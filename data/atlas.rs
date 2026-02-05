@@ -26,31 +26,51 @@ pub struct AtlasInfo {
     pub tiles_vertically: bool,
 }
 
+/// Result of an atlas lookup, including whether a -2x fallback was used.
+pub struct AtlasLookup {
+    pub info: &'static AtlasInfo,
+    /// True when the caller requested a non-2x name but we resolved to a -2x entry.
+    /// Width/height should be halved for logical (1x) dimensions.
+    pub is_2x_fallback: bool,
+}
+
+impl AtlasLookup {
+    /// Logical width (halved when -2x fallback was used).
+    pub fn width(&self) -> u32 {
+        if self.is_2x_fallback { self.info.width / 2 } else { self.info.width }
+    }
+
+    /// Logical height (halved when -2x fallback was used).
+    pub fn height(&self) -> u32 {
+        if self.is_2x_fallback { self.info.height / 2 } else { self.info.height }
+    }
+}
+
 /// Get atlas info by name (case-insensitive).
 /// Falls back to trying with/without -2x suffix for hi-res variants.
-pub fn get_atlas_info(name: &str) -> Option<&'static AtlasInfo> {
+pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     let lower = name.to_lowercase();
-    
+
     // Try exact match first
     if let Some(info) = ATLAS_DB.get(&lower as &str) {
-        return Some(info);
+        return Some(AtlasLookup { info, is_2x_fallback: false });
     }
-    
+
     // Try with -2x suffix if not present
     if !lower.ends_with("-2x") {
         let with_2x = format!("{lower}-2x");
         if let Some(info) = ATLAS_DB.get(&with_2x as &str) {
-            return Some(info);
+            return Some(AtlasLookup { info, is_2x_fallback: true });
         }
     }
-    
+
     // Try without -2x suffix if present
     if let Some(base) = lower.strip_suffix("-2x") {
         if let Some(info) = ATLAS_DB.get(base) {
-            return Some(info);
+            return Some(AtlasLookup { info, is_2x_fallback: false });
         }
     }
-    
+
     None
 }
 
