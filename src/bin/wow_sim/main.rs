@@ -7,6 +7,8 @@
 //!   wow-sim lua -e "print('hi')"     # Execute code and exit
 //!   wow-sim extract-textures         # Extract textures to WebP
 
+mod dump;
+
 use clap::{Parser, Subcommand};
 use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
@@ -96,8 +98,8 @@ enum Commands {
 
     /// Render UI to an image file (standalone, no GUI needed)
     Screenshot {
-        /// Output file path (format detected from extension: png, webp, jpg)
-        #[arg(short, long, default_value = "screenshot.png")]
+        /// Output file path (lossy WebP at quality 15 by default; png/jpg detected from extension)
+        #[arg(short, long, default_value = "screenshot.webp")]
         output: PathBuf,
 
         /// Image width in pixels
@@ -165,7 +167,7 @@ fn main() {
             no_addons,
             no_saved_vars,
         } => {
-            dump_standalone(filter, visible_only, no_addons, no_saved_vars);
+            dump::dump_standalone(filter, visible_only, no_addons, no_saved_vars);
         }
         Commands::ConvertTexture { input, output } => {
             convert_texture(&input, output.as_ref());
@@ -413,8 +415,15 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
+    // UIPanels_Game must load before WorldMap (QuestMapFrame needed by AttachQuestLog)
     ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
+    // WorldMap dependency chain
+    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
+    ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mainline.toc"),
+    ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
+    ("Blizzard_UnitFrame", "Blizzard_UnitFrame_Mainline.toc"),
     // Existing UI modules
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
     ("Blizzard_UIWidgets", "Blizzard_UIWidgets_Mainline.toc"),
@@ -456,9 +465,78 @@ fn create_standalone_env(
     let _ = env.exec("UpdateMicroButtons = function() end");
 
     let addons_path = PathBuf::from("./Interface/AddOns");
-    env.scan_and_register_addons(&addons_path);
+    load_third_party_addons_standalone(&env, &addons_path, no_addons, no_saved_vars);
 
     (env, font_system)
+}
+
+/// Scan and load third-party addons for standalone commands.
+fn load_third_party_addons_standalone(
+    env: &WowLuaEnv,
+    addons_path: &PathBuf,
+    no_addons: bool,
+    _no_saved_vars: bool,
+) {
+    use wow_ui_sim::loader::{find_toc_file, load_addon_with_saved_vars};
+    use wow_ui_sim::lua_api::AddonInfo;
+    use wow_ui_sim::saved_variables::SavedVariablesManager;
+    use wow_ui_sim::toc::TocFile;
+
+    // Always register addon metadata for C_AddOns API
+    env.scan_and_register_addons(addons_path);
+
+    let skip = no_addons
+        || std::env::var("WOW_SIM_NO_ADDONS")
+            .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false);
+    if skip {
+        return;
+    }
+
+    let mut saved_vars = SavedVariablesManager::new();
+
+    let Ok(entries) = std::fs::read_dir(addons_path) else { return };
+    let mut addons: Vec<(String, PathBuf)> = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() { continue; }
+        let name = path.file_name().unwrap().to_str().unwrap().to_string();
+        if name.starts_with('.') || name == "BlizzardUI" { continue; }
+        if let Some(toc) = find_toc_file(&path) {
+            addons.push((name, toc));
+        }
+    }
+    addons.sort_by(|a, b| a.0.to_lowercase().cmp(&b.0.to_lowercase()));
+
+    for (name, toc_path) in &addons {
+        let toc = TocFile::from_file(toc_path).ok();
+        let (title, notes, lod) = toc.as_ref().map(|t| {
+            let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.clone());
+            let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
+            let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
+            (title, notes, lod)
+        }).unwrap_or_else(|| (name.clone(), String::new(), false));
+
+        match load_addon_with_saved_vars(env, toc_path, &mut saved_vars) {
+            Ok(r) => {
+                eprintln!("{} loaded: {} Lua, {} XML, {} warnings",
+                    name, r.lua_files, r.xml_files, r.warnings.len());
+                env.register_addon(AddonInfo {
+                    folder_name: name.clone(), title, notes,
+                    enabled: true, loaded: true, load_on_demand: lod,
+                    load_time_secs: r.timing.total().as_secs_f64(),
+                });
+            }
+            Err(e) => {
+                eprintln!("{} failed: {}", name, e);
+                env.register_addon(AddonInfo {
+                    folder_name: name.clone(), title, notes,
+                    enabled: true, loaded: false, load_on_demand: lod,
+                    load_time_secs: 0.0,
+                });
+            }
+        }
+    }
 }
 
 /// Load Blizzard base UI addons from Interface/BlizzardUI.
@@ -490,6 +568,19 @@ fn load_blizzard_addons(env: &WowLuaEnv) {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
+    fire_core_startup_events(env);
+    fire_post_login_events(env);
+}
+
+/// Fire the core login events: ADDON_LOADED through TIME_PLAYED_MSG.
+fn fire_core_startup_events(env: &WowLuaEnv) {
+    let fire = |name| {
+        eprintln!("[Startup] Firing {}", name);
+        if let Err(e) = env.fire_event(name) {
+            eprintln!("Error firing {}: {}", name, e);
+        }
+    };
+
     eprintln!("[Startup] Firing ADDON_LOADED");
     if let Err(e) = env.fire_event_with_args(
         "ADDON_LOADED",
@@ -498,342 +589,46 @@ fn fire_startup_events(env: &WowLuaEnv) {
         eprintln!("Error firing ADDON_LOADED: {}", e);
     }
 
-    eprintln!("[Startup] Firing VARIABLES_LOADED");
-    if let Err(e) = env.fire_event("VARIABLES_LOADED") {
-        eprintln!("Error firing VARIABLES_LOADED: {}", e);
-    }
+    fire("VARIABLES_LOADED");
+    fire("PLAYER_LOGIN");
 
-    eprintln!("[Startup] Firing PLAYER_LOGIN");
-    if let Err(e) = env.fire_event("PLAYER_LOGIN") {
-        eprintln!("Error firing PLAYER_LOGIN: {}", e);
+    eprintln!("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
+    if let Err(e) = env.lua().globals().get::<mlua::Function>("RequestTimePlayed")
+        .and_then(|f| f.call::<()>(()))
+    {
+        eprintln!("Error calling RequestTimePlayed: {}", e);
     }
 
     eprintln!("[Startup] Firing PLAYER_ENTERING_WORLD");
     if let Err(e) = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
-        &[
-            mlua::Value::Boolean(true),  // isInitialLogin
-            mlua::Value::Boolean(false), // isReloadingUi
-        ],
+        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     ) {
         eprintln!("Error firing PLAYER_ENTERING_WORLD: {}", e);
     }
-
-    eprintln!("[Startup] Firing UPDATE_BINDINGS");
-    if let Err(e) = env.fire_event("UPDATE_BINDINGS") {
-        eprintln!("Error firing UPDATE_BINDINGS: {}", e);
-    }
-
-    eprintln!("[Startup] Firing DISPLAY_SIZE_CHANGED");
-    if let Err(e) = env.fire_event("DISPLAY_SIZE_CHANGED") {
-        eprintln!("Error firing DISPLAY_SIZE_CHANGED: {}", e);
-    }
-
-    eprintln!("[Startup] Firing UI_SCALE_CHANGED");
-    if let Err(e) = env.fire_event("UI_SCALE_CHANGED") {
-        eprintln!("Error firing UI_SCALE_CHANGED: {}", e);
-    }
-
-    eprintln!("[Startup] Firing PLAYER_LEAVING_WORLD");
-    if let Err(e) = env.fire_event("PLAYER_LEAVING_WORLD") {
-        eprintln!("Error firing PLAYER_LEAVING_WORLD: {}", e);
-    }
 }
 
-fn dump_standalone(
-    filter: Option<String>,
-    visible_only: bool,
-    no_addons: bool,
-    no_saved_vars: bool,
-) {
-    let (env, _font_system) = create_standalone_env(no_addons, no_saved_vars);
+/// Fire post-login events and trigger addon UI.
+fn fire_post_login_events(env: &WowLuaEnv) {
+    let fire = |name| {
+        eprintln!("[Startup] Firing {}", name);
+        if let Err(e) = env.fire_event(name) {
+            eprintln!("Error firing {}: {}", name, e);
+        }
+    };
 
-    // Load debug script if present
-    if let Ok(script) = std::fs::read_to_string("/tmp/debug-scrollbox-update.lua") {
-        let _ = env.exec(&script);
-    }
+    fire("UPDATE_BINDINGS");
+    fire("DISPLAY_SIZE_CHANGED");
+    fire("UI_SCALE_CHANGED");
 
-    // Fire startup events (same as GUI path)
-    fire_startup_events(&env);
-
-    // Print addon list
-    let _ = env.exec(
-        r#"
-        local num = C_AddOns.GetNumAddOns()
-        if num > 0 then
-            print("\n=== Addons (" .. num .. ") ===\n")
-            for i = 1, num do
-                local name, title, notes, loadable, reason, security = C_AddOns.GetAddOnInfo(i)
-                local loaded = C_AddOns.IsAddOnLoaded(i)
-                local enabled = C_AddOns.GetAddOnEnableState(i) > 0
-                local status = loaded and "loaded" or (enabled and "enabled" or "disabled")
-                print(string.format("  [%d] %s (%s) [%s]", i, tostring(title), tostring(name), status))
-            end
+    // Show AccountPlayed popup on startup if the addon is loaded
+    let _ = env.lua().load(r#"
+        if SlashCmdList and SlashCmdList.ACCOUNTPLAYEDPOPUP then
+            SlashCmdList.ACCOUNTPLAYEDPOPUP()
         end
-        "#,
-    );
+    "#).exec();
 
-    let state = env.state().borrow();
-    let widgets = &state.widgets;
-
-    let mut roots = collect_root_frames(widgets);
-    roots.sort_by(|a, b| {
-        let name_a = a.1.as_deref().unwrap_or("");
-        let name_b = b.1.as_deref().unwrap_or("");
-        name_a.cmp(name_b)
-    });
-
-    let version_check = state.cvars.get_bool("checkAddonVersion");
-    eprintln!("Load out of date addons: {}", if version_check { "off" } else { "on" });
-
-    // Quick anchor diagnostic
-    print_anchor_diagnostic(widgets);
-    eprintln!("\n=== Frame Tree ===\n");
-
-    for (id, _) in &roots {
-        print_frame(widgets, *id, 0, &filter, visible_only);
-    }
-}
-
-/// Collect root frames (no parent) sorted by name.
-fn collect_root_frames(
-    widgets: &wow_ui_sim::widget::WidgetRegistry,
-) -> Vec<(u64, Option<String>)> {
-    widgets
-        .all_ids()
-        .iter()
-        .filter_map(|&id| {
-            let w = widgets.get(id)?;
-            if w.parent_id.is_none() {
-                Some((id, w.name.clone()))
-            } else {
-                None
-            }
-        })
-        .collect()
-}
-
-/// Print anchor diagnostic showing counts and details of unanchored frames.
-fn print_anchor_diagnostic(widgets: &wow_ui_sim::widget::WidgetRegistry) {
-    let mut anchored = 0;
-    let mut unanchored = 0;
-    let mut unanchored_keys: std::collections::HashMap<String, Vec<String>> =
-        std::collections::HashMap::new();
-    for id in widgets.all_ids() {
-        let Some(w) = widgets.get(id) else { continue };
-        if !w.anchors.is_empty() {
-            anchored += 1;
-            continue;
-        }
-        unanchored += 1;
-        let parent_key = find_parent_key(widgets, w, id);
-        let parent_name = w
-            .parent_id
-            .and_then(|pid| widgets.get(pid))
-            .and_then(|p| p.name.clone())
-            .unwrap_or_else(|| "(no parent)".into());
-        let detail = format!(
-            "  {:?} on {} ({:?})",
-            w.widget_type, parent_name, w.name
-        );
-        let key = parent_key.unwrap_or_else(|| "(no key)".into());
-        unanchored_keys.entry(key).or_default().push(detail);
-    }
-    let mut kv: Vec<_> = unanchored_keys
-        .iter()
-        .map(|(k, v)| (k.clone(), v.len()))
-        .collect();
-    kv.sort_by(|a, b| b.1.cmp(&a.1));
-    eprintln!("Anchored: {anchored}, Unanchored: {unanchored}");
-    eprintln!("Top unanchored keys: {:?}", &kv[..kv.len().min(15)]);
-    // Show first 3 examples for top 5 keys
-    for (key, _) in kv.iter().take(5) {
-        if let Some(details) = unanchored_keys.get(key) {
-            eprintln!("  {}:", key);
-            for d in details.iter().take(3) {
-                eprintln!("  {}", d);
-            }
-        }
-    }
-    // Break down "(no key)" by widget type
-    if let Some(no_key) = unanchored_keys.get("(no key)") {
-        let mut by_type: std::collections::HashMap<String, usize> =
-            std::collections::HashMap::new();
-        for d in no_key {
-            let wtype = d.trim().split(' ').next().unwrap_or("?");
-            *by_type.entry(wtype.to_string()).or_default() += 1;
-        }
-        let mut tv: Vec<_> = by_type.iter().collect();
-        tv.sort_by(|a, b| b.1.cmp(a.1));
-        eprintln!("  (no key) by type: {:?}", tv);
-    }
-}
-
-/// Find the parentKey name for a widget in its parent's children_keys.
-fn find_parent_key(
-    widgets: &wow_ui_sim::widget::WidgetRegistry,
-    w: &wow_ui_sim::widget::Frame,
-    id: u64,
-) -> Option<String> {
-    let pid = w.parent_id?;
-    let p = widgets.get(pid)?;
-    p.children_keys
-        .iter()
-        .find(|(_, cid)| **cid == id)
-        .map(|(k, _)| k.clone())
-}
-
-/// Recursively print a frame and its children.
-fn print_frame(
-    widgets: &wow_ui_sim::widget::WidgetRegistry,
-    id: u64,
-    depth: usize,
-    filter: &Option<String>,
-    visible_only: bool,
-) {
-    let Some(frame) = widgets.get(id) else { return };
-
-    if visible_only && !frame.visible {
-        return;
-    }
-
-    let display_name = resolve_display_name(widgets, frame, id);
-    let matches_filter = filter
-        .as_ref()
-        .map(|f| display_name.to_lowercase().contains(&f.to_lowercase()))
-        .unwrap_or(true);
-
-    if matches_filter {
-        let indent = "  ".repeat(depth);
-        let vis = if frame.visible { "visible" } else { "hidden" };
-        let keys: Vec<_> = frame.children_keys.keys().collect();
-        let keys_str = if keys.is_empty() {
-            String::new()
-        } else {
-            format!(" keys=[{}]", keys.iter().map(|s| s.as_str()).collect::<Vec<_>>().join(", "))
-        };
-        let text_str = resolve_display_text(widgets, frame)
-            .map(|t| format!(" text={:?}", t))
-            .unwrap_or_default();
-        let font_str = if frame.widget_type == wow_ui_sim::widget::WidgetType::FontString {
-            format!(" font={:?} size={}", frame.font.as_deref().unwrap_or("(none)"), frame.font_size)
-        } else {
-            String::new()
-        };
-        println!(
-            "{}{} [{:?}] ({}x{}) {}{}{}{}",
-            indent, display_name, frame.widget_type, frame.width as i32, frame.height as i32, vis, text_str, font_str, keys_str
-        );
-    }
-
-    for &child_id in &frame.children {
-        print_frame(widgets, child_id, depth + 1, filter, visible_only);
-    }
-}
-
-/// Resolve a display name for a frame: use its global name, or look up its
-/// parentKey from the parent's children_keys, falling back to "(anonymous)".
-fn resolve_display_name(
-    widgets: &wow_ui_sim::widget::WidgetRegistry,
-    frame: &wow_ui_sim::widget::Frame,
-    id: u64,
-) -> String {
-    // Use global name if it's a real name (not auto-generated)
-    if let Some(ref name) = frame.name {
-        if !name.starts_with("__anon_")
-            && !name.starts_with("__frame_")
-            && !name.starts_with("__tex_")
-            && !name.starts_with("__fs_")
-        {
-            return name.clone();
-        }
-    }
-
-    // Look up parentKey from parent's children_keys
-    if let Some(parent_id) = frame.parent_id {
-        if let Some(parent) = widgets.get(parent_id) {
-            for (key, &child_id) in &parent.children_keys {
-                if child_id == id {
-                    return format!(".{}", key);
-                }
-            }
-        }
-    }
-
-    frame
-        .name
-        .as_deref()
-        .unwrap_or("(anonymous)")
-        .to_string()
-}
-
-/// Get display text for a frame: its own text, or text from a Title/TitleText child.
-fn resolve_display_text(
-    widgets: &wow_ui_sim::widget::WidgetRegistry,
-    frame: &wow_ui_sim::widget::Frame,
-) -> Option<String> {
-    // Use frame's own text if present
-    if let Some(ref t) = frame.text {
-        if !t.is_empty() {
-            return Some(strip_wow_escapes(t));
-        }
-    }
-
-    // Check Title/TitleText children for text
-    for key in &["Title", "TitleText"] {
-        if let Some(&child_id) = frame.children_keys.get(*key) {
-            if let Some(child) = widgets.get(child_id) {
-                if let Some(ref t) = child.text {
-                    if !t.is_empty() {
-                        return Some(strip_wow_escapes(t));
-                    }
-                }
-            }
-        }
-    }
-
-    None
-}
-
-/// Strip WoW escape sequences (|T...|t texture, |c...|r color) for cleaner display.
-fn strip_wow_escapes(s: &str) -> String {
-    let mut result = String::with_capacity(s.len());
-    let mut chars = s.chars().peekable();
-    while let Some(c) = chars.next() {
-        if c == '|' {
-            match chars.peek() {
-                Some('T') | Some('t') => {
-                    // |Tpath:h:w:x:y|t - skip texture escape
-                    if chars.peek() == Some(&'T') {
-                        chars.next();
-                        while let Some(&ch) = chars.peek() {
-                            chars.next();
-                            if ch == '|' {
-                                chars.next(); // skip 't'
-                                break;
-                            }
-                        }
-                    } else {
-                        chars.next(); // lowercase t is end marker, already consumed
-                    }
-                }
-                Some('c') => {
-                    // |cFFRRGGBB - skip color code (10 chars total: |c + 8 hex)
-                    chars.next();
-                    for _ in 0..8 {
-                        chars.next();
-                    }
-                }
-                Some('r') => {
-                    chars.next(); // |r = color reset
-                }
-                _ => result.push(c),
-            }
-        } else {
-            result.push(c);
-        }
-    }
-    result.trim().to_string()
+    fire("PLAYER_LEAVING_WORLD");
 }
 
 fn screenshot_standalone(
@@ -848,7 +643,12 @@ fn screenshot_standalone(
     use wow_ui_sim::render::GlyphAtlas;
 
     let (env, font_system) = create_standalone_env(no_addons, no_saved_vars);
+    env.set_screen_size(width as f32, height as f32);
     run_debug_script(&env);
+    fire_startup_events(&env);
+
+    // Hide frames that WoW's C++ engine hides by default (no target, no group, etc.)
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
 
     let mut glyph_atlas = GlyphAtlas::new();
     let batch = build_screenshot_batch(&env, &font_system, width, height, filter.as_deref(), &mut glyph_atlas);
@@ -869,12 +669,24 @@ fn screenshot_standalone(
 
     let img = render_to_image(&batch, &mut tex_mgr, width, height, glyph_data);
 
-    if let Err(e) = img.save(&output) {
+    save_screenshot(&img, &output);
+    eprintln!("Saved {}x{} screenshot to {}", width, height, output.display());
+}
+
+/// Save screenshot image. Uses lossy WebP (quality 15) for .webp, delegates to image crate otherwise.
+fn save_screenshot(img: &image::RgbaImage, output: &std::path::Path) {
+    let ext = output.extension().and_then(|e: &std::ffi::OsStr| e.to_str()).unwrap_or("webp");
+    if ext.eq_ignore_ascii_case("webp") {
+        let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
+        let mem = encoder.encode(15.0);
+        if let Err(e) = std::fs::write(output, &*mem) {
+            eprintln!("Failed to save WebP: {}", e);
+            std::process::exit(1);
+        }
+    } else if let Err(e) = img.save(output) {
         eprintln!("Failed to save image: {}", e);
         std::process::exit(1);
     }
-
-    eprintln!("Saved {}x{} screenshot to {}", width, height, output.display());
 }
 
 /// Run optional debug Lua script for screenshot debugging.
