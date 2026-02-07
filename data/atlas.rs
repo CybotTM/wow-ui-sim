@@ -65,11 +65,10 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     }
 
     // Try without -2x suffix if present
-    if let Some(base) = lower.strip_suffix("-2x") {
-        if let Some(info) = ATLAS_DB.get(base) {
+    if let Some(base) = lower.strip_suffix("-2x")
+        && let Some(info) = ATLAS_DB.get(base) {
             return Some(AtlasLookup { info, is_2x_fallback: false });
         }
-    }
 
     None
 }
