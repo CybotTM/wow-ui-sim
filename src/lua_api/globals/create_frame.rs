@@ -2,7 +2,7 @@
 
 use super::super::frame::{extract_frame_id, frame_lud};
 use super::super::SimState;
-use super::template::{apply_templates_from_registry, fire_on_load};
+use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
 use crate::widget::{Frame, WidgetType};
 use mlua::{Lua, Result, Value};
@@ -94,6 +94,7 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let suppress_depth: i32 = lua.globals().get("__suppress_create_frame_onload")
             .unwrap_or(0);
         if suppress_depth <= 0 {
+            fire_deferred_child_onloads(lua);
             fire_on_load(lua, &ref_name);
         }
 

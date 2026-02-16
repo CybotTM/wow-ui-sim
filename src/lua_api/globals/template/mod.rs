@@ -80,39 +80,8 @@ pub fn apply_templates_from_registry(
         return;
     }
 
-    let mut all_child_names = Vec::new();
     for entry in &chain {
-        let child_names = apply_single_template(lua, state, frame_name, entry);
-        all_child_names.extend(child_names);
-    }
-
-    // When __suppress_create_frame_onload is set (XML loading mode), defer child
-    // OnLoad firing so the XML loader can apply instance-level KeyValues first.
-    // Child OnLoad handlers may reference parent properties set via KeyValues
-    // (e.g. ArenaEnemyPetFrame accesses parent.layoutIndex).
-    let suppress_depth: i32 = lua
-        .globals()
-        .get("__suppress_create_frame_onload")
-        .unwrap_or(0);
-
-    if suppress_depth > 0 {
-        // Store names for the XML loader to fire after KeyValues are applied
-        let deferred: mlua::Table = lua
-            .globals()
-            .get("__deferred_child_onloads")
-            .unwrap_or_else(|_| lua.create_table().unwrap());
-        for child_name in &all_child_names {
-            let len = deferred.raw_len();
-            let _ = deferred.raw_set(len + 1, child_name.as_str());
-        }
-        let _ = lua.globals().set("__deferred_child_onloads", deferred);
-    } else {
-        // Fire OnLoad for all child frames created during template application.
-        // This is deferred until after ALL templates in the chain are applied,
-        // because child OnLoad handlers may depend on KeyValues from later templates.
-        for child_name in &all_child_names {
-            fire_on_load(lua, child_name);
-        }
+        apply_single_template(lua, state, frame_name, entry);
     }
 }
 
@@ -132,13 +101,13 @@ pub fn fire_deferred_child_onloads(lua: &Lua) {
     }
 }
 
-/// Apply a single template entry to a frame, returning names of created children.
+/// Apply a single template entry to a frame.
 fn apply_single_template(
     lua: &Lua,
     state: &Rc<RefCell<SimState>>,
     frame_name: &str,
     entry: &TemplateEntry,
-) -> Vec<String> {
+) {
     let template = &entry.frame;
 
     // Apply mixin (must be before children and scripts) — stays in Lua
@@ -191,19 +160,17 @@ fn apply_single_template(
     apply_animation_groups(lua, template, frame_name);
 
     // Create child frames defined in the template
-    let mut child_names = create_child_frames(lua, state, template, frame_name, frame_name);
+    create_child_frames(lua, state, template, frame_name, frame_name);
 
     // Create ScrollChild children
     if let Some(scroll_child) = template.scroll_child() {
-        child_names.extend(create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, frame_name));
+        create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, frame_name);
     }
 
     // Apply scripts from template (after children, so OnLoad can reference them)
     if let Some(scripts) = template.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
     }
-
-    child_names
 }
 
 /// Apply key values from a template to a frame.
@@ -315,6 +282,28 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
     let _ = lua.load(&code).exec();
 }
 
+/// Push the suppress-OnLoad depth counter (prevents premature OnLoad in nested CreateFrame).
+fn push_suppress(lua: &Lua) {
+    let depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
+    let _ = lua.globals().set("__suppress_create_frame_onload", depth + 1);
+}
+
+/// Pop the suppress-OnLoad depth counter.
+fn pop_suppress(lua: &Lua) {
+    let depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
+    let _ = lua.globals().set("__suppress_create_frame_onload", depth - 1);
+}
+
+/// Queue a child frame name for deferred OnLoad firing.
+fn defer_child_onload(lua: &Lua, name: &str) {
+    let deferred: mlua::Table = lua.globals()
+        .get("__deferred_child_onloads")
+        .unwrap_or_else(|_| lua.create_table().unwrap());
+    let len = deferred.raw_len();
+    let _ = deferred.raw_set(len + 1, name);
+    let _ = lua.globals().set("__deferred_child_onloads", deferred);
+}
+
 /// Fire OnLoad on a frame.
 ///
 /// Only fires handlers registered via `SetScript` (from `<Scripts>` XML tags)
@@ -361,23 +350,25 @@ fn create_child_frames(
     frame: &FrameXml,
     parent_name: &str,
     subst_parent: &str,
-) -> Vec<String> {
-    let mut all_names = Vec::new();
+) {
     let elements = frame.all_frame_elements();
     for child in &elements {
         let Some((child_frame, child_type, intrinsic)) = frame_element_type(child) else {
             continue;
         };
-        let names = create_child_frame_from_template(
+        create_child_frame_from_template(
             lua, state, child_frame, child_type, intrinsic, parent_name, subst_parent,
         );
-        all_names.extend(names);
     }
-    all_names
 }
 
 /// Create a child frame from template XML.
-/// Returns names of this frame AND all nested descendants (for deferred OnLoad).
+///
+/// Suppresses OnLoad during CreateFrame so it doesn't fire prematurely on a
+/// bare frame (before mixin/scripts are applied). After all templates and
+/// inline content are applied, defers this child's name to
+/// `__deferred_child_onloads` for firing by `create_frame_function` or
+/// `exec_create_frame_code`.
 ///
 /// `subst_parent` is the name used for `$parent` substitution. For anonymous
 /// frames (no name attribute), `$parent` propagates from the nearest named
@@ -390,7 +381,7 @@ fn create_child_frame_from_template(
     intrinsic: Option<&str>,
     parent_name: &str,
     subst_parent: &str,
-) -> Vec<String> {
+) {
     let is_named = frame.name.is_some();
     let child_name = frame
         .name
@@ -402,12 +393,17 @@ fn create_child_frame_from_template(
     // For anonymous children, propagate the current subst_parent.
     let child_subst = if is_named { &child_name } else { subst_parent };
 
+    // Suppress OnLoad in nested CreateFrame — the child has no handlers yet.
+    push_suppress(lua);
+
     let code = build_create_child_code(frame, widget_type, parent_name, &child_name);
     if let Err(e) = lua.load(&code).exec() {
         eprintln!(
             "[template] Failed to create child '{}' (type={}) under '{}': {}",
             child_name, widget_type, parent_name, e
         );
+        pop_suppress(lua);
+        return;
     }
 
     // Apply intrinsic template (e.g. DropdownButton) and set the intrinsic property.
@@ -431,11 +427,12 @@ fn create_child_frame_from_template(
         apply_templates_from_registry(lua, state, &child_name, inherits);
     }
 
-    let nested_names = apply_inline_frame_content(lua, state, frame, &child_name, child_subst);
+    apply_inline_frame_content(lua, state, frame, &child_name, child_subst);
 
-    let mut all_names = nested_names;
-    all_names.push(child_name);
-    all_names
+    pop_suppress(lua);
+
+    // Queue for deferred OnLoad (fired by create_frame_function or exec_create_frame_code)
+    defer_child_onload(lua, &child_name);
 }
 
 /// Build Lua code to create a child frame with size, anchors, visibility, and parentKey.
@@ -535,18 +532,15 @@ fn create_scroll_child_frames(
     children: &[FrameElement],
     parent_name: &str,
     subst_parent: &str,
-) -> Vec<String> {
-    let mut all_names = Vec::new();
+) {
     for child in children {
         let Some((child_frame, child_type, intrinsic)) = frame_element_type(child) else {
             continue;
         };
-        let names = create_child_frame_from_template(
+        create_child_frame_from_template(
             lua, state, child_frame, child_type, intrinsic, parent_name, subst_parent,
         );
-        all_names.extend(names);
     }
-    all_names
 }
 
 /// Apply inline content from a FrameXml to an already-created frame.
@@ -556,7 +550,7 @@ fn apply_inline_frame_content(
     frame: &crate::xml::FrameXml,
     frame_name: &str,
     subst_parent: &str,
-) -> Vec<String> {
+) {
     apply_mixin(lua, &frame.combined_mixin(), frame_name);
     apply_inline_key_values(lua, frame, frame_name);
     // Re-apply inline size — templates may override the size set in build_create_child_code.
@@ -581,16 +575,14 @@ fn apply_inline_frame_content(
     apply_editbox_fontstring(lua, frame, frame_name, subst_parent);
     apply_animation_groups(lua, frame, frame_name);
 
-    let mut nested_names = create_child_frames(lua, state, frame, frame_name, subst_parent);
+    create_child_frames(lua, state, frame, frame_name, subst_parent);
     if let Some(scroll_child) = frame.scroll_child() {
-        nested_names.extend(create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent));
+        create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent);
     }
 
     if let Some(scripts) = frame.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
     }
-
-    nested_names
 }
 
 /// Apply animation groups from a FrameXml to an already-created frame.
