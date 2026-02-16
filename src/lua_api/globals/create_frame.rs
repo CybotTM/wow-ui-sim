@@ -237,7 +237,7 @@ fn create_frame_userdata(
 
     let globals = lua.globals();
     if let Some(n) = name {
-        globals.raw_set(n, lud.clone())?;
+        crate::lua_api::secure_env::set_in_both_envs(lua, n, lud.clone())?;
     }
     let frame_key = format!("__frame_{}", frame_id);
     globals.raw_set(frame_key.as_str(), lud.clone())?;
@@ -265,12 +265,15 @@ fn register_button_child_globals(
             })
             .collect()
     };
-    let globals = lua.globals();
     let mut st = state.borrow_mut();
     for (key, child_id) in keys {
         let global_name = format!("{}{}", button_name, key);
         st.widgets.set_name(child_id, global_name.clone());
-        let _ = globals.raw_set(global_name.as_str(), frame_lud(child_id));
+        let _ = crate::lua_api::secure_env::set_in_both_envs(
+            lua,
+            &global_name,
+            frame_lud(child_id),
+        );
     }
     Ok(())
 }

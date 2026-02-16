@@ -38,6 +38,11 @@ pub fn load_lua_file(
         load_cached_or_compile(lua, &bytes, &chunk_name, timing)?
     };
 
+    if ctx.use_secure_env {
+        crate::lua_api::secure_env::apply_secure_env(lua, &func)
+            .map_err(|e| LoadError::Lua(e.to_string()))?;
+    }
+
     func.call::<()>((ctx.name.to_string(), table_clone))
         .map_err(|e| LoadError::Lua(e.to_string()))?;
     timing.lua_exec_time += lua_start.elapsed();

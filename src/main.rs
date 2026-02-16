@@ -282,12 +282,6 @@ fn load_blizzard_addons(env: &WowLuaEnv) {
             }
             Err(e) => println!("{} failed: {}", name, e),
         }
-        // Blizzard_EnvironmentCleanup nils secure C_* namespaces that are normally
-        // provided by the C++ engine in a separate secure environment. Re-register
-        // the stubs our sim needs after that addon runs.
-        if name == "Blizzard_EnvironmentCleanup" {
-            wow_ui_sim::lua_api::globals::restore_secure_stubs(env);
-        }
     }
     let elapsed = blizzard_start.elapsed();
     let cache_total = total_timing.cache_hits + total_timing.cache_misses;

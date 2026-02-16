@@ -15,6 +15,7 @@ mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;
 pub(crate) mod script_helpers;
+pub(crate) mod secure_env;
 pub mod simple_html;
 pub(crate) mod state;
 pub(crate) mod talent_state;

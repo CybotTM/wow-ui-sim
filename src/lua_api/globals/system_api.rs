@@ -284,7 +284,8 @@ fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
 fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
-    globals.set("SwapToGlobalEnvironment", lua.create_function(|_, ()| Ok(()))?)?;
+    // SwapToGlobalEnvironment must be a Lua function for correct setfenv stack level.
+    lua.load("function SwapToGlobalEnvironment() setfenv(2, _G) end").exec()?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("RegisterStaticConstants", lua.create_function(|_, _tbl: Value| Ok(()))?)?;
 

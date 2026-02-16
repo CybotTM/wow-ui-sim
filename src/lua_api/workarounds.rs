@@ -18,8 +18,6 @@ pub fn apply_post_event(env: &WowLuaEnv) {
 
 /// Apply all post-load workarounds. Called after addon loading, before events.
 pub fn apply(env: &WowLuaEnv) {
-    // Blizzard_EnvironmentCleanup clears secure globals; restore them.
-    super::globals::restore_secure_stubs(env);
     let _ = env.exec("UpdateMicroButtons = function() end");
     // CompactUnitFrame helpers may not be defined if CompactUnitFrame.lua fails to load fully
     let _ = env.exec(

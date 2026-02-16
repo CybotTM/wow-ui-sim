@@ -18,6 +18,8 @@ pub struct AddonContext<'a> {
     pub table: Table,
     /// Addon root directory for fallback path resolution
     pub addon_root: &'a Path,
+    /// Whether this addon uses the secure Lua environment (UseSecureEnvironment: 1)
+    pub use_secure_env: bool,
 }
 
 /// Initialize saved variables for an addon (WTF first, then JSON fallback).
@@ -98,6 +100,7 @@ pub fn load_addon_internal(
         name: folder_name,
         table: addon_table,
         addon_root: &toc.addon_dir,
+        use_secure_env: toc.is_secure_env(),
     };
 
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);

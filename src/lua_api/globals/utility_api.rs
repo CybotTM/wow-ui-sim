@@ -253,10 +253,19 @@ fn register_global_access(lua: &Lua) -> Result<()> {
 
     // loadstring: provided by Elune's luaopen_base, wrapped with taint in env.rs
 
-    globals.set(
-        "GetCurrentEnvironment",
-        lua.create_function(|lua, ()| Ok(lua.globals()))?,
-    )?;
+    // Environment functions must be Lua (not Rust closures) for correct
+    // getfenv/setfenv stack levels — level 2 reaches the actual caller.
+    lua.load(
+        r#"
+        function GetCurrentEnvironment()
+            return getfenv(2)
+        end
+        function IsInGlobalEnvironment()
+            return getfenv(2) == _G
+        end
+    "#,
+    )
+    .exec()?;
 
     Ok(())
 }

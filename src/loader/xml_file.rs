@@ -99,8 +99,18 @@ fn process_script(
         Ok(1)
     } else if let Some(inline) = &s.inline {
         let table_clone = ctx.table.clone();
+        let lua = env.lua();
         let lua_start = Instant::now();
-        env.exec_with_varargs(inline, "@inline", ctx.name, table_clone)
+        let func: mlua::Function = lua
+            .load(inline.as_str())
+            .set_name("@inline")
+            .into_function()
+            .map_err(|e| LoadError::Lua(e.to_string()))?;
+        if ctx.use_secure_env {
+            crate::lua_api::secure_env::apply_secure_env(lua, &func)
+                .map_err(|e| LoadError::Lua(e.to_string()))?;
+        }
+        func.call::<()>((ctx.name.to_string(), table_clone))
             .map_err(|e| LoadError::Lua(e.to_string()))?;
         timing.lua_exec_time += lua_start.elapsed();
         Ok(1)

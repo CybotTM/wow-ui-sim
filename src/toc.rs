@@ -161,6 +161,14 @@ impl TocFile {
             .unwrap_or_default()
     }
 
+    /// Check if addon uses the secure Lua environment (UseSecureEnvironment: 1).
+    pub fn is_secure_env(&self) -> bool {
+        self.metadata
+            .get("UseSecureEnvironment")
+            .map(|v| v == "1")
+            .unwrap_or(false)
+    }
+
     /// Check if addon is load-on-demand.
     pub fn is_load_on_demand(&self) -> bool {
         self.metadata

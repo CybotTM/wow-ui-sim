@@ -51,6 +51,7 @@ impl WowLuaEnv {
 
         // Register global functions
         super::globals::register_globals(&lua, Rc::clone(&state))?;
+        super::secure_env::create_secure_environment(&lua)?;
 
         // Enable Elune taint tracking after all engine globals are set.
         // Install a default error handler (Rust logs to stderr; Lua handler
@@ -536,7 +537,6 @@ impl WowLuaEnv {
     pub fn has_pending_timers(&self) -> bool {
         !self.state.borrow().timers.is_empty()
     }
-
 
     /// Fire OnUpdate handlers for all frames that have them registered,
     /// then tick animation groups.
