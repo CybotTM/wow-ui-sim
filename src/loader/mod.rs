@@ -238,6 +238,8 @@ fn topological_sort_addons(
 }
 
 /// Recursively pull non-base dependencies from the addon pool into the result list.
+/// Refuses to pull an addon that depends on a not-yet-loaded base addon — those
+/// will be correctly ordered by Kahn's sort in the second phase.
 fn pull_base_deps(
     name: &str,
     addons: &mut HashMap<String, (PathBuf, TocFile)>,
@@ -252,6 +254,11 @@ fn pull_base_deps(
         .get(name)
         .map(|(_, toc)| toc.dependencies())
         .unwrap_or_default();
+    // If this addon depends on a base addon that hasn't loaded yet, defer it
+    // to the Kahn's sort phase where all base addons will already be present.
+    if deps.iter().any(|d| base_set.contains(d.as_str()) && !loaded.contains(d)) {
+        return;
+    }
     for dep in deps {
         pull_base_deps(&dep, addons, result, loaded, base_set);
     }

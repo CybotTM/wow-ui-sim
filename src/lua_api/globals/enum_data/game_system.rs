@@ -183,6 +183,21 @@ pub const SEND_REPORT_RESULT: SeqEnumDef = (
 );
 
 // ============================================================================
+// Game Rules Enums
+// ============================================================================
+
+pub const EVENT_REALM_QUEUES: EnumDef = (
+    "EventRealmQueues",
+    &[
+        ("None", 0),
+        ("PlunderstormSolo", 1),
+        ("PlunderstormDuo", 2),
+        ("PlunderstormTrio", 4),
+        ("PlunderstormTraining", 8),
+    ],
+);
+
+// ============================================================================
 // Edit Mode Enums (basic)
 // ============================================================================
 
