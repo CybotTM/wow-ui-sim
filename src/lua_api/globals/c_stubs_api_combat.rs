@@ -4,7 +4,8 @@
 //! Contains: C_ColorUtil, C_CombatLog, C_CurveUtil, C_RestrictedActions,
 //! C_TransmogOutfitInfo, Constants.EncounterTimelineIconMasks.
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, Result, UserData, UserDataMethods, Value};
+use std::cell::RefCell;
 
 /// Register all combat/encounter-related stubs.
 pub fn register_combat_stubs(lua: &Lua) -> Result<()> {
@@ -23,36 +24,59 @@ pub fn register_combat_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+/// A curve point for piecewise linear interpolation.
+struct CurvePoint {
+    x: f64,
+    y: f64,
+}
+
+/// Curve object exposed to Lua as UserData with AddPoint/SetType/GetValue methods.
+struct Curve {
+    points: RefCell<Vec<CurvePoint>>,
+}
+
+impl UserData for Curve {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("AddPoint", |_, this, (x, y): (f64, f64)| {
+            this.points.borrow_mut().push(CurvePoint { x, y });
+            Ok(())
+        });
+        methods.add_method("SetType", |_, _, _t: i32| Ok(()));
+        methods.add_method("GetValue", |_, this, x: f64| {
+            Ok(interpolate(&this.points.borrow(), x))
+        });
+    }
+}
+
+/// Piecewise linear interpolation over sorted points.
+fn interpolate(pts: &[CurvePoint], x: f64) -> f64 {
+    match pts.len() {
+        0 => 0.0,
+        1 => pts[0].y,
+        _ => {
+            if x <= pts[0].x { return pts[0].y; }
+            if x >= pts[pts.len() - 1].x { return pts[pts.len() - 1].y; }
+            for pair in pts.windows(2) {
+                if x >= pair[0].x && x <= pair[1].x {
+                    let t = (x - pair[0].x) / (pair[1].x - pair[0].x);
+                    return pair[0].y + t * (pair[1].y - pair[0].y);
+                }
+            }
+            pts[pts.len() - 1].y
+        }
+    }
+}
+
 /// C_CurveUtil - creates curve objects for interpolation (used by CurveConstants.lua).
 fn register_c_curve_util(lua: &Lua) -> Result<()> {
-    lua.load(r#"
-        local CurveMT = {}
-        CurveMT.__index = CurveMT
-        function CurveMT:AddPoint(x, y) table.insert(self._points, {x = x, y = y}) end
-        function CurveMT:SetType(t) self._type = t end
-        function CurveMT:GetValue(x)
-            local pts = self._points
-            if #pts == 0 then return 0 end
-            if #pts == 1 then return pts[1].y end
-            if x <= pts[1].x then return pts[1].y end
-            if x >= pts[#pts].x then return pts[#pts].y end
-            for i = 1, #pts - 1 do
-                if x >= pts[i].x and x <= pts[i+1].x then
-                    local t = (x - pts[i].x) / (pts[i+1].x - pts[i].x)
-                    return pts[i].y + t * (pts[i+1].y - pts[i].y)
-                end
-            end
-            return pts[#pts].y
-        end
-        C_CurveUtil = {
-            CreateCurve = function()
-                return setmetatable({_points = {}, _type = 0}, CurveMT)
-            end,
-            CreateColorCurve = function()
-                return setmetatable({_points = {}, _type = 0}, CurveMT)
-            end,
-        }
-    "#).exec()
+    let t = lua.create_table()?;
+    let create = lua.create_function(|_, ()| {
+        Ok(Curve { points: RefCell::new(Vec::new()) })
+    })?;
+    t.set("CreateCurve", create.clone())?;
+    t.set("CreateColorCurve", create)?;
+    lua.globals().set("C_CurveUtil", t)?;
+    Ok(())
 }
 
 /// C_ColorUtil - hex color formatting for ColorMixin.
