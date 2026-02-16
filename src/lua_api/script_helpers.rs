@@ -10,7 +10,6 @@ use mlua::{Lua, Value};
 const SCRIPTS_KEY: &str = "__scripts";
 const SCRIPT_HOOKS_KEY: &str = "__script_hooks";
 const FRAME_FIELDS_KEY: &str = "__frame_fields";
-const ERROR_HANDLER_KEY: &str = "__wow_error_handler";
 
 /// Get the __scripts table from the Lua registry. Returns None if not yet created.
 pub fn get_scripts_table(lua: &Lua) -> Option<mlua::Table> {
@@ -105,12 +104,17 @@ pub fn get_frame_ref(_lua: &Lua, widget_id: u64) -> Option<Value> {
 // ── Error handler ────────────────────────────────────────────────────
 
 /// Call the WoW error handler (set via `seterrorhandler`) and always log to stderr.
+///
+/// Uses Elune's `geterrorhandler()` which reads `LUA_ERRORHANDLERINDEX` (-9999),
+/// the same slot that `securecall`'s `lua_pcall` references.
 pub fn call_error_handler(lua: &Lua, error_msg: &str) {
     eprintln!("Lua error: {error_msg}");
-    let handler: Option<mlua::Function> = lua.named_registry_value(ERROR_HANDLER_KEY).ok();
-    if let Some(h) = handler
-        && let Err(e) = h.call::<()>(error_msg.to_string()) {
-            eprintln!("Error in error handler: {e}");
-        }
+    let result: mlua::Result<()> = lua.load(r#"
+        local handler = geterrorhandler()
+        if handler then handler((...)) end
+    "#).call(error_msg.to_string());
+    if let Err(e) = result {
+        eprintln!("Error in error handler: {e}");
+    }
 }
 

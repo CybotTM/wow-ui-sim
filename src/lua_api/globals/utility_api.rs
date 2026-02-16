@@ -251,17 +251,7 @@ fn register_global_access(lua: &Lua) -> Result<()> {
         })?,
     )?;
 
-    // loadstring(code, name) - Compile a string of Lua code and return it as a function
-    globals.set(
-        "loadstring",
-        lua.create_function(|lua, (code, name): (String, Option<String>)| {
-            let chunk_name = name.unwrap_or_else(|| "=(loadstring)".to_string());
-            match lua.load(&code).set_name(&chunk_name).into_function() {
-                Ok(func) => Ok((Value::Function(func), Value::Nil)),
-                Err(e) => Ok((Value::Nil, Value::String(lua.create_string(e.to_string())?))),
-            }
-        })?,
-    )?;
+    // loadstring: provided by Elune's luaopen_base, wrapped with taint in env.rs
 
     globals.set(
         "GetCurrentEnvironment",
@@ -324,31 +314,8 @@ fn register_error_handlers(lua: &Lua) -> Result<()> {
     register_debugstack(lua)?;
     register_debuglocals(lua)?;
 
-    globals.set(
-        "geterrorhandler",
-        lua.create_function(|lua, ()| {
-            let handler: Value =
-                lua.named_registry_value("__wow_error_handler").unwrap_or(Value::Nil);
-            if let Value::Function(f) = handler {
-                Ok(Value::Function(f))
-            } else {
-                // Return default handler that prints to stderr
-                let default = lua.create_function(|_, msg: String| {
-                    eprintln!("Lua error: {}", msg);
-                    Ok(())
-                })?;
-                Ok(Value::Function(default))
-            }
-        })?,
-    )?;
-
-    globals.set(
-        "seterrorhandler",
-        lua.create_function(|lua, handler: mlua::Function| {
-            lua.set_named_registry_value("__wow_error_handler", handler)?;
-            Ok(())
-        })?,
-    )?;
+    // geterrorhandler / seterrorhandler: provided by Elune's baselib_shared,
+    // using LUA_ERRORHANDLERINDEX (-9999) which securecall's lua_pcall references.
 
     // Internal error reporter used by generated Lua code (chained handlers,
     // lifecycle scripts).  Unlike `print()`, this always logs to stderr and

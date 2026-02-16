@@ -42,8 +42,33 @@ impl WowLuaEnv {
             create_builtin_frames(&mut s.widgets, w, h);
         }
 
+        // Load Elune's security library (taint functions for debug table).
+        // mlua opens libraries individually; luaopen_security is Elune-specific.
+        unsafe extern "C" {
+            fn luaopen_security(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
+        }
+        unsafe { lua.exec_raw::<()>((), |state| { luaopen_security(state); })? };
+
         // Register global functions
         super::globals::register_globals(&lua, Rc::clone(&state))?;
+
+        // Enable Elune taint tracking after all engine globals are set.
+        // Install a default error handler (Rust logs to stderr; Lua handler
+        // is for addon code that calls geterrorhandler()).
+        lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
+
+        // Wrap loadstring with taint — luaopen_base registers an untainted
+        // version; addon-loaded code must be marked tainted.
+        lua.load(r#"
+            do
+                local original = loadstring
+                local setstacktaint = debug.setstacktaint
+                loadstring = function(code, name)
+                    setstacktaint("*** ForceTaint_Strong ***")
+                    return original(code, name)
+                end
+            end
+        "#).exec()?;
 
         // Initialize keybinding tables with defaults
         super::keybindings::init_keybindings(&lua)?;
