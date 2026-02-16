@@ -48,6 +48,7 @@ pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     register_c_incoming_summon(lua)?;
     super::c_stubs_api_extra::register_extra_stubs(lua)?;
     super::c_stubs_api_combat::register_combat_stubs(lua)?;
+    super::c_stubs_api_professions::register_profession_stubs(lua)?;
     Ok(())
 }
 
@@ -725,4 +726,5 @@ fn register_c_incoming_summon(lua: &Lua) -> Result<()> {
     lua.globals().set("C_IncomingSummon", t)?;
     Ok(())
 }
+
 
