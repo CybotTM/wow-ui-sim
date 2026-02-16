@@ -1,0 +1,3 @@
+[submodule "elune-src/elune"]
+	path = elune-src/elune
+	url = https://github.com/meorawr/elune.git

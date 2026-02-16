@@ -69,6 +69,7 @@ fn env_with_action_bar() -> WowLuaEnv {
         }
     }
 
+    env.apply_post_load_workarounds();
     fire_startup_events(&env);
     env
 }

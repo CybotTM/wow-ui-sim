@@ -1,0 +1,11 @@
+[package]
+name = "lua-src"
+version = "547.0.0"
+edition = "2021"
+description = "Elune (WoW Lua 5.1 fork) source and build support, drop-in replacement for lua-src"
+
+[dependencies]
+cc = "1.0"
+
+[features]
+ucid = []

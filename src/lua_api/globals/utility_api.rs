@@ -499,68 +499,71 @@ fn register_os_aliases(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Bitwise operations (Lua 5.1 bit library compatibility).
+/// Bitwise operations (native Rust implementation of WoW's bit library).
 fn register_bit_library(lua: &Lua) -> Result<()> {
-    register_bit_logic_ops(lua)?;
-    register_bit_shift_ops(lua)?;
+    let bit = lua.create_table()?;
+    bit.set("band", lua.create_function(bit_fold_op(|a, b| a & b, 0xFFFFFFFF))?)?;
+    bit.set("bor", lua.create_function(bit_fold_op(|a, b| a | b, 0))?)?;
+    bit.set("bxor", lua.create_function(bit_fold_op(|a, b| a ^ b, 0))?)?;
+    bit.set("bnot", lua.create_function(|_, a: mlua::Number| Ok(!to_u32(a)))?)?;
+    bit.set("lshift", bit_shift_fn(lua, |a, n| a << n)?)?;
+    bit.set("rshift", bit_shift_fn(lua, |a, n| a >> n)?)?;
+    bit.set("arshift", bit_arshift_fn(lua)?)?;
+    bit.set("mod", lua.create_function(bit_mod)?)?;
+    lua.globals().set("bit", bit)?;
     Ok(())
 }
 
-/// bit.band, bit.bor, bit.bxor - bitwise logic operations.
-fn register_bit_logic_ops(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        bit = bit or {}
-        bit.band = function(a, b)
-            a = a or 0; b = b or 0
-            local result, bitval = 0, 1
-            while a > 0 and b > 0 do
-                if a % 2 == 1 and b % 2 == 1 then result = result + bitval end
-                bitval = bitval * 2
-                a = math.floor(a / 2)
-                b = math.floor(b / 2)
-            end
-            return result
-        end
-        bit.bor = function(a, b)
-            a = a or 0; b = b or 0
-            local result, bitval = 0, 1
-            while a > 0 or b > 0 do
-                if a % 2 == 1 or b % 2 == 1 then result = result + bitval end
-                bitval = bitval * 2
-                a = math.floor(a / 2)
-                b = math.floor(b / 2)
-            end
-            return result
-        end
-        bit.bxor = function(a, b)
-            a = a or 0; b = b or 0
-            local result, bitval = 0, 1
-            while a > 0 or b > 0 do
-                if (a % 2 == 1) ~= (b % 2 == 1) then result = result + bitval end
-                bitval = bitval * 2
-                a = math.floor(a / 2)
-                b = math.floor(b / 2)
-            end
-            return result
-        end
-    "##,
-    )
-    .exec()?;
-    Ok(())
+fn to_u32(n: mlua::Number) -> u32 {
+    n as u32
 }
 
-/// bit.bnot, bit.lshift, bit.rshift - bitwise not and shift operations.
-fn register_bit_shift_ops(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        bit.bnot = function(a) return 4294967295 - a end
-        bit.lshift = function(a, n) return a * (2 ^ n) end
-        bit.rshift = function(a, n) return math.floor(a / (2 ^ n)) end
-    "##,
-    )
-    .exec()?;
-    Ok(())
+/// Create a variadic fold function for bitwise logic ops (band, bor, bxor).
+fn bit_fold_op(
+    op: fn(u32, u32) -> u32,
+    identity: u32,
+) -> impl Fn(&Lua, mlua::MultiValue) -> Result<u32> {
+    move |_, args: mlua::MultiValue| {
+        let mut result = identity;
+        for val in args {
+            let n = match val {
+                Value::Number(n) => n,
+                Value::Integer(n) => n as mlua::Number,
+                _ => 0.0,
+            };
+            result = op(result, to_u32(n));
+        }
+        Ok(result)
+    }
+}
+
+/// Create a shift function (lshift, rshift) with u32 shift clamping.
+fn bit_shift_fn(lua: &Lua, op: fn(u32, u32) -> u32) -> Result<mlua::Function> {
+    lua.create_function(move |_, (a, n): (mlua::Number, mlua::Number)| {
+        let shift = to_u32(n);
+        if shift >= 32 { return Ok(0u32); }
+        Ok(op(to_u32(a), shift))
+    })
+}
+
+/// Arithmetic right shift: preserves sign bit by casting through i32.
+fn bit_arshift_fn(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (a, n): (mlua::Number, mlua::Number)| {
+        let shift = to_u32(n);
+        if shift >= 32 {
+            return Ok(if (to_u32(a) as i32) < 0 { 0xFFFFFFFFu32 } else { 0u32 });
+        }
+        Ok((to_u32(a) as i32 >> shift) as u32)
+    })
+}
+
+/// Integer modulo: `a % b`.
+fn bit_mod(_: &Lua, (a, b): (mlua::Number, mlua::Number)) -> Result<u32> {
+    let b = to_u32(b);
+    if b == 0 {
+        return Err(mlua::Error::RuntimeError("bit.mod: division by zero".into()));
+    }
+    Ok(to_u32(a) % b)
 }
 
 /// Mixin system: Mixin, CreateFromMixins, CreateAndInitFromMixin.

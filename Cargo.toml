@@ -66,3 +66,6 @@ debug = "line-tables-only"
 lto = false
 incremental = true
 debug = "line-tables-only"
+
+[patch.crates-io]
+lua-src = { path = "elune-src" }
