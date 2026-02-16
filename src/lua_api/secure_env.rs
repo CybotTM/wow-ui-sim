@@ -37,7 +37,10 @@ pub fn create_secure_environment(lua: &Lua) -> Result<()> {
     "##,
         )
         .eval()?;
-    lua.set_named_registry_value("__secureenv", secureenv)?;
+    lua.set_named_registry_value("__secureenv", secureenv.clone())?;
+    // Expose in _G so generated Lua code (mixin lookups, etc.) can resolve
+    // globals that were set by UseSecureEnvironment addons.
+    lua.globals().raw_set("__secureenv", secureenv)?;
     Ok(())
 }
 

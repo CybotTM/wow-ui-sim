@@ -103,10 +103,24 @@ pub fn load_addon_internal(
         use_secure_env: toc.is_secure_env(),
     };
 
+    load_addon_files(env, toc, folder_name, &ctx, &mut result);
+
+    env.state().borrow_mut().loading_addon_index = None;
+
+    Ok(result)
+}
+
+/// Load all Lua/XML files listed in the TOC, applying local overlay paths.
+fn load_addon_files(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    ctx: &AddonContext,
+    result: &mut LoadResult,
+) {
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
 
     for (file_rel, file) in toc.files.iter().zip(toc.file_paths()) {
-        // Check local overlay first (./Interface/AddOns/{addon}/{file})
         let file = {
             let overlay = overlay_dir.join(file_rel);
             if overlay.exists() { overlay } else { file }
@@ -114,13 +128,13 @@ pub fn load_addon_internal(
         let ext = file.extension().and_then(|e| e.to_str()).unwrap_or("");
         match ext {
             "lua" => {
-                match load_lua_file(env, &file, &ctx, &mut result.timing) {
+                match load_lua_file(env, &file, ctx, &mut result.timing) {
                     Ok(()) => result.lua_files += 1,
                     Err(e) => result.warnings.push(format!("{}: {}", file.display(), e)),
                 }
                 apply_cpp_mixin_stubs(env);
             }
-            "xml" => match load_xml_file(env, &file, &ctx, &mut result.timing) {
+            "xml" => match load_xml_file(env, &file, ctx, &mut result.timing) {
                 Ok(count) => {
                     result.xml_files += 1;
                     result.lua_files += count;
@@ -132,12 +146,6 @@ pub fn load_addon_internal(
             }
         }
     }
-
-    // Clear loading_addon_index so runtime-created frames don't get attributed
-    // to this addon after it finishes loading.
-    env.state().borrow_mut().loading_addon_index = None;
-
-    Ok(result)
 }
 
 /// Patch Lua mixin tables with methods normally provided by the C++ engine.

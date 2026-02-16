@@ -298,10 +298,8 @@ fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, inher
 
     for m in &all_mixins {
         lua_code.push_str(&format!(
-            r#"
-        if {} then Mixin(frame, {}) end
-        "#,
-            m, m
+            "\n        do local m = {m} or (__secureenv and rawget(__secureenv, \"{m}\")) \
+             if m then Mixin(frame, m) end end"
         ));
     }
 }

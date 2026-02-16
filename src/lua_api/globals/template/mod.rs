@@ -240,7 +240,10 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
     let Some(mixin) = mixin else { return };
     let mut parts = Vec::new();
     for name in mixin.split(',').map(str::trim).filter(|s| !s.is_empty()) {
-        parts.push(format!("if {} then Mixin(f, {}) end", name, name));
+        parts.push(format!(
+            "do local m = {name} or (__secureenv and rawget(__secureenv, \"{name}\")) \
+             if m then Mixin(f, m) end end"
+        ));
     }
     if parts.is_empty() {
         return;
