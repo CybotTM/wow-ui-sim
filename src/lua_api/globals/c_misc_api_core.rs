@@ -146,6 +146,7 @@ fn register_c_lfg_info(lua: &Lua) -> Result<()> {
     t.set("CanPlayerUseLFR", lua.create_function(|_, ()| Ok((true, Value::Nil)))?)?;
     t.set("CanPlayerUsePremadeGroup", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("CanPlayerUseGroupFinder", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("GetCurrentEventRealmQueues", lua.create_function(|lua, ()| lua.create_table())?)?;
     lua.globals().set("C_LFGInfo", t)?;
     Ok(())
 }
