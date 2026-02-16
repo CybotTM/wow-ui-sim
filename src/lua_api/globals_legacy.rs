@@ -30,6 +30,7 @@ use super::globals::settings_api::register_settings_api;
 use super::globals::sound_api::register_sound_api;
 use super::globals::cursor_api;
 use super::globals::spell_api::register_spell_api;
+use super::globals::early_globals::register_early_globals;
 use super::globals::frame_level_api::register_frame_level_helpers;
 use super::globals::system_api::register_system_api;
 use super::globals::timer_api::register_timer_api;
@@ -439,6 +440,7 @@ fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_cvar_api(lua, Rc::clone(state))?;
     register_system_api(lua, Rc::clone(state))?;
     register_frame_level_helpers(lua)?;
+    register_early_globals(lua)?;
 
     // Frame registration (creates global frame objects)
     register_global_frames(lua, Rc::clone(state))?;
