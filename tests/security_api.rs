@@ -215,3 +215,125 @@ fn test_issecurevariable_detects_taint() {
         .unwrap();
     assert!(!result, "variable set by tainted code should be insecure");
 }
+
+// ============================================================================
+// issecretvalue / canaccessvalue / canaccessallvalues / canaccesstable
+// ============================================================================
+
+#[test]
+fn test_issecretvalue_untainted() {
+    let env = env();
+    let result: bool = env.eval("return issecretvalue(print)").unwrap();
+    assert!(!result, "engine function should not be secret");
+}
+
+#[test]
+fn test_issecretvalue_tainted() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local f = loadstring("return 1")
+            return issecretvalue(f)
+            "#,
+        )
+        .unwrap();
+    assert!(result, "loadstring result should be secret");
+}
+
+#[test]
+fn test_canaccessvalue_untainted() {
+    let env = env();
+    let result: bool = env.eval("return canaccessvalue(print)").unwrap();
+    assert!(result, "engine function should be accessible");
+}
+
+#[test]
+fn test_canaccessvalue_tainted() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local f = loadstring("return 1")
+            return canaccessvalue(f)
+            "#,
+        )
+        .unwrap();
+    assert!(!result, "loadstring result should not be accessible");
+}
+
+#[test]
+fn test_canaccessallvalues_all_clean() {
+    let env = env();
+    let result: bool = env
+        .eval("return canaccessallvalues(print, type, tostring)")
+        .unwrap();
+    assert!(result, "all engine values should be accessible");
+}
+
+#[test]
+fn test_canaccessallvalues_one_tainted() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local f = loadstring("return 1")
+            return canaccessallvalues(print, f, type)
+            "#,
+        )
+        .unwrap();
+    assert!(!result, "mixed values should fail access check");
+}
+
+#[test]
+fn test_canaccesstable_clean() {
+    let env = env();
+    let result: bool = env
+        .eval("return canaccesstable({1, 2, 3})")
+        .unwrap();
+    assert!(result, "engine-created table should be accessible");
+}
+
+#[test]
+fn test_securecallmethod_returns_values() {
+    let env = env();
+    let result: i32 = env
+        .eval(
+            r#"
+            local obj = { Add = function(self, a, b) return a + b end }
+            return securecallmethod(obj, "Add", 3, 7)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, 10);
+}
+
+#[test]
+fn test_securecallmethod_swallows_errors() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local obj = { Bad = function() error("boom") end }
+            securecallmethod(obj, "Bad")
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(result, "securecallmethod should swallow errors");
+}
+
+#[test]
+fn test_securecallmethod_missing_method() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local obj = {}
+            local r = securecallmethod(obj, "Nope")
+            return r == nil
+            "#,
+        )
+        .unwrap();
+    assert!(result, "missing method should return nil");
+}

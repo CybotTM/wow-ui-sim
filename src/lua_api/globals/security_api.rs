@@ -16,15 +16,40 @@ pub fn register_security_functions(lua: &Lua) -> Result<()> {
     // Elune provides: issecure, issecurevariable, securecall,
     // securecallfunction, forceinsecure, hooksecurefunc, secureexecuterange
 
-    globals.set("securecallmethod", lua.create_function(securecallmethod_impl)?)?;
+    // Taint-aware functions using Elune's debug.getvaluetaint
+    lua.load(
+        r##"
+        function securecallmethod(obj, name, ...)
+            if not obj then return end
+            local method = obj[name]
+            if method then
+                return securecall(method, obj, ...)
+            end
+        end
 
-    globals.set("issecretvalue", lua.create_function(|_, _val: Value| Ok(false))?)?;
-    globals.set("canaccessvalue", lua.create_function(|_, _val: Value| Ok(true))?)?;
-    globals.set(
-        "canaccessallvalues",
-        lua.create_function(|_, _vals: mlua::MultiValue| Ok(true))?,
-    )?;
-    globals.set("canaccesstable", lua.create_function(|_, _val: Value| Ok(true))?)?;
+        function issecretvalue(val)
+            return debug.getvaluetaint(val) ~= nil
+        end
+
+        function canaccessvalue(val)
+            return debug.getvaluetaint(val) == nil
+        end
+
+        function canaccessallvalues(...)
+            for i = 1, select("#", ...) do
+                if debug.getvaluetaint(select(i, ...)) ~= nil then
+                    return false
+                end
+            end
+            return true
+        end
+
+        function canaccesstable(tbl)
+            return debug.getvaluetaint(tbl) == nil
+        end
+        "##,
+    )
+    .exec()?;
 
     register_secure_handler_stubs(lua)?;
 
@@ -41,28 +66,6 @@ pub fn register_security_functions(lua: &Lua) -> Result<()> {
     )?;
 
     Ok(())
-}
-
-/// securecallmethod(object, methodName, ...) → object:methodName(...)
-fn securecallmethod_impl(_lua: &Lua, args: mlua::MultiValue) -> Result<mlua::MultiValue> {
-    let mut it = args.into_iter();
-    let obj = match it.next() {
-        Some(Value::Table(t)) => t,
-        _ => return Ok(mlua::MultiValue::new()),
-    };
-    let method_name = match it.next() {
-        Some(Value::String(s)) => s,
-        _ => return Ok(mlua::MultiValue::new()),
-    };
-    let remaining: Vec<Value> = it.collect();
-    match obj.get::<Value>(method_name)? {
-        Value::Function(f) => {
-            let mut call_args = vec![Value::Table(obj)];
-            call_args.extend(remaining);
-            f.call::<mlua::MultiValue>(mlua::MultiValue::from_iter(call_args))
-        }
-        _ => Ok(mlua::MultiValue::new()),
-    }
 }
 
 /// SecureHandler stubs and state/attribute driver stubs.
