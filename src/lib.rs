@@ -14,6 +14,8 @@ pub mod global_strings;
 pub mod items;
 #[path = "../data/manifest_interface_data.rs"]
 pub mod manifest_interface_data;
+#[path = "../data/specializations.rs"]
+pub mod specializations;
 #[path = "../data/spells.rs"]
 pub mod spells;
 #[path = "../data/spell_power.rs"]

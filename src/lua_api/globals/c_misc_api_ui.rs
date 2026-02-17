@@ -339,27 +339,28 @@ fn register_c_spec_info(lua: &Lua) -> Result<()> {
     t.set("IsInitialized", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetSpecialization", lua.create_function(|_, ()| Ok(2i32))?)?;
     t.set("GetSpecializationInfo", lua.create_function(|lua, idx: i32| {
-        // Paladin specs: 1=Holy, 2=Protection, 3=Retribution
-        let (spec_id, name, icon, role) = match idx {
-            1 => (65, "Holy", 135920i64, "HEALER"),
-            2 => (66, "Protection", 236264i64, "TANK"),
-            3 => (70, "Retribution", 135873i64, "DAMAGER"),
-            _ => (65, "Holy", 135920i64, "HEALER"),
-        };
+        use crate::specializations;
+        let paladin_class_id = 2u32;
+        let specs: Vec<_> = specializations::specs_for_class(paladin_class_id).collect();
+        let i = (idx - 1).clamp(0, specs.len() as i32 - 1) as usize;
+        let spec = specs[i];
         Ok(mlua::MultiValue::from_vec(vec![
-            Value::Integer(spec_id),
-            Value::String(lua.create_string(name)?),
-            Value::String(lua.create_string("Paladin specialization.")?),
-            Value::Integer(icon),
-            Value::String(lua.create_string(role)?),
-            Value::Integer(2), // classID = Paladin
+            Value::Integer(spec.id as i64),
+            Value::String(lua.create_string(spec.name)?),
+            Value::String(lua.create_string(spec.description)?),
+            Value::Integer(spec.icon_file_data_id as i64),
+            Value::String(lua.create_string(spec.role)?),
+            Value::Integer(spec.primary_stat as i64),
         ]))
     })?)?;
     t.set("SetSpecialization", lua.create_function(|_, _spec_index: i32| Ok(true))?)?;
     t.set("GetAllSelectedPvpTalentIDs", lua.create_function(|lua, ()| lua.create_table())?)?;
     t.set("GetPvpTalentSlotInfo", lua.create_function(|_, _s: i32| Ok(Value::Nil))?)?;
-    t.set("GetNumSpecializationsForClassID", lua.create_function(|_, (_class_id, _sex): (Option<i32>, Option<i32>)| {
-        Ok(_class_id.map_or(0, |_| 3i32))
+    t.set("GetNumSpecializationsForClassID", lua.create_function(|_, (class_id, _sex): (Option<i32>, Option<i32>)| {
+        use crate::specializations;
+        Ok(class_id.map_or(0, |cid| {
+            specializations::specs_for_class(cid as u32).count() as i32
+        }))
     })?)?;
     lua.globals().set("C_SpecializationInfo", t)?;
     Ok(())

@@ -81,12 +81,10 @@ fn register_specialization_functions(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Paladin specialization data: (spec_id, name, icon_file_data_id, role).
-const PALADIN_SPECS: &[(i64, &str, i64, &str)] = &[
-    (65, "Holy", 135920, "HEALER"),
-    (66, "Protection", 236264, "TANK"),
-    (70, "Retribution", 135873, "DAMAGER"),
-];
+use crate::specializations;
+
+/// Paladin class ID.
+const PALADIN_CLASS_ID: u32 = 2;
 
 /// Active spec index (1-based): 2 = Protection.
 const ACTIVE_SPEC_INDEX: i32 = 2;
@@ -102,45 +100,63 @@ fn register_spec_basic_queries(lua: &Lua) -> Result<()> {
     globals.set(
         "GetSpecializationInfo",
         lua.create_function(|lua, spec_index: i32| {
-            let idx = (spec_index - 1).clamp(0, 2) as usize;
-            let (id, name, icon, role) = PALADIN_SPECS[idx];
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::Integer(id),
-                Value::String(lua.create_string(name)?),
-                Value::String(lua.create_string("Spec description")?),
-                Value::Integer(icon),
-                Value::String(lua.create_string(role)?),
-                Value::Integer(2), // classID = Paladin
-            ]))
+            let specs: Vec<_> = specializations::specs_for_class(PALADIN_CLASS_ID).collect();
+            let idx = (spec_index - 1).clamp(0, specs.len() as i32 - 1) as usize;
+            spec_to_multivalue(lua, specs[idx])
         })?,
     )?;
-    globals.set("GetNumSpecializations", lua.create_function(|_, ()| Ok(3))?)?;
+    globals.set(
+        "GetNumSpecializations",
+        lua.create_function(|_, ()| {
+            Ok(specializations::specs_for_class(PALADIN_CLASS_ID).count() as i32)
+        })?,
+    )?;
+    register_spec_role_queries(&globals, lua)?;
+
+    Ok(())
+}
+
+/// Role and count queries: GetSpecializationRole, GetSpecializationRoleByID, GetNumSpecializationsForClassID.
+fn register_spec_role_queries(globals: &mlua::Table, lua: &Lua) -> Result<()> {
     globals.set(
         "GetSpecializationRole",
         lua.create_function(|lua, spec_index: Option<i32>| {
-            let idx = (spec_index.unwrap_or(ACTIVE_SPEC_INDEX) - 1).clamp(0, 2) as usize;
-            Ok(Value::String(lua.create_string(PALADIN_SPECS[idx].3)?))
+            let specs: Vec<_> = specializations::specs_for_class(PALADIN_CLASS_ID).collect();
+            let idx = (spec_index.unwrap_or(ACTIVE_SPEC_INDEX) - 1).clamp(0, specs.len() as i32 - 1) as usize;
+            Ok(Value::String(lua.create_string(specs[idx].role)?))
         })?,
     )?;
     globals.set(
         "GetSpecializationRoleByID",
         lua.create_function(|lua, spec_id: i32| {
-            let role = PALADIN_SPECS
-                .iter()
-                .find(|(id, ..)| *id == spec_id as i64)
-                .map(|(.., r)| *r)
+            let role = specializations::spec_by_id(spec_id as u32)
+                .map(|s| s.role)
                 .unwrap_or("DAMAGER");
             Ok(Value::String(lua.create_string(role)?))
         })?,
     )?;
     globals.set(
         "GetNumSpecializationsForClassID",
-        lua.create_function(|_, (_class_id, _sex): (Option<i32>, Option<i32>)| {
-            Ok(_class_id.map_or(0, |_| 3i32))
+        lua.create_function(|_, (class_id, _sex): (Option<i32>, Option<i32>)| {
+            Ok(class_id.map_or(0, |cid| {
+                specializations::specs_for_class(cid as u32).count() as i32
+            }))
         })?,
     )?;
 
     Ok(())
+}
+
+/// Convert a SpecInfo to the MultiValue returned by GetSpecializationInfo.
+fn spec_to_multivalue(lua: &Lua, spec: &specializations::SpecInfo) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::Integer(spec.id as i64),
+        Value::String(lua.create_string(spec.name)?),
+        Value::String(lua.create_string(spec.description)?),
+        Value::Integer(spec.icon_file_data_id as i64),
+        Value::String(lua.create_string(spec.role)?),
+        Value::Integer(spec.primary_stat as i64),
+    ]))
 }
 
 /// Spec info lookups by ID or class: GetSpecializationInfoByID, ForSpecID, ForClassID.
@@ -157,20 +173,16 @@ fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
     )?;
     globals.set(
         "GetSpecializationInfoForClassID",
-        lua.create_function(|lua, (_class_id, spec_index): (i32, i32)| {
-            if !(1..=3).contains(&spec_index) {
+        lua.create_function(|lua, (class_id, spec_index): (i32, i32)| {
+            let specs: Vec<_> = specializations::specs_for_class(class_id as u32).collect();
+            if spec_index < 1 || spec_index as usize > specs.len() {
                 return Ok(mlua::MultiValue::new());
             }
-            let (id, name, icon, role) = PALADIN_SPECS[(spec_index - 1) as usize];
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::Integer(id),
-                Value::String(lua.create_string(name)?),
-                Value::String(lua.create_string("Description")?),
-                Value::Integer(icon),
-                Value::String(lua.create_string(role)?),
-                Value::Boolean(false),
-                Value::Boolean(spec_index == ACTIVE_SPEC_INDEX),
-            ]))
+            let spec = specs[(spec_index - 1) as usize];
+            let mut vals = spec_to_multivalue(lua, spec)?.into_vec();
+            vals.push(Value::Boolean(false)); // isAllowed
+            vals.push(Value::Boolean(spec_index == ACTIVE_SPEC_INDEX));
+            Ok(mlua::MultiValue::from_vec(vals))
         })?,
     )?;
 
@@ -178,19 +190,10 @@ fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
 }
 
 fn spec_info_by_id(lua: &Lua, spec_id: i32) -> Result<mlua::MultiValue> {
-    let spec = PALADIN_SPECS
-        .iter()
-        .find(|(id, ..)| *id == spec_id as i64)
-        .unwrap_or(&PALADIN_SPECS[1]); // Default to Protection
-    let (id, name, icon, role) = *spec;
-    Ok(mlua::MultiValue::from_vec(vec![
-        Value::Integer(id),
-        Value::String(lua.create_string(name)?),
-        Value::String(lua.create_string("Spec description")?),
-        Value::Integer(icon),
-        Value::String(lua.create_string(role)?),
-        Value::String(lua.create_string("PALADIN")?),
-    ]))
+    let spec = specializations::spec_by_id(spec_id as u32)
+        .or_else(|| specializations::spec_by_id(66)) // Default to Protection
+        .unwrap();
+    spec_to_multivalue(lua, spec)
 }
 
 /// Economy functions: money, trade, buyback.
