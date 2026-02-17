@@ -63,6 +63,9 @@ fn set_node_dynamic_fields(
 
     // Hero subtree nodes stay fully talented.
     if node.sub_tree_id != 0 {
+        let active_subtree = super::hero_talents::get_active_hero_subtree(&s);
+        let sub_tree_active = active_subtree == Some(node.sub_tree_id);
+        info.set("subTreeActive", sub_tree_active)?;
         return set_fully_talented(lua, info, node, max_ranks);
     }
 

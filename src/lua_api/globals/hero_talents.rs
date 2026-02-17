@@ -149,24 +149,22 @@ fn collect_entry_subtree_ids(entry_ids: &[u32]) -> Vec<u32> {
 ///
 /// Checks SubTreeSelection nodes for the active spec (Protection, spec_set=28)
 /// in tree 790. If one has a selection, returns the selected entry's subtree ID.
-pub fn get_active_hero_subtree(state: &SimState) -> Value {
+pub fn get_active_hero_subtree(state: &SimState) -> Option<u32> {
     let spec_set = 28u32; // Protection
     let tree_id = 790u32;
-    let Some(subtree_ids) = subtree_ids_for_spec(tree_id, spec_set) else {
-        return Value::Nil;
-    };
+    let subtree_ids = subtree_ids_for_spec(tree_id, spec_set)?;
     for &st_id in subtree_ids {
         for &node_id in selection_node_ids_for_subtree(st_id) {
             if let Some(&entry_id) = state.talents.node_selections.get(&node_id) {
                 if let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) {
                     if entry.sub_tree_id != 0 {
-                        return Value::Integer(entry.sub_tree_id as i64);
+                        return Some(entry.sub_tree_id);
                     }
                 }
             }
         }
     }
-    Value::Nil
+    None
 }
 
 /// C_ClassTalents namespace — class talent configuration and hero spec APIs.
@@ -181,7 +179,10 @@ pub fn register_c_class_talents(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
     t.set("HasUnspentHeroTalentPoints", lua.create_function(|_, ()| Ok(false))?)?;
     let st = state;
     t.set("GetActiveHeroTalentSpec", lua.create_function(move |_, ()| {
-        Ok(get_active_hero_subtree(&st.borrow()))
+        match get_active_hero_subtree(&st.borrow()) {
+            Some(id) => Ok(Value::Integer(id as i64)),
+            None => Ok(Value::Nil),
+        }
     })?)?;
     lua.globals().set("C_ClassTalents", t)?;
     Ok(())
