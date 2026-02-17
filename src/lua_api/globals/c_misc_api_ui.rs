@@ -193,6 +193,7 @@ fn register_c_scenario(lua: &Lua) -> Result<()> {
     t.set("GetStepInfo", lua.create_function(|_, _s: Option<i32>| Ok((Value::Nil, Value::Nil, 0i32, false, false)))?)?;
     t.set("GetCriteriaInfo", lua.create_function(|_, _i: i32| Ok(Value::Nil))?)?;
     t.set("IsInScenario", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("ShouldShowCriteria", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_Scenario", t)?;
     Ok(())
 }

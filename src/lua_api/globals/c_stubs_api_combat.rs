@@ -1,8 +1,8 @@
 //! Combat, color, curve, and encounter-related C_* namespace stubs.
 //!
 //! Split from c_stubs_api_extra.rs to keep file sizes manageable.
-//! Contains: C_ColorUtil, C_CombatLog, C_CurveUtil, C_RestrictedActions,
-//! C_TransmogOutfitInfo, Constants.EncounterTimelineIconMasks.
+//! Contains: C_ColorUtil, C_CombatLog, C_CurveUtil, C_EncounterTimeline,
+//! C_RestrictedActions, C_TransmogOutfitInfo, Constants.EncounterTimelineIconMasks.
 
 use mlua::{Lua, Result, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
@@ -21,6 +21,7 @@ pub fn register_combat_stubs(lua: &Lua) -> Result<()> {
     register_c_housing_photo_sharing(lua, &g)?;
     register_nameplate_constants(lua)?;
     register_c_death_recap(lua, &g)?;
+    register_c_encounter_timeline(lua, &g)?;
     Ok(())
 }
 
@@ -274,5 +275,41 @@ fn register_encounter_timeline_constants(lua: &Lua, g: &mlua::Table) -> Result<(
     masks.set("EncounterTimelineEnrageIcons", 32i32)?;
     masks.set("EncounterTimelineAllIcons", 63i32)?;
     constants.set("EncounterTimelineIconMasks", masks)?;
+    Ok(())
+}
+
+/// C_EncounterTimeline - encounter timeline UI data (boss ability timers).
+fn register_c_encounter_timeline(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    // Feature availability / state
+    t.set("IsFeatureAvailable", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("IsFeatureEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    // Event queries
+    t.set("GetEventList", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set("GetEventInfo", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    t.set("GetEventState", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    t.set("GetEventTimer", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    t.set("GetEventTrack", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    t.set("GetEventHighlightTime", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set("GetEventTimeRemaining", lua.create_function(|_, _event_id: Value| Ok(0.0f64))?)?;
+    t.set("IsEventBlocked", lua.create_function(|_, _event_id: Value| Ok(false))?)?;
+    t.set("HasActiveEvents", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("HasPausedEvents", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("HasVisibleEvents", lua.create_function(|_, ()| Ok(false))?)?;
+    register_c_encounter_timeline_extra(lua, &t)?;
+    g.set("C_EncounterTimeline", t)?;
+    Ok(())
+}
+
+/// C_EncounterTimeline continued - tracks, view, edit mode, and icon textures.
+fn register_c_encounter_timeline_extra(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set("GetTrackList", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set("GetTrackType", lua.create_function(|_, _track: Value| Ok(0i32))?)?;
+    t.set("GetViewType", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("SetViewType", lua.create_function(|_, _view_type: Value| Ok(()))?)?;
+    t.set("GetCurrentTime", lua.create_function(|_, ()| Ok(0.0f64))?)?;
+    t.set("AddEditModeEvents", lua.create_function(|_, ()| Ok(0.0f64))?)?;
+    t.set("CancelEditModeEvents", lua.create_function(|_, ()| Ok(()))?)?;
+    t.set("SetEventIconTextures", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
     Ok(())
 }

@@ -444,8 +444,9 @@ fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
     // Native WoW error display function — called by Blizzard_ScriptErrors error handler.
     // Without this stub, the error handler itself crashes, causing recursive error spam.
     // Log the message to stderr so script errors are visible in terminal output.
-    g.set("addframetext", lua.create_function(|_, msg: String| {
+    g.set("addframetext", lua.create_function(|lua, msg: String| {
         eprintln!("[addframetext] {msg}");
+        super::super::script_helpers::collect_lua_error(lua, &msg);
         Ok(())
     })?)?;
     Ok(())
@@ -673,19 +674,7 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
     spell_overlay.set("IsSpellOverlayed", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     g.set("C_SpellActivationOverlay", spell_overlay)?;
 
-    let account_store = lua.create_table()?;
-    account_store.set("GetCategories", lua.create_function(|lua, _store_id: Value| lua.create_table())?)?;
-    account_store.set("GetCategoryInfo", lua.create_function(|_, _cat_id: Value| Ok(Value::Nil))?)?;
-    account_store.set("GetCategoryItems", lua.create_function(|lua, _cat_id: Value| lua.create_table())?)?;
-    account_store.set("GetCurrencyIDForStore", lua.create_function(|_, _store_id: Value| Ok(Value::Nil))?)?;
-    account_store.set("GetCurrencyInfo", lua.create_function(|_, _currency_id: Value| Ok(Value::Nil))?)?;
-    account_store.set("GetCurrencyAvailable", lua.create_function(|_, _currency_id: Value| Ok(0i32))?)?;
-    account_store.set("GetItemInfo", lua.create_function(|_, _item_id: Value| Ok(Value::Nil))?)?;
-    account_store.set("GetStoreFrontState", lua.create_function(|_, _store_id: Value| Ok(0i32))?)?;
-    account_store.set("RequestStoreFrontInfoUpdate", lua.create_function(|_, _store_id: Value| Ok(()))?)?;
-    account_store.set("BeginPurchase", lua.create_function(|_, _item_id: Value| Ok(()))?)?;
-    account_store.set("RefundItem", lua.create_function(|_, _item_id: Value| Ok(()))?)?;
-    g.set("C_AccountStore", account_store)?;
+    super::c_stubs_api_store::register_c_account_store(lua)?;
 
     Ok(())
 }

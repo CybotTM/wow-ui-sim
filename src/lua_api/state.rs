@@ -225,6 +225,8 @@ pub struct SimState {
     pub app_frame_metrics: AppFrameMetrics,
     /// Talent tree interactive state (ranks, selections, currency mappings).
     pub talents: super::talent_state::TalentState,
+    /// Collected Lua errors (from call_error_handler and addframetext).
+    pub lua_errors: Vec<String>,
 }
 
 impl Default for SimState {
@@ -275,6 +277,7 @@ impl Default for SimState {
             loading_addon_index: None,
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
+            lua_errors: Vec::new(),
         }
     }
 }

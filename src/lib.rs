@@ -30,6 +30,7 @@ pub mod extract_textures;
 pub mod iced_app;
 pub mod loader;
 pub mod lua_api;
+pub mod lua_errors;
 pub mod lua_server;
 pub mod render;
 pub mod saved_variables;

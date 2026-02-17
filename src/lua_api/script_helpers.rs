@@ -3,7 +3,10 @@
 //! All internal tables (__scripts, __script_hooks, __frame_fields) are stored
 //! in the Lua registry, invisible to addon Lua code.
 
+use crate::lua_api::SimState;
 use mlua::{Lua, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 // ── __scripts table ──────────────────────────────────────────────────
 
@@ -109,12 +112,22 @@ pub fn get_frame_ref(_lua: &Lua, widget_id: u64) -> Option<Value> {
 /// the same slot that `securecall`'s `lua_pcall` references.
 pub fn call_error_handler(lua: &Lua, error_msg: &str) {
     eprintln!("Lua error: {error_msg}");
+    collect_lua_error(lua, error_msg);
     let result: mlua::Result<()> = lua.load(r#"
         local handler = geterrorhandler()
         if handler then handler((...)) end
     "#).call(error_msg.to_string());
     if let Err(e) = result {
         eprintln!("Error in error handler: {e}");
+    }
+}
+
+/// Push an error message into SimState.lua_errors for later retrieval.
+pub fn collect_lua_error(lua: &Lua, msg: &str) {
+    if let Some(state_rc) = lua.app_data_ref::<Rc<RefCell<SimState>>>() {
+        if let Ok(mut state) = state_rc.try_borrow_mut() {
+            state.lua_errors.push(msg.to_string());
+        }
     }
 }
 

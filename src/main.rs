@@ -94,6 +94,9 @@ enum Commands {
         dump_tree: Option<Option<String>>,
     },
 
+    /// Show unique Lua errors as JSON (suppresses other output)
+    LuaErrors,
+
     /// Dump textures used by frames to disk (for debugging atlas crops)
     DumpTexture {
         #[arg(short, long, default_value = "/tmp/claude/textures")]
@@ -146,6 +149,11 @@ fn scan_addons(base_path: &PathBuf) -> Vec<(String, PathBuf)> {
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+
+    // For lua-errors: redirect stdout→stderr so only JSON hits stdout
+    let quiet = matches!(args.command, Some(Commands::LuaErrors));
+    let saved_stdout = if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None };
+
     apply_resource_limits();
 
     tracing_subscriber::fmt()
@@ -185,6 +193,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
             run_screenshot(&env, &font_system, output, width, height, filter, crop, args.delay, exec_lua.as_deref(), dump_tree);
+        }
+        Some(Commands::LuaErrors) => {
+            wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout);
         }
         Some(Commands::DumpTexture { output, filter, frame_filter }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);

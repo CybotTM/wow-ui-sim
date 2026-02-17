@@ -36,6 +36,7 @@ pub mod c_stubs_api;
 pub mod c_stubs_api_combat;
 pub mod c_stubs_api_extra;
 pub mod c_stubs_api_professions;
+pub mod c_stubs_api_store;
 pub mod c_map_api;
 pub mod c_misc_api;
 mod c_misc_api_core;

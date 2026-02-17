@@ -24,6 +24,16 @@ fn register_table_functions(lua: &Lua) -> Result<()> {
     register_wipe_and_aliases(lua)?;
     register_table_search(lua)?;
     register_table_transform(lua)?;
+
+    // table.create(narray, nrec) — WoW-specific pre-allocation hint.
+    let table_lib: mlua::Table = lua.globals().get("table")?;
+    table_lib.set("create", lua.create_function(|lua, (narray, nrec): (Option<i32>, Option<i32>)| {
+        lua.create_table_with_capacity(
+            narray.unwrap_or(0).max(0) as usize,
+            nrec.unwrap_or(0).max(0) as usize,
+        )
+    })?)?;
+
     Ok(())
 }
 

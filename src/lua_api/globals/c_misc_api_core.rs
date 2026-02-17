@@ -401,6 +401,7 @@ fn register_c_unit_auras(lua: &Lua) -> Result<()> {
     t.set("AddPrivateAuraAppliedSound", lua.create_function(|_, _a: mlua::MultiValue| Ok(()))?)?;
     t.set("RemovePrivateAuraAppliedSound", lua.create_function(|_, _a: mlua::MultiValue| Ok(()))?)?;
     t.set("SetPrivateWarningTextAnchor", lua.create_function(|_, _a: mlua::MultiValue| Ok(()))?)?;
+    t.set("AuraIsBigDefensive", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     lua.globals().set("C_UnitAuras", t)?;
     Ok(())
 }
