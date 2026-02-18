@@ -191,6 +191,17 @@ Three-part horizontally-stretched button used for most Blizzard UI action button
 
 Both `wow-sim` and `wow-cli` provide CLI subcommands. `wow-sim` subcommands use the same loading as the GUI; `wow-cli` subcommands either load standalone or connect to a running server.
 
+### Lua Errors
+
+Check for Lua errors during startup. Outputs unique errors as JSON to stdout (all other output to stderr). **Always run this after adding/modifying stubs or API registrations.**
+
+```bash
+wow-sim --no-addons --no-saved-vars lua-errors 2>/dev/null   # Check for errors (JSON output)
+wow-sim lua-errors 2>/dev/null                                # Full load with addons
+```
+
+Empty output (no JSON array) means zero errors. Non-empty output lists unique error messages with counts.
+
 ### Screenshot
 
 Render the UI to an image file without starting the GUI (headless GPU, same shader pipeline as the live renderer). Text is not rendered — this is for debugging frame layout and textures.

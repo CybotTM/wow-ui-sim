@@ -15,7 +15,7 @@
 //! - C_ActionBar - Action bar queries
 //! - C_ZoneAbility - Zone ability data
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
 
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
@@ -662,7 +662,34 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
     g.set("C_SpellActivationOverlay", spell_overlay)?;
 
     super::c_stubs_api_store::register_c_account_store(lua)?;
+    register_c_video_options(lua)?;
 
+    Ok(())
+}
+
+/// C_VideoOptions — screen resolution and graphics queries.
+fn register_c_video_options(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    let video = lua.create_table()?;
+    video.set("GetDefaultGameWindowSize", lua.create_function(|lua, _monitor: i32| {
+        let t = lua.create_table()?;
+        t.set("x", 1920)?;
+        t.set("y", 1080)?;
+        Ok(t)
+    })?)?;
+    video.set("GetCurrentGameWindowSize", lua.create_function(|lua, _args: MultiValue| {
+        let t = lua.create_table()?;
+        t.set("x", 1920)?;
+        t.set("y", 1080)?;
+        Ok(t)
+    })?)?;
+    video.set("GetGameWindowSizes", lua.create_function(|lua, _args: MultiValue| {
+        lua.create_table()
+    })?)?;
+    video.set("GetGxAdapterInfo", lua.create_function(|lua, ()| lua.create_table())?)?;
+    video.set("IsSpellVisualDensitySystemSupported", lua.create_function(|_, ()| Ok(false))?)?;
+    video.set("SetGameWindowSize", lua.create_function(|_, (_x, _y): (i32, i32)| Ok(()))?)?;
+    g.set("C_VideoOptions", video)?;
     Ok(())
 }
 
