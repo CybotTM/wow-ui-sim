@@ -374,10 +374,7 @@ fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
 /// Global name > parentKey > anonymous fallback.
 fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> String {
     if let Some(ref name) = frame.name
-        && !name.starts_with("__anon_")
-            && !name.starts_with("__frame_")
-            && !name.starts_with("__tex_")
-            && !name.starts_with("__fs_")
+        && !name.starts_with("__")
         {
             return name.clone();
         }

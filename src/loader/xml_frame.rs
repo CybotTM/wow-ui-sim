@@ -38,7 +38,13 @@ pub fn create_frame_from_xml(
         }
     }
 
-    let name = match resolve_frame_name(frame, parent_override) {
+    let creator_name = {
+        let s = env.state().borrow();
+        s.loading_addon_index
+            .and_then(|idx| s.addons.get(idx as usize))
+            .map(|a| a.folder_name.clone())
+    };
+    let name = match resolve_frame_name(frame, parent_override, creator_name.as_deref()) {
         Some(n) => n,
         None => return Ok(None),
     };
@@ -165,7 +171,7 @@ fn apply_xml_properties_direct(
 
 /// Resolve the frame name, applying `$parent` substitution and generating anonymous names.
 /// Returns `None` if the frame should be skipped (anonymous top-level frame).
-fn resolve_frame_name(frame: &crate::xml::FrameXml, parent_override: Option<&str>) -> Option<String> {
+fn resolve_frame_name(frame: &crate::xml::FrameXml, parent_override: Option<&str>, creator: Option<&str>) -> Option<String> {
     match &frame.name {
         Some(n) => {
             if let Some(parent_name) = parent_override {
@@ -176,7 +182,7 @@ fn resolve_frame_name(frame: &crate::xml::FrameXml, parent_override: Option<&str
         }
         None => {
             if parent_override.is_some() {
-                Some(format!("__anon_{}", rand_id()))
+                Some(format!("__{}_{}",  creator.unwrap_or("anon"), rand_id()))
             } else {
                 None // Anonymous top-level frames are templates
             }
