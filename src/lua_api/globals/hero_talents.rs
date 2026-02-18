@@ -30,6 +30,14 @@ static SPEC_TO_SUBTREES: LazyLock<HashMap<(u32, u32), Vec<u32>>> = LazyLock::new
 static SUBTREE_TO_SELECTION_NODES: LazyLock<HashMap<u32, Vec<u32>>> =
     LazyLock::new(compute_subtree_to_selection_nodes);
 
+/// For each subtree, the center X and topmost Y of its nodes.
+/// posX = average (center) of all node posX values in the subtree.
+/// posY = minimum (topmost) posY of all nodes in the subtree.
+/// Matches the WoW API docs: "Center X calculated from posX values of all nodes;
+/// Topmost Y taken from posY values of all nodes".
+static SUBTREE_POSITIONS: LazyLock<HashMap<u32, (i32, i32)>> =
+    LazyLock::new(compute_subtree_positions);
+
 /// Get hero subtree IDs available for the given tree and spec set.
 pub fn subtree_ids_for_spec(tree_id: u32, spec_set_id: u32) -> Option<&'static Vec<u32>> {
     SPEC_TO_SUBTREES.get(&(tree_id, spec_set_id))
@@ -104,6 +112,43 @@ fn compute_subtree_to_selection_nodes() -> HashMap<u32, Vec<u32>> {
     map
 }
 
+/// Build map: subtree_id → (center_pos_x, topmost_pos_y).
+///
+/// posX = average (center) of all normal node posX values (node_type != 3, i.e. not SubTreeSelection).
+/// posY = minimum posY of those nodes (topmost, since Y increases downward).
+///
+/// Matches WoW API: "Center X calculated from posX values of all of this subTree's nodes;
+/// Topmost Y taken from posY values of all nodes".
+fn compute_subtree_positions() -> HashMap<u32, (i32, i32)> {
+    // Accumulate sum_x, min_y, count per subtree_id
+    let mut accum: HashMap<u32, (i64, i32, u32)> = HashMap::new(); // (sum_x, min_y, count)
+
+    for node in TRAIT_NODE_DB.values() {
+        if node.sub_tree_id == 0 || node.node_type == 3 {
+            continue; // skip non-hero nodes and SubTreeSelection sentinel nodes
+        }
+        let entry = accum.entry(node.sub_tree_id).or_insert((0, i32::MAX, 0));
+        entry.0 += node.pos_x as i64;
+        entry.1 = entry.1.min(node.pos_y);
+        entry.2 += 1;
+    }
+
+    let mut map = HashMap::new();
+    for (sub_tree_id, (sum_x, min_y, count)) in accum {
+        if count > 0 {
+            let center_x = (sum_x / count as i64) as i32;
+            map.insert(sub_tree_id, (center_x, min_y));
+        }
+    }
+    map
+}
+
+/// Get the center X and topmost Y for a subtree's nodes.
+/// Returns (center_x, topmost_y) or (0, 0) if no nodes found.
+pub fn subtree_position(sub_tree_id: u32) -> (i32, i32) {
+    SUBTREE_POSITIONS.get(&sub_tree_id).copied().unwrap_or((0, 0))
+}
+
 /// Find the spec_set_id from a node's conditions (cond_type == 1).
 /// Returns 0 if no spec condition found (visible to all specs).
 fn find_spec_set_condition(cond_ids: &[u32]) -> u32 {
@@ -143,6 +188,40 @@ fn collect_entry_subtree_ids(entry_ids: &[u32]) -> Vec<u32> {
         }
     }
     ids
+}
+
+/// Auto-select the first hero spec for the active specialization.
+///
+/// Finds the visible SubTreeSelection node for the current spec, picks the first
+/// entry, and populates node_selections/node_ranks so the hero talent UI displays.
+pub fn auto_select_hero_spec(
+    node_ranks: &mut std::collections::HashMap<u32, u32>,
+    node_selections: &mut std::collections::HashMap<u32, u32>,
+) {
+    let spec_set = 28u32; // Protection
+    let tree_id = 790u32;
+    let Some(subtree_ids) = subtree_ids_for_spec(tree_id, spec_set) else {
+        return;
+    };
+    // Find a SubTreeSelection node visible to this spec (has matching spec condition).
+    for &st_id in subtree_ids {
+        for &node_id in selection_node_ids_for_subtree(st_id) {
+            let Some(node) = TRAIT_NODE_DB.get(&node_id) else { continue };
+            // Only pick nodes visible to our spec.
+            if find_spec_set_condition(node.cond_ids) != spec_set {
+                continue;
+            }
+            // Pick the first entry with a subtree that's in our available list.
+            for &entry_id in node.entry_ids {
+                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else { continue };
+                if entry.sub_tree_id != 0 && subtree_ids.contains(&entry.sub_tree_id) {
+                    node_selections.insert(node_id, entry_id);
+                    node_ranks.insert(node_id, 1);
+                    return;
+                }
+            }
+        }
+    }
 }
 
 /// Get the active hero subtree ID from talent state, or None.

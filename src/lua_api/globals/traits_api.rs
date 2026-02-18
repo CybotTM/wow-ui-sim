@@ -251,7 +251,10 @@ fn register_c_traits_node(
         super::traits_api_node::create_condition_info(lua, &st, cid)
     })?)?;
 
-    t.set("GetSubTreeInfo", lua.create_function(super::traits_api_node::create_sub_tree_info)?)?;
+    let st = Rc::clone(&state);
+    t.set("GetSubTreeInfo", lua.create_function(move |lua, (config_id, sub_tree_id): (i32, i32)| {
+        super::traits_api_node::create_sub_tree_info(lua, &st, config_id, sub_tree_id)
+    })?)?;
 
     let st = Rc::clone(&state);
     t.set("GetNodeCost", lua.create_function(move |lua, (_cfg, node_id): (i32, i32)| {

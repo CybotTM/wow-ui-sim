@@ -38,9 +38,18 @@ impl TalentState {
             }
         }
 
+        let mut node_ranks = HashMap::new();
+        let mut node_selections = HashMap::new();
+
+        // Auto-select the first hero spec so hero talent UI displays by default.
+        super::globals::hero_talents::auto_select_hero_spec(
+            &mut node_ranks,
+            &mut node_selections,
+        );
+
         Self {
-            node_ranks: HashMap::new(),
-            node_selections: HashMap::new(),
+            node_ranks,
+            node_selections,
             group_currency_map,
             node_currency_map,
         }

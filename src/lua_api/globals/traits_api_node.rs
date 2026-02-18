@@ -457,21 +457,29 @@ fn evaluate_condition(cond: &crate::traits::TraitCondInfo, state: &SimState) -> 
     }
 }
 
-pub fn create_sub_tree_info(lua: &Lua, (_config_id, sub_tree_id): (i32, i32)) -> Result<Value> {
-    use super::hero_talents::selection_node_ids_for_subtree;
+pub fn create_sub_tree_info(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    _config_id: i32,
+    sub_tree_id: i32,
+) -> Result<Value> {
+    use super::hero_talents::{get_active_hero_subtree, selection_node_ids_for_subtree, subtree_position};
     use crate::traits::TRAIT_SUBTREE_DB;
     let Some(st) = TRAIT_SUBTREE_DB.get(&(sub_tree_id as u32)) else {
         return Ok(Value::Nil);
     };
+    let (pos_x, pos_y) = subtree_position(sub_tree_id as u32);
+    let active_subtree = get_active_hero_subtree(&state.borrow());
+    let is_active = active_subtree == Some(sub_tree_id as u32);
     let info = lua.create_table()?;
     info.set("ID", sub_tree_id)?;
     info.set("name", st.name)?;
     info.set("description", st.description)?;
     info.set("traitTreeID", st.tree_id as i64)?;
     info.set("iconElementID", st.atlas_element_id as i64)?;
-    info.set("isActive", true)?;
-    info.set("posX", 0)?;
-    info.set("posY", 0)?;
+    info.set("isActive", is_active)?;
+    info.set("posX", pos_x)?;
+    info.set("posY", pos_y)?;
     let sel_nodes = selection_node_ids_for_subtree(sub_tree_id as u32);
     let sel_table = lua.create_table()?;
     for (i, &nid) in sel_nodes.iter().enumerate() {
