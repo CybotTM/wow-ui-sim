@@ -164,70 +164,97 @@ fn handle_set_text(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(
         }
     });
 
-    let height_changed_id = set_text_on_frame(&mut state, id, store_text.clone());
-    let height_changed_child = text_child_id
-        .and_then(|cid| set_text_on_frame(&mut state, cid, store_text).then_some(cid));
+    set_text_on_frame(&mut state, id, store_text.clone());
+    if let Some(cid) = text_child_id {
+        set_text_on_frame(&mut state, cid, store_text);
+    }
 
     let ids_to_measure = collect_fontstring_measure_ids(&state, id, text_child_id);
     drop(state);
 
-    // Invalidate layout for frames whose height was auto-sized
-    if height_changed_id || height_changed_child.is_some() {
-        let mut state = state_rc.borrow_mut();
-        if height_changed_id {
-            state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout_with_dependents(id);
-        }
-        if let Some(cid) = height_changed_child {
-            state.widgets.mark_rect_dirty(cid);
-            state.invalidate_layout_with_dependents(cid);
-        }
-    }
-
-    measure_and_apply_widths(lua, &state_rc, &ids_to_measure);
+    measure_and_apply_sizes(lua, &state_rc, &ids_to_measure);
     Ok(())
 }
 
-/// Collect FontString IDs that need width measurement after text changes.
+/// Info needed to measure a FontString after text changes.
+struct FontStringMeasureInfo {
+    id: u64,
+    text: String,
+    font: Option<String>,
+    font_size: f32,
+    width: f32,
+    word_wrap: bool,
+}
+
+/// Collect FontString IDs that need size measurement after text changes.
 fn collect_fontstring_measure_ids(
     state: &std::cell::RefMut<'_, crate::lua_api::SimState>,
     id: u64,
     text_child_id: Option<u64>,
-) -> Vec<(u64, String, Option<String>, f32)> {
+) -> Vec<FontStringMeasureInfo> {
     [Some(id), text_child_id]
         .into_iter()
         .flatten()
         .filter_map(|fid| {
             let f = state.widgets.get(fid)?;
             if f.widget_type != WidgetType::FontString { return None; }
-            if f.word_wrap && f.width > 0.0 { return None; }
             let text = f.text.as_ref()?.clone();
-            Some((fid, text, f.font.clone(), f.font_size))
+            Some(FontStringMeasureInfo {
+                id: fid,
+                text,
+                font: f.font.clone(),
+                font_size: f.font_size,
+                width: f.width,
+                word_wrap: f.word_wrap,
+            })
         })
         .collect()
 }
 
-/// Measure text widths and apply to frames that changed.
-/// Invalidates layout for any frames whose width was updated.
-fn measure_and_apply_widths(
+/// Measure text width and height, apply to frames, and invalidate layout.
+///
+/// Width is auto-sized for non-word-wrap FontStrings (no fixed width).
+/// Height is auto-sized for all FontStrings based on wrapped text content.
+fn measure_and_apply_sizes(
     lua: &Lua,
     state_rc: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    ids_to_measure: &[(u64, String, Option<String>, f32)],
+    ids_to_measure: &[FontStringMeasureInfo],
 ) {
     if ids_to_measure.is_empty() { return; }
     let changed_ids: Vec<u64> = if let Some(fs_rc) = lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::render::font::WowFontSystem>>>() {
         let mut fs = fs_rc.borrow_mut();
         let mut state = state_rc.borrow_mut();
         let mut changed = Vec::new();
-        for (fid, text, font, font_size) in ids_to_measure {
-            let width = fs.measure_text_width(text, font.as_deref(), *font_size);
-            let did_change = state.widgets.get(*fid).map(|f| f.width != width).unwrap_or(false);
-            if did_change {
-                if let Some(frame) = state.widgets.get_mut_visual(*fid) {
-                    frame.width = width;
+        for info in ids_to_measure {
+            let mut did_change = false;
+
+            // Auto-size width for non-word-wrap FontStrings
+            if !(info.word_wrap && info.width > 0.0) {
+                let width = fs.measure_text_width(&info.text, info.font.as_deref(), info.font_size);
+                if state.widgets.get(info.id).map(|f| f.width != width).unwrap_or(false) {
+                    if let Some(frame) = state.widgets.get_mut_visual(info.id) {
+                        frame.width = width;
+                    }
+                    did_change = true;
                 }
-                state.widgets.mark_rect_dirty(*fid);
-                changed.push(*fid);
+            }
+
+            // Auto-size height based on wrapped text content
+            let wrap_width = {
+                let cur_width = state.widgets.get(info.id).map(|f| f.width).unwrap_or(0.0);
+                if info.word_wrap && cur_width > 0.0 { Some(cur_width) } else { None }
+            };
+            let height = fs.measure_text_height(&info.text, info.font.as_deref(), info.font_size, wrap_width);
+            if state.widgets.get(info.id).map(|f| f.height != height).unwrap_or(false) {
+                if let Some(frame) = state.widgets.get_mut_visual(info.id) {
+                    frame.height = height;
+                }
+                did_change = true;
+            }
+
+            if did_change {
+                state.widgets.mark_rect_dirty(info.id);
+                changed.push(info.id);
             }
         }
         changed
@@ -266,37 +293,18 @@ fn update_tooltip_line(
     }
 }
 
-/// Set text on a frame, auto-sizing height if needed.
-/// Returns true if the frame's height was changed (layout invalidation needed).
-///
-/// FontStrings auto-size their height to fit text content, matching WoW
-/// behavior where GetHeight() returns the rendered text height regardless
-/// of any XML Size element.
+/// Set text on a frame. Size auto-sizing is handled by `measure_and_apply_sizes`.
 fn set_text_on_frame(
     state: &mut std::cell::RefMut<'_, crate::lua_api::SimState>,
     id: u64,
     text: Option<String>,
-) -> bool {
-    // Skip get_mut() (and render_dirty) when text is unchanged
+) {
     if let Some(frame) = state.widgets.get(id) {
-        let needs_height = text.is_some()
-            && frame.widget_type == crate::widget::WidgetType::FontString
-            && frame.height < frame.font_size.max(12.0);
-        if frame.text == text && !needs_height {
-            return false;
-        }
+        if frame.text == text { return; }
     }
-    let mut height_changed = false;
     if let Some(frame) = state.widgets.get_mut_visual(id) {
-        let min_height = frame.font_size.max(12.0);
-        let is_fontstring = frame.widget_type == crate::widget::WidgetType::FontString;
-        if text.is_some() && is_fontstring && frame.height < min_height {
-            frame.height = min_height;
-            height_changed = true;
-        }
         frame.text = text;
     }
-    height_changed
 }
 
 /// SetFont([textType,] font, size, flags).
