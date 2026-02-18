@@ -306,6 +306,8 @@ fn register_quest_global_functions(lua: &Lua) -> Result<()> {
     g.set("GetAutoQuestPopUp", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
     g.set("GetQuestLogSpecialItemInfo", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
     g.set("GetTasksTable", lua.create_function(|lua, ()| lua.create_table())?)?;
+    g.set("ExpandQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
+    g.set("CollapseQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
     register_quest_leaderboard_functions(lua, &g)?;
     Ok(())
 }
