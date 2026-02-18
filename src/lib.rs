@@ -16,6 +16,8 @@ pub mod items;
 pub mod manifest_interface_data;
 #[path = "../data/specializations.rs"]
 pub mod specializations;
+#[path = "../data/spec_display_spells.rs"]
+pub mod spec_display_spells;
 #[path = "../data/spells.rs"]
 pub mod spells;
 #[path = "../data/spell_power.rs"]

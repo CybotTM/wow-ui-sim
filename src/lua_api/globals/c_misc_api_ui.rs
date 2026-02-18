@@ -332,7 +332,16 @@ fn register_c_class_color(lua: &Lua) -> Result<()> {
 
 fn register_c_spec_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetSpellsDisplay", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
+    t.set("GetSpellsDisplay", lua.create_function(|lua, spec_id: i32| {
+        use crate::spec_display_spells;
+        // Returns array of spell IDs ordered by display_order.
+        // Lua picks index 1 (BASIC_SPELL_INDEX) and 6 (SIGNATURE_SPELL_INDEX).
+        let tbl = lua.create_table()?;
+        for (i, entry) in spec_display_spells::spells_for_spec(spec_id as u32).enumerate() {
+            tbl.set(i as i64 + 1, entry.spell_id)?;
+        }
+        Ok(tbl)
+    })?)?;
     t.set("GetInspectSelectedSpecialization", lua.create_function(|_, _u: Option<String>| Ok(0))?)?;
     t.set("CanPlayerUseTalentSpecUI", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("CanPlayerUseTalentUI", lua.create_function(|_, ()| Ok(true))?)?;
