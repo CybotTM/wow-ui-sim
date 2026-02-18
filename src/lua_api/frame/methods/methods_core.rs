@@ -357,7 +357,14 @@ fn add_visibility_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
     methods.set("SetShown", lua.create_function(|lua, (ud, shown): (LightUserData, bool)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
+        let was_hidden = {
+            let state = state_rc.borrow();
+            state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
+        };
         state_rc.borrow_mut().set_frame_visible(id, shown);
+        if shown && was_hidden {
+            fire_on_show_recursive(lua, id)?;
+        }
         Ok(())
     })?)?;
 

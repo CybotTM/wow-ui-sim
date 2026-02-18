@@ -545,7 +545,6 @@ fn dump_game_menu_buttons(env: &WowLuaEnv) {
     let Some(gmf) = state.widgets.get(gmf_id) else { return };
     eprintln!("  vis={} strata={:?} lvl={} {}x{} children={}",
         gmf.visible, gmf.frame_strata, gmf.frame_level, gmf.width, gmf.height, gmf.children.len());
-    // Show all children, not just buttons
     for (i, &cid) in gmf.children.iter().enumerate() {
         let Some(c) = state.widgets.get(cid) else { continue };
         let nm = c.name.as_deref().unwrap_or("(anon)");
@@ -653,6 +652,7 @@ fn run_dump_tree(
         && let Err(e) = env.exec(code) {
             eprintln!("[exec-lua] error: {e}");
         }
+    run_extra_update_ticks(env, 3);
     apply_delay(delay);
     let state = env.state().borrow();
     wow_ui_sim::dump::print_frame_tree(&state.widgets, filter.as_deref(), filter_key.as_deref(), visible_only, width as f32, height as f32);
