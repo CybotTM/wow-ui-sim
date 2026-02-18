@@ -329,6 +329,8 @@ impl App {
             self.mark_all_strata_dirty();
             // Invalidate per-strata cache — screen size changed.
             *self.cached_strata_quads.borrow_mut() = std::array::from_fn(|_| None);
+            // Invalidate hit grid — frame positions change with screen size.
+            *self.cached_hittable.borrow_mut() = None;
         }
 
         let dirty = self.strata_dirty.get();
