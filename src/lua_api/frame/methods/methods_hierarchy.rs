@@ -66,7 +66,8 @@ fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: O
                 frame.frame_strata = parent_strata;
             }
             if !frame.has_fixed_frame_level {
-                frame.frame_level = parent_level + 1;
+                let offset = frame.frame_level_offset.unwrap_or(1);
+                frame.frame_level = parent_level + offset;
             }
         }
     }
@@ -226,7 +227,8 @@ fn propagate_strata_level(widgets: &mut WidgetRegistry, root_id: u64) {
             child.frame_strata = parent_strata;
         }
         if !child.has_fixed_frame_level {
-            child.frame_level = parent_level + 1;
+            let offset = child.frame_level_offset.unwrap_or(1);
+            child.frame_level = parent_level + offset;
         }
         let child_strata = child.frame_strata;
         let child_level = child.frame_level;

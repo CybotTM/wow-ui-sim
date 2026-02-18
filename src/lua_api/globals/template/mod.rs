@@ -133,6 +133,17 @@ fn apply_single_template(
         direct::set_anchors(state, fid, template, frame_name);
         direct::set_all_points(state, fid, template);
         direct::set_hidden(state, fid, template);
+        // Apply frameLevel from template as a level offset.  The simulator
+        // accumulates frame levels (parent+1 per nesting depth) and parents
+        // may be raised long after children are created.  Storing an offset
+        // lets propagate_strata_level use parent_level + offset instead of
+        // the default parent_level + 1.
+        if let Some(level) = template.frame_level {
+            let mut s = state.borrow_mut();
+            if let Some(frame) = s.widgets.get_mut_visual(fid) {
+                frame.frame_level_offset = Some(level);
+            }
+        }
     }
 
     // Apply layers (textures and fontstrings)

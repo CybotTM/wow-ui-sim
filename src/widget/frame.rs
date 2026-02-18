@@ -137,6 +137,10 @@ pub struct Frame {
     pub frame_level: i32,
     /// Whether frame level was explicitly set (not inherited from parent).
     pub has_fixed_frame_level: bool,
+    /// Optional level offset from parent (from XML frameLevel attribute).
+    /// When set, propagate_strata_level uses parent_level + offset instead
+    /// of the default parent_level + 1.
+    pub frame_level_offset: Option<i32>,
     /// Frame strata (major draw order).
     pub frame_strata: FrameStrata,
     /// Whether frame strata was explicitly set (not inherited from parent).
@@ -415,6 +419,7 @@ macro_rules! frame_defaults {
             registered_events: HashSet::new(),
             frame_level: 0,
             has_fixed_frame_level: false,
+            frame_level_offset: None,
             frame_strata: FrameStrata::Medium,
             has_fixed_frame_strata: false,
             toplevel: false,
