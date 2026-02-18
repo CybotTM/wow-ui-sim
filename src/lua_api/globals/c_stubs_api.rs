@@ -311,22 +311,18 @@ fn register_quest_global_functions(lua: &Lua) -> Result<()> {
 }
 
 /// GetNumQuestLeaderBoards / GetQuestLogLeaderBoard - quest objective data.
+/// Delegates to c_quest_api which owns the single source of truth for quest data.
 fn register_quest_leaderboard_functions(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetNumQuestLeaderBoards",
         lua.create_function(|_, log_idx: i32| {
-            Ok(match log_idx {
-                1 => 2,
-                2 => 1,
-                3 => 2,
-                _ => 0,
-            })
+            Ok(super::c_quest_api::num_quest_leaderboards(log_idx))
         })?,
     )?;
     g.set(
         "GetQuestLogLeaderBoard",
         lua.create_function(|_, (obj_idx, log_idx, _suppress): (i32, i32, Option<bool>)| {
-            Ok(quest_leaderboard_entry(log_idx, obj_idx))
+            Ok(super::c_quest_api::quest_leaderboard_entry(log_idx, obj_idx))
         })?,
     )?;
     Ok(())
@@ -385,17 +381,6 @@ fn register_c_macro(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Return (text, objectiveType, finished) for a mock quest objective.
-fn quest_leaderboard_entry(log_idx: i32, obj_idx: i32) -> (String, String, bool) {
-    match (log_idx, obj_idx) {
-        (1, 1) => ("Ironforge Relics collected: 3/5".into(), "item".into(), false),
-        (1, 2) => ("Explore the Old Quarry".into(), "event".into(), false),
-        (2, 1) => ("Stormwind Guards defended: 7/10".into(), "monster".into(), false),
-        (3, 1) => ("Supplies gathered: 5/5".into(), "item".into(), true),
-        (3, 2) => ("Deliver to Quartermaster".into(), "event".into(), false),
-        _ => ("Unknown objective".into(), "event".into(), false),
-    }
-}
 
 fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;

@@ -1,16 +1,98 @@
 //! C_Quest namespaces and quest-related API functions.
 //!
-//! Contains quest log, task quests, quest info, and quest line API functions.
-//! Mock quest data provides 3 watched quests for the ObjectiveTracker.
+//! Single source of truth for all quest data. The `QUEST_LOG` array defines
+//! headers and quests with objectives. All quest APIs derive from this array.
 
 use mlua::{Lua, Result, Value};
 
-/// Mock quest definitions: (questID, logIndex, title).
-const MOCK_QUESTS: &[(i32, i32, &str)] = &[
-    (80000, 1, "The Lost Expedition"),
-    (80001, 2, "Defending the Gates"),
-    (80002, 3, "Supply Run"),
+/// A quest objective (leaderboard entry).
+struct Objective {
+    text: &'static str,
+    obj_type: &'static str,
+    finished: bool,
+}
+
+/// An entry in the quest log — either a zone header or a quest.
+enum QuestLogEntry {
+    Header {
+        title: &'static str,
+    },
+    Quest {
+        quest_id: i32,
+        title: &'static str,
+        objectives: &'static [Objective],
+    },
+}
+
+/// Single source of truth for the quest log.
+/// Log index is the 1-based position in this array.
+/// Headers group subsequent quests; the UI needs at least one header.
+static QUEST_LOG: &[QuestLogEntry] = &[
+    QuestLogEntry::Header {
+        title: "Khaz Algar",
+    },
+    QuestLogEntry::Quest {
+        quest_id: 80000,
+        title: "The Lost Expedition",
+        objectives: &[
+            Objective { text: "Ironforge Relics collected: 3/5", obj_type: "item", finished: false },
+            Objective { text: "Explore the Old Quarry", obj_type: "event", finished: false },
+        ],
+    },
+    QuestLogEntry::Quest {
+        quest_id: 80001,
+        title: "Defending the Gates",
+        objectives: &[
+            Objective { text: "Stormwind Guards defended: 7/10", obj_type: "monster", finished: false },
+        ],
+    },
+    QuestLogEntry::Quest {
+        quest_id: 80002,
+        title: "Supply Run",
+        objectives: &[
+            Objective { text: "Supplies gathered: 5/5", obj_type: "item", finished: true },
+            Objective { text: "Deliver to Quartermaster", obj_type: "event", finished: false },
+        ],
+    },
 ];
+
+/// Number of actual quests (non-header entries).
+fn quest_count() -> i32 {
+    QUEST_LOG.iter().filter(|e| matches!(e, QuestLogEntry::Quest { .. })).count() as i32
+}
+
+/// Find a quest entry by quest ID, returning (log_index_1based, entry).
+fn find_quest_by_id(quest_id: i32) -> Option<(i32, &'static QuestLogEntry)> {
+    QUEST_LOG.iter().enumerate().find_map(|(i, e)| match e {
+        QuestLogEntry::Quest { quest_id: qid, .. } if *qid == quest_id => {
+            Some((i as i32 + 1, e))
+        }
+        _ => None,
+    })
+}
+
+/// Get the quest log entry at a 1-based log index.
+fn entry_at(log_index: i32) -> Option<&'static QuestLogEntry> {
+    QUEST_LOG.get((log_index - 1) as usize)
+}
+
+/// Public: get objective count for a quest at the given log index.
+pub fn num_quest_leaderboards(log_index: i32) -> i32 {
+    match entry_at(log_index) {
+        Some(QuestLogEntry::Quest { objectives, .. }) => objectives.len() as i32,
+        _ => 0,
+    }
+}
+
+/// Public: get objective data (text, type, finished) for a quest.
+pub fn quest_leaderboard_entry(log_index: i32, obj_index: i32) -> (String, String, bool) {
+    if let Some(QuestLogEntry::Quest { objectives, .. }) = entry_at(log_index) {
+        if let Some(obj) = objectives.get((obj_index - 1) as usize) {
+            return (obj.text.into(), obj.obj_type.into(), obj.finished);
+        }
+    }
+    ("Unknown objective".into(), "event".into(), false)
+}
 
 /// Register quest-related C_* namespaces.
 pub fn register_c_quest_api(lua: &Lua) -> Result<()> {
@@ -41,16 +123,23 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
 
 /// Quest log query methods (counts, GetInfo, objectives).
 fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    // Return 0 quests in the log index — avoids triggering quest button
-    // template display code that requires full child frame hierarchies.
-    // Quest data is still available via GetTitleForQuestID, IsOnQuest, etc.
-    t.set("GetNumQuestLogEntries", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
-    t.set("GetInfo", lua.create_function(|lua, idx: i32| create_quest_info(lua, idx))?)?;
+    // Total entries (headers + quests), and number of actual quests
+    let num_entries = QUEST_LOG.len() as i32;
+    let num_quests = quest_count();
+    t.set("GetNumQuestLogEntries", lua.create_function(move |_, ()| {
+        Ok((num_entries, num_quests))
+    })?)?;
+    t.set("GetInfo", lua.create_function(|lua, idx: i32| {
+        create_quest_info(lua, idx)
+    })?)?;
     t.set("GetQuestIDForLogIndex", lua.create_function(|_, idx: i32| {
-        Ok(MOCK_QUESTS.iter().find(|q| q.1 == idx).map_or(0, |q| q.0))
+        Ok(match entry_at(idx) {
+            Some(QuestLogEntry::Quest { quest_id, .. }) => *quest_id,
+            _ => 0,
+        })
     })?)?;
     t.set("GetLogIndexForQuestID", lua.create_function(|_, quest_id: i32| {
-        Ok(MOCK_QUESTS.iter().find(|q| q.0 == quest_id).map(|q| q.1))
+        Ok(find_quest_by_id(quest_id).map(|(idx, _)| idx))
     })?)?;
     t.set("GetQuestObjectives", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
     t.set("GetMaxNumQuestsCanAccept", lua.create_function(|_, ()| Ok(35i32))?)?;
@@ -65,31 +154,44 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Create a quest info table for a given log index.
 fn create_quest_info(lua: &Lua, idx: i32) -> Result<Value> {
-    let quest = MOCK_QUESTS.iter().find(|q| q.1 == idx);
-    let Some(&(quest_id, _, title)) = quest else {
+    let Some(entry) = entry_at(idx) else {
         return Ok(Value::Nil);
     };
     let info = lua.create_table()?;
-    info.set("title", title)?;
     info.set("questLogIndex", idx)?;
-    info.set("questID", quest_id)?;
-    info.set("campaignID", 0)?;
-    info.set("level", 80)?;
-    info.set("difficultyLevel", 80)?;
-    info.set("suggestedGroup", 0)?;
-    info.set("isHeader", false)?;
-    info.set("isCollapsed", false)?;
-    info.set("isTask", false)?;
-    info.set("isBounty", false)?;
-    info.set("isStory", false)?;
-    info.set("isOnMap", true)?;
-    info.set("hasLocalPOI", false)?;
-    info.set("isHidden", false)?;
-    info.set("isAutoComplete", false)?;
-    info.set("overridesSortOrder", false)?;
-    info.set("startEvent", false)?;
-    info.set("isScaling", false)?;
-    info.set("readyForTranslation", false)?;
+    match entry {
+        QuestLogEntry::Header { title } => {
+            info.set("title", *title)?;
+            info.set("questID", 0)?;
+            info.set("isHeader", true)?;
+            info.set("isCollapsed", false)?;
+            info.set("isTask", false)?;
+            info.set("isBounty", false)?;
+            info.set("isHidden", false)?;
+            info.set("isOnMap", false)?;
+        }
+        QuestLogEntry::Quest { quest_id, title, .. } => {
+            info.set("title", *title)?;
+            info.set("questID", *quest_id)?;
+            info.set("campaignID", 0)?;
+            info.set("level", 80)?;
+            info.set("difficultyLevel", 80)?;
+            info.set("suggestedGroup", 0)?;
+            info.set("isHeader", false)?;
+            info.set("isCollapsed", false)?;
+            info.set("isTask", false)?;
+            info.set("isBounty", false)?;
+            info.set("isStory", false)?;
+            info.set("isOnMap", true)?;
+            info.set("hasLocalPOI", false)?;
+            info.set("isHidden", false)?;
+            info.set("isAutoComplete", false)?;
+            info.set("overridesSortOrder", false)?;
+            info.set("startEvent", false)?;
+            info.set("isScaling", false)?;
+            info.set("readyForTranslation", false)?;
+        }
+    }
     Ok(Value::Table(info))
 }
 
@@ -104,7 +206,10 @@ fn register_quest_log_requests(lua: &Lua, t: &mlua::Table) -> Result<()> {
 /// Quest log info methods (titles, tags).
 fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetTitleForQuestID", lua.create_function(|lua, id: i32| {
-        let title = MOCK_QUESTS.iter().find(|q| q.0 == id).map_or("Quest", |q| q.2);
+        let title = find_quest_by_id(id).map_or("Quest", |(_, e)| match e {
+            QuestLogEntry::Quest { title, .. } => title,
+            _ => "Quest",
+        });
         Ok(Value::String(lua.create_string(title)?))
     })?)?;
     t.set("GetQuestTagInfo", lua.create_function(|lua, _id: i32| {
@@ -123,10 +228,15 @@ fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Quest watch list methods (tracked quests for ObjectiveTracker).
 fn register_quest_log_watch(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    let num_watches = MOCK_QUESTS.len() as i32;
+    let num_watches = quest_count();
     t.set("GetNumQuestWatches", lua.create_function(move |_, ()| Ok(num_watches))?)?;
     t.set("GetQuestIDForQuestWatchIndex", lua.create_function(|_, idx: i32| {
-        Ok(MOCK_QUESTS.get((idx - 1) as usize).map(|q| q.0))
+        // Watch index is 1-based among quests only (skip headers)
+        let quest_ids: Vec<i32> = QUEST_LOG.iter().filter_map(|e| match e {
+            QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
+            _ => None,
+        }).collect();
+        Ok(quest_ids.get((idx - 1) as usize).copied())
     })?)?;
     t.set("AddQuestWatch", lua.create_function(|_, _id: i32| Ok(()))?)?;
     t.set("RemoveQuestWatch", lua.create_function(|_, _id: i32| Ok(()))?)?;
@@ -141,7 +251,7 @@ fn register_quest_log_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("IsQuestFlaggedCompleted", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("IsComplete", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("IsOnQuest", lua.create_function(|_, id: i32| {
-        Ok(MOCK_QUESTS.iter().any(|q| q.0 == id))
+        Ok(find_quest_by_id(id).is_some())
     })?)?;
     t.set("ReadyForTurnIn", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("IsFailed", lua.create_function(|_, _id: i32| Ok(false))?)?;
