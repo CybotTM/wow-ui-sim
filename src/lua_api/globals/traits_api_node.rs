@@ -55,7 +55,7 @@ fn set_node_dynamic_fields(
     // SubTreeSelection nodes (type 3): visible only if spec condition met.
     // Must read actual selection state so activation works.
     if node.node_type == 3 {
-        let spec_ok = check_spec_conditions_met(node);
+        let spec_ok = check_spec_conditions_met(node, &s);
         info.set("isVisible", spec_ok)?;
         info.set("isAvailable", spec_ok)?;
         return set_selection_node_ranks(info, lua, node, node_id, max_ranks, spec_ok, &s);
@@ -70,7 +70,7 @@ fn set_node_dynamic_fields(
     }
 
     // Nodes with a spec-set condition (condType=1) for the wrong spec are invisible.
-    if !check_spec_conditions_met(node) {
+    if !check_spec_conditions_met(node, &s) {
         info.set("isVisible", false)?;
         return set_empty_ranks(info, lua, max_ranks);
     }
@@ -246,7 +246,7 @@ fn build_node_edges_dynamic(
         }
         // Filter edges to nodes hidden by spec conditions.
         if let Some(target) = TRAIT_NODE_DB.get(&edge.source_node_id) {
-            if !check_spec_conditions_met(target) { continue }
+            if !check_spec_conditions_met(target, state) { continue }
         }
         idx += 1;
         let e = lua.create_table()?;
@@ -415,11 +415,10 @@ fn set_condition_static_fields(
 /// Check if all spec-set conditions (condType=1) on a node are met.
 /// Checks both direct node conditions and group-level conditions.
 /// Returns false if any condition specifies a spec set that doesn't include the active spec.
-fn check_spec_conditions_met(node: &TraitNodeInfo) -> bool {
-    // Check direct node conditions, then group-level conditions.
+fn check_spec_conditions_met(node: &TraitNodeInfo, state: &SimState) -> bool {
     for &cond_id in node.cond_ids.iter().chain(node.group_cond_ids.iter()) {
         if let Some(cond) = TRAIT_COND_DB.get(&cond_id) {
-            if cond.cond_type == 1 && !spec_set_contains_active_spec(cond.spec_set_id) {
+            if cond.cond_type == 1 && !spec_set_contains_active_spec(cond.spec_set_id, state) {
                 return false;
             }
         }
@@ -431,17 +430,16 @@ fn check_spec_conditions_met(node: &TraitNodeInfo) -> bool {
 ///
 /// Paladin specSet mapping (from SpecSetMember DB2):
 ///   27 → 65 (Holy), 28 → 66 (Protection), 29 → 70 (Retribution)
-///
-/// Active spec = Protection (66), matching ACTIVE_SPEC_INDEX=2 in player_api.rs.
-fn spec_set_contains_active_spec(spec_set_id: u32) -> bool {
+fn spec_set_contains_active_spec(spec_set_id: u32, state: &SimState) -> bool {
     if spec_set_id == 0 { return true } // No spec restriction
-    const ACTIVE_SPEC_ID: u32 = 66; // Protection
-    // Paladin specSet mapping (from SpecSetMember DB2):
-    //   27 → 65 (Holy), 28 → 66 (Protection), 29 → 70 (Retribution)
+    let active_spec_id = crate::specializations::specs_for_class(state.player_class_index as u32)
+        .nth((state.active_spec_index - 1).max(0) as usize)
+        .map(|s| s.id)
+        .unwrap_or(66); // fallback to Protection
     match spec_set_id {
-        27 => ACTIVE_SPEC_ID == 65,
-        28 => ACTIVE_SPEC_ID == 66,
-        29 => ACTIVE_SPEC_ID == 70,
+        27 => active_spec_id == 65,
+        28 => active_spec_id == 66,
+        29 => active_spec_id == 70,
         _ => true, // Unknown spec set — assume visible
     }
 }
@@ -453,7 +451,7 @@ fn evaluate_condition(cond: &crate::traits::TraitCondInfo, state: &SimState) -> 
             if cond.currency_id == 0 { return true }
             state.talents.spent_for_currency(cond.currency_id) >= cond.spent_amount
         }
-        1 => spec_set_contains_active_spec(cond.spec_set_id),
+        1 => spec_set_contains_active_spec(cond.spec_set_id, state),
         2 => cond.required_level <= 80, // Level check: simulated level 80
         _ => true,  // Granted ranks, misc: always met
     }

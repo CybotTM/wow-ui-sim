@@ -325,6 +325,7 @@ impl App {
         if let Some((cast_id, spell_id)) = completed {
             fire_cast_complete_events(&env, cast_id, spell_id);
             apply_heal_effect(env.state(), &env, spell_id);
+            apply_spec_change(env.state(), &env);
         }
     }
 
@@ -631,6 +632,29 @@ fn apply_heal_effect(
                 &[mlua::Value::String(unit_str)],
             );
         }
+    }
+}
+
+/// If a spec change was pending, apply it and fire PLAYER_SPECIALIZATION_CHANGED.
+fn apply_spec_change(
+    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    env: &crate::lua_api::WowLuaEnv,
+) {
+    let new_spec = {
+        let mut s = state.borrow_mut();
+        let pending = s.pending_spec_change.take();
+        if let Some(idx) = pending {
+            s.active_spec_index = idx;
+        }
+        pending
+    };
+    if new_spec.is_some() {
+        let lua = env.lua();
+        let Ok(unit) = lua.create_string("player") else { return };
+        let _ = env.fire_event_with_args(
+            "PLAYER_SPECIALIZATION_CHANGED",
+            &[mlua::Value::String(unit)],
+        );
     }
 }
 

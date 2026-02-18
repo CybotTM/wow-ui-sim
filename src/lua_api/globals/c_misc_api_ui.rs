@@ -9,8 +9,10 @@
 //! - C_PlayerInteractionManager, C_PaperDollInfo, C_PerksProgram
 
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
-pub(super) fn register_all(lua: &Lua) -> Result<()> {
+pub(super) fn register_all(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_vignette_info(lua)?;
     register_c_area_poi(lua)?;
     register_c_player_choice(lua)?;
@@ -28,7 +30,7 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_glue(lua)?;
     register_c_ui_color(lua)?;
     register_c_class_color(lua)?;
-    register_c_spec_info(lua)?;
+    register_c_spec_info(lua, state)?;
     register_c_super_track(lua)?;
     register_c_player_interaction_manager(lua)?;
     register_c_paper_doll_info(lua)?;
@@ -330,12 +332,32 @@ fn register_c_class_color(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_spec_info(lua: &Lua) -> Result<()> {
+/// Synthetic spell ID used for spec-activation casts.
+pub const SPEC_ACTIVATION_SPELL_ID: u32 = 200_000;
+
+fn register_c_spec_info(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
+    let t = build_c_spec_info_table(lua, Rc::clone(&state))?;
+    lua.globals().set("C_SpecializationInfo", t)?;
+    register_is_spec_activate_spell(lua)?;
+    Ok(())
+}
+
+/// Build the C_SpecializationInfo table with all its methods.
+fn build_c_spec_info_table(
+    lua: &Lua,
+    state: Rc<RefCell<crate::lua_api::SimState>>,
+) -> Result<mlua::Table> {
     let t = lua.create_table()?;
+    set_spec_info_static_methods(&t, lua)?;
+    set_spec_info_get_specialization(&t, lua, Rc::clone(&state))?;
+    set_spec_info_set_specialization(&t, lua, state)?;
+    Ok(t)
+}
+
+/// Register static (stateless) methods on C_SpecializationInfo.
+fn set_spec_info_static_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set("GetSpellsDisplay", lua.create_function(|lua, spec_id: i32| {
         use crate::spec_display_spells;
-        // Returns array of spell IDs ordered by display_order.
-        // Lua picks index 1 (BASIC_SPELL_INDEX) and 6 (SIGNATURE_SPELL_INDEX).
         let tbl = lua.create_table()?;
         for (i, entry) in spec_display_spells::spells_for_spec(spec_id as u32).enumerate() {
             tbl.set(i as i64 + 1, entry.spell_id)?;
@@ -346,11 +368,9 @@ fn register_c_spec_info(lua: &Lua) -> Result<()> {
     t.set("CanPlayerUseTalentSpecUI", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("CanPlayerUseTalentUI", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("IsInitialized", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("GetSpecialization", lua.create_function(|_, ()| Ok(2i32))?)?;
     t.set("GetSpecializationInfo", lua.create_function(|lua, idx: i32| {
         use crate::specializations;
-        let paladin_class_id = 2u32;
-        let specs: Vec<_> = specializations::specs_for_class(paladin_class_id).collect();
+        let specs: Vec<_> = specializations::specs_for_class(2u32).collect();
         let i = (idx - 1).clamp(0, specs.len() as i32 - 1) as usize;
         let spec = specs[i];
         Ok(mlua::MultiValue::from_vec(vec![
@@ -362,7 +382,6 @@ fn register_c_spec_info(lua: &Lua) -> Result<()> {
             Value::Integer(spec.primary_stat as i64),
         ]))
     })?)?;
-    t.set("SetSpecialization", lua.create_function(|_, _spec_index: i32| Ok(true))?)?;
     t.set("GetAllSelectedPvpTalentIDs", lua.create_function(|lua, ()| lua.create_table())?)?;
     t.set("GetPvpTalentSlotInfo", lua.create_function(|_, _s: i32| Ok(Value::Nil))?)?;
     t.set("GetNumSpecializationsForClassID", lua.create_function(|_, (class_id, _sex): (Option<i32>, Option<i32>)| {
@@ -371,8 +390,42 @@ fn register_c_spec_info(lua: &Lua) -> Result<()> {
             specializations::specs_for_class(cid as u32).count() as i32
         }))
     })?)?;
-    lua.globals().set("C_SpecializationInfo", t)?;
     Ok(())
+}
+
+/// Set GetSpecialization — reads active_spec_index from state.
+fn set_spec_info_get_specialization(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: Rc<RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    t.set("GetSpecialization", lua.create_function(move |_, ()| {
+        Ok(state.borrow().active_spec_index)
+    })?)
+}
+
+/// Set SetSpecialization — starts a spec-change cast if valid.
+fn set_spec_info_set_specialization(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: Rc<RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    t.set("SetSpecialization", lua.create_function(move |lua, spec_index: i32| {
+        if state.borrow().casting.is_some() { return Ok(false) }
+        if state.borrow().active_spec_index == spec_index { return Ok(false) }
+        state.borrow_mut().pending_spec_change = Some(spec_index);
+        crate::lua_api::globals::action_bar_api::start_cast(
+            &state, lua, SPEC_ACTIVATION_SPELL_ID, 4000,
+        )?;
+        Ok(true)
+    })?)
+}
+
+/// Register IsSpecializationActivateSpell global.
+fn register_is_spec_activate_spell(lua: &Lua) -> Result<()> {
+    lua.globals().set("IsSpecializationActivateSpell", lua.create_function(|_, spell_id: i32| {
+        Ok(spell_id as u32 == SPEC_ACTIVATION_SPELL_ID)
+    })?)
 }
 
 fn register_c_super_track(lua: &Lua) -> Result<()> {

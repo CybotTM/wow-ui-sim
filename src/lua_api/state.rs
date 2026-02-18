@@ -227,6 +227,10 @@ pub struct SimState {
     pub talents: super::talent_state::TalentState,
     /// Collected Lua errors (from call_error_handler and addframetext).
     pub lua_errors: Vec<String>,
+    /// Active specialization index (1-based). Default: 2 (Protection for Paladin).
+    pub active_spec_index: i32,
+    /// Pending spec change: Some(new_spec_index) while spec-change cast is in progress.
+    pub pending_spec_change: Option<i32>,
 }
 
 impl Default for SimState {
@@ -278,6 +282,8 @@ impl Default for SimState {
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             lua_errors: Vec::new(),
+            active_spec_index: 2, // Protection for Paladin
+            pending_spec_change: None,
         }
     }
 }

@@ -6,13 +6,15 @@
 //! - `c_misc_api_game` - Game menu stubs and global game functions
 
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Register all miscellaneous C_* namespace APIs.
-pub fn register_c_misc_api(lua: &Lua) -> Result<()> {
+pub fn register_c_misc_api(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
     super::c_misc_api_core::register_all(lua)?;
     register_c_color_overrides(lua)?;
     register_tooltip_data_processor(lua)?;
-    super::c_misc_api_ui::register_all(lua)?;
+    super::c_misc_api_ui::register_all(lua, state)?;
     super::c_misc_api_game::register_all(lua)?;
     Ok(())
 }

@@ -13,7 +13,7 @@ use std::rc::Rc;
 /// Register all player-related API functions to the Lua globals table.
 pub fn register_player_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_battlenet_functions(lua)?;
-    register_specialization_functions(lua)?;
+    register_specialization_functions(lua, Rc::clone(&state))?;
     super::action_bar_api::register_action_bar_functions(lua, state)?;
     register_timerunning_functions(lua)?;
     register_economy_functions(lua)?;
@@ -75,9 +75,9 @@ fn register_battlenet_functions(lua: &Lua) -> Result<()> {
 }
 
 /// Register specialization query functions.
-fn register_specialization_functions(lua: &Lua) -> Result<()> {
-    register_spec_basic_queries(lua)?;
-    register_spec_info_lookups(lua)?;
+fn register_specialization_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_spec_basic_queries(lua, Rc::clone(&state))?;
+    register_spec_info_lookups(lua, state)?;
     Ok(())
 }
 
@@ -86,17 +86,17 @@ use crate::specializations;
 /// Paladin class ID.
 const PALADIN_CLASS_ID: u32 = 2;
 
-/// Active spec index (1-based): 2 = Protection.
-const ACTIVE_SPEC_INDEX: i32 = 2;
-
 /// Basic spec queries: GetSpecialization, GetSpecializationInfo, GetNumSpecializations.
-fn register_spec_basic_queries(lua: &Lua) -> Result<()> {
+fn register_spec_basic_queries(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
 
-    globals.set(
-        "GetSpecialization",
-        lua.create_function(|_, ()| Ok(ACTIVE_SPEC_INDEX))?,
-    )?;
+    {
+        let state = Rc::clone(&state);
+        globals.set(
+            "GetSpecialization",
+            lua.create_function(move |_, ()| Ok(state.borrow().active_spec_index))?,
+        )?;
+    }
     globals.set(
         "GetSpecializationInfo",
         lua.create_function(|lua, spec_index: i32| {
@@ -111,18 +111,19 @@ fn register_spec_basic_queries(lua: &Lua) -> Result<()> {
             Ok(specializations::specs_for_class(PALADIN_CLASS_ID).count() as i32)
         })?,
     )?;
-    register_spec_role_queries(&globals, lua)?;
+    register_spec_role_queries(&globals, lua, state)?;
 
     Ok(())
 }
 
 /// Role and count queries: GetSpecializationRole, GetSpecializationRoleByID, GetNumSpecializationsForClassID.
-fn register_spec_role_queries(globals: &mlua::Table, lua: &Lua) -> Result<()> {
+fn register_spec_role_queries(globals: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     globals.set(
         "GetSpecializationRole",
-        lua.create_function(|lua, spec_index: Option<i32>| {
+        lua.create_function(move |lua, spec_index: Option<i32>| {
+            let active = state.borrow().active_spec_index;
             let specs: Vec<_> = specializations::specs_for_class(PALADIN_CLASS_ID).collect();
-            let idx = (spec_index.unwrap_or(ACTIVE_SPEC_INDEX) - 1).clamp(0, specs.len() as i32 - 1) as usize;
+            let idx = (spec_index.unwrap_or(active) - 1).clamp(0, specs.len() as i32 - 1) as usize;
             Ok(Value::String(lua.create_string(specs[idx].role)?))
         })?,
     )?;
@@ -160,7 +161,7 @@ fn spec_to_multivalue(lua: &Lua, spec: &specializations::SpecInfo) -> Result<mlu
 }
 
 /// Spec info lookups by ID or class: GetSpecializationInfoByID, ForSpecID, ForClassID.
-fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
+fn register_spec_info_lookups(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
 
     globals.set(
@@ -173,7 +174,8 @@ fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
     )?;
     globals.set(
         "GetSpecializationInfoForClassID",
-        lua.create_function(|lua, (class_id, spec_index): (i32, i32)| {
+        lua.create_function(move |lua, (class_id, spec_index): (i32, i32)| {
+            let active_spec_index = state.borrow().active_spec_index;
             let specs: Vec<_> = specializations::specs_for_class(class_id as u32).collect();
             if spec_index < 1 || spec_index as usize > specs.len() {
                 return Ok(mlua::MultiValue::new());
@@ -181,7 +183,7 @@ fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
             let spec = specs[(spec_index - 1) as usize];
             let mut vals = spec_to_multivalue(lua, spec)?.into_vec();
             vals.push(Value::Boolean(false)); // isAllowed
-            vals.push(Value::Boolean(spec_index == ACTIVE_SPEC_INDEX));
+            vals.push(Value::Boolean(spec_index == active_spec_index));
             Ok(mlua::MultiValue::from_vec(vals))
         })?,
     )?;
