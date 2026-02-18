@@ -298,7 +298,7 @@ fn click_all_groups(env: &WowLuaEnv) -> Vec<String> {
 /// Goal: drive this to zero over time by implementing missing APIs.
 /// 1 = LFDMicroButton: GetCurrentEventRealmQueues nil (unimplemented API,
 ///     surfaced by Elune's real securecallfunction error catching)
-const KNOWN_ERROR_COUNT: usize = 1;
+const KNOWN_ERROR_COUNT: usize = 0;
 
 #[test]
 fn test_click_all_frames() {

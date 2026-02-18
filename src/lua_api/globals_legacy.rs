@@ -452,6 +452,10 @@ fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     // only sets the widget registry name without calling raw_set on _G.
     sync_named_frames_to_globals(lua, state)?;
 
+    // Generated stubs for all remaining unimplemented WoW API functions.
+    // Must run last so hand-written implementations always take priority.
+    super::globals::generated_stubs::register_generated_stubs(lua)?;
+
     Ok(())
 }
 

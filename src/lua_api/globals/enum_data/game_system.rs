@@ -255,6 +255,11 @@ pub const MINIMAP_TRACKING_FILTER: EnumDef = (
     ],
 );
 
+pub const CLICK_BINDING_TYPE: SeqEnumDef = (
+    "ClickBindingType",
+    &["None", "Spell", "Macro", "Interaction", "PetAction"],
+);
+
 pub const CUSTOM_BINDING_TYPE: SeqEnumDef = (
     "CustomBindingType",
     &["VoicePushToTalk"],
