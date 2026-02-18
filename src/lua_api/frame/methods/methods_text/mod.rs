@@ -84,48 +84,17 @@ fn add_text_get_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         if let Ok(Value::String(result)) = format_func.call::<Value>(args) {
             let text = result.to_string_lossy().to_string();
             let state_rc = get_sim_state(lua);
-            {
+            let ids_to_measure = {
                 let mut state = state_rc.borrow_mut();
                 set_text_on_frame(&mut state, id, Some(text));
-            }
-            auto_size_fontstring(lua, &state_rc, id);
+                collect_fontstring_measure_ids(&state, id, None)
+            };
+            measure_and_apply_sizes(lua, &state_rc, &ids_to_measure);
         }
         Ok(())
     })?)?;
 
     Ok(())
-}
-
-/// Auto-size a FontString's width to match its text content.
-///
-/// Skips if the FontString has word-wrap with an explicit width constraint.
-fn auto_size_fontstring(
-    lua: &Lua,
-    state_rc: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    id: u64,
-) {
-    let measure_info = {
-        let state = state_rc.borrow();
-        state.widgets.get(id).and_then(|f| {
-            if f.widget_type != WidgetType::FontString { return None; }
-            if f.word_wrap && f.width > 0.0 { return None; }
-            let text = f.text.as_ref()?.clone();
-            Some((text, f.font.clone(), f.font_size))
-        })
-    };
-    if let Some((text, font, font_size)) = measure_info {
-        if let Some(fs_rc) = lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::render::font::WowFontSystem>>>() {
-            let mut fs = fs_rc.borrow_mut();
-            let width = fs.measure_text_width(&text, font.as_deref(), font_size);
-            let mut state = state_rc.borrow_mut();
-            let changed = state.widgets.get(id).map(|f| f.width != width).unwrap_or(false);
-            if changed {
-                if let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.width = width;
-                }
-            }
-        }
-    }
 }
 
 /// SetText(text [, r, g, b, wrap]) - universal handler for all widget types.
