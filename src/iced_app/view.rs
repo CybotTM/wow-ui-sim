@@ -215,7 +215,7 @@ impl App {
             .spacing(12)
             .padding(16),
         )
-        .width(340)
+        .width(Length::Shrink)
         .style(|_| container::Style {
             background: Some(iced::Background::Color(palette::BG_PANEL)),
             border: Border {
