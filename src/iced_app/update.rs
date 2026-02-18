@@ -613,7 +613,15 @@ fn apply_heal_effect(
         if let Some(ref mut t) = s.current_target {
             if !t.is_enemy {
                 t.health = (t.health + HEAL_AMOUNT).min(t.health_max);
-                Some(t.unit_id.clone())
+                let healed = t.health;
+                let unit_id = t.unit_id.clone();
+                // Sync back to party_members so group frames see the update
+                if let Some(idx) = crate::lua_api::globals::unit_api::parse_party_index(&unit_id) {
+                    if let Some(m) = s.party_members.get_mut(idx) {
+                        m.health = healed;
+                    }
+                }
+                Some(unit_id)
             } else {
                 // Heal self when targeting enemy
                 s.player_health = (s.player_health + HEAL_AMOUNT).min(s.player_health_max);
