@@ -135,6 +135,14 @@ Each addon shows timing: `(total: io=X xml=X lua=X sv=X)`
 
 - `BetterWardrobe/ColorFilter.lua` has very large constant tables (works in WoW's patched LuaJIT)
 
+### Bilinear Atlas Bleed
+
+GPU texture atlas uses `ClampToEdge` + `Linear` (bilinear) filtering. UVs are remapped to atlas slot space in `resolve_and_scale_quads` (`primitive.rs:210-214`) with **no half-pixel inset**, so the sampler bleeds into adjacent content at slot boundaries. Symptoms: thin bright lines at tile seams, colored fringe around icons/buttons.
+
+**Partial fix applied**: `@crop:` paths isolate sub-region textures (nine-slice pieces, tiled textures) into their own atlas slots, preventing bleed from adjacent source texture content. See `crop_path_for_subregion()` in `tiling.rs` and `crop_piece()` in `nine_slice.rs`.
+
+**Remaining**: Half-pixel UV inset needed in `resolve_and_scale_quads` to prevent bleed at atlas slot boundaries globally. Button textures (`emit_button_texture`, `emit_button_highlight` in `quad_builders.rs`) also pass raw atlas UVs without `@crop:`. See `PLAN.md` for details.
+
 ### Frame Re-creation and Orphaned Children
 
 Several frames are pre-created in Rust before XML addons load (UIParent, WorldFrame, GameTooltip, etc.). When a Blizzard XML addon later defines a frame with the same name, `CreateFrame` creates a NEW frame with a new ID, orphaning the old one. Any children that were parented to the old frame become invisible because `collect_ancestor_visible_ids` can't reach them — the old frame is hidden and disconnected from the tree.

@@ -5,15 +5,19 @@ use iced::{Point, Rectangle, Size};
 use crate::atlas::{NineSliceAtlasInfo, NineSlicePiece};
 use crate::render::{BlendMode, QuadBatch};
 
-use super::tiling::{emit_horiz_tiles, emit_vert_tiles};
+use super::tiling::{crop_path_for_subregion, emit_horiz_tiles, emit_vert_tiles};
+
+/// Build a `@crop:` path for a nine-slice piece so it gets its own GPU atlas slot,
+/// preventing bilinear bleed into adjacent content in the source texture.
+fn crop_piece(piece: &NineSlicePiece) -> (String, Rectangle) {
+    let uvs = piece_uvs(piece);
+    crop_path_for_subregion(piece.file, &uvs)
+}
 
 /// Emit a single nine-slice piece as a textured quad.
 fn emit_piece(batch: &mut QuadBatch, bounds: Rectangle, piece: &NineSlicePiece, alpha: f32) {
-    let uvs = Rectangle::new(
-        Point::new(piece.left, piece.top),
-        Size::new(piece.right - piece.left, piece.bottom - piece.top),
-    );
-    batch.push_textured_path_uv(bounds, uvs, piece.file, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    let (path, uvs) = crop_piece(piece);
+    batch.push_textured_path_uv(bounds, uvs, &path, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
 }
 
 /// UV rectangle for a nine-slice piece.
@@ -61,13 +65,15 @@ fn emit_horiz_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtla
         Point::new(edge_x, bounds.y),
         Size::new(edge_w, ns.edge_top.height as f32),
     );
-    emit_horiz_tiles(batch, top_bounds, &piece_uvs(&ns.edge_top), ns.edge_top.file, ns.edge_top.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    let (top_path, top_uvs) = crop_piece(&ns.edge_top);
+    emit_horiz_tiles(batch, top_bounds, &top_uvs, &top_path, ns.edge_top.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
 
     let bot_bounds = Rectangle::new(
         Point::new(edge_x, bounds.y + bounds.height - ns.edge_bottom.height as f32),
         Size::new(edge_w, ns.edge_bottom.height as f32),
     );
-    emit_horiz_tiles(batch, bot_bounds, &piece_uvs(&ns.edge_bottom), ns.edge_bottom.file, ns.edge_bottom.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    let (bot_path, bot_uvs) = crop_piece(&ns.edge_bottom);
+    emit_horiz_tiles(batch, bot_bounds, &bot_uvs, &bot_path, ns.edge_bottom.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
 }
 
 /// Emit tiled vertical edges (left and right) between corners.
@@ -82,13 +88,15 @@ fn emit_vert_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtlas
         Point::new(bounds.x, edge_y),
         Size::new(ns.edge_left.width as f32, edge_h),
     );
-    emit_vert_tiles(batch, left_bounds, &piece_uvs(&ns.edge_left), ns.edge_left.file, ns.edge_left.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    let (left_path, left_uvs) = crop_piece(&ns.edge_left);
+    emit_vert_tiles(batch, left_bounds, &left_uvs, &left_path, ns.edge_left.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
 
     let right_bounds = Rectangle::new(
         Point::new(bounds.x + bounds.width - ns.edge_right.width as f32, edge_y),
         Size::new(ns.edge_right.width as f32, edge_h),
     );
-    emit_vert_tiles(batch, right_bounds, &piece_uvs(&ns.edge_right), ns.edge_right.file, ns.edge_right.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    let (right_path, right_uvs) = crop_piece(&ns.edge_right);
+    emit_vert_tiles(batch, right_bounds, &right_uvs, &right_path, ns.edge_right.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
 }
 
 /// Emit a nine-slice atlas kit: 4 corners, 4 tiled edges, optional stretched center.

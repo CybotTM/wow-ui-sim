@@ -3,6 +3,26 @@
 use iced::{Point, Rectangle, Size};
 use crate::render::{BlendMode, QuadBatch};
 
+/// If UVs describe a sub-region (not full [0,1]×[0,1]), return a `@crop:` path
+/// that isolates the sub-region in its own GPU atlas slot, plus remapped [0,1] UVs.
+/// This prevents bilinear filtering from bleeding into adjacent texture content.
+pub(super) fn crop_path_for_subregion(tex_path: &str, uvs: &Rectangle) -> (String, Rectangle) {
+    let is_full = (uvs.x).abs() < 0.001
+        && (uvs.y).abs() < 0.001
+        && (uvs.width - 1.0).abs() < 0.001
+        && (uvs.height - 1.0).abs() < 0.001;
+    if is_full {
+        return (tex_path.to_string(), *uvs);
+    }
+    let left = uvs.x;
+    let right = uvs.x + uvs.width;
+    let top = uvs.y;
+    let bottom = uvs.y + uvs.height;
+    let crop_key = format!("{tex_path}@crop:{left:.6},{right:.6},{top:.6},{bottom:.6}");
+    let full_uvs = Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0));
+    (crop_key, full_uvs)
+}
+
 #[derive(Debug, Clone, Copy)]
 enum TileDir {
     Horizontal,
@@ -103,16 +123,19 @@ pub(super) fn emit_tiled_texture(
         }
     }
 
-    let (left, right, top, bottom) = (uvs.x, uvs.x + uvs.width, uvs.y, uvs.y + uvs.height);
+    // Isolate sub-region UVs into their own GPU atlas slot via @crop: so that
+    // bilinear filtering at tile boundaries can't bleed into adjacent content.
+    let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
+    let (left, right, top, bottom) = (cropped_uvs.x, cropped_uvs.x + cropped_uvs.width, cropped_uvs.y, cropped_uvs.y + cropped_uvs.height);
     let (tile_w, tile_h) = tile_dimensions(f, right - left, bottom - top);
     let tint = frame_tint(f, alpha);
 
     if f.horiz_tile && !f.vert_tile {
-        emit_horiz_tiles(batch, bounds, uvs, tex_path, tile_w, tint, f.blend_mode);
+        emit_horiz_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_w, tint, f.blend_mode);
     } else if f.vert_tile && !f.horiz_tile {
-        emit_vert_tiles(batch, bounds, uvs, tex_path, tile_h, tint, f.blend_mode);
+        emit_vert_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_h, tint, f.blend_mode);
     } else {
-        emit_grid_tiles(batch, bounds, uvs, tex_path, tile_w, tile_h, tint, f.blend_mode);
+        emit_grid_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_w, tile_h, tint, f.blend_mode);
     }
 }
 
@@ -136,12 +159,13 @@ fn emit_uv_repeat_tiled(
             Point::new(info.u_min, info.v_start),
             Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
         );
+        let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, &base_uvs);
         match info.dir {
             TileDir::Vertical => {
-                emit_vert_tiles(batch, bounds, &base_uvs, tex_path, tile_size.1, tint, f.blend_mode);
+                emit_vert_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_size.1, tint, f.blend_mode);
             }
             _ => {
-                emit_grid_tiles(batch, bounds, &base_uvs, tex_path, tile_size.0, tile_size.1, tint, f.blend_mode);
+                emit_grid_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_size.0, tile_size.1, tint, f.blend_mode);
             }
         }
     }
@@ -159,19 +183,31 @@ fn emit_rotated_horiz_tiles(
     tint: [f32; 4],
     blend: BlendMode,
 ) {
+    // Crop the UV sub-region into its own atlas slot to prevent bilinear bleed.
+    let sub_uvs = Rectangle::new(
+        Point::new(info.u_min, info.v_start),
+        Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
+    );
+    let (cropped_path, _) = crop_path_for_subregion(tex_path, &sub_uvs);
+    // After cropping, UVs are remapped to full [0,1] range within the cropped slot.
+    let u_min = 0.0_f32;
+    let u_max = 1.0_f32;
+    let v_start = 0.0_f32;
+    let v_range = 1.0_f32;
+
     let mut x = bounds.x;
     while x < bounds.x + bounds.width {
         let w = (bounds.x + bounds.width - x).min(tile_w);
         let tile_bounds = Rectangle::new(Point::new(x, bounds.y), Size::new(w, bounds.height));
-        let v_extent = if w < tile_w { (1.0 - info.v_start) * (w / tile_w) } else { 1.0 - info.v_start };
+        let v_extent = if w < tile_w { v_range * (w / tile_w) } else { v_range };
         // Rotated: U maps to screen Y (top→bottom), V maps to screen X (left→right)
         let uvs = [
-            [info.u_min, info.v_start + v_extent], // TL: top of strip, right side of V tile
-            [info.u_min, info.v_start],             // TR: top of strip, left side of V tile
-            [info.u_max, info.v_start],             // BR: bottom of strip, left side of V tile
-            [info.u_max, info.v_start + v_extent],  // BL: bottom of strip, right side of V tile
+            [u_min, v_start + v_extent], // TL: top of strip, right side of V tile
+            [u_min, v_start],             // TR: top of strip, left side of V tile
+            [u_max, v_start],             // BR: bottom of strip, left side of V tile
+            [u_max, v_start + v_extent],  // BL: bottom of strip, right side of V tile
         ];
-        batch.push_textured_path_uv4(tile_bounds, uvs, tex_path, tint, blend);
+        batch.push_textured_path_uv4(tile_bounds, uvs, &cropped_path, tint, blend);
         x += tile_w;
     }
 }
