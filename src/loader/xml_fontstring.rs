@@ -87,13 +87,23 @@ fn generate_fontstring_parent_code(fs: &crate::xml::FontStringXml) -> String {
 fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) {
     let state = env.state();
     let mut state_ref = state.borrow_mut();
-    if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name)
-        && let Some(frame) = state_ref.widgets.get_mut_visual(frame_id) {
+    if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name) {
+        let height_changed = if let Some(frame) = state_ref.widgets.get_mut_visual(frame_id) {
             frame.text = Some(text.to_string());
             if frame.height == 0.0 {
                 frame.height = frame.font_size.max(12.0);
+                true
+            } else {
+                false
             }
+        } else {
+            false
+        };
+        if height_changed {
+            state_ref.widgets.mark_rect_dirty(frame_id);
+            state_ref.invalidate_layout_with_dependents(frame_id);
         }
+    }
 }
 
 /// Create a fontstring from XML definition.
