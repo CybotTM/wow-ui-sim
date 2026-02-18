@@ -48,6 +48,7 @@ impl App {
             Message::RotDamageLevelChanged(ref label) => { self.handle_rot_damage_level_changed(label); Task::none() }
             Message::ToggleOptionsModal => { self.options_modal_visible = !self.options_modal_visible; Task::none() }
             Message::CloseOptionsModal => { self.options_modal_visible = false; Task::none() }
+            Message::MovementToggled(field, val) => { self.handle_movement_toggled(field, val); Task::none() }
         };
 
         Task::batch([task, ipc_task])
@@ -154,6 +155,30 @@ impl App {
             .unwrap_or(0);
         self.selected_rot_level = label.to_string();
         self.env.borrow().state().borrow_mut().rot_damage_level = index;
+        self.save_config();
+    }
+
+    fn handle_movement_toggled(&mut self, field: &str, val: bool) {
+        match field {
+            "moving" => self.movement.moving = val,
+            "mounted" => self.movement.mounted = val,
+            "flying" => self.movement.flying = val,
+            "falling" => self.movement.falling = val,
+            "swimming" => self.movement.swimming = val,
+            _ => return,
+        }
+        let env = self.env.borrow();
+        let mut state = env.state().borrow_mut();
+        match field {
+            "moving" => state.movement.moving = val,
+            "mounted" => state.movement.mounted = val,
+            "flying" => state.movement.flying = val,
+            "falling" => state.movement.falling = val,
+            "swimming" => state.movement.swimming = val,
+            _ => {}
+        }
+        drop(state);
+        drop(env);
         self.save_config();
     }
 
@@ -373,6 +398,7 @@ impl App {
         config.player_race = self.selected_race.clone();
         config.rot_damage_level = self.selected_rot_level.clone();
         config.xp_level = self.selected_xp_level.clone();
+        config.movement = self.movement.clone();
         config.save();
     }
 

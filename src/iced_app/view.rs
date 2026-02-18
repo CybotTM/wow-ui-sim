@@ -264,11 +264,18 @@ impl App {
         let xp_opts: Vec<String> = XP_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
         let rot_opts: Vec<String> = ROT_DAMAGE_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
 
+        let m = &self.movement;
         column![
             labeled_pick_list("Class:", class_opts, &self.selected_class, Message::PlayerClassChanged),
             labeled_pick_list("Race:", race_opts, &self.selected_race, Message::PlayerRaceChanged),
             labeled_pick_list("XP Bar:", xp_opts, &self.selected_xp_level, Message::XpLevelChanged),
             labeled_pick_list("Rot Damage:", rot_opts, &self.selected_rot_level, Message::RotDamageLevelChanged),
+            text("Movement").size(12).color(palette::TEXT_SECONDARY),
+            labeled_checkbox("Moving", m.moving, |v| Message::MovementToggled("moving", v)),
+            labeled_checkbox("Mounted", m.mounted, |v| Message::MovementToggled("mounted", v)),
+            labeled_checkbox("Flying", m.flying, |v| Message::MovementToggled("flying", v)),
+            labeled_checkbox("Falling", m.falling, |v| Message::MovementToggled("falling", v)),
+            labeled_checkbox("Swimming", m.swimming, |v| Message::MovementToggled("swimming", v)),
         ]
         .spacing(8)
         .into()
@@ -630,6 +637,21 @@ fn labeled_pick_list<'a>(
             .text_size(12)
             .width(Length::Fill)
             .style(pick_list_style),
+    ]
+    .spacing(6)
+    .align_y(iced::Alignment::Center)
+    .into()
+}
+
+/// A label + checkbox row used in the options modal.
+fn labeled_checkbox<'a, F: Fn(bool) -> Message + 'a>(
+    label: &'a str,
+    checked: bool,
+    on_toggle: F,
+) -> Element<'a, Message> {
+    row![
+        checkbox(checked).on_toggle(on_toggle).text_size(12),
+        text(label).size(12).color(palette::TEXT_PRIMARY),
     ]
     .spacing(6)
     .align_y(iced::Alignment::Center)

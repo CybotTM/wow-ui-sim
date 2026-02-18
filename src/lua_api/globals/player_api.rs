@@ -14,6 +14,7 @@ use std::rc::Rc;
 pub fn register_player_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_battlenet_functions(lua)?;
     register_specialization_functions(lua, Rc::clone(&state))?;
+    register_movement_functions(lua, Rc::clone(&state))?;
     super::action_bar_api::register_action_bar_functions(lua, state)?;
     register_timerunning_functions(lua)?;
     register_economy_functions(lua)?;
@@ -423,6 +424,26 @@ fn register_cinematic_functions(lua: &Lua) -> Result<()> {
             Ok(s)
         })?,
     )?;
+    Ok(())
+}
+
+/// Player movement state functions (read from SimState.movement toggles).
+fn register_movement_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let globals = lua.globals();
+    let mk = |field: fn(&super::super::state::MovementState) -> bool| {
+        let st = Rc::clone(&state);
+        lua.create_function(move |_, ()| Ok(field(&st.borrow().movement)))
+    };
+    globals.set("IsPlayerMoving", mk(|m| m.moving)?)?;
+    globals.set("IsMounted", mk(|m| m.mounted)?)?;
+    globals.set("IsFlying", mk(|m| m.flying)?)?;
+    globals.set("IsFalling", mk(|m| m.falling)?)?;
+    globals.set("IsSwimming", mk(|m| m.swimming)?)?;
+    globals.set("IsSubmerged", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set("IsFlyableArea", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set("IsAdvancedFlyableArea", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set("IsDrivableArea", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set("IsOutOfBounds", lua.create_function(|_, ()| Ok(false))?)?;
     Ok(())
 }
 

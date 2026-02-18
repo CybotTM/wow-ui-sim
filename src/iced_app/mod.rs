@@ -98,6 +98,8 @@ pub enum Message {
     ToggleOptionsModal,
     /// Close options modal (backdrop click or Escape).
     CloseOptionsModal,
+    /// Movement state toggle changed (field name, new value).
+    MovementToggled(&'static str, bool),
 }
 
 /// Run the iced UI with the given Lua environment.

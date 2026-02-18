@@ -26,9 +26,27 @@ pub struct SimConfig {
     pub rot_damage_level: String,
     #[serde(default = "default_xp_level")]
     pub xp_level: String,
+    /// Player movement state toggles.
+    #[serde(default)]
+    pub movement: MovementConfig,
     /// Path the config was loaded from (not serialized).
     #[serde(skip)]
     path: PathBuf,
+}
+
+/// Persisted movement toggle states (all default to false).
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct MovementConfig {
+    #[serde(default)]
+    pub moving: bool,
+    #[serde(default)]
+    pub mounted: bool,
+    #[serde(default)]
+    pub flying: bool,
+    #[serde(default)]
+    pub falling: bool,
+    #[serde(default)]
+    pub swimming: bool,
 }
 
 fn default_class() -> String { "Warrior".into() }
@@ -43,6 +61,7 @@ impl Default for SimConfig {
             player_race: default_race(),
             rot_damage_level: default_rot_level(),
             xp_level: default_xp_level(),
+            movement: MovementConfig::default(),
             path: default_path(),
         }
     }

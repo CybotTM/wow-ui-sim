@@ -231,19 +231,42 @@ pub struct SimState {
     pub active_spec_index: i32,
     /// Pending spec change: Some(new_spec_index) while spec-change cast is in progress.
     pub pending_spec_change: Option<i32>,
+    /// Player movement state toggles (controlled from options UI).
+    pub movement: MovementState,
+}
+
+/// Simulated player movement flags (all false = stationary).
+#[derive(Debug, Clone, Default)]
+pub struct MovementState {
+    pub moving: bool,
+    pub mounted: bool,
+    pub flying: bool,
+    pub falling: bool,
+    pub swimming: bool,
 }
 
 impl Default for SimState {
     fn default() -> Self {
+        let mut state = Self::new_empty();
+        state.action_bars = default_action_bars();
+        state.party_members = default_party();
+        state.player_name = random_player_name();
+        state.player_buffs = default_player_buffs();
+        state
+    }
+}
+
+impl SimState {
+    fn new_empty() -> Self {
         Self {
             widgets: WidgetRegistry::default(),
             events: EventQueue::default(),
             scripts: ScriptRegistry::default(),
+            cvars: CVarStorage::new(),
             console_output: Vec::new(),
             timers: VecDeque::new(),
             focused_frame_id: None,
             addons: Vec::new(),
-            cvars: CVarStorage::new(),
             tooltips: HashMap::new(),
             simple_htmls: HashMap::new(),
             message_frames: HashMap::new(),
@@ -255,21 +278,20 @@ impl Default for SimState {
             next_anim_group_id: 1,
             screen_width: 1600.0,
             screen_height: 1200.0,
-            action_bars: default_action_bars(),
+            action_bars: HashMap::new(),
             addon_base_paths: Vec::new(),
             mouse_position: None,
             hovered_frame: None,
-            party_members: default_party(),
-            current_target: None,
-            current_focus: None,
+            party_members: Vec::new(),
+            current_target: None, current_focus: None,
             sound_manager: None,
-            player_name: random_player_name(),
+            player_name: String::new(),
             player_health: 100_000,
             player_health_max: 100_000,
             player_class_index: 2,  // Paladin
-            player_race_index: 0,   // Human
-            rot_damage_level: 0,    // Off
-            player_buffs: default_player_buffs(),
+            player_race_index: 0,
+            rot_damage_level: 0,
+            player_buffs: Vec::new(),
             fps: 0.0,
             start_time: Instant::now(),
             casting: None,
@@ -282,8 +304,9 @@ impl Default for SimState {
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             lua_errors: Vec::new(),
-            active_spec_index: 2, // Protection for Paladin
+            active_spec_index: 2,  // Protection
             pending_spec_change: None,
+            movement: MovementState::default(),
         }
     }
 }

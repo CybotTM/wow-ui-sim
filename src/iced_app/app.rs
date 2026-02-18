@@ -211,6 +211,8 @@ pub struct App {
     pub(crate) selected_rot_level: String,
     /// Whether the options modal is visible.
     pub(crate) options_modal_visible: bool,
+    /// Movement state toggles (mirrors SimState.movement for UI display).
+    pub(crate) movement: crate::config::MovementConfig,
 }
 
 impl App {
@@ -303,6 +305,7 @@ impl App {
             selected_race: config.player_race,
             selected_rot_level: config.rot_damage_level,
             options_modal_visible: false,
+            movement: config.movement,
         }
     }
 
@@ -321,6 +324,13 @@ impl App {
         state.rot_damage_level = ROT_DAMAGE_LEVELS.iter()
             .position(|(l, _)| *l == config.rot_damage_level)
             .unwrap_or(0);
+        state.movement = crate::lua_api::state::MovementState {
+            moving: config.movement.moving,
+            mounted: config.movement.mounted,
+            flying: config.movement.flying,
+            falling: config.movement.falling,
+            swimming: config.movement.swimming,
+        };
     }
 
     /// Extract init params from thread-local storage.
