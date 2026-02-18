@@ -14,6 +14,19 @@ use super::layout::compute_frame_rect;
 use super::styles::{event_button_style, input_style, palette, pick_list_style, run_button_style};
 use super::Message;
 
+/// Resolve a frame's display name, using the owner addon as fallback for anonymous frames.
+fn anon_display_name(frame: &crate::widget::Frame, addons: &[crate::lua_api::state::AddonInfo]) -> String {
+    if let Some(ref name) = frame.name {
+        return name.clone();
+    }
+    if let Some(idx) = frame.owner_addon {
+        if let Some(addon) = addons.get(idx as usize) {
+            return format!("({})", addon.folder_name);
+        }
+    }
+    "(anon)".to_string()
+}
+
 impl App {
     /// Build the title bar with FPS counter, frame time, canvas size, and mouse coords.
     fn build_title_bar(&self) -> Element<'_, Message> {
@@ -362,7 +375,7 @@ impl App {
         let frame = state.widgets.get(frame_id);
 
         let (name, widget_type, computed_rect) = Self::inspector_frame_info(
-            frame, frame_id, &state.widgets,
+            frame, frame_id, &state.widgets, &state.addons,
             self.screen_size.get().width, self.screen_size.get().height,
         );
 
@@ -379,7 +392,7 @@ impl App {
             .on_press(Message::InspectorApply)
             .padding(Padding::from([4, 12]));
 
-        let parent_chain = Self::inspector_parent_chain(&state.widgets, frame_id);
+        let parent_chain = Self::inspector_parent_chain(&state.widgets, &state.addons, frame_id);
 
         let content = column![
             title,
@@ -403,6 +416,7 @@ impl App {
         frame: Option<&crate::widget::Frame>,
         frame_id: u64,
         widgets: &crate::widget::WidgetRegistry,
+        addons: &[crate::lua_api::state::AddonInfo],
         screen_width: f32,
         screen_height: f32,
     ) -> (String, String, LayoutRect) {
@@ -410,7 +424,7 @@ impl App {
             Some(f) => {
                 let rect = compute_frame_rect(widgets, frame_id, screen_width, screen_height);
                 (
-                    f.name.clone().unwrap_or_else(|| "(anon)".to_string()),
+                    anon_display_name(f, addons),
                     f.widget_type.as_str().to_string(),
                     rect,
                 )
@@ -521,14 +535,14 @@ impl App {
     /// Build parent chain display for the inspector.
     fn inspector_parent_chain<'a>(
         widgets: &crate::widget::WidgetRegistry,
+        addons: &[crate::lua_api::state::AddonInfo],
         frame_id: u64,
     ) -> Element<'a, Message> {
         let mut ancestors = Vec::new();
         let mut current = widgets.get(frame_id).and_then(|f| f.parent_id);
         while let Some(pid) = current {
             let Some(parent) = widgets.get(pid) else { break };
-            let name = parent.name.as_deref().unwrap_or("(anon)");
-            ancestors.push(name.to_string());
+            ancestors.push(anon_display_name(parent, addons));
             if ancestors.len() >= 6 {
                 ancestors.push("...".to_string());
                 break;
@@ -537,9 +551,9 @@ impl App {
         }
         ancestors.reverse();
         let self_name = widgets.get(frame_id)
-            .and_then(|f| f.name.as_deref())
-            .unwrap_or("(anon)");
-        ancestors.push(self_name.to_string());
+            .map(|f| anon_display_name(f, addons))
+            .unwrap_or_else(|| "(anon)".to_string());
+        ancestors.push(self_name);
         let chain_text = ancestors.join(" > ");
         text(chain_text).size(10).color(palette::TEXT_MUTED).into()
     }
