@@ -85,9 +85,16 @@ fn set_single_anchor(
 
     let (offset_x, offset_y) = anchor_offset(anchor);
 
-    // Resolve relative_to target
-    let relative_to_id =
-        resolve_relative_to(state, frame_id, anchor.relative_to.as_deref(), frame_name);
+    // Resolve relative_to target (relative_key takes priority when relative_to is absent)
+    let relative_to_id = if anchor.relative_to.is_none() {
+        if let Some(key) = anchor.relative_key.as_deref() {
+            resolve_relative_key(state, frame_id, key)
+        } else {
+            resolve_relative_to(state, frame_id, None, frame_name)
+        }
+    } else {
+        resolve_relative_to(state, frame_id, anchor.relative_to.as_deref(), frame_name)
+    };
 
     // Cycle detection
     if let Some(rel_id) = relative_to_id {
@@ -142,6 +149,27 @@ fn resolve_relative_to(
         }
         None => state.widgets.get(frame_id).and_then(|f| f.parent_id),
     }
+}
+
+/// Resolve a `relativeKey` expression like `$parent.HeroSpecButton` to a frame ID.
+///
+/// Supported patterns:
+/// - `$parent` → parent frame
+/// - `$parent.ChildKey` → child of parent with matching parentKey
+/// - `$parent.ChildKey.GrandchildKey` → nested child lookup
+fn resolve_relative_key(state: &SimState, frame_id: u64, key: &str) -> Option<u64> {
+    let parts: Vec<&str> = key.split('.').collect();
+    if parts.is_empty() || parts[0] != "$parent" {
+        return None;
+    }
+    // Start from parent
+    let mut current_id = state.widgets.get(frame_id)?.parent_id?;
+    // Walk remaining segments via children_keys
+    for &segment in &parts[1..] {
+        let frame = state.widgets.get(current_id)?;
+        current_id = *frame.children_keys.get(segment)?;
+    }
+    Some(current_id)
 }
 
 /// Set SetAllPoints from template (clears anchors, adds TOPLEFT+BOTTOMRIGHT to parent).
