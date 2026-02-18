@@ -369,6 +369,7 @@ fn register_lua_table_constants(lua: &Lua, globals: &mlua::Table) -> Result<()> 
     register_class_name_tables(lua, globals)?;
     register_icon_list(lua, globals)?;
     register_unit_frame_colors(lua, globals)?;
+    register_quest_objective_colors(lua, globals)?;
     Ok(())
 }
 
@@ -382,6 +383,23 @@ fn register_unit_frame_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
         "COMPACT_UNIT_FRAME_FRIENDLY_HEALTH_COLOR_BG",
         make_color_table(lua, 0.0, 0.35, 0.0, 1.0)?,
     )?;
+    Ok(())
+}
+
+/// Register quest objective text color constants (engine-defined globals).
+fn register_quest_objective_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set("QUEST_OBJECTIVE_FONT_COLOR",
+        make_color_table(lua, 0.8, 0.8, 0.8, 1.0)?)?;
+    globals.set("QUEST_OBJECTIVE_HIGHLIGHT_FONT_COLOR",
+        make_color_table(lua, 1.0, 1.0, 1.0, 1.0)?)?;
+    globals.set("QUEST_OBJECTIVE_DISABLED_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
+    globals.set("QUEST_OBJECTIVE_DISABLED_HIGHLIGHT_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
+    globals.set("QUEST_OBJECTIVE_COMPLETED_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
+    globals.set("QUEST_OBJECTIVE_COMPLETED_FONT_COLOR_DARK_BACKGROUND",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
     Ok(())
 }
 
