@@ -137,7 +137,11 @@ pub fn validate_spell_target(
 ) -> std::result::Result<(), &'static str> {
     match spell_target_type(spell_id) {
         SpellTargetType::SelfOnly => Ok(()),
-        SpellTargetType::Helpful => Ok(()), // auto-target self handled by caller
+        SpellTargetType::Helpful => match target {
+            // Can't heal dead units with normal spells (need resurrection)
+            Some(t) if !t.is_enemy && t.health <= 0 => Err("Target is dead."),
+            _ => Ok(()), // auto-target self handled by caller
+        },
         SpellTargetType::Harmful => match target {
             None => Err("You have no target."),
             Some(t) if !t.is_enemy => Err("Target is friendly."),
