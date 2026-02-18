@@ -378,9 +378,10 @@ fn emit_widget_text_quads(
     } else {
         None
     };
+    let scaled_font_size = f.font_size * f.effective_scale;
     emit_text_quads(
         batch, font_sys, glyph_atlas, text, text_bounds,
-        f.font.as_deref(), f.font_size, color,
+        f.font.as_deref(), scaled_font_size, color,
         justify_h, justify_v,
         GLYPH_ATLAS_TEX_INDEX,
         shadow, f.shadow_offset,
