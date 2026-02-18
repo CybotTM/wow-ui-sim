@@ -61,12 +61,11 @@ fn set_node_dynamic_fields(
         return set_selection_node_ranks(info, lua, node, node_id, max_ranks, spec_ok, &s);
     }
 
-    // Hero subtree nodes stay fully talented.
+    // Hero subtree nodes: set subTreeActive, then fall through to normal rank logic.
     if node.sub_tree_id != 0 {
         let active_subtree = super::hero_talents::get_active_hero_subtree(&s);
         let sub_tree_active = active_subtree == Some(node.sub_tree_id);
         info.set("subTreeActive", sub_tree_active)?;
-        return set_fully_talented(lua, info, node, max_ranks);
     }
 
     // Nodes with a spec-set condition (condType=1) for the wrong spec are invisible.
@@ -92,41 +91,6 @@ fn set_node_dynamic_fields(
     info.set("meetsEdgeRequirements", meets_edges)?;
     build_node_edges_dynamic(lua, info, node, &s)?;
     build_active_entry(lua, info, node, node_id, ranks_purchased, &s)?;
-    Ok(())
-}
-
-fn set_fully_talented(
-    lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo, max_ranks: i32,
-) -> Result<()> {
-    info.set("currentRank", max_ranks)?;
-    info.set("activeRank", max_ranks)?;
-    info.set("ranksPurchased", max_ranks)?;
-    info.set("maxRanks", max_ranks)?;
-    info.set("isVisible", true)?;
-    info.set("isAvailable", true)?;
-    info.set("canPurchaseRank", false)?;
-    info.set("canRefundRank", false)?;
-    info.set("meetsEdgeRequirements", true)?;
-    // Edges all active for hero nodes, filtered to same subtree.
-    let edges = lua.create_table()?;
-    let mut idx = 0i64;
-    for edge in node.edges.iter() {
-        if !should_show_edge(node.sub_tree_id, edge.source_node_id) {
-            continue;
-        }
-        idx += 1;
-        let e = lua.create_table()?;
-        e.set("targetNode", edge.source_node_id as i64)?;
-        e.set("type", edge.edge_type as i32)?;
-        e.set("visualStyle", edge.visual_style as i32)?;
-        e.set("isActive", true)?;
-        edges.set(idx, e)?;
-    }
-    info.set("visibleEdges", edges)?;
-    let active_entry = lua.create_table()?;
-    active_entry.set("entryID", node.entry_ids.first().copied().unwrap_or(0) as i64)?;
-    active_entry.set("rank", max_ranks)?;
-    info.set("activeEntry", active_entry)?;
     Ok(())
 }
 
