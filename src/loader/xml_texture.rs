@@ -74,15 +74,29 @@ fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
     let mut code = String::new();
 
     if let Some(color) = &texture.color {
-        code.push_str(&format!(
-            r#"
+        if let Some(name) = &color.color {
+            code.push_str(&format!(
+                r#"
+        do
+            local c = {name}
+            if c then
+                tex:SetColorTexture(c:GetRGBA())
+            end
+        end
+        "#,
+                name = name
+            ));
+        } else {
+            code.push_str(&format!(
+                r#"
         tex:SetVertexColor({}, {}, {}, {})
         "#,
-            color.r.unwrap_or(1.0),
-            color.g.unwrap_or(1.0),
-            color.b.unwrap_or(1.0),
-            color.a.unwrap_or(1.0)
-        ));
+                color.r.unwrap_or(1.0),
+                color.g.unwrap_or(1.0),
+                color.b.unwrap_or(1.0),
+                color.a.unwrap_or(1.0)
+            ));
+        }
     }
 
     if texture.horiz_tile == Some(true) {

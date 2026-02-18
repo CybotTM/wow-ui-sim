@@ -111,7 +111,7 @@ WOW_SIM_NO_SAVED_VARS=1 WOW_SIM_NO_ADDONS=1 timeout 90 cargo run --bin wow-sim
 
 ### CLI Arguments
 
-- `--exec-lua "code"` - Execute Lua code after first frame render (GUI mode only, not available in screenshot/dump-tree subcommands)
+- `--exec-lua "code"` - Execute Lua code after startup events. Works in all modes: GUI (after first frame render), screenshot, and dump-tree. Prefix with `@` to load from file (e.g., `--exec-lua @/tmp/debug.lua`)
 - `--no-addons` / `--no-saved-vars` - Same as environment variables below
 - `--delay <ms>` - Delay in milliseconds after firing startup events (for dump-tree/screenshot)
 

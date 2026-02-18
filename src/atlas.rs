@@ -77,7 +77,7 @@ const SIZE_SUFFIXES: &[u32] = &[16, 20, 32, 48, 64];
 /// Resolution order:
 /// 1. Exact match, then `-2x` / strip `-2x` (from generated lookup)
 /// 2. With `-NxN` size suffix (e.g. `coin-copper` → `coin-copper-20x20`)
-/// 3. With `_1x` / `_2x` underscore suffix (e.g. `Unit_Evoker_EbonMight_EndCap` → `_2x`)
+/// 3. With `_2x` / `-2x` / `_1x` / `-1x` suffixes (e.g. `bags-item-slot64` → `-2x`)
 pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     if let Some(lookup) = crate::atlas_data::get_atlas_info(name) {
         return Some(lookup);
@@ -93,14 +93,16 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
         }
     }
 
-    // Try with _2x then _1x underscore suffixes
-    let with_2x = format!("{lower}_2x");
-    if let Some(info) = ATLAS_DB.get(&with_2x as &str) {
-        return Some(AtlasLookup { info, is_2x_fallback: true });
-    }
-    let with_1x = format!("{lower}_1x");
-    if let Some(info) = ATLAS_DB.get(&with_1x as &str) {
-        return Some(AtlasLookup { info, is_2x_fallback: false });
+    // Try with _2x/_1x underscore and -2x/-1x hyphen suffixes
+    for sep in ["_", "-"] {
+        let with_2x = format!("{lower}{sep}2x");
+        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {
+            return Some(AtlasLookup { info, is_2x_fallback: true });
+        }
+        let with_1x = format!("{lower}{sep}1x");
+        if let Some(info) = ATLAS_DB.get(&with_1x as &str) {
+            return Some(AtlasLookup { info, is_2x_fallback: false });
+        }
     }
 
     // Blizzard typo corrections (divider→devider in atlas DB)

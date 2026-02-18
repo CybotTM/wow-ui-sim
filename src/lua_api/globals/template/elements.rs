@@ -195,14 +195,20 @@ fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml
     }
     append_texture_source(code, texture, var, is_mask);
     if let Some(color) = &texture.color {
-        let r = color.r.unwrap_or(1.0);
-        let g = color.g.unwrap_or(1.0);
-        let b = color.b.unwrap_or(1.0);
-        let a = color.a.unwrap_or(1.0);
-        code.push_str(&format!(
-            "            {}:SetColorTexture({}, {}, {}, {})\n",
-            var, r, g, b, a
-        ));
+        if let Some(name) = &color.color {
+            code.push_str(&format!(
+                "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
+            ));
+        } else {
+            let r = color.r.unwrap_or(1.0);
+            let g = color.g.unwrap_or(1.0);
+            let b = color.b.unwrap_or(1.0);
+            let a = color.a.unwrap_or(1.0);
+            code.push_str(&format!(
+                "            {}:SetColorTexture({}, {}, {}, {})\n",
+                var, r, g, b, a
+            ));
+        }
     }
     if texture.horiz_tile == Some(true) {
         code.push_str(&format!("            {}:SetHorizTile(true)\n", var));
