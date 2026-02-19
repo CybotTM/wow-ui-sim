@@ -69,7 +69,9 @@ fn set_node_dynamic_fields(
     }
 
     // Nodes with a spec-set condition (condType=1) for the wrong spec are invisible.
-    if !check_spec_conditions_met(node, &s) {
+    // Hero nodes skip this — their visibility is controlled by subTreeActive, and
+    // their group conditions use OR semantics (visible if ANY spec matches).
+    if node.sub_tree_id == 0 && !check_spec_conditions_met(node, &s) {
         info.set("isVisible", false)?;
         return set_empty_ranks(info, lua, max_ranks);
     }
