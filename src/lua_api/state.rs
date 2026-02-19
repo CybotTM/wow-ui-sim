@@ -596,8 +596,15 @@ impl SimState {
         crate::lua_api::frame::propagate_strata_level_pub(
             &mut self.widgets, id,
         );
-        // Invalidate strata buckets since level changed (affects sort order).
-        self.strata_buckets = None;
+        // Re-sort the affected subtree in strata buckets (level changed).
+        // Avoid setting strata_buckets = None here because Show/Hide calls
+        // later in the same handler chain rely on buckets being Some for
+        // surgical insert/remove.  A full rebuild from None would discard
+        // those updates.
+        if self.strata_buckets.is_some() {
+            self.remove_subtree_from_buckets(id);
+            self.insert_subtree_into_buckets(id);
+        }
     }
 
     /// Find the maximum frame_level among siblings of `id` in the given strata.
