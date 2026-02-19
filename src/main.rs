@@ -195,7 +195,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             run_screenshot(&env, &font_system, output, width, height, filter, crop, args.delay, exec_lua.as_deref(), dump_tree);
         }
         Some(Commands::LuaErrors) => {
-            wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout);
+            wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
         }
         Some(Commands::DumpTexture { output, filter, frame_filter }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);

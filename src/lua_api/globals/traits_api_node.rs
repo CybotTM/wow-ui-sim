@@ -176,16 +176,21 @@ fn check_node_available(node: &TraitNodeInfo, state: &SimState) -> bool {
     true
 }
 
-/// Check all required edges (type > 0) have their source node purchased.
+/// Check edge requirements using WoW semantics:
+/// - type 2 (SufficientForAvailability): OR — any one satisfied is enough
+/// - type 3 (RequiredForAvailability): AND — all must be satisfied
 fn check_edge_requirements(node: &TraitNodeInfo, state: &SimState) -> bool {
+    let mut has_sufficient = false;
+    let mut any_sufficient_met = false;
     for edge in node.edges {
-        if edge.edge_type == 0 { continue }
-        let source_rank = *state.talents.node_ranks.get(&edge.source_node_id).unwrap_or(&0);
-        if source_rank == 0 {
-            return false;
+        let purchased = *state.talents.node_ranks.get(&edge.source_node_id).unwrap_or(&0) > 0;
+        match edge.edge_type {
+            2 => { has_sufficient = true; if purchased { any_sufficient_met = true; } }
+            3 => { if !purchased { return false; } }
+            _ => {}
         }
     }
-    true
+    !has_sufficient || any_sufficient_met
 }
 
 /// Check the node's currency has remaining points.
