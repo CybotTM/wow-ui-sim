@@ -267,6 +267,8 @@ fn register_ui_enums(lua: &Lua, enum_table: &mlua::Table) -> Result<()> {
 // ============================================================================
 
 fn register_misc_enums(lua: &Lua, enum_table: &mlua::Table) -> Result<()> {
+    seq_enum(lua, enum_table, "ClubFinderDisableReason", &["Muted", "Silenced", "VeteranTrial"])?;
+
     seq_enum(lua, enum_table, "BankType", &["Character", "Account"])?;
     seq_enum(lua, enum_table, "AddOnEnableState", &["None", "Some", "All"])?;
 

@@ -9,7 +9,7 @@ mod elements;
 use crate::loader::helpers::generate_set_point_code;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::lua_api::SimState;
-use crate::xml::{get_template_chain, FrameElement, FrameXml, TemplateEntry};
+use crate::xml::{get_template_chain, FrameElement, FrameXml, LayerElement, TemplateEntry};
 use mlua::Lua;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -219,11 +219,24 @@ fn apply_layers(lua: &Lua, template: &FrameXml, frame_name: &str, subst_parent: 
     for layers in template.layers() {
         for layer in &layers.layers {
             let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
-            for (texture, is_mask, is_line) in layer.textures() {
-                elements::create_texture_from_template(lua, texture, frame_name, subst_parent, draw_layer, is_mask, is_line);
-            }
-            for fontstring in layer.font_strings() {
-                elements::create_fontstring_from_template(lua, fontstring, frame_name, subst_parent, draw_layer);
+            // Process elements in document order so that FontStrings referenced
+            // by subsequent Texture anchors (e.g. $parent.SpecName) are already
+            // created when the Texture's SetPoint runs.
+            for element in &layer.elements {
+                match element {
+                    LayerElement::Texture(t) => {
+                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, false, false);
+                    }
+                    LayerElement::Line(t) => {
+                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, false, true);
+                    }
+                    LayerElement::MaskTexture(t) => {
+                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, true, false);
+                    }
+                    LayerElement::FontString(f) => {
+                        elements::create_fontstring_from_template(lua, f, frame_name, subst_parent, draw_layer);
+                    }
+                }
             }
         }
     }

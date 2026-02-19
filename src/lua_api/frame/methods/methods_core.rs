@@ -604,7 +604,7 @@ fn add_scale_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             .map(|p| p.effective_scale)
             .unwrap_or(1.0);
         if let Some(f) = state.widgets.get_mut_visual(id) {
-            f.scale = scale;
+            f.scale = scale.max(0.001); // WoW doesn't allow zero scale
         }
         state.widgets.propagate_effective_scale(id, parent_eff_scale);
         state.invalidate_layout_with_dependents(id);
