@@ -437,10 +437,25 @@ fn migrate_children_to_new_frame(
     let keys: std::collections::HashMap<String, u64> = widgets.get(old_id)
         .map(|f| f.children_keys.clone())
         .unwrap_or_default();
+
+    // Preserve the old frame's explicit size on the new frame if the new frame has no
+    // size yet. This covers frames like UIParent which are pre-seeded with screen
+    // dimensions before XML loads — the XML re-creates them with setAllPoints but no
+    // explicit <Size>, so the new frame would start at 0x0 without this copy.
+    let (old_width, old_height) = widgets.get(old_id)
+        .map(|f| (f.width, f.height))
+        .unwrap_or((0.0, 0.0));
+
     if let Some(new_frame) = widgets.get_mut_visual(new_id) {
         new_frame.children.extend(&children);
         for (k, v) in keys {
             new_frame.children_keys.entry(k).or_insert(v);
+        }
+        if new_frame.width == 0.0 && old_width > 0.0 {
+            new_frame.width = old_width;
+        }
+        if new_frame.height == 0.0 && old_height > 0.0 {
+            new_frame.height = old_height;
         }
     }
     if let Some(old_frame) = widgets.get_mut_visual(old_id) {
