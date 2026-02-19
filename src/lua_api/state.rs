@@ -382,6 +382,9 @@ impl SimState {
         let sh = self.screen_height;
         let mut cache = crate::iced_app::layout::LayoutCache::default();
         Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
+        // Frame positions may have changed — schedule hit grid re-insertion
+        // so apply_hit_grid_changes updates stale rectangles.
+        self.pending_hit_grid_changes.push((id, true));
     }
 
     /// Like `invalidate_layout` but also recomputes sibling frames anchored to
@@ -394,6 +397,7 @@ impl SimState {
         let mut cache = crate::iced_app::layout::LayoutCache::default();
         Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
         Self::recompute_anchor_dependents(&mut self.widgets, id, sw, sh, &mut cache, 0);
+        self.pending_hit_grid_changes.push((id, true));
     }
 
     fn recompute_layout_subtree(

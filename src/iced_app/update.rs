@@ -442,6 +442,8 @@ impl App {
             while let Some(id) = stack.pop() {
                 let Some(f) = registry.get(id) else { continue };
                 if became_visible {
+                    // Remove first so moved frames get old cell entries cleaned up.
+                    grid.remove(id);
                     if f.visible && f.effective_alpha > 0.0 && f.mouse_enabled
                         && !f.name.as_deref().is_some_and(|n| {
                             super::frame_collect::HIT_TEST_EXCLUDED.contains(&n)
