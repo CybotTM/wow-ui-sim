@@ -544,8 +544,19 @@ fn register_cursor_position(lua: &Lua) -> Result<()> {
 fn register_localization_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
-    // GetText(key) - localization lookup; just return the key as-is
-    globals.set("GetText", lua.create_function(|_, key: String| Ok(key))?)?;
+    // GetText(key [, gender]) - localization lookup; tries gender suffix then base key
+    globals.set("GetText", lua.create_function(|lua, (key, gender): (String, Option<i32>)| {
+        let g = lua.globals();
+        let suffix = match gender {
+            Some(2) => Some("_FEMALE"),
+            Some(3) => Some("_NEUTRAL"),
+            _ => None,
+        };
+        if let Some(s) = suffix {
+            if let Ok(val) = g.get::<String>(format!("{key}{s}")) { return Ok(val); }
+        }
+        Ok(g.get::<String>(key.clone()).unwrap_or(key))
+    })?)?;
 
     Ok(())
 }
