@@ -125,6 +125,8 @@ pub struct Frame {
     pub children: Vec<u64>,
     /// Width in pixels.
     pub width: f32,
+    /// Whether width was set by text auto-sizing (vs explicit SetWidth/anchors).
+    pub width_is_text_auto: bool,
     /// Height in pixels.
     pub height: f32,
     /// Anchors defining position.
@@ -413,6 +415,7 @@ macro_rules! frame_defaults {
             parent_id: None,
             children: Vec::new(),
             width: 0.0,
+            width_is_text_auto: false,
             height: 0.0,
             anchors: Vec::new(),
             visible: true,

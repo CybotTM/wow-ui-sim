@@ -129,6 +129,7 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.set_size(width, height);
+            frame.width_is_text_auto = false;
         }
         state.widgets.mark_rect_dirty(id);
         state.invalidate_layout_with_dependents(id);
@@ -141,6 +142,7 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.width = width;
+            frame.width_is_text_auto = false;
         }
         state.widgets.mark_rect_dirty(id);
         state.invalidate_layout_with_dependents(id);

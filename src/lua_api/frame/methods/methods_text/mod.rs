@@ -152,6 +152,7 @@ struct FontStringMeasureInfo {
     font: Option<String>,
     font_size: f32,
     width: f32,
+    width_is_text_auto: bool,
     word_wrap: bool,
 }
 
@@ -174,6 +175,7 @@ fn collect_fontstring_measure_ids(
                 font: f.font.clone(),
                 font_size: f.font_size,
                 width: f.width,
+                width_is_text_auto: f.width_is_text_auto,
                 word_wrap: f.word_wrap,
             })
         })
@@ -197,22 +199,21 @@ fn measure_and_apply_sizes(
         for info in ids_to_measure {
             let mut did_change = false;
 
-            // Auto-size width for non-word-wrap FontStrings
-            if !(info.word_wrap && info.width > 0.0) {
+            // Auto-size width unless explicitly constrained (SetWidth/anchors)
+            let width_is_explicit = info.word_wrap && info.width > 0.0 && !info.width_is_text_auto;
+            if !width_is_explicit {
                 let width = fs.measure_text_width(&info.text, info.font.as_deref(), info.font_size);
                 if state.widgets.get(info.id).map(|f| f.width != width).unwrap_or(false) {
                     if let Some(frame) = state.widgets.get_mut_visual(info.id) {
                         frame.width = width;
+                        frame.width_is_text_auto = true;
                     }
                     did_change = true;
                 }
             }
 
-            // Auto-size height based on wrapped text content
-            let wrap_width = {
-                let cur_width = state.widgets.get(info.id).map(|f| f.width).unwrap_or(0.0);
-                if info.word_wrap && cur_width > 0.0 { Some(cur_width) } else { None }
-            };
+            // Only wrap at explicitly constrained width (not auto-sized)
+            let wrap_width = if width_is_explicit { Some(info.width) } else { None };
             let height = fs.measure_text_height(&info.text, info.font.as_deref(), info.font_size, wrap_width);
             if state.widgets.get(info.id).map(|f| f.height != height).unwrap_or(false) {
                 if let Some(frame) = state.widgets.get_mut_visual(info.id) {
