@@ -70,10 +70,13 @@ pub fn compute_frame_rect(
     }
 
     let anchor = &frame.anchors[0];
-    let (pax, pay) = anchor_position(anchor.relative_point, pr.x, pr.y, pr.width, pr.height);
-    let target_x = pax + anchor.x_offset;
+    let rel_rect = resolve_anchor_target(registry, anchor, &pr, screen_width, screen_height);
+    let (ax, ay) = anchor_position(
+        anchor.relative_point, rel_rect.x, rel_rect.y, rel_rect.width, rel_rect.height,
+    );
     // WoW uses Y-up coordinate system, screen uses Y-down
-    let target_y = pay - anchor.y_offset;
+    let target_x = ax + anchor.x_offset;
+    let target_y = ay - anchor.y_offset;
     let (frame_x, frame_y) =
         frame_position_from_anchor(anchor.point, target_x, target_y, width, height);
 
@@ -82,6 +85,21 @@ pub fn compute_frame_rect(
         y: frame_y,
         width,
         height,
+    }
+}
+
+/// Resolve the rect to anchor against: relative_to_id frame or parent.
+fn resolve_anchor_target(
+    registry: &WidgetRegistry,
+    anchor: &crate::widget::Anchor,
+    parent_rect: &LayoutRect,
+    screen_width: f32,
+    screen_height: f32,
+) -> LayoutRect {
+    if let Some(rel_id) = anchor.relative_to_id {
+        compute_frame_rect(registry, rel_id as u64, screen_width, screen_height)
+    } else {
+        *parent_rect
     }
 }
 
