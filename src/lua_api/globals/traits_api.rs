@@ -96,8 +96,9 @@ fn purchase_rank(
         return Ok(false);
     }
     s.talents.node_ranks.insert(node_id, current + 1);
+    let affected = compute_affected_nodes(node_id, &s);
     drop(s);
-    fire_trait_nodes_changed(lua)
+    fire_trait_nodes_changed_for(lua, &affected)
 }
 
 fn refund_rank(
@@ -114,8 +115,9 @@ fn refund_rank(
     } else {
         s.talents.node_ranks.insert(node_id, current - 1);
     }
+    let affected = compute_affected_nodes(node_id, &s);
     drop(s);
-    fire_trait_nodes_changed(lua)
+    fire_trait_nodes_changed_for(lua, &affected)
 }
 
 fn set_selection(
@@ -142,8 +144,9 @@ fn set_selection(
             s.talents.node_selections.remove(&node_id);
         }
     }
+    let affected = compute_affected_nodes(node_id, &s);
     drop(s);
-    fire_trait_nodes_changed(lua)
+    fire_trait_nodes_changed_for(lua, &affected)
 }
 
 fn reset_tree(
@@ -172,30 +175,49 @@ fn reset_tree_by_currency(
     fire_trait_config_updated(lua, config_id)
 }
 
-/// Fire events for staging operations (PurchaseRank, RefundRank, SetSelection):
-/// - TRAIT_NODE_CHANGED for each node (invalidates nodeInfo cache)
-/// - TRAIT_TREE_CURRENCY_INFO_UPDATED for the tree (refreshes point display)
-/// Does NOT fire TRAIT_CONFIG_UPDATED — that only happens on CommitConfig.
-fn fire_trait_nodes_changed(lua: &Lua) -> Result<bool> {
-    fire_node_changed_events(lua)?;
+/// Compute the set of nodes affected by a change to `changed_node_id`:
+/// - The node itself
+/// - Nodes with edges pointing to it (dependents whose meetsEdgeRequirements may flip)
+/// - Nodes with gate conditions on the same currency (their isAvailable may change)
+fn compute_affected_nodes(changed_node_id: u32, state: &SimState) -> Vec<u32> {
+    use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_COND_DB};
+    let Some(tree) = TRAIT_TREE_DB.get(&790) else { return vec![changed_node_id] };
+    let changed_currency = state.talents.node_currency_map.get(&changed_node_id).copied();
+
+    let mut affected = vec![changed_node_id];
+    for &nid in tree.node_ids {
+        if nid == changed_node_id { continue }
+        let Some(node) = TRAIT_NODE_DB.get(&nid) else { continue };
+        let is_dependent = node.edges.iter()
+            .any(|e| e.source_node_id == changed_node_id && e.edge_type > 0);
+        let is_gate_affected = changed_currency.map_or(false, |ccy| {
+            node.cond_ids.iter().any(|&cid| {
+                TRAIT_COND_DB.get(&cid)
+                    .map_or(false, |c| c.cond_type == 0 && c.currency_id == ccy)
+            })
+        });
+        if is_dependent || is_gate_affected {
+            affected.push(nid);
+        }
+    }
+    affected
+}
+
+/// Fire TRAIT_NODE_CHANGED for a specific set of affected nodes, then currency update.
+fn fire_trait_nodes_changed_for(lua: &Lua, affected: &[u32]) -> Result<bool> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    let event = lua.create_string("TRAIT_NODE_CHANGED")?;
+    for &nid in affected {
+        fire.call::<()>((event.clone(), nid as i64))?;
+    }
     fire_currency_updated_event(lua)?;
     Ok(true)
 }
 
 /// Fire all events after a config commit or full reset:
-/// - TRAIT_NODE_CHANGED + TRAIT_TREE_CURRENCY_INFO_UPDATED (via fire_trait_nodes_changed)
-/// - TRAIT_CONFIG_UPDATED for the config (triggers tree reload in the UI)
+/// - TRAIT_NODE_CHANGED for ALL nodes (full invalidation)
+/// - TRAIT_TREE_CURRENCY_INFO_UPDATED + TRAIT_CONFIG_UPDATED
 fn fire_trait_config_updated(lua: &Lua, config_id: i32) -> Result<bool> {
-    fire_trait_nodes_changed(lua)?;
-    let fire: mlua::Function = lua.globals().get("FireEvent")?;
-    fire.call::<()>((
-        lua.create_string("TRAIT_CONFIG_UPDATED")?,
-        config_id as i64,
-    ))?;
-    Ok(true)
-}
-
-fn fire_node_changed_events(lua: &Lua) -> Result<()> {
     use crate::traits::TRAIT_TREE_DB;
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     let event = lua.create_string("TRAIT_NODE_CHANGED")?;
@@ -204,7 +226,12 @@ fn fire_node_changed_events(lua: &Lua) -> Result<()> {
             fire.call::<()>((event.clone(), nid as i64))?;
         }
     }
-    Ok(())
+    fire_currency_updated_event(lua)?;
+    fire.call::<()>((
+        lua.create_string("TRAIT_CONFIG_UPDATED")?,
+        config_id as i64,
+    ))?;
+    Ok(true)
 }
 
 fn fire_currency_updated_event(lua: &Lua) -> Result<()> {
