@@ -90,7 +90,7 @@ fn position_tests() -> Vec<TestCase> {
         ("party_frame_position", "PartyFrame", 22.0, 147.0, 120.0, 244.0),
         ("compact_party_frame_position", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0),
         // HUD elements
-        ("minimap_position", "Minimap", 807.0, 44.0, 198.0, 198.0),
+        ("minimap_position", "Minimap", 815.0, 44.0, 198.0, 198.0),
         ("objective_tracker_position", "ObjectiveTrackerFrame", 759.0, 271.0, 260.0, 400.0),
         ("bags_bar_position", "BagsBar", 810.0, 672.0, 208.0, 47.0),
         ("micro_menu_position", "MicroMenu", 629.0, 717.0, 329.0, 40.0),
