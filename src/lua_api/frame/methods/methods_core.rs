@@ -1,7 +1,7 @@
 //! Core frame methods: GetName, SetSize, Show/Hide, strata/level, mouse, scale, rect.
 
 use super::methods_helpers::{calculate_frame_height, calculate_frame_width};
-use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
 use crate::lua_api::layout::compute_frame_rect;
 use crate::lua_api::SimState;
 use mlua::{LightUserData, Lua, Value};
@@ -275,62 +275,9 @@ fn add_rect_edge_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
-/// Fire OnShow on a frame and recursively on its visible children.
-pub(crate) fn fire_on_show_recursive(
-    lua: &Lua,
-    id: u64,
-) -> mlua::Result<()> {
-    if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, "OnShow") {
-        let frame_val = frame_lud(id);
-        if let Err(e) = handler.call::<()>(frame_val) {
-            crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-        }
-    }
-
-    let children: Vec<u64> = {
-        let state_rc = get_sim_state(lua);
-        let st = state_rc.borrow();
-        st.widgets
-            .get(id)
-            .map(|f| {
-                f.children
-                    .iter()
-                    .filter(|&&cid| st.widgets.get(cid).map(|c| c.visible).unwrap_or(false))
-                    .copied()
-                    .collect()
-            })
-            .unwrap_or_default()
-    };
-
-    for child_id in children {
-        fire_on_show_recursive(lua, child_id)?;
-    }
-
-    Ok(())
-}
-
 /// Visibility methods: Show, Hide, IsVisible, IsShown, SetShown
 fn add_visibility_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("Show", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let was_hidden = {
-            let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
-        };
-        state_rc.borrow_mut().set_frame_visible(id, true);
-        if was_hidden {
-            fire_on_show_recursive(lua, id)?;
-        }
-        Ok(())
-    })?)?;
-
-    methods.set("Hide", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        state_rc.borrow_mut().set_frame_visible(id, false);
-        Ok(())
-    })?)?;
+    super::methods_visibility::add_show_hide_methods(lua, methods)?;
 
     methods.set("IsVisible", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
@@ -354,20 +301,6 @@ fn add_visibility_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
         let state = state_rc.borrow();
         let visible = state.widgets.get(id).map(|f| f.visible).unwrap_or(false);
         Ok(visible)
-    })?)?;
-
-    methods.set("SetShown", lua.create_function(|lua, (ud, shown): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let was_hidden = {
-            let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
-        };
-        state_rc.borrow_mut().set_frame_visible(id, shown);
-        if shown && was_hidden {
-            fire_on_show_recursive(lua, id)?;
-        }
-        Ok(())
     })?)?;
 
     Ok(())

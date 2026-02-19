@@ -17,6 +17,7 @@ mod methods_misc;
 mod methods_script;
 mod methods_text;
 mod methods_texture;
+pub(crate) mod methods_visibility;
 mod methods_widget;
 mod widget_cooldown;
 mod widget_editbox;
@@ -27,7 +28,7 @@ mod widget_scroll;
 mod widget_slider;
 mod widget_tooltip;
 
-pub(crate) use methods_core::fire_on_show_recursive;
+pub(crate) use methods_visibility::fire_on_show_recursive;
 
 /// Register all ~200 frame methods into the shared methods table.
 pub fn register_all_methods(lua: &mlua::Lua, methods: &mlua::Table) -> mlua::Result<()> {
