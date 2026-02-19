@@ -148,6 +148,20 @@ impl TocFile {
             .unwrap_or_default()
     }
 
+    /// Get `LoadWith` triggers — addon names that, when loaded, should trigger
+    /// loading this addon immediately inline.
+    pub fn load_with(&self) -> Vec<String> {
+        self.metadata
+            .get("LoadWith")
+            .map(|s| {
+                s.split(',')
+                    .map(|d| d.trim().to_string())
+                    .filter(|d| !d.is_empty())
+                    .collect()
+            })
+            .unwrap_or_default()
+    }
+
     /// Get optional dependencies.
     pub fn optional_deps(&self) -> Vec<String> {
         self.metadata

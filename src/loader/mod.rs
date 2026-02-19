@@ -200,9 +200,14 @@ fn pull_required_lod_addons(
 
 /// Topologically sort addons by their declared dependencies (Kahn's algorithm).
 /// Base UI addons are placed first in a fixed order, then remaining addons are sorted.
+/// After emitting each addon, any addon with `LoadWith` pointing to it is emitted
+/// immediately (matching WoW's inline load-on-trigger behavior).
 fn topological_sort_addons(
     mut addons: HashMap<String, (PathBuf, TocFile)>,
 ) -> Vec<(String, PathBuf)> {
+    // Build LoadWith reverse index: parent_name -> list of addon names to load inline.
+    let load_with_map = build_load_with_map(&addons);
+
     // Extract base UI addons in fixed order, pulling their non-base dependencies first.
     let base_set: std::collections::HashSet<&str> =
         BASE_UI_ADDONS.iter().copied().collect();
@@ -221,20 +226,72 @@ fn topological_sort_addons(
             result.push((base.to_string(), toc_path));
             loaded.insert(base.to_string());
         }
+        emit_load_with(base, &load_with_map, &mut addons, &mut result, &mut loaded);
     }
 
-    // Sort remaining addons by declared dependencies
-    let available: std::collections::HashSet<&str> =
-        addons.keys().map(|s| s.as_str()).collect();
-    let deps = build_dependency_graph(&addons, &available);
-    let sorted = kahns_sort(&deps, addons.len());
+    // Sort remaining addons by declared dependencies.
+    // Collect to owned strings so we can mutate `addons` during iteration.
+    let sorted: Vec<String> = {
+        let available: std::collections::HashSet<&str> =
+            addons.keys().map(|s| s.as_str()).collect();
+        let deps = build_dependency_graph(&addons, &available);
+        kahns_sort(&deps, addons.len())
+            .into_iter()
+            .map(|s| s.to_string())
+            .collect()
+    };
 
-    result.extend(sorted.into_iter().filter_map(|name| {
-        let (toc_path, _) = addons.get(name)?;
-        Some((name.to_string(), toc_path.clone()))
-    }));
+    for name in &sorted {
+        if let Some((toc_path, _)) = addons.remove(name.as_str()) {
+            result.push((name.clone(), toc_path));
+            loaded.insert(name.clone());
+            emit_load_with(name, &load_with_map, &mut addons, &mut result, &mut loaded);
+        }
+    }
 
     result
+}
+
+/// Build reverse index: for each addon name, which addons have `LoadWith` pointing to it.
+fn build_load_with_map(
+    addons: &HashMap<String, (PathBuf, TocFile)>,
+) -> HashMap<String, Vec<String>> {
+    let mut map: HashMap<String, Vec<String>> = HashMap::new();
+    for (name, (_, toc)) in addons {
+        for trigger in toc.load_with() {
+            map.entry(trigger).or_default().push(name.clone());
+        }
+    }
+    // Sort each list for deterministic order
+    for list in map.values_mut() {
+        list.sort();
+    }
+    map
+}
+
+/// After emitting an addon, emit any addons with `LoadWith` pointing to it.
+/// Recurses to handle chained LoadWith triggers.
+fn emit_load_with(
+    just_loaded: &str,
+    load_with_map: &HashMap<String, Vec<String>>,
+    addons: &mut HashMap<String, (PathBuf, TocFile)>,
+    result: &mut Vec<(String, PathBuf)>,
+    loaded: &mut std::collections::HashSet<String>,
+) {
+    let Some(triggered) = load_with_map.get(just_loaded) else {
+        return;
+    };
+    for name in triggered.clone() {
+        if loaded.contains(&name) {
+            continue;
+        }
+        if let Some((toc_path, _)) = addons.remove(&name) {
+            result.push((name.clone(), toc_path));
+            loaded.insert(name.clone());
+            // Recurse: this addon may trigger further LoadWith addons
+            emit_load_with(&name, load_with_map, addons, result, loaded);
+        }
+    }
 }
 
 /// Recursively pull non-base dependencies from the addon pool into the result list.

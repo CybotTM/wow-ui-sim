@@ -9,35 +9,18 @@ use mlua::{Lua, Result, Value};
 
 /// Register early stubs for globals needed during addon XML/Lua loading.
 pub fn register_early_globals(lua: &Lua) -> Result<()> {
-    register_panel_stubs(lua)?;
+    register_panel_table(lua)?;
     register_mixin_stubs(lua)?;
     Ok(())
 }
 
-/// ShowUIPanel / HideUIPanel / CloseAllWindows — called by ChatFrame OnLoad
-/// before Blizzard_UIParentPanelManager loads. The workaround code in
-/// workarounds_editmode.rs overwrites these with full implementations.
-fn register_panel_stubs(lua: &Lua) -> Result<()> {
+/// UIPanelWindows registry table — addons register panels here before
+/// ShowUIPanel/HideUIPanel reference it.
+fn register_panel_table(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-
-    globals.set("ShowUIPanel", lua.create_function(|_, _args: mlua::MultiValue| {
-        Ok(())
-    })?)?;
-
-    globals.set("HideUIPanel", lua.create_function(|_, _args: mlua::MultiValue| {
-        Ok(())
-    })?)?;
-
-    globals.set("CloseAllWindows", lua.create_function(|_, _args: mlua::MultiValue| {
-        Ok(false)
-    })?)?;
-
-    // UIPanelWindows registry table — addons register panels here before
-    // ShowUIPanel/HideUIPanel reference it.
     if globals.get::<Value>("UIPanelWindows")? == Value::Nil {
         globals.set("UIPanelWindows", lua.create_table()?)?;
     }
-
     Ok(())
 }
 
