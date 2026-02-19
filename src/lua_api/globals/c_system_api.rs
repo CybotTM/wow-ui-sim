@@ -196,8 +196,9 @@ fn faction_data_by_id(lua: &Lua, faction_id: i32) -> Result<Value> {
     }
 }
 
-fn faction_data_by_index(lua: &Lua, index: i32) -> Result<Value> {
+fn faction_data_by_index(lua: &Lua, index: Option<i32>) -> Result<Value> {
     use super::reputation_data;
+    let Some(index) = index else { return Ok(Value::Nil) };
     match reputation_data::get_faction_by_index(index) {
         Some(f) => build_faction_table(lua, f, index),
         None => Ok(Value::Nil),
