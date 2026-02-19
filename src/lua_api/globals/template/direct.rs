@@ -162,12 +162,14 @@ fn resolve_relative_key(state: &SimState, frame_id: u64, key: &str) -> Option<u6
     if parts.is_empty() || parts[0] != "$parent" {
         return None;
     }
-    // Start from parent
     let mut current_id = state.widgets.get(frame_id)?.parent_id?;
-    // Walk remaining segments via children_keys
     for &segment in &parts[1..] {
-        let frame = state.widgets.get(current_id)?;
-        current_id = *frame.children_keys.get(segment)?;
+        if segment == "$parent" || segment == "$Parent" || segment == "$parentKey" {
+            current_id = state.widgets.get(current_id)?.parent_id?;
+        } else {
+            let frame = state.widgets.get(current_id)?;
+            current_id = *frame.children_keys.get(segment)?;
+        }
     }
     Some(current_id)
 }
