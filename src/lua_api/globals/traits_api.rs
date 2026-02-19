@@ -146,7 +146,25 @@ fn set_selection(
     }
     let affected = compute_affected_nodes(node_id, &s);
     drop(s);
-    fire_trait_nodes_changed_for(lua, &affected)
+    fire_trait_nodes_changed_for(lua, &affected)?;
+    // Fire TRAIT_SUB_TREE_CHANGED for SubTreeSelection nodes (node_type == 3).
+    if let Some(eid) = entry_id {
+        use crate::traits::{TRAIT_NODE_DB, TRAIT_ENTRY_DB};
+        if let Some(node) = TRAIT_NODE_DB.get(&node_id) {
+            if node.node_type == 3 {
+                if let Some(entry) = TRAIT_ENTRY_DB.get(&eid) {
+                    if entry.sub_tree_id != 0 {
+                        let fire: mlua::Function = lua.globals().get("FireEvent")?;
+                        fire.call::<()>((
+                            lua.create_string("TRAIT_SUB_TREE_CHANGED")?,
+                            entry.sub_tree_id as i64,
+                        ))?;
+                    }
+                }
+            }
+        }
+    }
+    Ok(true)
 }
 
 fn reset_tree(
