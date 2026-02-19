@@ -83,7 +83,7 @@ impl App {
             let button_val = mlua::Value::String(env.lua().create_string("LeftButton").unwrap());
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
         }
-        self.invalidate();
+        self.flush_post_script_updates();
     }
 
     pub(super) fn handle_mouse_up(&mut self, pos: Point) {
@@ -134,7 +134,7 @@ impl App {
         }
         self.mouse_down_frame = None;
         self.pressed_frame = None;
-        self.invalidate();
+        self.flush_post_script_updates();
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
@@ -146,7 +146,7 @@ impl App {
             let button_val = mlua::Value::String(env.lua().create_string("RightButton").unwrap());
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
         }
-        self.invalidate();
+        self.flush_post_script_updates();
     }
 
     pub(super) fn handle_right_mouse_up(&mut self, pos: Point) {
@@ -184,7 +184,7 @@ impl App {
 
                 let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
             }
-            self.invalidate();
+            self.flush_post_script_updates();
         }
         self.right_mouse_down_frame = None;
     }

@@ -402,6 +402,15 @@ impl App {
         config.save();
     }
 
+    /// Resolve layout and fire OnUpdate after script handlers so that handlers
+    /// registered during events (e.g. talent UI dirty-node processing) run in
+    /// the same frame as the triggering click, then invalidate the render.
+    pub(super) fn flush_post_script_updates(&mut self) {
+        self.env.borrow().state().borrow_mut().ensure_layout_rects();
+        self.fire_on_update();
+        self.invalidate();
+    }
+
     /// Drain console, clear frame cache, and mark all strata dirty.
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
