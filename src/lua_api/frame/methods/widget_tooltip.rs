@@ -298,6 +298,16 @@ fn add_tooltip_padding_override_methods(lua: &Lua, methods: &mlua::Table) -> Res
         Ok(mlua::MultiValue::from_iter(std::iter::once(padding)))
     })?)?;
 
+    methods.set("ClearPadding", lua.create_function(|lua, ud: LightUserData| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&id) {
+            td.padding = 0.0;
+        }
+        Ok(())
+    })?)?;
+
     Ok(())
 }
 

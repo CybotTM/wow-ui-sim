@@ -39,10 +39,12 @@ pub(super) fn add_show_hide_methods(lua: &Lua, methods: &mlua::Table) -> mlua::R
             let state = state_rc.borrow();
             state.widgets.get(id).map(|f| f.visible).unwrap_or(false)
         };
+        // Set invisible BEFORE firing OnHide to prevent re-entrant Hide()
+        // from recursing (e.g. HelpTip.OnHide → Release → Hide).
+        state_rc.borrow_mut().set_frame_visible(id, false);
         if was_visible {
             fire_on_hide_recursive(lua, id)?;
         }
-        state_rc.borrow_mut().set_frame_visible(id, false);
         Ok(())
     })?)?;
 
@@ -54,6 +56,8 @@ pub(super) fn add_show_hide_methods(lua: &Lua, methods: &mlua::Table) -> mlua::R
             state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
         };
         let was_visible = !was_hidden;
+        // Set visibility BEFORE firing handlers to prevent re-entrant
+        // Show/Hide from recursing.
         state_rc.borrow_mut().set_frame_visible(id, shown);
         if shown && was_hidden {
             fire_on_show_recursive(lua, id)?;
