@@ -1384,9 +1384,6 @@ fn register_global_stubs_10(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetFrameMetatable")?.is_nil() {
         g.set("GetFrameMetatable", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
-    if g.get::<Value>("GetFramesRegisteredForEvent")?.is_nil() {
-        g.set("GetFramesRegisteredForEvent", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
     if g.get::<Value>("GetGMStatus")?.is_nil() {
         g.set("GetGMStatus", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -3703,9 +3700,6 @@ fn register_global_stubs_29(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("SendSubscriptionInterstitialResponse")?.is_nil() {
         g.set("SendSubscriptionInterstitialResponse", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
-    if g.get::<Value>("SendSystemMessage")?.is_nil() {
-        g.set("SendSystemMessage", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("SetAchievementComparisonUnit")?.is_nil() {
         g.set("SetAchievementComparisonUnit", lua.create_function(|_, _: MultiValue| Ok(()))?)?;

@@ -407,6 +407,7 @@ fn register_create_frame(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> 
 /// Register all sub-module APIs (locale, addon, unit, timer, etc.).
 fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     // Stateless APIs
+    super::globals::event_query_api::register(lua)?;
     register_locale_api(lua)?;
     register_player_api(lua, state.clone())?;
     register_enum_api(lua)?;
