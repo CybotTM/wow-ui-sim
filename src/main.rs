@@ -97,6 +97,13 @@ enum Commands {
     /// Show unique Lua errors as JSON (suppresses other output)
     LuaErrors,
 
+    /// Run Wowless tests headlessly, report results to terminal
+    Test {
+        /// Maximum OnUpdate ticks before timeout
+        #[arg(long, default_value_t = 10000)]
+        max_ticks: u32,
+    },
+
     /// Dump textures used by frames to disk (for debugging atlas crops)
     DumpTexture {
         #[arg(short, long, default_value = "/tmp/claude/textures")]
@@ -196,6 +203,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Some(Commands::LuaErrors) => {
             wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
+        }
+        Some(Commands::Test { max_ticks }) => {
+            run_headless_startup(&env);
+            wow_ui_sim::test_runner::run_test(&env, max_ticks, exec_lua.as_deref());
         }
         Some(Commands::DumpTexture { output, filter, frame_filter }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);
@@ -508,59 +519,8 @@ fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     }
 }
 
-/// Debug: open game menu via micro button click for screenshot testing.
 fn debug_show_game_menu(env: &WowLuaEnv) {
-    if std::env::var("WOW_SIM_SHOW_GAME_MENU").is_err() {
-        return;
-    }
-    if let Err(e) = env.exec(r#"
-        local btn = MainMenuMicroButton
-        if btn then
-            local onclick = btn:GetScript("OnClick")
-            if onclick then onclick(btn, "LeftButton", false) end
-        end
-    "#) {
-        eprintln!("[debug_game_menu] click error: {e}");
-    }
-    // Check what SetText resolves to for a game menu button
-    if let Err(e) = env.exec(r#"if GameMenuFrame and GameMenuFrame.buttonPool then
-        for button in GameMenuFrame.buttonPool:EnumerateActive() do
-            local text, st = button:GetText() or "(nil)", button.SetText
-            io.stderr:write(("[lua_debug] text=%q type(SetText)=%s\n"):format(text, type(st)))
-            if type(st) == "function" then
-                local info = debug.getinfo(st, "S")
-                io.stderr:write(("[lua_debug] SetText source=%s\n"):format(info and info.source or "unknown"))
-            end
-            break
-        end end"#) { eprintln!("[debug_game_menu] lua debug error: {e}"); }
-    dump_game_menu_buttons(env);
-}
-
-fn dump_game_menu_buttons(env: &WowLuaEnv) {
-    use wow_ui_sim::widget::WidgetType;
-    let state = env.state().borrow();
-    let gmf_id = state.widgets.get_id_by_name("GameMenuFrame");
-    eprintln!("[debug] GameMenuFrame id={gmf_id:?}");
-    let Some(gmf_id) = gmf_id else { return };
-    let Some(gmf) = state.widgets.get(gmf_id) else { return };
-    eprintln!("  vis={} strata={:?} lvl={} {}x{} children={}",
-        gmf.visible, gmf.frame_strata, gmf.frame_level, gmf.width, gmf.height, gmf.children.len());
-    for (i, &cid) in gmf.children.iter().enumerate() {
-        let Some(c) = state.widgets.get(cid) else { continue };
-        let nm = c.name.as_deref().unwrap_or("(anon)");
-        eprintln!("  [{i}] {cid} {nm} [{:?}] {}x{} strata={:?} lvl={} vis={} text={:?}",
-            c.widget_type, c.width, c.height, c.frame_strata, c.frame_level, c.visible, c.text);
-        if c.widget_type == WidgetType::Button {
-            eprintln!("      font={:?} fsz={} color={:?}",
-                c.font, c.font_size, c.text_color);
-            if let Some(&tid) = c.children_keys.get("Text")
-                && let Some(tf) = state.widgets.get(tid) {
-                    eprintln!("      TextFS {tid}: text={:?} {}x{} vis={} strata={:?} lvl={} draw={:?} anch={}",
-                        tf.text, tf.width, tf.height, tf.visible, tf.frame_strata,
-                        tf.frame_level, tf.draw_layer, tf.anchors.len());
-                }
-        }
-    }
+    wow_ui_sim::debug_helpers::debug_show_game_menu(env);
 }
 
 /// Parse a crop string in WxH+X+Y format (e.g., "700x150+400+650").
