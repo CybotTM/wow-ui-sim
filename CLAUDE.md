@@ -202,6 +202,62 @@ wow-sim lua-errors 2>/dev/null                                # Full load with a
 
 Empty output (no JSON array) means zero errors. Non-empty output lists unique error messages with counts.
 
+### Self-Test (Wowless Suite)
+
+Run the Wowless test suite headlessly. Polls `WowlessTestsDone`/`WowlessTestFailures` globals via OnUpdate ticks. Outputs failures as JSON to stdout.
+
+```bash
+wow-sim --no-saved-vars self-test                    # Run Wowless tests (exit 0=pass, 1=fail, 2=timeout)
+wow-sim --no-saved-vars self-test --max-ticks 20000  # Increase timeout
+```
+
+### Run Tests (Addon Test Runner)
+
+Run Lua test files from `Interface/AddOns/<name>/tests/`. Loads the `TestFramework` addon automatically (even with `--no-addons`).
+
+```bash
+wow-sim --no-addons --no-saved-vars run-tests Wowless    # Run Wowless tests (fast, no third-party addons)
+wow-sim --no-saved-vars run-tests Wowless                # Run with all addons loaded
+```
+
+**Test file syntax** (`Interface/AddOns/<name>/tests/something.lua`):
+
+```lua
+test("frame name matches", function()
+    local f = CreateFrame("Frame", "MyFrame")
+    assertEquals("MyFrame", f:GetName())
+end)
+
+async_test("timer fires callback", function(done)
+    C_Timer.After(0, function()
+        done(function()
+            assertTrue(true)
+        end)
+    end)
+end)
+```
+
+**Available assertions** (provided by `Interface/AddOns/TestFramework/`):
+
+| Function | Description |
+|---|---|
+| `assertEquals(expected, actual)` | Strict equality (`~=`) |
+| `assertNotEquals(expected, actual)` | Not equal |
+| `assertTrue(value)` / `assertFalse(value)` | Truthy/falsy |
+| `assertNil(value)` / `assertNotNil(value)` | Nil checks |
+| `assertError(fn)` | Function throws an error |
+| `assertType(expected, value)` | `type(value) == expected` |
+| `assertAlmostEquals(expected, actual, tolerance?)` | Float comparison (default 0.001) |
+| `assertContains(haystack, needle)` | String substring or table value |
+| `assertStartsWith(str, prefix)` | String prefix |
+| `assertEndsWith(str, suffix)` | String suffix |
+| `assertMatches(str, pattern)` | Lua pattern match |
+| `assertCount(expected, table)` | Table element count |
+| `assertTableEquals(expected, actual)` | Deep table equality |
+| `assertTableContains(table, subset)` | Table contains subset (deep) |
+
+**Async tests**: Use `async_test("name", function(done) ... end)`. The runner ticks OnUpdate/timers until `done()` is called or 500 ticks timeout. Pass an optional assertion function to `done()` for final checks.
+
 ### Screenshot
 
 Render the UI to an image file without starting the GUI (headless GPU, same shader pipeline as the live renderer). Text is not rendered — this is for debugging frame layout and textures.
