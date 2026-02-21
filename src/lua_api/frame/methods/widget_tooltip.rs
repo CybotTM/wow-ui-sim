@@ -67,6 +67,8 @@ fn is_valid_anchor_type(s: &str) -> bool {
         s,
         "ANCHOR_LEFT"
             | "ANCHOR_RIGHT"
+            | "ANCHOR_TOP"
+            | "ANCHOR_BOTTOM"
             | "ANCHOR_TOPLEFT"
             | "ANCHOR_TOPRIGHT"
             | "ANCHOR_BOTTOMLEFT"
