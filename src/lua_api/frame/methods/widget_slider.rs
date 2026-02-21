@@ -133,13 +133,43 @@ fn add_slider_orientation_methods(lua: &Lua, methods: &mlua::Table) -> Result<()
 }
 
 fn add_slider_thumb_methods(lua: &Lua, methods: &mlua::Table) -> Result<()> {
-    methods.set("SetThumbTexture", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
-
-    methods.set("GetThumbTexture", lua.create_function(|lua, ud: LightUserData| {
+    // SetThumbTexture(texture_or_fileID) - set the thumb texture
+    // If arg is a texture (LightUserData), store it directly.
+    // If arg is a number/string, call SetTexture on the existing thumb.
+    methods.set("SetThumbTexture", lua.create_function(|lua, (ud, arg): (LightUserData, Value)| {
         let id = lud_to_id(ud);
-        get_or_create_child_texture(lua, id, "ThumbTexture")
+        let store: mlua::Table = lua
+            .load("_G.__slider_thumbs = _G.__slider_thumbs or {}; return _G.__slider_thumbs")
+            .eval()?;
+        match arg {
+            Value::LightUserData(_) => { store.set(id, arg)?; }
+            Value::Integer(_) | Value::Number(_) | Value::String(_) => {
+                let existing: Value = store.get(id)?;
+                if let Value::LightUserData(_) = existing {
+                    call_set_texture(lua, &existing, &arg)?;
+                }
+            }
+            _ => {}
+        }
+        Ok(())
     })?)?;
 
+    // GetThumbTexture() - return the stored thumb texture, or nil
+    methods.set("GetThumbTexture", lua.create_function(|lua, ud: LightUserData| {
+        let id = lud_to_id(ud);
+        let store: mlua::Table =
+            lua.load("return _G.__slider_thumbs or {}").eval()?;
+        let thumb: Value = store.get(id)?;
+        Ok(thumb)
+    })?)?;
+
+    Ok(())
+}
+
+/// Call SetTexture on a texture region via its Lua method table.
+fn call_set_texture(lua: &Lua, texture_ud: &Value, arg: &Value) -> Result<()> {
+    lua.load("local t, v = ...; t:SetTexture(v)")
+        .call::<()>((texture_ud.clone(), arg.clone()))?;
     Ok(())
 }
 
