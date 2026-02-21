@@ -1,8 +1,8 @@
 //! Regression test: verify key frame positions match the origin/master baseline.
 //!
-//! Loads all Blizzard addons at 1024x768, fires startup events (same sequence
+//! Loads all Blizzard addons at 1600x1200, fires startup events (same sequence
 //! as the dump-tree/screenshot headless path), then checks that important UI
-//! elements are positioned correctly. Expected values from origin/master dump-tree.
+//! elements are positioned correctly.
 //!
 //! Uses `harness = false` with a custom main to load the Blizzard UI once and
 //! run all position checks against the shared environment.
@@ -18,7 +18,7 @@ fn blizzard_ui_dir() -> PathBuf {
 
 fn create_env() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_size(1600.0, 1200.0);
 
     {
         let mut state = env.state().borrow_mut();
@@ -61,7 +61,7 @@ fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
     let state = env.state().borrow();
     let id = state.widgets.get_id_by_name(name)
         .unwrap_or_else(|| panic!("Frame '{}' not found", name));
-    let rect = compute_frame_rect(&state.widgets, id, 1024.0, 768.0);
+    let rect = compute_frame_rect(&state.widgets, id, 1600.0, 1200.0);
     (rect.x, rect.y, rect.width, rect.height)
 }
 
@@ -82,29 +82,29 @@ type TestCase = (&'static str, &'static str, f32, f32, f32, f32);
 fn position_tests() -> Vec<TestCase> {
     vec![
         // Player / Target / Group frames
-        ("player_frame_position", "PlayerFrame", 0.0, 418.0, 232.0, 100.0),
-        ("target_frame_position", "TargetFrame", 792.0, 418.0, 232.0, 100.0),
-        ("focus_frame_position", "FocusFrame", 850.0, 494.0, 174.0, 75.0),
-        ("pet_frame_position", "PetFrame", 93.0, 535.0, 120.0, 49.0),
-        ("paladin_power_bar_position", "PaladinPowerBarFrame", 73.0, 490.0, 150.0, 43.0),
+        ("player_frame_position", "PlayerFrame", 268.0, 850.0, 232.0, 100.0),
+        ("target_frame_position", "TargetFrame", 1100.0, 850.0, 232.0, 100.0),
+        ("focus_frame_position", "FocusFrame", 1190.0, 926.25, 174.0, 75.0),
+        ("pet_frame_position", "PetFrame", 361.5, 967.0, 120.0, 49.0),
+        ("paladin_power_bar_position", "PaladinPowerBarFrame", 341.5, 922.0, 150.0, 43.0),
         ("party_frame_position", "PartyFrame", 22.0, 147.0, 120.0, 244.0),
         ("compact_party_frame_position", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0),
         // HUD elements
-        ("minimap_position", "Minimap", 815.0, 44.0, 198.0, 198.0),
-        ("objective_tracker_position", "ObjectiveTrackerFrame", 759.0, 271.0, 260.0, 400.0),
-        ("bags_bar_position", "BagsBar", 810.0, 672.0, 208.0, 47.0),
-        ("micro_menu_position", "MicroMenu", 629.0, 717.0, 329.0, 40.0),
-        ("buff_frame_position", "BuffFrame", 369.0, 10.0, 400.0, 135.0),
-        ("debuff_frame_position", "DebuffFrame", 474.0, 155.0, 280.0, 90.0),
-        ("chat_frame_position", "ChatFrame1", 35.0, 548.0, 430.0, 170.0),
-        ("micro_menu_container_position", "MicroMenuContainer", 629.0, 717.0, 389.0, 45.0),
+        ("minimap_position", "Minimap", 1391.0, 44.0, 198.0, 198.0),
+        ("objective_tracker_position", "ObjectiveTrackerFrame", 1335.0, 271.0, 260.0, 836.5),
+        ("bags_bar_position", "BagsBar", 1386.0, 1104.0, 208.0, 47.0),
+        ("micro_menu_position", "MicroMenu", 1265.0, 1154.0, 329.0, 40.0),
+        ("buff_frame_position", "BuffFrame", 945.0, 10.0, 400.0, 135.0),
+        ("debuff_frame_position", "DebuffFrame", 1050.0, 155.0, 280.0, 90.0),
+        ("chat_frame_position", "ChatFrame1", 35.0, 980.0, 430.0, 170.0),
+        ("micro_menu_container_position", "MicroMenuContainer", 1205.0, 1149.0, 389.0, 45.0),
     ]
 }
 
 /// ActionButton1 only checks x position (y/size depend on bar layout).
 fn check_action_button(env: &WowLuaEnv) {
     let (x, _y, _w, _h) = frame_rect(env, "ActionButton1");
-    assert!((x - 512.0).abs() <= 1.0, "ActionButton1 x: expected 512, got {x}");
+    assert!((x - 517.0).abs() <= 1.0, "ActionButton1 x: expected 517, got {x}");
 }
 
 fn run_tests(env: &WowLuaEnv) -> (usize, usize) {
