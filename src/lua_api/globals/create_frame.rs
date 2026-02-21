@@ -138,11 +138,6 @@ fn parse_create_frame_args(
         _ => None,
     });
 
-    // Default to UIParent if no parent specified
-    if parent_id.is_none() {
-        parent_id = state.borrow().widgets.get_id_by_name("UIParent");
-    }
-
     // Handle $parent/$Parent name substitution
     let name = name_raw.map(|n| substitute_parent_name(n, parent_id, state));
 
