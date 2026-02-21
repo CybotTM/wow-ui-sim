@@ -15,8 +15,11 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Use CI cargo config
+        run: cp .cargo/config.ci.toml .cargo/config.toml
+
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo test
-        run: cargo test
+        run: cargo test --no-default-features
