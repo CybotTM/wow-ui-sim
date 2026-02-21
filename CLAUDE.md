@@ -19,7 +19,15 @@
 
 CI image for running `run-tests` in addon CI pipelines. Published to `ghcr.io/osso/wow-ui-sim`.
 
-### Usage
+### GitHub Action
+
+```yaml
+- uses: osso/wow-ui-sim@v1
+  with:
+    addon: MyAddon
+```
+
+### Docker
 
 ```bash
 # Run addon tests

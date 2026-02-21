@@ -1,0 +1,16 @@
+name: WoW UI Sim Tests
+description: Run WoW addon tests using the wow-ui-sim Docker image
+
+inputs:
+  addon:
+    description: Addon directory name
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        docker run --rm \
+          -v ${{ github.workspace }}:/app/Interface/AddOns/${{ inputs.addon }} \
+          ghcr.io/osso/wow-ui-sim run-tests ${{ inputs.addon }}
+      shell: bash
