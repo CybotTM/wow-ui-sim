@@ -15,6 +15,29 @@
 - `docs/glow-plan.md` - Glow/shine effect plan
 - `docs/anchor-resolution.md` - Anchor resolution walkthrough: data structures, core functions, single/multi-anchor, SetPoint API, coordinate inversion
 
+## Docker
+
+CI image for running `run-tests` in addon CI pipelines. Published to `ghcr.io/osso/wow-ui-sim`.
+
+### Usage
+
+```bash
+# Run addon tests
+docker run --rm -v ./MyAddon:/app/Interface/AddOns/MyAddon ghcr.io/osso/wow-ui-sim run-tests MyAddon
+
+# Run with all Blizzard addons loaded
+docker run --rm -v ./MyAddon:/app/Interface/AddOns/MyAddon ghcr.io/osso/wow-ui-sim --no-saved-vars run-tests MyAddon
+```
+
+### Building Locally
+
+```bash
+docker build -t wow-ui-sim .
+docker run --rm wow-ui-sim --no-addons --no-saved-vars run-tests Wowless
+```
+
+The image is optimized for headless test commands (`run-tests`, `self-test`, `lua-errors`). It excludes audio (built with `--no-default-features`), textures, and GPU drivers to keep the image small (~220MB). The `screenshot` command is not supported in the Docker image.
+
 ## Addon Directories
 
 - `./Interface/AddOns/` - Third-party addons bundled with the simulator (e.g., AccountPlayed). This is the simulator's own addon directory, NOT the WoW game extract.

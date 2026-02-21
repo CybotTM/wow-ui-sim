@@ -1,0 +1,22 @@
+# Rust build artifacts
+target/
+
+# Git history
+.git/
+
+# GitHub CI config
+.github/
+
+# Audio files (not needed, built with --no-default-features)
+sounds/
+
+# Documentation
+docs/
+
+# Dev tools
+tools/
+
+# Screenshot files in root
+*.webp
+*.png
+screenshot.*

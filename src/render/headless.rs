@@ -40,7 +40,8 @@ fn create_headless_device() -> (wgpu::Device, wgpu::Queue) {
             .request_adapter(&wgpu::RequestAdapterOptions {
                 power_preference: wgpu::PowerPreference::default(),
                 compatible_surface: None,
-                force_fallback_adapter: false,
+                force_fallback_adapter: std::env::var("WOW_SIM_SOFTWARE_RENDER")
+                    .is_ok_and(|v| v == "1" || v == "true"),
             })
             .await
             .expect("Failed to find GPU adapter");
