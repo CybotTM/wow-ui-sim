@@ -7,12 +7,19 @@
 use std::path::PathBuf;
 use crate::lua_api::WowLuaEnv;
 
-/// Lua bootstrap: injects `test()` global that collects into `__addon_tests`.
+/// Lua bootstrap: injects `test()` and `assertEquals()` globals.
 const TEST_BOOTSTRAP: &str = r#"
 __addon_tests = {}
 __addon_test_results = {}
 function test(name, fn)
     table.insert(__addon_tests, { name = name, fn = fn })
+end
+if not assertEquals then
+    function assertEquals(expected, actual)
+        if expected ~= actual then
+            error(string.format("expected %s, got %s", tostring(expected), tostring(actual)), 2)
+        end
+    end
 end
 "#;
 
