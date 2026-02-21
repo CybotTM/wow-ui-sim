@@ -101,13 +101,16 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
 
 /// SetParentKey, GetParentKey
 fn add_parent_key_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetParentKey", lua.create_function(|lua, (ud, key): (LightUserData, String)| {
+    methods.set("SetParentKey", lua.create_function(|lua, (ud, key, remove_old): (LightUserData, String, Option<bool>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let parent_id = state.widgets.get(id).and_then(|f| f.parent_id);
         if let Some(pid) = parent_id
             && let Some(parent) = state.widgets.get_mut_visual(pid) {
+                if remove_old.unwrap_or(false) {
+                    parent.children_keys.retain(|_, &mut cid| cid != id);
+                }
                 parent.children_keys.insert(key, id);
             }
         Ok(())
