@@ -330,28 +330,31 @@ fn add_get_point_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 }
 
 /// GetPoint(index) - return anchor details at the given 1-based index.
+///
+/// Anchors are returned sorted by canonical AnchorPoint order (TOPLEFT=0..BOTTOMRIGHT=8),
+/// not insertion order. relativeTo is nil when no explicit relative frame was set.
 fn add_get_point(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("GetPoint", lua.create_function(|lua, (ud, index): (LightUserData, Option<i32>)| {
         let id = lud_to_id(ud);
-        let idx = index.unwrap_or(1) - 1;
+        let idx = (index.unwrap_or(1) - 1) as usize;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id)
-            && let Some(anchor) = frame.anchors.get(idx as usize)
-        {
-            let rel_id = anchor.relative_to_id.or(frame.parent_id.map(|p| p as usize));
-            let relative_to: Value = if let Some(rid) = rel_id {
-                frame_lud(rid as u64)
-            } else {
-                Value::Nil
-            };
-            return Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string(anchor.point.as_str())?),
-                relative_to,
-                Value::String(lua.create_string(anchor.relative_point.as_str())?),
-                Value::Number(anchor.x_offset as f64),
-                Value::Number(anchor.y_offset as f64),
-            ]));
+        if let Some(frame) = state.widgets.get(id) {
+            let mut sorted: Vec<_> = frame.anchors.iter().collect();
+            sorted.sort_by_key(|a| a.point.sort_key());
+            if let Some(anchor) = sorted.get(idx) {
+                let relative_to = match anchor.relative_to_id {
+                    Some(rid) => frame_lud(rid as u64),
+                    None => Value::Nil,
+                };
+                return Ok(mlua::MultiValue::from_vec(vec![
+                    Value::String(lua.create_string(anchor.point.as_str())?),
+                    relative_to,
+                    Value::String(lua.create_string(anchor.relative_point.as_str())?),
+                    Value::Number(anchor.x_offset as f64),
+                    Value::Number(anchor.y_offset as f64),
+                ]));
+            }
         }
         Ok(mlua::MultiValue::new())
     })?)?;

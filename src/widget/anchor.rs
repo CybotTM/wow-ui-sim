@@ -32,6 +32,21 @@ impl AnchorPoint {
         }
     }
 
+    /// WoW canonical sort order for GetPoint indexing.
+    pub fn sort_key(&self) -> u8 {
+        match self {
+            Self::TopLeft => 0,
+            Self::Top => 1,
+            Self::TopRight => 2,
+            Self::Left => 3,
+            Self::Center => 4,
+            Self::Right => 5,
+            Self::BottomLeft => 6,
+            Self::Bottom => 7,
+            Self::BottomRight => 8,
+        }
+    }
+
     pub fn as_str(&self) -> &'static str {
         match self {
             Self::Center => "CENTER",
