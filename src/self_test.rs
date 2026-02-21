@@ -1,4 +1,4 @@
-//! `test` subcommand: run Wowless tests headlessly and report results to terminal.
+//! `self-test` subcommand: run Wowless tests headlessly and report results to terminal.
 
 use crate::lua_api::WowLuaEnv;
 use crate::startup::{fire_one_on_update_tick, process_pending_timers};

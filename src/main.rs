@@ -97,11 +97,17 @@ enum Commands {
     /// Show unique Lua errors as JSON (suppresses other output)
     LuaErrors,
 
-    /// Run Wowless tests headlessly, report results to terminal
-    Test {
+    /// Run simulator self-tests (Wowless test suite)
+    SelfTest {
         /// Maximum OnUpdate ticks before timeout
         #[arg(long, default_value_t = 10000)]
         max_ticks: u32,
+    },
+
+    /// Run test Lua files from Interface/AddOns/<name>/tests/
+    RunTests {
+        /// Addon name (e.g., "Wowless")
+        addon_name: String,
     },
 
     /// Dump textures used by frames to disk (for debugging atlas crops)
@@ -204,9 +210,13 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::LuaErrors) => {
             wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
         }
-        Some(Commands::Test { max_ticks }) => {
+        Some(Commands::SelfTest { max_ticks }) => {
             run_headless_startup(&env);
-            wow_ui_sim::test_runner::run_test(&env, max_ticks, exec_lua.as_deref());
+            wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref());
+        }
+        Some(Commands::RunTests { addon_name }) => {
+            run_headless_startup(&env);
+            wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
         }
         Some(Commands::DumpTexture { output, filter, frame_filter }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);
