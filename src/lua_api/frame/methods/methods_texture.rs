@@ -464,6 +464,7 @@ fn add_vertex_color_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
                 let mut state = state_rc.borrow_mut();
                 if let Some(frame) = state.widgets.get_mut_visual(id) {
                     frame.vertex_color = Some(new_color);
+                    frame.alpha = new_color.a;
                 }
             }
             Ok(())
@@ -662,7 +663,16 @@ fn add_rotation_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 
 /// SetGradient, SetDrawLayer, GetDrawLayer.
 fn add_draw_layer_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetGradient", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
+    methods.set("SetGradient", lua.create_function(|lua, (ud, _args): (LightUserData, mlua::MultiValue)| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.vertex_color = None;
+            frame.alpha = 1.0;
+        }
+        Ok(())
+    })?)?;
 
     methods.set("SetDrawLayer", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
         use crate::widget::DrawLayer;
