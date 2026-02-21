@@ -3,10 +3,11 @@ name: Test
 on:
   push:
     branches: [master]
+  pull_request:
   workflow_dispatch:
 
 jobs:
-  test:
+  cargo-test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -14,12 +15,8 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Build image
-        run: docker build -t ghcr.io/osso/wow-ui-sim .
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
 
-      - name: Run tests
-        run: |
-          docker run --rm \
-            -v ${{ github.workspace }}/Interface/AddOns/Wowless:/app/Interface/AddOns/Wowless \
-            -v ${{ github.workspace }}/Interface/AddOns/WowlessData:/app/Interface/AddOns/WowlessData \
-            ghcr.io/osso/wow-ui-sim --no-addons run-tests Wowless
+      - name: Run cargo test
+        run: cargo test
