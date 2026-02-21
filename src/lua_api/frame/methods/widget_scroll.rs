@@ -1,5 +1,6 @@
 //! ScrollFrame and ScrollBox widget methods.
 
+use super::methods_hierarchy::reparent_widget;
 use super::widget_tooltip::fire_tooltip_script;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, Value};
@@ -23,12 +24,19 @@ pub fn add_scrollbox_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<(
 fn add_scrollframe_child_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("SetScrollChild", lua.create_function(|lua, (ud, child): (LightUserData, Value)| {
         let id = lud_to_id(ud);
-        let child_id = extract_frame_id(&child);
+        let child_id = match extract_frame_id(&child) {
+            Some(cid) => cid,
+            None => return Err(mlua::Error::runtime("Usage: ScrollFrame:SetScrollChild(child)")),
+        };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.scroll_child_id = child_id;
+            frame.scroll_child_id = Some(child_id);
         }
+        // Reparent child to the scroll frame
+        reparent_widget(&mut state.widgets, child_id, Some(id));
+        state.visible_on_update_cache = None;
+        state.invalidate_layout(child_id);
         Ok(())
     })?)?;
 

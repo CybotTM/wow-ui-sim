@@ -43,7 +43,7 @@ fn add_parent_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 }
 
 /// Move a widget to a new parent, updating children lists and inheriting strata/level.
-fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: Option<u64>) {
+pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: Option<u64>) {
     // Remove from old parent's children list
     let old_parent_id = widgets.get(child_id).and_then(|f| f.parent_id);
     if let Some(old_pid) = old_parent_id
