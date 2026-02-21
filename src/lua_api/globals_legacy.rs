@@ -52,6 +52,7 @@ pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_print(lua, Rc::clone(&state))?;
     register_custom_ipairs(lua, Rc::clone(&state))?;
     register_custom_getmetatable(lua)?;
+    register_custom_setmetatable(lua)?;
     register_create_frame(lua, Rc::clone(&state))?;
     register_submodule_apis(lua, &state)?;
     register_ui_strings_and_fonts(lua)?;
@@ -210,6 +211,38 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
     let real_getmetatable: mlua::Function = globals.get("getmetatable")?;
     globals.set("__real_getmetatable", real_getmetatable)?;
     globals.set("getmetatable", custom_getmetatable)
+}
+
+/// Override `setmetatable` to support per-frame custom metatables on LightUserData.
+///
+/// WoW frames are tables with metatables, but our simulator uses LightUserData.
+/// This stores per-frame metatables in a registry table `__frame_custom_mt`
+/// so that `__newindex` can delegate to per-frame `__newindex` metamethods.
+fn register_custom_setmetatable(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+
+    // Create the per-frame custom metatable storage
+    let custom_mt_store = lua.create_table()?;
+    lua.set_named_registry_value("__frame_custom_mt", custom_mt_store)?;
+
+    let custom_setmetatable = lua.create_function(|lua, (value, mt): (Value, Value)| {
+        if let Value::LightUserData(lud) = &value {
+            let id = lud.0 as u64;
+            let store: mlua::Table = lua.named_registry_value("__frame_custom_mt")?;
+            match &mt {
+                Value::Table(_) => store.set(id, mt)?,
+                Value::Nil => store.set(id, Value::Nil)?,
+                _ => {}
+            }
+            return Ok(value);
+        }
+        let real_setmetatable: mlua::Function = lua.globals().get("__real_setmetatable")?;
+        real_setmetatable.call((value, mt))
+    })?;
+
+    let real_setmetatable: mlua::Function = globals.get("setmetatable")?;
+    globals.set("__real_setmetatable", real_setmetatable)?;
+    globals.set("setmetatable", custom_setmetatable)
 }
 
 /// Build a fake metatable for frame LightUserData with `__index` from the methods table.

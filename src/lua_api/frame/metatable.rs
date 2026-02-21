@@ -30,6 +30,13 @@ pub fn setup_frame_metatable(lua: &Lua) -> mlua::Result<()> {
     // Install as the shared metatable for ALL LightUserData values
     lua.set_type_metatable::<LightUserData>(Some(frame_mt));
 
+    // Helper function for triggering __newindex from Rust (used by SetParentKey).
+    // Doing `parent[key] = value` in Lua triggers the type metatable's __newindex.
+    let assign_fn = lua
+        .load("return function(parent, key, value) parent[key] = value end")
+        .eval::<mlua::Function>()?;
+    lua.set_named_registry_value("__frame_assign_fn", assign_fn)?;
+
     Ok(())
 }
 
@@ -74,9 +81,23 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
 }
 
 /// __newindex: children_keys sync + __frame_fields storage.
+///
+/// If the frame has a per-frame custom metatable with `__newindex` (set via
+/// `setmetatable(frame, mt)`), delegate to it instead of the default behavior.
 fn create_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (ud, key, value): (LightUserData, String, Value)| {
         let frame_id = lud_to_id(ud);
+
+        // Check for per-frame custom __newindex metamethod
+        if let Ok(store) = lua.named_registry_value::<mlua::Table>("__frame_custom_mt") {
+            if let Ok(mt) = store.get::<mlua::Table>(frame_id) {
+                if let Ok(newindex) = mt.get::<mlua::Function>("__newindex") {
+                    newindex.call::<()>((Value::LightUserData(ud), key, value))?;
+                    return Ok(());
+                }
+            }
+        }
+
         let state_rc = get_sim_state(lua);
 
         // Sync children_keys with frame assignments

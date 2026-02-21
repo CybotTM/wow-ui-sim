@@ -104,15 +104,31 @@ fn add_parent_key_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
     methods.set("SetParentKey", lua.create_function(|lua, (ud, key, remove_old): (LightUserData, String, Option<bool>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        let parent_id = state.widgets.get(id).and_then(|f| f.parent_id);
-        if let Some(pid) = parent_id
-            && let Some(parent) = state.widgets.get_mut_visual(pid) {
-                if remove_old.unwrap_or(false) {
-                    parent.children_keys.retain(|_, &mut cid| cid != id);
-                }
-                parent.children_keys.insert(key, id);
+
+        let parent_id = state_rc.borrow().widgets.get(id).and_then(|f| f.parent_id);
+        let Some(pid) = parent_id else { return Ok(()) };
+
+        // Remove old keys pointing to this child before inserting the new one
+        if remove_old.unwrap_or(false) {
+            let old_keys: Vec<String> = {
+                let state = state_rc.borrow();
+                state.widgets.get(pid)
+                    .map(|p| p.children_keys.iter()
+                        .filter(|&(_, &cid)| cid == id)
+                        .map(|(k, _)| k.clone())
+                        .collect())
+                    .unwrap_or_default()
+            };
+            let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
+            let parent_lud = frame_lud(pid);
+            for old_key in old_keys {
+                assign_fn.call::<()>((parent_lud.clone(), old_key, Value::Nil))?;
             }
+        }
+
+        // Assign parent[key] = child via Lua to trigger __newindex metamethods
+        let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
+        assign_fn.call::<()>((frame_lud(pid), key, frame_lud(id)))?;
         Ok(())
     })?)?;
 
