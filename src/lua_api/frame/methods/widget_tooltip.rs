@@ -61,13 +61,35 @@ fn add_tooltip_owner_methods(lua: &Lua, methods: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+/// Known anchor type strings for SetOwner.
+fn is_valid_anchor_type(s: &str) -> bool {
+    matches!(
+        s,
+        "ANCHOR_LEFT"
+            | "ANCHOR_RIGHT"
+            | "ANCHOR_TOPLEFT"
+            | "ANCHOR_TOPRIGHT"
+            | "ANCHOR_BOTTOMLEFT"
+            | "ANCHOR_BOTTOMRIGHT"
+            | "ANCHOR_CURSOR"
+            | "ANCHOR_PRESERVE"
+            | "ANCHOR_NONE"
+    )
+}
+
 /// Implementation of SetOwner after mixin override check.
 fn set_owner_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> Result<()> {
     let mut args_iter = args.into_iter();
-    let owner_val = args_iter.next().unwrap_or(Value::Nil);
+    let owner_val = match args_iter.next() {
+        Some(v) if extract_frame_id(&v).is_some() => v,
+        _ => return Err(mlua::Error::runtime("Usage: GameTooltip:SetOwner(owner[, anchor])")),
+    };
     let anchor: String = match args_iter.next() {
-        Some(Value::String(s)) => s.to_string_lossy().to_string(),
-        _ => "ANCHOR_NONE".to_string(),
+        Some(Value::String(s)) => {
+            let s = s.to_string_lossy().to_string();
+            if is_valid_anchor_type(&s) { s } else { "ANCHOR_LEFT".to_string() }
+        }
+        _ => "ANCHOR_LEFT".to_string(),
     };
 
     let owner_id = extract_frame_id(&owner_val);
