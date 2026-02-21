@@ -133,6 +133,8 @@ pub struct Frame {
     pub anchors: Vec<Anchor>,
     /// Whether the frame is visible.
     pub visible: bool,
+    /// Whether the frame collapses layout when hidden.
+    pub collapses_layout: bool,
     /// Events this frame is registered to receive.
     pub registered_events: HashSet<String>,
     /// Frame level (draw order within strata).
@@ -419,6 +421,7 @@ macro_rules! frame_defaults {
             height: 0.0,
             anchors: Vec::new(),
             visible: true,
+            collapses_layout: false,
             registered_events: HashSet::new(),
             frame_level: 0,
             has_fixed_frame_level: false,

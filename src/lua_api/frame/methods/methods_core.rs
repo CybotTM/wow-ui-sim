@@ -303,6 +303,53 @@ fn add_visibility_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
         Ok(visible)
     })?)?;
 
+    add_collapse_layout_methods(lua, methods)?;
+    Ok(())
+}
+
+/// SetCollapsesLayout, CollapsesLayout, IsCollapsed.
+fn add_collapse_layout_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    methods.set("SetCollapsesLayout", lua.create_function(|lua, (ud, val): (LightUserData, bool)| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.collapses_layout = val;
+        }
+        Ok(())
+    })?)?;
+
+    methods.set("CollapsesLayout", lua.create_function(|lua, ud: LightUserData| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state.widgets.get(id).map(|f| f.collapses_layout).unwrap_or(false))
+    })?)?;
+
+    methods.set("IsCollapsed", lua.create_function(|lua, ud: LightUserData| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let frame = match state.widgets.get(id) {
+            Some(f) => f,
+            None => return Ok(false),
+        };
+        if !frame.collapses_layout {
+            return Ok(false);
+        }
+        // Walk ancestor chain to check visibility
+        let mut visible = frame.visible;
+        let mut cur_parent = frame.parent_id;
+        while visible {
+            match cur_parent.and_then(|pid| state.widgets.get(pid)) {
+                Some(p) if p.visible => cur_parent = p.parent_id,
+                Some(_) => { visible = false; }
+                None => break,
+            }
+        }
+        Ok(!visible)
+    })?)?;
+
     Ok(())
 }
 
