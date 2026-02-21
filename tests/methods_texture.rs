@@ -141,9 +141,9 @@ fn test_set_color_texture() {
     )
     .unwrap();
 
-    // SetColorTexture should clear the file texture
-    let is_nil: bool = env.eval("return CTTex:GetTexture() == nil").unwrap();
-    assert!(is_nil, "SetColorTexture should clear file texture");
+    // SetColorTexture makes GetTexture return fileID 136235 (solid white marker)
+    let file_id: String = env.eval("return CTTex:GetTexture()").unwrap();
+    assert_eq!(file_id, "136235");
 
     // Verify via Rust state that color_texture is set
     let state = env.state().borrow();

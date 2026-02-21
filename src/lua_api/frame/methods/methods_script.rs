@@ -1,9 +1,7 @@
 //! Script handler methods: SetScript, GetScript, HookScript, HasScript, etc.
 
 use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
-use crate::lua_api::script_helpers::{
-    get_or_create_hooks_table, get_scripts_table, remove_script, set_script,
-};
+use crate::lua_api::script_helpers::{get_scripts_table, remove_script, set_script};
 use mlua::{LightUserData, Lua, Value};
 
 /// Add script handler methods to the shared methods table.
@@ -86,21 +84,33 @@ fn add_get_script_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 fn add_hook_and_wrap_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("HookScript", lua.create_function(|lua, (ud, handler, func): (LightUserData, String, Value)| {
         let id = lud_to_id(ud);
-        if let Value::Function(f) = func {
-            let hooks_table = get_or_create_hooks_table(lua);
+        if let Value::Function(hook_fn) = func {
+            let old = crate::lua_api::script_helpers::get_script(lua, id, &handler);
+            let combined = match old {
+                Some(old_fn) => {
+                    lua.load(r#"
+                        local old, hook = ...
+                        return function(...)
+                            old(...)
+                            hook(...)
+                        end
+                    "#).call::<mlua::Function>((old_fn, hook_fn))?
+                }
+                None => hook_fn,
+            };
+            set_script(lua, id, &handler, combined);
 
-            let frame_key = format!("{}_{}", id, handler);
-            let hooks_array: mlua::Table = hooks_table
-                .get::<mlua::Table>(frame_key.as_str())
-                .unwrap_or_else(|_| {
-                    let t = lua.create_table().unwrap();
-                    hooks_table.set(frame_key.as_str(), t.clone()).unwrap();
-                    t
-                });
-            let len = hooks_array.len().unwrap_or(0);
-            hooks_array.set(len + 1, f)?;
+            if let Some(h) = crate::event::ScriptHandler::from_str(&handler) {
+                let state_rc = get_sim_state(lua);
+                let mut state = state_rc.borrow_mut();
+                state.scripts.set(id, h, 1);
+                if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
+                    state.on_update_frames.insert(id);
+                    state.visible_on_update_cache = None;
+                }
+            }
         }
-        Ok(())
+        Ok(Value::Boolean(true))
     })?)?;
 
     // WrapScript - stub for secure script wrapping
