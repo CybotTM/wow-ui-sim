@@ -1,0 +1,25 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Build image
+        run: docker build -t ghcr.io/osso/wow-ui-sim .
+
+      - name: Run tests
+        run: |
+          docker run --rm \
+            -v ${{ github.workspace }}/Interface/AddOns/Wowless:/app/Interface/AddOns/Wowless \
+            -v ${{ github.workspace }}/Interface/AddOns/WowlessData:/app/Interface/AddOns/WowlessData \
+            ghcr.io/osso/wow-ui-sim --no-addons run-tests Wowless
