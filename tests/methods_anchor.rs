@@ -191,13 +191,49 @@ fn test_get_point_by_name_not_found() {
 // ============================================================================
 
 #[test]
-fn test_set_point_self_reference_no_crash() {
+fn test_set_point_self_reference_raises_error() {
     let env = env();
-    // SetPoint to self should not cause infinite recursion
-    env.exec(r#"
+    let failed: bool = env.eval(r#"
         local f = CreateFrame("Frame", "AnchorSelf", UIParent)
-        f:SetPoint("CENTER", f, "CENTER", 0, 0)
+        local ok = pcall(f.SetPoint, f, "CENTER", f, "CENTER", 0, 0)
+        return not ok
     "#).unwrap();
+    assert!(failed, "SetPoint to self should raise a Lua error");
+}
+
+// ============================================================================
+// SetAllPoints implicit parent — GetPoint returns parent as relativeTo
+// ============================================================================
+
+#[test]
+fn test_set_all_points_implicit_parent_returns_parent() {
+    let env = env();
+    let (pt1_rel_is_parent, pt2_rel_is_parent): (bool, bool) = env.eval(r#"
+        local parent = CreateFrame("Frame", "SAPParent")
+        local f = CreateFrame("Frame", "SAPChild", SAPParent)
+        f:SetAllPoints()
+        local p1, r1 = f:GetPoint(1)
+        local p2, r2 = f:GetPoint(2)
+        return r1 == SAPParent, r2 == SAPParent
+    "#).unwrap();
+    assert!(pt1_rel_is_parent, "GetPoint(1) relativeTo should be parent after SetAllPoints()");
+    assert!(pt2_rel_is_parent, "GetPoint(2) relativeTo should be parent after SetAllPoints()");
+}
+
+#[test]
+fn test_set_all_points_explicit_nil_returns_nil() {
+    let env = env();
+    let (r1_nil, r2_nil): (bool, bool) = env.eval(r#"
+        local parent = CreateFrame("Frame", "SAPNilParent")
+        local f = CreateFrame("Frame", "SAPNilChild", SAPNilParent)
+        f:SetParent(SAPNilParent)
+        f:SetAllPoints(nil)
+        local _, r1 = f:GetPoint(1)
+        local _, r2 = f:GetPoint(2)
+        return r1 == nil, r2 == nil
+    "#).unwrap();
+    assert!(r1_nil, "GetPoint(1) relativeTo should be nil after SetAllPoints(nil)");
+    assert!(r2_nil, "GetPoint(2) relativeTo should be nil after SetAllPoints(nil)");
 }
 
 // ============================================================================
@@ -212,4 +248,43 @@ fn test_get_num_points_default_zero() {
         return f:GetNumPoints()
     "#).unwrap();
     assert_eq!(num, 0);
+}
+
+// ============================================================================
+// Cycle detection — SetPoint/SetAllPoints should raise Lua errors
+// ============================================================================
+
+#[test]
+fn test_set_point_self_cycle_raises_error() {
+    let env = env();
+    let failed: bool = env.eval(r#"
+        local f = CreateFrame("Frame")
+        local ok, msg = pcall(f.SetPoint, f, "CENTER", f)
+        return not ok
+    "#).unwrap();
+    assert!(failed, "SetPoint to self should raise a Lua error");
+}
+
+#[test]
+fn test_set_point_indirect_cycle_raises_error() {
+    let env = env();
+    let failed: bool = env.eval(r#"
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame")
+        g:SetPoint("CENTER", f)
+        local ok, msg = pcall(f.SetPoint, f, "CENTER", g)
+        return not ok
+    "#).unwrap();
+    assert!(failed, "SetPoint creating indirect cycle should raise a Lua error");
+}
+
+#[test]
+fn test_set_all_points_self_cycle_raises_error() {
+    let env = env();
+    let failed: bool = env.eval(r#"
+        local f = CreateFrame("Frame")
+        local ok, msg = pcall(f.SetAllPoints, f, f)
+        return not ok
+    "#).unwrap();
+    assert!(failed, "SetAllPoints to self should raise a Lua error");
 }

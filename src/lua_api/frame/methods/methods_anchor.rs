@@ -136,7 +136,8 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
                 .map_err(|msg| lua_error(lua, msg))?;
 
         let state_rc = get_sim_state(lua);
-        if !should_update_point(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
+        check_anchor_cycle(&state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
+        if is_duplicate_anchor(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
             return Ok(());
         }
 
@@ -146,8 +147,29 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
-/// Check if the point needs updating (cycle check + duplicate check).
-fn should_update_point(
+/// Raise a Lua error if anchoring `id` to `relative_to` would create a cycle.
+fn check_anchor_cycle(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    relative_to: Option<usize>,
+    action: &str,
+) -> mlua::Result<()> {
+    let Some(rel_id) = relative_to else { return Ok(()) };
+    if !state.widgets.would_create_anchor_cycle(id, rel_id as u64) {
+        return Ok(());
+    }
+    let reason = if rel_id as u64 == id {
+        "[Cannot anchor to itself]"
+    } else {
+        "[Cannot anchor to a region dependent on it]"
+    };
+    Err(mlua::Error::RuntimeError(format!(
+        "Action[SetPoint] failed because{reason}: attempted from: {action}."
+    )))
+}
+
+/// Check if the anchor already matches (skip redundant updates).
+fn is_duplicate_anchor(
     state: &crate::lua_api::SimState,
     id: u64,
     relative_to: Option<usize>,
@@ -156,14 +178,6 @@ fn should_update_point(
     x_ofs: f32,
     y_ofs: f32,
 ) -> bool {
-    // Check for anchor cycles before setting point
-    if let Some(rel_id) = relative_to
-        && state.widgets.would_create_anchor_cycle(id, rel_id as u64)
-    {
-        return false;
-    }
-
-    // Skip if the anchor already matches
     if let Some(frame) = state.widgets.get(id)
         && let Some(existing) = frame.anchors.iter().find(|a| a.point == point)
         && existing.relative_to_id == relative_to
@@ -171,10 +185,9 @@ fn should_update_point(
         && existing.x_offset == x_ofs
         && existing.y_offset == y_ofs
     {
-        return false;
+        return true;
     }
-
-    true
+    false
 }
 
 /// Apply the SetPoint mutation to the widget state.
@@ -276,16 +289,27 @@ fn add_clear_and_adjust_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Resul
 
 /// SetAllPoints(relativeTo) - sets TOPLEFT and BOTTOMRIGHT to fill a relative frame.
 fn add_set_all_points_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetAllPoints", lua.create_function(|lua, (ud, arg): (LightUserData, Option<Value>)| {
+    methods.set("SetAllPoints", lua.create_function(|lua, (ud, arg): (LightUserData, mlua::MultiValue)| {
         let id = lud_to_id(ud);
-        let (should_set, relative_to_id) = match &arg {
-            Some(Value::Boolean(false)) => (false, None),
-            Some(Value::LightUserData(lud)) => (true, Some(lud_to_id(*lud) as usize)),
-            _ => (true, None),
+        let first = arg.get(0).cloned().unwrap_or(Value::Nil);
+        let has_arg = !arg.is_empty();
+
+        let (should_set, relative_to_id) = match &first {
+            Value::Boolean(false) => (false, None),
+            Value::LightUserData(lud) => (true, Some(lud_to_id(*lud) as usize)),
+            _ if has_arg => (true, None), // explicit nil → screen
+            _ => {
+                // No argument → implicit parent
+                let state_rc = get_sim_state(lua);
+                let state = state_rc.borrow();
+                let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
+                (true, parent_id)
+            }
         };
 
         if should_set {
             let state_rc = get_sim_state(lua);
+            check_anchor_cycle(&state_rc.borrow(), id, relative_to_id, "Frame:SetAllPoints")?;
             apply_set_all_points(&state_rc, id, relative_to_id);
         }
         Ok(())
@@ -300,12 +324,6 @@ fn apply_set_all_points(
     relative_to_id: Option<usize>,
 ) {
     let mut state = state_rc.borrow_mut();
-
-    if let Some(rel_id) = relative_to_id
-        && state.widgets.would_create_anchor_cycle(id, rel_id as u64)
-    {
-        return;
-    }
 
     // Update reverse index: remove old, add new
     state.widgets.remove_all_anchor_dependents_for(id);
