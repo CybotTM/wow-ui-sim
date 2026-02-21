@@ -44,12 +44,19 @@ fn add_parent_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 
 /// Move a widget to a new parent, updating children lists and inheriting strata/level.
 pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: Option<u64>) {
-    // Remove from old parent's children list
     let old_parent_id = widgets.get(child_id).and_then(|f| f.parent_id);
-    if let Some(old_pid) = old_parent_id
-        && let Some(old_parent) = widgets.get_mut_visual(old_pid) {
-            old_parent.children.retain(|&id| id != child_id);
-        }
+
+    // If already parented to the same frame, nothing to do for the children list.
+    // Still re-inherit strata/level/alpha/scale below.
+    let same_parent = old_parent_id.is_some() && old_parent_id == new_parent_id;
+
+    // Remove from old parent's children list (skip if same parent to preserve order)
+    if !same_parent {
+        if let Some(old_pid) = old_parent_id
+            && let Some(old_parent) = widgets.get_mut_visual(old_pid) {
+                old_parent.children.retain(|&id| id != child_id);
+            }
+    }
 
     // Get parent's strata, level, effective_alpha, effective_scale for inheritance
     let parent_props = new_parent_id.and_then(|pid| {
@@ -82,12 +89,14 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
     widgets.propagate_effective_alpha(child_id, parent_eff_alpha);
     widgets.propagate_effective_scale(child_id, parent_eff_scale);
 
-    // Add to new parent's children list
-    if let Some(new_pid) = new_parent_id
-        && let Some(new_parent) = widgets.get_mut_visual(new_pid)
-            && !new_parent.children.contains(&child_id) {
-                new_parent.children.push(child_id);
-            }
+    // Add to new parent's children list (skip if same parent — already there)
+    if !same_parent {
+        if let Some(new_pid) = new_parent_id
+            && let Some(new_parent) = widgets.get_mut_visual(new_pid)
+                && !new_parent.children.contains(&child_id) {
+                    new_parent.children.push(child_id);
+                }
+    }
 }
 
 /// SetParentKey, GetParentKey
