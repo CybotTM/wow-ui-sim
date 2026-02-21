@@ -233,8 +233,50 @@ impl AnimHandle {
             Ok(())
         });
 
-        methods.add_method("SetOrigin", |_, _this, _args: MultiValue| {
-            Ok(()) // Store only, no visual effect
+        methods.add_method("SetOrigin", |_, this, args: MultiValue| {
+            let mut iter = args.into_iter();
+            let point = match iter.next() {
+                Some(Value::String(s)) => s.to_string_lossy().to_string(),
+                _ => "CENTER".to_string(),
+            };
+            let offset_x = match iter.next() {
+                Some(Value::Number(n)) => n,
+                Some(Value::Integer(n)) => n as f64,
+                _ => 0.0,
+            };
+            let offset_y = match iter.next() {
+                Some(Value::Number(n)) => n,
+                Some(Value::Integer(n)) => n as f64,
+                _ => 0.0,
+            };
+            let mut state = this.state.borrow_mut();
+            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.origin_point = point;
+                anim.origin_offset_x = offset_x;
+                anim.origin_offset_y = offset_y;
+            }
+            Ok(())
+        });
+
+        methods.add_method("GetOrigin", |lua, this, _: ()| {
+            let state = this.state.borrow();
+            if let Some(group) = state.animation_groups.get(&this.group_id)
+                && let Some(anim) = group.animations.get(this.anim_index)
+            {
+                Ok(MultiValue::from_vec(vec![
+                    Value::String(lua.create_string(&anim.origin_point)?),
+                    Value::Number(anim.origin_offset_x),
+                    Value::Number(anim.origin_offset_y),
+                ]))
+            } else {
+                Ok(MultiValue::from_vec(vec![
+                    Value::String(lua.create_string("CENTER")?),
+                    Value::Number(0.0),
+                    Value::Number(0.0),
+                ]))
+            }
         });
     }
 

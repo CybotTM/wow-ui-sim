@@ -154,6 +154,9 @@ pub struct AnimState {
     pub to_scale_y: f64,
     // Rotation
     pub degrees: f64,
+    pub origin_point: String,
+    pub origin_offset_x: f64,
+    pub origin_offset_y: f64,
     // FlipBook
     pub flip_book_rows: u32,
     pub flip_book_columns: u32,
@@ -186,6 +189,9 @@ impl AnimState {
             to_scale_x: 1.0,
             to_scale_y: 1.0,
             degrees: 0.0,
+            origin_point: "CENTER".to_string(),
+            origin_offset_x: 0.0,
+            origin_offset_y: 0.0,
             flip_book_rows: 1,
             flip_book_columns: 1,
             flip_book_frames: 1,
