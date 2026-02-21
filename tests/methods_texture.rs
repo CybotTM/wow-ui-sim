@@ -141,9 +141,9 @@ fn test_set_color_texture() {
     )
     .unwrap();
 
-    // SetColorTexture makes GetTexture return fileID 136235 (solid white marker)
+    // SetColorTexture makes GetTexture return "FileData ID 0" (real WoW behavior)
     let file_id: String = env.eval("return CTTex:GetTexture()").unwrap();
-    assert_eq!(file_id, "136235");
+    assert_eq!(file_id, "FileData ID 0");
 
     // Verify via Rust state that color_texture is set
     let state = env.state().borrow();

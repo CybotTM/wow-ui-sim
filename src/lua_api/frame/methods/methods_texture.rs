@@ -64,8 +64,8 @@ fn add_texture_path_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.color_texture =
                 Some(crate::widget::Color::new(r, g, b, a.unwrap_or(1.0)));
-            // WoW returns fileID 136235 (solid white 1x1) from GetTexture after SetColorTexture
-            frame.texture = Some("136235".to_string());
+            // Real WoW returns "FileData ID 0" from GetTexture after SetColorTexture
+            frame.texture = Some("FileData ID 0".to_string());
         }
         Ok(())
     })?)?;
