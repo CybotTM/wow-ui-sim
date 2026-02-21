@@ -494,6 +494,8 @@ impl AnimHandle {
 
 impl UserData for AnimHandle {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("GetObjectType", |_, _, ()| Ok("Animation"));
+
         Self::add_duration_methods(methods);
         Self::add_delay_and_order_methods(methods);
         Self::add_property_methods(methods);
