@@ -676,13 +676,11 @@ fn add_draw_layer_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
                 if let Some(frame) = state.widgets.get_mut_visual(id) {
                     frame.draw_layer = layer;
                     // Second arg is sublevel (default 0, range -8..7)
-                    if let Some(sub_val) = args_vec.get(1) {
-                        frame.draw_sub_layer = match sub_val {
-                            Value::Integer(n) => *n as i32,
-                            Value::Number(n) => *n as i32,
-                            _ => 0,
-                        };
-                    }
+                    frame.draw_sub_layer = match args_vec.get(1) {
+                        Some(Value::Integer(n)) => *n as i32,
+                        Some(Value::Number(n)) => *n as i32,
+                        _ => 0,
+                    };
                 }
             }
         }
