@@ -253,8 +253,8 @@ pub fn generate_set_point_code(
 ) -> String {
     let mut code = String::new();
     for anchor in &anchors.anchors {
-        let point = &anchor.point;
-        let relative_point = anchor.relative_point.as_deref().unwrap_or(point.as_str());
+        let point = anchor.point.as_deref().unwrap_or("TOPLEFT");
+        let relative_point = anchor.relative_point.as_deref().unwrap_or(point);
         let (x, y) = resolve_anchor_offset(anchor);
         let rel = resolve_anchor_relative(anchor, parent_expr, parent_name, default_relative);
         // relativeKey chains can reference frames that don't exist yet at load

@@ -93,6 +93,9 @@ pub enum XmlElement {
     // Text content (from malformed XML or comments)
     #[serde(rename = "$text")]
     Text(String),
+    // Unknown elements (intrinsic types, custom elements)
+    #[serde(other)]
+    Unknown,
 }
 
 /// Frame definition in XML.
@@ -550,7 +553,7 @@ pub struct AnchorsXml {
 #[derive(Debug, Deserialize, Clone)]
 pub struct AnchorXml {
     #[serde(rename = "@point")]
-    pub point: String,
+    pub point: Option<String>,
     #[serde(rename = "@relativeTo")]
     pub relative_to: Option<String>,
     /// Relative key like "$parent.ScrollBox" or "$parent.Performance"

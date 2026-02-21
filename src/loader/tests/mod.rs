@@ -702,3 +702,4 @@ fn test_xml_hit_rect_insets() {
 }
 
 mod global_frame_access;
+mod inline_script;

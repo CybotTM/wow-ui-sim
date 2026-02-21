@@ -12,39 +12,43 @@ pub fn parse_xml(xml: &str) -> Result<UiXml, quick_xml::DeError> {
 /// Applies fixups for known Blizzard XML quirks before parsing.
 pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
     let contents = std::fs::read_to_string(path)?;
-    let fixed = strip_duplicate_size_elements(&contents);
+    let fixed = strip_duplicate_self_closing(&contents, "Size");
+    let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
     let fixed = strip_duplicate_script_handlers(&fixed);
     Ok(parse_xml(&fixed)?)
 }
 
-/// Remove duplicate `<Size .../>` elements within the same parent element.
+/// Remove duplicate self-closing `<Tag .../>` elements within the same parent.
 ///
-/// Blizzard's XML occasionally has two `<Size>` elements in a single
-/// FontString/Texture (e.g. GuildRewards.xml). quick-xml's serde can't
-/// handle non-contiguous duplicate elements. We keep only the last
-/// occurrence (matching WoW's behavior where the last Size wins).
-fn strip_duplicate_size_elements(xml: &str) -> String {
+/// Blizzard's XML occasionally has duplicate elements in a single parent
+/// (e.g. two `<Size>` in GuildRewards.xml, two `<TexCoords>` in Wowless
+/// test.xml). quick-xml's serde can't handle duplicate fields. We keep only
+/// the last occurrence (matching WoW's behavior where the last one wins).
+fn strip_duplicate_self_closing(xml: &str, tag: &str) -> String {
     use std::collections::HashMap;
 
+    let prefix = format!("<{tag} ");
     let lines: Vec<&str> = xml.lines().collect();
     let mut result: Vec<Option<usize>> = Vec::with_capacity(lines.len());
 
-    // Track Size element line indices per indentation depth.
-    // When we see a second Size at the same depth, remove the first.
-    let mut size_at_depth: HashMap<usize, usize> = HashMap::new();
+    // Track element line indices per indentation depth.
+    // When we see a second one at the same depth, remove the first.
+    let mut seen_at_depth: HashMap<usize, usize> = HashMap::new();
 
     for (i, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
         let depth = line.len() - line.trim_start().len();
 
-        // Closing tags end a child scope - clear Sizes tracked inside it
+        // Closing tags end a child scope - clear tracked elements inside it
         if trimmed.starts_with("</") {
-            size_at_depth.retain(|&d, _| d <= depth);
+            seen_at_depth.retain(|&d, _| d <= depth);
         }
 
-        if trimmed.starts_with("<Size ") && trimmed.ends_with("/>") {
-            if let Some(prev_idx) = size_at_depth.insert(depth, i) {
-                // Mark previous Size line for removal
+        // Strip trailing XML comments for matching (e.g. `<TexCoords .../> <!-- comment -->`)
+        let effective = trimmed.find("<!--").map_or(trimmed, |pos| trimmed[..pos].trim());
+        if effective.starts_with(&prefix) && effective.ends_with("/>") {
+            if let Some(prev_idx) = seen_at_depth.insert(depth, i) {
+                // Mark previous line for removal
                 result[prev_idx] = None;
             }
             result.push(Some(i));
@@ -186,7 +190,7 @@ mod tests {
     <Size x="0" y="0"/>
     <Color r="0" g="1" b="0"/>
 </FontString>"#;
-        let result = strip_duplicate_size_elements(xml);
+        let result = strip_duplicate_self_closing(xml, "Size");
         assert!(!result.contains(r#"<Size x="0" y="28"/>"#));
         assert!(result.contains(r#"<Size x="0" y="0"/>"#));
     }
@@ -197,7 +201,7 @@ mod tests {
     <Size x="10" y="20"/>
     <Color r="1" g="0" b="0"/>
 </FontString>"#;
-        let result = strip_duplicate_size_elements(xml);
+        let result = strip_duplicate_self_closing(xml, "Size");
         assert!(result.contains(r#"<Size x="10" y="20"/>"#));
     }
 
@@ -267,7 +271,7 @@ mod tests {
         </Layer>
     </Layers>
 </Frame>"#;
-        let result = strip_duplicate_size_elements(xml);
+        let result = strip_duplicate_self_closing(xml, "Size");
         assert!(result.contains(r#"<Size x="100" y="50"/>"#));
         assert!(result.contains(r#"<Size x="10" y="10"/>"#));
     }

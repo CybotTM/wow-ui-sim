@@ -110,8 +110,11 @@ fn process_script(
             crate::lua_api::secure_env::apply_secure_env(lua, &func)
                 .map_err(|e| LoadError::Lua(e.to_string()))?;
         }
-        func.call::<()>((ctx.name.to_string(), table_clone))
-            .map_err(|e| LoadError::Lua(e.to_string()))?;
+        // In WoW, runtime errors in inline <Script> elements are caught by the
+        // error handler and don't abort XML file processing.
+        if let Err(e) = func.call::<()>((ctx.name.to_string(), table_clone)) {
+            tracing::warn!("Inline script error: {}", e);
+        }
         timing.lua_exec_time += lua_start.elapsed();
         Ok(1)
     } else {
