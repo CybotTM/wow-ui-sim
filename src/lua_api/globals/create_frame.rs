@@ -124,7 +124,9 @@ fn parse_create_frame_args(
         .map(|s| s.to_string_lossy().to_string());
 
     let parent_arg = args_iter.next();
-    let parent_id: Option<u64> = parent_arg.and_then(|v| extract_frame_id(v));
+    let parent_id: Option<u64> = parent_arg
+        .and_then(|v| extract_frame_id(v))
+        .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
 
     let template: Option<String> = args_iter
         .next()
