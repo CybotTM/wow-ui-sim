@@ -2,6 +2,7 @@
 
 use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
 use crate::lua_api::simple_html::TextStyle;
+use crate::widget::WidgetType;
 use mlua::{LightUserData, Lua, Value};
 
 use super::{is_simple_html, is_text_type};
@@ -39,6 +40,7 @@ pub(super) fn add_font_object_methods(lua: &Lua, methods: &mlua::Table) -> mlua:
     })?)?;
 
     // GetFontObject([textType]) - return the font object set via SetFontObject
+    // MessageFrame auto-creates a sticky Font object on first call.
     methods.set("GetFontObject", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
         let id = lud_to_id(ud);
         let args_vec: Vec<Value> = args.into_iter().collect();
@@ -52,6 +54,11 @@ pub(super) fn add_font_object_methods(lua: &Lua, methods: &mlua::Table) -> mlua:
                 let font: Value = store.get(key)?;
                 return Ok(font);
             }
+        }
+
+        // MessageFrame: auto-create and cache a bare Font object
+        if is_message_frame(lua, id) {
+            return get_or_create_messageframe_font(lua, id);
         }
 
         let store: mlua::Table =
@@ -120,6 +127,30 @@ fn set_font_object_for_text_type(
         store.set(key, fo)?;
     }
     Ok(())
+}
+
+/// Check if a frame ID corresponds to a MessageFrame widget.
+fn is_message_frame(lua: &Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .is_some_and(|f| f.widget_type == WidgetType::MessageFrame)
+}
+
+/// Get or create the auto-created Font object for a MessageFrame.
+fn get_or_create_messageframe_font(lua: &Lua, id: u64) -> mlua::Result<Value> {
+    let store: mlua::Table = lua
+        .load("_G.__msgframe_fonts = _G.__msgframe_fonts or {}; return _G.__msgframe_fonts")
+        .eval()?;
+    let existing: Value = store.get(id)?;
+    if !existing.is_nil() {
+        return Ok(existing);
+    }
+    let font = crate::lua_api::globals::font_api::create_bare_font(lua)?;
+    store.set(id, font.clone())?;
+    Ok(Value::Table(font))
 }
 
 /// Resolve a font object Value (table or name string) into an optional Table.
