@@ -1,6 +1,7 @@
 //! Attribute methods: GetAttribute, SetAttribute, frame references, etc.
 
 use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::script_helpers::lua_error;
 use crate::widget::AttributeValue;
 use mlua::{LightUserData, Lua, Value};
 
@@ -23,7 +24,7 @@ fn add_get_set_attribute_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Resu
         "GetAttribute",
         lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
             let id = lud_to_id(ud);
-            let keys = build_attribute_keys(&args);
+            let keys = validate_and_build_keys(lua, &args)?;
             get_attribute_value(lua, id, &keys)
         })?,
     )?;
@@ -61,6 +62,60 @@ fn add_get_set_attribute_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Resu
     )?;
 
     Ok(())
+}
+
+/// Check if a Lua value is "truthy" (not nil and not false).
+fn is_truthy(v: &Value) -> bool {
+    !matches!(v, Value::Nil | Value::Boolean(false))
+}
+
+/// Validate GetAttribute arguments and build lookup keys.
+///
+/// WoW's GetAttribute(arg1, arg2, ...) validation (from wowless):
+/// - arg1 truthy AND arg2 nil → valid 1-arg form
+/// - arg2 nil OR no varargs (select('#', ...) == 0) → error with taint
+/// - else → valid 3-arg fallback form
+fn validate_and_build_keys(lua: &Lua, args: &mlua::MultiValue) -> mlua::Result<Vec<String>> {
+    let arg1 = args.get(0).unwrap_or(&Value::Nil);
+    let arg2 = args.get(1).unwrap_or(&Value::Nil);
+    let vararg_count = args.len().saturating_sub(2);
+
+    if is_truthy(arg1) && !is_truthy(arg2) {
+        // Valid 1-arg form: just look up arg1
+        Ok(build_attribute_keys(args))
+    } else if !is_truthy(arg2) || vararg_count == 0 {
+        // Invalid: raise error with taint info.
+        let taint = get_stack_taint(lua);
+        let msg = format!(
+            "Arguments: (\"name\"){}",
+            taint.map(|t| format!("\nLua Taint: {t}")).unwrap_or_default()
+        );
+        Err(lua_error(lua, msg))
+    } else {
+        // Valid 3-arg form: build fallback keys
+        Ok(build_attribute_keys(args))
+    }
+}
+
+/// Get the calling addon's name by walking the call stack for an AddOns/ source path.
+/// Falls back to `debug.getstacktaint()` if no addon source is found.
+fn get_stack_taint(lua: &Lua) -> Option<String> {
+    lua.load(
+        r#"
+        for level = 2, 30 do
+            local info = debug.getinfo(level, "S")
+            if not info then break end
+            if info.source then
+                local addon = info.source:match("AddOns/([^/]+)")
+                if addon then return addon end
+            end
+        end
+        return debug.getstacktaint()
+        "#,
+    )
+    .eval::<Option<String>>()
+    .ok()
+    .flatten()
 }
 
 /// Build the list of attribute keys to try, in WoW's fallback order.
