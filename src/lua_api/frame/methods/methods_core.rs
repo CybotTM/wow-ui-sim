@@ -497,7 +497,6 @@ fn add_level_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.frame_level = level;
-            frame.has_fixed_frame_level = true;
         }
         super::methods_hierarchy::propagate_strata_level_pub(&mut state.widgets, id);
         Ok(())

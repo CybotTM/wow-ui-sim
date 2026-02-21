@@ -305,3 +305,52 @@ fn test_standard_font_gold_color() {
     assert_eq!(r, 1.0);
     assert!((g - 0.82).abs() < 0.01);
 }
+
+// ============================================================================
+// MessageFrame / EditBox auto-created FontObject
+// ============================================================================
+
+#[test]
+fn test_messageframe_get_font_object_auto_creates() {
+    let env = env();
+    let is_table: bool = env
+        .eval(
+            r#"
+            local mf = CreateFrame('MessageFrame')
+            local fo = mf:GetFontObject()
+            return type(fo) == 'table'
+            "#,
+        )
+        .unwrap();
+    assert!(is_table, "MessageFrame:GetFontObject() should auto-create a Font object");
+}
+
+#[test]
+fn test_editbox_get_font_object_auto_creates() {
+    let env = env();
+    let is_table: bool = env
+        .eval(
+            r#"
+            local eb = CreateFrame('EditBox')
+            local fo = eb:GetFontObject()
+            return type(fo) == 'table'
+            "#,
+        )
+        .unwrap();
+    assert!(is_table, "EditBox:GetFontObject() should auto-create a Font object");
+}
+
+#[test]
+fn test_set_font_object_nil_errors() {
+    let env = env();
+    let errors: bool = env
+        .eval(
+            r#"
+            local mf = CreateFrame('MessageFrame')
+            local ok = pcall(mf.SetFontObject, mf, nil)
+            return not ok
+            "#,
+        )
+        .unwrap();
+    assert!(errors, "SetFontObject(nil) should throw an error");
+}

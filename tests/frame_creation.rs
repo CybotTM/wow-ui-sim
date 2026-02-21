@@ -6,6 +6,41 @@
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 // ============================================================================
+// Frame Level Defaults
+// ============================================================================
+
+#[test]
+fn test_frame_level_default_zero() {
+    let env = WowLuaEnv::new().unwrap();
+    let level: i32 = env
+        .eval(
+            r#"
+            local f = CreateFrame('Frame')
+            return f:GetFrameLevel()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 0, "newly created frame should have level 0");
+}
+
+#[test]
+fn test_set_frame_level_does_not_fix_level() {
+    let env = WowLuaEnv::new().unwrap();
+    let level: i32 = env
+        .eval(
+            r#"
+            local f = CreateFrame('Frame')
+            local h = CreateFrame('Frame')
+            f:SetFrameLevel(5)
+            f:SetParent(h)
+            return f:GetFrameLevel()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 1, "SetFrameLevel should not prevent level inheritance on reparent");
+}
+
+// ============================================================================
 // Basic CreateFrame Tests
 // ============================================================================
 

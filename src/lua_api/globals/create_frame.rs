@@ -13,12 +13,16 @@ use std::rc::Rc;
 pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     let state_clone = Rc::clone(&state);
     let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
-        let (frame_type, name, parent_id, template, id) = parse_create_frame_args(lua, &args, &state_clone)?;
-        let widget_type = WidgetType::from_str(&frame_type).unwrap_or(WidgetType::Frame);
-        let frame_id = register_new_frame(&state_clone, widget_type, name.clone(), parent_id);
+        let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
+        let widget_type = WidgetType::from_str(&cfa.frame_type).unwrap_or(WidgetType::Frame);
+        let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
+        let parent_id = cfa.parent_id;
+        let name = cfa.name;
+        let template = cfa.template;
+        let frame_type = cfa.frame_type;
 
         // Apply the 5th argument (frame ID) if provided
-        if let Some(frame_lua_id) = id {
+        if let Some(frame_lua_id) = cfa.id {
             if let Some(frame) = state_clone.borrow_mut().widgets.get_mut_visual(frame_id) {
                 frame.user_id = frame_lua_id;
             }
@@ -103,13 +107,23 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     Ok(create_frame)
 }
 
+/// Parsed CreateFrame arguments.
+struct CreateFrameArgs {
+    frame_type: String,
+    name: Option<String>,
+    parent_id: Option<u64>,
+    template: Option<String>,
+    id: Option<i32>,
+    /// Whether the parent was explicitly provided (vs defaulting to UIParent).
+    parent_explicit: bool,
+}
+
 /// Parse the arguments to CreateFrame: (frameType, name, parent, template, id).
-#[allow(clippy::type_complexity)]
 fn parse_create_frame_args(
     lua: &Lua,
     args: &mlua::MultiValue,
     state: &Rc<RefCell<SimState>>,
-) -> Result<(String, Option<String>, Option<u64>, Option<String>, Option<i32>)> {
+) -> Result<CreateFrameArgs> {
     let mut args_iter = args.iter();
 
     let frame_type: String = args_iter
@@ -124,8 +138,9 @@ fn parse_create_frame_args(
         .map(|s| s.to_string_lossy().to_string());
 
     let parent_arg = args_iter.next();
-    let parent_id: Option<u64> = parent_arg
-        .and_then(|v| extract_frame_id(v))
+    let explicit_parent = parent_arg.and_then(|v| extract_frame_id(v));
+    let parent_explicit = explicit_parent.is_some();
+    let parent_id = explicit_parent
         .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
 
     let template: Option<String> = args_iter
@@ -143,7 +158,7 @@ fn parse_create_frame_args(
     // Handle $parent/$Parent name substitution
     let name = name_raw.map(|n| substitute_parent_name(n, parent_id, state));
 
-    Ok((frame_type, name, parent_id, template, id))
+    Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
 }
 
 /// Replace $parent/$Parent placeholders in a frame name with the actual parent name.
@@ -167,11 +182,13 @@ fn substitute_parent_name(
 
 /// Register a new frame in the widget registry and set up parent-child relationship.
 /// If a named frame already exists, orphan the old one (remove from parent's children and hide).
+/// When `parent_explicit` is false (UIParent default), frame_level stays at 0.
 fn register_new_frame(
     state: &Rc<RefCell<SimState>>,
     widget_type: WidgetType,
     name: Option<String>,
     parent_id: Option<u64>,
+    parent_explicit: bool,
 ) -> u64 {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
 
@@ -206,13 +223,17 @@ fn register_new_frame(
         state.widgets.add_child(pid, frame_id);
 
         // Inherit strata, level, effective_alpha, and effective_scale from parent.
+        // When parent was defaulted to UIParent (not explicitly specified),
+        // skip frame_level inheritance — WoW keeps level at 0 in that case.
         let parent_props = state.widgets.get(pid).map(|p| {
             (p.frame_strata, p.frame_level, p.effective_alpha, p.effective_scale)
         });
         if let Some((parent_strata, parent_level, parent_eff_alpha, parent_eff_scale)) = parent_props
             && let Some(f) = state.widgets.get_mut_visual(frame_id) {
                 f.frame_strata = parent_strata;
-                f.frame_level = parent_level + 1;
+                if parent_explicit {
+                    f.frame_level = parent_level + 1;
+                }
                 f.effective_alpha = parent_eff_alpha * f.alpha;
                 f.effective_scale = parent_eff_scale * f.scale;
             }

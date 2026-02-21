@@ -24,8 +24,11 @@ pub(super) fn add_font_object_methods(lua: &Lua, methods: &mlua::Table) -> mlua:
                 }
             }
 
-        // Standard path
+        // Standard path — reject nil
         let font_object = args_vec.into_iter().next().unwrap_or(Value::Nil);
+        if font_object.is_nil() {
+            return Err(mlua::Error::runtime("Usage: SetFontObject(fontObject or \"fontName\")"));
+        }
         let font_table = resolve_font_table(lua, &font_object);
         apply_font_table_to_frame(lua, id, font_table.as_ref());
 
@@ -56,9 +59,9 @@ pub(super) fn add_font_object_methods(lua: &Lua, methods: &mlua::Table) -> mlua:
             }
         }
 
-        // MessageFrame: auto-create and cache a bare Font object
-        if is_message_frame(lua, id) {
-            return get_or_create_messageframe_font(lua, id);
+        // MessageFrame / EditBox: auto-create and cache a bare Font object
+        if needs_auto_font_object(lua, id) {
+            return get_or_create_auto_font(lua, id);
         }
 
         let store: mlua::Table =
@@ -129,20 +132,19 @@ fn set_font_object_for_text_type(
     Ok(())
 }
 
-/// Check if a frame ID corresponds to a MessageFrame widget.
-fn is_message_frame(lua: &Lua, id: u64) -> bool {
+/// Check if a frame ID corresponds to a type that auto-creates a Font object.
+fn needs_auto_font_object(lua: &Lua, id: u64) -> bool {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
-    state
-        .widgets
-        .get(id)
-        .is_some_and(|f| f.widget_type == WidgetType::MessageFrame)
+    state.widgets.get(id).is_some_and(|f| {
+        matches!(f.widget_type, WidgetType::MessageFrame | WidgetType::EditBox)
+    })
 }
 
-/// Get or create the auto-created Font object for a MessageFrame.
-fn get_or_create_messageframe_font(lua: &Lua, id: u64) -> mlua::Result<Value> {
+/// Get or create the auto-created Font object for a MessageFrame or EditBox.
+fn get_or_create_auto_font(lua: &Lua, id: u64) -> mlua::Result<Value> {
     let store: mlua::Table = lua
-        .load("_G.__msgframe_fonts = _G.__msgframe_fonts or {}; return _G.__msgframe_fonts")
+        .load("_G.__auto_fonts = _G.__auto_fonts or {}; return _G.__auto_fonts")
         .eval()?;
     let existing: Value = store.get(id)?;
     if !existing.is_nil() {
