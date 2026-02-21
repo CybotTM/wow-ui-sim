@@ -1,0 +1,6 @@
+## Interface: 110100
+## Title: TestFramework
+## Notes: Lightweight test framework for wow-ui-sim (test/async_test/assertions)
+## LoadOnDemand: 1
+
+TestFramework.lua

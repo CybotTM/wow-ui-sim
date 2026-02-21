@@ -1,9 +1,7 @@
 //! `run-tests` subcommand: run Lua test files from an addon's tests/ directory.
 //!
-//! Each test file uses a Pest-like `test("name", fn)` syntax to register tests.
-//! Sync tests: `test("name", function() ... end)`
-//! Async tests: `test("name", function(done) ... done() end)` — detected via arg count.
-//! The runner ticks OnUpdate/timers for async tests until done() is called or timeout.
+//! Loads the TestFramework addon (assertions + test/async_test registration),
+//! then executes each .lua file and reports per-test pass/fail.
 
 use std::path::PathBuf;
 use crate::lua_api::WowLuaEnv;
@@ -11,182 +9,12 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 
 const MAX_ASYNC_TICKS: u32 = 500;
 
-/// Lua bootstrap: injects test(), async_test(), and assertEquals().
-const TEST_BOOTSTRAP: &str = r#"
+/// Reset test registry between files (TestFramework globals stay alive).
+const TEST_RESET: &str = r#"
 __addon_tests = {}
 __addon_test_results = {}
 __async_done = false
 __async_error = nil
-function test(name, fn)
-    table.insert(__addon_tests, { name = name, fn = fn, async = false })
-end
-function async_test(name, fn)
-    table.insert(__addon_tests, { name = name, fn = fn, async = true })
-end
-if not assertEquals then
-    function assertEquals(expected, actual)
-        if expected ~= actual then
-            error(string.format("expected %s, got %s", tostring(expected), tostring(actual)), 2)
-        end
-    end
-end
-if not assertNotEquals then
-    function assertNotEquals(expected, actual)
-        if expected == actual then
-            error(string.format("expected value to differ from %s", tostring(expected)), 2)
-        end
-    end
-end
-if not assertTrue then
-    function assertTrue(value)
-        if not value then
-            error(string.format("expected truthy, got %s", tostring(value)), 2)
-        end
-    end
-end
-if not assertFalse then
-    function assertFalse(value)
-        if value then
-            error(string.format("expected falsy, got %s", tostring(value)), 2)
-        end
-    end
-end
-if not assertNil then
-    function assertNil(value)
-        if value ~= nil then
-            error(string.format("expected nil, got %s", tostring(value)), 2)
-        end
-    end
-end
-if not assertNotNil then
-    function assertNotNil(value)
-        if value == nil then
-            error("expected non-nil value, got nil", 2)
-        end
-    end
-end
-if not assertError then
-    function assertError(fn)
-        local ok = pcall(fn)
-        if ok then
-            error("expected function to throw an error", 2)
-        end
-    end
-end
-if not assertContains then
-    function assertContains(haystack, needle)
-        if type(haystack) == "string" then
-            if not haystack:find(needle, 1, true) then
-                error(string.format("expected string to contain %q", needle), 2)
-            end
-        elseif type(haystack) == "table" then
-            for _, v in pairs(haystack) do
-                if v == needle then return end
-            end
-            error(string.format("expected table to contain %s", tostring(needle)), 2)
-        else
-            error(string.format("assertContains expects string or table, got %s", type(haystack)), 2)
-        end
-    end
-end
-if not assertCount then
-    function assertCount(expected, tbl)
-        local count = 0
-        for _ in pairs(tbl) do count = count + 1 end
-        if count ~= expected then
-            error(string.format("expected %d elements, got %d", expected, count), 2)
-        end
-    end
-end
-if not assertType then
-    function assertType(expected, value)
-        local actual = type(value)
-        if actual ~= expected then
-            error(string.format("expected type %s, got %s", expected, actual), 2)
-        end
-    end
-end
-if not assertAlmostEquals then
-    function assertAlmostEquals(expected, actual, tolerance)
-        tolerance = tolerance or 0.001
-        if math.abs(expected - actual) > tolerance then
-            error(string.format("expected ~%s, got %s (tolerance %s)", tostring(expected), tostring(actual), tostring(tolerance)), 2)
-        end
-    end
-end
-do
-    -- Deep table comparison helper (shared by assertTableEquals and assertTableContains)
-    local function deep_equal(a, b)
-        if a == b then return true end
-        if type(a) ~= "table" or type(b) ~= "table" then return false end
-        for k, v in pairs(a) do
-            if not deep_equal(v, b[k]) then return false end
-        end
-        for k in pairs(b) do
-            if a[k] == nil then return false end
-        end
-        return true
-    end
-    local function table_to_string(t, depth)
-        depth = depth or 0
-        if type(t) ~= "table" then return tostring(t) end
-        if depth > 3 then return "{...}" end
-        local parts = {}
-        for k, v in pairs(t) do
-            local key = type(k) == "string" and k or "[" .. tostring(k) .. "]"
-            parts[#parts + 1] = key .. " = " .. table_to_string(v, depth + 1)
-        end
-        return "{ " .. table.concat(parts, ", ") .. " }"
-    end
-    if not assertTableEquals then
-        function assertTableEquals(expected, actual)
-            if not deep_equal(expected, actual) then
-                error(string.format("expected %s, got %s",
-                    table_to_string(expected), table_to_string(actual)), 2)
-            end
-        end
-    end
-    if not assertTableContains then
-        function assertTableContains(tbl, subset)
-            for k, v in pairs(subset) do
-                if not deep_equal(v, tbl[k]) then
-                    error(string.format("key %s: expected %s, got %s",
-                        tostring(k), table_to_string(v), table_to_string(tbl[k])), 2)
-                end
-            end
-        end
-    end
-end
-if not assertStartsWith then
-    function assertStartsWith(str, prefix)
-        if type(str) ~= "string" then
-            error(string.format("expected string, got %s", type(str)), 2)
-        end
-        if str:sub(1, #prefix) ~= prefix then
-            error(string.format("expected %q to start with %q", str, prefix), 2)
-        end
-    end
-end
-if not assertEndsWith then
-    function assertEndsWith(str, suffix)
-        if type(str) ~= "string" then
-            error(string.format("expected string, got %s", type(str)), 2)
-        end
-        if str:sub(-#suffix) ~= suffix then
-            error(string.format("expected %q to end with %q", str, suffix), 2)
-        end
-    end
-end
-if not assertMatches then
-    function assertMatches(str, pattern)
-        if type(str) ~= "string" then
-            error(string.format("expected string, got %s", type(str)), 2)
-        end
-        if not str:match(pattern) then
-            error(string.format("expected %q to match pattern %q", str, pattern), 2)
-        end
-    end
-end
 "#;
 
 /// Run sync tests, store results. Skips async tests (marked for Rust to handle).
@@ -226,6 +54,26 @@ if not ok then
 end
 "#;
 
+/// Load the TestFramework addon (provides test/async_test/assertions).
+fn load_test_framework(env: &WowLuaEnv) {
+    let toc_path = PathBuf::from("./Interface/AddOns/TestFramework/TestFramework.toc");
+    if !toc_path.exists() {
+        eprintln!("TestFramework addon not found at {}", toc_path.display());
+        std::process::exit(1);
+    }
+    match crate::loader::load_addon(&env.loader_env(), &toc_path) {
+        Ok(r) => {
+            for w in &r.warnings {
+                eprintln!("  [!] {w}");
+            }
+        }
+        Err(e) => {
+            eprintln!("Failed to load TestFramework: {e}");
+            std::process::exit(1);
+        }
+    }
+}
+
 /// Run all .lua test files from `Interface/AddOns/<addon_name>/tests/`.
 pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>) {
     if let Some(code) = exec_lua {
@@ -233,6 +81,9 @@ pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>
             eprintln!("[exec-lua] error: {e}");
         }
     }
+
+    // Always load TestFramework first
+    load_test_framework(env);
 
     let tests_dir = PathBuf::from(format!("./Interface/AddOns/{addon_name}/tests"));
     if !tests_dir.exists() {
@@ -301,15 +152,15 @@ fn collect_test_files(dir: &PathBuf) -> Result<Vec<PathBuf>, String> {
     Ok(files)
 }
 
-/// Run a single test file: bootstrap, load, run sync tests, then async tests.
+/// Run a single test file: reset registry, load file, run sync then async tests.
 fn run_test_file(env: &WowLuaEnv, path: &PathBuf) -> Result<(u32, u32), String> {
     let file_name = path.file_name().unwrap().to_string_lossy();
     let code =
         std::fs::read_to_string(path).map_err(|e| format!("read error: {e}"))?;
 
-    // Reset test registry and inject test() function
-    env.exec(TEST_BOOTSTRAP)
-        .map_err(|e| format!("bootstrap error: {e}"))?;
+    // Reset test registry between files
+    env.exec(TEST_RESET)
+        .map_err(|e| format!("reset error: {e}"))?;
 
     // Load the test file (registers tests via test() calls)
     let chunk_name = format!("@{}", path.display());
@@ -372,13 +223,11 @@ fn get_test_name(env: &WowLuaEnv, idx: i64) -> Result<String, String> {
 
 /// Run a single async test: call fn(done), tick until __async_done or timeout.
 fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
-    // Start the async test (calls fn(done))
     let chunk = env.lua().load(ASYNC_START);
     chunk
         .call::<()>(idx)
         .map_err(|e| format!("{e}"))?;
 
-    // Tick until done or timeout
     for _ in 0..MAX_ASYNC_TICKS {
         let done: bool = env.eval("__async_done").unwrap_or(false);
         if done {

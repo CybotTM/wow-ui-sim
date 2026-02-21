@@ -1,4 +1,5 @@
 /target
 /.cache
 /Interface/AddOns/*
+!/Interface/AddOns/TestFramework
 /docs/local/
