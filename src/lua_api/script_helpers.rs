@@ -131,3 +131,19 @@ pub fn collect_lua_error(lua: &Lua, msg: &str) {
     }
 }
 
+/// A Lua-style error with no prefix. When caught by pcall, shows just the message.
+/// Uses ExternalError so Display outputs the raw message without "runtime error: " prefix.
+#[derive(Debug)]
+pub struct LuaApiError(pub String);
+impl std::fmt::Display for LuaApiError {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+impl std::error::Error for LuaApiError {}
+
+/// Create a Lua API error that pcall catches as just the message string.
+pub fn lua_error(_lua: &Lua, msg: impl Into<String>) -> mlua::Error {
+    mlua::Error::external(LuaApiError(msg.into()))
+}
+

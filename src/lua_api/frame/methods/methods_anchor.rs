@@ -1,6 +1,7 @@
 //! Anchor/point methods: SetPoint, ClearAllPoints, SetAllPoints, GetPoint, etc.
 
 use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::script_helpers::lua_error;
 use mlua::{LightUserData, Lua, Value};
 
 /// Add anchor/point methods to the frame methods table.
@@ -40,6 +41,22 @@ fn get_frame_id(lua: &Lua, v: &Value) -> Option<usize> {
     }
 }
 
+/// Resolve a relative point from an optional Value, defaulting to the main point.
+/// Returns Err(raw_string) if the value is a string that doesn't match a valid point.
+fn resolve_relative_point(
+    v: Option<&Value>,
+    default: crate::widget::AnchorPoint,
+) -> Result<crate::widget::AnchorPoint, String> {
+    match v {
+        Some(Value::String(s)) => {
+            let s = s.to_string_lossy();
+            crate::widget::AnchorPoint::from_str(&s)
+                .ok_or_else(|| format!("Frame:SetPoint(): Unknown region point {s}"))
+        }
+        _ => Ok(default),
+    }
+}
+
 /// Extract an anchor point string from a Value, defaulting to "CENTER".
 fn extract_point_str(v: Option<&Value>) -> String {
     v.and_then(|v| {
@@ -53,13 +70,14 @@ fn extract_point_str(v: Option<&Value>) -> String {
 }
 
 /// Parse variable SetPoint arguments into (relative_to, relative_point, x_ofs, y_ofs).
+/// Returns Err(msg) for invalid relative point names.
 fn parse_set_point_args(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> (Option<usize>, crate::widget::AnchorPoint, f32, f32) {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
     match args.len() {
-        1 => (None, point, 0.0, 0.0),
+        1 => Ok((None, point, 0.0, 0.0)),
         2 | 3 => parse_set_point_2_or_3(lua, args, point),
         _ => parse_set_point_full(lua, args, point),
     }
@@ -70,24 +88,16 @@ fn parse_set_point_2_or_3(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> (Option<usize>, crate::widget::AnchorPoint, f32, f32) {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
     let x = args.get(1).and_then(get_number);
     let y = args.get(2).and_then(get_number);
     if let (Some(x), Some(y)) = (x, y) {
         // SetPoint("point", x, y)
-        (None, point, x, y)
+        Ok((None, point, x, y))
     } else {
         let rel_to = args.get(1).and_then(|v| get_frame_id(lua, v));
-        // Check if 3rd arg is a relativePoint string:
-        // SetPoint("point", relativeTo, "relativePoint")
-        let rel_point = args.get(2).and_then(|v| {
-            if let Value::String(s) = v {
-                crate::widget::AnchorPoint::from_str(&s.to_string_lossy())
-            } else {
-                None
-            }
-        }).unwrap_or(point);
-        (rel_to, rel_point, 0.0, 0.0)
+        let rel_point = resolve_relative_point(args.get(2), point)?;
+        Ok((rel_to, rel_point, 0.0, 0.0))
     }
 }
 
@@ -96,21 +106,12 @@ fn parse_set_point_full(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> (Option<usize>, crate::widget::AnchorPoint, f32, f32) {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
     let rel_to = args.get(1).and_then(|v| get_frame_id(lua, v));
-    let rel_point_str = args.get(2).and_then(|v| {
-        if let Value::String(s) = v {
-            Some(s.to_string_lossy().to_string())
-        } else {
-            None
-        }
-    });
-    let rel_point = rel_point_str
-        .and_then(|s| crate::widget::AnchorPoint::from_str(&s))
-        .unwrap_or(point);
+    let rel_point = resolve_relative_point(args.get(2), point)?;
     let x = args.get(3).and_then(get_number).unwrap_or(0.0);
     let y = args.get(4).and_then(get_number).unwrap_or(0.0);
-    (rel_to, rel_point, x, y)
+    Ok((rel_to, rel_point, x, y))
 }
 
 /// SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
@@ -118,9 +119,21 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("SetPoint", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
         let id = lud_to_id(ud);
         let args: Vec<Value> = args.into_iter().collect();
+        if args.is_empty() {
+            return Err(lua_error(lua,
+                "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]"
+            ));
+        }
         let point_str = extract_point_str(args.first());
-        let point = crate::widget::AnchorPoint::from_str(&point_str).unwrap_or_default();
-        let (relative_to, relative_point, x_ofs, y_ofs) = parse_set_point_args(lua, &args, point);
+        let point = match crate::widget::AnchorPoint::from_str(&point_str) {
+            Some(p) => p,
+            None => return Err(lua_error(lua,
+                format!("Frame:SetPoint(): Invalid region point {point_str}")
+            )),
+        };
+        let (relative_to, relative_point, x_ofs, y_ofs) =
+            parse_set_point_args(lua, &args, point)
+                .map_err(|msg| lua_error(lua, msg))?;
 
         let state_rc = get_sim_state(lua);
         if !should_update_point(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {

@@ -21,7 +21,7 @@ use std::rc::Rc;
 /// Register system utility functions in the Lua global namespace.
 pub fn register_system_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_type_overrides(lua)?;
-    register_xpcall(lua)?;
+    super::protected_call::register_protected_calls(lua)?;
     register_slash_cmd_list(lua)?;
     register_fire_event(lua, Rc::clone(&state))?;
     register_reload_ui(lua, Rc::clone(&state))?;
@@ -81,62 +81,6 @@ fn register_type_overrides(lua: &Lua) -> Result<()> {
     globals.raw_set("__original_rawget", original_rawget)?;
     globals.set("rawget", rawget_fn)?;
 
-    Ok(())
-}
-
-/// Override `xpcall()` with varargs support (Lua 5.2+ feature needed by WoW addons).
-fn register_xpcall(lua: &Lua) -> Result<()> {
-    let xpcall_fn = lua.create_function(|lua, args: mlua::MultiValue| {
-        let mut args_vec: Vec<Value> = args.into_iter().collect();
-        if args_vec.len() < 2 {
-            return Err(mlua::Error::RuntimeError(
-                "xpcall requires at least 2 arguments".to_string(),
-            ));
-        }
-
-        let func = match args_vec.remove(0) {
-            Value::Function(f) => f,
-            _ => {
-                return Err(mlua::Error::RuntimeError(
-                    "bad argument #1 to 'xpcall' (function expected)".to_string(),
-                ))
-            }
-        };
-
-        let error_handler = match args_vec.remove(0) {
-            Value::Function(f) => f,
-            _ => {
-                return Err(mlua::Error::RuntimeError(
-                    "bad argument #2 to 'xpcall' (function expected)".to_string(),
-                ))
-            }
-        };
-
-        let call_args: mlua::MultiValue = args_vec.into_iter().collect();
-
-        match func.call::<mlua::MultiValue>(call_args) {
-            Ok(results) => {
-                let mut ret = mlua::MultiValue::new();
-                ret.push_back(Value::Boolean(true));
-                for v in results {
-                    ret.push_back(v);
-                }
-                Ok(ret)
-            }
-            Err(e) => {
-                let error_msg = lua.create_string(e.to_string())?;
-                let handler_result = error_handler.call::<Value>(Value::String(error_msg));
-                let mut ret = mlua::MultiValue::new();
-                ret.push_back(Value::Boolean(false));
-                match handler_result {
-                    Ok(v) => ret.push_back(v),
-                    Err(he) => ret.push_back(Value::String(lua.create_string(he.to_string())?)),
-                }
-                Ok(ret)
-            }
-        }
-    })?;
-    lua.globals().set("xpcall", xpcall_fn)?;
     Ok(())
 }
 
