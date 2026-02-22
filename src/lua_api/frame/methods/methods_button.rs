@@ -516,9 +516,33 @@ fn add_font_string_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
         Ok(Value::Nil)
     })?)?;
 
-    methods.set("SetFontString", lua.create_function(
-        |_, (_ud, _fontstring): (LightUserData, Value)| Ok(()),
-    )?)?;
+    methods.set("SetFontString", lua.create_function(|lua, (ud, fontstring): (LightUserData, Value)| {
+        let button_id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(fs_id) = super::super::handle::extract_frame_id(&fontstring) {
+            // Reparent to this button (clears old parent's children_keys entry + parent_key)
+            super::methods_hierarchy::reparent_widget(&mut state.widgets, fs_id, Some(button_id));
+            // Set fill-parent anchors
+            if let Some(fs) = state.widgets.get_mut_visual(fs_id) {
+                fs.anchors.clear();
+                super::methods_helpers::set_all_points_anchors_pub(fs, button_id);
+            }
+            // Register in children_keys and set parent_key
+            if let Some(btn) = state.widgets.get_mut_visual(button_id) {
+                btn.children_keys.insert("Text".to_string(), fs_id);
+            }
+            if let Some(fs) = state.widgets.get_mut_visual(fs_id) {
+                fs.parent_key = Some("Text".to_string());
+            }
+        } else {
+            // nil: disconnect the existing Text entry without destroying it
+            if let Some(btn) = state.widgets.get_mut_visual(button_id) {
+                btn.children_keys.remove("Text");
+            }
+        }
+        Ok(())
+    })?)?;
 
     Ok(())
 }

@@ -75,10 +75,12 @@ fn add_event_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id) {
-            return Ok(frame.register_all_events || frame.registered_events.contains(&event));
-        }
-        Ok(false)
+        let registered = if let Some(frame) = state.widgets.get(id) {
+            frame.register_all_events || frame.registered_events.contains(&event)
+        } else {
+            false
+        };
+        Ok((registered, Value::Nil))
     })?)?;
 
     // RegisterEventCallback(event, callbackContainer) - callback-based event registration

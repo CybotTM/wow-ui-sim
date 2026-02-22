@@ -273,8 +273,15 @@ fn add_statusbar_color_methods(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         let a = val_to_f32(it.next(), 1.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        let mut bar_id = None;
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.statusbar_color = Some(Color::new(r, g, b, a));
+            bar_id = frame.statusbar_bar_id;
+        }
+        if let Some(bar_id) = bar_id {
+            if let Some(bar) = state.widgets.get_mut_visual(bar_id) {
+                bar.vertex_color = Some(Color::new(r, g, b, a));
+            }
         }
         Ok(())
     })?)?;
