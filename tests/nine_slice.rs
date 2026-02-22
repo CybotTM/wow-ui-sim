@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 //! Tests for NineSlice title bar textures and layout.
 
 mod common;

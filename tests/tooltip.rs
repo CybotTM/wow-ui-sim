@@ -491,6 +491,7 @@ fn test_micro_menu_hover_shows_tooltip() {
 }
 
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
+#[cfg(feature = "gui")]
 #[test]
 fn test_tooltip_produces_quads_after_hover() {
     use std::path::PathBuf;

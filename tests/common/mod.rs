@@ -6,6 +6,7 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Try to create a wgpu device for GPU tests.
 /// Returns None if no adapter is available (e.g., headless CI).
+#[cfg(feature = "gui")]
 #[allow(dead_code)]
 pub fn try_create_gpu_device() -> Option<(wgpu::Device, wgpu::Queue)> {
     let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor {

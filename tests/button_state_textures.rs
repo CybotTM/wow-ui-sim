@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 //! Tests for button state-dependent texture visibility.
 //!
 //! WoW buttons have child Texture widgets (NormalTexture, PushedTexture,

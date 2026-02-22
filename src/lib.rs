@@ -27,6 +27,7 @@ pub mod traits;
 pub mod config;
 pub mod cvars;
 pub mod dump;
+#[cfg(feature = "gui")]
 pub mod dump_texture;
 pub mod error;
 pub mod event;
@@ -49,7 +50,19 @@ pub mod widget;
 pub mod xml;
 
 pub use error::{Error, Result};
+#[cfg(feature = "gui")]
 pub use iced_app::{run_iced_ui, run_iced_ui_with_textures, DebugOptions};
+
+/// Blend mode for quad rendering.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
+#[repr(u32)]
+pub enum BlendMode {
+    /// Standard alpha blending: src * alpha + dst * (1 - alpha)
+    #[default]
+    Alpha = 0,
+    /// Additive blending: src + dst (for highlight textures)
+    Additive = 1,
+}
 
 /// Computed layout position for a frame.
 #[derive(Debug, Clone, Copy, Default)]

@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 //! Tests for MinimalCheckboxTemplate and button mouse-enable defaults.
 
 mod common;

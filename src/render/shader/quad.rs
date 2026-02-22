@@ -12,16 +12,7 @@ pub const FLAG_COOLDOWN_SWIPE: u32 = 0x200;
 /// Flag bit: desaturate (convert to greyscale).
 pub const FLAG_DESATURATE: u32 = 0x400;
 
-/// Blend mode for quad rendering.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
-#[repr(u32)]
-pub enum BlendMode {
-    /// Standard alpha blending: src * alpha + dst * (1 - alpha)
-    #[default]
-    Alpha = 0,
-    /// Additive blending: src + dst (for highlight textures)
-    Additive = 1,
-}
+pub use crate::BlendMode;
 
 /// Vertex format for textured quads.
 ///

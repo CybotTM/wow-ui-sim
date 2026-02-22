@@ -69,6 +69,7 @@ enum Commands {
     },
 
     /// Render UI to an image file (no GUI needed)
+    #[cfg(feature = "gui")]
     Screenshot {
         /// Output file path (always lossy WebP at quality 15, extension forced to .webp)
         #[arg(short, long, default_value = "screenshot.webp")]
@@ -111,6 +112,7 @@ enum Commands {
     },
 
     /// Dump textures used by frames to disk (for debugging atlas crops)
+    #[cfg(feature = "gui")]
     DumpTexture {
         #[arg(short, long, default_value = "/tmp/claude/textures")]
         output: PathBuf,
@@ -160,27 +162,14 @@ fn scan_addons(base_path: &PathBuf) -> Vec<(String, PathBuf)> {
     addons
 }
 
-fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args = Args::parse();
-
-    // For lua-errors: redirect stdout→stderr so only JSON hits stdout
-    let quiet = matches!(args.command, Some(Commands::LuaErrors));
-    let saved_stdout = if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None };
-
+/// Initialize the simulator environment: tracing, font system, sound, addon paths.
+fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
     apply_resource_limits();
-
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .init();
-
-    let env = WowLuaEnv::new()?;
-    let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
-    env.set_font_system(Rc::clone(&font_system));
-
-    // Initialize sound manager (skip with WOW_SIM_NO_SOUND=1)
-    init_sound(&env);
-
-    // Set addon base paths for runtime on-demand loading (C_AddOns.LoadAddOn)
+    env.set_font_system(Rc::clone(font_system));
+    init_sound(env);
     {
         let mut state = env.state().borrow_mut();
         state.addon_base_paths = vec![
@@ -188,10 +177,19 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             PathBuf::from("./Interface/AddOns"),
         ];
     }
-
-    // Register synthetic templates for C++ intrinsic frame types (WoWScrollBoxList, etc.)
-    // before any addons that reference them are loaded.
     wow_ui_sim::xml::register_intrinsic_templates();
+}
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let args = Args::parse();
+
+    // For lua-errors: redirect stdout→stderr so only JSON hits stdout
+    let quiet = matches!(args.command, Some(Commands::LuaErrors));
+    let saved_stdout = if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None };
+
+    let env = WowLuaEnv::new()?;
+    let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
+    init_environment(&args, &env, &font_system);
 
     let mut saved_vars = configure_saved_vars(&args);
     load_blizzard_addons(&env);
@@ -204,6 +202,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(Commands::DumpTree { filter, filter_key, visible_only, width, height }) => {
             run_dump_tree(&env, filter, filter_key, visible_only, width, height, args.delay, exec_lua.as_deref());
         }
+        #[cfg(feature = "gui")]
         Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
             run_screenshot(&env, &font_system, output, width, height, filter, crop, args.delay, exec_lua.as_deref(), dump_tree);
         }
@@ -218,15 +217,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             run_headless_startup(&env);
             wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
         }
+        #[cfg(feature = "gui")]
         Some(Commands::DumpTexture { output, filter, frame_filter }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);
         }
+        #[cfg(feature = "gui")]
         None => {
             let debug = wow_ui_sim::DebugOptions {
                 borders: args.debug_borders || args.debug_elements,
                 anchors: args.debug_anchors || args.debug_elements,
             };
             wow_ui_sim::run_iced_ui(env, debug, saved_vars, exec_lua)?;
+        }
+        #[cfg(not(feature = "gui"))]
+        None => {
+            eprintln!("GUI not available (compiled without 'gui' feature). Use a subcommand: dump-tree, lua-errors, self-test, run-tests");
+            std::process::exit(1);
         }
     }
 
@@ -529,10 +535,12 @@ fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     }
 }
 
+#[cfg(feature = "gui")]
 fn debug_show_game_menu(env: &WowLuaEnv) {
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
 }
 
+#[cfg(feature = "gui")]
 /// Parse a crop string in WxH+X+Y format (e.g., "700x150+400+650").
 /// Returns (width, height, x, y) or None if the format is invalid.
 fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
@@ -546,6 +554,7 @@ fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
     Some((w, h, x, y))
 }
 
+#[cfg(feature = "gui")]
 /// Apply crop to an image, exiting on invalid input.
 fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     use image::GenericImageView;
@@ -563,6 +572,7 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     img.view(cx, cy, cw, ch).to_image()
 }
 
+#[cfg(feature = "gui")]
 /// Build the quad batch and glyph atlas for headless rendering.
 fn build_screenshot_batch(
     env: &WowLuaEnv,
@@ -628,6 +638,7 @@ fn run_dump_tree(
     wow_ui_sim::dump::print_frame_tree(&state.widgets, filter.as_deref(), filter_key.as_deref(), visible_only, width as f32, height as f32);
 }
 
+#[cfg(feature = "gui")]
 /// Render a headless screenshot.
 #[allow(clippy::too_many_arguments)]
 fn run_screenshot(
@@ -679,6 +690,7 @@ fn run_screenshot(
     eprintln!("Saved {}x{} screenshot to {}", img.width(), img.height(), output.with_extension("webp").display());
 }
 
+#[cfg(feature = "gui")]
 fn save_screenshot(img: &image::RgbaImage, output: &std::path::Path) {
     let output = output.with_extension("webp");
     let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
@@ -689,6 +701,7 @@ fn save_screenshot(img: &image::RgbaImage, output: &std::path::Path) {
     }
 }
 
+#[cfg(feature = "gui")]
 /// Dump textures used by frames to disk.
 fn run_dump_texture(
     env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>,
@@ -702,6 +715,7 @@ fn run_dump_texture(
     wow_ui_sim::dump_texture::dump_batch_textures(&batch, &mut tex_mgr, &output, filter.as_deref());
 }
 
+#[cfg(feature = "gui")]
 /// Create a TextureManager with local and fallback texture paths.
 fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
     use wow_ui_sim::texture::TextureManager;

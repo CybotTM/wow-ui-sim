@@ -644,6 +644,7 @@ fn test_set_get_hit_rect_insets() {
     assert!(ok, "SetHitRectInsets / GetHitRectInsets Lua test failed");
 }
 
+#[cfg(feature = "gui")]
 #[test]
 fn test_hit_rect_insets_shrinks_hittable_rect() {
     use crate::LayoutRect;

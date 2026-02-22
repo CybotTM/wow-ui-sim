@@ -2,7 +2,7 @@
 
 use super::{next_widget_id, Anchor, AnchorPoint, WidgetType};
 use crate::atlas::NineSliceAtlasInfo;
-use crate::render::BlendMode;
+use crate::BlendMode;
 use std::collections::{HashMap, HashSet};
 
 /// Attribute value stored on frames.

@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 //! Rendering pipeline tests: from XML templates through GPU upload.
 //!
 //! Uses scroll bar buttons as the test subject, testing 5 layers:

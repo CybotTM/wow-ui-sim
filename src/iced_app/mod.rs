@@ -9,50 +9,86 @@
 //! - `update`: App::update() and message handling
 //! - `render`: Shader/canvas rendering implementations
 
-mod app;
-mod button_vis;
+// Always-compiled: no iced/GPU dependencies
 pub mod frame_collect;
-mod hit_grid;
-mod keybinds;
 pub mod layout;
+
+// GUI-only submodules
+#[cfg(feature = "gui")]
+mod app;
+#[cfg(feature = "gui")]
+mod button_vis;
+#[cfg(feature = "gui")]
+mod hit_grid;
+#[cfg(feature = "gui")]
+mod keybinds;
+#[cfg(feature = "gui")]
 mod message_frame_render;
+#[cfg(feature = "gui")]
 mod nine_slice;
+#[cfg(feature = "gui")]
 mod masking;
+#[cfg(feature = "gui")]
 mod quad_builders;
+#[cfg(feature = "gui")]
 mod render;
+#[cfg(feature = "gui")]
 mod statusbar;
+#[cfg(feature = "gui")]
 mod state;
+#[cfg(feature = "gui")]
 mod tiling;
+#[cfg(feature = "gui")]
 pub mod tooltip;
+#[cfg(feature = "gui")]
 mod styles;
+#[cfg(feature = "gui")]
 mod mouse;
+#[cfg(feature = "gui")]
 mod update;
+#[cfg(feature = "gui")]
 mod update_servers;
+#[cfg(feature = "gui")]
 mod screenshot;
+#[cfg(feature = "gui")]
 mod tree_dump;
+#[cfg(feature = "gui")]
 mod view;
 
+// Always-compiled re-exports
+pub use layout::{anchor_position, compute_frame_rect, compute_frame_rect_cached, frame_position_from_anchor, CachedFrameLayout, LayoutCache};
+
+// GUI-only imports and re-exports
+#[cfg(feature = "gui")]
 use std::path::PathBuf;
 
+#[cfg(feature = "gui")]
 use iced::window::screenshot::Screenshot;
 
+#[cfg(feature = "gui")]
 use crate::lua_api::WowLuaEnv;
+#[cfg(feature = "gui")]
 use crate::saved_variables::SavedVariablesManager;
 
-// Re-export public types
+#[cfg(feature = "gui")]
 pub use app::App;
-pub use layout::{anchor_position, compute_frame_rect, compute_frame_rect_cached, frame_position_from_anchor, CachedFrameLayout, LayoutCache};
+#[cfg(feature = "gui")]
 pub use render::{build_quad_batch_for_registry, build_hittable_rects};
+#[cfg(feature = "gui")]
 pub use state::{CanvasMessage, InspectorState};
+#[cfg(feature = "gui")]
 pub use styles::palette;
 
+#[cfg(feature = "gui")]
 pub use app::DebugOptions;
+#[cfg(feature = "gui")]
 use app::{
     FALLBACK_TEXTURES_PATH, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES,
     LOCAL_TEXTURES_PATH,
 };
 
 /// Application messages.
+#[cfg(feature = "gui")]
 #[derive(Debug, Clone)]
 pub enum Message {
     FireEvent(String),
@@ -103,6 +139,7 @@ pub enum Message {
 }
 
 /// Run the iced UI with the given Lua environment.
+#[cfg(feature = "gui")]
 pub fn run_iced_ui(
     env: WowLuaEnv,
     debug: DebugOptions,
@@ -122,6 +159,7 @@ pub fn run_iced_ui(
 }
 
 /// Run the iced UI with the given Lua environment and textures path.
+#[cfg(feature = "gui")]
 pub fn run_iced_ui_with_textures(
     env: WowLuaEnv,
     textures_path: PathBuf,

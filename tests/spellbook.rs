@@ -1,3 +1,4 @@
+#![cfg(feature = "gui")]
 //! Tests for spellbook first-load rendering.
 //!
 //! Bug: Spellbook shows blank on first open, spells appear only on second open.
