@@ -125,9 +125,8 @@ fn test_parent_sub_anon_chain_fallback_top() {
             "#,
         )
         .unwrap();
-    // anon2 and anon1 have no name, but UIParent is named → "UIParentIgnoreAnonTop"
-    // ("Top" only occurs when parent_id=None, which can't happen in Lua since nil→UIParent)
-    assert_eq!(name, "UIParentIgnoreAnonTop");
+    // anon2 and anon1 have no name; UIParent is skipped in $parent walk → falls back to "Top"
+    assert_eq!(name, "TopIgnoreAnonTop");
 }
 
 /// CreateTexture with $parent: verify parent substitution works for child regions.

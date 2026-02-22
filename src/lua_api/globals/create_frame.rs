@@ -14,7 +14,12 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     let state_clone = Rc::clone(&state);
     let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
-        let widget_type = WidgetType::from_str(&cfa.frame_type).unwrap_or(WidgetType::Frame);
+        let widget_type = match WidgetType::from_str(&cfa.frame_type) {
+            Some(wt) => wt,
+            None => return Err(mlua::Error::RuntimeError(
+                format!("Unknown frame type: {}", cfa.frame_type),
+            )),
+        };
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
         let parent_id = cfa.parent_id;
         let name = cfa.name;
@@ -55,52 +60,8 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             let _ = lua.load(&code).exec();
         }
 
-        // Apply intrinsic template if the frame type is registered as one.
-        // This handles types like ContainedAlertFrame, EventButton, etc. whose
-        // intrinsic XML definition (mixin, scripts, children) should be applied
-        // automatically when created via CreateFrame/CreateFramePool.
-        let intrinsic_entry = crate::xml::get_template(&frame_type);
         let ref_name = name.unwrap_or_else(|| format!("__frame_{}", frame_id));
-        if let Some(entry) = &intrinsic_entry {
-            // Use the canonical template name (PascalCase from XML definition),
-            // not the raw Lua input which may be all-caps (e.g. "DROPDOWNBUTTON").
-            let canonical = &entry.name;
-            apply_templates_from_registry(lua, &state_clone, &ref_name, canonical);
-            // Set frame.intrinsic = "TypeName" BEFORE user templates, so OnLoad
-            // handlers (e.g. ValidateIsDropdownButtonIntrinsic) can see it.
-            let code = format!(
-                "{}.intrinsic = \"{}\"",
-                lua_global_ref(&ref_name),
-                canonical
-            );
-            let _ = lua.load(&code).exec();
-        }
-
-        // Apply user-specified templates from the registry
-        if let Some(ref tmpl) = template {
-            apply_templates_from_registry(lua, &state_clone, &ref_name, tmpl);
-
-            // If any template in the chain defines parentArray, insert this frame
-            // into its parent's array.  This handles dynamic CreateFrame calls like
-            // CreateFrame("Frame", nil, self, "PreMatchArenaUnitFrameTemplate")
-            // where PreMatchArenaUnitFrameTemplate has parentArray="preMatchUnitFrames".
-            if parent_id.is_some() {
-                apply_parent_array_from_template(lua, tmpl, frame_id, &ref_name);
-            }
-        }
-
-
-        // Fire OnLoad on the frame itself (WoW fires OnLoad before CreateFrame returns).
-        // Skip when the XML loader is in charge — it fires OnLoad via
-        // fire_lifecycle_scripts after all inline properties (KeyValues, scripts,
-        // layers) are applied.  Without this, OnLoad fires before inline content
-        // is set, causing nil-reference errors (e.g. ActionBar numButtons).
-        let suppress_depth: i32 = lua.globals().get("__suppress_create_frame_onload")
-            .unwrap_or(0);
-        if suppress_depth <= 0 {
-            fire_deferred_child_onloads(lua);
-            fire_on_load(lua, &ref_name);
-        }
+        apply_intrinsic_and_templates(lua, &state_clone, &frame_type, &ref_name, template.as_deref(), parent_id, frame_id)?;
 
         Ok(ud)
     })?;
@@ -108,6 +69,31 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
 }
 
 /// Parsed CreateFrame arguments.
+/// Apply intrinsic templates, user templates, and fire OnLoad.
+fn apply_intrinsic_and_templates(
+    lua: &Lua, state: &Rc<RefCell<SimState>>, frame_type: &str,
+    ref_name: &str, template: Option<&str>, parent_id: Option<u64>, frame_id: u64,
+) -> mlua::Result<()> {
+    if let Some(entry) = &crate::xml::get_template(frame_type) {
+        let canonical = &entry.name;
+        apply_templates_from_registry(lua, state, ref_name, canonical);
+        let code = format!("{}.intrinsic = \"{}\"", lua_global_ref(ref_name), canonical);
+        let _ = lua.load(&code).exec();
+    }
+    if let Some(tmpl) = template {
+        apply_templates_from_registry(lua, state, ref_name, tmpl);
+        if parent_id.is_some() {
+            apply_parent_array_from_template(lua, tmpl, frame_id, ref_name);
+        }
+    }
+    let suppress_depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
+    if suppress_depth <= 0 {
+        fire_deferred_child_onloads(lua);
+        fire_on_load(lua, ref_name);
+    }
+    Ok(())
+}
+
 struct CreateFrameArgs {
     frame_type: String,
     name: Option<String>,
@@ -201,12 +187,13 @@ pub(crate) fn apply_parent_sub(name: &str, parent_id: Option<u64>, state: &SimSt
 }
 
 /// Walk the parent chain from `parent_id` and return the first frame with a non-empty name.
+/// Skips UIParent — when the walk reaches UIParent, returns None so the caller uses "Top".
 fn find_named_ancestor(start_id: Option<u64>, state: &SimState) -> Option<String> {
     let mut current_id = start_id;
     while let Some(id) = current_id {
         if let Some(frame) = state.widgets.get(id) {
             if let Some(ref n) = frame.name {
-                if !n.is_empty() {
+                if !n.is_empty() && n != "UIParent" {
                     return Some(n.clone());
                 }
             }

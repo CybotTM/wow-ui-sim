@@ -24,60 +24,75 @@ pub fn add_texture_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
 
 /// SetTexture, GetTexture, SetColorTexture.
 fn add_texture_path_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    add_set_texture(lua, methods)?;
+    add_get_texture(lua, methods)?;
+    add_set_color_texture(lua, methods)?;
+    Ok(())
+}
+
+/// Extract numeric file data ID from a Lua value (for GetTexture round-trip).
+fn extract_file_data_id(value: &Value) -> Option<i64> {
+    match value {
+        Value::Integer(n) => Some(*n),
+        Value::Number(n) => Some(*n as i64),
+        Value::String(s) => s.to_str().ok().and_then(|s| s.parse::<i64>().ok()),
+        _ => None,
+    }
+}
+
+fn add_set_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("SetTexture", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
         let id = lud_to_id(ud);
         let args_vec: Vec<Value> = args.into_iter().collect();
+        let file_data_id = args_vec.first().and_then(extract_file_data_id);
         let path = args_vec.first().map(resolve_file_data_id_or_path).unwrap_or(None);
-        let horiz_tile = args_vec.get(1).and_then(|v| match v {
-            Value::Boolean(b) => Some(*b),
-            _ => None,
-        });
-        let vert_tile = args_vec.get(2).and_then(|v| match v {
-            Value::Boolean(b) => Some(*b),
-            _ => None,
-        });
+        let horiz_tile = args_vec.get(1).and_then(|v| if let Value::Boolean(b) = v { Some(*b) } else { None });
+        let vert_tile = args_vec.get(2).and_then(|v| if let Value::Boolean(b) = v { Some(*b) } else { None });
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.texture = path;
+            frame.texture_file_data_id = file_data_id;
             if let Some(h) = horiz_tile { frame.horiz_tile = h; }
             if let Some(v) = vert_tile { frame.vert_tile = v; }
         }
         Ok(())
     })?)?;
+    Ok(())
+}
 
+fn add_get_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("GetTexture", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let texture = state
-            .widgets
-            .get(id)
-            .and_then(|f| f.texture.clone());
-        // When the stored texture string is a pure numeric fileID, return it as a Lua integer
-        // so callers get back the same type they passed to SetTexture.
+        let frame = state.widgets.get(id);
+        // Prefer the original numeric file data ID for round-trip fidelity
+        if let Some(fid) = frame.and_then(|f| f.texture_file_data_id) {
+            return Ok(Value::Integer(fid));
+        }
+        let texture = frame.and_then(|f| f.texture.clone());
         match texture {
-            Some(ref s) if s.parse::<i64>().is_ok() => {
-                Ok(Value::Integer(s.parse::<i64>().unwrap()))
-            }
+            Some(ref s) if s.parse::<i64>().is_ok() => Ok(Value::Integer(s.parse::<i64>().unwrap())),
             Some(s) => Ok(Value::String(lua.create_string(&s)?)),
             None => Ok(Value::Nil),
         }
     })?)?;
+    Ok(())
+}
 
+fn add_set_color_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("SetColorTexture", lua.create_function(|lua, (ud, r, g, b, a): (LightUserData, f32, f32, f32, Option<f32>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.color_texture =
-                Some(crate::widget::Color::new(r, g, b, a.unwrap_or(1.0)));
-            // GetTexture returns nil after SetColorTexture (headless/wowless behavior)
+            frame.color_texture = Some(crate::widget::Color::new(r, g, b, a.unwrap_or(1.0)));
             frame.texture = None;
+            frame.texture_file_data_id = None;
         }
         Ok(())
     })?)?;
-
     Ok(())
 }
 

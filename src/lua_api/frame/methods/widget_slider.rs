@@ -242,7 +242,7 @@ fn add_set_statusbar_texture(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         if let Some(bid) = bar_id {
             anchor_bar_to_parent(&mut state.widgets, bid, id);
         }
-        Ok(())
+        Ok(true)
     })?)?;
     Ok(())
 }

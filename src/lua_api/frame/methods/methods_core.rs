@@ -706,14 +706,20 @@ fn add_region_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
 }
 
 /// Check if a widget type is or inherits from the given type name.
+/// WorldFrame is special: GetObjectType() returns "Frame" but IsObjectType("Frame") is false.
 fn widget_type_is_a(wt: crate::widget::WidgetType, type_name: &str) -> bool {
     use crate::widget::WidgetType;
+    // WorldFrame: IsObjectType("WorldFrame") → true, IsObjectType("Frame") → false
+    if wt == WidgetType::WorldFrame {
+        return type_name.eq_ignore_ascii_case("worldframe")
+            || type_name.eq_ignore_ascii_case("region");
+    }
     if wt.as_str().eq_ignore_ascii_case(type_name) {
         return true;
     }
     match type_name.to_ascii_lowercase().as_str() {
         "region" => true,
-        "frame" => !matches!(wt, WidgetType::FontString | WidgetType::Texture | WidgetType::Line | WidgetType::WorldFrame),
+        "frame" => !matches!(wt, WidgetType::FontString | WidgetType::Texture | WidgetType::Line),
         "texture" => matches!(wt, WidgetType::Texture | WidgetType::Line),
         "line" => matches!(wt, WidgetType::Line),
         "button" => matches!(wt, WidgetType::Button | WidgetType::CheckButton),

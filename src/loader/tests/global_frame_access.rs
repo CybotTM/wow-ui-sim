@@ -133,10 +133,10 @@ fn test_preexisting_global_frames() {
 #[test]
 fn test_world_frame_object_type() {
     let env = WowLuaEnv::new().unwrap();
-    // WorldFrame reports its type as "WorldFrame", not "Frame"
+    // WorldFrame reports its type as "Frame" (WoW quirk), but IsObjectType("Frame") is false
     assert!(
-        env.eval::<bool>("return WorldFrame:GetObjectType() == 'WorldFrame'").unwrap(),
-        "WorldFrame:GetObjectType() should return 'WorldFrame'",
+        env.eval::<bool>("return WorldFrame:GetObjectType() == 'Frame'").unwrap(),
+        "WorldFrame:GetObjectType() should return 'Frame'",
     );
     // WorldFrame:IsObjectType("WorldFrame") should return true
     assert!(

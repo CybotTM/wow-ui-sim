@@ -427,7 +427,12 @@ impl AnimHandle {
             let Some(id) = target_id else { return Ok(Value::Nil) };
             Ok(frame_lud(id))
         });
-        methods.add_method("SetTarget", |_, _this, _target: Value| Ok(()));
+        methods.add_method("SetTarget", |_, _this, target: Value| {
+            if target.is_nil() || target == Value::NULL {
+                return Err(mlua::Error::RuntimeError("Usage: Animation:SetTarget(target)".into()));
+            }
+            Ok(())
+        });
         methods.add_method("SetChildKey", |_, this, key: String| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)

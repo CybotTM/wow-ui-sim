@@ -175,6 +175,7 @@ pub struct Frame {
     pub propagate_keyboard_input: bool,
     /// Texture path (for Texture widgets).
     pub texture: Option<String>,
+    pub texture_file_data_id: Option<i64>,
     /// Solid color texture (from SetColorTexture).
     pub color_texture: Option<Color>,
     /// Vertex color for textures (tinting).
@@ -445,6 +446,7 @@ macro_rules! frame_defaults {
             keyboard_enabled: false,
             propagate_keyboard_input: false,
             texture: None,
+            texture_file_data_id: None,
             color_texture: None,
             vertex_color: None,
             text: None,

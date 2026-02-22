@@ -26,7 +26,7 @@ fn test_world_frame_exists() {
     let exists: bool = env.eval("return WorldFrame ~= nil").unwrap();
     assert!(exists, "WorldFrame should exist as a global");
     let obj_type: String = env.eval("return WorldFrame:GetObjectType()").unwrap();
-    assert_eq!(obj_type, "WorldFrame");
+    assert_eq!(obj_type, "Frame");
     // WorldFrame is a special type — IsObjectType("Frame") returns false
     let is_frame: bool = env.eval("return WorldFrame:IsObjectType('Frame')").unwrap();
     assert!(!is_frame, "WorldFrame:IsObjectType('Frame') should return false");

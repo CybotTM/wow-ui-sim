@@ -69,7 +69,9 @@ impl WidgetType {
             "simplehtml" => Some(Self::SimpleHTML),
             "gametooltip" => Some(Self::GameTooltip),
             "minimap" => Some(Self::Minimap),
-            "worldframe" => Some(Self::WorldFrame),
+            // EventFrame is a Frame subtype for event-only handling
+            "eventframe" => Some(Self::Frame),
+            // WorldFrame is internal only — CreateFrame("WorldFrame") should error
             _ => None,
         }
     }
@@ -95,7 +97,7 @@ impl WidgetType {
             Self::SimpleHTML => "SimpleHTML",
             Self::GameTooltip => "GameTooltip",
             Self::Minimap => "Minimap",
-            Self::WorldFrame => "WorldFrame",
+            Self::WorldFrame => "Frame",
         }
     }
 }
