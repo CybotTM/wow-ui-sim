@@ -46,7 +46,7 @@ RUN cargo build --release --bin wow-sim --no-default-features --locked \
 # =============================================================================
 # Runtime Stage
 # =============================================================================
-FROM debian:bookworm-slim
+FROM gcr.io/distroless/cc-debian12
 
 WORKDIR /app
 
