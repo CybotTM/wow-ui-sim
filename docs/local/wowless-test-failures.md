@@ -25,21 +25,16 @@ Results from `wow-sim --no-saved-vars self-test` against the Wowless addon test 
 - **CreateFrame unknown types**: CreateFrame errors on unrecognized type names (e.g. "WorldFrame"). Added "EventFrame" as alias for Frame.
 - **Region rect**: GetLeft/Right/Top/Bottom/Center/GetRect return nothing when no anchors. IsRectValid checks dirty flag without resolving. GetWidth/Height/Size(true) return explicit dimensions. SetSize no-op when unchanged. Separated rect_dirty cache from rect_dirty_ids. Tests: `Interface/AddOns/Wowless/tests/test_region_rect.lua`
 - **Font vfs**: Fresh CreateFont returns nil from GetFont (removed default `__fontPath`). Tests: `tests/font_api.rs`
+- **OnShow/OnHide mutual recursion**: Iterative handler loop with 12-invocation limit. `show_hide_depth` reentry flag. Tests: wowless uiobjects.lua
+- **RegisterEventCallback**: Stub returns `true` (was returning nothing). Tests: wowless uiobjects.lua
+- **OnShow/OnHide ordering**: Children-first depth-first ordering (children fire before parents). Tests: wowless uiobjects.lua
+- **Button states**: SetButtonState validates input (errors on invalid), GetButtonState returns "DISABLED" when disabled, Disable resets button_state.
 
 ## Remaining Failures
 
-### Frame OnShow/OnHide mutual recursion (1 failure)
+### Button text/textures (8 failures)
 
-Recursion pattern differs — WoW limits Show/Hide recursion depth differently than our simulator.
-
-### Frame RegisterEventCallback (1 failure)
-
-`RegisterEventCallback` with funtainer arg — missing `funtainer` support.
-
-### Button states/textures (8 failures)
-
-- `button states`: State transition error handling differs
-- `button text`: Reset state child count wrong
+- `button text`: Reset state child count wrong — 5 default children created at button creation
 - `button textures parent`: Multiple issues with reparenting, child count, texture reuse
 
 ### StatusBar (1 failure)
@@ -64,9 +59,9 @@ Recursion pattern differs — WoW limits Show/Hide recursion depth differently t
 
 Missing `SimpleCheckout` frame type support.
 
-### Visibility OnShow ordering (2 failures)
+### Frame parent keys (1 failure)
 
-Children should see updated visibility before parent's OnShow fires. Current order: parent first, then children.
+`want "moo", got "cow"` — parent key handling differs from WoW.
 
 ### C_Timer.NewTimer (1 async failure)
 

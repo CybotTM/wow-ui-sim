@@ -490,6 +490,8 @@ fn add_enable_disable_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
 }
 
 /// Update the `__enabled` attribute on a widget.
+/// When disabling, also resets `button_state` to 0 (normal) so that
+/// re-enabling transitions to "NORMAL" rather than "PUSHED".
 fn set_enabled_attribute(state: &mut crate::lua_api::SimState, id: u64, enabled: bool) {
     // Skip if the value is already set to avoid dirtying the frame on no-op calls
     // (e.g. LeaveInstanceGroupButton calls SetEnabled every OnUpdate tick).
@@ -505,6 +507,9 @@ fn set_enabled_attribute(state: &mut crate::lua_api::SimState, id: u64, enabled:
             "__enabled".to_string(),
             crate::widget::AttributeValue::Boolean(enabled),
         );
+        if !enabled {
+            frame.button_state = 0;
+        }
     }
 }
 
@@ -532,11 +537,23 @@ fn add_button_state_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
     methods.set("SetButtonState", lua.create_function(
         |lua, (ud, state_str, _locked): (LightUserData, String, Option<bool>)| {
             let id = lud_to_id(ud);
-            let val = if state_str.eq_ignore_ascii_case("PUSHED") { 1 } else { 0 };
             let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.button_state = val;
+            if state_str.eq_ignore_ascii_case("PUSHED") {
+                let mut state = state_rc.borrow_mut();
+                if let Some(f) = state.widgets.get_mut_visual(id) { f.button_state = 1; }
+                set_enabled_attribute(&mut state, id, true);
+            } else if state_str.eq_ignore_ascii_case("NORMAL") {
+                let mut state = state_rc.borrow_mut();
+                if let Some(f) = state.widgets.get_mut_visual(id) { f.button_state = 0; }
+                set_enabled_attribute(&mut state, id, true);
+            } else if state_str.eq_ignore_ascii_case("DISABLED") {
+                let mut state = state_rc.borrow_mut();
+                set_enabled_attribute(&mut state, id, false);
+            } else {
+                return Err(mlua::Error::runtime(format!(
+                    "Usage: Button:SetButtonState(\"state\"): Unknown button state ({})",
+                    state_str
+                )));
             }
             Ok(())
         },
@@ -546,8 +563,19 @@ fn add_button_state_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let val = state.widgets.get(id).map(|f| f.button_state).unwrap_or(0);
-        Ok(if val == 1 { "PUSHED".to_string() } else { "NORMAL".to_string() })
+        if let Some(f) = state.widgets.get(id) {
+            let enabled = f.attributes.get("__enabled")
+                .and_then(|v| match v {
+                    crate::widget::AttributeValue::Boolean(b) => Some(*b),
+                    _ => None,
+                })
+                .unwrap_or(true);
+            if !enabled {
+                return Ok("DISABLED".to_string());
+            }
+            return Ok(if f.button_state == 1 { "PUSHED" } else { "NORMAL" }.to_string());
+        }
+        Ok("NORMAL".to_string())
     })?)?;
 
     methods.set("LockHighlight", lua.create_function(|_, _ud: LightUserData| Ok(()))?)?;
