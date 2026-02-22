@@ -98,7 +98,7 @@ fn create_engine_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_
     }
 
     // WorldFrame (3D world rendering area, same level as UIParent)
-    register_frame(widgets, WidgetType::Frame, "WorldFrame", None, Some((screen_width, screen_height)));
+    register_frame(widgets, WidgetType::WorldFrame, "WorldFrame", None, Some((screen_width, screen_height)));
 
     // DEFAULT_CHAT_FRAME fallback (overwritten by show_chat_frame workaround when chat addons load)
     register_frame(widgets, WidgetType::MessageFrame, "DEFAULT_CHAT_FRAME", Some(ui_parent_id), Some((430.0, 120.0)));

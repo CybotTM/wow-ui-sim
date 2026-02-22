@@ -131,6 +131,31 @@ fn test_preexisting_global_frames() {
 }
 
 #[test]
+fn test_world_frame_object_type() {
+    let env = WowLuaEnv::new().unwrap();
+    // WorldFrame reports its type as "WorldFrame", not "Frame"
+    assert!(
+        env.eval::<bool>("return WorldFrame:GetObjectType() == 'WorldFrame'").unwrap(),
+        "WorldFrame:GetObjectType() should return 'WorldFrame'",
+    );
+    // WorldFrame:IsObjectType("WorldFrame") should return true
+    assert!(
+        env.eval::<bool>("return WorldFrame:IsObjectType('WorldFrame')").unwrap(),
+        "WorldFrame:IsObjectType('WorldFrame') should return true",
+    );
+    // WorldFrame:IsObjectType("Frame") should return false (special case, unlike other frames)
+    assert!(
+        !env.eval::<bool>("return WorldFrame:IsObjectType('Frame')").unwrap(),
+        "WorldFrame:IsObjectType('Frame') should return false",
+    );
+    // WorldFrame:IsObjectType("Region") should return true (it is a Region)
+    assert!(
+        env.eval::<bool>("return WorldFrame:IsObjectType('Region')").unwrap(),
+        "WorldFrame:IsObjectType('Region') should return true",
+    );
+}
+
+#[test]
 fn test_global_nil_for_nonexistent_frame() {
     let env = WowLuaEnv::new().unwrap();
     assert!(

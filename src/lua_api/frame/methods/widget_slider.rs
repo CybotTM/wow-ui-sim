@@ -258,7 +258,7 @@ fn add_get_statusbar_texture(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         if let Some(bar_id) = bar_id {
             return Ok(frame_lud(bar_id));
         }
-        get_or_create_child_texture(lua, id, "StatusBarTexture")
+        Ok(Value::Nil)
     })?)?;
     Ok(())
 }

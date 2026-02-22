@@ -40,6 +40,7 @@ pub enum WidgetType {
     SimpleHTML,
     GameTooltip,
     Minimap,
+    WorldFrame,
 }
 
 impl WidgetType {
@@ -68,6 +69,7 @@ impl WidgetType {
             "simplehtml" => Some(Self::SimpleHTML),
             "gametooltip" => Some(Self::GameTooltip),
             "minimap" => Some(Self::Minimap),
+            "worldframe" => Some(Self::WorldFrame),
             _ => None,
         }
     }
@@ -93,6 +95,7 @@ impl WidgetType {
             Self::SimpleHTML => "SimpleHTML",
             Self::GameTooltip => "GameTooltip",
             Self::Minimap => "Minimap",
+            Self::WorldFrame => "WorldFrame",
         }
     }
 }

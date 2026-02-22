@@ -713,7 +713,7 @@ fn widget_type_is_a(wt: crate::widget::WidgetType, type_name: &str) -> bool {
     }
     match type_name.to_ascii_lowercase().as_str() {
         "region" => true,
-        "frame" => !matches!(wt, WidgetType::FontString | WidgetType::Texture | WidgetType::Line),
+        "frame" => !matches!(wt, WidgetType::FontString | WidgetType::Texture | WidgetType::Line | WidgetType::WorldFrame),
         "texture" => matches!(wt, WidgetType::Texture | WidgetType::Line),
         "line" => matches!(wt, WidgetType::Line),
         "button" => matches!(wt, WidgetType::Button | WidgetType::CheckButton),
