@@ -1,7 +1,16 @@
 //! Visibility methods (Show, Hide, SetShown) and OnShow/OnHide recursive firing.
+//!
+//! WoW fires Show/Hide handlers iteratively, not recursively. When a handler
+//! calls Show/Hide on the same frame, the state changes immediately but the
+//! handler is deferred. After the current handler returns, the loop detects
+//! the state change and fires the next handler. This limits mutual recursion
+//! to 12 handler invocations (6 cycles of OnHide→OnShow).
 
 use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua};
+
+/// Maximum handler invocations per Show/Hide call (6 cycles × 2 handlers).
+const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
 
 /// Fire OnShow on a frame and recursively on its visible children.
 pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
@@ -18,55 +27,86 @@ pub(crate) fn fire_on_hide_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
 
 /// Register Show, Hide, SetShown methods.
 pub(super) fn add_show_hide_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("Show", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let was_hidden = {
-            let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
-        };
-        state_rc.borrow_mut().set_frame_visible(id, true);
-        if was_hidden {
-            fire_on_show_recursive(lua, id)?;
-        }
-        Ok(())
-    })?)?;
+    methods.set("Show", lua.create_function(show_impl)?)?;
+    methods.set("Hide", lua.create_function(hide_impl)?)?;
+    methods.set("SetShown", lua.create_function(setshown_impl)?)?;
+    Ok(())
+}
 
-    methods.set("Hide", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let was_visible = {
-            let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| f.visible).unwrap_or(false)
-        };
-        // Set invisible BEFORE firing OnHide to prevent re-entrant Hide()
-        // from recursing (e.g. HelpTip.OnHide → Release → Hide).
-        state_rc.borrow_mut().set_frame_visible(id, false);
-        if was_visible {
-            fire_on_hide_recursive(lua, id)?;
-        }
-        Ok(())
-    })?)?;
+fn show_impl(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
+    show_or_hide(lua, lud_to_id(ud), true)
+}
 
-    methods.set("SetShown", lua.create_function(|lua, (ud, shown): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let was_hidden = {
-            let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| !f.visible).unwrap_or(false)
-        };
-        let was_visible = !was_hidden;
-        // Set visibility BEFORE firing handlers to prevent re-entrant
-        // Show/Hide from recursing.
-        state_rc.borrow_mut().set_frame_visible(id, shown);
-        if shown && was_hidden {
-            fire_on_show_recursive(lua, id)?;
-        } else if !shown && was_visible {
-            fire_on_hide_recursive(lua, id)?;
-        }
-        Ok(())
-    })?)?;
+fn hide_impl(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
+    show_or_hide(lua, lud_to_id(ud), false)
+}
 
+fn setshown_impl(lua: &Lua, (ud, shown): (LightUserData, bool)) -> mlua::Result<()> {
+    show_or_hide(lua, lud_to_id(ud), shown)
+}
+
+/// Unified Show/Hide implementation with iterative handler loop.
+///
+/// When called from inside a handler (re-entrant), just changes visible
+/// state and returns. The outer loop detects the change after the handler
+/// returns and fires the next handler.
+fn show_or_hide(lua: &Lua, id: u64, show: bool) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let (needs_change, in_handler) = {
+        let state = state_rc.borrow();
+        let f = state.widgets.get(id);
+        (
+            f.map(|f| f.visible != show).unwrap_or(false),
+            f.map(|f| f.show_hide_depth > 0).unwrap_or(false),
+        )
+    };
+    if !needs_change {
+        return Ok(());
+    }
+    state_rc.borrow_mut().set_frame_visible(id, show);
+    if in_handler {
+        return Ok(());
+    }
+    drain_visibility_handlers(lua, id, show)?;
+    // Restore to outermost caller's intended state
+    state_rc.borrow_mut().set_frame_visible(id, show);
+    if let Some(f) = state_rc.borrow_mut().widgets.get_mut(id) {
+        f.show_hide_depth = 0;
+    }
+    Ok(())
+}
+
+/// Iteratively fire OnShow/OnHide handlers until no more state changes
+/// occur or the handler limit is reached.
+fn drain_visibility_handlers(
+    lua: &Lua,
+    id: u64,
+    initial_target: bool,
+) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    if let Some(f) = state_rc.borrow_mut().widgets.get_mut(id) {
+        f.show_hide_depth = 1;
+    }
+    let mut target = initial_target;
+    for _ in 0..SHOW_HIDE_HANDLER_LIMIT {
+        let handler = if target { "OnShow" } else { "OnHide" };
+        fire_script_recursive(lua, id, handler)?;
+        // Check if handler called Show/Hide (changed visible)
+        let visible_after = state_rc
+            .borrow()
+            .widgets
+            .get(id)
+            .map(|f| f.visible)
+            .unwrap_or(false);
+        // Restore visible to what this handler intended
+        state_rc.borrow_mut().set_frame_visible(id, target);
+        if visible_after == target {
+            break; // Handler didn't call Show/Hide, done
+        }
+        // Handler called the opposite — set up for next iteration
+        target = visible_after;
+        state_rc.borrow_mut().set_frame_visible(id, target);
+    }
     Ok(())
 }
 
