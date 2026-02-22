@@ -90,26 +90,41 @@ fn add_size_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 }
 
 /// Size getter methods: GetWidth, GetHeight, GetSize
+/// When called with `true`, return explicitly set size without resolving dirty rect.
 fn add_size_getters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetWidth", lua.create_function(|lua, ud: LightUserData| {
+    methods.set("GetWidth", lua.create_function(|lua, (ud, ignore): (LightUserData, Option<bool>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
+        if ignore == Some(true) {
+            let state = state_rc.borrow();
+            return Ok(state.widgets.get(id).map(|f| f.width).unwrap_or(0.0));
+        }
         let mut state = state_rc.borrow_mut();
         state.resolve_rect_if_dirty(id);
         Ok(calculate_frame_width(&state.widgets, id))
     })?)?;
 
-    methods.set("GetHeight", lua.create_function(|lua, ud: LightUserData| {
+    methods.set("GetHeight", lua.create_function(|lua, (ud, ignore): (LightUserData, Option<bool>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
+        if ignore == Some(true) {
+            let state = state_rc.borrow();
+            return Ok(state.widgets.get(id).map(|f| f.height).unwrap_or(0.0));
+        }
         let mut state = state_rc.borrow_mut();
         state.resolve_rect_if_dirty(id);
         Ok(calculate_frame_height(&state.widgets, id))
     })?)?;
 
-    methods.set("GetSize", lua.create_function(|lua, (ud, _explicit): (LightUserData, Option<bool>)| {
+    methods.set("GetSize", lua.create_function(|lua, (ud, ignore): (LightUserData, Option<bool>)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
+        if ignore == Some(true) {
+            let state = state_rc.borrow();
+            let (w, h) = state.widgets.get(id)
+                .map(|f| (f.width, f.height)).unwrap_or((0.0, 0.0));
+            return Ok((w, h));
+        }
         let mut state = state_rc.borrow_mut();
         state.resolve_rect_if_dirty(id);
         let width = calculate_frame_width(&state.widgets, id);
@@ -126,12 +141,17 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        let changed = state.widgets.get(id)
+            .map(|f| f.width != width || f.height != height)
+            .unwrap_or(false);
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.set_size(width, height);
             frame.width_is_text_auto = false;
         }
-        state.widgets.mark_rect_dirty(id);
-        state.invalidate_layout_with_dependents(id);
+        if changed {
+            state.widgets.mark_rect_dirty(id);
+            state.invalidate_layout_with_dependents(id);
+        }
         Ok(())
     })?)?;
 
@@ -139,12 +159,15 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        let changed = state.widgets.get(id).map(|f| f.width != width).unwrap_or(false);
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.width = width;
             frame.width_is_text_auto = false;
         }
-        state.widgets.mark_rect_dirty(id);
-        state.invalidate_layout_with_dependents(id);
+        if changed {
+            state.widgets.mark_rect_dirty(id);
+            state.invalidate_layout_with_dependents(id);
+        }
         Ok(())
     })?)?;
 
@@ -152,11 +175,14 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        let changed = state.widgets.get(id).map(|f| f.height != height).unwrap_or(false);
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.height = height;
         }
-        state.widgets.mark_rect_dirty(id);
-        state.invalidate_layout_with_dependents(id);
+        if changed {
+            state.widgets.mark_rect_dirty(id);
+            state.invalidate_layout_with_dependents(id);
+        }
         Ok(())
     })?)?;
 
@@ -565,13 +591,11 @@ fn add_region_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
     methods.set("IsRectValid", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
-        let has_anchors = state_rc.borrow().widgets.get(id)
+        let mut state = state_rc.borrow_mut();
+        let has_anchors = state.widgets.get(id)
             .map(|f| !f.anchors.is_empty()).unwrap_or(false);
-        if !has_anchors {
-            return Ok(false);
-        }
-        state_rc.borrow_mut().resolve_rect_if_dirty(id);
-        Ok(true)
+        if !has_anchors { return Ok(false); }
+        Ok(!state.widgets.is_rect_dirty(id))
     })?)?;
 
     methods.set("IsObjectLoaded", lua.create_function(|_, _ud: LightUserData| Ok(true))?)?;

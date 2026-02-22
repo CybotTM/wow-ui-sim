@@ -464,15 +464,14 @@ impl SimState {
     }
 
     /// Force layout resolution for a single frame, clearing its rect_dirty flag.
-    /// Called by GetSize/GetWidth/GetHeight/IsRectValid to match WoW behavior
-    /// where those methods force immediate rect resolution within the same frame.
+    /// Called by GetSize/GetWidth/GetHeight and rect query methods to match WoW
+    /// behavior where those methods force immediate rect resolution.
     pub fn resolve_rect_if_dirty(&mut self, id: u64) {
         if !self.widgets.is_rect_dirty(id) {
             return;
         }
         self.invalidate_layout(id);
-        // invalidate_layout → recompute_layout_subtree already clears rect_dirty
-        // on the frame and all descendants via clear_rect_dirty.
+        self.widgets.clear_rect_dirty(id);
     }
 
     /// Set a frame's visibility and eagerly propagate effective_alpha.

@@ -264,10 +264,15 @@ impl WidgetRegistry {
         }
     }
 
-    /// Check if a frame is rect-dirty by walking up ancestors.
-    /// Caches the result on the walked chain so subsequent calls are O(1).
+    /// Check if a frame is rect-dirty by checking `rect_dirty_ids` (authoritative
+    /// for Lua-visible dirty state) then walking up ancestors with caching.
     pub fn is_rect_dirty(&mut self, id: u64) -> bool {
-        // Fast path: already resolved
+        // Authoritative check: is this frame a dirty root?
+        if self.rect_dirty_ids.contains(&id) {
+            return true;
+        }
+
+        // Fast path: cached result from previous ancestor walk
         if let Some(f) = self.widgets.get(&id) {
             match f.rect_dirty {
                 Some(true) => return true,
@@ -283,6 +288,10 @@ impl WidgetRegistry {
         let mut current = self.widgets.get(&id).and_then(|f| f.parent_id);
         let mut found_dirty = false;
         while let Some(pid) = current {
+            if self.rect_dirty_ids.contains(&pid) {
+                found_dirty = true;
+                break;
+            }
             if let Some(f) = self.widgets.get(&pid) {
                 match f.rect_dirty {
                     Some(true) => { found_dirty = true; break; }
@@ -331,10 +340,15 @@ impl WidgetRegistry {
         std::mem::take(&mut self.pending_layout_ids)
     }
 
-    /// Mark a frame's layout as resolved: remove from pending set and clear rect_dirty.
+    /// Mark a frame's layout as resolved: remove from pending set and clear
+    /// the `rect_dirty` cache field to prevent stale ancestor-walk results.
+    /// Does NOT remove from `rect_dirty_ids` — that set is the authoritative
+    /// Lua-visible dirty state, managed by `clear_rect_dirty`/`drain_rect_dirty`.
     pub fn mark_layout_resolved(&mut self, id: u64) {
         self.pending_layout_ids.remove(&id);
-        self.clear_rect_dirty(id);
+        if let Some(f) = self.widgets.get_mut(&id) {
+            f.rect_dirty = None;
+        }
     }
 
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.
