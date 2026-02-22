@@ -6,10 +6,10 @@
 use crate::lua_api::script_helpers::lua_error;
 use mlua::{Lua, Result, Value};
 
-/// Set default font properties on a table.
+/// Set default font properties on a table (no font path — GetFont returns nil until SetFont).
 fn set_font_defaults(font: &mlua::Table, name: Option<&str>) -> Result<()> {
-    font.set("__fontPath", "Fonts\\FRIZQT__.TTF")?;
-    font.set("__fontHeight", 12.0)?;
+    // No __fontPath set — GetFont will return (nil, 0, "") until SetFont is called
+    font.set("__fontHeight", 0.0)?;
     font.set("__fontFlags", "")?;
     font.set("__textColorR", 1.0)?;
     font.set("__textColorG", 1.0)?;
