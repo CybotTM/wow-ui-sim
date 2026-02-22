@@ -83,7 +83,7 @@ fn add_event_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
 
     // RegisterEventCallback(event, callbackContainer) - callback-based event registration
     methods.set("RegisterEventCallback", lua.create_function(
-        |_lua, (_ud, _event, _cb): (LightUserData, Value, Value)| Ok(()),
+        |_lua, (_ud, _event, _cb): (LightUserData, Value, Value)| Ok(true),
     )?)?;
 
     Ok(())
