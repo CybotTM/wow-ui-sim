@@ -161,23 +161,56 @@ fn parse_create_frame_args(
     Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
 }
 
+/// Replace the `$parent` prefix in a frame name with the actual ancestor name.
+///
+/// Matches wowless `ParentSub()` behavior:
+/// - Pattern `^$[pP][aA][rR][eE][nN][tT]` — case-insensitive, start-of-string only
+/// - Walk parent chain to find the first NAMED ancestor (skip unnamed/anonymous frames)
+/// - Fallback: "Top" when no named ancestor exists
+/// - Single replacement only (anchored to start of string)
+pub(crate) fn apply_parent_sub(name: &str, parent_id: Option<u64>, state: &SimState) -> String {
+    // Fast-path: check if name starts with "$parent" (case-insensitive, 7 chars)
+    if name.len() < 7 {
+        return name.to_string();
+    }
+    let prefix = &name[..7];
+    if !prefix.eq_ignore_ascii_case("$parent") {
+        return name.to_string();
+    }
+
+    // Walk parent chain to find first named ancestor
+    let ancestor_name = find_named_ancestor(parent_id, state);
+    let replacement = ancestor_name.as_deref().unwrap_or("Top");
+
+    // Replace only the leading $parent prefix (chars 0..7), keep the rest
+    format!("{}{}", replacement, &name[7..])
+}
+
+/// Walk the parent chain from `parent_id` and return the first frame with a non-empty name.
+fn find_named_ancestor(start_id: Option<u64>, state: &SimState) -> Option<String> {
+    let mut current_id = start_id;
+    while let Some(id) = current_id {
+        if let Some(frame) = state.widgets.get(id) {
+            if let Some(ref n) = frame.name {
+                if !n.is_empty() {
+                    return Some(n.clone());
+                }
+            }
+            current_id = frame.parent_id;
+        } else {
+            break;
+        }
+    }
+    None
+}
+
 /// Replace $parent/$Parent placeholders in a frame name with the actual parent name.
 fn substitute_parent_name(
     name: String,
     parent_id: Option<u64>,
     state: &Rc<RefCell<SimState>>,
 ) -> String {
-    if !name.contains("$parent") && !name.contains("$Parent") {
-        return name;
-    }
-    if let Some(pid) = parent_id {
-        let state = state.borrow();
-        if let Some(parent_name) = state.widgets.get(pid).and_then(|f| f.name.clone()) {
-            return name.replace("$parent", &parent_name)
-                .replace("$Parent", &parent_name);
-        }
-    }
-    name.replace("$parent", "").replace("$Parent", "")
+    apply_parent_sub(&name, parent_id, &state.borrow())
 }
 
 /// Register a new frame in the widget registry and set up parent-child relationship.

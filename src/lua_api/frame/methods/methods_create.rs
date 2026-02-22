@@ -2,30 +2,17 @@
 
 use crate::lua_api::animation::{AnimGroupHandle, AnimGroupState};
 use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::globals::create_frame::apply_parent_sub;
 use crate::widget::{Frame, WidgetType};
 use mlua::{LightUserData, Lua, Value};
 use std::rc::Rc;
 
-/// Handle $parent substitution in frame names.
-fn substitute_parent_name(name: &str, parent_name: Option<&str>) -> String {
-    if name.contains("$parent") || name.contains("$Parent") {
-        if let Some(pname) = parent_name {
-            name.replace("$parent", pname).replace("$Parent", pname)
-        } else {
-            name.replace("$parent", "").replace("$Parent", "")
-        }
-    } else {
-        name.to_string()
-    }
-}
-
-/// Resolve a raw name with $parent substitution using the parent widget's name.
+/// Resolve a raw name with $parent substitution using the parent widget's ancestor chain.
 fn resolve_child_name(lua: &Lua, name_raw: Option<String>, parent_id: u64) -> Option<String> {
     name_raw.map(|n| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let parent_name = state.widgets.get(parent_id).and_then(|f| f.name.as_deref());
-        substitute_parent_name(&n, parent_name)
+        apply_parent_sub(&n, Some(parent_id), &state)
     })
 }
 
