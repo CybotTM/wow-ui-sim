@@ -110,10 +110,10 @@ fn drain_visibility_handlers(
     Ok(())
 }
 
-/// Shared implementation: fire a script handler on a frame, then recurse
-/// into visible children.
+/// Fire a script handler depth-first: recurse into visible children first,
+/// then fire the handler on this frame. WoW fires OnShow/OnHide on children
+/// before parents so all frames see correct visibility when their handler runs.
 fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result<()> {
-    // Collect visible children first (before the handler potentially hides them).
     let children: Vec<u64> = {
         let state_rc = get_sim_state(lua);
         let st = state_rc.borrow();
@@ -129,15 +129,15 @@ fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result
             .unwrap_or_default()
     };
 
+    for child_id in children {
+        fire_script_recursive(lua, child_id, handler_name)?;
+    }
+
     if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, handler_name) {
         let frame_val = frame_lud(id);
         if let Err(e) = handler.call::<()>(frame_val) {
             crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
         }
-    }
-
-    for child_id in children {
-        fire_script_recursive(lua, child_id, handler_name)?;
     }
 
     Ok(())
