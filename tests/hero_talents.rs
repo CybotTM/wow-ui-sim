@@ -94,8 +94,9 @@ fn test_activate_hero_spec_lightsmith() {
     let result: String = env
         .eval(
             r#"
-            -- Before activation: no active hero spec
-            assert(C_ClassTalents.GetActiveHeroTalentSpec() == nil, "should be nil before activation")
+            -- Clear auto-selected hero spec so we start from a clean state
+            C_Traits.SetSelection(1, 99838, nil)
+            assert(C_ClassTalents.GetActiveHeroTalentSpec() == nil, "should be nil after clearing")
 
             -- Selection node 99838 should be visible (Protection spec)
             local nodeInfo = C_Traits.GetNodeInfo(1, 99838)
