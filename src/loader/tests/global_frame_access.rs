@@ -105,20 +105,14 @@ fn test_xml_child_texture_in_global() {
 }
 
 #[test]
-fn test_button_child_globals() {
-    let (t, _) = load_test_lua("test-g-btn-children", r#"
+fn test_button_child_globals_not_on_fresh_button() {
+    let (t, _) = load_test_lua("test-g-btn-no-children", r#"
         local btn = CreateFrame("Button", "BtnGlobalTest", UIParent)
         HAS_NORMAL = (_G["BtnGlobalTestNormalTexture"] ~= nil)
-        HAS_PUSHED = (_G["BtnGlobalTestPushedTexture"] ~= nil)
-        HAS_HIGHLIGHT = (_G["BtnGlobalTestHighlightTexture"] ~= nil)
-        HAS_DISABLED = (_G["BtnGlobalTestDisabledTexture"] ~= nil)
         HAS_TEXT = (_G["BtnGlobalTestText"] ~= nil)
     "#);
-    t.assert_lua_true("return HAS_NORMAL", "NormalTexture should be a global");
-    t.assert_lua_true("return HAS_PUSHED", "PushedTexture should be a global");
-    t.assert_lua_true("return HAS_HIGHLIGHT", "HighlightTexture should be a global");
-    t.assert_lua_true("return HAS_DISABLED", "DisabledTexture should be a global");
-    t.assert_lua_true("return HAS_TEXT", "Text should be a global");
+    t.assert_lua_true("return not HAS_NORMAL", "NormalTexture should NOT be a global on fresh button");
+    t.assert_lua_true("return not HAS_TEXT", "Text should NOT be a global on fresh button");
 }
 
 #[test]

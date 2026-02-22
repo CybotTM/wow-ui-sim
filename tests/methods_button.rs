@@ -128,87 +128,47 @@ fn test_pushed_text_offset() {
 // ============================================================================
 
 #[test]
-fn test_get_normal_texture_not_nil() {
+fn test_get_normal_texture_nil_on_fresh_button() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"local btn = CreateFrame("Button", "TestGetNormTex", UIParent)"#)
+        .unwrap();
+
+    let is_nil: bool = env
+        .eval("return TestGetNormTex:GetNormalTexture() == nil")
+        .unwrap();
+    assert!(is_nil, "Fresh button GetNormalTexture should return nil");
+}
+
+#[test]
+fn test_get_normal_texture_after_set() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
         r#"
-        local btn = CreateFrame("Button", "TestGetNormTex", UIParent)
+        local btn = CreateFrame("Button", "TestGetNormTex2", UIParent)
+        btn:SetNormalTexture("Interface\\Buttons\\UI-Panel-Button-Up")
     "#,
     )
     .unwrap();
 
-    let not_nil: bool = env
-        .eval("return TestGetNormTex:GetNormalTexture() ~= nil")
-        .unwrap();
-    assert!(not_nil, "GetNormalTexture should return a non-nil value");
-
     let obj_type: String = env
-        .eval("return TestGetNormTex:GetNormalTexture():GetObjectType()")
+        .eval("return TestGetNormTex2:GetNormalTexture():GetObjectType()")
         .unwrap();
-    assert_eq!(obj_type, "Texture", "GetNormalTexture should return a Texture");
-}
-
-#[test]
-fn test_get_highlight_texture_not_nil() {
-    let env = WowLuaEnv::new().unwrap();
-
-    env.exec(r#"local btn = CreateFrame("Button", "TestGetHlTex", UIParent)"#)
-        .unwrap();
-
-    let not_nil: bool = env
-        .eval("return TestGetHlTex:GetHighlightTexture() ~= nil")
-        .unwrap();
-    assert!(not_nil, "GetHighlightTexture should return a non-nil value");
-
-    let obj_type: String = env
-        .eval("return TestGetHlTex:GetHighlightTexture():GetObjectType()")
-        .unwrap();
-    assert_eq!(obj_type, "Texture", "GetHighlightTexture should return a Texture");
-}
-
-#[test]
-fn test_get_pushed_texture_not_nil() {
-    let env = WowLuaEnv::new().unwrap();
-
-    env.exec(r#"local btn = CreateFrame("Button", "TestGetPushTex", UIParent)"#)
-        .unwrap();
-
-    let not_nil: bool = env
-        .eval("return TestGetPushTex:GetPushedTexture() ~= nil")
-        .unwrap();
-    assert!(not_nil, "GetPushedTexture should return a non-nil value");
-
-    let obj_type: String = env
-        .eval("return TestGetPushTex:GetPushedTexture():GetObjectType()")
-        .unwrap();
-    assert_eq!(obj_type, "Texture", "GetPushedTexture should return a Texture");
-}
-
-#[test]
-fn test_get_disabled_texture_not_nil() {
-    let env = WowLuaEnv::new().unwrap();
-
-    env.exec(r#"local btn = CreateFrame("Button", "TestGetDisTex", UIParent)"#)
-        .unwrap();
-
-    let not_nil: bool = env
-        .eval("return TestGetDisTex:GetDisabledTexture() ~= nil")
-        .unwrap();
-    assert!(not_nil, "GetDisabledTexture should return a non-nil value");
-
-    let obj_type: String = env
-        .eval("return TestGetDisTex:GetDisabledTexture():GetObjectType()")
-        .unwrap();
-    assert_eq!(obj_type, "Texture", "GetDisabledTexture should return a Texture");
+    assert_eq!(obj_type, "Texture", "GetNormalTexture should return a Texture after Set");
 }
 
 #[test]
 fn test_get_texture_returns_child_of_button() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.exec(r#"local btn = CreateFrame("Button", "TestTexChild", UIParent)"#)
-        .unwrap();
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestTexChild", UIParent)
+        btn:SetNormalTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+    "#,
+    )
+    .unwrap();
 
     let parent_name: String = env
         .eval("return TestTexChild:GetNormalTexture():GetParent():GetName()")
@@ -751,21 +711,15 @@ fn test_set_highlight_atlas_creates_texture() {
 fn test_texture_children_have_fill_parent_anchors() {
     let env = WowLuaEnv::new().unwrap();
 
+    // Setting textures by path lazily creates children with fill-parent anchors
     env.exec(
         r#"
         local btn = CreateFrame("Button", "TestTexAnchors", UIParent)
         btn:SetSize(100, 30)
-    "#,
-    )
-    .unwrap();
-
-    // Getting textures should create them with fill-parent anchors
-    env.exec(
-        r#"
-        local _ = TestTexAnchors:GetNormalTexture()
-        local _ = TestTexAnchors:GetPushedTexture()
-        local _ = TestTexAnchors:GetHighlightTexture()
-        local _ = TestTexAnchors:GetDisabledTexture()
+        btn:SetNormalTexture("Interface\\Buttons\\UI-Panel-Button-Up")
+        btn:SetPushedTexture("Interface\\Buttons\\UI-Panel-Button-Down")
+        btn:SetHighlightTexture("Interface\\Buttons\\UI-Panel-Button-Highlight")
+        btn:SetDisabledTexture("Interface\\Buttons\\UI-Panel-Button-Disabled")
     "#,
     )
     .unwrap();

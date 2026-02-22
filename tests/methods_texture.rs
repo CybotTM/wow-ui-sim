@@ -482,7 +482,8 @@ fn test_set_atlas_propagates_to_button_normal_texture() {
         r#"
         local btn = CreateFrame("Button", "AtlasBtnFrame", UIParent)
         btn:SetSize(30, 30)
-        local normalTex = btn.NormalTexture
+        local normalTex = btn:CreateTexture()
+        btn:SetNormalTexture(normalTex)
         normalTex:SetAtlas("checkbox-minimal")
     "#,
     )

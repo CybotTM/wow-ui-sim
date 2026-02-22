@@ -61,17 +61,25 @@ fn add_text_get_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         handle_set_text(lua, id, args)
     })?)?;
 
-    // GetText() - for FontString widgets
+    // GetText() - returns text or nil if no text set.
+    // For buttons, delegates to the Text child FontString.
     methods.set("GetText", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let text = state
-            .widgets
-            .get(id)
-            .and_then(|f| f.text.clone())
-            .unwrap_or_default();
-        Ok(text)
+        let text = state.widgets.get(id).and_then(|f| {
+            if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+                f.children_keys.get("Text")
+                    .and_then(|&cid| state.widgets.get(cid))
+                    .and_then(|c| c.text.clone())
+            } else {
+                f.text.clone()
+            }
+        });
+        match text {
+            Some(t) => Ok(Value::String(lua.create_string(&t)?)),
+            None => Ok(Value::Nil),
+        }
     })?)?;
 
     // SetFormattedText(format, ...) - for FontString widgets (like string.format + SetText)
@@ -95,6 +103,28 @@ fn add_text_get_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
     })?)?;
 
     Ok(())
+}
+
+/// Lazily create a "Text" FontString child for a Button/CheckButton.
+///
+/// WoW creates this child on first SetText call, not at button creation time.
+/// The FontString fills the button (Overlay layer) so text renders above textures.
+fn create_button_text_child(state: &mut crate::lua_api::SimState, button_id: u64) -> u64 {
+    use crate::widget::Frame;
+    let mut fs = Frame::new(WidgetType::FontString, None, Some(button_id));
+    super::methods_helpers::set_all_points_anchors_pub(&mut fs, button_id);
+    fs.draw_layer = crate::widget::DrawLayer::Overlay;
+    if let Some(parent) = state.widgets.get(button_id) {
+        fs.frame_strata = parent.frame_strata;
+        fs.frame_level = parent.frame_level + 1;
+    }
+    let fs_id = fs.id;
+    state.widgets.register(fs);
+    state.widgets.add_child(button_id, fs_id);
+    if let Some(btn) = state.widgets.get_mut_visual(button_id) {
+        btn.children_keys.insert("Text".to_string(), fs_id);
+    }
+    fs_id
 }
 
 /// SetText(text [, r, g, b, wrap]) - universal handler for all widget types.
@@ -121,7 +151,17 @@ fn handle_set_text(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(
     let (text_child_id, is_html) = {
         let f = state.widgets.get(id);
         let child = f.and_then(|f| f.children_keys.get("Text").copied());
+        let is_button = f.map(|f| matches!(
+            f.widget_type,
+            crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+        )).unwrap_or(false);
         let html = state.simple_htmls.contains_key(&id);
+        // Lazily create "Text" FontString child for buttons
+        let child = if child.is_none() && is_button && text_str.is_some() {
+            Some(create_button_text_child(&mut state, id))
+        } else {
+            child
+        };
         (child, html)
     };
 

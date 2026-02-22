@@ -100,7 +100,7 @@ fn create_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
 
         let state_rc = get_sim_state(lua);
 
-        // Sync children_keys with frame assignments
+        // Sync children_keys and parent_key with frame assignments
         if let Some(child_id) = extract_frame_id(&value) {
             let mut state = state_rc.borrow_mut();
             let is_real_child = state
@@ -113,11 +113,23 @@ fn create_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
                     parent_frame.children.push(child_id);
                 }
             }
+            // Set parent_key on child if not already set
+            if let Some(child) = state.widgets.get_mut_visual(child_id) {
+                if child.parent_key.is_none() {
+                    child.parent_key = Some(key.clone());
+                }
+            }
         } else {
-            // Non-frame value — remove stale children_keys entry
+            // Non-frame value — remove stale children_keys entry and clear parent_key
             let mut state = state_rc.borrow_mut();
             if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
-                parent_frame.children_keys.remove(&key);
+                if let Some(old_child_id) = parent_frame.children_keys.remove(&key) {
+                    if let Some(child) = state.widgets.get_mut_visual(old_child_id) {
+                        if child.parent_key.as_deref() == Some(&key) {
+                            child.parent_key = None;
+                        }
+                    }
+                }
             }
         }
 

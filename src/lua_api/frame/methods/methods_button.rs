@@ -64,7 +64,7 @@ fn add_pushed_text_offset_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Res
     Ok(())
 }
 
-/// Get{Normal,Highlight,Pushed,Disabled}Texture - return or create texture children.
+/// Get{Normal,Highlight,Pushed,Disabled}Texture - return texture child or nil.
 fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     for (method_name, parent_key) in [
         ("GetNormalTexture", "NormalTexture"),
@@ -75,9 +75,12 @@ fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
         methods.set(method_name, lua.create_function(move |lua, ud: LightUserData| {
             let id = lud_to_id(ud);
             let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            let tex_id = get_or_create_button_texture(&mut state, id, parent_key);
-            Ok(frame_lud(tex_id))
+            let state = state_rc.borrow();
+            if let Some(frame) = state.widgets.get(id)
+                && let Some(&tex_id) = frame.children_keys.get(parent_key) {
+                    return Ok(frame_lud(tex_id));
+                }
+            Ok(Value::Nil)
         })?)?;
     }
     Ok(())
@@ -128,25 +131,105 @@ fn apply_button_texture_setter(
     texture: &Value,
     set_button_field: fn(&mut crate::widget::Frame, Option<String>, Option<(f32, f32, f32, f32)>),
 ) -> Result<(), mlua::Error> {
-    let path = extract_texture_path(texture)?;
-    let is_userdata = matches!(texture, Value::LightUserData(_));
-    if !is_userdata {
-        let resolved = path.as_ref().map(|p| resolve_texture_string(p));
-        let resolved_path = resolved.as_ref().map(|r| r.path.clone());
-        let tex_coords = resolved.as_ref().and_then(|r| r.tex_coords);
-        if let Some(frame) = state.widgets.get_mut_visual(button_id) {
-            set_button_field(frame, resolved_path.clone(), tex_coords);
-        }
-        let tex_id = get_or_create_button_texture(state, button_id, parent_key);
-        if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-            tex.texture = resolved_path;
-            tex.tex_coords = tex_coords;
-            tex.atlas_tex_coords = tex_coords;
-        }
+    if let Value::LightUserData(ud) = texture {
+        apply_set_button_texture(state, button_id, parent_key, ud.0 as u64);
     } else {
-        get_or_create_button_texture(state, button_id, parent_key);
+        apply_set_button_texture_path(state, button_id, parent_key, texture, set_button_field)?;
     }
     Ok(())
+}
+
+/// Assign a texture userdata as a button's texture child.
+///
+/// Sets fill-parent anchors, updates children_keys, reparents if needed,
+/// and shows/hides based on current button state.
+fn apply_set_button_texture(
+    state: &mut crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    tex_id: u64,
+) {
+    // Reparent to button if needed
+    let current_parent = state.widgets.get(tex_id).and_then(|f| f.parent_id);
+    if current_parent != Some(button_id) {
+        super::methods_hierarchy::reparent_widget(&mut state.widgets, tex_id, Some(button_id));
+    }
+    // Set fill-parent anchors (clear existing first)
+    if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
+        tex.anchors.clear();
+        super::methods_helpers::set_all_points_anchors_pub(tex, button_id);
+    }
+    // Register in children_keys
+    if let Some(btn) = state.widgets.get_mut_visual(button_id) {
+        btn.children_keys.insert(parent_key.to_string(), tex_id);
+    }
+    // Apply highlight-specific properties
+    if parent_key == "HighlightTexture" {
+        if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
+            tex.draw_layer = crate::widget::DrawLayer::Highlight;
+        }
+    }
+    // Set visibility based on current button state
+    let should_show = button_texture_should_show(state, button_id, parent_key);
+    state.widgets.set_visible(tex_id, should_show);
+}
+
+/// Set a button texture by path/atlas/fileDataID (non-userdata).
+#[allow(clippy::type_complexity)]
+fn apply_set_button_texture_path(
+    state: &mut crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+    texture: &Value,
+    set_button_field: fn(&mut crate::widget::Frame, Option<String>, Option<(f32, f32, f32, f32)>),
+) -> Result<(), mlua::Error> {
+    // Preserve numeric fileDataID for GetTexture round-trip
+    let file_data_id = match texture {
+        Value::Integer(n) => Some(*n as i64),
+        Value::Number(n) => Some(*n as i64),
+        _ => None,
+    };
+    let path = extract_texture_path(texture)?;
+    let resolved = path.as_ref().map(|p| resolve_texture_string(p));
+    let resolved_path = resolved.as_ref().map(|r| r.path.clone());
+    let tex_coords = resolved.as_ref().and_then(|r| r.tex_coords);
+    if let Some(frame) = state.widgets.get_mut_visual(button_id) {
+        set_button_field(frame, resolved_path.clone(), tex_coords);
+    }
+    let tex_id = get_or_create_button_texture(state, button_id, parent_key);
+    if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
+        tex.texture = resolved_path;
+        tex.tex_coords = tex_coords;
+        tex.atlas_tex_coords = tex_coords;
+        tex.texture_file_data_id = file_data_id;
+    }
+    Ok(())
+}
+
+/// Determine if a button texture child should be visible based on button state.
+fn button_texture_should_show(
+    state: &crate::lua_api::SimState,
+    button_id: u64,
+    parent_key: &str,
+) -> bool {
+    let (enabled, button_state) = state.widgets.get(button_id)
+        .map(|f| {
+            let en = f.attributes.get("__enabled")
+                .and_then(|v| match v {
+                    crate::widget::AttributeValue::Boolean(b) => Some(*b),
+                    _ => None,
+                })
+                .unwrap_or(true);
+            (en, f.button_state)
+        })
+        .unwrap_or((true, 0));
+    match parent_key {
+        "NormalTexture" => enabled && button_state == 0,
+        "PushedTexture" => enabled && button_state == 1,
+        "DisabledTexture" => !enabled,
+        "HighlightTexture" => true,
+        _ => true,
+    }
 }
 
 /// Set{Normal,Highlight}Texture - set texture by path, atlas name, or userdata.
@@ -511,6 +594,23 @@ fn set_enabled_attribute(state: &mut crate::lua_api::SimState, id: u64, enabled:
             frame.button_state = 0;
         }
     }
+    update_button_texture_visibility(state, id);
+}
+
+/// Update visibility of all button texture children based on current state.
+fn update_button_texture_visibility(state: &mut crate::lua_api::SimState, button_id: u64) {
+    let keys: Vec<(String, u64)> = state.widgets.get(button_id)
+        .map(|f| {
+            ["NormalTexture", "PushedTexture", "DisabledTexture", "HighlightTexture"]
+                .iter()
+                .filter_map(|k| f.children_keys.get(*k).map(|&id| (k.to_string(), id)))
+                .collect()
+        })
+        .unwrap_or_default();
+    for (key, tex_id) in keys {
+        let should_show = button_texture_should_show(state, button_id, &key);
+        state.widgets.set_visible(tex_id, should_show);
+    }
 }
 
 /// Click, RegisterForClicks - click simulation and registration.
@@ -542,10 +642,12 @@ fn add_button_state_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
                 let mut state = state_rc.borrow_mut();
                 if let Some(f) = state.widgets.get_mut_visual(id) { f.button_state = 1; }
                 set_enabled_attribute(&mut state, id, true);
+                update_button_texture_visibility(&mut state, id);
             } else if state_str.eq_ignore_ascii_case("NORMAL") {
                 let mut state = state_rc.borrow_mut();
                 if let Some(f) = state.widgets.get_mut_visual(id) { f.button_state = 0; }
                 set_enabled_attribute(&mut state, id, true);
+                update_button_texture_visibility(&mut state, id);
             } else if state_str.eq_ignore_ascii_case("DISABLED") {
                 let mut state = state_rc.borrow_mut();
                 set_enabled_attribute(&mut state, id, false);

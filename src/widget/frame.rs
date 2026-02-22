@@ -205,13 +205,11 @@ pub struct Frame {
     pub backdrop: Backdrop,
     /// Named child references (e.g., "Text" -> FontString child ID for CheckButtons).
     pub children_keys: HashMap<String, u64>,
-    /// Whether the frame can be moved by the user.
+    /// Key under which this frame is stored on its parent (e.g., "NormalTexture").
+    pub parent_key: Option<String>,
     pub movable: bool,
-    /// Whether the frame can be resized by the user.
     pub resizable: bool,
-    /// Whether the frame is clamped to screen bounds.
     pub clamped_to_screen: bool,
-    /// Whether the frame is currently being moved/dragged.
     pub is_moving: bool,
     /// Whether text should word-wrap (for FontString widgets).
     pub word_wrap: bool,
@@ -462,6 +460,7 @@ macro_rules! frame_defaults {
             attributes: HashMap::new(),
             backdrop: Backdrop::default(),
             children_keys: HashMap::new(),
+            parent_key: None,
             movable: false,
             resizable: false,
             clamped_to_screen: false,

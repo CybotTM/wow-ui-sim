@@ -260,7 +260,7 @@ fn test_create_frame_strata_inheritance() {
 // ============================================================================
 
 #[test]
-fn test_create_button_has_textures() {
+fn test_create_button_no_default_textures() {
     let env = WowLuaEnv::new().unwrap();
 
     env.exec(
@@ -281,9 +281,9 @@ fn test_create_button_has_textures() {
         .eval("return TestButtonTextures:GetHighlightTexture() ~= nil")
         .unwrap();
 
-    assert!(has_normal, "Button should have NormalTexture");
-    assert!(has_pushed, "Button should have PushedTexture");
-    assert!(has_highlight, "Button should have HighlightTexture");
+    assert!(!has_normal, "Fresh button should not have NormalTexture");
+    assert!(!has_pushed, "Fresh button should not have PushedTexture");
+    assert!(!has_highlight, "Fresh button should not have HighlightTexture");
 }
 
 #[test]
@@ -364,9 +364,9 @@ fn test_create_checkbutton_basic() {
         .eval("return TestCheckButton:GetHighlightTexture() ~= nil")
         .unwrap();
 
-    assert!(has_normal, "CheckButton should have NormalTexture");
-    assert!(has_pushed, "CheckButton should have PushedTexture");
-    assert!(has_highlight, "CheckButton should have HighlightTexture");
+    assert!(!has_normal, "Fresh CheckButton should not have NormalTexture");
+    assert!(!has_pushed, "Fresh CheckButton should not have PushedTexture");
+    assert!(!has_highlight, "Fresh CheckButton should not have HighlightTexture");
 }
 
 #[test]
@@ -397,19 +397,21 @@ fn test_checkbutton_checked_state() {
 }
 
 #[test]
-fn test_checkbutton_template_creates_text() {
+fn test_checkbutton_settext_creates_text_child() {
     let env = WowLuaEnv::new().unwrap();
 
+    // SetText lazily creates the "Text" FontString child
     env.exec(
         r#"
-        local cb = CreateFrame("CheckButton", "TestCheckBoxTemplate", UIParent, "UICheckButtonTemplate")
+        local cb = CreateFrame("CheckButton", "TestCheckBoxTemplate", UIParent)
         cb:SetSize(24, 24)
+        cb:SetText("Test Label")
     "#,
     )
     .unwrap();
 
     let has_text: bool = env.eval("return TestCheckBoxTemplate.Text ~= nil").unwrap();
-    assert!(has_text, "CheckButton with UICheckButtonTemplate should have Text");
+    assert!(has_text, "SetText should lazily create Text FontString child");
 
     let text_type: String = env
         .eval("return TestCheckBoxTemplate.Text:GetObjectType()")
@@ -423,49 +425,34 @@ fn test_checkbutton_with_label() {
 
     env.exec(
         r#"
-        local cb = CreateFrame("CheckButton", "TestCheckBoxWithLabel", UIParent, "UICheckButtonTemplate")
+        local cb = CreateFrame("CheckButton", "TestCheckBoxWithLabel", UIParent)
         cb:SetSize(24, 24)
-        cb.Text:SetText("Enable Feature")
+        cb:SetText("Enable Feature")
     "#,
     )
     .unwrap();
 
-    let label_text: String = env.eval("return TestCheckBoxWithLabel.Text:GetText()").unwrap();
+    let label_text: String = env.eval("return TestCheckBoxWithLabel:GetText()").unwrap();
     assert_eq!(label_text, "Enable Feature");
 }
 
-/// When a CheckButton template (e.g., MinimalCheckboxArtTemplate) creates textures via
-/// SetNormalTexture/SetPushedTexture/etc., it should reuse the default children from
-/// create_widget_type_defaults, not create duplicates that orphan the defaults.
-/// Orphaned default children with no anchors center themselves in the parent, causing
-/// visual artifacts (ghost rectangles in the middle of the panel).
+/// When a CheckButton sets textures via SetNormalTexture/SetPushedTexture/etc.,
+/// they should be lazily created without orphaned children.
 #[test]
 fn test_checkbutton_template_no_orphaned_children() {
     let env = WowLuaEnv::new().unwrap();
 
-    // Simulate what create_button_texture_from_template generates:
-    // reuse existing default textures from children_keys instead of creating new ones.
+    // Buttons no longer have default children — textures are created lazily.
+    // Setting textures by path creates them via get_or_create_button_texture.
     env.exec(
         r#"
         local cb = CreateFrame("CheckButton", "TestCbOrphans", UIParent)
         cb:SetSize(30, 29)
         cb:SetPoint("CENTER")
 
-        -- Reuse existing default children (same pattern as the fixed template code)
-        local normal = cb.NormalTexture
-        cb:SetNormalTexture(normal)
-        normal:SetTexture("Interface\\common\\minimalcheckbox")
-
-        local pushed = cb.PushedTexture
-        cb:SetPushedTexture(pushed)
-        pushed:SetTexture("Interface\\common\\minimalcheckbox")
-
-        local highlight = cb.HighlightTexture
-        cb:SetHighlightTexture(highlight)
-        highlight:SetTexture("Interface\\common\\minimalcheckbox")
-
-        -- CheckedTexture/DisabledCheckedTexture don't have defaults,
-        -- so these create new children via get_or_create_button_texture
+        cb:SetNormalTexture("Interface\\common\\minimalcheckbox")
+        cb:SetPushedTexture("Interface\\common\\minimalcheckbox")
+        cb:SetHighlightTexture("Interface\\common\\minimalcheckbox")
         cb:SetCheckedTexture("Interface\\common\\minimalcheckbox")
         cb:SetDisabledCheckedTexture("Interface\\common\\minimalcheckbox")
     "#,
@@ -508,34 +495,22 @@ fn test_checkbutton_template_no_orphaned_children() {
     );
 }
 
-/// Verify that SetAtlas on a reused default texture correctly propagates the
+/// Verify that SetAtlas on a button texture correctly propagates the
 /// texture path back to the parent CheckButton's normal_texture field.
-/// This is the code path used by MinimalCheckboxArtTemplate.
 #[test]
 fn test_checkbutton_setatlas_propagates_to_parent() {
     let env = WowLuaEnv::new().unwrap();
 
-    // Simulate exactly what the template code generates for NormalTexture:
-    //   local tex = parent.NormalTexture  (reuse default)
-    //   parent.NormalTexture = tex
-    //   parent:SetNormalTexture(tex)
-    //   tex:SetAtlas("checkbox-minimal")
+    // Create a texture, assign it as NormalTexture, then set atlas on it.
     env.exec(
         r#"
         local cb = CreateFrame("CheckButton", "TestCbAtlasProp", UIParent)
         cb:SetSize(30, 29)
         cb:SetPoint("CENTER")
 
-        local parent = TestCbAtlasProp
-        if parent and parent.SetNormalTexture then
-            local tex = parent.NormalTexture
-            if tex == nil then
-                error("NormalTexture default child not found")
-            end
-            parent.NormalTexture = tex
-            parent:SetNormalTexture(tex)
-            tex:SetAtlas("checkbox-minimal")
-        end
+        local tex = cb:CreateTexture()
+        cb:SetNormalTexture(tex)
+        tex:SetAtlas("checkbox-minimal")
     "#,
     )
     .unwrap();
@@ -699,14 +674,14 @@ fn test_checkbutton_text_from_global_string() {
 
     env.exec(
         r#"
-        local cb = CreateFrame("CheckButton", "TestCbGlobalStr", UIParent, "UICheckButtonTemplate")
+        local cb = CreateFrame("CheckButton", "TestCbGlobalStr", UIParent)
         cb:SetSize(24, 24)
-        cb.Text:SetText(ADDON_FORCE_LOAD)
+        cb:SetText(ADDON_FORCE_LOAD)
     "#,
     )
     .unwrap();
 
-    let label: String = env.eval("return TestCbGlobalStr.Text:GetText()").unwrap();
+    let label: String = env.eval("return TestCbGlobalStr:GetText()").unwrap();
     assert_eq!(label, "Load out of date AddOns");
 }
 

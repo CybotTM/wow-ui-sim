@@ -368,54 +368,14 @@ fn create_widget_type_defaults(state: &mut SimState, frame_id: u64, widget_type:
     }
 }
 
-/// Create default texture slots and text fontstring for Button/CheckButton.
+/// Initialize Button/CheckButton defaults (no child widgets created).
+///
+/// WoW creates button texture/text children lazily via SetNormalTexture,
+/// SetText, etc. — not at button creation time. See `get_or_create_button_texture`
+/// and `apply_set_button_texture` for lazy creation.
 fn create_button_defaults(state: &mut SimState, frame_id: u64) {
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
         frame.mouse_enabled = true;
-    }
-
-    let normal_id = create_child_widget(state, WidgetType::Texture, frame_id);
-    let pushed_id = create_child_widget(state, WidgetType::Texture, frame_id);
-    let highlight_id = create_child_widget(state, WidgetType::Texture, frame_id);
-    let disabled_id = create_child_widget(state, WidgetType::Texture, frame_id);
-
-    // Button textures fill the parent by default (SetAllPoints equivalent)
-    for tex_id in [normal_id, pushed_id, highlight_id, disabled_id] {
-        if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-            add_fill_parent_anchors(tex, frame_id);
-        }
-    }
-
-    // Button state textures render below child regions (icon, etc.) in WoW.
-    // Set to Background layer so they don't occlude Border/Artwork children.
-    for tex_id in [normal_id, pushed_id, disabled_id] {
-        if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-            tex.draw_layer = crate::widget::DrawLayer::Background;
-        }
-    }
-
-    // HighlightTexture is only visible on hover in WoW, uses additive blending
-    if let Some(highlight) = state.widgets.get_mut_visual(highlight_id) {
-        highlight.draw_layer = crate::widget::DrawLayer::Highlight;
-        highlight.visible = false;
-        highlight.blend_mode = crate::render::BlendMode::Additive;
-    }
-
-    // Text fontstring for button label — fill parent so it inherits the
-    // button's width and renders at Overlay layer (above child textures
-    // like three-slice Background-layer Left/Right/Center).
-    let text_id = create_child_widget(state, WidgetType::FontString, frame_id);
-    if let Some(text_fs) = state.widgets.get_mut_visual(text_id) {
-        add_fill_parent_anchors(text_fs, frame_id);
-        text_fs.draw_layer = crate::widget::DrawLayer::Overlay;
-    }
-
-    if let Some(btn) = state.widgets.get_mut_visual(frame_id) {
-        btn.children_keys.insert("NormalTexture".to_string(), normal_id);
-        btn.children_keys.insert("PushedTexture".to_string(), pushed_id);
-        btn.children_keys.insert("HighlightTexture".to_string(), highlight_id);
-        btn.children_keys.insert("DisabledTexture".to_string(), disabled_id);
-        btn.children_keys.insert("Text".to_string(), text_id);
     }
 }
 

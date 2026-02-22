@@ -105,6 +105,12 @@ pub fn calculate_frame_height(widgets: &crate::widget::WidgetRegistry, id: u64) 
 }
 
 /// Add fill-parent anchors (TopLeft + BottomRight) to a frame, equivalent to SetAllPoints.
+/// Public wrapper for use by button texture setters.
+pub fn set_all_points_anchors_pub(frame: &mut Frame, parent_id: u64) {
+    set_all_points_anchors(frame, parent_id);
+}
+
+/// Add fill-parent anchors (TopLeft + BottomRight) to a frame, equivalent to SetAllPoints.
 fn set_all_points_anchors(frame: &mut Frame, parent_id: u64) {
     frame.anchors.push(Anchor {
         point: AnchorPoint::TopLeft,

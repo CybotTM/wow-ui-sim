@@ -55,12 +55,16 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
     // Still re-inherit strata/level/alpha/scale below.
     let same_parent = old_parent_id.is_some() && old_parent_id == new_parent_id;
 
-    // Remove from old parent's children list (skip if same parent to preserve order)
+    // Remove from old parent's children list and children_keys (skip if same parent)
     if !same_parent {
         if let Some(old_pid) = old_parent_id
             && let Some(old_parent) = widgets.get_mut_visual(old_pid) {
                 old_parent.children.retain(|&id| id != child_id);
+                old_parent.children_keys.retain(|_, &mut v| v != child_id);
             }
+        if let Some(child) = widgets.get_mut_visual(child_id) {
+            child.parent_key = None;
+        }
     }
 
     // Get parent's strata, level, effective_alpha, effective_scale for inheritance
@@ -144,14 +148,9 @@ fn add_parent_key_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let parent_id = state.widgets.get(id).and_then(|f| f.parent_id);
-        if let Some(pid) = parent_id
-            && let Some(parent) = state.widgets.get(pid) {
-                for (key, &cid) in &parent.children_keys {
-                    if cid == id {
-                        return Ok(Value::String(lua.create_string(key.as_bytes())?));
-                    }
-                }
+        if let Some(frame) = state.widgets.get(id)
+            && let Some(ref key) = frame.parent_key {
+                return Ok(Value::String(lua.create_string(key.as_bytes())?));
             }
         Ok(Value::Nil)
     })?)?;
