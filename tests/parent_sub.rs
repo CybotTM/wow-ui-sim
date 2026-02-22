@@ -195,3 +195,35 @@ fn test_parent_sub_dollar_parent_upper_p() {
         .unwrap();
     assert_eq!(name, "MooCow");
 }
+
+/// nil parent passed explicitly: $parent substitution should use "Top" fallback,
+/// not "UIParent" (which is only the parenting default, not the $parent sub source).
+#[test]
+fn test_parent_sub_top_fallback_nil_parent() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", "$parentWowlessCow", nil)
+            return f:GetName()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "TopWowlessCow");
+}
+
+/// No parent arg at all: $parent substitution should use "Top" fallback,
+/// not "UIParent" (which is only the parenting default, not the $parent sub source).
+#[test]
+fn test_parent_sub_top_fallback_no_parent_arg() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame", "$parentWowlessCow")
+            return f:GetName()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "TopWowlessCow");
+}

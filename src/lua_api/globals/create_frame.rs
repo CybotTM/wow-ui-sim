@@ -143,16 +143,16 @@ fn parse_create_frame_args(
         .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string());
 
-    let (parent_id, parent_explicit) = if name_arg_invalid {
+    let (parent_id, parent_explicit, explicit_parent) = if name_arg_invalid {
         // Invalid name type consumes remaining args — no parent, no UIParent default
-        (None, false)
+        (None, false, None)
     } else {
         let parent_arg = args_iter.next();
         let explicit_parent = parent_arg.and_then(|v| extract_frame_id(v));
         let parent_explicit = explicit_parent.is_some();
         let parent_id = explicit_parent
             .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
-        (parent_id, parent_explicit)
+        (parent_id, parent_explicit, explicit_parent)
     };
 
     let template: Option<String> = args_iter
@@ -167,8 +167,10 @@ fn parse_create_frame_args(
         _ => None,
     });
 
-    // Handle $parent/$Parent name substitution
-    let name = name_raw.map(|n| substitute_parent_name(n, parent_id, state));
+    // Handle $parent/$Parent name substitution.
+    // Use explicit_parent (before UIParent fallback) so that nil/missing parent
+    // produces "Top" fallback, not "UIParent".
+    let name = name_raw.map(|n| substitute_parent_name(n, explicit_parent, state));
 
     Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
 }
@@ -282,6 +284,15 @@ fn register_new_frame(
                 f.effective_alpha = parent_eff_alpha * f.alpha;
                 f.effective_scale = parent_eff_scale * f.scale;
             }
+    }
+
+    // Track whether the parent was defaulted (not explicitly provided).
+    // SetAllPoints() with no args uses this to decide whether to store nil
+    // or the actual parent ID as relativeTo (matching wowless headless behavior).
+    if !parent_explicit {
+        if let Some(f) = state.widgets.get_mut_visual(frame_id) {
+            f.default_parent = true;
+        }
     }
 
     frame_id

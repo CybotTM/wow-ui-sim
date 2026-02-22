@@ -56,3 +56,15 @@ fn test_set_thumb_texture_fileid_keeps_same_object() {
         .unwrap();
     assert!(still_same, "SetThumbTexture with fileID should keep same texture object");
 }
+
+#[test]
+fn test_slider_set_thumb_texture_file_id_get_texture() {
+    let env = env();
+    let tex_id: i32 = env.eval(r#"
+        local s = CreateFrame("Slider")
+        s:SetThumbTexture(12345)
+        local t = s:GetThumbTexture()
+        return t:GetTexture()
+    "#).unwrap();
+    assert_eq!(tex_id, 12345);
+}

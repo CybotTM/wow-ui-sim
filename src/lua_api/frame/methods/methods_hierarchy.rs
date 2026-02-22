@@ -34,6 +34,11 @@ fn add_parent_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         reparent_widget(&mut state.widgets, id, new_parent_id);
+        // Explicit SetParent call clears the default_parent flag — the parent
+        // is now explicitly known, so SetAllPoints() should anchor to it.
+        if let Some(f) = state.widgets.get_mut_visual(id) {
+            f.default_parent = false;
+        }
         state.visible_on_update_cache = None;
         state.invalidate_layout(id);
         Ok(())

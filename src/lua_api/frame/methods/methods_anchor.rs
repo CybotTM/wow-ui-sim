@@ -3,6 +3,7 @@
 use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
 use crate::lua_api::script_helpers::lua_error;
 use mlua::{LightUserData, Lua, Value};
+use std::collections::HashMap;
 
 /// Add anchor/point methods to the frame methods table.
 pub fn add_anchor_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
@@ -136,7 +137,7 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
                 .map_err(|msg| lua_error(lua, msg))?;
 
         let state_rc = get_sim_state(lua);
-        check_anchor_cycle(&state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
+        check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
         if is_duplicate_anchor(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
             return Ok(());
         }
@@ -148,24 +149,69 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 }
 
 /// Raise a Lua error if anchoring `id` to `relative_to` would create a cycle.
+///
+/// Matches wowless error format exactly: self-anchors produce a simple message;
+/// indirect cycles include Relative/Dependent frame hex IDs and optional
+/// Dependent ancestors list.  Frame hex IDs are `format!("{:x}", id)` because
+/// `frame_lud(id)` stores the id as the pointer value, so Lua's `tostring()`
+/// gives `"userdata: 0x{id:x}"` and `rstr()` extracts the part after `0x`.
 fn check_anchor_cycle(
+    lua: &Lua,
     state: &crate::lua_api::SimState,
     id: u64,
     relative_to: Option<usize>,
     action: &str,
 ) -> mlua::Result<()> {
     let Some(rel_id) = relative_to else { return Ok(()) };
-    if !state.widgets.would_create_anchor_cycle(id, rel_id as u64) {
-        return Ok(());
+    let rel_id = rel_id as u64;
+
+    // Self-anchor is a special case with a different message.
+    if rel_id == id {
+        return Err(lua_error(lua, format!(
+            "Action[SetPoint] failed because[Cannot anchor to itself]: attempted from: {action}."
+        )));
     }
-    let reason = if rel_id as u64 == id {
-        "[Cannot anchor to itself]"
-    } else {
-        "[Cannot anchor to a region dependent on it]"
-    };
-    Err(mlua::Error::RuntimeError(format!(
-        "Action[SetPoint] failed because{reason}: attempted from: {action}."
-    )))
+
+    // BFS (LIFO/stack order, matching wowless) starting from rel_id.
+    // For each visited node x, check if any of x's anchor targets == id.
+    // seen[y] = x means y was discovered while processing x.
+    let mut stack: Vec<u64> = vec![rel_id];
+    let mut seen: HashMap<u64, u64> = HashMap::new();
+
+    while let Some(x) = stack.pop() {
+        if let Some(frame) = state.widgets.get(x) {
+            for anchor in &frame.anchors {
+                if let Some(anchor_target) = anchor.relative_to_id {
+                    let y = anchor_target as u64;
+                    if y == id {
+                        // Cycle found: x anchors to id (the frame being anchored).
+                        // Build ancestor chain by following seen[] from x back toward rel_id.
+                        let mut anc: Vec<String> = Vec::new();
+                        let mut z = seen.get(&x).copied();
+                        while let Some(ancestor) = z {
+                            anc.push(format!("[{ancestor:x}]"));
+                            z = seen.get(&ancestor).copied();
+                        }
+                        let base = format!(
+                            "Action[SetPoint] failed because[Cannot anchor to a region dependent on it]: \
+attempted from: {action}.\nRelative: [{rel_id:x}]\nDependent: [{x:x}]"
+                        );
+                        let extra = if anc.is_empty() {
+                            String::new()
+                        } else {
+                            format!("\nDependent ancestors:\n{}", anc.join("\n"))
+                        };
+                        return Err(lua_error(lua, format!("{base}{extra}")));
+                    } else if !seen.contains_key(&y) {
+                        seen.insert(y, x);
+                        stack.push(y);
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
 }
 
 /// Check if the anchor already matches (skip redundant updates).
@@ -299,17 +345,26 @@ fn add_set_all_points_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<(
             Value::LightUserData(lud) => (true, Some(lud_to_id(*lud) as usize)),
             _ if has_arg => (true, None), // explicit nil → screen
             _ => {
-                // No argument → implicit parent
+                // No argument → implicit parent. If the parent was defaulted (not explicitly
+                // set by the caller), store None so GetPoint returns nil, matching wowless
+                // headless behavior where the default parent is nil.
+                // If the parent was explicitly set via SetParent, store the parent's ID.
                 let state_rc = get_sim_state(lua);
                 let state = state_rc.borrow();
-                let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
-                (true, parent_id)
+                let frame = state.widgets.get(id);
+                let is_default = frame.map(|f| f.default_parent).unwrap_or(true);
+                if is_default {
+                    (true, None)
+                } else {
+                    let parent_id = frame.and_then(|f| f.parent_id).map(|p| p as usize);
+                    (true, parent_id)
+                }
             }
         };
 
         if should_set {
             let state_rc = get_sim_state(lua);
-            check_anchor_cycle(&state_rc.borrow(), id, relative_to_id, "Frame:SetAllPoints")?;
+            check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to_id, "Frame:SetAllPoints")?;
             apply_set_all_points(&state_rc, id, relative_to_id);
         }
         Ok(())

@@ -141,9 +141,9 @@ fn test_set_color_texture() {
     )
     .unwrap();
 
-    // SetColorTexture makes GetTexture return "FileData ID 0" (real WoW behavior)
-    let file_id: String = env.eval("return CTTex:GetTexture()").unwrap();
-    assert_eq!(file_id, "FileData ID 0");
+    // SetColorTexture makes GetTexture return nil (matches headless/wowless behavior)
+    let is_nil: bool = env.eval("return CTTex:GetTexture() == nil").unwrap();
+    assert!(is_nil, "GetTexture should return nil after SetColorTexture");
 
     // Verify via Rust state that color_texture is set
     let state = env.state().borrow();

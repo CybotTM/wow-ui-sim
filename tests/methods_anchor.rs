@@ -202,22 +202,25 @@ fn test_set_point_self_reference_raises_error() {
 }
 
 // ============================================================================
-// SetAllPoints implicit parent — GetPoint returns parent as relativeTo
+// SetAllPoints with explicit parent — GetPoint returns the parent frame
+// (frame was created with explicit parent arg, so SetAllPoints() anchors to it)
 // ============================================================================
 
 #[test]
-fn test_set_all_points_implicit_parent_returns_parent() {
+fn test_set_all_points_explicit_parent_returns_parent() {
     let env = env();
-    let (pt1_rel_is_parent, pt2_rel_is_parent): (bool, bool) = env.eval(r#"
-        local parent = CreateFrame("Frame", "SAPParent")
-        local f = CreateFrame("Frame", "SAPChild", SAPParent)
+    // Frame created with explicit parent arg — SetAllPoints() no-arg should
+    // store the parent reference, GetPoint returns parent (not nil).
+    let (r1_is_parent, r2_is_parent): (bool, bool) = env.eval(r#"
+        local parent = CreateFrame("Frame", "SAPParent2")
+        local f = CreateFrame("Frame", "SAPChild2", SAPParent2)
         f:SetAllPoints()
         local p1, r1 = f:GetPoint(1)
         local p2, r2 = f:GetPoint(2)
-        return r1 == SAPParent, r2 == SAPParent
+        return r1 == SAPParent2, r2 == SAPParent2
     "#).unwrap();
-    assert!(pt1_rel_is_parent, "GetPoint(1) relativeTo should be parent after SetAllPoints()");
-    assert!(pt2_rel_is_parent, "GetPoint(2) relativeTo should be parent after SetAllPoints()");
+    assert!(r1_is_parent, "GetPoint(1) relativeTo should be parent after SetAllPoints() with explicit parent");
+    assert!(r2_is_parent, "GetPoint(2) relativeTo should be parent after SetAllPoints() with explicit parent");
 }
 
 #[test]
@@ -234,6 +237,28 @@ fn test_set_all_points_explicit_nil_returns_nil() {
     "#).unwrap();
     assert!(r1_nil, "GetPoint(1) relativeTo should be nil after SetAllPoints(nil)");
     assert!(r2_nil, "GetPoint(2) relativeTo should be nil after SetAllPoints(nil)");
+}
+
+// ============================================================================
+// SetAllPoints implicit screen — GetPoint returns nil for relativeTo
+// ============================================================================
+
+#[test]
+fn test_set_all_points_implicit_screen_returns_nil() {
+    let env = env();
+    // Frame parented to UIParent, SetAllPoints() with no args
+    // GetPoint should return nil for relativeTo (not UIParent)
+    let (point, has_relative, rel_point, x, y): (String, bool, String, f64, f64) = env.eval(r#"
+        local f = CreateFrame("Frame")
+        f:SetAllPoints()
+        local p, rel, rp, x, y = f:GetPoint(1)
+        return p, rel ~= nil, rp, x, y
+    "#).unwrap();
+    assert_eq!(point, "TOPLEFT");
+    assert_eq!(has_relative, false, "relativeTo should be nil for implicit parent");
+    assert_eq!(rel_point, "TOPLEFT");
+    assert_eq!(x, 0.0);
+    assert_eq!(y, 0.0);
 }
 
 // ============================================================================
@@ -287,4 +312,166 @@ fn test_set_all_points_self_cycle_raises_error() {
         return not ok
     "#).unwrap();
     assert!(failed, "SetAllPoints to self should raise a Lua error");
+}
+
+// ============================================================================
+// Cycle error message format — matches wowless dag tests exactly
+// ============================================================================
+
+/// Helper: extract hex ID from a frame LightUserData, matching wowless rstr().
+/// tostring(lud) gives "userdata: 0x<hex>", rstr extracts after "0x".
+const RSTR_LUA: &str = r#"
+local function rstr(r)
+    return tostring(r):gsub('^.*0x(.*)$', '%1')
+end
+"#;
+
+#[test]
+fn test_cycle_error_dag0_self_anchor_message() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to itself]: ',
+            'attempted from: Frame:SetPoint.',
+        }})
+        local ok, got = pcall(f.SetPoint, f, "CENTER", f)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. expected .. "\ngot: " .. got)
+        return got
+    "#)).unwrap();
+    assert!(msg.starts_with("Action[SetPoint] failed because[Cannot anchor to itself]"), "msg: {msg}");
+}
+
+#[test]
+fn test_cycle_error_dag1_direct_cycle_message() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to a region dependent on it]: ',
+            'attempted from: Frame:SetPoint.\n',
+            'Relative: [' .. rstr(g) .. ']\n',
+            'Dependent: [' .. rstr(g) .. ']',
+        }})
+        g:SetPoint("CENTER", f)
+        local ok, got = pcall(f.SetPoint, f, "CENTER", g)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. tostring(expected) .. "\ngot: " .. tostring(got))
+        return got
+    "#)).unwrap();
+    assert!(msg.contains("Relative:") && msg.contains("Dependent:"), "msg: {msg}");
+    assert!(!msg.contains("Dependent ancestors:"), "dag1 should have no ancestors, msg: {msg}");
+}
+
+#[test]
+fn test_cycle_error_dag2_one_ancestor_message() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame")
+        local h = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to a region dependent on it]: ',
+            'attempted from: Frame:SetPoint.\n',
+            'Relative: [' .. rstr(h) .. ']\n',
+            'Dependent: [' .. rstr(g) .. ']\n',
+            'Dependent ancestors:\n',
+            '[' .. rstr(h) .. ']',
+        }})
+        g:SetPoint("CENTER", f)
+        h:SetPoint("CENTER", g)
+        local ok, got = pcall(f.SetPoint, f, "CENTER", h)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. tostring(expected) .. "\ngot: " .. tostring(got))
+        return got
+    "#)).unwrap();
+    assert!(msg.contains("Dependent ancestors:"), "dag2 should have ancestors, msg: {msg}");
+}
+
+#[test]
+fn test_cycle_error_dag3_two_ancestors_message() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame")
+        local h = CreateFrame("Frame")
+        local i = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to a region dependent on it]: ',
+            'attempted from: Frame:SetPoint.\n',
+            'Relative: [' .. rstr(i) .. ']\n',
+            'Dependent: [' .. rstr(g) .. ']\n',
+            'Dependent ancestors:\n',
+            '[' .. rstr(h) .. ']\n',
+            '[' .. rstr(i) .. ']',
+        }})
+        g:SetPoint("CENTER", f)
+        h:SetPoint("CENTER", g)
+        i:SetPoint("CENTER", h)
+        local ok, got = pcall(f.SetPoint, f, "CENTER", i)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. tostring(expected) .. "\ngot: " .. tostring(got))
+        return got
+    "#)).unwrap();
+    assert!(msg.contains("[Cannot anchor to a region dependent on it]"), "msg: {msg}");
+}
+
+#[test]
+fn test_cycle_error_all0_set_all_points_self() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to itself]: ',
+            'attempted from: Frame:SetAllPoints.',
+        }})
+        local ok, got = pcall(f.SetAllPoints, f, f)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. tostring(expected) .. "\ngot: " .. tostring(got))
+        return got
+    "#)).unwrap();
+    assert!(msg.contains("Frame:SetAllPoints"), "msg: {msg}");
+}
+
+#[test]
+fn test_cycle_error_all3_set_all_points_chain() {
+    let env = env();
+    let msg: String = env.eval(&format!(r#"
+        {RSTR_LUA}
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame")
+        local h = CreateFrame("Frame")
+        local i = CreateFrame("Frame")
+        local expected = table.concat({{
+            'Action[SetPoint] failed because',
+            '[Cannot anchor to a region dependent on it]: ',
+            'attempted from: Frame:SetAllPoints.\n',
+            'Relative: [' .. rstr(i) .. ']\n',
+            'Dependent: [' .. rstr(g) .. ']\n',
+            'Dependent ancestors:\n',
+            '[' .. rstr(h) .. ']\n',
+            '[' .. rstr(i) .. ']',
+        }})
+        g:SetAllPoints(f)
+        h:SetAllPoints(g)
+        i:SetAllPoints(h)
+        local ok, got = pcall(f.SetAllPoints, f, i)
+        assert(not ok, "should fail")
+        assert(got == expected, "msg mismatch:\nexpected: " .. tostring(expected) .. "\ngot: " .. tostring(got))
+        return got
+    "#)).unwrap();
+    assert!(msg.contains("Frame:SetAllPoints"), "msg: {msg}");
+    assert!(msg.contains("Dependent ancestors:"), "msg: {msg}");
 }

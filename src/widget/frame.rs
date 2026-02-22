@@ -405,6 +405,11 @@ pub struct Frame {
     /// Index into `SimState.addons` identifying which addon owns this frame.
     /// Set during frame creation based on `SimState.loading_addon_index`.
     pub owner_addon: Option<u16>,
+
+    /// Whether the parent was defaulted (e.g. UIParent) rather than explicitly set.
+    /// Used by SetAllPoints to match wowless headless behavior where default-parented
+    /// frames anchor to screen (nil) rather than to the default parent.
+    pub default_parent: bool,
 }
 
 /// Build a `Frame` with all defaults. `$id` is the expression for the `id` field.
@@ -559,6 +564,8 @@ macro_rules! frame_defaults {
 
             // Profiler
             owner_addon: None,
+
+            default_parent: false,
         }
     };
 }

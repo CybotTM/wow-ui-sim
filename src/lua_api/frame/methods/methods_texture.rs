@@ -54,7 +54,15 @@ fn add_texture_path_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
             .widgets
             .get(id)
             .and_then(|f| f.texture.clone());
-        Ok(texture)
+        // When the stored texture string is a pure numeric fileID, return it as a Lua integer
+        // so callers get back the same type they passed to SetTexture.
+        match texture {
+            Some(ref s) if s.parse::<i64>().is_ok() => {
+                Ok(Value::Integer(s.parse::<i64>().unwrap()))
+            }
+            Some(s) => Ok(Value::String(lua.create_string(&s)?)),
+            None => Ok(Value::Nil),
+        }
     })?)?;
 
     methods.set("SetColorTexture", lua.create_function(|lua, (ud, r, g, b, a): (LightUserData, f32, f32, f32, Option<f32>)| {
@@ -64,8 +72,8 @@ fn add_texture_path_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.color_texture =
                 Some(crate::widget::Color::new(r, g, b, a.unwrap_or(1.0)));
-            // Real WoW returns "FileData ID 0" from GetTexture after SetColorTexture
-            frame.texture = Some("FileData ID 0".to_string());
+            // GetTexture returns nil after SetColorTexture (headless/wowless behavior)
+            frame.texture = None;
         }
         Ok(())
     })?)?;

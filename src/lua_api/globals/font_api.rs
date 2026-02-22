@@ -3,6 +3,7 @@
 //! Contains CreateFont, CreateFontFamily, GetFonts, GetFontInfo, and
 //! standard WoW font object creation.
 
+use crate::lua_api::script_helpers::lua_error;
 use mlua::{Lua, Result, Value};
 
 /// Set default font properties on a table.
@@ -226,7 +227,7 @@ fn add_font_misc_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// GetObjectType, GetFontObject (on the Font object itself).
+/// GetObjectType, IsObjectType, GetFontObject, SetFontObject (on the Font object itself).
 fn add_font_type_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     font.set(
         "GetObjectType",
@@ -235,10 +236,51 @@ fn add_font_type_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
         })?,
     )?;
 
-    // Font:GetFontObject() returns nil (no inherited font object by default)
+    font.set(
+        "IsObjectType",
+        lua.create_function(|_, (_this, type_name): (mlua::Table, String)| {
+            Ok(type_name.eq_ignore_ascii_case("Font"))
+        })?,
+    )?;
+
+    // Font:GetFontObject() returns the font object set via SetFontObject.
     font.set(
         "GetFontObject",
-        lua.create_function(|_, _this: mlua::Table| Ok(Value::Nil))?,
+        lua.create_function(|_, this: mlua::Table| {
+            let fo: Value = this.get("__fontObject")?;
+            Ok(fo)
+        })?,
+    )?;
+
+    // Font:SetFontObject(target) — set inherited font object with cycle detection.
+    font.set(
+        "SetFontObject",
+        lua.create_function(|lua, (this, target): (mlua::Table, mlua::Table)| {
+            let name: String = this
+                .get::<String>("__name")
+                .unwrap_or_else(|_| "Font".to_string());
+            // Walk the target's __fontObject chain looking for this table.
+            let mut current: Value = Value::Table(target.clone());
+            loop {
+                match current {
+                    Value::Table(ref t) => {
+                        if *t == this {
+                            return Err(lua_error(
+                                lua,
+                                format!(
+                                    "{}:SetFontObject(): Can't create a font object loop",
+                                    name
+                                ),
+                            ));
+                        }
+                        current = t.get::<Value>("__fontObject").unwrap_or(Value::Nil);
+                    }
+                    _ => break,
+                }
+            }
+            this.set("__fontObject", target)?;
+            Ok(())
+        })?,
     )?;
 
     Ok(())
@@ -314,14 +356,39 @@ pub fn register_font_api(lua: &Lua) -> Result<()> {
 }
 
 /// Register CreateFont global function.
+///
+/// - Requires a name argument (nil or absent → error).
+/// - Coerces numeric names to strings.
+/// - Returns the same font object on repeat calls (uses an internal registry).
 fn register_create_font(lua: &Lua) -> Result<()> {
-    let func = lua.create_function(|lua, name: Option<String>| {
-        let font = lua.create_table()?;
-        set_font_defaults(&font, name.as_deref())?;
-        add_font_methods(lua, &font)?;
-        if let Some(ref n) = name {
-            lua.globals().set(n.as_str(), font.clone())?;
+    let func = lua.create_function(|lua, name_arg: Value| {
+        // Coerce name to string; nil / absent → error.
+        let name: String = match &name_arg {
+            Value::String(s) => s.to_string_lossy().to_string(),
+            Value::Integer(n) => n.to_string(),
+            Value::Number(n) => (*n as i64).to_string(),
+            _ => {
+                return Err(lua_error(lua, "Usage: CreateFont(\"name\")"));
+            }
+        };
+
+        // Check the internal font registry first so repeat calls return the same object.
+        // Always re-register in _G so `_G[name]` is valid even if the caller cleared it.
+        let registry: mlua::Table = lua
+            .load("_G.__font_registry = _G.__font_registry or {}; return _G.__font_registry")
+            .eval()?;
+        let existing: Value = registry.get(name.as_str())?;
+        if let Value::Table(t) = existing {
+            lua.globals().set(name.as_str(), t.clone())?;
+            return Ok(t);
         }
+
+        // Create new font, store in registry and _G.
+        let font = lua.create_table()?;
+        set_font_defaults(&font, Some(&name))?;
+        add_font_methods(lua, &font)?;
+        registry.set(name.as_str(), font.clone())?;
+        lua.globals().set(name.as_str(), font.clone())?;
         Ok(font)
     })?;
     lua.globals().set("CreateFont", func)?;
