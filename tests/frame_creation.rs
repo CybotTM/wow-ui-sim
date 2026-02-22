@@ -710,3 +710,23 @@ fn test_checkbutton_text_from_global_string() {
     assert_eq!(label, "Load out of date AddOns");
 }
 
+// ============================================================================
+// CreateFrame with frame in name position
+// ============================================================================
+
+#[test]
+fn test_create_frame_with_frame_in_name_position() {
+    let env = WowLuaEnv::new().unwrap();
+    let (name_nil, parent_nil): (bool, bool) = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame")
+        local g = CreateFrame("Frame", f)
+        return g:GetName() == nil, g:GetParent() == nil
+    "#,
+        )
+        .unwrap();
+    assert!(name_nil, "CreateFrame with frame as name should have nil name");
+    assert!(parent_nil, "CreateFrame with frame as name should have nil parent");
+}
+

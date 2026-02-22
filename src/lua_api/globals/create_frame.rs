@@ -132,16 +132,28 @@ fn parse_create_frame_args(
         .map(|s| s.to_string_lossy().to_string())
         .unwrap_or_else(|| "Frame".to_string());
 
-    let name_raw: Option<String> = args_iter
-        .next()
+    // Position 2: name. If it's a non-coercible type (e.g. userdata/frame),
+    // WoW treats the entire call as having no name AND no parent.
+    let name_arg = args_iter.next();
+    let name_arg_invalid = matches!(
+        name_arg,
+        Some(Value::LightUserData(_) | Value::UserData(_) | Value::Table(_) | Value::Function(_))
+    );
+    let name_raw: Option<String> = name_arg
         .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string());
 
-    let parent_arg = args_iter.next();
-    let explicit_parent = parent_arg.and_then(|v| extract_frame_id(v));
-    let parent_explicit = explicit_parent.is_some();
-    let parent_id = explicit_parent
-        .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
+    let (parent_id, parent_explicit) = if name_arg_invalid {
+        // Invalid name type consumes remaining args — no parent, no UIParent default
+        (None, false)
+    } else {
+        let parent_arg = args_iter.next();
+        let explicit_parent = parent_arg.and_then(|v| extract_frame_id(v));
+        let parent_explicit = explicit_parent.is_some();
+        let parent_id = explicit_parent
+            .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
+        (parent_id, parent_explicit)
+    };
 
     let template: Option<String> = args_iter
         .next()
