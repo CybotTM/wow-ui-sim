@@ -5,12 +5,18 @@ const LIBSTUB_PATH: &str = "/home/osso/Projects/wow/Rarity/Libs/LibStub/LibStub.
 const CALLBACK_PATH: &str = "/home/osso/Projects/wow/Rarity/Libs/CallbackHandler-1.0/CallbackHandler-1.0.lua";
 
 fn load_libstub(env: &WowLuaEnv) {
-    let code = fs::read_to_string(LIBSTUB_PATH).unwrap();
+    let code = fs::read_to_string(LIBSTUB_PATH).expect("LibStub.lua not found — skipping (local-only test)");
     env.exec(&code).unwrap();
+}
+
+/// Return true if the required Lua files exist on disk (local dev only).
+fn has_test_files() -> bool {
+    std::path::Path::new(LIBSTUB_PATH).exists()
 }
 
 #[test]
 fn test_libstub_loads() {
+    if !has_test_files() { return; }
     let env = WowLuaEnv::new().unwrap();
     load_libstub(&env);
 
@@ -20,6 +26,7 @@ fn test_libstub_loads() {
 
 #[test]
 fn test_libstub_new_library() {
+    if !has_test_files() { return; }
     let env = WowLuaEnv::new().unwrap();
     load_libstub(&env);
 
@@ -38,6 +45,7 @@ fn test_libstub_new_library() {
 
 #[test]
 fn test_callbackhandler_loads() {
+    if !has_test_files() { return; }
     let env = WowLuaEnv::new().unwrap();
     load_libstub(&env);
 
@@ -50,6 +58,7 @@ fn test_callbackhandler_loads() {
 
 #[test]
 fn test_callbackhandler_works() {
+    if !has_test_files() { return; }
     let env = WowLuaEnv::new().unwrap();
     load_libstub(&env);
 
