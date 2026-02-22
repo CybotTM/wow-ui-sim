@@ -2,12 +2,11 @@
 
 use super::methods_helpers::{calculate_frame_height, calculate_frame_width};
 use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
-use crate::lua_api::layout::compute_frame_rect;
 use crate::lua_api::SimState;
 use mlua::{LightUserData, Lua, Value};
 
 /// Read screen dimensions from SimState.
-fn screen_dims(state: &SimState) -> (f32, f32) {
+pub(crate) fn screen_dims(state: &SimState) -> (f32, f32) {
     (state.screen_width, state.screen_height)
 }
 
@@ -15,7 +14,7 @@ fn screen_dims(state: &SimState) -> (f32, f32) {
 pub fn add_core_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     add_identity_methods(lua, methods)?;
     add_size_methods(lua, methods)?;
-    add_rect_methods(lua, methods)?;
+    super::methods_rect::add_rect_methods(lua, methods)?;
     add_visibility_methods(lua, methods)?;
     add_strata_level_methods(lua, methods)?;
     add_mouse_input_methods(lua, methods)?;
@@ -159,117 +158,6 @@ fn add_size_setters(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
         state.widgets.mark_rect_dirty(id);
         state.invalidate_layout_with_dependents(id);
         Ok(())
-    })?)?;
-
-    Ok(())
-}
-
-/// Compute effective scale by walking up the parent chain.
-fn effective_scale(widgets: &crate::widget::WidgetRegistry, id: u64) -> f32 {
-    let mut scale = 1.0f32;
-    let mut current_id = Some(id);
-    while let Some(cid) = current_id {
-        if let Some(f) = widgets.get(cid) {
-            scale *= f.scale;
-            current_id = f.parent_id;
-        } else {
-            break;
-        }
-    }
-    scale
-}
-
-/// Rect/position methods
-fn add_rect_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_rect_full_methods(lua, methods)?;
-    add_rect_edge_methods(lua, methods)?;
-    Ok(())
-}
-
-/// GetRect, GetScaledRect, GetBounds
-fn add_rect_full_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetRect", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (screen_width, screen_height) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, screen_width, screen_height);
-        let bottom = screen_height - rect.y - rect.height;
-        Ok((rect.x, bottom, rect.width, rect.height))
-    })?)?;
-
-    methods.set("GetScaledRect", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (screen_width, screen_height) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, screen_width, screen_height);
-        let scale = effective_scale(&state.widgets, id);
-        let left = rect.x * scale;
-        let bottom = (screen_height - rect.y - rect.height) * scale;
-        Ok((left, bottom, rect.width * scale, rect.height * scale))
-    })?)?;
-
-    methods.set("GetBounds", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (screen_width, screen_height) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, screen_width, screen_height);
-        let bottom = screen_height - rect.y - rect.height;
-        Ok((rect.x, bottom, rect.width, rect.height))
-    })?)?;
-
-    Ok(())
-}
-
-/// GetLeft, GetRight, GetTop, GetBottom, GetCenter
-fn add_rect_edge_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetLeft", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (sw, sh) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, sw, sh);
-        Ok(rect.x)
-    })?)?;
-
-    methods.set("GetRight", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (sw, sh) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, sw, sh);
-        Ok(rect.x + rect.width)
-    })?)?;
-
-    methods.set("GetTop", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (sw, sh) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, sw, sh);
-        Ok(sh - rect.y)
-    })?)?;
-
-    methods.set("GetBottom", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (sw, sh) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, sw, sh);
-        Ok(sh - rect.y - rect.height)
-    })?)?;
-
-    methods.set("GetCenter", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let (sw, sh) = screen_dims(&state);
-        let rect = compute_frame_rect(&state.widgets, id, sw, sh);
-        let cx = rect.x + rect.width / 2.0;
-        let cy = sh - rect.y - rect.height / 2.0;
-        Ok((cx, cy))
     })?)?;
 
     Ok(())

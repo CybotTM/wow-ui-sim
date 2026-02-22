@@ -9,6 +9,7 @@ mod methods_backdrop;
 mod methods_button;
 pub(crate) mod methods_core;
 mod methods_create;
+mod methods_rect;
 mod methods_event;
 pub(crate) mod methods_helpers;
 mod methods_line;

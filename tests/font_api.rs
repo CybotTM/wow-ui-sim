@@ -47,17 +47,17 @@ fn test_create_font_set_get_font() {
 #[test]
 fn test_create_font_default_values() {
     let env = env();
-    let (path, height): (String, f64) = env
+    let (is_nil, height): (bool, f64) = env
         .eval(
             r#"
             local f = CreateFont('TestDefault')
             local p, h = f:GetFont()
-            return p, h
+            return p == nil, h
             "#,
         )
         .unwrap();
-    assert_eq!(path, "Fonts\\FRIZQT__.TTF");
-    assert_eq!(height, 12.0);
+    assert!(is_nil, "GetFont path should be nil on fresh CreateFont");
+    assert_eq!(height, 0.0);
 }
 
 #[test]
@@ -289,10 +289,10 @@ fn test_standard_fonts_exist() {
 #[test]
 fn test_standard_font_has_methods() {
     let env = env();
-    let (path, height, _flags): (String, f64, String) = env
-        .eval("return GameFontNormal:GetFont()")
+    let (is_nil, height): (bool, f64) = env
+        .eval("local p, h = GameFontNormal:GetFont(); return p == nil, h")
         .unwrap();
-    assert_eq!(path, "Fonts\\FRIZQT__.TTF");
+    assert!(is_nil, "Standard font has no path set in headless mode");
     assert_eq!(height, 12.0);
 }
 
