@@ -68,13 +68,16 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
     if let Some(frame) = widgets.get_mut_visual(child_id) {
         frame.parent_id = new_parent_id;
         // Inherit strata and level from parent (like wowless does)
-        if let Some((parent_strata, parent_level, _, _)) = parent_props {
-            if !frame.has_fixed_frame_strata {
-                frame.frame_strata = parent_strata;
-            }
-            if !frame.has_fixed_frame_level {
-                let offset = frame.frame_level_offset.unwrap_or(1);
-                frame.frame_level = parent_level + offset;
+        // Only recalculate when actually changing parents, not re-assigning the same one
+        if !same_parent {
+            if let Some((parent_strata, parent_level, _, _)) = parent_props {
+                if !frame.has_fixed_frame_strata {
+                    frame.frame_strata = parent_strata;
+                }
+                if !frame.has_fixed_frame_level {
+                    let offset = frame.frame_level_offset.unwrap_or(1);
+                    frame.frame_level = parent_level + offset;
+                }
             }
         }
     }
