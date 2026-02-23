@@ -86,6 +86,83 @@ fn create_new_timer(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fun
     })
 }
 
+/// Get or create the shared timer handle metatable.
+///
+/// The metatable provides:
+/// - `__eq`: compares `_id` fields so proxies compare equal to their originals
+/// - `__index`: delegates to `_proxy_target` if present (for proxies)
+/// - `__newindex`: delegates to `_proxy_target` if present, otherwise rawset
+/// - `__tostring`: returns `"TimerHandle: <id>"` for originals; delegates to `tostring(target)` for proxies
+fn get_timer_handle_metatable(lua: &Lua) -> Result<mlua::Table> {
+    if let Ok(mt) = lua.named_registry_value::<mlua::Table>("wow_timer_handle_mt") {
+        return Ok(mt);
+    }
+    let mt = lua.create_table()?;
+    mt.raw_set(
+        "__eq",
+        lua.create_function(|_, (a, b): (mlua::Table, mlua::Table)| {
+            let id_a: u64 = a.raw_get("_id")?;
+            let id_b: u64 = b.raw_get("_id")?;
+            Ok(id_a == id_b)
+        })?,
+    )?;
+    mt.raw_set(
+        "__index",
+        lua.create_function(|_, (this, key): (mlua::Table, mlua::Value)| {
+            let target: Option<mlua::Table> = this.raw_get("_proxy_target")?;
+            match target {
+                Some(t) => t.get::<mlua::Value>(key),
+                None => Ok(mlua::Value::Nil),
+            }
+        })?,
+    )?;
+    mt.raw_set(
+        "__newindex",
+        lua.create_function(
+            |_, (this, key, value): (mlua::Table, mlua::Value, mlua::Value)| {
+                let target: Option<mlua::Table> = this.raw_get("_proxy_target")?;
+                match target {
+                    Some(t) => t.raw_set(key, value),
+                    None => this.raw_set(key, value),
+                }
+            },
+        )?,
+    )?;
+    mt.raw_set(
+        "__tostring",
+        lua.create_function(|lua, this: mlua::Table| {
+            let target: Option<mlua::Table> = this.raw_get("_proxy_target")?;
+            match target {
+                Some(t) => {
+                    let tostring: mlua::Function = lua.globals().get("tostring")?;
+                    tostring.call::<mlua::String>(t)
+                }
+                None => {
+                    let id: u64 = this.raw_get("_id")?;
+                    lua.create_string(format!("TimerHandle: {}", id))
+                }
+            }
+        })?,
+    )?;
+    lua.set_named_registry_value("wow_timer_handle_mt", mt.clone())?;
+    Ok(mt)
+}
+
+/// Create a proxy table that delegates to the original handle.
+///
+/// The proxy has the same `_id` and shared metatable as the original,
+/// so `proxy == original` is true via `__eq`, but they are different
+/// Lua table objects (raw table key lookup distinguishes them).
+pub fn create_timer_proxy(lua: &Lua, handle: &mlua::Table) -> Result<mlua::Table> {
+    let proxy = lua.create_table()?;
+    let id: u64 = handle.raw_get("_id")?;
+    proxy.raw_set("_id", id)?;
+    proxy.raw_set("_proxy_target", handle.clone())?;
+    let mt = get_timer_handle_metatable(lua)?;
+    proxy.set_metatable(Some(mt));
+    Ok(proxy)
+}
+
 /// Create a timer handle table with Cancel and IsCancelled methods.
 fn create_timer_handle(
     lua: &Lua,
@@ -117,6 +194,9 @@ fn create_timer_handle(
         Ok(cancelled)
     })?;
     handle.set("IsCancelled", is_cancelled)?;
+
+    let mt = get_timer_handle_metatable(lua)?;
+    handle.set_metatable(Some(mt));
 
     Ok(handle)
 }

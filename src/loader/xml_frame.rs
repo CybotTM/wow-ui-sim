@@ -33,6 +33,13 @@ pub fn create_frame_from_xml(
         if let Some(ref name) = frame.name {
             crate::xml::register_template(name, widget_type, frame.clone());
         }
+        // Apply secure mixin transformation: move methods into __index, clear table,
+        // set __metatable = 0. This mirrors the wowless securemixin handler and is
+        // needed so that _G.ScrollingMessageFrameSecureMixin is an empty table with
+        // methods accessible via __index (matching real WoW client behavior).
+        if let Some(ref sm) = frame.secure_mixin {
+            apply_secure_mixins(env.lua(), sm);
+        }
         if parent_override.is_none() {
             return Ok(None);
         }
@@ -523,4 +530,51 @@ fn create_frame_elements(
     Ok(())
 }
 
+/// Apply the secure mixin transformation to the named mixin tables.
+///
+/// In the real WoW client (and in wowless), when a frame has `secureMixin="Foo"`,
+/// the mixin table `_G.Foo` has its methods moved into a hidden `__index` table,
+/// leaving the mixin itself empty. `getmetatable(Foo)` returns a number (0).
+///
+/// This mirrors the wowless `securemixin` handler:
+/// ```lua
+/// local vv = {}
+/// for k, v in pairs(mv) do vv[k] = v; mv[k] = nil end
+/// setmetatable(mv, { __index = vv, __metatable = 0 })
+/// ```
+///
+/// Additionally, we store the methods table in `__secureMixinMethods` (a registry table)
+/// keyed by the mixin table reference, so that `Mixin()` can apply only the stable
+/// methods (not user-added direct entries like test fixtures) when applying secure mixins
+/// to new frame instances.
+fn apply_secure_mixins(lua: &mlua::Lua, secure_mixin_attr: &str) {
+    let transform = r#"
+        local names = ...
+        __secureMixinMethods = __secureMixinMethods or {}
+        for _, name in ipairs(names) do
+            local mv = _G[name] or (__secureenv and rawget(__secureenv, name))
+            if mv and type(mv) == 'table' then
+                local vv = {}
+                for k, v in pairs(mv) do
+                    vv[k] = v
+                    mv[k] = nil
+                end
+                setmetatable(mv, { __index = vv, __metatable = 0 })
+                __secureMixinMethods[mv] = vv
+            end
+        end
+    "#;
+    let names: Vec<String> = secure_mixin_attr
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty())
+        .collect();
+    if names.is_empty() {
+        return;
+    }
+    let lua_names: mlua::Result<mlua::Table> = lua.create_sequence_from(names);
+    if let Ok(tbl) = lua_names {
+        let _ = lua.load(transform).call::<()>(tbl);
+    }
+}
 

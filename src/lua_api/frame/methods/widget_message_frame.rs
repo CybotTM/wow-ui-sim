@@ -317,7 +317,28 @@ fn add_message_frame_misc_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Res
 
 fn add_message_frame_callback_stubs(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("SetOnScrollChangedCallback", lua.create_function(|_, (_ud, _func): (LightUserData, Value)| Ok(()))?)?;
-    methods.set("SetOnTextCopiedCallback", lua.create_function(|_, (_ud, _func): (LightUserData, Value)| Ok(()))?)?;
+    methods.set("SetOnTextCopiedCallback", lua.create_function(|lua, (ud, func): (LightUserData, Value)| {
+        let frame_id = lud_to_id(ud);
+        let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+        match func {
+            Value::Function(callback) => {
+                frame_fields.set("_onTextCopiedCallback_orig", callback)?;
+                let wrapper = lua.create_function(move |lua, args: mlua::Variadic<Value>| {
+                    let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+                    if let Ok(orig) = fields.get::<mlua::Function>("_onTextCopiedCallback_orig") {
+                        orig.call::<()>(args)?;
+                    }
+                    Ok(())
+                })?;
+                frame_fields.set("onTextCopiedCallback", wrapper)?;
+            }
+            _ => {
+                frame_fields.set("onTextCopiedCallback", Value::Nil)?;
+                frame_fields.set("_onTextCopiedCallback_orig", Value::Nil)?;
+            }
+        }
+        Ok(())
+    })?)?;
     methods.set("SetOnLineRightClickedCallback", lua.create_function(|_, (_ud, _func): (LightUserData, Value)| Ok(()))?)?;
     methods.set("AddOnDisplayRefreshedCallback", lua.create_function(|_, (_ud, _func): (LightUserData, Value)| Ok(()))?)?;
     methods.set("RemoveMessagesByPredicate", lua.create_function(|_, (_ud, _func): (LightUserData, Value)| Ok(()))?)?;

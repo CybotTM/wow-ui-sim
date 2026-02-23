@@ -18,6 +18,7 @@ pub(crate) mod script_helpers;
 pub(crate) mod secure_env;
 pub mod simple_html;
 pub(crate) mod state;
+mod timer_processing;
 pub(crate) mod talent_state;
 pub mod tooltip;
 pub(crate) mod workarounds;

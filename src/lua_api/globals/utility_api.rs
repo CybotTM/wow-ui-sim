@@ -560,7 +560,12 @@ fn register_mixin_system(lua: &Lua) -> Result<()> {
             for i = 1, select("#", ...) do
                 local mixin = select(i, ...)
                 if mixin then
-                    for k, v in pairs(mixin) do
+                    -- For secure mixins (transformed by secureMixin XML attribute),
+                    -- use the stable methods table stored in __secureMixinMethods.
+                    -- This prevents user-added direct entries (e.g. test fixtures) from
+                    -- propagating to new frame instances created after the mixin is modified.
+                    local source = (__secureMixinMethods and __secureMixinMethods[mixin]) or mixin
+                    for k, v in pairs(source) do
                         object[k] = v
                     end
                 end

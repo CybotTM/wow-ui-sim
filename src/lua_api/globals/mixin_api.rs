@@ -15,9 +15,37 @@ pub fn register_mixin_api(lua: &Lua) -> Result<()> {
     globals.set("POIButtonMixin", register_poi_button_mixin(lua)?)?;
     globals.set("TaggableObjectMixin", register_taggable_object_mixin(lua)?)?;
     globals.set("MapCanvasPinMixin", register_map_canvas_pin_mixin(lua)?)?;
+    globals.set("ScrollingMessageFrameMixin", register_scrolling_message_frame_mixin(lua)?)?;
     globals.set("Menu", register_menu(lua)?)?;
     globals.set("MenuUtil", register_menu_util(lua)?)?;
     Ok(())
+}
+
+/// ScrollingMessageFrameMixin - mixin table for ScrollingMessageFrame widgets.
+///
+/// Structure:
+/// - Empty table (no direct entries, `next(m) == nil`)
+/// - Metatable with `__metatable = 0` (so `getmetatable(m)` returns a number)
+/// - Metatable `__index` points to a methods table containing Lua functions
+/// - No `__newindex` so assignments rawset directly into the mixin table
+fn register_scrolling_message_frame_mixin(lua: &Lua) -> Result<mlua::Table> {
+    // Methods table: SetOnTextCopiedCallback stores arg directly (no wrapping).
+    // This is a pure Lua function so coroutine.create works on it.
+    let methods = lua.create_table()?;
+    let set_callback_fn: mlua::Function = lua
+        .load("function(self, cb) self.onTextCopiedCallback = cb end")
+        .eval()?;
+    methods.set("SetOnTextCopiedCallback", set_callback_fn)?;
+
+    // Mixin table: empty, with metatable
+    let mixin = lua.create_table()?;
+    let mt = lua.create_table()?;
+    mt.set("__metatable", 0)?;
+    mt.set("__index", methods)?;
+    // No __newindex: default rawset means `mixin.key = val` stores directly in mixin
+    mixin.set_metatable(Some(mt));
+
+    Ok(mixin)
 }
 
 /// POIButtonMixin - mixin for quest POI buttons on world map.
