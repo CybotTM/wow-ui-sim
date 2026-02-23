@@ -26,6 +26,57 @@ pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
 fn register_missing_c_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_item_pet_aura_namespaces(lua, g)?;
     register_utility_namespaces(lua, g)?;
+    register_account_encounter_proto_namespaces(lua, g)?;
+    register_reincarnation_table_util(lua, g)?;
+    Ok(())
+}
+
+/// C_AccountServices, C_ArrowCalloutManager, C_EncounterEvents, C_PrototypeDialog stubs.
+fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let acct = lua.create_table()?;
+    acct.set("IsAccountLockedPostSave", lua.create_function(|_, ()| Ok(false))?)?;
+    acct.set("IsAccountSaveEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    acct.set("IsAccountSaveInProgress", lua.create_function(|_, ()| Ok(false))?)?;
+    acct.set("SaveAccountData", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set("C_AccountServices", acct)?;
+
+    let arrow = lua.create_table()?;
+    arrow.set("AcknowledgeCallout", lua.create_function(|_, _id: Value| Ok(()))?)?;
+    arrow.set("HideCallout", lua.create_function(|_, _id: Value| Ok(()))?)?;
+    g.set("C_ArrowCalloutManager", arrow)?;
+
+    let ee = lua.create_table()?;
+    ee.set("GetEventColor", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    ee.set("GetEventInfo", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    ee.set("GetEventList", lua.create_function(|lua, ()| lua.create_table())?)?;
+    ee.set("GetEventSound", lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?)?;
+    ee.set("HasEventInfo", lua.create_function(|_, _event_id: Value| Ok(false))?)?;
+    ee.set("PlayEventSound", lua.create_function(|_, _event_id: Value| Ok(()))?)?;
+    ee.set("SetEventColor", lua.create_function(|_, (_event_id, _color): (Value, Value)| Ok(()))?)?;
+    ee.set("SetEventSound", lua.create_function(|_, (_event_id, _sound): (Value, Value)| Ok(()))?)?;
+    g.set("C_EncounterEvents", ee)?;
+
+    let pd = lua.create_table()?;
+    pd.set("EnsureRemoved", lua.create_function(|_, _dialog_id: Value| Ok(()))?)?;
+    pd.set("SelectOption", lua.create_function(|_, (_dialog_id, _option_id): (Value, Value)| Ok(()))?)?;
+    g.set("C_PrototypeDialog", pd)?;
+
+    Ok(())
+}
+
+/// C_Reincarnation and C_TableUtil stubs.
+fn register_reincarnation_table_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let ri = lua.create_table()?;
+    ri.set("GetReincarnatingCharacter", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    ri.set("IsReincarnating", lua.create_function(|_, ()| Ok(false))?)?;
+    ri.set("StartReincarnation", lua.create_function(|_, ()| Ok(()))?)?;
+    ri.set("StopReincarnation", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set("C_Reincarnation", ri)?;
+
+    let tu = lua.create_table()?;
+    tu.set("FindIndexedMismatch", lua.create_function(|_, (_t1, _t2, _fn): (Value, Value, Value)| Ok(Value::Nil))?)?;
+    g.set("C_TableUtil", tu)?;
+
     Ok(())
 }
 
