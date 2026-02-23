@@ -95,21 +95,50 @@ fn test_unregister_event() {
         _G.testFrame:SetScript("OnEvent", function(self, event)
             _G.eventCount = _G.eventCount + 1
         end)
-        _G.testFrame:RegisterEvent("TEST_EVENT")
+        _G.testFrame:RegisterEvent("PLAYER_LOGIN")
         "#,
     )
     .unwrap();
 
-    env.fire_event("TEST_EVENT").unwrap();
+    env.fire_event("PLAYER_LOGIN").unwrap();
     let count: i32 = env.eval("return _G.eventCount").unwrap();
     assert_eq!(count, 1);
 
-    env.exec(r#"_G.testFrame:UnregisterEvent("TEST_EVENT")"#)
+    env.exec(r#"_G.testFrame:UnregisterEvent("PLAYER_LOGIN")"#)
         .unwrap();
-    env.fire_event("TEST_EVENT").unwrap();
+    env.fire_event("PLAYER_LOGIN").unwrap();
 
     let count: i32 = env.eval("return _G.eventCount").unwrap();
     assert_eq!(count, 1, "Event should not fire after unregister");
+}
+
+/// Test that RegisterEvent rejects unknown event names.
+#[test]
+fn test_register_event_invalid_name() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result = env.exec(r#"
+        local f = CreateFrame("Frame", "TestEventFrame")
+        f:RegisterEvent("WOWLESS_NOPE")
+    "#);
+    assert!(result.is_err(), "RegisterEvent should error on unknown event");
+    let err = result.unwrap_err().to_string();
+    assert!(
+        err.contains("Couldn't find event WOWLESS_NOPE"),
+        "Error should mention event name, got: {err}"
+    );
+}
+
+/// Test that RegisterEvent accepts a known valid WoW event.
+#[test]
+fn test_register_event_valid_name() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"
+        local f = CreateFrame("Frame")
+        f:RegisterEvent("PLAYER_LOGIN")
+    "#)
+    .unwrap();
 }
 
 /// Test the print function (used extensively in AutoRoll).

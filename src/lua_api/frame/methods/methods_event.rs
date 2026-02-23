@@ -1,5 +1,6 @@
 //! Event registration methods: RegisterEvent, UnregisterEvent, etc.
 
+use crate::event::is_valid_event;
 use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, Value};
 
@@ -13,14 +14,37 @@ pub fn add_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
 
 /// RegisterEvent, RegisterUnitEvent, UnregisterEvent, UnregisterAllEvents, RegisterAllEvents
 fn add_event_register_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    add_register_event_methods(lua, methods)?;
+    add_unregister_event_methods(lua, methods)?;
+    Ok(())
+}
+
+/// Build the error returned when an unrecognised event name is passed to RegisterEvent.
+fn unknown_event_error(frame_name: &str, event: &str) -> mlua::Error {
+    mlua::Error::RuntimeError(format!(
+        "Usage: {}:RegisterEvent(\"event\"): Couldn't find event {}",
+        frame_name, event
+    ))
+}
+
+/// RegisterEvent, RegisterUnitEvent
+fn add_register_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("RegisterEvent", lua.create_function(|lua, (ud, event): (LightUserData, String)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(id) {
-            frame.register_event(&event);
+        if !is_valid_event(&event) {
+            let frame_name = state.widgets.get(id)
+                .and_then(|f| f.name.clone())
+                .unwrap_or_else(|| "Frame".to_string());
+            return Err(unknown_event_error(&frame_name, &event));
         }
-        Ok(())
+        let newly_registered = if let Some(frame) = state.widgets.get_mut(id) {
+            frame.registered_events.insert(event)
+        } else {
+            false
+        };
+        Ok(newly_registered)
     })?)?;
 
     // Some addons pass a callback function as the last argument (non-standard)
@@ -29,21 +53,36 @@ fn add_event_register_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
             let id = lud_to_id(ud);
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut(id) {
-                frame.register_event(&event);
-            }
-            Ok(())
+            let newly_registered = if let Some(frame) = state.widgets.get_mut(id) {
+                frame.registered_events.insert(event)
+            } else {
+                false
+            };
+            Ok(newly_registered)
         },
     )?)?;
 
+    Ok(())
+}
+
+/// UnregisterEvent, UnregisterAllEvents, RegisterAllEvents
+fn add_unregister_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("UnregisterEvent", lua.create_function(|lua, (ud, event): (LightUserData, String)| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(id) {
-            frame.unregister_event(&event);
+        if !is_valid_event(&event) {
+            let frame_name = state.widgets.get(id)
+                .and_then(|f| f.name.clone())
+                .unwrap_or_else(|| "Frame".to_string());
+            return Err(unknown_event_error(&frame_name, &event));
         }
-        Ok(())
+        let was_registered = if let Some(frame) = state.widgets.get_mut(id) {
+            frame.registered_events.remove(&event)
+        } else {
+            false
+        };
+        Ok(was_registered)
     })?)?;
 
     methods.set("UnregisterAllEvents", lua.create_function(|lua, ud: LightUserData| {
@@ -76,7 +115,7 @@ fn add_event_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         let registered = if let Some(frame) = state.widgets.get(id) {
-            frame.register_all_events || frame.registered_events.contains(&event)
+            frame.registered_events.contains(&event)
         } else {
             false
         };

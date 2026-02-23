@@ -2,6 +2,9 @@
 
 use std::collections::HashMap;
 
+pub mod valid_events;
+pub use valid_events::is_valid_event;
+
 /// Common WoW events that addons typically use.
 pub mod events {
     pub const PLAYER_LOGIN: &str = "PLAYER_LOGIN";

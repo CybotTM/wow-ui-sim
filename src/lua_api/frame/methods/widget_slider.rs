@@ -232,7 +232,9 @@ fn add_set_statusbar_texture(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.statusbar_texture_path = path.clone();
-            if let Some(bid) = bar_id {
+            if matches!(&texture, Value::Nil) {
+                frame.statusbar_bar_id = None;
+            } else if let Some(bid) = bar_id {
                 frame.statusbar_bar_id = Some(bid);
             }
         }
@@ -250,13 +252,14 @@ fn add_set_statusbar_texture(lua: &Lua, methods: &mlua::Table) -> Result<()> {
 fn add_get_statusbar_texture(lua: &Lua, methods: &mlua::Table) -> Result<()> {
     methods.set("GetStatusBarTexture", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
-        let bar_id = {
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            state.widgets.get(id).and_then(|f| f.statusbar_bar_id)
-        };
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
         if let Some(bar_id) = bar_id {
-            return Ok(frame_lud(bar_id));
+            // Only return if texture is still our child
+            if state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id)) {
+                return Ok(frame_lud(bar_id));
+            }
         }
         Ok(Value::Nil)
     })?)?;
@@ -273,14 +276,14 @@ fn add_statusbar_color_methods(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         let a = val_to_f32(it.next(), 1.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let mut bar_id = None;
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.statusbar_color = Some(Color::new(r, g, b, a));
-            bar_id = frame.statusbar_bar_id;
-        }
+        let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
         if let Some(bar_id) = bar_id {
-            if let Some(bar) = state.widgets.get_mut_visual(bar_id) {
-                bar.vertex_color = Some(Color::new(r, g, b, a));
+            // Only apply if bar texture is still our child
+            let is_child = state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id));
+            if is_child {
+                if let Some(bar) = state.widgets.get_mut_visual(bar_id) {
+                    bar.vertex_color = Some(Color::new(r, g, b, a));
+                }
             }
         }
         Ok(())
@@ -290,10 +293,16 @@ fn add_statusbar_color_methods(lua: &Lua, methods: &mlua::Table) -> Result<()> {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id)
-            && let Some(c) = &frame.statusbar_color {
-                return Ok((c.r, c.g, c.b, c.a));
+        let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
+        if let Some(bar_id) = bar_id {
+            // Only read from bar texture if it's still our child
+            let is_child = state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id));
+            if is_child {
+                if let Some(c) = state.widgets.get(bar_id).and_then(|f| f.vertex_color.as_ref()) {
+                    return Ok((c.r, c.g, c.b, c.a));
+                }
             }
+        }
         Ok((1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32))
     })?)?;
 
@@ -492,12 +501,12 @@ fn apply_min_max(frame: &mut crate::widget::Frame, min: f64, max: f64) {
 fn apply_statusbar_texture_path(state: &mut crate::lua_api::SimState, id: u64, tex_str: &str) {
     let bar_child_id = find_bar_texture_child(&state.widgets, id)
         .unwrap_or_else(|| {
-            let child_id = super::methods_helpers::get_or_create_button_texture(state, id, "StatusBarTexture");
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.statusbar_bar_id = Some(child_id);
-            }
-            child_id
+            super::methods_helpers::get_or_create_button_texture(state, id, "StatusBarTexture")
         });
+    // Always update statusbar_bar_id after finding or creating the bar child
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.statusbar_bar_id = Some(bar_child_id);
+    }
     apply_bar_texture(&mut state.widgets, bar_child_id, tex_str);
     anchor_bar_to_parent(&mut state.widgets, bar_child_id, id);
 }
@@ -505,10 +514,11 @@ fn apply_statusbar_texture_path(state: &mut crate::lua_api::SimState, id: u64, t
 /// Find the bar texture child of a StatusBar by stored ID or children_keys.
 fn find_bar_texture_child(widgets: &crate::widget::WidgetRegistry, parent_id: u64) -> Option<u64> {
     let frame = widgets.get(parent_id)?;
-    frame.statusbar_bar_id
+    let candidate = frame.statusbar_bar_id
         .or_else(|| frame.children_keys.get("BarTexture").copied())
         .or_else(|| frame.children_keys.get("StatusBarTexture").copied())
-        .or_else(|| frame.children_keys.get("Bar").copied())
+        .or_else(|| frame.children_keys.get("Bar").copied());
+    candidate.filter(|&id| widgets.get(id).is_some_and(|f| f.parent_id == Some(parent_id)))
 }
 
 /// Apply a texture path or atlas name to a bar texture child.
