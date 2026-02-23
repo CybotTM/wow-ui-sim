@@ -52,9 +52,9 @@ fn generate_button_texture_code(
 
 /// Apply button textures (NormalTexture, PushedTexture, etc.) from a FrameXml to a button.
 ///
-/// For XML elements with atlas/file, generates Lua code to call Set*Texture.
-/// For empty XML elements like `<NormalTexture/>`, creates an empty texture child
-/// so that Get*Texture() returns a valid object (matching WoW behavior).
+/// First ensures texture children exist for ALL XML texture slots (atlas, file, or empty),
+/// then generates Lua code to set atlas/file on them. This ordering is critical: Lua code
+/// calls `Get*Texture()` which returns nil if the child doesn't exist yet.
 pub fn apply_button_textures(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
@@ -67,6 +67,10 @@ pub fn apply_button_textures(
         ("SetDisabledTexture", "DisabledTexture", frame_xml.disabled_texture()),
     ];
 
+    // Create texture children for ALL slots BEFORE running Lua code.
+    // The Lua atlas path calls Get*Texture() which needs the child to exist.
+    ensure_button_texture_children(env, &texture_slots, button_name);
+
     let lua_code: String = texture_slots
         .iter()
         .filter_map(|(method, _, tex)| tex.map(|t| generate_button_texture_code(button_name, method, t)))
@@ -78,15 +82,13 @@ pub fn apply_button_textures(
         })?;
     }
 
-    // Create empty texture children for XML elements without atlas/file.
-    // WoW creates these so GetNormalTexture() etc. return valid objects.
-    create_empty_button_textures(env, &texture_slots, button_name);
-
     Ok(())
 }
 
-/// Create empty texture children for button XML elements that have no atlas or file.
-fn create_empty_button_textures(
+/// Ensure texture children exist for all button XML texture slots.
+/// Creates empty texture children for any slot that has an XML element,
+/// regardless of whether it has atlas/file attributes.
+fn ensure_button_texture_children(
     env: &LoaderEnv<'_>,
     slots: &[(&str, &str, Option<&crate::xml::TextureXml>); 4],
     button_name: &str,
@@ -96,9 +98,7 @@ fn create_empty_button_textures(
     let button_id = state.widgets.get_id_by_name(button_name);
     let Some(button_id) = button_id else { return };
     for &(_, parent_key, tex_opt) in slots {
-        let Some(tex) = tex_opt else { continue };
-        // Skip if already created by Set*Texture Lua code (has atlas or file)
-        if tex.atlas.is_some() || tex.file.is_some() {
+        if tex_opt.is_none() {
             continue;
         }
         get_or_create_button_texture(&mut state, button_id, parent_key);

@@ -412,6 +412,17 @@ fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
     })?;
     mt.raw_set("__index", index_fn)?;
 
+    // Delegate __newindex to the underlying LightUserData's type metatable so that
+    // children_keys and __frame_fields stay synced.  Without this, `proxy["key"] = value`
+    // does a plain rawset on the proxy table, invisible to LightUserData __index.
+    let lud_for_newindex = lud.clone();
+    let newindex_fn = lua.create_function(move |lua, (_this, key, value): (mlua::Table, String, Value)| {
+        let assign: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
+        assign.call::<()>((lud_for_newindex.clone(), key, value))?;
+        Ok(())
+    })?;
+    mt.raw_set("__newindex", newindex_fn)?;
+
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))
 }
