@@ -151,15 +151,19 @@ impl App {
 
     pub(super) fn handle_right_mouse_up(&mut self, pos: Point) {
         // Right-click clears the cursor (drops held spell/action) in WoW.
-        let had_cursor_item = {
-            let env = self.env.borrow();
-            let mut state = env.state().borrow_mut();
-            state.cursor_item.take().is_some()
-        };
+        // Use the Lua ClearCursor() function so events fire properly.
+        let had_cursor_item = self.env.borrow().state().borrow().cursor_item.is_some();
         if had_cursor_item {
             eprintln!("[cursor] Right-click ClearCursor");
+            {
+                let env = self.env.borrow();
+                let lua = env.lua();
+                if let Ok(clear_fn) = lua.globals().get::<mlua::Function>("ClearCursor") {
+                    let _ = clear_fn.call::<()>(());
+                }
+            }
             self.right_mouse_down_frame = None;
-            self.invalidate();
+            self.flush_post_script_updates();
             return;
         }
 

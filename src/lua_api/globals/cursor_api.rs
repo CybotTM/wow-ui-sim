@@ -23,11 +23,12 @@ pub fn register_c_spell_pickup(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
     let g = lua.globals();
     let c_spell: mlua::Table = g.get("C_Spell")?;
     let st = Rc::clone(state);
-    c_spell.set("PickupSpell", lua.create_function(move |_, spell_id: i32| {
+    c_spell.set("PickupSpell", lua.create_function(move |lua, spell_id: i32| {
         let spell_id = spell_id as u32;
         if crate::spells::get_spell(spell_id).is_some() {
             eprintln!("[cursor] PickupSpell({})", spell_id);
             st.borrow_mut().cursor_item = Some(CursorInfo::Spell { spell_id });
+            fire_cursor_changed(lua)?;
         }
         Ok(())
     })?)?;
@@ -71,11 +72,19 @@ fn register_clear_cursor(
     lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let st = Rc::clone(state);
-    g.set("ClearCursor", lua.create_function(move |_, ()| {
-        let mut s = st.borrow_mut();
-        if s.cursor_item.is_some() {
-            eprintln!("[cursor] ClearCursor");
-            s.cursor_item = None;
+    g.set("ClearCursor", lua.create_function(move |lua, ()| {
+        let had_item = {
+            let mut s = st.borrow_mut();
+            let had = s.cursor_item.is_some();
+            if had {
+                eprintln!("[cursor] ClearCursor");
+                s.cursor_item = None;
+            }
+            had
+        };
+        if had_item {
+            fire_cursor_changed(lua)?;
+            fire_action_bar_updates(&st, lua)?;
         }
         Ok(())
     })?)?;
@@ -142,6 +151,7 @@ fn pickup_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<
         state.borrow_mut().cursor_item = Some(CursorInfo::Action { slot, spell_id });
     }
 
+    fire_cursor_changed(lua)?;
     fire_action_bar_updates(state, lua)?;
     Ok(())
 }
@@ -165,6 +175,7 @@ fn place_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<(
         state.borrow_mut().cursor_item = Some(CursorInfo::Action { slot, spell_id: old_spell });
     }
 
+    fire_cursor_changed(lua)?;
     fire_action_bar_updates(state, lua)?;
     Ok(())
 }
@@ -175,6 +186,13 @@ fn put_action_in_slot(state: &Rc<RefCell<SimState>>, lua: &Lua, action: u32, slo
     state.borrow_mut().action_bars.insert(slot, action);
     eprintln!("[cursor] PutActionInSlot({}, {})", action, slot);
     fire_action_bar_updates(state, lua)?;
+    Ok(())
+}
+
+/// Fire CURSOR_CHANGED event.
+fn fire_cursor_changed(lua: &Lua) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    fire.call::<()>(lua.create_string("CURSOR_CHANGED")?)?;
     Ok(())
 }
 
