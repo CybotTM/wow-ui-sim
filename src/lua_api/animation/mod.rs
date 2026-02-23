@@ -237,7 +237,10 @@ pub struct AnimGroupState {
     pub name: Option<String>,
     pub playing: bool,
     pub paused: bool,
-    pub finished: bool,
+    /// True after Stop() or natural completion — IsDone() returns this.
+    pub done: bool,
+    /// True after Finish() is called — IsPendingFinish() returns this.
+    pub pending_finish: bool,
     pub reverse: bool,
     pub elapsed: f64,
     pub looping: LoopType,
@@ -258,7 +261,8 @@ impl AnimGroupState {
             name: None,
             playing: false,
             paused: false,
-            finished: false,
+            done: false,
+            pending_finish: false,
             reverse: false,
             elapsed: 0.0,
             looping: LoopType::None,

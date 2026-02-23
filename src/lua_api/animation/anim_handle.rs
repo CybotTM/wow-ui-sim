@@ -351,7 +351,7 @@ impl AnimHandle {
 
         methods.add_method("IsDone", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| g.finished))
+            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| g.done))
         });
 
         methods.add_method("IsStopped", |_, this, ()| {

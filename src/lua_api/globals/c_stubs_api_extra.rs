@@ -188,8 +188,8 @@ fn register_chat_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     cfc.set("MaxChatWindows", 10i32)?;
     cfc.set("ScrollToBottomFlashInterval", 0.5f64)?;
     cfc.set("WhisperSoundAlertCooldown", 3.0f64)?;
-    cfc.set("TruncatedCommunityNameLength", 20i32)?;
-    cfc.set("TruncatedCommunityNameWithoutChannelLength", 15i32)?;
+    cfc.set("TruncatedCommunityNameLength", 12i32)?;
+    cfc.set("TruncatedCommunityNameWithoutChannelLength", 24i32)?;
     cfc.set("MaxRememberedWhisperTargets", 10i32)?;
     g.set("ChatFrameConstants", cfc)?;
 

@@ -540,75 +540,93 @@ fn add_text_color_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
     Ok(())
 }
 
-/// SetJustifyH, SetJustifyV.
+/// SetJustifyH, GetJustifyH, SetJustifyV, GetJustifyV.
 fn add_justification_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    // SetJustifyH([textType,] justify) - for FontString or SimpleHTML widgets
     methods.set("SetJustifyH", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let is_html = is_simple_html(lua, id);
-
-        if is_html && args_vec.len() >= 2
-            && let Some(Value::String(s)) = args_vec.first() {
-                let type_str = s.to_string_lossy().to_string();
-                if is_text_type(&type_str) {
-                    if let Some(Value::String(j)) = args_vec.get(1) {
-                        let justify = j.to_string_lossy().to_string();
-                        let state_rc = get_sim_state(lua);
-                        let mut state = state_rc.borrow_mut();
-                        if let Some(data) = state.simple_htmls.get_mut(&id) {
-                            let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
-                            style.justify_h = justify;
-                        }
-                    }
-                    return Ok(());
-                }
-            }
-
-        if let Some(Value::String(j)) = args_vec.first() {
-            let justify = j.to_string_lossy().to_string();
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.justify_h = crate::widget::TextJustify::from_wow_str(&justify);
-            }
-        }
-        Ok(())
+        apply_set_justify_h(lua, lud_to_id(ud), args)
     })?)?;
-
-    // SetJustifyV([textType,] justify) - for FontString or SimpleHTML widgets
     methods.set("SetJustifyV", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let is_html = is_simple_html(lua, id);
-
-        if is_html && args_vec.len() >= 2
-            && let Some(Value::String(s)) = args_vec.first() {
-                let type_str = s.to_string_lossy().to_string();
-                if is_text_type(&type_str) {
-                    if let Some(Value::String(j)) = args_vec.get(1) {
-                        let justify = j.to_string_lossy().to_string();
-                        let state_rc = get_sim_state(lua);
-                        let mut state = state_rc.borrow_mut();
-                        if let Some(data) = state.simple_htmls.get_mut(&id) {
-                            let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
-                            style.justify_v = justify;
-                        }
-                    }
-                    return Ok(());
-                }
-            }
-
-        if let Some(Value::String(j)) = args_vec.first() {
-            let justify = j.to_string_lossy().to_string();
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.justify_v = crate::widget::TextJustify::from_wow_str(&justify);
-            }
-        }
-        Ok(())
+        apply_set_justify_v(lua, lud_to_id(ud), args)
     })?)?;
-
+    methods.set("GetJustifyH", lua.create_function(|lua, ud: LightUserData| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let s = state.widgets.get(lud_to_id(ud)).map(|f| f.justify_h.as_h_str()).unwrap_or("CENTER");
+        Ok(Value::String(lua.create_string(s)?))
+    })?)?;
+    methods.set("GetJustifyV", lua.create_function(|lua, ud: LightUserData| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let s = state.widgets.get(lud_to_id(ud)).map(|f| f.justify_v.as_v_str()).unwrap_or("MIDDLE");
+        Ok(Value::String(lua.create_string(s)?))
+    })?)?;
     Ok(())
+}
+
+/// Set horizontal justification, handling SimpleHTML per-textType and standard FontString.
+fn apply_set_justify_h(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    if is_simple_html(lua, id) && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first()
+    {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            if let Some(Value::String(j)) = args_vec.get(1) {
+                set_html_justify_h(lua, id, type_str, j.to_string_lossy().to_string());
+            }
+            return Ok(());
+        }
+    }
+    if let Some(Value::String(j)) = args_vec.first() {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.justify_h = crate::widget::TextJustify::from_wow_str(&j.to_string_lossy());
+        }
+    }
+    Ok(())
+}
+
+/// Set vertical justification, handling SimpleHTML per-textType and standard FontString.
+fn apply_set_justify_v(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    if is_simple_html(lua, id) && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first()
+    {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            if let Some(Value::String(j)) = args_vec.get(1) {
+                set_html_justify_v(lua, id, type_str, j.to_string_lossy().to_string());
+            }
+            return Ok(());
+        }
+    }
+    if let Some(Value::String(j)) = args_vec.first() {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.justify_v = crate::widget::TextJustify::from_wow_str(&j.to_string_lossy());
+        }
+    }
+    Ok(())
+}
+
+/// Store horizontal justification in a SimpleHTML text style.
+fn set_html_justify_h(lua: &Lua, id: u64, type_str: String, justify: String) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(data) = state.simple_htmls.get_mut(&id) {
+        let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
+        style.justify_h = justify;
+    }
+}
+
+/// Store vertical justification in a SimpleHTML text style.
+fn set_html_justify_v(lua: &Lua, id: u64, type_str: String, justify: String) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(data) = state.simple_htmls.get_mut(&id) {
+        let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
+        style.justify_v = justify;
+    }
 }

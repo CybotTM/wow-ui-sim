@@ -90,3 +90,68 @@ fn test_multiple_hook_scripts_chain_in_order() {
         .unwrap();
     assert_eq!(order, vec!["original", "hook1", "hook2"]);
 }
+
+#[test]
+fn test_set_script_invalid_handler_errors() {
+    let env = WowLuaEnv::new().unwrap();
+    let result = env.exec(
+        r#"
+        local f = CreateFrame("Frame")
+        f:SetScript("OnNotARealScript", function() end)
+    "#,
+    );
+    assert!(result.is_err(), "SetScript with unknown handler name should error");
+    let err = result.unwrap_err().to_string();
+    assert!(
+        err.contains("OnNotARealScript"),
+        "Error message should name the invalid handler, got: {err}"
+    );
+}
+
+#[test]
+fn test_has_script_returns_false_for_onclick_on_plain_frame() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(r#"
+        local f = CreateFrame("Frame")
+        return f:HasScript("OnClick")
+    "#)
+        .unwrap();
+    assert!(!result, "Plain Frame should not support OnClick");
+}
+
+#[test]
+fn test_has_script_returns_true_for_onclick_on_button() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(r#"
+        local b = CreateFrame("Button")
+        return b:HasScript("OnClick")
+    "#)
+        .unwrap();
+    assert!(result, "Button should support OnClick");
+}
+
+#[test]
+fn test_has_script_returns_false_for_bogus_name() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(r#"
+        local f = CreateFrame("Frame")
+        return f:HasScript("OnNotARealScript")
+    "#)
+        .unwrap();
+    assert!(!result, "HasScript should return false for unknown handler names");
+}
+
+#[test]
+fn test_has_script_returns_true_for_base_handlers_on_frame() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(r#"
+        local f = CreateFrame("Frame")
+        return f:HasScript("OnShow") and f:HasScript("OnUpdate") and f:HasScript("OnEvent")
+    "#)
+        .unwrap();
+    assert!(result, "Frame should support base handlers OnShow, OnUpdate, OnEvent");
+}

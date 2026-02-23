@@ -33,7 +33,7 @@ struct AnchorEdges {
 fn resolve_multi_anchor_edges(
     registry: &WidgetRegistry,
     frame: &crate::widget::Frame,
-    parent_rect: LayoutRect,
+    _parent_rect: LayoutRect,
     eff_scale: f32,
     screen_width: f32,
     screen_height: f32,
@@ -49,7 +49,10 @@ fn resolve_multi_anchor_edges(
         let relative_rect = if let Some(rel_id) = anchor.relative_to_id {
             compute_frame_rect_cached(registry, rel_id as u64, screen_width, screen_height, cache).rect
         } else {
-            parent_rect
+            // nil relativeTo in SetPoint anchors to the screen (UIParent), not the parent frame.
+            // XML anchors with no relativeTo are resolved to an explicit parent_id before storage,
+            // so they never reach this branch with None.
+            LayoutRect { x: 0.0, y: 0.0, width: screen_width, height: screen_height }
         };
 
         let (anchor_x, anchor_y) = anchor_position(
@@ -136,7 +139,7 @@ fn compute_rect_from_edges(
 fn resolve_single_anchor(
     registry: &WidgetRegistry,
     frame: &crate::widget::Frame,
-    parent_rect: LayoutRect,
+    _parent_rect: LayoutRect,
     eff_scale: f32,
     screen_width: f32,
     screen_height: f32,
@@ -149,7 +152,8 @@ fn resolve_single_anchor(
     let relative_rect = if let Some(rel_id) = anchor.relative_to_id {
         compute_frame_rect_cached(registry, rel_id as u64, screen_width, screen_height, cache).rect
     } else {
-        parent_rect
+        // nil relativeTo in SetPoint anchors to the screen (UIParent), not the parent frame.
+        LayoutRect { x: 0.0, y: 0.0, width: screen_width, height: screen_height }
     };
 
     let (anchor_x, anchor_y) = anchor_position(
@@ -373,17 +377,23 @@ mod tests {
     }
 
     /// Build a three-slice registry: UIParent → button → Left, Right, Center.
+    ///
+    /// Anchors use explicit parent IDs (matching XML-loaded frames, which resolve
+    /// nil relativeTo to the parent ID before storage).
     fn build_three_slice_registry() -> WidgetRegistry {
         let mut reg = WidgetRegistry::new();
         let mut uip = make_frame(1, None, 1024.0, 768.0, vec![10], vec![]);
         uip.name = Some("UIParent".to_string());
         reg.register(uip);
+        // Button (10): CENTER anchor to UIParent (id=1) — explicit parent ID as XML loading stores
         reg.register(make_frame(10, Some(1), 200.0, 36.0, vec![20, 21, 22],
-            vec![anchor(AnchorPoint::Center, None, AnchorPoint::Center)]));
+            vec![anchor(AnchorPoint::Center, Some(1), AnchorPoint::Center)]));
+        // Left (20): LEFT anchor to button (id=10)
         reg.register(make_frame(20, Some(10), 32.0, 39.0, vec![],
-            vec![anchor(AnchorPoint::Left, None, AnchorPoint::Left)]));
+            vec![anchor(AnchorPoint::Left, Some(10), AnchorPoint::Left)]));
+        // Right (21): RIGHT anchor to button (id=10)
         reg.register(make_frame(21, Some(10), 32.0, 39.0, vec![],
-            vec![anchor(AnchorPoint::Right, None, AnchorPoint::Right)]));
+            vec![anchor(AnchorPoint::Right, Some(10), AnchorPoint::Right)]));
         reg.register(make_frame(22, Some(10), 0.0, 0.0, vec![], vec![
             anchor(AnchorPoint::TopLeft, Some(20), AnchorPoint::TopRight),
             anchor(AnchorPoint::BottomRight, Some(21), AnchorPoint::BottomLeft),

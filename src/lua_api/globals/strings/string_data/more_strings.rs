@@ -147,22 +147,22 @@ pub const STAT_STRINGS: &[StringDef] = &[
 
 pub const ITEM_MOD_STRINGS: &[StringDef] = &[
     // Primary stats
-    ("ITEM_MOD_STRENGTH", "Strength"),
+    ("ITEM_MOD_STRENGTH", "%c%s Strength"),
     ("ITEM_MOD_STRENGTH_SHORT", "Strength"),
-    ("ITEM_MOD_AGILITY", "Agility"),
+    ("ITEM_MOD_AGILITY", "%c%s Agility"),
     ("ITEM_MOD_AGILITY_SHORT", "Agility"),
-    ("ITEM_MOD_STAMINA", "Stamina"),
+    ("ITEM_MOD_STAMINA", "%c%s Stamina"),
     ("ITEM_MOD_STAMINA_SHORT", "Stamina"),
-    ("ITEM_MOD_INTELLECT", "Intellect"),
+    ("ITEM_MOD_INTELLECT", "%c%s Intellect"),
     ("ITEM_MOD_INTELLECT_SHORT", "Intellect"),
-    ("ITEM_MOD_SPIRIT", "Spirit"),
+    ("ITEM_MOD_SPIRIT", "%c%s Spirit"),
     ("ITEM_MOD_SPIRIT_SHORT", "Spirit"),
     // Secondary stats
-    ("ITEM_MOD_CRIT_RATING", "Critical Strike"),
+    ("ITEM_MOD_CRIT_RATING", "Increases your critical strike by %s."),
     ("ITEM_MOD_CRIT_RATING_SHORT", "Critical Strike"),
-    ("ITEM_MOD_HASTE_RATING", "Haste"),
+    ("ITEM_MOD_HASTE_RATING", "Increases your haste by %s."),
     ("ITEM_MOD_HASTE_RATING_SHORT", "Haste"),
-    ("ITEM_MOD_MASTERY_RATING", "Mastery"),
+    ("ITEM_MOD_MASTERY_RATING", "Increases your mastery by %s."),
     ("ITEM_MOD_MASTERY_RATING_SHORT", "Mastery"),
     ("ITEM_MOD_VERSATILITY", "Versatility"),
     // Tertiary and other stats
@@ -323,8 +323,8 @@ pub const TOOLTIP_STRINGS: &[StringDef] = &[
 pub const ITEM_REQUIREMENT_STRINGS: &[StringDef] = &[
     ("ITEM_REQ_SKILL", "Requires %s"),
     ("ITEM_REQ_REPUTATION", "Requires %s - %s"),
-    ("ITEM_REQ_ALLIANCE", "Alliance"),
-    ("ITEM_REQ_HORDE", "Horde"),
+    ("ITEM_REQ_ALLIANCE", "Alliance Only"),
+    ("ITEM_REQ_HORDE", "Horde Only"),
     ("ITEM_MIN_LEVEL", "Requires Level %d"),
     ("ITEM_LEVEL", "Item Level %d"),
     ("ITEM_CLASSES_ALLOWED", "Classes: %s"),
@@ -357,7 +357,7 @@ pub const CURRENCY_STRINGS: &[StringDef] = &[
 
 pub const SPELL_ERROR_STRINGS: &[StringDef] = &[
     ("SPELL_FAILED_CUSTOM_ERROR_1029", "Requires Skyriding"),
-    ("SPELL_FAILED_NOT_READY", "Spell is not ready"),
+    ("SPELL_FAILED_NOT_READY", "Not yet recovered"),
     ("SPELL_FAILED_BAD_TARGETS", "Invalid target"),
     ("SPELL_FAILED_NO_VALID_TARGETS", "No valid targets"),
 ];
@@ -386,7 +386,7 @@ pub const SPELLBOOK_STRINGS: &[StringDef] = &[
     ("GARRISON_SHIPYARD", "Shipyard"),
     ("GARRISON_MISSION_COMPLETE", "Mission Complete"),
     ("GARRISON_FOLLOWER", "Follower"),
-    ("RAID_BOSSES", "Raid Bosses"),
+    ("RAID_BOSSES", "Bosses"),
     ("RAID_INSTANCES", "Raid Instances"),
     ("DUNGEON_BOSSES", "Dungeon Bosses"),
     ("DUNGEON_INSTANCES", "Dungeon Instances"),
@@ -511,9 +511,9 @@ pub const TOTEM_SLOT_CONSTANTS: &[IntDef] = &[
 
 pub const LFG_CATEGORY_CONSTANTS: &[IntDef] = &[
     ("LE_LFG_CATEGORY_LFD", 1),
-    ("LE_LFG_CATEGORY_RF", 2),
-    ("LE_LFG_CATEGORY_SCENARIO", 3),
-    ("LE_LFG_CATEGORY_LFR", 4),
+    ("LE_LFG_CATEGORY_LFR", 2),
+    ("LE_LFG_CATEGORY_RF", 3),
+    ("LE_LFG_CATEGORY_SCENARIO", 4),
     ("LE_LFG_CATEGORY_FLEXRAID", 5),
     ("LE_LFG_CATEGORY_WORLDPVP", 6),
     ("LE_LFG_CATEGORY_BATTLEFIELD", 7),

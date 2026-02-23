@@ -37,7 +37,8 @@ fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) {
     if let Some(group) = state.animation_groups.get_mut(&group_id) {
         group.playing = true;
         group.paused = false;
-        group.finished = false;
+        group.done = false;
+        group.pending_finish = false;
         group.reverse = reverse;
         group.elapsed = 0.0;
         group.saved_alphas.clear();
@@ -92,7 +93,8 @@ pub(super) fn stop_group(state: &mut SimState, group_id: u64) {
     if let Some(group) = state.animation_groups.get_mut(&group_id) {
         group.playing = false;
         group.paused = false;
-        group.finished = true;
+        group.done = true;
+        group.pending_finish = false;
     }
 }
 
@@ -113,7 +115,12 @@ impl AnimGroupHandle {
             }).unwrap_or(false);
 
             let mut state = this.state.borrow_mut();
-            start_group_playback(&mut state, this.group_id, reverse);
+            // Play() is a no-op if already playing (WoW-confirmed behavior).
+            let already_playing = state.animation_groups.get(&this.group_id)
+                .is_some_and(|g| g.playing && !g.done);
+            if !already_playing {
+                start_group_playback(&mut state, this.group_id, reverse);
+            }
             Ok(())
         });
 
@@ -164,15 +171,12 @@ impl AnimGroupHandle {
         });
 
         methods.add_method("Finish", |_, this, ()| {
+            // WoW-confirmed: Finish() marks the group as pending-finish.
+            // IsPlaying() stays true, IsDone() stays false.
+            // The group will complete at the end of the current loop iteration.
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id) {
-                group.playing = false;
-                group.paused = false;
-                group.finished = true;
-                for anim in &mut group.animations {
-                    anim.elapsed = anim.total_time();
-                }
-                group.elapsed = group.total_duration();
+                group.pending_finish = true;
             }
             Ok(())
         });
@@ -192,12 +196,12 @@ impl AnimGroupHandle {
 
         methods.add_method("IsDone", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| g.finished))
+            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| g.done))
         });
 
         methods.add_method("IsPendingFinish", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_some_and(|g| g.finished))
+            Ok(state.animation_groups.get(&this.group_id).is_some_and(|g| g.pending_finish))
         });
 
         methods.add_method("IsReverse", |_, this, ()| {
@@ -335,8 +339,16 @@ impl AnimGroupHandle {
         });
     }
 
-    /// Register identity/hierarchy methods: GetName, GetParent.
+    /// Register identity/hierarchy methods: GetObjectType, GetName, GetParent.
     fn add_identity_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("GetObjectType", |_, _this, ()| {
+            Ok("AnimationGroup")
+        });
+
+        methods.add_method("IsObjectType", |_, _this, type_name: String| {
+            Ok(matches!(type_name.as_str(), "AnimationGroup" | "Animation" | "UIObject" | "ParallelAnimation"))
+        });
+
         methods.add_method("GetName", |_, this, ()| {
             let state = this.state.borrow();
             Ok(state.animation_groups.get(&this.group_id)

@@ -79,7 +79,8 @@ fn add_editbox_cursor_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.editbox_cursor_pos = pos;
+            let char_count = frame.text.as_deref().unwrap_or("").chars().count() as i32;
+            frame.editbox_cursor_pos = pos.clamp(0, char_count);
         }
         Ok(())
     })?)?;

@@ -79,6 +79,7 @@ pub fn add_create_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
     add_create_line_method(lua, methods)?;
     add_create_font_string_method(lua, methods)?;
     add_create_animation_group_method(lua, methods)?;
+    add_get_animation_groups_method(lua, methods)?;
     Ok(())
 }
 
@@ -196,6 +197,34 @@ fn apply_font_inherit(lua: &Lua, frame: &mut Frame, inherits: Option<&str>) {
     if let Ok(h) = tbl.get::<String>("__justifyH") {
         frame.justify_h = crate::widget::TextJustify::from_wow_str(&h);
     }
+}
+
+/// GetAnimationGroups() — return all animation groups owned by this frame.
+fn add_get_animation_groups_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    methods.set(
+        "GetAnimationGroups",
+        lua.create_function(|lua, ud: LightUserData| {
+            let id = lud_to_id(ud);
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            let group_ids: Vec<u64> = state
+                .animation_groups
+                .iter()
+                .filter(|(_, g)| g.owner_frame_id == id)
+                .map(|(&gid, _)| gid)
+                .collect();
+            drop(state);
+            let mut values = Vec::with_capacity(group_ids.len());
+            for group_id in group_ids {
+                let handle = AnimGroupHandle {
+                    group_id,
+                    state: Rc::clone(&state_rc),
+                };
+                values.push(mlua::Value::UserData(lua.create_userdata(handle)?));
+            }
+            Ok(mlua::MultiValue::from_vec(values))
+        })?,
+    )
 }
 
 /// CreateAnimationGroup(name, inherits)

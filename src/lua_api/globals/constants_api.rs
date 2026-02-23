@@ -10,11 +10,16 @@
 
 use mlua::{Lua, Result};
 
+/// Auto-generated Lua code that registers missing WoW client constants.
+const MISSING_CONSTANTS_LUA: &str = include_str!("enum_data/missing_constants.lua");
+
 /// Register the Constants table with auto-vivifying metatables.
 pub fn register_constants_api(lua: &Lua) -> Result<()> {
     register_constants_table(lua)?;
     register_color_globals(lua)?;
     register_raid_class_colors(lua)?;
+    // Load auto-generated missing constants from WoW client diff (1364 constants).
+    lua.load(MISSING_CONSTANTS_LUA).set_name("missing_constants").exec()?;
     Ok(())
 }
 
@@ -53,7 +58,7 @@ fn register_constants_table(lua: &Lua) -> Result<()> {
 
         Constants.ChatFrameConstants.MaxChatWindows = 10
         Constants.ChatFrameConstants.MaxChatChannels = 20
-        Constants.ChatFrameConstants.MaxCharacterNameBytes = 100
+        Constants.ChatFrameConstants.MaxCharacterNameBytes = 305
     "#,
     )
     .exec()

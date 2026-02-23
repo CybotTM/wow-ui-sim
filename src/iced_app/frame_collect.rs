@@ -42,7 +42,7 @@ pub fn collect_subtree_ids(
 }
 
 /// Sort key type for frame rendering order within a strata bucket.
-pub type IntraStrataKey = (i32, std::cmp::Reverse<u64>, u8, i32, i32, u8, std::cmp::Reverse<u64>);
+pub type IntraStrataKey = (i32, i32, std::cmp::Reverse<u64>, u8, i32, i32, u8, std::cmp::Reverse<u64>);
 
 /// Intra-strata sort key for rendering order within the same frame strata.
 ///
@@ -51,10 +51,11 @@ pub type IntraStrataKey = (i32, std::cmp::Reverse<u64>, u8, i32, i32, u8, std::c
 /// their parent via `parent_id`, ensuring all regions of a frame render
 /// immediately after that frame (before any higher-level content).
 ///
-/// Non-regions sort by `(frame_level, Reverse(id))` — higher IDs (later-created
-/// frames) render first (lower in the sort), so earlier-created frames render on
-/// top. This matches WoW's stacking where action bar icon textures (created
-/// early) must render above the bar background.
+/// Non-regions sort by `(frame_level, raise_order, Reverse(id))` — higher
+/// frame_level renders on top; within the same level, raise_order (adjusted by
+/// Raise()/Lower()) breaks ties; within the same raise_order, lower IDs
+/// (earlier-created frames) render on top. This matches WoW's stacking where
+/// action bar icon textures (created early) render above the bar background.
 /// FontStrings (type_flag=1) render above Textures (type_flag=0) in the same
 /// draw layer per WoW rules.
 pub fn intra_strata_sort_key(
@@ -63,13 +64,13 @@ pub fn intra_strata_sort_key(
     registry: &crate::widget::WidgetRegistry,
 ) -> IntraStrataKey {
     if matches!(f.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
-        let (parent_level, parent_id) = f.parent_id
-            .and_then(|pid| registry.get(pid).map(|p| (p.frame_level, pid)))
-            .unwrap_or((f.frame_level, id));
+        let (parent_level, parent_raise_order, parent_id) = f.parent_id
+            .and_then(|pid| registry.get(pid).map(|p| (p.frame_level, p.raise_order, pid)))
+            .unwrap_or((f.frame_level, f.raise_order, id));
         let type_flag = if f.widget_type == WidgetType::FontString { 1u8 } else { 0u8 };
-        (parent_level, std::cmp::Reverse(parent_id), 1, f.draw_layer as i32, f.draw_sub_layer, type_flag, std::cmp::Reverse(id))
+        (parent_level, parent_raise_order, std::cmp::Reverse(parent_id), 1, f.draw_layer as i32, f.draw_sub_layer, type_flag, std::cmp::Reverse(id))
     } else {
-        (f.frame_level, std::cmp::Reverse(id), 0, 0, 0, 0, std::cmp::Reverse(0))
+        (f.frame_level, f.raise_order, std::cmp::Reverse(id), 0, 0, 0, 0, std::cmp::Reverse(0))
     }
 }
 

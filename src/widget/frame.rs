@@ -55,6 +55,24 @@ impl TextJustify {
             _ => TextJustify::Left,  // WoW defaults to LEFT
         }
     }
+
+    /// Convert to the canonical horizontal WoW string ("LEFT", "CENTER", "RIGHT").
+    pub fn as_h_str(self) -> &'static str {
+        match self {
+            TextJustify::Left => "LEFT",
+            TextJustify::Center => "CENTER",
+            TextJustify::Right => "RIGHT",
+        }
+    }
+
+    /// Convert to the canonical vertical WoW string ("TOP", "MIDDLE", "BOTTOM").
+    pub fn as_v_str(self) -> &'static str {
+        match self {
+            TextJustify::Left => "TOP",
+            TextJustify::Center => "MIDDLE",
+            TextJustify::Right => "BOTTOM",
+        }
+    }
 }
 
 /// Text outline style for FontStrings.
@@ -138,6 +156,9 @@ pub struct Frame {
     pub registered_events: HashSet<String>,
     /// Frame level (draw order within strata).
     pub frame_level: i32,
+    /// Raise/Lower order offset within same strata+level siblings.
+    /// Raise() increments, Lower() decrements. Does not affect frame_level.
+    pub raise_order: i32,
     /// Whether frame level was explicitly set (not inherited from parent).
     pub has_fixed_frame_level: bool,
     /// Optional level offset from parent (from XML frameLevel attribute).
@@ -432,6 +453,7 @@ macro_rules! frame_defaults {
             collapses_layout: false,
             registered_events: HashSet::new(),
             frame_level: 0,
+            raise_order: 0,
             has_fixed_frame_level: false,
             frame_level_offset: None,
             frame_strata: FrameStrata::Medium,

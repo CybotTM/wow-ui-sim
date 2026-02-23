@@ -61,7 +61,7 @@ pub const EXPANSION_CONSTANTS: &[IntDef] = &[
     ("LE_EXPANSION_SHADOWLANDS", 8),
     ("LE_EXPANSION_DRAGONFLIGHT", 9),
     ("LE_EXPANSION_WAR_WITHIN", 10),
-    ("LE_EXPANSION_LEVEL_CURRENT", 10),
+    ("LE_EXPANSION_LEVEL_CURRENT", 11),
 ];
 
 // ============================================================================
@@ -69,13 +69,13 @@ pub const EXPANSION_CONSTANTS: &[IntDef] = &[
 // ============================================================================
 
 pub const AUTOCOMPLETE_CONSTANTS: &[IntDef] = &[
-    ("LE_AUTOCOMPLETE_PRIORITY_OTHER", 0),
-    ("LE_AUTOCOMPLETE_PRIORITY_INTERACTED", 1),
-    ("LE_AUTOCOMPLETE_PRIORITY_IN_GROUP", 2),
-    ("LE_AUTOCOMPLETE_PRIORITY_GUILD", 3),
-    ("LE_AUTOCOMPLETE_PRIORITY_FRIEND", 4),
-    ("LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER", 5),
-    ("LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER_SAME_REALM", 6),
+    ("LE_AUTOCOMPLETE_PRIORITY_OTHER", 1),
+    ("LE_AUTOCOMPLETE_PRIORITY_INTERACTED", 2),
+    ("LE_AUTOCOMPLETE_PRIORITY_IN_GROUP", 3),
+    ("LE_AUTOCOMPLETE_PRIORITY_GUILD", 4),
+    ("LE_AUTOCOMPLETE_PRIORITY_FRIEND", 5),
+    ("LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER", 6),
+    ("LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER_SAME_REALM", 7),
 ];
 
 // ============================================================================
@@ -233,7 +233,7 @@ pub const ITEM_STRINGS: &[StringDef] = &[
     ("ITEM_UNIQUE_EQUIPPABLE", "Unique-Equipped"),
     ("ITEM_ACCOUNTBOUND", "Warbound"),
     ("ITEM_ACCOUNTBOUND_UNTIL_EQUIP", "Warbound until equipped"),
-    ("ITEM_BNETACCOUNTBOUND", "Battle.net Account Bound"),
+    ("ITEM_BNETACCOUNTBOUND", "Warbound"),
     ("ITEM_SOULBOUND", "Soulbound"),
     ("ITEM_BIND_ON_EQUIP", "Binds when equipped"),
     ("ITEM_BIND_ON_PICKUP", "Binds when picked up"),
@@ -289,7 +289,7 @@ pub const MISC_UI_STRINGS: &[StringDef] = &[
     ("COLOR", "Color"),
     ("COMPACT_UNIT_FRAME_PROFILE_SORTBY_ALPHABETICAL", "Alphabetical"),
     ("ITEM_QUALITY6_DESC", "Artifact"),
-    ("ITEM_COOLDOWN_TIME", "%s Cooldown"),
+    ("ITEM_COOLDOWN_TIME", "Cooldown remaining: %s"),
     ("TOY", "Toy"),
     ("MOUNT", "Mount"),
     ("PET", "Pet"),

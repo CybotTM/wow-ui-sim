@@ -1,0 +1,14 @@
+C_* namespaces missing: 6
+C_* namespaces extra: 11
+C_* functions missing: 208
+C_* functions extra: 152
+Global functions missing: 310
+Global functions extra: 182
+Enums missing: 1430
+Enums extra: 2
+Enum values to add: 6862
+Frame methods missing: 1382
+Frame methods extra: 3810
+Constants missing: 1364
+Constants extra: 12
+Constants wrong value: 72

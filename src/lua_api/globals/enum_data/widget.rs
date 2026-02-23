@@ -29,7 +29,7 @@ pub const PVP_MATCH_STATE: EnumDef = (
 
 pub const WORLD_ELAPSED_TIMER_TYPES: EnumDef = (
     "WorldElapsedTimerTypes",
-    &[("ChallengeMode", 0), ("ProvingGround", 1)],
+    &[("None", 0), ("ChallengeMode", 1), ("ProvingGround", 2)],
 );
 
 pub const PLAYER_MENTORSHIP_STATUS: SeqEnumDef = (

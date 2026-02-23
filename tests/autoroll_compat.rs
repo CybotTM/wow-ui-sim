@@ -124,7 +124,7 @@ fn test_register_event_invalid_name() {
     assert!(result.is_err(), "RegisterEvent should error on unknown event");
     let err = result.unwrap_err().to_string();
     assert!(
-        err.contains("Couldn't find event WOWLESS_NOPE"),
+        err.contains("Attempt to register unknown event"),
         "Error should mention event name, got: {err}"
     );
 }

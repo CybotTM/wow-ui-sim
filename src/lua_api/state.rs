@@ -561,42 +561,63 @@ impl SimState {
         }
     }
 
-    /// Raise a frame above all siblings in the same strata.
+    /// Raise a frame above all siblings in the same strata+level.
     ///
-    /// Finds the maximum frame_level among sibling frames (same parent, same
-    /// strata) and sets this frame's level to max + 1. Propagates the new level
-    /// to all descendants.
+    /// Sets `raise_order` to max sibling raise_order + 1 without modifying
+    /// `frame_level`. Resorts the affected subtree in strata buckets.
     pub fn raise_frame(&mut self, id: u64) {
-        let (parent_id, strata) = match self.widgets.get(id) {
-            Some(f) => (f.parent_id, f.frame_strata),
+        let (parent_id, strata, level) = match self.widgets.get(id) {
+            Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
             None => return,
         };
-        // Find max level among siblings in the same strata.
-        let max_sibling_level = self.max_sibling_level(id, parent_id, strata);
-        let current_level = self.widgets.get(id).map(|f| f.frame_level).unwrap_or(0);
-        if current_level > max_sibling_level {
+        let max_raise_order = self.sibling_raise_order_range(id, parent_id, strata, level).1;
+        let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
+        if current_raise_order > max_raise_order {
             return; // Already on top
         }
-        let new_level = max_sibling_level + 1;
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.frame_level = new_level;
+            f.raise_order = max_raise_order + 1;
         }
-        crate::lua_api::frame::propagate_strata_level_pub(
-            &mut self.widgets, id,
-        );
-        // Re-sort the affected subtree in strata buckets (level changed).
-        // Avoid setting strata_buckets = None here because Show/Hide calls
-        // later in the same handler chain rely on buckets being Some for
-        // surgical insert/remove.  A full rebuild from None would discard
-        // those updates.
+        // Re-sort the affected subtree in strata buckets.
+        // Avoid setting strata_buckets = None: Show/Hide calls later in the
+        // same handler chain rely on buckets being Some for surgical insert/remove.
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
             self.insert_subtree_into_buckets(id);
         }
     }
 
-    /// Find the maximum frame_level among siblings of `id` in the given strata.
-    fn max_sibling_level(&self, id: u64, parent_id: Option<u64>, strata: crate::widget::FrameStrata) -> i32 {
+    /// Lower a frame below all siblings in the same strata+level.
+    ///
+    /// Sets `raise_order` to min sibling raise_order - 1 without modifying
+    /// `frame_level`. Resorts the affected subtree in strata buckets.
+    pub fn lower_frame(&mut self, id: u64) {
+        let (parent_id, strata, level) = match self.widgets.get(id) {
+            Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
+            None => return,
+        };
+        let min_raise_order = self.sibling_raise_order_range(id, parent_id, strata, level).0;
+        let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
+        if current_raise_order < min_raise_order {
+            return; // Already at bottom
+        }
+        if let Some(f) = self.widgets.get_mut_visual(id) {
+            f.raise_order = min_raise_order - 1;
+        }
+        if self.strata_buckets.is_some() {
+            self.remove_subtree_from_buckets(id);
+            self.insert_subtree_into_buckets(id);
+        }
+    }
+
+    /// Return (min, max) raise_order among siblings of `id` in the given strata+level.
+    fn sibling_raise_order_range(
+        &self,
+        id: u64,
+        parent_id: Option<u64>,
+        strata: crate::widget::FrameStrata,
+        level: i32,
+    ) -> (i32, i32) {
         let sibling_ids: Vec<u64> = if let Some(pid) = parent_id {
             self.widgets.get(pid)
                 .map(|p| p.children.clone())
@@ -607,13 +628,15 @@ impl SimState {
                 .filter(|&fid| self.widgets.get(fid).map(|f| f.parent_id.is_none()).unwrap_or(false))
                 .collect()
         };
-        sibling_ids.iter()
+        let orders: Vec<i32> = sibling_ids.iter()
             .filter(|&&sid| sid != id)
             .filter_map(|&sid| self.widgets.get(sid))
-            .filter(|f| f.frame_strata == strata)
-            .map(|f| f.frame_level)
-            .max()
-            .unwrap_or(0)
+            .filter(|f| f.frame_strata == strata && f.frame_level == level)
+            .map(|f| f.raise_order)
+            .collect();
+        let min = orders.iter().copied().min().unwrap_or(0);
+        let max = orders.iter().copied().max().unwrap_or(0);
+        (min, max)
     }
 
     fn update_on_update_cache(&mut self, id: u64, visible: bool) {

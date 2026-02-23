@@ -1,0 +1,2 @@
+ExpansionLandingPageType
+TransmogOutfitFlags

@@ -1,0 +1,6 @@
+C_AccountServices
+C_ArrowCalloutManager
+C_EncounterEvents
+C_PrototypeDialog
+C_Reincarnation
+C_TableUtil

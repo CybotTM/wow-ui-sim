@@ -7,6 +7,9 @@
 use super::enum_data::{EXPLICIT_ENUMS, SEQUENTIAL_ENUMS};
 use mlua::{Lua, Result};
 
+/// Auto-generated Lua code that registers missing WoW client enums.
+const MISSING_ENUMS_LUA: &str = include_str!("enum_data/missing_enums.lua");
+
 /// Register the Enum table with all WoW game enumerations.
 pub fn register_enum_api(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
@@ -25,6 +28,10 @@ pub fn register_enum_api(lua: &Lua) -> Result<()> {
     register_misc_enums(lua, &enum_table)?;
 
     globals.set("Enum", enum_table)?;
+
+    // Load auto-generated missing enums from WoW client diff (1430 enums, 6862 values).
+    // Uses `if not Enum.X then` guards so existing Rust-registered enums take priority.
+    lua.load(MISSING_ENUMS_LUA).set_name("missing_enums").exec()?;
 
     Ok(())
 }

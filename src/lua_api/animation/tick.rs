@@ -15,7 +15,7 @@ pub fn tick_animation_groups(state_rc: &Rc<RefCell<SimState>>, lua: &Lua, delta:
     let playing_ids: Vec<u64> = {
         let state = state_rc.borrow();
         state.animation_groups.iter()
-            .filter(|(_, g)| g.playing && !g.paused
+            .filter(|(_, g)| g.playing && !g.paused && !g.done
                 && state.widgets.is_ancestor_visible(g.owner_frame_id))
             .map(|(id, _)| *id)
             .collect()
@@ -274,26 +274,47 @@ fn handle_group_finish(group: &mut AnimGroupState, lua: &Lua) -> Vec<mlua::Funct
     match group.looping {
         LoopType::None => {
             group.playing = false;
-            group.finished = true;
+            group.done = true;
+            group.pending_finish = false;
             if let Some(key) = group.scripts.get("OnFinished")
                 && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
                     scripts.push(func);
                 }
         }
         LoopType::Repeat => {
-            group.elapsed -= total_dur;
-            for anim in &mut group.animations {
-                anim.elapsed = 0.0;
+            if group.pending_finish {
+                group.playing = false;
+                group.done = true;
+                group.pending_finish = false;
+                if let Some(key) = group.scripts.get("OnFinished")
+                    && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
+                        scripts.push(func);
+                    }
+            } else {
+                group.elapsed -= total_dur;
+                for anim in &mut group.animations {
+                    anim.elapsed = 0.0;
+                }
+                collect_loop_script(&mut scripts, group, lua);
             }
-            collect_loop_script(&mut scripts, group, lua);
         }
         LoopType::Bounce => {
-            group.elapsed -= total_dur;
-            group.reverse = !group.reverse;
-            for anim in &mut group.animations {
-                anim.elapsed = 0.0;
+            if group.pending_finish {
+                group.playing = false;
+                group.done = true;
+                group.pending_finish = false;
+                if let Some(key) = group.scripts.get("OnFinished")
+                    && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
+                        scripts.push(func);
+                    }
+            } else {
+                group.elapsed -= total_dur;
+                group.reverse = !group.reverse;
+                for anim in &mut group.animations {
+                    anim.elapsed = 0.0;
+                }
+                collect_loop_script(&mut scripts, group, lua);
             }
-            collect_loop_script(&mut scripts, group, lua);
         }
     }
 

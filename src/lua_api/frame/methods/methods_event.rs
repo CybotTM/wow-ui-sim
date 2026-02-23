@@ -22,8 +22,8 @@ fn add_event_register_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
 /// Build the error returned when an unrecognised event name is passed to RegisterEvent.
 fn unknown_event_error(frame_name: &str, event: &str) -> mlua::Error {
     mlua::Error::RuntimeError(format!(
-        "Usage: {}:RegisterEvent(\"event\"): Couldn't find event {}",
-        frame_name, event
+        "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
+        frame_name, frame_name, event
     ))
 }
 

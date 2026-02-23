@@ -62,7 +62,15 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
             _ => return Ok(Value::Nil),
         };
 
-        // Fast path: rawget on methods_table
+        // Mixin overrides: functions written by Mixin() shadow Rust methods.
+        // In real WoW, frames are tables so Mixin(frame, {GetName=fn}) rawsets directly into
+        // the frame table, which takes precedence over the metatable __index. We replicate that
+        // with a dedicated __mixin_overrides table that is checked before Rust methods.
+        if let Some(value) = lookup_mixin_override(lua, frame_id, &key_str) {
+            return Ok(value);
+        }
+
+        // Rust methods table (built-in frame methods) — checked before custom fields
         let method: Value = methods_table.raw_get(key_str.as_str())?;
         if method != Value::Nil {
             return Ok(method);
@@ -73,7 +81,7 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
             return Ok(child);
         }
 
-        // Custom fields table
+        // Custom fields table (__frame_fields: script handlers, properties, etc.)
         if let Some(value) = lookup_custom_field(lua, frame_id, &key_str) {
             return Ok(value);
         }
@@ -199,6 +207,18 @@ fn lookup_custom_field(lua: &Lua, frame_id: u64, key: &str) -> Option<Value> {
     }
 }
 
+/// Look up a Mixin-applied override from the dedicated __mixin_overrides registry table.
+///
+/// When Mixin(frame, mixin) is called on a LightUserData frame, function values are written
+/// to `__mixin_overrides[frame_id][key]` so they can shadow Rust built-in methods. Only
+/// function values go here — non-function properties still go through __frame_fields.
+fn lookup_mixin_override(lua: &Lua, frame_id: u64, key: &str) -> Option<Value> {
+    let overrides: mlua::Table = lua.named_registry_value("__mixin_overrides").ok()?;
+    let frame_overrides: mlua::Table = overrides.get::<mlua::Table>(frame_id).ok()?;
+    let value: Value = frame_overrides.get::<Value>(key).unwrap_or(Value::Nil);
+    if value != Value::Nil { Some(value) } else { None }
+}
+
 /// Handle special fallback methods (Clear for Cooldown, Lower, Raise).
 fn lookup_fallback_method(lua: &Lua, frame_id: u64, key: &str) -> mlua::Result<Option<Value>> {
     if key == "Clear" {
@@ -224,9 +244,7 @@ fn lookup_fallback_method(lua: &Lua, frame_id: u64, key: &str) -> mlua::Result<O
                 let id = lud_to_id(ud);
                 let state_rc = get_sim_state(lua);
                 let mut state = state_rc.borrow_mut();
-                if let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.frame_level = (frame.frame_level - 1).max(0);
-                }
+                state.lower_frame(id);
                 Ok(())
             },
         )?)));

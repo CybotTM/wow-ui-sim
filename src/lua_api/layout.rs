@@ -88,18 +88,22 @@ pub fn compute_frame_rect(
     }
 }
 
-/// Resolve the rect to anchor against: relative_to_id frame or parent.
+/// Resolve the rect to anchor against: relative_to_id frame or screen.
+///
+/// When relative_to_id is None, the anchor targets the screen (UIParent).
+/// XML anchors with no relativeTo are resolved to an explicit parent_id before
+/// storage, so they never reach this branch with None.
 fn resolve_anchor_target(
     registry: &WidgetRegistry,
     anchor: &crate::widget::Anchor,
-    parent_rect: &LayoutRect,
+    _parent_rect: &LayoutRect,
     screen_width: f32,
     screen_height: f32,
 ) -> LayoutRect {
     if let Some(rel_id) = anchor.relative_to_id {
         compute_frame_rect(registry, rel_id as u64, screen_width, screen_height)
     } else {
-        *parent_rect
+        LayoutRect { x: 0.0, y: 0.0, width: screen_width, height: screen_height }
     }
 }
 

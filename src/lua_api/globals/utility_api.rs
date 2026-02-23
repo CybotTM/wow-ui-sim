@@ -554,20 +554,77 @@ fn bit_mod(_: &Lua, (a, b): (mlua::Number, mlua::Number)) -> Result<u32> {
 
 /// Mixin system: Mixin, CreateFromMixins, CreateAndInitFromMixin.
 fn register_mixin_system(lua: &Lua) -> Result<()> {
+    register_mixin_overrides_table(lua)?;
+    register_set_mixin_override(lua)?;
+    register_mixin_globals(lua)?;
+    register_scrollbox_globals(lua)?;
+    register_utility_stubs(lua)
+}
+
+/// Initialize the __mixin_overrides registry table used by the frame __index.
+/// Structure: __mixin_overrides[frame_id][method_name] = function.
+/// Only function values are stored here; non-function properties go through __frame_fields.
+fn register_mixin_overrides_table(lua: &Lua) -> Result<()> {
+    let overrides_table = lua.create_table()?;
+    lua.set_named_registry_value("__mixin_overrides", overrides_table)?;
+    Ok(())
+}
+
+/// Register __SetMixinOverride(frame_lud, key, value): write a function override into
+/// __mixin_overrides[frame_id][key]. Called by Mixin() for LightUserData targets.
+/// Accepts any Value for the object and silently skips non-LightUserData values
+/// (e.g. animation group full-userdata objects that don't use the frame __index).
+fn register_set_mixin_override(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "__SetMixinOverride",
+        lua.create_function(
+            |lua, (obj, key, value): (Value, String, Value)| {
+                let ud = match &obj {
+                    Value::LightUserData(lud) => *lud,
+                    _ => return Ok(()), // not a frame LightUserData, skip
+                };
+                let frame_id = crate::lua_api::frame::lud_to_id(ud);
+                let overrides: mlua::Table = lua.named_registry_value("__mixin_overrides")?;
+                let frame_overrides: mlua::Table = match overrides.get::<mlua::Table>(frame_id) {
+                    Ok(t) => t,
+                    Err(_) => {
+                        let t = lua.create_table()?;
+                        overrides.set(frame_id, t.clone())?;
+                        t
+                    }
+                };
+                frame_overrides.set(key, value)?;
+                Ok(())
+            },
+        )?,
+    )?;
+    Ok(())
+}
+
+/// Register Mixin, CreateFromMixins, CreateAndInitFromMixin as Lua globals.
+fn register_mixin_globals(lua: &Lua) -> Result<()> {
     lua.load(
         r##"
         function Mixin(object, ...)
             for i = 1, select("#", ...) do
                 local mixin = select(i, ...)
-                if mixin then
-                    -- For secure mixins (transformed by secureMixin XML attribute),
-                    -- use the stable methods table stored in __secureMixinMethods.
-                    -- This prevents user-added direct entries (e.g. test fixtures) from
-                    -- propagating to new frame instances created after the mixin is modified.
-                    local source = (__secureMixinMethods and __secureMixinMethods[mixin]) or mixin
-                    for k, v in pairs(source) do
-                        object[k] = v
+                -- Live WoW errors on nil mixins: "Usage: local outObject = Mixin(object, ...)"
+                if mixin == nil then
+                    error("Usage: local outObject = Mixin(object, ...)")
+                end
+                -- For secure mixins (transformed by secureMixin XML attribute),
+                -- use the stable methods table stored in __secureMixinMethods.
+                -- This prevents user-added direct entries (e.g. test fixtures) from
+                -- propagating to new frame instances created after the mixin is modified.
+                local source = (__secureMixinMethods and __secureMixinMethods[mixin]) or mixin
+                for k, v in pairs(source) do
+                    -- For LightUserData frames, store function values in __mixin_overrides
+                    -- so they shadow built-in Rust methods (mirrors WoW where frames are
+                    -- tables and Mixin rawsets directly, taking precedence over __index).
+                    if type(object) == "userdata" and type(v) == "function" then
+                        __SetMixinOverride(object, k, v)
                     end
+                    object[k] = v
                 end
             end
             return object
@@ -583,6 +640,96 @@ fn register_mixin_system(lua: &Lua) -> Result<()> {
                 object:Init(...)
             end
             return object
+        end
+    "##,
+    )
+    .exec()?;
+    Ok(())
+}
+
+/// Register ScrollBox factory functions: CreateScrollBoxPadding, CreateScrollBoxLinearView.
+fn register_scrollbox_globals(lua: &Lua) -> Result<()> {
+    lua.load(
+        r##"
+        function CreateScrollBoxPadding(top, bottom, left, right, spacing)
+            return {
+                top = top or 0,
+                bottom = bottom or 0,
+                left = left or 0,
+                right = right or 0,
+                spacing = spacing or 0,
+                GetSpacing = function(self) return self.spacing end,
+                GetLeft = function(self) return self.left end,
+                GetRight = function(self) return self.right end,
+                GetTop = function(self) return self.top end,
+                GetBottom = function(self) return self.bottom end,
+            }
+        end
+
+        function CreateScrollBoxLinearView(top, bottom, left, right, spacing)
+            local view = CreateAndInitFromMixin(ScrollBoxLinearViewMixin, top, bottom, left, right, spacing)
+            return view
+        end
+    "##,
+    )
+    .exec()?;
+    Ok(())
+}
+
+/// Register utility factory functions: GetFinalNameFromTextureKit, NineSliceUtil, CreateFramePool.
+fn register_utility_stubs(lua: &Lua) -> Result<()> {
+    lua.load(
+        r##"
+        -- TextureKit utility
+        function GetFinalNameFromTextureKit(kit)
+            if not kit or not kit.name then
+                return ""
+            end
+            return kit.name
+        end
+
+        -- NineSlice utility table
+        NineSliceUtil = {
+            GetBorderSizes = function(self, border)
+                if not border then return 0, 0, 0, 0 end
+                return border.top or 0, border.bottom or 0, border.left or 0, border.right or 0
+            end,
+        }
+
+        -- Frame pool creation
+        function CreateFramePool(frameType, parent, template)
+            local pool = {}
+            function pool:Acquire()
+                return CreateFrame(frameType or "Frame", nil, parent, template)
+            end
+            function pool:Release(frame)
+                if frame then
+                    frame:Hide()
+                    frame:ClearAllPoints()
+                end
+            end
+            function pool:EnumerateActive()
+                return function() end
+            end
+            return pool
+        end
+
+        function CreateTexturePool(parent, template)
+            local pool = {}
+            function pool:Acquire()
+                local parent_frame = type(parent) == "string" and _G[parent] or parent
+                if not parent_frame then parent_frame = UIParent end
+                return parent_frame:CreateTexture(nil, template)
+            end
+            function pool:Release(texture)
+                if texture then
+                    texture:SetTexture(nil)
+                end
+            end
+            function pool:EnumerateActive()
+                return function() end
+            end
+            return pool
         end
     "##,
     )

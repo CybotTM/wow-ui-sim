@@ -1,0 +1,11 @@
+C_CinematicList
+C_CombatLogSecure
+C_Console
+C_GMTicketInfo
+C_Guild
+C_Login
+C_MacOptions
+C_PingSecure
+C_PrivateAuras
+C_UnitAurasPrivate
+C_Who

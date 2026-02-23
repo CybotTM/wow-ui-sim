@@ -96,7 +96,9 @@ fn set_owner_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> Result<()> {
 
     let owner_id = extract_frame_id(&owner_val);
 
-    // Clear lines and set owner
+    // Clear lines and set owner. SetOwner does NOT show the tooltip — callers
+    // must explicitly call Show() or use a method like SetSpellByID. Matches
+    // live WoW: IsShown() returns false immediately after SetOwner.
     {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -105,7 +107,6 @@ fn set_owner_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> Result<()> {
             td.owner_id = owner_id;
             td.anchor_type = anchor.clone();
         }
-        state.set_frame_visible(id, true);
         position_tooltip(&mut state, id, owner_id, &anchor);
     }
 
@@ -223,6 +224,10 @@ fn add_tooltip_data_query_stubs(lua: &Lua, methods: &mlua::Table) -> Result<()> 
             .unwrap_or(0);
         Ok(count as i32)
     })?)?;
+
+    // GetNumLines() - In real WoW, this returns 0 even after AddLine — it only
+    // reflects lines after a layout pass. Return 0 always to match live behavior.
+    methods.set("GetNumLines", lua.create_function(|_, _ud: LightUserData| Ok(0_i32))?)?;
 
     Ok(())
 }

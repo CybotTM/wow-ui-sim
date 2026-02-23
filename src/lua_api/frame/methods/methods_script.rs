@@ -20,30 +20,36 @@ fn add_set_script_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
         let id = lud_to_id(ud);
         let handler_type = crate::event::ScriptHandler::from_str(&handler);
 
-        if let Some(h) = handler_type {
-            if let Value::Function(f) = func {
-                set_script(lua, id, &handler, f);
+        let h = match handler_type {
+            Some(h) => h,
+            None => return Err(mlua::Error::RuntimeError(format!(
+                "SetScript: `{}' is not a valid script handler for this widget type",
+                handler
+            ))),
+        };
 
-                let state_rc = get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                state.scripts.set(id, h, 1);
+        if let Value::Function(f) = func {
+            set_script(lua, id, &handler, f);
 
-                if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
-                    state.on_update_frames.insert(id);
-                    state.visible_on_update_cache = None;
-                }
-            } else {
-                // nil func: remove the handler
-                remove_script(lua, id, &handler);
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            state.scripts.set(id, h, 1);
 
-                let state_rc = get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                state.scripts.remove(id, h);
+            if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
+                state.on_update_frames.insert(id);
+                state.visible_on_update_cache = None;
+            }
+        } else {
+            // nil func: remove the handler
+            remove_script(lua, id, &handler);
 
-                if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
-                    state.on_update_frames.remove(&id);
-                    state.visible_on_update_cache = None;
-                }
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            state.scripts.remove(id, h);
+
+            if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
+                state.on_update_frames.remove(&id);
+                state.visible_on_update_cache = None;
             }
         }
         Ok(())
@@ -174,54 +180,86 @@ fn add_clear_scripts_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
     Ok(())
 }
 
+/// Base script handlers supported by all frame types.
+const BASE_SCRIPTS: &[&str] = &[
+    "OnShow", "OnHide", "OnUpdate", "OnEvent", "OnSizeChanged",
+    "OnMouseDown", "OnMouseUp", "OnMouseWheel",
+    "OnEnter", "OnLeave", "OnDragStart", "OnDragStop", "OnReceiveDrag",
+    "OnKeyDown", "OnKeyUp", "OnAttributeChanged", "OnLoad",
+    "OnEnable", "OnDisable",
+    "OnPostUpdate", "OnPostShow", "OnPostHide",
+];
+
+/// Script handlers added by Button / CheckButton.
+const BUTTON_SCRIPTS: &[&str] = &[
+    "OnClick", "PreClick", "PostClick", "OnPostClick", "OnDoubleClick",
+];
+
+/// Script handlers added by EditBox.
+const EDITBOX_SCRIPTS: &[&str] = &[
+    "OnTextChanged", "OnCursorChanged", "OnEditFocusGained", "OnEditFocusLost",
+    "OnEnterPressed", "OnEscapePressed", "OnTabPressed", "OnSpacePressed",
+    "OnInputLanguageChanged", "OnChar",
+];
+
+/// Script handlers added by Slider and StatusBar.
+const RANGE_SCRIPTS: &[&str] = &["OnValueChanged", "OnMinMaxChanged"];
+
+/// Script handlers added by ScrollFrame.
+const SCROLL_SCRIPTS: &[&str] = &[
+    "OnHorizontalScroll", "OnVerticalScroll", "OnScrollRangeChanged",
+];
+
+/// Script handlers added by GameTooltip.
+const TOOLTIP_SCRIPTS: &[&str] = &[
+    "OnTooltipSetDefaultAnchor", "OnTooltipSetItem", "OnTooltipSetUnit",
+    "OnTooltipSetSpell", "OnTooltipCleared",
+];
+
+/// Script handlers added by Model / PlayerModel.
+const MODEL_SCRIPTS: &[&str] = &["OnModelLoaded", "OnAnimFinished"];
+
+/// Script handlers added by Cooldown.
+const COOLDOWN_SCRIPTS: &[&str] = &["OnCooldownDone"];
+
+/// Return extra (non-base) handlers for the given widget type. Empty for plain frames.
+fn extra_scripts_for_type(widget_type: crate::widget::WidgetType) -> &'static [&'static str] {
+    use crate::widget::WidgetType::*;
+    match widget_type {
+        Button | CheckButton => BUTTON_SCRIPTS,
+        EditBox => EDITBOX_SCRIPTS,
+        Slider | StatusBar => RANGE_SCRIPTS,
+        ScrollFrame => SCROLL_SCRIPTS,
+        GameTooltip => TOOLTIP_SCRIPTS,
+        Model | PlayerModel | ModelScene => MODEL_SCRIPTS,
+        Cooldown => COOLDOWN_SCRIPTS,
+        _ => &[],
+    }
+}
+
+/// Return whether `script_type` is valid for the given widget type.
+///
+/// Matches WoW client behaviour: `HasScript("OnClick")` is false on a plain Frame.
+fn script_supported(widget_type: crate::widget::WidgetType, script_type: &str) -> bool {
+    let in_base = BASE_SCRIPTS.iter().any(|s| s.eq_ignore_ascii_case(script_type));
+    if in_base {
+        return true;
+    }
+    extra_scripts_for_type(widget_type)
+        .iter()
+        .any(|s| s.eq_ignore_ascii_case(script_type))
+}
+
 /// HasScript(scriptType) - check if frame supports a script handler type.
 fn add_has_script_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("HasScript", lua.create_function(|_, (_ud, script_type): (LightUserData, String)| {
-        let common_scripts = [
-            "OnClick",
-            "OnEnter",
-            "OnLeave",
-            "OnShow",
-            "OnHide",
-            "OnMouseDown",
-            "OnMouseUp",
-            "OnMouseWheel",
-            "OnDragStart",
-            "OnDragStop",
-            "OnUpdate",
-            "OnEvent",
-            "OnLoad",
-            "OnSizeChanged",
-            "OnAttributeChanged",
-            "OnEnable",
-            "OnDisable",
-            "OnTooltipSetItem",
-            "OnTooltipSetUnit",
-            "OnTooltipSetSpell",
-            "OnTooltipCleared",
-            "PostClick",
-            "PreClick",
-            "OnValueChanged",
-            "OnMinMaxChanged",
-            "OnEditFocusGained",
-            "OnEditFocusLost",
-            "OnTextChanged",
-            "OnEnterPressed",
-            "OnEscapePressed",
-            "OnKeyDown",
-            "OnKeyUp",
-            "OnChar",
-            "OnTabPressed",
-            "OnSpacePressed",
-            "OnReceiveDrag",
-            "OnPostUpdate",
-            "OnPostShow",
-            "OnPostHide",
-            "OnPostClick",
-        ];
-        Ok(common_scripts
-            .iter()
-            .any(|s| s.eq_ignore_ascii_case(&script_type)))
+    methods.set("HasScript", lua.create_function(|lua, (ud, script_type): (LightUserData, String)| {
+        let id = lud_to_id(ud);
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let widget_type = state.widgets.get(id)
+            .map(|f| f.widget_type)
+            .unwrap_or(crate::widget::WidgetType::Frame);
+        Ok(script_supported(widget_type, &script_type))
     })?)?;
 
     Ok(())

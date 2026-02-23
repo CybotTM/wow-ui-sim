@@ -432,7 +432,6 @@ fn create_child_frame_from_template(
         pop_suppress(lua);
         return;
     }
-
     // Apply intrinsic template (e.g. DropdownButton) and set the intrinsic property.
     if let Some(intrinsic_name) = intrinsic {
         apply_templates_from_registry(lua, state, &child_name, intrinsic_name);
