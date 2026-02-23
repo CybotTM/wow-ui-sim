@@ -91,7 +91,7 @@ fn register_slash_cmd_list(lua: &Lua) -> Result<()> {
 }
 
 /// Register `FireEvent()` - simulator utility to fire events for testing.
-fn register_fire_event(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
     let fire_event = lua.create_function(move |lua, args: mlua::Variadic<Value>| {
         let mut args_iter = args.into_iter();
         let event_name: String = match args_iter.next() {
@@ -101,10 +101,7 @@ fn register_fire_event(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
 
         let event_args: Vec<Value> = args_iter.collect();
 
-        let listeners = {
-            let state = state.borrow();
-            state.widgets.get_event_listeners(&event_name)
-        };
+        let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, &event_name)?;
 
         for widget_id in listeners {
             if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent") {
@@ -169,17 +166,14 @@ fn register_reload_ui(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
 /// Fire an event to all registered listeners, building extra args via a closure.
 fn fire_event_to_listeners<F>(
     lua: &Lua,
-    state: &Rc<RefCell<SimState>>,
+    _state: &Rc<RefCell<SimState>>,
     event_name: &str,
     build_extra_args: F,
 ) -> Result<()>
 where
     F: Fn(&Lua) -> Result<Vec<Value>>,
 {
-    let listeners = {
-        let state = state.borrow();
-        state.widgets.get_event_listeners(event_name)
-    };
+    let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, event_name)?;
     for widget_id in listeners {
         if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
             && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) {
@@ -440,16 +434,13 @@ fn register_screen_size_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> R
 /// In WoW, `RequestTimePlayed()` is asynchronous and fires `TIME_PLAYED_MSG`
 /// with `(totalTimePlayed, timePlayedThisLevel)`. We fire it immediately with
 /// fake data for the current simulated character.
-fn register_request_time_played(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+fn register_request_time_played(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
     let request_fn = lua.create_function(move |lua, ()| {
         // Simulated: 15 days played total, 3 days at current level
         let total_played = 15 * 24 * 3600; // 15 days in seconds
         let level_played = 3 * 24 * 3600; // 3 days in seconds
 
-        let listeners = {
-            let s = state.borrow();
-            s.widgets.get_event_listeners("TIME_PLAYED_MSG")
-        };
+        let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, "TIME_PLAYED_MSG")?;
 
         for widget_id in listeners {
             if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")

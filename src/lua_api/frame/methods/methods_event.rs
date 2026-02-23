@@ -27,23 +27,74 @@ fn unknown_event_error(frame_name: &str, event: &str) -> mlua::Error {
     ))
 }
 
+/// Insert a frame into the per-event Lua table (__event_individual[event][lud] = true).
+fn lua_register_individual(lua: &Lua, ud: LightUserData, event: &str) -> mlua::Result<()> {
+    let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
+    let event_tbl = match individual.get::<mlua::Table>(event) {
+        Ok(t) => t,
+        Err(_) => {
+            let t = lua.create_table()?;
+            individual.set(event, t.clone())?;
+            t
+        }
+    };
+    event_tbl.set(Value::LightUserData(ud), true)?;
+    Ok(())
+}
+
+/// Remove a frame from the per-event Lua table (__event_individual[event][lud] = nil).
+fn lua_unregister_individual(lua: &Lua, ud: LightUserData, event: &str) -> mlua::Result<()> {
+    let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
+    if let Ok(event_tbl) = individual.get::<mlua::Table>(event) {
+        event_tbl.set(Value::LightUserData(ud), Value::Nil)?;
+    }
+    Ok(())
+}
+
+/// Insert a frame into the all-events Lua table (__event_all[lud] = true).
+fn lua_register_all(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
+    let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
+    all_events.set(Value::LightUserData(ud), true)?;
+    Ok(())
+}
+
+/// Remove a frame from all individual event tables and the all-events table.
+fn lua_unregister_all(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
+    let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
+    for pair in individual.pairs::<String, mlua::Table>() {
+        if let Ok((_, event_tbl)) = pair {
+            event_tbl.set(Value::LightUserData(ud), Value::Nil)?;
+        }
+    }
+    let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
+    all_events.set(Value::LightUserData(ud), Value::Nil)?;
+    Ok(())
+}
+
 /// RegisterEvent, RegisterUnitEvent
 fn add_register_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("RegisterEvent", lua.create_function(|lua, (ud, event): (LightUserData, String)| {
         let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if !is_valid_event(&event) {
-            let frame_name = state.widgets.get(id)
-                .and_then(|f| f.name.clone())
-                .unwrap_or_else(|| "Frame".to_string());
-            return Err(unknown_event_error(&frame_name, &event));
-        }
-        let newly_registered = if let Some(frame) = state.widgets.get_mut(id) {
-            frame.registered_events.insert(event)
-        } else {
-            false
+        // Validate and update Rust-side state first.
+        let newly_registered = {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if !is_valid_event(&event) {
+                let frame_name = state.widgets.get(id)
+                    .and_then(|f| f.name.clone())
+                    .unwrap_or_else(|| "Frame".to_string());
+                return Err(unknown_event_error(&frame_name, &event));
+            }
+            if let Some(frame) = state.widgets.get_mut(id) {
+                frame.registered_events.insert(event.clone())
+            } else {
+                false
+            }
         };
+        // Update Lua-side table for dispatch ordering (borrow released above).
+        if newly_registered {
+            lua_register_individual(lua, ud, &event)?;
+        }
         Ok(newly_registered)
     })?)?;
 
@@ -51,13 +102,18 @@ fn add_register_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
     methods.set("RegisterUnitEvent", lua.create_function(
         |lua, (ud, event, _args): (LightUserData, String, mlua::Variadic<Value>)| {
             let id = lud_to_id(ud);
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            let newly_registered = if let Some(frame) = state.widgets.get_mut(id) {
-                frame.registered_events.insert(event)
-            } else {
-                false
+            let newly_registered = {
+                let state_rc = get_sim_state(lua);
+                let mut state = state_rc.borrow_mut();
+                if let Some(frame) = state.widgets.get_mut(id) {
+                    frame.registered_events.insert(event.clone())
+                } else {
+                    false
+                }
             };
+            if newly_registered {
+                lua_register_individual(lua, ud, &event)?;
+            }
             Ok(newly_registered)
         },
     )?)?;
@@ -69,39 +125,51 @@ fn add_register_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
 fn add_unregister_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("UnregisterEvent", lua.create_function(|lua, (ud, event): (LightUserData, String)| {
         let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if !is_valid_event(&event) {
-            let frame_name = state.widgets.get(id)
-                .and_then(|f| f.name.clone())
-                .unwrap_or_else(|| "Frame".to_string());
-            return Err(unknown_event_error(&frame_name, &event));
-        }
-        let was_registered = if let Some(frame) = state.widgets.get_mut(id) {
-            frame.registered_events.remove(&event)
-        } else {
-            false
+        let was_registered = {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if !is_valid_event(&event) {
+                let frame_name = state.widgets.get(id)
+                    .and_then(|f| f.name.clone())
+                    .unwrap_or_else(|| "Frame".to_string());
+                return Err(unknown_event_error(&frame_name, &event));
+            }
+            if let Some(frame) = state.widgets.get_mut(id) {
+                frame.registered_events.remove(&event)
+            } else {
+                false
+            }
         };
+        if was_registered {
+            lua_unregister_individual(lua, ud, &event)?;
+        }
         Ok(was_registered)
     })?)?;
 
     methods.set("UnregisterAllEvents", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(id) {
-            frame.registered_events.clear();
+        {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(id) {
+                frame.registered_events.clear();
+                frame.register_all_events = false;
+            }
         }
+        lua_unregister_all(lua, ud)?;
         Ok(())
     })?)?;
 
     methods.set("RegisterAllEvents", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(id) {
-            frame.register_all_events = true;
+        {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(id) {
+                frame.register_all_events = true;
+            }
         }
+        lua_register_all(lua, ud)?;
         Ok(())
     })?)?;
 

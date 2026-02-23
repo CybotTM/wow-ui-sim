@@ -131,6 +131,45 @@ pub fn collect_lua_error(lua: &Lua, msg: &str) {
     }
 }
 
+// ── Event dispatch ordering ───────────────────────────────────────────
+
+/// Get event listeners in Lua hash table order (matching WoW's dispatch behaviour).
+///
+/// WoW stores registrations in Lua tables and iterates with `pairs()`, which
+/// follows Lua 5.1 hash table order. This replicates that by reading the same
+/// tables we maintain alongside the Rust-side `registered_events` HashSet.
+///
+/// Returns individual-event registrations first (in Lua hash order), then
+/// all-events registrations (in Lua hash order), with duplicates skipped.
+pub fn get_event_listeners_lua_order(lua: &Lua, event: &str) -> mlua::Result<Vec<u64>> {
+    use mlua::{LightUserData, Value};
+    let mut result = Vec::new();
+    let mut individual_ids = std::collections::HashSet::new();
+
+    let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
+    if let Ok(event_tbl) = individual.get::<mlua::Table>(event) {
+        for pair in event_tbl.pairs::<LightUserData, Value>() {
+            if let Ok((lud, _)) = pair {
+                let id = lud.0 as u64;
+                result.push(id);
+                individual_ids.insert(id);
+            }
+        }
+    }
+
+    let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
+    for pair in all_events.pairs::<LightUserData, Value>() {
+        if let Ok((lud, _)) = pair {
+            let id = lud.0 as u64;
+            if !individual_ids.contains(&id) {
+                result.push(id);
+            }
+        }
+    }
+
+    Ok(result)
+}
+
 /// A Lua-style error with no prefix. When caught by pcall, shows just the message.
 /// Uses ExternalError so Display outputs the raw message without "runtime error: " prefix.
 #[derive(Debug)]

@@ -49,6 +49,12 @@ impl WowLuaEnv {
         }
         unsafe { lua.exec_raw::<()>((), |state| { luaopen_security(state); })? };
 
+        // Event registration tables for dispatch ordering (Lua hash table order)
+        let event_individual = lua.create_table()?;
+        lua.set_named_registry_value("__event_individual", event_individual)?;
+        let event_all = lua.create_table()?;
+        lua.set_named_registry_value("__event_all", event_all)?;
+
         // Register global functions
         super::globals::register_globals(&lua, Rc::clone(&state))?;
         super::secure_env::create_secure_environment(&lua)?;
@@ -158,10 +164,7 @@ impl WowLuaEnv {
     pub fn fire_event_with_args(&self, event: &str, args: &[Value]) -> Result<()> {
         use super::script_helpers::{call_error_handler, get_frame_ref, get_script};
 
-        let listeners = {
-            let state = self.state.borrow();
-            state.widgets.get_event_listeners(event)
-        };
+        let listeners = super::script_helpers::get_event_listeners_lua_order(&self.lua, event)?;
 
         for widget_id in listeners {
             if let Some(handler) = get_script(&self.lua, widget_id, "OnEvent")
