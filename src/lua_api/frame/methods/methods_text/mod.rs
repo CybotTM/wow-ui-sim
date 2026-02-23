@@ -63,11 +63,14 @@ fn add_text_get_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
 
     // GetText() - returns text or nil if no text set.
     // For buttons, delegates to the Text child FontString.
+    // For EditBox, returns "" instead of nil (WoW behavior).
     methods.set("GetText", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let text = state.widgets.get(id).and_then(|f| {
+        let frame = state.widgets.get(id);
+        let is_editbox = frame.map(|f| f.widget_type == WidgetType::EditBox).unwrap_or(false);
+        let text = frame.and_then(|f| {
             if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
                 f.children_keys.get("Text")
                     .and_then(|&cid| state.widgets.get(cid))
@@ -78,6 +81,7 @@ fn add_text_get_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()
         });
         match text {
             Some(t) => Ok(Value::String(lua.create_string(&t)?)),
+            None if is_editbox => Ok(Value::String(lua.create_string("")?)),
             None => Ok(Value::Nil),
         }
     })?)?;

@@ -51,21 +51,25 @@ fn generate_button_texture_code(
 }
 
 /// Apply button textures (NormalTexture, PushedTexture, etc.) from a FrameXml to a button.
+///
+/// For XML elements with atlas/file, generates Lua code to call Set*Texture.
+/// For empty XML elements like `<NormalTexture/>`, creates an empty texture child
+/// so that Get*Texture() returns a valid object (matching WoW behavior).
 pub fn apply_button_textures(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
 ) -> Result<(), LoadError> {
-    let texture_slots: [(&str, Option<&crate::xml::TextureXml>); 4] = [
-        ("SetNormalTexture", frame_xml.normal_texture()),
-        ("SetPushedTexture", frame_xml.pushed_texture()),
-        ("SetHighlightTexture", frame_xml.highlight_texture()),
-        ("SetDisabledTexture", frame_xml.disabled_texture()),
+    let texture_slots: [(&str, &str, Option<&crate::xml::TextureXml>); 4] = [
+        ("SetNormalTexture", "NormalTexture", frame_xml.normal_texture()),
+        ("SetPushedTexture", "PushedTexture", frame_xml.pushed_texture()),
+        ("SetHighlightTexture", "HighlightTexture", frame_xml.highlight_texture()),
+        ("SetDisabledTexture", "DisabledTexture", frame_xml.disabled_texture()),
     ];
 
     let lua_code: String = texture_slots
         .iter()
-        .filter_map(|(method, tex)| tex.map(|t| generate_button_texture_code(button_name, method, t)))
+        .filter_map(|(method, _, tex)| tex.map(|t| generate_button_texture_code(button_name, method, t)))
         .collect();
 
     if !lua_code.is_empty() {
@@ -74,7 +78,31 @@ pub fn apply_button_textures(
         })?;
     }
 
+    // Create empty texture children for XML elements without atlas/file.
+    // WoW creates these so GetNormalTexture() etc. return valid objects.
+    create_empty_button_textures(env, &texture_slots, button_name);
+
     Ok(())
+}
+
+/// Create empty texture children for button XML elements that have no atlas or file.
+fn create_empty_button_textures(
+    env: &LoaderEnv<'_>,
+    slots: &[(&str, &str, Option<&crate::xml::TextureXml>); 4],
+    button_name: &str,
+) {
+    use crate::lua_api::frame::methods::methods_helpers::get_or_create_button_texture;
+    let mut state = env.state.borrow_mut();
+    let button_id = state.widgets.get_id_by_name(button_name);
+    let Some(button_id) = button_id else { return };
+    for &(_, parent_key, tex_opt) in slots {
+        let Some(tex) = tex_opt else { continue };
+        // Skip if already created by Set*Texture Lua code (has atlas or file)
+        if tex.atlas.is_some() || tex.file.is_some() {
+            continue;
+        }
+        get_or_create_button_texture(&mut state, button_id, parent_key);
+    }
 }
 
 /// Apply button text from the text attribute and ButtonText child element.

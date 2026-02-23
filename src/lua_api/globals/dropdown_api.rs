@@ -128,7 +128,18 @@ fn create_dropdown_button(
     let text_name = format!("DropDownList{}Button{}NormalText", level, btn_idx);
     let mut text_frame = Frame::new(WidgetType::FontString, Some(text_name.clone()), Some(btn_id));
     text_frame.visible = true;
+    let text_id = text_frame.id;
     create_and_register_global(lua, state, text_frame, &text_name)?;
+
+    // Register NormalText as a child of the button with key "Text"
+    // so that Button:GetText()/SetText() can find it via children_keys.
+    let mut s = state.borrow_mut();
+    s.widgets.add_child(btn_id, text_id);
+    if let Some(btn) = s.widgets.get_mut_visual(btn_id) {
+        btn.children_keys.insert("Text".to_string(), text_id);
+    }
+    drop(s);
+
     Ok(())
 }
 
@@ -202,9 +213,19 @@ fn register_add_button(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
             }
 
             if let Ok(text) = info.get::<mlua::String>("text") {
+                let text_str = text.to_string_lossy().to_string();
                 let mut s = state.borrow_mut();
+                // Set text on button itself
                 if let Some(btn_frame) = s.widgets.get_mut_visual(btn_id) {
-                    btn_frame.text = Some(text.to_string_lossy().to_string());
+                    btn_frame.text = Some(text_str.clone());
+                }
+                // Also set on "Text" child — Button:GetText() reads from here
+                if let Some(&text_child_id) = s.widgets.get(btn_id)
+                    .and_then(|f| f.children_keys.get("Text"))
+                {
+                    if let Some(tc) = s.widgets.get_mut_visual(text_child_id) {
+                        tc.text = Some(text_str);
+                    }
                 }
                 s.set_frame_visible(btn_id, true);
             }

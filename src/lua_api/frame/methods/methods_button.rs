@@ -64,11 +64,10 @@ fn add_pushed_text_offset_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Res
     Ok(())
 }
 
-/// Get{Normal,Highlight,Pushed,Disabled}Texture - return or create texture child.
+/// Get{Normal,Highlight,Pushed,Disabled}Texture - return existing texture child or nil.
 ///
-/// WoW creates texture children for empty XML elements like `<NormalTexture/>`.
-/// We lazily create on first access so Lua code like `GetNormalTexture():SetAtlas()`
-/// works even when the XML element had no atlas/file attributes.
+/// Returns nil if the texture child doesn't exist (fresh button with no Set*Texture
+/// or XML element). XML loader creates empty children for `<NormalTexture/>` etc.
 fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     for (method_name, parent_key) in [
         ("GetNormalTexture", "NormalTexture"),
@@ -79,9 +78,13 @@ fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
         methods.set(method_name, lua.create_function(move |lua, ud: LightUserData| {
             let id = lud_to_id(ud);
             let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            let tex_id = get_or_create_button_texture(&mut state, id, parent_key);
-            Ok(frame_lud(tex_id))
+            let state = state_rc.borrow();
+            let tex_id = state.widgets.get(id)
+                .and_then(|f| f.children_keys.get(parent_key).copied());
+            match tex_id {
+                Some(tid) => Ok(mlua::Value::LightUserData(mlua::LightUserData(tid as *mut std::ffi::c_void))),
+                None => Ok(mlua::Value::Nil),
+            }
         })?)?;
     }
     Ok(())
@@ -204,6 +207,9 @@ fn apply_set_button_texture_path(
         tex.atlas_tex_coords = tex_coords;
         tex.texture_file_data_id = file_data_id;
     }
+    // Set visibility based on current button state (same as userdata path)
+    let should_show = button_texture_should_show(state, button_id, parent_key);
+    state.widgets.set_visible(tex_id, should_show);
     Ok(())
 }
 
