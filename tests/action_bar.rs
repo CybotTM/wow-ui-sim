@@ -147,3 +147,32 @@ fn test_action_buttons_have_showgrid_attribute() {
         .unwrap();
     assert!(all_have_grid, "All ActionButtons should have showgrid > 0");
 }
+
+#[test]
+fn test_action_button_size() {
+    let env = env_with_action_bar();
+
+    let size: (f64, f64) = env
+        .eval(r#"
+            local btn = ActionButton1
+            if not btn then return 0, 0 end
+            return btn:GetSize()
+        "#)
+        .unwrap();
+    assert_eq!(size, (45.0, 45.0), "ActionButton should be 45x45");
+}
+
+#[test]
+fn test_main_action_bar_size() {
+    let env = env_with_action_bar();
+
+    let size: (f64, f64) = env
+        .eval(r#"
+            local bar = MainActionBar
+            if not bar then return 0, 0 end
+            return bar:GetSize()
+        "#)
+        .unwrap();
+    // 12 buttons (45px) + padding + margins computed by ResizeLayoutFrame:Layout()
+    assert_eq!(size, (570.0, 52.0), "MainActionBar should be 570x52 after layout");
+}
