@@ -3,11 +3,23 @@
 //! Provides a Unix socket server that accepts Lua code and returns results.
 
 use serde::{Deserialize, Serialize};
+use std::cell::UnsafeCell;
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc;
 use std::thread;
+
+/// Wrapper to make `UnsafeCell<[u8; 128]>` Sync for use in a static.
+/// Safety: only written once in `install_signal_handler` (single-threaded init),
+/// then read in the signal handler (which runs on the same thread that received the signal).
+struct SyncBuf(UnsafeCell<[u8; 128]>);
+unsafe impl Sync for SyncBuf {}
+
+/// Null-terminated socket path for async-signal-safe cleanup.
+static SOCKET_PATH_BUF: SyncBuf = SyncBuf(UnsafeCell::new([0u8; 128]));
+static SOCKET_PATH_LEN: AtomicUsize = AtomicUsize::new(0);
 
 /// Request sent to the Lua server.
 #[derive(Debug, Serialize, Deserialize)]
@@ -92,6 +104,9 @@ pub fn init() -> mpsc::Receiver<LuaCommand> {
     // Clean up our own stale socket if it exists
     let _ = std::fs::remove_file(&path);
 
+    // Store path for signal handler cleanup
+    install_signal_handler(&path);
+
     thread::spawn(move || {
         run_server(tx, path);
     });
@@ -118,6 +133,39 @@ fn cleanup_stale_sockets() {
                             }
                     }
         }
+    }
+}
+
+/// Async-signal-safe handler: unlink socket, re-raise with default handler.
+extern "C" fn cleanup_on_signal(sig: libc::c_int) {
+    unsafe {
+        if SOCKET_PATH_LEN.load(Ordering::Relaxed) > 0 {
+            libc::unlink((*SOCKET_PATH_BUF.0.get()).as_ptr() as *const libc::c_char);
+        }
+        libc::signal(sig, libc::SIG_DFL);
+        libc::raise(sig);
+    }
+}
+
+/// Install sigaction handlers for SIGTERM and SIGINT to clean up the socket.
+fn install_signal_handler(path: &std::path::Path) {
+    let path_bytes = path.as_os_str().as_encoded_bytes();
+    // Store null-terminated path in static buffer
+    unsafe {
+        let buf = &mut *SOCKET_PATH_BUF.0.get();
+        assert!(path_bytes.len() < buf.len());
+        buf[..path_bytes.len()].copy_from_slice(path_bytes);
+        buf[path_bytes.len()] = 0;
+    }
+    SOCKET_PATH_LEN.store(path_bytes.len(), Ordering::Relaxed);
+
+    unsafe {
+        let mut sa: libc::sigaction = std::mem::zeroed();
+        sa.sa_sigaction = cleanup_on_signal as *const () as usize;
+        libc::sigemptyset(&mut sa.sa_mask);
+        sa.sa_flags = 0;
+        libc::sigaction(libc::SIGTERM, &sa, std::ptr::null_mut());
+        libc::sigaction(libc::SIGINT, &sa, std::ptr::null_mut());
     }
 }
 
