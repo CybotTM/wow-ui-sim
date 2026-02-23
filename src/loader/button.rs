@@ -77,14 +77,20 @@ pub fn apply_button_textures(
     Ok(())
 }
 
-/// Apply button text from the text attribute on a button.
-/// The text attribute is a localization key that gets resolved to actual text.
+/// Apply button text from the text attribute and ButtonText child element.
 pub fn apply_button_text(
     env: &LoaderEnv<'_>,
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
     inherits: &str,
 ) -> Result<(), LoadError> {
+    // Create FontString from <ButtonText> child element if present.
+    if let Some(bt) = frame_xml.button_text() {
+        super::xml_fontstring::create_fontstring_from_xml(
+            env, bt, button_name, "ARTWORK", 0,
+        )?;
+    }
+
     // Check for text attribute on the frame itself first
     let text = if let Some(t) = &frame_xml.text {
         Some(t.clone())

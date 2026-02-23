@@ -64,7 +64,11 @@ fn add_pushed_text_offset_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Res
     Ok(())
 }
 
-/// Get{Normal,Highlight,Pushed,Disabled}Texture - return texture child or nil.
+/// Get{Normal,Highlight,Pushed,Disabled}Texture - return or create texture child.
+///
+/// WoW creates texture children for empty XML elements like `<NormalTexture/>`.
+/// We lazily create on first access so Lua code like `GetNormalTexture():SetAtlas()`
+/// works even when the XML element had no atlas/file attributes.
 fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     for (method_name, parent_key) in [
         ("GetNormalTexture", "NormalTexture"),
@@ -75,12 +79,9 @@ fn add_texture_getter_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
         methods.set(method_name, lua.create_function(move |lua, ud: LightUserData| {
             let id = lud_to_id(ud);
             let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            if let Some(frame) = state.widgets.get(id)
-                && let Some(&tex_id) = frame.children_keys.get(parent_key) {
-                    return Ok(frame_lud(tex_id));
-                }
-            Ok(Value::Nil)
+            let mut state = state_rc.borrow_mut();
+            let tex_id = get_or_create_button_texture(&mut state, id, parent_key);
+            Ok(frame_lud(tex_id))
         })?)?;
     }
     Ok(())
