@@ -17,14 +17,6 @@ pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
     fire_script_recursive(lua, id, "OnShow")
 }
 
-/// Fire OnHide on a frame and recursively on its visible children.
-///
-/// Children are collected BEFORE the handler fires so their OnHide runs too
-/// (matches WoW: parent hides → children become effectively hidden).
-pub(crate) fn fire_on_hide_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
-    fire_script_recursive(lua, id, "OnHide")
-}
-
 /// Register Show, Hide, SetShown methods.
 pub(super) fn add_show_hide_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set("Show", lua.create_function(show_impl)?)?;

@@ -11,7 +11,6 @@ use std::rc::Rc;
 // ── __scripts table ──────────────────────────────────────────────────
 
 const SCRIPTS_KEY: &str = "__scripts";
-const SCRIPT_HOOKS_KEY: &str = "__script_hooks";
 const FRAME_FIELDS_KEY: &str = "__frame_fields";
 
 /// Get the __scripts table from the Lua registry. Returns None if not yet created.
@@ -49,19 +48,6 @@ pub fn remove_script(lua: &Lua, widget_id: u64, handler_name: &str) {
         let key = format!("{}_{}", widget_id, handler_name);
         table.set(key.as_str(), Value::Nil).ok();
     }
-}
-
-// ── __script_hooks table ─────────────────────────────────────────────
-
-/// Get or create the __script_hooks table in the Lua registry.
-pub fn get_or_create_hooks_table(lua: &Lua) -> mlua::Table {
-    lua.named_registry_value(SCRIPT_HOOKS_KEY)
-        .unwrap_or_else(|_| {
-            let t = lua.create_table().unwrap();
-            lua.set_named_registry_value(SCRIPT_HOOKS_KEY, t.clone())
-                .unwrap();
-            t
-        })
 }
 
 // ── __frame_fields table ─────────────────────────────────────────────

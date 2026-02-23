@@ -9,6 +9,25 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Extract a frame ID from a Lua Value, handling forbidden proxy tables.
+///
+/// Normal frames are LightUserData. Forbidden frames are proxy Tables with the
+/// LightUserData stored at key `"__lud"` (set by `create_forbidden_proxy`).
+fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
+    match value {
+        Value::LightUserData(_) => extract_frame_id(value),
+        Value::Table(t) => {
+            // Forbidden proxy: LightUserData stored at "__lud"
+            if let Ok(Value::LightUserData(lud)) = t.raw_get::<Value>("__lud") {
+                Some(lud.0 as u64)
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
+
 /// Create the CreateFrame Lua function.
 pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     let state_clone = Rc::clone(&state);
@@ -136,7 +155,7 @@ fn parse_create_frame_args(
         (None, false, None)
     } else {
         let parent_arg = args_iter.next();
-        let explicit_parent = parent_arg.and_then(|v| extract_frame_id(v));
+        let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
         let parent_explicit = explicit_parent.is_some();
         let parent_id = explicit_parent
             .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
@@ -348,6 +367,9 @@ fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
         },
     })?;
     proxy.raw_set(0, raw_ref)?;
+    // Store the LightUserData at "__lud" so that CreateFrame can resolve the
+    // frame ID when this proxy is passed as a parent argument.
+    proxy.raw_set("__lud", lud.clone())?;
 
     let mt = lua.create_table()?;
     mt.raw_set("__metatable", "Forbidden")?;
