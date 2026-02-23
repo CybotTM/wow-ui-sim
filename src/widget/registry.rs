@@ -109,12 +109,22 @@ impl WidgetRegistry {
     }
 
     /// Get all widgets registered for a specific event.
+    /// Individual RegisterEvent listeners fire before RegisterAllEvents listeners.
+    /// Within each group, frames fire in creation order (ascending ID).
     pub fn get_event_listeners(&self, event: &str) -> Vec<u64> {
-        self.widgets
-            .values()
-            .filter(|w| w.is_registered_for_event(event))
-            .map(|w| w.id)
-            .collect()
+        let mut individual = Vec::new();
+        let mut all_events = Vec::new();
+        for frame in self.widgets.values() {
+            if frame.registered_events.contains(event) {
+                individual.push(frame.id);
+            } else if frame.register_all_events {
+                all_events.push(frame.id);
+            }
+        }
+        individual.sort_unstable();
+        all_events.sort_unstable();
+        individual.extend(all_events);
+        individual
     }
 
     /// Add a child to a parent widget.
