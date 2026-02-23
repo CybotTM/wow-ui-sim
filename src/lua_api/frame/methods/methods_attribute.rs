@@ -302,11 +302,25 @@ fn add_security_and_input_stubs(lua: &Lua, methods: &mlua::Table) -> mlua::Resul
 fn add_security_stubs(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     methods.set(
         "SetForbidden",
-        lua.create_function(|_, (_ud, _forbidden): (LightUserData, Option<bool>)| Ok(()))?,
+        lua.create_function(|lua, (ud, forbidden): (LightUserData, Option<bool>)| {
+            let id = lud_to_id(ud);
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(id) {
+                frame.forbidden = forbidden.unwrap_or(true);
+            }
+            Ok(())
+        })?,
     )?;
     methods.set(
         "IsForbidden",
-        lua.create_function(|_, _ud: LightUserData| Ok(false))?,
+        lua.create_function(|lua, ud: LightUserData| {
+            let id = lud_to_id(ud);
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            let forbidden = state.widgets.get(id).map(|f| f.forbidden).unwrap_or(false);
+            Ok(forbidden)
+        })?,
     )?;
     methods.set(
         "CanChangeProtectedState",

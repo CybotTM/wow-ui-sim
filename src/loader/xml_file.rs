@@ -59,10 +59,15 @@ fn process_element(
             Ok(0)
         }
         XmlElement::ScopedModifier(scoped) => {
+            let prev_forbidden = env.state().borrow().loading_forbidden;
+            if scoped.forbidden.unwrap_or(false) {
+                env.state().borrow_mut().loading_forbidden = true;
+            }
             let mut count = 0;
             for child in &scoped.elements {
                 count += process_element(env, child, xml_dir, ctx, timing)?;
             }
+            env.state().borrow_mut().loading_forbidden = prev_forbidden;
             Ok(count)
         }
         XmlElement::Texture(tex) => {

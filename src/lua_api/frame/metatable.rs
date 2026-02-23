@@ -37,6 +37,13 @@ pub fn setup_frame_metatable(lua: &Lua) -> mlua::Result<()> {
         .eval::<mlua::Function>()?;
     lua.set_named_registry_value("__frame_assign_fn", assign_fn)?;
 
+    // Helper for forbidden proxy __index fallback: access a property on a LightUserData
+    // frame via the type metatable (handles script handlers, children, custom fields).
+    let index_helper = lua
+        .load("return function(lud, key) return lud[key] end")
+        .eval::<mlua::Function>()?;
+    lua.set_named_registry_value("__frame_index_helper", index_helper)?;
+
     Ok(())
 }
 

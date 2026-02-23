@@ -41,7 +41,9 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             create_item_button_intrinsics(&mut state_clone.borrow_mut(), frame_id);
         }
 
-        let ud = create_frame_userdata(lua, &state_clone, frame_id, name.as_deref())?;
+        let is_forbidden = state_clone.borrow().widgets.get(frame_id)
+            .map(|f| f.forbidden).unwrap_or(false);
+        let ud = create_frame_userdata(lua, frame_id, name.as_deref(), is_forbidden)?;
 
         // WoW registers named button's default texture children as globals:
         // ButtonNameNormalTexture, ButtonNamePushedTexture, etc.
@@ -227,11 +229,13 @@ fn register_new_frame(
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
 
     // Attribute frame to the addon currently being loaded, or inherit from parent.
+    // Also mark forbidden if we're inside a ScopedModifier with forbidden="true".
     {
         let s = state.borrow();
         frame.owner_addon = s.loading_addon_index.or_else(|| {
             parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
         });
+        frame.forbidden = s.loading_forbidden;
     }
 
     let frame_id = frame.id;
@@ -289,22 +293,105 @@ fn register_new_frame(
 ///
 /// Caches both `_G[name]` (for named frames) and `_G["__frame_{id}"]` (always)
 /// so that `lua_global_ref` lookups work for template application and mixin code.
+///
+/// For forbidden frames, a proxy table with `getmetatable() == "Forbidden"` is
+/// stored under the global name, while the internal `__frame_{id}` key always
+/// holds the raw LightUserData so template application can reach the frame.
 fn create_frame_userdata(
     lua: &Lua,
-    _state: &Rc<RefCell<SimState>>,
     frame_id: u64,
     name: Option<&str>,
+    is_forbidden: bool,
 ) -> Result<Value> {
     let lud = frame_lud(frame_id);
-
     let globals = lua.globals();
+
     if let Some(n) = name {
-        crate::lua_api::secure_env::set_in_both_envs(lua, n, lud.clone())?;
+        if is_forbidden {
+            let proxy = create_forbidden_proxy(lua, lud.clone())?;
+            crate::lua_api::secure_env::set_in_both_envs(lua, n, proxy)?;
+        } else {
+            crate::lua_api::secure_env::set_in_both_envs(lua, n, lud.clone())?;
+        }
     }
     let frame_key = format!("__frame_{}", frame_id);
     globals.raw_set(frame_key.as_str(), lud.clone())?;
 
     Ok(lud)
+}
+
+/// Opaque wrapper for a frame ID stored as full UserData in forbidden proxies.
+///
+/// `type(ForbiddenRawRef {...})` returns `"userdata"` (not `"table"`) because the
+/// `type()` override in system_api.rs only maps LightUserData → "table".
+struct ForbiddenRawRef {
+    #[allow(dead_code)]
+    frame_id: u64,
+}
+
+impl mlua::UserData for ForbiddenRawRef {}
+
+/// Create a forbidden proxy table for a frame.
+///
+/// The proxy table has:
+/// - `proxy[0]` = full UserData wrapping the frame ID (type() returns "userdata")
+/// - metatable with `__metatable = "Forbidden"` so `getmetatable(proxy)` returns `"Forbidden"`
+/// - `__index` that looks up the method on `__frame_methods_table` and wraps it so
+///   the first argument (proxy table) is replaced with the LightUserData before dispatch
+fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
+    let proxy = lua.create_table()?;
+    // Store a full UserData at key 0 so type(proxy[0]) == "userdata" (not "table")
+    let raw_ref = lua.create_userdata(ForbiddenRawRef {
+        frame_id: match &lud {
+            Value::LightUserData(l) => l.0 as u64,
+            _ => 0,
+        },
+    })?;
+    proxy.raw_set(0, raw_ref)?;
+
+    let mt = lua.create_table()?;
+    mt.raw_set("__metatable", "Forbidden")?;
+
+    let methods_table: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
+    let lud_for_index = lud.clone();
+    let index_fn = lua.create_function(move |lua, (_this, key): (mlua::Table, mlua::Value)| {
+        // Fast path: method in __frame_methods_table
+        let method: Value = methods_table.raw_get(key.clone())?;
+        if let Value::Function(f) = method {
+            let lud_inner = lud_for_index.clone();
+            let wrapper = lua.create_function(move |_, mut args: mlua::MultiValue| {
+                // Replace first arg (proxy table) with LightUserData
+                if !args.is_empty() {
+                    args[0] = lud_inner.clone();
+                }
+                f.call::<mlua::MultiValue>(args)
+            })?;
+            return Ok(Value::Function(wrapper));
+        }
+
+        // Fall through to normal frame __index via type metatable:
+        // handles script handlers (__frame_fields), child frame keys, custom fields.
+        let index_helper: mlua::Function = lua.named_registry_value("__frame_index_helper")?;
+        let result: Value = index_helper.call((lud_for_index.clone(), key))?;
+
+        // If the result is a function, wrap it to replace self with LightUserData.
+        if let Value::Function(f) = result {
+            let lud_inner = lud_for_index.clone();
+            let wrapper = lua.create_function(move |_, mut args: mlua::MultiValue| {
+                if !args.is_empty() {
+                    args[0] = lud_inner.clone();
+                }
+                f.call::<mlua::MultiValue>(args)
+            })?;
+            return Ok(Value::Function(wrapper));
+        }
+
+        Ok(result)
+    })?;
+    mt.raw_set("__index", index_fn)?;
+
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
 }
 
 /// Register button's default texture children as globals.

@@ -2,10 +2,12 @@
 
 mod anchor;
 mod frame;
+mod frame_enums;
 mod registry;
 
 pub use anchor::{Anchor, AnchorPoint};
-pub use frame::{AttributeValue, Backdrop, Color, DrawLayer, Frame, FrameStrata, LineAnchor, TextJustify, TextOutline};
+pub use frame::{AttributeValue, Backdrop, Color, Frame, LineAnchor, TextJustify, TextOutline};
+pub use frame_enums::{DrawLayer, FrameStrata};
 pub use crate::atlas::NineSliceAtlasInfo;
 pub use registry::WidgetRegistry;
 
@@ -71,6 +73,8 @@ impl WidgetType {
             "minimap" => Some(Self::Minimap),
             // EventFrame is a Frame subtype for event-only handling
             "eventframe" => Some(Self::Frame),
+            // Checkout is a special frame type for the in-game shop
+            "checkout" => Some(Self::Frame),
             // WorldFrame is internal only — CreateFrame("WorldFrame") should error
             _ => None,
         }

@@ -221,6 +221,9 @@ pub struct SimState {
     /// Index of the addon currently being loaded (into `addons` vec).
     /// Set by the loader, read by CreateFrame to assign `owner_addon`.
     pub loading_addon_index: Option<u16>,
+    /// Whether we are currently loading inside a ScopedModifier with forbidden="true".
+    /// Set by the XML loader, read by CreateFrame to mark new frames as forbidden.
+    pub loading_forbidden: bool,
     /// Application-level frame metrics (total frame time for profiler ratios).
     pub app_frame_metrics: AppFrameMetrics,
     /// Talent tree interactive state (ranks, selections, currency mappings).
@@ -258,56 +261,42 @@ impl Default for SimState {
 
 impl SimState {
     fn new_empty() -> Self {
+        let (player_health, player_health_max, player_class_index, active_spec_index) =
+            Self::default_player_stats();
         Self {
             widgets: WidgetRegistry::default(),
             events: EventQueue::default(),
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
-            console_output: Vec::new(),
-            timers: VecDeque::new(),
-            focused_frame_id: None,
-            addons: Vec::new(),
-            tooltips: HashMap::new(),
-            simple_htmls: HashMap::new(),
-            message_frames: HashMap::new(),
-            on_update_frames: HashSet::new(),
-            visible_on_update_cache: None,
-            strata_buckets: None,
-            pending_hit_grid_changes: Vec::new(),
-            animation_groups: HashMap::new(),
-            next_anim_group_id: 1,
-            screen_width: 1600.0,
-            screen_height: 1200.0,
-            action_bars: HashMap::new(),
-            addon_base_paths: Vec::new(),
-            mouse_position: None,
-            hovered_frame: None,
-            party_members: Vec::new(),
-            current_target: None, current_focus: None,
-            sound_manager: None,
+            console_output: Vec::new(), timers: VecDeque::new(),
+            addons: Vec::new(), lua_errors: Vec::new(),
+            tooltips: HashMap::new(), simple_htmls: HashMap::new(),
+            message_frames: HashMap::new(), animation_groups: HashMap::new(),
+            on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
+            action_bars: HashMap::new(), addon_base_paths: Vec::new(),
+            spell_cooldowns: HashMap::new(), action_ui_buttons: Vec::new(),
+            focused_frame_id: None, visible_on_update_cache: None,
+            strata_buckets: None, mouse_position: None, hovered_frame: None,
+            current_target: None, current_focus: None, sound_manager: None,
+            casting: None, gcd: None, cursor_item: None,
+            loading_addon_index: None, pending_spec_change: None,
+            party_members: Vec::new(), player_buffs: Vec::new(),
             player_name: String::new(),
-            player_health: 100_000,
-            player_health_max: 100_000,
-            player_class_index: 2,  // Paladin
-            player_race_index: 0,
-            rot_damage_level: 0,
-            player_buffs: Vec::new(),
-            fps: 0.0,
+            player_health, player_health_max, player_class_index, active_spec_index,
+            player_race_index: 0, rot_damage_level: 0,
+            next_anim_group_id: 1, next_cast_id: 1,
+            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
+            loading_forbidden: false,
             start_time: Instant::now(),
-            casting: None,
-            next_cast_id: 1,
-            gcd: None,
-            spell_cooldowns: HashMap::new(),
-            action_ui_buttons: Vec::new(),
-            cursor_item: None,
-            loading_addon_index: None,
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
-            lua_errors: Vec::new(),
-            active_spec_index: 2,  // Protection
-            pending_spec_change: None,
             movement: MovementState::default(),
         }
+    }
+
+    /// Return default player stats: (health, health_max, class_index, spec_index).
+    fn default_player_stats() -> (i32, i32, i32, i32) {
+        (100_000, 100_000, 2, 2)  // Paladin, Protection spec
     }
 }
 

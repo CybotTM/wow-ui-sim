@@ -2,6 +2,9 @@
 
 use std::collections::HashMap;
 
+mod valid_events_a;
+mod valid_events_b;
+mod valid_events_c;
 pub mod valid_events;
 pub use valid_events::is_valid_event;
 
