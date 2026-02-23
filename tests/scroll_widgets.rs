@@ -669,3 +669,71 @@ fn test_minimal_scrollbar_rust_children_keys() {
     );
 }
 
+// ============================================================================
+// Unnamed frame tests (nil name in CreateFrame)
+// ============================================================================
+
+#[test]
+fn test_unnamed_scrollbox_creates_child_frames() {
+    let env = env_with_shared_xml();
+
+    // Create an unnamed ScrollBox (nil name) — this is the path that fails at startup
+    let has_shadows: bool = env
+        .eval(
+            r#"
+        local sb = CreateFrame("Frame", nil, UIParent, "WowScrollBoxList")
+        sb:SetSize(300, 400)
+        sb:SetPoint("CENTER")
+        return sb.Shadows ~= nil
+    "#,
+        )
+        .unwrap();
+    assert!(
+        has_shadows,
+        "Unnamed WowScrollBoxList should have Shadows child from template"
+    );
+}
+
+/// MinimalScrollBar's Track child should have Thumb child set via parentKey.
+/// This is the actual failure: ScrollBar.lua:30 errors because Track.Thumb is nil.
+#[test]
+fn test_minimal_scrollbar_track_has_thumb() {
+    let env = env_with_shared_xml();
+
+    let result: String = env
+        .eval(
+            r#"
+        local sb = CreateFrame("EventFrame", nil, UIParent, "MinimalScrollBar")
+        local track = sb.Track
+        local thumb = track and track.Thumb or nil
+        return tostring(track ~= nil) .. "," .. tostring(thumb ~= nil)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "true,true",
+        "MinimalScrollBar Track should have Thumb child"
+    );
+}
+
+/// ScrollFrame_OnLoad dynamically creates a MinimalScrollBar.
+/// Verify the full chain works as it does during startup.
+#[test]
+fn test_scrollframe_template_creates_scrollbar_with_thumb() {
+    let env = env_with_shared_xml();
+
+    let result: String = env
+        .eval(
+            r#"
+        local sf = CreateFrame("ScrollFrame", nil, UIParent, "ScrollFrameTemplate")
+        local bar = sf.ScrollBar
+        if not bar then return "no_scrollbar" end
+        local track = bar.Track
+        if not track then return "no_track" end
+        local thumb = track.Thumb
+        return tostring(thumb ~= nil)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(result, "true", "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist");
+}
