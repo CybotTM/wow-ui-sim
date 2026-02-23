@@ -328,8 +328,16 @@ fn pull_base_deps(
 /// Foundational addons that form the base UI layer.
 /// In WoW these are loaded before all other addons as part of FrameXML.
 /// They have circular declared dependencies, so we load them in this fixed order.
+///
+/// Blizzard_Colors and Blizzard_ObjectAPI are placed before Blizzard_SharedXML
+/// because Blizzard_FrameXML (via EventToastManager.lua) uses ItemMixin at file
+/// scope, which is defined in Blizzard_ObjectAPI. Blizzard_ObjectAPI depends only
+/// on Blizzard_Colors, which depends only on Blizzard_SharedXMLBase — both are
+/// safe to load early.
 const BASE_UI_ADDONS: &[&str] = &[
     "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_ObjectAPI",
     "Blizzard_SharedXML",
     "Blizzard_SharedXMLGame",
     "Blizzard_FrameXML",
