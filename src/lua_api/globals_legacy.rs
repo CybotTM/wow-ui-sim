@@ -10,6 +10,7 @@ use super::globals::c_item_api::register_c_item_api;
 use super::globals::c_map_api::register_c_map_api;
 use super::globals::c_misc_api::register_c_misc_api;
 use super::globals::c_editmode_api::register_c_editmode_api;
+use super::globals::c_event_utils_api::register_c_event_utils_api;
 use super::globals::c_stubs_api::register_c_stubs_api;
 use super::globals::c_quest_api::register_c_quest_api;
 use super::globals::c_system_api::register_c_system_api;
@@ -453,6 +454,7 @@ fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_c_system_api(lua)?;
     register_c_stubs_api(lua, Rc::clone(state))?;
     register_c_editmode_api(lua)?;
+    register_c_event_utils_api(lua)?;
     register_mixin_api(lua)?;
     register_utility_api(lua)?;
     register_settings_api(lua)?;

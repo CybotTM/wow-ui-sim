@@ -30,6 +30,7 @@ pub mod aura_api;
 pub mod c_collection_api;
 pub mod c_container_api;
 pub mod c_editmode_api;
+pub mod c_event_utils_api;
 pub mod constants_api;
 pub mod c_item_api;
 pub mod c_stubs_api;

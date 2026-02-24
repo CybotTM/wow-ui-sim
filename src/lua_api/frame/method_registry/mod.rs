@@ -7,6 +7,7 @@ mod controls;
 mod edit;
 mod frame;
 mod leaf;
+mod minimap;
 mod misc;
 mod model;
 mod scroll;
@@ -16,6 +17,7 @@ use controls::{COOLDOWN_METHODS, SLIDER_METHODS, STATUSBAR_METHODS};
 use edit::EDITBOX_METHODS;
 use frame::{BUTTON_METHODS, CHECKBUTTON_METHODS, FRAME_METHODS};
 use leaf::{FONTSTRING_METHODS, TEXTURE_METHODS};
+use minimap::MINIMAP_METHODS;
 use misc::{MESSAGEFRAME_METHODS, SIMPLEHTML_METHODS};
 use model::{MODEL_METHODS, PLAYERMODEL_METHODS};
 use scroll::SCROLLFRAME_METHODS;
@@ -58,7 +60,7 @@ fn methods_for_type(widget_type: WidgetType) -> &'static [&'static str] {
         WidgetType::MessageFrame => MESSAGEFRAME_METHODS,
         WidgetType::GameTooltip => GAMETOOLTIP_METHODS,
         WidgetType::ColorSelect => COLORSELECT_METHODS,
-        WidgetType::Minimap => FRAME_METHODS,
+        WidgetType::Minimap => MINIMAP_METHODS,
     }
 }
 
@@ -82,6 +84,7 @@ static ALL_KNOWN_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
         MESSAGEFRAME_METHODS,
         GAMETOOLTIP_METHODS,
         COLORSELECT_METHODS,
+        MINIMAP_METHODS,
     ] {
         for &m in list {
             set.insert(m);

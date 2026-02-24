@@ -1,6 +1,7 @@
 //! Core C_* namespace API stubs.
 //!
 //! Contains C_ namespaces for game systems:
+//! - C_DateAndTime - Calendar time arithmetic (AdjustTimeByDays, AdjustTimeByMinutes, CompareCalendarTime)
 //! - C_ScenarioInfo, C_TooltipInfo, C_TradeSkillUI
 //! - C_MythicPlus, C_LFGInfo, C_NamePlate, C_PlayerInfo
 //! - C_PartyInfo, C_ChatInfo, C_EventUtils, C_AzeriteEssence
@@ -11,6 +12,7 @@
 use mlua::{Lua, Result, Value};
 
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
+    register_c_date_and_time(lua)?;
     register_c_scenario_info(lua)?;
     register_c_tooltip_info(lua)?;
     register_c_trade_skill(lua)?;
@@ -32,6 +34,119 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_currency_info(lua)?;
     register_c_neighborhood_initiative(lua)?;
     Ok(())
+}
+
+fn register_c_date_and_time(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    let t: mlua::Table = g.get::<mlua::Table>("C_DateAndTime")
+        .unwrap_or_else(|_| lua.create_table().unwrap());
+
+    t.set("AdjustTimeByDays", lua.create_function(|lua, (date, days): (mlua::Table, i64)| {
+        let epoch_days = calendar_time_to_epoch_days(&date)?;
+        let new_days = epoch_days + days;
+        epoch_days_to_calendar_time_table(lua, new_days, &date)
+    })?)?;
+
+    t.set("AdjustTimeByMinutes", lua.create_function(|lua, (date, minutes): (mlua::Table, i64)| {
+        let epoch_days = calendar_time_to_epoch_days(&date)?;
+        let hour: i64 = date.get::<i64>("hour").unwrap_or(0);
+        let minute: i64 = date.get::<i64>("minute").unwrap_or(0);
+        let total_minutes = epoch_days * 1440 + hour * 60 + minute + minutes;
+        let new_days = total_minutes.div_euclid(1440);
+        let rem = total_minutes.rem_euclid(1440);
+        let new_hour = rem / 60;
+        let new_minute = rem % 60;
+        let result = epoch_days_to_calendar_time_table(lua, new_days, &date)?;
+        if let Value::Table(ref t) = result {
+            t.set("hour", new_hour)?;
+            t.set("minute", new_minute)?;
+        }
+        Ok(result)
+    })?)?;
+
+    t.set("CompareCalendarTime", lua.create_function(|_, (lhs, rhs): (mlua::Table, mlua::Table)| {
+        let lhs_mins = calendar_time_to_total_minutes(&lhs)?;
+        let rhs_mins = calendar_time_to_total_minutes(&rhs)?;
+        // WoW docs: returns -1 if rhs < lhs, 0 if equal, 1 if rhs > lhs
+        Ok(match lhs_mins.cmp(&rhs_mins) {
+            std::cmp::Ordering::Less => 1i64,
+            std::cmp::Ordering::Equal => 0i64,
+            std::cmp::Ordering::Greater => -1i64,
+        })
+    })?)?;
+
+    g.set("C_DateAndTime", t)?;
+    Ok(())
+}
+
+/// Convert a CalendarTime table to days since the Unix epoch (1970-01-01).
+/// Uses Howard Hinnant's civil calendar algorithm.
+fn calendar_time_to_epoch_days(date: &mlua::Table) -> mlua::Result<i64> {
+    let y: i64 = date.get::<i64>("year")?;
+    let m: i64 = date.get::<i64>("month")?;
+    let d: i64 = date.get::<i64>("monthDay")?;
+    Ok(ymd_to_epoch_days(y, m, d))
+}
+
+/// Convert year/month/day to days since 1970-01-01.
+/// Algorithm: https://howardhinnant.github.io/date_algorithms.html
+fn ymd_to_epoch_days(y: i64, m: i64, d: i64) -> i64 {
+    let (y, m) = if m <= 2 { (y - 1, m + 9) } else { (y, m - 3) };
+    let era = if y >= 0 { y } else { y - 399 } / 400;
+    let yoe = y - era * 400;
+    let doy = (153 * m + 2) / 5 + d - 1;
+    let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+    era * 146097 + doe - 719468
+}
+
+/// Convert days since 1970-01-01 back to (year, month, day).
+/// Algorithm: https://howardhinnant.github.io/date_algorithms.html
+fn epoch_days_to_ymd(z: i64) -> (i64, i64, i64) {
+    let z = z + 719468;
+    let era = if z >= 0 { z } else { z - 146096 } / 146097;
+    let doe = z - era * 146097;
+    let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
+    let y = yoe + era * 400;
+    let doy = doe - (365 * yoe + yoe / 4 - yoe / 100);
+    let mp = (5 * doy + 2) / 153;
+    let d = doy - (153 * mp + 2) / 5 + 1;
+    let m = if mp < 10 { mp + 3 } else { mp - 9 };
+    let y = if m <= 2 { y + 1 } else { y };
+    (y, m, d)
+}
+
+fn days_to_wow_weekday(days: i64) -> i64 {
+    // Verified: (days + 4).rem_euclid(7) + 1 gives WoW weekday (1=Sun..7=Sat)
+    (days + 4).rem_euclid(7) + 1
+}
+
+fn epoch_days_to_calendar_time_table(lua: &mlua::Lua, days: i64, source: &mlua::Table) -> mlua::Result<Value> {
+    let (y, m, d) = epoch_days_to_ymd(days);
+    let weekday = days_to_wow_weekday(days);
+    let result = lua.create_table()?;
+    result.set("year", y)?;
+    result.set("month", m)?;
+    result.set("monthDay", d)?;
+    result.set("weekday", weekday)?;
+    // Preserve hour/minute from source (AdjustTimeByDays does not change them)
+    let hour: i64 = source.get::<i64>("hour").unwrap_or(0);
+    let minute: i64 = source.get::<i64>("minute").unwrap_or(0);
+    result.set("hour", hour)?;
+    result.set("minute", minute)?;
+    // Preserve optional "day" field (present only for non-Standard gametype)
+    match source.get::<Value>("day")? {
+        Value::Nil => {}
+        v => result.set("day", v)?,
+    }
+    Ok(Value::Table(result))
+}
+
+/// Convert CalendarTime to total minutes since the Unix epoch for ordering.
+fn calendar_time_to_total_minutes(date: &mlua::Table) -> mlua::Result<i64> {
+    let epoch_days = calendar_time_to_epoch_days(date)?;
+    let hour: i64 = date.get::<i64>("hour").unwrap_or(0);
+    let minute: i64 = date.get::<i64>("minute").unwrap_or(0);
+    Ok(epoch_days * 1440 + hour * 60 + minute)
 }
 
 fn register_c_scenario_info(lua: &Lua) -> Result<()> {
