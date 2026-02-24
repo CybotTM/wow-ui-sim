@@ -22,9 +22,10 @@ fn register_pcall(lua: &Lua) -> Result<()> {
         let result = orig_pcall.call::<MultiValue>(args)?;
         let mut result_vec: Vec<Value> = result.into_iter().collect();
         if let Some(Value::Boolean(false)) = result_vec.first() {
-            // Convert error value to string and strip traceback
-            if let Some(err_val) = result_vec.get(1) {
-                let msg = coerce_to_string(lua, &tostring, err_val)?;
+            // Nil error objects pass through unchanged (error() with no args).
+            // All other error values are converted to string and traceback-stripped.
+            if result_vec.len() > 1 && !matches!(result_vec[1], Value::Nil) {
+                let msg = error_to_string(lua, &tostring, &result_vec[1])?;
                 let clean = strip_traceback(&msg);
                 result_vec[1] = Value::String(lua.create_string(clean)?);
             }
@@ -35,8 +36,8 @@ fn register_pcall(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Convert any Lua value to a string via tostring().
-fn coerce_to_string(_lua: &Lua, tostring: &mlua::Function, val: &Value) -> Result<String> {
+/// Convert an error value to a string, handling both String and Error types.
+fn error_to_string(_lua: &Lua, tostring: &mlua::Function, val: &Value) -> Result<String> {
     match val {
         Value::String(s) => Ok(s.to_string_lossy().to_string()),
         _ => {
