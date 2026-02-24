@@ -20,6 +20,8 @@ pub fn register_c_event_utils_api(lua: &Lua) -> Result<()> {
         })?,
     )?;
 
+    t.set("CanPlayerUseEventScheduler", lua.create_function(|_, ()| Ok(false))?)?;
+
     lua.globals().set("C_EventUtils", t)?;
     Ok(())
 }

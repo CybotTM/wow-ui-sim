@@ -4,7 +4,7 @@
 //! - C_DateAndTime - Calendar time arithmetic (AdjustTimeByDays, AdjustTimeByMinutes, CompareCalendarTime)
 //! - C_ScenarioInfo, C_TooltipInfo, C_TradeSkillUI
 //! - C_MythicPlus, C_LFGInfo, C_NamePlate, C_PlayerInfo
-//! - C_PartyInfo, C_ChatInfo, C_EventUtils, C_AzeriteEssence
+//! - C_PartyInfo, C_ChatInfo, C_AzeriteEssence
 //! - C_PvP, C_FriendList, C_AuctionHouse, C_Bank
 //! - C_EncounterJournal, C_GMTicketInfo, C_UnitAuras, C_CurrencyInfo
 //! - C_NeighborhoodInitiative
@@ -22,7 +22,6 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_player_info(lua)?;
     register_c_party_info(lua)?;
     register_c_chat_info(lua)?;
-    register_c_event_utils(lua)?;
     register_c_azerite_essence(lua)?;
     register_c_pvp(lua)?;
     register_c_friend_list(lua)?;
@@ -389,20 +388,6 @@ fn register_c_chat_info(lua: &Lua) -> Result<()> {
     t.set("GetChannelShortcutForChannelID", lua.create_function(|_, _id: Value| Ok(Value::Nil))?)?;
     t.set("PerformEmote", lua.create_function(|_, (_emote, _target, _silent): (Value, Value, Value)| Ok(()))?)?;
     lua.globals().set("C_ChatInfo", t)?;
-    Ok(())
-}
-
-fn register_c_event_utils(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set("IsEventValid", lua.create_function(|_, event: String| {
-        if event.len() < 3 { return Ok(false); }
-        let chars: Vec<char> = event.chars().collect();
-        if !chars[0].is_ascii_uppercase() { return Ok(false); }
-        let has_underscore = event.contains('_');
-        let all_valid = chars.iter().all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || *c == '_');
-        Ok(has_underscore && all_valid)
-    })?)?;
-    lua.globals().set("C_EventUtils", t)?;
     Ok(())
 }
 

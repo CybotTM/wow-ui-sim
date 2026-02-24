@@ -523,12 +523,6 @@ fn register_ui_object_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     wow_style1.set("OnLoad", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
     globals.set("WowStyle1DropdownMixin", wow_style1)?;
 
-    // C_EventUtils - event scheduling and validation
-    let c_event_utils = lua.create_table()?;
-    c_event_utils.set("CanPlayerUseEventScheduler", lua.create_function(|_, ()| Ok(false))?)?;
-    c_event_utils.set("IsEventValid", lua.create_function(|_, _event: String| Ok(true))?)?;
-    globals.set("C_EventUtils", c_event_utils)?;
-
     // AnimateMouse global table (used by TutorialFrame)
     let animate_mouse = lua.create_table()?;
     animate_mouse.set("Start", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
