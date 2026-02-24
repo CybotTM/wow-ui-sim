@@ -54,7 +54,8 @@ fn print_failures(env: &WowLuaEnv) {
             local pad = string.rep("  ", indent)
             local pad1 = string.rep("  ", indent + 1)
             if type(v) == "string" then
-                return string.format("%q", v)
+                local s = v:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t')
+                return '"' .. s .. '"'
             elseif type(v) == "number" or type(v) == "boolean" then
                 return tostring(v)
             elseif type(v) == "table" then

@@ -142,7 +142,16 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("SpellIsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     g.set("GetExpansionDisplayInfo", lua.create_function(|_, _expansion_level: Value| Ok(Value::Nil))?)?;
     g.set("AddSourceLocationExclude", lua.create_function(|_, _location: Value| Ok(()))?)?;
-    g.set("RegisterEventCallback", lua.create_function(|_, (_event, _callback): (Value, Value)| Ok(()))?)?;
+    g.set("RegisterEventCallback", lua.create_function(|_, (event, _callback): (String, Value)| {
+        use crate::event::{is_callback_event, is_restricted_event};
+        if !is_callback_event(&event) {
+            return Err(mlua::Error::RuntimeError(format!(
+                "RegisterEventCallback Attempt to register unknown event \"{}\"",
+                event
+            )));
+        }
+        Ok(!is_restricted_event(&event))
+    })?)?;
     g.set("UnitIsHumanPlayer", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
     Ok(())
 }

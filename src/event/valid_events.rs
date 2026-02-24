@@ -28,3 +28,30 @@ pub fn is_valid_event(name: &str) -> bool {
     };
     chunk.binary_search(&name).is_ok()
 }
+
+/// Restricted events cannot be registered by addons (returns false as second value).
+const RESTRICTED_EVENTS: &[&str] = &[
+    "COMBAT_LOG_APPLY_FILTER_SETTINGS",
+    "COMBAT_LOG_EVENT",
+    "COMBAT_LOG_EVENT_UNFILTERED",
+    "COMBAT_LOG_REFILTER_ENTRIES",
+    "TUTORIAL_COMBAT_EVENT",
+];
+
+pub fn is_restricted_event(name: &str) -> bool {
+    RESTRICTED_EVENTS.binary_search(&name).is_ok()
+}
+
+/// Events that support RegisterEventCallback (only 6 in the client).
+const CALLBACK_EVENTS: &[&str] = &[
+    "COMBAT_LOG_APPLY_FILTER_SETTINGS",
+    "COMBAT_LOG_EVENT",
+    "COMBAT_LOG_EVENT_UNFILTERED",
+    "COMBAT_LOG_REFILTER_ENTRIES",
+    "ENCOUNTER_STATE_CHANGED",
+    "TOOLTIP_SHOW_ITEM_COMPARISON",
+];
+
+pub fn is_callback_event(name: &str) -> bool {
+    CALLBACK_EVENTS.binary_search(&name).is_ok()
+}
