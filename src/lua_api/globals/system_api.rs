@@ -303,12 +303,24 @@ fn register_c_widget(lua: &Lua) -> Result<mlua::Table> {
 }
 
 /// Register `GetTime()` - returns seconds since UI load.
+/// Also registers `debugprofilestop()` (ms since start) and `debugprofilestart()` (no-op).
+/// These are registered here before generated stubs run; the stubs check `is_nil()` first,
+/// so they won't overwrite these real implementations.
 fn register_time_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
     let get_time = lua.create_function(move |_, ()| {
         Ok(st.borrow().start_time.elapsed().as_secs_f64())
     })?;
     lua.globals().set("GetTime", get_time)?;
+
+    let st = Rc::clone(state);
+    lua.globals().set("debugprofilestop", lua.create_function(move |_, ()| {
+        Ok(st.borrow().start_time.elapsed().as_secs_f64() * 1000.0)
+    })?)?;
+    lua.globals().set("debugprofilestart", lua.create_function(|_, ()| {
+        Ok(())
+    })?)?;
+
     Ok(())
 }
 

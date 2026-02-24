@@ -94,6 +94,13 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>) {
         }
     }
 
+    // Override debugprofilestop to return 0 so the Wowless test runner never
+    // yields between OnUpdate ticks. All sync tests run in a single tick.
+    // The real debugprofilestop (registered in system_api.rs) returns wall-clock
+    // ms which causes Wowless to yield every ~8ms — fine for interactive use
+    // but too slow for headless testing (70K tests need thousands of ticks).
+    let _ = env.exec("debugprofilestop = function() return 0 end");
+
     let completed = poll_until_done(env, max_ticks);
     flush_console(env);
 
