@@ -142,12 +142,25 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("SpellIsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     g.set("GetExpansionDisplayInfo", lua.create_function(|_, _expansion_level: Value| Ok(Value::Nil))?)?;
     g.set("AddSourceLocationExclude", lua.create_function(|_, _location: Value| Ok(()))?)?;
-    g.set("RegisterEventCallback", lua.create_function(|_, (event, _callback): (String, Value)| {
+    g.set("RegisterEventCallback", lua.create_function(|lua, (event, _callback): (String, Value)| {
         use crate::event::{is_callback_event, is_restricted_event};
         if !is_callback_event(&event) {
+            // Get taint info (calling addon name) from the stack
+            let taint: Option<String> = lua.load(r#"
+                for level = 2, 30 do
+                    local info = debug.getinfo(level, "S")
+                    if not info then break end
+                    if info.source then
+                        local addon = info.source:match("AddOns/([^/]+)")
+                        if addon then return addon end
+                    end
+                end
+                return debug.getstacktaint()
+            "#).eval().ok().flatten();
+            let taint_suffix = taint.map(|t| format!("\nLua Taint: {t}")).unwrap_or_default();
             return Err(mlua::Error::RuntimeError(format!(
-                "RegisterEventCallback Attempt to register unknown event \"{}\"",
-                event
+                "RegisterEventCallback Attempt to register unknown event \"{}\"{}",
+                event, taint_suffix
             )));
         }
         Ok(!is_restricted_event(&event))

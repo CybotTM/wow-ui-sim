@@ -1,6 +1,6 @@
 //! Event registration methods: RegisterEvent, UnregisterEvent, etc.
 
-use crate::event::{is_restricted_event, is_valid_event};
+use crate::event::{is_callback_event, is_restricted_event, is_valid_event};
 use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, Value};
 
@@ -192,10 +192,15 @@ fn add_event_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
     })?)?;
 
     // RegisterEventCallback(event, callbackContainer) - callback-based event registration
-    // Returns !restricted for callback events. Non-callback events should error in real WoW
-    // but Blizzard code (Minimap) relies on script error handling, so we stay permissive.
+    // Only callback events are accepted; non-callback events produce an error.
     methods.set("RegisterEventCallback", lua.create_function(
         |_lua, (_ud, event, _cb): (LightUserData, String, Value)| {
+            if !is_callback_event(&event) {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
+                    event
+                )));
+            }
             Ok(!is_restricted_event(&event))
         },
     )?)?;
