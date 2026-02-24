@@ -35,8 +35,8 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
         let widget_type = match WidgetType::from_str(&cfa.frame_type) {
             Some(wt) => wt,
-            None => return Err(mlua::Error::RuntimeError(
-                format!("Unknown frame type: {}", cfa.frame_type),
+            None => return Err(crate::lua_api::script_helpers::lua_error_val(
+                format!("CreateFrame: Unknown frame type '{}'", cfa.frame_type),
             )),
         };
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
@@ -155,11 +155,16 @@ fn parse_create_frame_args(
         (None, false, None)
     } else {
         let parent_arg = args_iter.next();
+        // WoW errors if parent is a string (name lookup not supported).
+        if matches!(parent_arg, Some(Value::String(_))) {
+            return Err(crate::lua_api::script_helpers::lua_error_val(
+                "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])"
+            ));
+        }
         let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
         let parent_explicit = explicit_parent.is_some();
-        let parent_id = explicit_parent
-            .or_else(|| state.borrow().widgets.get_id_by_name("UIParent"));
-        (parent_id, parent_explicit, explicit_parent)
+        // WoW does NOT default to UIParent — nil/missing parent means no parent.
+        (explicit_parent, parent_explicit, explicit_parent)
     };
 
     let template: Option<String> = args_iter

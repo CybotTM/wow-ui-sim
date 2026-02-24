@@ -96,8 +96,8 @@ fn add_register_event_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
         if newly_registered {
             lua_register_individual(lua, ud, &event)?;
         }
-        // WoW returns whether the event is unrestricted, not whether it was newly registered.
-        Ok(!is_restricted_event(&event))
+        // WoW returns true only if newly registered AND the event is unrestricted.
+        Ok(newly_registered && !is_restricted_event(&event))
     })?)?;
 
     // Some addons pass a callback function as the last argument (non-standard)

@@ -248,189 +248,21 @@ fn register_custom_setmetatable(lua: &Lua) -> Result<()> {
 
 /// Build a fake metatable for frame LightUserData with `__index` from the methods table.
 fn build_frame_metatable(lua: &Lua) -> Result<Value> {
+    use crate::lua_api::frame::method_registry;
     let mt = lua.create_table()?;
-    let methods_table: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
+    let all_methods: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
     let index_table = lua.create_table()?;
-    populate_method_index(&methods_table, &index_table)?;
+    // Include all methods from all widget types (union).
+    for pair in all_methods.pairs::<String, Value>() {
+        let (name, func) = pair?;
+        // Only include methods from discovery data — skip Mixin/sim methods.
+        if method_registry::is_known_method(&name) {
+            index_table.set(name, func)?;
+        }
+    }
     mt.set("__index", index_table)?;
     Ok(Value::Table(mt))
 }
-
-/// Populate an index table with all frame method names from the categorized lists.
-fn populate_method_index(methods_table: &mlua::Table, index_table: &mlua::Table) -> Result<()> {
-    for methods in ALL_METHOD_GROUPS {
-        for &name in *methods {
-            let method: Value = methods_table.raw_get(name)?;
-            if method != Value::Nil {
-                index_table.set(name, method)?;
-            }
-        }
-    }
-    Ok(())
-}
-
-/// All method name groups, organized by widget type.
-const ALL_METHOD_GROUPS: &[&[&str]] = &[
-    FRAME_BASE_METHODS, TEXTURE_METHODS, BUTTON_METHODS,
-    EDITBOX_METHODS, SLIDER_METHODS, SCROLLFRAME_METHODS,
-    STATUSBAR_METHODS, CHECKBUTTON_METHODS, MODEL_METHODS,
-    COLORSELECT_METHODS, COOLDOWN_METHODS, MESSAGEFRAME_METHODS,
-    GAMETOOLTIP_METHODS,
-];
-
-const FRAME_BASE_METHODS: &[&str] = &[
-    "GetName", "GetWidth", "GetHeight", "SetSize", "SetWidth", "SetHeight",
-    "SetPoint", "ClearAllPoints", "GetPoint", "GetNumPoints", "Show", "Hide",
-    "IsShown", "IsVisible", "SetShown", "SetAlpha", "GetAlpha", "SetScale",
-    "GetScale", "GetParent", "SetParent", "GetChildren", "GetRegions",
-    "GetFrameLevel", "SetFrameLevel", "GetFrameStrata", "SetFrameStrata",
-    "EnableMouse", "IsMouseEnabled", "EnableMouseWheel", "IsMouseWheelEnabled",
-    "SetMovable", "IsMovable", "SetResizable",
-    "IsResizable", "SetClampedToScreen", "IsClampedToScreen", "SetID", "GetID",
-    "GetObjectType", "IsObjectType", "GetDebugName", "SetScript", "GetScript",
-    "HookScript", "HasScript", "RegisterEvent", "UnregisterEvent",
-    "UnregisterAllEvents", "IsEventRegistered", "RegisterForDrag",
-    "RegisterUnitEvent", "SetAttribute", "GetAttribute", "ClearAttributes", "SetBackdrop",
-    "ApplyBackdrop", "SetBackdropColor", "SetBackdropBorderColor", "GetBackdrop",
-    "GetBackdropColor", "GetBackdropBorderColor", "CreateTexture",
-    "CreateMaskTexture", "CreateFontString", "CreateAnimationGroup",
-    "GetAnimationGroups", "GetNumRegions", "SetText", "GetText", "SetTitle", "GetTitle",
-    "SetTextColor", "GetTextColor", "SetFontObject", "GetFontObject", "SetFont",
-    "GetFont", "SetJustifyH", "GetJustifyH", "SetJustifyV", "GetJustifyV",
-    "SetWordWrap", "GetWordWrap", "CanChangeAttribute", "SetToplevel",
-    "IsToplevel", "Raise", "Lower", "GetEffectiveScale", "GetEffectiveAlpha",
-    "SetPropagateKeyboardInput", "GetPropagateKeyboardInput", "SetIgnoreParentScale",
-    "SetIgnoreParentAlpha", "SetFlattensRenderLayers", "GetFlattensRenderLayers",
-    "SetDrawLayerEnabled", "GetDrawLayerEnabled", "GetTop", "GetBottom",
-    "GetLeft", "GetRight", "GetCenter", "GetBounds", "GetRect", "GetSize",
-    "GetScaledRect", "SetClipsChildren", "DoesClipChildren",
-    "EnableKeyboard", "IsKeyboardEnabled",
-    "SetMouseClickEnabled", "IsMouseClickEnabled", "SetMouseMotionEnabled",
-    "IsMouseMotionEnabled", "SetPassThroughButtons", "GetPassThroughButtons",
-    "SetFixedFrameLevel", "HasFixedFrameLevel", "SetFixedFrameStrata",
-    "HasFixedFrameStrata", "SetUsingParentLevel", "IsUsingParentLevel",
-    "EnableGamePadButton", "IsGamePadButtonEnabled", "EnableGamePadStick",
-    "IsGamePadStickEnabled", "CanChangeProtectedState", "SetForbidden",
-    "IsForbidden", "SetUserPlaced", "IsUserPlaced", "SetResizeBounds",
-    "GetResizeBounds", "SetMinResize", "SetMaxResize",
-    "SetDontSavePosition", "GetDontSavePosition",
-    "SetWindow", "GetWindow", "SetHyperlinksEnabled", "GetHyperlinksEnabled",
-    "AdjustPointsOffset", "ClearPoint", "ClearPointsOffset",
-    "RegisterAllEvents", "IsRectValid", "IsObjectLoaded",
-    "IsMouseOver", "StopAnimating", "GetSourceLocation",
-    "Intersects", "SetAlphaFromBoolean", "EnableMouseMotion",
-    "ClearScripts", "IsDrawLayerEnabled",
-    "SetParentKey", "GetParentKey",
-];
-
-const TEXTURE_METHODS: &[&str] = &[
-    "SetTexture", "GetTexture", "SetTexCoord",
-    "GetTexCoord", "SetVertexColor", "GetVertexColor", "SetDesaturated",
-    "IsDesaturated", "SetBlendMode", "GetBlendMode", "SetRotation",
-    "GetRotation", "SetAtlas", "GetAtlas", "SetColorTexture", "SetGradient",
-    "SetAllPoints",
-    "SetSnapToPixelGrid", "IsSnappingToPixelGrid", "SetTexelSnappingBias",
-    "GetTexelSnappingBias", "ClearTextureSlice", "SetTextureSliceMode",
-    "GetTextureSliceMode", "SetTextureSliceMargins", "GetTextureSliceMargins",
-    "AddMaskTexture", "RemoveMaskTexture", "GetMaskTexture", "GetNumMaskTextures",
-    "SetDrawLayer", "GetDrawLayer", "SetVertexOffset", "GetVertexOffset",
-    "SetHorizTile", "GetHorizTile", "SetVertTile", "GetVertTile",
-    "SetNonBlocking", "GetNonBlocking", "SetBlockingLoadsRequested",
-    "IsBlockingLoadRequested", "GetNumRegionsByLayer", "GetRegionsByLayer",
-    "GetNumChildren", "PlaySoundFile", "ClearNineSlice",
-    "SetAutomaticFrameLevelEnabled", "IsAutomaticFrameLevelEnabled",
-    "SetVisuals",
-];
-
-const BUTTON_METHODS: &[&str] = &[
-    "Click", "SetNormalTexture", "GetNormalTexture", "SetPushedTexture",
-    "GetPushedTexture", "SetHighlightTexture", "GetHighlightTexture",
-    "SetDisabledTexture", "GetDisabledTexture", "SetNormalFontObject",
-    "GetNormalFontObject", "SetHighlightFontObject", "GetHighlightFontObject",
-    "SetDisabledFontObject", "GetDisabledFontObject", "SetPushedTextOffset",
-    "GetPushedTextOffset", "Enable", "Disable", "IsEnabled", "SetEnabled",
-    "SetButtonState", "GetButtonState", "LockHighlight", "UnlockHighlight",
-    "RegisterForClicks", "RegisterForMouse", "GetMotionScriptsWhileDisabled",
-    "SetMotionScriptsWhileDisabled", "GetFontString", "SetFontString",
-    "GetTextWidth", "GetTextHeight", "GetNumLines", "GetMaxLines",
-    "GetUnboundedStringWidth", "GetFontObjectForAlphabet",
-];
-
-const EDITBOX_METHODS: &[&str] = &[
-    "SetMaxLetters", "GetMaxLetters", "SetMaxBytes", "GetMaxBytes",
-    "SetNumber", "GetNumber", "SetMultiLine", "IsMultiLine",
-    "SetAutoFocus", "HasFocus", "SetFocus", "ClearFocus", "Insert",
-    "SetCursorPosition", "GetCursorPosition", "SetTextInsets",
-    "GetTextInsets", "SetHistoryLines", "GetHistoryLines", "AddHistoryLine",
-    "HighlightText", "GetHighlightedText", "SetBlinkSpeed",
-    "SetNumeric", "IsNumeric", "SetPassword", "IsPassword",
-    "SetCountInvisibleLetters", "IsCountInvisibleLetters",
-    "SetSecurityDisablePaste", "SetSecurityDisableSetText", "SetSecureText",
-    "SetVisibleTextByteLimit", "GetUTF8CursorPosition",
-];
-
-const SLIDER_METHODS: &[&str] = &[
-    "SetMinMaxValues", "GetMinMaxValues", "SetValue", "GetValue",
-    "SetValueStep", "GetValueStep", "SetStepsPerPage", "GetStepsPerPage",
-    "SetOrientation", "GetOrientation", "SetThumbTexture", "GetThumbTexture",
-    "SetObeyStepOnDrag", "GetObeyStepOnDrag",
-];
-
-const SCROLLFRAME_METHODS: &[&str] = &[
-    "SetScrollChild", "GetScrollChild", "SetHorizontalScroll",
-    "GetHorizontalScroll", "SetVerticalScroll", "GetVerticalScroll",
-    "GetHorizontalScrollRange", "GetVerticalScrollRange", "UpdateScrollChildRect",
-];
-
-const STATUSBAR_METHODS: &[&str] = &[
-    "SetStatusBarTexture", "GetStatusBarTexture", "SetStatusBarColor",
-    "GetStatusBarColor", "SetStatusBarDesaturated", "GetStatusBarDesaturated",
-    "SetStatusBarAtlas", "SetFillStyle", "GetFillStyle",
-    "SetReverseFill", "GetReverseFill", "SetRotatesTexture", "GetRotatesTexture",
-];
-
-const CHECKBUTTON_METHODS: &[&str] = &[
-    "SetChecked", "GetChecked", "GetCheckedTexture", "SetCheckedTexture",
-];
-
-const MODEL_METHODS: &[&str] = &[
-    "SetModel", "GetModel", "SetModelScale", "GetModelScale",
-    "SetPosition", "GetPosition", "SetFacing", "GetFacing",
-    "SetSequence", "GetSequence", "SetCamera", "GetCamera",
-    "ClearModel", "SetDisplayInfo", "SetCreature", "SetUnit",
-    "RefreshUnit", "RefreshCamera", "SetItem", "SetItemAppearance",
-    "SetKeepModelOnHide", "GetKeepModelOnHide", "SetLight",
-    "SetModelDrawLayer", "GetModelDrawLayer", "UseModelCenterToTransform",
-    "SetCamDistanceScale", "GetCamDistanceScale", "SetPortraitZoom",
-    "SetDesaturation", "SetSequenceTime", "SetAnimation",
-];
-
-const COLORSELECT_METHODS: &[&str] = &[
-    "SetColorRGB", "GetColorRGB", "SetColorHSV", "GetColorHSV",
-];
-
-const COOLDOWN_METHODS: &[&str] = &[
-    "SetCooldown", "Clear", "GetCooldownTimes", "SetCooldownDuration",
-    "GetCooldownDuration", "SetHideCountdownNumbers", "SetDrawSwipe",
-    "SetDrawBling", "SetDrawEdge", "SetSwipeColor", "SetSwipeTexture",
-    "SetBlingTexture", "SetEdgeTexture", "SetEdgeScale", "SetUseCircularEdge",
-    "SetReverse", "GetReverse",
-];
-
-const MESSAGEFRAME_METHODS: &[&str] = &[
-    "AddMessage", "AddMsg", "SetFading", "GetFading", "SetFadeDuration",
-    "GetFadeDuration", "SetFadePower", "GetFadePower", "SetTimeVisible",
-    "GetTimeVisible", "SetInsertMode", "GetInsertMode",
-];
-
-const GAMETOOLTIP_METHODS: &[&str] = &[
-    "SetOwner", "GetOwner", "AddLine", "AddDoubleLine", "SetPadding",
-    "GetPadding", "NumLines", "GetLine", "ClearLines", "SetMinimumWidth",
-    "SetAnchorType", "GetAnchorType", "SetHyperlink",
-    "SetSpellByID", "SetItemByID", "SetUnitBuff", "SetUnitDebuff",
-    "SetUnitAura", "SetAction", "SetBagItem", "SetInventoryItem",
-    "FadeOut", "AppendText",
-];
 
 /// Register `CreateFrame` from its dedicated sub-module.
 fn register_create_frame(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {

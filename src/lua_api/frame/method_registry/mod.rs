@@ -40,7 +40,7 @@ pub fn is_method_allowed(widget_type: WidgetType, method: &str) -> bool {
     list.binary_search(&method).is_ok()
 }
 
-fn methods_for_type(widget_type: WidgetType) -> &'static [&'static str] {
+pub fn methods_for_type(widget_type: WidgetType) -> &'static [&'static str] {
     match widget_type {
         WidgetType::Frame | WidgetType::WorldFrame => FRAME_METHODS,
         WidgetType::Line => TEXTURE_METHODS,
@@ -92,3 +92,8 @@ static ALL_KNOWN_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     }
     set
 });
+
+/// Check if a method is in ANY widget type's discovery data (i.e., not a Mixin/sim method).
+pub fn is_known_method(method: &str) -> bool {
+    ALL_KNOWN_METHODS.contains(method)
+}
