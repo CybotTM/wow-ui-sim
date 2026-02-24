@@ -6,7 +6,9 @@ mod valid_events_a;
 mod valid_events_b;
 mod valid_events_c;
 pub mod valid_events;
-pub use valid_events::{is_callback_event, is_restricted_event, is_valid_event};
+pub use valid_events::{
+    callback_events, is_callback_event, is_restricted_event, is_valid_event, restricted_events,
+};
 
 /// Common WoW events that addons typically use.
 pub mod events {

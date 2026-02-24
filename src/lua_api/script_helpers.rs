@@ -108,6 +108,35 @@ pub fn call_error_handler(lua: &Lua, error_msg: &str) {
     }
 }
 
+/// Get the calling addon name by walking the Lua stack from Rust.
+///
+/// Walks the stack looking for a source path containing "AddOns/<name>".
+/// Falls back to `debug.getstacktaint()` if no addon source is found.
+/// Uses mlua's `inspect_stack` (pure Rust) for speed — avoids compiling
+/// and running a Lua chunk on each call.
+pub fn get_stack_taint(lua: &Lua) -> Option<String> {
+    // Fast path: walk the stack from Rust
+    for level in 2..30usize {
+        let debug = match lua.inspect_stack(level) {
+            Some(d) => d,
+            None => break,
+        };
+        let src = debug.source();
+        if let Some(source_str) = src.source {
+            let s = source_str.as_ref();
+            if let Some(pos) = s.find("AddOns/") {
+                let rest = &s[pos + 7..];
+                if let Some(end) = rest.find('/') {
+                    return Some(rest[..end].to_string());
+                }
+            }
+        }
+    }
+    // Fallback to Elune's taint tracking
+    let fallback: mlua::Function = lua.named_registry_value("__get_stack_taint_fallback").ok()?;
+    fallback.call(()).ok()
+}
+
 /// Push an error message into SimState.lua_errors for later retrieval.
 pub fn collect_lua_error(lua: &Lua, msg: &str) {
     if let Some(state_rc) = lua.app_data_ref::<Rc<RefCell<SimState>>>() {

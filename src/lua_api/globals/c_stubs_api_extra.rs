@@ -142,29 +142,38 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("SpellIsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     g.set("GetExpansionDisplayInfo", lua.create_function(|_, _expansion_level: Value| Ok(Value::Nil))?)?;
     g.set("AddSourceLocationExclude", lua.create_function(|_, _location: Value| Ok(()))?)?;
-    g.set("RegisterEventCallback", lua.create_function(|lua, (event, _callback): (String, Value)| {
-        use crate::event::{is_callback_event, is_restricted_event};
-        if !is_callback_event(&event) {
-            // Get taint info (calling addon name) from the stack
-            let taint: Option<String> = lua.load(r#"
+    // Wrap in Lua to avoid mlua::Error::RuntimeError overhead (12000x slower than
+    // Lua error() due to Elune taint bookkeeping on Rust→Lua error boundary).
+    {
+        let callback_tbl = lua.create_table()?;
+        let restricted_tbl = lua.create_table()?;
+        for &e in crate::event::callback_events() { callback_tbl.set(e, true)?; }
+        for &e in crate::event::restricted_events() { restricted_tbl.set(e, true)?; }
+        lua.load(r#"
+            local callback_events, restricted_events = ...
+            local getinfo, getstacktaint = debug.getinfo, debug.getstacktaint
+            local match = string.match
+            local function get_taint()
                 for level = 2, 30 do
-                    local info = debug.getinfo(level, "S")
+                    local info = getinfo(level, "S")
                     if not info then break end
                     if info.source then
-                        local addon = info.source:match("AddOns/([^/]+)")
+                        local addon = match(info.source, "AddOns/([^/]+)")
                         if addon then return addon end
                     end
                 end
-                return debug.getstacktaint()
-            "#).eval().ok().flatten();
-            let taint_suffix = taint.map(|t| format!("\nLua Taint: {t}")).unwrap_or_default();
-            return Err(mlua::Error::RuntimeError(format!(
-                "RegisterEventCallback Attempt to register unknown event \"{}\"{}",
-                event, taint_suffix
-            )));
-        }
-        Ok(!is_restricted_event(&event))
-    })?)?;
+                return getstacktaint()
+            end
+            RegisterEventCallback = function(event, callback)
+                if not callback_events[event] then
+                    local taint = get_taint()
+                    local suffix = taint and ("\nLua Taint: " .. taint) or ""
+                    error("RegisterEventCallback Attempt to register unknown event \"" .. event .. "\"" .. suffix, 0)
+                end
+                return not restricted_events[event]
+            end
+        "#).call::<()>((callback_tbl, restricted_tbl))?;
+    }
     g.set("UnitIsHumanPlayer", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
     Ok(())
 }

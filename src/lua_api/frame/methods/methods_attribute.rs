@@ -97,25 +97,9 @@ fn validate_and_build_keys(lua: &Lua, args: &mlua::MultiValue) -> mlua::Result<V
     }
 }
 
-/// Get the calling addon's name by walking the call stack for an AddOns/ source path.
-/// Falls back to `debug.getstacktaint()` if no addon source is found.
+/// Get the calling addon name via Rust-side stack walking.
 fn get_stack_taint(lua: &Lua) -> Option<String> {
-    lua.load(
-        r#"
-        for level = 2, 30 do
-            local info = debug.getinfo(level, "S")
-            if not info then break end
-            if info.source then
-                local addon = info.source:match("AddOns/([^/]+)")
-                if addon then return addon end
-            end
-        end
-        return debug.getstacktaint()
-        "#,
-    )
-    .eval::<Option<String>>()
-    .ok()
-    .flatten()
+    crate::lua_api::script_helpers::get_stack_taint(lua)
 }
 
 /// Build the list of attribute keys to try, in WoW's fallback order.

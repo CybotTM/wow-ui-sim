@@ -55,3 +55,6 @@ const CALLBACK_EVENTS: &[&str] = &[
 pub fn is_callback_event(name: &str) -> bool {
     CALLBACK_EVENTS.binary_search(&name).is_ok()
 }
+
+pub fn callback_events() -> &'static [&'static str] { CALLBACK_EVENTS }
+pub fn restricted_events() -> &'static [&'static str] { RESTRICTED_EVENTS }

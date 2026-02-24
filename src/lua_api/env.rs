@@ -55,6 +55,12 @@ impl WowLuaEnv {
         let event_all = lua.create_table()?;
         lua.set_named_registry_value("__event_all", event_all)?;
 
+        // Pre-compiled taint fallback (only called when Rust stack walk finds nothing).
+        let taint_fallback: mlua::Function = lua.load(
+            "return debug.getstacktaint()"
+        ).into_function()?;
+        lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
+
         // Register global functions
         super::globals::register_globals(&lua, Rc::clone(&state))?;
         super::secure_env::create_secure_environment(&lua)?;

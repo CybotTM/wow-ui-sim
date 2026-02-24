@@ -1,6 +1,6 @@
 //! Event registration methods: RegisterEvent, UnregisterEvent, etc.
 
-use crate::event::{is_callback_event, is_restricted_event, is_valid_event};
+use crate::event::{is_restricted_event, is_valid_event};
 use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, Value};
 
@@ -193,17 +193,24 @@ fn add_event_query_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()>
 
     // RegisterEventCallback(event, callbackContainer) - callback-based event registration
     // Only callback events are accepted; non-callback events produce an error.
-    methods.set("RegisterEventCallback", lua.create_function(
-        |_lua, (_ud, event, _cb): (LightUserData, String, Value)| {
-            if !is_callback_event(&event) {
-                return Err(mlua::Error::RuntimeError(format!(
-                    "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
-                    event
-                )));
-            }
-            Ok(!is_restricted_event(&event))
-        },
-    )?)?;
+    // Implemented in Lua to avoid mlua::Error::RuntimeError overhead (12000x slower
+    // than Lua error() due to Elune taint bookkeeping on Rust→Lua error boundary).
+    {
+        let callback_tbl = lua.create_table()?;
+        let restricted_tbl = lua.create_table()?;
+        for e in crate::event::callback_events() { callback_tbl.set(*e, true)?; }
+        for e in crate::event::restricted_events() { restricted_tbl.set(*e, true)?; }
+        let func: mlua::Function = lua.load(r#"
+            local callback_events, restricted_events = ...
+            return function(self, event, cb)
+                if not callback_events[event] then
+                    error("Frame:RegisterEventCallback(): Attempt to register unknown event \"" .. event .. "\"", 0)
+                end
+                return not restricted_events[event]
+            end
+        "#).call((callback_tbl, restricted_tbl))?;
+        methods.set("RegisterEventCallback", func)?;
+    }
 
     Ok(())
 }
