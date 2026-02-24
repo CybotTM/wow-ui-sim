@@ -3,6 +3,8 @@
 //! Loads all Blizzard addons once, then clicks frames grouped by UI area.
 //! Each group reports independently so failures are easy to locate.
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -301,7 +303,7 @@ fn click_all_groups(env: &WowLuaEnv) -> Vec<String> {
 const KNOWN_ERROR_COUNT: usize = 0;
 
 #[test]
-fn test_click_all_frames() {
+fn test_click_all_frames() { test_timeout! {
     let env = setup_full_ui();
     let report = click_all_groups(&env);
     let count = report.len();
@@ -323,4 +325,4 @@ fn test_click_all_frames() {
              Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."
         );
     }
-}
+}}

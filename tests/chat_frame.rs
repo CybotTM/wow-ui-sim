@@ -4,6 +4,8 @@
 //! presses Enter, and verifies the message was submitted via
 //! C_ChatInfo.SendChatMessage.
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -134,7 +136,7 @@ fn assert_message_sent(env: &WowLuaEnv, expected_text: &str, expected_type: &str
 }
 
 #[test]
-fn test_chat_editbox_click_type_and_submit() {
+fn test_chat_editbox_click_type_and_submit() { test_timeout! {
     let env = setup_env();
 
     let exists: bool = env
@@ -176,10 +178,10 @@ fn test_chat_editbox_click_type_and_submit() {
         .eval("return ChatFrame1EditBox:GetText() or ''")
         .expect("GetText failed");
     assert_eq!(text_after, "", "EditBox should be cleared after submit");
-}
+}}
 
 #[test]
-fn test_chat_message_contains_timestamp() {
+fn test_chat_message_contains_timestamp() { test_timeout! {
     let env = setup_env();
 
     // Send a chat message — C_ChatInfo.SendChatMessage adds it to ChatFrame1
@@ -209,10 +211,10 @@ fn test_chat_message_contains_timestamp() {
         has_time,
         "Chat message should start with HH:MM timestamp, got: {msg:.40}"
     );
-}
+}}
 
 #[test]
-fn test_chat_editbox_text_color_after_activation() {
+fn test_chat_editbox_text_color_after_activation() { test_timeout! {
     let env = setup_env();
 
     click_chat_editbox(&env);
@@ -235,4 +237,4 @@ fn test_chat_editbox_text_color_after_activation() {
         (alpha - 1.0).abs() < 0.01,
         "EditBox alpha should be 1.0 after activation, got {alpha}"
     );
-}
+}}

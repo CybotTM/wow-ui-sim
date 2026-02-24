@@ -200,7 +200,7 @@ fn log_ancestor_chain(registry: &WidgetRegistry, frame_id: u64) {
 }
 
 #[test]
-fn spellbook_spells_visible_on_first_open() {
+fn spellbook_spells_visible_on_first_open() { test_timeout! {
     let env = setup_full_ui();
     open_spellbook(&env);
 
@@ -239,7 +239,7 @@ fn spellbook_spells_visible_on_first_open() {
          First: {first_quads}, Second: {second_quads}, Diff: {}",
         second_quads as i64 - first_quads as i64,
     );
-}
+}}
 
 /// Check which items are missing from ancestor-visible set and log details.
 /// Uses effective_alpha > 0 as the visibility check (requires get_strata_buckets called first).
@@ -270,7 +270,7 @@ fn diagnose_missing_items(env: &WowLuaEnv, item_ids: &[u64]) {
 }
 
 #[test]
-fn spellbook_spell_items_in_ancestor_visible() {
+fn spellbook_spell_items_in_ancestor_visible() { test_timeout! {
     let env = setup_full_ui();
     open_spellbook(&env);
 
@@ -302,10 +302,10 @@ fn spellbook_spell_items_in_ancestor_visible() {
         missing.len(),
         &missing[..missing.len().min(10)]
     );
-}
+}}
 
 #[test]
-fn spellbook_icon_textures_in_ancestor_visible() {
+fn spellbook_icon_textures_in_ancestor_visible() { test_timeout! {
     let env = setup_full_ui();
     open_spellbook(&env);
 
@@ -350,10 +350,10 @@ fn spellbook_icon_textures_in_ancestor_visible() {
     eprintln!("Icons: found={icons_found} missing={icons_missing}");
     assert_eq!(icons_missing, 0,
         "All spell icon textures should have effective_alpha > 0");
-}
+}}
 
 #[test]
-fn spellbook_texture_requests_match_between_opens() {
+fn spellbook_texture_requests_match_between_opens() { test_timeout! {
     let env = setup_full_ui();
     open_spellbook(&env);
 
@@ -389,10 +389,10 @@ fn spellbook_texture_requests_match_between_opens() {
 
     assert_eq!(icon_tex1.len(), icon_tex2.len(),
         "Should have same icon texture count between opens");
-}
+}}
 
 #[test]
-fn spellbook_spell_items_have_nonzero_rect() {
+fn spellbook_spell_items_have_nonzero_rect() { test_timeout! {
     let env = setup_full_ui();
     open_spellbook(&env);
 
@@ -425,4 +425,4 @@ fn spellbook_spell_items_have_nonzero_rect() {
         zero_rect.len(),
         zero_rect.join("\n")
     );
-}
+}}

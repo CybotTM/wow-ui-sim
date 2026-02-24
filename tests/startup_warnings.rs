@@ -1,5 +1,7 @@
 //! Test that loading Blizzard addons and firing startup events produces no warnings.
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -127,7 +129,7 @@ fn fire_startup_events(env: &WowLuaEnv, warnings: &mut Vec<String>) {
 const KNOWN_WARNING_COUNT: usize = 0;
 
 #[test]
-fn test_no_warnings_on_startup() {
+fn test_no_warnings_on_startup() { test_timeout! {
     let warnings = load_and_startup();
     let count = warnings.len();
 
@@ -148,7 +150,7 @@ fn test_no_warnings_on_startup() {
              Update KNOWN_WARNING_COUNT to {count} to lock in the improvement."
         );
     }
-}
+}}
 
 /// Load all Blizzard addons and apply workarounds (no startup events).
 fn load_all_addons() -> WowLuaEnv {
@@ -196,7 +198,7 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
 /// which inherits UIWidgetContainerNoResizeTemplate (mixin UIWidgetContainerMixin).
 /// GetNumWidgetsShowing must be available on the frame.
 #[test]
-fn test_widget_container_mixin_applied() {
+fn test_widget_container_mixin_applied() { test_timeout! {
     let env = load_all_addons();
 
     assert_lua(&env, "return type(UIWidgetContainerMixin) == 'table'",
@@ -217,4 +219,4 @@ fn test_widget_container_mixin_applied() {
     fire_events_and_timers(&env);
     assert_lua(&env, "return type(ObjectiveTrackerUIWidgetContainer.GetNumWidgetsShowing) == 'function'",
         "GetNumWidgetsShowing should still be available after startup events and timer processing");
-}
+}}

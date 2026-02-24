@@ -6,6 +6,8 @@
 //! - CastSpellByID / CastSpellByName work (used by SECURE_ACTIONS["spell"])
 //! - Action bar UseAction click chain casts spells
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -91,7 +93,7 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 // ── CastSpellBookItem ────────────────────────────────────────────────
 
 #[test]
-fn cast_spell_book_item_starts_cast() {
+fn cast_spell_book_item_starts_cast() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target party1");
 
@@ -121,10 +123,10 @@ fn cast_spell_book_item_starts_cast() {
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(spell_name, "Flash of Light");
-}
+}}
 
 #[test]
-fn cast_spell_book_item_instant_spell() {
+fn cast_spell_book_item_instant_spell() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target party1");
 
@@ -145,10 +147,10 @@ fn cast_spell_book_item_instant_spell() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(!casting, "instant spell should not show casting info");
-}
+}}
 
 #[test]
-fn cast_spell_book_item_blocked_while_casting() {
+fn cast_spell_book_item_blocked_while_casting() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target party1");
 
@@ -171,12 +173,12 @@ fn cast_spell_book_item_blocked_while_casting() {
         .eval("return select(7, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(cast_id_1, cast_id_2, "second cast should be blocked, cast_id unchanged");
-}
+}}
 
 // ── CastSpellByID / CastSpellByName ──────────────────────────────────
 
 #[test]
-fn cast_spell_by_id_starts_cast() {
+fn cast_spell_by_id_starts_cast() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target party1");
 
@@ -192,10 +194,10 @@ fn cast_spell_by_id_starts_cast() {
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(spell_name, "Flash of Light");
-}
+}}
 
 #[test]
-fn cast_spell_by_name_starts_cast() {
+fn cast_spell_by_name_starts_cast() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target party1");
 
@@ -205,12 +207,12 @@ fn cast_spell_by_name_starts_cast() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(casting, "CastSpellByName should start a cast");
-}
+}}
 
 // ── Party targeting via TargetUnit ───────────────────────────────────
 
 #[test]
-fn target_unit_party1_sets_target() {
+fn target_unit_party1_sets_target() { test_timeout! {
     let env = env();
 
     let has_target_before: bool = env
@@ -229,10 +231,10 @@ fn target_unit_party1_sets_target() {
         .eval("return UnitName('target')")
         .unwrap();
     assert_eq!(name, "Thrynn", "target should be Thrynn (party1)");
-}
+}}
 
 #[test]
-fn target_unit_party_members_by_index() {
+fn target_unit_party_members_by_index() { test_timeout! {
     let env = env();
     let expected = [
         ("party1", "Thrynn"),
@@ -247,10 +249,10 @@ fn target_unit_party_members_by_index() {
             .unwrap();
         assert_eq!(name, expected_name, "targeting {unit} should give {expected_name}");
     }
-}
+}}
 
 #[test]
-fn clear_target_removes_target() {
+fn clear_target_removes_target() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("TargetUnit");
     assert!(env.eval::<bool>("return UnitExists('target')").unwrap());
@@ -260,7 +262,7 @@ fn clear_target_removes_target() {
         .eval("return UnitExists('target')")
         .unwrap();
     assert!(!has_target, "ClearTarget should remove the target");
-}
+}}
 
 // ── Secure action chain simulation ───────────────────────────────────
 // Simulates what SecureTemplates does: calls TargetUnit/CastSpellByID
@@ -268,7 +270,7 @@ fn clear_target_removes_target() {
 // in lightweight tests).
 
 #[test]
-fn secure_action_target_calls_target_unit() {
+fn secure_action_target_calls_target_unit() { test_timeout! {
     let env = env();
 
     // Simulate what SECURE_ACTIONS["target"] does
@@ -281,10 +283,10 @@ fn secure_action_target_calls_target_unit() {
 
     let name: String = env.eval("return UnitName('target')").unwrap();
     assert_eq!(name, "Kazzara", "SECURE_ACTIONS target should call TargetUnit");
-}
+}}
 
 #[test]
-fn secure_action_spell_calls_cast_spell_by_id() {
+fn secure_action_spell_calls_cast_spell_by_id() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target");
 
@@ -298,12 +300,12 @@ fn secure_action_spell_calls_cast_spell_by_id() {
 
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
     assert!(casting, "SECURE_ACTIONS spell should start a cast");
-}
+}}
 
 // ── Action bar UseAction ─────────────────────────────────────────────
 
 #[test]
-fn use_action_casts_from_action_bar() {
+fn use_action_casts_from_action_bar() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target");
 
@@ -317,10 +319,10 @@ fn use_action_casts_from_action_bar() {
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(spell_name, "Flash of Light");
-}
+}}
 
 #[test]
-fn use_action_instant_spell_succeeds() {
+fn use_action_instant_spell_succeeds() { test_timeout! {
     let env = env();
     env.exec("TargetUnit('party1')").expect("target");
 
@@ -329,12 +331,12 @@ fn use_action_instant_spell_succeeds() {
 
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
     assert!(!casting, "instant spell should not show casting info");
-}
+}}
 
 // ── Full Blizzard UI: SecureTemplates click chain ────────────────────
 
 #[test]
-fn blizzard_secure_unit_button_click_targets_party() {
+fn blizzard_secure_unit_button_click_targets_party() { test_timeout! {
     let env = env_with_full_ui();
     install_test_error_handler(&env);
 
@@ -395,10 +397,10 @@ fn blizzard_secure_unit_button_click_targets_party() {
 
     let target_name: String = env.eval("return UnitName('target')").unwrap();
     assert_eq!(target_name, "Thrynn", "target should be Thrynn (party1)");
-}
+}}
 
 #[test]
-fn blizzard_secure_action_button_click_casts_spell() {
+fn blizzard_secure_action_button_click_casts_spell() { test_timeout! {
     let env = env_with_full_ui();
     install_test_error_handler(&env);
     env.exec("TargetUnit('party1')").expect("target party1");
@@ -454,10 +456,10 @@ fn blizzard_secure_action_button_click_casts_spell() {
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(spell_name, "Flash of Light");
-}
+}}
 
 #[test]
-fn blizzard_action_button_click_casts_via_use_action() {
+fn blizzard_action_button_click_casts_via_use_action() { test_timeout! {
     let env = env_with_full_ui();
     install_test_error_handler(&env);
     env.exec("TargetUnit('party1')").expect("target party1");
@@ -487,4 +489,4 @@ fn blizzard_action_button_click_casts_via_use_action() {
 
     let casting: bool = env.eval("return UnitCastingInfo('player') ~= nil").unwrap();
     assert!(casting, "clicking ActionButton1 should start casting Flash of Light");
-}
+}}

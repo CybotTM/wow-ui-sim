@@ -4,6 +4,8 @@
 //! cast time), shows UnitCastingInfo, and on completion clears the cast and
 //! heals the target.
 
+mod common;
+
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 /// Lightweight environment — no Blizzard addons, just the Lua API.
@@ -15,7 +17,7 @@ fn env_with_friendly_target() -> WowLuaEnv {
 }
 
 #[test]
-fn use_action_starts_cast_for_flash_of_light() {
+fn use_action_starts_cast_for_flash_of_light() { test_timeout! {
     let env = env_with_friendly_target();
 
     // Slot 1 = Flash of Light (1.5s cast)
@@ -36,10 +38,10 @@ fn use_action_starts_cast_for_flash_of_light() {
         .eval("return select(1, UnitCastingInfo('player'))")
         .unwrap();
     assert_eq!(spell_name, "Flash of Light");
-}
+}}
 
 #[test]
-fn cast_completes_and_heals_target() {
+fn cast_completes_and_heals_target() { test_timeout! {
     let env = env_with_friendly_target();
 
     // Damage target so we can observe healing
@@ -110,10 +112,10 @@ fn cast_completes_and_heals_target() {
         20_000,
         "heal amount should be 20000"
     );
-}
+}}
 
 #[test]
-fn instant_spell_does_not_show_cast_bar() {
+fn instant_spell_does_not_show_cast_bar() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
     // Avenger's Shield is harmful — needs hostile target
     env.exec("TargetUnit('enemy1')").expect("target enemy1");
@@ -125,7 +127,7 @@ fn instant_spell_does_not_show_cast_bar() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(!casting, "instant spell should not show casting info");
-}
+}}
 
 /// Load all Blizzard addons and fire startup events.
 fn env_with_full_blizzard_ui() -> WowLuaEnv {
@@ -169,7 +171,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
 }
 
 #[test]
-fn action_button_down_sets_pushed_state() {
+fn action_button_down_sets_pushed_state() { test_timeout! {
     let env = env_with_full_blizzard_ui();
 
     // ActionButtonDown calls SetButtonState("PUSHED") on the button widget
@@ -192,10 +194,10 @@ fn action_button_down_sets_pushed_state() {
         .eval(r#"return _G["ActionButton1"]:GetButtonState()"#)
         .unwrap();
     assert_eq!(state_reset, "NORMAL", "ActionButtonUp should reset to NORMAL");
-}
+}}
 
 #[test]
-fn button_state_pushed_during_keypress() {
+fn button_state_pushed_during_keypress() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
 
     // Create a test button and set its state
@@ -215,10 +217,10 @@ fn button_state_pushed_during_keypress() {
         .eval(r#"return TestCastButton:GetButtonState()"#)
         .unwrap();
     assert_eq!(state, "NORMAL", "SetButtonState('NORMAL') should reset");
-}
+}}
 
 #[test]
-fn cast_bar_times_are_in_milliseconds() {
+fn cast_bar_times_are_in_milliseconds() { test_timeout! {
     let env = env_with_friendly_target();
     env.exec("UseAction(1)").expect("UseAction(1)");
 
@@ -234,7 +236,7 @@ fn cast_bar_times_are_in_milliseconds() {
         (duration_ms - 1500.0).abs() < 10.0,
         "cast duration should be ~1500ms, got {duration_ms}ms"
     );
-}
+}}
 
 /// Install a Lua error handler that collects errors into `__test_errors`.
 fn install_test_error_handler(env: &WowLuaEnv) {
@@ -267,7 +269,7 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 }
 
 #[test]
-fn use_action_with_blizzard_ui_no_errors() {
+fn use_action_with_blizzard_ui_no_errors() { test_timeout! {
     let env = env_with_full_blizzard_ui();
     env.exec("TargetUnit('party1')").expect("target party1");
     install_test_error_handler(&env);
@@ -283,7 +285,7 @@ fn use_action_with_blizzard_ui_no_errors() {
         errors.len(),
         errors.join("\n"),
     );
-}
+}}
 
 /// Diagnose cast bar state — prints mixin/handler info for debugging.
 fn dump_cast_bar_diagnostics(env: &WowLuaEnv) {
@@ -331,7 +333,7 @@ fn assert_cast_bar_shows(env: &WowLuaEnv) {
 }
 
 #[test]
-fn cast_bar_visible_during_cast() {
+fn cast_bar_visible_during_cast() { test_timeout! {
     let env = env_with_full_blizzard_ui();
     env.exec("TargetUnit('party1')").expect("target party1");
     install_test_error_handler(&env);
@@ -355,10 +357,10 @@ fn cast_bar_visible_during_cast() {
 
     env.exec("UseAction(1)").expect("UseAction(1)");
     assert_cast_bar_shows(&env);
-}
+}}
 
 #[test]
-fn harmful_spell_blocked_with_no_target() {
+fn harmful_spell_blocked_with_no_target() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
     // No target set — harmful spell should not cast
     env.exec("CastSpellByID(275779)").expect("CastSpellByID");
@@ -366,10 +368,10 @@ fn harmful_spell_blocked_with_no_target() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(!casting, "harmful spell with no target should not cast");
-}
+}}
 
 #[test]
-fn harmful_spell_blocked_on_friendly_target() {
+fn harmful_spell_blocked_on_friendly_target() { test_timeout! {
     let env = env_with_friendly_target();
     // Judgment (harmful) on a friendly target should be blocked
     env.exec("CastSpellByID(275779)").expect("CastSpellByID");
@@ -377,10 +379,10 @@ fn harmful_spell_blocked_on_friendly_target() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(!casting, "harmful spell on friendly target should not cast");
-}
+}}
 
 #[test]
-fn harmful_spell_succeeds_on_hostile_target() {
+fn harmful_spell_succeeds_on_hostile_target() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
     env.exec("TargetUnit('enemy1')").expect("target enemy1");
     // Judgment (harmful, instant) on a hostile target should succeed
@@ -390,10 +392,10 @@ fn harmful_spell_succeeds_on_hostile_target() {
         .eval("local info = C_Spell.GetSpellCooldown(275779); return info.duration > 0")
         .unwrap();
     assert!(on_cd, "harmful spell on hostile target should cast and trigger GCD");
-}
+}}
 
 #[test]
-fn helpful_spell_succeeds_on_hostile_target() {
+fn helpful_spell_succeeds_on_hostile_target() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
     env.exec("TargetUnit('enemy1')").expect("target enemy1");
     // Flash of Light (helpful) on hostile target — should still cast (auto-target self)
@@ -402,10 +404,10 @@ fn helpful_spell_succeeds_on_hostile_target() {
         .eval("return UnitCastingInfo('player') ~= nil")
         .unwrap();
     assert!(casting, "helpful spell should cast even with hostile target (auto-self)");
-}
+}}
 
 #[test]
-fn self_only_spell_succeeds_with_no_target() {
+fn self_only_spell_succeeds_with_no_target() { test_timeout! {
     let env = WowLuaEnv::new().expect("create env");
     // Divine Shield (self-only) should cast regardless of target
     env.exec("CastSpellByID(642)").expect("CastSpellByID");
@@ -414,10 +416,10 @@ fn self_only_spell_succeeds_with_no_target() {
         .eval("local info = C_Spell.GetSpellCooldown(642); return info.duration > 0")
         .unwrap();
     assert!(on_cd, "self-only spell should cast with no target");
-}
+}}
 
 #[test]
-fn ui_error_message_wired_with_blizzard_ui() {
+fn ui_error_message_wired_with_blizzard_ui() { test_timeout! {
     let env = env_with_full_blizzard_ui();
     env.exec("TargetUnit('party1')").expect("target party1");
     install_test_error_handler(&env);
@@ -438,4 +440,4 @@ fn ui_error_message_wired_with_blizzard_ui() {
         errors.len(),
         errors.join("\n"),
     );
-}
+}}

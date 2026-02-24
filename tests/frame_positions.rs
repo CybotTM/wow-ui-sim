@@ -149,16 +149,28 @@ fn report_result(
 }
 
 fn main() {
-    let env = create_env();
-    let (passed, failed) = run_tests(&env);
-    let total = passed + failed;
+    let (tx, rx) = std::sync::mpsc::channel();
+    let handle = std::thread::spawn(move || {
+        let env = create_env();
+        let (passed, failed) = run_tests(&env);
+        let _ = tx.send((passed, failed));
+    });
 
-    eprintln!("\ntest result: {}. {passed} passed; {failed} failed; 0 ignored; \
-              0 measured; 0 filtered out",
-        if failed == 0 { "ok" } else { "FAILED" });
-
-    if failed > 0 {
-        std::process::exit(1);
+    match rx.recv_timeout(std::time::Duration::from_secs(120)) {
+        Ok((passed, failed)) => {
+            handle.join().expect("test thread panicked");
+            let total = passed + failed;
+            eprintln!("\ntest result: {}. {passed} passed; {failed} failed; 0 ignored; \
+                      0 measured; 0 filtered out",
+                if failed == 0 { "ok" } else { "FAILED" });
+            if failed > 0 {
+                std::process::exit(1);
+            }
+            assert_eq!(total, 16, "Expected 16 tests, ran {total}");
+        }
+        Err(_) => {
+            eprintln!("\ntest timed out after 120s");
+            std::process::exit(1);
+        }
     }
-    assert_eq!(total, 16, "Expected 16 tests, ran {total}");
 }

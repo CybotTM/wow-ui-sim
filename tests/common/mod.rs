@@ -4,6 +4,39 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+/// Per-test timeout. Panics if the closure doesn't complete within `secs`.
+/// Default 120s — enough for full Blizzard UI load + test logic.
+#[allow(dead_code)]
+pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
+    let (tx, rx) = std::sync::mpsc::channel();
+    let handle = std::thread::spawn(move || {
+        f();
+        let _ = tx.send(());
+    });
+    match rx.recv_timeout(std::time::Duration::from_secs(secs)) {
+        Ok(()) => handle.join().expect("test thread panicked"),
+        Err(_) => panic!("test timed out after {secs}s"),
+    }
+}
+
+/// Convenience macro: wraps a test body with a 120s timeout.
+///
+/// ```ignore
+/// #[test]
+/// fn my_test() {
+///     test_timeout! {
+///         let env = WowLuaEnv::new().unwrap();
+///         // ... test body ...
+///     }
+/// }
+/// ```
+#[macro_export]
+macro_rules! test_timeout {
+    ($($body:tt)*) => {
+        common::with_timeout(120, move || { $($body)* })
+    };
+}
+
 /// Try to create a wgpu device for GPU tests.
 /// Returns None if no adapter is available (e.g., headless CI).
 #[cfg(feature = "gui")]
