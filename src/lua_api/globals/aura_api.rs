@@ -34,13 +34,13 @@ fn get_player_buff(state: &SimState, index: i32) -> Option<&AuraInfo> {
 /// Build the old-style multi-return values for UnitBuff/UnitAura.
 pub(super) fn build_aura_multi_value(lua: &Lua, aura: &AuraInfo) -> Result<MultiValue> {
     Ok(MultiValue::from_vec(vec![
-        Value::String(lua.create_string(aura.name)?),
+        Value::String(lua.create_string(aura.name.as_str())?),
         Value::Integer(aura.icon as i64),
         Value::Integer(aura.applications as i64),
         Value::Nil, // dispelName (buffs have none)
         Value::Number(aura.duration),
         Value::Number(aura.expiration_time),
-        Value::String(lua.create_string(aura.source_unit)?),
+        Value::String(lua.create_string(aura.source_unit.as_str())?),
         Value::Boolean(aura.is_stealable),
         Value::Boolean(false), // nameplateShowPersonal
         Value::Integer(aura.spell_id as i64),
@@ -62,13 +62,13 @@ pub(super) fn build_aura_data_table(lua: &Lua, aura: &AuraInfo) -> Result<mlua::
 
 /// Set the core AuraData fields (name, icon, duration, etc.).
 fn set_aura_data_core_fields(lua: &Lua, t: &mlua::Table, aura: &AuraInfo) -> Result<()> {
-    t.set("name", lua.create_string(aura.name)?)?;
+    t.set("name", lua.create_string(aura.name.as_str())?)?;
     t.set("icon", aura.icon)?;
     t.set("applications", aura.applications)?;
     t.set("dispelName", Value::Nil)?;
     t.set("duration", aura.duration)?;
     t.set("expirationTime", aura.expiration_time)?;
-    t.set("sourceUnit", lua.create_string(aura.source_unit)?)?;
+    t.set("sourceUnit", lua.create_string(aura.source_unit.as_str())?)?;
     t.set("isStealable", aura.is_stealable)?;
     t.set("nameplateShowPersonal", false)?;
     t.set("spellId", aura.spell_id)?;

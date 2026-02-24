@@ -308,7 +308,7 @@ fn register_stateless_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_player_api(lua, state.clone())?;
     register_enum_api(lua)?;
     register_constants_api(lua)?;
-    register_c_map_api(lua)?;
+    register_c_map_api(lua, Rc::clone(state))?;
     register_c_quest_api(lua)?;
     register_c_collection_api(lua)?;
     register_c_item_api(lua)?;
@@ -357,6 +357,9 @@ fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
     // Ensure all named frames have _G entries. Covers frames created by
     // builtin_frames.rs (no Lua access) and any registration site that
     // only sets the widget registry name without calling raw_set on _G.
+    // Admin API for simulator state control from Lua.
+    super::globals::admin_api::register_admin_api(lua, Rc::clone(state))?;
+
     sync_named_frames_to_globals(lua, state)
 }
 

@@ -236,6 +236,51 @@ pub struct SimState {
     pub pending_spec_change: Option<i32>,
     /// Player movement state toggles (controlled from options UI).
     pub movement: MovementState,
+
+    // Player identity
+    /// Player level (default 70).
+    pub player_level: i32,
+    /// Player sex: 2=male, 3=female (WoW convention).
+    pub player_sex: i32,
+
+    // Combat state
+    /// Whether the player is in combat.
+    pub in_combat: bool,
+
+    // Power
+    pub player_power: i32,
+    pub player_power_max: i32,
+    pub player_power_type: i32,
+
+    // Zone/Instance
+    pub zone_name: String,
+    pub zone_id: i32,
+    pub sub_zone_name: String,
+    pub instance_name: String,
+    pub instance_type: String,
+    pub instance_difficulty: i32,
+    pub instance_max_players: i32,
+    pub in_instance: bool,
+
+    // Economy
+    pub player_money: i64,
+    pub player_item_level: f32,
+
+    // PvP
+    pub pvp_enabled: bool,
+    pub honor_level: i32,
+
+    // Guild
+    pub guild_name: Option<String>,
+    pub guild_rank: Option<String>,
+    pub guild_num_members: i32,
+
+    // Collections
+    pub collected_transmogs: HashSet<i32>,
+    pub collected_mounts: HashSet<i32>,
+    pub collected_pets: HashSet<i32>,
+    pub collected_toys: HashSet<i32>,
+    pub earned_achievements: HashSet<i32>,
 }
 
 /// Simulated player movement flags (all false = stationary).
@@ -291,6 +336,32 @@ impl SimState {
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             movement: MovementState::default(),
+            player_level: 70,
+            player_sex: 2,
+            in_combat: false,
+            player_power: 100,
+            player_power_max: 100,
+            player_power_type: 0,
+            zone_name: "Stormwind City".to_string(),
+            zone_id: 1519,
+            sub_zone_name: String::new(),
+            instance_name: String::new(),
+            instance_type: "none".to_string(),
+            instance_difficulty: 0,
+            instance_max_players: 0,
+            in_instance: false,
+            player_money: 0,
+            player_item_level: 0.0,
+            pvp_enabled: false,
+            honor_level: 0,
+            guild_name: None,
+            guild_rank: None,
+            guild_num_members: 0,
+            collected_transmogs: HashSet::new(),
+            collected_mounts: HashSet::new(),
+            collected_pets: HashSet::new(),
+            collected_toys: HashSet::new(),
+            earned_achievements: HashSet::new(),
         }
     }
 

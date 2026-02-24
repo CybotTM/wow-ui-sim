@@ -130,7 +130,8 @@ fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
             ]))
         })?,
     )?;
-    globals.set("UnitSex", lua.create_function(|_, _unit: Option<String>| Ok(2))?)?;
+    let st = state.clone();
+    globals.set("UnitSex", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player_sex))?)?;
     globals.set("UnitEffectiveLevel", lua.create_function(|_, _unit: Option<String>| Ok(80))?)?;
     globals.set(
         "UnitFactionGroup",
@@ -195,7 +196,7 @@ fn register_unit_level_exists(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
                     return Ok(m.level);
                 }
             }
-            Ok(80)
+            Ok(st.borrow().player_level)
         })?,
     )?;
 
@@ -677,15 +678,19 @@ fn register_pvp_vehicle_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
         "UnitInVehicle",
         "UnitHasVehiclePlayerFrameUI",
         "UnitInVehicleHidesPetFrame",
-        "UnitAffectingCombat",
-        "UnitInCombat",
         "UnitInPartyIsAI",
     ];
     for &name in false_unit_stubs {
         g.set(name, lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
     }
 
-    g.set("UnitHonorLevel", lua.create_function(|_, _unit: Option<String>| Ok(0i32))?)?;
+    let st = state.clone();
+    g.set("UnitAffectingCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().in_combat))?)?;
+    let st = state.clone();
+    g.set("UnitInCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().in_combat))?)?;
+
+    let st = state.clone();
+    g.set("UnitHonorLevel", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().honor_level))?)?;
     g.set("UnitPartialPower", lua.create_function(|_, (_unit, _pt): (Option<String>, Option<i32>)| Ok(0i32))?)?;
 
     // UnitGroupRolesAssignedEnum -> nil
