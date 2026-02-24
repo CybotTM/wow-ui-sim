@@ -494,7 +494,7 @@ fn build_create_child_code(
 /// so that template defaults are set first, then inline size overrides.
 fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_name: &str) {
     if let Some(anchors) = frame.anchors() {
-        code.push_str(&generate_set_point_code(anchors, "child", "parent", parent_name, "nil"));
+        code.push_str(&generate_set_point_code(anchors, "child", "parent", parent_name, "parent"));
     }
     if frame.set_all_points == Some(true) {
         code.push_str("            child:SetAllPoints(true)\n");

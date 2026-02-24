@@ -237,7 +237,7 @@ fn append_anchors_and_parent_refs(
     parent_name: &str,
 ) {
     if let Some(anchors) = anchors {
-        code.push_str(&generate_set_point_code(anchors, var, parent_var, parent_name, "nil"));
+        code.push_str(&generate_set_point_code(anchors, var, parent_var, parent_name, parent_var));
     }
     if set_all_points == Some(true) {
         code.push_str(&format!("            {}:SetAllPoints(true)\n", var));
