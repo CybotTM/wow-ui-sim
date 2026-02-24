@@ -72,13 +72,16 @@ fn extract_point_str(v: Option<&Value>) -> String {
 
 /// Parse variable SetPoint arguments into (relative_to, relative_point, x_ofs, y_ofs).
 /// Returns Err(msg) for invalid relative point names.
+/// Returns (relative_to, relative_point, x_ofs, y_ofs, explicit_relative).
+/// `explicit_relative` is true when the caller provided a relativeTo argument
+/// (even if nil). When false, the caller should resolve to parent.
 fn parse_set_point_args(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32, bool), String> {
     match args.len() {
-        1 => Ok((None, point, 0.0, 0.0)),
+        1 => Ok((None, point, 0.0, 0.0, false)),
         2 | 3 => parse_set_point_2_or_3(lua, args, point),
         _ => parse_set_point_full(lua, args, point),
     }
@@ -89,16 +92,17 @@ fn parse_set_point_2_or_3(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32, bool), String> {
     let x = args.get(1).and_then(get_number);
     let y = args.get(2).and_then(get_number);
     if let (Some(x), Some(y)) = (x, y) {
-        // SetPoint("point", x, y)
-        Ok((None, point, x, y))
+        // SetPoint("point", x, y) — no explicit relativeTo, resolve to parent
+        Ok((None, point, x, y, false))
     } else {
+        // Explicit relativeTo argument (could be nil, frame, or string)
         let rel_to = args.get(1).and_then(|v| get_frame_id(lua, v));
         let rel_point = resolve_relative_point(args.get(2), point)?;
-        Ok((rel_to, rel_point, 0.0, 0.0))
+        Ok((rel_to, rel_point, 0.0, 0.0, true))
     }
 }
 
@@ -107,12 +111,13 @@ fn parse_set_point_full(
     lua: &Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
-) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32), String> {
+) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32, bool), String> {
+    // Explicit relativeTo argument (could be nil, frame, or string)
     let rel_to = args.get(1).and_then(|v| get_frame_id(lua, v));
     let rel_point = resolve_relative_point(args.get(2), point)?;
     let x = args.get(3).and_then(get_number).unwrap_or(0.0);
     let y = args.get(4).and_then(get_number).unwrap_or(0.0);
-    Ok((rel_to, rel_point, x, y))
+    Ok((rel_to, rel_point, x, y, true))
 }
 
 /// SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
@@ -132,9 +137,20 @@ fn add_set_point_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
                 format!("Frame:SetPoint(): Invalid region point {point_str}")
             )),
         };
-        let (relative_to, relative_point, x_ofs, y_ofs) =
+        let (mut relative_to, relative_point, x_ofs, y_ofs, explicit_relative) =
             parse_set_point_args(lua, &args, point)
                 .map_err(|msg| lua_error(lua, msg))?;
+
+        // When no explicit relativeTo was given (e.g. SetPoint("CENTER") or
+        // SetPoint("CENTER", x, y)), anchor to parent frame. Explicit nil
+        // (SetPoint("CENTER", nil, ...)) anchors to the screen.
+        if !explicit_relative && relative_to.is_none() {
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            if let Some(frame) = state.widgets.get(id as u64) {
+                relative_to = frame.parent_id.map(|pid| pid as usize);
+            }
+        }
 
         let state_rc = get_sim_state(lua);
         check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;

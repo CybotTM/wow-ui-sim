@@ -40,7 +40,8 @@ pub fn is_method_allowed(widget_type: WidgetType, method: &str) -> bool {
 
 fn methods_for_type(widget_type: WidgetType) -> &'static [&'static str] {
     match widget_type {
-        WidgetType::Frame | WidgetType::WorldFrame | WidgetType::Line => FRAME_METHODS,
+        WidgetType::Frame | WidgetType::WorldFrame => FRAME_METHODS,
+        WidgetType::Line => TEXTURE_METHODS,
         WidgetType::ModelScene => MODEL_METHODS,
         WidgetType::Button => BUTTON_METHODS,
         WidgetType::CheckButton => CHECKBUTTON_METHODS,
