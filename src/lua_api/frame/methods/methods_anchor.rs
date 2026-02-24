@@ -359,35 +359,20 @@ fn add_set_all_points_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<(
         let (should_set, relative_to_id) = match &first {
             Value::Boolean(false) => (false, None),
             Value::Boolean(true) => {
-                // SetAllPoints(true) → anchor to parent (same as no-argument form).
+                // SetAllPoints(true) → anchor to parent.
                 let state_rc = get_sim_state(lua);
                 let state = state_rc.borrow();
-                let frame = state.widgets.get(id);
-                let is_default = frame.map(|f| f.default_parent).unwrap_or(true);
-                if is_default {
-                    (true, None)
-                } else {
-                    let parent_id = frame.and_then(|f| f.parent_id).map(|p| p as usize);
-                    (true, parent_id)
-                }
+                let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
+                (true, parent_id)
             }
             Value::LightUserData(lud) => (true, Some(lud_to_id(*lud) as usize)),
             _ if has_arg => (true, None), // explicit nil → screen
             _ => {
-                // No argument → implicit parent. If the parent was defaulted (not explicitly
-                // set by the caller), store None so GetPoint returns nil, matching wowless
-                // headless behavior where the default parent is nil.
-                // If the parent was explicitly set via SetParent, store the parent's ID.
+                // No argument → anchor to parent.
                 let state_rc = get_sim_state(lua);
                 let state = state_rc.borrow();
-                let frame = state.widgets.get(id);
-                let is_default = frame.map(|f| f.default_parent).unwrap_or(true);
-                if is_default {
-                    (true, None)
-                } else {
-                    let parent_id = frame.and_then(|f| f.parent_id).map(|p| p as usize);
-                    (true, parent_id)
-                }
+                let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
+                (true, parent_id)
             }
         };
 

@@ -191,10 +191,11 @@ fn set_all_points_inner(state: &mut SimState, frame_id: u64) {
     // Remove old anchor dependents
     state.widgets.remove_all_anchor_dependents_for(frame_id);
 
+    let parent_id = state.widgets.get(frame_id).and_then(|f| f.parent_id);
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
         frame.clear_all_points();
-        frame.set_point(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft, 0.0, 0.0);
-        frame.set_point(AnchorPoint::BottomRight, None, AnchorPoint::BottomRight, 0.0, 0.0);
+        frame.set_point(AnchorPoint::TopLeft, parent_id.map(|p| p as usize), AnchorPoint::TopLeft, 0.0, 0.0);
+        frame.set_point(AnchorPoint::BottomRight, parent_id.map(|p| p as usize), AnchorPoint::BottomRight, 0.0, 0.0);
     }
 
     state.widgets.mark_rect_dirty(frame_id);
