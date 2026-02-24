@@ -43,7 +43,7 @@ fn register_c_cvar_namespace(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result
     let s = Rc::clone(state);
     t.set("GetCVarDefault", lua.create_function(move |lua, cvar: String| {
         let state = s.borrow();
-        match state.cvars.get(&cvar) {
+        match state.cvars.get_default(&cvar) {
             Some(value) => Ok(Value::String(lua.create_string(&value)?)),
             None => Ok(Value::Nil),
         }
@@ -87,6 +87,19 @@ fn register_cvar_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
         Ok(state.cvars.set(&cvar, &value))
     })?;
     globals.set("SetCVar", set_cvar)?;
+
+    let s = Rc::clone(state);
+    globals.set("ConsoleGetAllCommands", lua.create_function(move |lua, ()| {
+        let state = s.borrow();
+        let keys = state.cvars.all_keys();
+        let result = lua.create_table_with_capacity(keys.len(), 0)?;
+        for (i, key) in keys.iter().enumerate() {
+            let entry = lua.create_table_with_capacity(0, 1)?;
+            entry.set("command", key.as_str())?;
+            result.set(i + 1, entry)?;
+        }
+        Ok(result)
+    })?)?;
 
     Ok(())
 }

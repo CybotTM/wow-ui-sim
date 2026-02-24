@@ -19,6 +19,8 @@ fn default_storage_path() -> PathBuf {
 pub struct CVarStorage {
     /// Default values (lowercase key -> value)
     defaults: HashMap<String, String>,
+    /// Original-case names (lowercase key -> original name)
+    original_names: HashMap<String, String>,
     /// Runtime overrides (lowercase key -> value), persisted to disk.
     overrides: RwLock<HashMap<String, String>>,
     /// Path to persist overrides.
@@ -29,10 +31,11 @@ impl CVarStorage {
     /// Create storage with defaults parsed from YAML, loading persisted overrides from disk.
     pub fn new() -> Self {
         let path = default_storage_path();
-        let defaults = parse_cvar_yaml(include_str!("cvars.yaml"));
+        let (defaults, original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
         let overrides = load_overrides(&path);
         Self {
             defaults,
+            original_names,
             overrides: RwLock::new(overrides),
             storage_path: path,
         }
@@ -41,10 +44,11 @@ impl CVarStorage {
     /// Create storage with a custom path (for testing).
     #[cfg(test)]
     fn with_path(path: PathBuf) -> Self {
-        let defaults = parse_cvar_yaml(include_str!("cvars.yaml"));
+        let (defaults, original_names) = parse_cvar_yaml(include_str!("cvars.yaml"));
         let overrides = load_overrides(&path);
         Self {
             defaults,
+            original_names,
             overrides: RwLock::new(overrides),
             storage_path: path,
         }
@@ -80,6 +84,21 @@ impl CVarStorage {
             .insert(key, value.to_string());
         self.save();
         true
+    }
+
+    /// Get all known CVar names in original case (defaults + overrides).
+    pub fn all_keys(&self) -> Vec<String> {
+        let mut keys: std::collections::HashSet<String> =
+            self.defaults.keys().cloned().collect();
+        for key in self.overrides.read().unwrap().keys() {
+            keys.insert(key.clone());
+        }
+        let mut sorted: Vec<String> = keys
+            .into_iter()
+            .map(|k| self.original_names.get(&k).cloned().unwrap_or(k))
+            .collect();
+        sorted.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
+        sorted
     }
 
     /// Register a new CVar with a default value.
@@ -123,15 +142,18 @@ fn load_overrides(path: &PathBuf) -> HashMap<String, String> {
 }
 
 /// Parse YAML in format `key: 'value'` or `key: value`.
-fn parse_cvar_yaml(yaml: &str) -> HashMap<String, String> {
-    let mut map = HashMap::new();
+/// Returns (defaults: lowercase_key->value, original_names: lowercase_key->original_key).
+fn parse_cvar_yaml(yaml: &str) -> (HashMap<String, String>, HashMap<String, String>) {
+    let mut defaults = HashMap::new();
+    let mut original_names = HashMap::new();
     for line in yaml.lines() {
         let line = line.trim();
         if line.is_empty() || line.starts_with('#') {
             continue;
         }
         if let Some((key, value)) = line.split_once(':') {
-            let key = key.trim().to_lowercase();
+            let original_key = key.trim().to_string();
+            let lower_key = original_key.to_lowercase();
             let value = value.trim();
             // Strip surrounding quotes if present
             let value = value
@@ -139,10 +161,11 @@ fn parse_cvar_yaml(yaml: &str) -> HashMap<String, String> {
                 .and_then(|v| v.strip_suffix('\''))
                 .or_else(|| value.strip_prefix('"').and_then(|v| v.strip_suffix('"')))
                 .unwrap_or(value);
-            map.insert(key, value.to_string());
+            original_names.insert(lower_key.clone(), original_key);
+            defaults.insert(lower_key, value.to_string());
         }
     }
-    map
+    (defaults, original_names)
 }
 
 #[cfg(test)]
@@ -157,10 +180,14 @@ mod tests {
             otherVar: "hello"
             plainVar: 50
         "#;
-        let map = parse_cvar_yaml(yaml);
-        assert_eq!(map.get("somevar"), Some(&"1".to_string()));
-        assert_eq!(map.get("othervar"), Some(&"hello".to_string()));
-        assert_eq!(map.get("plainvar"), Some(&"50".to_string()));
+        let (defaults, original_names) = parse_cvar_yaml(yaml);
+        assert_eq!(defaults.get("somevar"), Some(&"1".to_string()));
+        assert_eq!(defaults.get("othervar"), Some(&"hello".to_string()));
+        assert_eq!(defaults.get("plainvar"), Some(&"50".to_string()));
+        // Original case preserved
+        assert_eq!(original_names.get("somevar"), Some(&"someVar".to_string()));
+        assert_eq!(original_names.get("othervar"), Some(&"otherVar".to_string()));
+        assert_eq!(original_names.get("plainvar"), Some(&"plainVar".to_string()));
     }
 
     #[test]
