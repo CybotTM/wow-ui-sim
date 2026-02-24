@@ -172,10 +172,10 @@ fn resolve_frame_element(element: &XmlElement) -> Option<(&FrameXml, &'static st
         XmlElement::MessageFrame(f)
         | XmlElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
         XmlElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
+        XmlElement::TabardModel(f) => Some((f, "PlayerModel", None)),
         XmlElement::EventFrame(f)
         | XmlElement::TaxiRouteFrame(f)
         | XmlElement::ModelFFX(f)
-        | XmlElement::TabardModel(f)
         | XmlElement::UiCamera(f)
         | XmlElement::UnitPositionFrame(f)
         | XmlElement::OffScreenFrame(f)

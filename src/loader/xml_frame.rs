@@ -448,10 +448,10 @@ fn frame_element_to_type(child: &crate::xml::FrameElement) -> Option<(&crate::xm
         | FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
         FrameElement::Minimap(f) => Some((f, "Minimap", None)),
+        FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
         FrameElement::EventFrame(f)
         | FrameElement::TaxiRouteFrame(f)
         | FrameElement::ModelFFX(f)
-        | FrameElement::TabardModel(f)
         | FrameElement::UiCamera(f)
         | FrameElement::UnitPositionFrame(f)
         | FrameElement::OffScreenFrame(f)

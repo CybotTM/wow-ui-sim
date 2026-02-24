@@ -1,7 +1,6 @@
 //! ScrollFrame and ScrollBox widget methods.
 
 use super::methods_hierarchy::reparent_widget;
-use super::widget_tooltip::fire_tooltip_script;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, Value};
 
@@ -84,7 +83,6 @@ fn add_scrollframe_offset_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Res
                 frame.scroll_vertical = offset;
             }
         }
-        fire_tooltip_script(lua, id, "OnScrollRangeChanged")?;
         Ok(())
     })?)?;
 

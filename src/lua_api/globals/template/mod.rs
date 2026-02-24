@@ -42,10 +42,10 @@ fn frame_element_type(element: &FrameElement) -> Option<(&FrameXml, &'static str
         FrameElement::MessageFrame(f)
         | FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
+        FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
         FrameElement::EventFrame(f)
         | FrameElement::TaxiRouteFrame(f)
         | FrameElement::ModelFFX(f)
-        | FrameElement::TabardModel(f)
         | FrameElement::UiCamera(f)
         | FrameElement::UnitPositionFrame(f)
         | FrameElement::OffScreenFrame(f)

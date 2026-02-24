@@ -70,10 +70,21 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
             return Ok(value);
         }
 
-        // Rust methods table (built-in frame methods) — checked before custom fields
+        // Rust methods table — filtered by widget type.
+        // Methods in the WoW discovery data are only returned for matching types.
+        // Methods NOT in any type's discovery list pass through (Mixin/sim-specific).
         let method: Value = methods_table.raw_get(key_str.as_str())?;
         if method != Value::Nil {
-            return Ok(method);
+            let widget_type = {
+                let state_rc = get_sim_state(lua);
+                let state = state_rc.borrow();
+                state.widgets.get(frame_id)
+                    .map(|f| f.widget_type)
+                    .unwrap_or(WidgetType::Frame)
+            };
+            if super::method_registry::is_method_allowed(widget_type, key_str.as_str()) {
+                return Ok(method);
+            }
         }
 
         // Children_keys lookup

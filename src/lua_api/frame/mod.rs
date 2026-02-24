@@ -2,6 +2,7 @@
 
 mod handle;
 pub(crate) mod metatable;
+pub(crate) mod method_registry;
 pub(crate) mod methods;
 
 pub use handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
