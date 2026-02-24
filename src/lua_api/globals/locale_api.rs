@@ -119,6 +119,19 @@ fn register_expansion_functions(lua: &Lua) -> Result<()> {
     globals.set("GetAccountExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
     globals.set("GetAutoCompleteRealms", lua.create_function(|lua, ()| lua.create_table())?)?;
 
+    // ClassicExpansionAtLeast: errors on invalid arg, returns true for Standard WoW.
+    // Implemented in Lua to avoid mlua::Error::RuntimeError overhead at the Rust→Lua boundary.
+    lua.load(r#"
+        ClassicExpansionAtLeast = function(level)
+            assert(type(level) == 'number' and level >= 0 and level <= 4294967295)
+            return true
+        end
+        ClassicExpansionAtMost = function(level)
+            assert(type(level) == 'number' and level >= 0 and level <= 4294967295)
+            return false
+        end
+    "#).exec()?;
+
     Ok(())
 }
 
