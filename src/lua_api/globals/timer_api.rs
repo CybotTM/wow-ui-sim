@@ -25,7 +25,8 @@ fn create_timer_after(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::F
     lua.create_function(move |lua, (seconds, callback): (f64, mlua::Function)| {
         let id = next_timer_id();
         let callback_key = lua.create_registry_value(callback)?;
-        let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+        let secs = seconds.max(0.0);
+        let fire_at = Instant::now() + Duration::from_secs_f64(secs);
         let owner_addon = state.borrow().loading_addon_index;
 
         let timer = PendingTimer {
@@ -45,8 +46,9 @@ fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
         move |lua, (seconds, callback, iterations): (f64, mlua::Function, Option<i32>)| {
             let id = next_timer_id();
             let callback_key = lua.create_registry_value(callback)?;
-            let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
-            let interval = Duration::from_secs_f64(seconds);
+            let secs = seconds.max(0.0);
+            let fire_at = Instant::now() + Duration::from_secs_f64(secs);
+            let interval = Duration::from_secs_f64(secs);
             let owner_addon = state.borrow().loading_addon_index;
 
             let ticker = create_timer_handle(lua, id, &state)?;
@@ -69,7 +71,8 @@ fn create_new_timer(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fun
     lua.create_function(move |lua, (seconds, callback): (f64, mlua::Function)| {
         let id = next_timer_id();
         let callback_key = lua.create_registry_value(callback)?;
-        let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+        let secs = seconds.max(0.0);
+        let fire_at = Instant::now() + Duration::from_secs_f64(secs);
         let owner_addon = state.borrow().loading_addon_index;
 
         let timer_handle = create_timer_handle(lua, id, &state)?;

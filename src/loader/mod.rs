@@ -127,6 +127,44 @@ pub fn load_addon_from_toc_with_saved_vars(
     addon::load_addon_internal(env, toc, Some(saved_vars_mgr))
 }
 
+/// Sort a list of `(name, toc_path)` pairs by their `## Dependencies:` / `## OptionalDeps:`.
+///
+/// Addons whose dependencies aren't in the list are treated as having no deps (they load early).
+/// Ties are broken alphabetically for deterministic output.
+pub fn sort_addons_by_dependencies(addons: &mut Vec<(String, PathBuf)>) {
+    // Parse TOC files to build dependency info
+    let mut toc_map: HashMap<String, (PathBuf, TocFile)> = HashMap::new();
+    for (name, toc_path) in addons.iter() {
+        if let Ok(toc) = TocFile::from_file(toc_path) {
+            toc_map.insert(name.clone(), (toc_path.clone(), toc));
+        }
+    }
+
+    let available: std::collections::HashSet<&str> =
+        toc_map.keys().map(|s| s.as_str()).collect();
+    let deps = build_dependency_graph(&toc_map, &available);
+    let sorted = kahns_sort(&deps, toc_map.len());
+
+    // Rebuild the vec in sorted order, appending any addons not in the graph at the end
+    let name_to_path: HashMap<&str, &PathBuf> = addons
+        .iter()
+        .map(|(n, p)| (n.as_str(), p))
+        .collect();
+    let mut result: Vec<(String, PathBuf)> = sorted
+        .iter()
+        .filter_map(|&name| {
+            name_to_path.get(name).map(|&p| (name.to_string(), p.clone()))
+        })
+        .collect();
+    // Append addons that weren't in the toc_map (failed to parse)
+    for (name, path) in addons.iter() {
+        if !toc_map.contains_key(name) {
+            result.push((name.clone(), path.clone()));
+        }
+    }
+    *addons = result;
+}
+
 /// Discover all Blizzard addons in a BlizzardUI directory, topologically sorted by dependencies.
 ///
 /// Scans for `Blizzard_*` subdirectories, parses their TOC files, filters out `LoadOnDemand`

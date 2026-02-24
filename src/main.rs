@@ -158,7 +158,7 @@ fn scan_addons(base_path: &PathBuf) -> Vec<(String, PathBuf)> {
                     }
         }
     }
-    addons.sort_by(|a, b| a.0.to_lowercase().cmp(&b.0.to_lowercase()));
+    wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
     addons
 }
 
