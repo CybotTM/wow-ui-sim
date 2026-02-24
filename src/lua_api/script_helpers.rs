@@ -198,6 +198,11 @@ impl std::error::Error for LuaApiError {}
 
 /// Create a Lua API error that pcall catches as just the message string.
 pub fn lua_error(_lua: &Lua, msg: impl Into<String>) -> mlua::Error {
+    lua_error_val(msg)
+}
+
+/// Same as `lua_error` but without requiring a Lua reference.
+pub fn lua_error_val(msg: impl Into<String>) -> mlua::Error {
     mlua::Error::external(LuaApiError(msg.into()))
 }
 

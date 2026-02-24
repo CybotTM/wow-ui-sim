@@ -20,8 +20,9 @@ fn add_event_register_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<
 }
 
 /// Build the error returned when an unrecognised event name is passed to RegisterEvent.
+/// Uses ExternalError (not RuntimeError) to avoid "runtime error: " prefix in pcall.
 fn unknown_event_error(frame_name: &str, event: &str) -> mlua::Error {
-    mlua::Error::RuntimeError(format!(
+    crate::lua_api::script_helpers::lua_error_val(format!(
         "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
         frame_name, frame_name, event
     ))
