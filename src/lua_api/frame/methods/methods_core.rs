@@ -633,11 +633,13 @@ fn widget_type_is_a(wt: crate::widget::WidgetType, type_name: &str) -> bool {
         return true;
     }
     match type_name.to_ascii_lowercase().as_str() {
-        "region" => true,
+        "object" | "region" => true,
         "frame" => !matches!(wt, WidgetType::FontString | WidgetType::Texture | WidgetType::Line),
         "texture" => matches!(wt, WidgetType::Texture | WidgetType::Line),
         "line" => matches!(wt, WidgetType::Line),
         "button" => matches!(wt, WidgetType::Button | WidgetType::CheckButton),
+        "model" => matches!(wt, WidgetType::Model | WidgetType::PlayerModel),
+        "playermodel" => matches!(wt, WidgetType::PlayerModel),
         _ => false,
     }
 }

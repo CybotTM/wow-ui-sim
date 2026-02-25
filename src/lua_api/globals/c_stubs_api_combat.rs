@@ -677,3 +677,41 @@ fn register_c_encounter_timeline_extra(lua: &Lua, t: &mlua::Table) -> Result<()>
     t.set("SetEventIconTextures", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
     Ok(())
 }
+
+/// Global-to-namespace alias pairs: (global_name, C_CombatLog method name).
+const COMBAT_LOG_ALIASES: &[(&str, &str)] = &[
+    ("CombatLogAddFilter", "AddEventFilter"),
+    ("CombatLogGetCurrentEntry", "GetCurrentEntryInfo"),
+    ("CombatLogGetCurrentEventInfo", "GetCurrentEventInfo"),
+    ("CombatLogGetNumEntries", "GetEntryCount"),
+    ("CombatLogAdvanceEntry", "AdvanceEntry"),
+    ("CombatLogSetCurrentEntry", "SetCurrentEntry"),
+    ("CombatLogShowCurrentEntry", "ShowCurrentEntry"),
+    ("CombatLogResetFilter", "ResetFilter"),
+    ("CombatLogClearEntries", "ClearEntries"),
+    ("CombatLogGetRetentionTime", "GetRetentionTime"),
+    ("CombatLogSetRetentionTime", "SetRetentionTime"),
+];
+
+/// Re-alias CombatLog* globals to the same function objects stored in C_CombatLog.
+///
+/// Wowless's cfuncs uniqueChecker requires that alias pairs (e.g. "C_CombatLog.AddEventFilter"
+/// and "CombatLogAddFilter") share the same underlying C function pointer. This function
+/// overwrites separately-created global stubs with direct references to the namespace functions.
+/// Must be called after all CombatLog registrations complete.
+pub fn fixup_combat_log_aliases(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let Ok(cl) = g.get::<mlua::Table>("C_CombatLog") else { return Ok(()) };
+    apply_aliases(lua, g, &cl, COMBAT_LOG_ALIASES)
+}
+
+/// Apply alias pairs from a namespace table to globals, with fallback no-op on missing methods.
+fn apply_aliases(lua: &Lua, g: &mlua::Table, ns: &mlua::Table, pairs: &[(&str, &str)]) -> Result<()> {
+    for &(global_name, method_name) in pairs {
+        let f = match ns.get::<mlua::Function>(method_name) {
+            Ok(f) => f,
+            Err(_) => lua.create_function(|_, _: MultiValue| Ok(()))?,
+        };
+        g.set(global_name, f)?;
+    }
+    Ok(())
+}

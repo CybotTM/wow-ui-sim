@@ -38,6 +38,8 @@ pub fn register_system_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     register_cursor_position(lua)?;
     register_localization_stubs(lua)?;
     register_ui_object_stubs(lua, state)?;
+    register_lua_stdlib_extensions(lua)?;
+    register_ui_parent_stubs(lua)?;
     Ok(())
 }
 
@@ -677,4 +679,72 @@ fn patch_get_aura_data_by_spell_name(
             }
         },
     )?)
+}
+
+/// Register WoW extensions to Lua stdlib tables (coroutine, math) and global `clock`.
+///
+/// WoW ships Lua 5.1 with additional C functions patched into the standard tables:
+/// - `coroutine.bind`, `coroutine.call`, `coroutine.mainthread`
+/// - `math.securerandom`
+/// - global `clock` (wall-clock seconds, similar to os.clock)
+fn register_lua_stdlib_extensions(lua: &Lua) -> Result<()> {
+    register_coroutine_extensions(lua)?;
+    register_math_extensions(lua)?;
+    register_clock_global(lua)?;
+    Ok(())
+}
+
+/// Add WoW-specific coroutine functions: bind, call, mainthread.
+///
+/// - `coroutine.bind(f)` → returns a function that resumes a new coroutine running f
+/// - `coroutine.call(f, ...)` → creates and resumes a coroutine immediately
+/// - `coroutine.mainthread()` → returns the main thread
+fn register_coroutine_extensions(lua: &Lua) -> Result<()> {
+    let co_tbl: mlua::Table = lua.globals().get("coroutine")?;
+    co_tbl.set("bind", lua.create_function(|lua, f: mlua::Function| {
+        let co = lua.create_thread(f)?;
+        lua.create_function(move |_, args: mlua::MultiValue| {
+            co.resume::<mlua::MultiValue>(args)
+        })
+    })?)?;
+    co_tbl.set("call", lua.create_function(|lua, (f, args): (mlua::Function, mlua::MultiValue)| {
+        let co = lua.create_thread(f)?;
+        co.resume::<mlua::MultiValue>(args)
+    })?)?;
+    co_tbl.set("mainthread", lua.create_function(|lua, ()| {
+        Ok(lua.current_thread())
+    })?)?;
+    Ok(())
+}
+
+/// Add `math.securerandom([m [, n]])` → cryptographically secure random number.
+///
+/// Stubbed to delegate to the standard `math.random` (no security requirements in sim).
+fn register_math_extensions(lua: &Lua) -> Result<()> {
+    let math_tbl: mlua::Table = lua.globals().get("math")?;
+    let math_random: mlua::Function = math_tbl.get("random")?;
+    math_tbl.set("securerandom", math_random)?;
+    Ok(())
+}
+
+/// Add global `clock()` → elapsed time in seconds (approximated via GetTime).
+///
+/// WoW's `clock()` is a C function returning a float representing wall-clock time.
+fn register_clock_global(lua: &Lua) -> Result<()> {
+    lua.globals().set("clock", lua.create_function(|lua, ()| {
+        let get_time: mlua::Function = lua.globals().get("GetTime")?;
+        get_time.call::<f64>(())
+    })?)?;
+    Ok(())
+}
+
+/// Register UIParent-related global stubs.
+///
+/// `UpdateUIParentPosition()` repositions the root frame after screen resize.
+fn register_ui_parent_stubs(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "UpdateUIParentPosition",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    Ok(())
 }

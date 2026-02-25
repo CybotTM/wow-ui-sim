@@ -219,13 +219,30 @@ fn create_frame_children_iterator(lua: &Lua, frame_id: u64) -> Result<mlua::Mult
 /// Override `getmetatable` to return a proper metatable for frame LightUserData.
 ///
 /// WoW addons expect `getmetatable(frame).__index` to be an iterable table
-/// of method names mapped to functions.
+/// of method names mapped to functions. Two frames of the same widget type
+/// return the same metatable (identity check passes).
 fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
+    // Build and cache per-type metatables now that __frame_methods_table is ready.
+    build_per_type_metatables(lua)?;
+
     let custom_getmetatable = lua.create_function(|lua, value: Value| {
-        if let Value::LightUserData(_) = &value {
-            return build_frame_metatable(lua);
+        if let Value::LightUserData(lud) = &value {
+            let frame_id = lud_to_id(*lud);
+            let widget_type = {
+                let state_rc = get_sim_state(lua);
+                let state = state_rc.borrow();
+                state
+                    .widgets
+                    .get(frame_id)
+                    .map(|f| f.widget_type)
+                    .unwrap_or(crate::widget::WidgetType::Frame)
+            };
+            let type_key = widget_type.as_str();
+            let per_type: mlua::Table = lua.named_registry_value("__per_type_metatables")?;
+            let mt: Value = per_type.raw_get(type_key)?;
+            return Ok(mt);
         }
         let real_getmetatable: mlua::Function = lua.named_registry_value("__real_getmetatable")?;
         real_getmetatable.call(value)
@@ -234,6 +251,102 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
     let real_getmetatable: mlua::Function = globals.get("getmetatable")?;
     lua.set_named_registry_value("__real_getmetatable", real_getmetatable)?;
     globals.set("getmetatable", custom_getmetatable)
+}
+
+/// Pre-build one metatable per widget type and store in `__per_type_metatables`.
+///
+/// Each metatable has exactly one key `__index` whose value is a table containing:
+/// - All methods from `__frame_methods_table` that `is_method_allowed(type, name)` permits.
+/// - Methods NOT in `is_known_method` (Mixin/sim-specific) are also included.
+///
+/// Two frames of the same widget type will receive the same table object from this
+/// cache, so `getmetatable(frame1) == getmetatable(frame2)` passes in Lua.
+fn build_per_type_metatables(lua: &Lua) -> Result<()> {
+    let method_pairs = collect_method_pairs(lua)?;
+    let per_type = lua.create_table()?;
+
+    for widget_type in all_widget_types() {
+        let type_key = widget_type.as_str();
+        // Skip if already built (WorldFrame shares "Frame" key with Frame).
+        if per_type.raw_get::<Value>(type_key)? != Value::Nil {
+            continue;
+        }
+        let mt = build_metatable_for_type(lua, widget_type, &method_pairs)?;
+        per_type.raw_set(type_key, mt)?;
+    }
+
+    lua.set_named_registry_value("__per_type_metatables", per_type)?;
+    Ok(())
+}
+
+/// Collect all (name, func) pairs from `__frame_methods_table` into a Vec.
+fn collect_method_pairs(lua: &Lua) -> Result<Vec<(String, Value)>> {
+    let all_methods: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
+    let mut pairs = Vec::new();
+    for pair in all_methods.pairs::<String, Value>() {
+        let (name, func) = pair?;
+        pairs.push((name, func));
+    }
+    Ok(pairs)
+}
+
+/// Build a `{ __index = { allowed methods } }` metatable for one widget type.
+///
+/// Each function in the `__index` table is wrapped in a unique thin closure so that
+/// the cfuncs identity checker sees distinct function objects per type. In real WoW,
+/// the C engine creates separate function wrappers per widget type metatable.
+fn build_metatable_for_type(
+    lua: &Lua,
+    widget_type: crate::widget::WidgetType,
+    method_pairs: &[(String, Value)],
+) -> Result<mlua::Table> {
+    use crate::lua_api::frame::method_registry;
+
+    let index_table = lua.create_table()?;
+    for (name, func) in method_pairs {
+        if method_registry::is_method_allowed(widget_type, name) {
+            let wrapped = lua.create_function({
+                let f = func.clone();
+                move |_, args: mlua::MultiValue| {
+                    match &f {
+                        Value::Function(func) => func.call::<mlua::MultiValue>(args),
+                        _ => Ok(mlua::MultiValue::new()),
+                    }
+                }
+            })?;
+            index_table.set(name.clone(), wrapped)?;
+        }
+    }
+    let mt = lua.create_table()?;
+    mt.set("__index", index_table)?;
+    Ok(mt)
+}
+
+/// All widget type variants (used to pre-build per-type metatables).
+fn all_widget_types() -> [crate::widget::WidgetType; 20] {
+    use crate::widget::WidgetType;
+    [
+        WidgetType::Frame,
+        WidgetType::WorldFrame,
+        WidgetType::Button,
+        WidgetType::CheckButton,
+        WidgetType::Texture,
+        WidgetType::FontString,
+        WidgetType::EditBox,
+        WidgetType::ScrollFrame,
+        WidgetType::Slider,
+        WidgetType::StatusBar,
+        WidgetType::Cooldown,
+        WidgetType::Model,
+        WidgetType::ModelScene,
+        WidgetType::PlayerModel,
+        WidgetType::ColorSelect,
+        WidgetType::MessageFrame,
+        WidgetType::SimpleHTML,
+        WidgetType::GameTooltip,
+        WidgetType::Minimap,
+        WidgetType::Line,
+    ]
 }
 
 /// Override `setmetatable` to support per-frame custom metatables on LightUserData.
@@ -266,24 +379,6 @@ fn register_custom_setmetatable(lua: &Lua) -> Result<()> {
     let real_setmetatable: mlua::Function = globals.get("setmetatable")?;
     lua.set_named_registry_value("__real_setmetatable", real_setmetatable)?;
     globals.set("setmetatable", custom_setmetatable)
-}
-
-/// Build a fake metatable for frame LightUserData with `__index` from the methods table.
-fn build_frame_metatable(lua: &Lua) -> Result<Value> {
-    use crate::lua_api::frame::method_registry;
-    let mt = lua.create_table()?;
-    let all_methods: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
-    let index_table = lua.create_table()?;
-    // Include all methods from all widget types (union).
-    for pair in all_methods.pairs::<String, Value>() {
-        let (name, func) = pair?;
-        // Only include methods from discovery data — skip Mixin/sim methods.
-        if method_registry::is_known_method(&name) {
-            index_table.set(name, func)?;
-        }
-    }
-    mt.set("__index", index_table)?;
-    Ok(Value::Table(mt))
 }
 
 /// Register `CreateFrame` from its dedicated sub-module.

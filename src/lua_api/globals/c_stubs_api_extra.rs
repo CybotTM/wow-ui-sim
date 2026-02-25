@@ -40,6 +40,8 @@ pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
     register_c_delves_ui(lua)?;
     register_c_zone_ability(lua)?;
     super::c_stubs_achievement::register_simulate_ping(lua)?;
+    // Re-apply CombatLog global aliases so they share the same function pointer as C_CombatLog.
+    super::c_stubs_api_combat::fixup_combat_log_aliases(lua, &g)?;
     Ok(())
 }
 
