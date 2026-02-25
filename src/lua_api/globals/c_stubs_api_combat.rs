@@ -4,8 +4,20 @@
 //! Contains: C_ColorUtil, C_CombatLog, C_CurveUtil, C_EncounterTimeline,
 //! C_RestrictedActions, C_TransmogOutfitInfo, Constants.EncounterTimelineIconMasks.
 
-use mlua::{Lua, Result, UserData, UserDataMethods, Value};
+use mlua::{AnyUserData, Lua, MetaMethod, MultiValue, Result, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+static NEXT_CURVE_ID: AtomicU64 = AtomicU64::new(1);
+
+/// Metamethod names that should return nil when accessed via __index on curve objects.
+const METAMETHOD_NAMES: &[&str] = &["__eq", "__index", "__metatable", "__newindex", "__tostring"];
+
+/// Registry key for the shared LuaCurveObject methods table.
+const CURVE_METHODS_KEY: &str = "__lua_curve_object_methods";
+
+/// Registry key for the shared LuaColorCurveObject methods table.
+const COLOR_CURVE_METHODS_KEY: &str = "__lua_color_curve_object_methods";
 
 /// Register all combat/encounter-related stubs.
 pub fn register_combat_stubs(lua: &Lua) -> Result<()> {
@@ -31,21 +43,37 @@ struct CurvePoint {
     y: f64,
 }
 
-/// Curve object exposed to Lua as UserData with AddPoint/SetType/GetValue methods.
-struct Curve {
+/// LuaCurveObject: WoW curve object for interpolation (scalar y values).
+struct LuaCurveObject {
+    id: u64,
+    curve_type: RefCell<i32>,
     points: RefCell<Vec<CurvePoint>>,
 }
 
-impl UserData for Curve {
-    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("AddPoint", |_, this, (x, y): (f64, f64)| {
-            this.points.borrow_mut().push(CurvePoint { x, y });
-            Ok(())
-        });
-        methods.add_method("SetType", |_, _, _t: i32| Ok(()));
-        methods.add_method("GetValue", |_, this, x: f64| {
-            Ok(interpolate(&this.points.borrow(), x))
-        });
+impl LuaCurveObject {
+    fn new() -> Self {
+        Self {
+            id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+            curve_type: RefCell::new(0),
+            points: RefCell::new(Vec::new()),
+        }
+    }
+}
+
+/// LuaColorCurveObject: WoW color curve object (4-component RGBA values per point).
+struct LuaColorCurveObject {
+    id: u64,
+    curve_type: RefCell<i32>,
+    points: RefCell<Vec<CurvePoint>>,
+}
+
+impl LuaColorCurveObject {
+    fn new() -> Self {
+        Self {
+            id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+            curve_type: RefCell::new(0),
+            points: RefCell::new(Vec::new()),
+        }
     }
 }
 
@@ -68,14 +96,335 @@ fn interpolate(pts: &[CurvePoint], x: f64) -> f64 {
     }
 }
 
-/// C_CurveUtil - creates curve objects for interpolation (used by CurveConstants.lua).
-fn register_c_curve_util(lua: &Lua) -> Result<()> {
+/// Build a __index handler for curve objects.
+///
+/// Checks (in order):
+/// 1. Metamethod names → nil (not exposed as indexable fields)
+/// 2. Per-instance user_value table (for arbitrary field storage)
+/// 3. Shared methods table from the registry (for WoW API methods)
+fn curve_index(lua: &Lua, ud: AnyUserData, key: String, methods_key: &'static str) -> Result<Value> {
+    if METAMETHOD_NAMES.contains(&key.as_str()) {
+        return Ok(Value::Nil);
+    }
+    // Check per-instance field storage first
+    if let Ok(fields) = ud.user_value::<mlua::Table>() {
+        let v: Value = fields.raw_get(key.as_str())?;
+        if v != Value::Nil {
+            return Ok(v);
+        }
+    }
+    // Fall back to shared methods table
+    let methods: mlua::Table = lua.named_registry_value(methods_key)?;
+    methods.raw_get(key.as_str())
+}
+
+/// Build a __newindex handler for curve objects.
+///
+/// - Errors with "Attempted to assign to read-only key X" for method names and metamethods
+/// - Stores all other key/value pairs in the per-instance user_value table
+fn curve_newindex(lua: &Lua, ud: AnyUserData, key: String, value: Value, methods_key: &'static str) -> Result<()> {
+    // Block metamethod assignment
+    if METAMETHOD_NAMES.contains(&key.as_str()) {
+        return Err(mlua::Error::runtime(format!("Attempted to assign to read-only key {}", key)));
+    }
+    let methods: mlua::Table = lua.named_registry_value(methods_key)?;
+    let existing: Value = methods.raw_get(key.as_str())?;
+    if existing != Value::Nil {
+        return Err(mlua::Error::runtime(format!("Attempted to assign to read-only key {}", key)));
+    }
+    let fields = ud.user_value::<mlua::Table>()?;
+    fields.raw_set(key, value)?;
+    Ok(())
+}
+
+impl UserData for LuaCurveObject {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_meta_function(
+            MetaMethod::Index,
+            |lua, (ud, key): (AnyUserData, String)| {
+                curve_index(lua, ud, key, CURVE_METHODS_KEY)
+            },
+        );
+        methods.add_meta_function(
+            MetaMethod::NewIndex,
+            |lua, (ud, key, value): (AnyUserData, String, Value)| {
+                curve_newindex(lua, ud, key, value, CURVE_METHODS_KEY)
+            },
+        );
+        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
+            Ok(format!("LuaCurveObject: 0x{:016x}", this.id))
+        });
+    }
+}
+
+impl UserData for LuaColorCurveObject {
+    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_meta_function(
+            MetaMethod::Index,
+            |lua, (ud, key): (AnyUserData, String)| {
+                curve_index(lua, ud, key, COLOR_CURVE_METHODS_KEY)
+            },
+        );
+        methods.add_meta_function(
+            MetaMethod::NewIndex,
+            |lua, (ud, key, value): (AnyUserData, String, Value)| {
+                curve_newindex(lua, ud, key, value, COLOR_CURVE_METHODS_KEY)
+            },
+        );
+        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
+            Ok(format!("LuaColorCurveObject: 0x{:016x}", this.id))
+        });
+    }
+}
+
+/// Add AddPoint and ClearPoints to the LuaCurveObject methods table.
+fn add_curve_add_clear(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("AddPoint", lua.create_function(|_, (ud, x, y): (AnyUserData, f64, f64)| {
+        ud.borrow::<LuaCurveObject>()?.points.borrow_mut().push(CurvePoint { x, y });
+        Ok(())
+    })?)?;
+    t.raw_set("ClearPoints", lua.create_function(|_, ud: AnyUserData| {
+        ud.borrow::<LuaCurveObject>()?.points.borrow_mut().clear();
+        Ok(())
+    })?)?;
+    Ok(())
+}
+
+/// Add RemovePoint, SetPoints, SetToDefaults, SetType to the LuaCurveObject methods table.
+fn add_curve_set_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("RemovePoint", lua.create_function(|_, (ud, index): (AnyUserData, usize)| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        let mut pts = obj.points.borrow_mut();
+        if index >= 1 && index <= pts.len() { pts.remove(index - 1); }
+        Ok(())
+    })?)?;
+    t.raw_set("SetPoints", lua.create_function(|_, (ud, src): (AnyUserData, mlua::Table)| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        let mut pts = obj.points.borrow_mut();
+        pts.clear();
+        for pair in src.sequence_values::<mlua::Table>().flatten() {
+            pts.push(CurvePoint { x: pair.get("x").unwrap_or(0.0), y: pair.get("y").unwrap_or(0.0) });
+        }
+        Ok(())
+    })?)?;
+    t.raw_set("SetToDefaults", lua.create_function(|_, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        obj.points.borrow_mut().clear();
+        *obj.curve_type.borrow_mut() = 0;
+        Ok(())
+    })?)?;
+    t.raw_set("SetType", lua.create_function(|_, (ud, ty): (AnyUserData, i32)| {
+        *ud.borrow::<LuaCurveObject>()?.curve_type.borrow_mut() = ty;
+        Ok(())
+    })?)?;
+    Ok(())
+}
+
+/// Add Copy and Evaluate to the LuaCurveObject methods table.
+fn add_curve_copy_eval(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("Copy", lua.create_function(|lua, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        let new_obj = LuaCurveObject {
+            id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+            curve_type: RefCell::new(*obj.curve_type.borrow()),
+            points: RefCell::new(obj.points.borrow().iter().map(|p| CurvePoint { x: p.x, y: p.y }).collect()),
+        };
+        drop(obj);
+        let new_ud = lua.create_userdata(new_obj)?;
+        new_ud.set_user_value(lua.create_table()?)?;
+        Ok(new_ud)
+    })?)?;
+    t.raw_set("Evaluate", lua.create_function(|_, (ud, x): (AnyUserData, f64)| {
+        Ok(interpolate(&ud.borrow::<LuaCurveObject>()?.points.borrow(), x))
+    })?)?;
+    Ok(())
+}
+
+/// Add GetPoint, GetPointCount, GetPoints, GetType, HasSecretValues to the LuaCurveObject table.
+fn add_curve_get_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("GetPoint", lua.create_function(|lua, (ud, index): (AnyUserData, usize)| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        let pts = obj.points.borrow();
+        if index < 1 || index > pts.len() { return Ok(Value::Nil); }
+        let p = &pts[index - 1];
+        let tbl = lua.create_table()?;
+        tbl.raw_set("x", p.x)?;
+        tbl.raw_set("y", p.y)?;
+        Ok(Value::Table(tbl))
+    })?)?;
+    t.raw_set("GetPointCount", lua.create_function(|_, ud: AnyUserData| {
+        Ok(ud.borrow::<LuaCurveObject>()?.points.borrow().len())
+    })?)?;
+    t.raw_set("GetPoints", lua.create_function(|lua, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaCurveObject>()?;
+        let tbl = lua.create_table()?;
+        for (i, p) in obj.points.borrow().iter().enumerate() {
+            let pt = lua.create_table()?;
+            pt.raw_set("x", p.x)?;
+            pt.raw_set("y", p.y)?;
+            tbl.raw_set(i + 1, pt)?;
+        }
+        Ok(tbl)
+    })?)?;
+    t.raw_set("GetType", lua.create_function(|_, ud: AnyUserData| {
+        Ok(*ud.borrow::<LuaCurveObject>()?.curve_type.borrow())
+    })?)?;
+    t.raw_set("HasSecretValues", lua.create_function(|_, _: AnyUserData| Ok(false))?)?;
+    Ok(())
+}
+
+/// Build the shared methods table for LuaCurveObject.
+fn build_curve_methods(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    let create = lua.create_function(|_, ()| {
-        Ok(Curve { points: RefCell::new(Vec::new()) })
-    })?;
-    t.set("CreateCurve", create.clone())?;
-    t.set("CreateColorCurve", create)?;
+    add_curve_add_clear(lua, &t)?;
+    add_curve_set_methods(lua, &t)?;
+    add_curve_copy_eval(lua, &t)?;
+    add_curve_get_methods(lua, &t)?;
+    Ok(t)
+}
+
+/// Add AddPoint, ClearPoints, Copy to the LuaColorCurveObject methods table.
+fn add_color_curve_basic(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("AddPoint", lua.create_function(|_, (ud, x, y): (AnyUserData, f64, f64)| {
+        ud.borrow::<LuaColorCurveObject>()?.points.borrow_mut().push(CurvePoint { x, y });
+        Ok(())
+    })?)?;
+    t.raw_set("ClearPoints", lua.create_function(|_, ud: AnyUserData| {
+        ud.borrow::<LuaColorCurveObject>()?.points.borrow_mut().clear();
+        Ok(())
+    })?)?;
+    t.raw_set("Copy", lua.create_function(|lua, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        let new_obj = LuaColorCurveObject {
+            id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+            curve_type: RefCell::new(*obj.curve_type.borrow()),
+            points: RefCell::new(obj.points.borrow().iter().map(|p| CurvePoint { x: p.x, y: p.y }).collect()),
+        };
+        drop(obj);
+        let new_ud = lua.create_userdata(new_obj)?;
+        new_ud.set_user_value(lua.create_table()?)?;
+        Ok(new_ud)
+    })?)?;
+    Ok(())
+}
+
+/// Add Evaluate and EvaluateUnpacked to the LuaColorCurveObject methods table.
+fn add_color_curve_evaluate(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("Evaluate", lua.create_function(|lua, (ud, x): (AnyUserData, f64)| {
+        let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points.borrow(), x);
+        let tbl = lua.create_table()?;
+        tbl.raw_set("r", y)?;
+        tbl.raw_set("g", y)?;
+        tbl.raw_set("b", y)?;
+        tbl.raw_set("a", 1.0_f64)?;
+        Ok(Value::Table(tbl))
+    })?)?;
+    t.raw_set("EvaluateUnpacked", lua.create_function(|_, (ud, x): (AnyUserData, f64)| {
+        let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points.borrow(), x);
+        Ok(MultiValue::from_iter([Value::Number(y), Value::Number(y), Value::Number(y), Value::Number(1.0)]))
+    })?)?;
+    Ok(())
+}
+
+/// Add GetPoint, GetPointCount, GetPoints, GetType, HasSecretValues to LuaColorCurveObject table.
+fn add_color_curve_get_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("GetPoint", lua.create_function(|lua, (ud, index): (AnyUserData, usize)| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        let pts = obj.points.borrow();
+        if index < 1 || index > pts.len() { return Ok(Value::Nil); }
+        let p = &pts[index - 1];
+        let tbl = lua.create_table()?;
+        tbl.raw_set("x", p.x)?;
+        tbl.raw_set("y", p.y)?;
+        Ok(Value::Table(tbl))
+    })?)?;
+    t.raw_set("GetPointCount", lua.create_function(|_, ud: AnyUserData| {
+        Ok(ud.borrow::<LuaColorCurveObject>()?.points.borrow().len())
+    })?)?;
+    t.raw_set("GetPoints", lua.create_function(|lua, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        let tbl = lua.create_table()?;
+        for (i, p) in obj.points.borrow().iter().enumerate() {
+            let pt = lua.create_table()?;
+            pt.raw_set("x", p.x)?;
+            pt.raw_set("y", p.y)?;
+            tbl.raw_set(i + 1, pt)?;
+        }
+        Ok(tbl)
+    })?)?;
+    t.raw_set("GetType", lua.create_function(|_, ud: AnyUserData| {
+        Ok(*ud.borrow::<LuaColorCurveObject>()?.curve_type.borrow())
+    })?)?;
+    t.raw_set("HasSecretValues", lua.create_function(|_, _: AnyUserData| Ok(false))?)?;
+    Ok(())
+}
+
+/// Add RemovePoint, SetPoints, SetToDefaults, SetType to LuaColorCurveObject methods table.
+fn add_color_curve_set_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.raw_set("RemovePoint", lua.create_function(|_, (ud, index): (AnyUserData, usize)| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        let mut pts = obj.points.borrow_mut();
+        if index >= 1 && index <= pts.len() { pts.remove(index - 1); }
+        Ok(())
+    })?)?;
+    t.raw_set("SetPoints", lua.create_function(|_, (ud, src): (AnyUserData, mlua::Table)| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        let mut pts = obj.points.borrow_mut();
+        pts.clear();
+        for pair in src.sequence_values::<mlua::Table>().flatten() {
+            pts.push(CurvePoint { x: pair.get("x").unwrap_or(0.0), y: pair.get("y").unwrap_or(0.0) });
+        }
+        Ok(())
+    })?)?;
+    t.raw_set("SetToDefaults", lua.create_function(|_, ud: AnyUserData| {
+        let obj = ud.borrow::<LuaColorCurveObject>()?;
+        obj.points.borrow_mut().clear();
+        *obj.curve_type.borrow_mut() = 0;
+        Ok(())
+    })?)?;
+    t.raw_set("SetType", lua.create_function(|_, (ud, ty): (AnyUserData, i32)| {
+        *ud.borrow::<LuaColorCurveObject>()?.curve_type.borrow_mut() = ty;
+        Ok(())
+    })?)?;
+    Ok(())
+}
+
+/// Build the shared methods table for LuaColorCurveObject.
+fn build_color_curve_methods(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    add_color_curve_basic(lua, &t)?;
+    add_color_curve_evaluate(lua, &t)?;
+    add_color_curve_get_methods(lua, &t)?;
+    add_color_curve_set_methods(lua, &t)?;
+    Ok(t)
+}
+
+/// C_CurveUtil - creates LuaCurveObject and LuaColorCurveObject for interpolation.
+///
+/// Both types expose the full WoW API: AddPoint, ClearPoints, Copy, Evaluate, GetPoint,
+/// GetPointCount, GetPoints, GetType, HasSecretValues, RemovePoint, SetPoints, SetToDefaults,
+/// SetType. LuaColorCurveObject additionally has EvaluateUnpacked.
+fn register_c_curve_util(lua: &Lua) -> Result<()> {
+    let curve_methods = build_curve_methods(lua)?;
+    lua.set_named_registry_value(CURVE_METHODS_KEY, curve_methods)?;
+
+    let color_curve_methods = build_color_curve_methods(lua)?;
+    lua.set_named_registry_value(COLOR_CURVE_METHODS_KEY, color_curve_methods)?;
+
+    let t = lua.create_table()?;
+
+    t.set("CreateCurve", lua.create_function(|lua, ()| {
+        let ud = lua.create_userdata(LuaCurveObject::new())?;
+        ud.set_user_value(lua.create_table()?)?;
+        Ok(ud)
+    })?)?;
+
+    t.set("CreateColorCurve", lua.create_function(|lua, ()| {
+        let ud = lua.create_userdata(LuaColorCurveObject::new())?;
+        ud.set_user_value(lua.create_table()?)?;
+        Ok(ud)
+    })?)?;
+
     lua.globals().set("C_CurveUtil", t)?;
     Ok(())
 }
@@ -204,45 +553,60 @@ fn register_c_housing_photo_sharing(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+/// Build the NamePlateConstants string cvar fields sub-table.
+fn nameplate_cvar_fields(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.raw_set("INFO_DISPLAY_CVAR", "nameplateInfoDisplay")?;
+    t.raw_set("CAST_BAR_DISPLAY_CVAR", "nameplateCastBarDisplay")?;
+    t.raw_set("THREAT_DISPLAY_CVAR", "nameplateThreatDisplay")?;
+    t.raw_set("ENEMY_NPC_AURA_DISPLAY_CVAR", "nameplateEnemyNpcAuraDisplay")?;
+    t.raw_set("ENEMY_PLAYER_AURA_DISPLAY_CVAR", "nameplateEnemyPlayerAuraDisplay")?;
+    t.raw_set("FRIENDLY_PLAYER_AURA_DISPLAY_CVAR", "nameplateFriendlyPlayerAuraDisplay")?;
+    t.raw_set("SHOW_DEBUFFS_ON_FRIENDLY_CVAR", "nameplateShowDebuffsOnFriendly")?;
+    t.raw_set("DEBUFF_PADDING_CVAR", "nameplateDebuffPadding")?;
+    t.raw_set("AURA_SCALE_CVAR", "nameplateAuraScale")?;
+    t.raw_set("SIZE_CVAR", "nameplateSize")?;
+    t.raw_set("STYLE_CVAR", "nameplateStyle")?;
+    t.raw_set("SIMPLIFIED_TYPES_CVAR", "nameplateSimplifiedTypes")?;
+    t.raw_set("SOFT_TARGET_NAMEPLATE_SIZE_CVAR", "SoftTargetNameplateSize")?;
+    t.raw_set("SOFT_TARGET_ICON_ENEMY_CVAR", "SoftTargetIconEnemy")?;
+    t.raw_set("SOFT_TARGET_ICON_FRIEND_CVAR", "SoftTargetIconFriend")?;
+    t.raw_set("SOFT_TARGET_ICON_INTERACT_CVAR", "SoftTargetIconInteract")?;
+    t.raw_set("SHOW_FRIENDLY_NPCS_CVAR", "nameplateShowFriendlyNpcs")?;
+    t.raw_set("SHOW_ONLY_NAME_FOR_FRIENDLY_PLAYER_UNITS_CVAR", "nameplateShowOnlyNameForFriendlyPlayerUnits")?;
+    t.raw_set("USE_CLASS_COLOR_FOR_FRIENDLY_PLAYER_UNIT_NAMES_CVAR", "nameplateUseClassColorForFriendlyPlayerUnitNames")?;
+    t.raw_set("PREVIEW_UNIT_TOKEN", "preview")?;
+    Ok(t)
+}
+
+/// Build the NamePlateConstants numeric fields sub-table.
+fn nameplate_numeric_fields(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.raw_set("AURA_ITEM_HEIGHT", 25_i32)?;
+    t.raw_set("LARGE_HEALTH_BAR_HEIGHT", 20_i32)?;
+    t.raw_set("SMALL_HEALTH_BAR_HEIGHT", 10_i32)?;
+    t.raw_set("HEALTH_BAR_FONT_HEIGHT", 12_i32)?;
+    t.raw_set("LARGE_CAST_BAR_HEIGHT", 16_i32)?;
+    t.raw_set("SMALL_CAST_BAR_HEIGHT", 10_i32)?;
+    t.raw_set("CAST_BAR_FONT_HEIGHT", 10_i32)?;
+    t.raw_set("CAST_BAR_ICON_HEIGHT", 12_i32)?;
+    let scales = lua.create_table()?;
+    for (i, v) in [0.75f64, 1.0, 1.25, 1.5, 2.0].iter().enumerate() {
+        scales.raw_set(i as i32 + 1, *v)?;
+    }
+    t.raw_set("NAME_PLATE_SCALES", scales)?;
+    Ok(t)
+}
+
 /// NamePlateConstants - global constant table for nameplate system.
 fn register_nameplate_constants(lua: &Lua) -> Result<()> {
-    lua.load(r#"
-        NamePlateConstants = {
-            INFO_DISPLAY_CVAR = "nameplateInfoDisplay",
-            CAST_BAR_DISPLAY_CVAR = "nameplateCastBarDisplay",
-            THREAT_DISPLAY_CVAR = "nameplateThreatDisplay",
-            ENEMY_NPC_AURA_DISPLAY_CVAR = "nameplateEnemyNpcAuraDisplay",
-            ENEMY_PLAYER_AURA_DISPLAY_CVAR = "nameplateEnemyPlayerAuraDisplay",
-            FRIENDLY_PLAYER_AURA_DISPLAY_CVAR = "nameplateFriendlyPlayerAuraDisplay",
-            SHOW_DEBUFFS_ON_FRIENDLY_CVAR = "nameplateShowDebuffsOnFriendly",
-            DEBUFF_PADDING_CVAR = "nameplateDebuffPadding",
-            AURA_SCALE_CVAR = "nameplateAuraScale",
-            SIZE_CVAR = "nameplateSize",
-            STYLE_CVAR = "nameplateStyle",
-            SIMPLIFIED_TYPES_CVAR = "nameplateSimplifiedTypes",
-            SOFT_TARGET_NAMEPLATE_SIZE_CVAR = "SoftTargetNameplateSize",
-            SOFT_TARGET_ICON_ENEMY_CVAR = "SoftTargetIconEnemy",
-            SOFT_TARGET_ICON_FRIEND_CVAR = "SoftTargetIconFriend",
-            SOFT_TARGET_ICON_INTERACT_CVAR = "SoftTargetIconInteract",
-            SHOW_FRIENDLY_NPCS_CVAR = "nameplateShowFriendlyNpcs",
-            SHOW_ONLY_NAME_FOR_FRIENDLY_PLAYER_UNITS_CVAR =
-                "nameplateShowOnlyNameForFriendlyPlayerUnits",
-            USE_CLASS_COLOR_FOR_FRIENDLY_PLAYER_UNIT_NAMES_CVAR =
-                "nameplateUseClassColorForFriendlyPlayerUnitNames",
-            PREVIEW_UNIT_TOKEN = "preview",
-            AURA_ITEM_HEIGHT = 25,
-            LARGE_HEALTH_BAR_HEIGHT = 20,
-            SMALL_HEALTH_BAR_HEIGHT = 10,
-            HEALTH_BAR_FONT_HEIGHT = 12,
-            LARGE_CAST_BAR_HEIGHT = 16,
-            SMALL_CAST_BAR_HEIGHT = 10,
-            CAST_BAR_FONT_HEIGHT = 10,
-            CAST_BAR_ICON_HEIGHT = 12,
-            NAME_PLATE_SCALES = {
-                [1] = 0.75, [2] = 1.0, [3] = 1.25, [4] = 1.5, [5] = 2.0,
-            },
-        }
-    "#).exec()
+    let t = nameplate_cvar_fields(lua)?;
+    for pair in nameplate_numeric_fields(lua)?.pairs::<String, Value>() {
+        let (k, v) = pair?;
+        t.raw_set(k, v)?;
+    }
+    lua.globals().set("NamePlateConstants", t)?;
+    Ok(())
 }
 
 /// C_DeathRecap - death recap data.

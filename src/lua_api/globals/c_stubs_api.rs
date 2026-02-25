@@ -654,9 +654,8 @@ fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()>
     g.set("DefaultCompactNamePlateFriendlyFrameOptions", lua.create_table()?)?;
     g.set("DefaultCompactNamePlatePlayerFrameSetUpOptions", lua.create_table()?)?;
 
-    let func_containers = lua.create_table()?;
-    func_containers.set("CreateCallback", lua.create_function(|lua, _func: Value| lua.create_table())?)?;
-    g.set("C_FunctionContainers", func_containers)?;
+    // Register C_FunctionContainers with proper LuaFunctionContainer UserData
+    super::function_container::register_c_function_containers(lua)?;
 
     let spell_overlay = lua.create_table()?;
     spell_overlay.set("IsSpellOverlayed", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;

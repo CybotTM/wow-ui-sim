@@ -1,7 +1,7 @@
 //! Timer processing: firing callbacks, cancellation, cleanup, and tick loop.
 
 use super::env::WowLuaEnv;
-use super::globals::timer_api::create_timer_proxy;
+use super::globals::timer_api::create_fc_proxy;
 use super::state::PendingTimer;
 use crate::Result;
 use std::time::Instant;
@@ -31,21 +31,30 @@ impl WowLuaEnv {
         let Ok(callback) = self.lua.registry_value::<mlua::Function>(&timer.callback_key) else {
             return false;
         };
-        let handle: Option<mlua::Table> = timer
-            .handle_key
-            .as_ref()
-            .and_then(|k| self.lua.registry_value(k).ok());
-        let result = match handle {
-            Some(h) => {
-                let arg = create_timer_proxy(&self.lua, &h).unwrap_or(h);
-                callback.call::<()>(arg)
-            }
-            None => callback.call::<()>(()),
-        };
+        let result = self.invoke_timer_callback(&callback, timer);
         if let Err(e) = result {
             eprintln!("Timer callback error: {}", e);
         }
         true
+    }
+
+    /// Invoke the timer callback, passing the handle proxy if available.
+    fn invoke_timer_callback(
+        &self,
+        callback: &mlua::Function,
+        timer: &PendingTimer,
+    ) -> mlua::Result<()> {
+        let handle: Option<mlua::AnyUserData> = timer
+            .handle_key
+            .as_ref()
+            .and_then(|k| self.lua.registry_value(k).ok());
+        match handle {
+            Some(h) => {
+                let proxy = create_fc_proxy(&self.lua, &h).unwrap_or(h);
+                callback.call::<()>(proxy)
+            }
+            None => callback.call::<()>(()),
+        }
     }
 
     /// Check if a ticker should repeat and decrement its remaining count.
@@ -60,6 +69,47 @@ impl WowLuaEnv {
         }
     }
 
+    /// Reschedule a repeating timer or clean it up if exhausted.
+    fn reschedule_or_cleanup(&self, mut timer: PendingTimer, now: Instant, to_reschedule: &mut Vec<PendingTimer>) {
+        let Some(interval) = timer.interval else {
+            self.cleanup_timer(timer);
+            return;
+        };
+        if Self::ticker_should_repeat(&mut timer) {
+            timer.fire_at = now + interval;
+            to_reschedule.push(timer);
+        } else {
+            self.cleanup_timer(timer);
+        }
+    }
+
+    /// Fire one ready timer, accounting for addon timing. Returns updated fired count.
+    fn fire_ready_timer(
+        &self,
+        timer: PendingTimer,
+        now: Instant,
+        fired: usize,
+        to_reschedule: &mut Vec<PendingTimer>,
+    ) -> usize {
+        let timer_addon = timer.owner_addon;
+        let cb_start = Instant::now();
+        if self.fire_timer_callback(&timer) {
+            let elapsed_ms = cb_start.elapsed().as_secs_f64() * 1000.0;
+            let mut state = self.state.borrow_mut();
+            if let Some(idx) = timer_addon {
+                if let Some(addon) = state.addons.get_mut(idx as usize) {
+                    addon.runtime.current_frame_ms += elapsed_ms;
+                }
+            }
+            drop(state);
+            self.reschedule_or_cleanup(timer, now, to_reschedule);
+            fired + 1
+        } else {
+            self.cleanup_timer(timer);
+            fired
+        }
+    }
+
     /// Process any timers that are ready to fire.
     /// Returns the number of callbacks invoked.
     pub fn process_timers(&self) -> Result<usize> {
@@ -67,52 +117,29 @@ impl WowLuaEnv {
         let mut fired = 0;
         let mut to_reschedule = Vec::new();
 
-        let mut state = self.state.borrow_mut();
         let mut i = 0;
-        while i < state.timers.len() {
-            if state.timers[i].cancelled {
-                self.cleanup_timer(state.timers.remove(i).unwrap());
-                continue;
+        loop {
+            let len = self.state.borrow().timers.len();
+            if i >= len {
+                break;
             }
-
-            if state.timers[i].fire_at <= now {
-                let mut timer = state.timers.remove(i).unwrap();
-                let timer_addon = timer.owner_addon;
-                // Drop state borrow before calling Lua callback
-                drop(state);
-
-                let cb_start = Instant::now();
-                if self.fire_timer_callback(&timer) {
-                    let elapsed_ms = cb_start.elapsed().as_secs_f64() * 1000.0;
-                    fired += 1;
-                    state = self.state.borrow_mut();
-                    if let Some(idx) = timer_addon {
-                        if let Some(addon) = state.addons.get_mut(idx as usize) {
-                            addon.runtime.current_frame_ms += elapsed_ms;
-                        }
-                    }
-
-                    if let Some(interval) = timer.interval {
-                        if Self::ticker_should_repeat(&mut timer) {
-                            timer.fire_at = now + interval;
-                            to_reschedule.push(timer);
-                        } else {
-                            self.cleanup_timer(timer);
-                        }
-                    } else {
-                        self.cleanup_timer(timer);
-                    }
-                } else {
-                    self.cleanup_timer(timer);
-                    state = self.state.borrow_mut();
-                }
-                continue;
+            let (cancelled, ready) = {
+                let state = self.state.borrow();
+                (state.timers[i].cancelled, state.timers[i].fire_at <= now)
+            };
+            if cancelled {
+                let timer = self.state.borrow_mut().timers.remove(i).unwrap();
+                self.cleanup_timer(timer);
+            } else if ready {
+                let timer = self.state.borrow_mut().timers.remove(i).unwrap();
+                fired = self.fire_ready_timer(timer, now, fired, &mut to_reschedule);
+            } else {
+                i += 1;
             }
-            i += 1;
         }
 
         for timer in to_reschedule {
-            state.timers.push_back(timer);
+            self.state.borrow_mut().timers.push_back(timer);
         }
 
         Ok(fired)

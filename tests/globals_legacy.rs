@@ -337,6 +337,38 @@ fn test_ui_strings_registered() {
 }
 
 // ============================================================================
+// string.format error messages
+// ============================================================================
+
+#[test]
+fn test_string_format_missing_string_arg_error_message() {
+    let env = env();
+    let err: String = env
+        .eval("local ok, err = pcall(string.format, '%s'); return err")
+        .unwrap();
+    assert_eq!(
+        err,
+        "bad argument #2 to '?' (string expected, got no value)",
+        "got: {}",
+        err
+    );
+}
+
+#[test]
+fn test_string_format_nil_string_arg_error_message() {
+    let env = env();
+    let err: String = env
+        .eval("local ok, err = pcall(string.format, '%s', nil); return err")
+        .unwrap();
+    assert_eq!(
+        err,
+        "bad argument #2 to '?' (string expected, got nil)",
+        "got: {}",
+        err
+    );
+}
+
+// ============================================================================
 // Standard font objects created
 // ============================================================================
 

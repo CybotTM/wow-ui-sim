@@ -7,6 +7,8 @@
 //! - Missing global functions, constants, and utility tables
 
 use mlua::{Lua, Result, Value};
+use std::collections::HashMap;
+use std::sync::OnceLock;
 
 /// Convert a Lua value to f64 for abbreviation functions, returning None for non-numeric.
 fn to_abbrev_number(value: &Value) -> Option<f64> {
@@ -149,6 +151,35 @@ fn register_missing_global_functions(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+/// Lazy reverse map: normalized path (uppercase, no Interface/ prefix, no extension) → file ID.
+static PATH_TO_FILE_ID: OnceLock<HashMap<String, u32>> = OnceLock::new();
+
+fn get_path_to_file_id() -> &'static HashMap<String, u32> {
+    PATH_TO_FILE_ID.get_or_init(|| {
+        crate::manifest_interface_data::MANIFEST
+            .entries()
+            .map(|(&id, &path)| (path.to_uppercase(), id))
+            .collect()
+    })
+}
+
+/// Normalize a WoW file path for manifest lookup.
+///
+/// Converts backslashes to `/`, strips `interface/` prefix (case-insensitive),
+/// strips file extension, and uppercases — matching manifest key format.
+fn normalize_file_path(raw: &str) -> String {
+    let normalized = raw.replace('\\', "/");
+    let stripped = normalized
+        .strip_prefix("interface/")
+        .or_else(|| normalized.strip_prefix("Interface/"))
+        .unwrap_or_else(|| {
+            let lower = normalized.to_lowercase();
+            if lower.starts_with("interface/") { &normalized[10..] } else { &normalized }
+        });
+    let no_ext = stripped.rfind('.').map(|i| &stripped[..i]).unwrap_or(stripped);
+    no_ext.to_uppercase()
+}
+
 /// Gameplay-related global function stubs.
 fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("IsPlayerInWorld", lua.create_function(|_, ()| Ok(true))?)?;
@@ -163,6 +194,10 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("AddSourceLocationExclude", lua.create_function(|_, _location: Value| Ok(()))?)?;
     register_event_callback(lua)?;
     g.set("UnitIsHumanPlayer", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
+    g.set("GetFileIDFromPath", lua.create_function(|_, path: String| {
+        let key = normalize_file_path(&path);
+        Ok(get_path_to_file_id().get(&key).copied().map(|id| id as i64))
+    })?)?;
     Ok(())
 }
 

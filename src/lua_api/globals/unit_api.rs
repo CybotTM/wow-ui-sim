@@ -319,7 +319,7 @@ fn register_unit_name_strict(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             fn_name,
             lua.create_function(move |lua, unit: String| {
                 let Some(name) = resolve_unit_name_with_party(&unit, &st.borrow()) else {
-                    return Ok(MultiValue::new());
+                    return Ok(MultiValue::from_vec(vec![Value::Nil, Value::Nil]));
                 };
                 Ok(MultiValue::from_vec(vec![
                     Value::String(lua.create_string(name)?),

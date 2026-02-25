@@ -3,7 +3,7 @@
 //! Contains C_ namespaces for UI systems:
 //! - C_VignetteInfo, C_AreaPoiInfo, C_PlayerChoice, C_MajorFactions
 //! - C_UIWidgetManager, C_GossipInfo, C_Calendar, C_CovenantCallings
-//! - C_WeeklyRewards, C_ContributionCollector, C_Scenario, C_Housing
+//! - C_CovenantSanctumUI, C_WeeklyRewards, C_ContributionCollector, C_Scenario, C_Housing
 //! - C_GameRules, C_ScriptedAnimations, C_Glue, C_UIColor, C_ClassColor
 //! - C_SpecializationInfo, C_SuperTrack
 //! - C_PlayerInteractionManager, C_PaperDollInfo, C_PerksProgram
@@ -21,6 +21,7 @@ pub(super) fn register_all(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState
     register_c_gossip_info(lua)?;
     register_c_calendar(lua)?;
     register_c_covenant_callings(lua)?;
+    register_c_covenant_sanctum_ui(lua)?;
     register_c_weekly_rewards(lua)?;
     register_c_contribution_collector(lua)?;
     register_c_scenario(lua)?;
@@ -99,6 +100,20 @@ fn register_c_ui_widget(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+fn make_friendship_reputation_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("friendshipFactionID", 0)?;
+    info.set("standing", 0)?;
+    info.set("maxRep", 0)?;
+    info.set("name", Value::Nil)?;
+    info.set("text", Value::Nil)?;
+    info.set("texture", Value::Nil)?;
+    info.set("reaction", Value::Nil)?;
+    info.set("reactionThreshold", 0)?;
+    info.set("nextThreshold", Value::Nil)?;
+    Ok(info)
+}
+
 fn register_c_gossip_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set("GetNumOptions", lua.create_function(|_, ()| Ok(0i32))?)?;
@@ -113,17 +128,7 @@ fn register_c_gossip_info(lua: &Lua) -> Result<()> {
     t.set("SelectActiveQuest", lua.create_function(|_, _i: i32| Ok(()))?)?;
     t.set("SelectAvailableQuest", lua.create_function(|_, _i: i32| Ok(()))?)?;
     t.set("GetFriendshipReputation", lua.create_function(|lua, _fid: Option<i32>| {
-        let info = lua.create_table()?;
-        info.set("friendshipFactionID", 0)?;
-        info.set("standing", 0)?;
-        info.set("maxRep", 0)?;
-        info.set("name", Value::Nil)?;
-        info.set("text", Value::Nil)?;
-        info.set("texture", Value::Nil)?;
-        info.set("reaction", Value::Nil)?;
-        info.set("reactionThreshold", 0)?;
-        info.set("nextThreshold", Value::Nil)?;
-        Ok(info)
+        make_friendship_reputation_info(lua)
     })?)?;
     t.set("GetFriendshipReputationRanks", lua.create_function(|lua, _fid: Option<i32>| {
         let info = lua.create_table()?;
@@ -200,15 +205,15 @@ fn register_c_scenario(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_housing(lua: &Lua) -> Result<()> {
-    let g = lua.globals();
-
+fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("GetHoveredDecorInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     t.set("GetDecorDyeSlots", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
-    g.set("C_HousingCustomizeMode", t)?;
+    Ok(t)
+}
 
+fn make_c_dye_color(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("GetDyeColorInfo", lua.create_function(|lua, _id: i32| {
         let info = lua.create_table()?;
@@ -219,34 +224,43 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
         info.set("shadowColor", 0x000000u32)?;
         Ok(info)
     })?)?;
-    g.set("C_DyeColor", t)?;
+    Ok(t)
+}
 
+fn make_c_house_editor(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("IsHouseEditorActive", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("GetActiveHouseEditorMode", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set("ActivateHouseEditorMode", lua.create_function(|_, _m: i32| Ok(()))?)?;
     t.set("GetHouseEditorModeAvailability", lua.create_function(|_, _m: i32| Ok(false))?)?;
     t.set("IsHouseEditorModeActive", lua.create_function(|_, _m: i32| Ok(false))?)?;
-    g.set("C_HouseEditor", t)?;
+    Ok(t)
+}
 
-    let t = lua.create_table()?;
-    t.set("GetHoveredDecorInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetDecorInfo", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    g.set("C_HousingDecor", t)?;
+fn register_c_housing(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("C_HousingCustomizeMode", make_c_housing_customize_mode(lua)?)?;
+    g.set("C_DyeColor", make_c_dye_color(lua)?)?;
+    g.set("C_HouseEditor", make_c_house_editor(lua)?)?;
 
-    let t = lua.create_table()?;
-    t.set("GetTrackedHouseGuid", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("IsInsideHouse", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("IsInsideHouseOrPlot", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("IsHousingServiceEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetPlayerOwnedHouses", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("C_Housing", t)?;
+    let decor = lua.create_table()?;
+    decor.set("GetHoveredDecorInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    decor.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
+    decor.set("GetDecorInfo", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
+    g.set("C_HousingDecor", decor)?;
 
-    let t = lua.create_table()?;
-    t.set("IsDecorSelected", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetSelectedDecorInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("C_HousingBasicMode", t)?;
+    let housing = lua.create_table()?;
+    housing.set("GetTrackedHouseGuid", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    housing.set("IsInsideHouse", lua.create_function(|_, ()| Ok(false))?)?;
+    housing.set("IsInsideHouseOrPlot", lua.create_function(|_, ()| Ok(false))?)?;
+    housing.set("IsHousingServiceEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    housing.set("GetPlayerOwnedHouses", lua.create_function(|lua, ()| lua.create_table())?)?;
+    g.set("C_Housing", housing)?;
+
+    let basic = lua.create_table()?;
+    basic.set("IsDecorSelected", lua.create_function(|_, ()| Ok(false))?)?;
+    basic.set("GetSelectedDecorInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    g.set("C_HousingBasicMode", basic)?;
 
     Ok(())
 }
@@ -354,21 +368,19 @@ fn build_c_spec_info_table(
     Ok(t)
 }
 
-/// Register static (stateless) methods on C_SpecializationInfo.
-fn set_spec_info_static_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
-    t.set("GetSpellsDisplay", lua.create_function(|lua, spec_id: i32| {
+fn make_get_spells_display(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, spec_id: i32| {
         use crate::spec_display_spells;
         let tbl = lua.create_table()?;
         for (i, entry) in spec_display_spells::spells_for_spec(spec_id as u32).enumerate() {
             tbl.set(i as i64 + 1, entry.spell_id)?;
         }
         Ok(tbl)
-    })?)?;
-    t.set("GetInspectSelectedSpecialization", lua.create_function(|_, _u: Option<String>| Ok(0))?)?;
-    t.set("CanPlayerUseTalentSpecUI", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("CanPlayerUseTalentUI", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("IsInitialized", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("GetSpecializationInfo", lua.create_function(|lua, idx: i32| {
+    })
+}
+
+fn make_get_specialization_info(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, idx: i32| {
         use crate::specializations;
         let specs: Vec<_> = specializations::specs_for_class(2u32).collect();
         let i = (idx - 1).clamp(0, specs.len() as i32 - 1) as usize;
@@ -381,7 +393,17 @@ fn set_spec_info_static_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
             Value::String(lua.create_string(spec.role)?),
             Value::Integer(spec.primary_stat as i64),
         ]))
-    })?)?;
+    })
+}
+
+/// Register static (stateless) methods on C_SpecializationInfo.
+fn set_spec_info_static_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
+    t.set("GetSpellsDisplay", make_get_spells_display(lua)?)?;
+    t.set("GetInspectSelectedSpecialization", lua.create_function(|_, _u: Option<String>| Ok(0))?)?;
+    t.set("CanPlayerUseTalentSpecUI", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("CanPlayerUseTalentUI", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("IsInitialized", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("GetSpecializationInfo", make_get_specialization_info(lua)?)?;
     t.set("GetAllSelectedPvpTalentIDs", lua.create_function(|lua, ()| lua.create_table())?)?;
     t.set("GetPvpTalentSlotInfo", lua.create_function(|_, _s: i32| Ok(Value::Nil))?)?;
     t.set("GetNumSpecializationsForClassID", lua.create_function(|_, (class_id, _sex): (Option<i32>, Option<i32>)| {
@@ -473,5 +495,36 @@ fn register_c_perks_program(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set("IsTradingPostAvailable", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_PerksProgram", t)?;
+    Ok(())
+}
+
+/// Build one renown level entry: {level=j, isCapstone=bool, isMilestone=bool, locked=bool}.
+fn make_renown_level_entry(lua: &Lua, level: i32) -> Result<mlua::Table> {
+    let entry = lua.create_table()?;
+    entry.set("level", level)?;
+    entry.set("isCapstone", level % 10 == 0)?;
+    entry.set("isMilestone", level % 5 == 0)?;
+    entry.set("locked", false)?;
+    Ok(entry)
+}
+
+/// C_CovenantSanctumUI — Shadowlands covenant sanctum UI API.
+///
+/// GetRenownLevels(covenantID) returns 80 level entries for valid covenants (1-4),
+/// empty table for invalid IDs, and errors on nil input.
+fn register_c_covenant_sanctum_ui(lua: &Lua) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("GetRenownLevels", lua.create_function(|lua, covenant_id: i32| {
+        let result = lua.create_table()?;
+        if covenant_id >= 1 && covenant_id <= 4 {
+            for j in 1..=80 {
+                result.set(j, make_renown_level_entry(lua, j)?)?;
+            }
+        }
+        Ok(result)
+    })?)?;
+    t.set("GetCurrentRenownLevel", lua.create_function(|_, _id: i32| Ok(0i32))?)?;
+    t.set("HasMaximumRenown", lua.create_function(|_, _id: i32| Ok(false))?)?;
+    lua.globals().set("C_CovenantSanctumUI", t)?;
     Ok(())
 }

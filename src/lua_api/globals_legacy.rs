@@ -38,6 +38,9 @@ use super::globals::timer_api::register_timer_api;
 use super::globals::tooltip_api::register_tooltip_frames;
 use super::globals::unit_api::register_unit_api;
 use super::globals::utility_api::register_utility_api;
+use super::globals::abbreviate_config::register_abbreviate_config;
+use super::globals::lua_duration_object::register_lua_duration_object;
+use super::globals::unit_heal_prediction::register_unit_heal_prediction;
 use super::SimState;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
@@ -67,10 +70,22 @@ pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
 ///   but standard Lua 5.1 does not; converted by reordering arguments
 const STRING_FORMAT_PATCH: &str = r#"
     local _format = string.format
+    local function _clean_format_error(msg)
+        -- Strip source location prefix e.g. "[string \"...\"]:6: " added by lua.load
+        msg = msg:gsub("^%[string [^%]]*%]:%d+: ", "")
+        -- Replace internal function name '_format' with '?' to match WoW error style
+        msg = msg:gsub("'_format'", "'?'")
+        return msg
+    end
+    local function _safe_format(fmt, ...)
+        local ok, result = pcall(_format, fmt, ...)
+        if ok then return result end
+        error(_clean_format_error(result), 2)
+    end
     string.format = function(fmt, ...)
-        if type(fmt) ~= "string" then return _format(fmt, ...) end
+        if type(fmt) ~= "string" then return _safe_format(fmt, ...) end
         fmt = fmt:gsub("%%(%d*%.?%d*)F", "%%%1f")
-        if not fmt:find("%%%d+%$") then return _format(fmt, ...) end
+        if not fmt:find("%%%d+%$") then return _safe_format(fmt, ...) end
         local args = {...}
         local out, new_args, seq = {}, {}, 0
         local i, len = 1, #fmt
@@ -106,7 +121,7 @@ const STRING_FORMAT_PATCH: &str = r#"
                 end
             end
         end
-        return _format(table.concat(out), unpack(new_args))
+        return _safe_format(table.concat(out), unpack(new_args))
     end
     format = string.format
 "#;
@@ -303,7 +318,10 @@ fn register_stateless_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_settings_api(lua)?;
     register_spell_api(lua, Rc::clone(state))?;
     register_item_api(lua)?;
-    register_font_api(lua)
+    register_font_api(lua)?;
+    register_abbreviate_config(lua)?;
+    register_lua_duration_object(lua)?;
+    register_unit_heal_prediction(lua)
 }
 
 /// Register cursor/drag-and-drop APIs (must run after C_Spell and C_ActionBar).

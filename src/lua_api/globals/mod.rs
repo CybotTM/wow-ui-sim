@@ -25,6 +25,9 @@
 //! The main `register_globals` function is still in `globals_legacy.rs`
 //! but calls into these split modules.
 
+pub mod abbreviate_config;
+pub mod function_container;
+pub mod lua_duration_object;
 pub mod addon_api;
 pub mod bit_api;
 pub mod utility_stubs;
@@ -87,6 +90,7 @@ pub mod unit_health_power_api;
 pub mod security_api;
 pub mod utility_api;
 pub mod environment_restore;
+pub mod unit_heal_prediction;
 pub mod generated_stubs;
 
 // Re-export for backwards compatibility
