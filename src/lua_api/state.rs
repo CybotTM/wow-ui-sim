@@ -275,12 +275,32 @@ pub struct SimState {
     pub guild_rank: Option<String>,
     pub guild_num_members: i32,
 
+    // Great Vault (C_WeeklyRewards)
+    pub great_vault_activities: Vec<GreatVaultActivity>,
+    pub great_vault_has_rewards: bool,
+    pub great_vault_can_claim: bool,
+
     // Collections
     pub collected_transmogs: HashSet<i32>,
     pub collected_mounts: HashSet<i32>,
     pub collected_pets: HashSet<i32>,
     pub collected_toys: HashSet<i32>,
     pub earned_achievements: HashSet<i32>,
+}
+
+/// A Great Vault activity slot (one row/tier in the weekly rewards UI).
+#[derive(Debug, Clone)]
+pub struct GreatVaultActivity {
+    /// WeeklyRewardChestThresholdType: 1=Activities, 2=Raid, 4=RankedPvP, 5=World.
+    pub activity_type: i32,
+    /// Slot index within the row (1-3).
+    pub index: i32,
+    /// Number of activities required to unlock this slot.
+    pub threshold: i32,
+    /// Current progress toward the threshold.
+    pub progress: i32,
+    /// Key level, boss difficulty, or rating.
+    pub level: i32,
 }
 
 /// Simulated player movement flags (all false = stationary).
@@ -362,6 +382,9 @@ impl SimState {
             collected_pets: HashSet::new(),
             collected_toys: HashSet::new(),
             earned_achievements: HashSet::new(),
+            great_vault_activities: Vec::new(),
+            great_vault_has_rewards: false,
+            great_vault_can_claim: false,
         }
     }
 

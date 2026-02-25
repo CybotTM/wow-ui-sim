@@ -78,6 +78,10 @@ local HELP = {
     { "/aa honor <level>",                  "Set honor level" },
     { "/aa guild <name> <rank> <members>",  "Set guild info" },
     { "/aa noguild",                        "Clear guild" },
+    { "--- Great Vault ---" },
+    { "/aa vault activity <type> <idx> <threshold> <progress> <level>", "Set vault slot" },
+    { "/aa vault rewards [on|off] [canClaim]", "Toggle vault rewards" },
+    { "/aa vault clear",                    "Clear all vault data" },
     { "--- Events ---" },
     { "/aa event <name> [args...]",         "Fire a WoW event" },
 }
@@ -431,6 +435,37 @@ end
 handlers["noguild"] = function(_args)
     A_Admin.ClearGuild()
     Confirm("Guild cleared")
+end
+
+-- Great Vault
+
+handlers["vault"] = function(args)
+    local sub = args[1]
+    if not sub then return Err("Usage: /aa vault activity|rewards|clear") end
+    sub = sub:lower()
+    if sub == "activity" then
+        local atype     = tonumber(args[2])
+        local idx       = tonumber(args[3])
+        local threshold = tonumber(args[4])
+        local progress  = tonumber(args[5])
+        local level     = tonumber(args[6])
+        if not atype or not idx or not threshold or not progress or not level then
+            return Err("Usage: /aa vault activity <type> <idx> <threshold> <progress> <level>")
+        end
+        A_Admin.SetVaultActivity(atype, idx, threshold, progress, level)
+        Confirm("Vault slot type=" .. Val(atype) .. " idx=" .. Val(idx) .. ": " .. Val(progress) .. "/" .. Val(threshold) .. " lv" .. Val(level))
+    elseif sub == "rewards" then
+        local has = ParseBool(args[2])
+        if has == nil then return Err("Usage: /aa vault rewards [on|off] [canClaim]") end
+        local canClaim = args[3] and ParseBool(args[3])
+        A_Admin.SetVaultRewards(has, canClaim)
+        Confirm("Vault rewards: " .. Val(has and "on" or "off"))
+    elseif sub == "clear" then
+        A_Admin.ClearVault()
+        Confirm("Vault cleared")
+    else
+        Err("Unknown vault subcommand: " .. sub)
+    end
 end
 
 -- Events

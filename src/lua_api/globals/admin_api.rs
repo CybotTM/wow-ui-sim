@@ -29,6 +29,7 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_collection_api(lua, &admin, Rc::clone(&state))?;
     register_pvp_guild_api(lua, &admin, Rc::clone(&state))?;
     register_event_api(lua, &admin, Rc::clone(&state))?;
+    register_vault_api(lua, &admin, Rc::clone(&state))?;
 
     lua.globals().set("A_Admin", admin)?;
     Ok(())
@@ -561,6 +562,50 @@ fn lua_value_to_event_arg(v: &Value) -> EventArg {
         Value::Boolean(b) => EventArg::Boolean(*b),
         _ => EventArg::Nil,
     }
+}
+
+// ---------------------------------------------------------------------------
+// Great Vault
+// ---------------------------------------------------------------------------
+
+fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    set_fn(lua, t, "SetVaultActivity", {
+        let s = Rc::clone(&state);
+        move |_, (atype, index, threshold, progress, level): (i32, i32, i32, i32, i32)| {
+            let mut st = s.borrow_mut();
+            let activity = crate::lua_api::state::GreatVaultActivity {
+                activity_type: atype, index, threshold, progress, level,
+            };
+            if let Some(existing) = st.great_vault_activities.iter_mut()
+                .find(|a| a.activity_type == atype && a.index == index)
+            {
+                *existing = activity;
+            } else {
+                st.great_vault_activities.push(activity);
+            }
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "SetVaultRewards", {
+        let s = Rc::clone(&state);
+        move |_, (has, can_claim): (bool, Option<bool>)| {
+            let mut st = s.borrow_mut();
+            st.great_vault_has_rewards = has;
+            st.great_vault_can_claim = can_claim.unwrap_or(has);
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "ClearVault", {
+        let s = Rc::clone(&state);
+        move |_, ()| {
+            let mut st = s.borrow_mut();
+            st.great_vault_activities.clear();
+            st.great_vault_has_rewards = false;
+            st.great_vault_can_claim = false;
+            Ok(())
+        }
+    })?;
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
