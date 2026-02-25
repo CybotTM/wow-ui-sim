@@ -183,20 +183,6 @@ fn register_c_tooltip_info(lua: &Lua) -> Result<()> {
             Ok(info)
         })?)?;
     }
-    // Catch-all for any C_TooltipInfo getter not explicitly stubbed above.
-    // TooltipDataHandler maps ~50 Set* methods to Get* getters on this table;
-    // return a stub that produces an empty tooltip data table.
-    let mt = lua.create_table()?;
-    mt.set("__index", lua.create_function(|lua, (_table, _key): (Value, String)| {
-        let func = lua.create_function(move |lua, _args: mlua::MultiValue| {
-            let info = lua.create_table()?;
-            info.set("type", 0)?;
-            info.set("lines", lua.create_table()?)?;
-            Ok(info)
-        })?;
-        Ok(Value::Function(func))
-    })?)?;
-    t.set_metatable(Some(mt));
     lua.globals().set("C_TooltipInfo", t)?;
     Ok(())
 }

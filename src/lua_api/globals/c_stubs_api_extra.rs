@@ -591,20 +591,16 @@ fn register_guild_bank_pet_battles(lua: &Lua, g: &mlua::Table) -> Result<()> {
     guild_bank.set("FetchNumTabs", lua.create_function(|_, ()| Ok(0i32))?)?;
     g.set("C_GuildBank", guild_bank)?;
 
-    // C_PetBattles - methods return 0 by default (many are numeric: GetHealth, GetLevel, etc.)
-    // Returning nil would cause "attempt to compare nil with number" in PetBattle Lua code.
-    // Methods that return non-numeric types must be listed explicitly.
-    lua.load(r#"
-        C_PetBattles = setmetatable({
-            IsInBattle = function() return false end,
-            IsWildBattle = function() return false end,
-            IsPlayerNPC = function() return false end,
-            GetAllEffectNames = function() end,
-            GetAllStates = function() return {} end,
-            GetBattleState = function() return nil end,
-            GetPVPMatchmakingInfo = function() return nil end,
-        }, { __index = function() return function() return 0 end end })
-    "#).exec()?;
+    // C_PetBattles - plain table, no metatable (Wowless expects getmetatable == nil).
+    let pet = lua.create_table()?;
+    pet.set("IsInBattle", lua.create_function(|_, ()| Ok(false))?)?;
+    pet.set("IsWildBattle", lua.create_function(|_, ()| Ok(false))?)?;
+    pet.set("IsPlayerNPC", lua.create_function(|_, ()| Ok(false))?)?;
+    pet.set("GetAllEffectNames", lua.create_function(|_, ()| Ok(()))?)?;
+    pet.set("GetAllStates", lua.create_function(|lua, ()| lua.create_table())?)?;
+    pet.set("GetBattleState", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    pet.set("GetPVPMatchmakingInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    g.set("C_PetBattles", pet)?;
     Ok(())
 }
 

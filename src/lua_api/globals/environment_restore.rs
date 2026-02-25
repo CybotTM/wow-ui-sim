@@ -15,6 +15,11 @@ pub fn restore_environment_cleanup_stubs(lua: &Lua) -> Result<()> {
     restore_create_secure_delegate(lua, &g)?;
     restore_loadstring_untainted(lua, &g)?;
     restore_secretunwrap(lua, &g)?;
+    // Re-register generated stubs to restore C_* namespaces cleared by Blizzard's
+    // security model (e.g. C_AuthChallenge, C_SecureTransfer, C_StoreSecure,
+    // C_WowTokenSecure). Each stub already checks is_nil(), so surviving globals
+    // are left untouched.
+    super::generated_stubs::register_generated_stubs(lua)?;
     Ok(())
 }
 
