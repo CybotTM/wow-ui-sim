@@ -42,12 +42,13 @@ impl PrecompiledFns {
 
 fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
     lua.load(r#"
+        local __report = debug.getregistry()["__report_script_error"]
         local frame = _G[...]
         if not frame then return end
         if type(frame.OnLoad_Intrinsic) == "function" then
             local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
             if not ok then
-                __report_script_error("[OnLoad_Intrinsic] " .. tostring(err))
+                __report("[OnLoad_Intrinsic] " .. tostring(err))
             end
         end
         local handler = frame:GetScript("OnLoad")
@@ -55,7 +56,7 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
             local ok, err = pcall(handler, frame)
             if not ok then
                 local name = frame.GetName and frame:GetName() or "?"
-                __report_script_error("[OnLoad] " .. name .. ": " .. tostring(err))
+                __report("[OnLoad] " .. name .. ": " .. tostring(err))
             end
         end
     "#).into_function()
@@ -63,6 +64,7 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
 
 fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
     lua.load(r#"
+        local __report = debug.getregistry()["__report_script_error"]
         local frame = _G[...]
         if not frame then return end
         if frame:IsVisible() then
@@ -71,13 +73,13 @@ fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
                 local ok, err = pcall(handler, frame)
                 if not ok then
                     local name = frame.GetName and frame:GetName() or "?"
-                    __report_script_error("[OnShow] " .. name .. ": " .. tostring(err))
+                    __report("[OnShow] " .. name .. ": " .. tostring(err))
                 end
             end
             if type(frame.OnShow_Intrinsic) == "function" then
                 local ok, err = pcall(frame.OnShow_Intrinsic, frame)
                 if not ok then
-                    __report_script_error("[OnShow_Intrinsic] " .. tostring(err))
+                    __report("[OnShow_Intrinsic] " .. tostring(err))
                 end
             end
         end

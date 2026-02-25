@@ -85,53 +85,72 @@ fn register_client_type_checks(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Register expansion level functions.
+/// Max player level per expansion index.
+fn max_level_for_expansion(expansion: i32) -> i32 {
+    match expansion {
+        0 => 60,  // Classic
+        1 => 70,  // TBC
+        2 => 80,  // WotLK
+        3 => 85,  // Cata
+        4 => 90,  // MoP
+        5 => 100, // WoD
+        6 => 110, // Legion
+        7 => 120, // BfA
+        8 => 60,  // Shadowlands (level squish)
+        9 => 70,  // Dragonflight
+        10 => 80, // The War Within
+        _ => 80,
+    }
+}
+
+/// Validate ClassicExpansionAtLeast/AtMost arg: must be a number in [0, 4294967295].
+fn is_valid_expansion_level(level: &Value) -> bool {
+    match level {
+        Value::Number(n) => *n >= 0.0 && *n <= 4_294_967_295.0,
+        Value::Integer(n) => *n >= 0 && *n <= 4_294_967_295,
+        _ => false,
+    }
+}
+
+/// Register expansion level query functions.
 fn register_expansion_functions(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
+    register_expansion_level_stubs(lua)?;
+    register_classic_expansion_checks(lua)
+}
 
-    globals.set("GetExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    globals.set("GetMaxLevelForPlayerExpansion", lua.create_function(|_, ()| Ok(80))?)?;
-    globals.set("GetMaxPlayerLevel", lua.create_function(|_, ()| Ok(80))?)?;
-    globals.set(
-        "GetMaxLevelForExpansionLevel",
-        lua.create_function(|_, expansion: i32| {
-            let max_level = match expansion {
-                0 => 60,  // Classic
-                1 => 70,  // TBC
-                2 => 80,  // WotLK
-                3 => 85,  // Cata
-                4 => 90,  // MoP
-                5 => 100, // WoD
-                6 => 110, // Legion
-                7 => 120, // BfA
-                8 => 60,  // Shadowlands (level squish)
-                9 => 70,  // Dragonflight
-                10 => 80, // The War Within
-                _ => 80,
-            };
-            Ok(max_level)
-        })?,
-    )?;
-    globals.set("GetServerExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    globals.set("GetClientDisplayExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    globals.set("GetMinimumExpansionLevel", lua.create_function(|_, ()| Ok(0))?)?;
-    globals.set("GetMaximumExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    globals.set("GetAccountExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    globals.set("GetAutoCompleteRealms", lua.create_function(|lua, ()| lua.create_table())?)?;
+/// GetExpansionLevel, GetMaxLevel*, GetServerExpansionLevel, etc.
+fn register_expansion_level_stubs(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("GetExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
+    g.set("GetMaxLevelForPlayerExpansion", lua.create_function(|_, ()| Ok(80))?)?;
+    g.set("GetMaxPlayerLevel", lua.create_function(|_, ()| Ok(80))?)?;
+    g.set("GetMaxLevelForExpansionLevel",
+        lua.create_function(|_, expansion: i32| Ok(max_level_for_expansion(expansion)))?)?;
+    g.set("GetServerExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
+    g.set("GetClientDisplayExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
+    g.set("GetMinimumExpansionLevel", lua.create_function(|_, ()| Ok(0))?)?;
+    g.set("GetMaximumExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
+    g.set("GetAccountExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
+    g.set("GetAutoCompleteRealms", lua.create_function(|lua, ()| lua.create_table())?)?;
+    Ok(())
+}
 
-    // ClassicExpansionAtLeast: errors on invalid arg, returns true for Standard WoW.
-    // Implemented in Lua to avoid mlua::Error::RuntimeError overhead at the Rust→Lua boundary.
-    lua.load(r#"
-        ClassicExpansionAtLeast = function(level)
-            assert(type(level) == 'number' and level >= 0 and level <= 4294967295)
-            return true
-        end
-        ClassicExpansionAtMost = function(level)
-            assert(type(level) == 'number' and level >= 0 and level <= 4294967295)
-            return false
-        end
-    "#).exec()?;
-
+/// ClassicExpansionAtLeast / ClassicExpansionAtMost.
+/// Errors on invalid arg; simulates retail WoW (AtLeast=true, AtMost=false).
+fn register_classic_expansion_checks(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("ClassicExpansionAtLeast", lua.create_function(|_, level: Value| {
+        if !is_valid_expansion_level(&level) {
+            return Err(mlua::Error::RuntimeError("assertion failed!".into()));
+        }
+        Ok(true)
+    })?)?;
+    g.set("ClassicExpansionAtMost", lua.create_function(|_, level: Value| {
+        if !is_valid_expansion_level(&level) {
+            return Err(mlua::Error::RuntimeError("assertion failed!".into()));
+        }
+        Ok(false)
+    })?)?;
     Ok(())
 }
 

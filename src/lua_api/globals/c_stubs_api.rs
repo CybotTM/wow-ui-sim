@@ -19,6 +19,20 @@ use mlua::{Lua, MultiValue, Result, Value};
 
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+    register_core_namespaces(lua, state)?;
+    register_ui_and_chat_stubs(lua)?;
+    register_missing_globals(lua)?;
+    register_missing_namespaces(lua)?;
+    register_c_perks_activities(lua)?;
+    register_game_state_stubs(lua)?;
+    register_c_incoming_summon(lua)?;
+    super::c_stubs_api_extra::register_extra_stubs(lua)?;
+    super::c_stubs_api_combat::register_combat_stubs(lua)?;
+    super::c_stubs_api_professions::register_profession_stubs(lua)?;
+    Ok(())
+}
+
+fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_achievement_info(lua)?;
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
     register_c_guild(lua)?;
@@ -31,8 +45,12 @@ pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     super::action_bar_api::register_c_action_bar_namespace(lua, state)?;
     register_unit_frame_global_stubs(lua)?;
     register_powerbar_prediction_colors(lua)?;
-    super::c_stubs_api_extra::register_achievement_stubs(lua)?;
-    super::c_stubs_api_extra::register_tracking_stubs(lua)?;
+    super::c_stubs_achievement::register_achievement_stubs(lua)?;
+    super::c_stubs_achievement::register_tracking_stubs(lua)?;
+    Ok(())
+}
+
+fn register_ui_and_chat_stubs(lua: &Lua) -> Result<()> {
     register_c_log(lua)?;
     register_c_campaign_info(lua)?;
     register_quest_global_functions(lua)?;
@@ -41,14 +59,6 @@ pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     register_c_macro(lua)?;
     register_c_wowlabs_matchmaking(lua)?;
     register_fading_frame_stubs(lua)?;
-    register_missing_globals(lua)?;
-    register_missing_namespaces(lua)?;
-    register_c_perks_activities(lua)?;
-    register_game_state_stubs(lua)?;
-    register_c_incoming_summon(lua)?;
-    super::c_stubs_api_extra::register_extra_stubs(lua)?;
-    super::c_stubs_api_combat::register_combat_stubs(lua)?;
-    super::c_stubs_api_professions::register_profession_stubs(lua)?;
     Ok(())
 }
 
@@ -224,45 +234,40 @@ fn register_unit_frame_global_stubs_2(lua: &Lua) -> Result<()> {
 }
 
 /// POWERBAR_PREDICTION_COLOR_* globals used by PowerBarColorUtil.lua at parse time.
+const POWERBAR_COLORS: &[(&str, f64, f64, f64)] = &[
+    ("POWERBAR_PREDICTION_COLOR_MANA", 0.0, 0.0, 1.0),
+    ("POWERBAR_PREDICTION_COLOR_RAGE", 1.0, 0.0, 0.0),
+    ("POWERBAR_PREDICTION_COLOR_FOCUS", 1.0, 0.5, 0.25),
+    ("POWERBAR_PREDICTION_COLOR_ENERGY", 1.0, 1.0, 0.0),
+    ("POWERBAR_PREDICTION_COLOR_RUNIC_POWER", 0.0, 0.82, 1.0),
+    ("POWERBAR_PREDICTION_COLOR_LUNAR_POWER", 0.3, 0.52, 0.9),
+    ("POWERBAR_PREDICTION_COLOR_MAELSTROM", 0.0, 0.5, 1.0),
+    ("POWERBAR_PREDICTION_COLOR_INSANITY", 0.4, 0.0, 0.8),
+    ("POWERBAR_PREDICTION_COLOR_FURY", 0.788, 0.259, 0.992),
+    ("POWERBAR_PREDICTION_COLOR_PAIN", 1.0, 0.612, 0.0),
+];
+
+fn build_color_entry(lua: &Lua, r: f64, green: f64, b: f64, get_rgba: &mlua::Function, get_rgb: &mlua::Function) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set("r", r)?;
+    t.set("g", green)?;
+    t.set("b", b)?;
+    t.set("a", 0.5f64)?;
+    t.set("GetRGBA", get_rgba.clone())?;
+    t.set("GetRGB", get_rgb.clone())?;
+    Ok(t)
+}
+
 fn register_powerbar_prediction_colors(lua: &Lua) -> Result<()> {
     let get_rgba = lua.create_function(|_, this: mlua::Table| {
-        Ok((
-            this.get::<f64>("r")?,
-            this.get::<f64>("g")?,
-            this.get::<f64>("b")?,
-            this.get::<f64>("a")?,
-        ))
+        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?, this.get::<f64>("b")?, this.get::<f64>("a")?))
     })?;
     let get_rgb = lua.create_function(|_, this: mlua::Table| {
-        Ok((
-            this.get::<f64>("r")?,
-            this.get::<f64>("g")?,
-            this.get::<f64>("b")?,
-        ))
+        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?, this.get::<f64>("b")?))
     })?;
-
     let g = lua.globals();
-    let colors: &[(&str, f64, f64, f64)] = &[
-        ("POWERBAR_PREDICTION_COLOR_MANA", 0.0, 0.0, 1.0),
-        ("POWERBAR_PREDICTION_COLOR_RAGE", 1.0, 0.0, 0.0),
-        ("POWERBAR_PREDICTION_COLOR_FOCUS", 1.0, 0.5, 0.25),
-        ("POWERBAR_PREDICTION_COLOR_ENERGY", 1.0, 1.0, 0.0),
-        ("POWERBAR_PREDICTION_COLOR_RUNIC_POWER", 0.0, 0.82, 1.0),
-        ("POWERBAR_PREDICTION_COLOR_LUNAR_POWER", 0.3, 0.52, 0.9),
-        ("POWERBAR_PREDICTION_COLOR_MAELSTROM", 0.0, 0.5, 1.0),
-        ("POWERBAR_PREDICTION_COLOR_INSANITY", 0.4, 0.0, 0.8),
-        ("POWERBAR_PREDICTION_COLOR_FURY", 0.788, 0.259, 0.992),
-        ("POWERBAR_PREDICTION_COLOR_PAIN", 1.0, 0.612, 0.0),
-    ];
-    for &(name, r, green, b) in colors {
-        let t = lua.create_table()?;
-        t.set("r", r)?;
-        t.set("g", green)?;
-        t.set("b", b)?;
-        t.set("a", 0.5f64)?;
-        t.set("GetRGBA", get_rgba.clone())?;
-        t.set("GetRGB", get_rgb.clone())?;
-        g.set(name, t)?;
+    for &(name, r, green, b) in POWERBAR_COLORS {
+        g.set(name, build_color_entry(lua, r, green, b, &get_rgba, &get_rgb)?)?;
     }
     Ok(())
 }
@@ -442,6 +447,21 @@ fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
 /// Missing global functions referenced during startup events.
 fn register_missing_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_timer_and_bar_globals(lua, &g)?;
+    register_lfg_and_guild_stubs(lua, &g)?;
+    register_action_button_util(lua, &g)?;
+    g.set("UnitGetAvailableRoles", lua.create_function(|_, _unit: Value| {
+        Ok((true, true, true))
+    })?)?;
+    g.set("UnitIsGameObject", lua.create_function(|_, _unit: Value| Ok(false))?)?;
+    g.set("GetLFGRoleUpdate", lua.create_function(|_, ()| {
+        Ok((false, 0i32, 0i32, 0i32, 0i32, false))
+    })?)?;
+    register_paperdoll_container_and_misc_stubs(lua, &g)?;
+    Ok(())
+}
+
+fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("GetDefaultScale", lua.create_function(|_, ()| Ok(1.0f64))?)?;
     g.set("HasVehicleActionBar", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("HasOverrideActionBar", lua.create_function(|_, ()| Ok(false))?)?;
@@ -455,25 +475,11 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     })?)?;
     g.set("GetInventoryAlertStatus", lua.create_function(|_, _slot: i32| Ok(0i32))?)?;
     g.set("GetWorldElapsedTimers", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetWorldElapsedTime", lua.create_function(|_, _id: i32| {
-        Ok((0i32, 0i32, 0i32))
-    })?)?;
+    g.set("GetWorldElapsedTime", lua.create_function(|_, _id: i32| Ok((0i32, 0i32, 0i32)))?)?;
     g.set("HasBonusActionBar", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("HasTempShapeshiftActionBar", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("PutItemInBackpack", lua.create_function(|_, ()| Ok(()))?)?;
     g.set("PutItemInBag", lua.create_function(|_, _bag: i32| Ok(()))?)?;
-    register_lfg_and_guild_stubs(lua, &g)?;
-    register_action_button_util(lua, &g)?;
-    // Unit role/classification queries
-    g.set("UnitGetAvailableRoles", lua.create_function(|_, _unit: Value| {
-        Ok((true, true, true)) // canBeTank, canBeHealer, canBeDamager
-    })?)?;
-    g.set("UnitIsGameObject", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetLFGRoleUpdate", lua.create_function(|_, ()| {
-        // Returns: inProgress, slots, members, category, lfgID, isBattleground
-        Ok((false, 0i32, 0i32, 0i32, 0i32, false))
-    })?)?;
-    register_paperdoll_container_and_misc_stubs(lua, &g)?;
     Ok(())
 }
 
@@ -576,7 +582,12 @@ fn register_missing_namespaces(lua: &Lua) -> Result<()> {
 /// Social, friends, and matchmaking namespace stubs.
 fn register_social_namespaces(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_social_status_namespaces(lua, &g)?;
+    register_social_queue_namespace(lua, &g)?;
+    Ok(())
+}
 
+fn register_social_status_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let spectating = lua.create_table()?;
     spectating.set("IsSpectating", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("C_SpectatingUI", spectating)?;
@@ -602,7 +613,10 @@ fn register_social_namespaces(lua: &Lua) -> Result<()> {
     let recent_allies = lua.create_table()?;
     recent_allies.set("IsSystemEnabled", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("C_RecentAllies", recent_allies)?;
+    Ok(())
+}
 
+fn register_social_queue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let social_queue = lua.create_table()?;
     social_queue.set("GetAllGroups", lua.create_function(|lua, _local_only: Option<bool>| lua.create_table())?)?;
     social_queue.set("GetConfig", lua.create_function(|lua, ()| {
@@ -612,19 +626,22 @@ fn register_social_namespaces(lua: &Lua) -> Result<()> {
         Ok(config)
     })?)?;
     g.set("C_SocialQueue", social_queue)?;
-
     Ok(())
 }
 
 /// System, service, and utility namespace stubs.
 fn register_system_namespaces(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_cinematic_login_nameplates(lua, &g)?;
+    register_character_services_namespace(lua, &g)?;
+    super::c_stubs_api_store::register_c_account_store(lua)?;
+    register_c_video_options(lua)?;
+    Ok(())
+}
 
+fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let cinematic = lua.create_table()?;
-    cinematic.set(
-        "GetUICinematicList",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
+    cinematic.set("GetUICinematicList", lua.create_function(|lua, ()| lua.create_table())?)?;
     g.set("C_CinematicList", cinematic)?;
 
     let login = lua.create_table()?;
@@ -633,17 +650,21 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
     login.set("GetLastError", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("C_Login", login)?;
 
-    // Nameplate option tables used by Blizzard_NamePlates
     g.set("DefaultCompactNamePlateEnemyFrameOptions", lua.create_table()?)?;
     g.set("DefaultCompactNamePlateFriendlyFrameOptions", lua.create_table()?)?;
     g.set("DefaultCompactNamePlatePlayerFrameSetUpOptions", lua.create_table()?)?;
 
     let func_containers = lua.create_table()?;
-    func_containers.set("CreateCallback", lua.create_function(|lua, _func: Value| {
-        lua.create_table()
-    })?)?;
+    func_containers.set("CreateCallback", lua.create_function(|lua, _func: Value| lua.create_table())?)?;
     g.set("C_FunctionContainers", func_containers)?;
 
+    let spell_overlay = lua.create_table()?;
+    spell_overlay.set("IsSpellOverlayed", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
+    g.set("C_SpellActivationOverlay", spell_overlay)?;
+    Ok(())
+}
+
+fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let char_svc = lua.create_table()?;
     char_svc.set("HasRequiredBoostForUnrevoke", lua.create_function(|_, ()| Ok(false))?)?;
     char_svc.set("HasRequiredBoostForClassTrial", lua.create_function(|_, ()| Ok(false))?)?;
@@ -656,14 +677,6 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
         Ok(Value::Table(t))
     })?)?;
     g.set("C_CharacterServices", char_svc)?;
-
-    let spell_overlay = lua.create_table()?;
-    spell_overlay.set("IsSpellOverlayed", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    g.set("C_SpellActivationOverlay", spell_overlay)?;
-
-    super::c_stubs_api_store::register_c_account_store(lua)?;
-    register_c_video_options(lua)?;
-
     Ok(())
 }
 

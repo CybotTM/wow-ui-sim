@@ -3,7 +3,7 @@
 //! Contains table manipulation functions (wipe, tinsert, tremove, tContains, etc.),
 //! string utilities (strsplit, strjoin), and other general-purpose functions.
 
-use mlua::{Lua, Result, Value};
+use mlua::{Function, Lua, MultiValue, Result, Value};
 
 /// Register all utility API functions.
 pub fn register_utility_api(lua: &Lua) -> Result<()> {
@@ -40,7 +40,12 @@ fn register_table_functions(lua: &Lua) -> Result<()> {
 /// wipe, tinsert, tremove - core table mutation functions.
 fn register_wipe_and_aliases(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
+    register_wipe(lua, &globals)?;
+    register_tinsert(lua, &globals)?;
+    register_tremove(lua, &globals)
+}
 
+fn register_wipe(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     let wipe = lua.create_function(|_, table: mlua::Table| {
         let keys: Vec<Value> = table
             .pairs::<Value, Value>()
@@ -53,8 +58,10 @@ fn register_wipe_and_aliases(lua: &Lua) -> Result<()> {
     })?;
     globals.set("wipe", wipe.clone())?;
     let table_lib: mlua::Table = globals.get("table")?;
-    table_lib.set("wipe", wipe)?;
+    table_lib.set("wipe", wipe)
+}
 
+fn register_tinsert(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tinsert",
         lua.create_function(|lua, args: mlua::MultiValue| {
@@ -63,8 +70,10 @@ fn register_wipe_and_aliases(lua: &Lua) -> Result<()> {
             table_insert.call::<()>(args)?;
             Ok(())
         })?,
-    )?;
+    )
+}
 
+fn register_tremove(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tremove",
         lua.create_function(|lua, args: mlua::MultiValue| {
@@ -72,15 +81,19 @@ fn register_wipe_and_aliases(lua: &Lua) -> Result<()> {
                 lua.globals().get::<mlua::Table>("table")?.get("remove")?;
             table_remove.call::<Value>(args)
         })?,
-    )?;
-
-    Ok(())
+    )
 }
 
 /// tInvert, tContains, tIndexOf, tFilter - table search/filter functions.
 fn register_table_search(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
+    register_tinvert(lua, &globals)?;
+    register_tcontains(lua, &globals)?;
+    register_tindexof(lua, &globals)?;
+    register_tfilter(lua, &globals)
+}
 
+fn register_tinvert(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tInvert",
         lua.create_function(|lua, tbl: mlua::Table| {
@@ -91,36 +104,38 @@ fn register_table_search(lua: &Lua) -> Result<()> {
             }
             Ok(result)
         })?,
-    )?;
+    )
+}
 
+fn register_tcontains(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tContains",
         lua.create_function(|_, (tbl, value): (Option<mlua::Table>, Value)| {
             if let Some(tbl) = tbl {
                 for pair in tbl.pairs::<Value, Value>() {
                     let (_, v) = pair?;
-                    if v == value {
-                        return Ok(true);
-                    }
+                    if v == value { return Ok(true); }
                 }
             }
             Ok(false)
         })?,
-    )?;
+    )
+}
 
+fn register_tindexof(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tIndexOf",
         lua.create_function(|_, (tbl, value): (mlua::Table, Value)| {
             for pair in tbl.pairs::<i32, Value>() {
                 let (k, v) = pair?;
-                if v == value {
-                    return Ok(Value::Integer(k as i64));
-                }
+                if v == value { return Ok(Value::Integer(k as i64)); }
             }
             Ok(Value::Nil)
         })?,
-    )?;
+    )
+}
 
+fn register_tfilter(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "tFilter",
         lua.create_function(
@@ -128,26 +143,23 @@ fn register_table_search(lua: &Lua) -> Result<()> {
                 let mut to_remove = Vec::new();
                 for pair in tbl.pairs::<Value, Value>() {
                     let (k, v) = pair?;
-                    let keep: bool = pred.call((v.clone(),))?;
-                    if !keep {
-                        to_remove.push(k);
-                    }
+                    if !pred.call((v.clone(),))? { to_remove.push(k); }
                 }
-                for k in to_remove {
-                    tbl.set(k, Value::Nil)?;
-                }
+                for k in to_remove { tbl.set(k, Value::Nil)?; }
                 Ok(tbl)
             },
         )?,
-    )?;
-
-    Ok(())
+    )
 }
 
 /// CopyTable, MergeTable - table copy/merge functions.
 fn register_table_transform(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
+    register_copy_table(lua, &globals)?;
+    register_merge_table(lua, &globals)
+}
 
+fn register_copy_table(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "CopyTable",
         lua.create_function(|lua, (tbl, seen): (mlua::Table, Option<mlua::Table>)| {
@@ -170,8 +182,10 @@ fn register_table_transform(lua: &Lua) -> Result<()> {
             }
             Ok(result)
         })?,
-    )?;
+    )
+}
 
+fn register_merge_table(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "MergeTable",
         lua.create_function(|_, (dest, source): (mlua::Table, mlua::Table)| {
@@ -181,64 +195,42 @@ fn register_table_transform(lua: &Lua) -> Result<()> {
             }
             Ok(dest)
         })?,
-    )?;
-
-    Ok(())
+    )
 }
 
 /// String functions: strsplit.
 fn register_string_functions(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
+    lua.globals().set("strsplit", lua.create_function(strsplit_impl)?)
+}
 
-    // strsplit(delimiter, str, limit) - WoW string utility
-    globals.set(
-        "strsplit",
-        lua.create_function(|lua, args: mlua::MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
+/// Implementation of WoW's strsplit(delimiter, str, limit).
+fn strsplit_impl(lua: &Lua, args: mlua::MultiValue) -> Result<mlua::MultiValue> {
+    let args: Vec<Value> = args.into_iter().collect();
+    let delimiter = lua_string_arg(&args, 0).unwrap_or_else(|| " ".to_string());
+    let input = lua_string_arg(&args, 1).unwrap_or_default();
+    let limit = args.get(2).and_then(|v| match v {
+        Value::Integer(n) => Some(*n as usize),
+        Value::Number(n) => Some(*n as usize),
+        _ => None,
+    });
+    let parts: Vec<&str> = match limit {
+        Some(n) => input.splitn(n, &delimiter).collect(),
+        None => input.split(&delimiter).collect(),
+    };
+    let mut result = mlua::MultiValue::new();
+    for part in parts {
+        result.push_back(Value::String(lua.create_string(part)?));
+    }
+    Ok(result)
+}
 
-            let delimiter = args
-                .first()
-                .and_then(|v| {
-                    if let Value::String(s) = v {
-                        Some(s.to_string_lossy().to_string())
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or_else(|| " ".to_string());
-
-            let input = args
-                .get(1)
-                .and_then(|v| {
-                    if let Value::String(s) = v {
-                        Some(s.to_string_lossy().to_string())
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or_default();
-
-            let limit = args.get(2).and_then(|v| match v {
-                Value::Integer(n) => Some(*n as usize),
-                Value::Number(n) => Some(*n as usize),
-                _ => None,
-            });
-
-            let parts: Vec<&str> = if let Some(limit) = limit {
-                input.splitn(limit, &delimiter).collect()
-            } else {
-                input.split(&delimiter).collect()
-            };
-
-            let mut result = mlua::MultiValue::new();
-            for part in parts {
-                result.push_back(Value::String(lua.create_string(part)?));
-            }
-            Ok(result)
-        })?,
-    )?;
-
-    Ok(())
+/// Extract a Lua string argument from a positional arg list.
+fn lua_string_arg(args: &[Value], index: usize) -> Option<String> {
+    if let Some(Value::String(s)) = args.get(index) {
+        Some(s.to_string_lossy().to_string())
+    } else {
+        None
+    }
 }
 
 /// Global access: getglobal, setglobal, loadstring, GetCurrentEnvironment.
@@ -340,13 +332,14 @@ fn register_error_handlers(lua: &Lua) -> Result<()> {
     // lifecycle scripts).  Unlike `print()`, this always logs to stderr and
     // invokes the Lua error handler regardless of whether Blizzard_PrintHandler
     // has overridden `print`.
-    globals.set(
-        "__report_script_error",
-        lua.create_function(|lua, msg: String| {
-            super::super::script_helpers::call_error_handler(lua, &msg);
-            Ok(())
-        })?,
-    )?;
+    // Stored in registry; also set as a temporary global so that Lua code
+    // compiled before sandbox cleanup can capture it as an upvalue.
+    let report_fn = lua.create_function(|lua, msg: String| {
+        super::super::script_helpers::call_error_handler(lua, &msg);
+        Ok(())
+    })?;
+    lua.set_named_registry_value("__report_script_error", report_fn.clone())?;
+    globals.set("__report_script_error", report_fn)?;
 
     Ok(())
 }
@@ -383,86 +376,142 @@ fn register_lua_stdlib_aliases(lua: &Lua) -> Result<()> {
     register_string_aliases(lua)?;
     register_math_aliases(lua)?;
     register_table_aliases(lua)?;
-    register_bit_library(lua)?;
+    super::bit_api::register_bit_library(lua)?;
     register_os_aliases(lua)?;
     Ok(())
 }
 
+const STRING_ALIASES_LUA: &str = r##"
+    strlen = string.len
+    strsub = string.sub
+    strfind = string.find
+    strmatch = string.match
+    strbyte = string.byte
+    strchar = string.char
+    strrep = string.rep
+    strrev = string.reverse
+    strlower = string.lower
+    strupper = string.upper
+    strtrim = function(s) return (s:gsub("^%s*(.-)%s*$", "%1")) end
+    format = string.format
+    gsub = string.gsub
+    gmatch = string.gmatch
+"##;
+
 /// String library global aliases.
 fn register_string_aliases(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        strlen = string.len
-        strsub = string.sub
-        strfind = string.find
-        strmatch = string.match
-        strbyte = string.byte
-        strchar = string.char
-        strrep = string.rep
-        strrev = string.reverse
-        strlower = string.lower
-        strupper = string.upper
-        strtrim = function(s) return (s:gsub("^%s*(.-)%s*$", "%1")) end
-        strsplittable = function(del, str) local t = {} for v in string.gmatch(str, "([^"..del.."]+)") do t[#t+1] = v end return t end
-        strjoin = function(delimiter, ...) return table.concat({...}, delimiter) end
-        string.join = strjoin
-        format = string.format
-
-        function string:split(delimiter)
-            local result = {}
-            local from = 1
-            local delim_from, delim_to = string.find(self, delimiter, from, true)
-            while delim_from do
-                table.insert(result, string.sub(self, from, delim_from - 1))
-                from = delim_to + 1
-                delim_from, delim_to = string.find(self, delimiter, from, true)
-            end
-            table.insert(result, string.sub(self, from))
-            return result
-        end
-        gsub = string.gsub
-        gmatch = string.gmatch
-    "##,
-    )
-    .exec()?;
-    Ok(())
+    lua.load(STRING_ALIASES_LUA).exec()?;
+    register_strjoin(lua)?;
+    register_strsplittable(lua)?;
+    register_string_split(lua)
 }
+
+/// strjoin(delimiter, ...) -> concatenate variadic args with delimiter.
+fn register_strjoin(lua: &Lua) -> Result<()> {
+    let strjoin = lua.create_function(|_, args: MultiValue| {
+        let mut iter = args.into_iter();
+        let sep = match iter.next() {
+            Some(Value::String(s)) => s.to_str()?.to_string(),
+            Some(Value::Nil) | None => String::new(),
+            Some(v) => v.to_string()?,
+        };
+        let parts: Vec<String> = iter
+            .map(|v| match v {
+                Value::String(s) => s.to_str().map(|s| s.to_string()).unwrap_or_default(),
+                Value::Number(n) => format!("{}", n),
+                Value::Integer(n) => format!("{}", n),
+                _ => String::new(),
+            })
+            .collect();
+        Ok(parts.join(&sep))
+    })?;
+    lua.globals().set("strjoin", strjoin.clone())?;
+    lua.globals()
+        .get::<mlua::Table>("string")?
+        .set("join", strjoin)
+}
+
+/// strsplittable(delimiter, str) -> table of non-empty parts split by delimiter.
+/// Mirrors WoW's gmatch pattern `([^del]+)` which skips empty parts.
+fn register_strsplittable(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "strsplittable",
+        lua.create_function(|lua, (del, s): (String, String)| {
+            let t = lua.create_table()?;
+            if del.is_empty() {
+                t.set(1, s)?;
+            } else {
+                let mut i = 1;
+                for part in s.split(&*del) {
+                    if !part.is_empty() {
+                        t.set(i, part)?;
+                        i += 1;
+                    }
+                }
+            }
+            Ok(t)
+        })?,
+    )
+}
+
+/// string:split(delimiter) -> table of parts split by delimiter, including empty strings.
+/// Mirrors WoW's string.find with plain=true which preserves empty parts.
+fn register_string_split(lua: &Lua) -> Result<()> {
+    let string_table: mlua::Table = lua.globals().get("string")?;
+    string_table.set(
+        "split",
+        lua.create_function(|lua, (s, del): (String, String)| {
+            let t = lua.create_table()?;
+            if del.is_empty() {
+                t.set(1, s)?;
+                return Ok(t);
+            }
+            let mut from = 0;
+            let mut i = 1;
+            while let Some(pos) = s[from..].find(&*del) {
+                t.set(i, &s[from..from + pos])?;
+                i += 1;
+                from += pos + del.len();
+            }
+            t.set(i, &s[from..])?;
+            Ok(t)
+        })?,
+    )
+}
+
+const MATH_ALIASES_LUA: &str = r##"
+    abs = math.abs
+    ceil = math.ceil
+    floor = math.floor
+    max = math.max
+    min = math.min
+    mod = math.fmod
+    sqrt = math.sqrt
+    sin = math.sin
+    cos = math.cos
+    tan = math.tan
+    asin = math.asin
+    acos = math.acos
+    atan = math.atan
+    atan2 = math.atan2
+    deg = math.deg
+    rad = math.rad
+    random = math.random
+    exp = math.exp
+    log = math.log
+    log10 = math.log10
+    pow = math.pow
+    frexp = math.frexp
+    ldexp = math.ldexp
+
+    sort = table.sort
+    getn = function(t) return #t end
+    tconcat = table.concat
+"##;
 
 /// Math library global aliases.
 fn register_math_aliases(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        abs = math.abs
-        ceil = math.ceil
-        floor = math.floor
-        max = math.max
-        min = math.min
-        mod = math.fmod
-        sqrt = math.sqrt
-        sin = math.sin
-        cos = math.cos
-        tan = math.tan
-        asin = math.asin
-        acos = math.acos
-        atan = math.atan
-        atan2 = math.atan2
-        deg = math.deg
-        rad = math.rad
-        random = math.random
-        exp = math.exp
-        log = math.log
-        log10 = math.log10
-        pow = math.pow
-        frexp = math.frexp
-        ldexp = math.ldexp
-
-        sort = table.sort
-        getn = function(t) return #t end
-        tconcat = table.concat
-    "##,
-    )
-    .exec()?;
-    Ok(())
+    lua.load(MATH_ALIASES_LUA).exec()
 }
 
 /// Table library global aliases.
@@ -485,80 +534,19 @@ fn register_os_aliases(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Bitwise operations (native Rust implementation of WoW's bit library).
-fn register_bit_library(lua: &Lua) -> Result<()> {
-    let bit = lua.create_table()?;
-    bit.set("band", lua.create_function(bit_fold_op(|a, b| a & b, 0xFFFFFFFF))?)?;
-    bit.set("bor", lua.create_function(bit_fold_op(|a, b| a | b, 0))?)?;
-    bit.set("bxor", lua.create_function(bit_fold_op(|a, b| a ^ b, 0))?)?;
-    bit.set("bnot", lua.create_function(|_, a: mlua::Number| Ok(!to_u32(a)))?)?;
-    bit.set("lshift", bit_shift_fn(lua, |a, n| a << n)?)?;
-    bit.set("rshift", bit_shift_fn(lua, |a, n| a >> n)?)?;
-    bit.set("arshift", bit_arshift_fn(lua)?)?;
-    bit.set("mod", lua.create_function(bit_mod)?)?;
-    lua.globals().set("bit", bit)?;
-    Ok(())
-}
-
-fn to_u32(n: mlua::Number) -> u32 {
-    n as u32
-}
-
-/// Create a variadic fold function for bitwise logic ops (band, bor, bxor).
-fn bit_fold_op(
-    op: fn(u32, u32) -> u32,
-    identity: u32,
-) -> impl Fn(&Lua, mlua::MultiValue) -> Result<u32> {
-    move |_, args: mlua::MultiValue| {
-        let mut result = identity;
-        for val in args {
-            let n = match val {
-                Value::Number(n) => n,
-                Value::Integer(n) => n as mlua::Number,
-                _ => 0.0,
-            };
-            result = op(result, to_u32(n));
-        }
-        Ok(result)
-    }
-}
-
-/// Create a shift function (lshift, rshift) with u32 shift clamping.
-fn bit_shift_fn(lua: &Lua, op: fn(u32, u32) -> u32) -> Result<mlua::Function> {
-    lua.create_function(move |_, (a, n): (mlua::Number, mlua::Number)| {
-        let shift = to_u32(n);
-        if shift >= 32 { return Ok(0u32); }
-        Ok(op(to_u32(a), shift))
-    })
-}
-
-/// Arithmetic right shift: preserves sign bit by casting through i32.
-fn bit_arshift_fn(lua: &Lua) -> Result<mlua::Function> {
-    lua.create_function(|_, (a, n): (mlua::Number, mlua::Number)| {
-        let shift = to_u32(n);
-        if shift >= 32 {
-            return Ok(if (to_u32(a) as i32) < 0 { 0xFFFFFFFFu32 } else { 0u32 });
-        }
-        Ok((to_u32(a) as i32 >> shift) as u32)
-    })
-}
-
-/// Integer modulo: `a % b`.
-fn bit_mod(_: &Lua, (a, b): (mlua::Number, mlua::Number)) -> Result<u32> {
-    let b = to_u32(b);
-    if b == 0 {
-        return Err(mlua::Error::RuntimeError("bit.mod: division by zero".into()));
-    }
-    Ok(to_u32(a) % b)
-}
-
 /// Mixin system: Mixin, CreateFromMixins, CreateAndInitFromMixin.
 fn register_mixin_system(lua: &Lua) -> Result<()> {
     register_mixin_overrides_table(lua)?;
     register_set_mixin_override(lua)?;
+    register_lud_setter(lua)?;
     register_mixin_globals(lua)?;
-    register_scrollbox_globals(lua)?;
-    register_utility_stubs(lua)
+    super::utility_stubs::register_scrollbox_and_utility_stubs(lua)
+}
+
+/// Register a Lua-level setter for LightUserData __newindex dispatch.
+fn register_lud_setter(lua: &Lua) -> Result<()> {
+    let f = lua.load("return function(obj, k, v) obj[k] = v end").eval::<Function>()?;
+    lua.set_named_registry_value("__mixin_lud_setter", f)
 }
 
 /// Initialize the __mixin_overrides registry table used by the frame __index.
@@ -574,165 +562,131 @@ fn register_mixin_overrides_table(lua: &Lua) -> Result<()> {
 /// __mixin_overrides[frame_id][key]. Called by Mixin() for LightUserData targets.
 /// Accepts any Value for the object and silently skips non-LightUserData values
 /// (e.g. animation group full-userdata objects that don't use the frame __index).
+/// Stored in registry; also exposed as a temporary global so Mixin() (compiled
+/// immediately after) can reference it by name. Sandbox cleanup nils the global.
 fn register_set_mixin_override(lua: &Lua) -> Result<()> {
-    lua.globals().set(
-        "__SetMixinOverride",
-        lua.create_function(
-            |lua, (obj, key, value): (Value, String, Value)| {
-                let ud = match &obj {
-                    Value::LightUserData(lud) => *lud,
-                    _ => return Ok(()), // not a frame LightUserData, skip
-                };
-                let frame_id = crate::lua_api::frame::lud_to_id(ud);
-                let overrides: mlua::Table = lua.named_registry_value("__mixin_overrides")?;
-                let frame_overrides: mlua::Table = match overrides.get::<mlua::Table>(frame_id) {
-                    Ok(t) => t,
-                    Err(_) => {
-                        let t = lua.create_table()?;
-                        overrides.set(frame_id, t.clone())?;
-                        t
-                    }
-                };
-                frame_overrides.set(key, value)?;
-                Ok(())
-            },
-        )?,
-    )?;
-    Ok(())
+    let f = lua.create_function(set_mixin_override_impl)?;
+    lua.set_named_registry_value("__SetMixinOverride", f.clone())?;
+    lua.globals().set("__SetMixinOverride", f)
 }
 
-/// Register Mixin, CreateFromMixins, CreateAndInitFromMixin as Lua globals.
-fn register_mixin_globals(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        function Mixin(object, ...)
-            for i = 1, select("#", ...) do
-                local mixin = select(i, ...)
-                -- Live WoW errors on nil mixins: "Usage: local outObject = Mixin(object, ...)"
-                if mixin == nil then
-                    error("Usage: local outObject = Mixin(object, ...)")
-                end
-                -- For secure mixins (transformed by secureMixin XML attribute),
-                -- use the stable methods table stored in __secureMixinMethods.
-                -- This prevents user-added direct entries (e.g. test fixtures) from
-                -- propagating to new frame instances created after the mixin is modified.
-                local source = (__secureMixinMethods and __secureMixinMethods[mixin]) or mixin
-                for k, v in pairs(source) do
-                    -- For LightUserData frames, store function values in __mixin_overrides
-                    -- so they shadow built-in Rust methods (mirrors WoW where frames are
-                    -- tables and Mixin rawsets directly, taking precedence over __index).
-                    if type(object) == "userdata" and type(v) == "function" then
-                        __SetMixinOverride(object, k, v)
-                    end
-                    object[k] = v
-                end
-            end
-            return object
-        end
-
-        function CreateFromMixins(...)
-            return Mixin({}, ...)
-        end
-
-        function CreateAndInitFromMixin(mixin, ...)
-            local object = CreateFromMixins(mixin)
-            if object.Init then
-                object:Init(...)
-            end
-            return object
-        end
-    "##,
-    )
-    .exec()?;
-    Ok(())
-}
-
-/// Register ScrollBox factory functions: CreateScrollBoxPadding, CreateScrollBoxLinearView.
-fn register_scrollbox_globals(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        function CreateScrollBoxPadding(top, bottom, left, right, spacing)
-            return {
-                top = top or 0,
-                bottom = bottom or 0,
-                left = left or 0,
-                right = right or 0,
-                spacing = spacing or 0,
-                GetSpacing = function(self) return self.spacing end,
-                GetLeft = function(self) return self.left end,
-                GetRight = function(self) return self.right end,
-                GetTop = function(self) return self.top end,
-                GetBottom = function(self) return self.bottom end,
-            }
-        end
-
-        function CreateScrollBoxLinearView(top, bottom, left, right, spacing)
-            local view = CreateAndInitFromMixin(ScrollBoxLinearViewMixin, top, bottom, left, right, spacing)
-            return view
-        end
-    "##,
-    )
-    .exec()?;
-    Ok(())
-}
-
-/// Register utility factory functions: GetFinalNameFromTextureKit, NineSliceUtil, CreateFramePool.
-fn register_utility_stubs(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        -- TextureKit utility
-        function GetFinalNameFromTextureKit(kit)
-            if not kit or not kit.name then
-                return ""
-            end
-            return kit.name
-        end
-
-        -- NineSlice utility table
-        NineSliceUtil = {
-            GetBorderSizes = function(self, border)
-                if not border then return 0, 0, 0, 0 end
-                return border.top or 0, border.bottom or 0, border.left or 0, border.right or 0
-            end,
+fn set_mixin_override_impl(lua: &Lua, (obj, key, value): (Value, String, Value)) -> Result<()> {
+    let ud = match &obj {
+        Value::LightUserData(lud) => *lud,
+        _ => return Ok(()), // not a frame LightUserData, skip
+    };
+    let frame_id = crate::lua_api::frame::lud_to_id(ud);
+    let overrides: mlua::Table = lua.named_registry_value("__mixin_overrides")?;
+    let frame_overrides: mlua::Table = match overrides.get::<mlua::Table>(frame_id) {
+        Ok(t) => t,
+        Err(_) => {
+            let t = lua.create_table()?;
+            overrides.set(frame_id, t.clone())?;
+            t
         }
-
-        -- Frame pool creation
-        function CreateFramePool(frameType, parent, template)
-            local pool = {}
-            function pool:Acquire()
-                return CreateFrame(frameType or "Frame", nil, parent, template)
-            end
-            function pool:Release(frame)
-                if frame then
-                    frame:Hide()
-                    frame:ClearAllPoints()
-                end
-            end
-            function pool:EnumerateActive()
-                return function() end
-            end
-            return pool
-        end
-
-        function CreateTexturePool(parent, template)
-            local pool = {}
-            function pool:Acquire()
-                local parent_frame = type(parent) == "string" and _G[parent] or parent
-                if not parent_frame then parent_frame = UIParent end
-                return parent_frame:CreateTexture(nil, template)
-            end
-            function pool:Release(texture)
-                if texture then
-                    texture:SetTexture(nil)
-                end
-            end
-            function pool:EnumerateActive()
-                return function() end
-            end
-            return pool
-        end
-    "##,
-    )
-    .exec()?;
+    };
+    frame_overrides.set(key, value)?;
     Ok(())
 }
+
+/// Resolve the effective source table for a mixin, preferring __secureMixinMethods.
+fn resolve_mixin_source(secure_methods: &Value, mixin: mlua::Table) -> Result<mlua::Table> {
+    if let Value::Table(sm) = secure_methods {
+        if let Value::Table(t) = sm.get::<Value>(mixin.clone())? {
+            return Ok(t);
+        }
+    }
+    Ok(mixin)
+}
+
+/// Apply a mixin source table's k/v pairs into object.
+/// For userdata objects, function values are also routed through __SetMixinOverride.
+/// For LightUserData/UserData, uses a Lua-level setter to trigger __newindex.
+fn apply_mixin_to_object(
+    lua: &Lua,
+    object: &Value,
+    source: mlua::Table,
+    is_userdata: bool,
+    set_override: &Option<Function>,
+) -> Result<()> {
+    let ud_setter: Option<Function> = if is_userdata {
+        Some(lua.named_registry_value("__mixin_lud_setter")?)
+    } else {
+        None
+    };
+    for pair in source.pairs::<Value, Value>() {
+        let (k, v) = pair?;
+        if is_userdata {
+            if let Value::Function(_) = &v {
+                if let Some(f) = set_override {
+                    f.call::<()>((object.clone(), k.clone(), v.clone()))?;
+                }
+            }
+        }
+        match object {
+            Value::Table(t) => t.set(k, v)?,
+            _ if is_userdata => {
+                if let Some(ref setter) = ud_setter {
+                    setter.call::<()>((object.clone(), k, v))?;
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+/// Mixin(object, ...) — copy k/v from each mixin into object, return object.
+fn mixin_impl(lua: &Lua, args: MultiValue) -> Result<Value> {
+    let mut iter = args.into_iter();
+    let object = iter.next().ok_or_else(|| {
+        mlua::Error::RuntimeError("Usage: local outObject = Mixin(object, ...)".into())
+    })?;
+    let secure_methods: Value = lua.globals().get("__secureMixinMethods")?;
+    let set_override: Option<Function> = lua.named_registry_value("__SetMixinOverride").ok();
+    let is_userdata = matches!(&object, Value::LightUserData(_) | Value::UserData(_));
+    for mixin_val in iter {
+        let mixin = match mixin_val {
+            Value::Table(t) => t,
+            Value::Nil => return Err(mlua::Error::RuntimeError(
+                "Usage: local outObject = Mixin(object, ...)".into()
+            )),
+            _ => continue,
+        };
+        let source = resolve_mixin_source(&secure_methods, mixin)?;
+        apply_mixin_to_object(lua, &object, source, is_userdata, &set_override)?;
+    }
+    Ok(object)
+}
+
+/// CreateAndInitFromMixin(mixin, ...) — create from mixin, then call :Init(...).
+fn create_and_init_from_mixin_impl(lua: &Lua, args: MultiValue) -> Result<Value> {
+    let mut iter = args.into_iter();
+    let mixin = iter.next().unwrap_or(Value::Nil);
+    let create_fn: Function = lua.globals().get("CreateFromMixins")?;
+    let obj: Value = create_fn.call(mixin)?;
+    if let Value::Table(ref t) = obj {
+        if let Ok(init) = t.get::<Function>("Init") {
+            let mut call_args = vec![obj.clone()];
+            call_args.extend(iter);
+            init.call::<MultiValue>(MultiValue::from_iter(call_args))?;
+        }
+    }
+    Ok(obj)
+}
+
+/// Register Mixin, CreateFromMixins, CreateAndInitFromMixin as Rust closures.
+fn register_mixin_globals(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("Mixin", lua.create_function(mixin_impl)?)?;
+    g.set("CreateFromMixins", lua.create_function(|lua, args: MultiValue| {
+        let obj = lua.create_table()?;
+        let mixin_fn: Function = lua.globals().get("Mixin")?;
+        let mut call_args = vec![Value::Table(obj)];
+        call_args.extend(args);
+        mixin_fn.call::<Value>(MultiValue::from_iter(call_args))
+    })?)?;
+    g.set("CreateAndInitFromMixin", lua.create_function(create_and_init_from_mixin_impl)?)?;
+    Ok(())
+}
+

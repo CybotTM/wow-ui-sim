@@ -8,6 +8,25 @@
 
 use mlua::{Lua, Result, Value};
 
+/// Convert a Lua value to f64 for abbreviation functions, returning None for non-numeric.
+fn to_abbrev_number(value: &Value) -> Option<f64> {
+    match value {
+        Value::Nil => None,
+        Value::Number(n) => Some(*n),
+        Value::Integer(n) => Some(*n as f64),
+        Value::String(s) => s.to_str().ok()?.parse::<f64>().ok(),
+        _ => None,
+    }
+}
+
+/// Format a number with B/M/K suffixes. threshold_k controls K cutoff (10000 or 1000).
+fn format_abbreviated(n: f64, threshold_k: f64) -> String {
+    if n >= 1_000_000_000.0 { format!("{:.1}B", n / 1_000_000_000.0) }
+    else if n >= 1_000_000.0 { format!("{:.1}M", n / 1_000_000.0) }
+    else if n >= threshold_k { format!("{:.1}K", n / 1_000.0) }
+    else { format!("{}", n.floor() as i64) }
+}
+
 /// Register all extra stubs (called from c_stubs_api::register_c_stubs_api).
 pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
@@ -18,7 +37,7 @@ pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
     register_missing_global_tables(lua, &g)?;
     register_c_delves_ui(lua)?;
     register_c_zone_ability(lua)?;
-    register_simulate_ping(lua)?;
+    super::c_stubs_achievement::register_simulate_ping(lua)?;
     Ok(())
 }
 
@@ -142,40 +161,48 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("SpellIsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     g.set("GetExpansionDisplayInfo", lua.create_function(|_, _expansion_level: Value| Ok(Value::Nil))?)?;
     g.set("AddSourceLocationExclude", lua.create_function(|_, _location: Value| Ok(()))?)?;
-    // Wrap in Lua to avoid mlua::Error::RuntimeError overhead (12000x slower than
-    // Lua error() due to Elune taint bookkeeping on Rust→Lua error boundary).
-    {
-        let callback_tbl = lua.create_table()?;
-        let restricted_tbl = lua.create_table()?;
-        for &e in crate::event::callback_events() { callback_tbl.set(e, true)?; }
-        for &e in crate::event::restricted_events() { restricted_tbl.set(e, true)?; }
-        lua.load(r#"
-            local callback_events, restricted_events = ...
-            local getinfo, getstacktaint = debug.getinfo, debug.getstacktaint
-            local match = string.match
-            local function get_taint()
-                for level = 2, 30 do
-                    local info = getinfo(level, "S")
-                    if not info then break end
-                    if info.source then
-                        local addon = match(info.source, "AddOns/([^/]+)")
-                        if addon then return addon end
-                    end
-                end
-                return getstacktaint()
-            end
-            RegisterEventCallback = function(event, callback)
-                if not callback_events[event] then
-                    local taint = get_taint()
-                    local suffix = taint and ("\nLua Taint: " .. taint) or ""
-                    error("RegisterEventCallback Attempt to register unknown event \"" .. event .. "\"" .. suffix, 0)
-                end
-                return not restricted_events[event]
-            end
-        "#).call::<()>((callback_tbl, restricted_tbl))?;
-    }
+    register_event_callback(lua)?;
     g.set("UnitIsHumanPlayer", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
     Ok(())
+}
+
+/// RegisterEventCallback - validates event names with taint detection.
+///
+/// Wrapped in Lua to avoid mlua::Error::RuntimeError overhead (12000x slower than
+/// Lua error() due to Elune taint bookkeeping on Rust→Lua error boundary).
+fn register_event_callback(lua: &Lua) -> Result<()> {
+    let callback_tbl = lua.create_table()?;
+    let restricted_tbl = lua.create_table()?;
+    for &e in crate::event::callback_events() { callback_tbl.set(e, true)?; }
+    for &e in crate::event::restricted_events() { restricted_tbl.set(e, true)?; }
+    lua.load(event_callback_lua_src()).call::<()>((callback_tbl, restricted_tbl))
+}
+
+fn event_callback_lua_src() -> &'static str {
+    concat!(
+        "local callback_events, restricted_events = ...\n",
+        "local getinfo, getstacktaint = debug.getinfo, debug.getstacktaint\n",
+        "local match = string.match\n",
+        "local function get_taint()\n",
+        "    for level = 2, 30 do\n",
+        "        local info = getinfo(level, 'S')\n",
+        "        if not info then break end\n",
+        "        if info.source then\n",
+        "            local addon = match(info.source, 'AddOns/([^/]+)')\n",
+        "            if addon then return addon end\n",
+        "        end\n",
+        "    end\n",
+        "    return getstacktaint()\n",
+        "end\n",
+        "RegisterEventCallback = function(event, callback)\n",
+        "    if not callback_events[event] then\n",
+        "        local taint = get_taint()\n",
+        "        local suffix = taint and ('\\nLua Taint: ' .. taint) or ''\n",
+        "        error('RegisterEventCallback Attempt to register unknown event \"' .. event .. '\"' .. suffix, 0)\n",
+        "    end\n",
+        "    return not restricted_events[event]\n",
+        "end\n",
+    )
 }
 
 /// Legacy LE_* constants and label strings.
@@ -218,27 +245,22 @@ fn register_combat_log_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 /// Taint system and restricted environment globals.
 fn register_taint_and_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("GetGlobalEnvironment", lua.create_function(|lua, ()| Ok(lua.globals()))?)?;
-    lua.load(r#"
-        function secretwrap(...) return ... end
-        function AbbreviateNumbers(value, options)
-            if not value then return "0" end
-            local n = tonumber(value)
-            if not n then return tostring(value) end
-            if n >= 1000000000 then return string.format("%.1fB", n / 1000000000)
-            elseif n >= 1000000 then return string.format("%.1fM", n / 1000000)
-            elseif n >= 10000 then return string.format("%.1fK", n / 1000)
-            else return tostring(math.floor(n)) end
-        end
-        function AbbreviateLargeNumbers(value, options)
-            if not value then return "0" end
-            local n = tonumber(value)
-            if not n then return tostring(value) end
-            if n >= 1000000000 then return string.format("%.1fB", n / 1000000000)
-            elseif n >= 1000000 then return string.format("%.1fM", n / 1000000)
-            elseif n >= 1000 then return string.format("%.1fK", n / 1000)
-            else return tostring(math.floor(n)) end
-        end
-    "#).exec().map_err(|e| mlua::Error::external(e.to_string()))?;
+    // secretwrap(...) -> pass-through, returns all args unchanged.
+    g.set("secretwrap", lua.create_function(|_, args: mlua::MultiValue| Ok(args))?)?;
+    // AbbreviateNumbers: K threshold at 10000.
+    g.set("AbbreviateNumbers", lua.create_function(|_, (value, _): (Value, Value)| {
+        Ok(match to_abbrev_number(&value) {
+            None => value.to_string().unwrap_or_else(|_| "0".into()),
+            Some(n) => format_abbreviated(n, 10_000.0),
+        })
+    })?)?;
+    // AbbreviateLargeNumbers: K threshold at 1000.
+    g.set("AbbreviateLargeNumbers", lua.create_function(|_, (value, _): (Value, Value)| {
+        Ok(match to_abbrev_number(&value) {
+            None => value.to_string().unwrap_or_else(|_| "0".into()),
+            Some(n) => format_abbreviated(n, 1_000.0),
+        })
+    })?)?;
     Ok(())
 }
 
@@ -309,6 +331,14 @@ fn register_pet_inventory_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// Global Lua tables that are referenced by addon code.
 fn register_missing_global_tables(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_simple_stub_tables(lua, g)?;
+    register_ui_frame_manager_stub(lua, g)?;
+    register_action_button_spell_alert_manager(lua, g)?;
+    Ok(())
+}
+
+/// QuestUtil, ChatFrameMixin, TalentButtonUtil, SpellSearchUtil, Dispatcher stubs.
+fn register_simple_stub_tables(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("QuestUtil")?.is_nil() {
         g.set("QuestUtil", lua.create_table()?)?;
     }
@@ -327,32 +357,33 @@ fn register_missing_global_tables(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("Dispatcher")?.is_nil() {
         g.set("Dispatcher", build_dispatcher_stub(lua)?)?;
     }
+    Ok(())
+}
+
+/// UIFrameManager_ManagedFrameMixin stub — needed before Blizzard_UIFrameManager loads.
+/// (Blizzard_UIFrameManager loads after Blizzard_Tutorials alphabetically.)
+fn register_ui_frame_manager_stub(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("UIFrameManager_ManagedFrameMixin")?.is_nil() {
-        // Stub with OnLoad/UpdateFrameState — Blizzard_UIFrameManager loads after
-        // Blizzard_Tutorials (alphabetical order), so RPETutorialInterruptMixin:OnLoad
-        // calls UIFrameManager_ManagedFrameMixin.OnLoad(self) before the real definition.
-        // The real OnLoad registers frames with UIFrameManager; our stub is a no-op.
-        lua.load(r#"
-            UIFrameManager_ManagedFrameMixin = {}
-            function UIFrameManager_ManagedFrameMixin:OnLoad()
-                if UIFrameManager and UIFrameManager.RegisterFrameForFrameType then
-                    UIFrameManager:RegisterFrameForFrameType(self, self.frameType)
-                end
-            end
-            function UIFrameManager_ManagedFrameMixin:UpdateFrameState(show)
-                self:SetShown(show)
-            end
-        "#).exec()?;
+        let mixin = lua.create_table()?;
+        let on_load = lua.load(
+            "return function(self) if UIFrameManager and UIFrameManager.RegisterFrameForFrameType then UIFrameManager:RegisterFrameForFrameType(self, self.frameType) end end"
+        ).eval::<mlua::Function>()?;
+        mixin.set("OnLoad", on_load)?;
+        let update_state = lua.load("return function(self, show) self:SetShown(show) end").eval::<mlua::Function>()?;
+        mixin.set("UpdateFrameState", update_state)?;
+        g.set("UIFrameManager_ManagedFrameMixin", mixin)?;
     }
-    // ActionButtonSpellAlertManager - referenced by PetBattleUI OnLoad
-    // before ActionBar workarounds run. Provide stub with ShowAlert/HideAlert.
+    Ok(())
+}
+
+/// ActionButtonSpellAlertManager stub — referenced by PetBattleUI OnLoad before ActionBar loads.
+fn register_action_button_spell_alert_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("ActionButtonSpellAlertManager")?.is_nil() {
-        lua.load(r#"
-            ActionButtonSpellAlertManager = {
-                ShowAlert = function() end,
-                HideAlert = function() end,
-            }
-        "#).exec()?;
+        let mgr = lua.create_table()?;
+        let noop = lua.create_function(|_, _: mlua::MultiValue| Ok(()))?;
+        mgr.set("ShowAlert", noop.clone())?;
+        mgr.set("HideAlert", noop)?;
+        g.set("ActionButtonSpellAlertManager", mgr)?;
     }
     Ok(())
 }
@@ -489,46 +520,77 @@ fn register_c_ping_secure(lua: &Lua) -> Result<()> {
     "#).exec()
 }
 
+fn ping_get_default_options(lua: &Lua, (): ()) -> Result<mlua::Table> {
+    let result = lua.create_table()?;
+    let entries: &[(i32, &str)] =
+        &[(0, "Attack"), (1, "Warning"), (2, "Assist"), (3, "OnMyWay")];
+    for (i, (order_index, texture_kit)) in entries.iter().enumerate() {
+        let entry = lua.create_table()?;
+        entry.set("orderIndex", *order_index)?;
+        entry.set("type", *order_index)?;
+        entry.set("uiTextureKitID", *texture_kit)?;
+        result.set(i + 1, entry)?;
+    }
+    Ok(result)
+}
+
+fn ping_get_texture_kit(lua: &Lua, ping_type: Value) -> Result<Value> {
+    let n = match ping_type {
+        Value::Integer(n) => n,
+        Value::Number(n) => n as i64,
+        _ => return Ok(Value::Nil),
+    };
+    let kit: Option<&str> = match n {
+        0 => Some("Attack"),
+        1 => Some("Warning"),
+        2 => Some("Assist"),
+        3 => Some("OnMyWay"),
+        4 => Some("Threat"),
+        5 => Some("NonThreat"),
+        _ => None,
+    };
+    match kit {
+        Some(s) => Ok(Value::String(lua.create_string(s)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
 /// C_Ping - non-secure ping API with real data for PingManager:SetupDefaultPingOptions.
 fn register_c_ping(lua: &Lua) -> Result<()> {
-    lua.load(r#"
-        local TEXTURE_KIT_MAP = {
-            [0] = "Attack", [1] = "Warning", [2] = "Assist",
-            [3] = "OnMyWay", [4] = "Threat", [5] = "NonThreat",
-        }
-        C_Ping = {
-            GetDefaultPingOptions = function()
-                return {
-                    { orderIndex = 0, type = 0, uiTextureKitID = "Attack" },
-                    { orderIndex = 1, type = 1, uiTextureKitID = "Warning" },
-                    { orderIndex = 2, type = 2, uiTextureKitID = "Assist" },
-                    { orderIndex = 3, type = 3, uiTextureKitID = "OnMyWay" },
-                }
-            end,
-            GetTextureKitForType = function(pingType)
-                return TEXTURE_KIT_MAP[pingType]
-            end,
-            GetCooldownInfo = function() return nil end,
-            IsPingSystemEnabled = function() return false end,
-        }
-    "#).exec()
+    let ping = lua.create_table()?;
+    ping.set("GetCooldownInfo", lua.create_function(|_, _: mlua::MultiValue| Ok(Value::Nil))?)?;
+    ping.set("GetDefaultPingOptions", lua.create_function(ping_get_default_options)?)?;
+    ping.set("GetTextureKitForType", lua.create_function(ping_get_texture_kit)?)?;
+    ping.set("IsPingSystemEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    lua.globals().set("C_Ping", ping)?;
+    Ok(())
 }
 
 /// C_ClassTrial, C_RecruitAFriend, C_WowTokenPublic, C_FriendList stubs.
 fn register_trial_raf_token(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let class_trial = lua.create_table()?;
-    class_trial.set("IsClassTrialCharacter", lua.create_function(|_, ()| Ok(false))?)?;
-    class_trial.set("GetClassTrialLogoutTimeSeconds", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("C_ClassTrial", class_trial)?;
+    register_c_class_trial(lua, g)?;
+    register_c_recruit_a_friend(lua, g)?;
+    register_c_wow_token_public(lua, g)?;
+    register_c_friend_list(lua, g)?;
+    Ok(())
+}
 
-    let raf = lua.create_table()?;
-    raf.set("GetRecruitInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    raf.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    raf.set("IsRecruitingEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    // GetRAFInfo returns nil when there's no active RAF relationship
-    raf.set("GetRAFInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    // GetRAFSystemInfo returns a table with RAF system configuration
-    raf.set("GetRAFSystemInfo", lua.create_function(|lua, ()| {
+/// C_ClassTrial stubs.
+fn register_c_class_trial(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("IsClassTrialCharacter", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("GetClassTrialLogoutTimeSeconds", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set("C_ClassTrial", t)
+}
+
+/// C_RecruitAFriend stubs.
+fn register_c_recruit_a_friend(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("GetRecruitInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("IsRecruitingEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("GetRAFInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set("GetRAFSystemInfo", lua.create_function(|lua, ()| {
         let info = lua.create_table()?;
         info.set("maxRecruits", 0i32)?;
         info.set("maxRecruitMonths", 0i32)?;
@@ -536,31 +598,31 @@ fn register_trial_raf_token(lua: &Lua, g: &mlua::Table) -> Result<()> {
         info.set("daysInCycle", 30i32)?;
         Ok(info)
     })?)?;
-    g.set("C_RecruitAFriend", raf)?;
+    g.set("C_RecruitAFriend", t)
+}
 
-    let wow_token = lua.create_table()?;
-    wow_token.set("GetCurrentMarketPrice", lua.create_function(|_, ()| Ok(0i32))?)?;
-    wow_token.set("GetGuaranteedPrice", lua.create_function(|_, ()| Ok(0i32))?)?;
-    wow_token.set("UpdateTokenCount", lua.create_function(|_, ()| Ok(()))?)?;
-    // GetCommerceSystemStatus returns (purchaseAvailable, listAvailable, balanceEnabled)
-    wow_token.set("GetCommerceSystemStatus", lua.create_function(|_, ()| {
-        Ok((false, false, false))
-    })?)?;
-    wow_token.set("UpdateMarketPrice", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("C_WowTokenPublic", wow_token)?;
+/// C_WowTokenPublic stubs.
+fn register_c_wow_token_public(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("GetCurrentMarketPrice", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("GetGuaranteedPrice", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("UpdateTokenCount", lua.create_function(|_, ()| Ok(()))?)?;
+    t.set("GetCommerceSystemStatus", lua.create_function(|_, ()| Ok((false, false, false)))?)?;
+    t.set("UpdateMarketPrice", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set("C_WowTokenPublic", t)
+}
 
-    // C_FriendList - friend list / who system
-    let friend_list = lua.create_table()?;
-    friend_list.set("SetWhoToUi", lua.create_function(|_, _flag: bool| Ok(()))?)?;
-    friend_list.set("SendWho", lua.create_function(|_, _msg: String| Ok(()))?)?;
-    friend_list.set("GetNumWhoResults", lua.create_function(|_, ()| Ok(0i32))?)?;
-    friend_list.set("GetNumFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
-    friend_list.set("GetNumOnlineFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
-    friend_list.set("GetFriendInfoByIndex", lua.create_function(|_, _idx: i32| Ok(Value::Nil))?)?;
-    friend_list.set("ShowFriends", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("C_FriendList", friend_list)?;
-
-    Ok(())
+/// C_FriendList stubs.
+fn register_c_friend_list(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("SetWhoToUi", lua.create_function(|_, _flag: bool| Ok(()))?)?;
+    t.set("SendWho", lua.create_function(|_, _msg: String| Ok(()))?)?;
+    t.set("GetNumWhoResults", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("GetNumFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("GetNumOnlineFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set("GetFriendInfoByIndex", lua.create_function(|_, _idx: i32| Ok(Value::Nil))?)?;
+    t.set("ShowFriends", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set("C_FriendList", t)
 }
 
 /// C_CatalogShop, C_Who, C_PrivateAuras stubs.
@@ -633,106 +695,3 @@ fn register_c_zone_ability(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Achievement category API stubs needed by Blizzard_AchievementUI at parse time.
-pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
-    let g = lua.globals();
-    g.set("GetCategoryList", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("GetGuildCategoryList", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("GetStatisticsCategoryList", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set(
-        "GetCategoryInfo",
-        lua.create_function(|_, _id: Value| Ok((Value::Nil, -1i32, -1i32)))?,
-    )?;
-    g.set(
-        "GetCategoryNumAchievements",
-        lua.create_function(|_, _id: Value| Ok((0i32, 0i32, 0i32)))?,
-    )?;
-    g.set(
-        "GetTotalAchievementPoints",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0i32))?,
-    )?;
-    g.set(
-        "GetLatestCompletedAchievements",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(mlua::MultiValue::new()))?,
-    )?;
-    g.set("GetAchievementInfo", lua.create_function(stub_get_achievement_info)?)?;
-    g.set(
-        "GetTrackedAchievements",
-        lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?,
-    )?;
-    g.set(
-        "GetNumCompletedAchievements",
-        lua.create_function(|_, _for_guild: Option<bool>| Ok((0i32, 0i32)))?,
-    )?;
-    Ok(())
-}
-
-/// Stub for GetAchievementInfo — returns 14 values matching WoW's signature.
-fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
-    let aid = match &id {
-        Value::Integer(n) => *n,
-        Value::Number(n) => *n as i64,
-        _ => return Ok(mlua::MultiValue::from_vec(vec![Value::Nil])),
-    };
-    Ok(mlua::MultiValue::from_vec(vec![
-        Value::Integer(aid),
-        Value::String(lua.create_string("Achievement")?),
-        Value::Integer(10),
-        Value::Boolean(false),
-        Value::Integer(1),
-        Value::Integer(1),
-        Value::Integer(2025),
-        Value::String(lua.create_string("Achievement description")?),
-        Value::Integer(0),
-        Value::Integer(136243),
-        Value::String(lua.create_string("")?),
-        Value::Boolean(false),
-        Value::Boolean(false),
-        Value::Nil,
-    ]))
-}
-
-/// SimulatePing(textureKit) - fires stored PingManager callbacks to render a pin.
-fn register_simulate_ping(lua: &Lua) -> Result<()> {
-    lua.load(r#"
-        function SimulatePing(textureKit)
-            textureKit = textureKit or "Attack"
-            local cbs = _G.__PingSecureCallbacks
-            if not cbs or not cbs.PingPinFrameAdded then
-                print("SimulatePing: PingManager not initialized (no PingPinFrameAdded callback)")
-                return
-            end
-            local anchor = CreateFrame("Frame", nil, UIParent)
-            anchor:SetSize(1, 1)
-            anchor:SetPoint("CENTER", UIParent, "CENTER", 0, 0)
-            anchor:Show()
-            cbs.PingPinFrameAdded(anchor, textureKit, true)
-            C_Timer.After(5, function()
-                if cbs.PingPinFrameRemoved then cbs.PingPinFrameRemoved(anchor) end
-            end)
-        end
-    "#).exec()
-}
-
-/// Loot, content-tracking, and achievement telemetry namespace stubs.
-pub fn register_tracking_stubs(lua: &Lua) -> Result<()> {
-    let g = lua.globals();
-
-    let cl = lua.create_table()?;
-    cl.set("GetLootRollDuration", lua.create_function(|_, _id: Value| Ok(0i32))?)?;
-    g.set("C_Loot", cl)?;
-
-    let ct = lua.create_table()?;
-    ct.set("GetTrackedIDs", lua.create_function(|lua, _type: Value| lua.create_table())?)?;
-    ct.set("IsTracking", lua.create_function(|_, (_type, _id): (Value, Value)| Ok(false))?)?;
-    ct.set("GetCollectableSourceTrackingEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("C_ContentTracking", ct)?;
-
-    let at = lua.create_table()?;
-    at.set("ShowAchievements", lua.create_function(|_, ()| Ok(()))?)?;
-    at.set("LinkAchievementInWhisper", lua.create_function(|_, _id: Value| Ok(()))?)?;
-    at.set("LinkAchievementInClub", lua.create_function(|_, _id: Value| Ok(()))?)?;
-    g.set("C_AchievementTelemetry", at)?;
-
-    Ok(())
-}

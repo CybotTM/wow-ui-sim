@@ -30,65 +30,10 @@ pub struct WowLuaEnv {
 impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
-        // Use unsafe_new to get full standard library including debug
-        // This is safe for our simulator since we control the Lua code
         let lua = unsafe { Lua::unsafe_new() };
         let state = Rc::new(RefCell::new(SimState::default()));
-
-        // Create all built-in frames
-        {
-            let mut s = state.borrow_mut();
-            let (w, h) = (s.screen_width, s.screen_height);
-            create_builtin_frames(&mut s.widgets, w, h);
-        }
-
-        // Load Elune's security library (taint functions for debug table).
-        // mlua opens libraries individually; luaopen_security is Elune-specific.
-        unsafe extern "C" {
-            fn luaopen_security(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
-        }
-        unsafe { lua.exec_raw::<()>((), |state| { luaopen_security(state); })? };
-
-        // Event registration tables for dispatch ordering (Lua hash table order)
-        let event_individual = lua.create_table()?;
-        lua.set_named_registry_value("__event_individual", event_individual)?;
-        let event_all = lua.create_table()?;
-        lua.set_named_registry_value("__event_all", event_all)?;
-
-        // Pre-compiled taint fallback (only called when Rust stack walk finds nothing).
-        let taint_fallback: mlua::Function = lua.load(
-            "return debug.getstacktaint()"
-        ).into_function()?;
-        lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
-
-        // Register global functions
-        super::globals::register_globals(&lua, Rc::clone(&state))?;
-        super::secure_env::create_secure_environment(&lua)?;
-
-        // Enable Elune taint tracking after all engine globals are set.
-        // Install a default error handler (Rust logs to stderr; Lua handler
-        // is for addon code that calls geterrorhandler()).
-        lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
-
-        // Wrap loadstring with taint — luaopen_base registers an untainted
-        // version; addon-loaded code must be marked tainted.
-        lua.load(r#"
-            do
-                local original = loadstring
-                local setstacktaint = debug.setstacktaint
-                loadstring = function(code, name)
-                    setstacktaint("*** ForceTaint_Strong ***")
-                    return original(code, name)
-                end
-            end
-        "#).exec()?;
-
-        // Initialize keybinding tables with defaults
-        super::keybindings::init_keybindings(&lua)?;
-
-        // Precompile Lua helper functions for the XML loader
-        crate::loader::precompiled::init(&lua)?;
-
+        init_builtin_frames(&state);
+        init_lua_state(&lua, Rc::clone(&state))?;
         Ok(Self {
             lua,
             state,
@@ -368,44 +313,10 @@ impl WowLuaEnv {
 
     /// Scan an addons directory and register all found addons (metadata only, no loading).
     pub fn scan_and_register_addons(&self, addons_path: &std::path::Path) {
-        use crate::toc::TocFile;
-        let entries = match std::fs::read_dir(addons_path) {
-            Ok(e) => e,
-            Err(_) => return,
-        };
-        let mut addons: Vec<AddonInfo> = Vec::new();
-        for entry in entries.flatten() {
-            let path = entry.path();
-            if !path.is_dir() {
-                continue;
-            }
-            let name = path.file_name().unwrap().to_str().unwrap().to_string();
-            if name.starts_with('.') || name == "BlizzardUI" {
-                continue;
-            }
-            // Find TOC file
-            let toc_path = crate::loader::find_toc_file(&path);
-            let Some(toc_path) = toc_path else { continue };
-            let toc = TocFile::from_file(&toc_path).ok();
-            let (title, notes, load_on_demand) = toc
-                .as_ref()
-                .map(|t| {
-                    let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.clone());
-                    let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-                    let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
-                    (title, notes, lod)
-                })
-                .unwrap_or_else(|| (name.clone(), String::new(), false));
-            addons.push(AddonInfo {
-                folder_name: name, title, notes,
-                enabled: true, loaded: false, load_on_demand,
-                load_time_secs: 0.0, ..Default::default()
-            });
-        }
+        let mut addons = scan_addon_entries(addons_path);
         addons.sort_by(|a, b| a.folder_name.to_lowercase().cmp(&b.folder_name.to_lowercase()));
         let mut state = self.state.borrow_mut();
         for addon in addons {
-            // Don't register duplicates (Blizzard addons may already be registered)
             if !state.addons.iter().any(|a| a.folder_name == addon.folder_name) {
                 state.addons.push(addon);
             }
@@ -512,48 +423,45 @@ impl WowLuaEnv {
         let mut error_counts = self.on_update_errors.borrow_mut();
         for widget_id in frame_ids {
             let count = error_counts.get(widget_id).copied().unwrap_or(0);
-            if count >= SUPPRESS_THRESHOLD {
-                continue;
-            }
-            let addon_idx = self.state.borrow().widgets.get(*widget_id)
-                .and_then(|f| f.owner_addon);
+            if count >= SUPPRESS_THRESHOLD { continue; }
+            let addon_idx = self.state.borrow().widgets.get(*widget_id).and_then(|f| f.owner_addon);
             let start = Instant::now();
             if let Some(handler) = get_script(&self.lua, *widget_id, "OnUpdate")
                 && let Some(frame) = get_frame_ref(&self.lua, *widget_id)
             {
-                match handler.call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()])) {
-                    Ok(()) => {
-                        // Success: reset consecutive error count.
-                        error_counts.remove(widget_id);
-                    }
-                    Err(e) => {
-                        let new_count = count + 1;
-                        if new_count <= 3 || new_count == SUPPRESS_THRESHOLD {
-                            let name = self.state.borrow().widgets.get(*widget_id)
-                                .and_then(|f| f.name.clone())
-                                .unwrap_or_else(|| format!("id={}", widget_id));
-                            eprintln!(
-                                "[OnUpdate] error #{} in frame '{}': {}",
-                                new_count, name, e
-                            );
-                            call_error_handler(&self.lua, &e.to_string());
-                            if new_count == SUPPRESS_THRESHOLD {
-                                eprintln!(
-                                    "[OnUpdate] suppressing '{}' after {} consecutive errors",
-                                    name, SUPPRESS_THRESHOLD
-                                );
-                            }
-                        }
-                        error_counts.insert(*widget_id, new_count);
-                    }
-                }
+                let result = handler.call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]));
+                self.handle_on_update_result(result, *widget_id, count, &mut error_counts,
+                    SUPPRESS_THRESHOLD, &call_error_handler);
             }
-            if let Some(idx) = addon_idx {
-                let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
-                let mut state = self.state.borrow_mut();
-                if let Some(addon) = state.addons.get_mut(idx as usize) {
-                    addon.runtime.current_frame_ms += elapsed_ms;
+            accumulate_addon_time(&self.state, addon_idx, start.elapsed().as_secs_f64() * 1000.0);
+        }
+    }
+
+    fn handle_on_update_result(
+        &self,
+        result: mlua::Result<()>,
+        widget_id: u64,
+        count: u32,
+        error_counts: &mut std::collections::HashMap<u64, u32>,
+        suppress_threshold: u32,
+        call_error_handler: &dyn Fn(&Lua, &str),
+    ) {
+        match result {
+            Ok(()) => { error_counts.remove(&widget_id); }
+            Err(e) => {
+                let new_count = count + 1;
+                if new_count <= 3 || new_count == suppress_threshold {
+                    let name = self.state.borrow().widgets.get(widget_id)
+                        .and_then(|f| f.name.clone())
+                        .unwrap_or_else(|| format!("id={}", widget_id));
+                    eprintln!("[OnUpdate] error #{} in frame '{}': {}", new_count, name, e);
+                    call_error_handler(&self.lua, &e.to_string());
+                    if new_count == suppress_threshold {
+                        eprintln!("[OnUpdate] suppressing '{}' after {} consecutive errors",
+                            name, suppress_threshold);
+                    }
                 }
+                error_counts.insert(widget_id, new_count);
             }
         }
     }
@@ -644,4 +552,109 @@ fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 100.0 { rt.count_over_100ms += 1; }
     if ms > 500.0 { rt.count_over_500ms += 1; }
     if ms > 1000.0 { rt.count_over_1000ms += 1; }
+}
+
+/// Scan an addons directory and return AddonInfo for each valid addon folder.
+fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
+    use crate::toc::TocFile;
+    let Ok(entries) = std::fs::read_dir(addons_path) else { return Vec::new() };
+    let mut addons = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() { continue; }
+        let name = path.file_name().unwrap().to_str().unwrap().to_string();
+        if name.starts_with('.') || name == "BlizzardUI" { continue; }
+        let Some(toc_path) = crate::loader::find_toc_file(&path) else { continue };
+        let toc = TocFile::from_file(&toc_path).ok();
+        let (title, notes, load_on_demand) = toc.as_ref()
+            .map(|t| {
+                let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.clone());
+                let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
+                let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
+                (title, notes, lod)
+            })
+            .unwrap_or_else(|| (name.clone(), String::new(), false));
+        addons.push(AddonInfo {
+            folder_name: name, title, notes,
+            enabled: true, loaded: false, load_on_demand,
+            load_time_secs: 0.0, ..Default::default()
+        });
+    }
+    addons
+}
+
+/// Add elapsed milliseconds to the owning addon's current-frame metric.
+fn accumulate_addon_time(state: &Rc<RefCell<SimState>>, addon_idx: Option<u16>, elapsed_ms: f64) {
+    if let Some(idx) = addon_idx {
+        if let Some(addon) = state.borrow_mut().addons.get_mut(idx as usize) {
+            addon.runtime.current_frame_ms += elapsed_ms;
+        }
+    }
+}
+
+/// Create built-in frames in the widget registry before Lua loads.
+fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
+    let mut s = state.borrow_mut();
+    let (w, h) = (s.screen_width, s.screen_height);
+    create_builtin_frames(&mut s.widgets, w, h);
+}
+
+/// Initialize the Lua state: load Elune, register globals, patch stdlib, run keybindings.
+fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> {
+    load_elune_security(lua)?;
+    init_registry_tables(lua)?;
+    super::globals::register_globals(lua, Rc::clone(&state))?;
+    super::secure_env::create_secure_environment(lua)?;
+    enable_taint_and_wrap_loadstring(lua)?;
+    super::keybindings::init_keybindings(lua)?;
+    crate::loader::precompiled::init(lua)?;
+    remove_sandbox_globals(lua)?;
+    Ok(())
+}
+
+/// Load Elune's security library (taint functions for the debug table).
+fn load_elune_security(lua: &Lua) -> crate::Result<()> {
+    unsafe extern "C" {
+        fn luaopen_security(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
+    }
+    unsafe { lua.exec_raw::<()>((), |state| { luaopen_security(state); })? };
+    Ok(())
+}
+
+/// Set up registry tables for event dispatch and taint fallback.
+fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
+    lua.set_named_registry_value("__event_individual", lua.create_table()?)?;
+    lua.set_named_registry_value("__event_all", lua.create_table()?)?;
+    let taint_fallback: mlua::Function = lua.load("return debug.getstacktaint()").into_function()?;
+    lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)
+}
+
+/// Enable Elune taint tracking and wrap loadstring to mark addon code tainted.
+fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
+    lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
+    lua.load(r#"
+        do
+            local original = loadstring
+            local setstacktaint = debug.setstacktaint
+            loadstring = function(code, name)
+                setstacktaint("*** ForceTaint_Strong ***")
+                return original(code, name)
+            end
+        end
+    "#).exec()
+}
+
+/// Remove globals that WoW's sandbox doesn't expose and internal helpers
+/// now stored in the Lua registry.
+fn remove_sandbox_globals(lua: &Lua) -> mlua::Result<()> {
+    let g = lua.globals();
+    for name in &["dofile", "load", "loadfile", "module", "require",
+                  "__original_ipairs", "__original_rawget",
+                  "__real_getmetatable", "__real_setmetatable",
+                  "__SetMixinOverride", "__report_script_error"] {
+        g.set(*name, Value::Nil)?;
+    }
+    lua.globals().get::<mlua::Table>("string")?.set("dump", Value::Nil)?;
+    lua.globals().get::<mlua::Table>("math")?.set("randomseed", Value::Nil)?;
+    Ok(())
 }

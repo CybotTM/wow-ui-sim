@@ -72,13 +72,13 @@ fn register_type_overrides(lua: &Lua) -> Result<()> {
             Value::Table(t) => t.raw_get(key),
             Value::UserData(_) | Value::LightUserData(_) => Ok(Value::Nil),
             _ => {
-                let original: mlua::Function = lua.globals().raw_get("__original_rawget")?;
+                let original: mlua::Function = lua.named_registry_value("__original_rawget")?;
                 original.call((table, key))
             }
         }
     })?;
     let original_rawget: mlua::Function = globals.raw_get("rawget")?;
-    globals.raw_set("__original_rawget", original_rawget)?;
+    lua.set_named_registry_value("__original_rawget", original_rawget)?;
     globals.set("rawget", rawget_fn)?;
 
     Ok(())
@@ -125,42 +125,40 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
 /// Register `ReloadUI()` - reload the interface by firing startup events again.
 fn register_reload_ui(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let reload_ui = lua.create_function(move |lua, ()| {
-        fire_event_to_listeners(lua, &state, "ADDON_LOADED", |lua| {
-            let event_str = lua.create_string("ADDON_LOADED")?;
-            let addon_name = lua.create_string("WoWUISim")?;
-            Ok(vec![Value::String(event_str), Value::String(addon_name)])
-        })?;
-
-        fire_event_to_listeners(lua, &state, "VARIABLES_LOADED", |lua| {
-            let event_str = lua.create_string("VARIABLES_LOADED")?;
-            Ok(vec![Value::String(event_str)])
-        })?;
-
-        fire_event_to_listeners(lua, &state, "PLAYER_ENTERING_WORLD", |lua| {
-            let event_str = lua.create_string("PLAYER_ENTERING_WORLD")?;
-            Ok(vec![Value::String(event_str), Value::Boolean(false), Value::Boolean(true)])
-        })?;
-
-        fire_event_to_listeners(lua, &state, "UPDATE_BINDINGS", |lua| {
-            let event_str = lua.create_string("UPDATE_BINDINGS")?;
-            Ok(vec![Value::String(event_str)])
-        })?;
-
-        fire_event_to_listeners(lua, &state, "DISPLAY_SIZE_CHANGED", |lua| {
-            let event_str = lua.create_string("DISPLAY_SIZE_CHANGED")?;
-            Ok(vec![Value::String(event_str)])
-        })?;
-
-        fire_event_to_listeners(lua, &state, "UI_SCALE_CHANGED", |lua| {
-            let event_str = lua.create_string("UI_SCALE_CHANGED")?;
-            Ok(vec![Value::String(event_str)])
-        })?;
-
+        fire_reload_startup_events(lua, &state)?;
         state.borrow_mut().console_output.push("UI Reloaded".to_string());
         Ok(())
     })?;
     lua.globals().set("ReloadUI", reload_ui)?;
     Ok(())
+}
+
+/// Fire the sequence of startup events that ReloadUI replays.
+fn fire_reload_startup_events(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    fire_event_to_listeners(lua, state, "ADDON_LOADED", |lua| {
+        let event_str = lua.create_string("ADDON_LOADED")?;
+        let addon_name = lua.create_string("WoWUISim")?;
+        Ok(vec![Value::String(event_str), Value::String(addon_name)])
+    })?;
+    fire_event_to_listeners(lua, state, "VARIABLES_LOADED", |lua| {
+        Ok(vec![Value::String(lua.create_string("VARIABLES_LOADED")?)])
+    })?;
+    fire_event_to_listeners(lua, state, "PLAYER_ENTERING_WORLD", |lua| {
+        Ok(vec![
+            Value::String(lua.create_string("PLAYER_ENTERING_WORLD")?),
+            Value::Boolean(false),
+            Value::Boolean(true),
+        ])
+    })?;
+    fire_event_to_listeners(lua, state, "UPDATE_BINDINGS", |lua| {
+        Ok(vec![Value::String(lua.create_string("UPDATE_BINDINGS")?)])
+    })?;
+    fire_event_to_listeners(lua, state, "DISPLAY_SIZE_CHANGED", |lua| {
+        Ok(vec![Value::String(lua.create_string("DISPLAY_SIZE_CHANGED")?)])
+    })?;
+    fire_event_to_listeners(lua, state, "UI_SCALE_CHANGED", |lua| {
+        Ok(vec![Value::String(lua.create_string("UI_SCALE_CHANGED")?)])
+    })
 }
 
 /// Fire an event to all registered listeners, building extra args via a closure.
@@ -222,8 +220,8 @@ fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
 fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
-    // SwapToGlobalEnvironment must be a Lua function for correct setfenv stack level.
-    lua.load("function SwapToGlobalEnvironment() setfenv(2, _G) end").exec()?;
+    // SwapToGlobalEnvironment: no-op in sim (no taint/environment isolation).
+    globals.set("SwapToGlobalEnvironment", lua.create_function(|_, ()| Ok(()))?)?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("RegisterStaticConstants", lua.create_function(|_, _tbl: Value| Ok(()))?)?;
 

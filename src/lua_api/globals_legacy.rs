@@ -61,56 +61,59 @@ pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     Ok(())
 }
 
-/// Patch string.format to support:
+/// Lua source for patching string.format to support:
 /// - %F (uppercase float) which Lua 5.1 lacks; converted to %f
 /// - Positional arguments (%1$s, %2$d, %11$s) which WoW's patched LuaJIT supports
 ///   but standard Lua 5.1 does not; converted by reordering arguments
-fn patch_string_format(lua: &Lua) -> Result<()> {
-    lua.load(r#"
-        local _format = string.format
-        string.format = function(fmt, ...)
-            if type(fmt) ~= "string" then return _format(fmt, ...) end
-            fmt = fmt:gsub("%%(%d*%.?%d*)F", "%%%1f")
-            if not fmt:find("%%%d+%$") then return _format(fmt, ...) end
-            local args = {...}
-            local out, new_args, seq = {}, {}, 0
-            local i, len = 1, #fmt
-            while i <= len do
-                if fmt:sub(i,i) ~= "%" then
-                    out[#out+1] = fmt:sub(i,i); i = i + 1
-                elseif fmt:sub(i+1,i+1) == "%" then
-                    out[#out+1] = "%%"; i = i + 2
+const STRING_FORMAT_PATCH: &str = r#"
+    local _format = string.format
+    string.format = function(fmt, ...)
+        if type(fmt) ~= "string" then return _format(fmt, ...) end
+        fmt = fmt:gsub("%%(%d*%.?%d*)F", "%%%1f")
+        if not fmt:find("%%%d+%$") then return _format(fmt, ...) end
+        local args = {...}
+        local out, new_args, seq = {}, {}, 0
+        local i, len = 1, #fmt
+        while i <= len do
+            if fmt:sub(i,i) ~= "%" then
+                out[#out+1] = fmt:sub(i,i); i = i + 1
+            elseif fmt:sub(i+1,i+1) == "%" then
+                out[#out+1] = "%%"; i = i + 2
+            else
+                local n, a = fmt:match("^%%(%d+)%$()", i)
+                if n then
+                    new_args[#new_args+1] = args[tonumber(n)]
+                    out[#out+1] = "%"; i = a
                 else
-                    local n, a = fmt:match("^%%(%d+)%$()", i)
-                    if n then
-                        new_args[#new_args+1] = args[tonumber(n)]
-                        out[#out+1] = "%"; i = a
-                    else
-                        seq = seq + 1
-                        new_args[#new_args+1] = args[seq]
-                        out[#out+1] = "%"; i = i + 1
-                    end
-                    while i <= len and fmt:sub(i,i):find("[%-+ #0]") do
-                        out[#out+1] = fmt:sub(i,i); i = i + 1
-                    end
+                    seq = seq + 1
+                    new_args[#new_args+1] = args[seq]
+                    out[#out+1] = "%"; i = i + 1
+                end
+                while i <= len and fmt:sub(i,i):find("[%-+ #0]") do
+                    out[#out+1] = fmt:sub(i,i); i = i + 1
+                end
+                while i <= len and fmt:sub(i,i):find("%d") do
+                    out[#out+1] = fmt:sub(i,i); i = i + 1
+                end
+                if i <= len and fmt:sub(i,i) == "." then
+                    out[#out+1] = "."; i = i + 1
                     while i <= len and fmt:sub(i,i):find("%d") do
                         out[#out+1] = fmt:sub(i,i); i = i + 1
                     end
-                    if i <= len and fmt:sub(i,i) == "." then
-                        out[#out+1] = "."; i = i + 1
-                        while i <= len and fmt:sub(i,i):find("%d") do
-                            out[#out+1] = fmt:sub(i,i); i = i + 1
-                        end
-                    end
-                    if i <= len and fmt:sub(i,i):find("[diouxXeEfgGaAcspqn]") then
-                        out[#out+1] = fmt:sub(i,i); i = i + 1
-                    end
+                end
+                if i <= len and fmt:sub(i,i):find("[diouxXeEfgGaAcspqn]") then
+                    out[#out+1] = fmt:sub(i,i); i = i + 1
                 end
             end
-            return _format(table.concat(out), unpack(new_args))
         end
-        format = string.format
-    "#).exec()
+        return _format(table.concat(out), unpack(new_args))
+    end
+    format = string.format
+"#;
+
+/// Patch string.format to handle %F and positional arguments.
+fn patch_string_format(lua: &Lua) -> Result<()> {
+    lua.load(STRING_FORMAT_PATCH).exec()
 }
 
 /// Override `print` to capture output to the console buffer (shown in GUI log panel).
@@ -157,11 +160,11 @@ fn register_custom_ipairs(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()
         if let Value::LightUserData(lud) = &value {
             return create_frame_children_iterator(lua, lud_to_id(*lud));
         }
-        let original_ipairs: mlua::Function = lua.globals().get("__original_ipairs")?;
+        let original_ipairs: mlua::Function = lua.named_registry_value("__original_ipairs")?;
         original_ipairs.call(value)
     })?;
 
-    globals.set("__original_ipairs", original_ipairs)?;
+    lua.set_named_registry_value("__original_ipairs", original_ipairs)?;
     globals.set("ipairs", custom_ipairs)
 }
 
@@ -205,12 +208,12 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
         if let Value::LightUserData(_) = &value {
             return build_frame_metatable(lua);
         }
-        let real_getmetatable: mlua::Function = lua.globals().get("__real_getmetatable")?;
+        let real_getmetatable: mlua::Function = lua.named_registry_value("__real_getmetatable")?;
         real_getmetatable.call(value)
     })?;
 
     let real_getmetatable: mlua::Function = globals.get("getmetatable")?;
-    globals.set("__real_getmetatable", real_getmetatable)?;
+    lua.set_named_registry_value("__real_getmetatable", real_getmetatable)?;
     globals.set("getmetatable", custom_getmetatable)
 }
 
@@ -237,12 +240,12 @@ fn register_custom_setmetatable(lua: &Lua) -> Result<()> {
             }
             return Ok(value);
         }
-        let real_setmetatable: mlua::Function = lua.globals().get("__real_setmetatable")?;
+        let real_setmetatable: mlua::Function = lua.named_registry_value("__real_setmetatable")?;
         real_setmetatable.call((value, mt))
     })?;
 
     let real_setmetatable: mlua::Function = globals.get("setmetatable")?;
-    globals.set("__real_setmetatable", real_setmetatable)?;
+    lua.set_named_registry_value("__real_setmetatable", real_setmetatable)?;
     globals.set("setmetatable", custom_setmetatable)
 }
 
@@ -272,7 +275,15 @@ fn register_create_frame(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> 
 
 /// Register all sub-module APIs (locale, addon, unit, timer, etc.).
 fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    // Stateless APIs
+    register_stateless_apis(lua, state)?;
+    register_cursor_apis(lua, state)?;
+    register_stateful_apis(lua, state)?;
+    register_frame_globals(lua, state)?;
+    super::globals::generated_stubs::register_generated_stubs(lua)
+}
+
+/// Register APIs that don't require mutable SimState access.
+fn register_stateless_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     super::globals::event_query_api::register(lua)?;
     register_locale_api(lua)?;
     register_player_api(lua, state.clone())?;
@@ -292,14 +303,18 @@ fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_settings_api(lua)?;
     register_spell_api(lua, Rc::clone(state))?;
     register_item_api(lua)?;
-    register_font_api(lua)?;
+    register_font_api(lua)
+}
 
-    // Cursor/drag-and-drop API (after C_Spell and C_ActionBar are registered)
+/// Register cursor/drag-and-drop APIs (must run after C_Spell and C_ActionBar).
+fn register_cursor_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     cursor_api::register_cursor_functions(lua, Rc::clone(state))?;
     cursor_api::register_c_spell_pickup(lua, state)?;
-    cursor_api::register_c_action_bar_put(lua, state)?;
+    cursor_api::register_c_action_bar_put(lua, state)
+}
 
-    // Stateful APIs (need SimState)
+/// Register stateful APIs that need SimState.
+fn register_stateful_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     register_sound_api(lua, Rc::clone(state))?;
     register_unit_api(lua, Rc::clone(state))?;
     register_addon_api(lua, Rc::clone(state))?;
@@ -308,23 +323,18 @@ fn register_submodule_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_cvar_api(lua, Rc::clone(state))?;
     register_system_api(lua, Rc::clone(state))?;
     register_frame_level_helpers(lua)?;
-    register_early_globals(lua)?;
+    register_early_globals(lua)
+}
 
-    // Frame registration (creates global frame objects)
+/// Register global frame objects and sync named frames to _G.
+fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     register_global_frames(lua, Rc::clone(state))?;
     register_tooltip_frames(lua, Rc::clone(state))?;
     register_quest_frames(lua, Rc::clone(state))?;
-
     // Ensure all named frames have _G entries. Covers frames created by
     // builtin_frames.rs (no Lua access) and any registration site that
     // only sets the widget registry name without calling raw_set on _G.
-    sync_named_frames_to_globals(lua, state)?;
-
-    // Generated stubs for all remaining unimplemented WoW API functions.
-    // Must run last so hand-written implementations always take priority.
-    super::globals::generated_stubs::register_generated_stubs(lua)?;
-
-    Ok(())
+    sync_named_frames_to_globals(lua, state)
 }
 
 /// Set `_G[name]` and `_G["__frame_{id}"]` for every named frame in the registry

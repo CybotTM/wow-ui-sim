@@ -26,6 +26,8 @@
 //! but calls into these split modules.
 
 pub mod addon_api;
+pub mod bit_api;
+pub mod utility_stubs;
 pub mod aura_api;
 pub mod c_collection_api;
 pub mod c_container_api;
@@ -35,6 +37,7 @@ pub mod constants_api;
 pub mod c_item_api;
 pub mod c_stubs_api;
 pub mod c_stubs_api_combat;
+pub mod c_stubs_achievement;
 pub mod c_stubs_api_extra;
 pub mod c_stubs_api_professions;
 pub mod c_stubs_api_store;

@@ -107,41 +107,47 @@ pub fn resolve_lua_escapes(s: &str) -> String {
     let mut i = 0;
     while i < bytes.len() {
         if bytes[i] == b'\\' && i + 1 < bytes.len() {
-            match bytes[i + 1] {
-                b'a' => { result.push('\x07'); i += 2; }
-                b'b' => { result.push('\x08'); i += 2; }
-                b'f' => { result.push('\x0C'); i += 2; }
-                b'n' => { result.push('\n'); i += 2; }
-                b'r' => { result.push('\r'); i += 2; }
-                b't' => { result.push('\t'); i += 2; }
-                b'v' => { result.push('\x0B'); i += 2; }
-                b'\\' => { result.push('\\'); i += 2; }
-                b'"' => { result.push('"'); i += 2; }
-                b'\'' => { result.push('\''); i += 2; }
-                d if d.is_ascii_digit() => {
-                    let mut val: u32 = 0;
-                    let mut j = i + 1;
-                    let end = (i + 4).min(bytes.len());
-                    while j < end && bytes[j].is_ascii_digit() {
-                        val = val * 10 + (bytes[j] - b'0') as u32;
-                        j += 1;
-                    }
-                    if val <= 255 {
-                        result.push(val as u8 as char);
-                    }
-                    i = j;
-                }
-                _ => {
-                    result.push('\\');
-                    i += 1;
-                }
-            }
+            i = apply_lua_escape(bytes, i, &mut result);
         } else {
             result.push(bytes[i] as char);
             i += 1;
         }
     }
     result
+}
+
+/// Decode one Lua escape sequence starting at `i` (which must be `\\`).
+/// Returns the index after the consumed escape.
+fn apply_lua_escape(bytes: &[u8], i: usize, result: &mut String) -> usize {
+    match bytes[i + 1] {
+        b'a' => { result.push('\x07'); i + 2 }
+        b'b' => { result.push('\x08'); i + 2 }
+        b'f' => { result.push('\x0C'); i + 2 }
+        b'n' => { result.push('\n');   i + 2 }
+        b'r' => { result.push('\r');   i + 2 }
+        b't' => { result.push('\t');   i + 2 }
+        b'v' => { result.push('\x0B'); i + 2 }
+        b'\\' => { result.push('\\'); i + 2 }
+        b'"'  => { result.push('"');  i + 2 }
+        b'\'' => { result.push('\''); i + 2 }
+        d if d.is_ascii_digit() => decode_decimal_escape(bytes, i, result),
+        _ => { result.push('\\'); i + 1 }
+    }
+}
+
+/// Decode a decimal escape like `\32` or `\255`. Returns index after consumed bytes.
+fn decode_decimal_escape(bytes: &[u8], i: usize, result: &mut String) -> usize {
+    let mut val: u32 = 0;
+    let mut j = i + 1;
+    let end = (i + 4).min(bytes.len());
+    while j < end && bytes[j].is_ascii_digit() {
+        val = val * 10 + (bytes[j] - b'0') as u32;
+        j += 1;
+    }
+    if val <= 255 {
+        result.push(val as u8 as char);
+    }
+    j
 }
 
 /// Escape a string for use in Lua code.
@@ -316,17 +322,18 @@ fn emit_chained_handler(
         do
             local __old = {target}:GetScript("{handler_name}")
             local __new = {new_handler}
+            local __report = debug.getregistry()["__report_script_error"]
             if __old then
                 {target}:SetScript("{handler_name}", function(self, ...)
                     local __ok1, __err1 = pcall({first}, self, ...)
                     local __ok2, __err2 = pcall({second}, self, ...)
                     if not __ok1 then
                         local name = self.GetName and self:GetName() or "?"
-                        __report_script_error("[script:{handler_name}] " .. name .. ": " .. tostring(__err1))
+                        __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err1))
                     end
                     if not __ok2 then
                         local name = self.GetName and self:GetName() or "?"
-                        __report_script_error("[script:{handler_name}] " .. name .. ": " .. tostring(__err2))
+                        __report("[script:{handler_name}] " .. name .. ": " .. tostring(__err2))
                     end
                 end)
             else
@@ -383,6 +390,12 @@ pub fn apply_script_handlers(
 
 /// Generate Lua code for setting script handlers.
 pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
+    let mut code = frame_lifecycle_handlers(scripts);
+    code.push_str(&frame_input_handlers(scripts));
+    code
+}
+
+fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
     apply_script_handlers("frame", &[
         ("OnLoad", scripts.on_load.last()),
         ("OnEvent", scripts.on_event.last()),
@@ -390,7 +403,6 @@ pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
         ("OnClick", scripts.on_click.last()),
         ("OnShow", scripts.on_show.last()),
         ("OnHide", scripts.on_hide.last()),
-        // Mouse
         ("OnEnter", scripts.on_enter.last()),
         ("OnLeave", scripts.on_leave.last()),
         ("OnMouseDown", scripts.on_mouse_down.last()),
@@ -399,7 +411,11 @@ pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
         ("OnDragStart", scripts.on_drag_start.last()),
         ("OnDragStop", scripts.on_drag_stop.last()),
         ("OnReceiveDrag", scripts.on_receive_drag.last()),
-        // EditBox
+    ])
+}
+
+fn frame_input_handlers(scripts: &crate::xml::ScriptsXml) -> String {
+    apply_script_handlers("frame", &[
         ("OnEnterPressed", scripts.on_enter_pressed.last()),
         ("OnEscapePressed", scripts.on_escape_pressed.last()),
         ("OnTabPressed", scripts.on_tab_pressed.last()),
@@ -410,10 +426,8 @@ pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
         ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
         ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
         ("OnInputLanguageChanged", scripts.on_input_language_changed.last()),
-        // Keyboard
         ("OnKeyDown", scripts.on_key_down.last()),
         ("OnKeyUp", scripts.on_key_up.last()),
-        // Other
         ("OnValueChanged", scripts.on_value_changed.last()),
         ("OnEnable", scripts.on_enable.last()),
         ("OnDisable", scripts.on_disable.last()),
