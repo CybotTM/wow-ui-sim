@@ -32,7 +32,7 @@ local HELP = {
     { "/aa level <level>",                  "Set player level" },
     { "--- Combat ---" },
     { "/aa combat [on|off]",                "Toggle combat state" },
-    { "/aa rest [on|off]",                  "Toggle resting (not implemented)" },
+    { "/aa rest [on|off]",                  "Toggle resting (inn/city)" },
     { "/aa cast <spellId> <name> <icon> <duration>", "Start casting" },
     { "/aa stopcast",                       "Stop casting" },
     { "/aa gcd <duration>",                 "Trigger GCD" },
@@ -44,8 +44,11 @@ local HELP = {
     { "--- Targeting ---" },
     { "/aa target <name> <level> <class> [enemy]", "Set target (enemy defaults off)" },
     { "/aa cleartarget",                    "Clear target" },
+    { "/aa tpower <cur> <max> [powerType]", "Set target power" },
     { "/aa focus <name> <level> <class> [enemy]",  "Set focus" },
     { "/aa clearfocus",                     "Clear focus" },
+    { "/aa fhealth <cur> <max>",            "Set focus health" },
+    { "/aa fpower <cur> <max> [powerType]", "Set focus power" },
     { "--- Party ---" },
     { "/aa party <size>",                   "Set party size (0-4)" },
     { "/aa partymember <idx> <name> <class> <level>", "Set party member info" },
@@ -78,6 +81,10 @@ local HELP = {
     { "/aa honor <level>",                  "Set honor level" },
     { "/aa guild <name> <rank> <members>",  "Set guild info" },
     { "/aa noguild",                        "Clear guild" },
+    { "--- Action Bars ---" },
+    { "/aa actionslot <slot> <spellId>",    "Set action bar slot (1-120)" },
+    { "/aa clearslot <slot>",               "Clear action bar slot" },
+    { "/aa clearactions",                   "Clear all action bar slots" },
     { "--- Great Vault ---" },
     { "/aa vault activity <type> <idx> <threshold> <progress> <level>", "Set vault slot" },
     { "/aa vault rewards [on|off] [canClaim]", "Toggle vault rewards" },
@@ -142,8 +149,11 @@ handlers["combat"] = function(args)
     Confirm("Combat: " .. Val(b and "on" or "off"))
 end
 
-handlers["rest"] = function(_args)
-    Err("SetResting is not implemented in A_Admin (IsResting is a read-only stub)")
+handlers["rest"] = function(args)
+    local b = ParseBool(args[1])
+    if b == nil then return Err("Usage: /aa rest [on|off]") end
+    A_Admin.SetResting(b)
+    Confirm("Resting: " .. Val(b and "on" or "off"))
 end
 
 handlers["cast"] = function(args)
@@ -224,6 +234,15 @@ handlers["target"] = function(args)
     Confirm("Target: " .. Val(name) .. " lv" .. Val(level) .. " class " .. Val(class) .. (enemy and " (enemy)" or ""))
 end
 
+handlers["tpower"] = function(args)
+    local cur       = tonumber(args[1])
+    local max       = tonumber(args[2])
+    local powerType = args[3] and tonumber(args[3])
+    if not cur or not max then return Err("Usage: /aa tpower <cur> <max> [powerType]") end
+    A_Admin.SetTargetPower(cur, max, powerType)
+    Confirm("Target power: " .. Val(cur) .. "/" .. Val(max))
+end
+
 handlers["cleartarget"] = function(_args)
     A_Admin.ClearTarget()
     Confirm("Target cleared")
@@ -244,6 +263,23 @@ end
 handlers["clearfocus"] = function(_args)
     A_Admin.ClearFocus()
     Confirm("Focus cleared")
+end
+
+handlers["fhealth"] = function(args)
+    local cur = tonumber(args[1])
+    local max = tonumber(args[2])
+    if not cur or not max then return Err("Usage: /aa fhealth <cur> <max>") end
+    A_Admin.SetFocusHealth(cur, max)
+    Confirm("Focus health: " .. Val(cur) .. "/" .. Val(max))
+end
+
+handlers["fpower"] = function(args)
+    local cur       = tonumber(args[1])
+    local max       = tonumber(args[2])
+    local powerType = args[3] and tonumber(args[3])
+    if not cur or not max then return Err("Usage: /aa fpower <cur> <max> [powerType]") end
+    A_Admin.SetFocusPower(cur, max, powerType)
+    Confirm("Focus power: " .. Val(cur) .. "/" .. Val(max))
 end
 
 -- Party
@@ -435,6 +471,28 @@ end
 handlers["noguild"] = function(_args)
     A_Admin.ClearGuild()
     Confirm("Guild cleared")
+end
+
+-- Action Bars
+
+handlers["actionslot"] = function(args)
+    local slot    = tonumber(args[1])
+    local spellId = tonumber(args[2])
+    if not slot or not spellId then return Err("Usage: /aa actionslot <slot> <spellId>") end
+    A_Admin.SetActionSlot(slot, spellId)
+    Confirm("Action slot " .. Val(slot) .. " = spell " .. Val(spellId))
+end
+
+handlers["clearslot"] = function(args)
+    local slot = tonumber(args[1])
+    if not slot then return Err("Usage: /aa clearslot <slot>") end
+    A_Admin.ClearActionSlot(slot)
+    Confirm("Action slot " .. Val(slot) .. " cleared")
+end
+
+handlers["clearactions"] = function(_args)
+    A_Admin.ClearActionBars()
+    Confirm("All action bar slots cleared")
 end
 
 -- Great Vault

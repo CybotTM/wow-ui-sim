@@ -188,8 +188,9 @@ fn set_texture_on_handle(lua: &mlua::Lua, tex: &Value, path: Option<String>) {
 /// Global function stubs needed by Blizzard_UnitFrame.
 fn register_unit_frame_global_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let g = lua.globals();
-    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(state.borrow().in_combat))?)?;
-    g.set("IsResting", lua.create_function(|_, ()| Ok(false))?)?;
+    let s2 = std::rc::Rc::clone(&state);
+    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(s2.borrow().in_combat))?)?;
+    g.set("IsResting", lua.create_function(move |_, ()| Ok(state.borrow().is_resting))?)?;
     g.set("IsPVPTimerRunning", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("GetPVPTimer", lua.create_function(|_, ()| Ok(0.0f64))?)?;
     g.set("GetReadyCheckStatus", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;

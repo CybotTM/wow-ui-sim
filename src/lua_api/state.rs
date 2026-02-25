@@ -246,6 +246,8 @@ pub struct SimState {
     // Combat state
     /// Whether the player is in combat.
     pub in_combat: bool,
+    /// Whether the player is resting (inn/city).
+    pub is_resting: bool,
 
     // Power
     pub player_power: i32,
@@ -369,6 +371,7 @@ impl SimState {
             instance_type: "none".to_string(),
             instance_difficulty: 0,
             instance_max_players: 0,
+            is_resting: false,
             in_instance: false,
             player_money: 0,
             player_item_level: 0.0,

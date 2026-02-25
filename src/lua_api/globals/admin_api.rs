@@ -30,6 +30,7 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_pvp_guild_api(lua, &admin, Rc::clone(&state))?;
     register_event_api(lua, &admin, Rc::clone(&state))?;
     register_vault_api(lua, &admin, Rc::clone(&state))?;
+    register_action_bar_api(lua, &admin, Rc::clone(&state))?;
 
     lua.globals().set("A_Admin", admin)?;
     Ok(())
@@ -71,6 +72,10 @@ fn register_combat_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>)
     set_fn(lua, t, "SetInCombat", {
         let s = Rc::clone(&state);
         move |_, v: bool| { s.borrow_mut().in_combat = v; Ok(()) }
+    })?;
+    set_fn(lua, t, "SetResting", {
+        let s = Rc::clone(&state);
+        move |_, v: bool| { s.borrow_mut().is_resting = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetCasting", {
         let s = Rc::clone(&state);
@@ -177,6 +182,41 @@ fn register_targeting_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
     set_fn(lua, t, "ClearFocus", {
         let s = Rc::clone(&state);
         move |_, ()| { s.borrow_mut().current_focus = None; Ok(()) }
+    })?;
+    set_fn(lua, t, "SetTargetPower", {
+        let s = Rc::clone(&state);
+        move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
+            let mut st = s.borrow_mut();
+            if let Some(t) = st.current_target.as_mut() {
+                t.power = cur;
+                t.power_max = max;
+                if let Some(pt) = power_type { t.power_type = pt; }
+            }
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "SetFocusPower", {
+        let s = Rc::clone(&state);
+        move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
+            let mut st = s.borrow_mut();
+            if let Some(f) = st.current_focus.as_mut() {
+                f.power = cur;
+                f.power_max = max;
+                if let Some(pt) = power_type { f.power_type = pt; }
+            }
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "SetFocusHealth", {
+        let s = Rc::clone(&state);
+        move |_, (cur, max): (i32, i32)| {
+            let mut st = s.borrow_mut();
+            if let Some(f) = st.current_focus.as_mut() {
+                f.health = cur;
+                f.health_max = max;
+            }
+            Ok(())
+        }
     })?;
     Ok(())
 }
@@ -562,6 +602,32 @@ fn lua_value_to_event_arg(v: &Value) -> EventArg {
         Value::Boolean(b) => EventArg::Boolean(*b),
         _ => EventArg::Nil,
     }
+}
+
+// ---------------------------------------------------------------------------
+// Action Bars
+// ---------------------------------------------------------------------------
+
+fn register_action_bar_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    set_fn(lua, t, "SetActionSlot", {
+        let s = Rc::clone(&state);
+        move |_, (slot, spell_id): (u32, u32)| {
+            s.borrow_mut().action_bars.insert(slot, spell_id);
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "ClearActionSlot", {
+        let s = Rc::clone(&state);
+        move |_, slot: u32| {
+            s.borrow_mut().action_bars.remove(&slot);
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "ClearActionBars", {
+        let s = Rc::clone(&state);
+        move |_, ()| { s.borrow_mut().action_bars.clear(); Ok(()) }
+    })?;
+    Ok(())
 }
 
 // ---------------------------------------------------------------------------
