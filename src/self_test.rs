@@ -47,40 +47,40 @@ fn poll_until_done(env: &WowLuaEnv, max_ticks: u32) -> bool {
 }
 
 /// Serialize WowlessTestFailures to indented JSON via Lua and print to stdout.
-fn print_failures(env: &WowLuaEnv) {
-    let json: String = env.eval(r#"
-        local function to_json(v, indent)
-            indent = indent or 0
-            local pad = string.rep("  ", indent)
-            local pad1 = string.rep("  ", indent + 1)
-            if type(v) == "string" then
-                local s = v:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t')
-                return '"' .. s .. '"'
-            elseif type(v) == "number" or type(v) == "boolean" then
-                return tostring(v)
-            elseif type(v) == "table" then
-                local parts = {}
-                local is_array = #v > 0
-                if is_array then
-                    for _, item in ipairs(v) do
-                        parts[#parts+1] = pad1 .. to_json(item, indent + 1)
-                    end
-                    return "[\n" .. table.concat(parts, ",\n") .. "\n" .. pad .. "]"
-                else
-                    local keys = {}
-                    for k in pairs(v) do keys[#keys+1] = tostring(k) end
-                    table.sort(keys)
-                    for _, k in ipairs(keys) do
-                        parts[#parts+1] = pad1 .. string.format("%q", k) .. ": " .. to_json(v[k], indent + 1)
-                    end
-                    return "{\n" .. table.concat(parts, ",\n") .. "\n" .. pad .. "}"
-                end
+const FAILURES_TO_JSON_LUA: &str = r#"
+    local function to_json(v, indent)
+        indent = indent or 0
+        local pad = string.rep("  ", indent)
+        local pad1 = string.rep("  ", indent + 1)
+        if type(v) == "string" then
+            local s = v:gsub('\\', '\\\\'):gsub('"', '\\"'):gsub('\n', '\\n'):gsub('\r', '\\r'):gsub('\t', '\\t')
+            return '"' .. s .. '"'
+        elseif type(v) == "number" or type(v) == "boolean" then
+            return tostring(v)
+        elseif type(v) == "table" then
+            local parts = {}
+            local is_array = #v > 0
+            if is_array then
+                for _, item in ipairs(v) do parts[#parts+1] = pad1 .. to_json(item, indent + 1) end
+                return "[\n" .. table.concat(parts, ",\n") .. "\n" .. pad .. "]"
             else
-                return string.format("%q", tostring(v))
+                local keys = {}
+                for k in pairs(v) do keys[#keys+1] = tostring(k) end
+                table.sort(keys)
+                for _, k in ipairs(keys) do
+                    parts[#parts+1] = pad1 .. string.format("%q", k) .. ": " .. to_json(v[k], indent + 1)
+                end
+                return "{\n" .. table.concat(parts, ",\n") .. "\n" .. pad .. "}"
             end
+        else
+            return string.format("%q", tostring(v))
         end
-        return to_json(WowlessTestFailures)
-    "#).unwrap_or_else(|_| "{}".to_string());
+    end
+    return to_json(WowlessTestFailures)
+"#;
+
+fn print_failures(env: &WowLuaEnv) {
+    let json: String = env.eval(FAILURES_TO_JSON_LUA).unwrap_or_else(|_| "{}".to_string());
     println!("{json}");
 }
 
@@ -96,10 +96,13 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>) {
 
     // Override debugprofilestop to return 0 so the Wowless test runner never
     // yields between OnUpdate ticks. All sync tests run in a single tick.
-    // The real debugprofilestop (registered in system_api.rs) returns wall-clock
-    // ms which causes Wowless to yield every ~8ms — fine for interactive use
-    // but too slow for headless testing (70K tests need thousands of ticks).
-    let _ = env.exec("debugprofilestop = function() return 0 end");
+    // Registered as a native C function (create_function) so the Wowless
+    // globalApis.impltype test sees it as a C function, not a Lua function.
+    let lua = env.lua();
+    let _ = lua.globals().set(
+        "debugprofilestop",
+        lua.create_function(|_, ()| Ok(0i64)).expect("debugprofilestop override"),
+    );
 
     let completed = poll_until_done(env, max_ticks);
     flush_console(env);

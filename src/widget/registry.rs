@@ -11,6 +11,8 @@ pub struct WidgetRegistry {
     widgets: HashMap<u64, Frame>,
     /// Widget IDs by name.
     names: HashMap<String, u64>,
+    /// Widget IDs in creation order (monotonically increasing, always sorted).
+    ordered_ids: Vec<u64>,
     /// Frame IDs whose visual properties changed since last render.
     /// Checked and drained by the render loop.
     render_dirty_ids: RefCell<HashSet<u64>>,
@@ -30,6 +32,7 @@ impl WidgetRegistry {
     /// Register a new widget.
     pub fn register(&mut self, widget: Frame) -> u64 {
         let id = widget.id;
+        let is_new = !self.widgets.contains_key(&id);
         // Debug: check for re-registration that would lose children
         if let Some(existing) = self.widgets.get(&id)
             && !existing.children.is_empty() {
@@ -43,6 +46,9 @@ impl WidgetRegistry {
             self.pending_layout_ids.insert(id);
         }
         self.widgets.insert(id, widget);
+        if is_new {
+            self.ordered_ids.push(id);
+        }
         id
     }
 
@@ -137,6 +143,13 @@ impl WidgetRegistry {
     /// Iterate over all widget IDs.
     pub fn iter_ids(&self) -> impl Iterator<Item = u64> + '_ {
         self.widgets.keys().copied()
+    }
+
+    /// Get the next widget ID after `after_id` in creation order.
+    /// Returns `None` when enumeration is complete.
+    pub fn next_id_after(&self, after_id: u64) -> Option<u64> {
+        let idx = self.ordered_ids.partition_point(|&id| id <= after_id);
+        self.ordered_ids.get(idx).copied()
     }
 
     /// Clear all cached layout rects (e.g. after screen resize).

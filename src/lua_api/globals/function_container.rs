@@ -7,6 +7,7 @@
 //!
 //! The metatable is automatically hidden by mlua (`getmetatable` returns `false`).
 
+use crate::lua_api::script_helpers::lua_error;
 use mlua::{AnyUserData, Lua, MetaMethod, Result, UserData, UserDataMethods, Value};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -240,13 +241,24 @@ pub fn register_c_function_containers(lua: &Lua) -> Result<()> {
 
     t.set(
         "CreateCallback",
-        lua.create_function(|lua, func: mlua::Function| {
-            // Reject C functions - WoW only accepts Lua functions
-            if !is_lua_function(lua, &func)? {
-                return Err(mlua::Error::RuntimeError(
-                    "Usage: C_FunctionContainers.CreateCallback(func)".to_string(),
-                ));
-            }
+        lua.create_function(|lua, arg: Value| {
+            let func = match arg {
+                Value::Function(f) => {
+                    if !is_lua_function(lua, &f)? {
+                        return Err(lua_error(
+                            lua,
+                            "Usage: C_FunctionContainers.CreateCallback(func)",
+                        ));
+                    }
+                    f
+                }
+                _ => {
+                    return Err(lua_error(
+                        lua,
+                        "Usage: C_FunctionContainers.CreateCallback(func)",
+                    ));
+                }
+            };
             FunctionContainer::new(lua, func, None)
         })?,
     )?;

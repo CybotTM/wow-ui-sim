@@ -61,6 +61,7 @@ pub mod event_query_api;
 pub mod enum_data;
 pub mod early_globals;
 pub mod font_api;
+pub mod frame_enumerate;
 pub mod frame_level_api;
 pub mod global_frames;
 pub mod hero_talents;
