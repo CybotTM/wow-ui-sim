@@ -6,7 +6,7 @@
 //! - UIDropDownMenu_* functions for menu management
 //! - Global constants for dropdown configuration
 
-use crate::lua_api::frame::extract_frame_id;
+use crate::lua_api::frame::{extract_frame_id, frame_ref, sync_child_to_lua};
 use crate::lua_api::SimState;
 use crate::widget::{Frame, FrameStrata, WidgetType};
 use mlua::{Lua, Result, Value};
@@ -30,11 +30,11 @@ fn create_and_register_global(
 ) -> Result<u64> {
     let id = frame.id;
     state.borrow_mut().widgets.register(frame);
-    let lud = super::super::frame::frame_lud(id);
+    let val = frame_ref(lua, id)?;
     let globals = lua.globals();
-    globals.raw_set(name, lud.clone())?;
+    globals.raw_set(name, val.clone())?;
     let frame_key = format!("__frame_{}", id);
-    globals.raw_set(frame_key.as_str(), lud)?;
+    globals.raw_set(frame_key.as_str(), val)?;
     Ok(id)
 }
 
@@ -139,6 +139,7 @@ fn create_dropdown_button(
         btn.children_keys.insert("Text".to_string(), text_id);
     }
     drop(s);
+    sync_child_to_lua(lua, btn_id, "Text", text_id)?;
 
     Ok(())
 }
@@ -187,60 +188,73 @@ fn register_initialize(lua: &Lua, _state: &Rc<RefCell<SimState>>) -> Result<()> 
 fn register_add_button(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state = Rc::clone(state);
     let func = lua.create_function(move |lua, (info, level): (mlua::Table, Option<i32>)| {
-        let level = level.unwrap_or(1);
-        let list_name = format!("DropDownList{}", level);
-
-        let list_val: Value = match lua.globals().get(list_name.as_str()) {
-            Ok(v) => v,
-            Err(_) => return Ok(()),
-        };
-        let list_id = match extract_frame_id(&list_val) {
-            Some(id) => id,
-            None => return Ok(()),
-        };
-
-        let list_fields = get_or_create_frame_fields(lua, list_id)?;
-        let num_buttons: i32 = list_fields.get("numButtons").unwrap_or(0);
-        let new_index = num_buttons + 1;
-        list_fields.set("numButtons", new_index)?;
-
-        let btn_name = format!("DropDownList{}Button{}", level, new_index);
-        let btn_val: Value = lua.globals().get(btn_name.as_str()).unwrap_or(Value::Nil);
-        if let Some(btn_id) = extract_frame_id(&btn_val) {
-            let btn_fields = get_or_create_frame_fields(lua, btn_id)?;
-            for (k, v) in info.pairs::<String, Value>().flatten() {
-                btn_fields.set(k, v)?;
-            }
-
-            if let Ok(text) = info.get::<mlua::String>("text") {
-                let text_str = text.to_string_lossy().to_string();
-                let mut s = state.borrow_mut();
-                // Set text on button itself
-                if let Some(btn_frame) = s.widgets.get_mut_visual(btn_id) {
-                    btn_frame.text = Some(text_str.clone());
-                }
-                // Also set on "Text" child — Button:GetText() reads from here
-                if let Some(&text_child_id) = s.widgets.get(btn_id)
-                    .and_then(|f| f.children_keys.get("Text"))
-                {
-                    if let Some(tc) = s.widgets.get_mut_visual(text_child_id) {
-                        tc.text = Some(text_str);
-                    }
-                }
-                s.set_frame_visible(btn_id, true);
-            }
-        }
-
-        Ok(())
+        add_button_impl(lua, &state, info, level)
     })?;
     lua.globals().set("UIDropDownMenu_AddButton", func)?;
     Ok(())
 }
 
+fn add_button_impl(
+    lua: &mlua::Lua,
+    state: &Rc<RefCell<SimState>>,
+    info: mlua::Table,
+    level: Option<i32>,
+) -> mlua::Result<()> {
+    let level = level.unwrap_or(1);
+    let list_name = format!("DropDownList{}", level);
+    let list_val: Value = match lua.globals().get(list_name.as_str()) {
+        Ok(v) => v,
+        Err(_) => return Ok(()),
+    };
+    let list_id = match extract_frame_id(&list_val) {
+        Some(id) => id,
+        None => return Ok(()),
+    };
+    let list_fields = get_or_create_frame_fields(lua, list_id)?;
+    let num_buttons: i32 = list_fields.get("numButtons").unwrap_or(0);
+    let new_index = num_buttons + 1;
+    list_fields.set("numButtons", new_index)?;
+    let btn_name = format!("DropDownList{}Button{}", level, new_index);
+    let btn_val: Value = lua.globals().get(btn_name.as_str()).unwrap_or(Value::Nil);
+    if let Some(btn_id) = extract_frame_id(&btn_val) {
+        let btn_fields = get_or_create_frame_fields(lua, btn_id)?;
+        for (k, v) in info.pairs::<String, Value>().flatten() {
+            btn_fields.set(k, v)?;
+        }
+        set_button_text_from_info(state, &info, btn_id);
+    }
+    Ok(())
+}
+
+/// Apply the `text` field from info to the button widget and its Text child.
+fn set_button_text_from_info(state: &Rc<RefCell<SimState>>, info: &mlua::Table, btn_id: u64) {
+    if let Ok(text) = info.get::<mlua::String>("text") {
+        let text_str = text.to_string_lossy().to_string();
+        let mut s = state.borrow_mut();
+        if let Some(btn_frame) = s.widgets.get_mut_visual(btn_id) {
+            btn_frame.text = Some(text_str.clone());
+        }
+        if let Some(&text_child_id) = s.widgets.get(btn_id)
+            .and_then(|f| f.children_keys.get("Text"))
+        {
+            if let Some(tc) = s.widgets.get_mut_visual(text_child_id) {
+                tc.text = Some(text_str);
+            }
+        }
+        s.set_frame_visible(btn_id, true);
+    }
+}
+
 /// Register UIDropDownMenu_SetWidth, SetText, GetText.
 fn register_width_and_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    register_set_width(lua, state)?;
+    register_set_text(lua, state)?;
+    register_get_text(lua, state)
+}
+
+fn register_set_width(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_w = Rc::clone(state);
-    let set_width = lua.create_function(
+    lua.globals().set("UIDropDownMenu_SetWidth", lua.create_function(
         move |_lua, (frame, width, _padding): (Value, f32, Option<f32>)| {
             if let Some(id) = extract_frame_id(&frame) {
                 let mut s = state_w.borrow_mut();
@@ -250,11 +264,12 @@ fn register_width_and_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
             }
             Ok(())
         },
-    )?;
-    lua.globals().set("UIDropDownMenu_SetWidth", set_width)?;
+    )?)
+}
 
+fn register_set_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_st = Rc::clone(state);
-    let set_text = lua.create_function(
+    lua.globals().set("UIDropDownMenu_SetText", lua.create_function(
         move |_lua, (frame, text): (Value, Option<String>)| {
             if let Some(id) = extract_frame_id(&frame) {
                 let mut s = state_st.borrow_mut();
@@ -264,11 +279,12 @@ fn register_width_and_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
             }
             Ok(())
         },
-    )?;
-    lua.globals().set("UIDropDownMenu_SetText", set_text)?;
+    )?)
+}
 
+fn register_get_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_gt = Rc::clone(state);
-    let get_text = lua.create_function(move |lua, frame: Value| {
+    lua.globals().set("UIDropDownMenu_GetText", lua.create_function(move |lua, frame: Value| {
         if let Some(id) = extract_frame_id(&frame) {
             let s = state_gt.borrow();
             if let Some(f) = s.widgets.get(id)
@@ -277,9 +293,7 @@ fn register_width_and_text(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
                 }
         }
         Ok(Value::Nil)
-    })?;
-    lua.globals().set("UIDropDownMenu_GetText", get_text)?;
-    Ok(())
+    })?)
 }
 
 /// Register SetSelectedID, GetSelectedID, SetSelectedValue, GetSelectedValue, SetSelectedName.
@@ -358,70 +372,65 @@ fn register_enable_disable(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
 }
 
 /// Register ToggleDropDownMenu and CloseDropDownMenus.
-#[allow(clippy::type_complexity)]
 fn register_toggle_and_close(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    register_toggle_dropdown(lua, state)?;
+    register_close_dropdown_menus(lua, state)
+}
+
+#[allow(clippy::type_complexity)]
+fn register_toggle_dropdown(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_t = Rc::clone(state);
-    let toggle = lua.create_function(
+    lua.globals().set("ToggleDropDownMenu", lua.create_function(
         move |lua,
               (level, _value, dropdown_frame, _anchor_name, _x_offset, _y_offset, _menu_list, _button, _auto_hide_delay, _display_mode): (
-                  Option<i32>,
-                  Option<Value>,
-                  Option<Value>,
-                  Option<String>,
-                  Option<f32>,
-                  Option<f32>,
-                  Option<mlua::Table>,
-                  Option<Value>,
-                  Option<f32>,
-                  Option<String>,
+                  Option<i32>, Option<Value>, Option<Value>, Option<String>,
+                  Option<f32>, Option<f32>, Option<mlua::Table>, Option<Value>,
+                  Option<f32>, Option<String>,
               )| {
             let level = level.unwrap_or(1);
-            let list_name = format!("DropDownList{}", level);
-
-            let list_val: Value = lua.globals().get(list_name.as_str()).unwrap_or(Value::Nil);
+            let list_val: Value = lua.globals()
+                .get(format!("DropDownList{}", level).as_str())
+                .unwrap_or(Value::Nil);
             if let Some(id) = extract_frame_id(&list_val) {
                 let mut s = state_t.borrow_mut();
                 if let Some(f) = s.widgets.get_mut_visual(id) {
                     f.visible = !f.visible;
                 }
             }
-
-            lua.globals()
-                .set("UIDROPDOWNMENU_OPEN_MENU", dropdown_frame)?;
+            lua.globals().set("UIDROPDOWNMENU_OPEN_MENU", dropdown_frame)?;
             Ok(())
         },
-    )?;
-    lua.globals().set("ToggleDropDownMenu", toggle)?;
+    )?)
+}
 
+fn register_close_dropdown_menus(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_c = Rc::clone(state);
-    let close = lua.create_function(move |lua, level: Option<i32>| {
+    lua.globals().set("CloseDropDownMenus", lua.create_function(move |lua, level: Option<i32>| {
         let start_level = level.unwrap_or(1);
         for lvl in start_level..=3 {
-            let list_name = format!("DropDownList{}", lvl);
-            let list_val: Value = lua.globals().get(list_name.as_str()).unwrap_or(Value::Nil);
+            let list_val: Value = lua.globals()
+                .get(format!("DropDownList{}", lvl).as_str())
+                .unwrap_or(Value::Nil);
             if let Some(id) = extract_frame_id(&list_val) {
                 state_c.borrow_mut().set_frame_visible(id, false);
             }
         }
-        lua.globals()
-            .set("UIDROPDOWNMENU_OPEN_MENU", Value::Nil)?;
+        lua.globals().set("UIDROPDOWNMENU_OPEN_MENU", Value::Nil)?;
         Ok(())
-    })?;
-    lua.globals().set("CloseDropDownMenus", close)?;
+    })?)?;
     Ok(())
 }
 
 /// Register UIDropDownMenu_SetAnchor and SetFrameStrata.
 fn register_anchor_and_strata(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    let set_anchor = lua.create_function(
-        |lua,
-         (dropdown, x_offset, y_offset, point, relative_to, relative_point): (
-            Value,
-            f32,
-            f32,
-            String,
-            Option<Value>,
-            Option<String>,
+    register_set_anchor(lua)?;
+    register_set_frame_strata(lua, state)
+}
+
+fn register_set_anchor(lua: &Lua) -> Result<()> {
+    lua.globals().set("UIDropDownMenu_SetAnchor", lua.create_function(
+        |lua, (dropdown, x_offset, y_offset, point, relative_to, relative_point): (
+            Value, f32, f32, String, Option<Value>, Option<String>,
         )| {
             if let Some(id) = extract_frame_id(&dropdown) {
                 let fields = get_or_create_frame_fields(lua, id)?;
@@ -433,34 +442,36 @@ fn register_anchor_and_strata(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
             }
             Ok(())
         },
-    )?;
-    lua.globals().set("UIDropDownMenu_SetAnchor", set_anchor)?;
+    )?)
+}
 
+fn register_set_frame_strata(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_s = Rc::clone(state);
-    let set_strata = lua.create_function(
+    lua.globals().set("UIDropDownMenu_SetFrameStrata", lua.create_function(
         move |_lua, (frame, strata): (Value, String)| {
             if let Some(id) = extract_frame_id(&frame) {
                 let mut s = state_s.borrow_mut();
                 if let Some(f) = s.widgets.get_mut_visual(id) {
-                    f.frame_strata = match strata.to_uppercase().as_str() {
-                        "WORLD" | "BACKGROUND" => FrameStrata::Background,
-                        "LOW" => FrameStrata::Low,
-                        "MEDIUM" => FrameStrata::Medium,
-                        "HIGH" => FrameStrata::High,
-                        "DIALOG" => FrameStrata::Dialog,
-                        "FULLSCREEN" => FrameStrata::Fullscreen,
-                        "FULLSCREEN_DIALOG" => FrameStrata::FullscreenDialog,
-                        "TOOLTIP" => FrameStrata::Tooltip,
-                        _ => FrameStrata::Medium,
-                    };
+                    f.frame_strata = parse_frame_strata(&strata);
                 }
             }
             Ok(())
         },
-    )?;
-    lua.globals()
-        .set("UIDropDownMenu_SetFrameStrata", set_strata)?;
-    Ok(())
+    )?)
+}
+
+fn parse_frame_strata(strata: &str) -> FrameStrata {
+    match strata.to_uppercase().as_str() {
+        "WORLD" | "BACKGROUND" => FrameStrata::Background,
+        "LOW" => FrameStrata::Low,
+        "MEDIUM" => FrameStrata::Medium,
+        "HIGH" => FrameStrata::High,
+        "DIALOG" => FrameStrata::Dialog,
+        "FULLSCREEN" => FrameStrata::Fullscreen,
+        "FULLSCREEN_DIALOG" => FrameStrata::FullscreenDialog,
+        "TOOLTIP" => FrameStrata::Tooltip,
+        _ => FrameStrata::Medium,
+    }
 }
 
 /// Register UIDropDownMenu_AddSeparator and AddSpace.

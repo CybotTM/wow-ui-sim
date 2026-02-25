@@ -77,12 +77,7 @@ impl WowLuaEnv {
                 }
         }
 
-        // Check keybindings (skip if an EditBox has focus — keys go to the EditBox).
-        let is_editbox = focused.is_some_and(|fid| {
-            self.state.borrow().widgets.get(fid)
-                .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
-                .unwrap_or(false)
-        });
+        let is_editbox = self.focused_is_editbox(focused);
         if !is_editbox
             && super::keybindings::dispatch_key_binding(&self.lua, key)? {
                 return Ok(());
@@ -90,30 +85,41 @@ impl WowLuaEnv {
 
         self.dispatch_on_key_down(key)?;
 
-        // EditBox text editing: handle backspace/delete/arrow keys and character input.
         if let Some(fid) = focused
             && is_editbox {
-                match key {
-                    "BACKSPACE" => self.editbox_backspace(fid)?,
-                    "DELETE" => self.editbox_delete(fid)?,
-                    "LEFT" => self.editbox_move_cursor(fid, -1)?,
-                    "RIGHT" => self.editbox_move_cursor(fid, 1)?,
-                    "HOME" => self.editbox_cursor_home(fid)?,
-                    "END" => self.editbox_cursor_end(fid)?,
-                    _ => {
-                        // Insert printable characters (skip control chars like \n, \t)
-                        if let Some(t) = text {
-                            let printable: String = t.chars()
-                                .filter(|c| !c.is_control())
-                                .collect();
-                            if !printable.is_empty() {
-                                self.editbox_insert_text(fid, &printable)?;
-                            }
-                        }
+                self.dispatch_editbox_key(fid, key, text)?;
+            }
+
+        Ok(())
+    }
+
+    /// Returns true if the given focused frame ID refers to an EditBox widget.
+    fn focused_is_editbox(&self, focused: Option<u64>) -> bool {
+        focused.is_some_and(|fid| {
+            self.state.borrow().widgets.get(fid)
+                .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
+                .unwrap_or(false)
+        })
+    }
+
+    /// Dispatch a key event to a focused EditBox: movement, deletion, or character input.
+    fn dispatch_editbox_key(&self, fid: u64, key: &str, text: Option<&str>) -> Result<()> {
+        match key {
+            "BACKSPACE" => self.editbox_backspace(fid)?,
+            "DELETE" => self.editbox_delete(fid)?,
+            "LEFT" => self.editbox_move_cursor(fid, -1)?,
+            "RIGHT" => self.editbox_move_cursor(fid, 1)?,
+            "HOME" => self.editbox_cursor_home(fid)?,
+            "END" => self.editbox_cursor_end(fid)?,
+            _ => {
+                if let Some(t) = text {
+                    let printable: String = t.chars().filter(|c| !c.is_control()).collect();
+                    if !printable.is_empty() {
+                        self.editbox_insert_text(fid, &printable)?;
                     }
                 }
             }
-
+        }
         Ok(())
     }
 
@@ -172,7 +178,7 @@ impl WowLuaEnv {
         let Some(handler) = get_script(&self.lua, widget_id, handler_name) else {
             return Ok(false);
         };
-        let frame = super::frame::frame_lud(widget_id);
+        let frame = super::frame::frame_ref(&self.lua, widget_id)?;
         let result: Value = handler.call(MultiValue::from_vec(vec![frame]))?;
         Ok(is_truthy(&result))
     }

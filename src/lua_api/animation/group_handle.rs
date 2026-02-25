@@ -1,7 +1,7 @@
 //! AnimGroupHandle userdata methods and metamethods.
 
 use crate::lua_api::SimState;
-use crate::lua_api::frame::frame_lud;
+use crate::lua_api::frame::frame_ref;
 use mlua::{Lua, MultiValue, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -355,12 +355,14 @@ impl AnimGroupHandle {
                 .and_then(|g| g.name.clone()))
         });
 
-        methods.add_method("GetParent", |_, this, ()| {
-            let state = this.state.borrow();
-            if let Some(group) = state.animation_groups.get(&this.group_id) {
-                return Ok(frame_lud(group.owner_frame_id));
+        methods.add_method("GetParent", |lua, this, ()| {
+            let owner_id = this.state.borrow()
+                .animation_groups.get(&this.group_id)
+                .map(|g| g.owner_frame_id);
+            match owner_id {
+                Some(id) => frame_ref(lua, id),
+                None => Ok(Value::Nil),
             }
-            Ok(Value::Nil)
         });
     }
 
@@ -384,35 +386,7 @@ impl AnimGroupHandle {
         });
 
         methods.add_method("CreateAnimation", |lua, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let anim_type_str = args.first().and_then(|v| {
-                if let Value::String(s) = v { Some(s.to_string_lossy().to_string()) } else { None }
-            });
-            let anim_name = args.get(1).and_then(|v| {
-                if let Value::String(s) = v { Some(s.to_string_lossy().to_string()) } else { None }
-            });
-
-            let anim_type = AnimationType::from_str(anim_type_str.as_deref().unwrap_or("Animation"));
-            let mut anim = AnimState::new(anim_type);
-            anim.name = anim_name;
-
-            let anim_index;
-            {
-                let mut state = this.state.borrow_mut();
-                if let Some(group) = state.animation_groups.get_mut(&this.group_id) {
-                    anim_index = group.animations.len();
-                    group.animations.push(anim);
-                } else {
-                    return Err(mlua::Error::runtime("Animation group not found"));
-                }
-            }
-
-            let handle = AnimHandle {
-                group_id: this.group_id,
-                anim_index,
-                state: Rc::clone(&this.state),
-            };
-            lua.create_userdata(handle)
+            create_animation_impl(lua, this, args)
         });
 
         methods.add_method("RemoveAnimations", |_, this, ()| {
@@ -423,6 +397,37 @@ impl AnimGroupHandle {
             Ok(())
         });
     }
+}
+
+/// CreateAnimation implementation — extracted to keep add_animation_management_methods short.
+fn create_animation_impl(
+    lua: &mlua::Lua,
+    this: &AnimGroupHandle,
+    args: MultiValue,
+) -> mlua::Result<mlua::AnyUserData> {
+    let args: Vec<Value> = args.into_iter().collect();
+    let anim_type_str = args.first().and_then(|v| {
+        if let Value::String(s) = v { Some(s.to_string_lossy().to_string()) } else { None }
+    });
+    let anim_name = args.get(1).and_then(|v| {
+        if let Value::String(s) = v { Some(s.to_string_lossy().to_string()) } else { None }
+    });
+    let anim_type = AnimationType::from_str(anim_type_str.as_deref().unwrap_or("Animation"));
+    let mut anim = AnimState::new(anim_type);
+    anim.name = anim_name;
+    let anim_index = {
+        let mut state = this.state.borrow_mut();
+        let group = state.animation_groups.get_mut(&this.group_id)
+            .ok_or_else(|| mlua::Error::runtime("Animation group not found"))?;
+        let idx = group.animations.len();
+        group.animations.push(anim);
+        idx
+    };
+    lua.create_userdata(AnimHandle {
+        group_id: this.group_id,
+        anim_index,
+        state: Rc::clone(&this.state),
+    })
 }
 
 impl AnimGroupHandle {

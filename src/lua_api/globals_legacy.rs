@@ -3,7 +3,8 @@
 //! Orchestrates registration of all WoW API globals by delegating to
 //! sub-modules and registering core Lua overrides (print, ipairs, getmetatable).
 
-use super::frame::{frame_lud, get_sim_state, lud_to_id};
+use super::frame::{extract_frame_id, frame_ref};
+use super::frame::get_sim_state;
 use super::globals::addon_api::register_addon_api;
 use super::globals::c_collection_api::register_c_collection_api;
 use super::globals::c_item_api::register_c_item_api;
@@ -49,10 +50,10 @@ use std::rc::Rc;
 
 /// Register all global WoW API functions.
 pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    // Store SimState in Lua app_data for LightUserData methods to access
+    // Store SimState in Lua app_data for UserData methods to access
     lua.set_app_data(Rc::clone(&state));
-    // Set up the shared LightUserData metatable for all frames
-    super::frame::metatable::setup_frame_metatable(lua)?;
+    // Set up shared frame helpers (assign fn, index helper, forbidden proxy mt, methods table)
+    super::frame::metatable::setup_frame_helpers(lua)?;
 
     register_print(lua, Rc::clone(&state))?;
     register_custom_ipairs(lua, Rc::clone(&state))?;
@@ -176,8 +177,8 @@ fn register_custom_ipairs(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()
     let original_ipairs: mlua::Function = globals.get("ipairs")?;
 
     let custom_ipairs = lua.create_function(move |lua, value: Value| {
-        if let Value::LightUserData(lud) = &value {
-            return create_frame_children_iterator(lua, lud_to_id(*lud));
+        if let Some(id) = extract_frame_id(&value) {
+            return create_frame_children_iterator(lua, id);
         }
         let original_ipairs: mlua::Function = lua.named_registry_value("__original_ipairs")?;
         original_ipairs.call(value)
@@ -197,7 +198,7 @@ fn create_frame_children_iterator(lua: &Lua, frame_id: u64) -> Result<mlua::Mult
         st.widgets.get(frame_id).map(|f| f.children.clone()).unwrap_or_default()
     };
 
-    let iterator = lua.create_function(move |_lua, (_, idx): (Value, i32)| {
+    let iterator = lua.create_function(move |lua, (_, idx): (Value, i32)| {
         let next_idx = idx + 1;
         if next_idx as usize > children.len() {
             return Ok(mlua::MultiValue::new());
@@ -205,7 +206,7 @@ fn create_frame_children_iterator(lua: &Lua, frame_id: u64) -> Result<mlua::Mult
         let child_id = children[(next_idx - 1) as usize];
         Ok(mlua::MultiValue::from_vec(vec![
             Value::Integer(next_idx as i64),
-            frame_lud(child_id),
+            frame_ref(lua, child_id)?,
         ]))
     })?;
 
@@ -228,8 +229,7 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
     build_per_type_metatables(lua)?;
 
     let custom_getmetatable = lua.create_function(|lua, value: Value| {
-        if let Value::LightUserData(lud) = &value {
-            let frame_id = lud_to_id(*lud);
+        if let Some(frame_id) = extract_frame_id(&value) {
             let widget_type = {
                 let state_rc = get_sim_state(lua);
                 let state = state_rc.borrow();
@@ -362,8 +362,7 @@ fn register_custom_setmetatable(lua: &Lua) -> Result<()> {
     lua.set_named_registry_value("__frame_custom_mt", custom_mt_store)?;
 
     let custom_setmetatable = lua.create_function(|lua, (value, mt): (Value, Value)| {
-        if let Value::LightUserData(lud) = &value {
-            let id = lud.0 as u64;
+        if let Some(id) = extract_frame_id(&value) {
             let store: mlua::Table = lua.named_registry_value("__frame_custom_mt")?;
             match &mt {
                 Value::Table(_) => store.set(id, mt)?,
@@ -462,16 +461,17 @@ fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
 /// that doesn't already have a `_G` entry.
 fn sync_named_frames_to_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    let st = state.borrow();
-    for (id, name) in st.widgets.named_frames() {
-        let lud = super::frame::frame_lud(id);
-        // Only set if not already present (avoid overwriting setup done above)
+    let ids_and_names: Vec<(u64, String)> = state.borrow().widgets.named_frames()
+        .map(|(id, name)| (id, name.clone()))
+        .collect();
+    for (id, name) in ids_and_names {
+        let val = frame_ref(lua, id)?;
         if globals.raw_get::<Value>(name.as_str())?.is_nil() {
-            globals.raw_set(name.as_str(), lud.clone())?;
+            globals.raw_set(name.as_str(), val.clone())?;
         }
         let frame_key = format!("__frame_{}", id);
         if globals.raw_get::<Value>(frame_key.as_str())?.is_nil() {
-            globals.raw_set(frame_key.as_str(), lud)?;
+            globals.raw_set(frame_key.as_str(), val)?;
         }
     }
     Ok(())

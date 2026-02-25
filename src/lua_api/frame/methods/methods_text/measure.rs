@@ -1,52 +1,42 @@
 //! Text measurement, word wrap, text scale, and spacing methods.
 
-use super::super::super::handle::{get_sim_state, lud_to_id};
+use super::super::super::handle::{get_sim_state, FrameRef};
 use super::{is_simple_html, is_text_type, val_to_f64};
 use crate::lua_api::simple_html::TextStyle;
 use crate::render::font::WowFontSystem;
-use mlua::{LightUserData, Lua, Value};
+use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Add measurement, word wrap, text scale, and spacing methods.
-pub fn add_measure_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_text_measurement_methods(lua, methods)?;
-    add_text_height_methods(lua, methods)?;
-    add_word_wrap_methods(lua, methods)?;
-    add_text_scale_methods(lua, methods)?;
-    add_spacing_methods(lua, methods)?;
-    Ok(())
+pub fn add_measure_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_text_measurement_methods(methods);
+    add_text_height_methods(methods);
+    add_word_wrap_methods(methods);
+    add_text_scale_methods(methods);
+    add_spacing_methods(methods);
 }
 
-/// GetStringWidth, GetTextWidth, GetUnboundedStringWidth, GetStringHeight.
-fn add_text_measurement_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetStringWidth", lua.create_function(|lua, ud: LightUserData| {
-        measure_text_width(lua, lud_to_id(ud))
-    })?)?;
-
-    methods.set("GetTextWidth", lua.create_function(|lua, ud: LightUserData| {
-        measure_text_width(lua, lud_to_id(ud))
-    })?)?;
-
-    methods.set("GetUnboundedStringWidth", lua.create_function(|lua, ud: LightUserData| {
-        measure_text_width(lua, lud_to_id(ud))
-    })?)?;
-
-    methods.set("GetStringHeight", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
-        measure_string_height(lua, id)
-    })?)?;
-
-    // GetLineHeight - height of a single line at the current font size.
-    methods.set("GetLineHeight", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+/// GetStringWidth, GetTextWidth, GetUnboundedStringWidth, GetStringHeight, GetLineHeight.
+fn add_text_measurement_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetStringWidth", |lua, this, ()| {
+        measure_text_width(lua, this.0)
+    });
+    methods.add_method("GetTextWidth", |lua, this, ()| {
+        measure_text_width(lua, this.0)
+    });
+    methods.add_method("GetUnboundedStringWidth", |lua, this, ()| {
+        measure_text_width(lua, this.0)
+    });
+    methods.add_method("GetStringHeight", |lua, this, ()| {
+        measure_string_height(lua, this.0)
+    });
+    methods.add_method("GetLineHeight", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let font_size = state.widgets.get(id).map_or(12.0_f32, |f| f.font_size);
+        let font_size = state.widgets.get(this.0).map_or(12.0_f32, |f| f.font_size);
         Ok((font_size * 1.2).ceil() as f64)
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// Shared implementation for GetStringWidth / GetTextWidth / GetUnboundedStringWidth.
@@ -85,11 +75,7 @@ fn measure_string_height(lua: &Lua, id: u64) -> mlua::Result<f64> {
         Some(t) if !t.is_empty() => t,
         _ => return Ok((font_size * 1.2).ceil() as f64),
     };
-    let wrap_width = if word_wrap && width > 0.0 {
-        Some(width)
-    } else {
-        None
-    };
+    let wrap_width = if word_wrap && width > 0.0 { Some(width) } else { None };
     if let Some(fs_rc) = lua.app_data_ref::<Rc<RefCell<WowFontSystem>>>() {
         let mut fs = fs_rc.borrow_mut();
         Ok(fs.measure_text_height(&text, font_path.as_deref(), font_size, wrap_width) as f64)
@@ -100,168 +86,146 @@ fn measure_string_height(lua: &Lua, id: u64) -> mlua::Result<f64> {
 
 /// SetWordWrap, GetWordWrap, IsTruncated, CanWordWrap, GetWrappedWidth,
 /// SetNonSpaceWrap, CanNonSpaceWrap, SetMaxLines, GetMaxLines.
-fn add_word_wrap_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetWordWrap", lua.create_function(|lua, (ud, wrap): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+fn add_word_wrap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetWordWrap", |lua, this, wrap: bool| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(id) {
+            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
                 frame.word_wrap = wrap;
             }
         Ok(())
-    })?)?;
-
-    methods.set("GetWordWrap", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetWordWrap", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(id) {
+            && let Some(frame) = s.widgets.get(this.0) {
                 return Ok(frame.word_wrap);
             }
         Ok(false)
-    })?)?;
-
-    methods.set("IsTruncated", lua.create_function(|_lua, _ud: LightUserData| Ok(false))?)?;
-    methods.set("CanWordWrap", lua.create_function(|_lua, _ud: LightUserData| Ok(true))?)?;
-
-    methods.set("GetWrappedWidth", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("IsTruncated", |_, _this, ()| Ok(false));
+    methods.add_method("CanWordWrap", |_, _this, ()| Ok(true));
+    methods.add_method("GetWrappedWidth", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let width = state.widgets.get(id).map(|f| f.width).unwrap_or(0.0);
-        Ok(width)
-    })?)?;
-
-    methods.set("SetNonSpaceWrap", lua.create_function(
-        |_lua, (_ud, _wrap): (LightUserData, bool)| Ok(()),
-    )?)?;
-    methods.set("CanNonSpaceWrap", lua.create_function(|_lua, _ud: LightUserData| Ok(true))?)?;
-
-    add_max_lines_methods(lua, methods)?;
-    Ok(())
+        Ok(state.widgets.get(this.0).map(|f| f.width).unwrap_or(0.0))
+    });
+    methods.add_method("SetNonSpaceWrap", |_, _this, _wrap: bool| Ok(()));
+    methods.add_method("CanNonSpaceWrap", |_, _this, ()| Ok(true));
+    add_max_lines_methods(methods);
 }
 
 /// SetMaxLines, GetMaxLines.
-fn add_max_lines_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetMaxLines", lua.create_function(|lua, (ud, max_lines): (LightUserData, i32)| {
-        let id = lud_to_id(ud);
+fn add_max_lines_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetMaxLines", |lua, this, max_lines: i32| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(id) {
+            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
                 frame.max_lines = max_lines.max(0) as u32;
             }
         Ok(())
-    })?)?;
-
-    methods.set("GetMaxLines", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetMaxLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(id) {
+            && let Some(frame) = s.widgets.get(this.0) {
                 return Ok(frame.max_lines as i32);
             }
         Ok(0i32)
-    })?)?;
-
-    Ok(())
+    });
 }
 
-/// SetTextHeight - sets the font height (effectively font size) for a FontString.
-fn add_text_height_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetTextHeight", lua.create_function(|lua, (ud, height): (LightUserData, f64)| {
-        let id = lud_to_id(ud);
+/// SetTextHeight, GetTextHeight.
+fn add_text_height_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetTextHeight", |lua, this, height: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.font_size = height as f32;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetTextHeight", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetTextHeight", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id) {
+        if let Some(frame) = state.widgets.get(this.0) {
             return Ok(frame.font_size as f64);
         }
         Ok(12.0_f64)
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// SetTextScale, GetTextScale.
-fn add_text_scale_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetTextScale", lua.create_function(|lua, (ud, scale): (LightUserData, f64)| {
-        let id = lud_to_id(ud);
+fn add_text_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetTextScale", |lua, this, scale: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.text_scale = scale;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetTextScale", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetTextScale", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id) {
+        if let Some(frame) = state.widgets.get(this.0) {
             return Ok(frame.text_scale);
         }
         Ok(1.0_f64)
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// SetIndentedWordWrap, SetSpacing, GetSpacing.
-fn add_spacing_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetIndentedWordWrap", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let is_html = is_simple_html(lua, id);
+fn add_spacing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetIndentedWordWrap", |lua, this, args: mlua::MultiValue| {
+        set_indented_word_wrap_impl(lua, this.0, args)
+    });
+    methods.add_method("SetSpacing", |lua, this, args: mlua::MultiValue| {
+        set_spacing_impl(lua, this.0, args)
+    });
+    methods.add_method("GetSpacing", |lua, this, args: mlua::MultiValue| {
+        get_spacing_impl(lua, this.0, args)
+    });
+}
 
-        if is_html && args_vec.len() >= 2
-            && let Some(Value::String(s)) = args_vec.first() {
-                let type_str = s.to_string_lossy().to_string();
-                if is_text_type(&type_str) {
-                    return set_indented_wrap_html(lua, id, &type_str, &args_vec);
-                }
-            }
-        Ok(())
-    })?)?;
-
-    methods.set("SetSpacing", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let is_html = is_simple_html(lua, id);
-
-        if is_html && args_vec.len() >= 2
-            && let Some(Value::String(s)) = args_vec.first() {
-                let type_str = s.to_string_lossy().to_string();
-                if is_text_type(&type_str) {
-                    return set_spacing_html(lua, id, &type_str, &args_vec);
-                }
-            }
-        Ok(())
-    })?)?;
-
-    methods.set("GetSpacing", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let args_vec: Vec<Value> = args.into_iter().collect();
-
-        if let Some(Value::String(s)) = args_vec.first() {
+/// SetIndentedWordWrap implementation.
+fn set_indented_word_wrap_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    let is_html = is_simple_html(lua, id);
+    if is_html && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first() {
             let type_str = s.to_string_lossy().to_string();
             if is_text_type(&type_str) {
-                return get_spacing_html(lua, id, &type_str);
+                return set_indented_wrap_html(lua, id, &type_str, &args_vec);
             }
         }
-        Ok(0.0_f64)
-    })?)?;
-
     Ok(())
+}
+
+/// SetSpacing implementation.
+fn set_spacing_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    let is_html = is_simple_html(lua, id);
+    if is_html && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first() {
+            let type_str = s.to_string_lossy().to_string();
+            if is_text_type(&type_str) {
+                return set_spacing_html(lua, id, &type_str, &args_vec);
+            }
+        }
+    Ok(())
+}
+
+/// GetSpacing implementation.
+fn get_spacing_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<f64> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    if let Some(Value::String(s)) = args_vec.first() {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            return get_spacing_html(lua, id, &type_str);
+        }
+    }
+    Ok(0.0_f64)
 }
 
 /// Set indented word wrap for a SimpleHTML text type.

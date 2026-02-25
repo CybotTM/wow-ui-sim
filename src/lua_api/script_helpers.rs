@@ -82,12 +82,9 @@ pub fn get_or_create_frame_fields(lua: &Lua, frame_id: u64) -> mlua::Table {
 
 // ── Frame reference ──────────────────────────────────────────────────
 
-/// Get the LightUserData value for a given widget ID.
-///
-/// With LightUserData, this is a trivial pointer construction — no global
-/// lookup, no allocation. Always returns Some.
-pub fn get_frame_ref(_lua: &Lua, widget_id: u64) -> Option<Value> {
-    Some(super::frame::frame_lud(widget_id))
+/// Get the UserData Value for a given widget ID (cached FrameRef).
+pub fn get_frame_ref(lua: &Lua, widget_id: u64) -> Option<Value> {
+    super::frame::frame_ref(lua, widget_id).ok()
 }
 
 // ── Error handler ────────────────────────────────────────────────────
@@ -157,15 +154,14 @@ pub fn collect_lua_error(lua: &Lua, msg: &str) {
 /// Returns individual-event registrations first (in Lua hash order), then
 /// all-events registrations (in Lua hash order), with duplicates skipped.
 pub fn get_event_listeners_lua_order(lua: &Lua, event: &str) -> mlua::Result<Vec<u64>> {
-    use mlua::{LightUserData, Value};
+    use mlua::Value;
     let mut result = Vec::new();
     let mut individual_ids = std::collections::HashSet::new();
 
     let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
     if let Ok(event_tbl) = individual.get::<mlua::Table>(event) {
-        for pair in event_tbl.pairs::<LightUserData, Value>() {
-            if let Ok((lud, _)) = pair {
-                let id = lud.0 as u64;
+        for pair in event_tbl.pairs::<u64, Value>() {
+            if let Ok((id, _)) = pair {
                 result.push(id);
                 individual_ids.insert(id);
             }
@@ -173,9 +169,8 @@ pub fn get_event_listeners_lua_order(lua: &Lua, event: &str) -> mlua::Result<Vec
     }
 
     let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
-    for pair in all_events.pairs::<LightUserData, Value>() {
-        if let Ok((lud, _)) = pair {
-            let id = lud.0 as u64;
+    for pair in all_events.pairs::<u64, Value>() {
+        if let Ok((id, _)) = pair {
             if !individual_ids.contains(&id) {
                 result.push(id);
             }

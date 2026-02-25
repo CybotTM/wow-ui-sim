@@ -1,92 +1,75 @@
 //! Cooldown widget methods: SetCooldown, swipe/edge/bling display, pause/resume.
 
+use super::super::handle::FrameRef;
 use super::widget_tooltip::val_to_f32;
-use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
+use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::AttributeValue;
-use mlua::{LightUserData, Lua, Value};
+use mlua::Value;
 
-pub fn add_cooldown_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_cooldown_set_methods(lua, methods)?;
-    add_cooldown_get_methods(lua, methods)?;
-    add_cooldown_display_methods(lua, methods)?;
-    add_cooldown_bool_display_methods(lua, methods)?;
-    add_cooldown_texture_methods(lua, methods)?;
-    add_cooldown_state_methods(lua, methods)?;
-    Ok(())
+pub fn add_cooldown_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_cooldown_set_methods(methods);
+    add_cooldown_get_methods(methods);
+    add_cooldown_display_methods(methods);
+    add_cooldown_bool_display_methods(methods);
+    add_cooldown_texture_methods(methods);
+    add_cooldown_state_methods(methods);
 }
 
-fn add_cooldown_set_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetCooldown", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+fn parse_f64_arg(val: Option<Value>) -> f64 {
+    match val {
+        Some(Value::Number(n)) => n,
+        Some(Value::Integer(n)) => n as f64,
+        _ => 0.0,
+    }
+}
+
+fn add_cooldown_set_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetCooldown", |lua, this, args: mlua::MultiValue| {
         let mut it = args.into_iter();
-        let start = match it.next() {
-            Some(Value::Number(n)) => n,
-            Some(Value::Integer(n)) => n as f64,
-            _ => 0.0,
-        };
-        let duration = match it.next() {
-            Some(Value::Number(n)) => n,
-            Some(Value::Integer(n)) => n as f64,
-            _ => 0.0,
-        };
+        let start = parse_f64_arg(it.next());
+        let duration = parse_f64_arg(it.next());
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.cooldown_start = start;
             frame.cooldown_duration = duration;
         }
         Ok(())
-    })?)?;
+    });
 
-    methods.set("SetCooldownUNIX", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+    methods.add_method("SetCooldownUNIX", |lua, this, args: mlua::MultiValue| {
         let mut it = args.into_iter();
-        let start = match it.next() {
-            Some(Value::Number(n)) => n,
-            Some(Value::Integer(n)) => n as f64,
-            _ => 0.0,
-        };
-        let end = match it.next() {
-            Some(Value::Number(n)) => n,
-            Some(Value::Integer(n)) => n as f64,
-            _ => 0.0,
-        };
+        let start = parse_f64_arg(it.next());
+        let end = parse_f64_arg(it.next());
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.cooldown_start = start;
             frame.cooldown_duration = end - start;
         }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
-fn add_cooldown_get_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetCooldownTimes", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+fn add_cooldown_get_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetCooldownTimes", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id) {
+        if let Some(frame) = state.widgets.get(this.0) {
             return Ok((frame.cooldown_start, frame.cooldown_duration));
         }
         Ok((0.0_f64, 0.0_f64))
-    })?)?;
+    });
 
-    methods.set("GetCooldownDuration", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("GetCooldownDuration", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(id).map(|f| f.cooldown_duration).unwrap_or(0.0))
-    })?)?;
-
-    Ok(())
+        Ok(state.widgets.get(this.0).map(|f| f.cooldown_duration).unwrap_or(0.0))
+    });
 }
 
-fn add_cooldown_display_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetSwipeColor", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+fn add_cooldown_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSwipeColor", |lua, this, args: mlua::MultiValue| {
         let mut it = args.into_iter();
         let r = val_to_f32(it.next(), 0.0);
         let g = val_to_f32(it.next(), 0.0);
@@ -94,137 +77,99 @@ fn add_cooldown_display_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Resul
         let a = val_to_f32(it.next(), 0.8);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.attributes.insert(
                 "__swipe_color".to_string(),
                 AttributeValue::String(format!("{},{},{},{}", r, g, b, a)),
             );
         }
         Ok(())
-    })?)?;
+    });
 
-    methods.set("SetHideCountdownNumbers", lua.create_function(|lua, (ud, hide): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+    methods.add_method("SetHideCountdownNumbers", |lua, this, hide: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_hide_countdown = hide;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_hide_countdown = hide; }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
-fn add_cooldown_bool_display_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetDrawSwipe", lua.create_function(|lua, (ud, draw): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+fn add_cooldown_bool_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetDrawSwipe", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_draw_swipe = draw;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_swipe = draw; }
         Ok(())
-    })?)?;
-
-    methods.set("SetDrawEdge", lua.create_function(|lua, (ud, draw): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("SetDrawEdge", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_draw_edge = draw;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_edge = draw; }
         Ok(())
-    })?)?;
-
-    methods.set("SetDrawBling", lua.create_function(|lua, (ud, draw): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("SetDrawBling", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_draw_bling = draw;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_bling = draw; }
         Ok(())
-    })?)?;
-
-    methods.set("SetReverse", lua.create_function(|lua, (ud, reverse): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("SetReverse", |lua, this, reverse: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_reverse = reverse;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_reverse = reverse; }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
-fn add_cooldown_texture_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetEdgeTexture", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
-    methods.set("SetSwipeTexture", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
-    methods.set("SetBlingTexture", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
-    methods.set("SetEdgeScale", lua.create_function(|_, (_ud, _scale): (LightUserData, Value)| Ok(()))?)?;
-    methods.set("SetUseCircularEdge", lua.create_function(|_, (_ud, _use_circular): (LightUserData, bool)| Ok(()))?)?;
-    methods.set("SetCountdownAbbrevThreshold", lua.create_function(|_, (_ud, _seconds): (LightUserData, Value)| Ok(()))?)?;
-    methods.set("SetCountdownFont", lua.create_function(|_, (_ud, _font): (LightUserData, Value)| Ok(()))?)?;
-    methods.set("SetUseAuraDisplayTime", lua.create_function(|_, (_ud, _use): (LightUserData, Value)| Ok(()))?)?;
+fn add_cooldown_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetEdgeTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetSwipeTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetBlingTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetEdgeScale", |_, _this, _scale: Value| Ok(()));
+    methods.add_method("SetUseCircularEdge", |_, _this, _use_circular: bool| Ok(()));
+    methods.add_method("SetCountdownAbbrevThreshold", |_, _this, _seconds: Value| Ok(()));
+    methods.add_method("SetCountdownFont", |_, _this, _font: Value| Ok(()));
+    methods.add_method("SetUseAuraDisplayTime", |_, _this, _use: Value| Ok(()));
 
-    methods.set("GetReverse", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("GetReverse", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(id).map(|f| f.cooldown_reverse).unwrap_or(false))
-    })?)?;
+        Ok(state.widgets.get(this.0).map(|f| f.cooldown_reverse).unwrap_or(false))
+    });
 
-    methods.set("SetCooldownDuration", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
-        let mut it = args.into_iter();
-        let duration = match it.next() {
+    methods.add_method("SetCooldownDuration", |lua, this, args: mlua::MultiValue| {
+        let duration = match args.into_iter().next() {
             Some(Value::Number(n)) => n,
             Some(Value::Integer(n)) => n as f64,
             _ => 0.0,
         };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_duration = duration;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_duration = duration; }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
-fn add_cooldown_state_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("Clear", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+fn add_cooldown_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("Clear", |_, _this, _: mlua::MultiValue| Ok(()));
 
-    methods.set("Pause", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("Pause", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_paused = true;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_paused = true; }
         Ok(())
-    })?)?;
+    });
 
-    methods.set("Resume", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("Resume", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.cooldown_paused = false;
-        }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_paused = false; }
         Ok(())
-    })?)?;
+    });
 
-    methods.set("IsPaused", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("IsPaused", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(id).map(|f| f.cooldown_paused).unwrap_or(false))
-    })?)?;
-
-    Ok(())
+        Ok(state.widgets.get(this.0).map(|f| f.cooldown_paused).unwrap_or(false))
+    });
 }

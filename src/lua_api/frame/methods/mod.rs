@@ -1,7 +1,7 @@
-//! Frame methods registered into the shared LightUserData methods table.
+//! Frame methods registered into the FrameRef UserData methods table.
 //!
-//! Each submodule exports `add_*_methods(lua, &Table) -> Result<()>` which
-//! sets method functions on the shared methods table.
+//! Each submodule exports `add_*_methods<M: UserDataMethods<FrameRef>>(methods: &mut M)`
+//! which registers method functions on the UserData methods container.
 
 mod methods_anchor;
 mod methods_attribute;
@@ -31,21 +31,20 @@ mod widget_tooltip;
 
 pub(crate) use methods_visibility::fire_on_show_recursive;
 
-/// Register all ~200 frame methods into the shared methods table.
-pub fn register_all_methods(lua: &mlua::Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods_core::add_core_methods(lua, methods)?;
-    methods_hierarchy::add_hierarchy_methods(lua, methods)?;
-    methods_misc::add_misc_methods(lua, methods)?;
-    methods_anchor::add_anchor_methods(lua, methods)?;
-    methods_event::add_event_methods(lua, methods)?;
-    methods_script::add_script_methods(lua, methods)?;
-    methods_attribute::add_attribute_methods(lua, methods)?;
-    methods_backdrop::add_backdrop_methods(lua, methods)?;
-    methods_create::add_create_methods(lua, methods)?;
-    methods_texture::add_texture_methods(lua, methods)?;
-    methods_text::add_text_methods(lua, methods)?;
-    methods_button::add_button_methods(lua, methods)?;
-    methods_widget::add_widget_methods(lua, methods)?;
-    methods_line::add_line_methods(lua, methods)?;
-    Ok(())
+/// Register all ~200 frame methods into the FrameRef UserData methods container.
+pub fn register_all_methods<M: mlua::UserDataMethods<super::handle::FrameRef>>(methods: &mut M) {
+    methods_core::add_core_methods(methods);
+    methods_hierarchy::add_hierarchy_methods(methods);
+    methods_misc::add_misc_methods(methods);
+    methods_anchor::add_anchor_methods(methods);
+    methods_event::add_event_methods(methods);
+    methods_script::add_script_methods(methods);
+    methods_attribute::add_attribute_methods(methods);
+    methods_backdrop::add_backdrop_methods(methods);
+    methods_create::add_create_methods(methods);
+    methods_texture::add_texture_methods(methods);
+    methods_text::add_text_methods(methods);
+    methods_button::add_button_methods(methods);
+    methods_widget::add_widget_methods(methods);
+    methods_line::add_line_methods(methods);
 }

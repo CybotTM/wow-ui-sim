@@ -6,8 +6,9 @@
 //! the state change and fires the next handler. This limits mutual recursion
 //! to 12 handler invocations (6 cycles of OnHide→OnShow).
 
-use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
-use mlua::{LightUserData, Lua};
+use super::super::handle::{frame_ref, FrameRef};
+use crate::lua_api::frame::handle::get_sim_state;
+use mlua::Lua;
 
 /// Maximum handler invocations per Show/Hide call (6 cycles × 2 handlers).
 const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
@@ -18,23 +19,10 @@ pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
 }
 
 /// Register Show, Hide, SetShown methods.
-pub(super) fn add_show_hide_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("Show", lua.create_function(show_impl)?)?;
-    methods.set("Hide", lua.create_function(hide_impl)?)?;
-    methods.set("SetShown", lua.create_function(setshown_impl)?)?;
-    Ok(())
-}
-
-fn show_impl(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
-    show_or_hide(lua, lud_to_id(ud), true)
-}
-
-fn hide_impl(lua: &Lua, ud: LightUserData) -> mlua::Result<()> {
-    show_or_hide(lua, lud_to_id(ud), false)
-}
-
-fn setshown_impl(lua: &Lua, (ud, shown): (LightUserData, bool)) -> mlua::Result<()> {
-    show_or_hide(lua, lud_to_id(ud), shown)
+pub(super) fn add_show_hide_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("Show", |lua, this, ()| show_or_hide(lua, this.0, true));
+    methods.add_method("Hide", |lua, this, ()| show_or_hide(lua, this.0, false));
+    methods.add_method("SetShown", |lua, this, shown: bool| show_or_hide(lua, this.0, shown));
 }
 
 /// Unified Show/Hide implementation with iterative handler loop.
@@ -70,11 +58,7 @@ fn show_or_hide(lua: &Lua, id: u64, show: bool) -> mlua::Result<()> {
 
 /// Iteratively fire OnShow/OnHide handlers until no more state changes
 /// occur or the handler limit is reached.
-fn drain_visibility_handlers(
-    lua: &Lua,
-    id: u64,
-    initial_target: bool,
-) -> mlua::Result<()> {
+fn drain_visibility_handlers(lua: &Lua, id: u64, initial_target: bool) -> mlua::Result<()> {
     let state_rc = get_sim_state(lua);
     if let Some(f) = state_rc.borrow_mut().widgets.get_mut(id) {
         f.show_hide_depth = 1;
@@ -83,19 +67,12 @@ fn drain_visibility_handlers(
     for _ in 0..SHOW_HIDE_HANDLER_LIMIT {
         let handler = if target { "OnShow" } else { "OnHide" };
         fire_script_recursive(lua, id, handler)?;
-        // Check if handler called Show/Hide (changed visible)
-        let visible_after = state_rc
-            .borrow()
-            .widgets
-            .get(id)
-            .map(|f| f.visible)
-            .unwrap_or(false);
-        // Restore visible to what this handler intended
+        let visible_after = state_rc.borrow().widgets.get(id)
+            .map(|f| f.visible).unwrap_or(false);
         state_rc.borrow_mut().set_frame_visible(id, target);
         if visible_after == target {
-            break; // Handler didn't call Show/Hide, done
+            break;
         }
-        // Handler called the opposite — set up for next iteration
         target = visible_after;
         state_rc.borrow_mut().set_frame_visible(id, target);
     }
@@ -109,11 +86,9 @@ fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result
     let children: Vec<u64> = {
         let state_rc = get_sim_state(lua);
         let st = state_rc.borrow();
-        st.widgets
-            .get(id)
+        st.widgets.get(id)
             .map(|f| {
-                f.children
-                    .iter()
+                f.children.iter()
                     .filter(|&&cid| st.widgets.get(cid).map(|c| c.visible).unwrap_or(false))
                     .copied()
                     .collect()
@@ -126,7 +101,7 @@ fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result
     }
 
     if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, handler_name) {
-        let frame_val = frame_lud(id);
+        let frame_val = frame_ref(lua, id)?;
         if let Err(e) = handler.call::<()>(frame_val) {
             crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
         }

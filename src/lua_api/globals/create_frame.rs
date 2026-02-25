@@ -1,6 +1,6 @@
 //! CreateFrame implementation for creating WoW frames from Lua.
 
-use super::super::frame::{extract_frame_id, frame_lud};
+use super::super::frame::{extract_frame_id, frame_ref, sync_child_to_lua};
 use super::super::SimState;
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
@@ -11,15 +11,16 @@ use std::rc::Rc;
 
 /// Extract a frame ID from a Lua Value, handling forbidden proxy tables.
 ///
-/// Normal frames are LightUserData. Forbidden frames are proxy Tables with the
-/// LightUserData stored at key `"__lud"` (set by `create_forbidden_proxy`).
+/// Normal frames are UserData (FrameRef). Forbidden frames are proxy Tables with the
+/// UserData stored at key `"__lud"` (set by `create_forbidden_proxy`).
 fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
     match value {
         Value::LightUserData(_) => extract_frame_id(value),
+        Value::UserData(_) => extract_frame_id(value),
         Value::Table(t) => {
-            // Forbidden proxy: LightUserData stored at "__lud"
-            if let Ok(Value::LightUserData(lud)) = t.raw_get::<Value>("__lud") {
-                Some(lud.0 as u64)
+            // Forbidden proxy: UserData stored at "__lud"
+            if let Ok(inner) = t.raw_get::<Value>("__lud") {
+                extract_frame_id(&inner)
             } else {
                 None
             }
@@ -36,9 +37,9 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let widget_type = parse_widget_type(&cfa.frame_type)?;
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
         apply_frame_id_arg(&state_clone, frame_id, cfa.id);
-        create_widget_type_defaults(&mut state_clone.borrow_mut(), frame_id, widget_type);
+        create_widget_type_defaults(lua, &mut state_clone.borrow_mut(), frame_id, widget_type);
         if cfa.frame_type == "ItemButton" {
-            create_item_button_intrinsics(&mut state_clone.borrow_mut(), frame_id);
+            create_item_button_intrinsics(lua, &mut state_clone.borrow_mut(), frame_id);
         }
         let is_forbidden = state_clone.borrow().widgets.get(frame_id)
             .map(|f| f.forbidden).unwrap_or(false);
@@ -310,67 +311,50 @@ fn register_new_frame(
     frame_id
 }
 
-/// Create a LightUserData value for a frame and cache it in `_G`.
+/// Create a FrameRef UserData value for a frame and cache it in `_G`.
 ///
 /// Caches both `_G[name]` (for named frames) and `_G["__frame_{id}"]` (always)
 /// so that `lua_global_ref` lookups work for template application and mixin code.
 ///
 /// For forbidden frames, a proxy table with `getmetatable() == "Forbidden"` is
 /// stored under the global name, while the internal `__frame_{id}` key always
-/// holds the raw LightUserData so template application can reach the frame.
+/// holds the raw UserData so template application can reach the frame.
 fn create_frame_userdata(
     lua: &Lua,
     frame_id: u64,
     name: Option<&str>,
     is_forbidden: bool,
 ) -> Result<Value> {
-    let lud = frame_lud(frame_id);
-    let globals = lua.globals();
+    let val = frame_ref(lua, frame_id)?;
 
     if let Some(n) = name {
         if is_forbidden {
-            let proxy = create_forbidden_proxy(lua, lud.clone())?;
+            let proxy = create_forbidden_proxy(lua, val.clone())?;
             crate::lua_api::secure_env::set_in_both_envs(lua, n, proxy)?;
         } else {
-            crate::lua_api::secure_env::set_in_both_envs(lua, n, lud.clone())?;
+            crate::lua_api::secure_env::set_in_both_envs(lua, n, val.clone())?;
         }
     }
+    // __frame_{id} cache is handled by frame_ref(), but ensure it's set for named frames too
     let frame_key = format!("__frame_{}", frame_id);
-    globals.raw_set(frame_key.as_str(), lud.clone())?;
+    lua.globals().raw_set(frame_key.as_str(), val.clone())?;
 
-    Ok(lud)
+    Ok(val)
 }
-
-/// Opaque wrapper for a frame ID stored as full UserData in forbidden proxies.
-///
-/// `type(ForbiddenRawRef {...})` returns `"userdata"` (not `"table"`) because the
-/// `type()` override in system_api.rs only maps LightUserData → "table".
-struct ForbiddenRawRef {
-    #[allow(dead_code)]
-    frame_id: u64,
-}
-
-impl mlua::UserData for ForbiddenRawRef {}
 
 /// Create a forbidden proxy table for a frame.
 ///
 /// The proxy table has:
-/// - `proxy[0]` = full UserData wrapping the frame ID (type() returns "userdata")
-/// - `proxy["__lud"]` = the LightUserData for this frame (read by the shared metatable)
+/// - `proxy["__lud"]` = the FrameRef UserData for this frame (read by the shared metatable)
 /// - The shared `__forbidden_proxy_mt` metatable (cached in registry, same identity for all instances)
-fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
+///
+/// The FrameRef UserData already has type() == "userdata" (not "table"), so no additional
+/// wrapper is needed. The type() override in system_api.rs handles remapping if needed.
+fn create_forbidden_proxy(lua: &Lua, ud: Value) -> Result<Value> {
     let proxy = lua.create_table()?;
-    // Store a full UserData at key 0 so type(proxy[0]) == "userdata" (not "table")
-    let raw_ref = lua.create_userdata(ForbiddenRawRef {
-        frame_id: match &lud {
-            Value::LightUserData(l) => l.0 as u64,
-            _ => 0,
-        },
-    })?;
-    proxy.raw_set(0, raw_ref)?;
-    // Store the LightUserData at "__lud" so the shared metatable __index/__newindex
+    // Store the UserData at "__lud" so the shared metatable __index/__newindex
     // can retrieve it at call time, and so CreateFrame can resolve the parent frame ID.
-    proxy.raw_set("__lud", lud)?;
+    proxy.raw_set("__lud", ud)?;
 
     // Reuse the single shared metatable for all forbidden proxies so that
     // getmetatable(proxy1) == getmetatable(proxy2) (identity check).
@@ -403,18 +387,18 @@ fn register_button_child_globals(
     for (key, child_id) in keys {
         let global_name = format!("{}{}", button_name, key);
         st.widgets.set_name(child_id, global_name.clone());
-        let _ = crate::lua_api::secure_env::set_in_both_envs(
-            lua,
-            &global_name,
-            frame_lud(child_id),
-        );
+        drop(st);
+        if let Ok(val) = frame_ref(lua, child_id) {
+            let _ = crate::lua_api::secure_env::set_in_both_envs(lua, &global_name, val);
+        }
+        st = state.borrow_mut();
     }
     Ok(())
 }
 
 /// Create default children for widget types that fundamentally need them.
 /// This is separate from templates - these are intrinsic to the widget type.
-fn create_widget_type_defaults(state: &mut SimState, frame_id: u64, widget_type: WidgetType) {
+fn create_widget_type_defaults(lua: &Lua, state: &mut SimState, frame_id: u64, widget_type: WidgetType) {
     match widget_type {
         WidgetType::Button | WidgetType::CheckButton => {
             create_button_defaults(state, frame_id);
@@ -429,7 +413,7 @@ fn create_widget_type_defaults(state: &mut SimState, frame_id: u64, widget_type:
             state.message_frames.insert(frame_id, crate::lua_api::message_frame::MessageFrameData::default());
         }
         WidgetType::Slider => {
-            create_slider_defaults(state, frame_id);
+            create_slider_defaults(lua, state, frame_id);
         }
         WidgetType::EditBox => {
             if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
@@ -461,7 +445,7 @@ fn create_tooltip_defaults(state: &mut SimState, frame_id: u64) {
 }
 
 /// Create default fontstrings and thumb texture for Slider.
-fn create_slider_defaults(state: &mut SimState, frame_id: u64) {
+fn create_slider_defaults(lua: &Lua, state: &mut SimState, frame_id: u64) {
     let low_id = create_child_widget(state, WidgetType::FontString, frame_id);
     let high_id = create_child_widget(state, WidgetType::FontString, frame_id);
     let text_id = create_child_widget(state, WidgetType::FontString, frame_id);
@@ -473,6 +457,10 @@ fn create_slider_defaults(state: &mut SimState, frame_id: u64) {
         slider.children_keys.insert("Text".to_string(), text_id);
         slider.children_keys.insert("ThumbTexture".to_string(), thumb_id);
     }
+    let _ = sync_child_to_lua(lua, frame_id, "Low", low_id);
+    let _ = sync_child_to_lua(lua, frame_id, "High", high_id);
+    let _ = sync_child_to_lua(lua, frame_id, "Text", text_id);
+    let _ = sync_child_to_lua(lua, frame_id, "ThumbTexture", thumb_id);
 }
 
 /// Add TOPLEFT+BOTTOMRIGHT anchors to fill the parent (equivalent to SetAllPoints).
@@ -577,7 +565,7 @@ fn create_child_widget(state: &mut SimState, widget_type: WidgetType, parent_id:
 /// Create intrinsic children for ItemButton (from WoW's intrinsic="true" template).
 /// ItemButton defines: icon (Texture), Count (FontString), Stock (FontString),
 /// searchOverlay, ItemContextOverlay, IconBorder, IconOverlay, IconOverlay2 (Textures).
-fn create_item_button_intrinsics(state: &mut SimState, frame_id: u64) {
+fn create_item_button_intrinsics(lua: &Lua, state: &mut SimState, frame_id: u64) {
     let icon_id = create_item_button_icon(state, frame_id);
     let count_id = create_item_button_count(state, frame_id);
     let stock_id = create_hidden_artwork_fontstring(state, frame_id);
@@ -586,7 +574,7 @@ fn create_item_button_intrinsics(state: &mut SimState, frame_id: u64) {
     let icon_overlay2_id = create_hidden_overlay(state, frame_id);
     let search_overlay_id = create_fill_parent_overlay(state, frame_id);
     let context_overlay_id = create_hidden_overlay(state, frame_id);
-    register_item_button_children(state, frame_id, icon_id, count_id, stock_id,
+    register_item_button_children(lua, state, frame_id, icon_id, count_id, stock_id,
         icon_border_id, icon_overlay_id, icon_overlay2_id, search_overlay_id, context_overlay_id);
 }
 
@@ -638,7 +626,7 @@ fn create_fill_parent_overlay(state: &mut SimState, frame_id: u64) -> u64 {
 
 #[allow(clippy::too_many_arguments)]
 fn register_item_button_children(
-    state: &mut SimState, frame_id: u64,
+    lua: &Lua, state: &mut SimState, frame_id: u64,
     icon_id: u64, count_id: u64, stock_id: u64,
     icon_border_id: u64, icon_overlay_id: u64, icon_overlay2_id: u64,
     search_overlay_id: u64, context_overlay_id: u64,
@@ -653,6 +641,14 @@ fn register_item_button_children(
         btn.children_keys.insert("searchOverlay".to_string(), search_overlay_id);
         btn.children_keys.insert("ItemContextOverlay".to_string(), context_overlay_id);
     }
+    let _ = sync_child_to_lua(lua, frame_id, "icon", icon_id);
+    let _ = sync_child_to_lua(lua, frame_id, "Count", count_id);
+    let _ = sync_child_to_lua(lua, frame_id, "Stock", stock_id);
+    let _ = sync_child_to_lua(lua, frame_id, "IconBorder", icon_border_id);
+    let _ = sync_child_to_lua(lua, frame_id, "IconOverlay", icon_overlay_id);
+    let _ = sync_child_to_lua(lua, frame_id, "IconOverlay2", icon_overlay2_id);
+    let _ = sync_child_to_lua(lua, frame_id, "searchOverlay", search_overlay_id);
+    let _ = sync_child_to_lua(lua, frame_id, "ItemContextOverlay", context_overlay_id);
 }
 
 /// Check the template chain for a `parentArray` attribute and insert the frame

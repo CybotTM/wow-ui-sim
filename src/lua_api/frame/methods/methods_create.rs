@@ -1,14 +1,15 @@
 //! Child creation methods: CreateTexture, CreateFontString, CreateAnimationGroup, etc.
 
+use super::super::handle::FrameRef;
 use crate::lua_api::animation::{AnimGroupHandle, AnimGroupState};
-use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
 use crate::lua_api::globals::create_frame::apply_parent_sub;
 use crate::widget::{Frame, WidgetType};
-use mlua::{LightUserData, Lua, Value};
+use mlua::Value;
 use std::rc::Rc;
 
 /// Resolve a raw name with $parent substitution using the parent widget's ancestor chain.
-fn resolve_child_name(lua: &Lua, name_raw: Option<String>, parent_id: u64) -> Option<String> {
+fn resolve_child_name(lua: &mlua::Lua, name_raw: Option<String>, parent_id: u64) -> Option<String> {
     name_raw.map(|n| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -27,13 +28,9 @@ fn extract_string_arg(args: &[Value], index: usize) -> Option<String> {
     })
 }
 
-/// Register a child widget in the state and cache its LightUserData in `_G`.
-///
-/// Caches `frame_lud(child_id)` in `_G` via `raw_set` for named children
-/// (and always for `__frame_{id}`) so that Lua lookups via `_G["name"]`
-/// resolve to the correct LightUserData value.
+/// Register a child widget in the state and cache its FrameRef UserData in `_G`.
 fn register_child_widget(
-    lua: &Lua,
+    lua: &mlua::Lua,
     parent_id: u64,
     child: Frame,
     name: &Option<String>,
@@ -46,7 +43,6 @@ fn register_child_widget(
         state.widgets.register(child);
         state.widgets.add_child(parent_id, child_id);
 
-        // Inherit strata and level from parent (regions render in parent's context)
         let parent_props = state
             .widgets
             .get(parent_id)
@@ -59,129 +55,112 @@ fn register_child_widget(
         }
     }
 
-    let lud = frame_lud(child_id);
+    let ud = frame_ref(lua, child_id)?;
 
-    // Cache in _G so Lua identity matches for named lookups
-    let globals = lua.globals();
     if let Some(n) = name {
-        globals.raw_set(n.as_str(), lud.clone())?;
+        lua.globals().raw_set(n.as_str(), ud.clone())?;
     }
-    let frame_key = format!("__frame_{}", child_id);
-    globals.raw_set(frame_key.as_str(), lud.clone())?;
 
-    Ok(lud)
+    Ok(ud)
 }
 
 /// Add child creation methods to the shared methods table.
-pub fn add_create_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_create_texture_method(lua, methods)?;
-    add_create_mask_texture_method(lua, methods)?;
-    add_create_line_method(lua, methods)?;
-    add_create_font_string_method(lua, methods)?;
-    add_create_animation_group_method(lua, methods)?;
-    add_get_animation_groups_method(lua, methods)?;
-    Ok(())
+pub fn add_create_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_create_texture_method(methods);
+    add_create_mask_texture_method(methods);
+    add_create_line_method(methods);
+    add_create_font_string_method(methods);
+    add_create_animation_group_method(methods);
+    add_get_animation_groups_method(methods);
 }
 
 /// CreateTexture(name, layer, inherits, subLevel)
-fn add_create_texture_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "CreateTexture",
-        lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-            use crate::widget::DrawLayer;
+fn add_create_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateTexture", |lua, this, args: mlua::MultiValue| {
+        use crate::widget::DrawLayer;
 
-            let id = lud_to_id(ud);
-            let args: Vec<Value> = args.into_iter().collect();
-            let name_raw = extract_string_arg(&args, 0);
-            let layer = extract_string_arg(&args, 1);
-            let name = resolve_child_name(lua, name_raw, id);
+        let id = this.0;
+        let args: Vec<Value> = args.into_iter().collect();
+        let name_raw = extract_string_arg(&args, 0);
+        let layer = extract_string_arg(&args, 1);
+        let name = resolve_child_name(lua, name_raw, id);
 
-            let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
+        let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
 
-            if let Some(layer_str) = layer
-                && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
-            {
-                texture.draw_layer = draw_layer;
-            }
+        if let Some(layer_str) = layer
+            && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
+        {
+            texture.draw_layer = draw_layer;
+        }
 
-            register_child_widget(lua, id, texture, &name)
-        })?,
-    )
+        register_child_widget(lua, id, texture, &name)
+    });
 }
 
 /// CreateMaskTexture(layer, inherits, subLevel) - create a mask texture.
-fn add_create_mask_texture_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "CreateMaskTexture",
-        lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-            let id = lud_to_id(ud);
-            let args: Vec<Value> = args.into_iter().collect();
-            let name_raw = extract_string_arg(&args, 0);
-            let name = resolve_child_name(lua, name_raw, id);
-            let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
-            texture.is_mask = true;
-            register_child_widget(lua, id, texture, &name)
-        })?,
-    )
+fn add_create_mask_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateMaskTexture", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
+        let args: Vec<Value> = args.into_iter().collect();
+        let name_raw = extract_string_arg(&args, 0);
+        let name = resolve_child_name(lua, name_raw, id);
+        let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
+        texture.is_mask = true;
+        register_child_widget(lua, id, texture, &name)
+    });
 }
 
-/// CreateLine(name, layer, inherits, subLevel) - create a Line (texture with start/end points).
-fn add_create_line_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "CreateLine",
-        lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-            use crate::widget::DrawLayer;
+/// CreateLine(name, layer, inherits, subLevel) - create a Line.
+fn add_create_line_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateLine", |lua, this, args: mlua::MultiValue| {
+        use crate::widget::DrawLayer;
 
-            let id = lud_to_id(ud);
-            let args: Vec<Value> = args.into_iter().collect();
-            let name_raw = extract_string_arg(&args, 0);
-            let layer = extract_string_arg(&args, 1);
-            let name = resolve_child_name(lua, name_raw, id);
+        let id = this.0;
+        let args: Vec<Value> = args.into_iter().collect();
+        let name_raw = extract_string_arg(&args, 0);
+        let layer = extract_string_arg(&args, 1);
+        let name = resolve_child_name(lua, name_raw, id);
 
-            let mut line = Frame::new(WidgetType::Line, name.clone(), Some(id));
+        let mut line = Frame::new(WidgetType::Line, name.clone(), Some(id));
 
-            if let Some(layer_str) = layer
-                && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
-            {
-                line.draw_layer = draw_layer;
-            }
+        if let Some(layer_str) = layer
+            && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
+        {
+            line.draw_layer = draw_layer;
+        }
 
-            register_child_widget(lua, id, line, &name)
-        })?,
-    )
+        register_child_widget(lua, id, line, &name)
+    });
 }
 
 /// CreateFontString(name, layer, inherits)
-fn add_create_font_string_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "CreateFontString",
-        lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-            use crate::widget::DrawLayer;
+fn add_create_font_string_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateFontString", |lua, this, args: mlua::MultiValue| {
+        use crate::widget::DrawLayer;
 
-            let id = lud_to_id(ud);
-            let args: Vec<Value> = args.into_iter().collect();
-            let name_raw = extract_string_arg(&args, 0);
-            let layer = extract_string_arg(&args, 1);
-            let inherits = extract_string_arg(&args, 2);
-            let name = resolve_child_name(lua, name_raw, id);
+        let id = this.0;
+        let args: Vec<Value> = args.into_iter().collect();
+        let name_raw = extract_string_arg(&args, 0);
+        let layer = extract_string_arg(&args, 1);
+        let inherits = extract_string_arg(&args, 2);
+        let name = resolve_child_name(lua, name_raw, id);
 
-            let mut fontstring = Frame::new(WidgetType::FontString, name.clone(), Some(id));
+        let mut fontstring = Frame::new(WidgetType::FontString, name.clone(), Some(id));
 
-            if let Some(layer_str) = layer
-                && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
-            {
-                fontstring.draw_layer = draw_layer;
-            }
+        if let Some(layer_str) = layer
+            && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
+        {
+            fontstring.draw_layer = draw_layer;
+        }
 
-            apply_font_inherit(lua, &mut fontstring, inherits.as_deref());
+        apply_font_inherit(lua, &mut fontstring, inherits.as_deref());
 
-            register_child_widget(lua, id, fontstring, &name)
-        })?,
-    )
+        register_child_widget(lua, id, fontstring, &name)
+    });
 }
 
 /// Apply font properties from an inherited Font object to a fontstring widget.
-fn apply_font_inherit(lua: &Lua, frame: &mut Frame, inherits: Option<&str>) {
+fn apply_font_inherit(lua: &mlua::Lua, frame: &mut Frame, inherits: Option<&str>) {
     let Some(name) = inherits else { return };
     let Ok(globals) = lua.globals().get::<Value>(name) else { return };
     let Value::Table(tbl) = globals else { return };
@@ -200,57 +179,49 @@ fn apply_font_inherit(lua: &Lua, frame: &mut Frame, inherits: Option<&str>) {
 }
 
 /// GetAnimationGroups() — return all animation groups owned by this frame.
-fn add_get_animation_groups_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "GetAnimationGroups",
-        lua.create_function(|lua, ud: LightUserData| {
-            let id = lud_to_id(ud);
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            let group_ids: Vec<u64> = state
-                .animation_groups
-                .iter()
-                .filter(|(_, g)| g.owner_frame_id == id)
-                .map(|(&gid, _)| gid)
-                .collect();
-            drop(state);
-            let mut values = Vec::with_capacity(group_ids.len());
-            for group_id in group_ids {
-                let handle = AnimGroupHandle {
-                    group_id,
-                    state: Rc::clone(&state_rc),
-                };
-                values.push(mlua::Value::UserData(lua.create_userdata(handle)?));
-            }
-            Ok(mlua::MultiValue::from_vec(values))
-        })?,
-    )
+fn add_get_animation_groups_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetAnimationGroups", |lua, this, ()| {
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let group_ids: Vec<u64> = state
+            .animation_groups
+            .iter()
+            .filter(|(_, g)| g.owner_frame_id == id)
+            .map(|(&gid, _)| gid)
+            .collect();
+        drop(state);
+        let mut values = Vec::with_capacity(group_ids.len());
+        for group_id in group_ids {
+            let handle = AnimGroupHandle {
+                group_id,
+                state: Rc::clone(&state_rc),
+            };
+            values.push(mlua::Value::UserData(lua.create_userdata(handle)?));
+        }
+        Ok(mlua::MultiValue::from_vec(values))
+    });
 }
 
 /// CreateAnimationGroup(name, inherits)
-fn add_create_animation_group_method(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set(
-        "CreateAnimationGroup",
-        lua.create_function(
-            |lua, (ud, name, _inherits): (LightUserData, Option<String>, Option<String>)| {
-                let id = lud_to_id(ud);
-                let state_rc = get_sim_state(lua);
-                let group_id;
-                {
-                    let mut state = state_rc.borrow_mut();
-                    group_id = state.next_anim_group_id;
-                    state.next_anim_group_id += 1;
-                    let mut group = AnimGroupState::new(id);
-                    group.name = name;
-                    state.animation_groups.insert(group_id, group);
-                }
+fn add_create_animation_group_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateAnimationGroup", |lua, this, (name, _inherits): (Option<String>, Option<String>)| {
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let group_id;
+        {
+            let mut state = state_rc.borrow_mut();
+            group_id = state.next_anim_group_id;
+            state.next_anim_group_id += 1;
+            let mut group = AnimGroupState::new(id);
+            group.name = name;
+            state.animation_groups.insert(group_id, group);
+        }
 
-                let handle = AnimGroupHandle {
-                    group_id,
-                    state: Rc::clone(&state_rc),
-                };
-                lua.create_userdata(handle)
-            },
-        )?,
-    )
+        let handle = AnimGroupHandle {
+            group_id,
+            state: Rc::clone(&state_rc),
+        };
+        lua.create_userdata(handle)
+    });
 }

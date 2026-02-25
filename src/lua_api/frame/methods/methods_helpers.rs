@@ -1,6 +1,6 @@
 //! Helper functions for frame methods.
 
-use crate::lua_api::frame::handle::frame_lud;
+use crate::lua_api::frame::handle::{frame_ref, sync_child_to_lua};
 use crate::widget::{Anchor, AnchorPoint, Frame, WidgetType};
 use mlua::{Lua, Value};
 
@@ -11,7 +11,7 @@ use mlua::{Lua, Value};
 /// before `__index`, so they shadow mixin methods. This helper allows Rust methods to
 /// detect and delegate to mixin overrides.
 ///
-/// Returns `(function, frame_lightuserdata)` if an override exists, None otherwise.
+/// Returns `(function, frame_userdata)` if an override exists, None otherwise.
 pub fn get_mixin_override(
     lua: &Lua,
     frame_id: u64,
@@ -23,7 +23,7 @@ pub fn get_mixin_override(
         Ok(Value::Function(f)) => f,
         _ => return None,
     };
-    let ud = frame_lud(frame_id);
+    let ud = frame_ref(lua, frame_id).ok()?;
     Some((func, ud))
 }
 
@@ -133,6 +133,7 @@ fn set_all_points_anchors(frame: &mut Frame, parent_id: u64) {
 /// Helper to create a button texture child if it doesn't exist.
 /// Also ensures existing textures have proper anchors to fill the button.
 pub fn get_or_create_button_texture(
+    lua: &Lua,
     state: &mut crate::lua_api::SimState,
     button_id: u64,
     key: &str,
@@ -167,6 +168,7 @@ pub fn get_or_create_button_texture(
     if let Some(frame) = state.widgets.get_mut_visual(button_id) {
         frame.children_keys.insert(key.to_string(), texture_id);
     }
+    let _ = sync_child_to_lua(lua, button_id, key, texture_id);
 
     texture_id
 }

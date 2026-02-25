@@ -12,9 +12,9 @@
 //! - Battle.net stubs: `BNFeaturesEnabled()`, `BNConnected()`, etc.
 //! - Streaming stubs: `GetFileStreamingStatus()`, `GetBackgroundLoadingStatus()`
 
-use crate::lua_api::frame::frame_lud;
+use crate::lua_api::frame::{frame_ref, FrameRef};
 use crate::lua_api::SimState;
-use mlua::{Lua, MultiValue, Result, Value};
+use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -45,10 +45,14 @@ pub fn register_system_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
 
 /// Override `type()` and `rawget()` to handle frame LightUserData as "table".
 fn register_type_overrides(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
+    register_type_override(lua)?;
+    register_rawget_override(lua)
+}
 
-    // Override type() to recognize frame LightUserData as "table"
-    // Blizzard's Dump.lua does `type(v) == "table"` checks and we want frames to pass
+/// Override `type()` to report frames (LightUserData or FrameRef UserData) as "table".
+///
+/// Blizzard's Dump.lua does `type(v) == "table"` checks and we want frames to pass.
+fn register_type_override(lua: &Lua) -> Result<()> {
     let type_fn = lua.create_function(|_lua, value: Value| {
         let type_str = match &value {
             Value::Nil => "nil",
@@ -58,17 +62,26 @@ fn register_type_overrides(lua: &Lua) -> Result<()> {
             Value::Table(_) => "table",
             Value::Function(_) => "function",
             Value::Thread(_) => "thread",
-            Value::UserData(_) => "userdata",
+            Value::UserData(ud) => {
+                if ud.borrow::<FrameRef>().is_ok() {
+                    return Ok("table");
+                }
+                "userdata"
+            }
             Value::LightUserData(_) => "table",
             Value::Error(_) => "error",
             Value::Other(_) => "userdata",
         };
         Ok(type_str)
     })?;
-    globals.set("type", type_fn)?;
+    lua.globals().set("type", type_fn)
+}
 
-    // Override rawget() to handle userdata gracefully
-    // Blizzard's Dump.lua does `rawget(v, 0)` on things that pass `type(v) == "table"`
+/// Override `rawget()` to handle userdata gracefully.
+///
+/// Blizzard's Dump.lua does `rawget(v, 0)` on things that pass `type(v) == "table"`.
+fn register_rawget_override(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
     let rawget_fn = lua.create_function(|lua, (table, key): (Value, Value)| {
         match table {
             Value::Table(t) => t.raw_get(key),
@@ -81,9 +94,7 @@ fn register_type_overrides(lua: &Lua) -> Result<()> {
     })?;
     let original_rawget: mlua::Function = globals.raw_get("rawget")?;
     lua.set_named_registry_value("__original_rawget", original_rawget)?;
-    globals.set("rawget", rawget_fn)?;
-
-    Ok(())
+    globals.set("rawget", rawget_fn)
 }
 
 /// Register the `SlashCmdList` table.
@@ -107,7 +118,7 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
 
         for widget_id in listeners {
             if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent") {
-                let frame = frame_lud(widget_id);
+                let frame = frame_ref(lua, widget_id)?;
 
                 let mut call_args = vec![frame, Value::String(lua.create_string(&event_name)?)];
                 call_args.extend(event_args.iter().cloned());
@@ -383,10 +394,10 @@ fn register_input_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
     let st = Rc::clone(state);
     globals.set(
         "GetMouseFocus",
-        lua.create_function(move |_lua, ()| {
+        lua.create_function(move |lua, ()| {
             let hovered = st.borrow().hovered_frame;
             match hovered {
-                Some(id) => Ok(frame_lud(id)),
+                Some(id) => frame_ref(lua, id),
                 None => Ok(Value::Nil),
             }
         })?,
@@ -400,7 +411,7 @@ fn register_input_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
             let tbl = lua.create_table()?;
             let hovered = st2.borrow().hovered_frame;
             if let Some(id) = hovered {
-                tbl.raw_set(1, frame_lud(id))?;
+                tbl.raw_set(1, frame_ref(lua, id)?)?;
             }
             Ok(tbl)
         })?,
@@ -542,143 +553,10 @@ fn register_ui_object_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
 
     // Patch C_UnitAuras with real buff data from state (table created in c_misc_api.rs).
     if let Ok(c_unit_auras) = globals.get::<mlua::Table>("C_UnitAuras") {
-        patch_c_unit_auras(lua, &c_unit_auras, state)?;
+        super::c_unit_auras_api::patch_c_unit_auras(lua, &c_unit_auras, state)?;
     }
 
     Ok(())
-}
-
-/// Patch C_UnitAuras with state-backed implementations.
-fn patch_c_unit_auras(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    patch_get_aura_slots(lua, t, state.clone())?;
-    patch_get_aura_data_by_slot(lua, t, state.clone())?;
-    patch_get_aura_data_by_index(lua, t, state.clone())?;
-    patch_get_buff_data_by_index(lua, t, state.clone())?;
-    patch_get_player_aura_by_spell_id(lua, t, state.clone())?;
-    patch_get_aura_data_by_spell_name(lua, t, state)?;
-    Ok(())
-}
-
-/// GetAuraSlots(unit, filter, maxSlots, token) -> (token, slot1, slot2, ...).
-fn patch_get_aura_slots(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetAuraSlots", lua.create_function(
-        move |_, (unit, filter, _max, token): (Option<String>, Option<String>, Option<i32>, Option<i32>)| {
-            if token.is_some() || unit.as_deref() != Some("player") {
-                return Ok(MultiValue::from_vec(vec![Value::Nil]));
-            }
-            let is_harmful = filter.as_ref().map_or(false, |f| f.contains("HARMFUL"));
-            if is_harmful {
-                return Ok(MultiValue::from_vec(vec![Value::Nil]));
-            }
-            let s = state.borrow();
-            let mut vals = vec![Value::Nil]; // nil continuation = all in one batch
-            for aura in &s.player_buffs {
-                vals.push(Value::Integer(aura.aura_instance_id as i64));
-            }
-            Ok(MultiValue::from_vec(vals))
-        },
-    )?)
-}
-
-/// GetAuraDataBySlot(unit, slot) -> AuraData table or nil.
-fn patch_get_aura_data_by_slot(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetAuraDataBySlot", lua.create_function(
-        move |lua, (unit, slot): (String, i32)| {
-            if unit != "player" { return Ok(Value::Nil); }
-            let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.aura_instance_id == slot) {
-                Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
-                None => Ok(Value::Nil),
-            }
-        },
-    )?)
-}
-
-/// GetAuraDataByIndex(unit, index, filter) -> AuraData table or nil.
-fn patch_get_aura_data_by_index(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetAuraDataByIndex", lua.create_function(
-        move |lua, (unit, index, filter): (String, i32, Option<String>)| {
-            if unit != "player" || index < 1 { return Ok(Value::Nil); }
-            let dominated = filter.as_ref().map_or(false, |f| {
-                f.contains("HARMFUL") || f.contains("MAW")
-            });
-            if dominated { return Ok(Value::Nil); }
-            let s = state.borrow();
-            match s.player_buffs.get((index - 1) as usize) {
-                Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
-                None => Ok(Value::Nil),
-            }
-        },
-    )?)
-}
-
-/// GetBuffDataByIndex(unit, index, filter) -> AuraData table or nil.
-fn patch_get_buff_data_by_index(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetBuffDataByIndex", lua.create_function(
-        move |lua, (unit, index, _filter): (String, i32, Option<String>)| {
-            if unit != "player" || index < 1 { return Ok(Value::Nil); }
-            let s = state.borrow();
-            match s.player_buffs.get((index - 1) as usize) {
-                Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
-                None => Ok(Value::Nil),
-            }
-        },
-    )?)
-}
-
-/// GetPlayerAuraBySpellID(spellID) -> AuraData table or nil.
-fn patch_get_player_aura_by_spell_id(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetPlayerAuraBySpellID", lua.create_function(
-        move |lua, spell_id: i32| {
-            let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.spell_id == spell_id) {
-                Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
-                None => Ok(Value::Nil),
-            }
-        },
-    )?)
-}
-
-/// GetAuraDataBySpellName(unit, name, filter) -> AuraData table or nil.
-fn patch_get_aura_data_by_spell_name(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    t.set("GetAuraDataBySpellName", lua.create_function(
-        move |lua, (unit, name, _filter): (String, String, Option<String>)| {
-            if unit != "player" { return Ok(Value::Nil); }
-            let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.name == name) {
-                Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
-                None => Ok(Value::Nil),
-            }
-        },
-    )?)
 }
 
 /// Register WoW extensions to Lua stdlib tables (coroutine, math) and global `clock`.

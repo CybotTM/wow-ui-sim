@@ -1,33 +1,32 @@
 //! Texture-related methods: SetTexture, SetAtlas, SetTexCoord, etc.
 
+use super::super::handle::FrameRef;
 use super::methods_helpers::resolve_file_data_id_or_path;
-use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
+use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use crate::widget::{Frame, WidgetType};
-use mlua::{LightUserData, Lua, Value};
+use mlua::Value;
 
 /// Add texture-related methods to the shared methods table.
-pub fn add_texture_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_texture_path_methods(lua, methods)?;
-    add_tiling_methods(lua, methods)?;
-    add_blend_and_desaturation_methods(lua, methods)?;
-    add_atlas_methods(lua, methods)?;
-    add_pixel_grid_methods(lua, methods)?;
-    add_nine_slice_methods(lua, methods)?;
-    add_vertex_color_methods(lua, methods)?;
-    add_tex_coord_methods(lua, methods)?;
-    add_mask_methods(lua, methods)?;
-    add_rotation_methods(lua, methods)?;
-    add_draw_layer_methods(lua, methods)?;
-    add_visual_methods(lua, methods)?;
-    Ok(())
+pub fn add_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_texture_path_methods(methods);
+    add_tiling_methods(methods);
+    add_blend_and_desaturation_methods(methods);
+    add_atlas_methods(methods);
+    add_pixel_grid_methods(methods);
+    add_nine_slice_methods(methods);
+    add_vertex_color_methods(methods);
+    add_tex_coord_methods(methods);
+    add_mask_methods(methods);
+    add_rotation_methods(methods);
+    add_draw_layer_methods(methods);
+    add_visual_methods(methods);
 }
 
 /// SetTexture, GetTexture, SetColorTexture.
-fn add_texture_path_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_set_texture(lua, methods)?;
-    add_get_texture(lua, methods)?;
-    add_set_color_texture(lua, methods)?;
-    Ok(())
+fn add_texture_path_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_texture(methods);
+    add_get_texture(methods);
+    add_set_color_texture(methods);
 }
 
 /// Extract numeric file data ID from a Lua value (for GetTexture round-trip).
@@ -40,9 +39,9 @@ fn extract_file_data_id(value: &Value) -> Option<i64> {
     }
 }
 
-fn add_set_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetTexture", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+fn add_set_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetTexture", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
         let args_vec: Vec<Value> = args.into_iter().collect();
         let file_data_id = args_vec.first().and_then(extract_file_data_id);
         let path = args_vec.first().map(resolve_file_data_id_or_path).unwrap_or(None);
@@ -57,17 +56,15 @@ fn add_set_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             if let Some(v) = vert_tile { frame.vert_tile = v; }
         }
         Ok(())
-    })?)?;
-    Ok(())
+    });
 }
 
-fn add_get_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetTexture", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+fn add_get_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetTexture", |lua, this, ()| {
+        let id = this.0;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         let frame = state.widgets.get(id);
-        // Prefer the original numeric file data ID for round-trip fidelity
         if let Some(fid) = frame.and_then(|f| f.texture_file_data_id) {
             return Ok(Value::Integer(fid));
         }
@@ -77,13 +74,12 @@ fn add_get_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             Some(s) => Ok(Value::String(lua.create_string(&s)?)),
             None => Ok(Value::Nil),
         }
-    })?)?;
-    Ok(())
+    });
 }
 
-fn add_set_color_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetColorTexture", lua.create_function(|lua, (ud, r, g, b, a): (LightUserData, f32, f32, f32, Option<f32>)| {
-        let id = lud_to_id(ud);
+fn add_set_color_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetColorTexture", |lua, this, (r, g, b, a): (f32, f32, f32, Option<f32>)| {
+        let id = this.0;
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
@@ -92,132 +88,95 @@ fn add_set_color_texture(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             frame.texture_file_data_id = None;
         }
         Ok(())
-    })?)?;
-    Ok(())
+    });
 }
 
 /// SetHorizTile, GetHorizTile, SetVertTile, GetVertTile.
-fn add_tiling_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetHorizTile", lua.create_function(|lua, (ud, tile): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+fn add_tiling_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetHorizTile", |lua, this, tile: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.horiz_tile = tile;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetHorizTile", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetHorizTile", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let tile = state
-            .widgets
-            .get(id)
-            .map(|f| f.horiz_tile)
-            .unwrap_or(false);
-        Ok(tile)
-    })?)?;
-
-    methods.set("SetVertTile", lua.create_function(|lua, (ud, tile): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+        Ok(state.widgets.get(this.0).map(|f| f.horiz_tile).unwrap_or(false))
+    });
+    methods.add_method("SetVertTile", |lua, this, tile: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.vert_tile = tile;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetVertTile", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetVertTile", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let tile = state
-            .widgets
-            .get(id)
-            .map(|f| f.vert_tile)
-            .unwrap_or(false);
-        Ok(tile)
-    })?)?;
-
-    Ok(())
+        Ok(state.widgets.get(this.0).map(|f| f.vert_tile).unwrap_or(false))
+    });
 }
 
 /// SetBlendMode, GetBlendMode, SetDesaturated, IsDesaturated.
-fn add_blend_and_desaturation_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_blend_mode_methods(lua, methods)?;
-    add_desaturation_methods(lua, methods)?;
-    Ok(())
+fn add_blend_and_desaturation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_blend_mode_methods(methods);
+    add_desaturation_methods(methods);
 }
 
-/// SetBlendMode, GetBlendMode.
-fn add_blend_mode_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetBlendMode", lua.create_function(|lua, (ud, mode): (LightUserData, Option<String>)| {
-        let id = lud_to_id(ud);
+fn add_blend_mode_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetBlendMode", |lua, this, mode: Option<String>| {
         let blend = match mode.as_deref() {
             Some("ADD") => crate::render::BlendMode::Additive,
             _ => crate::render::BlendMode::Alpha,
         };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(id) {
+        if let Some(f) = state.widgets.get_mut_visual(this.0) {
             f.blend_mode = blend;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetBlendMode", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetBlendMode", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(match state.widgets.get(id).map(|f| f.blend_mode) {
+        Ok(match state.widgets.get(this.0).map(|f| f.blend_mode) {
             Some(crate::render::BlendMode::Additive) => "ADD",
             _ => "BLEND",
         })
-    })?)?;
-
-    Ok(())
+    });
 }
 
-/// SetDesaturated, IsDesaturated, GetDesaturation, SetDesaturation.
-fn add_desaturation_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetDesaturated", lua.create_function(|lua, (ud, desaturated): (LightUserData, bool)| {
-        let id = lud_to_id(ud);
+fn add_desaturation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetDesaturated", |lua, this, desaturated: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(id) {
+        if let Some(f) = state.widgets.get_mut_visual(this.0) {
             f.desaturated = desaturated;
         }
         Ok(())
-    })?)?;
-
-    methods.set("IsDesaturated", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("IsDesaturated", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(id).map(|f| f.desaturated).unwrap_or(false))
-    })?)?;
-
-    methods.set("GetDesaturation", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+        Ok(state.widgets.get(this.0).map(|f| f.desaturated).unwrap_or(false))
+    });
+    methods.add_method("GetDesaturation", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(if state.widgets.get(id).map(|f| f.desaturated).unwrap_or(false) { 1.0_f64 } else { 0.0 })
-    })?)?;
-
-    methods.set("SetDesaturation", lua.create_function(|lua, (ud, desat): (LightUserData, f64)| {
-        let id = lud_to_id(ud);
+        Ok(if state.widgets.get(this.0).map(|f| f.desaturated).unwrap_or(false) { 1.0_f64 } else { 0.0 })
+    });
+    methods.add_method("SetDesaturation", |lua, this, desat: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(id) {
+        if let Some(f) = state.widgets.get_mut_visual(this.0) {
             f.desaturated = desat > 0.0;
         }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// Resolve atlas name from a Lua value (string or numeric element ID).
@@ -233,29 +192,22 @@ fn resolve_atlas_name(value: &Value) -> Option<String> {
 }
 
 /// SetAtlas, GetAtlas.
-fn add_atlas_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    // SetAtlas(atlasName, useAtlasSize, filterMode, resetTexCoords)
-    methods.set("SetAtlas", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+fn add_atlas_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetAtlas", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
         let args_vec: Vec<Value> = args.into_iter().collect();
         let atlas_name = args_vec.first().and_then(resolve_atlas_name);
         let use_atlas_size = args_vec
             .get(1)
             .map(|v| matches!(v, Value::Boolean(true)))
             .unwrap_or(false);
-
         if let Some(name) = atlas_name {
             apply_set_atlas(lua, id, &name, use_atlas_size)?;
         }
         Ok(())
-    })?)?;
-
-    // GetAtlas() - Get current atlas name
-    // NOTE: Mixins can override GetAtlas with a Lua function. Since the methods
-    // table takes priority over __index, we check for Lua overrides
-    // in __frame_fields before using the default.
-    methods.set("GetAtlas", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetAtlas", |lua, this, ()| {
+        let id = this.0;
         if let Some(result) = call_lua_override(lua, id, "GetAtlas")? {
             return Ok(result);
         }
@@ -266,15 +218,12 @@ fn add_atlas_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             Some(name) => Ok(Value::String(lua.create_string(&name)?)),
             None => Ok(Value::Nil),
         }
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// Apply SetAtlas logic: look up atlas info, apply nine-slice or regular atlas.
-fn apply_set_atlas(lua: &Lua, id: u64, name: &str, use_atlas_size: bool) -> mlua::Result<()> {
+fn apply_set_atlas(lua: &mlua::Lua, id: u64, name: &str, use_atlas_size: bool) -> mlua::Result<()> {
     let lookup = crate::atlas::get_atlas_info(name);
-    // When the only match is a -2x fallback, prefer a nine-slice kit
     let prefer_nine_slice = lookup.as_ref().is_some_and(|l| l.is_2x_fallback);
     let ns_info = if lookup.is_none() || prefer_nine_slice {
         crate::atlas::get_nine_slice_atlas_info(name)
@@ -311,15 +260,11 @@ fn apply_set_atlas(lua: &Lua, id: u64, name: &str, use_atlas_size: bool) -> mlua
 }
 
 /// Check __frame_fields for a Lua override of a method and call it if present.
-fn call_lua_override(
-    lua: &Lua,
-    id: u64,
-    method_name: &str,
-) -> mlua::Result<Option<Value>> {
+fn call_lua_override(lua: &mlua::Lua, id: u64, method_name: &str) -> mlua::Result<Option<Value>> {
     if let Some(fields_table) = crate::lua_api::script_helpers::get_frame_fields_table(lua)
         && let Ok(frame_fields) = fields_table.get::<mlua::Table>(id)
             && let Ok(Value::Function(f)) = frame_fields.get::<Value>(method_name) {
-                return Ok(Some(f.call::<Value>(frame_lud(id))?));
+                return Ok(Some(f.call::<Value>(frame_ref(lua, id)?)?));
             }
     Ok(None)
 }
@@ -374,7 +319,6 @@ fn apply_atlas_to_frame(
 }
 
 /// Return horizontal three-slice cap info for known atlas entries.
-/// Returns (left_cap_px, right_cap_px, atlas_entry_width_px).
 fn three_slice_caps_for_atlas(atlas_name: &str, atlas_width: u32) -> Option<(f32, f32, f32)> {
     let w = atlas_width as f32;
     match atlas_name {
@@ -383,23 +327,15 @@ fn three_slice_caps_for_atlas(atlas_name: &str, atlas_width: u32) -> Option<(f32
     }
 }
 
-/// If the frame is a standard button texture child (NormalTexture, PushedTexture, etc.),
-/// propagate the atlas texture path and UV coords to the parent button.
+/// Propagate atlas texture path and UV coords to the parent button if appropriate.
 fn propagate_atlas_to_button(
     widgets: &mut crate::widget::WidgetRegistry,
     parent_info: Option<(u64, Option<String>)>,
     atlas_info: &crate::atlas::AtlasInfo,
 ) {
-    let Some((parent_id, Some(parent_key))) = parent_info else {
-        return;
-    };
-    let Some(parent) = widgets.get_mut_visual(parent_id) else {
-        return;
-    };
-    if !matches!(
-        parent.widget_type,
-        WidgetType::Button | WidgetType::CheckButton
-    ) {
+    let Some((parent_id, Some(parent_key))) = parent_info else { return };
+    let Some(parent) = widgets.get_mut_visual(parent_id) else { return };
+    if !matches!(parent.widget_type, WidgetType::Button | WidgetType::CheckButton) {
         return;
     }
     let texture_path = atlas_info.file.to_string();
@@ -449,86 +385,68 @@ fn set_button_texture_field(
 }
 
 /// SetSnapToPixelGrid, IsSnappingToPixelGrid, SetTexelSnappingBias, GetTexelSnappingBias.
-fn add_pixel_grid_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetSnapToPixelGrid", lua.create_function(|_, (_ud, _snap): (LightUserData, bool)| Ok(()))?)?;
-    methods.set("IsSnappingToPixelGrid", lua.create_function(|_, _ud: LightUserData| Ok(false))?)?;
-    methods.set("SetTexelSnappingBias", lua.create_function(|_, (_ud, _bias): (LightUserData, f32)| Ok(()))?)?;
-    methods.set("GetTexelSnappingBias", lua.create_function(|_, _ud: LightUserData| Ok(0.0_f32))?)?;
-    Ok(())
+fn add_pixel_grid_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSnapToPixelGrid", |_, _this, _snap: bool| Ok(()));
+    methods.add_method("IsSnappingToPixelGrid", |_, _this, ()| Ok(false));
+    methods.add_method("SetTexelSnappingBias", |_, _this, _bias: f32| Ok(()));
+    methods.add_method("GetTexelSnappingBias", |_, _this, ()| Ok(0.0_f32));
 }
 
-/// SetTextureSliceMargins, GetTextureSliceMargins, SetTextureSliceMode,
-/// GetTextureSliceMode, ClearTextureSlice.
-fn add_nine_slice_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetTextureSliceMargins", lua.create_function(
-        |_, (_ud, _left, _right, _top, _bottom): (LightUserData, f32, f32, f32, f32)| Ok(()),
-    )?)?;
-    methods.set("GetTextureSliceMargins", lua.create_function(
-        |_, _ud: LightUserData| Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32)),
-    )?)?;
-    methods.set("SetTextureSliceMode", lua.create_function(|_, (_ud, _mode): (LightUserData, i32)| Ok(()))?)?;
-    methods.set("GetTextureSliceMode", lua.create_function(|_, _ud: LightUserData| Ok(0i32))?)?;
-    methods.set("ClearTextureSlice", lua.create_function(|_, _ud: LightUserData| Ok(()))?)?;
-    Ok(())
+/// SetTextureSliceMargins etc.
+fn add_nine_slice_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetTextureSliceMargins", |_, _this, (_l, _r, _t, _b): (f32, f32, f32, f32)| Ok(()));
+    methods.add_method("GetTextureSliceMargins", |_, _this, ()| {
+        Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32))
+    });
+    methods.add_method("SetTextureSliceMode", |_, _this, _mode: i32| Ok(()));
+    methods.add_method("GetTextureSliceMode", |_, _this, ()| Ok(0i32));
+    methods.add_method("ClearTextureSlice", |_, _this, ()| Ok(()));
 }
 
 /// SetVertexColor, GetVertexColor, SetCenterColor.
-fn add_vertex_color_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetVertexColor", lua.create_function(
-        |lua, (ud, r, g, b, a): (LightUserData, f32, f32, f32, Option<f32>)| {
-            let id = lud_to_id(ud);
-            let new_color = crate::widget::Color::new(r, g, b, a.unwrap_or(1.0));
-            let state_rc = get_sim_state(lua);
-            let already_set = state_rc.borrow().widgets.get(id)
-                .and_then(|f| f.vertex_color.as_ref())
-                .map(|c| c.r == new_color.r && c.g == new_color.g && c.b == new_color.b && c.a == new_color.a)
-                .unwrap_or(false);
-            if !already_set {
-                let mut state = state_rc.borrow_mut();
-                if let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.vertex_color = Some(new_color);
-                    frame.alpha = new_color.a;
-                }
+fn add_vertex_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetVertexColor", |lua, this, (r, g, b, a): (f32, f32, f32, Option<f32>)| {
+        let id = this.0;
+        let new_color = crate::widget::Color::new(r, g, b, a.unwrap_or(1.0));
+        let state_rc = get_sim_state(lua);
+        let already_set = state_rc.borrow().widgets.get(id)
+            .and_then(|f| f.vertex_color.as_ref())
+            .map(|c| c.r == new_color.r && c.g == new_color.g && c.b == new_color.b && c.a == new_color.a)
+            .unwrap_or(false);
+        if !already_set {
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(id) {
+                frame.vertex_color = Some(new_color);
+                frame.alpha = new_color.a;
             }
-            Ok(())
-        },
-    )?)?;
-
-    methods.set("GetVertexColor", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+        }
+        Ok(())
+    });
+    methods.add_method("GetVertexColor", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id)
+        if let Some(frame) = state.widgets.get(this.0)
             && let Some(color) = &frame.vertex_color {
                 return Ok((color.r, color.g, color.b, color.a));
             }
-        Ok((1.0f32, 1.0f32, 1.0f32, 1.0f32)) // Default white
-    })?)?;
-
-    // SetCenterColor(r, g, b, a) - for NineSlice frames (sets center fill color)
-    methods.set("SetCenterColor", lua.create_function(|_, (_ud, _args): (LightUserData, mlua::MultiValue)| Ok(()))?)?;
-
-    Ok(())
+        Ok((1.0f32, 1.0f32, 1.0f32, 1.0f32))
+    });
+    methods.add_method("SetCenterColor", |_, _this, _args: mlua::MultiValue| Ok(()));
 }
 
-/// GetTexCoord, SetTexCoord - with atlas-relative coordinate remapping.
-fn add_tex_coord_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    // GetTexCoord() - returns UL.x, UL.y, LL.x, LL.y, UR.x, UR.y, LR.x, LR.y (8 values)
-    methods.set("GetTexCoord", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+/// GetTexCoord, SetTexCoord.
+fn add_tex_coord_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetTexCoord", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(id)
+        if let Some(frame) = state.widgets.get(this.0)
             && let Some((left, right, top, bottom)) = frame.tex_coords {
-                // Return 8 values: UL, LL, UR, LR corners
                 return Ok((left, top, left, bottom, right, top, right, bottom));
             }
-        // Default: full texture
         Ok((0.0_f32, 0.0_f32, 0.0_f32, 1.0_f32, 1.0_f32, 0.0_f32, 1.0_f32, 1.0_f32))
-    })?)?;
-
-    methods.set("SetTexCoord", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("SetTexCoord", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
         let args_vec: Vec<Value> = args.into_iter().collect();
         let (raw_quad, left, right, top, bottom) = parse_tex_coord_args(&args_vec);
         let (Some(left), Some(right), Some(top), Some(bottom)) = (left, right, top, bottom) else {
@@ -542,13 +460,10 @@ fn add_tex_coord_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             frame.tex_coords_quad = raw_quad;
         }
         Ok(())
-    })?)?;
-
-    Ok(())
+    });
 }
 
 /// Parse SetTexCoord arguments into raw quad and (left, right, top, bottom).
-/// Returns (raw_quad, left, right, top, bottom) where None values mean insufficient args.
 fn parse_tex_coord_args(args_vec: &[Value]) -> (Option<[f32; 8]>, Option<f32>, Option<f32>, Option<f32>, Option<f32>) {
     if args_vec.len() >= 8 {
         parse_tex_coord_8_args(args_vec)
@@ -576,7 +491,6 @@ fn parse_tex_coord_8_args(args_vec: &[Value]) -> (Option<[f32; 8]>, Option<f32>,
     let lr_x = value_to_f32(&args_vec[6], 1.0);
     let lr_y = value_to_f32(&args_vec[7], 1.0);
     let raw_quad = Some([ul_x, ul_y, ll_x, ll_y, ur_x, ur_y, lr_x, lr_y]);
-    // Compute axis-aligned bounding box from all 4 corners.
     let left = ul_x.min(ll_x).min(ur_x).min(lr_x);
     let right = ul_x.max(ll_x).max(ur_x).max(lr_x);
     let top = ul_y.min(ll_y).min(ur_y).min(lr_y);
@@ -584,7 +498,6 @@ fn parse_tex_coord_8_args(args_vec: &[Value]) -> (Option<[f32; 8]>, Option<f32>,
     (raw_quad, Some(left), Some(right), Some(top), Some(bottom))
 }
 
-/// Convert a Lua Value to f32, with a default if it's not a number.
 fn value_to_f32(value: &Value, default: f32) -> f32 {
     match value {
         Value::Number(n) => *n as f32,
@@ -593,113 +506,84 @@ fn value_to_f32(value: &Value, default: f32) -> f32 {
     }
 }
 
-/// Remap texture coordinates relative to atlas sub-region if active,
-/// otherwise return them as-is.
 fn remap_tex_coords(
     atlas_tex_coords: Option<(f32, f32, f32, f32)>,
-    left: f32,
-    right: f32,
-    top: f32,
-    bottom: f32,
+    left: f32, right: f32, top: f32, bottom: f32,
 ) -> (f32, f32, f32, f32) {
     if let Some((al, ar, at, ab)) = atlas_tex_coords {
         let aw = ar - al;
         let ah = ab - at;
-        (
-            al + left * aw,
-            al + right * aw,
-            at + top * ah,
-            at + bottom * ah,
-        )
+        (al + left * aw, al + right * aw, at + top * ah, at + bottom * ah)
     } else {
         (left, right, top, bottom)
     }
 }
 
 /// AddMaskTexture, RemoveMaskTexture, GetNumMaskTextures, GetMaskTexture.
-fn add_mask_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("AddMaskTexture", lua.create_function(|lua, (ud, mask): (LightUserData, Value)| {
-        let id = lud_to_id(ud);
+fn add_mask_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("AddMaskTexture", |lua, this, mask: Value| {
         let mask_id = extract_frame_id(&mask);
         if let Some(mask_id) = mask_id {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
                 if !frame.mask_textures.contains(&mask_id) {
                     frame.mask_textures.push(mask_id);
                 }
             }
         }
         Ok(())
-    })?)?;
-
-    methods.set("RemoveMaskTexture", lua.create_function(|lua, (ud, mask): (LightUserData, Value)| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("RemoveMaskTexture", |lua, this, mask: Value| {
         let mask_id = extract_frame_id(&mask);
         if let Some(mask_id) = mask_id {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
                 frame.mask_textures.retain(|&mid| mid != mask_id);
             }
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetNumMaskTextures", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetNumMaskTextures", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(id).map_or(0, |f| f.mask_textures.len()))
-    })?)?;
-
-    methods.set("GetMaskTexture", lua.create_function(|_, (_ud, _index): (LightUserData, i32)| Ok(Value::Nil))?)?;
-
-    Ok(())
+        Ok(state.widgets.get(this.0).map_or(0, |f| f.mask_textures.len()))
+    });
+    methods.add_method("GetMaskTexture", |_, _this, _index: i32| Ok(Value::Nil));
 }
 
-/// SetRotation, GetRotation - rotate texture UVs around center.
-fn add_rotation_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetRotation", lua.create_function(|lua, (ud, radians): (LightUserData, f64)| {
-        let id = lud_to_id(ud);
+/// SetRotation, GetRotation.
+fn add_rotation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetRotation", |lua, this, radians: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.rotation = radians as f32;
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetRotation", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetRotation", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(id)
-            .map(|f| f.rotation as f64)
-            .unwrap_or(0.0))
-    })?)?;
-
-    Ok(())
+        Ok(state.widgets.get(this.0).map(|f| f.rotation as f64).unwrap_or(0.0))
+    });
 }
 
 /// SetGradient, SetDrawLayer, GetDrawLayer.
-fn add_draw_layer_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetGradient", lua.create_function(|lua, (ud, _args): (LightUserData, mlua::MultiValue)| {
-        let id = lud_to_id(ud);
+fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetGradient", |lua, this, _args: mlua::MultiValue| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.vertex_color = None;
             frame.alpha = 1.0;
         }
         Ok(())
-    })?)?;
-
-    methods.set("SetDrawLayer", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
+    });
+    methods.add_method("SetDrawLayer", |lua, this, args: mlua::MultiValue| {
         use crate::widget::DrawLayer;
-        let id = lud_to_id(ud);
+        let id = this.0;
         let args_vec: Vec<Value> = args.into_iter().collect();
         if let Some(Value::String(s)) = args_vec.first() {
             let layer_str = s.to_string_lossy();
@@ -708,7 +592,6 @@ fn add_draw_layer_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
                 let mut state = state_rc.borrow_mut();
                 if let Some(frame) = state.widgets.get_mut_visual(id) {
                     frame.draw_layer = layer;
-                    // Second arg is sublevel (default 0, range -8..7)
                     frame.draw_sub_layer = match args_vec.get(1) {
                         Some(Value::Integer(n)) => *n as i32,
                         Some(Value::Number(n)) => *n as i32,
@@ -718,24 +601,19 @@ fn add_draw_layer_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> 
             }
         }
         Ok(())
-    })?)?;
-
-    methods.set("GetDrawLayer", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    });
+    methods.add_method("GetDrawLayer", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(f) = state.widgets.get(id) {
+        if let Some(f) = state.widgets.get(this.0) {
             Ok((f.draw_layer.as_str().to_string(), f.draw_sub_layer))
         } else {
             Ok(("ARTWORK".to_string(), 0i32))
         }
-    })?)?;
-
-    Ok(())
+    });
 }
 
-/// SetVisuals - used by StatusBar spark textures in UnitFrame.
-fn add_visual_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetVisuals", lua.create_function(|_, (_ud, _info): (LightUserData, Value)| Ok(()))?)?;
-    Ok(())
+/// SetVisuals - used by StatusBar spark textures.
+fn add_visual_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetVisuals", |_, _this, _info: Value| Ok(()));
 }

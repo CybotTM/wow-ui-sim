@@ -8,10 +8,11 @@
 //! effective_scale). GetRect/edge methods divide by effective_scale to return WoW
 //! "UI coordinates"; GetScaledRect returns screen-space values directly.
 
-use crate::lua_api::frame::handle::{get_sim_state, lud_to_id};
+use super::super::handle::FrameRef;
+use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::SimState;
 use crate::LayoutRect;
-use mlua::{LightUserData, Lua, Value};
+use mlua::Value;
 
 use super::methods_core::screen_dims;
 
@@ -29,7 +30,7 @@ fn has_anchors(state: &SimState, id: u64) -> bool {
 
 /// Resolve dirty flag, then extract layout_rect + effective_scale + screen_height.
 /// Returns None if the frame has no anchors or no layout_rect.
-fn resolve_and_extract(lua: &Lua, id: u64) -> Option<ResolvedRect> {
+fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state_rc = get_sim_state(lua);
     if !has_anchors(&state_rc.borrow(), id) { return None; }
     state_rc.borrow_mut().resolve_rect_if_dirty(id);
@@ -68,94 +69,93 @@ fn rect_to_multivalue(left: f32, bottom: f32, width: f32, height: f32) -> mlua::
     ])
 }
 
-pub fn add_rect_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    add_get_rect(lua, methods)?;
-    add_get_scaled_rect(lua, methods)?;
-    add_get_bounds(lua, methods)?;
-    add_get_left(lua, methods)?;
-    add_get_right(lua, methods)?;
-    add_get_top(lua, methods)?;
-    add_get_bottom(lua, methods)?;
-    add_get_center(lua, methods)?;
-    Ok(())
+pub fn add_rect_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_get_rect(methods);
+    add_get_scaled_rect(methods);
+    add_get_bounds(methods);
+    add_get_left(methods);
+    add_get_right(methods);
+    add_get_top(methods);
+    add_get_bottom(methods);
+    add_get_center(methods);
 }
 
-fn add_get_rect(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetRect", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_rect<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetRect", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         let (l, b, w, h) = to_wow_rect(&r);
         Ok(rect_to_multivalue(l, b, w, h))
-    })?)
+    });
 }
 
-fn add_get_scaled_rect(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetScaledRect", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_scaled_rect<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetScaledRect", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         let (l, b, w, h) = to_wow_scaled_rect(&r);
         Ok(rect_to_multivalue(l, b, w, h))
-    })?)
+    });
 }
 
-fn add_get_bounds(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetBounds", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_bounds<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetBounds", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         let (l, b, w, h) = to_wow_rect(&r);
         Ok(rect_to_multivalue(l, b, w, h))
-    })?)
+    });
 }
 
-fn add_get_left(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetLeft", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_left<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetLeft", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         Ok(single_value(r.rect.x / r.eff_scale))
-    })?)
+    });
 }
 
-fn add_get_right(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetRight", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_right<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetRight", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         Ok(single_value((r.rect.x + r.rect.width) / r.eff_scale))
-    })?)
+    });
 }
 
-fn add_get_top(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetTop", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_top<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetTop", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         Ok(single_value((r.screen_height - r.rect.y) / r.eff_scale))
-    })?)
+    });
 }
 
-fn add_get_bottom(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetBottom", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_bottom<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetBottom", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
         Ok(single_value((r.screen_height - r.rect.y - r.rect.height) / r.eff_scale))
-    })?)
+    });
 }
 
-fn add_get_center(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("GetCenter", lua.create_function(|lua, ud: LightUserData| {
-        let r = match resolve_and_extract(lua, lud_to_id(ud)) {
+fn add_get_center<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetCenter", |lua, this, ()| {
+        let r = match resolve_and_extract(lua, this.0) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
@@ -166,5 +166,5 @@ fn add_get_center(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
             Value::Number(cx as f64),
             Value::Number(cy as f64),
         ]))
-    })?)
+    });
 }

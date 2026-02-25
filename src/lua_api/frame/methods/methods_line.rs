@@ -1,48 +1,45 @@
 //! Line-specific methods: SetStartPoint, SetEndPoint, SetThickness, and getters.
 
-use crate::lua_api::frame::handle::{extract_frame_id, frame_lud, get_sim_state, lud_to_id};
+use super::super::handle::FrameRef;
+use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use crate::widget::{AnchorPoint, LineAnchor};
-use mlua::{LightUserData, Lua, Value};
+use mlua::Value;
 
-pub fn add_line_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
-    methods.set("SetStartPoint", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        set_line_point(lua, lud_to_id(ud), args, true)
-    })?)?;
+pub fn add_line_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetStartPoint", |lua, this, args: mlua::MultiValue| {
+        set_line_point(lua, this.0, args, true)
+    });
 
-    methods.set("SetEndPoint", lua.create_function(|lua, (ud, args): (LightUserData, mlua::MultiValue)| {
-        set_line_point(lua, lud_to_id(ud), args, false)
-    })?)?;
+    methods.add_method("SetEndPoint", |lua, this, args: mlua::MultiValue| {
+        set_line_point(lua, this.0, args, false)
+    });
 
-    methods.set("SetThickness", lua.create_function(|lua, (ud, thickness): (LightUserData, f32)| {
-        let id = lud_to_id(ud);
+    methods.add_method("SetThickness", |lua, this, thickness: f32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(id) {
+        if let Some(f) = state.widgets.get_mut_visual(this.0) {
             f.line_thickness = thickness;
         }
         Ok(())
-    })?)?;
+    });
 
-    methods.set("GetStartPoint", lua.create_function(|lua, ud: LightUserData| {
-        get_line_point(lua, lud_to_id(ud), true)
-    })?)?;
+    methods.add_method("GetStartPoint", |lua, this, ()| {
+        get_line_point(lua, this.0, true)
+    });
 
-    methods.set("GetEndPoint", lua.create_function(|lua, ud: LightUserData| {
-        get_line_point(lua, lud_to_id(ud), false)
-    })?)?;
+    methods.add_method("GetEndPoint", |lua, this, ()| {
+        get_line_point(lua, this.0, false)
+    });
 
-    methods.set("GetThickness", lua.create_function(|lua, ud: LightUserData| {
-        let id = lud_to_id(ud);
+    methods.add_method("GetThickness", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let thickness = state.widgets.get(id).map_or(1.0, |f| f.line_thickness);
+        let thickness = state.widgets.get(this.0).map_or(1.0, |f| f.line_thickness);
         Ok(thickness)
-    })?)?;
-
-    Ok(())
+    });
 }
 
-fn set_line_point(lua: &Lua, id: u64, args: mlua::MultiValue, is_start: bool) -> mlua::Result<()> {
+fn set_line_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue, is_start: bool) -> mlua::Result<()> {
     let args: Vec<Value> = args.into_iter().collect();
 
     let point_str = match args.first() {
@@ -64,12 +61,7 @@ fn set_line_point(lua: &Lua, id: u64, args: mlua::MultiValue, is_start: bool) ->
         _ => 0.0,
     };
 
-    let anchor = LineAnchor {
-        point,
-        target_id,
-        x_offset,
-        y_offset,
-    };
+    let anchor = LineAnchor { point, target_id, x_offset, y_offset };
 
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
@@ -83,7 +75,7 @@ fn set_line_point(lua: &Lua, id: u64, args: mlua::MultiValue, is_start: bool) ->
     Ok(())
 }
 
-fn get_line_point(lua: &Lua, id: u64, is_start: bool) -> mlua::Result<mlua::MultiValue> {
+fn get_line_point(lua: &mlua::Lua, id: u64, is_start: bool) -> mlua::Result<mlua::MultiValue> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     let anchor = state.widgets.get(id).and_then(|f| {
@@ -96,7 +88,7 @@ fn get_line_point(lua: &Lua, id: u64, is_start: bool) -> mlua::Result<mlua::Mult
 
     let point_str = lua.create_string(anchor.point.as_str())?;
     let target: Value = if let Some(tid) = anchor.target_id {
-        frame_lud(tid)
+        frame_ref(lua, tid)?
     } else {
         Value::Nil
     };

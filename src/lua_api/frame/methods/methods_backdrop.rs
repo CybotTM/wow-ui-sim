@@ -10,9 +10,8 @@
 //! `__index` lookups), preventing the mixin from creating the nine-slice
 //! child textures.
 
-use mlua::Lua;
+use super::super::handle::FrameRef;
 
 /// No-op: all backdrop methods are handled by BackdropTemplateMixin in Lua.
-pub fn add_backdrop_methods(_lua: &Lua, _methods: &mlua::Table) -> mlua::Result<()> {
-    Ok(())
+pub fn add_backdrop_methods<M: mlua::UserDataMethods<FrameRef>>(_methods: &mut M) {
 }

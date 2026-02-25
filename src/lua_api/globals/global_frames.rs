@@ -3,7 +3,7 @@
 //! This module registers all global frame objects that are expected to exist
 //! in the WoW UI environment, such as UIParent, WorldFrame, PlayerFrame, etc.
 
-use crate::lua_api::frame::frame_lud;
+use crate::lua_api::frame::sync_child_to_lua;
 use crate::lua_api::SimState;
 use crate::widget::{Frame, WidgetType};
 use mlua::{Lua, Result, Value};
@@ -61,17 +61,22 @@ fn register_frame_global_impl(
         st.widgets.register(frame)
     };
     drop(st);
-    let lud = frame_lud(id);
+    let val = crate::lua_api::frame::frame_ref(lua, id)?;
     let globals = lua.globals();
-    globals.raw_set(name, lud.clone())?;
+    globals.raw_set(name, val.clone())?;
+    // __frame_{id} cache is already set by frame_ref(), but set explicitly for clarity
     let frame_key = format!("__frame_{}", id);
-    globals.raw_set(frame_key.as_str(), lud)?;
+    globals.raw_set(frame_key.as_str(), val)?;
     Ok(id)
 }
 
-/// Get or create the `__frame_fields` table for a given frame ID.
+/// Get the per-frame fields table from the UserData's user_value.
 fn get_or_create_frame_fields(lua: &Lua, frame_id: u64) -> Result<mlua::Table> {
-    Ok(crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id))
+    let val = crate::lua_api::frame::frame_ref(lua, frame_id)?;
+    match val {
+        Value::UserData(ud) => Ok(ud.user_value::<mlua::Table>()?),
+        _ => Ok(lua.create_table()?),
+    }
 }
 
 /// Register all global frame objects.
@@ -241,7 +246,7 @@ fn setup_alert_frame(lua: &Lua) -> Result<()> {
 }
 
 /// Set up EditModeManagerFrame with AccountSettings child frame.
-fn setup_edit_mode_manager(_lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+fn setup_edit_mode_manager(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     // AccountSettings is a child frame with parentKey="AccountSettings"
     let emm_id = state.borrow().widgets.get_id_by_name("EditModeManagerFrame");
     if let Some(parent_id) = emm_id {
@@ -256,6 +261,7 @@ fn setup_edit_mode_manager(_lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
                 parent.children_keys.insert("AccountSettings".to_string(), child_id);
             }
         }
+        sync_child_to_lua(lua, parent_id, "AccountSettings", child_id)?;
     }
     Ok(())
 }
@@ -415,6 +421,55 @@ fn register_table_globals(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+/// Frames hidden by WoW's C++ engine at startup based on game state.
+const RUNTIME_HIDDEN_FRAMES: &[&str] = &[
+    // Unit frames: no target/focus/group/pet by default
+    "TargetFrame",
+    "FocusFrame",
+    "TargetFrameSpellBar",
+    "FocusFrameSpellBar",
+    "PetFrame",
+    // Boss frames: no encounter active
+    "BossTargetFrameContainer",
+    // Class-specific power bars
+    "AlternatePowerBar",
+    "MonkStaggerBar",
+    "InsanityBarFrame",
+    "EvokerEbonMightBar",
+    // Encounter bar: no encounter active
+    "EncounterBar",
+    // Casting bar: not casting
+    "PlayerCastingBarFrame",
+    // Bags/loot not open
+    "ContainerFrameContainer",
+    "ContainerFrameCombinedBags",
+    "LootFrame",
+    // Misc UI not shown at login
+    "RoleChangedFrame",
+    "QuestInfoRequiredMoneyFrame",
+    "SpellActivationOverlayFrame",
+    "ScenarioObjectiveTracker",
+    "RaidWarningFrame",
+    "FriendsFrame",
+    // Combat log quick buttons: combat log tab not active
+    "CombatLogQuickButtonFrame_Custom",
+    // Positioned by game systems, not during login
+    "QuickJoinToastButton",
+    "TextToSpeechButtonFrame",
+    // Nameplate bars: only shown on active nameplates
+    "ClassNameplateEbonMightBarFrame",
+    "ClassNameplateBrewmasterBarFrame",
+];
+
+fn hide_named_frames(lua: &Lua, names: &[&str]) {
+    for name in names {
+        let code = format!("if {} then {}:Hide() end", name, name);
+        if let Err(e) = lua.load(&code).exec() {
+            eprintln!("[hide_runtime] Failed to hide {}: {}", name, e);
+        }
+    }
+}
+
 /// Hide frames that WoW's C++ engine hides by default at startup.
 ///
 /// Must be called AFTER addon XML loading, because `CreateFrame` in the XML
@@ -422,52 +477,7 @@ fn register_table_globals(lua: &Lua) -> Result<()> {
 /// These frames have no `hidden="true"` in XML — WoW hides them at runtime
 /// based on game state (no target, no group, no encounter, etc.).
 pub fn hide_runtime_hidden_frames(lua: &Lua) -> Result<()> {
-    let frames_to_hide: &[&str] = &[
-        // Unit frames: no target/focus/group/pet by default
-        "TargetFrame",
-        "FocusFrame",
-        "TargetFrameSpellBar",
-        "FocusFrameSpellBar",
-        "PetFrame",
-        // Boss frames: no encounter active
-        "BossTargetFrameContainer",
-        // Class-specific power bars
-        "AlternatePowerBar",
-        "MonkStaggerBar",
-        "InsanityBarFrame",
-        "EvokerEbonMightBar",
-        // Encounter bar: no encounter active
-        "EncounterBar",
-        // Casting bar: not casting
-        "PlayerCastingBarFrame",
-        // Bags/loot not open
-        "ContainerFrameContainer",
-        "ContainerFrameCombinedBags",
-        "LootFrame",
-        // Misc UI not shown at login
-        "RoleChangedFrame",
-        "QuestInfoRequiredMoneyFrame",
-        "SpellActivationOverlayFrame",
-        "ScenarioObjectiveTracker",
-        "RaidWarningFrame",
-        "FriendsFrame",
-        // Combat log quick buttons: combat log tab not active
-        "CombatLogQuickButtonFrame_Custom",
-        // Positioned by game systems, not during login
-        "QuickJoinToastButton",
-        "TextToSpeechButtonFrame",
-        // Nameplate bars: only shown on active nameplates
-        "ClassNameplateEbonMightBarFrame",
-        "ClassNameplateBrewmasterBarFrame",
-    ];
-
-    for name in frames_to_hide {
-        let code = format!("if {} then {}:Hide() end", name, name);
-        if let Err(e) = lua.load(&code).exec() {
-            eprintln!("[hide_runtime] Failed to hide {}: {}", name, e);
-        }
-    }
-
+    hide_named_frames(lua, RUNTIME_HIDDEN_FRAMES);
     hide_child_overlays(lua)?;
     hide_orphaned_anonymous_frames(lua)?;
     Ok(())

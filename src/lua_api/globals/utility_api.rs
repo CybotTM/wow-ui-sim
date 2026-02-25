@@ -544,7 +544,7 @@ fn register_mixin_system(lua: &Lua) -> Result<()> {
     super::utility_stubs::register_scrollbox_and_utility_stubs(lua)
 }
 
-/// Register a Lua-level setter for LightUserData __newindex dispatch.
+/// Register a Lua-level setter for UserData __newindex dispatch.
 fn register_lud_setter(lua: &Lua) -> Result<()> {
     let f = lua.load("return function(obj, k, v) obj[k] = v end").eval::<Function>()?;
     lua.set_named_registry_value("__mixin_lud_setter", f)
@@ -559,10 +559,10 @@ fn register_mixin_overrides_table(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Register __SetMixinOverride(frame_lud, key, value): write a function override into
-/// __mixin_overrides[frame_id][key]. Called by Mixin() for LightUserData targets.
-/// Accepts any Value for the object and silently skips non-LightUserData values
-/// (e.g. animation group full-userdata objects that don't use the frame __index).
+/// Register __SetMixinOverride(frame_ud, key, value): write a function override into
+/// __mixin_overrides[frame_id][key]. Called by Mixin() for UserData targets.
+/// Accepts any Value for the object and silently skips non-FrameRef values
+/// (e.g. animation group userdata objects that don't use the frame __index).
 /// Stored in registry; also exposed as a temporary global so Mixin() (compiled
 /// immediately after) can reference it by name. Sandbox cleanup nils the global.
 fn register_set_mixin_override(lua: &Lua) -> Result<()> {
@@ -571,22 +571,17 @@ fn register_set_mixin_override(lua: &Lua) -> Result<()> {
     lua.globals().set("__SetMixinOverride", f)
 }
 
-fn set_mixin_override_impl(lua: &Lua, (obj, key, value): (Value, String, Value)) -> Result<()> {
-    let ud = match &obj {
-        Value::LightUserData(lud) => *lud,
-        _ => return Ok(()), // not a frame LightUserData, skip
-    };
-    let frame_id = crate::lua_api::frame::lud_to_id(ud);
-    let overrides: mlua::Table = lua.named_registry_value("__mixin_overrides")?;
-    let frame_overrides: mlua::Table = match overrides.get::<mlua::Table>(frame_id) {
-        Ok(t) => t,
-        Err(_) => {
-            let t = lua.create_table()?;
-            overrides.set(frame_id, t.clone())?;
-            t
+fn set_mixin_override_impl(_lua: &Lua, (obj, key, value): (Value, String, Value)) -> Result<()> {
+    // Store mixin function directly in the per-frame user_value table.
+    // The UserData __index reads from this table, so mixin functions are found
+    // without needing a separate __mixin_overrides lookup.
+    if let Value::UserData(ud) = &obj {
+        if ud.borrow::<crate::lua_api::frame::FrameRef>().is_ok() {
+            if let Ok(fields) = ud.user_value::<mlua::Table>() {
+                fields.raw_set(key, value)?;
+            }
         }
-    };
-    frame_overrides.set(key, value)?;
+    }
     Ok(())
 }
 

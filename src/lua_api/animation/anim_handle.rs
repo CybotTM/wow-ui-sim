@@ -1,7 +1,7 @@
 //! AnimHandle userdata methods.
 
 use crate::lua_api::SimState;
-use crate::lua_api::frame::frame_lud;
+use crate::lua_api::frame::frame_ref;
 use mlua::{MultiValue, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -425,12 +425,14 @@ impl AnimHandle {
             lua.create_userdata(handle)
         });
 
-        methods.add_method("GetRegionParent", |_, this, ()| {
-            let state = this.state.borrow();
-            if let Some(group) = state.animation_groups.get(&this.group_id) {
-                return Ok(frame_lud(group.owner_frame_id));
+        methods.add_method("GetRegionParent", |lua, this, ()| {
+            let owner_id = this.state.borrow()
+                .animation_groups.get(&this.group_id)
+                .map(|g| g.owner_frame_id);
+            match owner_id {
+                Some(id) => frame_ref(lua, id),
+                None => Ok(Value::Nil),
             }
-            Ok(Value::Nil)
         });
 
         methods.add_method("GetName", |_, this, ()| {
@@ -443,7 +445,7 @@ impl AnimHandle {
 
     /// Register target accessor and key methods.
     fn add_target_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetTarget", |_, this, ()| {
+        methods.add_method("GetTarget", |lua, this, ()| {
             let state = this.state.borrow();
             let Some(group) = state.animation_groups.get(&this.group_id) else {
                 return Ok(Value::Nil);
@@ -457,7 +459,8 @@ impl AnimHandle {
                 None => Some(owner_id),
             };
             let Some(id) = target_id else { return Ok(Value::Nil) };
-            Ok(frame_lud(id))
+            drop(state);
+            frame_ref(lua, id)
         });
 
         methods.add_method("SetTarget", |_, _this, target: Value| {

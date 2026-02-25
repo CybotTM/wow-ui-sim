@@ -58,7 +58,7 @@ fn register_ui_and_chat_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<c
     register_chat_window_stubs(lua)?;
     register_c_macro(lua)?;
     register_c_wowlabs_matchmaking(lua)?;
-    register_fading_frame_stubs(lua)?;
+    super::fading_frame_api::register_fading_frame_stubs(lua)?;
     Ok(())
 }
 
@@ -418,44 +418,6 @@ fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
 }
 
 /// FadingFrame_* global functions used by ZoneText.lua.
-fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
-    let g = lua.globals();
-    // FadingFrame_OnLoad initializes fading state on the frame.
-    // Frames may be UserData or Table depending on context.
-    g.set("FadingFrame_OnLoad", lua.create_function(|lua, frame: Value| {
-        match &frame {
-            Value::LightUserData(lud) => {
-                let id = crate::lua_api::frame::lud_to_id(*lud);
-                let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, id);
-                fields.set("fadeInTime", 0.0f64)?;
-                fields.set("fadeOutTime", 0.0f64)?;
-                fields.set("holdTime", 0.0f64)?;
-            }
-            Value::Table(t) => {
-                t.set("fadeInTime", 0.0f64)?;
-                t.set("fadeOutTime", 0.0f64)?;
-                t.set("holdTime", 0.0f64)?;
-            }
-            _ => {}
-        }
-        Ok(())
-    })?)?;
-    g.set("FadingFrame_SetFadeInTime", lua.create_function(|_, (_frame, _t): (Value, f64)| Ok(()))?)?;
-    g.set("FadingFrame_SetHoldTime", lua.create_function(|_, (_frame, _t): (Value, f64)| Ok(()))?)?;
-    g.set("FadingFrame_SetFadeOutTime", lua.create_function(|_, (_frame, _t): (Value, f64)| Ok(()))?)?;
-    g.set("FadingFrame_Show", lua.create_function(|_, _frame: Value| Ok(()))?)?;
-    g.set("GetErrorCallstackHeight", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("SetChatWindowShown", lua.create_function(|_, (_id, _shown): (Value, Value)| Ok(()))?)?;
-    // Native WoW error display function — called by Blizzard_ScriptErrors error handler.
-    // Without this stub, the error handler itself crashes, causing recursive error spam.
-    // Log the message to stderr so script errors are visible in terminal output.
-    g.set("addframetext", lua.create_function(|lua, msg: String| {
-        eprintln!("[addframetext] {msg}");
-        super::super::script_helpers::collect_lua_error(lua, &msg);
-        Ok(())
-    })?)?;
-    Ok(())
-}
 
 /// Missing global functions referenced during startup events.
 fn register_missing_globals(lua: &Lua) -> Result<()> {
