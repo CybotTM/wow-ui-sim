@@ -2,7 +2,7 @@
 //!
 //! Sets up a shared metatable for all LightUserData values (frames):
 //! - `__index` = Rust fn that does rawget on methods_table, then falls back
-//!   to children_keys / custom fields / numeric index / Lower/Raise/Clear
+//!   to children_keys / custom fields / methods (children before methods)
 //! - `__newindex` = Rust fn (children_keys sync + __frame_fields storage)
 //! - `__len` = Rust fn (children count)
 //! - No `__eq` needed: same ID = same pointer = Lua `==` works natively.
@@ -125,17 +125,24 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
             _ => return Ok(Value::Nil),
         };
 
-        // Mixin overrides: functions written by Mixin() shadow Rust methods.
-        // In real WoW, frames are tables so Mixin(frame, {GetName=fn}) rawsets directly into
-        // the frame table, which takes precedence over the metatable __index. We replicate that
-        // with a dedicated __mixin_overrides table that is checked before Rust methods.
+        // Mixin overrides: functions written by Mixin() shadow everything.
+        // In real WoW, Mixin(frame, {GetName=fn}) rawsets into the frame table,
+        // which takes precedence over the metatable __index.
         if let Some(value) = lookup_mixin_override(lua, frame_id, &key_str) {
             return Ok(value);
         }
 
-        // Rust methods table — filtered by widget type.
-        // Methods in the WoW discovery data are only returned for matching types.
-        // Methods NOT in any type's discovery list pass through (Mixin/sim-specific).
+        // Children_keys lookup (own-table keys in real WoW — resolve before methods)
+        if let Some(child) = lookup_child_by_key(lua, frame_id, &key_str)? {
+            return Ok(child);
+        }
+
+        // Custom fields (__frame_fields: script handlers, properties, etc.)
+        if let Some(value) = lookup_custom_field(lua, frame_id, &key_str) {
+            return Ok(value);
+        }
+
+        // Rust methods table — filtered by widget type (metatable __index in real WoW).
         let method: Value = methods_table.raw_get(key_str.as_str())?;
         if method != Value::Nil {
             let widget_type = {
@@ -148,21 +155,6 @@ fn create_index(lua: &Lua, methods_table: mlua::Table) -> mlua::Result<mlua::Fun
             if super::method_registry::is_method_allowed(widget_type, key_str.as_str()) {
                 return Ok(method);
             }
-        }
-
-        // Children_keys lookup
-        if let Some(child) = lookup_child_by_key(lua, frame_id, &key_str)? {
-            return Ok(child);
-        }
-
-        // Custom fields table (__frame_fields: script handlers, properties, etc.)
-        if let Some(value) = lookup_custom_field(lua, frame_id, &key_str) {
-            return Ok(value);
-        }
-
-        // Fallback methods (Clear for Cooldown, Lower, Raise)
-        if let Some(func) = lookup_fallback_method(lua, frame_id, &key_str)? {
-            return Ok(func);
         }
 
         Ok(Value::Nil)
@@ -325,46 +317,4 @@ fn lookup_mixin_override(lua: &Lua, frame_id: u64, key: &str) -> Option<Value> {
     if value != Value::Nil { Some(value) } else { None }
 }
 
-/// Handle special fallback methods (Clear for Cooldown, Lower, Raise).
-fn lookup_fallback_method(lua: &Lua, frame_id: u64, key: &str) -> mlua::Result<Option<Value>> {
-    match key {
-        "Clear" => lookup_clear_method(lua, frame_id),
-        "Lower" => Ok(Some(Value::Function(make_lower_fn(lua)?))),
-        "Raise" => Ok(Some(Value::Function(make_raise_fn(lua)?))),
-        _ => Ok(None),
-    }
-}
 
-/// Return the no-op `Clear` function if the frame is a Cooldown widget.
-fn lookup_clear_method(lua: &Lua, frame_id: u64) -> mlua::Result<Option<Value>> {
-    let state_rc = get_sim_state(lua);
-    let is_cooldown = state_rc
-        .borrow()
-        .widgets
-        .get(frame_id)
-        .map(|f| f.widget_type == WidgetType::Cooldown)
-        .unwrap_or(false);
-    if is_cooldown {
-        Ok(Some(Value::Function(
-            lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-        )))
-    } else {
-        Ok(None)
-    }
-}
-
-fn make_lower_fn(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, ud: LightUserData| {
-        let state_rc = get_sim_state(lua);
-        state_rc.borrow_mut().lower_frame(lud_to_id(ud));
-        Ok(())
-    })
-}
-
-fn make_raise_fn(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, ud: LightUserData| {
-        let state_rc = get_sim_state(lua);
-        state_rc.borrow_mut().raise_frame(lud_to_id(ud));
-        Ok(())
-    })
-}

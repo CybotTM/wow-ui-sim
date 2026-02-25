@@ -193,12 +193,12 @@ fn add_cooldown_texture_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Resul
         Ok(())
     })?)?;
 
-    // Note: Clear() for Cooldown frames is handled in __index to avoid conflicts
-    // with addons that use frame.Clear as a field
     Ok(())
 }
 
 fn add_cooldown_state_methods(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    methods.set("Clear", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+
     methods.set("Pause", lua.create_function(|lua, ud: LightUserData| {
         let id = lud_to_id(ud);
         let state_rc = get_sim_state(lua);

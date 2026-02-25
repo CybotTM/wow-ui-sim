@@ -1,6 +1,6 @@
 //! Miscellaneous frame-type-specific method stubs (Minimap, ScrollingMessage, Alerts, etc.).
 
-use crate::lua_api::frame::handle::{frame_lud, lud_to_id};
+use crate::lua_api::frame::handle::{frame_lud, get_sim_state, lud_to_id};
 use mlua::{LightUserData, Lua, MultiValue, Value};
 
 /// Add all miscellaneous frame-type-specific methods.
@@ -106,8 +106,16 @@ fn add_attribute_stubs(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
     Ok(())
 }
 
-/// Frame Level/Hierarchy stubs.
+/// Frame Level/Hierarchy methods.
 fn add_frame_level_stubs(lua: &Lua, methods: &mlua::Table) -> mlua::Result<()> {
+    methods.set("Lower", lua.create_function(|lua, ud: LightUserData| {
+        get_sim_state(lua).borrow_mut().lower_frame(lud_to_id(ud));
+        Ok(())
+    })?)?;
+    methods.set("Raise", lua.create_function(|lua, ud: LightUserData| {
+        get_sim_state(lua).borrow_mut().raise_frame(lud_to_id(ud));
+        Ok(())
+    })?)?;
     methods.set("GetHighestFrameLevel", lua.create_function(|_, _ud: LightUserData| Ok(0i32))?)?;
     methods.set("GetRaisedFrameLevel", lua.create_function(|_, _ud: LightUserData| Ok(0i32))?)?;
     methods.set("IsUsingParentLevel", lua.create_function(|_, _ud: LightUserData| Ok(false))?)?;
