@@ -116,13 +116,12 @@ fn register_place_action(
 
 /// Stub pickup functions for types we don't handle yet.
 fn register_pickup_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let noop = lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?;
     for name in [
         "PickupBagFromSlot", "PickupInventoryItem", "PickupMacro",
         "PickupMerchantItem", "PickupPetAction", "PickupPlayerMoney",
         "PickupCompanion",
     ] {
-        g.set(name, noop.clone())?;
+        g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
     }
     Ok(())
 }

@@ -408,27 +408,28 @@ fn register_string_aliases(lua: &Lua) -> Result<()> {
 
 /// strjoin(delimiter, ...) -> concatenate variadic args with delimiter.
 fn register_strjoin(lua: &Lua) -> Result<()> {
-    let strjoin = lua.create_function(|_, args: MultiValue| {
-        let mut iter = args.into_iter();
-        let sep = match iter.next() {
-            Some(Value::String(s)) => s.to_str()?.to_string(),
-            Some(Value::Nil) | None => String::new(),
-            Some(v) => v.to_string()?,
-        };
-        let parts: Vec<String> = iter
-            .map(|v| match v {
-                Value::String(s) => s.to_str().map(|s| s.to_string()).unwrap_or_default(),
-                Value::Number(n) => format!("{}", n),
-                Value::Integer(n) => format!("{}", n),
-                _ => String::new(),
-            })
-            .collect();
-        Ok(parts.join(&sep))
-    })?;
-    lua.globals().set("strjoin", strjoin.clone())?;
+    lua.globals().set("strjoin", lua.create_function(strjoin_impl_join)?)?;
     lua.globals()
         .get::<mlua::Table>("string")?
-        .set("join", strjoin)
+        .set("join", lua.create_function(strjoin_impl_join)?)
+}
+
+fn strjoin_impl_join(_: &Lua, args: MultiValue) -> Result<String> {
+    let mut iter = args.into_iter();
+    let sep = match iter.next() {
+        Some(Value::String(s)) => s.to_str()?.to_string(),
+        Some(Value::Nil) | None => String::new(),
+        Some(v) => v.to_string()?,
+    };
+    let parts: Vec<String> = iter
+        .map(|v| match v {
+            Value::String(s) => s.to_str().map(|s| s.to_string()).unwrap_or_default(),
+            Value::Number(n) => format!("{}", n),
+            Value::Integer(n) => format!("{}", n),
+            _ => String::new(),
+        })
+        .collect();
+    Ok(parts.join(&sep))
 }
 
 /// strsplittable(delimiter, str) -> table of non-empty parts split by delimiter.

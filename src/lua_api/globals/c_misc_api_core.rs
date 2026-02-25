@@ -39,43 +39,42 @@ fn register_c_date_and_time(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     let t: mlua::Table = g.get::<mlua::Table>("C_DateAndTime")
         .unwrap_or_else(|_| lua.create_table().unwrap());
-
-    t.set("AdjustTimeByDays", lua.create_function(|lua, (date, days): (mlua::Table, i64)| {
-        let epoch_days = calendar_time_to_epoch_days(&date)?;
-        let new_days = epoch_days + days;
-        epoch_days_to_calendar_time_table(lua, new_days, &date)
-    })?)?;
-
-    t.set("AdjustTimeByMinutes", lua.create_function(|lua, (date, minutes): (mlua::Table, i64)| {
-        let epoch_days = calendar_time_to_epoch_days(&date)?;
-        let hour: i64 = date.get::<i64>("hour").unwrap_or(0);
-        let minute: i64 = date.get::<i64>("minute").unwrap_or(0);
-        let total_minutes = epoch_days * 1440 + hour * 60 + minute + minutes;
-        let new_days = total_minutes.div_euclid(1440);
-        let rem = total_minutes.rem_euclid(1440);
-        let new_hour = rem / 60;
-        let new_minute = rem % 60;
-        let result = epoch_days_to_calendar_time_table(lua, new_days, &date)?;
-        if let Value::Table(ref t) = result {
-            t.set("hour", new_hour)?;
-            t.set("minute", new_minute)?;
-        }
-        Ok(result)
-    })?)?;
-
-    t.set("CompareCalendarTime", lua.create_function(|_, (lhs, rhs): (mlua::Table, mlua::Table)| {
-        let lhs_mins = calendar_time_to_total_minutes(&lhs)?;
-        let rhs_mins = calendar_time_to_total_minutes(&rhs)?;
-        // WoW docs: returns -1 if rhs < lhs, 0 if equal, 1 if rhs > lhs
-        Ok(match lhs_mins.cmp(&rhs_mins) {
-            std::cmp::Ordering::Less => 1i64,
-            std::cmp::Ordering::Equal => 0i64,
-            std::cmp::Ordering::Greater => -1i64,
-        })
-    })?)?;
-
+    t.set("AdjustTimeByDays", lua.create_function(adjust_time_by_days)?)?;
+    t.set("AdjustTimeByMinutes", lua.create_function(adjust_time_by_minutes)?)?;
+    t.set("CompareCalendarTime", lua.create_function(compare_calendar_time)?)?;
     g.set("C_DateAndTime", t)?;
     Ok(())
+}
+
+fn adjust_time_by_days(lua: &Lua, (date, days): (mlua::Table, i64)) -> Result<Value> {
+    let epoch_days = calendar_time_to_epoch_days(&date)?;
+    epoch_days_to_calendar_time_table(lua, epoch_days + days, &date)
+}
+
+fn adjust_time_by_minutes(lua: &Lua, (date, minutes): (mlua::Table, i64)) -> Result<Value> {
+    let epoch_days = calendar_time_to_epoch_days(&date)?;
+    let hour: i64 = date.get::<i64>("hour").unwrap_or(0);
+    let minute: i64 = date.get::<i64>("minute").unwrap_or(0);
+    let total_minutes = epoch_days * 1440 + hour * 60 + minute + minutes;
+    let new_days = total_minutes.div_euclid(1440);
+    let rem = total_minutes.rem_euclid(1440);
+    let result = epoch_days_to_calendar_time_table(lua, new_days, &date)?;
+    if let Value::Table(ref t) = result {
+        t.set("hour", rem / 60)?;
+        t.set("minute", rem % 60)?;
+    }
+    Ok(result)
+}
+
+fn compare_calendar_time(_: &Lua, (lhs, rhs): (mlua::Table, mlua::Table)) -> Result<i64> {
+    let lhs_mins = calendar_time_to_total_minutes(&lhs)?;
+    let rhs_mins = calendar_time_to_total_minutes(&rhs)?;
+    // WoW docs: returns -1 if rhs < lhs, 0 if equal, 1 if rhs > lhs
+    Ok(match lhs_mins.cmp(&rhs_mins) {
+        std::cmp::Ordering::Less => 1i64,
+        std::cmp::Ordering::Equal => 0i64,
+        std::cmp::Ordering::Greater => -1i64,
+    })
 }
 
 /// Convert a CalendarTime table to days since the Unix epoch (1970-01-01).
@@ -159,11 +158,12 @@ fn register_c_scenario_info(lua: &Lua) -> Result<()> {
     t.set("GetScenarioStepInfo", lua.create_function(|_, _step: Option<i32>| {
         Ok((Value::Nil, Value::Nil, Value::Integer(0), Value::Integer(0)))
     })?)?;
-    let criteria_stub = lua.create_function(|_, _args: mlua::MultiValue| {
+    t.set("GetCriteriaInfo", lua.create_function(|_, _: mlua::MultiValue| {
         Ok((Value::Nil, Value::Nil, Value::Boolean(false), Value::Integer(0), Value::Integer(0)))
-    })?;
-    t.set("GetCriteriaInfo", criteria_stub.clone())?;
-    t.set("GetCriteriaInfoByStep", criteria_stub)?;
+    })?)?;
+    t.set("GetCriteriaInfoByStep", lua.create_function(|_, _: mlua::MultiValue| {
+        Ok((Value::Nil, Value::Nil, Value::Boolean(false), Value::Integer(0), Value::Integer(0)))
+    })?)?;
     t.set("IsInScenario", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_ScenarioInfo", t)?;
     Ok(())
@@ -338,36 +338,7 @@ fn register_c_chat_info(lua: &Lua) -> Result<()> {
         |_, (_p, _m, _c, _t): (String, String, Option<String>, Option<String>)| Ok(()),
     )?)?;
     t.set("GetRegisteredAddonMessagePrefixes", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("SendChatMessage", lua.create_function(
-        |lua, (msg, chat_type, _lang, _target): (String, Option<String>, Option<Value>, Option<String>)| {
-            let chat_type = chat_type.unwrap_or_else(|| "SAY".to_string());
-            let (r, g, b) = match chat_type.as_str() {
-                "EMOTE" => ("1.0", "0.5", "0.25"),
-                "YELL" => ("1.0", "0.25", "0.25"),
-                "PARTY" => ("0.67", "0.67", "1.0"),
-                "GUILD" => ("0.25", "1.0", "0.25"),
-                "WHISPER" => ("1.0", "0.5", "1.0"),
-                _ => ("1.0", "1.0", "1.0"),
-            };
-            lua.load(format!(
-                r#"
-                if ChatFrame1 and ChatFrame1.AddMessage then
-                    local name = UnitName("player") or "Player"
-                    local msg = ...
-                    local prefix = ""
-                    local fmt = GetCVar and GetCVar("showTimestamps")
-                    if fmt and fmt ~= "" and fmt ~= "none" then
-                        prefix = date(fmt, time())
-                    end
-                    ChatFrame1:AddMessage(
-                        prefix .. "|Hplayer:" .. name .. "|h[" .. name .. "]|h says: " .. msg,
-                        {r}, {g}, {b})
-                end
-                "#
-            )).call::<()>(msg)?;
-            Ok(())
-        },
-    )?)?;
+    t.set("SendChatMessage", lua.create_function(send_chat_message)?)?;
     t.set("GetNumReservedChatWindows", lua.create_function(|_, ()| Ok(1i32))?)?;
     t.set("GetNumActiveChannels", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set("IsChannelRegionalForChannelID", lua.create_function(|_, _id: Value| Ok(false))?)?;
@@ -375,6 +346,37 @@ fn register_c_chat_info(lua: &Lua) -> Result<()> {
     t.set("PerformEmote", lua.create_function(|_, (_emote, _target, _silent): (Value, Value, Value)| Ok(()))?)?;
     lua.globals().set("C_ChatInfo", t)?;
     Ok(())
+}
+
+fn send_chat_message(
+    lua: &Lua,
+    (msg, chat_type, _lang, _target): (String, Option<String>, Option<Value>, Option<String>),
+) -> Result<()> {
+    let chat_type = chat_type.unwrap_or_else(|| "SAY".to_string());
+    let (r, g, b) = match chat_type.as_str() {
+        "EMOTE" => ("1.0", "0.5", "0.25"),
+        "YELL" => ("1.0", "0.25", "0.25"),
+        "PARTY" => ("0.67", "0.67", "1.0"),
+        "GUILD" => ("0.25", "1.0", "0.25"),
+        "WHISPER" => ("1.0", "0.5", "1.0"),
+        _ => ("1.0", "1.0", "1.0"),
+    };
+    lua.load(format!(
+        r#"
+        if ChatFrame1 and ChatFrame1.AddMessage then
+            local name = UnitName("player") or "Player"
+            local msg = ...
+            local prefix = ""
+            local fmt = GetCVar and GetCVar("showTimestamps")
+            if fmt and fmt ~= "" and fmt ~= "none" then
+                prefix = date(fmt, time())
+            end
+            ChatFrame1:AddMessage(
+                prefix .. "|Hplayer:" .. name .. "|h[" .. name .. "]|h says: " .. msg,
+                {r}, {g}, {b})
+        end
+        "#
+    )).call::<()>(msg)
 }
 
 fn register_c_azerite_essence(lua: &Lua) -> Result<()> {
@@ -493,27 +495,23 @@ fn register_c_unit_auras(lua: &Lua) -> Result<()> {
 }
 
 fn register_c_currency_info(lua: &Lua) -> Result<()> {
-    use super::currency_data;
     let t = lua.create_table()?;
+    register_currency_query_methods(lua, &t)?;
+    register_currency_list_methods(lua, &t)?;
+    register_currency_id_methods(lua, &t)?;
+    lua.globals().set("C_CurrencyInfo", t)?;
+    Ok(())
+}
+
+fn register_currency_query_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetCurrencyInfo", lua.create_function(currency_info_by_id)?)?;
-    t.set("GetBasicCurrencyInfo", lua.create_function(|lua, (cid, _qty): (i32, Option<i32>)| {
-        let info = lua.create_table()?;
-        if let Some(c) = currency_data::get_currency_by_id(cid) {
-            info.set("name", c.name)?;
-            info.set("currencyID", c.currency_id)?;
-            info.set("quantity", c.quantity)?;
-            info.set("iconFileID", c.icon_file_id as i64)?;
-            info.set("displayAmount", c.quantity)?;
-        } else {
-            info.set("name", format!("Currency {}", cid))?;
-            info.set("currencyID", cid)?;
-            info.set("quantity", 0)?;
-            info.set("iconFileID", 0)?;
-            info.set("displayAmount", 0)?;
-        }
-        Ok(Value::Table(info))
-    })?)?;
+    t.set("GetBasicCurrencyInfo", lua.create_function(basic_currency_info)?)?;
     t.set("GetCurrencyInfoFromLink", lua.create_function(|_, _l: String| Ok(Value::Nil))?)?;
+    Ok(())
+}
+
+fn register_currency_list_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    use super::currency_data;
     t.set("GetCurrencyListSize", lua.create_function(|_, ()| Ok(currency_data::currency_list_size()))?)?;
     t.set("GetCurrencyListInfo", lua.create_function(currency_list_info)?)?;
     t.set("GetBackpackCurrencyInfo", lua.create_function(backpack_currency_info)?)?;
@@ -522,12 +520,34 @@ fn register_c_currency_info(lua: &Lua) -> Result<()> {
     t.set("SetCurrencyFilter", lua.create_function(|_, _f: i32| Ok(()))?)?;
     t.set("SetCurrencyBackpack", lua.create_function(|_, (_i, _w): (i32, bool)| Ok(()))?)?;
     t.set("SetCurrencyUnused", lua.create_function(|_, (_i, _u): (i32, bool)| Ok(()))?)?;
+    Ok(())
+}
+
+fn register_currency_id_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("DoesCurrentFilterRequireAccountCurrencyData", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("IsAccountCharacterCurrencyDataReady", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetWarResourcesCurrencyID", lua.create_function(|_, ()| Ok(1560))?)?;
     t.set("GetAzeriteCurrencyID", lua.create_function(|_, ()| Ok(1553))?)?;
-    lua.globals().set("C_CurrencyInfo", t)?;
     Ok(())
+}
+
+fn basic_currency_info(lua: &Lua, (cid, _qty): (i32, Option<i32>)) -> Result<Value> {
+    use super::currency_data;
+    let info = lua.create_table()?;
+    if let Some(c) = currency_data::get_currency_by_id(cid) {
+        info.set("name", c.name)?;
+        info.set("currencyID", c.currency_id)?;
+        info.set("quantity", c.quantity)?;
+        info.set("iconFileID", c.icon_file_id as i64)?;
+        info.set("displayAmount", c.quantity)?;
+    } else {
+        info.set("name", format!("Currency {}", cid))?;
+        info.set("currencyID", cid)?;
+        info.set("quantity", 0)?;
+        info.set("iconFileID", 0)?;
+        info.set("displayAmount", 0)?;
+    }
+    Ok(Value::Table(info))
 }
 
 fn currency_info_by_id(lua: &Lua, cid: i32) -> Result<Value> {

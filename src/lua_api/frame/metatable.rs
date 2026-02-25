@@ -44,7 +44,70 @@ pub fn setup_frame_metatable(lua: &Lua) -> mlua::Result<()> {
         .eval::<mlua::Function>()?;
     lua.set_named_registry_value("__frame_index_helper", index_helper)?;
 
+    // Shared metatable for all forbidden proxy tables.
+    // __index and __newindex read __lud from the proxy table at call time so the
+    // same metatable can be reused across all instances (identity check passes).
+    let forbidden_mt = create_forbidden_proxy_metatable(lua)?;
+    lua.set_named_registry_value("__forbidden_proxy_mt", forbidden_mt)?;
+
     Ok(())
+}
+
+/// Build the shared metatable used by all forbidden proxy tables.
+///
+/// Reads `__lud` (LightUserData) from the proxy table at call time so this single
+/// metatable can be reused for every forbidden proxy instance.  This makes
+/// `getmetatable(proxy1) == getmetatable(proxy2)` true for any two forbidden proxies.
+fn create_forbidden_proxy_metatable(lua: &Lua) -> mlua::Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__metatable", "Forbidden")?;
+    mt.raw_set("__index", create_forbidden_index(lua)?)?;
+    mt.raw_set("__newindex", create_forbidden_newindex(lua)?)?;
+    Ok(mt)
+}
+
+/// Wrap a function so its first argument is replaced with `lud`.
+fn wrap_fn_with_lud(lua: &Lua, f: mlua::Function, lud: Value) -> mlua::Result<mlua::Function> {
+    lua.create_function(move |_, mut args: mlua::MultiValue| {
+        if !args.is_empty() {
+            args[0] = lud.clone();
+        }
+        f.call::<mlua::MultiValue>(args)
+    })
+}
+
+/// __index for forbidden proxy: reads __lud from proxy, forwards to frame methods.
+fn create_forbidden_index(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
+        let lud: Value = this.raw_get("__lud")?;
+
+        // Fast path: method in __frame_methods_table.
+        let methods_table: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
+        let method: Value = methods_table.raw_get(key.clone())?;
+        if let Value::Function(f) = method {
+            return Ok(Value::Function(wrap_fn_with_lud(lua, f, lud)?));
+        }
+
+        // Fall through: handles script handlers, children, custom fields.
+        let index_helper: mlua::Function = lua.named_registry_value("__frame_index_helper")?;
+        let result: Value = index_helper.call((lud.clone(), key))?;
+
+        if let Value::Function(f) = result {
+            return Ok(Value::Function(wrap_fn_with_lud(lua, f, lud)?));
+        }
+
+        Ok(result)
+    })
+}
+
+/// __newindex for forbidden proxy: delegates to the LightUserData's __newindex.
+fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, (this, key, value): (mlua::Table, String, Value)| {
+        let lud: Value = this.raw_get("__lud")?;
+        let assign: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
+        assign.call::<()>((lud, key, value))?;
+        Ok(())
+    })
 }
 
 /// __index: method lookup via rawget on methods_table, then fallback.
@@ -114,57 +177,89 @@ fn create_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (ud, key, value): (LightUserData, String, Value)| {
         let frame_id = lud_to_id(ud);
 
-        // Check for per-frame custom __newindex metamethod
-        if let Ok(store) = lua.named_registry_value::<mlua::Table>("__frame_custom_mt") {
-            if let Ok(mt) = store.get::<mlua::Table>(frame_id) {
-                if let Ok(newindex) = mt.get::<mlua::Function>("__newindex") {
-                    newindex.call::<()>((Value::LightUserData(ud), key, value))?;
-                    return Ok(());
-                }
-            }
+        if dispatch_custom_newindex(lua, ud, frame_id, &key, value.clone())? {
+            return Ok(());
         }
 
-        let state_rc = get_sim_state(lua);
+        sync_children_keys(lua, frame_id, &key, &value);
 
-        // Sync children_keys and parent_key with frame assignments
-        if let Some(child_id) = extract_frame_id(&value) {
-            let mut state = state_rc.borrow_mut();
-            let is_real_child = state
-                .widgets
-                .get(child_id)
-                .is_some_and(|c| c.parent_id == Some(frame_id));
-            if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
-                parent_frame.children_keys.insert(key.clone(), child_id);
-                if is_real_child && !parent_frame.children.contains(&child_id) {
-                    parent_frame.children.push(child_id);
-                }
-            }
-            // Set parent_key on child if not already set
-            if let Some(child) = state.widgets.get_mut_visual(child_id) {
-                if child.parent_key.is_none() {
-                    child.parent_key = Some(key.clone());
-                }
-            }
-        } else {
-            // Non-frame value — remove stale children_keys entry and clear parent_key
-            let mut state = state_rc.borrow_mut();
-            if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
-                if let Some(old_child_id) = parent_frame.children_keys.remove(&key) {
-                    if let Some(child) = state.widgets.get_mut_visual(old_child_id) {
-                        if child.parent_key.as_deref() == Some(&key) {
-                            child.parent_key = None;
-                        }
-                    }
-                }
-            }
-        }
-
-        // Store in frame fields table
         let frame_fields =
             crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
         frame_fields.set(key, value)?;
         Ok(())
     })
+}
+
+/// If the frame has a per-frame custom `__newindex`, call it and return true.
+fn dispatch_custom_newindex(
+    lua: &Lua,
+    ud: LightUserData,
+    frame_id: u64,
+    key: &str,
+    value: Value,
+) -> mlua::Result<bool> {
+    if let Ok(store) = lua.named_registry_value::<mlua::Table>("__frame_custom_mt") {
+        if let Ok(mt) = store.get::<mlua::Table>(frame_id) {
+            if let Ok(newindex) = mt.get::<mlua::Function>("__newindex") {
+                newindex.call::<()>((Value::LightUserData(ud), key.to_owned(), value))?;
+                return Ok(true);
+            }
+        }
+    }
+    Ok(false)
+}
+
+/// Sync children_keys and parent_key when a value is assigned to a frame property.
+fn sync_children_keys(lua: &Lua, frame_id: u64, key: &str, value: &Value) {
+    let state_rc = get_sim_state(lua);
+    if let Some(child_id) = extract_frame_id(value) {
+        sync_child_frame(state_rc, frame_id, key, child_id);
+    } else {
+        remove_stale_child_key(state_rc, frame_id, key);
+    }
+}
+
+/// Register a child frame under a key on the parent, updating children_keys and parent_key.
+fn sync_child_frame(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    key: &str,
+    child_id: u64,
+) {
+    let mut state = state_rc.borrow_mut();
+    let is_real_child = state
+        .widgets
+        .get(child_id)
+        .is_some_and(|c| c.parent_id == Some(frame_id));
+    if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
+        parent_frame.children_keys.insert(key.to_owned(), child_id);
+        if is_real_child && !parent_frame.children.contains(&child_id) {
+            parent_frame.children.push(child_id);
+        }
+    }
+    if let Some(child) = state.widgets.get_mut_visual(child_id) {
+        if child.parent_key.is_none() {
+            child.parent_key = Some(key.to_owned());
+        }
+    }
+}
+
+/// Remove a stale children_keys entry and clear parent_key when a non-frame is assigned.
+fn remove_stale_child_key(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    key: &str,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
+        if let Some(old_child_id) = parent_frame.children_keys.remove(key) {
+            if let Some(child) = state.widgets.get_mut_visual(old_child_id) {
+                if child.parent_key.as_deref() == Some(key) {
+                    child.parent_key = None;
+                }
+            }
+        }
+    }
 }
 
 /// __len: returns number of children.
@@ -232,46 +327,44 @@ fn lookup_mixin_override(lua: &Lua, frame_id: u64, key: &str) -> Option<Value> {
 
 /// Handle special fallback methods (Clear for Cooldown, Lower, Raise).
 fn lookup_fallback_method(lua: &Lua, frame_id: u64, key: &str) -> mlua::Result<Option<Value>> {
-    if key == "Clear" {
+    match key {
+        "Clear" => lookup_clear_method(lua, frame_id),
+        "Lower" => Ok(Some(Value::Function(make_lower_fn(lua)?))),
+        "Raise" => Ok(Some(Value::Function(make_raise_fn(lua)?))),
+        _ => Ok(None),
+    }
+}
+
+/// Return the no-op `Clear` function if the frame is a Cooldown widget.
+fn lookup_clear_method(lua: &Lua, frame_id: u64) -> mlua::Result<Option<Value>> {
+    let state_rc = get_sim_state(lua);
+    let is_cooldown = state_rc
+        .borrow()
+        .widgets
+        .get(frame_id)
+        .map(|f| f.widget_type == WidgetType::Cooldown)
+        .unwrap_or(false);
+    if is_cooldown {
+        Ok(Some(Value::Function(
+            lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+        )))
+    } else {
+        Ok(None)
+    }
+}
+
+fn make_lower_fn(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, ud: LightUserData| {
         let state_rc = get_sim_state(lua);
-        let is_cooldown = {
-            let state = state_rc.borrow();
-            state
-                .widgets
-                .get(frame_id)
-                .map(|f| f.widget_type == WidgetType::Cooldown)
-                .unwrap_or(false)
-        };
-        if is_cooldown {
-            return Ok(Some(Value::Function(
-                lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-            )));
-        }
-    }
+        state_rc.borrow_mut().lower_frame(lud_to_id(ud));
+        Ok(())
+    })
+}
 
-    if key == "Lower" {
-        return Ok(Some(Value::Function(lua.create_function(
-            |lua, ud: LightUserData| {
-                let id = lud_to_id(ud);
-                let state_rc = get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                state.lower_frame(id);
-                Ok(())
-            },
-        )?)));
-    }
-
-    if key == "Raise" {
-        return Ok(Some(Value::Function(lua.create_function(
-            |lua, ud: LightUserData| {
-                let id = lud_to_id(ud);
-                let state_rc = get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                state.raise_frame(id);
-                Ok(())
-            },
-        )?)));
-    }
-
-    Ok(None)
+fn make_raise_fn(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, ud: LightUserData| {
+        let state_rc = get_sim_state(lua);
+        state_rc.borrow_mut().raise_frame(lud_to_id(ud));
+        Ok(())
+    })
 }

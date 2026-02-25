@@ -81,21 +81,16 @@ fn register_game_rules_util(lua: &Lua) -> Result<()> {
 
 fn register_game_menu_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    let nop = lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?;
 
     g.set("CurrentVersionHasNewUnseenSettings", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("StaticPopup_Visible", lua.create_function(|_, _w: String| Ok(Value::Nil))?)?;
     g.set("IsRestrictedAccount", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("Logout", nop.clone())?;
-    g.set("Quit", nop.clone())?;
-    g.set("ForceLogout", nop.clone())?;
-    g.set("ForceQuit", nop.clone())?;
-    g.set("ShowMacroFrame", nop.clone())?;
-    g.set("ToggleHelpFrame", nop.clone())?;
-    g.set("ToggleStoreUI", nop.clone())?;
-    g.set("UpdateMicroButtons", nop.clone())?;
+    for name in ["Logout", "Quit", "ForceLogout", "ForceQuit", "ShowMacroFrame",
+                 "ToggleHelpFrame", "ToggleStoreUI", "UpdateMicroButtons",
+                 "SetGamePadCursorControl"] {
+        g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+    }
     g.set("CanAutoSetGamePadCursorControl", lua.create_function(|_, _e: bool| Ok(false))?)?;
-    g.set("SetGamePadCursorControl", nop.clone())?;
     g.set("SetPortraitTexture", lua.create_function(|lua, (tex, unit): (Value, Value)| {
         let texture_path = class_icon_path_for_unit(lua, &unit);
         if let Some(id) = crate::lua_api::frame::extract_frame_id(&tex) {
@@ -107,10 +102,9 @@ fn register_game_menu_stubs(lua: &Lua) -> Result<()> {
         }
         Ok(())
     })?)?;
-    g.set("ChangeActionBarPage", nop.clone())?;
-    g.set("StaticPopup_UpdateAll", nop.clone())?;
-    g.set("StaticPopup_Show", nop.clone())?;
-    g.set("StaticPopup_Hide", nop.clone())?;
+    for name in ["ChangeActionBarPage", "StaticPopup_UpdateAll", "StaticPopup_Show", "StaticPopup_Hide"] {
+        g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+    }
     g.set("IsTutorialFlagged", lua.create_function(|_, _f: i32| Ok(false))?)?;
 
     register_c_splash_screen(lua)?;

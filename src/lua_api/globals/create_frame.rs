@@ -33,60 +33,53 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     let state_clone = Rc::clone(&state);
     let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
-        let widget_type = match WidgetType::from_str(&cfa.frame_type) {
-            Some(wt) => wt,
-            None => return Err(crate::lua_api::script_helpers::lua_error_val(
-                format!("CreateFrame: Unknown frame type '{}'", cfa.frame_type),
-            )),
-        };
+        let widget_type = parse_widget_type(&cfa.frame_type)?;
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
-        let parent_id = cfa.parent_id;
-        let name = cfa.name;
-        let template = cfa.template;
-        let frame_type = cfa.frame_type;
-
-        // Apply the 5th argument (frame ID) if provided
-        if let Some(frame_lua_id) = cfa.id {
-            if let Some(frame) = state_clone.borrow_mut().widgets.get_mut_visual(frame_id) {
-                frame.user_id = frame_lua_id;
-            }
-        }
-
-        // Create default children for widget types that always need them
+        apply_frame_id_arg(&state_clone, frame_id, cfa.id);
         create_widget_type_defaults(&mut state_clone.borrow_mut(), frame_id, widget_type);
-
-        // ItemButton has intrinsic children (Count, icon, etc.) from WoW's intrinsic template
-        if frame_type == "ItemButton" {
+        if cfa.frame_type == "ItemButton" {
             create_item_button_intrinsics(&mut state_clone.borrow_mut(), frame_id);
         }
-
         let is_forbidden = state_clone.borrow().widgets.get(frame_id)
             .map(|f| f.forbidden).unwrap_or(false);
-        let ud = create_frame_userdata(lua, frame_id, name.as_deref(), is_forbidden)?;
-
-        // WoW registers named button's default texture children as globals:
-        // ButtonNameNormalTexture, ButtonNamePushedTexture, etc.
+        let ud = create_frame_userdata(lua, frame_id, cfa.name.as_deref(), is_forbidden)?;
         if matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
-            && let Some(ref btn_name) = name {
+            && let Some(ref btn_name) = cfa.name {
                 register_button_child_globals(lua, &state_clone, frame_id, btn_name)?;
             }
-
-        // ItemButton intrinsic template defines mixin="ItemButtonMixin"
-        if frame_type == "ItemButton" {
-            let frame_key = format!("__frame_{}", frame_id);
-            let code = format!(
-                "do local f = {} if f and ItemButtonMixin then Mixin(f, ItemButtonMixin) end end",
-                lua_global_ref(&frame_key)
-            );
-            let _ = lua.load(&code).exec();
+        if cfa.frame_type == "ItemButton" {
+            apply_item_button_mixin(lua, frame_id);
         }
-
-        let ref_name = name.unwrap_or_else(|| format!("__frame_{}", frame_id));
-        apply_intrinsic_and_templates(lua, &state_clone, &frame_type, &ref_name, template.as_deref(), parent_id, frame_id)?;
-
+        let ref_name = cfa.name.unwrap_or_else(|| format!("__frame_{}", frame_id));
+        apply_intrinsic_and_templates(lua, &state_clone, &cfa.frame_type, &ref_name, cfa.template.as_deref(), cfa.parent_id, frame_id)?;
         Ok(ud)
     })?;
     Ok(create_frame)
+}
+
+fn parse_widget_type(frame_type: &str) -> Result<WidgetType> {
+    WidgetType::from_str(frame_type).ok_or_else(|| {
+        crate::lua_api::script_helpers::lua_error_val(
+            format!("CreateFrame: Unknown frame type '{}'", frame_type),
+        )
+    })
+}
+
+fn apply_frame_id_arg(state: &Rc<RefCell<SimState>>, frame_id: u64, id: Option<i32>) {
+    if let Some(frame_lua_id) = id {
+        if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
+            frame.user_id = frame_lua_id;
+        }
+    }
+}
+
+fn apply_item_button_mixin(lua: &Lua, frame_id: u64) {
+    let frame_key = format!("__frame_{}", frame_id);
+    let code = format!(
+        "do local f = {} if f and ItemButtonMixin then Mixin(f, ItemButtonMixin) end end",
+        lua_global_ref(&frame_key)
+    );
+    let _ = lua.load(&code).exec();
 }
 
 /// Parsed CreateFrame arguments.
@@ -132,59 +125,63 @@ fn parse_create_frame_args(
     state: &Rc<RefCell<SimState>>,
 ) -> Result<CreateFrameArgs> {
     let mut args_iter = args.iter();
+    let frame_type = parse_frame_type_arg(lua, args_iter.next());
+    let (name_raw, name_arg_invalid) = parse_name_arg(lua, args_iter.next());
+    let (parent_id, parent_explicit, explicit_parent) =
+        parse_parent_arg(&mut args_iter, name_arg_invalid)?;
+    let template = coerce_string_arg(lua, args_iter.next());
+    let id = parse_id_arg(args_iter.next());
+    let name = name_raw.map(|n| substitute_parent_name(n, explicit_parent, state));
+    Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
+}
 
-    let frame_type: String = args_iter
-        .next()
-        .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
+fn parse_frame_type_arg(lua: &Lua, v: Option<&Value>) -> String {
+    v.and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string())
-        .unwrap_or_else(|| "Frame".to_string());
+        .unwrap_or_else(|| "Frame".to_string())
+}
 
-    // Position 2: name. If it's a non-coercible type (e.g. userdata/frame),
-    // WoW treats the entire call as having no name AND no parent.
-    let name_arg = args_iter.next();
-    let name_arg_invalid = matches!(
-        name_arg,
+/// Returns `(name_raw, is_invalid)`. Invalid = non-coercible type (frame/userdata/function).
+fn parse_name_arg(lua: &Lua, v: Option<&Value>) -> (Option<String>, bool) {
+    let invalid = matches!(
+        v,
         Some(Value::LightUserData(_) | Value::UserData(_) | Value::Table(_) | Value::Function(_))
     );
-    let name_raw: Option<String> = name_arg
-        .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
+    let name = v.and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string());
+    (name, invalid)
+}
 
-    let (parent_id, parent_explicit, explicit_parent) = if name_arg_invalid {
-        // Invalid name type consumes remaining args — no parent, no UIParent default
-        (None, false, None)
-    } else {
-        let parent_arg = args_iter.next();
-        // WoW errors if parent is a string (name lookup not supported).
-        if matches!(parent_arg, Some(Value::String(_))) {
-            return Err(crate::lua_api::script_helpers::lua_error_val(
-                "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])"
-            ));
-        }
-        let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
-        let parent_explicit = explicit_parent.is_some();
-        // WoW does NOT default to UIParent — nil/missing parent means no parent.
-        (explicit_parent, parent_explicit, explicit_parent)
-    };
+/// Returns `(parent_id, parent_explicit, explicit_parent)`.
+fn parse_parent_arg(
+    args_iter: &mut std::collections::vec_deque::Iter<'_, Value>,
+    name_arg_invalid: bool,
+) -> Result<(Option<u64>, bool, Option<u64>)> {
+    if name_arg_invalid {
+        return Ok((None, false, None));
+    }
+    let parent_arg = args_iter.next();
+    if matches!(parent_arg, Some(Value::String(_))) {
+        return Err(crate::lua_api::script_helpers::lua_error_val(
+            "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])"
+        ));
+    }
+    let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
+    let parent_explicit = explicit_parent.is_some();
+    Ok((explicit_parent, parent_explicit, explicit_parent))
+}
 
-    let template: Option<String> = args_iter
-        .next()
-        .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
-        .map(|s| s.to_string_lossy().to_string());
+fn coerce_string_arg(lua: &Lua, v: Option<&Value>) -> Option<String> {
+    v.and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
+        .map(|s| s.to_string_lossy().to_string())
+}
 
-    // 5th arg: numeric frame ID
-    let id: Option<i32> = args_iter.next().and_then(|v| match v {
+fn parse_id_arg(v: Option<&Value>) -> Option<i32> {
+    v.and_then(|v| match v {
         Value::Integer(n) => Some(*n as i32),
         Value::Number(n) => Some(*n as i32),
         _ => None,
-    });
-
-    // Handle $parent/$Parent name substitution.
-    // Use explicit_parent (before UIParent fallback) so that nil/missing parent
-    // produces "Top" fallback, not "UIParent".
-    let name = name_raw.map(|n| substitute_parent_name(n, explicit_parent, state));
-
-    Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
+    })
 }
 
 /// Replace the `$parent` prefix in a frame name with the actual ancestor name.
@@ -359,9 +356,8 @@ impl mlua::UserData for ForbiddenRawRef {}
 ///
 /// The proxy table has:
 /// - `proxy[0]` = full UserData wrapping the frame ID (type() returns "userdata")
-/// - metatable with `__metatable = "Forbidden"` so `getmetatable(proxy)` returns `"Forbidden"`
-/// - `__index` that looks up the method on `__frame_methods_table` and wraps it so
-///   the first argument (proxy table) is replaced with the LightUserData before dispatch
+/// - `proxy["__lud"]` = the LightUserData for this frame (read by the shared metatable)
+/// - The shared `__forbidden_proxy_mt` metatable (cached in registry, same identity for all instances)
 fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
     let proxy = lua.create_table()?;
     // Store a full UserData at key 0 so type(proxy[0]) == "userdata" (not "table")
@@ -372,62 +368,13 @@ fn create_forbidden_proxy(lua: &Lua, lud: Value) -> Result<Value> {
         },
     })?;
     proxy.raw_set(0, raw_ref)?;
-    // Store the LightUserData at "__lud" so that CreateFrame can resolve the
-    // frame ID when this proxy is passed as a parent argument.
-    proxy.raw_set("__lud", lud.clone())?;
+    // Store the LightUserData at "__lud" so the shared metatable __index/__newindex
+    // can retrieve it at call time, and so CreateFrame can resolve the parent frame ID.
+    proxy.raw_set("__lud", lud)?;
 
-    let mt = lua.create_table()?;
-    mt.raw_set("__metatable", "Forbidden")?;
-
-    let methods_table: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
-    let lud_for_index = lud.clone();
-    let index_fn = lua.create_function(move |lua, (_this, key): (mlua::Table, mlua::Value)| {
-        // Fast path: method in __frame_methods_table
-        let method: Value = methods_table.raw_get(key.clone())?;
-        if let Value::Function(f) = method {
-            let lud_inner = lud_for_index.clone();
-            let wrapper = lua.create_function(move |_, mut args: mlua::MultiValue| {
-                // Replace first arg (proxy table) with LightUserData
-                if !args.is_empty() {
-                    args[0] = lud_inner.clone();
-                }
-                f.call::<mlua::MultiValue>(args)
-            })?;
-            return Ok(Value::Function(wrapper));
-        }
-
-        // Fall through to normal frame __index via type metatable:
-        // handles script handlers (__frame_fields), child frame keys, custom fields.
-        let index_helper: mlua::Function = lua.named_registry_value("__frame_index_helper")?;
-        let result: Value = index_helper.call((lud_for_index.clone(), key))?;
-
-        // If the result is a function, wrap it to replace self with LightUserData.
-        if let Value::Function(f) = result {
-            let lud_inner = lud_for_index.clone();
-            let wrapper = lua.create_function(move |_, mut args: mlua::MultiValue| {
-                if !args.is_empty() {
-                    args[0] = lud_inner.clone();
-                }
-                f.call::<mlua::MultiValue>(args)
-            })?;
-            return Ok(Value::Function(wrapper));
-        }
-
-        Ok(result)
-    })?;
-    mt.raw_set("__index", index_fn)?;
-
-    // Delegate __newindex to the underlying LightUserData's type metatable so that
-    // children_keys and __frame_fields stay synced.  Without this, `proxy["key"] = value`
-    // does a plain rawset on the proxy table, invisible to LightUserData __index.
-    let lud_for_newindex = lud.clone();
-    let newindex_fn = lua.create_function(move |lua, (_this, key, value): (mlua::Table, String, Value)| {
-        let assign: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
-        assign.call::<()>((lud_for_newindex.clone(), key, value))?;
-        Ok(())
-    })?;
-    mt.raw_set("__newindex", newindex_fn)?;
-
+    // Reuse the single shared metatable for all forbidden proxies so that
+    // getmetatable(proxy1) == getmetatable(proxy2) (identity check).
+    let mt: mlua::Table = lua.named_registry_value("__forbidden_proxy_mt")?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))
 }
@@ -631,16 +578,30 @@ fn create_child_widget(state: &mut SimState, widget_type: WidgetType, parent_id:
 /// ItemButton defines: icon (Texture), Count (FontString), Stock (FontString),
 /// searchOverlay, ItemContextOverlay, IconBorder, IconOverlay, IconOverlay2 (Textures).
 fn create_item_button_intrinsics(state: &mut SimState, frame_id: u64) {
-    // icon texture (BORDER layer, fills parent)
-    let icon_id = create_child_widget(state, WidgetType::Texture, frame_id);
-    if let Some(tex) = state.widgets.get_mut_visual(icon_id) {
+    let icon_id = create_item_button_icon(state, frame_id);
+    let count_id = create_item_button_count(state, frame_id);
+    let stock_id = create_hidden_artwork_fontstring(state, frame_id);
+    let icon_border_id = create_hidden_overlay(state, frame_id);
+    let icon_overlay_id = create_hidden_overlay(state, frame_id);
+    let icon_overlay2_id = create_hidden_overlay(state, frame_id);
+    let search_overlay_id = create_fill_parent_overlay(state, frame_id);
+    let context_overlay_id = create_hidden_overlay(state, frame_id);
+    register_item_button_children(state, frame_id, icon_id, count_id, stock_id,
+        icon_border_id, icon_overlay_id, icon_overlay2_id, search_overlay_id, context_overlay_id);
+}
+
+fn create_item_button_icon(state: &mut SimState, frame_id: u64) -> u64 {
+    let id = create_child_widget(state, WidgetType::Texture, frame_id);
+    if let Some(tex) = state.widgets.get_mut_visual(id) {
         tex.draw_layer = crate::widget::DrawLayer::Border;
         add_fill_parent_anchors(tex, frame_id);
     }
+    id
+}
 
-    // Count fontstring (ARTWORK layer, hidden, anchored BOTTOMRIGHT)
-    let count_id = create_child_widget(state, WidgetType::FontString, frame_id);
-    if let Some(fs) = state.widgets.get_mut_visual(count_id) {
+fn create_item_button_count(state: &mut SimState, frame_id: u64) -> u64 {
+    let id = create_child_widget(state, WidgetType::FontString, frame_id);
+    if let Some(fs) = state.widgets.get_mut_visual(id) {
         fs.draw_layer = crate::widget::DrawLayer::Artwork;
         fs.visible = false;
         fs.justify_h = crate::widget::TextJustify::Right;
@@ -653,30 +614,35 @@ fn create_item_button_intrinsics(state: &mut SimState, frame_id: u64) {
             y_offset: -2.0,
         });
     }
+    id
+}
 
-    // Stock fontstring (ARTWORK layer, hidden)
-    let stock_id = create_child_widget(state, WidgetType::FontString, frame_id);
-    if let Some(fs) = state.widgets.get_mut_visual(stock_id) {
+fn create_hidden_artwork_fontstring(state: &mut SimState, frame_id: u64) -> u64 {
+    let id = create_child_widget(state, WidgetType::FontString, frame_id);
+    if let Some(fs) = state.widgets.get_mut_visual(id) {
         fs.draw_layer = crate::widget::DrawLayer::Artwork;
         fs.visible = false;
     }
+    id
+}
 
-    // IconBorder, IconOverlay, IconOverlay2 (OVERLAY layer, hidden)
-    let icon_border_id = create_hidden_overlay(state, frame_id);
-    let icon_overlay_id = create_hidden_overlay(state, frame_id);
-    let icon_overlay2_id = create_hidden_overlay(state, frame_id);
-
-    // searchOverlay (OVERLAY layer, hidden, fills parent)
-    let search_overlay_id = create_child_widget(state, WidgetType::Texture, frame_id);
-    if let Some(tex) = state.widgets.get_mut_visual(search_overlay_id) {
+fn create_fill_parent_overlay(state: &mut SimState, frame_id: u64) -> u64 {
+    let id = create_child_widget(state, WidgetType::Texture, frame_id);
+    if let Some(tex) = state.widgets.get_mut_visual(id) {
         tex.draw_layer = crate::widget::DrawLayer::Overlay;
         tex.visible = false;
         add_fill_parent_anchors(tex, frame_id);
     }
+    id
+}
 
-    // ItemContextOverlay (OVERLAY layer, hidden)
-    let context_overlay_id = create_hidden_overlay(state, frame_id);
-
+#[allow(clippy::too_many_arguments)]
+fn register_item_button_children(
+    state: &mut SimState, frame_id: u64,
+    icon_id: u64, count_id: u64, stock_id: u64,
+    icon_border_id: u64, icon_overlay_id: u64, icon_overlay2_id: u64,
+    search_overlay_id: u64, context_overlay_id: u64,
+) {
     if let Some(btn) = state.widgets.get_mut_visual(frame_id) {
         btn.children_keys.insert("icon".to_string(), icon_id);
         btn.children_keys.insert("Count".to_string(), count_id);
