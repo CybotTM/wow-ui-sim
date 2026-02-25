@@ -151,6 +151,7 @@ impl WowLuaEnv {
     /// Must be called after all addons are loaded and before firing events.
     pub fn apply_post_load_workarounds(&self) {
         super::workarounds::apply(self);
+        let _ = super::globals::environment_restore::restore_environment_cleanup_stubs(&self.lua);
     }
 
     /// Apply workarounds that must run after startup events.

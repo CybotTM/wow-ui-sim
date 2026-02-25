@@ -25,31 +25,40 @@ const CLASS_DATA: &[(i32, &str, &str)] = &[
     (13, "Evoker", "EVOKER"),
 ];
 
-/// Look up class name and file by 1-based index.
-fn class_info_by_index(index: i32) -> (&'static str, &'static str) {
+/// Look up class name and file by 1-based index. Returns None for invalid indices.
+fn class_info_by_index(index: i32) -> Option<(&'static str, &'static str)> {
     CLASS_DATA
         .iter()
         .find(|(i, _, _)| *i == index)
         .map(|(_, name, file)| (*name, *file))
-        .unwrap_or(("Unknown", "UNKNOWN"))
 }
 
-/// Resolve a unit name, checking target, party members, and player name.
-/// Returns owned String to avoid borrow lifetime issues in closures.
-fn resolve_unit_name_with_party(unit: &str, state: &SimState) -> String {
+/// Return true if a unit token is a recognized WoW unit ID.
+fn is_known_unit(unit: &str) -> bool {
+    matches!(unit, "player" | "target" | "pet" | "focus" | "mouseover")
+        || parse_party_index(unit).is_some()
+}
+
+/// Resolve a unit name for known unit tokens. Returns None for unknown tokens.
+fn resolve_unit_name_with_party(unit: &str, state: &SimState) -> Option<String> {
     if unit == "player" {
-        return state.player_name.clone();
+        return Some(state.player_name.clone());
     }
     if unit == "target" {
-        return state.current_target.as_ref()
+        return Some(state.current_target.as_ref()
             .map(|t| t.name.clone())
-            .unwrap_or_else(|| "Unknown".to_string());
+            .unwrap_or_else(|| "Unknown".to_string()));
     }
-    if let Some(idx) = parse_party_index(unit)
-        && let Some(m) = state.party_members.get(idx) {
-            return m.name.to_string();
+    if let Some(idx) = parse_party_index(unit) {
+        if let Some(m) = state.party_members.get(idx) {
+            return Some(m.name.to_string());
         }
-    "SimUnit".to_string()
+        return Some("SimUnit".to_string());
+    }
+    if !is_known_unit(unit) {
+        return None;
+    }
+    Some("SimUnit".to_string())
 }
 
 /// Parse a "partyN" unit ID and return the 0-based index if valid.
@@ -89,6 +98,24 @@ fn register_identity_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
     register_identity_party_aware(lua, state)
 }
 
+/// Look up (name, file) for the player's race from state.
+fn player_race_name_file(state: &SimState) -> (&'static str, &'static str) {
+    let (name, file, _) = crate::lua_api::state::RACE_DATA
+        .get(state.player_race_index)
+        .copied()
+        .unwrap_or(("Human", "Human", "Alliance"));
+    (name, file)
+}
+
+/// Look up faction string for the player's race from state.
+fn player_race_faction(state: &SimState) -> &'static str {
+    crate::lua_api::state::RACE_DATA
+        .get(state.player_race_index)
+        .copied()
+        .map(|(_, _, f)| f)
+        .unwrap_or("Alliance")
+}
+
 /// Register identity functions that read player race/faction from state.
 fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
@@ -96,11 +123,7 @@ fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     globals.set(
         "UnitRace",
         lua.create_function(move |lua, _unit: Option<String>| {
-            let s = st.borrow();
-            let (name, file, _) = crate::lua_api::state::RACE_DATA
-                .get(s.player_race_index)
-                .copied()
-                .unwrap_or(("Human", "Human", "Alliance"));
+            let (name, file) = player_race_name_file(&st.borrow());
             Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(name)?),
                 Value::String(lua.create_string(file)?),
@@ -112,11 +135,7 @@ fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     globals.set(
         "UnitFactionGroup",
         lua.create_function(move |lua, _unit: Option<String>| {
-            let s = state.borrow();
-            let (_, _, faction) = crate::lua_api::state::RACE_DATA
-                .get(s.player_race_index)
-                .copied()
-                .unwrap_or(("Human", "Human", "Alliance"));
+            let faction = player_race_faction(&state.borrow());
             Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(faction)?),
                 Value::String(lua.create_string(faction)?),
@@ -205,67 +224,66 @@ fn register_class_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     register_class_lookup_functions(lua, state)
 }
 
+/// Resolve class (name, file, index) for the given unit token from state.
+fn resolve_unit_class(unit: &str, state: &SimState) -> (&'static str, &'static str, i32) {
+    if unit == "target" {
+        if let Some(t) = &state.current_target {
+            let (n, f) = class_info_by_index(t.class_index).unwrap_or(("Warrior", "WARRIOR"));
+            return (n, f, t.class_index);
+        }
+        return ("Warrior", "WARRIOR", 1);
+    }
+    if let Some(i) = parse_party_index(unit) {
+        if let Some(m) = state.party_members.get(i) {
+            let (n, f) = class_info_by_index(m.class_index).unwrap_or(("Warrior", "WARRIOR"));
+            return (n, f, m.class_index);
+        }
+        return ("Warrior", "WARRIOR", 1);
+    }
+    let (n, f) = class_info_by_index(state.player_class_index).unwrap_or(("Warrior", "WARRIOR"));
+    (n, f, state.player_class_index)
+}
+
 /// Register UnitClass with party member awareness.
 fn register_unit_class(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
-    globals.set(
+    lua.globals().set(
         "UnitClass",
         lua.create_function(move |lua, unit: Option<String>| {
             let unit = unit.unwrap_or_default();
-            let (name, file, idx) = if unit == "target" {
-                let s = state.borrow();
-                if let Some(t) = &s.current_target {
-                    let (n, f) = class_info_by_index(t.class_index);
-                    (n, f, t.class_index)
-                } else {
-                    ("Warrior", "WARRIOR", 1)
-                }
-            } else if let Some(i) = parse_party_index(&unit) {
-                let s = state.borrow();
-                if let Some(m) = s.party_members.get(i) {
-                    let (n, f) = class_info_by_index(m.class_index);
-                    (n, f, m.class_index)
-                } else {
-                    ("Warrior", "WARRIOR", 1)
-                }
-            } else {
-                // Player
-                let s = state.borrow();
-                let (n, f) = class_info_by_index(s.player_class_index);
-                (n, f, s.player_class_index)
-            };
+            let (name, file, idx) = resolve_unit_class(&unit, &state.borrow());
             Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(name)?),
                 Value::String(lua.create_string(file)?),
                 Value::Integer(idx as i64),
             ]))
         })?,
-    )?;
-    Ok(())
+    )
 }
 
-/// Register class lookup functions (some need state for player class).
-fn register_class_lookup_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+/// Register UnitClassBase and GetNumClasses.
+fn register_class_base_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-
     globals.set(
         "UnitClassBase",
         lua.create_function(move |lua, _unit: Option<String>| {
             let s = state.borrow();
-            let (_, file) = class_info_by_index(s.player_class_index);
+            let (_, file) = class_info_by_index(s.player_class_index).unwrap_or(("Warrior", "WARRIOR"));
             Ok(Value::String(lua.create_string(file)?))
         })?,
     )?;
+    globals.set("GetNumClasses", lua.create_function(|_, ()| Ok(CLASS_DATA.len() as i32))?)?;
+    Ok(())
+}
 
-    globals.set(
-        "GetNumClasses",
-        lua.create_function(|_, ()| Ok(CLASS_DATA.len() as i32))?,
-    )?;
-
+/// Register GetClassInfo and LocalizedClassList.
+fn register_class_info_functions(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
     globals.set(
         "GetClassInfo",
         lua.create_function(|lua, class_index: i32| {
-            let (name, file) = class_info_by_index(class_index);
+            let Some((name, file)) = class_info_by_index(class_index) else {
+                return Ok(MultiValue::new());
+            };
             Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(name)?),
                 Value::String(lua.create_string(file)?),
@@ -273,7 +291,6 @@ fn register_class_lookup_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> R
             ]))
         })?,
     )?;
-
     globals.set(
         "LocalizedClassList",
         lua.create_function(|lua, _is_female: Option<bool>| {
@@ -284,21 +301,26 @@ fn register_class_lookup_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> R
             Ok(classes)
         })?,
     )?;
-
     Ok(())
 }
 
-/// Register UnitName, UnitNameUnmodified, UnitFullName, GetUnitName.
-fn register_name_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+/// Register class lookup functions (some need state for player class).
+fn register_class_lookup_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_class_base_functions(lua, state)?;
+    register_class_info_functions(lua)
+}
+
+/// Register UnitName and UnitNameUnmodified (strict: error on missing arg, nil on unknown unit).
+fn register_unit_name_strict(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    let name_fns: &[&str] = &["UnitName", "UnitNameUnmodified"];
-    for &fn_name in name_fns {
+    for &fn_name in &["UnitName", "UnitNameUnmodified"] {
         let st = state.clone();
         globals.set(
             fn_name,
-            lua.create_function(move |lua, unit: Option<String>| {
-                let unit = unit.unwrap_or_default();
-                let name = resolve_unit_name_with_party(&unit, &st.borrow());
+            lua.create_function(move |lua, unit: String| {
+                let Some(name) = resolve_unit_name_with_party(&unit, &st.borrow()) else {
+                    return Ok(MultiValue::new());
+                };
                 Ok(MultiValue::from_vec(vec![
                     Value::String(lua.create_string(name)?),
                     Value::Nil,
@@ -306,41 +328,57 @@ fn register_name_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
             })?,
         )?;
     }
+    Ok(())
+}
 
-    let st = state.clone();
-    globals.set(
+/// Register UnitFullName (returns name + realm).
+fn register_unit_full_name(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
         "UnitFullName",
         lua.create_function(move |lua, unit: Option<String>| {
-            let unit = unit.unwrap_or_default();
-            let name = resolve_unit_name_with_party(&unit, &st.borrow());
+            let name = resolve_unit_name_with_party(&unit.unwrap_or_default(), &state.borrow())
+                .unwrap_or_else(|| "SimUnit".to_string());
             Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(name)?),
                 Value::String(lua.create_string("SimRealm")?),
             ]))
         })?,
-    )?;
+    )
+}
 
+/// Register GetUnitName and UnitPVPName (single string returns, fallback to SimUnit).
+fn register_unit_name_display(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let globals = lua.globals();
     let st = state.clone();
     globals.set(
         "GetUnitName",
-        lua.create_function(move |lua, (unit, _show_server): (Option<String>, Option<bool>)| {
-            let unit = unit.unwrap_or_default();
-            let name = resolve_unit_name_with_party(&unit, &st.borrow());
+        lua.create_function(move |lua, (unit, _): (Option<String>, Option<bool>)| {
+            let name = resolve_unit_name_with_party(&unit.unwrap_or_default(), &st.borrow())
+                .unwrap_or_else(|| "SimUnit".to_string());
             Ok(Value::String(lua.create_string(name)?))
         })?,
     )?;
-
-    let st = state;
     globals.set(
         "UnitPVPName",
         lua.create_function(move |lua, unit: Option<String>| {
-            let unit = unit.unwrap_or_default();
-            let name = resolve_unit_name_with_party(&unit, &st.borrow());
+            let name = resolve_unit_name_with_party(&unit.unwrap_or_default(), &state.borrow())
+                .unwrap_or_else(|| "SimUnit".to_string());
             Ok(Value::String(lua.create_string(name)?))
         })?,
     )?;
-
     Ok(())
+}
+
+/// Register UnitFullName, GetUnitName, UnitPVPName (lenient: fallback to SimUnit).
+fn register_unit_name_lenient(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_unit_full_name(lua, state.clone())?;
+    register_unit_name_display(lua, state)
+}
+
+/// Register UnitName, UnitNameUnmodified, UnitFullName, GetUnitName.
+fn register_name_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_unit_name_strict(lua, state.clone())?;
+    register_unit_name_lenient(lua, state)
 }
 
 /// Register unit state boolean functions: alive/dead, AFK/DND, combat
@@ -472,44 +510,37 @@ fn register_state_relations(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     Ok(())
 }
 
-/// Register UnitInParty, UnitInRaid, UnitIsGroupLeader, UnitIsGroupAssistant.
-fn register_group_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
-
-    let st = state.clone();
-    globals.set(
-        "UnitInParty",
-        lua.create_function(move |_, unit: Option<String>| {
-            let Some(unit) = unit else { return Ok(false) };
-            if let Some(idx) = parse_party_index(&unit) {
-                return Ok(idx < st.borrow().party_members.len());
-            }
-            Ok(false)
-        })?,
-    )?;
-    globals.set(
-        "UnitInRaid",
-        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
-    )?;
-    let st = state;
-    globals.set(
+/// Register UnitIsGroupLeader with party member awareness.
+fn register_unit_is_group_leader(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
         "UnitIsGroupLeader",
         lua.create_function(move |_, unit: Option<String>| {
             let Some(unit) = unit else { return Ok(false) };
             if let Some(idx) = parse_party_index(&unit) {
-                let s = st.borrow();
+                let s = state.borrow();
                 if let Some(m) = s.party_members.get(idx) {
                     return Ok(m.is_leader);
                 }
             }
             Ok(false)
         })?,
-    )?;
-    globals.set(
-        "UnitIsGroupAssistant",
-        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
-    )?;
+    )
+}
 
+/// Register UnitInParty, UnitInRaid, UnitIsGroupLeader, UnitIsGroupAssistant.
+fn register_group_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let globals = lua.globals();
+    let st = state.clone();
+    globals.set(
+        "UnitInParty",
+        lua.create_function(move |_, unit: Option<String>| {
+            let Some(unit) = unit else { return Ok(false) };
+            Ok(parse_party_index(&unit).map_or(false, |idx| idx < st.borrow().party_members.len()))
+        })?,
+    )?;
+    globals.set("UnitInRaid", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    register_unit_is_group_leader(lua, state)?;
+    globals.set("UnitIsGroupAssistant", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
     Ok(())
 }
 

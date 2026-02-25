@@ -83,6 +83,7 @@ pub mod unit_combat_api;
 pub mod unit_health_power_api;
 pub mod security_api;
 pub mod utility_api;
+pub mod environment_restore;
 pub mod generated_stubs;
 
 // Re-export for backwards compatibility
