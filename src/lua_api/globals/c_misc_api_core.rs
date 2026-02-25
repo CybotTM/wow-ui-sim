@@ -14,7 +14,7 @@ use mlua::{Lua, Result, Value};
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_date_and_time(lua)?;
     register_c_scenario_info(lua)?;
-    register_c_tooltip_info(lua)?;
+
     register_c_trade_skill(lua)?;
     register_c_mythic_plus(lua)?;
     register_c_lfg_info(lua)?;
@@ -169,23 +169,6 @@ fn register_c_scenario_info(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_tooltip_info(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    for (name, type_id) in &[
-        ("GetItemByID", 1), ("GetItemByGUID", 1), ("GetBagItem", 1),
-        ("GetSpellByID", 2), ("GetUnit", 3), ("GetHyperlink", 1),
-    ] {
-        let tid = *type_id;
-        t.set(*name, lua.create_function(move |lua, _args: mlua::MultiValue| {
-            let info = lua.create_table()?;
-            info.set("type", tid)?;
-            info.set("lines", lua.create_table()?)?;
-            Ok(info)
-        })?)?;
-    }
-    lua.globals().set("C_TooltipInfo", t)?;
-    Ok(())
-}
 
 fn register_c_trade_skill(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;

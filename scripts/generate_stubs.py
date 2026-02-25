@@ -134,9 +134,22 @@ def parse_apis(apis):
     return globals_funcs, dict(c_namespaces)
 
 
-def emit_stub_line(target_var, name, outputs, indent="    "):
+TOOLTIP_DATA_CLOSURE = (
+    "|lua, _: MultiValue| {\n"
+    "            let t = lua.create_table()?;\n"
+    "            t.set(\"type\", 0)?;\n"
+    "            t.set(\"lines\", lua.create_table()?)?;\n"
+    "            Ok(Value::Table(t))\n"
+    "        }"
+)
+
+
+def emit_stub_line(target_var, name, outputs, indent="    ", ns=None):
     """Emit the if-nil-then-set lines for one stub."""
-    cl = closure_str(outputs)
+    if ns == "C_TooltipInfo":
+        cl = TOOLTIP_DATA_CLOSURE
+    else:
+        cl = closure_str(outputs)
     return (
         f'{indent}if {target_var}.get::<Value>("{name}")?.is_nil() {{\n'
         f'{indent}    {target_var}.set("{name}", lua.create_function({cl})?)?;\n'
@@ -220,7 +233,7 @@ def generate_rust(globals_funcs, c_namespaces, existing):
             for j, sub in enumerate(sub_chunks):
                 w(f"fn {fn_name}_{j}(lua: &Lua, t: &mlua::Table) -> Result<()> {{")
                 for m in sub:
-                    w(emit_stub_line("t", m, methods[m]["outputs"]))
+                    w(emit_stub_line("t", m, methods[m]["outputs"], ns=ns))
                 w("    Ok(())")
                 w("}")
                 w("")
@@ -231,7 +244,7 @@ def generate_rust(globals_funcs, c_namespaces, existing):
             w("        _ => lua.create_table()?,")
             w("    };")
             for m in method_names:
-                w(emit_stub_line("t", m, methods[m]["outputs"]))
+                w(emit_stub_line("t", m, methods[m]["outputs"], ns=ns))
             w(f'    g.set("{ns}", t)?;')
             w("    Ok(())")
             w("}")
