@@ -22,7 +22,7 @@ pub(super) fn register_all(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState
     register_c_calendar(lua)?;
     register_c_covenant_callings(lua)?;
     register_c_covenant_sanctum_ui(lua)?;
-    register_c_weekly_rewards(lua)?;
+    register_c_weekly_rewards(lua, Rc::clone(&state))?;
     register_c_contribution_collector(lua)?;
     register_c_scenario(lua)?;
     register_c_housing(lua)?;
@@ -173,14 +173,44 @@ fn register_c_covenant_callings(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_weekly_rewards(lua: &Lua) -> Result<()> {
+fn register_c_weekly_rewards(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("HasAvailableRewards", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("CanClaimRewards", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetActivities", lua.create_function(|lua, _t: Option<i32>| lua.create_table())?)?;
-    t.set("GetNumCompletedDungeonRuns", lua.create_function(|_, ()| Ok(0i32))?)?;
+    let s = Rc::clone(&state);
+    t.set("HasAvailableRewards", lua.create_function(move |_, ()| Ok(s.borrow().great_vault_has_rewards))?)?;
+    let s = Rc::clone(&state);
+    t.set("CanClaimRewards", lua.create_function(move |_, ()| Ok(s.borrow().great_vault_can_claim))?)?;
+    let s = Rc::clone(&state);
+    t.set("GetActivities", lua.create_function(move |lua, filter: Option<i32>| {
+        build_vault_activities_table(lua, &s.borrow(), filter)
+    })?)?;
+    t.set("GetNumCompletedDungeonRuns", lua.create_function(|_, ()| Ok((0i32, 0i32, 0i32)))?)?;
     lua.globals().set("C_WeeklyRewards", t)?;
     Ok(())
+}
+
+fn build_vault_activities_table(
+    lua: &Lua,
+    state: &crate::lua_api::SimState,
+    filter: Option<i32>,
+) -> Result<mlua::Table> {
+    let result = lua.create_table()?;
+    let mut idx = 1;
+    for a in &state.great_vault_activities {
+        if let Some(f) = filter {
+            if a.activity_type != f { continue; }
+        }
+        let entry = lua.create_table()?;
+        entry.set("type", a.activity_type)?;
+        entry.set("index", a.index)?;
+        entry.set("threshold", a.threshold)?;
+        entry.set("progress", a.progress)?;
+        entry.set("level", a.level)?;
+        entry.set("id", 0i32)?;
+        entry.set("rewards", lua.create_table()?)?;
+        result.set(idx, entry)?;
+        idx += 1;
+    }
+    Ok(result)
 }
 
 fn register_c_contribution_collector(lua: &Lua) -> Result<()> {

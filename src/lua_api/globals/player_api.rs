@@ -15,11 +15,11 @@ pub fn register_player_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     register_battlenet_functions(lua)?;
     register_specialization_functions(lua, Rc::clone(&state))?;
     register_movement_functions(lua, Rc::clone(&state))?;
-    super::action_bar_api::register_action_bar_functions(lua, state)?;
+    super::action_bar_api::register_action_bar_functions(lua, state.clone())?;
     register_timerunning_functions(lua)?;
-    register_economy_functions(lua)?;
-    register_instance_functions(lua)?;
-    register_character_functions(lua)?;
+    register_economy_functions(lua, Rc::clone(&state))?;
+    register_instance_functions(lua, Rc::clone(&state))?;
+    register_character_functions(lua, Rc::clone(&state))?;
     register_character_stat_functions(lua)?;
     register_cinematic_functions(lua)?;
     register_unit_functions(lua)?;
@@ -200,9 +200,9 @@ fn spec_info_by_id(lua: &Lua, spec_id: i32) -> Result<mlua::MultiValue> {
 }
 
 /// Economy functions: money, trade, buyback.
-fn register_economy_functions(lua: &Lua) -> Result<()> {
+fn register_economy_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetMoney", lua.create_function(|_, ()| Ok(0i64))?)?;
+    globals.set("GetMoney", lua.create_function(move |_, ()| Ok(state.borrow().player_money))?)?;
     globals.set(
         "GetTargetTradeMoney",
         lua.create_function(|_, ()| Ok(0i64))?,
@@ -212,24 +212,25 @@ fn register_economy_functions(lua: &Lua) -> Result<()> {
 }
 
 /// Instance/dungeon info functions.
-fn register_instance_functions(lua: &Lua) -> Result<()> {
+fn register_instance_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     // GetInstanceInfo() -> name, instanceType, difficultyID, difficultyName,
     //   maxPlayers, dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID
     globals.set(
         "GetInstanceInfo",
-        lua.create_function(|lua, ()| {
+        lua.create_function(move |lua, ()| {
+            let s = state.borrow();
             Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string("")?),     // name
-                Value::String(lua.create_string("none")?), // instanceType
-                Value::Integer(0),                         // difficultyID
-                Value::String(lua.create_string("")?),     // difficultyName
-                Value::Integer(0),                         // maxPlayers
-                Value::Integer(0),                         // dynamicDifficulty
-                Value::Boolean(false),                     // isDynamic
-                Value::Integer(0),                         // instanceID
-                Value::Integer(0),                         // instanceGroupSize
-                Value::Integer(0),                         // LfgDungeonID
+                Value::String(lua.create_string(&s.instance_name)?),      // name
+                Value::String(lua.create_string(&s.instance_type)?),      // instanceType
+                Value::Integer(s.instance_difficulty as i64),             // difficultyID
+                Value::String(lua.create_string("")?),                    // difficultyName
+                Value::Integer(s.instance_max_players as i64),            // maxPlayers
+                Value::Integer(0),                                        // dynamicDifficulty
+                Value::Boolean(false),                                    // isDynamic
+                Value::Integer(0),                                        // instanceID
+                Value::Integer(0),                                        // instanceGroupSize
+                Value::Integer(0),                                        // LfgDungeonID
             ]))
         })?,
     )?;
@@ -237,19 +238,22 @@ fn register_instance_functions(lua: &Lua) -> Result<()> {
 }
 
 /// Character info functions: titles, item level, RPE state, inventory.
-fn register_character_functions(lua: &Lua) -> Result<()> {
-    register_character_info_stubs(lua)?;
+fn register_character_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_character_info_stubs(lua, state)?;
     register_paperdoll_ui_stubs(lua)?;
     Ok(())
 }
 
 /// Character info stubs: title, item level, inventory quality, stats.
-fn register_character_info_stubs(lua: &Lua) -> Result<()> {
+fn register_character_info_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     globals.set("GetCurrentTitle", lua.create_function(|_, ()| Ok(0i32))?)?;
     globals.set(
         "GetAverageItemLevel",
-        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64, 0.0_f64)))?,
+        lua.create_function(move |_, ()| {
+            let ilvl = state.borrow().player_item_level as f64;
+            Ok((ilvl, ilvl, ilvl))
+        })?,
     )?;
     globals.set("IsPlayerInRPE", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set(

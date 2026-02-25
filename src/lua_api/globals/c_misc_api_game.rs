@@ -10,7 +10,7 @@
 
 use mlua::{Lua, Result, Value};
 
-pub(super) fn register_all(lua: &Lua) -> Result<()> {
+pub(super) fn register_all(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_external_event_url(lua)?;
     register_c_store_public(lua)?;
     register_kiosk(lua)?;
@@ -22,7 +22,7 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_club(lua)?;
     register_c_club_finder(lua)?;
     register_c_artifact_and_azerite(lua)?;
-    register_global_game_stubs(lua)?;
+    register_global_game_stubs(lua, state)?;
     register_c_garrison(lua)?;
     register_minimap_util(lua)?;
     register_c_crafting_orders(lua)?;
@@ -202,10 +202,10 @@ fn register_c_club_finder(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_global_game_stubs(lua: &Lua) -> Result<()> {
+fn register_global_game_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_global_combat_stubs(lua)?;
     register_global_action_stubs(lua)?;
-    register_global_account_stubs(lua)?;
+    register_global_account_stubs(lua, state)?;
     register_actionbar_hotkey_color(lua)?;
     register_unit_stat_constants(lua)?;
     register_store_frame_functions(lua)?;
@@ -307,11 +307,11 @@ fn register_global_action_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_global_account_stubs(lua: &Lua) -> Result<()> {
+fn register_global_account_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let g = lua.globals();
     g.set("GetExpansionTrialInfo", lua.create_function(|_, ()| Ok((false, 0i32)))?)?;
     g.set("UnitTrialBankedLevels", lua.create_function(|_, _u: Option<String>| Ok(0i32))?)?;
-    g.set("IsInGuild", lua.create_function(|_, ()| Ok(true))?)?;
+    g.set("IsInGuild", lua.create_function(move |_, ()| Ok(state.borrow().guild_name.is_some()))?)?;
     g.set("GetGuildLogoInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("HasCompletedAnyAchievement", lua.create_function(|_, ()| Ok(true))?)?;
     g.set("CanShowAchievementUI", lua.create_function(|_, ()| Ok(true))?)?;

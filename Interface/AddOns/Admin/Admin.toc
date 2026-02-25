@@ -1,0 +1,6 @@
+## Interface: 120000
+## Title: Admin
+## Notes: Simulator admin commands for controlling game state via A_Admin API
+## LoadOnDemand: 0
+
+Admin.lua

@@ -14,8 +14,8 @@ pub fn register_c_misc_api(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState
     super::c_misc_api_core::register_all(lua)?;
     register_c_color_overrides(lua)?;
     register_tooltip_data_processor(lua)?;
-    super::c_misc_api_ui::register_all(lua, state)?;
-    super::c_misc_api_game::register_all(lua)?;
+    super::c_misc_api_ui::register_all(lua, state.clone())?;
+    super::c_misc_api_game::register_all(lua, Rc::clone(&state))?;
     Ok(())
 }
 

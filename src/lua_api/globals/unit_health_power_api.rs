@@ -101,7 +101,7 @@ fn register_power_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             if is_secondary_power_type(power_type) {
                 return Ok(0i32);
             }
-            Ok(50_000i32)
+            Ok(st.borrow().player_power)
         })?,
     )?;
     globals.set(
@@ -130,7 +130,7 @@ fn register_power_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             if is_secondary_power_type(power_type) {
                 return Ok(secondary_power_max(power_type.unwrap_or(0)));
             }
-            Ok(100_000i32)
+            Ok(state.borrow().player_power_max)
         })?,
     )?;
     Ok(())
@@ -153,6 +153,26 @@ fn secondary_power_max(power_type: i64) -> i32 {
     }
 }
 
+/// Map a power type integer to its WoW API name string.
+fn power_type_name(power_type: i32) -> &'static str {
+    match power_type {
+        0 => "MANA",
+        1 => "RAGE",
+        2 => "FOCUS",
+        3 => "ENERGY",
+        5 => "RUNES",
+        6 => "RUNIC_POWER",
+        7 => "SOUL_SHARDS",
+        8 => "LUNAR_POWER",
+        9 => "HOLY_POWER",
+        11 => "MAELSTROM",
+        13 => "INSANITY",
+        17 => "FURY",
+        18 => "PAIN",
+        _ => "MANA",
+    }
+}
+
 /// Register UnitPowerType with party and target awareness.
 fn register_power_type_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set(
@@ -160,16 +180,21 @@ fn register_power_type_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
         lua.create_function(move |lua, unit: Value| {
             if let Value::String(s) = &unit {
                 let u = s.to_string_lossy();
+                if u == "player" {
+                    let st = state.borrow();
+                    let pt = st.player_power_type;
+                    return Ok((pt, Value::String(lua.create_string(power_type_name(pt))?)));
+                }
                 if u == "target" {
                     let st = state.borrow();
                     if let Some(t) = &st.current_target {
-                        return Ok((t.power_type, Value::String(lua.create_string(t.power_type_name)?)));
+                        return Ok((t.power_type, Value::String(lua.create_string(t.power_type_name.as_str())?)));
                     }
                 }
                 if let Some(idx) = parse_party_index(&u) {
                     let st = state.borrow();
                     if let Some(m) = st.party_members.get(idx) {
-                        return Ok((m.power_type, Value::String(lua.create_string(m.power_type_name)?)));
+                        return Ok((m.power_type, Value::String(lua.create_string(m.power_type_name.as_str())?)));
                     }
                 }
             }

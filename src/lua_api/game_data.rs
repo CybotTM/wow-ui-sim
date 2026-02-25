@@ -17,15 +17,21 @@ pub struct TargetInfo {
     pub power: i32,
     pub power_max: i32,
     pub power_type: i32,
-    pub power_type_name: &'static str,
+    pub power_type_name: String,
     pub is_player: bool,
     pub is_enemy: bool,
     pub guid: String,
+    /// "normal", "elite", "rare", "rareelite", "worldboss", "trivial", "minus".
+    pub classification: String,
+    /// "Humanoid", "Beast", "Demon", "Undead", "Elemental", "Dragonkin", etc.
+    pub creature_type: String,
+    /// 1-8: 1=Hostile, 4=Neutral, 5=Friendly (relative to player).
+    pub reaction: i32,
 }
 
 /// A simulated party member.
 pub struct PartyMember {
-    pub name: &'static str,
+    pub name: String,
     /// 1-based class index into CLASS_DATA.
     pub class_index: i32,
     pub level: i32,
@@ -35,7 +41,7 @@ pub struct PartyMember {
     pub power_max: i32,
     /// 0=MANA, 1=RAGE, 2=FOCUS, 3=ENERGY.
     pub power_type: i32,
-    pub power_type_name: &'static str,
+    pub power_type_name: String,
     pub is_leader: bool,
     /// When the member died (for auto-rez after 30s).
     pub dead_since: Option<std::time::Instant>,
@@ -44,7 +50,7 @@ pub struct PartyMember {
 /// A simulated aura (buff or debuff).
 #[derive(Clone)]
 pub struct AuraInfo {
-    pub name: &'static str,
+    pub name: String,
     pub spell_id: i32,
     pub icon: i32,
     /// Total duration in seconds (0 = permanent/no duration).
@@ -53,7 +59,7 @@ pub struct AuraInfo {
     pub expiration_time: f64,
     /// Stack count.
     pub applications: i32,
-    pub source_unit: &'static str,
+    pub source_unit: String,
     pub is_helpful: bool,
     pub is_stealable: bool,
     pub can_apply_aura: bool,
@@ -254,7 +260,7 @@ pub fn default_party() -> Vec<PartyMember> {
         .iter()
         .map(|&(name, class_index, health_max, power, power_max, power_type, power_type_name)| {
             PartyMember {
-                name,
+                name: name.to_string(),
                 class_index,
                 level: 80,
                 health: health_max,
@@ -262,7 +268,7 @@ pub fn default_party() -> Vec<PartyMember> {
                 power,
                 power_max,
                 power_type,
-                power_type_name,
+                power_type_name: power_type_name.to_string(),
                 is_leader: false,
                 dead_since: None,
             }
@@ -295,10 +301,13 @@ fn build_player_target(state: &super::state::SimState) -> TargetInfo {
         power: 50_000,
         power_max: 100_000,
         power_type: 0,
-        power_type_name: "MANA",
+        power_type_name: "MANA".to_string(),
         is_player: true,
         is_enemy: false,
         guid: "Player-0000-00000001".into(),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 5,
     }
 }
 
@@ -310,7 +319,7 @@ fn build_party_target(unit_id: &str, state: &super::state::SimState) -> Option<T
     let m = state.party_members.get(idx)?;
     Some(TargetInfo {
         unit_id: unit_id.into(),
-        name: m.name.into(),
+        name: m.name.clone(),
         class_index: m.class_index,
         level: m.level,
         health: m.health,
@@ -318,10 +327,13 @@ fn build_party_target(unit_id: &str, state: &super::state::SimState) -> Option<T
         power: m.power,
         power_max: m.power_max,
         power_type: m.power_type,
-        power_type_name: m.power_type_name,
+        power_type_name: m.power_type_name.clone(),
         is_player: true,
         is_enemy: false,
         guid: format!("Player-0000-0000000{}", idx + 2),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 5,
     })
 }
 
@@ -338,10 +350,13 @@ fn build_enemy_target() -> TargetInfo {
         power,
         power_max,
         power_type: 0,
-        power_type_name,
+        power_type_name: power_type_name.to_string(),
         is_player: false,
         is_enemy: true,
         guid: "Creature-0000-00000099".into(),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 2,
     }
 }
 
@@ -437,13 +452,13 @@ fn build_auras_from_indices(indices: &[usize]) -> Vec<AuraInfo> {
             let (name, spell_id, icon, duration, source, can_apply) = BUFF_POOL[pool_idx];
             let expiration_time = if duration > 0.0 { get_time + duration } else { 0.0 };
             AuraInfo {
-                name,
+                name: name.to_string(),
                 spell_id,
                 icon,
                 duration,
                 expiration_time,
                 applications: 0,
-                source_unit: source,
+                source_unit: source.to_string(),
                 is_helpful: true,
                 is_stealable: false,
                 can_apply_aura: can_apply,

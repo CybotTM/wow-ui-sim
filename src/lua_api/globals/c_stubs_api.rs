@@ -35,15 +35,15 @@ pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
 fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_achievement_info(lua)?;
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
-    register_c_guild(lua)?;
+    register_c_guild(lua, std::rc::Rc::clone(&state))?;
     register_c_guild_info(lua)?;
     register_c_lfg_list(lua)?;
     register_c_loss_of_control(lua)?;
     register_c_mail(lua)?;
     register_c_stable_info(lua)?;
     register_c_tutorial(lua)?;
-    super::action_bar_api::register_c_action_bar_namespace(lua, state)?;
-    register_unit_frame_global_stubs(lua)?;
+    super::action_bar_api::register_c_action_bar_namespace(lua, state.clone())?;
+    register_unit_frame_global_stubs(lua, std::rc::Rc::clone(&state))?;
     register_powerbar_prediction_colors(lua)?;
     super::c_stubs_achievement::register_achievement_stubs(lua)?;
     super::c_stubs_achievement::register_tracking_stubs(lua)?;
@@ -53,7 +53,7 @@ fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
 fn register_ui_and_chat_stubs(lua: &Lua) -> Result<()> {
     register_c_log(lua)?;
     register_c_campaign_info(lua)?;
-    register_quest_global_functions(lua)?;
+    register_quest_global_functions(lua, std::rc::Rc::clone(&state))?;
     register_chat_stubs(lua)?;
     register_chat_window_stubs(lua)?;
     register_c_macro(lua)?;
@@ -71,12 +71,21 @@ fn register_c_achievement_info(lua: &Lua) -> Result<()> {
 }
 
 
-fn register_c_guild(lua: &Lua) -> Result<()> {
+fn register_c_guild(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetNumMembers", lua.create_function(|_, ()| Ok(5i32))?)?;
-    t.set("IsInGuild", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("GetGuildInfo", lua.create_function(|_, _unit: Option<String>| {
-        Ok(("Stormwind Guard".to_string(), "Officer".to_string(), 2i32, ""))
+    let st = std::rc::Rc::clone(&state);
+    t.set("GetNumMembers", lua.create_function(move |_, ()| Ok(st.borrow().guild_num_members))?)?;
+    let st = std::rc::Rc::clone(&state);
+    t.set("IsInGuild", lua.create_function(move |_, ()| Ok(st.borrow().guild_name.is_some()))?)?;
+    t.set("GetGuildInfo", lua.create_function(move |_, _unit: Option<String>| {
+        let s = state.borrow();
+        match &s.guild_name {
+            Some(name) => {
+                let rank = s.guild_rank.clone().unwrap_or_default();
+                Ok((name.clone(), rank, s.guild_num_members, String::new()))
+            }
+            None => Ok((String::new(), String::new(), 0i32, String::new())),
+        }
     })?)?;
     t.set("GetMemberInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
     lua.globals().set("C_Guild", t)?;
@@ -177,10 +186,11 @@ fn set_texture_on_handle(lua: &mlua::Lua, tex: &Value, path: Option<String>) {
 }
 
 /// Global function stubs needed by Blizzard_UnitFrame.
-fn register_unit_frame_global_stubs(lua: &Lua) -> Result<()> {
+fn register_unit_frame_global_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let g = lua.globals();
-    g.set("InCombatLockdown", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("IsResting", lua.create_function(|_, ()| Ok(false))?)?;
+    let s2 = std::rc::Rc::clone(&state);
+    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(s2.borrow().in_combat))?)?;
+    g.set("IsResting", lua.create_function(move |_, ()| Ok(state.borrow().is_resting))?)?;
     g.set("IsPVPTimerRunning", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("GetPVPTimer", lua.create_function(|_, ()| Ok(0.0f64))?)?;
     g.set("GetReadyCheckStatus", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
@@ -296,9 +306,12 @@ fn register_c_campaign_info(lua: &Lua) -> Result<()> {
 }
 
 /// Quest-related global functions used by ObjectiveTracker.
-fn register_quest_global_functions(lua: &Lua) -> Result<()> {
+fn register_quest_global_functions(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let g = lua.globals();
-    g.set("IsInInstance", lua.create_function(|_, ()| Ok((false, "none")))?)?;
+    g.set("IsInInstance", lua.create_function(move |_, ()| {
+        let s = state.borrow();
+        Ok((s.in_instance, s.instance_type.clone()))
+    })?)?;
     g.set("IsQuestSequenced", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
     g.set("GetQuestLogCompletionText", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
     g.set("GetQuestProgressBarPercent", lua.create_function(|_, _quest_id: i32| Ok(0.0f64))?)?;

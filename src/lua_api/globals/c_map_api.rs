@@ -2,14 +2,17 @@
 //!
 //! Contains map, exploration, navigation, and location-related API functions.
 
+use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Register C_Map namespace and map-related functions.
-pub fn register_c_map_api(lua: &Lua) -> Result<()> {
+pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
 
     globals.set("C_Map", register_c_map(lua)?)?;
-    register_zone_text_functions(lua)?;
+    register_zone_text_functions(lua, state)?;
     globals.set("UiMapPoint", register_ui_map_point(lua)?)?;
     globals.set("C_MapExplorationInfo", register_c_map_exploration(lua)?)?;
     globals.set("C_DateAndTime", register_c_date_and_time(lua)?)?;
@@ -97,12 +100,22 @@ fn create_world_pos_from_map_pos(lua: &Lua, (map_id, pos): (i32, Value)) -> Resu
 }
 
 /// Zone text functions (GetRealZoneText, GetZoneText, etc.).
-fn register_zone_text_functions(lua: &Lua) -> Result<()> {
+fn register_zone_text_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetRealZoneText", lua.create_function(|_, ()| Ok("Stormwind City"))?)?;
-    globals.set("GetZoneText", lua.create_function(|_, ()| Ok("Stormwind City"))?)?;
-    globals.set("GetSubZoneText", lua.create_function(|_, ()| Ok("Trade District"))?)?;
-    globals.set("GetMinimapZoneText", lua.create_function(|_, ()| Ok("Trade District"))?)?;
+    let st = state.clone();
+    globals.set("GetRealZoneText", lua.create_function(move |_, ()| Ok(st.borrow().zone_name.clone()))?)?;
+    let st = state.clone();
+    globals.set("GetZoneText", lua.create_function(move |_, ()| Ok(st.borrow().zone_name.clone()))?)?;
+    let st = state.clone();
+    globals.set("GetSubZoneText", lua.create_function(move |_, ()| Ok(st.borrow().sub_zone_name.clone()))?)?;
+    globals.set("GetMinimapZoneText", lua.create_function(move |_, ()| {
+        let s = state.borrow();
+        if s.sub_zone_name.is_empty() {
+            Ok(s.zone_name.clone())
+        } else {
+            Ok(s.sub_zone_name.clone())
+        }
+    })?)?;
     Ok(())
 }
 

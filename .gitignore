@@ -2,4 +2,5 @@
 /.cache
 /Interface/AddOns/*
 !/Interface/AddOns/TestFramework
+!/Interface/AddOns/Admin
 /docs/local/
