@@ -25,12 +25,12 @@ fn get_number(v: &Value) -> Option<f32> {
 
 /// Helper to extract frame ID from Value.
 ///
-/// Handles both LightUserData (direct frame reference) and String (global name
-/// lookup via `_G`), matching WoW's SetPoint behavior where string frame
-/// names are resolved to the corresponding frame object.
+/// Handles UserData (FrameRef) and String (global name lookup via `_G`),
+/// matching WoW's SetPoint behavior where string frame names are resolved
+/// to the corresponding frame object.
 fn get_frame_id(lua: &mlua::Lua, v: &Value) -> Option<usize> {
     match v {
-        ref v @ Value::UserData(_) | ref v @ Value::LightUserData(_) => {
+        ref v @ Value::UserData(_) => {
             extract_frame_id(v).map(|id| id as usize)
         }
         Value::String(s) => {
@@ -383,7 +383,7 @@ fn resolve_set_all_points_target(
             let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
             (true, parent_id)
         }
-        ref v @ Value::UserData(_) | ref v @ Value::LightUserData(_) => {
+        ref v @ Value::UserData(_) => {
             (true, extract_frame_id(v).map(|id| id as usize))
         }
         _ if has_arg => (true, None),

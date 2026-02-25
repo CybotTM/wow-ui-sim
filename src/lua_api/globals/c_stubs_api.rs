@@ -174,7 +174,7 @@ fn resolve_texture_path(value: &Value) -> Option<String> {
     }
 }
 
-/// Set texture path on a frame LightUserData widget.
+/// Set texture path on a frame UserData (FrameRef) widget.
 fn set_texture_on_handle(lua: &mlua::Lua, tex: &Value, path: Option<String>) {
     if let Some(id) = crate::lua_api::frame::extract_frame_id(tex) {
         let state_rc = crate::lua_api::frame::get_sim_state(lua);

@@ -168,7 +168,7 @@ fn format_print_args(args: &[Value]) -> String {
     output
 }
 
-/// Override `ipairs` to support iterating over frame LightUserData children.
+/// Override `ipairs` to support iterating over frame UserData (FrameRef) children.
 ///
 /// WoW addons iterate frame children with `for i, child in ipairs(frame)`.
 /// Falls back to the original `ipairs` for regular tables.
@@ -217,7 +217,7 @@ fn create_frame_children_iterator(lua: &Lua, frame_id: u64) -> Result<mlua::Mult
     ]))
 }
 
-/// Override `getmetatable` to return a proper metatable for frame LightUserData.
+/// Override `getmetatable` to return a proper metatable for frame UserData (FrameRef).
 ///
 /// WoW addons expect `getmetatable(frame).__index` to be an iterable table
 /// of method names mapped to functions. Two frames of the same widget type
@@ -349,9 +349,9 @@ fn all_widget_types() -> [crate::widget::WidgetType; 20] {
     ]
 }
 
-/// Override `setmetatable` to support per-frame custom metatables on LightUserData.
+/// Override `setmetatable` to support per-frame custom metatables on UserData (FrameRef).
 ///
-/// WoW frames are tables with metatables, but our simulator uses LightUserData.
+/// WoW frames are tables with metatables, but our simulator uses UserData.
 /// This stores per-frame metatables in a registry table `__frame_custom_mt`
 /// so that `__newindex` can delegate to per-frame `__newindex` metamethods.
 fn register_custom_setmetatable(lua: &Lua) -> Result<()> {

@@ -126,10 +126,10 @@ fn add_set_thumb_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
             .load("_G.__slider_thumbs = _G.__slider_thumbs or {}; return _G.__slider_thumbs")
             .eval()?;
         match arg {
-            Value::LightUserData(_) => { store.set(id, arg)?; }
+            Value::UserData(_) => { store.set(id, arg)?; }
             Value::Integer(_) | Value::Number(_) | Value::String(_) => {
                 let existing: Value = store.get(id)?;
-                let thumb_ud = if let Value::LightUserData(_) = existing {
+                let thumb_ud = if let Value::UserData(_) = existing {
                     existing
                 } else {
                     let new_thumb = get_or_create_child_texture(lua, id, "ThumbTexture")?;
@@ -183,7 +183,7 @@ fn add_set_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let id = this.0;
         let (path, bar_id) = match &texture {
             Value::String(s) => (Some(s.to_string_lossy().to_string()), None),
-            Value::LightUserData(lud) => (None, Some(lud.0 as u64)),
+            Value::UserData(_) => (None, crate::lua_api::frame::extract_frame_id(&texture)),
             _ => (None, None),
         };
         let state_rc = get_sim_state(lua);

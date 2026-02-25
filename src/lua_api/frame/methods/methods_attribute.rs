@@ -130,7 +130,7 @@ fn attribute_to_value(lua: &mlua::Lua, attr: &AttributeValue) -> mlua::Result<Va
 
 /// Store the attribute value in Lua (tables) or Rust (simple types).
 fn set_attribute_value(lua: &mlua::Lua, id: u64, name: &str, value: &Value) -> mlua::Result<()> {
-    if matches!(value, Value::Table(_) | Value::UserData(_) | Value::LightUserData(_) | Value::Function(_)) {
+    if matches!(value, Value::Table(_) | Value::UserData(_) | Value::Function(_)) {
         store_table_attribute(lua, id, name, value)?;
     } else {
         store_simple_attribute(lua, id, name, value)?;

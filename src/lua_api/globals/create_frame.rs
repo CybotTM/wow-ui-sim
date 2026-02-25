@@ -15,7 +15,6 @@ use std::rc::Rc;
 /// UserData stored at key `"__lud"` (set by `create_forbidden_proxy`).
 fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
     match value {
-        Value::LightUserData(_) => extract_frame_id(value),
         Value::UserData(_) => extract_frame_id(value),
         Value::Table(t) => {
             // Forbidden proxy: UserData stored at "__lud"
@@ -146,7 +145,7 @@ fn parse_frame_type_arg(lua: &Lua, v: Option<&Value>) -> String {
 fn parse_name_arg(lua: &Lua, v: Option<&Value>) -> (Option<String>, bool) {
     let invalid = matches!(
         v,
-        Some(Value::LightUserData(_) | Value::UserData(_) | Value::Table(_) | Value::Function(_))
+        Some(Value::UserData(_) | Value::Table(_) | Value::Function(_))
     );
     let name = v.and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string());

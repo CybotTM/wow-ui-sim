@@ -597,7 +597,7 @@ fn resolve_mixin_source(secure_methods: &Value, mixin: mlua::Table) -> Result<ml
 
 /// Apply a mixin source table's k/v pairs into object.
 /// For userdata objects, function values are also routed through __SetMixinOverride.
-/// For LightUserData/UserData, uses a Lua-level setter to trigger __newindex.
+/// For UserData (FrameRef), uses a Lua-level setter to trigger __newindex.
 fn apply_mixin_to_object(
     lua: &Lua,
     object: &Value,
@@ -640,7 +640,7 @@ fn mixin_impl(lua: &Lua, args: MultiValue) -> Result<Value> {
     })?;
     let secure_methods: Value = lua.globals().get("__secureMixinMethods")?;
     let set_override: Option<Function> = lua.named_registry_value("__SetMixinOverride").ok();
-    let is_userdata = matches!(&object, Value::LightUserData(_) | Value::UserData(_));
+    let is_userdata = matches!(&object, Value::UserData(_));
     for mixin_val in iter {
         let mixin = match mixin_val {
             Value::Table(t) => t,

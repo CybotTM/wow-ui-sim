@@ -22,7 +22,7 @@ fn enumerate_frames(lua: &Lua, arg: Value) -> Result<Value> {
     let state = state_rc.borrow();
 
     let after_id: u64 = match &arg {
-        ref v @ Value::LightUserData(_) | ref v @ Value::UserData(_) => {
+        ref v @ Value::UserData(_) => {
             extract_frame_id(v).unwrap_or(0)
         }
         Value::Nil => 0,

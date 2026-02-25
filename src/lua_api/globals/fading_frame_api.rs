@@ -25,7 +25,7 @@ pub fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
 /// FadingFrame_OnLoad: initializes fading state fields on the frame or table.
 fn fading_frame_on_load(lua: &Lua, frame: Value) -> Result<()> {
     match &frame {
-        Value::LightUserData(_) | Value::UserData(_) => {
+        Value::UserData(_) => {
             if let Some(id) = crate::lua_api::frame::extract_frame_id(&frame) {
                 let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, id);
                 fields.set("fadeInTime", 0.0f64)?;

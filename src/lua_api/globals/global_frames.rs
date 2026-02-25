@@ -236,7 +236,7 @@ fn setup_lfg_list_frame(lua: &Lua) -> Result<()> {
 
 /// Set up AlertFrame.alertFrameSubSystems table.
 fn setup_alert_frame(lua: &Lua) -> Result<()> {
-    // AlertFrame is now LightUserData — use __frame_fields to store custom properties
+    // AlertFrame is UserData (FrameRef) — use __frame_fields to store custom properties
     let alert_frame: Value = lua.globals().get("AlertFrame")?;
     if let Some(id) = crate::lua_api::frame::extract_frame_id(&alert_frame) {
         let fields = get_or_create_frame_fields(lua, id)?;
@@ -345,7 +345,7 @@ fn register_misc_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
 
 /// Set ContainerFrames table on ContainerFrameContainer.
 fn setup_container_frame(lua: &Lua) -> Result<()> {
-    // ContainerFrameContainer is now LightUserData — use __frame_fields
+    // ContainerFrameContainer is UserData (FrameRef) — use __frame_fields
     let container: Value = lua.globals().get("ContainerFrameContainer")?;
     if let Some(id) = crate::lua_api::frame::extract_frame_id(&container) {
         let fields = get_or_create_frame_fields(lua, id)?;

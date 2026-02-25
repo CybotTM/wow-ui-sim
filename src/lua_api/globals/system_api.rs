@@ -1,7 +1,7 @@
 //! System utility functions.
 //!
 //! This module contains WoW's core system functions including:
-//! - `type()` - Type introspection with Frame LightUserData support
+//! - `type()` - Type introspection with Frame UserData (FrameRef) support
 //! - `rawget()` - Raw table access with userdata compatibility
 //! - `xpcall()` - Protected call with error handler and varargs (Lua 5.2+ feature)
 //! - `SlashCmdList` - Slash command registry table
@@ -43,13 +43,13 @@ pub fn register_system_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     Ok(())
 }
 
-/// Override `type()` and `rawget()` to handle frame LightUserData as "table".
+/// Override `type()` and `rawget()` to handle frame UserData (FrameRef) as "table".
 fn register_type_overrides(lua: &Lua) -> Result<()> {
     register_type_override(lua)?;
     register_rawget_override(lua)
 }
 
-/// Override `type()` to report frames (LightUserData or FrameRef UserData) as "table".
+/// Override `type()` to report frames (FrameRef UserData) as "table".
 ///
 /// Blizzard's Dump.lua does `type(v) == "table"` checks and we want frames to pass.
 fn register_type_override(lua: &Lua) -> Result<()> {
@@ -68,9 +68,7 @@ fn register_type_override(lua: &Lua) -> Result<()> {
                 }
                 "userdata"
             }
-            Value::LightUserData(_) => "table",
-            Value::Error(_) => "error",
-            Value::Other(_) => "userdata",
+            Value::LightUserData(_) | Value::Error(_) | Value::Other(_) => "userdata",
         };
         Ok(type_str)
     })?;
@@ -85,7 +83,7 @@ fn register_rawget_override(lua: &Lua) -> Result<()> {
     let rawget_fn = lua.create_function(|lua, (table, key): (Value, Value)| {
         match table {
             Value::Table(t) => t.raw_get(key),
-            Value::UserData(_) | Value::LightUserData(_) => Ok(Value::Nil),
+            Value::UserData(_) => Ok(Value::Nil),
             _ => {
                 let original: mlua::Function = lua.named_registry_value("__original_rawget")?;
                 original.call((table, key))
