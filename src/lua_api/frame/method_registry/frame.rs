@@ -187,7 +187,6 @@ pub const FRAME_METHODS: &[&str] = &[
     "SetMouseMotionEnabled",
     "SetMovable",
     "SetOnClickHandler",
-    "SetOwningDialog",
     "SetParent",
     "SetParentKey",
     "SetPassThroughButtons",
