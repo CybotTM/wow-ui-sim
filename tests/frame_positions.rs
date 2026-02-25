@@ -87,7 +87,7 @@ fn position_tests() -> Vec<TestCase> {
         ("focus_frame_position", "FocusFrame", 1190.0, 926.25, 174.0, 75.0),
         ("pet_frame_position", "PetFrame", 361.5, 967.0, 120.0, 49.0),
         ("paladin_power_bar_position", "PaladinPowerBarFrame", 341.5, 922.0, 150.0, 43.0),
-        ("party_frame_position", "PartyFrame", 22.0, 147.0, 120.0, 244.0),
+        ("party_frame_position", "PartyFrame", 22.0, 147.0, 120.0, 55.0),
         ("compact_party_frame_position", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0),
         // HUD elements
         ("minimap_position", "Minimap", 1391.0, 44.0, 198.0, 198.0),

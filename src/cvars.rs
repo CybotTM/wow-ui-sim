@@ -155,17 +155,48 @@ fn parse_cvar_yaml(yaml: &str) -> (HashMap<String, String>, HashMap<String, Stri
             let original_key = key.trim().to_string();
             let lower_key = original_key.to_lowercase();
             let value = value.trim();
-            // Strip surrounding quotes if present
-            let value = value
-                .strip_prefix('\'')
-                .and_then(|v| v.strip_suffix('\''))
-                .or_else(|| value.strip_prefix('"').and_then(|v| v.strip_suffix('"')))
-                .unwrap_or(value);
+            // Strip surrounding quotes and process escapes for double-quoted strings
+            let (value, is_double_quoted) = if let Some(inner) =
+                value.strip_prefix('"').and_then(|v| v.strip_suffix('"'))
+            {
+                (inner, true)
+            } else if let Some(inner) =
+                value.strip_prefix('\'').and_then(|v| v.strip_suffix('\''))
+            {
+                (inner, false)
+            } else {
+                (value, false)
+            };
+            let value = if is_double_quoted {
+                process_yaml_escapes(value)
+            } else {
+                value.to_string()
+            };
             original_names.insert(lower_key.clone(), original_key);
-            defaults.insert(lower_key, value.to_string());
+            defaults.insert(lower_key, value);
         }
     }
     (defaults, original_names)
+}
+
+/// Process YAML double-quoted string escape sequences (\\xHH hex escapes).
+fn process_yaml_escapes(s: &str) -> String {
+    let mut result = String::with_capacity(s.len());
+    let bytes = s.as_bytes();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' && i + 3 < bytes.len() && bytes[i + 1] == b'x' {
+            let hex = &s[i + 2..i + 4];
+            if let Ok(byte) = u8::from_str_radix(hex, 16) {
+                result.push(byte as char);
+                i += 4;
+                continue;
+            }
+        }
+        result.push(bytes[i] as char);
+        i += 1;
+    }
+    result
 }
 
 #[cfg(test)]
