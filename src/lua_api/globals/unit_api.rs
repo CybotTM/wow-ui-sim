@@ -78,7 +78,7 @@ pub fn register_unit_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> 
     register_group_functions(lua, state.clone())?;
     super::unit_health_power_api::register_health_power_functions(lua, state.clone())?;
     register_threat_functions(lua)?;
-    register_classification_functions(lua)?;
+    register_classification_functions(lua, state.clone())?;
     register_casting_functions(lua)?;
     register_unit_casting_info(lua, state.clone())?;
     register_aura_functions(lua, state.clone())?;
@@ -565,32 +565,37 @@ fn register_threat_functions(lua: &Lua) -> Result<()> {
 }
 
 /// Register UnitClassification, UnitCreatureType, UnitCreatureFamily, UnitReaction.
-fn register_classification_functions(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
-        "UnitClassification",
-        lua.create_function(|lua, _unit: Option<String>| {
-            Ok(Value::String(lua.create_string("normal")?))
-        })?,
-    )?;
-    globals.set(
-        "UnitCreatureType",
-        lua.create_function(|lua, _unit: Option<String>| {
-            Ok(Value::String(lua.create_string("Humanoid")?))
-        })?,
-    )?;
-    globals.set(
-        "UnitCreatureFamily",
-        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
-    )?;
-    // Reaction 1-8: 1=Exceptionally Hostile .. 4=Neutral .. 5=Friendly .. 8=Exalted
-    globals.set(
-        "UnitReaction",
-        lua.create_function(|_, (_unit1, _unit2): (String, String)| Ok(5i32))?,
-    )?;
-
+fn register_classification_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let g = lua.globals();
+    let s = Rc::clone(&state);
+    g.set("UnitClassification", lua.create_function(move |lua, unit: Option<String>| {
+        let val = lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.classification.clone())
+            .unwrap_or_else(|| "normal".to_string());
+        Ok(Value::String(lua.create_string(&val)?))
+    })?)?;
+    let s = Rc::clone(&state);
+    g.set("UnitCreatureType", lua.create_function(move |lua, unit: Option<String>| {
+        let val = lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.creature_type.clone())
+            .unwrap_or_else(|| "Humanoid".to_string());
+        Ok(Value::String(lua.create_string(&val)?))
+    })?)?;
+    g.set("UnitCreatureFamily", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    let s = Rc::clone(&state);
+    g.set("UnitReaction", lua.create_function(move |_, (_unit1, unit2): (String, String)| {
+        let val = lookup_target_field(&s.borrow(), Some(&unit2), |t| t.reaction)
+            .unwrap_or(5);
+        Ok(val)
+    })?)?;
     Ok(())
+}
+
+/// Look up a field from the TargetInfo matching a unit ID ("target", "focus", "player", etc.).
+fn lookup_target_field<T>(state: &SimState, unit: Option<&str>, f: impl Fn(&super::super::game_data::TargetInfo) -> T) -> Option<T> {
+    match unit.unwrap_or("player") {
+        "target" => state.current_target.as_ref().map(&f),
+        "focus" => state.current_focus.as_ref().map(&f),
+        _ => None,
+    }
 }
 
 /// Register UnitCastingInfo, UnitChannelInfo.

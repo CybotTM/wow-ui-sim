@@ -45,10 +45,12 @@ local HELP = {
     { "/aa target <name> <level> <class> [enemy]", "Set target (enemy defaults off)" },
     { "/aa cleartarget",                    "Clear target" },
     { "/aa tpower <cur> <max> [powerType]", "Set target power" },
+    { "/aa ttype <class> <creature> <reaction>", "Set target type (e.g. elite Beast 2)" },
     { "/aa focus <name> <level> <class> [enemy]",  "Set focus" },
     { "/aa clearfocus",                     "Clear focus" },
     { "/aa fhealth <cur> <max>",            "Set focus health" },
     { "/aa fpower <cur> <max> [powerType]", "Set focus power" },
+    { "/aa ftype <class> <creature> <reaction>", "Set focus type" },
     { "--- Party ---" },
     { "/aa party <size>",                   "Set party size (0-4)" },
     { "/aa partymember <idx> <name> <class> <level>", "Set party member info" },
@@ -234,6 +236,15 @@ handlers["target"] = function(args)
     Confirm("Target: " .. Val(name) .. " lv" .. Val(level) .. " class " .. Val(class) .. (enemy and " (enemy)" or ""))
 end
 
+handlers["ttype"] = function(args)
+    local classification = args[1]
+    local creatureType   = args[2]
+    local reaction       = args[3] and tonumber(args[3])
+    if not classification then return Err("Usage: /aa ttype <classification> <creatureType> <reaction>") end
+    A_Admin.SetTargetType(classification, creatureType, reaction)
+    Confirm("Target type: " .. Val(classification) .. " " .. Val(creatureType or "nil") .. " reaction=" .. Val(reaction or "nil"))
+end
+
 handlers["tpower"] = function(args)
     local cur       = tonumber(args[1])
     local max       = tonumber(args[2])
@@ -271,6 +282,15 @@ handlers["fhealth"] = function(args)
     if not cur or not max then return Err("Usage: /aa fhealth <cur> <max>") end
     A_Admin.SetFocusHealth(cur, max)
     Confirm("Focus health: " .. Val(cur) .. "/" .. Val(max))
+end
+
+handlers["ftype"] = function(args)
+    local classification = args[1]
+    local creatureType   = args[2]
+    local reaction       = args[3] and tonumber(args[3])
+    if not classification then return Err("Usage: /aa ftype <classification> <creatureType> <reaction>") end
+    A_Admin.SetFocusType(classification, creatureType, reaction)
+    Confirm("Focus type: " .. Val(classification) .. " " .. Val(creatureType or "nil") .. " reaction=" .. Val(reaction or "nil"))
 end
 
 handlers["fpower"] = function(args)

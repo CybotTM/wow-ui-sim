@@ -21,6 +21,12 @@ pub struct TargetInfo {
     pub is_player: bool,
     pub is_enemy: bool,
     pub guid: String,
+    /// "normal", "elite", "rare", "rareelite", "worldboss", "trivial", "minus".
+    pub classification: String,
+    /// "Humanoid", "Beast", "Demon", "Undead", "Elemental", "Dragonkin", etc.
+    pub creature_type: String,
+    /// 1-8: 1=Hostile, 4=Neutral, 5=Friendly (relative to player).
+    pub reaction: i32,
 }
 
 /// A simulated party member.
@@ -299,6 +305,9 @@ fn build_player_target(state: &super::state::SimState) -> TargetInfo {
         is_player: true,
         is_enemy: false,
         guid: "Player-0000-00000001".into(),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 5,
     }
 }
 
@@ -322,6 +331,9 @@ fn build_party_target(unit_id: &str, state: &super::state::SimState) -> Option<T
         is_player: true,
         is_enemy: false,
         guid: format!("Player-0000-0000000{}", idx + 2),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 5,
     })
 }
 
@@ -342,6 +354,9 @@ fn build_enemy_target() -> TargetInfo {
         is_player: false,
         is_enemy: true,
         guid: "Creature-0000-00000099".into(),
+        classification: "normal".into(),
+        creature_type: "Humanoid".into(),
+        reaction: 2,
     }
 }
 

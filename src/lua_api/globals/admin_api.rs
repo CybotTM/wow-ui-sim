@@ -207,6 +207,30 @@ fn register_targeting_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
             Ok(())
         }
     })?;
+    set_fn(lua, t, "SetTargetType", {
+        let s = Rc::clone(&state);
+        move |_, (classification, creature_type, reaction): (Option<String>, Option<String>, Option<i32>)| {
+            let mut st = s.borrow_mut();
+            if let Some(t) = st.current_target.as_mut() {
+                if let Some(c) = classification { t.classification = c; }
+                if let Some(ct) = creature_type { t.creature_type = ct; }
+                if let Some(r) = reaction { t.reaction = r; }
+            }
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "SetFocusType", {
+        let s = Rc::clone(&state);
+        move |_, (classification, creature_type, reaction): (Option<String>, Option<String>, Option<i32>)| {
+            let mut st = s.borrow_mut();
+            if let Some(f) = st.current_focus.as_mut() {
+                if let Some(c) = classification { f.classification = c; }
+                if let Some(ct) = creature_type { f.creature_type = ct; }
+                if let Some(r) = reaction { f.reaction = r; }
+            }
+            Ok(())
+        }
+    })?;
     set_fn(lua, t, "SetFocusHealth", {
         let s = Rc::clone(&state);
         move |_, (cur, max): (i32, i32)| {
@@ -246,6 +270,9 @@ fn make_target_info(unit_id: &str, name: &str, level: i32, class_index: i32, is_
         is_player: !is_enemy,
         is_enemy,
         guid,
+        classification: if is_enemy { "normal".to_string() } else { "normal".to_string() },
+        creature_type: if is_enemy { "Humanoid".to_string() } else { "Humanoid".to_string() },
+        reaction: if is_enemy { 2 } else { 5 },
     }
 }
 
