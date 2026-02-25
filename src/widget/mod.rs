@@ -75,6 +75,9 @@ impl WidgetType {
             "eventframe" => Some(Self::Frame),
             // Checkout is a special frame type for the in-game shop
             "checkout" => Some(Self::Frame),
+            // Specialty frame types — no custom behavior needed, treat as plain Frame
+            "archaeologydigsiteframe" | "browser" | "fogofwarframe" | "movieframe"
+            | "offscreenframe" | "questpoiframe" | "scenariopoiframe" | "unitpositionframe" => Some(Self::Frame),
             // WorldFrame is internal only — CreateFrame("WorldFrame") should error
             _ => None,
         }

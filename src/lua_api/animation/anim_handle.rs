@@ -36,8 +36,8 @@ impl AnimHandle {
         });
     }
 
-    /// Register delay and order methods.
-    fn add_delay_and_order_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+    /// Register start/end delay methods.
+    fn add_start_end_delay_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetStartDelay", |_, this, delay: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -69,7 +69,10 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.end_delay))
         });
+    }
 
+    /// Register order methods: SetOrder, GetOrder.
+    fn add_order_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetOrder", |_, this, order: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -85,6 +88,12 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.order))
         });
+    }
+
+    /// Register delay and order methods.
+    fn add_delay_and_order_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        Self::add_start_end_delay_methods(methods);
+        Self::add_order_methods(methods);
     }
 
     /// Register all property methods by delegating to sub-helpers.
@@ -222,8 +231,28 @@ impl AnimHandle {
         });
     }
 
-    /// Register rotation methods: SetDegrees, SetOrigin.
-    fn add_rotation_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+    /// Parse origin args from a Lua MultiValue into (point, offset_x, offset_y).
+    fn parse_origin_args(args: MultiValue) -> (String, f64, f64) {
+        let mut iter = args.into_iter();
+        let point = match iter.next() {
+            Some(Value::String(s)) => s.to_string_lossy().to_string(),
+            _ => "CENTER".to_string(),
+        };
+        let offset_x = match iter.next() {
+            Some(Value::Number(n)) => n,
+            Some(Value::Integer(n)) => n as f64,
+            _ => 0.0,
+        };
+        let offset_y = match iter.next() {
+            Some(Value::Number(n)) => n,
+            Some(Value::Integer(n)) => n as f64,
+            _ => 0.0,
+        };
+        (point, offset_x, offset_y)
+    }
+
+    /// Register SetDegrees and SetOrigin rotation methods.
+    fn add_set_rotation_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetDegrees", |_, this, degrees: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -234,21 +263,7 @@ impl AnimHandle {
         });
 
         methods.add_method("SetOrigin", |_, this, args: MultiValue| {
-            let mut iter = args.into_iter();
-            let point = match iter.next() {
-                Some(Value::String(s)) => s.to_string_lossy().to_string(),
-                _ => "CENTER".to_string(),
-            };
-            let offset_x = match iter.next() {
-                Some(Value::Number(n)) => n,
-                Some(Value::Integer(n)) => n as f64,
-                _ => 0.0,
-            };
-            let offset_y = match iter.next() {
-                Some(Value::Number(n)) => n,
-                Some(Value::Integer(n)) => n as f64,
-                _ => 0.0,
-            };
+            let (point, offset_x, offset_y) = Self::parse_origin_args(args);
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
                 && let Some(anim) = group.animations.get_mut(this.anim_index)
@@ -259,6 +274,11 @@ impl AnimHandle {
             }
             Ok(())
         });
+    }
+
+    /// Register rotation methods: SetDegrees, SetOrigin, GetOrigin.
+    fn add_rotation_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        Self::add_set_rotation_methods(methods);
 
         methods.add_method("GetOrigin", |lua, this, _: ()| {
             let state = this.state.borrow();
@@ -280,8 +300,8 @@ impl AnimHandle {
         });
     }
 
-    /// Register flipbook property methods.
-    fn add_flipbook_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+    /// Register flipbook rows and columns methods.
+    fn add_flipbook_rows_cols_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetFlipBookRows", |_, this, rows: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -313,7 +333,10 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.flip_book_columns))
         });
+    }
 
+    /// Register flipbook frames methods: SetFlipBookFrames, GetFlipBookFrames.
+    fn add_flipbook_frames_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetFlipBookFrames", |_, this, frames: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -329,6 +352,12 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.flip_book_frames))
         });
+    }
+
+    /// Register flipbook property methods.
+    fn add_flipbook_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        Self::add_flipbook_rows_cols_methods(methods);
+        Self::add_flipbook_frames_methods(methods);
     }
 
     /// Register playback control stubs and state queries.
@@ -386,8 +415,8 @@ impl AnimHandle {
         });
     }
 
-    /// Register parent, name, and target accessor methods.
-    fn add_accessor_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+    /// Register parent and name accessor methods.
+    fn add_parent_name_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetParent", |lua, this, ()| {
             let handle = AnimGroupHandle {
                 group_id: this.group_id,
@@ -410,7 +439,10 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .and_then(|a| a.name.clone()))
         });
+    }
 
+    /// Register target accessor and key methods.
+    fn add_target_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetTarget", |_, this, ()| {
             let state = this.state.borrow();
             let Some(group) = state.animation_groups.get(&this.group_id) else {
@@ -427,12 +459,14 @@ impl AnimHandle {
             let Some(id) = target_id else { return Ok(Value::Nil) };
             Ok(frame_lud(id))
         });
+
         methods.add_method("SetTarget", |_, _this, target: Value| {
             if target.is_nil() || target == Value::NULL {
                 return Err(mlua::Error::RuntimeError("Usage: Animation:SetTarget(target)".into()));
             }
             Ok(())
         });
+
         methods.add_method("SetChildKey", |_, this, key: String| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -441,13 +475,20 @@ impl AnimHandle {
                 }
             Ok(())
         });
+
         methods.add_method("SetTargetKey", |_, _this, _key: String| Ok(()));
         methods.add_method("SetTargetName", |_, _this, _name: String| Ok(()));
         methods.add_method("SetTargetParent", |_, _this, ()| Ok(()));
     }
 
-    /// Register script handler methods.
-    fn add_script_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+    /// Register parent, name, and target accessor methods.
+    fn add_accessor_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        Self::add_parent_name_methods(methods);
+        Self::add_target_methods(methods);
+    }
+
+    /// Register SetScript, GetScript, HasScript methods.
+    fn add_set_get_script_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetScript", |lua, this, (event, handler): (String, Option<mlua::Function>)| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -480,7 +521,10 @@ impl AnimHandle {
                 .and_then(|g| g.animations.get(this.anim_index))
                 .is_some_and(|a| a.scripts.contains_key(&event)))
         });
+    }
 
+    /// Register HookScript method.
+    fn add_hook_script_method<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("HookScript", |lua, this, (event, handler): (String, Option<mlua::Function>)| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
@@ -495,11 +539,24 @@ impl AnimHandle {
             Ok(())
         });
     }
+
+    /// Register script handler methods.
+    fn add_script_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        Self::add_set_get_script_methods(methods);
+        Self::add_hook_script_method(methods);
+    }
 }
 
 impl UserData for AnimHandle {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetObjectType", |_, _, ()| Ok("Animation"));
+        methods.add_method("GetObjectType", |_, this, ()| {
+            let state = this.state.borrow();
+            let anim_type = state.animation_groups.get(&this.group_id)
+                .and_then(|g| g.animations.get(this.anim_index))
+                .map(|a| a.anim_type)
+                .unwrap_or(AnimationType::Animation);
+            Ok(anim_type.as_str())
+        });
 
         Self::add_duration_methods(methods);
         Self::add_delay_and_order_methods(methods);
