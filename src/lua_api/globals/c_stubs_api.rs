@@ -19,8 +19,8 @@ use mlua::{Lua, MultiValue, Result, Value};
 
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
-    register_core_namespaces(lua, state)?;
-    register_ui_and_chat_stubs(lua)?;
+    register_core_namespaces(lua, std::rc::Rc::clone(&state))?;
+    register_ui_and_chat_stubs(lua, state)?;
     register_missing_globals(lua)?;
     register_missing_namespaces(lua)?;
     register_c_perks_activities(lua)?;
@@ -50,10 +50,10 @@ fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     Ok(())
 }
 
-fn register_ui_and_chat_stubs(lua: &Lua) -> Result<()> {
+fn register_ui_and_chat_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_log(lua)?;
     register_c_campaign_info(lua)?;
-    register_quest_global_functions(lua, std::rc::Rc::clone(&state))?;
+    register_quest_global_functions(lua, state)?;
     register_chat_stubs(lua)?;
     register_chat_window_stubs(lua)?;
     register_c_macro(lua)?;
