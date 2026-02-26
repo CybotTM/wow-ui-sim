@@ -43,11 +43,14 @@ fn add_font_path_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     font.set(
         "SetFont",
         lua.create_function(
-            |_, (this, path, height, flags): (mlua::Table, String, f64, Option<String>)| {
+            |_, (this, path, height, flags): (mlua::Table, Option<String>, Option<f64>, Option<String>)| {
+                let Some(path) = path else { return Ok(false) };
                 this.set("__fontPath", path)?;
-                this.set("__fontHeight", height)?;
+                if let Some(h) = height {
+                    this.set("__fontHeight", h)?;
+                }
                 this.set("__fontFlags", flags.unwrap_or_default())?;
-                Ok(())
+                Ok(true)
             },
         )?,
     )?;
