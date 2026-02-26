@@ -21,6 +21,7 @@ mod gen_spells;
 mod gen_traits;
 mod gen_traits_emit;
 mod gen_traits_load;
+mod gen_zones;
 
 use clap::{Parser, Subcommand};
 use std::io::{self, BufRead, Write};
@@ -132,6 +133,8 @@ enum GenerateTarget {
     Manifest,
     /// Generate data/traits.rs from Trait* CSVs
     Traits,
+    /// Generate data/zones.rs from AreaTable CSV
+    Zones,
 }
 
 fn default_addons_path() -> PathBuf {
@@ -187,6 +190,7 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::GlobalStrings => gen_global_strings::run(),
         GenerateTarget::Manifest => gen_manifest::run(),
         GenerateTarget::Traits => gen_traits::run(),
+        GenerateTarget::Zones => gen_zones::run(),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);

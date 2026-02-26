@@ -366,7 +366,7 @@ impl SimState {
             player_power_type: 0,
             zone_name: "Stormwind City".to_string(),
             zone_id: 1519,
-            sub_zone_name: String::new(),
+            sub_zone_name: "Trade District".to_string(),
             instance_name: String::new(),
             instance_type: "none".to_string(),
             instance_difficulty: 0,

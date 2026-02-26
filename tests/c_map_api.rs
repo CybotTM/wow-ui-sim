@@ -14,7 +14,14 @@ fn env() -> WowLuaEnv {
 fn test_get_area_info() {
     let env = env();
     let name: String = env.eval("return C_Map.GetAreaInfo(1)").unwrap();
-    assert_eq!(name, "Area_1");
+    assert_eq!(name, "Dun Morogh");
+}
+
+#[test]
+fn test_get_area_info_nil_for_unknown() {
+    let env = env();
+    let is_nil: bool = env.eval("return C_Map.GetAreaInfo(999999999) == nil").unwrap();
+    assert!(is_nil);
 }
 
 #[test]

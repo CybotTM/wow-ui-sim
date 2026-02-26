@@ -27,49 +27,35 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
-    t.set(
-        "GetAreaInfo",
-        lua.create_function(|lua, area_id: i32| {
-            Ok(Value::String(lua.create_string(format!("Area_{}", area_id))?))
-        })?,
-    )?;
-    t.set(
-        "GetMapInfo",
-        lua.create_function(|lua, map_id: i32| {
-            let info = lua.create_table()?;
-            info.set("mapID", map_id)?;
-            info.set("name", format!("Map_{}", map_id))?;
-            info.set("mapType", 3)?;
-            info.set("parentMapID", 0)?;
-            Ok(Value::Table(info))
-        })?,
-    )?;
-    t.set(
-        "GetBestMapForUnit",
-        lua.create_function(|_, _unit: String| Ok(Value::Integer(1)))?,
-    )?;
+    t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
+    t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
+    t.set("GetBestMapForUnit", lua.create_function(|_, _unit: String| Ok(Value::Integer(1)))?)?;
     t.set("GetPlayerMapPosition", lua.create_function(create_player_map_position)?)?;
-    t.set(
-        "GetMapChildrenInfo",
-        lua.create_function(|lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
-            lua.create_table()
-        })?,
-    )?;
+    t.set("GetMapChildrenInfo", lua.create_function(|lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
+        lua.create_table()
+    })?)?;
     t.set("GetWorldPosFromMapPos", lua.create_function(create_world_pos_from_map_pos)?)?;
-    t.set(
-        "GetMapWorldSize",
-        lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?,
-    )?;
-    t.set(
-        "RequestPreloadMap",
-        lua.create_function(|_, _map_id: i32| Ok(()))?,
-    )?;
-    t.set(
-        "MapHasArt",
-        lua.create_function(|_, _map_id: i32| Ok(true))?,
-    )?;
+    t.set("GetMapWorldSize", lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?)?;
+    t.set("RequestPreloadMap", lua.create_function(|_, _map_id: i32| Ok(()))?)?;
+    t.set("MapHasArt", lua.create_function(|_, _map_id: i32| Ok(true))?)?;
 
     Ok(t)
+}
+
+fn get_area_info(lua: &Lua, area_id: i32) -> Result<Value> {
+    match crate::zones::get_area(area_id as u32) {
+        Some(area) => Ok(Value::String(lua.create_string(area.name)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn get_map_info(lua: &Lua, map_id: i32) -> Result<Value> {
+    let info = lua.create_table()?;
+    info.set("mapID", map_id)?;
+    info.set("name", format!("Map_{}", map_id))?;
+    info.set("mapType", 3)?;
+    info.set("parentMapID", 0)?;
+    Ok(Value::Table(info))
 }
 
 fn create_player_map_position(lua: &Lua, (_map_id, _unit): (i32, String)) -> Result<Value> {

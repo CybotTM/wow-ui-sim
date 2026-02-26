@@ -24,6 +24,8 @@ pub mod spells;
 pub mod spell_power;
 #[path = "../data/traits.rs"]
 pub mod traits;
+#[path = "../data/zones.rs"]
+pub mod zones;
 pub mod config;
 pub mod cvars;
 pub mod dump;
