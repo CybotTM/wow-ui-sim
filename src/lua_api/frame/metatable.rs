@@ -364,7 +364,7 @@ mod tests {
     impl UserData for TestObj {
         fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
             methods.add_method("Lower", |_, _, ()| Ok("hello"));
-            methods.add_meta_function(MetaMethod::Index, |_, (_ud, key): (mlua::AnyUserData, Value)| {
+            methods.add_meta_function(MetaMethod::Index, |_, (_ud, _key): (mlua::AnyUserData, Value)| {
                 Ok(Value::Nil)
             });
             methods.add_meta_function(
