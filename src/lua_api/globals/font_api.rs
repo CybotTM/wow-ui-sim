@@ -191,8 +191,26 @@ fn add_font_justify_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+/// SetIndentedWordWrap, GetIndentedWordWrap, SetMaxLines, GetMaxLines on Font objects.
+fn add_font_text_layout_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
+    font.set("SetIndentedWordWrap", lua.create_function(|_, (this, v): (mlua::Table, bool)| {
+        this.set("__indentedWordWrap", v)
+    })?)?;
+    font.set("GetIndentedWordWrap", lua.create_function(|_, this: mlua::Table| {
+        Ok(this.get::<bool>("__indentedWordWrap").unwrap_or(false))
+    })?)?;
+    font.set("SetMaxLines", lua.create_function(|_, (this, v): (mlua::Table, i32)| {
+        this.set("__maxLines", v)
+    })?)?;
+    font.set("GetMaxLines", lua.create_function(|_, this: mlua::Table| {
+        Ok(this.get::<i32>("__maxLines").unwrap_or(0))
+    })?)?;
+    Ok(())
+}
+
 /// GetName, GetFontObjectForAlphabet, CopyFontObject.
 fn add_font_misc_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
+    add_font_text_layout_methods(lua, font)?;
     font.set(
         "GetName",
         lua.create_function(|_, this: mlua::Table| {

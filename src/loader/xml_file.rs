@@ -59,16 +59,7 @@ fn process_element(
             Ok(0)
         }
         XmlElement::ScopedModifier(scoped) => {
-            let prev_forbidden = env.state().borrow().loading_forbidden;
-            if scoped.forbidden.unwrap_or(false) {
-                env.state().borrow_mut().loading_forbidden = true;
-            }
-            let mut count = 0;
-            for child in &scoped.elements {
-                count += process_element(env, child, xml_dir, ctx, timing)?;
-            }
-            env.state().borrow_mut().loading_forbidden = prev_forbidden;
-            Ok(count)
+            process_scoped_modifier(env, scoped, xml_dir, ctx, timing)
         }
         XmlElement::Texture(tex) => {
             register_virtual_texture(tex);
@@ -88,6 +79,26 @@ fn process_element(
             Ok(0)
         }
     }
+}
+
+/// Process a ScopedModifier element, temporarily setting forbidden state.
+fn process_scoped_modifier(
+    env: &LoaderEnv<'_>,
+    scoped: &crate::xml::ScopedModifierXml,
+    xml_dir: &Path,
+    ctx: &AddonContext,
+    timing: &mut LoadTiming,
+) -> Result<usize, LoadError> {
+    let prev_forbidden = env.state().borrow().loading_forbidden;
+    if scoped.forbidden.unwrap_or(false) {
+        env.state().borrow_mut().loading_forbidden = true;
+    }
+    let mut count = 0;
+    for child in &scoped.elements {
+        count += process_element(env, child, xml_dir, ctx, timing)?;
+    }
+    env.state().borrow_mut().loading_forbidden = prev_forbidden;
+    Ok(count)
 }
 
 /// Process a Script element (file reference or inline code).
@@ -146,6 +157,11 @@ fn process_include(
 
 /// Extract the FrameXml data, widget type, and optional intrinsic name from an XmlElement.
 fn resolve_frame_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+    resolve_specialized_element(element).or_else(|| resolve_frame_like_element(element))
+}
+
+/// Specialized widget types with distinct widget type strings or intrinsic bases.
+fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         XmlElement::Frame(f) => Some((f, "Frame", None)),
         XmlElement::Button(f)
@@ -168,11 +184,19 @@ fn resolve_frame_element(element: &XmlElement) -> Option<(&FrameXml, &'static st
         | XmlElement::DressUpModel(f) => Some((f, "Model", None)),
         XmlElement::ModelScene(f) => Some((f, "ModelScene", None)),
         XmlElement::PlayerModel(f)
-        | XmlElement::CinematicModel(f) => Some((f, "PlayerModel", None)),
-        XmlElement::MessageFrame(f)
-        | XmlElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
+        | XmlElement::CinematicModel(f)
+        | XmlElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        XmlElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
+        XmlElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
         XmlElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
-        XmlElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        XmlElement::Minimap(f) => Some((f, "Minimap", None)),
+        _ => None,
+    }
+}
+
+/// Frame-like elements that all map to widget type "Frame".
+fn resolve_frame_like_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+    match element {
         XmlElement::EventFrame(f)
         | XmlElement::TaxiRouteFrame(f)
         | XmlElement::ModelFFX(f)
@@ -190,7 +214,6 @@ fn resolve_frame_element(element: &XmlElement) -> Option<(&FrameXml, &'static st
         | XmlElement::Browser(f)
         | XmlElement::MovieFrame(f)
         | XmlElement::WorldFrame(f) => Some((f, "Frame", None)),
-        XmlElement::Minimap(f) => Some((f, "Minimap", None)),
         _ => None,
     }
 }

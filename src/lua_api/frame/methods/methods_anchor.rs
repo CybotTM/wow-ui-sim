@@ -208,6 +208,17 @@ fn find_cycle_node(
     None
 }
 
+/// Format a frame ID for error messages like WoW: "WidgetType:decimal_id".
+fn frame_label(lua: &mlua::Lua, id: u64) -> String {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    if let Some(f) = state.widgets.get(id) {
+        format!("{:?}:{id}", f.widget_type)
+    } else {
+        format!("Frame:{id}")
+    }
+}
+
 /// Build the cycle error message including the ancestor chain.
 fn build_cycle_error(
     lua: &mlua::Lua,
@@ -219,12 +230,14 @@ fn build_cycle_error(
     let mut anc: Vec<String> = Vec::new();
     let mut z = seen.get(&x).copied();
     while let Some(ancestor) = z {
-        anc.push(format!("[{ancestor:x}]"));
+        anc.push(format!("[{}]", frame_label(lua, ancestor)));
         z = seen.get(&ancestor).copied();
     }
+    let rel = frame_label(lua, rel_id);
+    let dep = frame_label(lua, x);
     let base = format!(
         "Action[SetPoint] failed because[Cannot anchor to a region dependent on it]: \
-attempted from: {action}.\nRelative: [{rel_id:x}]\nDependent: [{x:x}]"
+attempted from: {action}.\nRelative: [{rel}]\nDependent: [{dep}]"
     );
     let extra = if anc.is_empty() {
         String::new()

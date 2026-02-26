@@ -31,13 +31,17 @@ def load_apis():
         return yaml.safe_load(f)
 
 
+## Globals provided by Elune's C runtime (not visible to Rust source scanner).
+ELUNE_PROVIDED = {"securecall", "securecallfunction", "secureexecuterange"}
+
+
 def extract_existing():
     """Extract global-level names already registered in hand-written Rust code.
 
     Only matches registrations on the globals table (variables named `globals`
     or `g`), not on C_ namespace sub-tables (named `t`, `c_timer`, etc.).
     """
-    names = set()
+    names = set(ELUNE_PROVIDED)
     sources = list(GLOBALS_DIR.glob("*.rs")) + [LEGACY_FILE]
     for rs_file in sources:
         if rs_file.name == "generated_stubs.rs":

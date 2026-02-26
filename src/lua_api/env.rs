@@ -612,12 +612,16 @@ fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> 
     Ok(())
 }
 
-/// Load Elune's security library (taint functions for the debug table).
+/// Load Elune's security library and secure call functions.
 fn load_elune_security(lua: &Lua) -> crate::Result<()> {
     unsafe extern "C" {
         fn luaopen_security(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
+        fn luaopen_securecalls(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
     }
-    unsafe { lua.exec_raw::<()>((), |state| { luaopen_security(state); })? };
+    unsafe {
+        lua.exec_raw::<()>((), |state| { luaopen_security(state); })?;
+        lua.exec_raw::<()>((), |state| { luaopen_securecalls(state); })?;
+    };
     Ok(())
 }
 

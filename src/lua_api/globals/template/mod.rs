@@ -16,6 +16,11 @@ use std::rc::Rc;
 
 /// Extract the FrameXml, widget type, and optional intrinsic name from a FrameElement.
 fn frame_element_type(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+    specialized_frame_element(element).or_else(|| frame_like_frame_element(element))
+}
+
+/// Specialized widget types with distinct type strings or intrinsic bases.
+fn specialized_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         FrameElement::Frame(f) => Some((f, "Frame", None)),
         FrameElement::Button(f) => Some((f, "Button", None)),
@@ -38,11 +43,18 @@ fn frame_element_type(element: &FrameElement) -> Option<(&FrameXml, &'static str
         | FrameElement::DressUpModel(f) => Some((f, "Model", None)),
         FrameElement::ModelScene(f) => Some((f, "ModelScene", None)),
         FrameElement::PlayerModel(f)
-        | FrameElement::CinematicModel(f) => Some((f, "PlayerModel", None)),
-        FrameElement::MessageFrame(f)
-        | FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
+        | FrameElement::CinematicModel(f)
+        | FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
+        FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
-        FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        _ => None,
+    }
+}
+
+/// Frame-like elements that all map to widget type "Frame".
+fn frame_like_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+    match element {
         FrameElement::EventFrame(f)
         | FrameElement::TaxiRouteFrame(f)
         | FrameElement::ModelFFX(f)
@@ -61,7 +73,7 @@ fn frame_element_type(element: &FrameElement) -> Option<(&FrameXml, &'static str
         | FrameElement::Minimap(f)
         | FrameElement::MovieFrame(f)
         | FrameElement::WorldFrame(f) => Some((f, "Frame", None)),
-        FrameElement::ScopedModifier(_) => None,
+        _ => None,
     }
 }
 
@@ -110,40 +122,13 @@ fn apply_single_template(
 ) {
     let template = &entry.frame;
 
-    // Apply mixin (must be before children and scripts) — stays in Lua
     apply_mixin(lua, &template.combined_mixin(), frame_name);
-
-    // Look up frame_id for direct Rust property setting.
-    // Named frames are in the registry; unnamed frames use "__frame_{id}" as
-    // their Lua global key, so extract the id from the pattern as fallback.
-    let frame_id = state.borrow().widgets.get_id_by_name(frame_name).or_else(|| {
-        frame_name
-            .strip_prefix("__frame_")
-            .and_then(|s| s.parse::<u64>().ok())
-    });
-
-    // Apply key values from template (handles multiple <KeyValues> blocks) — stays in Lua
+    let frame_id = resolve_template_frame_id(state, frame_name);
     for key_values in template.all_key_values() {
         apply_key_values(lua, key_values, frame_name);
     }
-
-    // Direct Rust property setting (bypasses Lua compilation)
     if let Some(fid) = frame_id {
-        direct::set_size(state, fid, template);
-        direct::set_anchors(state, fid, template, frame_name);
-        direct::set_all_points(state, fid, template);
-        direct::set_hidden(state, fid, template);
-        // Apply frameLevel from template as a level offset.  The simulator
-        // accumulates frame levels (parent+1 per nesting depth) and parents
-        // may be raised long after children are created.  Storing an offset
-        // lets propagate_strata_level use parent_level + offset instead of
-        // the default parent_level + 1.
-        if let Some(level) = template.frame_level {
-            let mut s = state.borrow_mut();
-            if let Some(frame) = s.widgets.get_mut_visual(fid) {
-                frame.frame_level_offset = Some(level);
-            }
-        }
+        apply_direct_rust_properties(state, fid, template, frame_name);
     }
 
     // Apply layers (textures and fontstrings)
@@ -181,6 +166,34 @@ fn apply_single_template(
     // Apply scripts from template (after children, so OnLoad can reference them)
     if let Some(scripts) = template.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
+    }
+}
+
+/// Look up frame_id for direct Rust property setting.
+fn resolve_template_frame_id(state: &Rc<RefCell<SimState>>, frame_name: &str) -> Option<u64> {
+    state.borrow().widgets.get_id_by_name(frame_name).or_else(|| {
+        frame_name
+            .strip_prefix("__frame_")
+            .and_then(|s| s.parse::<u64>().ok())
+    })
+}
+
+/// Apply direct Rust properties from template (size, anchors, hidden, frame level).
+fn apply_direct_rust_properties(
+    state: &Rc<RefCell<SimState>>,
+    fid: u64,
+    template: &FrameXml,
+    frame_name: &str,
+) {
+    direct::set_size(state, fid, template);
+    direct::set_anchors(state, fid, template, frame_name);
+    direct::set_all_points(state, fid, template);
+    direct::set_hidden(state, fid, template);
+    if let Some(level) = template.frame_level {
+        let mut s = state.borrow_mut();
+        if let Some(frame) = s.widgets.get_mut_visual(fid) {
+            frame.frame_level_offset = Some(level);
+        }
     }
 }
 
@@ -272,34 +285,7 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
     if parts.is_empty() {
         return;
     }
-    // WoW's C++ engine pre-initializes certain fields that OnLoad methods
-    // expect to exist before they run. Simulate this for ActionBarMixin.
-    let mut post_init = String::new();
-    for name in mixin.split(',').map(str::trim) {
-        if name == "ActionBarMixin" {
-            post_init.push_str("f.actionButtons = f.actionButtons or {} ");
-            post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
-        }
-        if name == "EditModeSystemMixin" {
-            // Pre-initialize "Base" method aliases that OnSystemLoad normally sets up.
-            // Frames with inherit="prepend" OnLoad handlers (e.g. StanceBar) may call
-            // methods depending on these aliases before OnSystemLoad runs.
-            post_init.push_str("f.SetScaleBase = f.SetScale ");
-            post_init.push_str("f.SetPointBase = f.SetPoint ");
-            post_init.push_str("f.ClearAllPointsBase = f.ClearAllPoints ");
-            post_init.push_str("f.SetShownBase = f.SetShown ");
-            post_init.push_str("f.ShowBase = f.Show ");
-            post_init.push_str("f.HideBase = f.Hide ");
-            post_init.push_str("f.IsShownBase = f.IsShown ");
-        }
-        if name == "EventFrameMixin" || name == "CallbackRegistryMixin" {
-            // Initialize callbackTables immediately so TriggerEvent works even
-            // before OnLoad fires (Show() during creation can trigger OnShow).
-            post_init.push_str(
-                "if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ",
-            );
-        }
-    }
+    let post_init = build_mixin_post_init(mixin);
     let code = format!(
         "do local f = {} if f then {} {} end end",
         lua_global_ref(frame_name),
@@ -307,6 +293,29 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
         post_init,
     );
     let _ = lua.load(&code).exec();
+}
+
+/// Build post-initialization code for known mixins that need pre-seeded fields.
+fn build_mixin_post_init(mixin: &str) -> String {
+    let mut post_init = String::new();
+    for name in mixin.split(',').map(str::trim) {
+        match name {
+            "ActionBarMixin" => {
+                post_init.push_str("f.actionButtons = f.actionButtons or {} ");
+                post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
+            }
+            "EditModeSystemMixin" => {
+                for alias in ["SetScale", "SetPoint", "ClearAllPoints", "SetShown", "Show", "Hide", "IsShown"] {
+                    post_init.push_str(&format!("f.{alias}Base = f.{alias} "));
+                }
+            }
+            "EventFrameMixin" | "CallbackRegistryMixin" => {
+                post_init.push_str("if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ");
+            }
+            _ => {}
+        }
+    }
+    post_init
 }
 
 /// Push the suppress-OnLoad depth counter (prevents premature OnLoad in nested CreateFrame).

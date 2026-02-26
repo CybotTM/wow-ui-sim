@@ -22,14 +22,30 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_flatten_render_stubs(methods);
     add_window_display_stubs(methods);
     add_misc_stubs(methods);
-    // DropdownButtonMixin stub
+    add_specialized_frame_stubs(methods);
+}
+
+/// Stubs for specialized frame types (QuestPOI, FogOfWar, UnitPosition, etc.).
+fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsMenuOpen", |_, _this, ()| Ok(false));
-    // StaticPopupElementMixin stub (dialog ownership tracking)
     methods.add_method("SetOwningDialog", |_, _this, _dialog: Value| Ok(()));
-    // GuildRenameFrameMixin / layout tracking methods (no-op in simulator)
     methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method("RegisterFrames", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method("RegisterBackgroundTexture", |_, _this, _args: MultiValue| Ok(()));
+    // QuestPOIFrame
+    methods.add_method("SetFillTexture", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("SetBorderTexture", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("SetFillAlpha", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("SetBorderAlpha", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("SetBorderScalar", |_, _, _: mlua::MultiValue| Ok(()));
+    // FogOfWarFrame
+    methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil));
+    // Blob frame (QuestBlobDataProvider)
+    methods.add_method("DrawNone", |_, _, ()| Ok(()));
+    methods.add_method("DrawBlob", |_, _, _: mlua::MultiValue| Ok(()));
+    // UnitPositionFrame
+    methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
 }
 
 /// Drag/Input stubs.

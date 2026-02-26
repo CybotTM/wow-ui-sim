@@ -294,6 +294,18 @@ pub fn append_script_handler(
 ) {
     let Some(new_handler) = build_handler_expr(handler_name, script) else { return };
 
+    // intrinsicOrder="precall"/"postcall" — store as {EventName}_Intrinsic property
+    // instead of SetScript. The fire_onload/fire_onshow dispatchers call these
+    // before/after the regular handler respectively.
+    if let Some(order) = script.intrinsic_order.as_deref() {
+        if order == "precall" || order == "postcall" {
+            code.push_str(&format!(
+                "\n        {target}.{handler_name}_Intrinsic = {new_handler}\n        "
+            ));
+            return;
+        }
+    }
+
     match script.inherit.as_deref() {
         Some("prepend") => emit_chained_handler(code, target, handler_name, &new_handler, false),
         Some("append") => emit_chained_handler(code, target, handler_name, &new_handler, true),

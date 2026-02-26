@@ -433,6 +433,28 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         Ok((false, 0i32, 0i32, 0i32, 0i32, false))
     })?)?;
     register_paperdoll_container_and_misc_stubs(lua, &g)?;
+    register_secure_env_globals(lua, &g)?;
+    Ok(())
+}
+
+fn register_secure_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    // Globals normally set in secure-environment files via SwapToGlobalEnvironment().
+    // Our sim doesn't implement secure environments, so these need explicit stubs.
+    let combat_log = lua.create_table()?;
+    combat_log.set("GenerateMessage", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
+    g.set("CombatLogInbound", combat_log)?;
+    g.set("StoreFrame_CheckForFree", lua.create_function(|_, ()| Ok(()))?)?;
+
+    // GetAvailableLocaleInfo: generated stub returns empty table, needs locale data.
+    // Set here so the is_nil() check in generated_stubs.rs skips it.
+    g.set("GetAvailableLocaleInfo", lua.create_function(|lua, _: MultiValue| {
+        let entry = lua.create_table()?;
+        entry.set("localeName", "enUS")?;
+        entry.set("localeId", 1)?;
+        let result = lua.create_table()?;
+        result.set(1, entry)?;
+        Ok(Value::Table(result))
+    })?)?;
     Ok(())
 }
 

@@ -405,7 +405,8 @@ fn add_nine_slice_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// SetVertexColor, GetVertexColor, SetCenterColor.
 fn add_vertex_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetVertexColor", |lua, this, (r, g, b, a): (f32, f32, f32, Option<f32>)| {
+    methods.add_method("SetVertexColor", |lua, this, (r, g, b, a): (Option<f32>, Option<f32>, Option<f32>, Option<f32>)| {
+        let (Some(r), Some(g), Some(b)) = (r, g, b) else { return Ok(()) };
         let id = this.0;
         let new_color = crate::widget::Color::new(r, g, b, a.unwrap_or(1.0));
         let state_rc = get_sim_state(lua);

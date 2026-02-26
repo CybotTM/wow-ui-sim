@@ -24,25 +24,8 @@ pub fn create_frame_from_xml(
     parent_override: Option<&str>,
     intrinsic_base: Option<&str>,
 ) -> Result<Option<String>, LoadError> {
-    // Register virtual/intrinsic frames (templates) in the template registry.
-    // Top-level virtual frames are templates only (not instantiated).
-    // Child virtual frames (with parent_override) are still created — WoW's
-    // engine creates them as children and optionally registers them as templates
-    // when they have a name.
-    if frame.is_virtual == Some(true) || frame.intrinsic == Some(true) {
-        if let Some(ref name) = frame.name {
-            crate::xml::register_template(name, widget_type, frame.clone());
-        }
-        // Apply secure mixin transformation: move methods into __index, clear table,
-        // set __metatable = 0. This mirrors the wowless securemixin handler and is
-        // needed so that _G.ScrollingMessageFrameSecureMixin is an empty table with
-        // methods accessible via __index (matching real WoW client behavior).
-        if let Some(ref sm) = frame.secure_mixin {
-            apply_secure_mixins(env.lua(), sm);
-        }
-        if parent_override.is_none() {
-            return Ok(None);
-        }
+    if let Some(early) = register_virtual_or_intrinsic(env, frame, widget_type, parent_override) {
+        return Ok(early);
     }
 
     let creator_name = {
@@ -62,18 +45,8 @@ pub fn create_frame_from_xml(
         .or(inherited_parent_buf.as_deref());
     let parent = explicit_parent.unwrap_or("UIParent");
 
-    // Prepend intrinsic base template to the inherits chain so the intrinsic
-    // type's mixin, scripts, and children are applied before user templates.
-    let explicit_inherits = frame.inherits.as_deref().unwrap_or("");
-    let inherits_buf;
-    let inherits = match intrinsic_base {
-        Some(base) if !explicit_inherits.is_empty() => {
-            inherits_buf = format!("{}, {}", base, explicit_inherits);
-            &inherits_buf
-        }
-        Some(base) => base,
-        None => explicit_inherits,
-    };
+    let inherits_buf = build_inherits_chain(frame, intrinsic_base);
+    let inherits = inherits_buf.as_deref().unwrap_or(frame.inherits.as_deref().unwrap_or(""));
 
     let lua_code = build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
     exec_create_frame_code(env, &lua_code, &name)?;
@@ -81,6 +54,40 @@ pub fn create_frame_from_xml(
     apply_intrinsic_property(env, intrinsic_base, &name);
     create_children_and_finalize(env, frame, &name, inherits)?;
     Ok(Some(name))
+}
+
+/// Register virtual/intrinsic frames as templates. Returns Some(None) to skip instantiation
+/// for top-level virtual frames, or None to continue with normal creation.
+fn register_virtual_or_intrinsic(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    widget_type: &str,
+    parent_override: Option<&str>,
+) -> Option<Option<String>> {
+    if frame.is_virtual != Some(true) && frame.intrinsic != Some(true) {
+        return None;
+    }
+    if let Some(ref name) = frame.name {
+        crate::xml::register_template(name, widget_type, frame.clone());
+    }
+    if let Some(ref sm) = frame.secure_mixin {
+        apply_secure_mixins(env.lua(), sm);
+    }
+    if parent_override.is_none() {
+        Some(None) // skip instantiation for top-level virtual frames
+    } else {
+        None // child virtual frames are still created
+    }
+}
+
+/// Prepend intrinsic base template to the inherits chain.
+fn build_inherits_chain(frame: &crate::xml::FrameXml, intrinsic_base: Option<&str>) -> Option<String> {
+    let explicit = frame.inherits.as_deref().unwrap_or("");
+    match intrinsic_base {
+        Some(base) if !explicit.is_empty() => Some(format!("{}, {}", base, explicit)),
+        Some(base) => Some(base.to_string()),
+        None => None,
+    }
 }
 
 /// Build the Lua code that creates a frame and sets Lua-only XML properties.
@@ -416,10 +423,13 @@ fn create_layer_children(env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name
 }
 
 /// Map a FrameElement variant to its (FrameXml, widget_type, intrinsic_name) triple.
-/// `intrinsic_name` is Some when the XML element is an intrinsic type whose template
-/// should be implicitly inherited (e.g. `<ContainedAlertFrame>` inherits "ContainedAlertFrame").
 /// Returns None for unsupported element types.
 fn frame_element_to_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+    specialized_element_type(child).or_else(|| frame_like_element_type(child))
+}
+
+/// Specialized widget types with distinct type strings or intrinsic bases.
+fn specialized_element_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
     use crate::xml::FrameElement;
     match child {
         FrameElement::Frame(f) => Some((f, "Frame", None)),
@@ -443,12 +453,20 @@ fn frame_element_to_type(child: &crate::xml::FrameElement) -> Option<(&crate::xm
         | FrameElement::DressUpModel(f) => Some((f, "Model", None)),
         FrameElement::ModelScene(f) => Some((f, "ModelScene", None)),
         FrameElement::PlayerModel(f)
-        | FrameElement::CinematicModel(f) => Some((f, "PlayerModel", None)),
-        FrameElement::MessageFrame(f)
-        | FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", None)),
+        | FrameElement::CinematicModel(f)
+        | FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
+        FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
         FrameElement::Minimap(f) => Some((f, "Minimap", None)),
-        FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        _ => None,
+    }
+}
+
+/// Frame-like elements that all map to widget type "Frame".
+fn frame_like_element_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+    use crate::xml::FrameElement;
+    match child {
         FrameElement::EventFrame(f)
         | FrameElement::TaxiRouteFrame(f)
         | FrameElement::ModelFFX(f)
@@ -466,7 +484,7 @@ fn frame_element_to_type(child: &crate::xml::FrameElement) -> Option<(&crate::xm
         | FrameElement::Browser(f)
         | FrameElement::MovieFrame(f)
         | FrameElement::WorldFrame(f) => Some((f, "Frame", None)),
-        FrameElement::ScopedModifier(_) => None,
+        _ => None,
     }
 }
 
