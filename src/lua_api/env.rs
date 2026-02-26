@@ -21,10 +21,6 @@ pub(crate) fn next_timer_id() -> u64 {
 pub struct WowLuaEnv {
     pub(crate) lua: Lua,
     pub(crate) state: Rc<RefCell<SimState>>,
-    /// OnUpdate handlers: maps frame ID → consecutive error count.
-    /// Errors are logged but handlers keep firing (matching WoW behavior).
-    /// Only suppressed after many consecutive errors to avoid infinite spam.
-    on_update_errors: RefCell<std::collections::HashMap<u64, u32>>,
 }
 
 impl WowLuaEnv {
@@ -37,7 +33,6 @@ impl WowLuaEnv {
         Ok(Self {
             lua,
             state,
-            on_update_errors: RefCell::new(std::collections::HashMap::new()),
         })
     }
 
@@ -353,8 +348,8 @@ impl WowLuaEnv {
         let frame_ids = self.get_visible_on_update_frames();
 
         if !frame_ids.is_empty() {
-            self.fire_on_update_handlers(&frame_ids, elapsed);
-            self.fire_on_post_update_handlers(&frame_ids, elapsed);
+            self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnUpdate");
+            self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnPostUpdate");
         }
 
         // Tick animation groups
@@ -365,25 +360,6 @@ impl WowLuaEnv {
         self.finalize_frame_metrics(elapsed * 1000.0);
 
         Ok(())
-    }
-
-    /// Fire OnPostUpdate handlers for visible frames.
-    fn fire_on_post_update_handlers(&self, frame_ids: &[u64], elapsed: f64) {
-        use super::script_helpers::{call_error_handler, get_frame_ref, get_script};
-        let elapsed_val = Value::Number(elapsed);
-        for widget_id in frame_ids {
-            let addon_idx = self.state.borrow().widgets.get(*widget_id)
-                .and_then(|f| f.owner_addon);
-            let start = Instant::now();
-            if let Some(handler) = get_script(&self.lua, *widget_id, "OnPostUpdate")
-                && let Some(frame) = get_frame_ref(&self.lua, *widget_id)
-                && let Err(e) = handler
-                    .call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]))
-            {
-                call_error_handler(&self.lua, &e.to_string());
-            }
-            accumulate_addon_time(&self.state, addon_idx, start.elapsed().as_secs_f64() * 1000.0);
-        }
     }
 
     /// Return the cached visible OnUpdate frame IDs.
@@ -404,58 +380,20 @@ impl WowLuaEnv {
         ids
     }
 
-    /// Execute OnUpdate Lua handlers for the given visible frame IDs.
+    /// Dispatch OnUpdate (or OnPostUpdate) handlers via a Lua-side loop.
     ///
-    /// Matches WoW behavior: handlers continue firing after errors (WoW shows
-    /// an error popup but doesn't disable the handler). We suppress logging
-    /// after 100 consecutive errors per frame to avoid infinite spam.
-    fn fire_on_update_handlers(&self, frame_ids: &[u64], elapsed: f64) {
-        use super::script_helpers::{call_error_handler, get_frame_ref, get_script};
-        const SUPPRESS_THRESHOLD: u32 = 100;
-        let elapsed_val = Value::Number(elapsed);
-        let mut error_counts = self.on_update_errors.borrow_mut();
-        for widget_id in frame_ids {
-            let count = error_counts.get(widget_id).copied().unwrap_or(0);
-            if count >= SUPPRESS_THRESHOLD { continue; }
-            let addon_idx = self.state.borrow().widgets.get(*widget_id).and_then(|f| f.owner_addon);
-            let start = Instant::now();
-            if let Some(handler) = get_script(&self.lua, *widget_id, "OnUpdate")
-                && let Some(frame) = get_frame_ref(&self.lua, *widget_id)
-            {
-                let result = handler.call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]));
-                self.handle_on_update_result(result, *widget_id, count, &mut error_counts,
-                    SUPPRESS_THRESHOLD, &call_error_handler);
-            }
-            accumulate_addon_time(&self.state, addon_idx, start.elapsed().as_secs_f64() * 1000.0);
+    /// A single Rust→Lua call dispatches all handlers, avoiding per-handler
+    /// FFI overhead (string formatting, table lookups, frame ref retrieval).
+    fn dispatch_handlers_lua(&self, frame_ids: &[u64], elapsed: f64, suffix: &str) {
+        let dispatch: mlua::Function = self.lua
+            .named_registry_value("__dispatch_on_update")
+            .expect("__dispatch_on_update not registered");
+        let ids_table = self.lua.create_table().unwrap();
+        for (i, id) in frame_ids.iter().enumerate() {
+            ids_table.set(i + 1, *id as i64).unwrap();
         }
-    }
-
-    fn handle_on_update_result(
-        &self,
-        result: mlua::Result<()>,
-        widget_id: u64,
-        count: u32,
-        error_counts: &mut std::collections::HashMap<u64, u32>,
-        suppress_threshold: u32,
-        call_error_handler: &dyn Fn(&Lua, &str),
-    ) {
-        match result {
-            Ok(()) => { error_counts.remove(&widget_id); }
-            Err(e) => {
-                let new_count = count + 1;
-                if new_count <= 3 || new_count == suppress_threshold {
-                    let name = self.state.borrow().widgets.get(widget_id)
-                        .and_then(|f| f.name.clone())
-                        .unwrap_or_else(|| format!("id={}", widget_id));
-                    eprintln!("[OnUpdate] error #{} in frame '{}': {}", new_count, name, e);
-                    call_error_handler(&self.lua, &e.to_string());
-                    if new_count == suppress_threshold {
-                        eprintln!("[OnUpdate] suppressing '{}' after {} consecutive errors",
-                            name, suppress_threshold);
-                    }
-                }
-                error_counts.insert(widget_id, new_count);
-            }
+        if let Err(e) = dispatch.call::<()>((ids_table, elapsed, suffix)) {
+            eprintln!("[OnUpdate] dispatch error: {e}");
         }
     }
 
@@ -577,14 +515,6 @@ fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
 }
 
 /// Add elapsed milliseconds to the owning addon's current-frame metric.
-fn accumulate_addon_time(state: &Rc<RefCell<SimState>>, addon_idx: Option<u16>, elapsed_ms: f64) {
-    if let Some(idx) = addon_idx {
-        if let Some(addon) = state.borrow_mut().addons.get_mut(idx as usize) {
-            addon.runtime.current_frame_ms += elapsed_ms;
-        }
-    }
-}
-
 /// Create built-in frames in the widget registry before Lua loads.
 fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
     let mut s = state.borrow_mut();
@@ -623,7 +553,35 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value("__event_individual", lua.create_table()?)?;
     lua.set_named_registry_value("__event_all", lua.create_table()?)?;
     let taint_fallback: mlua::Function = lua.load("return debug.getstacktaint()").into_function()?;
-    lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)
+    lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
+    register_on_update_dispatcher(lua)
+}
+
+/// Register a Lua function that dispatches OnUpdate/OnPostUpdate handlers
+/// in a single Lua call, avoiding per-handler Rust→Lua FFI overhead.
+fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
+    // Ensure __scripts table exists before capturing it as upvalue.
+    super::script_helpers::get_or_create_scripts_table(lua);
+    let dispatch: mlua::Function = lua.load(r#"
+        local scripts = debug.getregistry().__scripts
+        local G = _G
+        return function(ids, elapsed, suffix)
+            local handler = geterrorhandler()
+            for i = 1, #ids do
+                local id = ids[i]
+                local func = scripts[id .. suffix]
+                if func then
+                    local frame = rawget(G, "__frame_" .. id)
+                    if frame then
+                        local ok, err = pcall(func, frame, elapsed)
+                        if not ok then handler(err) end
+                    end
+                end
+            end
+        end
+    "#).into_function()?;
+    let dispatch = dispatch.call::<mlua::Function>(())?;
+    lua.set_named_registry_value("__dispatch_on_update", dispatch)
 }
 
 /// Enable Elune taint tracking and wrap loadstring to mark addon code tainted.
