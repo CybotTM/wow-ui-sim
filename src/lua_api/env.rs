@@ -407,7 +407,11 @@ impl WowLuaEnv {
                         let parent = f.parent_id.and_then(|pid| state.widgets.get(pid))
                             .and_then(|p| p.name.clone()).unwrap_or_default();
                         let pkey = f.parent_key.clone().unwrap_or_default();
-                        format!("{n} [parent={parent} key={pkey} type={:?}]", f.widget_type)
+                        let addon = f.owner_addon
+                            .and_then(|idx| state.addons.get(idx as usize))
+                            .map(|a| format!(" @{}", a.folder_name))
+                            .unwrap_or_default();
+                        format!("{n} [parent={parent} key={pkey} type={:?}{addon}]", f.widget_type)
                     })
                     .unwrap_or_else(|| format!("id={id}"));
                 drop(state);
@@ -556,12 +560,17 @@ fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
     addons
 }
 
-/// Add elapsed milliseconds to the owning addon's current-frame metric.
 /// Create built-in frames in the widget registry before Lua loads.
+/// Registers a `__BuiltIn` pseudo-addon as their owner.
 fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
     let mut s = state.borrow_mut();
+    let owner = s.addons.len() as u16;
+    s.addons.push(super::AddonInfo {
+        folder_name: "__BuiltIn".to_string(), title: "Built-in Frames".to_string(),
+        enabled: true, loaded: true, ..Default::default()
+    });
     let (w, h) = (s.screen_width, s.screen_height);
-    create_builtin_frames(&mut s.widgets, w, h);
+    create_builtin_frames(&mut s.widgets, w, h, owner);
 }
 
 /// Initialize the Lua state: load Elune, register globals, patch stdlib, run keybindings.

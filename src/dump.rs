@@ -13,6 +13,7 @@ use regex::RegexBuilder;
 /// Print the frame tree to stdout (headless subcommand).
 pub fn print_frame_tree(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     filter: Option<&str>,
     filter_key: Option<&str>,
     visible_only: bool,
@@ -21,7 +22,7 @@ pub fn print_frame_tree(
 ) {
     print_anchor_diagnostic(widgets);
     eprintln!("\n=== Frame Tree ===\n");
-    let lines = build_tree(widgets, filter, filter_key, visible_only, screen_width, screen_height);
+    let lines = build_tree(widgets, addon_names, filter, filter_key, visible_only, screen_width, screen_height);
     for line in &lines {
         println!("{line}");
     }
@@ -30,6 +31,7 @@ pub fn print_frame_tree(
 /// Build the frame tree as lines (for connected dump-tree server).
 pub fn build_tree(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     filter: Option<&str>,
     filter_key: Option<&str>,
     visible_only: bool,
@@ -55,12 +57,12 @@ pub fn build_tree(
         let re = compile_re(key_filter);
         let matching = collect_key_matches(widgets, &roots, &re);
         for id in matching {
-            emit_subtree(widgets, id, 0, visible_only, screen_width, screen_height, &mut lines);
+            emit_subtree(widgets, addon_names, id, 0, visible_only, screen_width, screen_height, &mut lines);
         }
     } else {
         let re = filter.map(|f| compile_re(f));
         for (id, _) in &roots {
-            emit_filtered(widgets, *id, 0, re.as_ref(), visible_only, screen_width, screen_height, &mut lines);
+            emit_filtered(widgets, addon_names, *id, 0, re.as_ref(), visible_only, screen_width, screen_height, &mut lines);
         }
     }
     lines
@@ -69,6 +71,7 @@ pub fn build_tree(
 /// Build a compact dump with warning flags (for debug server Dump command).
 pub fn build_warning_dump(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     screen_width: f32,
     screen_height: f32,
 ) -> Vec<String> {
@@ -87,7 +90,7 @@ pub fn build_warning_dump(
     root_ids.sort();
 
     for id in root_ids {
-        emit_warning_recursive(widgets, id, 0, screen_width, screen_height, &mut lines);
+        emit_warning_recursive(widgets, addon_names, id, 0, screen_width, screen_height, &mut lines);
     }
     lines
 }
@@ -95,12 +98,14 @@ pub fn build_warning_dump(
 // ── Frame line formatting ───────────────────────────────────────────
 
 /// Emit a single frame line with computed rect, stored size, anchors, texture.
+#[allow(clippy::too_many_arguments)]
 fn emit_frame_line(
     frame: &Frame,
     id: u64,
     display_name: &str,
     depth: usize,
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -115,8 +120,11 @@ fn emit_frame_line(
     let font_str = format_font_str(frame);
     let strata_str = format!(" {}:{}", frame.frame_strata.as_str(), frame.frame_level);
     let mask_str = if frame.is_mask { " MASK" } else { "" };
+    let owner_str = resolve_addon_name(addon_names, frame.owner_addon)
+        .map(|name| format!(" @{name}"))
+        .unwrap_or_default();
     lines.push(format!(
-        "{indent}{display_name} [{:?}] {size_str} {vis}{strata_str}{mask_str}{stale_str}{info_str}{text_str}{font_str}",
+        "{indent}{display_name} [{:?}] {size_str} {vis}{strata_str}{mask_str}{owner_str}{stale_str}{info_str}{text_str}{font_str}",
         frame.widget_type,
     ));
     emit_anchor_lines(widgets, frame, &indent, screen_width, screen_height, lines);
@@ -246,6 +254,7 @@ fn format_font_str(frame: &Frame) -> String {
 /// Emit a full subtree unconditionally (for filter_key matches).
 fn emit_subtree(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     id: u64,
     depth: usize,
     visible_only: bool,
@@ -258,9 +267,9 @@ fn emit_subtree(
         return;
     }
     let name = resolve_display_name(widgets, frame, id);
-    emit_frame_line(frame, id, &name, depth, widgets, screen_width, screen_height, lines);
+    emit_frame_line(frame, id, &name, depth, widgets, addon_names, screen_width, screen_height, lines);
     for &child_id in &frame.children {
-        emit_subtree(widgets, child_id, depth + 1, visible_only, screen_width, screen_height, lines);
+        emit_subtree(widgets, addon_names, child_id, depth + 1, visible_only, screen_width, screen_height, lines);
     }
 }
 
@@ -268,6 +277,7 @@ fn emit_subtree(
 #[allow(clippy::too_many_arguments)]
 fn emit_filtered(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     id: u64,
     depth: usize,
     filter: Option<&regex::Regex>,
@@ -283,16 +293,17 @@ fn emit_filtered(
     let name = resolve_display_name(widgets, frame, id);
     let matches = filter.map(|re| re.is_match(&name)).unwrap_or(true);
     if matches {
-        emit_frame_line(frame, id, &name, depth, widgets, screen_width, screen_height, lines);
+        emit_frame_line(frame, id, &name, depth, widgets, addon_names, screen_width, screen_height, lines);
     }
     for &child_id in &frame.children {
-        emit_filtered(widgets, child_id, depth + 1, filter, visible_only, screen_width, screen_height, lines);
+        emit_filtered(widgets, addon_names, child_id, depth + 1, filter, visible_only, screen_width, screen_height, lines);
     }
 }
 
 /// Emit a frame with warning flags (compact format for debug server).
 fn emit_warning_recursive(
     widgets: &WidgetRegistry,
+    addon_names: &[String],
     id: u64,
     depth: usize,
     screen_width: f32,
@@ -303,6 +314,9 @@ fn emit_warning_recursive(
     let rect = compute_frame_rect(widgets, id, screen_width, screen_height);
     let indent = "  ".repeat(depth);
     let name = frame.name.as_deref().unwrap_or("(anon)");
+    let owner_str = resolve_addon_name(addon_names, frame.owner_addon)
+        .map(|a| format!(" @{a}"))
+        .unwrap_or_default();
     let warnings = build_warnings(frame, &rect, screen_width, screen_height);
     let warn_str = if warnings.is_empty() {
         String::new()
@@ -310,12 +324,12 @@ fn emit_warning_recursive(
         format!(" ! {}", warnings.join(", "))
     };
     lines.push(format!(
-        "{indent}{name} [{}] ({:.0},{:.0} {}x{}){warn_str}",
+        "{indent}{name} [{}] ({:.0},{:.0} {}x{}){owner_str}{warn_str}",
         frame.widget_type.as_str(),
         rect.x, rect.y, rect.width as i32, rect.height as i32,
     ));
     for &child_id in &frame.children {
-        emit_warning_recursive(widgets, child_id, depth + 1, screen_width, screen_height, lines);
+        emit_warning_recursive(widgets, addon_names, child_id, depth + 1, screen_width, screen_height, lines);
     }
 }
 
@@ -369,6 +383,11 @@ fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
             if w.parent_id.is_none() { Some((id, w.name.clone())) } else { None }
         })
         .collect()
+}
+
+/// Resolve owner addon index to folder name.
+fn resolve_addon_name<'a>(addon_names: &'a [String], owner: Option<u16>) -> Option<&'a str> {
+    owner.and_then(|idx| addon_names.get(idx as usize).map(|s| s.as_str()))
 }
 
 /// Global name > parentKey > anonymous fallback.

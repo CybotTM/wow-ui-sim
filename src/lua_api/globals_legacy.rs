@@ -445,6 +445,8 @@ fn register_stateful_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
 
 /// Register global frame objects and sync named frames to _G.
 fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    // Set a built-in pseudo-addon as owner for pre-created frames.
+    set_builtin_addon_owner(state);
     register_global_frames(lua, Rc::clone(state))?;
     register_tooltip_frames(lua, Rc::clone(state))?;
     register_quest_frames(lua, Rc::clone(state))?;
@@ -453,8 +455,17 @@ fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
     // only sets the widget registry name without calling raw_set on _G.
     // Admin API for simulator state control from Lua.
     super::globals::admin_api::register_admin_api(lua, Rc::clone(state))?;
+    state.borrow_mut().loading_addon_index = None;
 
     sync_named_frames_to_globals(lua, state)
+}
+
+/// Set loading_addon_index to the existing `__BuiltIn` pseudo-addon.
+fn set_builtin_addon_owner(state: &Rc<RefCell<SimState>>) {
+    let mut s = state.borrow_mut();
+    let idx = s.addons.iter().position(|a| a.folder_name == "__BuiltIn")
+        .expect("__BuiltIn addon must be registered by init_builtin_frames");
+    s.loading_addon_index = Some(idx as u16);
 }
 
 /// Set `_G[name]` and `_G["__frame_{id}"]` for every named frame in the registry

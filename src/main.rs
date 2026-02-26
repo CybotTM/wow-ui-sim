@@ -645,7 +645,8 @@ fn run_dump_tree(
     run_extra_update_ticks(env, 3);
     apply_delay(delay);
     let state = env.state().borrow();
-    wow_ui_sim::dump::print_frame_tree(&state.widgets, filter.as_deref(), filter_key.as_deref(), visible_only, width as f32, height as f32);
+    let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
+    wow_ui_sim::dump::print_frame_tree(&state.widgets, &addon_names, filter.as_deref(), filter_key.as_deref(), visible_only, width as f32, height as f32);
 }
 
 #[cfg(feature = "gui")]
@@ -677,7 +678,8 @@ fn run_screenshot(
     if let Some(dump_filter) = &dump_tree {
         let state = env.state().borrow();
         let fk = dump_filter.as_deref();
-        wow_ui_sim::dump::print_frame_tree(&state.widgets, None, fk, false, width as f32, height as f32);
+        let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
+        wow_ui_sim::dump::print_frame_tree(&state.widgets, &addon_names, None, fk, false, width as f32, height as f32);
     }
     eprintln!("QuadBatch: {} quads, {} texture requests", batch.quad_count(), batch.texture_requests.len());
 

@@ -150,6 +150,44 @@ fn test_world_frame_object_type() {
 }
 
 #[test]
+fn test_create_frame_has_owner_addon() {
+    let (t, _) = load_test_lua("test-owner-addon", r#"
+        local f = CreateFrame("Frame", "OwnerTestFrame", UIParent)
+    "#);
+    let state = t.env.state().borrow();
+    let id = state.widgets.get_id_by_name("OwnerTestFrame").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(frame.owner_addon.is_some(), "frame should have owner_addon set");
+    let addon = &state.addons[frame.owner_addon.unwrap() as usize];
+    assert_eq!(addon.folder_name, "TestAddon");
+}
+
+#[test]
+fn test_child_inherits_owner_from_parent() {
+    let (t, _) = load_test_lua("test-owner-inherit", r#"
+        local parent = CreateFrame("Frame", "OwnerParent", UIParent)
+        local child = CreateFrame("Frame", "OwnerChild", OwnerParent)
+    "#);
+    let state = t.env.state().borrow();
+    let parent_id = state.widgets.get_id_by_name("OwnerParent").unwrap();
+    let child_id = state.widgets.get_id_by_name("OwnerChild").unwrap();
+    let parent = state.widgets.get(parent_id).unwrap();
+    let child = state.widgets.get(child_id).unwrap();
+    assert_eq!(parent.owner_addon, child.owner_addon, "child should inherit parent's owner");
+}
+
+#[test]
+fn test_builtin_frames_have_owner() {
+    let env = WowLuaEnv::new().unwrap();
+    let state = env.state().borrow();
+    let ui_parent_id = state.widgets.get_id_by_name("UIParent").unwrap();
+    let frame = state.widgets.get(ui_parent_id).unwrap();
+    assert!(frame.owner_addon.is_some(), "UIParent should have owner_addon");
+    let addon = &state.addons[frame.owner_addon.unwrap() as usize];
+    assert_eq!(addon.folder_name, "__BuiltIn");
+}
+
+#[test]
 fn test_global_nil_for_nonexistent_frame() {
     let env = WowLuaEnv::new().unwrap();
     assert!(

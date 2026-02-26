@@ -88,13 +88,9 @@ pub fn load_addon_internal(
     let addon_table = env.create_addon_table().map_err(|e| LoadError::Lua(e.to_string()))?;
 
     // Set loading_addon_index so frames created during this addon's load
-    // are attributed to it for profiler metrics.
-    {
-        let s = env.state().borrow();
-        let idx = s.addons.iter().position(|a| a.folder_name == folder_name);
-        drop(s);
-        env.state().borrow_mut().loading_addon_index = idx.map(|i| i as u16);
-    }
+    // are attributed to it. Panic if addon not registered — caller bug.
+    let addon_idx = resolve_addon_index(env, folder_name);
+    env.state().borrow_mut().loading_addon_index = Some(addon_idx);
 
     let ctx = AddonContext {
         name: folder_name,
@@ -108,6 +104,22 @@ pub fn load_addon_internal(
     env.state().borrow_mut().loading_addon_index = None;
 
     Ok(result)
+}
+
+/// Find or auto-register addon in the addon list, returning its index.
+fn resolve_addon_index(env: &LoaderEnv<'_>, folder_name: &str) -> u16 {
+    let mut s = env.state().borrow_mut();
+    let idx = s.addons.iter().position(|a| a.folder_name == folder_name)
+        .unwrap_or_else(|| {
+            let idx = s.addons.len();
+            s.addons.push(crate::lua_api::AddonInfo {
+                folder_name: folder_name.to_string(),
+                title: folder_name.to_string(),
+                enabled: true, ..Default::default()
+            });
+            idx
+        });
+    idx as u16
 }
 
 /// Load all Lua/XML files listed in the TOC, applying local overlay paths.

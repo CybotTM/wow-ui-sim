@@ -240,6 +240,26 @@ fn substitute_parent_name(
 /// Register a new frame in the widget registry and set up parent-child relationship.
 /// If a named frame already exists, orphan the old one (remove from parent's children and hide).
 /// When `parent_explicit` is false (UIParent default), frame_level stays at 0.
+/// Set owner_addon and forbidden flag on a new frame.
+/// Panics if no owner can be determined — every CreateFrame must have a creator.
+fn attribute_frame_owner(
+    frame: &mut Frame,
+    state: &Rc<RefCell<SimState>>,
+    parent_id: Option<u64>,
+) {
+    let s = state.borrow();
+    frame.owner_addon = s.loading_addon_index.or_else(|| {
+        parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
+    });
+    frame.forbidden = s.loading_forbidden;
+    if frame.owner_addon.is_none() {
+        eprintln!(
+            "[WARN] CreateFrame {:?} ({:?}): no owner addon (runtime creation without parent)",
+            frame.name, frame.widget_type
+        );
+    }
+}
+
 fn register_new_frame(
     state: &Rc<RefCell<SimState>>,
     widget_type: WidgetType,
@@ -249,15 +269,7 @@ fn register_new_frame(
 ) -> u64 {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
 
-    // Attribute frame to the addon currently being loaded, or inherit from parent.
-    // Also mark forbidden if we're inside a ScopedModifier with forbidden="true".
-    {
-        let s = state.borrow();
-        frame.owner_addon = s.loading_addon_index.or_else(|| {
-            parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
-        });
-        frame.forbidden = s.loading_forbidden;
-    }
+    attribute_frame_owner(&mut frame, state, parent_id);
 
     let frame_id = frame.id;
 

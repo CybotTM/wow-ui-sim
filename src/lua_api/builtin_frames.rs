@@ -18,8 +18,10 @@ fn register_frame(
     name: &str,
     parent: Option<u64>,
     size: Option<(f32, f32)>,
+    owner: u16,
 ) -> u64 {
     let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
+    frame.owner_addon = Some(owner);
     if let Some((w, h)) = size {
         frame.width = w;
         frame.height = h;
@@ -34,8 +36,10 @@ fn register_hidden_frame(
     name: &str,
     parent: Option<u64>,
     size: Option<(f32, f32)>,
+    owner: u16,
 ) -> u64 {
     let mut frame = Frame::new(widget_type, Some(name.to_string()), parent);
+    frame.owner_addon = Some(owner);
     if let Some((w, h)) = size {
         frame.width = w;
         frame.height = h;
@@ -61,26 +65,27 @@ fn link_child(widgets: &mut WidgetRegistry, parent_id: u64, key: &str, child_id:
 /// Frames from loaded Blizzard addons (Blizzard_FrameXML, Blizzard_UIPanels_Game,
 /// Blizzard_EditMode, Blizzard_Settings_Shared, Blizzard_Minimap, etc.) are
 /// created by the XML loader and must NOT be duplicated here.
-pub fn create_builtin_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_height: f32) {
-    let ui_parent_id = create_engine_frames(widgets, screen_width, screen_height);
+pub fn create_builtin_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_height: f32, owner: u16) {
+    let ui_parent_id = create_engine_frames(widgets, screen_width, screen_height, owner);
 
     // Stubs for addons not yet in BLIZZARD_ADDONS:
-    create_buff_frame(widgets, ui_parent_id);       // Blizzard_BuffFrame
-    create_debuff_frame(widgets, ui_parent_id);     // Blizzard_BuffFrame (referenced by Blizzard_UnitFrame)
-    create_stub_frames(widgets, ui_parent_id);      // Various not-loaded addons
+    create_buff_frame(widgets, ui_parent_id, owner);       // Blizzard_BuffFrame
+    create_debuff_frame(widgets, ui_parent_id, owner);     // Blizzard_BuffFrame (referenced by Blizzard_UnitFrame)
+    create_stub_frames(widgets, ui_parent_id, owner);      // Various not-loaded addons
 }
 
 // ---------------------------------------------------------------------------
 // Engine-created frames (no XML definition, or must exist before XML loads)
 // ---------------------------------------------------------------------------
 
-fn create_engine_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_height: f32) -> u64 {
+fn create_engine_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_height: f32, o: u16) -> u64 {
     let ui_parent_id = register_frame(
         widgets,
         WidgetType::Frame,
         "UIParent",
         None,
         Some((screen_width, screen_height)),
+        o,
     );
 
     // Set UIParent panel attributes (from UIParent.xml <Attributes>).
@@ -98,10 +103,10 @@ fn create_engine_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_
     }
 
     // WorldFrame (3D world rendering area, same level as UIParent)
-    register_frame(widgets, WidgetType::WorldFrame, "WorldFrame", None, Some((screen_width, screen_height)));
+    register_frame(widgets, WidgetType::WorldFrame, "WorldFrame", None, Some((screen_width, screen_height)), o);
 
     // DEFAULT_CHAT_FRAME fallback (overwritten by show_chat_frame workaround when chat addons load)
-    register_frame(widgets, WidgetType::MessageFrame, "DEFAULT_CHAT_FRAME", Some(ui_parent_id), Some((430.0, 120.0)));
+    register_frame(widgets, WidgetType::MessageFrame, "DEFAULT_CHAT_FRAME", Some(ui_parent_id), Some((430.0, 120.0)), o);
 
     ui_parent_id
 }
@@ -110,15 +115,15 @@ fn create_engine_frames(widgets: &mut WidgetRegistry, screen_width: f32, screen_
 // Stubs: Blizzard_BuffFrame (not loaded)
 // ---------------------------------------------------------------------------
 
-fn create_buff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
-    let bf_id = register_frame(widgets, WidgetType::Frame, "BuffFrame", Some(ui_parent_id), Some((300.0, 100.0)));
-    let ac_id = register_frame(widgets, WidgetType::Frame, "BuffFrameAuraContainer", Some(bf_id), Some((300.0, 100.0)));
+fn create_buff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
+    let bf_id = register_frame(widgets, WidgetType::Frame, "BuffFrame", Some(ui_parent_id), Some((300.0, 100.0)), o);
+    let ac_id = register_frame(widgets, WidgetType::Frame, "BuffFrameAuraContainer", Some(bf_id), Some((300.0, 100.0)), o);
     link_child(widgets, bf_id, "AuraContainer", ac_id);
 }
 
-fn create_debuff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
-    let df_id = register_frame(widgets, WidgetType::Frame, "DebuffFrame", Some(ui_parent_id), Some((300.0, 100.0)));
-    let ac_id = register_frame(widgets, WidgetType::Frame, "DebuffFrameAuraContainer", Some(df_id), Some((300.0, 100.0)));
+fn create_debuff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
+    let df_id = register_frame(widgets, WidgetType::Frame, "DebuffFrame", Some(ui_parent_id), Some((300.0, 100.0)), o);
+    let ac_id = register_frame(widgets, WidgetType::Frame, "DebuffFrameAuraContainer", Some(df_id), Some((300.0, 100.0)), o);
     link_child(widgets, df_id, "AuraContainer", ac_id);
 }
 
@@ -126,21 +131,21 @@ fn create_debuff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
 // Simple stubs: frames from various not-loaded addons (no children needed)
 // ---------------------------------------------------------------------------
 
-fn create_stub_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
+fn create_stub_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
     // Blizzard_ObjectiveTracker (not loaded)
-    register_frame(widgets, WidgetType::Frame, "ObjectiveTrackerFrame", Some(ui_parent_id), Some((248.0, 600.0)));
-    register_frame(widgets, WidgetType::Frame, "ScenarioObjectiveTracker", Some(ui_parent_id), None);
+    register_frame(widgets, WidgetType::Frame, "ObjectiveTrackerFrame", Some(ui_parent_id), Some((248.0, 600.0)), o);
+    register_frame(widgets, WidgetType::Frame, "ScenarioObjectiveTracker", Some(ui_parent_id), None, o);
 
     // Blizzard_GroupFinder (not loaded)
-    register_hidden_frame(widgets, WidgetType::Frame, "LFGListFrame", Some(ui_parent_id), Some((400.0, 500.0)));
-    register_frame(widgets, WidgetType::Frame, "LFGEventFrame", Some(ui_parent_id), None);
+    register_hidden_frame(widgets, WidgetType::Frame, "LFGListFrame", Some(ui_parent_id), Some((400.0, 500.0)), o);
+    register_frame(widgets, WidgetType::Frame, "LFGEventFrame", Some(ui_parent_id), None, o);
 
     // Blizzard_NamePlates (not loaded)
-    register_frame(widgets, WidgetType::Frame, "NamePlateDriverFrame", Some(ui_parent_id), None);
+    register_frame(widgets, WidgetType::Frame, "NamePlateDriverFrame", Some(ui_parent_id), None, o);
 
     // Blizzard_AuctionHouseUI (not loaded)
-    register_frame(widgets, WidgetType::Frame, "AuctionHouseFrame", Some(ui_parent_id), None);
+    register_frame(widgets, WidgetType::Frame, "AuctionHouseFrame", Some(ui_parent_id), None, o);
 
     // Engine-only (no XML definition)
-    register_frame(widgets, WidgetType::Frame, "InterfaceOptionsFrame", Some(ui_parent_id), None);
+    register_frame(widgets, WidgetType::Frame, "InterfaceOptionsFrame", Some(ui_parent_id), None, o);
 }
