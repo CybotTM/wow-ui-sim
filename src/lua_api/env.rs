@@ -353,9 +353,10 @@ impl WowLuaEnv {
             let on_update_dur = t.elapsed();
             self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnPostUpdate");
             let total = t.elapsed();
-            if total.as_millis() > 10 {
+            if total.as_millis() > 20 {
                 eprintln!("[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
                     frame_ids.len());
+                self.profile_on_update_handlers(&frame_ids, elapsed);
             }
         }
 
@@ -385,6 +386,40 @@ impl WowLuaEnv {
             .collect();
         state.visible_on_update_cache = Some(ids.clone());
         ids
+    }
+
+    /// Profile each OnUpdate handler individually from Rust (accurate timing).
+    fn profile_on_update_handlers(&self, frame_ids: &[u64], elapsed: f64) {
+        use super::script_helpers::{get_frame_ref, get_script};
+        let elapsed_val = Value::Number(elapsed);
+        let mut timings: Vec<(String, std::time::Duration)> = Vec::new();
+        for &id in frame_ids {
+            if let Some(handler) = get_script(&self.lua, id, "OnUpdate")
+                && let Some(frame) = get_frame_ref(&self.lua, id)
+            {
+                let t = Instant::now();
+                let _ = handler.call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]));
+                let dur = t.elapsed();
+                let state = self.state.borrow();
+                let name = state.widgets.get(id)
+                    .map(|f| {
+                        let n = f.name.clone().unwrap_or_else(|| format!("__anon_{id}"));
+                        let parent = f.parent_id.and_then(|pid| state.widgets.get(pid))
+                            .and_then(|p| p.name.clone()).unwrap_or_default();
+                        let pkey = f.parent_key.clone().unwrap_or_default();
+                        format!("{n} [parent={parent} key={pkey} type={:?}]", f.widget_type)
+                    })
+                    .unwrap_or_else(|| format!("id={id}"));
+                drop(state);
+                timings.push((name, dur));
+            }
+        }
+        timings.sort_by(|a, b| b.1.cmp(&a.1));
+        for (name, dur) in timings.iter().take(10) {
+            if dur.as_micros() > 500 {
+                eprintln!("  {dur:>8.1?}  {name}");
+            }
+        }
     }
 
     /// Dispatch OnUpdate (or OnPostUpdate) handlers via a Lua-side loop.
