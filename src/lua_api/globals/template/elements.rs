@@ -33,61 +33,62 @@ pub(super) fn create_texture_from_template(
     is_mask: bool,
     is_line: bool,
 ) {
-    let child_name = texture
+    let resolved = crate::xml::resolve_texture_inheritance(texture);
+    let child_name = resolved
         .name
         .as_ref()
         .map(|n| n.replace("$parent", subst_parent))
         .unwrap_or_else(|| format!("__tex_{}", rand_id()));
 
+    let code = build_template_texture_lua(&resolved, parent_name, &child_name, draw_layer, is_mask, is_line);
+    if let Err(e) = lua.load(&code).exec() {
+        eprintln!("[create_texture] failed for '{}' on '{}': {}", child_name, parent_name, e);
+    }
+    apply_texture_animations(lua, &resolved, &child_name);
+}
+
+/// Build Lua code that creates and configures a texture from a template.
+fn build_template_texture_lua(
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+    child_name: &str,
+    draw_layer: &str,
+    is_mask: bool,
+    is_line: bool,
+) -> String {
     let create_method = if is_line { "CreateLine" } else if is_mask { "CreateMaskTexture" } else { "CreateTexture" };
     let mut code = format!(
-        r#"
-        local parent = {}
-        if parent then
-            local tex = parent:{}("{}", "{}")
-        "#,
-        lua_global_ref(parent_name), create_method, escape_lua_string(&child_name), draw_layer,
+        "local parent = {}\nif parent then\nlocal tex = parent:{}(\"{}\", \"{}\")\n",
+        lua_global_ref(parent_name), create_method, escape_lua_string(child_name), draw_layer,
     );
-
-    // Apply mixins from inherited templates and direct mixin attribute
-    let mixins = crate::xml::collect_texture_mixins(texture);
-    for m in &mixins {
-        code.push_str(&format!(
-            "            if {} then Mixin(tex, {}) end\n",
-            m, m
-        ));
-    }
-
+    append_template_texture_mixins(&mut code, texture);
     if is_line {
         if let Some(t) = texture.thickness {
-            code.push_str(&format!("            tex:SetThickness({})\n", t));
+            code.push_str(&format!("tex:SetThickness({})\n", t));
         }
     }
-
     append_texture_properties(&mut code, texture, "tex", is_mask);
     append_anchors_and_parent_refs(
         &mut code, &texture.anchors, texture.set_all_points,
         &texture.parent_key, &texture.parent_array,
         "tex", "parent", parent_name,
     );
-
-    // WoW implicitly applies SetAllPoints to textures with no anchors
     if texture.anchors.is_none() && texture.set_all_points != Some(true) {
-        code.push_str("            tex:SetAllPoints(true)\n");
+        code.push_str("tex:SetAllPoints(true)\n");
     }
-
     if texture.hidden == Some(true) {
-        code.push_str("            tex:Hide()\n");
+        code.push_str("tex:Hide()\n");
     }
-
     append_mask_wiring(&mut code, is_mask, texture);
+    code.push_str("end\n");
+    code
+}
 
-    code.push_str("        end\n");
-    if let Err(e) = lua.load(&code).exec() {
-        eprintln!("[create_texture] failed for '{}' on '{}': {}", child_name, parent_name, e);
+/// Append Mixin() calls from inherited templates and direct mixin attribute.
+fn append_template_texture_mixins(code: &mut String, texture: &crate::xml::TextureXml) {
+    for m in &crate::xml::collect_texture_mixins(texture) {
+        code.push_str(&format!("if {} then Mixin(tex, {}) end\n", m, m));
     }
-
-    apply_texture_animations(lua, texture, &child_name);
 }
 
 /// Process animation groups on a texture.

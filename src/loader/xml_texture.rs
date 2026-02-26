@@ -1,7 +1,7 @@
 //! Texture creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
-use crate::xml::{collect_texture_mixins, register_texture_template};
+use crate::xml::{collect_texture_mixins, register_texture_template, resolve_texture_inheritance};
 
 use super::error::LoadError;
 use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref, resolve_child_name};
@@ -165,8 +165,9 @@ pub fn create_texture_from_xml(
         return Ok(());
     }
 
-    let tex_name = resolve_child_name(texture.name.as_deref(), parent_name, "__tex_");
-    let lua_code = build_texture_lua(&tex_name, texture, parent_name, draw_layer, is_mask, is_line, sub_level);
+    let resolved = resolve_texture_inheritance(texture);
+    let tex_name = resolve_child_name(resolved.name.as_deref(), parent_name, "__tex_");
+    let lua_code = build_texture_lua(&tex_name, &resolved, parent_name, draw_layer, is_mask, is_line, sub_level);
     env.exec(&lua_code).map_err(|e| {
         LoadError::Lua(format!(
             "Failed to create texture {} on {}: {}",

@@ -189,6 +189,75 @@ pub fn register_texture_template(name: &str, texture: TextureXml) {
     registry.insert(name.to_string(), texture);
 }
 
+/// Resolve texture inheritance: merge properties from the template chain.
+///
+/// Returns a new `TextureXml` with inherited properties filled in.
+/// Instance properties override template properties (most-derived wins).
+pub fn resolve_texture_inheritance(texture: &TextureXml) -> TextureXml {
+    let Some(ref inherits) = texture.inherits else {
+        return texture.clone();
+    };
+
+    let registry = texture_template_registry().read().unwrap();
+    // Collect templates in order (base first)
+    let mut templates = Vec::new();
+    for parent_name in inherits.split(',').map(|s| s.trim()) {
+        if let Some(parent) = registry.get(parent_name) {
+            templates.push(parent.clone());
+        }
+    }
+    drop(registry);
+
+    if templates.is_empty() {
+        return texture.clone();
+    }
+
+    // Start with first template as base, overlay subsequent templates, then instance
+    let mut merged = templates[0].clone();
+    for tmpl in &templates[1..] {
+        merge_texture_fields(&mut merged, tmpl);
+    }
+    merge_texture_fields(&mut merged, texture);
+
+    // Preserve instance identity fields
+    merged.name = texture.name.clone();
+    merged.parent_key = texture.parent_key.clone();
+    merged.parent_array = texture.parent_array.clone();
+    merged.is_virtual = texture.is_virtual;
+    merged.inherits = texture.inherits.clone();
+    merged.anchors = texture.anchors.clone();
+    merged.animations = texture.animations.clone();
+    merged.scripts = texture.scripts.clone();
+    merged.masked_textures = texture.masked_textures.clone();
+
+    merged
+}
+
+/// Overlay `src` fields onto `dst` where `src` has a value.
+fn merge_texture_fields(dst: &mut TextureXml, src: &TextureXml) {
+    macro_rules! merge_opt {
+        ($field:ident) => {
+            if src.$field.is_some() {
+                dst.$field = src.$field.clone();
+            }
+        };
+    }
+    merge_opt!(file);
+    merge_opt!(atlas);
+    merge_opt!(use_atlas_size);
+    merge_opt!(tex_coords);
+    merge_opt!(size);
+    merge_opt!(color);
+    merge_opt!(horiz_tile);
+    merge_opt!(vert_tile);
+    merge_opt!(thickness);
+    merge_opt!(hidden);
+    merge_opt!(alpha);
+    merge_opt!(alpha_mode);
+    merge_opt!(set_all_points);
+    merge_opt!(mixin);
+}
+
 /// Collect all mixins for a texture by resolving its `inherits` chain.
 pub fn collect_texture_mixins(texture: &TextureXml) -> Vec<String> {
     let mut mixins = Vec::new();
