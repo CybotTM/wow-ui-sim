@@ -145,6 +145,21 @@ impl WidgetRegistry {
         self.widgets.keys().copied()
     }
 
+    /// Collect unique texture paths from all visible frames.
+    pub fn visible_texture_paths(&self) -> Vec<String> {
+        let mut paths = std::collections::HashSet::new();
+        for frame in self.widgets.values() {
+            if !frame.visible { continue; }
+            for path in [
+                &frame.texture, &frame.normal_texture, &frame.pushed_texture,
+                &frame.highlight_texture, &frame.disabled_texture,
+            ] {
+                if let Some(t) = path { paths.insert(t.clone()); }
+            }
+        }
+        paths.into_iter().collect()
+    }
+
     /// Get the next widget ID after `after_id` in creation order.
     /// Returns `None` when enumeration is complete.
     pub fn next_id_after(&self, after_id: u64) -> Option<u64> {

@@ -269,7 +269,16 @@ fn add_statusbar_fill_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 fn add_statusbar_desaturate_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetStatusBarDesaturated", |_, _this, _desat: bool| Ok(()));
     methods.add_method("GetStatusBarDesaturated", |_, _this, ()| Ok(false));
-    methods.add_method("SetStatusBarAtlas", |_, _this, _atlas: String| Ok(()));
+    methods.add_method("SetStatusBarAtlas", |lua, this, atlas: String| {
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.statusbar_texture_path = Some(atlas.clone());
+        }
+        apply_statusbar_texture_path(lua, &mut state, id, &atlas);
+        Ok(())
+    });
     methods.add_method("GetFillStyle", |_, _this, ()| Ok("STANDARD"));
     methods.add_method("GetReverseFill", |_, _this, ()| Ok(false));
     methods.add_method("GetRotatesTexture", |_, _this, ()| Ok(false));
