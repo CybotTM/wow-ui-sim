@@ -139,16 +139,22 @@ fn add_len_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-/// __tostring: returns the frame name or "Frame:{id}".
+/// __tostring: returns "WidgetType: 0xID" matching WoW's format.
+///
+/// WoW returns e.g. "Frame: 0x12345678" for `tostring(frame)`.  Returning the
+/// frame *name* caused `CreateFont(tostring(self))` inside
+/// `FontableFrameMixin:MakeFontObjectCustom` to overwrite `_G["ChatFrame1"]`
+/// (a FrameRef) with a Font table, breaking `:Hide()` / `:Show()` etc.
 fn add_tostring_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_meta_method(mlua::MetaMethod::ToString, |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let name = state.widgets.get(this.0).and_then(|f| f.name.clone());
-        match name {
-            Some(n) => Ok(n),
-            None => Ok(format!("Frame:{}", this.0)),
-        }
+        let type_name = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.widget_type.as_str())
+            .unwrap_or("Frame");
+        Ok(format!("{}: 0x{:08X}", type_name, this.0))
     });
 }
 

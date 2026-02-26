@@ -1,5 +1,9 @@
 # WoW UI Simulator
 
+## Important Rules
+
+- **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
+
 ## Architecture Docs
 
 - `docs/layout-system.md` - Anchor/layout system: AnchorPoint, single vs multi-anchor resolution, cycle detection, coordinate systems
@@ -74,6 +78,10 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 - Overlapping textures in same layer have undefined order
 
 **Texture Coordinates**: 8 values - `tlx, tly, blx, bly, trx, try, brx, bry` (top-left, bottom-left, top-right, bottom-right)
+
+### Method/Property Lookup on UserData
+
+All frame methods (`Hide`, `Show`, `IsVisible`, etc.) are registered once on `FrameRef` via `add_method` — mlua resolves them for ALL widget types regardless of `WidgetType`. The per-type method registry (`is_method_allowed`) only gates `getmetatable()` results, not actual method calls. Verified by `test_message_frame_has_global_methods` in `src/loader/tests/mod.rs`. If runtime errors report global methods as nil, the problem is the Lua value not being a `FrameRef` (e.g., overwritten by a table), not a missing method registration.
 
 ## Lua + Rust Architecture
 

@@ -191,16 +191,21 @@ fn add_is_event_registered<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 }
 
 fn add_register_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    // RegisterEventCallback(event, callbackContainer) - callback-based event registration
-    // Implemented in Lua to avoid mlua::Error::RuntimeError overhead (12000x slower
-    // than Lua error() due to Elune taint bookkeeping on Rust→Lua error boundary).
-    methods.add_method("RegisterEventCallback", |lua, _this, (event, _cb): (String, Value)| {
-        let callback_events_fn: Option<mlua::Function> =
-            lua.named_registry_value("__register_event_callback_fn").ok();
-        if let Some(f) = callback_events_fn {
-            return f.call::<Value>((Value::Nil, event));
+    use crate::event::is_callback_event;
+    methods.add_method("RegisterEventCallback", |lua, this, (event, _cb): (String, Value)| {
+        if !is_callback_event(&event) {
+            return Err(crate::lua_api::script_helpers::lua_error_val(format!(
+                "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
+                event
+            )));
         }
-        Ok(Value::Nil)
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(f) = state.widgets.get_mut(id) {
+            f.registered_events.insert(event.clone());
+        }
+        Ok(Value::Boolean(!is_restricted_event(&event)))
     });
 }
 
