@@ -426,20 +426,25 @@ impl App {
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
         self.preload_visible_textures();
-        // Clear failed texture set so preloaded textures get a fresh upload attempt.
-        self.gpu_failed_textures.borrow_mut().clear();
+        self.gpu_failed_textures.borrow_mut().clear(); // fresh upload attempt
         self.mark_all_strata_dirty();
     }
 
-    /// Preload textures for all visible frames into the TextureManager cache.
+    /// Preload visible textures with a ~10ms budget to avoid freezing.
     fn preload_visible_textures(&self) {
         let env = self.env.borrow();
         let paths = env.state().borrow().widgets.visible_texture_paths();
         drop(env);
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let before = tex_mgr.cache_len();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
         for path in &paths {
+            if tex_mgr.get(path).is_some() { continue; }
             tex_mgr.load(path);
+            if std::time::Instant::now() >= deadline {
+                self.textures_pending.set(true);
+                break;
+            }
         }
         let loaded = tex_mgr.cache_len() - before;
         if loaded > 0 {
@@ -728,21 +733,13 @@ fn apply_spec_change(
     state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
     env: &crate::lua_api::WowLuaEnv,
 ) {
-    let new_spec = {
+    let changed = {
         let mut s = state.borrow_mut();
-        let pending = s.pending_spec_change.take();
-        if let Some(idx) = pending {
-            s.active_spec_index = idx;
-        }
-        pending
+        s.pending_spec_change.take().map(|idx| { s.active_spec_index = idx; })
     };
-    if new_spec.is_some() {
+    if changed.is_some() {
         let lua = env.lua();
         let Ok(unit) = lua.create_string("player") else { return };
-        let _ = env.fire_event_with_args(
-            "PLAYER_SPECIALIZATION_CHANGED",
-            &[mlua::Value::String(unit)],
-        );
+        let _ = env.fire_event_with_args("PLAYER_SPECIALIZATION_CHANGED", &[mlua::Value::String(unit)]);
     }
 }
-
