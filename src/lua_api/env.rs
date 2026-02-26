@@ -350,37 +350,11 @@ impl WowLuaEnv {
     /// then tick animation groups.
     /// `elapsed` is the time in seconds since the last frame.
     pub fn fire_on_update(&self, elapsed: f64) -> Result<()> {
-        use super::script_helpers::{call_error_handler, get_frame_ref, get_script};
-
         let frame_ids = self.get_visible_on_update_frames();
 
         if !frame_ids.is_empty() {
             self.fire_on_update_handlers(&frame_ids, elapsed);
-        }
-
-        // Fire OnPostUpdate handlers
-        if !frame_ids.is_empty() {
-            let elapsed_val = Value::Number(elapsed);
-
-            for widget_id in &frame_ids {
-                let addon_idx = self.state.borrow().widgets.get(*widget_id)
-                    .and_then(|f| f.owner_addon);
-                let start = Instant::now();
-                if let Some(handler) = get_script(&self.lua, *widget_id, "OnPostUpdate")
-                    && let Some(frame) = get_frame_ref(&self.lua, *widget_id)
-                        && let Err(e) = handler
-                            .call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]))
-                        {
-                            call_error_handler(&self.lua, &e.to_string());
-                        }
-                if let Some(idx) = addon_idx {
-                    let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
-                    let mut state = self.state.borrow_mut();
-                    if let Some(addon) = state.addons.get_mut(idx as usize) {
-                        addon.runtime.current_frame_ms += elapsed_ms;
-                    }
-                }
-            }
+            self.fire_on_post_update_handlers(&frame_ids, elapsed);
         }
 
         // Tick animation groups
@@ -391,6 +365,25 @@ impl WowLuaEnv {
         self.finalize_frame_metrics(elapsed * 1000.0);
 
         Ok(())
+    }
+
+    /// Fire OnPostUpdate handlers for visible frames.
+    fn fire_on_post_update_handlers(&self, frame_ids: &[u64], elapsed: f64) {
+        use super::script_helpers::{call_error_handler, get_frame_ref, get_script};
+        let elapsed_val = Value::Number(elapsed);
+        for widget_id in frame_ids {
+            let addon_idx = self.state.borrow().widgets.get(*widget_id)
+                .and_then(|f| f.owner_addon);
+            let start = Instant::now();
+            if let Some(handler) = get_script(&self.lua, *widget_id, "OnPostUpdate")
+                && let Some(frame) = get_frame_ref(&self.lua, *widget_id)
+                && let Err(e) = handler
+                    .call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]))
+            {
+                call_error_handler(&self.lua, &e.to_string());
+            }
+            accumulate_addon_time(&self.state, addon_idx, start.elapsed().as_secs_f64() * 1000.0);
+        }
     }
 
     /// Return the cached visible OnUpdate frame IDs.

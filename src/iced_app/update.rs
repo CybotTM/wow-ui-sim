@@ -275,11 +275,13 @@ impl App {
 
         let health_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
         let combined = timers_mask | on_update_mask | health_mask;
+        self.drain_console();
         if combined != 0 {
-            self.drain_console();
             self.mark_strata_dirty(combined);
-        } else {
-            self.drain_console();
+        }
+        // If texture loading was capped last frame, re-dirty so draw() loads more.
+        if self.textures_pending.get() {
+            self.mark_all_strata_dirty();
         }
 
         Task::none()
@@ -309,11 +311,19 @@ impl App {
     fn fire_on_update(&mut self) {
         let now = std::time::Instant::now();
         let elapsed = now.duration_since(self.last_on_update_time);
+        // Throttle: skip if less than 16ms since last completion.
+        // Prevents queued ProcessTimers messages from starving draw().
+        if elapsed.as_millis() < 16 {
+            return;
+        }
         self.last_on_update_time = now;
         let env = self.env.borrow();
         if let Err(e) = env.fire_on_update(elapsed.as_secs_f64()) {
-            eprintln!("[OnUpdate] error: {}", e);
+            let ts = now.duration_since(self.fps_last_time);
+            eprintln!("[{ts:.1?}] [OnUpdate] error: {e}");
         }
+        // Update timestamp to after completion so throttle measures from end.
+        self.last_on_update_time = std::time::Instant::now();
     }
 
 
@@ -411,10 +421,29 @@ impl App {
         self.invalidate();
     }
 
-    /// Drain console, clear frame cache, and mark all strata dirty.
+    /// Drain console, preload textures, and mark all strata dirty.
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
+        self.preload_visible_textures();
+        // Clear failed texture set so preloaded textures get a fresh upload attempt.
+        self.gpu_failed_textures.borrow_mut().clear();
         self.mark_all_strata_dirty();
+    }
+
+    /// Preload textures for all visible frames into the TextureManager cache.
+    fn preload_visible_textures(&self) {
+        let env = self.env.borrow();
+        let paths = env.state().borrow().widgets.visible_texture_paths();
+        drop(env);
+        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let before = tex_mgr.cache_len();
+        for path in &paths {
+            tex_mgr.load(path);
+        }
+        let loaded = tex_mgr.cache_len() - before;
+        if loaded > 0 {
+            eprintln!("[preload] {loaded} new textures ({} total)", paths.len());
+        }
     }
 
     /// Apply pending HitGrid changes from `set_frame_visible` calls.

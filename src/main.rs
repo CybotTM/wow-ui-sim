@@ -143,7 +143,10 @@ fn apply_resource_limits() {
 }
 
 /// Scan addons directory and return sorted list of addon directories
-fn scan_addons(base_path: &PathBuf) -> Vec<(String, PathBuf)> {
+/// Addon names that are test-only and should not be loaded in GUI mode.
+const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData"];
+
+fn scan_addons(base_path: &PathBuf, exclude: &[&str]) -> Vec<(String, PathBuf)> {
     let mut addons = Vec::new();
     if let Ok(entries) = std::fs::read_dir(base_path) {
         for entry in entries.flatten() {
@@ -151,6 +154,7 @@ fn scan_addons(base_path: &PathBuf) -> Vec<(String, PathBuf)> {
             if !path.is_dir() { continue; }
             let name = path.file_name().unwrap().to_str().unwrap().to_string();
             if name.starts_with('.') || name == "BlizzardUI" { continue; }
+            if exclude.iter().any(|e| *e == name) { continue; }
             if let Some(toc_path) = wow_ui_sim::loader::find_toc_file(&path)
                 && let Ok(toc) = TocFile::from_file(&toc_path)
                     && !toc.is_glue_only() && !toc.is_ptr_only() && !toc.is_game_type_restricted() {
@@ -334,6 +338,11 @@ fn load_blizzard_addons(env: &WowLuaEnv) {
     );
 }
 
+/// Whether the current command needs test addons (Wowless, WowlessData).
+fn is_test_command(args: &Args) -> bool {
+    matches!(args.command, Some(Commands::SelfTest { .. }) | Some(Commands::RunTests { .. }))
+}
+
 /// Scan, load, and register third-party addons; print summary.
 fn load_third_party_addons(args: &Args, env: &WowLuaEnv, saved_vars: &mut Option<SavedVariablesManager>) {
     let skip_addons = args.no_addons
@@ -347,7 +356,8 @@ fn load_third_party_addons(args: &Args, env: &WowLuaEnv, saved_vars: &mut Option
     }
 
     let addons_path = PathBuf::from("./Interface/AddOns");
-    let addons = scan_addons(&addons_path);
+    let exclude = if is_test_command(args) { &[][..] } else { TEST_ADDONS };
+    let addons = scan_addons(&addons_path, exclude);
 
     if addons.is_empty() {
         return;

@@ -161,6 +161,8 @@ pub struct App {
     pub(crate) debug_anchors: bool,
     /// Track which textures have been uploaded to GPU atlas (avoid re-sending pixel data).
     pub(crate) gpu_uploaded_textures: RefCell<std::collections::HashSet<String>>,
+    /// Track texture paths that failed to load (avoid infinite retry loops).
+    pub(crate) gpu_failed_textures: RefCell<std::collections::HashSet<String>>,
     /// Cached merged quad batch (all strata combined), used by draw().
     pub(crate) cached_quads: RefCell<Option<(Size, std::sync::Arc<crate::render::QuadBatch>)>>,
     /// Per-strata cached quad batches. Index = FrameStrata::as_index().
@@ -169,6 +171,8 @@ pub struct App {
     pub(crate) cached_hittable: RefCell<Option<super::hit_grid::HitGrid>>,
     /// Per-strata dirty bitmask — bit `i` means strata index `i` needs re-emit.
     pub(crate) strata_dirty: std::cell::Cell<u16>,
+    /// True when texture loading was capped and more textures are pending.
+    pub(crate) textures_pending: std::cell::Cell<bool>,
     /// FPS counter: frame count since last update (interior mutability for draw()).
     pub(crate) frame_count: std::cell::Cell<u32>,
     /// FPS counter: last FPS calculation time.
@@ -280,10 +284,12 @@ impl App {
             debug_borders,
             debug_anchors,
             gpu_uploaded_textures: RefCell::new(std::collections::HashSet::new()),
+            gpu_failed_textures: RefCell::new(std::collections::HashSet::new()),
             cached_quads: RefCell::new(None),
             cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
             cached_hittable: RefCell::new(None),
             strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
+            textures_pending: std::cell::Cell::new(false),
             frame_count: std::cell::Cell::new(0),
             fps_last_time: now,
             fps: 0.0,
@@ -457,7 +463,9 @@ impl App {
         if has_cooldowns {
             self.mark_all_strata_dirty();
         }
-        if has_animations || has_casting || self.strata_dirty.get() != 0 {
+        if has_animations || has_casting || self.strata_dirty.get() != 0
+            || self.textures_pending.get()
+        {
             return Some(std::time::Duration::from_millis(16));
         }
         drop(state);
