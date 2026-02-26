@@ -32,19 +32,25 @@ pub(super) fn add_show_hide_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
 /// returns and fires the next handler.
 fn show_or_hide(lua: &Lua, id: u64, show: bool) -> mlua::Result<()> {
     let state_rc = get_sim_state(lua);
-    let (needs_change, in_handler) = {
+    let (needs_change, in_handler, parent_visible) = {
         let state = state_rc.borrow();
         let f = state.widgets.get(id);
         (
             f.map(|f| f.visible != show).unwrap_or(false),
             f.map(|f| f.show_hide_depth > 0).unwrap_or(false),
+            // WoW only fires OnShow/OnHide when the frame is effectively visible,
+            // which requires all ancestors to be visible too. If parent is hidden,
+            // just change the flag silently.
+            f.and_then(|f| f.parent_id)
+                .map(|pid| state.widgets.is_ancestor_visible(pid))
+                .unwrap_or(true), // root frames have no parent, always "parent visible"
         )
     };
     if !needs_change {
         return Ok(());
     }
     state_rc.borrow_mut().set_frame_visible(id, show);
-    if in_handler {
+    if in_handler || !parent_visible {
         return Ok(());
     }
     drain_visibility_handlers(lua, id, show)?;
