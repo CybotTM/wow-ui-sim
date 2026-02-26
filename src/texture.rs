@@ -94,6 +94,11 @@ impl TextureManager {
         self.cache.get(&normalized)
     }
 
+    /// Number of entries in the texture cache.
+    pub fn cache_len(&self) -> usize {
+        self.cache.len()
+    }
+
     /// Get the dimensions of a cached texture.
     pub fn get_texture_size(&self, wow_path: &str) -> Option<(u32, u32)> {
         let normalized = normalize_wow_path(wow_path);
@@ -143,11 +148,14 @@ impl TextureManager {
                     return Some(result);
                 }
 
-        // Remove "Interface/" prefix if present for game textures
-        let path = normalized_path
-            .strip_prefix("Interface/")
-            .or_else(|| normalized_path.strip_prefix("interface/"))
-            .unwrap_or(normalized_path);
+        // Remove "Interface/" prefix if present for game textures (case-insensitive)
+        let path = if normalized_path.len() >= 10
+            && normalized_path[..10].eq_ignore_ascii_case("Interface/")
+        {
+            &normalized_path[10..]
+        } else {
+            normalized_path
+        };
 
         // Try local textures first
         if let Some(result) = self.try_resolve_in_dir(&self.textures_path, path) {

@@ -215,6 +215,7 @@ pub fn resolve_file_data_id_or_path(value: &Value) -> Option<String> {
             }
         }
         Value::Integer(n) => {
+            if *n == 0 { return None; } // 0 means "clear texture"
             if let Some(path) = crate::manifest_interface_data::get_texture_path(*n as u32) {
                 Some(format!("Interface\\{}", path.replace('/', "\\")))
             } else {
@@ -223,6 +224,7 @@ pub fn resolve_file_data_id_or_path(value: &Value) -> Option<String> {
             }
         }
         Value::Number(n) => {
+            if *n == 0.0 { return None; } // 0 means "clear texture"
             if let Some(path) = crate::manifest_interface_data::get_texture_path(*n as u32) {
                 Some(format!("Interface\\{}", path.replace('/', "\\")))
             } else {
