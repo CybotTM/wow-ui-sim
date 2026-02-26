@@ -348,8 +348,15 @@ impl WowLuaEnv {
         let frame_ids = self.get_visible_on_update_frames();
 
         if !frame_ids.is_empty() {
+            let t = Instant::now();
             self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnUpdate");
+            let on_update_dur = t.elapsed();
             self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnPostUpdate");
+            let total = t.elapsed();
+            if total.as_millis() > 10 {
+                eprintln!("[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
+                    frame_ids.len());
+            }
         }
 
         // Tick animation groups
@@ -557,30 +564,40 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
     register_on_update_dispatcher(lua)
 }
 
-/// Register a Lua function that dispatches OnUpdate/OnPostUpdate handlers
-/// in a single Lua call, avoiding per-handler Rust→Lua FFI overhead.
-fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
-    // Ensure __scripts table exists before capturing it as upvalue.
-    super::script_helpers::get_or_create_scripts_table(lua);
-    let dispatch: mlua::Function = lua.load(r#"
-        local scripts = debug.getregistry().__scripts
-        local G = _G
-        return function(ids, elapsed, suffix)
-            local handler = geterrorhandler()
-            for i = 1, #ids do
-                local id = ids[i]
-                local func = scripts[id .. suffix]
-                if func then
-                    local frame = rawget(G, "__frame_" .. id)
-                    if frame then
-                        local ok, err = pcall(func, frame, elapsed)
-                        if not ok then handler(err) end
+/// Lua source for the OnUpdate dispatch loop. Runs all handlers in pure Lua
+/// and logs any individual handler that takes >5ms.
+const ON_UPDATE_DISPATCH_LUA: &str = r#"
+    local scripts = debug.getregistry().__scripts
+    local G = _G
+    return function(ids, elapsed, suffix)
+        local profile = debugprofilestop
+        local handler = geterrorhandler()
+        for i = 1, #ids do
+            local id = ids[i]
+            local func = scripts[id .. suffix]
+            if func then
+                local frame = rawget(G, "__frame_" .. id)
+                if frame then
+                    local t0 = profile()
+                    local ok, err = pcall(func, frame, elapsed)
+                    local dt = profile() - t0
+                    if dt > 5 then
+                        local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
+                        print(string.format("[OnUpdate] slow: %.1fms %s%s", dt, n, suffix))
                     end
+                    if not ok then handler(err) end
                 end
             end
         end
-    "#).into_function()?;
-    let dispatch = dispatch.call::<mlua::Function>(())?;
+    end
+"#;
+
+/// Register a Lua function that dispatches OnUpdate/OnPostUpdate handlers
+/// in a single Lua call, avoiding per-handler Rust→Lua FFI overhead.
+fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
+    super::script_helpers::get_or_create_scripts_table(lua);
+    let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;
+    let dispatch = factory.call::<mlua::Function>(())?;
     lua.set_named_registry_value("__dispatch_on_update", dispatch)
 }
 

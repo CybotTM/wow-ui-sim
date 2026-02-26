@@ -252,20 +252,17 @@ impl App {
     }
 
     fn handle_process_timers(&mut self) -> Task<Message> {
+        let t0 = std::time::Instant::now();
         self.update_fps_counter();
         self.run_pending_exec_lua();
 
-        // Track timer dirty separately — timer callbacks can legitimately change widgets.
         self.env.borrow().state().borrow().widgets.take_render_dirty();
         self.run_wow_timers();
         let timers_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
 
-        // Resolve pending layout before OnUpdate so IsRectValid() returns true
-        // for frames whose rects have been computed.  Without this, Blizzard code
-        // that iterates buttonsWithDirtyEdges during OnUpdate can trigger
-        // MarkEdgesDirty mid-iteration (via arrow-edge UpdatePosition calling
-        // IsRectValid), corrupting the table and producing "invalid key to next".
+        let t_layout = std::time::Instant::now();
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
+        let layout_dur = t_layout.elapsed();
 
         self.fire_on_update();
         let on_update_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
@@ -279,9 +276,13 @@ impl App {
         if combined != 0 {
             self.mark_strata_dirty(combined);
         }
-        // If texture loading was capped last frame, re-dirty so draw() loads more.
         if self.textures_pending.get() {
             self.mark_all_strata_dirty();
+        }
+        let total = t0.elapsed();
+        if total.as_millis() > 10 {
+            eprintln!("[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} pending={})",
+                self.textures_pending.get());
         }
 
         Task::none()

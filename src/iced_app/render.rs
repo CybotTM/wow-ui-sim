@@ -178,7 +178,7 @@ fn rebuild_strata_batches(
             );
         }
         let dur = strata_start.elapsed();
-        if dur.as_millis() > 10 {
+        if dur.as_millis() > 5 {
             eprintln!("[render] strata {i}: {n} frames, {dur:.1?}");
         }
         strata_cache[i] = Some(Arc::new(batch));
@@ -336,7 +336,7 @@ use crate::widget::FrameStrata;
 use std::sync::Arc;
 
 fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
-    if quad_dur.as_millis() > 20 || tex_dur.as_millis() > 20 {
+    if quad_dur.as_millis() > 5 || tex_dur.as_millis() > 5 {
         eprintln!("[draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)");
     }
 }
@@ -477,7 +477,7 @@ impl App {
         let t1 = std::time::Instant::now();
         let _ = state.get_strata_buckets();
         let bucket_dur = t1.elapsed();
-        if layout_dur.as_millis() > 10 || bucket_dur.as_millis() > 10 {
+        if layout_dur.as_millis() > 5 || bucket_dur.as_millis() > 5 {
             eprintln!("[rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}");
         }
         state.strata_buckets.take().unwrap()
@@ -496,7 +496,7 @@ impl App {
         let grid = super::hit_grid::HitGrid::new(hittable, size.width, size.height);
         *self.cached_hittable.borrow_mut() = Some(grid);
         let dur = t.elapsed();
-        if dur.as_millis() > 20 {
+        if dur.as_millis() > 5 {
             eprintln!("[rebuild] hit_grid={dur:.1?}");
         }
     }
