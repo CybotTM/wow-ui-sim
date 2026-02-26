@@ -42,11 +42,14 @@ pub fn is_restricted_event(name: &str) -> bool {
     RESTRICTED_EVENTS.binary_search(&name).is_ok()
 }
 
-/// Events that support RegisterEventCallback (only 6 in the client).
+/// Events that support RegisterEventCallback (from wowless events.yaml callback: true).
 const CALLBACK_EVENTS: &[&str] = &[
+    "COLOR_OVERRIDES_RESET",
     "COMBAT_LOG_APPLY_FILTER_SETTINGS",
+    "COMBAT_LOG_ENTRIES_CLEARED",
     "COMBAT_LOG_EVENT",
     "COMBAT_LOG_EVENT_UNFILTERED",
+    "COMBAT_LOG_MESSAGE_LIMIT_CHANGED",
     "COMBAT_LOG_REFILTER_ENTRIES",
     "ENCOUNTER_STATE_CHANGED",
     "TOOLTIP_SHOW_ITEM_COMPARISON",

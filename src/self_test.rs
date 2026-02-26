@@ -22,7 +22,7 @@ fn poll_until_done(env: &WowLuaEnv, max_ticks: u32) -> bool {
     let mut idle_ticks: u32 = 0;
     let mut prev_error_count: usize = 0;
 
-    for _ in 0..max_ticks {
+    for _tick in 0..max_ticks {
         flush_console(env);
         if tests_done(env) { return true; }
 
@@ -94,14 +94,17 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>) {
         }
     }
 
-    // Override debugprofilestop to return 0 so the Wowless test runner never
-    // yields between OnUpdate ticks. All sync tests run in a single tick.
+    // Override debugprofilestop to return real elapsed milliseconds so the
+    // Wowless test runner's budget check works (yields every half-frame).
     // Registered as a native C function (create_function) so the Wowless
     // globalApis.impltype test sees it as a C function, not a Lua function.
     let lua = env.lua();
+    let start = std::time::Instant::now();
     let _ = lua.globals().set(
         "debugprofilestop",
-        lua.create_function(|_, ()| Ok(0i64)).expect("debugprofilestop override"),
+        lua.create_function(move |_, ()| {
+            Ok(start.elapsed().as_millis() as i64)
+        }).expect("debugprofilestop override"),
     );
 
     let completed = poll_until_done(env, max_ticks);

@@ -23,9 +23,29 @@ OUTPUT_DIR = Path("./Interface/AddOns/WowlessData")
 PRODUCT = "wow"
 
 
+class _StringBoolLoader(yaml.SafeLoader):
+    """YAML loader that keeps YAML 1.1 boolean strings (Off/On/Yes/No) as strings."""
+    pass
+
+
+# Remove the implicit bool resolvers that convert Off/On/Yes/No to Python bools.
+# Keep only true/false (lowercase) as actual booleans, matching YAML 1.2 behavior.
+_StringBoolLoader.yaml_implicit_resolvers = {
+    k: [(tag, regexp) for tag, regexp in v
+        if tag != 'tag:yaml.org,2002:bool']
+    for k, v in yaml.SafeLoader.yaml_implicit_resolvers.copy().items()
+}
+# Re-add only true/false (YAML 1.2 booleans)
+_StringBoolLoader.add_implicit_resolver(
+    'tag:yaml.org,2002:bool',
+    __import__('re').compile(r'^(?:true|false)$'),
+    list('tf'),
+)
+
+
 def read_yaml(path: Path):
     with open(path) as f:
-        return yaml.safe_load(f)
+        return yaml.load(f, Loader=_StringBoolLoader)
 
 
 def perproduct(product: str, filename: str):
