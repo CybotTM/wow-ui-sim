@@ -65,55 +65,83 @@ fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
     (rect.x, rect.y, rect.width, rect.height)
 }
 
-/// Assert frame position and size within tolerance (±1px for rounding).
-fn assert_frame_rect(env: &WowLuaEnv, name: &str, ex: f32, ey: f32, ew: f32, eh: f32) {
+fn frame_alpha(env: &WowLuaEnv, name: &str) -> f32 {
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name(name)
+        .unwrap_or_else(|| panic!("Frame '{}' not found", name));
+    state.widgets.get(id).map(|f| f.alpha).unwrap_or(1.0)
+}
+
+/// Assert frame position, size, and alpha within tolerance (±1px position, ±0.02 alpha).
+fn assert_frame_rect(env: &WowLuaEnv, name: &str, ex: f32, ey: f32, ew: f32, eh: f32, ea: f32) {
     let (x, y, w, h) = frame_rect(env, name);
+    let alpha = frame_alpha(env, name);
     let tol = 1.0;
+    let atol = 0.02;
     assert!(
         (x - ex).abs() <= tol && (y - ey).abs() <= tol
-            && (w - ew).abs() <= tol && (h - eh).abs() <= tol,
-        "{name}: expected ({ex}, {ey}, {ew}x{eh}), got ({x}, {y}, {w}x{h})"
+            && (w - ew).abs() <= tol && (h - eh).abs() <= tol
+            && (alpha - ea).abs() <= atol,
+        "{name}: expected ({ex}, {ey}, {ew}x{eh}, alpha={ea}), got ({x}, {y}, {w}x{h}, alpha={alpha})"
     );
 }
 
-type TestCase = (&'static str, &'static str, f32, f32, f32, f32);
+/// (test_name, frame_name, x, y, width, height, alpha)
+type TestCase = (&'static str, &'static str, f32, f32, f32, f32, f32);
 
-/// Frame name, expected x, y, width, height.
 fn position_tests() -> Vec<TestCase> {
     vec![
         // Player / Target / Group frames
-        ("player_frame_position", "PlayerFrame", 268.0, 850.0, 232.0, 100.0),
-        ("target_frame_position", "TargetFrame", 1100.0, 850.0, 232.0, 100.0),
-        ("focus_frame_position", "FocusFrame", 1190.0, 926.25, 174.0, 75.0),
-        ("pet_frame_position", "PetFrame", 361.5, 967.0, 120.0, 49.0),
-        ("paladin_power_bar_position", "PaladinPowerBarFrame", 341.5, 922.0, 150.0, 43.0),
-        ("party_frame_position", "PartyFrame", 22.0, 147.0, 120.0, 55.0),
-        ("compact_party_frame_position", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0),
+        ("player_frame", "PlayerFrame", 268.0, 850.0, 232.0, 100.0, 1.0),
+        ("target_frame", "TargetFrame", 1100.0, 850.0, 232.0, 100.0, 1.0),
+        ("focus_frame", "FocusFrame", 1190.0, 926.25, 174.0, 75.0, 1.0),
+        ("pet_frame", "PetFrame", 361.5, 967.0, 120.0, 49.0, 1.0),
+        ("paladin_power_bar", "PaladinPowerBarFrame", 341.5, 922.0, 150.0, 43.0, 1.0),
+        ("party_frame", "PartyFrame", 22.0, 147.0, 120.0, 244.0, 1.0),
+        ("compact_party_frame", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0, 1.0),
         // HUD elements
-        ("minimap_position", "Minimap", 1391.0, 44.0, 198.0, 198.0),
-        ("objective_tracker_position", "ObjectiveTrackerFrame", 1335.0, 271.0, 260.0, 836.5),
-        ("bags_bar_position", "BagsBar", 1386.0, 1104.0, 208.0, 47.0),
-        ("micro_menu_position", "MicroMenu", 1265.0, 1154.0, 329.0, 40.0),
-        ("buff_frame_position", "BuffFrame", 945.0, 10.0, 400.0, 135.0),
-        ("debuff_frame_position", "DebuffFrame", 1050.0, 155.0, 280.0, 90.0),
-        ("chat_frame_position", "ChatFrame1", 35.0, 980.0, 430.0, 170.0),
-        ("micro_menu_container_position", "MicroMenuContainer", 1205.0, 1149.0, 389.0, 45.0),
+        ("minimap", "Minimap", 1391.0, 44.0, 198.0, 198.0, 1.0),
+        ("minimap_cluster", "MinimapCluster", 1360.0, 0.0, 240.0, 252.0, 1.0),
+        ("objective_tracker", "ObjectiveTrackerFrame", 1335.0, 271.0, 260.0, 836.5, 1.0),
+        ("bags_bar", "BagsBar", 1386.0, 1104.0, 208.0, 47.0, 1.0),
+        ("micro_button_bags_bar", "MicroButtonAndBagsBar", 1362.0, 1114.0, 232.0, 80.0, 1.0),
+        ("micro_menu", "MicroMenu", 1265.0, 1154.0, 329.0, 40.0, 1.0),
+        ("micro_menu_container", "MicroMenuContainer", 1205.0, 1149.0, 389.0, 45.0, 1.0),
+        ("buff_frame", "BuffFrame", 945.0, 10.0, 400.0, 135.0, 1.0),
+        ("debuff_frame", "DebuffFrame", 1050.0, 155.0, 280.0, 90.0, 1.0),
+        // Chat
+        ("chat_frame", "ChatFrame1", 35.0, 980.0, 430.0, 170.0, 1.0),
+        ("chat_edit_box", "ChatFrame1EditBox", 30.0, 1152.0, 447.0, 32.0, 0.35),
+        ("general_dock_manager", "GeneralDockManager", 35.0, 951.0, 430.0, 26.0, 1.0),
+        // Action bars
+        ("main_action_bar", "MainActionBar", 517.0, 1103.0, 566.0, 52.0, 1.0),
+        ("status_tracking_bar", "StatusTrackingBarManager", 514.0, 1166.0, 571.0, 34.0, 1.0),
+        // Overlay / warning frames
+        ("ui_errors_frame", "UIErrorsFrame", 544.0, 122.0, 512.0, 60.0, 1.0),
+        ("raid_boss_emote_anchor", "PrivateRaidBossEmoteFrameAnchor", 544.0, 252.0, 512.0, 80.0, 1.0),
+        ("critical_encounter_warnings", "CriticalEncounterWarnings", 500.0, 40.0, 600.0, 48.0, 1.0),
+        ("medium_encounter_warnings", "MediumEncounterWarnings", 525.0, 90.0, 550.0, 36.0, 1.0),
+        ("minor_encounter_warnings", "MinorEncounterWarnings", 550.0, 130.0, 500.0, 36.0, 1.0),
+        // Managed containers
+        ("right_managed_container", "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
     ]
 }
 
 /// ActionButton1 only checks x position (y/size depend on bar layout).
 fn check_action_button(env: &WowLuaEnv) {
     let (x, _y, _w, _h) = frame_rect(env, "ActionButton1");
+    let alpha = frame_alpha(env, "ActionButton1");
     assert!((x - 517.0).abs() <= 1.0, "ActionButton1 x: expected 517, got {x}");
+    assert!((alpha - 1.0).abs() <= 0.02, "ActionButton1 alpha: expected 1.0, got {alpha}");
 }
 
 fn run_tests(env: &WowLuaEnv) -> (usize, usize) {
     let mut passed = 0;
     let mut failed = 0;
 
-    for (name, frame, ex, ey, ew, eh) in &position_tests() {
+    for (name, frame, ex, ey, ew, eh, ea) in &position_tests() {
         let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-            assert_frame_rect(env, frame, *ex, *ey, *ew, *eh);
+            assert_frame_rect(env, frame, *ex, *ey, *ew, *eh, *ea);
         }));
         report_result(&result, name, &mut passed, &mut failed);
     }
@@ -166,7 +194,7 @@ fn main() {
             if failed > 0 {
                 std::process::exit(1);
             }
-            assert_eq!(total, 16, "Expected 16 tests, ran {total}");
+            assert_eq!(total, 28, "Expected 28 tests, ran {total}");
         }
         Err(_) => {
             eprintln!("\ntest timed out after 120s");
