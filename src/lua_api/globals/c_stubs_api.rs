@@ -513,7 +513,7 @@ fn register_paperdoll_container_and_misc_stubs(lua: &Lua, g: &mlua::Table) -> Re
 fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("GetLFGProposal", lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?)?;
     g.set("GetLFGQueuedList", lua.create_function(|_, _args: mlua::MultiValue| Ok(mlua::MultiValue::new()))?)?;
-    g.set("GetActionBarToggles", lua.create_function(|_, ()| Ok((1i32, 1i32, 1i32, 1i32)))?)?;
+    // GetActionBarToggles/SetActionBarToggles registered in action_bar_api.rs
     g.set("UnitPowerBarTimerInfo", lua.create_function(|_, _unit: Value| Ok(Value::Nil))?)?;
     g.set("GetWebTicket", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("UnitGroupRolesAssigned", lua.create_function(|_, _unit: Option<String>| Ok("NONE"))?)?;

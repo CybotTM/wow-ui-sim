@@ -112,9 +112,9 @@ fn add_slider_orientation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 
 fn add_slider_thumb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_thumb_texture_method(methods);
-    methods.add_method("GetThumbTexture", |lua, _this, ()| {
+    methods.add_method("GetThumbTexture", |lua, this, ()| {
         let store: mlua::Table = lua.load("return _G.__slider_thumbs or {}").eval()?;
-        let thumb: Value = store.get(0u64)?;
+        let thumb: Value = store.get(this.0)?;
         Ok(thumb)
     });
 }

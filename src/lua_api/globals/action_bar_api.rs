@@ -11,6 +11,35 @@ pub fn register_action_bar_functions(lua: &Lua, state: Rc<RefCell<SimState>>) ->
     register_action_cooldown(lua, &state)?;
     register_use_action(lua, &state)?;
     register_action_bar_stubs(lua, &state)?;
+    register_action_bar_toggles(lua)?;
+    Ok(())
+}
+
+/// GetActionBarToggles / SetActionBarToggles — shared state for optional bar visibility.
+///
+/// In real WoW these are server-mirrored engine state (not CVars). The Blizzard
+/// Settings system wraps them via PROXY_SHOW_ACTIONBAR_* proxy settings.
+/// Default: all false (optional bars hidden).
+fn register_action_bar_toggles(lua: &Lua) -> Result<()> {
+    let state = lua.create_table()?;
+    for i in 1..=4 {
+        state.set(i, false)?;
+    }
+    let key = Rc::new(lua.create_registry_value(state)?);
+    let g = lua.globals();
+
+    let k = Rc::clone(&key);
+    g.set("GetActionBarToggles", lua.create_function(move |lua, ()| {
+        let t: mlua::Table = lua.registry_value(&k)?;
+        Ok((t.get::<bool>(1)?, t.get::<bool>(2)?, t.get::<bool>(3)?, t.get::<bool>(4)?))
+    })?)?;
+
+    g.set("SetActionBarToggles", lua.create_function(move |lua, (a, b, c, d): (bool, bool, bool, bool)| {
+        let t: mlua::Table = lua.registry_value(&key)?;
+        t.set(1, a)?; t.set(2, b)?; t.set(3, c)?; t.set(4, d)?;
+        Ok(())
+    })?)?;
+
     Ok(())
 }
 

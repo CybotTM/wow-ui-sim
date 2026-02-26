@@ -101,6 +101,24 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+/// MultiBarLeft and MultiBarRight (right-side action bars) should be hidden
+/// by default — they're only shown when the player enables them via
+/// PROXY_SHOW_ACTIONBAR_4/5 settings (backed by GetActionBarToggles).
+#[test]
+fn test_right_action_bars_hidden_by_default() {
+    let env = env_with_action_bar();
+
+    let results: (bool, bool) = env
+        .eval(r#"
+            local left = MultiBarLeft and MultiBarLeft:IsVisible()
+            local right = MultiBarRight and MultiBarRight:IsVisible()
+            return left or false, right or false
+        "#)
+        .unwrap();
+    assert!(!results.0, "MultiBarLeft should be hidden by default");
+    assert!(!results.1, "MultiBarRight should be hidden by default");
+}
+
 #[test]
 fn test_main_action_bar_visible_after_startup() {
     let env = env_with_action_bar();

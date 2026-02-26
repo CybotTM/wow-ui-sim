@@ -83,6 +83,18 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 All frame methods (`Hide`, `Show`, `IsVisible`, etc.) are registered once on `FrameRef` via `add_method` — mlua resolves them for ALL widget types regardless of `WidgetType`. The per-type method registry (`is_method_allowed`) only gates `getmetatable()` results, not actual method calls. Verified by `test_message_frame_has_global_methods` in `src/loader/tests/mod.rs`. If runtime errors report global methods as nil, the problem is the Lua value not being a `FrameRef` (e.g., overwritten by a table), not a missing method registration.
 
+### UserData vs Table: rawset/rawget
+
+`FrameRef` is a UserData that `type()` reports as `"table"` (custom metamethod), but it is NOT a Lua table. `rawset(frame, key, val)` and `rawget(frame, key)` will **fail** with "table expected, got userdata". To access or clear per-frame fields (children, mixin overrides, custom properties), use `debug.getfenv(frame)[1]`:
+
+```lua
+-- Clear a field from a frame's per-instance table
+local env = debug.getfenv(frame)
+if env and env[1] then rawset(env[1], "SetPoint", nil) end
+```
+
+This is the table checked by `__index` (in `PATCH_INDEX_LUA` in `metatable.rs`). EditMode overrides like `SetPointOverride`, `SetScaleOverride`, `ClearAllPointsOverride` are stored here by `OnSystemLoad` and shadow the Rust methods.
+
 ## Lua + Rust Architecture
 
 WoW frames exist in **two parallel systems** that must stay in sync:

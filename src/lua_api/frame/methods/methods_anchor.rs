@@ -208,15 +208,12 @@ fn find_cycle_node(
     None
 }
 
-/// Format a frame ID for error messages like WoW: "WidgetType:decimal_id".
-fn frame_label(lua: &mlua::Lua, id: u64) -> String {
-    let state_rc = get_sim_state(lua);
-    let state = state_rc.borrow();
-    if let Some(f) = state.widgets.get(id) {
-        format!("{:?}:{id}", f.widget_type)
-    } else {
-        format!("Frame:{id}")
-    }
+/// Format a frame ID for error messages like WoW: 8-digit uppercase hex.
+///
+/// WoW's `tostring(frame)` returns `"Type: 0xHHHHHHHH"` and error messages
+/// use the hex ID extracted via `rstr()` in test code.
+fn frame_label(_lua: &mlua::Lua, id: u64) -> String {
+    format!("{:08X}", id)
 }
 
 /// Build the cycle error message including the ancestor chain.

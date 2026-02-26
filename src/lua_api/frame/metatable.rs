@@ -69,8 +69,13 @@ fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             let id = this.0;
             drop(this);
 
-            // Numeric index → child by position (1-indexed)
+            // Numeric index: [0] returns raw LightUserData, [1+] returns children
             if let mlua::Value::Integer(idx) = key {
+                if idx == 0 {
+                    return Ok(mlua::Value::LightUserData(mlua::LightUserData(
+                        id as *mut std::ffi::c_void,
+                    )));
+                }
                 return lookup_child_by_index(lua, id, idx);
             }
 
