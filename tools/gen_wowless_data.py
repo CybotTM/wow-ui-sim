@@ -196,14 +196,17 @@ def gen_events(product: str) -> str:
     return f'_G.WowlessData.Events = {lua_repr(t)}\n'
 
 
+_MISSING = object()
+
+
 def _tpath(d, *keys):
-    """Follow a chain of dict keys; return None if any lookup fails."""
+    """Follow a chain of dict keys; return _MISSING if any key is absent."""
     for k in keys:
         if not isinstance(d, dict):
-            return None
-        d = d.get(k)
-        if d is None:
-            return None
+            return _MISSING
+        d = d.get(k, _MISSING)
+        if d is _MISSING:
+            return _MISSING
     return d
 
 
@@ -213,7 +216,7 @@ def gen_globalapis(product: str) -> str:
     t = {}
     for name in apis:
         if '.' not in name:
-            if _tpath(config, 'addon', 'overwritten_apis', name):
+            if _tpath(config, 'addon', 'overwritten_apis', name) is not _MISSING:
                 t[name] = {'overwritten': True}
             else:
                 t[name] = True
@@ -282,7 +285,7 @@ def gen_namespaceapis(product: str) -> str:
     for ns, methods in api_namespaces.items():
         mt = {}
         for mk in methods:
-            if _tpath(config, 'addon', 'overwritten_apis', f'{ns}.{mk}'):
+            if _tpath(config, 'addon', 'overwritten_apis', f'{ns}.{mk}') is not _MISSING:
                 mt[mk] = {'overwritten': True}
             else:
                 mt[mk] = True
