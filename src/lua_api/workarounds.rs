@@ -4,7 +4,6 @@
 use super::WowLuaEnv;
 use super::workarounds_bags;
 use super::workarounds_editmode;
-use super::workarounds_talents;
 
 /// Apply workarounds that must run after startup events.
 ///
@@ -43,8 +42,6 @@ pub fn apply(env: &WowLuaEnv) {
     init_console_saved_vars(env);
     init_lfg_events_in_background(env);
     patch_scrollbox_nil_dataprovider(env);
-    workarounds_talents::register_patch_function(env);
-    workarounds_talents::patch_talent_frame_update_loop(env);
 }
 
 /// SuperTrackedFrame shows a quest navigation arrow positioned by the engine's
