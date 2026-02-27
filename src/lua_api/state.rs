@@ -455,15 +455,10 @@ impl SimState {
         let sh = self.screen_height;
         let mut cache = crate::iced_app::layout::LayoutCache::default();
         // Process topmost first (reverse of bottom-up collection order).
+        // Recompute the full subtree so siblings of `id` also get updated
+        // layout_rects before we clear the dirty flag.
         for &root_id in dirty_roots.iter().rev() {
-            cache.remove(&root_id);
-            let rect = crate::iced_app::compute_frame_rect_cached(
-                &self.widgets, root_id, sw, sh, &mut cache,
-            ).rect;
-            if let Some(f) = self.widgets.get_mut(root_id) {
-                f.layout_rect = Some(rect);
-            }
-            self.widgets.mark_layout_resolved(root_id);
+            Self::recompute_layout_subtree(&mut self.widgets, root_id, sw, sh, &mut cache);
             self.widgets.clear_rect_dirty(root_id);
         }
     }

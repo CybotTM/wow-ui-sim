@@ -391,6 +391,57 @@ fn spellbook_texture_requests_match_between_opens() { test_timeout! {
         "Should have same icon texture count between opens");
 }}
 
+fn check_rect(registry: &WidgetRegistry, name: &str, sw: f32, sh: f32, ex: f32, ey: f32, ew: f32, eh: f32) {
+    let id = registry.get_id_by_name(name)
+        .unwrap_or_else(|| panic!("Frame '{name}' not found"));
+    let rect = compute_frame_rect(registry, id, sw, sh);
+    let tol = 2.0;
+    assert!(
+        (rect.x - ex).abs() <= tol && (rect.y - ey).abs() <= tol
+            && (rect.width - ew).abs() <= tol && (rect.height - eh).abs() <= tol,
+        "{name}: expected ({ex}, {ey}, {ew}x{eh}), got ({}, {}, {}x{})",
+        rect.x, rect.y, rect.width, rect.height
+    );
+}
+
+#[test]
+fn spellbook_frame_positions() { test_timeout! {
+    let env = setup_full_ui();
+    open_spellbook(&env);
+
+    let state = env.state().borrow();
+    let registry = &state.widgets;
+    let (sw, sh) = (1024.0, 768.0);
+
+    // PlayerSpellsFrame — main container
+    check_rect(registry, "PlayerSpellsFrame", sw, sh, 56.3, 85.0, 911.3, 497.4);
+
+    let psf_id = registry.get_id_by_name("PlayerSpellsFrame").expect("PlayerSpellsFrame exists");
+    let psf = registry.get(psf_id).unwrap();
+
+    // SpellBookFrame — verify stored dimensions
+    let sb_id = *psf.children_keys.get("SpellBookFrame").expect("SpellBookFrame child key");
+    let sb = registry.get(sb_id).unwrap();
+    assert!(sb.width > 900.0, "SpellBookFrame stored width {} should be > 900", sb.width);
+    assert!(sb.height > 500.0, "SpellBookFrame stored height {} should be > 500", sb.height);
+
+    // NineSlice border — should match PlayerSpellsFrame bounds
+    let nine_id = *psf.children_keys.get("NineSlice").expect("NineSlice exists");
+    let nine_rect = compute_frame_rect(registry, nine_id, sw, sh);
+    let psf_rect = compute_frame_rect(registry, psf_id, sw, sh);
+    assert!((nine_rect.x - psf_rect.x).abs() <= 1.0, "NineSlice x should match PlayerSpellsFrame");
+    assert!((nine_rect.width - psf_rect.width).abs() <= 1.0, "NineSlice width should match");
+
+    // tabSystem — should be near bottom of PlayerSpellsFrame
+    if let Some(&tab_id) = psf.children_keys.get("tabSystem") {
+        let tab_rect = compute_frame_rect(registry, tab_id, sw, sh);
+        assert!(tab_rect.y > psf_rect.y + psf_rect.height - 50.0,
+            "tabSystem y={} should be near bottom of PlayerSpellsFrame (bottom={})",
+            tab_rect.y, psf_rect.y + psf_rect.height);
+        assert!(tab_rect.width > 100.0, "tabSystem should have width > 100, got {}", tab_rect.width);
+    }
+}}
+
 #[test]
 fn spellbook_spell_items_have_nonzero_rect() { test_timeout! {
     let env = setup_full_ui();
