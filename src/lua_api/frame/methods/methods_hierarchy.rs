@@ -39,7 +39,7 @@ fn add_parent_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             f.default_parent = false;
         }
         state.visible_on_update_cache = None;
-        state.invalidate_layout(id);
+        state.widgets.mark_rect_dirty(id);
         Ok(())
     });
 }

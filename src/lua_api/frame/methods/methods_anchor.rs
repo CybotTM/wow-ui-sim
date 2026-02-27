@@ -291,7 +291,6 @@ fn apply_set_point(
         frame.set_point(point, relative_to, relative_point, x_ofs, y_ofs);
     }
     state.widgets.mark_rect_dirty(id);
-    state.invalidate_layout_with_dependents(id);
 }
 
 fn add_clear_and_adjust_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -313,7 +312,6 @@ fn add_clear_all_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                 frame.clear_all_points();
             }
             state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout(id);
         }
         Ok(())
     });
@@ -337,7 +335,6 @@ fn add_clear_point<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                 frame.anchors.retain(|a| a.point != point);
             }
             state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout(id);
         }
         Ok(())
     });
@@ -357,7 +354,6 @@ fn add_adjust_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             }
         }
         state.widgets.mark_rect_dirty(id);
-        state.invalidate_layout(id);
         Ok(())
     });
 }
@@ -433,7 +429,6 @@ fn apply_set_all_points(
         );
     }
     state.widgets.mark_rect_dirty(id);
-    state.invalidate_layout(id);
 }
 
 fn add_get_point_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

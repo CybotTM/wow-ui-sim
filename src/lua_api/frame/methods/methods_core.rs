@@ -149,7 +149,6 @@ fn add_set_size<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         if changed {
             state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout_with_dependents(id);
         }
         Ok(())
     });
@@ -167,7 +166,6 @@ fn add_set_width<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         if changed {
             state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout_with_dependents(id);
         }
         Ok(())
     });
@@ -184,7 +182,6 @@ fn add_set_height<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         if changed {
             state.widgets.mark_rect_dirty(id);
-            state.invalidate_layout_with_dependents(id);
         }
         Ok(())
     });
@@ -574,7 +571,7 @@ fn add_get_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             f.scale = scale;
         }
         state.widgets.propagate_effective_scale(id, parent_eff_scale);
-        state.invalidate_layout_with_dependents(id);
+        state.widgets.mark_rect_dirty(id);
         Ok(())
     });
 
@@ -601,7 +598,7 @@ fn add_rect_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsRectValid", |lua, this, ()| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
+        let state = state_rc.borrow();
         let has_anchors = state.widgets.get(id)
             .map(|f| !f.anchors.is_empty()).unwrap_or(false);
         if !has_anchors { return Ok(false); }

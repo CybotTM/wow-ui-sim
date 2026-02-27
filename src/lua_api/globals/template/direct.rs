@@ -20,7 +20,6 @@ pub fn set_size(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXm
         frame.set_size(w, h);
     }
     s.widgets.mark_rect_dirty(frame_id);
-    s.invalidate_layout_with_dependents(frame_id);
 }
 
 /// Set partial or full size from XML (handles width-only and height-only).
@@ -51,7 +50,6 @@ pub fn set_size_partial(
         (None, None) => return,
     }
     s.widgets.mark_rect_dirty(frame_id);
-    s.invalidate_layout_with_dependents(frame_id);
 }
 
 /// Set frame anchors directly from a FrameXml's `<Anchors>` element.
@@ -131,7 +129,6 @@ fn set_single_anchor(
     }
 
     state.widgets.mark_rect_dirty(frame_id);
-    state.invalidate_layout_with_dependents(frame_id);
 }
 
 /// Resolve the relative_to target for an anchor, returning the target frame ID.
@@ -199,7 +196,6 @@ fn set_all_points_inner(state: &mut SimState, frame_id: u64) {
     }
 
     state.widgets.mark_rect_dirty(frame_id);
-    state.invalidate_layout(frame_id);
 }
 
 /// Set frame hidden state directly from template.
@@ -352,7 +348,6 @@ pub fn apply_xml_size(
             f.set_size(w, h);
         }
         s.widgets.mark_rect_dirty(frame_id);
-        s.invalidate_layout_with_dependents(frame_id);
     }
 }
 

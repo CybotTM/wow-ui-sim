@@ -296,81 +296,46 @@ impl WidgetRegistry {
     /// Mark a frame as rect-dirty root. O(1) — no subtree walk.
     /// Descendants discover dirtiness lazily via `is_rect_dirty` ancestor walk.
     pub fn mark_rect_dirty(&mut self, id: u64) {
-        if let Some(f) = self.widgets.get_mut(&id) {
-            f.rect_dirty = Some(true);
+        if self.widgets.contains_key(&id) {
             self.rect_dirty_ids.insert(id);
         }
     }
 
-    /// Check if a frame is rect-dirty by checking `rect_dirty_ids` (authoritative
-    /// for Lua-visible dirty state) then walking up ancestors with caching.
-    pub fn is_rect_dirty(&mut self, id: u64) -> bool {
-        // Authoritative check: is this frame a dirty root?
-        if self.rect_dirty_ids.contains(&id) {
-            return true;
+    /// Check if a frame or any ancestor is rect-dirty.
+    /// Pure ancestor walk using `rect_dirty_ids` as single source of truth.
+    pub fn is_rect_dirty(&self, id: u64) -> bool {
+        let mut current = Some(id);
+        while let Some(cid) = current {
+            if self.rect_dirty_ids.contains(&cid) {
+                return true;
+            }
+            current = self.widgets.get(&cid).and_then(|f| f.parent_id);
         }
+        false
+    }
 
-        // Fast path: cached result from previous ancestor walk
-        if let Some(f) = self.widgets.get(&id) {
-            match f.rect_dirty {
-                Some(true) => return true,
-                Some(false) => return false,
-                None => {}
+    /// Walk up the parent chain and collect all frame IDs (including `id`)
+    /// that are in `rect_dirty_ids`. Returns in bottom-up order.
+    pub fn collect_dirty_ancestor_roots(&self, id: u64) -> Vec<u64> {
+        let mut roots = Vec::new();
+        let mut current = Some(id);
+        while let Some(cid) = current {
+            if self.rect_dirty_ids.contains(&cid) {
+                roots.push(cid);
             }
-        } else {
-            return false;
+            current = self.widgets.get(&cid).and_then(|f| f.parent_id);
         }
-
-        // Walk up ancestors collecting the path
-        let mut path = vec![id];
-        let mut current = self.widgets.get(&id).and_then(|f| f.parent_id);
-        let mut found_dirty = false;
-        while let Some(pid) = current {
-            if self.rect_dirty_ids.contains(&pid) {
-                found_dirty = true;
-                break;
-            }
-            if let Some(f) = self.widgets.get(&pid) {
-                match f.rect_dirty {
-                    Some(true) => { found_dirty = true; break; }
-                    Some(false) => { break; }
-                    None => {
-                        path.push(pid);
-                        current = f.parent_id;
-                    }
-                }
-            } else {
-                break;
-            }
-        }
-
-        // Cache the result on the entire walked path
-        let result = Some(found_dirty);
-        for &walked_id in &path {
-            if let Some(f) = self.widgets.get_mut(&walked_id) {
-                f.rect_dirty = result;
-            }
-        }
-        found_dirty
+        roots
     }
 
     /// Clear rect-dirty on a single frame (after layout recomputation).
     pub fn clear_rect_dirty(&mut self, id: u64) {
-        if let Some(f) = self.widgets.get_mut(&id) {
-            f.rect_dirty = None;
-        }
         self.rect_dirty_ids.remove(&id);
     }
 
-    /// Drain rect_dirty_ids, clearing dirty flags. Returns the set for callers that need it.
+    /// Drain rect_dirty_ids. Returns the set for callers that need it.
     pub fn drain_rect_dirty(&mut self) -> HashSet<u64> {
-        let ids = std::mem::take(&mut self.rect_dirty_ids);
-        for &id in &ids {
-            if let Some(f) = self.widgets.get_mut(&id) {
-                f.rect_dirty = None;
-            }
-        }
-        ids
+        std::mem::take(&mut self.rect_dirty_ids)
     }
 
     /// Drain pending_layout_ids (frames missing layout_rect).
@@ -378,15 +343,9 @@ impl WidgetRegistry {
         std::mem::take(&mut self.pending_layout_ids)
     }
 
-    /// Mark a frame's layout as resolved: remove from pending set and clear
-    /// the `rect_dirty` cache field to prevent stale ancestor-walk results.
-    /// Does NOT remove from `rect_dirty_ids` — that set is the authoritative
-    /// Lua-visible dirty state, managed by `clear_rect_dirty`/`drain_rect_dirty`.
+    /// Mark a frame's layout as resolved: remove from pending set.
     pub fn mark_layout_resolved(&mut self, id: u64) {
         self.pending_layout_ids.remove(&id);
-        if let Some(f) = self.widgets.get_mut(&id) {
-            f.rect_dirty = None;
-        }
     }
 
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.

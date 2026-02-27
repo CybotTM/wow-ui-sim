@@ -403,10 +403,10 @@ impl SimState {
 }
 
 impl SimState {
-    /// Ensure every frame has a layout_rect and clear rect_dirty flags.
-    /// Computes missing rects using the same eager path as invalidate_layout.
+    /// Ensure every frame has a layout_rect and resolve dirty roots.
     /// Called before quad rebuilds (acts as the "next frame" layout resolution).
     pub fn ensure_layout_rects(&mut self) {
+        // Phase 1: frames that never had layout computed
         let pending = self.widgets.drain_pending_layout();
         if !pending.is_empty() {
             let sw = self.screen_width;
@@ -418,19 +418,54 @@ impl SimState {
                 }
             }
         }
-        // Clear rect_dirty flags using the tracked set.
-        self.widgets.drain_rect_dirty();
+        // Phase 2: dirty roots — recompute subtree + anchor dependents
+        let dirty = self.widgets.drain_rect_dirty();
+        if !dirty.is_empty() {
+            let sw = self.screen_width;
+            let sh = self.screen_height;
+            let mut cache = crate::iced_app::layout::LayoutCache::default();
+            for id in &dirty {
+                Self::recompute_layout_subtree(&mut self.widgets, *id, sw, sh, &mut cache);
+                Self::recompute_anchor_dependents(&mut self.widgets, *id, sw, sh, &mut cache, 0);
+            }
+        }
     }
 
     /// Force layout resolution for a single frame, clearing its rect_dirty flag.
-    /// Called by GetSize/GetWidth/GetHeight and rect query methods to match WoW
-    /// behavior where those methods force immediate rect resolution.
+    /// Called by GetSize/GetWidth/GetHeight, rect query methods, and IsRectValid
+    /// to match WoW behavior where layout resolves immediately.
     pub fn resolve_rect_if_dirty(&mut self, id: u64) {
         if !self.widgets.is_rect_dirty(id) {
             return;
         }
+        self.resolve_dirty_ancestors(id);
         self.invalidate_layout(id);
         self.widgets.clear_rect_dirty(id);
+    }
+
+    /// Resolve dirty ancestor roots that cause `id` to appear dirty via the
+    /// `is_rect_dirty` ancestor walk. Computes their layout rects and clears
+    /// their dirty flags so descendants become clean.
+    fn resolve_dirty_ancestors(&mut self, id: u64) {
+        let dirty_roots = self.widgets.collect_dirty_ancestor_roots(id);
+        if dirty_roots.is_empty() {
+            return;
+        }
+        let sw = self.screen_width;
+        let sh = self.screen_height;
+        let mut cache = crate::iced_app::layout::LayoutCache::default();
+        // Process topmost first (reverse of bottom-up collection order).
+        for &root_id in dirty_roots.iter().rev() {
+            cache.remove(&root_id);
+            let rect = crate::iced_app::compute_frame_rect_cached(
+                &self.widgets, root_id, sw, sh, &mut cache,
+            ).rect;
+            if let Some(f) = self.widgets.get_mut(root_id) {
+                f.layout_rect = Some(rect);
+            }
+            self.widgets.mark_layout_resolved(root_id);
+            self.widgets.clear_rect_dirty(root_id);
+        }
     }
 
     /// Set a frame's visibility and eagerly propagate effective_alpha.

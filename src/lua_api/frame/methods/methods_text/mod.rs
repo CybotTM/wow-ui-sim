@@ -251,7 +251,7 @@ fn measure_and_apply_sizes(
     if !changed_ids.is_empty() {
         let mut state = state_rc.borrow_mut();
         for id in changed_ids {
-            state.invalidate_layout_with_dependents(id);
+            state.widgets.mark_rect_dirty(id);
         }
     }
 }
