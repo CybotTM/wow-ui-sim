@@ -190,17 +190,16 @@ fn add_is_event_registered<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     });
 }
 
+/// RegisterEventCallback only accepts the ~9 callback events (COMBAT_LOG_*, etc).
+/// All other events — even valid RegisterEvent events — get "unknown event" error.
 fn add_register_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     use crate::event::is_callback_event;
     methods.add_method("RegisterEventCallback", |lua, this, (event, _cb): (String, Value)| {
-        if !is_valid_event(&event) {
+        if !is_callback_event(&event) {
             return Err(crate::lua_api::script_helpers::lua_error_val(format!(
                 "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
                 event
             )));
-        }
-        if !is_callback_event(&event) {
-            return Ok(Value::Boolean(false));
         }
         let id = this.0;
         let state_rc = get_sim_state(lua);

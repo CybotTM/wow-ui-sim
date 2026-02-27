@@ -3,6 +3,7 @@
 ## Important Rules
 
 - **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
+- **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
 
 ## Architecture Docs
 

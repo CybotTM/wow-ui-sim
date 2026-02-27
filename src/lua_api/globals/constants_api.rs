@@ -13,6 +13,9 @@ use mlua::{Lua, Result};
 /// Auto-generated Lua code that registers missing WoW client constants.
 const MISSING_CONSTANTS_LUA: &str = include_str!("enum_data/missing_constants.lua");
 
+/// Auto-generated Constants.* values from wowless globals.yaml.
+const CONSTANTS_VALUES_LUA: &str = include_str!("enum_data/constants_values.lua");
+
 /// Register the Constants table with auto-vivifying metatables.
 pub fn register_constants_api(lua: &Lua) -> Result<()> {
     register_constants_table(lua)?;
@@ -25,6 +28,12 @@ pub fn register_constants_api(lua: &Lua) -> Result<()> {
 
 /// Create the auto-vivifying Constants table and populate constant namespaces.
 fn register_constants_table(lua: &Lua) -> Result<()> {
+    create_autovivify_constants(lua)?;
+    lua.load(CONSTANTS_VALUES_LUA).set_name("constants_values").exec()
+}
+
+/// Create the auto-vivifying Constants global table.
+fn create_autovivify_constants(lua: &Lua) -> Result<()> {
     lua.load(
         r#"
         local function make_autovivify()
@@ -37,28 +46,7 @@ fn register_constants_table(lua: &Lua) -> Result<()> {
             }
             return setmetatable({}, mt)
         end
-
         Constants = make_autovivify()
-
-        Constants.LFG_ROLEConstants.LFG_ROLE_NO_ROLE = -1
-        Constants.LFG_ROLEConstants.LFG_ROLE_ANY = 3
-        Constants.LFGConstsExposed.GROUP_FINDER_MAX_ACTIVITY_CAPACITY = 16
-        Constants.MoneyFormattingConstants.GOLD_REWARD_THRESHOLD_TO_HIDE_COPPER = 10
-        Constants.TimerunningConsts.TIMERUNNING_SEASON_NONE = 0
-        Constants.TimerunningConsts.TIMERUNNING_SEASON_PANDARIA = 1
-        Constants.AccountStoreConsts.PlunderstormStoreFrontID = 0
-        Constants.AccountStoreConsts.WowhackStoreFrontID = 0
-        Constants.InventoryConstants.NumBagSlots = 5
-        Constants.InventoryConstants.NumReagentBagSlots = 1
-        Constants.EditModeConsts.EditModeDefaultGridSpacing = 100
-        Constants.EditModeConsts.EditModeMinGridSpacing = 20
-        Constants.EditModeConsts.EditModeMaxGridSpacing = 300
-        Constants.EditModeConsts.EditModeMaxLayoutsPerType = 5
-        Constants.MajorFactionsConsts.PLUNDERSTORM_MAJOR_FACTION_ID = 0
-
-        Constants.ChatFrameConstants.MaxChatWindows = 10
-        Constants.ChatFrameConstants.MaxChatChannels = 20
-        Constants.ChatFrameConstants.MaxCharacterNameBytes = 305
     "#,
     )
     .exec()
