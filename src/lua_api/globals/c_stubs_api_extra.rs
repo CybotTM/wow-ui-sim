@@ -305,7 +305,6 @@ fn register_taint_and_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn register_missing_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_bag_constants(lua, g)?;
     register_chat_constants(lua, g)?;
-    register_pet_inventory_constants(lua, g)?;
     // Defined in Blizzard_UIParent/Mainline/UIParent.lua but needed earlier
     // by Blizzard_GameTooltip which loads before Blizzard_UIParent.
     g.set("TOOLTIP_UPDATE_TIME", 0.2f64)?;
@@ -341,30 +340,6 @@ fn register_chat_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-fn register_pet_inventory_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    // Constants.PetConsts_PostCata.STABLED_PETS_FIRST_SLOT_INDEX
-    let constants: mlua::Table = match g.get("Constants")? {
-        Value::Table(t) => t,
-        _ => {
-            let t = lua.create_table()?;
-            g.set("Constants", t.clone())?;
-            t
-        }
-    };
-    let pet_consts = lua.create_table()?;
-    pet_consts.set("STABLED_PETS_FIRST_SLOT_INDEX", 5i32)?;
-    pet_consts.set("EXTRA_PET_STABLE_SLOT", 5i32)?;
-    pet_consts.set("NUM_PET_SLOTS_THAT_NEED_LEARNED_SPELL", 5i32)?;
-    constants.set("PetConsts_PostCata", pet_consts)?;
-
-    // Constants.InventoryConstants
-    let inv = lua.create_table()?;
-    inv.set("NumBagSlots", 4i32)?;
-    inv.set("NumReagentBagSlots", 1i32)?;
-    constants.set("InventoryConstants", inv)?;
-
-    Ok(())
-}
 
 /// Global Lua tables that are referenced by addon code.
 fn register_missing_global_tables(lua: &Lua, g: &mlua::Table) -> Result<()> {

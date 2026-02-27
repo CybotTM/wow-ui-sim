@@ -26,7 +26,6 @@ pub fn register_combat_stubs(lua: &Lua) -> Result<()> {
     register_c_color_util(lua, &g)?;
     register_c_combat_log(lua, &g)?;
     register_c_restricted_transmog(lua, &g)?;
-    register_encounter_timeline_constants(lua, &g)?;
     register_c_damage_meter(lua, &g)?;
     register_c_combat_text(lua, &g)?;
     register_c_combat_audio_alert(lua, &g)?;
@@ -620,27 +619,6 @@ fn register_c_death_recap(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// Constants.EncounterTimelineIconMasks - bitmask constants for timeline icon filtering.
-fn register_encounter_timeline_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let constants: mlua::Table = match g.get("Constants")? {
-        Value::Table(t) => t,
-        _ => {
-            let t = lua.create_table()?;
-            g.set("Constants", t.clone())?;
-            t
-        }
-    };
-    let masks = lua.create_table()?;
-    masks.set("EncounterTimelineTankAlertIcons", 1i32)?;
-    masks.set("EncounterTimelineHealerAlertIcons", 2i32)?;
-    masks.set("EncounterTimelineDamageAlertIcons", 4i32)?;
-    masks.set("EncounterTimelineDeadlyIcons", 8i32)?;
-    masks.set("EncounterTimelineDispelIcons", 16i32)?;
-    masks.set("EncounterTimelineEnrageIcons", 32i32)?;
-    masks.set("EncounterTimelineAllIcons", 63i32)?;
-    constants.set("EncounterTimelineIconMasks", masks)?;
-    Ok(())
-}
 
 /// C_EncounterTimeline - encounter timeline UI data (boss ability timers).
 fn register_c_encounter_timeline(lua: &Lua, g: &mlua::Table) -> Result<()> {
