@@ -81,9 +81,14 @@ def _lua_str(s: str) -> str:
 
 
 def lua_repr(value, indent: int = 0) -> str:
-    """Convert a Python value to a Lua table literal."""
+    """Convert a Python value to a Lua table literal.
+
+    None maps to {} (empty table), not nil. This matches wowless's native
+    cyaml parser which converts YAML null values to empty Lua tables.
+    Using {} preserves key existence in set-like tables (e.g. capsule.enums).
+    """
     if value is None:
-        return 'nil'
+        return '{}'
     if value is True:
         return 'true'
     if value is False:
