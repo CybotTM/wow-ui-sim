@@ -16,5 +16,5 @@ pub use primitive::{GpuTextureData, WowUiPrimitive, load_texture_or_crop};
 pub use program::WowUiProgram;
 pub use quad::FLAG_CIRCLE_CLIP;
 pub use quad::FLAG_DESATURATE;
-pub use quad::{BlendMode, QuadBatch, QuadVertex, TextureRequest};
+pub use quad::{BlendMode, FrameQuadSnapshot, QuadBatch, QuadVertex, TextureRequest};
 pub use quad_nine_slice::NineSliceTextures;

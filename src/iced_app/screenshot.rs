@@ -7,7 +7,7 @@ use crate::render::headless::render_to_image;
 use crate::render::GlyphAtlas;
 
 use super::app::App;
-use super::render::build_quad_batch_for_registry;
+use super::strata_emit::build_quad_batch_for_registry;
 
 impl App {
     /// Render a screenshot from the live app state and save to disk.

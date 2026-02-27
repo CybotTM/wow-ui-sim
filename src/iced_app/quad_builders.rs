@@ -387,6 +387,7 @@ fn emit_widget_text_quads(
         shadow, f.shadow_offset,
         f.font_outline,
         word_wrap, max_lines,
+        f.text_stripped.as_deref(),
     );
 }
 

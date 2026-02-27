@@ -75,6 +75,16 @@ pub struct TextureRequest {
     pub vertex_count: u32,
 }
 
+/// Cached quad data for a single frame, used for incremental strata rebuilds.
+/// All indices and texture request offsets are relative (0-based).
+#[derive(Debug, Clone, Default)]
+pub struct FrameQuadSnapshot {
+    pub vertices: Vec<QuadVertex>,
+    pub indices: Vec<u32>,
+    pub texture_requests: Vec<TextureRequest>,
+    pub mask_texture_requests: Vec<TextureRequest>,
+}
+
 /// Batched quad collection for efficient GPU rendering.
 ///
 /// Collects quads during frame traversal, then uploads to GPU in one batch.
@@ -637,6 +647,54 @@ impl QuadBatch {
         let start = self.vertices.len() - count;
         for v in &mut self.vertices[start..] {
             v.flags |= extra;
+        }
+    }
+
+    /// Take a snapshot of quads added since the given offsets.
+    /// Indices and texture request vertex_starts are made relative (0-based).
+    pub fn take_snapshot_since(
+        &self,
+        vert_start: usize,
+        idx_start: usize,
+        tex_start: usize,
+        mask_start: usize,
+    ) -> FrameQuadSnapshot {
+        let base = vert_start as u32;
+        FrameQuadSnapshot {
+            vertices: self.vertices[vert_start..].to_vec(),
+            indices: self.indices[idx_start..].iter().map(|&i| i - base).collect(),
+            texture_requests: self.texture_requests[tex_start..].iter().map(|r| TextureRequest {
+                path: r.path.clone(),
+                vertex_start: r.vertex_start - base,
+                vertex_count: r.vertex_count,
+            }).collect(),
+            mask_texture_requests: self.mask_texture_requests[mask_start..].iter().map(|r| TextureRequest {
+                path: r.path.clone(),
+                vertex_start: r.vertex_start - base,
+                vertex_count: r.vertex_count,
+            }).collect(),
+        }
+    }
+
+    /// Append a cached frame snapshot, adjusting indices and offsets.
+    pub fn append_snapshot(&mut self, snap: &FrameQuadSnapshot) {
+        if snap.vertices.is_empty() { return; }
+        let base = self.vertices.len() as u32;
+        self.vertices.extend_from_slice(&snap.vertices);
+        self.indices.extend(snap.indices.iter().map(|&i| i + base));
+        for req in &snap.texture_requests {
+            self.texture_requests.push(TextureRequest {
+                path: req.path.clone(),
+                vertex_start: req.vertex_start + base,
+                vertex_count: req.vertex_count,
+            });
+        }
+        for req in &snap.mask_texture_requests {
+            self.mask_texture_requests.push(TextureRequest {
+                path: req.path.clone(),
+                vertex_start: req.vertex_start + base,
+                vertex_count: req.vertex_count,
+            });
         }
     }
 }

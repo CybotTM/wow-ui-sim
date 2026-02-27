@@ -256,22 +256,7 @@ impl App {
         self.update_fps_counter();
         self.run_pending_exec_lua();
 
-        self.env.borrow().state().borrow().widgets.take_render_dirty();
-        self.run_wow_timers();
-        let timers_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
-
-        let t_layout = std::time::Instant::now();
-        self.env.borrow().state().borrow_mut().ensure_layout_rects();
-        let layout_dur = t_layout.elapsed();
-
-        self.fire_on_update();
-        let on_update_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
-
-        self.tick_party_health();
-        self.tick_casting();
-
-        let health_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
-        let combined = timers_mask | on_update_mask | health_mask;
+        let (combined, layout_dur) = self.collect_tick_dirty();
         self.drain_console();
         if combined != 0 {
             self.mark_strata_dirty(combined);
@@ -280,12 +265,37 @@ impl App {
             self.mark_all_strata_dirty();
         }
         let total = t0.elapsed();
-        if total.as_millis() > 10 {
-            eprintln!("[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} pending={})",
+        if combined != 0 || total.as_millis() > 10 {
+            let n = self.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
+            eprintln!("[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
                 self.textures_pending.get());
         }
-
         Task::none()
+    }
+
+    /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
+    fn collect_tick_dirty(&mut self) -> (u16, std::time::Duration) {
+        self.env.borrow().state().borrow().widgets.take_render_dirty();
+        self.run_wow_timers();
+        let (m1, ids1) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+
+        let t_layout = std::time::Instant::now();
+        self.env.borrow().state().borrow_mut().ensure_layout_rects();
+        let layout_dur = t_layout.elapsed();
+
+        self.fire_on_update();
+        let (m2, ids2) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+
+        self.tick_party_health();
+        self.tick_casting();
+        let (m3, ids3) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+
+        let combined_ids = match (ids1, ids2, ids3) {
+            (Some(mut a), Some(b), Some(c)) => { a.extend(b); a.extend(c); Some(a) }
+            _ => None,
+        };
+        *self.pending_dirty_ids.borrow_mut() = combined_ids;
+        (m1 | m2 | m3, layout_dur)
     }
 
     fn update_fps_counter(&mut self) {
@@ -357,11 +367,11 @@ impl App {
 
     fn tick_casting(&mut self) {
         let env = self.env.borrow();
-        let completed = extract_completed_cast(env.state());
+        let completed = super::casting::extract_completed_cast(env.state());
         if let Some((cast_id, spell_id)) = completed {
-            fire_cast_complete_events(&env, cast_id, spell_id);
-            apply_heal_effect(env.state(), &env, spell_id);
-            apply_spec_change(env.state(), &env);
+            super::casting::fire_cast_complete_events(&env, cast_id, spell_id);
+            super::casting::apply_heal_effect(env.state(), &env, spell_id);
+            super::casting::apply_spec_change(env.state(), &env);
         }
     }
 
@@ -631,115 +641,3 @@ impl App {
 
 }
 
-/// Check if a cast has completed and extract its info, clearing state.
-fn extract_completed_cast(
-    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-) -> Option<(u32, u32)> {
-    let mut s = state.borrow_mut();
-    let c = s.casting.as_ref()?;
-    let now = s.start_time.elapsed().as_secs_f64();
-    if now < c.end_time {
-        return None;
-    }
-    let cast_id = c.cast_id;
-    let spell_id = c.spell_id;
-    s.casting = None;
-    Some((cast_id, spell_id))
-}
-
-/// Fire UNIT_SPELLCAST_STOP and UNIT_SPELLCAST_SUCCEEDED events.
-fn fire_cast_complete_events(
-    env: &crate::lua_api::WowLuaEnv,
-    cast_id: u32,
-    spell_id: u32,
-) {
-    let lua = env.lua();
-    let Ok(player) = lua.create_string("player") else { return };
-    let args = &[
-        mlua::Value::String(player.clone()),
-        mlua::Value::Integer(cast_id as i64),
-        mlua::Value::Integer(spell_id as i64),
-    ];
-    let _ = env.fire_event_with_args("UNIT_SPELLCAST_STOP", args);
-    let _ = env.fire_event_with_args("UNIT_SPELLCAST_SUCCEEDED", args);
-    // Push state update to registered action buttons (casting is now None).
-    let _ = crate::lua_api::globals::action_bar_api::push_action_button_state_update(
-        &env.state(), env.lua(),
-    );
-}
-
-/// Apply healing from a completed cast spell to the target or self.
-fn apply_heal_effect(
-    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    env: &crate::lua_api::WowLuaEnv,
-    spell_id: u32,
-) {
-    const HEAL_AMOUNT: i32 = 20_000;
-    // Only healing spells apply an effect
-    let is_heal = matches!(spell_id, 19750 | 82326 | 85673);
-    if !is_heal {
-        return;
-    }
-    let unit_event = {
-        let mut s = state.borrow_mut();
-        if let Some(ref mut t) = s.current_target {
-            if !t.is_enemy {
-                // Can't heal dead units — they need a resurrection spell
-                if t.health <= 0 {
-                    None
-                } else {
-                    t.health = (t.health + HEAL_AMOUNT).min(t.health_max);
-                    let healed = t.health;
-                    let unit_id = t.unit_id.clone();
-                    // Sync back to party_members so group frames see the update
-                    if let Some(idx) = crate::lua_api::globals::unit_api::parse_party_index(&unit_id) {
-                        if let Some(m) = s.party_members.get_mut(idx) {
-                            m.health = healed;
-                        }
-                    }
-                    Some(unit_id)
-                }
-            } else {
-                // Heal self when targeting enemy
-                if s.player_health <= 0 {
-                    None
-                } else {
-                    s.player_health = (s.player_health + HEAL_AMOUNT).min(s.player_health_max);
-                    Some("player".to_string())
-                }
-            }
-        } else {
-            if s.player_health <= 0 {
-                None
-            } else {
-                s.player_health = (s.player_health + HEAL_AMOUNT).min(s.player_health_max);
-                Some("player".to_string())
-            }
-        }
-    };
-    if let Some(unit) = unit_event {
-        let lua = env.lua();
-        if let Ok(unit_str) = lua.create_string(&unit) {
-            let _ = env.fire_event_with_args(
-                "UNIT_HEALTH",
-                &[mlua::Value::String(unit_str)],
-            );
-        }
-    }
-}
-
-/// If a spec change was pending, apply it and fire PLAYER_SPECIALIZATION_CHANGED.
-fn apply_spec_change(
-    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    env: &crate::lua_api::WowLuaEnv,
-) {
-    let changed = {
-        let mut s = state.borrow_mut();
-        s.pending_spec_change.take().map(|idx| { s.active_spec_index = idx; })
-    };
-    if changed.is_some() {
-        let lua = env.lua();
-        let Ok(unit) = lua.create_string("player") else { return };
-        let _ = env.fire_event_with_args("PLAYER_SPECIALIZATION_CHANGED", &[mlua::Value::String(unit)]);
-    }
-}

@@ -90,6 +90,7 @@ fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) 
     let mut state_ref = state.borrow_mut();
     if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name) {
         if let Some(frame) = state_ref.widgets.get_mut_visual(frame_id) {
+            frame.text_stripped = Some(crate::render::text::strip_wow_markup(text));
             frame.text = Some(text.to_string());
         }
     }

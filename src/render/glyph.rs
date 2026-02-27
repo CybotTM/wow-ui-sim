@@ -33,15 +33,24 @@ struct GlyphEntry {
     top: i32,
 }
 
-/// Key for the text shape cache, capturing all inputs that affect glyph layout.
-#[derive(Hash, Eq, PartialEq, Clone)]
-struct ShapeCacheKey {
-    text: String,
-    font_path: String,       // "" for default
-    font_size_bits: u32,     // f32::to_bits()
-    shape_width_bits: u32,   // effective width
-    bounds_height_bits: u32,
+/// Compute a u64 hash key for the shape cache from all inputs that affect glyph layout.
+fn shape_cache_hash(
+    text: &str,
+    font_path: Option<&str>,
+    font_size: f32,
+    shape_width: f32,
+    bounds_height: f32,
     max_lines: u32,
+) -> u64 {
+    use std::hash::{Hash, Hasher};
+    let mut h = std::hash::DefaultHasher::new();
+    text.hash(&mut h);
+    font_path.unwrap_or("").hash(&mut h);
+    font_size.to_bits().hash(&mut h);
+    shape_width.to_bits().hash(&mut h);
+    bounds_height.to_bits().hash(&mut h);
+    max_lines.hash(&mut h);
+    h.finish()
 }
 
 /// A single glyph position extracted from a layout run.
@@ -82,8 +91,8 @@ pub struct GlyphAtlas {
     entries: HashMap<CacheKey, GlyphEntry>,
     /// Whether the atlas has new data since the last GPU upload.
     dirty: bool,
-    /// Cache of shaped text layout runs keyed by shaping inputs.
-    shape_cache: HashMap<ShapeCacheKey, ShapeCacheEntry>,
+    /// Cache of shaped text layout runs keyed by u64 hash of shaping inputs.
+    shape_cache: HashMap<u64, ShapeCacheEntry>,
     /// Generation counter for LRU eviction.
     shape_cache_generation: u64,
     /// Unique path used to register this atlas in the GpuTextureAtlas.
@@ -405,14 +414,7 @@ pub fn measure_text_height(
         return 0.0;
     }
     let shape_width = if word_wrap && bounds_width > 0.0 { bounds_width } else { 10000.0 };
-    let key = ShapeCacheKey {
-        text: stripped.clone(),
-        font_path: font_path.unwrap_or("").to_string(),
-        font_size_bits: font_size.to_bits(),
-        shape_width_bits: shape_width.to_bits(),
-        bounds_height_bits: 10000.0_f32.to_bits(),
-        max_lines: 0,
-    };
+    let key = shape_cache_hash(&stripped, font_path, font_size, shape_width, 10000.0, 0);
     if let Some(entry) = glyph_atlas.shape_cache.get_mut(&key) {
         entry.last_used = glyph_atlas.shape_cache_generation;
         return entry.total_height;
@@ -449,35 +451,36 @@ pub fn emit_text_quads(
     outline: crate::widget::TextOutline,
     word_wrap: bool,
     max_lines: u32,
+    pre_stripped: Option<&str>,
 ) {
     if text.is_empty() || bounds.height <= 0.0 {
         return;
     }
 
-    let stripped = crate::render::text::strip_wow_markup(text);
+    // Use pre-stripped text if available, otherwise strip on the fly.
+    let stripped_owned;
+    let stripped: &str = if let Some(s) = pre_stripped {
+        s
+    } else {
+        stripped_owned = crate::render::text::strip_wow_markup(text);
+        &stripped_owned
+    };
     if stripped.is_empty() {
         return;
     }
 
     // Phase 1: Populate cache if miss, extract runs + total_height.
     let shape_width = if word_wrap && bounds.width > 0.0 { bounds.width } else { 10000.0 };
-    let key = ShapeCacheKey {
-        text: stripped.clone(),
-        font_path: font_path.unwrap_or("").to_string(),
-        font_size_bits: font_size.to_bits(),
-        shape_width_bits: shape_width.to_bits(),
-        bounds_height_bits: bounds.height.to_bits(),
-        max_lines,
-    };
+    let key = shape_cache_hash(stripped, font_path, font_size, shape_width, bounds.height, max_lines);
     let generation = glyph_atlas.shape_cache_generation;
     if !glyph_atlas.shape_cache.contains_key(&key) {
         let (buffer, total_height) = shape_text_to_runs(
-            font_system, &stripped, font_path, font_size,
+            font_system, stripped, font_path, font_size,
             bounds.width, bounds.height, word_wrap, max_lines,
         );
         let runs = extract_layout_runs(&buffer, max_lines);
         glyph_atlas.shape_cache.insert(
-            key.clone(),
+            key,
             ShapeCacheEntry { runs, total_height, last_used: generation },
         );
     }

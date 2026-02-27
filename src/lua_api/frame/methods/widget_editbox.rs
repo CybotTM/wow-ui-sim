@@ -107,7 +107,9 @@ fn add_editbox_number_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.text = Some(n.to_string());
+            let s = n.to_string();
+            frame.text_stripped = Some(s.clone());
+            frame.text = Some(s);
         }
         Ok(())
     });

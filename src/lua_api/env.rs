@@ -349,9 +349,11 @@ impl WowLuaEnv {
 
         if !frame_ids.is_empty() {
             let t = Instant::now();
-            self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnUpdate");
+            self.dispatch_on_update_with_dirty_tracking(&frame_ids, elapsed);
             let on_update_dur = t.elapsed();
-            self.dispatch_handlers_lua(&frame_ids, elapsed, "_OnPostUpdate");
+            for &id in &frame_ids {
+                self.dispatch_handlers_lua(&[id], elapsed, "_OnPostUpdate");
+            }
             let total = t.elapsed();
             if total.as_millis() > 20 {
                 eprintln!("[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
@@ -367,6 +369,18 @@ impl WowLuaEnv {
         self.finalize_frame_metrics(elapsed * 1000.0);
 
         Ok(())
+    }
+
+    /// Dispatch OnUpdate handlers one at a time, logging which ones dirty the render.
+    fn dispatch_on_update_with_dirty_tracking(&self, frame_ids: &[u64], elapsed: f64) {
+        for &id in frame_ids {
+            let before = self.state.borrow().widgets.render_dirty_count();
+            self.dispatch_handlers_lua(&[id], elapsed, "_OnUpdate");
+            let after = self.state.borrow().widgets.render_dirty_count();
+            if after > before {
+                log_dirty_on_update(&self.state.borrow(), id, after - before);
+            }
+        }
     }
 
     /// Return the cached visible OnUpdate frame IDs.
@@ -600,6 +614,22 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
 
 /// Register a Lua function that dispatches OnUpdate/OnPostUpdate handlers
 /// in a single Lua call, avoiding per-handler Rust→Lua FFI overhead.
+fn log_dirty_on_update(state: &crate::lua_api::SimState, id: u64, delta: usize) {
+    let f = state.widgets.get(id);
+    let addon = f.and_then(|f| f.owner_addon)
+        .and_then(|i| state.addons.get(i as usize))
+        .map(|a| a.folder_name.as_str())
+        .unwrap_or("?");
+    let dirty_ids = state.widgets.peek_render_dirty();
+    let dirty_names: Vec<String> = dirty_ids.iter().map(|&did| {
+        let df = state.widgets.get(did);
+        let n = df.and_then(|f| f.name.as_deref()).unwrap_or("?");
+        let k = df.and_then(|f| f.parent_key.as_deref()).unwrap_or("");
+        format!("{did}:{n}{}", if k.is_empty() { String::new() } else { format!("({k})") })
+    }).collect();
+    eprintln!("[OnUpdate dirty] addon={addon} (id={id}) +{delta} → [{}]", dirty_names.join(", "));
+}
+
 fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
     super::script_helpers::get_or_create_scripts_table(lua);
     let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;

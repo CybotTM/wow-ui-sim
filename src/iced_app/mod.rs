@@ -33,6 +33,8 @@ mod quad_builders;
 #[cfg(feature = "gui")]
 mod render;
 #[cfg(feature = "gui")]
+mod strata_emit;
+#[cfg(feature = "gui")]
 mod statusbar;
 #[cfg(feature = "gui")]
 mod state;
@@ -44,6 +46,8 @@ pub mod tooltip;
 mod styles;
 #[cfg(feature = "gui")]
 mod mouse;
+#[cfg(feature = "gui")]
+mod casting;
 #[cfg(feature = "gui")]
 mod update;
 #[cfg(feature = "gui")]
@@ -73,7 +77,7 @@ use crate::saved_variables::SavedVariablesManager;
 #[cfg(feature = "gui")]
 pub use app::App;
 #[cfg(feature = "gui")]
-pub use render::{build_quad_batch_for_registry, build_hittable_rects};
+pub use strata_emit::{build_quad_batch_for_registry, build_hittable_rects};
 #[cfg(feature = "gui")]
 pub use state::{CanvasMessage, InspectorState};
 #[cfg(feature = "gui")]

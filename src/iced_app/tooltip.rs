@@ -202,6 +202,7 @@ fn emit_tooltip_line(
         GLYPH_ATLAS_TEX_INDEX,
         None, (0.0, 0.0), TextOutline::None,
         line.wrap, 0,
+        None,
     );
 
     // Right-aligned text (for double lines)
@@ -215,6 +216,7 @@ fn emit_tooltip_line(
             GLYPH_ATLAS_TEX_INDEX,
             None, (0.0, 0.0), TextOutline::None,
             false, 0,
+            None,
         );
     }
 }

@@ -167,6 +167,10 @@ pub struct App {
     pub(crate) cached_quads: RefCell<Option<(Size, std::sync::Arc<crate::render::QuadBatch>)>>,
     /// Per-strata cached quad batches. Index = FrameStrata::as_index().
     pub(crate) cached_strata_quads: RefCell<[Option<std::sync::Arc<crate::render::QuadBatch>>; crate::widget::FrameStrata::COUNT]>,
+    /// Per-strata per-frame quad snapshots for incremental strata rebuild.
+    pub(crate) cached_frame_snapshots: RefCell<[Option<std::collections::HashMap<u64, crate::render::FrameQuadSnapshot>>; crate::widget::FrameStrata::COUNT]>,
+    /// Dirty frame IDs from the last timer tick. `None` means full rebuild needed.
+    pub(crate) pending_dirty_ids: RefCell<Option<std::collections::HashSet<u64>>>,
     /// Spatial grid for fast hit testing (rebuilt when layout changes).
     pub(crate) cached_hittable: RefCell<Option<super::hit_grid::HitGrid>>,
     /// Per-strata dirty bitmask — bit `i` means strata index `i` needs re-emit.
@@ -287,6 +291,8 @@ impl App {
             gpu_failed_textures: RefCell::new(std::collections::HashSet::new()),
             cached_quads: RefCell::new(None),
             cached_strata_quads: RefCell::new(std::array::from_fn(|_| None)),
+            cached_frame_snapshots: RefCell::new(std::array::from_fn(|_| None)),
+            pending_dirty_ids: RefCell::new(None),
             cached_hittable: RefCell::new(None),
             strata_dirty: std::cell::Cell::new((1u16 << crate::widget::FrameStrata::COUNT) - 1),
             textures_pending: std::cell::Cell::new(false),
@@ -436,8 +442,11 @@ impl App {
     }
 
     /// Mark ALL strata as dirty (full rebuild).
+    /// Also clears per-frame snapshot caches so the next rebuild is non-incremental.
     pub(crate) fn mark_all_strata_dirty(&self) {
         self.strata_dirty.set((1u16 << crate::widget::FrameStrata::COUNT) - 1);
+        *self.cached_frame_snapshots.borrow_mut() = std::array::from_fn(|_| None);
+        *self.pending_dirty_ids.borrow_mut() = None;
     }
 
     /// Determine how often the timer subscription should tick.
@@ -460,10 +469,8 @@ impl App {
         });
         let has_casting = state.casting.is_some();
         let has_cooldowns = has_active_cooldowns(&state);
-        if has_cooldowns {
-            self.mark_all_strata_dirty();
-        }
-        if has_animations || has_casting || self.strata_dirty.get() != 0
+        if has_animations || has_casting || has_cooldowns
+            || self.strata_dirty.get() != 0
             || self.textures_pending.get()
         {
             return Some(std::time::Duration::from_millis(16));

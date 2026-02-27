@@ -4,16 +4,20 @@ use iced::mouse;
 use iced::widget::shader;
 use iced::{Event, Point, Rectangle, Size};
 
+use std::collections::{HashMap, HashSet};
+
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
+use crate::render::FrameQuadSnapshot;
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
 use crate::widget::{WidgetType};
 
 use super::app::App;
-use super::frame_collect::{CollectedFrames, collect_subtree_ids, collect_hittable_frames};
+use super::frame_collect::collect_hittable_frames;
 use super::quad_builders::{build_texture_quads, emit_button_highlight, emit_frame_quads};
 use super::statusbar::collect_statusbar_fills;
+use super::strata_emit::{build_hittable_rects, build_render_list};
 use super::state::CanvasMessage;
 use super::tooltip::TooltipRenderData;
 use super::Message;
@@ -141,199 +145,160 @@ impl shader::Program<Message> for &App {
 }
 
 /// Rebuild strata batches for all dirty strata indices.
+///
+/// When `dirty_ids` is `Some`, uses per-frame snapshot cache for incremental
+/// rebuild — only re-emitting dirty frames, copying cached quads for the rest.
 #[allow(clippy::too_many_arguments)]
 fn rebuild_strata_batches(
     strata_cache: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+    snapshot_cache: &mut [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT],
     dirty: u16,
+    dirty_ids: Option<&HashSet<u64>>,
     size: Size,
     strata_buckets: &[Vec<u64>],
     widgets: &crate::widget::WidgetRegistry,
     pressed_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: &std::collections::HashMap<u64, crate::lua_api::MessageFrameData>,
-    tooltip_data: &std::collections::HashMap<u64, super::tooltip::TooltipRenderData>,
+    message_frames: &HashMap<u64, crate::lua_api::MessageFrameData>,
+    tooltip_data: &HashMap<u64, super::tooltip::TooltipRenderData>,
     elapsed_secs: f64,
 ) {
     for i in 0..FrameStrata::COUNT {
         if dirty & (1 << i) == 0 && strata_cache[i].is_some() {
             continue;
         }
+        let bucket = strata_buckets.get(i).map(|b| b.as_slice()).unwrap_or(&[]);
         let strata_start = std::time::Instant::now();
         let mut batch = QuadBatch::new();
         if i == 0 {
-            batch.push_tiled_path(
-                Rectangle::new(Point::ORIGIN, size),
-                256.0, 256.0,
-                "framegeneral/ui-background-marble",
-                [0.55, 0.55, 0.55, 1.0],
-            );
+            emit_marble_background(&mut batch, size);
         }
-        let n = strata_buckets.get(i).map(|b| b.len()).unwrap_or(0);
-        if let Some(bucket) = strata_buckets.get(i) {
-            emit_single_strata(
-                &mut batch, bucket, widgets,
-                &None, pressed_frame, None,
-                text_ctx, Some(message_frames),
-                Some(tooltip_data), elapsed_secs,
-            );
-        }
-        let dur = strata_start.elapsed();
-        if dur.as_millis() > 5 {
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap_or_default();
-            let secs = now.as_secs() % 86400;
-            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
-            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?}");
-        }
+        let snapshots = snapshot_cache[i].get_or_insert_with(HashMap::new);
+        let stats = emit_strata_cached(
+            &mut batch, snapshots, bucket, dirty_ids, widgets,
+            pressed_frame, text_ctx, message_frames, tooltip_data, elapsed_secs,
+        );
+        log_strata_timing(i, bucket.len(), &stats, strata_start.elapsed());
         strata_cache[i] = Some(Arc::new(batch));
     }
 }
 
-/// Emit quads for a single strata bucket.
-///
-/// Reads rect and effective_alpha fresh from the registry for each frame.
-/// Button state textures use parent's effective_alpha as fallback.
-#[allow(clippy::too_many_arguments)]
-fn emit_single_strata(
-    batch: &mut QuadBatch,
-    bucket: &[u64],
-    registry: &crate::widget::WidgetRegistry,
-    visible_ids: &Option<std::collections::HashSet<u64>>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    elapsed_secs: f64,
-) {
-    let mut render_list: Vec<(u64, crate::LayoutRect, f32)> = Vec::new();
-    for &id in bucket {
-        let Some(f) = registry.get(id) else { continue };
-        let Some(rect) = f.layout_rect else { continue };
-        let eff_alpha = if f.effective_alpha > 0.0 {
-            f.effective_alpha
-        } else if f.alpha > 0.0 {
-            // Frame hidden via visible=false (e.g. button state textures):
-            // fall back to parent's effective_alpha so the active texture renders.
-            f.parent_id
-                .and_then(|pid| registry.get(pid))
-                .map(|p| p.effective_alpha)
-                .unwrap_or(0.0)
-        } else {
-            // Frame explicitly set to alpha=0 (e.g. glow/anim textures):
-            // genuinely invisible, no fallback.
-            0.0
-        };
-        if eff_alpha <= 0.0 { continue; }
-        render_list.push((id, rect, eff_alpha));
-    }
-    let statusbar_fills = collect_statusbar_fills(&render_list, registry);
-
-    for &(id, rect, eff_alpha) in &render_list {
-        let Some(f) = registry.get(id) else { continue };
-
-        if super::button_vis::should_skip_frame(f, id, eff_alpha, visible_ids, registry, pressed_frame, hovered_frame) {
-            continue;
-        }
-        let is_fontstring = matches!(f.widget_type, WidgetType::FontString);
-        let is_line = matches!(f.widget_type, WidgetType::Line);
-        if (rect.height <= 0.0 && !is_line) || (rect.width <= 0.0 && !is_fontstring && !is_line) {
-            continue;
-        }
-
-        let bounds = Rectangle::new(
-            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
-            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
-        );
-        let bar_fill = statusbar_fills.get(&id);
-        emit_frame_quads(batch, id, f, bounds, bar_fill, pressed_frame, hovered_frame, text_ctx, message_frames, tooltip_data, registry, elapsed_secs, eff_alpha);
-    }
-}
-
-/// Build a QuadBatch from a WidgetRegistry without needing an App instance.
-///
-/// When `text_ctx` is provided, FontString and button/editbox/checkbox text is
-/// rendered as glyph quads interleaved with texture quads (correct draw order).
-/// When `None`, text is skipped (legacy behavior for callers without fonts).
-#[allow(clippy::too_many_arguments)]
-pub fn build_quad_batch_for_registry(
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    root_name: Option<&str>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    mut text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    strata_buckets: &Vec<Vec<u64>>,
-) -> QuadBatch {
-    let (batch, _collected) = build_quad_batch_with_cache(
-        registry, screen_size, root_name, pressed_frame, hovered_frame,
-        &mut text_ctx, message_frames, tooltip_data,
-        strata_buckets, 0.0,
-    );
-    batch
-}
-
-/// Scale hittable layout rects to screen coordinates, applying hit rect insets.
-pub fn build_hittable_rects(
-    collected: &CollectedFrames,
-    registry: &crate::widget::WidgetRegistry,
-) -> Vec<(u64, Rectangle)> {
-    collected.hittable.iter().map(|&(id, r)| {
-        let (il, ir, it, ib) = registry.get(id)
-            .map(|f| f.hit_rect_insets)
-            .unwrap_or((0.0, 0.0, 0.0, 0.0));
-        (id, Rectangle::new(
-            Point::new((r.x + il) * UI_SCALE, (r.y + it) * UI_SCALE),
-            Size::new((r.width - il - ir).max(0.0) * UI_SCALE,
-                      (r.height - it - ib).max(0.0) * UI_SCALE),
-        ))
-    }).collect()
-}
-
-/// Build a QuadBatch by iterating visible-only strata buckets directly.
-///
-/// Also builds a hittable frame list as a side output for hit testing.
-/// Returns the quad batch and the `CollectedFrames` (hittable list only).
-#[allow(clippy::too_many_arguments)]
-pub fn build_quad_batch_with_cache(
-    registry: &crate::widget::WidgetRegistry,
-    screen_size: (f32, f32),
-    root_name: Option<&str>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
-    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    strata_buckets: &[Vec<u64>],
-    elapsed_secs: f64,
-) -> (QuadBatch, CollectedFrames) {
-    let mut batch = QuadBatch::with_capacity(1000);
-    let (screen_width, screen_height) = screen_size;
-    let size = Size::new(screen_width, screen_height);
-
-    // Tiled marble background
+fn emit_marble_background(batch: &mut QuadBatch, size: Size) {
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
-        256.0,
-        256.0,
+        256.0, 256.0,
         "framegeneral/ui-background-marble",
         [0.55, 0.55, 0.55, 1.0],
     );
+}
 
-    let visible_ids = root_name.map(|name| collect_subtree_ids(registry, name));
-    let collected = collect_hittable_frames(registry, strata_buckets);
+struct EmitStats { cached: u32, emitted: u32 }
 
-    for bucket in strata_buckets {
-        emit_single_strata(
-            &mut batch, bucket, registry,
-            &visible_ids, pressed_frame, hovered_frame,
-            text_ctx, message_frames, tooltip_data, elapsed_secs,
-        );
+fn log_strata_timing(i: usize, n: usize, stats: &EmitStats, dur: std::time::Duration) {
+    if dur.as_millis() <= 5 { return; }
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default();
+    let secs = now.as_secs() % 86400;
+    let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
+    eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?} (cached={} emitted={})",
+        stats.cached, stats.emitted);
+}
+
+/// Emit one frame's quads into the batch. Returns true if quads were emitted.
+#[allow(clippy::too_many_arguments)]
+fn emit_one_frame(
+    batch: &mut QuadBatch,
+    id: u64,
+    rect: crate::LayoutRect,
+    eff_alpha: f32,
+    registry: &crate::widget::WidgetRegistry,
+    pressed_frame: Option<u64>,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    tooltip_data: &HashMap<u64, TooltipRenderData>,
+    statusbar_fills: &HashMap<u64, super::statusbar::StatusBarFill>,
+    elapsed_secs: f64,
+) -> bool {
+    let Some(f) = registry.get(id) else { return false };
+    let no_vis: Option<HashSet<u64>> = None;
+    if super::button_vis::should_skip_frame(f, id, eff_alpha, &no_vis, registry, pressed_frame, None) {
+        return false;
     }
-    (batch, collected)
+    if !has_renderable_size(f, rect) { return false; }
+    let bounds = Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    );
+    emit_frame_quads(
+        batch, id, f, bounds, statusbar_fills.get(&id), pressed_frame, None,
+        text_ctx, Some(message_frames), Some(tooltip_data),
+        registry, elapsed_secs, eff_alpha,
+    );
+    true
+}
+
+fn has_renderable_size(f: &crate::widget::Frame, rect: crate::LayoutRect) -> bool {
+    let is_fontstring = matches!(f.widget_type, WidgetType::FontString);
+    let is_line = matches!(f.widget_type, WidgetType::Line);
+    !((rect.height <= 0.0 && !is_line) || (rect.width <= 0.0 && !is_fontstring && !is_line))
+}
+
+/// Emit quads for a strata bucket with per-frame snapshot caching.
+///
+/// For frames not in `dirty_ids` that have a cached snapshot, appends the
+/// cached data (fast memcpy). Dirty or uncached frames are emitted fresh
+/// and their snapshots recorded for future incremental rebuilds.
+#[allow(clippy::too_many_arguments)]
+fn emit_strata_cached(
+    batch: &mut QuadBatch,
+    snapshots: &mut HashMap<u64, FrameQuadSnapshot>,
+    bucket: &[u64],
+    dirty_ids: Option<&HashSet<u64>>,
+    registry: &crate::widget::WidgetRegistry,
+    pressed_frame: Option<u64>,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    tooltip_data: &HashMap<u64, TooltipRenderData>,
+    elapsed_secs: f64,
+) -> EmitStats {
+    let render_list = build_render_list(bucket, registry);
+    let statusbar_fills = collect_statusbar_fills(&render_list, registry);
+    let mut stats = EmitStats { cached: 0, emitted: 0 };
+
+    for &(id, rect, eff_alpha) in &render_list {
+        if try_use_cached(batch, snapshots, dirty_ids, id) {
+            stats.cached += 1;
+            continue;
+        }
+        let before = snapshot_offsets(batch);
+        let emitted = emit_one_frame(
+            batch, id, rect, eff_alpha, registry, pressed_frame,
+            text_ctx, message_frames, tooltip_data, &statusbar_fills, elapsed_secs,
+        );
+        snapshots.insert(id, batch.take_snapshot_since(before.0, before.1, before.2, before.3));
+        if emitted { stats.emitted += 1; }
+    }
+    stats
+}
+
+/// Try to append a cached snapshot for a clean frame. Returns true on hit.
+fn try_use_cached(
+    batch: &mut QuadBatch,
+    snapshots: &HashMap<u64, FrameQuadSnapshot>,
+    dirty_ids: Option<&HashSet<u64>>,
+    id: u64,
+) -> bool {
+    let Some(dirty) = dirty_ids else { return false };
+    if dirty.contains(&id) { return false; }
+    let Some(snap) = snapshots.get(&id) else { return false; };
+    batch.append_snapshot(snap);
+    true
+}
+
+fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
+    (batch.vertices.len(), batch.indices.len(),
+     batch.texture_requests.len(), batch.mask_texture_requests.len())
 }
 
 
@@ -452,6 +417,7 @@ impl App {
     /// Stores results in `cached_strata_quads`. Also updates the hittable
     /// grid on first build and syncs layout caches.
     fn rebuild_dirty_strata(&self, size: Size, dirty: u16) {
+        let dirty_ids = self.pending_dirty_ids.borrow_mut().take();
         let env = self.env.borrow();
         let mut font_sys = self.font_system.borrow_mut();
         let strata_buckets = self.resolve_layout_and_buckets(&env, &mut font_sys);
@@ -465,12 +431,15 @@ impl App {
             Some((&mut font_sys, &mut glyph_atlas));
 
         let mut strata_cache = self.cached_strata_quads.borrow_mut();
+        let mut snap_cache = self.cached_frame_snapshots.borrow_mut();
         rebuild_strata_batches(
-            &mut strata_cache, dirty, size, &strata_buckets, &state.widgets,
+            &mut strata_cache, &mut snap_cache, dirty, dirty_ids.as_ref(),
+            size, &strata_buckets, &state.widgets,
             self.pressed_frame, &mut text_ctx, &state.message_frames,
             &tooltip_data, elapsed_secs,
         );
         drop(strata_cache);
+        drop(snap_cache);
         self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
         drop(state);
         self.apply_hit_grid_changes();

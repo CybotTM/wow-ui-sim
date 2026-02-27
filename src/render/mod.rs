@@ -19,9 +19,9 @@ pub use font::WowFontSystem;
 
 #[cfg(feature = "gui")]
 pub use shader::{
-    GpuTextureAtlas, GpuTextureData, NineSliceTextures, QuadBatch, QuadVertex,
-    TextureEntry, TextureRequest, WowUiPipeline, WowUiPrimitive, WowUiProgram,
-    load_texture_or_crop,
+    FrameQuadSnapshot, GpuTextureAtlas, GpuTextureData, NineSliceTextures, QuadBatch,
+    QuadVertex, TextureEntry, TextureRequest, WowUiPipeline, WowUiPrimitive,
+    WowUiProgram, load_texture_or_crop,
 };
 #[cfg(feature = "gui")]
 pub use glyph::{emit_text_quads, GlyphAtlas};

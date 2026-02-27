@@ -202,6 +202,8 @@ pub struct Frame {
     pub vertex_color: Option<Color>,
     /// Text content (for FontString widgets).
     pub text: Option<String>,
+    /// Pre-stripped text (WoW markup removed). Updated when `text` is set.
+    pub text_stripped: Option<String>,
     /// Title text (for DefaultPanelTemplate frames).
     pub title: Option<String>,
     /// Text color for FontStrings.
@@ -467,6 +469,7 @@ macro_rules! frame_defaults {
             color_texture: None,
             vertex_color: None,
             text: None,
+            text_stripped: None,
             title: None,
             text_color: Color::new(1.0, 0.8, 0.2, 1.0),
             shadow_color: Color::new(0.0, 0.0, 0.0, 0.0),

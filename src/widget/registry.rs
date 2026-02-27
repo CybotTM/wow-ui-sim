@@ -181,6 +181,16 @@ impl WidgetRegistry {
         !self.render_dirty_ids.borrow().is_empty()
     }
 
+    /// Number of frames currently in the render-dirty set (diagnostic).
+    pub fn render_dirty_count(&self) -> usize {
+        self.render_dirty_ids.borrow().len()
+    }
+
+    /// Peek at the current render-dirty IDs (diagnostic).
+    pub fn peek_render_dirty(&self) -> Vec<u64> {
+        self.render_dirty_ids.borrow().iter().copied().collect()
+    }
+
     /// Drain the set of visually dirty frame IDs and return a per-strata
     /// bitmask indicating which strata contain dirty frames.
     ///
@@ -188,22 +198,36 @@ impl WidgetRegistry {
     /// The sentinel `u64::MAX` (from `mark_all_visual_dirty`) produces the
     /// all-strata mask `(1 << COUNT) - 1`.
     pub fn take_render_dirty(&self) -> u16 {
+        self.take_render_dirty_with_ids().0
+    }
+
+    /// Drain the dirty set, returning both the strata bitmask and the set of
+    /// dirty frame IDs. Returns `None` for the ID set when the sentinel
+    /// (`u64::MAX`) was present, signalling that a full rebuild is needed.
+    pub fn take_render_dirty_with_ids(&self) -> (u16, Option<HashSet<u64>>) {
         let mut ids = self.render_dirty_ids.borrow_mut();
         if ids.is_empty() {
-            return 0;
+            return (0, Some(HashSet::new()));
         }
         let all_mask = (1u16 << super::FrameStrata::COUNT) - 1;
-        let mut mask: u16 = 0;
-        for &id in ids.iter() {
-            if id == u64::MAX {
-                mask = all_mask;
-                break;
+        let has_sentinel = ids.contains(&u64::MAX);
+        let mask = if has_sentinel {
+            all_mask
+        } else {
+            let mut m: u16 = 0;
+            for &id in ids.iter() {
+                m |= self.strata_bit_for(id);
+                if m == all_mask { break; }
             }
-            mask |= self.strata_bit_for(id);
-            if mask == all_mask { break; }
-        }
-        ids.clear();
-        mask
+            m
+        };
+        let frame_ids = if has_sentinel {
+            ids.clear();
+            None
+        } else {
+            Some(std::mem::take(&mut *ids))
+        };
+        (mask, frame_ids)
     }
 
     /// Return the strata bitmask for a single frame ID.
@@ -249,10 +273,17 @@ impl WidgetRegistry {
     ///
     /// effective_alpha = parent_effective_alpha × own_alpha when visible,
     /// 0.0 when the frame itself is hidden.
+    /// Also marks frames as visually dirty when their effective_alpha changes,
+    /// so cached quad snapshots with baked-in alpha are invalidated.
     pub fn propagate_effective_alpha(&mut self, id: u64, parent_effective_alpha: f32) {
         let Some(f) = self.widgets.get_mut(&id) else { return };
         let eff = if f.visible { parent_effective_alpha * f.alpha } else { 0.0 };
-        f.effective_alpha = eff;
+        if (eff - f.effective_alpha).abs() > f32::EPSILON {
+            f.effective_alpha = eff;
+            self.render_dirty_ids.borrow_mut().insert(id);
+        } else {
+            f.effective_alpha = eff;
+        }
         let children: Vec<u64> = f.children.clone();
         for child_id in children {
             self.propagate_effective_alpha(child_id, eff);

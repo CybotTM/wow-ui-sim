@@ -141,5 +141,6 @@ fn render_message(
         shadow, (1.0, 1.0),
         f.font_outline,
         true, 0, // word_wrap=true, no line limit
+        None, // message frames don't pre-strip
     );
 }
