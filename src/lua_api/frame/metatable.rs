@@ -65,26 +65,19 @@ fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_meta_function(
         mlua::MetaMethod::Index,
         |lua, (ud, key): (mlua::AnyUserData, mlua::Value)| {
-            let this = ud.borrow::<FrameRef>()?;
-            let id = this.0;
-            drop(this);
-
-            // Numeric index: [0] returns raw LightUserData, [1+] returns children
+            // Numeric index: [0] returns raw LightUserData, [1+] returns children.
+            // String keys are fully handled in Lua (PATCH_INDEX_LUA checks both
+            // env[1] for mixin methods and env for __newindex-set properties).
             if let mlua::Value::Integer(idx) = key {
+                let this = ud.borrow::<FrameRef>()?;
+                let id = this.0;
+                drop(this);
                 if idx == 0 {
                     return Ok(mlua::Value::LightUserData(mlua::LightUserData(
                         id as *mut std::ffi::c_void,
                     )));
                 }
                 return lookup_child_by_index(lua, id, idx);
-            }
-
-            // Single rawget on per-frame table (children, mixin fns, custom fields)
-            if let Ok(fields) = ud.user_value::<mlua::Table>() {
-                let val: mlua::Value = fields.raw_get(key)?;
-                if val != mlua::Value::Nil {
-                    return Ok(val);
-                }
             }
 
             Ok(mlua::Value::Nil)
@@ -271,10 +264,15 @@ const PATCH_INDEX_LUA: &str = r#"
         if type(key) == "string" then
             local env = dgetfenv(self)
             if env then
+                -- Check mixin methods first (env[1])
                 local val = rawget(env[1], key)
+                if val ~= nil then return val end
+                -- Check per-frame properties (set via __newindex)
+                val = rawget(env, key)
                 if val ~= nil then return val end
             end
         end
+        -- Numeric keys or complete miss → Rust handler
         return old_index(self, key)
     end
 

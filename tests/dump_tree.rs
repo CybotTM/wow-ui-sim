@@ -80,7 +80,8 @@ fn test_strip_nested_escapes() {
 #[test]
 fn test_build_tree_includes_children() {
     let reg = build_basic_registry();
-    let lines = build_tree(&reg, None, None, false, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
     let has_button = lines.iter().any(|l| l.contains("MyButton"));
     let has_icon = lines.iter().any(|l| l.contains(".Icon"));
     assert!(has_button, "Should contain MyButton");
@@ -90,7 +91,8 @@ fn test_build_tree_includes_children() {
 #[test]
 fn test_build_tree_filter() {
     let reg = build_basic_registry();
-    let lines = build_tree(&reg, Some("MyButton"), None, false, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, Some("MyButton"), None, false, 1024.0, 768.0);
     assert!(lines.iter().any(|l| l.contains("MyButton")));
     assert!(!lines.iter().any(|l| l.contains("HiddenFrame")));
 }
@@ -98,28 +100,32 @@ fn test_build_tree_filter() {
 #[test]
 fn test_build_tree_visible_only() {
     let reg = build_basic_registry();
-    let lines = build_tree(&reg, None, None, true, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, true, 1024.0, 768.0);
     assert!(!lines.iter().any(|l| l.contains("HiddenFrame")));
 }
 
 #[test]
 fn test_build_tree_shows_texture_path() {
     let reg = build_basic_registry();
-    let lines = build_tree(&reg, None, None, false, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
     assert!(lines.iter().any(|l| l.contains("[texture] Interface/Icons/foo")));
 }
 
 #[test]
 fn test_build_tree_shows_anchor_lines() {
     let reg = build_basic_registry();
-    let lines = build_tree(&reg, None, None, false, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
     assert!(lines.iter().any(|l| l.contains("[anchor]")));
 }
 
 #[test]
 fn test_build_warning_dump_includes_header() {
     let reg = build_basic_registry();
-    let lines = build_warning_dump(&reg, 1024.0, 768.0);
+    let names: Vec<String> = vec![];
+    let lines = build_warning_dump(&reg, &names, 1024.0, 768.0);
     assert!(lines[0].contains("Frame Dump"));
     assert!(lines[1].contains("1024x768"));
 }

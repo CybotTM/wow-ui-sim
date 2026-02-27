@@ -356,7 +356,6 @@ impl WowLuaEnv {
             if total.as_millis() > 20 {
                 eprintln!("[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
                     frame_ids.len());
-                self.profile_on_update_handlers(&frame_ids, elapsed);
             }
         }
 
@@ -386,44 +385,6 @@ impl WowLuaEnv {
             .collect();
         state.visible_on_update_cache = Some(ids.clone());
         ids
-    }
-
-    /// Profile each OnUpdate handler individually from Rust (accurate timing).
-    fn profile_on_update_handlers(&self, frame_ids: &[u64], elapsed: f64) {
-        use super::script_helpers::{get_frame_ref, get_script};
-        let elapsed_val = Value::Number(elapsed);
-        let mut timings: Vec<(String, std::time::Duration)> = Vec::new();
-        for &id in frame_ids {
-            if let Some(handler) = get_script(&self.lua, id, "OnUpdate")
-                && let Some(frame) = get_frame_ref(&self.lua, id)
-            {
-                let t = Instant::now();
-                let _ = handler.call::<()>(MultiValue::from_vec(vec![frame, elapsed_val.clone()]));
-                let dur = t.elapsed();
-                let state = self.state.borrow();
-                let name = state.widgets.get(id)
-                    .map(|f| {
-                        let n = f.name.clone().unwrap_or_else(|| format!("__anon_{id}"));
-                        let parent = f.parent_id.and_then(|pid| state.widgets.get(pid))
-                            .and_then(|p| p.name.clone()).unwrap_or_default();
-                        let pkey = f.parent_key.clone().unwrap_or_default();
-                        let addon = f.owner_addon
-                            .and_then(|idx| state.addons.get(idx as usize))
-                            .map(|a| format!(" @{}", a.folder_name))
-                            .unwrap_or_default();
-                        format!("{n} [parent={parent} key={pkey} type={:?}{addon}]", f.widget_type)
-                    })
-                    .unwrap_or_else(|| format!("id={id}"));
-                drop(state);
-                timings.push((name, dur));
-            }
-        }
-        timings.sort_by(|a, b| b.1.cmp(&a.1));
-        for (name, dur) in timings.iter().take(10) {
-            if dur.as_micros() > 500 {
-                eprintln!("  {dur:>8.1?}  {name}");
-            }
-        }
     }
 
     /// Dispatch OnUpdate (or OnPostUpdate) handlers via a Lua-side loop.
@@ -609,10 +570,11 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
 }
 
 /// Lua source for the OnUpdate dispatch loop. Runs all handlers in pure Lua
-/// and logs any individual handler that takes >5ms.
+/// and logs any individual handler that takes >5ms to stderr.
 const ON_UPDATE_DISPATCH_LUA: &str = r#"
     local scripts = debug.getregistry().__scripts
     local G = _G
+    local stderr = io.stderr
     return function(ids, elapsed, suffix)
         local profile = debugprofilestop
         local handler = geterrorhandler()
@@ -627,7 +589,7 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
                     local dt = profile() - t0
                     if dt > 5 then
                         local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
-                        print(string.format("[OnUpdate] slow: %.1fms %s%s", dt, n, suffix))
+                        stderr:write(string.format("  [OnUpdate] %7.1fms  %s%s\n", dt, n, suffix))
                     end
                     if not ok then handler(err) end
                 end
