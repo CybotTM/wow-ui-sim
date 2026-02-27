@@ -26,7 +26,6 @@ pub type SeqEnumDef = (&'static str, &'static [&'static str]);
 // ============================================================================
 
 pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
-    GAME_MODE,
     VAS_TRANSACTION_PURCHASE_RESULT,
     STORE_ERROR,
     GAME_RULE,
@@ -149,7 +148,6 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     COOLDOWN_VIEWER_ORIENTATION,
     COOLDOWN_VIEWER_VISIBLE_SETTING,
     CONTENT_TRACKING_TYPE,
-    PLAYER_MENTORSHIP_STATUS,
     RELATIVE_CONTENT_DIFFICULTY,
     CLUB_TYPE,
     CLUB_FINDER_SETTING_FLAGS,
@@ -281,4 +279,6 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     COMBAT_AUDIO_ALERT_PLAYER_DEBUFF_FORMAT_VALUES_META,
     NAME_PLATE_SIZE,
     EVENT_REALM_QUEUES,
+    GAME_MODE,
+    PLAYER_MENTORSHIP_STATUS,
 ];

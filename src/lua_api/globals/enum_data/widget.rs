@@ -8,13 +8,13 @@ use super::{EnumDef, SeqEnumDef};
 
 pub const LFG_ROLE: EnumDef = ("LFGRole", &[("Tank", 0), ("Healer", 1), ("Damage", 2)]);
 
-pub const UNIT_SEX: EnumDef = ("UnitSex", &[("Male", 2), ("Female", 3)]);
+pub const UNIT_SEX: EnumDef = ("UnitSex", &[("Male", 0), ("Female", 1), ("None", 2), ("Both", 3), ("Neutral", 4)]);
 
-pub const GAME_MODE: SeqEnumDef = ("GameMode", &["Standard", "Plunderstorm", "WoWHack"]);
+pub const GAME_MODE: EnumDef = ("GameMode", &[("Standard", 1), ("Plunderstorm", 2), ("WoWHack", 3)]);
 
 pub const PARTY_PLAYLIST_ENTRY: EnumDef = (
     "PartyPlaylistEntry",
-    &[("NormalGameMode", 0), ("TrainingGameMode", 1)],
+    &[("SoloGameMode", 0), ("DuoGameMode", 1), ("TrioGameMode", 2), ("TrainingGameMode", 3)],
 );
 
 pub const CHAT_CHANNEL_TYPE: EnumDef = (
@@ -32,9 +32,9 @@ pub const WORLD_ELAPSED_TIMER_TYPES: EnumDef = (
     &[("None", 0), ("ChallengeMode", 1), ("ProvingGround", 2)],
 );
 
-pub const PLAYER_MENTORSHIP_STATUS: SeqEnumDef = (
+pub const PLAYER_MENTORSHIP_STATUS: EnumDef = (
     "PlayerMentorshipStatus",
-    &["None", "Mentor", "Newcomer"],
+    &[("None", 0), ("Newcomer", 1), ("Mentor", 2)],
 );
 
 pub const RELATIVE_CONTENT_DIFFICULTY: SeqEnumDef = (
@@ -425,7 +425,7 @@ pub const ICON_STATE: SeqEnumDef = (
 // Zone Control Enums
 // ============================================================================
 
-pub const ZONE_CONTROL_STATE: SeqEnumDef = ("ZoneControlState", &["State1", "State2", "State3"]);
+pub const ZONE_CONTROL_STATE: SeqEnumDef = ("ZoneControlState", &["State1", "State2"]);
 
 pub const ZONE_CONTROL_MODE: SeqEnumDef = (
     "ZoneControlMode",
