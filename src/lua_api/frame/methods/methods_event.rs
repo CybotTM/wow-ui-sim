@@ -1,7 +1,7 @@
 //! Event registration methods: RegisterEvent, UnregisterEvent, etc.
 
 use super::super::handle::FrameRef;
-use crate::event::{is_restricted_event, is_valid_event};
+use crate::event::{is_registerable_event, is_restricted_event};
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
 
@@ -80,7 +80,7 @@ fn add_register_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let newly_registered = {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            if !is_valid_event(&event) {
+            if !is_registerable_event(&event) {
                 let frame_name = state.widgets.get(id)
                     .and_then(|f| f.name.clone())
                     .unwrap_or_else(|| "Frame".to_string());
@@ -126,7 +126,7 @@ fn add_unregister_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let was_registered = {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            if !is_valid_event(&event) {
+            if !is_registerable_event(&event) {
                 let frame_name = state.widgets.get(id)
                     .and_then(|f| f.name.clone())
                     .unwrap_or_else(|| "Frame".to_string());
