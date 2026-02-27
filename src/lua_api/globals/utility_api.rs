@@ -586,13 +586,14 @@ fn set_mixin_override_impl(_lua: &Lua, (obj, key, value): (Value, String, Value)
 }
 
 /// Resolve the effective source table for a mixin, preferring __secureMixinMethods.
-fn resolve_mixin_source(secure_methods: &Value, mixin: mlua::Table) -> Result<mlua::Table> {
+/// Returns (source_table, is_secure).
+fn resolve_mixin_source(secure_methods: &Value, mixin: mlua::Table) -> Result<(mlua::Table, bool)> {
     if let Value::Table(sm) = secure_methods {
         if let Value::Table(t) = sm.get::<Value>(mixin.clone())? {
-            return Ok(t);
+            return Ok((t, true));
         }
     }
-    Ok(mixin)
+    Ok((mixin, false))
 }
 
 /// Apply a mixin source table's k/v pairs into object.
@@ -603,6 +604,7 @@ fn apply_mixin_to_object(
     object: &Value,
     source: mlua::Table,
     is_userdata: bool,
+    is_secure: bool,
     set_override: &Option<Function>,
 ) -> Result<()> {
     let ud_setter: Option<Function> = if is_userdata {
@@ -610,8 +612,20 @@ fn apply_mixin_to_object(
     } else {
         None
     };
+    let mut newsecfn: Option<Function> = None;
     for pair in source.pairs::<Value, Value>() {
-        let (k, v) = pair?;
+        let (k, mut v) = pair?;
+        // Wrap secure mixin functions using Elune's debug.newsecurefunction
+        if is_secure && is_userdata {
+            if let Value::Function(ref f) = v {
+                if newsecfn.is_none() {
+                    newsecfn =
+                        Some(lua.load("return debug.newsecurefunction").eval::<Function>()?);
+                }
+                let wrapped = newsecfn.as_ref().unwrap().call::<Function>(f.clone())?;
+                v = Value::Function(wrapped);
+            }
+        }
         if is_userdata {
             if let Value::Function(_) = &v {
                 if let Some(f) = set_override {
@@ -649,8 +663,8 @@ fn mixin_impl(lua: &Lua, args: MultiValue) -> Result<Value> {
             )),
             _ => continue,
         };
-        let source = resolve_mixin_source(&secure_methods, mixin)?;
-        apply_mixin_to_object(lua, &object, source, is_userdata, &set_override)?;
+        let (source, is_secure) = resolve_mixin_source(&secure_methods, mixin)?;
+        apply_mixin_to_object(lua, &object, source, is_userdata, is_secure, &set_override)?;
     }
     Ok(object)
 }

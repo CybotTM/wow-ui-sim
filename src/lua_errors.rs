@@ -77,7 +77,7 @@ pub fn redirect_stdout_to_stderr() -> Option<i32> {
 }
 
 /// Restore stdout from a saved fd.
-fn restore_stdout(saved: Option<i32>) {
+pub fn restore_stdout(saved: Option<i32>) {
     if let Some(fd) = saved {
         unsafe { libc::dup2(fd, 1); libc::close(fd); }
     }

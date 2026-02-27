@@ -187,8 +187,8 @@ fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowF
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
-    // For lua-errors: redirect stdout→stderr so only JSON hits stdout
-    let quiet = matches!(args.command, Some(Commands::LuaErrors));
+    // For JSON-output commands: redirect stdout→stderr so only JSON hits stdout
+    let quiet = matches!(args.command, Some(Commands::LuaErrors) | Some(Commands::SelfTest { .. }));
     let saved_stdout = if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None };
 
     let env = WowLuaEnv::new()?;
@@ -215,7 +215,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
         Some(Commands::SelfTest { max_ticks }) => {
             run_headless_startup(&env);
-            wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref());
+            wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
         }
         Some(Commands::RunTests { addon_name }) => {
             run_headless_startup(&env);

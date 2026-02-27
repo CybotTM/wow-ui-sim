@@ -1,6 +1,7 @@
 //! `self-test` subcommand: run Wowless tests headlessly and report results to terminal.
 
 use crate::lua_api::WowLuaEnv;
+use crate::lua_errors::restore_stdout;
 use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 
 /// Flush Lua print() output from console_output to stderr.
@@ -87,7 +88,7 @@ fn print_failures(env: &WowLuaEnv) {
 /// Run Wowless tests headlessly, printing output to stderr and failures as JSON to stdout.
 ///
 /// Exit codes: 0 = pass, 1 = failures, 2 = timeout.
-pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>) {
+pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_stdout: Option<i32>) {
     if let Some(code) = exec_lua {
         if let Err(e) = env.exec(code) {
             eprintln!("[exec-lua] error: {e}");
@@ -113,6 +114,9 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>) {
     if !completed {
         eprintln!("Wowless tests did not complete within {max_ticks} ticks");
     }
+
+    // Restore stdout before printing JSON results
+    restore_stdout(saved_stdout);
 
     let has_failures: bool = env.eval("next(WowlessTestFailures) ~= nil").unwrap_or(false);
     if has_failures {
