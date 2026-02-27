@@ -179,7 +179,12 @@ fn rebuild_strata_batches(
         }
         let dur = strata_start.elapsed();
         if dur.as_millis() > 5 {
-            eprintln!("[render] strata {i}: {n} frames, {dur:.1?}");
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default();
+            let secs = now.as_secs() % 86400;
+            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
+            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?}");
         }
         strata_cache[i] = Some(Arc::new(batch));
     }
@@ -337,7 +342,15 @@ use std::sync::Arc;
 
 fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
     if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
-        eprintln!("[draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)");
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default();
+        let secs = now.as_secs() % 86400;
+        let h = secs / 3600;
+        let m = (secs % 3600) / 60;
+        let s = secs % 60;
+        let ms = now.subsec_millis();
+        eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)");
     }
 }
 
@@ -478,7 +491,12 @@ impl App {
         let _ = state.get_strata_buckets();
         let bucket_dur = t1.elapsed();
         if layout_dur.as_millis() > 5 || bucket_dur.as_millis() > 5 {
-            eprintln!("[rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}");
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default();
+            let secs = now.as_secs() % 86400;
+            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
+            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}");
         }
         state.strata_buckets.take().unwrap()
     }
@@ -497,7 +515,12 @@ impl App {
         *self.cached_hittable.borrow_mut() = Some(grid);
         let dur = t.elapsed();
         if dur.as_millis() > 5 {
-            eprintln!("[rebuild] hit_grid={dur:.1?}");
+            let now = std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap_or_default();
+            let secs = now.as_secs() % 86400;
+            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
+            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] hit_grid={dur:.1?}");
         }
     }
 
