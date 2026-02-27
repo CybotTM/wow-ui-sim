@@ -336,7 +336,7 @@ use crate::widget::FrameStrata;
 use std::sync::Arc;
 
 fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
-    if quad_dur.as_millis() > 5 || tex_dur.as_millis() > 5 {
+    if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
         eprintln!("[draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)");
     }
 }
