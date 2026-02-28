@@ -74,15 +74,15 @@ fn register_c_achievement_info(lua: &Lua) -> Result<()> {
 fn register_c_guild(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     let st = std::rc::Rc::clone(&state);
-    t.set("GetNumMembers", lua.create_function(move |_, ()| Ok(st.borrow().guild_num_members))?)?;
+    t.set("GetNumMembers", lua.create_function(move |_, ()| Ok(st.borrow().world.guild_num_members))?)?;
     let st = std::rc::Rc::clone(&state);
-    t.set("IsInGuild", lua.create_function(move |_, ()| Ok(st.borrow().guild_name.is_some()))?)?;
+    t.set("IsInGuild", lua.create_function(move |_, ()| Ok(st.borrow().world.guild_name.is_some()))?)?;
     t.set("GetGuildInfo", lua.create_function(move |_, _unit: Option<String>| {
         let s = state.borrow();
-        match &s.guild_name {
+        match &s.world.guild_name {
             Some(name) => {
-                let rank = s.guild_rank.clone().unwrap_or_default();
-                Ok((name.clone(), rank, s.guild_num_members, String::new()))
+                let rank = s.world.guild_rank.clone().unwrap_or_default();
+                Ok((name.clone(), rank, s.world.guild_num_members, String::new()))
             }
             None => Ok((String::new(), String::new(), 0i32, String::new())),
         }
@@ -189,8 +189,8 @@ fn set_texture_on_handle(lua: &mlua::Lua, tex: &Value, path: Option<String>) {
 fn register_unit_frame_global_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let g = lua.globals();
     let s2 = std::rc::Rc::clone(&state);
-    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(s2.borrow().in_combat))?)?;
-    g.set("IsResting", lua.create_function(move |_, ()| Ok(state.borrow().is_resting))?)?;
+    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(s2.borrow().player.in_combat))?)?;
+    g.set("IsResting", lua.create_function(move |_, ()| Ok(state.borrow().player.is_resting))?)?;
     g.set("IsPVPTimerRunning", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("GetPVPTimer", lua.create_function(|_, ()| Ok(0.0f64))?)?;
     g.set("GetReadyCheckStatus", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
@@ -310,7 +310,7 @@ fn register_quest_global_functions(lua: &Lua, state: std::rc::Rc<std::cell::RefC
     let g = lua.globals();
     g.set("IsInInstance", lua.create_function(move |_, ()| {
         let s = state.borrow();
-        Ok((s.in_instance, s.instance_type.clone()))
+        Ok((s.world.in_instance, s.world.instance_type.clone()))
     })?)?;
     g.set("IsQuestSequenced", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
     g.set("GetQuestLogCompletionText", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;

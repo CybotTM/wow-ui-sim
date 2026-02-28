@@ -311,7 +311,7 @@ fn register_global_account_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCel
     let g = lua.globals();
     g.set("GetExpansionTrialInfo", lua.create_function(|_, ()| Ok((false, 0i32)))?)?;
     g.set("UnitTrialBankedLevels", lua.create_function(|_, _u: Option<String>| Ok(0i32))?)?;
-    g.set("IsInGuild", lua.create_function(move |_, ()| Ok(state.borrow().guild_name.is_some()))?)?;
+    g.set("IsInGuild", lua.create_function(move |_, ()| Ok(state.borrow().world.guild_name.is_some()))?)?;
     g.set("GetGuildLogoInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("HasCompletedAnyAchievement", lua.create_function(|_, ()| Ok(true))?)?;
     g.set("CanShowAchievementUI", lua.create_function(|_, ()| Ok(true))?)?;

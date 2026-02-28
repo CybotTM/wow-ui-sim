@@ -326,17 +326,17 @@ impl App {
         use crate::lua_api::state::{CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS};
         let env = env_rc.borrow();
         let mut state = env.state().borrow_mut();
-        state.player_class_index = CLASS_LABELS.iter()
+        state.player.class_index = CLASS_LABELS.iter()
             .position(|&n| n == config.player_class)
             .map(|i| (i + 1) as i32)
             .unwrap_or(1);
-        state.player_race_index = RACE_DATA.iter()
+        state.player.race_index = RACE_DATA.iter()
             .position(|(n, _, _)| *n == config.player_race)
             .unwrap_or(0);
         state.rot_damage_level = ROT_DAMAGE_LEVELS.iter()
             .position(|(l, _)| *l == config.rot_damage_level)
             .unwrap_or(0);
-        state.movement = crate::lua_api::state::MovementState {
+        state.player.movement = crate::lua_api::state::MovementState {
             moving: config.movement.moving,
             mounted: config.movement.mounted,
             flying: config.movement.flying,

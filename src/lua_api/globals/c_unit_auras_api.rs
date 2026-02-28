@@ -40,7 +40,7 @@ fn patch_get_aura_slots(
             }
             let s = state.borrow();
             let mut vals = vec![Value::Nil]; // nil continuation = all in one batch
-            for aura in &s.player_buffs {
+            for aura in &s.player.buffs {
                 vals.push(Value::Integer(aura.aura_instance_id as i64));
             }
             Ok(MultiValue::from_vec(vals))
@@ -58,7 +58,7 @@ fn patch_get_aura_data_by_slot(
         move |lua, (unit, slot): (String, i32)| {
             if unit != "player" { return Ok(Value::Nil); }
             let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.aura_instance_id == slot) {
+            match s.player.buffs.iter().find(|a| a.aura_instance_id == slot) {
                 Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
             }
@@ -80,7 +80,7 @@ fn patch_get_aura_data_by_index(
             });
             if dominated { return Ok(Value::Nil); }
             let s = state.borrow();
-            match s.player_buffs.get((index - 1) as usize) {
+            match s.player.buffs.get((index - 1) as usize) {
                 Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
             }
@@ -98,7 +98,7 @@ fn patch_get_buff_data_by_index(
         move |lua, (unit, index, _filter): (String, i32, Option<String>)| {
             if unit != "player" || index < 1 { return Ok(Value::Nil); }
             let s = state.borrow();
-            match s.player_buffs.get((index - 1) as usize) {
+            match s.player.buffs.get((index - 1) as usize) {
                 Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
             }
@@ -115,7 +115,7 @@ fn patch_get_player_aura_by_spell_id(
     t.set("GetPlayerAuraBySpellID", lua.create_function(
         move |lua, spell_id: i32| {
             let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.spell_id == spell_id) {
+            match s.player.buffs.iter().find(|a| a.spell_id == spell_id) {
                 Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
             }
@@ -133,7 +133,7 @@ fn patch_get_aura_data_by_spell_name(
         move |lua, (unit, name, _filter): (String, String, Option<String>)| {
             if unit != "player" { return Ok(Value::Nil); }
             let s = state.borrow();
-            match s.player_buffs.iter().find(|a| a.name == name) {
+            match s.player.buffs.iter().find(|a| a.name == name) {
                 Some(a) => Ok(Value::Table(super::aura_api::build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
             }

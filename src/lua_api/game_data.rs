@@ -48,7 +48,7 @@ pub struct PartyMember {
 }
 
 /// A simulated aura (buff or debuff).
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct AuraInfo {
     pub name: String,
     pub spell_id: i32,
@@ -293,11 +293,11 @@ pub fn build_target_info(unit_id: &str, state: &super::state::SimState) -> Optio
 fn build_player_target(state: &super::state::SimState) -> TargetInfo {
     TargetInfo {
         unit_id: "player".into(),
-        name: state.player_name.clone(),
-        class_index: state.player_class_index,
+        name: state.player.name.clone(),
+        class_index: state.player.class_index,
         level: 80,
-        health: state.player_health,
-        health_max: state.player_health_max,
+        health: state.player.health,
+        health_max: state.player.health_max,
         power: 50_000,
         power_max: 100_000,
         power_type: 0,

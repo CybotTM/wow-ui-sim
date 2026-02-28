@@ -176,9 +176,9 @@ fn register_c_covenant_callings(lua: &Lua) -> Result<()> {
 fn register_c_weekly_rewards(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     let s = Rc::clone(&state);
-    t.set("HasAvailableRewards", lua.create_function(move |_, ()| Ok(s.borrow().great_vault_has_rewards))?)?;
+    t.set("HasAvailableRewards", lua.create_function(move |_, ()| Ok(s.borrow().world.great_vault_has_rewards))?)?;
     let s = Rc::clone(&state);
-    t.set("CanClaimRewards", lua.create_function(move |_, ()| Ok(s.borrow().great_vault_can_claim))?)?;
+    t.set("CanClaimRewards", lua.create_function(move |_, ()| Ok(s.borrow().world.great_vault_can_claim))?)?;
     let s = Rc::clone(&state);
     t.set("GetActivities", lua.create_function(move |lua, filter: Option<i32>| {
         build_vault_activities_table(lua, &s.borrow(), filter)
@@ -195,7 +195,7 @@ fn build_vault_activities_table(
 ) -> Result<mlua::Table> {
     let result = lua.create_table()?;
     let mut idx = 1;
-    for a in &state.great_vault_activities {
+    for a in &state.world.great_vault_activities {
         if let Some(f) = filter {
             if a.activity_type != f { continue; }
         }
@@ -452,7 +452,7 @@ fn set_spec_info_get_specialization(
     state: Rc<RefCell<crate::lua_api::SimState>>,
 ) -> Result<()> {
     t.set("GetSpecialization", lua.create_function(move |_, ()| {
-        Ok(state.borrow().active_spec_index)
+        Ok(state.borrow().player.active_spec_index)
     })?)
 }
 
@@ -464,8 +464,8 @@ fn set_spec_info_set_specialization(
 ) -> Result<()> {
     t.set("SetSpecialization", lua.create_function(move |lua, spec_index: i32| {
         if state.borrow().casting.is_some() { return Ok(false) }
-        if state.borrow().active_spec_index == spec_index { return Ok(false) }
-        state.borrow_mut().pending_spec_change = Some(spec_index);
+        if state.borrow().player.active_spec_index == spec_index { return Ok(false) }
+        state.borrow_mut().player.pending_spec_change = Some(spec_index);
         crate::lua_api::globals::action_bar_api::start_cast(
             &state, lua, SPEC_ACTIVATION_SPELL_ID, 4000,
         )?;

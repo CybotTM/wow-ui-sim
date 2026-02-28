@@ -31,6 +31,7 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_event_api(lua, &admin, Rc::clone(&state))?;
     register_vault_api(lua, &admin, Rc::clone(&state))?;
     register_action_bar_api(lua, &admin, Rc::clone(&state))?;
+    super::admin_encounter::register_encounter_api(lua, &admin, Rc::clone(&state))?;
 
     lua.globals().set("A_Admin", admin)?;
     Ok(())
@@ -43,23 +44,23 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 fn register_identity_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetPlayerName", {
         let s = Rc::clone(&state);
-        move |_, name: String| { s.borrow_mut().player_name = name; Ok(()) }
+        move |_, name: String| { s.borrow_mut().player.name = name; Ok(()) }
     })?;
     set_fn(lua, t, "SetPlayerClass", {
         let s = Rc::clone(&state);
-        move |_, class_index: i32| { s.borrow_mut().player_class_index = class_index; Ok(()) }
+        move |_, class_index: i32| { s.borrow_mut().player.class_index = class_index; Ok(()) }
     })?;
     set_fn(lua, t, "SetPlayerRace", {
         let s = Rc::clone(&state);
-        move |_, race_index: i32| { s.borrow_mut().player_race_index = race_index as usize; Ok(()) }
+        move |_, race_index: i32| { s.borrow_mut().player.race_index = race_index as usize; Ok(()) }
     })?;
     set_fn(lua, t, "SetPlayerLevel", {
         let s = Rc::clone(&state);
-        move |_, level: i32| { s.borrow_mut().player_level = level; Ok(()) }
+        move |_, level: i32| { s.borrow_mut().player.level = level; Ok(()) }
     })?;
     set_fn(lua, t, "SetPlayerSex", {
         let s = Rc::clone(&state);
-        move |_, sex: i32| { s.borrow_mut().player_sex = sex; Ok(()) }
+        move |_, sex: i32| { s.borrow_mut().player.sex = sex; Ok(()) }
     })?;
     Ok(())
 }
@@ -71,11 +72,11 @@ fn register_identity_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
 fn register_combat_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetInCombat", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().in_combat = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.in_combat = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetResting", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().is_resting = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.is_resting = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetCasting", {
         let s = Rc::clone(&state);
@@ -127,8 +128,8 @@ fn register_health_power_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimSt
         let s = Rc::clone(&state);
         move |_, (cur, max): (i32, i32)| {
             let mut st = s.borrow_mut();
-            st.player_health = cur;
-            st.player_health_max = max;
+            st.player.health = cur;
+            st.player.health_max = max;
             Ok(())
         }
     })?;
@@ -136,9 +137,9 @@ fn register_health_power_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimSt
         let s = Rc::clone(&state);
         move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
             let mut st = s.borrow_mut();
-            st.player_power = cur;
-            st.player_power_max = max;
-            if let Some(pt) = power_type { st.player_power_type = pt; }
+            st.player.power = cur;
+            st.player.power_max = max;
+            if let Some(pt) = power_type { st.player.power_type = pt; }
             Ok(())
         }
     })?;
@@ -368,23 +369,23 @@ fn default_party_member() -> PartyMember {
 fn register_movement_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetMoving", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().movement.moving = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.movement.moving = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetMounted", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().movement.mounted = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.movement.mounted = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetFlying", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().movement.flying = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.movement.flying = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetFalling", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().movement.falling = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.movement.falling = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetSwimming", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().movement.swimming = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.movement.swimming = v; Ok(()) }
     })?;
     Ok(())
 }
@@ -396,7 +397,7 @@ fn register_movement_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
 fn register_spec_talent_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetSpec", {
         let s = Rc::clone(&state);
-        move |_, spec_index: i32| { s.borrow_mut().active_spec_index = spec_index; Ok(()) }
+        move |_, spec_index: i32| { s.borrow_mut().player.active_spec_index = spec_index; Ok(()) }
     })?;
     set_fn(lua, t, "SetTalentRank", {
         let s = Rc::clone(&state);
@@ -435,8 +436,8 @@ fn register_buff_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
             let mut st = s.borrow_mut();
             let now = st.start_time.elapsed().as_secs_f64();
             let expiration_time = if duration > 0.0 { now + duration } else { 0.0 };
-            let aura_instance_id = (st.player_buffs.len() + 1) as i32;
-            st.player_buffs.push(AuraInfo {
+            let aura_instance_id = (st.player.buffs.len() + 1) as i32;
+            st.player.buffs.push(AuraInfo {
                 name,
                 spell_id,
                 icon: icon.parse::<i32>().unwrap_or(0),
@@ -456,13 +457,13 @@ fn register_buff_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
     set_fn(lua, t, "RemoveBuff", {
         let s = Rc::clone(&state);
         move |_, spell_id: i32| {
-            s.borrow_mut().player_buffs.retain(|a| a.spell_id != spell_id);
+            s.borrow_mut().player.buffs.retain(|a| a.spell_id != spell_id);
             Ok(())
         }
     })?;
     set_fn(lua, t, "ClearBuffs", {
         let s = Rc::clone(&state);
-        move |_, ()| { s.borrow_mut().player_buffs.clear(); Ok(()) }
+        move |_, ()| { s.borrow_mut().player.buffs.clear(); Ok(()) }
     })?;
     Ok(())
 }
@@ -476,30 +477,30 @@ fn register_zone_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
         let s = Rc::clone(&state);
         move |_, (name, id): (String, i32)| {
             let mut st = s.borrow_mut();
-            st.zone_name = name;
-            st.zone_id = id;
+            st.world.zone_name = name;
+            st.world.zone_id = id;
             Ok(())
         }
     })?;
     set_fn(lua, t, "SetSubZone", {
         let s = Rc::clone(&state);
-        move |_, name: String| { s.borrow_mut().sub_zone_name = name; Ok(()) }
+        move |_, name: String| { s.borrow_mut().world.sub_zone_name = name; Ok(()) }
     })?;
     set_fn(lua, t, "SetInstanceInfo", {
         let s = Rc::clone(&state);
         move |_, (name, inst_type, difficulty, max_players): (String, String, i32, i32)| {
             let mut st = s.borrow_mut();
-            st.instance_name = name;
-            st.instance_type = inst_type;
-            st.instance_difficulty = difficulty;
-            st.instance_max_players = max_players;
-            st.in_instance = true;
+            st.world.instance_name = name;
+            st.world.instance_type = inst_type;
+            st.world.instance_difficulty = difficulty;
+            st.world.instance_max_players = max_players;
+            st.world.in_instance = true;
             Ok(())
         }
     })?;
     set_fn(lua, t, "SetInInstance", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().in_instance = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().world.in_instance = v; Ok(()) }
     })?;
     Ok(())
 }
@@ -511,11 +512,11 @@ fn register_zone_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
 fn register_economy_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetMoney", {
         let s = Rc::clone(&state);
-        move |_, copper: i64| { s.borrow_mut().player_money = copper; Ok(()) }
+        move |_, copper: i64| { s.borrow_mut().player.money = copper; Ok(()) }
     })?;
     set_fn(lua, t, "SetItemLevel", {
         let s = Rc::clone(&state);
-        move |_, ilvl: f64| { s.borrow_mut().player_item_level = ilvl as f32; Ok(()) }
+        move |_, ilvl: f64| { s.borrow_mut().player.item_level = ilvl as f32; Ok(()) }
     })?;
     Ok(())
 }
@@ -527,17 +528,17 @@ fn register_economy_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>
 fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "AddTransmog", {
         let s = Rc::clone(&state);
-        move |_, id: i32| { s.borrow_mut().collected_transmogs.insert(id); Ok(()) }
+        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.insert(id); Ok(()) }
     })?;
     set_fn(lua, t, "RemoveTransmog", {
         let s = Rc::clone(&state);
-        move |_, id: i32| { s.borrow_mut().collected_transmogs.remove(&id); Ok(()) }
+        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.remove(&id); Ok(()) }
     })?;
     set_fn(lua, t, "SetMountCollected", {
         let s = Rc::clone(&state);
         move |_, (id, collected): (i32, bool)| {
             let mut st = s.borrow_mut();
-            if collected { st.collected_mounts.insert(id); } else { st.collected_mounts.remove(&id); }
+            if collected { st.world.collected_mounts.insert(id); } else { st.world.collected_mounts.remove(&id); }
             Ok(())
         }
     })?;
@@ -545,7 +546,7 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         let s = Rc::clone(&state);
         move |_, (id, collected): (i32, bool)| {
             let mut st = s.borrow_mut();
-            if collected { st.collected_pets.insert(id); } else { st.collected_pets.remove(&id); }
+            if collected { st.world.collected_pets.insert(id); } else { st.world.collected_pets.remove(&id); }
             Ok(())
         }
     })?;
@@ -553,7 +554,7 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         let s = Rc::clone(&state);
         move |_, (id, collected): (i32, bool)| {
             let mut st = s.borrow_mut();
-            if collected { st.collected_toys.insert(id); } else { st.collected_toys.remove(&id); }
+            if collected { st.world.collected_toys.insert(id); } else { st.world.collected_toys.remove(&id); }
             Ok(())
         }
     })?;
@@ -561,7 +562,7 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         let s = Rc::clone(&state);
         move |_, (id, earned): (i32, bool)| {
             let mut st = s.borrow_mut();
-            if earned { st.earned_achievements.insert(id); } else { st.earned_achievements.remove(&id); }
+            if earned { st.world.earned_achievements.insert(id); } else { st.world.earned_achievements.remove(&id); }
             Ok(())
         }
     })?;
@@ -575,19 +576,19 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
 fn register_pvp_guild_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     set_fn(lua, t, "SetPvPEnabled", {
         let s = Rc::clone(&state);
-        move |_, v: bool| { s.borrow_mut().pvp_enabled = v; Ok(()) }
+        move |_, v: bool| { s.borrow_mut().player.pvp_enabled = v; Ok(()) }
     })?;
     set_fn(lua, t, "SetHonorLevel", {
         let s = Rc::clone(&state);
-        move |_, level: i32| { s.borrow_mut().honor_level = level; Ok(()) }
+        move |_, level: i32| { s.borrow_mut().player.honor_level = level; Ok(()) }
     })?;
     set_fn(lua, t, "SetGuildInfo", {
         let s = Rc::clone(&state);
         move |_, (name, rank, num_members): (String, String, i32)| {
             let mut st = s.borrow_mut();
-            st.guild_name = Some(name);
-            st.guild_rank = Some(rank);
-            st.guild_num_members = num_members;
+            st.world.guild_name = Some(name);
+            st.world.guild_rank = Some(rank);
+            st.world.guild_num_members = num_members;
             Ok(())
         }
     })?;
@@ -595,9 +596,9 @@ fn register_pvp_guild_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
         let s = Rc::clone(&state);
         move |_, ()| {
             let mut st = s.borrow_mut();
-            st.guild_name = None;
-            st.guild_rank = None;
-            st.guild_num_members = 0;
+            st.world.guild_name = None;
+            st.world.guild_rank = None;
+            st.world.guild_num_members = 0;
             Ok(())
         }
     })?;
@@ -669,12 +670,12 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
             let activity = crate::lua_api::state::GreatVaultActivity {
                 activity_type: atype, index, threshold, progress, level,
             };
-            if let Some(existing) = st.great_vault_activities.iter_mut()
+            if let Some(existing) = st.world.great_vault_activities.iter_mut()
                 .find(|a| a.activity_type == atype && a.index == index)
             {
                 *existing = activity;
             } else {
-                st.great_vault_activities.push(activity);
+                st.world.great_vault_activities.push(activity);
             }
             Ok(())
         }
@@ -683,8 +684,8 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
         let s = Rc::clone(&state);
         move |_, (has, can_claim): (bool, Option<bool>)| {
             let mut st = s.borrow_mut();
-            st.great_vault_has_rewards = has;
-            st.great_vault_can_claim = can_claim.unwrap_or(has);
+            st.world.great_vault_has_rewards = has;
+            st.world.great_vault_can_claim = can_claim.unwrap_or(has);
             Ok(())
         }
     })?;
@@ -692,9 +693,9 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
         let s = Rc::clone(&state);
         move |_, ()| {
             let mut st = s.borrow_mut();
-            st.great_vault_activities.clear();
-            st.great_vault_has_rewards = false;
-            st.great_vault_can_claim = false;
+            st.world.great_vault_activities.clear();
+            st.world.great_vault_has_rewards = false;
+            st.world.great_vault_can_claim = false;
             Ok(())
         }
     })?;
@@ -706,7 +707,7 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
 // ---------------------------------------------------------------------------
 
 /// Register a closure as a named method on a table.
-fn set_fn<F, A, R>(lua: &Lua, t: &mlua::Table, name: &str, f: F) -> Result<()>
+pub fn set_fn<F, A, R>(lua: &Lua, t: &mlua::Table, name: &str, f: F) -> Result<()>
 where
     F: Fn(&Lua, A) -> Result<R> + 'static,
     A: mlua::FromLuaMulti,
