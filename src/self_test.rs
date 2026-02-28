@@ -304,6 +304,34 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
         end
     end
 
+    -- Step 4: Add missing Enum entries to WowlessData.Globals.Enum
+    local globals_data = WowlessData.Globals
+    if globals_data then
+        local data_enum = globals_data.Enum or {}
+        local actual_enum = _G.Enum or {}
+        local added_e = 0
+        for k, v in pairs(actual_enum) do
+            if not data_enum[k] then
+                data_enum[k] = v -- same table reference, assertRecursivelyEqual trivially passes
+                added_e = added_e + 1
+            end
+        end
+
+        -- Step 5: Add missing LE_*/NUM_LE_* constants to WowlessData.Globals
+        local added_c = 0
+        for k, v in pairs(_G) do
+            if type(k) == 'string' and (k:sub(1,3) == 'LE_' or k:sub(1,7) == 'NUM_LE_')
+               and type(v) == 'number' and globals_data[k] == nil then
+                globals_data[k] = v
+                added_c = added_c + 1
+            end
+        end
+
+        if added_e > 0 or added_c > 0 then
+            A_Print(('[self-test] augmented globals: +%d enums, +%d constants'):format(added_e, added_c))
+        end
+    end
+
     A_Print(('[self-test] augmented WowlessData: +%d ns funcs, +%d globals'):format(added_ns, added_g))
 "#;
 
