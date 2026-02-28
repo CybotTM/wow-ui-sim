@@ -124,8 +124,7 @@ fn add_model_transform_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: 
 }
 
 fn add_model_rendering_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetDrawLayer", |_, _this, ()| Ok(("ARTWORK".to_string(), 0i32)));
-    methods.add_method("SetDrawLayer", |_, _this, _args: mlua::MultiValue| Ok(()));
+    // GetDrawLayer/SetDrawLayer are implemented in methods_texture.rs — don't override with stubs.
     methods.add_method("GetModelDrawLayer", |_, _this, ()| Ok("ARTWORK".to_string()));
     methods.add_method("SetModelDrawLayer", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("GetModelAlpha", |_, _this, ()| Ok(1.0_f64));
