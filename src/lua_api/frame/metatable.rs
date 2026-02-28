@@ -146,7 +146,7 @@ fn add_tostring_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         let type_name = state
             .widgets
             .get(this.0)
-            .map(|f| f.widget_type.as_str())
+            .map(|f| f.object_type_name.as_deref().unwrap_or(f.widget_type.as_str()))
             .unwrap_or("Frame");
         Ok(format!("{}: 0x{:08X}", type_name, this.0))
     });

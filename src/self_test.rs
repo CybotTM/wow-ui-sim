@@ -362,14 +362,16 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
         Path = function() return augment_ag:CreateAnimation("Path") end,
         FlipBook = function() return augment_ag:CreateAnimation("FlipBook") end,
         Animation = function() return augment_ag:CreateAnimation("Animation") end,
+        VertexColor = function() return augment_ag:CreateAnimation("VertexColor") end,
+        TextureCoordTranslation = function() return augment_ag:CreateAnimation("TextureCoordTranslation") end,
         ControlPoint = function() return augment_ag:CreateAnimation("Path"):CreateControlPoint() end,
         Actor = function() return augment_scene:CreateActor() end,
     }
     local function create_test_object(type_name, cfg)
-        if cfg.isa and cfg.isa.Frame then
-            return pcall(CreateFrame, type_name)
-        elseif non_frame_factories[type_name] then
+        if non_frame_factories[type_name] then
             return pcall(non_frame_factories[type_name])
+        elseif cfg.isa and cfg.isa.Frame then
+            return pcall(CreateFrame, type_name)
         end
         return false, nil
     end

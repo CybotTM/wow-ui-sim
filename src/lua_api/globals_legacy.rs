@@ -386,6 +386,7 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
 ///
 /// For aliased types (e.g. ArchaeologyDigSiteFrame → Frame), creates and caches
 /// a unique cloned metatable so per-type identity checks pass.
+/// Animation/Actor/ControlPoint types get a restricted method set (not Frame's).
 fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
     let (widget_type, obj_type_name) = {
         let state_rc = get_sim_state(lua);
@@ -401,6 +402,14 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
     let mt: Value = per_type.raw_get(type_key)?;
     if mt != Value::Nil {
         return Ok(mt);
+    }
+    // Animation/Actor/ControlPoint types get a restricted metatable.
+    if let Some(otn) = obj_type_name.as_deref() {
+        if super::frame::methods::methods_core::is_anim_type(otn) {
+            let new_mt = build_anim_metatable(lua, &per_type, otn)?;
+            per_type.raw_set(type_key, new_mt.clone())?;
+            return Ok(Value::Table(new_mt));
+        }
     }
     // Clone the base type's metatable into a new unique table for this alias.
     let new_mt = clone_metatable(lua, &per_type, widget_type.as_str())?;
@@ -420,6 +429,59 @@ fn clone_metatable(lua: &Lua, per_type: &mlua::Table, base_key: &str) -> Result<
     let new_mt = lua.create_table()?;
     new_mt.raw_set("__index", new_idx)?;
     Ok(new_mt)
+}
+
+/// Common methods for all animation/actor/controlpoint types (UIObject-level).
+const ANIM_COMMON_META: &[&str] = &[
+    "GetObjectType",
+    "IsObjectType",
+    "GetName",
+    "GetDebugName",
+    "GetParent",
+    "SetParent",
+    "IsForbidden",
+    "IsProtected",
+    "CanChangeProtectedState",
+    "IsObjectLoaded",
+    "GetSourceLocation",
+];
+
+/// Script methods for AnimationGroup and Animation types.
+const ANIM_SCRIPT_META: &[&str] = &[
+    "SetScript",
+    "GetScript",
+    "HasScript",
+    "HookScript",
+    "ClearScripts",
+];
+
+/// Build a restricted metatable for animation/actor/controlpoint types.
+///
+/// Copies only animation-appropriate methods from Frame's metatable, wrapping
+/// each in a unique closure for per-type function identity (cfuncs test).
+fn build_anim_metatable(lua: &Lua, per_type: &mlua::Table, otn: &str) -> Result<mlua::Table> {
+    let frame_mt: mlua::Table = per_type.raw_get("Frame")?;
+    let frame_idx: mlua::Table = frame_mt.raw_get("__index")?;
+    let index_table = lua.create_table()?;
+
+    // Common UIObject methods
+    for &name in ANIM_COMMON_META {
+        if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
+            index_table.set(name, wrap_method(lua, f)?)?;
+        }
+    }
+    // Script methods for AnimationGroup and Animation subtypes (not ControlPoint/Actor)
+    if otn != "ControlPoint" && otn != "Actor" {
+        for &name in ANIM_SCRIPT_META {
+            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
+                index_table.set(name, wrap_method(lua, f)?)?;
+            }
+        }
+    }
+
+    let mt = lua.create_table()?;
+    mt.set("__index", index_table)?;
+    Ok(mt)
 }
 
 /// Pre-build one metatable per widget type and store in `__per_type_metatables`.

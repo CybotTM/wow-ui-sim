@@ -210,11 +210,39 @@ fn script_supported(widget_type: crate::widget::WidgetType, script_type: &str) -
         .any(|s| s.eq_ignore_ascii_case(script_type))
 }
 
+/// Scripts supported by AnimationGroup.
+const ANIM_GROUP_SCRIPTS: &[&str] =
+    &["OnPlay", "OnStop", "OnFinished", "OnPause", "OnLoop", "OnUpdate"];
+
+/// Scripts supported by Animation subtypes.
+const ANIMATION_SCRIPTS: &[&str] = &["OnPlay", "OnStop", "OnFinished", "OnPause", "OnUpdate"];
+
+/// Check if an animation type supports a given script.
+/// Returns Some(bool) if it's an animation type, None otherwise.
+fn anim_has_script(otn: &str, script_type: &str) -> Option<bool> {
+    let scripts: &[&str] = match otn {
+        "AnimationGroup" => ANIM_GROUP_SCRIPTS,
+        "Animation" | "Alpha" | "Rotation" | "Scale" | "Translation"
+        | "LineTranslation" | "LineScale" | "Path" | "FlipBook"
+        | "VertexColor" | "TextureCoordTranslation" => ANIMATION_SCRIPTS,
+        "ControlPoint" | "Actor" => return Some(false),
+        _ => return None,
+    };
+    Some(scripts.iter().any(|s| s.eq_ignore_ascii_case(script_type)))
+}
+
 fn add_has_script_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("HasScript", |lua, this, script_type: String| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let widget_type = state.widgets.get(this.0)
+        let frame = state.widgets.get(this.0);
+        // Check animation types first (they have their own script lists)
+        if let Some(otn) = frame.and_then(|f| f.object_type_name.as_deref()) {
+            if let Some(result) = anim_has_script(otn, &script_type) {
+                return Ok(result);
+            }
+        }
+        let widget_type = frame
             .map(|f| f.widget_type)
             .unwrap_or(crate::widget::WidgetType::Frame);
         Ok(script_supported(widget_type, &script_type))

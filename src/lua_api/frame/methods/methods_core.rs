@@ -85,6 +85,10 @@ fn add_is_object_type<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             if otn.eq_ignore_ascii_case(&type_name) {
                 return Ok(true);
             }
+            // Animation/Actor/ControlPoint types have their own hierarchy (not Frame)
+            if is_anim_type(otn) {
+                return Ok(anim_object_type_is_a(otn, &type_name));
+            }
         }
         Ok(widget_type_is_a(wt, &type_name))
     });
@@ -625,6 +629,62 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("Intersects", |_lua, _this, _region: Value| Ok(false));
     methods.add_method("IsDrawLayerEnabled", |_lua, _this, _layer: String| Ok(true));
     methods.add_method("SetDrawLayerEnabled", |_lua, _this, (_layer, _enabled): (String, bool)| Ok(()));
+}
+
+/// Check if an object_type_name belongs to the animation/actor/controlpoint family.
+pub(crate) fn is_anim_type(otn: &str) -> bool {
+    matches!(
+        otn,
+        "AnimationGroup"
+            | "Animation"
+            | "Alpha"
+            | "Rotation"
+            | "Scale"
+            | "Translation"
+            | "LineTranslation"
+            | "LineScale"
+            | "Path"
+            | "FlipBook"
+            | "VertexColor"
+            | "TextureCoordTranslation"
+            | "ControlPoint"
+            | "Actor"
+    )
+}
+
+/// Check IsObjectType for animation/actor/controlpoint types using WoW's hierarchy.
+///
+/// Hierarchy:
+/// - AnimationGroup → UIObject only (NOT Frame, NOT Region)
+/// - Animation subtypes → their type + parent chain + Animation + UIObject
+///   - LineScale → Scale → Animation
+///   - LineTranslation → Translation → Animation
+///   - All others → Animation directly
+/// - ControlPoint → UIObject only
+/// - Actor → UIObject only
+fn anim_object_type_is_a(obj_type: &str, query: &str) -> bool {
+    // "Object" is the root for everything
+    if query.eq_ignore_ascii_case("object") {
+        return true;
+    }
+    // Animation types are NOT Region or Frame
+    if query.eq_ignore_ascii_case("region") || query.eq_ignore_ascii_case("frame") {
+        return false;
+    }
+    match obj_type {
+        // These only match themselves + UIObject
+        "AnimationGroup" | "ControlPoint" | "Actor" => false,
+        // LineScale inherits Scale → Animation
+        "LineScale" => {
+            query.eq_ignore_ascii_case("scale") || query.eq_ignore_ascii_case("animation")
+        }
+        // LineTranslation inherits Translation → Animation
+        "LineTranslation" => {
+            query.eq_ignore_ascii_case("translation") || query.eq_ignore_ascii_case("animation")
+        }
+        // All other animation subtypes inherit Animation directly
+        _ => query.eq_ignore_ascii_case("animation"),
+    }
 }
 
 /// Check if a widget type is or inherits from the given type name.
