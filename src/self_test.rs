@@ -445,15 +445,24 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
                                 if has_missing then
                                     to_remove[#to_remove + 1] = fk
                                 else
+                                    local has_userdata = false
                                     for _, g in ipairs(fv.getters) do
                                         local method = idx[g.method]
                                         local ok2, result = pcall(function()
                                             return select(g.index, method(obj))
                                         end)
-                                        if ok2 and result ~= fv.init then
+                                        if ok2 and type(result) == 'table' then
+                                            -- Getter returns a frame userdata (type() reports "table").
+                                            -- Per-instance refs can't be compared across objects.
+                                            has_userdata = true
+                                            break
+                                        elseif ok2 and result ~= fv.init then
                                             fv.init = result
                                             fixed_f = fixed_f + 1
                                         end
+                                    end
+                                    if has_userdata then
+                                        to_remove[#to_remove + 1] = fk
                                     end
                                 end
                             end

@@ -453,6 +453,7 @@ fn create_widget_type_defaults(lua: &Lua, state: &mut SimState, frame_id: u64, w
         WidgetType::EditBox => {
             if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
                 frame.mouse_enabled = true;
+                frame.visible = false;
             }
         }
         _ => {}
