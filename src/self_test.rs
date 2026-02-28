@@ -7,6 +7,10 @@ use crate::startup::{fire_one_on_update_tick, process_pending_timers};
 /// Flush Lua print() output from console_output to stderr.
 fn flush_console(env: &WowLuaEnv) {
     let mut state = env.state().borrow_mut();
+    let n = state.console_output.len();
+    if n > 0 {
+        eprintln!("[flush] draining {n} console lines");
+    }
     for line in state.console_output.drain(..) {
         eprintln!("{line}");
     }
@@ -17,30 +21,99 @@ fn tests_done(env: &WowLuaEnv) -> bool {
     env.eval("WowlessTestsDone or false").unwrap_or(false)
 }
 
+/// Inject Lua tracker that exposes test progress via `__wowsim_progress` global.
+fn inject_progress_tracker(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        __wowsim_progress = { phase = "waiting", categories = {} }
+        local prog = __wowsim_progress
+        -- Track new top-level failure categories as they appear
+        setmetatable(WowlessTestFailures, {
+            __newindex = function(t, k, v)
+                rawset(t, k, v)
+                prog.categories[k] = true
+            end,
+        })
+        "#,
+    );
+}
+
+/// Query current failure category names from Lua.
+fn failure_categories(env: &WowLuaEnv) -> Vec<String> {
+    let csv: String = env
+        .eval(
+            r#"
+            local parts = {}
+            if WowlessTestFailures then
+                for k in pairs(WowlessTestFailures) do parts[#parts+1] = tostring(k) end
+            end
+            table.sort(parts)
+            return table.concat(parts, ",")
+            "#,
+        )
+        .unwrap_or_default();
+    if csv.is_empty() {
+        Vec::new()
+    } else {
+        csv.split(',').map(String::from).collect()
+    }
+}
+
+/// Count top-level failure keys and console lines pending.
+fn tick_debug(env: &WowLuaEnv) -> String {
+    let console_n = env.state().borrow().console_output.len();
+    let fail_n: i64 = env
+        .eval("local n=0; for _ in pairs(WowlessTestFailures or {}) do n=n+1 end; return n")
+        .unwrap_or(0);
+    format!("console={console_n} failures={fail_n}")
+}
+
+/// Run one tick: fire OnUpdate + timers, return (errors_before, errors_after, duration).
+fn run_one_tick(env: &WowLuaEnv) -> (usize, usize, std::time::Duration) {
+    let before = env.state().borrow().lua_errors.len();
+    let t0 = std::time::Instant::now();
+    fire_one_on_update_tick(env);
+    process_pending_timers(env);
+    (before, env.state().borrow().lua_errors.len(), t0.elapsed())
+}
+
+/// Report new failure categories that appeared this tick.
+fn report_new_failures(env: &WowLuaEnv, tick: u32, prev: &mut Vec<String>) {
+    let cats = failure_categories(env);
+    if cats != *prev {
+        for cat in &cats {
+            if !prev.contains(cat) {
+                eprintln!("[tick {tick}] FAIL: {cat}");
+            }
+        }
+        *prev = cats;
+    }
+}
+
 /// Loop OnUpdate ticks until Wowless completes or appears stuck.
 /// Returns true if tests completed, false if timed out / stuck.
 fn poll_until_done(env: &WowLuaEnv, max_ticks: u32) -> bool {
+    inject_progress_tracker(env);
+    let wall = std::time::Instant::now();
     let mut idle_ticks: u32 = 0;
-    let mut prev_error_count: usize = 0;
+    let mut prev_errors: usize = 0;
+    let mut prev_cats: Vec<String> = Vec::new();
 
-    for _tick in 0..max_ticks {
+    for tick in 0..max_ticks {
         flush_console(env);
         if tests_done(env) { return true; }
 
-        let errors_before = env.state().borrow().lua_errors.len();
-        fire_one_on_update_tick(env);
-        process_pending_timers(env);
-        let errors_after = env.state().borrow().lua_errors.len();
-
-        if errors_after == prev_error_count && errors_after == errors_before {
-            idle_ticks += 1;
-        } else {
-            idle_ticks = 0;
+        let (before, after, dur) = run_one_tick(env);
+        if tick < 5 || tick % 10 == 0 {
+            eprintln!("[tick {tick}] {dur:.1?} {} errors={after} wall={:.1?}", tick_debug(env), wall.elapsed());
         }
-        prev_error_count = errors_after;
+
+        idle_ticks = if after == prev_errors && after == before { idle_ticks + 1 } else { 0 };
+        prev_errors = after;
+        report_new_failures(env, tick, &mut prev_cats);
 
         if idle_ticks >= 500 {
-            eprintln!("Wowless tests appear stuck (500 idle ticks), stopping");
+            eprintln!("Wowless tests appear stuck (500 idle ticks at tick {tick}), stopping");
             return false;
         }
     }
@@ -88,17 +161,15 @@ fn print_failures(env: &WowLuaEnv) {
 /// Run Wowless tests headlessly, printing output to stderr and failures as JSON to stdout.
 ///
 /// Exit codes: 0 = pass, 1 = failures, 2 = timeout.
-pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_stdout: Option<i32>) {
-    if let Some(code) = exec_lua {
-        if let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
-    }
+/// Debug: verify A_Print works and report test readiness.
+fn debug_print(env: &WowLuaEnv) {
+    let _ = env.exec("A_Print('[self-test] A_Print works')");
+    flush_console(env);
+    eprintln!("[self-test] WowlessTestsDone = {:?}", tests_done(env));
+}
 
-    // Override debugprofilestop to return real elapsed milliseconds so the
-    // Wowless test runner's budget check works (yields every half-frame).
-    // Registered as a native C function (create_function) so the Wowless
-    // globalApis.impltype test sees it as a C function, not a Lua function.
+/// Override debugprofilestop with real wall-clock timer.
+fn override_debugprofilestop(env: &WowLuaEnv) {
     let lua = env.lua();
     let start = std::time::Instant::now();
     let _ = lua.globals().set(
@@ -107,6 +178,17 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_s
             Ok(start.elapsed().as_millis() as i64)
         }).expect("debugprofilestop override"),
     );
+}
+
+pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_stdout: Option<i32>) {
+    if let Some(code) = exec_lua {
+        if let Err(e) = env.exec(code) {
+            eprintln!("[exec-lua] error: {e}");
+        }
+    }
+
+    override_debugprofilestop(env);
+    debug_print(env);
 
     let completed = poll_until_done(env, max_ticks);
     flush_console(env);
@@ -115,15 +197,16 @@ pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_s
         eprintln!("Wowless tests did not complete within {max_ticks} ticks");
     }
 
-    // Restore stdout before printing JSON results
     restore_stdout(saved_stdout);
+    report_results(env, completed);
+}
 
+fn report_results(env: &WowLuaEnv, completed: bool) {
     let has_failures: bool = env.eval("next(WowlessTestFailures) ~= nil").unwrap_or(false);
     if has_failures {
         print_failures(env);
         std::process::exit(1);
     }
-
     if !completed {
         std::process::exit(2);
     }

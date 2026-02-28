@@ -234,10 +234,19 @@ fn is_format_conversion(b: u8) -> bool {
 fn register_print(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let print_func = lua.create_function(move |_lua, args: mlua::Variadic<Value>| {
         let output = format_print_args(&args);
+        eprintln!("{output}");
         state.borrow_mut().console_output.push(output);
         Ok(())
     })?;
-    lua.globals().set("print", print_func)
+    lua.globals().set("print", print_func.clone())?;
+    // Store in registry so A_Print bypasses taint
+    lua.set_named_registry_value("__sim_print", print_func)?;
+    lua.load(r#"
+        function A_Print(...)
+            local p = debug.getregistry().__sim_print
+            if p then p(...) end
+        end
+    "#).exec()
 }
 
 /// Format variadic print arguments with tab separators, matching WoW's print behavior.
