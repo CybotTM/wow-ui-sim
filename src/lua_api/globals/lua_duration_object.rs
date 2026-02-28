@@ -24,6 +24,7 @@ const METHOD_NAMES: &[&str] = &[
     "EvaluateElapsedPercent",
     "EvaluateRemainingDuration",
     "EvaluateRemainingPercent",
+    "GetClockTime",
     "GetElapsedDuration",
     "GetElapsedPercent",
     "GetEndTime",
@@ -139,6 +140,7 @@ fn add_evaluate_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) 
 
 /// Register Get* query methods (return 0.0 / false stubs).
 fn add_getter_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
+    methods.add_method("GetClockTime", |_, _, _: MultiValue| Ok(0.0f64));
     methods.add_method("GetElapsedDuration", |_, _, _: MultiValue| Ok(0.0f64));
     methods.add_method("GetElapsedPercent", |_, _, _: MultiValue| Ok(0.0f64));
     methods.add_method("GetEndTime", |_, _, _: MultiValue| Ok(0.0f64));

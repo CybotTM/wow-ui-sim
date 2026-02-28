@@ -15,6 +15,10 @@ static NEXT_HEAL_PRED_ID: AtomicU64 = AtomicU64::new(1);
 
 /// Method names that are read-only (cannot be overwritten via __newindex).
 const METHOD_NAMES: &[&str] = &[
+    "EvaluateCurrentHealthPercent",
+    "EvaluateMissingHealthPercent",
+    "GetCurrentHealth",
+    "GetCurrentHealthPercent",
     "GetDamageAbsorbClampMode",
     "GetDamageAbsorbs",
     "GetHealAbsorbClampMode",
@@ -23,14 +27,27 @@ const METHOD_NAMES: &[&str] = &[
     "GetIncomingHealClampMode",
     "GetIncomingHealOverflowPercent",
     "GetIncomingHeals",
+    "GetMaximumDamageAbsorbs",
+    "GetMaximumHealAbsorbs",
+    "GetMaximumHealth",
+    "GetMaximumHealthMode",
+    "GetMaximumIncomingHeals",
+    "GetMissingHealth",
+    "GetMissingHealthPercent",
     "GetPredictedValues",
+    "GetTotalDamageAbsorbs",
+    "GetTotalHealAbsorbs",
+    "GetTotalIncomingHeals",
+    "GetTotalIncomingHealsFromHealer",
     "HasSecretValues",
     "Reset",
+    "ResetPredictedValues",
     "SetDamageAbsorbClampMode",
     "SetHealAbsorbClampMode",
     "SetHealAbsorbMode",
     "SetIncomingHealClampMode",
     "SetIncomingHealOverflowPercent",
+    "SetMaximumHealthMode",
     "SetPredictedValues",
     "SetToDefaults",
 ];
@@ -50,6 +67,7 @@ struct HealPredictionInner {
     incoming_heals: RefCell<f64>,
     damage_absorbs: RefCell<f64>,
     heal_absorbs: RefCell<f64>,
+    maximum_health_mode: RefCell<i32>,
 }
 
 impl HealPredictionInner {
@@ -65,6 +83,7 @@ impl HealPredictionInner {
             incoming_heals: RefCell::new(0.0),
             damage_absorbs: RefCell::new(0.0),
             heal_absorbs: RefCell::new(0.0),
+            maximum_health_mode: RefCell::new(0),
         })
     }
 }
@@ -102,6 +121,32 @@ impl UserData for UnitHealPredictionCalculator {
 }
 
 fn add_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
+    add_health_query_methods(methods);
+    add_stored_getter_methods(methods);
+    add_total_getter_methods(methods);
+    methods.add_method("GetPredictedValues", |_, this, _unit: Value| {
+        let incoming = *this.inner.incoming_heals.borrow();
+        let absorbs = *this.inner.heal_absorbs.borrow();
+        let damage_absorbs = *this.inner.damage_absorbs.borrow();
+        Ok((incoming, absorbs, damage_absorbs))
+    });
+    methods.add_method("HasSecretValues", |_, _, ()| Ok(false));
+}
+
+fn add_health_query_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
+    methods.add_method("EvaluateCurrentHealthPercent", |_, _, _unit: Value| Ok(1.0f64));
+    methods.add_method("EvaluateMissingHealthPercent", |_, _, _unit: Value| Ok(0.0f64));
+    methods.add_method("GetCurrentHealth", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetCurrentHealthPercent", |_, _, ()| Ok(1.0f64));
+    methods.add_method("GetMaximumHealth", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetMaximumHealthMode", |_, this, ()| {
+        Ok(*this.inner.maximum_health_mode.borrow())
+    });
+    methods.add_method("GetMissingHealth", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetMissingHealthPercent", |_, _, ()| Ok(0.0f64));
+}
+
+fn add_stored_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
     methods.add_method("GetDamageAbsorbClampMode", |_, this, ()| {
         Ok(*this.inner.damage_absorb_clamp_mode.borrow())
     });
@@ -126,13 +171,22 @@ fn add_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
     methods.add_method("GetIncomingHeals", |_, this, ()| {
         Ok(*this.inner.incoming_heals.borrow())
     });
-    methods.add_method("GetPredictedValues", |_, this, _unit: Value| {
-        let incoming = *this.inner.incoming_heals.borrow();
-        let absorbs = *this.inner.heal_absorbs.borrow();
-        let damage_absorbs = *this.inner.damage_absorbs.borrow();
-        Ok((incoming, absorbs, damage_absorbs))
+}
+
+fn add_total_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
+    methods.add_method("GetMaximumDamageAbsorbs", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetMaximumHealAbsorbs", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetMaximumIncomingHeals", |_, _, ()| Ok(0.0f64));
+    methods.add_method("GetTotalDamageAbsorbs", |_, this, ()| {
+        Ok(*this.inner.damage_absorbs.borrow())
     });
-    methods.add_method("HasSecretValues", |_, _, ()| Ok(false));
+    methods.add_method("GetTotalHealAbsorbs", |_, this, ()| {
+        Ok(*this.inner.heal_absorbs.borrow())
+    });
+    methods.add_method("GetTotalIncomingHeals", |_, this, ()| {
+        Ok(*this.inner.incoming_heals.borrow())
+    });
+    methods.add_method("GetTotalIncomingHealsFromHealer", |_, _, ()| Ok(0.0f64));
 }
 
 fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
@@ -145,6 +199,13 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
         *this.inner.heal_absorb_clamp_mode.borrow_mut() = 0;
         *this.inner.heal_absorb_mode.borrow_mut() = 0;
         *this.inner.incoming_heal_clamp_mode.borrow_mut() = 0;
+        *this.inner.maximum_health_mode.borrow_mut() = 0;
+        Ok(())
+    });
+    methods.add_method("ResetPredictedValues", |_, this, ()| {
+        *this.inner.incoming_heals.borrow_mut() = 0.0;
+        *this.inner.damage_absorbs.borrow_mut() = 0.0;
+        *this.inner.heal_absorbs.borrow_mut() = 0.0;
         Ok(())
     });
     methods.add_method("SetDamageAbsorbClampMode", |_, this, mode: i32| {
@@ -167,6 +228,10 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
         *this.inner.incoming_heal_overflow_percent.borrow_mut() = pct;
         Ok(())
     });
+    methods.add_method("SetMaximumHealthMode", |_, this, mode: i32| {
+        *this.inner.maximum_health_mode.borrow_mut() = mode;
+        Ok(())
+    });
     methods.add_method("SetPredictedValues", |_, this, (unit, incoming, absorbs, damage_absorbs): (Value, f64, f64, f64)| {
         let _ = unit;
         *this.inner.incoming_heals.borrow_mut() = incoming;
@@ -183,6 +248,7 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
         *this.inner.heal_absorb_clamp_mode.borrow_mut() = 0;
         *this.inner.heal_absorb_mode.borrow_mut() = 0;
         *this.inner.incoming_heal_clamp_mode.borrow_mut() = 0;
+        *this.inner.maximum_health_mode.borrow_mut() = 0;
         Ok(())
     });
 }
