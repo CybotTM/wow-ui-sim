@@ -156,6 +156,22 @@ pub fn validate_spell_target(
     }
 }
 
+/// Hardcoded spell effect amounts (damage or healing).
+pub fn spell_effect_amount(spell_id: u32) -> i32 {
+    match spell_id {
+        35395 => 15_000,  // Crusader Strike (instant, harmful)
+        31935 => 25_000,  // Avenger's Shield (instant, harmful)
+        53600 => 20_000,  // Shield of the Righteous (instant, harmful)
+        24275 => 30_000,  // Hammer of Wrath (instant, harmful)
+        62124 => 5_000,   // Hand of Reckoning (instant, harmful)
+        853 => 0,         // Hammer of Justice (stun only)
+        19750 => 20_000,  // Flash of Light (cast-time, helpful)
+        82326 => 35_000,  // Holy Light (cast-time, helpful)
+        85673 => 20_000,  // Word of Glory (instant, helpful)
+        _ => 10_000,      // Default fallback
+    }
+}
+
 /// Standard GCD duration in seconds (1.5s for most spells).
 pub const GCD_DURATION: f64 = 1.5;
 
@@ -183,6 +199,67 @@ pub fn spell_triggers_gcd(spell_id: u32) -> bool {
         31850 | 86659 | 642 => false, // Ardent Defender, GoAK, Divine Shield are off-GCD
         _ => true,
     }
+}
+
+/// Apply spell effect to state: damage enemy or heal friendly/self.
+/// Returns the unit_id that was affected (for UNIT_HEALTH event).
+pub fn apply_spell_to_state(
+    state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
+    spell_id: u32,
+) -> Option<String> {
+    let amount = spell_effect_amount(spell_id);
+    if amount == 0 {
+        return None;
+    }
+    match spell_target_type(spell_id) {
+        SpellTargetType::Harmful => apply_damage_to_target(state, amount),
+        SpellTargetType::Helpful => apply_heal_to_target(state, amount),
+        SpellTargetType::SelfOnly => None,
+    }
+}
+
+fn apply_damage_to_target(
+    state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
+    amount: i32,
+) -> Option<String> {
+    let mut s = state.borrow_mut();
+    let t = s.current_target.as_mut()?;
+    if !t.is_enemy || t.health <= 0 {
+        return None;
+    }
+    t.health = (t.health - amount).max(0);
+    Some(t.unit_id.clone())
+}
+
+fn apply_heal_to_target(
+    state: &std::rc::Rc<std::cell::RefCell<super::state::SimState>>,
+    amount: i32,
+) -> Option<String> {
+    let mut s = state.borrow_mut();
+    if let Some(ref mut t) = s.current_target {
+        if !t.is_enemy {
+            if t.health <= 0 { return None; }
+            t.health = (t.health + amount).min(t.health_max);
+            let healed = t.health;
+            let unit_id = t.unit_id.clone();
+            if let Some(idx) = super::globals::unit_api::parse_party_index(&unit_id) {
+                if let Some(m) = s.party_members.get_mut(idx) {
+                    m.health = healed;
+                }
+            }
+            Some(unit_id)
+        } else {
+            heal_player(&mut s, amount)
+        }
+    } else {
+        heal_player(&mut s, amount)
+    }
+}
+
+fn heal_player(s: &mut super::state::SimState, amount: i32) -> Option<String> {
+    if s.player.health <= 0 { return None; }
+    s.player.health = (s.player.health + amount).min(s.player.health_max);
+    Some("player".to_string())
 }
 
 /// Class display names (index 0 = class_index 1, etc.).

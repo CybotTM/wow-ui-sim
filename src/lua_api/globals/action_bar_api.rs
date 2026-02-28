@@ -320,6 +320,13 @@ pub fn apply_instant_spell(
         cast_id as i64,
         spell_id as i64,
     ))?;
+    // Apply damage/healing effect.
+    if let Some(unit_id) = crate::lua_api::game_data::apply_spell_to_state(state, spell_id) {
+        fire.call::<()>((
+            lua.create_string("UNIT_HEALTH")?,
+            lua.create_string(unit_id.as_str())?,
+        ))?;
+    }
     // Push state update to registered action buttons (instant spells don't cast).
     push_action_button_state_update(state, lua)?;
     Ok(())

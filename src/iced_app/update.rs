@@ -370,7 +370,7 @@ impl App {
         let completed = super::casting::extract_completed_cast(env.state());
         if let Some((cast_id, spell_id)) = completed {
             super::casting::fire_cast_complete_events(&env, cast_id, spell_id);
-            super::casting::apply_heal_effect(env.state(), &env, spell_id);
+            super::casting::apply_spell_effect(env.state(), &env, spell_id);
             super::casting::apply_spec_change(env.state(), &env);
         }
     }

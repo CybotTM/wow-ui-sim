@@ -36,57 +36,21 @@ pub(super) fn fire_cast_complete_events(
     );
 }
 
-/// Apply healing from a completed cast spell to the target or self.
-pub(super) fn apply_heal_effect(
+/// Apply spell effects (damage or healing) based on spell target type.
+pub(super) fn apply_spell_effect(
     state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
     env: &crate::lua_api::WowLuaEnv,
     spell_id: u32,
 ) {
-    const HEAL_AMOUNT: i32 = 20_000;
-    if !matches!(spell_id, 19750 | 82326 | 85673) {
-        return;
-    }
-    let unit_event = compute_heal_target(state, HEAL_AMOUNT);
-    if let Some(unit) = unit_event {
+    if let Some(unit_id) = crate::lua_api::game_data::apply_spell_to_state(state, spell_id) {
         let lua = env.lua();
-        if let Ok(unit_str) = lua.create_string(&unit) {
+        if let Ok(unit_str) = lua.create_string(&unit_id) {
             let _ = env.fire_event_with_args(
                 "UNIT_HEALTH",
                 &[mlua::Value::String(unit_str)],
             );
         }
     }
-}
-
-fn compute_heal_target(
-    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    amount: i32,
-) -> Option<String> {
-    let mut s = state.borrow_mut();
-    if let Some(ref mut t) = s.current_target {
-        if !t.is_enemy {
-            if t.health <= 0 { return None; }
-            t.health = (t.health + amount).min(t.health_max);
-            let healed = t.health;
-            let unit_id = t.unit_id.clone();
-            if let Some(idx) = crate::lua_api::globals::unit_api::parse_party_index(&unit_id) {
-                if let Some(m) = s.party_members.get_mut(idx) {
-                    m.health = healed;
-                }
-            }
-            Some(unit_id)
-        } else {
-            heal_player(&mut s, amount)
-        }
-    } else {
-        heal_player(&mut s, amount)
-    }
-}
-
-fn heal_player(s: &mut crate::lua_api::SimState, amount: i32) -> Option<String> {
-    if s.player.health <= 0 { return None; }
-    s.player.health = (s.player.health + amount).min(s.player.health_max);
-    Some("player".to_string())
 }
 
 /// If a spec change was pending, apply it and fire PLAYER_SPECIALIZATION_CHANGED.
