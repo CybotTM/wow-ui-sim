@@ -1,0 +1,158 @@
+//! Tests for size: SetSize, SetWidth, SetHeight, GetSize, GetWidth, GetHeight,
+//! explicit vs computed, dirty tracking.
+
+use super::*;
+
+#[test]
+fn test_size_initial_zero() {
+    let (t, _) = load_test_lua("layout-size-init", r#"
+        local f = CreateFrame("Frame")
+        W = f:GetWidth()
+        H = f:GetHeight()
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 0.0);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 0.0);
+}
+
+#[test]
+fn test_set_size_and_get() {
+    let (t, _) = load_test_lua("layout-setsize", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(100, 50)
+        local w, h = f:GetSize()
+        W = w; H = h
+        COUNT = select('#', f:GetSize())
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 100.0);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 50.0);
+    assert_eq!(t.env.eval::<i32>("return COUNT").unwrap(), 2);
+}
+
+#[test]
+fn test_set_width_only() {
+    let (t, _) = load_test_lua("layout-setwidth", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(100, 50)
+        f:SetWidth(200)
+        W = f:GetWidth(); H = f:GetHeight()
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 200.0);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 50.0);
+}
+
+#[test]
+fn test_set_height_only() {
+    let (t, _) = load_test_lua("layout-setheight", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(100, 50)
+        f:SetHeight(75)
+        W = f:GetWidth(); H = f:GetHeight()
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 100.0);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 75.0);
+}
+
+#[test]
+fn test_get_width_true_returns_explicit() {
+    let (t, _) = load_test_lua("layout-width-true", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(100, 50)
+        W = f:GetWidth(); W_TRUE = f:GetWidth(true)
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 100.0);
+    assert_eq!(t.env.eval::<f64>("return W_TRUE").unwrap(), 100.0);
+}
+
+#[test]
+fn test_get_height_true_returns_explicit() {
+    let (t, _) = load_test_lua("layout-height-true", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(100, 50)
+        H = f:GetHeight(); H_TRUE = f:GetHeight(true)
+    "#);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 50.0);
+    assert_eq!(t.env.eval::<f64>("return H_TRUE").unwrap(), 50.0);
+}
+
+#[test]
+fn test_set_size_marks_dirty() {
+    let (t, _) = load_test_lua("layout-size-dirty", r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        f:SetSize(50, 30); f:SetPoint("CENTER")
+        f:GetLeft()
+        VALID_BEFORE = f:IsRectValid()
+        f:SetSize(100, 60)
+        VALID_AFTER = f:IsRectValid()
+    "#);
+    t.assert_lua_true("return VALID_BEFORE", "valid after resolution");
+    assert!(!t.env.eval::<bool>("return VALID_AFTER").unwrap());
+}
+
+#[test]
+fn test_set_size_same_values_no_dirty() {
+    let (t, _) = load_test_lua("layout-size-nodirty", r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        f:SetSize(50, 30); f:SetPoint("CENTER")
+        f:GetLeft()
+        f:SetSize(50, 30)
+        STILL_VALID = f:IsRectValid()
+    "#);
+    t.assert_lua_true("return STILL_VALID", "same size should not dirty");
+}
+
+#[test]
+fn test_zero_size() {
+    let (t, _) = load_test_lua("layout-zero-size", r#"
+        local f = CreateFrame("Frame")
+        f:SetSize(0, 0)
+        W = f:GetWidth(); H = f:GetHeight()
+    "#);
+    assert_eq!(t.env.eval::<f64>("return W").unwrap(), 0.0);
+    assert_eq!(t.env.eval::<f64>("return H").unwrap(), 0.0);
+}
+
+#[test]
+fn test_width_from_opposite_anchors() {
+    let (t, _) = load_test_lua("layout-width-opp", r#"
+        local parent = CreateFrame("Frame", nil, UIParent)
+        parent:SetSize(200, 100); parent:SetPoint("CENTER")
+        local child = CreateFrame("Frame", nil, parent)
+        child:SetPoint("LEFT", parent, "LEFT", 10, 0)
+        child:SetPoint("RIGHT", parent, "RIGHT", -10, 0)
+        W = child:GetWidth()
+    "#);
+    let w = t.env.eval::<f64>("return W").unwrap();
+    assert!((w - 180.0).abs() < 0.01, "expected 180, got {}", w);
+}
+
+#[test]
+fn test_height_from_opposite_anchors() {
+    let (t, _) = load_test_lua("layout-height-opp", r#"
+        local parent = CreateFrame("Frame", nil, UIParent)
+        parent:SetSize(200, 100); parent:SetPoint("CENTER")
+        local child = CreateFrame("Frame", nil, parent)
+        child:SetPoint("TOP", parent, "TOP", 0, -5)
+        child:SetPoint("BOTTOM", parent, "BOTTOM", 0, 5)
+        H = child:GetHeight()
+    "#);
+    let h = t.env.eval::<f64>("return H").unwrap();
+    assert!((h - 90.0).abs() < 0.01, "expected 90, got {}", h);
+}
+
+#[test]
+fn test_explicit_vs_computed_width() {
+    let (t, _) = load_test_lua("layout-explicit-vs-computed", r#"
+        local parent = CreateFrame("Frame", nil, UIParent)
+        parent:SetSize(200, 100); parent:SetPoint("CENTER")
+        local child = CreateFrame("Frame", nil, parent)
+        child:SetSize(50, 30)
+        child:SetPoint("LEFT", parent, "LEFT", 10, 0)
+        child:SetPoint("RIGHT", parent, "RIGHT", -10, 0)
+        W_COMPUTED = child:GetWidth()
+        W_EXPLICIT = child:GetWidth(true)
+    "#);
+    let computed = t.env.eval::<f64>("return W_COMPUTED").unwrap();
+    let explicit = t.env.eval::<f64>("return W_EXPLICIT").unwrap();
+    assert!((computed - 180.0).abs() < 0.01, "computed: {}", computed);
+    assert_eq!(explicit, 50.0);
+}
