@@ -262,6 +262,57 @@ fn test_transmog_collection_player_has_transmog_item_modified_appearance() {
 }
 
 #[test]
+fn test_transmog_add_then_has() {
+    let env = env();
+    env.exec("A_Admin.AddTransmog(42)").unwrap();
+    let has: bool = env
+        .eval("return C_TransmogCollection.PlayerHasTransmog(42, 0)")
+        .unwrap();
+    assert!(has, "Should have transmog after AddTransmog");
+}
+
+#[test]
+fn test_transmog_add_then_has_by_item_info() {
+    let env = env();
+    env.exec("A_Admin.AddTransmog(99)").unwrap();
+    let has: bool = env
+        .eval("return C_TransmogCollection.PlayerHasTransmogByItemInfo('item:99:0')")
+        .unwrap();
+    assert!(has, "Should find transmog via item info link");
+}
+
+#[test]
+fn test_transmog_add_then_has_modified_appearance() {
+    let env = env();
+    env.exec("A_Admin.AddTransmog(77)").unwrap();
+    let has: bool = env
+        .eval("return C_TransmogCollection.PlayerHasTransmogItemModifiedAppearance(77)")
+        .unwrap();
+    assert!(has, "Should find transmog via modified appearance ID");
+}
+
+#[test]
+fn test_transmog_remove_then_not_has() {
+    let env = env();
+    env.exec("A_Admin.AddTransmog(42)").unwrap();
+    env.exec("A_Admin.RemoveTransmog(42)").unwrap();
+    let has: bool = env
+        .eval("return C_TransmogCollection.PlayerHasTransmog(42, 0)")
+        .unwrap();
+    assert!(!has, "Should not have transmog after RemoveTransmog");
+}
+
+#[test]
+fn test_transmog_uncollected_returns_false() {
+    let env = env();
+    env.exec("A_Admin.AddTransmog(42)").unwrap();
+    let has: bool = env
+        .eval("return C_TransmogCollection.PlayerHasTransmog(999, 0)")
+        .unwrap();
+    assert!(!has, "Different ID should not match");
+}
+
+#[test]
 fn test_transmog_collection_get_item_info_nil() {
     let env = env();
     let is_nil: bool = env

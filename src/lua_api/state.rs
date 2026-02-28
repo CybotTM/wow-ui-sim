@@ -20,7 +20,7 @@ pub use super::game_data::{
 };
 pub use super::game_data::SpellCooldownState;
 pub use super::state_types::{
-    CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
+    BagItem, CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
     AddonInfo, GreatVaultActivity, MovementState,
 };
 use super::game_data::{
@@ -180,6 +180,9 @@ pub struct SimState {
     pub great_vault_has_rewards: bool,
     pub great_vault_can_claim: bool,
 
+    // Bags/Inventory: (bag_index, slot_index) → BagItem
+    pub bag_items: HashMap<(i32, i32), BagItem>,
+
     // Collections
     pub collected_transmogs: HashSet<i32>,
     pub collected_mounts: HashSet<i32>,
@@ -204,10 +207,8 @@ impl SimState {
         let (player_health, player_health_max, player_class_index, active_spec_index) =
             Self::default_player_stats();
         Self {
-            widgets: WidgetRegistry::default(),
-            events: EventQueue::default(),
-            scripts: ScriptRegistry::default(),
-            cvars: CVarStorage::new(),
+            widgets: WidgetRegistry::default(), events: EventQueue::default(),
+            scripts: ScriptRegistry::default(), cvars: CVarStorage::new(),
             console_output: Vec::new(), timers: VecDeque::new(),
             addons: Vec::new(), lua_errors: Vec::new(),
             tooltips: HashMap::new(), simple_htmls: HashMap::new(),
@@ -215,6 +216,7 @@ impl SimState {
             on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
             action_bars: HashMap::new(), addon_base_paths: Vec::new(),
             spell_cooldowns: HashMap::new(), action_ui_buttons: Vec::new(),
+            bag_items: HashMap::new(),
             focused_frame_id: None, visible_on_update_cache: None,
             strata_buckets: None, mouse_position: None, hovered_frame: None,
             current_target: None, current_focus: None, sound_manager: None,
@@ -226,47 +228,41 @@ impl SimState {
             player_race_index: 0, rot_damage_level: 0,
             next_anim_group_id: 1, next_cast_id: 1,
             screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
-            loading_forbidden: false,
-            start_time: Instant::now(),
+            loading_forbidden: false, start_time: Instant::now(),
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             movement: MovementState::default(),
-            player_level: 70,
-            player_sex: 2,
-            in_combat: false,
-            player_power: 100,
-            player_power_max: 100,
-            player_power_type: 0,
-            zone_name: "Stormwind City".to_string(),
-            zone_id: 1519,
+            player_level: 70, player_sex: 2, in_combat: false,
+            player_power: 100, player_power_max: 100, player_power_type: 0,
+            zone_name: "Stormwind City".to_string(), zone_id: 1519,
             sub_zone_name: "Trade District".to_string(),
-            instance_name: String::new(),
-            instance_type: "none".to_string(),
-            instance_difficulty: 0,
-            instance_max_players: 0,
-            is_resting: false,
-            in_instance: false,
-            player_money: 0,
-            player_item_level: 0.0,
-            pvp_enabled: false,
-            honor_level: 0,
-            guild_name: None,
-            guild_rank: None,
-            guild_num_members: 0,
-            collected_transmogs: HashSet::new(),
-            collected_mounts: HashSet::new(),
-            collected_pets: HashSet::new(),
-            collected_toys: HashSet::new(),
+            instance_name: String::new(), instance_type: "none".to_string(),
+            instance_difficulty: 0, instance_max_players: 0,
+            is_resting: false, in_instance: false,
+            player_money: 0, player_item_level: 0.0,
+            pvp_enabled: false, honor_level: 0,
+            guild_name: None, guild_rank: None, guild_num_members: 0,
+            collected_transmogs: HashSet::new(), collected_mounts: HashSet::new(),
+            collected_pets: HashSet::new(), collected_toys: HashSet::new(),
             earned_achievements: HashSet::new(),
             great_vault_activities: Vec::new(),
-            great_vault_has_rewards: false,
-            great_vault_can_claim: false,
+            great_vault_has_rewards: false, great_vault_can_claim: false,
         }
     }
 
     /// Return default player stats: (health, health_max, class_index, spec_index).
     fn default_player_stats() -> (i32, i32, i32, i32) {
         (100_000, 100_000, 2, 2)  // Paladin, Protection spec
+    }
+
+    /// Look up bag item at (bag, slot). Returns (item_id, stack_count).
+    pub fn get_bag_item(&self, bag: i32, slot: i32) -> Option<(u32, i32)> {
+        self.bag_items.get(&(bag, slot)).map(|i| (i.item_id, i.stack_count))
+    }
+
+    /// Count occupied slots in a bag.
+    pub fn bag_occupied_slots(&self, bag: i32) -> i32 {
+        self.bag_items.keys().filter(|(b, _)| *b == bag).count() as i32
     }
 }
 

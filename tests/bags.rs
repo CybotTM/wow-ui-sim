@@ -215,9 +215,14 @@ fn test_bags_open_with_items() {
     let env = setup_env();
     install_test_error_handler(&env);
 
+    // Populate bags via admin API (bags start empty)
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();  // Hearthstone
+    env.exec("A_Admin.AddBagItem(0, 3, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
+
     open_all_bags(&env);
     assert_bag_frame_visible(&env);
-    assert_backpack_item_count(&env, 6);
+    assert_backpack_item_count(&env, 3);
 
     // Verify item data fields are correct for a known slot
     let item_link: String = env
