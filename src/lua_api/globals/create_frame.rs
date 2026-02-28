@@ -35,6 +35,14 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
         let widget_type = parse_widget_type(&cfa.frame_type)?;
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
+        // Store original type name when it differs from the WidgetType enum name,
+        // so GetObjectType() returns e.g. "ArchaeologyDigSiteFrame" instead of "Frame".
+        if !widget_type.as_str().eq_ignore_ascii_case(&cfa.frame_type) {
+            let obj_name = resolve_object_type_name(&cfa.frame_type);
+            if let Some(f) = state_clone.borrow_mut().widgets.get_mut_visual(frame_id) {
+                f.object_type_name = Some(obj_name);
+            }
+        }
         apply_frame_id_arg(&state_clone, frame_id, cfa.id);
         create_widget_type_defaults(lua, &mut state_clone.borrow_mut(), frame_id, widget_type);
         if cfa.frame_type == "ItemButton" {
@@ -57,12 +65,28 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     Ok(create_frame)
 }
 
+/// Map CreateFrame type name to GetObjectType() name for special cases.
+fn resolve_object_type_name(frame_type: &str) -> String {
+    match frame_type.to_ascii_lowercase().as_str() {
+        "checkout" => "BlizzardCheckout".to_string(),
+        _ => frame_type.to_string(),
+    }
+}
+
 fn parse_widget_type(frame_type: &str) -> Result<WidgetType> {
-    WidgetType::from_str(frame_type).ok_or_else(|| {
+    let wt = WidgetType::from_str(frame_type).ok_or_else(|| {
         crate::lua_api::script_helpers::lua_error_val(
             format!("CreateFrame: Unknown frame type '{}'", frame_type),
         )
-    })
+    })?;
+    // Texture, FontString, and Line are Region types — not creatable via CreateFrame.
+    // They must be created via frame:CreateTexture(), frame:CreateFontString(), frame:CreateLine().
+    if matches!(wt, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
+        return Err(crate::lua_api::script_helpers::lua_error_val(
+            format!("CreateFrame: Unknown frame type '{}'", frame_type),
+        ));
+    }
+    Ok(wt)
 }
 
 fn apply_frame_id_arg(state: &Rc<RefCell<SimState>>, frame_id: u64, id: Option<i32>) {

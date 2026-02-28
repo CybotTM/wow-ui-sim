@@ -163,27 +163,27 @@ const BASE_SCRIPTS: &[&str] = &[
     "OnMouseDown", "OnMouseUp", "OnMouseWheel",
     "OnEnter", "OnLeave", "OnDragStart", "OnDragStop", "OnReceiveDrag",
     "OnKeyDown", "OnKeyUp", "OnAttributeChanged", "OnLoad",
-    "OnEnable", "OnDisable",
-    "OnPostUpdate", "OnPostShow", "OnPostHide",
+    "OnEnable", "OnDisable", "OnChar",
+    "OnGamePadButtonDown", "OnGamePadButtonUp",
+    "OnHyperlinkClick", "OnHyperlinkEnter", "OnHyperlinkLeave",
 ];
 
 const BUTTON_SCRIPTS: &[&str] = &[
-    "OnClick", "PreClick", "PostClick", "OnPostClick", "OnDoubleClick",
+    "OnClick", "PreClick", "PostClick", "OnDoubleClick",
 ];
 const EDITBOX_SCRIPTS: &[&str] = &[
     "OnTextChanged", "OnCursorChanged", "OnEditFocusGained", "OnEditFocusLost",
     "OnEnterPressed", "OnEscapePressed", "OnTabPressed", "OnSpacePressed",
-    "OnInputLanguageChanged", "OnChar",
+    "OnInputLanguageChanged", "OnArrowPressed", "OnCharComposition", "OnTextSet",
 ];
-const RANGE_SCRIPTS: &[&str] = &["OnValueChanged", "OnMinMaxChanged"];
-const SCROLL_SCRIPTS: &[&str] = &[
-    "OnHorizontalScroll", "OnVerticalScroll", "OnScrollRangeChanged",
-];
+const RANGE_SCRIPTS: &[&str] = &["OnValueChanged"];
+const SCROLL_SCRIPTS: &[&str] = &["OnVerticalScroll", "OnScrollRangeChanged"];
 const TOOLTIP_SCRIPTS: &[&str] = &[
-    "OnTooltipSetDefaultAnchor", "OnTooltipSetItem", "OnTooltipSetUnit",
-    "OnTooltipSetSpell", "OnTooltipCleared",
+    "OnTooltipSetDefaultAnchor", "OnTooltipCleared", "OnTooltipSetFrameStack",
 ];
-const MODEL_SCRIPTS: &[&str] = &["OnModelLoaded", "OnAnimFinished"];
+const MODEL_SCRIPTS: &[&str] = &["OnModelLoaded", "OnAnimFinished", "OnAnimStarted"];
+const MODELSCENE_SCRIPTS: &[&str] = &["OnDressModel"];
+const COLORSELECT_SCRIPTS: &[&str] = &["OnColorSelect"];
 const COOLDOWN_SCRIPTS: &[&str] = &["OnCooldownDone"];
 
 fn extra_scripts_for_type(widget_type: crate::widget::WidgetType) -> &'static [&'static str] {
@@ -194,7 +194,9 @@ fn extra_scripts_for_type(widget_type: crate::widget::WidgetType) -> &'static [&
         Slider | StatusBar => RANGE_SCRIPTS,
         ScrollFrame => SCROLL_SCRIPTS,
         GameTooltip => TOOLTIP_SCRIPTS,
-        Model | PlayerModel | ModelScene => MODEL_SCRIPTS,
+        Model | PlayerModel => MODEL_SCRIPTS,
+        ModelScene => MODELSCENE_SCRIPTS,
+        ColorSelect => COLORSELECT_SCRIPTS,
         Cooldown => COOLDOWN_SCRIPTS,
         _ => &[],
     }

@@ -106,6 +106,7 @@ fn add_create_mask_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &
         let name = resolve_child_name(lua, name_raw, id);
         let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
         texture.is_mask = true;
+        texture.object_type_name = Some("MaskTexture".to_string());
         register_child_widget(lua, id, texture, &name)
     });
 }

@@ -56,6 +56,7 @@ pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     super::frame::metatable::setup_frame_helpers(lua)?;
 
     register_print(lua, Rc::clone(&state))?;
+    register_custom_next(lua)?;
     register_custom_ipairs(lua, Rc::clone(&state))?;
     register_custom_getmetatable(lua)?;
     register_custom_setmetatable(lua)?;
@@ -271,6 +272,43 @@ fn format_print_args(args: &[Value]) -> String {
     output
 }
 
+/// Override `next` to support FrameRef UserData.
+///
+/// In WoW, frames are tables with a C userdata at key `[0]`. Our frames are pure
+/// userdata, so `next(frame)` must return `(0, raw_userdata)` then nil.
+fn register_custom_next(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    let original_next: mlua::Function = globals.get("next")?;
+    lua.set_named_registry_value("__original_next", original_next)?;
+
+    let custom_next = lua.create_function(|lua, (tbl, key): (Value, Value)| {
+        // If called on a FrameRef userdata, simulate table with [0]=userdata
+        if let Value::UserData(ud) = &tbl {
+            if ud.borrow::<super::frame::FrameRef>().is_ok() {
+                return match key {
+                    Value::Nil => {
+                        // First iteration: return (0, lightuserdata)
+                        // In WoW, frames are tables with [0]=C_userdata (no metatable).
+                        // Use LightUserData so getmetatable returns nil.
+                        Ok(mlua::MultiValue::from_vec(vec![
+                            Value::Integer(0),
+                            Value::LightUserData(mlua::LightUserData(std::ptr::null_mut())),
+                        ]))
+                    }
+                    _ => {
+                        // After key 0: no more entries
+                        Ok(mlua::MultiValue::new())
+                    }
+                };
+            }
+        }
+        let original: mlua::Function = lua.named_registry_value("__original_next")?;
+        original.call((tbl, key))
+    })?;
+
+    globals.set("next", custom_next)
+}
+
 /// Override `ipairs` to support iterating over frame UserData (FrameRef) children.
 ///
 /// WoW addons iterate frame children with `for i, child in ipairs(frame)`.
@@ -333,19 +371,7 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
 
     let custom_getmetatable = lua.create_function(|lua, value: Value| {
         if let Some(frame_id) = extract_frame_id(&value) {
-            let widget_type = {
-                let state_rc = get_sim_state(lua);
-                let state = state_rc.borrow();
-                state
-                    .widgets
-                    .get(frame_id)
-                    .map(|f| f.widget_type)
-                    .unwrap_or(crate::widget::WidgetType::Frame)
-            };
-            let type_key = widget_type.as_str();
-            let per_type: mlua::Table = lua.named_registry_value("__per_type_metatables")?;
-            let mt: Value = per_type.raw_get(type_key)?;
-            return Ok(mt);
+            return resolve_frame_metatable(lua, frame_id);
         }
         let real_getmetatable: mlua::Function = lua.named_registry_value("__real_getmetatable")?;
         real_getmetatable.call(value)
@@ -354,6 +380,46 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
     let real_getmetatable: mlua::Function = globals.get("getmetatable")?;
     lua.set_named_registry_value("__real_getmetatable", real_getmetatable)?;
     globals.set("getmetatable", custom_getmetatable)
+}
+
+/// Resolve the metatable for a frame, handling aliased types.
+///
+/// For aliased types (e.g. ArchaeologyDigSiteFrame → Frame), creates and caches
+/// a unique cloned metatable so per-type identity checks pass.
+fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
+    let (widget_type, obj_type_name) = {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let f = state.widgets.get(frame_id);
+        (
+            f.map(|f| f.widget_type).unwrap_or(crate::widget::WidgetType::Frame),
+            f.and_then(|f| f.object_type_name.clone()),
+        )
+    };
+    let per_type: mlua::Table = lua.named_registry_value("__per_type_metatables")?;
+    let type_key = obj_type_name.as_deref().unwrap_or(widget_type.as_str());
+    let mt: Value = per_type.raw_get(type_key)?;
+    if mt != Value::Nil {
+        return Ok(mt);
+    }
+    // Clone the base type's metatable into a new unique table for this alias.
+    let new_mt = clone_metatable(lua, &per_type, widget_type.as_str())?;
+    per_type.raw_set(type_key, new_mt.clone())?;
+    Ok(Value::Table(new_mt))
+}
+
+/// Clone a base type's metatable `{ __index = { methods } }` into a new unique table.
+fn clone_metatable(lua: &Lua, per_type: &mlua::Table, base_key: &str) -> Result<mlua::Table> {
+    let base_mt: mlua::Table = per_type.raw_get(base_key)?;
+    let base_idx: mlua::Table = base_mt.raw_get("__index")?;
+    let new_idx = lua.create_table()?;
+    for pair in base_idx.pairs::<Value, Value>() {
+        let (k, v) = pair?;
+        new_idx.raw_set(k, v)?;
+    }
+    let new_mt = lua.create_table()?;
+    new_mt.raw_set("__index", new_idx)?;
+    Ok(new_mt)
 }
 
 /// Pre-build one metatable per widget type and store in `__per_type_metatables`.

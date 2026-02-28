@@ -67,7 +67,7 @@ fn add_get_object_type<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         let obj_type = state.widgets.get(this.0)
-            .map(|f| f.widget_type.as_str())
+            .map(|f| f.object_type_name.as_deref().unwrap_or(f.widget_type.as_str()))
             .unwrap_or("Frame");
         Ok(obj_type.to_string())
     });
@@ -78,9 +78,14 @@ fn add_is_object_type<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         use crate::widget::WidgetType;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let wt = state.widgets.get(this.0)
-            .map(|f| f.widget_type)
-            .unwrap_or(WidgetType::Frame);
+        let frame = state.widgets.get(this.0);
+        let wt = frame.map(|f| f.widget_type).unwrap_or(WidgetType::Frame);
+        // Check object_type_name first (e.g., "ArchaeologyDigSiteFrame")
+        if let Some(otn) = frame.and_then(|f| f.object_type_name.as_deref()) {
+            if otn.eq_ignore_ascii_case(&type_name) {
+                return Ok(true);
+            }
+        }
         Ok(widget_type_is_a(wt, &type_name))
     });
 }

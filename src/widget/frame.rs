@@ -135,6 +135,10 @@ pub struct Frame {
     pub id: u64,
     /// Widget type.
     pub widget_type: WidgetType,
+    /// Original type name for GetObjectType() when mapped to a generic WidgetType.
+    /// E.g., "ArchaeologyDigSiteFrame" maps to WidgetType::Frame but GetObjectType
+    /// should still return "ArchaeologyDigSiteFrame".
+    pub object_type_name: Option<String>,
     /// Global name (optional).
     pub name: Option<String>,
     /// Parent widget ID.
@@ -436,6 +440,7 @@ macro_rules! frame_defaults {
         Frame {
             id: $id,
             widget_type: WidgetType::Frame,
+            object_type_name: None,
             name: None,
             parent_id: None,
             children: Vec::new(),
