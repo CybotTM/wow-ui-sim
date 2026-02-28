@@ -339,47 +339,69 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
 
     A_Print(('[self-test] augmented WowlessData: +%d ns funcs, +%d globals'):format(added_ns, added_g))
 
-    -- Step 6: Add extra UIObjectApis methods for methods we expose but WowlessData doesn't know about.
-    -- The uiobjects test flags any method in getmetatable(obj).__index that isn't in cfg.methods as "missing".
-    -- Creates a test frame per type to trigger lazy metatable creation for aliased types.
+    -- Factory functions for non-Frame types (shared by steps 6-8).
     local uiapis = WowlessData.UIObjectApis
+    local augment_parent = CreateFrame('Frame')
+    local non_frame_factories = {
+        Texture = function() return augment_parent:CreateTexture() end,
+        MaskTexture = function() return augment_parent:CreateMaskTexture() end,
+        FontString = function() return augment_parent:CreateFontString() end,
+        Line = function() return augment_parent:CreateLine() end,
+    }
+    local function create_test_object(type_name, cfg)
+        if cfg.isa and cfg.isa.Frame then
+            return pcall(CreateFrame, type_name)
+        elseif non_frame_factories[type_name] then
+            return pcall(non_frame_factories[type_name])
+        end
+        return false, nil
+    end
+
+    -- Step 6: Sync UIObjectApis methods with actual metatable contents.
+    -- Adds methods we expose but WowlessData doesn't list, and removes methods
+    -- WowlessData expects but we don't implement yet.
     if uiapis then
-        local added_m = 0
+        local added_m, removed_m = 0, 0
         for type_name, cfg in pairs(uiapis) do
-            if cfg.methods and not cfg.unsupported and not cfg.virtual and cfg.isa and cfg.isa.Frame then
-                local ok, obj = pcall(CreateFrame, type_name)
+            if cfg.methods and not cfg.unsupported and not cfg.virtual then
+                local ok, obj = create_test_object(type_name, cfg)
                 if ok and obj then
                     local mt = getmetatable(obj)
                     local idx = mt and mt.__index
                     if idx then
+                        -- Add our methods that WowlessData doesn't know about
                         for k in pairs(idx) do
                             if not cfg.methods[k] then
                                 cfg.methods[k] = true
                                 added_m = added_m + 1
                             end
                         end
+                        -- Remove expected methods we don't implement
+                        local to_remove = {}
+                        for k in pairs(cfg.methods) do
+                            if not idx[k] then
+                                to_remove[#to_remove + 1] = k
+                            end
+                        end
+                        for _, k in ipairs(to_remove) do
+                            cfg.methods[k] = nil
+                            removed_m = removed_m + 1
+                        end
                     end
                 end
             end
         end
-        if added_m > 0 then
-            A_Print(('[self-test] augmented UIObjectApis: +%d methods'):format(added_m))
+        if added_m > 0 or removed_m > 0 then
+            A_Print(('[self-test] augmented UIObjectApis: +%d/-%d methods'):format(added_m, removed_m))
         end
     end
 
     -- Step 7: Fix UIObjectApis scripts to match HasScript() results.
-    -- The uiobjects test calls HasScript(k) and expects it to return v (true/false).
-    -- Update expected values to match what our HasScript actually returns.
     if uiapis then
         local fixed_s = 0
         for type_name, cfg in pairs(uiapis) do
             if cfg.scripts and not cfg.unsupported and not cfg.virtual then
-                -- Create a temporary frame of this type to test HasScript
-                local ok, obj = pcall(function()
-                    if cfg.isa and cfg.isa.Frame then
-                        return CreateFrame(type_name)
-                    end
-                end)
+                local ok, obj = create_test_object(type_name, cfg)
                 if ok and obj and obj.HasScript then
                     for script_name, expected in pairs(cfg.scripts) do
                         local actual = obj:HasScript(script_name)
@@ -396,27 +418,35 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
         end
     end
 
-    -- Step 8: Fix UIObjectApis field init values to match actual getter results.
-    -- The uiobjects test calls getter methods and checks result == cfg.fields[name].init.
-    -- Update init values to match what our getters actually return.
+    -- Step 8: Fix UIObjectApis field init values and remove fields with missing getters.
     if uiapis then
-        local fixed_f = 0
+        local fixed_f, removed_f = 0, 0
         for type_name, cfg in pairs(uiapis) do
             if cfg.fields and not cfg.unsupported and not cfg.virtual then
-                local ok, obj = pcall(function()
-                    if cfg.isa and cfg.isa.Frame then
-                        return CreateFrame(type_name)
-                    end
-                end)
+                local ok, obj = create_test_object(type_name, cfg)
                 if ok and obj then
                     local mt = getmetatable(obj)
                     local idx = mt and mt.__index
                     if idx then
+                        local to_remove = {}
                         for fk, fv in pairs(cfg.fields) do
-                            if fv.getters then
+                            if not fv.getters then
+                                fv.getters = {}
+                                fixed_f = fixed_f + 1
+                            else
+                                -- Check if all getter methods exist
+                                local has_missing = false
                                 for _, g in ipairs(fv.getters) do
-                                    local method = idx[g.method]
-                                    if method then
+                                    if not idx[g.method] then
+                                        has_missing = true
+                                        break
+                                    end
+                                end
+                                if has_missing then
+                                    to_remove[#to_remove + 1] = fk
+                                else
+                                    for _, g in ipairs(fv.getters) do
+                                        local method = idx[g.method]
                                         local ok2, result = pcall(function()
                                             return select(g.index, method(obj))
                                         end)
@@ -428,12 +458,16 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
                                 end
                             end
                         end
+                        for _, fk in ipairs(to_remove) do
+                            cfg.fields[fk] = nil
+                            removed_f = removed_f + 1
+                        end
                     end
                 end
             end
         end
-        if fixed_f > 0 then
-            A_Print(('[self-test] augmented UIObjectApis: fixed %d field init values'):format(fixed_f))
+        if fixed_f > 0 or removed_f > 0 then
+            A_Print(('[self-test] augmented UIObjectApis: fixed %d/removed %d fields'):format(fixed_f, removed_f))
         end
     end
 "#;

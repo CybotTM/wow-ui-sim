@@ -180,12 +180,12 @@ fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'sta
         XmlElement::Cooldown(f) => Some((f, "Cooldown", None)),
         XmlElement::GameTooltip(f) => Some((f, "GameTooltip", None)),
         XmlElement::ColorSelect(f) => Some((f, "ColorSelect", None)),
-        XmlElement::Model(f)
-        | XmlElement::DressUpModel(f) => Some((f, "Model", None)),
+        XmlElement::Model(f) => Some((f, "Model", None)),
         XmlElement::ModelScene(f) => Some((f, "ModelScene", None)),
         XmlElement::PlayerModel(f)
         | XmlElement::CinematicModel(f)
-        | XmlElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        | XmlElement::TabardModel(f)
+        | XmlElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
         XmlElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
         XmlElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
         XmlElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),

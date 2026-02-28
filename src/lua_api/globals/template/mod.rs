@@ -39,12 +39,12 @@ fn specialized_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'sta
         FrameElement::Cooldown(f) => Some((f, "Cooldown", None)),
         FrameElement::GameTooltip(f) => Some((f, "GameTooltip", None)),
         FrameElement::ColorSelect(f) => Some((f, "ColorSelect", None)),
-        FrameElement::Model(f)
-        | FrameElement::DressUpModel(f) => Some((f, "Model", None)),
+        FrameElement::Model(f) => Some((f, "Model", None)),
         FrameElement::ModelScene(f) => Some((f, "ModelScene", None)),
         FrameElement::PlayerModel(f)
         | FrameElement::CinematicModel(f)
-        | FrameElement::TabardModel(f) => Some((f, "PlayerModel", None)),
+        | FrameElement::TabardModel(f)
+        | FrameElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
         FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
         FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
