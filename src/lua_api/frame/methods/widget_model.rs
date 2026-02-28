@@ -226,7 +226,7 @@ fn add_model_scene_actor_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         use crate::widget::{Frame, WidgetType};
         let id = this.0;
         let mut child = Frame::new(WidgetType::Frame, None, Some(id));
-        child.object_type_name = Some("Actor".to_string());
+        child.object_type_name = Some("ModelSceneActor".to_string());
         let child_id = child.id;
         {
             let state_rc = get_sim_state(lua);

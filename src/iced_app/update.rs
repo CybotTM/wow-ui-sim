@@ -265,7 +265,7 @@ impl App {
             self.mark_all_strata_dirty();
         }
         let total = t0.elapsed();
-        if combined != 0 || total.as_millis() > 10 {
+        if total.as_millis() > 10 {
             let n = self.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
             eprintln!("[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
                 self.textures_pending.get());

@@ -225,7 +225,7 @@ fn anim_has_script(otn: &str, script_type: &str) -> Option<bool> {
         "Animation" | "Alpha" | "Rotation" | "Scale" | "Translation"
         | "LineTranslation" | "LineScale" | "Path" | "FlipBook"
         | "VertexColor" | "TextureCoordTranslation" => ANIMATION_SCRIPTS,
-        "ControlPoint" | "Actor" => return Some(false),
+        "ControlPoint" | "Actor" | "ModelSceneActor" => return Some(false),
         _ => return None,
     };
     Some(scripts.iter().any(|s| s.eq_ignore_ascii_case(script_type)))

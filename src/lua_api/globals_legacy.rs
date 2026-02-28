@@ -471,7 +471,7 @@ fn build_anim_metatable(lua: &Lua, per_type: &mlua::Table, otn: &str) -> Result<
         }
     }
     // Script methods for AnimationGroup and Animation subtypes (not ControlPoint/Actor)
-    if otn != "ControlPoint" && otn != "Actor" {
+    if otn != "ControlPoint" && otn != "Actor" && otn != "ModelSceneActor" {
         for &name in ANIM_SCRIPT_META {
             if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
                 index_table.set(name, wrap_method(lua, f)?)?;

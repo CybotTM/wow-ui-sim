@@ -65,8 +65,8 @@ impl AnimationType {
             Self::Path => "Path",
             Self::FlipBook => "FlipBook",
             Self::VertexColor => "VertexColor",
-            // WoW reports TextureCoordTranslation as "Animation" in GetObjectType
-            Self::TextureCoordTranslation | Self::Animation => "Animation",
+            Self::TextureCoordTranslation => "TextureCoordTranslation",
+            Self::Animation => "Animation",
         }
     }
 }

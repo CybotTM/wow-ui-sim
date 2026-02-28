@@ -365,7 +365,7 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
         VertexColor = function() return augment_ag:CreateAnimation("VertexColor") end,
         TextureCoordTranslation = function() return augment_ag:CreateAnimation("TextureCoordTranslation") end,
         ControlPoint = function() return augment_ag:CreateAnimation("Path"):CreateControlPoint() end,
-        Actor = function() return augment_scene:CreateActor() end,
+        ModelSceneActor = function() return augment_scene:CreateActor() end,
     }
     local function create_test_object(type_name, cfg)
         if non_frame_factories[type_name] then

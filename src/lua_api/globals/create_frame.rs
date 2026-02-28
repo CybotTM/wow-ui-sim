@@ -9,6 +9,17 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Write a frame's owner_addon into the persistent `__frame_owners` registry table.
+pub(crate) fn sync_frame_owner_to_lua(lua: &Lua, state: &Rc<RefCell<SimState>>, frame_id: u64) {
+    let owner = state.borrow().widgets.get(frame_id)
+        .and_then(|f| f.owner_addon);
+    if let Some(idx) = owner {
+        if let Ok(t) = lua.named_registry_value::<mlua::Table>("__frame_owners") {
+            let _ = t.raw_set(frame_id as i64, idx as i64);
+        }
+    }
+}
+
 /// Extract a frame ID from a Lua Value, handling forbidden proxy tables.
 ///
 /// Normal frames are UserData (FrameRef). Forbidden frames are proxy Tables with the
@@ -35,6 +46,7 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
         let widget_type = parse_widget_type(&cfa.frame_type)?;
         let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
+        sync_frame_owner_to_lua(lua, &state_clone, frame_id);
         // Store original type name when it differs from the WidgetType enum name,
         // so GetObjectType() returns e.g. "ArchaeologyDigSiteFrame" instead of "Frame".
         if !widget_type.as_str().eq_ignore_ascii_case(&cfa.frame_type) {

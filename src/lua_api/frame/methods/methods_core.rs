@@ -649,6 +649,7 @@ pub(crate) fn is_anim_type(otn: &str) -> bool {
             | "TextureCoordTranslation"
             | "ControlPoint"
             | "Actor"
+            | "ModelSceneActor"
     )
 }
 
@@ -673,7 +674,7 @@ fn anim_object_type_is_a(obj_type: &str, query: &str) -> bool {
     }
     match obj_type {
         // These only match themselves + UIObject
-        "AnimationGroup" | "ControlPoint" | "Actor" => false,
+        "AnimationGroup" | "ControlPoint" | "Actor" | "ModelSceneActor" => false,
         // LineScale inherits Scale → Animation
         "LineScale" => {
             query.eq_ignore_ascii_case("scale") || query.eq_ignore_ascii_case("animation")
