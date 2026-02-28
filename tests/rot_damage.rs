@@ -16,7 +16,7 @@ fn test_player_health_decreases_with_rot_damage() {
     // Apply 10,000 damage to the player via state.
     {
         let mut state = env.state().borrow_mut();
-        state.player_health -= 10_000;
+        state.player.health -= 10_000;
     }
 
     let hp: i32 = env.eval("return UnitHealth('player')").unwrap();
@@ -30,7 +30,7 @@ fn test_rot_damage_ticks_health_to_zero() {
     // Set player to low health so ROT kills quickly.
     {
         let mut state = env.state().borrow_mut();
-        state.player_health = 500;
+        state.player.health = 500;
     }
 
     // Apply 5 ticks of 100 damage each.
@@ -38,7 +38,7 @@ fn test_rot_damage_ticks_health_to_zero() {
         let expected = 500 - (tick + 1) * 100;
         {
             let mut state = env.state().borrow_mut();
-            state.player_health = (state.player_health - 100).max(0);
+            state.player.health = (state.player.health - 100).max(0);
         }
         let hp: i32 = env.eval("return UnitHealth('player')").unwrap();
         assert_eq!(hp, expected, "health after tick {}", tick + 1);
@@ -59,7 +59,7 @@ fn test_player_marked_dead_at_zero_health() {
     // Set health to zero.
     {
         let mut state = env.state().borrow_mut();
-        state.player_health = 0;
+        state.player.health = 0;
     }
 
     let dead: bool = env.eval("return UnitIsDead('player')").unwrap();
@@ -93,7 +93,7 @@ fn test_unit_health_event_fires_on_rot_tick() {
     // Apply damage and fire the event.
     {
         let mut state = env.state().borrow_mut();
-        state.player_health -= 5_000;
+        state.player.health -= 5_000;
     }
     let lua = env.lua();
     env.fire_event_with_args(
@@ -143,7 +143,7 @@ fn test_rot_damage_full_sequence_to_death() {
     for _ in 0..5 {
         {
             let mut state = env.state().borrow_mut();
-            state.player_health = (state.player_health - tick_damage).max(0);
+            state.player.health = (state.player.health - tick_damage).max(0);
         }
         env.fire_event_with_args(
             "UNIT_HEALTH",

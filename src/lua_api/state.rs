@@ -21,7 +21,8 @@ pub use super::game_data::{
 pub use super::game_data::SpellCooldownState;
 pub use super::state_types::{
     BagItem, CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
-    AddonInfo, GreatVaultActivity, MovementState,
+    AddonInfo, GreatVaultActivity, MovementState, LootRollInfo,
+    PlayerState, WorldState,
 };
 use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
@@ -89,20 +90,8 @@ pub struct SimState {
     pub current_focus: Option<TargetInfo>,
     /// Audio playback manager (None when no audio device or WOW_SIM_NO_SOUND=1).
     pub sound_manager: Option<SoundManager>,
-    /// Player character name (randomly chosen on startup).
-    pub player_name: String,
-    /// Player current health.
-    pub player_health: i32,
-    /// Player maximum health.
-    pub player_health_max: i32,
-    /// Player class (1-based index matching CLASS_DATA in unit_api).
-    pub player_class_index: i32,
-    /// Player race (0-based index into RACE_DATA).
-    pub player_race_index: usize,
     /// Rot damage intensity (index into ROT_DAMAGE_LEVELS).
     pub rot_damage_level: usize,
-    /// Player buffs/debuffs (disabled by WOW_SIM_NO_BUFFS=1).
-    pub player_buffs: Vec<AuraInfo>,
     /// Current framerate (FPS), updated by the app's FPS counter.
     pub fps: f32,
     /// Instant at which the UI started (used by GetTime and message timestamps).
@@ -116,15 +105,12 @@ pub struct SimState {
     /// Per-spell cooldowns: spell_id → SpellCooldownState.
     pub spell_cooldowns: HashMap<u32, SpellCooldownState>,
     /// Buttons registered via SetActionUIButton(button, action, cooldownFrame).
-    /// Stores (frame_id, action_slot) pairs for engine-pushed state updates.
     pub action_ui_buttons: Vec<(u64, u32)>,
     /// What is currently held on the cursor (drag-and-drop).
     pub cursor_item: Option<CursorInfo>,
     /// Index of the addon currently being loaded (into `addons` vec).
-    /// Set by the loader, read by CreateFrame to assign `owner_addon`.
     pub loading_addon_index: Option<u16>,
-    /// Whether we are currently loading inside a ScopedModifier with forbidden="true".
-    /// Set by the XML loader, read by CreateFrame to mark new frames as forbidden.
+    /// Whether loading inside a ScopedModifier with forbidden="true".
     pub loading_forbidden: bool,
     /// Application-level frame metrics (total frame time for profiler ratios).
     pub app_frame_metrics: AppFrameMetrics,
@@ -132,67 +118,13 @@ pub struct SimState {
     pub talents: super::talent_state::TalentState,
     /// Collected Lua errors (from call_error_handler and addframetext).
     pub lua_errors: Vec<String>,
-    /// Active specialization index (1-based). Default: 2 (Protection for Paladin).
-    pub active_spec_index: i32,
-    /// Pending spec change: Some(new_spec_index) while spec-change cast is in progress.
-    pub pending_spec_change: Option<i32>,
-    /// Player movement state toggles (controlled from options UI).
-    pub movement: MovementState,
 
-    // Player identity
-    /// Player level (default 70).
-    pub player_level: i32,
-    /// Player sex: 2=male, 3=female (WoW convention).
-    pub player_sex: i32,
-
-    // Combat state
-    /// Whether the player is in combat.
-    pub in_combat: bool,
-    /// Whether the player is resting (inn/city).
-    pub is_resting: bool,
-
-    // Power
-    pub player_power: i32,
-    pub player_power_max: i32,
-    pub player_power_type: i32,
-
-    // Zone/Instance
-    pub zone_name: String,
-    pub zone_id: i32,
-    pub sub_zone_name: String,
-    pub instance_name: String,
-    pub instance_type: String,
-    pub instance_difficulty: i32,
-    pub instance_max_players: i32,
-    pub in_instance: bool,
-
-    // Economy
-    pub player_money: i64,
-    pub player_item_level: f32,
-
-    // PvP
-    pub pvp_enabled: bool,
-    pub honor_level: i32,
-
-    // Guild
-    pub guild_name: Option<String>,
-    pub guild_rank: Option<String>,
-    pub guild_num_members: i32,
-
-    // Great Vault (C_WeeklyRewards)
-    pub great_vault_activities: Vec<GreatVaultActivity>,
-    pub great_vault_has_rewards: bool,
-    pub great_vault_can_claim: bool,
-
-    // Bags/Inventory: (bag_index, slot_index) → BagItem
+    /// Player character state (identity, combat, power, buffs, spec).
+    pub player: PlayerState,
+    /// World state (zone, instance, guild, collections, vault, loot).
+    pub world: WorldState,
+    /// Bags/Inventory: (bag_index, slot_index) → BagItem.
     pub bag_items: HashMap<(i32, i32), BagItem>,
-
-    // Collections
-    pub collected_transmogs: HashSet<i32>,
-    pub collected_mounts: HashSet<i32>,
-    pub collected_pets: HashSet<i32>,
-    pub collected_toys: HashSet<i32>,
-    pub earned_achievements: HashSet<i32>,
 }
 
 impl Default for SimState {
@@ -200,74 +132,39 @@ impl Default for SimState {
         let mut state = Self::new_empty();
         state.action_bars = default_action_bars();
         state.party_members = default_party();
-        state.player_name = random_player_name();
-        state.player_buffs = default_player_buffs();
+        state.player.name = random_player_name();
+        state.player.buffs = default_player_buffs();
         state
     }
 }
 
 impl SimState {
     fn new_empty() -> Self {
-        let mut s = Self::new_subsystems();
-        s.apply_player_defaults();
-        s.apply_world_defaults();
-        s
-    }
-
-    fn new_subsystems() -> Self {
-        macro_rules! d { () => { Default::default() }; }
         Self {
-            widgets: d!(), events: d!(), scripts: d!(), cvars: CVarStorage::new(),
-            console_output: d!(), timers: d!(), addons: d!(), lua_errors: d!(),
-            tooltips: d!(), simple_htmls: d!(), message_frames: d!(), animation_groups: d!(),
-            anim_frame_to_group: d!(), anim_frame_to_anim: d!(),
-            on_update_frames: d!(), pending_hit_grid_changes: d!(),
-            action_bars: d!(), addon_base_paths: d!(), spell_cooldowns: d!(), action_ui_buttons: d!(),
-            bag_items: d!(),
-            focused_frame_id: None, visible_on_update_cache: None, strata_buckets: None,
-            mouse_position: None, hovered_frame: None, current_target: None, current_focus: None,
-            sound_manager: None, casting: None, gcd: None, cursor_item: None,
-            loading_addon_index: None, pending_spec_change: None,
-            party_members: d!(), player_buffs: d!(), player_name: d!(),
-            player_health: 0, player_health_max: 0, player_class_index: 0, active_spec_index: 0,
-            player_race_index: 0, rot_damage_level: 0, next_anim_group_id: 1, next_cast_id: 1,
-            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0, loading_forbidden: false,
-            start_time: Instant::now(), app_frame_metrics: d!(),
-            talents: super::talent_state::TalentState::new(), movement: d!(),
-            player_level: 0, player_sex: 0, in_combat: false,
-            player_power: 0, player_power_max: 0, player_power_type: 0,
-            zone_name: d!(), zone_id: 0, sub_zone_name: d!(), instance_name: d!(), instance_type: d!(),
-            instance_difficulty: 0, instance_max_players: 0, is_resting: false, in_instance: false,
-            player_money: 0, player_item_level: 0.0, pvp_enabled: false, honor_level: 0,
-            guild_name: None, guild_rank: None, guild_num_members: 0,
-            collected_transmogs: d!(), collected_mounts: d!(),
-            collected_pets: d!(), collected_toys: d!(), earned_achievements: d!(),
-            great_vault_activities: d!(), great_vault_has_rewards: false, great_vault_can_claim: false,
+            widgets: WidgetRegistry::default(), events: EventQueue::default(),
+            scripts: ScriptRegistry::default(), cvars: CVarStorage::new(),
+            console_output: Vec::new(), timers: VecDeque::new(),
+            addons: Vec::new(), lua_errors: Vec::new(),
+            tooltips: HashMap::new(), simple_htmls: HashMap::new(),
+            message_frames: HashMap::new(), animation_groups: HashMap::new(),
+            anim_frame_to_group: HashMap::new(), anim_frame_to_anim: HashMap::new(),
+            on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
+            action_bars: HashMap::new(), addon_base_paths: Vec::new(),
+            spell_cooldowns: HashMap::new(), action_ui_buttons: Vec::new(),
+            party_members: Vec::new(), bag_items: HashMap::new(),
+            focused_frame_id: None, visible_on_update_cache: None,
+            strata_buckets: None, mouse_position: None, hovered_frame: None,
+            current_target: None, current_focus: None, sound_manager: None,
+            casting: None, gcd: None, cursor_item: None,
+            loading_addon_index: None, loading_forbidden: false,
+            next_anim_group_id: 1, next_cast_id: 1,
+            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
+            rot_damage_level: 0, start_time: Instant::now(),
+            app_frame_metrics: AppFrameMetrics::default(),
+            talents: super::talent_state::TalentState::new(),
+            player: PlayerState::default(),
+            world: WorldState::default(),
         }
-    }
-
-    fn apply_player_defaults(&mut self) {
-        let (health, health_max, class_index, spec_index) = Self::default_player_stats();
-        self.player_health = health;
-        self.player_health_max = health_max;
-        self.player_class_index = class_index;
-        self.active_spec_index = spec_index;
-        self.player_level = 70;
-        self.player_sex = 2;
-        self.player_power = 100;
-        self.player_power_max = 100;
-    }
-
-    fn apply_world_defaults(&mut self) {
-        self.zone_name = "Stormwind City".to_string();
-        self.zone_id = 1519;
-        self.sub_zone_name = "Trade District".to_string();
-        self.instance_type = "none".to_string();
-    }
-
-    /// Return default player stats: (health, health_max, class_index, spec_index).
-    fn default_player_stats() -> (i32, i32, i32, i32) {
-        (100_000, 100_000, 2, 2)  // Paladin, Protection spec
     }
 
     /// Look up bag item at (bag, slot). Returns (item_id, stack_count).

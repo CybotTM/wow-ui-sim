@@ -42,7 +42,7 @@ fn is_known_unit(unit: &str) -> bool {
 /// Resolve a unit name for known unit tokens. Returns None for unknown tokens.
 fn resolve_unit_name_with_party(unit: &str, state: &SimState) -> Option<String> {
     if unit == "player" {
-        return Some(state.player_name.clone());
+        return Some(state.player.name.clone());
     }
     if unit == "target" {
         return Some(state.current_target.as_ref()
@@ -101,7 +101,7 @@ fn register_identity_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
 /// Look up (name, file) for the player's race from state.
 fn player_race_name_file(state: &SimState) -> (&'static str, &'static str) {
     let (name, file, _) = crate::lua_api::state::RACE_DATA
-        .get(state.player_race_index)
+        .get(state.player.race_index)
         .copied()
         .unwrap_or(("Human", "Human", "Alliance"));
     (name, file)
@@ -110,7 +110,7 @@ fn player_race_name_file(state: &SimState) -> (&'static str, &'static str) {
 /// Look up faction string for the player's race from state.
 fn player_race_faction(state: &SimState) -> &'static str {
     crate::lua_api::state::RACE_DATA
-        .get(state.player_race_index)
+        .get(state.player.race_index)
         .copied()
         .map(|(_, _, f)| f)
         .unwrap_or("Alliance")
@@ -131,7 +131,7 @@ fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
         })?,
     )?;
     let st = state.clone();
-    globals.set("UnitSex", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player_sex))?)?;
+    globals.set("UnitSex", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.sex))?)?;
     globals.set("UnitEffectiveLevel", lua.create_function(|_, _unit: Option<String>| Ok(80))?)?;
     globals.set(
         "UnitFactionGroup",
@@ -196,7 +196,7 @@ fn register_unit_level_exists(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
                     return Ok(m.level);
                 }
             }
-            Ok(st.borrow().player_level)
+            Ok(st.borrow().player.level)
         })?,
     )?;
 
@@ -241,8 +241,8 @@ fn resolve_unit_class(unit: &str, state: &SimState) -> (&'static str, &'static s
         }
         return ("Warrior", "WARRIOR", 1);
     }
-    let (n, f) = class_info_by_index(state.player_class_index).unwrap_or(("Warrior", "WARRIOR"));
-    (n, f, state.player_class_index)
+    let (n, f) = class_info_by_index(state.player.class_index).unwrap_or(("Warrior", "WARRIOR"));
+    (n, f, state.player.class_index)
 }
 
 /// Register UnitClass with party member awareness.
@@ -268,7 +268,7 @@ fn register_class_base_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
         "UnitClassBase",
         lua.create_function(move |lua, _unit: Option<String>| {
             let s = state.borrow();
-            let (_, file) = class_info_by_index(s.player_class_index).unwrap_or(("Warrior", "WARRIOR"));
+            let (_, file) = class_info_by_index(s.player.class_index).unwrap_or(("Warrior", "WARRIOR"));
             Ok(Value::String(lua.create_string(file)?))
         })?,
     )?;
@@ -400,7 +400,7 @@ fn register_death_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
         "UnitIsDead",
         lua.create_function(move |_, unit: Option<String>| {
             if unit.as_deref() == Some("player") {
-                return Ok(st.borrow().player_health <= 0);
+                return Ok(st.borrow().player.health <= 0);
             }
             Ok(false)
         })?,
@@ -409,7 +409,7 @@ fn register_death_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
         "UnitIsDeadOrGhost",
         lua.create_function(move |_, unit: Option<String>| {
             if unit.as_deref() == Some("player") {
-                return Ok(state.borrow().player_health <= 0);
+                return Ok(state.borrow().player.health <= 0);
             }
             Ok(false)
         })?,
@@ -690,12 +690,12 @@ fn register_pvp_vehicle_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
     }
 
     let st = state.clone();
-    g.set("UnitAffectingCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().in_combat))?)?;
+    g.set("UnitAffectingCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?)?;
     let st = state.clone();
-    g.set("UnitInCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().in_combat))?)?;
+    g.set("UnitInCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?)?;
 
     let st = state.clone();
-    g.set("UnitHonorLevel", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().honor_level))?)?;
+    g.set("UnitHonorLevel", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.honor_level))?)?;
     g.set("UnitPartialPower", lua.create_function(|_, (_unit, _pt): (Option<String>, Option<i32>)| Ok(0i32))?)?;
 
     // UnitGroupRolesAssignedEnum -> nil

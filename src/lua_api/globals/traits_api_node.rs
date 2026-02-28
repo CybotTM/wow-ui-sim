@@ -403,8 +403,8 @@ fn check_spec_conditions_met(node: &TraitNodeInfo, state: &SimState) -> bool {
 ///   27 → 65 (Holy), 28 → 66 (Protection), 29 → 70 (Retribution)
 fn spec_set_contains_active_spec(spec_set_id: u32, state: &SimState) -> bool {
     if spec_set_id == 0 { return true } // No spec restriction
-    let active_spec_id = crate::specializations::specs_for_class(state.player_class_index as u32)
-        .nth((state.active_spec_index - 1).max(0) as usize)
+    let active_spec_id = crate::specializations::specs_for_class(state.player.class_index as u32)
+        .nth((state.player.active_spec_index - 1).max(0) as usize)
         .map(|s| s.id)
         .unwrap_or(66); // fallback to Protection
     match spec_set_id {

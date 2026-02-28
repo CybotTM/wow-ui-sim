@@ -89,17 +89,17 @@ fn create_world_pos_from_map_pos(lua: &Lua, (map_id, pos): (i32, Value)) -> Resu
 fn register_zone_text_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     let st = state.clone();
-    globals.set("GetRealZoneText", lua.create_function(move |_, ()| Ok(st.borrow().zone_name.clone()))?)?;
+    globals.set("GetRealZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?)?;
     let st = state.clone();
-    globals.set("GetZoneText", lua.create_function(move |_, ()| Ok(st.borrow().zone_name.clone()))?)?;
+    globals.set("GetZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?)?;
     let st = state.clone();
-    globals.set("GetSubZoneText", lua.create_function(move |_, ()| Ok(st.borrow().sub_zone_name.clone()))?)?;
+    globals.set("GetSubZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.sub_zone_name.clone()))?)?;
     globals.set("GetMinimapZoneText", lua.create_function(move |_, ()| {
         let s = state.borrow();
-        if s.sub_zone_name.is_empty() {
-            Ok(s.zone_name.clone())
+        if s.world.sub_zone_name.is_empty() {
+            Ok(s.world.zone_name.clone())
         } else {
-            Ok(s.sub_zone_name.clone())
+            Ok(s.world.sub_zone_name.clone())
         }
     })?)?;
     Ok(())

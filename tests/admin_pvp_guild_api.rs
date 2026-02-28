@@ -1,0 +1,174 @@
+//! Tests for A_Admin PvP and Guild API.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+// ============================================================================
+// SetHonorLevel
+// ============================================================================
+
+#[test]
+fn test_set_honor_level_unit_honor_level_returns_level() {
+    let env = env();
+    let level: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetHonorLevel(50)
+            return UnitHonorLevel("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 50);
+}
+
+#[test]
+fn test_set_honor_level_zero() {
+    let env = env();
+    let level: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetHonorLevel(0)
+            return UnitHonorLevel("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 0);
+}
+
+#[test]
+fn test_set_honor_level_max() {
+    let env = env();
+    let level: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetHonorLevel(500)
+            return UnitHonorLevel("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 500);
+}
+
+#[test]
+fn test_set_honor_level_overwrites_previous() {
+    let env = env();
+    let level: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetHonorLevel(10)
+            A_Admin.SetHonorLevel(75)
+            return UnitHonorLevel("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(level, 75);
+}
+
+// ============================================================================
+// SetGuildInfo
+// ============================================================================
+
+#[test]
+fn test_set_guild_info_c_guild_get_guild_info_name() {
+    let env = env();
+    let guild_name: String = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Epic Guild", "Officer", 150)
+            local guildName = C_Guild.GetGuildInfo("player")
+            return guildName
+            "#,
+        )
+        .unwrap();
+    assert_eq!(guild_name, "Epic Guild");
+}
+
+#[test]
+fn test_set_guild_info_is_in_guild_returns_true() {
+    let env = env();
+    let in_guild: bool = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Epic Guild", "Officer", 150)
+            return IsInGuild()
+            "#,
+        )
+        .unwrap();
+    assert!(in_guild);
+}
+
+#[test]
+fn test_set_guild_info_c_guild_is_in_guild_returns_true() {
+    let env = env();
+    let in_guild: bool = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Epic Guild", "Officer", 150)
+            return C_Guild.IsInGuild()
+            "#,
+        )
+        .unwrap();
+    assert!(in_guild);
+}
+
+#[test]
+fn test_set_guild_info_c_guild_get_guild_info_rank() {
+    let env = env();
+    let (guild_name, guild_rank): (String, String) = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Some Guild", "Guild Master", 42)
+            local name, rank = C_Guild.GetGuildInfo("player")
+            return name, rank
+            "#,
+        )
+        .unwrap();
+    assert_eq!(guild_name, "Some Guild");
+    assert_eq!(guild_rank, "Guild Master");
+}
+
+// ============================================================================
+// ClearGuild
+// ============================================================================
+
+#[test]
+fn test_clear_guild_is_in_guild_returns_false() {
+    let env = env();
+    let in_guild: bool = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Epic Guild", "Officer", 150)
+            A_Admin.ClearGuild()
+            return IsInGuild()
+            "#,
+        )
+        .unwrap();
+    assert!(!in_guild);
+}
+
+#[test]
+fn test_clear_guild_c_guild_is_in_guild_returns_false() {
+    let env = env();
+    let in_guild: bool = env
+        .eval(
+            r#"
+            A_Admin.SetGuildInfo("Epic Guild", "Officer", 150)
+            A_Admin.ClearGuild()
+            return C_Guild.IsInGuild()
+            "#,
+        )
+        .unwrap();
+    assert!(!in_guild);
+}
+
+#[test]
+fn test_not_in_guild_by_default() {
+    let env = env();
+    let in_guild: bool = env
+        .eval("return IsInGuild()")
+        .unwrap();
+    assert!(!in_guild);
+}

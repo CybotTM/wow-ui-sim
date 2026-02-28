@@ -25,7 +25,7 @@ fn register_health_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             if let Value::String(s) = &unit {
                 let u = s.to_string_lossy();
                 if u == "player" {
-                    return Ok(st.borrow().player_health);
+                    return Ok(st.borrow().player.health);
                 }
                 if u == "target" {
                     let st = st.borrow();
@@ -47,7 +47,7 @@ fn register_health_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             if let Value::String(s) = &unit {
                 let u = s.to_string_lossy();
                 if u == "player" {
-                    return Ok(state.borrow().player_health_max);
+                    return Ok(state.borrow().player.health_max);
                 }
                 if u == "target" {
                     let st = state.borrow();
@@ -101,7 +101,7 @@ fn register_power_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             if is_secondary_power_type(power_type) {
                 return Ok(0i32);
             }
-            Ok(st.borrow().player_power)
+            Ok(st.borrow().player.power)
         })?,
     )?;
     globals.set(
@@ -130,7 +130,7 @@ fn register_power_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             if is_secondary_power_type(power_type) {
                 return Ok(secondary_power_max(power_type.unwrap_or(0)));
             }
-            Ok(state.borrow().player_power_max)
+            Ok(state.borrow().player.power_max)
         })?,
     )?;
     Ok(())
@@ -182,7 +182,7 @@ fn register_power_type_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
                 let u = s.to_string_lossy();
                 if u == "player" {
                     let st = state.borrow();
-                    let pt = st.player_power_type;
+                    let pt = st.player.power_type;
                     return Ok((pt, Value::String(lua.create_string(power_type_name(pt))?)));
                 }
                 if u == "target" {

@@ -1,0 +1,234 @@
+//! Tests for the global FireEvent function (synchronous event dispatch).
+//! Uses real WoW event names since RegisterEvent validates against the known list.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+// ============================================================================
+// FireEvent with string + number args
+// ============================================================================
+
+#[test]
+fn test_fire_event_handler_receives_event_and_args() {
+    let env = env();
+    let (received, arg1, arg2): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local received = false
+            local got_arg1, got_arg2
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            f:SetScript("OnEvent", function(self, event, a1, a2)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    received = true
+                    got_arg1 = a1
+                    got_arg2 = a2
+                end
+            end)
+            FireEvent("PLAYER_ENTERING_WORLD", true, false)
+            return received, got_arg1, got_arg2
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+    assert!(arg1);
+    assert!(!arg2);
+}
+
+// ============================================================================
+// Only registered frames receive the event
+// ============================================================================
+
+#[test]
+fn test_fire_event_only_registered_frames_receive_it() {
+    let env = env();
+    let (got_a, got_b): (bool, bool) = env
+        .eval(
+            r#"
+            local got_a = false
+            local got_b = false
+            local fa = CreateFrame("Frame")
+            fa:RegisterEvent("PLAYER_LOGIN")
+            fa:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_LOGIN" then got_a = true end
+            end)
+            local fb = CreateFrame("Frame")
+            fb:RegisterEvent("PLAYER_LOGOUT")
+            fb:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_LOGOUT" then got_b = true end
+            end)
+            FireEvent("PLAYER_LOGIN")
+            return got_a, got_b
+            "#,
+        )
+        .unwrap();
+    assert!(got_a, "frame A should have received PLAYER_LOGIN");
+    assert!(!got_b, "frame B should not have received PLAYER_LOGIN");
+}
+
+// ============================================================================
+// FireEvent with no args
+// ============================================================================
+
+#[test]
+fn test_fire_event_with_no_args() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            local received = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ALIVE")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_ALIVE" then
+                    received = true
+                end
+            end)
+            FireEvent("PLAYER_ALIVE")
+            return received
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+}
+
+#[test]
+fn test_fire_event_no_args_extra_params_are_nil() {
+    let env = env();
+    let (received, arg1_nil): (bool, bool) = env
+        .eval(
+            r#"
+            local received = false
+            local arg1_nil = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("VARIABLES_LOADED")
+            f:SetScript("OnEvent", function(self, event, a1)
+                if event == "VARIABLES_LOADED" then
+                    received = true
+                    arg1_nil = (a1 == nil)
+                end
+            end)
+            FireEvent("VARIABLES_LOADED")
+            return received, arg1_nil
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+    assert!(arg1_nil, "first extra arg should be nil when FireEvent has no args");
+}
+
+// ============================================================================
+// Standard WoW events
+// ============================================================================
+
+#[test]
+fn test_fire_event_player_entering_world() {
+    let env = env();
+    let received: bool = env
+        .eval(
+            r#"
+            local received = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    received = true
+                end
+            end)
+            FireEvent("PLAYER_ENTERING_WORLD")
+            return received
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+}
+
+#[test]
+fn test_fire_event_boolean_args() {
+    let env = env();
+    let (received, is_initial, is_reload): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local received = false
+            local got_initial, got_reload
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_ENTERING_WORLD")
+            f:SetScript("OnEvent", function(self, event, isInitial, isReloadUI)
+                if event == "PLAYER_ENTERING_WORLD" then
+                    received = true
+                    got_initial = isInitial
+                    got_reload = isReloadUI
+                end
+            end)
+            FireEvent("PLAYER_ENTERING_WORLD", true, false)
+            return received, got_initial, got_reload
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+    assert!(is_initial);
+    assert!(!is_reload);
+}
+
+// ============================================================================
+// Multiple frames all receive the same event
+// ============================================================================
+
+#[test]
+fn test_fire_event_multiple_frames_all_receive() {
+    let env = env();
+    let (got1, got2): (bool, bool) = env
+        .eval(
+            r#"
+            local got1 = false
+            local got2 = false
+            local f1 = CreateFrame("Frame")
+            f1:RegisterEvent("ZONE_CHANGED")
+            f1:SetScript("OnEvent", function(self, event)
+                if event == "ZONE_CHANGED" then got1 = true end
+            end)
+            local f2 = CreateFrame("Frame")
+            f2:RegisterEvent("ZONE_CHANGED")
+            f2:SetScript("OnEvent", function(self, event)
+                if event == "ZONE_CHANGED" then got2 = true end
+            end)
+            FireEvent("ZONE_CHANGED")
+            return got1, got2
+            "#,
+        )
+        .unwrap();
+    assert!(got1, "frame 1 should receive ZONE_CHANGED");
+    assert!(got2, "frame 2 should receive ZONE_CHANGED");
+}
+
+// ============================================================================
+// String argument passthrough
+// ============================================================================
+
+#[test]
+fn test_fire_event_string_arg() {
+    let env = env();
+    let (received, unit): (bool, String) = env
+        .eval(
+            r#"
+            local received = false
+            local got_unit
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("UNIT_HEALTH")
+            f:SetScript("OnEvent", function(self, event, unit)
+                if event == "UNIT_HEALTH" then
+                    received = true
+                    got_unit = unit
+                end
+            end)
+            FireEvent("UNIT_HEALTH", "player")
+            return received, got_unit
+            "#,
+        )
+        .unwrap();
+    assert!(received);
+    assert_eq!(unit, "player");
+}

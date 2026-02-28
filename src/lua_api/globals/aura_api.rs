@@ -28,7 +28,7 @@ fn filter_is_harmful(filter: &Option<String>) -> bool {
 /// Get the nth player buff (1-based index), or None.
 fn get_player_buff(state: &SimState, index: i32) -> Option<&AuraInfo> {
     if index < 1 { return None; }
-    state.player_buffs.get((index - 1) as usize)
+    state.player.buffs.get((index - 1) as usize)
 }
 
 /// Build the old-style multi-return values for UnitBuff/UnitAura.
@@ -144,7 +144,7 @@ fn register_get_player_aura_by_spell_id(
         "GetPlayerAuraBySpellID",
         lua.create_function(move |lua, spell_id: i32| {
             let s = state.borrow();
-            let aura = s.player_buffs.iter().find(|a| a.spell_id == spell_id);
+            let aura = s.player.buffs.iter().find(|a| a.spell_id == spell_id);
             match aura {
                 Some(a) => Ok(Value::Table(build_aura_data_table(lua, a)?)),
                 None => Ok(Value::Nil),
@@ -189,7 +189,7 @@ fn register_for_each_aura(
                 }
                 let limit = max.unwrap_or(i32::MAX) as usize;
                 let s = state.borrow();
-                for (i, aura) in s.player_buffs.iter().enumerate() {
+                for (i, aura) in s.player.buffs.iter().enumerate() {
                     if i >= limit {
                         break;
                     }

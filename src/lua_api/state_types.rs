@@ -1,7 +1,8 @@
 //! Plain data types used by SimState.
 
+use crate::lua_api::game_data::AuraInfo;
 use mlua::RegistryKey;
-use std::collections::VecDeque;
+use std::collections::{HashMap, HashSet, VecDeque};
 use std::time::Instant;
 
 /// What is currently held on the cursor (drag-and-drop state).
@@ -131,6 +132,88 @@ pub struct BagItem {
     pub stack_count: i32,
 }
 
+/// Player character state: identity, combat, power, health, buffs, spec.
+#[derive(Debug, Clone)]
+pub struct PlayerState {
+    pub name: String,
+    pub health: i32,
+    pub health_max: i32,
+    pub class_index: i32,
+    pub race_index: usize,
+    pub level: i32,
+    pub sex: i32,
+    pub power: i32,
+    pub power_max: i32,
+    pub power_type: i32,
+    pub in_combat: bool,
+    pub is_resting: bool,
+    pub money: i64,
+    pub item_level: f32,
+    pub pvp_enabled: bool,
+    pub honor_level: i32,
+    pub buffs: Vec<AuraInfo>,
+    pub movement: MovementState,
+    pub active_spec_index: i32,
+    pub pending_spec_change: Option<i32>,
+}
+
+impl Default for PlayerState {
+    fn default() -> Self {
+        Self {
+            name: String::new(), health: 100_000, health_max: 100_000,
+            class_index: 2, race_index: 0, level: 70, sex: 2,
+            power: 100, power_max: 100, power_type: 0,
+            in_combat: false, is_resting: false, money: 0, item_level: 0.0,
+            pvp_enabled: false, honor_level: 0, buffs: Vec::new(),
+            movement: MovementState::default(), active_spec_index: 2,
+            pending_spec_change: None,
+        }
+    }
+}
+
+/// World/instance state: zone, guild, collections, vault, loot.
+#[derive(Debug, Clone)]
+pub struct WorldState {
+    pub zone_name: String,
+    pub zone_id: i32,
+    pub sub_zone_name: String,
+    pub instance_name: String,
+    pub instance_type: String,
+    pub instance_difficulty: i32,
+    pub instance_max_players: i32,
+    pub in_instance: bool,
+    pub guild_name: Option<String>,
+    pub guild_rank: Option<String>,
+    pub guild_num_members: i32,
+    pub great_vault_activities: Vec<GreatVaultActivity>,
+    pub great_vault_has_rewards: bool,
+    pub great_vault_can_claim: bool,
+    pub loot_rolls: HashMap<i32, LootRollInfo>,
+    pub collected_transmogs: HashSet<i32>,
+    pub collected_mounts: HashSet<i32>,
+    pub collected_pets: HashSet<i32>,
+    pub collected_toys: HashSet<i32>,
+    pub earned_achievements: HashSet<i32>,
+}
+
+impl Default for WorldState {
+    fn default() -> Self {
+        Self {
+            zone_name: "Stormwind City".into(), zone_id: 1519,
+            sub_zone_name: "Trade District".into(),
+            instance_name: String::new(), instance_type: "none".into(),
+            instance_difficulty: 0, instance_max_players: 0, in_instance: false,
+            guild_name: None, guild_rank: None, guild_num_members: 0,
+            great_vault_activities: Vec::new(),
+            great_vault_has_rewards: false, great_vault_can_claim: false,
+            loot_rolls: HashMap::new(),
+            collected_transmogs: HashSet::new(), collected_mounts: HashSet::new(),
+            collected_pets: HashSet::new(), collected_toys: HashSet::new(),
+            earned_achievements: HashSet::new(),
+        }
+    }
+}
+
 /// Simulated player movement flags (all false = stationary).
 #[derive(Debug, Clone, Default)]
 pub struct MovementState {
@@ -139,4 +222,35 @@ pub struct MovementState {
     pub flying: bool,
     pub falling: bool,
     pub swimming: bool,
+}
+
+/// An active loot roll (group loot item pending a player decision).
+#[derive(Debug, Clone)]
+pub struct LootRollInfo {
+    /// Unique roll identifier.
+    pub roll_id: i32,
+    /// Duration in seconds for the roll timer.
+    pub roll_time: f64,
+    /// Item texture path/ID.
+    pub texture: String,
+    /// Item display name.
+    pub name: String,
+    /// Stack count.
+    pub count: i32,
+    /// Item quality (0=Poor..4=Epic).
+    pub quality: i32,
+    /// Whether the item binds on pickup.
+    pub bind_on_pickup: bool,
+    /// Whether need roll is allowed.
+    pub can_need: bool,
+    /// Whether greed roll is allowed.
+    pub can_greed: bool,
+    /// Whether disenchant roll is allowed.
+    pub can_disenchant: bool,
+    /// Disenchant required skill level.
+    pub disenchant_level: i32,
+    /// Item level.
+    pub item_level: i32,
+    /// Item link string.
+    pub item_link: String,
 }

@@ -216,17 +216,17 @@ fn register_transmog_source_methods(
 ) -> Result<()> {
     let s = Rc::clone(state);
     t.set("PlayerHasTransmog", lua.create_function(move |_, (item_id, _appearance_mod): (i32, Option<i32>)| {
-        Ok(s.borrow().collected_transmogs.contains(&item_id))
+        Ok(s.borrow().world.collected_transmogs.contains(&item_id))
     })?)?;
     let s = Rc::clone(state);
     t.set("PlayerHasTransmogByItemInfo", lua.create_function(move |_, item_info: String| {
         // Parse item_id from "item:12345:..." link format.
         let id = item_info.split(':').nth(1).and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
-        Ok(s.borrow().collected_transmogs.contains(&id))
+        Ok(s.borrow().world.collected_transmogs.contains(&id))
     })?)?;
     let s = Rc::clone(state);
     t.set("PlayerHasTransmogItemModifiedAppearance", lua.create_function(move |_, id: i32| {
-        Ok(s.borrow().collected_transmogs.contains(&id))
+        Ok(s.borrow().world.collected_transmogs.contains(&id))
     })?)?;
     t.set(
         "GetItemInfo",

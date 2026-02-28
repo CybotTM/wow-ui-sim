@@ -84,8 +84,8 @@ fn compute_heal_target(
 }
 
 fn heal_player(s: &mut crate::lua_api::SimState, amount: i32) -> Option<String> {
-    if s.player_health <= 0 { return None; }
-    s.player_health = (s.player_health + amount).min(s.player_health_max);
+    if s.player.health <= 0 { return None; }
+    s.player.health = (s.player.health + amount).min(s.player.health_max);
     Some("player".to_string())
 }
 
@@ -96,7 +96,7 @@ pub(super) fn apply_spec_change(
 ) {
     let changed = {
         let mut s = state.borrow_mut();
-        s.pending_spec_change.take().map(|idx| { s.active_spec_index = idx; })
+        s.player.pending_spec_change.take().map(|idx| { s.player.active_spec_index = idx; })
     };
     if changed.is_some() {
         let lua = env.lua();

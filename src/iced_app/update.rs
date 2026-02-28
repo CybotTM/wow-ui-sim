@@ -128,7 +128,7 @@ impl App {
         self.selected_class = class_name.to_string();
         {
             let env = self.env.borrow();
-            env.state().borrow_mut().player_class_index = index;
+            env.state().borrow_mut().player.class_index = index;
             self.fire_portrait_update(&env);
         }
         self.save_config();
@@ -142,7 +142,7 @@ impl App {
         self.selected_race = race_name.to_string();
         {
             let env = self.env.borrow();
-            env.state().borrow_mut().player_race_index = index;
+            env.state().borrow_mut().player.race_index = index;
             self.fire_portrait_update(&env);
         }
         self.save_config();
@@ -170,11 +170,11 @@ impl App {
         let env = self.env.borrow();
         let mut state = env.state().borrow_mut();
         match field {
-            "moving" => state.movement.moving = val,
-            "mounted" => state.movement.mounted = val,
-            "flying" => state.movement.flying = val,
-            "falling" => state.movement.falling = val,
-            "swimming" => state.movement.swimming = val,
+            "moving" => state.player.movement.moving = val,
+            "mounted" => state.player.movement.mounted = val,
+            "flying" => state.player.movement.flying = val,
+            "falling" => state.player.movement.falling = val,
+            "swimming" => state.player.movement.swimming = val,
             _ => {}
         }
         drop(state);

@@ -1,0 +1,210 @@
+//! Tests for A_Admin health and power API.
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+// ============================================================================
+// SetPlayerHealth
+// ============================================================================
+
+#[test]
+fn test_set_player_health_current() {
+    let env = env();
+    let hp: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(5000, 10000)
+            return UnitHealth("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(hp, 5000);
+}
+
+#[test]
+fn test_set_player_health_max() {
+    let env = env();
+    let hp_max: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(5000, 10000)
+            return UnitHealthMax("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(hp_max, 10000);
+}
+
+#[test]
+fn test_set_player_health_both_values() {
+    let env = env();
+    let (cur, max): (i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(75000, 200000)
+            return UnitHealth("player"), UnitHealthMax("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(cur, 75000);
+    assert_eq!(max, 200000);
+}
+
+#[test]
+fn test_set_player_health_full() {
+    let env = env();
+    let (cur, max): (i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerHealth(100000, 100000)
+            return UnitHealth("player"), UnitHealthMax("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(cur, 100000);
+    assert_eq!(max, 100000);
+}
+
+// ============================================================================
+// SetPlayerPower
+// ============================================================================
+
+#[test]
+fn test_set_player_power_current() {
+    let env = env();
+    let power: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(500, 1000, 0)
+            return UnitPower("player", 0)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(power, 500);
+}
+
+#[test]
+fn test_set_player_power_max() {
+    let env = env();
+    let power_max: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(500, 1000, 0)
+            return UnitPowerMax("player", 0)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(power_max, 1000);
+}
+
+#[test]
+fn test_set_player_power_both_values() {
+    let env = env();
+    let (cur, max): (i32, i32) = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(30000, 80000, 0)
+            return UnitPower("player"), UnitPowerMax("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(cur, 30000);
+    assert_eq!(max, 80000);
+}
+
+#[test]
+fn test_set_player_power_type_changes() {
+    let env = env();
+    let power_type: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(100, 100, 1)
+            local pt, name = UnitPowerType("player")
+            return pt
+            "#,
+        )
+        .unwrap();
+    assert_eq!(power_type, 1);
+}
+
+#[test]
+fn test_set_player_power_without_type_keeps_existing() {
+    let env = env();
+    // SetPlayerPower with nil power_type should not change the power type
+    let power: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPlayerPower(42000, 90000)
+            return UnitPower("player")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(power, 42000);
+}
+
+// ============================================================================
+// SetTargetHealth
+// ============================================================================
+
+#[test]
+fn test_set_target_health_requires_target_first() {
+    let env = env();
+    let hp: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetTarget("Boss", 63, 1, true)
+            A_Admin.SetTargetHealth(50000, 100000)
+            return UnitHealth("target")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(hp, 50000);
+}
+
+#[test]
+fn test_set_target_health_max() {
+    let env = env();
+    let hp_max: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetTarget("Boss", 63, 1, true)
+            A_Admin.SetTargetHealth(50000, 100000)
+            return UnitHealthMax("target")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(hp_max, 100000);
+}
+
+#[test]
+fn test_set_target_health_silently_ignored_without_target() {
+    let env = env();
+    // Without a target, SetTargetHealth should not crash
+    let ok: bool = env
+        .eval(
+            r#"
+            A_Admin.SetTargetHealth(50000, 100000)
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(ok);
+}
+
+#[test]
+fn test_set_target_health_default_before_set() {
+    let env = env();
+    let hp: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetTarget("Miniboss", 20, 4, true)
+            return UnitHealth("target")
+            "#,
+        )
+        .unwrap();
+    // Default health for new target is 100_000
+    assert_eq!(hp, 100_000);
+}

@@ -95,7 +95,7 @@ fn register_spec_basic_queries(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
         let state = Rc::clone(&state);
         globals.set(
             "GetSpecialization",
-            lua.create_function(move |_, ()| Ok(state.borrow().active_spec_index))?,
+            lua.create_function(move |_, ()| Ok(state.borrow().player.active_spec_index))?,
         )?;
     }
     globals.set(
@@ -122,7 +122,7 @@ fn register_spec_role_queries(globals: &mlua::Table, lua: &Lua, state: Rc<RefCel
     globals.set(
         "GetSpecializationRole",
         lua.create_function(move |lua, spec_index: Option<i32>| {
-            let active = state.borrow().active_spec_index;
+            let active = state.borrow().player.active_spec_index;
             let specs: Vec<_> = specializations::specs_for_class(PALADIN_CLASS_ID).collect();
             let idx = (spec_index.unwrap_or(active) - 1).clamp(0, specs.len() as i32 - 1) as usize;
             Ok(Value::String(lua.create_string(specs[idx].role)?))
@@ -176,7 +176,7 @@ fn register_spec_info_lookups(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
     globals.set(
         "GetSpecializationInfoForClassID",
         lua.create_function(move |lua, (class_id, spec_index): (i32, i32)| {
-            let active_spec_index = state.borrow().active_spec_index;
+            let active_spec_index = state.borrow().player.active_spec_index;
             let specs: Vec<_> = specializations::specs_for_class(class_id as u32).collect();
             if spec_index < 1 || spec_index as usize > specs.len() {
                 return Ok(mlua::MultiValue::new());
@@ -202,7 +202,7 @@ fn spec_info_by_id(lua: &Lua, spec_id: i32) -> Result<mlua::MultiValue> {
 /// Economy functions: money, trade, buyback.
 fn register_economy_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetMoney", lua.create_function(move |_, ()| Ok(state.borrow().player_money))?)?;
+    globals.set("GetMoney", lua.create_function(move |_, ()| Ok(state.borrow().player.money))?)?;
     globals.set(
         "GetTargetTradeMoney",
         lua.create_function(|_, ()| Ok(0i64))?,
@@ -221,11 +221,11 @@ fn register_instance_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
         lua.create_function(move |lua, ()| {
             let s = state.borrow();
             Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string(&s.instance_name)?),      // name
-                Value::String(lua.create_string(&s.instance_type)?),      // instanceType
-                Value::Integer(s.instance_difficulty as i64),             // difficultyID
+                Value::String(lua.create_string(&s.world.instance_name)?),      // name
+                Value::String(lua.create_string(&s.world.instance_type)?),      // instanceType
+                Value::Integer(s.world.instance_difficulty as i64),             // difficultyID
                 Value::String(lua.create_string("")?),                    // difficultyName
-                Value::Integer(s.instance_max_players as i64),            // maxPlayers
+                Value::Integer(s.world.instance_max_players as i64),            // maxPlayers
                 Value::Integer(0),                                        // dynamicDifficulty
                 Value::Boolean(false),                                    // isDynamic
                 Value::Integer(0),                                        // instanceID
@@ -251,7 +251,7 @@ fn register_character_info_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     globals.set(
         "GetAverageItemLevel",
         lua.create_function(move |_, ()| {
-            let ilvl = state.borrow().player_item_level as f64;
+            let ilvl = state.borrow().player.item_level as f64;
             Ok((ilvl, ilvl, ilvl))
         })?,
     )?;
@@ -436,7 +436,7 @@ fn register_movement_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
     let globals = lua.globals();
     let mk = |field: fn(&super::super::state::MovementState) -> bool| {
         let st = Rc::clone(&state);
-        lua.create_function(move |_, ()| Ok(field(&st.borrow().movement)))
+        lua.create_function(move |_, ()| Ok(field(&st.borrow().player.movement)))
     };
     globals.set("IsPlayerMoving", mk(|m| m.moving)?)?;
     globals.set("IsMounted", mk(|m| m.mounted)?)?;
