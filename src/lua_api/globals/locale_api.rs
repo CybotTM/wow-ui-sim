@@ -20,10 +20,10 @@ fn register_build_info(lua: &Lua) -> Result<()> {
 
     let get_build_info = lua.create_function(|lua, ()| {
         Ok(mlua::MultiValue::from_vec(vec![
-            Value::String(lua.create_string("12.0.0")?),
-            Value::String(lua.create_string("65655")?),
-            Value::String(lua.create_string("Jan 28 2026")?),
-            Value::Integer(120000),
+            Value::String(lua.create_string("12.0.1")?),
+            Value::String(lua.create_string("66102")?),
+            Value::String(lua.create_string("Feb 23 2026")?),
+            Value::Integer(120001),
             Value::String(lua.create_string("")?),
             Value::String(lua.create_string(" ")?),
         ]))
