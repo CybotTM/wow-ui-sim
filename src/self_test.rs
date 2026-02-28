@@ -2,7 +2,7 @@
 
 use crate::lua_api::WowLuaEnv;
 use crate::lua_errors::restore_stdout;
-use crate::startup::{fire_one_on_update_tick, process_pending_timers};
+use crate::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
 
 /// Flush Lua print() output from console_output to stderr.
 fn flush_console(env: &WowLuaEnv) {
@@ -202,6 +202,132 @@ pub fn inject_category_filter(env: &WowLuaEnv, categories: &str) {
     eprintln!("[self-test] category filter: {categories}");
     if let Err(e) = env.exec(&lua_code) {
         eprintln!("[self-test] failed to set category filter: {e}");
+    }
+}
+
+/// Augment WowlessData with extra stubs not defined in wowless YAML.
+///
+/// Our sim registers C functions (stubs) that WowlessData doesn't know about.
+/// The `~cfuncs` test expects every C function to have a "true name" via `cfuncs.add`,
+/// which only runs in `checkCFunc` (created by `mkftests` for functions in WowlessData).
+/// Unknown functions only get `cfuncs.addAlias` → "no true name" failure.
+///
+/// This scans all namespaces and globals, adding missing C functions to WowlessData
+/// so the test generates proper `checkCFunc` entries for them.
+fn augment_wowless_data(env: &WowLuaEnv) {
+    let result = env.exec(AUGMENT_WOWLESS_DATA_LUA);
+    if let Err(e) = result {
+        eprintln!("[self-test] WowlessData augmentation error: {e}");
+    }
+}
+
+const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
+    if not WowlessData then return end
+    local nsapis = WowlessData.NamespaceApis
+    local gapis = WowlessData.GlobalApis
+    if not nsapis or not gapis then return end
+
+    -- Step 0: Collect function objects already claimed by WowlessData.
+    -- Each gets cfuncs.add (true name); adding duplicates causes
+    -- "multiple true names". Track them to avoid double-registering.
+    local claimed = {} -- func_object -> true
+    local ns_funcs = {} -- all namespace function objects (for alias detection)
+    for ns_name, ns_cfg in pairs(nsapis) do
+        local ns = _G[ns_name]
+        if type(ns) == 'table' then
+            for k, v in pairs(ns) do
+                if type(v) == 'function' then
+                    ns_funcs[v] = true
+                    if ns_cfg[k] then claimed[v] = true end
+                end
+            end
+        end
+    end
+    for k, _ in pairs(gapis) do
+        local v = _G[k]
+        if type(v) == 'function' then claimed[v] = true end
+    end
+
+    local added_ns, added_g = 0, 0
+
+    local function is_c_func(f)
+        return type(f) == 'function' and not pcall(coroutine.create, f)
+    end
+
+    -- Step 1: For known namespaces, add missing C functions
+    for ns_name, ns_cfg in pairs(nsapis) do
+        local ns = _G[ns_name]
+        if type(ns) == 'table' then
+            for k, v in pairs(ns) do
+                if is_c_func(v) and not ns_cfg[k] and not claimed[v] then
+                    ns_cfg[k] = true
+                    claimed[v] = true
+                    added_ns = added_ns + 1
+                end
+            end
+        end
+    end
+
+    -- Step 2: Add unknown C_* namespaces entirely
+    for k, v in pairs(_G) do
+        if type(v) == 'table' and type(k) == 'string'
+           and k:sub(1, 2) == 'C_' and not nsapis[k] then
+            local entry = {}
+            local any = false
+            for fk, fv in pairs(v) do
+                if is_c_func(fv) then
+                    ns_funcs[fv] = true
+                    if not claimed[fv] then
+                        entry[fk] = true
+                        claimed[fv] = true
+                        added_ns = added_ns + 1
+                        any = true
+                    end
+                end
+            end
+            if any then nsapis[k] = entry end
+        end
+    end
+
+    -- Step 3: Add standalone global C functions (not namespace aliases)
+    local cfg = WowlessData.Config.addon
+    local capsule = (cfg.capsule or {}).globalapis or {}
+    local hooked = cfg.hooked_globals or {}
+    for k, v in pairs(_G) do
+        if type(v) == 'function' and type(k) == 'string'
+           and not gapis[k] and not capsule[k] and not hooked[k] then
+            if not (pcall(coroutine.create, v)) and not ns_funcs[v] and not claimed[v] then
+                gapis[k] = true
+                claimed[v] = true
+                added_g = added_g + 1
+            end
+        end
+    end
+
+    A_Print(('[self-test] augmented WowlessData: +%d ns funcs, +%d globals'):format(added_ns, added_g))
+"#;
+
+/// Self-test startup: fire events, augment WowlessData, then OnUpdate ticks.
+///
+/// Unlike `run_headless_startup`, injects WowlessData augmentation BEFORE any
+/// OnUpdate ticks fire, so the test suite sees augmented data from the start.
+pub fn run_startup(env: &WowLuaEnv) {
+    fire_startup_events(env);
+    env.apply_post_event_workarounds();
+    env.state().borrow_mut().widgets.rebuild_anchor_index();
+    process_pending_timers(env);
+    augment_wowless_data(env);
+    fire_one_on_update_tick(env);
+    settle_extra_ticks(env);
+}
+
+fn settle_extra_ticks(env: &WowLuaEnv) {
+    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    std::thread::sleep(std::time::Duration::from_secs(2));
+    for _ in 0..3 {
+        env.state().borrow_mut().ensure_layout_rects();
+        fire_one_on_update_tick(env);
+        process_pending_timers(env);
     }
 }
 

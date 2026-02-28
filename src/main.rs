@@ -589,7 +589,7 @@ fn dispatch_command(
         }
         Some(Commands::SelfTest { max_ticks, categories }) => {
             if let Some(c) = &categories { wow_ui_sim::self_test::inject_category_filter(&env, c); }
-            run_headless_startup(&env);
+            wow_ui_sim::self_test::run_startup(&env);
             wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
         }
         Some(Commands::RunTests { addon_name }) => {

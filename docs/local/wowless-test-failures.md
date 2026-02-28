@@ -1,66 +1,109 @@
-# Wowless Self-Test Failures
+# Wowless Self-Test Status
 
-Results from `wow-sim --no-saved-vars self-test` against the Wowless addon test suite.
+Results from `wow-sim --no-saved-vars self-test --max-ticks 20000`.
+
+**Total: 97,282 sync + 4 async = 97,286 tests**
+**Passing: 92,319 sync + 1 async = 92,320 (94.9%)**
+**Failing: 4,962 sync + 3 async = 4,965 (5.1%)**
+
+## Category Filter
+
+Use `--categories` to run a subset:
+
+```bash
+# Run only failing categories (fast iteration)
+wow-sim --no-saved-vars self-test --categories "generated.globalApis,generated.globals,generated.impltests,generated.uiobjects,generated.~cfuncs,luaobjects,async"
+
+# Run a single sub-category
+wow-sim --no-saved-vars self-test --categories "generated.globalApis"
+```
+
+## Category Breakdown
+
+### Fully Passing (skip with --categories)
+
+| Category | Tests | Status |
+|---|---|---|
+| `sync` | ~1,000 | PASS |
+| `xml` | ~100 | PASS |
+| `uiobjects` (top-level) | ~500 | PASS |
+| `generated.apiNamespaces` | ~5,000 | PASS |
+| `generated.cvars` | ~1,000 | PASS |
+| `generated.events` | ~2,000 | PASS |
+
+### Failing Categories
+
+#### `generated.globals` (failures)
+
+Missing or incorrect global values/functions. Includes:
+- Missing LE_* enum constants (partially fixed)
+- Constants values from wowless YAML
+
+#### `generated.impltests` (failures)
+
+Implementation-specific tests for frame methods and behaviors. Various widget method issues.
+
+#### `generated.uiobjects` (bulk of failures)
+
+Frame type method tests. Major failure patterns:
+
+- **StatusBar methods**: `want "function", got "nil"` — many StatusBar-specific methods not on our StatusBar type (SetMinMaxValues, SetValue, SetOrientation, SetStatusBarColor, etc.)
+- **TabardModel/UnitPositionFrame**: Wrong GetObjectType results — our CreateFrame maps these to simpler types
+- **Texture**: `want false, got true` — Texture creation test expects something different
+- **Animation types** (TextureCoordTranslation, Translation, VertexColor): `attempt to index field 'AnimationGroup' (a nil value)` — animation system gaps
+- **Script handlers**: OnChar, OnGamePadButtonDown/Up, OnHyperlinkClick/Enter/Leave report `want true, got false` — HasScript check failures
+
+#### `generated.~cfuncs` (failures)
+
+C function uniqueness checker. Tests that each C function has exactly one "true name". Our Lua-implemented stubs (closures) don't satisfy this — `debug.getinfo` can't find a canonical name for them.
+
+~100 functions fail, mostly C_* namespace stubs that are Lua closures rather than native C functions.
+
+#### `luaobjects` (failures)
+
+- **LuaDurationObject**: `GetClockTime` method missing, `methodsunique` check fails
+- **UnitHealPredictionCalculator**: 17 methods missing (GetCurrentHealth, GetMaximumHealth, etc.), `methodsunique` check fails
+
+These are specialized Lua object types we haven't implemented yet.
+
+#### `async` (3 of 4 failing)
+
+| Test | Status | Issue |
+|---|---|---|
+| RequestTimePlayed | PASS | |
+| event registration and dispatch order | FAIL | Our dispatch is sequential (t1..t32), WoW interleaves by registration order within event buckets |
+| individual event reg before all | FAIL | RegisterAllEvents dispatch order: want a1,a2 got a2,a1 |
+| C_Timer.NewTimer | FAIL | Timer callback receives wrong LuaFunctionContainer pointer — tostring mismatch |
 
 ## Previously Fixed
 
-- **SetAllPoints implicit parent**: `SetAllPoints()` resolves to parent_id. Tests: `tests/methods_anchor.rs`
-- **Anchor cycle detection**: Raises Lua errors on cycles. Tests: `tests/methods_anchor.rs`
-- **GetNumPoints default**: Returns 0 on fresh frame. Test: `test_get_num_points_default_zero`
-- **$parent substitution**: Start-of-string, case-insensitive, ancestor chain walk, "Top" fallback. Tests: `tests/parent_sub.rs`
-- **CreateFrame with frame in name position**: Non-coercible name → name=nil, parent=nil. Test: `test_create_frame_with_frame_in_name_position`
-- **Taint error message**: `GetAttribute` validates arguments and reports addon name.
-- **Frame level**: `SetParent` only recalculates level when parent changes. Tests: `tests/frame_level.rs`
-- **$parent "Top" fallback**: `substitute_parent_name` uses `explicit_parent` (before UIParent fallback); `find_named_ancestor` skips UIParent → "Top" fallback. Tests: `tests/parent_sub.rs`
-- **SetAllPoints implicitscreen**: Added `default_parent` flag to Frame. SetAllPoints no-arg on default-parented frames stores None; explicit-parent stores parent_id. Tests: `tests/methods_anchor.rs`
-- **Anchor cycle error messages**: BFS cycle detection with Relative/Dependent/Dependent ancestors details, no "runtime error:" prefix. Tests: `tests/methods_anchor.rs`
-- **SetColorTexture GetTexture nil**: Headless behavior — SetColorTexture clears frame.texture so GetTexture returns nil. Tests: `tests/methods_texture.rs`
-- **Slider SetThumbTexture fileID**: Unknown fileIDs stored as raw string. GetTexture returns integer for numeric textures. Tests: `tests/methods_texture.rs`
-- **Font object**: CreateFont registry (same object on repeat), numeric name coercion, no-name error, SetFontObject cycle detection, IsObjectType. Tests: `tests/font_object.rs`
-- **StatusBar GetStatusBarTexture**: Returns nil on empty StatusBar (no auto-create). SetStatusBarTexture returns true.
-- **WorldFrame**: GetObjectType returns "Frame" (WoW quirk), IsObjectType("Frame") returns false, CreateFrame("WorldFrame") errors. Tests: `tests/global_frames.rs`
-- **Animation target**: SetTarget validates arguments — errors on nil/missing. Tests: wowless uiobjects.lua
-- **$parent ignoresanontop**: `find_named_ancestor` skips UIParent, falls back to "Top". Tests: `tests/parent_sub.rs`
-- **Texture SetColorTexture/SetTexture round-trip**: SetTexture stores original numeric file data ID in `texture_file_data_id`; GetTexture returns it as integer.
-- **CreateFrame unknown types**: CreateFrame errors on unrecognized type names (e.g. "WorldFrame"). Added "EventFrame" as alias for Frame.
-- **Region rect**: GetLeft/Right/Top/Bottom/Center/GetRect return nothing when no anchors. IsRectValid checks dirty flag without resolving. GetWidth/Height/Size(true) return explicit dimensions. SetSize no-op when unchanged.
-- **Font vfs**: Fresh CreateFont returns nil from GetFont (removed default `__fontPath`). Tests: `tests/font_api.rs`
-- **OnShow/OnHide mutual recursion**: Iterative handler loop with 12-invocation limit.
-- **RegisterEventCallback**: Stub returns `true` (was returning nothing).
-- **OnShow/OnHide ordering**: Children-first depth-first ordering (children fire before parents).
-- **Button states**: SetButtonState validates input (errors on invalid), GetButtonState returns "DISABLED" when disabled, Disable resets button_state.
-- **Button default children**: Removed 5 default children. Textures/text created lazily via Set* methods.
-- **Frame parent keys**: Added `parent_key` field to Frame for deterministic GetParentKey.
+- SetAllPoints implicit parent, anchor cycles, GetNumPoints, $parent substitution
+- CreateFrame with frame in name position, taint error messages
+- Frame level recalculation on SetParent
+- SetAllPoints implicitscreen, anchor cycle error messages
+- SetColorTexture/GetTexture round-trip, Slider SetThumbTexture fileID
+- Font object (CreateFont registry, numeric name, cycle detection)
+- StatusBar GetStatusBarTexture returns nil, WorldFrame quirks
+- Animation target validation, Texture SetTexture numeric ID
+- Region rect (GetLeft/Right/Top/Bottom/Center, IsRectValid)
+- Font vfs (GetFont returns nil on fresh CreateFont)
+- OnShow/OnHide mutual recursion (12-invocation limit)
+- RegisterEventCallback stub, OnShow/OnHide children-first ordering
+- Button states, default children, parent keys
+- All 72 generated.cvars failures (synced cvars.yaml from wowless)
+- string.format.impltype (rewritten patch in Rust)
+- apiNamespaces (regenerated stubs, fixed _tpath null handling)
+- Constants values (from wowless YAML)
+- generated.globalApis (5 impltype failures: newsecurefunction wrapping)
 
-## Remaining Failures (12)
+## A_Print Taint Bypass
 
-### Button text (1 failure)
+`print()` is intercepted by Elune's taint system after `debug.settaintmode('rw')`. Use `A_Print(...)` which reads the original print function from Lua registry, bypassing taint.
 
-`SetFontStringFtoG transition from ftext to gtext poststate`: want 0 regions, got 1. SetFontString needs to properly transfer/remove the FontString child when reassigning between buttons.
+## Test Runner Notes
 
-### StatusBar (1 failure)
-
-`SetStatusBarColor`: After SetStatusBarTexture + SetStatusBarColor, vertex color not applied to texture (want 0.8, got 1).
-
-### Event registration (1 sync failure)
-
-`none state`: Event count differs (want 2, got 1). IsEventRegistered may need to check both unit and non-unit registrations.
-
-### Event dispatch order (2 async failures)
-
-- `event dispatch order`: Async event ordering is non-deterministic
-- `individual event reg before all`: Registration order differs
-
-### ScrollingMessageFrame (5 failures)
-
-- `fn/wrapsarg`: SetOnTextCopiedCallback wrapper missing
-- `mixin/empty`: Mixin has extra entries
-- `mixin/metatable/*`: Method resolution order and metatable type wrong
-
-### SimpleCheckout (1 failure)
-
-Missing `SimpleCheckout`/`Checkout` frame type and forbidden frame support.
-
-### C_Timer.NewTimer (1 async failure)
-
-Callback receives unexpected `true` argument instead of nil.
+- test.lua creates an OnUpdate frame that iterates sync tests with a budget (~half frame time)
+- Sync tests run ~1000/tick in release mode, ~1.3s/tick
+- Full run takes ~8 minutes in release
+- `--categories` filter reduces to ~2 minutes for failing categories only
+- Two OnUpdate frames run (test.lua loaded during addon load, registers twice) — cosmetic duplicate output, doesn't affect results
