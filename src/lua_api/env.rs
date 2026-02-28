@@ -92,6 +92,11 @@ impl WowLuaEnv {
     pub fn apply_post_load_workarounds(&self) {
         super::workarounds::apply(self);
         let _ = super::globals::environment_restore::restore_environment_cleanup_stubs(&self.lua);
+        // Wrap seterrorhandler with newsecurefunction so coroutine.create rejects it.
+        // Done here because BugGrabber overwrites it during addon loading.
+        let _ = self.lua.load(
+            "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))"
+        ).exec();
     }
 
     /// Apply workarounds that must run after startup events.
@@ -637,17 +642,20 @@ fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value("__dispatch_on_update", dispatch)
 }
 
-/// Enable Elune taint tracking and wrap loadstring to mark addon code tainted.
+/// Enable Elune taint tracking and wrap loadstring/seterrorhandler as secure.
 fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
     lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
     lua.load(r#"
         do
-            local original = loadstring
+            local nsf = debug.newsecurefunction
+            local original_ls = loadstring
             local setstacktaint = debug.setstacktaint
-            loadstring = function(code, name)
+            loadstring = nsf(function(code, name)
                 setstacktaint("*** ForceTaint_Strong ***")
-                return original(code, name)
-            end
+                return original_ls(code, name)
+            end)
+            -- seterrorhandler: wrapped in apply_post_load_workarounds
+            -- (BugGrabber overwrites it during addon loading)
         end
     "#).exec()
 }

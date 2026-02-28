@@ -257,14 +257,16 @@ fn register_global_access(lua: &Lua) -> Result<()> {
 
     // Environment functions must be Lua (not Rust closures) for correct
     // getfenv/setfenv stack levels — level 2 reaches the actual caller.
+    // Wrapped with newsecurefunction so coroutine.create rejects them (C-like).
     lua.load(
         r#"
-        function GetCurrentEnvironment()
+        local nsf = debug.newsecurefunction
+        GetCurrentEnvironment = nsf(function()
             return getfenv(2)
-        end
-        function IsInGlobalEnvironment()
+        end)
+        IsInGlobalEnvironment = nsf(function()
             return getfenv(2) == _G
-        end
+        end)
     "#,
     )
     .exec()?;

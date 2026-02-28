@@ -239,6 +239,7 @@ fn event_callback_lua_src() -> &'static str {
         "    end\n",
         "    return not restricted_events[event]\n",
         "end\n",
+        "RegisterEventCallback = debug.newsecurefunction(RegisterEventCallback)\n",
     )
 }
 
