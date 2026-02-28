@@ -38,8 +38,9 @@ fn env_with_addons() -> WowLuaEnv {
 #[test]
 fn test_get_num_addons() {
     let env = env_with_addons();
+    // 2 test addons + 1 __BuiltIn pseudo-addon from init_builtin_frames
     let count: i32 = env.eval("return C_AddOns.GetNumAddOns()").unwrap();
-    assert_eq!(count, 2);
+    assert_eq!(count, 3);
 }
 
 // ============================================================================
@@ -49,8 +50,9 @@ fn test_get_num_addons() {
 #[test]
 fn test_get_addon_info_by_index() {
     let env = env_with_addons();
+    // Index 1 is __BuiltIn, test addons start at index 2
     let (name, title, notes, loadable): (String, String, String, bool) = env
-        .eval("return C_AddOns.GetAddOnInfo(1)")
+        .eval("return C_AddOns.GetAddOnInfo(2)")
         .unwrap();
     assert_eq!(name, "MyAddon");
     assert_eq!(title, "My Addon Title");
@@ -97,9 +99,10 @@ fn test_is_addon_loaded_by_name() {
 #[test]
 fn test_is_addon_loaded_by_index() {
     let env = env_with_addons();
-    let loaded: bool = env.eval("return C_AddOns.IsAddOnLoaded(1)").unwrap();
+    // Index 2 = MyAddon (loaded), Index 3 = LODAddon (not loaded)
+    let loaded: bool = env.eval("return C_AddOns.IsAddOnLoaded(2)").unwrap();
     assert!(loaded);
-    let not_loaded: bool = env.eval("return C_AddOns.IsAddOnLoaded(2)").unwrap();
+    let not_loaded: bool = env.eval("return C_AddOns.IsAddOnLoaded(3)").unwrap();
     assert!(!not_loaded);
 }
 
@@ -149,15 +152,16 @@ fn test_enable_disable_addon_by_name() {
 #[test]
 fn test_enable_disable_addon_by_index() {
     let env = env_with_addons();
-    env.eval::<()>("C_AddOns.DisableAddOn(1)").unwrap();
+    // Index 2 = MyAddon
+    env.eval::<()>("C_AddOns.DisableAddOn(2)").unwrap();
     let state: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(1)")
+        .eval("return C_AddOns.GetAddOnEnableState(2)")
         .unwrap();
     assert_eq!(state, 0);
 
-    env.eval::<()>("C_AddOns.EnableAddOn(1)").unwrap();
+    env.eval::<()>("C_AddOns.EnableAddOn(2)").unwrap();
     let state: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(1)")
+        .eval("return C_AddOns.GetAddOnEnableState(2)")
         .unwrap();
     assert_eq!(state, 2);
 }
@@ -170,21 +174,22 @@ fn test_enable_disable_addon_by_index() {
 fn test_enable_all_disable_all() {
     let env = env_with_addons();
     env.eval::<()>("C_AddOns.DisableAllAddOns()").unwrap();
+    // Index 2 = MyAddon, Index 3 = LODAddon
     let s1: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(1)")
+        .eval("return C_AddOns.GetAddOnEnableState(2)")
         .unwrap();
     let s2: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(2)")
+        .eval("return C_AddOns.GetAddOnEnableState(3)")
         .unwrap();
     assert_eq!(s1, 0);
     assert_eq!(s2, 0);
 
     env.eval::<()>("C_AddOns.EnableAllAddOns()").unwrap();
     let s1: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(1)")
+        .eval("return C_AddOns.GetAddOnEnableState(2)")
         .unwrap();
     let s2: i32 = env
-        .eval("return C_AddOns.GetAddOnEnableState(2)")
+        .eval("return C_AddOns.GetAddOnEnableState(3)")
         .unwrap();
     assert_eq!(s1, 2);
     assert_eq!(s2, 2);
@@ -247,19 +252,21 @@ fn test_does_addon_exist() {
 #[test]
 fn test_get_addon_name_title_notes() {
     let env = env_with_addons();
-    let name: String = env.eval("return C_AddOns.GetAddOnName(1)").unwrap();
+    // Index 2 = MyAddon
+    let name: String = env.eval("return C_AddOns.GetAddOnName(2)").unwrap();
     assert_eq!(name, "MyAddon");
-    let title: String = env.eval("return C_AddOns.GetAddOnTitle(1)").unwrap();
+    let title: String = env.eval("return C_AddOns.GetAddOnTitle(2)").unwrap();
     assert_eq!(title, "My Addon Title");
-    let notes: String = env.eval("return C_AddOns.GetAddOnNotes(1)").unwrap();
+    let notes: String = env.eval("return C_AddOns.GetAddOnNotes(2)").unwrap();
     assert_eq!(notes, "A test addon");
 }
 
 #[test]
 fn test_get_addon_notes_empty() {
     let env = env_with_addons();
+    // Index 3 = LODAddon (empty notes)
     let is_nil: bool = env
-        .eval("return C_AddOns.GetAddOnNotes(2) == nil")
+        .eval("return C_AddOns.GetAddOnNotes(3) == nil")
         .unwrap();
     assert!(is_nil, "Empty notes should return nil");
 }
@@ -271,7 +278,8 @@ fn test_get_addon_notes_empty() {
 #[test]
 fn test_get_addon_security() {
     let env = env_with_addons();
-    let sec: String = env.eval("return C_AddOns.GetAddOnSecurity(1)").unwrap();
+    // Index 2 = MyAddon
+    let sec: String = env.eval("return C_AddOns.GetAddOnSecurity(2)").unwrap();
     assert_eq!(sec, "INSECURE");
 }
 
@@ -302,8 +310,9 @@ fn test_version_check_toggle() {
 #[test]
 fn test_legacy_get_num_addons() {
     let env = env_with_addons();
+    // 2 test addons + 1 __BuiltIn
     let count: i32 = env.eval("return GetNumAddOns()").unwrap();
-    assert_eq!(count, 2);
+    assert_eq!(count, 3);
 }
 
 #[test]
@@ -375,10 +384,10 @@ fn test_legacy_is_addon_load_on_demand() {
 #[test]
 fn test_profiler_app_vs_overall_metric_differ() {
     let env = env_with_addons();
-    // Create a frame owned by MyAddon (index 0) with a busy OnUpdate handler.
+    // Create a frame owned by MyAddon (index 1; index 0 is __BuiltIn).
     {
         let mut state = env.state().borrow_mut();
-        state.loading_addon_index = Some(0);
+        state.loading_addon_index = Some(1);
     }
     env.eval::<()>(r#"
         local f = CreateFrame("Frame", "ProfTestFrame", UIParent)

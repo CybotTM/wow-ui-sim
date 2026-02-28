@@ -410,16 +410,40 @@ impl WowLuaEnv {
     ///
     /// A single Rust→Lua call dispatches all handlers, avoiding per-handler
     /// FFI overhead (string formatting, table lookups, frame ref retrieval).
+    /// Returns per-addon timing to Rust for profiler attribution.
     fn dispatch_handlers_lua(&self, frame_ids: &[u64], elapsed: f64, suffix: &str) {
         let dispatch: mlua::Function = self.lua
             .named_registry_value("__dispatch_on_update")
             .expect("__dispatch_on_update not registered");
         let ids_table = self.lua.create_table().unwrap();
-        for (i, id) in frame_ids.iter().enumerate() {
-            ids_table.set(i + 1, *id as i64).unwrap();
+        let owners_table = self.lua.create_table().unwrap();
+        let state = self.state.borrow();
+        for (i, &id) in frame_ids.iter().enumerate() {
+            ids_table.set(i + 1, id as i64).unwrap();
+            let owner = state.widgets.get(id)
+                .and_then(|f| f.owner_addon)
+                .map(|idx| idx as i64)
+                .unwrap_or(-1);
+            owners_table.set(i + 1, owner).unwrap();
         }
-        if let Err(e) = dispatch.call::<()>((ids_table, elapsed, suffix)) {
-            eprintln!("[OnUpdate] dispatch error: {e}");
+        drop(state);
+        match dispatch.call::<mlua::Table>((ids_table, elapsed, suffix, owners_table)) {
+            Ok(timing) => self.apply_addon_timing(&timing),
+            Err(e) => eprintln!("[OnUpdate] dispatch error: {e}"),
+        }
+    }
+
+    /// Apply per-addon timing from Lua dispatch to addon metrics.
+    fn apply_addon_timing(&self, timing: &mlua::Table) {
+        let mut state = self.state.borrow_mut();
+        for pair in timing.pairs::<i64, f64>() {
+            if let Ok((idx, ms)) = pair {
+                if idx >= 0 {
+                    if let Some(addon) = state.addons.get_mut(idx as usize) {
+                        addon.runtime.current_frame_ms += ms;
+                    }
+                }
+            }
         }
     }
 
@@ -590,13 +614,15 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
 
 /// Lua source for the OnUpdate dispatch loop. Runs all handlers in pure Lua
 /// and logs any individual handler that takes >5ms to stderr.
+/// Accepts an owners table (parallel to ids) and returns per-addon timing.
 const ON_UPDATE_DISPATCH_LUA: &str = r#"
     local scripts = debug.getregistry().__scripts
     local G = _G
     local stderr = io.stderr
-    return function(ids, elapsed, suffix)
+    return function(ids, elapsed, suffix, owners)
         local profile = debugprofilestop
         local handler = geterrorhandler()
+        local timing = {}
         for i = 1, #ids do
             local id = ids[i]
             local func = scripts[id .. suffix]
@@ -611,9 +637,14 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
                         stderr:write(string.format("  [OnUpdate] %7.1fms  %s%s\n", dt, n, suffix))
                     end
                     if not ok then handler(err) end
+                    local owner = owners[i]
+                    if owner >= 0 then
+                        timing[owner] = (timing[owner] or 0) + dt
+                    end
                 end
             end
         end
+        return timing
     end
 "#;
 
