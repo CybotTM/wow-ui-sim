@@ -2,14 +2,17 @@
 //!
 //! Contains collection journal API functions for various game collectibles.
 
+use crate::lua_api::state::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Register collection-related C_* namespaces.
-pub fn register_c_collection_api(lua: &Lua) -> Result<()> {
+pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_pet_journal(lua)?;
     register_mount_journal(lua)?;
     register_toy_box(lua)?;
-    register_transmog_collection(lua)?;
+    register_transmog_collection(lua, state)?;
     register_transmog(lua)?;
     register_transmog_util(lua)?;
     register_heirloom(lua)?;
@@ -138,11 +141,11 @@ fn register_toy_box(lua: &Lua) -> Result<()> {
 }
 
 /// C_TransmogCollection namespace - transmog/appearance collection.
-fn register_transmog_collection(lua: &Lua) -> Result<()> {
+fn register_transmog_collection(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     register_transmog_appearance_methods(lua, &t)?;
     register_transmog_outfit_methods(lua, &t)?;
-    register_transmog_source_methods(lua, &t)?;
+    register_transmog_source_methods(lua, &t, &state)?;
     lua.globals().set("C_TransmogCollection", t)?;
     Ok(())
 }
@@ -208,19 +211,23 @@ fn register_transmog_outfit_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 }
 
 /// Source and player ownership methods: transmog checks, filters, item info.
-fn register_transmog_source_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set(
-        "PlayerHasTransmog",
-        lua.create_function(|_, (_item_id, _appearance_mod): (i32, Option<i32>)| Ok(false))?,
-    )?;
-    t.set(
-        "PlayerHasTransmogByItemInfo",
-        lua.create_function(|_, _item_info: String| Ok(false))?,
-    )?;
-    t.set(
-        "PlayerHasTransmogItemModifiedAppearance",
-        lua.create_function(|_, _item_modified_appearance_id: i32| Ok(false))?,
-    )?;
+fn register_transmog_source_methods(
+    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let s = Rc::clone(state);
+    t.set("PlayerHasTransmog", lua.create_function(move |_, (item_id, _appearance_mod): (i32, Option<i32>)| {
+        Ok(s.borrow().collected_transmogs.contains(&item_id))
+    })?)?;
+    let s = Rc::clone(state);
+    t.set("PlayerHasTransmogByItemInfo", lua.create_function(move |_, item_info: String| {
+        // Parse item_id from "item:12345:..." link format.
+        let id = item_info.split(':').nth(1).and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
+        Ok(s.borrow().collected_transmogs.contains(&id))
+    })?)?;
+    let s = Rc::clone(state);
+    t.set("PlayerHasTransmogItemModifiedAppearance", lua.create_function(move |_, id: i32| {
+        Ok(s.borrow().collected_transmogs.contains(&id))
+    })?)?;
     t.set(
         "GetItemInfo",
         lua.create_function(|_, _item_modified_appearance_id: i32| Ok(Value::Nil))?,

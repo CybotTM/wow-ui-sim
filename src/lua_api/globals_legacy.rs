@@ -594,8 +594,8 @@ fn register_stateless_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_constants_api(lua)?;
     register_c_map_api(lua, Rc::clone(state))?;
     register_c_quest_api(lua)?;
-    register_c_collection_api(lua)?;
-    register_c_item_api(lua)?;
+    register_c_collection_api(lua, Rc::clone(state))?;
+    register_c_item_api(lua, Rc::clone(state))?;
     register_c_misc_api(lua, Rc::clone(state))?;
     register_c_system_api(lua)?;
     register_c_stubs_api(lua, Rc::clone(state))?;

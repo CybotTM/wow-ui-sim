@@ -246,21 +246,114 @@ fn test_c_container_get_num_slots_other_bag() {
 }
 
 #[test]
-fn test_c_container_get_item_id_populated_slot() {
+fn test_c_container_get_item_id_empty_by_default() {
     let env = env();
-    let id: i64 = env
-        .eval("return C_Container.GetContainerItemID(0, 1)")
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
         .unwrap();
-    assert_eq!(id, 6948, "Slot 1 should contain Hearthstone");
+    assert!(is_nil, "Bags should be empty by default");
 }
 
 #[test]
-fn test_c_container_get_item_id_empty_slot() {
+fn test_c_container_add_bag_item_via_admin() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 5)").unwrap();
+    let id: i64 = env
+        .eval("return C_Container.GetContainerItemID(0, 1)")
+        .unwrap();
+    assert_eq!(id, 6948);
+}
+
+#[test]
+fn test_c_container_get_item_info_after_add() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 3, 6948, 10)").unwrap();
+    let stack: i32 = env
+        .eval("local info = C_Container.GetContainerItemInfo(0, 3); return info.stackCount")
+        .unwrap();
+    assert_eq!(stack, 10);
+}
+
+#[test]
+fn test_c_container_get_item_info_empty_slot_nil() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_Container.GetContainerItemID(0, 2) == nil")
+        .eval("return C_Container.GetContainerItemInfo(0, 1) == nil")
         .unwrap();
-    assert!(is_nil, "Slot 2 should be empty");
+    assert!(is_nil, "Empty slot should return nil");
+}
+
+#[test]
+fn test_c_container_remove_bag_item() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.RemoveBagItem(0, 1)").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
+        .unwrap();
+    assert!(is_nil, "Removed item should be nil");
+}
+
+#[test]
+fn test_c_container_clear_bags() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 2, 6948, 1)").unwrap();
+    env.exec("A_Admin.ClearBags()").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
+fn test_c_container_free_slots_tracks_items() {
+    let env = env();
+    let (free, _): (i32, i32) = env
+        .eval("return C_Container.GetContainerNumFreeSlots(0)")
+        .unwrap();
+    assert_eq!(free, 16, "Empty backpack should have 16 free slots");
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
+    let (free2, _): (i32, i32) = env
+        .eval("return C_Container.GetContainerNumFreeSlots(0)")
+        .unwrap();
+    assert_eq!(free2, 14, "Should have 14 free after adding 2 items");
+}
+
+#[test]
+fn test_c_container_has_item() {
+    let env = env();
+    let has: bool = env
+        .eval("return C_Container.HasContainerItem(0, 1)")
+        .unwrap();
+    assert!(!has, "Empty slot should return false");
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    let has: bool = env
+        .eval("return C_Container.HasContainerItem(0, 1)")
+        .unwrap();
+    assert!(has, "Occupied slot should return true");
+}
+
+#[test]
+fn test_c_container_get_item_link_after_add() {
+    let env = env();
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    let link: String = env
+        .eval("return C_Container.GetContainerItemLink(0, 1)")
+        .unwrap();
+    assert!(link.contains("Hearthstone"), "Link should contain item name");
+}
+
+#[test]
+fn test_c_container_default_stack_count_is_one() {
+    let env = env();
+    // AddBagItem without explicit stack count defaults to 1
+    env.exec("A_Admin.AddBagItem(0, 1, 6948)").unwrap();
+    let stack: i32 = env
+        .eval("local info = C_Container.GetContainerItemInfo(0, 1); return info.stackCount")
+        .unwrap();
+    assert_eq!(stack, 1);
 }
 
 // ============================================================================

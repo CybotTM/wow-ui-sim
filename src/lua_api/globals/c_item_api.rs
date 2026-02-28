@@ -2,12 +2,15 @@
 //!
 //! Contains item information, container, encoding utilities, and inventory slot functions.
 
+use crate::lua_api::state::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Register item-related C_* namespaces and global functions.
-pub fn register_c_item_api(lua: &Lua) -> Result<()> {
+pub fn register_c_item_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_c_item(lua)?;
-    super::c_container_api::register_c_container_api(lua)?;
+    super::c_container_api::register_c_container_api(lua, state)?;
     register_c_encoding_util(lua)?;
     register_legacy_item_globals(lua)?;
     register_spell_globals(lua)?;

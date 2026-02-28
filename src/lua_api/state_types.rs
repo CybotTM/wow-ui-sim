@@ -124,6 +124,13 @@ pub struct GreatVaultActivity {
     pub level: i32,
 }
 
+/// An item in a bag slot.
+#[derive(Debug, Clone)]
+pub struct BagItem {
+    pub item_id: u32,
+    pub stack_count: i32,
+}
+
 /// Simulated player movement flags (all false = stationary).
 #[derive(Debug, Clone, Default)]
 pub struct MovementState {

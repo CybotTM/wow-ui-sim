@@ -20,7 +20,7 @@ pub use super::game_data::{
 };
 pub use super::game_data::SpellCooldownState;
 pub use super::state_types::{
-    CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
+    BagItem, CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
     AddonInfo, GreatVaultActivity, MovementState,
 };
 use super::game_data::{
@@ -184,6 +184,9 @@ pub struct SimState {
     pub great_vault_has_rewards: bool,
     pub great_vault_can_claim: bool,
 
+    // Bags/Inventory: (bag_index, slot_index) → BagItem
+    pub bag_items: HashMap<(i32, i32), BagItem>,
+
     // Collections
     pub collected_transmogs: HashSet<i32>,
     pub collected_mounts: HashSet<i32>,
@@ -220,6 +223,7 @@ impl SimState {
             anim_frame_to_group: d!(), anim_frame_to_anim: d!(),
             on_update_frames: d!(), pending_hit_grid_changes: d!(),
             action_bars: d!(), addon_base_paths: d!(), spell_cooldowns: d!(), action_ui_buttons: d!(),
+            bag_items: d!(),
             focused_frame_id: None, visible_on_update_cache: None, strata_buckets: None,
             mouse_position: None, hovered_frame: None, current_target: None, current_focus: None,
             sound_manager: None, casting: None, gcd: None, cursor_item: None,
@@ -264,6 +268,16 @@ impl SimState {
     /// Return default player stats: (health, health_max, class_index, spec_index).
     fn default_player_stats() -> (i32, i32, i32, i32) {
         (100_000, 100_000, 2, 2)  // Paladin, Protection spec
+    }
+
+    /// Look up bag item at (bag, slot). Returns (item_id, stack_count).
+    pub fn get_bag_item(&self, bag: i32, slot: i32) -> Option<(u32, i32)> {
+        self.bag_items.get(&(bag, slot)).map(|i| (i.item_id, i.stack_count))
+    }
+
+    /// Count occupied slots in a bag.
+    pub fn bag_occupied_slots(&self, bag: i32) -> i32 {
+        self.bag_items.keys().filter(|(b, _)| *b == bag).count() as i32
     }
 }
 

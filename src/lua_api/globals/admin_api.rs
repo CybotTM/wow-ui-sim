@@ -31,6 +31,7 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_event_api(lua, &admin, Rc::clone(&state))?;
     register_vault_api(lua, &admin, Rc::clone(&state))?;
     register_action_bar_api(lua, &admin, Rc::clone(&state))?;
+    register_bag_api(lua, &admin, Rc::clone(&state))?;
 
     lua.globals().set("A_Admin", admin)?;
     Ok(())
@@ -697,6 +698,35 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
             st.great_vault_can_claim = false;
             Ok(())
         }
+    })?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Bags / Inventory
+// ---------------------------------------------------------------------------
+
+fn register_bag_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    set_fn(lua, t, "AddBagItem", {
+        let s = Rc::clone(&state);
+        move |_, (bag, slot, item_id, stack): (i32, i32, u32, Option<i32>)| {
+            let item = crate::lua_api::state::BagItem {
+                item_id, stack_count: stack.unwrap_or(1),
+            };
+            s.borrow_mut().bag_items.insert((bag, slot), item);
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "RemoveBagItem", {
+        let s = Rc::clone(&state);
+        move |_, (bag, slot): (i32, i32)| {
+            s.borrow_mut().bag_items.remove(&(bag, slot));
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "ClearBags", {
+        let s = Rc::clone(&state);
+        move |_, ()| { s.borrow_mut().bag_items.clear(); Ok(()) }
     })?;
     Ok(())
 }
