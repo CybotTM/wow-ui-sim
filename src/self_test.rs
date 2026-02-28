@@ -168,6 +168,43 @@ fn debug_print(env: &WowLuaEnv) {
     eprintln!("[self-test] WowlessTestsDone = {:?}", tests_done(env));
 }
 
+/// Set `__wowsim_test_filter` Lua global to restrict which categories run.
+///
+/// Format: comma-separated, dot for sub-categories.
+/// Examples: `"generated.globalApis,luaobjects"`, `"generated"` (all sub-cats).
+/// Must be called before `run_headless_startup` so the filter is active
+/// when the test iterator first runs during OnUpdate ticks.
+pub fn inject_category_filter(env: &WowLuaEnv, categories: &str) {
+    use std::collections::HashMap;
+    let mut top: HashMap<&str, Vec<&str>> = HashMap::new();
+    for entry in categories.split(',') {
+        let entry = entry.trim();
+        if entry.is_empty() { continue; }
+        if let Some((cat, sub)) = entry.split_once('.') {
+            top.entry(cat).or_default().push(sub);
+        } else {
+            top.entry(entry).or_default(); // empty vec = run all
+        }
+    }
+    let mut lua_code = String::from("__wowsim_test_filter = {\n");
+    for (cat, subs) in &top {
+        if subs.is_empty() {
+            lua_code += &format!("  [\"{cat}\"] = true,\n");
+        } else {
+            lua_code += &format!("  [\"{cat}\"] = {{ ");
+            for sub in subs {
+                lua_code += &format!("[\"{sub}\"] = true, ");
+            }
+            lua_code += "},\n";
+        }
+    }
+    lua_code += "}\n";
+    eprintln!("[self-test] category filter: {categories}");
+    if let Err(e) = env.exec(&lua_code) {
+        eprintln!("[self-test] failed to set category filter: {e}");
+    }
+}
+
 /// Override debugprofilestop with real wall-clock timer.
 fn override_debugprofilestop(env: &WowLuaEnv) {
     let lua = env.lua();
@@ -180,7 +217,10 @@ fn override_debugprofilestop(env: &WowLuaEnv) {
     );
 }
 
-pub fn run_test(env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>, saved_stdout: Option<i32>) {
+pub fn run_test(
+    env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>,
+    saved_stdout: Option<i32>,
+) {
     if let Some(code) = exec_lua {
         if let Err(e) = env.exec(code) {
             eprintln!("[exec-lua] error: {e}");

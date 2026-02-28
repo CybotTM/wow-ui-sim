@@ -103,6 +103,9 @@ enum Commands {
         /// Maximum OnUpdate ticks before timeout
         #[arg(long, default_value_t = 10000)]
         max_ticks: u32,
+        /// Run only these categories (e.g. "generated.globalApis,luaobjects,async")
+        #[arg(long)]
+        categories: Option<String>,
     },
 
     /// Run test Lua files from Interface/AddOns/<name>/tests/
@@ -202,43 +205,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let exec_lua = resolve_exec_lua(&args.exec_lua);
 
-    match args.command {
-        Some(Commands::DumpTree { filter, filter_key, visible_only, width, height }) => {
-            run_dump_tree(&env, filter, filter_key, visible_only, width, height, args.delay, exec_lua.as_deref());
-        }
-        #[cfg(feature = "gui")]
-        Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
-            run_screenshot(&env, &font_system, output, width, height, filter, crop, args.delay, exec_lua.as_deref(), dump_tree);
-        }
-        Some(Commands::LuaErrors) => {
-            wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
-        }
-        Some(Commands::SelfTest { max_ticks }) => {
-            run_headless_startup(&env);
-            wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
-        }
-        Some(Commands::RunTests { addon_name }) => {
-            run_headless_startup(&env);
-            wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
-        }
-        #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture { output, filter, frame_filter }) => {
-            run_dump_texture(&env, &font_system, output, filter, frame_filter);
-        }
-        #[cfg(feature = "gui")]
-        None => {
-            let debug = wow_ui_sim::DebugOptions {
-                borders: args.debug_borders || args.debug_elements,
-                anchors: args.debug_anchors || args.debug_elements,
-            };
-            wow_ui_sim::run_iced_ui(env, debug, saved_vars, exec_lua)?;
-        }
-        #[cfg(not(feature = "gui"))]
-        None => {
-            eprintln!("GUI not available (compiled without 'gui' feature). Use a subcommand: dump-tree, lua-errors, self-test, run-tests");
-            std::process::exit(1);
-        }
-    }
+    dispatch_command(args.command, env, font_system, args.delay, exec_lua, saved_stdout, saved_vars, args.debug_borders, args.debug_anchors, args.debug_elements)?;
 
     Ok(())
 }
@@ -519,19 +486,6 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
 }
 
 /// Run /tmp/debug-scrollbox-update.lua after startup events (ShowUIPanel needs them).
-fn run_debug_script(env: &WowLuaEnv) {
-    let path = PathBuf::from("/tmp/debug-scrollbox-update.lua");
-    if let Ok(script) = std::fs::read_to_string(&path) {
-        if let Err(e) = env.exec(&script) {
-            println!("[Debug] Script error: {}", e);
-        }
-    }
-}
-
-/// Process pending timers (deferred template wiring, addon callbacks, etc.).
-///
-/// In GUI mode timers fire every frame, but headless paths (screenshot, dump-tree)
-/// must explicitly drain them. Loops until no more timers fire (handles chaining).
 use wow_ui_sim::startup::{
     apply_delay, fire_one_on_update_tick, fire_startup_events, process_pending_timers,
 };
@@ -543,11 +497,6 @@ fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
         fire_one_on_update_tick(env);
         process_pending_timers(env);
     }
-}
-
-#[cfg(feature = "gui")]
-fn debug_show_game_menu(env: &WowLuaEnv) {
-    wow_ui_sim::debug_helpers::debug_show_game_menu(env);
 }
 
 #[cfg(feature = "gui")]
@@ -618,6 +567,56 @@ fn build_screenshot_batch(
     (batch, glyph_atlas)
 }
 
+/// Dispatch the CLI subcommand after environment and addons are loaded.
+#[allow(clippy::too_many_arguments)]
+fn dispatch_command(
+    command: Option<Commands>, env: WowLuaEnv,
+    font_system: Rc<RefCell<WowFontSystem>>, delay: Option<u64>,
+    exec_lua: Option<String>, saved_stdout: Option<i32>,
+    saved_vars: Option<SavedVariablesManager>,
+    debug_borders: bool, debug_anchors: bool, debug_elements: bool,
+) -> Result<(), Box<dyn std::error::Error>> {
+    match command {
+        Some(Commands::DumpTree { filter, filter_key, visible_only, width, height }) => {
+            run_dump_tree(&env, filter, filter_key, visible_only, width, height, delay, exec_lua.as_deref());
+        }
+        #[cfg(feature = "gui")]
+        Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
+            run_screenshot(&env, &font_system, output, width, height, filter, crop, delay, exec_lua.as_deref(), dump_tree);
+        }
+        Some(Commands::LuaErrors) => {
+            wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
+        }
+        Some(Commands::SelfTest { max_ticks, categories }) => {
+            if let Some(c) = &categories { wow_ui_sim::self_test::inject_category_filter(&env, c); }
+            run_headless_startup(&env);
+            wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
+        }
+        Some(Commands::RunTests { addon_name }) => {
+            run_headless_startup(&env);
+            wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
+        }
+        #[cfg(feature = "gui")]
+        Some(Commands::DumpTexture { output, filter, frame_filter }) => {
+            run_dump_texture(&env, &font_system, output, filter, frame_filter);
+        }
+        #[cfg(feature = "gui")]
+        None => {
+            let debug = wow_ui_sim::DebugOptions {
+                borders: debug_borders || debug_elements,
+                anchors: debug_anchors || debug_elements,
+            };
+            wow_ui_sim::run_iced_ui(env, debug, saved_vars, exec_lua)?;
+        }
+        #[cfg(not(feature = "gui"))]
+        None => {
+            eprintln!("GUI not available (compiled without 'gui' feature).");
+            std::process::exit(1);
+        }
+    }
+    Ok(())
+}
+
 /// Run startup events, timers, and settle the UI state for headless subcommands.
 fn run_headless_startup(env: &WowLuaEnv) {
     fire_startup_events(env);
@@ -626,7 +625,7 @@ fn run_headless_startup(env: &WowLuaEnv) {
     process_pending_timers(env);
     fire_one_on_update_tick(env);
     let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
-    run_debug_script(env);
+    if let Ok(s) = std::fs::read_to_string("/tmp/debug-scrollbox-update.lua") { let _ = env.exec(&s); }
     std::thread::sleep(std::time::Duration::from_secs(2));
     run_extra_update_ticks(env, 3);
 }
@@ -668,7 +667,7 @@ fn run_screenshot(
 
     env.set_screen_size(width as f32, height as f32);
     run_headless_startup(env);
-    debug_show_game_menu(env);
+    wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     if let Some(code) = exec_lua
         && let Err(e) = env.exec(code) {
             eprintln!("[exec-lua] error: {e}");
