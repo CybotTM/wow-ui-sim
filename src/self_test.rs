@@ -69,10 +69,15 @@ fn tick_debug(env: &WowLuaEnv) -> String {
 }
 
 /// Run one tick: fire OnUpdate + timers, return (errors_before, errors_after, duration).
+///
+/// Uses 40ms elapsed (vs 16ms normal) to give the Wowless test runner more
+/// budget per tick (`elapsed * 1000 / 2` = 20ms vs 8ms), reducing total ticks.
 fn run_one_tick(env: &WowLuaEnv) -> (usize, usize, std::time::Duration) {
     let before = env.state().borrow().lua_errors.len();
     let t0 = std::time::Instant::now();
-    fire_one_on_update_tick(env);
+    if let Err(e) = env.fire_on_update(0.040) {
+        eprintln!("[OnUpdate tick] error: {e}");
+    }
     process_pending_timers(env);
     (before, env.state().borrow().lua_errors.len(), t0.elapsed())
 }
