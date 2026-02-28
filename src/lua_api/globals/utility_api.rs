@@ -256,16 +256,17 @@ fn register_global_access(lua: &Lua) -> Result<()> {
     // loadstring: provided by Elune's luaopen_base, wrapped with taint in env.rs
 
     // Environment functions must be Lua (not Rust closures) for correct
-    // getfenv/setfenv stack levels — level 2 reaches the actual caller.
-    // Wrapped with newsecurefunction so coroutine.create rejects them (C-like).
+    // getfenv/setfenv stack levels.  newsecurefunction wraps the inner Lua
+    // function in a C closure, adding one extra stack frame.  So level 3
+    // (not 2) reaches the actual caller.
     lua.load(
         r#"
         local nsf = debug.newsecurefunction
         GetCurrentEnvironment = nsf(function()
-            return getfenv(2)
+            return getfenv(3)
         end)
         IsInGlobalEnvironment = nsf(function()
-            return getfenv(2) == _G
+            return getfenv(3) == _G
         end)
     "#,
     )

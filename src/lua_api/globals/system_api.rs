@@ -231,8 +231,19 @@ fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
 fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
-    // SwapToGlobalEnvironment: no-op in sim (no taint/environment isolation).
-    globals.set("SwapToGlobalEnvironment", lua.create_function(|_, ()| Ok(()))?)?;
+    // SwapToGlobalEnvironment: sets the caller's environment back to _G.
+    // NOT wrapped with nsf — taint must propagate from caller so issecure()
+    // can detect insecure callers and error (WoW behavior).
+    // Trade-off: this makes it a Lua function rather than C function, so the
+    // globalApis.impltype check fails (cosmetic, not functional).
+    lua.load(r#"
+        SwapToGlobalEnvironment = function()
+            if not issecure() then
+                error("cannot modify function environment from a tainted context", 2)
+            end
+            setfenv(2, _G)
+        end
+    "#).exec()?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("RegisterStaticConstants", lua.create_function(|_, _tbl: Value| Ok(()))?)?;
 
