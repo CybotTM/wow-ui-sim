@@ -26,7 +26,7 @@ fn register_pcall(lua: &Lua) -> Result<()> {
             // All other error values are converted to string and traceback-stripped.
             if result_vec.len() > 1 && !matches!(result_vec[1], Value::Nil) {
                 let msg = error_to_string(lua, &tostring, &result_vec[1])?;
-                let clean = strip_traceback(&msg);
+                let clean = strip_error_wrapper(&msg);
                 result_vec[1] = Value::String(lua.create_string(clean)?);
             }
         }
@@ -47,8 +47,11 @@ fn error_to_string(_lua: &Lua, tostring: &mlua::Function, val: &Value) -> Result
     }
 }
 
-/// Strip mlua's stack traceback suffix and trailing newlines from error messages.
-fn strip_traceback(msg: &str) -> &str {
+/// Strip mlua's "runtime error: " prefix, stack traceback suffix, and trailing newlines.
+fn strip_error_wrapper(msg: &str) -> &str {
+    let msg = msg
+        .strip_prefix("runtime error: ")
+        .unwrap_or(msg);
     let msg = match msg.find("\nstack traceback:") {
         Some(pos) => &msg[..pos],
         None => msg,
@@ -108,7 +111,9 @@ fn call_with_handler(
             Ok(ret)
         }
         Err(e) => {
-            let error_msg = lua.create_string(e.to_string())?;
+            let raw = e.to_string();
+            let clean = strip_error_wrapper(&raw);
+            let error_msg = lua.create_string(clean)?;
             let handler_result = error_handler.call::<Value>(Value::String(error_msg));
             let mut ret = MultiValue::new();
             ret.push_back(Value::Boolean(false));
