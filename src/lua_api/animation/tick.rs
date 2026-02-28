@@ -235,7 +235,7 @@ fn apply_flipbook_uv(
 }
 
 /// Apply flipbook UV effects for a group (used when pausing to show current frame).
-pub(super) fn apply_flipbook_for_group(state: &mut SimState, group_id: u64) {
+pub fn apply_flipbook_for_group(state: &mut SimState, group_id: u64) {
     let flipbook_data: Vec<(Option<String>, u32, u32, u32, f64)> = {
         let Some(group) = state.animation_groups.get(&group_id) else { return };
         group.animations.iter()

@@ -19,7 +19,7 @@ fn resolve_child(state: &SimState, owner_id: u64, child_key: &Option<String>) ->
 }
 
 /// Start (or restart) playback: reset elapsed, save pre-animation alphas.
-fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) {
+pub fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) {
     // Collect alpha targets to save before mutating the group.
     let targets: Vec<(u64, f32)> = state.animation_groups.get(&group_id)
         .map(|group| {
@@ -53,7 +53,7 @@ fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) {
 
 /// Stop a group: restore pre-animation alphas (unless setToFinalAlpha),
 /// clear translation offsets, mark finished.
-pub(super) fn stop_group(state: &mut SimState, group_id: u64) {
+pub fn stop_group(state: &mut SimState, group_id: u64) {
     // Collect restoration data before mutating.
     let restore: Option<(bool, Vec<(u64, f32)>, Vec<u64>)> =
         state.animation_groups.get(&group_id).map(|group| {

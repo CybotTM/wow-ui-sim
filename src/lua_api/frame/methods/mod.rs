@@ -4,6 +4,7 @@
 //! which registers method functions on the UserData methods container.
 
 mod methods_anchor;
+mod methods_anim_proxy;
 mod methods_attribute;
 mod methods_backdrop;
 mod methods_button;
@@ -47,4 +48,5 @@ pub fn register_all_methods<M: mlua::UserDataMethods<super::handle::FrameRef>>(m
     methods_button::add_button_methods(methods);
     methods_widget::add_widget_methods(methods);
     methods_line::add_line_methods(methods);
+    methods_anim_proxy::add_anim_proxy_methods(methods);
 }

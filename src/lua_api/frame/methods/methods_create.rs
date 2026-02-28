@@ -1,12 +1,11 @@
 //! Child creation methods: CreateTexture, CreateFontString, CreateAnimationGroup, etc.
 
 use super::super::handle::FrameRef;
-use crate::lua_api::animation::{AnimGroupHandle, AnimGroupState};
+use crate::lua_api::animation::AnimGroupState;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
 use crate::lua_api::globals::create_frame::apply_parent_sub;
 use crate::widget::{Frame, WidgetType};
 use mlua::Value;
-use std::rc::Rc;
 
 /// Resolve a raw name with $parent substitution using the parent widget's ancestor chain.
 fn resolve_child_name(lua: &mlua::Lua, name_raw: Option<String>, parent_id: u64) -> Option<String> {
@@ -72,6 +71,8 @@ pub fn add_create_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_create_font_string_method(methods);
     add_create_animation_group_method(methods);
     add_get_animation_groups_method(methods);
+    add_create_animation_method(methods);
+    add_create_control_point_method(methods);
 }
 
 /// CreateTexture(name, layer, inherits, subLevel)
@@ -182,47 +183,98 @@ fn apply_font_inherit(lua: &mlua::Lua, frame: &mut Frame, inherits: Option<&str>
 /// GetAnimationGroups() — return all animation groups owned by this frame.
 fn add_get_animation_groups_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetAnimationGroups", |lua, this, ()| {
-        let id = this.0;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let group_ids: Vec<u64> = state
-            .animation_groups
-            .iter()
-            .filter(|(_, g)| g.owner_frame_id == id)
-            .map(|(&gid, _)| gid)
+        // Find child frame IDs that are animation groups for this frame.
+        let ag_frame_ids: Vec<u64> = state.anim_frame_to_group.iter()
+            .filter(|&(_, &gid)| {
+                state.animation_groups.get(&gid).is_some_and(|g| g.owner_frame_id == this.0)
+            })
+            .map(|(&fid, _)| fid)
             .collect();
         drop(state);
-        let mut values = Vec::with_capacity(group_ids.len());
-        for group_id in group_ids {
-            let handle = AnimGroupHandle {
-                group_id,
-                state: Rc::clone(&state_rc),
-            };
-            values.push(mlua::Value::UserData(lua.create_userdata(handle)?));
+        let mut values = Vec::with_capacity(ag_frame_ids.len());
+        for fid in ag_frame_ids {
+            values.push(frame_ref(lua, fid)?);
         }
         Ok(mlua::MultiValue::from_vec(values))
     });
 }
 
-/// CreateAnimationGroup(name, inherits)
+/// CreateAnimationGroup(name, inherits) — returns FrameRef with object_type_name "AnimationGroup".
 fn add_create_animation_group_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("CreateAnimationGroup", |lua, this, (name, _inherits): (Option<String>, Option<String>)| {
+    methods.add_method("CreateAnimationGroup", |lua, this, (name_raw, _inherits): (Option<String>, Option<String>)| {
         let id = this.0;
+        let name = resolve_child_name(lua, name_raw, id);
+        let mut child = Frame::new(WidgetType::Frame, name.clone(), Some(id));
+        child.object_type_name = Some("AnimationGroup".to_string());
+        let child_id = child.id;
         let state_rc = get_sim_state(lua);
-        let group_id;
-        {
+        let group_id = {
             let mut state = state_rc.borrow_mut();
-            group_id = state.next_anim_group_id;
+            let gid = state.next_anim_group_id;
             state.next_anim_group_id += 1;
             let mut group = AnimGroupState::new(id);
-            group.name = name;
-            state.animation_groups.insert(group_id, group);
-        }
-
-        let handle = AnimGroupHandle {
-            group_id,
-            state: Rc::clone(&state_rc),
+            group.name = name.clone();
+            state.animation_groups.insert(gid, group);
+            state.anim_frame_to_group.insert(child_id, gid);
+            gid
         };
-        lua.create_userdata(handle)
+        let _ = group_id;
+        register_child_widget(lua, id, child, &name)
+    });
+}
+
+/// CreateAnimation(type, name) on an AnimationGroup FrameRef.
+fn add_create_animation_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateAnimation", |lua, this, args: mlua::MultiValue| {
+        let args: Vec<Value> = args.into_iter().collect();
+        let anim_type_str = extract_string_arg(&args, 0);
+        let anim_name_raw = extract_string_arg(&args, 1);
+        create_animation_on_group(lua, this.0, anim_type_str.as_deref(), anim_name_raw)
+    });
+}
+
+/// Shared logic for creating an animation child on a group FrameRef.
+fn create_animation_on_group(
+    lua: &mlua::Lua, group_frame_id: u64,
+    anim_type_str: Option<&str>, anim_name_raw: Option<String>,
+) -> mlua::Result<Value> {
+    use crate::lua_api::animation::{AnimState, AnimationType};
+    let state_rc = get_sim_state(lua);
+    let group_id = {
+        let state = state_rc.borrow();
+        state.anim_frame_to_group.get(&group_frame_id).copied()
+            .ok_or_else(|| mlua::Error::runtime("CreateAnimation called on non-AnimationGroup"))?
+    };
+    let anim_type = AnimationType::from_str(anim_type_str.unwrap_or("Animation"));
+    let type_name = anim_type.as_str().to_string();
+    let name = resolve_child_name(lua, anim_name_raw, group_frame_id);
+    let mut child = Frame::new(WidgetType::Frame, name.clone(), Some(group_frame_id));
+    child.object_type_name = Some(type_name);
+    let child_id = child.id;
+    let mut anim = AnimState::new(anim_type);
+    anim.name = name.clone();
+    {
+        let mut state = state_rc.borrow_mut();
+        let group = state.animation_groups.get_mut(&group_id)
+            .ok_or_else(|| mlua::Error::runtime("Animation group not found"))?;
+        let idx = group.animations.len();
+        group.animations.push(anim);
+        state.anim_frame_to_anim.insert(child_id, (group_id, idx));
+    }
+    register_child_widget(lua, group_frame_id, child, &name)
+}
+
+/// CreateControlPoint() on a Path animation FrameRef.
+fn add_create_control_point_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CreateControlPoint", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
+        let args: Vec<Value> = args.into_iter().collect();
+        let name_raw = extract_string_arg(&args, 0);
+        let name = resolve_child_name(lua, name_raw, id);
+        let mut child = Frame::new(WidgetType::Frame, name.clone(), Some(id));
+        child.object_type_name = Some("ControlPoint".to_string());
+        register_child_widget(lua, id, child, &name)
     });
 }

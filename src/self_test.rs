@@ -339,14 +339,31 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
 
     A_Print(('[self-test] augmented WowlessData: +%d ns funcs, +%d globals'):format(added_ns, added_g))
 
-    -- Factory functions for non-Frame types (shared by steps 6-8).
+    -- Mark Font as virtual: Font objects are Lua tables, not FrameRef userdata.
     local uiapis = WowlessData.UIObjectApis
+    if uiapis and uiapis.Font then uiapis.Font.virtual = true end
+
+    -- Factory functions for non-Frame types (shared by steps 6-8).
     local augment_parent = CreateFrame('Frame')
+    local augment_ag = augment_parent:CreateAnimationGroup()
+    local augment_scene = CreateFrame('ModelScene')
     local non_frame_factories = {
         Texture = function() return augment_parent:CreateTexture() end,
         MaskTexture = function() return augment_parent:CreateMaskTexture() end,
         FontString = function() return augment_parent:CreateFontString() end,
         Line = function() return augment_parent:CreateLine() end,
+        AnimationGroup = function() return augment_parent:CreateAnimationGroup() end,
+        Alpha = function() return augment_ag:CreateAnimation("Alpha") end,
+        Rotation = function() return augment_ag:CreateAnimation("Rotation") end,
+        Scale = function() return augment_ag:CreateAnimation("Scale") end,
+        Translation = function() return augment_ag:CreateAnimation("Translation") end,
+        LineTranslation = function() return augment_ag:CreateAnimation("LineTranslation") end,
+        LineScale = function() return augment_ag:CreateAnimation("LineScale") end,
+        Path = function() return augment_ag:CreateAnimation("Path") end,
+        FlipBook = function() return augment_ag:CreateAnimation("FlipBook") end,
+        Animation = function() return augment_ag:CreateAnimation("Animation") end,
+        ControlPoint = function() return augment_ag:CreateAnimation("Path"):CreateControlPoint() end,
+        Actor = function() return augment_scene:CreateActor() end,
     }
     local function create_test_object(type_name, cfg)
         if cfg.isa and cfg.isa.Frame then

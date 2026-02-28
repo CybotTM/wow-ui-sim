@@ -66,6 +66,10 @@ pub struct SimState {
     pub animation_groups: HashMap<u64, AnimGroupState>,
     /// Counter for generating unique animation group IDs.
     pub next_anim_group_id: u64,
+    /// Map: animation-group frame_id → group_id in `animation_groups`.
+    pub anim_frame_to_group: HashMap<u64, u64>,
+    /// Map: animation frame_id → (group_id, anim_index).
+    pub anim_frame_to_anim: HashMap<u64, (u64, usize)>,
     /// Screen dimensions in UI coordinates.
     pub screen_width: f32,
     pub screen_height: f32,
@@ -201,67 +205,60 @@ impl Default for SimState {
 
 impl SimState {
     fn new_empty() -> Self {
-        let (player_health, player_health_max, player_class_index, active_spec_index) =
-            Self::default_player_stats();
+        let mut s = Self::new_subsystems();
+        s.apply_player_defaults();
+        s.apply_world_defaults();
+        s
+    }
+
+    fn new_subsystems() -> Self {
+        macro_rules! d { () => { Default::default() }; }
         Self {
-            widgets: WidgetRegistry::default(),
-            events: EventQueue::default(),
-            scripts: ScriptRegistry::default(),
-            cvars: CVarStorage::new(),
-            console_output: Vec::new(), timers: VecDeque::new(),
-            addons: Vec::new(), lua_errors: Vec::new(),
-            tooltips: HashMap::new(), simple_htmls: HashMap::new(),
-            message_frames: HashMap::new(), animation_groups: HashMap::new(),
-            on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
-            action_bars: HashMap::new(), addon_base_paths: Vec::new(),
-            spell_cooldowns: HashMap::new(), action_ui_buttons: Vec::new(),
-            focused_frame_id: None, visible_on_update_cache: None,
-            strata_buckets: None, mouse_position: None, hovered_frame: None,
-            current_target: None, current_focus: None, sound_manager: None,
-            casting: None, gcd: None, cursor_item: None,
+            widgets: d!(), events: d!(), scripts: d!(), cvars: CVarStorage::new(),
+            console_output: d!(), timers: d!(), addons: d!(), lua_errors: d!(),
+            tooltips: d!(), simple_htmls: d!(), message_frames: d!(), animation_groups: d!(),
+            anim_frame_to_group: d!(), anim_frame_to_anim: d!(),
+            on_update_frames: d!(), pending_hit_grid_changes: d!(),
+            action_bars: d!(), addon_base_paths: d!(), spell_cooldowns: d!(), action_ui_buttons: d!(),
+            focused_frame_id: None, visible_on_update_cache: None, strata_buckets: None,
+            mouse_position: None, hovered_frame: None, current_target: None, current_focus: None,
+            sound_manager: None, casting: None, gcd: None, cursor_item: None,
             loading_addon_index: None, pending_spec_change: None,
-            party_members: Vec::new(), player_buffs: Vec::new(),
-            player_name: String::new(),
-            player_health, player_health_max, player_class_index, active_spec_index,
-            player_race_index: 0, rot_damage_level: 0,
-            next_anim_group_id: 1, next_cast_id: 1,
-            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
-            loading_forbidden: false,
-            start_time: Instant::now(),
-            app_frame_metrics: AppFrameMetrics::default(),
-            talents: super::talent_state::TalentState::new(),
-            movement: MovementState::default(),
-            player_level: 70,
-            player_sex: 2,
-            in_combat: false,
-            player_power: 100,
-            player_power_max: 100,
-            player_power_type: 0,
-            zone_name: "Stormwind City".to_string(),
-            zone_id: 1519,
-            sub_zone_name: "Trade District".to_string(),
-            instance_name: String::new(),
-            instance_type: "none".to_string(),
-            instance_difficulty: 0,
-            instance_max_players: 0,
-            is_resting: false,
-            in_instance: false,
-            player_money: 0,
-            player_item_level: 0.0,
-            pvp_enabled: false,
-            honor_level: 0,
-            guild_name: None,
-            guild_rank: None,
-            guild_num_members: 0,
-            collected_transmogs: HashSet::new(),
-            collected_mounts: HashSet::new(),
-            collected_pets: HashSet::new(),
-            collected_toys: HashSet::new(),
-            earned_achievements: HashSet::new(),
-            great_vault_activities: Vec::new(),
-            great_vault_has_rewards: false,
-            great_vault_can_claim: false,
+            party_members: d!(), player_buffs: d!(), player_name: d!(),
+            player_health: 0, player_health_max: 0, player_class_index: 0, active_spec_index: 0,
+            player_race_index: 0, rot_damage_level: 0, next_anim_group_id: 1, next_cast_id: 1,
+            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0, loading_forbidden: false,
+            start_time: Instant::now(), app_frame_metrics: d!(),
+            talents: super::talent_state::TalentState::new(), movement: d!(),
+            player_level: 0, player_sex: 0, in_combat: false,
+            player_power: 0, player_power_max: 0, player_power_type: 0,
+            zone_name: d!(), zone_id: 0, sub_zone_name: d!(), instance_name: d!(), instance_type: d!(),
+            instance_difficulty: 0, instance_max_players: 0, is_resting: false, in_instance: false,
+            player_money: 0, player_item_level: 0.0, pvp_enabled: false, honor_level: 0,
+            guild_name: None, guild_rank: None, guild_num_members: 0,
+            collected_transmogs: d!(), collected_mounts: d!(),
+            collected_pets: d!(), collected_toys: d!(), earned_achievements: d!(),
+            great_vault_activities: d!(), great_vault_has_rewards: false, great_vault_can_claim: false,
         }
+    }
+
+    fn apply_player_defaults(&mut self) {
+        let (health, health_max, class_index, spec_index) = Self::default_player_stats();
+        self.player_health = health;
+        self.player_health_max = health_max;
+        self.player_class_index = class_index;
+        self.active_spec_index = spec_index;
+        self.player_level = 70;
+        self.player_sex = 2;
+        self.player_power = 100;
+        self.player_power_max = 100;
+    }
+
+    fn apply_world_defaults(&mut self) {
+        self.zone_name = "Stormwind City".to_string();
+        self.zone_id = 1519;
+        self.sub_zone_name = "Trade District".to_string();
+        self.instance_type = "none".to_string();
     }
 
     /// Return default player stats: (health, health_max, class_index, spec_index).

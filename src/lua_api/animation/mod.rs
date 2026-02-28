@@ -1,8 +1,8 @@
 //! Animation group state, handles, and tick logic.
 
 mod anim_handle;
-mod group_handle;
-mod tick;
+pub mod group_handle;
+pub mod tick;
 
 use mlua::{RegistryKey, Value};
 use std::collections::HashMap;

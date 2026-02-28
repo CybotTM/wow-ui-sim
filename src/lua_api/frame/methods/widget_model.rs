@@ -221,7 +221,21 @@ fn add_model_scene_fog_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_model_scene_actor_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("CreateActor", |_, _this, _args: mlua::MultiValue| Ok(mlua::Value::Nil));
+    methods.add_method("CreateActor", |lua, this, _args: mlua::MultiValue| {
+        use crate::lua_api::frame::handle::{frame_ref as mk_frame_ref, get_sim_state};
+        use crate::widget::{Frame, WidgetType};
+        let id = this.0;
+        let mut child = Frame::new(WidgetType::Frame, None, Some(id));
+        child.object_type_name = Some("Actor".to_string());
+        let child_id = child.id;
+        {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            state.widgets.register(child);
+            state.widgets.add_child(id, child_id);
+        }
+        mk_frame_ref(lua, child_id)
+    });
     methods.add_method("GetActorAtIndex", |_, _this, _args: mlua::MultiValue| Ok(mlua::Value::Nil));
     methods.add_method("GetNumActors", |_, _this, ()| Ok(0i32));
     methods.add_method("TakeActor", |_, _this, _args: mlua::MultiValue| Ok(mlua::Value::Nil));
