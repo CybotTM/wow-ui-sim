@@ -6,7 +6,7 @@
 mod controls;
 mod edit;
 mod frame;
-mod global;
+pub(crate) mod global;
 mod leaf;
 mod minimap;
 mod misc;
@@ -17,7 +17,6 @@ mod tooltip;
 use controls::{COOLDOWN_METHODS, SLIDER_METHODS, STATUSBAR_METHODS};
 use edit::EDITBOX_METHODS;
 use frame::{BUTTON_METHODS, CHECKBUTTON_METHODS, FRAME_METHODS};
-use global::GLOBAL_METHODS;
 use leaf::{FONTSTRING_METHODS, TEXTURE_METHODS};
 use minimap::MINIMAP_METHODS;
 use misc::{MESSAGEFRAME_METHODS, SIMPLEHTML_METHODS};
@@ -27,11 +26,6 @@ use tooltip::{COLORSELECT_METHODS, GAMETOOLTIP_METHODS};
 
 use crate::widget::WidgetType;
 use std::collections::HashSet;
-
-/// Check if a method should be allowed for this widget type.
-pub fn is_method_allowed(widget_type: WidgetType, method: &str) -> bool {
-    GLOBAL_METHODS.contains(method) || methods_for_type(widget_type).contains(method)
-}
 
 pub fn methods_for_type(widget_type: WidgetType) -> &'static HashSet<&'static str> {
     match widget_type {

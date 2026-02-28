@@ -42,10 +42,6 @@ pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
     let forbidden_mt = create_forbidden_proxy_metatable(lua)?;
     lua.set_named_registry_value("__forbidden_proxy_mt", forbidden_mt)?;
 
-    // Extract method table from FrameRef's UserData metatable for getmetatable() per-type filtering.
-    // With UserData, methods live in the internal metatable — expose them as __frame_methods_table.
-    populate_methods_table(lua)?;
-
     // Patch __index to check user_value (fenv) BEFORE mlua's method table.
     // mlua's generated __index checks methods first, so children with names matching
     // methods (e.g. parentKey="Lower" vs frame:Lower()) get shadowed. This wraps
@@ -224,31 +220,6 @@ fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
         assign.call::<()>((frame_val, key, value))?;
         Ok(())
     })
-}
-
-// ── Methods table for getmetatable() ─────────────────────────────────────────
-
-/// Extract all non-meta methods from FrameRef's UserData metatable into __frame_methods_table.
-/// This is used by the getmetatable() override to build per-type metatables for Wowless.
-fn populate_methods_table(lua: &Lua) -> mlua::Result<()> {
-    let dummy = lua.create_userdata(FrameRef(0))?;
-    let methods_table = lua.create_table()?;
-    lua.load(
-        r#"
-        local ud, out = ...
-        local mt = debug.getmetatable(ud)
-        if mt then
-            for k, v in pairs(mt) do
-                if type(k) == "string" and type(v) == "function" and not k:match("^__") then
-                    out[k] = v
-                end
-            end
-        end
-    "#,
-    )
-    .call::<()>((dummy, methods_table.clone()))?;
-    lua.set_named_registry_value("__frame_methods_table", methods_table)?;
-    Ok(())
 }
 
 /// Lua code to patch a UserData metatable's __index: check per-instance fields

@@ -358,23 +358,26 @@ fn register_custom_getmetatable(lua: &Lua) -> Result<()> {
 
 /// Pre-build one metatable per widget type and store in `__per_type_metatables`.
 ///
-/// Each metatable has exactly one key `__index` whose value is a table containing:
-/// - All methods from `__frame_methods_table` that `is_method_allowed(type, name)` permits.
-/// - Methods NOT in `is_known_method` (Mixin/sim-specific) are also included.
-///
-/// Two frames of the same widget type will receive the same table object from this
-/// cache, so `getmetatable(frame1) == getmetatable(frame2)` passes in Lua.
+/// Methods are resolved by probing a dummy FrameRef via `ud[name]` (mlua's internal
+/// `__index` resolves `add_method` entries that aren't enumerable via `pairs(mt)`).
+/// Two frames of the same widget type receive the same table object (identity check passes).
 fn build_per_type_metatables(lua: &Lua) -> Result<()> {
-    let method_pairs = collect_method_pairs(lua)?;
+    use crate::lua_api::frame::FrameRef;
+
+    let dummy = lua.create_userdata(FrameRef(0))?;
+    // The patched __index checks debug.getfenv(ud)[1] — set up a valid fenv.
+    let fenv = lua.create_table()?;
+    fenv.raw_set(1, lua.create_table()?)?;
+    dummy.set_user_value(fenv)?;
     let per_type = lua.create_table()?;
+    let mut resolved: std::collections::HashMap<String, Value> = std::collections::HashMap::new();
 
     for widget_type in all_widget_types() {
         let type_key = widget_type.as_str();
-        // Skip if already built (WorldFrame shares "Frame" key with Frame).
         if per_type.raw_get::<Value>(type_key)? != Value::Nil {
             continue;
         }
-        let mt = build_metatable_for_type(lua, widget_type, &method_pairs)?;
+        let mt = build_metatable_for_type(lua, widget_type, &dummy, &mut resolved)?;
         per_type.raw_set(type_key, mt)?;
     }
 
@@ -382,47 +385,65 @@ fn build_per_type_metatables(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Collect all (name, func) pairs from `__frame_methods_table` into a Vec.
-fn collect_method_pairs(lua: &Lua) -> Result<Vec<(String, Value)>> {
-    let all_methods: mlua::Table = lua.named_registry_value("__frame_methods_table")?;
-    let mut pairs = Vec::new();
-    for pair in all_methods.pairs::<String, Value>() {
-        let (name, func) = pair?;
-        pairs.push((name, func));
-    }
-    Ok(pairs)
-}
-
-/// Build a `{ __index = { allowed methods } }` metatable for one widget type.
+/// Build `{ __index = { methods } }` for one widget type by probing the dummy FrameRef.
 ///
-/// Each function in the `__index` table is wrapped in a unique thin closure so that
-/// the cfuncs identity checker sees distinct function objects per type. In real WoW,
-/// the C engine creates separate function wrappers per widget type metatable.
+/// Each function is wrapped in a unique closure so the cfuncs identity checker sees
+/// distinct function objects per type (matching real WoW's per-type C wrappers).
 fn build_metatable_for_type(
     lua: &Lua,
     widget_type: crate::widget::WidgetType,
-    method_pairs: &[(String, Value)],
+    dummy: &mlua::AnyUserData,
+    resolved: &mut std::collections::HashMap<String, Value>,
 ) -> Result<mlua::Table> {
     use crate::lua_api::frame::method_registry;
 
     let index_table = lua.create_table()?;
-    for (name, func) in method_pairs {
-        if method_registry::is_method_allowed(widget_type, name) {
-            let wrapped = lua.create_function({
-                let f = func.clone();
-                move |_, args: mlua::MultiValue| {
-                    match &f {
-                        Value::Function(func) => func.call::<mlua::MultiValue>(args),
-                        _ => Ok(mlua::MultiValue::new()),
-                    }
-                }
-            })?;
-            index_table.set(name.clone(), wrapped)?;
+    let type_methods = method_registry::methods_for_type(widget_type);
+    let allowed = method_registry::global::GLOBAL_METHODS
+        .iter()
+        .chain(type_methods.iter());
+
+    for &name in allowed {
+        if let Some(f) = resolve_method(lua, dummy, name, resolved)? {
+            index_table.set(name, wrap_method(lua, f)?)?;
         }
     }
+
     let mt = lua.create_table()?;
     mt.set("__index", index_table)?;
     Ok(mt)
+}
+
+/// Resolve a method name on the dummy FrameRef, caching the result.
+///
+/// Uses `ud[name]` in Lua (triggering mlua's internal __index) since mlua doesn't
+/// expose registered `add_method` entries via `AnyUserData::get`.
+fn resolve_method(
+    lua: &Lua,
+    dummy: &mlua::AnyUserData,
+    name: &str,
+    cache: &mut std::collections::HashMap<String, Value>,
+) -> Result<Option<mlua::Function>> {
+    let val = if let Some(v) = cache.get(name) {
+        v.clone()
+    } else {
+        let v: Value = lua
+            .load("local ud, k = ...; return ud[k]")
+            .call((dummy.clone(), name))?;
+        cache.insert(name.to_owned(), v.clone());
+        v
+    };
+    match val {
+        Value::Function(f) => Ok(Some(f)),
+        _ => Ok(None),
+    }
+}
+
+/// Wrap a method function in a unique closure for per-type identity.
+fn wrap_method(lua: &Lua, f: mlua::Function) -> Result<mlua::Function> {
+    Ok(lua.create_function(move |_, args: mlua::MultiValue| {
+        f.call::<mlua::MultiValue>(args)
+    })?)
 }
 
 /// All widget type variants (used to pre-build per-type metatables).
