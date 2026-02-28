@@ -11,6 +11,8 @@ pub fn add_slider_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_slider_orientation_methods(methods);
     add_slider_thumb_methods(methods);
     add_slider_drag_methods(methods);
+    methods.add_method("GetObeyStepOnDrag", |_, _, ()| Ok(false));
+    methods.add_method("IsDraggingThumb", |_, _, ()| Ok(false));
 }
 
 pub fn add_statusbar_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -18,6 +20,18 @@ pub fn add_statusbar_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_statusbar_color_methods(methods);
     add_statusbar_fill_methods(methods);
     add_statusbar_desaturate_methods(methods);
+    add_statusbar_stubs(methods);
+}
+
+fn add_statusbar_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetInterpolatedValue", |_, _, ()| Ok(0.0_f64));
+    methods.add_method("GetStatusBarDesaturation", |_, _, ()| Ok(0.0_f64));
+    methods.add_method("GetTimerDuration", |_, _, ()| Ok(0.0_f64));
+    methods.add_method("IsInterpolating", |_, _, ()| Ok(false));
+    methods.add_method("IsStatusBarDesaturated", |_, _, ()| Ok(false));
+    methods.add_method("SetStatusBarDesaturation", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetTimerDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetToTargetValue", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
 pub fn add_checkbutton_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

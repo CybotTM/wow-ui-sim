@@ -13,6 +13,24 @@ pub fn add_cooldown_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     add_cooldown_bool_display_methods(methods);
     add_cooldown_texture_methods(methods);
     add_cooldown_state_methods(methods);
+    add_cooldown_stubs(methods);
+}
+
+fn add_cooldown_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetCooldownDisplayDuration", |_, _, ()| Ok(0.0_f64));
+    methods.add_method("GetCountdownFontString", |_, _, ()| Ok(Value::Nil));
+    methods.add_method("GetDrawBling", |_, _, ()| Ok(true));
+    methods.add_method("GetDrawEdge", |_, _, ()| Ok(false));
+    methods.add_method("GetDrawSwipe", |_, _, ()| Ok(true));
+    methods.add_method("GetEdgeScale", |_, _, ()| Ok(1.0_f64));
+    methods.add_method("GetHideCountdownNumbers", |_, _, ()| Ok(false));
+    methods.add_method("GetMinimumCountdownDuration", |_, _, ()| Ok(0.0_f64));
+    methods.add_method("GetUseAuraDisplayTime", |_, _, ()| Ok(false));
+    methods.add_method("SetCooldownFromDurationObject", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetCooldownFromExpirationTime", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetEdgeColor", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetMinimumCountdownDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetTexCoordRange", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
 fn parse_f64_arg(val: Option<Value>) -> f64 {

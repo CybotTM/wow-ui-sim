@@ -9,6 +9,7 @@ pub fn add_scrollframe_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     add_scrollframe_child_methods(methods);
     add_scrollframe_offset_methods(methods);
     add_scrollframe_range_methods(methods);
+    methods.add_method("SetMaxLines", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
 pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

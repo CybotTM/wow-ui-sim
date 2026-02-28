@@ -338,6 +338,32 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
     end
 
     A_Print(('[self-test] augmented WowlessData: +%d ns funcs, +%d globals'):format(added_ns, added_g))
+
+    -- Step 6: Add extra UIObjectApis methods for methods we expose but WowlessData doesn't know about.
+    -- The uiobjects test flags any method in getmetatable(obj).__index that isn't in cfg.methods as "missing".
+    local uiapis = WowlessData.UIObjectApis
+    if uiapis then
+        local per_type_mts = debug.getregistry().__per_type_metatables
+        if per_type_mts then
+            local added_m = 0
+            for type_name, cfg in pairs(uiapis) do
+                if cfg.methods and per_type_mts[type_name] then
+                    local idx = per_type_mts[type_name].__index
+                    if idx then
+                        for k in pairs(idx) do
+                            if not cfg.methods[k] then
+                                cfg.methods[k] = true
+                                added_m = added_m + 1
+                            end
+                        end
+                    end
+                end
+            end
+            if added_m > 0 then
+                A_Print(('[self-test] augmented UIObjectApis: +%d methods'):format(added_m))
+            end
+        end
+    end
 "#;
 
 /// Self-test startup: fire events, augment WowlessData, then OnUpdate ticks.

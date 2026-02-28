@@ -14,6 +14,7 @@ pub fn add_button_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_texture_setter_methods_2(methods);
     add_atlas_setter_methods(methods);
     add_checked_texture_methods(methods);
+    add_clear_texture_methods(methods);
     add_three_slice_methods(methods);
     add_font_string_methods(methods);
     add_enable_disable_methods(methods);
@@ -398,6 +399,15 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         }
         Ok(())
     });
+}
+
+/// Clear{Normal,Highlight,Pushed,Disabled}Texture and GetDisabledCheckedTexture stubs.
+fn add_clear_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("ClearNormalTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("ClearHighlightTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("ClearPushedTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("ClearDisabledTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("GetDisabledCheckedTexture", |_, _, ()| Ok(Value::Nil));
 }
 
 /// Set{Left,Middle,Right}Texture - three-slice button cap textures.

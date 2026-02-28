@@ -92,6 +92,19 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     methods.add_method("SetUnitAura", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("SetUnitBuffByAuraInstanceID", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("SetUnitDebuffByAuraInstanceID", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("AddAtlas", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("AddFontStrings", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("CopyTooltip", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
+    methods.add_method("GetLeftLine", |_, _this, ()| Ok(Value::Nil));
+    methods.add_method("GetRightLine", |_, _this, ()| Ok(Value::Nil));
+    methods.add_method("SetAllowShowWithNoLines", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetAnchorType", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetCustomLineSpacing", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetCustomWordWrapMinWidth", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetFrameStack", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetObjectTooltipPosition", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetShrinkToFitWrapped", |_, _this, _: mlua::Variadic<Value>| Ok(()));
 
     methods.add_method("NumLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);

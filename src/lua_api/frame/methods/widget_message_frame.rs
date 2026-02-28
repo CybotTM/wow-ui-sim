@@ -239,6 +239,7 @@ fn add_get_message_info_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
     methods.add_method("SetOnScrollChangedCallback", |_, _this, _func: Value| Ok(()));
     methods.add_method("SetOnLineRightClickedCallback", |_, _this, _func: Value| Ok(()));
     methods.add_method("AddOnDisplayRefreshedCallback", |_, _this, _func: Value| Ok(()));
