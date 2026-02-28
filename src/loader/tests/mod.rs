@@ -53,6 +53,7 @@ fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
         table: addon_table,
         addon_root: &temp_dir,
         use_secure_env: false,
+        taint: false,
     };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
@@ -84,6 +85,7 @@ fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) 
         table: addon_table.clone(),
         addon_root: &temp_dir,
         use_secure_env: false,
+        taint: false,
     };
     load_lua_file(&env.loader_env(), &lua_path, &ctx, &mut LoadTiming::default()).unwrap();
 
@@ -104,6 +106,7 @@ fn test_load_lua_file() {
         table: addon_table,
         addon_root: &temp_dir,
         use_secure_env: false,
+        taint: false,
     };
     load_lua_file(&env.loader_env(), &lua_path, &ctx, &mut LoadTiming::default()).unwrap();
 
@@ -184,7 +187,7 @@ fn test_xml_scripts_function_attribute() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     let handler_set: bool = env.eval("return FuncTestFrame:GetScript('OnLoad') == MyGlobalOnLoad").unwrap();
@@ -205,7 +208,7 @@ fn test_xml_scripts_method_attribute() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     env.exec(r#"
@@ -237,7 +240,7 @@ fn test_xml_keyvalues() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     assert_eq!(env.eval::<String>("return KeyValueFrame.myString").unwrap(), "hello");
@@ -262,7 +265,7 @@ fn test_xml_keyvalue_global_type_resolves_global_string() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     let val: String = env.eval("return KeyValueGlobalFrame.instructionText").unwrap();
@@ -288,7 +291,7 @@ fn test_xml_anchors_with_offset() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     let point_info: String = env.eval(r#"
@@ -313,7 +316,7 @@ fn test_xml_size_with_absdimension() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     assert_eq!(env.eval::<f64>("return AbsSizeFrame:GetWidth()").unwrap(), 150.0);
@@ -378,7 +381,7 @@ fn test_xml_texture_color() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     assert!(env.eval::<bool>("return ColorTexFrame.bg ~= nil").unwrap(), "bg should exist");
@@ -400,7 +403,7 @@ fn test_xml_virtual_frames_skipped() {
     </Ui>"#).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false };
+    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
     load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
 
     assert!(!env.eval::<bool>("return VirtualTemplate ~= nil").unwrap(), "VirtualTemplate should NOT exist");
@@ -496,6 +499,7 @@ fn load_test_lua_files(
         table: addon_table.clone(),
         addon_root: &temp_dir,
         use_secure_env: false,
+        taint: false,
     };
 
     for (filename, content) in files {

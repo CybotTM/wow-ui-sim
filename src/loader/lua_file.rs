@@ -20,15 +20,7 @@ pub fn load_lua_file(
     let bytes = std::fs::read(path)?;
     timing.io_time += io_start.elapsed();
 
-    // Transform path to WoW-style for debugstack (libraries expect "AddOns/..." pattern)
-    let path_str = path.display().to_string();
-    let chunk_name = if let Some(pos) = path_str.find("AddOns/") {
-        format!("@Interface/{}", &path_str[pos..])
-    } else {
-        format!("@{}", path_str)
-    };
-    // Clone the table since mlua moves it on call
-    let table_clone = ctx.table.clone();
+    let chunk_name = wow_chunk_name(path);
     let lua = env.lua();
 
     let lua_start = Instant::now();
@@ -43,11 +35,45 @@ pub fn load_lua_file(
             .map_err(|e| LoadError::Lua(e.to_string()))?;
     }
 
-    func.call::<()>((ctx.name.to_string(), table_clone))
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
+    exec_addon_func(lua, func, ctx)?;
     timing.lua_exec_time += lua_start.elapsed();
 
     Ok(())
+}
+
+/// Transform path to WoW-style chunk name for debugstack.
+fn wow_chunk_name(path: &Path) -> String {
+    let path_str = path.display().to_string();
+    if let Some(pos) = path_str.find("AddOns/") {
+        format!("@Interface/{}", &path_str[pos..])
+    } else {
+        format!("@{}", path_str)
+    }
+}
+
+/// Execute a compiled addon function with optional per-addon taint.
+///
+/// Third-party addon code runs with `debug.setstacktaint(addonName)` so
+/// `issecurevariable` tracks the taint source. Blizzard base UI runs
+/// securely (no taint).
+fn exec_addon_func(
+    lua: &mlua::Lua,
+    func: mlua::Function,
+    ctx: &AddonContext,
+) -> Result<(), LoadError> {
+    let name = ctx.name.to_string();
+    let table = ctx.table.clone();
+
+    if ctx.taint {
+        if let Ok(taint_exec) = lua.named_registry_value::<mlua::Function>("__addon_taint_exec") {
+            return taint_exec
+                .call::<()>((func, name.clone(), name, table))
+                .map_err(|e| LoadError::Lua(e.to_string()));
+        }
+    }
+
+    func.call::<()>((name, table))
+        .map_err(|e| LoadError::Lua(e.to_string()))
 }
 
 /// Try loading from bytecode cache; compile and cache on miss.

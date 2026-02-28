@@ -20,6 +20,8 @@ pub struct AddonContext<'a> {
     pub addon_root: &'a Path,
     /// Whether this addon uses the secure Lua environment (UseSecureEnvironment: 1)
     pub use_secure_env: bool,
+    /// Whether to taint code with the addon name (false for Blizzard base UI).
+    pub taint: bool,
 }
 
 /// Initialize saved variables for an addon (WTF first, then JSON fallback).
@@ -92,11 +94,15 @@ pub fn load_addon_internal(
     let addon_idx = resolve_addon_index(env, folder_name);
     env.state().borrow_mut().loading_addon_index = Some(addon_idx);
 
+    // Blizzard base UI code runs securely (no taint). Third-party addons
+    // get tainted with their folder name so issecurevariable tracks the source.
+    let is_blizzard = toc.addon_dir.to_string_lossy().contains("BlizzardUI");
     let ctx = AddonContext {
         name: folder_name,
         table: addon_table,
         addon_root: &toc.addon_dir,
         use_secure_env: toc.is_secure_env(),
+        taint: !is_blizzard,
     };
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);

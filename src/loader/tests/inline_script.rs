@@ -46,6 +46,7 @@ fn test_xml_inline_script_error_continues() {
         table: addon_table,
         addon_root: &temp_dir,
         use_secure_env: false,
+        taint: false,
     };
     // Should not return an error — inline script errors are non-fatal
     let result = load_xml_file(

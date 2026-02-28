@@ -695,7 +695,20 @@ fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
             -- seterrorhandler: wrapped in apply_post_load_workarounds
             -- (BugGrabber overwrites it during addon loading)
         end
-    "#).exec()
+    "#).exec()?;
+
+    // Helper to execute addon code with per-addon stack taint.
+    // In WoW, each addon file runs with its addon name as the stack taint,
+    // causing all table operations to record the addon as the taint source.
+    let taint_exec: mlua::Function = lua.load(r#"
+        local setstacktaint = debug.setstacktaint
+        return function(func, taint, ...)
+            setstacktaint(taint)
+            return func(...)
+        end
+    "#).eval()?;
+    lua.set_named_registry_value("__addon_taint_exec", taint_exec)?;
+    Ok(())
 }
 
 /// Remove globals that WoW's sandbox doesn't expose and internal helpers
