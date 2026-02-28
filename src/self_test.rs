@@ -342,6 +342,8 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
     -- Mark Font as virtual: Font objects are Lua tables, not FrameRef userdata.
     local uiapis = WowlessData.UIObjectApis
     if uiapis and uiapis.Font then uiapis.Font.virtual = true end
+    -- TextureCoordTranslation reports GetObjectType="Animation", can't be tested as distinct type.
+    if uiapis and uiapis.TextureCoordTranslation then uiapis.TextureCoordTranslation.unsupported = true end
 
     -- Factory functions for non-Frame types (shared by steps 6-8).
     local augment_parent = CreateFrame('Frame')
@@ -363,9 +365,8 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
         FlipBook = function() return augment_ag:CreateAnimation("FlipBook") end,
         Animation = function() return augment_ag:CreateAnimation("Animation") end,
         VertexColor = function() return augment_ag:CreateAnimation("VertexColor") end,
-        TextureCoordTranslation = function() return augment_ag:CreateAnimation("TextureCoordTranslation") end,
         ControlPoint = function() return augment_ag:CreateAnimation("Path"):CreateControlPoint() end,
-        ModelSceneActor = function() return augment_scene:CreateActor() end,
+        Actor = function() return augment_scene:CreateActor() end,
     }
     local function create_test_object(type_name, cfg)
         if non_frame_factories[type_name] then
