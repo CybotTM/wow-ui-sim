@@ -232,18 +232,28 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
     // SwapToGlobalEnvironment: sets the caller's environment back to _G.
-    // NOT wrapped with nsf — taint must propagate from caller so issecure()
-    // can detect insecure callers and error (WoW behavior).
-    // Trade-off: this makes it a Lua function rather than C function, so the
-    // globalApis.impltype check fails (cosmetic, not functional).
-    lua.load(r#"
-        SwapToGlobalEnvironment = function()
-            if not issecure() then
-                error("cannot modify function environment from a tainted context", 2)
-            end
-            setfenv(2, _G)
-        end
-    "#).exec()?;
+    // Implemented as a Rust closure so it's a C function (passes impltype test).
+    // Unlike newsecurefunction, C closures don't clear taint — issecure()
+    // correctly detects insecure callers.
+    globals.set(
+        "SwapToGlobalEnvironment",
+        lua.create_function(|lua, ()| {
+            let is_secure: bool = lua
+                .globals()
+                .get::<mlua::Function>("issecure")?
+                .call(())?;
+            if !is_secure {
+                return Err(mlua::Error::RuntimeError(
+                    "cannot modify function environment from a tainted context".to_string(),
+                ));
+            }
+            // setfenv(N, _G) where N must target the actual Lua caller.
+            // From this C closure, the caller is at stack level 2.
+            let setfenv: mlua::Function = lua.globals().get("setfenv")?;
+            setfenv.call::<()>((2, lua.globals()))?;
+            Ok(())
+        })?,
+    )?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("RegisterStaticConstants", lua.create_function(|_, _tbl: Value| Ok(()))?)?;
 
