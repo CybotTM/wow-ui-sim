@@ -216,6 +216,7 @@ fn add_create_animation_group_method<M: mlua::UserDataMethods<FrameRef>>(methods
             state.next_anim_group_id += 1;
             let mut group = AnimGroupState::new(id);
             group.name = name.clone();
+            group.frame_id = Some(child_id);
             state.animation_groups.insert(gid, group);
             state.anim_frame_to_group.insert(child_id, gid);
             gid

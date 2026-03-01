@@ -234,6 +234,8 @@ impl AnimState {
 /// State for an animation group.
 pub struct AnimGroupState {
     pub owner_frame_id: u64,
+    /// FrameRef ID for this group (set when group is represented as a FrameRef).
+    pub frame_id: Option<u64>,
     pub name: Option<String>,
     pub playing: bool,
     pub paused: bool,
@@ -258,6 +260,7 @@ impl AnimGroupState {
     pub fn new(owner_frame_id: u64) -> Self {
         Self {
             owner_frame_id,
+            frame_id: None,
             name: None,
             playing: false,
             paused: false,

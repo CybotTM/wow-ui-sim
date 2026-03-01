@@ -236,10 +236,11 @@ fn add_has_script_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         let frame = state.widgets.get(this.0);
-        // Check animation types first (they have their own script lists)
+        // Animation types: HasScript checks handler *presence*, not type support
         if let Some(otn) = frame.and_then(|f| f.object_type_name.as_deref()) {
-            if let Some(result) = anim_has_script(otn, &script_type) {
-                return Ok(result);
+            if anim_has_script(otn, &script_type).is_some() {
+                drop(state);
+                return Ok(crate::lua_api::script_helpers::get_script(lua, this.0, &script_type).is_some());
             }
         }
         let widget_type = frame

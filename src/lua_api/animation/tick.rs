@@ -8,6 +8,7 @@ use std::rc::Rc;
 
 use super::{AnimGroupHandle, AnimGroupState, AnimationType, LoopType};
 use super::group_handle::stop_group;
+use crate::lua_api::script_helpers::get_script;
 
 /// Advance all playing animation groups by `delta` seconds.
 /// Applies alpha and translation animations to target frames and fires script callbacks.
@@ -266,6 +267,18 @@ pub fn apply_flipbook_for_group(state: &mut SimState, group_id: u64) {
     }
 }
 
+/// Look up a script handler for an animation group.
+/// Checks the Lua __scripts table (FrameRef path) first, then legacy group.scripts.
+fn get_group_script(group: &AnimGroupState, lua: &Lua, name: &str) -> Option<mlua::Function> {
+    if let Some(fid) = group.frame_id {
+        if let Some(func) = get_script(lua, fid, name) {
+            return Some(func);
+        }
+    }
+    group.scripts.get(name)
+        .and_then(|key| lua.registry_value::<mlua::Function>(key).ok())
+}
+
 /// Handle a finished animation group: update state and collect scripts to fire.
 fn handle_group_finish(group: &mut AnimGroupState, lua: &Lua) -> Vec<mlua::Function> {
     let mut scripts = Vec::new();
@@ -276,26 +289,26 @@ fn handle_group_finish(group: &mut AnimGroupState, lua: &Lua) -> Vec<mlua::Funct
             group.playing = false;
             group.done = true;
             group.pending_finish = false;
-            if let Some(key) = group.scripts.get("OnFinished")
-                && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
-                    scripts.push(func);
-                }
+            if let Some(func) = get_group_script(group, lua, "OnFinished") {
+                scripts.push(func);
+            }
         }
         LoopType::Repeat => {
             if group.pending_finish {
                 group.playing = false;
                 group.done = true;
                 group.pending_finish = false;
-                if let Some(key) = group.scripts.get("OnFinished")
-                    && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
-                        scripts.push(func);
-                    }
+                if let Some(func) = get_group_script(group, lua, "OnFinished") {
+                    scripts.push(func);
+                }
             } else {
                 group.elapsed -= total_dur;
                 for anim in &mut group.animations {
                     anim.elapsed = 0.0;
                 }
-                collect_loop_script(&mut scripts, group, lua);
+                if let Some(func) = get_group_script(group, lua, "OnLoop") {
+                    scripts.push(func);
+                }
             }
         }
         LoopType::Bounce => {
@@ -303,34 +316,23 @@ fn handle_group_finish(group: &mut AnimGroupState, lua: &Lua) -> Vec<mlua::Funct
                 group.playing = false;
                 group.done = true;
                 group.pending_finish = false;
-                if let Some(key) = group.scripts.get("OnFinished")
-                    && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
-                        scripts.push(func);
-                    }
+                if let Some(func) = get_group_script(group, lua, "OnFinished") {
+                    scripts.push(func);
+                }
             } else {
                 group.elapsed -= total_dur;
                 group.reverse = !group.reverse;
                 for anim in &mut group.animations {
                     anim.elapsed = 0.0;
                 }
-                collect_loop_script(&mut scripts, group, lua);
+                if let Some(func) = get_group_script(group, lua, "OnLoop") {
+                    scripts.push(func);
+                }
             }
         }
     }
 
     scripts
-}
-
-/// Collect OnLoop script if present.
-fn collect_loop_script(
-    scripts: &mut Vec<mlua::Function>,
-    group: &AnimGroupState,
-    lua: &Lua,
-) {
-    if let Some(key) = group.scripts.get("OnLoop")
-        && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
-            scripts.push(func);
-        }
 }
 
 /// Fire collected animation scripts and OnUpdate callback for a group.
@@ -342,13 +344,12 @@ fn fire_animation_scripts(
     scripts_to_fire: &[mlua::Function],
     delta: f64,
 ) -> mlua::Result<()> {
+    let frame_id = state_rc.borrow().animation_groups.get(&group_id)
+        .and_then(|g| g.frame_id);
+
     for func in scripts_to_fire {
-        let handle = AnimGroupHandle {
-            group_id,
-            state: Rc::clone(state_rc),
-        };
-        let ud = lua.create_userdata(handle)?;
-        if let Err(e) = func.call::<()>(ud) {
+        let self_arg = make_group_self(lua, state_rc, group_id, frame_id)?;
+        if let Err(e) = func.call::<()>(self_arg) {
             eprintln!("Animation script error: {e}");
         }
     }
@@ -358,8 +359,7 @@ fn fire_animation_scripts(
         state.animation_groups.get(&group_id)
             .and_then(|g| {
                 if g.playing || !finished {
-                    g.scripts.get("OnUpdate")
-                        .and_then(|key| lua.registry_value::<mlua::Function>(key).ok())
+                    get_group_script(g, lua, "OnUpdate")
                 } else {
                     None
                 }
@@ -367,15 +367,29 @@ fn fire_animation_scripts(
     };
 
     if let Some(func) = on_update_func {
-        let handle = AnimGroupHandle {
-            group_id,
-            state: Rc::clone(state_rc),
-        };
-        let ud = lua.create_userdata(handle)?;
-        if let Err(e) = func.call::<()>((ud, delta)) {
+        let self_arg = make_group_self(lua, state_rc, group_id, frame_id)?;
+        if let Err(e) = func.call::<()>((self_arg, delta)) {
             eprintln!("Animation OnUpdate error: {e}");
         }
     }
 
     Ok(())
+}
+
+/// Create the `self` argument for animation group script callbacks.
+/// Returns a FrameRef if the group has a frame_id, otherwise falls back to AnimGroupHandle.
+fn make_group_self(
+    lua: &Lua,
+    state_rc: &Rc<RefCell<SimState>>,
+    group_id: u64,
+    frame_id: Option<u64>,
+) -> mlua::Result<mlua::AnyUserData> {
+    if let Some(fid) = frame_id {
+        lua.create_userdata(crate::lua_api::frame::FrameRef(fid))
+    } else {
+        lua.create_userdata(AnimGroupHandle {
+            group_id,
+            state: Rc::clone(state_rc),
+        })
+    }
 }

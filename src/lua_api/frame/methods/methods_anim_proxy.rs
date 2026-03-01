@@ -147,6 +147,7 @@ fn add_group_play_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             if let Some(group) = state.animation_groups.get_mut(&gid) {
                 group.animations.clear();
             }
+            state.anim_frame_to_anim.retain(|_, &mut (g, _)| g != gid);
         }
         Ok(())
     });
