@@ -221,14 +221,18 @@ fn compute_affected_nodes(changed_node_id: u32, state: &SimState) -> Vec<u32> {
     affected
 }
 
-/// Fire TRAIT_NODE_CHANGED for a specific set of affected nodes, then currency update.
+/// Fire TRAIT_NODE_CHANGED for a specific set of affected nodes.
+///
+/// Does NOT fire TRAIT_TREE_CURRENCY_INFO_UPDATED — in WoW, that event fires
+/// after CommitConfig (server confirms), not on individual staging changes.
+/// Firing it here caused UpdateTreeCurrencyInfo → UpdateAllButtons → FullUpdate
+/// on every button, making all edges flash on every single point change.
 fn fire_trait_nodes_changed_for(lua: &Lua, affected: &[u32]) -> Result<bool> {
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     let event = lua.create_string("TRAIT_NODE_CHANGED")?;
     for &nid in affected {
         fire.call::<()>((event.clone(), nid as i64))?;
     }
-    fire_currency_updated_event(lua)?;
     Ok(true)
 }
 
