@@ -25,7 +25,50 @@ fn unknown_event_error(frame_name: &str, event: &str) -> mlua::Error {
     ))
 }
 
-/// Insert a frame into the per-event Lua table (__event_individual[event][id] = true).
+/// hlist-style insert: append id to array part, record index in "_s" sub-table.
+/// Table layout: tbl[1..N] = frame IDs (array), tbl["_s"][frame_id] = index.
+fn hlist_insert(lua: &mlua::Lua, tbl: &mlua::Table, id: u64) -> mlua::Result<()> {
+    let set = hlist_set(lua, tbl)?;
+    if set.raw_get::<Value>(id).is_ok_and(|v| v != Value::Nil) {
+        return Ok(());
+    }
+    let n = tbl.raw_len() + 1;
+    tbl.raw_set(n as i64, id)?;
+    set.raw_set(id, n as i64)?;
+    Ok(())
+}
+
+/// hlist-style remove: swap last element into the removed slot.
+fn hlist_remove(lua: &mlua::Lua, tbl: &mlua::Table, id: u64) -> mlua::Result<()> {
+    let set = hlist_set(lua, tbl)?;
+    let idx: i64 = match set.raw_get(id) {
+        Ok(v) if v > 0 => v,
+        _ => return Ok(()),
+    };
+    let n = tbl.raw_len() as i64;
+    if idx != n {
+        let last_id: u64 = tbl.raw_get(n)?;
+        tbl.raw_set(idx, last_id)?;
+        set.raw_set(last_id, idx)?;
+    }
+    tbl.raw_set(n, Value::Nil)?;
+    set.raw_set(id, Value::Nil)?;
+    Ok(())
+}
+
+/// Get or create the "_s" set sub-table.
+fn hlist_set(lua: &mlua::Lua, tbl: &mlua::Table) -> mlua::Result<mlua::Table> {
+    match tbl.raw_get::<mlua::Table>("_s") {
+        Ok(s) => Ok(s),
+        _ => {
+            let s = lua.create_table()?;
+            tbl.raw_set("_s", s.clone())?;
+            Ok(s)
+        }
+    }
+}
+
+/// Insert a frame into the per-event hlist (__event_individual[event]).
 fn lua_register_individual(lua: &mlua::Lua, id: u64, event: &str) -> mlua::Result<()> {
     let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
     let event_tbl = match individual.get::<mlua::Table>(event) {
@@ -36,37 +79,34 @@ fn lua_register_individual(lua: &mlua::Lua, id: u64, event: &str) -> mlua::Resul
             t
         }
     };
-    event_tbl.set(id, true)?;
-    Ok(())
+    hlist_insert(lua, &event_tbl, id)
 }
 
-/// Remove a frame from the per-event Lua table (__event_individual[event][id] = nil).
+/// Remove a frame from the per-event hlist.
 fn lua_unregister_individual(lua: &mlua::Lua, id: u64, event: &str) -> mlua::Result<()> {
     let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
     if let Ok(event_tbl) = individual.get::<mlua::Table>(event) {
-        event_tbl.set(id, Value::Nil)?;
+        hlist_remove(lua, &event_tbl, id)?;
     }
     Ok(())
 }
 
-/// Insert a frame into the all-events Lua table (__event_all[id] = true).
+/// Insert a frame into the all-events hlist (__event_all).
 fn lua_register_all(lua: &mlua::Lua, id: u64) -> mlua::Result<()> {
     let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
-    all_events.set(id, true)?;
-    Ok(())
+    hlist_insert(lua, &all_events, id)
 }
 
-/// Remove a frame from all individual event tables and the all-events table.
+/// Remove a frame from all individual event hlists and the all-events hlist.
 fn lua_unregister_all(lua: &mlua::Lua, id: u64) -> mlua::Result<()> {
     let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
     for pair in individual.pairs::<String, mlua::Table>() {
         if let Ok((_, event_tbl)) = pair {
-            event_tbl.set(id, Value::Nil)?;
+            hlist_remove(lua, &event_tbl, id)?;
         }
     }
     let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
-    all_events.set(id, Value::Nil)?;
-    Ok(())
+    hlist_remove(lua, &all_events, id)
 }
 
 fn add_register_event_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

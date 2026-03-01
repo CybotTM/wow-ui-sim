@@ -99,11 +99,10 @@ impl FunctionContainer {
     /// The proxy is a distinct Lua UserData object (different pointer), so
     /// table key lookup `{ [original] = true }[proxy]` returns nil.
     pub fn new_proxy(lua: &Lua, original: &FunctionContainer) -> Result<Self> {
-        let fc_id = NEXT_FC_ID.fetch_add(1, Ordering::Relaxed);
         let orig_func = lua.registry_value::<mlua::Function>(&original.callback)?;
         let callback_key = lua.create_registry_value(orig_func)?;
         Ok(FunctionContainer {
-            fc_id,
+            fc_id: original.fc_id, // Same display ID — tostring matches
             callback: callback_key,
             inner: Rc::clone(&original.inner),
             state: original.state.as_ref().map(Rc::clone),

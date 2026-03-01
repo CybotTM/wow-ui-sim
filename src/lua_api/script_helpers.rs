@@ -147,21 +147,18 @@ pub fn collect_lua_error(lua: &Lua, msg: &str) {
 
 /// Get event listeners in Lua hash table order (matching WoW's dispatch behaviour).
 ///
-/// WoW stores registrations in Lua tables and iterates with `pairs()`, which
-/// follows Lua 5.1 hash table order. This replicates that by reading the same
-/// tables we maintain alongside the Rust-side `registered_events` HashSet.
-///
-/// Returns individual-event registrations first (in Lua hash order), then
-/// all-events registrations (in Lua hash order), with duplicates skipped.
+/// Returns event listeners in WoW dispatch order: individual-event registrations
+/// first, then all-events registrations. Both use hlist ordering (insertion order
+/// with swap-remove on unregister). Duplicates are skipped.
 pub fn get_event_listeners_lua_order(lua: &Lua, event: &str) -> mlua::Result<Vec<u64>> {
-    use mlua::Value;
     let mut result = Vec::new();
     let mut individual_ids = std::collections::HashSet::new();
 
     let individual: mlua::Table = lua.named_registry_value("__event_individual")?;
     if let Ok(event_tbl) = individual.get::<mlua::Table>(event) {
-        for pair in event_tbl.pairs::<u64, Value>() {
-            if let Ok((id, _)) = pair {
+        let n = event_tbl.raw_len();
+        for i in 1..=n {
+            if let Ok(id) = event_tbl.raw_get::<u64>(i as i64) {
                 result.push(id);
                 individual_ids.insert(id);
             }
@@ -169,8 +166,9 @@ pub fn get_event_listeners_lua_order(lua: &Lua, event: &str) -> mlua::Result<Vec
     }
 
     let all_events: mlua::Table = lua.named_registry_value("__event_all")?;
-    for pair in all_events.pairs::<u64, Value>() {
-        if let Ok((id, _)) = pair {
+    let n = all_events.raw_len();
+    for i in 1..=n {
+        if let Ok(id) = all_events.raw_get::<u64>(i as i64) {
             if !individual_ids.contains(&id) {
                 result.push(id);
             }
