@@ -86,6 +86,17 @@ impl WowLuaEnv {
         Ok(result)
     }
 
+    /// Populate the `__addon_names` registry table mapping addon index → folder name.
+    /// The table is pre-created in `init_registry_tables` so the OnUpdate dispatcher
+    /// captures a reference to it. This method fills it after all addons are loaded.
+    pub fn sync_addon_names_to_lua(&self) {
+        let state = self.state.borrow();
+        let Ok(t) = self.lua.named_registry_value::<mlua::Table>("__addon_names") else { return };
+        for (i, addon) in state.addons.iter().enumerate() {
+            t.raw_set(i as i64, addon.folder_name.as_str()).ok();
+        }
+    }
+
     /// Apply post-load workarounds for Blizzard code that depends on
     /// unimplemented engine features (AnimationGroups, EditMode, etc.).
     /// Must be called after all addons are loaded and before firing events.
@@ -123,31 +134,24 @@ impl WowLuaEnv {
                 && let Some(frame) = get_frame_ref(&self.lua, widget_id) {
                     let addon_idx = self.state.borrow().widgets.get(widget_id)
                         .and_then(|f| f.owner_addon);
+                    let taint = addon_taint_name(&self.state, addon_idx);
                     let mut call_args =
                         vec![frame, Value::String(self.lua.create_string(event)?)];
                     call_args.extend(args.iter().cloned());
 
                     let start = Instant::now();
-                    if let Err(e) = handler.call::<()>(MultiValue::from_vec(call_args)) {
+                    let result = call_with_taint(&self.lua, handler, taint, call_args);
+                    if let Err(e) = result {
                         call_error_handler(&self.lua, &e.to_string());
                     }
-                    if let Some(idx) = addon_idx {
-                        let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0;
-                        let mut state = self.state.borrow_mut();
-                        if let Some(addon) = state.addons.get_mut(idx as usize) {
-                            addon.runtime.current_frame_ms += elapsed_ms;
-                        }
-                    }
+                    record_addon_time(&self.state, addon_idx, &start);
                 }
         }
 
         Ok(())
     }
 
-    /// Fire a script handler for a specific widget.
-    /// handler_name is like "OnClick", "OnEnter", etc.
-    /// extra_args are passed after the frame (self) argument.
-    /// Lua errors are routed through `call_error_handler` (same as event dispatch).
+    /// Fire a script handler for a specific widget with per-addon taint restoration.
     pub fn fire_script_handler(
         &self,
         widget_id: u64,
@@ -158,11 +162,12 @@ impl WowLuaEnv {
 
         if let Some(handler) = get_script(&self.lua, widget_id, handler_name) {
             let frame = super::frame::frame_ref(&self.lua, widget_id)?;
-
+            let addon_idx = self.state.borrow().widgets.get(widget_id)
+                .and_then(|f| f.owner_addon);
+            let taint = addon_taint_name(&self.state, addon_idx);
             let mut call_args = vec![frame];
             call_args.extend(extra_args);
-
-            if let Err(e) = handler.call::<()>(MultiValue::from_vec(call_args)) {
+            if let Err(e) = call_with_taint(&self.lua, handler, taint, call_args) {
                 call_error_handler(&self.lua, &e.to_string());
             }
         }
@@ -376,7 +381,6 @@ impl WowLuaEnv {
         Ok(())
     }
 
-    /// Dispatch OnUpdate handlers one at a time, logging which ones dirty the render.
     fn dispatch_on_update_with_dirty_tracking(&self, frame_ids: &[u64], elapsed: f64) {
         for &id in frame_ids {
             let before = self.state.borrow().widgets.render_dirty_count();
@@ -388,8 +392,6 @@ impl WowLuaEnv {
         }
     }
 
-    /// Return the cached visible OnUpdate frame IDs.
-    /// The cache is built on first call and kept up to date by `set_frame_visible`.
     fn get_visible_on_update_frames(&self) -> Vec<u64> {
         let mut state = self.state.borrow_mut();
         if let Some(ref cached) = state.visible_on_update_cache {
@@ -406,12 +408,7 @@ impl WowLuaEnv {
         ids
     }
 
-    /// Dispatch OnUpdate (or OnPostUpdate) handlers via a Lua-side loop.
-    ///
-    /// A single Rust→Lua call dispatches all handlers, avoiding per-handler
-    /// FFI overhead (string formatting, table lookups, frame ref retrieval).
-    /// Per-addon timing is accumulated in the persistent `__addon_timing` registry
-    /// table and consumed by `finalize_frame_metrics`.
+    /// Dispatch OnUpdate/OnPostUpdate via a Lua-side loop (avoids per-handler FFI overhead).
     fn dispatch_handlers_lua(&self, frame_ids: &[u64], elapsed: f64, suffix: &str) {
         let dispatch: mlua::Function = self.lua
             .named_registry_value("__dispatch_on_update")
@@ -425,8 +422,6 @@ impl WowLuaEnv {
         }
     }
 
-
-    /// Aggregate per-addon metrics at the end of each frame tick.
     /// Read and clear `__addon_timing`, applying accumulated ms to each addon.
     fn drain_addon_timing(&self) {
         let Ok(timing) = self.lua.named_registry_value::<mlua::Table>("__addon_timing")
@@ -448,8 +443,6 @@ impl WowLuaEnv {
         }
     }
 
-    /// Drains `__addon_timing` (accumulated by the Lua OnUpdate dispatch) into
-    /// per-addon `current_frame_ms` before finalizing.
     fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
         self.drain_addon_timing();
         let mut state = self.state.borrow_mut();
@@ -505,17 +498,9 @@ impl WowLuaEnv {
     pub fn next_timer_delay(&self) -> Option<std::time::Duration> {
         let state = self.state.borrow();
         let now = Instant::now();
-        state
-            .timers
-            .iter()
+        state.timers.iter()
             .filter(|t| !t.cancelled)
-            .map(|t| {
-                if t.fire_at > now {
-                    t.fire_at - now
-                } else {
-                    std::time::Duration::ZERO
-                }
-            })
+            .map(|t| t.fire_at.saturating_duration_since(now))
             .min()
     }
 
@@ -535,6 +520,33 @@ fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 100.0 { rt.count_over_100ms += 1; }
     if ms > 500.0 { rt.count_over_500ms += 1; }
     if ms > 1000.0 { rt.count_over_1000ms += 1; }
+}
+
+/// Call a handler via `__addon_taint_exec` so taint is set in the handler's call frame.
+fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, args: Vec<Value>) -> mlua::Result<()> {
+    if let Some(ref name) = taint {
+        let exec: mlua::Function = lua.named_registry_value("__addon_taint_exec")?;
+        let mut ea = vec![Value::Function(handler), Value::String(lua.create_string(name.as_str())?)];
+        ea.extend(args);
+        exec.call(MultiValue::from_vec(ea))
+    } else {
+        handler.call(MultiValue::from_vec(args))
+    }
+}
+
+/// Look up the addon folder name for a given owner_addon index.
+fn addon_taint_name(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>) -> Option<String> {
+    idx.and_then(|i| state.borrow().addons.get(i as usize).map(|a| a.folder_name.clone()))
+}
+
+/// Record per-addon timing from an Instant.
+fn record_addon_time(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>, start: &Instant) {
+    if let Some(i) = idx {
+        let ms = start.elapsed().as_secs_f64() * 1000.0;
+        if let Some(addon) = state.borrow_mut().addons.get_mut(i as usize) {
+            addon.runtime.current_frame_ms += ms;
+        }
+    }
 }
 
 /// Scan an addons directory and return AddonInfo for each valid addon folder.
@@ -612,23 +624,25 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
     // Persistent tables for OnUpdate profiler attribution.
     lua.set_named_registry_value("__frame_owners", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_timing", lua.create_table()?)?;
+    lua.set_named_registry_value("__addon_names", lua.create_table()?)?;
     let taint_fallback: mlua::Function = lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
     register_on_update_dispatcher(lua)
 }
 
-/// Lua source for the OnUpdate dispatch loop. Runs all handlers in pure Lua
-/// and logs any individual handler that takes >5ms to stderr.
-/// Reads frame owners from persistent `__frame_owners` registry table and
-/// accumulates per-addon timing into persistent `__addon_timing` table.
+/// OnUpdate dispatch loop: per-handler taint, profiling, error handling — all in pure Lua.
 const ON_UPDATE_DISPATCH_LUA: &str = r#"
     local reg = debug.getregistry()
     local scripts = reg.__scripts
     local owners = reg.__frame_owners
     local timing = reg.__addon_timing
+    local addon_names = reg.__addon_names
+    local setstacktaint = debug.setstacktaint
     local G = _G
     local stderr = io.stderr
+    local taint_exec  -- lazily resolved (registered after this factory runs)
     return function(ids, elapsed, suffix)
+        taint_exec = taint_exec or reg.__addon_taint_exec
         local profile = debugprofilestop
         local handler = geterrorhandler()
         for i = 1, #ids do
@@ -637,15 +651,21 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
             if func then
                 local frame = rawget(G, "__frame_" .. id)
                 if frame then
+                    local owner = owners[id]
+                    local taint = owner and addon_names[owner]
                     local t0 = profile()
-                    local ok, err = pcall(func, frame, elapsed)
+                    local ok, err
+                    if taint then
+                        ok, err = pcall(taint_exec, func, taint, frame, elapsed)
+                    else
+                        ok, err = pcall(func, frame, elapsed)
+                    end
                     local dt = profile() - t0
                     if dt > 5 then
                         local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
                         stderr:write(string.format("  [OnUpdate] %7.1fms  %s%s\n", dt, n, suffix))
                     end
                     if not ok then handler(err) end
-                    local owner = owners[id]
                     if owner then
                         timing[owner] = (timing[owner] or 0) + dt
                     end
@@ -680,34 +700,32 @@ fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value("__dispatch_on_update", dispatch)
 }
 
-/// Enable Elune taint tracking and wrap loadstring/seterrorhandler as secure.
+/// Enable Elune taint tracking, wrap loadstring, register taint helpers.
 fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
     lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
     lua.load(r#"
-        do
-            local nsf = debug.newsecurefunction
-            local original_ls = loadstring
-            local setstacktaint = debug.setstacktaint
-            loadstring = nsf(function(code, name)
-                setstacktaint("*** ForceTaint_Strong ***")
-                return original_ls(code, name)
-            end)
-            -- seterrorhandler: wrapped in apply_post_load_workarounds
-            -- (BugGrabber overwrites it during addon loading)
-        end
+        local original_ls = loadstring
+        local sst = debug.setstacktaint
+        local sot = debug.setobjecttaint
+        local reg = debug.getregistry()
+        loadstring = debug.newsecurefunction(function(code, name)
+            sst("*** ForceTaint_Strong ***"); return original_ls(code, name)
+        end)
+        reg.__addon_taint_exec = (function()
+            return function(func, taint, ...)
+                sot(func, taint)
+                local ok, err = pcall(func, ...)
+                if not ok then error(err, 0) end
+            end
+        end)()
+        reg.__tainted_compile = (function()
+            return function(code, name, taint)
+                local fn, err = original_ls(code, name)
+                if fn then sot(fn, taint) end
+                return fn, err
+            end
+        end)()
     "#).exec()?;
-
-    // Helper to execute addon code with per-addon stack taint.
-    // In WoW, each addon file runs with its addon name as the stack taint,
-    // causing all table operations to record the addon as the taint source.
-    let taint_exec: mlua::Function = lua.load(r#"
-        local setstacktaint = debug.setstacktaint
-        return function(func, taint, ...)
-            setstacktaint(taint)
-            return func(...)
-        end
-    "#).eval()?;
-    lua.set_named_registry_value("__addon_taint_exec", taint_exec)?;
     Ok(())
 }
 

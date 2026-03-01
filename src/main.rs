@@ -201,6 +201,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut saved_vars = configure_saved_vars(&args);
     load_blizzard_addons(&env);
     load_third_party_addons(&args, &env, &mut saved_vars);
+    env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
 
     let exec_lua = resolve_exec_lua(&args.exec_lua);

@@ -24,7 +24,11 @@ pub fn load_lua_file(
     let lua = env.lua();
 
     let lua_start = Instant::now();
-    let func = if bytecode_cache::is_disabled() {
+    let func = if ctx.taint {
+        // Compile via Lua with setstacktaint so the function carries addon taint.
+        // Closures defined inside will inherit this taint (Elune behavior).
+        tainted_compile(lua, &bytes, &chunk_name, ctx.name)?
+    } else if bytecode_cache::is_disabled() {
         compile_from_source(lua, &bytes, &chunk_name)?
     } else {
         load_cached_or_compile(lua, &bytes, &chunk_name, timing)?
@@ -103,6 +107,18 @@ fn load_cached_or_compile(
     let bc = func.dump(false);
     bytecode_cache::put(hash, &bc);
     Ok(func)
+}
+
+/// Compile source with `setstacktaint(addonName)` so the function carries addon taint.
+fn tainted_compile(lua: &mlua::Lua, bytes: &[u8], chunk_name: &str, addon: &str) -> Result<mlua::Function, LoadError> {
+    let code = String::from_utf8_lossy(bytes);
+    let code = code.strip_prefix('\u{feff}').unwrap_or(&code);
+    let compiler: mlua::Function = lua.named_registry_value("__tainted_compile")
+        .map_err(|e| LoadError::Lua(e.to_string()))?;
+    let (func, err): (Option<mlua::Function>, Option<String>) = compiler
+        .call((&*code, chunk_name, addon))
+        .map_err(|e| LoadError::Lua(e.to_string()))?;
+    func.ok_or_else(|| LoadError::Lua(err.unwrap_or_else(|| "unknown error".into())))
 }
 
 /// Compile Lua source code into a function.
