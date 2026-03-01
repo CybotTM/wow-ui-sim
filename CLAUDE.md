@@ -145,6 +145,34 @@ The `inherit` attribute on `<Scripts>` elements describes the **inherited** (tem
 
 This is counterintuitive — "append" means the inherited handler is appended (runs after), so the new code runs first. Confirmed via wowless (`wowless/modules/loader.lua:201-210`). Implementation: `src/loader/helpers.rs` `emit_chained_handler`.
 
+## Taint System (Elune)
+
+The simulator uses **Elune** — Blizzard's custom Lua 5.1 fork with taint tracking built into the VM. Elune is loaded as a C library (`luaopen_security`, `luaopen_securecalls` in `env.rs`).
+
+### What Elune provides (C runtime, NOT our code)
+
+`issecure`, `issecurevariable`, `securecall`, `securecallfunction`, `forceinsecure`, `hooksecurefunc`, `secureexecuterange`, `debug.setobjecttaint`, `debug.getstacktaint`, `debug.setstacktaint`, `debug.settaintmode`
+
+`issecure()` checks `debug.getstacktaint()` — returns true when stack taint is nil (Blizzard code), false when tainted (addon code). **Do NOT override issecure()** — Elune's implementation is correct and Wowless tests verify it.
+
+### What the simulator provides (`security_api.rs`)
+
+- `securecallmethod` — wrapper around Elune's `securecall`
+- `issecretvalue`, `canaccessvalue`, `canaccessallvalues`, `canaccesstable` — permissive stubs (always true/false)
+- SecureHandler stubs (do nothing)
+- State/attribute driver stubs (do nothing)
+
+### Per-addon taint stamping
+
+- **Loading** (`loader/lua_file.rs`): `debug.setobjecttaint(compiled_func, addon_name)` on each addon's compiled closure. Blizzard UI code is NOT tainted.
+- **Script dispatch** (`env.rs`): `debug.setobjecttaint(handler, addon_name)` before calling frame script handlers, using the frame's owner addon.
+- **Effect**: When tainted code runs, Elune sets stack taint to the addon name. Variables set by tainted code are marked. `issecurevariable(table, key)` returns `false, "AddonName"`.
+
+### What is NOT enforced
+
+- **Protected frame restrictions**: `SetAttribute` does NOT check `issecure()`. In real WoW, protected frames block attribute changes from insecure code. We don't enforce this — known gap.
+- **`SetForbidden`/`IsForbidden`**: Implemented as flags but not enforced on any method.
+
 ## Performance
 
 Uses **Lua 5.1** via mlua (WoW's Lua version).
