@@ -93,6 +93,7 @@ impl WowLuaEnv {
     ) -> usize {
         let timer_addon = timer.owner_addon;
         let cb_start = Instant::now();
+        self.state.borrow_mut().executing_addon_index = timer_addon;
         if self.fire_timer_callback(&timer) {
             let elapsed_ms = cb_start.elapsed().as_secs_f64() * 1000.0;
             let mut state = self.state.borrow_mut();
@@ -102,9 +103,11 @@ impl WowLuaEnv {
                 }
             }
             drop(state);
+            self.state.borrow_mut().executing_addon_index = None;
             self.reschedule_or_cleanup(timer, now, to_reschedule);
             fired + 1
         } else {
+            self.state.borrow_mut().executing_addon_index = None;
             self.cleanup_timer(timer);
             fired
         }

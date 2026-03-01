@@ -110,6 +110,8 @@ pub struct SimState {
     pub cursor_item: Option<CursorInfo>,
     /// Index of the addon currently being loaded (into `addons` vec).
     pub loading_addon_index: Option<u16>,
+    /// Index of the addon whose code is currently executing (event/timer/script handlers).
+    pub executing_addon_index: Option<u16>,
     /// Whether loading inside a ScopedModifier with forbidden="true".
     pub loading_forbidden: bool,
     /// Application-level frame metrics (total frame time for profiler ratios).
@@ -156,7 +158,8 @@ impl SimState {
             strata_buckets: None, mouse_position: None, hovered_frame: None,
             current_target: None, current_focus: None, sound_manager: None,
             casting: None, gcd: None, cursor_item: None,
-            loading_addon_index: None, loading_forbidden: false,
+            loading_addon_index: None, executing_addon_index: None,
+            loading_forbidden: false,
             next_anim_group_id: 1, next_cast_id: 1,
             screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
             rot_damage_level: 0, start_time: Instant::now(),

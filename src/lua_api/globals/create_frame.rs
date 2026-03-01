@@ -284,9 +284,11 @@ fn attribute_frame_owner(
     parent_id: Option<u64>,
 ) {
     let s = state.borrow();
-    frame.owner_addon = s.loading_addon_index.or_else(|| {
-        parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
-    });
+    frame.owner_addon = s.loading_addon_index
+        .or(s.executing_addon_index)
+        .or_else(|| {
+            parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
+        });
     frame.forbidden = s.loading_forbidden;
     if frame.owner_addon.is_none() {
         eprintln!(

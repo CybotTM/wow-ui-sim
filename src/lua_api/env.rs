@@ -140,7 +140,9 @@ impl WowLuaEnv {
                     call_args.extend(args.iter().cloned());
 
                     let start = Instant::now();
+                    self.state.borrow_mut().executing_addon_index = addon_idx;
                     let result = call_with_taint(&self.lua, handler, taint, call_args);
+                    self.state.borrow_mut().executing_addon_index = None;
                     if let Err(e) = result {
                         call_error_handler(&self.lua, &e.to_string());
                     }
@@ -167,9 +169,11 @@ impl WowLuaEnv {
             let taint = addon_taint_name(&self.state, addon_idx);
             let mut call_args = vec![frame];
             call_args.extend(extra_args);
+            self.state.borrow_mut().executing_addon_index = addon_idx;
             if let Err(e) = call_with_taint(&self.lua, handler, taint, call_args) {
                 call_error_handler(&self.lua, &e.to_string());
             }
+            self.state.borrow_mut().executing_addon_index = None;
         }
 
         Ok(())
@@ -362,7 +366,11 @@ impl WowLuaEnv {
             self.dispatch_on_update_with_dirty_tracking(&frame_ids, elapsed);
             let on_update_dur = t.elapsed();
             for &id in &frame_ids {
+                let addon_idx = self.state.borrow().widgets.get(id)
+                    .and_then(|f| f.owner_addon);
+                self.state.borrow_mut().executing_addon_index = addon_idx;
                 self.dispatch_handlers_lua(&[id], elapsed, "_OnPostUpdate");
+                self.state.borrow_mut().executing_addon_index = None;
             }
             let total = t.elapsed();
             if total.as_millis() > 20 {
@@ -383,9 +391,13 @@ impl WowLuaEnv {
 
     fn dispatch_on_update_with_dirty_tracking(&self, frame_ids: &[u64], elapsed: f64) {
         for &id in frame_ids {
+            let addon_idx = self.state.borrow().widgets.get(id)
+                .and_then(|f| f.owner_addon);
+            self.state.borrow_mut().executing_addon_index = addon_idx;
             let before = self.state.borrow().widgets.render_dirty_count();
             self.dispatch_handlers_lua(&[id], elapsed, "_OnUpdate");
             let after = self.state.borrow().widgets.render_dirty_count();
+            self.state.borrow_mut().executing_addon_index = None;
             if after > before {
                 log_dirty_on_update(&self.state.borrow(), id, after - before);
             }
