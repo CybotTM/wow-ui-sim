@@ -181,16 +181,6 @@ impl WidgetRegistry {
         !self.render_dirty_ids.borrow().is_empty()
     }
 
-    /// Number of frames currently in the render-dirty set (diagnostic).
-    pub fn render_dirty_count(&self) -> usize {
-        self.render_dirty_ids.borrow().len()
-    }
-
-    /// Peek at the current render-dirty IDs (diagnostic).
-    pub fn peek_render_dirty(&self) -> Vec<u64> {
-        self.render_dirty_ids.borrow().iter().copied().collect()
-    }
-
     /// Drain the set of visually dirty frame IDs and return a per-strata
     /// bitmask indicating which strata contain dirty frames.
     ///

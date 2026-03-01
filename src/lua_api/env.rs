@@ -394,13 +394,8 @@ impl WowLuaEnv {
             let addon_idx = self.state.borrow().widgets.get(id)
                 .and_then(|f| f.owner_addon);
             self.state.borrow_mut().executing_addon_index = addon_idx;
-            let before = self.state.borrow().widgets.render_dirty_count();
             self.dispatch_handlers_lua(&[id], elapsed, "_OnUpdate");
-            let after = self.state.borrow().widgets.render_dirty_count();
             self.state.borrow_mut().executing_addon_index = None;
-            if after > before {
-                log_dirty_on_update(&self.state.borrow(), id, after - before);
-            }
         }
     }
 
@@ -678,24 +673,6 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
         end
     end
 "#;
-
-/// Register a Lua function that dispatches OnUpdate/OnPostUpdate handlers
-/// in a single Lua call, avoiding per-handler Rust→Lua FFI overhead.
-fn log_dirty_on_update(state: &crate::lua_api::SimState, id: u64, delta: usize) {
-    let f = state.widgets.get(id);
-    let addon = f.and_then(|f| f.owner_addon)
-        .and_then(|i| state.addons.get(i as usize))
-        .map(|a| a.folder_name.as_str())
-        .unwrap_or("?");
-    let dirty_ids = state.widgets.peek_render_dirty();
-    let dirty_names: Vec<String> = dirty_ids.iter().map(|&did| {
-        let df = state.widgets.get(did);
-        let n = df.and_then(|f| f.name.as_deref()).unwrap_or("?");
-        let k = df.and_then(|f| f.parent_key.as_deref()).unwrap_or("");
-        format!("{did}:{n}{}", if k.is_empty() { String::new() } else { format!("({k})") })
-    }).collect();
-    eprintln!("[OnUpdate dirty] addon={addon} (id={id}) +{delta} → [{}]", dirty_names.join(", "));
-}
 
 fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
     super::script_helpers::get_or_create_scripts_table(lua);
