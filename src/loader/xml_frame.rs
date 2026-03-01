@@ -180,6 +180,7 @@ fn apply_xml_properties_direct(
     direct::apply_xml_hit_rect_insets(state, fid, frame);
     direct::apply_xml_clamped_to_screen(state, fid, frame, inherits);
     direct::apply_xml_set_all_points(state, fid, frame, inherits);
+    direct::apply_xml_protected(state, fid, frame, inherits);
     direct::apply_xml_id(state, fid, frame);
 }
 

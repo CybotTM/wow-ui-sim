@@ -326,10 +326,18 @@ fn register_c_assisted_combat(lua: &Lua) -> Result<mlua::Table> {
 /// C_Widget namespace - widget type checking.
 fn register_c_widget(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("IsFrameWidget", lua.create_function(|_, _widget: Value| Ok(false))?)?;
-    t.set("IsRenderableWidget", lua.create_function(|_, _widget: Value| Ok(false))?)?;
-    t.set("IsWidget", lua.create_function(|_, _widget: Value| Ok(false))?)?;
+    t.set("IsFrameWidget", lua.create_function(is_frame_widget)?)?;
+    t.set("IsRenderableWidget", lua.create_function(is_frame_widget)?)?;
+    t.set("IsWidget", lua.create_function(is_frame_widget)?)?;
     Ok(t)
+}
+
+/// Check if a Lua value is a FrameRef UserData (i.e. a WoW widget).
+fn is_frame_widget(_: &Lua, widget: Value) -> Result<bool> {
+    match &widget {
+        Value::UserData(ud) => Ok(ud.borrow::<FrameRef>().is_ok()),
+        _ => Ok(false),
+    }
 }
 
 /// Register `GetTime()` - returns seconds since UI load.

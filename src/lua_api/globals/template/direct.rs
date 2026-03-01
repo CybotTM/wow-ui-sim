@@ -564,6 +564,28 @@ pub fn apply_xml_set_all_points(
     }
 }
 
+/// Resolve and apply protected from template chain + instance XML.
+pub fn apply_xml_protected(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let protected = frame.protected.or_else(|| {
+        if inherits.is_empty() {
+            return None;
+        }
+        crate::xml::get_template_chain(inherits)
+            .iter()
+            .find_map(|e| e.frame.protected)
+    });
+    if protected == Some(true) {
+        if let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
+            f.is_protected = true;
+        }
+    }
+}
+
 /// Apply frame ID from XML `id` attribute.
 pub fn apply_xml_id(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameXml) {
     if let Some(id) = frame.xml_id {

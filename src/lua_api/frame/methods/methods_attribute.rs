@@ -207,8 +207,15 @@ fn add_execute_attribute<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_frame_ref_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFrameRef", |_lua, _this, (_label, _frame): (String, Value)| Ok(()));
-    methods.add_method("GetFrameRef", |_lua, _this, _label: String| Ok(Value::Nil));
+    methods.add_method("SetFrameRef", |lua, this, (label, frame): (String, Value)| {
+        let key = format!("frameref-{}", label);
+        set_attribute_value(lua, this.0, &key, &frame)?;
+        Ok(())
+    });
+    methods.add_method("GetFrameRef", |lua, this, label: String| {
+        let key = format!("frameref-{}", label);
+        get_attribute_value(lua, this.0, &[key])
+    });
 }
 
 fn add_security_and_input_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

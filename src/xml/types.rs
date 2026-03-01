@@ -145,6 +145,8 @@ pub struct FrameXml {
     pub frame_level: Option<i32>,
     #[serde(rename = "@toplevel")]
     pub toplevel: Option<bool>,
+    #[serde(rename = "@protected")]
+    pub protected: Option<bool>,
 
     // Child elements collected via $value to allow multiples
     #[serde(rename = "$value", default)]

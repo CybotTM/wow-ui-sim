@@ -432,6 +432,10 @@ pub struct Frame {
     /// Whether this frame is forbidden (secure-restricted, e.g. created inside ScopedModifier forbidden="true").
     /// Forbidden frames are exposed as proxy tables in _G with a "Forbidden" metatable.
     pub forbidden: bool,
+
+    /// Whether this frame is protected (inherits SecureFrameTemplate).
+    /// Protected frames can use secure handler execution (SecureHandlerExecute, SetFrameRef, etc.).
+    pub is_protected: bool,
 }
 
 /// Build a `Frame` with all defaults. `$id` is the expression for the `id` field.
@@ -594,6 +598,7 @@ macro_rules! frame_defaults {
 
             default_parent: false,
             forbidden: false,
+            is_protected: false,
         }
     };
 }
