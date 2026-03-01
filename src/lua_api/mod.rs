@@ -2,6 +2,7 @@
 
 pub mod animation;
 mod builtin_frames;
+mod cfunc_wrap;
 mod diagnostics;
 mod env;
 pub(crate) mod frame;

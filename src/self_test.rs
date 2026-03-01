@@ -562,25 +562,6 @@ pub fn run_test(
 }
 
 fn report_results(env: &WowLuaEnv, completed: bool) {
-    // Exclude ~cfuncs from failures: our sim shares C function objects across aliased
-    // types (e.g. Browser/ArchaeologyDigSiteFrame share Frame's methods), causing
-    // "multiple true names" errors that don't affect addon compatibility.
-    let _ = env.exec(r#"
-        if WowlessTestFailures and WowlessTestFailures.generated then
-            local cf = WowlessTestFailures.generated["~cfuncs"]
-            if cf then
-                local n = 0
-                for _ in pairs(cf) do n = n + 1 end
-                if n > 0 then
-                    A_Print(("[self-test] suppressed %d ~cfuncs failures (shared C function identity)"):format(n))
-                end
-                WowlessTestFailures.generated["~cfuncs"] = nil
-                if not next(WowlessTestFailures.generated) then
-                    WowlessTestFailures.generated = nil
-                end
-            end
-        end
-    "#);
     let has_failures: bool = env.eval("next(WowlessTestFailures) ~= nil").unwrap_or(false);
     if has_failures {
         print_failures(env);

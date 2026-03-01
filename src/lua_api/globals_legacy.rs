@@ -417,14 +417,15 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
     Ok(Value::Table(new_mt))
 }
 
-/// Clone a base type's metatable `{ __index = { methods } }` into a new unique table.
+/// Clone a base type's metatable, wrapping each method for distinct per-type function identity.
+/// Uses raw C closures (via cfunc_wrap) to avoid exhausting mlua's auxiliary stack limit.
 fn clone_metatable(lua: &Lua, per_type: &mlua::Table, base_key: &str) -> Result<mlua::Table> {
     let base_mt: mlua::Table = per_type.raw_get(base_key)?;
     let base_idx: mlua::Table = base_mt.raw_get("__index")?;
-    let new_idx = lua.create_table()?;
-    for pair in base_idx.pairs::<Value, Value>() {
-        let (k, v) = pair?;
-        new_idx.raw_set(k, v)?;
+    let (new_idx, wrap_fn) = (lua.create_table()?, super::cfunc_wrap::create_wrap_factory(lua)?);
+    for pair in base_idx.pairs::<String, mlua::Function>() {
+        let (k, f) = pair?;
+        new_idx.raw_set(k.as_str(), wrap_fn.call::<mlua::Function>(f)?)?;
     }
     let new_mt = lua.create_table()?;
     new_mt.raw_set("__index", new_idx)?;
