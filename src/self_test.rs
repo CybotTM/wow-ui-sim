@@ -2,7 +2,7 @@
 
 use crate::lua_api::WowLuaEnv;
 use crate::lua_errors::restore_stdout;
-use crate::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
+use crate::startup::{fire_one_on_update_tick, fire_startup_events_headless, process_pending_timers};
 
 /// Flush Lua print() output from console_output to stderr.
 fn flush_console(env: &WowLuaEnv) {
@@ -69,9 +69,6 @@ fn tick_debug(env: &WowLuaEnv) -> String {
 }
 
 /// Run one tick: fire OnUpdate + timers, return (errors_before, errors_after, duration).
-///
-/// Uses 40ms elapsed (vs 16ms normal) to give the Wowless test runner more
-/// budget per tick (`elapsed * 1000 / 2` = 20ms vs 8ms), reducing total ticks.
 fn run_one_tick(env: &WowLuaEnv) -> (usize, usize, std::time::Duration) {
     let before = env.state().borrow().lua_errors.len();
     let t0 = std::time::Instant::now();
@@ -506,7 +503,7 @@ const AUGMENT_WOWLESS_DATA_LUA: &str = r#"
 /// Unlike `run_headless_startup`, injects WowlessData augmentation BEFORE any
 /// OnUpdate ticks fire, so the test suite sees augmented data from the start.
 pub fn run_startup(env: &WowLuaEnv) {
-    fire_startup_events(env);
+    fire_startup_events_headless(env);
     env.apply_post_event_workarounds();
     env.state().borrow_mut().widgets.rebuild_anchor_index();
     process_pending_timers(env);
@@ -525,15 +522,13 @@ fn settle_extra_ticks(env: &WowLuaEnv) {
     }
 }
 
-/// Override debugprofilestop with real wall-clock timer.
+/// Override debugprofilestop with a C function returning 0, disabling the
+/// test runner's per-tick time budget so it processes all sync tests in one tick.
 fn override_debugprofilestop(env: &WowLuaEnv) {
     let lua = env.lua();
-    let start = std::time::Instant::now();
     let _ = lua.globals().set(
         "debugprofilestop",
-        lua.create_function(move |_, ()| {
-            Ok(start.elapsed().as_millis() as i64)
-        }).expect("debugprofilestop override"),
+        lua.create_function(|_, ()| Ok(0i64)).expect("debugprofilestop override"),
     );
 }
 
@@ -548,6 +543,8 @@ pub fn run_test(
     }
 
     override_debugprofilestop(env);
+    // Strip non-Wowless OnUpdate handlers to avoid slow ticks from Blizzard addons.
+    env.state().borrow_mut().retain_on_update_for_addon("Wowless");
     debug_print(env);
 
     let completed = poll_until_done(env, max_ticks);

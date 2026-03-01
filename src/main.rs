@@ -318,14 +318,18 @@ fn load_third_party_addons(args: &Args, env: &WowLuaEnv, saved_vars: &mut Option
             .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
             .unwrap_or(false);
 
-    if skip_addons {
+    let addons_path = PathBuf::from("./Interface/AddOns");
+    if skip_addons && !is_test_command(args) {
         println!("\nAddon loading disabled");
         return;
     }
 
-    let addons_path = PathBuf::from("./Interface/AddOns");
     let exclude = if is_test_command(args) { &[][..] } else { TEST_ADDONS };
-    let addons = scan_addons(&addons_path, exclude);
+    let mut addons = scan_addons(&addons_path, exclude);
+    // --no-addons with test commands: keep only test addons (Wowless, WowlessData)
+    if skip_addons {
+        addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));
+    }
 
     if addons.is_empty() {
         return;

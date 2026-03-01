@@ -588,5 +588,18 @@ impl SimState {
         }
     }
 
+    /// Keep only OnUpdate handlers owned by the named addon. Invalidates cache.
+    pub fn retain_on_update_for_addon(&mut self, addon_name: &str) {
+        let idx = self.addons.iter().position(|a| a.folder_name == addon_name);
+        let addon_idx = idx.map(|i| i as u16);
+        let before = self.on_update_frames.len();
+        self.on_update_frames.retain(|&id| {
+            self.widgets.get(id).and_then(|f| f.owner_addon) == addon_idx
+        });
+        self.visible_on_update_cache = None;
+        let after = self.on_update_frames.len();
+        eprintln!("[self-test] stripped OnUpdate: {before} → {after} (keeping {addon_name})");
+    }
+
 }
 

@@ -38,13 +38,20 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
 
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
-    fire_login_sequence(env);
+    fire_login_sequence(env, false);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
 }
 
-/// Fire ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN and set IsLoggedIn.
-fn fire_login_sequence(env: &WowLuaEnv) {
+/// Fire startup events for headless test mode (skips IsLoggedIn override).
+pub fn fire_startup_events_headless(env: &WowLuaEnv) {
+    fire_login_sequence(env, true);
+    fire_world_enter_sequence(env);
+    fire_post_login_events(env);
+}
+
+/// Fire ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN and optionally set IsLoggedIn.
+fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
     let fire = |name| fire_simple_event(env, name);
 
     eprintln!("[Startup] Firing ADDON_LOADED");
@@ -59,12 +66,14 @@ fn fire_login_sequence(env: &WowLuaEnv) {
 
     // In WoW, IsLoggedIn() returns true once the player is logged in.
     // AceAddon-3.0 checks IsLoggedIn() before enabling addons from its queue.
-    if let Err(e) = env
-        .lua()
-        .load(r#"IsLoggedIn = function() return true end"#)
-        .exec()
-    {
-        eprintln!("Error setting IsLoggedIn: {}", e);
+    if !skip_is_logged_in {
+        if let Err(e) = env
+            .lua()
+            .load(r#"IsLoggedIn = function() return true end"#)
+            .exec()
+        {
+            eprintln!("Error setting IsLoggedIn: {}", e);
+        }
     }
 
     fire("PLAYER_LOGIN");
