@@ -15,6 +15,10 @@ pub fn register_security_functions(lua: &Lua) -> Result<()> {
     register_secure_handler_stubs(lua)?;
     register_state_driver_stubs(lua)?;
     register_secure_cmd_option_parse(lua)?;
+    // Override Elune's issecure() to always return true.
+    // We stamp per-addon taint for tracking but don't enforce restrictions,
+    // so all code should be considered secure (e.g. SetAttribute in ActionBar).
+    lua.globals().set("issecure", lua.create_function(|_, ()| Ok(true))?)?;
     Ok(())
 }
 
