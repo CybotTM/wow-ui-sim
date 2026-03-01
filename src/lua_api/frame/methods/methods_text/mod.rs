@@ -340,7 +340,7 @@ fn set_text_on_frame(
         if frame.text == text { return; }
     }
     if let Some(frame) = state.widgets.get_mut_visual(id) {
-        frame.text_stripped = text.as_ref().map(|t| crate::render::text::strip_wow_markup(t));
+        frame.text_stripped = text.as_ref().map(|t| crate::render::strip_wow_markup(t));
         frame.text = text;
     }
 }

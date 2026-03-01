@@ -231,7 +231,7 @@ fn set_button_text_from_info(state: &Rc<RefCell<SimState>>, info: &mlua::Table, 
     if let Ok(text) = info.get::<mlua::String>("text") {
         let text_str = text.to_string_lossy().to_string();
         let mut s = state.borrow_mut();
-        let stripped = crate::render::text::strip_wow_markup(&text_str);
+        let stripped = crate::render::strip_wow_markup(&text_str);
         if let Some(btn_frame) = s.widgets.get_mut_visual(btn_id) {
             btn_frame.text_stripped = Some(stripped.clone());
             btn_frame.text = Some(text_str.clone());
@@ -240,7 +240,7 @@ fn set_button_text_from_info(state: &Rc<RefCell<SimState>>, info: &mlua::Table, 
             .and_then(|f| f.children_keys.get("Text"))
         {
             if let Some(tc) = s.widgets.get_mut_visual(text_child_id) {
-                tc.text_stripped = Some(crate::render::text::strip_wow_markup(&text_str));
+                tc.text_stripped = Some(crate::render::strip_wow_markup(&text_str));
                 tc.text = Some(text_str);
             }
         }

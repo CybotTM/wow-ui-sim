@@ -409,7 +409,7 @@ pub fn measure_text_height(
     bounds_width: f32,
     word_wrap: bool,
 ) -> f32 {
-    let stripped = crate::render::text::strip_wow_markup(text);
+    let stripped = crate::render::strip_wow_markup(text);
     if stripped.is_empty() {
         return 0.0;
     }
@@ -462,7 +462,7 @@ pub fn emit_text_quads(
     let stripped: &str = if let Some(s) = pre_stripped {
         s
     } else {
-        stripped_owned = crate::render::text::strip_wow_markup(text);
+        stripped_owned = crate::render::strip_wow_markup(text);
         &stripped_owned
     };
     if stripped.is_empty() {
