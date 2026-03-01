@@ -38,12 +38,14 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
 
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
-    let fire = |name| {
-        eprintln!("[Startup] Firing {}", name);
-        if let Err(e) = env.fire_event(name) {
-            eprintln!("Error firing {}: {}", name, e);
-        }
-    };
+    fire_login_sequence(env);
+    fire_world_enter_sequence(env);
+    fire_post_login_events(env);
+}
+
+/// Fire ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN and set IsLoggedIn.
+fn fire_login_sequence(env: &WowLuaEnv) {
+    let fire = |name| fire_simple_event(env, name);
 
     eprintln!("[Startup] Firing ADDON_LOADED");
     if let Err(e) = env.fire_event_with_args(
@@ -54,15 +56,32 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     }
 
     fire("VARIABLES_LOADED");
-    fire("PLAYER_LOGIN");
 
+    // In WoW, IsLoggedIn() returns true once the player is logged in.
+    // AceAddon-3.0 checks IsLoggedIn() before enabling addons from its queue.
+    if let Err(e) = env
+        .lua()
+        .load(r#"IsLoggedIn = function() return true end"#)
+        .exec()
+    {
+        eprintln!("Error setting IsLoggedIn: {}", e);
+    }
+
+    fire("PLAYER_LOGIN");
+}
+
+/// Fire EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, and PLAYER_ENTERING_WORLD.
+fn fire_world_enter_sequence(env: &WowLuaEnv) {
     eprintln!("[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
     if let Err(e) = env.fire_edit_mode_layouts_updated() {
         eprintln!("  {}", e);
     }
 
     eprintln!("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
-    if let Err(e) = env.lua().globals().get::<mlua::Function>("RequestTimePlayed")
+    if let Err(e) = env
+        .lua()
+        .globals()
+        .get::<mlua::Function>("RequestTimePlayed")
         .and_then(|f| f.call::<()>(()))
     {
         eprintln!("Error calling RequestTimePlayed: {}", e);
@@ -75,9 +94,13 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     ) {
         eprintln!("Error firing PLAYER_ENTERING_WORLD: {}", e);
     }
+}
+
+/// Fire post-login events: unit frames, auras, bags, UI updates.
+fn fire_post_login_events(env: &WowLuaEnv) {
+    let fire = |name| fire_simple_event(env, name);
 
     call_unit_frame_set_unit(env);
-
     fire_unit_aura(env);
     seed_buff_durations(env);
 
@@ -89,6 +112,14 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
     fire("UI_SCALE_CHANGED");
     fire("UPDATE_CHAT_WINDOWS");
     fire("PLAYER_LEAVING_WORLD");
+}
+
+/// Fire a simple event with no arguments, logging to stderr.
+fn fire_simple_event(env: &WowLuaEnv, name: &str) {
+    eprintln!("[Startup] Firing {}", name);
+    if let Err(e) = env.fire_event(name) {
+        eprintln!("Error firing {}: {}", name, e);
+    }
 }
 
 /// Call `UnitFrame_SetUnit` on the main unit frames after PLAYER_ENTERING_WORLD.
