@@ -3,6 +3,7 @@ name = "wow-ui-sim"
 version = "0.1.0"
 edition = "2024"
 description = "World of Warcraft UI simulator for addon development"
+license = "GPL-3.0-only"
 default-run = "wow-sim"
 
 [dependencies]
