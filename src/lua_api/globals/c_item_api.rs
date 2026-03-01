@@ -10,6 +10,7 @@ use std::rc::Rc;
 /// Register item-related C_* namespaces and global functions.
 pub fn register_c_item_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_c_item(lua)?;
+    super::c_item_location_api::register(lua, state.clone())?;
     super::c_container_api::register_c_container_api(lua, state)?;
     register_c_encoding_util(lua)?;
     register_legacy_item_globals(lua)?;
@@ -69,40 +70,55 @@ fn register_c_item_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// Build the C_Item.GetItemInfo closure (returns a table of item properties).
+/// Build the C_Item.GetItemInfo closure.
+///
+/// Returns 17 values matching the real WoW API signature:
+///   itemName, itemLink, itemQuality, itemLevel, itemMinLevel,
+///   itemType, itemSubType, itemStackCount, itemEquipLoc, itemTexture,
+///   sellPrice, classID, subclassID, bindType, expacID, setID, isCraftingReagent
 fn make_c_item_get_item_info(lua: &Lua) -> Result<mlua::Function> {
     lua.create_function(|lua, item_id: Value| {
         let id = parse_item_id_from_value(&item_id);
         if id == 0 {
-            return Ok(Value::Nil);
+            return Ok(mlua::MultiValue::new());
         }
         let Some(item) = crate::items::get_item(id as u32) else {
-            return Ok(Value::Nil);
+            return Ok(mlua::MultiValue::new());
         };
-        let color = quality_color(item.quality);
-        let link = format!(
-            "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",
-            color, id, item.name
-        );
-        let result = lua.create_table()?;
-        result.set("itemName", item.name)?;
-        result.set("itemLink", lua.create_string(&link)?)?;
-        result.set("itemQuality", item.quality as i32)?;
-        result.set("itemLevel", item.item_level as i32)?;
-        result.set("itemMinLevel", item.required_level as i32)?;
-        result.set("itemType", item_class_from_inv_type(item.inventory_type))?;
-        result.set("itemSubType", "")?;
-        result.set("itemStackCount", item.stackable as i32)?;
-        result.set("itemEquipLoc", inv_type_to_equip_loc(item.inventory_type))?;
-        result.set("itemTexture", 134400)?;
-        result.set("sellPrice", item.sell_price as i64)?;
-        result.set("classID", 15)?;
-        result.set("subclassID", 0)?;
-        result.set("bindType", item.bonding as i32)?;
-        result.set("expacID", item.expansion_id as i32)?;
-        result.set("isCraftingReagent", false)?;
-        Ok(Value::Table(result))
+        Ok(item_info_multi_value(lua, id, item)?)
     })
+}
+
+/// Build the 17-value MultiValue return for GetItemInfo.
+fn item_info_multi_value(
+    lua: &Lua,
+    id: i32,
+    item: &crate::items::ItemInfo,
+) -> Result<mlua::MultiValue> {
+    let color = quality_color(item.quality);
+    let link = format!(
+        "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",
+        color, id, item.name
+    );
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string(item.name)?),                          // 1  itemName
+        Value::String(lua.create_string(&link)?),                              // 2  itemLink
+        Value::Integer(item.quality as i64),                                   // 3  itemQuality
+        Value::Integer(item.item_level as i64),                                // 4  itemLevel
+        Value::Integer(item.required_level as i64),                            // 5  itemMinLevel
+        Value::String(lua.create_string(item_class_from_inv_type(item.inventory_type))?), // 6 itemType
+        Value::String(lua.create_string(inv_type_to_subclass(item.inventory_type))?), // 7 itemSubType
+        Value::Integer(item.stackable as i64),                                 // 8  itemStackCount
+        Value::String(lua.create_string(inv_type_to_equip_loc(item.inventory_type))?), // 9 itemEquipLoc
+        Value::Integer(134400),                                                // 10 itemTexture
+        Value::Integer(item.sell_price as i64),                                // 11 sellPrice
+        Value::Integer(inv_type_to_class_id(item.inventory_type) as i64),      // 12 classID
+        Value::Integer(0),                                                     // 13 subclassID
+        Value::Integer(item.bonding as i64),                                   // 14 bindType
+        Value::Integer(item.expansion_id as i64),                              // 15 expacID
+        Value::Integer(0),                                                     // 16 setID
+        Value::Boolean(false),                                                 // 17 isCraftingReagent
+    ]))
 }
 
 /// C_Item query methods: icon, subclass, count, class, spec, name, level.
@@ -171,11 +187,11 @@ fn register_c_item_link_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// C_Item stub methods (transmog, load, existence, sockets).
+/// C_Item stub methods (transmog, load, sockets).
+/// DoesItemExist, IsBound, etc. are in c_item_location_api.rs (state-aware).
 fn register_c_item_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetItemLearnTransmogSet", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
     t.set("RequestLoadItemDataByID", lua.create_function(|_, _id: i32| Ok(()))?)?;
-    t.set("DoesItemExist", lua.create_function(|_, _loc: Value| Ok(false))?)?;
     t.set("CanViewItemPowers", lua.create_function(|_, _loc: Value| Ok(false))?)?;
     t.set("GetItemNumSockets", lua.create_function(|_, _loc: Value| Ok(0i32))?)?;
     t.set("GetItemGemID", lua.create_function(|_, _args: mlua::MultiValue| Ok(0i32))?)?;
@@ -454,6 +470,11 @@ fn parse_item_id_from_link(link: &str) -> Option<i32> {
 }
 
 /// Parse an item ID from a Lua Value (integer, number, or item link string).
+/// Public accessor for sibling modules.
+pub fn parse_item_id(value: &Value) -> i32 {
+    parse_item_id_from_value(value)
+}
+
 fn parse_item_id_from_value(value: &Value) -> i32 {
     match value {
         Value::Integer(n) => *n as i32,
@@ -574,6 +595,16 @@ fn item_class_from_inv_type(inv_type: u8) -> &'static str {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
         1..=12 | 14 | 16 | 23 => "Armor",
         _ => "Miscellaneous",
+    }
+}
+
+/// Map inventory type to Enum.ItemClass numeric ID.
+/// Weapon=2, Armor=4, Miscellaneous=15.
+fn inv_type_to_class_id(inv_type: u8) -> u8 {
+    match inv_type {
+        13 | 15 | 17 | 21 | 22 | 25 | 26 => 2,
+        1..=12 | 14 | 16 | 23 => 4,
+        _ => 15,
     }
 }
 

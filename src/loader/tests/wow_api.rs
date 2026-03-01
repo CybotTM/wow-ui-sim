@@ -248,6 +248,30 @@ fn test_c_item_functions_exist() {
     }
 }
 
+#[test]
+fn test_c_item_get_item_info_returns_multi_value() {
+    let env = WowLuaEnv::new().unwrap();
+    // GetItemInfo returns 17 values: itemName, itemLink, itemQuality, itemLevel,
+    // itemMinLevel, itemType, itemSubType, itemStackCount, itemEquipLoc,
+    // itemTexture, sellPrice, classID, subclassID, bindType, expacID, setID, isCraftingReagent
+    // Item 6948 = Hearthstone (quality 1, Common)
+    let name: String = env
+        .eval("local n = C_Item.GetItemInfo(6948); return n")
+        .unwrap();
+    assert_eq!(name, "Hearthstone");
+
+    let quality: i32 = env
+        .eval("local _,_,q = C_Item.GetItemInfo(6948); return q")
+        .unwrap();
+    assert_eq!(quality, 1, "Hearthstone quality should be 1 (Common)");
+
+    // select(14, ...) is bindType — used by BetterBags
+    let bind_type: i32 = env
+        .eval("return select(14, C_Item.GetItemInfo(6948))")
+        .unwrap();
+    assert!(bind_type >= 0, "bindType should be a valid number");
+}
+
 // ---------------------------------------------------------------------------
 // C_NewItems API
 // ---------------------------------------------------------------------------
