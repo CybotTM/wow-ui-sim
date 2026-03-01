@@ -95,8 +95,9 @@ fn purchase_rank(
     if current >= max_ranks as u32 {
         return Ok(false);
     }
+    let old_spent = currency_spent_before_change(&s, node_id);
     s.talents.node_ranks.insert(node_id, current + 1);
-    let affected = compute_affected_nodes(node_id, &s);
+    let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
     fire_trait_nodes_changed_for(lua, &affected)
 }
@@ -109,13 +110,14 @@ fn refund_rank(
     if current == 0 {
         return Ok(false);
     }
+    let old_spent = currency_spent_before_change(&s, node_id);
     if current == 1 {
         s.talents.node_ranks.remove(&node_id);
         s.talents.node_selections.remove(&node_id);
     } else {
         s.talents.node_ranks.insert(node_id, current - 1);
     }
-    let affected = compute_affected_nodes(node_id, &s);
+    let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
     fire_trait_nodes_changed_for(lua, &affected)
 }
@@ -125,6 +127,7 @@ fn set_selection(
     _config_id: i32, node_id: u32, entry_id: Option<u32>,
 ) -> Result<bool> {
     let mut s = state.borrow_mut();
+    let old_spent = currency_spent_before_change(&s, node_id);
     match entry_id {
         Some(eid) => {
             // Select an entry: set selection and ensure rank >= 1.
@@ -144,7 +147,7 @@ fn set_selection(
             s.talents.node_selections.remove(&node_id);
         }
     }
-    let affected = compute_affected_nodes(node_id, &s);
+    let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
     fire_trait_nodes_changed_for(lua, &affected)?;
     // Fire TRAIT_SUB_TREE_CHANGED for SubTreeSelection nodes (node_type == 3).
@@ -193,14 +196,23 @@ fn reset_tree_by_currency(
     fire_trait_config_updated(lua, config_id)
 }
 
+/// Get the spent amount for the changed node's currency before mutation.
+fn currency_spent_before_change(state: &SimState, node_id: u32) -> Option<u32> {
+    state.talents.node_currency_map.get(&node_id)
+        .map(|&cid| state.talents.spent_for_currency(cid))
+}
+
 /// Compute the set of nodes affected by a change to `changed_node_id`:
 /// - The node itself
 /// - Nodes with edges pointing to it (dependents whose meetsEdgeRequirements may flip)
-/// - Nodes with gate conditions on the same currency (their isAvailable may change)
-fn compute_affected_nodes(changed_node_id: u32, state: &SimState) -> Vec<u32> {
+/// - Nodes with gate conditions whose threshold is crossed by this point change
+fn compute_affected_nodes(
+    changed_node_id: u32, state: &SimState, old_spent: Option<u32>,
+) -> Vec<u32> {
     use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_COND_DB};
     let Some(tree) = TRAIT_TREE_DB.get(&790) else { return vec![changed_node_id] };
     let changed_currency = state.talents.node_currency_map.get(&changed_node_id).copied();
+    let new_spent = changed_currency.map(|cid| state.talents.spent_for_currency(cid));
 
     let mut affected = vec![changed_node_id];
     for &nid in tree.node_ids {
@@ -208,17 +220,28 @@ fn compute_affected_nodes(changed_node_id: u32, state: &SimState) -> Vec<u32> {
         let Some(node) = TRAIT_NODE_DB.get(&nid) else { continue };
         let is_dependent = node.edges.iter()
             .any(|e| e.source_node_id == changed_node_id && e.edge_type > 0);
-        let is_gate_affected = changed_currency.map_or(false, |ccy| {
+        // Only fire for gate nodes whose threshold is actually crossed.
+        let is_gate_crossed = changed_currency.map_or(false, |ccy| {
             node.cond_ids.iter().any(|&cid| {
-                TRAIT_COND_DB.get(&cid)
-                    .map_or(false, |c| c.cond_type == 0 && c.currency_id == ccy)
+                TRAIT_COND_DB.get(&cid).map_or(false, |c| {
+                    c.cond_type == 0 && c.currency_id == ccy
+                        && gate_threshold_crossed(old_spent, new_spent, c.spent_amount)
+                })
             })
         });
-        if is_dependent || is_gate_affected {
+        if is_dependent || is_gate_crossed {
             affected.push(nid);
         }
     }
     affected
+}
+
+/// True if the gate threshold was crossed: met before but not after, or vice versa.
+fn gate_threshold_crossed(old_spent: Option<u32>, new_spent: Option<u32>, threshold: u32) -> bool {
+    match (old_spent, new_spent) {
+        (Some(old), Some(new)) => (old >= threshold) != (new >= threshold),
+        _ => false,
+    }
 }
 
 /// Fire TRAIT_NODE_CHANGED for a specific set of affected nodes.
