@@ -522,16 +522,14 @@ fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 1000.0 { rt.count_over_1000ms += 1; }
 }
 
-/// Call a handler via `__addon_taint_exec` so taint is set in the handler's call frame.
+/// Stamp addon taint on a handler and call it. The VM applies fixedtaint on entry.
 fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, args: Vec<Value>) -> mlua::Result<()> {
     if let Some(ref name) = taint {
-        let exec: mlua::Function = lua.named_registry_value("__addon_taint_exec")?;
-        let mut ea = vec![Value::Function(handler), Value::String(lua.create_string(name.as_str())?)];
-        ea.extend(args);
-        exec.call(MultiValue::from_vec(ea))
-    } else {
-        handler.call(MultiValue::from_vec(args))
+        if let Ok(sot) = lua.named_registry_value::<mlua::Function>("__setobjecttaint") {
+            sot.call::<()>((handler.clone(), name.as_str()))?;
+        }
     }
+    handler.call(MultiValue::from_vec(args))
 }
 
 /// Look up the addon folder name for a given owner_addon index.
@@ -637,12 +635,10 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
     local owners = reg.__frame_owners
     local timing = reg.__addon_timing
     local addon_names = reg.__addon_names
-    local setstacktaint = debug.setstacktaint
+    local setobjecttaint = debug.setobjecttaint
     local G = _G
     local stderr = io.stderr
-    local taint_exec  -- lazily resolved (registered after this factory runs)
     return function(ids, elapsed, suffix)
-        taint_exec = taint_exec or reg.__addon_taint_exec
         local profile = debugprofilestop
         local handler = geterrorhandler()
         for i = 1, #ids do
@@ -653,13 +649,9 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
                 if frame then
                     local owner = owners[id]
                     local taint = owner and addon_names[owner]
+                    if taint then setobjecttaint(func, taint) end
                     local t0 = profile()
-                    local ok, err
-                    if taint then
-                        ok, err = pcall(taint_exec, func, taint, frame, elapsed)
-                    else
-                        ok, err = pcall(func, frame, elapsed)
-                    end
+                    local ok, err = pcall(func, frame, elapsed)
                     local dt = profile() - t0
                     if dt > 5 then
                         local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
@@ -700,31 +692,18 @@ fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value("__dispatch_on_update", dispatch)
 }
 
-/// Enable Elune taint tracking, wrap loadstring, register taint helpers.
+/// Enable Elune taint tracking and wrap loadstring as secure.
 fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
     lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
+    // Cache setobjecttaint in registry for Rust-side and Lua-side use.
+    let sot: mlua::Function = lua.load("return debug.setobjecttaint").eval()?;
+    lua.set_named_registry_value("__setobjecttaint", sot)?;
     lua.load(r#"
         local original_ls = loadstring
         local sst = debug.setstacktaint
-        local sot = debug.setobjecttaint
-        local reg = debug.getregistry()
         loadstring = debug.newsecurefunction(function(code, name)
             sst("*** ForceTaint_Strong ***"); return original_ls(code, name)
         end)
-        reg.__addon_taint_exec = (function()
-            return function(func, taint, ...)
-                sot(func, taint)
-                local ok, err = pcall(func, ...)
-                if not ok then error(err, 0) end
-            end
-        end)()
-        reg.__tainted_compile = (function()
-            return function(code, name, taint)
-                local fn, err = original_ls(code, name)
-                if fn then sot(fn, taint) end
-                return fn, err
-            end
-        end)()
     "#).exec()?;
     Ok(())
 }

@@ -24,15 +24,18 @@ pub fn load_lua_file(
     let lua = env.lua();
 
     let lua_start = Instant::now();
-    let func = if ctx.taint {
-        // Compile via Lua with setstacktaint so the function carries addon taint.
-        // Closures defined inside will inherit this taint (Elune behavior).
-        tainted_compile(lua, &bytes, &chunk_name, ctx.name)?
-    } else if bytecode_cache::is_disabled() {
+    let func = if bytecode_cache::is_disabled() {
         compile_from_source(lua, &bytes, &chunk_name)?
     } else {
         load_cached_or_compile(lua, &bytes, &chunk_name, timing)?
     };
+
+    // Stamp addon taint on the compiled function's GC header.
+    // When the VM executes it, fixedtaint = cl->taint blocks read-propagation
+    // and inner closures inherit via writetaint.
+    if ctx.taint {
+        set_object_taint(lua, &func, ctx.name);
+    }
 
     if ctx.use_secure_env {
         crate::lua_api::secure_env::apply_secure_env(lua, &func)
@@ -55,27 +58,15 @@ fn wow_chunk_name(path: &Path) -> String {
     }
 }
 
-/// Execute a compiled addon function with optional per-addon taint.
-///
-/// Third-party addon code runs with `debug.setstacktaint(addonName)` so
-/// `issecurevariable` tracks the taint source. Blizzard base UI runs
-/// securely (no taint).
+/// Execute a compiled addon function.
+/// Taint is already stamped on the function's GC header by the caller.
 fn exec_addon_func(
-    lua: &mlua::Lua,
+    _lua: &mlua::Lua,
     func: mlua::Function,
     ctx: &AddonContext,
 ) -> Result<(), LoadError> {
     let name = ctx.name.to_string();
     let table = ctx.table.clone();
-
-    if ctx.taint {
-        if let Ok(taint_exec) = lua.named_registry_value::<mlua::Function>("__addon_taint_exec") {
-            return taint_exec
-                .call::<()>((func, name.clone(), name, table))
-                .map_err(|e| LoadError::Lua(e.to_string()));
-        }
-    }
-
     func.call::<()>((name, table))
         .map_err(|e| LoadError::Lua(e.to_string()))
 }
@@ -109,16 +100,11 @@ fn load_cached_or_compile(
     Ok(func)
 }
 
-/// Compile source with `setstacktaint(addonName)` so the function carries addon taint.
-fn tainted_compile(lua: &mlua::Lua, bytes: &[u8], chunk_name: &str, addon: &str) -> Result<mlua::Function, LoadError> {
-    let code = String::from_utf8_lossy(bytes);
-    let code = code.strip_prefix('\u{feff}').unwrap_or(&code);
-    let compiler: mlua::Function = lua.named_registry_value("__tainted_compile")
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
-    let (func, err): (Option<mlua::Function>, Option<String>) = compiler
-        .call((&*code, chunk_name, addon))
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
-    func.ok_or_else(|| LoadError::Lua(err.unwrap_or_else(|| "unknown error".into())))
+/// Set taint on a Lua function's GC object header via `debug.setobjecttaint`.
+fn set_object_taint(lua: &mlua::Lua, func: &mlua::Function, taint: &str) {
+    if let Ok(sot) = lua.named_registry_value::<mlua::Function>("__setobjecttaint") {
+        let _ = sot.call::<()>((func.clone(), taint));
+    }
 }
 
 /// Compile Lua source code into a function.
