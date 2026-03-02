@@ -730,15 +730,13 @@ fn run_dump_texture(
 /// Create a TextureManager with local and fallback texture paths.
 fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
     use wow_ui_sim::texture::TextureManager;
-
     let home = dirs::home_dir().unwrap_or_default();
     let local_textures = PathBuf::from("./textures");
-    let textures_path = if local_textures.exists() {
-        local_textures
-    } else {
-        home.join("Repos/wow-ui-textures")
-    };
-    TextureManager::new(textures_path)
+    let textures_path = if local_textures.exists() { local_textures } else { home.join("Repos/wow-ui-textures") };
+    let mut mgr = TextureManager::new(textures_path)
         .with_interface_path(home.join("Projects/wow/Interface"))
-        .with_addons_path(PathBuf::from("./Interface/AddOns"))
+        .with_addons_path(PathBuf::from("./Interface/AddOns"));
+    mgr.preload_talent_textures(790);
+    mgr.preload_talent_panel_textures();
+    mgr
 }

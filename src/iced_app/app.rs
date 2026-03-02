@@ -393,11 +393,12 @@ impl App {
         Rc<RefCell<WowFontSystem>>,
         Rc<RefCell<GlyphAtlas>>,
     ) {
-        let texture_manager = Rc::new(RefCell::new(
-            TextureManager::new(textures_path)
-                .with_interface_path(DEFAULT_INTERFACE_PATH)
-                .with_addons_path(DEFAULT_ADDONS_PATH),
-        ));
+        let mut tex_mgr = TextureManager::new(textures_path)
+            .with_interface_path(DEFAULT_INTERFACE_PATH)
+            .with_addons_path(DEFAULT_ADDONS_PATH);
+        tex_mgr.preload_talent_textures(790);
+        tex_mgr.preload_talent_panel_textures();
+        let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(
             WowFontSystem::new(&PathBuf::from(DEFAULT_FONTS_PATH)),
         ));
