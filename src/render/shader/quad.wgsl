@@ -131,11 +131,7 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         color = tex_color * in.color;
     }
 
-    // Straight alpha blending: pipeline uses src * src.a + dst * (1 - src.a).
     let blend_mode = in.flags & 0xFFu;
-    if blend_mode == BLEND_ADDITIVE {
-        color.a = min(color.a * 1.5, 1.0);
-    }
 
     // Circle clip (for minimap) — uses local_uv which is preserved across atlas remapping
     const FLAG_CIRCLE_CLIP: u32 = 0x100u;
@@ -179,6 +175,14 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     if in.mask_tex_index >= 0 {
         let mask_color = sample_tiered_texture(in.mask_tex_index, in.mask_tex_coords);
         color.a *= mask_color.a;
+    }
+
+    // Premultiplied alpha output: pipeline uses src + dst * (1 - src.a).
+    // Standard alpha: premultiply color by alpha for correct blending.
+    // Additive: premultiply then zero alpha so dst is fully preserved (src + dst).
+    color = vec4f(color.rgb * color.a, color.a);
+    if blend_mode == BLEND_ADDITIVE {
+        color.a = 0.0;
     }
 
     return color;
