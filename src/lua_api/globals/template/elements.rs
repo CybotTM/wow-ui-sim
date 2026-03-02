@@ -617,3 +617,100 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
     );
     let _ = lua.load(&code).exec();
 }
+
+/// Apply deferred mask atlases from KeyValues after all templates are applied.
+///
+/// Some templates define MaskTexture children with `useAtlasSize="true"` but no
+/// atlas in XML — the atlas name is stored in a KeyValue and applied by a
+/// composite-mixin OnLoad that may not run in our simulator.  We scan the
+/// template chain for this pattern and emit Lua code to apply the atlas.
+pub(super) fn apply_deferred_mask_atlases(
+    lua: &Lua,
+    frame_name: &str,
+    chain: &[crate::xml::TemplateEntry],
+) {
+    let atlas_kvs = collect_atlas_key_values(chain);
+    let masks = collect_unatlased_masks(chain);
+    if atlas_kvs.is_empty() || masks.is_empty() {
+        return;
+    }
+    let frame_ref = lua_global_ref(frame_name);
+    let mut code = format!("do local f = {frame_ref}\nif f then\n");
+    for (parent_key, _) in &masks {
+        for (kv_key, _) in &atlas_kvs {
+            if mask_key_matches_atlas_kv(parent_key, kv_key) {
+                code.push_str(&format!(
+                    "if f.{parent_key} and f.{kv_key} and f.{kv_key} ~= \"\" \
+                     and not f.{parent_key}:GetAtlas() then \
+                     f.{parent_key}:SetAtlas(f.{kv_key}, true) end\n"
+                ));
+            }
+        }
+    }
+    code.push_str("end\nend");
+    let _ = lua.load(&code).exec();
+}
+
+/// Collect KeyValues whose key ends with "Atlas" and has a string type.
+fn collect_atlas_key_values(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, String)> {
+    let mut result = Vec::new();
+    for entry in chain {
+        for kvs in entry.frame.all_key_values() {
+            for kv in &kvs.values {
+                if kv.key.ends_with("Atlas")
+                    && kv.value_type.as_deref() == Some("string")
+                    && !kv.value.is_empty()
+                {
+                    result.push((kv.key.clone(), kv.value.clone()));
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Collect MaskTextures with `useAtlasSize=true` and no atlas attribute.
+fn collect_unatlased_masks(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, bool)> {
+    let mut result = Vec::new();
+    for entry in chain {
+        for layers in entry.frame.layers() {
+            for layer in &layers.layers {
+                for elem in &layer.elements {
+                    if let crate::xml::LayerElement::MaskTexture(t) = elem {
+                        if t.atlas.is_none() && t.use_atlas_size == Some(true) {
+                            if let Some(pk) = &t.parent_key {
+                                result.push((pk.clone(), true));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Check if a MaskTexture parentKey matches an atlas KeyValue key.
+///
+/// Pattern: `BorderSheenMask` matches `sheenMaskAtlas` by stripping the common
+/// "Border" prefix, lowercasing the first char, and appending "Atlas".
+fn mask_key_matches_atlas_kv(parent_key: &str, kv_key: &str) -> bool {
+    let Some(suffix) = kv_key.strip_suffix("Atlas") else { return false };
+    // Direct: parentKey lowercased == suffix (e.g. "IconMask" → "iconMask")
+    if lowercase_first(parent_key) == suffix {
+        return true;
+    }
+    // Strip "Border" prefix: "BorderSheenMask" → "sheenMask"
+    if let Some(stripped) = parent_key.strip_prefix("Border") {
+        return lowercase_first(stripped) == suffix;
+    }
+    false
+}
+
+fn lowercase_first(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        Some(c) => c.to_lowercase().to_string() + chars.as_str(),
+        None => String::new(),
+    }
+}
