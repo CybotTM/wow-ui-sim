@@ -94,6 +94,12 @@ impl TextureManager {
         self.cache.get(&normalized)
     }
 
+    /// Check if a texture is already in the CPU cache (no disk I/O needed).
+    pub fn is_cached(&self, wow_path: &str) -> bool {
+        let normalized = normalize_wow_path(wow_path);
+        self.cache.contains_key(&normalized)
+    }
+
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.
     pub fn preload_talent_textures(&mut self, tree_id: u32) {
         use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_ENTRY_DB, TRAIT_DEFINITION_DB};

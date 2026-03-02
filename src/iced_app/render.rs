@@ -512,7 +512,11 @@ impl App {
                 continue;
             }
             if !textures.is_empty() && std::time::Instant::now() >= deadline {
-                return (textures, true);
+                // Skip deadline for CPU-cached textures (preloaded) — no disk I/O.
+                let base = request.path.find("@crop:").map_or(request.path.as_str(), |i| &request.path[..i]);
+                if !tex_mgr.is_cached(base) {
+                    return (textures, true);
+                }
             }
             if let Some(gpu_data) = load_texture_or_crop(&mut tex_mgr, &request.path) {
                 uploaded.insert(request.path.clone());
