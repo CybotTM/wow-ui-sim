@@ -221,8 +221,44 @@ fn add_atlas_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
+/// Returns true if the atlas is already set to the given name and no resize is needed.
+fn atlas_unchanged(lua: &mlua::Lua, id: u64, name: &str, use_atlas_size: bool) -> bool {
+    if use_atlas_size { return false; }
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state.widgets.get(id).is_some_and(|f| f.atlas.as_deref() == Some(name))
+}
+
+/// Apply a nine-slice atlas to a frame.
+fn apply_nine_slice(lua: &mlua::Lua, id: u64, name: &str, ns_info: crate::atlas::NineSliceAtlasInfo) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.nine_slice_atlas = Some(ns_info);
+        frame.atlas = Some(name.to_string());
+        frame.texture = None;
+        frame.tex_coords = None;
+        frame.tex_coords_quad = None;
+    }
+}
+
+/// Apply a regular atlas lookup to a frame, propagating to parent button if applicable.
+fn apply_regular_atlas(lua: &mlua::Lua, id: u64, name: &str, lookup: &crate::atlas::AtlasLookup, use_atlas_size: bool) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let parent_info = find_parent_key(&state.widgets, id);
+    apply_atlas_to_frame(&mut state.widgets, id, lookup.info, name, lookup, use_atlas_size);
+    propagate_atlas_to_button(&mut state.widgets, parent_info, lookup.info);
+    if use_atlas_size {
+        state.invalidate_layout_with_dependents(id);
+    }
+}
+
 /// Apply SetAtlas logic: look up atlas info, apply nine-slice or regular atlas.
 fn apply_set_atlas(lua: &mlua::Lua, id: u64, name: &str, use_atlas_size: bool) -> mlua::Result<()> {
+    if atlas_unchanged(lua, id, name, use_atlas_size) {
+        return Ok(());
+    }
     let lookup = crate::atlas::get_atlas_info(name);
     let prefer_nine_slice = lookup.as_ref().is_some_and(|l| l.is_2x_fallback);
     let ns_info = if lookup.is_none() || prefer_nine_slice {
@@ -230,27 +266,12 @@ fn apply_set_atlas(lua: &mlua::Lua, id: u64, name: &str, use_atlas_size: bool) -
     } else {
         None
     };
-
-    let state_rc = get_sim_state(lua);
     if let Some(ns_info) = ns_info {
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.nine_slice_atlas = Some(ns_info);
-            frame.atlas = Some(name.to_string());
-            frame.texture = None;
-            frame.tex_coords = None;
-            frame.tex_coords_quad = None;
-        }
+        apply_nine_slice(lua, id, name, ns_info);
     } else if let Some(lookup) = lookup {
-        let atlas_info = lookup.info;
-        let mut state = state_rc.borrow_mut();
-        let parent_info = find_parent_key(&state.widgets, id);
-        apply_atlas_to_frame(&mut state.widgets, id, atlas_info, name, &lookup, use_atlas_size);
-        propagate_atlas_to_button(&mut state.widgets, parent_info, atlas_info);
-        if use_atlas_size {
-            state.invalidate_layout_with_dependents(id);
-        }
+        apply_regular_atlas(lua, id, name, &lookup, use_atlas_size);
     } else {
+        let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.atlas = Some(name.to_string());

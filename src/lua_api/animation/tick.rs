@@ -377,19 +377,20 @@ fn fire_animation_scripts(
 }
 
 /// Create the `self` argument for animation group script callbacks.
-/// Returns a FrameRef if the group has a frame_id, otherwise falls back to AnimGroupHandle.
+/// Returns the cached FrameRef if the group has a frame_id (preserving its
+/// fenv/mixin table), otherwise falls back to AnimGroupHandle.
 fn make_group_self(
     lua: &Lua,
     state_rc: &Rc<RefCell<SimState>>,
     group_id: u64,
     frame_id: Option<u64>,
-) -> mlua::Result<mlua::AnyUserData> {
+) -> mlua::Result<mlua::Value> {
     if let Some(fid) = frame_id {
-        lua.create_userdata(crate::lua_api::frame::FrameRef(fid))
+        crate::lua_api::frame::frame_ref(lua, fid)
     } else {
-        lua.create_userdata(AnimGroupHandle {
+        Ok(mlua::Value::UserData(lua.create_userdata(AnimGroupHandle {
             group_id,
             state: Rc::clone(state_rc),
-        })
+        })?))
     }
 }

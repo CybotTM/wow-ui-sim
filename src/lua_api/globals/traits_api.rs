@@ -248,8 +248,6 @@ fn gate_threshold_crossed(old_spent: Option<u32>, new_spent: Option<u32>, thresh
 ///
 /// Does NOT fire TRAIT_TREE_CURRENCY_INFO_UPDATED — in WoW, that event fires
 /// after CommitConfig (server confirms), not on individual staging changes.
-/// Firing it here caused UpdateTreeCurrencyInfo → UpdateAllButtons → FullUpdate
-/// on every button, making all edges flash on every single point change.
 fn fire_trait_nodes_changed_for(lua: &Lua, affected: &[u32]) -> Result<bool> {
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     let event = lua.create_string("TRAIT_NODE_CHANGED")?;
