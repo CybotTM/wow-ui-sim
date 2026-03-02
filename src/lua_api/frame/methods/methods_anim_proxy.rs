@@ -22,11 +22,24 @@ fn add_anim_group_proxy_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_group_looping_methods(methods);
     add_group_play_core(methods);
     add_group_play_stop(methods);
+    add_group_play_synced(methods);
     add_group_play_extras(methods);
     add_group_state_methods(methods);
     add_group_state_extras(methods);
     add_group_timing_methods(methods);
     add_group_alpha_methods(methods);
+}
+
+/// Parse Play/Restart arguments: (reverse: bool, offset: f64).
+fn parse_proxy_play_args(args: MultiValue) -> (bool, f64) {
+    let args: Vec<Value> = args.into_iter().collect();
+    let reverse = matches!(args.first(), Some(Value::Boolean(true)));
+    let offset = args.get(1).and_then(|v| match v {
+        Value::Number(n) => Some(*n),
+        Value::Integer(n) => Some(*n as f64),
+        _ => None,
+    }).unwrap_or(0.0);
+    (reverse, offset)
 }
 
 fn add_group_looping_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -62,26 +75,24 @@ fn add_group_looping_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 
 fn add_group_play_core<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("Play", |lua, this, args: MultiValue| {
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let reverse = matches!(args_vec.first(), Some(Value::Boolean(true)));
+        let (reverse, offset) = parse_proxy_play_args(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
             let already = state.animation_groups.get(&gid).is_some_and(|g| g.playing && !g.done);
             if !already {
-                crate::lua_api::animation::group_handle::start_group_playback(&mut state, gid, reverse);
+                crate::lua_api::animation::group_handle::start_group_playback_at(&mut state, gid, reverse, offset);
             }
         }
         Ok(())
     });
 
     methods.add_method("Restart", |lua, this, args: MultiValue| {
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let reverse = matches!(args_vec.first(), Some(Value::Boolean(true)));
+        let (reverse, offset) = parse_proxy_play_args(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            crate::lua_api::animation::group_handle::start_group_playback(&mut state, gid, reverse);
+            crate::lua_api::animation::group_handle::start_group_playback_at(&mut state, gid, reverse, offset);
         }
         Ok(())
     });
@@ -124,9 +135,27 @@ fn add_group_play_stop<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-fn add_group_play_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("PlaySynced", |_, _this, _args: MultiValue| Ok(()));
+fn add_group_play_synced<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("PlaySynced", |lua, this, args: MultiValue| {
+        let reverse = matches!(args.iter().next(), Some(Value::Boolean(true)));
+        let state_rc = get_sim_state(lua);
+        let offset = crate::lua_api::animation::group_handle::compute_sync_offset(
+            lua, this.0, &state_rc,
+        )?;
+        let mut state = state_rc.borrow_mut();
+        if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
+            let already = state.animation_groups.get(&gid).is_some_and(|g| g.playing && !g.done);
+            if !already {
+                crate::lua_api::animation::group_handle::start_group_playback_at(
+                    &mut state, gid, reverse, offset,
+                );
+            }
+        }
+        Ok(())
+    });
+}
 
+fn add_group_play_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetPlaying", |lua, this, playing: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();

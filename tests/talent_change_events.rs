@@ -216,3 +216,35 @@ fn animation_groups_finish_after_duration() {
     let still = count_playing_groups(&env);
     assert_eq!(still, 0, "No groups should be playing after duration elapsed");
 }
+
+// ============================================================================
+// PlaySynced starts playback (was previously a no-op)
+// ============================================================================
+
+#[test]
+fn play_synced_starts_animation_group() {
+    let env = env();
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "_TestSyncFrame", UIParent)
+        _G._testSyncAG = f:CreateAnimationGroup("SyncAnim")
+        _G._testSyncAG.syncKey = "TestSyncKey"
+        _G._testSyncAG:SetLooping("REPEAT")
+        local a = _G._testSyncAG:CreateAnimation("Translation")
+        a:SetDuration(6.5)
+        a:SetStartDelay(5)
+        a:SetEndDelay(10.5)
+        a:SetOffset(150, 0)
+        _G._testSyncAG:PlaySynced()
+        "#,
+    )
+    .unwrap();
+
+    let playing: bool = env.eval("return _G._testSyncAG:IsPlaying()").unwrap();
+    assert!(playing, "PlaySynced should start the animation group");
+
+    let duration: f64 = env.eval("return _G._testSyncAG:GetDuration()").unwrap();
+    let expected = 22.0;
+    assert!((duration - expected).abs() < 0.01,
+        "Total duration should be {expected}s (5+6.5+10.5), got {duration}");
+}
