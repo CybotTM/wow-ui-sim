@@ -1,6 +1,7 @@
 //! Attribute methods: GetAttribute, SetAttribute, frame references, etc.
 
 use super::super::handle::{frame_ref, FrameRef};
+use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::script_helpers::lua_error;
 use crate::widget::AttributeValue;
@@ -266,10 +267,17 @@ fn add_clip_children_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 
 fn add_hit_rect_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetHitRectInsets", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetHitRectInsets") {
+                return Ok(());
+            }
+        }
         let (l, r, t, b) = parse_hit_rect_insets(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(this.0) {
+        if let Some(frame) = state.widgets.get_mut(id) {
             frame.hit_rect_insets = (l, r, t, b);
         }
         Ok(())

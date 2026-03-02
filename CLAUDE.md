@@ -63,7 +63,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ## Reference Implementations
 
-- `~/Repos/wowless` - Headless WoW client Lua/XML interpreter (useful for understanding WoW API behavior)
+- `~/Repos/wowless` - Headless WoW client Lua/XML interpreter. Useful as a reference for WoW API behavior but less complete than wow-ui-sim (no rendering, limited widget support, no layout engine). Use for cross-referencing specific API semantics, not as an implementation target.
   - `wowless/render.lua` - Frame-to-rect conversion with strata/level ordering
   - `wowless/modules/points.lua` - Anchor point system (SetPoint, ClearAllPoints)
   - `wowless/modules/loader.lua` - XML element handlers (anchors, texcoords, colors, gradients)

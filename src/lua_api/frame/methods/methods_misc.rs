@@ -145,9 +145,28 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
             .map(|f| f.is_protected)
             .unwrap_or(false);
         // (isProtectedFromInsecure, isExplicitlyProtected)
-        // First bool: false because InCombatLockdown() is always false in sim
-        Ok((false, is_protected))
+        // isProtectedFromInsecure is true when: frame is protected AND in combat lockdown.
+        let is_protected_from_insecure = is_protected && state.player.in_combat;
+        Ok((is_protected_from_insecure, is_protected))
     });
+
+    methods.add_method("Protect", |lua, this, ()| {
+        // Only secure (Blizzard) code can protect a frame.
+        let caller_secure = lua.globals()
+            .get::<mlua::Function>("issecure")
+            .and_then(|f| f.call::<bool>(()))
+            .unwrap_or(false);
+        if !caller_secure {
+            return Ok(());
+        }
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.is_protected = true;
+        }
+        Ok(())
+    });
+
     methods.add_method("SetPreventSecretValues", |_, _this, _: bool| Ok(()));
 }
 

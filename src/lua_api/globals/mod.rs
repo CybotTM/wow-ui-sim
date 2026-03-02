@@ -97,6 +97,7 @@ pub mod environment_restore;
 pub mod unit_heal_prediction;
 pub mod generated_stubs;
 pub mod admin_api;
+pub mod admin_combat;
 pub mod admin_encounter;
 
 // Re-export for backwards compatibility

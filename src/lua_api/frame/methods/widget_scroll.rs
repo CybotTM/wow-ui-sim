@@ -1,6 +1,7 @@
 //! ScrollFrame and ScrollBox widget methods.
 
 use super::super::handle::FrameRef;
+use super::combat_lockdown;
 use super::methods_hierarchy::reparent_widget;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use mlua::Value;
@@ -23,6 +24,12 @@ pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScrollChild", |lua, this, child: Value| {
         let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetScrollChild") {
+                return Ok(());
+            }
+        }
         let child_id = match extract_frame_id(&child) {
             Some(cid) => cid,
             None => return Err(mlua::Error::runtime("Usage: ScrollFrame:SetScrollChild(child)")),

@@ -5,7 +5,7 @@
 //! Intended for addon test scripts and UI development.
 
 use crate::event::{Event, EventArg};
-use crate::lua_api::game_data::{AuraInfo, CastingState, PartyMember, SpellCooldownState, TargetInfo};
+use crate::lua_api::game_data::{AuraInfo, PartyMember, TargetInfo};
 use crate::lua_api::state::SimState;
 use mlua::{Lua, Result, Value, Variadic};
 use std::cell::RefCell;
@@ -79,45 +79,19 @@ fn register_combat_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>)
         let s = Rc::clone(&state);
         move |_, v: bool| { s.borrow_mut().player.is_resting = v; Ok(()) }
     })?;
-    set_fn(lua, t, "SetCasting", {
+    set_fn(lua, t, "SetFrameProtected", {
         let s = Rc::clone(&state);
-        move |_, (spell_id, spell_name, icon_path, duration): (u32, String, String, f64)| {
+        move |_, (name, v): (String, bool)| {
             let mut st = s.borrow_mut();
-            let now = st.start_time.elapsed().as_secs_f64();
-            let cast_id = st.next_cast_id;
-            st.next_cast_id += 1;
-            st.casting = Some(CastingState {
-                spell_id,
-                spell_name,
-                icon_path,
-                start_time: now,
-                end_time: now + duration,
-                cast_id,
-            });
+            if let Some(id) = st.widgets.get_id_by_name(&name) {
+                if let Some(frame) = st.widgets.get_mut(id) {
+                    frame.is_protected = v;
+                }
+            }
             Ok(())
         }
     })?;
-    set_fn(lua, t, "StopCasting", {
-        let s = Rc::clone(&state);
-        move |_, ()| { s.borrow_mut().casting = None; Ok(()) }
-    })?;
-    set_fn(lua, t, "SetGCD", {
-        let s = Rc::clone(&state);
-        move |_, duration: f64| {
-            let now = s.borrow().start_time.elapsed().as_secs_f64();
-            s.borrow_mut().gcd = Some((now, duration));
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetSpellCooldown", {
-        let s = Rc::clone(&state);
-        move |_, (spell_id, duration): (u32, f64)| {
-            let now = s.borrow().start_time.elapsed().as_secs_f64();
-            s.borrow_mut().spell_cooldowns.insert(spell_id, SpellCooldownState { start: now, duration });
-            Ok(())
-        }
-    })?;
-    Ok(())
+    super::admin_combat::register_casting_api(lua, t, state)
 }
 
 // ---------------------------------------------------------------------------

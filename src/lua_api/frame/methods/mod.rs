@@ -6,6 +6,7 @@
 mod methods_anchor;
 mod methods_anim_proxy;
 mod methods_attribute;
+pub(crate) mod combat_lockdown;
 mod methods_backdrop;
 mod methods_button;
 pub(crate) mod methods_core;

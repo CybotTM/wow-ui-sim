@@ -1,6 +1,7 @@
 //! Miscellaneous widget methods: ColorSelect, drag/move/resize, SimpleHTML, and stubs.
 
 use super::super::handle::FrameRef;
+use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::AttributeValue;
 use mlua::Value;
@@ -189,23 +190,8 @@ fn add_colorselect_alpha_texture_stubs<M: mlua::UserDataMethods<FrameRef>>(metho
 // --- Drag/Move/Resize ---
 
 fn add_drag_move_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("StartMoving", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0)
-                && frame.movable {
-                    frame.is_moving = true;
-                }
-        Ok(())
-    });
-    methods.add_method("StopMovingOrSizing", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
-                frame.is_moving = false;
-            }
-        Ok(())
-    });
+    add_start_moving(methods);
+    add_stop_moving_or_sizing(methods);
     methods.add_method("SetMovable", |lua, this, movable: bool| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
@@ -221,6 +207,43 @@ fn add_drag_move_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                 return Ok(frame.movable);
             }
         Ok(false)
+    });
+}
+
+fn add_start_moving<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("StartMoving", |lua, this, ()| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "StartMoving") {
+                return Ok(());
+            }
+        }
+        let state_rc = get_sim_state(lua);
+        if let Ok(mut s) = state_rc.try_borrow_mut()
+            && let Some(frame) = s.widgets.get_mut_visual(id)
+                && frame.movable {
+                    frame.is_moving = true;
+                }
+        Ok(())
+    });
+}
+
+fn add_stop_moving_or_sizing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("StopMovingOrSizing", |lua, this, ()| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "StopMovingOrSizing") {
+                return Ok(());
+            }
+        }
+        let state_rc = get_sim_state(lua);
+        if let Ok(mut s) = state_rc.try_borrow_mut()
+            && let Some(frame) = s.widgets.get_mut_visual(id) {
+                frame.is_moving = false;
+            }
+        Ok(())
     });
 }
 
@@ -245,9 +268,16 @@ fn add_drag_movable_resizable_methods<M: mlua::UserDataMethods<FrameRef>>(method
 
 fn add_drag_clamp_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetClampedToScreen", |lua, this, clamped: bool| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetClampedToScreen") {
+                return Ok(());
+            }
+        }
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
+            && let Some(frame) = s.widgets.get_mut_visual(id) {
                 frame.clamped_to_screen = clamped;
             }
         Ok(())

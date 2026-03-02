@@ -7,6 +7,7 @@
 //! to 12 handler invocations (6 cycles of OnHide→OnShow).
 
 use super::super::handle::{frame_ref, FrameRef};
+use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Lua;
 
@@ -20,9 +21,9 @@ pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
 
 /// Register Show, Hide, SetShown methods.
 pub(super) fn add_show_hide_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("Show", |lua, this, ()| show_or_hide(lua, this.0, true));
-    methods.add_method("Hide", |lua, this, ()| show_or_hide(lua, this.0, false));
-    methods.add_method("SetShown", |lua, this, shown: bool| show_or_hide(lua, this.0, shown));
+    methods.add_method("Show", |lua, this, ()| show_or_hide(lua, this.0, true, "Show"));
+    methods.add_method("Hide", |lua, this, ()| show_or_hide(lua, this.0, false, "Hide"));
+    methods.add_method("SetShown", |lua, this, shown: bool| show_or_hide(lua, this.0, shown, "SetShown"));
 }
 
 /// Unified Show/Hide implementation with iterative handler loop.
@@ -30,22 +31,12 @@ pub(super) fn add_show_hide_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
 /// When called from inside a handler (re-entrant), just changes visible
 /// state and returns. The outer loop detects the change after the handler
 /// returns and fires the next handler.
-fn show_or_hide(lua: &Lua, id: u64, show: bool) -> mlua::Result<()> {
+fn show_or_hide(lua: &Lua, id: u64, show: bool, method_name: &str) -> mlua::Result<()> {
+    if blocked_by_combat_lockdown(lua, id, method_name) {
+        return Ok(());
+    }
     let state_rc = get_sim_state(lua);
-    let (needs_change, in_handler, parent_visible) = {
-        let state = state_rc.borrow();
-        let f = state.widgets.get(id);
-        (
-            f.map(|f| f.visible != show).unwrap_or(false),
-            f.map(|f| f.show_hide_depth > 0).unwrap_or(false),
-            // WoW only fires OnShow/OnHide when the frame is effectively visible,
-            // which requires all ancestors to be visible too. If parent is hidden,
-            // just change the flag silently.
-            f.and_then(|f| f.parent_id)
-                .map(|pid| state.widgets.is_ancestor_visible(pid))
-                .unwrap_or(true), // root frames have no parent, always "parent visible"
-        )
-    };
+    let (needs_change, in_handler, parent_visible) = read_show_hide_state(&state_rc.borrow(), id, show);
     if !needs_change {
         return Ok(());
     }
@@ -60,6 +51,31 @@ fn show_or_hide(lua: &Lua, id: u64, show: bool) -> mlua::Result<()> {
         f.show_hide_depth = 0;
     }
     Ok(())
+}
+
+/// Check combat lockdown and fire the blocked event if needed. Returns true if blocked.
+fn blocked_by_combat_lockdown(lua: &Lua, id: u64, method_name: &str) -> bool {
+    let state_rc = get_sim_state(lua);
+    combat_lockdown::check_and_fire(lua, &state_rc, id, method_name)
+}
+
+/// Extract (needs_change, in_handler, parent_visible) from state for show_or_hide.
+fn read_show_hide_state(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    show: bool,
+) -> (bool, bool, bool) {
+    let f = state.widgets.get(id);
+    (
+        f.map(|f| f.visible != show).unwrap_or(false),
+        f.map(|f| f.show_hide_depth > 0).unwrap_or(false),
+        // WoW only fires OnShow/OnHide when the frame is effectively visible,
+        // which requires all ancestors to be visible too. If parent is hidden,
+        // just change the flag silently.
+        f.and_then(|f| f.parent_id)
+            .map(|pid| state.widgets.is_ancestor_visible(pid))
+            .unwrap_or(true), // root frames have no parent, always "parent visible"
+    )
 }
 
 /// Iteratively fire OnShow/OnHide handlers until no more state changes

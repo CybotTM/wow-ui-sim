@@ -119,6 +119,7 @@ pub static GLOBAL_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
     "IsObjectType",
     "IsPreventingSecretValues",
     "IsProtected",
+    "Protect",
     "IsRectValid",
     "IsResizable",
     "IsShown",

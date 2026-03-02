@@ -1,5 +1,6 @@
 //! Core frame methods: GetName, SetSize, Show/Hide, strata/level, mouse, scale, rect.
 
+use super::combat_lockdown;
 use super::methods_helpers::{calculate_frame_height, calculate_frame_width};
 use super::super::handle::FrameRef;
 use crate::lua_api::frame::handle::get_sim_state;
@@ -9,6 +10,13 @@ use mlua::Value;
 /// Read screen dimensions from SimState.
 pub(crate) fn screen_dims(state: &SimState) -> (f32, f32) {
     (state.screen_width, state.screen_height)
+}
+
+/// Check combat lockdown for `id` and fire ADDON_ACTION_BLOCKED if blocked.
+/// Returns `true` when the caller should return early (call was blocked).
+fn lockdown_blocked(lua: &mlua::Lua, id: u64, method_name: &str) -> bool {
+    let state_rc = get_sim_state(lua);
+    combat_lockdown::check_and_fire(lua, &state_rc, id, method_name)
 }
 
 /// Add core frame methods to the shared methods table.
@@ -282,9 +290,11 @@ fn add_strata_level_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
 
 fn add_toplevel_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetToplevel", |lua, this, toplevel: bool| {
+        let id = this.0;
+        if lockdown_blocked(lua, id, "SetToplevel") { return Ok(()); }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut(this.0) { f.toplevel = toplevel; }
+        if let Some(f) = state.widgets.get_mut(id) { f.toplevel = toplevel; }
         Ok(())
     });
 
@@ -364,6 +374,7 @@ fn add_strata_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_frame_strata<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFrameStrata", |lua, this, strata: String| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetFrameStrata") { return Ok(()); }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let Some(s) = crate::widget::FrameStrata::from_str(&strata) else {
@@ -399,9 +410,11 @@ fn add_get_frame_strata<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_fixed_frame_strata<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFixedFrameStrata", |lua, this, fixed: bool| {
+        let id = this.0;
+        if lockdown_blocked(lua, id, "SetFixedFrameStrata") { return Ok(()); }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.has_fixed_frame_strata = fixed;
         }
         Ok(())
@@ -423,6 +436,7 @@ fn add_level_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_frame_level<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFrameLevel", |lua, this, level: i32| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetFrameLevel") { return Ok(()); }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
@@ -443,9 +457,11 @@ fn add_get_frame_level<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_fixed_frame_level<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFixedFrameLevel", |lua, this, fixed: bool| {
+        let id = this.0;
+        if lockdown_blocked(lua, id, "SetFixedFrameLevel") { return Ok(()); }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.has_fixed_frame_level = fixed;
         }
         Ok(())

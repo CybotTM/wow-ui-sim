@@ -12,10 +12,47 @@ pub fn parse_xml(xml: &str) -> Result<UiXml, quick_xml::DeError> {
 /// Applies fixups for known Blizzard XML quirks before parsing.
 pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
     let contents = std::fs::read_to_string(path)?;
+    let contents = strip_packager_xml_comments(&contents);
     let fixed = strip_duplicate_self_closing(&contents, "Size");
     let fixed = strip_duplicate_self_closing(&fixed, "TexCoords");
     let fixed = strip_duplicate_script_handlers(&fixed);
     Ok(parse_xml(&fixed)?)
+}
+
+
+/// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.
+///
+/// Two forms are handled:
+/// 1. Self-closing markers: `<!--@non-debug@-->` and `<!--@end-non-debug@-->` — stripped as
+///    no-ops (content between them is already valid XML).
+/// 2. Block wrappers: `<!--@non-debug@` ... `@end-non-debug@-->` — the comment markers are
+///    removed so the wrapped content becomes active XML.
+///    Same treatment for `<!--@debug@` / `@end-debug@-->` blocks (treat source as debug build).
+///
+/// `<!--@no-lib-strip@-->` / `<!--@end-no-lib-strip@-->` are similarly stripped.
+fn strip_packager_xml_comments(xml: &str) -> String {
+    // Self-closing markers: remove the entire comment line
+    let xml = xml.replace("<!--@non-debug@-->", "");
+    let xml = xml.replace("<!--@end-non-debug@-->", "");
+    let xml = xml.replace("<!--@debug@-->", "");
+    let xml = xml.replace("<!--@end-debug@-->", "");
+    let xml = xml.replace("<!--@no-lib-strip@-->", "");
+    let xml = xml.replace("<!--@end-no-lib-strip@-->", "");
+
+    // Block-wrapper openers: `<!--@tag@` (no closing `-->` on same line)
+    let xml = xml.replace("<!--@non-debug@
+", "");
+    let xml = xml.replace("<!--@debug@
+", "");
+    let xml = xml.replace("<!--@no-lib-strip@
+", "");
+
+    // Block-wrapper closers: `@end-tag@-->` (no opening `<!--` on same line)
+    let xml = xml.replace("@end-non-debug@-->", "");
+    let xml = xml.replace("@end-debug@-->", "");
+    let xml = xml.replace("@end-no-lib-strip@-->", "");
+
+    xml
 }
 
 /// Remove duplicate self-closing `<Tag .../>` elements within the same parent.
@@ -275,4 +312,31 @@ mod tests {
         assert!(result.contains(r#"<Size x="100" y="50"/>"#));
         assert!(result.contains(r#"<Size x="10" y="10"/>"#));
     }
+
+    #[test]
+    fn test_strip_packager_self_closing_non_debug() {
+        // BlizzMove Libs.xml style: self-closing comment markers, content is already valid
+        let xml = r#"<Ui>
+    <!--@non-debug@-->
+    <Script file="LibStub\LibStub.lua"/>
+    <!--@end-non-debug@-->
+</Ui>"#;
+        let result = strip_packager_xml_comments(xml);
+        assert!(!result.contains("<!--@non-debug@-->"));
+        assert!(!result.contains("<!--@end-non-debug@-->"));
+        assert!(result.contains(r#"<Script file="LibStub\LibStub.lua"/>"#));
+    }
+
+    #[test]
+    fn test_strip_packager_block_non_debug() {
+        // Block-comment form: content is inside comment wrapper
+        let xml = "<!--@non-debug@
+<Script file=\"LibStub.lua\"/>
+@end-non-debug@-->";
+        let result = strip_packager_xml_comments(xml);
+        assert!(!result.contains("<!--@non-debug@"));
+        assert!(!result.contains("@end-non-debug@-->"));
+        assert!(result.contains(r#"<Script file="LibStub.lua"/>"#));
+    }
+
 }

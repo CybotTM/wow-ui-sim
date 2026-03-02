@@ -60,48 +60,82 @@ fn resolve_addon_name(metadata: &HashMap<String, String>, addon_dir: &Path) -> S
     })
 }
 
+
+/// Check if a metadata value consists entirely of unresolved packager template tokens.
+///
+/// Returns true when every comma-separated token looks like `@something@`.
+/// Example: `@toc-version-retail@, @toc-version-cata@` → true.
+/// Mixed: `@toc-version-retail@, 110000` → false.
+fn is_all_template_versions(value: &str) -> bool {
+    if !value.contains("@toc-version-") {
+        return false;
+    }
+    value
+        .split(',')
+        .map(|v| v.trim())
+        .all(|v| v.starts_with('@') && v.ends_with('@'))
+}
+
+/// Replace packager template variables in a metadata value.
+/// - `@project-version@` → `dev`
+fn replace_template_vars(value: &str) -> String {
+    value.replace("@project-version@", "dev")
+}
+
+/// Process a `## Key: Value` metadata line into the map.
+///
+/// Skips `Interface` lines whose value consists entirely of unresolved
+/// `@toc-version-*@` packager tokens — the `#@debug@` block in the TOC
+/// provides the real fallback version for source-form TOC files.
+fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
+    let Some((key, value)) = rest.split_once(':') else { return };
+    let key = key.trim();
+    let value = value.trim();
+    if key == "Interface" && is_all_template_versions(value) {
+        return;
+    }
+    metadata.insert(key.to_string(), replace_template_vars(value));
+}
+
+/// Process a non-metadata, non-comment TOC line as a file path entry.
+fn push_file_entry(files: &mut Vec<PathBuf>, line: &str) {
+    if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
+        return;
+    }
+    if line.contains("[AllowLoadGameType") && !is_allowed_game_type(line) {
+        return;
+    }
+    let line = line.replace("[TextLocale]", "enUS");
+    let line = line.replace("[Family]", "Mainline");
+    let line = line.replace("[Game]", "Standard");
+    let file_path = strip_annotations(&line).replace('\\', "/");
+    if !file_path.is_empty() {
+        files.push(PathBuf::from(file_path));
+    }
+}
+
 impl TocFile {
     /// Parse a TOC file from its contents.
+    ///
+    /// Handles CurseForge/BigWigs packager template tags in source form:
+    /// - `#@debug@` / `#@end-debug@` block markers: skipped as `#` comments;
+    ///   inner lines like `## Interface: 120000` are active.
+    /// - `## Interface: @toc-version-*@, ...` with only template tokens: skipped
+    ///   so the `#@debug@` block entry takes precedence.
+    /// - `@project-version@` in any value: replaced with `dev`.
     pub fn parse(addon_dir: &Path, contents: &str) -> Self {
         let mut metadata = HashMap::new();
         let mut files = Vec::new();
 
         for line in contents.lines() {
             let line = line.trim();
-            if line.is_empty() {
-                continue;
-            }
-
+            if line.is_empty() { continue; }
             if let Some(rest) = line.strip_prefix("##") {
-                let rest = rest.trim();
-                if let Some((key, value)) = rest.split_once(':') {
-                    metadata.insert(key.trim().to_string(), value.trim().to_string());
-                }
+                insert_metadata(&mut metadata, rest.trim());
                 continue;
             }
-
-            if line.starts_with('#') {
-                continue;
-            }
-
-            // Skip locale-restricted files that don't include enUS
-            if line.contains("[AllowLoadTextLocale") && !line.contains("enUS") {
-                continue;
-            }
-
-            // Skip game-type-restricted files that aren't for mainline/standard retail
-            if line.contains("[AllowLoadGameType") && !is_allowed_game_type(line) {
-                continue;
-            }
-
-            // Replace placeholders and strip annotations
-            let line = line.replace("[TextLocale]", "enUS");
-            let line = line.replace("[Family]", "Mainline");
-            let line = line.replace("[Game]", "Standard");
-            let file_path = strip_annotations(&line).replace('\\', "/");
-            if !file_path.is_empty() {
-                files.push(PathBuf::from(file_path));
-            }
+            if line.starts_with('#') { continue; }
+            push_file_entry(&mut files, line);
         }
 
         TocFile {
@@ -534,5 +568,49 @@ Cata\Mode.lua [AllowLoadGameType wrath, cata, mists]
             "## Title: TestAddon\nCore.lua",
         );
         assert!(!no_restriction.is_game_type_restricted());
+    }
+
+    #[test]
+    fn test_packager_debug_block_interface_version() {
+        // BlizzMove-style TOC: template Interface line skipped, debug block wins
+        let contents = r#"
+## Interface: @toc-version-midnight@, @toc-version-retail@, @toc-version-classic@
+#@debug@
+## Interface: 120000
+#@end-debug@
+## Title: BlizzMove
+## Version: @project-version@
+Core.lua
+"#;
+        let toc = TocFile::parse(Path::new("/addons/BlizzMove"), contents);
+        // Template-only Interface line is skipped; debug block provides version
+        assert_eq!(toc.interface_versions(), vec![120000]);
+        // @project-version@ replaced with "dev"
+        assert_eq!(toc.metadata.get("Version").map(|s| s.as_str()), Some("dev"));
+        assert_eq!(toc.files.len(), 1);
+    }
+
+    #[test]
+    fn test_packager_mixed_interface_version_kept() {
+        // If Interface has at least one plain number alongside templates, keep it
+        let contents = r#"
+## Interface: @toc-version-retail@, 110000
+Core.lua
+"#;
+        let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+        // Mixed value retained; non-numeric tokens dropped by interface_versions()
+        assert_eq!(toc.interface_versions(), vec![110000]);
+    }
+
+    #[test]
+    fn test_is_all_template_versions() {
+        assert!(is_all_template_versions(
+            "@toc-version-retail@, @toc-version-cata@"
+        ));
+        assert!(is_all_template_versions("@toc-version-retail@"));
+        assert!(!is_all_template_versions("110000"));
+        assert!(!is_all_template_versions("@toc-version-retail@, 110000"));
+        assert!(!is_all_template_versions(""));
+        assert!(!is_all_template_versions("@project-version@"));
     }
 }

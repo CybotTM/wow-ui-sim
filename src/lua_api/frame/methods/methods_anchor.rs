@@ -1,6 +1,7 @@
 //! Anchor/point methods: SetPoint, ClearAllPoints, SetAllPoints, GetPoint, etc.
 
 use super::super::handle::{extract_frame_id, frame_ref, FrameRef};
+use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::script_helpers::lua_error;
 use mlua::Value;
@@ -124,40 +125,53 @@ fn parse_set_point_full(
 /// SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)
 fn add_set_point_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetPoint", |lua, this, args: mlua::MultiValue| {
-        let id = this.0;
-        let args: Vec<Value> = args.into_iter().collect();
-        if args.is_empty() {
-            return Err(lua_error(lua,
-                "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]"
-            ));
-        }
-        let point_str = extract_point_str(args.first());
-        let point = match crate::widget::AnchorPoint::from_str(&point_str) {
-            Some(p) => p,
-            None => return Err(lua_error(lua,
-                format!("Frame:SetPoint(): Invalid region point {point_str}")
-            )),
-        };
-        let (mut relative_to, relative_point, x_ofs, y_ofs, explicit_relative) =
-            parse_set_point_args(lua, &args, point)
-                .map_err(|msg| lua_error(lua, msg))?;
+        do_set_point(lua, this.0, args)
+    });
+}
 
-        if !explicit_relative && relative_to.is_none() {
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            if let Some(frame) = state.widgets.get(id) {
-                relative_to = frame.parent_id.map(|pid| pid as usize);
-            }
-        }
-
+/// Parse and validate SetPoint args, returning (point, relative_to, rel_point, x, y).
+fn parse_validated_set_point(
+    lua: &mlua::Lua,
+    id: u64,
+    args: Vec<Value>,
+) -> mlua::Result<(crate::widget::AnchorPoint, Option<usize>, crate::widget::AnchorPoint, f32, f32)> {
+    let point_str = extract_point_str(args.first());
+    let point = crate::widget::AnchorPoint::from_str(&point_str)
+        .ok_or_else(|| lua_error(lua, format!("Frame:SetPoint(): Invalid region point {point_str}")))?;
+    let (mut relative_to, relative_point, x_ofs, y_ofs, explicit_relative) =
+        parse_set_point_args(lua, &args, point).map_err(|msg| lua_error(lua, msg))?;
+    if !explicit_relative && relative_to.is_none() {
         let state_rc = get_sim_state(lua);
-        check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
-        if is_duplicate_anchor(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
+        let state = state_rc.borrow();
+        if let Some(frame) = state.widgets.get(id) {
+            relative_to = frame.parent_id.map(|pid| pid as usize);
+        }
+    }
+    Ok((point, relative_to, relative_point, x_ofs, y_ofs))
+}
+
+fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    {
+        let state_rc = get_sim_state(lua);
+        if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetPoint") {
             return Ok(());
         }
-        apply_set_point(&state_rc, id, point, relative_to, relative_point, x_ofs, y_ofs);
-        Ok(())
-    });
+    }
+    let args: Vec<Value> = args.into_iter().collect();
+    if args.is_empty() {
+        return Err(lua_error(lua,
+            "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]"
+        ));
+    }
+    let (point, relative_to, relative_point, x_ofs, y_ofs) =
+        parse_validated_set_point(lua, id, args)?;
+    let state_rc = get_sim_state(lua);
+    check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
+    if is_duplicate_anchor(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
+        return Ok(());
+    }
+    apply_set_point(&state_rc, id, point, relative_to, relative_point, x_ofs, y_ofs);
+    Ok(())
 }
 
 /// Raise a Lua error if anchoring `id` to `relative_to` would create a cycle.
@@ -303,6 +317,9 @@ fn add_clear_all_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ClearAllPoints", |lua, this, ()| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
+        if combat_lockdown::check_and_fire(lua, &state_rc, id, "ClearAllPoints") {
+            return Ok(());
+        }
         let already_empty = state_rc.borrow().widgets.get(id)
             .map(|f| f.anchors.is_empty()).unwrap_or(true);
         if !already_empty {
@@ -346,6 +363,9 @@ fn add_adjust_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("AdjustPointsOffset", |lua, this, (x_offset, y_offset): (f32, f32)| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
+        if combat_lockdown::check_and_fire(lua, &state_rc, id, "AdjustPointsOffset") {
+            return Ok(());
+        }
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             for anchor in &mut frame.anchors {
