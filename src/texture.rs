@@ -163,6 +163,11 @@ impl TextureManager {
         self.cache.len()
     }
 
+    /// Return all cached texture paths (for diagnostics/tests).
+    pub fn cached_paths(&self) -> Vec<&str> {
+        self.cache.keys().map(|s| s.as_str()).collect()
+    }
+
     /// Get the dimensions of a cached texture.
     pub fn get_texture_size(&self, wow_path: &str) -> Option<(u32, u32)> {
         let normalized = normalize_wow_path(wow_path);
@@ -560,5 +565,84 @@ mod tests {
 
         // Verify same data
         assert_eq!(pixels1, result2.unwrap().pixels);
+    }
+
+    #[test]
+    fn test_preloaded_talent_textures_cover_atlas_entries() {
+        let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
+        if !textures_path.exists() {
+            eprintln!("Skipping test: textures directory not found");
+            return;
+        }
+        let home = dirs::home_dir().unwrap_or_default();
+        let mut mgr = TextureManager::new(&textures_path)
+            .with_interface_path(home.join("Projects/wow/Interface"));
+
+        mgr.preload_talent_textures(790);
+        mgr.preload_talent_panel_textures();
+
+        // Every talents-* atlas entry's base file should now be cached
+        let mut missing = Vec::new();
+        for (key, info) in crate::atlas::ATLAS_DB.entries() {
+            if key.starts_with("talents-") && !mgr.is_cached(info.file) {
+                missing.push((key.to_string(), info.file.to_string()));
+            }
+        }
+        assert!(
+            missing.is_empty(),
+            "Talent atlas entries reference {} uncached base textures:\n{}",
+            missing.len(),
+            missing.iter().map(|(k, f)| format!("  {} -> {}", k, f)).collect::<Vec<_>>().join("\n"),
+        );
+    }
+
+    /// Collect talent icon paths that should be cached but aren't.
+    fn find_uncached_talent_icons(mgr: &TextureManager, tree_id: u32) -> Vec<String> {
+        use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_ENTRY_DB, TRAIT_DEFINITION_DB};
+        let tree = TRAIT_TREE_DB.get(&tree_id).expect("tree exists");
+        let mut missing = Vec::new();
+        for &node_id in tree.node_ids {
+            let Some(node) = TRAIT_NODE_DB.get(&node_id) else { continue };
+            for &entry_id in node.entry_ids {
+                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else { continue };
+                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else { continue };
+                let icon_id = if def.override_icon != 0 {
+                    def.override_icon
+                } else {
+                    let Some(spell) = crate::spells::get_spell(def.spell_id) else { continue };
+                    spell.icon_file_data_id
+                };
+                if icon_id == 0 { continue; }
+                check_icon_cached(mgr, &mut missing, node_id, icon_id);
+            }
+        }
+        missing
+    }
+
+    fn check_icon_cached(mgr: &TextureManager, missing: &mut Vec<String>, node_id: u32, icon_id: u32) {
+        let Some(path) = crate::manifest_interface_data::get_texture_path(icon_id) else {
+            missing.push(format!("  node={node_id} icon={icon_id} -> no manifest path"));
+            return;
+        };
+        let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
+        if !mgr.is_cached(&wow_path) {
+            missing.push(format!("  node={node_id} icon={icon_id} -> {wow_path} NOT cached"));
+        }
+    }
+
+    #[test]
+    fn test_preloaded_talent_icons_are_cached() {
+        let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
+        if !textures_path.exists() {
+            eprintln!("Skipping test: textures directory not found");
+            return;
+        }
+        let home = dirs::home_dir().unwrap_or_default();
+        let mut mgr = TextureManager::new(&textures_path)
+            .with_interface_path(home.join("Projects/wow/Interface"));
+        mgr.preload_talent_textures(790);
+
+        let missing = find_uncached_talent_icons(&mgr, 790);
+        assert!(missing.is_empty(), "Talent icon textures not cached:\n{}", missing.join("\n"));
     }
 }
