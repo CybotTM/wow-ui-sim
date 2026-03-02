@@ -177,39 +177,52 @@ fn append_texture_source(code: &mut String, texture: &crate::xml::TextureXml, va
     }
 }
 
+/// Append `SetColorTexture` or `SetVertexColor` from a `<Color>` XML element.
+fn append_color_code(code: &mut String, color: &crate::xml::ColorXml, var: &str) {
+    if let Some(name) = &color.color {
+        code.push_str(&format!(
+            "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
+        ));
+    } else {
+        let (r, g, b, a) = (
+            color.r.unwrap_or(1.0), color.g.unwrap_or(1.0),
+            color.b.unwrap_or(1.0), color.a.unwrap_or(1.0),
+        );
+        code.push_str(&format!(
+            "            {var}:SetColorTexture({r}, {g}, {b}, {a})\n"
+        ));
+    }
+}
+
+/// Append `SetGradient` from a `<Gradient>` XML element.
+fn append_gradient_code(code: &mut String, grad: &crate::xml::GradientXml, var: &str) {
+    let orient = grad.orientation.as_deref().unwrap_or("VERTICAL");
+    let [mr, mg, mb, ma] = extract_gradient_rgba(grad.min_color.as_ref(), 1.0);
+    let [xr, xg, xb, xa] = extract_gradient_rgba(grad.max_color.as_ref(), 1.0);
+    code.push_str(&format!(
+        "            {var}:SetGradient(\"{orient}\", {{r={mr},g={mg},b={mb},a={ma}}}, {{r={xr},g={xg},b={xb},a={xa}}})\n"
+    ));
+}
+
+/// Extract RGBA from an optional ColorXml with defaults (0 for RGB, custom for alpha).
+fn extract_gradient_rgba(color: Option<&crate::xml::ColorXml>, default_a: f32) -> [f32; 4] {
+    match color {
+        Some(c) => [c.r.unwrap_or(0.0), c.g.unwrap_or(0.0), c.b.unwrap_or(0.0), c.a.unwrap_or(default_a)],
+        None => [0.0, 0.0, 0.0, default_a],
+    }
+}
+
 /// Append texture-specific property setters (size, source, color, tiling, etc.) to Lua code.
 fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml, var: &str, is_mask: bool) {
     if let Some(size) = &texture.size {
-        let (width, height) = get_size_values(size);
-        match (width, height) {
-            (Some(w), Some(h)) => {
-                code.push_str(&format!("            {}:SetSize({}, {})\n", var, w, h));
-            }
-            (Some(w), None) => {
-                code.push_str(&format!("            {}:SetWidth({})\n", var, w));
-            }
-            (None, Some(h)) => {
-                code.push_str(&format!("            {}:SetHeight({})\n", var, h));
-            }
-            _ => {}
-        }
+        append_size_code(code, size, var);
     }
     append_texture_source(code, texture, var, is_mask);
     if let Some(color) = &texture.color {
-        if let Some(name) = &color.color {
-            code.push_str(&format!(
-                "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
-            ));
-        } else {
-            let r = color.r.unwrap_or(1.0);
-            let g = color.g.unwrap_or(1.0);
-            let b = color.b.unwrap_or(1.0);
-            let a = color.a.unwrap_or(1.0);
-            code.push_str(&format!(
-                "            {}:SetColorTexture({}, {}, {}, {})\n",
-                var, r, g, b, a
-            ));
-        }
+        append_color_code(code, color, var);
+    }
+    if let Some(ref grad) = texture.gradient {
+        append_gradient_code(code, grad, var);
     }
     if texture.horiz_tile == Some(true) {
         code.push_str(&format!("            {}:SetHorizTile(true)\n", var));
@@ -222,6 +235,17 @@ fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml
     }
     if let Some(ref mode) = texture.alpha_mode {
         code.push_str(&format!("            {}:SetBlendMode(\"{}\")\n", var, mode));
+    }
+}
+
+/// Append SetSize/SetWidth/SetHeight from a `<Size>` XML element.
+fn append_size_code(code: &mut String, size: &crate::xml::SizeXml, var: &str) {
+    let (width, height) = get_size_values(size);
+    match (width, height) {
+        (Some(w), Some(h)) => code.push_str(&format!("            {var}:SetSize({w}, {h})\n")),
+        (Some(w), None) => code.push_str(&format!("            {var}:SetWidth({w})\n")),
+        (None, Some(h)) => code.push_str(&format!("            {var}:SetHeight({h})\n")),
+        _ => {}
     }
 }
 

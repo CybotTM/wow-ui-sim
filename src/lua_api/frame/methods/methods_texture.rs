@@ -15,6 +15,7 @@ pub fn add_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     add_pixel_grid_methods(methods);
     add_nine_slice_methods(methods);
     add_vertex_color_methods(methods);
+    add_gradient_methods(methods);
     add_tex_coord_methods(methods);
     add_mask_methods(methods);
     add_rotation_methods(methods);
@@ -456,6 +457,48 @@ fn add_vertex_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("SetCenterColor", |_, _this, _args: mlua::MultiValue| Ok(()));
 }
 
+/// SetGradient — applies a per-vertex color gradient (VERTICAL or HORIZONTAL).
+fn add_gradient_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetGradient", |lua, this, args: mlua::MultiValue| {
+        let args_vec: Vec<mlua::Value> = args.into_iter().collect();
+        if args_vec.is_empty() { return Ok(()); }
+        let orientation = match &args_vec[0] {
+            mlua::Value::String(s) => s.to_str().map(|s| s.to_uppercase()).unwrap_or_else(|_| "VERTICAL".to_string()),
+            _ => "VERTICAL".to_string(),
+        };
+        let vertical = orientation != "HORIZONTAL";
+        // Modern API: SetGradient(orientation, minColorTable, maxColorTable)
+        let (min_color, max_color) = if args_vec.len() >= 3 {
+            let min_c = extract_color_from_value(&args_vec[1]);
+            let max_c = extract_color_from_value(&args_vec[2]);
+            (min_c, max_c)
+        } else {
+            return Ok(());
+        };
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.gradient = Some(crate::widget::Gradient { vertical, min_color, max_color });
+        }
+        Ok(())
+    });
+}
+
+/// Extract RGBA from a Lua value (table with r/g/b/a keys, or userdata with GetRGBA).
+fn extract_color_from_value(val: &mlua::Value) -> crate::widget::Color {
+    match val {
+        mlua::Value::Table(t) => {
+            let r = t.get::<f32>("r").unwrap_or(0.0);
+            let g = t.get::<f32>("g").unwrap_or(0.0);
+            let b = t.get::<f32>("b").unwrap_or(0.0);
+            let a = t.get::<f32>("a").unwrap_or(1.0);
+            crate::widget::Color::new(r, g, b, a)
+        }
+        _ => crate::widget::Color::new(0.0, 0.0, 0.0, 1.0),
+    }
+}
+
 /// GetTexCoord, SetTexCoord.
 fn add_tex_coord_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetTexCoord", |lua, this, ()| {
@@ -592,17 +635,8 @@ fn add_rotation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-/// SetGradient, SetDrawLayer, GetDrawLayer.
+/// SetDrawLayer, GetDrawLayer.
 fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetGradient", |lua, this, _args: mlua::MultiValue| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.vertex_color = None;
-            frame.alpha = 1.0;
-        }
-        Ok(())
-    });
     methods.add_method("SetDrawLayer", |lua, this, args: mlua::MultiValue| {
         use crate::widget::DrawLayer;
         let id = this.0;

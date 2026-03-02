@@ -16,8 +16,8 @@ pub use template::{
 };
 pub use types::{
     AbsDimensionXml, AnchorXml, AnchorsXml, AnimationsXml, AttributeXml, AttributesXml,
-    BackdropXml, ColorXml, FontRefXml, FrameChildElement, FrameXml, ScopedModifierXml,
-    InsetsXml, KeyValueXml, KeyValuesXml, OffsetXml,
+    BackdropXml, ColorXml, FontRefXml, FrameChildElement, FrameXml, GradientXml,
+    ScopedModifierXml, InsetsXml, KeyValueXml, KeyValuesXml, OffsetXml,
     ResizeBoundsXml, ScriptBodyXml, ScriptsXml, ScrollChildXml, SizeXml,
     UiXml, XmlElement,
 };
