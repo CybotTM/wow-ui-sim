@@ -500,6 +500,20 @@ fn test_hooksecurefunc() {
 }
 
 #[test]
+fn test_hooksecurefunc_on_frame_userdata() {
+    let (t, _) = load_test_lua(
+        "test-hooksecure-ud",
+        r#"
+        local f = CreateFrame("Frame", "HookSecureUDTest", UIParent)
+        HOOK_CALLED = false
+        hooksecurefunc(f, "SetAlpha", function() HOOK_CALLED = true end)
+        f:SetAlpha(0.5)
+    "#,
+    );
+    t.assert_lua_true("return HOOK_CALLED", "hook should fire on userdata frame");
+}
+
+#[test]
 fn test_mixin() {
     let (t, _) = load_test_lua(
         "test-mixin",
