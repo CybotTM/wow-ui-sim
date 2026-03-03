@@ -144,10 +144,11 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let is_protected = state.widgets.get(this.0)
             .map(|f| f.is_protected)
             .unwrap_or(false);
-        // (isProtectedFromInsecure, isExplicitlyProtected)
-        // isProtectedFromInsecure is true when: frame is protected AND in combat lockdown.
-        let is_protected_from_insecure = is_protected && state.player.in_combat;
-        Ok((is_protected_from_insecure, is_protected))
+        // (isProtected, isProtectedExplicitly) — both are static frame properties,
+        // NOT affected by combat state. Combat lockdown controls whether
+        // protected frames block insecure calls, but IsProtected() itself
+        // always returns the same values.
+        Ok((is_protected, is_protected))
     });
 
     methods.add_method("Protect", |lua, this, ()| {
