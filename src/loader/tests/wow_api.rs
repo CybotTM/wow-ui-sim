@@ -514,6 +514,20 @@ fn test_hooksecurefunc_on_frame_userdata() {
 }
 
 #[test]
+fn test_issecurevariable_on_frame_userdata() {
+    let (t, _) = load_test_lua(
+        "test-issecurevar-ud",
+        r#"
+        local f = CreateFrame("Frame", "IssecureVarUDTest", UIParent)
+        -- issecurevariable(frame, "method") should not error on userdata
+        local secure, taint = issecurevariable(f, "Show")
+        SECURE_RESULT = secure
+    "#,
+    );
+    t.assert_lua_true("return SECURE_RESULT", "native method should be secure");
+}
+
+#[test]
 fn test_mixin() {
     let (t, _) = load_test_lua(
         "test-mixin",

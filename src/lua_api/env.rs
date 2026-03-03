@@ -599,7 +599,7 @@ fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
 /// Initialize the Lua state: load Elune, register globals, patch stdlib, run keybindings.
 fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> {
     load_elune_security(lua)?;
-    patch_hooksecurefunc(lua)?;
+    patch_elune_userdata_compat(lua)?;
     init_registry_tables(lua)?;
     super::globals::register_globals(lua, Rc::clone(&state))?;
     super::secure_env::create_secure_environment(lua)?;
@@ -623,9 +623,9 @@ fn load_elune_security(lua: &Lua) -> crate::Result<()> {
     Ok(())
 }
 
-/// Wrap Elune's hooksecurefunc to accept userdata (FrameRef) as the table arg.
-fn patch_hooksecurefunc(lua: &Lua) -> crate::Result<()> {
-    lua.load(include_str!("../../data/lua/hooksecurefunc_userdata.lua")).exec()?;
+/// Wrap Elune's hooksecurefunc/issecurevariable to accept userdata (FrameRef).
+fn patch_elune_userdata_compat(lua: &Lua) -> crate::Result<()> {
+    lua.load(include_str!("../../data/lua/elune_userdata_compat.lua")).exec()?;
     Ok(())
 }
 
