@@ -391,22 +391,10 @@ fn create_frame_userdata(
     Ok(val)
 }
 
-/// Create a forbidden proxy table for a frame.
-///
-/// The proxy table has:
-/// - `proxy["__lud"]` = the FrameRef UserData for this frame (read by the shared metatable)
-/// - The shared `__forbidden_proxy_mt` metatable (cached in registry, same identity for all instances)
-///
-/// The FrameRef UserData already has type() == "userdata" (not "table"), so no additional
-/// wrapper is needed. The type() override in system_api.rs handles remapping if needed.
+/// Create a forbidden proxy table: `{ __lud = ud }` with shared `__forbidden_proxy_mt`.
 fn create_forbidden_proxy(lua: &Lua, ud: Value) -> Result<Value> {
     let proxy = lua.create_table()?;
-    // Store the UserData at "__lud" so the shared metatable __index/__newindex
-    // can retrieve it at call time, and so CreateFrame can resolve the parent frame ID.
     proxy.raw_set("__lud", ud)?;
-
-    // Reuse the single shared metatable for all forbidden proxies so that
-    // getmetatable(proxy1) == getmetatable(proxy2) (identity check).
     let mt: mlua::Table = lua.named_registry_value("__forbidden_proxy_mt")?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))

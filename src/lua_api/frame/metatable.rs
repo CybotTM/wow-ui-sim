@@ -61,22 +61,22 @@ fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_meta_function(
         mlua::MetaMethod::Index,
         |lua, (ud, key): (mlua::AnyUserData, mlua::Value)| {
-            // Numeric index: [0] returns raw LightUserData, [1+] returns children.
-            // String keys are fully handled in Lua (PATCH_INDEX_LUA checks both
-            // env[1] for mixin methods and env for __newindex-set properties).
-            if let mlua::Value::Integer(idx) = key {
-                let this = ud.borrow::<FrameRef>()?;
-                let id = this.0;
-                drop(this);
-                if idx == 0 {
-                    return Ok(mlua::Value::LightUserData(mlua::LightUserData(
-                        id as *mut std::ffi::c_void,
-                    )));
+            match key {
+                mlua::Value::Integer(idx) => {
+                    let id = ud.borrow::<FrameRef>()?.0;
+                    if idx == 0 {
+                        return Ok(mlua::Value::LightUserData(mlua::LightUserData(
+                            id as *mut std::ffi::c_void,
+                        )));
+                    }
+                    lookup_child_by_index(lua, id, idx)
                 }
-                return lookup_child_by_index(lua, id, idx);
+                mlua::Value::String(ref s) => {
+                    // Per-type lookup: check addon-injected methods
+                    lookup_type_injected(lua, &ud, &s.to_string_lossy())
+                }
+                _ => Ok(mlua::Value::Nil),
             }
-
-            Ok(mlua::Value::Nil)
         },
     );
 }
@@ -225,6 +225,12 @@ fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
 /// Lua code to patch a UserData metatable's __index: check per-instance fields
 /// (via debug.getfenv) before falling through to mlua's method resolution.
 /// Args: (userdata_instance).
+///
+/// Lookup order for string keys:
+/// 1. env[1] — mixin methods (per-instance overrides from Mixin())
+/// 2. env — per-frame properties (set via __newindex)
+/// 3. Rust __index (per-type lookup + numeric children)
+/// 4. old_index — mlua registered Rust methods
 const PATCH_INDEX_LUA: &str = r#"
     local ud = ...
     local mt = debug.getmetatable(ud)
@@ -235,15 +241,13 @@ const PATCH_INDEX_LUA: &str = r#"
         if type(key) == "string" then
             local env = dgetfenv(self)
             if env then
-                -- Check mixin methods first (env[1])
-                local val = rawget(env[1], key)
+                local val = rawget(rawget(env, 1), key)
                 if val ~= nil then return val end
-                -- Check per-frame properties (set via __newindex)
                 val = rawget(env, key)
                 if val ~= nil then return val end
             end
         end
-        -- Numeric keys or complete miss → Rust handler
+        -- Falls through to Rust __index (per-type lookup for strings, children for ints)
         return old_index(self, key)
     end
 
@@ -258,6 +262,7 @@ fn patch_metatable_index(lua: &Lua) -> mlua::Result<()> {
     Ok(())
 }
 
+
 // ── Lookup helpers ────────────────────────────────────────────────────────────
 
 /// Look up a child frame by numeric index (1-indexed).
@@ -270,6 +275,34 @@ fn lookup_child_by_index(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Val
         {
             drop(state);
             return frame_ref(lua, child_id);
+        }
+    }
+    Ok(Value::Nil)
+}
+
+/// Check per-type __index tables for addon-injected methods (e.g. ATT's SetATTTooltip).
+/// Reads `__per_type_metatables[widget_type].__index[key]`. Returns Nil if not found.
+fn lookup_type_injected(lua: &Lua, ud: &mlua::AnyUserData, key: &str) -> mlua::Result<Value> {
+    let per_type: mlua::Table = match lua.named_registry_value("__per_type_metatables") {
+        Ok(t) => t,
+        Err(_) => return Ok(Value::Nil),
+    };
+    let id = ud.borrow::<FrameRef>()?.0;
+    let wt = {
+        let state_rc = get_sim_state(lua);
+        let Ok(state) = state_rc.try_borrow() else { return Ok(Value::Nil) };
+        state.widgets.get(id).map(|f| {
+            f.object_type_name.clone().unwrap_or_else(|| f.widget_type.as_str().to_owned())
+        })
+    };
+    if let Some(wt) = wt {
+        if let Ok(mt) = per_type.raw_get::<mlua::Table>(wt.as_str()) {
+            if let Ok(idx) = mt.raw_get::<mlua::Table>("__index") {
+                let val: Value = idx.raw_get(key)?;
+                if val != Value::Nil {
+                    return Ok(val);
+                }
+            }
         }
     }
     Ok(Value::Nil)

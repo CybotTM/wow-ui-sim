@@ -486,10 +486,7 @@ fn build_anim_metatable(lua: &Lua, per_type: &mlua::Table, otn: &str) -> Result<
 }
 
 /// Pre-build one metatable per widget type and store in `__per_type_metatables`.
-///
-/// Methods are resolved by probing a dummy FrameRef via `ud[name]` (mlua's internal
-/// `__index` resolves `add_method` entries that aren't enumerable via `pairs(mt)`).
-/// Two frames of the same widget type receive the same table object (identity check passes).
+/// Methods resolved by probing a dummy FrameRef; same type → same table identity.
 fn build_per_type_metatables(lua: &Lua) -> Result<()> {
     use crate::lua_api::frame::FrameRef;
 

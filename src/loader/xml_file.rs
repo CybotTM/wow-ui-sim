@@ -148,7 +148,11 @@ fn process_include(
 ) -> Result<usize, LoadError> {
     let include_path = resolve_path_with_fallback(xml_dir, ctx.addon_root, &i.file);
     if i.file.ends_with(".lua") {
-        load_lua_file(env, &include_path, ctx, timing)?;
+        // In WoW, Lua errors in <Script file="..."> includes are caught and don't
+        // abort XML file processing — same as inline <Script> elements.
+        if let Err(e) = load_lua_file(env, &include_path, ctx, timing) {
+            tracing::warn!("Script file include error ({}): {}", i.file, e);
+        }
         Ok(1)
     } else {
         load_xml_file(env, &include_path, ctx, timing)
