@@ -273,7 +273,7 @@ fn register_c_player_info_mythic(lua: &Lua, t: &mlua::Table) -> Result<()> {
 }
 
 fn register_c_player_info_misc(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("CanPlayerUseMountEquipment", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("CanPlayerUseMountEquipment", lua.create_function(|_, ()| Ok((true, "")))?)?;
     t.set("IsPlayerNPERestricted", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("GetGlidingInfo", lua.create_function(|_, ()| Ok((false, false, 0.0_f64)))?)?;
     t.set("IsPlayerInChromieTime", lua.create_function(|_, ()| Ok(false))?)?;
