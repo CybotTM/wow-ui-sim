@@ -160,6 +160,70 @@ fn register_c_commentator(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+const CHALLENGE_MODE_MAP_IDS: [i32; 8] = [506, 504, 370, 525, 499, 247, 500, 382];
+
+fn challenge_mode_map_info(map_id: i32) -> Option<(&'static str, i32)> {
+    match map_id {
+        506 => Some(("Cinderbrew Meadery", 1980)),
+        504 => Some(("Darkflame Cleft", 1860)),
+        370 => Some(("Mechagon Workshop", 1920)),
+        525 => Some(("Operation: Floodgate", 1980)),
+        499 => Some(("Priory of the Sacred Flame", 1950)),
+        247 => Some(("The MOTHERLODE!!", 1980)),
+        500 => Some(("The Rookery", 1740)),
+        382 => Some(("Theater of Pain", 2040)),
+        _ => None,
+    }
+}
+
+fn challenge_mode_affix_info(affix_id: i32) -> Option<(&'static str, &'static str, i64)> {
+    match affix_id {
+        9 => Some(("Tyrannical", "Boss enemies have 20% more health and inflict up to 15% increased damage.", 236401)),
+        10 => Some(("Fortified", "Non-boss enemies have 20% more health and inflict up to 30% increased damage.", 236402)),
+        160 => Some(("Challenger's Peril", "Dying subtracts 15 seconds from time remaining.", 136120)),
+        148 => Some(("Xal'atath's Bargain: Ascendant", "While in combat, Xal'atath rains down shadow upon players.", 4630473)),
+        147 => Some(("Xal'atath's Bargain: Frenzied", "Non-boss enemies become frenzied at 30% health remaining.", 4630474)),
+        149 => Some(("Xal'atath's Bargain: Voidbound", "Xal'atath opens void portals that empower nearby enemies.", 4630471)),
+        158 => Some(("Xal'atath's Bargain: Oblivion", "Xal'atath tears open rifts to the void.", 4630472)),
+        _ => None,
+    }
+}
+
+fn add_challenge_mode_map_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set("GetMapTable", lua.create_function(|lua, ()| {
+        let t = lua.create_table_with_capacity(CHALLENGE_MODE_MAP_IDS.len(), 0)?;
+        for (i, id) in CHALLENGE_MODE_MAP_IDS.iter().enumerate() {
+            t.set(i as i64 + 1, *id)?;
+        }
+        Ok(t)
+    })?)?;
+    t.set("GetMapUIInfo", lua.create_function(|lua, map_id: i32| {
+        match challenge_mode_map_info(map_id) {
+            Some((name, time_limit)) => Ok(mlua::MultiValue::from_vec(vec![
+                Value::String(lua.create_string(name)?),
+                Value::Integer(map_id as i64),
+                Value::Integer(time_limit as i64),
+                Value::Nil, Value::Nil, Value::Integer(map_id as i64),
+            ])),
+            None => Ok(mlua::MultiValue::from_vec(vec![
+                Value::Nil, Value::Nil, Value::Integer(0),
+                Value::Nil, Value::Nil, Value::Nil,
+            ])),
+        }
+    })?)?;
+    t.set("GetAffixInfo", lua.create_function(|lua, affix_id: i32| {
+        match challenge_mode_affix_info(affix_id) {
+            Some((name, desc, icon)) => Ok((
+                Value::String(lua.create_string(name)?),
+                Value::String(lua.create_string(desc)?),
+                Value::Integer(icon),
+            )),
+            None => Ok((Value::Nil, Value::Nil, Value::Nil)),
+        }
+    })?)?;
+    Ok(())
+}
+
 fn register_c_challenge_mode(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set("IsChallengeModeActive", lua.create_function(|_, ()| Ok(false))?)?;
@@ -168,6 +232,7 @@ fn register_c_challenge_mode(lua: &Lua) -> Result<()> {
     t.set("GetCompletionInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     t.set("GetDeathCount", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
     t.set("GetLeaverPenaltyWarningTimeLeft", lua.create_function(|_, ()| Ok(0.0f64))?)?;
+    add_challenge_mode_map_methods(lua, &t)?;
     lua.globals().set("C_ChallengeMode", t)?;
     Ok(())
 }

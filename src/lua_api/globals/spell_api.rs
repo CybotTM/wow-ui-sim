@@ -317,6 +317,14 @@ fn create_spell_book_item_info(lua: &Lua, (slot, _bank): (i32, Option<i32>)) -> 
 fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
+    register_c_spell_queries(lua, &t)?;
+    register_c_spell_cooldown(lua, &t, Rc::clone(&state))?;
+    register_c_spell_stubs(lua, &t)?;
+
+    Ok(t)
+}
+
+fn register_c_spell_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetSpellInfo", lua.create_function(create_spell_info)?)?;
     t.set("GetSpellCharges", lua.create_function(create_spell_charges)?)?;
     t.set("IsSpellPassive", lua.create_function(|_, spell_id: i32| {
@@ -329,9 +337,20 @@ fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Tab
     t.set("GetSpellTexture", lua.create_function(create_spell_texture)?)?;
     t.set("GetSpellLink", lua.create_function(create_spell_link)?)?;
     t.set("GetSpellName", lua.create_function(create_spell_name)?)?;
-    let st = Rc::clone(&state);
+    t.set("DoesSpellExist", lua.create_function(|_, spell_id: i32| {
+        Ok(spell_id > 0 && crate::spells::get_spell(spell_id as u32).is_some())
+    })?)?;
+    t.set("GetSpellPowerCost", lua.create_function(create_spell_power_cost)?)?;
+    t.set("IsSpellUsable", lua.create_function(|_, spell_id: i32| {
+        let usable = spellbook_data::is_spell_known(spell_id as u32);
+        Ok((usable, false))
+    })?)?;
+    Ok(())
+}
+
+fn register_c_spell_cooldown(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set("GetSpellCooldown", lua.create_function(move |lua, spell_id: i32| {
-        let s = st.borrow();
+        let s = state.borrow();
         let now = s.start_time.elapsed().as_secs_f64();
         let (start, duration) = super::action_bar_api::spell_cooldown_times(
             &s, spell_id as u32, now,
@@ -343,24 +362,29 @@ fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Tab
         info.set("modRate", 1.0)?;
         Ok(info)
     })?)?;
-    t.set("DoesSpellExist", lua.create_function(|_, spell_id: i32| {
-        Ok(spell_id > 0 && crate::spells::get_spell(spell_id as u32).is_some())
-    })?)?;
+    t.set("GetSpellLossOfControlCooldown", lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?)?;
+    Ok(())
+}
+
+fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("RequestLoadSpellData", lua.create_function(|_, _spell_id: i32| Ok(()))?)?;
     t.set("IsAutoAttackSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     t.set("IsRangedAutoAttackSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     t.set("IsPressHoldReleaseSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("GetSpellLossOfControlCooldown", lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?)?;
     t.set("GetMawPowerBorderAtlasBySpellID", lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?)?;
-    t.set("GetSpellPowerCost", lua.create_function(create_spell_power_cost)?)?;
     // GetVisibilityInfo(spellId, context) -> hasCustom, alwaysShowMine, showForMySpec
     t.set("GetVisibilityInfo", lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| {
         Ok((false, false, false))
     })?)?;
     t.set("IsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
     t.set("IsPriorityAura", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-
-    Ok(t)
+    t.set("GetSpellSubtext", lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?)?;
+    t.set("GetSpellDescription", lua.create_function(|lua, _spell_id: i32| {
+        Ok(Value::String(lua.create_string("")?))
+    })?)?;
+    t.set("IsSpellHarmful", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
+    t.set("IsSpellHelpful", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
+    Ok(())
 }
 
 /// Return power cost info for a spell from the generated SpellPower database.
@@ -368,7 +392,7 @@ fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Tab
 /// cost, minCost, costPercent, costPerSec, requiredAuraID, hasRequiredAura.
 fn create_spell_power_cost(lua: &Lua, spell_id: i32) -> Result<Value> {
     let Some(costs) = crate::spell_power::get_spell_power(spell_id as u32) else {
-        return Ok(Value::Nil);
+        return Ok(Value::Table(lua.create_table()?));
     };
     let result = lua.create_table()?;
     for (i, cost) in costs.iter().enumerate() {

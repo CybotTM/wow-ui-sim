@@ -285,13 +285,21 @@ fn register_c_player_info_misc(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetNativeDisplayID", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set("GetContentDifficultyQuestForPlayer", lua.create_function(|_, _id: i32| Ok(1i32))?)?;
     t.set("IsExpansionLandingPageUnlockedForPlayer", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("GetAlternateFormInfo", lua.create_function(|_, ()| Ok((false, false)))?)?;
+    t.set("HasVisibleInvSlot", lua.create_function(|_, slot: i32| Ok(slot >= 1 && slot <= 19))?)?;
+    t.set("IsDisplayRaceNative", lua.create_function(|_, ()| Ok(true))?)?;
     Ok(())
 }
 
 fn register_c_party_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     // Invite stubs
-    t.set("GetActiveCategories", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set("GetActiveCategories", lua.create_function(|lua, ()| {
+        let t = lua.create_table()?;
+        t.set(1, 1i32)?;
+        Ok(t)
+    })?)?;
+    t.set("CanFormCrossFactionParties", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetInviteConfirmationInfo", lua.create_function(|_, _g: String| Ok(Value::Nil))?)?;
     t.set("GetInviteReferralInfo", lua.create_function(|_, _g: String| Ok(Value::Nil))?)?;
     t.set("ConfirmInviteUnit", lua.create_function(|_, _g: String| Ok(()))?)?;
@@ -327,8 +335,42 @@ fn register_c_chat_info(lua: &Lua) -> Result<()> {
     t.set("IsChannelRegionalForChannelID", lua.create_function(|_, _id: Value| Ok(false))?)?;
     t.set("GetChannelShortcutForChannelID", lua.create_function(|_, _id: Value| Ok(Value::Nil))?)?;
     t.set("PerformEmote", lua.create_function(|_, (_emote, _target, _silent): (Value, Value, Value)| Ok(()))?)?;
+    register_c_chat_info_extras(lua, &t)?;
     lua.globals().set("C_ChatInfo", t)?;
     Ok(())
+}
+
+fn register_c_chat_info_extras(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set("GetColorForChatType", lua.create_function(|lua, chat_type: String| {
+        let (r, g, b) = chat_type_color(&chat_type);
+        let color = lua.create_table()?;
+        color.set("r", r)?;
+        color.set("g", g)?;
+        color.set("b", b)?;
+        Ok(color)
+    })?)?;
+    t.set("ReplaceIconAndGroupExpressions", lua.create_function(|_, (input, _no_icon, _no_group): (String, Option<bool>, Option<bool>)| {
+        Ok(input)
+    })?)?;
+    t.set("GetGeneralChannelID", lua.create_function(|_, ()| Ok(1i32))?)?;
+    Ok(())
+}
+
+fn chat_type_color(chat_type: &str) -> (f64, f64, f64) {
+    match chat_type {
+        "SAY" => (1.0, 1.0, 1.0),
+        "YELL" => (1.0, 0.25, 0.25),
+        "WHISPER" | "WHISPER_INFORM" => (1.0, 0.5, 1.0),
+        "GUILD" => (0.25, 1.0, 0.25),
+        "OFFICER" => (0.25, 0.75, 0.25),
+        "PARTY" | "PARTY_LEADER" => (0.67, 0.67, 1.0),
+        "RAID" | "RAID_LEADER" | "RAID_WARNING" => (1.0, 0.5, 0.0),
+        "INSTANCE_CHAT" | "INSTANCE_CHAT_LEADER" => (1.0, 0.5, 0.0),
+        "EMOTE" => (1.0, 0.5, 0.25),
+        "CHANNEL" => (1.0, 0.75, 0.75),
+        "SYSTEM" => (1.0, 1.0, 0.0),
+        _ => (1.0, 1.0, 1.0),
+    }
 }
 
 fn send_chat_message(
@@ -490,7 +532,28 @@ fn register_currency_query_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetCurrencyInfo", lua.create_function(currency_info_by_id)?)?;
     t.set("GetBasicCurrencyInfo", lua.create_function(basic_currency_info)?)?;
     t.set("GetCurrencyInfoFromLink", lua.create_function(|_, _l: String| Ok(Value::Nil))?)?;
+    t.set("GetCoinTextureString", lua.create_function(|lua, amount: i64| {
+        let result = format_coin_texture_string(amount);
+        Ok(mlua::Value::String(lua.create_string(&result)?))
+    })?)?;
     Ok(())
+}
+
+fn format_coin_texture_string(amount: i64) -> String {
+    let gold = amount / 10000;
+    let silver = (amount % 10000) / 100;
+    let copper = amount % 100;
+    let mut parts = Vec::new();
+    if gold > 0 {
+        parts.push(format!("{}|TInterface\\MoneyFrame\\UI-GoldIcon:0:0:2:0|t", gold));
+    }
+    if silver > 0 {
+        parts.push(format!("{}|TInterface\\MoneyFrame\\UI-SilverIcon:0:0:2:0|t", silver));
+    }
+    if copper > 0 || parts.is_empty() {
+        parts.push(format!("{}|TInterface\\MoneyFrame\\UI-CopperIcon:0:0:2:0|t", copper));
+    }
+    parts.join(" ")
 }
 
 fn register_currency_list_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
