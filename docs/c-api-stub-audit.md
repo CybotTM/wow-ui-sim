@@ -7,7 +7,7 @@ Current state of all C_* namespace implementations in wow-ui-sim.
 The simulator registers **~260 C_* namespaces** across three layers:
 1. **Hand-written Rust** (`src/lua_api/globals/c_*.rs`, `*_api.rs`) — real logic with state
 2. **Hand-written stubs** (`c_stubs_api*.rs`, `c_misc_api*.rs`) — hardcoded defaults
-3. **Auto-generated stubs** (`generated_stubs.rs`, 22K lines) — catch-all from `scripts/generate_stubs.py`
+3. **Auto-generated stubs** (`generated_stubs.rs`, ~19K lines) — catch-all from `scripts/generate_stubs.py`
 
 Additionally, **~25 global (non-C_*) stubs** have been upgraded from auto-generated
 nil returns to hand-written implementations with correct return values.
@@ -316,6 +316,28 @@ cleaned up:
 - `UnitIsBattlePet`, `UnitGUID` — already in `unit_api.rs`
 - `C_CVar.*` (GetCVar, GetCVarBool, GetCVarDefault, GetCVarBitfield, SetCVar, SetCVarBitfield, RegisterCVar, ResetTestCVars) — already in `cvar_api.rs`
 - `C_Map.GetBestMapForUnit`, `C_Map.GetPlayerMapPosition` — already in `c_map_api.rs`
+
+## Dead Stub Cleanup
+
+854 dead stubs were removed from `generated_stubs.rs`, reducing the file from ~22K to ~19K lines.
+Dead stubs are functions that existed in both the auto-generated file AND a hand-written
+`*_api.rs` file. The `is_nil()` guard meant they were functionally inert, but they added
+unnecessary code.
+
+Major namespaces cleaned:
+- C_ActionBar: 46 stubs (already in action_bar_api.rs)
+- C_Container/C_NewItems: 25 stubs (already in c_container_api.rs)
+- C_UnitAuras: 10 stubs (already in c_misc_api_core.rs)
+- C_UIWidgetManager: 6 stubs (already in c_misc_api_ui.rs)
+- Plus ~767 more across 100+ namespaces
+- 12 dead global function stubs (pcall, xpcall, type, etc.)
+
+### Remaining Nil Stubs (351)
+
+All 351 remaining nil-returning stubs have been verified as correct:
+- Return types are nilable (`Type?`) where nil means "no data available"
+- Systems not simulated (PvP, Auction House, Voice Chat, Housing, etc.)
+- Query functions for state that doesn't exist in the simulator
 
 ## Missing Namespaces (Not Registered)
 
