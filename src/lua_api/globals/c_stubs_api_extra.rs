@@ -39,6 +39,7 @@ pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
     register_missing_global_tables(lua, &g)?;
     register_c_delves_ui(lua)?;
     register_c_zone_ability(lua)?;
+    register_misc_global_stubs(lua)?;
     super::c_stubs_achievement::register_simulate_ping(lua)?;
     // Re-apply CombatLog global aliases so they share the same function pointer as C_CombatLog.
     super::c_stubs_api_combat::fixup_combat_log_aliases(lua, &g)?;
@@ -705,6 +706,18 @@ fn register_c_zone_ability(lua: &Lua) -> Result<()> {
     t.set("GetActiveAbilities", lua.create_function(|lua, ()| lua.create_table())?)?;
     t.set("GetZoneAbilityIcon", lua.create_function(|_, _spell_id: Value| Ok(Value::Nil))?)?;
     lua.globals().set("C_ZoneAbility", t)?;
+    Ok(())
+}
+
+/// Misc global stubs: guild info, totems, parental controls, item text.
+fn register_misc_global_stubs(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("CanEditGuildInfo", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set("IsCpuBound", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set("GetTotemCannotDismiss", lua.create_function(|_, _slot: i32| Ok(false))?)?;
+    g.set("GetTotemTimeLeft", lua.create_function(|_, _slot: i32| Ok(0.0_f64))?)?;
+    g.set("GetSecondsUntilParentalControlsKick", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set("ItemTextHasNextPage", lua.create_function(|_, ()| Ok(false))?)?;
     Ok(())
 }
 

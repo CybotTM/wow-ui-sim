@@ -53,5 +53,9 @@ fn register_ranged_and_form_stats(lua: &Lua) -> Result<()> {
     g.set("GetPetActionCooldown", lua.create_function(|_, _idx: Value| {
         Ok((0.0_f64, 0.0_f64, true))
     })?)?;
+    // Battle pet numeric stubs (no battle pets in sim)
+    g.set("UnitBattlePetLevel", lua.create_function(|_, _unit: Value| Ok(0))?)?;
+    g.set("UnitBattlePetType", lua.create_function(|_, _unit: Value| Ok(0i32))?)?;
+    g.set("UnitBattlePetSpeciesID", lua.create_function(|_, _unit: Value| Ok(0))?)?;
     Ok(())
 }

@@ -7,7 +7,17 @@ use mlua::{Lua, MultiValue, Result, Value};
 pub fn register(lua: &Lua) -> Result<()> {
     register_get_frames_registered(lua)?;
     register_send_system_message(lua)?;
+    register_get_current_event_id(lua)?;
     Ok(())
+}
+
+/// `GetCurrentEventID()` - Returns the event ID currently being processed, or 0.
+/// Requires scriptProfile CVar. We always return 0 (no profiling in sim).
+fn register_get_current_event_id(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "GetCurrentEventID",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )
 }
 
 /// `GetFramesRegisteredForEvent(event)` - returns all frames registered for an event.

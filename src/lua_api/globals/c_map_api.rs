@@ -29,7 +29,10 @@ fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
 
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
-    t.set("GetBestMapForUnit", lua.create_function(|_, _unit: String| Ok(Value::Integer(1)))?)?;
+    // GetBestMapForUnit(unit) -> uiMapID; 2274 = Dornogal
+    t.set("GetBestMapForUnit", lua.create_function(|_, _unit: String| Ok(2274i32))?)?;
+    // GetCurrentMapID() -> uiMapID
+    t.set("GetCurrentMapID", lua.create_function(|_, ()| Ok(2274i32))?)?;
     t.set("GetPlayerMapPosition", lua.create_function(create_player_map_position)?)?;
     t.set("GetMapChildrenInfo", lua.create_function(|lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
         lua.create_table()

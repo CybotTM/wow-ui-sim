@@ -411,12 +411,26 @@ fn register_network_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
 
 /// Keyboard/mouse modifier state stubs (simulator has no real input state).
 fn register_input_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    register_keyboard_stubs(lua)?;
+    register_mouse_state_stubs(lua, state)
+}
+
+/// Keyboard modifier and key-press stubs — always return false (no real input).
+fn register_keyboard_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set("IsShiftKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsControlKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsAltKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsModifierKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsModifiedClick", lua.create_function(|_, _action: Option<String>| Ok(false))?)?;
+    // IsKeyDown(key) -> true if the named key is currently pressed
+    globals.set("IsKeyDown", lua.create_function(|_, _key: String| Ok(false))?)?;
+    Ok(())
+}
+
+/// Mouse state stubs: button state, focus, and click info.
+fn register_mouse_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    let globals = lua.globals();
     globals.set("IsMouseButtonDown", lua.create_function(|_, _btn: Option<Value>| Ok(false))?)?;
     let st = Rc::clone(state);
     globals.set(
@@ -429,22 +443,25 @@ fn register_input_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
             }
         })?,
     )?;
-    // GetMouseFoci() - returns a table of frames under the cursor (WoW 10.x+).
-    // Simplified: returns a single-element table with the hovered frame.
-    let st2 = Rc::clone(state);
-    globals.set(
+    register_mouse_foci(lua, state)?;
+    globals.set("GetMouseButtonClicked", lua.create_function(|_, ()| Ok(""))?)?;
+    Ok(())
+}
+
+/// GetMouseFoci() - returns a table of frames under the cursor (WoW 10.x+).
+fn register_mouse_foci(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    let st = Rc::clone(state);
+    lua.globals().set(
         "GetMouseFoci",
         lua.create_function(move |lua, ()| {
             let tbl = lua.create_table()?;
-            let hovered = st2.borrow().hovered_frame;
+            let hovered = st.borrow().hovered_frame;
             if let Some(id) = hovered {
                 tbl.raw_set(1, frame_ref(lua, id)?)?;
             }
             Ok(tbl)
         })?,
-    )?;
-    globals.set("GetMouseButtonClicked", lua.create_function(|_, ()| Ok(""))?)?;
-    Ok(())
+    )
 }
 
 /// Screen size functions reading from the rendering surface dimensions in SimState.

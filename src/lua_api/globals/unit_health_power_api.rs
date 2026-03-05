@@ -7,12 +7,14 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Register UnitHealth, UnitHealthMax, UnitPower, UnitPowerMax, UnitPowerType,
-/// UnitGetIncomingHeals, UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs.
+/// UnitGetIncomingHeals, UnitGetTotalAbsorbs, UnitGetTotalHealAbsorbs,
+/// UnitPercentHealthFromGUID.
 pub fn register_health_power_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_health_functions(lua, state.clone())?;
     register_power_functions(lua, state.clone())?;
     register_power_type_function(lua, state)?;
-    register_heal_absorb_stubs(lua)
+    register_heal_absorb_stubs(lua)?;
+    register_percent_health_from_guid(lua)
 }
 
 /// Register UnitHealth, UnitHealthMax with party and target awareness.
@@ -219,4 +221,17 @@ fn register_heal_absorb_stubs(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _unit: Option<String>| Ok(0i32))?,
     )?;
     Ok(())
+}
+
+/// Register UnitPercentHealthFromGUID — returns 100.0 for any GUID (full health).
+fn register_percent_health_from_guid(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "UnitPercentHealthFromGUID",
+        lua.create_function(|_, guid: Option<String>| {
+            match guid {
+                Some(_) => Ok(Value::Number(100.0)),
+                None => Ok(Value::Nil),
+            }
+        })?,
+    )
 }

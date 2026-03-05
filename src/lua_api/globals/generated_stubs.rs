@@ -320,9 +320,6 @@ fn register_global_stubs_2(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("CanEditGuildEvent")?.is_nil() {
         g.set("CanEditGuildEvent", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("CanEditGuildInfo")?.is_nil() {
-        g.set("CanEditGuildInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("CanEditGuildTabInfo")?.is_nil() {
         g.set("CanEditGuildTabInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -1254,9 +1251,7 @@ fn register_global_stubs_9(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetCurrentEnvironment")?.is_nil() {
         g.set("GetCurrentEnvironment", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("GetCurrentEventID")?.is_nil() {
-        g.set("GetCurrentEventID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+
     if g.get::<Value>("GetCurrentGlyphNameForSpell")?.is_nil() {
         g.set("GetCurrentGlyphNameForSpell", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -1333,9 +1328,7 @@ fn register_global_stubs_10(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetFollowerTypeIDFromSpell")?.is_nil() {
         g.set("GetFollowerTypeIDFromSpell", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("GetFontInfo")?.is_nil() {
-        g.set("GetFontInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+
     if g.get::<Value>("GetFontStringMetatable")?.is_nil() {
         g.set("GetFontStringMetatable", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
@@ -1662,9 +1655,7 @@ fn register_global_stubs_12(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetLatestUpdatedStats")?.is_nil() {
         g.set("GetLatestUpdatedStats", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("GetLegacyRaidDifficultyID")?.is_nil() {
-        g.set("GetLegacyRaidDifficultyID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+
     Ok(())
 }
 
@@ -1732,9 +1723,7 @@ fn register_global_stubs_13(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetMastery")?.is_nil() {
         g.set("GetMastery", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
-    if g.get::<Value>("GetMaxCombatRatingBonus")?.is_nil() {
-        g.set("GetMaxCombatRatingBonus", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+
     if g.get::<Value>("GetMaxNumCUFProfiles")?.is_nil() {
         g.set("GetMaxNumCUFProfiles", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -1774,9 +1763,7 @@ fn register_global_stubs_13(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetMinRenderScale")?.is_nil() {
         g.set("GetMinRenderScale", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
-    if g.get::<Value>("GetMirrorTimerProgress")?.is_nil() {
-        g.set("GetMirrorTimerProgress", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+
     if g.get::<Value>("GetModifiedClick")?.is_nil() {
         g.set("GetModifiedClick", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -2068,9 +2055,6 @@ fn register_global_stubs_16(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetPetitionNameInfo")?.is_nil() {
         g.set("GetPetitionNameInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
-    if g.get::<Value>("GetPlayerFacing")?.is_nil() {
-        g.set("GetPlayerFacing", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("GetPlayerInfoByGUID")?.is_nil() {
         g.set("GetPlayerInfoByGUID", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?)])))?)?;
     }
@@ -2240,9 +2224,6 @@ fn register_global_stubs_17(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetRFDungeonInfo")?.is_nil() {
         g.set("GetRFDungeonInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
-    if g.get::<Value>("GetRaidDifficultyID")?.is_nil() {
-        g.set("GetRaidDifficultyID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("GetRaidProfileFlattenedOptions")?.is_nil() {
         g.set("GetRaidProfileFlattenedOptions", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -2272,9 +2253,6 @@ fn register_global_stubs_17(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("GetReadyCheckTimeLeft")?.is_nil() {
         g.set("GetReadyCheckTimeLeft", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
-    if g.get::<Value>("GetResSicknessDuration")?.is_nil() {
-        g.set("GetResSicknessDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("GetRewardArtifactXP")?.is_nil() {
         g.set("GetRewardArtifactXP", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
@@ -2352,9 +2330,6 @@ fn register_global_stubs_18(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetScreenDPIScale")?.is_nil() {
         g.set("GetScreenDPIScale", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
-    if g.get::<Value>("GetSecondsUntilParentalControlsKick")?.is_nil() {
-        g.set("GetSecondsUntilParentalControlsKick", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("GetSelectedArtifactInfo")?.is_nil() {
         g.set("GetSelectedArtifactInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -2388,17 +2363,11 @@ fn register_global_stubs_18(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetShapeshiftFormCooldown")?.is_nil() {
         g.set("GetShapeshiftFormCooldown", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("GetSheathState")?.is_nil() {
-        g.set("GetSheathState", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("GetSoundEntryCount")?.is_nil() {
         g.set("GetSoundEntryCount", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("GetSourceLocation")?.is_nil() {
         g.set("GetSourceLocation", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
-    }
-    if g.get::<Value>("GetSpecializationNameForSpecID")?.is_nil() {
-        g.set("GetSpecializationNameForSpecID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("GetSpecializationRoleEnumByID")?.is_nil() {
         g.set("GetSpecializationRoleEnumByID", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -2481,12 +2450,6 @@ fn register_global_stubs_19(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("GetTitleText")?.is_nil() {
         g.set("GetTitleText", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
-    }
-    if g.get::<Value>("GetTotemCannotDismiss")?.is_nil() {
-        g.set("GetTotemCannotDismiss", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if g.get::<Value>("GetTotemTimeLeft")?.is_nil() {
-        g.set("GetTotemTimeLeft", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("GetTradePlayerItemInfo")?.is_nil() {
         g.set("GetTradePlayerItemInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Nil, Value::Boolean(false)])))?)?;
@@ -2788,9 +2751,6 @@ fn register_global_stubs_22(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("IsChatDND")?.is_nil() {
         g.set("IsChatDND", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("IsCpuBound")?.is_nil() {
-        g.set("IsCpuBound", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("IsCurrentQuestFailed")?.is_nil() {
         g.set("IsCurrentQuestFailed", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -2872,9 +2832,6 @@ fn register_global_stubs_22(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("IsJailersTowerLayerTimeLocked")?.is_nil() {
         g.set("IsJailersTowerLayerTimeLocked", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
-    if g.get::<Value>("IsKeyDown")?.is_nil() {
-        g.set("IsKeyDown", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("IsLFGComplete")?.is_nil() {
         g.set("IsLFGComplete", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -2892,9 +2849,6 @@ fn register_global_stubs_22(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("IsLeftShiftKeyDown")?.is_nil() {
         g.set("IsLeftShiftKeyDown", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
-    }
-    if g.get::<Value>("IsLegacyDifficulty")?.is_nil() {
-        g.set("IsLegacyDifficulty", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("IsMasterLooter")?.is_nil() {
         g.set("IsMasterLooter", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -4357,23 +4311,8 @@ fn register_global_stubs_34(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("UnitAlliedRaceInfo")?.is_nil() {
         g.set("UnitAlliedRaceInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
     }
-    if g.get::<Value>("UnitBattlePetSpeciesID")?.is_nil() {
-        g.set("UnitBattlePetSpeciesID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if g.get::<Value>("UnitCanPetBattle")?.is_nil() {
         g.set("UnitCanPetBattle", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
-    }
-    if g.get::<Value>("UnitCastingDuration")?.is_nil() {
-        g.set("UnitCastingDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if g.get::<Value>("UnitCastingInfo")?.is_nil() {
-        g.set("UnitCastingInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Boolean(false), Value::String(lua.create_string("")?), Value::Nil, Value::Integer(0), Value::Nil, Value::Integer(0)])))?)?;
-    }
-    if g.get::<Value>("UnitChannelDuration")?.is_nil() {
-        g.set("UnitChannelDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if g.get::<Value>("UnitChannelInfo")?.is_nil() {
-        g.set("UnitChannelInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Boolean(false), Value::Nil, Value::Integer(0), Value::Boolean(false), Value::Integer(0), Value::Nil])))?)?;
     }
     if g.get::<Value>("UnitChromieTimeID")?.is_nil() {
         g.set("UnitChromieTimeID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -4406,9 +4345,7 @@ fn register_global_stubs_35(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("UnitFullName")?.is_nil() {
         g.set("UnitFullName", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?)])))?)?;
     }
-    if g.get::<Value>("UnitGUID")?.is_nil() {
-        g.set("UnitGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+    // UnitGUID: implemented in unit_api.rs
     if g.get::<Value>("UnitGetDetailedHealPrediction")?.is_nil() {
         g.set("UnitGetDetailedHealPrediction", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
@@ -4450,9 +4387,6 @@ fn register_global_stubs_35(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("UnitIsAFK")?.is_nil() {
         g.set("UnitIsAFK", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
-    }
-    if g.get::<Value>("UnitIsBattlePet")?.is_nil() {
-        g.set("UnitIsBattlePet", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("UnitIsBattlePetCompanion")?.is_nil() {
         g.set("UnitIsBattlePetCompanion", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -4566,9 +4500,7 @@ fn register_global_stubs_36(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("UnitOwnerGUID")?.is_nil() {
         g.set("UnitOwnerGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
-    if g.get::<Value>("UnitPercentHealthFromGUID")?.is_nil() {
-        g.set("UnitPercentHealthFromGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
+    // UnitPercentHealthFromGUID: implemented in unit_health_power_api.rs
     if g.get::<Value>("UnitPlayerOrPetInParty")?.is_nil() {
         g.set("UnitPlayerOrPetInParty", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
@@ -4610,9 +4542,6 @@ fn register_global_stubs_36(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if g.get::<Value>("UnitSetRoleEnum")?.is_nil() {
         g.set("UnitSetRoleEnum", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
-    }
-    if g.get::<Value>("UnitSexBase")?.is_nil() {
-        g.set("UnitSexBase", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if g.get::<Value>("UnitShouldDisplayName")?.is_nil() {
         g.set("UnitShouldDisplayName", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -6791,32 +6720,8 @@ fn register_c_c_var(lua: &Lua, g: &mlua::Table) -> Result<()> {
         Value::Table(t) => t,
         _ => lua.create_table()?,
     };
-    if t.get::<Value>("GetCVar")?.is_nil() {
-        t.set("GetCVar", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if t.get::<Value>("GetCVarBitfield")?.is_nil() {
-        t.set("GetCVarBitfield", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if t.get::<Value>("GetCVarBool")?.is_nil() {
-        t.set("GetCVarBool", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
-    if t.get::<Value>("GetCVarDefault")?.is_nil() {
-        t.set("GetCVarDefault", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if t.get::<Value>("GetCVarInfo")?.is_nil() {
         t.set("GetCVarInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Boolean(false), Value::Boolean(false), Value::Boolean(false), Value::Boolean(false), Value::Boolean(false)])))?)?;
-    }
-    if t.get::<Value>("RegisterCVar")?.is_nil() {
-        t.set("RegisterCVar", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
-    if t.get::<Value>("ResetTestCVars")?.is_nil() {
-        t.set("ResetTestCVars", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
-    if t.get::<Value>("SetCVar")?.is_nil() {
-        t.set("SetCVar", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
-    }
-    if t.get::<Value>("SetCVarBitfield")?.is_nil() {
-        t.set("SetCVarBitfield", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     g.set("C_CVar", t)?;
     Ok(())
@@ -8550,9 +8455,6 @@ fn register_c_commentator_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
     }
     if t.get::<Value>("GetCommentatorHistory")?.is_nil() {
         t.set("GetCommentatorHistory", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
-    }
-    if t.get::<Value>("GetCurrentMapID")?.is_nil() {
-        t.set("GetCurrentMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if t.get::<Value>("GetDampeningPercent")?.is_nil() {
         t.set("GetDampeningPercent", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -14229,9 +14131,6 @@ fn register_c_map(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetAreaInfo")?.is_nil() {
         t.set("GetAreaInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
-    if t.get::<Value>("GetBestMapForUnit")?.is_nil() {
-        t.set("GetBestMapForUnit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
-    }
     if t.get::<Value>("GetBountySetMaps")?.is_nil() {
         t.set("GetBountySetMaps", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
@@ -14297,9 +14196,6 @@ fn register_c_map(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     if t.get::<Value>("GetMapWorldSize")?.is_nil() {
         t.set("GetMapWorldSize", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
-    }
-    if t.get::<Value>("GetPlayerMapPosition")?.is_nil() {
-        t.set("GetPlayerMapPosition", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
     }
     if t.get::<Value>("GetUserWaypoint")?.is_nil() {
         t.set("GetUserWaypoint", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
