@@ -705,7 +705,7 @@ fn register_global_stubs_5(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("CreateNewRaidProfile", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("CreateWindow")?.is_nil() {
-        g.set("CreateWindow", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("CreateWindow", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if g.get::<Value>("CursorHasMacro")?.is_nil() {
         g.set("CursorHasMacro", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -1654,15 +1654,6 @@ fn register_global_stubs_13(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetLootInfo")?.is_nil() {
         g.set("GetLootInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
-    if g.get::<Value>("GetLootRollItemInfo")?.is_nil() {
-        g.set("GetLootRollItemInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Boolean(false), Value::Boolean(false), Value::Boolean(false), Value::Boolean(false), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
-    }
-    if g.get::<Value>("GetLootRollItemLink")?.is_nil() {
-        g.set("GetLootRollItemLink", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
-    if g.get::<Value>("GetLootRollTimeLeft")?.is_nil() {
-        g.set("GetLootRollTimeLeft", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    }
     if g.get::<Value>("GetLootSlotInfo")?.is_nil() {
         g.set("GetLootSlotInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Boolean(false), Value::Boolean(false), Value::Integer(0), Value::Boolean(false)])))?)?;
     }
@@ -1784,7 +1775,7 @@ fn register_global_stubs_14(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("GetNextCompleatedTutorial", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("GetNextPendingInviteConfirmation")?.is_nil() {
-        g.set("GetNextPendingInviteConfirmation", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("GetNextPendingInviteConfirmation", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if g.get::<Value>("GetNumActiveQuests")?.is_nil() {
         g.set("GetNumActiveQuests", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -2483,7 +2474,7 @@ fn register_global_stubs_20(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("GetTrainerServiceSkillReq", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("GetTrainerServiceStepIndex")?.is_nil() {
-        g.set("GetTrainerServiceStepIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("GetTrainerServiceStepIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if g.get::<Value>("GetTrainerServiceTypeFilter")?.is_nil() {
         g.set("GetTrainerServiceTypeFilter", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -2970,7 +2961,7 @@ fn register_global_stubs_24(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("ItemTextGetItem", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if g.get::<Value>("ItemTextGetMaterial")?.is_nil() {
-        g.set("ItemTextGetMaterial", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("ItemTextGetMaterial", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if g.get::<Value>("ItemTextGetPage")?.is_nil() {
         g.set("ItemTextGetPage", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -4294,10 +4285,10 @@ fn register_global_stubs_34(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("UnitControllingVehicle", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if g.get::<Value>("UnitCreatureID")?.is_nil() {
-        g.set("UnitCreatureID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitCreatureID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if g.get::<Value>("UnitEmpoweredChannelDuration")?.is_nil() {
-        g.set("UnitEmpoweredChannelDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitEmpoweredChannelDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     Ok(())
 }
@@ -4332,7 +4323,7 @@ fn register_global_stubs_35(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("UnitInAnyGroup", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if g.get::<Value>("UnitInBattleground")?.is_nil() {
-        g.set("UnitInBattleground", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitInBattleground", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if g.get::<Value>("UnitInPartyIsAI")?.is_nil() {
         g.set("UnitInPartyIsAI", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -4493,7 +4484,7 @@ fn register_global_stubs_36(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("UnitPowerType", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if g.get::<Value>("UnitPvpClassification")?.is_nil() {
-        g.set("UnitPvpClassification", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitPvpClassification", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if g.get::<Value>("UnitQuestTrivialLevelRange")?.is_nil() {
         g.set("UnitQuestTrivialLevelRange", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -4532,17 +4523,17 @@ fn register_global_stubs_36(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("UnitTargetsVehicleInRaidUI", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if g.get::<Value>("UnitThreatLeadSituation")?.is_nil() {
-        g.set("UnitThreatLeadSituation", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitThreatLeadSituation", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if g.get::<Value>("UnitThreatPercentageOfLead")?.is_nil() {
-        g.set("UnitThreatPercentageOfLead", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitThreatPercentageOfLead", lua.create_function(|_, _: MultiValue| Ok(Value::Number(0.0)))?)?;
     }
     Ok(())
 }
 
 fn register_global_stubs_37(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("UnitTokenFromGUID")?.is_nil() {
-        g.set("UnitTokenFromGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("UnitTokenFromGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if g.get::<Value>("UnitUsingVehicle")?.is_nil() {
         g.set("UnitUsingVehicle", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -4681,7 +4672,7 @@ fn register_global_stubs_38(lua: &Lua, g: &mlua::Table) -> Result<()> {
         g.set("dropsecretaccess", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if g.get::<Value>("dumpobject")?.is_nil() {
-        g.set("dumpobject", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        g.set("dumpobject", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if g.get::<Value>("error")?.is_nil() {
         g.set("error", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -5125,10 +5116,10 @@ fn register_c_action_bar_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetActionAutocast", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetProfessionQuality")?.is_nil() {
-        t.set("GetProfessionQuality", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProfessionQuality", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetProfessionQualityInfo")?.is_nil() {
-        t.set("GetProfessionQualityInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProfessionQualityInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("HasPetActionButtons")?.is_nil() {
         t.set("HasPetActionButtons", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -5147,7 +5138,7 @@ fn register_c_action_bar_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("HasSpellActionButtons", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsActionInRange")?.is_nil() {
-        t.set("IsActionInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsActionInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsInterruptAction")?.is_nil() {
         t.set("IsInterruptAction", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -5374,7 +5365,7 @@ fn register_c_anima_diversion(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAnimaDiversionNodes", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetOriginPosition")?.is_nil() {
-        t.set("GetOriginPosition", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetOriginPosition", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetReinforceProgress")?.is_nil() {
         t.set("GetReinforceProgress", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -5507,7 +5498,7 @@ fn register_c_artifact_ui_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetEquippedArtifactRelicInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Integer(0), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?)])))?)?;
     }
     if t.get::<Value>("GetEquippedRelicLockedReason")?.is_nil() {
-        t.set("GetEquippedRelicLockedReason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEquippedRelicLockedReason", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetForgeRotation")?.is_nil() {
         t.set("GetForgeRotation", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
@@ -5549,7 +5540,7 @@ fn register_c_artifact_ui_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetPowersAffectedByRelicItemLink", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPreviewAppearance")?.is_nil() {
-        t.set("GetPreviewAppearance", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPreviewAppearance", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     Ok(())
 }
@@ -5562,7 +5553,7 @@ fn register_c_artifact_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetRelicInfoByItemID", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Integer(0), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?)])))?)?;
     }
     if t.get::<Value>("GetRelicLockedReason")?.is_nil() {
-        t.set("GetRelicLockedReason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRelicLockedReason", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetRelicSlotType")?.is_nil() {
         t.set("GetRelicSlotType", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -5638,10 +5629,10 @@ fn register_c_auction_house(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 fn register_c_auction_house_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("CalculateCommodityDeposit")?.is_nil() {
-        t.set("CalculateCommodityDeposit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("CalculateCommodityDeposit", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("CalculateItemDeposit")?.is_nil() {
-        t.set("CalculateItemDeposit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("CalculateItemDeposit", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("CanCancelAuction")?.is_nil() {
         t.set("CanCancelAuction", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -5671,7 +5662,7 @@ fn register_c_auction_house_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("FavoritesAreAvailable", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetAuctionInfoByID")?.is_nil() {
-        t.set("GetAuctionInfoByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAuctionInfoByID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAuctionItemSubClasses")?.is_nil() {
         t.set("GetAuctionItemSubClasses", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -5680,10 +5671,10 @@ fn register_c_auction_house_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetAvailablePostCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetBidInfo")?.is_nil() {
-        t.set("GetBidInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBidInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBidType")?.is_nil() {
-        t.set("GetBidType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBidType", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBids")?.is_nil() {
         t.set("GetBids", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -5695,7 +5686,7 @@ fn register_c_auction_house_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCancelCost", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCommoditySearchResultInfo")?.is_nil() {
-        t.set("GetCommoditySearchResultInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCommoditySearchResultInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCommoditySearchResultsQuantity")?.is_nil() {
         t.set("GetCommoditySearchResultsQuantity", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -5713,37 +5704,37 @@ fn register_c_auction_house_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetItemKeyFromItem", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemKeyInfo")?.is_nil() {
-        t.set("GetItemKeyInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemKeyInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemKeyRequiredLevel")?.is_nil() {
         t.set("GetItemKeyRequiredLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemSearchResultInfo")?.is_nil() {
-        t.set("GetItemSearchResultInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemSearchResultInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemSearchResultsQuantity")?.is_nil() {
         t.set("GetItemSearchResultsQuantity", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxBidItemBid")?.is_nil() {
-        t.set("GetMaxBidItemBid", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxBidItemBid", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxBidItemBuyout")?.is_nil() {
-        t.set("GetMaxBidItemBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxBidItemBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxCommoditySearchResultPrice")?.is_nil() {
-        t.set("GetMaxCommoditySearchResultPrice", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxCommoditySearchResultPrice", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxItemSearchResultBid")?.is_nil() {
-        t.set("GetMaxItemSearchResultBid", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxItemSearchResultBid", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxItemSearchResultBuyout")?.is_nil() {
-        t.set("GetMaxItemSearchResultBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxItemSearchResultBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxOwnedAuctionBid")?.is_nil() {
-        t.set("GetMaxOwnedAuctionBid", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxOwnedAuctionBid", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxOwnedAuctionBuyout")?.is_nil() {
-        t.set("GetMaxOwnedAuctionBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxOwnedAuctionBuyout", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetNumBidTypes")?.is_nil() {
         t.set("GetNumBidTypes", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -5768,10 +5759,10 @@ fn register_c_auction_house_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetNumOwnedAuctions", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetOwnedAuctionInfo")?.is_nil() {
-        t.set("GetOwnedAuctionInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetOwnedAuctionInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetOwnedAuctionType")?.is_nil() {
-        t.set("GetOwnedAuctionType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetOwnedAuctionType", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetOwnedAuctions")?.is_nil() {
         t.set("GetOwnedAuctions", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -5786,7 +5777,7 @@ fn register_c_auction_house_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetReplicateItemInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil, Value::Integer(0), Value::Integer(0), Value::Nil, Value::Integer(0), Value::Nil, Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Nil, Value::Nil, Value::Nil, Value::Nil, Value::Integer(0), Value::Integer(0), Value::Nil])))?)?;
     }
     if t.get::<Value>("GetReplicateItemLink")?.is_nil() {
-        t.set("GetReplicateItemLink", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetReplicateItemLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetReplicateItemTimeLeft")?.is_nil() {
         t.set("GetReplicateItemTimeLeft", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -6101,10 +6092,10 @@ fn register_c_bank(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("DoesBankTypeSupportMoneyTransfer", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("FetchBankLockedReason")?.is_nil() {
-        t.set("FetchBankLockedReason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FetchBankLockedReason", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("FetchNextPurchasableBankTabData")?.is_nil() {
-        t.set("FetchNextPurchasableBankTabData", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FetchNextPurchasableBankTabData", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("FetchNumPurchasedBankTabs")?.is_nil() {
         t.set("FetchNumPurchasedBankTabs", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -6164,7 +6155,7 @@ fn register_c_barber_shop(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetCurrentCost", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetViewingChrModel")?.is_nil() {
-        t.set("GetViewingChrModel", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetViewingChrModel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("HasAlteredForm")?.is_nil() {
         t.set("HasAlteredForm", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -6242,25 +6233,25 @@ fn register_c_battle_net(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("BNCheckBattleTagInviteToRecentAlly", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetAccountInfoByGUID")?.is_nil() {
-        t.set("GetAccountInfoByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAccountInfoByGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAccountInfoByID")?.is_nil() {
-        t.set("GetAccountInfoByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAccountInfoByID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFriendAccountInfo")?.is_nil() {
-        t.set("GetFriendAccountInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFriendAccountInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFriendGameAccountInfo")?.is_nil() {
-        t.set("GetFriendGameAccountInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFriendGameAccountInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFriendNumGameAccounts")?.is_nil() {
         t.set("GetFriendNumGameAccounts", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetGameAccountInfoByGUID")?.is_nil() {
-        t.set("GetGameAccountInfoByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGameAccountInfoByGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetGameAccountInfoByID")?.is_nil() {
-        t.set("GetGameAccountInfoByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGameAccountInfoByID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("InstallHighResTextures")?.is_nil() {
         t.set("InstallHighResTextures", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -6385,7 +6376,7 @@ fn register_c_calendar_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("ContextMenuEventCopy", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("ContextMenuEventGetCalendarType")?.is_nil() {
-        t.set("ContextMenuEventGetCalendarType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("ContextMenuEventGetCalendarType", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("ContextMenuEventPaste")?.is_nil() {
         t.set("ContextMenuEventPaste", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -6445,10 +6436,10 @@ fn register_c_calendar_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("EventDecline", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("EventGetCalendarType")?.is_nil() {
-        t.set("EventGetCalendarType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("EventGetCalendarType", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("EventGetClubId")?.is_nil() {
-        t.set("EventGetClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("EventGetClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("EventGetInvite")?.is_nil() {
         t.set("EventGetInvite", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -6460,7 +6451,7 @@ fn register_c_calendar_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("EventGetInviteSortCriterion", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("EventGetSelectedInvite")?.is_nil() {
-        t.set("EventGetSelectedInvite", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("EventGetSelectedInvite", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("EventGetStatusOptions")?.is_nil() {
         t.set("EventGetStatusOptions", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -6548,13 +6539,13 @@ fn register_c_calendar_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetEventIndex", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetEventIndexInfo")?.is_nil() {
-        t.set("GetEventIndexInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEventIndexInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetEventInfo")?.is_nil() {
         t.set("GetEventInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFirstPendingInvite")?.is_nil() {
-        t.set("GetFirstPendingInvite", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFirstPendingInvite", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetGuildEventInfo")?.is_nil() {
         t.set("GetGuildEventInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -6569,7 +6560,7 @@ fn register_c_calendar_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetMaxCreateDate", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetNextClubId")?.is_nil() {
-        t.set("GetNextClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetNextClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetNumGuildEvents")?.is_nil() {
         t.set("GetNumGuildEvents", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -6620,17 +6611,17 @@ fn register_c_campaign_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAvailableCampaigns", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCampaignChapterInfo")?.is_nil() {
-        t.set("GetCampaignChapterInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCampaignChapterInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
 
     if t.get::<Value>("GetChapterIDs")?.is_nil() {
-        t.set("GetChapterIDs", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetChapterIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCurrentChapterID")?.is_nil() {
-        t.set("GetCurrentChapterID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentChapterID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFailureReason")?.is_nil() {
-        t.set("GetFailureReason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFailureReason", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsCampaignQuest")?.is_nil() {
         t.set("IsCampaignQuest", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -6660,7 +6651,7 @@ fn register_c_catalog_shop(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("ConfirmHousingPurchase", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("FindBestCurrencyProductForNeededAmount")?.is_nil() {
-        t.set("FindBestCurrencyProductForNeededAmount", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindBestCurrencyProductForNeededAmount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetAvailableTransmogRaceInfos")?.is_nil() {
         t.set("GetAvailableTransmogRaceInfos", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -6678,13 +6669,13 @@ fn register_c_catalog_shop(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetFailureInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?)?;
     }
     if t.get::<Value>("GetFirstCategoryByProductID")?.is_nil() {
-        t.set("GetFirstCategoryByProductID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFirstCategoryByProductID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetNewProducts")?.is_nil() {
         t.set("GetNewProducts", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetProductAvailabilityTimeRemainingSecs")?.is_nil() {
-        t.set("GetProductAvailabilityTimeRemainingSecs", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProductAvailabilityTimeRemainingSecs", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetProductIDsForBundle")?.is_nil() {
         t.set("GetProductIDsForBundle", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -6696,10 +6687,10 @@ fn register_c_catalog_shop(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetProductIDsForCategorySection", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetProductInfo")?.is_nil() {
-        t.set("GetProductInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProductInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetProductSortOrder")?.is_nil() {
-        t.set("GetProductSortOrder", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProductSortOrder", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetRefundableDecors")?.is_nil() {
         t.set("GetRefundableDecors", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Table(lua.create_table()?), Value::Integer(0)])))?)?;
@@ -6714,7 +6705,7 @@ fn register_c_catalog_shop(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetVCProductInfos", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetVirtualCurrencyBalance")?.is_nil() {
-        t.set("GetVirtualCurrencyBalance", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetVirtualCurrencyBalance", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("OnLegalDisclaimerClicked")?.is_nil() {
         t.set("OnLegalDisclaimerClicked", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -6928,7 +6919,7 @@ fn register_c_chat_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("DropCautionaryChatMessage", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetChannelInfoFromIdentifier")?.is_nil() {
-        t.set("GetChannelInfoFromIdentifier", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetChannelInfoFromIdentifier", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetChannelRosterInfo")?.is_nil() {
         t.set("GetChannelRosterInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Boolean(false), Value::Boolean(false), Value::String(lua.create_string("")?)])))?)?;
@@ -6952,13 +6943,13 @@ fn register_c_chat_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetChatLineText", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetChatTypeName")?.is_nil() {
-        t.set("GetChatTypeName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetChatTypeName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetClubStreamIDs")?.is_nil() {
         t.set("GetClubStreamIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetGeneralChannelLocalID")?.is_nil() {
-        t.set("GetGeneralChannelLocalID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGeneralChannelLocalID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMentorChannelID")?.is_nil() {
         t.set("GetMentorChannelID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -7000,7 +6991,7 @@ fn register_c_chat_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("ResetDefaultZoneChannels", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("SendAddonMessageLogged")?.is_nil() {
-        t.set("SendAddonMessageLogged", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("SendAddonMessageLogged", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     Ok(())
 }
@@ -7027,7 +7018,7 @@ fn register_c_chromie_time(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CloseUI", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetChromieTimeExpansionOption")?.is_nil() {
-        t.set("GetChromieTimeExpansionOption", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetChromieTimeExpansionOption", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetChromieTimeExpansionOptions")?.is_nil() {
         t.set("GetChromieTimeExpansionOptions", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7068,7 +7059,7 @@ fn register_c_class_talents(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetNextStarterBuildPurchase", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?)?;
     }
     if t.get::<Value>("GetTraitTreeForSpec")?.is_nil() {
-        t.set("GetTraitTreeForSpec", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTraitTreeForSpec", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("ImportLoadout")?.is_nil() {
         t.set("ImportLoadout", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::String(lua.create_string("")?)])))?)?;
@@ -7247,7 +7238,7 @@ fn register_c_club_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetAssignableRoles", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAvatarIdList")?.is_nil() {
-        t.set("GetAvatarIdList", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAvatarIdList", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetClubCapacity")?.is_nil() {
         t.set("GetClubCapacity", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -7263,10 +7254,10 @@ fn register_c_club_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetClubStreamNotificationSettings", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCommunityNameResultText")?.is_nil() {
-        t.set("GetCommunityNameResultText", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCommunityNameResultText", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetGuildClubId")?.is_nil() {
-        t.set("GetGuildClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGuildClubId", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetInfoFromLastCommunityChatLine")?.is_nil() {
         t.set("GetInfoFromLastCommunityChatLine", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Table(lua.create_table()?), Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Integer(0)])))?)?;
@@ -7275,7 +7266,7 @@ fn register_c_club_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetInvitationCandidates", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInvitationInfo")?.is_nil() {
-        t.set("GetInvitationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInvitationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInvitationsForClub")?.is_nil() {
         t.set("GetInvitationsForClub", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7288,13 +7279,13 @@ fn register_c_club_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetLastTicketResponse", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Nil, Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetMemberInfo")?.is_nil() {
-        t.set("GetMemberInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMemberInfoForSelf")?.is_nil() {
-        t.set("GetMemberInfoForSelf", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberInfoForSelf", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMessageInfo")?.is_nil() {
-        t.set("GetMessageInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMessageInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMessageRanges")?.is_nil() {
         t.set("GetMessageRanges", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7306,10 +7297,10 @@ fn register_c_club_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetMessagesInRange", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetStreamInfo")?.is_nil() {
-        t.set("GetStreamInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetStreamInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetStreamViewMarker")?.is_nil() {
-        t.set("GetStreamViewMarker", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetStreamViewMarker", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetTickets")?.is_nil() {
         t.set("GetTickets", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7433,7 +7424,7 @@ fn register_c_club_finder_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("DoesPlayerBelongToClubFromClubGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetClubFinderDisableReason")?.is_nil() {
-        t.set("GetClubFinderDisableReason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetClubFinderDisableReason", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetClubRecruitmentSettings")?.is_nil() {
         t.set("GetClubRecruitmentSettings", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7454,10 +7445,10 @@ fn register_c_club_finder_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetPlayerSettingsFocusFlagsSelectedCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPostingIDFromClubFinderGUID")?.is_nil() {
-        t.set("GetPostingIDFromClubFinderGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPostingIDFromClubFinderGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetRecruitingClubInfoFromClubID")?.is_nil() {
-        t.set("GetRecruitingClubInfoFromClubID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecruitingClubInfoFromClubID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecruitingClubInfoFromFinderGUID")?.is_nil() {
         t.set("GetRecruitingClubInfoFromFinderGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -7676,7 +7667,7 @@ fn register_c_combat_text(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetActiveUnit")?.is_nil() {
-        t.set("GetActiveUnit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetActiveUnit", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     g.set("C_CombatText", t)?;
     Ok(())
@@ -7739,10 +7730,10 @@ fn register_c_commentator_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("FindSpectatedUnit", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("FindTeamNameInCurrentInstance")?.is_nil() {
-        t.set("FindTeamNameInCurrentInstance", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindTeamNameInCurrentInstance", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("FindTeamNameInDirectory")?.is_nil() {
-        t.set("FindTeamNameInDirectory", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindTeamNameInDirectory", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("FlushCommentatorHistory")?.is_nil() {
         t.set("FlushCommentatorHistory", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -7863,7 +7854,7 @@ fn register_c_commentator_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetPlayerCrowdControlInfoByUnit", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetPlayerData")?.is_nil() {
-        t.set("GetPlayerData", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPlayerData", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPlayerFlagInfo")?.is_nil() {
         t.set("GetPlayerFlagInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -7908,16 +7899,16 @@ fn register_c_commentator_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetTeamColorByUnit", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTimeLeftInMatch")?.is_nil() {
-        t.set("GetTimeLeftInMatch", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTimeLeftInMatch", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetTrackedSpellID")?.is_nil() {
         t.set("GetTrackedSpellID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetTrackedSpells")?.is_nil() {
-        t.set("GetTrackedSpells", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTrackedSpells", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTrackedSpellsByUnit")?.is_nil() {
-        t.set("GetTrackedSpellsByUnit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTrackedSpellsByUnit", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetUnitData")?.is_nil() {
         t.set("GetUnitData", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8131,10 +8122,10 @@ fn register_c_console_script_collection(lua: &Lua, g: &mlua::Table) -> Result<()
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetCollectionDataByID")?.is_nil() {
-        t.set("GetCollectionDataByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCollectionDataByID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCollectionDataByTag")?.is_nil() {
-        t.set("GetCollectionDataByTag", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCollectionDataByTag", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetElements")?.is_nil() {
         t.set("GetElements", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8195,7 +8186,7 @@ fn register_c_container_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSortBagsRightToLeft", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("PlayerHasHearthstone")?.is_nil() {
-        t.set("PlayerHasHearthstone", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("PlayerHasHearthstone", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("SetBankAutosortDisabled")?.is_nil() {
         t.set("SetBankAutosortDisabled", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -8279,13 +8270,13 @@ fn register_c_content_tracking(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("IsTrackable", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("StartTracking")?.is_nil() {
-        t.set("StartTracking", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("StartTracking", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("StopTracking")?.is_nil() {
         t.set("StopTracking", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("ToggleTracking")?.is_nil() {
-        t.set("ToggleTracking", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("ToggleTracking", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     g.set("C_ContentTracking", t)?;
     Ok(())
@@ -8312,7 +8303,7 @@ fn register_c_contribution_collector(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetBuffs", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetContributionAppearance")?.is_nil() {
-        t.set("GetContributionAppearance", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetContributionAppearance", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetContributionCollectorsForMap")?.is_nil() {
         t.set("GetContributionCollectorsForMap", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8414,7 +8405,7 @@ fn register_c_covenant_sanctum_ui(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAnimaInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetCurrentTalentTreeID")?.is_nil() {
-        t.set("GetCurrentTalentTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentTalentTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFeatures")?.is_nil() {
         t.set("GetFeatures", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8423,7 +8414,7 @@ fn register_c_covenant_sanctum_ui(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetRenownLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSanctumType")?.is_nil() {
-        t.set("GetSanctumType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSanctumType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSoulCurrencies")?.is_nil() {
         t.set("GetSoulCurrencies", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8486,7 +8477,7 @@ fn register_c_crafting_orders(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("FulfillOrder", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetClaimedOrder")?.is_nil() {
-        t.set("GetClaimedOrder", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetClaimedOrder", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCrafterBuckets")?.is_nil() {
         t.set("GetCrafterBuckets", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8507,7 +8498,7 @@ fn register_c_crafting_orders(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetCustomerOrders", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDefaultOrdersSkillLine")?.is_nil() {
-        t.set("GetDefaultOrdersSkillLine", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDefaultOrdersSkillLine", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMyOrders")?.is_nil() {
         t.set("GetMyOrders", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8579,7 +8570,7 @@ fn register_c_creature_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetCreatureFamilyIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCreatureID")?.is_nil() {
-        t.set("GetCreatureID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCreatureID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCreatureTypeIDs")?.is_nil() {
         t.set("GetCreatureTypeIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8619,7 +8610,7 @@ fn register_c_currency_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCoinText", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetCostToTransferCurrency")?.is_nil() {
-        t.set("GetCostToTransferCurrency", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCostToTransferCurrency", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrencyContainerInfo")?.is_nil() {
         t.set("GetCurrencyContainerInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8640,10 +8631,10 @@ fn register_c_currency_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetDragonIslesSuppliesCurrencyID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFactionGrantedByCurrency")?.is_nil() {
-        t.set("GetFactionGrantedByCurrency", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFactionGrantedByCurrency", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMaxTransferableAmountFromQuantity")?.is_nil() {
-        t.set("GetMaxTransferableAmountFromQuantity", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMaxTransferableAmountFromQuantity", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPlayerCurrencyCategoryInfo")?.is_nil() {
         t.set("GetPlayerCurrencyCategoryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8755,10 +8746,10 @@ fn register_c_death_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetCorpseMapPosition")?.is_nil() {
-        t.set("GetCorpseMapPosition", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCorpseMapPosition", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDeathReleasePosition")?.is_nil() {
-        t.set("GetDeathReleasePosition", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDeathReleasePosition", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetGraveyardsForMap")?.is_nil() {
         t.set("GetGraveyardsForMap", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -8880,13 +8871,13 @@ fn register_c_dye_color(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAllDyeColors", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDyeColorCategoryInfo")?.is_nil() {
-        t.set("GetDyeColorCategoryInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDyeColorCategoryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDyeColorForItem")?.is_nil() {
-        t.set("GetDyeColorForItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDyeColorForItem", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetDyeColorForItemLocation")?.is_nil() {
-        t.set("GetDyeColorForItemLocation", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDyeColorForItemLocation", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetDyeColorInfo: implemented in c_misc_api_ui.rs
     if t.get::<Value>("GetDyeColorsInCategory")?.is_nil() {
@@ -8959,10 +8950,10 @@ fn register_c_encoding_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("DecompressString", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("DeserializeCBOR")?.is_nil() {
-        t.set("DeserializeCBOR", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("DeserializeCBOR", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("DeserializeJSON")?.is_nil() {
-        t.set("DeserializeJSON", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("DeserializeJSON", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("EncodeBase64")?.is_nil() {
         t.set("EncodeBase64", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -9004,13 +8995,13 @@ fn register_c_encounter_journal(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetEncountersOnMap", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInstanceForGameMap")?.is_nil() {
-        t.set("GetInstanceForGameMap", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInstanceForGameMap", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetLootInfo")?.is_nil() {
         t.set("GetLootInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSectionIconFlags")?.is_nil() {
-        t.set("GetSectionIconFlags", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSectionIconFlags", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSlotFilter")?.is_nil() {
         t.set("GetSlotFilter", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -9142,7 +9133,7 @@ fn register_c_end_of_match_ui(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetEndOfMatchDetails")?.is_nil() {
-        t.set("GetEndOfMatchDetails", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEndOfMatchDetails", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     g.set("C_EndOfMatchUI", t)?;
     Ok(())
@@ -9220,10 +9211,10 @@ fn register_c_event_scheduler(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetActiveContinentName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetEventUiMapID")?.is_nil() {
-        t.set("GetEventUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEventUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetEventZoneName")?.is_nil() {
-        t.set("GetEventZoneName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEventZoneName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetOngoingEvents")?.is_nil() {
         t.set("GetOngoingEvents", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -9310,10 +9301,10 @@ fn register_c_fog_of_war(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetFogOfWarForMap")?.is_nil() {
-        t.set("GetFogOfWarForMap", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFogOfWarForMap", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFogOfWarInfo")?.is_nil() {
-        t.set("GetFogOfWarInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFogOfWarInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     g.set("C_FogOfWar", t)?;
     Ok(())
@@ -9358,16 +9349,16 @@ fn register_c_friend_list(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetFriendInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetIgnoreName")?.is_nil() {
-        t.set("GetIgnoreName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetIgnoreName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetNumIgnores")?.is_nil() {
         t.set("GetNumIgnores", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSelectedFriend")?.is_nil() {
-        t.set("GetSelectedFriend", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedFriend", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSelectedIgnore")?.is_nil() {
-        t.set("GetSelectedIgnore", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedIgnore", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("IsIgnored")?.is_nil() {
         t.set("IsIgnored", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -9424,16 +9415,16 @@ fn register_c_game_pad(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("ApplyConfigs", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("AxisIndexToConfigName")?.is_nil() {
-        t.set("AxisIndexToConfigName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("AxisIndexToConfigName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("ButtonBindingToIndex")?.is_nil() {
-        t.set("ButtonBindingToIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("ButtonBindingToIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("ButtonIndexToBinding")?.is_nil() {
-        t.set("ButtonIndexToBinding", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("ButtonIndexToBinding", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("ButtonIndexToConfigName")?.is_nil() {
-        t.set("ButtonIndexToConfigName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("ButtonIndexToConfigName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("ClearLedColor")?.is_nil() {
         t.set("ClearLedColor", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -9448,7 +9439,7 @@ fn register_c_game_pad(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAllDeviceIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDeviceRawState")?.is_nil() {
-        t.set("GetDeviceRawState", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDeviceRawState", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetLedColor")?.is_nil() {
         t.set("GetLedColor", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -9460,7 +9451,7 @@ fn register_c_game_pad(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("SetVibration", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("StickIndexToConfigName")?.is_nil() {
-        t.set("StickIndexToConfigName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("StickIndexToConfigName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("StopVibration")?.is_nil() {
         t.set("StopVibration", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -9481,7 +9472,7 @@ fn register_c_game_rules(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("DoesGameModeHavePromo", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetCurrentGameModeDisplayInfo")?.is_nil() {
-        t.set("GetCurrentGameModeDisplayInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentGameModeDisplayInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCurrentGameModeRecordID")?.is_nil() {
         t.set("GetCurrentGameModeRecordID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -9490,7 +9481,7 @@ fn register_c_game_rules(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetDisplayedGameModeRecordIDAtIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetGameModeDisplayInfoByRecordID")?.is_nil() {
-        t.set("GetGameModeDisplayInfoByRecordID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGameModeDisplayInfoByRecordID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetGameModeGlueScreenName")?.is_nil() {
         t.set("GetGameModeGlueScreenName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -9615,7 +9606,7 @@ fn register_c_garrison_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetAutoMissionBoardState", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAutoMissionEnvironmentEffect")?.is_nil() {
-        t.set("GetAutoMissionEnvironmentEffect", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAutoMissionEnvironmentEffect", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAutoMissionTargetingInfo")?.is_nil() {
         t.set("GetAutoMissionTargetingInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -9679,7 +9670,7 @@ fn register_c_garrison_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCombatAllyMission", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetCombatLogSpellInfo")?.is_nil() {
-        t.set("GetCombatLogSpellInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCombatLogSpellInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCompleteMissions")?.is_nil() {
         t.set("GetCompleteMissions", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -9694,13 +9685,13 @@ fn register_c_garrison_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCurrentCypherEquipmentLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentGarrTalentTreeFriendshipFactionID")?.is_nil() {
-        t.set("GetCurrentGarrTalentTreeFriendshipFactionID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentGarrTalentTreeFriendshipFactionID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentGarrTalentTreeID")?.is_nil() {
-        t.set("GetCurrentGarrTalentTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentGarrTalentTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCyphersToNextEquipmentLevel")?.is_nil() {
-        t.set("GetCyphersToNextEquipmentLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCyphersToNextEquipmentLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFollowerAbilities")?.is_nil() {
         t.set("GetFollowerAbilities", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -9742,7 +9733,7 @@ fn register_c_garrison_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetFollowerAutoCombatSpells", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Table(lua.create_table()?), Value::Nil])))?)?;
     }
     if t.get::<Value>("GetFollowerAutoCombatStats")?.is_nil() {
-        t.set("GetFollowerAutoCombatStats", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFollowerAutoCombatStats", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFollowerBiasForMission")?.is_nil() {
         t.set("GetFollowerBiasForMission", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -9881,7 +9872,7 @@ fn register_c_garrison_2(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetGarrisonPlotsInstancesForMap", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetGarrisonTalentTreeCurrencyTypes")?.is_nil() {
-        t.set("GetGarrisonTalentTreeCurrencyTypes", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGarrisonTalentTreeCurrencyTypes", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetGarrisonTalentTreeType")?.is_nil() {
         t.set("GetGarrisonTalentTreeType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -10267,22 +10258,22 @@ fn register_c_gossip_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetActiveDelveGossip", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCompletedOptionDescriptionString")?.is_nil() {
-        t.set("GetCompletedOptionDescriptionString", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCompletedOptionDescriptionString", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetCustomGossipDescriptionString")?.is_nil() {
-        t.set("GetCustomGossipDescriptionString", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCustomGossipDescriptionString", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetGossipDelveMapID")?.is_nil() {
         t.set("GetGossipDelveMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetOptionUIWidgetSetsAndTypesByOptionID")?.is_nil() {
-        t.set("GetOptionUIWidgetSetsAndTypesByOptionID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetOptionUIWidgetSetsAndTypesByOptionID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPoiForUiMapID")?.is_nil() {
-        t.set("GetPoiForUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPoiForUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPoiInfo")?.is_nil() {
-        t.set("GetPoiInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPoiInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("RefreshOptions")?.is_nil() {
         t.set("RefreshOptions", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -10534,10 +10525,10 @@ fn register_c_house_exterior(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CancelActiveExteriorEditing", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetCoreFixtureOptionsInfo")?.is_nil() {
-        t.set("GetCoreFixtureOptionsInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCoreFixtureOptionsInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCurrentHouseExteriorSize")?.is_nil() {
-        t.set("GetCurrentHouseExteriorSize", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentHouseExteriorSize", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentHouseExteriorType")?.is_nil() {
         t.set("GetCurrentHouseExteriorType", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?)?;
@@ -10546,10 +10537,10 @@ fn register_c_house_exterior(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetFixtureDebugInfoForGUID", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetHouseExteriorSizeOptions")?.is_nil() {
-        t.set("GetHouseExteriorSizeOptions", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHouseExteriorSizeOptions", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetHouseExteriorTypeOptions")?.is_nil() {
-        t.set("GetHouseExteriorTypeOptions", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHouseExteriorTypeOptions", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetHoveredFixtureDebugInfo")?.is_nil() {
         t.set("GetHoveredFixtureDebugInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -10558,7 +10549,7 @@ fn register_c_house_exterior(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetSelectedFixtureDebugInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetSelectedFixturePointInfo")?.is_nil() {
-        t.set("GetSelectedFixturePointInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedFixturePointInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("HasHoveredFixture")?.is_nil() {
         t.set("HasHoveredFixture", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -10622,7 +10613,7 @@ fn register_c_housing_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("EditNeighborhoodCharter", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetCurrentHouseInfo")?.is_nil() {
-        t.set("GetCurrentHouseInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentHouseInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCurrentHouseLevelFavor")?.is_nil() {
         t.set("GetCurrentHouseLevelFavor", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -10631,7 +10622,7 @@ fn register_c_housing_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCurrentHouseRefundAmount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentNeighborhoodGUID")?.is_nil() {
-        t.set("GetCurrentNeighborhoodGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentNeighborhoodGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetHouseLevelFavorForLevel")?.is_nil() {
         t.set("GetHouseLevelFavorForLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -10652,7 +10643,7 @@ fn register_c_housing_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetOthersOwnedHouses", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetUIMapIDForNeighborhood")?.is_nil() {
-        t.set("GetUIMapIDForNeighborhood", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetUIMapIDForNeighborhood", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetVisitCooldownInfo")?.is_nil() {
         t.set("GetVisitCooldownInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -10845,31 +10836,31 @@ fn register_c_housing_catalog(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAllFilterTagGroups", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBundleInfo")?.is_nil() {
-        t.set("GetBundleInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBundleInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCartSizeLimit")?.is_nil() {
         t.set("GetCartSizeLimit", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCatalogCategoryInfo")?.is_nil() {
-        t.set("GetCatalogCategoryInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogCategoryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCatalogEntryDebugInfoForID")?.is_nil() {
         t.set("GetCatalogEntryDebugInfoForID", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetCatalogEntryInfo")?.is_nil() {
-        t.set("GetCatalogEntryInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogEntryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCatalogEntryInfoByItem")?.is_nil() {
-        t.set("GetCatalogEntryInfoByItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogEntryInfoByItem", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCatalogEntryInfoByRecordID")?.is_nil() {
-        t.set("GetCatalogEntryInfoByRecordID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogEntryInfoByRecordID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCatalogEntryRefundTimeStampByRecordID")?.is_nil() {
-        t.set("GetCatalogEntryRefundTimeStampByRecordID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogEntryRefundTimeStampByRecordID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCatalogSubcategoryInfo")?.is_nil() {
-        t.set("GetCatalogSubcategoryInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCatalogSubcategoryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDecorMaxOwnedCount")?.is_nil() {
         t.set("GetDecorMaxOwnedCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -10887,7 +10878,7 @@ fn register_c_housing_catalog(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetFeaturedDecor", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMarketInfoForDecor")?.is_nil() {
-        t.set("GetMarketInfoForDecor", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMarketInfoForDecor", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("HasFeaturedEntries")?.is_nil() {
         t.set("HasFeaturedEntries", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -10923,7 +10914,7 @@ fn register_c_housing_cleanup_mode(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetHoveredDecorInfo")?.is_nil() {
-        t.set("GetHoveredDecorInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHoveredDecorInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsHoveringDecor")?.is_nil() {
         t.set("IsHoveringDecor", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -10969,7 +10960,7 @@ fn register_c_housing_customize_mode(lua: &Lua, g: &mlua::Table) -> Result<()> {
     }
     // GetHoveredDecorInfo: implemented in c_misc_api_ui.rs (C_HousingCustomizeMode)
     if t.get::<Value>("GetHoveredRoomComponentInfo")?.is_nil() {
-        t.set("GetHoveredRoomComponentInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHoveredRoomComponentInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetNumDyesToRemoveOnSelectedDecor")?.is_nil() {
         t.set("GetNumDyesToRemoveOnSelectedDecor", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -10990,10 +10981,10 @@ fn register_c_housing_customize_mode(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetRecentlyUsedWallpapers", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSelectedRoomComponentInfo")?.is_nil() {
-        t.set("GetSelectedRoomComponentInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedRoomComponentInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetThemeSetInfo")?.is_nil() {
-        t.set("GetThemeSetInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetThemeSetInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetWallpapersForRoomComponentType")?.is_nil() {
         t.set("GetWallpapersForRoomComponentType", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -11047,7 +11038,7 @@ fn register_c_housing_decor(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetDecorIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetDecorInstanceInfoForGUID")?.is_nil() {
-        t.set("GetDecorInstanceInfoForGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDecorInstanceInfoForGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDecorName")?.is_nil() {
         t.set("GetDecorName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -11123,16 +11114,16 @@ fn register_c_housing_expert_mode(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CommitHouseExteriorPosition", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetHoveredDecorInfo")?.is_nil() {
-        t.set("GetHoveredDecorInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHoveredDecorInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPrecisionSubmode")?.is_nil() {
-        t.set("GetPrecisionSubmode", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPrecisionSubmode", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPrecisionSubmodeRestriction")?.is_nil() {
         t.set("GetPrecisionSubmodeRestriction", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSelectedDecorInfo")?.is_nil() {
-        t.set("GetSelectedDecorInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedDecorInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsDecorSelected")?.is_nil() {
         t.set("IsDecorSelected", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -11204,7 +11195,7 @@ fn register_c_housing_layout(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetSelectedDoor", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::String(lua.create_string("")?)])))?)?;
     }
     if t.get::<Value>("GetSelectedFloorplan")?.is_nil() {
-        t.set("GetSelectedFloorplan", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSelectedFloorplan", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSelectedRoom")?.is_nil() {
         t.set("GetSelectedRoom", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -11465,13 +11456,13 @@ fn register_c_invasion_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("AreInvasionsAvailable", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetInvasionForUiMapID")?.is_nil() {
-        t.set("GetInvasionForUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInvasionForUiMapID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetInvasionInfo")?.is_nil() {
         t.set("GetInvasionInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInvasionTimeLeft")?.is_nil() {
-        t.set("GetInvasionTimeLeft", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInvasionTimeLeft", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     g.set("C_InvasionInfo", t)?;
     Ok(())
@@ -11492,7 +11483,7 @@ fn register_c_islands_queue(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetIslandsMaxGroupSize", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetIslandsWeeklyQuestID")?.is_nil() {
-        t.set("GetIslandsWeeklyQuestID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetIslandsWeeklyQuestID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("QueueForIsland")?.is_nil() {
         t.set("QueueForIsland", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -11573,29 +11564,29 @@ fn register_c_item_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("EquipItemByName", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetAppliedItemTransmogInfo")?.is_nil() {
-        t.set("GetAppliedItemTransmogInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAppliedItemTransmogInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBaseItemTransmogInfo")?.is_nil() {
-        t.set("GetBaseItemTransmogInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBaseItemTransmogInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCurrentItemTransmogInfo")?.is_nil() {
-        t.set("GetCurrentItemTransmogInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentItemTransmogInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDelvePreviewItemLink")?.is_nil() {
-        t.set("GetDelvePreviewItemLink", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDelvePreviewItemLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetDelvePreviewItemQuality")?.is_nil() {
         t.set("GetDelvePreviewItemQuality", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetDetailedItemLevelInfo: implemented in c_item_api.rs
     if t.get::<Value>("GetFirstTriggeredSpellForItem")?.is_nil() {
-        t.set("GetFirstTriggeredSpellForItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFirstTriggeredSpellForItem", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemChildInfo")?.is_nil() {
         t.set("GetItemChildInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemConversionOutputIcon")?.is_nil() {
-        t.set("GetItemConversionOutputIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemConversionOutputIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemCooldown")?.is_nil() {
         t.set("GetItemCooldown", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Boolean(false)])))?)?;
@@ -11605,7 +11596,7 @@ fn register_c_item_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetItemCreationContext", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::String(lua.create_string("")?)])))?)?;
     }
     if t.get::<Value>("GetItemFamily")?.is_nil() {
-        t.set("GetItemFamily", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemFamily", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemGUID")?.is_nil() {
         t.set("GetItemGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -11618,7 +11609,7 @@ fn register_c_item_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetItemID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemIDByGUID")?.is_nil() {
-        t.set("GetItemIDByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemIDByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemIDForItemInfo")?.is_nil() {
         t.set("GetItemIDForItemInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -11628,7 +11619,7 @@ fn register_c_item_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 fn register_c_item_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetItemIcon")?.is_nil() {
-        t.set("GetItemIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetItemIconByID: implemented in c_item_api.rs
     // GetItemInfo: implemented in c_item_api.rs
@@ -11640,27 +11631,27 @@ fn register_c_item_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetItemInventorySlotKey", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetItemInventoryType")?.is_nil() {
-        t.set("GetItemInventoryType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemInventoryType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemInventoryTypeByID")?.is_nil() {
-        t.set("GetItemInventoryTypeByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemInventoryTypeByID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetItemLearnTransmogSet: implemented in c_item_api.rs
     // GetItemLink: implemented in c_item_api.rs
     if t.get::<Value>("GetItemLinkByGUID")?.is_nil() {
-        t.set("GetItemLinkByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemLinkByGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetItemLocation")?.is_nil() {
-        t.set("GetItemLocation", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemLocation", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemMaxStackSize")?.is_nil() {
-        t.set("GetItemMaxStackSize", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemMaxStackSize", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemMaxStackSizeByID")?.is_nil() {
-        t.set("GetItemMaxStackSizeByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemMaxStackSizeByID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetItemName")?.is_nil() {
-        t.set("GetItemName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetItemNumAddedSockets")?.is_nil() {
         t.set("GetItemNumAddedSockets", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -11690,7 +11681,7 @@ fn register_c_item_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetItemUniquenessByID", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Nil, Value::Nil, Value::Nil])))?)?;
     }
     if t.get::<Value>("GetItemUpgradeInfo")?.is_nil() {
-        t.set("GetItemUpgradeInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemUpgradeInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetLimitedCurrencyItemInfo")?.is_nil() {
         t.set("GetLimitedCurrencyItemInfo", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::String(lua.create_string("")?), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
@@ -11769,7 +11760,7 @@ fn register_c_item_2(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("IsItemGUIDInInventory", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsItemInRange")?.is_nil() {
-        t.set("IsItemInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsItemInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsItemKeystoneByID")?.is_nil() {
         t.set("IsItemKeystoneByID", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -11839,7 +11830,7 @@ fn register_c_item_interaction(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetItemConversionCurrencyCost", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemInteractionInfo")?.is_nil() {
-        t.set("GetItemInteractionInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemInteractionInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemInteractionSpellId")?.is_nil() {
         t.set("GetItemInteractionSpellId", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -11872,13 +11863,13 @@ fn register_c_item_socket_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CompleteSocketing", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetExistingSocketLink")?.is_nil() {
-        t.set("GetExistingSocketLink", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetExistingSocketLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetNewSocketInfo")?.is_nil() {
         t.set("GetNewSocketInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil, Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetNewSocketLink")?.is_nil() {
-        t.set("GetNewSocketLink", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetNewSocketLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetNumSockets")?.is_nil() {
         t.set("GetNumSockets", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -11893,7 +11884,7 @@ fn register_c_item_socket_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetSocketItemRefundable", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetSocketTypes")?.is_nil() {
-        t.set("GetSocketTypes", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSocketTypes", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("HasBoundGemProposed")?.is_nil() {
         t.set("HasBoundGemProposed", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -11971,16 +11962,16 @@ fn register_c_key_bindings(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetBindingByKey", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetBindingContextForAction")?.is_nil() {
-        t.set("GetBindingContextForAction", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBindingContextForAction", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetBindingIndex")?.is_nil() {
-        t.set("GetBindingIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBindingIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCustomBindingType")?.is_nil() {
-        t.set("GetCustomBindingType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCustomBindingType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSearchTagsForAction")?.is_nil() {
-        t.set("GetSearchTagsForAction", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSearchTagsForAction", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetTurnStrafeStyle")?.is_nil() {
         t.set("GetTurnStrafeStyle", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -12301,7 +12292,7 @@ fn register_c_legendary_crafting(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CraftRuneforgeLegendary", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetRuneforgeItemPreviewInfo")?.is_nil() {
-        t.set("GetRuneforgeItemPreviewInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRuneforgeItemPreviewInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRuneforgeLegendaryComponentInfo")?.is_nil() {
         t.set("GetRuneforgeLegendaryComponentInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -12466,16 +12457,16 @@ fn register_c_loot_history(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAllEncounterInfos", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInfoForEncounter")?.is_nil() {
-        t.set("GetInfoForEncounter", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInfoForEncounter", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetLootHistoryTime")?.is_nil() {
         t.set("GetLootHistoryTime", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSortedDropsForEncounter")?.is_nil() {
-        t.set("GetSortedDropsForEncounter", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSortedDropsForEncounter", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSortedInfoForDrop")?.is_nil() {
-        t.set("GetSortedInfoForDrop", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSortedInfoForDrop", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     g.set("C_LootHistory", t)?;
     Ok(())
@@ -12514,7 +12505,7 @@ fn register_c_loss_of_control(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetActiveLossOfControlDataByUnit")?.is_nil() {
-        t.set("GetActiveLossOfControlDataByUnit", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetActiveLossOfControlDataByUnit", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetActiveLossOfControlDataCountByUnit")?.is_nil() {
         t.set("GetActiveLossOfControlDataCountByUnit", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -12568,7 +12559,7 @@ fn register_c_macro(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetMacroName")?.is_nil() {
-        t.set("GetMacroName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMacroName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetSelectedMacroIcon")?.is_nil() {
         t.set("GetSelectedMacroIcon", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -12589,7 +12580,7 @@ fn register_c_mail(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("CanCheckInbox", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetCraftingOrderMailInfo")?.is_nil() {
-        t.set("GetCraftingOrderMailInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCraftingOrderMailInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("HasInboxMoney")?.is_nil() {
         t.set("HasInboxMoney", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -12607,7 +12598,7 @@ fn register_c_major_factions(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetMajorFactionRenownInfo")?.is_nil() {
-        t.set("GetMajorFactionRenownInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMajorFactionRenownInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRenownNPCFactionID")?.is_nil() {
         t.set("GetRenownNPCFactionID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -12899,7 +12890,7 @@ fn register_c_mount_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetAllCreatureDisplayIDsForMountID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAppliedMountEquipmentID")?.is_nil() {
-        t.set("GetAppliedMountEquipmentID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAppliedMountEquipmentID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCollectedDragonridingMounts")?.is_nil() {
         t.set("GetCollectedDragonridingMounts", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -12932,10 +12923,10 @@ fn register_c_mount_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetMountEquipmentUnlockLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMountFromItem")?.is_nil() {
-        t.set("GetMountFromItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMountFromItem", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMountFromSpell")?.is_nil() {
-        t.set("GetMountFromSpell", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMountFromSpell", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMountIDs")?.is_nil() {
         t.set("GetMountIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -12947,7 +12938,7 @@ fn register_c_mount_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetMountInfoExtraByID", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::String(lua.create_string("")?), Value::String(lua.create_string("")?), Value::Boolean(false), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetMountLink")?.is_nil() {
-        t.set("GetMountLink", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMountLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetMountUsabilityByID")?.is_nil() {
         t.set("GetMountUsabilityByID", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Nil])))?)?;
@@ -13037,10 +13028,10 @@ fn register_c_mythic_plus(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetCurrentSeasonValues", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetCurrentUIDisplaySeason")?.is_nil() {
-        t.set("GetCurrentUIDisplaySeason", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentUIDisplaySeason", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetEndOfRunGearSequenceLevel")?.is_nil() {
-        t.set("GetEndOfRunGearSequenceLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetEndOfRunGearSequenceLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetLastWeeklyBestInformation")?.is_nil() {
         t.set("GetLastWeeklyBestInformation", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
@@ -13145,14 +13136,14 @@ fn register_c_neighborhood_initiative(lua: &Lua, g: &mlua::Table) -> Result<()> 
         t.set("GetActiveNeighborhood", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetInitiativeActivityLogInfo")?.is_nil() {
-        t.set("GetInitiativeActivityLogInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInitiativeActivityLogInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetInitiativeTaskChatLink")?.is_nil() {
         t.set("GetInitiativeTaskChatLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     // GetInitiativeTaskInfo: implemented in c_misc_api_core.rs
     if t.get::<Value>("GetNeighborhoodInitiativeInfo")?.is_nil() {
-        t.set("GetNeighborhoodInitiativeInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetNeighborhoodInitiativeInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRequiredLevel")?.is_nil() {
         t.set("GetRequiredLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -13278,7 +13269,7 @@ fn register_c_party_info_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetInstanceAbandonVoteRequirements", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetInstanceAbandonVoteResponse")?.is_nil() {
-        t.set("GetInstanceAbandonVoteResponse", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInstanceAbandonVoteResponse", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetInviteConfirmationInvalidQueues")?.is_nil() {
         t.set("GetInviteConfirmationInvalidQueues", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -13685,10 +13676,10 @@ fn register_c_pet_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetBattlePetLink", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetDisplayIDByIndex")?.is_nil() {
-        t.set("GetDisplayIDByIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDisplayIDByIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetDisplayProbabilityByIndex")?.is_nil() {
-        t.set("GetDisplayProbabilityByIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDisplayProbabilityByIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Number(0.0)))?)?;
     }
     if t.get::<Value>("GetNonBattlePetLinkByIndex")?.is_nil() {
         t.set("GetNonBattlePetLinkByIndex", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -13697,7 +13688,7 @@ fn register_c_pet_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetNumCollectedInfo", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetNumDisplays")?.is_nil() {
-        t.set("GetNumDisplays", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetNumDisplays", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetNumPetSources")?.is_nil() {
         t.set("GetNumPetSources", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -13839,7 +13830,7 @@ fn register_c_pet_journal_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("PetNeedsFanfare", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("PetUsesRandomDisplay")?.is_nil() {
-        t.set("PetUsesRandomDisplay", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("PetUsesRandomDisplay", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("PickupPet")?.is_nil() {
         t.set("PickupPet", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -13934,7 +13925,7 @@ fn register_c_ping_secure(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("DisplayError", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetTargetPingReceiver")?.is_nil() {
-        t.set("GetTargetPingReceiver", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTargetPingReceiver", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetTargetWorldPing")?.is_nil() {
         t.set("GetTargetWorldPing", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -13982,7 +13973,7 @@ fn register_c_player_choice(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetNumRerolls", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetRemainingTime")?.is_nil() {
-        t.set("GetRemainingTime", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRemainingTime", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("OnUIClosed")?.is_nil() {
         t.set("OnUIClosed", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -14018,7 +14009,7 @@ fn register_c_player_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetInstancesUnlockedAtLevel", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetName")?.is_nil() {
-        t.set("GetName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetPetStableCreatureDisplayInfoID")?.is_nil() {
         t.set("GetPetStableCreatureDisplayInfoID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -14027,10 +14018,10 @@ fn register_c_player_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetPlayerCharacterData", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRace")?.is_nil() {
-        t.set("GetRace", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRace", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSex")?.is_nil() {
-        t.set("GetSex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("HasAccountInventoryLock")?.is_nil() {
         t.set("HasAccountInventoryLock", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -14042,7 +14033,7 @@ fn register_c_player_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("IsCharacterBankEnabled", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsConnected")?.is_nil() {
-        t.set("IsConnected", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsConnected", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsMirrorImage")?.is_nil() {
         t.set("IsMirrorImage", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -14099,7 +14090,7 @@ fn register_c_player_mentorship(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetMentorLevelRequirement")?.is_nil() {
-        t.set("GetMentorLevelRequirement", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMentorLevelRequirement", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMentorRequirements")?.is_nil() {
         t.set("GetMentorRequirements", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Table(lua.create_table()?), Value::Table(lua.create_table()?), Value::Integer(0)])))?)?;
@@ -14152,7 +14143,7 @@ fn register_c_pv_p_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("DoesMatchOutcomeAffectRating", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetActiveBrawlInfo")?.is_nil() {
-        t.set("GetActiveBrawlInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetActiveBrawlInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetActiveMatchBracket")?.is_nil() {
         t.set("GetActiveMatchBracket", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -14170,10 +14161,10 @@ fn register_c_pv_p_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetArenaSkirmishRewards", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Nil, Value::Nil, Value::Nil])))?)?;
     }
     if t.get::<Value>("GetAssignedSpecForBattlefieldQueue")?.is_nil() {
-        t.set("GetAssignedSpecForBattlefieldQueue", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAssignedSpecForBattlefieldQueue", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetAvailableBrawlInfo")?.is_nil() {
-        t.set("GetAvailableBrawlInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAvailableBrawlInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBattlefieldFlagPosition")?.is_nil() {
         t.set("GetBattlefieldFlagPosition", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil, Value::Integer(0)])))?)?;
@@ -14185,7 +14176,7 @@ fn register_c_pv_p_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetBattlefieldVehicles", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBattlegroundInfo")?.is_nil() {
-        t.set("GetBattlegroundInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBattlegroundInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetBrawlRewards")?.is_nil() {
         t.set("GetBrawlRewards", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Nil, Value::Nil, Value::Nil, Value::Boolean(false)])))?)?;
@@ -14200,34 +14191,34 @@ fn register_c_pv_p_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetGlobalPvpScalingInfoForSpecID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetHonorRewardInfo")?.is_nil() {
-        t.set("GetHonorRewardInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHonorRewardInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetLevelUpBattlegrounds")?.is_nil() {
         t.set("GetLevelUpBattlegrounds", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMatchPVPStatColumn")?.is_nil() {
-        t.set("GetMatchPVPStatColumn", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMatchPVPStatColumn", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMatchPVPStatColumns")?.is_nil() {
         t.set("GetMatchPVPStatColumns", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetNextHonorLevelForReward")?.is_nil() {
-        t.set("GetNextHonorLevelForReward", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetNextHonorLevelForReward", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPVPActiveMatchPersonalRatedInfo")?.is_nil() {
-        t.set("GetPVPActiveMatchPersonalRatedInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPVPActiveMatchPersonalRatedInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPVPActiveRatedMatchDeserterPenalty")?.is_nil() {
-        t.set("GetPVPActiveRatedMatchDeserterPenalty", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPVPActiveRatedMatchDeserterPenalty", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPVPSeasonRewardAchievementID")?.is_nil() {
         t.set("GetPVPSeasonRewardAchievementID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPersonalRatedBGBlitzSpecStats")?.is_nil() {
-        t.set("GetPersonalRatedBGBlitzSpecStats", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPersonalRatedBGBlitzSpecStats", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPersonalRatedSoloShuffleSpecStats")?.is_nil() {
-        t.set("GetPersonalRatedSoloShuffleSpecStats", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPersonalRatedSoloShuffleSpecStats", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPostMatchCurrencyRewards")?.is_nil() {
         t.set("GetPostMatchCurrencyRewards", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -14240,10 +14231,10 @@ fn register_c_pv_p_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 fn register_c_pv_p_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetPvpTierID")?.is_nil() {
-        t.set("GetPvpTierID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPvpTierID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPvpTierInfo")?.is_nil() {
-        t.set("GetPvpTierInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPvpTierInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRandomBGInfo")?.is_nil() {
         t.set("GetRandomBGInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -14279,7 +14270,7 @@ fn register_c_pv_p_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetRewardItemLevelsByTierEnum", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetScoreInfoByPlayerGuid")?.is_nil() {
-        t.set("GetScoreInfoByPlayerGuid", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetScoreInfoByPlayerGuid", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSeasonBestInfo")?.is_nil() {
         t.set("GetSeasonBestInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Nil])))?)?;
@@ -14288,10 +14279,10 @@ fn register_c_pv_p_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSkirmishInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSpecialEventBrawlInfo")?.is_nil() {
-        t.set("GetSpecialEventBrawlInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpecialEventBrawlInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTeamInfo")?.is_nil() {
-        t.set("GetTeamInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTeamInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTrainingGrounds")?.is_nil() {
         t.set("GetTrainingGrounds", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -14423,7 +14414,7 @@ fn register_c_quest_info_system(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetQuestRewardCurrencies", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetQuestRewardSpellInfo")?.is_nil() {
-        t.set("GetQuestRewardSpellInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQuestRewardSpellInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetQuestRewardSpells")?.is_nil() {
         t.set("GetQuestRewardSpells", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -14509,7 +14500,7 @@ fn register_c_quest_log_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetDistanceSqToQuest", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetHeaderIndexForQuest")?.is_nil() {
-        t.set("GetHeaderIndexForQuest", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHeaderIndexForQuest", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetInfo: implemented in c_quest_api.rs (C_QuestLog)
     // GetLogIndexForQuestID: implemented in c_quest_api.rs
@@ -14540,11 +14531,11 @@ fn register_c_quest_log_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetQuestRewardCurrencies", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetQuestRewardCurrencyInfo")?.is_nil() {
-        t.set("GetQuestRewardCurrencyInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQuestRewardCurrencyInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     // GetQuestTagInfo: implemented in c_quest_api.rs
     if t.get::<Value>("GetQuestType")?.is_nil() {
-        t.set("GetQuestType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQuestType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     // GetQuestWatchType: implemented in c_quest_api.rs
     Ok(())
@@ -14558,7 +14549,7 @@ fn register_c_quest_log_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSuggestedGroupSize", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetTitleForLogIndex")?.is_nil() {
-        t.set("GetTitleForLogIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTitleForLogIndex", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("IsQuestBounty")?.is_nil() {
         t.set("IsQuestBounty", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -14639,10 +14630,10 @@ fn register_c_quest_offer(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetHideRequiredItems", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetQuestRequiredCurrencyInfo")?.is_nil() {
-        t.set("GetQuestRequiredCurrencyInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQuestRequiredCurrencyInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetQuestRewardCurrencyInfo")?.is_nil() {
-        t.set("GetQuestRewardCurrencyInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQuestRewardCurrencyInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     g.set("C_QuestOffer", t)?;
     Ok(())
@@ -14657,7 +14648,7 @@ fn register_c_quest_session(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetProposedMaxLevelForSession", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSuperTrackedQuest")?.is_nil() {
-        t.set("GetSuperTrackedQuest", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSuperTrackedQuest", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("RequestSessionStart")?.is_nil() {
         t.set("RequestSessionStart", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -14705,10 +14696,10 @@ fn register_c_recent_allies(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetRecentAllies", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecentAllyByFullName")?.is_nil() {
-        t.set("GetRecentAllyByFullName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecentAllyByFullName", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecentAllyByGUID")?.is_nil() {
-        t.set("GetRecentAllyByGUID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecentAllyByGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsRecentAllyByFullName")?.is_nil() {
         t.set("IsRecentAllyByFullName", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -14795,13 +14786,13 @@ fn register_c_remix_artifact_ui(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetArtifactItemInfo", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Nil, Value::Integer(0), Value::Integer(0), Value::Nil, Value::Nil, Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetCurrArtifactItemID")?.is_nil() {
-        t.set("GetCurrArtifactItemID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrArtifactItemID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrItemSpecIndex")?.is_nil() {
-        t.set("GetCurrItemSpecIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrItemSpecIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrTraitTreeID")?.is_nil() {
-        t.set("GetCurrTraitTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrTraitTreeID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("ItemInSlotIsRemixArtifact")?.is_nil() {
         t.set("ItemInSlotIsRemixArtifact", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -14861,7 +14852,7 @@ fn register_c_reputation(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetGuildRepExpirationTime")?.is_nil() {
-        t.set("GetGuildRepExpirationTime", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGuildRepExpirationTime", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("SetWatchedFactionByIndex")?.is_nil() {
         t.set("SetWatchedFactionByIndex", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -14933,7 +14924,7 @@ fn register_c_scenario_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetJailersTowerTypeString")?.is_nil() {
-        t.set("GetJailersTowerTypeString", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetJailersTowerTypeString", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     g.set("C_ScenarioInfo", t)?;
     Ok(())
@@ -14996,7 +14987,7 @@ fn register_c_season_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("GetCurrentDisplaySeasonExpansion")?.is_nil() {
-        t.set("GetCurrentDisplaySeasonExpansion", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentDisplaySeasonExpansion", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentDisplaySeasonID")?.is_nil() {
         t.set("GetCurrentDisplaySeasonID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -15263,10 +15254,10 @@ fn register_c_soulbinds(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetConduitCollectionCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetConduitCollectionDataAtCursor")?.is_nil() {
-        t.set("GetConduitCollectionDataAtCursor", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetConduitCollectionDataAtCursor", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetConduitCollectionDataByVirtualID")?.is_nil() {
-        t.set("GetConduitCollectionDataByVirtualID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetConduitCollectionDataByVirtualID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetConduitDisplayed")?.is_nil() {
         t.set("GetConduitDisplayed", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -15359,22 +15350,22 @@ fn register_c_specialization_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetActiveSpecGroup", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetClassIDFromSpecID")?.is_nil() {
-        t.set("GetClassIDFromSpecID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetClassIDFromSpecID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetInspectSelectedPvpTalent")?.is_nil() {
-        t.set("GetInspectSelectedPvpTalent", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInspectSelectedPvpTalent", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPvpTalentAlertStatus")?.is_nil() {
         t.set("GetPvpTalentAlertStatus", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
     }
     if t.get::<Value>("GetPvpTalentInfo")?.is_nil() {
-        t.set("GetPvpTalentInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPvpTalentInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPvpTalentSlotUnlockLevel")?.is_nil() {
-        t.set("GetPvpTalentSlotUnlockLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPvpTalentSlotUnlockLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPvpTalentUnlockLevel")?.is_nil() {
-        t.set("GetPvpTalentUnlockLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPvpTalentUnlockLevel", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpecIDs")?.is_nil() {
         t.set("GetSpecIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -15383,7 +15374,7 @@ fn register_c_specialization_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetSpecializationMasterySpells", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTalentInfo")?.is_nil() {
-        t.set("GetTalentInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTalentInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsPvpTalentLocked")?.is_nil() {
         t.set("IsPvpTalentLocked", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -15441,10 +15432,10 @@ fn register_c_spell_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSpellCastCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellChargeDuration")?.is_nil() {
-        t.set("GetSpellChargeDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellChargeDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellCooldownDuration")?.is_nil() {
-        t.set("GetSpellCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellDisplayCount")?.is_nil() {
         t.set("GetSpellDisplayCount", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -15456,7 +15447,7 @@ fn register_c_spell_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSpellLevelLearned", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellLossOfControlCooldownDuration")?.is_nil() {
-        t.set("GetSpellLossOfControlCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellLossOfControlCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellMaxCumulativeAuraApplications")?.is_nil() {
         t.set("GetSpellMaxCumulativeAuraApplications", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -15505,7 +15496,7 @@ fn register_c_spell_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("IsSpellImportant", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsSpellInRange")?.is_nil() {
-        t.set("IsSpellInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsSpellInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("PickupSpell")?.is_nil() {
         t.set("PickupSpell", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -15559,7 +15550,7 @@ fn register_c_spell_book_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("ContainsAnyDisenchantSpell", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("FindBaseSpellByID")?.is_nil() {
-        t.set("FindBaseSpellByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindBaseSpellByID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("FindFlyoutSlotBySpellID")?.is_nil() {
         t.set("FindFlyoutSlotBySpellID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -15568,13 +15559,13 @@ fn register_c_spell_book_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("FindSpellBookSlotForSpell", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("FindSpellOverrideByID")?.is_nil() {
-        t.set("FindSpellOverrideByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindSpellOverrideByID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentLevelSpells")?.is_nil() {
         t.set("GetCurrentLevelSpells", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSkillLineIndexByID")?.is_nil() {
-        t.set("GetSkillLineIndexByID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSkillLineIndexByID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemAutoCast")?.is_nil() {
         t.set("GetSpellBookItemAutoCast", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
@@ -15583,13 +15574,13 @@ fn register_c_spell_book_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSpellBookItemCastCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemChargeDuration")?.is_nil() {
-        t.set("GetSpellBookItemChargeDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellBookItemChargeDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemCharges")?.is_nil() {
         t.set("GetSpellBookItemCharges", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemCooldownDuration")?.is_nil() {
-        t.set("GetSpellBookItemCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellBookItemCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemDescription")?.is_nil() {
         t.set("GetSpellBookItemDescription", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -15604,10 +15595,10 @@ fn register_c_spell_book_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetSpellBookItemLossOfControlCooldown", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetSpellBookItemLossOfControlCooldownDuration")?.is_nil() {
-        t.set("GetSpellBookItemLossOfControlCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellBookItemLossOfControlCooldownDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemSkillLineIndex")?.is_nil() {
-        t.set("GetSpellBookItemSkillLineIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellBookItemSkillLineIndex", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSpellBookItemTexture")?.is_nil() {
         t.set("GetSpellBookItemTexture", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -15634,7 +15625,7 @@ fn register_c_spell_book_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("IsSpellBookItemHelpful", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsSpellBookItemInRange")?.is_nil() {
-        t.set("IsSpellBookItemInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsSpellBookItemInRange", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsSpellBookItemOffSpec")?.is_nil() {
         t.set("IsSpellBookItemOffSpec", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -15682,7 +15673,7 @@ fn register_c_spell_diminish(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAllSpellDiminishCategories", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSpellDiminishCategoryInfo")?.is_nil() {
-        t.set("GetSpellDiminishCategoryInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpellDiminishCategoryInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("IsSystemSupported")?.is_nil() {
         t.set("IsSystemSupported", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -15730,7 +15721,7 @@ fn register_c_stable_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetStablePetFoodTypes", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetStablePetInfo")?.is_nil() {
-        t.set("GetStablePetInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetStablePetInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetStabledPetList")?.is_nil() {
         t.set("GetStabledPetList", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -15980,7 +15971,7 @@ fn register_c_summon_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetSummonConfirmAreaName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetSummonConfirmSummoner")?.is_nil() {
-        t.set("GetSummonConfirmSummoner", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSummonConfirmSummoner", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     g.set("C_SummonInfo", t)?;
     Ok(())
@@ -15998,7 +15989,7 @@ fn register_c_super_track(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("ClearSuperTrackedContent", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetHighestPrioritySuperTrackingType")?.is_nil() {
-        t.set("GetHighestPrioritySuperTrackingType", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHighestPrioritySuperTrackingType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetNextWaypointForMap")?.is_nil() {
         t.set("GetNextWaypointForMap", lua.create_function(|lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::String(lua.create_string("")?)])))?)?;
@@ -17167,10 +17158,10 @@ fn register_c_trade_skill_ui_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCraftableCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCraftingOperationInfo")?.is_nil() {
-        t.set("GetCraftingOperationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCraftingOperationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCraftingOperationInfoForOrder")?.is_nil() {
-        t.set("GetCraftingOperationInfoForOrder", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCraftingOperationInfoForOrder", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCraftingReagentBonusText")?.is_nil() {
         t.set("GetCraftingReagentBonusText", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -17185,7 +17176,7 @@ fn register_c_trade_skill_ui_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetEnchantItems", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFactionSpecificOutputItem")?.is_nil() {
-        t.set("GetFactionSpecificOutputItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFactionSpecificOutputItem", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFilterableInventorySlotName")?.is_nil() {
         t.set("GetFilterableInventorySlotName", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -17201,7 +17192,7 @@ fn register_c_trade_skill_ui_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetGatheringOperationInfo")?.is_nil() {
-        t.set("GetGatheringOperationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetGatheringOperationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetHideUnownedFlags")?.is_nil() {
         t.set("GetHideUnownedFlags", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
@@ -17228,19 +17219,19 @@ fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetOriginalCraftRecipeID", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?)?;
     }
     if t.get::<Value>("GetPendingObliterateItemID")?.is_nil() {
-        t.set("GetPendingObliterateItemID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPendingObliterateItemID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPendingObliterateItemLink")?.is_nil() {
         t.set("GetPendingObliterateItemLink", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetProfessionByInventorySlot")?.is_nil() {
-        t.set("GetProfessionByInventorySlot", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProfessionByInventorySlot", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetProfessionChildSkillLineID")?.is_nil() {
         t.set("GetProfessionChildSkillLineID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetProfessionForCursorItem")?.is_nil() {
-        t.set("GetProfessionForCursorItem", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetProfessionForCursorItem", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetProfessionInfoByRecipeID")?.is_nil() {
         t.set("GetProfessionInfoByRecipeID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -17261,7 +17252,7 @@ fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetProfessionSpells", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetQualitiesForRecipe")?.is_nil() {
-        t.set("GetQualitiesForRecipe", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetQualitiesForRecipe", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetReagentDifficultyText")?.is_nil() {
         t.set("GetReagentDifficultyText", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -17276,7 +17267,7 @@ fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetRecipeDescription", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetRecipeInfoForSkillLineAbility")?.is_nil() {
-        t.set("GetRecipeInfoForSkillLineAbility", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecipeInfoForSkillLineAbility", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecipeItemLevelFilter")?.is_nil() {
         t.set("GetRecipeItemLevelFilter", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -17288,7 +17279,7 @@ fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetRecipeItemNameFilter", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetRecipeItemQualityInfo")?.is_nil() {
-        t.set("GetRecipeItemQualityInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecipeItemQualityInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecipeLink")?.is_nil() {
         t.set("GetRecipeLink", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -17297,7 +17288,7 @@ fn register_c_trade_skill_ui_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetRecipeOutputItemData", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecipeQualityItemIDs")?.is_nil() {
-        t.set("GetRecipeQualityItemIDs", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRecipeQualityItemIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetRecipeQualityReagentLink")?.is_nil() {
         t.set("GetRecipeQualityReagentLink", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
@@ -17331,7 +17322,7 @@ fn register_c_trade_skill_ui_2(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetShowUnlearned", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetSkillLineForGear")?.is_nil() {
-        t.set("GetSkillLineForGear", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSkillLineForGear", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSourceTypeFilter")?.is_nil() {
         t.set("GetSourceTypeFilter", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -17349,7 +17340,7 @@ fn register_c_trade_skill_ui_2(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetTradeSkillListLink", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetTradeSkillTexture")?.is_nil() {
-        t.set("GetTradeSkillTexture", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTradeSkillTexture", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("HasFavoriteOrderRecipes")?.is_nil() {
         t.set("HasFavoriteOrderRecipes", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -17674,7 +17665,7 @@ fn register_c_transmog(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("ExtractTransmogIDList", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemIDForSource")?.is_nil() {
-        t.set("GetItemIDForSource", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemIDForSource", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetSlotForInventoryType")?.is_nil() {
         t.set("GetSlotForInventoryType", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -17790,7 +17781,7 @@ fn register_c_transmog_collection_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetCustomSets", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFallbackWeaponAppearance")?.is_nil() {
-        t.set("GetFallbackWeaponAppearance", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFallbackWeaponAppearance", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetFilteredCategoryCollectedCount")?.is_nil() {
         t.set("GetFilteredCategoryCollectedCount", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -17890,7 +17881,7 @@ fn register_c_transmog_collection_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("ModifyCustomSet", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("NewCustomSet")?.is_nil() {
-        t.set("NewCustomSet", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("NewCustomSet", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("PlayerCanCollectSource")?.is_nil() {
         t.set("PlayerCanCollectSource", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false), Value::Boolean(false)])))?)?;
@@ -18224,7 +18215,7 @@ fn register_c_transmog_sets(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetValidBaseSetsCountsForCharacter", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetValidClassForSet")?.is_nil() {
-        t.set("GetValidClassForSet", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetValidClassForSet", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetVariantSets")?.is_nil() {
         t.set("GetVariantSets", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -18341,10 +18332,10 @@ fn register_c_ui(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetTopRightNotchSafeRegion", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetUIParent")?.is_nil() {
-        t.set("GetUIParent", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetUIParent", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetWorldFrame")?.is_nil() {
-        t.set("GetWorldFrame", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetWorldFrame", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("Reload")?.is_nil() {
         t.set("Reload", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -18375,85 +18366,85 @@ fn register_c_ui_widget_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 fn register_c_ui_widget_manager_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetBulletTextListWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetBulletTextListWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetBulletTextListWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetButtonHeaderWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetButtonHeaderWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetButtonHeaderWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCaptureZoneVisualizationInfo")?.is_nil() {
-        t.set("GetCaptureZoneVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCaptureZoneVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDiscreteProgressStepsVisualizationInfo")?.is_nil() {
-        t.set("GetDiscreteProgressStepsVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDiscreteProgressStepsVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDoubleIconAndTextWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetDoubleIconAndTextWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDoubleIconAndTextWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetDoubleStateIconRowVisualizationInfo")?.is_nil() {
-        t.set("GetDoubleStateIconRowVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetDoubleStateIconRowVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetFillUpFramesWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetFillUpFramesWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetFillUpFramesWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetHorizontalCurrenciesWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetHorizontalCurrenciesWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHorizontalCurrenciesWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetIconTextAndBackgroundWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetIconTextAndBackgroundWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetIconTextAndBackgroundWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetIconTextAndCurrenciesWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetIconTextAndCurrenciesWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetIconTextAndCurrenciesWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetItemDisplayVisualizationInfo")?.is_nil() {
-        t.set("GetItemDisplayVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetItemDisplayVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMapPinAnimationWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetMapPinAnimationWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMapPinAnimationWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPowerBarWidgetSetID")?.is_nil() {
         t.set("GetPowerBarWidgetSetID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetPreyHuntProgressWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetPreyHuntProgressWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPreyHuntProgressWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetScenarioHeaderCurrenciesAndBackgroundWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetScenarioHeaderDelvesWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetScenarioHeaderDelvesWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetScenarioHeaderDelvesWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetScenarioHeaderTimerWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetScenarioHeaderTimerWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetScenarioHeaderTimerWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetSpacerVisualizationInfo")?.is_nil() {
-        t.set("GetSpacerVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetSpacerVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetStackedResourceTrackerWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetStackedResourceTrackerWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetStackedResourceTrackerWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTextColumnRowVisualizationInfo")?.is_nil() {
-        t.set("GetTextColumnRowVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTextColumnRowVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTextWithSubtextWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetTextWithSubtextWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTextWithSubtextWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTextureAndTextRowVisualizationInfo")?.is_nil() {
-        t.set("GetTextureAndTextRowVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTextureAndTextRowVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTextureAndTextVisualizationInfo")?.is_nil() {
-        t.set("GetTextureAndTextVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTextureAndTextVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTextureWithAnimationVisualizationInfo")?.is_nil() {
-        t.set("GetTextureWithAnimationVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTextureWithAnimationVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetTugOfWarWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetTugOfWarWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetTugOfWarWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetUnitPowerBarWidgetVisualizationInfo")?.is_nil() {
-        t.set("GetUnitPowerBarWidgetVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetUnitPowerBarWidgetVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetZoneControlVisualizationInfo")?.is_nil() {
-        t.set("GetZoneControlVisualizationInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetZoneControlVisualizationInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("RegisterUnitForWidgetUpdates")?.is_nil() {
         t.set("RegisterUnitForWidgetUpdates", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
@@ -18489,22 +18480,22 @@ fn register_c_unit_auras(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("GetAuraApplicationDisplayCount", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetAuraBaseDuration")?.is_nil() {
-        t.set("GetAuraBaseDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAuraBaseDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetAuraDispelTypeColor")?.is_nil() {
         t.set("GetAuraDispelTypeColor", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAuraDuration")?.is_nil() {
-        t.set("GetAuraDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAuraDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetAuraSlots")?.is_nil() {
         t.set("GetAuraSlots", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Nil, Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("GetRefreshExtendedDuration")?.is_nil() {
-        t.set("GetRefreshExtendedDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetRefreshExtendedDuration", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetUnitAuraBySpellID")?.is_nil() {
-        t.set("GetUnitAuraBySpellID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetUnitAuraBySpellID", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetUnitAuraInstanceIDs")?.is_nil() {
         t.set("GetUnitAuraInstanceIDs", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -18570,10 +18561,10 @@ fn register_c_vignette_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         _ => lua.create_table()?,
     };
     if t.get::<Value>("FindBestUniqueVignette")?.is_nil() {
-        t.set("FindBestUniqueVignette", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("FindBestUniqueVignette", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetHealthPercent")?.is_nil() {
-        t.set("GetHealthPercent", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetHealthPercent", lua.create_function(|_, _: MultiValue| Ok(Value::Number(0.0)))?)?;
     }
     if t.get::<Value>("GetRecommendedGroupSize")?.is_nil() {
         t.set("GetRecommendedGroupSize", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0)])))?)?;
@@ -18622,10 +18613,10 @@ fn register_c_voice_chat_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("EndLocalCapture", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     }
     if t.get::<Value>("GetAvailableInputDevices")?.is_nil() {
-        t.set("GetAvailableInputDevices", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAvailableInputDevices", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetAvailableOutputDevices")?.is_nil() {
-        t.set("GetAvailableOutputDevices", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetAvailableOutputDevices", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetChannel")?.is_nil() {
         t.set("GetChannel", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -18637,22 +18628,22 @@ fn register_c_voice_chat_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetChannelForCommunityStream", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetCommunicationMode")?.is_nil() {
-        t.set("GetCommunicationMode", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCommunicationMode", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetCurrentVoiceChatConnectionStatusCode")?.is_nil() {
-        t.set("GetCurrentVoiceChatConnectionStatusCode", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetCurrentVoiceChatConnectionStatusCode", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetInputVolume")?.is_nil() {
-        t.set("GetInputVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetInputVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(50)))?)?;
     }
     if t.get::<Value>("GetJoinClubVoiceChannelError")?.is_nil() {
-        t.set("GetJoinClubVoiceChannelError", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetJoinClubVoiceChannelError", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetLocalPlayerActiveChannelMemberInfo")?.is_nil() {
-        t.set("GetLocalPlayerActiveChannelMemberInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetLocalPlayerActiveChannelMemberInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetLocalPlayerMemberID")?.is_nil() {
-        t.set("GetLocalPlayerMemberID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetLocalPlayerMemberID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMasterVolumeScale")?.is_nil() {
         t.set("GetMasterVolumeScale", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
@@ -18661,28 +18652,28 @@ fn register_c_voice_chat_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetMemberGUID", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetMemberID")?.is_nil() {
-        t.set("GetMemberID", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberID", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?)?;
     }
     if t.get::<Value>("GetMemberInfo")?.is_nil() {
-        t.set("GetMemberInfo", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetMemberName")?.is_nil() {
-        t.set("GetMemberName", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberName", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetMemberVolume")?.is_nil() {
-        t.set("GetMemberVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetMemberVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(50)))?)?;
     }
     if t.get::<Value>("GetOutputVolume")?.is_nil() {
-        t.set("GetOutputVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetOutputVolume", lua.create_function(|_, _: MultiValue| Ok(Value::Integer(50)))?)?;
     }
     if t.get::<Value>("GetPTTButtonPressedState")?.is_nil() {
-        t.set("GetPTTButtonPressedState", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPTTButtonPressedState", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetProcesses")?.is_nil() {
         t.set("GetProcesses", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetPushToTalkBinding")?.is_nil() {
-        t.set("GetPushToTalkBinding", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetPushToTalkBinding", lua.create_function(|lua, _: MultiValue| Ok(Value::String(lua.create_string("")?)))?)?;
     }
     if t.get::<Value>("GetRemoteTtsVoices")?.is_nil() {
         t.set("GetRemoteTtsVoices", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -18691,13 +18682,13 @@ fn register_c_voice_chat_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("GetTtsVoices", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("GetVADSensitivity")?.is_nil() {
-        t.set("GetVADSensitivity", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetVADSensitivity", lua.create_function(|_, _: MultiValue| Ok(Value::Number(0.5)))?)?;
     }
     if t.get::<Value>("IsChannelJoinPending")?.is_nil() {
         t.set("IsChannelJoinPending", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsDeafened")?.is_nil() {
-        t.set("IsDeafened", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsDeafened", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsEnabled")?.is_nil() {
         t.set("IsEnabled", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -18710,13 +18701,13 @@ fn register_c_voice_chat_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 fn register_c_voice_chat_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("IsMemberMuted")?.is_nil() {
-        t.set("IsMemberMuted", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsMemberMuted", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsMemberMutedForAll")?.is_nil() {
-        t.set("IsMemberMutedForAll", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsMemberMutedForAll", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsMemberSilenced")?.is_nil() {
-        t.set("IsMemberSilenced", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsMemberSilenced", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsParentalDisabled")?.is_nil() {
         t.set("IsParentalDisabled", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -18728,7 +18719,7 @@ fn register_c_voice_chat_1(lua: &Lua, t: &mlua::Table) -> Result<()> {
         t.set("IsPlayerUsingVoice", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsSilenced")?.is_nil() {
-        t.set("IsSilenced", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("IsSilenced", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("IsSpeakForMeAllowed")?.is_nil() {
         t.set("IsSpeakForMeAllowed", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
@@ -18922,7 +18913,7 @@ fn register_c_world_loot_object(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("DoesSlotMatchInventoryType", lua.create_function(|_, _: MultiValue| Ok(Value::Boolean(false)))?)?;
     }
     if t.get::<Value>("GetWorldLootObjectDistanceSquared")?.is_nil() {
-        t.set("GetWorldLootObjectDistanceSquared", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("GetWorldLootObjectDistanceSquared", lua.create_function(|_, _: MultiValue| Ok(Value::Number(0.0)))?)?;
     }
     if t.get::<Value>("GetWorldLootObjectInfo")?.is_nil() {
         t.set("GetWorldLootObjectInfo", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
@@ -19345,7 +19336,7 @@ fn register_table(lua: &Lua, g: &mlua::Table) -> Result<()> {
         t.set("count", lua.create_function(|_lua, _: MultiValue| Ok(mlua::MultiValue::from_vec(vec![Value::Integer(0), Value::Integer(0), Value::Integer(0)])))?)?;
     }
     if t.get::<Value>("create")?.is_nil() {
-        t.set("create", lua.create_function(|_, _: MultiValue| Ok(Value::Nil))?)?;
+        t.set("create", lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?)?;
     }
     if t.get::<Value>("foreach")?.is_nil() {
         t.set("foreach", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
