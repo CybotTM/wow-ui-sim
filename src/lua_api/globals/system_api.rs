@@ -359,6 +359,11 @@ fn register_time_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
         Ok(())
     })?)?;
 
+    let st = Rc::clone(state);
+    lua.globals().set("GetTimePreciseSec", lua.create_function(move |_, ()| {
+        Ok(st.borrow().start_time.elapsed().as_secs_f64())
+    })?)?;
+
     Ok(())
 }
 
