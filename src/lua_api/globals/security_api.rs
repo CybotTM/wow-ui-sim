@@ -44,6 +44,18 @@ fn register_taint_functions(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _: MultiValue| Ok(true))?,
     )?;
 
+    // scrub: strips tainted values from args. No taint in simulator — pass through.
+    globals.set(
+        "scrub",
+        lua.create_function(|_, args: MultiValue| Ok(args))?,
+    )?;
+
+    // scrubsecretvalues: strips secret values. No secrets in simulator — pass through.
+    globals.set(
+        "scrubsecretvalues",
+        lua.create_function(|_, args: MultiValue| Ok(args))?,
+    )?;
+
     Ok(())
 }
 

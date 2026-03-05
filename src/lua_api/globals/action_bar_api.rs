@@ -1,6 +1,7 @@
 //! Action bar functions: queries, cooldowns, UseAction, and stubs.
 
 use crate::lua_api::SimState;
+use super::lua_duration_object::LuaDurationObject;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -470,6 +471,9 @@ fn register_c_action_bar_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("IsHelpfulAction", lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?)?;
     t.set("IsHarmfulAction", lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?)?;
     t.set("GetActionLossOfControlCooldown", lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64)))?)?;
+    t.set("GetActionChargeDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
+    t.set("GetActionCooldownDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
+    t.set("GetActionLossOfControlCooldownDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
     t.set("GetSpell", lua.create_function(|_, _: Value| Ok(Value::Nil))?)?;
     t.set("GetItemActionOnEquipSpellID", lua.create_function(|_, _: Value| Ok(Value::Nil))?)?;
     t.set("FindFlyoutActionButtons", lua.create_function(|lua, _: i32| lua.create_table())?)?;

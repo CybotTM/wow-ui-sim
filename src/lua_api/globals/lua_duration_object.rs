@@ -51,7 +51,7 @@ pub struct LuaDurationObject {
 }
 
 impl LuaDurationObject {
-    fn new() -> Self {
+    pub fn new() -> Self {
         LuaDurationObject {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
         }
