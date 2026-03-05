@@ -9,6 +9,9 @@ The simulator registers **~260 C_* namespaces** across three layers:
 2. **Hand-written stubs** (`c_stubs_api*.rs`, `c_misc_api*.rs`) — hardcoded defaults
 3. **Auto-generated stubs** (`generated_stubs.rs`, 22K lines) — catch-all from `scripts/generate_stubs.py`
 
+Additionally, **~25 global (non-C_*) stubs** have been upgraded from auto-generated
+nil returns to hand-written implementations with correct return values.
+
 Only **16 C_* namespaces** referenced in BlizzardUI are truly missing, and all are
 glue-screen (login/character creation) or legacy/removed APIs.
 
@@ -88,17 +91,18 @@ glue-screen (login/character creation) or legacy/removed APIs.
 | SetBagPortraitTexture | Stubbed |
 
 ### C_Map (`c_map_api.rs`)
-| Function | Status |
-|----------|--------|
-| GetAreaInfo | Implemented |
-| GetMapInfo | Implemented |
-| GetWorldPosFromMapPos | Implemented |
-| GetBestMapForUnit | Stubbed |
-| GetPlayerMapPosition | Stubbed |
-| GetMapChildrenInfo | Stubbed |
-| GetMapWorldSize | Stubbed |
-| RequestPreloadMap | Stubbed |
-| MapHasArt | Stubbed |
+| Function | Status | Notes |
+|----------|--------|-------|
+| GetAreaInfo | Implemented | |
+| GetMapInfo | Implemented | |
+| GetWorldPosFromMapPos | Implemented | |
+| GetBestMapForUnit | Stubbed | Returns 2274 (Dornogal) |
+| GetCurrentMapID | Stubbed | Returns 2274 (Dornogal) |
+| GetPlayerMapPosition | Stubbed | Returns (0.5, 0.5) |
+| GetMapChildrenInfo | Stubbed | |
+| GetMapWorldSize | Stubbed | |
+| RequestPreloadMap | Stubbed | |
+| MapHasArt | Stubbed | |
 
 ### C_QuestLog (`c_quest_api.rs`)
 | Function | Status |
@@ -241,6 +245,77 @@ glue-screen (login/character creation) or legacy/removed APIs.
 - C_DeathRecap, C_EncounterTimeline, C_SettingsUtil
 - C_Loot, C_ContentTracking, C_AchievementTelemetry
 - C_PetJournal, C_MountJournal, C_ToyBox, C_Transmog, C_ZoneAbility
+
+## Global API Stubs (Non-C_* Namespaces)
+
+Global stubs that were upgraded from auto-generated nil returns to hand-written
+stubs with correct return values.
+
+### Player API (`player_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| GetPlayerFacing | 0.0 |
+| GetRaidDifficultyID | 14 (Normal) |
+| GetResSicknessDuration | 0 |
+| GetSheathState | 1 (Melee) |
+| GetSpecializationNameForSpecID | Spec name lookup table |
+| GetLegacyRaidDifficultyID | 1 |
+| GetMaxCombatRatingBonus | 0.0 |
+| GetMirrorTimerProgress | 0 |
+| IsLegacyDifficulty | false |
+
+### Event Query API (`event_query_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| GetCurrentEventID | 0 |
+
+### System API (`system_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| IsKeyDown | false |
+
+### Unit API (`unit_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| UnitSexBase | Mapped sex enum (1/2/3) |
+
+### Unit Combat API (`unit_combat_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| UnitBattlePetSpeciesID | 0 |
+
+### Unit Health/Power API (`unit_health_power_api.rs`)
+| Function | Return Value |
+|----------|-------------|
+| UnitPercentHealthFromGUID | 100.0 |
+
+### Misc Stubs (`c_stubs_api_extra.rs`)
+| Function | Return Value |
+|----------|-------------|
+| CanEditGuildInfo | false |
+| IsCpuBound | false |
+| GetTotemCannotDismiss | false |
+| GetTotemTimeLeft | 0.0 |
+| GetSecondsUntilParentalControlsKick | 0 |
+| ItemTextHasNextPage | false |
+
+### Confirmed Correct nil Returns
+These globals correctly return nil (no meaningful data in the simulator):
+- `CreateFont` — no font objects in sim
+- `GetNextPendingInviteConfirmation` — no invites
+- `UnitPvpClassification` — no PvP
+- `UnitThreatLeadSituation` — no combat
+- `UnitThreatPercentageOfLead` — no combat
+- `UnitTokenFromGUID` — no unit tracking
+
+### Dead Stubs Removed from `generated_stubs.rs`
+These were duplicates of existing hand-written implementations and have been
+cleaned up:
+- `GetFontInfo` — already in `font_api.rs`
+- `UnitCastingInfo`, `UnitChannelInfo`, `UnitCastingDuration`, `UnitChannelDuration` — already in `unit_api.rs`
+- `UnitIsBattlePet`, `UnitGUID` — already in `unit_api.rs`
+- `C_CVar.*` (GetCVar, GetCVarBool, GetCVarDefault, GetCVarBitfield, SetCVar, SetCVarBitfield, RegisterCVar, ResetTestCVars) — already in `cvar_api.rs`
+- `C_Map.GetBestMapForUnit`, `C_Map.GetPlayerMapPosition` — already in `c_map_api.rs`
 
 ## Missing Namespaces (Not Registered)
 
