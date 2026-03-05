@@ -362,6 +362,14 @@ fn register_chat_window_stubs(lua: &Lua) -> Result<()> {
         // Returns: point, yOffset, xOffset, relativePoint
         Ok(("BOTTOMLEFT", 0.0f64, 0.0f64, "BOTTOMLEFT"))
     })?)?;
+    // ChangeChatColor: sets r,g,b on ChatTypeInfo[type]
+    g.set("ChangeChatColor", lua.create_function(|lua, (ct, r, g, b): (String, f64, f64, f64)| {
+        let cti: mlua::Table = lua.globals().get::<mlua::Table>("ChatTypeInfo")?.get(&*ct)?;
+        cti.set("r", r)?;
+        cti.set("g", g)?;
+        cti.set("b", b)?;
+        Ok(())
+    })?)?;
     Ok(())
 }
 

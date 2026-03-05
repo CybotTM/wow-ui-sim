@@ -34,6 +34,7 @@ pub fn apply(env: &WowLuaEnv) {
     workarounds_bags::init_bag_bar(env);
     workarounds_bags::init_bag_token_tracker(env);
     hide_super_tracked_frame(env);
+    init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     patch_compact_raid_container_pools(env);
     stub_arena_globals(env);
@@ -500,6 +501,35 @@ fn schedule_fake_chat_tickers(env: &WowLuaEnv) {
         C_Timer.After(15, function() C_Timer.NewTicker(40, function()
             post("guild", "|Hchannel:Guild|h[Guild]|h ", 0.25, 1.0, 0.25)
         end) end)
+    "#,
+    );
+}
+
+/// Initialize r,g,b on ChatTypeInfo entries.
+///
+/// In real WoW, the C++ engine sets default chat colors before Lua runs.
+/// Without these, GetMessageTypeColor() crashes accessing info.r on entries
+/// that only have sticky/flashTab fields from ChatTypeInfoConstants.lua.
+fn init_chat_type_colors(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not ChatTypeInfo then return end
+        local defaults = {
+            SYSTEM={1,1,0}, SAY={1,1,1}, PARTY={.67,.67,1}, RAID={1,.5,0},
+            GUILD={.25,1,.25}, OFFICER={.25,.75,.25}, YELL={1,.25,.25},
+            WHISPER={1,.5,1}, WHISPER_INFORM={1,.5,1}, EMOTE={1,.5,.25},
+            TEXT_EMOTE={1,.5,.25}, CHANNEL={1,.75,.5}, LOOT={0,.67,0},
+            MONEY={1,1,0}, SKILL={.33,.33,1}, ACHIEVEMENT={1,1,0},
+            GUILD_ACHIEVEMENT={.25,1,.25}, BN_WHISPER={0,.8,1},
+            BN_WHISPER_INFORM={0,.8,1}, INSTANCE_CHAT={1,.5,0},
+            INSTANCE_CHAT_LEADER={1,.5,0},
+        }
+        for key, info in pairs(ChatTypeInfo) do
+            if not info.r then
+                local d = defaults[key] or {1, 1, 1}
+                info.r, info.g, info.b = d[1], d[2], d[3]
+            end
+        end
     "#,
     );
 }
