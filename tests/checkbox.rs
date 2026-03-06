@@ -242,6 +242,7 @@ fn minimal_checkbox_quad_batch() {
 
     let buckets = {
         let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
         let _ = state.get_strata_buckets();
         state.strata_buckets.as_ref().unwrap().clone()
     };
