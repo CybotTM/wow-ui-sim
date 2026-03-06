@@ -119,11 +119,12 @@ impl WowLuaEnv {
         let now = Instant::now();
         let mut fired = 0;
         let mut to_reschedule = Vec::new();
+        const MAX_FIRE: usize = 1000;
 
         let mut i = 0;
         loop {
             let len = self.state.borrow().timers.len();
-            if i >= len {
+            if i >= len || fired >= MAX_FIRE {
                 break;
             }
             let (cancelled, ready) = {

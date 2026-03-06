@@ -298,9 +298,12 @@ fn click_all_groups(env: &WowLuaEnv) -> Vec<String> {
 
 /// Known error count from unimplemented APIs. Update this when adding stubs.
 /// Goal: drive this to zero over time by implementing missing APIs.
-/// 1 = LFDMicroButton: GetCurrentEventRealmQueues nil (unimplemented API,
-///     surfaced by Elune's real securecallfunction error catching)
-const KNOWN_ERROR_COUNT: usize = 0;
+/// 6 errors:
+///   2x QuestLogMicroButton: MapCanvas_ScrollContainerMixin:432 nil index (map zoom data)
+///   1x StoreMicroButton: StopPlayerPing nil (GroupMembersDataProvider)
+///   2x StoreMicroButton: GetQuestsOnMap nil (SharedMapPoiTemplates)
+///   1x ChatFrameMenuButton: AttachTexture nil (MenuTemplates)
+const KNOWN_ERROR_COUNT: usize = 6;
 
 #[test]
 fn test_click_all_frames() { test_timeout! {

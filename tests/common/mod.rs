@@ -15,7 +15,13 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
     });
     match rx.recv_timeout(std::time::Duration::from_secs(secs)) {
         Ok(()) => handle.join().expect("test thread panicked"),
-        Err(_) => panic!("test timed out after {secs}s"),
+        Err(std::sync::mpsc::RecvTimeoutError::Timeout) => {
+            panic!("test timed out after {secs}s")
+        }
+        Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
+            handle.join().expect_err("test thread panicked but join succeeded");
+            panic!("test thread panicked (see above)")
+        }
     }
 }
 

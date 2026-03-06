@@ -53,6 +53,9 @@ fn get_area_info(lua: &Lua, area_id: i32) -> Result<Value> {
 }
 
 fn get_map_info(lua: &Lua, map_id: i32) -> Result<Value> {
+    if map_id <= 0 {
+        return Ok(Value::Nil);
+    }
     let info = lua.create_table()?;
     info.set("mapID", map_id)?;
     info.set("name", format!("Map_{}", map_id))?;
