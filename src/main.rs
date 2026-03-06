@@ -188,13 +188,8 @@ fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowF
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Elune's taint tracking uses extra C stack; deep addon dispatch overflows 8MB.
-    std::thread::Builder::new()
-        .name("wow-sim".into())
-        .stack_size(32 * 1024 * 1024)
-        .spawn(|| run_main().map_err(|e| e.to_string()))?
-        .join().map_err(|e| format!("{e:?}"))??;
-    Ok(())
+    wow_ui_sim::stack::ensure_large_stack();
+    run_main()
 }
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
@@ -438,17 +433,17 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
     stats.success_count += 1;
 }
 
-/// Addons whose warnings are shown during loading.
 const VERBOSE_WARNING_ADDONS: &[&str] = &[
-    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur", "ExtraQuestButton", "WaypointUI",
-    "TomTom", "WorldQuestTracker", "SavedInstances", "Rarity", "SimpleItemLevel", "TalentLoadoutManager",
-    "Simulationcraft", "TomCats", "RaiderIO", "!BugGrabber", "AdvancedInterfaceOptions", "CraftSim",
-    "BlizzMove_Debug", "ClickableRaidBuffs", "Dejunk", "Cell", "AngryKeystones", "AutoPotion", "BigWigs_Plugins",
-    "BugSack", "Clicked", "DeathNote", "DeModal", "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam",
-    "DialogueUI", "Chattynator", "AstralKeys", "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker",
-    "idTip", "Macroriffic", "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator",
-    "EditModeExpanded", "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar", "LegionRemixHelper",
-    "Collectionator", "Syndicator", "BigWigs", "!KalielsTracker", "KRaidSkipTracker", "MacroToolkit",
+    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur", "ExtraQuestButton",
+    "WaypointUI", "TomTom", "WorldQuestTracker", "SavedInstances", "Rarity", "SimpleItemLevel",
+    "TalentLoadoutManager", "Simulationcraft", "TomCats", "RaiderIO", "!BugGrabber", "CraftSim",
+    "AdvancedInterfaceOptions", "BlizzMove_Debug", "ClickableRaidBuffs", "Dejunk", "Cell",
+    "AngryKeystones", "AutoPotion", "BigWigs_Plugins", "BugSack", "Clicked", "DeathNote", "DeModal",
+    "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam", "DialogueUI", "Chattynator", "AstralKeys",
+    "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker", "idTip", "Macroriffic",
+    "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator", "EditModeExpanded",
+    "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar", "LegionRemixHelper", "Collectionator",
+    "Syndicator", "BigWigs", "!KalielsTracker", "KRaidSkipTracker", "MacroToolkit",
     "MinimapButtonButton", "OribosExchange",
 ];
 
@@ -747,4 +742,3 @@ fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
         .with_interface_path(home.join("Projects/wow/Interface"))
         .with_addons_path(PathBuf::from("./Interface/AddOns"))
 }
-
