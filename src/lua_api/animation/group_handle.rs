@@ -9,6 +9,62 @@ use std::rc::Rc;
 use super::{AnimHandle, AnimState, AnimationType, LoopType};
 use super::tick::apply_flipbook_for_group;
 
+/// Parse Play/Restart arguments: (reverse: bool, offset: f64).
+fn parse_play_args(args: MultiValue) -> (bool, f64) {
+    let args: Vec<Value> = args.into_iter().collect();
+    let reverse = args.first().and_then(|v| {
+        if let Value::Boolean(b) = v { Some(*b) } else { None }
+    }).unwrap_or(false);
+    let offset = args.get(1).and_then(|v| match v {
+        Value::Number(n) => Some(*n),
+        Value::Integer(n) => Some(*n as f64),
+        _ => None,
+    }).unwrap_or(0.0);
+    (reverse, offset)
+}
+
+/// Compute the synced time offset for PlaySynced.
+///
+/// Reads `syncKey` from the animation group's Lua properties, then uses
+/// `SimState.anim_sync_times` to track when each key first started.
+/// Returns `(now - start) % duration` so all groups with the same key stay in phase.
+pub(crate) fn compute_sync_offset(
+    lua: &Lua, frame_id: u64, state_rc: &Rc<RefCell<SimState>>,
+) -> mlua::Result<f64> {
+    let sync_key = read_sync_key(lua, frame_id)?;
+    let state = state_rc.borrow();
+    let now = state.start_time.elapsed();
+    let duration = state.anim_frame_to_group.get(&frame_id)
+        .and_then(|gid| state.animation_groups.get(gid))
+        .map_or(0.0, |g| g.total_duration());
+    let sync_start = state.anim_sync_times.get(&sync_key).copied();
+    drop(state);
+
+    let offset = match sync_start {
+        Some(start) if duration > 0.0 => {
+            let elapsed = (now - start).as_secs_f64();
+            elapsed % duration
+        }
+        None => {
+            // First PlaySynced for this key — record start time, offset=0.
+            state_rc.borrow_mut().anim_sync_times.insert(sync_key, now);
+            0.0
+        }
+        _ => 0.0,
+    };
+    Ok(offset)
+}
+
+/// Read the `syncKey` property from an animation group's Lua properties.
+fn read_sync_key(lua: &Lua, frame_id: u64) -> mlua::Result<String> {
+    let self_val = frame_ref(lua, frame_id)?;
+    let key_val: Value = lua.load("return select(1,...).syncKey").call(self_val)?;
+    match key_val {
+        Value::String(s) => Ok(s.to_string_lossy().to_string()),
+        _ => Ok("DEFAULT".to_string()),
+    }
+}
+
 /// Resolve a child_key to a frame ID via the owner's children_keys.
 fn resolve_child(state: &SimState, owner_id: u64, child_key: &Option<String>) -> Option<u64> {
     match child_key {
@@ -19,7 +75,13 @@ fn resolve_child(state: &SimState, owner_id: u64, child_key: &Option<String>) ->
 }
 
 /// Start (or restart) playback: reset elapsed, save pre-animation alphas.
+/// `offset` allows starting partway through (used by PlaySynced for synchronization).
 pub fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) {
+    start_group_playback_at(state, group_id, reverse, 0.0);
+}
+
+/// Start playback at a specific elapsed offset (seconds).
+pub fn start_group_playback_at(state: &mut SimState, group_id: u64, reverse: bool, offset: f64) {
     // Collect alpha targets to save before mutating the group.
     let targets: Vec<(u64, f32)> = state.animation_groups.get(&group_id)
         .map(|group| {
@@ -40,7 +102,7 @@ pub fn start_group_playback(state: &mut SimState, group_id: u64, reverse: bool) 
         group.done = false;
         group.pending_finish = false;
         group.reverse = reverse;
-        group.elapsed = 0.0;
+        group.elapsed = offset;
         group.saved_alphas.clear();
         for (id, alpha) in targets {
             group.saved_alphas.insert(id, alpha);
@@ -106,36 +168,23 @@ pub struct AnimGroupHandle {
 }
 
 impl AnimGroupHandle {
-    /// Register Play, Restart, PlaySynced methods.
+    /// Register Play, Restart methods.
     fn add_play_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("Play", |_, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let reverse = args.first().and_then(|v| {
-                if let Value::Boolean(b) = v { Some(*b) } else { None }
-            }).unwrap_or(false);
-
+            let (reverse, offset) = parse_play_args(args);
             let mut state = this.state.borrow_mut();
-            // Play() is a no-op if already playing (WoW-confirmed behavior).
-            let already_playing = state.animation_groups.get(&this.group_id)
+            let already = state.animation_groups.get(&this.group_id)
                 .is_some_and(|g| g.playing && !g.done);
-            if !already_playing {
-                start_group_playback(&mut state, this.group_id, reverse);
+            if !already {
+                start_group_playback_at(&mut state, this.group_id, reverse, offset);
             }
             Ok(())
         });
 
         methods.add_method("Restart", |_, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let reverse = args.first().and_then(|v| {
-                if let Value::Boolean(b) = v { Some(*b) } else { None }
-            }).unwrap_or(false);
-
+            let (reverse, offset) = parse_play_args(args);
             let mut state = this.state.borrow_mut();
-            start_group_playback(&mut state, this.group_id, reverse);
-            Ok(())
-        });
-
-        methods.add_method("PlaySynced", |_, _this, _args: MultiValue| {
+            start_group_playback_at(&mut state, this.group_id, reverse, offset);
             Ok(())
         });
 
@@ -145,6 +194,26 @@ impl AnimGroupHandle {
                 start_group_playback(&mut state, this.group_id, false);
             } else {
                 stop_group(&mut state, this.group_id);
+            }
+            Ok(())
+        });
+    }
+
+    /// Register PlaySynced — starts playback with a time offset to sync with other groups.
+    fn add_play_synced_method<M: UserDataMethods<Self>>(methods: &mut M) {
+        methods.add_method("PlaySynced", |lua, this, args: MultiValue| {
+            let (reverse, _) = parse_play_args(args);
+            let frame_id = this.state.borrow().animation_groups.get(&this.group_id)
+                .and_then(|g| g.frame_id);
+            let offset = match frame_id {
+                Some(fid) => compute_sync_offset(lua, fid, &this.state)?,
+                None => 0.0,
+            };
+            let mut state = this.state.borrow_mut();
+            let already = state.animation_groups.get(&this.group_id)
+                .is_some_and(|g| g.playing && !g.done);
+            if !already {
+                start_group_playback_at(&mut state, this.group_id, reverse, offset);
             }
             Ok(())
         });
@@ -498,6 +567,7 @@ fn get_or_create_table(lua: &Lua, name: &str) -> mlua::Table {
 impl UserData for AnimGroupHandle {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         Self::add_play_methods(methods);
+        Self::add_play_synced_method(methods);
         Self::add_stop_methods(methods);
         Self::add_state_query_methods(methods);
         Self::add_looping_methods(methods);

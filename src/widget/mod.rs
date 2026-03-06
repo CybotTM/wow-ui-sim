@@ -6,7 +6,7 @@ mod frame_enums;
 mod registry;
 
 pub use anchor::{Anchor, AnchorPoint};
-pub use frame::{AttributeValue, Backdrop, Color, Frame, LineAnchor, TextJustify, TextOutline};
+pub use frame::{AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify, TextOutline};
 pub use frame_enums::{DrawLayer, FrameStrata};
 pub use crate::atlas::NineSliceAtlasInfo;
 pub use registry::WidgetRegistry;

@@ -113,43 +113,81 @@ pub fn build_texture_quads(batch: &mut QuadBatch, bounds: Rectangle, f: &crate::
         return;
     }
 
-    let vc = f.vertex_color.as_ref();
-    let base_tint = [
-        vc.map_or(1.0, |c| c.r),
-        vc.map_or(1.0, |c| c.g),
-        vc.map_or(1.0, |c| c.b),
-        vc.map_or(1.0, |c| c.a) * alpha,
-    ];
-
-    let tint = if let Some(fill) = bar_fill
-        && let Some(c) = &fill.color {
-            [c.r, c.g, c.b, c.a * alpha]
-        } else {
-            base_tint
-        };
+    let tint = resolve_tint(f, bar_fill, alpha);
 
     if let Some(color) = f.color_texture {
         let fill_bounds = apply_bar_fill(bounds, bar_fill);
-        batch.push_solid(fill_bounds, [color.r * tint[0], color.g * tint[1], color.b * tint[2], color.a * alpha]);
+        if let Some(ref grad) = f.gradient {
+            push_gradient_quad(batch, fill_bounds, grad, alpha);
+        } else {
+            batch.push_solid(fill_bounds, [color.r * tint[0], color.g * tint[1], color.b * tint[2], color.a * alpha]);
+        }
         return;
     }
 
     let Some(tex_path) = &f.texture else {
-        if let Some(fill) = bar_fill
-            && let Some(c) = &fill.color {
-                let fill_bounds = apply_bar_fill(bounds, bar_fill);
-                batch.push_solid(fill_bounds, [c.r, c.g, c.b, c.a * alpha]);
-            }
+        emit_bar_fill_fallback(batch, bar_fill, bounds, alpha);
         return;
     };
+    emit_textured_quad(batch, bounds, f, bar_fill, tex_path, tint, alpha);
+}
+
+/// Compute the vertex color tint from vertex_color and bar fill override.
+fn resolve_tint(f: &crate::widget::Frame, bar_fill: Option<&StatusBarFill>, alpha: f32) -> [f32; 4] {
+    if let Some(fill) = bar_fill
+        && let Some(c) = &fill.color
+    {
+        return [c.r, c.g, c.b, c.a * alpha];
+    }
+    let vc = f.vertex_color.as_ref();
+    [
+        vc.map_or(1.0, |c| c.r),
+        vc.map_or(1.0, |c| c.g),
+        vc.map_or(1.0, |c| c.b),
+        vc.map_or(1.0, |c| c.a) * alpha,
+    ]
+}
+
+/// Emit a solid color quad when no texture path exists but a bar fill has a color.
+fn emit_bar_fill_fallback(batch: &mut QuadBatch, bar_fill: Option<&StatusBarFill>, bounds: Rectangle, alpha: f32) {
+    if let Some(fill) = bar_fill
+        && let Some(c) = &fill.color
+    {
+        let fill_bounds = apply_bar_fill(bounds, bar_fill);
+        batch.push_solid(fill_bounds, [c.r, c.g, c.b, c.a * alpha]);
+    }
+}
+
+/// Emit a gradient quad with per-vertex colors (VERTICAL or HORIZONTAL).
+fn push_gradient_quad(batch: &mut QuadBatch, bounds: Rectangle, grad: &crate::widget::Gradient, alpha: f32) {
+    let min = &grad.min_color;
+    let max = &grad.max_color;
+    let (top_color, bottom_color) = if grad.vertical {
+        // VERTICAL: max at top, min at bottom
+        ([max.r, max.g, max.b, max.a * alpha], [min.r, min.g, min.b, min.a * alpha])
+    } else {
+        // HORIZONTAL: will use left/right instead; top=bottom=white, handled per-vertex below
+        ([min.r, min.g, min.b, min.a * alpha], [min.r, min.g, min.b, min.a * alpha])
+    };
+    let colors = if grad.vertical {
+        [top_color, top_color, bottom_color, bottom_color] // TL, TR, BR, BL
+    } else {
+        let right = [max.r, max.g, max.b, max.a * alpha];
+        let left = [min.r, min.g, min.b, min.a * alpha];
+        [left, right, right, left] // TL, TR, BR, BL
+    };
+    batch.push_gradient(bounds, colors);
+}
+
+/// Emit a textured quad with atlas cropping, three-slice, tiling, rotation, desaturation.
+fn emit_textured_quad(
+    batch: &mut QuadBatch, bounds: Rectangle, f: &crate::widget::Frame,
+    bar_fill: Option<&StatusBarFill>, tex_path: &str, tint: [f32; 4], alpha: f32,
+) {
     let (fill_bounds, fill_uvs) = apply_bar_fill_with_uvs(bounds, f.tex_coords, bar_fill);
-
-    // When a frame uses an atlas sub-region (SetAtlas), crop the sub-region at load time
-    // instead of uploading the full texture (which gets downscaled if >512px).
-    // This keeps small atlas entries (40x40 icons from 2048x1024 textures) at native resolution.
     let (effective_path, effective_uvs) = remap_atlas_crop(tex_path, fill_uvs, f.atlas_tex_coords);
-
     let vert_before = batch.vertices.len();
+
     if let Some((left_cap, right_cap, atlas_w)) = f.three_slice_h
         && let Some((left, right, top, bottom)) = effective_uvs
         && fill_bounds.width > left_cap + right_cap
@@ -167,12 +205,8 @@ pub fn build_texture_quads(batch: &mut QuadBatch, bounds: Rectangle, f: &crate::
         batch.push_textured_path(fill_bounds, &effective_path, tint, f.blend_mode);
     }
 
-    if f.rotation != 0.0 {
-        apply_uv_rotation(batch, vert_before, f.rotation);
-    }
-    if f.desaturated {
-        apply_desaturate_flag(batch, vert_before);
-    }
+    if f.rotation != 0.0 { apply_uv_rotation(batch, vert_before, f.rotation); }
+    if f.desaturated { apply_desaturate_flag(batch, vert_before); }
 }
 
 /// Render an atlas texture as 3 horizontal slices (left cap, stretched middle, right cap).

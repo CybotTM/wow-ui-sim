@@ -120,6 +120,8 @@ pub struct SimState {
     pub talents: super::talent_state::TalentState,
     /// Collected Lua errors (from call_error_handler and addframetext).
     pub lua_errors: Vec<String>,
+    /// Synced animation group start times (key → elapsed Duration when first PlaySynced was called).
+    pub anim_sync_times: HashMap<String, std::time::Duration>,
 
     /// Player character state (identity, combat, power, buffs, spec).
     pub player: PlayerState,
@@ -148,7 +150,8 @@ impl SimState {
             console_output: Vec::new(), timers: VecDeque::new(),
             addons: Vec::new(), lua_errors: Vec::new(),
             tooltips: HashMap::new(), simple_htmls: HashMap::new(),
-            message_frames: HashMap::new(), animation_groups: HashMap::new(),
+            message_frames: HashMap::new(),
+            animation_groups: HashMap::new(), anim_sync_times: HashMap::new(),
             anim_frame_to_group: HashMap::new(), anim_frame_to_anim: HashMap::new(),
             on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
             action_bars: HashMap::new(), addon_base_paths: Vec::new(),

@@ -729,3 +729,14 @@ pub struct ColorXml {
     #[serde(rename = "@color")]
     pub color: Option<String>,
 }
+
+/// `<Gradient orientation="VERTICAL"><MinColor .../><MaxColor .../></Gradient>`
+#[derive(Debug, Deserialize, Clone)]
+pub struct GradientXml {
+    #[serde(rename = "@orientation")]
+    pub orientation: Option<String>,
+    #[serde(rename = "MinColor")]
+    pub min_color: Option<ColorXml>,
+    #[serde(rename = "MaxColor")]
+    pub max_color: Option<ColorXml>,
+}

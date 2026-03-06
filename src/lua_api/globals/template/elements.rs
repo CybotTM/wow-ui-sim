@@ -177,39 +177,52 @@ fn append_texture_source(code: &mut String, texture: &crate::xml::TextureXml, va
     }
 }
 
+/// Append `SetColorTexture` or `SetVertexColor` from a `<Color>` XML element.
+fn append_color_code(code: &mut String, color: &crate::xml::ColorXml, var: &str) {
+    if let Some(name) = &color.color {
+        code.push_str(&format!(
+            "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
+        ));
+    } else {
+        let (r, g, b, a) = (
+            color.r.unwrap_or(1.0), color.g.unwrap_or(1.0),
+            color.b.unwrap_or(1.0), color.a.unwrap_or(1.0),
+        );
+        code.push_str(&format!(
+            "            {var}:SetColorTexture({r}, {g}, {b}, {a})\n"
+        ));
+    }
+}
+
+/// Append `SetGradient` from a `<Gradient>` XML element.
+fn append_gradient_code(code: &mut String, grad: &crate::xml::GradientXml, var: &str) {
+    let orient = grad.orientation.as_deref().unwrap_or("VERTICAL");
+    let [mr, mg, mb, ma] = extract_gradient_rgba(grad.min_color.as_ref(), 1.0);
+    let [xr, xg, xb, xa] = extract_gradient_rgba(grad.max_color.as_ref(), 1.0);
+    code.push_str(&format!(
+        "            {var}:SetGradient(\"{orient}\", {{r={mr},g={mg},b={mb},a={ma}}}, {{r={xr},g={xg},b={xb},a={xa}}})\n"
+    ));
+}
+
+/// Extract RGBA from an optional ColorXml with defaults (0 for RGB, custom for alpha).
+fn extract_gradient_rgba(color: Option<&crate::xml::ColorXml>, default_a: f32) -> [f32; 4] {
+    match color {
+        Some(c) => [c.r.unwrap_or(0.0), c.g.unwrap_or(0.0), c.b.unwrap_or(0.0), c.a.unwrap_or(default_a)],
+        None => [0.0, 0.0, 0.0, default_a],
+    }
+}
+
 /// Append texture-specific property setters (size, source, color, tiling, etc.) to Lua code.
 fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml, var: &str, is_mask: bool) {
     if let Some(size) = &texture.size {
-        let (width, height) = get_size_values(size);
-        match (width, height) {
-            (Some(w), Some(h)) => {
-                code.push_str(&format!("            {}:SetSize({}, {})\n", var, w, h));
-            }
-            (Some(w), None) => {
-                code.push_str(&format!("            {}:SetWidth({})\n", var, w));
-            }
-            (None, Some(h)) => {
-                code.push_str(&format!("            {}:SetHeight({})\n", var, h));
-            }
-            _ => {}
-        }
+        append_size_code(code, size, var);
     }
     append_texture_source(code, texture, var, is_mask);
     if let Some(color) = &texture.color {
-        if let Some(name) = &color.color {
-            code.push_str(&format!(
-                "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
-            ));
-        } else {
-            let r = color.r.unwrap_or(1.0);
-            let g = color.g.unwrap_or(1.0);
-            let b = color.b.unwrap_or(1.0);
-            let a = color.a.unwrap_or(1.0);
-            code.push_str(&format!(
-                "            {}:SetColorTexture({}, {}, {}, {})\n",
-                var, r, g, b, a
-            ));
-        }
+        append_color_code(code, color, var);
+    }
+    if let Some(ref grad) = texture.gradient {
+        append_gradient_code(code, grad, var);
     }
     if texture.horiz_tile == Some(true) {
         code.push_str(&format!("            {}:SetHorizTile(true)\n", var));
@@ -222,6 +235,17 @@ fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml
     }
     if let Some(ref mode) = texture.alpha_mode {
         code.push_str(&format!("            {}:SetBlendMode(\"{}\")\n", var, mode));
+    }
+}
+
+/// Append SetSize/SetWidth/SetHeight from a `<Size>` XML element.
+fn append_size_code(code: &mut String, size: &crate::xml::SizeXml, var: &str) {
+    let (width, height) = get_size_values(size);
+    match (width, height) {
+        (Some(w), Some(h)) => code.push_str(&format!("            {var}:SetSize({w}, {h})\n")),
+        (Some(w), None) => code.push_str(&format!("            {var}:SetWidth({w})\n")),
+        (None, Some(h)) => code.push_str(&format!("            {var}:SetHeight({h})\n")),
+        _ => {}
     }
 }
 
@@ -592,4 +616,101 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
          end end"
     );
     let _ = lua.load(&code).exec();
+}
+
+/// Apply deferred mask atlases from KeyValues after all templates are applied.
+///
+/// Some templates define MaskTexture children with `useAtlasSize="true"` but no
+/// atlas in XML — the atlas name is stored in a KeyValue and applied by a
+/// composite-mixin OnLoad that may not run in our simulator.  We scan the
+/// template chain for this pattern and emit Lua code to apply the atlas.
+pub(super) fn apply_deferred_mask_atlases(
+    lua: &Lua,
+    frame_name: &str,
+    chain: &[crate::xml::TemplateEntry],
+) {
+    let atlas_kvs = collect_atlas_key_values(chain);
+    let masks = collect_unatlased_masks(chain);
+    if atlas_kvs.is_empty() || masks.is_empty() {
+        return;
+    }
+    let frame_ref = lua_global_ref(frame_name);
+    let mut code = format!("do local f = {frame_ref}\nif f then\n");
+    for (parent_key, _) in &masks {
+        for (kv_key, _) in &atlas_kvs {
+            if mask_key_matches_atlas_kv(parent_key, kv_key) {
+                code.push_str(&format!(
+                    "if f.{parent_key} and f.{kv_key} and f.{kv_key} ~= \"\" \
+                     and not f.{parent_key}:GetAtlas() then \
+                     f.{parent_key}:SetAtlas(f.{kv_key}, true) end\n"
+                ));
+            }
+        }
+    }
+    code.push_str("end\nend");
+    let _ = lua.load(&code).exec();
+}
+
+/// Collect KeyValues whose key ends with "Atlas" and has a string type.
+fn collect_atlas_key_values(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, String)> {
+    let mut result = Vec::new();
+    for entry in chain {
+        for kvs in entry.frame.all_key_values() {
+            for kv in &kvs.values {
+                if kv.key.ends_with("Atlas")
+                    && kv.value_type.as_deref() == Some("string")
+                    && !kv.value.is_empty()
+                {
+                    result.push((kv.key.clone(), kv.value.clone()));
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Collect MaskTextures with `useAtlasSize=true` and no atlas attribute.
+fn collect_unatlased_masks(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, bool)> {
+    let mut result = Vec::new();
+    for entry in chain {
+        for layers in entry.frame.layers() {
+            for layer in &layers.layers {
+                for elem in &layer.elements {
+                    if let crate::xml::LayerElement::MaskTexture(t) = elem {
+                        if t.atlas.is_none() && t.use_atlas_size == Some(true) {
+                            if let Some(pk) = &t.parent_key {
+                                result.push((pk.clone(), true));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    result
+}
+
+/// Check if a MaskTexture parentKey matches an atlas KeyValue key.
+///
+/// Pattern: `BorderSheenMask` matches `sheenMaskAtlas` by stripping the common
+/// "Border" prefix, lowercasing the first char, and appending "Atlas".
+fn mask_key_matches_atlas_kv(parent_key: &str, kv_key: &str) -> bool {
+    let Some(suffix) = kv_key.strip_suffix("Atlas") else { return false };
+    // Direct: parentKey lowercased == suffix (e.g. "IconMask" → "iconMask")
+    if lowercase_first(parent_key) == suffix {
+        return true;
+    }
+    // Strip "Border" prefix: "BorderSheenMask" → "sheenMask"
+    if let Some(stripped) = parent_key.strip_prefix("Border") {
+        return lowercase_first(stripped) == suffix;
+    }
+    false
+}
+
+fn lowercase_first(s: &str) -> String {
+    let mut chars = s.chars();
+    match chars.next() {
+        Some(c) => c.to_lowercase().to_string() + chars.as_str(),
+        None => String::new(),
+    }
 }

@@ -95,6 +95,7 @@ pub fn apply_templates_from_registry(
     for entry in &chain {
         apply_single_template(lua, state, frame_name, entry);
     }
+    elements::apply_deferred_mask_atlases(lua, frame_name, &chain);
 }
 
 /// Fire all deferred child OnLoad scripts that were queued during template

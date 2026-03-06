@@ -236,6 +236,35 @@ impl QuadBatch {
         );
     }
 
+    /// Push a solid color quad with per-vertex colors (for gradients).
+    /// `colors` order: [TL, TR, BR, BL].
+    pub fn push_gradient(&mut self, bounds: Rectangle, colors: [[f32; 4]; 4]) {
+        let base_index = self.vertices.len() as u32;
+        let positions = [
+            [bounds.x, bounds.y],
+            [bounds.x + bounds.width, bounds.y],
+            [bounds.x + bounds.width, bounds.y + bounds.height],
+            [bounds.x, bounds.y + bounds.height],
+        ];
+        let uv = [0.0, 0.0];
+        for i in 0..4 {
+            self.vertices.push(QuadVertex {
+                position: positions[i],
+                tex_coords: uv,
+                color: colors[i],
+                tex_index: -1,
+                flags: BlendMode::Alpha as u32,
+                local_uv: uv,
+                mask_tex_index: -1,
+                mask_tex_coords: [0.0, 0.0],
+            });
+        }
+        self.indices.extend_from_slice(&[
+            base_index, base_index + 1, base_index + 2,
+            base_index, base_index + 2, base_index + 3,
+        ]);
+    }
+
     /// Push a textured quad with full UV coverage.
     pub fn push_textured(
         &mut self,

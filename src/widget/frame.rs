@@ -33,6 +33,15 @@ impl Color {
     }
 }
 
+/// Vertex color gradient (VERTICAL or HORIZONTAL).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Gradient {
+    /// true = vertical (min at bottom, max at top), false = horizontal (min at left, max at right).
+    pub vertical: bool,
+    pub min_color: Color,
+    pub max_color: Color,
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -204,6 +213,8 @@ pub struct Frame {
     pub color_texture: Option<Color>,
     /// Vertex color for textures (tinting).
     pub vertex_color: Option<Color>,
+    /// Vertex color gradient for textures.
+    pub gradient: Option<Gradient>,
     /// Text content (for FontString widgets).
     pub text: Option<String>,
     /// Pre-stripped text (WoW markup removed). Updated when `text` is set.
@@ -477,6 +488,7 @@ macro_rules! frame_defaults {
             texture_file_data_id: None,
             color_texture: None,
             vertex_color: None,
+            gradient: None,
             text: None,
             text_stripped: None,
             title: None,

@@ -100,6 +100,8 @@ pub struct TextureXml {
     pub anchors: Option<AnchorsXml>,
     #[serde(rename = "Color")]
     pub color: Option<ColorXml>,
+    #[serde(rename = "Gradient")]
+    pub gradient: Option<crate::xml::types::GradientXml>,
     #[serde(rename = "Animations")]
     pub animations: Option<AnimationsXml>,
     #[serde(rename = "Scripts")]
