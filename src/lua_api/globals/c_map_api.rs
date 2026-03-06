@@ -39,6 +39,7 @@ fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
     })?)?;
     t.set("GetWorldPosFromMapPos", lua.create_function(create_world_pos_from_map_pos)?)?;
     t.set("GetMapWorldSize", lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?)?;
+    t.set("GetMapArtLayers", lua.create_function(get_map_art_layers)?)?;
     t.set("RequestPreloadMap", lua.create_function(|_, _map_id: i32| Ok(()))?)?;
     t.set("MapHasArt", lua.create_function(|_, _map_id: i32| Ok(true))?)?;
 
@@ -62,6 +63,20 @@ fn get_map_info(lua: &Lua, map_id: i32) -> Result<Value> {
     info.set("mapType", 3)?;
     info.set("parentMapID", 0)?;
     Ok(Value::Table(info))
+}
+
+fn get_map_art_layers(lua: &Lua, _map_id: i32) -> Result<mlua::Table> {
+    let layers = lua.create_table()?;
+    let layer = lua.create_table()?;
+    layer.set("layerWidth", 1000)?;
+    layer.set("layerHeight", 668)?;
+    layer.set("tileWidth", 256)?;
+    layer.set("tileHeight", 256)?;
+    layer.set("minScale", 0.25)?;
+    layer.set("maxScale", 1.0)?;
+    layer.set("additionalZoomSteps", 0)?;
+    layers.set(1, layer)?;
+    Ok(layers)
 }
 
 fn create_player_map_position(lua: &Lua, (_map_id, _unit): (i32, String)) -> Result<Value> {

@@ -147,6 +147,7 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("SetMapForQuestPOIs", lua.create_function(|_, _map_id: i32| Ok(()))?)?;
     t.set("GetZoneStoryInfo", lua.create_function(|_, _map_id: i32| Ok((Value::Nil, Value::Nil)))?)?;
     t.set("GetQuestAdditionalHighlights", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
+    t.set("GetQuestsOnMap", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
     t.set("IsQuestReplayable", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("GetQuestWatchType", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
     Ok(())
