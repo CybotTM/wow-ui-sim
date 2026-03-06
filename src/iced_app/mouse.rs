@@ -24,6 +24,7 @@ impl App {
             if (dx * dx + dy * dy).sqrt() >= DRAG_THRESHOLD {
                 self.dragging = true;
                 self.fire_drag_start(down_frame);
+                self.flush_post_script_updates();
             }
         }
 

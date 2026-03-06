@@ -46,6 +46,7 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     // UnitPositionFrame
     methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
 }
 
 /// Drag/Input stubs.

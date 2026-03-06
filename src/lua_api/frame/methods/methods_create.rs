@@ -69,6 +69,8 @@ pub fn add_create_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_create_mask_texture_method(methods);
     add_create_line_method(methods);
     add_create_font_string_method(methods);
+    add_attach_texture_method(methods);
+    add_attach_font_string_method(methods);
     add_create_animation_group_method(methods);
     add_get_animation_groups_method(methods);
     add_create_animation_method(methods);
@@ -158,6 +160,22 @@ fn add_create_font_string_method<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         apply_font_inherit(lua, &mut fontstring, inherits.as_deref());
 
         register_child_widget(lua, id, fontstring, &name)
+    });
+}
+
+/// AttachTexture() — create an anonymous child Texture (used by menu system).
+fn add_attach_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("AttachTexture", |lua, this, ()| {
+        let texture = Frame::new(WidgetType::Texture, None, Some(this.0));
+        register_child_widget(lua, this.0, texture, &None)
+    });
+}
+
+/// AttachFontString() — create an anonymous child FontString (used by menu system).
+fn add_attach_font_string_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("AttachFontString", |lua, this, ()| {
+        let fontstring = Frame::new(WidgetType::FontString, None, Some(this.0));
+        register_child_widget(lua, this.0, fontstring, &None)
     });
 }
 
