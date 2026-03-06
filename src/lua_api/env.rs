@@ -135,13 +135,14 @@ impl WowLuaEnv {
                     let addon_idx = self.state.borrow().widgets.get(widget_id)
                         .and_then(|f| f.owner_addon);
                     let taint = addon_taint_name(&self.state, addon_idx);
+                    let blizzard = is_blizzard_addon(&self.state, addon_idx);
                     let mut call_args =
                         vec![frame, Value::String(self.lua.create_string(event)?)];
                     call_args.extend(args.iter().cloned());
 
                     let start = Instant::now();
                     self.state.borrow_mut().executing_addon_index = addon_idx;
-                    let result = call_with_taint(&self.lua, handler, taint, call_args);
+                    let result = call_with_taint(&self.lua, handler, taint, blizzard, call_args);
                     self.state.borrow_mut().executing_addon_index = None;
                     if let Err(e) = result {
                         call_error_handler(&self.lua, &e.to_string());
@@ -167,10 +168,11 @@ impl WowLuaEnv {
             let addon_idx = self.state.borrow().widgets.get(widget_id)
                 .and_then(|f| f.owner_addon);
             let taint = addon_taint_name(&self.state, addon_idx);
+            let blizzard = is_blizzard_addon(&self.state, addon_idx);
             let mut call_args = vec![frame];
             call_args.extend(extra_args);
             self.state.borrow_mut().executing_addon_index = addon_idx;
-            if let Err(e) = call_with_taint(&self.lua, handler, taint, call_args) {
+            if let Err(e) = call_with_taint(&self.lua, handler, taint, blizzard, call_args) {
                 call_error_handler(&self.lua, &e.to_string());
             }
             self.state.borrow_mut().executing_addon_index = None;
@@ -530,9 +532,14 @@ fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
 }
 
 /// Stamp addon taint on a handler and call it. The VM applies fixedtaint on entry.
-fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, args: Vec<Value>) -> mlua::Result<()> {
-    if let Some(ref name) = taint {
-        if let Ok(sot) = lua.named_registry_value::<mlua::Function>("__setobjecttaint") {
+/// For Blizzard addons (is_blizzard=true), clear the handler's taint so issecure()
+/// returns true during execution, matching real WoW behavior.
+fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, is_blizzard: bool, args: Vec<Value>) -> mlua::Result<()> {
+    if let Ok(sot) = lua.named_registry_value::<mlua::Function>("__setobjecttaint") {
+        if is_blizzard {
+            // Clear taint on Blizzard handlers so issecure() returns true.
+            sot.call::<()>((handler.clone(), Value::Nil))?;
+        } else if let Some(ref name) = taint {
             sot.call::<()>((handler.clone(), name.as_str()))?;
         }
     }
@@ -542,6 +549,13 @@ fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, ar
 /// Look up the addon folder name for a given owner_addon index.
 fn addon_taint_name(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>) -> Option<String> {
     idx.and_then(|i| state.borrow().addons.get(i as usize).map(|a| a.folder_name.clone()))
+}
+
+/// Check whether an addon index refers to a Blizzard addon (runs secure).
+fn is_blizzard_addon(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>) -> bool {
+    idx.map(|i| state.borrow().addons.get(i as usize)
+        .is_some_and(|a| a.folder_name.starts_with("Blizzard_")))
+        .unwrap_or(true)
 }
 
 /// Record per-addon timing from an Instant.
@@ -694,6 +708,8 @@ fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
     // Cache setobjecttaint in registry for Rust-side and Lua-side use.
     let sot: mlua::Function = lua.load("return debug.setobjecttaint").eval()?;
     lua.set_named_registry_value("__setobjecttaint", sot)?;
+    let sst: mlua::Function = lua.load("return debug.setstacktaint").eval()?;
+    lua.set_named_registry_value("__setstacktaint", sst)?;
     lua.load(r#"
         local original_ls = loadstring
         local sst = debug.setstacktaint

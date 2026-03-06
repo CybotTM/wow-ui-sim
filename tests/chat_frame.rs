@@ -184,6 +184,9 @@ fn test_chat_editbox_click_type_and_submit() { test_timeout! {
 fn test_chat_message_contains_timestamp() { test_timeout! {
     let env = setup_env();
 
+    // Enable timestamps (default CVar is "none")
+    env.exec(r#"SetCVar("showTimestamps", "%H:%M ")"#).unwrap();
+
     // Send a chat message — C_ChatInfo.SendChatMessage adds it to ChatFrame1
     env.exec(r#"C_ChatInfo.SendChatMessage("Test timestamp", "SAY")"#)
         .unwrap();

@@ -17,6 +17,11 @@ fn build_batch_for_button(
     pressed: Option<u64>,
     hovered: Option<u64>,
 ) -> wow_ui_sim::render::QuadBatch {
+    env.set_screen_size(1024.0, 768.0);
+    {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+    }
     let buckets = {
         let mut state = env.state().borrow_mut();
         let _ = state.get_strata_buckets();

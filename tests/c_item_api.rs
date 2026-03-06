@@ -23,9 +23,9 @@ fn test_c_item_get_item_info_returns_nil() {
 #[test]
 fn test_c_item_get_item_info_returns_data() {
     let env = env();
-    // Item 6948 (Hearthstone) exists in the DB
+    // Item 6948 (Hearthstone) — C_Item.GetItemInfo returns multi-values (name is first)
     let name: String = env
-        .eval("local info = C_Item.GetItemInfo(6948); return info.itemName")
+        .eval("return C_Item.GetItemInfo(6948)")
         .unwrap();
     assert_eq!(name, "Hearthstone");
 }

@@ -42,7 +42,7 @@ fn test_get_map_info_has_name_field() {
 fn test_get_best_map_for_unit() {
     let env = env();
     let map_id: i32 = env.eval(r#"return C_Map.GetBestMapForUnit("player")"#).unwrap();
-    assert_eq!(map_id, 1);
+    assert_eq!(map_id, 2274, "Default map should be Dornogal");
 }
 
 #[test]
