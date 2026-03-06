@@ -188,6 +188,16 @@ fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowF
 }
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Elune's taint tracking uses extra C stack; deep addon dispatch overflows 8MB.
+    std::thread::Builder::new()
+        .name("wow-sim".into())
+        .stack_size(32 * 1024 * 1024)
+        .spawn(|| run_main().map_err(|e| e.to_string()))?
+        .join().map_err(|e| format!("{e:?}"))??;
+    Ok(())
+}
+
+fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
 
     // For JSON-output commands: redirect stdout→stderr so only JSON hits stdout
@@ -225,7 +235,6 @@ fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
     })
 }
 
-/// Configure SavedVariables from WTF directory based on args/env.
 fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
     let skip = args.no_saved_vars
         || std::env::var("WOW_SIM_NO_SAVED_VARS").map(|v| v == "1").unwrap_or(false);
@@ -240,7 +249,6 @@ fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
     Some(saved_vars)
 }
 
-/// Initialize sound manager unless WOW_SIM_NO_SOUND=1 or --no-sound.
 fn init_sound(env: &WowLuaEnv) {
     let skip = std::env::var("WOW_SIM_NO_SOUND")
         .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
@@ -432,17 +440,16 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
 
 /// Addons whose warnings are shown during loading.
 const VERBOSE_WARNING_ADDONS: &[&str] = &[
-    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur", "ExtraQuestButton",
-    "WaypointUI", "TomTom", "WorldQuestTracker", "SavedInstances", "Rarity", "SimpleItemLevel",
-    "TalentLoadoutManager", "Simulationcraft", "TomCats", "RaiderIO", "!BugGrabber",
-    "AdvancedInterfaceOptions", "CraftSim", "BlizzMove_Debug", "ClickableRaidBuffs", "Dejunk",
-    "Cell", "AngryKeystones", "AutoPotion", "BigWigs_Plugins", "BugSack", "Clicked", "DeathNote",
-    "DeModal", "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam", "DialogueUI", "Chattynator",
-    "AstralKeys", "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker", "idTip",
-    "Macroriffic", "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator",
-    "EditModeExpanded", "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar",
-    "LegionRemixHelper", "Collectionator", "Syndicator", "BigWigs", "!KalielsTracker",
-    "KRaidSkipTracker", "MacroToolkit", "MinimapButtonButton", "OribosExchange",
+    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur", "ExtraQuestButton", "WaypointUI",
+    "TomTom", "WorldQuestTracker", "SavedInstances", "Rarity", "SimpleItemLevel", "TalentLoadoutManager",
+    "Simulationcraft", "TomCats", "RaiderIO", "!BugGrabber", "AdvancedInterfaceOptions", "CraftSim",
+    "BlizzMove_Debug", "ClickableRaidBuffs", "Dejunk", "Cell", "AngryKeystones", "AutoPotion", "BigWigs_Plugins",
+    "BugSack", "Clicked", "DeathNote", "DeModal", "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam",
+    "DialogueUI", "Chattynator", "AstralKeys", "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker",
+    "idTip", "Macroriffic", "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator",
+    "EditModeExpanded", "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar", "LegionRemixHelper",
+    "Collectionator", "Syndicator", "BigWigs", "!KalielsTracker", "KRaidSkipTracker", "MacroToolkit",
+    "MinimapButtonButton", "OribosExchange",
 ];
 
 /// Print warnings for addons in the verbose list.
@@ -463,9 +470,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     println!("\n=== Summary ===");
     println!("Loaded: {}/{} addons", stats.success_count, addons.len());
     println!("Failed: {}", stats.fail_count);
-    println!("Total: {} Lua files, {} XML files, {} warnings",
-        stats.total_lua, stats.total_xml, stats.total_warnings);
-
+    println!("Total: {} Lua files, {} XML files, {} warnings", stats.total_lua, stats.total_xml, stats.total_warnings);
     let total_time = stats.total_timing.total();
     if !total_time.is_zero() {
         let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
@@ -490,12 +495,9 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     }
 }
 
-/// Run /tmp/debug-scrollbox-update.lua after startup events (ShowUIPanel needs them).
-use wow_ui_sim::startup::{
-    apply_delay, fire_one_on_update_tick, fire_startup_events, process_pending_timers,
-};
+use wow_ui_sim::startup::{apply_delay, fire_one_on_update_tick, fire_startup_events, process_pending_timers};
 
-/// Fire extra OnUpdate ticks so deferred UI (talent frame, pool-created frames) can process.
+/// Fire extra OnUpdate ticks so deferred UI can process.
 fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
     for _ in 0..n {
         env.state().borrow_mut().ensure_layout_rects();
@@ -630,8 +632,6 @@ fn run_headless_startup(env: &WowLuaEnv) {
     process_pending_timers(env);
     fire_one_on_update_tick(env);
     let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
-    if let Ok(s) = std::fs::read_to_string("/tmp/debug-scrollbox-update.lua") { let _ = env.exec(&s); }
-    std::thread::sleep(std::time::Duration::from_secs(2));
     run_extra_update_ticks(env, 3);
 }
 

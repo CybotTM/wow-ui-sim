@@ -21,9 +21,6 @@ pub(crate) fn sync_frame_owner_to_lua(lua: &Lua, state: &Rc<RefCell<SimState>>, 
 }
 
 /// Extract a frame ID from a Lua Value, handling forbidden proxy tables.
-///
-/// Normal frames are UserData (FrameRef). Forbidden frames are proxy Tables with the
-/// UserData stored at key `"__lud"` (set by `create_forbidden_proxy`).
 fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
     match value {
         Value::UserData(_) => extract_frame_id(value),
@@ -63,6 +60,7 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         let is_forbidden = state_clone.borrow().widgets.get(frame_id)
             .map(|f| f.forbidden).unwrap_or(false);
         let ud = create_frame_userdata(lua, frame_id, cfa.name.as_deref(), is_forbidden)?;
+        store_widget_type_key(lua, &ud, widget_type, &cfa.frame_type)?;
         if matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
             && let Some(ref btn_name) = cfa.name {
                 register_button_child_globals(lua, &state_clone, frame_id, btn_name)?;
@@ -77,7 +75,6 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     Ok(create_frame)
 }
 
-/// Map CreateFrame type name to GetObjectType() name for special cases.
 fn resolve_object_type_name(frame_type: &str) -> String {
     match frame_type.to_ascii_lowercase().as_str() {
         "checkout" => "BlizzardCheckout".to_string(),
@@ -361,13 +358,6 @@ fn register_new_frame(
 }
 
 /// Create a FrameRef UserData value for a frame and cache it in `_G`.
-///
-/// Caches both `_G[name]` (for named frames) and `_G["__frame_{id}"]` (always)
-/// so that `lua_global_ref` lookups work for template application and mixin code.
-///
-/// For forbidden frames, a proxy table with `getmetatable() == "Forbidden"` is
-/// stored under the global name, while the internal `__frame_{id}` key always
-/// holds the raw UserData so template application can reach the frame.
 fn create_frame_userdata(
     lua: &Lua,
     frame_id: u64,
@@ -389,6 +379,20 @@ fn create_frame_userdata(
     lua.globals().raw_set(frame_key.as_str(), val.clone())?;
 
     Ok(val)
+}
+
+/// Cache per-type `__index` table as `__ti` in fenv[1] for Lua-side method lookup.
+fn store_widget_type_key(lua: &Lua, ud: &Value, wt: WidgetType, frame_type: &str) -> Result<()> {
+    let type_key = if wt.as_str().eq_ignore_ascii_case(frame_type) {
+        wt.as_str().to_owned()
+    } else {
+        resolve_object_type_name(frame_type)
+    };
+    if let Value::UserData(u) = ud {
+        let fields: mlua::Table = u.user_value()?;
+        fields.raw_set("__wt", lua.create_string(type_key.as_str())?)?;
+    }
+    Ok(())
 }
 
 /// Create a forbidden proxy table: `{ __lud = ud }` with shared `__forbidden_proxy_mt`.

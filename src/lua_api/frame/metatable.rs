@@ -72,7 +72,6 @@ fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                     lookup_child_by_index(lua, id, idx)
                 }
                 mlua::Value::String(ref s) => {
-                    // Per-type lookup: check addon-injected methods
                     lookup_type_injected(lua, &ud, &s.to_string_lossy())
                 }
                 _ => Ok(mlua::Value::Nil),
@@ -229,8 +228,10 @@ fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
 /// Lookup order for string keys:
 /// 1. env[1] — mixin methods (per-instance overrides from Mixin())
 /// 2. env — per-frame properties (set via __newindex)
-/// 3. Rust __index (per-type lookup + numeric children)
+/// 3. Rust __index — per-type injected methods + integer children
 /// 4. old_index — mlua registered Rust methods
+///
+/// Note: mlua wraps user values, so debug.getfenv(ud)[1] = fields.
 const PATCH_INDEX_LUA: &str = r#"
     local ud = ...
     local mt = debug.getmetatable(ud)
@@ -247,7 +248,6 @@ const PATCH_INDEX_LUA: &str = r#"
                 if val ~= nil then return val end
             end
         end
-        -- Falls through to Rust __index (per-type lookup for strings, children for ints)
         return old_index(self, key)
     end
 
@@ -280,31 +280,13 @@ fn lookup_child_by_index(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Val
     Ok(Value::Nil)
 }
 
-/// Check per-type __index tables for addon-injected methods (e.g. ATT's SetATTTooltip).
-/// Reads `__per_type_metatables[widget_type].__index[key]`. Returns Nil if not found.
-fn lookup_type_injected(lua: &Lua, ud: &mlua::AnyUserData, key: &str) -> mlua::Result<Value> {
-    let per_type: mlua::Table = match lua.named_registry_value("__per_type_metatables") {
-        Ok(t) => t,
-        Err(_) => return Ok(Value::Nil),
-    };
-    let id = ud.borrow::<FrameRef>()?.0;
-    let wt = {
-        let state_rc = get_sim_state(lua);
-        let Ok(state) = state_rc.try_borrow() else { return Ok(Value::Nil) };
-        state.widgets.get(id).map(|f| {
-            f.object_type_name.clone().unwrap_or_else(|| f.widget_type.as_str().to_owned())
-        })
-    };
-    if let Some(wt) = wt {
-        if let Ok(mt) = per_type.raw_get::<mlua::Table>(wt.as_str()) {
-            if let Ok(idx) = mt.raw_get::<mlua::Table>("__index") {
-                let val: Value = idx.raw_get(key)?;
-                if val != Value::Nil {
-                    return Ok(val);
-                }
-            }
-        }
-    }
+/// Check per-type __index tables for addon-injected methods.
+///
+/// Currently a no-op: Elune's taint tracking consumes too much C stack for any
+/// extra table operations in the hot __index path, and adding rawgets to
+/// PATCH_INDEX_LUA triggers Elune assertion crashes. Per-type methods remain
+/// accessible via `getmetatable(frame).__index.Method(frame)` (explicit access).
+fn lookup_type_injected(_lua: &Lua, _ud: &mlua::AnyUserData, _key: &str) -> mlua::Result<Value> {
     Ok(Value::Nil)
 }
 
