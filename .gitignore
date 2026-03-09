@@ -1,4 +1,6 @@
 /target
+/iced-dynamic/target
+/iced-dynamic/Cargo.lock
 /.cache
 /Interface/AddOns/*
 !/Interface/AddOns/TestFramework
