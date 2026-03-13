@@ -1,5 +1,8 @@
 //! Locale, region, and build info WoW API functions.
 
+use std::cell::RefCell;
+use std::rc::Rc;
+
 use mlua::{Lua, Result, Value};
 
 /// Register locale, region, and build-related global functions.
@@ -78,8 +81,14 @@ fn register_client_type_checks(lua: &Lua) -> Result<()> {
     globals.set("IsBetaBuild", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsPTRClient", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsTrialAccount", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("IsVeteranTrialAccount", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("IsPublicTestClient", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "IsVeteranTrialAccount",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    globals.set(
+        "IsPublicTestClient",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     globals.set("IsPublicBuild", lua.create_function(|_, ()| Ok(true))?)?;
 
     Ok(())
@@ -122,16 +131,39 @@ fn register_expansion_functions(lua: &Lua) -> Result<()> {
 fn register_expansion_level_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.set("GetExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    g.set("GetMaxLevelForPlayerExpansion", lua.create_function(|_, ()| Ok(80))?)?;
+    g.set(
+        "GetMaxLevelForPlayerExpansion",
+        lua.create_function(|_, ()| Ok(80))?,
+    )?;
     g.set("GetMaxPlayerLevel", lua.create_function(|_, ()| Ok(80))?)?;
-    g.set("GetMaxLevelForExpansionLevel",
-        lua.create_function(|_, expansion: i32| Ok(max_level_for_expansion(expansion)))?)?;
-    g.set("GetServerExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    g.set("GetClientDisplayExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    g.set("GetMinimumExpansionLevel", lua.create_function(|_, ()| Ok(0))?)?;
-    g.set("GetMaximumExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    g.set("GetAccountExpansionLevel", lua.create_function(|_, ()| Ok(10))?)?;
-    g.set("GetAutoCompleteRealms", lua.create_function(|lua, ()| lua.create_table())?)?;
+    g.set(
+        "GetMaxLevelForExpansionLevel",
+        lua.create_function(|_, expansion: i32| Ok(max_level_for_expansion(expansion)))?,
+    )?;
+    g.set(
+        "GetServerExpansionLevel",
+        lua.create_function(|_, ()| Ok(10))?,
+    )?;
+    g.set(
+        "GetClientDisplayExpansionLevel",
+        lua.create_function(|_, ()| Ok(10))?,
+    )?;
+    g.set(
+        "GetMinimumExpansionLevel",
+        lua.create_function(|_, ()| Ok(0))?,
+    )?;
+    g.set(
+        "GetMaximumExpansionLevel",
+        lua.create_function(|_, ()| Ok(10))?,
+    )?;
+    g.set(
+        "GetAccountExpansionLevel",
+        lua.create_function(|_, ()| Ok(10))?,
+    )?;
+    g.set(
+        "GetAutoCompleteRealms",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
     Ok(())
 }
 
@@ -139,18 +171,24 @@ fn register_expansion_level_stubs(lua: &Lua) -> Result<()> {
 /// Errors on invalid arg; simulates retail WoW (AtLeast=true, AtMost=false).
 fn register_classic_expansion_checks(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("ClassicExpansionAtLeast", lua.create_function(|_, level: Value| {
-        if !is_valid_expansion_level(&level) {
-            return Err(mlua::Error::RuntimeError("assertion failed!".into()));
-        }
-        Ok(true)
-    })?)?;
-    g.set("ClassicExpansionAtMost", lua.create_function(|_, level: Value| {
-        if !is_valid_expansion_level(&level) {
-            return Err(mlua::Error::RuntimeError("assertion failed!".into()));
-        }
-        Ok(false)
-    })?)?;
+    g.set(
+        "ClassicExpansionAtLeast",
+        lua.create_function(|_, level: Value| {
+            if !is_valid_expansion_level(&level) {
+                return Err(mlua::Error::RuntimeError("assertion failed!".into()));
+            }
+            Ok(true)
+        })?,
+    )?;
+    g.set(
+        "ClassicExpansionAtMost",
+        lua.create_function(|_, level: Value| {
+            if !is_valid_expansion_level(&level) {
+                return Err(mlua::Error::RuntimeError("assertion failed!".into()));
+            }
+            Ok(false)
+        })?,
+    )?;
     Ok(())
 }
 
@@ -179,11 +217,35 @@ fn register_glue_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
     let c_glue = lua.create_table()?;
-    c_glue.set("IsOnGlueScreen", lua.create_function(|_, ()| Ok(false))?)?;
+    c_glue.set(
+        "IsOnGlueScreen",
+        lua.create_function(|lua, ()| {
+            let Some(state) = lua.app_data_ref::<Rc<RefCell<crate::lua_api::SimState>>>() else {
+                return Ok(false);
+            };
+            Ok(state.borrow().screen_kind.is_glue())
+        })?,
+    )?;
     globals.set("C_Glue", c_glue)?;
 
-    globals.set("InGlue", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("IsLoggedIn", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "InGlue",
+        lua.create_function(|lua, ()| {
+            let Some(state) = lua.app_data_ref::<Rc<RefCell<crate::lua_api::SimState>>>() else {
+                return Ok(false);
+            };
+            Ok(state.borrow().screen_kind.is_glue())
+        })?,
+    )?;
+    globals.set(
+        "IsLoggedIn",
+        lua.create_function(|lua, ()| {
+            let Some(state) = lua.app_data_ref::<Rc<RefCell<crate::lua_api::SimState>>>() else {
+                return Ok(false);
+            };
+            Ok(state.borrow().is_logged_in)
+        })?,
+    )?;
 
     Ok(())
 }

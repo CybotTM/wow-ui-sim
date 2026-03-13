@@ -3,9 +3,10 @@ use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
-use wow_ui_sim::loader::{discover_blizzard_addons, load_addon, load_addon_with_saved_vars, LoadResult, LoadTiming};
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon, load_addon_with_saved_vars, LoadResult, LoadTiming};
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 use wow_ui_sim::render::WowFontSystem;
+use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
 use wow_ui_sim::toc::TocFile;
 
@@ -40,6 +41,10 @@ struct Args {
     /// Prefix with @ to load from file (e.g., --exec-lua @/tmp/debug.lua).
     #[arg(long, value_name = "CODE")]
     exec_lua: Option<String>,
+
+    /// Which top-level WoW screen to load.
+    #[arg(long, value_enum, default_value_t = ScreenKind::Game, value_name = "SCREEN")]
+    screen: ScreenKind,
 
     #[command(subcommand)]
     command: Option<Commands>,
@@ -149,7 +154,7 @@ fn apply_resource_limits() {
 /// Addon names that are test-only and should not be loaded in GUI mode.
 const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData"];
 
-fn scan_addons(base_path: &PathBuf, exclude: &[&str]) -> Vec<(String, PathBuf)> {
+fn scan_addons(base_path: &PathBuf, exclude: &[&str], screen: ScreenKind) -> Vec<(String, PathBuf)> {
     let mut addons = Vec::new();
     if let Ok(entries) = std::fs::read_dir(base_path) {
         for entry in entries.flatten() {
@@ -160,7 +165,7 @@ fn scan_addons(base_path: &PathBuf, exclude: &[&str]) -> Vec<(String, PathBuf)> 
             if exclude.iter().any(|e| *e == name) { continue; }
             if let Some(toc_path) = wow_ui_sim::loader::find_toc_file(&path)
                 && let Ok(toc) = TocFile::from_file(&toc_path)
-                    && !toc.is_glue_only() && !toc.is_ptr_only() && !toc.is_game_type_restricted() {
+                    && toc.allows_screen(screen) && !toc.is_ptr_only() && !toc.is_game_type_restricted() {
                         addons.push((name, toc_path));
                     }
         }
@@ -202,10 +207,11 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let env = WowLuaEnv::new()?;
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
     init_environment(&args, &env, &font_system);
+    env.set_screen_mode(args.screen);
 
     let mut saved_vars = configure_saved_vars(&args);
-    load_blizzard_addons(&env);
-    load_third_party_addons(&args, &env, &mut saved_vars);
+    load_blizzard_addons(&env, args.screen);
+    load_third_party_addons(&args, &env, &mut saved_vars, args.screen);
     env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
 
@@ -267,13 +273,13 @@ fn init_sound(env: &WowLuaEnv) {
 }
 
 /// Load Blizzard SharedXML and base UI addons (auto-discovered, dependency-sorted).
-fn load_blizzard_addons(env: &WowLuaEnv) {
+fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
     let blizzard_ui_path = PathBuf::from("./Interface/BlizzardUI");
     if !blizzard_ui_path.exists() {
         return;
     }
 
-    let addons = discover_blizzard_addons(&blizzard_ui_path);
+    let addons = discover_blizzard_addons_for_screen(&blizzard_ui_path, screen);
     let verbose = std::env::var("WOW_SIM_VERBOSE").is_ok();
     println!("\nLoading {} Blizzard addons...", addons.len());
     let blizzard_start = std::time::Instant::now();
@@ -315,7 +321,12 @@ fn is_test_command(args: &Args) -> bool {
 }
 
 /// Scan, load, and register third-party addons; print summary.
-fn load_third_party_addons(args: &Args, env: &WowLuaEnv, saved_vars: &mut Option<SavedVariablesManager>) {
+fn load_third_party_addons(
+    args: &Args,
+    env: &WowLuaEnv,
+    saved_vars: &mut Option<SavedVariablesManager>,
+    screen: ScreenKind,
+) {
     let skip_addons = args.no_addons
         || std::env::var("WOW_SIM_NO_ADDONS")
             .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
@@ -328,7 +339,7 @@ fn load_third_party_addons(args: &Args, env: &WowLuaEnv, saved_vars: &mut Option
     }
 
     let exclude = if is_test_command(args) { &[][..] } else { TEST_ADDONS };
-    let mut addons = scan_addons(&addons_path, exclude);
+    let mut addons = scan_addons(&addons_path, exclude, screen);
     // --no-addons with test commands: keep only test addons (Wowless, WowlessData)
     if skip_addons {
         addons.retain(|(name, _)| TEST_ADDONS.iter().any(|t| t == name));
@@ -490,7 +501,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     }
 }
 
-use wow_ui_sim::startup::{apply_delay, fire_one_on_update_tick, fire_startup_events, process_pending_timers};
+use wow_ui_sim::startup::{apply_delay, fire_one_on_update_tick, fire_startup_events_for_screen, process_pending_timers};
 
 /// Fire extra OnUpdate ticks so deferred UI can process.
 fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
@@ -621,7 +632,8 @@ fn dispatch_command(
 
 /// Run startup events, timers, and settle the UI state for headless subcommands.
 fn run_headless_startup(env: &WowLuaEnv) {
-    fire_startup_events(env);
+    let screen = env.state().borrow().screen_kind;
+    fire_startup_events_for_screen(env, screen);
     env.apply_post_event_workarounds();
     env.state().borrow_mut().widgets.rebuild_anchor_index();
     process_pending_timers(env);

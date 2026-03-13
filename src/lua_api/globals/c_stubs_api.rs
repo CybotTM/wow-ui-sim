@@ -18,7 +18,10 @@
 use mlua::{Lua, MultiValue, Result, Value};
 
 /// Register all additional C_* namespace stubs.
-pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+pub fn register_c_stubs_api(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     register_core_namespaces(lua, std::rc::Rc::clone(&state))?;
     register_ui_and_chat_stubs(lua, state)?;
     register_missing_globals(lua)?;
@@ -32,7 +35,10 @@ pub fn register_c_stubs_api(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     Ok(())
 }
 
-fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+fn register_core_namespaces(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     register_c_achievement_info(lua)?;
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
     register_c_guild(lua, std::rc::Rc::clone(&state))?;
@@ -50,7 +56,10 @@ fn register_core_namespaces(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<cra
     Ok(())
 }
 
-fn register_ui_and_chat_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+fn register_ui_and_chat_stubs(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     register_c_log(lua)?;
     register_c_campaign_info(lua)?;
     register_quest_global_functions(lua, state)?;
@@ -64,39 +73,68 @@ fn register_ui_and_chat_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<c
 
 fn register_c_achievement_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetRewardItemID", lua.create_function(|_, _achievement_id: i32| Ok(Value::Nil))?)?;
-    t.set("GetAchievementInfo", lua.create_function(|_, _achievement_id: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetRewardItemID",
+        lua.create_function(|_, _achievement_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetAchievementInfo",
+        lua.create_function(|_, _achievement_id: i32| Ok(Value::Nil))?,
+    )?;
     lua.globals().set("C_AchievementInfo", t)?;
     Ok(())
 }
 
-
-fn register_c_guild(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+fn register_c_guild(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let t = lua.create_table()?;
     let st = std::rc::Rc::clone(&state);
-    t.set("GetNumMembers", lua.create_function(move |_, ()| Ok(st.borrow().world.guild_num_members))?)?;
+    t.set(
+        "GetNumMembers",
+        lua.create_function(move |_, ()| Ok(st.borrow().world.guild_num_members))?,
+    )?;
     let st = std::rc::Rc::clone(&state);
-    t.set("IsInGuild", lua.create_function(move |_, ()| Ok(st.borrow().world.guild_name.is_some()))?)?;
-    t.set("GetGuildInfo", lua.create_function(move |_, _unit: Option<String>| {
-        let s = state.borrow();
-        match &s.world.guild_name {
-            Some(name) => {
-                let rank = s.world.guild_rank.clone().unwrap_or_default();
-                Ok((name.clone(), rank, s.world.guild_num_members, String::new()))
+    t.set(
+        "IsInGuild",
+        lua.create_function(move |_, ()| Ok(st.borrow().world.guild_name.is_some()))?,
+    )?;
+    t.set(
+        "GetGuildInfo",
+        lua.create_function(move |_, _unit: Option<String>| {
+            let s = state.borrow();
+            match &s.world.guild_name {
+                Some(name) => {
+                    let rank = s.world.guild_rank.clone().unwrap_or_default();
+                    Ok((name.clone(), rank, s.world.guild_num_members, String::new()))
+                }
+                None => Ok((String::new(), String::new(), 0i32, String::new())),
             }
-            None => Ok((String::new(), String::new(), 0i32, String::new())),
-        }
-    })?)?;
-    t.set("GetMemberInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
+        })?,
+    )?;
+    t.set(
+        "GetMemberInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
     lua.globals().set("C_Guild", t)?;
     Ok(())
 }
 
 fn register_c_guild_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetGuildTabardInfo", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
-    t.set("GetGuildNewsInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
-    t.set("AreGuildEventsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "GetGuildTabardInfo",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetGuildNewsInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "AreGuildEventsEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("GuildRoster", lua.create_function(|_, ()| Ok(()))?)?;
     lua.globals().set("C_GuildInfo", t)?;
     Ok(())
@@ -104,15 +142,39 @@ fn register_c_guild_info(lua: &Lua) -> Result<()> {
 
 fn register_c_lfg_list(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetActiveEntryInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("HasActiveEntryInfo", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetSearchResultInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
-    t.set("CanCreateQuestGroup", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
-    t.set("GetAvailableRoles", lua.create_function(|_, ()| Ok((true, true, true)))?)?;
-    t.set("GetApplications", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("GetNumApplications", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
+    t.set(
+        "GetActiveEntryInfo",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "HasActiveEntryInfo",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "GetSearchResultInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "CanCreateQuestGroup",
+        lua.create_function(|_, _quest_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetAvailableRoles",
+        lua.create_function(|_, ()| Ok((true, true, true)))?,
+    )?;
+    t.set(
+        "GetApplications",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "GetNumApplications",
+        lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
+    )?;
     t.set("IsSquelched", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetAvailableCategories", lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?)?;
+    t.set(
+        "GetAvailableCategories",
+        lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?,
+    )?;
     t.set("HasActivityList", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_LFGList", t)?;
     Ok(())
@@ -120,8 +182,14 @@ fn register_c_lfg_list(lua: &Lua) -> Result<()> {
 
 fn register_c_loss_of_control(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetActiveLossOfControlData", lua.create_function(|_, _index: Option<i32>| Ok(Value::Nil))?)?;
-    t.set("GetActiveLossOfControlDataCount", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set(
+        "GetActiveLossOfControlData",
+        lua.create_function(|_, _index: Option<i32>| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetActiveLossOfControlDataCount",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     lua.globals().set("C_LossOfControl", t)?;
     Ok(())
 }
@@ -144,12 +212,17 @@ fn register_c_stable_info(lua: &Lua) -> Result<()> {
 
 fn register_c_tutorial(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetTutorialStatus", lua.create_function(|_, _tutorial_id: Option<i32>| Ok(false))?)?;
-    t.set("SetTutorialFlag", lua.create_function(|_, _tutorial_id: i32| Ok(()))?)?;
+    t.set(
+        "GetTutorialStatus",
+        lua.create_function(|_, _tutorial_id: Option<i32>| Ok(false))?,
+    )?;
+    t.set(
+        "SetTutorialFlag",
+        lua.create_function(|_, _tutorial_id: i32| Ok(()))?,
+    )?;
     lua.globals().set("C_Tutorial", t)?;
     Ok(())
 }
-
 
 /// Resolve a texture path or file data ID to a WoW interface path.
 fn resolve_texture_path(value: &Value) -> Option<String> {
@@ -162,14 +235,10 @@ fn resolve_texture_path(value: &Value) -> Option<String> {
                 Some(s.to_string())
             }
         }),
-        Value::Integer(n) => {
-            crate::manifest_interface_data::get_texture_path(*n as u32)
-                .map(|p| format!("Interface\\{}", p.replace('/', "\\")))
-        }
-        Value::Number(n) => {
-            crate::manifest_interface_data::get_texture_path(*n as u32)
-                .map(|p| format!("Interface\\{}", p.replace('/', "\\")))
-        }
+        Value::Integer(n) => crate::manifest_interface_data::get_texture_path(*n as u32)
+            .map(|p| format!("Interface\\{}", p.replace('/', "\\"))),
+        Value::Number(n) => crate::manifest_interface_data::get_texture_path(*n as u32)
+            .map(|p| format!("Interface\\{}", p.replace('/', "\\"))),
         _ => None,
     }
 }
@@ -186,29 +255,68 @@ fn set_texture_on_handle(lua: &mlua::Lua, tex: &Value, path: Option<String>) {
 }
 
 /// Global function stubs needed by Blizzard_UnitFrame.
-fn register_unit_frame_global_stubs(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+fn register_unit_frame_global_stubs(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let g = lua.globals();
     let s2 = std::rc::Rc::clone(&state);
-    g.set("InCombatLockdown", lua.create_function(move |_, ()| Ok(s2.borrow().player.in_combat))?)?;
-    g.set("IsResting", lua.create_function(move |_, ()| Ok(state.borrow().player.is_resting))?)?;
+    g.set(
+        "InCombatLockdown",
+        lua.create_function(move |_, ()| Ok(s2.borrow().player.in_combat))?,
+    )?;
+    g.set(
+        "IsResting",
+        lua.create_function(move |_, ()| Ok(state.borrow().player.is_resting))?,
+    )?;
     g.set("IsPVPTimerRunning", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("GetPVPTimer", lua.create_function(|_, ()| Ok(0.0f64))?)?;
-    g.set("GetReadyCheckStatus", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
-    g.set("HasLFGRestrictions", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetPartyLFGID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("RequestGuildPartyState", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("GetLFGCategoryForID", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    g.set("IsEveryoneAssistant", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("WorldLootObjectExists", lua.create_function(|_, _unit: Value| Ok(false))?)?;
+    g.set(
+        "GetReadyCheckStatus",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "HasLFGRestrictions",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetPartyLFGID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "RequestGuildPartyState",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetLFGCategoryForID",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "IsEveryoneAssistant",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "WorldLootObjectExists",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
     g.set("IsInRaid", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetRaidRosterInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
+    g.set(
+        "GetRaidRosterInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
     g.set("PartialPlayTime", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("NoPlayTime", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetBillingTimeRested", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("SetPortraitToTexture", lua.create_function(|lua, (tex, path): (Value, Value)| {
-        set_texture_on_handle(lua, &tex, resolve_texture_path(&path));
-        Ok(())
-    })?)?;
+    g.set(
+        "GetBillingTimeRested",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "SetPortraitToTexture",
+        lua.create_function(|lua, (tex, path): (Value, Value)| {
+            set_texture_on_handle(lua, &tex, resolve_texture_path(&path));
+            Ok(())
+        })?,
+    )?;
     register_unit_frame_global_stubs_2(lua)?;
     Ok(())
 }
@@ -216,30 +324,93 @@ fn register_unit_frame_global_stubs(lua: &Lua, state: std::rc::Rc<std::cell::Ref
 /// Continuation of unit-frame global stubs (combat, arena, UIParent handlers).
 fn register_unit_frame_global_stubs_2(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetUnitTotalModifiedMaxHealthPercent", lua.create_function(|_, _unit: Option<String>| Ok(0.0f64))?)?;
-    g.set("IsThreatWarningEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetThreatStatusColor", lua.create_function(|_, _status: i32| Ok((1.0f64, 1.0f64, 1.0f64)))?)?;
+    g.set(
+        "GetUnitTotalModifiedMaxHealthPercent",
+        lua.create_function(|_, _unit: Option<String>| Ok(0.0f64))?,
+    )?;
+    g.set(
+        "IsThreatWarningEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetThreatStatusColor",
+        lua.create_function(|_, _status: i32| Ok((1.0f64, 1.0f64, 1.0f64)))?,
+    )?;
     g.set("LE_REALM_RELATION_VIRTUAL", 3i32)?;
-    g.set("IsActiveBattlefieldArena", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetNumArenaOpponents", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetBattlefieldEstimatedWaitTime", lua.create_function(|_, _index: Value| Ok(0i32))?)?;
+    g.set(
+        "IsActiveBattlefieldArena",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetNumArenaOpponents",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetBattlefieldEstimatedWaitTime",
+        lua.create_function(|_, _index: Value| Ok(0i32))?,
+    )?;
     g.set("PetUsesPetFrame", lua.create_function(|_, ()| Ok(true))?)?;
-    g.set("UnitIsPossessed", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
-    g.set("GetReleaseTimeRemaining", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("FCF_OnUpdate", lua.create_function(|_, _elapsed: Option<f64>| Ok(()))?)?;
-    g.set("HelpOpenWebTicketButton_OnUpdate", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    g.set("GetLootSpecialization", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set(
+        "UnitIsPossessed",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
+    g.set(
+        "GetReleaseTimeRemaining",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "FCF_OnUpdate",
+        lua.create_function(|_, _elapsed: Option<f64>| Ok(()))?,
+    )?;
+    g.set(
+        "HelpOpenWebTicketButton_OnUpdate",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    g.set(
+        "GetLootSpecialization",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     // UIParent PLAYER_ENTERING_WORLD handler stubs
-    g.set("GetSpellConfirmationPromptsInfo", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("ResurrectGetOfferer", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("GetActiveLootRollIDs", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("GetTutorialsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("BoostTutorial_AttemptLoad", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("ExpansionTrial_CheckLoadUI", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("SubscriptionInterstitial_LoadUI", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("ShowResurrectRequest", lua.create_function(|_, _offerer: String| Ok(()))?)?;
-    g.set("GroupLootContainer_AddRoll", lua.create_function(|_, (_id, _dur): (Value, Value)| Ok(()))?)?;
-    g.set("RemixArtifactTutorialUI_LoadUI", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set(
+        "GetSpellConfirmationPromptsInfo",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set(
+        "ResurrectGetOfferer",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetActiveLootRollIDs",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set(
+        "GetTutorialsEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "BoostTutorial_AttemptLoad",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "ExpansionTrial_CheckLoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "SubscriptionInterstitial_LoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "ShowResurrectRequest",
+        lua.create_function(|_, _offerer: String| Ok(()))?,
+    )?;
+    g.set(
+        "GroupLootContainer_AddRoll",
+        lua.create_function(|_, (_id, _dur): (Value, Value)| Ok(()))?,
+    )?;
+    g.set(
+        "RemixArtifactTutorialUI_LoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
     Ok(())
 }
 
@@ -257,7 +428,14 @@ const POWERBAR_COLORS: &[(&str, f64, f64, f64)] = &[
     ("POWERBAR_PREDICTION_COLOR_PAIN", 1.0, 0.612, 0.0),
 ];
 
-fn build_color_entry(lua: &Lua, r: f64, green: f64, b: f64, get_rgba: &mlua::Function, get_rgb: &mlua::Function) -> Result<mlua::Table> {
+fn build_color_entry(
+    lua: &Lua,
+    r: f64,
+    green: f64,
+    b: f64,
+    get_rgba: &mlua::Function,
+    get_rgb: &mlua::Function,
+) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("r", r)?;
     t.set("g", green)?;
@@ -270,24 +448,33 @@ fn build_color_entry(lua: &Lua, r: f64, green: f64, b: f64, get_rgba: &mlua::Fun
 
 fn register_powerbar_prediction_colors(lua: &Lua) -> Result<()> {
     let get_rgba = lua.create_function(|_, this: mlua::Table| {
-        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?, this.get::<f64>("b")?, this.get::<f64>("a")?))
+        Ok((
+            this.get::<f64>("r")?,
+            this.get::<f64>("g")?,
+            this.get::<f64>("b")?,
+            this.get::<f64>("a")?,
+        ))
     })?;
     let get_rgb = lua.create_function(|_, this: mlua::Table| {
-        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?, this.get::<f64>("b")?))
+        Ok((
+            this.get::<f64>("r")?,
+            this.get::<f64>("g")?,
+            this.get::<f64>("b")?,
+        ))
     })?;
     let g = lua.globals();
     for &(name, r, green, b) in POWERBAR_COLORS {
-        g.set(name, build_color_entry(lua, r, green, b, &get_rgba, &get_rgb)?)?;
+        g.set(
+            name,
+            build_color_entry(lua, r, green, b, &get_rgba, &get_rgb)?,
+        )?;
     }
     Ok(())
 }
 
 fn register_c_log(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "LogMessage",
-        lua.create_function(|_, _msg: Value| Ok(()))?,
-    )?;
+    t.set("LogMessage", lua.create_function(|_, _msg: Value| Ok(()))?)?;
     t.set(
         "LogErrorMessage",
         lua.create_function(|_, _msg: Value| Ok(()))?,
@@ -299,33 +486,84 @@ fn register_c_log(lua: &Lua) -> Result<()> {
 /// C_CampaignInfo namespace - campaign/war campaign data.
 fn register_c_campaign_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetCampaignID", lua.create_function(|_, _quest_id: i32| Ok(0i32))?)?;
-    t.set("GetCampaignInfo", lua.create_function(|_, _campaign_id: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetCampaignID",
+        lua.create_function(|_, _quest_id: i32| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetCampaignInfo",
+        lua.create_function(|_, _campaign_id: i32| Ok(Value::Nil))?,
+    )?;
     lua.globals().set("C_CampaignInfo", t)?;
     Ok(())
 }
 
 /// Quest-related global functions used by ObjectiveTracker.
-fn register_quest_global_functions(lua: &Lua, state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>) -> Result<()> {
+fn register_quest_global_functions(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let g = lua.globals();
-    g.set("IsInInstance", lua.create_function(move |_, ()| {
-        let s = state.borrow();
-        Ok((s.world.in_instance, s.world.instance_type.clone()))
-    })?)?;
-    g.set("IsQuestSequenced", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
-    g.set("GetQuestLogCompletionText", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
-    g.set("GetQuestProgressBarPercent", lua.create_function(|_, _quest_id: i32| Ok(0.0f64))?)?;
-    g.set("QuestMapFrame_GetFocusedQuestID", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("IsModifiedClick", lua.create_function(|_, _action: String| Ok(false))?)?;
-    g.set("GetQuestLink", lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?)?;
+    g.set(
+        "IsInInstance",
+        lua.create_function(move |_, ()| {
+            let s = state.borrow();
+            Ok((s.world.in_instance, s.world.instance_type.clone()))
+        })?,
+    )?;
+    g.set(
+        "IsQuestSequenced",
+        lua.create_function(|_, _quest_id: i32| Ok(false))?,
+    )?;
+    g.set(
+        "GetQuestLogCompletionText",
+        lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetQuestProgressBarPercent",
+        lua.create_function(|_, _quest_id: i32| Ok(0.0f64))?,
+    )?;
+    g.set(
+        "QuestMapFrame_GetFocusedQuestID",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "IsModifiedClick",
+        lua.create_function(|_, _action: String| Ok(false))?,
+    )?;
+    g.set(
+        "GetQuestLink",
+        lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?,
+    )?;
     g.set("IsInJailersTower", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("IsOnGroundFloorInJailersTower", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetNumAutoQuestPopUps", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetAutoQuestPopUp", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
-    g.set("GetQuestLogSpecialItemInfo", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
-    g.set("GetTasksTable", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("ExpandQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
-    g.set("CollapseQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
+    g.set(
+        "IsOnGroundFloorInJailersTower",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetNumAutoQuestPopUps",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetAutoQuestPopUp",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetQuestLogSpecialItemInfo",
+        lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetTasksTable",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set(
+        "ExpandQuestHeader",
+        lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?,
+    )?;
+    g.set(
+        "CollapseQuestHeader",
+        lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?,
+    )?;
     register_quest_leaderboard_functions(lua, &g)?;
     Ok(())
 }
@@ -341,9 +579,13 @@ fn register_quest_leaderboard_functions(lua: &Lua, g: &mlua::Table) -> Result<()
     )?;
     g.set(
         "GetQuestLogLeaderBoard",
-        lua.create_function(|_, (obj_idx, log_idx, _suppress): (i32, i32, Option<bool>)| {
-            Ok(super::c_quest_api::quest_leaderboard_entry(log_idx, obj_idx))
-        })?,
+        lua.create_function(
+            |_, (obj_idx, log_idx, _suppress): (i32, i32, Option<bool>)| {
+                Ok(super::c_quest_api::quest_leaderboard_entry(
+                    log_idx, obj_idx,
+                ))
+            },
+        )?,
     )?;
     Ok(())
 }
@@ -351,25 +593,47 @@ fn register_quest_leaderboard_functions(lua: &Lua, g: &mlua::Table) -> Result<()
 /// Chat window management stubs needed by FloatingChatFrame.
 fn register_chat_window_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("SetChatWindowLocked", lua.create_function(|_, (_id, _locked): (i32, bool)| Ok(()))?)?;
-    g.set("SetChatWindowUninteractable", lua.create_function(|_, (_id, _flag): (i32, bool)| Ok(()))?)?;
-    g.set("GetChatWindowSavedDimensions", lua.create_function(|_, _id: i32| {
-        Ok((430.0f64, 120.0f64))
-    })?)?;
-    g.set("SetChatWindowColor", lua.create_function(|_, (_id, _r, _g, _b): (i32, f64, f64, f64)| Ok(()))?)?;
-    g.set("SetChatWindowAlpha", lua.create_function(|_, (_id, _a): (i32, f64)| Ok(()))?)?;
-    g.set("GetChatWindowSavedPosition", lua.create_function(|_, _id: i32| {
-        // Returns: point, yOffset, xOffset, relativePoint
-        Ok(("BOTTOMLEFT", 0.0f64, 0.0f64, "BOTTOMLEFT"))
-    })?)?;
+    g.set(
+        "SetChatWindowLocked",
+        lua.create_function(|_, (_id, _locked): (i32, bool)| Ok(()))?,
+    )?;
+    g.set(
+        "SetChatWindowUninteractable",
+        lua.create_function(|_, (_id, _flag): (i32, bool)| Ok(()))?,
+    )?;
+    g.set(
+        "GetChatWindowSavedDimensions",
+        lua.create_function(|_, _id: i32| Ok((430.0f64, 120.0f64)))?,
+    )?;
+    g.set(
+        "SetChatWindowColor",
+        lua.create_function(|_, (_id, _r, _g, _b): (i32, f64, f64, f64)| Ok(()))?,
+    )?;
+    g.set(
+        "SetChatWindowAlpha",
+        lua.create_function(|_, (_id, _a): (i32, f64)| Ok(()))?,
+    )?;
+    g.set(
+        "GetChatWindowSavedPosition",
+        lua.create_function(|_, _id: i32| {
+            // Returns: point, yOffset, xOffset, relativePoint
+            Ok(("BOTTOMLEFT", 0.0f64, 0.0f64, "BOTTOMLEFT"))
+        })?,
+    )?;
     // ChangeChatColor: sets r,g,b on ChatTypeInfo[type]
-    g.set("ChangeChatColor", lua.create_function(|lua, (ct, r, g, b): (String, f64, f64, f64)| {
-        let cti: mlua::Table = lua.globals().get::<mlua::Table>("ChatTypeInfo")?.get(&*ct)?;
-        cti.set("r", r)?;
-        cti.set("g", g)?;
-        cti.set("b", b)?;
-        Ok(())
-    })?)?;
+    g.set(
+        "ChangeChatColor",
+        lua.create_function(|lua, (ct, r, g, b): (String, f64, f64, f64)| {
+            let cti: mlua::Table = lua
+                .globals()
+                .get::<mlua::Table>("ChatTypeInfo")?
+                .get(&*ct)?;
+            cti.set("r", r)?;
+            cti.set("g", g)?;
+            cti.set("b", b)?;
+            Ok(())
+        })?,
+    )?;
     Ok(())
 }
 
@@ -377,45 +641,87 @@ fn register_chat_window_stubs(lua: &Lua) -> Result<()> {
 fn register_chat_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     // GetChatTypeIndex: deterministic integer from chat type name
-    g.set("GetChatTypeIndex", lua.create_function(|_, name: String| {
-        let hash = name.bytes().fold(0u32, |acc, b| acc.wrapping_mul(31).wrapping_add(b as u32));
-        Ok((hash % 50 + 1) as i32)
-    })?)?;
+    g.set(
+        "GetChatTypeIndex",
+        lua.create_function(|_, name: String| {
+            let hash = name
+                .bytes()
+                .fold(0u32, |acc, b| acc.wrapping_mul(31).wrapping_add(b as u32));
+            Ok((hash % 50 + 1) as i32)
+        })?,
+    )?;
     // CreateSecureDelegate: no taint system, return the function as-is
-    g.set("CreateSecureDelegate", lua.create_function(|_, func: mlua::Function| Ok(func))?)?;
+    g.set(
+        "CreateSecureDelegate",
+        lua.create_function(|_, func: mlua::Function| Ok(func))?,
+    )?;
     // GetChatWindowInfo: return defaults (only window 1 is shown)
     // Returns: name, fontSize, r, g, b, alpha, shown, locked, docked, uninteractable
     // Default color is black (0,0,0) at 25% alpha, matching DEFAULT_CHATFRAME_COLOR/ALPHA
-    g.set("GetChatWindowInfo", lua.create_function(|_, id: i32| {
-        let name = format!("ChatFrame{id}");
-        let shown = id == 1;
-        Ok((name, 14.0f64, 0.0f64, 0.0f64, 0.0f64, 0.25f64, shown, false, false, false))
-    })?)?;
+    g.set(
+        "GetChatWindowInfo",
+        lua.create_function(|_, id: i32| {
+            let name = format!("ChatFrame{id}");
+            let shown = id == 1;
+            Ok((
+                name, 14.0f64, 0.0f64, 0.0f64, 0.0f64, 0.25f64, shown, false, false, false,
+            ))
+        })?,
+    )?;
     // GetChatWindowMessages/GetChatWindowChannels: return no message types or channels
-    g.set("GetChatWindowMessages", lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?)?;
-    g.set("GetChatWindowChannels", lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?)?;
-    g.set("GetDefaultLanguage", lua.create_function(|_, ()| Ok("Common"))?)?;
-    g.set("GetAlternativeDefaultLanguage", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    g.set(
+        "GetChatWindowMessages",
+        lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?,
+    )?;
+    g.set(
+        "GetChatWindowChannels",
+        lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?,
+    )?;
+    g.set(
+        "GetDefaultLanguage",
+        lua.create_function(|_, ()| Ok("Common"))?,
+    )?;
+    g.set(
+        "GetAlternativeDefaultLanguage",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
 /// C_Macro namespace - macro management stubs.
 fn register_c_macro(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("SetMacroExecuteLineCallback", lua.create_function(|_, _cb: Value| Ok(()))?)?;
-    t.set("GetMacroInfo", lua.create_function(|_, _id: Value| Ok(Value::Nil))?)?;
-    t.set("GetNumMacros", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
+    t.set(
+        "SetMacroExecuteLineCallback",
+        lua.create_function(|_, _cb: Value| Ok(()))?,
+    )?;
+    t.set(
+        "GetMacroInfo",
+        lua.create_function(|_, _id: Value| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetNumMacros",
+        lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
+    )?;
     lua.globals().set("C_Macro", t)?;
     Ok(())
 }
 
-
 fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetCurrentParty", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("GetPartyPlaylistEntry", lua.create_function(|_, ()| Ok(mlua::Value::Nil))?)?;
+    t.set(
+        "GetCurrentParty",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "GetPartyPlaylistEntry",
+        lua.create_function(|_, ()| Ok(mlua::Value::Nil))?,
+    )?;
     t.set("ClearFastLogin", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("SetAutoQueueOnLogout", lua.create_function(|_, _flag: bool| Ok(()))?)?;
+    t.set(
+        "SetAutoQueueOnLogout",
+        lua.create_function(|_, _flag: bool| Ok(()))?,
+    )?;
     lua.globals().set("C_WoWLabsMatchmaking", t)?;
 
     // C_WowLabsDataManager (note: different casing from C_WoWLabsMatchmaking)
@@ -433,13 +739,18 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     register_timer_and_bar_globals(lua, &g)?;
     register_lfg_and_guild_stubs(lua, &g)?;
     register_action_button_util(lua, &g)?;
-    g.set("UnitGetAvailableRoles", lua.create_function(|_, _unit: Value| {
-        Ok((true, true, true))
-    })?)?;
-    g.set("UnitIsGameObject", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetLFGRoleUpdate", lua.create_function(|_, ()| {
-        Ok((false, 0i32, 0i32, 0i32, 0i32, false))
-    })?)?;
+    g.set(
+        "UnitGetAvailableRoles",
+        lua.create_function(|_, _unit: Value| Ok((true, true, true)))?,
+    )?;
+    g.set(
+        "UnitIsGameObject",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "GetLFGRoleUpdate",
+        lua.create_function(|_, ()| Ok((false, 0i32, 0i32, 0i32, 0i32, false)))?,
+    )?;
     register_paperdoll_container_and_misc_stubs(lua, &g)?;
     register_secure_env_globals(lua, &g)?;
     Ok(())
@@ -449,40 +760,80 @@ fn register_secure_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     // Globals normally set in secure-environment files via SwapToGlobalEnvironment().
     // Our sim doesn't implement secure environments, so these need explicit stubs.
     let combat_log = lua.create_table()?;
-    combat_log.set("GenerateMessage", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
+    combat_log.set(
+        "GenerateMessage",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
     g.set("CombatLogInbound", combat_log)?;
-    g.set("StoreFrame_CheckForFree", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set(
+        "StoreFrame_CheckForFree",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
 
     // GetAvailableLocaleInfo: generated stub returns empty table, needs locale data.
     // Set here so the is_nil() check in generated_stubs.rs skips it.
-    g.set("GetAvailableLocaleInfo", lua.create_function(|lua, _: MultiValue| {
-        let entry = lua.create_table()?;
-        entry.set("localeName", "enUS")?;
-        entry.set("localeId", 1)?;
-        let result = lua.create_table()?;
-        result.set(1, entry)?;
-        Ok(Value::Table(result))
-    })?)?;
+    g.set(
+        "GetAvailableLocaleInfo",
+        lua.create_function(|lua, _: MultiValue| {
+            let entry = lua.create_table()?;
+            entry.set("localeName", "enUS")?;
+            entry.set("localeId", 1)?;
+            let result = lua.create_table()?;
+            result.set(1, entry)?;
+            Ok(Value::Table(result))
+        })?,
+    )?;
     Ok(())
 }
 
 fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("GetDefaultScale", lua.create_function(|_, ()| Ok(1.0f64))?)?;
-    g.set("HasVehicleActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("HasOverrideActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetMaxBattlefieldID", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set(
+        "HasVehicleActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "HasOverrideActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetMaxBattlefieldID",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     g.set("RequestRaidInfo", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("RequestLFDPlayerLockInfo", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("RequestLFDPartyLockInfo", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("GetQuestTimers", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("GetMirrorTimerInfo", lua.create_function(|_, _timer: Value| {
-        Ok(("UNKNOWN", 0i32, 0i32, -1i32, false, ""))
-    })?)?;
-    g.set("GetInventoryAlertStatus", lua.create_function(|_, _slot: i32| Ok(0i32))?)?;
-    g.set("GetWorldElapsedTimers", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetWorldElapsedTime", lua.create_function(|_, _id: i32| Ok((0i32, 0i32, 0i32)))?)?;
+    g.set(
+        "RequestLFDPlayerLockInfo",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "RequestLFDPartyLockInfo",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetQuestTimers",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetMirrorTimerInfo",
+        lua.create_function(|_, _timer: Value| Ok(("UNKNOWN", 0i32, 0i32, -1i32, false, "")))?,
+    )?;
+    g.set(
+        "GetInventoryAlertStatus",
+        lua.create_function(|_, _slot: i32| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetWorldElapsedTimers",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetWorldElapsedTime",
+        lua.create_function(|_, _id: i32| Ok((0i32, 0i32, 0i32)))?,
+    )?;
     g.set("HasBonusActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("HasTempShapeshiftActionBar", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set(
+        "HasTempShapeshiftActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     g.set("PutItemInBackpack", lua.create_function(|_, ()| Ok(()))?)?;
     g.set("PutItemInBag", lua.create_function(|_, _bag: i32| Ok(()))?)?;
     Ok(())
@@ -490,28 +841,49 @@ fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// PaperDoll, container frame, group roster, and miscellaneous stubs.
 fn register_paperdoll_container_and_misc_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    g.set("PaperDollItemSlotButton_OnLoad", lua.create_function(|_, _frame: Value| Ok(()))?)?;
-    g.set("PaperDollItemSlotButton_OnShow", lua.create_function(|_, _frame: Value| Ok(()))?)?;
-    g.set("ContainerFrame_GetContainerNumSlots", lua.create_function(|_, id: Value| {
-        let bag = match id {
-            Value::Integer(n) => n as i32,
-            Value::Number(n) => n as i32,
-            _ => -1,
-        };
-        let count = super::c_container_api::bag_slot_count(bag);
-        Ok((count, count))
-    })?)?;
-    g.set("GetGroupMemberCounts", lua.create_function(|lua, ()| {
-        let t = lua.create_table()?;
-        for key in ["TANK", "HEALER", "DAMAGER", "NOROLE", "ASSIGNEDROLE"] {
-            t.set(key, 0i32)?;
-        }
-        Ok(t)
-    })?)?;
-    g.set("GetDungeonDifficultyID", lua.create_function(|_, ()| Ok(1i32))?)?;
+    g.set(
+        "PaperDollItemSlotButton_OnLoad",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
+    g.set(
+        "PaperDollItemSlotButton_OnShow",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
+    g.set(
+        "ContainerFrame_GetContainerNumSlots",
+        lua.create_function(|_, id: Value| {
+            let bag = match id {
+                Value::Integer(n) => n as i32,
+                Value::Number(n) => n as i32,
+                _ => -1,
+            };
+            let count = super::c_container_api::bag_slot_count(bag);
+            Ok((count, count))
+        })?,
+    )?;
+    g.set(
+        "GetGroupMemberCounts",
+        lua.create_function(|lua, ()| {
+            let t = lua.create_table()?;
+            for key in ["TANK", "HEALER", "DAMAGER", "NOROLE", "ASSIGNEDROLE"] {
+                t.set(key, 0i32)?;
+            }
+            Ok(t)
+        })?,
+    )?;
+    g.set(
+        "GetDungeonDifficultyID",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
     g.set("GetSendMailPrice", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GuildControlSetRank", lua.create_function(|_, _rank: Value| Ok(()))?)?;
-    g.set("StoreSecureReference", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    g.set(
+        "GuildControlSetRank",
+        lua.create_function(|_, _rank: Value| Ok(()))?,
+    )?;
+    g.set(
+        "StoreSecureReference",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     // ResetCursor — cursor_api handles ClearCursor; ResetCursor resets visual.
     g.set("ResetCursor", lua.create_function(|_, ()| Ok(()))?)?;
     Ok(())
@@ -519,21 +891,52 @@ fn register_paperdoll_container_and_misc_stubs(lua: &Lua, g: &mlua::Table) -> Re
 
 /// LFG, dungeon finder, guild, and honor global stubs.
 fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    g.set("GetLFGProposal", lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?)?;
-    g.set("GetLFGQueuedList", lua.create_function(|_, _args: mlua::MultiValue| Ok(mlua::MultiValue::new()))?)?;
+    g.set(
+        "GetLFGProposal",
+        lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?,
+    )?;
+    g.set(
+        "GetLFGQueuedList",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(mlua::MultiValue::new()))?,
+    )?;
     // GetActionBarToggles/SetActionBarToggles registered in action_bar_api.rs
-    g.set("UnitPowerBarTimerInfo", lua.create_function(|_, _unit: Value| Ok(Value::Nil))?)?;
+    g.set(
+        "UnitPowerBarTimerInfo",
+        lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
+    )?;
     g.set("GetWebTicket", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("UnitGroupRolesAssigned", lua.create_function(|_, _unit: Option<String>| Ok("NONE"))?)?;
-    g.set("GuildControlGetNumRanks", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("RequestGuildChallengeInfo", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("GetGuildFactionGroup", lua.create_function(|_, ()| Ok(1i32))?)?;
-    g.set("UnitHonor", lua.create_function(|_, _unit: Option<String>| Ok(0i32))?)?;
-    g.set("UnitHonorMax", lua.create_function(|_, _unit: Option<String>| Ok(100i32))?)?;
-    g.set("UnitHonorLevel", lua.create_function(|_, _unit: Option<String>| Ok(1i32))?)?;
-    g.set("GetLFGInfoServer", lua.create_function(|_, (_cat, _id): (Value, Value)| {
-        Ok(mlua::MultiValue::new())
-    })?)?;
+    g.set(
+        "UnitGroupRolesAssigned",
+        lua.create_function(|_, _unit: Option<String>| Ok("NONE"))?,
+    )?;
+    g.set(
+        "GuildControlGetNumRanks",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "RequestGuildChallengeInfo",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetGuildFactionGroup",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
+    g.set(
+        "UnitHonor",
+        lua.create_function(|_, _unit: Option<String>| Ok(0i32))?,
+    )?;
+    g.set(
+        "UnitHonorMax",
+        lua.create_function(|_, _unit: Option<String>| Ok(100i32))?,
+    )?;
+    g.set(
+        "UnitHonorLevel",
+        lua.create_function(|_, _unit: Option<String>| Ok(1i32))?,
+    )?;
+    g.set(
+        "GetLFGInfoServer",
+        lua.create_function(|_, (_cat, _id): (Value, Value)| Ok(mlua::MultiValue::new()))?,
+    )?;
     Ok(())
 }
 
@@ -565,14 +968,26 @@ fn register_action_button_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
 /// C_PerksActivities - Monthly activities / Trading Post tracking.
 fn register_c_perks_activities(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetTrackedPerksActivities", lua.create_function(|lua, ()| {
-        let result = lua.create_table()?;
-        result.set("trackedIDs", lua.create_table()?)?;
-        Ok(result)
-    })?)?;
-    t.set("GetPerksActivityInfo", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    t.set("GetPerksActivityChatLink", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    t.set("RemoveTrackedPerksActivity", lua.create_function(|_, _id: i32| Ok(()))?)?;
+    t.set(
+        "GetTrackedPerksActivities",
+        lua.create_function(|lua, ()| {
+            let result = lua.create_table()?;
+            result.set("trackedIDs", lua.create_table()?)?;
+            Ok(result)
+        })?,
+    )?;
+    t.set(
+        "GetPerksActivityInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetPerksActivityChatLink",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "RemoveTrackedPerksActivity",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
     lua.globals().set("C_PerksActivities", t)?;
     Ok(())
 }
@@ -611,8 +1026,14 @@ fn register_social_status_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("C_LobbyMatchmakerInfo", lobby)?;
 
     let mentorship = lua.create_table()?;
-    mentorship.set("GetMentorshipStatus", lua.create_function(|_, _unit: Value| Ok(0i32))?)?;
-    mentorship.set("IsActivePlayerConsideredNewcomer", lua.create_function(|_, ()| Ok(false))?)?;
+    mentorship.set(
+        "GetMentorshipStatus",
+        lua.create_function(|_, _unit: Value| Ok(0i32))?,
+    )?;
+    mentorship.set(
+        "IsActivePlayerConsideredNewcomer",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     g.set("C_PlayerMentorship", mentorship)?;
 
     let recent_allies = lua.create_table()?;
@@ -623,13 +1044,19 @@ fn register_social_status_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 fn register_social_queue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let social_queue = lua.create_table()?;
-    social_queue.set("GetAllGroups", lua.create_function(|lua, _local_only: Option<bool>| lua.create_table())?)?;
-    social_queue.set("GetConfig", lua.create_function(|lua, ()| {
-        let config = lua.create_table()?;
-        config.set("toastDuration", 60.0f64)?;
-        config.set("enableToasts", false)?;
-        Ok(config)
-    })?)?;
+    social_queue.set(
+        "GetAllGroups",
+        lua.create_function(|lua, _local_only: Option<bool>| lua.create_table())?,
+    )?;
+    social_queue.set(
+        "GetConfig",
+        lua.create_function(|lua, ()| {
+            let config = lua.create_table()?;
+            config.set("toastDuration", 60.0f64)?;
+            config.set("enableToasts", false)?;
+            Ok(config)
+        })?,
+    )?;
     g.set("C_SocialQueue", social_queue)?;
     Ok(())
 }
@@ -646,40 +1073,74 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
 
 fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let cinematic = lua.create_table()?;
-    cinematic.set("GetUICinematicList", lua.create_function(|lua, ()| lua.create_table())?)?;
+    cinematic.set(
+        "GetUICinematicList",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
     g.set("C_CinematicList", cinematic)?;
 
     let login = lua.create_table()?;
-    login.set("GetState", lua.create_function(|_, ()| Ok(0i32))?)?;
+    login.set(
+        "GetState",
+        lua.create_function(|lua, ()| {
+            let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            else {
+                return Ok((1i32, false, 0i32, false));
+            };
+            Ok(state.borrow().screen_kind.login_state())
+        })?,
+    )?;
     login.set("ClearLastError", lua.create_function(|_, ()| Ok(()))?)?;
     login.set("GetLastError", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("C_Login", login)?;
 
-    g.set("DefaultCompactNamePlateEnemyFrameOptions", lua.create_table()?)?;
-    g.set("DefaultCompactNamePlateFriendlyFrameOptions", lua.create_table()?)?;
-    g.set("DefaultCompactNamePlatePlayerFrameSetUpOptions", lua.create_table()?)?;
+    g.set(
+        "DefaultCompactNamePlateEnemyFrameOptions",
+        lua.create_table()?,
+    )?;
+    g.set(
+        "DefaultCompactNamePlateFriendlyFrameOptions",
+        lua.create_table()?,
+    )?;
+    g.set(
+        "DefaultCompactNamePlatePlayerFrameSetUpOptions",
+        lua.create_table()?,
+    )?;
 
     // Register C_FunctionContainers with proper LuaFunctionContainer UserData
     super::function_container::register_c_function_containers(lua)?;
 
     let spell_overlay = lua.create_table()?;
-    spell_overlay.set("IsSpellOverlayed", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
+    spell_overlay.set(
+        "IsSpellOverlayed",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
     g.set("C_SpellActivationOverlay", spell_overlay)?;
     Ok(())
 }
 
 fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let char_svc = lua.create_table()?;
-    char_svc.set("HasRequiredBoostForUnrevoke", lua.create_function(|_, ()| Ok(false))?)?;
-    char_svc.set("HasRequiredBoostForClassTrial", lua.create_function(|_, ()| Ok(false))?)?;
-    char_svc.set("GetCharacterServiceDisplayData", lua.create_function(|lua, _boost_type: Value| {
-        let popup_info = lua.create_table()?;
-        popup_info.set("textureKit", "")?;
-        let t = lua.create_table()?;
-        t.set("popupInfo", popup_info)?;
-        t.set("flowTitle", "")?;
-        Ok(Value::Table(t))
-    })?)?;
+    char_svc.set(
+        "HasRequiredBoostForUnrevoke",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "HasRequiredBoostForClassTrial",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "GetCharacterServiceDisplayData",
+        lua.create_function(|lua, _boost_type: Value| {
+            let popup_info = lua.create_table()?;
+            popup_info.set("textureKit", "")?;
+            let t = lua.create_table()?;
+            t.set("popupInfo", popup_info)?;
+            t.set("flowTitle", "")?;
+            Ok(Value::Table(t))
+        })?,
+    )?;
     g.set("C_CharacterServices", char_svc)?;
     Ok(())
 }
@@ -688,24 +1149,40 @@ fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
 fn register_c_video_options(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     let video = lua.create_table()?;
-    video.set("GetDefaultGameWindowSize", lua.create_function(|lua, _monitor: i32| {
-        let t = lua.create_table()?;
-        t.set("x", 1920)?;
-        t.set("y", 1080)?;
-        Ok(t)
-    })?)?;
-    video.set("GetCurrentGameWindowSize", lua.create_function(|lua, _args: MultiValue| {
-        let t = lua.create_table()?;
-        t.set("x", 1920)?;
-        t.set("y", 1080)?;
-        Ok(t)
-    })?)?;
-    video.set("GetGameWindowSizes", lua.create_function(|lua, _args: MultiValue| {
-        lua.create_table()
-    })?)?;
-    video.set("GetGxAdapterInfo", lua.create_function(|lua, ()| lua.create_table())?)?;
-    video.set("IsSpellVisualDensitySystemSupported", lua.create_function(|_, ()| Ok(false))?)?;
-    video.set("SetGameWindowSize", lua.create_function(|_, (_x, _y): (i32, i32)| Ok(()))?)?;
+    video.set(
+        "GetDefaultGameWindowSize",
+        lua.create_function(|lua, _monitor: i32| {
+            let t = lua.create_table()?;
+            t.set("x", 1920)?;
+            t.set("y", 1080)?;
+            Ok(t)
+        })?,
+    )?;
+    video.set(
+        "GetCurrentGameWindowSize",
+        lua.create_function(|lua, _args: MultiValue| {
+            let t = lua.create_table()?;
+            t.set("x", 1920)?;
+            t.set("y", 1080)?;
+            Ok(t)
+        })?,
+    )?;
+    video.set(
+        "GetGameWindowSizes",
+        lua.create_function(|lua, _args: MultiValue| lua.create_table())?,
+    )?;
+    video.set(
+        "GetGxAdapterInfo",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    video.set(
+        "IsSpellVisualDensitySystemSupported",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    video.set(
+        "SetGameWindowSize",
+        lua.create_function(|_, (_x, _y): (i32, i32)| Ok(()))?,
+    )?;
     g.set("C_VideoOptions", video)?;
     Ok(())
 }
@@ -716,35 +1193,88 @@ fn register_game_state_stubs(lua: &Lua) -> Result<()> {
     g.set("IsTargetLoose", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("IsPartyLFG", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("IsPartyWorldPVP", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("PlayerGetTimerunningSeasonID", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("UnitDistanceSquared", lua.create_function(|_, _unit: Value| Ok((0.0f64, true)))?)?;
-    g.set("UnitInOtherParty", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("UnitHasIncomingResurrection", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetLFGRoles", lua.create_function(|_, ()| Ok((false, false, false)))?)?;
-    g.set("GetLFGReadyCheckUpdate", lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?)?;
-    g.set("CanPartyLFGBackfill", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetNumArenaOpponentSpecs", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetArenaOpponentSpec", lua.create_function(|_, _index: Value| Ok((0i32, 0i32)))?)?;
-    g.set("UnitTreatAsPlayerForDisplay", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetLFGDeserterExpiration", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("UnitHasLFGDeserter", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetWorldPVPQueueStatus", lua.create_function(|_, _index: Value| {
-        Ok(("none", 0i32, 0i32, 0i32))
-    })?)?;
-    g.set("CanHearthAndResurrectFromArea", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetChannelList", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("CanBeRaidTarget", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("GetRaidTargetIndex", lua.create_function(|_, _unit: Value| Ok(Value::Nil))?)?;
+    g.set(
+        "PlayerGetTimerunningSeasonID",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "UnitDistanceSquared",
+        lua.create_function(|_, _unit: Value| Ok((0.0f64, true)))?,
+    )?;
+    g.set(
+        "UnitInOtherParty",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "UnitHasIncomingResurrection",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "GetLFGRoles",
+        lua.create_function(|_, ()| Ok((false, false, false)))?,
+    )?;
+    g.set(
+        "GetLFGReadyCheckUpdate",
+        lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?,
+    )?;
+    g.set(
+        "CanPartyLFGBackfill",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetNumArenaOpponentSpecs",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetArenaOpponentSpec",
+        lua.create_function(|_, _index: Value| Ok((0i32, 0i32)))?,
+    )?;
+    g.set(
+        "UnitTreatAsPlayerForDisplay",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "GetLFGDeserterExpiration",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "UnitHasLFGDeserter",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "GetWorldPVPQueueStatus",
+        lua.create_function(|_, _index: Value| Ok(("none", 0i32, 0i32, 0i32)))?,
+    )?;
+    g.set(
+        "CanHearthAndResurrectFromArea",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetChannelList",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "CanBeRaidTarget",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "GetRaidTargetIndex",
+        lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
 /// C_IncomingSummon namespace stubs.
 fn register_c_incoming_summon(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("HasIncomingSummon", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    t.set("IncomingSummonStatus", lua.create_function(|_, _unit: Value| Ok(0i32))?)?;
+    t.set(
+        "HasIncomingSummon",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IncomingSummonStatus",
+        lua.create_function(|_, _unit: Value| Ok(0i32))?,
+    )?;
     lua.globals().set("C_IncomingSummon", t)?;
     Ok(())
 }
-
-

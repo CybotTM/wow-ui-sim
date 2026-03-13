@@ -1,8 +1,8 @@
 //! Addon loader - loads addons from TOC files.
 
 mod addon;
-pub(crate) mod bytecode_cache;
 mod button;
+pub(crate) mod bytecode_cache;
 mod error;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;
@@ -17,6 +17,7 @@ mod xml_texture;
 
 use crate::lua_api::LoaderEnv;
 use crate::saved_variables::SavedVariablesManager;
+use crate::screen::ScreenKind;
 use crate::toc::TocFile;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -140,20 +141,19 @@ pub fn sort_addons_by_dependencies(addons: &mut Vec<(String, PathBuf)>) {
         }
     }
 
-    let available: std::collections::HashSet<&str> =
-        toc_map.keys().map(|s| s.as_str()).collect();
+    let available: std::collections::HashSet<&str> = toc_map.keys().map(|s| s.as_str()).collect();
     let deps = build_dependency_graph(&toc_map, &available);
     let sorted = kahns_sort(&deps, toc_map.len());
 
     // Rebuild the vec in sorted order, appending any addons not in the graph at the end
-    let name_to_path: HashMap<&str, &PathBuf> = addons
-        .iter()
-        .map(|(n, p)| (n.as_str(), p))
-        .collect();
+    let name_to_path: HashMap<&str, &PathBuf> =
+        addons.iter().map(|(n, p)| (n.as_str(), p)).collect();
     let mut result: Vec<(String, PathBuf)> = sorted
         .iter()
         .filter_map(|&name| {
-            name_to_path.get(name).map(|&p| (name.to_string(), p.clone()))
+            name_to_path
+                .get(name)
+                .map(|&p| (name.to_string(), p.clone()))
         })
         .collect();
     // Append addons that weren't in the toc_map (failed to parse)
@@ -170,6 +170,14 @@ pub fn sort_addons_by_dependencies(addons: &mut Vec<(String, PathBuf)>) {
 /// Scans for `Blizzard_*` subdirectories, parses their TOC files, filters out `LoadOnDemand`
 /// addons (unless required by a non-LOD addon), and returns them in dependency order.
 pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)> {
+    discover_blizzard_addons_for_screen(blizzard_ui_dir, ScreenKind::Game)
+}
+
+/// Discover Blizzard addons for a specific screen mode, topologically sorted by dependencies.
+pub fn discover_blizzard_addons_for_screen(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+) -> Vec<(String, PathBuf)> {
     let entries = match std::fs::read_dir(blizzard_ui_dir) {
         Ok(e) => e,
         Err(_) => return Vec::new(),
@@ -193,7 +201,7 @@ pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)
         let Ok(toc) = TocFile::from_file(&toc_path) else {
             continue;
         };
-        if toc.is_glue_only() || toc.is_ptr_only() || toc.is_game_type_restricted() {
+        if !toc.allows_screen(screen) || toc.is_ptr_only() || toc.is_game_type_restricted() {
             continue;
         }
         if toc.is_load_on_demand() {
@@ -206,7 +214,7 @@ pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)
     // Pull LOD addons that are required by non-LOD addons
     pull_required_lod_addons(&mut addons, &mut lod_pool);
 
-    topological_sort_addons(addons)
+    topological_sort_addons(addons, base_addons_for_screen(screen))
 }
 
 /// Recursively pull LoadOnDemand addons into the main set when required by loaded addons.
@@ -242,16 +250,16 @@ fn pull_required_lod_addons(
 /// immediately (matching WoW's inline load-on-trigger behavior).
 fn topological_sort_addons(
     mut addons: HashMap<String, (PathBuf, TocFile)>,
+    base_addons: &[&str],
 ) -> Vec<(String, PathBuf)> {
     // Build LoadWith reverse index: parent_name -> list of addon names to load inline.
     let load_with_map = build_load_with_map(&addons);
 
     // Extract base UI addons in fixed order, pulling their non-base dependencies first.
-    let base_set: std::collections::HashSet<&str> =
-        BASE_UI_ADDONS.iter().copied().collect();
+    let base_set: std::collections::HashSet<&str> = base_addons.iter().copied().collect();
     let mut result = Vec::with_capacity(addons.len());
     let mut loaded: std::collections::HashSet<String> = std::collections::HashSet::new();
-    for &base in BASE_UI_ADDONS {
+    for &base in base_addons {
         // Pull non-base dependencies before this base addon
         let deps = addons
             .get(base)
@@ -351,7 +359,10 @@ fn pull_base_deps(
         .unwrap_or_default();
     // If this addon depends on a base addon that hasn't loaded yet, defer it
     // to the Kahn's sort phase where all base addons will already be present.
-    if deps.iter().any(|d| base_set.contains(d.as_str()) && !loaded.contains(d)) {
+    if deps
+        .iter()
+        .any(|d| base_set.contains(d.as_str()) && !loaded.contains(d))
+    {
         return;
     }
     for dep in deps {
@@ -382,6 +393,25 @@ const BASE_UI_ADDONS: &[&str] = &[
     "Blizzard_UIParent",
 ];
 
+const GLUE_BASE_ADDONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_ObjectAPI",
+    "Blizzard_SharedXML",
+    "Blizzard_ScriptErrorsFrame",
+    "Blizzard_StaticPopup_Glue",
+    "Blizzard_GlueXMLBase",
+    "Blizzard_GlueParent",
+    "Blizzard_GlueXML",
+];
+
+fn base_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
+    match screen {
+        ScreenKind::Game => BASE_UI_ADDONS,
+        ScreenKind::Login | ScreenKind::CharacterSelect => GLUE_BASE_ADDONS,
+    }
+}
+
 /// Build a map of addon name -> list of available addon names it depends on.
 /// Includes both required and optional dependencies (WoW loads optional deps
 /// before the addon if they are present).
@@ -399,9 +429,10 @@ fn build_dependency_graph<'a>(
                 .collect();
             for d in toc.optional_deps() {
                 if let Some(&dep) = available.get(d.as_str())
-                    && !deps.contains(&dep) {
-                        deps.push(dep);
-                    }
+                    && !deps.contains(&dep)
+                {
+                    deps.push(dep);
+                }
             }
             (name.as_str(), deps)
         })

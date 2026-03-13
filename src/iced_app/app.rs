@@ -15,8 +15,8 @@ use crate::saved_variables::SavedVariablesManager;
 use crate::texture::TextureManager;
 use iced_layout_inspector::server::{self as debug_server, ScreenshotData};
 
-use super::state::InspectorState;
 use super::Message;
+use super::state::InspectorState;
 
 /// Default path to WoW TTF fonts.
 pub const DEFAULT_FONTS_PATH: &str = "./fonts";
@@ -52,16 +52,19 @@ thread_local! {
 /// Fire the standard WoW startup events.
 pub fn fire_startup_events(env: &Rc<RefCell<WowLuaEnv>>) {
     let env = env.borrow();
-    fire_login_events(&env);
-    fire_world_and_ui_events(&env);
+    let screen = env.state().borrow().screen_kind;
+    crate::startup::fire_startup_events_for_screen(&env, screen);
 }
 
 /// ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN, TIME_PLAYED_MSG, PLAYER_ENTERING_WORLD.
+#[allow(dead_code)]
 fn fire_login_events(env: &WowLuaEnv) {
     println!("[Startup] Firing ADDON_LOADED");
     if let Err(e) = env.fire_event_with_args(
         "ADDON_LOADED",
-        &[mlua::Value::String(env.lua().create_string("WoWUISim").unwrap())],
+        &[mlua::Value::String(
+            env.lua().create_string("WoWUISim").unwrap(),
+        )],
     ) {
         eprintln!("Error firing ADDON_LOADED: {}", e);
     }
@@ -79,7 +82,10 @@ fn fire_login_events(env: &WowLuaEnv) {
     }
 
     println!("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
-    if let Err(e) = env.lua().globals().get::<mlua::Function>("RequestTimePlayed")
+    if let Err(e) = env
+        .lua()
+        .globals()
+        .get::<mlua::Function>("RequestTimePlayed")
         .and_then(|f| f.call::<()>(()))
     {
         eprintln!("Error calling RequestTimePlayed: {}", e);
@@ -99,6 +105,7 @@ fn fire_login_events(env: &WowLuaEnv) {
 }
 
 /// Fire UNIT_AURA("player", {isFullUpdate=true}) to trigger buff frame population.
+#[allow(dead_code)]
 fn fire_unit_aura_event(env: &WowLuaEnv) {
     println!("[Startup] Firing UNIT_AURA");
     let lua = env.lua();
@@ -119,14 +126,20 @@ fn fire_unit_aura_event(env: &WowLuaEnv) {
 }
 
 /// UPDATE_BINDINGS, DISPLAY_SIZE_CHANGED, UI_SCALE_CHANGED, addon hooks.
+#[allow(dead_code)]
 fn fire_world_and_ui_events(env: &WowLuaEnv) {
-    for event in ["BAG_UPDATE_DELAYED", "UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED", "UPDATE_CHAT_WINDOWS"] {
+    for event in [
+        "BAG_UPDATE_DELAYED",
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+        "UPDATE_CHAT_WINDOWS",
+    ] {
         println!("[Startup] Firing {event}");
         if let Err(e) = env.fire_event(event) {
             eprintln!("Error firing {event}: {}", e);
         }
     }
-
 }
 
 /// Application state.
@@ -166,9 +179,14 @@ pub struct App {
     /// Cached merged quad batch (all strata combined), used by draw().
     pub(crate) cached_quads: RefCell<Option<(Size, std::sync::Arc<crate::render::QuadBatch>)>>,
     /// Per-strata cached quad batches. Index = FrameStrata::as_index().
-    pub(crate) cached_strata_quads: RefCell<[Option<std::sync::Arc<crate::render::QuadBatch>>; crate::widget::FrameStrata::COUNT]>,
+    pub(crate) cached_strata_quads: RefCell<
+        [Option<std::sync::Arc<crate::render::QuadBatch>>; crate::widget::FrameStrata::COUNT],
+    >,
     /// Per-strata per-frame quad snapshots for incremental strata rebuild.
-    pub(crate) cached_frame_snapshots: RefCell<[Option<std::collections::HashMap<u64, crate::render::FrameQuadSnapshot>>; crate::widget::FrameStrata::COUNT]>,
+    pub(crate) cached_frame_snapshots: RefCell<
+        [Option<std::collections::HashMap<u64, crate::render::FrameQuadSnapshot>>;
+            crate::widget::FrameStrata::COUNT],
+    >,
     /// Dirty frame IDs from the last timer tick. `None` means full rebuild needed.
     pub(crate) pending_dirty_ids: RefCell<Option<std::collections::HashSet<u64>>>,
     /// Spatial grid for fast hit testing (rebuilt when layout changes).
@@ -244,8 +262,17 @@ impl App {
         let (debug_borders, debug_anchors) = Self::resolve_debug_flags();
 
         let app = Self::build_app(
-            env_rc, log_messages, texture_manager, font_system, glyph_atlas,
-            cmd_rx, lua_rx, debug_borders, debug_anchors, saved_vars, config,
+            env_rc,
+            log_messages,
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            debug_borders,
+            debug_anchors,
+            saved_vars,
+            config,
         );
 
         (app, Task::none())
@@ -326,14 +353,17 @@ impl App {
         use crate::lua_api::state::{CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS};
         let env = env_rc.borrow();
         let mut state = env.state().borrow_mut();
-        state.player.class_index = CLASS_LABELS.iter()
+        state.player.class_index = CLASS_LABELS
+            .iter()
             .position(|&n| n == config.player_class)
             .map(|i| (i + 1) as i32)
             .unwrap_or(1);
-        state.player.race_index = RACE_DATA.iter()
+        state.player.race_index = RACE_DATA
+            .iter()
             .position(|(n, _, _)| *n == config.player_race)
             .unwrap_or(0);
-        state.rot_damage_level = ROT_DAMAGE_LEVELS.iter()
+        state.rot_damage_level = ROT_DAMAGE_LEVELS
+            .iter()
             .position(|(l, _)| *l == config.rot_damage_level)
             .unwrap_or(0);
         state.player.movement = crate::lua_api::state::MovementState {
@@ -363,13 +393,15 @@ impl App {
         let env = INIT_ENV
             .with(|cell| cell.borrow_mut().take())
             .expect("WowLuaEnv not initialized");
-        let textures_path = INIT_TEXTURES.with(|cell| cell.borrow_mut().take()).unwrap_or_else(|| {
-            if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
-                PathBuf::from(LOCAL_TEXTURES_PATH)
-            } else {
-                PathBuf::from(FALLBACK_TEXTURES_PATH)
-            }
-        });
+        let textures_path = INIT_TEXTURES
+            .with(|cell| cell.borrow_mut().take())
+            .unwrap_or_else(|| {
+                if PathBuf::from(LOCAL_TEXTURES_PATH).exists() {
+                    PathBuf::from(LOCAL_TEXTURES_PATH)
+                } else {
+                    PathBuf::from(FALLBACK_TEXTURES_PATH)
+                }
+            });
         let saved_vars = INIT_SAVED_VARS.with(|cell| cell.borrow_mut().take());
         (Rc::new(RefCell::new(env)), textures_path, saved_vars)
     }
@@ -399,9 +431,9 @@ impl App {
         tex_mgr.preload_talent_textures(790);
         tex_mgr.preload_talent_panel_textures();
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
-        let font_system = Rc::new(RefCell::new(
-            WowFontSystem::new(&PathBuf::from(DEFAULT_FONTS_PATH)),
-        ));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+            DEFAULT_FONTS_PATH,
+        ))));
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         (texture_manager, font_system, glyph_atlas)
@@ -421,10 +453,14 @@ impl App {
 
     /// Resolve debug border/anchor flags from CLI and env vars.
     fn resolve_debug_flags() -> (bool, bool) {
-        let init_debug = INIT_DEBUG.with(|cell| cell.borrow_mut().take()).unwrap_or_default();
+        let init_debug = INIT_DEBUG
+            .with(|cell| cell.borrow_mut().take())
+            .unwrap_or_default();
         let debug_elements = std::env::var("WOW_SIM_DEBUG_ELEMENTS").is_ok();
-        let debug_borders = init_debug.borders || debug_elements || std::env::var("WOW_SIM_DEBUG_BORDERS").is_ok();
-        let debug_anchors = init_debug.anchors || debug_elements || std::env::var("WOW_SIM_DEBUG_ANCHORS").is_ok();
+        let debug_borders =
+            init_debug.borders || debug_elements || std::env::var("WOW_SIM_DEBUG_BORDERS").is_ok();
+        let debug_anchors =
+            init_debug.anchors || debug_elements || std::env::var("WOW_SIM_DEBUG_ANCHORS").is_ok();
 
         if debug_borders || debug_anchors {
             eprintln!(
@@ -445,7 +481,8 @@ impl App {
     /// Mark ALL strata as dirty (full rebuild).
     /// Also clears per-frame snapshot caches so the next rebuild is non-incremental.
     pub(crate) fn mark_all_strata_dirty(&self) {
-        self.strata_dirty.set((1u16 << crate::widget::FrameStrata::COUNT) - 1);
+        self.strata_dirty
+            .set((1u16 << crate::widget::FrameStrata::COUNT) - 1);
         *self.cached_frame_snapshots.borrow_mut() = std::array::from_fn(|_| None);
         *self.pending_dirty_ids.borrow_mut() = None;
     }
@@ -464,13 +501,17 @@ impl App {
 
         // Fast tick: playing visual animations, active cast, or dirty quads.
         let has_animations = state.animation_groups.values().any(|g| {
-            g.playing && !g.paused
+            g.playing
+                && !g.paused
                 && g.has_visual_effects()
                 && state.widgets.is_ancestor_visible(g.owner_frame_id)
         });
         let has_casting = state.casting.is_some();
         let has_cooldowns = has_active_cooldowns(&state);
-        if has_animations || has_casting || has_cooldowns
+        let is_glue_screen = state.screen_kind.is_glue();
+        if has_animations
+            || has_casting
+            || has_cooldowns
             || self.strata_dirty.get() != 0
             || self.textures_pending.get()
         {
@@ -489,6 +530,12 @@ impl App {
             return Some(std::time::Duration::from_secs(2));
         }
 
+        // Glue screens rely on interactive OnUpdate handlers for character
+        // rotation and similar motion even when nothing else is animating.
+        if is_glue_screen {
+            return Some(std::time::Duration::from_millis(33));
+        }
+
         // Idle heartbeat: fire OnUpdate handlers at 1s intervals even when
         // nothing else is active (e.g., buff duration countdown text).
         Some(std::time::Duration::from_secs(1))
@@ -503,7 +550,10 @@ fn has_active_cooldowns(state: &crate::lua_api::SimState) -> bool {
             return true;
         }
     }
-    state.spell_cooldowns.values().any(|cd| now < cd.start + cd.duration)
+    state
+        .spell_cooldowns
+        .values()
+        .any(|cd| now < cd.start + cd.duration)
 }
 
 impl Drop for App {
@@ -515,5 +565,68 @@ impl Drop for App {
                 Err(e) => eprintln!("[wow-sim] SavedVariables save error: {}", e),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use iced::Size;
+    use tokio::sync::mpsc;
+
+    fn build_test_app(screen_kind: ScreenKind) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(screen_kind);
+
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
+            "./textures",
+        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+            DEFAULT_FONTS_PATH,
+        ))));
+        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        App::build_app(
+            env,
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            false,
+            false,
+            None,
+            crate::config::SimConfig::default(),
+        )
+    }
+
+    #[test]
+    fn glue_screens_tick_on_update_at_interactive_rate() {
+        let app = build_test_app(ScreenKind::CharacterSelect);
+        app.strata_dirty.set(0);
+
+        assert_eq!(app.screen_size.get(), Size::new(800.0, 600.0));
+        assert_eq!(
+            app.compute_tick_interval(),
+            Some(std::time::Duration::from_millis(33)),
+        );
+    }
+
+    #[test]
+    fn game_screen_keeps_idle_on_update_heartbeat() {
+        let app = build_test_app(ScreenKind::Game);
+        app.strata_dirty.set(0);
+
+        assert_eq!(
+            app.compute_tick_interval(),
+            Some(std::time::Duration::from_secs(1)),
+        );
     }
 }

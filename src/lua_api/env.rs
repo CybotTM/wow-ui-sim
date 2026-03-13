@@ -1,9 +1,10 @@
 //! WoW Lua environment.
 
 use super::builtin_frames::create_builtin_frames;
-use super::state::{AddonRuntimeMetrics, AddonInfo, PendingTimer, SimState};
-use crate::render::font::WowFontSystem;
+use super::state::{AddonInfo, AddonRuntimeMetrics, PendingTimer, SimState};
 use crate::Result;
+use crate::render::font::WowFontSystem;
+use crate::screen::ScreenKind;
 use mlua::{Lua, MultiValue, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,10 +31,7 @@ impl WowLuaEnv {
         let state = Rc::new(RefCell::new(SimState::default()));
         init_builtin_frames(&state);
         init_lua_state(&lua, Rc::clone(&state))?;
-        Ok(Self {
-            lua,
-            state,
-        })
+        Ok(Self { lua, state })
     }
 
     /// Execute Lua code.
@@ -91,7 +89,12 @@ impl WowLuaEnv {
     /// captures a reference to it. This method fills it after all addons are loaded.
     pub fn sync_addon_names_to_lua(&self) {
         let state = self.state.borrow();
-        let Ok(t) = self.lua.named_registry_value::<mlua::Table>("__addon_names") else { return };
+        let Ok(t) = self
+            .lua
+            .named_registry_value::<mlua::Table>("__addon_names")
+        else {
+            return;
+        };
         for (i, addon) in state.addons.iter().enumerate() {
             t.raw_set(i as i64, addon.folder_name.as_str()).ok();
         }
@@ -131,24 +134,28 @@ impl WowLuaEnv {
 
         for widget_id in listeners {
             if let Some(handler) = get_script(&self.lua, widget_id, "OnEvent")
-                && let Some(frame) = get_frame_ref(&self.lua, widget_id) {
-                    let addon_idx = self.state.borrow().widgets.get(widget_id)
-                        .and_then(|f| f.owner_addon);
-                    let taint = addon_taint_name(&self.state, addon_idx);
-                    let blizzard = is_blizzard_addon(&self.state, addon_idx);
-                    let mut call_args =
-                        vec![frame, Value::String(self.lua.create_string(event)?)];
-                    call_args.extend(args.iter().cloned());
+                && let Some(frame) = get_frame_ref(&self.lua, widget_id)
+            {
+                let addon_idx = self
+                    .state
+                    .borrow()
+                    .widgets
+                    .get(widget_id)
+                    .and_then(|f| f.owner_addon);
+                let taint = addon_taint_name(&self.state, addon_idx);
+                let blizzard = is_blizzard_addon(&self.state, addon_idx);
+                let mut call_args = vec![frame, Value::String(self.lua.create_string(event)?)];
+                call_args.extend(args.iter().cloned());
 
-                    let start = Instant::now();
-                    self.state.borrow_mut().executing_addon_index = addon_idx;
-                    let result = call_with_taint(&self.lua, handler, taint, blizzard, call_args);
-                    self.state.borrow_mut().executing_addon_index = None;
-                    if let Err(e) = result {
-                        call_error_handler(&self.lua, &e.to_string());
-                    }
-                    record_addon_time(&self.state, addon_idx, &start);
+                let start = Instant::now();
+                self.state.borrow_mut().executing_addon_index = addon_idx;
+                let result = call_with_taint(&self.lua, handler, taint, blizzard, call_args);
+                self.state.borrow_mut().executing_addon_index = None;
+                if let Err(e) = result {
+                    call_error_handler(&self.lua, &e.to_string());
                 }
+                record_addon_time(&self.state, addon_idx, &start);
+            }
         }
 
         Ok(())
@@ -165,7 +172,11 @@ impl WowLuaEnv {
 
         if let Some(handler) = get_script(&self.lua, widget_id, handler_name) {
             let frame = super::frame::frame_ref(&self.lua, widget_id)?;
-            let addon_idx = self.state.borrow().widgets.get(widget_id)
+            let addon_idx = self
+                .state
+                .borrow()
+                .widgets
+                .get(widget_id)
                 .and_then(|f| f.owner_addon);
             let taint = addon_taint_name(&self.state, addon_idx);
             let blizzard = is_blizzard_addon(&self.state, addon_idx);
@@ -263,15 +274,16 @@ impl WowLuaEnv {
 
             // Check if this SLASH_ variable matches our command
             if let Value::String(slash_str) = value
-                && slash_str.to_str()?.to_lowercase() == cmd_lower {
-                    // Found a match! Look up the handler in SlashCmdList
-                    let handler: Option<mlua::Function> = slash_cmd_list.get(name).ok();
-                    if let Some(handler) = handler {
-                        let msg_value = self.lua.create_string(msg)?;
-                        handler.call::<()>(msg_value)?;
-                        return Ok(true);
-                    }
+                && slash_str.to_str()?.to_lowercase() == cmd_lower
+            {
+                // Found a match! Look up the handler in SlashCmdList
+                let handler: Option<mlua::Function> = slash_cmd_list.get(name).ok();
+                if let Some(handler) = handler {
+                    let msg_value = self.lua.create_string(msg)?;
+                    handler.call::<()>(msg_value)?;
+                    return Ok(true);
                 }
+            }
         }
 
         Ok(false)
@@ -310,11 +322,22 @@ impl WowLuaEnv {
         state.widgets.clear_all_layout_rects();
         for name in &["UIParent", "WorldFrame"] {
             if let Some(id) = state.widgets.get_id_by_name(name)
-                && let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.width = width;
-                    frame.height = height;
-                }
+                && let Some(frame) = state.widgets.get_mut_visual(id)
+            {
+                frame.width = width;
+                frame.height = height;
+            }
         }
+    }
+
+    /// Select which UI surface should be loaded.
+    pub fn set_screen_mode(&self, screen_kind: ScreenKind) {
+        self.state.borrow_mut().set_screen_kind(screen_kind);
+    }
+
+    /// Toggle whether the simulated player is logged into the world.
+    pub fn set_logged_in(&self, is_logged_in: bool) {
+        self.state.borrow_mut().is_logged_in = is_logged_in;
     }
 
     /// Register an addon in the addon list.
@@ -325,10 +348,18 @@ impl WowLuaEnv {
     /// Scan an addons directory and register all found addons (metadata only, no loading).
     pub fn scan_and_register_addons(&self, addons_path: &std::path::Path) {
         let mut addons = scan_addon_entries(addons_path);
-        addons.sort_by(|a, b| a.folder_name.to_lowercase().cmp(&b.folder_name.to_lowercase()));
+        addons.sort_by(|a, b| {
+            a.folder_name
+                .to_lowercase()
+                .cmp(&b.folder_name.to_lowercase())
+        });
         let mut state = self.state.borrow_mut();
         for addon in addons {
-            if !state.addons.iter().any(|a| a.folder_name == addon.folder_name) {
+            if !state
+                .addons
+                .iter()
+                .any(|a| a.folder_name == addon.folder_name)
+            {
                 state.addons.push(addon);
             }
         }
@@ -348,9 +379,14 @@ impl WowLuaEnv {
 
         let owner_addon = self.state.borrow().loading_addon_index;
         let timer = PendingTimer {
-            id, fire_at, callback_key, interval,
-            remaining: iterations, cancelled: false,
-            handle_key: None, owner_addon,
+            id,
+            fire_at,
+            callback_key,
+            interval,
+            remaining: iterations,
+            cancelled: false,
+            handle_key: None,
+            owner_addon,
         };
 
         self.state.borrow_mut().timers.push_back(timer);
@@ -368,7 +404,11 @@ impl WowLuaEnv {
             self.dispatch_on_update_with_dirty_tracking(&frame_ids, elapsed);
             let on_update_dur = t.elapsed();
             for &id in &frame_ids {
-                let addon_idx = self.state.borrow().widgets.get(id)
+                let addon_idx = self
+                    .state
+                    .borrow()
+                    .widgets
+                    .get(id)
                     .and_then(|f| f.owner_addon);
                 self.state.borrow_mut().executing_addon_index = addon_idx;
                 self.dispatch_handlers_lua(&[id], elapsed, "_OnPostUpdate");
@@ -376,8 +416,10 @@ impl WowLuaEnv {
             }
             let total = t.elapsed();
             if total.as_millis() > 20 {
-                eprintln!("[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
-                    frame_ids.len());
+                eprintln!(
+                    "[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
+                    frame_ids.len()
+                );
             }
         }
 
@@ -393,7 +435,11 @@ impl WowLuaEnv {
 
     fn dispatch_on_update_with_dirty_tracking(&self, frame_ids: &[u64], elapsed: f64) {
         for &id in frame_ids {
-            let addon_idx = self.state.borrow().widgets.get(id)
+            let addon_idx = self
+                .state
+                .borrow()
+                .widgets
+                .get(id)
                 .and_then(|f| f.owner_addon);
             self.state.borrow_mut().executing_addon_index = addon_idx;
             self.dispatch_handlers_lua(&[id], elapsed, "_OnUpdate");
@@ -419,7 +465,8 @@ impl WowLuaEnv {
 
     /// Dispatch OnUpdate/OnPostUpdate via a Lua-side loop (avoids per-handler FFI overhead).
     fn dispatch_handlers_lua(&self, frame_ids: &[u64], elapsed: f64, suffix: &str) {
-        let dispatch: mlua::Function = self.lua
+        let dispatch: mlua::Function = self
+            .lua
             .named_registry_value("__dispatch_on_update")
             .expect("__dispatch_on_update not registered");
         let ids_table = self.lua.create_table().unwrap();
@@ -433,8 +480,12 @@ impl WowLuaEnv {
 
     /// Read and clear `__addon_timing`, applying accumulated ms to each addon.
     fn drain_addon_timing(&self) {
-        let Ok(timing) = self.lua.named_registry_value::<mlua::Table>("__addon_timing")
-        else { return };
+        let Ok(timing) = self
+            .lua
+            .named_registry_value::<mlua::Table>("__addon_timing")
+        else {
+            return;
+        };
         let mut keys = Vec::new();
         let mut state = self.state.borrow_mut();
         for pair in timing.pairs::<i64, f64>() {
@@ -490,12 +541,21 @@ impl WowLuaEnv {
     /// Triggers `EditModeManagerFrame:UpdateLayoutInfo()` to initialize `layoutInfo`
     /// and unblock action bar positioning. No-op if EditMode addon isn't loaded.
     pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
-        let Ok(true) = self.lua.load(
-            "return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil"
-        ).eval::<bool>() else { return Ok(()) };
+        let Ok(true) = self
+            .lua
+            .load("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
+            .eval::<bool>()
+        else {
+            return Ok(());
+        };
 
-        let Ok(info) = self.lua.load("return C_EditMode.GetLayouts()").eval::<mlua::Table>()
-        else { return Ok(()) };
+        let Ok(info) = self
+            .lua
+            .load("return C_EditMode.GetLayouts()")
+            .eval::<mlua::Table>()
+        else {
+            return Ok(());
+        };
 
         self.fire_event_with_args(
             "EDIT_MODE_LAYOUTS_UPDATED",
@@ -507,7 +567,9 @@ impl WowLuaEnv {
     pub fn next_timer_delay(&self) -> Option<std::time::Duration> {
         let state = self.state.borrow();
         let now = Instant::now();
-        state.timers.iter()
+        state
+            .timers
+            .iter()
             .filter(|t| !t.cancelled)
             .map(|t| t.fire_at.saturating_duration_since(now))
             .min()
@@ -522,19 +584,39 @@ impl WowLuaEnv {
 
 /// Increment threshold counters for a frame's addon time.
 fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
-    if ms > 1.0 { rt.count_over_1ms += 1; }
-    if ms > 5.0 { rt.count_over_5ms += 1; }
-    if ms > 10.0 { rt.count_over_10ms += 1; }
-    if ms > 50.0 { rt.count_over_50ms += 1; }
-    if ms > 100.0 { rt.count_over_100ms += 1; }
-    if ms > 500.0 { rt.count_over_500ms += 1; }
-    if ms > 1000.0 { rt.count_over_1000ms += 1; }
+    if ms > 1.0 {
+        rt.count_over_1ms += 1;
+    }
+    if ms > 5.0 {
+        rt.count_over_5ms += 1;
+    }
+    if ms > 10.0 {
+        rt.count_over_10ms += 1;
+    }
+    if ms > 50.0 {
+        rt.count_over_50ms += 1;
+    }
+    if ms > 100.0 {
+        rt.count_over_100ms += 1;
+    }
+    if ms > 500.0 {
+        rt.count_over_500ms += 1;
+    }
+    if ms > 1000.0 {
+        rt.count_over_1000ms += 1;
+    }
 }
 
 /// Stamp addon taint on a handler and call it. The VM applies fixedtaint on entry.
 /// For Blizzard addons (is_blizzard=true), clear the handler's taint so issecure()
 /// returns true during execution, matching real WoW behavior.
-fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, is_blizzard: bool, args: Vec<Value>) -> mlua::Result<()> {
+fn call_with_taint(
+    lua: &Lua,
+    handler: mlua::Function,
+    taint: Option<String>,
+    is_blizzard: bool,
+    args: Vec<Value>,
+) -> mlua::Result<()> {
     if let Ok(sot) = lua.named_registry_value::<mlua::Function>("__setobjecttaint") {
         if is_blizzard {
             // Clear taint on Blizzard handlers so issecure() returns true.
@@ -547,19 +629,37 @@ fn call_with_taint(lua: &Lua, handler: mlua::Function, taint: Option<String>, is
 }
 
 /// Look up the addon folder name for a given owner_addon index.
-fn addon_taint_name(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>) -> Option<String> {
-    idx.and_then(|i| state.borrow().addons.get(i as usize).map(|a| a.folder_name.clone()))
+fn addon_taint_name(
+    state: &Rc<RefCell<super::state::SimState>>,
+    idx: Option<u16>,
+) -> Option<String> {
+    idx.and_then(|i| {
+        state
+            .borrow()
+            .addons
+            .get(i as usize)
+            .map(|a| a.folder_name.clone())
+    })
 }
 
 /// Check whether an addon index refers to a Blizzard addon (runs secure).
 fn is_blizzard_addon(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>) -> bool {
-    idx.map(|i| state.borrow().addons.get(i as usize)
-        .is_some_and(|a| a.folder_name.starts_with("Blizzard_")))
-        .unwrap_or(true)
+    idx.map(|i| {
+        state
+            .borrow()
+            .addons
+            .get(i as usize)
+            .is_some_and(|a| a.folder_name.starts_with("Blizzard_"))
+    })
+    .unwrap_or(true)
 }
 
 /// Record per-addon timing from an Instant.
-fn record_addon_time(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u16>, start: &Instant) {
+fn record_addon_time(
+    state: &Rc<RefCell<super::state::SimState>>,
+    idx: Option<u16>,
+    start: &Instant,
+) {
     if let Some(i) = idx {
         let ms = start.elapsed().as_secs_f64() * 1000.0;
         if let Some(addon) = state.borrow_mut().addons.get_mut(i as usize) {
@@ -571,27 +671,49 @@ fn record_addon_time(state: &Rc<RefCell<super::state::SimState>>, idx: Option<u1
 /// Scan an addons directory and return AddonInfo for each valid addon folder.
 fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
     use crate::toc::TocFile;
-    let Ok(entries) = std::fs::read_dir(addons_path) else { return Vec::new() };
+    let Ok(entries) = std::fs::read_dir(addons_path) else {
+        return Vec::new();
+    };
     let mut addons = Vec::new();
     for entry in entries.flatten() {
         let path = entry.path();
-        if !path.is_dir() { continue; }
+        if !path.is_dir() {
+            continue;
+        }
         let name = path.file_name().unwrap().to_str().unwrap().to_string();
-        if name.starts_with('.') || name == "BlizzardUI" { continue; }
-        let Some(toc_path) = crate::loader::find_toc_file(&path) else { continue };
+        if name.starts_with('.') || name == "BlizzardUI" {
+            continue;
+        }
+        let Some(toc_path) = crate::loader::find_toc_file(&path) else {
+            continue;
+        };
         let toc = TocFile::from_file(&toc_path).ok();
-        let (title, notes, load_on_demand) = toc.as_ref()
+        let (title, notes, load_on_demand) = toc
+            .as_ref()
             .map(|t| {
-                let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.clone());
+                let title = t
+                    .metadata
+                    .get("Title")
+                    .cloned()
+                    .unwrap_or_else(|| name.clone());
                 let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-                let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
+                let lod = t
+                    .metadata
+                    .get("LoadOnDemand")
+                    .map(|v| v == "1")
+                    .unwrap_or(false);
                 (title, notes, lod)
             })
             .unwrap_or_else(|| (name.clone(), String::new(), false));
         addons.push(AddonInfo {
-            folder_name: name, title, notes,
-            enabled: true, loaded: false, load_on_demand,
-            load_time_secs: 0.0, ..Default::default()
+            folder_name: name,
+            title,
+            notes,
+            enabled: true,
+            loaded: false,
+            load_on_demand,
+            load_time_secs: 0.0,
+            ..Default::default()
         });
     }
     addons
@@ -603,8 +725,11 @@ fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
     let mut s = state.borrow_mut();
     let owner = s.addons.len() as u16;
     s.addons.push(super::AddonInfo {
-        folder_name: "__BuiltIn".to_string(), title: "Built-in Frames".to_string(),
-        enabled: true, loaded: true, ..Default::default()
+        folder_name: "__BuiltIn".to_string(),
+        title: "Built-in Frames".to_string(),
+        enabled: true,
+        loaded: true,
+        ..Default::default()
     });
     let (w, h) = (s.screen_width, s.screen_height);
     create_builtin_frames(&mut s.widgets, w, h, owner);
@@ -631,15 +756,20 @@ fn load_elune_security(lua: &Lua) -> crate::Result<()> {
         fn luaopen_securecalls(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
     }
     unsafe {
-        lua.exec_raw::<()>((), |state| { luaopen_security(state); })?;
-        lua.exec_raw::<()>((), |state| { luaopen_securecalls(state); })?;
+        lua.exec_raw::<()>((), |state| {
+            luaopen_security(state);
+        })?;
+        lua.exec_raw::<()>((), |state| {
+            luaopen_securecalls(state);
+        })?;
     };
     Ok(())
 }
 
 /// Wrap Elune's hooksecurefunc/issecurevariable to accept userdata (FrameRef).
 fn patch_elune_userdata_compat(lua: &Lua) -> crate::Result<()> {
-    lua.load(include_str!("../../data/lua/elune_userdata_compat.lua")).exec()?;
+    lua.load(include_str!("../../data/lua/elune_userdata_compat.lua"))
+        .exec()?;
     Ok(())
 }
 
@@ -651,7 +781,8 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value("__frame_owners", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_timing", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_names", lua.create_table()?)?;
-    let taint_fallback: mlua::Function = lua.load("return debug.getstacktaint()").into_function()?;
+    let taint_fallback: mlua::Function =
+        lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
     register_on_update_dispatcher(lua)
 }
@@ -704,19 +835,23 @@ fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
 
 /// Enable Elune taint tracking and wrap loadstring as secure.
 fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
-    lua.load("seterrorhandler(function() end); debug.settaintmode('rw')").exec()?;
+    lua.load("seterrorhandler(function() end); debug.settaintmode('rw')")
+        .exec()?;
     // Cache setobjecttaint in registry for Rust-side and Lua-side use.
     let sot: mlua::Function = lua.load("return debug.setobjecttaint").eval()?;
     lua.set_named_registry_value("__setobjecttaint", sot)?;
     let sst: mlua::Function = lua.load("return debug.setstacktaint").eval()?;
     lua.set_named_registry_value("__setstacktaint", sst)?;
-    lua.load(r#"
+    lua.load(
+        r#"
         local original_ls = loadstring
         local sst = debug.setstacktaint
         loadstring = debug.newsecurefunction(function(code, name)
             sst("*** ForceTaint_Strong ***"); return original_ls(code, name)
         end)
-    "#).exec()?;
+    "#,
+    )
+    .exec()?;
     Ok(())
 }
 
@@ -724,13 +859,26 @@ fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
 /// now stored in the Lua registry.
 fn remove_sandbox_globals(lua: &Lua) -> mlua::Result<()> {
     let g = lua.globals();
-    for name in &["dofile", "load", "loadfile", "module", "require",
-                  "__original_ipairs", "__original_rawget",
-                  "__real_getmetatable", "__real_setmetatable",
-                  "__SetMixinOverride", "__report_script_error"] {
+    for name in &[
+        "dofile",
+        "load",
+        "loadfile",
+        "module",
+        "require",
+        "__original_ipairs",
+        "__original_rawget",
+        "__real_getmetatable",
+        "__real_setmetatable",
+        "__SetMixinOverride",
+        "__report_script_error",
+    ] {
         g.set(*name, Value::Nil)?;
     }
-    lua.globals().get::<mlua::Table>("string")?.set("dump", Value::Nil)?;
-    lua.globals().get::<mlua::Table>("math")?.set("randomseed", Value::Nil)?;
+    lua.globals()
+        .get::<mlua::Table>("string")?
+        .set("dump", Value::Nil)?;
+    lua.globals()
+        .get::<mlua::Table>("math")?
+        .set("randomseed", Value::Nil)?;
     Ok(())
 }

@@ -2,6 +2,7 @@
 //!
 //! Parses `.toc` files to extract addon metadata and file load order.
 
+use crate::screen::ScreenKind;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -60,7 +61,6 @@ fn resolve_addon_name(metadata: &HashMap<String, String>, addon_dir: &Path) -> S
     })
 }
 
-
 /// Check if a metadata value consists entirely of unresolved packager template tokens.
 ///
 /// Returns true when every comma-separated token looks like `@something@`.
@@ -88,7 +88,9 @@ fn replace_template_vars(value: &str) -> String {
 /// `@toc-version-*@` packager tokens — the `#@debug@` block in the TOC
 /// provides the real fallback version for source-form TOC files.
 fn insert_metadata(metadata: &mut HashMap<String, String>, rest: &str) {
-    let Some((key, value)) = rest.split_once(':') else { return };
+    let Some((key, value)) = rest.split_once(':') else {
+        return;
+    };
     let key = key.trim();
     let value = value.trim();
     if key == "Interface" && is_all_template_versions(value) {
@@ -129,12 +131,16 @@ impl TocFile {
 
         for line in contents.lines() {
             let line = line.trim();
-            if line.is_empty() { continue; }
+            if line.is_empty() {
+                continue;
+            }
             if let Some(rest) = line.strip_prefix("##") {
                 insert_metadata(&mut metadata, rest.trim());
                 continue;
             }
-            if line.starts_with('#') { continue; }
+            if line.starts_with('#') {
+                continue;
+            }
             push_file_entry(&mut files, line);
         }
 
@@ -157,11 +163,7 @@ impl TocFile {
     pub fn interface_versions(&self) -> Vec<u32> {
         self.metadata
             .get("Interface")
-            .map(|s| {
-                s.split(',')
-                    .filter_map(|v| v.trim().parse().ok())
-                    .collect()
-            })
+            .map(|s| s.split(',').filter_map(|v| v.trim().parse().ok()).collect())
             .unwrap_or_default()
     }
 
@@ -253,6 +255,17 @@ impl TocFile {
                     .any(|t| matches!(t.trim(), "mainline" | "standard"))
             })
             .unwrap_or(false)
+    }
+
+    /// Whether this addon should load for the requested screen kind.
+    pub fn allows_screen(&self, screen: ScreenKind) -> bool {
+        match self.metadata.get("AllowLoad").map(|v| v.trim()) {
+            Some(v) if v.eq_ignore_ascii_case("both") => true,
+            Some(v) if v.eq_ignore_ascii_case("game") => screen == ScreenKind::Game,
+            Some(v) if v.eq_ignore_ascii_case("glue") => screen.is_glue(),
+            Some(_) => screen == ScreenKind::Game,
+            None => screen == ScreenKind::Game,
+        }
     }
 
     /// Get saved variables names (account-wide + machine-specific).
@@ -372,7 +385,10 @@ Compat.lua
 Mixin.lua
 TableUtil.lua
 "#;
-        let toc = TocFile::parse(Path::new("/Interface/AddOns/Blizzard_SharedXMLBase"), contents);
+        let toc = TocFile::parse(
+            Path::new("/Interface/AddOns/Blizzard_SharedXMLBase"),
+            contents,
+        );
 
         assert_eq!(toc.name, "Blizzard_SharedXMLBase");
         assert!(toc.is_blizzard_addon());
@@ -523,15 +539,21 @@ Cata\Mode.lua [AllowLoadGameType wrath, cata, mists]
     #[test]
     fn test_is_allowed_game_type() {
         assert!(is_allowed_game_type("Core.lua"));
-        assert!(is_allowed_game_type("File.lua [AllowLoadGameType mainline]"));
-        assert!(is_allowed_game_type("File.lua [AllowLoadGameType standard]"));
+        assert!(is_allowed_game_type(
+            "File.lua [AllowLoadGameType mainline]"
+        ));
+        assert!(is_allowed_game_type(
+            "File.lua [AllowLoadGameType standard]"
+        ));
         assert!(is_allowed_game_type(
             "File.lua [AllowLoadGameType standard, wowhack]"
         ));
         assert!(!is_allowed_game_type(
             "File.lua [AllowLoadGameType plunderstorm]"
         ));
-        assert!(!is_allowed_game_type("File.lua [AllowLoadGameType classic]"));
+        assert!(!is_allowed_game_type(
+            "File.lua [AllowLoadGameType classic]"
+        ));
         assert!(!is_allowed_game_type(
             "File.lua [AllowLoadGameType wrath, cata, mists]"
         ));
@@ -563,10 +585,8 @@ Cata\Mode.lua [AllowLoadGameType wrath, cata, mists]
         );
         assert!(mixed.is_game_type_restricted());
 
-        let no_restriction = TocFile::parse(
-            Path::new("/addons/Test"),
-            "## Title: TestAddon\nCore.lua",
-        );
+        let no_restriction =
+            TocFile::parse(Path::new("/addons/Test"), "## Title: TestAddon\nCore.lua");
         assert!(!no_restriction.is_game_type_restricted());
     }
 
@@ -612,5 +632,33 @@ Core.lua
         assert!(!is_all_template_versions("@toc-version-retail@, 110000"));
         assert!(!is_all_template_versions(""));
         assert!(!is_all_template_versions("@project-version@"));
+    }
+
+    #[test]
+    fn test_allows_screen_modes() {
+        use crate::screen::ScreenKind;
+
+        let both = TocFile::parse(Path::new("/addons/Both"), "## AllowLoad: Both\nCore.lua");
+        assert!(both.allows_screen(ScreenKind::Game));
+        assert!(both.allows_screen(ScreenKind::Login));
+        assert!(both.allows_screen(ScreenKind::CharacterSelect));
+
+        let game = TocFile::parse(Path::new("/addons/Game"), "## AllowLoad: Game\nCore.lua");
+        assert!(game.allows_screen(ScreenKind::Game));
+        assert!(!game.allows_screen(ScreenKind::Login));
+        assert!(!game.allows_screen(ScreenKind::CharacterSelect));
+
+        let glue = TocFile::parse(Path::new("/addons/Glue"), "## AllowLoad: Glue\nCore.lua");
+        assert!(!glue.allows_screen(ScreenKind::Game));
+        assert!(glue.allows_screen(ScreenKind::Login));
+        assert!(glue.allows_screen(ScreenKind::CharacterSelect));
+
+        let unrestricted = TocFile::parse(
+            Path::new("/addons/Unrestricted"),
+            "## Title: TestAddon\nCore.lua",
+        );
+        assert!(unrestricted.allows_screen(ScreenKind::Game));
+        assert!(!unrestricted.allows_screen(ScreenKind::Login));
+        assert!(!unrestricted.allows_screen(ScreenKind::CharacterSelect));
     }
 }

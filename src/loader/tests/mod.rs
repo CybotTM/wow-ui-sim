@@ -1,9 +1,11 @@
 //! Tests for the addon loader.
 
-use super::*;
+mod screen_selection;
+
 use super::addon::AddonContext;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
+use super::*;
 use crate::lua_api::WowLuaEnv;
 
 /// Test context holding environment and temp directory for cleanup.
@@ -55,7 +57,13 @@ fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
         use_secure_env: false,
         taint: false,
     };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
     TestCtx { env, temp_dir }
 }
@@ -70,12 +78,19 @@ fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) 
 
     // Register TestAddon so CreateFrame can attribute frames to it.
     env.register_addon(crate::lua_api::AddonInfo {
-        folder_name: "TestAddon".to_string(), title: "TestAddon".to_string(),
-        enabled: true, loaded: true, ..Default::default()
+        folder_name: "TestAddon".to_string(),
+        title: "TestAddon".to_string(),
+        enabled: true,
+        loaded: true,
+        ..Default::default()
     });
     {
         let mut s = env.state().borrow_mut();
-        let idx = s.addons.iter().position(|a| a.folder_name == "TestAddon").unwrap();
+        let idx = s
+            .addons
+            .iter()
+            .position(|a| a.folder_name == "TestAddon")
+            .unwrap();
         s.loading_addon_index = Some(idx as u16);
     }
 
@@ -87,7 +102,13 @@ fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) 
         use_secure_env: false,
         taint: false,
     };
-    load_lua_file(&env.loader_env(), &lua_path, &ctx, &mut LoadTiming::default()).unwrap();
+    load_lua_file(
+        &env.loader_env(),
+        &lua_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
     (TestCtx { env, temp_dir }, addon_table)
 }
@@ -108,7 +129,13 @@ fn test_load_lua_file() {
         use_secure_env: false,
         taint: false,
     };
-    load_lua_file(&env.loader_env(), &lua_path, &ctx, &mut LoadTiming::default()).unwrap();
+    load_lua_file(
+        &env.loader_env(),
+        &lua_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
     let value: i32 = env.eval("return TEST_VAR").unwrap();
     assert_eq!(value, 42);
@@ -158,39 +185,72 @@ fn test_xml_frame_with_layers_and_scripts() {
 
 fn assert_layers_and_scripts_frame(t: &TestCtx) {
     t.assert_lua_true("return TestXMLFrame ~= nil", "TestXMLFrame should exist");
-    t.assert_lua_true("return TestXMLFrame.bg ~= nil", "bg should exist via parentKey");
-    t.assert_lua_true("return TestXMLFrame.title ~= nil", "title should exist via parentKey");
+    t.assert_lua_true(
+        "return TestXMLFrame.bg ~= nil",
+        "bg should exist via parentKey",
+    );
+    t.assert_lua_true(
+        "return TestXMLFrame.title ~= nil",
+        "title should exist via parentKey",
+    );
     t.assert_script_set("TestXMLFrame", "OnLoad");
 }
 
 fn assert_layers_and_scripts_children(t: &TestCtx) {
-    t.assert_lua_true("return TestXMLFrame_CloseBtn ~= nil", "CloseBtn should exist");
-    t.assert_lua_true("return TestXMLFrame.closeBtn ~= nil", "closeBtn should exist via parentKey");
+    t.assert_lua_true(
+        "return TestXMLFrame_CloseBtn ~= nil",
+        "CloseBtn should exist",
+    );
+    t.assert_lua_true(
+        "return TestXMLFrame.closeBtn ~= nil",
+        "closeBtn should exist via parentKey",
+    );
     t.assert_script_set("TestXMLFrame_CloseBtn", "OnClick");
 }
 
 #[test]
 fn test_xml_scripts_function_attribute() {
     let env = WowLuaEnv::new().unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         SCRIPT_FUNC_CALLED = false
         function MyGlobalOnLoad(self) SCRIPT_FUNC_CALLED = true end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     let temp_dir = std::env::temp_dir().join("wow-sim-test-scripts");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_func.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="FuncTestFrame" parent="UIParent">
             <Scripts><OnLoad function="MyGlobalOnLoad"/></Scripts>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    let handler_set: bool = env.eval("return FuncTestFrame:GetScript('OnLoad') == MyGlobalOnLoad").unwrap();
+    let handler_set: bool = env
+        .eval("return FuncTestFrame:GetScript('OnLoad') == MyGlobalOnLoad")
+        .unwrap();
     assert!(handler_set, "OnLoad should reference MyGlobalOnLoad");
     std::fs::remove_file(&xml_path).ok();
 }
@@ -201,24 +261,47 @@ fn test_xml_scripts_method_attribute() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-method");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_method.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="MethodTestFrame" parent="UIParent">
             <Scripts><OnShow method="OnShowHandler"/></Scripts>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    env.exec(r#"
+    env.exec(
+        r#"
         METHOD_CALLED = false
         function MethodTestFrame:OnShowHandler() METHOD_CALLED = true end
-    "#).unwrap();
-    env.exec("MethodTestFrame:GetScript('OnShow')(MethodTestFrame)").unwrap();
+    "#,
+    )
+    .unwrap();
+    env.exec("MethodTestFrame:GetScript('OnShow')(MethodTestFrame)")
+        .unwrap();
 
     let method_called: bool = env.eval("return METHOD_CALLED").unwrap();
-    assert!(method_called, "OnShow should have called OnShowHandler method");
+    assert!(
+        method_called,
+        "OnShow should have called OnShowHandler method"
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -228,7 +311,9 @@ fn test_xml_keyvalues() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-kv");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_kv.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="KeyValueFrame" parent="UIParent">
             <KeyValues>
                 <KeyValue key="myString" value="hello"/>
@@ -237,16 +322,39 @@ fn test_xml_keyvalues() {
                 <KeyValue key="myFalseBool" value="false" type="boolean"/>
             </KeyValues>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    assert_eq!(env.eval::<String>("return KeyValueFrame.myString").unwrap(), "hello");
-    assert_eq!(env.eval::<i32>("return KeyValueFrame.myNumber").unwrap(), 42);
+    assert_eq!(
+        env.eval::<String>("return KeyValueFrame.myString").unwrap(),
+        "hello"
+    );
+    assert_eq!(
+        env.eval::<i32>("return KeyValueFrame.myNumber").unwrap(),
+        42
+    );
     assert!(env.eval::<bool>("return KeyValueFrame.myBool").unwrap());
-    assert!(!env.eval::<bool>("return KeyValueFrame.myFalseBool").unwrap());
+    assert!(
+        !env.eval::<bool>("return KeyValueFrame.myFalseBool")
+            .unwrap()
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -256,20 +364,41 @@ fn test_xml_keyvalue_global_type_resolves_global_string() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-kv-global");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_kv_global.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="KeyValueGlobalFrame" parent="UIParent">
             <KeyValues>
                 <KeyValue key="instructionText" value="SEARCH" type="global"/>
             </KeyValues>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    let val: String = env.eval("return KeyValueGlobalFrame.instructionText").unwrap();
-    assert_eq!(val, "Search", "type='global' should resolve via global string lookup");
+    let val: String = env
+        .eval("return KeyValueGlobalFrame.instructionText")
+        .unwrap();
+    assert_eq!(
+        val, "Search",
+        "type='global' should resolve via global string lookup"
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -279,7 +408,9 @@ fn test_xml_anchors_with_offset() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-offset");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_offset.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="OffsetFrame" parent="UIParent">
             <Size x="100" y="100"/>
             <Anchors>
@@ -288,16 +419,34 @@ fn test_xml_anchors_with_offset() {
                 </Anchor>
             </Anchors>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    let point_info: String = env.eval(r#"
+    let point_info: String = env
+        .eval(
+            r#"
         local point, relativeTo, relativePoint, x, y = OffsetFrame:GetPoint(1)
         return string.format("%s,%s,%d,%d", point, relativePoint, x, y)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(point_info, "TOPLEFT,TOPLEFT,10,-20");
     std::fs::remove_file(&xml_path).ok();
 }
@@ -308,19 +457,41 @@ fn test_xml_size_with_absdimension() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-abssize");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_abssize.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="AbsSizeFrame" parent="UIParent">
             <Size><AbsDimension x="150" y="75"/></Size>
             <Anchors><Anchor point="CENTER"/></Anchors>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    assert_eq!(env.eval::<f64>("return AbsSizeFrame:GetWidth()").unwrap(), 150.0);
-    assert_eq!(env.eval::<f64>("return AbsSizeFrame:GetHeight()").unwrap(), 75.0);
+    assert_eq!(
+        env.eval::<f64>("return AbsSizeFrame:GetWidth()").unwrap(),
+        150.0
+    );
+    assert_eq!(
+        env.eval::<f64>("return AbsSizeFrame:GetHeight()").unwrap(),
+        75.0
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -352,14 +523,29 @@ fn test_xml_nested_child_frames() {
 fn assert_nested_frames_exist(t: &TestCtx) {
     t.assert_lua_true("return ParentFrame ~= nil", "ParentFrame should exist");
     t.assert_lua_true("return ChildFrame ~= nil", "ChildFrame should exist");
-    t.assert_lua_true("return ParentFrame.child == ChildFrame", "child should be ChildFrame");
-    t.assert_lua_true("return GrandchildButton ~= nil", "GrandchildButton should exist");
-    t.assert_lua_true("return ChildFrame.btn == GrandchildButton", "btn should be GrandchildButton");
+    t.assert_lua_true(
+        "return ParentFrame.child == ChildFrame",
+        "child should be ChildFrame",
+    );
+    t.assert_lua_true(
+        "return GrandchildButton ~= nil",
+        "GrandchildButton should exist",
+    );
+    t.assert_lua_true(
+        "return ChildFrame.btn == GrandchildButton",
+        "btn should be GrandchildButton",
+    );
 }
 
 fn assert_nested_parent_relationships(t: &TestCtx) {
-    t.assert_lua_str("return ChildFrame:GetParent():GetName() or 'nil'", "ParentFrame");
-    t.assert_lua_str("return GrandchildButton:GetParent():GetName() or 'nil'", "ChildFrame");
+    t.assert_lua_str(
+        "return ChildFrame:GetParent():GetName() or 'nil'",
+        "ParentFrame",
+    );
+    t.assert_lua_str(
+        "return GrandchildButton:GetParent():GetName() or 'nil'",
+        "ChildFrame",
+    );
 }
 
 #[test]
@@ -368,7 +554,9 @@ fn test_xml_texture_color() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-texcolor");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_texcolor.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="ColorTexFrame" parent="UIParent">
             <Size x="100" y="100"/>
             <Layers><Layer level="BACKGROUND">
@@ -378,14 +566,34 @@ fn test_xml_texture_color() {
                 </Texture>
             </Layer></Layers>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    assert!(env.eval::<bool>("return ColorTexFrame.bg ~= nil").unwrap(), "bg should exist");
-    assert!(env.eval::<bool>("return ColorTexFrame_BG ~= nil").unwrap(), "BG should exist as global");
+    assert!(
+        env.eval::<bool>("return ColorTexFrame.bg ~= nil").unwrap(),
+        "bg should exist"
+    );
+    assert!(
+        env.eval::<bool>("return ColorTexFrame_BG ~= nil").unwrap(),
+        "BG should exist as global"
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -395,19 +603,41 @@ fn test_xml_virtual_frames_skipped() {
     let temp_dir = std::env::temp_dir().join("wow-sim-test-virtual");
     std::fs::create_dir_all(&temp_dir).unwrap();
     let xml_path = temp_dir.join("test_virtual.xml");
-    std::fs::write(&xml_path, r#"<Ui>
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
         <Frame name="VirtualTemplate" virtual="true"><Size x="200" y="100"/></Frame>
         <Frame name="ConcreteFrame" parent="UIParent" inherits="VirtualTemplate">
             <Anchors><Anchor point="CENTER"/></Anchors>
         </Frame>
-    </Ui>"#).unwrap();
+    </Ui>"#,
+    )
+    .unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext { name: "TestAddon", table: addon_table, addon_root: &temp_dir, use_secure_env: false, taint: false };
-    load_xml_file(&env.loader_env(), &xml_path, &ctx, &mut LoadTiming::default()).unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
 
-    assert!(!env.eval::<bool>("return VirtualTemplate ~= nil").unwrap(), "VirtualTemplate should NOT exist");
-    assert!(env.eval::<bool>("return ConcreteFrame ~= nil").unwrap(), "ConcreteFrame should exist");
+    assert!(
+        !env.eval::<bool>("return VirtualTemplate ~= nil").unwrap(),
+        "VirtualTemplate should NOT exist"
+    );
+    assert!(
+        env.eval::<bool>("return ConcreteFrame ~= nil").unwrap(),
+        "ConcreteFrame should exist"
+    );
     std::fs::remove_file(&xml_path).ok();
 }
 
@@ -425,15 +655,26 @@ fn test_xml_multiple_anchors() {
         </Ui>"#,
     );
 
-    assert_eq!(t.env.eval::<i32>("return MultiAnchorFrame:GetNumPoints()").unwrap(), 2);
-    t.assert_lua_str(r#"
+    assert_eq!(
+        t.env
+            .eval::<i32>("return MultiAnchorFrame:GetNumPoints()")
+            .unwrap(),
+        2
+    );
+    t.assert_lua_str(
+        r#"
         local point, _, relPoint, x, y = MultiAnchorFrame:GetPoint(1)
         return string.format("%s,%s,%d,%d", point, relPoint, x, y)
-    "#, "TOPLEFT,TOPLEFT,10,-10");
-    t.assert_lua_str(r#"
+    "#,
+        "TOPLEFT,TOPLEFT,10,-10",
+    );
+    t.assert_lua_str(
+        r#"
         local point, _, relPoint, x, y = MultiAnchorFrame:GetPoint(2)
         return string.format("%s,%s,%d,%d", point, relPoint, x, y)
-    "#, "BOTTOMRIGHT,BOTTOMRIGHT,-10,10");
+    "#,
+        "BOTTOMRIGHT,BOTTOMRIGHT,-10,10",
+    );
 }
 
 #[test]
@@ -480,7 +721,10 @@ fn test_local_function_closures() {
 
     assert_eq!(addon_table.get::<i32>("result").unwrap(), 42);
     let create_something: mlua::Function = addon_table.get("CreateSomething").unwrap();
-    assert_eq!(create_something.call::<i32>(addon_table.clone()).unwrap(), 20);
+    assert_eq!(
+        create_something.call::<i32>(addon_table.clone()).unwrap(),
+        20
+    );
 }
 
 /// Load multiple Lua files in sequence with a shared addon table.
@@ -524,9 +768,15 @@ fn test_multi_file_closures() {
         ],
     );
 
-    let test_button: mlua::Table = addon_table.get("testButton").expect("testButton should exist");
+    let test_button: mlua::Table = addon_table
+        .get("testButton")
+        .expect("testButton should exist");
     let result: String = test_button.get("result").expect("result should be set");
-    assert!(result.starts_with("updated:"), "updateKeyDirection should have been called, got: {}", result);
+    assert!(
+        result.starts_with("updated:"),
+        "updateKeyDirection should have been called, got: {}",
+        result
+    );
 }
 
 const MULTI_FILE_WIDGETS_LUA: &str = r#"
@@ -571,21 +821,19 @@ fn test_get_attribute_multi_arg_and_wildcard() {
     );
 
     // Set attributes like SecureTemplates does
-    t.env.eval::<()>(r#"
+    t.env
+        .eval::<()>(
+            r#"
         TestSecureBtn:SetAttribute("*type1", "target")
         TestSecureBtn:SetAttribute("unit", "party1")
         TestSecureBtn:SetAttribute("type2", "menu")
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
 
     // Single-arg GetAttribute still works
-    t.assert_lua_str(
-        r#"return TestSecureBtn:GetAttribute("unit")"#,
-        "party1",
-    );
-    t.assert_lua_str(
-        r#"return TestSecureBtn:GetAttribute("type2")"#,
-        "menu",
-    );
+    t.assert_lua_str(r#"return TestSecureBtn:GetAttribute("unit")"#, "party1");
+    t.assert_lua_str(r#"return TestSecureBtn:GetAttribute("type2")"#, "menu");
 
     // Multi-arg form: GetAttribute(prefix, name, suffix) → concatenates
     t.assert_lua_str(
@@ -628,7 +876,9 @@ fn test_get_attribute_multi_arg_and_wildcard() {
 
 #[test]
 fn test_set_get_hit_rect_insets() {
-    let (t, _) = load_test_lua("test-hit-rect-insets", r#"
+    let (t, _) = load_test_lua(
+        "test-hit-rect-insets",
+        r#"
         local f = CreateFrame("Frame", "HitRectTestFrame", UIParent)
         f:SetSize(200, 100)
         f:SetPoint("CENTER")
@@ -653,7 +903,8 @@ fn test_set_get_hit_rect_insets() {
             "reset insets should be 0,0,0,0")
 
         HIT_RECT_TEST_OK = true
-    "#);
+    "#,
+    );
 
     let ok: bool = t.env.eval("return HIT_RECT_TEST_OK == true").unwrap();
     assert!(ok, "SetHitRectInsets / GetHitRectInsets Lua test failed");
@@ -663,8 +914,8 @@ fn test_set_get_hit_rect_insets() {
 #[test]
 fn test_hit_rect_insets_shrinks_hittable_rect() {
     use crate::LayoutRect;
-    use crate::iced_app::frame_collect::CollectedFrames;
     use crate::iced_app::build_hittable_rects;
+    use crate::iced_app::frame_collect::CollectedFrames;
 
     let mut registry = crate::widget::WidgetRegistry::new();
     let frame = crate::widget::Frame::default();
@@ -674,7 +925,15 @@ fn test_hit_rect_insets_shrinks_hittable_rect() {
     frame.hit_rect_insets = (10.0, 20.0, 5.0, 15.0);
 
     let collected = CollectedFrames {
-        hittable: vec![(id, LayoutRect { x: 100.0, y: 50.0, width: 200.0, height: 100.0 })],
+        hittable: vec![(
+            id,
+            LayoutRect {
+                x: 100.0,
+                y: 50.0,
+                width: 200.0,
+                height: 100.0,
+            },
+        )],
     };
 
     let result = build_hittable_rects(&collected, &registry);
@@ -687,10 +946,30 @@ fn test_hit_rect_insets_shrinks_hittable_rect() {
     let expected_y = (50.0 + 5.0) * scale;
     let expected_w = (200.0 - 10.0 - 20.0) * scale;
     let expected_h = (100.0 - 5.0 - 15.0) * scale;
-    assert!((rect.x - expected_x).abs() < 0.01, "x: {} != {}", rect.x, expected_x);
-    assert!((rect.y - expected_y).abs() < 0.01, "y: {} != {}", rect.y, expected_y);
-    assert!((rect.width - expected_w).abs() < 0.01, "w: {} != {}", rect.width, expected_w);
-    assert!((rect.height - expected_h).abs() < 0.01, "h: {} != {}", rect.height, expected_h);
+    assert!(
+        (rect.x - expected_x).abs() < 0.01,
+        "x: {} != {}",
+        rect.x,
+        expected_x
+    );
+    assert!(
+        (rect.y - expected_y).abs() < 0.01,
+        "y: {} != {}",
+        rect.y,
+        expected_y
+    );
+    assert!(
+        (rect.width - expected_w).abs() < 0.01,
+        "w: {} != {}",
+        rect.width,
+        expected_w
+    );
+    assert!(
+        (rect.height - expected_h).abs() < 0.01,
+        "h: {} != {}",
+        rect.height,
+        expected_h
+    );
 }
 
 #[test]
@@ -710,11 +989,16 @@ fn test_xml_hit_rect_insets() {
         "return HitRectXMLFrame ~= nil",
         "HitRectXMLFrame should exist",
     );
-    let insets: (f64, f64, f64, f64) = t.env.eval(
-        "return HitRectXMLFrame:GetHitRectInsets()"
-    ).unwrap();
-    assert_eq!(insets, (10.0, 20.0, 5.0, 15.0),
-        "XML HitRectInsets should be applied: got {:?}", insets);
+    let insets: (f64, f64, f64, f64) = t
+        .env
+        .eval("return HitRectXMLFrame:GetHitRectInsets()")
+        .unwrap();
+    assert_eq!(
+        insets,
+        (10.0, 20.0, 5.0, 15.0),
+        "XML HitRectInsets should be applied: got {:?}",
+        insets
+    );
 }
 
 mod global_frame_access;

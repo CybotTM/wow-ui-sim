@@ -5,6 +5,7 @@
 //! durations) is populated even without a GUI loop.
 
 use crate::lua_api::WowLuaEnv;
+use crate::screen::ScreenKind;
 
 /// Process any C_Timer callbacks that became ready during startup.
 pub fn process_pending_timers(env: &WowLuaEnv) {
@@ -38,13 +39,23 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
 
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
+    env.set_screen_mode(ScreenKind::Game);
     fire_login_sequence(env, false);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
 }
 
+/// Fire startup events for a selected top-level screen.
+pub fn fire_startup_events_for_screen(env: &WowLuaEnv, screen: ScreenKind) {
+    match screen {
+        ScreenKind::Game => fire_startup_events(env),
+        ScreenKind::Login | ScreenKind::CharacterSelect => fire_glue_startup_events(env, screen),
+    }
+}
+
 /// Fire startup events for headless test mode (skips IsLoggedIn override).
 pub fn fire_startup_events_headless(env: &WowLuaEnv) {
+    env.set_screen_mode(ScreenKind::Game);
     fire_login_sequence(env, true);
     fire_world_enter_sequence(env);
     fire_post_login_events(env);
@@ -52,12 +63,15 @@ pub fn fire_startup_events_headless(env: &WowLuaEnv) {
 
 /// Fire ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN and optionally set IsLoggedIn.
 fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
+    env.set_logged_in(false);
     let fire = |name| fire_simple_event(env, name);
 
     eprintln!("[Startup] Firing ADDON_LOADED");
     if let Err(e) = env.fire_event_with_args(
         "ADDON_LOADED",
-        &[mlua::Value::String(env.lua().create_string("WoWUISim").unwrap())],
+        &[mlua::Value::String(
+            env.lua().create_string("WoWUISim").unwrap(),
+        )],
     ) {
         eprintln!("Error firing ADDON_LOADED: {}", e);
     }
@@ -67,16 +81,24 @@ fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
     // In WoW, IsLoggedIn() returns true once the player is logged in.
     // AceAddon-3.0 checks IsLoggedIn() before enabling addons from its queue.
     if !skip_is_logged_in {
-        if let Err(e) = env
-            .lua()
-            .load(r#"IsLoggedIn = function() return true end"#)
-            .exec()
-        {
-            eprintln!("Error setting IsLoggedIn: {}", e);
-        }
+        env.set_logged_in(true);
     }
 
     fire("PLAYER_LOGIN");
+}
+
+fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
+    env.set_screen_mode(screen);
+    env.set_logged_in(false);
+    fire_simple_event(env, "FRAMES_LOADED");
+    if let Some(screen_name) = screen.glue_screen_name()
+        && let Err(e) = env.exec(&format!(
+            "if GlueParent_SetScreen then GlueParent_SetScreen({screen_name:?}) end"
+        ))
+    {
+        eprintln!("Error switching glue screen to {screen_name}: {e}");
+    }
+    fire_simple_event(env, "LOGIN_STATE_CHANGED");
 }
 
 /// Fire EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, and PLAYER_ENTERING_WORLD.
@@ -210,7 +232,8 @@ fn fire_unit_aura(env: &WowLuaEnv) {
 /// preventing PartyFrame:UpdatePartyFrames() from re-showing them.
 /// This safety net shows each member frame individually with pcall wrappers.
 fn force_show_party_member_frames(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(r#"
+    if let Err(e) = env.exec(
+        r#"
         if not PartyFrame or not PartyFrame.PartyMemberFramePool then return end
         local pool = PartyFrame.PartyMemberFramePool
         local i = 0
@@ -233,7 +256,8 @@ fn force_show_party_member_frames(env: &WowLuaEnv) {
             end
         end
         PartyFrame:Layout()
-    "#) {
+    "#,
+    ) {
         eprintln!("[startup] party frame safety-net error: {e}");
     }
 }
@@ -241,12 +265,14 @@ fn force_show_party_member_frames(env: &WowLuaEnv) {
 /// Seed buff duration text so it's visible immediately without waiting
 /// for the first OnUpdate tick. OnUpdate handlers maintain it afterwards.
 pub fn seed_buff_durations(env: &WowLuaEnv) {
-    let _ = env.exec(r#"
+    let _ = env.exec(
+        r#"
         if not BuffFrame or not BuffFrame.auraFrames then return end
         for _, b in ipairs(BuffFrame.auraFrames) do
             if b:IsVisible() and b.timeLeft and b.UpdateDuration then
                 pcall(b.UpdateDuration, b, b.timeLeft)
             end
         end
-    "#);
+    "#,
+    );
 }

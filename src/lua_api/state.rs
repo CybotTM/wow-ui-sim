@@ -6,6 +6,7 @@ use crate::lua_api::animation::AnimGroupState;
 use crate::lua_api::message_frame::MessageFrameData;
 use crate::lua_api::simple_html::SimpleHtmlData;
 use crate::lua_api::tooltip::TooltipData;
+use crate::screen::ScreenKind;
 use crate::sound::SoundManager;
 use crate::widget::WidgetRegistry;
 use std::collections::{HashMap, HashSet, VecDeque};
@@ -13,19 +14,17 @@ use std::path::PathBuf;
 use std::time::Instant;
 
 // Re-export game data types so existing `crate::lua_api::state::X` imports keep working.
-pub use super::game_data::{
-    AuraInfo, CastingState, PartyMember, TargetInfo,
-    CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS, XP_LEVELS,
-    build_target_info, tick_party_health,
-};
 pub use super::game_data::SpellCooldownState;
-pub use super::state_types::{
-    BagItem, CursorInfo, PendingTimer, AddonRuntimeMetrics, AppFrameMetrics,
-    AddonInfo, GreatVaultActivity, MovementState, LootRollInfo,
-    PlayerState, WorldState,
+pub use super::game_data::{
+    AuraInfo, CLASS_LABELS, CastingState, PartyMember, RACE_DATA, ROT_DAMAGE_LEVELS, TargetInfo,
+    XP_LEVELS, build_target_info, tick_party_health,
 };
 use super::game_data::{
     default_action_bars, default_party, default_player_buffs, random_player_name,
+};
+pub use super::state_types::{
+    AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, GreatVaultActivity,
+    LootRollInfo, MovementState, PendingTimer, PlayerState, WorldState,
 };
 
 /// Shared simulator state accessible from Lua.
@@ -74,6 +73,10 @@ pub struct SimState {
     /// Screen dimensions in UI coordinates.
     pub screen_width: f32,
     pub screen_height: f32,
+    /// Requested UI surface (in-game vs glue screen).
+    pub screen_kind: ScreenKind,
+    /// Whether the simulated player is logged into the world.
+    pub is_logged_in: bool,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -145,27 +148,52 @@ impl Default for SimState {
 impl SimState {
     fn new_empty() -> Self {
         Self {
-            widgets: WidgetRegistry::default(), events: EventQueue::default(),
-            scripts: ScriptRegistry::default(), cvars: CVarStorage::new(),
-            console_output: Vec::new(), timers: VecDeque::new(),
-            addons: Vec::new(), lua_errors: Vec::new(),
-            tooltips: HashMap::new(), simple_htmls: HashMap::new(),
+            widgets: WidgetRegistry::default(),
+            events: EventQueue::default(),
+            scripts: ScriptRegistry::default(),
+            cvars: CVarStorage::new(),
+            console_output: Vec::new(),
+            timers: VecDeque::new(),
+            addons: Vec::new(),
+            lua_errors: Vec::new(),
+            tooltips: HashMap::new(),
+            simple_htmls: HashMap::new(),
             message_frames: HashMap::new(),
-            animation_groups: HashMap::new(), anim_sync_times: HashMap::new(),
-            anim_frame_to_group: HashMap::new(), anim_frame_to_anim: HashMap::new(),
-            on_update_frames: HashSet::new(), pending_hit_grid_changes: Vec::new(),
-            action_bars: HashMap::new(), addon_base_paths: Vec::new(),
-            spell_cooldowns: HashMap::new(), action_ui_buttons: Vec::new(),
-            party_members: Vec::new(), bag_items: HashMap::new(),
-            focused_frame_id: None, visible_on_update_cache: None,
-            strata_buckets: None, mouse_position: None, hovered_frame: None,
-            current_target: None, current_focus: None, sound_manager: None,
-            casting: None, gcd: None, cursor_item: None,
-            loading_addon_index: None, executing_addon_index: None,
+            animation_groups: HashMap::new(),
+            anim_sync_times: HashMap::new(),
+            anim_frame_to_group: HashMap::new(),
+            anim_frame_to_anim: HashMap::new(),
+            on_update_frames: HashSet::new(),
+            pending_hit_grid_changes: Vec::new(),
+            action_bars: HashMap::new(),
+            addon_base_paths: Vec::new(),
+            spell_cooldowns: HashMap::new(),
+            action_ui_buttons: Vec::new(),
+            party_members: Vec::new(),
+            bag_items: HashMap::new(),
+            focused_frame_id: None,
+            visible_on_update_cache: None,
+            strata_buckets: None,
+            mouse_position: None,
+            hovered_frame: None,
+            current_target: None,
+            current_focus: None,
+            sound_manager: None,
+            casting: None,
+            gcd: None,
+            cursor_item: None,
+            loading_addon_index: None,
+            executing_addon_index: None,
             loading_forbidden: false,
-            next_anim_group_id: 1, next_cast_id: 1,
-            screen_width: 1600.0, screen_height: 1200.0, fps: 0.0,
-            rot_damage_level: 0, start_time: Instant::now(),
+            next_anim_group_id: 1,
+            next_cast_id: 1,
+            screen_width: 1600.0,
+            screen_height: 1200.0,
+            screen_kind: ScreenKind::Game,
+            is_logged_in: false,
+            fps: 0.0,
+            rot_damage_level: 0,
+            start_time: Instant::now(),
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             player: PlayerState::default(),
@@ -175,12 +203,21 @@ impl SimState {
 
     /// Look up bag item at (bag, slot). Returns (item_id, stack_count).
     pub fn get_bag_item(&self, bag: i32, slot: i32) -> Option<(u32, i32)> {
-        self.bag_items.get(&(bag, slot)).map(|i| (i.item_id, i.stack_count))
+        self.bag_items
+            .get(&(bag, slot))
+            .map(|i| (i.item_id, i.stack_count))
     }
 
     /// Count occupied slots in a bag.
     pub fn bag_occupied_slots(&self, bag: i32) -> i32 {
         self.bag_items.keys().filter(|(b, _)| *b == bag).count() as i32
+    }
+
+    pub fn set_screen_kind(&mut self, screen_kind: ScreenKind) {
+        self.screen_kind = screen_kind;
+        if screen_kind.is_glue() {
+            self.is_logged_in = false;
+        }
     }
 }
 
@@ -209,7 +246,9 @@ impl SimState {
         use crate::widget::WidgetType;
         let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
         for id in self.widgets.iter_ids() {
-            let Some(f) = self.widgets.get(id) else { continue };
+            let Some(f) = self.widgets.get(id) else {
+                continue;
+            };
             // Visibility filter: skip frames with no render alpha.
             // Fall back to parent alpha only for frames hidden via visible=false
             // (button state textures), NOT for frames with explicit alpha=0.
@@ -226,7 +265,10 @@ impl SimState {
             if render_alpha <= 0.0 {
                 continue;
             }
-            let strata = if matches!(f.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
+            let strata = if matches!(
+                f.widget_type,
+                WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+            ) {
                 f.parent_id
                     .and_then(|pid| self.widgets.get(pid))
                     .map(|p| p.frame_strata)
@@ -237,11 +279,10 @@ impl SimState {
             buckets[strata.as_index()].push(id);
         }
         for bucket in &mut buckets {
-            bucket.sort_by(|&a, &b| {
-                match (self.widgets.get(a), self.widgets.get(b)) {
-                    (Some(fa), Some(fb)) => intra_strata_sort_key(fa, a, &self.widgets).cmp(&intra_strata_sort_key(fb, b, &self.widgets)),
-                    _ => a.cmp(&b),
-                }
+            bucket.sort_by(|&a, &b| match (self.widgets.get(a), self.widgets.get(b)) {
+                (Some(fa), Some(fb)) => intra_strata_sort_key(fa, a, &self.widgets)
+                    .cmp(&intra_strata_sort_key(fb, b, &self.widgets)),
+                _ => a.cmp(&b),
             });
         }
         buckets
@@ -283,10 +324,17 @@ impl SimState {
         // Remove stale entry so compute_frame_rect_cached recomputes.
         cache.remove(&id);
         let rect = crate::iced_app::compute_frame_rect_cached(
-            widgets, id, screen_width, screen_height, cache,
-        ).rect;
-        let children: Vec<u64> = widgets.get(id)
-            .map(|f| f.children.clone()).unwrap_or_default();
+            widgets,
+            id,
+            screen_width,
+            screen_height,
+            cache,
+        )
+        .rect;
+        let children: Vec<u64> = widgets
+            .get(id)
+            .map(|f| f.children.clone())
+            .unwrap_or_default();
         if let Some(f) = widgets.get_mut(id) {
             f.layout_rect = Some(rect);
         }
@@ -302,18 +350,19 @@ impl SimState {
     fn recompute_anchor_dependents(
         widgets: &mut crate::widget::WidgetRegistry,
         target_id: u64,
-        sw: f32, sh: f32,
+        sw: f32,
+        sh: f32,
         cache: &mut crate::iced_app::layout::LayoutCache,
         _depth: u32,
     ) {
-        let deps: Vec<u64> = widgets.get_anchor_dependents(target_id)
+        let deps: Vec<u64> = widgets
+            .get_anchor_dependents(target_id)
             .map(|s| s.iter().copied().collect())
             .unwrap_or_default();
         for dep_id in deps {
             Self::recompute_layout_subtree(widgets, dep_id, sw, sh, cache);
         }
     }
-
 }
 
 impl SimState {
@@ -327,7 +376,11 @@ impl SimState {
             let sh = self.screen_height;
             let mut cache = crate::iced_app::layout::LayoutCache::default();
             for id in pending {
-                if self.widgets.get(id).is_some_and(|f| f.layout_rect.is_none()) {
+                if self
+                    .widgets
+                    .get(id)
+                    .is_some_and(|f| f.layout_rect.is_none())
+                {
                     Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
                 }
             }
@@ -394,7 +447,9 @@ impl SimState {
         }
         self.update_on_update_cache(id, visible);
         // Propagate effective_alpha: look up parent's effective_alpha.
-        let parent_eff = self.widgets.get(id)
+        let parent_eff = self
+            .widgets
+            .get(id)
             .and_then(|f| f.parent_id)
             .and_then(|pid| self.widgets.get(pid))
             .map(|p| p.effective_alpha)
@@ -414,7 +469,9 @@ impl SimState {
 
     /// Remove a frame and all its descendants from strata_buckets.
     fn remove_subtree_from_buckets(&mut self, root_id: u64) {
-        let Some(buckets) = self.strata_buckets.as_mut() else { return };
+        let Some(buckets) = self.strata_buckets.as_mut() else {
+            return;
+        };
         // Collect all IDs in the subtree.
         let mut subtree = std::collections::HashSet::new();
         let mut queue = vec![root_id];
@@ -434,13 +491,17 @@ impl SimState {
     /// Walks all descendants and inserts those with render_alpha > 0
     /// (own effective_alpha, or parent's for button state textures with alpha > 0).
     fn insert_subtree_into_buckets(&mut self, root_id: u64) {
-        let Some(buckets) = self.strata_buckets.as_mut() else { return };
+        let Some(buckets) = self.strata_buckets.as_mut() else {
+            return;
+        };
         use crate::iced_app::frame_collect::intra_strata_sort_key;
         use crate::widget::WidgetType;
         // Walk all descendants.
         let mut queue = vec![root_id];
         while let Some(fid) = queue.pop() {
-            let Some(f) = self.widgets.get(fid) else { continue };
+            let Some(f) = self.widgets.get(fid) else {
+                continue;
+            };
             queue.extend(f.children.iter().copied());
             let render_alpha = if f.effective_alpha > 0.0 {
                 f.effective_alpha
@@ -455,7 +516,10 @@ impl SimState {
             if render_alpha <= 0.0 {
                 continue;
             }
-            let strata = if matches!(f.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
+            let strata = if matches!(
+                f.widget_type,
+                WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+            ) {
                 f.parent_id
                     .and_then(|pid| self.widgets.get(pid))
                     .map(|p| p.frame_strata)
@@ -466,7 +530,8 @@ impl SimState {
             let key = intra_strata_sort_key(f, fid, &self.widgets);
             let bucket = &mut buckets[strata.as_index()];
             let pos = bucket.partition_point(|&existing_id| {
-                self.widgets.get(existing_id)
+                self.widgets
+                    .get(existing_id)
                     .map(|ef| intra_strata_sort_key(ef, existing_id, &self.widgets))
                     .unwrap_or_default()
                     < key
@@ -484,7 +549,9 @@ impl SimState {
             Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
             None => return,
         };
-        let max_raise_order = self.sibling_raise_order_range(id, parent_id, strata, level).1;
+        let max_raise_order = self
+            .sibling_raise_order_range(id, parent_id, strata, level)
+            .1;
         let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
         if current_raise_order > max_raise_order {
             return; // Already on top
@@ -510,7 +577,9 @@ impl SimState {
             Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
             None => return,
         };
-        let min_raise_order = self.sibling_raise_order_range(id, parent_id, strata, level).0;
+        let min_raise_order = self
+            .sibling_raise_order_range(id, parent_id, strata, level)
+            .0;
         let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
         if current_raise_order < min_raise_order {
             return; // Already at bottom
@@ -533,16 +602,24 @@ impl SimState {
         level: i32,
     ) -> (i32, i32) {
         let sibling_ids: Vec<u64> = if let Some(pid) = parent_id {
-            self.widgets.get(pid)
+            self.widgets
+                .get(pid)
                 .map(|p| p.children.clone())
                 .unwrap_or_default()
         } else {
             // Root frames: all frames with no parent
-            self.widgets.iter_ids()
-                .filter(|&fid| self.widgets.get(fid).map(|f| f.parent_id.is_none()).unwrap_or(false))
+            self.widgets
+                .iter_ids()
+                .filter(|&fid| {
+                    self.widgets
+                        .get(fid)
+                        .map(|f| f.parent_id.is_none())
+                        .unwrap_or(false)
+                })
                 .collect()
         };
-        let orders: Vec<i32> = sibling_ids.iter()
+        let orders: Vec<i32> = sibling_ids
+            .iter()
             .filter(|&&sid| sid != id)
             .filter_map(|&sid| self.widgets.get(sid))
             .filter(|f| f.frame_strata == strata && f.frame_level == level)
@@ -572,8 +649,11 @@ impl SimState {
                 cache.push(id);
             }
         }
-        let children: Vec<u64> = self.widgets.get(id)
-            .map(|f| f.children.clone()).unwrap_or_default();
+        let children: Vec<u64> = self
+            .widgets
+            .get(id)
+            .map(|f| f.children.clone())
+            .unwrap_or_default();
         for child_id in children {
             if self.widgets.get(child_id).is_some_and(|f| f.visible) {
                 self.add_on_update_descendants(child_id, cache);
@@ -584,8 +664,11 @@ impl SimState {
     /// Remove `id` and all its descendants from cache (hidden ancestor = all hidden).
     fn remove_on_update_descendants(&self, id: u64, cache: &mut Vec<u64>) {
         cache.retain(|&cached_id| cached_id != id);
-        let children: Vec<u64> = self.widgets.get(id)
-            .map(|f| f.children.clone()).unwrap_or_default();
+        let children: Vec<u64> = self
+            .widgets
+            .get(id)
+            .map(|f| f.children.clone())
+            .unwrap_or_default();
         for child_id in children {
             self.remove_on_update_descendants(child_id, cache);
         }
@@ -596,13 +679,10 @@ impl SimState {
         let idx = self.addons.iter().position(|a| a.folder_name == addon_name);
         let addon_idx = idx.map(|i| i as u16);
         let before = self.on_update_frames.len();
-        self.on_update_frames.retain(|&id| {
-            self.widgets.get(id).and_then(|f| f.owner_addon) == addon_idx
-        });
+        self.on_update_frames
+            .retain(|&id| self.widgets.get(id).and_then(|f| f.owner_addon) == addon_idx);
         self.visible_on_update_cache = None;
         let after = self.on_update_frames.len();
         eprintln!("[self-test] stripped OnUpdate: {before} → {after} (keeping {addon_name})");
     }
-
 }
-
