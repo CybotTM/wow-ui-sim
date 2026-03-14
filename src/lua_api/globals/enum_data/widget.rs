@@ -189,6 +189,24 @@ pub const VAS_TRANSACTION_PURCHASE_RESULT: SeqEnumDef = (
     ],
 );
 
+pub const VAS_QUEUE_STATUS: EnumDef = (
+    "VasQueueStatus",
+    &[
+        ("UnderAnHour", 0),
+        ("OneToThreeHours", 1),
+        ("ThreeToSixHours", 2),
+        ("SixToTwelveHours", 3),
+        ("OverTwelveHours", 4),
+        ("Over_1_Days", 5),
+        ("Over_2_Days", 6),
+        ("Over_3_Days", 7),
+        ("Over_4_Days", 8),
+        ("Over_5_Days", 9),
+        ("Over_6_Days", 10),
+        ("Over_7_Days", 11),
+    ],
+);
+
 pub const STORE_ERROR: SeqEnumDef = (
     "StoreError",
     &[

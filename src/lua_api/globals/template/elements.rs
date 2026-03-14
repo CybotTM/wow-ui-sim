@@ -289,6 +289,7 @@ fn append_texture_properties(
     if let Some(ref mode) = texture.alpha_mode {
         code.push_str(&format!("            {}:SetBlendMode(\"{}\")\n", var, mode));
     }
+    append_key_values(code, texture.key_values.as_ref(), var);
 }
 
 /// Append SetSize/SetWidth/SetHeight from a `<Size>` XML element.
@@ -299,6 +300,22 @@ fn append_size_code(code: &mut String, size: &crate::xml::SizeXml, var: &str) {
         (Some(w), None) => code.push_str(&format!("            {var}:SetWidth({w})\n")),
         (None, Some(h)) => code.push_str(&format!("            {var}:SetHeight({h})\n")),
         _ => {}
+    }
+}
+
+fn append_key_values(code: &mut String, key_values: Option<&crate::xml::KeyValuesXml>, var: &str) {
+    let Some(key_values) = key_values else {
+        return;
+    };
+    for kv in &key_values.values {
+        let value = match kv.value_type.as_deref() {
+            Some("number") => kv.value.clone(),
+            Some("boolean") => kv.value.to_lowercase(),
+            Some("global") if !kv.value.is_empty() => kv.value.clone(),
+            Some("global") => "nil".to_string(),
+            _ => format!("\"{}\"", escape_lua_string(&kv.value)),
+        };
+        code.push_str(&format!("            {var}.{} = {value}\n", kv.key));
     }
 }
 
@@ -390,6 +407,7 @@ pub(super) fn create_fontstring_from_template(
         parent_name,
     );
     append_fontstring_wrap_and_lines(&mut code, fontstring);
+    append_key_values(&mut code, fontstring.key_values.as_ref(), "fs");
 
     if fontstring.hidden == Some(true) {
         code.push_str("            fs:Hide()\n");

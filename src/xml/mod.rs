@@ -45,4 +45,52 @@ mod tests {
         let ui = parse_xml(xml).unwrap();
         assert_eq!(ui.elements.len(), 1);
     }
+
+    #[test]
+    fn test_parse_element_key_values() {
+        let xml = r#"
+            <Ui>
+                <Frame name="TestFrame">
+                    <Layers>
+                        <Layer level="ARTWORK">
+                            <FontString parentKey="Text">
+                                <KeyValues>
+                                    <KeyValue key="anchorSpacing" value="4" type="number"/>
+                                </KeyValues>
+                            </FontString>
+                            <Texture parentKey="Icon">
+                                <KeyValues>
+                                    <KeyValue key="layoutIndex" value="2" type="number"/>
+                                </KeyValues>
+                            </Texture>
+                        </Layer>
+                    </Layers>
+                </Frame>
+            </Ui>
+        "#;
+
+        let ui = parse_xml(xml).unwrap();
+        let frame = match &ui.elements[0] {
+            XmlElement::Frame(frame) => frame,
+            other => panic!("expected frame, got {:?}", other),
+        };
+        let layer = &frame.layers().next().unwrap().layers[0];
+        let text = match &layer.elements[0] {
+            LayerElement::FontString(text) => text,
+            other => panic!("expected fontstring, got {:?}", other),
+        };
+        let texture = match &layer.elements[1] {
+            LayerElement::Texture(texture) => texture,
+            other => panic!("expected texture, got {:?}", other),
+        };
+
+        assert_eq!(
+            text.key_values.as_ref().unwrap().values[0].key,
+            "anchorSpacing"
+        );
+        assert_eq!(
+            texture.key_values.as_ref().unwrap().values[0].key,
+            "layoutIndex"
+        );
+    }
 }

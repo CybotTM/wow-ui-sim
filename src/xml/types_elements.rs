@@ -106,6 +106,8 @@ pub struct TextureXml {
     pub animations: Option<AnimationsXml>,
     #[serde(rename = "Scripts")]
     pub scripts: Option<ScriptsXml>,
+    #[serde(rename = "KeyValues")]
+    pub key_values: Option<KeyValuesXml>,
     /// Texture coordinates (left, right, top, bottom) for UV mapping.
     #[serde(rename = "TexCoords")]
     pub tex_coords: Option<TexCoordsXml>,
@@ -196,6 +198,8 @@ pub struct FontStringXml {
     pub shadow: Option<ShadowXml>,
     #[serde(rename = "Scripts")]
     pub scripts: Option<ScriptsXml>,
+    #[serde(rename = "KeyValues")]
+    pub key_values: Option<KeyValuesXml>,
     #[serde(rename = "@setAllPoints")]
     pub set_all_points: Option<bool>,
     #[serde(rename = "@parentArray")]
