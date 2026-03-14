@@ -937,14 +937,15 @@ fn run_screenshot(
 ) {
     use wow_ui_sim::render::headless::render_to_image;
 
-    env.set_screen_size(width as f32, height as f32);
     run_headless_startup(env);
+    env.set_screen_size(width as f32, height as f32);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     if let Some(code) = exec_lua
         && let Err(e) = env.exec(code)
     {
         eprintln!("[exec-lua] error: {e}");
     }
+    run_extra_update_ticks(env, 3);
     apply_delay(delay);
     let (batch, glyph_atlas) =
         build_screenshot_batch(env, font_system, width, height, filter.as_deref());
