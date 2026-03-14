@@ -209,6 +209,28 @@ fn assert_layers_and_scripts_children(t: &TestCtx) {
 }
 
 #[test]
+fn test_xml_button_texture_parent_key_assigns_button_field() {
+    let t = load_test_xml(
+        "test-xml-button-texture-parent-key",
+        r#"<Ui>
+            <Button name="ParentKeyButton" parent="UIParent">
+                <Size x="48" y="48"/>
+                <NormalTexture file="Interface\Buttons\UI-PaidCharacterCustomization-Button" parentKey="texture"/>
+            </Button>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        "return ParentKeyButton.texture ~= nil",
+        "custom button texture parentKey should assign a Lua field on the button",
+    );
+    t.assert_lua_true(
+        "return ParentKeyButton.texture == ParentKeyButton:GetNormalTexture()",
+        "custom parentKey should reference the button's normal texture",
+    );
+}
+
+#[test]
 fn test_xml_scripts_function_attribute() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(

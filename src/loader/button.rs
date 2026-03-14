@@ -53,6 +53,30 @@ fn generate_texture_global_snippet(
         .unwrap_or_default()
 }
 
+/// Generate the per-button field assignment for a button texture parentKey.
+///
+/// WoW exposes custom parentKeys on button texture slots as fields on the button
+/// itself (for example `<NormalTexture parentKey="texture">` gives
+/// `button.texture`). The normal button slot (`NormalTexture`, `HighlightTexture`,
+/// etc.) still exists via the getter/setter methods; this only mirrors the extra
+/// Lua field expected by Blizzard code.
+fn generate_texture_parent_key_snippet(
+    button_name: &str,
+    method: &str,
+    texture: &crate::xml::TextureXml,
+) -> String {
+    let Some(parent_key) = texture.parent_key.as_deref() else {
+        return String::new();
+    };
+    let getter = method.replace("Set", "Get");
+    format!(
+        "do local b = {button_ref} local t = b and b:{getter}() if b and t then b[\"{parent_key}\"] = t end end\n",
+        button_ref = lua_global_ref(button_name),
+        getter = getter,
+        parent_key = escape_lua_string(parent_key),
+    )
+}
+
 /// Generate Lua code for a single button texture (atlas or file path),
 /// and register the texture as a global if it has a `$parent`-prefixed name.
 fn generate_button_texture_code(
@@ -61,6 +85,11 @@ fn generate_button_texture_code(
     texture: &crate::xml::TextureXml,
 ) -> String {
     let mut code = generate_texture_setter_code(button_name, method, texture);
+    code.push_str(&generate_texture_parent_key_snippet(
+        button_name,
+        method,
+        texture,
+    ));
     code.push_str(&generate_texture_global_snippet(
         button_name,
         method,
