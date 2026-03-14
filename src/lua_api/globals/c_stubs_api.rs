@@ -17,6 +17,90 @@
 
 use mlua::{Lua, MultiValue, Result, Value};
 
+const GLUE_CHARACTER_GUID: &str = "Player-1-00000001";
+
+fn has_glue_character(lua: &Lua) -> bool {
+    let Some(state) =
+        lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+    else {
+        return false;
+    };
+
+    matches!(
+        state.borrow().screen_kind,
+        crate::screen::ScreenKind::CharacterSelect
+    )
+}
+
+fn glue_character_count(lua: &Lua) -> i32 {
+    if has_glue_character(lua) { 1 } else { 0 }
+}
+
+fn glue_character_guid(lua: &Lua, index: i32) -> Option<String> {
+    (glue_character_count(lua) > 0 && index == 1).then(|| GLUE_CHARACTER_GUID.to_string())
+}
+
+fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
+    if guid != GLUE_CHARACTER_GUID || !has_glue_character(lua) {
+        return Ok(Value::Nil);
+    }
+
+    let table = lua.create_table()?;
+    if let Some(state) =
+        lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+    {
+        let state = state.borrow();
+        table.set("guid", guid)?;
+        table.set("name", state.player.name.clone())?;
+        table.set("className", "Paladin")?;
+        table.set("classFilename", "PALADIN")?;
+        table.set("experienceLevel", state.player.level)?;
+        table.set("areaName", state.world.zone_name.clone())?;
+    } else {
+        table.set("guid", guid)?;
+        table.set("name", "Player")?;
+        table.set("className", "Paladin")?;
+        table.set("classFilename", "PALADIN")?;
+        table.set("experienceLevel", 70)?;
+        table.set("areaName", "Stormwind City")?;
+    }
+
+    table.set("faction", "Alliance")?;
+    table.set("realmName", "Burning Blade")?;
+    table.set("realmAddress", 1i32)?;
+    table.set("lastLoginBuild", 110205i32)?;
+    table.set("lastActiveTime", 1i64)?;
+    table.set("isLocked", false)?;
+    table.set("isGhost", false)?;
+    table.set("isTrialBoost", false)?;
+    table.set("isTrialBoostCompleted", false)?;
+    table.set("isExpansionTrialCharacter", false)?;
+    table.set("isLockedByExpansion", false)?;
+    table.set("isRevokedCharacterUpgrade", false)?;
+    table.set("revokedCharacterUpgrade", false)?;
+    table.set("mailSenders", lua.create_table()?)?;
+    Ok(Value::Table(table))
+}
+
+fn glue_service_character_info(lua: &Lua, guid: &str) -> Result<Value> {
+    if guid != GLUE_CHARACTER_GUID || !has_glue_character(lua) {
+        return Ok(Value::Nil);
+    }
+
+    let table = lua.create_table()?;
+    table.set("boostInProgress", false)?;
+    table.set("hasFactionChange", false)?;
+    table.set("hasRaceChange", false)?;
+    table.set("hasCustomize", false)?;
+    table.set("customizeDisabled", false)?;
+    table.set("isTrialBoostCompleted", false)?;
+    table.set("isRevokedCharacterUpgrade", false)?;
+    table.set("revokedCharacterUpgrade", false)?;
+    table.set("hasNameChange", false)?;
+    table.set("rpeArathiAvailable", false)?;
+    Ok(Value::Table(table))
+}
+
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(
     lua: &Lua,
@@ -739,6 +823,7 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     register_timer_and_bar_globals(lua, &g)?;
     register_lfg_and_guild_stubs(lua, &g)?;
     register_action_button_util(lua, &g)?;
+    register_player_location_stub(lua, &g)?;
     g.set(
         "GetSavedAccountName",
         lua.create_function(|lua, ()| {
@@ -800,6 +885,148 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         })?,
     )?;
     g.set(
+        "InitializeCharacterScreenData",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "SetInCharacterSelect",
+        lua.create_function(|_, _in_character_select: bool| Ok(()))?,
+    )?;
+    g.set(
+        "SetWorldFrameStrata",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
+    g.set(
+        "SetCharSelectModelFrame",
+        lua.create_function(|_, _frame_name: String| Ok(()))?,
+    )?;
+    g.set(
+        "SetCharSelectMapSceneFrame",
+        lua.create_function(|_, _frame_name: String| Ok(()))?,
+    )?;
+    g.set(
+        "UpdateSelectionCustomizationScene",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetMaxWarbandGroupCount",
+        lua.create_function(|_, ()| Ok(20i32))?,
+    )?;
+    g.set(
+        "GetNumCharacters",
+        lua.create_function(|lua, _include_empty_slots: Option<bool>| {
+            Ok(glue_character_count(lua))
+        })?,
+    )?;
+    g.set(
+        "GetCharacterGUID",
+        lua.create_function(|lua, index: i32| match glue_character_guid(lua, index) {
+            Some(guid) => Ok(Value::String(lua.create_string(&guid)?)),
+            None => Ok(Value::Nil),
+        })?,
+    )?;
+    g.set(
+        "GetBasicCharacterInfo",
+        lua.create_function(|lua, guid: String| glue_basic_character_info(lua, &guid))?,
+    )?;
+    g.set(
+        "GetServiceCharacterInfo",
+        lua.create_function(|lua, guid: String| glue_service_character_info(lua, &guid))?,
+    )?;
+    g.set(
+        "GetCharacterSelection",
+        lua.create_function(|lua, ()| Ok((glue_character_count(lua) > 0) as i32))?,
+    )?;
+    g.set(
+        "SelectCharacter",
+        lua.create_function(|lua, character_id: i32| {
+            let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
+            fire_event.call::<()>(("UPDATE_SELECTED_CHARACTER", character_id))?;
+            Ok(())
+        })?,
+    )?;
+    g.set("CanCreateCharacter", lua.create_function(|_, ()| Ok(true))?)?;
+    g.set(
+        "GetCharacterListGroupsInfo",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "SaveCharacterOrder",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    g.set(
+        "GetCharacterListUpdate",
+        lua.create_function(|lua, ()| {
+            let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
+            fire_event.call::<()>(("CHARACTER_LIST_UPDATE", glue_character_count(lua)))?;
+            Ok(())
+        })?,
+    )?;
+    g.set(
+        "CheckCharacterUndeleteCooldown",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetCharacterUndeleteStatus",
+        lua.create_function(|_, ()| Ok((true, false, 0i32, 0i32)))?,
+    )?;
+    g.set(
+        "GetServerName",
+        lua.create_function(|_, ()| {
+            Ok((
+                String::from("Burning Blade"),
+                String::new(),
+                false,
+                false,
+                1i32,
+            ))
+        })?,
+    )?;
+    g.set(
+        "IsConnectedToServer",
+        lua.create_function(|_, ()| Ok(true))?,
+    )?;
+    g.set(
+        "ShouldShowLevelSquishDialog",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetActiveTimerunningSeasonID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetPlayersOnServer",
+        lua.create_function(|_, ()| Ok((false, 0i32, 0i32)))?,
+    )?;
+    g.set(
+        "GetCharacterTimerunningSeasonID",
+        lua.create_function(|_, _guid: Value| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "IsCharacterTimerunning",
+        lua.create_function(|_, _guid: Value| Ok(false))?,
+    )?;
+    g.set(
+        "IsCharacterTimerunningConversionAllowed",
+        lua.create_function(|_, _guid: Value| Ok(false))?,
+    )?;
+    g.set(
+        "IsTimerunningEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "HasCheckedSystemRequirements",
+        lua.create_function(|_, ()| Ok(true))?,
+    )?;
+    g.set(
+        "SetCheckedSystemRequirements",
+        lua.create_function(|_, _checked: bool| Ok(()))?,
+    )?;
+    g.set(
+        "AlertFrame_SetDuration",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    g.set(
         "UnitGetAvailableRoles",
         lua.create_function(|_, _unit: Value| Ok((true, true, true)))?,
     )?;
@@ -813,6 +1040,201 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     )?;
     register_paperdoll_container_and_misc_stubs(lua, &g)?;
     register_secure_env_globals(lua, &g)?;
+    Ok(())
+}
+
+fn register_player_location_stub(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    if !g.get::<Value>("PlayerLocation")?.is_nil() {
+        return Ok(());
+    }
+
+    lua.load(
+        r#"
+        PlayerLocation = {};
+        PlayerLocationMixin = {};
+
+        local function CreatePlayerLocation(fieldName, ...)
+            local playerLocation = CreateFromMixins(PlayerLocationMixin);
+            if fieldName == "guid" then
+                playerLocation:SetGUID(...);
+            elseif fieldName == "unit" then
+                playerLocation:SetUnit(...);
+            elseif fieldName == "chatLineID" then
+                playerLocation:SetChatLineID(...);
+            elseif fieldName == "communityData" then
+                playerLocation:SetCommunityData(...);
+            elseif fieldName == "communityInvitation" then
+                playerLocation:SetCommunityInvitation(...);
+            elseif fieldName == "battlefieldScoreIndex" then
+                playerLocation:SetBattlefieldScoreIndex(...);
+            elseif fieldName == "voiceID" then
+                playerLocation:SetVoiceID(...);
+            elseif fieldName == "battleNetID" then
+                playerLocation:SetBattleNetID(...);
+            end
+            return playerLocation;
+        end
+
+        function PlayerLocation:CreateFromGUID(guid)
+            return CreatePlayerLocation("guid", guid);
+        end
+
+        function PlayerLocation:CreateFromUnit(unit)
+            return CreatePlayerLocation("unit", unit);
+        end
+
+        function PlayerLocation:CreateFromChatLineID(lineID)
+            return CreatePlayerLocation("chatLineID", lineID);
+        end
+
+        function PlayerLocation:CreateFromCommunityChatData(clubID, streamID, epoch, position)
+            return CreatePlayerLocation("communityData", clubID, streamID, epoch, position);
+        end
+
+        function PlayerLocation:CreateFromCommunityInvitation(clubID, guid)
+            return CreatePlayerLocation("communityInvitation", clubID, guid);
+        end
+
+        function PlayerLocation:CreateFromBattlefieldScoreIndex(index)
+            return CreatePlayerLocation("battlefieldScoreIndex", index);
+        end
+
+        function PlayerLocation:CreateFromVoiceID(memberID, channelID)
+            return CreatePlayerLocation("voiceID", memberID, channelID);
+        end
+
+        function PlayerLocation:CreateFromBattleNetID(battleNetID)
+            return CreatePlayerLocation("battleNetID", battleNetID);
+        end
+
+        function PlayerLocationMixin:SetGUID(guid)
+            self:ClearAndSetField("guid", guid);
+        end
+
+        function PlayerLocationMixin:IsGUID()
+            return self.guid ~= nil;
+        end
+
+        function PlayerLocationMixin:IsBattleNetGUID()
+            return false;
+        end
+
+        function PlayerLocationMixin:GetGUID()
+            return self.guid or self.communityClubInviterGUID;
+        end
+
+        function PlayerLocationMixin:SetUnit(unit)
+            self:ClearAndSetField("unit", unit);
+        end
+
+        function PlayerLocationMixin:IsUnit()
+            return self.unit ~= nil;
+        end
+
+        function PlayerLocationMixin:GetUnit()
+            return self.unit;
+        end
+
+        function PlayerLocationMixin:SetChatLineID(lineID)
+            self:ClearAndSetField("chatLineID", lineID);
+        end
+
+        function PlayerLocationMixin:IsChatLineID()
+            return self.chatLineID ~= nil;
+        end
+
+        function PlayerLocationMixin:GetChatLineID()
+            return self.chatLineID;
+        end
+
+        function PlayerLocationMixin:SetBattlefieldScoreIndex(index)
+            self:ClearAndSetField("battlefieldScoreIndex", index);
+        end
+
+        function PlayerLocationMixin:IsBattlefieldScoreIndex()
+            return self.battlefieldScoreIndex ~= nil;
+        end
+
+        function PlayerLocationMixin:GetBattlefieldScoreIndex()
+            return self.battlefieldScoreIndex;
+        end
+
+        function PlayerLocationMixin:SetVoiceID(memberID, channelID)
+            self:Clear();
+            self.voiceMemberID = memberID;
+            self.voiceChannelID = channelID;
+        end
+
+        function PlayerLocationMixin:IsVoiceID()
+            return self.voiceMemberID ~= nil and self.voiceChannelID ~= nil;
+        end
+
+        function PlayerLocationMixin:GetVoiceID()
+            return self.voiceMemberID, self.voiceChannelID;
+        end
+
+        function PlayerLocationMixin:SetBattleNetID(battleNetID)
+            self:Clear();
+            self.battleNetID = battleNetID;
+        end
+
+        function PlayerLocationMixin:IsBattleNetID()
+            return self.battleNetID ~= nil;
+        end
+
+        function PlayerLocationMixin:GetBattleNetID()
+            return self.battleNetID;
+        end
+
+        function PlayerLocationMixin:SetCommunityData(clubID, streamID, epoch, position)
+            self:Clear();
+            self.communityClubID = clubID;
+            self.communityStreamID = streamID;
+            self.communityEpoch = epoch;
+            self.communityPosition = position;
+        end
+
+        function PlayerLocationMixin:IsCommunityData()
+            return self.communityClubID ~= nil and self.communityStreamID ~= nil and self.communityEpoch ~= nil and self.communityPosition ~= nil;
+        end
+
+        function PlayerLocationMixin:SetCommunityInvitation(clubID, guid)
+            self:Clear();
+            self.communityClubID = clubID;
+            self.communityClubInviterGUID = guid;
+        end
+
+        function PlayerLocationMixin:IsCommunityInvitation()
+            return self.communityClubID ~= nil and self.communityClubInviterGUID ~= nil;
+        end
+
+        function PlayerLocationMixin:IsValid()
+            return true;
+        end
+
+        function PlayerLocationMixin:Clear()
+            self.guid = nil;
+            self.unit = nil;
+            self.chatLineID = nil;
+            self.battlefieldScoreIndex = nil;
+            self.voiceMemberID = nil;
+            self.voiceChannelID = nil;
+            self.communityClubID = nil;
+            self.communityStreamID = nil;
+            self.communityEpoch = nil;
+            self.communityPosition = nil;
+            self.communityClubInviterGUID = nil;
+            self.battleNetID = nil;
+        end
+
+        function PlayerLocationMixin:ClearAndSetField(fieldName, field)
+            self:Clear();
+            self[fieldName] = field;
+        end
+        "#,
+    )
+    .exec()?;
+
     Ok(())
 }
 
@@ -1126,8 +1548,27 @@ fn register_system_namespaces(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     register_cinematic_login_nameplates(lua, &g)?;
     register_character_services_namespace(lua, &g)?;
+    register_social_contract_glue_namespace(lua, &g)?;
     super::c_stubs_api_store::register_c_account_store(lua)?;
     register_c_video_options(lua)?;
+    Ok(())
+}
+
+fn register_social_contract_glue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let social_contract = lua.create_table()?;
+    social_contract.set(
+        "GetShouldShowSocialContract",
+        lua.create_function(|lua, ()| {
+            let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
+            fire_event.call::<()>(("SOCIAL_CONTRACT_STATUS_UPDATE", false))?;
+            Ok(false)
+        })?,
+    )?;
+    social_contract.set(
+        "TryUpdateSocialContract",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set("C_SocialContractGlue", social_contract)?;
     Ok(())
 }
 
@@ -1159,13 +1600,13 @@ fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()>
             else {
                 return Ok(false);
             };
-            Ok(matches!(state.borrow().screen_kind, crate::screen::ScreenKind::Login))
+            Ok(matches!(
+                state.borrow().screen_kind,
+                crate::screen::ScreenKind::Login
+            ))
         })?,
     )?;
-    login.set(
-        "IsLauncherLogin",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    login.set("IsLauncherLogin", lua.create_function(|_, ()| Ok(false))?)?;
     login.set(
         "WasEverLauncherLogin",
         lua.create_function(|_, ()| Ok(false))?,
@@ -1179,18 +1620,16 @@ fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()>
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     login.set("ReconnectLogin", lua.create_function(|_, ()| Ok(()))?)?;
-    login.set(
-        "ClearReconnectLogin",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
+    login.set("ClearReconnectLogin", lua.create_function(|_, ()| Ok(()))?)?;
     login.set(
         "SelectGameAccount",
         lua.create_function(|_, _: Value| Ok(()))?,
     )?;
     login.set(
-        "Login",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        "RequestAutoRealmJoin",
+        lua.create_function(|_, _realm_addr: Value| Ok(()))?,
     )?;
+    login.set("Login", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
     login.set("ClearLastError", lua.create_function(|_, ()| Ok(()))?)?;
     login.set("GetLastError", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("C_Login", login)?;
@@ -1222,6 +1661,33 @@ fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()>
 
 fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let char_svc = lua.create_table()?;
+    char_svc.set("ApplyLevelUp", lua.create_function(|_, ()| Ok(()))?)?;
+    char_svc.set(
+        "AssignUpgradeDistribution",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    char_svc.set("HasQueuedUpgrade", lua.create_function(|_, ()| Ok(false))?)?;
+    char_svc.set(
+        "DoesGUIDHavePendingFactionChange",
+        lua.create_function(|_, _guid: Value| Ok(false))?,
+    )?;
+    char_svc.set(
+        "GetActiveClassTrialBoostType",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    char_svc.set(
+        "GetAutomaticBoost",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    char_svc.set(
+        "GetAutomaticBoostCharacter",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    char_svc.set(
+        "GetQueuedUpgradeGUID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    char_svc.set("ClearQueuedUpgrade", lua.create_function(|_, ()| Ok(()))?)?;
     char_svc.set(
         "HasRequiredBoostForUnrevoke",
         lua.create_function(|_, ()| Ok(false))?,
@@ -1229,6 +1695,69 @@ fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     char_svc.set(
         "HasRequiredBoostForClassTrial",
         lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "IsTrialBoostEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "GetCharacterServiceDisplayInfo",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    char_svc.set(
+        "GetCharacterServiceDisplayDataByVASType",
+        lua.create_function(|lua, _vas_type: Value| {
+            let popup_info = lua.create_table()?;
+            popup_info.set("textureKit", "")?;
+            let t = lua.create_table()?;
+            t.set("popupInfo", popup_info)?;
+            t.set("flowTitle", "")?;
+            Ok(Value::Table(t))
+        })?,
+    )?;
+    char_svc.set(
+        "GetFactionGroupByIndex",
+        lua.create_function(|_, _character_index: i32| Ok("Alliance"))?,
+    )?;
+    char_svc.set(
+        "GetVASDistributions",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    char_svc.set(
+        "IsLiveRegionCharacterListEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "IsLiveRegionCharacterCopyEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "IsLiveRegionAccountCopyEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "IsLiveRegionKeyBindingsCopyEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    char_svc.set(
+        "RequestManualUnrevoke",
+        lua.create_function(|_, _guid: Value| Ok(()))?,
+    )?;
+    char_svc.set(
+        "SetAutomaticBoost",
+        lua.create_function(|_, _boost_type: Value| Ok(()))?,
+    )?;
+    char_svc.set(
+        "SetAutomaticBoostCharacter",
+        lua.create_function(|_, _guid: Value| Ok(()))?,
+    )?;
+    char_svc.set(
+        "TrialBoostCharacter",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    char_svc.set(
+        "GetLiveRegionCharacterCopySourceRegions",
+        lua.create_function(|lua, ()| lua.create_table())?,
     )?;
     char_svc.set(
         "GetCharacterServiceDisplayData",
@@ -1242,6 +1771,126 @@ fn register_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         })?,
     )?;
     g.set("C_CharacterServices", char_svc)?;
+    Ok(())
+}
+
+fn register_realm_list_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let realm_list = lua.create_table()?;
+    realm_list.set(
+        "RequestChangeRealmList",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set("C_RealmList", realm_list)?;
+    Ok(())
+}
+
+fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let character_creation = lua.create_table()?;
+    character_creation.set(
+        "ClearCharacterTemplate",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "GetCharacterTemplateInfo",
+        lua.create_function(|_, _character_index: i32| Ok((String::new(), String::new())))?,
+    )?;
+    character_creation.set(
+        "GetCharacterCreateType",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    character_creation.set(
+        "GetNumCharacterTemplates",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    character_creation.set(
+        "GetAvailableRaces",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    character_creation.set(
+        "GetRaceDataByID",
+        lua.create_function(|lua, _race_id: i32| {
+            let race_data = lua.create_table()?;
+            race_data.set("name", "Human")?;
+            race_data.set("isAlliedRace", false)?;
+            race_data.set("hasHeritageArmor", true)?;
+            Ok(Value::Table(race_data))
+        })?,
+    )?;
+    character_creation.set(
+        "GetRaceIDFromName",
+        lua.create_function(|_, _race_name: String| Ok(1i32))?,
+    )?;
+    character_creation.set(
+        "IsNewPlayerRestricted",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "SetCharCustomizeFrame",
+        lua.create_function(|_, _frame_name: String| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetCharacterTemplate",
+        lua.create_function(|_, _character_index: i32| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetCharacterCreateType",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetTimerunningSeasonID",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    g.set("C_CharacterCreation", character_creation)?;
+    Ok(())
+}
+
+fn register_shared_character_services_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let shared_character_services = lua.create_table()?;
+    shared_character_services.set(
+        "GetUpgradeDistributions",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set("C_SharedCharacterServices", shared_character_services)?;
+    Ok(())
+}
+
+fn register_configuration_warnings_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let configuration_warnings = lua.create_table()?;
+    configuration_warnings.set(
+        "GetConfigurationWarnings",
+        lua.create_function(|lua, _include_seen_warnings: Option<bool>| lua.create_table())?,
+    )?;
+    configuration_warnings.set(
+        "GetConfigurationWarningString",
+        lua.create_function(|_, _warning: Value| Ok(Value::Nil))?,
+    )?;
+    g.set("C_ConfigurationWarnings", configuration_warnings)?;
+    Ok(())
+}
+
+fn register_store_glue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let store_glue = lua.create_table()?;
+    store_glue.set(
+        "GetDisconnectOnLogout",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    store_glue.set(
+        "GetVASProductReady",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    store_glue.set(
+        "GetVASPurchaseStateInfo",
+        lua.create_function(|_, _guid: Value| Ok((0i32, Value::Nil, Value::Nil)))?,
+    )?;
+    store_glue.set(
+        "RequestCharacterQueueTime",
+        lua.create_function(|_, _guid: Value| Ok(()))?,
+    )?;
+    store_glue.set(
+        "UpdateVASPurchaseStates",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set("C_StoreGlue", store_glue)?;
     Ok(())
 }
 
@@ -1290,6 +1939,11 @@ fn register_c_video_options(lua: &Lua) -> Result<()> {
 /// Game-state global stubs for functions referenced during startup events.
 fn register_game_state_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_character_creation_namespace(lua, &g)?;
+    register_shared_character_services_namespace(lua, &g)?;
+    register_configuration_warnings_namespace(lua, &g)?;
+    register_store_glue_namespace(lua, &g)?;
+    register_realm_list_namespace(lua, &g)?;
     g.set("IsTargetLoose", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("IsPartyLFG", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("IsPartyWorldPVP", lua.create_function(|_, ()| Ok(false))?)?;
