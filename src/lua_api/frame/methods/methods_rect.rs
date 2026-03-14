@@ -27,17 +27,15 @@ struct ResolvedRect {
 fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state_rc = get_sim_state(lua);
 
-    let needs_root_rect = {
+    let needs_layout_rect = {
         let state = state_rc.borrow();
         let frame = state.widgets.get(id)?;
-        frame.anchors.is_empty()
-            && frame.parent_id.is_none()
-            && frame.width > 0.0
-            && frame.height > 0.0
-            && frame.layout_rect.is_none()
+        frame.layout_rect.is_none()
+            && (!frame.anchors.is_empty()
+                || (frame.parent_id.is_none() && frame.width > 0.0 && frame.height > 0.0))
     };
 
-    if needs_root_rect {
+    if needs_layout_rect {
         state_rc.borrow_mut().invalidate_layout(id);
     }
 

@@ -46,6 +46,42 @@ fn test_ui_parent_get_rect_returns_screen_rect() {
 }
 
 #[test]
+fn test_get_rect_recovers_pending_layout_for_anchored_frame() {
+    let (t, _) = load_test_lua(
+        "layout-pos-pending-rect",
+        r#"
+        local f = CreateFrame("Frame", "PendingRectFrame", UIParent)
+        f:SetSize(100, 50)
+        f:SetPoint("CENTER", UIParent, "CENTER", 10, -20)
+    "#,
+    );
+
+    {
+        let mut state = t.env.state().borrow_mut();
+        let id = state
+            .widgets
+            .get_id_by_name("PendingRectFrame")
+            .expect("PendingRectFrame should exist");
+        state
+            .widgets
+            .get_mut(id)
+            .expect("pending frame should exist")
+            .layout_rect = None;
+        state.widgets.clear_rect_dirty(id);
+    }
+
+    let count: i32 = t
+        .env
+        .eval("return select('#', PendingRectFrame:GetRect())")
+        .unwrap();
+    assert_eq!(count, 4);
+    let width: f64 = t.env.eval("return select(3, PendingRectFrame:GetRect())").unwrap();
+    let height: f64 = t.env.eval("return select(4, PendingRectFrame:GetRect())").unwrap();
+    assert!((width - 100.0).abs() < 0.01, "expected width 100, got {}", width);
+    assert!((height - 50.0).abs() < 0.01, "expected height 50, got {}", height);
+}
+
+#[test]
 fn test_topleft_at_origin() {
     let (t, _) = load_test_lua(
         "layout-pos-tl-origin",
