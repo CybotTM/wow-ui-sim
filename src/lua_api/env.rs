@@ -197,31 +197,42 @@ impl WowLuaEnv {
         super::script_helpers::get_script(&self.lua, widget_id, handler_name).is_some()
     }
 
+    /// Resolve a clicked frame to the nearest EditBox in its parent chain.
+    pub(crate) fn resolve_editbox_focus_target(&self, clicked_frame: Option<u64>) -> Option<u64> {
+        use crate::widget::WidgetType;
+
+        let state = self.state.borrow();
+        let mut current = clicked_frame;
+
+        while let Some(frame_id) = current {
+            let Some(frame) = state.widgets.get(frame_id) else {
+                break;
+            };
+            if frame.widget_type == WidgetType::EditBox {
+                return Some(frame_id);
+            }
+            current = frame.parent_id;
+        }
+
+        None
+    }
+
     /// Simulate a left-click on a frame by ID.
     ///
     /// Handles EditBox focus management (focus/unfocus), then fires
     /// OnMouseDown, OnClick, and OnMouseUp in sequence.
     pub fn send_click(&self, frame_id: u64) -> Result<()> {
-        use crate::widget::WidgetType;
-
-        let is_editbox = self
-            .state
-            .borrow()
-            .widgets
-            .get(frame_id)
-            .map(|f| f.widget_type == WidgetType::EditBox)
-            .unwrap_or(false);
-
+        let editbox_target = self.resolve_editbox_focus_target(Some(frame_id));
         let old_focus = self.state.borrow().focused_frame_id;
 
         // EditBox focus management (mirrors iced_app::update::update_editbox_focus)
-        if is_editbox {
-            if old_focus != Some(frame_id) {
-                self.state.borrow_mut().focused_frame_id = Some(frame_id);
+        if let Some(editbox_id) = editbox_target {
+            if old_focus != Some(editbox_id) {
+                self.state.borrow_mut().focused_frame_id = Some(editbox_id);
                 if let Some(old_id) = old_focus {
                     self.fire_script_handler(old_id, "OnEditFocusLost", vec![])?;
                 }
-                self.fire_script_handler(frame_id, "OnEditFocusGained", vec![])?;
+                self.fire_script_handler(editbox_id, "OnEditFocusGained", vec![])?;
             }
         } else if let Some(old_id) = old_focus {
             self.state.borrow_mut().focused_frame_id = None;

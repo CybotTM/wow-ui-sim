@@ -1,6 +1,8 @@
 mod common;
 
+use iced::Point;
 use std::path::PathBuf;
+use wow_ui_sim::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
@@ -26,6 +28,78 @@ fn load_blizzard_screen(screen: ScreenKind) -> WowLuaEnv {
     env.apply_post_load_workarounds();
     fire_startup_events_for_screen(&env, screen);
     env
+}
+
+fn hit_test_like_gui(env: &WowLuaEnv, pos: Point) -> Option<u64> {
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+    let strata_buckets = state
+        .get_strata_buckets()
+        .expect("visible strata buckets should exist")
+        .clone();
+    let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
+    let hittable = build_hittable_rects(&collected, &state.widgets);
+
+    let rect_for = |id| {
+        hittable
+            .iter()
+            .find_map(|(hid, rect)| (*hid == id).then_some(*rect))
+    };
+
+    let mut current = hittable
+        .iter()
+        .rev()
+        .find_map(|(id, rect)| rect.contains(pos).then_some(*id))?;
+
+    loop {
+        let next = state.widgets.get(current).and_then(|frame| {
+            frame.children.iter().rev().find_map(|child_id| {
+                rect_for(*child_id)
+                    .filter(|rect| rect.contains(pos))
+                    .map(|_| *child_id)
+            })
+        });
+
+        match next {
+            Some(child_id) => current = child_id,
+            None => return Some(current),
+        }
+    }
+}
+
+fn frame_chain(env: &WowLuaEnv, frame_id: u64) -> Vec<String> {
+    let state = env.state().borrow();
+    let mut chain = Vec::new();
+    let mut current = Some(frame_id);
+
+    while let Some(id) = current {
+        let Some(frame) = state.widgets.get(id) else {
+            break;
+        };
+        chain.push(frame.name.clone().unwrap_or_else(|| format!("#{id}")));
+        current = frame.parent_id;
+    }
+
+    chain
+}
+
+fn frame_center(env: &WowLuaEnv, lua_expr: &str) -> Point {
+    let name: String = env
+        .eval(&format!("return {lua_expr}:GetName()"))
+        .expect("frame name should be queryable");
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+    let frame_id = state
+        .widgets
+        .get_id_by_name(&name)
+        .expect("frame should exist in the widget registry");
+    let rect = state
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.layout_rect)
+        .expect("frame should have a layout rect");
+
+    Point::new(rect.x + rect.width / 2.0, rect.y + rect.height / 2.0)
 }
 
 #[test]
@@ -91,6 +165,43 @@ fn login_boot_hides_non_login_frontend_frames() {
         assert!(
             !char_customize_visible,
             "plain login screen should not show character customization"
+        );
+    }
+}
+
+#[test]
+fn login_editboxes_gain_focus_when_clicking_their_visible_centers() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::Login);
+
+        let account_center = frame_center(&env, "AccountLogin.UI.AccountEditBox");
+        let password_center = frame_center(&env, "AccountLogin.UI.PasswordEditBox");
+
+        let account_hit = hit_test_like_gui(&env, account_center)
+            .expect("account edit box center should hit some widget");
+        let password_hit = hit_test_like_gui(&env, password_center)
+            .expect("password edit box center should hit some widget");
+
+        env.send_click(account_hit)
+            .expect("clicking the account edit box center should dispatch");
+        let account_has_focus: bool = env
+            .eval("return AccountLogin.UI.AccountEditBox:HasFocus()")
+            .expect("AccountEditBox focus should be queryable");
+        assert!(
+            account_has_focus,
+            "account edit box should gain focus when clicked; hit chain={:?}",
+            frame_chain(&env, account_hit)
+        );
+
+        env.send_click(password_hit)
+            .expect("clicking the password edit box center should dispatch");
+        let password_has_focus: bool = env
+            .eval("return AccountLogin.UI.PasswordEditBox:HasFocus()")
+            .expect("PasswordEditBox focus should be queryable");
+        assert!(
+            password_has_focus,
+            "password edit box should gain focus when clicked; hit chain={:?}",
+            frame_chain(&env, password_hit)
         );
     }
 }

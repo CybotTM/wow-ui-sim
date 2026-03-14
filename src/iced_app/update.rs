@@ -538,18 +538,10 @@ impl App {
     /// Focus an EditBox on click, or clear focus when clicking elsewhere.
     pub(super) fn update_editbox_focus(&self, clicked_frame: Option<u64>) {
         let env = self.env.borrow();
-        let is_editbox = clicked_frame.is_some_and(|fid| {
-            env.state()
-                .borrow()
-                .widgets
-                .get(fid)
-                .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
-                .unwrap_or(false)
-        });
+        let editbox_target = env.resolve_editbox_focus_target(clicked_frame);
         let old_focus = env.state().borrow().focused_frame_id;
 
-        if is_editbox {
-            let fid = clicked_frame.unwrap();
+        if let Some(fid) = editbox_target {
             if old_focus != Some(fid) {
                 // Focus the clicked EditBox via Lua SetFocus logic
                 {
@@ -640,4 +632,3 @@ impl App {
     }
 
 }
-

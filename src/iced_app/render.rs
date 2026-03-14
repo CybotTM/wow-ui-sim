@@ -474,9 +474,9 @@ impl App {
         &self, state: &crate::lua_api::SimState, buckets: &[Vec<u64>], size: Size,
     ) {
         if self.cached_hittable.borrow().is_some() { return; }
-        // Defer hit grid building if textures are still streaming in — it's
-        // only needed for mouse interaction and costs ~500ms on large UIs.
-        if self.textures_pending.get() { return; }
+        // Interaction has to work while textures are still streaming. Building
+        // the hit grid here keeps early clicks on glue/login screens from
+        // being dropped until texture preloading finishes.
         let t = std::time::Instant::now();
         let collected = collect_hittable_frames(&state.widgets, buckets);
         let hittable = build_hittable_rects(&collected, &state.widgets);
