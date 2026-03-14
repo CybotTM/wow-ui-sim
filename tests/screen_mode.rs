@@ -10,8 +10,12 @@ fn login_screen_updates_glue_login_state() {
     assert!(env.eval::<bool>("return C_Glue.IsOnGlueScreen()").unwrap());
     assert!(!env.eval::<bool>("return IsLoggedIn()").unwrap());
 
-    let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list): (i32, bool, i32, bool) =
-        env.eval("return C_Login.GetState()").unwrap();
+    let (aurora_state, connected_to_wow, wow_connection_state, has_realm_list): (
+        i32,
+        bool,
+        i32,
+        bool,
+    ) = env.eval("return C_Login.GetState()").unwrap();
     let expected_aurora_state: i32 = env.eval("return LE_AURORA_STATE_NONE").unwrap();
     assert_eq!(aurora_state, expected_aurora_state);
     assert!(!connected_to_wow);
@@ -28,8 +32,12 @@ fn character_select_screen_updates_glue_login_state() {
     assert!(env.eval::<bool>("return C_Glue.IsOnGlueScreen()").unwrap());
     assert!(!env.eval::<bool>("return IsLoggedIn()").unwrap());
 
-    let (_aurora_state, connected_to_wow, wow_connection_state, has_realm_list): (i32, bool, i32, bool) =
-        env.eval("return C_Login.GetState()").unwrap();
+    let (_aurora_state, connected_to_wow, wow_connection_state, has_realm_list): (
+        i32,
+        bool,
+        i32,
+        bool,
+    ) = env.eval("return C_Login.GetState()").unwrap();
     assert!(connected_to_wow);
     assert_eq!(wow_connection_state, 0);
     assert!(!has_realm_list);

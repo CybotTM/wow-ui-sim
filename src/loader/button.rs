@@ -6,30 +6,51 @@ use super::error::LoadError;
 use super::helpers::{escape_lua_string, lua_global_ref};
 
 /// Generate the setter portion of button texture Lua code (atlas or file path).
-fn generate_texture_setter_code(button_name: &str, method: &str, texture: &crate::xml::TextureXml) -> String {
+fn generate_texture_setter_code(
+    button_name: &str,
+    method: &str,
+    texture: &crate::xml::TextureXml,
+) -> String {
     let getter = method.replace("Set", "Get");
     if let Some(atlas) = &texture.atlas {
         format!(
             "do\n    local tex = {}:{}()\n    if tex then tex:SetAtlas(\"{}\") end\nend\n",
-            lua_global_ref(button_name), getter, escape_lua_string(atlas)
+            lua_global_ref(button_name),
+            getter,
+            escape_lua_string(atlas)
         )
     } else if let Some(file) = &texture.file {
-        format!("{}:{}(\"{}\")\n", lua_global_ref(button_name), method, escape_lua_string(file))
+        format!(
+            "{}:{}(\"{}\")\n",
+            lua_global_ref(button_name),
+            method,
+            escape_lua_string(file)
+        )
     } else {
         String::new()
     }
 }
 
 /// Generate the global registration snippet for a named button texture.
-fn generate_texture_global_snippet(button_name: &str, method: &str, texture: &crate::xml::TextureXml) -> String {
+fn generate_texture_global_snippet(
+    button_name: &str,
+    method: &str,
+    texture: &crate::xml::TextureXml,
+) -> String {
     let getter = method.replace("Set", "Get");
-    texture.name.as_ref().map(|n| {
-        let resolved = n.replace("$parent", button_name);
-        format!(
-            "do local t = {}:{}() if t then _G[\"{}\"] = t end end\n",
-            lua_global_ref(button_name), getter, escape_lua_string(&resolved),
-        )
-    }).unwrap_or_default()
+    texture
+        .name
+        .as_ref()
+        .map(|n| {
+            let resolved = n.replace("$parent", button_name);
+            format!(
+                "do local t = {}:{}() if t then _G[\"{}\"] = t end end\n",
+                lua_global_ref(button_name),
+                getter,
+                escape_lua_string(&resolved),
+            )
+        })
+        .unwrap_or_default()
 }
 
 /// Generate Lua code for a single button texture (atlas or file path),
@@ -40,7 +61,11 @@ fn generate_button_texture_code(
     texture: &crate::xml::TextureXml,
 ) -> String {
     let mut code = generate_texture_setter_code(button_name, method, texture);
-    code.push_str(&generate_texture_global_snippet(button_name, method, texture));
+    code.push_str(&generate_texture_global_snippet(
+        button_name,
+        method,
+        texture,
+    ));
     code
 }
 
@@ -55,10 +80,26 @@ pub fn apply_button_textures(
     button_name: &str,
 ) -> Result<(), LoadError> {
     let texture_slots: [(&str, &str, Option<&crate::xml::TextureXml>); 4] = [
-        ("SetNormalTexture", "NormalTexture", frame_xml.normal_texture()),
-        ("SetPushedTexture", "PushedTexture", frame_xml.pushed_texture()),
-        ("SetHighlightTexture", "HighlightTexture", frame_xml.highlight_texture()),
-        ("SetDisabledTexture", "DisabledTexture", frame_xml.disabled_texture()),
+        (
+            "SetNormalTexture",
+            "NormalTexture",
+            frame_xml.normal_texture(),
+        ),
+        (
+            "SetPushedTexture",
+            "PushedTexture",
+            frame_xml.pushed_texture(),
+        ),
+        (
+            "SetHighlightTexture",
+            "HighlightTexture",
+            frame_xml.highlight_texture(),
+        ),
+        (
+            "SetDisabledTexture",
+            "DisabledTexture",
+            frame_xml.disabled_texture(),
+        ),
     ];
 
     // Create texture children for ALL slots BEFORE running Lua code.
@@ -67,12 +108,17 @@ pub fn apply_button_textures(
 
     let lua_code: String = texture_slots
         .iter()
-        .filter_map(|(method, _, tex)| tex.map(|t| generate_button_texture_code(button_name, method, t)))
+        .filter_map(|(method, _, tex)| {
+            tex.map(|t| generate_button_texture_code(button_name, method, t))
+        })
         .collect();
 
     if !lua_code.is_empty() {
         env.exec(&lua_code).map_err(|e| {
-            LoadError::Lua(format!("Failed to apply button textures to {}: {}", button_name, e))
+            LoadError::Lua(format!(
+                "Failed to apply button textures to {}: {}",
+                button_name, e
+            ))
         })?;
     }
 
@@ -106,7 +152,9 @@ fn resolve_button_text_key(frame_xml: &crate::xml::FrameXml, inherits: &str) -> 
     }
     if !inherits.is_empty() {
         let template_chain = crate::xml::get_template_chain(inherits);
-        return template_chain.iter().find_map(|entry| entry.frame.text.clone());
+        return template_chain
+            .iter()
+            .find_map(|entry| entry.frame.text.clone());
     }
     None
 }
@@ -135,7 +183,8 @@ pub fn apply_button_text(
         super::xml_fontstring::create_fontstring_from_xml(env, bt, button_name, "ARTWORK", 0)?;
     }
     if let Some(text_key) = resolve_button_text_key(frame_xml, inherits) {
-        env.exec(&generate_set_text_code(button_name, &text_key)).ok();
+        env.exec(&generate_set_text_code(button_name, &text_key))
+            .ok();
     }
     Ok(())
 }

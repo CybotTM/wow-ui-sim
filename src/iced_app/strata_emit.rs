@@ -2,13 +2,13 @@
 
 use iced::{Point, Rectangle, Size};
 
+use crate::render::QuadBatch;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
 use crate::render::texture::UI_SCALE;
-use crate::render::QuadBatch;
 use crate::widget::WidgetType;
 
-use super::frame_collect::{CollectedFrames, collect_subtree_ids, collect_hittable_frames};
+use super::frame_collect::{CollectedFrames, collect_hittable_frames, collect_subtree_ids};
 use super::quad_builders::emit_frame_quads;
 use super::statusbar::collect_statusbar_fills;
 use super::tooltip::TooltipRenderData;
@@ -26,7 +26,9 @@ pub(super) fn emit_single_strata(
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
+    message_frames: Option<
+        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    >,
     tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
     elapsed_secs: f64,
 ) {
@@ -35,7 +37,15 @@ pub(super) fn emit_single_strata(
 
     for &(id, rect, eff_alpha) in &render_list {
         let Some(f) = registry.get(id) else { continue };
-        if super::button_vis::should_skip_frame(f, id, eff_alpha, visible_ids, registry, pressed_frame, hovered_frame) {
+        if super::button_vis::should_skip_frame(
+            f,
+            id,
+            eff_alpha,
+            visible_ids,
+            registry,
+            pressed_frame,
+            hovered_frame,
+        ) {
             continue;
         }
         let is_fontstring = matches!(f.widget_type, WidgetType::FontString);
@@ -48,7 +58,21 @@ pub(super) fn emit_single_strata(
             Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
         );
         let bar_fill = statusbar_fills.get(&id);
-        emit_frame_quads(batch, id, f, bounds, bar_fill, pressed_frame, hovered_frame, text_ctx, message_frames, tooltip_data, registry, elapsed_secs, eff_alpha);
+        emit_frame_quads(
+            batch,
+            id,
+            f,
+            bounds,
+            bar_fill,
+            pressed_frame,
+            hovered_frame,
+            text_ctx,
+            message_frames,
+            tooltip_data,
+            registry,
+            elapsed_secs,
+            eff_alpha,
+        );
     }
 }
 
@@ -62,7 +86,9 @@ pub(super) fn build_render_list(
         let Some(f) = registry.get(id) else { continue };
         let Some(rect) = f.layout_rect else { continue };
         let eff_alpha = resolve_eff_alpha(f, registry);
-        if eff_alpha <= 0.0 { continue; }
+        if eff_alpha <= 0.0 {
+            continue;
+        }
         list.push((id, rect, eff_alpha));
     }
     list
@@ -74,7 +100,8 @@ fn resolve_eff_alpha(f: &crate::widget::Frame, registry: &crate::widget::WidgetR
         return f.effective_alpha;
     }
     if f.alpha > 0.0 {
-        return f.parent_id
+        return f
+            .parent_id
             .and_then(|pid| registry.get(pid))
             .map(|p| p.effective_alpha)
             .unwrap_or(0.0);
@@ -91,13 +118,23 @@ pub fn build_quad_batch_for_registry(
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     mut text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
+    message_frames: Option<
+        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    >,
     tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
     strata_buckets: &Vec<Vec<u64>>,
 ) -> QuadBatch {
     let (batch, _) = build_quad_batch_with_cache(
-        registry, screen_size, root_name, pressed_frame, hovered_frame,
-        &mut text_ctx, message_frames, tooltip_data, strata_buckets, 0.0,
+        registry,
+        screen_size,
+        root_name,
+        pressed_frame,
+        hovered_frame,
+        &mut text_ctx,
+        message_frames,
+        tooltip_data,
+        strata_buckets,
+        0.0,
     );
     batch
 }
@@ -107,16 +144,26 @@ pub fn build_hittable_rects(
     collected: &CollectedFrames,
     registry: &crate::widget::WidgetRegistry,
 ) -> Vec<(u64, Rectangle)> {
-    collected.hittable.iter().map(|&(id, r)| {
-        let (il, ir, it, ib) = registry.get(id)
-            .map(|f| f.hit_rect_insets)
-            .unwrap_or((0.0, 0.0, 0.0, 0.0));
-        (id, Rectangle::new(
-            Point::new((r.x + il) * UI_SCALE, (r.y + it) * UI_SCALE),
-            Size::new((r.width - il - ir).max(0.0) * UI_SCALE,
-                      (r.height - it - ib).max(0.0) * UI_SCALE),
-        ))
-    }).collect()
+    collected
+        .hittable
+        .iter()
+        .map(|&(id, r)| {
+            let (il, ir, it, ib) = registry
+                .get(id)
+                .map(|f| f.hit_rect_insets)
+                .unwrap_or((0.0, 0.0, 0.0, 0.0));
+            (
+                id,
+                Rectangle::new(
+                    Point::new((r.x + il) * UI_SCALE, (r.y + it) * UI_SCALE),
+                    Size::new(
+                        (r.width - il - ir).max(0.0) * UI_SCALE,
+                        (r.height - it - ib).max(0.0) * UI_SCALE,
+                    ),
+                ),
+            )
+        })
+        .collect()
 }
 
 /// Build a QuadBatch by iterating visible-only strata buckets directly.
@@ -130,7 +177,9 @@ pub fn build_quad_batch_with_cache(
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<&std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
+    message_frames: Option<
+        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    >,
     tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
     strata_buckets: &[Vec<u64>],
     elapsed_secs: f64,
@@ -140,7 +189,8 @@ pub fn build_quad_batch_with_cache(
 
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
-        256.0, 256.0,
+        256.0,
+        256.0,
         "framegeneral/ui-background-marble",
         [0.55, 0.55, 0.55, 1.0],
     );
@@ -150,9 +200,16 @@ pub fn build_quad_batch_with_cache(
 
     for bucket in strata_buckets {
         emit_single_strata(
-            &mut batch, bucket, registry,
-            &visible_ids, pressed_frame, hovered_frame,
-            text_ctx, message_frames, tooltip_data, elapsed_secs,
+            &mut batch,
+            bucket,
+            registry,
+            &visible_ids,
+            pressed_frame,
+            hovered_frame,
+            text_ctx,
+            message_frames,
+            tooltip_data,
+            elapsed_secs,
         );
     }
     (batch, collected)

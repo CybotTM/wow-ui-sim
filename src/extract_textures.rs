@@ -65,10 +65,7 @@ pub fn build_file_index(base: &Path) -> HashMap<String, PathBuf> {
         let path = entry.path();
         let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
 
-        if matches!(
-            ext.to_lowercase().as_str(),
-            "blp" | "png" | "tga" | "jpg"
-        ) {
+        if matches!(ext.to_lowercase().as_str(), "blp" | "png" | "tga" | "jpg") {
             // Create lowercase key without extension
             if let Ok(rel) = path.strip_prefix(base) {
                 let key = rel
@@ -106,8 +103,7 @@ pub fn convert_to_webp(src: &Path, dst: &Path) -> Result<(), Box<dyn std::error:
         // Fix 1-bit alpha: image-blp decodes 1-bit alpha as literal 0/1 byte values
         let mut pixels = rgba.into_raw();
         crate::texture::fix_1bit_alpha(&mut pixels);
-        let img =
-            image::RgbaImage::from_raw(width, height, pixels).expect("invalid dimensions");
+        let img = image::RgbaImage::from_raw(width, height, pixels).expect("invalid dimensions");
         img.save(dst)?;
     } else {
         let img = image::open(src)?;
@@ -125,9 +121,10 @@ fn collect_texture_references(addons_path: &Path) -> HashSet<String> {
 
     let wow_ui_source = addons_path.parent().map(|p| p.join("BlizzardUI"));
     if let Some(ref ui_source) = wow_ui_source
-        && ui_source.exists() {
-            textures.extend(find_texture_references(ui_source));
-        }
+        && ui_source.exists()
+    {
+        textures.extend(find_texture_references(ui_source));
+    }
 
     println!("Found {} unique texture references", textures.len());
     textures

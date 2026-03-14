@@ -13,18 +13,14 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_strsplit_basic() {
     let env = env();
-    let result: (String, String, String) = env
-        .eval("return strsplit(',', 'a,b,c')")
-        .unwrap();
+    let result: (String, String, String) = env.eval("return strsplit(',', 'a,b,c')").unwrap();
     assert_eq!(result, ("a".into(), "b".into(), "c".into()));
 }
 
 #[test]
 fn test_strsplit_with_limit() {
     let env = env();
-    let result: (String, String) = env
-        .eval("return strsplit(',', 'a,b,c', 2)")
-        .unwrap();
+    let result: (String, String) = env.eval("return strsplit(',', 'a,b,c', 2)").unwrap();
     assert_eq!(result, ("a".into(), "b,c".into()));
 }
 
@@ -218,18 +214,14 @@ fn test_tinvert() {
 #[test]
 fn test_tcontains_found() {
     let env = env();
-    let found: bool = env
-        .eval("return tContains({10, 20, 30}, 20)")
-        .unwrap();
+    let found: bool = env.eval("return tContains({10, 20, 30}, 20)").unwrap();
     assert!(found);
 }
 
 #[test]
 fn test_tcontains_not_found() {
     let env = env();
-    let found: bool = env
-        .eval("return tContains({10, 20, 30}, 99)")
-        .unwrap();
+    let found: bool = env.eval("return tContains({10, 20, 30}, 99)").unwrap();
     assert!(!found);
 }
 
@@ -240,9 +232,7 @@ fn test_tcontains_not_found() {
 #[test]
 fn test_tindexof_found() {
     let env = env();
-    let idx: i32 = env
-        .eval("return tIndexOf({10, 20, 30}, 20)")
-        .unwrap();
+    let idx: i32 = env.eval("return tIndexOf({10, 20, 30}, 20)").unwrap();
     assert_eq!(idx, 2);
 }
 
@@ -608,7 +598,6 @@ fn test_seterrorhandler_accepts_function() {
     env.eval::<()>("seterrorhandler(function() end)").unwrap();
 }
 
-
 // ============================================================================
 // GetCurrentEnvironment
 // ============================================================================
@@ -616,9 +605,6 @@ fn test_seterrorhandler_accepts_function() {
 #[test]
 fn test_get_current_environment() {
     let env = env();
-    let is_global: bool = env
-        .eval("return GetCurrentEnvironment() == _G")
-        .unwrap();
+    let is_global: bool = env.eval("return GetCurrentEnvironment() == _G").unwrap();
     assert!(is_global);
 }
-

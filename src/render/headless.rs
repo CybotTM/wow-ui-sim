@@ -10,13 +10,14 @@ use super::shader::{GpuTextureData, QuadBatch, WowUiPrimitive};
 use crate::texture::TextureManager;
 
 /// Load unique textures for all batch texture requests.
-fn load_batch_textures(
-    batch: &QuadBatch,
-    tex_mgr: &mut TextureManager,
-) -> Vec<GpuTextureData> {
+fn load_batch_textures(batch: &QuadBatch, tex_mgr: &mut TextureManager) -> Vec<GpuTextureData> {
     let mut textures = Vec::new();
     let mut seen = std::collections::HashSet::new();
-    for request in batch.texture_requests.iter().chain(&batch.mask_texture_requests) {
+    for request in batch
+        .texture_requests
+        .iter()
+        .chain(&batch.mask_texture_requests)
+    {
         if seen.contains(&request.path) {
             continue;
         }
@@ -62,7 +63,11 @@ fn create_render_target(
 ) -> (wgpu::Texture, wgpu::TextureView) {
     let texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("Screenshot Render Target"),
-        size: wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+        size: wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
         mip_level_count: 1,
         sample_count: 1,
         dimension: wgpu::TextureDimension::D2,
@@ -107,7 +112,11 @@ fn read_back_pixels(
                 rows_per_image: Some(height),
             },
         },
-        wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+        wgpu::Extent3d {
+            width,
+            height,
+            depth_or_array_layers: 1,
+        },
     );
 
     queue.submit(std::iter::once(encoder.finish()));
@@ -130,7 +139,11 @@ fn read_back_pixels(
         let row = &data[src_offset..src_offset + (width * 4) as usize];
         for x in 0..width {
             let i = (x * 4) as usize;
-            img.put_pixel(x, y, image::Rgba([row[i], row[i + 1], row[i + 2], row[i + 3]]));
+            img.put_pixel(
+                x,
+                y,
+                image::Rgba([row[i], row[i + 1], row[i + 2], row[i + 3]]),
+            );
         }
     }
 
@@ -153,7 +166,8 @@ pub fn render_to_image(
     glyph_atlas_data: Option<(&[u8], u32)>,
 ) -> RgbaImage {
     let textures = load_batch_textures(batch, tex_mgr);
-    let mut primitive = WowUiPrimitive::new_merged_with_textures(std::sync::Arc::new(batch.clone()), textures);
+    let mut primitive =
+        WowUiPrimitive::new_merged_with_textures(std::sync::Arc::new(batch.clone()), textures);
 
     if let Some((data, size)) = glyph_atlas_data {
         primitive.glyph_atlas_data = Some(data.to_vec());
@@ -168,16 +182,30 @@ pub fn render_to_image(
     let (render_texture, render_view) = create_render_target(&device, width, height, format);
 
     // Prepare (uploads textures, resolves tex_index, uploads buffers)
-    let bounds = iced::Rectangle::new(iced::Point::ORIGIN, iced::Size::new(width as f32, height as f32));
-    let viewport = iced::widget::shader::Viewport::with_physical_size(iced::Size::new(width, height), 1.0);
+    let bounds = iced::Rectangle::new(
+        iced::Point::ORIGIN,
+        iced::Size::new(width as f32, height as f32),
+    );
+    let viewport =
+        iced::widget::shader::Viewport::with_physical_size(iced::Size::new(width, height), 1.0);
     primitive.prepare(&mut pipeline, &device, &queue, &bounds, &viewport);
 
     // Render
     let mut encoder = device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
         label: Some("Screenshot Encoder"),
     });
-    let clip_bounds_u32 = iced::Rectangle { x: 0u32, y: 0u32, width, height };
-    pipeline.render_clear(&mut encoder, &render_view, &clip_bounds_u32, [0.05, 0.05, 0.08, 1.0]);
+    let clip_bounds_u32 = iced::Rectangle {
+        x: 0u32,
+        y: 0u32,
+        width,
+        height,
+    };
+    pipeline.render_clear(
+        &mut encoder,
+        &render_view,
+        &clip_bounds_u32,
+        [0.05, 0.05, 0.08, 1.0],
+    );
 
     read_back_pixels(&device, &queue, encoder, &render_texture, width, height)
 }

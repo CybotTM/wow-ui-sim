@@ -30,18 +30,41 @@ fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
     // GetBestMapForUnit(unit) -> uiMapID; 2274 = Dornogal
-    t.set("GetBestMapForUnit", lua.create_function(|_, _unit: String| Ok(2274i32))?)?;
+    t.set(
+        "GetBestMapForUnit",
+        lua.create_function(|_, _unit: String| Ok(2274i32))?,
+    )?;
     // GetCurrentMapID() -> uiMapID
     t.set("GetCurrentMapID", lua.create_function(|_, ()| Ok(2274i32))?)?;
-    t.set("GetPlayerMapPosition", lua.create_function(create_player_map_position)?)?;
-    t.set("GetMapChildrenInfo", lua.create_function(|lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
-        lua.create_table()
-    })?)?;
-    t.set("GetWorldPosFromMapPos", lua.create_function(create_world_pos_from_map_pos)?)?;
-    t.set("GetMapWorldSize", lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?)?;
+    t.set(
+        "GetPlayerMapPosition",
+        lua.create_function(create_player_map_position)?,
+    )?;
+    t.set(
+        "GetMapChildrenInfo",
+        lua.create_function(
+            |lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
+                lua.create_table()
+            },
+        )?,
+    )?;
+    t.set(
+        "GetWorldPosFromMapPos",
+        lua.create_function(create_world_pos_from_map_pos)?,
+    )?;
+    t.set(
+        "GetMapWorldSize",
+        lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?,
+    )?;
     t.set("GetMapArtLayers", lua.create_function(get_map_art_layers)?)?;
-    t.set("RequestPreloadMap", lua.create_function(|_, _map_id: i32| Ok(()))?)?;
-    t.set("MapHasArt", lua.create_function(|_, _map_id: i32| Ok(true))?)?;
+    t.set(
+        "RequestPreloadMap",
+        lua.create_function(|_, _map_id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "MapHasArt",
+        lua.create_function(|_, _map_id: i32| Ok(true))?,
+    )?;
 
     Ok(t)
 }
@@ -86,7 +109,10 @@ fn create_player_map_position(lua: &Lua, (_map_id, _unit): (i32, String)) -> Res
     Ok(Value::Table(pos))
 }
 
-fn create_world_pos_from_map_pos(lua: &Lua, (map_id, pos): (i32, Value)) -> Result<(i32, mlua::Table)> {
+fn create_world_pos_from_map_pos(
+    lua: &Lua,
+    (map_id, pos): (i32, Value),
+) -> Result<(i32, mlua::Table)> {
     let (x, y) = if let Value::Table(ref t) = pos {
         let x: f64 = t.get("x").unwrap_or(0.5);
         let y: f64 = t.get("y").unwrap_or(0.5);
@@ -110,19 +136,31 @@ fn create_world_pos_from_map_pos(lua: &Lua, (map_id, pos): (i32, Value)) -> Resu
 fn register_zone_text_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     let st = state.clone();
-    globals.set("GetRealZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?)?;
+    globals.set(
+        "GetRealZoneText",
+        lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?,
+    )?;
     let st = state.clone();
-    globals.set("GetZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?)?;
+    globals.set(
+        "GetZoneText",
+        lua.create_function(move |_, ()| Ok(st.borrow().world.zone_name.clone()))?,
+    )?;
     let st = state.clone();
-    globals.set("GetSubZoneText", lua.create_function(move |_, ()| Ok(st.borrow().world.sub_zone_name.clone()))?)?;
-    globals.set("GetMinimapZoneText", lua.create_function(move |_, ()| {
-        let s = state.borrow();
-        if s.world.sub_zone_name.is_empty() {
-            Ok(s.world.zone_name.clone())
-        } else {
-            Ok(s.world.sub_zone_name.clone())
-        }
-    })?)?;
+    globals.set(
+        "GetSubZoneText",
+        lua.create_function(move |_, ()| Ok(st.borrow().world.sub_zone_name.clone()))?,
+    )?;
+    globals.set(
+        "GetMinimapZoneText",
+        lua.create_function(move |_, ()| {
+            let s = state.borrow();
+            if s.world.sub_zone_name.is_empty() {
+                Ok(s.world.zone_name.clone())
+            } else {
+                Ok(s.world.sub_zone_name.clone())
+            }
+        })?,
+    )?;
     Ok(())
 }
 
@@ -195,8 +233,14 @@ fn register_c_date_and_time(lua: &Lua) -> Result<mlua::Table> {
         })?,
     )?;
     t.set("GetServerTimeLocal", lua.create_function(|_, ()| Ok(0i64))?)?;
-    t.set("GetSecondsUntilDailyReset", lua.create_function(|_, ()| Ok(86400i32))?)?;
-    t.set("GetSecondsUntilWeeklyReset", lua.create_function(|_, ()| Ok(604800i32))?)?;
+    t.set(
+        "GetSecondsUntilDailyReset",
+        lua.create_function(|_, ()| Ok(86400i32))?,
+    )?;
+    t.set(
+        "GetSecondsUntilWeeklyReset",
+        lua.create_function(|_, ()| Ok(604800i32))?,
+    )?;
 
     Ok(t)
 }
@@ -215,17 +259,32 @@ fn register_c_minimap(lua: &Lua) -> Result<mlua::Table> {
         lua.create_function(|_, (_file_id, _icon_id): (i32, i32)| Ok(()))?,
     )?;
     // Tracking system stubs
-    t.set("GetNumTrackingTypes", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetTrackingInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
-    t.set("GetTrackingFilter", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetNumTrackingTypes",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetTrackingInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetTrackingFilter",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
     t.set("ClearAllTracking", lua.create_function(|_, ()| Ok(()))?)?;
     t.set(
         "SetTrackingFilterByFilterIndex",
         lua.create_function(|_, (_index, _value): (i32, bool)| Ok(()))?,
     )?;
-    t.set("ShouldUseHybridMinimap", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "ShouldUseHybridMinimap",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("GetUiMapID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("IsFilteredOut", lua.create_function(|_, _filter: Value| Ok(false))?)?;
+    t.set(
+        "IsFilteredOut",
+        lua.create_function(|_, _filter: Value| Ok(false))?,
+    )?;
 
     Ok(t)
 }
@@ -236,9 +295,18 @@ fn register_c_navigation(lua: &Lua) -> Result<mlua::Table> {
 
     t.set("GetFrame", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     t.set("GetDistance", lua.create_function(|_, ()| Ok(0.0f64))?)?;
-    t.set("GetDestination", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("IsAutoFollowEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("SetAutoFollowEnabled", lua.create_function(|_, _enabled: bool| Ok(()))?)?;
+    t.set(
+        "GetDestination",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "IsAutoFollowEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "SetAutoFollowEnabled",
+        lua.create_function(|_, _enabled: bool| Ok(()))?,
+    )?;
 
     Ok(t)
 }
@@ -247,9 +315,18 @@ fn register_c_navigation(lua: &Lua) -> Result<mlua::Table> {
 fn register_c_taxi_map(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
-    t.set("GetAllTaxiNodes", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("GetTaxiNodesForMap", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("ShouldMapShowTaxiNodes", lua.create_function(|_, _map_id: i32| Ok(true))?)?;
+    t.set(
+        "GetAllTaxiNodes",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetTaxiNodesForMap",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "ShouldMapShowTaxiNodes",
+        lua.create_function(|_, _map_id: i32| Ok(true))?,
+    )?;
 
     Ok(t)
 }

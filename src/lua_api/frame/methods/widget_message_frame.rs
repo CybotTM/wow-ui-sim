@@ -1,8 +1,8 @@
 //! MessageFrame widget methods: AddMessage, scrolling, fading, message history.
 
 use super::super::handle::FrameRef;
-use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::SimState;
+use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
 
 pub fn add_message_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -52,14 +52,20 @@ fn add_message_frame_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     methods.add_method("GetNumMessages", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.message_frames.get(&this.0).map(|d| d.messages.len()).unwrap_or(0);
+        let count = state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.messages.len())
+            .unwrap_or(0);
         Ok(count as i32)
     });
 
     methods.add_method("SetMaxLines", |lua, this, max_lines: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let data = state.message_frames.entry(this.0)
+        let data = state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
         data.max_lines = max_lines.max(1) as usize;
         data.messages.truncate(data.max_lines);
@@ -69,7 +75,11 @@ fn add_message_frame_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     methods.add_method("GetMaxLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let max = state.message_frames.get(&this.0).map(|d| d.max_lines).unwrap_or(120);
+        let max = state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.max_lines)
+            .unwrap_or(120);
         Ok(max as i32)
     });
 }
@@ -78,7 +88,9 @@ fn add_message_frame_fade_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("SetFading", |lua, this, fading: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .fading = fading;
         Ok(())
@@ -86,12 +98,18 @@ fn add_message_frame_fade_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetFading", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.fading).unwrap_or(true))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.fading)
+            .unwrap_or(true))
     });
     methods.add_method("SetTimeVisible", |lua, this, secs: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .time_visible = secs;
         Ok(())
@@ -99,7 +117,11 @@ fn add_message_frame_fade_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetTimeVisible", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.time_visible).unwrap_or(10.0))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.time_visible)
+            .unwrap_or(10.0))
     });
 }
 
@@ -107,7 +129,9 @@ fn add_message_frame_fade_duration_methods<M: mlua::UserDataMethods<FrameRef>>(m
     methods.add_method("SetFadeDuration", |lua, this, secs: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .fade_duration = secs;
         Ok(())
@@ -115,12 +139,18 @@ fn add_message_frame_fade_duration_methods<M: mlua::UserDataMethods<FrameRef>>(m
     methods.add_method("GetFadeDuration", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.fade_duration).unwrap_or(3.0))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.fade_duration)
+            .unwrap_or(3.0))
     });
     methods.add_method("SetFadePower", |lua, this, power: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .fade_power = power;
         Ok(())
@@ -128,7 +158,11 @@ fn add_message_frame_fade_duration_methods<M: mlua::UserDataMethods<FrameRef>>(m
     methods.add_method("GetFadePower", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.fade_power).unwrap_or(1.0))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.fade_power)
+            .unwrap_or(1.0))
     });
 }
 
@@ -136,7 +170,9 @@ fn add_message_frame_insert_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("SetInsertMode", |lua, this, mode: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .insert_mode = mode;
         Ok(())
@@ -144,7 +180,9 @@ fn add_message_frame_insert_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("GetInsertMode", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let mode = state.message_frames.get(&this.0)
+        let mode = state
+            .message_frames
+            .get(&this.0)
             .map(|d| d.insert_mode.clone())
             .unwrap_or_else(|| "BOTTOM".to_string());
         Ok(mode)
@@ -169,13 +207,19 @@ fn add_scroll_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("SetScrollOffset", |lua, this, offset: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(data) = state.message_frames.get_mut(&this.0) { data.scroll_offset = offset; }
+        if let Some(data) = state.message_frames.get_mut(&this.0) {
+            data.scroll_offset = offset;
+        }
         Ok(())
     });
     methods.add_method("GetScrollOffset", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.scroll_offset).unwrap_or(0))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.scroll_offset)
+            .unwrap_or(0))
     });
 }
 
@@ -183,7 +227,9 @@ fn add_scroll_allowed_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("SetScrollAllowed", |lua, this, allowed: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .scroll_allowed = allowed;
         Ok(())
@@ -191,7 +237,11 @@ fn add_scroll_allowed_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("IsScrollAllowed", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.scroll_allowed).unwrap_or(true))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.scroll_allowed)
+            .unwrap_or(true))
     });
 }
 
@@ -199,7 +249,9 @@ fn add_message_frame_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("SetTextCopyable", |lua, this, copyable: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.message_frames.entry(this.0)
+        state
+            .message_frames
+            .entry(this.0)
             .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
             .text_copyable = copyable;
         Ok(())
@@ -207,12 +259,18 @@ fn add_message_frame_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("IsTextCopyable", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.message_frames.get(&this.0).map(|d| d.text_copyable).unwrap_or(false))
+        Ok(state
+            .message_frames
+            .get(&this.0)
+            .map(|d| d.text_copyable)
+            .unwrap_or(false))
     });
     methods.add_method("HasMessageByID", |lua, this, msg_id: i64| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let has = state.message_frames.get(&this.0)
+        let has = state
+            .message_frames
+            .get(&this.0)
             .map(|d| d.messages.iter().any(|m| m.message_id == Some(msg_id)))
             .unwrap_or(false);
         Ok(has)
@@ -229,7 +287,10 @@ fn add_get_message_info_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
             if let Some(msg) = data.messages.get(idx) {
                 return Ok((
                     msg.text.clone(),
-                    msg.r as f64, msg.g as f64, msg.b as f64, msg.a as f64,
+                    msg.r as f64,
+                    msg.g as f64,
+                    msg.b as f64,
+                    msg.a as f64,
                     msg.timestamp,
                 ));
             }
@@ -240,11 +301,20 @@ fn add_get_message_info_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 
 fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
-    methods.add_method("SetOnScrollChangedCallback", |_, _this, _func: Value| Ok(()));
-    methods.add_method("SetOnLineRightClickedCallback", |_, _this, _func: Value| Ok(()));
-    methods.add_method("AddOnDisplayRefreshedCallback", |_, _this, _func: Value| Ok(()));
+    methods.add_method(
+        "SetOnScrollChangedCallback",
+        |_, _this, _func: Value| Ok(()),
+    );
+    methods.add_method("SetOnLineRightClickedCallback", |_, _this, _func: Value| {
+        Ok(())
+    });
+    methods.add_method("AddOnDisplayRefreshedCallback", |_, _this, _func: Value| {
+        Ok(())
+    });
     methods.add_method("RemoveMessagesByPredicate", |_, _this, _func: Value| Ok(()));
-    methods.add_method("TransformMessages", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("TransformMessages", |_, _this, _args: mlua::MultiValue| {
+        Ok(())
+    });
     methods.add_method("AdjustMessageColors", |_, _this, _func: Value| Ok(()));
     methods.add_method("GetFontStringByID", |_, _this, _id: i64| Ok(Value::Nil));
     methods.add_method("ResetMessageFadeByID", |_, _this, _id: i64| Ok(()));
@@ -256,12 +326,14 @@ fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods:
 fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetOnTextCopiedCallback", |lua, this, func: Value| {
         let frame_id = this.0;
-        let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+        let frame_fields =
+            crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
         match func {
             Value::Function(callback) => {
                 frame_fields.set("_onTextCopiedCallback_orig", callback)?;
                 let wrapper = lua.create_function(move |lua, args: mlua::Variadic<Value>| {
-                    let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+                    let fields =
+                        crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
                     if let Ok(orig) = fields.get::<mlua::Function>("_onTextCopiedCallback_orig") {
                         orig.call::<()>(args)?;
                     }
@@ -281,7 +353,9 @@ fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: 
 // --- Helper functions ---
 
 fn log_message(state: &SimState, id: u64, text: &str) {
-    let name = state.widgets.get(id)
+    let name = state
+        .widgets
+        .get(id)
         .and_then(|w| w.name.as_deref())
         .unwrap_or("?");
     let clean = crate::dump::strip_wow_escapes(text);
@@ -300,7 +374,9 @@ fn add_message_core(state: &mut SimState, id: u64, args: mlua::MultiValue, log: 
         Some(Value::Number(n)) => Some(*n as i64),
         _ => None,
     };
-    if log { log_message(state, id, &text); }
+    if log {
+        log_message(state, id, &text);
+    }
     let timestamp = state.start_time.elapsed().as_secs_f64();
     let data = state.message_frames.entry(id).or_default();
     insert_message(data, text, r, g, b, a, message_id, timestamp);
@@ -316,26 +392,60 @@ fn backfill_message(state: &mut SimState, id: u64, args: mlua::MultiValue) {
     let (r, g, b, a) = extract_rgba(&args_vec, 1);
     log_message(state, id, &text);
     let timestamp = state.start_time.elapsed().as_secs_f64();
-    let data = state.message_frames.entry(id)
+    let data = state
+        .message_frames
+        .entry(id)
         .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
-    data.messages.insert(0, crate::lua_api::message_frame::Message {
-        text, r, g, b, a, message_id: None, timestamp,
-    });
-    if data.messages.len() > data.max_lines { data.messages.pop(); }
+    data.messages.insert(
+        0,
+        crate::lua_api::message_frame::Message {
+            text,
+            r,
+            g,
+            b,
+            a,
+            message_id: None,
+            timestamp,
+        },
+    );
+    if data.messages.len() > data.max_lines {
+        data.messages.pop();
+    }
 }
 
 fn insert_message(
     data: &mut crate::lua_api::message_frame::MessageFrameData,
-    text: String, r: f32, g: f32, b: f32, a: f32,
-    message_id: Option<i64>, timestamp: f64,
+    text: String,
+    r: f32,
+    g: f32,
+    b: f32,
+    a: f32,
+    message_id: Option<i64>,
+    timestamp: f64,
 ) {
-    let msg = crate::lua_api::message_frame::Message { text, r, g, b, a, message_id, timestamp };
-    if data.insert_mode == "TOP" { data.messages.insert(0, msg); } else { data.messages.push(msg); }
+    let msg = crate::lua_api::message_frame::Message {
+        text,
+        r,
+        g,
+        b,
+        a,
+        message_id,
+        timestamp,
+    };
+    if data.insert_mode == "TOP" {
+        data.messages.insert(0, msg);
+    } else {
+        data.messages.push(msg);
+    }
 }
 
 fn truncate_messages(data: &mut crate::lua_api::message_frame::MessageFrameData) {
     if data.messages.len() > data.max_lines {
-        if data.insert_mode == "TOP" { data.messages.pop(); } else { data.messages.remove(0); }
+        if data.insert_mode == "TOP" {
+            data.messages.pop();
+        } else {
+            data.messages.remove(0);
+        }
     }
 }
 

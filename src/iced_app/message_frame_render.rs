@@ -3,10 +3,10 @@
 use iced::Rectangle;
 
 use crate::lua_api::message_frame::MessageFrameData;
-use crate::render::font::WowFontSystem;
-use crate::render::glyph::{emit_text_quads, measure_text_height, GlyphAtlas};
-use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::render::QuadBatch;
+use crate::render::font::WowFontSystem;
+use crate::render::glyph::{GlyphAtlas, emit_text_quads, measure_text_height};
+use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::widget::TextJustify;
 
 /// Render stored messages for a MessageFrame, bottom-aligned within bounds.
@@ -41,7 +41,12 @@ pub fn emit_message_frame_text(
     // Pre-measure wrapped heights from newest to oldest, stopping when
     // we've filled the available vertical space.
     let measured = measure_visible_messages(
-        font_sys, glyph_atlas, f, &data.messages[..end], bounds.width, bounds.height,
+        font_sys,
+        glyph_atlas,
+        f,
+        &data.messages[..end],
+        bounds.width,
+        bounds.height,
     );
 
     // Render bottom-aligned: walk measured messages from oldest to newest
@@ -53,8 +58,15 @@ pub fn emit_message_frame_text(
             continue;
         }
         render_message(
-            batch, font_sys, glyph_atlas, f, bounds,
-            &data.messages[msg_idx], y, height, alpha * msg_alpha,
+            batch,
+            font_sys,
+            glyph_atlas,
+            f,
+            bounds,
+            &data.messages[msg_idx],
+            y,
+            height,
+            alpha * msg_alpha,
         );
     }
 }
@@ -64,7 +76,11 @@ pub fn emit_message_frame_text(
 /// WoW MessageFrame fading: after `time_visible` seconds the message starts
 /// fading out over `fade_duration` seconds, with optional `fade_power` curve.
 /// Returns 1.0 (fully visible) → 0.0 (fully faded).
-fn message_fade_alpha(data: &MessageFrameData, msg: &crate::lua_api::message_frame::Message, now: f64) -> f32 {
+fn message_fade_alpha(
+    data: &MessageFrameData,
+    msg: &crate::lua_api::message_frame::Message,
+    now: f64,
+) -> f32 {
     if !data.fading {
         return 1.0;
     }
@@ -95,8 +111,13 @@ fn measure_visible_messages(
 
     for i in (0..messages.len()).rev() {
         let h = measure_text_height(
-            font_sys, glyph_atlas, &messages[i].text,
-            f.font.as_deref(), f.font_size, width, true,
+            font_sys,
+            glyph_atlas,
+            &messages[i].text,
+            f.font.as_deref(),
+            f.font_size,
+            width,
+            true,
         );
         if h <= 0.0 {
             continue;
@@ -133,14 +154,22 @@ fn render_message(
     let shadow = Some([0.0, 0.0, 0.0, alpha]);
 
     emit_text_quads(
-        batch, font_sys, glyph_atlas,
-        &msg.text, line_bounds,
-        f.font.as_deref(), f.font_size, color,
-        TextJustify::Left, TextJustify::Left, // top-aligned within slot
+        batch,
+        font_sys,
+        glyph_atlas,
+        &msg.text,
+        line_bounds,
+        f.font.as_deref(),
+        f.font_size,
+        color,
+        TextJustify::Left,
+        TextJustify::Left, // top-aligned within slot
         GLYPH_ATLAS_TEX_INDEX,
-        shadow, (1.0, 1.0),
+        shadow,
+        (1.0, 1.0),
         f.font_outline,
-        true, 0, // word_wrap=true, no line limit
+        true,
+        0,    // word_wrap=true, no line limit
         None, // message frames don't pre-strip
     );
 }

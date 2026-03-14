@@ -167,8 +167,6 @@ fn test_clear_guild_c_guild_is_in_guild_returns_false() {
 #[test]
 fn test_not_in_guild_by_default() {
     let env = env();
-    let in_guild: bool = env
-        .eval("return IsInGuild()")
-        .unwrap();
+    let in_guild: bool = env.eval("return IsInGuild()").unwrap();
     assert!(!in_guild);
 }

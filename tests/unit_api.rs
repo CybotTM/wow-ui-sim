@@ -13,9 +13,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_unit_race_returns_name_and_file() {
     let env = env();
-    let (name, file): (String, String) = env
-        .eval("return UnitRace('player')")
-        .unwrap();
+    let (name, file): (String, String) = env.eval("return UnitRace('player')").unwrap();
     assert_eq!(name, "Human");
     assert_eq!(file, "Human");
 }
@@ -38,9 +36,7 @@ fn test_unit_sex_returns_male() {
 #[test]
 fn test_unit_class_returns_three_values() {
     let env = env();
-    let (name, file, id): (String, String, i32) = env
-        .eval("return UnitClass('player')")
-        .unwrap();
+    let (name, file, id): (String, String, i32) = env.eval("return UnitClass('player')").unwrap();
     assert_eq!(name, "Paladin");
     assert_eq!(file, "PALADIN");
     assert_eq!(id, 2);
@@ -75,9 +71,7 @@ fn test_get_num_classes() {
 #[test]
 fn test_get_class_info_warrior() {
     let env = env();
-    let (name, file, id): (String, String, i32) = env
-        .eval("return GetClassInfo(1)")
-        .unwrap();
+    let (name, file, id): (String, String, i32) = env.eval("return GetClassInfo(1)").unwrap();
     assert_eq!(name, "Warrior");
     assert_eq!(file, "WARRIOR");
     assert_eq!(id, 1);
@@ -86,9 +80,7 @@ fn test_get_class_info_warrior() {
 #[test]
 fn test_get_class_info_evoker() {
     let env = env();
-    let (name, file, id): (String, String, i32) = env
-        .eval("return GetClassInfo(13)")
-        .unwrap();
+    let (name, file, id): (String, String, i32) = env.eval("return GetClassInfo(13)").unwrap();
     assert_eq!(name, "Evoker");
     assert_eq!(file, "EVOKER");
     assert_eq!(id, 13);
@@ -97,9 +89,7 @@ fn test_get_class_info_evoker() {
 #[test]
 fn test_get_class_info_death_knight() {
     let env = env();
-    let (name, file, id): (String, String, i32) = env
-        .eval("return GetClassInfo(6)")
-        .unwrap();
+    let (name, file, id): (String, String, i32) = env.eval("return GetClassInfo(6)").unwrap();
     assert_eq!(name, "Death Knight");
     assert_eq!(file, "DEATHKNIGHT");
     assert_eq!(id, 6);
@@ -108,9 +98,7 @@ fn test_get_class_info_death_knight() {
 #[test]
 fn test_get_class_info_unknown_index() {
     let env = env();
-    let (name, file): (String, String) = env
-        .eval("return GetClassInfo(99)")
-        .unwrap();
+    let (name, file): (String, String) = env.eval("return GetClassInfo(99)").unwrap();
     assert_eq!(name, "Unknown");
     assert_eq!(file, "UNKNOWN");
 }
@@ -134,9 +122,8 @@ fn test_get_class_info_all_classes() {
         (13, "Evoker", "EVOKER"),
     ];
     for (idx, exp_name, exp_file) in expected {
-        let (name, file, id): (String, String, i32) = env
-            .eval(&format!("return GetClassInfo({})", idx))
-            .unwrap();
+        let (name, file, id): (String, String, i32) =
+            env.eval(&format!("return GetClassInfo({})", idx)).unwrap();
         assert_eq!(name, exp_name, "class index {}", idx);
         assert_eq!(file, exp_file, "class index {}", idx);
         assert_eq!(id, idx, "class index {}", idx);
@@ -150,9 +137,7 @@ fn test_get_class_info_all_classes() {
 #[test]
 fn test_localized_class_list() {
     let env = env();
-    let warrior: String = env
-        .eval("return LocalizedClassList()['WARRIOR']")
-        .unwrap();
+    let warrior: String = env.eval("return LocalizedClassList()['WARRIOR']").unwrap();
     assert_eq!(warrior, "Warrior");
 }
 
@@ -192,7 +177,10 @@ fn test_unit_name_player() {
     let matches: bool = env
         .eval("local n = UnitName('player'); return n == UnitName('player')")
         .unwrap();
-    assert!(matches, "UnitName('player') should return a consistent name");
+    assert!(
+        matches,
+        "UnitName('player') should return a consistent name"
+    );
     let name: String = env.eval("return UnitName('player')").unwrap();
     assert!(!name.is_empty(), "Player name should not be empty");
 }
@@ -244,9 +232,7 @@ fn test_unit_name_unmodified_no_target() {
 #[test]
 fn test_unit_full_name_player() {
     let env = env();
-    let (name, realm): (String, String) = env
-        .eval("return UnitFullName('player')")
-        .unwrap();
+    let (name, realm): (String, String) = env.eval("return UnitFullName('player')").unwrap();
     let player_name: String = env.eval("return UnitName('player')").unwrap();
     assert_eq!(name, player_name);
     assert_eq!(realm, "SimRealm");
@@ -255,9 +241,7 @@ fn test_unit_full_name_player() {
 #[test]
 fn test_unit_full_name_no_target() {
     let env = env();
-    let (name, realm): (String, String) = env
-        .eval("return UnitFullName('target')")
-        .unwrap();
+    let (name, realm): (String, String) = env.eval("return UnitFullName('target')").unwrap();
     assert_eq!(name, "Unknown");
     assert_eq!(realm, "SimRealm");
 }
@@ -372,9 +356,8 @@ fn test_unit_exists_unknown() {
 #[test]
 fn test_unit_faction_group() {
     let env = env();
-    let (english, localized): (String, String) = env
-        .eval("return UnitFactionGroup('player')")
-        .unwrap();
+    let (english, localized): (String, String) =
+        env.eval("return UnitFactionGroup('player')").unwrap();
     assert_eq!(english, "Alliance");
     assert_eq!(localized, "Alliance");
 }
@@ -474,14 +457,18 @@ fn test_unit_is_friend() {
 #[test]
 fn test_unit_can_attack() {
     let env = env();
-    let val: bool = env.eval("return UnitCanAttack('player', 'target')").unwrap();
+    let val: bool = env
+        .eval("return UnitCanAttack('player', 'target')")
+        .unwrap();
     assert!(!val);
 }
 
 #[test]
 fn test_unit_can_assist() {
     let env = env();
-    let val: bool = env.eval("return UnitCanAssist('player', 'target')").unwrap();
+    let val: bool = env
+        .eval("return UnitCanAssist('player', 'target')")
+        .unwrap();
     assert!(val);
 }
 
@@ -509,9 +496,7 @@ fn test_unit_is_visible() {
 #[test]
 fn test_unit_in_range() {
     let env = env();
-    let (in_range, checked): (bool, bool) = env
-        .eval("return UnitInRange('player')")
-        .unwrap();
+    let (in_range, checked): (bool, bool) = env.eval("return UnitInRange('player')").unwrap();
     assert!(in_range);
     assert!(checked);
 }
@@ -590,9 +575,7 @@ fn test_unit_power_max() {
 #[test]
 fn test_unit_power_type() {
     let env = env();
-    let (power_type, token): (i32, String) = env
-        .eval("return UnitPowerType('player')")
-        .unwrap();
+    let (power_type, token): (i32, String) = env.eval("return UnitPowerType('player')").unwrap();
     assert_eq!(power_type, 0);
     assert_eq!(token, "MANA");
 }
@@ -614,7 +597,9 @@ fn test_unit_get_total_absorbs() {
 #[test]
 fn test_unit_get_total_heal_absorbs() {
     let env = env();
-    let val: i32 = env.eval("return UnitGetTotalHealAbsorbs('player')").unwrap();
+    let val: i32 = env
+        .eval("return UnitGetTotalHealAbsorbs('player')")
+        .unwrap();
     assert_eq!(val, 0);
 }
 
@@ -675,18 +660,14 @@ fn test_unit_creature_family() {
 #[test]
 fn test_unit_casting_info() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return UnitCastingInfo('player') == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return UnitCastingInfo('player') == nil").unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_unit_channel_info() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return UnitChannelInfo('player') == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return UnitChannelInfo('player') == nil").unwrap();
     assert!(is_nil);
 }
 

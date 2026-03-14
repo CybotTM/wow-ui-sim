@@ -53,9 +53,15 @@ impl WowFontSystem {
         // Load each TTF file and record its family name
         let font_files = [
             ("FRIZQT__.TTF", &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"][..]),
-            ("ARIALN.ttf", &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"][..]),
+            (
+                "ARIALN.ttf",
+                &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"][..],
+            ),
             ("frizqt___cyr.ttf", &["Fonts\\frizqt___cyr.ttf"][..]),
-            ("TrajanPro3SemiBold.ttf", &["Fonts\\TrajanPro3SemiBold.ttf"][..]),
+            (
+                "TrajanPro3SemiBold.ttf",
+                &["Fonts\\TrajanPro3SemiBold.ttf"][..],
+            ),
         ];
 
         for (filename, wow_paths) in &font_files {
@@ -90,8 +96,7 @@ impl WowFontSystem {
             tracing::debug!("Loaded font {} -> family '{}'", filename, family_name);
         }
 
-        let font_system =
-            cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
+        let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
         let swash_cache = cosmic_text::SwashCache::new();
 
         Self {
@@ -139,7 +144,12 @@ impl WowFontSystem {
     ///
     /// `font_path` is the WoW font path (e.g. `Fonts\\FRIZQT__.TTF`).
     /// Returns the width of the first layout line.
-    pub fn measure_text_width(&mut self, text: &str, font_path: Option<&str>, font_size: f32) -> f32 {
+    pub fn measure_text_width(
+        &mut self,
+        text: &str,
+        font_path: Option<&str>,
+        font_size: f32,
+    ) -> f32 {
         if text.is_empty() {
             return 0.0;
         }
@@ -201,7 +211,9 @@ impl WowFontSystem {
         if num_lines <= 1 {
             line_height
         } else {
-            runs.last().map(|run| run.line_y + line_height).unwrap_or(line_height)
+            runs.last()
+                .map(|run| run.line_y + line_height)
+                .unwrap_or(line_height)
         }
     }
 }
@@ -216,10 +228,7 @@ fn fontdb_family_name(data: &[u8]) -> Option<String> {
     // Parse the font to get its family name
     let mut tmp_db = fontdb::Database::new();
     tmp_db.load_font_data(data.to_vec());
-    tmp_db
-        .faces()
-        .next()
-        .map(|face| face.families[0].0.clone())
+    tmp_db.faces().next().map(|face| face.families[0].0.clone())
 }
 
 #[cfg(test)]
@@ -236,7 +245,12 @@ mod tests {
         let fs = WowFontSystem::new(&fonts_dir());
         // 4 font files loaded: FRIZQT__, ARIALN, frizqt___cyr, TrajanPro3SemiBold
         // Case-insensitive aliases collapse to 4 unique normalized keys
-        assert_eq!(fs.font_map.len(), 4, "font_map: {:?}", fs.font_map.keys().collect::<Vec<_>>());
+        assert_eq!(
+            fs.font_map.len(),
+            4,
+            "font_map: {:?}",
+            fs.font_map.keys().collect::<Vec<_>>()
+        );
     }
 
     #[test]
@@ -319,7 +333,10 @@ mod tests {
         let mut fs = WowFontSystem::new(&fonts_dir());
         let short = fs.measure_text_width("Hi", Some(WOW_FONT_FRIZ), 14.0);
         let long = fs.measure_text_width("Hello World", Some(WOW_FONT_FRIZ), 14.0);
-        assert!(long > short, "Longer text should be wider: {long} > {short}");
+        assert!(
+            long > short,
+            "Longer text should be wider: {long} > {short}"
+        );
     }
 
     #[test]
@@ -333,7 +350,8 @@ mod tests {
     #[test]
     fn measure_text_height_wraps_with_narrow_width() {
         let mut fs = WowFontSystem::new(&fonts_dir());
-        let long_text = "This is a fairly long sentence that should wrap when given a narrow width constraint";
+        let long_text =
+            "This is a fairly long sentence that should wrap when given a narrow width constraint";
         let single = fs.measure_text_height(long_text, Some(WOW_FONT_FRIZ), 14.0, None);
         let wrapped = fs.measure_text_height(long_text, Some(WOW_FONT_FRIZ), 14.0, Some(100.0));
         assert!(

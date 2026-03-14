@@ -96,10 +96,14 @@ pub fn get_frame_ref(lua: &Lua, widget_id: u64) -> Option<Value> {
 pub fn call_error_handler(lua: &Lua, error_msg: &str) {
     eprintln!("Lua error: {error_msg}");
     collect_lua_error(lua, error_msg);
-    let result: mlua::Result<()> = lua.load(r#"
+    let result: mlua::Result<()> = lua
+        .load(
+            r#"
         local handler = geterrorhandler()
         if handler then handler((...)) end
-    "#).call(error_msg.to_string());
+    "#,
+        )
+        .call(error_msg.to_string());
     if let Err(e) = result {
         eprintln!("Error in error handler: {e}");
     }
@@ -130,7 +134,9 @@ pub fn get_stack_taint(lua: &Lua) -> Option<String> {
         }
     }
     // Fallback to Elune's taint tracking
-    let fallback: mlua::Function = lua.named_registry_value("__get_stack_taint_fallback").ok()?;
+    let fallback: mlua::Function = lua
+        .named_registry_value("__get_stack_taint_fallback")
+        .ok()?;
     fallback.call(()).ok()
 }
 
@@ -198,4 +204,3 @@ pub fn lua_error(_lua: &Lua, msg: impl Into<String>) -> mlua::Error {
 pub fn lua_error_val(msg: impl Into<String>) -> mlua::Error {
     mlua::Error::external(LuaApiError(msg.into()))
 }
-

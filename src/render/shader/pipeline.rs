@@ -2,8 +2,8 @@
 
 use super::atlas::GpuTextureAtlas;
 use super::quad::{QuadBatch, QuadVertex};
-use iced::widget::shader;
 use iced::Rectangle;
+use iced::widget::shader;
 use std::mem;
 use wgpu::util::DeviceExt;
 
@@ -193,11 +193,7 @@ impl WowUiPipeline {
         }
 
         if !quads.vertices.is_empty() {
-            queue.write_buffer(
-                &buf.vertex_buffer,
-                0,
-                bytemuck::cast_slice(&quads.vertices),
-            );
+            queue.write_buffer(&buf.vertex_buffer, 0, bytemuck::cast_slice(&quads.vertices));
         }
         if !quads.indices.is_empty() {
             queue.write_buffer(&buf.index_buffer, 0, bytemuck::cast_slice(&quads.indices));
@@ -324,11 +320,7 @@ impl WowUiPipeline {
 }
 
 impl shader::Pipeline for WowUiPipeline {
-    fn new(
-        device: &wgpu::Device,
-        _queue: &wgpu::Queue,
-        format: wgpu::TextureFormat,
-    ) -> Self {
+    fn new(device: &wgpu::Device, _queue: &wgpu::Queue, format: wgpu::TextureFormat) -> Self {
         let texture_atlas = GpuTextureAtlas::new(device);
 
         let (uniform_buffer, uniform_bind_group_layout, uniform_bind_group) =
@@ -341,8 +333,9 @@ impl shader::Pipeline for WowUiPipeline {
             texture_atlas.bind_group_layout(),
         );
 
-        let strata_buffers: Vec<StrataGpuBuffer> =
-            (0..BUFFER_SLOTS).map(|i| create_strata_buffer(device, i)).collect();
+        let strata_buffers: Vec<StrataGpuBuffer> = (0..BUFFER_SLOTS)
+            .map(|i| create_strata_buffer(device, i))
+            .collect();
 
         Self {
             pipeline,

@@ -46,7 +46,10 @@ pub fn register_c_editmode_api(lua: &Lua) -> Result<()> {
         "OnLayoutAdded",
         "OnLayoutDeleted",
     ] {
-        t.set(name, lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+        t.set(
+            name,
+            lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+        )?;
     }
 
     // Simple return stubs

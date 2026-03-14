@@ -10,9 +10,7 @@ pub fn register_item_api(lua: &Lua) -> Result<()> {
 
     item_class.set(
         "CreateFromItemID",
-        lua.create_function(|lua, (_self, item_id): (Value, i32)| {
-            create_item_table(lua, item_id)
-        })?,
+        lua.create_function(|lua, (_self, item_id): (Value, i32)| create_item_table(lua, item_id))?,
     )?;
     item_class.set(
         "CreateFromItemLink",
@@ -88,10 +86,7 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
             } else {
                 ("Unknown", "ffffff")
             };
-            let link = format!(
-                "|cff{}|Hitem:{}::::::::60:::::|h[{}]|h|r",
-                color, id, name
-            );
+            let link = format!("|cff{}|Hitem:{}::::::::60:::::|h[{}]|h|r", color, id, name);
             Ok(Value::String(lua.create_string(&link)?))
         })?,
     )?;

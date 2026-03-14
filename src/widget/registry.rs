@@ -35,10 +35,15 @@ impl WidgetRegistry {
         let is_new = !self.widgets.contains_key(&id);
         // Debug: check for re-registration that would lose children
         if let Some(existing) = self.widgets.get(&id)
-            && !existing.children.is_empty() {
-                eprintln!("[WARN] Re-registering widget id={} name={:?} which has {} children!",
-                    id, existing.name, existing.children.len());
-            }
+            && !existing.children.is_empty()
+        {
+            eprintln!(
+                "[WARN] Re-registering widget id={} name={:?} which has {} children!",
+                id,
+                existing.name,
+                existing.children.len()
+            );
+        }
         if let Some(ref name) = widget.name {
             self.names.insert(name.clone(), id);
         }
@@ -149,12 +154,19 @@ impl WidgetRegistry {
     pub fn visible_texture_paths(&self) -> Vec<String> {
         let mut paths = std::collections::HashSet::new();
         for frame in self.widgets.values() {
-            if !frame.visible { continue; }
+            if !frame.visible {
+                continue;
+            }
             for path in [
-                &frame.texture, &frame.normal_texture, &frame.pushed_texture,
-                &frame.highlight_texture, &frame.disabled_texture,
+                &frame.texture,
+                &frame.normal_texture,
+                &frame.pushed_texture,
+                &frame.highlight_texture,
+                &frame.disabled_texture,
             ] {
-                if let Some(t) = path { paths.insert(t.clone()); }
+                if let Some(t) = path {
+                    paths.insert(t.clone());
+                }
             }
         }
         paths.into_iter().collect()
@@ -207,7 +219,9 @@ impl WidgetRegistry {
             let mut m: u16 = 0;
             for &id in ids.iter() {
                 m |= self.strata_bit_for(id);
-                if m == all_mask { break; }
+                if m == all_mask {
+                    break;
+                }
             }
             m
         };
@@ -224,14 +238,17 @@ impl WidgetRegistry {
     ///
     /// Regions (Texture, FontString, Line) use their parent's strata.
     fn strata_bit_for(&self, id: u64) -> u16 {
-        let Some(f) = self.widgets.get(&id) else { return 0 };
+        let Some(f) = self.widgets.get(&id) else {
+            return 0;
+        };
         let strata = match f.widget_type {
-            super::WidgetType::Texture | super::WidgetType::FontString | super::WidgetType::Line => {
-                f.parent_id
-                    .and_then(|pid| self.widgets.get(&pid))
-                    .map(|p| p.frame_strata)
-                    .unwrap_or(f.frame_strata)
-            }
+            super::WidgetType::Texture
+            | super::WidgetType::FontString
+            | super::WidgetType::Line => f
+                .parent_id
+                .and_then(|pid| self.widgets.get(&pid))
+                .map(|p| p.frame_strata)
+                .unwrap_or(f.frame_strata),
             _ => f.frame_strata,
         };
         1u16 << strata.as_index()
@@ -255,7 +272,8 @@ impl WidgetRegistry {
     /// `effective_alpha` — a frame is visible when effective_alpha > 0 and
     /// its own `visible` flag is true.
     pub fn is_ancestor_visible(&self, id: u64) -> bool {
-        self.widgets.get(&id)
+        self.widgets
+            .get(&id)
             .is_some_and(|f| f.visible && f.effective_alpha > 0.0)
     }
 
@@ -266,8 +284,14 @@ impl WidgetRegistry {
     /// Also marks frames as visually dirty when their effective_alpha changes,
     /// so cached quad snapshots with baked-in alpha are invalidated.
     pub fn propagate_effective_alpha(&mut self, id: u64, parent_effective_alpha: f32) {
-        let Some(f) = self.widgets.get_mut(&id) else { return };
-        let eff = if f.visible { parent_effective_alpha * f.alpha } else { 0.0 };
+        let Some(f) = self.widgets.get_mut(&id) else {
+            return;
+        };
+        let eff = if f.visible {
+            parent_effective_alpha * f.alpha
+        } else {
+            0.0
+        };
         if (eff - f.effective_alpha).abs() > f32::EPSILON {
             f.effective_alpha = eff;
             self.render_dirty_ids.borrow_mut().insert(id);
@@ -283,7 +307,10 @@ impl WidgetRegistry {
     /// Propagate effective_alpha for ALL frames from root. Called once at startup
     /// to initialize effective_alpha after all frames are created and parented.
     pub fn propagate_all_effective_alpha(&mut self) {
-        let root_ids: Vec<u64> = self.widgets.keys().copied()
+        let root_ids: Vec<u64> = self
+            .widgets
+            .keys()
+            .copied()
             .filter(|&id| self.widgets.get(&id).is_some_and(|f| f.parent_id.is_none()))
             .collect();
         for id in root_ids {
@@ -293,7 +320,10 @@ impl WidgetRegistry {
 
     /// Propagate effective_scale for ALL frames from root. Called once at startup.
     pub fn propagate_all_effective_scale(&mut self) {
-        let root_ids: Vec<u64> = self.widgets.keys().copied()
+        let root_ids: Vec<u64> = self
+            .widgets
+            .keys()
+            .copied()
             .filter(|&id| self.widgets.get(&id).is_some_and(|f| f.parent_id.is_none()))
             .collect();
         for id in root_ids {
@@ -305,7 +335,9 @@ impl WidgetRegistry {
     ///
     /// effective_scale = parent_effective_scale × own_scale.
     pub fn propagate_effective_scale(&mut self, id: u64, parent_effective_scale: f32) {
-        let Some(f) = self.widgets.get_mut(&id) else { return };
+        let Some(f) = self.widgets.get_mut(&id) else {
+            return;
+        };
         let eff = parent_effective_scale * f.scale;
         f.effective_scale = eff;
         let children: Vec<u64> = f.children.clone();
@@ -406,7 +438,10 @@ impl WidgetRegistry {
 
     /// Record that `frame_id` is anchored to `target_id`.
     pub fn add_anchor_dependent(&mut self, target_id: u64, frame_id: u64) {
-        self.anchor_dependents.entry(target_id).or_default().insert(frame_id);
+        self.anchor_dependents
+            .entry(target_id)
+            .or_default()
+            .insert(frame_id);
     }
 
     /// Remove `frame_id` from `target_id`'s dependents.
@@ -422,10 +457,15 @@ impl WidgetRegistry {
     /// Remove `frame_id` from all reverse-index entries by reading its current
     /// anchors to find the targets.
     pub fn remove_all_anchor_dependents_for(&mut self, frame_id: u64) {
-        let targets: Vec<u64> = self.widgets.get(&frame_id)
-            .map(|f| f.anchors.iter()
-                .filter_map(|a| a.relative_to_id.map(|t| t as u64))
-                .collect())
+        let targets: Vec<u64> = self
+            .widgets
+            .get(&frame_id)
+            .map(|f| {
+                f.anchors
+                    .iter()
+                    .filter_map(|a| a.relative_to_id.map(|t| t as u64))
+                    .collect()
+            })
             .unwrap_or_default();
         for target in targets {
             self.remove_anchor_dependent(target, frame_id);
@@ -442,15 +482,20 @@ impl WidgetRegistry {
     /// and frame creation.
     pub fn rebuild_anchor_index(&mut self) {
         self.anchor_dependents.clear();
-        let entries: Vec<(u64, u64)> = self.widgets.values()
+        let entries: Vec<(u64, u64)> = self
+            .widgets
+            .values()
             .flat_map(|f| {
-                f.anchors.iter().filter_map(move |a| {
-                    a.relative_to_id.map(|target| (target as u64, f.id))
-                })
+                f.anchors
+                    .iter()
+                    .filter_map(move |a| a.relative_to_id.map(|target| (target as u64, f.id)))
             })
             .collect();
         for (target, frame_id) in entries {
-            self.anchor_dependents.entry(target).or_default().insert(frame_id);
+            self.anchor_dependents
+                .entry(target)
+                .or_default()
+                .insert(frame_id);
         }
     }
 }

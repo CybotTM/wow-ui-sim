@@ -1,8 +1,8 @@
 //! Frame widget - the base container for UI elements.
 
-use super::{next_widget_id, Anchor, AnchorPoint, WidgetType};
-use crate::atlas::NineSliceAtlasInfo;
+use super::{Anchor, AnchorPoint, WidgetType, next_widget_id};
 use crate::BlendMode;
+use crate::atlas::NineSliceAtlasInfo;
 use std::collections::{HashMap, HashSet};
 
 /// Attribute value stored on frames.
@@ -61,7 +61,7 @@ impl TextJustify {
             "LEFT" | "TOP" => TextJustify::Left,
             "CENTER" | "MIDDLE" => TextJustify::Center,
             "RIGHT" | "BOTTOM" => TextJustify::Right,
-            _ => TextJustify::Left,  // WoW defaults to LEFT
+            _ => TextJustify::Left, // WoW defaults to LEFT
         }
     }
 

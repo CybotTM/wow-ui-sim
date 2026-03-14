@@ -26,10 +26,19 @@ fn add_cooldown_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetHideCountdownNumbers", |_, _, ()| Ok(false));
     methods.add_method("GetMinimumCountdownDuration", |_, _, ()| Ok(0.0_f64));
     methods.add_method("GetUseAuraDisplayTime", |_, _, ()| Ok(false));
-    methods.add_method("SetCooldownFromDurationObject", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetCooldownFromExpirationTime", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetCooldownFromDurationObject",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetCooldownFromExpirationTime",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("SetEdgeColor", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetMinimumCountdownDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetMinimumCountdownDuration",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("SetTexCoordRange", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
@@ -82,7 +91,11 @@ fn add_cooldown_get_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("GetCooldownDuration", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.cooldown_duration).unwrap_or(0.0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.cooldown_duration)
+            .unwrap_or(0.0))
     });
 }
 
@@ -107,7 +120,9 @@ fn add_cooldown_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     methods.add_method("SetHideCountdownNumbers", |lua, this, hide: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_hide_countdown = hide; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_hide_countdown = hide;
+        }
         Ok(())
     });
 }
@@ -116,56 +131,82 @@ fn add_cooldown_bool_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods
     methods.add_method("SetDrawSwipe", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_swipe = draw; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_draw_swipe = draw;
+        }
         Ok(())
     });
     methods.add_method("SetDrawEdge", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_edge = draw; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_draw_edge = draw;
+        }
         Ok(())
     });
     methods.add_method("SetDrawBling", |lua, this, draw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_draw_bling = draw; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_draw_bling = draw;
+        }
         Ok(())
     });
     methods.add_method("SetReverse", |lua, this, reverse: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_reverse = reverse; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_reverse = reverse;
+        }
         Ok(())
     });
 }
 
 fn add_cooldown_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetEdgeTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetSwipeTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetBlingTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "SetSwipeTexture",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
+    methods.add_method(
+        "SetBlingTexture",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
     methods.add_method("SetEdgeScale", |_, _this, _scale: Value| Ok(()));
     methods.add_method("SetUseCircularEdge", |_, _this, _use_circular: bool| Ok(()));
-    methods.add_method("SetCountdownAbbrevThreshold", |_, _this, _seconds: Value| Ok(()));
+    methods.add_method(
+        "SetCountdownAbbrevThreshold",
+        |_, _this, _seconds: Value| Ok(()),
+    );
     methods.add_method("SetCountdownFont", |_, _this, _font: Value| Ok(()));
     methods.add_method("SetUseAuraDisplayTime", |_, _this, _use: Value| Ok(()));
 
     methods.add_method("GetReverse", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.cooldown_reverse).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.cooldown_reverse)
+            .unwrap_or(false))
     });
 
-    methods.add_method("SetCooldownDuration", |lua, this, args: mlua::MultiValue| {
-        let duration = match args.into_iter().next() {
-            Some(Value::Number(n)) => n,
-            Some(Value::Integer(n)) => n as f64,
-            _ => 0.0,
-        };
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_duration = duration; }
-        Ok(())
-    });
+    methods.add_method(
+        "SetCooldownDuration",
+        |lua, this, args: mlua::MultiValue| {
+            let duration = match args.into_iter().next() {
+                Some(Value::Number(n)) => n,
+                Some(Value::Integer(n)) => n as f64,
+                _ => 0.0,
+            };
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+                frame.cooldown_duration = duration;
+            }
+            Ok(())
+        },
+    );
 }
 
 fn add_cooldown_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -174,20 +215,28 @@ fn add_cooldown_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("Pause", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_paused = true; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_paused = true;
+        }
         Ok(())
     });
 
     methods.add_method("Resume", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.cooldown_paused = false; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_paused = false;
+        }
         Ok(())
     });
 
     methods.add_method("IsPaused", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.cooldown_paused).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.cooldown_paused)
+            .unwrap_or(false))
     });
 }

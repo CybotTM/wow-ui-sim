@@ -77,7 +77,10 @@ fn texture_visibility(
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
 ) -> Option<bool> {
-    if !matches!(parent.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+    if !matches!(
+        parent.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    ) {
         return None;
     }
     let is_disabled = !is_enabled(parent);

@@ -120,18 +120,51 @@ pub fn resolve_lua_escapes(s: &str) -> String {
 /// Returns the index after the consumed escape.
 fn apply_lua_escape(bytes: &[u8], i: usize, result: &mut String) -> usize {
     match bytes[i + 1] {
-        b'a' => { result.push('\x07'); i + 2 }
-        b'b' => { result.push('\x08'); i + 2 }
-        b'f' => { result.push('\x0C'); i + 2 }
-        b'n' => { result.push('\n');   i + 2 }
-        b'r' => { result.push('\r');   i + 2 }
-        b't' => { result.push('\t');   i + 2 }
-        b'v' => { result.push('\x0B'); i + 2 }
-        b'\\' => { result.push('\\'); i + 2 }
-        b'"'  => { result.push('"');  i + 2 }
-        b'\'' => { result.push('\''); i + 2 }
+        b'a' => {
+            result.push('\x07');
+            i + 2
+        }
+        b'b' => {
+            result.push('\x08');
+            i + 2
+        }
+        b'f' => {
+            result.push('\x0C');
+            i + 2
+        }
+        b'n' => {
+            result.push('\n');
+            i + 2
+        }
+        b'r' => {
+            result.push('\r');
+            i + 2
+        }
+        b't' => {
+            result.push('\t');
+            i + 2
+        }
+        b'v' => {
+            result.push('\x0B');
+            i + 2
+        }
+        b'\\' => {
+            result.push('\\');
+            i + 2
+        }
+        b'"' => {
+            result.push('"');
+            i + 2
+        }
+        b'\'' => {
+            result.push('\'');
+            i + 2
+        }
         d if d.is_ascii_digit() => decode_decimal_escape(bytes, i, result),
-        _ => { result.push('\\'); i + 1 }
+        _ => {
+            result.push('\\');
+            i + 1
+        }
     }
 }
 
@@ -202,7 +235,10 @@ fn resolve_relative_key(key: &str, parent_expr: &str) -> String {
             } else {
                 expr = format!("{}:GetParent()", expr);
             }
-        } else if let Some(suffix) = part.strip_prefix("$parent").or_else(|| part.strip_prefix("$Parent")) {
+        } else if let Some(suffix) = part
+            .strip_prefix("$parent")
+            .or_else(|| part.strip_prefix("$Parent"))
+        {
             // Handle $parent as a prefix: "$parentPanelContainer" → parent["PanelContainer"]
             if expr.is_empty() {
                 expr = parent_expr.to_string();
@@ -216,7 +252,11 @@ fn resolve_relative_key(key: &str, parent_expr: &str) -> String {
             expr = format!("{}[\"{}\"]", expr, part);
         }
     }
-    if expr.is_empty() { parent_expr.to_string() } else { expr }
+    if expr.is_empty() {
+        parent_expr.to_string()
+    } else {
+        expr
+    }
 }
 
 /// Resolve the relative target for an anchor.
@@ -235,9 +275,10 @@ pub fn resolve_anchor_relative(
     } else {
         match anchor.relative_to.as_deref() {
             Some("$parent") => parent_expr.to_string(),
-            Some(r) if r.contains("$parent") || r.contains("$Parent") => {
-                lua_global_ref(&r.replace("$parent", parent_name).replace("$Parent", parent_name))
-            }
+            Some(r) if r.contains("$parent") || r.contains("$Parent") => lua_global_ref(
+                &r.replace("$parent", parent_name)
+                    .replace("$Parent", parent_name),
+            ),
             Some(r) => lua_global_ref(r),
             None => default_relative.to_string(),
         }
@@ -292,7 +333,9 @@ pub fn append_script_handler(
     handler_name: &str,
     script: &crate::xml::ScriptBodyXml,
 ) {
-    let Some(new_handler) = build_handler_expr(handler_name, script) else { return };
+    let Some(new_handler) = build_handler_expr(handler_name, script) else {
+        return;
+    };
 
     // intrinsicOrder="precall"/"postcall" — store as {EventName}_Intrinsic property
     // instead of SetScript. The fire_onload/fire_onshow dispatchers call these
@@ -328,7 +371,11 @@ fn emit_chained_handler(
     new_handler: &str,
     prepend: bool,
 ) {
-    let (first, second) = if prepend { ("__new", "__old") } else { ("__old", "__new") };
+    let (first, second) = if prepend {
+        ("__new", "__old")
+    } else {
+        ("__old", "__new")
+    };
     code.push_str(&format!(
         r#"
         do
@@ -374,15 +421,21 @@ fn handler_params(handler_name: &str) -> &'static str {
 /// Build the Lua expression for a script handler (without setting it).
 fn build_handler_expr(handler_name: &str, script: &crate::xml::ScriptBodyXml) -> Option<String> {
     if let Some(func) = &script.function {
-        if func.is_empty() { return None; }
+        if func.is_empty() {
+            return None;
+        }
         Some(func.clone())
     } else if let Some(method) = &script.method {
         Some(format!("function(self, ...) self:{method}(...) end"))
     } else {
         let body = script.body.as_deref()?.trim();
-        if body.is_empty() { return None; }
+        if body.is_empty() {
+            return None;
+        }
         let params = handler_params(handler_name);
-        Some(format!("function({params})\n            {body}\n        end"))
+        Some(format!(
+            "function({params})\n            {body}\n        end"
+        ))
     }
 }
 
@@ -408,49 +461,58 @@ pub fn generate_scripts_code(scripts: &crate::xml::ScriptsXml) -> String {
 }
 
 fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
-    apply_script_handlers("frame", &[
-        ("OnLoad", scripts.on_load.last()),
-        ("OnEvent", scripts.on_event.last()),
-        ("OnUpdate", scripts.on_update.last()),
-        ("OnClick", scripts.on_click.last()),
-        ("PreClick", scripts.pre_click.last()),
-        ("PostClick", scripts.post_click.last()),
-        ("OnShow", scripts.on_show.last()),
-        ("OnHide", scripts.on_hide.last()),
-        ("OnEnter", scripts.on_enter.last()),
-        ("OnLeave", scripts.on_leave.last()),
-        ("OnMouseDown", scripts.on_mouse_down.last()),
-        ("OnMouseUp", scripts.on_mouse_up.last()),
-        ("OnMouseWheel", scripts.on_mouse_wheel.last()),
-        ("OnDragStart", scripts.on_drag_start.last()),
-        ("OnDragStop", scripts.on_drag_stop.last()),
-        ("OnReceiveDrag", scripts.on_receive_drag.last()),
-    ])
+    apply_script_handlers(
+        "frame",
+        &[
+            ("OnLoad", scripts.on_load.last()),
+            ("OnEvent", scripts.on_event.last()),
+            ("OnUpdate", scripts.on_update.last()),
+            ("OnClick", scripts.on_click.last()),
+            ("PreClick", scripts.pre_click.last()),
+            ("PostClick", scripts.post_click.last()),
+            ("OnShow", scripts.on_show.last()),
+            ("OnHide", scripts.on_hide.last()),
+            ("OnEnter", scripts.on_enter.last()),
+            ("OnLeave", scripts.on_leave.last()),
+            ("OnMouseDown", scripts.on_mouse_down.last()),
+            ("OnMouseUp", scripts.on_mouse_up.last()),
+            ("OnMouseWheel", scripts.on_mouse_wheel.last()),
+            ("OnDragStart", scripts.on_drag_start.last()),
+            ("OnDragStop", scripts.on_drag_stop.last()),
+            ("OnReceiveDrag", scripts.on_receive_drag.last()),
+        ],
+    )
 }
 
 fn frame_input_handlers(scripts: &crate::xml::ScriptsXml) -> String {
-    apply_script_handlers("frame", &[
-        ("OnEnterPressed", scripts.on_enter_pressed.last()),
-        ("OnEscapePressed", scripts.on_escape_pressed.last()),
-        ("OnTabPressed", scripts.on_tab_pressed.last()),
-        ("OnSpacePressed", scripts.on_space_pressed.last()),
-        ("OnTextChanged", scripts.on_text_changed.last()),
-        ("OnTextSet", scripts.on_text_set.last()),
-        ("OnChar", scripts.on_char.last()),
-        ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
-        ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
-        ("OnInputLanguageChanged", scripts.on_input_language_changed.last()),
-        ("OnKeyDown", scripts.on_key_down.last()),
-        ("OnKeyUp", scripts.on_key_up.last()),
-        ("OnValueChanged", scripts.on_value_changed.last()),
-        ("OnEnable", scripts.on_enable.last()),
-        ("OnDisable", scripts.on_disable.last()),
-        ("OnSizeChanged", scripts.on_size_changed.last()),
-        ("OnAttributeChanged", scripts.on_attribute_changed.last()),
-        ("OnHyperlinkClick", scripts.on_hyperlink_click.last()),
-        ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
-        ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
-    ])
+    apply_script_handlers(
+        "frame",
+        &[
+            ("OnEnterPressed", scripts.on_enter_pressed.last()),
+            ("OnEscapePressed", scripts.on_escape_pressed.last()),
+            ("OnTabPressed", scripts.on_tab_pressed.last()),
+            ("OnSpacePressed", scripts.on_space_pressed.last()),
+            ("OnTextChanged", scripts.on_text_changed.last()),
+            ("OnTextSet", scripts.on_text_set.last()),
+            ("OnChar", scripts.on_char.last()),
+            ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
+            ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
+            (
+                "OnInputLanguageChanged",
+                scripts.on_input_language_changed.last(),
+            ),
+            ("OnKeyDown", scripts.on_key_down.last()),
+            ("OnKeyUp", scripts.on_key_up.last()),
+            ("OnValueChanged", scripts.on_value_changed.last()),
+            ("OnEnable", scripts.on_enable.last()),
+            ("OnDisable", scripts.on_disable.last()),
+            ("OnSizeChanged", scripts.on_size_changed.last()),
+            ("OnAttributeChanged", scripts.on_attribute_changed.last()),
+            ("OnHyperlinkClick", scripts.on_hyperlink_click.last()),
+            ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
+            ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
+        ],
+    )
 }
 
 #[cfg(test)]
@@ -459,12 +521,18 @@ mod tests {
 
     #[test]
     fn test_normalize_path_backslashes() {
-        assert_eq!(normalize_path("Interface\\Buttons\\UI-Button"), "Interface/Buttons/UI-Button");
+        assert_eq!(
+            normalize_path("Interface\\Buttons\\UI-Button"),
+            "Interface/Buttons/UI-Button"
+        );
     }
 
     #[test]
     fn test_normalize_path_already_forward() {
-        assert_eq!(normalize_path("Interface/Buttons/UI-Button"), "Interface/Buttons/UI-Button");
+        assert_eq!(
+            normalize_path("Interface/Buttons/UI-Button"),
+            "Interface/Buttons/UI-Button"
+        );
     }
 
     #[test]
@@ -510,7 +578,10 @@ mod tests {
 
     #[test]
     fn test_escape_lua_string_newlines() {
-        assert_eq!(escape_lua_string("line1\nline2\rline3"), "line1\\nline2\\rline3");
+        assert_eq!(
+            escape_lua_string("line1\nline2\rline3"),
+            "line1\\nline2\\rline3"
+        );
     }
 
     #[test]
@@ -533,7 +604,11 @@ mod tests {
     #[test]
     fn test_resolve_child_name_none_generates_prefix() {
         let name = resolve_child_name(None, "MyFrame", "anon_");
-        assert!(name.starts_with("anon_"), "Should start with prefix, got: {}", name);
+        assert!(
+            name.starts_with("anon_"),
+            "Should start with prefix, got: {}",
+            name
+        );
     }
 
     #[test]

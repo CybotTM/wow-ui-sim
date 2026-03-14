@@ -23,14 +23,26 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -42,18 +54,42 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    ("Blizzard_UIParentPanelManager", "Blizzard_UIParentPanelManager_Mainline.toc"),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
-    ("Blizzard_SettingsDefinitions_Shared", "Blizzard_SettingsDefinitions_Shared.toc"),
-    ("Blizzard_SettingsDefinitions_Frame", "Blizzard_SettingsDefinitions_Frame_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
-    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+    (
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    ),
     ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
-    ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mainline.toc"),
+    (
+        "Blizzard_SharedMapDataProviders",
+        "Blizzard_SharedMapDataProviders_Mainline.toc",
+    ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
@@ -121,9 +157,7 @@ fn fire_startup_events(env: &WowLuaEnv) {
 
 /// Check whether a global frame exists and is shown.
 fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
-    let code = format!(
-        "return {frame_name} ~= nil and {frame_name}:IsShown() == true"
-    );
+    let code = format!("return {frame_name} ~= nil and {frame_name}:IsShown() == true");
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
@@ -167,246 +201,282 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 // ── B → ToggleAllBags() ─────────────────────────────────────────────────
 
 #[test]
-fn keybind_b_opens_bags() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("B", None).expect("B keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame1"),
-        "A bag frame should be visible after pressing B"
-    );
-}}
+fn keybind_b_opens_bags() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("B", None).expect("B keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame1"),
+            "A bag frame should be visible after pressing B"
+        );
+    }
+}
 
 // ── BACKSPACE → ToggleBackpack() ────────────────────────────────────────
 
 #[test]
-fn keybind_backspace_opens_backpack() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("BACKSPACE", None).expect("BACKSPACE keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame1"),
-        "Backpack should be visible after pressing BACKSPACE"
-    );
-}}
+fn keybind_backspace_opens_backpack() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("BACKSPACE", None).expect("BACKSPACE keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame1"),
+            "Backpack should be visible after pressing BACKSPACE"
+        );
+    }
+}
 
 // ── F8 → ToggleBag(4) ──────────────────────────────────────────────
 
 #[test]
-fn keybind_f8_opens_bag4() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("F8", None).expect("F8 keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame5"),
-        "A bag frame should be visible after pressing F8"
-    );
-}}
+fn keybind_f8_opens_bag4() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("F8", None).expect("F8 keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame5"),
+            "A bag frame should be visible after pressing F8"
+        );
+    }
+}
 
 // ── F9 → ToggleBag(3) ──────────────────────────────────────────────
 
 #[test]
-fn keybind_f9_opens_bag3() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("F9", None).expect("F9 keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame4"),
-        "A bag frame should be visible after pressing F9"
-    );
-}}
+fn keybind_f9_opens_bag3() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("F9", None).expect("F9 keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame4"),
+            "A bag frame should be visible after pressing F9"
+        );
+    }
+}
 
 // ── F10 → ToggleBag(2) ─────────────────────────────────────────────
 
 #[test]
-fn keybind_f10_opens_bag2() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("F10", None).expect("F10 keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame3"),
-        "A bag frame should be visible after pressing F10"
-    );
-}}
+fn keybind_f10_opens_bag2() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("F10", None).expect("F10 keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame3"),
+            "A bag frame should be visible after pressing F10"
+        );
+    }
+}
 
 // ── F11 → ToggleBag(1) ─────────────────────────────────────────────
 
 #[test]
-fn keybind_f11_opens_bag1() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("F11", None).expect("F11 keybind failed");
-    assert!(
-        frame_is_shown(&env, "ContainerFrameCombinedBags")
-            || frame_is_shown(&env, "ContainerFrame2"),
-        "A bag frame should be visible after pressing F11"
-    );
-}}
+fn keybind_f11_opens_bag1() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("F11", None).expect("F11 keybind failed");
+        assert!(
+            frame_is_shown(&env, "ContainerFrameCombinedBags")
+                || frame_is_shown(&env, "ContainerFrame2"),
+            "A bag frame should be visible after pressing F11"
+        );
+    }
+}
 
 // ── C → ToggleCharacter("PaperDollFrame") ───────────────────────────────
 
 #[test]
-fn keybind_c_opens_character() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("C", None).expect("C keybind failed");
-    assert!(
-        frame_is_shown(&env, "CharacterFrame"),
-        "CharacterFrame should be shown after pressing C"
-    );
-}}
+fn keybind_c_opens_character() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("C", None).expect("C keybind failed");
+        assert!(
+            frame_is_shown(&env, "CharacterFrame"),
+            "CharacterFrame should be shown after pressing C"
+        );
+    }
+}
 
 // ── U → ToggleCharacter("ReputationFrame") ──────────────────────────────
 
 #[test]
-fn keybind_u_opens_reputation() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("U", None).expect("U keybind failed");
-    assert!(
-        frame_is_shown(&env, "CharacterFrame"),
-        "CharacterFrame should be shown after pressing U (reputation tab)"
-    );
-}}
+fn keybind_u_opens_reputation() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("U", None).expect("U keybind failed");
+        assert!(
+            frame_is_shown(&env, "CharacterFrame"),
+            "CharacterFrame should be shown after pressing U (reputation tab)"
+        );
+    }
+}
 
 // ── S → PlayerSpellsUtil.ToggleSpellBookFrame() ─────────────────────────
 
 #[test]
-fn keybind_s_opens_spellbook() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("S", None).expect("S keybind failed");
-    assert!(
-        frame_is_shown(&env, "PlayerSpellsFrame"),
-        "PlayerSpellsFrame should be shown after pressing S"
-    );
-    // ShowUIPanel should scale-to-fit and raise strata
-    let scale: f64 = env
-        .eval("return PlayerSpellsFrame:GetScale()")
-        .expect("GetScale failed");
-    assert!(
-        scale < 1.0,
-        "1618px-wide frame at 1024px screen should be scaled down, got {scale}"
-    );
-    let strata: String = env
-        .eval("return PlayerSpellsFrame:GetFrameStrata()")
-        .expect("GetFrameStrata failed");
-    assert_eq!(strata, "HIGH", "ShowUIPanel should raise strata to HIGH");
-}}
+fn keybind_s_opens_spellbook() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("S", None).expect("S keybind failed");
+        assert!(
+            frame_is_shown(&env, "PlayerSpellsFrame"),
+            "PlayerSpellsFrame should be shown after pressing S"
+        );
+        // ShowUIPanel should scale-to-fit and raise strata
+        let scale: f64 = env
+            .eval("return PlayerSpellsFrame:GetScale()")
+            .expect("GetScale failed");
+        assert!(
+            scale < 1.0,
+            "1618px-wide frame at 1024px screen should be scaled down, got {scale}"
+        );
+        let strata: String = env
+            .eval("return PlayerSpellsFrame:GetFrameStrata()")
+            .expect("GetFrameStrata failed");
+        assert_eq!(strata, "HIGH", "ShowUIPanel should raise strata to HIGH");
+    }
+}
 
 // ── N → PlayerSpellsUtil.ToggleClassTalentFrame() ───────────────────────
 
 #[test]
-fn keybind_n_opens_talents() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("N", None).expect("N keybind failed");
-    assert!(
-        frame_is_shown(&env, "PlayerSpellsFrame"),
-        "PlayerSpellsFrame should be shown after pressing N (talents tab)"
-    );
-}}
+fn keybind_n_opens_talents() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("N", None).expect("N keybind failed");
+        assert!(
+            frame_is_shown(&env, "PlayerSpellsFrame"),
+            "PlayerSpellsFrame should be shown after pressing N (talents tab)"
+        );
+    }
+}
 
 // ── A → ToggleAchievementFrame() ────────────────────────────────────────
 
 #[test]
-fn keybind_a_opens_achievements() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("A", None).expect("A keybind failed");
-    assert!(
-        frame_is_shown(&env, "AchievementFrame"),
-        "AchievementFrame should be shown after pressing A"
-    );
-}}
+fn keybind_a_opens_achievements() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("A", None).expect("A keybind failed");
+        assert!(
+            frame_is_shown(&env, "AchievementFrame"),
+            "AchievementFrame should be shown after pressing A"
+        );
+    }
+}
 
 // ── L → PVEFrame_ToggleFrame() ──────────────────────────────────────────
 
 #[test]
-fn keybind_l_opens_group_finder() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("L", None).expect("L keybind failed");
-    assert!(
-        frame_is_shown(&env, "PVEFrame"),
-        "PVEFrame should be shown after pressing L"
-    );
-}}
+fn keybind_l_opens_group_finder() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("L", None).expect("L keybind failed");
+        assert!(
+            frame_is_shown(&env, "PVEFrame"),
+            "PVEFrame should be shown after pressing L"
+        );
+    }
+}
 
 // ── O → ToggleFriendsFrame() ────────────────────────────────────────────
 
 #[test]
-fn keybind_o_opens_social() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("O", None).expect("O keybind failed");
-    assert!(
-        frame_is_shown(&env, "FriendsFrame"),
-        "FriendsFrame should be shown after pressing O"
-    );
-}}
+fn keybind_o_opens_social() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("O", None).expect("O keybind failed");
+        assert!(
+            frame_is_shown(&env, "FriendsFrame"),
+            "FriendsFrame should be shown after pressing O"
+        );
+    }
+}
 
 // ── J → ToggleGuildFrame() ──────────────────────────────────────────────
 
 #[test]
-fn keybind_j_opens_guild() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("J", None).expect("J keybind failed");
-    assert!(
-        frame_is_shown(&env, "CommunitiesFrame"),
-        "CommunitiesFrame should be shown after pressing J"
-    );
-}}
+fn keybind_j_opens_guild() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("J", None).expect("J keybind failed");
+        assert!(
+            frame_is_shown(&env, "CommunitiesFrame"),
+            "CommunitiesFrame should be shown after pressing J"
+        );
+    }
+}
 
 // ── M → ToggleWorldMap() ────────────────────────────────────────────────
 
 #[test]
-fn keybind_m_opens_world_map() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("M", None).expect("M keybind failed");
-    assert!(
-        frame_is_shown(&env, "WorldMapFrame"),
-        "WorldMapFrame should be shown after pressing M"
-    );
-}}
+fn keybind_m_opens_world_map() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("M", None).expect("M keybind failed");
+        assert!(
+            frame_is_shown(&env, "WorldMapFrame"),
+            "WorldMapFrame should be shown after pressing M"
+        );
+    }
+}
 
 // ── ESCAPE → toggle GameMenuFrame ───────────────────────────────────────
 
 #[test]
-fn keybind_escape_opens_game_menu() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("ESCAPE", None).expect("ESCAPE keybind failed");
-    assert!(
-        frame_is_shown(&env, "GameMenuFrame"),
-        "GameMenuFrame should be shown after pressing ESCAPE"
-    );
-}}
+fn keybind_escape_opens_game_menu() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("ESCAPE", None).expect("ESCAPE keybind failed");
+        assert!(
+            frame_is_shown(&env, "GameMenuFrame"),
+            "GameMenuFrame should be shown after pressing ESCAPE"
+        );
+    }
+}
 
 #[test]
-fn keybind_escape_closes_game_menu() { test_timeout! {
-    let env = setup_env();
-    env.send_key_press("ESCAPE", None).expect("first ESCAPE failed");
-    assert!(frame_is_shown(&env, "GameMenuFrame"));
-    env.send_key_press("ESCAPE", None).expect("second ESCAPE failed");
-    assert!(
-        !frame_is_shown(&env, "GameMenuFrame"),
-        "GameMenuFrame should be hidden after second ESCAPE"
-    );
-}}
+fn keybind_escape_closes_game_menu() {
+    test_timeout! {
+        let env = setup_env();
+        env.send_key_press("ESCAPE", None).expect("first ESCAPE failed");
+        assert!(frame_is_shown(&env, "GameMenuFrame"));
+        env.send_key_press("ESCAPE", None).expect("second ESCAPE failed");
+        assert!(
+            !frame_is_shown(&env, "GameMenuFrame"),
+            "GameMenuFrame should be hidden after second ESCAPE"
+        );
+    }
+}
 
 // ── S → Spellbook panel opens without errors ─────────────────────────────
 
 #[test]
-fn keybind_s_opens_spellbook_no_errors() { test_timeout! {
-    let env = setup_env();
-    install_test_error_handler(&env);
+fn keybind_s_opens_spellbook_no_errors() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
 
-    env.send_key_press("S", None).expect("S keybind dispatch failed");
+        env.send_key_press("S", None).expect("S keybind dispatch failed");
 
-    let errors = drain_test_errors(&env);
-    assert!(
-        errors.is_empty(),
-        "Opening spellbook produced {} Lua error(s):\n{}",
-        errors.len(),
-        errors.join("\n"),
-    );
-    assert!(
-        frame_is_shown(&env, "PlayerSpellsFrame"),
-        "PlayerSpellsFrame should be shown after pressing S"
-    );
-}}
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Opening spellbook produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert!(
+            frame_is_shown(&env, "PlayerSpellsFrame"),
+            "PlayerSpellsFrame should be shown after pressing S"
+        );
+    }
+}
 
 // ── Target frame visibility tests (full addon load including Blizzard_UnitFrame) ──
 
@@ -435,131 +505,145 @@ fn setup_full_env() -> WowLuaEnv {
 }
 
 #[test]
-fn target_frame_shown_after_targeting() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
+fn target_frame_shown_after_targeting() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
 
-    assert!(
-        frame_exists(&env, "TargetFrame"),
-        "TargetFrame should exist after full addon load"
-    );
+        assert!(
+            frame_exists(&env, "TargetFrame"),
+            "TargetFrame should exist after full addon load"
+        );
 
-    // TargetFrame starts hidden (hide_runtime_hidden_frames) or via startup;
-    // ensure it's hidden before testing
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+        // TargetFrame starts hidden (hide_runtime_hidden_frames) or via startup;
+        // ensure it's hidden before testing
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+
+        // F1 = target self → TargetFrame should show
+        env.send_key_press("F1", None).expect("F1 keybind failed");
+        let _ = drain_test_errors(&env); // non-fatal errors from TargetFrame:Update()
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting self with F1"
+        );
+
+        // ESCAPE = clear target → TargetFrame should hide
+        env.send_key_press("ESCAPE", None).expect("ESCAPE keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            !frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be hidden after clearing target with ESCAPE"
+        );
     }
-
-    // F1 = target self → TargetFrame should show
-    env.send_key_press("F1", None).expect("F1 keybind failed");
-    let _ = drain_test_errors(&env); // non-fatal errors from TargetFrame:Update()
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting self with F1"
-    );
-
-    // ESCAPE = clear target → TargetFrame should hide
-    env.send_key_press("ESCAPE", None).expect("ESCAPE keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        !frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be hidden after clearing target with ESCAPE"
-    );
-}}
+}
 
 #[test]
-fn target_frame_shown_for_enemy() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
+fn target_frame_shown_for_enemy() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
 
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+
+        // TAB = target nearest enemy → TargetFrame should show
+        env.send_key_press("TAB", None).expect("TAB keybind failed");
+        let _ = drain_test_errors(&env); // non-fatal errors from TargetFrame:Update()
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting enemy with TAB"
+        );
     }
-
-    // TAB = target nearest enemy → TargetFrame should show
-    env.send_key_press("TAB", None).expect("TAB keybind failed");
-    let _ = drain_test_errors(&env); // non-fatal errors from TargetFrame:Update()
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting enemy with TAB"
-    );
-}}
+}
 
 // ── F2–F5 → TargetUnit('party1')–('party4') ─────────────────────────────
 
 #[test]
-fn keybind_f2_targets_party1() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+fn keybind_f2_targets_party1() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+        env.send_key_press("F2", None).expect("F2 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting party1 with F2"
+        );
     }
-    env.send_key_press("F2", None).expect("F2 keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting party1 with F2"
-    );
-}}
+}
 
 #[test]
-fn keybind_f3_targets_party2() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+fn keybind_f3_targets_party2() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+        env.send_key_press("F3", None).expect("F3 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting party2 with F3"
+        );
     }
-    env.send_key_press("F3", None).expect("F3 keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting party2 with F3"
-    );
-}}
+}
 
 #[test]
-fn keybind_f4_targets_party3() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+fn keybind_f4_targets_party3() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+        env.send_key_press("F4", None).expect("F4 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting party3 with F4"
+        );
     }
-    env.send_key_press("F4", None).expect("F4 keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting party3 with F4"
-    );
-}}
+}
 
 #[test]
-fn keybind_f5_targets_party4() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+fn keybind_f5_targets_party4() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+        env.send_key_press("F5", None).expect("F5 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting party4 with F5"
+        );
     }
-    env.send_key_press("F5", None).expect("F5 keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting party4 with F5"
-    );
-}}
+}
 
 // ── F6 → TargetUnit('enemy1') ────────────────────────────────────────────
 
 #[test]
-fn keybind_f6_targets_enemy() { test_timeout! {
-    let env = setup_full_env();
-    install_test_error_handler(&env);
-    if frame_is_shown(&env, "TargetFrame") {
-        env.exec("TargetFrame:Hide()").unwrap();
+fn keybind_f6_targets_enemy() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+        if frame_is_shown(&env, "TargetFrame") {
+            env.exec("TargetFrame:Hide()").unwrap();
+        }
+        env.send_key_press("F6", None).expect("F6 keybind failed");
+        let _ = drain_test_errors(&env);
+        assert!(
+            frame_is_shown(&env, "TargetFrame"),
+            "TargetFrame should be shown after targeting enemy with F6"
+        );
     }
-    env.send_key_press("F6", None).expect("F6 keybind failed");
-    let _ = drain_test_errors(&env);
-    assert!(
-        frame_is_shown(&env, "TargetFrame"),
-        "TargetFrame should be shown after targeting enemy with F6"
-    );
-}}
+}

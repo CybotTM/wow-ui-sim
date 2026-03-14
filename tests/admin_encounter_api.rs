@@ -101,9 +101,7 @@ fn test_get_loot_roll_item_info_returns_data() {
 #[test]
 fn test_get_loot_roll_item_info_unknown_returns_nil() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return GetLootRollItemInfo(999) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return GetLootRollItemInfo(999) == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -124,9 +122,7 @@ fn test_get_loot_roll_item_link() {
 #[test]
 fn test_get_loot_roll_item_link_nil_when_missing() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return GetLootRollItemLink(999) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return GetLootRollItemLink(999) == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -184,8 +180,6 @@ fn test_end_loot_roll_removes_and_fires_event() {
 #[test]
 fn test_get_active_loot_roll_ids_empty_by_default() {
     let env = env();
-    let count: i32 = env
-        .eval("return #GetActiveLootRollIDs()")
-        .unwrap();
+    let count: i32 = env.eval("return #GetActiveLootRollIDs()").unwrap();
     assert_eq!(count, 0);
 }

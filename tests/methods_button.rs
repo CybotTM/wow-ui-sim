@@ -26,7 +26,10 @@ fn test_set_and_get_normal_font_object() {
     let result: bool = env
         .eval("return TestFontObjBtn:GetNormalFontObject() == TestFontObj")
         .unwrap();
-    assert!(result, "GetNormalFontObject should return the font set via SetNormalFontObject");
+    assert!(
+        result,
+        "GetNormalFontObject should return the font set via SetNormalFontObject"
+    );
 }
 
 #[test]
@@ -94,9 +97,18 @@ fn test_get_font_object_returns_nil_when_unset() {
         .eval("return TestNoFontBtn:GetDisabledFontObject() == nil")
         .unwrap();
 
-    assert!(normal_nil, "GetNormalFontObject should return nil when unset");
-    assert!(highlight_nil, "GetHighlightFontObject should return nil when unset");
-    assert!(disabled_nil, "GetDisabledFontObject should return nil when unset");
+    assert!(
+        normal_nil,
+        "GetNormalFontObject should return nil when unset"
+    );
+    assert!(
+        highlight_nil,
+        "GetHighlightFontObject should return nil when unset"
+    );
+    assert!(
+        disabled_nil,
+        "GetDisabledFontObject should return nil when unset"
+    );
 }
 
 // ============================================================================
@@ -155,7 +167,10 @@ fn test_get_normal_texture_after_set() {
     let obj_type: String = env
         .eval("return TestGetNormTex2:GetNormalTexture():GetObjectType()")
         .unwrap();
-    assert_eq!(obj_type, "Texture", "GetNormalTexture should return a Texture after Set");
+    assert_eq!(
+        obj_type, "Texture",
+        "GetNormalTexture should return a Texture after Set"
+    );
 }
 
 #[test]
@@ -173,7 +188,10 @@ fn test_get_texture_returns_child_of_button() {
     let parent_name: String = env
         .eval("return TestTexChild:GetNormalTexture():GetParent():GetName()")
         .unwrap();
-    assert_eq!(parent_name, "TestTexChild", "Texture child should have button as parent");
+    assert_eq!(
+        parent_name, "TestTexChild",
+        "Texture child should have button as parent"
+    );
 }
 
 // ============================================================================
@@ -201,7 +219,10 @@ fn test_set_normal_texture_with_path() {
         "Button normal_texture should be set after SetNormalTexture with path"
     );
     assert!(
-        btn.normal_texture.as_ref().unwrap().contains("UI-Panel-Button-Up"),
+        btn.normal_texture
+            .as_ref()
+            .unwrap()
+            .contains("UI-Panel-Button-Up"),
         "normal_texture should contain the texture path"
     );
 }
@@ -296,7 +317,10 @@ fn test_set_texture_with_userdata_does_not_overwrite_path() {
         "normal_texture should still be set after SetNormalTexture with userdata"
     );
     assert!(
-        btn.normal_texture.as_ref().unwrap().contains("UI-Panel-Button-Up"),
+        btn.normal_texture
+            .as_ref()
+            .unwrap()
+            .contains("UI-Panel-Button-Up"),
         "normal_texture should still contain original path after userdata set"
     );
 }
@@ -355,7 +379,10 @@ fn test_set_disabled_checked_texture() {
 
     let tex_id = cb.children_keys.get("DisabledCheckedTexture").unwrap();
     let tex = state.widgets.get(*tex_id).unwrap();
-    assert!(!tex.visible, "DisabledCheckedTexture child should start hidden");
+    assert!(
+        !tex.visible,
+        "DisabledCheckedTexture child should start hidden"
+    );
 }
 
 // ============================================================================
@@ -437,7 +464,10 @@ fn test_set_three_slice_nil_clears() {
     let btn_id = state.widgets.get_id_by_name("TestSliceNil").unwrap();
     let btn = state.widgets.get(btn_id).unwrap();
 
-    assert!(btn.left_texture.is_none(), "left_texture should be nil after setting nil");
+    assert!(
+        btn.left_texture.is_none(),
+        "left_texture should be nil after setting nil"
+    );
 }
 
 // ============================================================================
@@ -465,7 +495,10 @@ fn test_get_font_string_returns_text_child() {
     let obj_type: String = env
         .eval("return TestGetFontStr:GetFontString():GetObjectType()")
         .unwrap();
-    assert_eq!(obj_type, "FontString", "GetFontString should return a FontString");
+    assert_eq!(
+        obj_type, "FontString",
+        "GetFontString should return a FontString"
+    );
 
     // Verify the Rust side has the Text child registered
     let state = env.state().borrow();
@@ -491,7 +524,10 @@ fn test_get_font_string_nil_when_no_text() {
     let is_nil: bool = env
         .eval("return TestNoTextFrame:GetFontString() == nil")
         .unwrap();
-    assert!(is_nil, "GetFontString should return nil for frame with no Text child");
+    assert!(
+        is_nil,
+        "GetFontString should return nil for frame with no Text child"
+    );
 }
 
 // ============================================================================
@@ -522,7 +558,10 @@ fn test_set_enabled_false() {
     .unwrap();
 
     let enabled: bool = env.eval("return TestSetEnFalse:IsEnabled()").unwrap();
-    assert!(!enabled, "Button should be disabled after SetEnabled(false)");
+    assert!(
+        !enabled,
+        "Button should be disabled after SetEnabled(false)"
+    );
 }
 
 #[test]
@@ -728,8 +767,16 @@ fn test_texture_children_have_fill_parent_anchors() {
     let btn_id = state.widgets.get_id_by_name("TestTexAnchors").unwrap();
     let btn = state.widgets.get(btn_id).unwrap();
 
-    for key in &["NormalTexture", "PushedTexture", "HighlightTexture", "DisabledTexture"] {
-        let tex_id = btn.children_keys.get(*key).expect(&format!("{} should exist", key));
+    for key in &[
+        "NormalTexture",
+        "PushedTexture",
+        "HighlightTexture",
+        "DisabledTexture",
+    ] {
+        let tex_id = btn
+            .children_keys
+            .get(*key)
+            .expect(&format!("{} should exist", key));
         let tex = state.widgets.get(*tex_id).unwrap();
         assert!(
             !tex.anchors.is_empty(),

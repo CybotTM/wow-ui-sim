@@ -23,15 +23,18 @@ pub fn register_c_spell_pickup(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
     let g = lua.globals();
     let c_spell: mlua::Table = g.get("C_Spell")?;
     let st = Rc::clone(state);
-    c_spell.set("PickupSpell", lua.create_function(move |lua, spell_id: i32| {
-        let spell_id = spell_id as u32;
-        if crate::spells::get_spell(spell_id).is_some() {
-            eprintln!("[cursor] PickupSpell({})", spell_id);
-            st.borrow_mut().cursor_item = Some(CursorInfo::Spell { spell_id });
-            fire_cursor_changed(lua)?;
-        }
-        Ok(())
-    })?)?;
+    c_spell.set(
+        "PickupSpell",
+        lua.create_function(move |lua, spell_id: i32| {
+            let spell_id = spell_id as u32;
+            if crate::spells::get_spell(spell_id).is_some() {
+                eprintln!("[cursor] PickupSpell({})", spell_id);
+                st.borrow_mut().cursor_item = Some(CursorInfo::Spell { spell_id });
+                fire_cursor_changed(lua)?;
+            }
+            Ok(())
+        })?,
+    )?;
     Ok(())
 }
 
@@ -40,85 +43,97 @@ pub fn register_c_action_bar_put(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Re
     let g = lua.globals();
     let c_ab: mlua::Table = g.get("C_ActionBar")?;
     let st = Rc::clone(state);
-    c_ab.set("PutActionInSlot", lua.create_function(move |lua, (action, slot): (i32, i32)| {
-        put_action_in_slot(&st, lua, action as u32, slot as u32)
-    })?)?;
+    c_ab.set(
+        "PutActionInSlot",
+        lua.create_function(move |lua, (action, slot): (i32, i32)| {
+            put_action_in_slot(&st, lua, action as u32, slot as u32)
+        })?,
+    )?;
     Ok(())
 }
 
 /// GetCursorInfo() -> type, spellID, ...
 fn register_get_cursor_info(
-    lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    g: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let st = Rc::clone(state);
-    g.set("GetCursorInfo", lua.create_function(move |lua, ()| {
-        let s = st.borrow();
-        match &s.cursor_item {
-            None => Ok(mlua::MultiValue::new()),
-            Some(CursorInfo::Action { spell_id, .. }) | Some(CursorInfo::Spell { spell_id }) => {
-                let kind = lua.create_string("spell")?;
-                Ok(mlua::MultiValue::from_vec(vec![
-                    Value::String(kind),
-                    Value::Integer(*spell_id as i64),
-                ]))
+    g.set(
+        "GetCursorInfo",
+        lua.create_function(move |lua, ()| {
+            let s = st.borrow();
+            match &s.cursor_item {
+                None => Ok(mlua::MultiValue::new()),
+                Some(CursorInfo::Action { spell_id, .. })
+                | Some(CursorInfo::Spell { spell_id }) => {
+                    let kind = lua.create_string("spell")?;
+                    Ok(mlua::MultiValue::from_vec(vec![
+                        Value::String(kind),
+                        Value::Integer(*spell_id as i64),
+                    ]))
+                }
             }
-        }
-    })?)?;
+        })?,
+    )?;
     Ok(())
 }
 
 /// ClearCursor() — drop whatever is on the cursor.
-fn register_clear_cursor(
-    lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_clear_cursor(lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    g.set("ClearCursor", lua.create_function(move |lua, ()| {
-        let had_item = {
-            let mut s = st.borrow_mut();
-            let had = s.cursor_item.is_some();
-            if had {
-                eprintln!("[cursor] ClearCursor");
-                s.cursor_item = None;
+    g.set(
+        "ClearCursor",
+        lua.create_function(move |lua, ()| {
+            let had_item = {
+                let mut s = st.borrow_mut();
+                let had = s.cursor_item.is_some();
+                if had {
+                    eprintln!("[cursor] ClearCursor");
+                    s.cursor_item = None;
+                }
+                had
+            };
+            if had_item {
+                fire_cursor_changed(lua)?;
+                fire_action_bar_updates(&st, lua)?;
             }
-            had
-        };
-        if had_item {
-            fire_cursor_changed(lua)?;
-            fire_action_bar_updates(&st, lua)?;
-        }
-        Ok(())
-    })?)?;
+            Ok(())
+        })?,
+    )?;
     Ok(())
 }
 
 /// PickupAction(slot) — pick up the action in the given slot.
 /// If cursor already holds an action/spell, swap it into the slot.
-fn register_pickup_action(
-    lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_pickup_action(lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    g.set("PickupAction", lua.create_function(move |lua, slot: i32| {
-        pickup_action(&st, lua, slot as u32)
-    })?)?;
+    g.set(
+        "PickupAction",
+        lua.create_function(move |lua, slot: i32| pickup_action(&st, lua, slot as u32))?,
+    )?;
     Ok(())
 }
 
 /// PlaceAction(slot) — place cursor item into the given action bar slot.
-fn register_place_action(
-    lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_place_action(lua: &Lua, g: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    g.set("PlaceAction", lua.create_function(move |lua, slot: i32| {
-        place_action(&st, lua, slot as u32)
-    })?)?;
+    g.set(
+        "PlaceAction",
+        lua.create_function(move |lua, slot: i32| place_action(&st, lua, slot as u32))?,
+    )?;
     Ok(())
 }
 
 /// Stub pickup functions for types we don't handle yet.
 fn register_pickup_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     for name in [
-        "PickupBagFromSlot", "PickupInventoryItem", "PickupMacro",
-        "PickupMerchantItem", "PickupPetAction", "PickupPlayerMoney",
+        "PickupBagFromSlot",
+        "PickupInventoryItem",
+        "PickupMacro",
+        "PickupMerchantItem",
+        "PickupPetAction",
+        "PickupPlayerMoney",
         "PickupCompanion",
     ] {
         g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
@@ -138,7 +153,10 @@ fn pickup_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<
             CursorInfo::Spell { spell_id } => spell_id,
         };
         state.borrow_mut().action_bars.insert(slot, new_spell_id);
-        eprintln!("[cursor] PickupAction({}) — placed spell {} into slot", slot, new_spell_id);
+        eprintln!(
+            "[cursor] PickupAction({}) — placed spell {} into slot",
+            slot, new_spell_id
+        );
     } else {
         // Remove spell from slot
         state.borrow_mut().action_bars.remove(&slot);
@@ -158,7 +176,9 @@ fn pickup_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<
 /// Core logic for PlaceAction — drop cursor item into slot.
 fn place_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<()> {
     let cursor = { state.borrow_mut().cursor_item.take() };
-    let Some(cursor_info) = cursor else { return Ok(()) };
+    let Some(cursor_info) = cursor else {
+        return Ok(());
+    };
 
     let spell_id = match cursor_info {
         CursorInfo::Action { spell_id, .. } => spell_id,
@@ -171,7 +191,10 @@ fn place_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<(
     eprintln!("[cursor] PlaceAction({}) — spell {}", slot, spell_id);
 
     if let Some(old_spell) = old {
-        state.borrow_mut().cursor_item = Some(CursorInfo::Action { slot, spell_id: old_spell });
+        state.borrow_mut().cursor_item = Some(CursorInfo::Action {
+            slot,
+            spell_id: old_spell,
+        });
     }
 
     fire_cursor_changed(lua)?;
@@ -180,7 +203,12 @@ fn place_action(state: &Rc<RefCell<SimState>>, lua: &Lua, slot: u32) -> Result<(
 }
 
 /// Core logic for PutActionInSlot.
-fn put_action_in_slot(state: &Rc<RefCell<SimState>>, lua: &Lua, action: u32, slot: u32) -> Result<()> {
+fn put_action_in_slot(
+    state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    action: u32,
+    slot: u32,
+) -> Result<()> {
     // The "action" here is a spell_id — place it directly into the slot.
     state.borrow_mut().action_bars.insert(slot, action);
     eprintln!("[cursor] PutActionInSlot({}, {})", action, slot);

@@ -29,7 +29,10 @@ fn add_statusbar_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetTimerDuration", |_, _, ()| Ok(0.0_f64));
     methods.add_method("IsInterpolating", |_, _, ()| Ok(false));
     methods.add_method("IsStatusBarDesaturated", |_, _, ()| Ok(false));
-    methods.add_method("SetStatusBarDesaturation", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetStatusBarDesaturation",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("SetTimerDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
     methods.add_method("SetToTargetValue", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
@@ -40,9 +43,10 @@ pub fn add_checkbutton_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(frame) = state.widgets.get(this.0)
-            && let Some(AttributeValue::Boolean(checked)) = frame.attributes.get("__checked") {
-                return Ok(*checked);
-            }
+            && let Some(AttributeValue::Boolean(checked)) = frame.attributes.get("__checked")
+        {
+            return Ok(*checked);
+        }
         Ok(false)
     });
     methods.add_method("GetCheckedTexture", |lua, this, ()| {
@@ -55,15 +59,23 @@ fn add_set_checked_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let id = this.0;
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let already = state.widgets.get(id)
+        let already = state
+            .widgets
+            .get(id)
             .and_then(|f| f.attributes.get("__checked"))
             .map(|v| matches!(v, AttributeValue::Boolean(b) if *b == checked))
             .unwrap_or(false);
-        if already { return Ok(()); }
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.attributes.insert("__checked".to_string(), AttributeValue::Boolean(checked));
+        if already {
+            return Ok(());
         }
-        let checked_tex_id = state.widgets.get(id)
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame
+                .attributes
+                .insert("__checked".to_string(), AttributeValue::Boolean(checked));
+        }
+        let checked_tex_id = state
+            .widgets
+            .get(id)
             .and_then(|f| f.children_keys.get("CheckedTexture").copied());
         if let Some(tex_id) = checked_tex_id {
             state.set_frame_visible(tex_id, checked);
@@ -86,29 +98,40 @@ fn add_slider_step_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetValueStep", |lua, this, step: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.slider_step = step; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.slider_step = step;
+        }
         Ok(())
     });
     methods.add_method("GetValueStep", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.slider_step).unwrap_or(1.0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.slider_step)
+            .unwrap_or(1.0))
     });
 }
 
 fn add_slider_orientation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetOrientation", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
-        if let Some((func, frame_ud)) = super::methods_helpers::get_mixin_override(lua, id, "SetOrientation") {
+        if let Some((func, frame_ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "SetOrientation")
+        {
             let mut call_args = vec![frame_ud];
             call_args.extend(args);
-            return func.call::<Value>(mlua::MultiValue::from_iter(call_args)).map(|_| ());
+            return func
+                .call::<Value>(mlua::MultiValue::from_iter(call_args))
+                .map(|_| ());
         }
         if let Some(Value::String(s)) = args.into_iter().next() {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
             if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.slider_orientation = s.to_str()
+                frame.slider_orientation = s
+                    .to_str()
                     .map(|s| s.to_uppercase())
                     .unwrap_or_else(|_| "HORIZONTAL".to_string());
             }
@@ -118,7 +141,9 @@ fn add_slider_orientation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetOrientation", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0)
+        Ok(state
+            .widgets
+            .get(this.0)
             .map(|f| f.slider_orientation.clone())
             .unwrap_or_else(|| "HORIZONTAL".to_string()))
     });
@@ -140,7 +165,9 @@ fn add_set_thumb_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
             .load("_G.__slider_thumbs = _G.__slider_thumbs or {}; return _G.__slider_thumbs")
             .eval()?;
         match arg {
-            Value::UserData(_) => { store.set(id, arg)?; }
+            Value::UserData(_) => {
+                store.set(id, arg)?;
+            }
             Value::Integer(_) | Value::Number(_) | Value::String(_) => {
                 let existing: Value = store.get(id)?;
                 let thumb_ud = if let Value::UserData(_) = existing {
@@ -168,19 +195,27 @@ fn add_slider_drag_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetObeyStepOnDrag", |lua, this, obey: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.slider_obey_step_on_drag = obey; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.slider_obey_step_on_drag = obey;
+        }
         Ok(())
     });
     methods.add_method("SetStepsPerPage", |lua, this, steps: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.slider_steps_per_page = steps; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.slider_steps_per_page = steps;
+        }
         Ok(())
     });
     methods.add_method("GetStepsPerPage", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.slider_steps_per_page).unwrap_or(1))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.slider_steps_per_page)
+            .unwrap_or(1))
     });
 }
 
@@ -204,11 +239,18 @@ fn add_set_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.statusbar_texture_path = path.clone();
-            if matches!(&texture, Value::Nil) { frame.statusbar_bar_id = None; }
-            else if let Some(bid) = bar_id { frame.statusbar_bar_id = Some(bid); }
+            if matches!(&texture, Value::Nil) {
+                frame.statusbar_bar_id = None;
+            } else if let Some(bid) = bar_id {
+                frame.statusbar_bar_id = Some(bid);
+            }
         }
-        if let Some(ref tex_str) = path { apply_statusbar_texture_path(lua, &mut state, id, tex_str); }
-        if let Some(bid) = bar_id { anchor_bar_to_parent(&mut state.widgets, bid, id); }
+        if let Some(ref tex_str) = path {
+            apply_statusbar_texture_path(lua, &mut state, id, tex_str);
+        }
+        if let Some(bid) = bar_id {
+            anchor_bar_to_parent(&mut state.widgets, bid, id);
+        }
         Ok(true)
     });
 }
@@ -220,7 +262,11 @@ fn add_get_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let state = state_rc.borrow();
         let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
         if let Some(bar_id) = bar_id {
-            if state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id)) {
+            if state
+                .widgets
+                .get(bar_id)
+                .is_some_and(|f| f.parent_id == Some(id))
+            {
                 return frame_ref(lua, bar_id);
             }
         }
@@ -240,11 +286,13 @@ fn add_statusbar_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let mut state = state_rc.borrow_mut();
         let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
         if let Some(bar_id) = bar_id {
-            let is_child = state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id));
-            if is_child
-                && let Some(bar) = state.widgets.get_mut_visual(bar_id) {
-                    bar.vertex_color = Some(Color::new(r, g, b, a));
-                }
+            let is_child = state
+                .widgets
+                .get(bar_id)
+                .is_some_and(|f| f.parent_id == Some(id));
+            if is_child && let Some(bar) = state.widgets.get_mut_visual(bar_id) {
+                bar.vertex_color = Some(Color::new(r, g, b, a));
+            }
         }
         Ok(())
     });
@@ -255,11 +303,18 @@ fn add_statusbar_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state = state_rc.borrow();
         let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
         if let Some(bar_id) = bar_id {
-            let is_child = state.widgets.get(bar_id).is_some_and(|f| f.parent_id == Some(id));
+            let is_child = state
+                .widgets
+                .get(bar_id)
+                .is_some_and(|f| f.parent_id == Some(id));
             if is_child
-                && let Some(c) = state.widgets.get(bar_id).and_then(|f| f.vertex_color.as_ref()) {
-                    return Ok((c.r, c.g, c.b, c.a));
-                }
+                && let Some(c) = state
+                    .widgets
+                    .get(bar_id)
+                    .and_then(|f| f.vertex_color.as_ref())
+            {
+                return Ok((c.r, c.g, c.b, c.a));
+            }
         }
         Ok((1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32))
     });
@@ -269,13 +324,17 @@ fn add_statusbar_fill_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("SetFillStyle", |lua, this, style: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.statusbar_fill_style = style; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.statusbar_fill_style = style;
+        }
         Ok(())
     });
     methods.add_method("SetReverseFill", |lua, this, reverse: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.statusbar_reverse_fill = reverse; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.statusbar_reverse_fill = reverse;
+        }
         Ok(())
     });
 }
@@ -304,7 +363,10 @@ fn add_shared_set_value<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetValue", |lua, this, value: f64| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
-        let wtype = { let s = state_rc.borrow(); s.widgets.get(id).map(|f| f.widget_type) };
+        let wtype = {
+            let s = state_rc.borrow();
+            s.widgets.get(id).map(|f| f.widget_type)
+        };
         match wtype {
             Some(WidgetType::Slider) => set_slider_value(lua, id, value)?,
             Some(WidgetType::StatusBar) => set_statusbar_value(lua, id, value)?,
@@ -335,8 +397,12 @@ fn add_shared_set_min_max<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let (min, max) = parse_min_max_args(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if !min_max_changed(&state, id, min, max) { return Ok(()); }
-        if let Some(frame) = state.widgets.get_mut_visual(id) { apply_min_max(frame, min, max); }
+        if !min_max_changed(&state, id, min, max) {
+            return Ok(());
+        }
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            apply_min_max(frame, min, max);
+        }
         Ok(())
     });
 }
@@ -362,9 +428,13 @@ fn set_slider_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()> {
     let clamped = {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let Some(frame) = state.widgets.get(id) else { return Ok(()) };
+        let Some(frame) = state.widgets.get(id) else {
+            return Ok(());
+        };
         let clamped = value.clamp(frame.slider_min, frame.slider_max);
-        if clamped == frame.slider_value { return Ok(()); }
+        if clamped == frame.slider_value {
+            return Ok(());
+        }
         state.widgets.get_mut_visual(id).unwrap().slider_value = clamped;
         clamped
     };
@@ -375,9 +445,13 @@ fn set_statusbar_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()>
     let clamped = {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let Some(frame) = state.widgets.get(id) else { return Ok(()) };
+        let Some(frame) = state.widgets.get(id) else {
+            return Ok(());
+        };
         let clamped = value.clamp(frame.statusbar_min, frame.statusbar_max);
-        if clamped == frame.statusbar_value { return Ok(()); }
+        if clamped == frame.statusbar_value {
+            return Ok(());
+        }
         state.widgets.get_mut_visual(id).unwrap().statusbar_value = clamped;
         clamped
     };
@@ -387,9 +461,10 @@ fn set_statusbar_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()>
 fn fire_value_changed(lua: &mlua::Lua, frame_id: u64, value: f64) -> mlua::Result<()> {
     if let Some(func) = crate::lua_api::script_helpers::get_script(lua, frame_id, "OnValueChanged")
         && let Some(frame_ud) = crate::lua_api::script_helpers::get_frame_ref(lua, frame_id)
-            && let Err(e) = func.call::<()>((frame_ud, value)) {
-                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-            }
+        && let Err(e) = func.call::<()>((frame_ud, value))
+    {
+        crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+    }
     Ok(())
 }
 
@@ -409,11 +484,15 @@ fn parse_min_max_args(args: mlua::MultiValue) -> (f64, f64) {
 }
 
 fn min_max_changed(state: &crate::lua_api::SimState, id: u64, min: f64, max: f64) -> bool {
-    state.widgets.get(id).map(|frame| match frame.widget_type {
-        WidgetType::Slider => frame.slider_min != min || frame.slider_max != max,
-        WidgetType::StatusBar => frame.statusbar_min != min || frame.statusbar_max != max,
-        _ => false,
-    }).unwrap_or(false)
+    state
+        .widgets
+        .get(id)
+        .map(|frame| match frame.widget_type {
+            WidgetType::Slider => frame.slider_min != min || frame.slider_max != max,
+            WidgetType::StatusBar => frame.statusbar_min != min || frame.statusbar_max != max,
+            _ => false,
+        })
+        .unwrap_or(false)
 }
 
 fn apply_min_max(frame: &mut crate::widget::Frame, min: f64, max: f64) {
@@ -432,11 +511,15 @@ fn apply_min_max(frame: &mut crate::widget::Frame, min: f64, max: f64) {
     }
 }
 
-fn apply_statusbar_texture_path(lua: &mlua::Lua, state: &mut crate::lua_api::SimState, id: u64, tex_str: &str) {
-    let bar_child_id = find_bar_texture_child(&state.widgets, id)
-        .unwrap_or_else(|| {
-            super::methods_helpers::get_or_create_button_texture(lua, state, id, "StatusBarTexture")
-        });
+fn apply_statusbar_texture_path(
+    lua: &mlua::Lua,
+    state: &mut crate::lua_api::SimState,
+    id: u64,
+    tex_str: &str,
+) {
+    let bar_child_id = find_bar_texture_child(&state.widgets, id).unwrap_or_else(|| {
+        super::methods_helpers::get_or_create_button_texture(lua, state, id, "StatusBarTexture")
+    });
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.statusbar_bar_id = Some(bar_child_id);
     }
@@ -446,11 +529,16 @@ fn apply_statusbar_texture_path(lua: &mlua::Lua, state: &mut crate::lua_api::Sim
 
 fn find_bar_texture_child(widgets: &crate::widget::WidgetRegistry, parent_id: u64) -> Option<u64> {
     let frame = widgets.get(parent_id)?;
-    let candidate = frame.statusbar_bar_id
+    let candidate = frame
+        .statusbar_bar_id
         .or_else(|| frame.children_keys.get("BarTexture").copied())
         .or_else(|| frame.children_keys.get("StatusBarTexture").copied())
         .or_else(|| frame.children_keys.get("Bar").copied());
-    candidate.filter(|&id| widgets.get(id).is_some_and(|f| f.parent_id == Some(parent_id)))
+    candidate.filter(|&id| {
+        widgets
+            .get(id)
+            .is_some_and(|f| f.parent_id == Some(parent_id))
+    })
 }
 
 fn apply_bar_texture(widgets: &mut crate::widget::WidgetRegistry, child_id: u64, tex_str: &str) {
@@ -458,7 +546,12 @@ fn apply_bar_texture(widgets: &mut crate::widget::WidgetRegistry, child_id: u64,
         let info = lookup.info;
         if let Some(frame) = widgets.get_mut_visual(child_id) {
             frame.texture = Some(info.file.to_string());
-            let uvs = (info.left_tex_coord, info.right_tex_coord, info.top_tex_coord, info.bottom_tex_coord);
+            let uvs = (
+                info.left_tex_coord,
+                info.right_tex_coord,
+                info.top_tex_coord,
+                info.bottom_tex_coord,
+            );
             frame.atlas_tex_coords = Some(uvs);
             frame.tex_coords = Some(uvs);
             frame.horiz_tile = info.tiles_horizontally;
@@ -499,7 +592,11 @@ fn anchor_bar_to_parent(widgets: &mut crate::widget::WidgetRegistry, bar_id: u64
 }
 
 /// Look up or create a child texture by key and return it as a UserData Value.
-pub(super) fn get_or_create_child_texture(lua: &mlua::Lua, id: u64, key: &str) -> mlua::Result<Value> {
+pub(super) fn get_or_create_child_texture(
+    lua: &mlua::Lua,
+    id: u64,
+    key: &str,
+) -> mlua::Result<Value> {
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     let tex_id = super::methods_helpers::get_or_create_button_texture(lua, &mut state, id, key);

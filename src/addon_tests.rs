@@ -3,9 +3,9 @@
 //! Loads the TestFramework addon (assertions + test/async_test registration),
 //! then executes each .lua file and reports per-test pass/fail.
 
-use std::path::PathBuf;
 use crate::lua_api::WowLuaEnv;
 use crate::startup::{fire_one_on_update_tick, process_pending_timers};
+use std::path::PathBuf;
 
 const MAX_ASYNC_TICKS: u32 = 500;
 
@@ -155,8 +155,7 @@ fn collect_test_files(dir: &PathBuf) -> Result<Vec<PathBuf>, String> {
 /// Run a single test file: reset registry, load file, run sync then async tests.
 fn run_test_file(env: &WowLuaEnv, path: &PathBuf) -> Result<(u32, u32), String> {
     let file_name = path.file_name().unwrap().to_string_lossy();
-    let code =
-        std::fs::read_to_string(path).map_err(|e| format!("read error: {e}"))?;
+    let code = std::fs::read_to_string(path).map_err(|e| format!("read error: {e}"))?;
 
     // Reset test registry between files
     env.exec(TEST_RESET)
@@ -224,9 +223,7 @@ fn get_test_name(env: &WowLuaEnv, idx: i64) -> Result<String, String> {
 /// Run a single async test: call fn(done), tick until __async_done or timeout.
 fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
     let chunk = env.lua().load(ASYNC_START);
-    chunk
-        .call::<()>(idx)
-        .map_err(|e| format!("{e}"))?;
+    chunk.call::<()>(idx).map_err(|e| format!("{e}"))?;
 
     for _ in 0..MAX_ASYNC_TICKS {
         let done: bool = env.eval("__async_done").unwrap_or(false);
@@ -244,18 +241,11 @@ fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
     }
 
     let err: String = env.eval("__async_error or ''").unwrap_or_default();
-    if err.is_empty() {
-        Ok(())
-    } else {
-        Err(err)
-    }
+    if err.is_empty() { Ok(()) } else { Err(err) }
 }
 
 /// Read `__addon_test_results` from Lua and print failures.
-fn read_test_results(
-    env: &WowLuaEnv,
-    file_name: &str,
-) -> Result<(u32, u32), String> {
+fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), String> {
     let lua = env.lua();
     let results: mlua::Table = lua
         .globals()

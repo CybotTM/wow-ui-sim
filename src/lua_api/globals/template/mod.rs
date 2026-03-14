@@ -9,18 +9,22 @@ mod elements;
 use crate::loader::helpers::generate_set_point_code;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::lua_api::SimState;
-use crate::xml::{get_template_chain, FrameElement, FrameXml, LayerElement, TemplateEntry};
+use crate::xml::{FrameElement, FrameXml, LayerElement, TemplateEntry, get_template_chain};
 use mlua::Lua;
 use std::cell::RefCell;
 use std::rc::Rc;
 
 /// Extract the FrameXml, widget type, and optional intrinsic name from a FrameElement.
-fn frame_element_type(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn frame_element_type(
+    element: &FrameElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     specialized_frame_element(element).or_else(|| frame_like_frame_element(element))
 }
 
 /// Specialized widget types with distinct type strings or intrinsic bases.
-fn specialized_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn specialized_frame_element(
+    element: &FrameElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         FrameElement::Frame(f) => Some((f, "Frame", None)),
         FrameElement::Button(f) => Some((f, "Button", None)),
@@ -30,10 +34,10 @@ fn specialized_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'sta
         FrameElement::ContainedAlertFrame(f) => Some((f, "Button", Some("ContainedAlertFrame"))),
         FrameElement::ItemButton(f) => Some((f, "ItemButton", None)),
         FrameElement::CheckButton(f) => Some((f, "CheckButton", None)),
-        FrameElement::EditBox(f)
-        | FrameElement::EventEditBox(f) => Some((f, "EditBox", None)),
-        FrameElement::ScrollFrame(f)
-        | FrameElement::EventScrollFrame(f) => Some((f, "ScrollFrame", None)),
+        FrameElement::EditBox(f) | FrameElement::EventEditBox(f) => Some((f, "EditBox", None)),
+        FrameElement::ScrollFrame(f) | FrameElement::EventScrollFrame(f) => {
+            Some((f, "ScrollFrame", None))
+        }
         FrameElement::Slider(f) => Some((f, "Slider", None)),
         FrameElement::StatusBar(f) => Some((f, "StatusBar", None)),
         FrameElement::Cooldown(f) => Some((f, "Cooldown", None)),
@@ -46,14 +50,18 @@ fn specialized_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'sta
         | FrameElement::TabardModel(f)
         | FrameElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
         FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
-        FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
+        FrameElement::ScrollingMessageFrame(f) => {
+            Some((f, "MessageFrame", Some("ScrollingMessageFrame")))
+        }
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
         _ => None,
     }
 }
 
 /// Frame-like elements that all map to widget type "Frame".
-fn frame_like_frame_element(element: &FrameElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn frame_like_frame_element(
+    element: &FrameElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         FrameElement::EventFrame(f)
         | FrameElement::TaxiRouteFrame(f)
@@ -108,7 +116,9 @@ pub fn fire_deferred_child_onloads(lua: &Lua) {
         .sequence_values::<String>()
         .filter_map(|r| r.ok())
         .collect();
-    let _ = lua.globals().set("__deferred_child_onloads", mlua::Value::Nil);
+    let _ = lua
+        .globals()
+        .set("__deferred_child_onloads", mlua::Value::Nil);
     for name in &names {
         fire_on_load(lua, name);
     }
@@ -172,11 +182,15 @@ fn apply_single_template(
 
 /// Look up frame_id for direct Rust property setting.
 fn resolve_template_frame_id(state: &Rc<RefCell<SimState>>, frame_name: &str) -> Option<u64> {
-    state.borrow().widgets.get_id_by_name(frame_name).or_else(|| {
-        frame_name
-            .strip_prefix("__frame_")
-            .and_then(|s| s.parse::<u64>().ok())
-    })
+    state
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name)
+        .or_else(|| {
+            frame_name
+                .strip_prefix("__frame_")
+                .and_then(|s| s.parse::<u64>().ok())
+        })
 }
 
 /// Apply direct Rust properties from template (size, anchors, hidden, frame level).
@@ -204,11 +218,7 @@ fn apply_direct_rust_properties(
 }
 
 /// Apply key values from a template to a frame.
-fn apply_key_values(
-    lua: &Lua,
-    key_values: &crate::xml::KeyValuesXml,
-    frame_name: &str,
-) {
+fn apply_key_values(lua: &Lua, key_values: &crate::xml::KeyValuesXml, frame_name: &str) {
     let frame_ref = lua_global_ref(frame_name);
     for kv in &key_values.values {
         let value = format_key_value(&kv.value, kv.value_type.as_deref());
@@ -244,16 +254,46 @@ fn apply_layers(lua: &Lua, template: &FrameXml, frame_name: &str, subst_parent: 
             for element in &layer.elements {
                 match element {
                     LayerElement::Texture(t) => {
-                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, false, false);
+                        elements::create_texture_from_template(
+                            lua,
+                            t,
+                            frame_name,
+                            subst_parent,
+                            draw_layer,
+                            false,
+                            false,
+                        );
                     }
                     LayerElement::Line(t) => {
-                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, false, true);
+                        elements::create_texture_from_template(
+                            lua,
+                            t,
+                            frame_name,
+                            subst_parent,
+                            draw_layer,
+                            false,
+                            true,
+                        );
                     }
                     LayerElement::MaskTexture(t) => {
-                        elements::create_texture_from_template(lua, t, frame_name, subst_parent, draw_layer, true, false);
+                        elements::create_texture_from_template(
+                            lua,
+                            t,
+                            frame_name,
+                            subst_parent,
+                            draw_layer,
+                            true,
+                            false,
+                        );
                     }
                     LayerElement::FontString(f) => {
-                        elements::create_fontstring_from_template(lua, f, frame_name, subst_parent, draw_layer);
+                        elements::create_fontstring_from_template(
+                            lua,
+                            f,
+                            frame_name,
+                            subst_parent,
+                            draw_layer,
+                        );
                     }
                 }
             }
@@ -266,14 +306,33 @@ fn apply_button_textures(lua: &Lua, template: &FrameXml, frame_name: &str, subst
     let texture_specs: &[(&str, &str, Option<&crate::xml::TextureXml>)] = &[
         ("Normal", "SetNormalTexture", template.normal_texture()),
         ("Pushed", "SetPushedTexture", template.pushed_texture()),
-        ("Disabled", "SetDisabledTexture", template.disabled_texture()),
-        ("Highlight", "SetHighlightTexture", template.highlight_texture()),
+        (
+            "Disabled",
+            "SetDisabledTexture",
+            template.disabled_texture(),
+        ),
+        (
+            "Highlight",
+            "SetHighlightTexture",
+            template.highlight_texture(),
+        ),
         ("Checked", "SetCheckedTexture", template.checked_texture()),
-        ("DisabledChecked", "SetDisabledCheckedTexture", template.disabled_checked_texture()),
+        (
+            "DisabledChecked",
+            "SetDisabledCheckedTexture",
+            template.disabled_checked_texture(),
+        ),
     ];
     for &(parent_key, setter, tex_opt) in texture_specs {
         if let Some(tex) = tex_opt {
-            elements::create_button_texture_from_template(lua, tex, frame_name, subst_parent, parent_key, setter);
+            elements::create_button_texture_from_template(
+                lua,
+                tex,
+                frame_name,
+                subst_parent,
+                parent_key,
+                setter,
+            );
         }
     }
 }
@@ -311,7 +370,15 @@ fn build_mixin_post_init(mixin: &str) -> String {
                 post_init.push_str("f.shownButtonContainers = f.shownButtonContainers or {} ");
             }
             "EditModeSystemMixin" => {
-                for alias in ["SetScale", "SetPoint", "ClearAllPoints", "SetShown", "Show", "Hide", "IsShown"] {
+                for alias in [
+                    "SetScale",
+                    "SetPoint",
+                    "ClearAllPoints",
+                    "SetShown",
+                    "Show",
+                    "Hide",
+                    "IsShown",
+                ] {
                     post_init.push_str(&format!("f.{alias}Base = f.{alias} "));
                 }
             }
@@ -326,19 +393,30 @@ fn build_mixin_post_init(mixin: &str) -> String {
 
 /// Push the suppress-OnLoad depth counter (prevents premature OnLoad in nested CreateFrame).
 fn push_suppress(lua: &Lua) {
-    let depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
-    let _ = lua.globals().set("__suppress_create_frame_onload", depth + 1);
+    let depth: i32 = lua
+        .globals()
+        .get("__suppress_create_frame_onload")
+        .unwrap_or(0);
+    let _ = lua
+        .globals()
+        .set("__suppress_create_frame_onload", depth + 1);
 }
 
 /// Pop the suppress-OnLoad depth counter.
 fn pop_suppress(lua: &Lua) {
-    let depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
-    let _ = lua.globals().set("__suppress_create_frame_onload", depth - 1);
+    let depth: i32 = lua
+        .globals()
+        .get("__suppress_create_frame_onload")
+        .unwrap_or(0);
+    let _ = lua
+        .globals()
+        .set("__suppress_create_frame_onload", depth - 1);
 }
 
 /// Queue a child frame name for deferred OnLoad firing.
 fn defer_child_onload(lua: &Lua, name: &str) {
-    let deferred: mlua::Table = lua.globals()
+    let deferred: mlua::Table = lua
+        .globals()
         .get("__deferred_child_onloads")
         .unwrap_or_else(|_| lua.create_table().unwrap());
     let len = deferred.raw_len();
@@ -399,7 +477,13 @@ fn create_child_frames(
             continue;
         };
         create_child_frame_from_template(
-            lua, state, child_frame, child_type, intrinsic, parent_name, subst_parent,
+            lua,
+            state,
+            child_frame,
+            child_type,
+            intrinsic,
+            parent_name,
+            subst_parent,
         );
     }
 }
@@ -509,7 +593,13 @@ fn build_create_child_code(
 /// so that template defaults are set first, then inline size overrides.
 fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_name: &str) {
     if let Some(anchors) = frame.anchors() {
-        code.push_str(&generate_set_point_code(anchors, "child", "parent", parent_name, "parent"));
+        code.push_str(&generate_set_point_code(
+            anchors,
+            "child",
+            "parent",
+            parent_name,
+            "parent",
+        ));
     }
     if frame.set_all_points == Some(true) {
         code.push_str("            child:SetAllPoints(true)\n");
@@ -579,7 +669,13 @@ fn create_scroll_child_frames(
             continue;
         };
         create_child_frame_from_template(
-            lua, state, child_frame, child_type, intrinsic, parent_name, subst_parent,
+            lua,
+            state,
+            child_frame,
+            child_type,
+            intrinsic,
+            parent_name,
+            subst_parent,
         );
     }
 }
@@ -595,9 +691,15 @@ fn apply_inline_frame_content(
     apply_mixin(lua, &frame.combined_mixin(), frame_name);
     apply_inline_key_values(lua, frame, frame_name);
     // Re-apply inline size — templates may override the size set in build_create_child_code.
-    let fid = state.borrow().widgets.get_id_by_name(frame_name).or_else(|| {
-        frame_name.strip_prefix("__frame_").and_then(|s| s.parse::<u64>().ok())
-    });
+    let fid = state
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name)
+        .or_else(|| {
+            frame_name
+                .strip_prefix("__frame_")
+                .and_then(|s| s.parse::<u64>().ok())
+        });
     if let Some(fid) = fid {
         direct::set_size_partial(state, fid, frame);
     }
@@ -628,7 +730,9 @@ fn apply_inline_frame_content(
 
 /// Apply animation groups from a FrameXml to an already-created frame.
 fn apply_animation_groups(lua: &Lua, frame: &FrameXml, frame_name: &str) {
-    let Some(anims) = frame.animations() else { return };
+    let Some(anims) = frame.animations() else {
+        return;
+    };
     let mut code = format!("local frame = {}\n", lua_global_ref(frame_name));
     for group in &anims.animations {
         if group.is_virtual == Some(true) {
@@ -655,25 +759,52 @@ fn apply_inline_key_values(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: 
 }
 
 /// Apply button textures from inline frame content.
-fn apply_inline_button_textures(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str, subst_parent: &str) {
+fn apply_inline_button_textures(
+    lua: &Lua,
+    frame: &crate::xml::FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+) {
     let texture_specs: &[(&str, &str, Option<&crate::xml::TextureXml>)] = &[
         ("Normal", "SetNormalTexture", frame.normal_texture()),
         ("Pushed", "SetPushedTexture", frame.pushed_texture()),
         ("Disabled", "SetDisabledTexture", frame.disabled_texture()),
-        ("Highlight", "SetHighlightTexture", frame.highlight_texture()),
+        (
+            "Highlight",
+            "SetHighlightTexture",
+            frame.highlight_texture(),
+        ),
         ("Checked", "SetCheckedTexture", frame.checked_texture()),
-        ("DisabledChecked", "SetDisabledCheckedTexture", frame.disabled_checked_texture()),
+        (
+            "DisabledChecked",
+            "SetDisabledCheckedTexture",
+            frame.disabled_checked_texture(),
+        ),
     ];
     for &(parent_key, setter, tex_opt) in texture_specs {
         if let Some(tex) = tex_opt {
-            elements::create_button_texture_from_template(lua, tex, frame_name, subst_parent, parent_key, setter);
+            elements::create_button_texture_from_template(
+                lua,
+                tex,
+                frame_name,
+                subst_parent,
+                parent_key,
+                setter,
+            );
         }
     }
 }
 
 /// Create ButtonText fontstring from template.
-fn apply_button_text(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str, subst_parent: &str) {
-    let Some(fs) = frame.button_text() else { return };
+fn apply_button_text(
+    lua: &Lua,
+    frame: &crate::xml::FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+) {
+    let Some(fs) = frame.button_text() else {
+        return;
+    };
     elements::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
     // Only apply SetAllPoints when the ButtonText has no explicit anchors.
     // Templates like ChatTabTemplate define explicit anchors (e.g. CENTER 0 -5)
@@ -684,7 +815,11 @@ fn apply_button_text(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str, 
     } else {
         "select(p:GetNumRegions(), p:GetRegions())".to_string()
     };
-    let set_all_points = if has_anchors { "" } else { "if t then t:SetAllPoints(p) end " };
+    let set_all_points = if has_anchors {
+        ""
+    } else {
+        "if t then t:SetAllPoints(p) end "
+    };
     let code = format!(
         "do local p = {} if p then \
          local t = {text_ref} \
@@ -701,7 +836,9 @@ fn apply_button_fonts(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str)
     let frame_ref = lua_global_ref(frame_name);
     for (setter, font_ref) in frame.button_fonts() {
         let Some(font_ref) = font_ref else { continue };
-        let Some(style) = font_ref.style.as_deref().or(font_ref.inherits.as_deref()) else { continue };
+        let Some(style) = font_ref.style.as_deref().or(font_ref.inherits.as_deref()) else {
+            continue;
+        };
         let code = format!(
             "do local f={frame_ref} local fo={style} if f and fo then f:{setter}(fo) \
              if f.Text and f.Text.SetFontObject then f.Text:SetFontObject(fo) end end end"
@@ -711,8 +848,15 @@ fn apply_button_fonts(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str)
 }
 
 /// Create EditBox FontString child from template.
-fn apply_editbox_fontstring(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str, subst_parent: &str) {
-    let Some(fs) = frame.font_string_child() else { return };
+fn apply_editbox_fontstring(
+    lua: &Lua,
+    frame: &crate::xml::FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+) {
+    let Some(fs) = frame.font_string_child() else {
+        return;
+    };
     elements::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
 }
 

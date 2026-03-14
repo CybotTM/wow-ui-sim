@@ -4,7 +4,7 @@
 //! Methods are registered directly on FrameRef via add_method (mlua resolves them before
 //! __index is called), so __index only handles children / per-frame fields.
 
-use super::handle::{extract_frame_id, frame_ref, get_sim_state, FrameRef};
+use super::handle::{FrameRef, extract_frame_id, frame_ref, get_sim_state};
 use mlua::{Lua, Value};
 
 /// Register meta methods on the FrameRef UserData type.
@@ -60,22 +60,18 @@ pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
 fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_meta_function(
         mlua::MetaMethod::Index,
-        |lua, (ud, key): (mlua::AnyUserData, mlua::Value)| {
-            match key {
-                mlua::Value::Integer(idx) => {
-                    let id = ud.borrow::<FrameRef>()?.0;
-                    if idx == 0 {
-                        return Ok(mlua::Value::LightUserData(mlua::LightUserData(
-                            id as *mut std::ffi::c_void,
-                        )));
-                    }
-                    lookup_child_by_index(lua, id, idx)
+        |lua, (ud, key): (mlua::AnyUserData, mlua::Value)| match key {
+            mlua::Value::Integer(idx) => {
+                let id = ud.borrow::<FrameRef>()?.0;
+                if idx == 0 {
+                    return Ok(mlua::Value::LightUserData(mlua::LightUserData(
+                        id as *mut std::ffi::c_void,
+                    )));
                 }
-                mlua::Value::String(ref s) => {
-                    lookup_type_injected(lua, &ud, &s.to_string_lossy())
-                }
-                _ => Ok(mlua::Value::Nil),
+                lookup_child_by_index(lua, id, idx)
             }
+            mlua::Value::String(ref s) => lookup_type_injected(lua, &ud, &s.to_string_lossy()),
+            _ => Ok(mlua::Value::Nil),
         },
     );
 }
@@ -145,7 +141,11 @@ fn add_tostring_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         let type_name = state
             .widgets
             .get(this.0)
-            .map(|f| f.object_type_name.as_deref().unwrap_or(f.widget_type.as_str()))
+            .map(|f| {
+                f.object_type_name
+                    .as_deref()
+                    .unwrap_or(f.widget_type.as_str())
+            })
             .unwrap_or("Frame");
         Ok(format!("{}: 0x{:08X}", type_name, this.0))
     });
@@ -157,10 +157,7 @@ fn add_eq_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         mlua::MetaMethod::Eq,
         |_lua, (a, b): (mlua::AnyUserData, mlua::AnyUserData)| {
             let a_id = a.borrow::<FrameRef>().map(|r| r.0).unwrap_or(u64::MAX);
-            let b_id = b
-                .borrow::<FrameRef>()
-                .map(|r| r.0)
-                .unwrap_or(u64::MAX - 1);
+            let b_id = b.borrow::<FrameRef>().map(|r| r.0).unwrap_or(u64::MAX - 1);
             Ok(a_id == b_id)
         },
     );
@@ -262,7 +259,6 @@ fn patch_metatable_index(lua: &Lua) -> mlua::Result<()> {
     Ok(())
 }
 
-
 // ── Lookup helpers ────────────────────────────────────────────────────────────
 
 /// Look up a child frame by numeric index (1-indexed).
@@ -353,9 +349,10 @@ mod tests {
     impl UserData for TestObj {
         fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
             methods.add_method("Lower", |_, _, ()| Ok("hello"));
-            methods.add_meta_function(MetaMethod::Index, |_, (_ud, _key): (mlua::AnyUserData, Value)| {
-                Ok(Value::Nil)
-            });
+            methods.add_meta_function(
+                MetaMethod::Index,
+                |_, (_ud, _key): (mlua::AnyUserData, Value)| Ok(Value::Nil),
+            );
             methods.add_meta_function(
                 MetaMethod::NewIndex,
                 |_, (ud, key, value): (mlua::AnyUserData, String, Value)| {
@@ -376,10 +373,15 @@ mod tests {
         lua.globals().set("obj", obj).unwrap();
 
         // Without patching, method wins over property
-        let result: String = lua.load(r#"
+        let result: String = lua
+            .load(
+                r#"
             obj.Lower = "world"
             return type(obj.Lower)
-        "#).eval().unwrap();
+        "#,
+            )
+            .eval()
+            .unwrap();
         assert_eq!(result, "function", "method shadows property by default");
     }
 
@@ -388,7 +390,9 @@ mod tests {
         let obj = lua.create_userdata(TestObj).unwrap();
         let fields = lua.create_table().unwrap();
         obj.set_user_value(fields).unwrap();
-        lua.load(super::PATCH_INDEX_LUA).call::<()>(obj.clone()).unwrap();
+        lua.load(super::PATCH_INDEX_LUA)
+            .call::<()>(obj.clone())
+            .unwrap();
         lua.globals().set("obj", obj).unwrap();
         lua
     }
@@ -396,10 +400,15 @@ mod tests {
     #[test]
     fn test_patched_index_property_wins() {
         let lua = make_lua_and_patch();
-        let result: String = lua.load(r#"
+        let result: String = lua
+            .load(
+                r#"
             obj.Lower = "world"
             return obj.Lower
-        "#).eval().unwrap();
+        "#,
+            )
+            .eval()
+            .unwrap();
         assert_eq!(result, "world", "property should shadow method");
     }
 
@@ -409,7 +418,6 @@ mod tests {
         let result: String = lua.load("return obj:Lower()").eval().unwrap();
         assert_eq!(result, "hello", "method works when no property set");
     }
-
 }
 
 /// Remove a stale children_keys entry and clear parent_key when a non-frame is assigned.

@@ -47,47 +47,47 @@ static GENERAL_SPELLS: &[SpellBookEntry] = &[
 
 /// Paladin class baseline spells (shared across all specs).
 static CLASS_SPELLS: &[SpellBookEntry] = &[
-    spell(35395),   // Crusader Strike
-    spell(19750),   // Flash of Light
-    spell(85673),   // Word of Glory
-    spell(853),     // Hammer of Justice
-    spell(275779),  // Judgment
-    spell(465),     // Devotion Aura
-    spell(1022),    // Blessing of Protection
-    spell(1044),    // Blessing of Freedom
-    spell(642),     // Divine Shield
-    spell(633),     // Lay on Hands
-    spell(190784),  // Divine Steed
-    spell(96231),   // Rebuke
-    spell(10326),   // Turn Evil
-    spell(213644),  // Cleanse Toxins
-    spell(6940),    // Blessing of Sacrifice
-    spell(31884),   // Avenging Wrath
-    spell(375576),  // Divine Toll
-    spell(115750),  // Blinding Light
-    spell(32223),   // Crusader Aura
-    spell(317920),  // Concentration Aura
-    spell(183435),  // Retribution Aura
-    spell(5502),    // Sense Undead
-    spell(121183),  // Contemplation
+    spell(35395),    // Crusader Strike
+    spell(19750),    // Flash of Light
+    spell(85673),    // Word of Glory
+    spell(853),      // Hammer of Justice
+    spell(275779),   // Judgment
+    spell(465),      // Devotion Aura
+    spell(1022),     // Blessing of Protection
+    spell(1044),     // Blessing of Freedom
+    spell(642),      // Divine Shield
+    spell(633),      // Lay on Hands
+    spell(190784),   // Divine Steed
+    spell(96231),    // Rebuke
+    spell(10326),    // Turn Evil
+    spell(213644),   // Cleanse Toxins
+    spell(6940),     // Blessing of Sacrifice
+    spell(31884),    // Avenging Wrath
+    spell(375576),   // Divine Toll
+    spell(115750),   // Blinding Light
+    spell(32223),    // Crusader Aura
+    spell(317920),   // Concentration Aura
+    spell(183435),   // Retribution Aura
+    spell(5502),     // Sense Undead
+    spell(121183),   // Contemplation
     passive(137026), // Plate Specialization
     passive(385125), // Of Dusk and Dawn
 ];
 
 /// Protection specialization spells.
 static PROTECTION_SPELLS: &[SpellBookEntry] = &[
-    spell(31935),   // Avenger's Shield
-    spell(53595),   // Hammer of the Righteous
-    spell(26573),   // Consecration
-    spell(53600),   // Shield of the Righteous
-    spell(31850),   // Ardent Defender
-    spell(86659),   // Guardian of Ancient Kings
-    spell(62124),   // Hand of Reckoning
-    spell(498),     // Divine Protection
-    spell(327193),  // Moment of Glory
-    spell(378974),  // Bastion of Light
-    spell(387174),  // Eye of Tyr
-    spell(204019),  // Blessed Hammer
+    spell(31935),    // Avenger's Shield
+    spell(53595),    // Hammer of the Righteous
+    spell(26573),    // Consecration
+    spell(53600),    // Shield of the Righteous
+    spell(31850),    // Ardent Defender
+    spell(86659),    // Guardian of Ancient Kings
+    spell(62124),    // Hand of Reckoning
+    spell(498),      // Divine Protection
+    spell(327193),   // Moment of Glory
+    spell(378974),   // Bastion of Light
+    spell(387174),   // Eye of Tyr
+    spell(204019),   // Blessed Hammer
     passive(85043),  // Grand Crusader
     passive(152261), // Holy Shield
     passive(76671),  // Mastery: Divine Bulwark
@@ -96,26 +96,26 @@ static PROTECTION_SPELLS: &[SpellBookEntry] = &[
 
 /// Holy specialization spells (off-spec when Protection is active).
 static HOLY_SPELLS: &[SpellBookEntry] = &[
-    spell(20473),   // Holy Shock
-    spell(82326),   // Holy Light
-    spell(85222),   // Light of Dawn
-    spell(4987),    // Cleanse
-    spell(53563),   // Beacon of Light
-    spell(105809),  // Holy Avenger
-    spell(200652),  // Tyr's Deliverance
+    spell(20473),    // Holy Shock
+    spell(82326),    // Holy Light
+    spell(85222),    // Light of Dawn
+    spell(4987),     // Cleanse
+    spell(53563),    // Beacon of Light
+    spell(105809),   // Holy Avenger
+    spell(200652),   // Tyr's Deliverance
     passive(53576),  // Infusion of Light
     passive(183997), // Mastery: Lightbringer
 ];
 
 /// Retribution specialization spells (off-spec when Protection is active).
 static RETRIBUTION_SPELLS: &[SpellBookEntry] = &[
-    spell(184575),  // Blade of Justice
-    spell(85256),   // Templar's Verdict
-    spell(255937),  // Wake of Ashes
-    spell(184662),  // Shield of Vengeance
-    spell(343527),  // Execution Sentence
-    spell(343721),  // Final Reckoning
-    spell(383185),  // Exorcism
+    spell(184575),   // Blade of Justice
+    spell(85256),    // Templar's Verdict
+    spell(255937),   // Wake of Ashes
+    spell(184662),   // Shield of Vengeance
+    spell(343527),   // Execution Sentence
+    spell(343721),   // Final Reckoning
+    spell(383185),   // Exorcism
     passive(267344), // Art of War
     passive(231832), // Blade of Wrath
     passive(269569), // Zeal

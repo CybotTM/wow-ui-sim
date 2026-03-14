@@ -22,16 +22,27 @@ pub fn register_c_misc_api(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState
 fn register_c_color_overrides(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
 
-    t.set("GetColorForQuality", lua.create_function(|lua, quality: i32| {
-        create_quality_color(lua, quality)
-    })?)?;
-    t.set("GetDefaultColorForQuality", lua.create_function(|lua, quality: i32| {
-        create_quality_color(lua, quality)
-    })?)?;
-    t.set("GetColorOverrideInfo", lua.create_function(|_, _ot: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetColorForQuality",
+        lua.create_function(|lua, quality: i32| create_quality_color(lua, quality))?,
+    )?;
+    t.set(
+        "GetDefaultColorForQuality",
+        lua.create_function(|lua, quality: i32| create_quality_color(lua, quality))?,
+    )?;
+    t.set(
+        "GetColorOverrideInfo",
+        lua.create_function(|_, _ot: i32| Ok(Value::Nil))?,
+    )?;
     t.set("ClearColorOverrides", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("SetColorOverride", lua.create_function(|_, (_ot, _c): (i32, Value)| Ok(()))?)?;
-    t.set("RemoveColorOverride", lua.create_function(|_, _ot: i32| Ok(()))?)?;
+    t.set(
+        "SetColorOverride",
+        lua.create_function(|_, (_ot, _c): (i32, Value)| Ok(()))?,
+    )?;
+    t.set(
+        "RemoveColorOverride",
+        lua.create_function(|_, _ot: i32| Ok(()))?,
+    )?;
 
     lua.globals().set("C_ColorOverrides", t)?;
     Ok(())
@@ -57,11 +68,10 @@ fn create_quality_color(lua: &mlua::Lua, quality: i32) -> Result<Value> {
 fn register_tooltip_data_processor(lua: &Lua) -> Result<()> {
     lua.globals().set(
         "TooltipDataProcessor",
-        lua.create_table_from([
-            ("AddTooltipPostCall", Value::Function(
-                lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-            )),
-        ])?,
+        lua.create_table_from([(
+            "AddTooltipPostCall",
+            Value::Function(lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?),
+        )])?,
     )?;
     Ok(())
 }

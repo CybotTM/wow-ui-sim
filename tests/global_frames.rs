@@ -29,7 +29,10 @@ fn test_world_frame_exists() {
     assert_eq!(obj_type, "Frame");
     // WorldFrame is a special type — IsObjectType("Frame") returns false
     let is_frame: bool = env.eval("return WorldFrame:IsObjectType('Frame')").unwrap();
-    assert!(!is_frame, "WorldFrame:IsObjectType('Frame') should return false");
+    assert!(
+        !is_frame,
+        "WorldFrame:IsObjectType('Frame') should return false"
+    );
 }
 
 #[test]
@@ -50,7 +53,9 @@ fn test_garrison_type_enum() {
     assert!(exists, "Enum should exist");
     let gt_exists: bool = env.eval("return Enum.GarrisonType ~= nil").unwrap();
     assert!(gt_exists, "Enum.GarrisonType should exist");
-    let val: i32 = env.eval("return Enum.GarrisonType.Type_9_0_Garrison").unwrap();
+    let val: i32 = env
+        .eval("return Enum.GarrisonType.Type_9_0_Garrison")
+        .unwrap();
     assert_eq!(val, 111);
 }
 
@@ -161,7 +166,10 @@ fn test_settings_panel_container_structure() {
     let exists: bool = env
         .eval("return SettingsPanel.Container.SettingsList.ScrollBox.ScrollTarget ~= nil")
         .unwrap();
-    assert!(exists, "SettingsPanel.Container deep structure should exist");
+    assert!(
+        exists,
+        "SettingsPanel.Container deep structure should exist"
+    );
 
     let text: String = env
         .eval("return SettingsPanel.Container.SettingsList.Header.Title:GetText()")
@@ -220,14 +228,15 @@ fn test_addon_compartment_frame_methods() {
 #[test]
 fn test_lfg_list_frame_search_panel() {
     let env = env();
-    let exists: bool = env
-        .eval("return LFGListFrame.SearchPanel ~= nil")
-        .unwrap();
+    let exists: bool = env.eval("return LFGListFrame.SearchPanel ~= nil").unwrap();
     assert!(exists, "LFGListFrame.SearchPanel should exist");
     let box_exists: bool = env
         .eval("return LFGListFrame.SearchPanel.SearchBox ~= nil")
         .unwrap();
-    assert!(box_exists, "LFGListFrame.SearchPanel.SearchBox should exist");
+    assert!(
+        box_exists,
+        "LFGListFrame.SearchPanel.SearchBox should exist"
+    );
 }
 
 #[test]
@@ -236,7 +245,10 @@ fn test_alert_frame_sub_systems() {
     let is_table: bool = env
         .eval("return type(AlertFrame.alertFrameSubSystems) == 'table'")
         .unwrap();
-    assert!(is_table, "AlertFrame.alertFrameSubSystems should be a table");
+    assert!(
+        is_table,
+        "AlertFrame.alertFrameSubSystems should be a table"
+    );
 }
 
 #[test]
@@ -278,9 +290,7 @@ fn test_party_member_frame_pool() {
 #[test]
 fn test_ui_special_frames_exists() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(UISpecialFrames) == 'table'")
-        .unwrap();
+    let is_table: bool = env.eval("return type(UISpecialFrames) == 'table'").unwrap();
     assert!(is_table);
 }
 
@@ -296,9 +306,7 @@ fn test_static_popup_dialogs_exists() {
 #[test]
 fn test_ui_panel_windows_exists() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(UIPanelWindows) == 'table'")
-        .unwrap();
+    let is_table: bool = env.eval("return type(UIPanelWindows) == 'table'").unwrap();
     assert!(is_table);
 }
 
@@ -329,9 +337,7 @@ fn test_all_named_frame_globals_exist() {
         "FriendsFrame",
     ];
     for name in &frame_names {
-        let exists: bool = env
-            .eval(&format!("return {} ~= nil", name))
-            .unwrap();
+        let exists: bool = env.eval(&format!("return {} ~= nil", name)).unwrap();
         assert!(exists, "{} should exist as a global", name);
     }
 }

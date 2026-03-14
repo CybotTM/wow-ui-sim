@@ -6,7 +6,7 @@ use mlua::{MultiValue, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::{extract_number, AnimGroupHandle, AnimationType, Smoothing};
+use super::{AnimGroupHandle, AnimationType, Smoothing, extract_number};
 
 /// Userdata handle for an individual Animation.
 #[derive(Clone)]
@@ -22,15 +22,18 @@ impl AnimHandle {
         methods.add_method("SetDuration", |_, this, dur: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.duration = dur;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.duration = dur;
+            }
             Ok(())
         });
 
         methods.add_method("GetDuration", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.duration))
         });
@@ -41,15 +44,18 @@ impl AnimHandle {
         methods.add_method("SetStartDelay", |_, this, delay: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.start_delay = delay;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.start_delay = delay;
+            }
             Ok(())
         });
 
         methods.add_method("GetStartDelay", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.start_delay))
         });
@@ -57,15 +63,18 @@ impl AnimHandle {
         methods.add_method("SetEndDelay", |_, this, delay: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.end_delay = delay;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.end_delay = delay;
+            }
             Ok(())
         });
 
         methods.add_method("GetEndDelay", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.end_delay))
         });
@@ -76,15 +85,18 @@ impl AnimHandle {
         methods.add_method("SetOrder", |_, this, order: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.order = order;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.order = order;
+            }
             Ok(())
         });
 
         methods.add_method("GetOrder", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.order))
         });
@@ -111,15 +123,18 @@ impl AnimHandle {
         methods.add_method("SetSmoothing", |_, this, smooth: String| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.smoothing = Smoothing::from_str(&smooth);
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.smoothing = Smoothing::from_str(&smooth);
+            }
             Ok(())
         });
 
         methods.add_method("GetSmoothing", |lua, this, ()| {
             let state = this.state.borrow();
-            let s = state.animation_groups.get(&this.group_id)
+            let s = state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or("NONE", |a| a.smoothing.as_str());
             Ok(Value::String(lua.create_string(s)?))
@@ -131,15 +146,18 @@ impl AnimHandle {
         methods.add_method("SetFromAlpha", |_, this, alpha: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.from_alpha = alpha;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.from_alpha = alpha;
+            }
             Ok(())
         });
 
         methods.add_method("GetFromAlpha", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.from_alpha))
         });
@@ -147,15 +165,18 @@ impl AnimHandle {
         methods.add_method("SetToAlpha", |_, this, alpha: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.to_alpha = alpha;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.to_alpha = alpha;
+            }
             Ok(())
         });
 
         methods.add_method("GetToAlpha", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1.0, |a| a.to_alpha))
         });
@@ -169,10 +190,11 @@ impl AnimHandle {
             let y = extract_number(&args, 1).unwrap_or(0.0);
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.offset_x = x;
-                    anim.offset_y = y;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.offset_x = x;
+                anim.offset_y = y;
+            }
             Ok(())
         });
 
@@ -182,9 +204,10 @@ impl AnimHandle {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
                 && let Some(anim) = group.animations.get_mut(this.anim_index)
-                    && anim.anim_type == AnimationType::Alpha {
-                        anim.to_alpha = anim.from_alpha + val;
-                    }
+                && anim.anim_type == AnimationType::Alpha
+            {
+                anim.to_alpha = anim.from_alpha + val;
+            }
             Ok(())
         });
     }
@@ -197,10 +220,11 @@ impl AnimHandle {
             let y = extract_number(&args, 1).unwrap_or(1.0);
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.scale_x = x;
-                    anim.scale_y = y;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.scale_x = x;
+                anim.scale_y = y;
+            }
             Ok(())
         });
 
@@ -210,10 +234,11 @@ impl AnimHandle {
             let y = extract_number(&args, 1).unwrap_or(1.0);
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.from_scale_x = x;
-                    anim.from_scale_y = y;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.from_scale_x = x;
+                anim.from_scale_y = y;
+            }
             Ok(())
         });
 
@@ -223,10 +248,11 @@ impl AnimHandle {
             let y = extract_number(&args, 1).unwrap_or(1.0);
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.to_scale_x = x;
-                    anim.to_scale_y = y;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.to_scale_x = x;
+                anim.to_scale_y = y;
+            }
             Ok(())
         });
     }
@@ -256,9 +282,10 @@ impl AnimHandle {
         methods.add_method("SetDegrees", |_, this, degrees: f64| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.degrees = degrees;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.degrees = degrees;
+            }
             Ok(())
         });
 
@@ -305,15 +332,18 @@ impl AnimHandle {
         methods.add_method("SetFlipBookRows", |_, this, rows: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.flip_book_rows = rows;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.flip_book_rows = rows;
+            }
             Ok(())
         });
 
         methods.add_method("GetFlipBookRows", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.flip_book_rows))
         });
@@ -321,15 +351,18 @@ impl AnimHandle {
         methods.add_method("SetFlipBookColumns", |_, this, cols: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.flip_book_columns = cols;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.flip_book_columns = cols;
+            }
             Ok(())
         });
 
         methods.add_method("GetFlipBookColumns", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.flip_book_columns))
         });
@@ -340,15 +373,18 @@ impl AnimHandle {
         methods.add_method("SetFlipBookFrames", |_, this, frames: u32| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.flip_book_frames = frames;
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.flip_book_frames = frames;
+            }
             Ok(())
         });
 
         methods.add_method("GetFlipBookFrames", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(1_u32, |a| a.flip_book_frames))
         });
@@ -370,22 +406,34 @@ impl AnimHandle {
 
         methods.add_method("IsPlaying", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_some_and(|g| g.playing))
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
+                .is_some_and(|g| g.playing))
         });
 
         methods.add_method("IsPaused", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_some_and(|g| g.paused))
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
+                .is_some_and(|g| g.paused))
         });
 
         methods.add_method("IsDone", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| g.done))
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
+                .is_none_or(|g| g.done))
         });
 
         methods.add_method("IsStopped", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).is_none_or(|g| !g.playing && !g.paused))
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
+                .is_none_or(|g| !g.playing && !g.paused))
         });
 
         methods.add_method("IsDelaying", |_, _this, ()| Ok(false));
@@ -395,21 +443,27 @@ impl AnimHandle {
     fn add_progress_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetProgress", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.raw_progress()))
         });
 
         methods.add_method("GetSmoothProgress", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.smooth_progress()))
         });
 
         methods.add_method("GetElapsed", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map_or(0.0, |a| a.elapsed))
         });
@@ -426,8 +480,11 @@ impl AnimHandle {
         });
 
         methods.add_method("GetRegionParent", |lua, this, ()| {
-            let owner_id = this.state.borrow()
-                .animation_groups.get(&this.group_id)
+            let owner_id = this
+                .state
+                .borrow()
+                .animation_groups
+                .get(&this.group_id)
                 .map(|g| g.owner_frame_id);
             match owner_id {
                 Some(id) => frame_ref(lua, id),
@@ -437,7 +494,9 @@ impl AnimHandle {
 
         methods.add_method("GetName", |_, this, ()| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .and_then(|a| a.name.clone()))
         });
@@ -451,21 +510,29 @@ impl AnimHandle {
                 return Ok(Value::Nil);
             };
             let owner_id = group.owner_frame_id;
-            let child_key = group.animations.get(this.anim_index)
+            let child_key = group
+                .animations
+                .get(this.anim_index)
                 .and_then(|a| a.child_key.clone());
             let target_id = match &child_key {
-                Some(key) => state.widgets.get(owner_id)
+                Some(key) => state
+                    .widgets
+                    .get(owner_id)
                     .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
                 None => Some(owner_id),
             };
-            let Some(id) = target_id else { return Ok(Value::Nil) };
+            let Some(id) = target_id else {
+                return Ok(Value::Nil);
+            };
             drop(state);
             frame_ref(lua, id)
         });
 
         methods.add_method("SetTarget", |_, _this, target: Value| {
             if target.is_nil() || target == Value::NULL {
-                return Err(mlua::Error::RuntimeError("Usage: Animation:SetTarget(target)".into()));
+                return Err(mlua::Error::RuntimeError(
+                    "Usage: Animation:SetTarget(target)".into(),
+                ));
             }
             Ok(())
         });
@@ -473,9 +540,10 @@ impl AnimHandle {
         methods.add_method("SetChildKey", |_, this, key: String| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
-                    anim.child_key = Some(key);
-                }
+                && let Some(anim) = group.animations.get_mut(this.anim_index)
+            {
+                anim.child_key = Some(key);
+            }
             Ok(())
         });
 
@@ -492,10 +560,13 @@ impl AnimHandle {
 
     /// Register SetScript, GetScript, HasScript methods.
     fn add_set_get_script_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("SetScript", |lua, this, (event, handler): (String, Option<mlua::Function>)| {
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index) {
+        methods.add_method(
+            "SetScript",
+            |lua, this, (event, handler): (String, Option<mlua::Function>)| {
+                let mut state = this.state.borrow_mut();
+                if let Some(group) = state.animation_groups.get_mut(&this.group_id)
+                    && let Some(anim) = group.animations.get_mut(this.anim_index)
+                {
                     if let Some(old_key) = anim.scripts.remove(&event) {
                         lua.remove_registry_value(old_key).ok();
                     }
@@ -504,23 +575,27 @@ impl AnimHandle {
                         anim.scripts.insert(event, key);
                     }
                 }
-            Ok(())
-        });
+                Ok(())
+            },
+        );
 
         methods.add_method("GetScript", |lua, this, event: String| {
             let state = this.state.borrow();
             if let Some(group) = state.animation_groups.get(&this.group_id)
                 && let Some(anim) = group.animations.get(this.anim_index)
-                    && let Some(key) = anim.scripts.get(&event)
-                        && let Ok(func) = lua.registry_value::<mlua::Function>(key) {
-                            return Ok(Value::Function(func));
-                        }
+                && let Some(key) = anim.scripts.get(&event)
+                && let Ok(func) = lua.registry_value::<mlua::Function>(key)
+            {
+                return Ok(Value::Function(func));
+            }
             Ok(Value::Nil)
         });
 
         methods.add_method("HasScript", |_, this, event: String| {
             let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id)
+            Ok(state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .is_some_and(|a| a.scripts.contains_key(&event)))
         });
@@ -528,19 +603,23 @@ impl AnimHandle {
 
     /// Register HookScript method.
     fn add_hook_script_method<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("HookScript", |lua, this, (event, handler): (String, Option<mlua::Function>)| {
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index)
-                    && let Some(func) = handler {
-                        if let Some(old_key) = anim.scripts.remove(&event) {
-                            lua.remove_registry_value(old_key).ok();
-                        }
-                        let key = lua.create_registry_value(func)?;
-                        anim.scripts.insert(event, key);
+        methods.add_method(
+            "HookScript",
+            |lua, this, (event, handler): (String, Option<mlua::Function>)| {
+                let mut state = this.state.borrow_mut();
+                if let Some(group) = state.animation_groups.get_mut(&this.group_id)
+                    && let Some(anim) = group.animations.get_mut(this.anim_index)
+                    && let Some(func) = handler
+                {
+                    if let Some(old_key) = anim.scripts.remove(&event) {
+                        lua.remove_registry_value(old_key).ok();
                     }
-            Ok(())
-        });
+                    let key = lua.create_registry_value(func)?;
+                    anim.scripts.insert(event, key);
+                }
+                Ok(())
+            },
+        );
     }
 
     /// Register script handler methods.
@@ -554,7 +633,9 @@ impl UserData for AnimHandle {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetObjectType", |_, this, ()| {
             let state = this.state.borrow();
-            let anim_type = state.animation_groups.get(&this.group_id)
+            let anim_type = state
+                .animation_groups
+                .get(&this.group_id)
                 .and_then(|g| g.animations.get(this.anim_index))
                 .map(|a| a.anim_type)
                 .unwrap_or(AnimationType::Animation);

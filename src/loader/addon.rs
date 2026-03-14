@@ -34,7 +34,11 @@ fn init_saved_variables(
     let mut warnings = Vec::new();
     match mgr.load_wtf_for_addon(env.lua(), folder_name) {
         Ok(count) if count > 0 => {
-            tracing::debug!("Loaded {} WTF SavedVariables file(s) for {}", count, toc.name);
+            tracing::debug!(
+                "Loaded {} WTF SavedVariables file(s) for {}",
+                count,
+                toc.name
+            );
         }
         Ok(_) => {
             let saved_vars = toc.saved_variables();
@@ -42,12 +46,12 @@ fn init_saved_variables(
             if (!saved_vars.is_empty() || !saved_vars_per_char.is_empty())
                 && let Err(e) =
                     mgr.init_for_addon(env.lua(), folder_name, &saved_vars, &saved_vars_per_char)
-                {
-                    warnings.push(format!(
-                        "Failed to initialize saved variables for {}: {}",
-                        folder_name, e
-                    ));
-                }
+            {
+                warnings.push(format!(
+                    "Failed to initialize saved variables for {}: {}",
+                    folder_name, e
+                ));
+            }
         }
         Err(e) => {
             warnings.push(format!(
@@ -87,7 +91,9 @@ pub fn load_addon_internal(
         result.timing.saved_vars_time = sv_start.elapsed();
     }
 
-    let addon_table = env.create_addon_table().map_err(|e| LoadError::Lua(e.to_string()))?;
+    let addon_table = env
+        .create_addon_table()
+        .map_err(|e| LoadError::Lua(e.to_string()))?;
 
     // Set loading_addon_index so frames created during this addon's load
     // are attributed to it. Panic if addon not registered — caller bug.
@@ -115,13 +121,17 @@ pub fn load_addon_internal(
 /// Find or auto-register addon in the addon list, returning its index.
 fn resolve_addon_index(env: &LoaderEnv<'_>, folder_name: &str) -> u16 {
     let mut s = env.state().borrow_mut();
-    let idx = s.addons.iter().position(|a| a.folder_name == folder_name)
+    let idx = s
+        .addons
+        .iter()
+        .position(|a| a.folder_name == folder_name)
         .unwrap_or_else(|| {
             let idx = s.addons.len();
             s.addons.push(crate::lua_api::AddonInfo {
                 folder_name: folder_name.to_string(),
                 title: folder_name.to_string(),
-                enabled: true, ..Default::default()
+                enabled: true,
+                ..Default::default()
             });
             idx
         });
@@ -160,7 +170,9 @@ fn load_addon_files(
                 Err(e) => result.warnings.push(format!("{}: {}", file.display(), e)),
             },
             _ => {
-                result.warnings.push(format!("{}: unknown file type", file.display()));
+                result
+                    .warnings
+                    .push(format!("{}: unknown file type", file.display()));
             }
         }
     }

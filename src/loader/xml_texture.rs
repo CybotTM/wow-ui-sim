@@ -4,7 +4,9 @@ use crate::lua_api::LoaderEnv;
 use crate::xml::{collect_texture_mixins, register_texture_template, resolve_texture_inheritance};
 
 use super::error::LoadError;
-use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref, resolve_child_name};
+use super::helpers::{
+    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref, resolve_child_name,
+};
 use super::helpers_anim::generate_animation_group_code;
 
 /// Generate Lua code for texture source (file or atlas) and size.
@@ -167,7 +169,15 @@ pub fn create_texture_from_xml(
 
     let resolved = resolve_texture_inheritance(texture);
     let tex_name = resolve_child_name(resolved.name.as_deref(), parent_name, "__tex_");
-    let lua_code = build_texture_lua(&tex_name, &resolved, parent_name, draw_layer, is_mask, is_line, sub_level);
+    let lua_code = build_texture_lua(
+        &tex_name,
+        &resolved,
+        parent_name,
+        draw_layer,
+        is_mask,
+        is_line,
+        sub_level,
+    );
     env.exec(&lua_code).map_err(|e| {
         LoadError::Lua(format!(
             "Failed to create texture {} on {}: {}",
@@ -189,13 +199,22 @@ fn build_texture_lua(
     is_line: bool,
     sub_level: i32,
 ) -> String {
-    let create_method = if is_line { "CreateLine" } else if is_mask { "CreateMaskTexture" } else { "CreateTexture" };
+    let create_method = if is_line {
+        "CreateLine"
+    } else if is_mask {
+        "CreateMaskTexture"
+    } else {
+        "CreateTexture"
+    };
     let mut code = format!(
         r#"
         local parent = {}
         local tex = parent:{}("{}", "{}")
         "#,
-        lua_global_ref(parent_name), create_method, tex_name, draw_layer
+        lua_global_ref(parent_name),
+        create_method,
+        tex_name,
+        draw_layer
     );
     if sub_level != 0 {
         code.push_str(&format!(
@@ -219,7 +238,10 @@ fn build_texture_lua(
         code.push_str(&format!("\n        tex:SetAlpha({})\n        ", a));
     }
     if let Some(ref mode) = texture.alpha_mode {
-        code.push_str(&format!("\n        tex:SetBlendMode(\"{}\")\n        ", mode));
+        code.push_str(&format!(
+            "\n        tex:SetBlendMode(\"{}\")\n        ",
+            mode
+        ));
     }
     // Wire up MaskedTextures: call AddMaskTexture on each referenced sibling.
     if is_mask {
@@ -241,15 +263,27 @@ fn build_texture_lua(
 /// Append anchor or SetAllPoints code for a texture.
 fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, parent_name: &str) {
     if let Some(anchors) = &texture.anchors {
-        code.push_str(&generate_set_point_code(anchors, "tex", "parent", parent_name, "parent"));
+        code.push_str(&generate_set_point_code(
+            anchors,
+            "tex",
+            "parent",
+            parent_name,
+            "parent",
+        ));
     } else if texture.set_all_points != Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
 }
 
 /// Process animation groups on a texture created from XML.
-fn apply_texture_animations_xml(env: &LoaderEnv<'_>, texture: &crate::xml::TextureXml, tex_name: &str) {
-    let Some(anims) = &texture.animations else { return };
+fn apply_texture_animations_xml(
+    env: &LoaderEnv<'_>,
+    texture: &crate::xml::TextureXml,
+    tex_name: &str,
+) {
+    let Some(anims) = &texture.animations else {
+        return;
+    };
     let mut anim_code = format!("local frame = {}\n", lua_global_ref(tex_name));
     for anim_group_xml in &anims.animations {
         if anim_group_xml.is_virtual == Some(true) {

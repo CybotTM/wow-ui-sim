@@ -41,7 +41,8 @@ impl PrecompiledFns {
 }
 
 fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(r#"
+    lua.load(
+        r#"
         local __report = debug.getregistry()["__report_script_error"]
         local frame = _G[...]
         if not frame then return end
@@ -59,11 +60,14 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
                 __report("[OnLoad] " .. name .. ": " .. tostring(err))
             end
         end
-    "#).into_function()
+    "#,
+    )
+    .into_function()
 }
 
 fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(r#"
+    lua.load(
+        r#"
         local __report = debug.getregistry()["__report_script_error"]
         local frame = _G[...]
         if not frame then return end
@@ -83,40 +87,46 @@ fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
                 end
             end
         end
-    "#).into_function()
+    "#,
+    )
+    .into_function()
 }
 
 fn compile_suppress_push(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(
-        "__suppress_create_frame_onload = (__suppress_create_frame_onload or 0) + 1"
-    ).into_function()
+    lua.load("__suppress_create_frame_onload = (__suppress_create_frame_onload or 0) + 1")
+        .into_function()
 }
 
 fn compile_suppress_pop(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(
-        "__suppress_create_frame_onload = __suppress_create_frame_onload - 1"
-    ).into_function()
+    lua.load("__suppress_create_frame_onload = __suppress_create_frame_onload - 1")
+        .into_function()
 }
 
 fn compile_assign_parent_key(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(r#"
+    lua.load(
+        r#"
         local parent_name, key, child_name = ...
         local parent = _G[parent_name]
         local child = _G[child_name]
         if parent and child then
             parent[key] = child
         end
-    "#).into_function()
+    "#,
+    )
+    .into_function()
 }
 
 fn compile_set_intrinsic(lua: &Lua) -> mlua::Result<Function> {
-    lua.load(r#"
+    lua.load(
+        r#"
         local frame_name, base = ...
         local frame = _G[frame_name]
         if frame then
             frame.intrinsic = base
         end
-    "#).into_function()
+    "#,
+    )
+    .into_function()
 }
 
 /// Initialize precompiled functions and store them in Lua app_data.
@@ -134,7 +144,8 @@ pub fn init(lua: &Lua) -> mlua::Result<()> {
 /// Returns cloned `Function` handles (cheap Rc clone) to avoid holding
 /// a `Ref<PrecompiledFns>` borrow across Lua calls.
 pub fn get(lua: &Lua) -> PrecompiledFnsRef {
-    let fns = lua.app_data_ref::<PrecompiledFns>()
+    let fns = lua
+        .app_data_ref::<PrecompiledFns>()
         .expect("PrecompiledFns not initialized — call precompiled::init() first");
     PrecompiledFnsRef {
         fire_onload: fns.fire_onload.clone(),

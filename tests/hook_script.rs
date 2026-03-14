@@ -31,7 +31,10 @@ fn test_get_script_returns_different_function_after_hook() {
     "#,
         )
         .unwrap();
-    assert!(changed, "GetScript should return a different function after HookScript");
+    assert!(
+        changed,
+        "GetScript should return a different function after HookScript"
+    );
 }
 
 #[test]
@@ -68,7 +71,10 @@ fn test_hook_script_with_no_existing_handler() {
     "#,
         )
         .unwrap();
-    assert!(called, "Hook should be callable via GetScript when no prior handler exists");
+    assert!(
+        called,
+        "Hook should be callable via GetScript when no prior handler exists"
+    );
 }
 
 #[test]
@@ -100,7 +106,10 @@ fn test_set_script_invalid_handler_errors() {
         f:SetScript("OnNotARealScript", function() end)
     "#,
     );
-    assert!(result.is_err(), "SetScript with unknown handler name should error");
+    assert!(
+        result.is_err(),
+        "SetScript with unknown handler name should error"
+    );
     let err = result.unwrap_err().to_string();
     assert!(
         err.contains("OnNotARealScript"),
@@ -112,10 +121,12 @@ fn test_set_script_invalid_handler_errors() {
 fn test_has_script_returns_false_for_onclick_on_plain_frame() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env
-        .eval(r#"
+        .eval(
+            r#"
         local f = CreateFrame("Frame")
         return f:HasScript("OnClick")
-    "#)
+    "#,
+        )
         .unwrap();
     assert!(!result, "Plain Frame should not support OnClick");
 }
@@ -124,10 +135,12 @@ fn test_has_script_returns_false_for_onclick_on_plain_frame() {
 fn test_has_script_returns_true_for_onclick_on_button() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env
-        .eval(r#"
+        .eval(
+            r#"
         local b = CreateFrame("Button")
         return b:HasScript("OnClick")
-    "#)
+    "#,
+        )
         .unwrap();
     assert!(result, "Button should support OnClick");
 }
@@ -136,22 +149,32 @@ fn test_has_script_returns_true_for_onclick_on_button() {
 fn test_has_script_returns_false_for_bogus_name() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env
-        .eval(r#"
+        .eval(
+            r#"
         local f = CreateFrame("Frame")
         return f:HasScript("OnNotARealScript")
-    "#)
+    "#,
+        )
         .unwrap();
-    assert!(!result, "HasScript should return false for unknown handler names");
+    assert!(
+        !result,
+        "HasScript should return false for unknown handler names"
+    );
 }
 
 #[test]
 fn test_has_script_returns_true_for_base_handlers_on_frame() {
     let env = WowLuaEnv::new().unwrap();
     let result: bool = env
-        .eval(r#"
+        .eval(
+            r#"
         local f = CreateFrame("Frame")
         return f:HasScript("OnShow") and f:HasScript("OnUpdate") and f:HasScript("OnEvent")
-    "#)
+    "#,
+        )
         .unwrap();
-    assert!(result, "Frame should support base handlers OnShow, OnUpdate, OnEvent");
+    assert!(
+        result,
+        "Frame should support base handlers OnShow, OnUpdate, OnEvent"
+    );
 }

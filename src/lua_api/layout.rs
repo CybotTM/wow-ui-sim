@@ -72,7 +72,11 @@ pub fn compute_frame_rect(
     let anchor = &frame.anchors[0];
     let rel_rect = resolve_anchor_target(registry, anchor, &pr, screen_width, screen_height);
     let (ax, ay) = anchor_position(
-        anchor.relative_point, rel_rect.x, rel_rect.y, rel_rect.width, rel_rect.height,
+        anchor.relative_point,
+        rel_rect.x,
+        rel_rect.y,
+        rel_rect.width,
+        rel_rect.height,
     );
     // WoW uses Y-up coordinate system, screen uses Y-down
     let target_x = ax + anchor.x_offset;
@@ -103,7 +107,12 @@ fn resolve_anchor_target(
     if let Some(rel_id) = anchor.relative_to_id {
         compute_frame_rect(registry, rel_id as u64, screen_width, screen_height)
     } else {
-        LayoutRect { x: 0.0, y: 0.0, width: screen_width, height: screen_height }
+        LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: screen_width,
+            height: screen_height,
+        }
     }
 }
 

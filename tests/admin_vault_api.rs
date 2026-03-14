@@ -266,8 +266,6 @@ fn test_vault_has_no_rewards_by_default() {
 #[test]
 fn test_vault_get_activities_empty_by_default() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_WeeklyRewards.GetActivities()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_WeeklyRewards.GetActivities()").unwrap();
     assert_eq!(count, 0);
 }

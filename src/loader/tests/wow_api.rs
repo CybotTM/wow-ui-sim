@@ -84,11 +84,21 @@ fn test_enum_inventory_type_values() {
     let env = WowLuaEnv::new().unwrap();
     let _: i32 = env.eval("return Enum.InventoryType.IndexHeadType").unwrap();
     let _: i32 = env.eval("return Enum.InventoryType.IndexNeckType").unwrap();
-    let _: i32 = env.eval("return Enum.InventoryType.IndexShoulderType").unwrap();
-    let _: i32 = env.eval("return Enum.InventoryType.IndexChestType").unwrap();
-    let _: i32 = env.eval("return Enum.InventoryType.IndexWeaponType").unwrap();
-    let _: i32 = env.eval("return Enum.InventoryType.IndexShieldType").unwrap();
-    let _: i32 = env.eval("return Enum.InventoryType.Index2HweaponType").unwrap();
+    let _: i32 = env
+        .eval("return Enum.InventoryType.IndexShoulderType")
+        .unwrap();
+    let _: i32 = env
+        .eval("return Enum.InventoryType.IndexChestType")
+        .unwrap();
+    let _: i32 = env
+        .eval("return Enum.InventoryType.IndexWeaponType")
+        .unwrap();
+    let _: i32 = env
+        .eval("return Enum.InventoryType.IndexShieldType")
+        .unwrap();
+    let _: i32 = env
+        .eval("return Enum.InventoryType.Index2HweaponType")
+        .unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -147,7 +157,9 @@ fn test_le_expansion_constants() {
     let env = WowLuaEnv::new().unwrap();
     let _: i32 = env.eval("return LE_EXPANSION_CLASSIC").unwrap();
     let _: i32 = env.eval("return LE_EXPANSION_BURNING_CRUSADE").unwrap();
-    let _: i32 = env.eval("return LE_EXPANSION_WRATH_OF_THE_LICH_KING").unwrap();
+    let _: i32 = env
+        .eval("return LE_EXPANSION_WRATH_OF_THE_LICH_KING")
+        .unwrap();
     let _: i32 = env.eval("return LE_EXPANSION_CATACLYSM").unwrap();
     let _: i32 = env.eval("return LE_EXPANSION_MISTS_OF_PANDARIA").unwrap();
     let _: i32 = env.eval("return LE_EXPANSION_WARLORDS_OF_DRAENOR").unwrap();
@@ -178,14 +190,18 @@ fn test_expansion_name_globals() {
 #[test]
 fn test_c_container_get_num_slots() {
     let env = WowLuaEnv::new().unwrap();
-    let slots: i32 = env.eval("return C_Container.GetContainerNumSlots(0)").unwrap();
+    let slots: i32 = env
+        .eval("return C_Container.GetContainerNumSlots(0)")
+        .unwrap();
     assert!(slots >= 0);
 }
 
 #[test]
 fn test_c_container_get_num_free_slots() {
     let env = WowLuaEnv::new().unwrap();
-    let free: i32 = env.eval("return C_Container.GetContainerNumFreeSlots(0)").unwrap();
+    let free: i32 = env
+        .eval("return C_Container.GetContainerNumFreeSlots(0)")
+        .unwrap();
     assert!(free >= 0);
 }
 
@@ -296,7 +312,9 @@ fn test_c_new_items_api() {
 #[test]
 fn test_c_currency_info_api() {
     let env = WowLuaEnv::new().unwrap();
-    let size: i32 = env.eval("return C_CurrencyInfo.GetCurrencyListSize()").unwrap();
+    let size: i32 = env
+        .eval("return C_CurrencyInfo.GetCurrencyListSize()")
+        .unwrap();
     assert!(size >= 0);
 
     for f in &["GetCurrencyListInfo", "GetCoinTextureString"] {
@@ -333,9 +351,7 @@ fn test_c_bank_api() {
     let env = WowLuaEnv::new().unwrap();
     let ty: String = env.eval("return type(C_Bank)").unwrap();
     assert_eq!(ty, "table");
-    let fn_ty: String = env
-        .eval("return type(C_Bank.FetchDepositedMoney)")
-        .unwrap();
+    let fn_ty: String = env.eval("return type(C_Bank.FetchDepositedMoney)").unwrap();
     assert_eq!(fn_ty, "function");
 }
 
@@ -386,8 +402,9 @@ fn test_c_tooltip_info_exists() {
 #[test]
 fn test_get_build_info() {
     let env = WowLuaEnv::new().unwrap();
-    let (version, toc): (String, i32) =
-        env.eval("local v,_,_,t = GetBuildInfo(); return v, t").unwrap();
+    let (version, toc): (String, i32) = env
+        .eval("local v,_,_,t = GetBuildInfo(); return v, t")
+        .unwrap();
     assert!(!version.is_empty());
     assert!(toc > 0);
 }

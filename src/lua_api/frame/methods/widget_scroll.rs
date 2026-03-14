@@ -14,9 +14,13 @@ pub fn add_scrollframe_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("RegisterCallback", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("RegisterCallback", |_, _this, _args: mlua::MultiValue| {
+        Ok(())
+    });
     methods.add_method("ForEachFrame", |_, _this, _cb: mlua::Function| Ok(()));
-    methods.add_method("UnregisterCallback", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("UnregisterCallback", |_, _this, _args: mlua::MultiValue| {
+        Ok(())
+    });
     methods.add_method("CanInterpolateScroll", |_, _this, ()| Ok(false));
     methods.add_method("SetInterpolateScroll", |_, _this, _enabled: bool| Ok(()));
 }
@@ -32,7 +36,11 @@ fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         }
         let child_id = match extract_frame_id(&child) {
             Some(cid) => cid,
-            None => return Err(mlua::Error::runtime("Usage: ScrollFrame:SetScrollChild(child)")),
+            None => {
+                return Err(mlua::Error::runtime(
+                    "Usage: ScrollFrame:SetScrollChild(child)",
+                ));
+            }
         };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -73,7 +81,11 @@ fn add_scrollframe_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetHorizontalScroll", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.scroll_horizontal).unwrap_or(0.0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.scroll_horizontal)
+            .unwrap_or(0.0))
     });
 
     methods.add_method("SetVerticalScroll", |lua, this, offset: f64| {
@@ -88,7 +100,11 @@ fn add_scrollframe_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetVerticalScroll", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.scroll_vertical).unwrap_or(0.0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.scroll_vertical)
+            .unwrap_or(0.0))
     });
 }
 
@@ -100,7 +116,8 @@ fn add_scrollframe_range_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Some(f) => f,
             None => return Ok(0.0_f64),
         };
-        let child_width = frame.scroll_child_id
+        let child_width = frame
+            .scroll_child_id
             .and_then(|cid| state.widgets.get(cid))
             .map(|c| c.width as f64)
             .unwrap_or(0.0);
@@ -114,7 +131,8 @@ fn add_scrollframe_range_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Some(f) => f,
             None => return Ok(0.0_f64),
         };
-        let child_height = frame.scroll_child_id
+        let child_height = frame
+            .scroll_child_id
             .and_then(|cid| state.widgets.get(cid))
             .map(|c| c.height as f64)
             .unwrap_or(0.0);

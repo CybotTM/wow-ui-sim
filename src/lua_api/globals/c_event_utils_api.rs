@@ -8,19 +8,18 @@ pub fn register_c_event_utils_api(lua: &Lua) -> Result<()> {
 
     t.set(
         "IsEventValid",
-        lua.create_function(|_, event: String| {
-            Ok(crate::event::is_valid_event(&event))
-        })?,
+        lua.create_function(|_, event: String| Ok(crate::event::is_valid_event(&event)))?,
     )?;
 
     t.set(
         "IsCallbackEvent",
-        lua.create_function(|_, event: String| {
-            Ok(crate::event::is_callback_event(&event))
-        })?,
+        lua.create_function(|_, event: String| Ok(crate::event::is_callback_event(&event)))?,
     )?;
 
-    t.set("CanPlayerUseEventScheduler", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "CanPlayerUseEventScheduler",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
 
     lua.globals().set("C_EventUtils", t)?;
     Ok(())

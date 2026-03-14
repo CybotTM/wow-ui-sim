@@ -43,7 +43,10 @@ fn emit_corners(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtlasInf
         Size::new(left_w, bottom_h),
     );
     let br = Rectangle::new(
-        Point::new(bounds.x + bounds.width - right_w, bounds.y + bounds.height - bottom_h),
+        Point::new(
+            bounds.x + bounds.width - right_w,
+            bounds.y + bounds.height - bottom_h,
+        ),
         Size::new(right_w, bottom_h),
     );
 
@@ -66,14 +69,33 @@ fn emit_horiz_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtla
         Size::new(edge_w, ns.edge_top.height as f32),
     );
     let (top_path, top_uvs) = crop_piece(&ns.edge_top);
-    emit_horiz_tiles(batch, top_bounds, &top_uvs, &top_path, ns.edge_top.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    emit_horiz_tiles(
+        batch,
+        top_bounds,
+        &top_uvs,
+        &top_path,
+        ns.edge_top.width as f32,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Alpha,
+    );
 
     let bot_bounds = Rectangle::new(
-        Point::new(edge_x, bounds.y + bounds.height - ns.edge_bottom.height as f32),
+        Point::new(
+            edge_x,
+            bounds.y + bounds.height - ns.edge_bottom.height as f32,
+        ),
         Size::new(edge_w, ns.edge_bottom.height as f32),
     );
     let (bot_path, bot_uvs) = crop_piece(&ns.edge_bottom);
-    emit_horiz_tiles(batch, bot_bounds, &bot_uvs, &bot_path, ns.edge_bottom.width as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    emit_horiz_tiles(
+        batch,
+        bot_bounds,
+        &bot_uvs,
+        &bot_path,
+        ns.edge_bottom.width as f32,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Alpha,
+    );
 }
 
 /// Emit tiled vertical edges (left and right) between corners.
@@ -89,14 +111,30 @@ fn emit_vert_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtlas
         Size::new(ns.edge_left.width as f32, edge_h),
     );
     let (left_path, left_uvs) = crop_piece(&ns.edge_left);
-    emit_vert_tiles(batch, left_bounds, &left_uvs, &left_path, ns.edge_left.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    emit_vert_tiles(
+        batch,
+        left_bounds,
+        &left_uvs,
+        &left_path,
+        ns.edge_left.height as f32,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Alpha,
+    );
 
     let right_bounds = Rectangle::new(
         Point::new(bounds.x + bounds.width - ns.edge_right.width as f32, edge_y),
         Size::new(ns.edge_right.width as f32, edge_h),
     );
     let (right_path, right_uvs) = crop_piece(&ns.edge_right);
-    emit_vert_tiles(batch, right_bounds, &right_uvs, &right_path, ns.edge_right.height as f32, [1.0, 1.0, 1.0, alpha], BlendMode::Alpha);
+    emit_vert_tiles(
+        batch,
+        right_bounds,
+        &right_uvs,
+        &right_path,
+        ns.edge_right.height as f32,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Alpha,
+    );
 }
 
 /// Emit a nine-slice atlas kit: 4 corners, 4 tiled edges, optional stretched center.
@@ -116,7 +154,12 @@ pub fn emit_nine_slice_atlas(
         let cw = bounds.width - ns.corner_tl.width as f32 - ns.corner_tr.width as f32;
         let ch = bounds.height - ns.corner_tl.height as f32 - ns.corner_bl.height as f32;
         if cw > 0.0 && ch > 0.0 {
-            emit_piece(batch, Rectangle::new(Point::new(cx, cy), Size::new(cw, ch)), center, alpha);
+            emit_piece(
+                batch,
+                Rectangle::new(Point::new(cx, cy), Size::new(cw, ch)),
+                center,
+                alpha,
+            );
         }
     }
 }
@@ -139,10 +182,15 @@ pub fn emit_nine_slice_with_center_color(
     // with negative insets, so the fill extends under the corners to plug transparent areas.
     let cx = bounds.x + ns.corner_tl.width as f32 - center_overlap;
     let cy = bounds.y + ns.corner_tl.height as f32 - center_overlap;
-    let cw = bounds.width - ns.corner_tl.width as f32 - ns.corner_tr.width as f32 + center_overlap * 2.0;
-    let ch = bounds.height - ns.corner_tl.height as f32 - ns.corner_bl.height as f32 + center_overlap * 2.0;
+    let cw =
+        bounds.width - ns.corner_tl.width as f32 - ns.corner_tr.width as f32 + center_overlap * 2.0;
+    let ch = bounds.height - ns.corner_tl.height as f32 - ns.corner_bl.height as f32
+        + center_overlap * 2.0;
     if cw > 0.0 && ch > 0.0 {
-        batch.push_solid(Rectangle::new(Point::new(cx, cy), Size::new(cw, ch)), center_color);
+        batch.push_solid(
+            Rectangle::new(Point::new(cx, cy), Size::new(cw, ch)),
+            center_color,
+        );
     }
 
     emit_corners(batch, bounds, ns, alpha);

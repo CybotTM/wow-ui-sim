@@ -74,8 +74,18 @@ fn register_mount_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
             // Returns: name, spellID, icon, isActive, isUsable, sourceType, isFavorite,
             // isFactionSpecific, faction, shouldHideOnChar, isCollected, mountID
             Ok((
-                Value::Nil, Value::Nil, Value::Nil, false, false, 0i32,
-                false, false, Value::Nil, false, false, 0i32,
+                Value::Nil,
+                Value::Nil,
+                Value::Nil,
+                false,
+                false,
+                0i32,
+                false,
+                false,
+                Value::Nil,
+                false,
+                false,
+                0i32,
             ))
         })?,
     )?;
@@ -132,10 +142,7 @@ fn register_toy_box(lua: &Lua) -> Result<()> {
         "GetToyFromIndex",
         lua.create_function(|_, _index: i32| Ok(0i32))?,
     )?;
-    t.set(
-        "GetNumFilteredToys",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    t.set("GetNumFilteredToys", lua.create_function(|_, ()| Ok(0i32))?)?;
     lua.globals().set("C_ToyBox", t)?;
     Ok(())
 }
@@ -197,10 +204,7 @@ fn register_transmog_outfit_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetOutfits",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set(
-        "GetNumMaxOutfits",
-        lua.create_function(|_, ()| Ok(20i32))?,
-    )?;
+    t.set("GetNumMaxOutfits", lua.create_function(|_, ()| Ok(20i32))?)?;
     t.set(
         "GetOutfitInfo",
         lua.create_function(|_, _outfit_id: i32| {
@@ -212,22 +216,37 @@ fn register_transmog_outfit_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Source and player ownership methods: transmog checks, filters, item info.
 fn register_transmog_source_methods(
-    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let s = Rc::clone(state);
-    t.set("PlayerHasTransmog", lua.create_function(move |_, (item_id, _appearance_mod): (i32, Option<i32>)| {
-        Ok(s.borrow().world.collected_transmogs.contains(&item_id))
-    })?)?;
+    t.set(
+        "PlayerHasTransmog",
+        lua.create_function(move |_, (item_id, _appearance_mod): (i32, Option<i32>)| {
+            Ok(s.borrow().world.collected_transmogs.contains(&item_id))
+        })?,
+    )?;
     let s = Rc::clone(state);
-    t.set("PlayerHasTransmogByItemInfo", lua.create_function(move |_, item_info: String| {
-        // Parse item_id from "item:12345:..." link format.
-        let id = item_info.split(':').nth(1).and_then(|s| s.parse::<i32>().ok()).unwrap_or(0);
-        Ok(s.borrow().world.collected_transmogs.contains(&id))
-    })?)?;
+    t.set(
+        "PlayerHasTransmogByItemInfo",
+        lua.create_function(move |_, item_info: String| {
+            // Parse item_id from "item:12345:..." link format.
+            let id = item_info
+                .split(':')
+                .nth(1)
+                .and_then(|s| s.parse::<i32>().ok())
+                .unwrap_or(0);
+            Ok(s.borrow().world.collected_transmogs.contains(&id))
+        })?,
+    )?;
     let s = Rc::clone(state);
-    t.set("PlayerHasTransmogItemModifiedAppearance", lua.create_function(move |_, id: i32| {
-        Ok(s.borrow().world.collected_transmogs.contains(&id))
-    })?)?;
+    t.set(
+        "PlayerHasTransmogItemModifiedAppearance",
+        lua.create_function(move |_, id: i32| {
+            Ok(s.borrow().world.collected_transmogs.contains(&id))
+        })?,
+    )?;
     t.set(
         "GetItemInfo",
         lua.create_function(|_, _item_modified_appearance_id: i32| Ok(Value::Nil))?,
@@ -260,9 +279,7 @@ fn register_transmog(lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "GetSlotInfo",
-        lua.create_function(|_, _slot: i32| {
-            Ok((false, false, false, false, false, Value::Nil))
-        })?,
+        lua.create_function(|_, _slot: i32| Ok((false, false, false, false, false, Value::Nil)))?,
     )?;
     lua.globals().set("C_Transmog", t)?;
     Ok(())
@@ -273,23 +290,27 @@ fn register_transmog_util(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
         "GetTransmogLocation",
-        lua.create_function(|lua, (slot, transmog_type, modification): (String, i32, i32)| {
-            let location = lua.create_table()?;
-            location.set("slotName", slot)?;
-            location.set("transmogType", transmog_type)?;
-            location.set("modification", modification)?;
-            Ok(location)
-        })?,
+        lua.create_function(
+            |lua, (slot, transmog_type, modification): (String, i32, i32)| {
+                let location = lua.create_table()?;
+                location.set("slotName", slot)?;
+                location.set("transmogType", transmog_type)?;
+                location.set("modification", modification)?;
+                Ok(location)
+            },
+        )?,
     )?;
     t.set(
         "CreateTransmogLocation",
-        lua.create_function(|lua, (slot_id, transmog_type, modification): (i32, i32, i32)| {
-            let location = lua.create_table()?;
-            location.set("slotID", slot_id)?;
-            location.set("transmogType", transmog_type)?;
-            location.set("modification", modification)?;
-            Ok(location)
-        })?,
+        lua.create_function(
+            |lua, (slot_id, transmog_type, modification): (i32, i32, i32)| {
+                let location = lua.create_table()?;
+                location.set("slotID", slot_id)?;
+                location.set("transmogType", transmog_type)?;
+                location.set("modification", modification)?;
+                Ok(location)
+            },
+        )?,
     )?;
     t.set(
         "GetBestItemModifiedAppearanceID",
@@ -308,7 +329,16 @@ fn register_heirloom(lua: &Lua) -> Result<()> {
             // Returns: name, itemEquipLoc, isPvP, itemTexture, upgradeLevel, source,
             // searchFiltered, effectiveLevel, minLevel, maxLevel
             Ok((
-                Value::Nil, Value::Nil, false, 0i32, 0i32, 0i32, false, 0i32, 0i32, 0i32,
+                Value::Nil,
+                Value::Nil,
+                false,
+                0i32,
+                0i32,
+                0i32,
+                false,
+                0i32,
+                0i32,
+                0i32,
             ))
         })?,
     )?;
@@ -316,10 +346,7 @@ fn register_heirloom(lua: &Lua) -> Result<()> {
         "GetHeirloomMaxUpgradeLevel",
         lua.create_function(|_, _item_id: i32| Ok(0i32))?,
     )?;
-    t.set(
-        "GetNumHeirlooms",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    t.set("GetNumHeirlooms", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set(
         "GetNumKnownHeirlooms",
         lua.create_function(|_, ()| Ok(0i32))?,

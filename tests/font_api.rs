@@ -192,9 +192,7 @@ fn test_create_font_get_font_object_for_alphabet() {
 #[test]
 fn test_get_fonts_returns_table() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(GetFonts()) == 'table'")
-        .unwrap();
+    let is_table: bool = env.eval("return type(GetFonts()) == 'table'").unwrap();
     assert!(is_table);
 }
 
@@ -279,9 +277,7 @@ fn test_standard_fonts_exist() {
         "SystemFont_Med1",
         "GameTooltipText",
     ] {
-        let exists: bool = env
-            .eval(&format!("return {} ~= nil", name))
-            .unwrap();
+        let exists: bool = env.eval(&format!("return {} ~= nil", name)).unwrap();
         assert!(exists, "{} should exist", name);
     }
 }
@@ -299,9 +295,8 @@ fn test_standard_font_has_methods() {
 #[test]
 fn test_standard_font_gold_color() {
     let env = env();
-    let (r, g, _b, _a): (f64, f64, f64, f64) = env
-        .eval("return GameFontNormal:GetTextColor()")
-        .unwrap();
+    let (r, g, _b, _a): (f64, f64, f64, f64) =
+        env.eval("return GameFontNormal:GetTextColor()").unwrap();
     assert_eq!(r, 1.0);
     assert!((g - 0.82).abs() < 0.01);
 }
@@ -322,7 +317,10 @@ fn test_messageframe_get_font_object_auto_creates() {
             "#,
         )
         .unwrap();
-    assert!(is_table, "MessageFrame:GetFontObject() should auto-create a Font object");
+    assert!(
+        is_table,
+        "MessageFrame:GetFontObject() should auto-create a Font object"
+    );
 }
 
 #[test]
@@ -337,7 +335,10 @@ fn test_editbox_get_font_object_auto_creates() {
             "#,
         )
         .unwrap();
-    assert!(is_table, "EditBox:GetFontObject() should auto-create a Font object");
+    assert!(
+        is_table,
+        "EditBox:GetFontObject() should auto-create a Font object"
+    );
 }
 
 #[test]

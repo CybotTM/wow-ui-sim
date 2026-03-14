@@ -19,48 +19,51 @@ mod app;
 #[cfg(feature = "gui")]
 mod button_vis;
 #[cfg(feature = "gui")]
+mod casting;
+#[cfg(feature = "gui")]
 mod hit_grid;
 #[cfg(feature = "gui")]
 mod keybinds;
 #[cfg(feature = "gui")]
+mod masking;
+#[cfg(feature = "gui")]
 mod message_frame_render;
 #[cfg(feature = "gui")]
-mod nine_slice;
+mod mouse;
 #[cfg(feature = "gui")]
-mod masking;
+mod nine_slice;
 #[cfg(feature = "gui")]
 mod quad_builders;
 #[cfg(feature = "gui")]
 mod render;
 #[cfg(feature = "gui")]
-mod strata_emit;
+mod screenshot;
+#[cfg(feature = "gui")]
+mod state;
 #[cfg(feature = "gui")]
 mod statusbar;
 #[cfg(feature = "gui")]
-mod state;
+mod strata_emit;
+#[cfg(feature = "gui")]
+mod styles;
 #[cfg(feature = "gui")]
 mod tiling;
 #[cfg(feature = "gui")]
 pub mod tooltip;
 #[cfg(feature = "gui")]
-mod styles;
-#[cfg(feature = "gui")]
-mod mouse;
-#[cfg(feature = "gui")]
-mod casting;
+mod tree_dump;
 #[cfg(feature = "gui")]
 mod update;
 #[cfg(feature = "gui")]
 mod update_servers;
 #[cfg(feature = "gui")]
-mod screenshot;
-#[cfg(feature = "gui")]
-mod tree_dump;
-#[cfg(feature = "gui")]
 mod view;
 
 // Always-compiled re-exports
-pub use layout::{anchor_position, compute_frame_rect, compute_frame_rect_cached, frame_position_from_anchor, CachedFrameLayout, LayoutCache};
+pub use layout::{
+    CachedFrameLayout, LayoutCache, anchor_position, compute_frame_rect, compute_frame_rect_cached,
+    frame_position_from_anchor,
+};
 
 // GUI-only imports and re-exports
 #[cfg(feature = "gui")]
@@ -77,9 +80,9 @@ use crate::saved_variables::SavedVariablesManager;
 #[cfg(feature = "gui")]
 pub use app::App;
 #[cfg(feature = "gui")]
-pub use strata_emit::{build_quad_batch_for_registry, build_hittable_rects};
-#[cfg(feature = "gui")]
 pub use state::{CanvasMessage, InspectorState};
+#[cfg(feature = "gui")]
+pub use strata_emit::{build_hittable_rects, build_quad_batch_for_registry};
 #[cfg(feature = "gui")]
 pub use styles::palette;
 

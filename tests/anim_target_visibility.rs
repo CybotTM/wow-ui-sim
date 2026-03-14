@@ -35,7 +35,8 @@ const DEFINE_MIXIN: &str = r##"
 /// Returns Lua code that sets up the frame and fires OnLoad.
 fn setup_cast_bar_with_onload(env: &WowLuaEnv) {
     env.exec(DEFINE_MIXIN).unwrap();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestCastBar", UIParent)
         local flakes1 = f:CreateTexture("Flakes01", "ARTWORK")
         local flakes2 = f:CreateTexture("Flakes02", "ARTWORK")
@@ -52,7 +53,9 @@ fn setup_cast_bar_with_onload(env: &WowLuaEnv) {
 
         do local onLoad = ag:GetScript("OnLoad")
         if onLoad then onLoad(ag) end end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// Verify the full OnLoad chain hides animation targets.
@@ -60,20 +63,24 @@ fn setup_cast_bar_with_onload(env: &WowLuaEnv) {
 fn onload_hides_animation_targets() {
     let env = setup();
     setup_cast_bar_with_onload(&env);
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = TestCastBar
         assert(f.Flakes01:IsShown() == false,
             "Flakes01 should be hidden after OnLoad, got " .. tostring(f.Flakes01:IsShown()))
         assert(f.Flakes02:IsShown() == false,
             "Flakes02 should be hidden after OnLoad, got " .. tostring(f.Flakes02:IsShown()))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// Verify texture alpha=0 from XML template is preserved after creation.
 #[test]
 fn texture_alpha_zero_preserved_from_template() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAlphaFrame", UIParent)
         local tex = f:CreateTexture("AlphaTex", "ARTWORK")
         tex:SetAlpha(0)
@@ -82,14 +89,17 @@ fn texture_alpha_zero_preserved_from_template() {
             "Texture alpha should be 0 after SetAlpha(0), got " .. tex:GetAlpha())
         assert(tex:IsShown() == true,
             "Texture should still be shown (visible) even with alpha=0")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// GetTarget returns the owner frame when no childKey is set.
 #[test]
 fn get_target_returns_owner_when_no_child_key() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestTargetOwner", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
@@ -97,41 +107,50 @@ fn get_target_returns_owner_when_no_child_key() {
         assert(target ~= nil, "GetTarget should return owner frame")
         assert(target:GetName() == "TestTargetOwner",
             "Target should be owner frame, got " .. tostring(target:GetName()))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// CAST_BAR_CAST_TIME global string must exist for OnUpdate to work.
 #[test]
 fn cast_bar_cast_time_string_exists() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         assert(CAST_BAR_CAST_TIME ~= nil,
             "CAST_BAR_CAST_TIME global string must be defined")
         local text = string.format(CAST_BAR_CAST_TIME, 1.5)
         assert(type(text) == "string",
             "string.format(CAST_BAR_CAST_TIME, 1.5) should produce a string, got " .. type(text))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// GameRulesUtil.ShouldShowPlayerCastBar must exist for UpdateShownState to work.
 #[test]
 fn game_rules_util_should_show_player_cast_bar() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         assert(GameRulesUtil ~= nil,
             "GameRulesUtil global table must be defined")
         assert(GameRulesUtil.ShouldShowPlayerCastBar ~= nil,
             "GameRulesUtil.ShouldShowPlayerCastBar must be defined")
         assert(GameRulesUtil.ShouldShowPlayerCastBar() == true,
             "ShouldShowPlayerCastBar should return true")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 /// GetTarget resolves childKey to the correct child texture.
 #[test]
 fn get_target_resolves_child_key() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestTargetChild", UIParent)
         local tex = f:CreateTexture("MyTex", "ARTWORK")
         f.MyTex = tex
@@ -142,5 +161,7 @@ fn get_target_resolves_child_key() {
         assert(target ~= nil, "GetTarget should return child texture")
         assert(target:GetName() == "MyTex",
             "Target should be MyTex, got " .. tostring(target:GetName()))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

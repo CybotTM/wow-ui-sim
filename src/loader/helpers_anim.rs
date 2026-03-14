@@ -16,9 +16,16 @@ pub fn generate_animation_group_code(
     ));
 
     if let Some(parent_key) = &anim_group.parent_key {
-        code.push_str(&format!("\n        {frame_ref}.{parent_key} = __ag\n        "));
+        code.push_str(&format!(
+            "\n        {frame_ref}.{parent_key} = __ag\n        "
+        ));
     }
-    emit_str_call(&mut code, "__ag", "SetLooping", anim_group.looping.as_deref());
+    emit_str_call(
+        &mut code,
+        "__ag",
+        "SetLooping",
+        anim_group.looping.as_deref(),
+    );
     if anim_group.set_to_final_alpha == Some(true) {
         code.push_str("\n        __ag:SetToFinalAlpha(true)\n        ");
     }
@@ -30,10 +37,12 @@ pub fn generate_animation_group_code(
 
     // Fire OnLoad after the animation group is fully configured (mixin + scripts).
     // TargetsVisibleWhilePlayingAnimGroupTemplate uses OnLoad to Hide() animation targets.
-    code.push_str(r#"
+    code.push_str(
+        r#"
         do local __onLoad = __ag:GetScript("OnLoad")
         if __onLoad then __onLoad(__ag) end end
-        "#);
+        "#,
+    );
 
     code.push_str("\n        end\n        ");
     code
@@ -45,7 +54,9 @@ fn emit_inherited_anim_group_children(
     anim_group: &crate::xml::AnimationGroupXml,
     frame_ref: &str,
 ) {
-    let Some(ref inherits) = anim_group.inherits else { return };
+    let Some(ref inherits) = anim_group.inherits else {
+        return;
+    };
     let registry = crate::xml::anim_group_template_registry_read();
     for parent_name in inherits.split(',').map(|s| s.trim()) {
         if let Some(parent) = registry.get(parent_name) {
@@ -90,7 +101,10 @@ fn emit_anim_key_values(code: &mut String, kv: &crate::xml::KeyValuesXml) {
             Some("boolean") => key_value.value.to_lowercase(),
             _ => format!("\"{}\"", escape_lua_string(&key_value.value)),
         };
-        code.push_str(&format!("\n        __ag.{} = {}\n        ", key_value.key, value));
+        code.push_str(&format!(
+            "\n        __ag.{} = {}\n        ",
+            key_value.key, value
+        ));
     }
 }
 
@@ -120,7 +134,9 @@ fn resolve_animation_element(
 fn emit_anim_group_mixin(code: &mut String, anim_group: &crate::xml::AnimationGroupXml) {
     let mixins = crate::xml::collect_anim_group_mixins(anim_group);
     for m in &mixins {
-        code.push_str(&format!("\n        if {m} then Mixin(__ag, {m}) end\n        "));
+        code.push_str(&format!(
+            "\n        if {m} then Mixin(__ag, {m}) end\n        "
+        ));
     }
 }
 
@@ -190,43 +206,92 @@ fn generate_animation_code(
     }
     emit_num_call(&mut code, "__anim", "SetStartDelay", anim.start_delay);
     emit_num_call(&mut code, "__anim", "SetEndDelay", anim.end_delay);
-    emit_str_call(&mut code, "__anim", "SetSmoothing", anim.smoothing.as_deref());
+    emit_str_call(
+        &mut code,
+        "__anim",
+        "SetSmoothing",
+        anim.smoothing.as_deref(),
+    );
     emit_num_call(&mut code, "__anim", "SetFromAlpha", anim.from_alpha);
     emit_num_call(&mut code, "__anim", "SetToAlpha", anim.to_alpha);
-    emit_pair_call(&mut code, "__anim", "SetOffset", anim.offset_x, anim.offset_y, 0.0);
-    emit_pair_call(&mut code, "__anim", "SetScale", anim.scale_x, anim.scale_y, 1.0);
-    emit_pair_call(&mut code, "__anim", "SetScaleFrom", anim.from_scale_x, anim.from_scale_y, 1.0);
-    emit_pair_call(&mut code, "__anim", "SetScaleTo", anim.to_scale_x, anim.to_scale_y, 1.0);
+    emit_pair_call(
+        &mut code,
+        "__anim",
+        "SetOffset",
+        anim.offset_x,
+        anim.offset_y,
+        0.0,
+    );
+    emit_pair_call(
+        &mut code,
+        "__anim",
+        "SetScale",
+        anim.scale_x,
+        anim.scale_y,
+        1.0,
+    );
+    emit_pair_call(
+        &mut code,
+        "__anim",
+        "SetScaleFrom",
+        anim.from_scale_x,
+        anim.from_scale_y,
+        1.0,
+    );
+    emit_pair_call(
+        &mut code,
+        "__anim",
+        "SetScaleTo",
+        anim.to_scale_x,
+        anim.to_scale_y,
+        1.0,
+    );
     emit_num_call(&mut code, "__anim", "SetDegrees", anim.degrees);
-    emit_str_call(&mut code, "__anim", "SetChildKey", anim.child_key.as_deref());
+    emit_str_call(
+        &mut code,
+        "__anim",
+        "SetChildKey",
+        anim.child_key.as_deref(),
+    );
     emit_str_call(&mut code, "__anim", "SetTargetName", anim.target.as_deref());
-    emit_str_call(&mut code, "__anim", "SetTargetKey", anim.target_key.as_deref());
+    emit_str_call(
+        &mut code,
+        "__anim",
+        "SetTargetKey",
+        anim.target_key.as_deref(),
+    );
 
     // FlipBook properties
     if let Some(rows) = anim.flip_book_rows {
-        code.push_str(&format!("\n        __anim:SetFlipBookRows({rows})\n        "));
+        code.push_str(&format!(
+            "\n        __anim:SetFlipBookRows({rows})\n        "
+        ));
     }
     if let Some(cols) = anim.flip_book_columns {
-        code.push_str(&format!("\n        __anim:SetFlipBookColumns({cols})\n        "));
+        code.push_str(&format!(
+            "\n        __anim:SetFlipBookColumns({cols})\n        "
+        ));
     }
     if let Some(frames) = anim.flip_book_frames {
-        code.push_str(&format!("\n        __anim:SetFlipBookFrames({frames})\n        "));
+        code.push_str(&format!(
+            "\n        __anim:SetFlipBookFrames({frames})\n        "
+        ));
     }
 
     code
 }
 
 /// Generate Lua code for animation group script handlers (OnPlay, OnFinished, etc.).
-fn generate_anim_group_scripts_code(
-    scripts: &crate::xml::ScriptsXml,
-    group_ref: &str,
-) -> String {
-    apply_script_handlers(group_ref, &[
-        ("OnLoad", scripts.on_load.last()),
-        ("OnPlay", scripts.on_play.last()),
-        ("OnFinished", scripts.on_finished.last()),
-        ("OnStop", scripts.on_stop.last()),
-        ("OnLoop", scripts.on_loop.last()),
-        ("OnPause", scripts.on_pause.last()),
-    ])
+fn generate_anim_group_scripts_code(scripts: &crate::xml::ScriptsXml, group_ref: &str) -> String {
+    apply_script_handlers(
+        group_ref,
+        &[
+            ("OnLoad", scripts.on_load.last()),
+            ("OnPlay", scripts.on_play.last()),
+            ("OnFinished", scripts.on_finished.last()),
+            ("OnStop", scripts.on_stop.last()),
+            ("OnLoop", scripts.on_loop.last()),
+            ("OnPause", scripts.on_pause.last()),
+        ],
+    )
 }

@@ -1,6 +1,6 @@
+use super::super::LoadTiming;
 use super::super::addon::AddonContext;
 use super::super::xml_file::load_xml_file;
-use super::super::LoadTiming;
 use crate::lua_api::WowLuaEnv;
 use crate::xml::parse_xml_file;
 
@@ -11,7 +11,11 @@ fn test_parse_wowless_test_xml() {
         return; // Skip if Wowless addon not present
     }
     let result = parse_xml_file(path);
-    assert!(result.is_ok(), "Wowless test.xml should parse: {:?}", result.err());
+    assert!(
+        result.is_ok(),
+        "Wowless test.xml should parse: {:?}",
+        result.err()
+    );
 }
 
 #[test]

@@ -37,7 +37,10 @@ fn test_set_frame_level_does_not_fix_level() {
             "#,
         )
         .unwrap();
-    assert_eq!(level, 1, "SetFrameLevel should not prevent level inheritance on reparent");
+    assert_eq!(
+        level, 1,
+        "SetFrameLevel should not prevent level inheritance on reparent"
+    );
 }
 
 // ============================================================================
@@ -123,7 +126,9 @@ fn test_create_frame_anonymous() {
     )
     .unwrap();
 
-    let obj_type: String = env.eval("return TestAnonymousFrame:GetObjectType()").unwrap();
+    let obj_type: String = env
+        .eval("return TestAnonymousFrame:GetObjectType()")
+        .unwrap();
     let width: f32 = env.eval("return TestAnonymousFrame:GetWidth()").unwrap();
 
     assert_eq!(obj_type, "Frame");
@@ -149,7 +154,9 @@ fn test_create_frame_with_parent() {
     )
     .unwrap();
 
-    let parent_name: String = env.eval("return TestChildFrame:GetParent():GetName()").unwrap();
+    let parent_name: String = env
+        .eval("return TestChildFrame:GetParent():GetName()")
+        .unwrap();
     assert_eq!(parent_name, "TestParentFrame");
 
     // Verify child is registered with parent in Rust
@@ -182,7 +189,9 @@ fn test_create_frame_default_parent() {
     )
     .unwrap();
 
-    let parent_name: String = env.eval("return TestDefaultParent:GetParent():GetName()").unwrap();
+    let parent_name: String = env
+        .eval("return TestDefaultParent:GetParent():GetName()")
+        .unwrap();
     assert_eq!(parent_name, "UIParent");
 }
 
@@ -251,7 +260,10 @@ fn test_create_frame_strata_inheritance() {
     let child_strata: String = env.eval("return HighStrataChild:GetFrameStrata()").unwrap();
     let child_level: i32 = env.eval("return HighStrataChild:GetFrameLevel()").unwrap();
 
-    assert_eq!(child_strata, "DIALOG", "Child should inherit parent's strata");
+    assert_eq!(
+        child_strata, "DIALOG",
+        "Child should inherit parent's strata"
+    );
     assert_eq!(child_level, 11, "Child level should be parent level + 1");
 }
 
@@ -283,7 +295,10 @@ fn test_create_button_no_default_textures() {
 
     assert!(!has_normal, "Fresh button should not have NormalTexture");
     assert!(!has_pushed, "Fresh button should not have PushedTexture");
-    assert!(!has_highlight, "Fresh button should not have HighlightTexture");
+    assert!(
+        !has_highlight,
+        "Fresh button should not have HighlightTexture"
+    );
 }
 
 #[test]
@@ -364,9 +379,18 @@ fn test_create_checkbutton_basic() {
         .eval("return TestCheckButton:GetHighlightTexture() ~= nil")
         .unwrap();
 
-    assert!(!has_normal, "Fresh CheckButton should not have NormalTexture");
-    assert!(!has_pushed, "Fresh CheckButton should not have PushedTexture");
-    assert!(!has_highlight, "Fresh CheckButton should not have HighlightTexture");
+    assert!(
+        !has_normal,
+        "Fresh CheckButton should not have NormalTexture"
+    );
+    assert!(
+        !has_pushed,
+        "Fresh CheckButton should not have PushedTexture"
+    );
+    assert!(
+        !has_highlight,
+        "Fresh CheckButton should not have HighlightTexture"
+    );
 }
 
 #[test]
@@ -381,15 +405,24 @@ fn test_checkbutton_checked_state() {
     )
     .unwrap();
 
-    let initially_checked: bool = env.eval("return TestCheckButtonState:GetChecked()").unwrap();
+    let initially_checked: bool = env
+        .eval("return TestCheckButtonState:GetChecked()")
+        .unwrap();
     assert!(!initially_checked, "CheckButton should start unchecked");
 
     env.exec("TestCheckButtonState:SetChecked(true)").unwrap();
-    let now_checked: bool = env.eval("return TestCheckButtonState:GetChecked()").unwrap();
-    assert!(now_checked, "CheckButton should be checked after SetChecked(true)");
+    let now_checked: bool = env
+        .eval("return TestCheckButtonState:GetChecked()")
+        .unwrap();
+    assert!(
+        now_checked,
+        "CheckButton should be checked after SetChecked(true)"
+    );
 
     env.exec("TestCheckButtonState:SetChecked(false)").unwrap();
-    let now_unchecked: bool = env.eval("return TestCheckButtonState:GetChecked()").unwrap();
+    let now_unchecked: bool = env
+        .eval("return TestCheckButtonState:GetChecked()")
+        .unwrap();
     assert!(
         !now_unchecked,
         "CheckButton should be unchecked after SetChecked(false)"
@@ -411,7 +444,10 @@ fn test_checkbutton_settext_creates_text_child() {
     .unwrap();
 
     let has_text: bool = env.eval("return TestCheckBoxTemplate.Text ~= nil").unwrap();
-    assert!(has_text, "SetText should lazily create Text FontString child");
+    assert!(
+        has_text,
+        "SetText should lazily create Text FontString child"
+    );
 
     let text_type: String = env
         .eval("return TestCheckBoxTemplate.Text:GetObjectType()")
@@ -574,7 +610,9 @@ fn test_create_texture() {
 
     let exists: bool = env.eval("return TestTexture ~= nil").unwrap();
     let obj_type: String = env.eval("return TestTexture:GetObjectType()").unwrap();
-    let parent: String = env.eval("return TestTexture:GetParent():GetName()").unwrap();
+    let parent: String = env
+        .eval("return TestTexture:GetParent():GetName()")
+        .unwrap();
 
     assert!(exists);
     assert_eq!(obj_type, "Texture");
@@ -643,7 +681,9 @@ fn test_addon_style_frame_creation() {
     let main_exists: bool = env.eval("return MyAddon ~= nil").unwrap();
     let titlebar_exists: bool = env.eval("return MyAddonTitleBar ~= nil").unwrap();
     let title_exists: bool = env.eval("return MyAddonTitleBarTitle ~= nil").unwrap();
-    let close_exists: bool = env.eval("return MyAddonTitleBarCloseButton ~= nil").unwrap();
+    let close_exists: bool = env
+        .eval("return MyAddonTitleBarCloseButton ~= nil")
+        .unwrap();
     let content_exists: bool = env.eval("return MyAddonContent ~= nil").unwrap();
 
     assert!(main_exists);
@@ -652,7 +692,9 @@ fn test_addon_style_frame_creation() {
     assert!(close_exists);
     assert!(content_exists);
 
-    let titlebar_parent: String = env.eval("return MyAddonTitleBar:GetParent():GetName()").unwrap();
+    let titlebar_parent: String = env
+        .eval("return MyAddonTitleBar:GetParent():GetName()")
+        .unwrap();
     let title_parent: String = env
         .eval("return MyAddonTitleBarTitle:GetParent():GetName()")
         .unwrap();
@@ -701,7 +743,12 @@ fn test_create_frame_with_frame_in_name_position() {
     "#,
         )
         .unwrap();
-    assert!(name_nil, "CreateFrame with frame as name should have nil name");
-    assert!(parent_nil, "CreateFrame with frame as name should have nil parent");
+    assert!(
+        name_nil,
+        "CreateFrame with frame as name should have nil name"
+    );
+    assert!(
+        parent_nil,
+        "CreateFrame with frame as name should have nil parent"
+    );
 }
-

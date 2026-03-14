@@ -28,7 +28,10 @@ impl WowLuaEnv {
 
     /// Fire a single timer callback, returning true if it fired successfully.
     fn fire_timer_callback(&self, timer: &PendingTimer) -> bool {
-        let Ok(callback) = self.lua.registry_value::<mlua::Function>(&timer.callback_key) else {
+        let Ok(callback) = self
+            .lua
+            .registry_value::<mlua::Function>(&timer.callback_key)
+        else {
             return false;
         };
         let result = self.invoke_timer_callback(&callback, timer);
@@ -70,7 +73,12 @@ impl WowLuaEnv {
     }
 
     /// Reschedule a repeating timer or clean it up if exhausted.
-    fn reschedule_or_cleanup(&self, mut timer: PendingTimer, now: Instant, to_reschedule: &mut Vec<PendingTimer>) {
+    fn reschedule_or_cleanup(
+        &self,
+        mut timer: PendingTimer,
+        now: Instant,
+        to_reschedule: &mut Vec<PendingTimer>,
+    ) {
         let Some(interval) = timer.interval else {
             self.cleanup_timer(timer);
             return;

@@ -5,10 +5,12 @@ mod frame;
 mod frame_enums;
 mod registry;
 
-pub use anchor::{Anchor, AnchorPoint};
-pub use frame::{AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify, TextOutline};
-pub use frame_enums::{DrawLayer, FrameStrata};
 pub use crate::atlas::NineSliceAtlasInfo;
+pub use anchor::{Anchor, AnchorPoint};
+pub use frame::{
+    AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify, TextOutline,
+};
+pub use frame_enums::{DrawLayer, FrameStrata};
 pub use registry::WidgetRegistry;
 
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -53,7 +55,9 @@ impl WidgetType {
         let lower = s.to_ascii_lowercase();
         match lower.as_str() {
             "frame" => Some(Self::Frame),
-            "button" | "dropdownbutton" | "itembutton" | "containedalertframe" => Some(Self::Button),
+            "button" | "dropdownbutton" | "itembutton" | "containedalertframe" => {
+                Some(Self::Button)
+            }
             "fontstring" => Some(Self::FontString),
             "texture" => Some(Self::Texture),
             "line" => Some(Self::Line),
@@ -65,7 +69,9 @@ impl WidgetType {
             "cooldown" => Some(Self::Cooldown),
             "model" => Some(Self::Model),
             "modelscene" => Some(Self::ModelScene),
-            "playermodel" | "cinematicmodel" | "tabardmodel" | "dressupmodel" => Some(Self::PlayerModel),
+            "playermodel" | "cinematicmodel" | "tabardmodel" | "dressupmodel" => {
+                Some(Self::PlayerModel)
+            }
             "colorselect" => Some(Self::ColorSelect),
             "messageframe" | "scrollingmessageframe" => Some(Self::MessageFrame),
             "simplehtml" => Some(Self::SimpleHTML),
@@ -76,8 +82,14 @@ impl WidgetType {
             // Checkout is a special frame type for the in-game shop
             "checkout" => Some(Self::Frame),
             // Specialty frame types — no custom behavior needed, treat as plain Frame
-            "archaeologydigsiteframe" | "browser" | "fogofwarframe" | "movieframe"
-            | "offscreenframe" | "questpoiframe" | "scenariopoiframe" | "unitpositionframe" => Some(Self::Frame),
+            "archaeologydigsiteframe"
+            | "browser"
+            | "fogofwarframe"
+            | "movieframe"
+            | "offscreenframe"
+            | "questpoiframe"
+            | "scenariopoiframe"
+            | "unitpositionframe" => Some(Self::Frame),
             // WorldFrame is internal only — CreateFrame("WorldFrame") should error
             _ => None,
         }

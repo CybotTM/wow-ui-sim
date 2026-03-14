@@ -39,8 +39,14 @@ pub fn calculate_frame_width(widgets: &crate::widget::WidgetRegistry, id: u64) -
         use crate::widget::AnchorPoint::*;
         let left_anchors = [TopLeft, BottomLeft, Left];
         let right_anchors = [TopRight, BottomRight, Right];
-        let left = frame.anchors.iter().find(|a| left_anchors.contains(&a.point));
-        let right = frame.anchors.iter().find(|a| right_anchors.contains(&a.point));
+        let left = frame
+            .anchors
+            .iter()
+            .find(|a| left_anchors.contains(&a.point));
+        let right = frame
+            .anchors
+            .iter()
+            .find(|a| right_anchors.contains(&a.point));
         if let (Some(left_anchor), Some(right_anchor)) = (left, right) {
             if left_anchor.relative_to_id == right_anchor.relative_to_id {
                 // Same frame: compute from relative frame width
@@ -51,7 +57,8 @@ pub fn calculate_frame_width(widgets: &crate::widget::WidgetRegistry, id: u64) -
                 if let Some(pid) = parent_id {
                     let parent_width = calculate_frame_width(widgets, pid);
                     if parent_width > 0.0 {
-                        return (parent_width - left_anchor.x_offset + right_anchor.x_offset).max(0.0);
+                        return (parent_width - left_anchor.x_offset + right_anchor.x_offset)
+                            .max(0.0);
                     }
                 }
                 // Screen-anchored (both relative_to_id == None, no parent): use layout_rect
@@ -84,8 +91,14 @@ pub fn calculate_frame_height(widgets: &crate::widget::WidgetRegistry, id: u64) 
         use crate::widget::AnchorPoint::*;
         let top_anchors = [TopLeft, TopRight, Top];
         let bottom_anchors = [BottomLeft, BottomRight, Bottom];
-        let top = frame.anchors.iter().find(|a| top_anchors.contains(&a.point));
-        let bottom = frame.anchors.iter().find(|a| bottom_anchors.contains(&a.point));
+        let top = frame
+            .anchors
+            .iter()
+            .find(|a| top_anchors.contains(&a.point));
+        let bottom = frame
+            .anchors
+            .iter()
+            .find(|a| bottom_anchors.contains(&a.point));
         if let (Some(top_anchor), Some(bottom_anchor)) = (top, bottom) {
             if top_anchor.relative_to_id == bottom_anchor.relative_to_id {
                 // Same frame: compute from relative frame height
@@ -96,7 +109,8 @@ pub fn calculate_frame_height(widgets: &crate::widget::WidgetRegistry, id: u64) 
                 if let Some(pid) = parent_id {
                     let parent_height = calculate_frame_height(widgets, pid);
                     if parent_height > 0.0 {
-                        return (parent_height + top_anchor.y_offset - bottom_anchor.y_offset).max(0.0);
+                        return (parent_height + top_anchor.y_offset - bottom_anchor.y_offset)
+                            .max(0.0);
                     }
                 }
                 // Screen-anchored (both relative_to_id == None, no parent): use layout_rect
@@ -162,11 +176,14 @@ pub fn get_or_create_button_texture(
         .and_then(|frame| frame.children_keys.get(key).copied());
 
     if let Some(tex_id) = existing_tex_id {
-        let needs_anchors = state.widgets.get(tex_id).map(|t| t.anchors.is_empty()).unwrap_or(false);
-        if needs_anchors
-            && let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-                set_all_points_anchors(tex, button_id);
-            }
+        let needs_anchors = state
+            .widgets
+            .get(tex_id)
+            .map(|t| t.anchors.is_empty())
+            .unwrap_or(false);
+        if needs_anchors && let Some(tex) = state.widgets.get_mut_visual(tex_id) {
+            set_all_points_anchors(tex, button_id);
+        }
         return tex_id;
     }
 
@@ -220,7 +237,9 @@ pub fn resolve_file_data_id_or_path(value: &Value) -> Option<String> {
             }
         }
         Value::Integer(n) => {
-            if *n == 0 { return None; } // 0 means "clear texture"
+            if *n == 0 {
+                return None;
+            } // 0 means "clear texture"
             if let Some(path) = crate::manifest_interface_data::get_texture_path(*n as u32) {
                 Some(format!("Interface\\{}", path.replace('/', "\\")))
             } else {
@@ -229,7 +248,9 @@ pub fn resolve_file_data_id_or_path(value: &Value) -> Option<String> {
             }
         }
         Value::Number(n) => {
-            if *n == 0.0 { return None; } // 0 means "clear texture"
+            if *n == 0.0 {
+                return None;
+            } // 0 means "clear texture"
             if let Some(path) = crate::manifest_interface_data::get_texture_path(*n as u32) {
                 Some(format!("Interface\\{}", path.replace('/', "\\")))
             } else {

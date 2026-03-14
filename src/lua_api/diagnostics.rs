@@ -1,6 +1,6 @@
 //! Diagnostic dump functions for OnUpdate handlers and frame trees.
 
-use super::layout::{compute_frame_rect, get_parent_depth, LayoutRect};
+use super::layout::{LayoutRect, compute_frame_rect, get_parent_depth};
 use super::state::SimState;
 
 /// Dump all frame positions for debugging.
@@ -26,7 +26,9 @@ pub fn dump_frames(state: &SimState) -> String {
     });
 
     for id in frames {
-        let Some(frame) = state.widgets.get(id) else { continue };
+        let Some(frame) = state.widgets.get(id) else {
+            continue;
+        };
         let rect = compute_frame_rect(&state.widgets, id, screen_width, screen_height);
         format_frame_entry(&mut output, &state.widgets, id, frame, &rect);
     }
@@ -58,9 +60,16 @@ fn format_frame_entry(
     let _ = writeln!(
         output,
         "{}{} [{}] ({:.0},{:.0} {:.0}x{:.0}){}{} parent={}",
-        indent, name, frame.widget_type.as_str(),
-        rect.x, rect.y, rect.width, rect.height,
-        vis, mouse, parent_name,
+        indent,
+        name,
+        frame.widget_type.as_str(),
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height,
+        vis,
+        mouse,
+        parent_name,
     );
 
     if !frame.anchors.is_empty() {
@@ -74,4 +83,3 @@ fn format_frame_entry(
         let _ = writeln!(output, "{}  └─ (no anchors - topleft of parent)", indent);
     }
 }
-

@@ -11,7 +11,14 @@ fn make_frame(id: u64, parent: Option<u64>, w: f32, h: f32) -> Frame {
 }
 
 fn anchor(point: AnchorPoint, rel_id: Option<usize>, rel_point: AnchorPoint) -> Anchor {
-    Anchor { point, relative_to_id: rel_id, relative_to: None, relative_point: rel_point, x_offset: 0.0, y_offset: 0.0 }
+    Anchor {
+        point,
+        relative_to_id: rel_id,
+        relative_to: None,
+        relative_point: rel_point,
+        x_offset: 0.0,
+        y_offset: 0.0,
+    }
 }
 
 fn build_basic_registry() -> WidgetRegistry {
@@ -59,7 +66,10 @@ fn test_strip_color_codes() {
 
 #[test]
 fn test_strip_texture_escape() {
-    assert_eq!(strip_wow_escapes("Before |TInterface/Icons/foo:16|t After"), "Before  After");
+    assert_eq!(
+        strip_wow_escapes("Before |TInterface/Icons/foo:16|t After"),
+        "Before  After"
+    );
 }
 
 #[test]
@@ -110,7 +120,11 @@ fn test_build_tree_shows_texture_path() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
     let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
-    assert!(lines.iter().any(|l| l.contains("[texture] Interface/Icons/foo")));
+    assert!(
+        lines
+            .iter()
+            .any(|l| l.contains("[texture] Interface/Icons/foo"))
+    );
 }
 
 #[test]

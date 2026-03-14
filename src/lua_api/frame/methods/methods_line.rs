@@ -39,7 +39,12 @@ pub fn add_line_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-fn set_line_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue, is_start: bool) -> mlua::Result<()> {
+fn set_line_point(
+    lua: &mlua::Lua,
+    id: u64,
+    args: mlua::MultiValue,
+    is_start: bool,
+) -> mlua::Result<()> {
     let args: Vec<Value> = args.into_iter().collect();
 
     let point_str = match args.first() {
@@ -61,7 +66,12 @@ fn set_line_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue, is_start: bo
         _ => 0.0,
     };
 
-    let anchor = LineAnchor { point, target_id, x_offset, y_offset };
+    let anchor = LineAnchor {
+        point,
+        target_id,
+        x_offset,
+        y_offset,
+    };
 
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
@@ -79,7 +89,11 @@ fn get_line_point(lua: &mlua::Lua, id: u64, is_start: bool) -> mlua::Result<mlua
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     let anchor = state.widgets.get(id).and_then(|f| {
-        if is_start { f.line_start.as_ref() } else { f.line_end.as_ref() }
+        if is_start {
+            f.line_start.as_ref()
+        } else {
+            f.line_end.as_ref()
+        }
     });
 
     let Some(anchor) = anchor else {

@@ -54,8 +54,14 @@ fn register_battlenet_functions(lua: &Lua) -> Result<()> {
         "BNGetFriendInfo",
         lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
     )?;
-    globals.set("BNGetNumFriends", lua.create_function(|_, ()| Ok((0, 0, 0, 0)))?)?; // total, online, favorites, favoritesOnline
-    globals.set("BNGetNumFriendInvites", lua.create_function(|_, ()| Ok(0i32))?)?;
+    globals.set(
+        "BNGetNumFriends",
+        lua.create_function(|_, ()| Ok((0, 0, 0, 0)))?,
+    )?; // total, online, favorites, favoritesOnline
+    globals.set(
+        "BNGetNumFriendInvites",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     globals.set(
         "BNGetInfo",
         lua.create_function(|lua, ()| {
@@ -119,7 +125,11 @@ fn register_spec_basic_queries(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
 }
 
 /// Role and count queries: GetSpecializationRole, GetSpecializationRoleByID, GetNumSpecializationsForClassID.
-fn register_spec_role_queries(globals: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+fn register_spec_role_queries(
+    globals: &mlua::Table,
+    lua: &Lua,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     globals.set(
         "GetSpecializationRole",
         lua.create_function(move |lua, spec_index: Option<i32>| {
@@ -165,8 +175,14 @@ fn spec_to_multivalue(lua: &Lua, spec: &specializations::SpecInfo) -> Result<mlu
 /// Spec info lookups by ID: GetSpecializationInfoByID, ForSpecID, NameForSpecID.
 fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetSpecializationInfoByID", lua.create_function(spec_info_by_id)?)?;
-    globals.set("GetSpecializationInfoForSpecID", lua.create_function(spec_info_by_id)?)?;
+    globals.set(
+        "GetSpecializationInfoByID",
+        lua.create_function(spec_info_by_id)?,
+    )?;
+    globals.set(
+        "GetSpecializationInfoForSpecID",
+        lua.create_function(spec_info_by_id)?,
+    )?;
     // GetSpecializationNameForSpecID(specID) -> name string
     globals.set(
         "GetSpecializationNameForSpecID",
@@ -211,7 +227,10 @@ fn spec_info_by_id(lua: &Lua, spec_id: i32) -> Result<mlua::MultiValue> {
 /// Economy functions: money, trade, buyback.
 fn register_economy_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetMoney", lua.create_function(move |_, ()| Ok(state.borrow().player.money))?)?;
+    globals.set(
+        "GetMoney",
+        lua.create_function(move |_, ()| Ok(state.borrow().player.money))?,
+    )?;
     globals.set(
         "GetTargetTradeMoney",
         lua.create_function(|_, ()| Ok(0i64))?,
@@ -226,26 +245,35 @@ fn register_instance_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
     // GetInstanceInfo() -> name, instanceType, difficultyID, difficultyName,
     //   maxPlayers, dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID
     // GetRaidDifficultyID() -> difficultyID (14 = Normal Raid)
-    globals.set("GetRaidDifficultyID", lua.create_function(|_, ()| Ok(14i32))?)?;
+    globals.set(
+        "GetRaidDifficultyID",
+        lua.create_function(|_, ()| Ok(14i32))?,
+    )?;
     // GetLegacyRaidDifficultyID() -> difficultyID (1 = Normal legacy 40-man)
-    globals.set("GetLegacyRaidDifficultyID", lua.create_function(|_, ()| Ok(1i32))?)?;
+    globals.set(
+        "GetLegacyRaidDifficultyID",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
     // GetMirrorTimerProgress(timer) -> value (0 = timer not active; sim has no active timers)
-    globals.set("GetMirrorTimerProgress", lua.create_function(|_, _timer: String| Ok(0i32))?)?;
+    globals.set(
+        "GetMirrorTimerProgress",
+        lua.create_function(|_, _timer: String| Ok(0i32))?,
+    )?;
     globals.set(
         "GetInstanceInfo",
         lua.create_function(move |lua, ()| {
             let s = state.borrow();
             Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string(&s.world.instance_name)?),      // name
-                Value::String(lua.create_string(&s.world.instance_type)?),      // instanceType
-                Value::Integer(s.world.instance_difficulty as i64),             // difficultyID
-                Value::String(lua.create_string("")?),                    // difficultyName
-                Value::Integer(s.world.instance_max_players as i64),            // maxPlayers
-                Value::Integer(0),                                        // dynamicDifficulty
-                Value::Boolean(false),                                    // isDynamic
-                Value::Integer(0),                                        // instanceID
-                Value::Integer(0),                                        // instanceGroupSize
-                Value::Integer(0),                                        // LfgDungeonID
+                Value::String(lua.create_string(&s.world.instance_name)?), // name
+                Value::String(lua.create_string(&s.world.instance_type)?), // instanceType
+                Value::Integer(s.world.instance_difficulty as i64),        // difficultyID
+                Value::String(lua.create_string("")?),                     // difficultyName
+                Value::Integer(s.world.instance_max_players as i64),       // maxPlayers
+                Value::Integer(0),                                         // dynamicDifficulty
+                Value::Boolean(false),                                     // isDynamic
+                Value::Integer(0),                                         // instanceID
+                Value::Integer(0),                                         // instanceGroupSize
+                Value::Integer(0),                                         // LfgDungeonID
             ]))
         })?,
     )?;
@@ -278,14 +306,32 @@ fn register_character_info_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     )?;
     // GetInventoryItemTexture, GetInventoryItemID, GetInventoryItemLink,
     // GetInventoryItemCount are registered in c_item_api.rs (loaded after this).
-    globals.set("GetSpecializationRoleEnum", lua.create_function(|_, ()| Ok(0i32))?)?;
-    globals.set("GetPlayerTradeMoney", lua.create_function(|_, ()| Ok(0i64))?)?;
-    globals.set("IsInventoryItemLocked", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
-    globals.set("GetRestrictedAccountData", lua.create_function(|_, ()| Ok((false, false, false)))?)?;
+    globals.set(
+        "GetSpecializationRoleEnum",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    globals.set(
+        "GetPlayerTradeMoney",
+        lua.create_function(|_, ()| Ok(0i64))?,
+    )?;
+    globals.set(
+        "IsInventoryItemLocked",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    globals.set(
+        "GetRestrictedAccountData",
+        lua.create_function(|_, ()| Ok((false, false, false)))?,
+    )?;
     globals.set("IsAccountSecured", lua.create_function(|_, ()| Ok(true))?)?;
-    globals.set("IsActivePlayerNewcomer", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "IsActivePlayerNewcomer",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     // GetResSicknessDuration() -> seconds of resurrection sickness remaining (0 = none)
-    globals.set("GetResSicknessDuration", lua.create_function(|_, ()| Ok(0i32))?)?;
+    globals.set(
+        "GetResSicknessDuration",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     // GetSheathState() -> 1=none (sheathed), 2=melee, 3=ranged
     globals.set("GetSheathState", lua.create_function(|_, ()| Ok(1i32))?)?;
     Ok(())
@@ -312,12 +358,30 @@ fn register_character_combat_stubs(lua: &Lua) -> Result<()> {
 /// PaperDoll UI helper stubs: merchant, equipment flyout, tooltip.
 fn register_paperdoll_ui_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    globals.set("MerchantFrame_UpdateGuildBankRepair", lua.create_function(|_, ()| Ok(()))?)?;
-    globals.set("MerchantFrame_UpdateCanRepairAll", lua.create_function(|_, ()| Ok(()))?)?;
-    globals.set("SetItemButtonDesaturated", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    globals.set("EquipmentFlyout_UpdateFlyout", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    globals.set("EquipmentFlyout_SetTooltipAnchor", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
-    globals.set("GameTooltip_SuppressAutomaticCompareItem", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    globals.set(
+        "MerchantFrame_UpdateGuildBankRepair",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    globals.set(
+        "MerchantFrame_UpdateCanRepairAll",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    globals.set(
+        "SetItemButtonDesaturated",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    globals.set(
+        "EquipmentFlyout_UpdateFlyout",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    globals.set(
+        "EquipmentFlyout_SetTooltipAnchor",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    globals.set(
+        "GameTooltip_SuppressAutomaticCompareItem",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     Ok(())
 }
 
@@ -333,10 +397,22 @@ fn register_character_stat_functions(lua: &Lua) -> Result<()> {
 /// AP/SP override stubs.
 fn register_attack_power_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("HasAPEffectsSpellPower", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("HasSPEffectsAttackPower", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetOverrideAPBySpellPower", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetOverrideSpellPowerByAP", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
+    g.set(
+        "HasAPEffectsSpellPower",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "HasSPEffectsAttackPower",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetOverrideAPBySpellPower",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetOverrideSpellPowerByAP",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
     Ok(())
 }
 
@@ -347,18 +423,33 @@ fn register_avoidance_and_crit_stubs(lua: &Lua) -> Result<()> {
     g.set("GetParryChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     g.set("GetDodgeChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     g.set("GetCritChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetRangedCritChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetSpellCritChance", lua.create_function(|_, _school: Value| Ok(0.0_f64))?)?;
+    g.set(
+        "GetRangedCritChance",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetSpellCritChance",
+        lua.create_function(|_, _school: Value| Ok(0.0_f64))?,
+    )?;
     Ok(())
 }
 
 /// Combat rating query stubs.
 fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetCombatRating", lua.create_function(|_, _id: Value| Ok(0i32))?)?;
-    g.set("GetCombatRatingBonus", lua.create_function(|_, _id: Value| Ok(0.0_f64))?)?;
+    g.set(
+        "GetCombatRating",
+        lua.create_function(|_, _id: Value| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetCombatRatingBonus",
+        lua.create_function(|_, _id: Value| Ok(0.0_f64))?,
+    )?;
     // GetMaxCombatRatingBonus(ratingIndex) -> maxBonus
-    g.set("GetMaxCombatRatingBonus", lua.create_function(|_, _rating_index: i32| Ok(0.0_f64))?)?;
+    g.set(
+        "GetMaxCombatRatingBonus",
+        lua.create_function(|_, _rating_index: i32| Ok(0.0_f64))?,
+    )?;
     Ok(())
 }
 
@@ -376,14 +467,23 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
         "GetCombatRatingBonusForCombatRatingValue",
         lua.create_function(|_, _args: mlua::MultiValue| Ok(0.0_f64))?,
     )?;
-    g.set("GetMasteryEffect", lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?)?;
+    g.set(
+        "GetMasteryEffect",
+        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
+    )?;
     g.set("GetHaste", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     g.set("GetMeleeHaste", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetVersatilityBonus", lua.create_function(|_, _id: Value| Ok(0.0_f64))?)?;
+    g.set(
+        "GetVersatilityBonus",
+        lua.create_function(|_, _id: Value| Ok(0.0_f64))?,
+    )?;
     g.set("GetLifesteal", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     g.set("GetAvoidance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     g.set("GetSpeed", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetStaggerPercentage", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
+    g.set(
+        "GetStaggerPercentage",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
     g.set("GetBonusBarIndex", lua.create_function(|_, ()| Ok(0i32))?)?;
     g.set("GetShieldBlock", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     Ok(())
@@ -392,28 +492,76 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
 /// Spell power, regen, defense, and PVP stat stubs.
 fn register_spell_and_defense_stat_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetSpellBonusDamage", lua.create_function(|_, _school: Value| Ok(0.0_f64))?)?;
-    g.set("GetSpellBonusHealing", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetManaRegen", lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?)?;
-    g.set("GetPowerRegen", lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?)?;
-    g.set("GetPetSpellBonusDamage", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetArmorEffectiveness", lua.create_function(|_, _args: mlua::MultiValue| Ok(0.0_f64))?)?;
-    g.set("GetDodgeChanceFromAttribute", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetParryChanceFromAttribute", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetCritChanceProvidesParryEffect", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetExpertise", lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64, 0.0_f64)))?)?;
-    g.set("GetModResilienceDamageReduction", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetPVPGearStatRules", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetUnitMaxHealthModifier", lua.create_function(|_, _unit: Value| Ok(1.0_f64))?)?;
-    g.set("UnitHPPerStamina", lua.create_function(|_, _unit: Value| Ok(20.0_f64))?)?;
+    g.set(
+        "GetSpellBonusDamage",
+        lua.create_function(|_, _school: Value| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetSpellBonusHealing",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetManaRegen",
+        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
+    )?;
+    g.set(
+        "GetPowerRegen",
+        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
+    )?;
+    g.set(
+        "GetPetSpellBonusDamage",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetArmorEffectiveness",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetDodgeChanceFromAttribute",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetParryChanceFromAttribute",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetCritChanceProvidesParryEffect",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetExpertise",
+        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64, 0.0_f64)))?,
+    )?;
+    g.set(
+        "GetModResilienceDamageReduction",
+        lua.create_function(|_, ()| Ok(0.0_f64))?,
+    )?;
+    g.set(
+        "GetPVPGearStatRules",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetUnitMaxHealthModifier",
+        lua.create_function(|_, _unit: Value| Ok(1.0_f64))?,
+    )?;
+    g.set(
+        "UnitHPPerStamina",
+        lua.create_function(|_, _unit: Value| Ok(20.0_f64))?,
+    )?;
     Ok(())
 }
 
 /// Cinematic/cutscene control stubs.
 fn register_cinematic_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    globals.set("MouseOverrideCinematicDisable", lua.create_function(|_, ()| Ok(()))?)?;
-    globals.set("MouseOverrideCinematicEnable", lua.create_function(|_, ()| Ok(()))?)?;
+    globals.set(
+        "MouseOverrideCinematicDisable",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    globals.set(
+        "MouseOverrideCinematicEnable",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
     globals.set("GetCursorMoney", lua.create_function(|_, ()| Ok(0i64))?)?;
     globals.set("GetNumTitles", lua.create_function(|_, ()| Ok(0i32))?)?;
     register_difficulty_and_utility_stubs(lua)
@@ -441,7 +589,10 @@ fn register_difficulty_and_utility_stubs(lua: &Lua) -> Result<()> {
         })?,
     )?;
     // IsLegacyDifficulty(difficultyID) -> bool
-    globals.set("IsLegacyDifficulty", lua.create_function(|_, _id: Value| Ok(false))?)?;
+    globals.set(
+        "IsLegacyDifficulty",
+        lua.create_function(|_, _id: Value| Ok(false))?,
+    )?;
     // BreakUpLargeNumbers(amount) -> formatted string
     globals.set(
         "BreakUpLargeNumbers",
@@ -471,7 +622,10 @@ fn register_movement_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
     globals.set("IsSwimming", mk(|m| m.swimming)?)?;
     globals.set("IsSubmerged", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsFlyableArea", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("IsAdvancedFlyableArea", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "IsAdvancedFlyableArea",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     globals.set("IsDrivableArea", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsOutOfBounds", lua.create_function(|_, ()| Ok(false))?)?;
     // GetPlayerFacing() -> radians (0.0 = north, increases counterclockwise)

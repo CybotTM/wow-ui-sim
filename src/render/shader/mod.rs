@@ -10,7 +10,7 @@ mod program;
 mod quad;
 mod quad_nine_slice;
 
-pub use atlas::{GpuTextureAtlas, TextureEntry, GLYPH_ATLAS_TEX_INDEX};
+pub use atlas::{GLYPH_ATLAS_TEX_INDEX, GpuTextureAtlas, TextureEntry};
 pub use pipeline::WowUiPipeline;
 pub use primitive::{GpuTextureData, WowUiPrimitive, load_texture_or_crop};
 pub use program::WowUiProgram;

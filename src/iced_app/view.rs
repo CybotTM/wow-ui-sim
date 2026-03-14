@@ -2,20 +2,23 @@
 
 use iced::widget::shader::Shader;
 use iced::widget::{
-    button, checkbox, column, container, mouse_area, opaque, pick_list, row, scrollable, space,
-    stack, text, text_input, Column, Container,
+    Column, Container, button, checkbox, column, container, mouse_area, opaque, pick_list, row,
+    scrollable, space, stack, text, text_input,
 };
 use iced::{Border, Color, Element, Font, Length, Padding, Subscription};
 
 use crate::LayoutRect;
 
+use super::Message;
 use super::app::App;
 use super::layout::compute_frame_rect;
 use super::styles::{event_button_style, input_style, palette, pick_list_style, run_button_style};
-use super::Message;
 
 /// Resolve a frame's display name, using the owner addon as fallback for anonymous frames.
-fn anon_display_name(frame: &crate::widget::Frame, addons: &[crate::lua_api::state::AddonInfo]) -> String {
+fn anon_display_name(
+    frame: &crate::widget::Frame,
+    addons: &[crate::lua_api::state::AddonInfo],
+) -> String {
     if let Some(ref name) = frame.name {
         return name.clone();
     }
@@ -45,9 +48,8 @@ impl App {
 
     /// Build the canvas area with optional inspector panel overlay.
     fn build_canvas_area(&self) -> Container<'_, Message> {
-        let shader: Shader<Message, &App> = Shader::new(self)
-            .width(Length::Fill)
-            .height(Length::Fill);
+        let shader: Shader<Message, &App> =
+            Shader::new(self).width(Length::Fill).height(Length::Fill);
 
         let stacked: Element<'_, Message> = if self.inspector_visible {
             let inspector = self.build_inspector_panel();
@@ -72,7 +74,11 @@ impl App {
 
     /// Build the collapsible frames sidebar panel.
     fn build_sidebar_panel(&self) -> Container<'_, Message> {
-        let toggle_label = if self.frames_panel_collapsed { ">> Frames" } else { "<< Frames" };
+        let toggle_label = if self.frames_panel_collapsed {
+            ">> Frames"
+        } else {
+            "<< Frames"
+        };
         let toggle_btn = button(text(toggle_label).size(12))
             .on_press(Message::ToggleFramesPanel)
             .padding([2, 6])
@@ -84,7 +90,11 @@ impl App {
 
         let panel_style = |_: &_| container::Style {
             background: Some(iced::Background::Color(palette::BG_PANEL)),
-            border: Border { color: palette::BORDER, width: 1.0, radius: 4.0.into() },
+            border: Border {
+                color: palette::BORDER,
+                width: 1.0,
+                radius: 4.0.into(),
+            },
             ..Default::default()
         };
 
@@ -93,8 +103,11 @@ impl App {
         } else {
             let frames_list = self.build_frames_sidebar();
             container(
-                column![toggle_btn, scrollable(frames_list).width(Length::Fill).height(600)]
-                    .spacing(4),
+                column![
+                    toggle_btn,
+                    scrollable(frames_list).width(Length::Fill).height(600)
+                ]
+                .spacing(4),
             )
             .width(240)
             .padding(6)
@@ -150,7 +163,10 @@ impl App {
 
         container(
             scrollable(
-                text(console_text).size(12).color(palette::CONSOLE_TEXT).font(Font::MONOSPACE),
+                text(console_text)
+                    .size(12)
+                    .color(palette::CONSOLE_TEXT)
+                    .font(Font::MONOSPACE),
             )
             .width(Length::Fill)
             .height(Length::Fill),
@@ -160,7 +176,11 @@ impl App {
         .padding(6)
         .style(|_| container::Style {
             background: Some(iced::Background::Color(palette::BG_INPUT)),
-            border: Border { color: palette::BORDER, width: 1.0, radius: 4.0.into() },
+            border: Border {
+                color: palette::BORDER,
+                width: 1.0,
+                radius: 4.0.into(),
+            },
             ..Default::default()
         })
     }
@@ -262,20 +282,53 @@ impl App {
         let class_opts: Vec<String> = CLASS_LABELS.iter().map(|s| s.to_string()).collect();
         let race_opts: Vec<String> = RACE_DATA.iter().map(|(n, _, _)| n.to_string()).collect();
         let xp_opts: Vec<String> = XP_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
-        let rot_opts: Vec<String> = ROT_DAMAGE_LEVELS.iter().map(|(l, _)| l.to_string()).collect();
+        let rot_opts: Vec<String> = ROT_DAMAGE_LEVELS
+            .iter()
+            .map(|(l, _)| l.to_string())
+            .collect();
 
         let m = &self.movement;
         column![
-            labeled_pick_list("Class:", class_opts, &self.selected_class, Message::PlayerClassChanged),
-            labeled_pick_list("Race:", race_opts, &self.selected_race, Message::PlayerRaceChanged),
-            labeled_pick_list("XP Bar:", xp_opts, &self.selected_xp_level, Message::XpLevelChanged),
-            labeled_pick_list("Rot Damage:", rot_opts, &self.selected_rot_level, Message::RotDamageLevelChanged),
+            labeled_pick_list(
+                "Class:",
+                class_opts,
+                &self.selected_class,
+                Message::PlayerClassChanged
+            ),
+            labeled_pick_list(
+                "Race:",
+                race_opts,
+                &self.selected_race,
+                Message::PlayerRaceChanged
+            ),
+            labeled_pick_list(
+                "XP Bar:",
+                xp_opts,
+                &self.selected_xp_level,
+                Message::XpLevelChanged
+            ),
+            labeled_pick_list(
+                "Rot Damage:",
+                rot_opts,
+                &self.selected_rot_level,
+                Message::RotDamageLevelChanged
+            ),
             text("Movement").size(12).color(palette::TEXT_SECONDARY),
-            labeled_checkbox("Moving", m.moving, |v| Message::MovementToggled("moving", v)),
-            labeled_checkbox("Mounted", m.mounted, |v| Message::MovementToggled("mounted", v)),
-            labeled_checkbox("Flying", m.flying, |v| Message::MovementToggled("flying", v)),
-            labeled_checkbox("Falling", m.falling, |v| Message::MovementToggled("falling", v)),
-            labeled_checkbox("Swimming", m.swimming, |v| Message::MovementToggled("swimming", v)),
+            labeled_checkbox("Moving", m.moving, |v| Message::MovementToggled(
+                "moving", v
+            )),
+            labeled_checkbox("Mounted", m.mounted, |v| Message::MovementToggled(
+                "mounted", v
+            )),
+            labeled_checkbox("Flying", m.flying, |v| Message::MovementToggled(
+                "flying", v
+            )),
+            labeled_checkbox("Falling", m.falling, |v| Message::MovementToggled(
+                "falling", v
+            )),
+            labeled_checkbox("Swimming", m.swimming, |v| Message::MovementToggled(
+                "swimming", v
+            )),
         ]
         .spacing(8)
         .into()
@@ -285,7 +338,10 @@ impl App {
         let keyboard = iced::event::listen_with(|event, status, _window| {
             use iced::keyboard;
             if let iced::Event::Keyboard(keyboard::Event::KeyPressed {
-                key, modifiers, text, ..
+                key,
+                modifiers,
+                text,
+                ..
             }) = &event
             {
                 // Ctrl+R is a simulator-only shortcut
@@ -295,16 +351,17 @@ impl App {
                 // Only dispatch to Lua when no iced widget captured the event
                 // (i.e., when the command input is not focused)
                 if matches!(status, iced::event::Status::Ignored)
-                    && let Some(wow_key) = super::keybinds::iced_key_to_wow(key) {
-                        // Include raw text for character input into focused EditBox.
-                        // Skip text when Ctrl/Alt modifiers are held (shortcuts, not typing).
-                        let raw_text = if modifiers.control() || modifiers.alt() {
-                            None
-                        } else {
-                            text.as_ref().map(|t| t.to_string())
-                        };
-                        return Some(Message::KeyPress(wow_key, raw_text));
-                    }
+                    && let Some(wow_key) = super::keybinds::iced_key_to_wow(key)
+                {
+                    // Include raw text for character input into focused EditBox.
+                    // Skip text when Ctrl/Alt modifiers are held (shortcuts, not typing).
+                    let raw_text = if modifiers.control() || modifiers.alt() {
+                        None
+                    } else {
+                        text.as_ref().map(|t| t.to_string())
+                    };
+                    return Some(Message::KeyPress(wow_key, raw_text));
+                }
             }
             None
         });
@@ -382,14 +439,21 @@ impl App {
         let frame = state.widgets.get(frame_id);
 
         let (name, widget_type, computed_rect) = Self::inspector_frame_info(
-            frame, frame_id, &state.widgets, &state.addons,
-            self.screen_size.get().width, self.screen_size.get().height,
+            frame,
+            frame_id,
+            &state.widgets,
+            &state.addons,
+            self.screen_size.get().width,
+            self.screen_size.get().height,
         );
 
         let title = Self::inspector_title_bar(&name, &widget_type);
-        let id_row = text(format!("ID: {}  Pos: ({:.0}, {:.0})", frame_id, computed_rect.x, computed_rect.y))
-            .size(11)
-            .color(palette::TEXT_SECONDARY);
+        let id_row = text(format!(
+            "ID: {}  Pos: ({:.0}, {:.0})",
+            frame_id, computed_rect.x, computed_rect.y
+        ))
+        .size(11)
+        .color(palette::TEXT_SECONDARY);
         let size_row = self.inspector_size_row();
         let alpha_level_row = self.inspector_alpha_level_row();
         let checkbox_row = self.inspector_checkbox_row();
@@ -536,7 +600,10 @@ impl App {
             }
             _ => "No anchors".to_string(),
         };
-        text(anchors_text).size(10).color(palette::TEXT_MUTED).into()
+        text(anchors_text)
+            .size(10)
+            .color(palette::TEXT_MUTED)
+            .into()
     }
 
     /// Build parent chain display for the inspector.
@@ -548,7 +615,9 @@ impl App {
         let mut ancestors = Vec::new();
         let mut current = widgets.get(frame_id).and_then(|f| f.parent_id);
         while let Some(pid) = current {
-            let Some(parent) = widgets.get(pid) else { break };
+            let Some(parent) = widgets.get(pid) else {
+                break;
+            };
             ancestors.push(anon_display_name(parent, addons));
             if ancestors.len() >= 6 {
                 ancestors.push("...".to_string());
@@ -557,7 +626,8 @@ impl App {
             current = parent.parent_id;
         }
         ancestors.reverse();
-        let self_name = widgets.get(frame_id)
+        let self_name = widgets
+            .get(frame_id)
             .map(|f| anon_display_name(f, addons))
             .unwrap_or_else(|| "(anon)".to_string());
         ancestors.push(self_name);
@@ -610,10 +680,14 @@ impl App {
         let state = env.state().borrow();
         let mut current = initial_id;
         loop {
-            let Some(frame) = state.widgets.get(current) else { break };
-            let child_hit = frame.children.iter().rev().find(|&&cid| {
-                grid.contains(cid, pos)
-            });
+            let Some(frame) = state.widgets.get(current) else {
+                break;
+            };
+            let child_hit = frame
+                .children
+                .iter()
+                .rev()
+                .find(|&&cid| grid.contains(cid, pos));
             match child_hit {
                 Some(&cid) => current = cid,
                 None => break,
@@ -632,7 +706,10 @@ fn labeled_pick_list<'a>(
     on_select: fn(String) -> Message,
 ) -> Element<'a, Message> {
     row![
-        text(label).size(12).color(palette::TEXT_SECONDARY).width(80),
+        text(label)
+            .size(12)
+            .color(palette::TEXT_SECONDARY)
+            .width(80),
         pick_list(options, Some(selected.to_string()), on_select)
             .text_size(12)
             .width(Length::Fill)

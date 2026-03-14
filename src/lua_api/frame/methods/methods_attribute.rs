@@ -1,6 +1,6 @@
 //! Attribute methods: GetAttribute, SetAttribute, frame references, etc.
 
-use super::super::handle::{frame_ref, FrameRef};
+use super::super::handle::{FrameRef, frame_ref};
 use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::script_helpers::lua_error;
@@ -21,17 +21,23 @@ fn add_get_set_attribute_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         get_attribute_value(lua, this.0, &keys)
     });
 
-    methods.add_method("SetAttribute", |lua, this, (name, value): (String, Value)| {
-        let id = this.0;
-        set_attribute_value(lua, id, &name, &value)?;
-        fire_on_attribute_changed(lua, id, &name, value)?;
-        Ok(())
-    });
+    methods.add_method(
+        "SetAttribute",
+        |lua, this, (name, value): (String, Value)| {
+            let id = this.0;
+            set_attribute_value(lua, id, &name, &value)?;
+            fire_on_attribute_changed(lua, id, &name, value)?;
+            Ok(())
+        },
+    );
 
-    methods.add_method("SetAttributeNoHandler", |lua, this, (name, value): (String, Value)| {
-        set_attribute_value(lua, this.0, &name, &value)?;
-        Ok(())
-    });
+    methods.add_method(
+        "SetAttributeNoHandler",
+        |lua, this, (name, value): (String, Value)| {
+            set_attribute_value(lua, this.0, &name, &value)?;
+            Ok(())
+        },
+    );
 
     methods.add_method("ClearAttributes", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
@@ -60,7 +66,9 @@ fn validate_and_build_keys(lua: &mlua::Lua, args: &mlua::MultiValue) -> mlua::Re
         let taint = crate::lua_api::script_helpers::get_stack_taint(lua);
         let msg = format!(
             "Arguments: (\"name\"){}",
-            taint.map(|t| format!("\nLua Taint: {t}")).unwrap_or_default()
+            taint
+                .map(|t| format!("\nLua Taint: {t}"))
+                .unwrap_or_default()
         );
         Err(lua_error(lua, msg))
     } else {
@@ -70,7 +78,8 @@ fn validate_and_build_keys(lua: &mlua::Lua, args: &mlua::MultiValue) -> mlua::Re
 
 /// Build the list of attribute keys to try, in WoW's fallback order.
 fn build_attribute_keys(args: &mlua::MultiValue) -> Vec<String> {
-    let strings: Vec<String> = args.iter()
+    let strings: Vec<String> = args
+        .iter()
         .filter_map(|v| match v {
             Value::String(s) => s.to_str().ok().map(|s| s.to_string()),
             _ => None,
@@ -83,7 +92,11 @@ fn build_attribute_keys(args: &mlua::MultiValue) -> Vec<String> {
         _ => {
             let prefix = &strings[0];
             let name = &strings[1];
-            let suffix = if strings.len() > 2 { strings[2].as_str() } else { "" };
+            let suffix = if strings.len() > 2 {
+                strings[2].as_str()
+            } else {
+                ""
+            };
             vec![
                 format!("{}{}{}", prefix, name, suffix),
                 format!("*{}{}", name, suffix),
@@ -131,7 +144,10 @@ fn attribute_to_value(lua: &mlua::Lua, attr: &AttributeValue) -> mlua::Result<Va
 
 /// Store the attribute value in Lua (tables) or Rust (simple types).
 fn set_attribute_value(lua: &mlua::Lua, id: u64, name: &str, value: &Value) -> mlua::Result<()> {
-    if matches!(value, Value::Table(_) | Value::UserData(_) | Value::Function(_)) {
+    if matches!(
+        value,
+        Value::Table(_) | Value::UserData(_) | Value::Function(_)
+    ) {
         store_table_attribute(lua, id, name, value)?;
     } else {
         store_simple_attribute(lua, id, name, value)?;
@@ -141,11 +157,14 @@ fn set_attribute_value(lua: &mlua::Lua, id: u64, name: &str, value: &Value) -> m
 
 /// Store a complex Lua value (table/userdata/function) in the Lua-side attribute table.
 fn store_table_attribute(lua: &mlua::Lua, id: u64, name: &str, value: &Value) -> mlua::Result<()> {
-    let table_attrs: mlua::Table = lua.globals()
+    let table_attrs: mlua::Table = lua
+        .globals()
         .get("__frame_table_attributes")
         .unwrap_or_else(|_| {
             let t = lua.create_table().unwrap();
-            lua.globals().set("__frame_table_attributes", t.clone()).ok();
+            lua.globals()
+                .set("__frame_table_attributes", t.clone())
+                .ok();
             t
         });
     let key = format!("{}_{}", id, name);
@@ -190,7 +209,12 @@ fn remove_from_table_attributes(lua: &mlua::Lua, id: u64, name: &str) {
 }
 
 /// Fire OnAttributeChanged script handler if one exists.
-fn fire_on_attribute_changed(lua: &mlua::Lua, id: u64, name: &str, value: Value) -> mlua::Result<()> {
+fn fire_on_attribute_changed(
+    lua: &mlua::Lua,
+    id: u64,
+    name: &str,
+    value: Value,
+) -> mlua::Result<()> {
     use crate::lua_api::script_helpers::{call_error_handler, get_script};
     if let Some(handler) = get_script(lua, id, "OnAttributeChanged") {
         let name_str = lua.create_string(name)?;
@@ -202,17 +226,21 @@ fn fire_on_attribute_changed(lua: &mlua::Lua, id: u64, name: &str, value: Value)
 }
 
 fn add_execute_attribute<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ExecuteAttribute", |_lua, _this, _args: mlua::MultiValue| {
-        Ok(Value::Nil)
-    });
+    methods.add_method(
+        "ExecuteAttribute",
+        |_lua, _this, _args: mlua::MultiValue| Ok(Value::Nil),
+    );
 }
 
 fn add_frame_ref_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFrameRef", |lua, this, (label, frame): (String, Value)| {
-        let key = format!("frameref-{}", label);
-        set_attribute_value(lua, this.0, &key, &frame)?;
-        Ok(())
-    });
+    methods.add_method(
+        "SetFrameRef",
+        |lua, this, (label, frame): (String, Value)| {
+            let key = format!("frameref-{}", label);
+            set_attribute_value(lua, this.0, &key, &frame)?;
+            Ok(())
+        },
+    );
     methods.add_method("GetFrameRef", |lua, this, label: String| {
         let key = format!("frameref-{}", label);
         get_attribute_value(lua, this.0, &[key])
@@ -238,13 +266,26 @@ fn add_security_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsForbidden", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.forbidden).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.forbidden)
+            .unwrap_or(false))
     });
 
     methods.add_method("CanChangeProtectedState", |_lua, _this, ()| Ok(true));
-    methods.add_method("SetPassThroughButtons", |_lua, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetFlattensRenderLayers", |_lua, _this, _flatten: Option<bool>| Ok(()));
-    methods.add_method("SetMotionScriptsWhileDisabled", |_lua, _this, _enabled: Option<bool>| Ok(()));
+    methods.add_method(
+        "SetPassThroughButtons",
+        |_lua, _this, _args: mlua::MultiValue| Ok(()),
+    );
+    methods.add_method(
+        "SetFlattensRenderLayers",
+        |_lua, _this, _flatten: Option<bool>| Ok(()),
+    );
+    methods.add_method(
+        "SetMotionScriptsWhileDisabled",
+        |_lua, _this, _enabled: Option<bool>| Ok(()),
+    );
     methods.add_method("GetMotionScriptsWhileDisabled", |_lua, _this, ()| Ok(false));
 }
 
@@ -261,7 +302,11 @@ fn add_clip_children_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("DoesClipChildren", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.clips_children).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.clips_children)
+            .unwrap_or(false))
     });
 }
 

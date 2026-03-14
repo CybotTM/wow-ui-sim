@@ -55,10 +55,14 @@ fn test_type_function() {
 #[test]
 fn test_type_frame_returns_table() {
     let env = env();
-    let t: String = env.eval(r#"
+    let t: String = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestTypeFrame", UIParent)
         return type(f)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(t, "table", "type() on frame userdata should return 'table'");
 }
 
@@ -69,20 +73,28 @@ fn test_type_frame_returns_table() {
 #[test]
 fn test_rawget_table() {
     let env = env();
-    let val: i32 = env.eval(r#"
+    let val: i32 = env
+        .eval(
+            r#"
         local t = {a = 42}
         return rawget(t, "a")
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(val, 42);
 }
 
 #[test]
 fn test_rawget_bypasses_metatable() {
     let env = env();
-    let is_nil: bool = env.eval(r#"
+    let is_nil: bool = env
+        .eval(
+            r#"
         local t = setmetatable({}, {__index = function() return 99 end})
         return rawget(t, "missing") == nil
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(is_nil, "rawget should bypass metatable __index");
 }
 
@@ -93,9 +105,13 @@ fn test_rawget_bypasses_metatable() {
 #[test]
 fn test_xpcall_success() {
     let env = env();
-    let (ok, result): (bool, i32) = env.eval(r#"
+    let (ok, result): (bool, i32) = env
+        .eval(
+            r#"
         return xpcall(function() return 42 end, function(err) return err end)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(ok);
     assert_eq!(result, 42);
 }
@@ -103,9 +119,13 @@ fn test_xpcall_success() {
 #[test]
 fn test_xpcall_error() {
     let env = env();
-    let (ok, msg): (bool, String) = env.eval(r#"
+    let (ok, msg): (bool, String) = env
+        .eval(
+            r#"
         return xpcall(function() error("boom") end, function(err) return "handled: " .. err end)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(!ok);
     assert!(msg.contains("handled:"), "Error handler should be called");
 }
@@ -113,9 +133,13 @@ fn test_xpcall_error() {
 #[test]
 fn test_xpcall_passes_args() {
     let env = env();
-    let (ok, result): (bool, i32) = env.eval(r#"
+    let (ok, result): (bool, i32) = env
+        .eval(
+            r#"
         return xpcall(function(a, b) return a + b end, function(err) return err end, 10, 20)
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(ok);
     assert_eq!(result, 30);
 }

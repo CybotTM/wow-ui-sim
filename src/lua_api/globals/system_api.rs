@@ -12,8 +12,8 @@
 //! - Battle.net stubs: `BNFeaturesEnabled()`, `BNConnected()`, etc.
 //! - Streaming stubs: `GetFileStreamingStatus()`, `GetBackgroundLoadingStatus()`
 
-use crate::lua_api::frame::{frame_ref, FrameRef};
 use crate::lua_api::SimState;
+use crate::lua_api::frame::{FrameRef, frame_ref};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -80,14 +80,12 @@ fn register_type_override(lua: &Lua) -> Result<()> {
 /// Blizzard's Dump.lua does `rawget(v, 0)` on things that pass `type(v) == "table"`.
 fn register_rawget_override(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    let rawget_fn = lua.create_function(|lua, (table, key): (Value, Value)| {
-        match table {
-            Value::Table(t) => t.raw_get(key),
-            Value::UserData(_) => Ok(Value::Nil),
-            _ => {
-                let original: mlua::Function = lua.named_registry_value("__original_rawget")?;
-                original.call((table, key))
-            }
+    let rawget_fn = lua.create_function(|lua, (table, key): (Value, Value)| match table {
+        Value::Table(t) => t.raw_get(key),
+        Value::UserData(_) => Ok(Value::Nil),
+        _ => {
+            let original: mlua::Function = lua.named_registry_value("__original_rawget")?;
+            original.call((table, key))
         }
     })?;
     let original_rawget: mlua::Function = globals.raw_get("rawget")?;
@@ -107,15 +105,22 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
         let mut args_iter = args.into_iter();
         let event_name: String = match args_iter.next() {
             Some(Value::String(s)) => s.to_str()?.to_string(),
-            _ => return Err(mlua::Error::runtime("FireEvent requires event name as first argument")),
+            _ => {
+                return Err(mlua::Error::runtime(
+                    "FireEvent requires event name as first argument",
+                ));
+            }
         };
 
         let event_args: Vec<Value> = args_iter.collect();
 
-        let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, &event_name)?;
+        let listeners =
+            crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, &event_name)?;
 
         for widget_id in listeners {
-            if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent") {
+            if let Some(handler) =
+                crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
+            {
                 let frame = frame_ref(lua, widget_id)?;
 
                 let mut call_args = vec![frame, Value::String(lua.create_string(&event_name)?)];
@@ -137,7 +142,10 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
 fn register_reload_ui(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let reload_ui = lua.create_function(move |lua, ()| {
         fire_reload_startup_events(lua, &state)?;
-        state.borrow_mut().console_output.push("UI Reloaded".to_string());
+        state
+            .borrow_mut()
+            .console_output
+            .push("UI Reloaded".to_string());
         Ok(())
     })?;
     lua.globals().set("ReloadUI", reload_ui)?;
@@ -165,7 +173,9 @@ fn fire_reload_startup_events(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
         Ok(vec![Value::String(lua.create_string("UPDATE_BINDINGS")?)])
     })?;
     fire_event_to_listeners(lua, state, "DISPLAY_SIZE_CHANGED", |lua| {
-        Ok(vec![Value::String(lua.create_string("DISPLAY_SIZE_CHANGED")?)])
+        Ok(vec![Value::String(
+            lua.create_string("DISPLAY_SIZE_CHANGED")?,
+        )])
     })?;
     fire_event_to_listeners(lua, state, "UI_SCALE_CHANGED", |lua| {
         Ok(vec![Value::String(lua.create_string("UI_SCALE_CHANGED")?)])
@@ -185,13 +195,14 @@ where
     let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, event_name)?;
     for widget_id in listeners {
         if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
-            && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) {
-                let mut call_args = vec![frame];
-                call_args.extend(build_extra_args(lua)?);
-                if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
-                    crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                }
+            && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id)
+        {
+            let mut call_args = vec![frame];
+            call_args.extend(build_extra_args(lua)?);
+            if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
+                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
             }
+        }
     }
     Ok(())
 }
@@ -199,7 +210,10 @@ where
 /// Register build type check functions.
 fn register_build_type_checks(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    globals.set("IsPublicTestClient", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "IsPublicTestClient",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     globals.set("IsBetaBuild", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsPublicBuild", lua.create_function(|_, ()| Ok(true))?)?;
     Ok(())
@@ -209,21 +223,33 @@ fn register_build_type_checks(lua: &Lua) -> Result<()> {
 fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set("BNFeaturesEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("BNFeaturesEnabledAndConnected", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "BNFeaturesEnabledAndConnected",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     globals.set("BNConnected", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("BNGetFriendInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
-    globals.set("BNGetNumFriends", lua.create_function(|_, ()| Ok((0, 0, 0, 0)))?)?; // total, online, favorites, favoritesOnline
-    globals.set("BNGetInfo", lua.create_function(|lua, ()| {
-        Ok((
-            Value::Integer(0),
-            Value::String(lua.create_string("SimPlayer#0000")?),
-            Value::Nil,
-            Value::String(lua.create_string("")?),
-            Value::Boolean(false),
-            Value::Boolean(false),
-            Value::Boolean(false),
-        ))
-    })?)?;
+    globals.set(
+        "BNGetFriendInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
+    globals.set(
+        "BNGetNumFriends",
+        lua.create_function(|_, ()| Ok((0, 0, 0, 0)))?,
+    )?; // total, online, favorites, favoritesOnline
+    globals.set(
+        "BNGetInfo",
+        lua.create_function(|lua, ()| {
+            Ok((
+                Value::Integer(0),
+                Value::String(lua.create_string("SimPlayer#0000")?),
+                Value::Nil,
+                Value::String(lua.create_string("")?),
+                Value::Boolean(false),
+                Value::Boolean(false),
+                Value::Boolean(false),
+            ))
+        })?,
+    )?;
     Ok(())
 }
 
@@ -238,10 +264,7 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
     globals.set(
         "SwapToGlobalEnvironment",
         lua.create_function(|lua, ()| {
-            let is_secure: bool = lua
-                .globals()
-                .get::<mlua::Function>("issecure")?
-                .call(())?;
+            let is_secure: bool = lua.globals().get::<mlua::Function>("issecure")?.call(())?;
             if !is_secure {
                 return Err(mlua::Error::RuntimeError(
                     "cannot modify function environment from a tainted context".to_string(),
@@ -255,19 +278,25 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
         })?,
     )?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("RegisterStaticConstants", lua.create_function(|_, _tbl: Value| Ok(()))?)?;
+    globals.set(
+        "RegisterStaticConstants",
+        lua.create_function(|_, _tbl: Value| Ok(()))?,
+    )?;
 
     // GetFrameMetatable/GetButtonMetatable - return metatables with __index
     // The __index table must contain forwarding functions so that
     // CopyTable(GetFrameMetatable().__index) produces a table where
     // e.g. LOCAL_CHECK_Frame.GetAttribute(frame, ...) works.
     for name in &["GetFrameMetatable", "GetButtonMetatable"] {
-        globals.set(*name, lua.create_function(|lua, ()| {
-            let mt = lua.create_table()?;
-            let index = create_frame_method_forwarders(lua)?;
-            mt.set("__index", index)?;
-            Ok(Value::Table(mt))
-        })?)?;
+        globals.set(
+            *name,
+            lua.create_function(|lua, ()| {
+                let mt = lua.create_table()?;
+                let index = create_frame_method_forwarders(lua)?;
+                mt.set("__index", index)?;
+                Ok(Value::Table(mt))
+            })?,
+        )?;
     }
 
     globals.set("C_GamePad", register_c_gamepad(lua)?)?;
@@ -284,15 +313,28 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
 fn create_frame_method_forwarders(lua: &Lua) -> Result<mlua::Table> {
     let index = lua.create_table()?;
     let methods = &[
-        "GetAttribute", "SetAttribute", "GetParent", "GetName",
-        "GetObjectType", "IsObjectType", "GetFrameStrata",
-        "GetFrameLevel", "IsShown", "IsVisible", "GetWidth",
-        "GetHeight", "GetSize", "GetScale", "GetAlpha",
+        "GetAttribute",
+        "SetAttribute",
+        "GetParent",
+        "GetName",
+        "GetObjectType",
+        "IsObjectType",
+        "GetFrameStrata",
+        "GetFrameLevel",
+        "IsShown",
+        "IsVisible",
+        "GetWidth",
+        "GetHeight",
+        "GetSize",
+        "GetScale",
+        "GetAlpha",
     ];
     for method in methods {
-        let forwarder = lua.load(format!(
-            "return function(self, ...) return self:{method}(...) end"
-        )).eval::<mlua::Function>()?;
+        let forwarder = lua
+            .load(format!(
+                "return function(self, ...) return self:{method}(...) end"
+            ))
+            .eval::<mlua::Function>()?;
         index.set(*method, forwarder)?;
     }
     Ok(index)
@@ -303,23 +345,50 @@ fn register_c_gamepad(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("GetActiveDeviceID", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetDeviceMappedState", lua.create_function(|_, _id: Option<i32>| Ok(Value::Nil))?)?;
-    t.set("SetLedColor", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    t.set("GetConfig", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("GetCombinedDeviceID", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetPowerLevel", lua.create_function(|_, _id: Option<i32>| Ok(Value::Nil))?)?;
+    t.set(
+        "GetDeviceMappedState",
+        lua.create_function(|_, _id: Option<i32>| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "SetLedColor",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "GetConfig",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "GetCombinedDeviceID",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetPowerLevel",
+        lua.create_function(|_, _id: Option<i32>| Ok(Value::Nil))?,
+    )?;
     Ok(t)
 }
 
 /// C_AssistedCombat namespace stubs.
 fn register_c_assisted_combat(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("GetActionSpell", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("GetNextCastSpell", lua.create_function(|_, _check: Option<bool>| Ok(Value::Nil))?)?;
-    t.set("GetRotationSpells", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("IsAvailable", lua.create_function(|lua, ()| {
-        Ok((false, Value::String(lua.create_string("Not available")?)))
-    })?)?;
+    t.set(
+        "GetActionSpell",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetNextCastSpell",
+        lua.create_function(|_, _check: Option<bool>| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetRotationSpells",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "IsAvailable",
+        lua.create_function(|lua, ()| {
+            Ok((false, Value::String(lua.create_string("Not available")?)))
+        })?,
+    )?;
     Ok(t)
 }
 
@@ -346,23 +415,25 @@ fn is_frame_widget(_: &Lua, widget: Value) -> Result<bool> {
 /// so they won't overwrite these real implementations.
 fn register_time_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    let get_time = lua.create_function(move |_, ()| {
-        Ok(st.borrow().start_time.elapsed().as_secs_f64())
-    })?;
+    let get_time =
+        lua.create_function(move |_, ()| Ok(st.borrow().start_time.elapsed().as_secs_f64()))?;
     lua.globals().set("GetTime", get_time)?;
 
     let st = Rc::clone(state);
-    lua.globals().set("debugprofilestop", lua.create_function(move |_, ()| {
-        Ok(st.borrow().start_time.elapsed().as_secs_f64() * 1000.0)
-    })?)?;
-    lua.globals().set("debugprofilestart", lua.create_function(|_, ()| {
-        Ok(())
-    })?)?;
+    lua.globals().set(
+        "debugprofilestop",
+        lua.create_function(move |_, ()| {
+            Ok(st.borrow().start_time.elapsed().as_secs_f64() * 1000.0)
+        })?,
+    )?;
+    lua.globals()
+        .set("debugprofilestart", lua.create_function(|_, ()| Ok(()))?)?;
 
     let st = Rc::clone(state);
-    lua.globals().set("GetTimePreciseSec", lua.create_function(move |_, ()| {
-        Ok(st.borrow().start_time.elapsed().as_secs_f64())
-    })?)?;
+    lua.globals().set(
+        "GetTimePreciseSec",
+        lua.create_function(move |_, ()| Ok(st.borrow().start_time.elapsed().as_secs_f64()))?,
+    )?;
 
     Ok(())
 }
@@ -370,8 +441,14 @@ fn register_time_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
 /// Register streaming status stubs (simulator has no streaming).
 fn register_streaming_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetFileStreamingStatus", lua.create_function(|_, ()| Ok(0i32))?)?;
-    globals.set("GetBackgroundLoadingStatus", lua.create_function(|_, ()| Ok(0i32))?)?;
+    globals.set(
+        "GetFileStreamingStatus",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    globals.set(
+        "GetBackgroundLoadingStatus",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     globals.set(
         "GetMovieDownloadProgress",
         lua.create_function(|_, _movie_id: i32| Ok((false, 0i32, 0i32)))?,
@@ -383,7 +460,10 @@ fn register_streaming_stubs(lua: &Lua) -> Result<()> {
 fn register_error_callstack_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set("GetCallstackHeight", lua.create_function(|_, ()| Ok(2i32))?)?;
-    globals.set("SetErrorCallstackHeight", lua.create_function(|_, _height: Option<i32>| Ok(()))?)?;
+    globals.set(
+        "SetErrorCallstackHeight",
+        lua.create_function(|_, _height: Option<i32>| Ok(()))?,
+    )?;
     Ok(())
 }
 
@@ -427,16 +507,25 @@ fn register_keyboard_stubs(lua: &Lua) -> Result<()> {
     globals.set("IsControlKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsAltKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set("IsModifierKeyDown", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("IsModifiedClick", lua.create_function(|_, _action: Option<String>| Ok(false))?)?;
+    globals.set(
+        "IsModifiedClick",
+        lua.create_function(|_, _action: Option<String>| Ok(false))?,
+    )?;
     // IsKeyDown(key) -> true if the named key is currently pressed
-    globals.set("IsKeyDown", lua.create_function(|_, _key: String| Ok(false))?)?;
+    globals.set(
+        "IsKeyDown",
+        lua.create_function(|_, _key: String| Ok(false))?,
+    )?;
     Ok(())
 }
 
 /// Mouse state stubs: button state, focus, and click info.
 fn register_mouse_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("IsMouseButtonDown", lua.create_function(|_, _btn: Option<Value>| Ok(false))?)?;
+    globals.set(
+        "IsMouseButtonDown",
+        lua.create_function(|_, _btn: Option<Value>| Ok(false))?,
+    )?;
     let st = Rc::clone(state);
     globals.set(
         "GetMouseFocus",
@@ -449,7 +538,10 @@ fn register_mouse_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resul
         })?,
     )?;
     register_mouse_foci(lua, state)?;
-    globals.set("GetMouseButtonClicked", lua.create_function(|_, ()| Ok(""))?)?;
+    globals.set(
+        "GetMouseButtonClicked",
+        lua.create_function(|_, ()| Ok(""))?,
+    )?;
     Ok(())
 }
 
@@ -473,31 +565,43 @@ fn register_mouse_foci(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
 fn register_screen_size_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     let st = Rc::clone(state);
-    globals.set("GetScreenWidth", lua.create_function(move |_, ()| {
-        Ok(st.borrow().screen_width as f64)
-    })?)?;
+    globals.set(
+        "GetScreenWidth",
+        lua.create_function(move |_, ()| Ok(st.borrow().screen_width as f64))?,
+    )?;
     let st = Rc::clone(state);
-    globals.set("GetScreenHeight", lua.create_function(move |_, ()| {
-        Ok(st.borrow().screen_height as f64)
-    })?)?;
+    globals.set(
+        "GetScreenHeight",
+        lua.create_function(move |_, ()| Ok(st.borrow().screen_height as f64))?,
+    )?;
     let st = Rc::clone(state);
-    globals.set("GetPhysicalScreenSize", lua.create_function(move |_, ()| {
-        let s = st.borrow();
-        Ok((s.screen_width as i32, s.screen_height as i32))
-    })?)?;
+    globals.set(
+        "GetPhysicalScreenSize",
+        lua.create_function(move |_, ()| {
+            let s = st.borrow();
+            Ok((s.screen_width as i32, s.screen_height as i32))
+        })?,
+    )?;
     let st = Rc::clone(state);
-    globals.set("SetScreenSize", lua.create_function(move |_, (w, h): (f32, f32)| {
-        let mut s = st.borrow_mut();
-        s.screen_width = w;
-        s.screen_height = h;
-        s.strata_buckets = None;
-        s.widgets.clear_all_layout_rects();
-        for name in ["UIParent", "WorldFrame"] {
-            if let Some(id) = s.widgets.get_id_by_name(name)
-                && let Some(f) = s.widgets.get_mut_visual(id) { f.width = w; f.height = h; }
-        }
-        Ok(())
-    })?)?;
+    globals.set(
+        "SetScreenSize",
+        lua.create_function(move |_, (w, h): (f32, f32)| {
+            let mut s = st.borrow_mut();
+            s.screen_width = w;
+            s.screen_height = h;
+            s.strata_buckets = None;
+            s.widgets.clear_all_layout_rects();
+            for name in ["UIParent", "WorldFrame"] {
+                if let Some(id) = s.widgets.get_id_by_name(name)
+                    && let Some(f) = s.widgets.get_mut_visual(id)
+                {
+                    f.width = w;
+                    f.height = h;
+                }
+            }
+            Ok(())
+        })?,
+    )?;
     Ok(())
 }
 
@@ -512,21 +616,24 @@ fn register_request_time_played(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Res
         let total_played = 15 * 24 * 3600; // 15 days in seconds
         let level_played = 3 * 24 * 3600; // 3 days in seconds
 
-        let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, "TIME_PLAYED_MSG")?;
+        let listeners =
+            crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, "TIME_PLAYED_MSG")?;
 
         for widget_id in listeners {
-            if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
-                && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) {
-                    let args = vec![
-                        frame,
-                        Value::String(lua.create_string("TIME_PLAYED_MSG")?),
-                        Value::Integer(total_played),
-                        Value::Integer(level_played),
-                    ];
-                    if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(args)) {
-                        crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                    }
+            if let Some(handler) =
+                crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
+                && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id)
+            {
+                let args = vec![
+                    frame,
+                    Value::String(lua.create_string("TIME_PLAYED_MSG")?),
+                    Value::Integer(total_played),
+                    Value::Integer(level_played),
+                ];
+                if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(args)) {
+                    crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
                 }
+            }
         }
 
         Ok(())
@@ -552,18 +659,23 @@ fn register_localization_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
     // GetText(key [, gender]) - localization lookup; tries gender suffix then base key
-    globals.set("GetText", lua.create_function(|lua, (key, gender): (String, Option<i32>)| {
-        let g = lua.globals();
-        let suffix = match gender {
-            Some(2) => Some("_FEMALE"),
-            Some(3) => Some("_NEUTRAL"),
-            _ => None,
-        };
-        if let Some(s) = suffix {
-            if let Ok(val) = g.get::<String>(format!("{key}{s}")) { return Ok(val); }
-        }
-        Ok(g.get::<String>(key.clone()).unwrap_or(key))
-    })?)?;
+    globals.set(
+        "GetText",
+        lua.create_function(|lua, (key, gender): (String, Option<i32>)| {
+            let g = lua.globals();
+            let suffix = match gender {
+                Some(2) => Some("_FEMALE"),
+                Some(3) => Some("_NEUTRAL"),
+                _ => None,
+            };
+            if let Some(s) = suffix {
+                if let Ok(val) = g.get::<String>(format!("{key}{s}")) {
+                    return Ok(val);
+                }
+            }
+            Ok(g.get::<String>(key.clone()).unwrap_or(key))
+        })?,
+    )?;
 
     Ok(())
 }
@@ -574,30 +686,51 @@ fn register_ui_object_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
 
     // AnimateCallout global table (used by TutorialFrame)
     let animate_callout = lua.create_table()?;
-    animate_callout.set("Start", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    animate_callout.set("Stop", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    animate_callout.set(
+        "Start",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    animate_callout.set(
+        "Stop",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     globals.set("AnimateCallout", animate_callout)?;
 
     // WowStyle1DropdownMixin - dropdown mixin (used by WardrobeOutfits)
     let wow_style1 = lua.create_table()?;
-    wow_style1.set("OnLoad", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    wow_style1.set(
+        "OnLoad",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     globals.set("WowStyle1DropdownMixin", wow_style1)?;
 
     // AnimateMouse global table (used by TutorialFrame)
     let animate_mouse = lua.create_table()?;
-    animate_mouse.set("Start", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    animate_mouse.set("Stop", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    animate_mouse.set(
+        "Start",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    animate_mouse.set(
+        "Stop",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     globals.set("AnimateMouse", animate_mouse)?;
 
     // Patch C_PlayerInfo (table created in c_misc_api.rs)
     if let Ok(c_player_info) = globals.get::<mlua::Table>("C_PlayerInfo") {
         c_player_info.set("IsPlayerInRPE", lua.create_function(|_, ()| Ok(false))?)?;
-        c_player_info.set("GetAlternateFormInfo", lua.create_function(|_, ()| Ok((false, false)))?)?;
+        c_player_info.set(
+            "GetAlternateFormInfo",
+            lua.create_function(|_, ()| Ok((false, false)))?,
+        )?;
     }
 
     // Patch C_UIWidgetManager (table created in c_misc_api.rs)
     if let Ok(c_widget_mgr) = globals.get::<mlua::Table>("C_UIWidgetManager") {
-        c_widget_mgr.set("GetPowerBarWidgetSetID", lua.create_function(|_, ()| Ok(0i32))?)?;
+        c_widget_mgr.set(
+            "GetPowerBarWidgetSetID",
+            lua.create_function(|_, ()| Ok(0i32))?,
+        )?;
     }
 
     // Patch C_UnitAuras with real buff data from state (table created in c_misc_api.rs).
@@ -628,19 +761,26 @@ fn register_lua_stdlib_extensions(lua: &Lua) -> Result<()> {
 /// - `coroutine.mainthread()` → returns the main thread
 fn register_coroutine_extensions(lua: &Lua) -> Result<()> {
     let co_tbl: mlua::Table = lua.globals().get("coroutine")?;
-    co_tbl.set("bind", lua.create_function(|lua, f: mlua::Function| {
-        let co = lua.create_thread(f)?;
-        lua.create_function(move |_, args: mlua::MultiValue| {
+    co_tbl.set(
+        "bind",
+        lua.create_function(|lua, f: mlua::Function| {
+            let co = lua.create_thread(f)?;
+            lua.create_function(move |_, args: mlua::MultiValue| {
+                co.resume::<mlua::MultiValue>(args)
+            })
+        })?,
+    )?;
+    co_tbl.set(
+        "call",
+        lua.create_function(|lua, (f, args): (mlua::Function, mlua::MultiValue)| {
+            let co = lua.create_thread(f)?;
             co.resume::<mlua::MultiValue>(args)
-        })
-    })?)?;
-    co_tbl.set("call", lua.create_function(|lua, (f, args): (mlua::Function, mlua::MultiValue)| {
-        let co = lua.create_thread(f)?;
-        co.resume::<mlua::MultiValue>(args)
-    })?)?;
-    co_tbl.set("mainthread", lua.create_function(|lua, ()| {
-        Ok(lua.current_thread())
-    })?)?;
+        })?,
+    )?;
+    co_tbl.set(
+        "mainthread",
+        lua.create_function(|lua, ()| Ok(lua.current_thread()))?,
+    )?;
     Ok(())
 }
 
@@ -658,10 +798,13 @@ fn register_math_extensions(lua: &Lua) -> Result<()> {
 ///
 /// WoW's `clock()` is a C function returning a float representing wall-clock time.
 fn register_clock_global(lua: &Lua) -> Result<()> {
-    lua.globals().set("clock", lua.create_function(|lua, ()| {
-        let get_time: mlua::Function = lua.globals().get("GetTime")?;
-        get_time.call::<f64>(())
-    })?)?;
+    lua.globals().set(
+        "clock",
+        lua.create_function(|lua, ()| {
+            let get_time: mlua::Function = lua.globals().get("GetTime")?;
+            get_time.call::<f64>(())
+        })?,
+    )?;
     Ok(())
 }
 

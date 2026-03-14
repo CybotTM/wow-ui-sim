@@ -15,14 +15,26 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -34,18 +46,42 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    ("Blizzard_UIParentPanelManager", "Blizzard_UIParentPanelManager_Mainline.toc"),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
-    ("Blizzard_SettingsDefinitions_Shared", "Blizzard_SettingsDefinitions_Shared.toc"),
-    ("Blizzard_SettingsDefinitions_Frame", "Blizzard_SettingsDefinitions_Frame_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
-    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+    (
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    ),
     ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
-    ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mainline.toc"),
+    (
+        "Blizzard_SharedMapDataProviders",
+        "Blizzard_SharedMapDataProviders_Mainline.toc",
+    ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
@@ -151,7 +187,10 @@ fn test_container_frames_registered() {
         "#,
         )
         .unwrap();
-    assert_eq!(count, 6, "ContainerFrameContainer.ContainerFrames should have 6 entries");
+    assert_eq!(
+        count, 6,
+        "ContainerFrameContainer.ContainerFrames should have 6 entries"
+    );
 
     // Check individual frames exist
     for i in 1..=6 {
@@ -188,7 +227,10 @@ fn assert_bag_frame_visible(env: &WowLuaEnv) {
              or (ContainerFrame1 and ContainerFrame1:IsShown())",
         )
         .unwrap();
-    assert!(bag_shown, "A bag frame should be visible after ToggleAllBags");
+    assert!(
+        bag_shown,
+        "A bag frame should be visible after ToggleAllBags"
+    );
 }
 
 /// Assert the backpack has the expected number of populated item slots.
@@ -207,7 +249,10 @@ fn assert_backpack_item_count(env: &WowLuaEnv, expected: i32) {
         "#,
         )
         .unwrap();
-    assert_eq!(populated_slots, expected, "Backpack populated slot count mismatch");
+    assert_eq!(
+        populated_slots, expected,
+        "Backpack populated slot count mismatch"
+    );
 }
 
 #[test]
@@ -216,7 +261,7 @@ fn test_bags_open_with_items() {
     install_test_error_handler(&env);
 
     // Populate bags via admin API (bags start empty)
-    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();  // Hearthstone
+    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap(); // Hearthstone
     env.exec("A_Admin.AddBagItem(0, 3, 6948, 1)").unwrap();
     env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
 

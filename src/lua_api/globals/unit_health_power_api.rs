@@ -53,7 +53,11 @@ fn register_health_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
                 }
                 if u == "target" {
                     let st = state.borrow();
-                    return Ok(st.current_target.as_ref().map(|t| t.health_max).unwrap_or(0));
+                    return Ok(st
+                        .current_target
+                        .as_ref()
+                        .map(|t| t.health_max)
+                        .unwrap_or(0));
                 }
                 if let Some(idx) = parse_party_index(&u) {
                     let st = state.borrow();
@@ -147,11 +151,11 @@ fn is_secondary_power_type(power_type: Option<i64>) -> bool {
 /// Default max for secondary power types.
 fn secondary_power_max(power_type: i64) -> i32 {
     match power_type {
-        4 => 7,   // ComboPoints (5-7 depending on talents)
-        5 => 6,   // Runes
-        9 => 5,   // HolyPower
-        16 => 4,  // ArcaneCharges
-        _ => 5,   // Reasonable default for other secondary resources
+        4 => 7,  // ComboPoints (5-7 depending on talents)
+        5 => 6,  // Runes
+        9 => 5,  // HolyPower
+        16 => 4, // ArcaneCharges
+        _ => 5,  // Reasonable default for other secondary resources
     }
 }
 
@@ -190,13 +194,19 @@ fn register_power_type_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
                 if u == "target" {
                     let st = state.borrow();
                     if let Some(t) = &st.current_target {
-                        return Ok((t.power_type, Value::String(lua.create_string(t.power_type_name.as_str())?)));
+                        return Ok((
+                            t.power_type,
+                            Value::String(lua.create_string(t.power_type_name.as_str())?),
+                        ));
                     }
                 }
                 if let Some(idx) = parse_party_index(&u) {
                     let st = state.borrow();
                     if let Some(m) = st.party_members.get(idx) {
-                        return Ok((m.power_type, Value::String(lua.create_string(m.power_type_name.as_str())?)));
+                        return Ok((
+                            m.power_type,
+                            Value::String(lua.create_string(m.power_type_name.as_str())?),
+                        ));
                     }
                 }
             }
@@ -227,11 +237,9 @@ fn register_heal_absorb_stubs(lua: &Lua) -> Result<()> {
 fn register_percent_health_from_guid(lua: &Lua) -> Result<()> {
     lua.globals().set(
         "UnitPercentHealthFromGUID",
-        lua.create_function(|_, guid: Option<String>| {
-            match guid {
-                Some(_) => Ok(Value::Number(100.0)),
-                None => Ok(Value::Nil),
-            }
+        lua.create_function(|_, guid: Option<String>| match guid {
+            Some(_) => Ok(Value::Number(100.0)),
+            None => Ok(Value::Nil),
         })?,
     )
 }

@@ -108,9 +108,7 @@ fn register_secure_handler_stubs(lua: &Lua) -> Result<()> {
     )?;
     globals.set(
         "SecureHandlerExecute",
-        lua.create_function(|_, (_frame, _body, _args): (Value, String, mlua::MultiValue)| {
-            Ok(())
-        })?,
+        lua.create_function(|_, (_frame, _body, _args): (Value, String, mlua::MultiValue)| Ok(()))?,
     )?;
     globals.set(
         "SecureHandlerWrapScript",

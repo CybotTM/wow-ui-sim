@@ -274,8 +274,14 @@ fn test_set_spell_cooldown_different_spells_independent() {
             "#,
         )
         .unwrap();
-    assert!((dur_a - 3.0).abs() < 0.01, "spell 11111 duration ~3.0, got {dur_a}");
-    assert!((dur_b - 15.0).abs() < 0.01, "spell 22222 duration ~15.0, got {dur_b}");
+    assert!(
+        (dur_a - 3.0).abs() < 0.01,
+        "spell 11111 duration ~3.0, got {dur_a}"
+    );
+    assert!(
+        (dur_b - 15.0).abs() < 0.01,
+        "spell 22222 duration ~15.0, got {dur_b}"
+    );
 }
 
 #[test]

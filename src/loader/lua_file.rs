@@ -4,10 +4,10 @@ use crate::lua_api::LoaderEnv;
 use std::path::Path;
 use std::time::Instant;
 
+use super::LoadTiming;
 use super::addon::AddonContext;
 use super::bytecode_cache;
 use super::error::LoadError;
-use super::LoadTiming;
 
 /// Load a Lua file into the environment with addon varargs.
 pub fn load_lua_file(
@@ -81,10 +81,12 @@ fn load_cached_or_compile(
     let hash = bytecode_cache::content_hash(bytes, chunk_name);
 
     if let Some(bytecode) = bytecode_cache::get(hash) {
-        // Bytecode found — try loading (may fail if Lua version changed)
+        // Bytecode already embeds its original chunk name. Reassigning a name here
+        // causes mlua/Lua 5.1 binary loads to fail, so cached chunks must be loaded
+        // as-is.
         if let Ok(func) = lua
             .load(bytecode.as_slice())
-            .set_name(chunk_name)
+            .set_mode(mlua::ChunkMode::Binary)
             .into_function()
         {
             timing.cache_hits += 1;
@@ -120,4 +122,44 @@ fn compile_from_source(
         .set_name(chunk_name)
         .into_function()
         .map_err(|e| LoadError::Lua(e.to_string()))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dumped_bytecode_round_trips_with_same_lua_state() {
+        let lua = unsafe { mlua::Lua::unsafe_new() };
+        let chunk_name = "@Interface/AddOns/TestAddon/Test.lua";
+        let func = compile_from_source(&lua, b"return 40 + 2", chunk_name)
+            .expect("source chunk should compile");
+        let bytecode = func.dump(false);
+
+        let loaded = lua
+            .load(bytecode.as_slice())
+            .set_mode(mlua::ChunkMode::Binary)
+            .into_function();
+        if let Err(err) = loaded {
+            panic!("bytecode should load in same Lua state: {err}");
+        }
+    }
+
+    #[test]
+    fn dumped_bytecode_round_trips_with_fresh_lua_state() {
+        let source_lua = unsafe { mlua::Lua::unsafe_new() };
+        let chunk_name = "@Interface/AddOns/TestAddon/Test.lua";
+        let func = compile_from_source(&source_lua, b"return 40 + 2", chunk_name)
+            .expect("source chunk should compile");
+        let bytecode = func.dump(false);
+
+        let fresh_lua = unsafe { mlua::Lua::unsafe_new() };
+        let loaded = fresh_lua
+            .load(bytecode.as_slice())
+            .set_mode(mlua::ChunkMode::Binary)
+            .into_function();
+        if let Err(err) = loaded {
+            panic!("bytecode should load in fresh Lua state: {err}");
+        }
+    }
 }

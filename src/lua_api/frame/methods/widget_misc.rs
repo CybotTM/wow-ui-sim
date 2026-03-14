@@ -45,7 +45,9 @@ fn add_simplehtml_hyperlink_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("GetHyperlinkFormat", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let format = state.simple_htmls.get(&this.0)
+        let format = state
+            .simple_htmls
+            .get(&this.0)
             .map(|d| d.hyperlink_format.clone())
             .unwrap_or_else(|| "|H%s|h%s|h".to_string());
         Ok(format)
@@ -63,7 +65,9 @@ fn add_simplehtml_hyperlink_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("GetHyperlinksEnabled", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let enabled = state.simple_htmls.get(&this.0)
+        let enabled = state
+            .simple_htmls
+            .get(&this.0)
             .map(|d| d.hyperlinks_enabled)
             .unwrap_or(true);
         Ok(enabled)
@@ -102,9 +106,15 @@ fn add_colorselect_rgb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.attributes.insert("colorR".to_string(), AttributeValue::Number(r));
-            frame.attributes.insert("colorG".to_string(), AttributeValue::Number(g));
-            frame.attributes.insert("colorB".to_string(), AttributeValue::Number(b));
+            frame
+                .attributes
+                .insert("colorR".to_string(), AttributeValue::Number(r));
+            frame
+                .attributes
+                .insert("colorG".to_string(), AttributeValue::Number(g));
+            frame
+                .attributes
+                .insert("colorB".to_string(), AttributeValue::Number(b));
         }
         Ok(())
     });
@@ -135,12 +145,24 @@ fn add_colorselect_hsv_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.attributes.insert("colorR".to_string(), AttributeValue::Number(r));
-            frame.attributes.insert("colorG".to_string(), AttributeValue::Number(g));
-            frame.attributes.insert("colorB".to_string(), AttributeValue::Number(b));
-            frame.attributes.insert("colorH".to_string(), AttributeValue::Number(h % 360.0));
-            frame.attributes.insert("colorS".to_string(), AttributeValue::Number(s));
-            frame.attributes.insert("colorV".to_string(), AttributeValue::Number(v));
+            frame
+                .attributes
+                .insert("colorR".to_string(), AttributeValue::Number(r));
+            frame
+                .attributes
+                .insert("colorG".to_string(), AttributeValue::Number(g));
+            frame
+                .attributes
+                .insert("colorB".to_string(), AttributeValue::Number(b));
+            frame
+                .attributes
+                .insert("colorH".to_string(), AttributeValue::Number(h % 360.0));
+            frame
+                .attributes
+                .insert("colorS".to_string(), AttributeValue::Number(s));
+            frame
+                .attributes
+                .insert("colorV".to_string(), AttributeValue::Number(v));
         }
         Ok(())
     });
@@ -155,7 +177,9 @@ fn add_colorselect_hsv_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     });
 }
 
-fn get_color_hsv_from_attrs(attrs: &std::collections::HashMap<String, AttributeValue>) -> (f64, f64, f64) {
+fn get_color_hsv_from_attrs(
+    attrs: &std::collections::HashMap<String, AttributeValue>,
+) -> (f64, f64, f64) {
     let get = |key: &str| match attrs.get(key) {
         Some(AttributeValue::Number(n)) => Some(*n),
         _ => None,
@@ -170,7 +194,10 @@ fn get_color_hsv_from_attrs(attrs: &std::collections::HashMap<String, AttributeV
 }
 
 fn add_colorselect_alpha_texture_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ClearColorWheelTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "ClearColorWheelTexture",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("GetColorAlpha", |_, _, ()| Ok(0.0_f64));
     methods.add_method("GetColorAlphaTexture", |_, _, ()| Ok(Value::Nil));
     methods.add_method("GetColorAlphaThumbTexture", |_, _, ()| Ok(Value::Nil));
@@ -179,12 +206,27 @@ fn add_colorselect_alpha_texture_stubs<M: mlua::UserDataMethods<FrameRef>>(metho
     methods.add_method("GetColorWheelTexture", |_, _, ()| Ok(Value::Nil));
     methods.add_method("GetColorWheelThumbTexture", |_, _, ()| Ok(Value::Nil));
     methods.add_method("SetColorAlpha", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorAlphaTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorAlphaThumbTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorValueTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorValueThumbTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorWheelTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorWheelThumbTexture", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method("SetColorAlphaTexture", |_, _, _: mlua::Variadic<Value>| {
+        Ok(())
+    });
+    methods.add_method(
+        "SetColorAlphaThumbTexture",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
+    methods.add_method("SetColorValueTexture", |_, _, _: mlua::Variadic<Value>| {
+        Ok(())
+    });
+    methods.add_method(
+        "SetColorValueThumbTexture",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
+    methods.add_method("SetColorWheelTexture", |_, _, _: mlua::Variadic<Value>| {
+        Ok(())
+    });
+    methods.add_method(
+        "SetColorWheelThumbTexture",
+        |_, _, _: mlua::Variadic<Value>| Ok(()),
+    );
 }
 
 // --- Drag/Move/Resize ---
@@ -195,17 +237,19 @@ fn add_drag_move_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMovable", |lua, this, movable: bool| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
-                frame.movable = movable;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(this.0)
+        {
+            frame.movable = movable;
+        }
         Ok(())
     });
     methods.add_method("IsMovable", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(this.0) {
-                return Ok(frame.movable);
-            }
+            && let Some(frame) = s.widgets.get(this.0)
+        {
+            return Ok(frame.movable);
+        }
         Ok(false)
     });
 }
@@ -222,9 +266,10 @@ fn add_start_moving<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
             && let Some(frame) = s.widgets.get_mut_visual(id)
-                && frame.movable {
-                    frame.is_moving = true;
-                }
+            && frame.movable
+        {
+            frame.is_moving = true;
+        }
         Ok(())
     });
 }
@@ -240,9 +285,10 @@ fn add_stop_moving_or_sizing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(id) {
-                frame.is_moving = false;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(id)
+        {
+            frame.is_moving = false;
+        }
         Ok(())
     });
 }
@@ -251,17 +297,19 @@ fn add_drag_movable_resizable_methods<M: mlua::UserDataMethods<FrameRef>>(method
     methods.add_method("SetResizable", |lua, this, resizable: bool| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
-                frame.resizable = resizable;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(this.0)
+        {
+            frame.resizable = resizable;
+        }
         Ok(())
     });
     methods.add_method("IsResizable", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(this.0) {
-                return Ok(frame.resizable);
-            }
+            && let Some(frame) = s.widgets.get(this.0)
+        {
+            return Ok(frame.resizable);
+        }
         Ok(false)
     });
 }
@@ -277,29 +325,41 @@ fn add_drag_clamp_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(id) {
-                frame.clamped_to_screen = clamped;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(id)
+        {
+            frame.clamped_to_screen = clamped;
+        }
         Ok(())
     });
     methods.add_method("IsClampedToScreen", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(this.0) {
-                return Ok(frame.clamped_to_screen);
-            }
+            && let Some(frame) = s.widgets.get(this.0)
+        {
+            return Ok(frame.clamped_to_screen);
+        }
         Ok(false)
     });
-    methods.add_method("SetClampRectInsets", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetClampRectInsets", |_, _this, _args: mlua::MultiValue| {
+        Ok(())
+    });
 }
 
 fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetResizeBounds", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("GetResizeBounds", |_, _this, ()| Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32)));
+    methods.add_method(
+        "SetResizeBounds",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
+    methods.add_method("GetResizeBounds", |_, _this, ()| {
+        Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32))
+    });
     methods.add_method("SetMinResize", |_, _this, (_w, _h): (f32, f32)| Ok(()));
     methods.add_method("SetMaxResize", |_, _this, (_w, _h): (f32, f32)| Ok(()));
     methods.add_method("StartSizing", |_, _this, _point: Option<String>| Ok(()));
-    methods.add_method("RegisterForDrag", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "RegisterForDrag",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
     methods.add_method("SetUserPlaced", |_, _this, _user_placed: bool| Ok(()));
     methods.add_method("IsUserPlaced", |_, _this, ()| Ok(false));
     methods.add_method("SetDontSavePosition", |_, _this, _dont_save: bool| Ok(()));
@@ -314,23 +374,36 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetTextToFit", |lua, this, text: Option<String>| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.text = text; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.text = text;
+        }
         Ok(())
     });
     methods.add_method("SetSelectionTranslator", |_, _this, _func: Value| Ok(()));
     methods.add_method("SetItemButtonScale", |_, _this, _scale: Value| Ok(()));
-    methods.add_method("UpdateItemContextMatching", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "UpdateItemContextMatching",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
     methods.add_method("UpdateHeight", |_, _this, ()| Ok(()));
     methods.add_method("SetDefaultText", |_, _this, _text: Value| Ok(()));
     methods.add_method("SetVisuals", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("RegisterForWidgetSet", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("UnregisterForWidgetSet", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "RegisterForWidgetSet",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
+    methods.add_method(
+        "UnregisterForWidgetSet",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
 }
 
 fn add_misc_stubs_mixin<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetRotationIncrement", |lua, this, inc: Value| {
         let id = this.0;
-        if let Some((func, frame_ud)) = super::methods_helpers::get_mixin_override(lua, id, "SetRotationIncrement") {
+        if let Some((func, frame_ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "SetRotationIncrement")
+        {
             return func.call::<()>((frame_ud, inc));
         }
         Ok(())
@@ -344,12 +417,19 @@ fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {
     let c = v * s;
     let x = c * (1.0 - ((h / 60.0) % 2.0 - 1.0).abs());
     let m = v - c;
-    let (r1, g1, b1) = if h < 60.0 { (c, x, 0.0)
-    } else if h < 120.0 { (x, c, 0.0)
-    } else if h < 180.0 { (0.0, c, x)
-    } else if h < 240.0 { (0.0, x, c)
-    } else if h < 300.0 { (x, 0.0, c)
-    } else { (c, 0.0, x) };
+    let (r1, g1, b1) = if h < 60.0 {
+        (c, x, 0.0)
+    } else if h < 120.0 {
+        (x, c, 0.0)
+    } else if h < 180.0 {
+        (0.0, c, x)
+    } else if h < 240.0 {
+        (0.0, x, c)
+    } else if h < 300.0 {
+        (x, 0.0, c)
+    } else {
+        (c, 0.0, x)
+    };
     (r1 + m, g1 + m, b1 + m)
 }
 
@@ -359,10 +439,15 @@ fn rgb_to_hsv(r: f64, g: f64, b: f64) -> (f64, f64, f64) {
     let delta = max - min;
     let v = max;
     let s = if max == 0.0 { 0.0 } else { delta / max };
-    let h = if delta == 0.0 { 0.0
-    } else if max == r { 60.0 * (((g - b) / delta) % 6.0)
-    } else if max == g { 60.0 * ((b - r) / delta + 2.0)
-    } else { 60.0 * ((r - g) / delta + 4.0) };
+    let h = if delta == 0.0 {
+        0.0
+    } else if max == r {
+        60.0 * (((g - b) / delta) % 6.0)
+    } else if max == g {
+        60.0 * ((b - r) / delta + 2.0)
+    } else {
+        60.0 * ((r - g) / delta + 4.0)
+    };
     let h = if h < 0.0 { h + 360.0 } else { h };
     (h, s, v)
 }

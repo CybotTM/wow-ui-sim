@@ -19,11 +19,19 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 }
 
 fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ClearHighlightText", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("ClearHistory", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
+    methods.add_method(
+        "ClearHighlightText",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "ClearHistory",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
     methods.add_method("GetAltArrowKeyMode", |_, _this, ()| Ok(false));
     methods.add_method("GetDisplayText", |_, _this, ()| Ok("".to_string()));
-    methods.add_method("GetHighlightColor", |_, _this, ()| Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64)));
+    methods.add_method("GetHighlightColor", |_, _this, ()| {
+        Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
+    });
     methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
     methods.add_method("GetUTF8CursorPosition", |_, _this, ()| Ok(0i32));
     methods.add_method("GetVisibleTextByteLimit", |_, _this, ()| Ok(0i32));
@@ -33,15 +41,42 @@ fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("IsInIMECompositionMode", |_, _this, ()| Ok(false));
     methods.add_method("IsNumericFullRange", |_, _this, ()| Ok(false));
     methods.add_method("IsSecureText", |_, _this, ()| Ok(false));
-    methods.add_method("ResetInputMode", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetAlphabeticOnly", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetAltArrowKeyMode", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetHighlightColor", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetNumericFullRange", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetSecureText", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetSecurityDisablePaste", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("SetVisibleTextByteLimit", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    methods.add_method("ToggleInputLanguage", |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
+    methods.add_method(
+        "ResetInputMode",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetAlphabeticOnly",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetAltArrowKeyMode",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetHighlightColor",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetNumericFullRange",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetSecureText",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetSecurityDisablePaste",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetVisibleTextByteLimit",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
+    methods.add_method(
+        "ToggleInputLanguage",
+        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
+    );
 }
 
 fn add_editbox_focus_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -54,7 +89,9 @@ fn add_editbox_focus_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             s.focused_frame_id = Some(id);
             old
         };
-        if old_focus == Some(id) { return Ok(()); }
+        if old_focus == Some(id) {
+            return Ok(());
+        }
         if let Some(old_id) = old_focus {
             fire_focus_handler(lua, old_id, "OnEditFocusLost")?;
         }
@@ -74,7 +111,9 @@ fn add_editbox_focus_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
                 false
             }
         };
-        if had_focus { fire_focus_handler(lua, id, "OnEditFocusLost")?; }
+        if had_focus {
+            fire_focus_handler(lua, id, "OnEditFocusLost")?;
+        }
         Ok(())
     });
 
@@ -101,7 +140,11 @@ fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("GetCursorPosition", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_cursor_pos).unwrap_or(0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_cursor_pos)
+            .unwrap_or(0))
     });
 
     methods.add_method("HighlightText", |_, _this, _args: mlua::MultiValue| Ok(()));
@@ -121,7 +164,9 @@ fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("GetNumLetters", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let len = state.widgets.get(this.0)
+        let len = state
+            .widgets
+            .get(this.0)
             .and_then(|f| f.text.as_ref())
             .map(|t| t.chars().count())
             .unwrap_or(0);
@@ -145,9 +190,10 @@ fn add_editbox_number_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(frame) = state.widgets.get(this.0)
-            && let Some(text) = &frame.text {
-                return Ok(text.parse::<f64>().unwrap_or(0.0));
-            }
+            && let Some(text) = &frame.text
+        {
+            return Ok(text.parse::<f64>().unwrap_or(0.0));
+        }
         Ok(0.0)
     });
 }
@@ -156,27 +202,39 @@ fn add_editbox_limit_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("SetMaxLetters", |lua, this, max: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_max_letters = max; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_max_letters = max;
+        }
         Ok(())
     });
 
     methods.add_method("GetMaxLetters", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_max_letters).unwrap_or(0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_max_letters)
+            .unwrap_or(0))
     });
 
     methods.add_method("SetMaxBytes", |lua, this, max: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_max_bytes = max; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_max_bytes = max;
+        }
         Ok(())
     });
 
     methods.add_method("GetMaxBytes", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_max_bytes).unwrap_or(0))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_max_bytes)
+            .unwrap_or(0))
     });
 }
 
@@ -184,35 +242,53 @@ fn add_editbox_mode_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMultiLine", |lua, this, multi: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_multi_line = multi; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_multi_line = multi;
+        }
         Ok(())
     });
     methods.add_method("IsMultiLine", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_multi_line).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_multi_line)
+            .unwrap_or(false))
     });
     methods.add_method("SetAutoFocus", |lua, this, auto: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_auto_focus = auto; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_auto_focus = auto;
+        }
         Ok(())
     });
     methods.add_method("IsAutoFocus", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_auto_focus).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_auto_focus)
+            .unwrap_or(false))
     });
     methods.add_method("SetNumeric", |lua, this, numeric: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_numeric = numeric; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_numeric = numeric;
+        }
         Ok(())
     });
     methods.add_method("IsNumeric", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_numeric).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_numeric)
+            .unwrap_or(false))
     });
 }
 
@@ -220,24 +296,36 @@ fn add_editbox_input_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetPassword", |lua, this, pw: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_password = pw; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_password = pw;
+        }
         Ok(())
     });
     methods.add_method("IsPassword", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_password).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_password)
+            .unwrap_or(false))
     });
     methods.add_method("SetBlinkSpeed", |lua, this, speed: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_blink_speed = speed; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_blink_speed = speed;
+        }
         Ok(())
     });
     methods.add_method("GetBlinkSpeed", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.editbox_blink_speed).unwrap_or(0.5))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_blink_speed)
+            .unwrap_or(0.5))
     });
     methods.add_method("SetCountInvisibleLetters", |lua, this, count: bool| {
         let state_rc = get_sim_state(lua);
@@ -266,14 +354,20 @@ fn add_editbox_history_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("GetHistoryLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.widgets.get(this.0).map(|f| f.editbox_history.len()).unwrap_or(0);
+        let count = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.editbox_history.len())
+            .unwrap_or(0);
         Ok(count as i32)
     });
 
     methods.add_method("SetHistoryLines", |lua, this, max: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) { frame.editbox_history_max = max; }
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_history_max = max;
+        }
         Ok(())
     });
 }

@@ -1,8 +1,8 @@
 //! Texture drawing utilities for iced canvas.
 
+use iced::Rectangle;
 use iced::widget::canvas::{self, Frame};
 use iced::widget::image::Handle as ImageHandle;
-use iced::Rectangle;
 
 /// UI scale factor (1.0 = pixel-perfect, no scaling).
 pub const UI_SCALE: f32 = 1.0;
@@ -181,7 +181,15 @@ pub fn draw_nine_slice_texture(
 
     draw_nine_slice_center(frame, bounds, handles, edge_size);
     draw_nine_slice_corners(frame, bounds, handles, corner_size);
-    draw_nine_slice_edges(frame, bounds, handles, corner_size, edge_size, inner_width, inner_height);
+    draw_nine_slice_edges(
+        frame,
+        bounds,
+        handles,
+        corner_size,
+        edge_size,
+        inner_width,
+        inner_height,
+    );
 }
 
 /// Draw the center region of a 9-slice texture.

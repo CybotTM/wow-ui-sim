@@ -13,9 +13,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_unit_buff_returns_data_for_player() {
     let env = env();
-    let name: String = env
-        .eval("return UnitBuff('player', 1)")
-        .unwrap();
+    let name: String = env.eval("return UnitBuff('player', 1)").unwrap();
     assert!(!name.is_empty(), "First buff name should be non-empty");
 }
 
@@ -23,11 +21,13 @@ fn test_unit_buff_returns_data_for_player() {
 fn test_unit_buff_returns_all_fields() {
     let env = env();
     let (has_name, has_spell_id, has_duration): (bool, bool, bool) = env
-        .eval(r#"
+        .eval(
+            r#"
             local name, icon, count, dispelName, duration, expirationTime,
                   source, isStealable, nspp, spellId = UnitBuff('player', 1)
             return name ~= nil, spellId ~= nil, duration ~= nil
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(has_name, "UnitBuff should return name");
     assert!(has_spell_id, "UnitBuff should return spellId");
@@ -37,18 +37,14 @@ fn test_unit_buff_returns_all_fields() {
 #[test]
 fn test_unit_buff_past_end_returns_nil() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return UnitBuff('player', 100) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return UnitBuff('player', 100) == nil").unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_unit_buff_non_player_returns_nil() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return UnitBuff('target', 1) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return UnitBuff('target', 1) == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -56,13 +52,15 @@ fn test_unit_buff_non_player_returns_nil() {
 fn test_unit_buff_count_between_4_and_8() {
     let env = env();
     let count: i32 = env
-        .eval(r#"
+        .eval(
+            r#"
             local n = 0
             for i = 1, 20 do
                 if UnitBuff('player', i) then n = n + 1 else break end
             end
             return n
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(count >= 4, "Should have at least 4 buffs, got {}", count);
     assert!(count <= 8, "Should have at most 8 buffs, got {}", count);
@@ -75,9 +73,7 @@ fn test_unit_buff_count_between_4_and_8() {
 #[test]
 fn test_unit_aura_helpful_returns_data() {
     let env = env();
-    let name: String = env
-        .eval("return UnitAura('player', 1, 'HELPFUL')")
-        .unwrap();
+    let name: String = env.eval("return UnitAura('player', 1, 'HELPFUL')").unwrap();
     assert!(!name.is_empty(), "UnitAura HELPFUL should return buff name");
 }
 
@@ -97,9 +93,7 @@ fn test_unit_aura_harmful_returns_nil() {
 #[test]
 fn test_unit_debuff_returns_nil() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return UnitDebuff('player', 1) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return UnitDebuff('player', 1) == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -120,13 +114,15 @@ fn test_get_player_aura_by_spell_id_unknown() {
 fn test_get_player_aura_by_spell_id_finds_buff() {
     let env = env();
     let found: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local name, icon, count, dispelName, duration, expirationTime,
                   source, isStealable, nspp, spellId = UnitBuff('player', 1)
             if not spellId then return false end
             local data = GetPlayerAuraBySpellID(spellId)
             return data ~= nil and data.name == name
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(found, "GetPlayerAuraBySpellID should find an active buff");
 }
@@ -135,7 +131,8 @@ fn test_get_player_aura_by_spell_id_finds_buff() {
 fn test_get_player_aura_by_spell_id_table_fields() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local _, _, _, _, _, _, _, _, _, spellId = UnitBuff('player', 1)
             if not spellId then return false end
             local d = GetPlayerAuraBySpellID(spellId)
@@ -145,7 +142,8 @@ fn test_get_player_aura_by_spell_id_table_fields() {
                 and d.isHelpful == true
                 and d.auraInstanceID ~= nil
                 and type(d.points) == "table"
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "AuraData table should have expected fields");
 }
@@ -157,9 +155,7 @@ fn test_get_player_aura_by_spell_id_table_fields() {
 #[test]
 fn test_aura_util_exists() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(AuraUtil) == 'table'")
-        .unwrap();
+    let is_table: bool = env.eval("return type(AuraUtil) == 'table'").unwrap();
     assert!(is_table);
 }
 
@@ -205,13 +201,15 @@ fn test_aura_util_find_aura_by_name_returns_nil() {
 fn test_c_unit_auras_get_buff_data_by_index() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local data = C_UnitAuras.GetBuffDataByIndex("player", 1)
             return data ~= nil
                 and data.name ~= nil
                 and data.spellId ~= nil
                 and data.isHelpful == true
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "GetBuffDataByIndex(1) should return AuraData");
 }
@@ -229,10 +227,12 @@ fn test_c_unit_auras_get_buff_data_by_index_past_end() {
 fn test_c_unit_auras_get_aura_data_by_index() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local data = C_UnitAuras.GetAuraDataByIndex("player", 1, "HELPFUL")
             return data ~= nil and data.name ~= nil and data.isHelpful == true
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "GetAuraDataByIndex should return AuraData for HELPFUL");
 }
@@ -241,9 +241,11 @@ fn test_c_unit_auras_get_aura_data_by_index() {
 fn test_c_unit_auras_get_aura_data_by_index_harmful() {
     let env = env();
     let is_nil: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             return C_UnitAuras.GetAuraDataByIndex("player", 1, "HARMFUL") == nil
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(is_nil);
 }
@@ -252,10 +254,12 @@ fn test_c_unit_auras_get_aura_data_by_index_harmful() {
 fn test_c_unit_auras_get_aura_slots() {
     let env = env();
     let (has_slots, token_nil): (bool, bool) = env
-        .eval(r#"
+        .eval(
+            r#"
             local token, s1 = C_UnitAuras.GetAuraSlots("player", "HELPFUL")
             return s1 ~= nil, token == nil
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(has_slots, "GetAuraSlots should return at least one slot ID");
     assert!(token_nil, "Continuation token should be nil (all returned)");
@@ -265,12 +269,14 @@ fn test_c_unit_auras_get_aura_slots() {
 fn test_c_unit_auras_get_aura_data_by_slot() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local token, s1 = C_UnitAuras.GetAuraSlots("player", "HELPFUL")
             if not s1 then return false end
             local data = C_UnitAuras.GetAuraDataBySlot("player", s1)
             return data ~= nil and data.name ~= nil and data.auraInstanceID == s1
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "GetAuraDataBySlot should return data for a valid slot");
 }
@@ -279,12 +285,14 @@ fn test_c_unit_auras_get_aura_data_by_slot() {
 fn test_c_unit_auras_get_player_aura_by_spell_id() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local data = C_UnitAuras.GetBuffDataByIndex("player", 1)
             if not data then return false end
             local found = C_UnitAuras.GetPlayerAuraBySpellID(data.spellId)
             return found ~= nil and found.name == data.name
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "C_UnitAuras.GetPlayerAuraBySpellID should find buff");
 }
@@ -293,12 +301,14 @@ fn test_c_unit_auras_get_player_aura_by_spell_id() {
 fn test_c_unit_auras_get_aura_data_by_spell_name() {
     let env = env();
     let ok: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local data = C_UnitAuras.GetBuffDataByIndex("player", 1)
             if not data then return false end
             local found = C_UnitAuras.GetAuraDataBySpellName("player", data.name)
             return found ~= nil and found.spellId == data.spellId
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(ok, "GetAuraDataBySpellName should find buff by name");
 }
@@ -307,10 +317,12 @@ fn test_c_unit_auras_get_aura_data_by_spell_name() {
 fn test_c_unit_auras_slots_harmful_empty() {
     let env = env();
     let is_nil: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             local token, s1 = C_UnitAuras.GetAuraSlots("player", "HARMFUL")
             return s1 == nil
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(is_nil, "HARMFUL GetAuraSlots should return no slots");
 }

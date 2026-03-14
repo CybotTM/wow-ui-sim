@@ -1,7 +1,7 @@
 //! `EnumerateFrames` and `GetClickFrame` global functions.
 
-use crate::lua_api::frame::{extract_frame_id, frame_ref};
 use crate::lua_api::frame::get_sim_state;
+use crate::lua_api::frame::{extract_frame_id, frame_ref};
 use mlua::{Lua, Result, Value};
 
 /// Register `EnumerateFrames` and `GetClickFrame` globals.
@@ -22,9 +22,7 @@ fn enumerate_frames(lua: &Lua, arg: Value) -> Result<Value> {
     let state = state_rc.borrow();
 
     let after_id: u64 = match &arg {
-        ref v @ Value::UserData(_) => {
-            extract_frame_id(v).unwrap_or(0)
-        }
+        ref v @ Value::UserData(_) => extract_frame_id(v).unwrap_or(0),
         Value::Nil => 0,
         _ => return Ok(Value::Nil),
     };

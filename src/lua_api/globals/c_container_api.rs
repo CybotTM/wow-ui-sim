@@ -20,8 +20,14 @@ pub fn register_c_container_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
 /// Register the C_NewItems namespace (new item indicators).
 fn register_c_new_items(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("IsNewItem", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
-    t.set("RemoveNewItem", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    t.set(
+        "IsNewItem",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    t.set(
+        "RemoveNewItem",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     t.set("ClearAll", lua.create_function(|_, _: ()| Ok(()))?)?;
     lua.globals().set("C_NewItems", t)?;
     Ok(())
@@ -77,41 +83,57 @@ fn build_item_link(lua: &Lua, item_id: u32) -> Result<Value> {
 
 /// Register C_Container item query methods.
 fn register_c_container_item_methods(
-    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let s = Rc::clone(state);
-    t.set("GetContainerItemID", lua.create_function(move |_, (bag, slot): (i32, i32)| {
-        Ok(s.borrow().get_bag_item(bag, slot).map(|(id, _)| id as i64))
-    })?)?;
+    t.set(
+        "GetContainerItemID",
+        lua.create_function(move |_, (bag, slot): (i32, i32)| {
+            Ok(s.borrow().get_bag_item(bag, slot).map(|(id, _)| id as i64))
+        })?,
+    )?;
     let s = Rc::clone(state);
-    t.set("GetContainerItemLink", lua.create_function(move |lua, (bag, slot): (i32, i32)| {
-        let Some((item_id, _)) = s.borrow().get_bag_item(bag, slot) else {
-            return Ok(Value::Nil);
-        };
-        build_item_link(lua, item_id)
-    })?)?;
+    t.set(
+        "GetContainerItemLink",
+        lua.create_function(move |lua, (bag, slot): (i32, i32)| {
+            let Some((item_id, _)) = s.borrow().get_bag_item(bag, slot) else {
+                return Ok(Value::Nil);
+            };
+            build_item_link(lua, item_id)
+        })?,
+    )?;
     register_c_container_info_methods(lua, t, state)?;
     Ok(())
 }
 
 /// Register GetContainerItemInfo, QuestInfo, and Cooldown.
 fn register_c_container_info_methods(
-    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let s = Rc::clone(state);
-    t.set("GetContainerItemInfo", lua.create_function(move |lua, (bag, slot): (i32, i32)| {
-        let Some((item_id, stack_count)) = s.borrow().get_bag_item(bag, slot) else {
-            return Ok(Value::Nil);
-        };
-        build_container_item_info(lua, item_id, stack_count)
-    })?)?;
-    t.set("GetContainerItemQuestInfo", lua.create_function(|lua, (_bag, _slot): (i32, i32)| {
-        let t = lua.create_table()?;
-        t.set("isQuestItem", false)?;
-        t.set("questID", Value::Nil)?;
-        t.set("isActive", false)?;
-        Ok(Value::Table(t))
-    })?)?;
+    t.set(
+        "GetContainerItemInfo",
+        lua.create_function(move |lua, (bag, slot): (i32, i32)| {
+            let Some((item_id, stack_count)) = s.borrow().get_bag_item(bag, slot) else {
+                return Ok(Value::Nil);
+            };
+            build_container_item_info(lua, item_id, stack_count)
+        })?,
+    )?;
+    t.set(
+        "GetContainerItemQuestInfo",
+        lua.create_function(|lua, (_bag, _slot): (i32, i32)| {
+            let t = lua.create_table()?;
+            t.set("isQuestItem", false)?;
+            t.set("questID", Value::Nil)?;
+            t.set("isActive", false)?;
+            Ok(Value::Table(t))
+        })?,
+    )?;
     t.set(
         "GetContainerItemCooldown",
         lua.create_function(|_, (_bag, _slot): (i32, i32)| Ok((0.0, 0.0, 1)))?,
@@ -121,38 +143,89 @@ fn register_c_container_info_methods(
 
 /// Register C_Container stub methods used by ContainerFrame.lua.
 fn register_c_container_stubs(
-    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    t.set("IsContainerFiltered", lua.create_function(|_, _bag: i32| Ok(false))?)?;
-    t.set("GetBagName", lua.create_function(|lua, bag: i32| {
-        let name = if bag == 0 { "Backpack" } else { "Bag" };
-        Ok(Value::String(lua.create_string(name)?))
-    })?)?;
-    t.set("ContainerIDToInventoryID", lua.create_function(|_, bag: i32| {
-        Ok(if bag > 0 { 19 + bag } else { 0 })
-    })?)?;
+    t.set(
+        "IsContainerFiltered",
+        lua.create_function(|_, _bag: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetBagName",
+        lua.create_function(|lua, bag: i32| {
+            let name = if bag == 0 { "Backpack" } else { "Bag" };
+            Ok(Value::String(lua.create_string(name)?))
+        })?,
+    )?;
+    t.set(
+        "ContainerIDToInventoryID",
+        lua.create_function(|_, bag: i32| Ok(if bag > 0 { 19 + bag } else { 0 }))?,
+    )?;
     let s = Rc::clone(state);
-    t.set("HasContainerItem", lua.create_function(move |_, (bag, slot): (i32, i32)| {
-        Ok(s.borrow().get_bag_item(bag, slot).is_some())
-    })?)?;
-    t.set("GetBagSlotFlag", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
-    t.set("SetBagSlotFlag", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    t.set("GetBackpackAutosortDisabled", lua.create_function(|_, _: ()| Ok(false))?)?;
-    t.set("SetBackpackAutosortDisabled", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("GetBackpackSellJunkDisabled", lua.create_function(|_, _: ()| Ok(false))?)?;
-    t.set("SetBackpackSellJunkDisabled", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("GetContainerItemPurchaseInfo", lua.create_function(|_, _: mlua::MultiValue| Ok(Value::Nil))?)?;
-    t.set("UseContainerItem", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("PickupContainerItem", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("SplitContainerItem", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("IsBattlePayItem", lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?)?;
-    t.set("SetBagPortraitTexture", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    t.set(
+        "HasContainerItem",
+        lua.create_function(move |_, (bag, slot): (i32, i32)| {
+            Ok(s.borrow().get_bag_item(bag, slot).is_some())
+        })?,
+    )?;
+    t.set(
+        "GetBagSlotFlag",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    t.set(
+        "SetBagSlotFlag",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "GetBackpackAutosortDisabled",
+        lua.create_function(|_, _: ()| Ok(false))?,
+    )?;
+    t.set(
+        "SetBackpackAutosortDisabled",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "GetBackpackSellJunkDisabled",
+        lua.create_function(|_, _: ()| Ok(false))?,
+    )?;
+    t.set(
+        "SetBackpackSellJunkDisabled",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "GetContainerItemPurchaseInfo",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "UseContainerItem",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "PickupContainerItem",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "SplitContainerItem",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "IsBattlePayItem",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    t.set(
+        "SetBagPortraitTexture",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     let s = Rc::clone(state);
-    t.set("GetContainerNumFreeSlots", lua.create_function(move |_, bag: i32| {
-        let total = bag_slot_count(bag);
-        let occupied = s.borrow().bag_occupied_slots(bag);
-        Ok((total - occupied, 0i32))
-    })?)?;
+    t.set(
+        "GetContainerNumFreeSlots",
+        lua.create_function(move |_, bag: i32| {
+            let total = bag_slot_count(bag);
+            let occupied = s.borrow().bag_occupied_slots(bag);
+            Ok((total - occupied, 0i32))
+        })?,
+    )?;
     Ok(())
 }
 
@@ -181,15 +254,21 @@ fn register_container_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
         lua.create_function(|_, (_unit, _slot): (Value, Value)| Ok(false))?,
     )?;
     let s = Rc::clone(&state);
-    globals.set("GetContainerItemID", lua.create_function(move |_, (bag, slot): (i32, i32)| {
-        Ok(s.borrow().get_bag_item(bag, slot).map(|(id, _)| id as i64))
-    })?)?;
+    globals.set(
+        "GetContainerItemID",
+        lua.create_function(move |_, (bag, slot): (i32, i32)| {
+            Ok(s.borrow().get_bag_item(bag, slot).map(|(id, _)| id as i64))
+        })?,
+    )?;
     let s = Rc::clone(&state);
-    globals.set("GetContainerItemLink", lua.create_function(move |lua, (bag, slot): (i32, i32)| {
-        let Some((item_id, _)) = s.borrow().get_bag_item(bag, slot) else {
-            return Ok(Value::Nil);
-        };
-        build_item_link(lua, item_id)
-    })?)?;
+    globals.set(
+        "GetContainerItemLink",
+        lua.create_function(move |lua, (bag, slot): (i32, i32)| {
+            let Some((item_id, _)) = s.borrow().get_bag_item(bag, slot) else {
+                return Ok(Value::Nil);
+            };
+            build_item_link(lua, item_id)
+        })?,
+    )?;
     Ok(())
 }

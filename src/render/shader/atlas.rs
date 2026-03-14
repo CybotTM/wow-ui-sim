@@ -374,10 +374,7 @@ pub struct TierStats {
 }
 
 /// Create the glyph atlas texture and view.
-fn create_glyph_atlas(
-    device: &wgpu::Device,
-    size: u32,
-) -> (wgpu::Texture, wgpu::TextureView) {
+fn create_glyph_atlas(device: &wgpu::Device, size: u32) -> (wgpu::Texture, wgpu::TextureView) {
     let texture = device.create_texture(&wgpu::TextureDescriptor {
         label: Some("Glyph Atlas"),
         size: wgpu::Extent3d {

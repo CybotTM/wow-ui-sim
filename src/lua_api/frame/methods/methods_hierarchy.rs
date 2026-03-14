@@ -1,6 +1,6 @@
 //! Hierarchy methods: GetParent, SetParent, GetNumChildren, GetChildren, GetRegions.
 
-use super::super::handle::{extract_frame_id, frame_ref, FrameRef};
+use super::super::handle::{FrameRef, extract_frame_id, frame_ref};
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::{FrameStrata, WidgetRegistry};
 use mlua::Value;
@@ -70,10 +70,11 @@ pub fn reparent_widget(widgets: &mut WidgetRegistry, child_id: u64, new_parent_i
 /// Remove child from old parent's children list and clear parent_key.
 fn detach_from_old_parent(widgets: &mut WidgetRegistry, child_id: u64, old_parent_id: Option<u64>) {
     if let Some(old_pid) = old_parent_id
-        && let Some(old_parent) = widgets.get_mut_visual(old_pid) {
-            old_parent.children.retain(|&id| id != child_id);
-            old_parent.children_keys.retain(|_, &mut v| v != child_id);
-        }
+        && let Some(old_parent) = widgets.get_mut_visual(old_pid)
+    {
+        old_parent.children.retain(|&id| id != child_id);
+        old_parent.children_keys.retain(|_, &mut v| v != child_id);
+    }
     if let Some(child) = widgets.get_mut_visual(child_id) {
         child.parent_key = None;
     }
@@ -85,8 +86,14 @@ fn read_parent_props(
     new_parent_id: Option<u64>,
 ) -> Option<(FrameStrata, i32, f32, f32)> {
     new_parent_id.and_then(|pid| {
-        widgets.get(pid)
-            .map(|p| (p.frame_strata, p.frame_level, p.effective_alpha, p.effective_scale))
+        widgets.get(pid).map(|p| {
+            (
+                p.frame_strata,
+                p.frame_level,
+                p.effective_alpha,
+                p.effective_scale,
+            )
+        })
     })
 }
 
@@ -98,9 +105,13 @@ fn update_child_parent_link(
     same_parent: bool,
     parent_props: Option<(FrameStrata, i32, f32, f32)>,
 ) {
-    let Some(frame) = widgets.get_mut_visual(child_id) else { return };
+    let Some(frame) = widgets.get_mut_visual(child_id) else {
+        return;
+    };
     frame.parent_id = new_parent_id;
-    if same_parent { return; }
+    if same_parent {
+        return;
+    }
     if let Some((parent_strata, parent_level, _, _)) = parent_props {
         if !frame.has_fixed_frame_strata {
             frame.frame_strata = parent_strata;
@@ -116,9 +127,10 @@ fn update_child_parent_link(
 fn attach_to_new_parent(widgets: &mut WidgetRegistry, child_id: u64, new_parent_id: Option<u64>) {
     if let Some(new_pid) = new_parent_id
         && let Some(new_parent) = widgets.get_mut_visual(new_pid)
-            && !new_parent.children.contains(&child_id) {
-                new_parent.children.push(child_id);
-            }
+        && !new_parent.children.contains(&child_id)
+    {
+        new_parent.children.push(child_id);
+    }
 }
 
 fn add_parent_key_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -127,35 +139,43 @@ fn add_parent_key_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_set_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetParentKey", |lua, this, (key, remove_old): (String, Option<bool>)| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        let parent_id = state_rc.borrow().widgets.get(id).and_then(|f| f.parent_id);
-        let Some(pid) = parent_id else { return Ok(()) };
+    methods.add_method(
+        "SetParentKey",
+        |lua, this, (key, remove_old): (String, Option<bool>)| {
+            let id = this.0;
+            let state_rc = get_sim_state(lua);
+            let parent_id = state_rc.borrow().widgets.get(id).and_then(|f| f.parent_id);
+            let Some(pid) = parent_id else { return Ok(()) };
 
-        if remove_old.unwrap_or(false) {
-            let old_keys: Vec<String> = {
-                let state = state_rc.borrow();
-                state.widgets.get(pid)
-                    .map(|p| p.children_keys.iter()
-                        .filter(|&(_, &cid)| cid == id)
-                        .map(|(k, _)| k.clone())
-                        .collect())
-                    .unwrap_or_default()
-            };
+            if remove_old.unwrap_or(false) {
+                let old_keys: Vec<String> = {
+                    let state = state_rc.borrow();
+                    state
+                        .widgets
+                        .get(pid)
+                        .map(|p| {
+                            p.children_keys
+                                .iter()
+                                .filter(|&(_, &cid)| cid == id)
+                                .map(|(k, _)| k.clone())
+                                .collect()
+                        })
+                        .unwrap_or_default()
+                };
+                let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
+                let parent_ref = frame_ref(lua, pid)?;
+                for old_key in old_keys {
+                    assign_fn.call::<()>((parent_ref.clone(), old_key, Value::Nil))?;
+                }
+            }
+
             let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
             let parent_ref = frame_ref(lua, pid)?;
-            for old_key in old_keys {
-                assign_fn.call::<()>((parent_ref.clone(), old_key, Value::Nil))?;
-            }
-        }
-
-        let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
-        let parent_ref = frame_ref(lua, pid)?;
-        let child_ref = frame_ref(lua, id)?;
-        assign_fn.call::<()>((parent_ref, key, child_ref))?;
-        Ok(())
-    });
+            let child_ref = frame_ref(lua, id)?;
+            assign_fn.call::<()>((parent_ref, key, child_ref))?;
+            Ok(())
+        },
+    );
 }
 
 fn add_get_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -163,9 +183,10 @@ fn add_get_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(frame) = state.widgets.get(this.0)
-            && let Some(ref key) = frame.parent_key {
-                return Ok(Value::String(lua.create_string(key.as_bytes())?));
-            }
+            && let Some(ref key) = frame.parent_key
+        {
+            return Ok(Value::String(lua.create_string(key.as_bytes())?));
+        }
         Ok(Value::Nil)
     });
 }
@@ -174,7 +195,9 @@ fn add_children_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("GetNumChildren", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.widgets.get(this.0)
+        let count = state
+            .widgets
+            .get(this.0)
             .map(|f| f.children.len())
             .unwrap_or(0);
         Ok(count as i32)
@@ -185,7 +208,11 @@ fn add_children_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let state_rc = get_sim_state(lua);
         let children = {
             let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| f.children.clone()).unwrap_or_default()
+            state
+                .widgets
+                .get(id)
+                .map(|f| f.children.clone())
+                .unwrap_or_default()
         };
         let mut result = mlua::MultiValue::new();
         for child_id in children {
@@ -198,7 +225,9 @@ fn add_children_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 fn add_children_region_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_get_num_regions(methods);
     add_get_regions(methods);
-    methods.add_method("GetAdditionalRegions", |_lua, _this, ()| Ok(mlua::MultiValue::new()));
+    methods.add_method("GetAdditionalRegions", |_lua, _this, ()| {
+        Ok(mlua::MultiValue::new())
+    });
 }
 
 fn add_get_num_regions<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -206,13 +235,27 @@ fn add_get_num_regions<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         use crate::widget::WidgetType;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.widgets.get(this.0).map(|f| {
-            f.children.iter().filter(|&&cid| {
-                state.widgets.get(cid).map(|c| {
-                    matches!(c.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line)
-                }).unwrap_or(false)
-            }).count()
-        }).unwrap_or(0);
+        let count = state
+            .widgets
+            .get(this.0)
+            .map(|f| {
+                f.children
+                    .iter()
+                    .filter(|&&cid| {
+                        state
+                            .widgets
+                            .get(cid)
+                            .map(|c| {
+                                matches!(
+                                    c.widget_type,
+                                    WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+                                )
+                            })
+                            .unwrap_or(false)
+                    })
+                    .count()
+            })
+            .unwrap_or(0);
         Ok(count as i32)
     });
 }
@@ -224,15 +267,26 @@ fn add_get_regions<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let children = {
             let state = state_rc.borrow();
-            state.widgets.get(id).map(|f| f.children.clone()).unwrap_or_default()
+            state
+                .widgets
+                .get(id)
+                .map(|f| f.children.clone())
+                .unwrap_or_default()
         };
         let mut result = mlua::MultiValue::new();
         for child_id in children {
             let is_region = {
                 let state = state_rc.borrow();
-                state.widgets.get(child_id).map(|f| {
-                    matches!(f.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line)
-                }).unwrap_or(false)
+                state
+                    .widgets
+                    .get(child_id)
+                    .map(|f| {
+                        matches!(
+                            f.widget_type,
+                            WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+                        )
+                    })
+                    .unwrap_or(false)
             };
             if is_region {
                 result.push_back(frame_ref(lua, child_id)?);
@@ -251,7 +305,9 @@ pub fn propagate_strata_level_pub(widgets: &mut WidgetRegistry, root_id: u64) {
 /// Each child inherits parent_strata (unless has_fixed_frame_strata) and
 /// parent_level + 1 (unless has_fixed_frame_level).
 fn propagate_strata_level(widgets: &mut WidgetRegistry, root_id: u64) {
-    let Some(root) = widgets.get(root_id) else { return };
+    let Some(root) = widgets.get(root_id) else {
+        return;
+    };
     let root_strata = root.frame_strata;
     let root_level = root.frame_level;
     let mut queue: Vec<(u64, FrameStrata, i32)> = root
@@ -261,7 +317,9 @@ fn propagate_strata_level(widgets: &mut WidgetRegistry, root_id: u64) {
         .collect();
 
     while let Some((child_id, parent_strata, parent_level)) = queue.pop() {
-        let Some(child) = widgets.get_mut_visual(child_id) else { continue };
+        let Some(child) = widgets.get_mut_visual(child_id) else {
+            continue;
+        };
         if !child.has_fixed_frame_strata {
             child.frame_strata = parent_strata;
         }

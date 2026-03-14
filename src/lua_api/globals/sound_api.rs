@@ -10,7 +10,10 @@ pub fn register_sound_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     let g = lua.globals();
 
     g.set("PlaySound", create_play_sound(lua, Rc::clone(&state))?)?;
-    g.set("PlaySoundFile", create_play_sound_file(lua, Rc::clone(&state))?)?;
+    g.set(
+        "PlaySoundFile",
+        create_play_sound_file(lua, Rc::clone(&state))?,
+    )?;
     g.set("StopSound", create_stop_sound(lua, Rc::clone(&state))?)?;
 
     register_c_sound(lua, state)?;
@@ -27,7 +30,10 @@ fn create_play_sound(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
             _ => return Ok((false, Value::Nil)),
         };
         let mut st = state.borrow_mut();
-        let handle = st.sound_manager.as_mut().and_then(|mgr| mgr.play_sound(soundkit_id));
+        let handle = st
+            .sound_manager
+            .as_mut()
+            .and_then(|mgr| mgr.play_sound(soundkit_id));
         match handle {
             Some(h) => Ok((true, Value::Integer(h as i64))),
             None => Ok((false, Value::Nil)),
@@ -42,7 +48,10 @@ fn create_play_sound_file(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlu
             Value::String(s) => {
                 let path = s.to_string_lossy().to_string();
                 let mut st = state.borrow_mut();
-                let handle = st.sound_manager.as_mut().and_then(|mgr| mgr.play_sound_file(&path));
+                let handle = st
+                    .sound_manager
+                    .as_mut()
+                    .and_then(|mgr| mgr.play_sound_file(&path));
                 match handle {
                     Some(h) => Ok((true, Value::Integer(h as i64))),
                     None => Ok((false, Value::Nil)),
@@ -77,22 +86,40 @@ fn register_c_sound(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
 
     // C_Sound.PlaySound — Sound.lua does `PlaySound = C_Sound.PlaySound`
     snd.set("PlaySound", create_play_sound(lua, Rc::clone(&state))?)?;
-    snd.set("PlaySoundFile", create_play_sound_file(lua, Rc::clone(&state))?)?;
+    snd.set(
+        "PlaySoundFile",
+        create_play_sound_file(lua, Rc::clone(&state))?,
+    )?;
 
     let st = Rc::clone(&state);
-    snd.set("IsPlaying", lua.create_function(move |_, handle: Value| {
-        let h = match &handle {
-            Value::Integer(n) => *n as u32,
-            Value::Number(n) => *n as u32,
-            _ => return Ok(false),
-        };
-        let st = st.borrow();
-        Ok(st.sound_manager.as_ref().is_some_and(|mgr| mgr.is_playing(h)))
-    })?)?;
+    snd.set(
+        "IsPlaying",
+        lua.create_function(move |_, handle: Value| {
+            let h = match &handle {
+                Value::Integer(n) => *n as u32,
+                Value::Number(n) => *n as u32,
+                _ => return Ok(false),
+            };
+            let st = st.borrow();
+            Ok(st
+                .sound_manager
+                .as_ref()
+                .is_some_and(|mgr| mgr.is_playing(h)))
+        })?,
+    )?;
 
-    snd.set("GetSoundScaledVolume", lua.create_function(|_, _id: Value| Ok(1.0f64))?)?;
-    snd.set("PlayItemSound", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    snd.set("PlayVocalErrorSound", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
+    snd.set(
+        "GetSoundScaledVolume",
+        lua.create_function(|_, _id: Value| Ok(1.0f64))?,
+    )?;
+    snd.set(
+        "PlayItemSound",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    snd.set(
+        "PlayVocalErrorSound",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
 
     lua.globals().set("C_Sound", snd)?;
     Ok(())

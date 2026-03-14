@@ -106,17 +106,13 @@ fn test_setowner_and_isowned_and_getowner() {
         .unwrap();
     assert!(is_owned, "GameTooltip should be owned by TooltipOwner");
 
-    let owner_name: String = env
-        .eval("return GameTooltip:GetOwner():GetName()")
-        .unwrap();
+    let owner_name: String = env.eval("return GameTooltip:GetOwner():GetName()").unwrap();
     assert_eq!(owner_name, "TooltipOwner");
 
     // Check that non-owner returns false
     env.exec(r#"local other = CreateFrame("Frame", "OtherFrame", UIParent)"#)
         .unwrap();
-    let not_owned: bool = env
-        .eval("return GameTooltip:IsOwned(OtherFrame)")
-        .unwrap();
+    let not_owned: bool = env.eval("return GameTooltip:IsOwned(OtherFrame)").unwrap();
     assert!(!not_owned, "GameTooltip should not be owned by OtherFrame");
 }
 
@@ -183,22 +179,34 @@ fn test_isobjecttype_frame_returns_true_for_gametooltip() {
     let is_frame: bool = env
         .eval("return GameTooltip:IsObjectType('Frame')")
         .unwrap();
-    assert!(is_frame, "GameTooltip:IsObjectType('Frame') should return true");
+    assert!(
+        is_frame,
+        "GameTooltip:IsObjectType('Frame') should return true"
+    );
 
     let is_region: bool = env
         .eval("return GameTooltip:IsObjectType('Region')")
         .unwrap();
-    assert!(is_region, "GameTooltip:IsObjectType('Region') should return true");
+    assert!(
+        is_region,
+        "GameTooltip:IsObjectType('Region') should return true"
+    );
 
     let is_tooltip: bool = env
         .eval("return GameTooltip:IsObjectType('GameTooltip')")
         .unwrap();
-    assert!(is_tooltip, "GameTooltip:IsObjectType('GameTooltip') should return true");
+    assert!(
+        is_tooltip,
+        "GameTooltip:IsObjectType('GameTooltip') should return true"
+    );
 
     let is_button: bool = env
         .eval("return GameTooltip:IsObjectType('Button')")
         .unwrap();
-    assert!(!is_button, "GameTooltip:IsObjectType('Button') should return false");
+    assert!(
+        !is_button,
+        "GameTooltip:IsObjectType('Button') should return false"
+    );
 }
 
 #[test]
@@ -275,9 +283,7 @@ fn test_fadeout_hides_and_clears_owner() {
     let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
     assert!(!visible, "FadeOut should hide the tooltip");
 
-    let has_owner: bool = env
-        .eval("return GameTooltip:GetOwner() ~= nil")
-        .unwrap();
+    let has_owner: bool = env.eval("return GameTooltip:GetOwner() ~= nil").unwrap();
     assert!(!has_owner, "FadeOut should clear the owner");
 }
 
@@ -358,9 +364,7 @@ fn test_other_tooltip_frames_exist() {
     assert!(friends, "FriendsTooltip should exist");
 
     // All should be GameTooltip type
-    let item_type: String = env
-        .eval("return ItemRefTooltip:GetObjectType()")
-        .unwrap();
+    let item_type: String = env.eval("return ItemRefTooltip:GetObjectType()").unwrap();
     assert_eq!(item_type, "GameTooltip");
 }
 
@@ -384,8 +388,16 @@ fn test_tooltip_anchor_right_sets_anchors() {
 
     assert_eq!(frame.anchors.len(), 1, "ANCHOR_RIGHT should set one anchor");
     let anchor = &frame.anchors[0];
-    assert_eq!(anchor.point, AnchorPoint::TopLeft, "tooltip point should be TopLeft");
-    assert_eq!(anchor.relative_point, AnchorPoint::TopRight, "owner point should be TopRight");
+    assert_eq!(
+        anchor.point,
+        AnchorPoint::TopLeft,
+        "tooltip point should be TopLeft"
+    );
+    assert_eq!(
+        anchor.relative_point,
+        AnchorPoint::TopRight,
+        "owner point should be TopRight"
+    );
 
     let owner_id = state.widgets.get_id_by_name("AnchorRightOwner").unwrap();
     assert_eq!(anchor.relative_to_id, Some(owner_id as usize));
@@ -407,7 +419,10 @@ fn test_tooltip_anchor_none_no_anchors() {
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let frame = state.widgets.get(gt_id).unwrap();
 
-    assert!(frame.anchors.is_empty(), "ANCHOR_NONE should not set anchors");
+    assert!(
+        frame.anchors.is_empty(),
+        "ANCHOR_NONE should not set anchors"
+    );
 }
 
 #[test]
@@ -429,12 +444,25 @@ fn test_tooltip_anchor_cursor_uses_absolute_position() {
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let frame = state.widgets.get(gt_id).unwrap();
 
-    assert_eq!(frame.anchors.len(), 1, "ANCHOR_CURSOR should set one anchor");
+    assert_eq!(
+        frame.anchors.len(),
+        1,
+        "ANCHOR_CURSOR should set one anchor"
+    );
     let anchor = &frame.anchors[0];
     assert_eq!(anchor.point, AnchorPoint::TopLeft);
-    assert!(anchor.relative_to_id.is_none(), "ANCHOR_CURSOR should not reference owner");
-    assert!((anchor.x_offset - 200.0).abs() < 0.1, "x_offset should be mouse x");
-    assert!((anchor.y_offset - 320.0).abs() < 0.1, "y_offset should be mouse y + 20");
+    assert!(
+        anchor.relative_to_id.is_none(),
+        "ANCHOR_CURSOR should not reference owner"
+    );
+    assert!(
+        (anchor.x_offset - 200.0).abs() < 0.1,
+        "x_offset should be mouse x"
+    );
+    assert!(
+        (anchor.y_offset - 320.0).abs() < 0.1,
+        "y_offset should be mouse y + 20"
+    );
 }
 
 /// Test that hovering a micro menu button shows the tooltip with text.
@@ -447,7 +475,9 @@ fn test_micro_menu_hover_shows_tooltip() {
     // Find the CharacterMicroButton frame ID
     let btn_id = {
         let state = env.state().borrow();
-        state.widgets.get_id_by_name("CharacterMicroButton")
+        state
+            .widgets
+            .get_id_by_name("CharacterMicroButton")
             .expect("CharacterMicroButton should exist")
     };
 
@@ -461,14 +491,24 @@ fn test_micro_menu_hover_shows_tooltip() {
     let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
     let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
 
-    assert!(visible, "GameTooltip should be visible after micro menu hover");
-    assert!(num_lines > 0, "GameTooltip should have at least one line, got {}", num_lines);
+    assert!(
+        visible,
+        "GameTooltip should be visible after micro menu hover"
+    );
+    assert!(
+        num_lines > 0,
+        "GameTooltip should have at least one line, got {}",
+        num_lines
+    );
 
     // Verify the tooltip text content
     {
         let state = env.state().borrow();
         let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
-        let td = state.tooltips.get(&gt_id).expect("tooltip data should exist");
+        let td = state
+            .tooltips
+            .get(&gt_id)
+            .expect("tooltip data should exist");
         assert!(!td.lines.is_empty(), "tooltip should have line data");
         eprintln!("Tooltip text: {:?}", td.lines[0].left_text);
     }
@@ -481,13 +521,19 @@ fn test_micro_menu_hover_shows_tooltip() {
     let state = env.state().borrow();
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     assert!(
-        state.widgets.get(gt_id).is_some_and(|f| f.effective_alpha > 0.0),
+        state
+            .widgets
+            .get(gt_id)
+            .is_some_and(|f| f.effective_alpha > 0.0),
         "GameTooltip should be ancestor-visible (effective_alpha > 0)"
     );
 
     // Check frame dimensions (tooltip should not be 0x0)
     let frame = state.widgets.get(gt_id).unwrap();
-    eprintln!("Tooltip frame: visible={}, width={}, height={}", frame.visible, frame.width, frame.height);
+    eprintln!(
+        "Tooltip frame: visible={}, width={}, height={}",
+        frame.visible, frame.width, frame.height
+    );
 }
 
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
@@ -503,7 +549,9 @@ fn test_tooltip_produces_quads_after_hover() {
     // Hover over CharacterMicroButton
     let btn_id = {
         let state = env.state().borrow();
-        state.widgets.get_id_by_name("CharacterMicroButton")
+        state
+            .widgets
+            .get_id_by_name("CharacterMicroButton")
             .expect("CharacterMicroButton should exist")
     };
     env.state().borrow_mut().hovered_frame = Some(btn_id);
@@ -518,26 +566,50 @@ fn test_tooltip_produces_quads_after_hover() {
     }
 
     // Check tooltip got sized
-    let gt_id = env.state().borrow().widgets.get_id_by_name("GameTooltip").unwrap();
+    let gt_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("GameTooltip")
+        .unwrap();
     let (w, h) = {
         let state = env.state().borrow();
         let f = state.widgets.get(gt_id).unwrap();
         (f.width, f.height)
     };
     eprintln!("Tooltip after sizing: {}x{}", w, h);
-    assert!(w > 0.0, "Tooltip width should be > 0 after sizing, got {}", w);
-    assert!(h > 0.0, "Tooltip height should be > 0 after sizing, got {}", h);
+    assert!(
+        w > 0.0,
+        "Tooltip width should be > 0 after sizing, got {}",
+        w
+    );
+    assert!(
+        h > 0.0,
+        "Tooltip height should be > 0 after sizing, got {}",
+        h
+    );
 
     // Check tooltip position (compute_frame_rect uses the anchor system)
     {
         let state = env.state().borrow();
         let rect = wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, gt_id, 1024.0, 768.0);
-        eprintln!("Tooltip rect: x={}, y={}, w={}, h={}", rect.x, rect.y, rect.width, rect.height);
+        eprintln!(
+            "Tooltip rect: x={}, y={}, w={}, h={}",
+            rect.x, rect.y, rect.width, rect.height
+        );
         assert!(rect.width > 0.0, "Tooltip rect width should be > 0");
         assert!(rect.height > 0.0, "Tooltip rect height should be > 0");
         // Check tooltip is within visible screen
-        assert!(rect.x >= 0.0 && rect.x < 1024.0, "Tooltip x={} should be on screen", rect.x);
-        assert!(rect.y >= 0.0 && rect.y < 768.0, "Tooltip y={} should be on screen", rect.y);
+        assert!(
+            rect.x >= 0.0 && rect.x < 1024.0,
+            "Tooltip x={} should be on screen",
+            rect.x
+        );
+        assert!(
+            rect.y >= 0.0 && rect.y < 768.0,
+            "Tooltip y={} should be on screen",
+            rect.y
+        );
     }
 
     // Build quads and verify tooltip emits something
@@ -554,7 +626,9 @@ fn test_tooltip_produces_quads_after_hover() {
     let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
         &state.widgets,
         (1024.0, 768.0),
-        None, None, None,
+        None,
+        None,
+        None,
         Some((&mut font_sys, &mut glyph_atlas)),
         Some(&state.message_frames),
         Some(&tooltip_data),
@@ -563,21 +637,40 @@ fn test_tooltip_produces_quads_after_hover() {
 
     // Tooltip renders via glyph quads (text) not texture quads.
     // Verify the tooltip frame was reached by checking total quad count increased.
-    eprintln!("Total quads: {}, vertices: {}", batch.vertices.len() / 4, batch.vertices.len());
-    assert!(batch.vertices.len() > 100, "Batch should have many vertices (tooltip + UI)");
+    eprintln!(
+        "Total quads: {}, vertices: {}",
+        batch.vertices.len() / 4,
+        batch.vertices.len()
+    );
+    assert!(
+        batch.vertices.len() > 100,
+        "Batch should have many vertices (tooltip + UI)"
+    );
 }
 
 const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -589,15 +682,33 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    ("Blizzard_UIParentPanelManager", "Blizzard_UIParentPanelManager_Mainline.toc"),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
-    ("Blizzard_SettingsDefinitions_Shared", "Blizzard_SettingsDefinitions_Shared.toc"),
-    ("Blizzard_SettingsDefinitions_Frame", "Blizzard_SettingsDefinitions_Frame_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
 ];
 
@@ -643,7 +754,11 @@ fn fire_tooltip_test_startup_events(env: &WowLuaEnv) {
         "PLAYER_ENTERING_WORLD",
         &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     );
-    for event in ["UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED"] {
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
         let _ = env.fire_event(event);
     }
 }

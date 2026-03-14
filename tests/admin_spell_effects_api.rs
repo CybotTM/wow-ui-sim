@@ -24,7 +24,12 @@ fn test_damage_spell_reduces_enemy_health() {
             "#,
         )
         .unwrap();
-    assert!(after < before, "health should decrease: {} -> {}", before, after);
+    assert!(
+        after < before,
+        "health should decrease: {} -> {}",
+        before,
+        after
+    );
     assert_eq!(before - after, 15_000);
 }
 
@@ -116,7 +121,12 @@ fn test_heal_spell_increases_friendly_health() {
             "#,
         )
         .unwrap();
-    assert!(after > before, "health should increase: {} -> {}", before, after);
+    assert!(
+        after > before,
+        "health should increase: {} -> {}",
+        before,
+        after
+    );
     assert_eq!(after - before, 20_000);
 }
 
@@ -134,7 +144,12 @@ fn test_heal_spell_no_target_heals_self() {
             "#,
         )
         .unwrap();
-    assert!(after > before, "player health should increase: {} -> {}", before, after);
+    assert!(
+        after > before,
+        "player health should increase: {} -> {}",
+        before,
+        after
+    );
     assert_eq!(after - before, 20_000);
 }
 
@@ -153,7 +168,12 @@ fn test_heal_spell_enemy_target_heals_self() {
             "#,
         )
         .unwrap();
-    assert!(after > before, "player health should increase: {} -> {}", before, after);
+    assert!(
+        after > before,
+        "player health should increase: {} -> {}",
+        before,
+        after
+    );
 }
 
 #[test]

@@ -60,12 +60,14 @@ impl WtfConfig {
 
     /// Get the path to account-level SavedVariables file for an addon.
     pub fn account_saved_vars_file(&self, addon_name: &str) -> PathBuf {
-        self.account_saved_vars_path().join(format!("{}.lua", addon_name))
+        self.account_saved_vars_path()
+            .join(format!("{}.lua", addon_name))
     }
 
     /// Get the path to character-level SavedVariables file for an addon.
     pub fn character_saved_vars_file(&self, addon_name: &str) -> PathBuf {
-        self.character_saved_vars_path().join(format!("{}.lua", addon_name))
+        self.character_saved_vars_path()
+            .join(format!("{}.lua", addon_name))
     }
 }
 
@@ -196,7 +198,10 @@ impl SavedVariablesManager {
         let content = content.strip_prefix('\u{feff}').unwrap_or(&content);
 
         // Execute the Lua file - it will set global variables
-        let chunk_name = format!("@WTF/{}", path.file_name().unwrap_or_default().to_string_lossy());
+        let chunk_name = format!(
+            "@WTF/{}",
+            path.file_name().unwrap_or_default().to_string_lossy()
+        );
         lua.load(content).set_name(&chunk_name).exec()?;
         Ok(())
     }
@@ -290,20 +295,12 @@ impl SavedVariablesManager {
 
         // Save account-wide variables
         if let Some(vars) = self.registered.get(addon_name) {
-            self.write_vars_file(
-                &globals,
-                vars,
-                &self.account_path(addon_name),
-            );
+            self.write_vars_file(&globals, vars, &self.account_path(addon_name));
         }
 
         // Save per-character variables
         if let Some(vars) = self.registered_per_char.get(addon_name) {
-            self.write_vars_file(
-                &globals,
-                vars,
-                &self.character_path(addon_name),
-            );
+            self.write_vars_file(&globals, vars, &self.character_path(addon_name));
         }
 
         let _ = lua;
@@ -386,7 +383,10 @@ fn serialize_value(out: &mut String, value: &Value, depth: usize) {
             }
         }
         Value::String(s) => {
-            let Ok(s) = s.to_str() else { out.push_str("\"\""); return };
+            let Ok(s) = s.to_str() else {
+                out.push_str("\"\"");
+                return;
+            };
             out.push('"');
             for ch in s.chars() {
                 match ch {
@@ -410,7 +410,11 @@ fn serialize_value(out: &mut String, value: &Value, depth: usize) {
 /// Collect non-array entries from a table, sorted by key for deterministic output.
 fn collect_hash_entries(table: &Table, array_len: usize) -> Vec<(String, Value)> {
     let mut entries = Vec::new();
-    let Ok(pairs) = table.clone().pairs::<Value, Value>().collect::<std::result::Result<Vec<_>, _>>() else {
+    let Ok(pairs) = table
+        .clone()
+        .pairs::<Value, Value>()
+        .collect::<std::result::Result<Vec<_>, _>>()
+    else {
         return entries;
     };
     for (k, v) in pairs {
@@ -551,9 +555,18 @@ mod tests {
 
         let content = fs::read_to_string(dir.path().join("TestAddon.lua")).unwrap();
         assert!(content.contains("TestDB = {"), "should have Lua assignment");
-        assert!(content.contains("[\"name\"] = \"Haky\""), "should have string value");
-        assert!(content.contains("[\"level\"] = 70"), "should have integer value");
-        assert!(content.contains("[\"active\"] = true"), "should have boolean value");
+        assert!(
+            content.contains("[\"name\"] = \"Haky\""),
+            "should have string value"
+        );
+        assert!(
+            content.contains("[\"level\"] = 70"),
+            "should have integer value"
+        );
+        assert!(
+            content.contains("[\"active\"] = true"),
+            "should have boolean value"
+        );
     }
 
     #[test]
@@ -565,12 +578,14 @@ mod tests {
         mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        lua.load(r#"
+        lua.load(
+            r#"
             TestDB.nested = { a = 1, b = { c = "deep" } }
             TestDB.list = { 10, 20, 30 }
-        "#)
-            .exec()
-            .unwrap();
+        "#,
+        )
+        .exec()
+        .unwrap();
 
         mgr.save_addon(&lua, "TestAddon").unwrap();
 
@@ -673,16 +688,21 @@ mod tests {
             mgr.init_for_addon(
                 &lua,
                 "Angleur",
-                &["AngleurConfig".to_string(), "AngleurMinimapButton".to_string()],
+                &[
+                    "AngleurConfig".to_string(),
+                    "AngleurMinimapButton".to_string(),
+                ],
                 &["AngleurCharacter".to_string()],
             )
             .unwrap();
 
-            lua.load(r#"
+            lua.load(
+                r#"
                 AngleurConfig.method = "oneKey"
                 AngleurMinimapButton.hide = true
                 AngleurCharacter.sleeping = false
-            "#)
+            "#,
+            )
             .exec()
             .unwrap();
 
@@ -697,7 +717,10 @@ mod tests {
             mgr.init_for_addon(
                 &lua,
                 "Angleur",
-                &["AngleurConfig".to_string(), "AngleurMinimapButton".to_string()],
+                &[
+                    "AngleurConfig".to_string(),
+                    "AngleurMinimapButton".to_string(),
+                ],
                 &["AngleurCharacter".to_string()],
             )
             .unwrap();
@@ -717,12 +740,14 @@ mod tests {
     fn test_serialize_format_matches_wow() {
         // Verify the output format matches what WoW produces
         let lua = Lua::new();
-        lua.load(r#"
+        lua.load(
+            r#"
             TestVar = {
                 ["setting"] = "hello",
                 ["items"] = { 10, 20, 30 },
             }
-        "#)
+        "#,
+        )
         .exec()
         .unwrap();
 

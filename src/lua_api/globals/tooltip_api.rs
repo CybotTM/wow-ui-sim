@@ -1,7 +1,7 @@
 //! Tooltip frame creation (GameTooltip, ItemRefTooltip, ShoppingTooltip, etc.)
 
-use crate::lua_api::tooltip::TooltipData;
 use crate::lua_api::SimState;
+use crate::lua_api::tooltip::TooltipData;
 use crate::widget::{Frame, FrameStrata, WidgetType};
 use mlua::{Lua, Result};
 use std::cell::RefCell;
@@ -11,11 +11,7 @@ use std::rc::Rc;
 ///
 /// `_G` entries are set by `sync_named_frames_to_globals` after all
 /// registration is complete.
-fn create_tooltip_frame(
-    _lua: &Lua,
-    state: &Rc<RefCell<SimState>>,
-    name: &str,
-) -> Result<u64> {
+fn create_tooltip_frame(_lua: &Lua, state: &Rc<RefCell<SimState>>, name: &str) -> Result<u64> {
     let ui_parent_id = state.borrow().widgets.get_id_by_name("UIParent");
     let mut frame = Frame::new(
         WidgetType::GameTooltip,

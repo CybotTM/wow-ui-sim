@@ -23,7 +23,9 @@ pub(super) fn fire_cast_complete_events(
     spell_id: u32,
 ) {
     let lua = env.lua();
-    let Ok(player) = lua.create_string("player") else { return };
+    let Ok(player) = lua.create_string("player") else {
+        return;
+    };
     let args = &[
         mlua::Value::String(player.clone()),
         mlua::Value::Integer(cast_id as i64),
@@ -32,7 +34,8 @@ pub(super) fn fire_cast_complete_events(
     let _ = env.fire_event_with_args("UNIT_SPELLCAST_STOP", args);
     let _ = env.fire_event_with_args("UNIT_SPELLCAST_SUCCEEDED", args);
     let _ = crate::lua_api::globals::action_bar_api::push_action_button_state_update(
-        &env.state(), env.lua(),
+        &env.state(),
+        env.lua(),
     );
 }
 
@@ -45,10 +48,7 @@ pub(super) fn apply_spell_effect(
     if let Some(unit_id) = crate::lua_api::game_data::apply_spell_to_state(state, spell_id) {
         let lua = env.lua();
         if let Ok(unit_str) = lua.create_string(&unit_id) {
-            let _ = env.fire_event_with_args(
-                "UNIT_HEALTH",
-                &[mlua::Value::String(unit_str)],
-            );
+            let _ = env.fire_event_with_args("UNIT_HEALTH", &[mlua::Value::String(unit_str)]);
         }
     }
 }
@@ -60,11 +60,18 @@ pub(super) fn apply_spec_change(
 ) {
     let changed = {
         let mut s = state.borrow_mut();
-        s.player.pending_spec_change.take().map(|idx| { s.player.active_spec_index = idx; })
+        s.player.pending_spec_change.take().map(|idx| {
+            s.player.active_spec_index = idx;
+        })
     };
     if changed.is_some() {
         let lua = env.lua();
-        let Ok(unit) = lua.create_string("player") else { return };
-        let _ = env.fire_event_with_args("PLAYER_SPECIALIZATION_CHANGED", &[mlua::Value::String(unit)]);
+        let Ok(unit) = lua.create_string("player") else {
+            return;
+        };
+        let _ = env.fire_event_with_args(
+            "PLAYER_SPECIALIZATION_CHANGED",
+            &[mlua::Value::String(unit)],
+        );
     }
 }

@@ -37,6 +37,15 @@ pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
     }
 }
 
+/// Fire extra OnUpdate ticks so deferred UI can process in headless commands.
+pub fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
+    for _ in 0..n {
+        env.state().borrow_mut().ensure_layout_rects();
+        fire_one_on_update_tick(env);
+        process_pending_timers(env);
+    }
+}
+
 /// Fire startup events to simulate WoW login sequence.
 pub fn fire_startup_events(env: &WowLuaEnv) {
     env.set_screen_mode(ScreenKind::Game);
@@ -51,6 +60,19 @@ pub fn fire_startup_events_for_screen(env: &WowLuaEnv, screen: ScreenKind) {
         ScreenKind::Game => fire_startup_events(env),
         ScreenKind::Login | ScreenKind::CharacterSelect => fire_glue_startup_events(env, screen),
     }
+}
+
+/// Run startup events, workarounds, timers, and a few extra update ticks so
+/// headless commands see the same settled UI state.
+pub fn settle_headless_startup(env: &WowLuaEnv) {
+    let screen = env.state().borrow().screen_kind;
+    fire_startup_events_for_screen(env, screen);
+    env.apply_post_event_workarounds();
+    env.state().borrow_mut().widgets.rebuild_anchor_index();
+    process_pending_timers(env);
+    fire_one_on_update_tick(env);
+    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    run_extra_update_ticks(env, 3);
 }
 
 /// Fire startup events for headless test mode (skips IsLoggedIn override).
@@ -107,7 +129,16 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
 fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
     let script = match screen {
         ScreenKind::Game => return,
-        ScreenKind::CharacterSelect => return,
+        ScreenKind::CharacterSelect => {
+            r#"
+            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "charselect" then
+                if GeneralDockManager then GeneralDockManager:Hide() end
+                if ChatFrame1 then ChatFrame1:Hide() end
+                if ChatFrame1Tab then ChatFrame1Tab:Hide() end
+                if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
+            end
+            "#
+        }
         ScreenKind::Login => {
             r#"
             if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "login" then

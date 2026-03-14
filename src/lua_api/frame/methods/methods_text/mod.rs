@@ -19,7 +19,9 @@ pub(super) fn is_text_type(s: &str) -> bool {
 pub(super) fn is_simple_html(lua: &Lua, id: u64) -> bool {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
-    state.widgets.get(id)
+    state
+        .widgets
+        .get(id)
         .is_some_and(|f| f.widget_type == WidgetType::SimpleHTML)
 }
 
@@ -59,9 +61,7 @@ fn add_text_get_set_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("SetText", |lua, this, args: mlua::MultiValue| {
         handle_set_text(lua, this.0, args)
     });
-    methods.add_method("GetText", |lua, this, ()| {
-        get_text_impl(lua, this.0)
-    });
+    methods.add_method("GetText", |lua, this, ()| get_text_impl(lua, this.0));
     methods.add_method("SetFormattedText", |lua, this, args: mlua::MultiValue| {
         set_formatted_text_impl(lua, this.0, args)
     });
@@ -72,7 +72,9 @@ fn get_text_impl(lua: &Lua, id: u64) -> mlua::Result<Value> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     let frame = state.widgets.get(id);
-    let is_editbox = frame.map(|f| f.widget_type == WidgetType::EditBox).unwrap_or(false);
+    let is_editbox = frame
+        .map(|f| f.widget_type == WidgetType::EditBox)
+        .unwrap_or(false);
     let text = frame.and_then(|f| get_text_for_widget(f, &state.widgets));
     match text {
         Some(t) => Ok(Value::String(lua.create_string(&t)?)),
@@ -87,7 +89,8 @@ fn get_text_for_widget(
     widgets: &crate::widget::WidgetRegistry,
 ) -> Option<String> {
     if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
-        f.children_keys.get("Text")
+        f.children_keys
+            .get("Text")
             .and_then(|&cid| widgets.get(cid))
             .and_then(|c| c.text.clone())
     } else {
@@ -116,7 +119,11 @@ fn set_formatted_text_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::
 ///
 /// WoW creates this child on first SetText call, not at button creation time.
 /// The FontString fills the button (Overlay layer) so text renders above textures.
-fn create_button_text_child(lua: &Lua, state: &mut crate::lua_api::SimState, button_id: u64) -> u64 {
+fn create_button_text_child(
+    lua: &Lua,
+    state: &mut crate::lua_api::SimState,
+    button_id: u64,
+) -> u64 {
     use crate::widget::Frame;
     let mut fs = Frame::new(WidgetType::FontString, None, Some(button_id));
     super::methods_helpers::set_all_points_anchors_pub(&mut fs, button_id);
@@ -183,10 +190,14 @@ fn resolve_text_child(
 ) -> (Option<u64>, bool) {
     let f = state.widgets.get(id);
     let child = f.and_then(|f| f.children_keys.get("Text").copied());
-    let is_button = f.map(|f| matches!(
-        f.widget_type,
-        crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
-    )).unwrap_or(false);
+    let is_button = f
+        .map(|f| {
+            matches!(
+                f.widget_type,
+                crate::widget::WidgetType::Button | crate::widget::WidgetType::CheckButton
+            )
+        })
+        .unwrap_or(false);
     let html = state.simple_htmls.contains_key(&id);
     let child = if child.is_none() && is_button && text_str.is_some() {
         Some(create_button_text_child(lua, state, id))
@@ -199,7 +210,11 @@ fn resolve_text_child(
 /// Strip HTML if the frame is a SimpleHTML widget.
 fn apply_html_strip(text_str: Option<String>, is_html: bool) -> Option<String> {
     text_str.map(|t| {
-        if is_html { super::widget_tooltip::strip_html_tags(&t) } else { t }
+        if is_html {
+            super::widget_tooltip::strip_html_tags(&t)
+        } else {
+            t
+        }
     })
 }
 
@@ -225,7 +240,9 @@ fn collect_fontstring_measure_ids(
         .flatten()
         .filter_map(|fid| {
             let f = state.widgets.get(fid)?;
-            if f.widget_type != WidgetType::FontString { return None; }
+            if f.widget_type != WidgetType::FontString {
+                return None;
+            }
             let text = f.text.as_ref()?.clone();
             Some(FontStringMeasureInfo {
                 id: fid,
@@ -246,7 +263,9 @@ fn measure_and_apply_sizes(
     state_rc: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
     ids_to_measure: &[FontStringMeasureInfo],
 ) {
-    if ids_to_measure.is_empty() { return; }
+    if ids_to_measure.is_empty() {
+        return;
+    }
     let changed_ids = measure_with_font_system(lua, state_rc, ids_to_measure);
     if !changed_ids.is_empty() {
         let mut state = state_rc.borrow_mut();
@@ -287,7 +306,12 @@ fn apply_font_size_to_frame(
     let width_is_explicit = info.word_wrap && info.width > 0.0 && !info.width_is_text_auto;
     if !width_is_explicit {
         let width = fs.measure_text_width(&info.text, info.font.as_deref(), info.font_size);
-        if state.widgets.get(info.id).map(|f| f.width != width).unwrap_or(false) {
+        if state
+            .widgets
+            .get(info.id)
+            .map(|f| f.width != width)
+            .unwrap_or(false)
+        {
             if let Some(frame) = state.widgets.get_mut_visual(info.id) {
                 frame.width = width;
                 frame.width_is_text_auto = true;
@@ -295,15 +319,27 @@ fn apply_font_size_to_frame(
             did_change = true;
         }
     }
-    let wrap_width = if width_is_explicit { Some(info.width) } else { None };
-    let height = fs.measure_text_height(&info.text, info.font.as_deref(), info.font_size, wrap_width);
-    if state.widgets.get(info.id).map(|f| f.height != height).unwrap_or(false) {
+    let wrap_width = if width_is_explicit {
+        Some(info.width)
+    } else {
+        None
+    };
+    let height =
+        fs.measure_text_height(&info.text, info.font.as_deref(), info.font_size, wrap_width);
+    if state
+        .widgets
+        .get(info.id)
+        .map(|f| f.height != height)
+        .unwrap_or(false)
+    {
         if let Some(frame) = state.widgets.get_mut_visual(info.id) {
             frame.height = height;
         }
         did_change = true;
     }
-    if did_change { state.widgets.mark_rect_dirty(info.id); }
+    if did_change {
+        state.widgets.mark_rect_dirty(info.id);
+    }
     did_change
 }
 
@@ -337,7 +373,9 @@ fn set_text_on_frame(
     text: Option<String>,
 ) {
     if let Some(frame) = state.widgets.get(id) {
-        if frame.text == text { return; }
+        if frame.text == text {
+            return;
+        }
     }
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.text_stripped = text.as_ref().map(|t| crate::render::strip_wow_markup(t));
@@ -352,13 +390,16 @@ fn add_set_font_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let args_vec: Vec<Value> = args.into_iter().collect();
         let is_html = is_simple_html(lua, id);
 
-        if is_html && args_vec.len() >= 2
-            && let (Some(Value::String(s1)), Some(Value::String(s2))) = (args_vec.first(), args_vec.get(1)) {
-                let type_str = s1.to_string_lossy().to_string();
-                if is_text_type(&type_str) {
-                    return set_font_for_text_type(lua, id, &type_str, s2, &args_vec);
-                }
+        if is_html
+            && args_vec.len() >= 2
+            && let (Some(Value::String(s1)), Some(Value::String(s2))) =
+                (args_vec.first(), args_vec.get(1))
+        {
+            let type_str = s1.to_string_lossy().to_string();
+            if is_text_type(&type_str) {
+                return set_font_for_text_type(lua, id, &type_str, s2, &args_vec);
             }
+        }
 
         apply_set_font_standard(lua, id, &args_vec)
     });
@@ -383,7 +424,9 @@ fn apply_set_font_standard(lua: &Lua, id: u64, args_vec: &[Value]) -> mlua::Resu
     let mut state = state_rc.borrow_mut();
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.font = Some(font);
-        if let Some(s) = size { frame.font_size = s; }
+        if let Some(s) = size {
+            frame.font_size = s;
+        }
         if let Some(ref f) = flags {
             frame.font_outline = crate::widget::TextOutline::from_wow_str(f);
         }
@@ -408,9 +451,14 @@ fn set_font_for_text_type(
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str.to_string()).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str.to_string())
+            .or_insert_with(TextStyle::default);
         style.font = Some(font_path);
-        if let Some(s) = size { style.font_size = s; }
+        if let Some(s) = size {
+            style.font_size = s;
+        }
     }
     Ok(true)
 }
@@ -437,13 +485,17 @@ fn get_font_standard(lua: &Lua, id: u64) -> mlua::Result<mlua::MultiValue> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     let frame = state.widgets.get(id);
-    let font_path = frame.and_then(|f| f.font.as_deref()).unwrap_or("Fonts\\FRIZQT__.TTF");
+    let font_path = frame
+        .and_then(|f| f.font.as_deref())
+        .unwrap_or("Fonts\\FRIZQT__.TTF");
     let font_size = frame.map(|f| f.font_size).unwrap_or(12.0);
-    let flags = frame.map(|f| match f.font_outline {
-        crate::widget::TextOutline::None => "",
-        crate::widget::TextOutline::Outline => "OUTLINE",
-        crate::widget::TextOutline::ThickOutline => "THICKOUTLINE",
-    }).unwrap_or("");
+    let flags = frame
+        .map(|f| match f.font_outline {
+            crate::widget::TextOutline::None => "",
+            crate::widget::TextOutline::Outline => "OUTLINE",
+            crate::widget::TextOutline::ThickOutline => "THICKOUTLINE",
+        })
+        .unwrap_or("");
     Ok(mlua::MultiValue::from_vec(vec![
         Value::String(lua.create_string(font_path)?),
         Value::Number(font_size as f64),
@@ -456,14 +508,15 @@ fn get_font_for_text_type(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<ml
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     if let Some(data) = state.simple_htmls.get(&id)
-        && let Some(style) = data.text_styles.get(type_str) {
-            let font = style.font.as_deref().unwrap_or("Fonts\\FRIZQT__.TTF");
-            return Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string(font)?),
-                Value::Number(style.font_size as f64),
-                Value::String(lua.create_string("")?),
-            ]));
-        }
+        && let Some(style) = data.text_styles.get(type_str)
+    {
+        let font = style.font.as_deref().unwrap_or("Fonts\\FRIZQT__.TTF");
+        return Ok(mlua::MultiValue::from_vec(vec![
+            Value::String(lua.create_string(font)?),
+            Value::Number(style.font_size as f64),
+            Value::String(lua.create_string("")?),
+        ]));
+    }
     Ok(mlua::MultiValue::from_vec(vec![
         Value::String(lua.create_string("Fonts\\FRIZQT__.TTF")?),
         Value::Number(12.0),
@@ -480,7 +533,10 @@ fn set_text_color_html(lua: &Lua, id: u64, args: &[Value], type_str: String) {
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str)
+            .or_insert_with(TextStyle::default);
         style.text_color = (r, g, b, a);
     }
 }
@@ -494,7 +550,11 @@ fn set_text_color_standard(lua: &Lua, id: u64, args: &[Value]) {
     let new_color = crate::widget::Color::new(r, g, b, a);
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
-    if !state.widgets.get(id).is_some_and(|f| f.text_color == new_color) {
+    if !state
+        .widgets
+        .get(id)
+        .is_some_and(|f| f.text_color == new_color)
+    {
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.text_color = new_color;
         }
@@ -524,7 +584,11 @@ fn add_text_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 /// GetTextColor implementation.
-fn get_text_color_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(f32, f32, f32, f32)> {
+fn get_text_color_impl(
+    lua: &Lua,
+    id: u64,
+    args: mlua::MultiValue,
+) -> mlua::Result<(f32, f32, f32, f32)> {
     let args_vec: Vec<Value> = args.into_iter().collect();
     if let Some(Value::String(s)) = args_vec.first() {
         let type_str = s.to_string_lossy().to_string();
@@ -535,7 +599,12 @@ fn get_text_color_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Resu
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     if let Some(frame) = state.widgets.get(id) {
-        Ok((frame.text_color.r, frame.text_color.g, frame.text_color.b, frame.text_color.a))
+        Ok((
+            frame.text_color.r,
+            frame.text_color.g,
+            frame.text_color.b,
+            frame.text_color.a,
+        ))
     } else {
         Ok((1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32))
     }
@@ -546,9 +615,15 @@ fn get_text_color_html(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<(f32,
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     if let Some(data) = state.simple_htmls.get(&id)
-        && let Some(style) = data.text_styles.get(type_str) {
-            return Ok((style.text_color.0, style.text_color.1, style.text_color.2, style.text_color.3));
-        }
+        && let Some(style) = data.text_styles.get(type_str)
+    {
+        return Ok((
+            style.text_color.0,
+            style.text_color.1,
+            style.text_color.2,
+            style.text_color.3,
+        ));
+    }
     Ok((1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32))
 }
 
@@ -563,13 +638,21 @@ fn add_justification_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("GetJustifyH", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let s = state.widgets.get(this.0).map(|f| f.justify_h.as_h_str()).unwrap_or("CENTER");
+        let s = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.justify_h.as_h_str())
+            .unwrap_or("CENTER");
         Ok(Value::String(lua.create_string(s)?))
     });
     methods.add_method("GetJustifyV", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let s = state.widgets.get(this.0).map(|f| f.justify_v.as_v_str()).unwrap_or("MIDDLE");
+        let s = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.justify_v.as_v_str())
+            .unwrap_or("MIDDLE");
         Ok(Value::String(lua.create_string(s)?))
     });
 }
@@ -577,7 +660,8 @@ fn add_justification_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 /// Set horizontal justification, handling SimpleHTML per-textType and standard FontString.
 fn apply_set_justify_h(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
     let args_vec: Vec<Value> = args.into_iter().collect();
-    if is_simple_html(lua, id) && args_vec.len() >= 2
+    if is_simple_html(lua, id)
+        && args_vec.len() >= 2
         && let Some(Value::String(s)) = args_vec.first()
     {
         let type_str = s.to_string_lossy().to_string();
@@ -601,7 +685,8 @@ fn apply_set_justify_h(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Resu
 /// Set vertical justification, handling SimpleHTML per-textType and standard FontString.
 fn apply_set_justify_v(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
     let args_vec: Vec<Value> = args.into_iter().collect();
-    if is_simple_html(lua, id) && args_vec.len() >= 2
+    if is_simple_html(lua, id)
+        && args_vec.len() >= 2
         && let Some(Value::String(s)) = args_vec.first()
     {
         let type_str = s.to_string_lossy().to_string();
@@ -627,7 +712,10 @@ fn set_html_justify_h(lua: &Lua, id: u64, type_str: String, justify: String) {
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str)
+            .or_insert_with(TextStyle::default);
         style.justify_h = justify;
     }
 }
@@ -637,7 +725,10 @@ fn set_html_justify_v(lua: &Lua, id: u64, type_str: String, justify: String) {
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str)
+            .or_insert_with(TextStyle::default);
         style.justify_v = justify;
     }
 }

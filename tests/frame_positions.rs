@@ -59,7 +59,9 @@ fn create_env() -> WowLuaEnv {
 fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
     use wow_ui_sim::iced_app::layout::compute_frame_rect;
     let state = env.state().borrow();
-    let id = state.widgets.get_id_by_name(name)
+    let id = state
+        .widgets
+        .get_id_by_name(name)
         .unwrap_or_else(|| panic!("Frame '{}' not found", name));
     let rect = compute_frame_rect(&state.widgets, id, 1600.0, 1200.0);
     (rect.x, rect.y, rect.width, rect.height)
@@ -67,7 +69,9 @@ fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
 
 fn frame_alpha(env: &WowLuaEnv, name: &str) -> f32 {
     let state = env.state().borrow();
-    let id = state.widgets.get_id_by_name(name)
+    let id = state
+        .widgets
+        .get_id_by_name(name)
         .unwrap_or_else(|| panic!("Frame '{}' not found", name));
     state.widgets.get(id).map(|f| f.alpha).unwrap_or(1.0)
 }
@@ -79,8 +83,10 @@ fn assert_frame_rect(env: &WowLuaEnv, name: &str, ex: f32, ey: f32, ew: f32, eh:
     let tol = 1.0;
     let atol = 0.02;
     assert!(
-        (x - ex).abs() <= tol && (y - ey).abs() <= tol
-            && (w - ew).abs() <= tol && (h - eh).abs() <= tol
+        (x - ex).abs() <= tol
+            && (y - ey).abs() <= tol
+            && (w - ew).abs() <= tol
+            && (h - eh).abs() <= tol
             && (alpha - ea).abs() <= atol,
         "{name}: expected ({ex}, {ey}, {ew}x{eh}, alpha={ea}), got ({x}, {y}, {w}x{h}, alpha={alpha})"
     );
@@ -92,38 +98,198 @@ type TestCase = (&'static str, &'static str, f32, f32, f32, f32, f32);
 fn position_tests() -> Vec<TestCase> {
     vec![
         // Player / Target / Group frames
-        ("player_frame", "PlayerFrame", 268.0, 850.0, 232.0, 100.0, 1.0),
-        ("target_frame", "TargetFrame", 1100.0, 850.0, 232.0, 100.0, 1.0),
-        ("focus_frame", "FocusFrame", 1190.0, 926.25, 174.0, 75.0, 1.0),
+        (
+            "player_frame",
+            "PlayerFrame",
+            268.0,
+            850.0,
+            232.0,
+            100.0,
+            1.0,
+        ),
+        (
+            "target_frame",
+            "TargetFrame",
+            1100.0,
+            850.0,
+            232.0,
+            100.0,
+            1.0,
+        ),
+        (
+            "focus_frame",
+            "FocusFrame",
+            1190.0,
+            926.25,
+            174.0,
+            75.0,
+            1.0,
+        ),
         // PetFrame is hidden (no pet in simulator) — skip position test
-        ("paladin_power_bar", "PaladinPowerBarFrame", 341.5, 922.0, 150.0, 43.0, 1.0),
+        (
+            "paladin_power_bar",
+            "PaladinPowerBarFrame",
+            341.5,
+            922.0,
+            150.0,
+            43.0,
+            1.0,
+        ),
         ("party_frame", "PartyFrame", 22.0, 147.0, 120.0, 244.0, 1.0),
-        ("compact_party_frame", "CompactPartyFrame", 22.0, 147.0, 90.0, 224.0, 1.0),
+        (
+            "compact_party_frame",
+            "CompactPartyFrame",
+            22.0,
+            147.0,
+            90.0,
+            224.0,
+            1.0,
+        ),
         // HUD elements
         ("minimap", "Minimap", 1391.0, 44.0, 198.0, 198.0, 1.0),
-        ("minimap_cluster", "MinimapCluster", 1360.0, 0.0, 240.0, 252.0, 1.0),
-        ("objective_tracker", "ObjectiveTrackerFrame", 1335.0, 271.0, 260.0, 836.5, 1.0),
+        (
+            "minimap_cluster",
+            "MinimapCluster",
+            1360.0,
+            0.0,
+            240.0,
+            252.0,
+            1.0,
+        ),
+        (
+            "objective_tracker",
+            "ObjectiveTrackerFrame",
+            1335.0,
+            271.0,
+            260.0,
+            836.5,
+            1.0,
+        ),
         ("bags_bar", "BagsBar", 1386.0, 1104.0, 208.0, 47.0, 1.0),
-        ("micro_button_bags_bar", "MicroButtonAndBagsBar", 1362.0, 1114.0, 232.0, 80.0, 1.0),
+        (
+            "micro_button_bags_bar",
+            "MicroButtonAndBagsBar",
+            1362.0,
+            1114.0,
+            232.0,
+            80.0,
+            1.0,
+        ),
         ("micro_menu", "MicroMenu", 1265.0, 1154.0, 329.0, 40.0, 1.0),
-        ("micro_menu_container", "MicroMenuContainer", 1205.0, 1149.0, 389.0, 45.0, 1.0),
+        (
+            "micro_menu_container",
+            "MicroMenuContainer",
+            1205.0,
+            1149.0,
+            389.0,
+            45.0,
+            1.0,
+        ),
         ("buff_frame", "BuffFrame", 945.0, 10.0, 400.0, 135.0, 1.0),
-        ("debuff_frame", "DebuffFrame", 1050.0, 155.0, 280.0, 90.0, 1.0),
+        (
+            "debuff_frame",
+            "DebuffFrame",
+            1050.0,
+            155.0,
+            280.0,
+            90.0,
+            1.0,
+        ),
         // Chat
         ("chat_frame", "ChatFrame1", 35.0, 980.0, 430.0, 170.0, 1.0),
-        ("chat_edit_box", "ChatFrame1EditBox", 30.0, 1152.0, 447.0, 32.0, 0.35),
-        ("general_dock_manager", "GeneralDockManager", 35.0, 951.0, 430.0, 26.0, 1.0),
+        (
+            "chat_edit_box",
+            "ChatFrame1EditBox",
+            30.0,
+            1152.0,
+            447.0,
+            32.0,
+            0.35,
+        ),
+        (
+            "general_dock_manager",
+            "GeneralDockManager",
+            35.0,
+            951.0,
+            430.0,
+            26.0,
+            1.0,
+        ),
         // Action bars
-        ("main_action_bar", "MainActionBar", 517.0, 1103.0, 566.0, 52.0, 1.0),
-        ("status_tracking_bar", "StatusTrackingBarManager", 514.0, 1166.0, 571.0, 34.0, 1.0),
+        (
+            "main_action_bar",
+            "MainActionBar",
+            517.0,
+            1103.0,
+            566.0,
+            52.0,
+            1.0,
+        ),
+        (
+            "status_tracking_bar",
+            "StatusTrackingBarManager",
+            514.0,
+            1166.0,
+            571.0,
+            34.0,
+            1.0,
+        ),
         // Overlay / warning frames
-        ("ui_errors_frame", "UIErrorsFrame", 544.0, 122.0, 512.0, 60.0, 1.0),
-        ("raid_boss_emote_anchor", "PrivateRaidBossEmoteFrameAnchor", 544.0, 252.0, 512.0, 80.0, 1.0),
-        ("critical_encounter_warnings", "CriticalEncounterWarnings", 500.0, 40.0, 600.0, 48.0, 1.0),
-        ("medium_encounter_warnings", "MediumEncounterWarnings", 525.0, 90.0, 550.0, 36.0, 1.0),
-        ("minor_encounter_warnings", "MinorEncounterWarnings", 550.0, 130.0, 500.0, 36.0, 1.0),
+        (
+            "ui_errors_frame",
+            "UIErrorsFrame",
+            544.0,
+            122.0,
+            512.0,
+            60.0,
+            1.0,
+        ),
+        (
+            "raid_boss_emote_anchor",
+            "PrivateRaidBossEmoteFrameAnchor",
+            544.0,
+            252.0,
+            512.0,
+            80.0,
+            1.0,
+        ),
+        (
+            "critical_encounter_warnings",
+            "CriticalEncounterWarnings",
+            500.0,
+            40.0,
+            600.0,
+            48.0,
+            1.0,
+        ),
+        (
+            "medium_encounter_warnings",
+            "MediumEncounterWarnings",
+            525.0,
+            90.0,
+            550.0,
+            36.0,
+            1.0,
+        ),
+        (
+            "minor_encounter_warnings",
+            "MinorEncounterWarnings",
+            550.0,
+            130.0,
+            500.0,
+            36.0,
+            1.0,
+        ),
         // Managed containers
-        ("right_managed_container", "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
+        (
+            "right_managed_container",
+            "UIParentRightManagedFrameContainer",
+            1335.0,
+            260.0,
+            260.0,
+            847.0,
+            1.0,
+        ),
     ]
 }
 
@@ -131,8 +297,14 @@ fn position_tests() -> Vec<TestCase> {
 fn check_action_button(env: &WowLuaEnv) {
     let (x, _y, _w, _h) = frame_rect(env, "ActionButton1");
     let alpha = frame_alpha(env, "ActionButton1");
-    assert!((x - 517.0).abs() <= 1.0, "ActionButton1 x: expected 517, got {x}");
-    assert!((alpha - 1.0).abs() <= 0.02, "ActionButton1 alpha: expected 1.0, got {alpha}");
+    assert!(
+        (x - 517.0).abs() <= 1.0,
+        "ActionButton1 x: expected 517, got {x}"
+    );
+    assert!(
+        (alpha - 1.0).abs() <= 0.02,
+        "ActionButton1 alpha: expected 1.0, got {alpha}"
+    );
 }
 
 fn run_tests(env: &WowLuaEnv) -> (usize, usize) {
@@ -149,7 +321,12 @@ fn run_tests(env: &WowLuaEnv) -> (usize, usize) {
     let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         check_action_button(env);
     }));
-    report_result(&result, "action_button_1_position", &mut passed, &mut failed);
+    report_result(
+        &result,
+        "action_button_1_position",
+        &mut passed,
+        &mut failed,
+    );
 
     (passed, failed)
 }
@@ -167,7 +344,8 @@ fn report_result(
         }
         Err(e) => {
             *failed += 1;
-            let msg = e.downcast_ref::<String>()
+            let msg = e
+                .downcast_ref::<String>()
                 .map(|s| s.as_str())
                 .or_else(|| e.downcast_ref::<&str>().copied())
                 .unwrap_or("(unknown panic)");
@@ -188,9 +366,11 @@ fn main() {
         Ok((passed, failed)) => {
             handle.join().expect("test thread panicked");
             let total = passed + failed;
-            eprintln!("\ntest result: {}. {passed} passed; {failed} failed; 0 ignored; \
+            eprintln!(
+                "\ntest result: {}. {passed} passed; {failed} failed; 0 ignored; \
                       0 measured; 0 filtered out",
-                if failed == 0 { "ok" } else { "FAILED" });
+                if failed == 0 { "ok" } else { "FAILED" }
+            );
             if failed > 0 {
                 std::process::exit(1);
             }

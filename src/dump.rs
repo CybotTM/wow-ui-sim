@@ -3,9 +3,9 @@
 //! Single implementation used by both `wow-sim dump-tree` (headless) and
 //! the connected `wow-cli dump-tree` (via iced_app debug server).
 
+use crate::LayoutRect;
 use crate::iced_app::layout::{anchor_position, compute_frame_rect};
 use crate::widget::{Frame, WidgetRegistry, WidgetType};
-use crate::LayoutRect;
 use regex::RegexBuilder;
 
 // ── Public entry points ─────────────────────────────────────────────
@@ -22,7 +22,15 @@ pub fn print_frame_tree(
 ) {
     print_anchor_diagnostic(widgets);
     eprintln!("\n=== Frame Tree ===\n");
-    let lines = build_tree(widgets, addon_names, filter, filter_key, visible_only, screen_width, screen_height);
+    let lines = build_tree(
+        widgets,
+        addon_names,
+        filter,
+        filter_key,
+        visible_only,
+        screen_width,
+        screen_height,
+    );
     for line in &lines {
         println!("{line}");
     }
@@ -47,22 +55,46 @@ pub fn build_tree(
 
     let mut lines = Vec::new();
     let compile_re = |pat: &str| {
-        RegexBuilder::new(pat).case_insensitive(true).build()
+        RegexBuilder::new(pat)
+            .case_insensitive(true)
+            .build()
             .unwrap_or_else(|_| {
                 // Fall back to escaped literal if regex is invalid
-                RegexBuilder::new(&regex::escape(pat)).case_insensitive(true).build().unwrap()
+                RegexBuilder::new(&regex::escape(pat))
+                    .case_insensitive(true)
+                    .build()
+                    .unwrap()
             })
     };
     if let Some(key_filter) = filter_key {
         let re = compile_re(key_filter);
         let matching = collect_key_matches(widgets, &roots, &re);
         for id in matching {
-            emit_subtree(widgets, addon_names, id, 0, visible_only, screen_width, screen_height, &mut lines);
+            emit_subtree(
+                widgets,
+                addon_names,
+                id,
+                0,
+                visible_only,
+                screen_width,
+                screen_height,
+                &mut lines,
+            );
         }
     } else {
         let re = filter.map(|f| compile_re(f));
         for (id, _) in &roots {
-            emit_filtered(widgets, addon_names, *id, 0, re.as_ref(), visible_only, screen_width, screen_height, &mut lines);
+            emit_filtered(
+                widgets,
+                addon_names,
+                *id,
+                0,
+                re.as_ref(),
+                visible_only,
+                screen_width,
+                screen_height,
+                &mut lines,
+            );
         }
     }
     lines
@@ -77,12 +109,17 @@ pub fn build_warning_dump(
 ) -> Vec<String> {
     let mut lines = Vec::new();
     lines.push("WoW UI Simulator - Frame Dump".to_string());
-    lines.push(format!("Screen: {}x{}", screen_width as i32, screen_height as i32));
+    lines.push(format!(
+        "Screen: {}x{}",
+        screen_width as i32, screen_height as i32
+    ));
     lines.push(String::new());
 
-    let mut root_ids: Vec<u64> = widgets.iter_ids()
+    let mut root_ids: Vec<u64> = widgets
+        .iter_ids()
         .filter(|&id| {
-            widgets.get(id)
+            widgets
+                .get(id)
                 .map(|f| f.parent_id.is_none() || f.parent_id == Some(1))
                 .unwrap_or(false)
         })
@@ -90,7 +127,15 @@ pub fn build_warning_dump(
     root_ids.sort();
 
     for id in root_ids {
-        emit_warning_recursive(widgets, addon_names, id, 0, screen_width, screen_height, &mut lines);
+        emit_warning_recursive(
+            widgets,
+            addon_names,
+            id,
+            0,
+            screen_width,
+            screen_height,
+            &mut lines,
+        );
     }
     lines
 }
@@ -128,7 +173,9 @@ fn emit_frame_line(
         frame.widget_type,
     ));
     emit_anchor_lines(widgets, frame, &indent, screen_width, screen_height, lines);
-    let tex_path = frame.texture.as_deref()
+    let tex_path = frame
+        .texture
+        .as_deref()
         .or_else(|| resolve_button_state_texture(widgets, frame, id));
     if let Some(path) = tex_path {
         let fmt = resolve_texture_format(path);
@@ -138,10 +185,15 @@ fn emit_frame_line(
         lines.push(format!("{indent}  [atlas] {atlas}"));
     }
     if !frame.mask_textures.is_empty() {
-        let mask_names: Vec<_> = frame.mask_textures.iter()
-            .map(|mid| widgets.get(*mid)
-                .map(|m| m.texture.as_deref().unwrap_or("?"))
-                .unwrap_or("missing"))
+        let mask_names: Vec<_> = frame
+            .mask_textures
+            .iter()
+            .map(|mid| {
+                widgets
+                    .get(*mid)
+                    .map(|m| m.texture.as_deref().unwrap_or("?"))
+                    .unwrap_or("missing")
+            })
             .collect();
         lines.push(format!("{indent}  [masks] {}", mask_names.join(", ")));
     }
@@ -159,29 +211,46 @@ fn emit_anchor_lines(
     if frame.anchors.is_empty() {
         return;
     }
-    let parent_rect = frame.parent_id
+    let parent_rect = frame
+        .parent_id
         .map(|pid| compute_frame_rect(widgets, pid, screen_width, screen_height))
-        .unwrap_or(LayoutRect { x: 0.0, y: 0.0, width: screen_width, height: screen_height });
+        .unwrap_or(LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: screen_width,
+            height: screen_height,
+        });
 
     for anchor in &frame.anchors {
         let (rel_name, rel_rect) = if let Some(rel_id) = anchor.relative_to_id {
             let rect = compute_frame_rect(widgets, rel_id as u64, screen_width, screen_height);
-            let name = widgets.get(rel_id as u64)
+            let name = widgets
+                .get(rel_id as u64)
                 .and_then(|f| f.name.as_deref())
                 .unwrap_or("(anon)");
             (name, rect)
         } else {
-            (anchor.relative_to.as_deref().unwrap_or("$parent"), parent_rect)
+            (
+                anchor.relative_to.as_deref().unwrap_or("$parent"),
+                parent_rect,
+            )
         };
         let (ax, ay) = anchor_position(
             anchor.relative_point,
-            rel_rect.x, rel_rect.y, rel_rect.width, rel_rect.height,
+            rel_rect.x,
+            rel_rect.y,
+            rel_rect.width,
+            rel_rect.height,
         );
         lines.push(format!(
             "{indent}  [anchor] {} -> {}:{} offset({:.0},{:.0}) -> ({:.0},{:.0})",
-            anchor.point.as_str(), rel_name, anchor.relative_point.as_str(),
-            anchor.x_offset, anchor.y_offset,
-            ax + anchor.x_offset, ay - anchor.y_offset,
+            anchor.point.as_str(),
+            rel_name,
+            anchor.relative_point.as_str(),
+            anchor.x_offset,
+            anchor.y_offset,
+            ax + anchor.x_offset,
+            ay - anchor.y_offset,
         ));
     }
 }
@@ -190,13 +259,12 @@ fn emit_anchor_lines(
 
 /// Computed rect, with stored size annotation when it differs.
 fn format_size_str(frame: &Frame, rect: &LayoutRect) -> String {
-    let differs = (frame.width - rect.width).abs() > 0.5
-        || (frame.height - rect.height).abs() > 0.5;
+    let differs =
+        (frame.width - rect.width).abs() > 0.5 || (frame.height - rect.height).abs() > 0.5;
     if differs && (frame.width > 0.0 || frame.height > 0.0) {
         format!(
             "({}x{}) [stored={}x{}]",
-            rect.width as i32, rect.height as i32,
-            frame.width as i32, frame.height as i32,
+            rect.width as i32, rect.height as i32, frame.width as i32, frame.height as i32,
         )
     } else {
         format!("({}x{})", rect.width as i32, rect.height as i32)
@@ -206,12 +274,16 @@ fn format_size_str(frame: &Frame, rect: &LayoutRect) -> String {
 /// layout_rect staleness: show if cached rect diverges from computed rect.
 fn format_stale_str(frame: &Frame, rect: &LayoutRect) -> String {
     match frame.layout_rect {
-        Some(lr) if (lr.x - rect.x).abs() > 0.5
-            || (lr.y - rect.y).abs() > 0.5
-            || (lr.width - rect.width).abs() > 0.5
-            || (lr.height - rect.height).abs() > 0.5 =>
+        Some(lr)
+            if (lr.x - rect.x).abs() > 0.5
+                || (lr.y - rect.y).abs() > 0.5
+                || (lr.width - rect.width).abs() > 0.5
+                || (lr.height - rect.height).abs() > 0.5 =>
         {
-            format!(" [layout_rect=({:.0},{:.0}) {:.0}x{:.0}]", lr.x, lr.y, lr.width, lr.height)
+            format!(
+                " [layout_rect=({:.0},{:.0}) {:.0}x{:.0}]",
+                lr.x, lr.y, lr.width, lr.height
+            )
         }
         None => " [layout_rect=None]".to_string(),
         _ => String::new(),
@@ -226,8 +298,7 @@ fn format_info_str(frame: &Frame, rect: &LayoutRect) -> String {
     };
     format!(
         " x={}, y={}, alpha={:.2}{scale_str}",
-        rect.x as i32, rect.y as i32,
-        frame.alpha,
+        rect.x as i32, rect.y as i32, frame.alpha,
     )
 }
 
@@ -267,9 +338,28 @@ fn emit_subtree(
         return;
     }
     let name = resolve_display_name(widgets, frame, id);
-    emit_frame_line(frame, id, &name, depth, widgets, addon_names, screen_width, screen_height, lines);
+    emit_frame_line(
+        frame,
+        id,
+        &name,
+        depth,
+        widgets,
+        addon_names,
+        screen_width,
+        screen_height,
+        lines,
+    );
     for &child_id in &frame.children {
-        emit_subtree(widgets, addon_names, child_id, depth + 1, visible_only, screen_width, screen_height, lines);
+        emit_subtree(
+            widgets,
+            addon_names,
+            child_id,
+            depth + 1,
+            visible_only,
+            screen_width,
+            screen_height,
+            lines,
+        );
     }
 }
 
@@ -293,10 +383,30 @@ fn emit_filtered(
     let name = resolve_display_name(widgets, frame, id);
     let matches = filter.map(|re| re.is_match(&name)).unwrap_or(true);
     if matches {
-        emit_frame_line(frame, id, &name, depth, widgets, addon_names, screen_width, screen_height, lines);
+        emit_frame_line(
+            frame,
+            id,
+            &name,
+            depth,
+            widgets,
+            addon_names,
+            screen_width,
+            screen_height,
+            lines,
+        );
     }
     for &child_id in &frame.children {
-        emit_filtered(widgets, addon_names, child_id, depth + 1, filter, visible_only, screen_width, screen_height, lines);
+        emit_filtered(
+            widgets,
+            addon_names,
+            child_id,
+            depth + 1,
+            filter,
+            visible_only,
+            screen_width,
+            screen_height,
+            lines,
+        );
     }
 }
 
@@ -326,20 +436,46 @@ fn emit_warning_recursive(
     lines.push(format!(
         "{indent}{name} [{}] ({:.0},{:.0} {}x{}){owner_str}{warn_str}",
         frame.widget_type.as_str(),
-        rect.x, rect.y, rect.width as i32, rect.height as i32,
+        rect.x,
+        rect.y,
+        rect.width as i32,
+        rect.height as i32,
     ));
     for &child_id in &frame.children {
-        emit_warning_recursive(widgets, addon_names, child_id, depth + 1, screen_width, screen_height, lines);
+        emit_warning_recursive(
+            widgets,
+            addon_names,
+            child_id,
+            depth + 1,
+            screen_width,
+            screen_height,
+            lines,
+        );
     }
 }
 
-fn build_warnings(frame: &Frame, rect: &LayoutRect, screen_width: f32, screen_height: f32) -> Vec<&'static str> {
+fn build_warnings(
+    frame: &Frame,
+    rect: &LayoutRect,
+    screen_width: f32,
+    screen_height: f32,
+) -> Vec<&'static str> {
     let mut w = Vec::new();
-    if rect.width <= 0.0 { w.push("ZERO_WIDTH"); }
-    if rect.height <= 0.0 { w.push("ZERO_HEIGHT"); }
-    if rect.x + rect.width < 0.0 || rect.x > screen_width { w.push("OFFSCREEN_X"); }
-    if rect.y + rect.height < 0.0 || rect.y > screen_height { w.push("OFFSCREEN_Y"); }
-    if !frame.visible { w.push("HIDDEN"); }
+    if rect.width <= 0.0 {
+        w.push("ZERO_WIDTH");
+    }
+    if rect.height <= 0.0 {
+        w.push("ZERO_HEIGHT");
+    }
+    if rect.x + rect.width < 0.0 || rect.x > screen_width {
+        w.push("OFFSCREEN_X");
+    }
+    if rect.y + rect.height < 0.0 || rect.y > screen_height {
+        w.push("OFFSCREEN_Y");
+    }
+    if !frame.visible {
+        w.push("HIDDEN");
+    }
     w
 }
 
@@ -377,10 +513,15 @@ fn collect_key_matches_recursive(
 // ── Name / text resolution ──────────────────────────────────────────
 
 fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
-    widgets.iter_ids()
+    widgets
+        .iter_ids()
         .filter_map(|id| {
             let w = widgets.get(id)?;
-            if w.parent_id.is_none() { Some((id, w.name.clone())) } else { None }
+            if w.parent_id.is_none() {
+                Some((id, w.name.clone()))
+            } else {
+                None
+            }
         })
         .collect()
 }
@@ -394,17 +535,18 @@ fn resolve_addon_name<'a>(addon_names: &'a [String], owner: Option<u16>) -> Opti
 fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> String {
     if let Some(ref name) = frame.name
         && !name.starts_with("__")
-        {
-            return name.clone();
-        }
+    {
+        return name.clone();
+    }
     if let Some(parent_id) = frame.parent_id
-        && let Some(parent) = widgets.get(parent_id) {
-            for (key, &child_id) in &parent.children_keys {
-                if child_id == id {
-                    return format!(".{key}");
-                }
+        && let Some(parent) = widgets.get(parent_id)
+    {
+        for (key, &child_id) in &parent.children_keys {
+            if child_id == id {
+                return format!(".{key}");
             }
         }
+    }
     // For anonymous frames with text, show a text preview
     if let Some(ref text) = frame.text {
         if text.len() > 20 {
@@ -417,16 +559,18 @@ fn resolve_display_name(widgets: &WidgetRegistry, frame: &Frame, id: u64) -> Str
 
 fn resolve_display_text(widgets: &WidgetRegistry, frame: &Frame) -> Option<String> {
     if let Some(ref t) = frame.text
-        && !t.is_empty() {
-            return Some(strip_wow_escapes(t));
-        }
+        && !t.is_empty()
+    {
+        return Some(strip_wow_escapes(t));
+    }
     for key in &["Title", "TitleText"] {
         if let Some(&child_id) = frame.children_keys.get(*key)
             && let Some(child) = widgets.get(child_id)
-                && let Some(ref t) = child.text
-                    && !t.is_empty() {
-                        return Some(strip_wow_escapes(t));
-                    }
+            && let Some(ref t) = child.text
+            && !t.is_empty()
+        {
+            return Some(strip_wow_escapes(t));
+        }
     }
     None
 }
@@ -440,10 +584,14 @@ fn print_anchor_diagnostic(widgets: &WidgetRegistry) {
         std::collections::HashMap::new();
     for id in widgets.iter_ids() {
         let Some(w) = widgets.get(id) else { continue };
-        if !w.anchors.is_empty() { anchored += 1; continue; }
+        if !w.anchors.is_empty() {
+            anchored += 1;
+            continue;
+        }
         unanchored += 1;
         let parent_key = find_parent_key(widgets, w, id);
-        let parent_name = w.parent_id
+        let parent_name = w
+            .parent_id
             .and_then(|pid| widgets.get(pid))
             .and_then(|p| p.name.clone())
             .unwrap_or_else(|| "(no parent)".into());
@@ -490,7 +638,8 @@ fn print_no_key_breakdown(no_key: &[String]) {
 fn find_parent_key(widgets: &WidgetRegistry, w: &Frame, id: u64) -> Option<String> {
     let pid = w.parent_id?;
     let p = widgets.get(pid)?;
-    p.children_keys.iter()
+    p.children_keys
+        .iter()
         .find(|(_, cid)| **cid == id)
         .map(|(k, _)| k.clone())
 }
@@ -516,20 +665,37 @@ fn skip_wow_escape(chars: &mut std::iter::Peekable<std::str::Chars>) {
         Some('H') => {
             chars.next();
             while let Some(ch) = chars.next() {
-                if ch == '|' && chars.peek() == Some(&'h') { chars.next(); break; }
+                if ch == '|' && chars.peek() == Some(&'h') {
+                    chars.next();
+                    break;
+                }
             }
         }
-        Some('h') => { chars.next(); }
+        Some('h') => {
+            chars.next();
+        }
         Some('T') => {
             chars.next();
             while let Some(&ch) = chars.peek() {
                 chars.next();
-                if ch == '|' { chars.next(); break; }
+                if ch == '|' {
+                    chars.next();
+                    break;
+                }
             }
         }
-        Some('t') => { chars.next(); }
-        Some('c') => { chars.next(); for _ in 0..8 { chars.next(); } }
-        Some('r') => { chars.next(); }
+        Some('t') => {
+            chars.next();
+        }
+        Some('c') => {
+            chars.next();
+            for _ in 0..8 {
+                chars.next();
+            }
+        }
+        Some('r') => {
+            chars.next();
+        }
         _ => {}
     }
 }
@@ -538,10 +704,18 @@ fn skip_wow_escape(chars: &mut std::iter::Peekable<std::str::Chars>) {
 
 /// For Texture children with parentKey like NormalTexture/PushedTexture/etc.,
 /// look up the texture path from the parent button's corresponding field.
-fn resolve_button_state_texture<'a>(widgets: &'a WidgetRegistry, frame: &Frame, id: u64) -> Option<&'a str> {
-    if frame.widget_type != WidgetType::Texture { return None; }
+fn resolve_button_state_texture<'a>(
+    widgets: &'a WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+) -> Option<&'a str> {
+    if frame.widget_type != WidgetType::Texture {
+        return None;
+    }
     let parent = widgets.get(frame.parent_id?)?;
-    let key = parent.children_keys.iter()
+    let key = parent
+        .children_keys
+        .iter()
         .find(|&(_, cid)| *cid == id)
         .map(|(k, _)| k.as_str())?;
     match key {
@@ -558,14 +732,16 @@ fn resolve_button_state_texture<'a>(widgets: &'a WidgetRegistry, frame: &Frame, 
 /// Resolve a WoW texture path and return a suffix indicating the format found.
 /// Returns e.g. " (webp)", " (BLP)", or " (MISSING)".
 fn resolve_texture_format(wow_path: &str) -> String {
-    use std::sync::OnceLock;
     use crate::texture::{TextureManager, normalize_wow_path};
+    use std::sync::OnceLock;
 
     static TEX_MGR: OnceLock<TextureManager> = OnceLock::new();
     let mgr = TEX_MGR.get_or_init(|| {
         let home = dirs::home_dir().unwrap_or_default();
         let local = std::path::PathBuf::from("./textures");
-        let base = if local.exists() { local } else {
+        let base = if local.exists() {
+            local
+        } else {
             home.join("Repos/wow-ui-textures")
         };
         TextureManager::new(base)
@@ -576,7 +752,8 @@ fn resolve_texture_format(wow_path: &str) -> String {
     let normalized = normalize_wow_path(wow_path);
     match mgr.resolve_path(&normalized) {
         Some(p) => {
-            let ext = p.extension()
+            let ext = p
+                .extension()
                 .map(|e| e.to_string_lossy().to_lowercase())
                 .unwrap_or_default();
             format!(" ({ext})")

@@ -1,13 +1,13 @@
 //! Debug server, Lua REPL, and inspector update handlers.
 
-use iced::{window, Task};
+use iced::{Task, window};
 use iced_layout_inspector::server::Command as DebugCommand;
 
 use crate::lua_server::{LuaCommand, Response as LuaResponse};
 
+use super::Message;
 use super::app::App;
 use super::state::InspectorState;
-use super::Message;
 
 impl App {
     /// Drain both IPC channels (debug inspector + Lua REPL).
@@ -47,7 +47,8 @@ impl App {
         // Blizzard_PrintHandler overwrites the Rust `print` during addon load,
         // so console_output is never populated. This wrapper captures print
         // calls at the Lua level regardless of which print is active.
-        let _ = env.exec(r##"
+        let _ = env.exec(
+            r##"
             __repl_prev_print = print
             __repl_captured = {}
             print = function(...)
@@ -58,7 +59,8 @@ impl App {
                 end
                 __repl_captured[#__repl_captured + 1] = table.concat(parts, "\t")
             end
-        "##);
+        "##,
+        );
 
         let result = env.exec(code);
 
@@ -120,7 +122,13 @@ impl App {
                     crop,
                     respond,
                 } => {
-                    let result = self.render_screenshot(&output, width, height, filter.as_deref(), crop.as_deref());
+                    let result = self.render_screenshot(
+                        &output,
+                        width,
+                        height,
+                        filter.as_deref(),
+                        crop.as_deref(),
+                    );
                     let _ = respond.send(result);
                 }
             }

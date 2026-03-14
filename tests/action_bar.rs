@@ -20,13 +20,25 @@ const ACTION_BAR_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -38,18 +50,42 @@ const ACTION_BAR_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    ("Blizzard_UIParentPanelManager", "Blizzard_UIParentPanelManager_Mainline.toc"),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
-    ("Blizzard_SettingsDefinitions_Shared", "Blizzard_SettingsDefinitions_Shared.toc"),
-    ("Blizzard_SettingsDefinitions_Frame", "Blizzard_SettingsDefinitions_Frame_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
-    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+    (
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    ),
     ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
-    ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mainline.toc"),
+    (
+        "Blizzard_SharedMapDataProviders",
+        "Blizzard_SharedMapDataProviders_Mainline.toc",
+    ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
 ];
@@ -102,7 +138,11 @@ fn fire_startup_events(env: &WowLuaEnv) {
     // WoW's C++ engine fires ACTIONBAR_SHOWGRID on startup to show empty slots.
     let _ = env.fire_event("ACTIONBAR_SHOWGRID");
 
-    for event in ["UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED"] {
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
         let _ = env.fire_event(event);
     }
 }
@@ -115,11 +155,13 @@ fn test_right_action_bars_hidden_by_default() {
     let env = env_with_action_bar();
 
     let results: (bool, bool) = env
-        .eval(r#"
+        .eval(
+            r#"
             local left = MultiBarLeft and MultiBarLeft:IsVisible()
             local right = MultiBarRight and MultiBarRight:IsVisible()
             return left or false, right or false
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(!results.0, "MultiBarLeft should be hidden by default");
     assert!(!results.1, "MultiBarRight should be hidden by default");
@@ -140,7 +182,8 @@ fn test_action_buttons_visible_after_startup() {
     let env = env_with_action_bar();
 
     let count: i32 = env
-        .eval(r#"
+        .eval(
+            r#"
             local n = 0
             for i = 1, 12 do
                 local btn = _G["ActionButton" .. i]
@@ -149,7 +192,8 @@ fn test_action_buttons_visible_after_startup() {
                 end
             end
             return n
-        "#)
+        "#,
+        )
         .unwrap();
     assert_eq!(count, 12, "All 12 ActionButtons should be visible");
 }
@@ -159,7 +203,8 @@ fn test_action_buttons_have_showgrid_attribute() {
     let env = env_with_action_bar();
 
     let all_have_grid: bool = env
-        .eval(r#"
+        .eval(
+            r#"
             for i = 1, 12 do
                 local btn = _G["ActionButton" .. i]
                 if not btn then return false end
@@ -167,7 +212,8 @@ fn test_action_buttons_have_showgrid_attribute() {
                 if not grid or grid <= 0 then return false end
             end
             return true
-        "#)
+        "#,
+        )
         .unwrap();
     assert!(all_have_grid, "All ActionButtons should have showgrid > 0");
 }
@@ -177,11 +223,13 @@ fn test_action_button_size() {
     let env = env_with_action_bar();
 
     let size: (f64, f64) = env
-        .eval(r#"
+        .eval(
+            r#"
             local btn = ActionButton1
             if not btn then return 0, 0 end
             return btn:GetSize()
-        "#)
+        "#,
+        )
         .unwrap();
     assert_eq!(size, (45.0, 45.0), "ActionButton should be 45x45");
 }
@@ -191,12 +239,18 @@ fn test_main_action_bar_size() {
     let env = env_with_action_bar();
 
     let size: (f64, f64) = env
-        .eval(r#"
+        .eval(
+            r#"
             local bar = MainActionBar
             if not bar then return 0, 0 end
             return bar:GetSize()
-        "#)
+        "#,
+        )
         .unwrap();
     // 12 buttons (45px) + padding + margins computed by ResizeLayoutFrame:Layout()
-    assert_eq!(size, (570.0, 52.0), "MainActionBar should be 570x52 after layout");
+    assert_eq!(
+        size,
+        (570.0, 52.0),
+        "MainActionBar should be 570x52 after layout"
+    );
 }

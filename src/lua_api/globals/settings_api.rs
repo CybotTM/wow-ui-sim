@@ -42,22 +42,26 @@ fn register_canvas_methods(lua: &Lua, settings: &mlua::Table) -> Result<()> {
     let s = settings.clone();
     settings.set(
         "RegisterCanvasLayoutCategory",
-        lua.create_function(move |lua, (_frame, name, _group): (Value, Option<String>, Option<String>)| {
-            let id = name.as_deref().unwrap_or("CustomCategory");
-            let cat = make_category(lua, id, name.as_deref())?;
-            store_category(&s, &cat)?;
-            Ok(cat)
-        })?,
+        lua.create_function(
+            move |lua, (_frame, name, _group): (Value, Option<String>, Option<String>)| {
+                let id = name.as_deref().unwrap_or("CustomCategory");
+                let cat = make_category(lua, id, name.as_deref())?;
+                store_category(&s, &cat)?;
+                Ok(cat)
+            },
+        )?,
     )?;
     let s = settings.clone();
     settings.set(
         "RegisterCanvasLayoutSubcategory",
-        lua.create_function(move |lua, (_parent, _frame, name): (Value, Value, Option<String>)| {
-            let id = name.as_deref().unwrap_or("CustomSubcategory");
-            let cat = make_category(lua, id, name.as_deref())?;
-            store_category(&s, &cat)?;
-            Ok(cat)
-        })?,
+        lua.create_function(
+            move |lua, (_parent, _frame, name): (Value, Value, Option<String>)| {
+                let id = name.as_deref().unwrap_or("CustomSubcategory");
+                let cat = make_category(lua, id, name.as_deref())?;
+                store_category(&s, &cat)?;
+                Ok(cat)
+            },
+        )?,
     )?;
     Ok(())
 }

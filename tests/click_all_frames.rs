@@ -134,9 +134,7 @@ fn find_clickable_by_prefix(env: &WowLuaEnv, prefix: &str) -> Vec<(u64, String)>
                     return None;
                 }
                 match frame.widget_type {
-                    WidgetType::Button
-                    | WidgetType::CheckButton
-                    | WidgetType::Frame => {}
+                    WidgetType::Button | WidgetType::CheckButton | WidgetType::Frame => {}
                     _ => return None,
                 }
                 Some((id, name.clone()))
@@ -170,24 +168,14 @@ fn click_prefix(env: &WowLuaEnv, prefix: &str) -> (usize, Vec<String>) {
 }
 
 /// Run a named test group, collecting errors into the report.
-fn run_group(
-    env: &WowLuaEnv,
-    label: &str,
-    names: &[&str],
-    report: &mut Vec<String>,
-) {
+fn run_group(env: &WowLuaEnv, label: &str, names: &[&str], report: &mut Vec<String>) {
     let (clicked, errors) = click_group(env, names);
     eprintln!("[{label}] Clicked {clicked}/{} frames", names.len());
     report.extend(errors);
 }
 
 /// Run a prefix-based test group, collecting errors into the report.
-fn run_prefix(
-    env: &WowLuaEnv,
-    label: &str,
-    prefix: &str,
-    report: &mut Vec<String>,
-) {
+fn run_prefix(env: &WowLuaEnv, label: &str, prefix: &str, report: &mut Vec<String>) {
     let (count, errors) = click_prefix(env, prefix);
     eprintln!("[{label}] Clicked {count} frames matching '{prefix}*'");
     report.extend(errors);
@@ -216,12 +204,7 @@ const MAIN_MENU_BAR: &[&str] = &[
     "MainMenuMicroButton",
 ];
 
-const UNIT_FRAMES: &[&str] = &[
-    "PlayerFrame",
-    "TargetFrame",
-    "FocusFrame",
-    "PetFrame",
-];
+const UNIT_FRAMES: &[&str] = &["PlayerFrame", "TargetFrame", "FocusFrame", "PetFrame"];
 
 const MINIMAP: &[&str] = &[
     "Minimap",
@@ -257,15 +240,9 @@ const CHAT_FRAME: &[&str] = &[
     "QuickJoinToastButton",
 ];
 
-const OBJECTIVE_TRACKER: &[&str] = &[
-    "ObjectiveTrackerFrame",
-    "QuestObjectiveTracker",
-];
+const OBJECTIVE_TRACKER: &[&str] = &["ObjectiveTrackerFrame", "QuestObjectiveTracker"];
 
-const CLOSE_BUTTONS: &[&str] = &[
-    "AddonListCloseButton",
-    "SettingsCloseButton",
-];
+const CLOSE_BUTTONS: &[&str] = &["AddonListCloseButton", "SettingsCloseButton"];
 
 const ACTION_BAR_PREFIXES: &[(&str, &str)] = &[
     ("ActionButtons", "ActionButton"),
@@ -301,26 +278,28 @@ fn click_all_groups(env: &WowLuaEnv) -> Vec<String> {
 const KNOWN_ERROR_COUNT: usize = 0;
 
 #[test]
-fn test_click_all_frames() { test_timeout! {
-    let env = setup_full_ui();
-    let report = click_all_groups(&env);
-    let count = report.len();
+fn test_click_all_frames() {
+    test_timeout! {
+        let env = setup_full_ui();
+        let report = click_all_groups(&env);
+        let count = report.len();
 
-    if count > KNOWN_ERROR_COUNT {
-        let mut msg = format!(
-            "New click errors! Expected at most {KNOWN_ERROR_COUNT}, got {count}.\n\
-             All errors:\n"
-        );
-        for line in &report {
-            msg.push_str(&format!("  {line}\n"));
+        if count > KNOWN_ERROR_COUNT {
+            let mut msg = format!(
+                "New click errors! Expected at most {KNOWN_ERROR_COUNT}, got {count}.\n\
+                 All errors:\n"
+            );
+            for line in &report {
+                msg.push_str(&format!("  {line}\n"));
+            }
+            panic!("{msg}");
         }
-        panic!("{msg}");
-    }
 
-    if count < KNOWN_ERROR_COUNT {
-        panic!(
-            "Click error count improved from {KNOWN_ERROR_COUNT} to {count}! \
-             Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."
-        );
+        if count < KNOWN_ERROR_COUNT {
+            panic!(
+                "Click error count improved from {KNOWN_ERROR_COUNT} to {count}! \
+                 Update KNOWN_ERROR_COUNT to {count} to lock in the improvement."
+            );
+        }
     }
-}}
+}

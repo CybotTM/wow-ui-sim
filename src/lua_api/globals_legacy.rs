@@ -3,47 +3,47 @@
 //! Orchestrates registration of all WoW API globals by delegating to
 //! sub-modules and registering core Lua overrides (print, ipairs, getmetatable).
 
-use super::frame::{extract_frame_id, frame_ref};
+use super::SimState;
 use super::frame::get_sim_state;
+use super::frame::{extract_frame_id, frame_ref};
+use super::globals::abbreviate_config::register_abbreviate_config;
 use super::globals::addon_api::register_addon_api;
 use super::globals::c_collection_api::register_c_collection_api;
+use super::globals::c_editmode_api::register_c_editmode_api;
+use super::globals::c_event_utils_api::register_c_event_utils_api;
 use super::globals::c_item_api::register_c_item_api;
 use super::globals::c_map_api::register_c_map_api;
 use super::globals::c_misc_api::register_c_misc_api;
-use super::globals::c_editmode_api::register_c_editmode_api;
-use super::globals::c_event_utils_api::register_c_event_utils_api;
-use super::globals::c_stubs_api::register_c_stubs_api;
 use super::globals::c_quest_api::register_c_quest_api;
+use super::globals::c_stubs_api::register_c_stubs_api;
 use super::globals::c_system_api::register_c_system_api;
 use super::globals::constants_api::register_constants_api;
 use super::globals::create_frame::create_frame_function;
+use super::globals::cursor_api;
 use super::globals::cvar_api::register_cvar_api;
 use super::globals::dropdown_api::register_dropdown_api;
+use super::globals::early_globals::register_early_globals;
 use super::globals::enum_api::register_enum_api;
 use super::globals::font_api::{create_standard_font_objects, register_font_api};
+use super::globals::frame_enumerate::register_frame_enumerate;
+use super::globals::frame_level_api::register_frame_level_helpers;
 use super::globals::global_frames::register_global_frames;
 use super::globals::item_api::register_item_api;
 use super::globals::locale_api::register_locale_api;
+use super::globals::lua_duration_object::register_lua_duration_object;
 use super::globals::mixin_api::register_mixin_api;
 use super::globals::player_api::register_player_api;
 use super::globals::quest_frames::register_quest_frames;
 use super::globals::register_all_ui_strings;
 use super::globals::settings_api::register_settings_api;
 use super::globals::sound_api::register_sound_api;
-use super::globals::cursor_api;
 use super::globals::spell_api::register_spell_api;
-use super::globals::early_globals::register_early_globals;
-use super::globals::frame_enumerate::register_frame_enumerate;
-use super::globals::frame_level_api::register_frame_level_helpers;
 use super::globals::system_api::register_system_api;
 use super::globals::timer_api::register_timer_api;
 use super::globals::tooltip_api::register_tooltip_frames;
 use super::globals::unit_api::register_unit_api;
-use super::globals::utility_api::register_utility_api;
-use super::globals::abbreviate_config::register_abbreviate_config;
-use super::globals::lua_duration_object::register_lua_duration_object;
 use super::globals::unit_heal_prediction::register_unit_heal_prediction;
-use super::SimState;
+use super::globals::utility_api::register_utility_api;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -85,7 +85,10 @@ fn patch_string_format(lua: &Lua) -> Result<()> {
 }
 
 /// Rust implementation of WoW's extended `string.format`.
-fn wow_string_format(lua: &mlua::Lua, mut args: mlua::MultiValue) -> mlua::Result<mlua::MultiValue> {
+fn wow_string_format(
+    lua: &mlua::Lua,
+    mut args: mlua::MultiValue,
+) -> mlua::Result<mlua::MultiValue> {
     let original: mlua::Function = lua.named_registry_value("__original_string_format")?;
 
     // Non-string first arg: pass through to original C string.format
@@ -140,11 +143,23 @@ fn process_wow_format(fmt: &str, args: &[Value]) -> mlua::Result<(String, Vec<Va
             out.push_str("%%");
             i += 2;
         } else {
-            i = parse_format_specifier(bytes, i, args, &mut out, &mut reordered, &mut seq, &mut has_positional)?;
+            i = parse_format_specifier(
+                bytes,
+                i,
+                args,
+                &mut out,
+                &mut reordered,
+                &mut seq,
+                &mut has_positional,
+            )?;
         }
     }
 
-    if has_positional { Ok((out, reordered)) } else { Ok((out, args.to_vec())) }
+    if has_positional {
+        Ok((out, reordered))
+    } else {
+        Ok((out, args.to_vec()))
+    }
 }
 
 /// Parse one format specifier starting at `%`, appending to `out` and collecting args.
@@ -180,7 +195,11 @@ fn parse_format_specifier(
     i = skip_flags_width_precision(bytes, i, out);
     // Conversion character — %F → %f
     if i < bytes.len() && is_format_conversion(bytes[i]) {
-        out.push(if bytes[i] == b'F' { 'f' } else { bytes[i] as char });
+        out.push(if bytes[i] == b'F' {
+            'f'
+        } else {
+            bytes[i] as char
+        });
         i += 1;
     }
     Ok(i)
@@ -224,10 +243,24 @@ fn parse_positional_index(bytes: &[u8], start: usize) -> Option<(usize, usize)> 
 fn is_format_conversion(b: u8) -> bool {
     matches!(
         b,
-        b'd' | b'i' | b'o' | b'u' | b'x' | b'X'
-            | b'e' | b'E' | b'f' | b'F'
-            | b'g' | b'G' | b'a' | b'A'
-            | b'c' | b's' | b'p' | b'q' | b'n'
+        b'd' | b'i'
+            | b'o'
+            | b'u'
+            | b'x'
+            | b'X'
+            | b'e'
+            | b'E'
+            | b'f'
+            | b'F'
+            | b'g'
+            | b'G'
+            | b'a'
+            | b'A'
+            | b'c'
+            | b's'
+            | b'p'
+            | b'q'
+            | b'n'
     )
 }
 
@@ -242,12 +275,15 @@ fn register_print(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set("print", print_func.clone())?;
     // Store in registry so A_Print bypasses taint
     lua.set_named_registry_value("__sim_print", print_func)?;
-    lua.load(r#"
+    lua.load(
+        r#"
         function A_Print(...)
             local p = debug.getregistry().__sim_print
             if p then p(...) end
         end
-    "#).exec()
+    "#,
+    )
+    .exec()
 }
 
 /// Format variadic print arguments with tab separators, matching WoW's print behavior.
@@ -336,7 +372,10 @@ fn create_frame_children_iterator(lua: &Lua, frame_id: u64) -> Result<mlua::Mult
     let state_rc = get_sim_state(lua);
     let children: Vec<u64> = {
         let st = state_rc.borrow();
-        st.widgets.get(frame_id).map(|f| f.children.clone()).unwrap_or_default()
+        st.widgets
+            .get(frame_id)
+            .map(|f| f.children.clone())
+            .unwrap_or_default()
     };
 
     let iterator = lua.create_function(move |lua, (_, idx): (Value, i32)| {
@@ -393,7 +432,8 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
         let state = state_rc.borrow();
         let f = state.widgets.get(frame_id);
         (
-            f.map(|f| f.widget_type).unwrap_or(crate::widget::WidgetType::Frame),
+            f.map(|f| f.widget_type)
+                .unwrap_or(crate::widget::WidgetType::Frame),
             f.and_then(|f| f.object_type_name.clone()),
         )
     };
@@ -422,7 +462,10 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
 fn clone_metatable(lua: &Lua, per_type: &mlua::Table, base_key: &str) -> Result<mlua::Table> {
     let base_mt: mlua::Table = per_type.raw_get(base_key)?;
     let base_idx: mlua::Table = base_mt.raw_get("__index")?;
-    let (new_idx, wrap_fn) = (lua.create_table()?, super::cfunc_wrap::create_wrap_factory(lua)?);
+    let (new_idx, wrap_fn) = (
+        lua.create_table()?,
+        super::cfunc_wrap::create_wrap_factory(lua)?,
+    );
     for pair in base_idx.pairs::<String, mlua::Function>() {
         let (k, f) = pair?;
         new_idx.raw_set(k.as_str(), wrap_fn.call::<mlua::Function>(f)?)?;
@@ -567,9 +610,7 @@ fn resolve_method(
 
 /// Wrap a method function in a unique closure for per-type identity.
 fn wrap_method(lua: &Lua, f: mlua::Function) -> Result<mlua::Function> {
-    Ok(lua.create_function(move |_, args: mlua::MultiValue| {
-        f.call::<mlua::MultiValue>(args)
-    })?)
+    Ok(lua.create_function(move |_, args: mlua::MultiValue| f.call::<mlua::MultiValue>(args))?)
 }
 
 /// All widget type variants (used to pre-build per-type metatables).
@@ -713,7 +754,10 @@ fn register_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
 /// Set loading_addon_index to the existing `__BuiltIn` pseudo-addon.
 fn set_builtin_addon_owner(state: &Rc<RefCell<SimState>>) {
     let mut s = state.borrow_mut();
-    let idx = s.addons.iter().position(|a| a.folder_name == "__BuiltIn")
+    let idx = s
+        .addons
+        .iter()
+        .position(|a| a.folder_name == "__BuiltIn")
         .expect("__BuiltIn addon must be registered by init_builtin_frames");
     s.loading_addon_index = Some(idx as u16);
 }
@@ -722,7 +766,10 @@ fn set_builtin_addon_owner(state: &Rc<RefCell<SimState>>) {
 /// that doesn't already have a `_G` entry.
 fn sync_named_frames_to_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    let ids_and_names: Vec<(u64, String)> = state.borrow().widgets.named_frames()
+    let ids_and_names: Vec<(u64, String)> = state
+        .borrow()
+        .widgets
+        .named_frames()
         .map(|(id, name)| (id, name.clone()))
         .collect();
     for (id, name) in ids_and_names {
@@ -744,4 +791,3 @@ fn register_ui_strings_and_fonts(lua: &Lua) -> Result<()> {
     register_all_ui_strings(lua, &globals)?;
     create_standard_font_objects(lua)
 }
-

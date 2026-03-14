@@ -6,21 +6,21 @@ use iced::{Event, Point, Rectangle, Size};
 
 use std::collections::{HashMap, HashSet};
 
+use crate::render::FrameQuadSnapshot;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
-use crate::render::FrameQuadSnapshot;
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
-use crate::widget::{WidgetType};
+use crate::widget::WidgetType;
 
+use super::Message;
 use super::app::App;
 use super::frame_collect::collect_hittable_frames;
 use super::quad_builders::{build_texture_quads, emit_button_highlight, emit_frame_quads};
+use super::state::CanvasMessage;
 use super::statusbar::collect_statusbar_fills;
 use super::strata_emit::{build_hittable_rects, build_render_list};
-use super::state::CanvasMessage;
 use super::tooltip::TooltipRenderData;
-use super::Message;
 
 /// Shader program implementation for GPU rendering of WoW frames.
 impl shader::Program<Message> for &App {
@@ -175,8 +175,16 @@ fn rebuild_strata_batches(
         }
         let snapshots = snapshot_cache[i].get_or_insert_with(HashMap::new);
         let stats = emit_strata_cached(
-            &mut batch, snapshots, bucket, dirty_ids, widgets,
-            pressed_frame, text_ctx, message_frames, tooltip_data, elapsed_secs,
+            &mut batch,
+            snapshots,
+            bucket,
+            dirty_ids,
+            widgets,
+            pressed_frame,
+            text_ctx,
+            message_frames,
+            tooltip_data,
+            elapsed_secs,
         );
         log_strata_timing(i, bucket.len(), &stats, strata_start.elapsed());
         strata_cache[i] = Some(Arc::new(batch));
@@ -186,23 +194,36 @@ fn rebuild_strata_batches(
 fn emit_marble_background(batch: &mut QuadBatch, size: Size) {
     batch.push_tiled_path(
         Rectangle::new(Point::ORIGIN, size),
-        256.0, 256.0,
+        256.0,
+        256.0,
         "framegeneral/ui-background-marble",
         [0.55, 0.55, 0.55, 1.0],
     );
 }
 
-struct EmitStats { cached: u32, emitted: u32 }
+struct EmitStats {
+    cached: u32,
+    emitted: u32,
+}
 
 fn log_strata_timing(i: usize, n: usize, stats: &EmitStats, dur: std::time::Duration) {
-    if dur.as_millis() <= 5 { return; }
+    if dur.as_millis() <= 5 {
+        return;
+    }
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .unwrap_or_default();
     let secs = now.as_secs() % 86400;
-    let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
-    eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?} (cached={} emitted={})",
-        stats.cached, stats.emitted);
+    let (h, m, s, ms) = (
+        secs / 3600,
+        (secs % 3600) / 60,
+        secs % 60,
+        now.subsec_millis(),
+    );
+    eprintln!(
+        "[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?} (cached={} emitted={})",
+        stats.cached, stats.emitted
+    );
 }
 
 /// Emit one frame's quads into the batch. Returns true if quads were emitted.
@@ -220,20 +241,42 @@ fn emit_one_frame(
     statusbar_fills: &HashMap<u64, super::statusbar::StatusBarFill>,
     elapsed_secs: f64,
 ) -> bool {
-    let Some(f) = registry.get(id) else { return false };
+    let Some(f) = registry.get(id) else {
+        return false;
+    };
     let no_vis: Option<HashSet<u64>> = None;
-    if super::button_vis::should_skip_frame(f, id, eff_alpha, &no_vis, registry, pressed_frame, None) {
+    if super::button_vis::should_skip_frame(
+        f,
+        id,
+        eff_alpha,
+        &no_vis,
+        registry,
+        pressed_frame,
+        None,
+    ) {
         return false;
     }
-    if !has_renderable_size(f, rect) { return false; }
+    if !has_renderable_size(f, rect) {
+        return false;
+    }
     let bounds = Rectangle::new(
         Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
         Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
     );
     emit_frame_quads(
-        batch, id, f, bounds, statusbar_fills.get(&id), pressed_frame, None,
-        text_ctx, Some(message_frames), Some(tooltip_data),
-        registry, elapsed_secs, eff_alpha,
+        batch,
+        id,
+        f,
+        bounds,
+        statusbar_fills.get(&id),
+        pressed_frame,
+        None,
+        text_ctx,
+        Some(message_frames),
+        Some(tooltip_data),
+        registry,
+        elapsed_secs,
+        eff_alpha,
     );
     true
 }
@@ -264,7 +307,10 @@ fn emit_strata_cached(
 ) -> EmitStats {
     let render_list = build_render_list(bucket, registry);
     let statusbar_fills = collect_statusbar_fills(&render_list, registry);
-    let mut stats = EmitStats { cached: 0, emitted: 0 };
+    let mut stats = EmitStats {
+        cached: 0,
+        emitted: 0,
+    };
 
     for &(id, rect, eff_alpha) in &render_list {
         if try_use_cached(batch, snapshots, dirty_ids, id) {
@@ -273,11 +319,25 @@ fn emit_strata_cached(
         }
         let before = snapshot_offsets(batch);
         let emitted = emit_one_frame(
-            batch, id, rect, eff_alpha, registry, pressed_frame,
-            text_ctx, message_frames, tooltip_data, &statusbar_fills, elapsed_secs,
+            batch,
+            id,
+            rect,
+            eff_alpha,
+            registry,
+            pressed_frame,
+            text_ctx,
+            message_frames,
+            tooltip_data,
+            &statusbar_fills,
+            elapsed_secs,
         );
-        snapshots.insert(id, batch.take_snapshot_since(before.0, before.1, before.2, before.3));
-        if emitted { stats.emitted += 1; }
+        snapshots.insert(
+            id,
+            batch.take_snapshot_since(before.0, before.1, before.2, before.3),
+        );
+        if emitted {
+            stats.emitted += 1;
+        }
     }
     stats
 }
@@ -290,17 +350,24 @@ fn try_use_cached(
     id: u64,
 ) -> bool {
     let Some(dirty) = dirty_ids else { return false };
-    if dirty.contains(&id) { return false; }
-    let Some(snap) = snapshots.get(&id) else { return false; };
+    if dirty.contains(&id) {
+        return false;
+    }
+    let Some(snap) = snapshots.get(&id) else {
+        return false;
+    };
     batch.append_snapshot(snap);
     true
 }
 
 fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
-    (batch.vertices.len(), batch.indices.len(),
-     batch.texture_requests.len(), batch.mask_texture_requests.len())
+    (
+        batch.vertices.len(),
+        batch.indices.len(),
+        batch.texture_requests.len(),
+        batch.mask_texture_requests.len(),
+    )
 }
-
 
 use crate::widget::FrameStrata;
 use std::sync::Arc;
@@ -315,7 +382,9 @@ fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, te
         let m = (secs % 3600) / 60;
         let s = secs % 60;
         let ms = now.subsec_millis();
-        eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)");
+        eprintln!(
+            "[{h:02}:{m:02}:{s:02}.{ms:03}] [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)"
+        );
     }
 }
 
@@ -327,7 +396,10 @@ impl App {
             self.append_cursor_item_icon(&mut overlay, pos);
             const CURSOR_SIZE: f32 = 32.0;
             overlay.push_textured_path(
-                Rectangle::new(Point::new(pos.x, pos.y), Size::new(CURSOR_SIZE, CURSOR_SIZE)),
+                Rectangle::new(
+                    Point::new(pos.x, pos.y),
+                    Size::new(CURSOR_SIZE, CURSOR_SIZE),
+                ),
                 r"Interface\Cursor\Point",
                 [1.0, 1.0, 1.0, 1.0],
                 crate::render::BlendMode::Alpha,
@@ -347,7 +419,9 @@ impl App {
         let mut textures = Vec::new();
         let mut exhausted = false;
         for batch_opt in dirty_strata {
-            if exhausted { break; }
+            if exhausted {
+                break;
+            }
             if let Some(batch) = batch_opt {
                 let (loaded, hit) = self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(loaded);
@@ -433,10 +507,18 @@ impl App {
         let mut strata_cache = self.cached_strata_quads.borrow_mut();
         let mut snap_cache = self.cached_frame_snapshots.borrow_mut();
         rebuild_strata_batches(
-            &mut strata_cache, &mut snap_cache, dirty, dirty_ids.as_ref(),
-            size, &strata_buckets, &state.widgets,
-            self.pressed_frame, &mut text_ctx, &state.message_frames,
-            &tooltip_data, elapsed_secs,
+            &mut strata_cache,
+            &mut snap_cache,
+            dirty,
+            dirty_ids.as_ref(),
+            size,
+            &strata_buckets,
+            &state.widgets,
+            self.pressed_frame,
+            &mut text_ctx,
+            &state.message_frames,
+            &tooltip_data,
+            elapsed_secs,
         );
         drop(strata_cache);
         drop(snap_cache);
@@ -449,7 +531,9 @@ impl App {
 
     /// Resolve layout rects and build strata buckets, logging slow phases.
     fn resolve_layout_and_buckets(
-        &self, env: &crate::lua_api::WowLuaEnv, font_sys: &mut WowFontSystem,
+        &self,
+        env: &crate::lua_api::WowLuaEnv,
+        font_sys: &mut WowFontSystem,
     ) -> Vec<Vec<u64>> {
         let mut state = env.state().borrow_mut();
         let t0 = std::time::Instant::now();
@@ -464,16 +548,28 @@ impl App {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap_or_default();
             let secs = now.as_secs() % 86400;
-            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
-            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}");
+            let (h, m, s, ms) = (
+                secs / 3600,
+                (secs % 3600) / 60,
+                secs % 60,
+                now.subsec_millis(),
+            );
+            eprintln!(
+                "[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}"
+            );
         }
         state.strata_buckets.take().unwrap()
     }
 
     fn rebuild_hit_grid_if_needed(
-        &self, state: &crate::lua_api::SimState, buckets: &[Vec<u64>], size: Size,
+        &self,
+        state: &crate::lua_api::SimState,
+        buckets: &[Vec<u64>],
+        size: Size,
     ) {
-        if self.cached_hittable.borrow().is_some() { return; }
+        if self.cached_hittable.borrow().is_some() {
+            return;
+        }
         // Interaction has to work while textures are still streaming. Building
         // the hit grid here keeps early clicks on glue/login screens from
         // being dropped until texture preloading finishes.
@@ -488,7 +584,12 @@ impl App {
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap_or_default();
             let secs = now.as_secs() % 86400;
-            let (h, m, s, ms) = (secs / 3600, (secs % 3600) / 60, secs % 60, now.subsec_millis());
+            let (h, m, s, ms) = (
+                secs / 3600,
+                (secs % 3600) / 60,
+                secs % 60,
+                now.subsec_millis(),
+            );
             eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] hit_grid={dur:.1?}");
         }
     }
@@ -497,23 +598,34 @@ impl App {
     /// Load new textures from the batch's requests within a time budget.
     /// Returns the loaded textures and whether the deadline was reached.
     fn load_new_textures_budgeted(
-        &self, quads: &QuadBatch, deadline: std::time::Instant,
+        &self,
+        quads: &QuadBatch,
+        deadline: std::time::Instant,
     ) -> (Vec<GpuTextureData>, bool) {
         let mut textures = Vec::new();
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let all_requests = quads.texture_requests.iter().chain(&quads.mask_texture_requests);
+        let all_requests = quads
+            .texture_requests
+            .iter()
+            .chain(&quads.mask_texture_requests);
         for request in all_requests {
             if uploaded.contains(&request.path) || failed.contains(&request.path) {
                 continue;
             }
-            if textures.iter().any(|t: &GpuTextureData| t.path == request.path) {
+            if textures
+                .iter()
+                .any(|t: &GpuTextureData| t.path == request.path)
+            {
                 continue;
             }
             if !textures.is_empty() && std::time::Instant::now() >= deadline {
                 // Skip deadline for CPU-cached textures (preloaded) — no disk I/O.
-                let base = request.path.find("@crop:").map_or(request.path.as_str(), |i| &request.path[..i]);
+                let base = request
+                    .path
+                    .find("@crop:")
+                    .map_or(request.path.as_str(), |i| &request.path[..i]);
                 if !tex_mgr.is_cached(base) {
                     return (textures, true);
                 }
@@ -541,11 +653,15 @@ impl App {
 
     /// Append hover highlight quads for the currently hovered button.
     fn append_hover_highlight(&self, quads: &mut QuadBatch) {
-        let Some(hovered_id) = self.hovered_frame else { return };
+        let Some(hovered_id) = self.hovered_frame else {
+            return;
+        };
         let env = self.env.borrow();
         let state = env.state().borrow();
         let registry = &state.widgets;
-        let Some(f) = registry.get(hovered_id) else { return };
+        let Some(f) = registry.get(hovered_id) else {
+            return;
+        };
 
         if !matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
             return;
@@ -567,16 +683,19 @@ impl App {
         }
 
         if let Some(&ht_id) = f.children_keys.get("HighlightTexture")
-            && let Some(ht) = registry.get(ht_id) {
-                let Some(ht_rect) = ht.layout_rect else { return };
-                if ht_rect.width > 0.0 && ht_rect.height > 0.0 {
-                    let ht_bounds = Rectangle::new(
-                        Point::new(ht_rect.x * UI_SCALE, ht_rect.y * UI_SCALE),
-                        Size::new(ht_rect.width * UI_SCALE, ht_rect.height * UI_SCALE),
-                    );
-                    build_texture_quads(quads, ht_bounds, ht, None, ht.alpha);
-                }
+            && let Some(ht) = registry.get(ht_id)
+        {
+            let Some(ht_rect) = ht.layout_rect else {
+                return;
+            };
+            if ht_rect.width > 0.0 && ht_rect.height > 0.0 {
+                let ht_bounds = Rectangle::new(
+                    Point::new(ht_rect.x * UI_SCALE, ht_rect.y * UI_SCALE),
+                    Size::new(ht_rect.width * UI_SCALE, ht_rect.height * UI_SCALE),
+                );
+                build_texture_quads(quads, ht_bounds, ht, None, ht.alpha);
             }
+        }
     }
 
     /// Render the spell icon attached to the cursor when dragging.
@@ -588,8 +707,13 @@ impl App {
             Some(crate::lua_api::state::CursorInfo::Spell { spell_id }) => *spell_id,
             None => return,
         };
-        let Some(spell) = crate::spells::get_spell(spell_id) else { return };
-        let Some(path) = crate::manifest_interface_data::get_texture_path(spell.icon_file_data_id) else { return };
+        let Some(spell) = crate::spells::get_spell(spell_id) else {
+            return;
+        };
+        let Some(path) = crate::manifest_interface_data::get_texture_path(spell.icon_file_data_id)
+        else {
+            return;
+        };
         let tex_path = format!("Interface\\{}", path.replace('/', "\\"));
 
         const ICON_SIZE: f32 = 32.0;

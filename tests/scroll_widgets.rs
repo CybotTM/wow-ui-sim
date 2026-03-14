@@ -24,7 +24,9 @@ fn test_create_scrollframe_basic() {
     )
     .unwrap();
 
-    let obj_type: String = env.eval("return TestScrollFrameBasic:GetObjectType()").unwrap();
+    let obj_type: String = env
+        .eval("return TestScrollFrameBasic:GetObjectType()")
+        .unwrap();
     assert_eq!(obj_type, "ScrollFrame");
 }
 
@@ -120,7 +122,10 @@ fn test_scrollbar_track_textures() {
         .unwrap();
 
     assert!(has_top, "ListScrollFrame should have ScrollBarTop texture");
-    assert!(has_bot, "ListScrollFrame should have ScrollBarBottom texture");
+    assert!(
+        has_bot,
+        "ListScrollFrame should have ScrollBarBottom texture"
+    );
 }
 
 // ============================================================================
@@ -143,8 +148,12 @@ fn test_slider_basic() {
     .unwrap();
 
     let obj_type: String = env.eval("return TestSliderBasic:GetObjectType()").unwrap();
-    let min_val: f32 = env.eval("return select(1, TestSliderBasic:GetMinMaxValues())").unwrap();
-    let max_val: f32 = env.eval("return select(2, TestSliderBasic:GetMinMaxValues())").unwrap();
+    let min_val: f32 = env
+        .eval("return select(1, TestSliderBasic:GetMinMaxValues())")
+        .unwrap();
+    let max_val: f32 = env
+        .eval("return select(2, TestSliderBasic:GetMinMaxValues())")
+        .unwrap();
 
     assert_eq!(obj_type, "Slider");
     assert_eq!(min_val, 0.0);
@@ -164,8 +173,12 @@ fn test_slider_has_fontstrings() {
     .unwrap();
 
     let has_low: bool = env.eval("return TestSliderFontStrings.Low ~= nil").unwrap();
-    let has_high: bool = env.eval("return TestSliderFontStrings.High ~= nil").unwrap();
-    let has_text: bool = env.eval("return TestSliderFontStrings.Text ~= nil").unwrap();
+    let has_high: bool = env
+        .eval("return TestSliderFontStrings.High ~= nil")
+        .unwrap();
+    let has_text: bool = env
+        .eval("return TestSliderFontStrings.Text ~= nil")
+        .unwrap();
 
     assert!(has_low, "Slider should have Low FontString");
     assert!(has_high, "Slider should have High FontString");
@@ -205,7 +218,10 @@ fn test_scroll_button_has_textures() {
     assert!(has_normal, "ScrollUpButton should have Normal texture");
     assert!(has_pushed, "ScrollUpButton should have Pushed texture");
     assert!(has_disabled, "ScrollUpButton should have Disabled texture");
-    assert!(has_highlight, "ScrollUpButton should have Highlight texture");
+    assert!(
+        has_highlight,
+        "ScrollUpButton should have Highlight texture"
+    );
 }
 
 // ============================================================================
@@ -225,10 +241,18 @@ fn test_hybrid_scroll_template() {
     .unwrap();
 
     // Should have track textures
-    let has_thumb: bool = env.eval("return TestHybridScrollBar.ThumbTexture ~= nil").unwrap();
-    let has_top: bool = env.eval("return TestHybridScrollBar.ScrollBarTop ~= nil").unwrap();
-    let has_mid: bool = env.eval("return TestHybridScrollBar.ScrollBarMiddle ~= nil").unwrap();
-    let has_bot: bool = env.eval("return TestHybridScrollBar.ScrollBarBottom ~= nil").unwrap();
+    let has_thumb: bool = env
+        .eval("return TestHybridScrollBar.ThumbTexture ~= nil")
+        .unwrap();
+    let has_top: bool = env
+        .eval("return TestHybridScrollBar.ScrollBarTop ~= nil")
+        .unwrap();
+    let has_mid: bool = env
+        .eval("return TestHybridScrollBar.ScrollBarMiddle ~= nil")
+        .unwrap();
+    let has_bot: bool = env
+        .eval("return TestHybridScrollBar.ScrollBarBottom ~= nil")
+        .unwrap();
 
     assert!(has_thumb, "HybridScrollBar should have ThumbTexture");
     assert!(has_top, "HybridScrollBar should have ScrollBarTop");
@@ -260,12 +284,18 @@ fn test_texture_kit_constants_defined() {
     let defined: bool = env
         .eval("return type(TextureKitConstants) == 'table'")
         .unwrap();
-    assert!(defined, "TextureKitConstants should be defined after loading SharedXML");
+    assert!(
+        defined,
+        "TextureKitConstants should be defined after loading SharedXML"
+    );
 
     let use_atlas_size: bool = env
         .eval("return TextureKitConstants.UseAtlasSize == true")
         .unwrap();
-    assert!(use_atlas_size, "TextureKitConstants.UseAtlasSize should be true");
+    assert!(
+        use_atlas_size,
+        "TextureKitConstants.UseAtlasSize should be true"
+    );
 }
 
 // ============================================================================
@@ -294,13 +324,8 @@ fn test_scrollboxlist_creates_child_frames() {
         "WowScrollBoxList should have ScrollTarget child"
     );
 
-    let has_shadows: bool = env
-        .eval("return TestScrollBoxList.Shadows ~= nil")
-        .unwrap();
-    assert!(
-        has_shadows,
-        "WowScrollBoxList should have Shadows child"
-    );
+    let has_shadows: bool = env.eval("return TestScrollBoxList.Shadows ~= nil").unwrap();
+    assert!(has_shadows, "WowScrollBoxList should have Shadows child");
 
     let has_drag_delegate: bool = env
         .eval("return TestScrollBoxList.DragDelegate ~= nil")
@@ -407,7 +432,10 @@ fn test_scrollboxlist_rust_children_keys() {
     let registry = &state.widgets;
 
     let sb_id = registry.get_id_by_name("TestScrollBoxRust");
-    assert!(sb_id.is_some(), "TestScrollBoxRust should exist in registry");
+    assert!(
+        sb_id.is_some(),
+        "TestScrollBoxRust should exist in registry"
+    );
     let sb_id = sb_id.unwrap();
 
     let sb = registry.get(sb_id).unwrap();
@@ -442,9 +470,7 @@ fn test_minimal_scrollbar_child_structure() {
     .unwrap();
 
     // Track frame
-    let has_track: bool = env
-        .eval("return TestMinSBStructure.Track ~= nil")
-        .unwrap();
+    let has_track: bool = env.eval("return TestMinSBStructure.Track ~= nil").unwrap();
     assert!(has_track, "MinimalScrollBar should have Track child");
 
     // Track.Thumb (EventButton)
@@ -454,9 +480,7 @@ fn test_minimal_scrollbar_child_structure() {
     assert!(has_thumb, "Track should have Thumb child");
 
     // Back and Forward stepper buttons
-    let has_back: bool = env
-        .eval("return TestMinSBStructure.Back ~= nil")
-        .unwrap();
+    let has_back: bool = env.eval("return TestMinSBStructure.Back ~= nil").unwrap();
     let has_forward: bool = env
         .eval("return TestMinSBStructure.Forward ~= nil")
         .unwrap();
@@ -621,8 +645,12 @@ fn test_minimal_scrollbar_stepper_sizes() {
     assert_eq!(back_w, 17.0, "Back button width");
     assert_eq!(back_h, 11.0, "Back button height");
 
-    let fwd_w: f64 = env.eval("return TestMinSBSizes.Forward:GetWidth()").unwrap();
-    let fwd_h: f64 = env.eval("return TestMinSBSizes.Forward:GetHeight()").unwrap();
+    let fwd_w: f64 = env
+        .eval("return TestMinSBSizes.Forward:GetWidth()")
+        .unwrap();
+    let fwd_h: f64 = env
+        .eval("return TestMinSBSizes.Forward:GetHeight()")
+        .unwrap();
     assert_eq!(fwd_w, 17.0, "Forward button width");
     assert_eq!(fwd_h, 11.0, "Forward button height");
 }
@@ -735,5 +763,8 @@ fn test_scrollframe_template_creates_scrollbar_with_thumb() {
     "#,
         )
         .unwrap();
-    assert_eq!(result, "true", "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist");
+    assert_eq!(
+        result, "true",
+        "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist"
+    );
 }

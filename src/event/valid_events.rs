@@ -24,7 +24,7 @@ pub fn is_registerable_event(name: &str) -> bool {
     } else {
         EVENTS_C
     };
-    chunk.binary_search(&name).is_ok()
+    chunk.contains(&name)
 }
 
 /// Check if an event name is known to the WoW client (registerable or not).
@@ -61,8 +61,12 @@ pub fn is_callback_event(name: &str) -> bool {
     CALLBACK_EVENTS.binary_search(&name).is_ok()
 }
 
-pub fn callback_events() -> &'static [&'static str] { CALLBACK_EVENTS }
-pub fn restricted_events() -> &'static [&'static str] { RESTRICTED_EVENTS }
+pub fn callback_events() -> &'static [&'static str] {
+    CALLBACK_EVENTS
+}
+pub fn restricted_events() -> &'static [&'static str] {
+    RESTRICTED_EVENTS
+}
 
 /// Events that exist in the WoW client but cannot be registered by addons.
 /// From wowless events.yaml: registerable = false.

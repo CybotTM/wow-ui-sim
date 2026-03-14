@@ -83,7 +83,11 @@ fn test_set_item_level_get_average_item_level_overall() {
             "#,
         )
         .unwrap();
-    assert!((overall - 489.5).abs() < 0.1, "expected ~489.5, got {}", overall);
+    assert!(
+        (overall - 489.5).abs() < 0.1,
+        "expected ~489.5, got {}",
+        overall
+    );
 }
 
 #[test]
@@ -97,8 +101,16 @@ fn test_set_item_level_all_three_values_match() {
             "#,
         )
         .unwrap();
-    assert!((overall - 512.0).abs() < 0.1, "overall mismatch: {}", overall);
-    assert!((equipped - 512.0).abs() < 0.1, "equipped mismatch: {}", equipped);
+    assert!(
+        (overall - 512.0).abs() < 0.1,
+        "overall mismatch: {}",
+        overall
+    );
+    assert!(
+        (equipped - 512.0).abs() < 0.1,
+        "equipped mismatch: {}",
+        equipped
+    );
     assert!((pvp - 512.0).abs() < 0.1, "pvp mismatch: {}", pvp);
 }
 
@@ -114,7 +126,11 @@ fn test_set_item_level_integer_value() {
             "#,
         )
         .unwrap();
-    assert!((overall - 639.0).abs() < 0.1, "expected ~639.0, got {}", overall);
+    assert!(
+        (overall - 639.0).abs() < 0.1,
+        "expected ~639.0, got {}",
+        overall
+    );
 }
 
 #[test]
@@ -130,5 +146,9 @@ fn test_set_item_level_overwrites_previous() {
             "#,
         )
         .unwrap();
-    assert!((overall - 600.0).abs() < 0.1, "expected ~600.0, got {}", overall);
+    assert!(
+        (overall - 600.0).abs() < 0.1,
+        "expected ~600.0, got {}",
+        overall
+    );
 }

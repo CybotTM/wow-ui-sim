@@ -33,7 +33,10 @@ fn test_load_autoroll_main() {
     let autoroll_code = match fs::read_to_string(&autoroll_path) {
         Ok(code) => code,
         Err(e) => {
-            eprintln!("Could not read AutoRoll.lua: {} (path: {})", e, autoroll_path);
+            eprintln!(
+                "Could not read AutoRoll.lua: {} (path: {})",
+                e, autoroll_path
+            );
             return;
         }
     };
@@ -78,9 +81,7 @@ fn test_load_autoroll_main() {
     }
 
     // Check if the frame was created
-    let frame_exists: bool = env
-        .eval("return AutoRollFrame ~= nil")
-        .unwrap_or(false);
+    let frame_exists: bool = env.eval("return AutoRollFrame ~= nil").unwrap_or(false);
 
     println!("AutoRollFrame exists: {}", frame_exists);
 

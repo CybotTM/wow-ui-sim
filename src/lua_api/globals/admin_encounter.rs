@@ -17,14 +17,25 @@ pub fn register_encounter_api(
 ) -> Result<()> {
     super::admin_api::set_fn(lua, t, "SimulateBossKill", {
         move |lua, (encounter_id, name, difficulty_id, group_size): (i32, String, i32, i32)| {
-            fire_event(lua, "ENCOUNTER_END", &[
-                Value::Number(encounter_id as f64), Value::String(lua.create_string(&name)?),
-                Value::Number(difficulty_id as f64), Value::Number(group_size as f64),
-                Value::Number(1.0), // success=1
-            ])?;
-            fire_event(lua, "BOSS_KILL", &[
-                Value::Number(encounter_id as f64), Value::String(lua.create_string(&name)?),
-            ])?;
+            fire_event(
+                lua,
+                "ENCOUNTER_END",
+                &[
+                    Value::Number(encounter_id as f64),
+                    Value::String(lua.create_string(&name)?),
+                    Value::Number(difficulty_id as f64),
+                    Value::Number(group_size as f64),
+                    Value::Number(1.0), // success=1
+                ],
+            )?;
+            fire_event(
+                lua,
+                "BOSS_KILL",
+                &[
+                    Value::Number(encounter_id as f64),
+                    Value::String(lua.create_string(&name)?),
+                ],
+            )?;
             Ok(())
         }
     })?;
@@ -41,11 +52,7 @@ fn fire_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
     fire.call(mlua::MultiValue::from_vec(call_args))
 }
 
-fn register_loot_roll_api(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_loot_roll_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     super::admin_api::set_fn(lua, t, "StartLootRoll", {
         let s = Rc::clone(&state);
         move |lua, args: LootRollArgs| {
@@ -53,9 +60,11 @@ fn register_loot_roll_api(
             let roll_time = args.roll_time;
             let info = build_loot_roll_info(&args);
             s.borrow_mut().world.loot_rolls.insert(roll_id, info);
-            fire_event(lua, "START_LOOT_ROLL", &[
-                Value::Number(roll_id as f64), Value::Number(roll_time),
-            ])?;
+            fire_event(
+                lua,
+                "START_LOOT_ROLL",
+                &[Value::Number(roll_id as f64), Value::Number(roll_time)],
+            )?;
             Ok(())
         }
     })?;
@@ -63,9 +72,7 @@ fn register_loot_roll_api(
         let s = Rc::clone(&state);
         move |lua, roll_id: i32| {
             s.borrow_mut().world.loot_rolls.remove(&roll_id);
-            fire_event(lua, "LOOT_ROLLS_COMPLETE", &[
-                Value::Number(roll_id as f64),
-            ])?;
+            fire_event(lua, "LOOT_ROLLS_COMPLETE", &[Value::Number(roll_id as f64)])?;
             Ok(())
         }
     })?;
@@ -87,12 +94,29 @@ impl mlua::FromLuaMulti for LootRollArgs {
         let mut it = values.into_iter();
         let roll_id = it.next().and_then(|v| v.as_integer()).unwrap_or(1) as i32;
         let roll_time = it.next().and_then(as_f64).unwrap_or(30.0);
-        let item_name = it.next().and_then(|v| v.as_string_lossy()).unwrap_or_default();
-        let item_texture = it.next().and_then(|v| v.as_string_lossy()).unwrap_or_default();
+        let item_name = it
+            .next()
+            .and_then(|v| v.as_string_lossy())
+            .unwrap_or_default();
+        let item_texture = it
+            .next()
+            .and_then(|v| v.as_string_lossy())
+            .unwrap_or_default();
         let item_quality = it.next().and_then(|v| v.as_integer()).unwrap_or(4) as i32;
         let item_level = it.next().and_then(|v| v.as_integer()).unwrap_or(0) as i32;
-        let item_link = it.next().and_then(|v| v.as_string_lossy()).unwrap_or_default();
-        Ok(Self { roll_id, roll_time, item_name, item_texture, item_quality, item_level, item_link })
+        let item_link = it
+            .next()
+            .and_then(|v| v.as_string_lossy())
+            .unwrap_or_default();
+        Ok(Self {
+            roll_id,
+            roll_time,
+            item_name,
+            item_texture,
+            item_quality,
+            item_level,
+            item_link,
+        })
     }
 }
 
@@ -107,11 +131,18 @@ fn as_f64(v: Value) -> Option<f64> {
 
 fn build_loot_roll_info(args: &LootRollArgs) -> LootRollInfo {
     LootRollInfo {
-        roll_id: args.roll_id, roll_time: args.roll_time,
-        texture: args.item_texture.clone(), name: args.item_name.clone(),
-        count: 1, quality: args.item_quality, bind_on_pickup: true,
-        can_need: true, can_greed: true, can_disenchant: false,
-        disenchant_level: 0, item_level: args.item_level,
+        roll_id: args.roll_id,
+        roll_time: args.roll_time,
+        texture: args.item_texture.clone(),
+        name: args.item_name.clone(),
+        count: 1,
+        quality: args.item_quality,
+        bind_on_pickup: true,
+        can_need: true,
+        can_greed: true,
+        can_disenchant: false,
+        disenchant_level: 0,
+        item_level: args.item_level,
         item_link: args.item_link.clone(),
     }
 }
@@ -124,10 +155,22 @@ fn build_loot_roll_info(args: &LootRollArgs) -> LootRollInfo {
 /// backed by SimState.world.loot_rolls.
 fn register_loot_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetLootRollItemInfo", lua.create_function(get_loot_roll_item_info)?)?;
-    g.set("GetLootRollItemLink", lua.create_function(get_loot_roll_item_link)?)?;
-    g.set("GetLootRollTimeLeft", lua.create_function(get_loot_roll_time_left)?)?;
-    g.set("GetActiveLootRollIDs", lua.create_function(get_active_loot_roll_ids)?)?;
+    g.set(
+        "GetLootRollItemInfo",
+        lua.create_function(get_loot_roll_item_info)?,
+    )?;
+    g.set(
+        "GetLootRollItemLink",
+        lua.create_function(get_loot_roll_item_link)?,
+    )?;
+    g.set(
+        "GetLootRollTimeLeft",
+        lua.create_function(get_loot_roll_time_left)?,
+    )?;
+    g.set(
+        "GetActiveLootRollIDs",
+        lua.create_function(get_active_loot_roll_ids)?,
+    )?;
     Ok(())
 }
 
@@ -149,7 +192,7 @@ fn get_loot_roll_item_info(lua: &Lua, roll_id: i32) -> Result<mlua::MultiValue> 
         Value::Boolean(info.can_disenchant),
         Value::Integer(info.disenchant_level as i64),
         Value::Integer(info.item_level as i64),
-        Value::Integer(0), // encounterID (unused)
+        Value::Integer(0),     // encounterID (unused)
         Value::Boolean(false), // isArtifact
     ]))
 }
@@ -168,7 +211,11 @@ fn get_loot_roll_item_link(lua: &Lua, roll_id: i32) -> Result<Value> {
 fn get_loot_roll_time_left(lua: &Lua, roll_id: i32) -> Result<f64> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
-    Ok(state.world.loot_rolls.get(&roll_id).map_or(0.0, |r| r.roll_time))
+    Ok(state
+        .world
+        .loot_rolls
+        .get(&roll_id)
+        .map_or(0.0, |r| r.roll_time))
 }
 
 fn get_active_loot_roll_ids(lua: &Lua, _: ()) -> Result<mlua::Table> {

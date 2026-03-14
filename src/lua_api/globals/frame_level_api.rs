@@ -11,25 +11,27 @@ use mlua::{Lua, Result, Value};
 pub fn register_frame_level_helpers(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
-    globals.set("RaiseFrameLevel", lua.create_function(|lua, v: Value| {
-        adjust_frame_level(lua, v, 1)
-    })?)?;
+    globals.set(
+        "RaiseFrameLevel",
+        lua.create_function(|lua, v: Value| adjust_frame_level(lua, v, 1))?,
+    )?;
 
-    globals.set("LowerFrameLevel", lua.create_function(|lua, v: Value| {
-        adjust_frame_level(lua, v, -1)
-    })?)?;
+    globals.set(
+        "LowerFrameLevel",
+        lua.create_function(|lua, v: Value| adjust_frame_level(lua, v, -1))?,
+    )?;
 
-    globals.set("RaiseFrameLevelByTwo", lua.create_function(|lua, v: Value| {
-        adjust_frame_level(lua, v, 2)
-    })?)?;
+    globals.set(
+        "RaiseFrameLevelByTwo",
+        lua.create_function(|lua, v: Value| adjust_frame_level(lua, v, 2))?,
+    )?;
 
     Ok(())
 }
 
 fn adjust_frame_level(lua: &Lua, value: Value, delta: i32) -> Result<()> {
-    let id = extract_frame_id(&value).ok_or_else(|| {
-        mlua::Error::runtime("RaiseFrameLevel/LowerFrameLevel: expected frame")
-    })?;
+    let id = extract_frame_id(&value)
+        .ok_or_else(|| mlua::Error::runtime("RaiseFrameLevel/LowerFrameLevel: expected frame"))?;
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(frame) = state.widgets.get_mut_visual(id) {

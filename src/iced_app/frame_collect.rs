@@ -4,9 +4,13 @@ use crate::widget::{FrameStrata, WidgetType};
 
 /// Frame names excluded from hit testing (full-screen or non-interactive overlays).
 pub const HIT_TEST_EXCLUDED: &[&str] = &[
-    "UIParent", "Minimap", "WorldFrame",
-    "DEFAULT_CHAT_FRAME", "ChatFrame1",
-    "EventToastManagerFrame", "EditModeManagerFrame",
+    "UIParent",
+    "Minimap",
+    "WorldFrame",
+    "DEFAULT_CHAT_FRAME",
+    "ChatFrame1",
+    "EventToastManagerFrame",
+    "EditModeManagerFrame",
 ];
 
 /// Result of collecting frames for hit testing.
@@ -42,7 +46,16 @@ pub fn collect_subtree_ids(
 }
 
 /// Sort key type for frame rendering order within a strata bucket.
-pub type IntraStrataKey = (i32, i32, std::cmp::Reverse<u64>, u8, i32, i32, u8, std::cmp::Reverse<u64>);
+pub type IntraStrataKey = (
+    i32,
+    i32,
+    std::cmp::Reverse<u64>,
+    u8,
+    i32,
+    i32,
+    u8,
+    std::cmp::Reverse<u64>,
+);
 
 /// Intra-strata sort key for rendering order within the same frame strata.
 ///
@@ -63,14 +76,44 @@ pub fn intra_strata_sort_key(
     id: u64,
     registry: &crate::widget::WidgetRegistry,
 ) -> IntraStrataKey {
-    if matches!(f.widget_type, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
-        let (parent_level, parent_raise_order, parent_id) = f.parent_id
-            .and_then(|pid| registry.get(pid).map(|p| (p.frame_level, p.raise_order, pid)))
+    if matches!(
+        f.widget_type,
+        WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+    ) {
+        let (parent_level, parent_raise_order, parent_id) = f
+            .parent_id
+            .and_then(|pid| {
+                registry
+                    .get(pid)
+                    .map(|p| (p.frame_level, p.raise_order, pid))
+            })
             .unwrap_or((f.frame_level, f.raise_order, id));
-        let type_flag = if f.widget_type == WidgetType::FontString { 1u8 } else { 0u8 };
-        (parent_level, parent_raise_order, std::cmp::Reverse(parent_id), 1, f.draw_layer as i32, f.draw_sub_layer, type_flag, std::cmp::Reverse(id))
+        let type_flag = if f.widget_type == WidgetType::FontString {
+            1u8
+        } else {
+            0u8
+        };
+        (
+            parent_level,
+            parent_raise_order,
+            std::cmp::Reverse(parent_id),
+            1,
+            f.draw_layer as i32,
+            f.draw_sub_layer,
+            type_flag,
+            std::cmp::Reverse(id),
+        )
     } else {
-        (f.frame_level, f.raise_order, std::cmp::Reverse(id), 0, 0, 0, 0, std::cmp::Reverse(0))
+        (
+            f.frame_level,
+            f.raise_order,
+            std::cmp::Reverse(id),
+            0,
+            0,
+            0,
+            0,
+            std::cmp::Reverse(0),
+        )
     }
 }
 
@@ -88,8 +131,13 @@ pub fn collect_hittable_frames(
         for &id in bucket {
             let Some(f) = registry.get(id) else { continue };
             let Some(rect) = f.layout_rect else { continue };
-            if f.visible && f.effective_alpha > 0.0 && f.mouse_enabled
-                && !f.name.as_deref().is_some_and(|n| HIT_TEST_EXCLUDED.contains(&n))
+            if f.visible
+                && f.effective_alpha > 0.0
+                && f.mouse_enabled
+                && !f
+                    .name
+                    .as_deref()
+                    .is_some_and(|n| HIT_TEST_EXCLUDED.contains(&n))
             {
                 hittable.push((id, f.frame_strata, f.frame_level, rect));
             }

@@ -22,7 +22,10 @@ fn test_add_buff_is_findable_by_spell_id() {
             "#,
         )
         .unwrap();
-    assert!(found, "AddBuff should make the aura findable via GetPlayerAuraBySpellID");
+    assert!(
+        found,
+        "AddBuff should make the aura findable via GetPlayerAuraBySpellID"
+    );
 }
 
 #[test]
@@ -82,7 +85,11 @@ fn test_add_buff_duration_is_set() {
             "#,
         )
         .unwrap();
-    assert!((duration - 45.0).abs() < 0.001, "duration should be ~45.0, got {}", duration);
+    assert!(
+        (duration - 45.0).abs() < 0.001,
+        "duration should be ~45.0, got {}",
+        duration
+    );
 }
 
 #[test]
@@ -165,7 +172,10 @@ fn test_remove_buff_makes_aura_gone() {
             "#,
         )
         .unwrap();
-    assert!(is_nil, "RemoveBuff should make the aura unreachable by spell ID");
+    assert!(
+        is_nil,
+        "RemoveBuff should make the aura unreachable by spell ID"
+    );
 }
 
 #[test]
@@ -236,7 +246,10 @@ fn test_clear_buffs_results_in_no_helpful_auras() {
             "#,
         )
         .unwrap();
-    assert!(no_slots, "After ClearBuffs, there should be no HELPFUL aura slots");
+    assert!(
+        no_slots,
+        "After ClearBuffs, there should be no HELPFUL aura slots"
+    );
 }
 
 #[test]

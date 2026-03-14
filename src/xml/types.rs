@@ -221,7 +221,9 @@ impl FrameXml {
                 FrameChildElement::ModelScene(f) => result.push(FE::ModelScene(f.clone())),
                 FrameChildElement::PlayerModel(f) => result.push(FE::PlayerModel(f.clone())),
                 FrameChildElement::MessageFrame(f) => result.push(FE::MessageFrame(f.clone())),
-                FrameChildElement::ScrollingMessageFrame(f) => result.push(FE::ScrollingMessageFrame(f.clone())),
+                FrameChildElement::ScrollingMessageFrame(f) => {
+                    result.push(FE::ScrollingMessageFrame(f.clone()))
+                }
                 FrameChildElement::SimpleHTML(f) => result.push(FE::SimpleHTML(f.clone())),
                 FrameChildElement::ColorSelect(f) => result.push(FE::ColorSelect(f.clone())),
                 FrameChildElement::ItemButton(f) => result.push(FE::ItemButton(f.clone())),
@@ -393,34 +395,62 @@ pub enum FrameChildElement {
     KeyValues(KeyValuesXml),
     Attributes(AttributesXml),
     Animations(AnimationsXml),
-    NormalTexture(TextureXml), PushedTexture(TextureXml),
-    DisabledTexture(TextureXml), HighlightTexture(TextureXml),
-    CheckedTexture(TextureXml), DisabledCheckedTexture(TextureXml),
+    NormalTexture(TextureXml),
+    PushedTexture(TextureXml),
+    DisabledTexture(TextureXml),
+    HighlightTexture(TextureXml),
+    CheckedTexture(TextureXml),
+    DisabledCheckedTexture(TextureXml),
     ButtonText(FontStringXml),
-    NormalFont(FontRefXml), HighlightFont(FontRefXml), DisabledFont(FontRefXml),
+    NormalFont(FontRefXml),
+    HighlightFont(FontRefXml),
+    DisabledFont(FontRefXml),
     FontString(FontStringXml),
     ScrollChild(ScrollChildXml),
     ThumbTexture(TextureXml),
-    BarTexture(TextureXml), BarColor(ColorXml),
+    BarTexture(TextureXml),
+    BarColor(ColorXml),
     Backdrop(BackdropXml),
     ResizeBounds(ResizeBoundsXml),
-    HitRectInsets(InsetsXml), TextInsets(InsetsXml),
+    HitRectInsets(InsetsXml),
+    TextInsets(InsetsXml),
     PushedTextOffset(SizeXml),
-    SwipeTexture(TextureXml), EdgeTexture(TextureXml), BlingTexture(TextureXml),
-    ColorWheelTexture(TextureXml), ColorWheelThumbTexture(TextureXml),
-    ColorValueTexture(TextureXml), ColorValueThumbTexture(TextureXml),
-    ColorAlphaTexture(TextureXml), ColorAlphaThumbTexture(TextureXml),
-    FontStringHeader1(FontStringXml), FontStringHeader2(FontStringXml), FontStringHeader3(FontStringXml),
-    NormalColor(ColorXml), HighlightColor(ColorXml), DisabledColor(ColorXml),
+    SwipeTexture(TextureXml),
+    EdgeTexture(TextureXml),
+    BlingTexture(TextureXml),
+    ColorWheelTexture(TextureXml),
+    ColorWheelThumbTexture(TextureXml),
+    ColorValueTexture(TextureXml),
+    ColorValueThumbTexture(TextureXml),
+    ColorAlphaTexture(TextureXml),
+    ColorAlphaThumbTexture(TextureXml),
+    FontStringHeader1(FontStringXml),
+    FontStringHeader2(FontStringXml),
+    FontStringHeader3(FontStringXml),
+    NormalColor(ColorXml),
+    HighlightColor(ColorXml),
+    DisabledColor(ColorXml),
     Actors(ActorsXml),
-    FogColor(ColorXml), ViewInsets(InsetsXml),
-    Frame(FrameXml), Button(FrameXml), StatusBar(FrameXml),
-    CheckButton(FrameXml), EditBox(FrameXml), ScrollFrame(FrameXml),
-    Slider(FrameXml), Cooldown(FrameXml), GameTooltip(FrameXml),
-    Model(FrameXml), ModelScene(FrameXml), PlayerModel(FrameXml),
-    MessageFrame(FrameXml), ScrollingMessageFrame(FrameXml),
-    SimpleHTML(FrameXml), ColorSelect(FrameXml),
-    ItemButton(FrameXml), EventFrame(FrameXml),
+    FogColor(ColorXml),
+    ViewInsets(InsetsXml),
+    Frame(FrameXml),
+    Button(FrameXml),
+    StatusBar(FrameXml),
+    CheckButton(FrameXml),
+    EditBox(FrameXml),
+    ScrollFrame(FrameXml),
+    Slider(FrameXml),
+    Cooldown(FrameXml),
+    GameTooltip(FrameXml),
+    Model(FrameXml),
+    ModelScene(FrameXml),
+    PlayerModel(FrameXml),
+    MessageFrame(FrameXml),
+    ScrollingMessageFrame(FrameXml),
+    SimpleHTML(FrameXml),
+    ColorSelect(FrameXml),
+    ItemButton(FrameXml),
+    EventFrame(FrameXml),
     #[serde(other)]
     Unknown,
 }
@@ -489,25 +519,37 @@ pub struct InsetsXml {
 
 impl InsetsXml {
     pub fn left(&self) -> f32 {
-        self.left.or_else(|| self.abs_inset.as_ref()?.left).unwrap_or(0.0)
+        self.left
+            .or_else(|| self.abs_inset.as_ref()?.left)
+            .unwrap_or(0.0)
     }
     pub fn right(&self) -> f32 {
-        self.right.or_else(|| self.abs_inset.as_ref()?.right).unwrap_or(0.0)
+        self.right
+            .or_else(|| self.abs_inset.as_ref()?.right)
+            .unwrap_or(0.0)
     }
     pub fn top(&self) -> f32 {
-        self.top.or_else(|| self.abs_inset.as_ref()?.top).unwrap_or(0.0)
+        self.top
+            .or_else(|| self.abs_inset.as_ref()?.top)
+            .unwrap_or(0.0)
     }
     pub fn bottom(&self) -> f32 {
-        self.bottom.or_else(|| self.abs_inset.as_ref()?.bottom).unwrap_or(0.0)
+        self.bottom
+            .or_else(|| self.abs_inset.as_ref()?.bottom)
+            .unwrap_or(0.0)
     }
 }
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct AbsInsetXml {
-    #[serde(rename = "@left")]  pub left: Option<f32>,
-    #[serde(rename = "@right")] pub right: Option<f32>,
-    #[serde(rename = "@top")]   pub top: Option<f32>,
-    #[serde(rename = "@bottom")]pub bottom: Option<f32>,
+    #[serde(rename = "@left")]
+    pub left: Option<f32>,
+    #[serde(rename = "@right")]
+    pub right: Option<f32>,
+    #[serde(rename = "@top")]
+    pub top: Option<f32>,
+    #[serde(rename = "@bottom")]
+    pub bottom: Option<f32>,
 }
 
 /// Size definition.
@@ -719,15 +761,20 @@ pub struct ColorXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct BindingXml {
-    #[serde(rename = "@name")]     pub name: Option<String>,
-    #[serde(rename = "@category")] pub category: Option<String>,
-    #[serde(rename = "@header")]   pub header: Option<String>,
+    #[serde(rename = "@name")]
+    pub name: Option<String>,
+    #[serde(rename = "@category")]
+    pub category: Option<String>,
+    #[serde(rename = "@header")]
+    pub header: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct ModifiedClickXml {
-    #[serde(rename = "@action")]  pub action: Option<String>,
-    #[serde(rename = "@default")] pub default: Option<String>,
+    #[serde(rename = "@action")]
+    pub action: Option<String>,
+    #[serde(rename = "@default")]
+    pub default: Option<String>,
 }
 
 /// `<Gradient orientation="VERTICAL"><MinColor .../><MaxColor .../></Gradient>`

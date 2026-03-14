@@ -21,7 +21,10 @@ fn test_set_moving_true_is_player_moving() {
             "#,
         )
         .unwrap();
-    assert!(moving, "IsPlayerMoving() should return true after SetMoving(true)");
+    assert!(
+        moving,
+        "IsPlayerMoving() should return true after SetMoving(true)"
+    );
 }
 
 #[test]
@@ -36,7 +39,10 @@ fn test_set_moving_false_is_player_moving() {
             "#,
         )
         .unwrap();
-    assert!(!moving, "IsPlayerMoving() should return false after SetMoving(false)");
+    assert!(
+        !moving,
+        "IsPlayerMoving() should return false after SetMoving(false)"
+    );
 }
 
 #[test]
@@ -61,7 +67,10 @@ fn test_set_mounted_true() {
             "#,
         )
         .unwrap();
-    assert!(mounted, "IsMounted() should return true after SetMounted(true)");
+    assert!(
+        mounted,
+        "IsMounted() should return true after SetMounted(true)"
+    );
 }
 
 #[test]
@@ -76,7 +85,10 @@ fn test_set_mounted_false() {
             "#,
         )
         .unwrap();
-    assert!(!mounted, "IsMounted() should return false after SetMounted(false)");
+    assert!(
+        !mounted,
+        "IsMounted() should return false after SetMounted(false)"
+    );
 }
 
 #[test]
@@ -101,7 +113,10 @@ fn test_set_flying_true() {
             "#,
         )
         .unwrap();
-    assert!(flying, "IsFlying() should return true after SetFlying(true)");
+    assert!(
+        flying,
+        "IsFlying() should return true after SetFlying(true)"
+    );
 }
 
 #[test]
@@ -116,7 +131,10 @@ fn test_set_flying_false() {
             "#,
         )
         .unwrap();
-    assert!(!flying, "IsFlying() should return false after SetFlying(false)");
+    assert!(
+        !flying,
+        "IsFlying() should return false after SetFlying(false)"
+    );
 }
 
 #[test]
@@ -141,7 +159,10 @@ fn test_set_falling_true() {
             "#,
         )
         .unwrap();
-    assert!(falling, "IsFalling() should return true after SetFalling(true)");
+    assert!(
+        falling,
+        "IsFalling() should return true after SetFalling(true)"
+    );
 }
 
 #[test]
@@ -156,7 +177,10 @@ fn test_set_falling_false() {
             "#,
         )
         .unwrap();
-    assert!(!falling, "IsFalling() should return false after SetFalling(false)");
+    assert!(
+        !falling,
+        "IsFalling() should return false after SetFalling(false)"
+    );
 }
 
 #[test]
@@ -181,7 +205,10 @@ fn test_set_swimming_true() {
             "#,
         )
         .unwrap();
-    assert!(swimming, "IsSwimming() should return true after SetSwimming(true)");
+    assert!(
+        swimming,
+        "IsSwimming() should return true after SetSwimming(true)"
+    );
 }
 
 #[test]
@@ -196,7 +223,10 @@ fn test_set_swimming_false() {
             "#,
         )
         .unwrap();
-    assert!(!swimming, "IsSwimming() should return false after SetSwimming(false)");
+    assert!(
+        !swimming,
+        "IsSwimming() should return false after SetSwimming(false)"
+    );
 }
 
 #[test]

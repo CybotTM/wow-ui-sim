@@ -5,8 +5,7 @@ use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn ace3_path() -> PathBuf {
-    PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/Ace3/Ace3.toc")
+    PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Ace3/Ace3.toc")
 }
 
 #[test]
@@ -21,7 +20,10 @@ fn test_load_ace3() {
 
     match result {
         Ok(r) => {
-            println!("Ace3 loaded: {} Lua files, {} XML files", r.lua_files, r.xml_files);
+            println!(
+                "Ace3 loaded: {} Lua files, {} XML files",
+                r.lua_files, r.xml_files
+            );
             if !r.warnings.is_empty() {
                 println!("Warnings:");
                 for w in &r.warnings {
@@ -55,17 +57,24 @@ fn test_libstub_from_ace3() {
     assert!(exists, "LibStub should be defined");
 
     // Test creating a library
-    env.exec(r#"
+    env.exec(
+        r#"
         local lib = LibStub:NewLibrary("TestLib-1.0", 1)
         if lib then
             lib.Test = function() return "hello" end
         end
-    "#).expect("Should create library");
+    "#,
+    )
+    .expect("Should create library");
 
-    let result: String = env.eval(r#"
+    let result: String = env
+        .eval(
+            r#"
         local lib = LibStub("TestLib-1.0")
         return lib.Test()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(result, "hello");
 }
 
@@ -91,7 +100,9 @@ fn test_callbackhandler_from_ace3() {
     env.exec(&code).expect("CallbackHandler should load");
 
     // Verify it works
-    let exists: bool = env.eval("return LibStub('CallbackHandler-1.0') ~= nil").unwrap();
+    let exists: bool = env
+        .eval("return LibStub('CallbackHandler-1.0') ~= nil")
+        .unwrap();
     assert!(exists, "CallbackHandler should be loadable via LibStub");
 }
 
@@ -111,11 +122,14 @@ fn test_ace_addon_loads() {
     env.exec(&libstub_code).expect("LibStub should load");
 
     // Load CallbackHandler
-    let cbh_code = std::fs::read_to_string(ace3_dir.join("CallbackHandler-1.0/CallbackHandler-1.0.lua")).unwrap();
+    let cbh_code =
+        std::fs::read_to_string(ace3_dir.join("CallbackHandler-1.0/CallbackHandler-1.0.lua"))
+            .unwrap();
     env.exec(&cbh_code).expect("CallbackHandler should load");
 
     // Load AceAddon
-    let ace_addon_code = std::fs::read_to_string(ace3_dir.join("AceAddon-3.0/AceAddon-3.0.lua")).unwrap();
+    let ace_addon_code =
+        std::fs::read_to_string(ace3_dir.join("AceAddon-3.0/AceAddon-3.0.lua")).unwrap();
     let result = env.exec(&ace_addon_code);
 
     match result {
@@ -133,8 +147,8 @@ fn test_ace_addon_loads() {
 
 #[test]
 fn test_load_details() {
-    let details_path = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/Details/Details.toc");
+    let details_path =
+        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Details/Details.toc");
 
     if !details_path.exists() {
         eprintln!("Skipping: Details not found at {:?}", details_path);
@@ -146,7 +160,10 @@ fn test_load_details() {
 
     match result {
         Ok(r) => {
-            println!("Details loaded: {} Lua files, {} XML files", r.lua_files, r.xml_files);
+            println!(
+                "Details loaded: {} Lua files, {} XML files",
+                r.lua_files, r.xml_files
+            );
             if !r.warnings.is_empty() {
                 println!("Warnings ({}):", r.warnings.len());
                 for w in r.warnings.iter().take(10) {
@@ -165,8 +182,7 @@ fn test_load_details() {
 
 #[test]
 fn test_load_game_menu() {
-    let blizzard_ui = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("Interface/BlizzardUI");
+    let blizzard_ui = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI");
 
     if !blizzard_ui.exists() {
         eprintln!("Skipping: BlizzardUI not found at {:?}", blizzard_ui);
@@ -184,7 +200,12 @@ fn test_load_game_menu() {
 
     let shared_xml_toc = blizzard_ui.join("Blizzard_SharedXML/Blizzard_SharedXML_Mainline.toc");
     match load_addon(&env.loader_env(), &shared_xml_toc) {
-        Ok(r) => println!("SharedXML: {} Lua, {} XML (warnings: {})", r.lua_files, r.xml_files, r.warnings.len()),
+        Ok(r) => println!(
+            "SharedXML: {} Lua, {} XML (warnings: {})",
+            r.lua_files,
+            r.xml_files,
+            r.warnings.len()
+        ),
         Err(e) => println!("SharedXML failed: {}", e),
     }
 
@@ -194,7 +215,10 @@ fn test_load_game_menu() {
 
     match result {
         Ok(r) => {
-            println!("GameMenu loaded: {} Lua files, {} XML files", r.lua_files, r.xml_files);
+            println!(
+                "GameMenu loaded: {} Lua files, {} XML files",
+                r.lua_files, r.xml_files
+            );
             if !r.warnings.is_empty() {
                 println!("Warnings ({}):", r.warnings.len());
                 for w in &r.warnings {
@@ -208,9 +232,13 @@ fn test_load_game_menu() {
     }
 
     // Check if GameMenuFrame exists
-    let mixin_exists: bool = env.eval("return GameMenuFrameMixin ~= nil").unwrap_or(false);
+    let mixin_exists: bool = env
+        .eval("return GameMenuFrameMixin ~= nil")
+        .unwrap_or(false);
     let frame_exists: bool = env.eval("return GameMenuFrame ~= nil").unwrap_or(false);
-    let main_menu_mixin: bool = env.eval("return MainMenuFrameMixin ~= nil").unwrap_or(false);
+    let main_menu_mixin: bool = env
+        .eval("return MainMenuFrameMixin ~= nil")
+        .unwrap_or(false);
 
     println!("GameMenuFrameMixin exists: {}", mixin_exists);
     println!("GameMenuFrame exists: {}", frame_exists);
@@ -219,7 +247,9 @@ fn test_load_game_menu() {
     // Try to show the menu (if frame exists)
     if frame_exists {
         let _ = env.exec("GameMenuFrame:Show()");
-        let visible: bool = env.eval("return GameMenuFrame:IsVisible()").unwrap_or(false);
+        let visible: bool = env
+            .eval("return GameMenuFrame:IsVisible()")
+            .unwrap_or(false);
         println!("GameMenuFrame visible after Show(): {}", visible);
     }
 
@@ -241,7 +271,10 @@ fn test_load_dbm_core() {
 
     match result {
         Ok(r) => {
-            println!("DBM-Core loaded: {} Lua files, {} XML files", r.lua_files, r.xml_files);
+            println!(
+                "DBM-Core loaded: {} Lua files, {} XML files",
+                r.lua_files, r.xml_files
+            );
             if !r.warnings.is_empty() {
                 println!("Warnings ({}):", r.warnings.len());
                 for w in r.warnings.iter().take(10) {
@@ -262,7 +295,8 @@ fn test_load_dbm_core() {
 fn load_lua_file(env: &WowLuaEnv, path: &std::path::Path, must_succeed: bool) {
     if let Ok(code) = std::fs::read_to_string(path) {
         if must_succeed {
-            env.exec(&code).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
+            env.exec(&code)
+                .unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
         } else {
             let _ = env.exec(&code);
         }
@@ -288,8 +322,12 @@ fn load_details_core_libs(env: &WowLuaEnv, libs_dir: &std::path::Path) {
 
 /// Load a Lua file as a WoW addon chunk with (addonName, privateTable) varargs.
 fn load_addon_lua_chunk(env: &WowLuaEnv, path: &std::path::Path, addon_name: &str) {
-    let code = std::fs::read_to_string(path).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
-    let escaped = code.replace('\\', "\\\\").replace('"', "\\\"").replace('\n', "\\n");
+    let code =
+        std::fs::read_to_string(path).unwrap_or_else(|e| panic!("{}: {}", path.display(), e));
+    let escaped = code
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n");
     let wrapper = format!(
         r#"local chunk, err = loadstring("{escaped}", "@{addon_name}/Init.lua")
         if not chunk then error("compile: " .. tostring(err)) end
@@ -304,10 +342,10 @@ fn load_addon_lua_chunk(env: &WowLuaEnv, path: &std::path::Path, addon_name: &st
 
 #[test]
 fn test_load_weakauras_init() {
-    let details_path = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/Details/Details.toc");
-    let weakauras_dir = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/WeakAuras2/WeakAuras");
+    let details_path =
+        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Details/Details.toc");
+    let weakauras_dir =
+        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/WeakAuras2/WeakAuras");
 
     if !details_path.exists() || !weakauras_dir.exists() {
         eprintln!("Skipping: Details or WeakAuras not found");
@@ -321,8 +359,12 @@ fn test_load_weakauras_init() {
     let wa_exists: bool = env.eval("return WeakAuras ~= nil").unwrap_or(false);
     println!("WeakAuras table exists: {}", wa_exists);
     if wa_exists {
-        let is_retail: bool = env.eval("return WeakAuras.IsRetail and WeakAuras.IsRetail() or false").unwrap_or(false);
-        let libs_ok: bool = env.eval("return WeakAuras.IsLibsOK and WeakAuras.IsLibsOK() or false").unwrap_or(false);
+        let is_retail: bool = env
+            .eval("return WeakAuras.IsRetail and WeakAuras.IsRetail() or false")
+            .unwrap_or(false);
+        let libs_ok: bool = env
+            .eval("return WeakAuras.IsLibsOK and WeakAuras.IsLibsOK() or false")
+            .unwrap_or(false);
         println!("IsRetail: {is_retail}, IsLibsOK: {libs_ok}");
     }
 }
@@ -371,7 +413,6 @@ fn test_load_weakauras_full() {
                     .unwrap_or(false);
                 println!("WeakAuras.IsLibsOK(): {}", libs_ok);
             }
-
         }
         Err(e) => {
             println!("WeakAuras failed to load: {}", e);
@@ -381,8 +422,8 @@ fn test_load_weakauras_full() {
 
 #[test]
 fn test_load_plater() {
-    let plater_path = PathBuf::from(env!("HOME"))
-        .join("Projects/wow/reference-addons/Plater/Plater.toc");
+    let plater_path =
+        PathBuf::from(env!("HOME")).join("Projects/wow/reference-addons/Plater/Plater.toc");
 
     if !plater_path.exists() {
         eprintln!("Skipping: Plater not found at {:?}", plater_path);
@@ -394,7 +435,10 @@ fn test_load_plater() {
 
     match result {
         Ok(r) => {
-            println!("Plater loaded: {} Lua files, {} XML files", r.lua_files, r.xml_files);
+            println!(
+                "Plater loaded: {} Lua files, {} XML files",
+                r.lua_files, r.xml_files
+            );
             if !r.warnings.is_empty() {
                 println!("Warnings ({}):", r.warnings.len());
                 for w in r.warnings.iter().take(15) {

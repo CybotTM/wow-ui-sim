@@ -23,7 +23,9 @@ pub fn register_enum_api(lua: &Lua) -> Result<()> {
 
     // Load auto-generated missing enums from globals.yaml (1568 enums).
     // Uses `if not Enum.X then` guards so existing Rust-registered enums take priority.
-    lua.load(MISSING_ENUMS_LUA).set_name("missing_enums").exec()?;
+    lua.load(MISSING_ENUMS_LUA)
+        .set_name("missing_enums")
+        .exec()?;
 
     Ok(())
 }

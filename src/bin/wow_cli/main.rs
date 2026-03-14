@@ -162,13 +162,26 @@ fn main() {
                 run_repl();
             }
         }
-        Commands::DumpTree { filter, visible_only } => {
+        Commands::DumpTree {
+            filter,
+            visible_only,
+        } => {
             dump_tree(filter, visible_only);
         }
-        Commands::Screenshot { output, width, height, filter, crop } => {
+        Commands::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+        } => {
             take_screenshot(&output, width, height, filter, crop);
         }
-        Commands::ExtractTextures { addons, interface, output } => {
+        Commands::ExtractTextures {
+            addons,
+            interface,
+            output,
+        } => {
             let (found, missing) =
                 wow_ui_sim::extract_textures::extract_textures(&addons, &interface, &output);
             println!("\nSummary: {} converted, {} missing", found, missing);
@@ -280,13 +293,26 @@ fn dump_tree(filter: Option<String>, visible_only: bool) {
     }
 }
 
-fn take_screenshot(output: &PathBuf, width: u32, height: u32, filter: Option<String>, crop: Option<String>) {
+fn take_screenshot(
+    output: &PathBuf,
+    width: u32,
+    height: u32,
+    filter: Option<String>,
+    crop: Option<String>,
+) {
     let socket = resolve_socket();
     // Canonicalize output path so the server can write to the right location
     let abs_output = std::env::current_dir()
         .map(|cwd| cwd.join(output))
         .unwrap_or_else(|_| output.clone());
-    match client::screenshot(&socket, &abs_output.to_string_lossy(), width, height, filter, crop) {
+    match client::screenshot(
+        &socket,
+        &abs_output.to_string_lossy(),
+        width,
+        height,
+        filter,
+        crop,
+    ) {
         Ok(msg) => println!("{}", msg),
         Err(e) => {
             eprintln!("Error: {}", e);

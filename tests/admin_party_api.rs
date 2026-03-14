@@ -21,7 +21,10 @@ fn test_set_party_size_nonzero_means_in_group() {
             "#,
         )
         .unwrap();
-    assert!(in_group, "IsInGroup() should return true when party size > 0");
+    assert!(
+        in_group,
+        "IsInGroup() should return true when party size > 0"
+    );
 }
 
 #[test]
@@ -35,7 +38,10 @@ fn test_set_party_size_zero_means_not_in_group() {
             "#,
         )
         .unwrap();
-    assert!(!in_group, "IsInGroup() should return false when party size == 0");
+    assert!(
+        !in_group,
+        "IsInGroup() should return false when party size == 0"
+    );
 }
 
 #[test]
@@ -50,7 +56,10 @@ fn test_get_num_group_members_includes_player() {
             "#,
         )
         .unwrap();
-    assert_eq!(count, 4, "GetNumGroupMembers() should return party size + 1 (player)");
+    assert_eq!(
+        count, 4,
+        "GetNumGroupMembers() should return party size + 1 (player)"
+    );
 }
 
 #[test]
@@ -64,7 +73,10 @@ fn test_get_num_group_members_zero_when_no_party() {
             "#,
         )
         .unwrap();
-    assert_eq!(count, 0, "GetNumGroupMembers() should return 0 when not in a group");
+    assert_eq!(
+        count, 0,
+        "GetNumGroupMembers() should return 0 when not in a group"
+    );
 }
 
 // ============================================================================

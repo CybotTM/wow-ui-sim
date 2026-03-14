@@ -19,7 +19,6 @@ pub fn parse_xml_file(path: &std::path::Path) -> Result<UiXml, XmlLoadError> {
     Ok(parse_xml(&fixed)?)
 }
 
-
 /// Strip CurseForge/BigWigs packager XML comment markers so source-form addons parse correctly.
 ///
 /// Two forms are handled:
@@ -40,12 +39,21 @@ fn strip_packager_xml_comments(xml: &str) -> String {
     let xml = xml.replace("<!--@end-no-lib-strip@-->", "");
 
     // Block-wrapper openers: `<!--@tag@` (no closing `-->` on same line)
-    let xml = xml.replace("<!--@non-debug@
-", "");
-    let xml = xml.replace("<!--@debug@
-", "");
-    let xml = xml.replace("<!--@no-lib-strip@
-", "");
+    let xml = xml.replace(
+        "<!--@non-debug@
+",
+        "",
+    );
+    let xml = xml.replace(
+        "<!--@debug@
+",
+        "",
+    );
+    let xml = xml.replace(
+        "<!--@no-lib-strip@
+",
+        "",
+    );
 
     // Block-wrapper closers: `@end-tag@-->` (no opening `<!--` on same line)
     let xml = xml.replace("@end-non-debug@-->", "");
@@ -82,7 +90,9 @@ fn strip_duplicate_self_closing(xml: &str, tag: &str) -> String {
         }
 
         // Strip trailing XML comments for matching (e.g. `<TexCoords .../> <!-- comment -->`)
-        let effective = trimmed.find("<!--").map_or(trimmed, |pos| trimmed[..pos].trim());
+        let effective = trimmed
+            .find("<!--")
+            .map_or(trimmed, |pos| trimmed[..pos].trim());
         if effective.starts_with(&prefix) && effective.ends_with("/>") {
             if let Some(prev_idx) = seen_at_depth.insert(depth, i) {
                 // Mark previous line for removal
@@ -136,9 +146,7 @@ fn strip_duplicate_script_handlers(xml: &str) -> String {
         } else if trimmed.starts_with('<') && !trimmed.starts_with("</") {
             // Extract tag name (e.g. "OnEnter" from "<OnEnter ...>")
             let after_lt = &trimmed[1..];
-            let tag_end = after_lt
-                .find([' ', '>', '/'])
-                .unwrap_or(after_lt.len());
+            let tag_end = after_lt.find([' ', '>', '/']).unwrap_or(after_lt.len());
             let tag_name = &after_lt[..tag_end];
 
             let start = i;
@@ -338,5 +346,4 @@ mod tests {
         assert!(!result.contains("@end-non-debug@-->"));
         assert!(result.contains(r#"<Script file="LibStub.lua"/>"#));
     }
-
 }

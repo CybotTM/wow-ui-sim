@@ -152,7 +152,8 @@ impl GlyphAtlas {
         self.shape_cache_generation += 1;
         if self.shape_cache_generation % 60 == 0 {
             let generation = self.shape_cache_generation;
-            self.shape_cache.retain(|_, entry| generation - entry.last_used < 120);
+            self.shape_cache
+                .retain(|_, entry| generation - entry.last_used < 120);
         }
     }
 
@@ -295,10 +296,18 @@ fn shape_text_to_runs(
     let metrics = Metrics::new(font_size, line_height);
     let attrs = font_system.attrs_owned(font_path);
 
-    let shape_width = if word_wrap && bounds_width > 0.0 { bounds_width } else { 10000.0 };
+    let shape_width = if word_wrap && bounds_width > 0.0 {
+        bounds_width
+    } else {
+        10000.0
+    };
 
     let mut buffer = Buffer::new(&mut font_system.font_system, metrics);
-    buffer.set_size(&mut font_system.font_system, Some(shape_width), Some(bounds_height));
+    buffer.set_size(
+        &mut font_system.font_system,
+        Some(shape_width),
+        Some(bounds_height),
+    );
     buffer.set_text(
         &mut font_system.font_system,
         text,
@@ -317,7 +326,9 @@ fn shape_text_to_runs(
         line_height
     } else {
         let first_y = runs.first().map(|r| r.line_y).unwrap_or(0.0);
-        runs.last().map(|run| run.line_y - first_y + line_height).unwrap_or(line_height)
+        runs.last()
+            .map(|run| run.line_y - first_y + line_height)
+            .unwrap_or(line_height)
     };
 
     // We only need total_height; the buffer is returned for glyph iteration.
@@ -342,10 +353,18 @@ fn extract_layout_runs(buffer: &Buffer, max_lines: u32) -> Vec<CachedLayoutRun> 
                 .iter()
                 .map(|g| {
                     let pg = g.physical((0.0, 0.0), 1.0);
-                    CachedGlyph { cache_key: pg.cache_key, x: pg.x, y: pg.y }
+                    CachedGlyph {
+                        cache_key: pg.cache_key,
+                        x: pg.x,
+                        y: pg.y,
+                    }
                 })
                 .collect();
-            CachedLayoutRun { line_y: run.line_y, line_w: run.line_w, glyphs }
+            CachedLayoutRun {
+                line_y: run.line_y,
+                line_w: run.line_w,
+                glyphs,
+            }
         })
         .collect()
 }
@@ -389,7 +408,13 @@ fn emit_glyphs_from_cache(
                     iced::Point::new(entry.uv_x, entry.uv_y),
                     iced::Size::new(entry.uv_w, entry.uv_h),
                 );
-                batch.push_quad(glyph_bounds, uv, glyph_color, glyph_tex_index, BlendMode::Alpha);
+                batch.push_quad(
+                    glyph_bounds,
+                    uv,
+                    glyph_color,
+                    glyph_tex_index,
+                    BlendMode::Alpha,
+                );
             }
         }
     }
@@ -413,19 +438,36 @@ pub fn measure_text_height(
     if stripped.is_empty() {
         return 0.0;
     }
-    let shape_width = if word_wrap && bounds_width > 0.0 { bounds_width } else { 10000.0 };
+    let shape_width = if word_wrap && bounds_width > 0.0 {
+        bounds_width
+    } else {
+        10000.0
+    };
     let key = shape_cache_hash(&stripped, font_path, font_size, shape_width, 10000.0, 0);
     if let Some(entry) = glyph_atlas.shape_cache.get_mut(&key) {
         entry.last_used = glyph_atlas.shape_cache_generation;
         return entry.total_height;
     }
     let (buffer, total_height) = shape_text_to_runs(
-        font_system, &stripped, font_path, font_size,
-        bounds_width, 10000.0, word_wrap, 0,
+        font_system,
+        &stripped,
+        font_path,
+        font_size,
+        bounds_width,
+        10000.0,
+        word_wrap,
+        0,
     );
     let runs = extract_layout_runs(&buffer, 0);
     let generation = glyph_atlas.shape_cache_generation;
-    glyph_atlas.shape_cache.insert(key, ShapeCacheEntry { runs, total_height, last_used: generation });
+    glyph_atlas.shape_cache.insert(
+        key,
+        ShapeCacheEntry {
+            runs,
+            total_height,
+            last_used: generation,
+        },
+    );
     total_height
 }
 
@@ -470,18 +512,39 @@ pub fn emit_text_quads(
     }
 
     // Phase 1: Populate cache if miss, extract runs + total_height.
-    let shape_width = if word_wrap && bounds.width > 0.0 { bounds.width } else { 10000.0 };
-    let key = shape_cache_hash(stripped, font_path, font_size, shape_width, bounds.height, max_lines);
+    let shape_width = if word_wrap && bounds.width > 0.0 {
+        bounds.width
+    } else {
+        10000.0
+    };
+    let key = shape_cache_hash(
+        stripped,
+        font_path,
+        font_size,
+        shape_width,
+        bounds.height,
+        max_lines,
+    );
     let generation = glyph_atlas.shape_cache_generation;
     if !glyph_atlas.shape_cache.contains_key(&key) {
         let (buffer, total_height) = shape_text_to_runs(
-            font_system, stripped, font_path, font_size,
-            bounds.width, bounds.height, word_wrap, max_lines,
+            font_system,
+            stripped,
+            font_path,
+            font_size,
+            bounds.width,
+            bounds.height,
+            word_wrap,
+            max_lines,
         );
         let runs = extract_layout_runs(&buffer, max_lines);
         glyph_atlas.shape_cache.insert(
             key,
-            ShapeCacheEntry { runs, total_height, last_used: generation },
+            ShapeCacheEntry {
+                runs,
+                total_height,
+                last_used: generation,
+            },
         );
     }
     let entry = glyph_atlas.shape_cache.get_mut(&key).unwrap();
@@ -491,14 +554,30 @@ pub fn emit_text_quads(
 
     // Phase 2: Emit quads from cached runs.
     let y_offset = match justify_v {
-        TextJustify::Left => 0.0,   // TOP
+        TextJustify::Left => 0.0, // TOP
         TextJustify::Center => (bounds.height - total_height) / 2.0,
         TextJustify::Right => bounds.height - total_height, // BOTTOM
     };
 
-    let emit = |batch: &mut QuadBatch, ga: &mut GlyphAtlas, fs: &mut WowFontSystem,
-                c: [f32; 4], ox: f32, oy: f32| {
-        emit_glyphs_from_cache(batch, ga, fs, &runs, bounds, y_offset, justify_h, c, ox, oy, glyph_tex_index);
+    let emit = |batch: &mut QuadBatch,
+                ga: &mut GlyphAtlas,
+                fs: &mut WowFontSystem,
+                c: [f32; 4],
+                ox: f32,
+                oy: f32| {
+        emit_glyphs_from_cache(
+            batch,
+            ga,
+            fs,
+            &runs,
+            bounds,
+            y_offset,
+            justify_h,
+            c,
+            ox,
+            oy,
+            glyph_tex_index,
+        );
     };
 
     // Render outline first (behind everything)
@@ -509,16 +588,33 @@ pub fn emit_text_quads(
             crate::widget::TextOutline::ThickOutline => 2.0,
             crate::widget::TextOutline::None => unreachable!(),
         };
-        for &(dx, dy) in &[(-d, 0.0), (d, 0.0), (0.0, -d), (0.0, d), (-d, -d), (d, -d), (-d, d), (d, d)] {
+        for &(dx, dy) in &[
+            (-d, 0.0),
+            (d, 0.0),
+            (0.0, -d),
+            (0.0, d),
+            (-d, -d),
+            (d, -d),
+            (-d, d),
+            (d, d),
+        ] {
             emit(batch, glyph_atlas, font_system, outline_color, dx, dy);
         }
     }
 
     // Render shadow (behind main text, in front of outline)
     if let Some(sc) = shadow_color
-        && sc[3] > 0.0 {
-            emit(batch, glyph_atlas, font_system, sc, shadow_offset.0, shadow_offset.1);
-        }
+        && sc[3] > 0.0
+    {
+        emit(
+            batch,
+            glyph_atlas,
+            font_system,
+            sc,
+            shadow_offset.0,
+            shadow_offset.1,
+        );
+    }
 
     // Render main text
     emit(batch, glyph_atlas, font_system, color, 0.0, 0.0);

@@ -19,7 +19,9 @@ pub fn with_timeout<F: FnOnce() + Send + 'static>(secs: u64, f: F) {
             panic!("test timed out after {secs}s")
         }
         Err(std::sync::mpsc::RecvTimeoutError::Disconnected) => {
-            handle.join().expect_err("test thread panicked but join succeeded");
+            handle
+                .join()
+                .expect_err("test thread panicked but join succeeded");
             panic!("test thread panicked (see above)")
         }
     }
@@ -60,12 +62,10 @@ pub fn try_create_gpu_device() -> Option<(wgpu::Device, wgpu::Queue)> {
     }))
     .ok()?;
 
-    let (device, queue) = pollster::block_on(adapter.request_device(
-        &wgpu::DeviceDescriptor {
-            label: Some("Test GPU Device"),
-            ..Default::default()
-        },
-    ))
+    let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+        label: Some("Test GPU Device"),
+        ..Default::default()
+    }))
     .ok()?;
 
     Some((device, queue))

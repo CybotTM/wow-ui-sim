@@ -3,7 +3,10 @@
 use crate::lua_api::LoaderEnv;
 
 use super::error::LoadError;
-use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref, resolve_child_name, resolve_lua_escapes};
+use super::helpers::{
+    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
+    resolve_child_name, resolve_lua_escapes,
+};
 
 /// Resolve a text key through the global strings table.
 fn resolve_fontstring_text(text_key: Option<&str>) -> Option<String> {
@@ -24,16 +27,24 @@ fn generate_fontstring_visual_code(fs: &crate::xml::FontStringXml) -> String {
 
 fn generate_fontstring_justify_color(code: &mut String, fs: &crate::xml::FontStringXml) {
     if let Some(justify_h) = &fs.justify_h {
-        code.push_str(&format!("\n        fs:SetJustifyH(\"{}\")\n        ", justify_h));
+        code.push_str(&format!(
+            "\n        fs:SetJustifyH(\"{}\")\n        ",
+            justify_h
+        ));
     }
     if let Some(justify_v) = &fs.justify_v {
-        code.push_str(&format!("\n        fs:SetJustifyV(\"{}\")\n        ", justify_v));
+        code.push_str(&format!(
+            "\n        fs:SetJustifyV(\"{}\")\n        ",
+            justify_v
+        ));
     }
     if let Some(color) = &fs.color {
         code.push_str(&format!(
             "\n        fs:SetTextColor({}, {}, {}, {})\n        ",
-            color.r.unwrap_or(1.0), color.g.unwrap_or(1.0),
-            color.b.unwrap_or(1.0), color.a.unwrap_or(1.0)
+            color.r.unwrap_or(1.0),
+            color.g.unwrap_or(1.0),
+            color.b.unwrap_or(1.0),
+            color.a.unwrap_or(1.0)
         ));
     }
 }
@@ -42,7 +53,9 @@ fn generate_fontstring_size_and_flags(code: &mut String, fs: &crate::xml::FontSt
     if let Some(size) = fs.size.last() {
         let (x, y) = get_size_values(size);
         match (x, y) {
-            (Some(x), Some(y)) => code.push_str(&format!("\n        fs:SetSize({}, {})\n        ", x, y)),
+            (Some(x), Some(y)) => {
+                code.push_str(&format!("\n        fs:SetSize({}, {})\n        ", x, y))
+            }
             (Some(x), None) => code.push_str(&format!("\n        fs:SetWidth({})\n        ", x)),
             (None, Some(y)) => code.push_str(&format!("\n        fs:SetHeight({})\n        ", y)),
             _ => {}
@@ -57,9 +70,13 @@ fn generate_fontstring_size_and_flags(code: &mut String, fs: &crate::xml::FontSt
         code.push_str("\n        fs:SetWordWrap(false)\n        ");
     }
     if let Some(max_lines) = fs.max_lines
-        && max_lines > 0 {
-            code.push_str(&format!("\n        fs:SetMaxLines({})\n        ", max_lines));
-        }
+        && max_lines > 0
+    {
+        code.push_str(&format!(
+            "\n        fs:SetMaxLines({})\n        ",
+            max_lines
+        ));
+    }
     if fs.set_all_points == Some(true) {
         code.push_str("\n        fs:SetAllPoints(true)\n        ");
     }
@@ -110,7 +127,14 @@ pub fn create_fontstring_from_xml(
 
     let fs_name = resolve_child_name(fontstring.name.as_deref(), parent_name, "__fs_");
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
-    let lua_code = build_fontstring_lua(fontstring, parent_name, draw_layer, sub_level, &fs_name, &resolved_text);
+    let lua_code = build_fontstring_lua(
+        fontstring,
+        parent_name,
+        draw_layer,
+        sub_level,
+        &fs_name,
+        &resolved_text,
+    );
 
     env.exec(&lua_code).map_err(|e| {
         LoadError::Lua(format!(
@@ -144,18 +168,34 @@ fn build_fontstring_lua(
         lua_global_ref(parent_name),
         fs_name,
         draw_layer,
-        if inherits.is_empty() { "nil".to_string() } else { format!("\"{}\"", inherits) }
+        if inherits.is_empty() {
+            "nil".to_string()
+        } else {
+            format!("\"{}\"", inherits)
+        }
     );
     if sub_level != 0 {
-        code.push_str(&format!("\n        fs:SetDrawLayer(\"{}\", {})\n        ", draw_layer, sub_level));
+        code.push_str(&format!(
+            "\n        fs:SetDrawLayer(\"{}\", {})\n        ",
+            draw_layer, sub_level
+        ));
     }
     if let Some(text) = resolved_text {
-        code.push_str(&format!("\n        fs:SetText(\"{}\")\n        ", escape_lua_string(text)));
+        code.push_str(&format!(
+            "\n        fs:SetText(\"{}\")\n        ",
+            escape_lua_string(text)
+        ));
     }
     code.push_str(&generate_fontstring_visual_code(fontstring));
     code.push_str(&generate_fontstring_parent_code(fontstring));
     if let Some(anchors) = &fontstring.anchors {
-        code.push_str(&generate_set_point_code(anchors, "fs", "parent", parent_name, "parent"));
+        code.push_str(&generate_set_point_code(
+            anchors,
+            "fs",
+            "parent",
+            parent_name,
+            "parent",
+        ));
     }
     if let Some(a) = fontstring.alpha {
         code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));

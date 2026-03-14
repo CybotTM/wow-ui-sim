@@ -21,7 +21,10 @@ fn test_protection_hero_subtrees() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "48,49", "Protection should have Templar(48) + Lightsmith(49)");
+    assert_eq!(
+        result, "48,49",
+        "Protection should have Templar(48) + Lightsmith(49)"
+    );
 }
 
 #[test]

@@ -85,23 +85,29 @@ fn register_c_voice_chat(lua: &Lua) -> Result<mlua::Table> {
             |_, (_voice_id, _text, _dest, _rate, _volume): (i32, String, i32, i32, i32)| Ok(()),
         )?,
     )?;
-    t.set(
-        "StopSpeakingText",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
-    t.set(
-        "IsSpeakingText",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    t.set("StopSpeakingText", lua.create_function(|_, ()| Ok(()))?)?;
+    t.set("IsSpeakingText", lua.create_function(|_, ()| Ok(false))?)?;
     t.set(
         "GetTtsVoices",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set("IsSpeakForMeActive", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("IsTranscriptionAllowed", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "IsSpeakForMeActive",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "IsTranscriptionAllowed",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("IsTranscribing", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetActiveChannelType", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("GetActiveChannelID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "GetActiveChannelType",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetActiveChannelID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     t.set("IsMuted", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("IsLoggedIn", lua.create_function(|_, ()| Ok(false))?)?;
 
@@ -113,10 +119,19 @@ fn register_c_tts_settings(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
     t.set("GetSpeechRate", lua.create_function(|_, ()| Ok(0))?)?;
-    t.set("SetSpeechRate", lua.create_function(|_, _rate: i32| Ok(()))?)?;
+    t.set(
+        "SetSpeechRate",
+        lua.create_function(|_, _rate: i32| Ok(()))?,
+    )?;
     t.set("GetSpeechVolume", lua.create_function(|_, ()| Ok(100))?)?;
-    t.set("SetSpeechVolume", lua.create_function(|_, _volume: i32| Ok(()))?)?;
-    t.set("GetVoiceOptionID", lua.create_function(|_, _option: i32| Ok(0))?)?;
+    t.set(
+        "SetSpeechVolume",
+        lua.create_function(|_, _volume: i32| Ok(()))?,
+    )?;
+    t.set(
+        "GetVoiceOptionID",
+        lua.create_function(|_, _option: i32| Ok(0))?,
+    )?;
     t.set(
         "SetVoiceOption",
         lua.create_function(|_, (_option, _voice_id): (i32, i32)| Ok(()))?,
@@ -129,45 +144,122 @@ fn register_c_tts_settings(lua: &Lua) -> Result<mlua::Table> {
 fn register_c_reputation(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
-    t.set("GetFactionDataByID", lua.create_function(faction_data_by_id)?)?;
-    t.set("GetFactionDataByIndex", lua.create_function(faction_data_by_index)?)?;
-    t.set("GetNumFactions", lua.create_function(|_, ()| {
-        Ok(super::reputation_data::num_factions())
-    })?)?;
-    t.set("GetFactionInfo", lua.create_function(faction_data_by_index)?)?;
-    t.set("GetWatchedFactionData", lua.create_function(watched_faction_data)?)?;
+    t.set(
+        "GetFactionDataByID",
+        lua.create_function(faction_data_by_id)?,
+    )?;
+    t.set(
+        "GetFactionDataByIndex",
+        lua.create_function(faction_data_by_index)?,
+    )?;
+    t.set(
+        "GetNumFactions",
+        lua.create_function(|_, ()| Ok(super::reputation_data::num_factions()))?,
+    )?;
+    t.set(
+        "GetFactionInfo",
+        lua.create_function(faction_data_by_index)?,
+    )?;
+    t.set(
+        "GetWatchedFactionData",
+        lua.create_function(watched_faction_data)?,
+    )?;
     register_c_reputation_stubs(&t, lua)?;
-    t.set("GetGuildFactionData", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "GetGuildFactionData",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
 
     Ok(t)
 }
 
 /// Reputation stubs that don't need data.
 fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
-    t.set("IsFactionParagon", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsFactionParagonForCurrentPlayer", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("GetFactionParagonInfo", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    t.set("SetWatchedFactionByID", lua.create_function(|_, _id: i32| Ok(()))?)?;
-    t.set("ExpandFactionHeader", lua.create_function(|_, _i: i32| Ok(()))?)?;
-    t.set("CollapseFactionHeader", lua.create_function(|_, _i: i32| Ok(()))?)?;
-    t.set("ExpandAllFactionHeaders", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("CollapseAllFactionHeaders", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("GetReputationSortType", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("SetReputationSortType", lua.create_function(|_, _t: i32| Ok(()))?)?;
-    t.set("AreLegacyReputationsShown", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("SetLegacyReputationsShown", lua.create_function(|_, _s: bool| Ok(()))?)?;
-    t.set("GetSelectedFaction", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("SetSelectedFaction", lua.create_function(|_, _i: i32| Ok(()))?)?;
-    t.set("IsAccountWideReputation", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsMajorFaction", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsFactionActive", lua.create_function(|_, _i: i32| Ok(true))?)?;
-    t.set("SetFactionActive", lua.create_function(|_, (_i, _a): (i32, bool)| Ok(()))?)?;
-    t.set("RequestFactionParagonPreloadRewardData", lua.create_function(|_, _id: i32| Ok(()))?)?;
+    t.set(
+        "IsFactionParagon",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsFactionParagonForCurrentPlayer",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetFactionParagonInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "SetWatchedFactionByID",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "ExpandFactionHeader",
+        lua.create_function(|_, _i: i32| Ok(()))?,
+    )?;
+    t.set(
+        "CollapseFactionHeader",
+        lua.create_function(|_, _i: i32| Ok(()))?,
+    )?;
+    t.set(
+        "ExpandAllFactionHeaders",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    t.set(
+        "CollapseAllFactionHeaders",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    t.set(
+        "GetReputationSortType",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    t.set(
+        "SetReputationSortType",
+        lua.create_function(|_, _t: i32| Ok(()))?,
+    )?;
+    t.set(
+        "AreLegacyReputationsShown",
+        lua.create_function(|_, ()| Ok(true))?,
+    )?;
+    t.set(
+        "SetLegacyReputationsShown",
+        lua.create_function(|_, _s: bool| Ok(()))?,
+    )?;
+    t.set(
+        "GetSelectedFaction",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "SetSelectedFaction",
+        lua.create_function(|_, _i: i32| Ok(()))?,
+    )?;
+    t.set(
+        "IsAccountWideReputation",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsMajorFaction",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsFactionActive",
+        lua.create_function(|_, _i: i32| Ok(true))?,
+    )?;
+    t.set(
+        "SetFactionActive",
+        lua.create_function(|_, (_i, _a): (i32, bool)| Ok(()))?,
+    )?;
+    t.set(
+        "RequestFactionParagonPreloadRewardData",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
     Ok(())
 }
 
 /// Build a FactionData table from a FactionEntry.
-fn build_faction_table(lua: &Lua, f: &super::reputation_data::FactionEntry, index: i32) -> Result<Value> {
+fn build_faction_table(
+    lua: &Lua,
+    f: &super::reputation_data::FactionEntry,
+    index: i32,
+) -> Result<Value> {
     let info = lua.create_table()?;
     info.set("factionID", f.faction_id)?;
     info.set("name", f.name)?;
@@ -198,7 +290,9 @@ fn faction_data_by_id(lua: &Lua, faction_id: i32) -> Result<Value> {
 
 fn faction_data_by_index(lua: &Lua, index: Option<i32>) -> Result<Value> {
     use super::reputation_data;
-    let Some(index) = index else { return Ok(Value::Nil) };
+    let Some(index) = index else {
+        return Ok(Value::Nil);
+    };
     match reputation_data::get_faction_by_index(index) {
         Some(f) => build_faction_table(lua, f, index),
         None => Ok(Value::Nil),
@@ -261,7 +355,10 @@ fn register_c_creature_info(lua: &Lua) -> Result<mlua::Table> {
             Ok(ids)
         })?,
     )?;
-    t.set("GetCreatureTypeInfo", lua.create_function(create_get_creature_type_info)?)?;
+    t.set(
+        "GetCreatureTypeInfo",
+        lua.create_function(create_get_creature_type_info)?,
+    )?;
     t.set(
         "GetCreatureFamilyIDs",
         lua.create_function(|lua, ()| lua.create_table())?,
@@ -270,7 +367,10 @@ fn register_c_creature_info(lua: &Lua) -> Result<mlua::Table> {
         "GetCreatureFamilyInfo",
         lua.create_function(|_, _family_id: i32| Ok(Value::Nil))?,
     )?;
-    t.set("GetFactionInfo", lua.create_function(create_get_faction_info)?)?;
+    t.set(
+        "GetFactionInfo",
+        lua.create_function(create_get_faction_info)?,
+    )?;
 
     Ok(t)
 }
@@ -398,10 +498,7 @@ fn register_c_covenants(lua: &Lua) -> Result<mlua::Table> {
             Ok(Value::Table(data))
         })?,
     )?;
-    t.set(
-        "GetActiveCovenantID",
-        lua.create_function(|_, ()| Ok(0))?,
-    )?;
+    t.set("GetActiveCovenantID", lua.create_function(|_, ()| Ok(0))?)?;
     t.set(
         "GetCovenantIDs",
         lua.create_function(|lua, ()| {
@@ -420,10 +517,7 @@ fn register_c_covenants(lua: &Lua) -> Result<mlua::Table> {
 fn register_c_soulbinds(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
-    t.set(
-        "GetActiveSoulbindID",
-        lua.create_function(|_, ()| Ok(0))?,
-    )?;
+    t.set("GetActiveSoulbindID", lua.create_function(|_, ()| Ok(0))?)?;
     t.set(
         "GetSoulbindData",
         lua.create_function(|lua, _soulbind_id: i32| {

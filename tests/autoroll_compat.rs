@@ -117,11 +117,16 @@ fn test_unregister_event() {
 fn test_register_event_invalid_name() {
     let env = WowLuaEnv::new().unwrap();
 
-    let result = env.exec(r#"
+    let result = env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestEventFrame")
         f:RegisterEvent("WOWLESS_NOPE")
-    "#);
-    assert!(result.is_err(), "RegisterEvent should error on unknown event");
+    "#,
+    );
+    assert!(
+        result.is_err(),
+        "RegisterEvent should error on unknown event"
+    );
     let err = result.unwrap_err().to_string();
     assert!(
         err.contains("Attempt to register unknown event"),
@@ -134,10 +139,12 @@ fn test_register_event_invalid_name() {
 fn test_register_event_valid_name() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame")
         f:RegisterEvent("PLAYER_LOGIN")
-    "#)
+    "#,
+    )
     .unwrap();
 }
 

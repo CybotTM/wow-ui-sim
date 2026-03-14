@@ -33,9 +33,7 @@ fn register_metadata_functions(
 
     c_addons.set(
         "GetAddOnSecurity",
-        lua.create_function(|lua, _index: i64| {
-            Ok(Value::String(lua.create_string("INSECURE")?))
-        })?,
+        lua.create_function(|lua, _index: i64| Ok(Value::String(lua.create_string("INSECURE")?)))?,
     )?;
 
     let s = Rc::clone(state);
@@ -72,7 +70,10 @@ fn register_metadata_core(
     Ok(())
 }
 
-fn addon_info_tuple(lua: &Lua, addon: Option<&AddonInfo>) -> Result<(Value, Value, Value, Value, Value, Value, Value)> {
+fn addon_info_tuple(
+    lua: &Lua,
+    addon: Option<&AddonInfo>,
+) -> Result<(Value, Value, Value, Value, Value, Value, Value)> {
     if let Some(addon) = addon {
         Ok((
             Value::String(lua.create_string(&addon.folder_name)?),
@@ -85,8 +86,13 @@ fn addon_info_tuple(lua: &Lua, addon: Option<&AddonInfo>) -> Result<(Value, Valu
         ))
     } else {
         Ok((
-            Value::Nil, Value::Nil, Value::Nil,
-            Value::Boolean(false), Value::Nil, Value::Nil, Value::Boolean(false),
+            Value::Nil,
+            Value::Nil,
+            Value::Nil,
+            Value::Boolean(false),
+            Value::Nil,
+            Value::Nil,
+            Value::Boolean(false),
         ))
     }
 }
@@ -126,9 +132,7 @@ fn register_metadata_by_index(
         lua.create_function(move |lua, index: i64| {
             let state = s.borrow();
             match state.addons.get((index - 1) as usize) {
-                Some(a) if !a.notes.is_empty() => {
-                    Ok(Value::String(lua.create_string(&a.notes)?))
-                }
+                Some(a) if !a.notes.is_empty() => Ok(Value::String(lua.create_string(&a.notes)?)),
                 _ => Ok(Value::Nil),
             }
         })?,
@@ -325,12 +329,21 @@ fn register_profiler(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
 fn addon_metric_value(addon: &AddonInfo, metric: i32) -> f64 {
     let rt = &addon.runtime;
     match metric {
-        0 => { // SessionAverageTime
-            if rt.session_frame_count > 0 { rt.session_total_ms / rt.session_frame_count as f64 } else { 0.0 }
+        0 => {
+            // SessionAverageTime
+            if rt.session_frame_count > 0 {
+                rt.session_total_ms / rt.session_frame_count as f64
+            } else {
+                0.0
+            }
         }
-        1 => { // RecentAverageTime
-            if rt.recent_frames.is_empty() { 0.0 }
-            else { rt.recent_frames.iter().sum::<f64>() / rt.recent_frames.len() as f64 }
+        1 => {
+            // RecentAverageTime
+            if rt.recent_frames.is_empty() {
+                0.0
+            } else {
+                rt.recent_frames.iter().sum::<f64>() / rt.recent_frames.len() as f64
+            }
         }
         2 => 0.0, // EncounterAverageTime (not implemented)
         3 => rt.recent_frames.back().copied().unwrap_or(0.0), // LastTime
@@ -359,15 +372,24 @@ fn metric_index(v: &Value) -> i32 {
 /// Returns total frame time (not just addon time) for percentage calculations.
 fn app_metric_value(app: &crate::lua_api::state::AppFrameMetrics, metric: i32) -> f64 {
     match metric {
-        0 => { // SessionAverageTime
-            if app.session_frame_count > 0 { app.session_total_ms / app.session_frame_count as f64 } else { 0.0 }
+        0 => {
+            // SessionAverageTime
+            if app.session_frame_count > 0 {
+                app.session_total_ms / app.session_frame_count as f64
+            } else {
+                0.0
+            }
         }
-        1 => { // RecentAverageTime
-            if app.recent_frame_ms.is_empty() { 0.0 }
-            else { app.recent_frame_ms.iter().sum::<f64>() / app.recent_frame_ms.len() as f64 }
+        1 => {
+            // RecentAverageTime
+            if app.recent_frame_ms.is_empty() {
+                0.0
+            } else {
+                app.recent_frame_ms.iter().sum::<f64>() / app.recent_frame_ms.len() as f64
+            }
         }
         3 => app.recent_frame_ms.back().copied().unwrap_or(0.0), // LastTime
-        4 => app.peak_ms, // PeakTime
+        4 => app.peak_ms,                                        // PeakTime
         // Threshold counters don't apply to app-level; fall back to sum of addons
         _ => 0.0,
     }
@@ -375,51 +397,78 @@ fn app_metric_value(app: &crate::lua_api::state::AppFrameMetrics, metric: i32) -
 
 /// Profiler metric query methods (GetApplicationMetric, GetOverallMetric, etc.).
 fn register_profiler_metrics(
-    lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let s = Rc::clone(state);
-    t.set("GetApplicationMetric", lua.create_function(move |_, metric: Value| {
-        let state = s.borrow();
-        let m = metric_index(&metric);
-        // App metric = total frame time (for time-based metrics) or sum of addons (counters).
-        let app_val = app_metric_value(&state.app_frame_metrics, m);
-        if app_val > 0.0 { Ok(app_val) }
-        else { Ok(state.addons.iter().map(|a| addon_metric_value(a, m)).sum::<f64>()) }
-    })?)?;
+    t.set(
+        "GetApplicationMetric",
+        lua.create_function(move |_, metric: Value| {
+            let state = s.borrow();
+            let m = metric_index(&metric);
+            // App metric = total frame time (for time-based metrics) or sum of addons (counters).
+            let app_val = app_metric_value(&state.app_frame_metrics, m);
+            if app_val > 0.0 {
+                Ok(app_val)
+            } else {
+                Ok(state
+                    .addons
+                    .iter()
+                    .map(|a| addon_metric_value(a, m))
+                    .sum::<f64>())
+            }
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("GetOverallMetric", lua.create_function(move |_, metric: Value| {
-        let state = s.borrow();
-        let m = metric_index(&metric);
-        Ok(state.addons.iter().map(|a| addon_metric_value(a, m)).sum::<f64>())
-    })?)?;
+    t.set(
+        "GetOverallMetric",
+        lua.create_function(move |_, metric: Value| {
+            let state = s.borrow();
+            let m = metric_index(&metric);
+            Ok(state
+                .addons
+                .iter()
+                .map(|a| addon_metric_value(a, m))
+                .sum::<f64>())
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("GetAddOnMetric", lua.create_function(move |_, (addon, metric): (Value, Value)| {
-        let state = s.borrow();
-        let m = metric_index(&metric);
-        let val = find_addon_by_value(&state.addons, &addon)
-            .map(|a| addon_metric_value(a, m))
-            .unwrap_or(0.0);
-        Ok(val)
-    })?)?;
+    t.set(
+        "GetAddOnMetric",
+        lua.create_function(move |_, (addon, metric): (Value, Value)| {
+            let state = s.borrow();
+            let m = metric_index(&metric);
+            let val = find_addon_by_value(&state.addons, &addon)
+                .map(|a| addon_metric_value(a, m))
+                .unwrap_or(0.0);
+            Ok(val)
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("GetTopKAddOnsForMetric", lua.create_function(move |lua, (metric, k): (Value, usize)| {
-        let state = s.borrow();
-        let m = metric_index(&metric);
-        let mut sorted: Vec<_> = state.addons.iter().collect();
-        sorted.sort_by(|a, b| {
-            addon_metric_value(b, m).partial_cmp(&addon_metric_value(a, m)).unwrap()
-        });
-        let result = lua.create_table()?;
-        for (i, addon) in sorted.iter().take(k).enumerate() {
-            let entry = lua.create_table()?;
-            entry.set("addOnName", addon.folder_name.as_str())?;
-            result.set(i + 1, entry)?;
-        }
-        Ok(result)
-    })?)?;
+    t.set(
+        "GetTopKAddOnsForMetric",
+        lua.create_function(move |lua, (metric, k): (Value, usize)| {
+            let state = s.borrow();
+            let m = metric_index(&metric);
+            let mut sorted: Vec<_> = state.addons.iter().collect();
+            sorted.sort_by(|a, b| {
+                addon_metric_value(b, m)
+                    .partial_cmp(&addon_metric_value(a, m))
+                    .unwrap()
+            });
+            let result = lua.create_table()?;
+            for (i, addon) in sorted.iter().take(k).enumerate() {
+                let entry = lua.create_table()?;
+                entry.set("addOnName", addon.folder_name.as_str())?;
+                result.set(i + 1, entry)?;
+            }
+            Ok(result)
+        })?,
+    )?;
 
     Ok(())
 }
@@ -520,9 +569,7 @@ fn register_legacy_addon_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
 ///
 /// Returns `(loaded: bool, reason: string|nil)`.
 fn create_load_addon_fn(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
-    lua.create_function(move |lua, addon_name: String| {
-        load_addon_runtime(lua, &state, &addon_name)
-    })
+    lua.create_function(move |lua, addon_name: String| load_addon_runtime(lua, &state, &addon_name))
 }
 
 /// Runtime addon loading implementation.
@@ -537,7 +584,10 @@ fn load_addon_runtime(
     // Already loaded? Return early.
     {
         let s = state.borrow();
-        if s.addons.iter().any(|a| a.folder_name == addon_name && a.loaded) {
+        if s.addons
+            .iter()
+            .any(|a| a.folder_name == addon_name && a.loaded)
+        {
             return Ok((true, Value::Nil));
         }
     }
@@ -618,8 +668,11 @@ fn register_loaded_addon(state: &Rc<RefCell<SimState>>, name: &str, load_time_se
         s.addons.push(AddonInfo {
             folder_name: name.to_string(),
             title: name.to_string(),
-            enabled: true, loaded: true, load_on_demand: true,
-            load_time_secs, ..Default::default()
+            enabled: true,
+            loaded: true,
+            load_on_demand: true,
+            load_time_secs,
+            ..Default::default()
         });
     }
 }
@@ -628,9 +681,13 @@ fn register_loaded_addon(state: &Rc<RefCell<SimState>>, name: &str, load_time_se
 fn fire_addon_loaded(env: &crate::lua_api::LoaderEnv<'_>, addon_name: &str) {
     let arg = env.lua().create_string(addon_name).ok().map(Value::String);
     if let Some(arg) = arg
-        && let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[arg]) {
-            eprintln!("[LoadAddOn] Error firing ADDON_LOADED for {}: {}", addon_name, e);
-        }
+        && let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[arg])
+    {
+        eprintln!(
+            "[LoadAddOn] Error firing ADDON_LOADED for {}: {}",
+            addon_name, e
+        );
+    }
 }
 
 // ---------------------------------------------------------------------------

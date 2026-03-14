@@ -88,8 +88,7 @@ impl CVarStorage {
 
     /// Get all known CVar names in original case (defaults + overrides).
     pub fn all_keys(&self) -> Vec<String> {
-        let mut keys: std::collections::HashSet<String> =
-            self.defaults.keys().cloned().collect();
+        let mut keys: std::collections::HashSet<String> = self.defaults.keys().cloned().collect();
         for key in self.overrides.read().unwrap().keys() {
             keys.insert(key.clone());
         }
@@ -160,8 +159,7 @@ fn parse_cvar_yaml(yaml: &str) -> (HashMap<String, String>, HashMap<String, Stri
                 value.strip_prefix('"').and_then(|v| v.strip_suffix('"'))
             {
                 (inner, true)
-            } else if let Some(inner) =
-                value.strip_prefix('\'').and_then(|v| v.strip_suffix('\''))
+            } else if let Some(inner) = value.strip_prefix('\'').and_then(|v| v.strip_suffix('\''))
             {
                 (inner, false)
             } else {
@@ -217,8 +215,14 @@ mod tests {
         assert_eq!(defaults.get("plainvar"), Some(&"50".to_string()));
         // Original case preserved
         assert_eq!(original_names.get("somevar"), Some(&"someVar".to_string()));
-        assert_eq!(original_names.get("othervar"), Some(&"otherVar".to_string()));
-        assert_eq!(original_names.get("plainvar"), Some(&"plainVar".to_string()));
+        assert_eq!(
+            original_names.get("othervar"),
+            Some(&"otherVar".to_string())
+        );
+        assert_eq!(
+            original_names.get("plainvar"),
+            Some(&"plainVar".to_string())
+        );
     }
 
     #[test]

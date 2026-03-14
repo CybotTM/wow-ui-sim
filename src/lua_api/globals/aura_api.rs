@@ -3,8 +3,8 @@
 //! Implements UnitBuff, UnitDebuff, UnitAura, GetPlayerAuraBySpellID,
 //! and the AuraUtil namespace stubs.
 
-use crate::lua_api::state::AuraInfo;
 use crate::lua_api::SimState;
+use crate::lua_api::state::AuraInfo;
 use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -27,7 +27,9 @@ fn filter_is_harmful(filter: &Option<String>) -> bool {
 
 /// Get the nth player buff (1-based index), or None.
 fn get_player_buff(state: &SimState, index: i32) -> Option<&AuraInfo> {
-    if index < 1 { return None; }
+    if index < 1 {
+        return None;
+    }
     state.player.buffs.get((index - 1) as usize)
 }
 
@@ -95,16 +97,18 @@ fn set_aura_data_extra_fields(lua: &Lua, t: &mlua::Table, aura: &AuraInfo) -> Re
 fn register_unit_buff(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set(
         "UnitBuff",
-        lua.create_function(move |lua, (unit, index, _filter): (String, i32, Option<String>)| {
-            if unit != "player" {
-                return Ok(MultiValue::new());
-            }
-            let s = state.borrow();
-            match get_player_buff(&s, index) {
-                Some(aura) => build_aura_multi_value(lua, aura),
-                None => Ok(MultiValue::new()),
-            }
-        })?,
+        lua.create_function(
+            move |lua, (unit, index, _filter): (String, i32, Option<String>)| {
+                if unit != "player" {
+                    return Ok(MultiValue::new());
+                }
+                let s = state.borrow();
+                match get_player_buff(&s, index) {
+                    Some(aura) => build_aura_multi_value(lua, aura),
+                    None => Ok(MultiValue::new()),
+                }
+            },
+        )?,
     )
 }
 
@@ -122,24 +126,23 @@ fn register_unit_debuff(lua: &Lua) -> Result<()> {
 fn register_unit_aura(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set(
         "UnitAura",
-        lua.create_function(move |lua, (unit, index, filter): (String, i32, Option<String>)| {
-            if unit != "player" || filter_is_harmful(&filter) {
-                return Ok(MultiValue::new());
-            }
-            let s = state.borrow();
-            match get_player_buff(&s, index) {
-                Some(aura) => build_aura_multi_value(lua, aura),
-                None => Ok(MultiValue::new()),
-            }
-        })?,
+        lua.create_function(
+            move |lua, (unit, index, filter): (String, i32, Option<String>)| {
+                if unit != "player" || filter_is_harmful(&filter) {
+                    return Ok(MultiValue::new());
+                }
+                let s = state.borrow();
+                match get_player_buff(&s, index) {
+                    Some(aura) => build_aura_multi_value(lua, aura),
+                    None => Ok(MultiValue::new()),
+                }
+            },
+        )?,
     )
 }
 
 /// Register GetPlayerAuraBySpellID: looks up a buff by spell ID.
-fn register_get_player_aura_by_spell_id(
-    lua: &Lua,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_get_player_aura_by_spell_id(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set(
         "GetPlayerAuraBySpellID",
         lua.create_function(move |lua, spell_id: i32| {
@@ -159,11 +162,7 @@ fn register_get_player_aura_by_spell_id(
 /// If usePackedAura is true, passes the AuraData table directly.
 /// Otherwise passes it through AuraUtil.UnpackAuraData (multi-return).
 /// If the callback returns true, iteration stops early.
-fn register_for_each_aura(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_for_each_aura(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set(
         "ForEachAura",
         lua.create_function(
@@ -232,9 +231,7 @@ fn register_aura_util(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::T
     )?;
     aura_util.set(
         "FindAuraByName",
-        lua.create_function(|_, (_name, _unit, _filter): (String, String, String)| {
-            Ok(Value::Nil)
-        })?,
+        lua.create_function(|_, (_name, _unit, _filter): (String, String, String)| Ok(Value::Nil))?,
     )?;
     Ok(aura_util)
 }

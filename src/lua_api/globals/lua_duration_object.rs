@@ -134,7 +134,9 @@ fn add_copy_and_assign_methods<M: UserDataMethods<LuaDurationObject>>(methods: &
 fn add_evaluate_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
     methods.add_method("EvaluateElapsedDuration", |_, _, _: MultiValue| Ok(0.0f64));
     methods.add_method("EvaluateElapsedPercent", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("EvaluateRemainingDuration", |_, _, _: MultiValue| Ok(0.0f64));
+    methods.add_method("EvaluateRemainingDuration", |_, _, _: MultiValue| {
+        Ok(0.0f64)
+    });
     methods.add_method("EvaluateRemainingPercent", |_, _, _: MultiValue| Ok(0.0f64));
 }
 

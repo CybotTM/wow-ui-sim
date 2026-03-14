@@ -170,6 +170,30 @@ fn login_boot_hides_non_login_frontend_frames() {
 }
 
 #[test]
+fn login_boot_skips_current_known_glue_errors() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::Login);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        let unexpected: Vec<String> = errors
+            .into_iter()
+            .filter(|msg| {
+                msg.contains("CHARACTER_DUPLICATE_LOGON")
+                    || msg.contains("previewPanel")
+                    || msg.contains("AlertFrame_SetDuration")
+                    || msg.contains("PlayerLocation")
+                    || msg.contains("QuickJoinToastButton")
+            })
+            .collect();
+
+        assert!(
+            unexpected.is_empty(),
+            "login boot should not hit the current glue runtime gaps: {unexpected:#?}"
+        );
+    }
+}
+
+#[test]
 fn login_editboxes_gain_focus_when_clicking_their_visible_centers() {
     test_timeout! {
         let env = load_blizzard_screen(ScreenKind::Login);

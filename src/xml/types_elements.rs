@@ -132,14 +132,22 @@ pub struct TexCoordsXml {
 /// Rect child for TexCoords — corner-based UV coordinates.
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct TexCoordsRectXml {
-    #[serde(rename = "@ULx")] pub ul_x: Option<f32>,
-    #[serde(rename = "@ULy")] pub ul_y: Option<f32>,
-    #[serde(rename = "@LLx")] pub ll_x: Option<f32>,
-    #[serde(rename = "@LLy")] pub ll_y: Option<f32>,
-    #[serde(rename = "@URx")] pub ur_x: Option<f32>,
-    #[serde(rename = "@URy")] pub ur_y: Option<f32>,
-    #[serde(rename = "@LRx")] pub lr_x: Option<f32>,
-    #[serde(rename = "@LRy")] pub lr_y: Option<f32>,
+    #[serde(rename = "@ULx")]
+    pub ul_x: Option<f32>,
+    #[serde(rename = "@ULy")]
+    pub ul_y: Option<f32>,
+    #[serde(rename = "@LLx")]
+    pub ll_x: Option<f32>,
+    #[serde(rename = "@LLy")]
+    pub ll_y: Option<f32>,
+    #[serde(rename = "@URx")]
+    pub ur_x: Option<f32>,
+    #[serde(rename = "@URy")]
+    pub ur_y: Option<f32>,
+    #[serde(rename = "@LRx")]
+    pub lr_x: Option<f32>,
+    #[serde(rename = "@LRy")]
+    pub lr_y: Option<f32>,
 }
 
 /// Container for MaskedTexture entries inside a MaskTexture element.
@@ -448,9 +456,12 @@ pub struct AnimationXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct OriginXml {
-    #[serde(rename = "@point")] pub point: Option<String>,
-    #[serde(rename = "@x")]     pub x: Option<f32>,
-    #[serde(rename = "@y")]     pub y: Option<f32>,
+    #[serde(rename = "@point")]
+    pub point: Option<String>,
+    #[serde(rename = "@x")]
+    pub x: Option<f32>,
+    #[serde(rename = "@y")]
+    pub y: Option<f32>,
 }
 
 #[derive(Debug, Deserialize, Default, Clone)]
@@ -461,8 +472,10 @@ pub struct ControlPointsXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct ControlPointXml {
-    #[serde(rename = "@offsetX")] pub offset_x: Option<f32>,
-    #[serde(rename = "@offsetY")] pub offset_y: Option<f32>,
+    #[serde(rename = "@offsetX")]
+    pub offset_x: Option<f32>,
+    #[serde(rename = "@offsetY")]
+    pub offset_y: Option<f32>,
 }
 
 /// Actors container for ModelScene.
@@ -519,6 +532,8 @@ pub struct FontFamilyXml {
 
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct FontFamilyMemberXml {
-    #[serde(rename = "@alphabet")] pub alphabet: Option<String>,
-    #[serde(rename = "Font")]      pub font: Option<FontXml>,
+    #[serde(rename = "@alphabet")]
+    pub alphabet: Option<String>,
+    #[serde(rename = "Font")]
+    pub font: Option<FontXml>,
 }

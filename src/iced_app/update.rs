@@ -5,9 +5,9 @@ use iced_layout_inspector::server::ScreenshotData;
 
 use crate::lua_api::WowLuaEnv;
 
+use super::Message;
 use super::app::App;
 use super::state::CanvasMessage;
-use super::Message;
 
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
@@ -16,25 +16,73 @@ impl App {
         let ipc_task = self.process_ipc();
 
         let task = match message {
-            Message::FireEvent(event) => { self.handle_fire_event(&event); Task::none() }
+            Message::FireEvent(event) => {
+                self.handle_fire_event(&event);
+                Task::none()
+            }
             Message::CanvasEvent(canvas_msg) => self.handle_canvas_event(canvas_msg),
-            Message::Scroll(dx, dy) => { self.handle_scroll(dx, dy); Task::none() }
-            Message::ReloadUI => { self.handle_reload_ui(); Task::none() }
-            Message::CommandInputChanged(input) => { self.command_input = input; Task::none() }
-            Message::ExecuteCommand => { self.handle_execute_command(); Task::none() }
+            Message::Scroll(dx, dy) => {
+                self.handle_scroll(dx, dy);
+                Task::none()
+            }
+            Message::ReloadUI => {
+                self.handle_reload_ui();
+                Task::none()
+            }
+            Message::CommandInputChanged(input) => {
+                self.command_input = input;
+                Task::none()
+            }
+            Message::ExecuteCommand => {
+                self.handle_execute_command();
+                Task::none()
+            }
             Message::ProcessTimers => self.handle_process_timers(),
-            Message::ScreenshotTaken(screenshot) => { self.handle_screenshot_taken(screenshot); Task::none() }
+            Message::ScreenshotTaken(screenshot) => {
+                self.handle_screenshot_taken(screenshot);
+                Task::none()
+            }
             Message::FpsTick => Task::none(),
-            Message::InspectorClose => { self.handle_inspector_close(); Task::none() }
-            Message::InspectorWidthChanged(val) => { self.inspector_state.width = val; Task::none() }
-            Message::InspectorHeightChanged(val) => { self.inspector_state.height = val; Task::none() }
-            Message::InspectorAlphaChanged(val) => { self.inspector_state.alpha = val; Task::none() }
-            Message::InspectorLevelChanged(val) => { self.inspector_state.frame_level = val; Task::none() }
-            Message::InspectorVisibleToggled(val) => { self.inspector_state.visible = val; Task::none() }
-            Message::InspectorMouseEnabledToggled(val) => { self.inspector_state.mouse_enabled = val; Task::none() }
-            Message::InspectorApply => { self.handle_inspector_apply(); Task::none() }
-            Message::ToggleFramesPanel => { self.frames_panel_collapsed = !self.frames_panel_collapsed; Task::none() }
-            Message::XpLevelChanged(ref label) => { self.handle_xp_level_changed(label); Task::none() }
+            Message::InspectorClose => {
+                self.handle_inspector_close();
+                Task::none()
+            }
+            Message::InspectorWidthChanged(val) => {
+                self.inspector_state.width = val;
+                Task::none()
+            }
+            Message::InspectorHeightChanged(val) => {
+                self.inspector_state.height = val;
+                Task::none()
+            }
+            Message::InspectorAlphaChanged(val) => {
+                self.inspector_state.alpha = val;
+                Task::none()
+            }
+            Message::InspectorLevelChanged(val) => {
+                self.inspector_state.frame_level = val;
+                Task::none()
+            }
+            Message::InspectorVisibleToggled(val) => {
+                self.inspector_state.visible = val;
+                Task::none()
+            }
+            Message::InspectorMouseEnabledToggled(val) => {
+                self.inspector_state.mouse_enabled = val;
+                Task::none()
+            }
+            Message::InspectorApply => {
+                self.handle_inspector_apply();
+                Task::none()
+            }
+            Message::ToggleFramesPanel => {
+                self.frames_panel_collapsed = !self.frames_panel_collapsed;
+                Task::none()
+            }
+            Message::XpLevelChanged(ref label) => {
+                self.handle_xp_level_changed(label);
+                Task::none()
+            }
             Message::KeyPress(ref key, ref text) => {
                 if key == "ESCAPE" && self.options_modal_visible {
                     self.options_modal_visible = false;
@@ -43,12 +91,30 @@ impl App {
                 }
                 Task::none()
             }
-            Message::PlayerClassChanged(ref name) => { self.handle_player_class_changed(name); Task::none() }
-            Message::PlayerRaceChanged(ref name) => { self.handle_player_race_changed(name); Task::none() }
-            Message::RotDamageLevelChanged(ref label) => { self.handle_rot_damage_level_changed(label); Task::none() }
-            Message::ToggleOptionsModal => { self.options_modal_visible = !self.options_modal_visible; Task::none() }
-            Message::CloseOptionsModal => { self.options_modal_visible = false; Task::none() }
-            Message::MovementToggled(field, val) => { self.handle_movement_toggled(field, val); Task::none() }
+            Message::PlayerClassChanged(ref name) => {
+                self.handle_player_class_changed(name);
+                Task::none()
+            }
+            Message::PlayerRaceChanged(ref name) => {
+                self.handle_player_race_changed(name);
+                Task::none()
+            }
+            Message::RotDamageLevelChanged(ref label) => {
+                self.handle_rot_damage_level_changed(label);
+                Task::none()
+            }
+            Message::ToggleOptionsModal => {
+                self.options_modal_visible = !self.options_modal_visible;
+                Task::none()
+            }
+            Message::CloseOptionsModal => {
+                self.options_modal_visible = false;
+                Task::none()
+            }
+            Message::MovementToggled(field, val) => {
+                self.handle_movement_toggled(field, val);
+                Task::none()
+            }
         };
 
         Task::batch([task, ipc_task])
@@ -93,12 +159,17 @@ impl App {
     fn handle_xp_level_changed(&mut self, label: &str) {
         use crate::lua_api::state::XP_LEVELS;
         self.selected_xp_level = label.to_string();
-        let fraction = XP_LEVELS.iter()
+        let fraction = XP_LEVELS
+            .iter()
             .find(|(l, _)| *l == label)
             .map(|(_, f)| *f)
             .unwrap_or(0.0);
         let at_max = fraction == 0.0;
-        let event = if at_max { "DISABLE_XP_GAIN" } else { "ENABLE_XP_GAIN" };
+        let event = if at_max {
+            "DISABLE_XP_GAIN"
+        } else {
+            "ENABLE_XP_GAIN"
+        };
         {
             let env = self.env.borrow();
             let xp_max = 89_750i32;
@@ -122,7 +193,9 @@ impl App {
 
     fn handle_player_class_changed(&mut self, class_name: &str) {
         use crate::lua_api::state::CLASS_LABELS;
-        let index = CLASS_LABELS.iter().position(|&n| n == class_name)
+        let index = CLASS_LABELS
+            .iter()
+            .position(|&n| n == class_name)
             .map(|i| (i + 1) as i32)
             .unwrap_or(1);
         self.selected_class = class_name.to_string();
@@ -137,7 +210,9 @@ impl App {
 
     fn handle_player_race_changed(&mut self, race_name: &str) {
         use crate::lua_api::state::RACE_DATA;
-        let index = RACE_DATA.iter().position(|(name, _, _)| *name == race_name)
+        let index = RACE_DATA
+            .iter()
+            .position(|(name, _, _)| *name == race_name)
             .unwrap_or(0);
         self.selected_race = race_name.to_string();
         {
@@ -151,7 +226,9 @@ impl App {
 
     fn handle_rot_damage_level_changed(&mut self, label: &str) {
         use crate::lua_api::state::ROT_DAMAGE_LEVELS;
-        let index = ROT_DAMAGE_LEVELS.iter().position(|(l, _)| *l == label)
+        let index = ROT_DAMAGE_LEVELS
+            .iter()
+            .position(|(l, _)| *l == label)
             .unwrap_or(0);
         self.selected_rot_level = label.to_string();
         self.env.borrow().state().borrow_mut().rot_damage_level = index;
@@ -186,7 +263,9 @@ impl App {
     fn fire_portrait_update(&self, env: &WowLuaEnv) {
         let _ = env.fire_event_with_args(
             "UNIT_PORTRAIT_UPDATE",
-            &[mlua::Value::String(env.lua().create_string("player").unwrap())],
+            &[mlua::Value::String(
+                env.lua().create_string("player").unwrap(),
+            )],
         );
         let _ = env.fire_event_with_args(
             "PLAYER_ENTERING_WORLD",
@@ -267,31 +346,60 @@ impl App {
         let total = t0.elapsed();
         if total.as_millis() > 10 {
             let n = self.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
-            eprintln!("[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
-                self.textures_pending.get());
+            eprintln!(
+                "[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
+                self.textures_pending.get()
+            );
         }
         Task::none()
     }
 
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
     fn collect_tick_dirty(&mut self) -> (u16, std::time::Duration) {
-        self.env.borrow().state().borrow().widgets.take_render_dirty();
+        self.env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty();
         self.run_wow_timers();
-        let (m1, ids1) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+        let (m1, ids1) = self
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty_with_ids();
 
         let t_layout = std::time::Instant::now();
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
         let layout_dur = t_layout.elapsed();
 
         self.fire_on_update();
-        let (m2, ids2) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+        let (m2, ids2) = self
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty_with_ids();
 
         self.tick_party_health();
         self.tick_casting();
-        let (m3, ids3) = self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids();
+        let (m3, ids3) = self
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty_with_ids();
 
         let combined_ids = match (ids1, ids2, ids3) {
-            (Some(mut a), Some(b), Some(c)) => { a.extend(b); a.extend(c); Some(a) }
+            (Some(mut a), Some(b), Some(c)) => {
+                a.extend(b);
+                a.extend(c);
+                Some(a)
+            }
             _ => None,
         };
         *self.pending_dirty_ids.borrow_mut() = combined_ids;
@@ -337,7 +445,6 @@ impl App {
         self.last_on_update_time = std::time::Instant::now();
     }
 
-
     fn tick_party_health(&mut self) {
         if self.selected_rot_level == "Off" {
             return;
@@ -360,7 +467,9 @@ impl App {
             let unit_id = format!("party{idx}");
             let _ = env.fire_event_with_args(
                 "UNIT_HEALTH",
-                &[mlua::Value::String(env.lua().create_string(&unit_id).unwrap())],
+                &[mlua::Value::String(
+                    env.lua().create_string(&unit_id).unwrap(),
+                )],
             );
         }
     }
@@ -448,14 +557,18 @@ impl App {
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let before = tex_mgr.cache_len();
         let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
+        let mut remaining_uncached = false;
         for path in &paths {
-            if tex_mgr.get(path).is_some() { continue; }
+            if tex_mgr.get(path).is_some() {
+                continue;
+            }
             tex_mgr.load(path);
             if std::time::Instant::now() >= deadline {
-                self.textures_pending.set(true);
+                remaining_uncached = paths.iter().any(|p| tex_mgr.get(p).is_none());
                 break;
             }
         }
+        self.textures_pending.set(remaining_uncached);
         let loaded = tex_mgr.cache_len() - before;
         if loaded > 0 {
             eprintln!("[preload] {loaded} new textures ({} total)", paths.len());
@@ -476,7 +589,9 @@ impl App {
         drop(state);
 
         let mut grid_ref = self.cached_hittable.borrow_mut();
-        let Some(grid) = grid_ref.as_mut() else { return };
+        let Some(grid) = grid_ref.as_mut() else {
+            return;
+        };
 
         let state = env.state().borrow();
         let registry = &state.widgets;
@@ -489,10 +604,13 @@ impl App {
                 if became_visible {
                     // Remove first so moved frames get old cell entries cleaned up.
                     grid.remove(id);
-                    if f.visible && f.effective_alpha > 0.0 && f.mouse_enabled
-                        && !f.name.as_deref().is_some_and(|n| {
-                            super::frame_collect::HIT_TEST_EXCLUDED.contains(&n)
-                        })
+                    if f.visible
+                        && f.effective_alpha > 0.0
+                        && f.mouse_enabled
+                        && !f
+                            .name
+                            .as_deref()
+                            .is_some_and(|n| super::frame_collect::HIT_TEST_EXCLUDED.contains(&n))
                     {
                         if let Some(rect) = f.layout_rect {
                             let (il, ir, it, ib) = f.hit_rect_insets;
@@ -502,8 +620,10 @@ impl App {
                                     (rect.y + it) * crate::render::texture::UI_SCALE,
                                 ),
                                 iced::Size::new(
-                                    (rect.width - il - ir).max(0.0) * crate::render::texture::UI_SCALE,
-                                    (rect.height - it - ib).max(0.0) * crate::render::texture::UI_SCALE,
+                                    (rect.width - il - ir).max(0.0)
+                                        * crate::render::texture::UI_SCALE,
+                                    (rect.height - it - ib).max(0.0)
+                                        * crate::render::texture::UI_SCALE,
                                 ),
                             );
                             grid.insert(id, scaled);
@@ -577,7 +697,10 @@ impl App {
         }
         // Action bar buttons registered via SetActionUIButton manage their own
         // checked state through UpdateState() — don't auto-toggle them.
-        let is_action_button = state.action_ui_buttons.iter().any(|(id, _)| *id == frame_id);
+        let is_action_button = state
+            .action_ui_buttons
+            .iter()
+            .any(|(id, _)| *id == frame_id);
         if is_action_button {
             return;
         }
@@ -602,7 +725,9 @@ impl App {
                 crate::widget::AttributeValue::Boolean(new_checked),
             );
         }
-        let tex_id = state.widgets.get(frame_id)
+        let tex_id = state
+            .widgets
+            .get(frame_id)
             .and_then(|f| f.children_keys.get("CheckedTexture").copied());
         if let Some(tex_id) = tex_id {
             state.set_frame_visible(tex_id, new_checked);
@@ -617,9 +742,13 @@ impl App {
         if (state.screen_width - size.width).abs() > 0.5
             || (state.screen_height - size.height).abs() > 0.5
         {
-            println!("Window size: {}x{} (was {}x{})",
-                size.width as i32, size.height as i32,
-                state.screen_width as i32, state.screen_height as i32);
+            println!(
+                "Window size: {}x{} (was {}x{})",
+                size.width as i32,
+                size.height as i32,
+                state.screen_width as i32,
+                state.screen_height as i32
+            );
             drop(state);
             env.set_screen_size(size.width, size.height);
         }
@@ -630,5 +759,4 @@ impl App {
         let mut state = env.state().borrow_mut();
         self.log_messages.append(&mut state.console_output);
     }
-
 }

@@ -106,9 +106,7 @@ fn test_mount_journal_get_mount_info_by_id_first_nil() {
 #[test]
 fn test_mount_journal_get_mount_ids_empty_table() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_MountJournal.GetMountIDs()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_MountJournal.GetMountIDs()").unwrap();
     assert_eq!(count, 0);
 }
 
@@ -131,9 +129,8 @@ fn test_mount_journal_set_collected_filter_setting() {
 #[test]
 fn test_mount_journal_get_is_favorite() {
     let env = env();
-    let (is_fav, can_fav): (bool, bool) = env
-        .eval("return C_MountJournal.GetIsFavorite(1)")
-        .unwrap();
+    let (is_fav, can_fav): (bool, bool) =
+        env.eval("return C_MountJournal.GetIsFavorite(1)").unwrap();
     assert!(!is_fav);
     assert!(!can_fav);
 }
@@ -164,14 +161,8 @@ fn test_mount_journal_dismiss() {
 #[test]
 fn test_toy_box_get_toy_info() {
     let env = env();
-    let (item_id, _name, _icon, is_fav, has_fanfare, quality): (
-        i32,
-        String,
-        i32,
-        bool,
-        bool,
-        i32,
-    ) = env.eval("return C_ToyBox.GetToyInfo(1)").unwrap();
+    let (item_id, _name, _icon, is_fav, has_fanfare, quality): (i32, String, i32, bool, bool, i32) =
+        env.eval("return C_ToyBox.GetToyInfo(1)").unwrap();
     assert_eq!(item_id, 0);
     assert!(!is_fav);
     assert!(!has_fanfare);
@@ -445,9 +436,7 @@ fn test_transmog_get_applied_source_id_nil() {
 #[test]
 fn test_transmog_get_slot_info() {
     let env = env();
-    let first: bool = env
-        .eval("return C_Transmog.GetSlotInfo(1)")
-        .unwrap();
+    let first: bool = env.eval("return C_Transmog.GetSlotInfo(1)").unwrap();
     assert!(!first);
 }
 
@@ -546,9 +535,7 @@ fn test_heirloom_get_num_known_heirlooms() {
 #[test]
 fn test_heirloom_player_has_heirloom() {
     let env = env();
-    let has: bool = env
-        .eval("return C_Heirloom.PlayerHasHeirloom(1)")
-        .unwrap();
+    let has: bool = env.eval("return C_Heirloom.PlayerHasHeirloom(1)").unwrap();
     assert!(!has);
 }
 
@@ -587,9 +574,7 @@ fn test_heirloom_get_class_and_spec_filters() {
 #[test]
 fn test_transmog_sets_get_base_set_id() {
     let env = env();
-    let id: i32 = env
-        .eval("return C_TransmogSets.GetBaseSetID(1)")
-        .unwrap();
+    let id: i32 = env.eval("return C_TransmogSets.GetBaseSetID(1)").unwrap();
     assert_eq!(id, 0);
 }
 
@@ -630,18 +615,14 @@ fn test_transmog_sets_get_set_primary_appearances_empty() {
 #[test]
 fn test_transmog_sets_get_all_sets_empty() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_TransmogSets.GetAllSets()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_TransmogSets.GetAllSets()").unwrap();
     assert_eq!(count, 0);
 }
 
 #[test]
 fn test_transmog_sets_get_usable_sets_empty() {
     let env = env();
-    let count: i32 = env
-        .eval("return #C_TransmogSets.GetUsableSets()")
-        .unwrap();
+    let count: i32 = env.eval("return #C_TransmogSets.GetUsableSets()").unwrap();
     assert_eq!(count, 0);
 }
 

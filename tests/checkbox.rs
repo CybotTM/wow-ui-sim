@@ -26,8 +26,14 @@ fn minimal_checkbox_size() {
     let id = state.widgets.get_id_by_name("TestMinCheckbox").unwrap();
     let frame = state.widgets.get(id).unwrap();
 
-    assert_eq!(frame.width, 30.0, "MinimalCheckboxTemplate width should be 30");
-    assert_eq!(frame.height, 29.0, "MinimalCheckboxTemplate height should be 29");
+    assert_eq!(
+        frame.width, 30.0,
+        "MinimalCheckboxTemplate width should be 30"
+    );
+    assert_eq!(
+        frame.height, 29.0,
+        "MinimalCheckboxTemplate height should be 29"
+    );
 }
 
 #[test]
@@ -212,7 +218,10 @@ fn minimal_checkbox_set_checked_visibility() {
         let frame = state.widgets.get(id).unwrap();
         let checked_tex_id = *frame.children_keys.get("CheckedTexture").unwrap();
         let tex = state.widgets.get(checked_tex_id).unwrap();
-        assert!(tex.visible, "CheckedTexture should be visible after SetChecked(true)");
+        assert!(
+            tex.visible,
+            "CheckedTexture should be visible after SetChecked(true)"
+        );
     }
 
     // SetChecked(false) should hide it
@@ -223,7 +232,10 @@ fn minimal_checkbox_set_checked_visibility() {
         let frame = state.widgets.get(id).unwrap();
         let checked_tex_id = *frame.children_keys.get("CheckedTexture").unwrap();
         let tex = state.widgets.get(checked_tex_id).unwrap();
-        assert!(!tex.visible, "CheckedTexture should be hidden after SetChecked(false)");
+        assert!(
+            !tex.visible,
+            "CheckedTexture should be hidden after SetChecked(false)"
+        );
     }
 }
 
@@ -269,7 +281,11 @@ fn minimal_checkbox_quad_batch() {
     assert!(
         !checkbox_requests.is_empty(),
         "Quad batch should contain texture requests for minimalcheckbox atlas. Got paths: {:?}",
-        batch.texture_requests.iter().map(|r| &r.path).collect::<Vec<_>>()
+        batch
+            .texture_requests
+            .iter()
+            .map(|r| &r.path)
+            .collect::<Vec<_>>()
     );
 }
 
@@ -322,7 +338,8 @@ fn assert_checked_texture_visible(
     let tex_id = *frame.children_keys.get("CheckedTexture").unwrap();
     let tex = state.widgets.get(tex_id).unwrap();
     assert_eq!(
-        tex.visible, expected,
+        tex.visible,
+        expected,
         "CheckedTexture should be {} for {}",
         if expected { "visible" } else { "hidden" },
         name,
@@ -342,9 +359,7 @@ fn minimal_checkbox_mouse_enabled_by_default() {
     .unwrap();
 
     // CheckButton should have mouse enabled by default (like WoW)
-    let mouse_enabled: bool = env
-        .eval("return TestMinCbMouse:IsMouseEnabled()")
-        .unwrap();
+    let mouse_enabled: bool = env.eval("return TestMinCbMouse:IsMouseEnabled()").unwrap();
     assert!(
         mouse_enabled,
         "CheckButton should have mouse enabled by default"
@@ -374,8 +389,5 @@ fn button_mouse_enabled_by_default() {
     .unwrap();
 
     let mouse_enabled: bool = env.eval("return TestBtnMouse:IsMouseEnabled()").unwrap();
-    assert!(
-        mouse_enabled,
-        "Button should have mouse enabled by default"
-    );
+    assert!(mouse_enabled, "Button should have mouse enabled by default");
 }

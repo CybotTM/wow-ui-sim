@@ -1,7 +1,7 @@
 //! GameTooltip widget methods: SetOwner, AddLine, AddDoubleLine, tooltip queries, etc.
 
-use super::methods_helpers::get_mixin_override;
 use super::super::handle::FrameRef;
+use super::methods_helpers::get_mixin_override;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use crate::lua_api::tooltip::TooltipLine;
 use crate::widget::{Anchor, AnchorPoint};
@@ -29,7 +29,9 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         if let Some((func, self_val)) = get_mixin_override(lua, id, "SetOwner") {
             let mut call_args = vec![self_val];
             call_args.extend(args);
-            return func.call::<Value>(mlua::MultiValue::from_iter(call_args)).map(|_| ());
+            return func
+                .call::<Value>(mlua::MultiValue::from_iter(call_args))
+                .map(|_| ());
         }
         set_owner_impl(lua, id, args)
     });
@@ -90,26 +92,51 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     methods.add_method("SetUnitBuff", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("SetUnitDebuff", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("SetUnitAura", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetUnitBuffByAuraInstanceID", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetUnitDebuffByAuraInstanceID", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "SetUnitBuffByAuraInstanceID",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
+    methods.add_method(
+        "SetUnitDebuffByAuraInstanceID",
+        |_, _this, _args: mlua::MultiValue| Ok(()),
+    );
     methods.add_method("AddAtlas", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("AddFontStrings", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("CopyTooltip", |_, _this, _: mlua::Variadic<Value>| Ok(()));
     methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
     methods.add_method("GetLeftLine", |_, _this, ()| Ok(Value::Nil));
     methods.add_method("GetRightLine", |_, _this, ()| Ok(Value::Nil));
-    methods.add_method("SetAllowShowWithNoLines", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetAllowShowWithNoLines",
+        |_, _this, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("SetAnchorType", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetCustomLineSpacing", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetCustomWordWrapMinWidth", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetCustomLineSpacing",
+        |_, _this, _: mlua::Variadic<Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetCustomWordWrapMinWidth",
+        |_, _this, _: mlua::Variadic<Value>| Ok(()),
+    );
     methods.add_method("SetFrameStack", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetObjectTooltipPosition", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetShrinkToFitWrapped", |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    methods.add_method(
+        "SetObjectTooltipPosition",
+        |_, _this, _: mlua::Variadic<Value>| Ok(()),
+    );
+    methods.add_method(
+        "SetShrinkToFitWrapped",
+        |_, _this, _: mlua::Variadic<Value>| Ok(()),
+    );
 
     methods.add_method("NumLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.tooltips.get(&this.0).map(|td| td.lines.len()).unwrap_or(0);
+        let count = state
+            .tooltips
+            .get(&this.0)
+            .map(|td| td.lines.len())
+            .unwrap_or(0);
         Ok(count as i32)
     });
     methods.add_method("GetNumLines", |_, _this, ()| Ok(0_i32));
@@ -142,7 +169,11 @@ fn add_tooltip_minwidth_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     methods.add_method("GetMinimumWidth", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.tooltips.get(&this.0).map(|td| td.min_width).unwrap_or(0.0))
+        Ok(state
+            .tooltips
+            .get(&this.0)
+            .map(|td| td.min_width)
+            .unwrap_or(0.0))
     });
 }
 
@@ -154,14 +185,20 @@ fn add_tooltip_padding_override_methods<M: mlua::UserDataMethods<FrameRef>>(meth
             call_args.extend(args);
             return func.call::<()>(mlua::MultiValue::from_iter(call_args));
         }
-        let padding = args.into_iter().next().and_then(|v| match v {
-            Value::Number(n) => Some(n as f32),
-            Value::Integer(n) => Some(n as f32),
-            _ => None,
-        }).unwrap_or(0.0);
+        let padding = args
+            .into_iter()
+            .next()
+            .and_then(|v| match v {
+                Value::Number(n) => Some(n as f32),
+                Value::Integer(n) => Some(n as f32),
+                _ => None,
+            })
+            .unwrap_or(0.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&id) { td.padding = padding; }
+        if let Some(td) = state.tooltips.get_mut(&id) {
+            td.padding = padding;
+        }
         Ok(())
     });
 
@@ -172,14 +209,22 @@ fn add_tooltip_padding_override_methods<M: mlua::UserDataMethods<FrameRef>>(meth
         }
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let p = state.tooltips.get(&id).map(|td| td.padding as f64).unwrap_or(0.0);
-        Ok(mlua::MultiValue::from_iter(std::iter::once(Value::Number(p))))
+        let p = state
+            .tooltips
+            .get(&id)
+            .map(|td| td.padding as f64)
+            .unwrap_or(0.0);
+        Ok(mlua::MultiValue::from_iter(std::iter::once(Value::Number(
+            p,
+        ))))
     });
 
     methods.add_method("ClearPadding", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&this.0) { td.padding = 0.0; }
+        if let Some(td) = state.tooltips.get_mut(&this.0) {
+            td.padding = 0.0;
+        }
         Ok(())
     });
 }
@@ -189,9 +234,10 @@ fn add_tooltip_settext_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(td) = state.tooltips.get_mut(&this.0)
-            && let Some(last) = td.lines.last_mut() {
-                last.left_text.push_str(&text);
-            }
+            && let Some(last) = td.lines.last_mut()
+        {
+            last.left_text.push_str(&text);
+        }
         Ok(())
     });
 }
@@ -201,7 +247,9 @@ fn add_tooltip_info_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
         let check_id = extract_frame_id(&frame);
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let owned = state.tooltips.get(&this.0)
+        let owned = state
+            .tooltips
+            .get(&this.0)
             .is_some_and(|td| td.owner_id.is_some() && td.owner_id == check_id);
         Ok(owned)
     });
@@ -221,7 +269,9 @@ fn add_tooltip_info_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("GetAnchorType", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let anchor = state.tooltips.get(&this.0)
+        let anchor = state
+            .tooltips
+            .get(&this.0)
             .map(|td| td.anchor_type.clone())
             .unwrap_or_else(|| "ANCHOR_NONE".to_string());
         Ok(anchor)
@@ -246,12 +296,20 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
     let mut args_iter = args.into_iter();
     let owner_val = match args_iter.next() {
         Some(v) if extract_frame_id(&v).is_some() => v,
-        _ => return Err(mlua::Error::runtime("Usage: GameTooltip:SetOwner(owner[, anchor])")),
+        _ => {
+            return Err(mlua::Error::runtime(
+                "Usage: GameTooltip:SetOwner(owner[, anchor])",
+            ));
+        }
     };
     let anchor: String = match args_iter.next() {
         Some(Value::String(s)) => {
             let s = s.to_string_lossy().to_string();
-            if is_valid_anchor_type(&s) { s } else { "ANCHOR_LEFT".to_string() }
+            if is_valid_anchor_type(&s) {
+                s
+            } else {
+                "ANCHOR_LEFT".to_string()
+            }
         }
         _ => "ANCHOR_LEFT".to_string(),
     };
@@ -271,10 +329,19 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
 }
 
 fn is_valid_anchor_type(s: &str) -> bool {
-    matches!(s,
-        "ANCHOR_LEFT" | "ANCHOR_RIGHT" | "ANCHOR_TOP" | "ANCHOR_BOTTOM"
-        | "ANCHOR_TOPLEFT" | "ANCHOR_TOPRIGHT" | "ANCHOR_BOTTOMLEFT" | "ANCHOR_BOTTOMRIGHT"
-        | "ANCHOR_CURSOR" | "ANCHOR_PRESERVE" | "ANCHOR_NONE"
+    matches!(
+        s,
+        "ANCHOR_LEFT"
+            | "ANCHOR_RIGHT"
+            | "ANCHOR_TOP"
+            | "ANCHOR_BOTTOM"
+            | "ANCHOR_TOPLEFT"
+            | "ANCHOR_TOPRIGHT"
+            | "ANCHOR_BOTTOMLEFT"
+            | "ANCHOR_BOTTOMRIGHT"
+            | "ANCHOR_CURSOR"
+            | "ANCHOR_PRESERVE"
+            | "ANCHOR_NONE"
     )
 }
 
@@ -337,7 +404,10 @@ fn position_tooltip(
         }
         "ANCHOR_NONE" => {}
         _ => {
-            let owner = match owner_id { Some(id) => id, None => return };
+            let owner = match owner_id {
+                Some(id) => id,
+                None => return,
+            };
             let (tp, rp) = anchor_points_for_type(anchor_type);
             frame.anchors.push(Anchor {
                 point: tp,
@@ -366,12 +436,17 @@ fn anchor_points_for_type(anchor_type: &str) -> (AnchorPoint, AnchorPoint) {
 // --- Shared helpers (pub(super) so widget_editbox and widget_slider can use them) ---
 
 /// Fire a script handler on a frame (e.g. OnTooltipCleared).
-pub(super) fn fire_tooltip_script(lua: &mlua::Lua, frame_id: u64, handler: &str) -> mlua::Result<()> {
+pub(super) fn fire_tooltip_script(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    handler: &str,
+) -> mlua::Result<()> {
     if let Some(func) = crate::lua_api::script_helpers::get_script(lua, frame_id, handler)
         && let Some(frame_ud) = crate::lua_api::script_helpers::get_frame_ref(lua, frame_id)
-            && let Err(e) = func.call::<()>(frame_ud) {
-                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-            }
+        && let Err(e) = func.call::<()>(frame_ud)
+    {
+        crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+    }
     Ok(())
 }
 

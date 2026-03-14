@@ -117,7 +117,10 @@ fn test_fire_event_no_args_extra_params_are_nil() {
         )
         .unwrap();
     assert!(received);
-    assert!(arg1_nil, "first extra arg should be nil when FireEvent has no args");
+    assert!(
+        arg1_nil,
+        "first extra arg should be nil when FireEvent has no args"
+    );
 }
 
 // ============================================================================

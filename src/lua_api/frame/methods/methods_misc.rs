@@ -31,7 +31,10 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetOwningDialog", |_, _this, _dialog: Value| Ok(()));
     methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method("RegisterFrames", |_, _this, _args: MultiValue| Ok(()));
-    methods.add_method("RegisterBackgroundTexture", |_, _this, _args: MultiValue| Ok(()));
+    methods.add_method(
+        "RegisterBackgroundTexture",
+        |_, _this, _args: MultiValue| Ok(()),
+    );
     // QuestPOIFrame
     methods.add_method("SetFillTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderTexture", |_, _, _: mlua::MultiValue| Ok(()));
@@ -142,7 +145,9 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("IsProtected", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let is_protected = state.widgets.get(this.0)
+        let is_protected = state
+            .widgets
+            .get(this.0)
             .map(|f| f.is_protected)
             .unwrap_or(false);
         // (isProtected, isProtectedExplicitly) — both are static frame properties,
@@ -154,7 +159,8 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 
     methods.add_method("Protect", |lua, this, ()| {
         // Only secure (Blizzard) code can protect a frame.
-        let caller_secure = lua.globals()
+        let caller_secure = lua
+            .globals()
             .get::<mlua::Function>("issecure")
             .and_then(|f| f.call::<bool>(()))
             .unwrap_or(false);
@@ -174,7 +180,9 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 
 /// Flatten/Render stubs.
 fn add_flatten_render_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetEffectivelyFlattensRenderLayers", |_, _this, ()| Ok(false));
+    methods.add_method("GetEffectivelyFlattensRenderLayers", |_, _this, ()| {
+        Ok(false)
+    });
     methods.add_method("GetFlattensRenderLayers", |_, _this, ()| Ok(false));
 }
 
@@ -190,7 +198,10 @@ fn add_misc_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("DesaturateHierarchy", |_, _this, _: bool| Ok(()));
     methods.add_method("IsHighlightLocked", |_, _this, ()| Ok(false));
     methods.add_method("IsIgnoringChildrenForBounds", |_, _this, ()| Ok(false));
-    methods.add_method("RegisterUnitEventCallback", |_, _this, _args: MultiValue| Ok(()));
+    methods.add_method(
+        "RegisterUnitEventCallback",
+        |_, _this, _args: MultiValue| Ok(()),
+    );
     methods.add_method("SetHighlightLocked", |_, _this, _: bool| Ok(()));
     methods.add_method("SetIgnoringChildrenForBounds", |_, _this, _: bool| Ok(()));
     methods.add_method("SetToDefaults", |_, _this, ()| Ok(()));
@@ -203,9 +214,7 @@ fn add_minimap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_minimap_texture_setters(methods);
     add_minimap_blob_setters(methods);
     // GetCanvas() - for WorldMapFrame (returns self as the canvas)
-    methods.add_method("GetCanvas", |lua, this, ()| {
-        frame_ref(lua, this.0)
-    });
+    methods.add_method("GetCanvas", |lua, this, ()| frame_ref(lua, this.0));
 }
 
 /// Minimap core: zoom, ping, blips.
@@ -230,23 +239,34 @@ fn add_minimap_texture_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 
 /// Minimap quest/task/arch blob setters (no-op stubs).
 fn add_minimap_blob_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetQuestBlobInsideTexture", |_, _this, _asset: Value| Ok(()));
+    methods.add_method(
+        "SetQuestBlobInsideTexture",
+        |_, _this, _asset: Value| Ok(()),
+    );
     methods.add_method("SetQuestBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetQuestBlobOutsideTexture", |_, _this, _asset: Value| Ok(()));
+    methods.add_method("SetQuestBlobOutsideTexture", |_, _this, _asset: Value| {
+        Ok(())
+    });
     methods.add_method("SetQuestBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
     methods.add_method("SetQuestBlobRingTexture", |_, _this, _asset: Value| Ok(()));
     methods.add_method("SetQuestBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
     methods.add_method("SetQuestBlobRingAlpha", |_, _this, _alpha: f32| Ok(()));
     methods.add_method("SetTaskBlobInsideTexture", |_, _this, _asset: Value| Ok(()));
     methods.add_method("SetTaskBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetTaskBlobOutsideTexture", |_, _this, _asset: Value| Ok(()));
+    methods.add_method(
+        "SetTaskBlobOutsideTexture",
+        |_, _this, _asset: Value| Ok(()),
+    );
     methods.add_method("SetTaskBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
     methods.add_method("SetTaskBlobRingTexture", |_, _this, _asset: Value| Ok(()));
     methods.add_method("SetTaskBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
     methods.add_method("SetTaskBlobRingAlpha", |_, _this, _alpha: f32| Ok(()));
     methods.add_method("SetArchBlobInsideTexture", |_, _this, _asset: Value| Ok(()));
     methods.add_method("SetArchBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetArchBlobOutsideTexture", |_, _this, _asset: Value| Ok(()));
+    methods.add_method(
+        "SetArchBlobOutsideTexture",
+        |_, _this, _asset: Value| Ok(()),
+    );
     methods.add_method("SetArchBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
     methods.add_method("SetArchBlobRingTexture", |_, _this, _asset: Value| Ok(()));
     methods.add_method("SetArchBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
@@ -271,18 +291,29 @@ fn add_alert_and_data_provider_methods<M: mlua::UserDataMethods<FrameRef>>(metho
 
 /// AddQueuedAlertFrameSubSystem stub returning a table with no-op alert methods.
 fn add_alert_subsystem_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("AddQueuedAlertFrameSubSystem", |lua, _this, _args: MultiValue| {
-        let subsystem = lua.create_table()?;
-        subsystem.set("SetCanShowMoreConditionFunc",
-            lua.create_function(|_, (_self, _func): (Value, Value)| Ok(()))?)?;
-        subsystem.set("AddAlert",
-            lua.create_function(|_, _args: MultiValue| Ok(()))?)?;
-        subsystem.set("RemoveAlert",
-            lua.create_function(|_, _args: MultiValue| Ok(()))?)?;
-        subsystem.set("ClearAllAlerts",
-            lua.create_function(|_, _self: Value| Ok(()))?)?;
-        Ok(Value::Table(subsystem))
-    });
+    methods.add_method(
+        "AddQueuedAlertFrameSubSystem",
+        |lua, _this, _args: MultiValue| {
+            let subsystem = lua.create_table()?;
+            subsystem.set(
+                "SetCanShowMoreConditionFunc",
+                lua.create_function(|_, (_self, _func): (Value, Value)| Ok(()))?,
+            )?;
+            subsystem.set(
+                "AddAlert",
+                lua.create_function(|_, _args: MultiValue| Ok(()))?,
+            )?;
+            subsystem.set(
+                "RemoveAlert",
+                lua.create_function(|_, _args: MultiValue| Ok(()))?,
+            )?;
+            subsystem.set(
+                "ClearAllAlerts",
+                lua.create_function(|_, _self: Value| Ok(()))?,
+            )?;
+            Ok(Value::Table(subsystem))
+        },
+    );
 }
 
 /// WorldMapFrame data provider stubs and UseRaidStylePartyFrames.
@@ -296,14 +327,18 @@ fn add_data_provider_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 fn add_edit_mode_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsInDefaultPosition", |lua, this, ()| {
         let id = this.0;
-        if let Some((func, ud)) = super::methods_helpers::get_mixin_override(lua, id, "IsInDefaultPosition") {
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "IsInDefaultPosition")
+        {
             return func.call::<bool>(ud);
         }
         Ok(true)
     });
     methods.add_method("IsInitialized", |lua, this, ()| {
         let id = this.0;
-        if let Some((func, ud)) = super::methods_helpers::get_mixin_override(lua, id, "IsInitialized") {
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "IsInitialized")
+        {
             return func.call::<bool>(ud);
         }
         Ok(false)

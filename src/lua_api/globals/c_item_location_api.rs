@@ -82,11 +82,7 @@ fn register_is_item_data_cached_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> 
     )
 }
 
-fn register_get_item_guid(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_get_item_guid(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set(
         "GetItemGUID",
         lua.create_function(move |lua, loc: Value| {
@@ -103,11 +99,7 @@ fn register_get_item_guid(
     )
 }
 
-fn register_is_bound(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_is_bound(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set(
         "IsBound",
         lua.create_function(move |_, loc: Value| Ok(item_exists_at(&state.borrow(), &loc)))?,
@@ -161,9 +153,10 @@ fn register_get_current_item_level(
         lua.create_function(move |_, loc: Value| {
             let level = extract_bag_slot(&loc)
                 .and_then(|(b, s)| {
-                    state.borrow().get_bag_item(b, s).and_then(|(id, _)| {
-                        crate::items::get_item(id).map(|i| i.item_level as i32)
-                    })
+                    state
+                        .borrow()
+                        .get_bag_item(b, s)
+                        .and_then(|(id, _)| crate::items::get_item(id).map(|i| i.item_level as i32))
                 })
                 .unwrap_or(0);
             Ok(level)

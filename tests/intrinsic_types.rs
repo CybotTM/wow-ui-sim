@@ -1,7 +1,7 @@
 //! Tests for intrinsic frame types (ContainedAlertFrame, etc.).
 
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::xml::{parse_xml, register_template, XmlElement};
+use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
 
 /// Register a ContainedAlertFrame intrinsic template and its mixin.
 fn setup_contained_alert_frame(env: &WowLuaEnv) {

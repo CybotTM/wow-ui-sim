@@ -11,16 +11,27 @@ pub fn ensure_large_stack() {
     if std::env::var_os(MARKER).is_some() {
         return;
     }
-    let mut rlim = libc::rlimit { rlim_cur: 0, rlim_max: 0 };
-    unsafe { libc::getrlimit(libc::RLIMIT_STACK, &mut rlim); }
+    let mut rlim = libc::rlimit {
+        rlim_cur: 0,
+        rlim_max: 0,
+    };
+    unsafe {
+        libc::getrlimit(libc::RLIMIT_STACK, &mut rlim);
+    }
     if rlim.rlim_cur >= DESIRED {
         return;
     }
     rlim.rlim_cur = DESIRED;
-    if rlim.rlim_max < DESIRED { rlim.rlim_max = DESIRED; }
-    unsafe { libc::setrlimit(libc::RLIMIT_STACK, &rlim); }
+    if rlim.rlim_max < DESIRED {
+        rlim.rlim_max = DESIRED;
+    }
+    unsafe {
+        libc::setrlimit(libc::RLIMIT_STACK, &rlim);
+    }
     // SAFETY: called from main() before any threads are spawned.
-    unsafe { std::env::set_var(MARKER, "1"); }
+    unsafe {
+        std::env::set_var(MARKER, "1");
+    }
     let err = std::process::Command::new(std::env::current_exe().unwrap())
         .args(std::env::args_os().skip(1))
         .exec();

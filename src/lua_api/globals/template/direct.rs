@@ -14,7 +14,9 @@ use std::rc::Rc;
 pub fn set_size(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
     let Some(size) = template.size() else { return };
     let (width, height) = super::get_size_values(size);
-    let (Some(w), Some(h)) = (width, height) else { return };
+    let (Some(w), Some(h)) = (width, height) else {
+        return;
+    };
     let mut s = state.borrow_mut();
     if let Some(frame) = s.widgets.get_mut_visual(frame_id) {
         frame.set_size(w, h);
@@ -23,11 +25,7 @@ pub fn set_size(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXm
 }
 
 /// Set partial or full size from XML (handles width-only and height-only).
-pub fn set_size_partial(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    template: &FrameXml,
-) {
+pub fn set_size_partial(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
     let Some(size) = template.size() else { return };
     let (w, h) = super::get_size_values(size);
     let mut s = state.borrow_mut();
@@ -59,7 +57,9 @@ pub fn set_anchors(
     template: &FrameXml,
     frame_name: &str,
 ) {
-    let Some(anchors) = template.anchors() else { return };
+    let Some(anchors) = template.anchors() else {
+        return;
+    };
     let mut s = state.borrow_mut();
     for anchor in &anchors.anchors {
         set_single_anchor(&mut s, frame_id, anchor, frame_name);
@@ -67,16 +67,15 @@ pub fn set_anchors(
 }
 
 /// Set a single anchor point on a frame.
-fn set_single_anchor(
-    state: &mut SimState,
-    frame_id: u64,
-    anchor: &AnchorXml,
-    frame_name: &str,
-) {
+fn set_single_anchor(state: &mut SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str) {
     let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
     let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
-    let Some(point) = AnchorPoint::from_str(point_str) else { return };
-    let Some(relative_point) = AnchorPoint::from_str(relative_point_str) else { return };
+    let Some(point) = AnchorPoint::from_str(point_str) else {
+        return;
+    };
+    let Some(relative_point) = AnchorPoint::from_str(relative_point_str) else {
+        return;
+    };
 
     let (offset_x, offset_y) = anchor_offset(anchor);
     let relative_to_id = resolve_anchor_target(state, frame_id, anchor, frame_name);
@@ -94,7 +93,8 @@ fn set_single_anchor(
             point,
             relative_to_id.map(|id| id as usize),
             relative_point,
-            offset_x, offset_y,
+            offset_x,
+            offset_y,
         );
     }
     state.widgets.mark_rect_dirty(frame_id);
@@ -102,7 +102,10 @@ fn set_single_anchor(
 
 /// Resolve the relative_to target ID for an anchor element.
 fn resolve_anchor_target(
-    state: &SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str,
+    state: &SimState,
+    frame_id: u64,
+    anchor: &AnchorXml,
+    frame_name: &str,
 ) -> Option<u64> {
     if anchor.relative_to.is_none() {
         if let Some(key) = anchor.relative_key.as_deref() {
@@ -117,12 +120,17 @@ fn resolve_anchor_target(
 
 /// Remove old and add new anchor dependents for a point.
 fn update_anchor_dependents(
-    state: &mut SimState, frame_id: u64, point: AnchorPoint, new_target: Option<u64>,
+    state: &mut SimState,
+    frame_id: u64,
+    point: AnchorPoint,
+    new_target: Option<u64>,
 ) {
     if let Some(frame) = state.widgets.get(frame_id) {
         if let Some(old_anchor) = frame.anchors.iter().find(|a| a.point == point) {
             if let Some(old_target) = old_anchor.relative_to_id {
-                state.widgets.remove_anchor_dependent(old_target as u64, frame_id);
+                state
+                    .widgets
+                    .remove_anchor_dependent(old_target as u64, frame_id);
             }
         }
     }
@@ -191,8 +199,20 @@ fn set_all_points_inner(state: &mut SimState, frame_id: u64) {
     let parent_id = state.widgets.get(frame_id).and_then(|f| f.parent_id);
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
         frame.clear_all_points();
-        frame.set_point(AnchorPoint::TopLeft, parent_id.map(|p| p as usize), AnchorPoint::TopLeft, 0.0, 0.0);
-        frame.set_point(AnchorPoint::BottomRight, parent_id.map(|p| p as usize), AnchorPoint::BottomRight, 0.0, 0.0);
+        frame.set_point(
+            AnchorPoint::TopLeft,
+            parent_id.map(|p| p as usize),
+            AnchorPoint::TopLeft,
+            0.0,
+            0.0,
+        );
+        frame.set_point(
+            AnchorPoint::BottomRight,
+            parent_id.map(|p| p as usize),
+            AnchorPoint::BottomRight,
+            0.0,
+            0.0,
+        );
     }
 
     state.widgets.mark_rect_dirty(frame_id);
@@ -502,15 +522,15 @@ pub fn apply_xml_enable_mouse(
 }
 
 /// Apply hitRectInsets from instance XML (no template chain resolution).
-pub fn apply_xml_hit_rect_insets(
-    state: &Rc<RefCell<SimState>>,
-    frame_id: u64,
-    frame: &FrameXml,
-) {
+pub fn apply_xml_hit_rect_insets(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameXml) {
     if let Some(insets) = frame.hit_rect_insets() {
         set_hit_rect_insets(
-            state, frame_id,
-            insets.left(), insets.right(), insets.top(), insets.bottom(),
+            state,
+            frame_id,
+            insets.left(),
+            insets.right(),
+            insets.top(),
+            insets.bottom(),
         );
     }
 }
@@ -590,7 +610,11 @@ pub fn apply_xml_id(state: &Rc<RefCell<SimState>>, frame_id: u64, frame: &FrameX
 }
 
 /// Merge size values from a SizeXml into accumulators.
-fn merge_size(width: &mut Option<f32>, height: &mut Option<f32>, size: Option<&crate::xml::SizeXml>) {
+fn merge_size(
+    width: &mut Option<f32>,
+    height: &mut Option<f32>,
+    size: Option<&crate::xml::SizeXml>,
+) {
     if let Some(size) = size {
         let (x, y) = super::get_size_values(size);
         if let Some(x) = x {

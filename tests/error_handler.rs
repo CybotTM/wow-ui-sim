@@ -120,7 +120,10 @@ fn test_error_handler_receives_event_dispatch_errors() {
     let (count, msg): (i32, String) = env
         .eval("return #BugSackErrors, BugSackErrors[1] or ''")
         .unwrap();
-    assert_eq!(count, 1, "error handler should have received exactly 1 error");
+    assert_eq!(
+        count, 1,
+        "error handler should have received exactly 1 error"
+    );
     assert!(
         msg.contains("addon crashed in PLAYER_LOGIN"),
         "error message was: {msg}"
@@ -150,9 +153,7 @@ fn test_error_handler_receives_event_args() {
     let addon_name = mlua::Value::String(lua.create_string("MyAddon").unwrap());
     env.fire_event_with_args("ADDON_LOADED", &[addon_name]).ok();
 
-    let (count, msg): (i32, String) = env
-        .eval("return #TestErrors, TestErrors[1] or ''")
-        .unwrap();
+    let (count, msg): (i32, String) = env.eval("return #TestErrors, TestErrors[1] or ''").unwrap();
     assert_eq!(count, 1);
     assert!(
         msg.contains("failed loading MyAddon"),
@@ -184,11 +185,11 @@ fn test_error_handler_receives_onupdate_errors() {
     let (count, msg): (i32, String) = env
         .eval("return #UpdateErrors, UpdateErrors[1] or ''")
         .unwrap();
-    assert_eq!(count, 1, "error handler should have received exactly 1 error");
-    assert!(
-        msg.contains("tick failed"),
-        "error message was: {msg}"
+    assert_eq!(
+        count, 1,
+        "error handler should have received exactly 1 error"
     );
+    assert!(msg.contains("tick failed"), "error message was: {msg}");
 }
 
 // ── Multiple errors collected ────────────────────────────────────────
@@ -284,6 +285,9 @@ fn test_error_handler_can_be_replaced() {
     let (first, second): (i32, i32) = env
         .eval("return FirstHandlerCalls, SecondHandlerCalls")
         .unwrap();
-    assert_eq!(first, 0, "first handler should not be called after replacement");
+    assert_eq!(
+        first, 0,
+        "first handler should not be called after replacement"
+    );
     assert_eq!(second, 1, "second handler should receive the error");
 }

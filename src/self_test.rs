@@ -2,7 +2,9 @@
 
 use crate::lua_api::WowLuaEnv;
 use crate::lua_errors::restore_stdout;
-use crate::startup::{fire_one_on_update_tick, fire_startup_events_headless, process_pending_timers};
+use crate::startup::{
+    fire_one_on_update_tick, fire_startup_events_headless, process_pending_timers,
+};
 
 /// Flush Lua print() output from console_output to stderr.
 fn flush_console(env: &WowLuaEnv) {
@@ -103,14 +105,24 @@ fn poll_until_done(env: &WowLuaEnv, max_ticks: u32) -> bool {
 
     for tick in 0..max_ticks {
         flush_console(env);
-        if tests_done(env) { return true; }
+        if tests_done(env) {
+            return true;
+        }
 
         let (before, after, dur) = run_one_tick(env);
         if tick < 5 || tick % 10 == 0 {
-            eprintln!("[tick {tick}] {dur:.1?} {} errors={after} wall={:.1?}", tick_debug(env), wall.elapsed());
+            eprintln!(
+                "[tick {tick}] {dur:.1?} {} errors={after} wall={:.1?}",
+                tick_debug(env),
+                wall.elapsed()
+            );
         }
 
-        idle_ticks = if after == prev_errors && after == before { idle_ticks + 1 } else { 0 };
+        idle_ticks = if after == prev_errors && after == before {
+            idle_ticks + 1
+        } else {
+            0
+        };
         prev_errors = after;
         report_new_failures(env, tick, &mut prev_cats);
 
@@ -156,7 +168,9 @@ const FAILURES_TO_JSON_LUA: &str = r#"
 "#;
 
 fn print_failures(env: &WowLuaEnv) {
-    let json: String = env.eval(FAILURES_TO_JSON_LUA).unwrap_or_else(|_| "{}".to_string());
+    let json: String = env
+        .eval(FAILURES_TO_JSON_LUA)
+        .unwrap_or_else(|_| "{}".to_string());
     println!("{json}");
 }
 
@@ -181,7 +195,9 @@ pub fn inject_category_filter(env: &WowLuaEnv, categories: &str) {
     let mut top: HashMap<&str, Vec<&str>> = HashMap::new();
     for entry in categories.split(',') {
         let entry = entry.trim();
-        if entry.is_empty() { continue; }
+        if entry.is_empty() {
+            continue;
+        }
         if let Some((cat, sub)) = entry.split_once('.') {
             top.entry(cat).or_default().push(sub);
         } else {
@@ -528,12 +544,15 @@ fn override_debugprofilestop(env: &WowLuaEnv) {
     let lua = env.lua();
     let _ = lua.globals().set(
         "debugprofilestop",
-        lua.create_function(|_, ()| Ok(0i64)).expect("debugprofilestop override"),
+        lua.create_function(|_, ()| Ok(0i64))
+            .expect("debugprofilestop override"),
     );
 }
 
 pub fn run_test(
-    env: &WowLuaEnv, max_ticks: u32, exec_lua: Option<&str>,
+    env: &WowLuaEnv,
+    max_ticks: u32,
+    exec_lua: Option<&str>,
     saved_stdout: Option<i32>,
 ) {
     if let Some(code) = exec_lua {
@@ -544,7 +563,9 @@ pub fn run_test(
 
     override_debugprofilestop(env);
     // Strip non-Wowless OnUpdate handlers to avoid slow ticks from Blizzard addons.
-    env.state().borrow_mut().retain_on_update_for_addon("Wowless");
+    env.state()
+        .borrow_mut()
+        .retain_on_update_for_addon("Wowless");
     debug_print(env);
 
     let completed = poll_until_done(env, max_ticks);
@@ -559,7 +580,9 @@ pub fn run_test(
 }
 
 fn report_results(env: &WowLuaEnv, completed: bool) {
-    let has_failures: bool = env.eval("next(WowlessTestFailures) ~= nil").unwrap_or(false);
+    let has_failures: bool = env
+        .eval("next(WowlessTestFailures) ~= nil")
+        .unwrap_or(false);
     if has_failures {
         print_failures(env);
         std::process::exit(1);

@@ -403,7 +403,10 @@ fn test_set_atlas_known() {
     let id = state.widgets.get_id_by_name("AtlasTex").unwrap();
     let widget = state.widgets.get(id).unwrap();
     assert_eq!(widget.atlas.as_deref(), Some("checkbox-minimal"));
-    assert!(widget.texture.is_some(), "Known atlas should set texture path");
+    assert!(
+        widget.texture.is_some(),
+        "Known atlas should set texture path"
+    );
     assert!(
         widget.tex_coords.is_some(),
         "Known atlas should set tex_coords"

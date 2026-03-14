@@ -4,8 +4,8 @@
 //! they overlap. Point queries only scan frames in the relevant cell instead
 //! of the full list.
 
-use std::collections::HashMap;
 use iced::{Point, Rectangle};
+use std::collections::HashMap;
 
 /// Cell size in screen pixels. Each cell is CELL_SIZE × CELL_SIZE.
 /// 64px gives ~192 cells at 1024×768 and ~510 at 1920×1080.
@@ -45,7 +45,12 @@ impl HitGrid {
             }
         }
 
-        Self { cells, rects, cols, rows }
+        Self {
+            cells,
+            rects,
+            cols,
+            rows,
+        }
     }
 
     /// Find the topmost frame containing `pos` (Phase 1).
@@ -57,9 +62,10 @@ impl HitGrid {
         let row = ((pos.y / CELL_SIZE) as usize).min(self.rows.saturating_sub(1));
         let cell = &self.cells[row * self.cols + col];
         // Reverse: highest strata/level is last in the sorted order.
-        cell.iter().rev().find(|&&id| {
-            self.rects.get(&id).is_some_and(|r| r.contains(pos))
-        }).copied()
+        cell.iter()
+            .rev()
+            .find(|&&id| self.rects.get(&id).is_some_and(|r| r.contains(pos)))
+            .copied()
     }
 
     /// Check if a frame is in the hittable set and contains `pos` (Phase 2).
@@ -71,7 +77,9 @@ impl HitGrid {
     ///
     /// Uses the stored rect to find which cells contained the frame.
     pub fn remove(&mut self, id: u64) {
-        let Some(rect) = self.rects.remove(&id) else { return };
+        let Some(rect) = self.rects.remove(&id) else {
+            return;
+        };
         let (c0, r0, c1, r1) = cell_range(rect, self.cols, self.rows);
         for row in r0..=r1 {
             for col in c0..=c1 {
@@ -105,16 +113,23 @@ fn cell_range(rect: Rectangle, cols: usize, rows: usize) -> (usize, usize, usize
     let r0 = (rect.y / CELL_SIZE) as usize;
     let c1 = ((rect.x + rect.width) / CELL_SIZE) as usize;
     let r1 = ((rect.y + rect.height) / CELL_SIZE) as usize;
-    (c0.min(max_col), r0.min(max_row), c1.min(max_col), r1.min(max_row))
+    (
+        c0.min(max_col),
+        r0.min(max_row),
+        c1.min(max_col),
+        r1.min(max_row),
+    )
 }
 
 /// Brute-force linear scan (equivalent to old hit_test Phase 1).
 /// Used only in tests to verify grid results.
 #[cfg(test)]
 fn linear_topmost(hittable: &[(u64, Rectangle)], pos: Point) -> Option<u64> {
-    hittable.iter().rev().find_map(|(id, rect)| {
-        if rect.contains(pos) { Some(*id) } else { None }
-    })
+    hittable.iter().rev().find_map(
+        |(id, rect)| {
+            if rect.contains(pos) { Some(*id) } else { None }
+        },
+    )
 }
 
 #[cfg(test)]
@@ -131,19 +146,19 @@ mod tests {
         // 3 overlapping frames at different strata (sorted low→high).
         let hittable = vec![
             (1, rect(0.0, 0.0, 200.0, 200.0)),   // low strata, big
-            (2, rect(50.0, 50.0, 100.0, 100.0)),  // mid strata, overlaps
-            (3, rect(80.0, 80.0, 40.0, 40.0)),    // high strata, small
+            (2, rect(50.0, 50.0, 100.0, 100.0)), // mid strata, overlaps
+            (3, rect(80.0, 80.0, 40.0, 40.0)),   // high strata, small
         ];
         let grid = HitGrid::new(hittable.clone(), 256.0, 256.0);
 
         // Points that should hit different frames.
         let cases = [
-            (Point::new(10.0, 10.0), Some(1)),    // only frame 1
-            (Point::new(60.0, 60.0), Some(2)),    // frames 1+2, topmost=2
-            (Point::new(90.0, 90.0), Some(3)),    // all three, topmost=3
-            (Point::new(130.0, 130.0), Some(2)),   // frames 1+2 (3 ends at 120)
-            (Point::new(180.0, 180.0), Some(1)),   // only frame 1
-            (Point::new(250.0, 250.0), None),      // outside all
+            (Point::new(10.0, 10.0), Some(1)),   // only frame 1
+            (Point::new(60.0, 60.0), Some(2)),   // frames 1+2, topmost=2
+            (Point::new(90.0, 90.0), Some(3)),   // all three, topmost=3
+            (Point::new(130.0, 130.0), Some(2)), // frames 1+2 (3 ends at 120)
+            (Point::new(180.0, 180.0), Some(1)), // only frame 1
+            (Point::new(250.0, 250.0), None),    // outside all
         ];
         for (pos, expected) in cases {
             let grid_result = grid.topmost_at(pos);
@@ -156,13 +171,11 @@ mod tests {
     #[test]
     fn frame_spanning_multiple_cells() {
         // One frame spanning several cells.
-        let hittable = vec![
-            (1, rect(10.0, 10.0, 200.0, 200.0)),
-        ];
+        let hittable = vec![(1, rect(10.0, 10.0, 200.0, 200.0))];
         let grid = HitGrid::new(hittable, 256.0, 256.0);
 
         // Test points in different cells within the frame.
-        assert_eq!(grid.topmost_at(Point::new(20.0, 20.0)), Some(1));   // cell (0,0)
+        assert_eq!(grid.topmost_at(Point::new(20.0, 20.0)), Some(1)); // cell (0,0)
         assert_eq!(grid.topmost_at(Point::new(100.0, 100.0)), Some(1)); // cell (1,1)
         assert_eq!(grid.topmost_at(Point::new(200.0, 200.0)), Some(1)); // cell (3,3)
         // Just outside.
@@ -171,9 +184,7 @@ mod tests {
 
     #[test]
     fn contains_checks_rect() {
-        let hittable = vec![
-            (1, rect(100.0, 100.0, 50.0, 50.0)),
-        ];
+        let hittable = vec![(1, rect(100.0, 100.0, 50.0, 50.0))];
         let grid = HitGrid::new(hittable, 256.0, 256.0);
 
         assert!(grid.contains(1, Point::new(120.0, 120.0)));
@@ -185,7 +196,7 @@ mod tests {
     fn cell_boundary_frame() {
         // Frame exactly on cell boundary (64px).
         let hittable = vec![
-            (1, rect(60.0, 60.0, 10.0, 10.0)),  // spans cells (0,0) and (1,1)
+            (1, rect(60.0, 60.0, 10.0, 10.0)), // spans cells (0,0) and (1,1)
         ];
         let grid = HitGrid::new(hittable, 128.0, 128.0);
 

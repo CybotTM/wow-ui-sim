@@ -59,10 +59,19 @@ fn read_event_counts(env: &WowLuaEnv) -> (i32, i32, i32, i32) {
 /// Assert that only TRAIT_NODE_CHANGED fired, bounded, and nothing else.
 fn assert_bounded_node_changed(counts: (i32, i32, i32, i32), context: &str) {
     let (nc, tc, cu, co) = counts;
-    assert!(nc >= 1, "{context}: should fire >= 1 TRAIT_NODE_CHANGED, got {nc}");
-    assert!(nc <= 10, "{context}: should fire <= 10 TRAIT_NODE_CHANGED, got {nc}");
+    assert!(
+        nc >= 1,
+        "{context}: should fire >= 1 TRAIT_NODE_CHANGED, got {nc}"
+    );
+    assert!(
+        nc <= 10,
+        "{context}: should fire <= 10 TRAIT_NODE_CHANGED, got {nc}"
+    );
     assert_eq!(tc, 0, "{context}: TRAIT_TREE_CHANGED should not fire");
-    assert_eq!(cu, 0, "{context}: TRAIT_TREE_CURRENCY_INFO_UPDATED should not fire");
+    assert_eq!(
+        cu, 0,
+        "{context}: TRAIT_TREE_CURRENCY_INFO_UPDATED should not fire"
+    );
     assert_eq!(co, 0, "{context}: TRAIT_CONFIG_UPDATED should not fire");
 }
 
@@ -120,10 +129,16 @@ fn purchase_rank_reports_affected_node_ids() {
         )
         .unwrap();
 
-    assert!(result.contains("81469"), "Changed node must be in affected set: {result}");
+    assert!(
+        result.contains("81469"),
+        "Changed node must be in affected set: {result}"
+    );
     let count = result.split(',').filter(|s| !s.is_empty()).count();
     eprintln!("purchase_rank affected {count} nodes: {result}");
-    assert!(count <= 10, "Affected node count should be bounded (got {count})");
+    assert!(
+        count <= 10,
+        "Affected node count should be bounded (got {count})"
+    );
 }
 
 // ============================================================================
@@ -143,8 +158,14 @@ fn sequential_purchases_fire_events_independently() {
     let second = read_event_counts(&env).0;
 
     eprintln!("Events: first purchase={first}, second purchase={second}");
-    assert!(first <= 10, "First purchase should fire <= 10 events, got {first}");
-    assert!(second <= 10, "Second purchase should fire <= 10 events, got {second}");
+    assert!(
+        first <= 10,
+        "First purchase should fire <= 10 events, got {first}"
+    );
+    assert!(
+        second <= 10,
+        "Second purchase should fire <= 10 events, got {second}"
+    );
 }
 
 // ============================================================================
@@ -214,7 +235,10 @@ fn animation_groups_finish_after_duration() {
     env.fire_on_update(0.6).unwrap();
 
     let still = count_playing_groups(&env);
-    assert_eq!(still, 0, "No groups should be playing after duration elapsed");
+    assert_eq!(
+        still, 0,
+        "No groups should be playing after duration elapsed"
+    );
 }
 
 // ============================================================================
@@ -245,6 +269,8 @@ fn play_synced_starts_animation_group() {
 
     let duration: f64 = env.eval("return _G._testSyncAG:GetDuration()").unwrap();
     let expected = 22.0;
-    assert!((duration - expected).abs() < 0.01,
-        "Total duration should be {expected}s (5+6.5+10.5), got {duration}");
+    assert!(
+        (duration - expected).abs() < 0.01,
+        "Total duration should be {expected}s (5+6.5+10.5), got {duration}"
+    );
 }

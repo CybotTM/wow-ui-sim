@@ -24,10 +24,11 @@ fn nine_slice_corner_textures_have_atlas() {
     .unwrap();
 
     // The NineSlice child should exist (created by PortraitFrameBaseTemplate)
-    let has_nine_slice: bool = env
-        .eval("return TestNineSlice.NineSlice ~= nil")
-        .unwrap();
-    assert!(has_nine_slice, "ButtonFrameTemplate should have a NineSlice child");
+    let has_nine_slice: bool = env.eval("return TestNineSlice.NineSlice ~= nil").unwrap();
+    assert!(
+        has_nine_slice,
+        "ButtonFrameTemplate should have a NineSlice child"
+    );
 
     // NineSliceUtil.ApplyLayout should have set atlas on corner textures
     let tl_atlas: String = env
@@ -97,7 +98,9 @@ fn nine_slice_textures_produce_quads() {
     // NineSlice corner/edge textures use atlas entries from uiframemetal files
     let has_nine_slice_texture = tex_paths.iter().any(|p| {
         let lower = p.to_lowercase();
-        lower.contains("uiframemetal") || lower.contains("uiframehorizontal") || lower.contains("uiframemetalvertical")
+        lower.contains("uiframemetal")
+            || lower.contains("uiframehorizontal")
+            || lower.contains("uiframemetalvertical")
     });
 
     assert!(
@@ -125,11 +128,15 @@ fn nine_slice_child_fills_parent_bounds() {
     .unwrap();
 
     // Check NineSlice anchor count from Lua side
-    let ns_num_points: i32 = env.eval(r#"
+    let ns_num_points: i32 = env
+        .eval(
+            r#"
         local ns = TestNSFill.NineSlice
         if ns then return ns:GetNumPoints() end
         return -1
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
 
     assert!(
         ns_num_points >= 2,
@@ -146,8 +153,14 @@ fn nine_slice_child_fills_parent_bounds() {
     let parent = state.widgets.get(parent_id).unwrap();
     if let Some(&ns_id) = parent.children_keys.get("NineSlice") {
         let ns_rect = compute_frame_rect(&state.widgets, ns_id, 1024.0, 768.0);
-        eprintln!("Parent: ({}, {}, {}x{})", parent_rect.x, parent_rect.y, parent_rect.width, parent_rect.height);
-        eprintln!("NineSlice: ({}, {}, {}x{})", ns_rect.x, ns_rect.y, ns_rect.width, ns_rect.height);
+        eprintln!(
+            "Parent: ({}, {}, {}x{})",
+            parent_rect.x, parent_rect.y, parent_rect.width, parent_rect.height
+        );
+        eprintln!(
+            "NineSlice: ({}, {}, {}x{})",
+            ns_rect.x, ns_rect.y, ns_rect.width, ns_rect.height
+        );
 
         assert!(
             (ns_rect.width - parent_rect.width).abs() < 1.0,
@@ -265,8 +278,13 @@ fn nine_slice_corner_rust_layout_nonzero() {
                 let rect = compute_frame_rect(&state.widgets, id, 1024.0, 768.0);
                 eprintln!(
                     "TopLeftCorner atlas='{}' layout=({}, {}, {}x{}), visible={}, anchors={}",
-                    atlas, rect.x, rect.y, rect.width, rect.height,
-                    f.visible, f.anchors.len()
+                    atlas,
+                    rect.x,
+                    rect.y,
+                    rect.width,
+                    rect.height,
+                    f.visible,
+                    f.anchors.len()
                 );
                 assert!(
                     rect.width > 0.0 && rect.height > 0.0,
@@ -278,5 +296,8 @@ fn nine_slice_corner_rust_layout_nonzero() {
             }
         }
     }
-    assert!(found_corner, "Should find a TopLeftCorner texture with atlas set");
+    assert!(
+        found_corner,
+        "Should find a TopLeftCorner texture with atlas set"
+    );
 }

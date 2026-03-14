@@ -1,7 +1,7 @@
 //! `lua-errors` subcommand: load UI, collect Lua errors, output unique errors as JSON.
 
 use crate::lua_api::WowLuaEnv;
-use crate::startup::{fire_startup_events, process_pending_timers, fire_one_on_update_tick};
+use crate::startup::settle_headless_startup;
 
 /// A unique Lua error with its occurrence count.
 #[derive(serde::Serialize)]
@@ -19,12 +19,7 @@ pub fn run_lua_errors(env: &WowLuaEnv, saved_stdout: Option<i32>, exec_lua: Opti
     // Suppress stderr during startup events (errors are collected in SimState)
     let saved_stderr = suppress_stderr();
 
-    fire_startup_events(env);
-    env.apply_post_event_workarounds();
-    env.state().borrow_mut().widgets.rebuild_anchor_index();
-    process_pending_timers(env);
-    fire_one_on_update_tick(env);
-    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    settle_headless_startup(env);
 
     restore_stderr(saved_stderr);
 
@@ -49,11 +44,17 @@ fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
     for raw in &state.lua_errors {
         let msg = extract_error_message(raw);
         let entry = counts.entry(msg.clone()).or_insert(0);
-        if *entry == 0 { order.push(msg); }
+        if *entry == 0 {
+            order.push(msg);
+        }
         *entry += 1;
     }
-    order.into_iter()
-        .map(|message| LuaError { count: counts[&message], message })
+    order
+        .into_iter()
+        .map(|message| LuaError {
+            count: counts[&message],
+            message,
+        })
         .collect()
 }
 
@@ -70,7 +71,9 @@ fn extract_error_message(raw: &str) -> String {
 pub fn redirect_stdout_to_stderr() -> Option<i32> {
     unsafe {
         let saved = libc::dup(1);
-        if saved < 0 { return None; }
+        if saved < 0 {
+            return None;
+        }
         libc::dup2(2, 1); // stdout now points to stderr
         Some(saved)
     }
@@ -79,7 +82,10 @@ pub fn redirect_stdout_to_stderr() -> Option<i32> {
 /// Restore stdout from a saved fd.
 pub fn restore_stdout(saved: Option<i32>) {
     if let Some(fd) = saved {
-        unsafe { libc::dup2(fd, 1); libc::close(fd); }
+        unsafe {
+            libc::dup2(fd, 1);
+            libc::close(fd);
+        }
     }
 }
 
@@ -87,9 +93,14 @@ pub fn restore_stdout(saved: Option<i32>) {
 fn suppress_stderr() -> Option<i32> {
     unsafe {
         let saved = libc::dup(2);
-        if saved < 0 { return None; }
+        if saved < 0 {
+            return None;
+        }
         let devnull = libc::open(b"/dev/null\0".as_ptr().cast(), libc::O_WRONLY);
-        if devnull < 0 { libc::close(saved); return None; }
+        if devnull < 0 {
+            libc::close(saved);
+            return None;
+        }
         libc::dup2(devnull, 2);
         libc::close(devnull);
         Some(saved)
@@ -99,6 +110,9 @@ fn suppress_stderr() -> Option<i32> {
 /// Restore stderr from a saved fd.
 fn restore_stderr(saved: Option<i32>) {
     if let Some(fd) = saved {
-        unsafe { libc::dup2(fd, 2); libc::close(fd); }
+        unsafe {
+            libc::dup2(fd, 2);
+            libc::close(fd);
+        }
     }
 }

@@ -129,28 +129,30 @@ fn fire_startup_events(env: &WowLuaEnv, warnings: &mut Vec<String>) {
 const KNOWN_WARNING_COUNT: usize = 0;
 
 #[test]
-fn test_no_warnings_on_startup() { test_timeout! {
-    let warnings = load_and_startup();
-    let count = warnings.len();
+fn test_no_warnings_on_startup() {
+    test_timeout! {
+        let warnings = load_and_startup();
+        let count = warnings.len();
 
-    if count > KNOWN_WARNING_COUNT {
-        let mut msg = format!(
-            "New warnings introduced! Expected at most {KNOWN_WARNING_COUNT}, got {count}.\n\
-             All warnings:\n"
-        );
-        for w in &warnings {
-            msg.push_str(&format!("  {w}\n"));
+        if count > KNOWN_WARNING_COUNT {
+            let mut msg = format!(
+                "New warnings introduced! Expected at most {KNOWN_WARNING_COUNT}, got {count}.\n\
+                 All warnings:\n"
+            );
+            for w in &warnings {
+                msg.push_str(&format!("  {w}\n"));
+            }
+            panic!("{msg}");
         }
-        panic!("{msg}");
-    }
 
-    if count < KNOWN_WARNING_COUNT {
-        panic!(
-            "Warning count improved from {KNOWN_WARNING_COUNT} to {count}! \
-             Update KNOWN_WARNING_COUNT to {count} to lock in the improvement."
-        );
+        if count < KNOWN_WARNING_COUNT {
+            panic!(
+                "Warning count improved from {KNOWN_WARNING_COUNT} to {count}! \
+                 Update KNOWN_WARNING_COUNT to {count} to lock in the improvement."
+            );
+        }
     }
-}}
+}
 
 /// Load all Blizzard addons and apply workarounds (no startup events).
 fn load_all_addons() -> WowLuaEnv {
@@ -198,25 +200,27 @@ fn fire_events_and_timers(env: &WowLuaEnv) {
 /// which inherits UIWidgetContainerNoResizeTemplate (mixin UIWidgetContainerMixin).
 /// GetNumWidgetsShowing must be available on the frame.
 #[test]
-fn test_widget_container_mixin_applied() { test_timeout! {
-    let env = load_all_addons();
+fn test_widget_container_mixin_applied() {
+    test_timeout! {
+        let env = load_all_addons();
 
-    assert_lua(&env, "return type(UIWidgetContainerMixin) == 'table'",
-        "UIWidgetContainerMixin should exist as a Lua table");
-    assert_lua(&env, "return type(UIWidgetContainerMixin.GetNumWidgetsShowing) == 'function'",
-        "UIWidgetContainerMixin should have GetNumWidgetsShowing");
-    assert_lua(&env, "return ObjectiveTrackerUIWidgetContainer ~= nil",
-        "ObjectiveTrackerUIWidgetContainer should exist");
-    assert_lua(&env, "return type(ObjectiveTrackerUIWidgetContainer.GetNumWidgetsShowing) == 'function'",
-        "ObjectiveTrackerUIWidgetContainer should have GetNumWidgetsShowing from UIWidgetContainerMixin");
+        assert_lua(&env, "return type(UIWidgetContainerMixin) == 'table'",
+            "UIWidgetContainerMixin should exist as a Lua table");
+        assert_lua(&env, "return type(UIWidgetContainerMixin.GetNumWidgetsShowing) == 'function'",
+            "UIWidgetContainerMixin should have GetNumWidgetsShowing");
+        assert_lua(&env, "return ObjectiveTrackerUIWidgetContainer ~= nil",
+            "ObjectiveTrackerUIWidgetContainer should exist");
+        assert_lua(&env, "return type(ObjectiveTrackerUIWidgetContainer.GetNumWidgetsShowing) == 'function'",
+            "ObjectiveTrackerUIWidgetContainer should have GetNumWidgetsShowing from UIWidgetContainerMixin");
 
-    let result: i64 = env
-        .eval("return ObjectiveTrackerUIWidgetContainer:GetNumWidgetsShowing()")
-        .expect("GetNumWidgetsShowing() should not error");
-    assert_eq!(result, 0, "No widgets should be showing initially");
+        let result: i64 = env
+            .eval("return ObjectiveTrackerUIWidgetContainer:GetNumWidgetsShowing()")
+            .expect("GetNumWidgetsShowing() should not error");
+        assert_eq!(result, 0, "No widgets should be showing initially");
 
-    // Verify the method survives startup events and timer processing
-    fire_events_and_timers(&env);
-    assert_lua(&env, "return type(ObjectiveTrackerUIWidgetContainer.GetNumWidgetsShowing) == 'function'",
-        "GetNumWidgetsShowing should still be available after startup events and timer processing");
-}}
+        // Verify the method survives startup events and timer processing
+        fire_events_and_timers(&env);
+        assert_lua(&env, "return type(ObjectiveTrackerUIWidgetContainer.GetNumWidgetsShowing) == 'function'",
+            "GetNumWidgetsShowing should still be available after startup events and timer processing");
+    }
+}

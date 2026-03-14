@@ -49,9 +49,7 @@ fn error_to_string(_lua: &Lua, tostring: &mlua::Function, val: &Value) -> Result
 
 /// Strip mlua's "runtime error: " prefix, stack traceback suffix, and trailing newlines.
 fn strip_error_wrapper(msg: &str) -> &str {
-    let msg = msg
-        .strip_prefix("runtime error: ")
-        .unwrap_or(msg);
+    let msg = msg.strip_prefix("runtime error: ").unwrap_or(msg);
     let msg = match msg.find("\nstack traceback:") {
         Some(pos) => &msg[..pos],
         None => msg,
@@ -74,7 +72,7 @@ fn register_xpcall(lua: &Lua) -> Result<()> {
             _ => {
                 return Err(mlua::Error::RuntimeError(
                     "bad argument #1 to 'xpcall' (function expected)".to_string(),
-                ))
+                ));
             }
         };
 
@@ -83,7 +81,7 @@ fn register_xpcall(lua: &Lua) -> Result<()> {
             _ => {
                 return Err(mlua::Error::RuntimeError(
                     "bad argument #2 to 'xpcall' (function expected)".to_string(),
-                ))
+                ));
             }
         };
 

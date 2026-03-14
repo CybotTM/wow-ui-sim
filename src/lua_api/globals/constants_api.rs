@@ -22,14 +22,18 @@ pub fn register_constants_api(lua: &Lua) -> Result<()> {
     register_color_globals(lua)?;
     register_raid_class_colors(lua)?;
     // Load auto-generated missing constants from WoW client diff (1364 constants).
-    lua.load(MISSING_CONSTANTS_LUA).set_name("missing_constants").exec()?;
+    lua.load(MISSING_CONSTANTS_LUA)
+        .set_name("missing_constants")
+        .exec()?;
     Ok(())
 }
 
 /// Create the auto-vivifying Constants table and populate constant namespaces.
 fn register_constants_table(lua: &Lua) -> Result<()> {
     create_autovivify_constants(lua)?;
-    lua.load(CONSTANTS_VALUES_LUA).set_name("constants_values").exec()
+    lua.load(CONSTANTS_VALUES_LUA)
+        .set_name("constants_values")
+        .exec()
 }
 
 /// Create the auto-vivifying Constants global table.

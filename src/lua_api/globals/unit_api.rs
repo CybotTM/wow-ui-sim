@@ -42,9 +42,13 @@ fn resolve_unit_name_with_party(unit: &str, state: &SimState) -> Option<String> 
         return Some(state.player.name.clone());
     }
     if unit == "target" {
-        return Some(state.current_target.as_ref()
-            .map(|t| t.name.clone())
-            .unwrap_or_else(|| "Unknown".to_string()));
+        return Some(
+            state
+                .current_target
+                .as_ref()
+                .map(|t| t.name.clone())
+                .unwrap_or_else(|| "Unknown".to_string()),
+        );
     }
     if let Some(idx) = parse_party_index(unit) {
         if let Some(m) = state.party_members.get(idx) {
@@ -110,15 +114,21 @@ fn player_race_faction(state: &SimState) -> &'static str {
 fn register_sex_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
     let st = state.clone();
-    g.set("UnitSex", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.sex))?)?;
+    g.set(
+        "UnitSex",
+        lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.sex))?,
+    )?;
     let st = state;
-    g.set("UnitSexBase", lua.create_function(move |_, _unit: Option<String>| {
-        Ok(match st.borrow().player.sex {
-            2 => 0, // Male
-            3 => 1, // Female
-            _ => 2, // None/Unknown
-        })
-    })?)?;
+    g.set(
+        "UnitSexBase",
+        lua.create_function(move |_, _unit: Option<String>| {
+            Ok(match st.borrow().player.sex {
+                2 => 0, // Male
+                3 => 1, // Female
+                _ => 2, // None/Unknown
+            })
+        })?,
+    )?;
     Ok(())
 }
 
@@ -136,7 +146,10 @@ fn register_identity_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
         })?,
     )?;
     register_sex_stubs(lua, state.clone())?;
-    globals.set("UnitEffectiveLevel", lua.create_function(|_, _unit: Option<String>| Ok(80))?)?;
+    globals.set(
+        "UnitEffectiveLevel",
+        lua.create_function(|_, _unit: Option<String>| Ok(80))?,
+    )?;
     globals.set(
         "UnitFactionGroup",
         lua.create_function(move |lua, _unit: Option<String>| {
@@ -155,21 +168,27 @@ fn register_unit_guid(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     lua.globals().set(
         "UnitGUID",
         lua.create_function(move |lua, unit: Option<String>| {
-            let Some(unit) = unit else { return Ok(Value::Nil) };
+            let Some(unit) = unit else {
+                return Ok(Value::Nil);
+            };
             if unit == "player" {
                 return Ok(Value::String(lua.create_string("Player-0000-00000001")?));
             }
             if unit == "target" {
                 let s = state.borrow();
-                let guid = s.current_target.as_ref().map(|t| t.guid.clone())
+                let guid = s
+                    .current_target
+                    .as_ref()
+                    .map(|t| t.guid.clone())
                     .unwrap_or_else(|| "Creature-0000-00000000".into());
                 return Ok(Value::String(lua.create_string(&guid)?));
             }
             if let Some(idx) = parse_party_index(&unit)
-                && idx < state.borrow().party_members.len() {
-                    let guid = format!("Player-0000-0000000{}", idx + 2);
-                    return Ok(Value::String(lua.create_string(&guid)?));
-                }
+                && idx < state.borrow().party_members.len()
+            {
+                let guid = format!("Player-0000-0000000{}", idx + 2);
+                return Ok(Value::String(lua.create_string(&guid)?));
+            }
             Ok(Value::String(lua.create_string("Creature-0000-00000000")?))
         })?,
     )
@@ -266,11 +285,15 @@ fn register_class_base_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
         "UnitClassBase",
         lua.create_function(move |lua, _unit: Option<String>| {
             let s = state.borrow();
-            let (_, file) = class_info_by_index(s.player.class_index).unwrap_or(("Warrior", "WARRIOR"));
+            let (_, file) =
+                class_info_by_index(s.player.class_index).unwrap_or(("Warrior", "WARRIOR"));
             Ok(Value::String(lua.create_string(file)?))
         })?,
     )?;
-    globals.set("GetNumClasses", lua.create_function(|_, ()| Ok(CLASS_DATA.len() as i32))?)?;
+    globals.set(
+        "GetNumClasses",
+        lua.create_function(|_, ()| Ok(CLASS_DATA.len() as i32))?,
+    )?;
     Ok(())
 }
 
@@ -419,22 +442,44 @@ fn register_death_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
 fn register_state_boolean_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     for &name in &[
-        "UnitIsGhost", "UnitIsAFK", "UnitIsDND", "UnitIsTapDenied", "UnitIsCorpse",
-        "UnitIsWildBattlePet", "UnitIsBattlePetCompanion", "UnitIsBossMob", "UnitIsQuestBoss",
-        "UnitLeadsAnyGroup", "UnitIsUnconscious", "UnitIsBattlePet",
-        "UnitIsOtherPlayersBattlePet", "UnitIsOtherPlayersPet",
+        "UnitIsGhost",
+        "UnitIsAFK",
+        "UnitIsDND",
+        "UnitIsTapDenied",
+        "UnitIsCorpse",
+        "UnitIsWildBattlePet",
+        "UnitIsBattlePetCompanion",
+        "UnitIsBossMob",
+        "UnitIsQuestBoss",
+        "UnitLeadsAnyGroup",
+        "UnitIsUnconscious",
+        "UnitIsBattlePet",
+        "UnitIsOtherPlayersBattlePet",
+        "UnitIsOtherPlayersPet",
     ] {
-        globals.set(name, lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
+        globals.set(
+            name,
+            lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+        )?;
     }
-    globals.set("UnitIsConnected", lua.create_function(|_, _unit: Option<String>| Ok(true))?)?;
-    globals.set("UnitIsVisible", lua.create_function(move |_, unit: Option<String>| {
-        Ok(match unit.as_deref() {
-            Some("player" | "pet") => true,
-            Some("target") => state.borrow().current_target.is_some(),
-            _ => false,
-        })
-    })?)?;
-    globals.set("UnitCanCooperate", lua.create_function(|_, (_u1, _u2): (String, String)| Ok(false))?)?;
+    globals.set(
+        "UnitIsConnected",
+        lua.create_function(|_, _unit: Option<String>| Ok(true))?,
+    )?;
+    globals.set(
+        "UnitIsVisible",
+        lua.create_function(move |_, unit: Option<String>| {
+            Ok(match unit.as_deref() {
+                Some("player" | "pet") => true,
+                Some("target") => state.borrow().current_target.is_some(),
+                _ => false,
+            })
+        })?,
+    )?;
+    globals.set(
+        "UnitCanCooperate",
+        lua.create_function(|_, (_u1, _u2): (String, String)| Ok(false))?,
+    )?;
     Ok(())
 }
 
@@ -449,8 +494,12 @@ fn register_state_comparisons(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
                 return Ok(true);
             }
             if unit == "target" {
-                return Ok(state.borrow().current_target.as_ref()
-                    .map(|t| t.is_player).unwrap_or(false));
+                return Ok(state
+                    .borrow()
+                    .current_target
+                    .as_ref()
+                    .map(|t| t.is_player)
+                    .unwrap_or(false));
             }
             if let Some(idx) = parse_party_index(&unit) {
                 return Ok(idx < state.borrow().party_members.len());
@@ -478,33 +527,68 @@ fn register_state_relations(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     let globals = lua.globals();
 
     let st = state.clone();
-    globals.set("UnitIsEnemy", lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
-        if u2.as_deref() == Some("target") {
-            return Ok(st.borrow().current_target.as_ref().map(|t| t.is_enemy).unwrap_or(false));
-        }
-        Ok(false)
-    })?)?;
+    globals.set(
+        "UnitIsEnemy",
+        lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
+            if u2.as_deref() == Some("target") {
+                return Ok(st
+                    .borrow()
+                    .current_target
+                    .as_ref()
+                    .map(|t| t.is_enemy)
+                    .unwrap_or(false));
+            }
+            Ok(false)
+        })?,
+    )?;
     let st = state.clone();
-    globals.set("UnitCanAttack", lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
-        if u2.as_deref() == Some("target") {
-            return Ok(st.borrow().current_target.as_ref().map(|t| t.is_enemy).unwrap_or(false));
-        }
-        Ok(false)
-    })?)?;
+    globals.set(
+        "UnitCanAttack",
+        lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
+            if u2.as_deref() == Some("target") {
+                return Ok(st
+                    .borrow()
+                    .current_target
+                    .as_ref()
+                    .map(|t| t.is_enemy)
+                    .unwrap_or(false));
+            }
+            Ok(false)
+        })?,
+    )?;
     let st = state.clone();
-    globals.set("UnitIsFriend", lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
-        if u2.as_deref() == Some("target") {
-            return Ok(st.borrow().current_target.as_ref().map(|t| !t.is_enemy).unwrap_or(true));
-        }
-        Ok(true)
-    })?)?;
-    globals.set("UnitCanAssist", lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
-        if u2.as_deref() == Some("target") {
-            return Ok(state.borrow().current_target.as_ref().map(|t| !t.is_enemy).unwrap_or(true));
-        }
-        Ok(true)
-    })?)?;
-    globals.set("UnitInRange", lua.create_function(|_, _unit: Option<String>| Ok((true, true)))?)?;
+    globals.set(
+        "UnitIsFriend",
+        lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
+            if u2.as_deref() == Some("target") {
+                return Ok(st
+                    .borrow()
+                    .current_target
+                    .as_ref()
+                    .map(|t| !t.is_enemy)
+                    .unwrap_or(true));
+            }
+            Ok(true)
+        })?,
+    )?;
+    globals.set(
+        "UnitCanAssist",
+        lua.create_function(move |_, (_u1, u2): (Option<String>, Option<String>)| {
+            if u2.as_deref() == Some("target") {
+                return Ok(state
+                    .borrow()
+                    .current_target
+                    .as_ref()
+                    .map(|t| !t.is_enemy)
+                    .unwrap_or(true));
+            }
+            Ok(true)
+        })?,
+    )?;
+    globals.set(
+        "UnitInRange",
+        lua.create_function(|_, _unit: Option<String>| Ok((true, true)))?,
+    )?;
     Ok(())
 }
 
@@ -536,9 +620,15 @@ fn register_group_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             Ok(parse_party_index(&unit).map_or(false, |idx| idx < st.borrow().party_members.len()))
         })?,
     )?;
-    globals.set("UnitInRaid", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    globals.set(
+        "UnitInRaid",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
     register_unit_is_group_leader(lua, state)?;
-    globals.set("UnitIsGroupAssistant", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
+    globals.set(
+        "UnitIsGroupAssistant",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
     Ok(())
 }
 
@@ -564,29 +654,46 @@ fn register_threat_functions(lua: &Lua) -> Result<()> {
 fn register_classification_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
     let s = Rc::clone(&state);
-    g.set("UnitClassification", lua.create_function(move |lua, unit: Option<String>| {
-        let val = lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.classification.clone())
-            .unwrap_or_else(|| "normal".to_string());
-        Ok(Value::String(lua.create_string(&val)?))
-    })?)?;
+    g.set(
+        "UnitClassification",
+        lua.create_function(move |lua, unit: Option<String>| {
+            let val =
+                lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.classification.clone())
+                    .unwrap_or_else(|| "normal".to_string());
+            Ok(Value::String(lua.create_string(&val)?))
+        })?,
+    )?;
     let s = Rc::clone(&state);
-    g.set("UnitCreatureType", lua.create_function(move |lua, unit: Option<String>| {
-        let val = lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.creature_type.clone())
-            .unwrap_or_else(|| "Humanoid".to_string());
-        Ok(Value::String(lua.create_string(&val)?))
-    })?)?;
-    g.set("UnitCreatureFamily", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    g.set(
+        "UnitCreatureType",
+        lua.create_function(move |lua, unit: Option<String>| {
+            let val =
+                lookup_target_field(&s.borrow(), unit.as_deref(), |t| t.creature_type.clone())
+                    .unwrap_or_else(|| "Humanoid".to_string());
+            Ok(Value::String(lua.create_string(&val)?))
+        })?,
+    )?;
+    g.set(
+        "UnitCreatureFamily",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
     let s = Rc::clone(&state);
-    g.set("UnitReaction", lua.create_function(move |_, (_unit1, unit2): (String, String)| {
-        let val = lookup_target_field(&s.borrow(), Some(&unit2), |t| t.reaction)
-            .unwrap_or(5);
-        Ok(val)
-    })?)?;
+    g.set(
+        "UnitReaction",
+        lua.create_function(move |_, (_unit1, unit2): (String, String)| {
+            let val = lookup_target_field(&s.borrow(), Some(&unit2), |t| t.reaction).unwrap_or(5);
+            Ok(val)
+        })?,
+    )?;
     Ok(())
 }
 
 /// Look up a field from the TargetInfo matching a unit ID ("target", "focus", "player", etc.).
-fn lookup_target_field<T>(state: &SimState, unit: Option<&str>, f: impl Fn(&super::super::game_data::TargetInfo) -> T) -> Option<T> {
+fn lookup_target_field<T>(
+    state: &SimState,
+    unit: Option<&str>,
+    f: impl Fn(&super::super::game_data::TargetInfo) -> T,
+) -> Option<T> {
     match unit.unwrap_or("player") {
         "target" => state.current_target.as_ref().map(&f),
         "focus" => state.current_focus.as_ref().map(&f),
@@ -642,9 +749,7 @@ fn register_weapon_enchant_functions(lua: &Lua) -> Result<()> {
 
     globals.set(
         "GetWeaponEnchantInfo",
-        lua.create_function(|_, ()| {
-            Ok((false, 0i32, 0i32, 0i32, false, 0i32, 0i32, 0i32))
-        })?,
+        lua.create_function(|_, ()| Ok((false, 0i32, 0i32, 0i32, false, 0i32, 0i32, 0i32)))?,
     )?;
 
     Ok(())
@@ -660,10 +765,22 @@ fn register_xp_functions(lua: &Lua) -> Result<()> {
         .unwrap_or_default()
         .subsec_nanos();
     let xp_current = (nanos % xp_max as u32) as i32;
-    globals.set("UnitXP", lua.create_function(move |_, _unit: Option<String>| Ok(xp_current))?)?;
-    globals.set("UnitXPMax", lua.create_function(move |_, _unit: Option<String>| Ok(xp_max))?)?;
-    globals.set("UnitTrialXP", lua.create_function(|_, _unit: Option<String>| Ok(0i32))?)?;
-    globals.set("GetXPExhaustion", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    globals.set(
+        "UnitXP",
+        lua.create_function(move |_, _unit: Option<String>| Ok(xp_current))?,
+    )?;
+    globals.set(
+        "UnitXPMax",
+        lua.create_function(move |_, _unit: Option<String>| Ok(xp_max))?,
+    )?;
+    globals.set(
+        "UnitTrialXP",
+        lua.create_function(|_, _unit: Option<String>| Ok(0i32))?,
+    )?;
+    globals.set(
+        "GetXPExhaustion",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     globals.set("GetRestState", lua.create_function(|_, ()| Ok(1i32))?)?;
     Ok(())
 }
@@ -682,37 +799,61 @@ fn register_pvp_vehicle_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
         "UnitInPartyIsAI",
     ];
     for &name in false_unit_stubs {
-        g.set(name, lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
+        g.set(
+            name,
+            lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+        )?;
     }
 
     let st = state.clone();
-    g.set("UnitAffectingCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?)?;
+    g.set(
+        "UnitAffectingCombat",
+        lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?,
+    )?;
     let st = state.clone();
-    g.set("UnitInCombat", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?)?;
+    g.set(
+        "UnitInCombat",
+        lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.in_combat))?,
+    )?;
 
     let st = state.clone();
-    g.set("UnitHonorLevel", lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.honor_level))?)?;
-    g.set("UnitPartialPower", lua.create_function(|_, (_unit, _pt): (Option<String>, Option<i32>)| Ok(0i32))?)?;
+    g.set(
+        "UnitHonorLevel",
+        lua.create_function(move |_, _unit: Option<String>| Ok(st.borrow().player.honor_level))?,
+    )?;
+    g.set(
+        "UnitPartialPower",
+        lua.create_function(|_, (_unit, _pt): (Option<String>, Option<i32>)| Ok(0i32))?,
+    )?;
 
     // UnitGroupRolesAssignedEnum -> nil
-    g.set("UnitGroupRolesAssignedEnum", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    g.set(
+        "UnitGroupRolesAssignedEnum",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
 
     // UnitRealmRelationship -> nil
-    g.set("UnitRealmRelationship", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
+    g.set(
+        "UnitRealmRelationship",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
 
     // UnitSelectionColor -> r, g, b, a (red for enemies, green for friendly, white default)
-    g.set("UnitSelectionColor", lua.create_function(move |_, unit: Option<String>| {
-        if unit.as_deref() == Some("target") {
-            let s = state.borrow();
-            if let Some(t) = &s.current_target {
-                if t.is_enemy {
-                    return Ok((1.0f64, 0.0f64, 0.0f64, 1.0f64)); // red
+    g.set(
+        "UnitSelectionColor",
+        lua.create_function(move |_, unit: Option<String>| {
+            if unit.as_deref() == Some("target") {
+                let s = state.borrow();
+                if let Some(t) = &s.current_target {
+                    if t.is_enemy {
+                        return Ok((1.0f64, 0.0f64, 0.0f64, 1.0f64)); // red
+                    }
+                    return Ok((0.0f64, 1.0f64, 0.0f64, 1.0f64)); // green
                 }
-                return Ok((0.0f64, 1.0f64, 0.0f64, 1.0f64)); // green
             }
-        }
-        Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
-    })?)?;
+            Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
+        })?,
+    )?;
 
     Ok(())
 }
@@ -721,28 +862,65 @@ fn register_pvp_vehicle_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
 fn register_misc_unit_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
 
-    g.set("UnitPhaseReason", lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?)?;
-    g.set("UnitIsOwnerOrControllerOfUnit", lua.create_function(|_, (_u1, _u2): (String, String)| Ok(false))?)?;
-    g.set("UnitIsWarModePhased", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
-    g.set("UnitIsWarModeDesired", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
-    g.set("UnitIsWarModeActive", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
-    g.set("UnitHasMana", lua.create_function(|_, _unit: Value| Ok(true))?)?;
-    g.set("UnitHasRelicSlot", lua.create_function(|_, _unit: Value| Ok(false))?)?;
-    g.set("IsActiveBattlefieldArena", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetUnitPowerBarInfo", lua.create_function(|_, _unit: Value| Ok(Value::Nil))?)?;
+    g.set(
+        "UnitPhaseReason",
+        lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "UnitIsOwnerOrControllerOfUnit",
+        lua.create_function(|_, (_u1, _u2): (String, String)| Ok(false))?,
+    )?;
+    g.set(
+        "UnitIsWarModePhased",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
+    g.set(
+        "UnitIsWarModeDesired",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
+    g.set(
+        "UnitIsWarModeActive",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
+    g.set(
+        "UnitHasMana",
+        lua.create_function(|_, _unit: Value| Ok(true))?,
+    )?;
+    g.set(
+        "UnitHasRelicSlot",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
+    g.set(
+        "IsActiveBattlefieldArena",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetUnitPowerBarInfo",
+        lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
+    )?;
     let st = state.clone();
-    g.set("IsInGroup", lua.create_function(move |_, _flags: Option<i32>| {
-        Ok(!st.borrow().party_members.is_empty())
-    })?)?;
+    g.set(
+        "IsInGroup",
+        lua.create_function(move |_, _flags: Option<i32>| {
+            Ok(!st.borrow().party_members.is_empty())
+        })?,
+    )?;
     g.set("IsInRaid", lua.create_function(|_, ()| Ok(false))?)?;
     let st = state.clone();
-    g.set("GetNumSubgroupMembers", lua.create_function(move |_, ()| {
-        Ok(st.borrow().party_members.len() as i32)
-    })?)?;
-    g.set("GetNumGroupMembers", lua.create_function(move |_, ()| {
-        let count = state.borrow().party_members.len() as i32;
-        Ok(if count > 0 { count + 1 } else { 0 })
-    })?)?;
-    g.set("UnitStagger", lua.create_function(|_, _unit: Value| Ok(0i32))?)?;
+    g.set(
+        "GetNumSubgroupMembers",
+        lua.create_function(move |_, ()| Ok(st.borrow().party_members.len() as i32))?,
+    )?;
+    g.set(
+        "GetNumGroupMembers",
+        lua.create_function(move |_, ()| {
+            let count = state.borrow().party_members.len() as i32;
+            Ok(if count > 0 { count + 1 } else { 0 })
+        })?,
+    )?;
+    g.set(
+        "UnitStagger",
+        lua.create_function(|_, _unit: Value| Ok(0i32))?,
+    )?;
     Ok(())
 }

@@ -3,13 +3,16 @@
 //! Split from traits_api.rs — these are the read-side data accessors.
 
 use crate::lua_api::SimState;
-use crate::traits::{TraitNodeInfo, TRAIT_COND_DB, TRAIT_NODE_DB};
+use crate::traits::{TRAIT_COND_DB, TRAIT_NODE_DB, TraitNodeInfo};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
 pub fn create_node_info(
-    lua: &Lua, state: &Rc<RefCell<SimState>>, _config_id: Value, node_id: Value,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    _config_id: Value,
+    node_id: Value,
 ) -> Result<Value> {
     let node_id = match &node_id {
         Value::Integer(n) => *n as i32,
@@ -27,7 +30,10 @@ pub fn create_node_info(
 
 /// Static node fields that don't depend on talent state.
 fn set_node_static_fields(
-    lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo, node_id: i32,
+    lua: &Lua,
+    info: &mlua::Table,
+    node: &TraitNodeInfo,
+    node_id: i32,
 ) -> Result<()> {
     info.set("ID", node_id)?;
     info.set("posX", node.pos_x)?;
@@ -46,8 +52,11 @@ fn set_node_static_fields(
 
 /// Dynamic node fields that depend on talent purchase state.
 fn set_node_dynamic_fields(
-    lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo,
-    node_id: u32, state: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    info: &mlua::Table,
+    node: &TraitNodeInfo,
+    node_id: u32,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let max_ranks = node_max_ranks(node);
     let s = state.borrow();
@@ -99,8 +108,12 @@ fn set_node_dynamic_fields(
 /// Rank fields for SubTreeSelection nodes.
 /// Reads actual selection state so hero spec activation persists.
 fn set_selection_node_ranks(
-    info: &mlua::Table, lua: &Lua, node: &TraitNodeInfo,
-    node_id: u32, max_ranks: i32, visible: bool,
+    info: &mlua::Table,
+    lua: &Lua,
+    node: &TraitNodeInfo,
+    node_id: u32,
+    max_ranks: i32,
+    visible: bool,
     state: &crate::lua_api::SimState,
 ) -> Result<()> {
     let ranks = *state.talents.node_ranks.get(&node_id).unwrap_or(&0) as i32;
@@ -114,7 +127,11 @@ fn set_selection_node_ranks(
     info.set("visibleEdges", lua.create_table()?)?;
     let ae = lua.create_table()?;
     let entry_id = if ranks > 0 {
-        state.talents.node_selections.get(&node_id).copied()
+        state
+            .talents
+            .node_selections
+            .get(&node_id)
+            .copied()
             .unwrap_or_else(|| node.entry_ids.first().copied().unwrap_or(0))
     } else {
         0
@@ -144,13 +161,20 @@ fn set_empty_ranks(info: &mlua::Table, lua: &Lua, max_ranks: i32) -> Result<()> 
 }
 
 fn build_active_entry(
-    lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo,
-    node_id: u32, ranks_purchased: i32, state: &SimState,
+    lua: &Lua,
+    info: &mlua::Table,
+    node: &TraitNodeInfo,
+    node_id: u32,
+    ranks_purchased: i32,
+    state: &SimState,
 ) -> Result<()> {
     let active_entry = lua.create_table()?;
     let entry_id = if node.entry_ids.len() > 1 {
         // Choice node: use selected entry or first.
-        state.talents.node_selections.get(&node_id)
+        state
+            .talents
+            .node_selections
+            .get(&node_id)
             .copied()
             .unwrap_or_else(|| node.entry_ids.first().copied().unwrap_or(0))
     } else {
@@ -165,9 +189,15 @@ fn build_active_entry(
 /// Check all gate conditions (cond_type==0) are met for this node.
 fn check_node_available(node: &TraitNodeInfo, state: &SimState) -> bool {
     for &cid in node.cond_ids {
-        let Some(cond) = TRAIT_COND_DB.get(&cid) else { continue };
-        if cond.cond_type != 0 { continue }
-        if cond.currency_id == 0 { continue }
+        let Some(cond) = TRAIT_COND_DB.get(&cid) else {
+            continue;
+        };
+        if cond.cond_type != 0 {
+            continue;
+        }
+        if cond.currency_id == 0 {
+            continue;
+        }
         let spent = state.talents.spent_for_currency(cond.currency_id);
         if spent < cond.spent_amount {
             return false;
@@ -183,10 +213,24 @@ fn check_edge_requirements(node: &TraitNodeInfo, state: &SimState) -> bool {
     let mut has_sufficient = false;
     let mut any_sufficient_met = false;
     for edge in node.edges {
-        let purchased = *state.talents.node_ranks.get(&edge.source_node_id).unwrap_or(&0) > 0;
+        let purchased = *state
+            .talents
+            .node_ranks
+            .get(&edge.source_node_id)
+            .unwrap_or(&0)
+            > 0;
         match edge.edge_type {
-            2 => { has_sufficient = true; if purchased { any_sufficient_met = true; } }
-            3 => { if !purchased { return false; } }
+            2 => {
+                has_sufficient = true;
+                if purchased {
+                    any_sufficient_met = true;
+                }
+            }
+            3 => {
+                if !purchased {
+                    return false;
+                }
+            }
             _ => {}
         }
     }
@@ -199,7 +243,9 @@ fn check_has_currency(node_id: u32, state: &SimState) -> bool {
         return true; // No currency mapped → free (hero nodes, etc.)
     };
     let max_pts = super::traits_api::max_points_for_currency(cid);
-    if max_pts == 0 { return true }
+    if max_pts == 0 {
+        return true;
+    }
     state.talents.spent_for_currency(cid) < max_pts
 }
 
@@ -207,7 +253,10 @@ fn check_has_currency(node_id: u32, state: &SimState) -> bool {
 /// Filters out cross-subtree edges: non-hero nodes only show edges to other
 /// non-hero nodes, hero nodes only show edges within the same subtree.
 fn build_node_edges_dynamic(
-    lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo, state: &SimState,
+    lua: &Lua,
+    info: &mlua::Table,
+    node: &TraitNodeInfo,
+    state: &SimState,
 ) -> Result<()> {
     let edges = lua.create_table()?;
     let mut idx = 0i64;
@@ -217,15 +266,21 @@ fn build_node_edges_dynamic(
         }
         // Filter edges to nodes hidden by spec conditions.
         if let Some(target) = TRAIT_NODE_DB.get(&edge.source_node_id) {
-            if !check_spec_conditions_met(target, state) { continue }
+            if !check_spec_conditions_met(target, state) {
+                continue;
+            }
         }
         idx += 1;
         let e = lua.create_table()?;
         e.set("targetNode", edge.source_node_id as i64)?;
         e.set("type", edge.edge_type as i32)?;
         e.set("visualStyle", edge.visual_style as i32)?;
-        let is_active =
-            *state.talents.node_ranks.get(&edge.source_node_id).unwrap_or(&0) > 0;
+        let is_active = *state
+            .talents
+            .node_ranks
+            .get(&edge.source_node_id)
+            .unwrap_or(&0)
+            > 0;
         e.set("isActive", is_active)?;
         edges.set(idx, e)?;
     }
@@ -236,13 +291,14 @@ fn build_node_edges_dynamic(
 /// Filter cross-subtree edges: only show edges between nodes in the same
 /// subtree (both hero or both non-hero).
 fn should_show_edge(this_sub_tree: u32, target_node_id: u32) -> bool {
-    let target_sub_tree = TRAIT_NODE_DB.get(&target_node_id)
+    let target_sub_tree = TRAIT_NODE_DB
+        .get(&target_node_id)
         .map(|n| n.sub_tree_id)
         .unwrap_or(0);
     match (this_sub_tree, target_sub_tree) {
-        (0, 0) => true,                          // both non-hero
-        (a, b) if a != 0 && a == b => true,       // same hero subtree
-        _ => false,                                // cross-subtree
+        (0, 0) => true,                     // both non-hero
+        (a, b) if a != 0 && a == b => true, // same hero subtree
+        _ => false,                         // cross-subtree
     }
 }
 
@@ -310,7 +366,8 @@ fn build_node_group_ids(lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo) -> 
 /// Get max ranks for a node from its first entry.
 pub fn node_max_ranks(node: &TraitNodeInfo) -> i32 {
     use crate::traits::TRAIT_ENTRY_DB;
-    node.entry_ids.first()
+    node.entry_ids
+        .first()
         .and_then(|eid| TRAIT_ENTRY_DB.get(eid))
         .map(|e| e.max_ranks as i32)
         .unwrap_or(1)
@@ -340,10 +397,38 @@ pub fn create_definition_info(lua: &Lua, def_id: i32) -> Result<Value> {
         return Ok(Value::Nil);
     };
     let info = lua.create_table()?;
-    info.set("spellID", if def.spell_id != 0 { Value::Integer(def.spell_id as i64) } else { Value::Nil })?;
-    info.set("overriddenSpellID", if def.overrides_spell_id != 0 { Value::Integer(def.overrides_spell_id as i64) } else { Value::Nil })?;
-    info.set("overrideIcon", if def.override_icon != 0 { Value::Integer(def.override_icon as i64) } else { Value::Nil })?;
-    info.set("visibleSpellID", if def.visible_spell_id != 0 { Value::Integer(def.visible_spell_id as i64) } else { Value::Nil })?;
+    info.set(
+        "spellID",
+        if def.spell_id != 0 {
+            Value::Integer(def.spell_id as i64)
+        } else {
+            Value::Nil
+        },
+    )?;
+    info.set(
+        "overriddenSpellID",
+        if def.overrides_spell_id != 0 {
+            Value::Integer(def.overrides_spell_id as i64)
+        } else {
+            Value::Nil
+        },
+    )?;
+    info.set(
+        "overrideIcon",
+        if def.override_icon != 0 {
+            Value::Integer(def.override_icon as i64)
+        } else {
+            Value::Nil
+        },
+    )?;
+    info.set(
+        "visibleSpellID",
+        if def.visible_spell_id != 0 {
+            Value::Integer(def.visible_spell_id as i64)
+        } else {
+            Value::Nil
+        },
+    )?;
     info.set("overrideName", def.override_name)?;
     info.set("overrideSubtext", def.override_subtext)?;
     info.set("overrideDescription", def.override_description)?;
@@ -352,7 +437,9 @@ pub fn create_definition_info(lua: &Lua, def_id: i32) -> Result<Value> {
 
 /// Dynamic condition info — isMet depends on talent state.
 pub fn create_condition_info(
-    lua: &Lua, state: &Rc<RefCell<SimState>>, cond_id: i32,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    cond_id: i32,
 ) -> Result<Value> {
     let Some(cond) = TRAIT_COND_DB.get(&(cond_id as u32)) else {
         return Ok(Value::Nil);
@@ -367,7 +454,9 @@ pub fn create_condition_info(
 }
 
 fn set_condition_static_fields(
-    info: &mlua::Table, cond: &crate::traits::TraitCondInfo, cond_id: i32,
+    info: &mlua::Table,
+    cond: &crate::traits::TraitCondInfo,
+    cond_id: i32,
 ) -> Result<()> {
     info.set("condID", cond_id)?;
     info.set("condType", cond.cond_type as i32)?;
@@ -402,7 +491,9 @@ fn check_spec_conditions_met(node: &TraitNodeInfo, state: &SimState) -> bool {
 /// Paladin specSet mapping (from SpecSetMember DB2):
 ///   27 → 65 (Holy), 28 → 66 (Protection), 29 → 70 (Retribution)
 fn spec_set_contains_active_spec(spec_set_id: u32, state: &SimState) -> bool {
-    if spec_set_id == 0 { return true } // No spec restriction
+    if spec_set_id == 0 {
+        return true;
+    } // No spec restriction
     let active_spec_id = crate::specializations::specs_for_class(state.player.class_index as u32)
         .nth((state.player.active_spec_index - 1).max(0) as usize)
         .map(|s| s.id)
@@ -418,13 +509,16 @@ fn spec_set_contains_active_spec(spec_set_id: u32, state: &SimState) -> bool {
 /// Evaluate whether a trait condition is met based on current talent state.
 fn evaluate_condition(cond: &crate::traits::TraitCondInfo, state: &SimState) -> bool {
     match cond.cond_type {
-        0 => { // Gate: check spent amount for currency
-            if cond.currency_id == 0 { return true }
+        0 => {
+            // Gate: check spent amount for currency
+            if cond.currency_id == 0 {
+                return true;
+            }
             state.talents.spent_for_currency(cond.currency_id) >= cond.spent_amount
         }
         1 => spec_set_contains_active_spec(cond.spec_set_id, state),
         2 => cond.required_level <= 80, // Level check: simulated level 80
-        _ => true,  // Granted ranks, misc: always met
+        _ => true,                      // Granted ranks, misc: always met
     }
 }
 
@@ -434,7 +528,9 @@ pub fn create_sub_tree_info(
     _config_id: i32,
     sub_tree_id: i32,
 ) -> Result<Value> {
-    use super::hero_talents::{get_active_hero_subtree, selection_node_ids_for_subtree, subtree_position};
+    use super::hero_talents::{
+        get_active_hero_subtree, selection_node_ids_for_subtree, subtree_position,
+    };
     use crate::traits::TRAIT_SUBTREE_DB;
     let Some(st) = TRAIT_SUBTREE_DB.get(&(sub_tree_id as u32)) else {
         return Ok(Value::Nil);

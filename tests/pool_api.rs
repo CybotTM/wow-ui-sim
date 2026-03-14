@@ -26,43 +26,57 @@ fn bare_env() -> WowLuaEnv {
 #[test]
 fn test_create_frame_pool() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateFramePool("Frame", UIParent)
         assert(pool ~= nil, "Pool should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_acquire() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateFramePool("Frame", UIParent)
         local frame = pool:Acquire()
         assert(frame ~= nil, "Acquired frame should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_acquire_returns_different_frames() {
     let env = env();
-    let different: bool = env.eval(r#"
+    let different: bool = env
+        .eval(
+            r#"
         local pool = CreateFramePool("Frame", UIParent)
         local f1 = pool:Acquire()
         local f2 = pool:Acquire()
         return f1 ~= f2
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(different, "Two acquires should return different frames");
 }
 
 #[test]
 fn test_frame_pool_get_num_active() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local pool = CreateFramePool("Frame", UIParent)
         pool:Acquire()
         pool:Acquire()
         return pool:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 2);
 }
 
@@ -72,47 +86,59 @@ fn test_frame_pool_release_moves_to_inactive() {
     // Release moves a frame to inactive but the current implementation
     // doesn't remove it from active. Test the behavior that does work:
     // after release + acquire, we should get the released frame back.
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateFramePool("Frame", UIParent)
         local f1 = pool:Acquire()
         pool:Release(f1)
         -- After release, acquiring again should reuse from inactive
         local f2 = pool:Acquire()
         assert(f2 ~= nil, "Should reuse released frame")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_release_all() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local pool = CreateFramePool("Frame", UIParent)
         pool:Acquire()
         pool:Acquire()
         pool:Acquire()
         pool:ReleaseAll()
         return pool:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 0);
 }
 
 #[test]
 fn test_frame_pool_reuses_released() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateFramePool("Frame", UIParent)
         local f1 = pool:Acquire()
         pool:Release(f1)
         local f2 = pool:Acquire()
         -- f2 should reuse f1
         assert(f2 ~= nil, "Should be able to acquire after release")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_enumerate_active() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local pool = CreateFramePool("Frame", UIParent)
         pool:Acquire()
         pool:Acquire()
@@ -121,7 +147,9 @@ fn test_frame_pool_enumerate_active() {
             n = n + 1
         end
         return n
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 2);
 }
 
@@ -132,34 +160,43 @@ fn test_frame_pool_enumerate_active() {
 #[test]
 fn test_create_texture_pool() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TexPoolParent", UIParent)
         local pool = CreateTexturePool(parent, "BACKGROUND")
         assert(pool ~= nil, "Texture pool should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_texture_pool_acquire() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TexPoolAcq", UIParent)
         local pool = CreateTexturePool(parent, "BACKGROUND")
         local tex = pool:Acquire()
         assert(tex ~= nil, "Acquired texture should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_texture_pool_release_all() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TexPoolRelAll", UIParent)
         local pool = CreateTexturePool(parent, "BACKGROUND")
         pool:Acquire()
         pool:Acquire()
         pool:ReleaseAll()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 // ============================================================================
@@ -169,19 +206,24 @@ fn test_texture_pool_release_all() {
 #[test]
 fn test_create_object_pool() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateObjectPool(
             function() return {} end,
             function(obj) end
         )
         assert(pool ~= nil, "Object pool should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_object_pool_acquire_calls_creator() {
     let env = env();
-    let val: i32 = env.eval(r#"
+    let val: i32 = env
+        .eval(
+            r#"
         local counter = 0
         local pool = CreateObjectPool(
             function()
@@ -192,14 +234,18 @@ fn test_object_pool_acquire_calls_creator() {
         )
         local obj = pool:Acquire()
         return obj.id
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(val, 1);
 }
 
 #[test]
 fn test_object_pool_get_num_active() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local pool = CreateObjectPool(
             function() return {} end,
             function(obj) end
@@ -207,7 +253,9 @@ fn test_object_pool_get_num_active() {
         pool:Acquire()
         pool:Acquire()
         return pool:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 2);
 }
 
@@ -215,7 +263,8 @@ fn test_object_pool_get_num_active() {
 fn test_object_pool_release_all_no_error() {
     let env = env();
     // ObjectPool.ReleaseAll is currently a stub (no-op)
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateObjectPool(
             function() return {} end,
             function(obj) end
@@ -223,14 +272,17 @@ fn test_object_pool_release_all_no_error() {
         pool:Acquire()
         pool:Acquire()
         pool:ReleaseAll()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_object_pool_enumerate_active_stub() {
     let env = env();
     // ObjectPool.EnumerateActive is currently a stub that returns a no-op iterator
-    env.exec(r#"
+    env.exec(
+        r#"
         local pool = CreateObjectPool(
             function() return {} end,
             function(obj) end
@@ -240,7 +292,9 @@ fn test_object_pool_enumerate_active_stub() {
         for obj in pool:EnumerateActive() do
             -- stub iterator returns nil immediately
         end
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 // ============================================================================
@@ -250,51 +304,66 @@ fn test_object_pool_enumerate_active_stub() {
 #[test]
 fn test_create_frame_pool_collection() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local coll = CreateFramePoolCollection()
         assert(coll ~= nil, "Collection should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_collection_get_or_create_pool() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         assert(pool ~= nil, "Pool from GetOrCreatePool should not be nil")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_collection_acquire_from_pool() {
     let env = env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         local f = pool:Acquire()
         assert(f ~= nil, "Acquired frame should not be nil")
         assert(f:GetObjectType() == "Frame", "Should be a Frame")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_frame_pool_collection_get_num_active() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         pool:Acquire()
         pool:Acquire()
         return coll:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 2);
 }
 
 #[test]
 fn test_frame_pool_collection_enumerate_active() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         pool:Acquire()
@@ -305,42 +374,54 @@ fn test_frame_pool_collection_enumerate_active() {
             n = n + 1
         end
         return n
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 3);
 }
 
 #[test]
 fn test_frame_pool_collection_release_all() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         pool:Acquire()
         pool:Acquire()
         coll:ReleaseAll()
         return coll:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 0);
 }
 
 #[test]
 fn test_frame_pool_collection_release_single() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", UIParent, "")
         local f1 = pool:Acquire()
         pool:Acquire()
         coll:Release(f1)
         return coll:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 1);
 }
 
 #[test]
 fn test_frame_pool_collection_multiple_templates() {
     let env = env();
-    let count: i32 = env.eval(r#"
+    let count: i32 = env
+        .eval(
+            r#"
         local coll = CreateFramePoolCollection()
         -- Two different pools within the same collection
         local poolA = coll:GetOrCreatePool("FRAME", UIParent, "")
@@ -349,7 +430,9 @@ fn test_frame_pool_collection_multiple_templates() {
         poolB:Acquire()
         poolB:Acquire()
         return coll:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(count, 3);
 }
 
@@ -362,7 +445,8 @@ fn test_edge_pool_acquire_with_line_children() {
     // Simulates the edge pool pattern: create a frame with Line children,
     // then call SetStartPoint/SetEndPoint on those lines.
     let env = bare_env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "EdgePoolParent", UIParent)
         parent:SetSize(600, 400)
 
@@ -399,14 +483,18 @@ fn test_edge_pool_acquire_with_line_children() {
         assert(t2 == endBtn, "End target should be endBtn")
 
         assert(bg:GetThickness() == 12, "Thickness should be 12")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn test_edge_pool_collection_acquire_release_cycle() {
     // Full edge pool lifecycle: create collection, acquire edges, release, re-acquire
     let env = env();
-    let final_count: i32 = env.eval(r#"
+    let final_count: i32 = env
+        .eval(
+            r#"
         local parent = CreateFrame("Frame", "EdgeCycleParent", UIParent)
 
         local coll = CreateFramePoolCollection()
@@ -430,14 +518,18 @@ fn test_edge_pool_collection_acquire_release_cycle() {
         local e4 = pool:Acquire()
         assert(e4 ~= nil, "Should acquire after ReleaseAll")
         return coll:GetNumActive()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(final_count, 1);
 }
 
 #[test]
 fn test_edge_pool_enumerate_after_partial_release() {
     let env = env();
-    let names: String = env.eval(r#"
+    let names: String = env
+        .eval(
+            r#"
         local parent = CreateFrame("Frame", "EnumParent", UIParent)
         local coll = CreateFramePoolCollection()
         local pool = coll:GetOrCreatePool("FRAME", parent, "")
@@ -459,14 +551,17 @@ fn test_edge_pool_enumerate_after_partial_release() {
         end
         table.sort(tags)
         return table.concat(tags, ",")
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(names, "edge1,edge3");
 }
 
 #[test]
 fn test_line_set_start_end_point_offsets() {
     let env = bare_env();
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "LineOffsetParent", UIParent)
         parent:SetSize(200, 200)
         parent:SetPoint("CENTER")
@@ -488,5 +583,7 @@ fn test_line_set_start_end_point_offsets() {
         assert(p2 == "BOTTOMRIGHT", "Expected BOTTOMRIGHT, got " .. tostring(p2))
         assert(x2 == -5, "Expected x=-5, got " .. tostring(x2))
         assert(y2 == 3, "Expected y=3, got " .. tostring(y2))
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }

@@ -23,7 +23,9 @@ fn test_message_frame_is_object_type_frame() {
     let is_frame: bool = env.eval("return TestMF2:IsObjectType('Frame')").unwrap();
     assert!(is_frame);
 
-    let is_mf: bool = env.eval("return TestMF2:IsObjectType('MessageFrame')").unwrap();
+    let is_mf: bool = env
+        .eval("return TestMF2:IsObjectType('MessageFrame')")
+        .unwrap();
     assert!(is_mf);
 }
 

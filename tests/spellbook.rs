@@ -123,7 +123,12 @@ fn build_quads(env: &WowLuaEnv) -> usize {
     let batch = build_quad_batch_for_registry(
         &state.widgets,
         (1024.0, 768.0),
-        None, None, None, None, None, None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
         &buckets,
     );
     batch.quad_count()
@@ -135,10 +140,17 @@ fn build_quads_with_textures(env: &WowLuaEnv) -> (usize, Vec<String>) {
     let batch = build_quad_batch_for_registry(
         &state.widgets,
         (1024.0, 768.0),
-        None, None, None, None, None, None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
         &buckets,
     );
-    let textures: Vec<String> = batch.texture_requests.iter()
+    let textures: Vec<String> = batch
+        .texture_requests
+        .iter()
         .map(|r| r.path.clone())
         .collect();
     (batch.quad_count(), textures)
@@ -165,13 +177,21 @@ fn check_frame_reachability(registry: &WidgetRegistry, frame_id: u64) -> (bool, 
             .map(|p| p.children.contains(&id))
             .unwrap_or(false);
         if !parent_has_child {
-            let pname = registry.get(parent_id)
+            let pname = registry
+                .get(parent_id)
                 .and_then(|f| f.name.as_deref())
                 .unwrap_or("?");
-            return (false, format!(
-                "BREAK: {}[{}] parent={}[{}] but NOT in children list. Path: {}",
-                name, id, pname, parent_id, path.join(" -> ")
-            ));
+            return (
+                false,
+                format!(
+                    "BREAK: {}[{}] parent={}[{}] but NOT in children list. Path: {}",
+                    name,
+                    id,
+                    pname,
+                    parent_id,
+                    path.join(" -> ")
+                ),
+            );
         }
         id = parent_id;
     }
@@ -190,7 +210,11 @@ fn log_ancestor_chain(registry: &WidgetRegistry, frame_id: u64) {
         let name = frame.name.as_deref().unwrap_or("(anon)");
         eprintln!(
             "  {} [{}]: visible={}, children={}, anchors={}",
-            name, id, frame.visible, frame.children.len(), frame.anchors.len()
+            name,
+            id,
+            frame.visible,
+            frame.children.len(),
+            frame.anchors.len()
         );
         match frame.parent_id {
             Some(pid) => id = pid,
@@ -200,46 +224,48 @@ fn log_ancestor_chain(registry: &WidgetRegistry, frame_id: u64) {
 }
 
 #[test]
-fn spellbook_spells_visible_on_first_open() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_spells_visible_on_first_open() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    let sb_visible: bool = env
-        .eval(
-            "return PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame \
-             and PlayerSpellsFrame.SpellBookFrame:IsVisible() or false",
-        )
-        .unwrap();
-    assert!(sb_visible, "SpellBookFrame should be visible after toggle");
+        let sb_visible: bool = env
+            .eval(
+                "return PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame \
+                 and PlayerSpellsFrame.SpellBookFrame:IsVisible() or false",
+            )
+            .unwrap();
+        assert!(sb_visible, "SpellBookFrame should be visible after toggle");
 
-    let item_ids = {
-        let state = env.state().borrow();
-        find_spell_item_ids(&state.widgets)
-    };
-    assert!(!item_ids.is_empty(), "Should have visible spell items");
-    eprintln!("{} visible spell items on first open", item_ids.len());
+        let item_ids = {
+            let state = env.state().borrow();
+            find_spell_item_ids(&state.widgets)
+        };
+        assert!(!item_ids.is_empty(), "Should have visible spell items");
+        eprintln!("{} visible spell items on first open", item_ids.len());
 
-    diagnose_missing_items(&env, &item_ids);
+        diagnose_missing_items(&env, &item_ids);
 
-    let first_quads = build_quads(&env);
-    eprintln!("First open quad count: {}", first_quads);
+        let first_quads = build_quads(&env);
+        eprintln!("First open quad count: {}", first_quads);
 
-    // Close and reopen
-    env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
-    let _ = env.process_timers();
-    env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
-    let _ = env.process_timers();
+        // Close and reopen
+        env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
+        let _ = env.process_timers();
+        env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
+        let _ = env.process_timers();
 
-    let second_quads = build_quads(&env);
-    eprintln!("Second open quad count: {}", second_quads);
+        let second_quads = build_quads(&env);
+        eprintln!("Second open quad count: {}", second_quads);
 
-    assert_eq!(
-        first_quads, second_quads,
-        "First open should produce same quad count as second open.\n\
-         First: {first_quads}, Second: {second_quads}, Diff: {}",
-        second_quads as i64 - first_quads as i64,
-    );
-}}
+        assert_eq!(
+            first_quads, second_quads,
+            "First open should produce same quad count as second open.\n\
+             First: {first_quads}, Second: {second_quads}, Diff: {}",
+            second_quads as i64 - first_quads as i64,
+        );
+    }
+}
 
 /// Check which items are missing from ancestor-visible set and log details.
 /// Uses effective_alpha > 0 as the visibility check (requires get_strata_buckets called first).
@@ -256,13 +282,18 @@ fn diagnose_missing_items(env: &WowLuaEnv, item_ids: &[u64]) {
     let mut in_set = 0;
     let mut missing = 0;
     for &item_id in item_ids {
-        let is_visible = registry.get(item_id).is_some_and(|f| f.effective_alpha > 0.0);
+        let is_visible = registry
+            .get(item_id)
+            .is_some_and(|f| f.effective_alpha > 0.0);
         if is_visible {
             in_set += 1;
         } else {
             missing += 1;
             let (ok, detail) = check_frame_reachability(registry, item_id);
-            eprintln!("Item {} NOT ancestor-visible: ok={}, {}", item_id, ok, detail);
+            eprintln!(
+                "Item {} NOT ancestor-visible: ok={}, {}",
+                item_id, ok, detail
+            );
             log_ancestor_chain(registry, item_id);
         }
     }
@@ -270,210 +301,235 @@ fn diagnose_missing_items(env: &WowLuaEnv, item_ids: &[u64]) {
 }
 
 #[test]
-fn spellbook_spell_items_in_ancestor_visible() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_spell_items_in_ancestor_visible() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    // Propagate effective_alpha
-    {
-        let mut state = env.state().borrow_mut();
-        let _ = state.get_strata_buckets();
+        // Propagate effective_alpha
+        {
+            let mut state = env.state().borrow_mut();
+            let _ = state.get_strata_buckets();
+        }
+
+        let state = env.state().borrow();
+        let item_ids = find_spell_item_ids(&state.widgets);
+        assert!(!item_ids.is_empty(), "Should have spell items");
+
+        let missing: Vec<_> = item_ids
+            .iter()
+            .filter(|&&id| !state.widgets.get(id).is_some_and(|f| f.effective_alpha > 0.0))
+            .map(|&id| {
+                let name = state.widgets.get(id)
+                    .and_then(|f| f.name.as_deref())
+                    .unwrap_or("(anon)");
+                format!("{}[{}]", name, id)
+            })
+            .collect();
+
+        assert!(
+            missing.is_empty(),
+            "All visible spell items should have effective_alpha > 0.\n\
+             Missing {} items: {:?}",
+            missing.len(),
+            &missing[..missing.len().min(10)]
+        );
     }
-
-    let state = env.state().borrow();
-    let item_ids = find_spell_item_ids(&state.widgets);
-    assert!(!item_ids.is_empty(), "Should have spell items");
-
-    let missing: Vec<_> = item_ids
-        .iter()
-        .filter(|&&id| !state.widgets.get(id).is_some_and(|f| f.effective_alpha > 0.0))
-        .map(|&id| {
-            let name = state.widgets.get(id)
-                .and_then(|f| f.name.as_deref())
-                .unwrap_or("(anon)");
-            format!("{}[{}]", name, id)
-        })
-        .collect();
-
-    assert!(
-        missing.is_empty(),
-        "All visible spell items should have effective_alpha > 0.\n\
-         Missing {} items: {:?}",
-        missing.len(),
-        &missing[..missing.len().min(10)]
-    );
-}}
+}
 
 #[test]
-fn spellbook_icon_textures_in_ancestor_visible() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_icon_textures_in_ancestor_visible() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    // Propagate effective_alpha
-    {
-        let mut state = env.state().borrow_mut();
-        let _ = state.get_strata_buckets();
-    }
+        // Propagate effective_alpha
+        {
+            let mut state = env.state().borrow_mut();
+            let _ = state.get_strata_buckets();
+        }
 
-    let state = env.state().borrow();
-    let registry = &state.widgets;
-    let item_ids = find_spell_item_ids(registry);
-    assert!(!item_ids.is_empty(), "Should have spell items");
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let item_ids = find_spell_item_ids(registry);
+        assert!(!item_ids.is_empty(), "Should have spell items");
 
-    // For each spell item, find its Button child, then Icon texture child
-    let mut icons_found = 0u32;
-    let mut icons_missing = 0u32;
-    for &item_id in &item_ids {
-        let Some(item) = registry.get(item_id) else { continue };
-        let Some(&btn_id) = item.children_keys.get("Button") else { continue };
-        let Some(btn) = registry.get(btn_id) else { continue };
-        let Some(&icon_id) = btn.children_keys.get("Icon") else { continue };
-        let Some(icon) = registry.get(icon_id) else { continue };
+        // For each spell item, find its Button child, then Icon texture child
+        let mut icons_found = 0u32;
+        let mut icons_missing = 0u32;
+        for &item_id in &item_ids {
+            let Some(item) = registry.get(item_id) else { continue };
+            let Some(&btn_id) = item.children_keys.get("Button") else { continue };
+            let Some(btn) = registry.get(btn_id) else { continue };
+            let Some(&icon_id) = btn.children_keys.get("Icon") else { continue };
+            let Some(icon) = registry.get(icon_id) else { continue };
 
-        if icon.effective_alpha > 0.0 {
-            icons_found += 1;
-        } else {
-            icons_missing += 1;
-            if icons_missing <= 3 {
-                let (ok, detail) = check_frame_reachability(registry, icon_id);
-                eprintln!("Icon {icon_id} NOT ancestor-visible: ok={ok} {detail}");
-                eprintln!("  icon: vis={} tex={:?} w={} h={} alpha={}",
-                    icon.visible, icon.texture, icon.width, icon.height,
-                    icon.effective_alpha);
-                eprintln!("  btn {btn_id}: vis={} children={:?}",
-                    btn.visible, btn.children);
-                eprintln!("  item {item_id}: vis={} children={:?}",
-                    item.visible, item.children);
+            if icon.effective_alpha > 0.0 {
+                icons_found += 1;
+            } else {
+                icons_missing += 1;
+                if icons_missing <= 3 {
+                    let (ok, detail) = check_frame_reachability(registry, icon_id);
+                    eprintln!("Icon {icon_id} NOT ancestor-visible: ok={ok} {detail}");
+                    eprintln!("  icon: vis={} tex={:?} w={} h={} alpha={}",
+                        icon.visible, icon.texture, icon.width, icon.height,
+                        icon.effective_alpha);
+                    eprintln!("  btn {btn_id}: vis={} children={:?}",
+                        btn.visible, btn.children);
+                    eprintln!("  item {item_id}: vis={} children={:?}",
+                        item.visible, item.children);
+                }
             }
         }
+        eprintln!("Icons: found={icons_found} missing={icons_missing}");
+        assert_eq!(icons_missing, 0,
+            "All spell icon textures should have effective_alpha > 0");
     }
-    eprintln!("Icons: found={icons_found} missing={icons_missing}");
-    assert_eq!(icons_missing, 0,
-        "All spell icon textures should have effective_alpha > 0");
-}}
+}
 
 #[test]
-fn spellbook_texture_requests_match_between_opens() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_texture_requests_match_between_opens() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    let (q1, tex1) = build_quads_with_textures(&env);
-    let icon_tex1: Vec<_> = tex1.iter()
-        .filter(|t| t.to_lowercase().contains("icons"))
-        .collect();
+        let (q1, tex1) = build_quads_with_textures(&env);
+        let icon_tex1: Vec<_> = tex1.iter()
+            .filter(|t| t.to_lowercase().contains("icons"))
+            .collect();
 
-    // Close and reopen
-    env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
-    let _ = env.process_timers();
-    env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
-    let _ = env.process_timers();
+        // Close and reopen
+        env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
+        let _ = env.process_timers();
+        env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()").unwrap();
+        let _ = env.process_timers();
 
-    let (q2, tex2) = build_quads_with_textures(&env);
-    let icon_tex2: Vec<_> = tex2.iter()
-        .filter(|t| t.to_lowercase().contains("icons"))
-        .collect();
+        let (q2, tex2) = build_quads_with_textures(&env);
+        let icon_tex2: Vec<_> = tex2.iter()
+            .filter(|t| t.to_lowercase().contains("icons"))
+            .collect();
 
-    eprintln!("First open: {} quads, {} textures, {} icon textures",
-        q1, tex1.len(), icon_tex1.len());
-    eprintln!("Second open: {} quads, {} textures, {} icon textures",
-        q2, tex2.len(), icon_tex2.len());
+        eprintln!("First open: {} quads, {} textures, {} icon textures",
+            q1, tex1.len(), icon_tex1.len());
+        eprintln!("Second open: {} quads, {} textures, {} icon textures",
+            q2, tex2.len(), icon_tex2.len());
 
-    // Show icon textures unique to second open
-    let set1: std::collections::HashSet<_> = icon_tex1.iter().collect();
-    let new_icons: Vec<_> = icon_tex2.iter()
-        .filter(|t| !set1.contains(t))
-        .collect();
-    if !new_icons.is_empty() {
-        eprintln!("NEW icon textures on second open: {:?}", &new_icons[..new_icons.len().min(5)]);
+        // Show icon textures unique to second open
+        let set1: std::collections::HashSet<_> = icon_tex1.iter().collect();
+        let new_icons: Vec<_> = icon_tex2.iter()
+            .filter(|t| !set1.contains(t))
+            .collect();
+        if !new_icons.is_empty() {
+            eprintln!("NEW icon textures on second open: {:?}", &new_icons[..new_icons.len().min(5)]);
+        }
+
+        assert_eq!(icon_tex1.len(), icon_tex2.len(),
+            "Should have same icon texture count between opens");
     }
+}
 
-    assert_eq!(icon_tex1.len(), icon_tex2.len(),
-        "Should have same icon texture count between opens");
-}}
-
-fn check_rect(registry: &WidgetRegistry, name: &str, sw: f32, sh: f32, ex: f32, ey: f32, ew: f32, eh: f32) {
-    let id = registry.get_id_by_name(name)
+fn check_rect(
+    registry: &WidgetRegistry,
+    name: &str,
+    sw: f32,
+    sh: f32,
+    ex: f32,
+    ey: f32,
+    ew: f32,
+    eh: f32,
+) {
+    let id = registry
+        .get_id_by_name(name)
         .unwrap_or_else(|| panic!("Frame '{name}' not found"));
     let rect = compute_frame_rect(registry, id, sw, sh);
     let tol = 2.0;
     assert!(
-        (rect.x - ex).abs() <= tol && (rect.y - ey).abs() <= tol
-            && (rect.width - ew).abs() <= tol && (rect.height - eh).abs() <= tol,
+        (rect.x - ex).abs() <= tol
+            && (rect.y - ey).abs() <= tol
+            && (rect.width - ew).abs() <= tol
+            && (rect.height - eh).abs() <= tol,
         "{name}: expected ({ex}, {ey}, {ew}x{eh}), got ({}, {}, {}x{})",
-        rect.x, rect.y, rect.width, rect.height
+        rect.x,
+        rect.y,
+        rect.width,
+        rect.height
     );
 }
 
 #[test]
-fn spellbook_frame_positions() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_frame_positions() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    let state = env.state().borrow();
-    let registry = &state.widgets;
-    let (sw, sh) = (1024.0, 768.0);
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let (sw, sh) = (1024.0, 768.0);
 
-    // PlayerSpellsFrame — main container
-    check_rect(registry, "PlayerSpellsFrame", sw, sh, 56.3, 85.0, 911.3, 497.4);
+        // PlayerSpellsFrame — main container
+        check_rect(registry, "PlayerSpellsFrame", sw, sh, 56.3, 85.0, 911.3, 497.4);
 
-    let psf_id = registry.get_id_by_name("PlayerSpellsFrame").expect("PlayerSpellsFrame exists");
-    let psf = registry.get(psf_id).unwrap();
+        let psf_id = registry.get_id_by_name("PlayerSpellsFrame").expect("PlayerSpellsFrame exists");
+        let psf = registry.get(psf_id).unwrap();
 
-    // SpellBookFrame — verify stored dimensions
-    let sb_id = *psf.children_keys.get("SpellBookFrame").expect("SpellBookFrame child key");
-    let sb = registry.get(sb_id).unwrap();
-    assert!(sb.width > 900.0, "SpellBookFrame stored width {} should be > 900", sb.width);
-    assert!(sb.height > 500.0, "SpellBookFrame stored height {} should be > 500", sb.height);
+        // SpellBookFrame — verify stored dimensions
+        let sb_id = *psf.children_keys.get("SpellBookFrame").expect("SpellBookFrame child key");
+        let sb = registry.get(sb_id).unwrap();
+        assert!(sb.width > 900.0, "SpellBookFrame stored width {} should be > 900", sb.width);
+        assert!(sb.height > 500.0, "SpellBookFrame stored height {} should be > 500", sb.height);
 
-    // NineSlice border — should match PlayerSpellsFrame bounds
-    let nine_id = *psf.children_keys.get("NineSlice").expect("NineSlice exists");
-    let nine_rect = compute_frame_rect(registry, nine_id, sw, sh);
-    let psf_rect = compute_frame_rect(registry, psf_id, sw, sh);
-    assert!((nine_rect.x - psf_rect.x).abs() <= 1.0, "NineSlice x should match PlayerSpellsFrame");
-    assert!((nine_rect.width - psf_rect.width).abs() <= 1.0, "NineSlice width should match");
+        // NineSlice border — should match PlayerSpellsFrame bounds
+        let nine_id = *psf.children_keys.get("NineSlice").expect("NineSlice exists");
+        let nine_rect = compute_frame_rect(registry, nine_id, sw, sh);
+        let psf_rect = compute_frame_rect(registry, psf_id, sw, sh);
+        assert!((nine_rect.x - psf_rect.x).abs() <= 1.0, "NineSlice x should match PlayerSpellsFrame");
+        assert!((nine_rect.width - psf_rect.width).abs() <= 1.0, "NineSlice width should match");
 
-    // tabSystem — should be near bottom of PlayerSpellsFrame
-    if let Some(&tab_id) = psf.children_keys.get("tabSystem") {
-        let tab_rect = compute_frame_rect(registry, tab_id, sw, sh);
-        assert!(tab_rect.y > psf_rect.y + psf_rect.height - 50.0,
-            "tabSystem y={} should be near bottom of PlayerSpellsFrame (bottom={})",
-            tab_rect.y, psf_rect.y + psf_rect.height);
-        assert!(tab_rect.width > 100.0, "tabSystem should have width > 100, got {}", tab_rect.width);
+        // tabSystem — should be near bottom of PlayerSpellsFrame
+        if let Some(&tab_id) = psf.children_keys.get("tabSystem") {
+            let tab_rect = compute_frame_rect(registry, tab_id, sw, sh);
+            assert!(tab_rect.y > psf_rect.y + psf_rect.height - 50.0,
+                "tabSystem y={} should be near bottom of PlayerSpellsFrame (bottom={})",
+                tab_rect.y, psf_rect.y + psf_rect.height);
+            assert!(tab_rect.width > 100.0, "tabSystem should have width > 100, got {}", tab_rect.width);
+        }
     }
-}}
+}
 
 #[test]
-fn spellbook_spell_items_have_nonzero_rect() { test_timeout! {
-    let env = setup_full_ui();
-    open_spellbook(&env);
+fn spellbook_spell_items_have_nonzero_rect() {
+    test_timeout! {
+        let env = setup_full_ui();
+        open_spellbook(&env);
 
-    let state = env.state().borrow();
-    let registry = &state.widgets;
-    let item_ids = find_spell_item_ids(registry);
-    assert!(!item_ids.is_empty(), "Should have spell items");
+        let state = env.state().borrow();
+        let registry = &state.widgets;
+        let item_ids = find_spell_item_ids(registry);
+        assert!(!item_ids.is_empty(), "Should have spell items");
 
-    let zero_rect: Vec<_> = item_ids
-        .iter()
-        .filter_map(|&id| {
-            let rect = compute_frame_rect(registry, id, 1024.0, 768.0);
-            if rect.width <= 0.0 || rect.height <= 0.0 {
-                let f = registry.get(id)?;
-                let name = f.name.as_deref().unwrap_or("(anon)");
-                Some(format!(
-                    "{}[{}] rect={:?} fw={} fh={} anchors={}",
-                    name, id, rect, f.width, f.height, f.anchors.len()
-                ))
-            } else {
-                None
-            }
-        })
-        .collect();
+        let zero_rect: Vec<_> = item_ids
+            .iter()
+            .filter_map(|&id| {
+                let rect = compute_frame_rect(registry, id, 1024.0, 768.0);
+                if rect.width <= 0.0 || rect.height <= 0.0 {
+                    let f = registry.get(id)?;
+                    let name = f.name.as_deref().unwrap_or("(anon)");
+                    Some(format!(
+                        "{}[{}] rect={:?} fw={} fh={} anchors={}",
+                        name, id, rect, f.width, f.height, f.anchors.len()
+                    ))
+                } else {
+                    None
+                }
+            })
+            .collect();
 
-    assert!(
-        zero_rect.is_empty(),
-        "All visible spell items should have non-zero layout rects.\n\
-         Zero-rect items ({}):\n{}",
-        zero_rect.len(),
-        zero_rect.join("\n")
-    );
-}}
+        assert!(
+            zero_rect.is_empty(),
+            "All visible spell items should have non-zero layout rects.\n\
+             Zero-rect items ({}):\n{}",
+            zero_rect.len(),
+            zero_rect.join("\n")
+        );
+    }
+}

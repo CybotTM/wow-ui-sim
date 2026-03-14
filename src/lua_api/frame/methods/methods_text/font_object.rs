@@ -1,6 +1,6 @@
 //! SetFontObject, GetFontObject, SetFontObjectsToTry, GetFontObjectForAlphabet, GetNumLines.
 
-use crate::lua_api::frame::handle::{frame_ref, get_sim_state, FrameRef};
+use crate::lua_api::frame::handle::{FrameRef, frame_ref, get_sim_state};
 use crate::lua_api::simple_html::TextStyle;
 use crate::widget::WidgetType;
 use mlua::{Lua, Value};
@@ -22,17 +22,21 @@ fn set_font_object_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
     let args_vec: Vec<Value> = args.into_iter().collect();
     let is_html = is_simple_html(lua, id);
 
-    if is_html && args_vec.len() >= 2
-        && let Some(Value::String(s)) = args_vec.first() {
-            let type_str = s.to_string_lossy().to_string();
-            if is_text_type(&type_str) {
-                return set_font_object_for_text_type(lua, id, &type_str, &args_vec);
-            }
+    if is_html
+        && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first()
+    {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            return set_font_object_for_text_type(lua, id, &type_str, &args_vec);
         }
+    }
 
     let font_object = args_vec.into_iter().next().unwrap_or(Value::Nil);
     if font_object.is_nil() {
-        return Err(mlua::Error::runtime("Usage: SetFontObject(fontObject or \"fontName\")"));
+        return Err(mlua::Error::runtime(
+            "Usage: SetFontObject(fontObject or \"fontName\")",
+        ));
     }
     let font_table = resolve_font_table(lua, &font_object);
     apply_font_table_to_frame(lua, id, font_table.as_ref());
@@ -63,14 +67,18 @@ fn get_font_object_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
         return get_or_create_auto_font(lua, id);
     }
 
-    let store: mlua::Table = lua.load("return _G.__fontstring_font_objects or {}").eval()?;
+    let store: mlua::Table = lua
+        .load("return _G.__fontstring_font_objects or {}")
+        .eval()?;
     let font: Value = store.get(id)?;
     Ok(font)
 }
 
 /// Get the stored font object for a SimpleHTML text type.
 fn get_font_object_for_type(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<Value> {
-    let store: mlua::Table = lua.load("return _G.__fontstring_font_objects or {}").eval()?;
+    let store: mlua::Table = lua
+        .load("return _G.__fontstring_font_objects or {}")
+        .eval()?;
     let key = format!("{}_{}", id, type_str);
     let font: Value = store.get(key)?;
     Ok(font)
@@ -78,16 +86,20 @@ fn get_font_object_for_type(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<
 
 /// GetFontObjectForAlphabet, SetFontObjectsToTry, GetNumLines.
 pub(super) fn add_font_object_extra_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetFontObjectForAlphabet", |lua, this, _alphabet: Option<String>| {
-        frame_ref(lua, this.0)
-    });
-    methods.add_method("SetFontObjectsToTry", |lua, this, args: mlua::MultiValue| {
-        if let Some(first) = args.into_iter().next() {
-            let font_table = resolve_font_table(lua, &first);
-            apply_font_table_to_frame(lua, this.0, font_table.as_ref());
-        }
-        Ok(())
-    });
+    methods.add_method(
+        "GetFontObjectForAlphabet",
+        |lua, this, _alphabet: Option<String>| frame_ref(lua, this.0),
+    );
+    methods.add_method(
+        "SetFontObjectsToTry",
+        |lua, this, args: mlua::MultiValue| {
+            if let Some(first) = args.into_iter().next() {
+                let font_table = resolve_font_table(lua, &first);
+                apply_font_table_to_frame(lua, this.0, font_table.as_ref());
+            }
+            Ok(())
+        },
+    );
     methods.add_method("GetNumLines", |_, _this, ()| Ok(1_i32));
 }
 
@@ -106,7 +118,10 @@ fn set_font_object_for_text_type(
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str.to_string()).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str.to_string())
+            .or_insert_with(TextStyle::default);
         style.font_object = font_name;
     }
     drop(state);
@@ -125,7 +140,10 @@ fn needs_auto_font_object(lua: &Lua, id: u64) -> bool {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     state.widgets.get(id).is_some_and(|f| {
-        matches!(f.widget_type, WidgetType::MessageFrame | WidgetType::EditBox)
+        matches!(
+            f.widget_type,
+            WidgetType::MessageFrame | WidgetType::EditBox
+        )
     })
 }
 
@@ -149,7 +167,10 @@ pub(super) fn resolve_font_table(lua: &Lua, font_object: &Value) -> Option<mlua:
         Value::Table(t) => Some(t.clone()),
         Value::String(name) => {
             let name_str = name.to_string_lossy().to_string();
-            lua.globals().get::<Option<mlua::Table>>(name_str).ok().flatten()
+            lua.globals()
+                .get::<Option<mlua::Table>>(name_str)
+                .ok()
+                .flatten()
         }
         _ => None,
     }
@@ -160,20 +181,31 @@ pub(super) fn apply_font_table_to_frame(lua: &Lua, id: u64, font_table: Option<&
     let Some(src) = font_table else { return };
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
-    let Some(frame) = state.widgets.get_mut_visual(id) else { return };
+    let Some(frame) = state.widgets.get_mut_visual(id) else {
+        return;
+    };
     apply_font_table_paths(src, frame);
     apply_font_table_colors(src, frame);
 }
 
 /// Apply font path/size/outline from a font table to a frame.
 fn apply_font_table_paths(src: &mlua::Table, frame: &mut crate::widget::Frame) {
-    if let Ok(path) = src.get::<String>("__fontPath").or_else(|_| src.get::<String>("__font")) {
+    if let Ok(path) = src
+        .get::<String>("__fontPath")
+        .or_else(|_| src.get::<String>("__font"))
+    {
         frame.font = Some(path);
     }
-    if let Ok(height) = src.get::<f64>("__fontHeight").or_else(|_| src.get::<f64>("__height")) {
+    if let Ok(height) = src
+        .get::<f64>("__fontHeight")
+        .or_else(|_| src.get::<f64>("__height"))
+    {
         frame.font_size = height as f32;
     }
-    if let Ok(flags) = src.get::<String>("__fontFlags").or_else(|_| src.get::<String>("__outline")) {
+    if let Ok(flags) = src
+        .get::<String>("__fontFlags")
+        .or_else(|_| src.get::<String>("__outline"))
+    {
         frame.font_outline = crate::widget::TextOutline::from_wow_str(&flags);
     }
 }
@@ -202,7 +234,10 @@ fn apply_font_table_shadow(src: &mlua::Table, frame: &mut crate::widget::Frame) 
     ) {
         frame.shadow_color = crate::widget::Color::new(r as f32, g as f32, b as f32, a as f32);
     }
-    if let (Ok(x), Ok(y)) = (src.get::<f64>("__shadowOffsetX"), src.get::<f64>("__shadowOffsetY")) {
+    if let (Ok(x), Ok(y)) = (
+        src.get::<f64>("__shadowOffsetX"),
+        src.get::<f64>("__shadowOffsetY"),
+    ) {
         frame.shadow_offset = (x as f32, y as f32);
     }
 }

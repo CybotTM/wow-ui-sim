@@ -6,12 +6,12 @@ mod cfunc_wrap;
 mod diagnostics;
 mod env;
 pub(crate) mod frame;
-pub(crate) mod game_data;
-pub(crate) mod keybindings;
-mod key_dispatch;
 mod frame_methods;
+pub(crate) mod game_data;
 pub mod globals;
 mod globals_legacy;
+mod key_dispatch;
+pub(crate) mod keybindings;
 mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;
@@ -20,8 +20,8 @@ pub(crate) mod secure_env;
 pub mod simple_html;
 pub(crate) mod state;
 pub(crate) mod state_types;
-mod timer_processing;
 pub(crate) mod talent_state;
+mod timer_processing;
 pub mod tooltip;
 pub(crate) mod workarounds;
 pub(crate) mod workarounds_bags;
@@ -29,15 +29,15 @@ pub(crate) mod workarounds_editmode;
 
 // Re-export public types
 pub use env::WowLuaEnv;
+pub use globals::global_frames::hide_runtime_hidden_frames;
 pub use layout::{
-    anchor_position, compute_frame_rect, frame_position_from_anchor, get_parent_depth, LayoutRect,
+    LayoutRect, anchor_position, compute_frame_rect, frame_position_from_anchor, get_parent_depth,
 };
 pub use loader_env::LoaderEnv;
 pub use message_frame::MessageFrameData;
 pub use simple_html::SimpleHtmlData;
 pub use state::{AddonInfo, PendingTimer, SimState, tick_party_health};
 pub use tooltip::TooltipData;
-pub use globals::global_frames::hide_runtime_hidden_frames;
 
 // Crate-internal re-exports
 pub(crate) use env::next_timer_id;

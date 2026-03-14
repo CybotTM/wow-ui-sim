@@ -98,6 +98,10 @@ pub fn pick_list_style(_theme: &Theme, status: pick_list::Status) -> pick_list::
         placeholder_color: palette::TEXT_MUTED,
         handle_color: palette::TEXT_SECONDARY,
         background: iced::Background::Color(palette::BG_INPUT),
-        border: Border { color: border_color, width: 1.0, radius: 3.0.into() },
+        border: Border {
+            color: border_color,
+            width: 1.0,
+            radius: 3.0.into(),
+        },
     }
 }

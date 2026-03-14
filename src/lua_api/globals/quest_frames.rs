@@ -55,16 +55,52 @@ fn register_quest_frame(_lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<u64
 
 /// Register quest panel child frames (Reward, Detail, Progress).
 fn register_quest_panels(lua: &Lua, state: &Rc<RefCell<SimState>>, quest_id: u64) -> Result<()> {
-    create_child_frame(lua, state, "QuestFrameRewardPanel", WidgetType::Frame, quest_id)?;
-    create_child_frame(lua, state, "QuestFrameDetailPanel", WidgetType::Frame, quest_id)?;
-    create_child_frame(lua, state, "QuestFrameProgressPanel", WidgetType::Frame, quest_id)?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameRewardPanel",
+        WidgetType::Frame,
+        quest_id,
+    )?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameDetailPanel",
+        WidgetType::Frame,
+        quest_id,
+    )?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameProgressPanel",
+        WidgetType::Frame,
+        quest_id,
+    )?;
     Ok(())
 }
 
 /// Register quest button child frames (CompleteQuest, Accept, Complete).
 fn register_quest_buttons(lua: &Lua, state: &Rc<RefCell<SimState>>, quest_id: u64) -> Result<()> {
-    create_child_frame(lua, state, "QuestFrameCompleteQuestButton", WidgetType::Button, quest_id)?;
-    create_child_frame(lua, state, "QuestFrameAcceptButton", WidgetType::Button, quest_id)?;
-    create_child_frame(lua, state, "QuestFrameCompleteButton", WidgetType::Button, quest_id)?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameCompleteQuestButton",
+        WidgetType::Button,
+        quest_id,
+    )?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameAcceptButton",
+        WidgetType::Button,
+        quest_id,
+    )?;
+    create_child_frame(
+        lua,
+        state,
+        "QuestFrameCompleteButton",
+        WidgetType::Button,
+        quest_id,
+    )?;
     Ok(())
 }

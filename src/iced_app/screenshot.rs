@@ -3,8 +3,8 @@
 use std::path::Path;
 
 use crate::lua_server::Response as LuaResponse;
-use crate::render::headless::render_to_image;
 use crate::render::GlyphAtlas;
+use crate::render::headless::render_to_image;
 
 use super::app::App;
 use super::strata_emit::build_quad_batch_for_registry;
@@ -69,13 +69,20 @@ impl App {
         }
 
         let size_label = if crop.is_some() {
-            format!("{}x{} (cropped from {}x{})", img.width(), img.height(), width, height)
+            format!(
+                "{}x{} (cropped from {}x{})",
+                img.width(),
+                img.height(),
+                width,
+                height
+            )
         } else {
             format!("{}x{}", width, height)
         };
         LuaResponse::Output(format!(
             "Saved {} screenshot to {}",
-            size_label, output_path.display()
+            size_label,
+            output_path.display()
         ))
     }
 }
@@ -97,12 +104,20 @@ fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
 fn apply_crop(img: image::RgbaImage, crop_str: &str) -> Result<image::RgbaImage, String> {
     use image::GenericImageView;
     let (cw, ch, cx, cy) = parse_crop(crop_str).ok_or_else(|| {
-        format!("Invalid crop format '{}', expected WxH+X+Y (e.g., 700x150+400+650)", crop_str)
+        format!(
+            "Invalid crop format '{}', expected WxH+X+Y (e.g., 700x150+400+650)",
+            crop_str
+        )
     })?;
     if cx + cw > img.width() || cy + ch > img.height() {
         return Err(format!(
             "Crop region {}x{}+{}+{} exceeds image bounds {}x{}",
-            cw, ch, cx, cy, img.width(), img.height()
+            cw,
+            ch,
+            cx,
+            cy,
+            img.width(),
+            img.height()
         ));
     }
     Ok(img.view(cx, cy, cw, ch).to_image())

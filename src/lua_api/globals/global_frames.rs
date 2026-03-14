@@ -3,8 +3,8 @@
 //! This module registers all global frame objects that are expected to exist
 //! in the WoW UI environment, such as UIParent, WorldFrame, PlayerFrame, etc.
 
-use crate::lua_api::frame::sync_child_to_lua;
 use crate::lua_api::SimState;
+use crate::lua_api::frame::sync_child_to_lua;
 use crate::widget::{Frame, WidgetType};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
@@ -20,7 +20,11 @@ fn register_frame_global(lua: &Lua, state: &Rc<RefCell<SimState>>, name: &str) -
 }
 
 /// Register a frame global that starts hidden.
-fn register_hidden_frame_global(lua: &Lua, state: &Rc<RefCell<SimState>>, name: &str) -> Result<u64> {
+fn register_hidden_frame_global(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    name: &str,
+) -> Result<u64> {
     register_frame_global_with_visibility(lua, state, name, false)
 }
 
@@ -93,8 +97,7 @@ pub fn register_global_frames(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
 /// Register core frames: UIParent, WorldFrame, Minimap, etc.
 fn register_core_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     register_frame_global(lua, state, "UIParent")?;
-    lua.globals()
-        .set("UIPanelWindows", lua.create_table()?)?;
+    lua.globals().set("UIPanelWindows", lua.create_table()?)?;
     register_typed_frame_global(lua, state, "WorldFrame", WidgetType::WorldFrame)?;
     register_frame_global(lua, state, "Minimap")?;
     register_frame_global(lua, state, "EventToastManagerFrame")?;
@@ -118,7 +121,16 @@ fn register_chat_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()>
 /// Register ChatTypeGroup table mapping chat type groups to arrays of message types.
 fn register_chat_type_group(lua: &Lua) -> Result<()> {
     let groups: &[(&str, &[&str])] = &[
-        ("SYSTEM", &["SYSTEM", "ERROR", "IGNORED", "CHANNEL_NOTICE", "CHANNEL_NOTICE_USER"]),
+        (
+            "SYSTEM",
+            &[
+                "SYSTEM",
+                "ERROR",
+                "IGNORED",
+                "CHANNEL_NOTICE",
+                "CHANNEL_NOTICE_USER",
+            ],
+        ),
         ("SAY", &["SAY"]),
         ("YELL", &["YELL"]),
         ("WHISPER", &["WHISPER", "WHISPER_INFORM"]),
@@ -128,7 +140,10 @@ fn register_chat_type_group(lua: &Lua) -> Result<()> {
         ("EMOTE", &["EMOTE", "TEXT_EMOTE"]),
         ("CHANNEL", &["CHANNEL"]),
         ("INSTANCE_CHAT", &["INSTANCE_CHAT", "INSTANCE_CHAT_LEADER"]),
-        ("BN_WHISPER", &["BN_WHISPER", "BN_WHISPER_INFORM", "BN_CONVERSATION"]),
+        (
+            "BN_WHISPER",
+            &["BN_WHISPER", "BN_WHISPER_INFORM", "BN_CONVERSATION"],
+        ),
     ];
 
     let chat_type_group = lua.create_table()?;
@@ -148,16 +163,22 @@ fn register_chat_frame_util(lua: &Lua) -> Result<()> {
     let chat_frame_util = lua.create_table()?;
     chat_frame_util.set(
         "ProcessMessageEventFilters",
-        lua.create_function(|_, (_, event, args): (Value, String, mlua::Variadic<Value>)| {
-            Ok((false, event, args))
-        })?,
+        lua.create_function(
+            |_, (_, event, args): (Value, String, mlua::Variadic<Value>)| Ok((false, event, args)),
+        )?,
     )?;
     chat_frame_util.set(
         "GetChatWindowName",
         lua.create_function(|_, frame_id: i32| Ok(format!("Chat Window {}", frame_id)))?,
     )?;
-    chat_frame_util.set("RegisterForStickyFocus", lua.create_function(|_, _frame: Value| Ok(()))?)?;
-    chat_frame_util.set("UnregisterForStickyFocus", lua.create_function(|_, _frame: Value| Ok(()))?)?;
+    chat_frame_util.set(
+        "RegisterForStickyFocus",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
+    chat_frame_util.set(
+        "UnregisterForStickyFocus",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
     lua.globals().set("ChatFrameUtil", chat_frame_util)?;
     Ok(())
 }
@@ -205,6 +226,23 @@ fn setup_settings_panel(lua: &Lua) -> Result<()> {
                 }
             }
         }
+
+        local function CreatePreviewStub()
+            local preview = {
+                TitleText = { SetFontHeight = function() end },
+                BodyText = { SetFontHeight = function() end },
+            }
+
+            function preview:RegisterWithSettingInitializer() end
+            function preview:SetValueAccessor() end
+            function preview:UpdatePreview() end
+            function preview:Layout() end
+
+            return preview
+        end
+
+        SettingsPanel.AccessibilityFontPreview = SettingsPanel.AccessibilityFontPreview or CreatePreviewStub()
+        SettingsPanel.QuestTextPreview = SettingsPanel.QuestTextPreview or CreatePreviewStub()
     "#,
     )
     .exec()
@@ -248,7 +286,10 @@ fn setup_alert_frame(lua: &Lua) -> Result<()> {
 /// Set up EditModeManagerFrame with AccountSettings child frame.
 fn setup_edit_mode_manager(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     // AccountSettings is a child frame with parentKey="AccountSettings"
-    let emm_id = state.borrow().widgets.get_id_by_name("EditModeManagerFrame");
+    let emm_id = state
+        .borrow()
+        .widgets
+        .get_id_by_name("EditModeManagerFrame");
     if let Some(parent_id) = emm_id {
         let mut child = Frame::new(WidgetType::Frame, None, Some(parent_id));
         child.visible = false;
@@ -258,7 +299,9 @@ fn setup_edit_mode_manager(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
         {
             let mut st = state.borrow_mut();
             if let Some(parent) = st.widgets.get_mut_visual(parent_id) {
-                parent.children_keys.insert("AccountSettings".to_string(), child_id);
+                parent
+                    .children_keys
+                    .insert("AccountSettings".to_string(), child_id);
             }
         }
         sync_child_to_lua(lua, parent_id, "AccountSettings", child_id)?;
@@ -303,9 +346,7 @@ fn setup_editmode_stub_methods(lua: &Lua, frame_name: &str) -> Result<()> {
 fn setup_buff_frame_aura_container(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let aura_container_id = {
         let st = state.borrow();
-        st.widgets
-            .get_id_by_name("BuffFrameAuraContainer")
-            .unwrap()
+        st.widgets.get_id_by_name("BuffFrameAuraContainer").unwrap()
     };
     let aura_fields = get_or_create_frame_fields(lua, aura_container_id)?;
     aura_fields.set("iconScale", 1.0)?;
@@ -333,6 +374,8 @@ fn register_misc_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
 
     // FriendsFrame has hidden="true" in its XML but we create it as a stub
     register_hidden_frame_global(lua, state, "FriendsFrame")?;
+    let quick_join_toast_id = register_hidden_frame_global(lua, state, "QuickJoinToastButton")?;
+    setup_quick_join_toast_button(lua, quick_join_toast_id)?;
 
     // ChatAlertFrame - used by Blizzard_Channels and Blizzard_DelvesToast
     register_hidden_frame_global(lua, state, "ChatAlertFrame")?;
@@ -371,14 +414,17 @@ fn setup_addon_compartment(lua: &Lua, addon_compartment_id: u64) -> Result<()> {
 
 /// Set up ChatAlertFrame with stub methods used by Blizzard_Channels and Blizzard_DelvesToast.
 fn setup_chat_alert_frame(lua: &Lua) -> Result<()> {
-    lua.load(r#"
+    lua.load(
+        r#"
         if ChatAlertFrame then
             function ChatAlertFrame:AddAutoAnchoredSubSystem() end
             function ChatAlertFrame:SetChatButtonSide() end
             function ChatAlertFrame:SetSubSystemAnchorPriority() end
             function ChatAlertFrame:UpdateAnchors() end
         end
-    "#).exec()
+    "#,
+    )
+    .exec()
 }
 
 /// Register PartyMemberFramePool with empty iterator.
@@ -400,22 +446,37 @@ fn setup_party_member_frame_pool(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+fn setup_quick_join_toast_button(lua: &Lua, quick_join_toast_id: u64) -> Result<()> {
+    let fields = get_or_create_frame_fields(lua, quick_join_toast_id)?;
+    fields.set(
+        "UpdateDisplayedFriendCount",
+        lua.create_function(|_, _self: Value| Ok(()))?,
+    )?;
+    fields.set(
+        "SetToastDirection",
+        lua.create_function(|_, (_self, _is_on_right): (Value, bool)| Ok(()))?,
+    )?;
+    Ok(())
+}
+
 /// Create a clickable button to target the simulated enemy NPC.
 fn setup_enemy_target_button(lua: &Lua) -> Result<()> {
-    lua.load(r#"
+    lua.load(
+        r#"
         local btn = CreateFrame("Button", "SimEnemyTargetButton", UIParent)
         btn:SetSize(120, 24)
         btn:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -10, -10)
         btn:SetText("Hogger (F6)")
         btn:RegisterForClicks("LeftButtonUp")
         btn:SetScript("OnClick", function() TargetUnit("enemy1") end)
-    "#).exec()
+    "#,
+    )
+    .exec()
 }
 
 /// Register empty table globals.
 fn register_table_globals(lua: &Lua) -> Result<()> {
-    lua.globals()
-        .set("UISpecialFrames", lua.create_table()?)?;
+    lua.globals().set("UISpecialFrames", lua.create_table()?)?;
     lua.globals()
         .set("StaticPopupDialogs", lua.create_table()?)?;
     Ok(())
@@ -504,7 +565,9 @@ fn hide_child_overlays(lua: &Lua) -> Result<()> {
 }
 
 fn hide_action_bar_overlays(lua: &Lua) {
-    let _ = lua.load(r#"
+    let _ = lua
+        .load(
+            r#"
         if MainActionBar then
             local h = __hide_child
             h(MainActionBar, "QuickKeybindGlowLarge")
@@ -512,11 +575,15 @@ fn hide_action_bar_overlays(lua: &Lua) {
             h(MainActionBar, "QuickKeybindBottomShadow")
             h(MainActionBar, "QuickKeybindRightShadow")
         end
-    "#).exec();
+    "#,
+        )
+        .exec();
 }
 
 fn hide_player_frame_overlays(lua: &Lua) {
-    let _ = lua.load(r#"
+    let _ = lua
+        .load(
+            r#"
         if not PlayerFrame then return end
         local h = __hide_child
         -- Container-level textures (vehicle/alternate overlays)
@@ -543,21 +610,29 @@ fn hide_player_frame_overlays(lua: &Lua) {
         end
         -- Mana bar full-power glow
         if PlayerFrame.manabar then h(PlayerFrame.manabar, "FullPowerFrame") end
-    "#).exec();
+    "#,
+        )
+        .exec();
 }
 
 fn hide_micro_menu_flashes(lua: &Lua) {
-    let _ = lua.load(r#"
+    let _ = lua
+        .load(
+            r#"
         if MicroMenu then
             for _, child in ipairs({ MicroMenu:GetChildren() }) do
                 __hide_child(child, "FlashContent")
             end
         end
-    "#).exec();
+    "#,
+        )
+        .exec();
 }
 
 fn hide_xp_bar_effects(lua: &Lua) {
-    let _ = lua.load(r#"
+    let _ = lua
+        .load(
+            r#"
         if MainStatusTrackingBarContainer then
             local h = __hide_child
             for _, child in ipairs({ MainStatusTrackingBarContainer:GetChildren() }) do
@@ -567,16 +642,22 @@ fn hide_xp_bar_effects(lua: &Lua) {
                 end
             end
         end
-    "#).exec();
+    "#,
+        )
+        .exec();
 }
 
 fn hide_misc_overlays(lua: &Lua) {
-    let _ = lua.load(r#"
+    let _ = lua
+        .load(
+            r#"
         if GameTimeCalendarEventAlarmTexture then
             GameTimeCalendarEventAlarmTexture:Hide()
         end
         if ItemButton then ItemButton:Hide() end
-    "#).exec();
+    "#,
+        )
+        .exec();
 }
 
 /// Hide anonymous frames orphaned to UIParent during addon loading.
@@ -586,8 +667,9 @@ fn hide_misc_overlays(lua: &Lua) {
 /// When the parent is nil, `CreateFrame` falls back to UIParent, making these
 /// frames visible at the top level. In real WoW they'd be inside hidden panels.
 fn hide_orphaned_anonymous_frames(lua: &Lua) -> Result<()> {
-    if let Err(e) = lua.load(
-        r#"
+    if let Err(e) = lua
+        .load(
+            r#"
         for _, child in ipairs({ UIParent:GetChildren() }) do
             if not child:GetName() and child:IsShown() then
                 -- MapLegend categories (Quests, Activities, etc.)
@@ -604,8 +686,9 @@ fn hide_orphaned_anonymous_frames(lua: &Lua) -> Result<()> {
             end
         end
         "#,
-    )
-    .exec() {
+        )
+        .exec()
+    {
         eprintln!("[hide_orphaned] Error: {}", e);
     }
     Ok(())

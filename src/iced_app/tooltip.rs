@@ -5,18 +5,20 @@ use std::sync::OnceLock;
 
 use iced::{Point, Rectangle, Size};
 
-use crate::atlas::{get_nine_slice_atlas_info, NineSliceAtlasInfo};
+use crate::atlas::{NineSliceAtlasInfo, get_nine_slice_atlas_info};
 use crate::lua_api::SimState;
-use crate::render::font::WowFontSystem;
-use crate::render::glyph::{emit_text_quads, GlyphAtlas};
-use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::render::QuadBatch;
+use crate::render::font::WowFontSystem;
+use crate::render::glyph::{GlyphAtlas, emit_text_quads};
+use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
 use crate::widget::{TextJustify, TextOutline};
 
 /// Cached nine-slice atlas info for the default tooltip border.
 fn tooltip_nine_slice() -> Option<&'static NineSliceAtlasInfo> {
     static CACHE: OnceLock<Option<NineSliceAtlasInfo>> = OnceLock::new();
-    CACHE.get_or_init(|| get_nine_slice_atlas_info("Tooltip")).as_ref()
+    CACHE
+        .get_or_init(|| get_nine_slice_atlas_info("Tooltip"))
+        .as_ref()
 }
 
 const TOOLTIP_PADDING_H: f32 = 12.0;
@@ -76,9 +78,15 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
     let mut total_height: f32 = 0.0;
 
     for (i, line) in td.lines.iter().enumerate() {
-        let font_size = if i == 0 { TOOLTIP_HEADER_FONT_SIZE } else { TOOLTIP_BODY_FONT_SIZE };
+        let font_size = if i == 0 {
+            TOOLTIP_HEADER_FONT_SIZE
+        } else {
+            TOOLTIP_BODY_FONT_SIZE
+        };
         let left_w = font_system.measure_text_width(&line.left_text, None, font_size);
-        let right_w = line.right_text.as_ref()
+        let right_w = line
+            .right_text
+            .as_ref()
             .map(|t| font_system.measure_text_width(t, None, font_size))
             .unwrap_or(0.0);
 
@@ -102,9 +110,7 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
 }
 
 /// Collect render data for all visible tooltips with lines.
-pub fn collect_tooltip_data(
-    state: &SimState,
-) -> HashMap<u64, TooltipRenderData> {
+pub fn collect_tooltip_data(state: &SimState) -> HashMap<u64, TooltipRenderData> {
     let mut result = HashMap::new();
     for (&id, td) in &state.tooltips {
         if td.lines.is_empty() {
@@ -115,17 +121,36 @@ pub fn collect_tooltip_data(
             continue;
         }
         let alpha = state.widgets.get(id).map(|f| f.alpha).unwrap_or(1.0);
-        let lines = td.lines.iter().enumerate().map(|(i, line)| {
-            let font_size = if i == 0 { TOOLTIP_HEADER_FONT_SIZE } else { TOOLTIP_BODY_FONT_SIZE };
-            TooltipLineRender {
-                left_text: line.left_text.clone(),
-                left_color: [line.left_color.0, line.left_color.1, line.left_color.2, alpha],
-                right_text: line.right_text.clone(),
-                right_color: [line.right_color.0, line.right_color.1, line.right_color.2, alpha],
-                font_size,
-                wrap: line.wrap,
-            }
-        }).collect();
+        let lines = td
+            .lines
+            .iter()
+            .enumerate()
+            .map(|(i, line)| {
+                let font_size = if i == 0 {
+                    TOOLTIP_HEADER_FONT_SIZE
+                } else {
+                    TOOLTIP_BODY_FONT_SIZE
+                };
+                TooltipLineRender {
+                    left_text: line.left_text.clone(),
+                    left_color: [
+                        line.left_color.0,
+                        line.left_color.1,
+                        line.left_color.2,
+                        alpha,
+                    ],
+                    right_text: line.right_text.clone(),
+                    right_color: [
+                        line.right_color.0,
+                        line.right_color.1,
+                        line.right_color.2,
+                        alpha,
+                    ],
+                    font_size,
+                    wrap: line.wrap,
+                }
+            })
+            .collect();
         result.insert(id, TooltipRenderData { lines });
     }
     result
@@ -162,7 +187,9 @@ pub fn build_tooltip_quads(
         batch.push_border(bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
     }
 
-    let Some((font_sys, glyph_atlas)) = text_ctx else { return };
+    let Some((font_sys, glyph_atlas)) = text_ctx else {
+        return;
+    };
 
     let content_x = bounds.x + TOOLTIP_PADDING_H;
     let content_width = bounds.width - TOOLTIP_PADDING_H * 2.0;
@@ -172,8 +199,14 @@ pub fn build_tooltip_quads(
         let line_height = (line.font_size * 1.2).ceil();
 
         emit_tooltip_line(
-            batch, font_sys, glyph_atlas,
-            line, content_x, y, content_width, line_height,
+            batch,
+            font_sys,
+            glyph_atlas,
+            line,
+            content_x,
+            y,
+            content_width,
+            line_height,
         );
 
         y += line_height + TOOLTIP_LINE_SPACING;
@@ -195,13 +228,22 @@ fn emit_tooltip_line(
     // Left-aligned text
     let left_bounds = Rectangle::new(Point::new(x, y), Size::new(width, height));
     emit_text_quads(
-        batch, font_sys, glyph_atlas,
-        &line.left_text, left_bounds,
-        None, line.font_size, line.left_color,
-        TextJustify::Left, TextJustify::Center,
+        batch,
+        font_sys,
+        glyph_atlas,
+        &line.left_text,
+        left_bounds,
+        None,
+        line.font_size,
+        line.left_color,
+        TextJustify::Left,
+        TextJustify::Center,
         GLYPH_ATLAS_TEX_INDEX,
-        None, (0.0, 0.0), TextOutline::None,
-        line.wrap, 0,
+        None,
+        (0.0, 0.0),
+        TextOutline::None,
+        line.wrap,
+        0,
         None,
     );
 
@@ -209,13 +251,22 @@ fn emit_tooltip_line(
     if let Some(ref right_text) = line.right_text {
         let right_bounds = Rectangle::new(Point::new(x, y), Size::new(width, height));
         emit_text_quads(
-            batch, font_sys, glyph_atlas,
-            right_text, right_bounds,
-            None, line.font_size, line.right_color,
-            TextJustify::Right, TextJustify::Center,
+            batch,
+            font_sys,
+            glyph_atlas,
+            right_text,
+            right_bounds,
+            None,
+            line.font_size,
+            line.right_color,
+            TextJustify::Right,
+            TextJustify::Center,
             GLYPH_ATLAS_TEX_INDEX,
-            None, (0.0, 0.0), TextOutline::None,
-            false, 0,
+            None,
+            (0.0, 0.0),
+            TextOutline::None,
+            false,
+            0,
             None,
         );
     }

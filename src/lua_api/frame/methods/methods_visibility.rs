@@ -6,7 +6,7 @@
 //! the state change and fires the next handler. This limits mutual recursion
 //! to 12 handler invocations (6 cycles of OnHide→OnShow).
 
-use super::super::handle::{frame_ref, FrameRef};
+use super::super::handle::{FrameRef, frame_ref};
 use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Lua;
@@ -21,9 +21,15 @@ pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
 
 /// Register Show, Hide, SetShown methods.
 pub(super) fn add_show_hide_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("Show", |lua, this, ()| show_or_hide(lua, this.0, true, "Show"));
-    methods.add_method("Hide", |lua, this, ()| show_or_hide(lua, this.0, false, "Hide"));
-    methods.add_method("SetShown", |lua, this, shown: bool| show_or_hide(lua, this.0, shown, "SetShown"));
+    methods.add_method("Show", |lua, this, ()| {
+        show_or_hide(lua, this.0, true, "Show")
+    });
+    methods.add_method("Hide", |lua, this, ()| {
+        show_or_hide(lua, this.0, false, "Hide")
+    });
+    methods.add_method("SetShown", |lua, this, shown: bool| {
+        show_or_hide(lua, this.0, shown, "SetShown")
+    });
 }
 
 /// Unified Show/Hide implementation with iterative handler loop.
@@ -36,7 +42,8 @@ fn show_or_hide(lua: &Lua, id: u64, show: bool, method_name: &str) -> mlua::Resu
         return Ok(());
     }
     let state_rc = get_sim_state(lua);
-    let (needs_change, in_handler, parent_visible) = read_show_hide_state(&state_rc.borrow(), id, show);
+    let (needs_change, in_handler, parent_visible) =
+        read_show_hide_state(&state_rc.borrow(), id, show);
     if !needs_change {
         return Ok(());
     }
@@ -89,8 +96,12 @@ fn drain_visibility_handlers(lua: &Lua, id: u64, initial_target: bool) -> mlua::
     for _ in 0..SHOW_HIDE_HANDLER_LIMIT {
         let handler = if target { "OnShow" } else { "OnHide" };
         fire_script_recursive(lua, id, handler)?;
-        let visible_after = state_rc.borrow().widgets.get(id)
-            .map(|f| f.visible).unwrap_or(false);
+        let visible_after = state_rc
+            .borrow()
+            .widgets
+            .get(id)
+            .map(|f| f.visible)
+            .unwrap_or(false);
         state_rc.borrow_mut().set_frame_visible(id, target);
         if visible_after == target {
             break;
@@ -108,9 +119,11 @@ fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result
     let children: Vec<u64> = {
         let state_rc = get_sim_state(lua);
         let st = state_rc.borrow();
-        st.widgets.get(id)
+        st.widgets
+            .get(id)
             .map(|f| {
-                f.children.iter()
+                f.children
+                    .iter()
                     .filter(|&&cid| st.widgets.get(cid).map(|c| c.visible).unwrap_or(false))
                     .copied()
                     .collect()

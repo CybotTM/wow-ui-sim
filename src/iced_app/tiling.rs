@@ -1,7 +1,7 @@
 //! Tiled texture rendering — horizontal, vertical, and grid tiling.
 
-use iced::{Point, Rectangle, Size};
 use crate::render::{BlendMode, QuadBatch};
+use iced::{Point, Rectangle, Size};
 
 /// If UVs describe a sub-region (not full [0,1]×[0,1]), return a `@crop:` path
 /// that isolates the sub-region in its own GPU atlas slot, plus remapped [0,1] UVs.
@@ -45,8 +45,16 @@ struct UvRepeatInfo {
 
 /// Compute tile dimensions from frame size or UV region as fallback.
 fn tile_dimensions(f: &crate::widget::Frame, uv_w: f32, uv_h: f32) -> (f32, f32) {
-    let tile_w = if f.width > 1.0 { f.width } else { (uv_w * 128.0).max(8.0) };
-    let tile_h = if f.height > 1.0 { f.height } else { (uv_h * 128.0).max(8.0) };
+    let tile_w = if f.width > 1.0 {
+        f.width
+    } else {
+        (uv_w * 128.0).max(8.0)
+    };
+    let tile_h = if f.height > 1.0 {
+        f.height
+    } else {
+        (uv_h * 128.0).max(8.0)
+    };
     (tile_w, tile_h)
 }
 
@@ -70,16 +78,34 @@ fn analyze_uv_repeat(raw: &[f32; 8]) -> UvRepeatInfo {
 
     // Y repeats on left XOR right → TopEdge/BottomEdge (rotated: V→horizontal)
     if (left_y_repeats ^ right_y_repeats) && !any_x_repeats {
-        return UvRepeatInfo { u_min, u_max, v_start, dir: TileDir::Horizontal, rotated: true };
+        return UvRepeatInfo {
+            u_min,
+            u_max,
+            v_start,
+            dir: TileDir::Horizontal,
+            rotated: true,
+        };
     }
 
     // Y repeats on bottom XOR top → LeftEdge/RightEdge (standard: V→vertical)
     if (bottom_y_repeats ^ top_y_repeats) && !any_x_repeats {
-        return UvRepeatInfo { u_min, u_max, v_start, dir: TileDir::Vertical, rotated: false };
+        return UvRepeatInfo {
+            u_min,
+            u_max,
+            v_start,
+            dir: TileDir::Vertical,
+            rotated: false,
+        };
     }
 
     // Both axes repeat or unknown → grid
-    UvRepeatInfo { u_min, u_max, v_start, dir: TileDir::Grid, rotated: false }
+    UvRepeatInfo {
+        u_min,
+        u_max,
+        v_start,
+        dir: TileDir::Grid,
+        rotated: false,
+    }
 }
 
 /// Determine tile pixel size for UV-repeat tiling.
@@ -126,16 +152,46 @@ pub(super) fn emit_tiled_texture(
     // Isolate sub-region UVs into their own GPU atlas slot via @crop: so that
     // bilinear filtering at tile boundaries can't bleed into adjacent content.
     let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, uvs);
-    let (left, right, top, bottom) = (cropped_uvs.x, cropped_uvs.x + cropped_uvs.width, cropped_uvs.y, cropped_uvs.y + cropped_uvs.height);
+    let (left, right, top, bottom) = (
+        cropped_uvs.x,
+        cropped_uvs.x + cropped_uvs.width,
+        cropped_uvs.y,
+        cropped_uvs.y + cropped_uvs.height,
+    );
     let (tile_w, tile_h) = tile_dimensions(f, right - left, bottom - top);
     let tint = frame_tint(f, alpha);
 
     if f.horiz_tile && !f.vert_tile {
-        emit_horiz_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_w, tint, f.blend_mode);
+        emit_horiz_tiles(
+            batch,
+            bounds,
+            &cropped_uvs,
+            &cropped_path,
+            tile_w,
+            tint,
+            f.blend_mode,
+        );
     } else if f.vert_tile && !f.horiz_tile {
-        emit_vert_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_h, tint, f.blend_mode);
+        emit_vert_tiles(
+            batch,
+            bounds,
+            &cropped_uvs,
+            &cropped_path,
+            tile_h,
+            tint,
+            f.blend_mode,
+        );
     } else {
-        emit_grid_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_w, tile_h, tint, f.blend_mode);
+        emit_grid_tiles(
+            batch,
+            bounds,
+            &cropped_uvs,
+            &cropped_path,
+            tile_w,
+            tile_h,
+            tint,
+            f.blend_mode,
+        );
     }
 }
 
@@ -153,7 +209,15 @@ fn emit_uv_repeat_tiled(
     let tile_size = uv_repeat_tile_size(f);
 
     if info.rotated {
-        emit_rotated_horiz_tiles(batch, bounds, &info, tex_path, tile_size.0, tint, f.blend_mode);
+        emit_rotated_horiz_tiles(
+            batch,
+            bounds,
+            &info,
+            tex_path,
+            tile_size.0,
+            tint,
+            f.blend_mode,
+        );
     } else {
         let base_uvs = Rectangle::new(
             Point::new(info.u_min, info.v_start),
@@ -162,10 +226,27 @@ fn emit_uv_repeat_tiled(
         let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, &base_uvs);
         match info.dir {
             TileDir::Vertical => {
-                emit_vert_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_size.1, tint, f.blend_mode);
+                emit_vert_tiles(
+                    batch,
+                    bounds,
+                    &cropped_uvs,
+                    &cropped_path,
+                    tile_size.1,
+                    tint,
+                    f.blend_mode,
+                );
             }
             _ => {
-                emit_grid_tiles(batch, bounds, &cropped_uvs, &cropped_path, tile_size.0, tile_size.1, tint, f.blend_mode);
+                emit_grid_tiles(
+                    batch,
+                    bounds,
+                    &cropped_uvs,
+                    &cropped_path,
+                    tile_size.0,
+                    tile_size.1,
+                    tint,
+                    f.blend_mode,
+                );
             }
         }
     }
@@ -199,13 +280,17 @@ fn emit_rotated_horiz_tiles(
     while x < bounds.x + bounds.width {
         let w = (bounds.x + bounds.width - x).min(tile_w);
         let tile_bounds = Rectangle::new(Point::new(x, bounds.y), Size::new(w, bounds.height));
-        let v_extent = if w < tile_w { v_range * (w / tile_w) } else { v_range };
+        let v_extent = if w < tile_w {
+            v_range * (w / tile_w)
+        } else {
+            v_range
+        };
         // Rotated: U maps to screen Y (top→bottom), V maps to screen X (left→right)
         let uvs = [
             [u_min, v_start + v_extent], // TL: top of strip, right side of V tile
-            [u_min, v_start],             // TR: top of strip, left side of V tile
-            [u_max, v_start],             // BR: bottom of strip, left side of V tile
-            [u_max, v_start + v_extent],  // BL: bottom of strip, right side of V tile
+            [u_min, v_start],            // TR: top of strip, left side of V tile
+            [u_max, v_start],            // BR: bottom of strip, left side of V tile
+            [u_max, v_start + v_extent], // BL: bottom of strip, right side of V tile
         ];
         batch.push_textured_path_uv4(tile_bounds, uvs, &cropped_path, tint, blend);
         x += tile_w;
@@ -213,12 +298,24 @@ fn emit_rotated_horiz_tiles(
 }
 
 /// Emit horizontally tiled texture quads.
-pub(super) fn emit_horiz_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &Rectangle, tex_path: &str, tile_w: f32, tint: [f32; 4], blend: BlendMode) {
+pub(super) fn emit_horiz_tiles(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    uvs: &Rectangle,
+    tex_path: &str,
+    tile_w: f32,
+    tint: [f32; 4],
+    blend: BlendMode,
+) {
     let mut x = bounds.x;
     while x < bounds.x + bounds.width {
         let w = (bounds.x + bounds.width - x).min(tile_w);
         let tile_bounds = Rectangle::new(Point::new(x, bounds.y), Size::new(w, bounds.height));
-        let uv_w = if w < tile_w { uvs.width * (w / tile_w) } else { uvs.width };
+        let uv_w = if w < tile_w {
+            uvs.width * (w / tile_w)
+        } else {
+            uvs.width
+        };
         let tile_uvs = Rectangle::new(uvs.position(), Size::new(uv_w, uvs.height));
         batch.push_textured_path_uv(tile_bounds, tile_uvs, tex_path, tint, blend);
         x += tile_w;
@@ -226,12 +323,24 @@ pub(super) fn emit_horiz_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &R
 }
 
 /// Emit vertically tiled texture quads.
-pub(super) fn emit_vert_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &Rectangle, tex_path: &str, tile_h: f32, tint: [f32; 4], blend: BlendMode) {
+pub(super) fn emit_vert_tiles(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    uvs: &Rectangle,
+    tex_path: &str,
+    tile_h: f32,
+    tint: [f32; 4],
+    blend: BlendMode,
+) {
     let mut y = bounds.y;
     while y < bounds.y + bounds.height {
         let h = (bounds.y + bounds.height - y).min(tile_h);
         let tile_bounds = Rectangle::new(Point::new(bounds.x, y), Size::new(bounds.width, h));
-        let uv_h = if h < tile_h { uvs.height * (h / tile_h) } else { uvs.height };
+        let uv_h = if h < tile_h {
+            uvs.height * (h / tile_h)
+        } else {
+            uvs.height
+        };
         let tile_uvs = Rectangle::new(uvs.position(), Size::new(uvs.width, uv_h));
         batch.push_textured_path_uv(tile_bounds, tile_uvs, tex_path, tint, blend);
         y += tile_h;
@@ -240,7 +349,16 @@ pub(super) fn emit_vert_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &Re
 
 /// Emit grid-tiled texture quads (both horizontal and vertical).
 #[allow(clippy::too_many_arguments)]
-fn emit_grid_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &Rectangle, tex_path: &str, tile_w: f32, tile_h: f32, tint: [f32; 4], blend: BlendMode) {
+fn emit_grid_tiles(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    uvs: &Rectangle,
+    tex_path: &str,
+    tile_w: f32,
+    tile_h: f32,
+    tint: [f32; 4],
+    blend: BlendMode,
+) {
     let mut y = bounds.y;
     while y < bounds.y + bounds.height {
         let h = (bounds.y + bounds.height - y).min(tile_h);
@@ -248,8 +366,16 @@ fn emit_grid_tiles(batch: &mut QuadBatch, bounds: Rectangle, uvs: &Rectangle, te
         while x < bounds.x + bounds.width {
             let w = (bounds.x + bounds.width - x).min(tile_w);
             let tile_bounds = Rectangle::new(Point::new(x, y), Size::new(w, h));
-            let uv_w = if w < tile_w { uvs.width * (w / tile_w) } else { uvs.width };
-            let uv_h = if h < tile_h { uvs.height * (h / tile_h) } else { uvs.height };
+            let uv_w = if w < tile_w {
+                uvs.width * (w / tile_w)
+            } else {
+                uvs.width
+            };
+            let uv_h = if h < tile_h {
+                uvs.height * (h / tile_h)
+            } else {
+                uvs.height
+            };
             let tile_uvs = Rectangle::new(uvs.position(), Size::new(uv_w, uv_h));
             batch.push_textured_path_uv(tile_bounds, tile_uvs, tex_path, tint, blend);
             x += tile_w;

@@ -5,7 +5,7 @@
 
 use wow_ui_sim::loader::create_frame_from_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::xml::{clear_templates, parse_xml, register_template, XmlElement};
+use wow_ui_sim::xml::{XmlElement, clear_templates, parse_xml, register_template};
 
 const SPELL_BTN_MIXIN_LUA: &str = r#"
     TestSpellBtnMixin = {}
@@ -72,10 +72,8 @@ fn check_onload_only_on_parent(env: &WowLuaEnv, parent_name: &str) -> String {
 fn template_child_shared_mixin_no_onload_lua() {
     let env = setup_spell_btn_env();
 
-    env.exec(
-        r#"CreateFrame("Frame", "SpellBtnLua", UIParent, "TestSpellBtnTpl")"#,
-    )
-    .unwrap();
+    env.exec(r#"CreateFrame("Frame", "SpellBtnLua", UIParent, "TestSpellBtnTpl")"#)
+        .unwrap();
 
     let result = check_onload_only_on_parent(&env, "SpellBtnLua");
     assert_eq!(result, "ok", "Lua CreateFrame path: {}", result);

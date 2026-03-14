@@ -280,10 +280,12 @@ impl AnimGroupState {
     /// Whether any child animation produces visual effects (alpha, translation, flipbook).
     /// Groups containing only generic `Animation` (timers) don't modify frame state.
     pub fn has_visual_effects(&self) -> bool {
-        self.animations.iter().any(|a| matches!(
-            a.anim_type,
-            AnimationType::Alpha | AnimationType::Translation | AnimationType::FlipBook
-        ))
+        self.animations.iter().any(|a| {
+            matches!(
+                a.anim_type,
+                AnimationType::Alpha | AnimationType::Translation | AnimationType::FlipBook
+            )
+        })
     }
 
     /// Compute total duration of the group (max over order-groups sequentially).

@@ -122,7 +122,10 @@ fn test_enable_keyboard_gates_on_key_down() {
     env.send_key_press("X", None).unwrap();
 
     let fired: bool = env.eval("return _G.key_fired").unwrap();
-    assert!(!fired, "OnKeyDown should not fire when keyboard is disabled");
+    assert!(
+        !fired,
+        "OnKeyDown should not fire when keyboard is disabled"
+    );
 
     // Now enable keyboard and try again
     env.exec("KeyGateFrame:EnableKeyboard(true)").unwrap();
@@ -167,7 +170,10 @@ fn test_propagate_keyboard_input() {
     assert_eq!(child_key, "X", "Child should receive OnKeyDown");
 
     let parent_key: String = env.eval("return _G.parent_key").unwrap();
-    assert_eq!(parent_key, "X", "Parent should receive propagated OnKeyDown");
+    assert_eq!(
+        parent_key, "X",
+        "Parent should receive propagated OnKeyDown"
+    );
 }
 
 #[test]
@@ -363,10 +369,11 @@ fn test_escape_priority_chain() {
     let first: String = env.eval("return _G.escape_order[1]").unwrap();
     assert_eq!(first, "editbox", "First Escape consumed by EditBox");
 
-    let sf_visible: bool = env
-        .eval("return PrioritySpecialFrame:IsShown()")
-        .unwrap();
-    assert!(sf_visible, "Special frame still visible after EditBox consumed Escape");
+    let sf_visible: bool = env.eval("return PrioritySpecialFrame:IsShown()").unwrap();
+    assert!(
+        sf_visible,
+        "Special frame still visible after EditBox consumed Escape"
+    );
 
     let menu_shown: bool = env.eval("return GameMenuFrame:IsShown()").unwrap();
     assert!(!menu_shown, "GameMenuFrame still hidden");
@@ -382,13 +389,14 @@ fn test_escape_priority_chain() {
     // Second Escape: special frame gets closed
     env.send_key_press("ESCAPE", None).unwrap();
 
-    let sf_visible: bool = env
-        .eval("return PrioritySpecialFrame:IsShown()")
-        .unwrap();
+    let sf_visible: bool = env.eval("return PrioritySpecialFrame:IsShown()").unwrap();
     assert!(!sf_visible, "Special frame hidden by second Escape");
 
     let menu_shown: bool = env.eval("return GameMenuFrame:IsShown()").unwrap();
-    assert!(!menu_shown, "GameMenuFrame still hidden (special frame consumed)");
+    assert!(
+        !menu_shown,
+        "GameMenuFrame still hidden (special frame consumed)"
+    );
 
     // Third Escape: nothing else to close, GameMenuFrame toggles
     env.send_key_press("ESCAPE", None).unwrap();
@@ -446,12 +454,13 @@ fn test_click_editbox_type_message_and_submit() {
     env.send_key_press("ENTER", None).unwrap();
 
     let received: String = env.eval("return _G.received_message").unwrap();
-    assert_eq!(received, "hello", "OnEnterPressed should receive the message");
+    assert_eq!(
+        received, "hello",
+        "OnEnterPressed should receive the message"
+    );
 
     // EditBox should be cleared after submit
-    let text_after: String = env
-        .eval("return ChatEditBox:GetText() or ''")
-        .unwrap();
+    let text_after: String = env.eval("return ChatEditBox:GetText() or ''").unwrap();
     assert_eq!(text_after, "", "EditBox should be cleared after submit");
 }
 
@@ -562,10 +571,13 @@ fn test_tab_targets_enemy() {
 fn test_escape_clears_target() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.exec(r#"
+    env.exec(
+        r#"
         GameMenuFrame = CreateFrame("Frame", "GameMenuFrame", UIParent)
         GameMenuFrame:Hide()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // Set a target first
     env.send_key_press("F1", None).unwrap();
@@ -579,17 +591,23 @@ fn test_escape_clears_target() {
     assert!(!exists, "Escape should clear target");
 
     let menu_shown: bool = env.eval("return GameMenuFrame:IsShown()").unwrap();
-    assert!(!menu_shown, "GameMenuFrame should NOT open when clearing target");
+    assert!(
+        !menu_shown,
+        "GameMenuFrame should NOT open when clearing target"
+    );
 }
 
 #[test]
 fn test_escape_no_target_opens_game_menu() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.exec(r#"
+    env.exec(
+        r#"
         GameMenuFrame = CreateFrame("Frame", "GameMenuFrame", UIParent)
         GameMenuFrame:Hide()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // No target set, escape should toggle game menu
     env.send_key_press("ESCAPE", None).unwrap();
@@ -602,7 +620,8 @@ fn test_escape_no_target_opens_game_menu() {
 fn test_target_fires_player_target_changed() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.exec(r#"
+    env.exec(
+        r#"
         _G.target_changed_count = 0
         local f = CreateFrame("Frame", "TargetEventFrame", UIParent)
         f:RegisterEvent("PLAYER_TARGET_CHANGED")
@@ -611,7 +630,9 @@ fn test_target_fires_player_target_changed() {
                 _G.target_changed_count = _G.target_changed_count + 1
             end
         end)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     env.send_key_press("F1", None).unwrap();
     let count: i32 = env.eval("return _G.target_changed_count").unwrap();
@@ -619,7 +640,10 @@ fn test_target_fires_player_target_changed() {
 
     env.send_key_press("ESCAPE", None).unwrap();
     let count: i32 = env.eval("return _G.target_changed_count").unwrap();
-    assert_eq!(count, 2, "Clearing target should fire PLAYER_TARGET_CHANGED");
+    assert_eq!(
+        count, 2,
+        "Clearing target should fire PLAYER_TARGET_CHANGED"
+    );
 }
 
 #[test]
@@ -627,13 +651,22 @@ fn test_unit_exists_target_follows_state() {
     let env = WowLuaEnv::new().unwrap();
 
     let exists: bool = env.eval("return UnitExists('target')").unwrap();
-    assert!(!exists, "UnitExists('target') should be false with no target");
+    assert!(
+        !exists,
+        "UnitExists('target') should be false with no target"
+    );
 
     env.exec("TargetUnit('player')").unwrap();
     let exists: bool = env.eval("return UnitExists('target')").unwrap();
-    assert!(exists, "UnitExists('target') should be true after targeting");
+    assert!(
+        exists,
+        "UnitExists('target') should be true after targeting"
+    );
 
     env.exec("ClearTarget()").unwrap();
     let exists: bool = env.eval("return UnitExists('target')").unwrap();
-    assert!(!exists, "UnitExists('target') should be false after clearing");
+    assert!(
+        !exists,
+        "UnitExists('target') should be false after clearing"
+    );
 }

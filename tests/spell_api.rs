@@ -13,49 +13,63 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_spellbook_get_spell_name_slot1() {
     let env = env();
-    let name: String = env.eval("return C_SpellBook.GetSpellBookItemName(1)").unwrap();
+    let name: String = env
+        .eval("return C_SpellBook.GetSpellBookItemName(1)")
+        .unwrap();
     assert!(!name.is_empty(), "Slot 1 should have a spell name");
 }
 
 #[test]
 fn test_spellbook_get_spell_name_nil_invalid() {
     let env = env();
-    let is_nil: bool = env.eval("return C_SpellBook.GetSpellBookItemName(9999) == nil").unwrap();
+    let is_nil: bool = env
+        .eval("return C_SpellBook.GetSpellBookItemName(9999) == nil")
+        .unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_spellbook_get_num_skill_lines() {
     let env = env();
-    let count: i32 = env.eval("return C_SpellBook.GetNumSpellBookSkillLines()").unwrap();
+    let count: i32 = env
+        .eval("return C_SpellBook.GetNumSpellBookSkillLines()")
+        .unwrap();
     assert!(count > 0, "Static spellbook data should have skill lines");
 }
 
 #[test]
 fn test_spellbook_get_skill_line_info_valid() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_SpellBook.GetSpellBookSkillLineInfo(1)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_SpellBook.GetSpellBookSkillLineInfo(1)) == 'table'")
+        .unwrap();
     assert!(is_table, "Skill line 1 should return a table");
 }
 
 #[test]
 fn test_spellbook_get_skill_line_info_nil_invalid() {
     let env = env();
-    let is_nil: bool = env.eval("return C_SpellBook.GetSpellBookSkillLineInfo(9999) == nil").unwrap();
+    let is_nil: bool = env
+        .eval("return C_SpellBook.GetSpellBookSkillLineInfo(9999) == nil")
+        .unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_spellbook_get_item_info_valid() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_SpellBook.GetSpellBookItemInfo(1)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_SpellBook.GetSpellBookItemInfo(1)) == 'table'")
+        .unwrap();
     assert!(is_table, "Slot 1 should return a table");
 }
 
 #[test]
 fn test_spellbook_get_item_info_nil_invalid() {
     let env = env();
-    let is_nil: bool = env.eval("return C_SpellBook.GetSpellBookItemInfo(9999) == nil").unwrap();
+    let is_nil: bool = env
+        .eval("return C_SpellBook.GetSpellBookItemInfo(9999) == nil")
+        .unwrap();
     assert!(is_nil);
 }
 
@@ -87,21 +101,27 @@ fn test_spellbook_is_spell_known() {
 #[test]
 fn test_spell_get_spell_info() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Spell.GetSpellInfo(100)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Spell.GetSpellInfo(100)) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
 #[test]
 fn test_spell_get_spell_info_has_name() {
     let env = env();
-    let has_name: bool = env.eval("return C_Spell.GetSpellInfo(100).name ~= nil").unwrap();
+    let has_name: bool = env
+        .eval("return C_Spell.GetSpellInfo(100).name ~= nil")
+        .unwrap();
     assert!(has_name);
 }
 
 #[test]
 fn test_spell_get_spell_charges() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Spell.GetSpellCharges(100)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Spell.GetSpellCharges(100)) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
@@ -159,7 +179,9 @@ fn test_spell_get_spell_name_unknown() {
 #[test]
 fn test_spell_get_spell_cooldown() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Spell.GetSpellCooldown(100)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Spell.GetSpellCooldown(100)) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
@@ -186,7 +208,9 @@ fn test_traits_generate_import_string() {
 #[test]
 fn test_traits_get_config_id_by_system_id() {
     let env = env();
-    let id: i32 = env.eval("return C_Traits.GetConfigIDBySystemID(1)").unwrap();
+    let id: i32 = env
+        .eval("return C_Traits.GetConfigIDBySystemID(1)")
+        .unwrap();
     assert_eq!(id, 1);
 }
 
@@ -200,7 +224,9 @@ fn test_traits_get_config_id_by_tree_id() {
 #[test]
 fn test_traits_get_config_info() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Traits.GetConfigInfo(1)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Traits.GetConfigInfo(1)) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
@@ -215,42 +241,54 @@ fn test_traits_get_node_info_unknown() {
 #[test]
 fn test_traits_get_entry_info_nil() {
     let env = env();
-    let is_nil: bool = env.eval("return C_Traits.GetEntryInfo(1, 1) == nil").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Traits.GetEntryInfo(1, 1) == nil")
+        .unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_traits_initialize_view_loadout() {
     let env = env();
-    let ok: bool = env.eval("return C_Traits.InitializeViewLoadout(1, 1)").unwrap();
+    let ok: bool = env
+        .eval("return C_Traits.InitializeViewLoadout(1, 1)")
+        .unwrap();
     assert!(ok);
 }
 
 #[test]
 fn test_traits_get_tree_info_valid() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Traits.GetTreeInfo(1, 1)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Traits.GetTreeInfo(1, 1)) == 'table'")
+        .unwrap();
     assert!(is_table, "Tree 1 exists in TRAIT_TREE_DB");
 }
 
 #[test]
 fn test_traits_get_tree_info_nil_invalid() {
     let env = env();
-    let is_nil: bool = env.eval("return C_Traits.GetTreeInfo(1, 999999) == nil").unwrap();
+    let is_nil: bool = env
+        .eval("return C_Traits.GetTreeInfo(1, 999999) == nil")
+        .unwrap();
     assert!(is_nil);
 }
 
 #[test]
 fn test_traits_get_tree_nodes_empty() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Traits.GetTreeNodes(1, 1)) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Traits.GetTreeNodes(1, 1)) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
 #[test]
 fn test_traits_get_all_tree_ids_empty() {
     let env = env();
-    let is_table: bool = env.eval("return type(C_Traits.GetAllTreeIDs()) == 'table'").unwrap();
+    let is_table: bool = env
+        .eval("return type(C_Traits.GetAllTreeIDs()) == 'table'")
+        .unwrap();
     assert!(is_table);
 }
 
@@ -264,13 +302,17 @@ fn test_traits_get_trait_system_flags() {
 #[test]
 fn test_traits_can_purchase_rank() {
     let env = env();
-    let can: bool = env.eval("return C_Traits.CanPurchaseRank(1, 1, 1)").unwrap();
+    let can: bool = env
+        .eval("return C_Traits.CanPurchaseRank(1, 1, 1)")
+        .unwrap();
     assert!(!can);
 }
 
 #[test]
 fn test_traits_get_loadout_serialization_version() {
     let env = env();
-    let ver: i32 = env.eval("return C_Traits.GetLoadoutSerializationVersion()").unwrap();
+    let ver: i32 = env
+        .eval("return C_Traits.GetLoadoutSerializationVersion()")
+        .unwrap();
     assert_eq!(ver, 2);
 }

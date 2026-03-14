@@ -35,38 +35,57 @@ static QUEST_LOG: &[QuestLogEntry] = &[
         quest_id: 80000,
         title: "The Lost Expedition",
         objectives: &[
-            Objective { text: "Ironforge Relics collected: 3/5", obj_type: "item", finished: false },
-            Objective { text: "Explore the Old Quarry", obj_type: "event", finished: false },
+            Objective {
+                text: "Ironforge Relics collected: 3/5",
+                obj_type: "item",
+                finished: false,
+            },
+            Objective {
+                text: "Explore the Old Quarry",
+                obj_type: "event",
+                finished: false,
+            },
         ],
     },
     QuestLogEntry::Quest {
         quest_id: 80001,
         title: "Defending the Gates",
-        objectives: &[
-            Objective { text: "Stormwind Guards defended: 7/10", obj_type: "monster", finished: false },
-        ],
+        objectives: &[Objective {
+            text: "Stormwind Guards defended: 7/10",
+            obj_type: "monster",
+            finished: false,
+        }],
     },
     QuestLogEntry::Quest {
         quest_id: 80002,
         title: "Supply Run",
         objectives: &[
-            Objective { text: "Supplies gathered: 5/5", obj_type: "item", finished: true },
-            Objective { text: "Deliver to Quartermaster", obj_type: "event", finished: false },
+            Objective {
+                text: "Supplies gathered: 5/5",
+                obj_type: "item",
+                finished: true,
+            },
+            Objective {
+                text: "Deliver to Quartermaster",
+                obj_type: "event",
+                finished: false,
+            },
         ],
     },
 ];
 
 /// Number of actual quests (non-header entries).
 fn quest_count() -> i32 {
-    QUEST_LOG.iter().filter(|e| matches!(e, QuestLogEntry::Quest { .. })).count() as i32
+    QUEST_LOG
+        .iter()
+        .filter(|e| matches!(e, QuestLogEntry::Quest { .. }))
+        .count() as i32
 }
 
 /// Find a quest entry by quest ID, returning (log_index_1based, entry).
 fn find_quest_by_id(quest_id: i32) -> Option<(i32, &'static QuestLogEntry)> {
     QUEST_LOG.iter().enumerate().find_map(|(i, e)| match e {
-        QuestLogEntry::Quest { quest_id: qid, .. } if *qid == quest_id => {
-            Some((i as i32 + 1, e))
-        }
+        QuestLogEntry::Quest { quest_id: qid, .. } if *qid == quest_id => Some((i as i32 + 1, e)),
         _ => None,
     })
 }
@@ -115,9 +134,18 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
     register_quest_log_watch(lua, &t)?;
     register_quest_log_status(lua, &t)?;
     t.set("HasActiveThreats", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetBountySetInfoForMapID", lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?)?;
-    t.set("GetBountiesForMapID", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("IsUnitOnQuest", lua.create_function(|_, (_unit, _quest_id): (String, i32)| Ok(false))?)?;
+    t.set(
+        "GetBountySetInfoForMapID",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetBountiesForMapID",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "IsUnitOnQuest",
+        lua.create_function(|_, (_unit, _quest_id): (String, i32)| Ok(false))?,
+    )?;
     Ok(t)
 }
 
@@ -126,30 +154,60 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     // Total entries (headers + quests), and number of actual quests
     let num_entries = QUEST_LOG.len() as i32;
     let num_quests = quest_count();
-    t.set("GetNumQuestLogEntries", lua.create_function(move |_, ()| {
-        Ok((num_entries, num_quests))
-    })?)?;
-    t.set("GetInfo", lua.create_function(|lua, idx: i32| {
-        create_quest_info(lua, idx)
-    })?)?;
-    t.set("GetQuestIDForLogIndex", lua.create_function(|_, idx: i32| {
-        Ok(match entry_at(idx) {
-            Some(QuestLogEntry::Quest { quest_id, .. }) => *quest_id,
-            _ => 0,
-        })
-    })?)?;
-    t.set("GetLogIndexForQuestID", lua.create_function(|_, quest_id: i32| {
-        Ok(find_quest_by_id(quest_id).map(|(idx, _)| idx))
-    })?)?;
-    t.set("GetQuestObjectives", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
-    t.set("GetMaxNumQuestsCanAccept", lua.create_function(|_, ()| Ok(35i32))?)?;
+    t.set(
+        "GetNumQuestLogEntries",
+        lua.create_function(move |_, ()| Ok((num_entries, num_quests)))?,
+    )?;
+    t.set(
+        "GetInfo",
+        lua.create_function(|lua, idx: i32| create_quest_info(lua, idx))?,
+    )?;
+    t.set(
+        "GetQuestIDForLogIndex",
+        lua.create_function(|_, idx: i32| {
+            Ok(match entry_at(idx) {
+                Some(QuestLogEntry::Quest { quest_id, .. }) => *quest_id,
+                _ => 0,
+            })
+        })?,
+    )?;
+    t.set(
+        "GetLogIndexForQuestID",
+        lua.create_function(|_, quest_id: i32| Ok(find_quest_by_id(quest_id).map(|(idx, _)| idx)))?,
+    )?;
+    t.set(
+        "GetQuestObjectives",
+        lua.create_function(|lua, _id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetMaxNumQuestsCanAccept",
+        lua.create_function(|_, ()| Ok(35i32))?,
+    )?;
     t.set("GetMaxNumQuests", lua.create_function(|_, ()| Ok(35i32))?)?;
-    t.set("SetMapForQuestPOIs", lua.create_function(|_, _map_id: i32| Ok(()))?)?;
-    t.set("GetZoneStoryInfo", lua.create_function(|_, _map_id: i32| Ok((Value::Nil, Value::Nil)))?)?;
-    t.set("GetQuestAdditionalHighlights", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    t.set("GetQuestsOnMap", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("IsQuestReplayable", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("GetQuestWatchType", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "SetMapForQuestPOIs",
+        lua.create_function(|_, _map_id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "GetZoneStoryInfo",
+        lua.create_function(|_, _map_id: i32| Ok((Value::Nil, Value::Nil)))?,
+    )?;
+    t.set(
+        "GetQuestAdditionalHighlights",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetQuestsOnMap",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "IsQuestReplayable",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetQuestWatchType",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
@@ -171,7 +229,9 @@ fn create_quest_info(lua: &Lua, idx: i32) -> Result<Value> {
             info.set("isHidden", false)?;
             info.set("isOnMap", false)?;
         }
-        QuestLogEntry::Quest { quest_id, title, .. } => {
+        QuestLogEntry::Quest {
+            quest_id, title, ..
+        } => {
             info.set("title", *title)?;
             info.set("questID", *quest_id)?;
             info.set("campaignID", 0)?;
@@ -199,86 +259,171 @@ fn create_quest_info(lua: &Lua, idx: i32) -> Result<Value> {
 /// Quest data request stubs (async data loading).
 /// In WoW, these trigger server requests. We stub them as no-ops.
 fn register_quest_log_requests(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("RequestLoadQuestByID", lua.create_function(|_, _id: i32| Ok(()))?)?;
-    t.set("UpdateCampaignHeaders", lua.create_function(|_, ()| Ok(()))?)?;
+    t.set(
+        "RequestLoadQuestByID",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "UpdateCampaignHeaders",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
     Ok(())
 }
 
 /// Quest log info methods (titles, tags).
 fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetTitleForQuestID", lua.create_function(|lua, id: i32| {
-        let title = find_quest_by_id(id).map_or("Quest", |(_, e)| match e {
-            QuestLogEntry::Quest { title, .. } => title,
-            _ => "Quest",
-        });
-        Ok(Value::String(lua.create_string(title)?))
-    })?)?;
-    t.set("GetQuestTagInfo", lua.create_function(|lua, _id: i32| {
-        let info = lua.create_table()?;
-        info.set("tagID", 0)?;
-        info.set("tagName", "Quest")?;
-        info.set("worldQuestType", Value::Nil)?;
-        info.set("quality", 1)?;
-        info.set("isElite", false)?;
-        info.set("displayExpiration", false)?;
-        Ok(info)
-    })?)?;
-    t.set("GetRequiredMoney", lua.create_function(|_, _id: i32| Ok(0i32))?)?;
+    t.set(
+        "GetTitleForQuestID",
+        lua.create_function(|lua, id: i32| {
+            let title = find_quest_by_id(id).map_or("Quest", |(_, e)| match e {
+                QuestLogEntry::Quest { title, .. } => title,
+                _ => "Quest",
+            });
+            Ok(Value::String(lua.create_string(title)?))
+        })?,
+    )?;
+    t.set(
+        "GetQuestTagInfo",
+        lua.create_function(|lua, _id: i32| {
+            let info = lua.create_table()?;
+            info.set("tagID", 0)?;
+            info.set("tagName", "Quest")?;
+            info.set("worldQuestType", Value::Nil)?;
+            info.set("quality", 1)?;
+            info.set("isElite", false)?;
+            info.set("displayExpiration", false)?;
+            Ok(info)
+        })?,
+    )?;
+    t.set(
+        "GetRequiredMoney",
+        lua.create_function(|_, _id: i32| Ok(0i32))?,
+    )?;
     Ok(())
 }
 
 /// Quest watch list methods (tracked quests for ObjectiveTracker).
 fn register_quest_log_watch(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let num_watches = quest_count();
-    t.set("GetNumQuestWatches", lua.create_function(move |_, ()| Ok(num_watches))?)?;
-    t.set("GetQuestIDForQuestWatchIndex", lua.create_function(|_, idx: i32| {
-        // Watch index is 1-based among quests only (skip headers)
-        let quest_ids: Vec<i32> = QUEST_LOG.iter().filter_map(|e| match e {
-            QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
-            _ => None,
-        }).collect();
-        Ok(quest_ids.get((idx - 1) as usize).copied())
-    })?)?;
+    t.set(
+        "GetNumQuestWatches",
+        lua.create_function(move |_, ()| Ok(num_watches))?,
+    )?;
+    t.set(
+        "GetQuestIDForQuestWatchIndex",
+        lua.create_function(|_, idx: i32| {
+            // Watch index is 1-based among quests only (skip headers)
+            let quest_ids: Vec<i32> = QUEST_LOG
+                .iter()
+                .filter_map(|e| match e {
+                    QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
+                    _ => None,
+                })
+                .collect();
+            Ok(quest_ids.get((idx - 1) as usize).copied())
+        })?,
+    )?;
     t.set("AddQuestWatch", lua.create_function(|_, _id: i32| Ok(()))?)?;
-    t.set("RemoveQuestWatch", lua.create_function(|_, _id: i32| Ok(()))?)?;
+    t.set(
+        "RemoveQuestWatch",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
     t.set("SortQuestWatches", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("GetNumWorldQuestWatches", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetQuestIDForWorldQuestWatchIndex", lua.create_function(|_, _idx: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetNumWorldQuestWatches",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetQuestIDForWorldQuestWatchIndex",
+        lua.create_function(|_, _idx: i32| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
 /// Quest status check methods.
 fn register_quest_log_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("IsQuestFlaggedCompleted", lua.create_function(|_, _id: i32| Ok(false))?)?;
+    t.set(
+        "IsQuestFlaggedCompleted",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
     t.set("IsComplete", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsOnQuest", lua.create_function(|_, id: i32| {
-        Ok(find_quest_by_id(id).is_some())
-    })?)?;
-    t.set("ReadyForTurnIn", lua.create_function(|_, _id: i32| Ok(false))?)?;
+    t.set(
+        "IsOnQuest",
+        lua.create_function(|_, id: i32| Ok(find_quest_by_id(id).is_some()))?,
+    )?;
+    t.set(
+        "ReadyForTurnIn",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
     t.set("IsFailed", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsPushableQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsQuestDisabledForSession", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsRepeatableQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsImportantQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
+    t.set(
+        "IsPushableQuest",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsQuestDisabledForSession",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsRepeatableQuest",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsImportantQuest",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
     t.set("IsMetaQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("IsOnMap", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("GetNextWaypointText", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    t.set("GetTimeAllowed", lua.create_function(|_, _id: i32| Ok((Value::Nil, Value::Nil)))?)?;
-    t.set("IsAccountQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("IsQuestCalling", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("GetQuestDetailsTheme", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "GetNextWaypointText",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetTimeAllowed",
+        lua.create_function(|_, _id: i32| Ok((Value::Nil, Value::Nil)))?,
+    )?;
+    t.set(
+        "IsAccountQuest",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsQuestCalling",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetQuestDetailsTheme",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
 /// C_TaskQuest namespace - world quest/task utilities.
 fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("IsActive", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
-    t.set("GetQuestsOnMap", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("GetQuestInfoByQuestID", lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?)?;
-    t.set("GetQuestLocation", lua.create_function(|_, (_qid, _mid): (i32, i32)| Ok((0.0f64, 0.0f64)))?)?;
-    t.set("GetQuestsForPlayerByMapID", lua.create_function(|lua, _map_id: i32| lua.create_table())?)?;
-    t.set("GetQuestTimeLeftMinutes", lua.create_function(|_, _quest_id: i32| Ok(0i32))?)?;
+    t.set(
+        "IsActive",
+        lua.create_function(|_, _quest_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetQuestsOnMap",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetQuestInfoByQuestID",
+        lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetQuestLocation",
+        lua.create_function(|_, (_qid, _mid): (i32, i32)| Ok((0.0f64, 0.0f64)))?,
+    )?;
+    t.set(
+        "GetQuestsForPlayerByMapID",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetQuestTimeLeftMinutes",
+        lua.create_function(|_, _quest_id: i32| Ok(0i32))?,
+    )?;
     Ok(t)
 }
 
@@ -286,19 +431,37 @@ fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
 fn register_c_quest_info_system(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     // Returns Enum.QuestClassification.Normal (0)
-    t.set("GetQuestClassification", lua.create_function(|_, _quest_id: i32| Ok(0i32))?)?;
-    t.set("HasQuestRewardCurrencies", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
+    t.set(
+        "GetQuestClassification",
+        lua.create_function(|_, _quest_id: i32| Ok(0i32))?,
+    )?;
+    t.set(
+        "HasQuestRewardCurrencies",
+        lua.create_function(|_, _quest_id: i32| Ok(false))?,
+    )?;
     Ok(t)
 }
 
 /// C_QuestLine namespace - questline information.
 fn register_c_quest_line(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("GetQuestLineInfo", lua.create_function(|_, (_qid, _mid): (i32, Option<i32>)| Ok(Value::Nil))?)?;
-    t.set("GetQuestLineQuests", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
-    t.set("GetAvailableQuestLines", lua.create_function(|lua, _id: i32| lua.create_table())?)?;
+    t.set(
+        "GetQuestLineInfo",
+        lua.create_function(|_, (_qid, _mid): (i32, Option<i32>)| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetQuestLineQuests",
+        lua.create_function(|lua, _id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetAvailableQuestLines",
+        lua.create_function(|lua, _id: i32| lua.create_table())?,
+    )?;
     t.set("IsComplete", lua.create_function(|_, _id: i32| Ok(false))?)?;
-    t.set("RequestQuestLinesForMap", lua.create_function(|_, _id: i32| Ok(()))?)?;
+    t.set(
+        "RequestQuestLinesForMap",
+        lua.create_function(|_, _id: i32| Ok(()))?,
+    )?;
     Ok(t)
 }
 
@@ -307,10 +470,19 @@ fn register_c_quest_session(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set("Exists", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("HasJoined", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetAvailableSessionCommand", lua.create_function(|_, ()| Ok(0i32))?)?;
+    t.set(
+        "GetAvailableSessionCommand",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     t.set("HasPendingCommand", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetPendingCommand", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("GetSessionBeginDetails", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "GetPendingCommand",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetSessionBeginDetails",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     t.set("CanStart", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("CanStop", lua.create_function(|_, ()| Ok(false))?)?;
     Ok(t)
@@ -319,6 +491,9 @@ fn register_c_quest_session(lua: &Lua) -> Result<mlua::Table> {
 /// C_QuestOffer namespace - quest offer/reward info.
 fn register_c_quest_offer(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("GetQuestOfferMajorFactionReputationRewards", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set(
+        "GetQuestOfferMajorFactionReputationRewards",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
     Ok(t)
 }

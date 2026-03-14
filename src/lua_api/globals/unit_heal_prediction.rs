@@ -134,8 +134,12 @@ fn add_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
 }
 
 fn add_health_query_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("EvaluateCurrentHealthPercent", |_, _, _unit: Value| Ok(1.0f64));
-    methods.add_method("EvaluateMissingHealthPercent", |_, _, _unit: Value| Ok(0.0f64));
+    methods.add_method("EvaluateCurrentHealthPercent", |_, _, _unit: Value| {
+        Ok(1.0f64)
+    });
+    methods.add_method("EvaluateMissingHealthPercent", |_, _, _unit: Value| {
+        Ok(0.0f64)
+    });
     methods.add_method("GetCurrentHealth", |_, _, ()| Ok(0.0f64));
     methods.add_method("GetCurrentHealthPercent", |_, _, ()| Ok(1.0f64));
     methods.add_method("GetMaximumHealth", |_, _, ()| Ok(0.0f64));
@@ -232,13 +236,16 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
         *this.inner.maximum_health_mode.borrow_mut() = mode;
         Ok(())
     });
-    methods.add_method("SetPredictedValues", |_, this, (unit, incoming, absorbs, damage_absorbs): (Value, f64, f64, f64)| {
-        let _ = unit;
-        *this.inner.incoming_heals.borrow_mut() = incoming;
-        *this.inner.heal_absorbs.borrow_mut() = absorbs;
-        *this.inner.damage_absorbs.borrow_mut() = damage_absorbs;
-        Ok(())
-    });
+    methods.add_method(
+        "SetPredictedValues",
+        |_, this, (unit, incoming, absorbs, damage_absorbs): (Value, f64, f64, f64)| {
+            let _ = unit;
+            *this.inner.incoming_heals.borrow_mut() = incoming;
+            *this.inner.heal_absorbs.borrow_mut() = absorbs;
+            *this.inner.damage_absorbs.borrow_mut() = damage_absorbs;
+            Ok(())
+        },
+    );
     methods.add_method("SetToDefaults", |_, this, ()| {
         *this.inner.incoming_heals.borrow_mut() = 0.0;
         *this.inner.damage_absorbs.borrow_mut() = 0.0;

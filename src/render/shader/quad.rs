@@ -51,14 +51,46 @@ impl QuadVertex {
             array_stride: std::mem::size_of::<QuadVertex>() as wgpu::BufferAddress,
             step_mode: wgpu::VertexStepMode::Vertex,
             attributes: &[
-                wgpu::VertexAttribute { offset: 0, shader_location: 0, format: F },                     // position
-                wgpu::VertexAttribute { offset: 8, shader_location: 1, format: F },                     // tex_coords
-                wgpu::VertexAttribute { offset: 16, shader_location: 2, format: wgpu::VertexFormat::Float32x4 }, // color
-                wgpu::VertexAttribute { offset: 32, shader_location: 3, format: wgpu::VertexFormat::Sint32 },    // tex_index
-                wgpu::VertexAttribute { offset: 36, shader_location: 4, format: wgpu::VertexFormat::Uint32 },    // flags
-                wgpu::VertexAttribute { offset: 40, shader_location: 5, format: F },                    // local_uv
-                wgpu::VertexAttribute { offset: 48, shader_location: 6, format: wgpu::VertexFormat::Sint32 },    // mask_tex_index
-                wgpu::VertexAttribute { offset: 52, shader_location: 7, format: F },                    // mask_tex_coords
+                wgpu::VertexAttribute {
+                    offset: 0,
+                    shader_location: 0,
+                    format: F,
+                }, // position
+                wgpu::VertexAttribute {
+                    offset: 8,
+                    shader_location: 1,
+                    format: F,
+                }, // tex_coords
+                wgpu::VertexAttribute {
+                    offset: 16,
+                    shader_location: 2,
+                    format: wgpu::VertexFormat::Float32x4,
+                }, // color
+                wgpu::VertexAttribute {
+                    offset: 32,
+                    shader_location: 3,
+                    format: wgpu::VertexFormat::Sint32,
+                }, // tex_index
+                wgpu::VertexAttribute {
+                    offset: 36,
+                    shader_location: 4,
+                    format: wgpu::VertexFormat::Uint32,
+                }, // flags
+                wgpu::VertexAttribute {
+                    offset: 40,
+                    shader_location: 5,
+                    format: F,
+                }, // local_uv
+                wgpu::VertexAttribute {
+                    offset: 48,
+                    shader_location: 6,
+                    format: wgpu::VertexFormat::Sint32,
+                }, // mask_tex_index
+                wgpu::VertexAttribute {
+                    offset: 52,
+                    shader_location: 7,
+                    format: F,
+                }, // mask_tex_coords
             ],
         }
     }
@@ -149,10 +181,10 @@ impl QuadBatch {
 
         // Four corners: top-left, top-right, bottom-right, bottom-left
         let positions = [
-            [bounds.x, bounds.y],                                  // TL
-            [bounds.x + bounds.width, bounds.y],                   // TR
-            [bounds.x + bounds.width, bounds.y + bounds.height],   // BR
-            [bounds.x, bounds.y + bounds.height],                  // BL
+            [bounds.x, bounds.y],                                // TL
+            [bounds.x + bounds.width, bounds.y],                 // TR
+            [bounds.x + bounds.width, bounds.y + bounds.height], // BR
+            [bounds.x, bounds.y + bounds.height],                // BL
         ];
 
         let tex_coords = [
@@ -200,12 +232,7 @@ impl QuadBatch {
             [bounds.x + bounds.width, bounds.y + bounds.height],
             [bounds.x, bounds.y + bounds.height],
         ];
-        let local_uvs = [
-            [0.0_f32, 0.0],
-            [1.0, 0.0],
-            [1.0, 1.0],
-            [0.0, 1.0],
-        ];
+        let local_uvs = [[0.0_f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
         let flags = BlendMode::Alpha as u32 | FLAG_COOLDOWN_SWIPE;
         for i in 0..4 {
             self.vertices.push(QuadVertex {
@@ -220,8 +247,12 @@ impl QuadBatch {
             });
         }
         self.indices.extend_from_slice(&[
-            base_index, base_index + 1, base_index + 2,
-            base_index, base_index + 2, base_index + 3,
+            base_index,
+            base_index + 1,
+            base_index + 2,
+            base_index,
+            base_index + 2,
+            base_index + 3,
         ]);
     }
 
@@ -260,8 +291,12 @@ impl QuadBatch {
             });
         }
         self.indices.extend_from_slice(&[
-            base_index, base_index + 1, base_index + 2,
-            base_index, base_index + 2, base_index + 3,
+            base_index,
+            base_index + 1,
+            base_index + 2,
+            base_index,
+            base_index + 2,
+            base_index + 3,
         ]);
     }
 
@@ -372,8 +407,12 @@ impl QuadBatch {
             });
         }
         self.indices.extend_from_slice(&[
-            base_index, base_index + 1, base_index + 2,
-            base_index, base_index + 2, base_index + 3,
+            base_index,
+            base_index + 1,
+            base_index + 2,
+            base_index,
+            base_index + 2,
+            base_index + 3,
         ]);
         self.texture_requests.push(TextureRequest {
             path: path.to_string(),
@@ -404,8 +443,13 @@ impl QuadBatch {
         color: [f32; 4],
     ) {
         self.push_three_slice_h_path_blend(
-            bounds, left_cap_width, right_cap_width,
-            path, tex_width, color, BlendMode::Alpha,
+            bounds,
+            left_cap_width,
+            right_cap_width,
+            path,
+            tex_width,
+            color,
+            BlendMode::Alpha,
         );
     }
 
@@ -427,7 +471,15 @@ impl QuadBatch {
         }
 
         let vertex_start = self.vertices.len() as u32;
-        self.push_three_slice_quads(bounds, left_cap_width, right_cap_width, tex_width, color, -2, blend_mode);
+        self.push_three_slice_quads(
+            bounds,
+            left_cap_width,
+            right_cap_width,
+            tex_width,
+            color,
+            -2,
+            blend_mode,
+        );
 
         // Single texture request covers all 12 vertices (3 quads * 4 vertices)
         self.texture_requests.push(TextureRequest {
@@ -462,7 +514,15 @@ impl QuadBatch {
             self.push_textured(bounds, tex_index, color, BlendMode::Alpha);
             return;
         }
-        self.push_three_slice_quads(bounds, left_cap_width, right_cap_width, tex_width, color, tex_index, BlendMode::Alpha);
+        self.push_three_slice_quads(
+            bounds,
+            left_cap_width,
+            right_cap_width,
+            tex_width,
+            color,
+            tex_index,
+            BlendMode::Alpha,
+        );
     }
 
     /// Emit the 3 quads (left cap, stretched middle, right cap) for horizontal 3-slice rendering.
@@ -488,7 +548,9 @@ impl QuadBatch {
                 iced::Size::new(left_cap_width, bounds.height),
             ),
             Rectangle::new(iced::Point::ORIGIN, iced::Size::new(left_uv, 1.0)),
-            color, tex_index, blend_mode,
+            color,
+            tex_index,
+            blend_mode,
         );
 
         // Middle (stretched)
@@ -501,7 +563,9 @@ impl QuadBatch {
                 iced::Point::new(left_uv, 0.0),
                 iced::Size::new(right_uv_start - left_uv, 1.0),
             ),
-            color, tex_index, blend_mode,
+            color,
+            tex_index,
+            blend_mode,
         );
 
         // Right cap
@@ -514,7 +578,9 @@ impl QuadBatch {
                 iced::Point::new(right_uv_start, 0.0),
                 iced::Size::new(1.0 - right_uv_start, 1.0),
             ),
-            color, tex_index, blend_mode,
+            color,
+            tex_index,
+            blend_mode,
         );
     }
 
@@ -584,10 +650,7 @@ impl QuadBatch {
 
                 self.push_quad(
                     Rectangle::new(iced::Point::new(x, y), iced::Size::new(w, h)),
-                    Rectangle::new(
-                        iced::Point::ORIGIN,
-                        iced::Size::new(u_ratio, v_ratio),
-                    ),
+                    Rectangle::new(iced::Point::ORIGIN, iced::Size::new(u_ratio, v_ratio)),
                     color,
                     -2,
                     BlendMode::Alpha,
@@ -691,23 +754,34 @@ impl QuadBatch {
         let base = vert_start as u32;
         FrameQuadSnapshot {
             vertices: self.vertices[vert_start..].to_vec(),
-            indices: self.indices[idx_start..].iter().map(|&i| i - base).collect(),
-            texture_requests: self.texture_requests[tex_start..].iter().map(|r| TextureRequest {
-                path: r.path.clone(),
-                vertex_start: r.vertex_start - base,
-                vertex_count: r.vertex_count,
-            }).collect(),
-            mask_texture_requests: self.mask_texture_requests[mask_start..].iter().map(|r| TextureRequest {
-                path: r.path.clone(),
-                vertex_start: r.vertex_start - base,
-                vertex_count: r.vertex_count,
-            }).collect(),
+            indices: self.indices[idx_start..]
+                .iter()
+                .map(|&i| i - base)
+                .collect(),
+            texture_requests: self.texture_requests[tex_start..]
+                .iter()
+                .map(|r| TextureRequest {
+                    path: r.path.clone(),
+                    vertex_start: r.vertex_start - base,
+                    vertex_count: r.vertex_count,
+                })
+                .collect(),
+            mask_texture_requests: self.mask_texture_requests[mask_start..]
+                .iter()
+                .map(|r| TextureRequest {
+                    path: r.path.clone(),
+                    vertex_start: r.vertex_start - base,
+                    vertex_count: r.vertex_count,
+                })
+                .collect(),
         }
     }
 
     /// Append a cached frame snapshot, adjusting indices and offsets.
     pub fn append_snapshot(&mut self, snap: &FrameQuadSnapshot) {
-        if snap.vertices.is_empty() { return; }
+        if snap.vertices.is_empty() {
+            return;
+        }
         let base = self.vertices.len() as u32;
         self.vertices.extend_from_slice(&snap.vertices);
         self.indices.extend(snap.indices.iter().map(|&i| i + base));
@@ -727,4 +801,3 @@ impl QuadBatch {
         }
     }
 }
-

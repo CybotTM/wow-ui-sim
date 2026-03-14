@@ -428,8 +428,17 @@ impl App {
         let mut tex_mgr = TextureManager::new(textures_path)
             .with_interface_path(DEFAULT_INTERFACE_PATH)
             .with_addons_path(DEFAULT_ADDONS_PATH);
+        let class_name = {
+            let env = env_rc.borrow();
+            let state = env.state().borrow();
+            crate::lua_api::state::CLASS_LABELS
+                .get((state.player.class_index - 1).max(0) as usize)
+                .copied()
+                .unwrap_or("Warrior")
+                .to_string()
+        };
         tex_mgr.preload_talent_textures(790);
-        tex_mgr.preload_talent_panel_textures();
+        tex_mgr.preload_talent_panel_textures(&class_name);
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
             DEFAULT_FONTS_PATH,

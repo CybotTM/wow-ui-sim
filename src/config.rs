@@ -49,10 +49,18 @@ pub struct MovementConfig {
     pub swimming: bool,
 }
 
-fn default_class() -> String { "Warrior".into() }
-fn default_race() -> String { "Human".into() }
-fn default_rot_level() -> String { "Off".into() }
-fn default_xp_level() -> String { "33%".into() }
+fn default_class() -> String {
+    "Warrior".into()
+}
+fn default_race() -> String {
+    "Human".into()
+}
+fn default_rot_level() -> String {
+    "Off".into()
+}
+fn default_xp_level() -> String {
+    "33%".into()
+}
 
 impl Default for SimConfig {
     fn default() -> Self {

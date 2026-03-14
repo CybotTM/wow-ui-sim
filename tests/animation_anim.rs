@@ -13,12 +13,15 @@ fn setup() -> WowLuaEnv {
 #[test]
 fn animation_set_offset_no_error() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimOffset", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Translation")
         anim:SetOffset(10, -5)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
@@ -38,26 +41,32 @@ fn animation_set_change_alpha() {
 #[test]
 fn animation_set_scale_no_error() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimScale", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Scale")
         anim:SetScale(2.0, 3.0)
         anim:SetScaleFrom(0.5, 0.5)
         anim:SetScaleTo(1.5, 1.5)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn animation_set_degrees_no_error() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimDeg", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Rotation")
         anim:SetDegrees(360)
         anim:SetOrigin("CENTER", 0, 0)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 // ============================================================================
@@ -67,61 +76,86 @@ fn animation_set_degrees_no_error() {
 #[test]
 fn animation_is_stopped_initially() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimStopped", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         assert(anim:IsStopped() == true, "Should be stopped initially")
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn animation_is_delaying_stub() {
     let env = setup();
-    let delaying: bool = env.eval(r#"
+    let delaying: bool = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestAnimDelaying", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         return anim:IsDelaying()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert!(!delaying, "IsDelaying stub should return false");
 }
 
 #[test]
 fn animation_get_progress_with_duration() {
     let env = setup();
-    let progress: f64 = env.eval(r#"
+    let progress: f64 = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestAnimProg", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         anim:SetDuration(1.0)
         return anim:GetProgress()
-    "#).unwrap();
-    assert_eq!(progress, 0.0, "Progress should be 0.0 at start with duration set");
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        progress, 0.0,
+        "Progress should be 0.0 at start with duration set"
+    );
 }
 
 #[test]
 fn animation_get_smooth_progress_with_duration() {
     let env = setup();
-    let progress: f64 = env.eval(r#"
+    let progress: f64 = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestAnimSmProg", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         anim:SetDuration(1.0)
         return anim:GetSmoothProgress()
-    "#).unwrap();
-    assert_eq!(progress, 0.0, "Smooth progress should be 0.0 at start with duration set");
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        progress, 0.0,
+        "Smooth progress should be 0.0 at start with duration set"
+    );
 }
 
 #[test]
 fn animation_get_elapsed_default() {
     let env = setup();
-    let elapsed: f64 = env.eval(r#"
+    let elapsed: f64 = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestAnimElapsed2", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         return anim:GetElapsed()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(elapsed, 0.0);
 }
 
@@ -132,7 +166,8 @@ fn animation_get_elapsed_default() {
 #[test]
 fn animation_set_get_target_no_error() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimTarget", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
@@ -141,25 +176,32 @@ fn animation_set_get_target_no_error() {
         anim:SetTargetKey("SomeKey")
         anim:SetTargetName("SomeName")
         anim:SetTargetParent()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn animation_get_name() {
     let env = setup();
-    let name: String = env.eval(r#"
+    let name: String = env
+        .eval(
+            r#"
         local f = CreateFrame("Frame", "TestAnimName", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha", "FadeIn")
         return anim:GetName()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(name, "FadeIn");
 }
 
 #[test]
 fn animation_playback_stubs_no_error() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimStubs", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
@@ -168,7 +210,9 @@ fn animation_playback_stubs_no_error() {
         anim:Stop()
         anim:Restart()
         anim:Finish()
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 // ============================================================================
@@ -178,7 +222,8 @@ fn animation_playback_stubs_no_error() {
 #[test]
 fn animation_set_has_script() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimScript", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
@@ -187,19 +232,24 @@ fn animation_set_has_script() {
         assert(anim:HasScript("OnFinished") == true)
         anim:SetScript("OnFinished", nil)
         assert(anim:HasScript("OnFinished") == false)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]
 fn animation_hook_script() {
     let env = setup();
-    env.exec(r#"
+    env.exec(
+        r#"
         local f = CreateFrame("Frame", "TestAnimHookScript", UIParent)
         local ag = f:CreateAnimationGroup()
         local anim = ag:CreateAnimation("Alpha")
         anim:HookScript("OnPlay", function() end)
         assert(anim:HasScript("OnPlay") == true)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 }
 
 #[test]

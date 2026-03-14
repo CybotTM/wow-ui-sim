@@ -1,6 +1,6 @@
 //! Anchor/point methods: SetPoint, ClearAllPoints, SetAllPoints, GetPoint, etc.
 
-use super::super::handle::{extract_frame_id, frame_ref, FrameRef};
+use super::super::handle::{FrameRef, extract_frame_id, frame_ref};
 use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::script_helpers::lua_error;
@@ -31,9 +31,7 @@ fn get_number(v: &Value) -> Option<f32> {
 /// to the corresponding frame object.
 fn get_frame_id(lua: &mlua::Lua, v: &Value) -> Option<usize> {
     match v {
-        ref v @ Value::UserData(_) => {
-            extract_frame_id(v).map(|id| id as usize)
-        }
+        ref v @ Value::UserData(_) => extract_frame_id(v).map(|id| id as usize),
         Value::String(s) => {
             let name = s.to_string_lossy();
             if let Ok(val) = lua.globals().get::<Value>(name.as_str()) {
@@ -134,10 +132,20 @@ fn parse_validated_set_point(
     lua: &mlua::Lua,
     id: u64,
     args: Vec<Value>,
-) -> mlua::Result<(crate::widget::AnchorPoint, Option<usize>, crate::widget::AnchorPoint, f32, f32)> {
+) -> mlua::Result<(
+    crate::widget::AnchorPoint,
+    Option<usize>,
+    crate::widget::AnchorPoint,
+    f32,
+    f32,
+)> {
     let point_str = extract_point_str(args.first());
-    let point = crate::widget::AnchorPoint::from_str(&point_str)
-        .ok_or_else(|| lua_error(lua, format!("Frame:SetPoint(): Invalid region point {point_str}")))?;
+    let point = crate::widget::AnchorPoint::from_str(&point_str).ok_or_else(|| {
+        lua_error(
+            lua,
+            format!("Frame:SetPoint(): Invalid region point {point_str}"),
+        )
+    })?;
     let (mut relative_to, relative_point, x_ofs, y_ofs, explicit_relative) =
         parse_set_point_args(lua, &args, point).map_err(|msg| lua_error(lua, msg))?;
     if !explicit_relative && relative_to.is_none() {
@@ -159,18 +167,35 @@ fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Resul
     }
     let args: Vec<Value> = args.into_iter().collect();
     if args.is_empty() {
-        return Err(lua_error(lua,
-            "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]"
+        return Err(lua_error(
+            lua,
+            "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]",
         ));
     }
     let (point, relative_to, relative_point, x_ofs, y_ofs) =
         parse_validated_set_point(lua, id, args)?;
     let state_rc = get_sim_state(lua);
     check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
-    if is_duplicate_anchor(&state_rc.borrow(), id, relative_to, point, relative_point, x_ofs, y_ofs) {
+    if is_duplicate_anchor(
+        &state_rc.borrow(),
+        id,
+        relative_to,
+        point,
+        relative_point,
+        x_ofs,
+        y_ofs,
+    ) {
         return Ok(());
     }
-    apply_set_point(&state_rc, id, point, relative_to, relative_point, x_ofs, y_ofs);
+    apply_set_point(
+        &state_rc,
+        id,
+        point,
+        relative_to,
+        relative_point,
+        x_ofs,
+        y_ofs,
+    );
     Ok(())
 }
 
@@ -182,12 +207,17 @@ fn check_anchor_cycle(
     relative_to: Option<usize>,
     action: &str,
 ) -> mlua::Result<()> {
-    let Some(rel_id) = relative_to else { return Ok(()) };
+    let Some(rel_id) = relative_to else {
+        return Ok(());
+    };
     let rel_id = rel_id as u64;
     if rel_id == id {
-        return Err(lua_error(lua, format!(
-            "Action[SetPoint] failed because[Cannot anchor to itself]: attempted from: {action}."
-        )));
+        return Err(lua_error(
+            lua,
+            format!(
+                "Action[SetPoint] failed because[Cannot anchor to itself]: attempted from: {action}."
+            ),
+        ));
     }
     if let Some((x, seen)) = find_cycle_node(state, id, rel_id) {
         return Err(build_cycle_error(lua, action, rel_id, x, &seen));
@@ -320,8 +350,12 @@ fn add_clear_all_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         if combat_lockdown::check_and_fire(lua, &state_rc, id, "ClearAllPoints") {
             return Ok(());
         }
-        let already_empty = state_rc.borrow().widgets.get(id)
-            .map(|f| f.anchors.is_empty()).unwrap_or(true);
+        let already_empty = state_rc
+            .borrow()
+            .widgets
+            .get(id)
+            .map(|f| f.anchors.is_empty())
+            .unwrap_or(true);
         if !already_empty {
             let mut state = state_rc.borrow_mut();
             state.widgets.remove_all_anchor_dependents_for(id);
@@ -360,22 +394,25 @@ fn add_clear_point<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_adjust_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ClearPointsOffset", |_lua, _this, ()| Ok(()));
 
-    methods.add_method("AdjustPointsOffset", |lua, this, (x_offset, y_offset): (f32, f32)| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        if combat_lockdown::check_and_fire(lua, &state_rc, id, "AdjustPointsOffset") {
-            return Ok(());
-        }
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            for anchor in &mut frame.anchors {
-                anchor.x_offset += x_offset;
-                anchor.y_offset += y_offset;
+    methods.add_method(
+        "AdjustPointsOffset",
+        |lua, this, (x_offset, y_offset): (f32, f32)| {
+            let id = this.0;
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "AdjustPointsOffset") {
+                return Ok(());
             }
-        }
-        state.widgets.mark_rect_dirty(id);
-        Ok(())
-    });
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(id) {
+                for anchor in &mut frame.anchors {
+                    anchor.x_offset += x_offset;
+                    anchor.y_offset += y_offset;
+                }
+            }
+            state.widgets.mark_rect_dirty(id);
+            Ok(())
+        },
+    );
 }
 
 /// SetAllPoints(relativeTo) - sets TOPLEFT and BOTTOMRIGHT to fill a relative frame.
@@ -387,7 +424,13 @@ fn add_set_all_points_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let (should_set, relative_to_id) = resolve_set_all_points_target(lua, id, &first, has_arg);
         if should_set {
             let state_rc = get_sim_state(lua);
-            check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to_id, "Frame:SetAllPoints")?;
+            check_anchor_cycle(
+                lua,
+                &state_rc.borrow(),
+                id,
+                relative_to_id,
+                "Frame:SetAllPoints",
+            )?;
             apply_set_all_points(&state_rc, id, relative_to_id);
         }
         Ok(())
@@ -406,17 +449,23 @@ fn resolve_set_all_points_target(
         Value::Boolean(true) => {
             let state_rc = get_sim_state(lua);
             let state = state_rc.borrow();
-            let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
+            let parent_id = state
+                .widgets
+                .get(id)
+                .and_then(|f| f.parent_id)
+                .map(|p| p as usize);
             (true, parent_id)
         }
-        ref v @ Value::UserData(_) => {
-            (true, extract_frame_id(v).map(|id| id as usize))
-        }
+        ref v @ Value::UserData(_) => (true, extract_frame_id(v).map(|id| id as usize)),
         _ if has_arg => (true, None),
         _ => {
             let state_rc = get_sim_state(lua);
             let state = state_rc.borrow();
-            let parent_id = state.widgets.get(id).and_then(|f| f.parent_id).map(|p| p as usize);
+            let parent_id = state
+                .widgets
+                .get(id)
+                .and_then(|f| f.parent_id)
+                .map(|p| p as usize);
             (true, parent_id)
         }
     }
@@ -439,13 +488,15 @@ fn apply_set_all_points(
             crate::widget::AnchorPoint::TopLeft,
             relative_to_id,
             crate::widget::AnchorPoint::TopLeft,
-            0.0, 0.0,
+            0.0,
+            0.0,
         );
         frame.set_point(
             crate::widget::AnchorPoint::BottomRight,
             relative_to_id,
             crate::widget::AnchorPoint::BottomRight,
-            0.0, 0.0,
+            0.0,
+            0.0,
         );
     }
     state.widgets.mark_rect_dirty(id);
@@ -473,7 +524,13 @@ fn add_get_point<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             let Some(anchor) = sorted.get(idx) else {
                 return Ok(mlua::MultiValue::new());
             };
-            (anchor.point, anchor.relative_to_id, anchor.relative_point, anchor.x_offset, anchor.y_offset)
+            (
+                anchor.point,
+                anchor.relative_to_id,
+                anchor.relative_point,
+                anchor.x_offset,
+                anchor.y_offset,
+            )
         };
         let (point, relative_to_id, relative_point, x_offset, y_offset) = anchor_data;
         let relative_to = match relative_to_id {
@@ -494,7 +551,11 @@ fn add_get_num_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetNumPoints", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state.widgets.get(this.0).map(|f| f.anchors.len()).unwrap_or(0);
+        let count = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.anchors.len())
+            .unwrap_or(0);
         Ok(count as i32)
     });
 }

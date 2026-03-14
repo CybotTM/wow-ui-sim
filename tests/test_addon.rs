@@ -9,7 +9,10 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::WowFontSystem;
 
 fn load_test_addon(env: &WowLuaEnv) -> Result<(), String> {
-    let addon_path = concat!(env!("CARGO_MANIFEST_DIR"), "/test_addons/TestAddon/TestAddon.lua");
+    let addon_path = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/test_addons/TestAddon/TestAddon.lua"
+    );
     let code = fs::read_to_string(addon_path)
         .map_err(|e| format!("Failed to read TestAddon.lua: {}", e))?;
 
@@ -31,7 +34,8 @@ fn load_test_addon(env: &WowLuaEnv) -> Result<(), String> {
 fn fire_addon_loaded(env: &WowLuaEnv) {
     // Fire ADDON_LOADED with "TestAddon" as the addon name argument
     // Check a wide range since widget IDs are global and increment across tests
-    env.exec(r#"
+    env.exec(
+        r#"
         -- Manually trigger the loader's OnEvent
         for id = 1, 10000 do
             local key = "__frame_" .. id
@@ -43,7 +47,9 @@ fn fire_addon_loaded(env: &WowLuaEnv) {
                 end
             end
         end
-    "#).ok();
+    "#,
+    )
+    .ok();
 }
 
 #[test]
@@ -102,12 +108,8 @@ fn test_parent_child() {
     load_test_addon(&env).unwrap();
     fire_addon_loaded(&env);
 
-    let child1_parent: String = env
-        .eval("return TestChild1:GetParent():GetName()")
-        .unwrap();
-    let child2_parent: String = env
-        .eval("return TestChild2:GetParent():GetName()")
-        .unwrap();
+    let child1_parent: String = env.eval("return TestChild1:GetParent():GetName()").unwrap();
+    let child2_parent: String = env.eval("return TestChild2:GetParent():GetName()").unwrap();
 
     assert_eq!(child1_parent, "TestParent");
     assert_eq!(child2_parent, "TestParent");
@@ -198,13 +200,26 @@ fn test_strata_inheritance() {
     let child_level: i32 = env.eval("return TestStrataChild:GetFrameLevel()").unwrap();
 
     // Grandchild should also inherit HIGH strata
-    let grandchild_strata: String = env.eval("return TestStrataGrandchild:GetFrameStrata()").unwrap();
-    let grandchild_level: i32 = env.eval("return TestStrataGrandchild:GetFrameLevel()").unwrap();
+    let grandchild_strata: String = env
+        .eval("return TestStrataGrandchild:GetFrameStrata()")
+        .unwrap();
+    let grandchild_level: i32 = env
+        .eval("return TestStrataGrandchild:GetFrameLevel()")
+        .unwrap();
 
-    assert_eq!(child_strata, "HIGH", "Child should inherit HIGH strata from parent");
+    assert_eq!(
+        child_strata, "HIGH",
+        "Child should inherit HIGH strata from parent"
+    );
     assert_eq!(child_level, 6, "Child level should be parent level + 1");
-    assert_eq!(grandchild_strata, "HIGH", "Grandchild should inherit HIGH strata");
-    assert_eq!(grandchild_level, 7, "Grandchild level should be child level + 1");
+    assert_eq!(
+        grandchild_strata, "HIGH",
+        "Grandchild should inherit HIGH strata"
+    );
+    assert_eq!(
+        grandchild_level, 7,
+        "Grandchild level should be child level + 1"
+    );
 }
 
 #[test]
@@ -215,7 +230,9 @@ fn test_texture_creation() {
 
     let obj_type: String = env.eval("return TestTexture:GetObjectType()").unwrap();
     let has_texture: bool = env.eval("return TestTexture:GetTexture() ~= nil").unwrap();
-    let parent: String = env.eval("return TestTexture:GetParent():GetName()").unwrap();
+    let parent: String = env
+        .eval("return TestTexture:GetParent():GetName()")
+        .unwrap();
 
     assert_eq!(obj_type, "Texture");
     assert!(has_texture);
@@ -243,7 +260,9 @@ fn test_get_point() {
     load_test_addon(&env).unwrap();
     fire_addon_loaded(&env);
 
-    let point: String = env.eval("local p = TestGetPoint:GetPoint(1); return p").unwrap();
+    let point: String = env
+        .eval("local p = TestGetPoint:GetPoint(1); return p")
+        .unwrap();
     let num_points: i32 = env.eval("return TestGetPoint:GetNumPoints()").unwrap();
 
     assert_eq!(point, "TOPLEFT");
@@ -288,7 +307,8 @@ fn test_button_positions() {
     let env = WowLuaEnv::new().unwrap();
 
     // Create a panel at CENTER with a button at BOTTOMLEFT
-    env.exec(r#"
+    env.exec(
+        r#"
         local mainFrame = CreateFrame("Frame", "TestMainPanel", UIParent)
         mainFrame:SetSize(300, 220)
         mainFrame:SetPoint("CENTER", 60, 0)
@@ -300,7 +320,9 @@ fn test_button_positions() {
         local btn2 = CreateFrame("Button", "TestDeclineBtn", mainFrame)
         btn2:SetSize(100, 28)
         btn2:SetPoint("BOTTOMRIGHT", -30, 25)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // Dump and print frame positions for debugging
     let dump = env.dump_frames();
@@ -313,20 +335,28 @@ fn test_button_positions() {
     assert!(btn2_exists, "DeclineButton should exist");
 
     // Check that GetPoint returns the correct anchor info
-    let (point1, rel_point1, x1, y1): (String, String, f32, f32) = env.eval(r#"
+    let (point1, rel_point1, x1, y1): (String, String, f32, f32) = env
+        .eval(
+            r#"
         local p, rt, rp, x, y = TestAcceptBtn:GetPoint(1)
         return p, rp, x, y
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
 
     assert_eq!(point1, "BOTTOMLEFT");
     assert_eq!(rel_point1, "BOTTOMLEFT");
     assert_eq!(x1, 30.0);
     assert_eq!(y1, 25.0);
 
-    let (point2, rel_point2, x2, y2): (String, String, f32, f32) = env.eval(r#"
+    let (point2, rel_point2, x2, y2): (String, String, f32, f32) = env
+        .eval(
+            r#"
         local p, rt, rp, x, y = TestDeclineBtn:GetPoint(1)
         return p, rp, x, y
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
 
     assert_eq!(point2, "BOTTOMRIGHT");
     assert_eq!(rel_point2, "BOTTOMRIGHT");
@@ -339,7 +369,8 @@ fn test_parent_visibility_propagation() {
     let env = WowLuaEnv::new().unwrap();
 
     // Create a parent frame that is hidden
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TestHiddenParent", UIParent)
         parent:SetSize(200, 200)
         parent:Hide()  -- Parent is hidden
@@ -347,7 +378,9 @@ fn test_parent_visibility_propagation() {
         local child = CreateFrame("Button", "TestChildOfHidden", parent)
         child:SetSize(100, 50)
         child:Show()  -- Child is explicitly shown, but parent is hidden
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // Verify parent is hidden
     let parent_visible: bool = env.eval("return TestHiddenParent:IsVisible()").unwrap();
@@ -358,20 +391,47 @@ fn test_parent_visibility_propagation() {
     assert!(child_shown, "Child's own shown flag should be true");
 
     // Check parent_id is correctly set
-    let child_parent: String = env.eval("return TestChildOfHidden:GetParent():GetName()").unwrap();
-    assert_eq!(child_parent, "TestHiddenParent", "Child should have correct parent");
+    let child_parent: String = env
+        .eval("return TestChildOfHidden:GetParent():GetName()")
+        .unwrap();
+    assert_eq!(
+        child_parent, "TestHiddenParent",
+        "Child should have correct parent"
+    );
 
     // Get parent_id from the widget registry directly
     let state = env.state().borrow();
-    let child_id = state.widgets.get_id_by_name("TestChildOfHidden").expect("Child should exist");
-    let parent_id = state.widgets.get_id_by_name("TestHiddenParent").expect("Parent should exist");
+    let child_id = state
+        .widgets
+        .get_id_by_name("TestChildOfHidden")
+        .expect("Child should exist");
+    let parent_id = state
+        .widgets
+        .get_id_by_name("TestHiddenParent")
+        .expect("Parent should exist");
 
-    let child_frame = state.widgets.get(child_id).expect("Child frame should exist");
-    assert_eq!(child_frame.parent_id, Some(parent_id), "Child's parent_id should point to parent");
+    let child_frame = state
+        .widgets
+        .get(child_id)
+        .expect("Child frame should exist");
+    assert_eq!(
+        child_frame.parent_id,
+        Some(parent_id),
+        "Child's parent_id should point to parent"
+    );
 
-    let parent_frame = state.widgets.get(parent_id).expect("Parent frame should exist");
-    assert!(!parent_frame.visible, "Parent's visible flag should be false");
-    assert!(child_frame.visible, "Child's own visible flag should be true");
+    let parent_frame = state
+        .widgets
+        .get(parent_id)
+        .expect("Parent frame should exist");
+    assert!(
+        !parent_frame.visible,
+        "Parent's visible flag should be false"
+    );
+    assert!(
+        child_frame.visible,
+        "Child's own visible flag should be true"
+    );
 }
 
 #[test]
@@ -382,7 +442,8 @@ fn test_lua_property_syncs_to_rust_children_keys() {
     let env = WowLuaEnv::new().unwrap();
 
     // Create parent and child frames, then assign child to parent property
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TestParentWithKey", UIParent)
         local child = CreateFrame("Frame", "TestChildWithKey", parent)
         local fontstring = parent:CreateFontString("TestFontStringWithKey")
@@ -391,24 +452,48 @@ fn test_lua_property_syncs_to_rust_children_keys() {
         parent.MyChild = child
         parent.TitleContainer = child
         child.TitleText = fontstring
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // Verify Lua-side assignment works
     let lua_child_exists: bool = env.eval("return TestParentWithKey.MyChild ~= nil").unwrap();
-    let lua_title_container: bool = env.eval("return TestParentWithKey.TitleContainer ~= nil").unwrap();
-    let lua_title_text: bool = env.eval("return TestParentWithKey.TitleContainer.TitleText ~= nil").unwrap();
+    let lua_title_container: bool = env
+        .eval("return TestParentWithKey.TitleContainer ~= nil")
+        .unwrap();
+    let lua_title_text: bool = env
+        .eval("return TestParentWithKey.TitleContainer.TitleText ~= nil")
+        .unwrap();
     assert!(lua_child_exists, "Lua property MyChild should exist");
-    assert!(lua_title_container, "Lua property TitleContainer should exist");
+    assert!(
+        lua_title_container,
+        "Lua property TitleContainer should exist"
+    );
     assert!(lua_title_text, "Lua property TitleText should exist");
 
     // Verify Rust-side children_keys was updated via __newindex
     let state = env.state().borrow();
-    let parent_id = state.widgets.get_id_by_name("TestParentWithKey").expect("Parent should exist");
-    let child_id = state.widgets.get_id_by_name("TestChildWithKey").expect("Child should exist");
-    let fontstring_id = state.widgets.get_id_by_name("TestFontStringWithKey").expect("FontString should exist");
+    let parent_id = state
+        .widgets
+        .get_id_by_name("TestParentWithKey")
+        .expect("Parent should exist");
+    let child_id = state
+        .widgets
+        .get_id_by_name("TestChildWithKey")
+        .expect("Child should exist");
+    let fontstring_id = state
+        .widgets
+        .get_id_by_name("TestFontStringWithKey")
+        .expect("FontString should exist");
 
-    let parent_frame = state.widgets.get(parent_id).expect("Parent frame should exist");
-    let child_frame = state.widgets.get(child_id).expect("Child frame should exist");
+    let parent_frame = state
+        .widgets
+        .get(parent_id)
+        .expect("Parent frame should exist");
+    let child_frame = state
+        .widgets
+        .get(child_id)
+        .expect("Child frame should exist");
 
     // Check children_keys was populated by __newindex
     assert_eq!(
@@ -438,7 +523,8 @@ fn test_buff_duration_text_centered_under_icon() {
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
     env.set_font_system(font_system);
 
-    env.exec(r#"
+    env.exec(
+        r#"
         local parent = CreateFrame("Frame", "TestBuffButton", UIParent)
         parent:SetSize(30, 40)
         parent:SetPoint("CENTER")
@@ -451,13 +537,19 @@ fn test_buff_duration_text_centered_under_icon() {
         duration:SetFont("Fonts\\FRIZQT__.TTF", 12)
         duration:SetPoint("TOP", icon, "BOTTOM")
         duration:SetFormattedText("%dm", 60)
-    "#).unwrap();
+    "#,
+    )
+    .unwrap();
 
     // Verify the Duration FontString has auto-sized width
     let state = env.state().borrow();
-    let duration_id = state.widgets.get_id_by_name("TestBuffDuration")
+    let duration_id = state
+        .widgets
+        .get_id_by_name("TestBuffDuration")
         .expect("Duration FontString should exist");
-    let duration = state.widgets.get(duration_id)
+    let duration = state
+        .widgets
+        .get(duration_id)
         .expect("Duration frame should exist");
 
     // word_wrap defaults to true (matching WoW), but auto-sizing should still
@@ -477,14 +569,13 @@ fn test_buff_duration_text_centered_under_icon() {
     // Icon is 30px wide anchored at TOP of 30px parent → Icon center X = parent_x + 15
     // Duration with TOP anchor to Icon's BOTTOM: center X = icon_center_x = parent_x + 15
     // So Duration's left edge should be at: parent_x + 15 - duration.width/2
-    let icon_id = state.widgets.get_id_by_name("TestBuffIcon")
+    let icon_id = state
+        .widgets
+        .get_id_by_name("TestBuffIcon")
         .expect("Icon should exist");
-    let icon_rect = wow_ui_sim::lua_api::compute_frame_rect(
-        &state.widgets, icon_id, 1024.0, 768.0,
-    );
-    let dur_rect = wow_ui_sim::lua_api::compute_frame_rect(
-        &state.widgets, duration_id, 1024.0, 768.0,
-    );
+    let icon_rect = wow_ui_sim::lua_api::compute_frame_rect(&state.widgets, icon_id, 1024.0, 768.0);
+    let dur_rect =
+        wow_ui_sim::lua_api::compute_frame_rect(&state.widgets, duration_id, 1024.0, 768.0);
 
     let icon_center_x = icon_rect.x + icon_rect.width / 2.0;
     let dur_center_x = dur_rect.x + dur_rect.width / 2.0;
@@ -493,6 +584,9 @@ fn test_buff_duration_text_centered_under_icon() {
         (icon_center_x - dur_center_x).abs() < 1.0,
         "Duration text should be horizontally centered under Icon. \
          Icon center X={}, Duration center X={} (x={}, w={})",
-        icon_center_x, dur_center_x, dur_rect.x, dur_rect.width
+        icon_center_x,
+        dur_center_x,
+        dur_rect.x,
+        dur_rect.width
     );
 }

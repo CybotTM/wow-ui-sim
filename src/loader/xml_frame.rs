@@ -6,9 +6,9 @@ use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, rand_id};
 use super::precompiled;
+use super::xml_fontstring::create_fontstring_from_xml;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
 use super::xml_lifecycle::fire_lifecycle_scripts;
-use super::xml_fontstring::create_fontstring_from_xml;
 use super::xml_texture::create_texture_from_xml;
 
 /// Create a frame from XML definition.
@@ -46,9 +46,12 @@ pub fn create_frame_from_xml(
     let parent = explicit_parent.unwrap_or("UIParent");
 
     let inherits_buf = build_inherits_chain(frame, intrinsic_base);
-    let inherits = inherits_buf.as_deref().unwrap_or(frame.inherits.as_deref().unwrap_or(""));
+    let inherits = inherits_buf
+        .as_deref()
+        .unwrap_or(frame.inherits.as_deref().unwrap_or(""));
 
-    let lua_code = build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
+    let lua_code =
+        build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
     exec_create_frame_code(env, &lua_code, &name)?;
     apply_xml_properties_direct(env, &name, frame, inherits, parent);
     apply_intrinsic_property(env, intrinsic_base, &name);
@@ -81,7 +84,10 @@ fn register_virtual_or_intrinsic(
 }
 
 /// Prepend intrinsic base template to the inherits chain.
-fn build_inherits_chain(frame: &crate::xml::FrameXml, intrinsic_base: Option<&str>) -> Option<String> {
+fn build_inherits_chain(
+    frame: &crate::xml::FrameXml,
+    intrinsic_base: Option<&str>,
+) -> Option<String> {
     let explicit = frame.inherits.as_deref().unwrap_or("");
     match intrinsic_base {
         Some(base) if !explicit.is_empty() => Some(format!("{}, {}", base, explicit)),
@@ -98,8 +104,12 @@ fn build_inherits_chain(frame: &crate::xml::FrameXml, intrinsic_base: Option<&st
 /// Note: `id` is set here in Lua (not deferred to Rust) because template child
 /// OnLoad handlers may reference parent IDs during fire_deferred_child_onloads.
 fn build_frame_lua_code(
-    widget_type: &str, name: &str, explicit_parent: Option<&str>,
-    inherits: &str, frame: &crate::xml::FrameXml, parent: &str,
+    widget_type: &str,
+    name: &str,
+    explicit_parent: Option<&str>,
+    inherits: &str,
+    frame: &crate::xml::FrameXml,
+    parent: &str,
 ) -> String {
     let mut lua_code = build_create_frame_code(widget_type, name, explicit_parent, inherits);
     append_parent_key_code(&mut lua_code, frame, parent);
@@ -126,7 +136,10 @@ fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, n
 
 /// Create child frames, layer children, animations, and apply button/bar textures.
 fn create_children_and_finalize(
-    env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str, inherits: &str,
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+    inherits: &str,
 ) -> Result<(), LoadError> {
     create_child_frames(env, frame, name)?;
     create_layer_children(env, frame, name)?;
@@ -135,8 +148,32 @@ fn create_children_and_finalize(
     apply_button_text(env, frame, name, inherits)?;
     apply_bar_texture(env, frame, name)?;
     init_action_bar_tables(env, name);
-    fire_lifecycle_scripts(env, name);
+    if has_lifecycle_scripts(frame, inherits) {
+        fire_lifecycle_scripts(env, name);
+    }
     Ok(())
+}
+
+fn has_lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
+    if frame
+        .scripts()
+        .is_some_and(|scripts| !scripts.on_load.is_empty() || !scripts.on_show.is_empty())
+    {
+        return true;
+    }
+
+    if inherits.is_empty() {
+        return false;
+    }
+
+    crate::xml::get_template_chain(inherits)
+        .iter()
+        .any(|entry| {
+            entry
+                .frame
+                .scripts()
+                .is_some_and(|scripts| !scripts.on_load.is_empty() || !scripts.on_show.is_empty())
+        })
 }
 
 /// Execute the CreateFrame Lua code with OnLoad suppression.
@@ -145,12 +182,16 @@ fn create_children_and_finalize(
 /// Template children created during CreateFrame have their OnLoad deferred until
 /// instance-level KeyValues (e.g. layoutIndex) are applied in the Lua chunk.
 /// Uses a depth counter to handle recursive create_frame_from_xml calls correctly.
-fn exec_create_frame_code(env: &LoaderEnv<'_>, lua_code: &str, name: &str) -> Result<(), LoadError> {
+fn exec_create_frame_code(
+    env: &LoaderEnv<'_>,
+    lua_code: &str,
+    name: &str,
+) -> Result<(), LoadError> {
     let fns = precompiled::get(env.lua());
     fns.suppress_push.call::<()>(()).ok();
-    let exec_result = env.exec(lua_code).map_err(|e| {
-        LoadError::Lua(format!("Failed to create frame {}: {}", name, e))
-    });
+    let exec_result = env
+        .exec(lua_code)
+        .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", name, e)));
     fns.suppress_pop.call::<()>(()).ok();
     exec_result?;
     crate::lua_api::globals::template::fire_deferred_child_onloads(env.lua());
@@ -186,7 +227,11 @@ fn apply_xml_properties_direct(
 
 /// Resolve the frame name, applying `$parent` substitution and generating anonymous names.
 /// Returns `None` if the frame should be skipped (anonymous top-level frame).
-fn resolve_frame_name(frame: &crate::xml::FrameXml, parent_override: Option<&str>, creator: Option<&str>) -> Option<String> {
+fn resolve_frame_name(
+    frame: &crate::xml::FrameXml,
+    parent_override: Option<&str>,
+    creator: Option<&str>,
+) -> Option<String> {
     match &frame.name {
         Some(n) => {
             if let Some(parent_name) = parent_override {
@@ -197,7 +242,7 @@ fn resolve_frame_name(frame: &crate::xml::FrameXml, parent_override: Option<&str
         }
         None => {
             if parent_override.is_some() {
-                Some(format!("__{}_{}",  creator.unwrap_or("anon"), rand_id()))
+                Some(format!("__{}_{}", creator.unwrap_or("anon"), rand_id()))
             } else {
                 None // Anonymous top-level frames are templates
             }
@@ -224,7 +269,12 @@ fn resolve_parent(frame: &crate::xml::FrameXml, parent_override: Option<&str>) -
 }
 
 /// Build the initial `CreateFrame(...)` Lua code.
-fn build_create_frame_code(widget_type: &str, name: &str, parent: Option<&str>, inherits: &str) -> String {
+fn build_create_frame_code(
+    widget_type: &str,
+    name: &str,
+    parent: Option<&str>,
+    inherits: &str,
+) -> String {
     let inherits_arg = if inherits.is_empty() {
         "nil".to_string()
     } else {
@@ -310,7 +360,10 @@ fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, inher
     // Collect from inherited templates (base mixins first)
     if !inherits.is_empty() {
         for template_entry in &crate::xml::get_template_chain(inherits) {
-            collect_mixins_from_attr(&mut all_mixins, template_entry.frame.combined_mixin().as_deref());
+            collect_mixins_from_attr(
+                &mut all_mixins,
+                template_entry.frame.combined_mixin().as_deref(),
+            );
         }
     }
 
@@ -336,7 +389,6 @@ fn collect_mixins_from_attr(all_mixins: &mut Vec<String>, mixin_attr: Option<&st
     }
 }
 
-
 /// Append KeyValue assignments from templates and the frame itself.
 fn append_key_values_code(lua_code: &mut String, frame: &crate::xml::FrameXml, inherits: &str) {
     if !inherits.is_empty() {
@@ -352,7 +404,10 @@ fn append_key_values_code(lua_code: &mut String, frame: &crate::xml::FrameXml, i
 }
 
 /// Append `frame.key = value` assignments for a KeyValues block.
-fn append_key_values_from_xml(lua_code: &mut String, key_values: Option<&crate::xml::KeyValuesXml>) {
+fn append_key_values_from_xml(
+    lua_code: &mut String,
+    key_values: Option<&crate::xml::KeyValuesXml>,
+) {
     if let Some(key_values) = key_values {
         for kv in &key_values.values {
             let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
@@ -407,13 +462,19 @@ fn append_scripts_code(lua_code: &mut String, frame: &crate::xml::FrameXml) {
 }
 
 /// Create textures and fontstrings from the frame's Layers.
-fn create_layer_children(env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str) -> Result<(), LoadError> {
+fn create_layer_children(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+) -> Result<(), LoadError> {
     for layers in frame.layers() {
         for layer in &layers.layers {
             let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
             let sub_level = layer.texture_sub_level.unwrap_or(0);
             for (texture, is_mask, is_line) in layer.textures() {
-                create_texture_from_xml(env, texture, name, draw_layer, is_mask, is_line, sub_level)?;
+                create_texture_from_xml(
+                    env, texture, name, draw_layer, is_mask, is_line, sub_level,
+                )?;
             }
             for fontstring in layer.font_strings() {
                 create_fontstring_from_xml(env, fontstring, name, draw_layer, sub_level)?;
@@ -425,12 +486,16 @@ fn create_layer_children(env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name
 
 /// Map a FrameElement variant to its (FrameXml, widget_type, intrinsic_name) triple.
 /// Returns None for unsupported element types.
-fn frame_element_to_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+fn frame_element_to_type(
+    child: &crate::xml::FrameElement,
+) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
     specialized_element_type(child).or_else(|| frame_like_element_type(child))
 }
 
 /// Specialized widget types with distinct type strings or intrinsic bases.
-fn specialized_element_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+fn specialized_element_type(
+    child: &crate::xml::FrameElement,
+) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
     use crate::xml::FrameElement;
     match child {
         FrameElement::Frame(f) => Some((f, "Frame", None)),
@@ -441,10 +506,10 @@ fn specialized_element_type(child: &crate::xml::FrameElement) -> Option<(&crate:
         FrameElement::ContainedAlertFrame(f) => Some((f, "Button", Some("ContainedAlertFrame"))),
         FrameElement::ItemButton(f) => Some((f, "ItemButton", None)),
         FrameElement::CheckButton(f) => Some((f, "CheckButton", None)),
-        FrameElement::EditBox(f)
-        | FrameElement::EventEditBox(f) => Some((f, "EditBox", None)),
-        FrameElement::ScrollFrame(f)
-        | FrameElement::EventScrollFrame(f) => Some((f, "ScrollFrame", None)),
+        FrameElement::EditBox(f) | FrameElement::EventEditBox(f) => Some((f, "EditBox", None)),
+        FrameElement::ScrollFrame(f) | FrameElement::EventScrollFrame(f) => {
+            Some((f, "ScrollFrame", None))
+        }
         FrameElement::Slider(f) => Some((f, "Slider", None)),
         FrameElement::StatusBar(f) => Some((f, "StatusBar", None)),
         FrameElement::Cooldown(f) => Some((f, "Cooldown", None)),
@@ -457,7 +522,9 @@ fn specialized_element_type(child: &crate::xml::FrameElement) -> Option<(&crate:
         | FrameElement::TabardModel(f)
         | FrameElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
         FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
-        FrameElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
+        FrameElement::ScrollingMessageFrame(f) => {
+            Some((f, "MessageFrame", Some("ScrollingMessageFrame")))
+        }
         FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
         FrameElement::Minimap(f) => Some((f, "Minimap", None)),
         _ => None,
@@ -465,7 +532,9 @@ fn specialized_element_type(child: &crate::xml::FrameElement) -> Option<(&crate:
 }
 
 /// Frame-like elements that all map to widget type "Frame".
-fn frame_like_element_type(child: &crate::xml::FrameElement) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+fn frame_like_element_type(
+    child: &crate::xml::FrameElement,
+) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
     use crate::xml::FrameElement;
     match child {
         FrameElement::EventFrame(f)
@@ -490,7 +559,11 @@ fn frame_like_element_type(child: &crate::xml::FrameElement) -> Option<(&crate::
 }
 
 /// Recursively create child frames and assign parentKey references.
-fn create_child_frames(env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str) -> Result<(), LoadError> {
+fn create_child_frames(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+) -> Result<(), LoadError> {
     // Use all_frame_elements() to handle multiple <Frames> sections in the XML
     // and standalone frame-type children outside <Frames> wrappers
     let elements = frame.all_frame_elements();
@@ -514,12 +587,13 @@ fn create_single_child_frame(
         Some(triple) => triple,
         None => return Ok(()),
     };
-    let child_name = create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
-    if let (Some(actual_child_name), Some(parent_key)) =
-        (child_name, &child_frame.parent_key)
-    {
+    let child_name =
+        create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
+    if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
         let fns = precompiled::get(env.lua());
-        fns.assign_parent_key.call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str())).ok();
+        fns.assign_parent_key
+            .call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str()))
+            .ok();
     }
     Ok(())
 }
@@ -535,15 +609,16 @@ fn create_frame_elements(
             Some(triple) => triple,
             None => continue,
         };
-        let child_name = create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
+        let child_name =
+            create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
 
         // Assign parentKey so the parent can reference the child.
         // The Lua assignment triggers __newindex which syncs to Rust children_keys.
-        if let (Some(actual_child_name), Some(parent_key)) =
-            (child_name, &child_frame.parent_key)
-        {
+        if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
             let fns = precompiled::get(env.lua());
-            fns.assign_parent_key.call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str())).ok();
+            fns.assign_parent_key
+                .call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str()))
+                .ok();
         }
     }
     Ok(())
@@ -596,4 +671,3 @@ fn apply_secure_mixins(lua: &mlua::Lua, secure_mixin_attr: &str) {
         let _ = lua.load(transform).call::<()>(tbl);
     }
 }
-

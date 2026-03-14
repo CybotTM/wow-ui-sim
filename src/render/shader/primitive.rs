@@ -1,8 +1,8 @@
 //! WoW UI shader primitive implementation.
 
 use super::{QuadBatch, WowUiPipeline};
-use iced::widget::shader::{self, Viewport};
 use iced::Rectangle;
+use iced::widget::shader::{self, Viewport};
 use std::sync::Arc;
 
 /// Loaded texture data ready for GPU upload.
@@ -39,7 +39,12 @@ pub fn load_texture_or_crop(
         let tex_data = tex_mgr.load(base_path)?;
         let (w, h) = (tex_data.width, tex_data.height);
         let (crop_w, crop_h, cropped) = crop_sub_region(&tex_data.pixels, w, h, cl, cr, ct, cb);
-        Some(GpuTextureData { path: path.to_string(), width: crop_w, height: crop_h, rgba: cropped })
+        Some(GpuTextureData {
+            path: path.to_string(),
+            width: crop_w,
+            height: crop_h,
+            rgba: cropped,
+        })
     } else {
         let tex_data = tex_mgr.load(path)?;
         Some(GpuTextureData {
@@ -187,7 +192,11 @@ fn log_gpu_memory_once(atlas: &crate::render::shader::atlas::GpuTextureAtlas) {
         "[GPU] Atlas memory: {:.0} MB allocated, {:.1} MB used | slots: 64px={} 128px={} 256px={} 512px={} 2048px={}",
         stats.allocated_bytes as f64 / (1024.0 * 1024.0),
         stats.used_bytes as f64 / (1024.0 * 1024.0),
-        stats.used_slots[0], stats.used_slots[1], stats.used_slots[2], stats.used_slots[3], stats.used_slots[4],
+        stats.used_slots[0],
+        stats.used_slots[1],
+        stats.used_slots[2],
+        stats.used_slots[3],
+        stats.used_slots[4],
     );
 }
 
@@ -226,8 +235,10 @@ fn resolve_and_scale_quads(
             for vertex in resolved.vertices[start..end].iter_mut() {
                 if vertex.mask_tex_index == -2 {
                     vertex.mask_tex_index = tex_idx;
-                    vertex.mask_tex_coords[0] = entry.uv_x + vertex.mask_tex_coords[0] * entry.uv_width;
-                    vertex.mask_tex_coords[1] = entry.uv_y + vertex.mask_tex_coords[1] * entry.uv_height;
+                    vertex.mask_tex_coords[0] =
+                        entry.uv_x + vertex.mask_tex_coords[0] * entry.uv_width;
+                    vertex.mask_tex_coords[1] =
+                        entry.uv_y + vertex.mask_tex_coords[1] * entry.uv_height;
                 }
             }
         }
@@ -259,7 +270,13 @@ impl shader::Primitive for WowUiPrimitive {
             iced::Size::new(bounds.width * scale, bounds.height * scale),
         );
 
-        upload_pending_textures(pipeline, queue, &self.textures, &self.glyph_atlas_data, self.glyph_atlas_size);
+        upload_pending_textures(
+            pipeline,
+            queue,
+            &self.textures,
+            &self.glyph_atlas_data,
+            self.glyph_atlas_size,
+        );
         pipeline.update_projection(queue, &physical_bounds);
 
         // Upload only dirty strata (Some = dirty, None = keep previous GPU buffer).

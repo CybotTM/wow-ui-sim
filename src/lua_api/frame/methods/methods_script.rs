@@ -20,32 +20,38 @@ fn add_set_script_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_set_script<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetScript", |lua, this, (handler, func): (String, Value)| {
-        let id = this.0;
-        let h = validate_script_handler(&handler)?;
-        if let Value::Function(f) = func {
-            set_script(lua, id, &handler, f);
-            register_script_handler(lua, id, h);
-        } else {
-            remove_script(lua, id, &handler);
-            deregister_script_handler(lua, id, h);
-        }
-        Ok(())
-    });
+    methods.add_method(
+        "SetScript",
+        |lua, this, (handler, func): (String, Value)| {
+            let id = this.0;
+            let h = validate_script_handler(&handler)?;
+            if let Value::Function(f) = func {
+                set_script(lua, id, &handler, f);
+                register_script_handler(lua, id, h);
+            } else {
+                remove_script(lua, id, &handler);
+                deregister_script_handler(lua, id, h);
+            }
+            Ok(())
+        },
+    );
 }
 
 fn validate_script_handler(handler: &str) -> mlua::Result<crate::event::ScriptHandler> {
-    crate::event::ScriptHandler::from_str(handler)
-        .ok_or_else(|| mlua::Error::RuntimeError(format!(
-            "SetScript: `{}' is not a valid script handler for this widget type", handler
-        )))
+    crate::event::ScriptHandler::from_str(handler).ok_or_else(|| {
+        mlua::Error::RuntimeError(format!(
+            "SetScript: `{}' is not a valid script handler for this widget type",
+            handler
+        ))
+    })
 }
 
 fn register_script_handler(lua: &mlua::Lua, id: u64, h: crate::event::ScriptHandler) {
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     state.scripts.set(id, h, 1);
-    if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
+    if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate
+    {
         state.on_update_frames.insert(id);
         state.visible_on_update_cache = None;
     }
@@ -55,7 +61,8 @@ fn deregister_script_handler(lua: &mlua::Lua, id: u64, h: crate::event::ScriptHa
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     state.scripts.remove(id, h);
-    if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate {
+    if h == crate::event::ScriptHandler::OnUpdate || h == crate::event::ScriptHandler::OnPostUpdate
+    {
         state.on_update_frames.remove(&id);
         state.visible_on_update_cache = None;
     }
@@ -68,7 +75,9 @@ fn add_set_on_click_handler<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
             set_script(lua, id, "OnClick", f);
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
-            state.scripts.set(id, crate::event::ScriptHandler::OnClick, 1);
+            state
+                .scripts
+                .set(id, crate::event::ScriptHandler::OnClick, 1);
         }
         Ok(())
     });
@@ -85,22 +94,31 @@ fn add_get_script_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_hook_and_wrap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_hook_script(methods);
-    methods.add_method("WrapScript", |_lua, _this, (_target, _script, _pre_body): (Value, String, String)| Ok(()));
-    methods.add_method("UnwrapScript", |_lua, _this, (_target, _script): (Value, String)| Ok(()));
+    methods.add_method(
+        "WrapScript",
+        |_lua, _this, (_target, _script, _pre_body): (Value, String, String)| Ok(()),
+    );
+    methods.add_method(
+        "UnwrapScript",
+        |_lua, _this, (_target, _script): (Value, String)| Ok(()),
+    );
 }
 
 fn add_hook_script<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("HookScript", |lua, this, (handler, func): (String, Value)| {
-        let id = this.0;
-        if let Value::Function(hook_fn) = func {
-            let combined = build_hooked_function(lua, id, &handler, hook_fn)?;
-            set_script(lua, id, &handler, combined);
-            if let Some(h) = crate::event::ScriptHandler::from_str(&handler) {
-                register_script_handler(lua, id, h);
+    methods.add_method(
+        "HookScript",
+        |lua, this, (handler, func): (String, Value)| {
+            let id = this.0;
+            if let Value::Function(hook_fn) = func {
+                let combined = build_hooked_function(lua, id, &handler, hook_fn)?;
+                set_script(lua, id, &handler, combined);
+                if let Some(h) = crate::event::ScriptHandler::from_str(&handler) {
+                    register_script_handler(lua, id, h);
+                }
             }
-        }
-        Ok(Value::Boolean(true))
-    });
+            Ok(Value::Boolean(true))
+        },
+    );
 }
 
 fn build_hooked_function(
@@ -111,13 +129,17 @@ fn build_hooked_function(
 ) -> mlua::Result<mlua::Function> {
     let old = crate::lua_api::script_helpers::get_script(lua, id, handler);
     match old {
-        Some(old_fn) => lua.load(r#"
+        Some(old_fn) => lua
+            .load(
+                r#"
             local old, hook = ...
             return function(...)
                 old(...)
                 hook(...)
             end
-        "#).call::<mlua::Function>((old_fn, hook_fn)),
+        "#,
+            )
+            .call::<mlua::Function>((old_fn, hook_fn)),
         None => Ok(hook_fn),
     }
 }
@@ -126,7 +148,9 @@ fn remove_keys_with_prefix(table: &mlua::Table, prefix: &str) {
     let keys: Vec<String> = table
         .pairs::<String, Value>()
         .filter_map(|pair| {
-            if let Ok((k, _)) = pair && k.starts_with(prefix) {
+            if let Ok((k, _)) = pair
+                && k.starts_with(prefix)
+            {
                 return Some(k);
             }
             None
@@ -159,27 +183,54 @@ fn add_clear_scripts_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
 
 /// Base script handlers supported by all frame types.
 const BASE_SCRIPTS: &[&str] = &[
-    "OnShow", "OnHide", "OnUpdate", "OnEvent", "OnSizeChanged",
-    "OnMouseDown", "OnMouseUp", "OnMouseWheel",
-    "OnEnter", "OnLeave", "OnDragStart", "OnDragStop", "OnReceiveDrag",
-    "OnKeyDown", "OnKeyUp", "OnAttributeChanged", "OnLoad",
-    "OnEnable", "OnDisable", "OnChar",
-    "OnGamePadButtonDown", "OnGamePadButtonUp",
-    "OnHyperlinkClick", "OnHyperlinkEnter", "OnHyperlinkLeave",
+    "OnShow",
+    "OnHide",
+    "OnUpdate",
+    "OnEvent",
+    "OnSizeChanged",
+    "OnMouseDown",
+    "OnMouseUp",
+    "OnMouseWheel",
+    "OnEnter",
+    "OnLeave",
+    "OnDragStart",
+    "OnDragStop",
+    "OnReceiveDrag",
+    "OnKeyDown",
+    "OnKeyUp",
+    "OnAttributeChanged",
+    "OnLoad",
+    "OnEnable",
+    "OnDisable",
+    "OnChar",
+    "OnGamePadButtonDown",
+    "OnGamePadButtonUp",
+    "OnHyperlinkClick",
+    "OnHyperlinkEnter",
+    "OnHyperlinkLeave",
 ];
 
-const BUTTON_SCRIPTS: &[&str] = &[
-    "OnClick", "PreClick", "PostClick", "OnDoubleClick",
-];
+const BUTTON_SCRIPTS: &[&str] = &["OnClick", "PreClick", "PostClick", "OnDoubleClick"];
 const EDITBOX_SCRIPTS: &[&str] = &[
-    "OnTextChanged", "OnCursorChanged", "OnEditFocusGained", "OnEditFocusLost",
-    "OnEnterPressed", "OnEscapePressed", "OnTabPressed", "OnSpacePressed",
-    "OnInputLanguageChanged", "OnArrowPressed", "OnCharComposition", "OnTextSet",
+    "OnTextChanged",
+    "OnCursorChanged",
+    "OnEditFocusGained",
+    "OnEditFocusLost",
+    "OnEnterPressed",
+    "OnEscapePressed",
+    "OnTabPressed",
+    "OnSpacePressed",
+    "OnInputLanguageChanged",
+    "OnArrowPressed",
+    "OnCharComposition",
+    "OnTextSet",
 ];
 const RANGE_SCRIPTS: &[&str] = &["OnValueChanged"];
 const SCROLL_SCRIPTS: &[&str] = &["OnVerticalScroll", "OnScrollRangeChanged"];
 const TOOLTIP_SCRIPTS: &[&str] = &[
-    "OnTooltipSetDefaultAnchor", "OnTooltipCleared", "OnTooltipSetFrameStack",
+    "OnTooltipSetDefaultAnchor",
+    "OnTooltipCleared",
+    "OnTooltipSetFrameStack",
 ];
 const MODEL_SCRIPTS: &[&str] = &["OnModelLoaded", "OnAnimFinished", "OnAnimStarted"];
 const MODELSCENE_SCRIPTS: &[&str] = &["OnDressModel"];
@@ -203,16 +254,26 @@ fn extra_scripts_for_type(widget_type: crate::widget::WidgetType) -> &'static [&
 }
 
 fn script_supported(widget_type: crate::widget::WidgetType, script_type: &str) -> bool {
-    let in_base = BASE_SCRIPTS.iter().any(|s| s.eq_ignore_ascii_case(script_type));
-    if in_base { return true; }
+    let in_base = BASE_SCRIPTS
+        .iter()
+        .any(|s| s.eq_ignore_ascii_case(script_type));
+    if in_base {
+        return true;
+    }
     extra_scripts_for_type(widget_type)
         .iter()
         .any(|s| s.eq_ignore_ascii_case(script_type))
 }
 
 /// Scripts supported by AnimationGroup.
-const ANIM_GROUP_SCRIPTS: &[&str] =
-    &["OnPlay", "OnStop", "OnFinished", "OnPause", "OnLoop", "OnUpdate"];
+const ANIM_GROUP_SCRIPTS: &[&str] = &[
+    "OnPlay",
+    "OnStop",
+    "OnFinished",
+    "OnPause",
+    "OnLoop",
+    "OnUpdate",
+];
 
 /// Scripts supported by Animation subtypes.
 const ANIMATION_SCRIPTS: &[&str] = &["OnPlay", "OnStop", "OnFinished", "OnPause", "OnUpdate"];
@@ -222,9 +283,17 @@ const ANIMATION_SCRIPTS: &[&str] = &["OnPlay", "OnStop", "OnFinished", "OnPause"
 fn anim_has_script(otn: &str, script_type: &str) -> Option<bool> {
     let scripts: &[&str] = match otn {
         "AnimationGroup" => ANIM_GROUP_SCRIPTS,
-        "Animation" | "Alpha" | "Rotation" | "Scale" | "Translation"
-        | "LineTranslation" | "LineScale" | "Path" | "FlipBook"
-        | "VertexColor" | "TextureCoordTranslation" => ANIMATION_SCRIPTS,
+        "Animation"
+        | "Alpha"
+        | "Rotation"
+        | "Scale"
+        | "Translation"
+        | "LineTranslation"
+        | "LineScale"
+        | "Path"
+        | "FlipBook"
+        | "VertexColor"
+        | "TextureCoordTranslation" => ANIMATION_SCRIPTS,
         "ControlPoint" | "Actor" | "ModelSceneActor" => return Some(false),
         _ => return None,
     };
@@ -240,7 +309,9 @@ fn add_has_script_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         if let Some(otn) = frame.and_then(|f| f.object_type_name.as_deref()) {
             if anim_has_script(otn, &script_type).is_some() {
                 drop(state);
-                return Ok(crate::lua_api::script_helpers::get_script(lua, this.0, &script_type).is_some());
+                return Ok(
+                    crate::lua_api::script_helpers::get_script(lua, this.0, &script_type).is_some(),
+                );
             }
         }
         let widget_type = frame

@@ -21,7 +21,10 @@ fn test_get_thumb_texture_nil_by_default() {
     "#,
         )
         .unwrap();
-    assert!(is_nil, "GetThumbTexture should return nil on a fresh slider");
+    assert!(
+        is_nil,
+        "GetThumbTexture should return nil on a fresh slider"
+    );
 }
 
 #[test]
@@ -37,7 +40,10 @@ fn test_set_and_get_thumb_texture() {
     "#,
         )
         .unwrap();
-    assert!(matches, "GetThumbTexture should return the texture set via SetThumbTexture");
+    assert!(
+        matches,
+        "GetThumbTexture should return the texture set via SetThumbTexture"
+    );
 }
 
 #[test]
@@ -54,17 +60,24 @@ fn test_set_thumb_texture_fileid_keeps_same_object() {
     "#,
         )
         .unwrap();
-    assert!(still_same, "SetThumbTexture with fileID should keep same texture object");
+    assert!(
+        still_same,
+        "SetThumbTexture with fileID should keep same texture object"
+    );
 }
 
 #[test]
 fn test_slider_set_thumb_texture_file_id_get_texture() {
     let env = env();
-    let tex_id: i32 = env.eval(r#"
+    let tex_id: i32 = env
+        .eval(
+            r#"
         local s = CreateFrame("Slider")
         s:SetThumbTexture(12345)
         local t = s:GetThumbTexture()
         return t:GetTexture()
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(tex_id, 12345);
 }

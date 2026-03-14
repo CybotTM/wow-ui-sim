@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use std::io::{BufRead, BufReader, Write};
 use std::os::unix::net::{UnixListener, UnixStream};
 use std::path::PathBuf;
-use std::sync::{mpsc, OnceLock};
+use std::sync::{OnceLock, mpsc};
 use std::thread;
 
 /// Global socket path for signal handler cleanup.
@@ -77,10 +77,7 @@ pub enum LuaCommand {
 
 /// Get the socket path for Lua REPL.
 pub fn socket_path() -> PathBuf {
-    PathBuf::from(format!(
-        "/tmp/wow-lua-{}.sock",
-        std::process::id()
-    ))
+    PathBuf::from(format!("/tmp/wow-lua-{}.sock", std::process::id()))
 }
 
 /// Initialize the Lua server.
@@ -116,14 +113,14 @@ fn cleanup_stale_sockets() {
                 && let Some(pid_str) = filename
                     .strip_prefix("wow-lua-")
                     .and_then(|s| s.strip_suffix(".sock"))
-                    && let Ok(pid) = pid_str.parse::<i32>() {
-                        // Check if process is still alive using kill(pid, 0)
-                        let exists = unsafe { libc::kill(pid, 0) } == 0;
-                        if !exists
-                            && std::fs::remove_file(&entry).is_ok() {
-                                eprintln!("[wow-sim] Cleaned up stale socket: {}", entry.display());
-                            }
-                    }
+                && let Ok(pid) = pid_str.parse::<i32>()
+            {
+                // Check if process is still alive using kill(pid, 0)
+                let exists = unsafe { libc::kill(pid, 0) } == 0;
+                if !exists && std::fs::remove_file(&entry).is_ok() {
+                    eprintln!("[wow-sim] Cleaned up stale socket: {}", entry.display());
+                }
+            }
         }
     }
 }
@@ -140,8 +137,14 @@ extern "C" fn signal_handler(sig: libc::c_int) {
 
 fn register_signal_handlers() {
     unsafe {
-        libc::signal(libc::SIGTERM, signal_handler as *const () as libc::sighandler_t);
-        libc::signal(libc::SIGINT, signal_handler as *const () as libc::sighandler_t);
+        libc::signal(
+            libc::SIGTERM,
+            signal_handler as *const () as libc::sighandler_t,
+        );
+        libc::signal(
+            libc::SIGINT,
+            signal_handler as *const () as libc::sighandler_t,
+        );
     }
 }
 
@@ -221,12 +224,28 @@ fn handle_connection(
             Request::Exec { code } => {
                 send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
             }
-            Request::DumpTree { filter, visible_only } => {
-                send_command(cmd_tx, |respond| LuaCommand::DumpTree { filter, visible_only, respond })
-            }
-            Request::Screenshot { output, width, height, filter, crop } => {
-                send_command(cmd_tx, |respond| LuaCommand::Screenshot { output, width, height, filter, crop, respond })
-            }
+            Request::DumpTree {
+                filter,
+                visible_only,
+            } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
+                filter,
+                visible_only,
+                respond,
+            }),
+            Request::Screenshot {
+                output,
+                width,
+                height,
+                filter,
+                crop,
+            } => send_command(cmd_tx, |respond| LuaCommand::Screenshot {
+                output,
+                width,
+                height,
+                filter,
+                crop,
+                respond,
+            }),
         };
 
         writeln!(stream, "{}", serde_json::to_string(&response).unwrap())?;
@@ -349,7 +368,10 @@ pub mod client {
         let mut stream =
             UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
 
-        let request = Request::DumpTree { filter, visible_only };
+        let request = Request::DumpTree {
+            filter,
+            visible_only,
+        };
         writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
             .map_err(|e| format!("Write failed: {}", e))?;
 

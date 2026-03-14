@@ -246,7 +246,11 @@ fn test_getmetatable_frame_index_iterable_with_pairs() {
         )
         .unwrap();
     // Should have many methods
-    assert!(count > 50, "Expected many methods in __index, got {}", count);
+    assert!(
+        count > 50,
+        "Expected many methods in __index, got {}",
+        count
+    );
 }
 
 #[test]
@@ -273,9 +277,7 @@ fn test_getmetatable_string_has_metatable() {
 #[test]
 fn test_create_frame_exists() {
     let env = env();
-    let is_func: bool = env
-        .eval("return type(CreateFrame) == 'function'")
-        .unwrap();
+    let is_func: bool = env.eval("return type(CreateFrame) == 'function'").unwrap();
     assert!(is_func);
 }
 
@@ -288,13 +290,13 @@ fn test_submodule_apis_registered() {
     let env = env();
     // Spot-check a few functions/namespaces from sub-modules
     for name in &[
-        "GetLocale",       // locale_api
-        "GetNumAddOns",    // addon_api
-        "UnitName",        // unit_api
-        "Mixin",           // mixin_api
-        "strsplit",        // utility_api
-        "GetCVar",         // cvar_api
-        "CreateFont",      // font_api
+        "GetLocale",    // locale_api
+        "GetNumAddOns", // addon_api
+        "UnitName",     // unit_api
+        "Mixin",        // mixin_api
+        "strsplit",     // utility_api
+        "GetCVar",      // cvar_api
+        "CreateFont",   // font_api
     ] {
         let is_func: bool = env
             .eval(&format!("return type({}) == 'function'", name))
@@ -330,9 +332,7 @@ fn test_submodule_namespaces_registered() {
 fn test_ui_strings_registered() {
     let env = env();
     // Some well-known UI string constants
-    let is_string: bool = env
-        .eval("return type(OKAY) == 'string'")
-        .unwrap();
+    let is_string: bool = env.eval("return type(OKAY) == 'string'").unwrap();
     assert!(is_string);
 }
 
@@ -347,8 +347,7 @@ fn test_string_format_missing_string_arg_error_message() {
         .eval("local ok, err = pcall(string.format, '%s'); return err")
         .unwrap();
     assert_eq!(
-        err,
-        "bad argument #2 to '?' (string expected, got no value)",
+        err, "bad argument #2 to '?' (string expected, got no value)",
         "got: {}",
         err
     );
@@ -361,8 +360,7 @@ fn test_string_format_nil_string_arg_error_message() {
         .eval("local ok, err = pcall(string.format, '%s', nil); return err")
         .unwrap();
     assert_eq!(
-        err,
-        "bad argument #2 to '?' (string expected, got nil)",
+        err, "bad argument #2 to '?' (string expected, got nil)",
         "got: {}",
         err
     );
@@ -375,8 +373,6 @@ fn test_string_format_nil_string_arg_error_message() {
 #[test]
 fn test_standard_font_objects_created() {
     let env = env();
-    let exists: bool = env
-        .eval("return GameFontNormal ~= nil")
-        .unwrap();
+    let exists: bool = env.eval("return GameFontNormal ~= nil").unwrap();
     assert!(exists, "GameFontNormal should exist");
 }

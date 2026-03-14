@@ -95,11 +95,17 @@ fn test_checkbutton_checked_state() {
 
     env.exec("TestCB:SetChecked(true)").unwrap();
     let checked: bool = env.eval("return TestCB:GetChecked()").unwrap();
-    assert!(checked, "CheckButton should be checked after SetChecked(true)");
+    assert!(
+        checked,
+        "CheckButton should be checked after SetChecked(true)"
+    );
 
     env.exec("TestCB:SetChecked(false)").unwrap();
     let checked: bool = env.eval("return TestCB:GetChecked()").unwrap();
-    assert!(!checked, "CheckButton should be unchecked after SetChecked(false)");
+    assert!(
+        !checked,
+        "CheckButton should be unchecked after SetChecked(false)"
+    );
 }
 
 // ============================================================================
@@ -118,9 +124,7 @@ fn test_colorselect_rgb() {
     )
     .unwrap();
 
-    let (r, g, b): (f64, f64, f64) = env
-        .eval("return TestCS:GetColorRGB()")
-        .unwrap();
+    let (r, g, b): (f64, f64, f64) = env.eval("return TestCS:GetColorRGB()").unwrap();
     assert!((r - 0.5).abs() < 0.001);
     assert!((g - 0.6).abs() < 0.001);
     assert!((b - 0.7).abs() < 0.001);
@@ -133,9 +137,7 @@ fn test_colorselect_rgb_defaults() {
     env.exec(r#"local cs = CreateFrame("ColorSelect", "TestCSDef", UIParent)"#)
         .unwrap();
 
-    let (r, g, b): (f64, f64, f64) = env
-        .eval("return TestCSDef:GetColorRGB()")
-        .unwrap();
+    let (r, g, b): (f64, f64, f64) = env.eval("return TestCSDef:GetColorRGB()").unwrap();
     assert_eq!(r, 1.0);
     assert_eq!(g, 1.0);
     assert_eq!(b, 1.0);
@@ -157,9 +159,7 @@ fn test_colorselect_hsv_roundtrip() {
     )
     .unwrap();
 
-    let (h, s, v): (f64, f64, f64) = env
-        .eval("return TestCSHSV:GetColorHSV()")
-        .unwrap();
+    let (h, s, v): (f64, f64, f64) = env.eval("return TestCSHSV:GetColorHSV()").unwrap();
     assert!((h - 120.0).abs() < 0.01);
     assert!((s - 0.5).abs() < 0.01);
     assert!((v - 0.8).abs() < 0.01);
@@ -178,9 +178,7 @@ fn test_colorselect_hsv_to_rgb_red() {
     .unwrap();
 
     // HSV(0, 1, 1) should be pure red RGB(1, 0, 0)
-    let (r, g, b): (f64, f64, f64) = env
-        .eval("return TestCSRed:GetColorRGB()")
-        .unwrap();
+    let (r, g, b): (f64, f64, f64) = env.eval("return TestCSRed:GetColorRGB()").unwrap();
     assert!((r - 1.0).abs() < 0.01);
     assert!(g.abs() < 0.01);
     assert!(b.abs() < 0.01);
@@ -199,9 +197,7 @@ fn test_colorselect_hsv_to_rgb_green() {
     .unwrap();
 
     // HSV(120, 1, 1) should be pure green RGB(0, 1, 0)
-    let (r, g, b): (f64, f64, f64) = env
-        .eval("return TestCSGreen:GetColorRGB()")
-        .unwrap();
+    let (r, g, b): (f64, f64, f64) = env.eval("return TestCSGreen:GetColorRGB()").unwrap();
     assert!(r.abs() < 0.01);
     assert!((g - 1.0).abs() < 0.01);
     assert!(b.abs() < 0.01);
@@ -221,12 +217,18 @@ fn test_colorselect_rgb_to_hsv_conversion() {
     .unwrap();
 
     // Pure red should be HSV(0, 1, 1)
-    let (h, s, v): (f64, f64, f64) = env
-        .eval("return TestCSConv:GetColorHSV()")
-        .unwrap();
+    let (h, s, v): (f64, f64, f64) = env.eval("return TestCSConv:GetColorHSV()").unwrap();
     assert!(h.abs() < 0.01, "Hue for red should be ~0, got {}", h);
-    assert!((s - 1.0).abs() < 0.01, "Saturation for red should be 1, got {}", s);
-    assert!((v - 1.0).abs() < 0.01, "Value for red should be 1, got {}", v);
+    assert!(
+        (s - 1.0).abs() < 0.01,
+        "Saturation for red should be 1, got {}",
+        s
+    );
+    assert!(
+        (v - 1.0).abs() < 0.01,
+        "Value for red should be 1, got {}",
+        v
+    );
 }
 
 // ============================================================================

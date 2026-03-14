@@ -19,47 +19,64 @@ fn register_c_cvar_namespace(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result
     let t = lua.create_table()?;
 
     let s = Rc::clone(state);
-    t.set("GetCVar", lua.create_function(move |lua, cvar: String| {
-        let state = s.borrow();
-        match state.cvars.get(&cvar) {
-            Some(value) => Ok(Value::String(lua.create_string(&value)?)),
-            None => Ok(Value::Nil),
-        }
-    })?)?;
+    t.set(
+        "GetCVar",
+        lua.create_function(move |lua, cvar: String| {
+            let state = s.borrow();
+            match state.cvars.get(&cvar) {
+                Some(value) => Ok(Value::String(lua.create_string(&value)?)),
+                None => Ok(Value::Nil),
+            }
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("SetCVar", lua.create_function(move |_, (cvar, value): (String, Option<String>)| {
-        let state = s.borrow();
-        state.cvars.set(&cvar, value.as_deref().unwrap_or(""));
-        Ok(true)
-    })?)?;
+    t.set(
+        "SetCVar",
+        lua.create_function(move |_, (cvar, value): (String, Option<String>)| {
+            let state = s.borrow();
+            state.cvars.set(&cvar, value.as_deref().unwrap_or(""));
+            Ok(true)
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("GetCVarBool", lua.create_function(move |_, cvar: String| {
-        let state = s.borrow();
-        Ok(state.cvars.get_bool(&cvar))
-    })?)?;
+    t.set(
+        "GetCVarBool",
+        lua.create_function(move |_, cvar: String| {
+            let state = s.borrow();
+            Ok(state.cvars.get_bool(&cvar))
+        })?,
+    )?;
 
     let s = Rc::clone(state);
-    t.set("GetCVarDefault", lua.create_function(move |lua, cvar: String| {
-        let state = s.borrow();
-        match state.cvars.get_default(&cvar) {
-            Some(value) => Ok(Value::String(lua.create_string(&value)?)),
-            None => Ok(Value::Nil),
-        }
-    })?)?;
+    t.set(
+        "GetCVarDefault",
+        lua.create_function(move |lua, cvar: String| {
+            let state = s.borrow();
+            match state.cvars.get_default(&cvar) {
+                Some(value) => Ok(Value::String(lua.create_string(&value)?)),
+                None => Ok(Value::Nil),
+            }
+        })?,
+    )?;
 
-    t.set("GetCVarBitfield", lua.create_function(|_, (_name, _index): (String, Option<i32>)| {
-        Ok(false)
-    })?)?;
+    t.set(
+        "GetCVarBitfield",
+        lua.create_function(|_, (_name, _index): (String, Option<i32>)| Ok(false))?,
+    )?;
 
-    t.set("SetCVarBitfield", lua.create_function(|_, (_name, _index, _value, _script): (String, i32, bool, Option<String>)| {
-        Ok(true)
-    })?)?;
+    t.set(
+        "SetCVarBitfield",
+        lua.create_function(
+            |_, (_name, _index, _value, _script): (String, i32, bool, Option<String>)| Ok(true),
+        )?,
+    )?;
 
-    t.set("RegisterCVar", lua.create_function(|_, (_name, _value): (String, Option<String>)| {
-        Ok(())
-    })?)?;
+    t.set(
+        "RegisterCVar",
+        lua.create_function(|_, (_name, _value): (String, Option<String>)| Ok(()))?,
+    )?;
 
     t.set("ResetTestCVars", lua.create_function(|_, ()| Ok(()))?)?;
 
@@ -89,18 +106,20 @@ fn register_cvar_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     globals.set("SetCVar", set_cvar)?;
 
     let s = Rc::clone(state);
-    globals.set("ConsoleGetAllCommands", lua.create_function(move |lua, ()| {
-        let state = s.borrow();
-        let keys = state.cvars.all_keys();
-        let result = lua.create_table_with_capacity(keys.len(), 0)?;
-        for (i, key) in keys.iter().enumerate() {
-            let entry = lua.create_table_with_capacity(0, 1)?;
-            entry.set("command", key.as_str())?;
-            result.set(i + 1, entry)?;
-        }
-        Ok(result)
-    })?)?;
+    globals.set(
+        "ConsoleGetAllCommands",
+        lua.create_function(move |lua, ()| {
+            let state = s.borrow();
+            let keys = state.cvars.all_keys();
+            let result = lua.create_table_with_capacity(keys.len(), 0)?;
+            for (i, key) in keys.iter().enumerate() {
+                let entry = lua.create_table_with_capacity(0, 1)?;
+                entry.set("command", key.as_str())?;
+                result.set(i + 1, entry)?;
+            }
+            Ok(result)
+        })?,
+    )?;
 
     Ok(())
 }
-

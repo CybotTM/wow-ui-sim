@@ -1,13 +1,16 @@
+use clap::{Parser, Subcommand};
 use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
-use clap::{Parser, Subcommand};
 use tracing_subscriber::EnvFilter;
-use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon, load_addon_with_saved_vars, LoadResult, LoadTiming};
+use wow_ui_sim::loader::{
+    LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
+    load_addon_with_saved_vars,
+};
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 use wow_ui_sim::render::WowFontSystem;
-use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
+use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
 #[derive(Parser)]
@@ -45,6 +48,10 @@ struct Args {
     /// Which top-level WoW screen to load.
     #[arg(long, value_enum, default_value_t = ScreenKind::Game, value_name = "SCREEN")]
     screen: ScreenKind,
+
+    /// Compatibility alias for `--screen character-select`.
+    #[arg(long, hide = true)]
+    character_select: bool,
 
     #[command(subcommand)]
     command: Option<Commands>,
@@ -136,15 +143,26 @@ enum Commands {
 /// Apply resource limits (10GB memory, 1 CPU core by default).
 fn apply_resource_limits() {
     let max_mem_gb: u64 = std::env::var("WOW_SIM_MAX_MEM_GB")
-        .ok().and_then(|s| s.parse().ok()).unwrap_or(10);
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(10);
     let max_mem_bytes = max_mem_gb * 1024 * 1024 * 1024;
-    let mem_limit = libc::rlimit { rlim_cur: max_mem_bytes, rlim_max: max_mem_bytes };
-    unsafe { libc::setrlimit(libc::RLIMIT_AS, &mem_limit); }
+    let mem_limit = libc::rlimit {
+        rlim_cur: max_mem_bytes,
+        rlim_max: max_mem_bytes,
+    };
+    unsafe {
+        libc::setrlimit(libc::RLIMIT_AS, &mem_limit);
+    }
     let max_cores: usize = std::env::var("WOW_SIM_MAX_CORES")
-        .ok().and_then(|s| s.parse().ok()).unwrap_or(1);
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
     unsafe {
         let mut cpuset: libc::cpu_set_t = std::mem::zeroed();
-        for i in 0..max_cores { libc::CPU_SET(i, &mut cpuset); }
+        for i in 0..max_cores {
+            libc::CPU_SET(i, &mut cpuset);
+        }
         libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
     }
     println!("Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)");
@@ -154,20 +172,33 @@ fn apply_resource_limits() {
 /// Addon names that are test-only and should not be loaded in GUI mode.
 const TEST_ADDONS: &[&str] = &["Wowless", "WowlessData"];
 
-fn scan_addons(base_path: &PathBuf, exclude: &[&str], screen: ScreenKind) -> Vec<(String, PathBuf)> {
+fn scan_addons(
+    base_path: &PathBuf,
+    exclude: &[&str],
+    screen: ScreenKind,
+) -> Vec<(String, PathBuf)> {
     let mut addons = Vec::new();
     if let Ok(entries) = std::fs::read_dir(base_path) {
         for entry in entries.flatten() {
             let path = entry.path();
-            if !path.is_dir() { continue; }
+            if !path.is_dir() {
+                continue;
+            }
             let name = path.file_name().unwrap().to_str().unwrap().to_string();
-            if name.starts_with('.') || name == "BlizzardUI" { continue; }
-            if exclude.iter().any(|e| *e == name) { continue; }
+            if name.starts_with('.') || name == "BlizzardUI" {
+                continue;
+            }
+            if exclude.iter().any(|e| *e == name) {
+                continue;
+            }
             if let Some(toc_path) = wow_ui_sim::loader::find_toc_file(&path)
                 && let Ok(toc) = TocFile::from_file(&toc_path)
-                    && toc.allows_screen(screen) && !toc.is_ptr_only() && !toc.is_game_type_restricted() {
-                        addons.push((name, toc_path));
-                    }
+                && toc.allows_screen(screen)
+                && !toc.is_ptr_only()
+                && !toc.is_game_type_restricted()
+            {
+                addons.push((name, toc_path));
+            }
         }
     }
     wow_ui_sim::loader::sort_addons_by_dependencies(&mut addons);
@@ -199,27 +230,56 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let args = Args::parse();
+    let screen = args.effective_screen();
 
     // For JSON-output commands: redirect stdout→stderr so only JSON hits stdout
-    let quiet = matches!(args.command, Some(Commands::LuaErrors) | Some(Commands::SelfTest { .. }));
-    let saved_stdout = if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None };
+    let quiet = matches!(
+        args.command,
+        Some(Commands::LuaErrors) | Some(Commands::SelfTest { .. })
+    );
+    let saved_stdout = if quiet {
+        wow_ui_sim::lua_errors::redirect_stdout_to_stderr()
+    } else {
+        None
+    };
 
     let env = WowLuaEnv::new()?;
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
     init_environment(&args, &env, &font_system);
-    env.set_screen_mode(args.screen);
+    env.set_screen_mode(screen);
 
     let mut saved_vars = configure_saved_vars(&args);
-    load_blizzard_addons(&env, args.screen);
-    load_third_party_addons(&args, &env, &mut saved_vars, args.screen);
+    load_blizzard_addons(&env, screen);
+    load_third_party_addons(&args, &env, &mut saved_vars, screen);
     env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
 
     let exec_lua = resolve_exec_lua(&args.exec_lua);
 
-    dispatch_command(args.command, env, font_system, args.delay, exec_lua, saved_stdout, saved_vars, args.debug_borders, args.debug_anchors, args.debug_elements)?;
+    dispatch_command(
+        args.command,
+        env,
+        font_system,
+        args.delay,
+        exec_lua,
+        saved_stdout,
+        saved_vars,
+        args.debug_borders,
+        args.debug_anchors,
+        args.debug_elements,
+    )?;
 
     Ok(())
+}
+
+impl Args {
+    fn effective_screen(&self) -> ScreenKind {
+        if self.character_select {
+            ScreenKind::CharacterSelect
+        } else {
+            self.screen
+        }
+    }
 }
 
 /// Resolve exec-lua argument: if prefixed with `@`, read the file contents.
@@ -238,13 +298,21 @@ fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
 
 fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
     let skip = args.no_saved_vars
-        || std::env::var("WOW_SIM_NO_SAVED_VARS").map(|v| v == "1").unwrap_or(false);
-    if skip { println!("SavedVariables loading disabled"); return None; }
+        || std::env::var("WOW_SIM_NO_SAVED_VARS")
+            .map(|v| v == "1")
+            .unwrap_or(false);
+    if skip {
+        println!("SavedVariables loading disabled");
+        return None;
+    }
     let mut saved_vars = SavedVariablesManager::new();
     let wtf_path = PathBuf::from("/syncthing/Sync/Projects/wow/WTF");
     if wtf_path.exists() {
         let wtf = WtfConfig::new(wtf_path, "50868465#2", "Burning Blade", "Haky");
-        println!("WTF config: {} @ {}/{}", wtf.account, wtf.realm, wtf.character);
+        println!(
+            "WTF config: {} @ {}/{}",
+            wtf.account, wtf.realm, wtf.character
+        );
         saved_vars.set_wtf_config(wtf);
     }
     Some(saved_vars)
@@ -288,7 +356,13 @@ fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
         match load_addon(&env.loader_env(), toc_path) {
             Ok(r) => {
                 if verbose {
-                    println!("{} loaded: {} Lua, {} XML, {} warnings", name, r.lua_files, r.xml_files, r.warnings.len());
+                    println!(
+                        "{} loaded: {} Lua, {} XML, {} warnings",
+                        name,
+                        r.lua_files,
+                        r.xml_files,
+                        r.warnings.len()
+                    );
                 }
                 for w in &r.warnings {
                     println!("  [!] {}", w);
@@ -305,7 +379,10 @@ fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
     let elapsed = blizzard_start.elapsed();
     let cache_total = total_timing.cache_hits + total_timing.cache_misses;
     let cache_info = if cache_total > 0 {
-        format!(", bytecode cache: {}/{} hits", total_timing.cache_hits, cache_total)
+        format!(
+            ", bytecode cache: {}/{} hits",
+            total_timing.cache_hits, cache_total
+        )
     } else {
         String::new()
     };
@@ -317,7 +394,10 @@ fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
 
 /// Whether the current command needs test addons (Wowless, WowlessData).
 fn is_test_command(args: &Args) -> bool {
-    matches!(args.command, Some(Commands::SelfTest { .. }) | Some(Commands::RunTests { .. }))
+    matches!(
+        args.command,
+        Some(Commands::SelfTest { .. }) | Some(Commands::RunTests { .. })
+    )
 }
 
 /// Scan, load, and register third-party addons; print summary.
@@ -338,7 +418,11 @@ fn load_third_party_addons(
         return;
     }
 
-    let exclude = if is_test_command(args) { &[][..] } else { TEST_ADDONS };
+    let exclude = if is_test_command(args) {
+        &[][..]
+    } else {
+        TEST_ADDONS
+    };
     let mut addons = scan_addons(&addons_path, exclude, screen);
     // --no-addons with test commands: keep only test addons (Wowless, WowlessData)
     if skip_addons {
@@ -378,12 +462,22 @@ struct LoadStats {
 /// Parse TOC metadata for an addon.
 fn parse_addon_metadata(name: &str, toc_path: &Path) -> (String, String, bool) {
     let toc = TocFile::from_file(toc_path).ok();
-    toc.as_ref().map(|t| {
-        let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.to_string());
-        let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-        let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
-        (title, notes, lod)
-    }).unwrap_or_else(|| (name.to_string(), String::new(), false))
+    toc.as_ref()
+        .map(|t| {
+            let title = t
+                .metadata
+                .get("Title")
+                .cloned()
+                .unwrap_or_else(|| name.to_string());
+            let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
+            let lod = t
+                .metadata
+                .get("LoadOnDemand")
+                .map(|v| v == "1")
+                .unwrap_or(false);
+            (title, notes, lod)
+        })
+        .unwrap_or_else(|| (name.to_string(), String::new(), false))
 }
 
 /// Load a single third-party addon and update stats.
@@ -398,8 +492,13 @@ fn load_single_addon(
 
     // Pre-register so loading_addon_index attributes frames to this addon.
     env.register_addon(AddonInfo {
-        folder_name: name.to_string(), title, notes,
-        enabled: true, loaded: false, load_on_demand, ..Default::default()
+        folder_name: name.to_string(),
+        title,
+        notes,
+        enabled: true,
+        loaded: false,
+        load_on_demand,
+        ..Default::default()
     });
 
     let result = match saved_vars.as_mut() {
@@ -417,7 +516,30 @@ fn load_single_addon(
             drop(s);
             record_addon_success(name, &r, stats);
         }
-        Err(e) => { println!("✗ {} failed: {}", name, e); stats.fail_count += 1; }
+        Err(e) => {
+            println!("✗ {} failed: {}", name, e);
+            stats.fail_count += 1;
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn legacy_character_select_flag_maps_to_character_select_screen() {
+        let args = Args::try_parse_from(["wow-sim", "--character-select"])
+            .expect("legacy character-select flag should parse");
+        assert_eq!(args.effective_screen(), ScreenKind::CharacterSelect);
+    }
+
+    #[test]
+    fn explicit_screen_still_parses_character_select() {
+        let args = Args::try_parse_from(["wow-sim", "--screen", "character-select"])
+            .expect("screen option should parse character-select");
+        assert_eq!(args.effective_screen(), ScreenKind::CharacterSelect);
     }
 }
 
@@ -426,9 +548,19 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
     if std::env::var("WOW_SIM_VERBOSE").is_ok() {
         let status = if r.warnings.is_empty() { "✓" } else { "⚠" };
         let t = &r.timing;
-        println!("{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} lua={:.1?} sv={:.1?})",
-            status, name, r.lua_files, r.xml_files, r.warnings.len(),
-            t.total(), t.io_time, t.xml_parse_time, t.lua_exec_time, t.saved_vars_time);
+        println!(
+            "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} lua={:.1?} sv={:.1?})",
+            status,
+            name,
+            r.lua_files,
+            r.xml_files,
+            r.warnings.len(),
+            t.total(),
+            t.io_time,
+            t.xml_parse_time,
+            t.lua_exec_time,
+            t.saved_vars_time
+        );
     }
     stats.addon_times.push((name.to_string(), r.timing.total()));
     print_addon_warnings(name, &r.warnings);
@@ -445,17 +577,64 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
 }
 
 const VERBOSE_WARNING_ADDONS: &[&str] = &[
-    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur", "ExtraQuestButton",
-    "WaypointUI", "TomTom", "WorldQuestTracker", "SavedInstances", "Rarity", "SimpleItemLevel",
-    "TalentLoadoutManager", "Simulationcraft", "TomCats", "RaiderIO", "!BugGrabber", "CraftSim",
-    "AdvancedInterfaceOptions", "BlizzMove_Debug", "ClickableRaidBuffs", "Dejunk", "Cell",
-    "AngryKeystones", "AutoPotion", "BigWigs_Plugins", "BugSack", "Clicked", "DeathNote", "DeModal",
-    "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam", "DialogueUI", "Chattynator", "AstralKeys",
-    "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker", "idTip", "Macroriffic",
-    "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator", "EditModeExpanded",
-    "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar", "LegionRemixHelper", "Collectionator",
-    "Syndicator", "BigWigs", "!KalielsTracker", "KRaidSkipTracker", "MacroToolkit",
-    "MinimapButtonButton", "OribosExchange",
+    "BetterWardrobe",
+    "Plumber",
+    "BetterBlizzFrames",
+    "Baganator",
+    "Angleur",
+    "ExtraQuestButton",
+    "WaypointUI",
+    "TomTom",
+    "WorldQuestTracker",
+    "SavedInstances",
+    "Rarity",
+    "SimpleItemLevel",
+    "TalentLoadoutManager",
+    "Simulationcraft",
+    "TomCats",
+    "RaiderIO",
+    "!BugGrabber",
+    "CraftSim",
+    "AdvancedInterfaceOptions",
+    "BlizzMove_Debug",
+    "ClickableRaidBuffs",
+    "Dejunk",
+    "Cell",
+    "AngryKeystones",
+    "AutoPotion",
+    "BigWigs_Plugins",
+    "BugSack",
+    "Clicked",
+    "DeathNote",
+    "DeModal",
+    "ElvUI_OptionsUI",
+    "DragonRaceTimes",
+    "DynamicCam",
+    "DialogueUI",
+    "Chattynator",
+    "AstralKeys",
+    "Leatrix_Plus",
+    "CooldownToGo_Options",
+    "HousingItemTracker",
+    "idTip",
+    "Macroriffic",
+    "NameplateSCT",
+    "Krowi_ExtendedVendorUI",
+    "OmniCD",
+    "Auctionator",
+    "EditModeExpanded",
+    "GlobalIgnoreList",
+    "AllTheThings",
+    "BigWigs_KhazAlgar",
+    "LegionRemixHelper",
+    "Collectionator",
+    "Syndicator",
+    "BigWigs",
+    "!KalielsTracker",
+    "KRaidSkipTracker",
+    "MacroToolkit",
+    "MinimapButtonButton",
+    "OribosExchange",
 ];
 
 /// Print warnings for addons in the verbose list.
@@ -476,21 +655,43 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     println!("\n=== Summary ===");
     println!("Loaded: {}/{} addons", stats.success_count, addons.len());
     println!("Failed: {}", stats.fail_count);
-    println!("Total: {} Lua files, {} XML files, {} warnings", stats.total_lua, stats.total_xml, stats.total_warnings);
+    println!(
+        "Total: {} Lua files, {} XML files, {} warnings",
+        stats.total_lua, stats.total_xml, stats.total_warnings
+    );
     let total_time = stats.total_timing.total();
     if !total_time.is_zero() {
         let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
         println!("Total time: {:.2?}", total_time);
-        println!("  IO:         {:.2?} ({:.1}%)", stats.total_timing.io_time, pct(stats.total_timing.io_time));
-        println!("  XML parse:  {:.2?} ({:.1}%)", stats.total_timing.xml_parse_time, pct(stats.total_timing.xml_parse_time));
-        println!("  Lua exec:   {:.2?} ({:.1}%)", stats.total_timing.lua_exec_time, pct(stats.total_timing.lua_exec_time));
-        println!("  SavedVars:  {:.2?} ({:.1}%)", stats.total_timing.saved_vars_time, pct(stats.total_timing.saved_vars_time));
+        println!(
+            "  IO:         {:.2?} ({:.1}%)",
+            stats.total_timing.io_time,
+            pct(stats.total_timing.io_time)
+        );
+        println!(
+            "  XML parse:  {:.2?} ({:.1}%)",
+            stats.total_timing.xml_parse_time,
+            pct(stats.total_timing.xml_parse_time)
+        );
+        println!(
+            "  Lua exec:   {:.2?} ({:.1}%)",
+            stats.total_timing.lua_exec_time,
+            pct(stats.total_timing.lua_exec_time)
+        );
+        println!(
+            "  SavedVars:  {:.2?} ({:.1}%)",
+            stats.total_timing.saved_vars_time,
+            pct(stats.total_timing.saved_vars_time)
+        );
     }
 
     if stats.cache_hits > 0 || stats.cache_misses > 0 {
         let total = stats.cache_hits + stats.cache_misses;
         let pct = 100.0 * stats.cache_hits as f64 / total as f64;
-        println!("Bytecode cache: {}/{} hits ({:.0}%)", stats.cache_hits, total, pct);
+        println!(
+            "Bytecode cache: {}/{} hits ({:.0}%)",
+            stats.cache_hits, total, pct
+        );
     }
 
     let mut sorted_times = stats.addon_times.clone();
@@ -501,16 +702,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     }
 }
 
-use wow_ui_sim::startup::{apply_delay, fire_one_on_update_tick, fire_startup_events_for_screen, process_pending_timers};
-
-/// Fire extra OnUpdate ticks so deferred UI can process.
-fn run_extra_update_ticks(env: &WowLuaEnv, n: usize) {
-    for _ in 0..n {
-        env.state().borrow_mut().ensure_layout_rects();
-        fire_one_on_update_tick(env);
-        process_pending_timers(env);
-    }
-}
+use wow_ui_sim::startup::{apply_delay, run_extra_update_ticks, settle_headless_startup};
 
 #[cfg(feature = "gui")]
 /// Parse a crop string in WxH+X+Y format (e.g., "700x150+400+650").
@@ -531,13 +723,21 @@ fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
 fn apply_crop(img: image::RgbaImage, crop_str: &str) -> image::RgbaImage {
     use image::GenericImageView;
     let (cw, ch, cx, cy) = parse_crop(crop_str).unwrap_or_else(|| {
-        eprintln!("Invalid crop format '{}', expected WxH+X+Y (e.g., 700x150+400+650)", crop_str);
+        eprintln!(
+            "Invalid crop format '{}', expected WxH+X+Y (e.g., 700x150+400+650)",
+            crop_str
+        );
         std::process::exit(1);
     });
     if cx + cw > img.width() || cy + ch > img.height() {
         eprintln!(
             "Crop region {}x{}+{}+{} exceeds image bounds {}x{}",
-            cw, ch, cx, cy, img.width(), img.height()
+            cw,
+            ch,
+            cx,
+            cy,
+            img.width(),
+            img.height()
         );
         std::process::exit(1);
     }
@@ -552,7 +752,10 @@ fn build_screenshot_batch(
     width: u32,
     height: u32,
     filter: Option<&str>,
-) -> (wow_ui_sim::render::QuadBatch, wow_ui_sim::render::GlyphAtlas) {
+) -> (
+    wow_ui_sim::render::QuadBatch,
+    wow_ui_sim::render::GlyphAtlas,
+) {
     use wow_ui_sim::iced_app::build_quad_batch_for_registry;
     use wow_ui_sim::render::GlyphAtlas;
     let mut glyph_atlas = GlyphAtlas::new();
@@ -570,7 +773,9 @@ fn build_screenshot_batch(
         build_quad_batch_for_registry(
             &state.widgets,
             (width as f32, height as f32),
-            filter, None, None,
+            filter,
+            None,
+            None,
             Some((&mut fs, &mut glyph_atlas)),
             Some(&state.message_frames),
             Some(&tooltip_data),
@@ -583,25 +788,68 @@ fn build_screenshot_batch(
 /// Dispatch the CLI subcommand after environment and addons are loaded.
 #[allow(clippy::too_many_arguments)]
 fn dispatch_command(
-    command: Option<Commands>, env: WowLuaEnv,
-    font_system: Rc<RefCell<WowFontSystem>>, delay: Option<u64>,
-    exec_lua: Option<String>, saved_stdout: Option<i32>,
+    command: Option<Commands>,
+    env: WowLuaEnv,
+    font_system: Rc<RefCell<WowFontSystem>>,
+    delay: Option<u64>,
+    exec_lua: Option<String>,
+    saved_stdout: Option<i32>,
     saved_vars: Option<SavedVariablesManager>,
-    debug_borders: bool, debug_anchors: bool, debug_elements: bool,
+    debug_borders: bool,
+    debug_anchors: bool,
+    debug_elements: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match command {
-        Some(Commands::DumpTree { filter, filter_key, visible_only, width, height }) => {
-            run_dump_tree(&env, filter, filter_key, visible_only, width, height, delay, exec_lua.as_deref());
+        Some(Commands::DumpTree {
+            filter,
+            filter_key,
+            visible_only,
+            width,
+            height,
+        }) => {
+            run_dump_tree(
+                &env,
+                filter,
+                filter_key,
+                visible_only,
+                width,
+                height,
+                delay,
+                exec_lua.as_deref(),
+            );
         }
         #[cfg(feature = "gui")]
-        Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
-            run_screenshot(&env, &font_system, output, width, height, filter, crop, delay, exec_lua.as_deref(), dump_tree);
+        Some(Commands::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            dump_tree,
+        }) => {
+            run_screenshot(
+                &env,
+                &font_system,
+                output,
+                width,
+                height,
+                filter,
+                crop,
+                delay,
+                exec_lua.as_deref(),
+                dump_tree,
+            );
         }
         Some(Commands::LuaErrors) => {
             wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
         }
-        Some(Commands::SelfTest { max_ticks, categories }) => {
-            if let Some(c) = &categories { wow_ui_sim::self_test::inject_category_filter(&env, c); }
+        Some(Commands::SelfTest {
+            max_ticks,
+            categories,
+        }) => {
+            if let Some(c) = &categories {
+                wow_ui_sim::self_test::inject_category_filter(&env, c);
+            }
             wow_ui_sim::self_test::run_startup(&env);
             wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
         }
@@ -610,7 +858,11 @@ fn dispatch_command(
             wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
         }
         #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture { output, filter, frame_filter }) => {
+        Some(Commands::DumpTexture {
+            output,
+            filter,
+            frame_filter,
+        }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);
         }
         #[cfg(feature = "gui")]
@@ -632,32 +884,40 @@ fn dispatch_command(
 
 /// Run startup events, timers, and settle the UI state for headless subcommands.
 fn run_headless_startup(env: &WowLuaEnv) {
-    let screen = env.state().borrow().screen_kind;
-    fire_startup_events_for_screen(env, screen);
-    env.apply_post_event_workarounds();
-    env.state().borrow_mut().widgets.rebuild_anchor_index();
-    process_pending_timers(env);
-    fire_one_on_update_tick(env);
-    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
-    run_extra_update_ticks(env, 3);
+    settle_headless_startup(env);
 }
 
 /// Load UI and dump the frame tree to stdout.
 #[allow(clippy::too_many_arguments)]
 fn run_dump_tree(
-    env: &WowLuaEnv, filter: Option<String>, filter_key: Option<String>,
-    visible_only: bool, width: u32, height: u32, delay: Option<u64>, exec_lua: Option<&str>,
+    env: &WowLuaEnv,
+    filter: Option<String>,
+    filter_key: Option<String>,
+    visible_only: bool,
+    width: u32,
+    height: u32,
+    delay: Option<u64>,
+    exec_lua: Option<&str>,
 ) {
     run_headless_startup(env);
     if let Some(code) = exec_lua
-        && let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
+        && let Err(e) = env.exec(code)
+    {
+        eprintln!("[exec-lua] error: {e}");
+    }
     run_extra_update_ticks(env, 3);
     apply_delay(delay);
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
-    wow_ui_sim::dump::print_frame_tree(&state.widgets, &addon_names, filter.as_deref(), filter_key.as_deref(), visible_only, width as f32, height as f32);
+    wow_ui_sim::dump::print_frame_tree(
+        &state.widgets,
+        &addon_names,
+        filter.as_deref(),
+        filter_key.as_deref(),
+        visible_only,
+        width as f32,
+        height as f32,
+    );
 }
 
 #[cfg(feature = "gui")]
@@ -681,18 +941,32 @@ fn run_screenshot(
     run_headless_startup(env);
     wow_ui_sim::debug_helpers::debug_show_game_menu(env);
     if let Some(code) = exec_lua
-        && let Err(e) = env.exec(code) {
-            eprintln!("[exec-lua] error: {e}");
-        }
+        && let Err(e) = env.exec(code)
+    {
+        eprintln!("[exec-lua] error: {e}");
+    }
     apply_delay(delay);
-    let (batch, glyph_atlas) = build_screenshot_batch(env, font_system, width, height, filter.as_deref());
+    let (batch, glyph_atlas) =
+        build_screenshot_batch(env, font_system, width, height, filter.as_deref());
     if let Some(dump_filter) = &dump_tree {
         let state = env.state().borrow();
         let fk = dump_filter.as_deref();
         let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
-        wow_ui_sim::dump::print_frame_tree(&state.widgets, &addon_names, None, fk, false, width as f32, height as f32);
+        wow_ui_sim::dump::print_frame_tree(
+            &state.widgets,
+            &addon_names,
+            None,
+            fk,
+            false,
+            width as f32,
+            height as f32,
+        );
     }
-    eprintln!("QuadBatch: {} quads, {} texture requests", batch.quad_count(), batch.texture_requests.len());
+    eprintln!(
+        "QuadBatch: {} quads, {} texture requests",
+        batch.quad_count(),
+        batch.texture_requests.len()
+    );
 
     let mut tex_mgr = create_texture_manager();
     let glyph_data = if glyph_atlas.is_dirty() {
@@ -710,7 +984,12 @@ fn run_screenshot(
 
     let output = output.with_extension("webp");
     save_screenshot(&img, &output);
-    eprintln!("Saved {}x{} screenshot to {}", img.width(), img.height(), output.with_extension("webp").display());
+    eprintln!(
+        "Saved {}x{} screenshot to {}",
+        img.width(),
+        img.height(),
+        output.with_extension("webp").display()
+    );
 }
 
 #[cfg(feature = "gui")]
@@ -727,13 +1006,20 @@ fn save_screenshot(img: &image::RgbaImage, output: &std::path::Path) {
 #[cfg(feature = "gui")]
 /// Dump textures used by frames to disk.
 fn run_dump_texture(
-    env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>,
-    output: PathBuf, filter: Option<String>, frame_filter: Option<String>,
+    env: &WowLuaEnv,
+    font_system: &Rc<RefCell<WowFontSystem>>,
+    output: PathBuf,
+    filter: Option<String>,
+    frame_filter: Option<String>,
 ) {
     env.set_screen_size(1600.0, 1200.0);
     run_headless_startup(env);
     let (batch, _) = build_screenshot_batch(env, font_system, 1600, 1200, frame_filter.as_deref());
-    eprintln!("QuadBatch: {} quads, {} tex requests", batch.quad_count(), batch.texture_requests.len());
+    eprintln!(
+        "QuadBatch: {} quads, {} tex requests",
+        batch.quad_count(),
+        batch.texture_requests.len()
+    );
     let mut tex_mgr = create_texture_manager();
     wow_ui_sim::dump_texture::dump_batch_textures(&batch, &mut tex_mgr, &output, filter.as_deref());
 }
@@ -742,13 +1028,18 @@ fn run_dump_texture(
 /// Create a TextureManager with local and fallback texture paths.
 fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
     use wow_ui_sim::texture::TextureManager;
+    let config = wow_ui_sim::config::SimConfig::load();
     let home = dirs::home_dir().unwrap_or_default();
     let local_textures = PathBuf::from("./textures");
-    let textures_path = if local_textures.exists() { local_textures } else { home.join("Repos/wow-ui-textures") };
+    let textures_path = if local_textures.exists() {
+        local_textures
+    } else {
+        home.join("Repos/wow-ui-textures")
+    };
     let mut mgr = TextureManager::new(textures_path)
         .with_interface_path(home.join("Projects/wow/Interface"))
         .with_addons_path(PathBuf::from("./Interface/AddOns"));
     mgr.preload_talent_textures(790);
-    mgr.preload_talent_panel_textures();
+    mgr.preload_talent_panel_textures(&config.player_class);
     mgr
 }

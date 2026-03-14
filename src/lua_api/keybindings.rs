@@ -23,81 +23,294 @@ struct DefaultKey {
 
 /// Binding actions from Bindings_Standard.xml (action name → Lua code).
 const BINDING_ACTIONS: &[BindingAction] = &[
-    BindingAction { action: "TOGGLEGAMEMENU", lua_code: "ToggleGameMenu()" },
-    BindingAction { action: "TOGGLEBACKPACK", lua_code: "ToggleBackpack()" },
-    BindingAction { action: "TOGGLEBAG1", lua_code: "ToggleBag(4)" },
-    BindingAction { action: "TOGGLEBAG2", lua_code: "ToggleBag(3)" },
-    BindingAction { action: "TOGGLEBAG3", lua_code: "ToggleBag(2)" },
-    BindingAction { action: "TOGGLEBAG4", lua_code: "ToggleBag(1)" },
-    BindingAction { action: "OPENALLBAGS", lua_code: "ToggleAllBags()" },
-    BindingAction { action: "TOGGLECHARACTER0", lua_code: "ToggleCharacter(\"PaperDollFrame\")" },
-    BindingAction { action: "TOGGLECHARACTER2", lua_code: "ToggleCharacter(\"ReputationFrame\")" },
-    BindingAction { action: "TOGGLESPELLBOOK", lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()" },
-    BindingAction { action: "TOGGLETALENTS", lua_code: "PlayerSpellsUtil.ToggleClassTalentFrame()" },
-    BindingAction { action: "TOGGLEACHIEVEMENT", lua_code: "ToggleAchievementFrame()" },
-    BindingAction { action: "TOGGLEGROUPFINDER", lua_code: "if not PVEFrame_ToggleFrame then LoadAddOn('Blizzard_GroupFinder') end if PVEFrame_ToggleFrame then PVEFrame_ToggleFrame() end" },
-    BindingAction { action: "TOGGLECOLLECTIONS", lua_code: "ToggleCollectionsJournal()" },
-    BindingAction { action: "TOGGLEENCOUNTERJOURNAL", lua_code: "ToggleEncounterJournal()" },
-    BindingAction { action: "TOGGLEWORLDMAP", lua_code: "ToggleWorldMap()" },
-    BindingAction { action: "TOGGLESOCIAL", lua_code: "if not ToggleFriendsFrame then LoadAddOn('Blizzard_FriendsFrame') end if ToggleFriendsFrame then ToggleFriendsFrame() end" },
-    BindingAction { action: "TOGGLEGUILDTAB", lua_code: "ToggleGuildFrame()" },
-    BindingAction { action: "TOGGLEQUESTLOG", lua_code: "ToggleQuestLog()" },
-    BindingAction { action: "TARGETSELF", lua_code: "TargetUnit('player')" },
-    BindingAction { action: "TARGETPARTYMEMBER1", lua_code: "TargetUnit('party1')" },
-    BindingAction { action: "TARGETPARTYMEMBER2", lua_code: "TargetUnit('party2')" },
-    BindingAction { action: "TARGETPARTYMEMBER3", lua_code: "TargetUnit('party3')" },
-    BindingAction { action: "TARGETPARTYMEMBER4", lua_code: "TargetUnit('party4')" },
-    BindingAction { action: "TARGETNEARESTENEMY", lua_code: "TargetUnit('enemy1')" },
-    BindingAction { action: "ACTIONBUTTON1", lua_code: "ActionButtonDown(1) UseAction(1) ActionButtonUp(1)" },
-    BindingAction { action: "ACTIONBUTTON2", lua_code: "ActionButtonDown(2) UseAction(2) ActionButtonUp(2)" },
-    BindingAction { action: "ACTIONBUTTON3", lua_code: "ActionButtonDown(3) UseAction(3) ActionButtonUp(3)" },
-    BindingAction { action: "ACTIONBUTTON4", lua_code: "ActionButtonDown(4) UseAction(4) ActionButtonUp(4)" },
-    BindingAction { action: "ACTIONBUTTON5", lua_code: "ActionButtonDown(5) UseAction(5) ActionButtonUp(5)" },
-    BindingAction { action: "ACTIONBUTTON6", lua_code: "ActionButtonDown(6) UseAction(6) ActionButtonUp(6)" },
-    BindingAction { action: "ACTIONBUTTON7", lua_code: "ActionButtonDown(7) UseAction(7) ActionButtonUp(7)" },
-    BindingAction { action: "ACTIONBUTTON8", lua_code: "ActionButtonDown(8) UseAction(8) ActionButtonUp(8)" },
-    BindingAction { action: "ACTIONBUTTON9", lua_code: "ActionButtonDown(9) UseAction(9) ActionButtonUp(9)" },
-    BindingAction { action: "ACTIONBUTTON10", lua_code: "ActionButtonDown(10) UseAction(10) ActionButtonUp(10)" },
-    BindingAction { action: "ACTIONBUTTON11", lua_code: "ActionButtonDown(11) UseAction(11) ActionButtonUp(11)" },
-    BindingAction { action: "ACTIONBUTTON12", lua_code: "ActionButtonDown(12) UseAction(12) ActionButtonUp(12)" },
+    BindingAction {
+        action: "TOGGLEGAMEMENU",
+        lua_code: "ToggleGameMenu()",
+    },
+    BindingAction {
+        action: "TOGGLEBACKPACK",
+        lua_code: "ToggleBackpack()",
+    },
+    BindingAction {
+        action: "TOGGLEBAG1",
+        lua_code: "ToggleBag(4)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG2",
+        lua_code: "ToggleBag(3)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG3",
+        lua_code: "ToggleBag(2)",
+    },
+    BindingAction {
+        action: "TOGGLEBAG4",
+        lua_code: "ToggleBag(1)",
+    },
+    BindingAction {
+        action: "OPENALLBAGS",
+        lua_code: "ToggleAllBags()",
+    },
+    BindingAction {
+        action: "TOGGLECHARACTER0",
+        lua_code: "ToggleCharacter(\"PaperDollFrame\")",
+    },
+    BindingAction {
+        action: "TOGGLECHARACTER2",
+        lua_code: "ToggleCharacter(\"ReputationFrame\")",
+    },
+    BindingAction {
+        action: "TOGGLESPELLBOOK",
+        lua_code: "PlayerSpellsUtil.ToggleSpellBookFrame()",
+    },
+    BindingAction {
+        action: "TOGGLETALENTS",
+        lua_code: "PlayerSpellsUtil.ToggleClassTalentFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEACHIEVEMENT",
+        lua_code: "ToggleAchievementFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEGROUPFINDER",
+        lua_code: "if not PVEFrame_ToggleFrame then LoadAddOn('Blizzard_GroupFinder') end if PVEFrame_ToggleFrame then PVEFrame_ToggleFrame() end",
+    },
+    BindingAction {
+        action: "TOGGLECOLLECTIONS",
+        lua_code: "ToggleCollectionsJournal()",
+    },
+    BindingAction {
+        action: "TOGGLEENCOUNTERJOURNAL",
+        lua_code: "ToggleEncounterJournal()",
+    },
+    BindingAction {
+        action: "TOGGLEWORLDMAP",
+        lua_code: "ToggleWorldMap()",
+    },
+    BindingAction {
+        action: "TOGGLESOCIAL",
+        lua_code: "if not ToggleFriendsFrame then LoadAddOn('Blizzard_FriendsFrame') end if ToggleFriendsFrame then ToggleFriendsFrame() end",
+    },
+    BindingAction {
+        action: "TOGGLEGUILDTAB",
+        lua_code: "ToggleGuildFrame()",
+    },
+    BindingAction {
+        action: "TOGGLEQUESTLOG",
+        lua_code: "ToggleQuestLog()",
+    },
+    BindingAction {
+        action: "TARGETSELF",
+        lua_code: "TargetUnit('player')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER1",
+        lua_code: "TargetUnit('party1')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER2",
+        lua_code: "TargetUnit('party2')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER3",
+        lua_code: "TargetUnit('party3')",
+    },
+    BindingAction {
+        action: "TARGETPARTYMEMBER4",
+        lua_code: "TargetUnit('party4')",
+    },
+    BindingAction {
+        action: "TARGETNEARESTENEMY",
+        lua_code: "TargetUnit('enemy1')",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON1",
+        lua_code: "ActionButtonDown(1) UseAction(1) ActionButtonUp(1)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON2",
+        lua_code: "ActionButtonDown(2) UseAction(2) ActionButtonUp(2)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON3",
+        lua_code: "ActionButtonDown(3) UseAction(3) ActionButtonUp(3)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON4",
+        lua_code: "ActionButtonDown(4) UseAction(4) ActionButtonUp(4)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON5",
+        lua_code: "ActionButtonDown(5) UseAction(5) ActionButtonUp(5)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON6",
+        lua_code: "ActionButtonDown(6) UseAction(6) ActionButtonUp(6)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON7",
+        lua_code: "ActionButtonDown(7) UseAction(7) ActionButtonUp(7)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON8",
+        lua_code: "ActionButtonDown(8) UseAction(8) ActionButtonUp(8)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON9",
+        lua_code: "ActionButtonDown(9) UseAction(9) ActionButtonUp(9)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON10",
+        lua_code: "ActionButtonDown(10) UseAction(10) ActionButtonUp(10)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON11",
+        lua_code: "ActionButtonDown(11) UseAction(11) ActionButtonUp(11)",
+    },
+    BindingAction {
+        action: "ACTIONBUTTON12",
+        lua_code: "ActionButtonDown(12) UseAction(12) ActionButtonUp(12)",
+    },
 ];
 
 /// Default key→action assignments (WoW defaults + simulator overrides).
 const DEFAULT_KEYS: &[DefaultKey] = &[
-    DefaultKey { key: "BACKSPACE", action: "TOGGLEBACKPACK" },
-    DefaultKey { key: "F8", action: "TOGGLEBAG1" },
-    DefaultKey { key: "F9", action: "TOGGLEBAG2" },
-    DefaultKey { key: "F10", action: "TOGGLEBAG3" },
-    DefaultKey { key: "F11", action: "TOGGLEBAG4" },
-    DefaultKey { key: "B", action: "OPENALLBAGS" },
-    DefaultKey { key: "C", action: "TOGGLECHARACTER0" },
-    DefaultKey { key: "U", action: "TOGGLECHARACTER2" },
-    DefaultKey { key: "S", action: "TOGGLESPELLBOOK" },
-    DefaultKey { key: "N", action: "TOGGLETALENTS" },
-    DefaultKey { key: "A", action: "TOGGLEACHIEVEMENT" },
-    DefaultKey { key: "L", action: "TOGGLEGROUPFINDER" },
-    DefaultKey { key: "O", action: "TOGGLESOCIAL" },
-    DefaultKey { key: "J", action: "TOGGLEGUILDTAB" },
-    DefaultKey { key: "M", action: "TOGGLEWORLDMAP" },
-    DefaultKey { key: "F1", action: "TARGETSELF" },
-    DefaultKey { key: "F2", action: "TARGETPARTYMEMBER1" },
-    DefaultKey { key: "F3", action: "TARGETPARTYMEMBER2" },
-    DefaultKey { key: "F4", action: "TARGETPARTYMEMBER3" },
-    DefaultKey { key: "F5", action: "TARGETPARTYMEMBER4" },
-    DefaultKey { key: "F6", action: "TARGETNEARESTENEMY" },
-    DefaultKey { key: "TAB", action: "TARGETNEARESTENEMY" },
-    DefaultKey { key: "1", action: "ACTIONBUTTON1" },
-    DefaultKey { key: "2", action: "ACTIONBUTTON2" },
-    DefaultKey { key: "3", action: "ACTIONBUTTON3" },
-    DefaultKey { key: "4", action: "ACTIONBUTTON4" },
-    DefaultKey { key: "5", action: "ACTIONBUTTON5" },
-    DefaultKey { key: "6", action: "ACTIONBUTTON6" },
-    DefaultKey { key: "7", action: "ACTIONBUTTON7" },
-    DefaultKey { key: "8", action: "ACTIONBUTTON8" },
-    DefaultKey { key: "9", action: "ACTIONBUTTON9" },
-    DefaultKey { key: "0", action: "ACTIONBUTTON10" },
-    DefaultKey { key: "-", action: "ACTIONBUTTON11" },
-    DefaultKey { key: "=", action: "ACTIONBUTTON12" },
+    DefaultKey {
+        key: "BACKSPACE",
+        action: "TOGGLEBACKPACK",
+    },
+    DefaultKey {
+        key: "F8",
+        action: "TOGGLEBAG1",
+    },
+    DefaultKey {
+        key: "F9",
+        action: "TOGGLEBAG2",
+    },
+    DefaultKey {
+        key: "F10",
+        action: "TOGGLEBAG3",
+    },
+    DefaultKey {
+        key: "F11",
+        action: "TOGGLEBAG4",
+    },
+    DefaultKey {
+        key: "B",
+        action: "OPENALLBAGS",
+    },
+    DefaultKey {
+        key: "C",
+        action: "TOGGLECHARACTER0",
+    },
+    DefaultKey {
+        key: "U",
+        action: "TOGGLECHARACTER2",
+    },
+    DefaultKey {
+        key: "S",
+        action: "TOGGLESPELLBOOK",
+    },
+    DefaultKey {
+        key: "N",
+        action: "TOGGLETALENTS",
+    },
+    DefaultKey {
+        key: "A",
+        action: "TOGGLEACHIEVEMENT",
+    },
+    DefaultKey {
+        key: "L",
+        action: "TOGGLEGROUPFINDER",
+    },
+    DefaultKey {
+        key: "O",
+        action: "TOGGLESOCIAL",
+    },
+    DefaultKey {
+        key: "J",
+        action: "TOGGLEGUILDTAB",
+    },
+    DefaultKey {
+        key: "M",
+        action: "TOGGLEWORLDMAP",
+    },
+    DefaultKey {
+        key: "F1",
+        action: "TARGETSELF",
+    },
+    DefaultKey {
+        key: "F2",
+        action: "TARGETPARTYMEMBER1",
+    },
+    DefaultKey {
+        key: "F3",
+        action: "TARGETPARTYMEMBER2",
+    },
+    DefaultKey {
+        key: "F4",
+        action: "TARGETPARTYMEMBER3",
+    },
+    DefaultKey {
+        key: "F5",
+        action: "TARGETPARTYMEMBER4",
+    },
+    DefaultKey {
+        key: "F6",
+        action: "TARGETNEARESTENEMY",
+    },
+    DefaultKey {
+        key: "TAB",
+        action: "TARGETNEARESTENEMY",
+    },
+    DefaultKey {
+        key: "1",
+        action: "ACTIONBUTTON1",
+    },
+    DefaultKey {
+        key: "2",
+        action: "ACTIONBUTTON2",
+    },
+    DefaultKey {
+        key: "3",
+        action: "ACTIONBUTTON3",
+    },
+    DefaultKey {
+        key: "4",
+        action: "ACTIONBUTTON4",
+    },
+    DefaultKey {
+        key: "5",
+        action: "ACTIONBUTTON5",
+    },
+    DefaultKey {
+        key: "6",
+        action: "ACTIONBUTTON6",
+    },
+    DefaultKey {
+        key: "7",
+        action: "ACTIONBUTTON7",
+    },
+    DefaultKey {
+        key: "8",
+        action: "ACTIONBUTTON8",
+    },
+    DefaultKey {
+        key: "9",
+        action: "ACTIONBUTTON9",
+    },
+    DefaultKey {
+        key: "0",
+        action: "ACTIONBUTTON10",
+    },
+    DefaultKey {
+        key: "-",
+        action: "ACTIONBUTTON11",
+    },
+    DefaultKey {
+        key: "=",
+        action: "ACTIONBUTTON12",
+    },
 ];
 
 /// Initialize the binding tables in Lua and populate with defaults.
@@ -181,7 +394,15 @@ pub fn get_num_bindings(_lua: &Lua) -> Result<i32> {
 
 /// Get binding at index (1-based). Returns (action, header, key1, key2).
 #[allow(clippy::type_complexity)]
-pub fn get_binding_at(lua: &Lua, index: i32) -> Result<(Option<String>, Option<String>, Option<String>, Option<String>)> {
+pub fn get_binding_at(
+    lua: &Lua,
+    index: i32,
+) -> Result<(
+    Option<String>,
+    Option<String>,
+    Option<String>,
+    Option<String>,
+)> {
     if index < 1 || index as usize > BINDING_ACTIONS.len() {
         return Ok((None, None, None, None));
     }

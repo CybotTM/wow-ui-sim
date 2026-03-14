@@ -1,7 +1,7 @@
 //! CreateFrame implementation for creating WoW frames from Lua.
 
-use super::super::frame::{extract_frame_id, frame_ref, sync_child_to_lua};
 use super::super::SimState;
+use super::super::frame::{extract_frame_id, frame_ref, sync_child_to_lua};
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
 use crate::widget::{Frame, WidgetType};
@@ -11,7 +11,10 @@ use std::rc::Rc;
 
 /// Write a frame's owner_addon into the persistent `__frame_owners` registry table.
 pub(crate) fn sync_frame_owner_to_lua(lua: &Lua, state: &Rc<RefCell<SimState>>, frame_id: u64) {
-    let owner = state.borrow().widgets.get(frame_id)
+    let owner = state
+        .borrow()
+        .widgets
+        .get(frame_id)
         .and_then(|f| f.owner_addon);
     if let Some(idx) = owner {
         if let Ok(t) = lua.named_registry_value::<mlua::Table>("__frame_owners") {
@@ -42,7 +45,17 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
     let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
         let widget_type = parse_widget_type(&cfa.frame_type)?;
-        let frame_id = register_new_frame(&state_clone, widget_type, cfa.name.clone(), cfa.parent_id, cfa.parent_explicit);
+        let old_same_name = cfa
+            .name
+            .as_ref()
+            .and_then(|name| state_clone.borrow().widgets.get_id_by_name(name));
+        let frame_id = register_new_frame(
+            &state_clone,
+            widget_type,
+            cfa.name.clone(),
+            cfa.parent_id,
+            cfa.parent_explicit,
+        );
         sync_frame_owner_to_lua(lua, &state_clone, frame_id);
         // Store original type name when it differs from the WidgetType enum name,
         // so GetObjectType() returns e.g. "ArchaeologyDigSiteFrame" instead of "Frame".
@@ -57,19 +70,35 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
         if cfa.frame_type == "ItemButton" {
             create_item_button_intrinsics(lua, &mut state_clone.borrow_mut(), frame_id);
         }
-        let is_forbidden = state_clone.borrow().widgets.get(frame_id)
-            .map(|f| f.forbidden).unwrap_or(false);
+        let is_forbidden = state_clone
+            .borrow()
+            .widgets
+            .get(frame_id)
+            .map(|f| f.forbidden)
+            .unwrap_or(false);
         let ud = create_frame_userdata(lua, frame_id, cfa.name.as_deref(), is_forbidden)?;
+        if let Some(old_id) = old_same_name {
+            migrate_lua_fields_to_new_frame(lua, old_id, frame_id)?;
+        }
         store_widget_type_key(lua, &ud, widget_type, &cfa.frame_type)?;
         if matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
-            && let Some(ref btn_name) = cfa.name {
-                register_button_child_globals(lua, &state_clone, frame_id, btn_name)?;
-            }
+            && let Some(ref btn_name) = cfa.name
+        {
+            register_button_child_globals(lua, &state_clone, frame_id, btn_name)?;
+        }
         if cfa.frame_type == "ItemButton" {
             apply_item_button_mixin(lua, frame_id);
         }
         let ref_name = cfa.name.unwrap_or_else(|| format!("__frame_{}", frame_id));
-        apply_intrinsic_and_templates(lua, &state_clone, &cfa.frame_type, &ref_name, cfa.template.as_deref(), cfa.parent_id, frame_id)?;
+        apply_intrinsic_and_templates(
+            lua,
+            &state_clone,
+            &cfa.frame_type,
+            &ref_name,
+            cfa.template.as_deref(),
+            cfa.parent_id,
+            frame_id,
+        )?;
         Ok(ud)
     })?;
     Ok(create_frame)
@@ -84,16 +113,21 @@ fn resolve_object_type_name(frame_type: &str) -> String {
 
 fn parse_widget_type(frame_type: &str) -> Result<WidgetType> {
     let wt = WidgetType::from_str(frame_type).ok_or_else(|| {
-        crate::lua_api::script_helpers::lua_error_val(
-            format!("CreateFrame: Unknown frame type '{}'", frame_type),
-        )
+        crate::lua_api::script_helpers::lua_error_val(format!(
+            "CreateFrame: Unknown frame type '{}'",
+            frame_type
+        ))
     })?;
     // Texture, FontString, and Line are Region types — not creatable via CreateFrame.
     // They must be created via frame:CreateTexture(), frame:CreateFontString(), frame:CreateLine().
-    if matches!(wt, WidgetType::Texture | WidgetType::FontString | WidgetType::Line) {
-        return Err(crate::lua_api::script_helpers::lua_error_val(
-            format!("CreateFrame: Unknown frame type '{}'", frame_type),
-        ));
+    if matches!(
+        wt,
+        WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+    ) {
+        return Err(crate::lua_api::script_helpers::lua_error_val(format!(
+            "CreateFrame: Unknown frame type '{}'",
+            frame_type
+        )));
     }
     Ok(wt)
 }
@@ -118,8 +152,13 @@ fn apply_item_button_mixin(lua: &Lua, frame_id: u64) {
 /// Parsed CreateFrame arguments.
 /// Apply intrinsic templates, user templates, and fire OnLoad.
 fn apply_intrinsic_and_templates(
-    lua: &Lua, state: &Rc<RefCell<SimState>>, frame_type: &str,
-    ref_name: &str, template: Option<&str>, parent_id: Option<u64>, frame_id: u64,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame_type: &str,
+    ref_name: &str,
+    template: Option<&str>,
+    parent_id: Option<u64>,
+    frame_id: u64,
 ) -> mlua::Result<()> {
     if let Some(entry) = &crate::xml::get_template(frame_type) {
         let canonical = &entry.name;
@@ -133,7 +172,10 @@ fn apply_intrinsic_and_templates(
             apply_parent_array_from_template(lua, tmpl, frame_id, ref_name);
         }
     }
-    let suppress_depth: i32 = lua.globals().get("__suppress_create_frame_onload").unwrap_or(0);
+    let suppress_depth: i32 = lua
+        .globals()
+        .get("__suppress_create_frame_onload")
+        .unwrap_or(0);
     if suppress_depth <= 0 {
         fire_deferred_child_onloads(lua);
         fire_on_load(lua, ref_name);
@@ -165,7 +207,14 @@ fn parse_create_frame_args(
     let template = coerce_string_arg(lua, args_iter.next());
     let id = parse_id_arg(args_iter.next());
     let name = name_raw.map(|n| substitute_parent_name(n, explicit_parent, state));
-    Ok(CreateFrameArgs { frame_type, name, parent_id, template, id, parent_explicit })
+    Ok(CreateFrameArgs {
+        frame_type,
+        name,
+        parent_id,
+        template,
+        id,
+        parent_explicit,
+    })
 }
 
 fn parse_frame_type_arg(lua: &Lua, v: Option<&Value>) -> String {
@@ -180,7 +229,8 @@ fn parse_name_arg(lua: &Lua, v: Option<&Value>) -> (Option<String>, bool) {
         v,
         Some(Value::UserData(_) | Value::Table(_) | Value::Function(_))
     );
-    let name = v.and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
+    let name = v
+        .and_then(|v| lua.coerce_string(v.clone()).ok().flatten())
         .map(|s| s.to_string_lossy().to_string());
     (name, invalid)
 }
@@ -196,7 +246,7 @@ fn parse_parent_arg(
     let parent_arg = args_iter.next();
     if matches!(parent_arg, Some(Value::String(_))) {
         return Err(crate::lua_api::script_helpers::lua_error_val(
-            "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])"
+            "Usage: CreateFrame(\"type\" [, \"name\"] [, parent] [, \"template\"] [, id])",
         ));
     }
     let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
@@ -275,17 +325,12 @@ fn substitute_parent_name(
 /// When `parent_explicit` is false (UIParent default), frame_level stays at 0.
 /// Set owner_addon and forbidden flag on a new frame.
 /// Panics if no owner can be determined — every CreateFrame must have a creator.
-fn attribute_frame_owner(
-    frame: &mut Frame,
-    state: &Rc<RefCell<SimState>>,
-    parent_id: Option<u64>,
-) {
+fn attribute_frame_owner(frame: &mut Frame, state: &Rc<RefCell<SimState>>, parent_id: Option<u64>) {
     let s = state.borrow();
-    frame.owner_addon = s.loading_addon_index
+    frame.owner_addon = s
+        .loading_addon_index
         .or(s.executing_addon_index)
-        .or_else(|| {
-            parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon))
-        });
+        .or_else(|| parent_id.and_then(|pid| s.widgets.get(pid).and_then(|p| p.owner_addon)));
     frame.forbidden = s.loading_forbidden;
     if frame.owner_addon.is_none() {
         eprintln!(
@@ -312,8 +357,7 @@ fn register_new_frame(
 
     // If a frame with this name already exists, orphan it (WoW behavior: old frame
     // becomes unreachable via global, but still exists in the registry).
-    let old_same_name = name.as_ref()
-        .and_then(|n| state.widgets.get_id_by_name(n));
+    let old_same_name = name.as_ref().and_then(|n| state.widgets.get_id_by_name(n));
     if let Some(old_id) = old_same_name {
         orphan_old_frame(&mut state.widgets, old_id);
     }
@@ -332,17 +376,24 @@ fn register_new_frame(
         // When parent was defaulted to UIParent (not explicitly specified),
         // skip frame_level inheritance — WoW keeps level at 0 in that case.
         let parent_props = state.widgets.get(pid).map(|p| {
-            (p.frame_strata, p.frame_level, p.effective_alpha, p.effective_scale)
+            (
+                p.frame_strata,
+                p.frame_level,
+                p.effective_alpha,
+                p.effective_scale,
+            )
         });
-        if let Some((parent_strata, parent_level, parent_eff_alpha, parent_eff_scale)) = parent_props
-            && let Some(f) = state.widgets.get_mut_visual(frame_id) {
-                f.frame_strata = parent_strata;
-                if parent_explicit {
-                    f.frame_level = parent_level + 1;
-                }
-                f.effective_alpha = parent_eff_alpha * f.alpha;
-                f.effective_scale = parent_eff_scale * f.scale;
+        if let Some((parent_strata, parent_level, parent_eff_alpha, parent_eff_scale)) =
+            parent_props
+            && let Some(f) = state.widgets.get_mut_visual(frame_id)
+        {
+            f.frame_strata = parent_strata;
+            if parent_explicit {
+                f.frame_level = parent_level + 1;
             }
+            f.effective_alpha = parent_eff_alpha * f.alpha;
+            f.effective_scale = parent_eff_scale * f.scale;
+        }
     }
 
     // Track whether the parent was defaulted (not explicitly provided).
@@ -381,6 +432,26 @@ fn create_frame_userdata(
     Ok(val)
 }
 
+fn migrate_lua_fields_to_new_frame(lua: &Lua, old_id: u64, new_id: u64) -> Result<()> {
+    let old_val = frame_ref(lua, old_id)?;
+    let new_val = frame_ref(lua, new_id)?;
+    let (Value::UserData(old_ud), Value::UserData(new_ud)) = (old_val, new_val) else {
+        return Ok(());
+    };
+
+    let old_fields: mlua::Table = old_ud.user_value()?;
+    let new_fields: mlua::Table = new_ud.user_value()?;
+
+    for pair in old_fields.clone().pairs::<Value, Value>() {
+        let (key, value) = pair?;
+        if new_fields.raw_get::<Value>(key.clone())?.is_nil() {
+            new_fields.raw_set(key, value)?;
+        }
+    }
+
+    Ok(())
+}
+
 /// Cache per-type `__index` table as `__ti` in fenv[1] for Lua-side method lookup.
 fn store_widget_type_key(lua: &Lua, ud: &Value, wt: WidgetType, frame_type: &str) -> Result<()> {
     let type_key = if wt.as_str().eq_ignore_ascii_case(frame_type) {
@@ -416,13 +487,19 @@ fn register_button_child_globals(
 ) -> Result<()> {
     let keys: Vec<(String, u64)> = {
         let st = state.borrow();
-        let Some(btn) = st.widgets.get(frame_id) else { return Ok(()) };
-        ["NormalTexture", "PushedTexture", "HighlightTexture", "DisabledTexture", "Text"]
-            .iter()
-            .filter_map(|key| {
-                btn.children_keys.get(*key).map(|&id| (key.to_string(), id))
-            })
-            .collect()
+        let Some(btn) = st.widgets.get(frame_id) else {
+            return Ok(());
+        };
+        [
+            "NormalTexture",
+            "PushedTexture",
+            "HighlightTexture",
+            "DisabledTexture",
+            "Text",
+        ]
+        .iter()
+        .filter_map(|key| btn.children_keys.get(*key).map(|&id| (key.to_string(), id)))
+        .collect()
     };
     let mut st = state.borrow_mut();
     for (key, child_id) in keys {
@@ -439,7 +516,12 @@ fn register_button_child_globals(
 
 /// Create default children for widget types that fundamentally need them.
 /// This is separate from templates - these are intrinsic to the widget type.
-fn create_widget_type_defaults(lua: &Lua, state: &mut SimState, frame_id: u64, widget_type: WidgetType) {
+fn create_widget_type_defaults(
+    lua: &Lua,
+    state: &mut SimState,
+    frame_id: u64,
+    widget_type: WidgetType,
+) {
     match widget_type {
         WidgetType::Button | WidgetType::CheckButton => {
             create_button_defaults(state, frame_id);
@@ -448,10 +530,16 @@ fn create_widget_type_defaults(lua: &Lua, state: &mut SimState, frame_id: u64, w
             create_tooltip_defaults(state, frame_id);
         }
         WidgetType::SimpleHTML => {
-            state.simple_htmls.insert(frame_id, crate::lua_api::simple_html::SimpleHtmlData::default());
+            state.simple_htmls.insert(
+                frame_id,
+                crate::lua_api::simple_html::SimpleHtmlData::default(),
+            );
         }
         WidgetType::MessageFrame => {
-            state.message_frames.insert(frame_id, crate::lua_api::message_frame::MessageFrameData::default());
+            state.message_frames.insert(
+                frame_id,
+                crate::lua_api::message_frame::MessageFrameData::default(),
+            );
         }
         WidgetType::Slider => {
             create_slider_defaults(lua, state, frame_id);
@@ -479,7 +567,9 @@ fn create_button_defaults(state: &mut SimState, frame_id: u64) {
 
 /// Create default tooltip state and set TOOLTIP strata.
 fn create_tooltip_defaults(state: &mut SimState, frame_id: u64) {
-    state.tooltips.insert(frame_id, crate::lua_api::tooltip::TooltipData::default());
+    state
+        .tooltips
+        .insert(frame_id, crate::lua_api::tooltip::TooltipData::default());
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
         frame.frame_strata = crate::widget::FrameStrata::Tooltip;
         frame.has_fixed_frame_strata = true;
@@ -497,7 +587,9 @@ fn create_slider_defaults(lua: &Lua, state: &mut SimState, frame_id: u64) {
         slider.children_keys.insert("Low".to_string(), low_id);
         slider.children_keys.insert("High".to_string(), high_id);
         slider.children_keys.insert("Text".to_string(), text_id);
-        slider.children_keys.insert("ThumbTexture".to_string(), thumb_id);
+        slider
+            .children_keys
+            .insert("ThumbTexture".to_string(), thumb_id);
     }
     let _ = sync_child_to_lua(lua, frame_id, "Low", low_id);
     let _ = sync_child_to_lua(lua, frame_id, "High", high_id);
@@ -530,9 +622,10 @@ fn add_fill_parent_anchors(frame: &mut Frame, parent_id: u64) {
 fn orphan_old_frame(widgets: &mut crate::widget::WidgetRegistry, old_id: u64) {
     if let Some(old_frame) = widgets.get(old_id)
         && let Some(old_parent_id) = old_frame.parent_id
-            && let Some(old_parent) = widgets.get_mut_visual(old_parent_id) {
-                old_parent.children.retain(|&c| c != old_id);
-            }
+        && let Some(old_parent) = widgets.get_mut_visual(old_parent_id)
+    {
+        old_parent.children.retain(|&c| c != old_id);
+    }
     if let Some(old_frame) = widgets.get_mut_visual(old_id) {
         old_frame.visible = false;
     }
@@ -548,7 +641,8 @@ fn migrate_children_to_new_frame(
     old_id: u64,
     new_id: u64,
 ) {
-    let children: Vec<u64> = widgets.get(old_id)
+    let children: Vec<u64> = widgets
+        .get(old_id)
         .map(|f| f.children.clone())
         .unwrap_or_default();
     for &child_id in &children {
@@ -557,7 +651,8 @@ fn migrate_children_to_new_frame(
         }
     }
     // Move children_keys too (e.g. NineSlice for tooltips)
-    let keys: std::collections::HashMap<String, u64> = widgets.get(old_id)
+    let keys: std::collections::HashMap<String, u64> = widgets
+        .get(old_id)
         .map(|f| f.children_keys.clone())
         .unwrap_or_default();
 
@@ -565,7 +660,8 @@ fn migrate_children_to_new_frame(
     // size yet. This covers frames like UIParent which are pre-seeded with screen
     // dimensions before XML loads — the XML re-creates them with setAllPoints but no
     // explicit <Size>, so the new frame would start at 0x0 without this copy.
-    let (old_width, old_height) = widgets.get(old_id)
+    let (old_width, old_height) = widgets
+        .get(old_id)
         .map(|f| (f.width, f.height))
         .unwrap_or((0.0, 0.0));
 
@@ -594,7 +690,10 @@ fn create_child_widget(state: &mut SimState, widget_type: WidgetType, parent_id:
     state.widgets.register(child);
     state.widgets.add_child(parent_id, child_id);
     // Inherit strata and level from parent
-    let parent_props = state.widgets.get(parent_id).map(|p| (p.frame_strata, p.frame_level));
+    let parent_props = state
+        .widgets
+        .get(parent_id)
+        .map(|p| (p.frame_strata, p.frame_level));
     if let Some((parent_strata, parent_level)) = parent_props {
         if let Some(f) = state.widgets.get_mut_visual(child_id) {
             f.frame_strata = parent_strata;
@@ -616,8 +715,19 @@ fn create_item_button_intrinsics(lua: &Lua, state: &mut SimState, frame_id: u64)
     let icon_overlay2_id = create_hidden_overlay(state, frame_id);
     let search_overlay_id = create_fill_parent_overlay(state, frame_id);
     let context_overlay_id = create_hidden_overlay(state, frame_id);
-    register_item_button_children(lua, state, frame_id, icon_id, count_id, stock_id,
-        icon_border_id, icon_overlay_id, icon_overlay2_id, search_overlay_id, context_overlay_id);
+    register_item_button_children(
+        lua,
+        state,
+        frame_id,
+        icon_id,
+        count_id,
+        stock_id,
+        icon_border_id,
+        icon_overlay_id,
+        icon_overlay2_id,
+        search_overlay_id,
+        context_overlay_id,
+    );
 }
 
 fn create_item_button_icon(state: &mut SimState, frame_id: u64) -> u64 {
@@ -668,20 +778,32 @@ fn create_fill_parent_overlay(state: &mut SimState, frame_id: u64) -> u64 {
 
 #[allow(clippy::too_many_arguments)]
 fn register_item_button_children(
-    lua: &Lua, state: &mut SimState, frame_id: u64,
-    icon_id: u64, count_id: u64, stock_id: u64,
-    icon_border_id: u64, icon_overlay_id: u64, icon_overlay2_id: u64,
-    search_overlay_id: u64, context_overlay_id: u64,
+    lua: &Lua,
+    state: &mut SimState,
+    frame_id: u64,
+    icon_id: u64,
+    count_id: u64,
+    stock_id: u64,
+    icon_border_id: u64,
+    icon_overlay_id: u64,
+    icon_overlay2_id: u64,
+    search_overlay_id: u64,
+    context_overlay_id: u64,
 ) {
     if let Some(btn) = state.widgets.get_mut_visual(frame_id) {
         btn.children_keys.insert("icon".to_string(), icon_id);
         btn.children_keys.insert("Count".to_string(), count_id);
         btn.children_keys.insert("Stock".to_string(), stock_id);
-        btn.children_keys.insert("IconBorder".to_string(), icon_border_id);
-        btn.children_keys.insert("IconOverlay".to_string(), icon_overlay_id);
-        btn.children_keys.insert("IconOverlay2".to_string(), icon_overlay2_id);
-        btn.children_keys.insert("searchOverlay".to_string(), search_overlay_id);
-        btn.children_keys.insert("ItemContextOverlay".to_string(), context_overlay_id);
+        btn.children_keys
+            .insert("IconBorder".to_string(), icon_border_id);
+        btn.children_keys
+            .insert("IconOverlay".to_string(), icon_overlay_id);
+        btn.children_keys
+            .insert("IconOverlay2".to_string(), icon_overlay2_id);
+        btn.children_keys
+            .insert("searchOverlay".to_string(), search_overlay_id);
+        btn.children_keys
+            .insert("ItemContextOverlay".to_string(), context_overlay_id);
     }
     let _ = sync_child_to_lua(lua, frame_id, "icon", icon_id);
     let _ = sync_child_to_lua(lua, frame_id, "Count", count_id);
@@ -695,7 +817,12 @@ fn register_item_button_children(
 
 /// Check the template chain for a `parentArray` attribute and insert the frame
 /// into its parent's Lua array if found.
-fn apply_parent_array_from_template(lua: &Lua, template_names: &str, _frame_id: u64, ref_name: &str) {
+fn apply_parent_array_from_template(
+    lua: &Lua,
+    template_names: &str,
+    _frame_id: u64,
+    ref_name: &str,
+) {
     let chain = crate::xml::get_template_chain(template_names);
     for entry in &chain {
         if let Some(parent_array) = &entry.frame.parent_array {

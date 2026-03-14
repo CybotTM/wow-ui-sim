@@ -121,12 +121,16 @@ fn add_register_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
             if !is_registerable_event(&event) {
-                let frame_name = state.widgets.get(id)
+                let frame_name = state
+                    .widgets
+                    .get(id)
                     .and_then(|f| f.name.clone())
                     .unwrap_or_else(|| "Frame".to_string());
                 return Err(unknown_event_error(&frame_name, &event));
             }
-            state.widgets.get_mut(id)
+            state
+                .widgets
+                .get_mut(id)
                 .map(|f| f.registered_events.insert(event.clone()))
                 .unwrap_or(false)
         };
@@ -138,20 +142,25 @@ fn add_register_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_register_unit_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("RegisterUnitEvent", |lua, this, (event, _args): (String, mlua::Variadic<Value>)| {
-        let id = this.0;
-        let newly_registered = {
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            state.widgets.get_mut(id)
-                .map(|f| f.registered_events.insert(event.clone()))
-                .unwrap_or(false)
-        };
-        if newly_registered {
-            lua_register_individual(lua, id, &event)?;
-        }
-        Ok(newly_registered)
-    });
+    methods.add_method(
+        "RegisterUnitEvent",
+        |lua, this, (event, _args): (String, mlua::Variadic<Value>)| {
+            let id = this.0;
+            let newly_registered = {
+                let state_rc = get_sim_state(lua);
+                let mut state = state_rc.borrow_mut();
+                state
+                    .widgets
+                    .get_mut(id)
+                    .map(|f| f.registered_events.insert(event.clone()))
+                    .unwrap_or(false)
+            };
+            if newly_registered {
+                lua_register_individual(lua, id, &event)?;
+            }
+            Ok(newly_registered)
+        },
+    );
 }
 
 fn add_unregister_event_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -167,12 +176,16 @@ fn add_unregister_event<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
             if !is_registerable_event(&event) {
-                let frame_name = state.widgets.get(id)
+                let frame_name = state
+                    .widgets
+                    .get(id)
                     .and_then(|f| f.name.clone())
                     .unwrap_or_else(|| "Frame".to_string());
                 return Err(unknown_event_error(&frame_name, &event));
             }
-            state.widgets.get_mut(id)
+            state
+                .widgets
+                .get_mut(id)
                 .map(|f| f.registered_events.remove(&event))
                 .unwrap_or(false)
         };
@@ -223,7 +236,9 @@ fn add_is_event_registered<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("IsEventRegistered", |lua, this, event: String| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let registered = state.widgets.get(this.0)
+        let registered = state
+            .widgets
+            .get(this.0)
             .map(|f| f.registered_events.contains(&event))
             .unwrap_or(false);
         Ok((registered, Value::Nil))
@@ -234,21 +249,24 @@ fn add_is_event_registered<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 /// All other events — even valid RegisterEvent events — get "unknown event" error.
 fn add_register_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     use crate::event::is_callback_event;
-    methods.add_method("RegisterEventCallback", |lua, this, (event, _cb): (String, Value)| {
-        if !is_callback_event(&event) {
-            return Err(crate::lua_api::script_helpers::lua_error_val(format!(
-                "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
-                event
-            )));
-        }
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut(id) {
-            f.registered_events.insert(event.clone());
-        }
-        Ok(Value::Boolean(!is_restricted_event(&event)))
-    });
+    methods.add_method(
+        "RegisterEventCallback",
+        |lua, this, (event, _cb): (String, Value)| {
+            if !is_callback_event(&event) {
+                return Err(crate::lua_api::script_helpers::lua_error_val(format!(
+                    "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
+                    event
+                )));
+            }
+            let id = this.0;
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(f) = state.widgets.get_mut(id) {
+                f.registered_events.insert(event.clone());
+            }
+            Ok(Value::Boolean(!is_restricted_event(&event)))
+        },
+    );
 }
 
 fn add_keyboard_propagation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -264,6 +282,10 @@ fn add_keyboard_propagation_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("GetPropagateKeyboardInput", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.propagate_keyboard_input).unwrap_or(false))
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.propagate_keyboard_input)
+            .unwrap_or(false))
     });
 }

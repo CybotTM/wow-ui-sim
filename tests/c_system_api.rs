@@ -25,9 +25,7 @@ fn test_c_xml_util_get_template_info_unknown() {
 #[test]
 fn test_c_xml_util_namespace_exists() {
     let env = env();
-    let is_table: bool = env
-        .eval("return type(C_XMLUtil) == 'table'")
-        .unwrap();
+    let is_table: bool = env.eval("return type(C_XMLUtil) == 'table'").unwrap();
     assert!(is_table);
 }
 
@@ -104,9 +102,7 @@ fn test_c_voice_chat_stop_speaking_text_noop() {
 #[test]
 fn test_c_voice_chat_is_speaking_text_false() {
     let env = env();
-    let speaking: bool = env
-        .eval("return C_VoiceChat.IsSpeakingText()")
-        .unwrap();
+    let speaking: bool = env.eval("return C_VoiceChat.IsSpeakingText()").unwrap();
     assert!(!speaking);
 }
 
@@ -132,9 +128,7 @@ fn test_c_voice_chat_get_tts_voices_empty() {
 #[test]
 fn test_c_tts_settings_get_speech_rate() {
     let env = env();
-    let rate: i32 = env
-        .eval("return C_TTSSettings.GetSpeechRate()")
-        .unwrap();
+    let rate: i32 = env.eval("return C_TTSSettings.GetSpeechRate()").unwrap();
     assert_eq!(rate, 0);
 }
 
@@ -147,9 +141,7 @@ fn test_c_tts_settings_set_speech_rate_noop() {
 #[test]
 fn test_c_tts_settings_get_speech_volume() {
     let env = env();
-    let volume: i32 = env
-        .eval("return C_TTSSettings.GetSpeechVolume()")
-        .unwrap();
+    let volume: i32 = env.eval("return C_TTSSettings.GetSpeechVolume()").unwrap();
     assert_eq!(volume, 100);
 }
 
@@ -171,7 +163,8 @@ fn test_c_tts_settings_get_voice_option_id() {
 #[test]
 fn test_c_tts_settings_set_voice_option_noop() {
     let env = env();
-    env.eval::<()>("C_TTSSettings.SetVoiceOption(1, 2)").unwrap();
+    env.eval::<()>("C_TTSSettings.SetVoiceOption(1, 2)")
+        .unwrap();
 }
 
 // ============================================================================
@@ -190,9 +183,7 @@ fn test_c_reputation_get_faction_data_by_id_nil() {
 #[test]
 fn test_c_reputation_is_faction_paragon_false() {
     let env = env();
-    let is_paragon: bool = env
-        .eval("return C_Reputation.IsFactionParagon(1)")
-        .unwrap();
+    let is_paragon: bool = env.eval("return C_Reputation.IsFactionParagon(1)").unwrap();
     assert!(!is_paragon);
 }
 
@@ -208,9 +199,7 @@ fn test_c_reputation_get_faction_paragon_info_nil() {
 #[test]
 fn test_c_reputation_get_num_factions() {
     let env = env();
-    let count: i32 = env
-        .eval("return C_Reputation.GetNumFactions()")
-        .unwrap();
+    let count: i32 = env.eval("return C_Reputation.GetNumFactions()").unwrap();
     assert!(count > 0, "expected faction list to have entries");
 }
 

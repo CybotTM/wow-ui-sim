@@ -2,7 +2,7 @@
 
 use wow_ui_sim::loader::create_frame_from_xml;
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::xml::{clear_templates, parse_xml, XmlElement};
+use wow_ui_sim::xml::{XmlElement, clear_templates, parse_xml};
 
 #[test]
 fn test_create_frame_from_xml_frame_strata() {
@@ -22,7 +22,9 @@ fn test_create_frame_from_xml_frame_strata() {
         create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
     }
 
-    let strata: String = env.eval("return DialogStrataFrame:GetFrameStrata()").unwrap();
+    let strata: String = env
+        .eval("return DialogStrataFrame:GetFrameStrata()")
+        .unwrap();
     assert_eq!(strata, "DIALOG");
 
     // Children should inherit the parent's strata
@@ -66,6 +68,8 @@ fn test_frame_strata_inherited_from_template() {
         create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
     }
 
-    let strata: String = env.eval("return InheritsHighStrata:GetFrameStrata()").unwrap();
+    let strata: String = env
+        .eval("return InheritsHighStrata:GetFrameStrata()")
+        .unwrap();
     assert_eq!(strata, "HIGH");
 }

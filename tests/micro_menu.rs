@@ -16,14 +16,26 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame_Mainline.toc"),
-    ("Blizzard_UIPanelTemplates", "Blizzard_UIPanelTemplates_Mainline.toc"),
-    ("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
     ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
     ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
     ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
     ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
-    ("Blizzard_AccessibilityTemplates", "Blizzard_AccessibilityTemplates.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
     ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
     ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
     ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
@@ -35,18 +47,42 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
-    ("Blizzard_UIParentPanelManager", "Blizzard_UIParentPanelManager_Mainline.toc"),
-    ("Blizzard_Settings_Shared", "Blizzard_Settings_Shared_Mainline.toc"),
-    ("Blizzard_SettingsDefinitions_Shared", "Blizzard_SettingsDefinitions_Shared.toc"),
-    ("Blizzard_SettingsDefinitions_Frame", "Blizzard_SettingsDefinitions_Frame_Mainline.toc"),
-    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
-    ("Blizzard_UIPanels_Game", "Blizzard_UIPanels_Game_Mainline.toc"),
-    ("Blizzard_MapCanvasSecureUtil", "Blizzard_MapCanvasSecureUtil.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+    (
+        "Blizzard_MapCanvasSecureUtil",
+        "Blizzard_MapCanvasSecureUtil.toc",
+    ),
     ("Blizzard_MapCanvas", "Blizzard_MapCanvas.toc"),
-    ("Blizzard_SharedMapDataProviders", "Blizzard_SharedMapDataProviders_Mainline.toc"),
+    (
+        "Blizzard_SharedMapDataProviders",
+        "Blizzard_SharedMapDataProviders_Mainline.toc",
+    ),
     ("Blizzard_WorldMap", "Blizzard_WorldMap_Mainline.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
     ("Blizzard_GameMenu", "Blizzard_GameMenu_Mainline.toc"),
@@ -128,9 +164,7 @@ fn click_button(env: &WowLuaEnv, button_name: &str) -> Result<(), String> {
 
 /// Check whether a global frame exists and is shown.
 fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
-    let code = format!(
-        "return {frame_name} ~= nil and {frame_name}:IsShown() == true"
-    );
+    let code = format!("return {frame_name} ~= nil and {frame_name}:IsShown() == true");
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
@@ -302,4 +336,3 @@ fn micro_menu_guild_button_loads_and_opens_panel() {
         "CommunitiesFrame should exist after clicking GuildMicroButton"
     );
 }
-

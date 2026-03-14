@@ -164,9 +164,7 @@ fn test_secure_handler_stubs_exist() {
 #[test]
 fn test_forceinsecure() {
     let env = env();
-    let secure_after: bool = env
-        .eval("forceinsecure(); return issecure()")
-        .unwrap();
+    let secure_after: bool = env.eval("forceinsecure(); return issecure()").unwrap();
     assert!(!secure_after, "forceinsecure() should taint execution");
 }
 
@@ -288,9 +286,7 @@ fn test_canaccessallvalues_one_tainted() {
 #[test]
 fn test_canaccesstable_clean() {
     let env = env();
-    let result: bool = env
-        .eval("return canaccesstable({1, 2, 3})")
-        .unwrap();
+    let result: bool = env.eval("return canaccesstable({1, 2, 3})").unwrap();
     assert!(result, "engine-created table should be accessible");
 }
 

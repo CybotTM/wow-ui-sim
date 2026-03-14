@@ -13,9 +13,15 @@ use std::rc::Rc;
 pub fn register_spell_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
 
-    globals.set("C_SpellBook", register_c_spell_book(lua, Rc::clone(&state))?)?;
+    globals.set(
+        "C_SpellBook",
+        register_c_spell_book(lua, Rc::clone(&state))?,
+    )?;
     globals.set("C_Spell", register_c_spell(lua, Rc::clone(&state))?)?;
-    globals.set("C_Traits", super::traits_api::register_c_traits(lua, Rc::clone(&state))?)?;
+    globals.set(
+        "C_Traits",
+        super::traits_api::register_c_traits(lua, Rc::clone(&state))?,
+    )?;
     register_cast_globals(lua, state)?;
 
     Ok(())
@@ -36,10 +42,22 @@ fn register_c_spell_book_item_methods(t: &mlua::Table, lua: &Lua) -> Result<()> 
         "GetNumSpellBookSkillLines",
         lua.create_function(|_, ()| Ok(spellbook_data::num_skill_lines()))?,
     )?;
-    t.set("GetSpellBookSkillLineInfo", lua.create_function(create_skill_line_info)?)?;
-    t.set("GetSpellBookItemInfo", lua.create_function(create_spell_book_item_info)?)?;
-    t.set("GetSpellBookItemName", lua.create_function(create_spell_book_item_name)?)?;
-    t.set("GetSpellBookItemType", lua.create_function(create_spell_book_item_type)?)?;
+    t.set(
+        "GetSpellBookSkillLineInfo",
+        lua.create_function(create_skill_line_info)?,
+    )?;
+    t.set(
+        "GetSpellBookItemInfo",
+        lua.create_function(create_spell_book_item_info)?,
+    )?;
+    t.set(
+        "GetSpellBookItemName",
+        lua.create_function(create_spell_book_item_name)?,
+    )?;
+    t.set(
+        "GetSpellBookItemType",
+        lua.create_function(create_spell_book_item_type)?,
+    )?;
     t.set(
         "GetSpellBookItemLevelLearned",
         lua.create_function(|_, (_slot, _bank): (i32, Option<i32>)| {
@@ -53,13 +71,19 @@ fn register_c_spell_book_item_methods(t: &mlua::Table, lua: &Lua) -> Result<()> 
                 .is_some_and(|(_, entry, _)| entry.is_passive))
         })?,
     )?;
-    t.set("GetSpellBookItemCooldown", lua.create_function(create_spell_book_item_cooldown)?)?;
-    t.set("GetSpellBookItemPowerCost", lua.create_function(|lua, (slot, _bank): (i32, Option<i32>)| {
-        let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
-            return Ok(Value::Nil);
-        };
-        create_spell_power_cost(lua, entry.spell_id as i32)
-    })?)?;
+    t.set(
+        "GetSpellBookItemCooldown",
+        lua.create_function(create_spell_book_item_cooldown)?,
+    )?;
+    t.set(
+        "GetSpellBookItemPowerCost",
+        lua.create_function(|lua, (slot, _bank): (i32, Option<i32>)| {
+            let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
+                return Ok(Value::Nil);
+            };
+            create_spell_power_cost(lua, entry.spell_id as i32)
+        })?,
+    )?;
     t.set(
         "GetSpellBookItemAutoCast",
         lua.create_function(|_, (_slot, _bank): (i32, Option<i32>)| {
@@ -126,22 +150,31 @@ fn register_c_spell_book_actions(
     let st = Rc::clone(&state);
     t.set(
         "CastSpellBookItem",
-        lua.create_function(move |lua, (slot, _bank, _self_cast): (i32, Option<i32>, Option<bool>)| {
-            let spell_id = spellbook_data::get_spell_at_slot(slot)
-                .map(|(_, entry, _)| entry.spell_id);
-            let Some(spell_id) = spell_id else { return Ok(()) };
-            if st.borrow().casting.is_some() { return Ok(()) }
-            cast_spell_by_id(&st, lua, spell_id)
-        })?,
+        lua.create_function(
+            move |lua, (slot, _bank, _self_cast): (i32, Option<i32>, Option<bool>)| {
+                let spell_id =
+                    spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id);
+                let Some(spell_id) = spell_id else {
+                    return Ok(());
+                };
+                if st.borrow().casting.is_some() {
+                    return Ok(());
+                }
+                cast_spell_by_id(&st, lua, spell_id)
+            },
+        )?,
     )?;
     let st2 = Rc::clone(&state);
     t.set(
         "PickupSpellBookItem",
         lua.create_function(move |_, (slot, _bank): (i32, Option<i32>)| {
-            let spell_id = spellbook_data::get_spell_at_slot(slot)
-                .map(|(_, entry, _)| entry.spell_id);
+            let spell_id =
+                spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id);
             if let Some(spell_id) = spell_id {
-                eprintln!("[cursor] PickupSpellBookItem({}) → spell {}", slot, spell_id);
+                eprintln!(
+                    "[cursor] PickupSpellBookItem({}) → spell {}",
+                    slot, spell_id
+                );
                 st2.borrow_mut().cursor_item =
                     Some(crate::lua_api::state::CursorInfo::Spell { spell_id });
             }
@@ -156,11 +189,7 @@ fn register_c_spell_book_actions(
 }
 
 /// Shared cast logic: validate target, resolve cast time, start cast or apply instant.
-fn cast_spell_by_id(
-    state: &Rc<RefCell<SimState>>,
-    lua: &Lua,
-    spell_id: u32,
-) -> mlua::Result<()> {
+fn cast_spell_by_id(state: &Rc<RefCell<SimState>>, lua: &Lua, spell_id: u32) -> mlua::Result<()> {
     use super::action_bar_api::{apply_instant_spell, start_cast, start_cooldowns};
     use crate::lua_api::game_data::validate_spell_target;
 
@@ -204,8 +233,12 @@ fn register_cast_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> 
     g.set(
         "CastSpellByID",
         lua.create_function(move |lua, (spell_id, _unit): (i32, Option<String>)| {
-            if spell_id <= 0 { return Ok(()) }
-            if st.borrow().casting.is_some() { return Ok(()) }
+            if spell_id <= 0 {
+                return Ok(());
+            }
+            if st.borrow().casting.is_some() {
+                return Ok(());
+            }
             cast_spell_by_id(&st, lua, spell_id as u32)
         })?,
     )?;
@@ -214,8 +247,12 @@ fn register_cast_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> 
         "CastSpellByName",
         lua.create_function(move |lua, (name, _unit): (String, Option<String>)| {
             let spell_id = spellbook_data::find_spell_by_name(&name);
-            let Some(spell_id) = spell_id else { return Ok(()) };
-            if state.borrow().casting.is_some() { return Ok(()) }
+            let Some(spell_id) = spell_id else {
+                return Ok(());
+            };
+            if state.borrow().casting.is_some() {
+                return Ok(());
+            }
             cast_spell_by_id(&state, lua, spell_id)
         })?,
     )?;
@@ -326,64 +363,129 @@ fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Tab
 
 fn register_c_spell_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetSpellInfo", lua.create_function(create_spell_info)?)?;
-    t.set("GetSpellCharges", lua.create_function(create_spell_charges)?)?;
-    t.set("IsSpellPassive", lua.create_function(|_, spell_id: i32| {
-        Ok(spellbook_data::find_spell_slot(spell_id as u32)
-            .and_then(|(slot, _)| spellbook_data::get_spell_at_slot(slot))
-            .is_some_and(|(_, entry, _)| entry.is_passive))
-    })?)?;
-    t.set("GetOverrideSpell", lua.create_function(|_, spell_id: i32| Ok(spell_id))?)?;
-    t.set("GetSchoolString", lua.create_function(create_school_string)?)?;
-    t.set("GetSpellTexture", lua.create_function(create_spell_texture)?)?;
+    t.set(
+        "GetSpellCharges",
+        lua.create_function(create_spell_charges)?,
+    )?;
+    t.set(
+        "IsSpellPassive",
+        lua.create_function(|_, spell_id: i32| {
+            Ok(spellbook_data::find_spell_slot(spell_id as u32)
+                .and_then(|(slot, _)| spellbook_data::get_spell_at_slot(slot))
+                .is_some_and(|(_, entry, _)| entry.is_passive))
+        })?,
+    )?;
+    t.set(
+        "GetOverrideSpell",
+        lua.create_function(|_, spell_id: i32| Ok(spell_id))?,
+    )?;
+    t.set(
+        "GetSchoolString",
+        lua.create_function(create_school_string)?,
+    )?;
+    t.set(
+        "GetSpellTexture",
+        lua.create_function(create_spell_texture)?,
+    )?;
     t.set("GetSpellLink", lua.create_function(create_spell_link)?)?;
     t.set("GetSpellName", lua.create_function(create_spell_name)?)?;
-    t.set("DoesSpellExist", lua.create_function(|_, spell_id: i32| {
-        Ok(spell_id > 0 && crate::spells::get_spell(spell_id as u32).is_some())
-    })?)?;
-    t.set("GetSpellPowerCost", lua.create_function(create_spell_power_cost)?)?;
-    t.set("IsSpellUsable", lua.create_function(|_, spell_id: i32| {
-        let usable = spellbook_data::is_spell_known(spell_id as u32);
-        Ok((usable, false))
-    })?)?;
+    t.set(
+        "DoesSpellExist",
+        lua.create_function(|_, spell_id: i32| {
+            Ok(spell_id > 0 && crate::spells::get_spell(spell_id as u32).is_some())
+        })?,
+    )?;
+    t.set(
+        "GetSpellPowerCost",
+        lua.create_function(create_spell_power_cost)?,
+    )?;
+    t.set(
+        "IsSpellUsable",
+        lua.create_function(|_, spell_id: i32| {
+            let usable = spellbook_data::is_spell_known(spell_id as u32);
+            Ok((usable, false))
+        })?,
+    )?;
     Ok(())
 }
 
-fn register_c_spell_cooldown(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    t.set("GetSpellCooldown", lua.create_function(move |lua, spell_id: i32| {
-        let s = state.borrow();
-        let now = s.start_time.elapsed().as_secs_f64();
-        let (start, duration) = super::action_bar_api::spell_cooldown_times(
-            &s, spell_id as u32, now,
-        );
-        let info = lua.create_table()?;
-        info.set("startTime", start)?;
-        info.set("duration", duration)?;
-        info.set("isEnabled", true)?;
-        info.set("modRate", 1.0)?;
-        Ok(info)
-    })?)?;
-    t.set("GetSpellLossOfControlCooldown", lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?)?;
+fn register_c_spell_cooldown(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetSpellCooldown",
+        lua.create_function(move |lua, spell_id: i32| {
+            let s = state.borrow();
+            let now = s.start_time.elapsed().as_secs_f64();
+            let (start, duration) =
+                super::action_bar_api::spell_cooldown_times(&s, spell_id as u32, now);
+            let info = lua.create_table()?;
+            info.set("startTime", start)?;
+            info.set("duration", duration)?;
+            info.set("isEnabled", true)?;
+            info.set("modRate", 1.0)?;
+            Ok(info)
+        })?,
+    )?;
+    t.set(
+        "GetSpellLossOfControlCooldown",
+        lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?,
+    )?;
     Ok(())
 }
 
 fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("RequestLoadSpellData", lua.create_function(|_, _spell_id: i32| Ok(()))?)?;
-    t.set("IsAutoAttackSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("IsRangedAutoAttackSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("IsPressHoldReleaseSpell", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("GetMawPowerBorderAtlasBySpellID", lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?)?;
+    t.set(
+        "RequestLoadSpellData",
+        lua.create_function(|_, _spell_id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "IsAutoAttackSpell",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsRangedAutoAttackSpell",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsPressHoldReleaseSpell",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetMawPowerBorderAtlasBySpellID",
+        lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?,
+    )?;
     // GetVisibilityInfo(spellId, context) -> hasCustom, alwaysShowMine, showForMySpec
-    t.set("GetVisibilityInfo", lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| {
-        Ok((false, false, false))
-    })?)?;
-    t.set("IsSelfBuff", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("IsPriorityAura", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("GetSpellSubtext", lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?)?;
-    t.set("GetSpellDescription", lua.create_function(|lua, _spell_id: i32| {
-        Ok(Value::String(lua.create_string("")?))
-    })?)?;
-    t.set("IsSpellHarmful", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
-    t.set("IsSpellHelpful", lua.create_function(|_, _spell_id: i32| Ok(false))?)?;
+    t.set(
+        "GetVisibilityInfo",
+        lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| Ok((false, false, false)))?,
+    )?;
+    t.set(
+        "IsSelfBuff",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsPriorityAura",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetSpellSubtext",
+        lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetSpellDescription",
+        lua.create_function(|lua, _spell_id: i32| Ok(Value::String(lua.create_string("")?)))?,
+    )?;
+    t.set(
+        "IsSpellHarmful",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "IsSpellHelpful",
+        lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
     Ok(())
 }
 
@@ -435,9 +537,9 @@ fn create_spell_name(lua: &Lua, spell_id: i32) -> Result<Value> {
 /// Cast time in milliseconds for spells that have one (WoW API returns ms).
 pub fn spell_cast_time(spell_id: i32) -> i32 {
     match spell_id {
-        19750 => 1500,  // Flash of Light
-        82326 => 2500,  // Holy Light
-        7328 => 10000,  // Redemption (10s res)
+        19750 => 1500, // Flash of Light
+        82326 => 2500, // Holy Light
+        7328 => 10000, // Redemption (10s res)
         _ => 0,
     }
 }
@@ -481,4 +583,3 @@ fn create_school_string(lua: &Lua, school_mask: i32) -> Result<Value> {
     };
     Ok(Value::String(lua.create_string(name)?))
 }
-

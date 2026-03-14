@@ -139,8 +139,6 @@ fn test_has_action_returns_false_for_empty_slot() {
 #[test]
 fn test_get_action_info_returns_nil_for_empty_slot() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return GetActionInfo(99) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return GetActionInfo(99) == nil").unwrap();
     assert!(is_nil);
 }

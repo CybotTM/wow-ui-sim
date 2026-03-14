@@ -6,9 +6,9 @@ pub mod font;
 #[cfg(feature = "gui")]
 pub mod glyph;
 #[cfg(feature = "gui")]
-pub mod shader;
-#[cfg(feature = "gui")]
 pub mod headless;
+#[cfg(feature = "gui")]
+pub mod shader;
 #[cfg(feature = "gui")]
 pub mod text;
 #[cfg(feature = "gui")]
@@ -44,7 +44,9 @@ pub fn strip_wow_markup(text: &str) -> String {
                 }
                 if next == 'c' {
                     chars.next();
-                    for _ in 0..8 { chars.next(); }
+                    for _ in 0..8 {
+                        chars.next();
+                    }
                     continue;
                 }
             }
@@ -55,10 +57,7 @@ pub fn strip_wow_markup(text: &str) -> String {
     result
 }
 
-fn skip_until_marker(
-    chars: &mut std::iter::Peekable<std::str::Chars<'_>>,
-    marker: char,
-) {
+fn skip_until_marker(chars: &mut std::iter::Peekable<std::str::Chars<'_>>, marker: char) {
     while let Some(ch) = chars.next() {
         if ch == '|' && chars.peek() == Some(&marker) {
             chars.next();
@@ -68,13 +67,13 @@ fn skip_until_marker(
 }
 
 #[cfg(feature = "gui")]
-pub use shader::{
-    FrameQuadSnapshot, GpuTextureAtlas, GpuTextureData, NineSliceTextures, QuadBatch,
-    QuadVertex, TextureEntry, TextureRequest, WowUiPipeline, WowUiPrimitive,
-    WowUiProgram, load_texture_or_crop,
-};
+pub use glyph::{GlyphAtlas, emit_text_quads};
 #[cfg(feature = "gui")]
-pub use glyph::{emit_text_quads, GlyphAtlas};
+pub use shader::{
+    FrameQuadSnapshot, GpuTextureAtlas, GpuTextureData, NineSliceTextures, QuadBatch, QuadVertex,
+    TextureEntry, TextureRequest, WowUiPipeline, WowUiPrimitive, WowUiProgram,
+    load_texture_or_crop,
+};
 #[cfg(feature = "gui")]
 pub use text::TextRenderer;
 #[cfg(feature = "gui")]

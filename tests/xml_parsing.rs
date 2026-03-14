@@ -1,9 +1,8 @@
 use std::path::PathBuf;
-use wow_ui_sim::xml::{parse_xml, parse_xml_file, AnimationElement, FrameChildElement, XmlElement};
+use wow_ui_sim::xml::{AnimationElement, FrameChildElement, XmlElement, parse_xml, parse_xml_file};
 
 fn blizzard_dir() -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("Interface/BlizzardUI/Blizzard_SharedXMLBase")
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI/Blizzard_SharedXMLBase")
 }
 
 #[test]
@@ -59,7 +58,11 @@ fn test_parse_color_swatch_xml() {
                 assert!(!layers.is_empty(), "Expected at least one layer");
 
                 // Check for textures in layers
-                let has_textures = layers.iter().any(|l| l.layers.iter().any(|layer| layer.textures().next().is_some()));
+                let has_textures = layers.iter().any(|l| {
+                    l.layers
+                        .iter()
+                        .any(|layer| layer.textures().next().is_some())
+                });
                 assert!(has_textures, "Expected textures in layers");
 
                 return;
@@ -259,19 +262,27 @@ fn test_parse_animation_group_with_alpha() {
         XmlElement::Frame(f) => f,
         _ => panic!("Expected Frame"),
     };
-    let anims: Vec<_> = f.children.iter().filter_map(|c| match c {
-        FrameChildElement::Animations(a) => Some(a),
-        _ => None,
-    }).collect();
+    let anims: Vec<_> = f
+        .children
+        .iter()
+        .filter_map(|c| match c {
+            FrameChildElement::Animations(a) => Some(a),
+            _ => None,
+        })
+        .collect();
     assert_eq!(anims.len(), 1);
     let group = &anims[0].animations[0];
     assert_eq!(group.parent_key.as_deref(), Some("FadeIn"));
     assert_eq!(group.looping.as_deref(), Some("NONE"));
 
-    let alpha = group.elements.iter().find_map(|e| match e {
-        AnimationElement::Alpha(a) => Some(a),
-        _ => None,
-    }).expect("Expected Alpha animation");
+    let alpha = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::Alpha(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected Alpha animation");
     assert_eq!(alpha.from_alpha, Some(0.0));
     assert_eq!(alpha.to_alpha, Some(1.0));
     assert_eq!(alpha.duration, Some(0.3));
@@ -294,23 +305,39 @@ fn test_parse_translation_animation() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Frame(f) => f, _ => panic!() };
-    let group = &f.children.iter().find_map(|c| match c {
-        FrameChildElement::Animations(a) => Some(a),
-        _ => None,
-    }).unwrap().animations[0];
+    let f = match &ui.elements[0] {
+        XmlElement::Frame(f) => f,
+        _ => panic!(),
+    };
+    let group = &f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::Animations(a) => Some(a),
+            _ => None,
+        })
+        .unwrap()
+        .animations[0];
 
-    let tr = group.elements.iter().find_map(|e| match e {
-        AnimationElement::Translation(a) => Some(a),
-        _ => None,
-    }).expect("Expected Translation");
+    let tr = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::Translation(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected Translation");
     assert_eq!(tr.offset_x, Some(10.0));
     assert_eq!(tr.offset_y, Some(-20.0));
 
-    let lt = group.elements.iter().find_map(|e| match e {
-        AnimationElement::LineTranslation(a) => Some(a),
-        _ => None,
-    }).expect("Expected LineTranslation");
+    let lt = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::LineTranslation(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected LineTranslation");
     assert_eq!(lt.offset_x, Some(5.0));
 }
 
@@ -328,16 +355,28 @@ fn test_parse_rotation_animation() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Frame(f) => f, _ => panic!() };
-    let group = &f.children.iter().find_map(|c| match c {
-        FrameChildElement::Animations(a) => Some(a),
-        _ => None,
-    }).unwrap().animations[0];
+    let f = match &ui.elements[0] {
+        XmlElement::Frame(f) => f,
+        _ => panic!(),
+    };
+    let group = &f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::Animations(a) => Some(a),
+            _ => None,
+        })
+        .unwrap()
+        .animations[0];
 
-    let rot = group.elements.iter().find_map(|e| match e {
-        AnimationElement::Rotation(a) => Some(a),
-        _ => None,
-    }).expect("Expected Rotation");
+    let rot = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::Rotation(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected Rotation");
     assert_eq!(rot.degrees, Some(-180.0));
     assert_eq!(rot.child_key.as_deref(), Some("Swirl"));
 }
@@ -357,20 +396,37 @@ fn test_parse_scale_animations() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Frame(f) => f, _ => panic!() };
-    let group = &f.children.iter().find_map(|c| match c {
-        FrameChildElement::Animations(a) => Some(a),
-        _ => None,
-    }).unwrap().animations[0];
+    let f = match &ui.elements[0] {
+        XmlElement::Frame(f) => f,
+        _ => panic!(),
+    };
+    let group = &f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::Animations(a) => Some(a),
+            _ => None,
+        })
+        .unwrap()
+        .animations[0];
 
-    let scale = group.elements.iter().find_map(|e| match e {
-        AnimationElement::Scale(a) => Some(a),
-        _ => None,
-    }).expect("Expected Scale");
+    let scale = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::Scale(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected Scale");
     assert_eq!(scale.from_scale_x, Some(0.0));
     assert_eq!(scale.to_scale_x, Some(1.0));
 
-    assert!(group.elements.iter().any(|e| matches!(e, AnimationElement::LineScale(_))));
+    assert!(
+        group
+            .elements
+            .iter()
+            .any(|e| matches!(e, AnimationElement::LineScale(_)))
+    );
 }
 
 #[test]
@@ -391,36 +447,66 @@ fn test_parse_path_flipbook_vertexcolor_texcoord() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Frame(f) => f, _ => panic!() };
-    let group = &f.children.iter().find_map(|c| match c {
-        FrameChildElement::Animations(a) => Some(a),
-        _ => None,
-    }).unwrap().animations[0];
+    let f = match &ui.elements[0] {
+        XmlElement::Frame(f) => f,
+        _ => panic!(),
+    };
+    let group = &f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::Animations(a) => Some(a),
+            _ => None,
+        })
+        .unwrap()
+        .animations[0];
 
-    let path = group.elements.iter().find_map(|e| match e {
-        AnimationElement::Path(a) => Some(a),
-        _ => None,
-    }).expect("Expected Path");
+    let path = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::Path(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected Path");
     assert_eq!(path.curve.as_deref(), Some("SMOOTH"));
 
-    let fb = group.elements.iter().find_map(|e| match e {
-        AnimationElement::FlipBook(a) => Some(a),
-        _ => None,
-    }).expect("Expected FlipBook");
+    let fb = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::FlipBook(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected FlipBook");
     assert_eq!(fb.flip_book_rows, Some(4));
     assert_eq!(fb.flip_book_columns, Some(4));
     assert_eq!(fb.flip_book_frames, Some(16));
 
-    assert!(group.elements.iter().any(|e| matches!(e, AnimationElement::VertexColor(_))));
+    assert!(
+        group
+            .elements
+            .iter()
+            .any(|e| matches!(e, AnimationElement::VertexColor(_)))
+    );
 
-    let tc = group.elements.iter().find_map(|e| match e {
-        AnimationElement::TextureCoordTranslation(a) => Some(a),
-        _ => None,
-    }).expect("Expected TextureCoordTranslation");
+    let tc = group
+        .elements
+        .iter()
+        .find_map(|e| match e {
+            AnimationElement::TextureCoordTranslation(a) => Some(a),
+            _ => None,
+        })
+        .expect("Expected TextureCoordTranslation");
     assert_eq!(tc.offset_u, Some(0.5));
     assert_eq!(tc.offset_v, Some(-0.5));
 
-    assert!(group.elements.iter().any(|e| matches!(e, AnimationElement::Animation(_))));
+    assert!(
+        group
+            .elements
+            .iter()
+            .any(|e| matches!(e, AnimationElement::Animation(_)))
+    );
 }
 
 // --- Frame child elements (#30-#37) ---
@@ -435,11 +521,18 @@ fn test_parse_text_insets() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::EditBox(f) => f, _ => panic!("Expected EditBox") };
-    let insets = f.children.iter().find_map(|c| match c {
-        FrameChildElement::TextInsets(i) => Some(i),
-        _ => None,
-    }).expect("Expected TextInsets");
+    let f = match &ui.elements[0] {
+        XmlElement::EditBox(f) => f,
+        _ => panic!("Expected EditBox"),
+    };
+    let insets = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::TextInsets(i) => Some(i),
+            _ => None,
+        })
+        .expect("Expected TextInsets");
     assert_eq!(insets.left, Some(5.0));
     assert_eq!(insets.right, Some(5.0));
     assert_eq!(insets.top, Some(2.0));
@@ -456,11 +549,18 @@ fn test_parse_pushed_text_offset() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Button(f) => f, _ => panic!("Expected Button") };
-    let offset = f.children.iter().find_map(|c| match c {
-        FrameChildElement::PushedTextOffset(s) => Some(s),
-        _ => None,
-    }).expect("Expected PushedTextOffset");
+    let f = match &ui.elements[0] {
+        XmlElement::Button(f) => f,
+        _ => panic!("Expected Button"),
+    };
+    let offset = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::PushedTextOffset(s) => Some(s),
+            _ => None,
+        })
+        .expect("Expected PushedTextOffset");
     assert_eq!(offset.x, Some(1.0));
     assert_eq!(offset.y, Some(-1.0));
 }
@@ -477,11 +577,23 @@ fn test_parse_cooldown_textures() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Cooldown(f) => f, _ => panic!("Expected Cooldown") };
+    let f = match &ui.elements[0] {
+        XmlElement::Cooldown(f) => f,
+        _ => panic!("Expected Cooldown"),
+    };
 
-    let has_swipe = f.children.iter().any(|c| matches!(c, FrameChildElement::SwipeTexture(_)));
-    let has_edge = f.children.iter().any(|c| matches!(c, FrameChildElement::EdgeTexture(_)));
-    let has_bling = f.children.iter().any(|c| matches!(c, FrameChildElement::BlingTexture(_)));
+    let has_swipe = f
+        .children
+        .iter()
+        .any(|c| matches!(c, FrameChildElement::SwipeTexture(_)));
+    let has_edge = f
+        .children
+        .iter()
+        .any(|c| matches!(c, FrameChildElement::EdgeTexture(_)));
+    let has_bling = f
+        .children
+        .iter()
+        .any(|c| matches!(c, FrameChildElement::BlingTexture(_)));
     assert!(has_swipe, "Missing SwipeTexture");
     assert!(has_edge, "Missing EdgeTexture");
     assert!(has_bling, "Missing BlingTexture");
@@ -502,15 +614,30 @@ fn test_parse_color_select_textures() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::ColorSelect(f) => f, _ => panic!("Expected ColorSelect") };
+    let f = match &ui.elements[0] {
+        XmlElement::ColorSelect(f) => f,
+        _ => panic!("Expected ColorSelect"),
+    };
 
     let checks = [
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorWheelTexture(_))),
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorWheelThumbTexture(_))),
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorValueTexture(_))),
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorValueThumbTexture(_))),
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorAlphaTexture(_))),
-        f.children.iter().any(|c| matches!(c, FrameChildElement::ColorAlphaThumbTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorWheelTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorWheelThumbTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorValueTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorValueThumbTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorAlphaTexture(_))),
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::ColorAlphaThumbTexture(_))),
     ];
     for (i, present) in checks.iter().enumerate() {
         assert!(present, "Missing ColorSelect texture child #{i}");
@@ -529,16 +656,31 @@ fn test_parse_simple_html_headers() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::SimpleHTML(f) => f, _ => panic!("Expected SimpleHTML") };
+    let f = match &ui.elements[0] {
+        XmlElement::SimpleHTML(f) => f,
+        _ => panic!("Expected SimpleHTML"),
+    };
 
-    let h1 = f.children.iter().find_map(|c| match c {
-        FrameChildElement::FontStringHeader1(fs) => Some(fs),
-        _ => None,
-    }).expect("Missing FontStringHeader1");
+    let h1 = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::FontStringHeader1(fs) => Some(fs),
+            _ => None,
+        })
+        .expect("Missing FontStringHeader1");
     assert_eq!(h1.inherits.as_deref(), Some("GameFontNormalLarge"));
 
-    assert!(f.children.iter().any(|c| matches!(c, FrameChildElement::FontStringHeader2(_))));
-    assert!(f.children.iter().any(|c| matches!(c, FrameChildElement::FontStringHeader3(_))));
+    assert!(
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::FontStringHeader2(_)))
+    );
+    assert!(
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::FontStringHeader3(_)))
+    );
 }
 
 #[test]
@@ -553,17 +695,32 @@ fn test_parse_button_state_colors() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Button(f) => f, _ => panic!("Expected Button") };
+    let f = match &ui.elements[0] {
+        XmlElement::Button(f) => f,
+        _ => panic!("Expected Button"),
+    };
 
-    let normal = f.children.iter().find_map(|c| match c {
-        FrameChildElement::NormalColor(c) => Some(c),
-        _ => None,
-    }).expect("Missing NormalColor");
+    let normal = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::NormalColor(c) => Some(c),
+            _ => None,
+        })
+        .expect("Missing NormalColor");
     assert_eq!(normal.r, Some(1.0));
     assert_eq!(normal.g, Some(0.82));
 
-    assert!(f.children.iter().any(|c| matches!(c, FrameChildElement::HighlightColor(_))));
-    assert!(f.children.iter().any(|c| matches!(c, FrameChildElement::DisabledColor(_))));
+    assert!(
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::HighlightColor(_)))
+    );
+    assert!(
+        f.children
+            .iter()
+            .any(|c| matches!(c, FrameChildElement::DisabledColor(_)))
+    );
 }
 
 #[test]
@@ -579,12 +736,19 @@ fn test_parse_actors_container() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::ModelScene(f) => f, _ => panic!("Expected ModelScene") };
+    let f = match &ui.elements[0] {
+        XmlElement::ModelScene(f) => f,
+        _ => panic!("Expected ModelScene"),
+    };
 
-    let actors = f.children.iter().find_map(|c| match c {
-        FrameChildElement::Actors(a) => Some(a),
-        _ => None,
-    }).expect("Missing Actors container");
+    let actors = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::Actors(a) => Some(a),
+            _ => None,
+        })
+        .expect("Missing Actors container");
     assert_eq!(actors.actors.len(), 2);
     assert_eq!(actors.actors[0].parent_key.as_deref(), Some("Actor1"));
     assert_eq!(actors.actors[0].mixin.as_deref(), Some("TestMixin"));
@@ -601,18 +765,29 @@ fn test_parse_model_fog_and_view_insets() {
         </Ui>
     "#;
     let ui = parse_xml(xml).expect("Failed to parse");
-    let f = match &ui.elements[0] { XmlElement::Model(f) => f, _ => panic!("Expected Model") };
+    let f = match &ui.elements[0] {
+        XmlElement::Model(f) => f,
+        _ => panic!("Expected Model"),
+    };
 
-    let fog = f.children.iter().find_map(|c| match c {
-        FrameChildElement::FogColor(c) => Some(c),
-        _ => None,
-    }).expect("Missing FogColor");
+    let fog = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::FogColor(c) => Some(c),
+            _ => None,
+        })
+        .expect("Missing FogColor");
     assert_eq!(fog.r, Some(0.5));
 
-    let insets = f.children.iter().find_map(|c| match c {
-        FrameChildElement::ViewInsets(i) => Some(i),
-        _ => None,
-    }).expect("Missing ViewInsets");
+    let insets = f
+        .children
+        .iter()
+        .find_map(|c| match c {
+            FrameChildElement::ViewInsets(i) => Some(i),
+            _ => None,
+        })
+        .expect("Missing ViewInsets");
     assert_eq!(insets.left, Some(10.0));
     assert_eq!(insets.top, Some(5.0));
 }

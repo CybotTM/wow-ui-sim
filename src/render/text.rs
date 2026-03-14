@@ -4,7 +4,7 @@
 //! Text measurement is handled by iced's text rendering via cosmic-text.
 
 use iced::widget::canvas::{self, Frame};
-use iced::{alignment, Color, Font, Pixels, Point, Rectangle};
+use iced::{Color, Font, Pixels, Point, Rectangle, alignment};
 
 use crate::widget::TextJustify;
 
@@ -74,7 +74,7 @@ impl TextRenderer {
         };
 
         let (align_y, y_pos) = match justify_v {
-            TextJustify::Left => (alignment::Vertical::Top, bounds.y),     // TOP
+            TextJustify::Left => (alignment::Vertical::Top, bounds.y), // TOP
             TextJustify::Center => (alignment::Vertical::Center, bounds.y + bounds.height / 2.0), // MIDDLE
             TextJustify::Right => (alignment::Vertical::Bottom, bounds.y + bounds.height), // BOTTOM
         };
@@ -129,10 +129,11 @@ pub fn strip_wow_markup(text: &str) -> String {
                     while let Some(ch) = chars.next() {
                         if ch == '|'
                             && let Some(&marker) = chars.peek()
-                                && marker == end_marker {
-                                    chars.next();
-                                    break;
-                                }
+                            && marker == end_marker
+                        {
+                            chars.next();
+                            break;
+                        }
                     }
                     continue;
                 }

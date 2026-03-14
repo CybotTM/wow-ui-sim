@@ -122,7 +122,10 @@ fn assert_message_sent(env: &WowLuaEnv, expected_text: &str, expected_type: &str
     let message: String = env
         .eval("return _G.__test_sent_messages[1].message")
         .expect("eval failed");
-    assert_eq!(message, expected_text, "Sent message should match typed text");
+    assert_eq!(
+        message, expected_text,
+        "Sent message should match typed text"
+    );
 
     let chat_type: String = env
         .eval("return _G.__test_sent_messages[1].chatType")
@@ -136,108 +139,114 @@ fn assert_message_sent(env: &WowLuaEnv, expected_text: &str, expected_type: &str
 }
 
 #[test]
-fn test_chat_editbox_click_type_and_submit() { test_timeout! {
-    let env = setup_env();
+fn test_chat_editbox_click_type_and_submit() {
+    test_timeout! {
+        let env = setup_env();
 
-    let exists: bool = env
-        .eval("return ChatFrame1EditBox ~= nil")
-        .expect("eval failed");
-    assert!(exists, "ChatFrame1EditBox should exist after loading Blizzard UI");
+        let exists: bool = env
+            .eval("return ChatFrame1EditBox ~= nil")
+            .expect("eval failed");
+        assert!(exists, "ChatFrame1EditBox should exist after loading Blizzard UI");
 
-    hook_send_chat_message(&env);
+        hook_send_chat_message(&env);
 
-    let has_focus: bool = env
-        .eval("return ChatFrame1EditBox:HasFocus()")
-        .expect("HasFocus failed");
-    assert!(!has_focus, "ChatFrame1EditBox should not have focus initially");
+        let has_focus: bool = env
+            .eval("return ChatFrame1EditBox:HasFocus()")
+            .expect("HasFocus failed");
+        assert!(!has_focus, "ChatFrame1EditBox should not have focus initially");
 
-    click_chat_editbox(&env);
-    type_text(&env, "hello world");
+        click_chat_editbox(&env);
+        type_text(&env, "hello world");
 
-    let text: String = env
-        .eval("return ChatFrame1EditBox:GetText()")
-        .expect("GetText failed");
-    assert_eq!(text, "hello world", "EditBox should contain typed text");
+        let text: String = env
+            .eval("return ChatFrame1EditBox:GetText()")
+            .expect("GetText failed");
+        assert_eq!(text, "hello world", "EditBox should contain typed text");
 
-    env.send_key_press("ENTER", None)
-        .expect("ENTER key press failed");
+        env.send_key_press("ENTER", None)
+            .expect("ENTER key press failed");
 
-    assert_message_sent(&env, "hello world", "SAY");
+        assert_message_sent(&env, "hello world", "SAY");
 
-    let message: String = env
-        .eval("return _G.__test_sent_messages[1].message")
-        .expect("eval failed");
-    assert_eq!(message, "hello world", "Sent message should match typed text");
+        let message: String = env
+            .eval("return _G.__test_sent_messages[1].message")
+            .expect("eval failed");
+        assert_eq!(message, "hello world", "Sent message should match typed text");
 
-    let chat_type: String = env
-        .eval("return _G.__test_sent_messages[1].chatType")
-        .expect("eval failed");
-    assert_eq!(chat_type, "SAY", "Default chat type should be SAY");
+        let chat_type: String = env
+            .eval("return _G.__test_sent_messages[1].chatType")
+            .expect("eval failed");
+        assert_eq!(chat_type, "SAY", "Default chat type should be SAY");
 
-    let text_after: String = env
-        .eval("return ChatFrame1EditBox:GetText() or ''")
-        .expect("GetText failed");
-    assert_eq!(text_after, "", "EditBox should be cleared after submit");
-}}
+        let text_after: String = env
+            .eval("return ChatFrame1EditBox:GetText() or ''")
+            .expect("GetText failed");
+        assert_eq!(text_after, "", "EditBox should be cleared after submit");
+    }
+}
 
 #[test]
-fn test_chat_message_contains_timestamp() { test_timeout! {
-    let env = setup_env();
+fn test_chat_message_contains_timestamp() {
+    test_timeout! {
+        let env = setup_env();
 
-    // Enable timestamps (default CVar is "none")
-    env.exec(r#"SetCVar("showTimestamps", "%H:%M ")"#).unwrap();
+        // Enable timestamps (default CVar is "none")
+        env.exec(r#"SetCVar("showTimestamps", "%H:%M ")"#).unwrap();
 
-    // Send a chat message — C_ChatInfo.SendChatMessage adds it to ChatFrame1
-    env.exec(r#"C_ChatInfo.SendChatMessage("Test timestamp", "SAY")"#)
-        .unwrap();
+        // Send a chat message — C_ChatInfo.SendChatMessage adds it to ChatFrame1
+        env.exec(r#"C_ChatInfo.SendChatMessage("Test timestamp", "SAY")"#)
+            .unwrap();
 
-    // Get the last message text from ChatFrame1
-    let msg: String = env
-        .eval(
-            r#"
+        // Get the last message text from ChatFrame1
+        let msg: String = env
+            .eval(
+                r#"
         local n = ChatFrame1:GetNumMessages()
         local text = ChatFrame1:GetMessageInfo(n)
         return text
     "#,
-        )
-        .unwrap();
+            )
+            .unwrap();
 
-    // Message should start with a time like "14:32 " (HH:MM followed by space)
-    let has_time = msg.len() >= 6
-        && msg.as_bytes()[2] == b':'
-        && msg.as_bytes()[0].is_ascii_digit()
-        && msg.as_bytes()[1].is_ascii_digit()
-        && msg.as_bytes()[3].is_ascii_digit()
-        && msg.as_bytes()[4].is_ascii_digit()
-        && msg.as_bytes()[5] == b' ';
-    assert!(
-        has_time,
-        "Chat message should start with HH:MM timestamp, got: {msg:.40}"
-    );
-}}
+        // Message should start with a time like "14:32 " (HH:MM followed by space)
+        let has_time = msg.len() >= 6
+            && msg.as_bytes()[2] == b':'
+            && msg.as_bytes()[0].is_ascii_digit()
+            && msg.as_bytes()[1].is_ascii_digit()
+            && msg.as_bytes()[3].is_ascii_digit()
+            && msg.as_bytes()[4].is_ascii_digit()
+            && msg.as_bytes()[5] == b' ';
+        assert!(
+            has_time,
+            "Chat message should start with HH:MM timestamp, got: {msg:.40}"
+        );
+    }
+}
 
 #[test]
-fn test_chat_editbox_text_color_after_activation() { test_timeout! {
-    let env = setup_env();
+fn test_chat_editbox_text_color_after_activation() {
+    test_timeout! {
+        let env = setup_env();
 
-    click_chat_editbox(&env);
+        click_chat_editbox(&env);
 
-    // After activation, ActivateChat should have called UpdateHeader
-    // which sets text color to white (ChatTypeInfo default = 1.0, 1.0, 1.0)
-    let (r, g, b): (f64, f64, f64) = env
-        .eval("return ChatFrame1EditBox:GetTextColor()")
-        .expect("GetTextColor failed");
-    assert!(
-        (r - 1.0).abs() < 0.01 && (g - 1.0).abs() < 0.01 && (b - 1.0).abs() < 0.01,
-        "EditBox text color should be white after activation, got ({r}, {g}, {b})"
-    );
+        // After activation, ActivateChat should have called UpdateHeader
+        // which sets text color to white (ChatTypeInfo default = 1.0, 1.0, 1.0)
+        let (r, g, b): (f64, f64, f64) = env
+            .eval("return ChatFrame1EditBox:GetTextColor()")
+            .expect("GetTextColor failed");
+        assert!(
+            (r - 1.0).abs() < 0.01 && (g - 1.0).abs() < 0.01 && (b - 1.0).abs() < 0.01,
+            "EditBox text color should be white after activation, got ({r}, {g}, {b})"
+        );
 
-    // Alpha should be 1.0 after activation
-    let alpha: f64 = env
-        .eval("return ChatFrame1EditBox:GetAlpha()")
-        .expect("GetAlpha failed");
-    assert!(
-        (alpha - 1.0).abs() < 0.01,
-        "EditBox alpha should be 1.0 after activation, got {alpha}"
-    );
-}}
+        // Alpha should be 1.0 after activation
+        let alpha: f64 = env
+            .eval("return ChatFrame1EditBox:GetAlpha()")
+            .expect("GetAlpha failed");
+        assert!(
+            (alpha - 1.0).abs() < 0.01,
+            "EditBox alpha should be 1.0 after activation, got {alpha}"
+        );
+    }
+}

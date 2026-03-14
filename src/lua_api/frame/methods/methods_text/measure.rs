@@ -1,6 +1,6 @@
 //! Text measurement, word wrap, text scale, and spacing methods.
 
-use super::super::super::handle::{get_sim_state, FrameRef};
+use super::super::super::handle::{FrameRef, get_sim_state};
 use super::{is_simple_html, is_text_type, val_to_f64};
 use crate::lua_api::simple_html::TextStyle;
 use crate::render::font::WowFontSystem;
@@ -67,7 +67,13 @@ fn measure_string_height(lua: &Lua, id: u64) -> mlua::Result<f64> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     let (text, font_path, font_size, word_wrap, width) = match state.widgets.get(id) {
-        Some(f) => (f.text.clone(), f.font.clone(), f.font_size, f.word_wrap, f.width),
+        Some(f) => (
+            f.text.clone(),
+            f.font.clone(),
+            f.font_size,
+            f.word_wrap,
+            f.width,
+        ),
         None => return Ok(12.0_f64),
     };
     drop(state);
@@ -75,7 +81,11 @@ fn measure_string_height(lua: &Lua, id: u64) -> mlua::Result<f64> {
         Some(t) if !t.is_empty() => t,
         _ => return Ok((font_size * 1.2).ceil() as f64),
     };
-    let wrap_width = if word_wrap && width > 0.0 { Some(width) } else { None };
+    let wrap_width = if word_wrap && width > 0.0 {
+        Some(width)
+    } else {
+        None
+    };
     if let Some(fs_rc) = lua.app_data_ref::<Rc<RefCell<WowFontSystem>>>() {
         let mut fs = fs_rc.borrow_mut();
         Ok(fs.measure_text_height(&text, font_path.as_deref(), font_size, wrap_width) as f64)
@@ -90,17 +100,19 @@ fn add_word_wrap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetWordWrap", |lua, this, wrap: bool| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
-                frame.word_wrap = wrap;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(this.0)
+        {
+            frame.word_wrap = wrap;
+        }
         Ok(())
     });
     methods.add_method("GetWordWrap", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(this.0) {
-                return Ok(frame.word_wrap);
-            }
+            && let Some(frame) = s.widgets.get(this.0)
+        {
+            return Ok(frame.word_wrap);
+        }
         Ok(false)
     });
     methods.add_method("IsTruncated", |_, _this, ()| Ok(false));
@@ -120,17 +132,19 @@ fn add_max_lines_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMaxLines", |lua, this, max_lines: i32| {
         let state_rc = get_sim_state(lua);
         if let Ok(mut s) = state_rc.try_borrow_mut()
-            && let Some(frame) = s.widgets.get_mut_visual(this.0) {
-                frame.max_lines = max_lines.max(0) as u32;
-            }
+            && let Some(frame) = s.widgets.get_mut_visual(this.0)
+        {
+            frame.max_lines = max_lines.max(0) as u32;
+        }
         Ok(())
     });
     methods.add_method("GetMaxLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         if let Ok(s) = state_rc.try_borrow()
-            && let Some(frame) = s.widgets.get(this.0) {
-                return Ok(frame.max_lines as i32);
-            }
+            && let Some(frame) = s.widgets.get(this.0)
+        {
+            return Ok(frame.max_lines as i32);
+        }
         Ok(0i32)
     });
 }
@@ -177,9 +191,10 @@ fn add_text_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// SetIndentedWordWrap, SetSpacing, GetSpacing.
 fn add_spacing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetIndentedWordWrap", |lua, this, args: mlua::MultiValue| {
-        set_indented_word_wrap_impl(lua, this.0, args)
-    });
+    methods.add_method(
+        "SetIndentedWordWrap",
+        |lua, this, args: mlua::MultiValue| set_indented_word_wrap_impl(lua, this.0, args),
+    );
     methods.add_method("SetSpacing", |lua, this, args: mlua::MultiValue| {
         set_spacing_impl(lua, this.0, args)
     });
@@ -192,13 +207,15 @@ fn add_spacing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn set_indented_word_wrap_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
     let args_vec: Vec<Value> = args.into_iter().collect();
     let is_html = is_simple_html(lua, id);
-    if is_html && args_vec.len() >= 2
-        && let Some(Value::String(s)) = args_vec.first() {
-            let type_str = s.to_string_lossy().to_string();
-            if is_text_type(&type_str) {
-                return set_indented_wrap_html(lua, id, &type_str, &args_vec);
-            }
+    if is_html
+        && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first()
+    {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            return set_indented_wrap_html(lua, id, &type_str, &args_vec);
         }
+    }
     Ok(())
 }
 
@@ -206,13 +223,15 @@ fn set_indented_word_wrap_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> ml
 fn set_spacing_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
     let args_vec: Vec<Value> = args.into_iter().collect();
     let is_html = is_simple_html(lua, id);
-    if is_html && args_vec.len() >= 2
-        && let Some(Value::String(s)) = args_vec.first() {
-            let type_str = s.to_string_lossy().to_string();
-            if is_text_type(&type_str) {
-                return set_spacing_html(lua, id, &type_str, &args_vec);
-            }
+    if is_html
+        && args_vec.len() >= 2
+        && let Some(Value::String(s)) = args_vec.first()
+    {
+        let type_str = s.to_string_lossy().to_string();
+        if is_text_type(&type_str) {
+            return set_spacing_html(lua, id, &type_str, &args_vec);
         }
+    }
     Ok(())
 }
 
@@ -229,12 +248,20 @@ fn get_spacing_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<
 }
 
 /// Set indented word wrap for a SimpleHTML text type.
-fn set_indented_wrap_html(lua: &Lua, id: u64, type_str: &str, args_vec: &[Value]) -> mlua::Result<()> {
+fn set_indented_wrap_html(
+    lua: &Lua,
+    id: u64,
+    type_str: &str,
+    args_vec: &[Value],
+) -> mlua::Result<()> {
     let indent = matches!(args_vec.get(1), Some(Value::Boolean(true)));
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str.to_string()).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str.to_string())
+            .or_insert_with(TextStyle::default);
         style.indented_word_wrap = indent;
     }
     Ok(())
@@ -246,7 +273,10 @@ fn set_spacing_html(lua: &Lua, id: u64, type_str: &str, args_vec: &[Value]) -> m
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(data) = state.simple_htmls.get_mut(&id) {
-        let style = data.text_styles.entry(type_str.to_string()).or_insert_with(TextStyle::default);
+        let style = data
+            .text_styles
+            .entry(type_str.to_string())
+            .or_insert_with(TextStyle::default);
         style.spacing = spacing as f32;
     }
     Ok(())
@@ -257,8 +287,9 @@ fn get_spacing_html(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<f64> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
     if let Some(data) = state.simple_htmls.get(&id)
-        && let Some(style) = data.text_styles.get(type_str) {
-            return Ok(style.spacing as f64);
-        }
+        && let Some(style) = data.text_styles.get(type_str)
+    {
+        return Ok(style.spacing as f64);
+    }
     Ok(0.0_f64)
 }

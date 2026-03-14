@@ -42,10 +42,7 @@ impl TalentState {
         let mut node_selections = HashMap::new();
 
         // Auto-select the first hero spec so hero talent UI displays by default.
-        super::globals::hero_talents::auto_select_hero_spec(
-            &mut node_ranks,
-            &mut node_selections,
-        );
+        super::globals::hero_talents::auto_select_hero_spec(&mut node_ranks, &mut node_selections);
 
         Self {
             node_ranks,
@@ -57,7 +54,8 @@ impl TalentState {
 
     /// Total points spent for a given currency across all nodes.
     pub fn spent_for_currency(&self, currency_id: u32) -> u32 {
-        self.node_ranks.iter()
+        self.node_ranks
+            .iter()
             .filter(|&(&nid, _)| self.node_currency_map.get(&nid) == Some(&currency_id))
             .map(|(_, &ranks)| ranks)
             .sum()

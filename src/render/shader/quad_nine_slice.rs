@@ -1,7 +1,7 @@
 //! Nine-slice quad rendering for panel borders and frames.
 
-use iced::Rectangle;
 use super::quad::{BlendMode, QuadBatch};
+use iced::Rectangle;
 
 /// Texture indices for 9-slice rendering.
 #[derive(Debug, Clone, Copy, Default)]
@@ -40,7 +40,17 @@ impl QuadBatch {
 
         push_center(self, bounds, edge_size, textures, color, full_uv);
         push_corners(self, bounds, corner_size, textures, color, full_uv);
-        push_edges(self, bounds, corner_size, edge_size, inner_width, inner_height, textures, color, full_uv);
+        push_edges(
+            self,
+            bounds,
+            corner_size,
+            edge_size,
+            inner_width,
+            inner_height,
+            textures,
+            color,
+            full_uv,
+        );
     }
 }
 
@@ -55,7 +65,10 @@ fn push_center(
     if let Some(tex) = textures.center {
         let center_bounds = Rectangle::new(
             iced::Point::new(bounds.x + edge_size, bounds.y + edge_size),
-            iced::Size::new(bounds.width - edge_size * 2.0, bounds.height - edge_size * 2.0),
+            iced::Size::new(
+                bounds.width - edge_size * 2.0,
+                bounds.height - edge_size * 2.0,
+            ),
         );
         batch.push_quad(center_bounds, full_uv, color, tex, BlendMode::Alpha);
     }

@@ -28,7 +28,10 @@ fn test_fixed_frame_level_preserved_on_reparent() {
     "#,
         )
         .unwrap();
-    assert_eq!(f_level, 42, "Fixed frame level should be preserved on reparent");
+    assert_eq!(
+        f_level, 42,
+        "Fixed frame level should be preserved on reparent"
+    );
     assert_eq!(g_level, 43, "Child should inherit from fixed parent level");
 }
 
@@ -52,8 +55,14 @@ fn test_frame_level_same_parent_no_recalc() {
     "#,
         )
         .unwrap();
-    assert_eq!(f_level, 42, "Same-parent reparent should not recalculate level");
-    assert_eq!(g_level, 43, "Child should keep inherited level on same-parent reparent");
+    assert_eq!(
+        f_level, 42,
+        "Same-parent reparent should not recalculate level"
+    );
+    assert_eq!(
+        g_level, 43,
+        "Child should keep inherited level on same-parent reparent"
+    );
 }
 
 #[test]
@@ -77,6 +86,12 @@ fn test_frame_level_recalc_after_nil_reparent() {
     "#,
         )
         .unwrap();
-    assert_eq!(f_level, 1, "Level should recalculate after nil->parent transition");
-    assert_eq!(g_level, 2, "Child should recalculate after parent's nil->parent transition");
+    assert_eq!(
+        f_level, 1,
+        "Level should recalculate after nil->parent transition"
+    );
+    assert_eq!(
+        g_level, 2,
+        "Child should recalculate after parent's nil->parent transition"
+    );
 }

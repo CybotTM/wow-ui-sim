@@ -3,20 +3,20 @@
 //! Each submodule exports `add_*_methods<M: UserDataMethods<FrameRef>>(methods: &mut M)`
 //! which registers method functions on the UserData methods container.
 
+pub(crate) mod combat_lockdown;
 mod methods_anchor;
 mod methods_anim_proxy;
 mod methods_attribute;
-pub(crate) mod combat_lockdown;
 mod methods_backdrop;
 mod methods_button;
 pub(crate) mod methods_core;
 mod methods_create;
-mod methods_rect;
 mod methods_event;
 pub(crate) mod methods_helpers;
-mod methods_line;
 pub(crate) mod methods_hierarchy;
+mod methods_line;
 mod methods_misc;
+mod methods_rect;
 mod methods_script;
 mod methods_text;
 mod methods_texture;

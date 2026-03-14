@@ -43,7 +43,13 @@ fn add_font_path_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     font.set(
         "SetFont",
         lua.create_function(
-            |_, (this, path, height, flags): (mlua::Table, Option<String>, Option<f64>, Option<String>)| {
+            |_,
+             (this, path, height, flags): (
+                mlua::Table,
+                Option<String>,
+                Option<f64>,
+                Option<String>,
+            )| {
                 let Some(path) = path else { return Ok(()) };
                 this.set("__fontPath", path)?;
                 if let Some(h) = height {
@@ -196,18 +202,24 @@ fn add_font_justify_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
 
 /// SetIndentedWordWrap, GetIndentedWordWrap, SetMaxLines, GetMaxLines on Font objects.
 fn add_font_text_layout_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
-    font.set("SetIndentedWordWrap", lua.create_function(|_, (this, v): (mlua::Table, bool)| {
-        this.set("__indentedWordWrap", v)
-    })?)?;
-    font.set("GetIndentedWordWrap", lua.create_function(|_, this: mlua::Table| {
-        Ok(this.get::<bool>("__indentedWordWrap").unwrap_or(false))
-    })?)?;
-    font.set("SetMaxLines", lua.create_function(|_, (this, v): (mlua::Table, i32)| {
-        this.set("__maxLines", v)
-    })?)?;
-    font.set("GetMaxLines", lua.create_function(|_, this: mlua::Table| {
-        Ok(this.get::<i32>("__maxLines").unwrap_or(0))
-    })?)?;
+    font.set(
+        "SetIndentedWordWrap",
+        lua.create_function(|_, (this, v): (mlua::Table, bool)| this.set("__indentedWordWrap", v))?,
+    )?;
+    font.set(
+        "GetIndentedWordWrap",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok(this.get::<bool>("__indentedWordWrap").unwrap_or(false))
+        })?,
+    )?;
+    font.set(
+        "SetMaxLines",
+        lua.create_function(|_, (this, v): (mlua::Table, i32)| this.set("__maxLines", v))?,
+    )?;
+    font.set(
+        "GetMaxLines",
+        lua.create_function(|_, this: mlua::Table| Ok(this.get::<i32>("__maxLines").unwrap_or(0)))?,
+    )?;
     Ok(())
 }
 
@@ -462,7 +474,10 @@ fn resolve_font_info_source(
 fn populate_font_info(info: &mlua::Table, obj: Option<&mlua::Table>, lua: &Lua) -> Result<()> {
     if let Some(obj) = obj {
         info.set("height", obj.get::<f64>("__fontHeight").unwrap_or(12.0))?;
-        info.set("outline", obj.get::<String>("__fontFlags").unwrap_or_default())?;
+        info.set(
+            "outline",
+            obj.get::<String>("__fontFlags").unwrap_or_default(),
+        )?;
         let color = lua.create_table()?;
         color.set("r", obj.get::<f64>("__textColorR").unwrap_or(1.0))?;
         color.set("g", obj.get::<f64>("__textColorG").unwrap_or(1.0))?;
@@ -524,7 +539,14 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     // Highlighted (white)
     ("GameFontHighlight", 12.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightSmall", 10.0, "", 1.0, 1.0, 1.0),
-    ("GameFontHighlightSmallOutline", 10.0, "OUTLINE", 1.0, 1.0, 1.0),
+    (
+        "GameFontHighlightSmallOutline",
+        10.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("GameFontHighlightLarge", 16.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightHuge", 20.0, "", 1.0, 1.0, 1.0),
     ("GameFontHighlightOutline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
@@ -553,7 +575,14 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("NumberFontNormalLarge", 16.0, "OUTLINE", 1.0, 1.0, 1.0),
     ("NumberFontNormalHuge", 24.0, "OUTLINE", 1.0, 1.0, 1.0),
     ("NumberFontNormalRightRed", 14.0, "OUTLINE", 1.0, 0.1, 0.1),
-    ("NumberFontNormalRightYellow", 14.0, "OUTLINE", 1.0, 1.0, 0.0),
+    (
+        "NumberFontNormalRightYellow",
+        14.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        0.0,
+    ),
     // Chat fonts
     ("ChatFontNormal", 14.0, "", 1.0, 1.0, 1.0),
     ("ChatFontSmall", 12.0, "", 1.0, 1.0, 1.0),
@@ -566,15 +595,43 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("SystemFont_Huge1", 20.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Huge2", 24.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Outline", 12.0, "OUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_Huge2", 24.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_Huge4", 32.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
-    ("SystemFont_OutlineThick_WTF", 64.0, "OUTLINE, THICKOUTLINE", 1.0, 1.0, 1.0),
+    (
+        "SystemFont_OutlineThick_Huge2",
+        24.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
+    (
+        "SystemFont_OutlineThick_Huge4",
+        32.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
+    (
+        "SystemFont_OutlineThick_WTF",
+        64.0,
+        "OUTLINE, THICKOUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("SystemFont_Shadow_Small", 10.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med1", 12.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med2", 13.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Med3", 14.0, "", 1.0, 1.0, 1.0),
     ("SystemFont_Shadow_Large", 16.0, "", 1.0, 1.0, 1.0),
-    ("SystemFont_Shadow_Large_Outline", 16.0, "OUTLINE", 1.0, 1.0, 1.0),
+    (
+        "SystemFont_Shadow_Large_Outline",
+        16.0,
+        "OUTLINE",
+        1.0,
+        1.0,
+        1.0,
+    ),
     ("SystemFont_Shadow_Huge1", 20.0, "", 1.0, 1.0, 1.0),
     // Tooltip fonts
     ("GameTooltipHeader", 14.0, "", 1.0, 1.0, 1.0),

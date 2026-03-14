@@ -9,9 +9,9 @@
 //! "UI coordinates"; GetScaledRect returns screen-space values directly.
 
 use super::super::handle::FrameRef;
-use crate::lua_api::frame::handle::get_sim_state;
-use crate::lua_api::SimState;
 use crate::LayoutRect;
+use crate::lua_api::SimState;
+use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
 
 use super::methods_core::screen_dims;
@@ -25,20 +25,30 @@ struct ResolvedRect {
 
 /// Check if a frame has anchors. Returns false if no frame or no anchors.
 fn has_anchors(state: &SimState, id: u64) -> bool {
-    state.widgets.get(id).map(|f| !f.anchors.is_empty()).unwrap_or(false)
+    state
+        .widgets
+        .get(id)
+        .map(|f| !f.anchors.is_empty())
+        .unwrap_or(false)
 }
 
 /// Resolve dirty flag, then extract layout_rect + effective_scale + screen_height.
 /// Returns None if the frame has no anchors or no layout_rect.
 fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state_rc = get_sim_state(lua);
-    if !has_anchors(&state_rc.borrow(), id) { return None; }
+    if !has_anchors(&state_rc.borrow(), id) {
+        return None;
+    }
     state_rc.borrow_mut().resolve_rect_if_dirty(id);
     let state = state_rc.borrow();
     let (_, sh) = screen_dims(&state);
     let frame = state.widgets.get(id)?;
     let rect = frame.layout_rect?;
-    Some(ResolvedRect { rect, eff_scale: frame.effective_scale, screen_height: sh })
+    Some(ResolvedRect {
+        rect,
+        eff_scale: frame.effective_scale,
+        screen_height: sh,
+    })
 }
 
 /// Convert layout_rect to WoW UI coordinates (bottom-left origin, divided by effective_scale).
@@ -149,7 +159,9 @@ fn add_get_bottom<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             Some(r) => r,
             None => return Ok(mlua::MultiValue::new()),
         };
-        Ok(single_value((r.screen_height - r.rect.y - r.rect.height) / r.eff_scale))
+        Ok(single_value(
+            (r.screen_height - r.rect.y - r.rect.height) / r.eff_scale,
+        ))
     });
 }
 

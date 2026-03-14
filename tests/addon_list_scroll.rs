@@ -107,7 +107,9 @@ fn init_addon_list(env: &WowLuaEnv) {
 
 #[test]
 fn test_addon_list_scroll_down_changes_entries() {
-    if !has_local_addons() { return; }
+    if !has_local_addons() {
+        return;
+    }
     let env = env_with_addon_list();
     init_addon_list(&env);
 
@@ -138,7 +140,9 @@ fn test_addon_list_scroll_down_changes_entries() {
 
 #[test]
 fn test_addon_list_scroll_up_restores_entries() {
-    if !has_local_addons() { return; }
+    if !has_local_addons() {
+        return;
+    }
     let env = env_with_addon_list();
     init_addon_list(&env);
 
@@ -174,7 +178,9 @@ fn test_addon_list_scroll_up_restores_entries() {
 
 #[test]
 fn test_addon_list_scroll_percentage_changes() {
-    if !has_local_addons() { return; }
+    if !has_local_addons() {
+        return;
+    }
     let env = env_with_addon_list();
     init_addon_list(&env);
 

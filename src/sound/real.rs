@@ -1,4 +1,4 @@
-use rodio::stream::{OutputStreamBuilder, OutputStream};
+use rodio::stream::{OutputStream, OutputStreamBuilder};
 use rodio::{Decoder, Sink};
 use std::collections::HashMap;
 use std::fs::File;

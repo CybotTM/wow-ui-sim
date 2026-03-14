@@ -137,9 +137,7 @@ fn add_fc_methods<M: UserDataMethods<FunctionContainer>>(methods: &mut M) {
         Ok(())
     });
 
-    methods.add_method("IsCancelled", |_, this, ()| {
-        Ok(this.inner.cancelled.get())
-    });
+    methods.add_method("IsCancelled", |_, this, ()| Ok(this.inner.cancelled.get()));
 
     methods.add_method("Invoke", |lua, this, args: mlua::MultiValue| {
         if this.inner.cancelled.get() {

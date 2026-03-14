@@ -2,8 +2,8 @@
 
 use std::path::Path;
 
-use crate::render::shader::load_texture_or_crop;
 use crate::render::QuadBatch;
+use crate::render::shader::load_texture_or_crop;
 use crate::texture::TextureManager;
 
 /// Save all unique textures from a QuadBatch to disk as PNGs.
@@ -20,7 +20,9 @@ pub fn dump_batch_textures(
     let mut seen = std::collections::HashSet::new();
     let mut saved = 0;
 
-    let all_requests = batch.texture_requests.iter()
+    let all_requests = batch
+        .texture_requests
+        .iter()
         .chain(&batch.mask_texture_requests);
 
     for request in all_requests {
@@ -48,13 +50,22 @@ pub fn dump_batch_textures(
                 if let Err(e) = img.save(&out_path) {
                     eprintln!("  ERROR saving {filename}: {e}");
                 } else {
-                    eprintln!("  {}x{} → {}", gpu_data.width, gpu_data.height, out_path.display());
+                    eprintln!(
+                        "  {}x{} → {}",
+                        gpu_data.width,
+                        gpu_data.height,
+                        out_path.display()
+                    );
                     saved += 1;
                 }
             }
-            None => eprintln!("  BAD DATA: {} ({}x{}, expected {} bytes)",
-                request.path, gpu_data.width, gpu_data.height,
-                gpu_data.width * gpu_data.height * 4),
+            None => eprintln!(
+                "  BAD DATA: {} ({}x{}, expected {} bytes)",
+                request.path,
+                gpu_data.width,
+                gpu_data.height,
+                gpu_data.width * gpu_data.height * 4
+            ),
         }
     }
     eprintln!("Saved {saved} textures to {}", output_dir.display());

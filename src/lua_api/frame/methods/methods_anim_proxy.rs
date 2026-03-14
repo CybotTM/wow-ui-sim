@@ -5,9 +5,9 @@
 //! via the `anim_frame_to_group` and `anim_frame_to_anim` mappings.
 
 use super::super::handle::FrameRef;
+use crate::lua_api::SimState;
 use crate::lua_api::animation::{AnimState, AnimationType, LoopType, Smoothing};
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
-use crate::lua_api::SimState;
 use mlua::{MultiValue, Value};
 
 /// Register all animation proxy methods on FrameRef.
@@ -34,11 +34,14 @@ fn add_anim_group_proxy_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
 fn parse_proxy_play_args(args: MultiValue) -> (bool, f64) {
     let args: Vec<Value> = args.into_iter().collect();
     let reverse = matches!(args.first(), Some(Value::Boolean(true)));
-    let offset = args.get(1).and_then(|v| match v {
-        Value::Number(n) => Some(*n),
-        Value::Integer(n) => Some(*n as f64),
-        _ => None,
-    }).unwrap_or(0.0);
+    let offset = args
+        .get(1)
+        .and_then(|v| match v {
+            Value::Number(n) => Some(*n),
+            Value::Integer(n) => Some(*n as f64),
+            _ => None,
+        })
+        .unwrap_or(0.0);
     (reverse, offset)
 }
 
@@ -57,7 +60,9 @@ fn add_group_looping_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("GetLooping", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let s = state.anim_frame_to_group.get(&this.0)
+        let s = state
+            .anim_frame_to_group
+            .get(&this.0)
             .and_then(|gid| state.animation_groups.get(gid))
             .map_or("NONE", |g| g.looping.as_str());
         Ok(Value::String(lua.create_string(s)?))
@@ -66,7 +71,9 @@ fn add_group_looping_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("GetLoopState", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let s = state.anim_frame_to_group.get(&this.0)
+        let s = state
+            .anim_frame_to_group
+            .get(&this.0)
             .and_then(|gid| state.animation_groups.get(gid))
             .map_or("NONE", |g| g.looping.as_str());
         Ok(Value::String(lua.create_string(s)?))
@@ -79,9 +86,14 @@ fn add_group_play_core<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            let already = state.animation_groups.get(&gid).is_some_and(|g| g.playing && !g.done);
+            let already = state
+                .animation_groups
+                .get(&gid)
+                .is_some_and(|g| g.playing && !g.done);
             if !already {
-                crate::lua_api::animation::group_handle::start_group_playback_at(&mut state, gid, reverse, offset);
+                crate::lua_api::animation::group_handle::start_group_playback_at(
+                    &mut state, gid, reverse, offset,
+                );
             }
         }
         Ok(())
@@ -92,7 +104,9 @@ fn add_group_play_core<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            crate::lua_api::animation::group_handle::start_group_playback_at(&mut state, gid, reverse, offset);
+            crate::lua_api::animation::group_handle::start_group_playback_at(
+                &mut state, gid, reverse, offset,
+            );
         }
         Ok(())
     });
@@ -139,12 +153,14 @@ fn add_group_play_synced<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("PlaySynced", |lua, this, args: MultiValue| {
         let reverse = matches!(args.iter().next(), Some(Value::Boolean(true)));
         let state_rc = get_sim_state(lua);
-        let offset = crate::lua_api::animation::group_handle::compute_sync_offset(
-            lua, this.0, &state_rc,
-        )?;
+        let offset =
+            crate::lua_api::animation::group_handle::compute_sync_offset(lua, this.0, &state_rc)?;
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            let already = state.animation_groups.get(&gid).is_some_and(|g| g.playing && !g.done);
+            let already = state
+                .animation_groups
+                .get(&gid)
+                .is_some_and(|g| g.playing && !g.done);
             if !already {
                 crate::lua_api::animation::group_handle::start_group_playback_at(
                     &mut state, gid, reverse, offset,
@@ -161,7 +177,9 @@ fn add_group_play_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
             if playing {
-                crate::lua_api::animation::group_handle::start_group_playback(&mut state, gid, false);
+                crate::lua_api::animation::group_handle::start_group_playback(
+                    &mut state, gid, false,
+                );
             } else {
                 crate::lua_api::animation::group_handle::stop_group(&mut state, gid);
             }
@@ -225,7 +243,10 @@ fn add_group_state_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            return Ok(state.animation_groups.get(&gid).is_some_and(|g| g.pending_finish));
+            return Ok(state
+                .animation_groups
+                .get(&gid)
+                .is_some_and(|g| g.pending_finish));
         }
         Ok(false)
     });
@@ -243,7 +264,10 @@ fn add_group_state_extras<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(&(gid, _)) = state.anim_frame_to_anim.get(&this.0) {
-            return Ok(state.animation_groups.get(&gid).is_none_or(|g| !g.playing && !g.paused));
+            return Ok(state
+                .animation_groups
+                .get(&gid)
+                .is_none_or(|g| !g.playing && !g.paused));
         }
         Ok(true)
     });
@@ -256,7 +280,9 @@ fn add_group_timing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            if let Some(g) = state.animation_groups.get_mut(&gid) { g.speed_multiplier = mult; }
+            if let Some(g) = state.animation_groups.get_mut(&gid) {
+                g.speed_multiplier = mult;
+            }
         }
         Ok(())
     });
@@ -264,7 +290,9 @@ fn add_group_timing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("GetAnimationSpeedMultiplier", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.anim_frame_to_group.get(&this.0)
+        Ok(state
+            .anim_frame_to_group
+            .get(&this.0)
             .and_then(|gid| state.animation_groups.get(gid))
             .map_or(1.0, |g| g.speed_multiplier))
     });
@@ -275,7 +303,9 @@ fn add_group_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            if let Some(g) = state.animation_groups.get_mut(&gid) { g.set_to_final_alpha = val; }
+            if let Some(g) = state.animation_groups.get_mut(&gid) {
+                g.set_to_final_alpha = val;
+            }
         }
         Ok(())
     });
@@ -283,7 +313,9 @@ fn add_group_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("IsSetToFinalAlpha", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.anim_frame_to_group.get(&this.0)
+        Ok(state
+            .anim_frame_to_group
+            .get(&this.0)
             .and_then(|gid| state.animation_groups.get(gid))
             .is_some_and(|g| g.set_to_final_alpha))
     });
@@ -291,7 +323,9 @@ fn add_group_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("GetToFinalAlpha", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.anim_frame_to_group.get(&this.0)
+        Ok(state
+            .anim_frame_to_group
+            .get(&this.0)
             .and_then(|gid| state.animation_groups.get(gid))
             .is_some_and(|g| g.set_to_final_alpha))
     });
@@ -316,21 +350,28 @@ fn add_anim_duration_order<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetDuration", |lua, this, dur: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.duration = dur; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.duration = dur;
+        }
         Ok(())
     });
     methods.add_method("GetDuration", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
-            return Ok(state.animation_groups.get(&gid).map_or(0.0, |g| g.total_duration()));
+            return Ok(state
+                .animation_groups
+                .get(&gid)
+                .map_or(0.0, |g| g.total_duration()));
         }
         Ok(lookup_anim(&state, this.0).map_or(0.0, |a| a.duration))
     });
     methods.add_method("SetOrder", |lua, this, order: u32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.order = order; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.order = order;
+        }
         Ok(())
     });
     methods.add_method("GetOrder", |lua, this, ()| {
@@ -344,7 +385,9 @@ fn add_anim_delay<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetStartDelay", |lua, this, d: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.start_delay = d; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.start_delay = d;
+        }
         Ok(())
     });
     methods.add_method("GetStartDelay", |lua, this, ()| {
@@ -355,7 +398,9 @@ fn add_anim_delay<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetEndDelay", |lua, this, d: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.end_delay = d; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.end_delay = d;
+        }
         Ok(())
     });
     methods.add_method("GetEndDelay", |lua, this, ()| {
@@ -369,7 +414,9 @@ fn add_anim_smoothing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetSmoothing", |lua, this, smooth: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.smoothing = Smoothing::from_str(&smooth); }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.smoothing = Smoothing::from_str(&smooth);
+        }
         Ok(())
     });
     methods.add_method("GetSmoothing", |lua, this, ()| {
@@ -384,7 +431,9 @@ fn add_anim_alpha_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFromAlpha", |lua, this, v: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.from_alpha = v; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.from_alpha = v;
+        }
         Ok(())
     });
     methods.add_method("GetFromAlpha", |lua, this, ()| {
@@ -395,7 +444,9 @@ fn add_anim_alpha_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetToAlpha", |lua, this, v: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.to_alpha = v; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.to_alpha = v;
+        }
         Ok(())
     });
     methods.add_method("GetToAlpha", |lua, this, ()| {
@@ -409,7 +460,9 @@ fn add_anim_alpha_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            if a.anim_type == AnimationType::Alpha { a.to_alpha = a.from_alpha + val; }
+            if a.anim_type == AnimationType::Alpha {
+                a.to_alpha = a.from_alpha + val;
+            }
         }
         Ok(())
     });
@@ -422,7 +475,10 @@ fn add_anim_translation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let y = crate::lua_api::animation::extract_number(&args, 1).unwrap_or(0.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.offset_x = x; a.offset_y = y; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.offset_x = x;
+            a.offset_y = y;
+        }
         Ok(())
     });
 }
@@ -434,7 +490,10 @@ fn add_anim_scale_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let y = crate::lua_api::animation::extract_number(&args, 1).unwrap_or(1.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.from_scale_x = x; a.from_scale_y = y; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.from_scale_x = x;
+            a.from_scale_y = y;
+        }
         Ok(())
     });
     methods.add_method("SetScaleTo", |lua, this, args: MultiValue| {
@@ -443,7 +502,10 @@ fn add_anim_scale_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let y = crate::lua_api::animation::extract_number(&args, 1).unwrap_or(1.0);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.to_scale_x = x; a.to_scale_y = y; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.to_scale_x = x;
+            a.to_scale_y = y;
+        }
         Ok(())
     });
 }
@@ -452,7 +514,9 @@ fn add_anim_rotation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetDegrees", |lua, this, deg: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.degrees = deg; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.degrees = deg;
+        }
         Ok(())
     });
     methods.add_method("SetOrigin", |lua, this, args: MultiValue| {
@@ -466,7 +530,9 @@ fn add_anim_rotation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.origin_point = point; a.origin_offset_x = ox; a.origin_offset_y = oy;
+            a.origin_point = point;
+            a.origin_offset_x = ox;
+            a.origin_offset_y = oy;
         }
         Ok(())
     });
@@ -476,12 +542,14 @@ fn add_anim_rotation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         if let Some(a) = lookup_anim(&state, this.0) {
             return Ok(MultiValue::from_vec(vec![
                 Value::String(lua.create_string(&a.origin_point)?),
-                Value::Number(a.origin_offset_x), Value::Number(a.origin_offset_y),
+                Value::Number(a.origin_offset_x),
+                Value::Number(a.origin_offset_y),
             ]));
         }
         Ok(MultiValue::from_vec(vec![
             Value::String(lua.create_string("CENTER")?),
-            Value::Number(0.0), Value::Number(0.0),
+            Value::Number(0.0),
+            Value::Number(0.0),
         ]))
     });
 }
@@ -490,7 +558,9 @@ fn add_anim_flipbook_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetFlipBookRows", |lua, this, v: u32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.flip_book_rows = v; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.flip_book_rows = v;
+        }
         Ok(())
     });
     methods.add_method("GetFlipBookRows", |lua, this, ()| {
@@ -501,7 +571,9 @@ fn add_anim_flipbook_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetFlipBookColumns", |lua, this, v: u32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.flip_book_columns = v; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.flip_book_columns = v;
+        }
         Ok(())
     });
     methods.add_method("GetFlipBookColumns", |lua, this, ()| {
@@ -512,7 +584,9 @@ fn add_anim_flipbook_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     methods.add_method("SetFlipBookFrames", |lua, this, v: u32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.flip_book_frames = v; }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.flip_book_frames = v;
+        }
         Ok(())
     });
     methods.add_method("GetFlipBookFrames", |lua, this, ()| {
@@ -529,7 +603,11 @@ fn add_anim_progress<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         if let Some(&gid) = state.anim_frame_to_group.get(&this.0) {
             return Ok(state.animation_groups.get(&gid).map_or(0.0, |g| {
                 let dur = g.total_duration();
-                if dur <= 0.0 { 0.0 } else { (g.elapsed / dur).clamp(0.0, 1.0) }
+                if dur <= 0.0 {
+                    0.0
+                } else {
+                    (g.elapsed / dur).clamp(0.0, 1.0)
+                }
             }));
         }
         Ok(lookup_anim(&state, this.0).map_or(0.0, |a| a.raw_progress()))
@@ -553,28 +631,41 @@ fn add_anim_target<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetTarget", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let Some(&(gid, idx)) = state.anim_frame_to_anim.get(&this.0) else { return Ok(Value::Nil) };
-        let Some(group) = state.animation_groups.get(&gid) else { return Ok(Value::Nil) };
+        let Some(&(gid, idx)) = state.anim_frame_to_anim.get(&this.0) else {
+            return Ok(Value::Nil);
+        };
+        let Some(group) = state.animation_groups.get(&gid) else {
+            return Ok(Value::Nil);
+        };
         let owner_id = group.owner_frame_id;
         let child_key = group.animations.get(idx).and_then(|a| a.child_key.clone());
         let target_id = match &child_key {
-            Some(key) => state.widgets.get(owner_id).and_then(|o| o.children_keys.get(key.as_str()).copied()),
+            Some(key) => state
+                .widgets
+                .get(owner_id)
+                .and_then(|o| o.children_keys.get(key.as_str()).copied()),
             None => Some(owner_id),
         };
-        let Some(id) = target_id else { return Ok(Value::Nil) };
+        let Some(id) = target_id else {
+            return Ok(Value::Nil);
+        };
         drop(state);
         frame_ref(lua, id)
     });
     methods.add_method("SetTarget", |_, _this, target: Value| {
         if target.is_nil() || target == Value::NULL {
-            return Err(mlua::Error::RuntimeError("Usage: Animation:SetTarget(target)".into()));
+            return Err(mlua::Error::RuntimeError(
+                "Usage: Animation:SetTarget(target)".into(),
+            ));
         }
         Ok(())
     });
     methods.add_method("SetChildKey", |lua, this, key: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) { a.child_key = Some(key); }
+        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
+            a.child_key = Some(key);
+        }
         Ok(())
     });
     methods.add_method("SetTargetKey", |_, _this, _key: String| Ok(()));
@@ -589,7 +680,9 @@ fn add_anim_get_animations<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         let Some(&gid) = state.anim_frame_to_group.get(&this.0) else {
             return Ok(MultiValue::new());
         };
-        let anim_fids: Vec<u64> = state.anim_frame_to_anim.iter()
+        let anim_fids: Vec<u64> = state
+            .anim_frame_to_anim
+            .iter()
             .filter(|&(_, &(g, _))| g == gid)
             .map(|(&fid, _)| fid)
             .collect();
@@ -625,7 +718,11 @@ fn lookup_anim(state: &SimState, frame_id: u64) -> Option<&AnimState> {
 
 fn lookup_anim_mut(state: &mut SimState, frame_id: u64) -> Option<&mut AnimState> {
     let &(gid, idx) = state.anim_frame_to_anim.get(&frame_id)?;
-    state.animation_groups.get_mut(&gid)?.animations.get_mut(idx)
+    state
+        .animation_groups
+        .get_mut(&gid)?
+        .animations
+        .get_mut(idx)
 }
 
 fn extract_num_iter(iter: &mut impl Iterator<Item = Value>) -> f64 {

@@ -1,16 +1,16 @@
 //! XML file loading and element processing.
 
 use crate::lua_api::LoaderEnv;
-use crate::xml::{parse_xml_file, FrameXml, XmlElement};
+use crate::xml::{FrameXml, XmlElement, parse_xml_file};
 use std::path::Path;
 use std::time::Instant;
 
+use super::LoadTiming;
 use super::addon::AddonContext;
 use super::error::LoadError;
 use super::helpers::resolve_path_with_fallback;
 use super::lua_file::load_lua_file;
 use super::xml_frame::create_frame_from_xml;
-use super::LoadTiming;
 
 /// Load an XML file, processing its elements.
 /// Returns the number of Lua files loaded from Script elements.
@@ -69,11 +69,7 @@ fn process_element(
             register_virtual_anim_group(ag);
             Ok(0)
         }
-        XmlElement::Animation(_)
-        | XmlElement::Binding(_)
-        | XmlElement::ModifiedClick(_) => {
-            Ok(0)
-        }
+        XmlElement::Animation(_) | XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
         _ => {
             process_frame_element(env, element)?;
             Ok(0)
@@ -160,12 +156,16 @@ fn process_include(
 }
 
 /// Extract the FrameXml data, widget type, and optional intrinsic name from an XmlElement.
-fn resolve_frame_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn resolve_frame_element(
+    element: &XmlElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     resolve_specialized_element(element).or_else(|| resolve_frame_like_element(element))
 }
 
 /// Specialized widget types with distinct widget type strings or intrinsic bases.
-fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn resolve_specialized_element(
+    element: &XmlElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         XmlElement::Frame(f) => Some((f, "Frame", None)),
         XmlElement::Button(f)
@@ -175,10 +175,10 @@ fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'sta
         XmlElement::DropdownButton(f) => Some((f, "Button", Some("DropdownButton"))),
         XmlElement::ContainedAlertFrame(f) => Some((f, "Button", Some("ContainedAlertFrame"))),
         XmlElement::CheckButton(f) => Some((f, "CheckButton", None)),
-        XmlElement::EditBox(f)
-        | XmlElement::EventEditBox(f) => Some((f, "EditBox", None)),
-        XmlElement::ScrollFrame(f)
-        | XmlElement::EventScrollFrame(f) => Some((f, "ScrollFrame", None)),
+        XmlElement::EditBox(f) | XmlElement::EventEditBox(f) => Some((f, "EditBox", None)),
+        XmlElement::ScrollFrame(f) | XmlElement::EventScrollFrame(f) => {
+            Some((f, "ScrollFrame", None))
+        }
         XmlElement::Slider(f) => Some((f, "Slider", None)),
         XmlElement::StatusBar(f) => Some((f, "StatusBar", None)),
         XmlElement::Cooldown(f) => Some((f, "Cooldown", None)),
@@ -191,7 +191,9 @@ fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'sta
         | XmlElement::TabardModel(f)
         | XmlElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
         XmlElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
-        XmlElement::ScrollingMessageFrame(f) => Some((f, "MessageFrame", Some("ScrollingMessageFrame"))),
+        XmlElement::ScrollingMessageFrame(f) => {
+            Some((f, "MessageFrame", Some("ScrollingMessageFrame")))
+        }
         XmlElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
         XmlElement::Minimap(f) => Some((f, "Minimap", None)),
         _ => None,
@@ -199,7 +201,9 @@ fn resolve_specialized_element(element: &XmlElement) -> Option<(&FrameXml, &'sta
 }
 
 /// Frame-like elements that all map to widget type "Frame".
-fn resolve_frame_like_element(element: &XmlElement) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
+fn resolve_frame_like_element(
+    element: &XmlElement,
+) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
     match element {
         XmlElement::EventFrame(f)
         | XmlElement::TaxiRouteFrame(f)
@@ -225,17 +229,19 @@ fn resolve_frame_like_element(element: &XmlElement) -> Option<(&FrameXml, &'stat
 /// Register a top-level virtual Texture template (e.g. TextStatusBarSparkTemplate).
 fn register_virtual_texture(texture: &crate::xml::TextureXml) {
     if texture.is_virtual == Some(true)
-        && let Some(ref name) = texture.name {
-            crate::xml::register_texture_template(name, texture.clone());
-        }
+        && let Some(ref name) = texture.name
+    {
+        crate::xml::register_texture_template(name, texture.clone());
+    }
 }
 
 /// Register a top-level virtual AnimationGroup template.
 fn register_virtual_anim_group(anim_group: &crate::xml::AnimationGroupXml) {
     if anim_group.is_virtual == Some(true)
-        && let Some(ref name) = anim_group.name {
-            crate::xml::register_anim_group_template(name, anim_group.clone());
-        }
+        && let Some(ref name) = anim_group.name
+    {
+        crate::xml::register_anim_group_template(name, anim_group.clone());
+    }
 }
 
 /// Process a frame-type XML element by dispatching to create_frame_from_xml.
@@ -296,16 +302,19 @@ const FONT_LUA_TEMPLATE: &str = r#"
 ///
 /// When `inherits` is set, copies properties from the parent font first,
 /// then overrides with any explicitly specified attributes.
-fn create_font_object(
-    env: &LoaderEnv<'_>,
-    font: &crate::xml::FontXml,
-) -> Result<(), LoadError> {
-    let Some(name) = &font.name else { return Ok(()) };
+fn create_font_object(env: &LoaderEnv<'_>, font: &crate::xml::FontXml) -> Result<(), LoadError> {
+    let Some(name) = &font.name else {
+        return Ok(());
+    };
     if name.is_empty() {
         return Ok(());
     }
 
-    let font_path = font.font.as_deref().unwrap_or("Fonts/FRIZQT__.TTF").replace('\\', "/");
+    let font_path = font
+        .font
+        .as_deref()
+        .unwrap_or("Fonts/FRIZQT__.TTF")
+        .replace('\\', "/");
     let lua_code = FONT_LUA_TEMPLATE
         .replace("{name}", name)
         .replace("{font_path}", &font_path)
@@ -314,15 +323,12 @@ fn create_font_object(
         .replace("{justify_h}", font.justify_h.as_deref().unwrap_or("CENTER"))
         .replace("{justify_v}", font.justify_v.as_deref().unwrap_or("MIDDLE"));
 
-    env.exec(&lua_code).map_err(|e| {
-        LoadError::Lua(format!("Failed to create font {}: {}", name, e))
-    })?;
+    env.exec(&lua_code)
+        .map_err(|e| LoadError::Lua(format!("Failed to create font {}: {}", name, e)))?;
 
     // Apply inheritance: copy properties from parent, then re-apply explicit overrides.
     if let Some(parent) = &font.inherits {
-        let mut copy_code = format!(
-            "if {parent} then {name}:CopyFontObject({parent}) end\n",
-        );
+        let mut copy_code = format!("if {parent} then {name}:CopyFontObject({parent}) end\n",);
         // Re-apply explicit overrides from the XML (they take precedence over inherited values).
         if font.font.is_some() {
             copy_code.push_str(&format!("{name}.__font = \"{font_path}\"\n"));
@@ -402,11 +408,12 @@ fn create_font_family_object(
         return Ok(());
     }
     let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", name);
-    env.exec(&lua_code).map_err(|e| {
-        LoadError::Lua(format!("Failed to create font family {}: {}", name, e))
-    })?;
+    env.exec(&lua_code)
+        .map_err(|e| LoadError::Lua(format!("Failed to create font family {}: {}", name, e)))?;
     // Use the roman member's font if present
-    let roman_font = font_family.members.iter()
+    let roman_font = font_family
+        .members
+        .iter()
         .find(|m| m.alphabet.as_deref() == Some("roman"))
         .and_then(|m| m.font.as_ref());
     if let Some(font) = roman_font {

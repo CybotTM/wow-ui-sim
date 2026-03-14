@@ -6,18 +6,28 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use super::{AnimGroupHandle, AnimGroupState, AnimationType, LoopType};
 use super::group_handle::stop_group;
+use super::{AnimGroupHandle, AnimGroupState, AnimationType, LoopType};
 use crate::lua_api::script_helpers::get_script;
 
 /// Advance all playing animation groups by `delta` seconds.
 /// Applies alpha and translation animations to target frames and fires script callbacks.
-pub fn tick_animation_groups(state_rc: &Rc<RefCell<SimState>>, lua: &Lua, delta: f64) -> mlua::Result<()> {
+pub fn tick_animation_groups(
+    state_rc: &Rc<RefCell<SimState>>,
+    lua: &Lua,
+    delta: f64,
+) -> mlua::Result<()> {
     let playing_ids: Vec<u64> = {
         let state = state_rc.borrow();
-        state.animation_groups.iter()
-            .filter(|(_, g)| g.playing && !g.paused && !g.done
-                && state.widgets.is_ancestor_visible(g.owner_frame_id))
+        state
+            .animation_groups
+            .iter()
+            .filter(|(_, g)| {
+                g.playing
+                    && !g.paused
+                    && !g.done
+                    && state.widgets.is_ancestor_visible(g.owner_frame_id)
+            })
             .map(|(id, _)| *id)
             .collect()
     };
@@ -74,7 +84,9 @@ fn advance_group(
     // On finish, run stop_group to handle setToFinalAlpha/translation cleanup.
     // For non-looping groups, handle_group_finish already set finished=true.
     if group_finished {
-        let is_looping = state.animation_groups.get(group_id)
+        let is_looping = state
+            .animation_groups
+            .get(group_id)
             .is_some_and(|g| g.looping != LoopType::None);
         if !is_looping {
             // stop_group handles alpha restore (if !setToFinalAlpha) and translation clear.
@@ -96,7 +108,9 @@ fn collect_effects(group: &mut AnimGroupState) -> HashMap<Option<String>, Target
     let mut effects: HashMap<Option<String>, TargetEffects> = HashMap::new();
 
     for &order in &orders {
-        let order_dur = group.animations.iter()
+        let order_dur = group
+            .animations
+            .iter()
             .filter(|a| a.order == order)
             .map(|a| a.total_time())
             .fold(0.0_f64, f64::max);
@@ -126,7 +140,11 @@ fn collect_effects(group: &mut AnimGroupState) -> HashMap<Option<String>, Target
 
 /// Compute smoothed progress for a single animation, accounting for reverse.
 fn compute_progress(anim: &super::AnimState, reverse: bool) -> f64 {
-    if reverse { 1.0 - anim.smooth_progress() } else { anim.smooth_progress() }
+    if reverse {
+        1.0 - anim.smooth_progress()
+    } else {
+        anim.smooth_progress()
+    }
 }
 
 /// Apply a single animation's contribution to the target effects entry.
@@ -167,20 +185,24 @@ fn apply_effects(
 ) {
     for (child_key, fx) in effects {
         let target_id = match child_key {
-            Some(key) => state.widgets.get(owner_frame_id)
+            Some(key) => state
+                .widgets
+                .get(owner_frame_id)
                 .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
             None => Some(owner_frame_id),
         };
         let Some(id) = target_id else { continue };
-        let alpha_changed = fx.alpha.is_some_and(|a| {
-            state.widgets.get(id).map(|f| f.alpha != a).unwrap_or(false)
-        });
-        let Some(frame) = state.widgets.get_mut(id) else { continue };
+        let alpha_changed = fx
+            .alpha
+            .is_some_and(|a| state.widgets.get(id).map(|f| f.alpha != a).unwrap_or(false));
+        let Some(frame) = state.widgets.get_mut(id) else {
+            continue;
+        };
         if let Some(alpha) = fx.alpha {
             frame.alpha = alpha;
         }
-        let offset_changed = frame.anim_offset_x != fx.offset_x
-            || frame.anim_offset_y != fx.offset_y;
+        let offset_changed =
+            frame.anim_offset_x != fx.offset_x || frame.anim_offset_y != fx.offset_y;
         frame.anim_offset_x = fx.offset_x;
         frame.anim_offset_y = fx.offset_y;
         if let Some((rows, cols, frames, progress)) = fx.flipbook {
@@ -196,7 +218,9 @@ fn apply_effects(
             state.invalidate_layout(id);
         }
         if alpha_changed {
-            let parent_eff = state.widgets.get(id)
+            let parent_eff = state
+                .widgets
+                .get(id)
                 .and_then(|f| f.parent_id)
                 .and_then(|pid| state.widgets.get(pid))
                 .map(|p| p.effective_alpha)
@@ -222,7 +246,8 @@ fn apply_flipbook_uv(
     let col = idx % cols;
 
     // Use atlas_tex_coords as the full spritesheet region, fall back to tex_coords
-    let (left, right, top, bottom) = frame.atlas_tex_coords
+    let (left, right, top, bottom) = frame
+        .atlas_tex_coords
         .or(frame.tex_coords)
         .unwrap_or((0.0, 1.0, 0.0, 1.0));
 
@@ -238,24 +263,38 @@ fn apply_flipbook_uv(
 /// Apply flipbook UV effects for a group (used when pausing to show current frame).
 pub fn apply_flipbook_for_group(state: &mut SimState, group_id: u64) {
     let flipbook_data: Vec<(Option<String>, u32, u32, u32, f64)> = {
-        let Some(group) = state.animation_groups.get(&group_id) else { return };
-        group.animations.iter()
+        let Some(group) = state.animation_groups.get(&group_id) else {
+            return;
+        };
+        group
+            .animations
+            .iter()
             .filter(|a| a.anim_type == AnimationType::FlipBook)
             .map(|a| {
                 let progress = a.smooth_progress();
-                (a.child_key.clone(), a.flip_book_rows, a.flip_book_columns, a.flip_book_frames, progress)
+                (
+                    a.child_key.clone(),
+                    a.flip_book_rows,
+                    a.flip_book_columns,
+                    a.flip_book_frames,
+                    progress,
+                )
             })
             .collect()
     };
 
     let owner_id = {
-        let Some(group) = state.animation_groups.get(&group_id) else { return };
+        let Some(group) = state.animation_groups.get(&group_id) else {
+            return;
+        };
         group.owner_frame_id
     };
 
     for (child_key, rows, cols, frames, progress) in flipbook_data {
         let target_id = match &child_key {
-            Some(key) => state.widgets.get(owner_id)
+            Some(key) => state
+                .widgets
+                .get(owner_id)
                 .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
             None => Some(owner_id),
         };
@@ -275,7 +314,9 @@ fn get_group_script(group: &AnimGroupState, lua: &Lua, name: &str) -> Option<mlu
             return Some(func);
         }
     }
-    group.scripts.get(name)
+    group
+        .scripts
+        .get(name)
         .and_then(|key| lua.registry_value::<mlua::Function>(key).ok())
 }
 
@@ -344,7 +385,10 @@ fn fire_animation_scripts(
     scripts_to_fire: &[mlua::Function],
     delta: f64,
 ) -> mlua::Result<()> {
-    let frame_id = state_rc.borrow().animation_groups.get(&group_id)
+    let frame_id = state_rc
+        .borrow()
+        .animation_groups
+        .get(&group_id)
         .and_then(|g| g.frame_id);
 
     for func in scripts_to_fire {
@@ -356,14 +400,13 @@ fn fire_animation_scripts(
 
     let on_update_func = {
         let state = state_rc.borrow();
-        state.animation_groups.get(&group_id)
-            .and_then(|g| {
-                if g.playing || !finished {
-                    get_group_script(g, lua, "OnUpdate")
-                } else {
-                    None
-                }
-            })
+        state.animation_groups.get(&group_id).and_then(|g| {
+            if g.playing || !finished {
+                get_group_script(g, lua, "OnUpdate")
+            } else {
+                None
+            }
+        })
     };
 
     if let Some(func) = on_update_func {
@@ -388,9 +431,11 @@ fn make_group_self(
     if let Some(fid) = frame_id {
         crate::lua_api::frame::frame_ref(lua, fid)
     } else {
-        Ok(mlua::Value::UserData(lua.create_userdata(AnimGroupHandle {
-            group_id,
-            state: Rc::clone(state_rc),
-        })?))
+        Ok(mlua::Value::UserData(lua.create_userdata(
+            AnimGroupHandle {
+                group_id,
+                state: Rc::clone(state_rc),
+            },
+        )?))
     }
 }

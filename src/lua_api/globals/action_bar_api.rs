@@ -1,7 +1,7 @@
 //! Action bar functions: queries, cooldowns, UseAction, and stubs.
 
-use crate::lua_api::SimState;
 use super::lua_duration_object::LuaDurationObject;
+use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,16 +30,30 @@ fn register_action_bar_toggles(lua: &Lua) -> Result<()> {
     let g = lua.globals();
 
     let k = Rc::clone(&key);
-    g.set("GetActionBarToggles", lua.create_function(move |lua, ()| {
-        let t: mlua::Table = lua.registry_value(&k)?;
-        Ok((t.get::<bool>(1)?, t.get::<bool>(2)?, t.get::<bool>(3)?, t.get::<bool>(4)?))
-    })?)?;
+    g.set(
+        "GetActionBarToggles",
+        lua.create_function(move |lua, ()| {
+            let t: mlua::Table = lua.registry_value(&k)?;
+            Ok((
+                t.get::<bool>(1)?,
+                t.get::<bool>(2)?,
+                t.get::<bool>(3)?,
+                t.get::<bool>(4)?,
+            ))
+        })?,
+    )?;
 
-    g.set("SetActionBarToggles", lua.create_function(move |lua, (a, b, c, d): (bool, bool, bool, bool)| {
-        let t: mlua::Table = lua.registry_value(&key)?;
-        t.set(1, a)?; t.set(2, b)?; t.set(3, c)?; t.set(4, d)?;
-        Ok(())
-    })?)?;
+    g.set(
+        "SetActionBarToggles",
+        lua.create_function(move |lua, (a, b, c, d): (bool, bool, bool, bool)| {
+            let t: mlua::Table = lua.registry_value(&key)?;
+            t.set(1, a)?;
+            t.set(2, b)?;
+            t.set(3, c)?;
+            t.set(4, d)?;
+            Ok(())
+        })?,
+    )?;
 
     Ok(())
 }
@@ -200,8 +214,10 @@ fn register_use_action(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
             let blocked_msg = {
                 let s = st.borrow();
                 crate::lua_api::game_data::validate_spell_target(
-                    spell_id, s.current_target.as_ref(),
-                ).err()
+                    spell_id,
+                    s.current_target.as_ref(),
+                )
+                .err()
             };
             if let Some(msg) = blocked_msg {
                 eprintln!("[action] Blocked: {} (spell {})", msg, spell_id);
@@ -221,14 +237,9 @@ fn register_use_action(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
 }
 
 /// Start GCD and per-spell cooldown after using an action.
-pub fn start_cooldowns(
-    state: &Rc<RefCell<SimState>>,
-    lua: &Lua,
-    spell_id: u32,
-) -> Result<()> {
+pub fn start_cooldowns(state: &Rc<RefCell<SimState>>, lua: &Lua, spell_id: u32) -> Result<()> {
     use crate::lua_api::game_data::{
-        GCD_DURATION, SpellCooldownState,
-        spell_cooldown_duration, spell_triggers_gcd,
+        GCD_DURATION, SpellCooldownState, spell_cooldown_duration, spell_triggers_gcd,
     };
 
     let now = state.borrow().start_time.elapsed().as_secs_f64();
@@ -239,10 +250,13 @@ pub fn start_cooldowns(
         }
         let cd = spell_cooldown_duration(spell_id);
         if cd > 0.0 {
-            s.spell_cooldowns.insert(spell_id, SpellCooldownState {
-                start: now,
-                duration: cd,
-            });
+            s.spell_cooldowns.insert(
+                spell_id,
+                SpellCooldownState {
+                    start: now,
+                    duration: cd,
+                },
+            );
         }
     }
 
@@ -284,7 +298,12 @@ pub fn start_cast(
         cast_id
     };
 
-    eprintln!("[cast] Starting {} (id={}, {:.1}s)", spell_name, cast_id, cast_time_ms as f64 / 1000.0);
+    eprintln!(
+        "[cast] Starting {} (id={}, {:.1}s)",
+        spell_name,
+        cast_id,
+        cast_time_ms as f64 / 1000.0
+    );
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     fire.call::<()>((
         lua.create_string("UNIT_SPELLCAST_START")?,
@@ -298,11 +317,7 @@ pub fn start_cast(
 }
 
 /// Apply an instant spell effect and fire UNIT_SPELLCAST_SUCCEEDED.
-pub fn apply_instant_spell(
-    state: &Rc<RefCell<SimState>>,
-    lua: &Lua,
-    spell_id: u32,
-) -> Result<()> {
+pub fn apply_instant_spell(state: &Rc<RefCell<SimState>>, lua: &Lua, spell_id: u32) -> Result<()> {
     let cast_id = {
         let mut s = state.borrow_mut();
         let id = s.next_cast_id;
@@ -311,7 +326,8 @@ pub fn apply_instant_spell(
     };
 
     let spell_name = crate::spells::get_spell(spell_id)
-        .map(|s| s.name).unwrap_or("Unknown");
+        .map(|s| s.name)
+        .unwrap_or("Unknown");
     eprintln!("[cast] Instant {} (id={})", spell_name, cast_id);
 
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
@@ -364,42 +380,69 @@ fn register_release_and_highlight_functions(lua: &Lua) -> Result<()> {
 /// Action slot query stubs (GetActionCooldown is overridden by stateful version).
 fn register_action_slot_query_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
-    globals.set("GetActionText", lua.create_function(|_, _slot: Value| Ok(Value::Nil))?)?;
-    globals.set("GetActionCount", lua.create_function(|_, _slot: Value| Ok(0))?)?;
-    globals.set("IsConsumableAction", lua.create_function(|_, _slot: Value| Ok(false))?)?;
-    globals.set("IsStackableAction", lua.create_function(|_, _slot: Value| Ok(false))?)?;
-    globals.set("IsAttackAction", lua.create_function(|_, _slot: Value| Ok(false))?)?;
-    globals.set("IsAutoRepeatAction", lua.create_function(|_, _slot: Value| Ok(false))?)?;
+    globals.set(
+        "GetActionText",
+        lua.create_function(|_, _slot: Value| Ok(Value::Nil))?,
+    )?;
+    globals.set(
+        "GetActionCount",
+        lua.create_function(|_, _slot: Value| Ok(0))?,
+    )?;
+    globals.set(
+        "IsConsumableAction",
+        lua.create_function(|_, _slot: Value| Ok(false))?,
+    )?;
+    globals.set(
+        "IsStackableAction",
+        lua.create_function(|_, _slot: Value| Ok(false))?,
+    )?;
+    globals.set(
+        "IsAttackAction",
+        lua.create_function(|_, _slot: Value| Ok(false))?,
+    )?;
+    globals.set(
+        "IsAutoRepeatAction",
+        lua.create_function(|_, _slot: Value| Ok(false))?,
+    )?;
     let st = Rc::clone(state);
-    globals.set("IsCurrentAction", lua.create_function(move |_, slot: Value| {
-        let slot = slot_from_value(&slot).unwrap_or(0);
-        let state = st.borrow();
-        let casting = match &state.casting {
-            Some(c) => c.spell_id,
-            None => return Ok(false),
-        };
-        Ok(state.action_bars.get(&slot).copied() == Some(casting))
-    })?)?;
+    globals.set(
+        "IsCurrentAction",
+        lua.create_function(move |_, slot: Value| {
+            let slot = slot_from_value(&slot).unwrap_or(0);
+            let state = st.borrow();
+            let casting = match &state.casting {
+                Some(c) => c.spell_id,
+                None => return Ok(false),
+            };
+            Ok(state.action_bars.get(&slot).copied() == Some(casting))
+        })?,
+    )?;
     globals.set(
         "GetActionCharges",
         lua.create_function(|_, _slot: Value| Ok((0, 0, 0.0_f64, 0.0_f64, 1.0_f64)))?,
     )?;
-    globals.set("GetPossessInfo", lua.create_function(|_, _index: Value| Ok(Value::Nil))?)?;
+    globals.set(
+        "GetPossessInfo",
+        lua.create_function(|_, _index: Value| Ok(Value::Nil))?,
+    )?;
     let st = Rc::clone(state);
-    globals.set("SetActionUIButton", lua.create_function(move |_, args: mlua::MultiValue| {
-        let mut iter = args.iter();
-        let frame_id = iter.next().and_then(|v| {
-            crate::lua_api::frame::extract_frame_id(v)
-        });
-        let action = iter.next().and_then(|v| slot_from_value(v));
-        if let (Some(fid), Some(slot)) = (frame_id, action) {
-            let mut s = st.borrow_mut();
-            // Remove any previous registration for this frame.
-            s.action_ui_buttons.retain(|(id, _)| *id != fid);
-            s.action_ui_buttons.push((fid, slot));
-        }
-        Ok(())
-    })?)?;
+    globals.set(
+        "SetActionUIButton",
+        lua.create_function(move |_, args: mlua::MultiValue| {
+            let mut iter = args.iter();
+            let frame_id = iter
+                .next()
+                .and_then(|v| crate::lua_api::frame::extract_frame_id(v));
+            let action = iter.next().and_then(|v| slot_from_value(v));
+            if let (Some(fid), Some(slot)) = (frame_id, action) {
+                let mut s = st.borrow_mut();
+                // Remove any previous registration for this frame.
+                s.action_ui_buttons.retain(|(id, _)| *id != fid);
+                s.action_ui_buttons.push((fid, slot));
+            }
+            Ok(())
+        })?,
+    )?;
     Ok(())
 }
 
@@ -408,12 +451,27 @@ fn register_action_bar_indices(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set("GetActionBarPage", lua.create_function(|_, ()| Ok(1))?)?;
     globals.set("GetBonusBarOffset", lua.create_function(|_, ()| Ok(0))?)?;
-    globals.set("GetOverrideBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    globals.set("GetVehicleBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    globals.set("GetTempShapeshiftBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    globals.set("GetMultiCastBarIndex", lua.create_function(|_, ()| Ok(7i32))?)?;
+    globals.set(
+        "GetOverrideBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    globals.set(
+        "GetVehicleBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    globals.set(
+        "GetTempShapeshiftBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    globals.set(
+        "GetMultiCastBarIndex",
+        lua.create_function(|_, ()| Ok(7i32))?,
+    )?;
     globals.set("GetExtraBarIndex", lua.create_function(|_, ()| Ok(13i32))?)?;
-    globals.set("IsPossessBarVisible", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
+        "IsPossessBarVisible",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(())
 }
 
@@ -428,62 +486,194 @@ pub fn register_c_action_bar_namespace(lua: &Lua, state: Rc<RefCell<SimState>>) 
 }
 
 fn register_c_action_bar_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetBonusBarIndexForSlot", lua.create_function(|_, _s: i32| Ok(0i32))?)?;
-    t.set("IsOnBarOrSpecialBar", lua.create_function(|_, _s: i32| Ok(false))?)?;
-    t.set("FindSpellActionButtons", lua.create_function(|lua, _: i32| lua.create_table())?)?;
-    t.set("GetCurrentActionBarByClass", lua.create_function(|_, ()| Ok(1i32))?)?;
-    t.set("HasFlyoutActionButtons", lua.create_function(|_, _: i32| Ok(false))?)?;
-    t.set("EnableActionRangeCheck", lua.create_function(|_, (_, _): (Value, bool)| Ok(()))?)?;
-    t.set("IsAssistedCombatAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("HasAssistedCombatActionButtons", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "GetBonusBarIndexForSlot",
+        lua.create_function(|_, _s: i32| Ok(0i32))?,
+    )?;
+    t.set(
+        "IsOnBarOrSpecialBar",
+        lua.create_function(|_, _s: i32| Ok(false))?,
+    )?;
+    t.set(
+        "FindSpellActionButtons",
+        lua.create_function(|lua, _: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetCurrentActionBarByClass",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
+    t.set(
+        "HasFlyoutActionButtons",
+        lua.create_function(|_, _: i32| Ok(false))?,
+    )?;
+    t.set(
+        "EnableActionRangeCheck",
+        lua.create_function(|_, (_, _): (Value, bool)| Ok(()))?,
+    )?;
+    t.set(
+        "IsAssistedCombatAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "HasAssistedCombatActionButtons",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     // Page/index methods
     t.set("GetActionBarPage", lua.create_function(|_, ()| Ok(1i32))?)?;
-    t.set("SetActionBarPage", lua.create_function(|_, _: Value| Ok(()))?)?;
+    t.set(
+        "SetActionBarPage",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
     t.set("GetExtraBarIndex", lua.create_function(|_, ()| Ok(13i32))?)?;
-    t.set("GetMultiCastBarIndex", lua.create_function(|_, ()| Ok(7i32))?)?;
-    t.set("GetVehicleBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("GetOverrideBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set("GetTempShapeshiftBarIndex", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "GetMultiCastBarIndex",
+        lua.create_function(|_, ()| Ok(7i32))?,
+    )?;
+    t.set(
+        "GetVehicleBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetOverrideBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetTempShapeshiftBarIndex",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     t.set("GetBonusBarIndex", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetOverrideBarSkin", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "GetOverrideBarSkin",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
     // Boolean state queries
-    t.set("HasVehicleActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("HasOverrideActionBar", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "HasVehicleActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "HasOverrideActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("HasBonusActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("HasTempShapeshiftActionBar", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "HasTempShapeshiftActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("HasExtraActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("IsPossessBarVisible", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "IsPossessBarVisible",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(())
 }
 
 fn register_c_action_bar_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetActionText", lua.create_function(|_, _: Value| Ok(Value::Nil))?)?;
-    t.set("GetActionCount", lua.create_function(|_, _: Value| Ok(0i32))?)?;
-    t.set("GetActionDisplayCount", lua.create_function(|_, (_, _): (Value, Value)| Ok(Value::Nil))?)?;
-    t.set("GetActionUseCount", lua.create_function(|_, _: Value| Ok(0i32))?)?;
-    t.set("IsConsumableAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsStackableAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsItemAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsAttackAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsAutoRepeatAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsEquippedAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsEquippedGearOutfitAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsHelpfulAction", lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?)?;
-    t.set("IsHarmfulAction", lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?)?;
-    t.set("GetActionLossOfControlCooldown", lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64)))?)?;
-    t.set("GetActionChargeDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
-    t.set("GetActionCooldownDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
-    t.set("GetActionLossOfControlCooldownDuration", lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?)?;
-    t.set("GetSpell", lua.create_function(|_, _: Value| Ok(Value::Nil))?)?;
-    t.set("GetItemActionOnEquipSpellID", lua.create_function(|_, _: Value| Ok(Value::Nil))?)?;
-    t.set("FindFlyoutActionButtons", lua.create_function(|lua, _: i32| lua.create_table())?)?;
-    t.set("FindPetActionButtons", lua.create_function(|lua, _: Value| lua.create_table())?)?;
-    t.set("GetPetActionPetBarIndices", lua.create_function(|lua, _: Value| lua.create_table())?)?;
-    t.set("RegisterActionUIButton", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+    t.set(
+        "GetActionText",
+        lua.create_function(|_, _: Value| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetActionCount",
+        lua.create_function(|_, _: Value| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetActionDisplayCount",
+        lua.create_function(|_, (_, _): (Value, Value)| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetActionUseCount",
+        lua.create_function(|_, _: Value| Ok(0i32))?,
+    )?;
+    t.set(
+        "IsConsumableAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsStackableAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsItemAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsAttackAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsAutoRepeatAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsEquippedAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsEquippedGearOutfitAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsHelpfulAction",
+        lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?,
+    )?;
+    t.set(
+        "IsHarmfulAction",
+        lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?,
+    )?;
+    t.set(
+        "GetActionLossOfControlCooldown",
+        lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64)))?,
+    )?;
+    t.set(
+        "GetActionChargeDuration",
+        lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?,
+    )?;
+    t.set(
+        "GetActionCooldownDuration",
+        lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?,
+    )?;
+    t.set(
+        "GetActionLossOfControlCooldownDuration",
+        lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?,
+    )?;
+    t.set(
+        "GetSpell",
+        lua.create_function(|_, _: Value| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetItemActionOnEquipSpellID",
+        lua.create_function(|_, _: Value| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "FindFlyoutActionButtons",
+        lua.create_function(|lua, _: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "FindPetActionButtons",
+        lua.create_function(|lua, _: Value| lua.create_table())?,
+    )?;
+    t.set(
+        "GetPetActionPetBarIndices",
+        lua.create_function(|lua, _: Value| lua.create_table())?,
+    )?;
+    t.set(
+        "RegisterActionUIButton",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
     // PutActionInSlot is registered by cursor_api with real implementation.
-    t.set("IsAutoCastPetAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("IsEnabledAutoCastPetAction", lua.create_function(|_, _: Value| Ok(false))?)?;
-    t.set("ToggleAutoCastPetAction", lua.create_function(|_, _: Value| Ok(()))?)?;
+    t.set(
+        "IsAutoCastPetAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "IsEnabledAutoCastPetAction",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
+        "ToggleAutoCastPetAction",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
     Ok(())
 }
 
@@ -493,31 +683,52 @@ fn register_c_action_bar_stateful(
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let st = Rc::clone(state);
-    t.set("HasAction", lua.create_function(move |_, slot: Value| {
-        let s = st.borrow();
-        Ok(slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)))
-    })?)?;
+    t.set(
+        "HasAction",
+        lua.create_function(move |_, slot: Value| {
+            let s = st.borrow();
+            Ok(slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)))
+        })?,
+    )?;
     let st = Rc::clone(state);
-    t.set("GetActionTexture", lua.create_function(move |lua, slot: Value| {
-        let s = st.borrow();
-        let n = match slot_from_value(&slot) { Some(n) => n, None => return Ok(Value::Nil) };
-        match action_texture_path(&s, n) {
-            Some(path) => Ok(Value::String(lua.create_string(&path)?)),
-            None => Ok(Value::Nil),
-        }
-    })?)?;
+    t.set(
+        "GetActionTexture",
+        lua.create_function(move |lua, slot: Value| {
+            let s = st.borrow();
+            let n = match slot_from_value(&slot) {
+                Some(n) => n,
+                None => return Ok(Value::Nil),
+            };
+            match action_texture_path(&s, n) {
+                Some(path) => Ok(Value::String(lua.create_string(&path)?)),
+                None => Ok(Value::Nil),
+            }
+        })?,
+    )?;
     let st = Rc::clone(state);
-    t.set("IsUsableAction", lua.create_function(move |_, slot: Value| {
-        let s = st.borrow();
-        Ok((slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)), false))
-    })?)?;
+    t.set(
+        "IsUsableAction",
+        lua.create_function(move |_, slot: Value| {
+            let s = st.borrow();
+            Ok((
+                slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)),
+                false,
+            ))
+        })?,
+    )?;
     let st = Rc::clone(state);
-    t.set("IsCurrentAction", lua.create_function(move |_, slot: Value| {
-        let n = slot_from_value(&slot).unwrap_or(0);
-        let s = st.borrow();
-        let casting = match &s.casting { Some(c) => c.spell_id, None => return Ok(false) };
-        Ok(s.action_bars.get(&n).copied() == Some(casting))
-    })?)?;
+    t.set(
+        "IsCurrentAction",
+        lua.create_function(move |_, slot: Value| {
+            let n = slot_from_value(&slot).unwrap_or(0);
+            let s = st.borrow();
+            let casting = match &s.casting {
+                Some(c) => c.spell_id,
+                None => return Ok(false),
+            };
+            Ok(s.action_bars.get(&n).copied() == Some(casting))
+        })?,
+    )?;
     register_c_action_bar_cooldowns(lua, t, state)?;
     Ok(())
 }
@@ -528,41 +739,50 @@ fn register_c_action_bar_cooldowns(
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let st = Rc::clone(state);
-    t.set("GetActionCooldown", lua.create_function(move |lua, slot: Value| {
-        let s = st.borrow();
-        let (start, dur) = slot_from_value(&slot)
-            .and_then(|n| s.action_bars.get(&n).map(|&id| {
-                spell_cooldown_times(&s, id, s.start_time.elapsed().as_secs_f64())
-            }))
-            .unwrap_or((0.0, 0.0));
-        let info = lua.create_table()?;
-        info.set("startTime", start)?;
-        info.set("duration", dur)?;
-        info.set("isEnabled", true)?;
-        info.set("modRate", 1.0_f64)?;
-        Ok(info)
-    })?)?;
-    t.set("GetActionCharges", lua.create_function(|lua, _: Value| {
-        let info = lua.create_table()?;
-        info.set("currentCharges", 0)?;
-        info.set("maxCharges", 0)?;
-        info.set("cooldownStartTime", 0.0_f64)?;
-        info.set("cooldownDuration", 0.0_f64)?;
-        info.set("chargeModRate", 1.0_f64)?;
-        Ok(info)
-    })?)?;
+    t.set(
+        "GetActionCooldown",
+        lua.create_function(move |lua, slot: Value| {
+            let s = st.borrow();
+            let (start, dur) = slot_from_value(&slot)
+                .and_then(|n| {
+                    s.action_bars.get(&n).map(|&id| {
+                        spell_cooldown_times(&s, id, s.start_time.elapsed().as_secs_f64())
+                    })
+                })
+                .unwrap_or((0.0, 0.0));
+            let info = lua.create_table()?;
+            info.set("startTime", start)?;
+            info.set("duration", dur)?;
+            info.set("isEnabled", true)?;
+            info.set("modRate", 1.0_f64)?;
+            Ok(info)
+        })?,
+    )?;
+    t.set(
+        "GetActionCharges",
+        lua.create_function(|lua, _: Value| {
+            let info = lua.create_table()?;
+            info.set("currentCharges", 0)?;
+            info.set("maxCharges", 0)?;
+            info.set("cooldownStartTime", 0.0_f64)?;
+            info.set("cooldownDuration", 0.0_f64)?;
+            info.set("chargeModRate", 1.0_f64)?;
+            Ok(info)
+        })?,
+    )?;
     Ok(())
 }
 
 /// Push state updates to all buttons registered via SetActionUIButton.
 /// This replaces the ACTIONBAR_UPDATE_STATE event which WoW's C++ engine
 /// pushes directly to registered buttons (the event is commented out in Lua).
-pub fn push_action_button_state_update(
-    state: &Rc<RefCell<SimState>>,
-    lua: &Lua,
-) -> Result<()> {
-    let buttons: Vec<u64> = state.borrow().action_ui_buttons
-        .iter().map(|(id, _)| *id).collect();
+pub fn push_action_button_state_update(state: &Rc<RefCell<SimState>>, lua: &Lua) -> Result<()> {
+    let buttons: Vec<u64> = state
+        .borrow()
+        .action_ui_buttons
+        .iter()
+        .map(|(id, _)| *id)
+        .collect();
     for frame_id in buttons {
         // Use Lua code so metatable __index resolves mixin methods correctly.
         let code = format!(

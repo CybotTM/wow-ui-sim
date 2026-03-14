@@ -14,9 +14,7 @@ fn env() -> WowLuaEnv {
 fn test_c_item_get_item_info_returns_nil() {
     let env = env();
     // Item 42 doesn't exist in the DB, should return nil
-    let is_nil: bool = env
-        .eval("return C_Item.GetItemInfo(42) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return C_Item.GetItemInfo(42) == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -24,9 +22,7 @@ fn test_c_item_get_item_info_returns_nil() {
 fn test_c_item_get_item_info_returns_data() {
     let env = env();
     // Item 6948 (Hearthstone) — C_Item.GetItemInfo returns multi-values (name is first)
-    let name: String = env
-        .eval("return C_Item.GetItemInfo(6948)")
-        .unwrap();
+    let name: String = env.eval("return C_Item.GetItemInfo(6948)").unwrap();
     assert_eq!(name, "Hearthstone");
 }
 
@@ -37,9 +33,8 @@ fn test_c_item_get_item_info_returns_data() {
 #[test]
 fn test_c_item_get_item_info_instant_by_id() {
     let env = env();
-    let (item_id, item_type, item_sub_type): (i64, String, String) = env
-        .eval("return C_Item.GetItemInfoInstant(12345)")
-        .unwrap();
+    let (item_id, item_type, item_sub_type): (i64, String, String) =
+        env.eval("return C_Item.GetItemInfoInstant(12345)").unwrap();
     assert_eq!(item_id, 12345);
     assert_eq!(item_type, "Miscellaneous");
     assert_eq!(item_sub_type, "Junk");
@@ -70,9 +65,7 @@ fn test_c_item_get_item_info_instant_invalid() {
 #[test]
 fn test_c_item_get_item_id_for_item_info_integer() {
     let env = env();
-    let id: i64 = env
-        .eval("return C_Item.GetItemIDForItemInfo(999)")
-        .unwrap();
+    let id: i64 = env.eval("return C_Item.GetItemIDForItemInfo(999)").unwrap();
     assert_eq!(id, 999);
 }
 
@@ -80,7 +73,9 @@ fn test_c_item_get_item_id_for_item_info_integer() {
 fn test_c_item_get_item_id_for_item_info_link() {
     let env = env();
     let id: i64 = env
-        .eval(r#"return C_Item.GetItemIDForItemInfo("|cffffffff|Hitem:42::::::::80:::::|h[X]|h|r")"#)
+        .eval(
+            r#"return C_Item.GetItemIDForItemInfo("|cffffffff|Hitem:42::::::::80:::::|h[X]|h|r")"#,
+        )
         .unwrap();
     assert_eq!(id, 42);
 }
@@ -108,9 +103,7 @@ fn test_c_item_get_item_icon_by_id() {
 #[test]
 fn test_c_item_get_item_quality_by_id() {
     let env = env();
-    let quality: i32 = env
-        .eval("return C_Item.GetItemQualityByID(1)")
-        .unwrap();
+    let quality: i32 = env.eval("return C_Item.GetItemQualityByID(1)").unwrap();
     assert_eq!(quality, 1);
 }
 
@@ -147,18 +140,14 @@ fn test_c_item_get_item_name_by_id_unknown() {
 #[test]
 fn test_c_item_get_item_sub_class_info_weapon() {
     let env = env();
-    let name: String = env
-        .eval("return C_Item.GetItemSubClassInfo(2, 7)")
-        .unwrap();
+    let name: String = env.eval("return C_Item.GetItemSubClassInfo(2, 7)").unwrap();
     assert_eq!(name, "One-Handed Swords");
 }
 
 #[test]
 fn test_c_item_get_item_sub_class_info_armor() {
     let env = env();
-    let name: String = env
-        .eval("return C_Item.GetItemSubClassInfo(4, 4)")
-        .unwrap();
+    let name: String = env.eval("return C_Item.GetItemSubClassInfo(4, 4)").unwrap();
     assert_eq!(name, "Plate");
 }
 
@@ -342,7 +331,10 @@ fn test_c_container_get_item_link_after_add() {
     let link: String = env
         .eval("return C_Container.GetContainerItemLink(0, 1)")
         .unwrap();
-    assert!(link.contains("Hearthstone"), "Link should contain item name");
+    assert!(
+        link.contains("Hearthstone"),
+        "Link should contain item name"
+    );
 }
 
 #[test]
@@ -456,13 +448,21 @@ fn test_get_inventory_slot_info_mainhand() {
 #[test]
 fn test_get_inventory_slot_info_bag_slots() {
     let env = env();
-    let slot: i32 = env.eval(r#"return GetInventorySlotInfo("Bag0Slot")"#).unwrap();
+    let slot: i32 = env
+        .eval(r#"return GetInventorySlotInfo("Bag0Slot")"#)
+        .unwrap();
     assert_eq!(slot, 20);
-    let slot: i32 = env.eval(r#"return GetInventorySlotInfo("Bag1Slot")"#).unwrap();
+    let slot: i32 = env
+        .eval(r#"return GetInventorySlotInfo("Bag1Slot")"#)
+        .unwrap();
     assert_eq!(slot, 21);
-    let slot: i32 = env.eval(r#"return GetInventorySlotInfo("Bag2Slot")"#).unwrap();
+    let slot: i32 = env
+        .eval(r#"return GetInventorySlotInfo("Bag2Slot")"#)
+        .unwrap();
     assert_eq!(slot, 22);
-    let slot: i32 = env.eval(r#"return GetInventorySlotInfo("Bag3Slot")"#).unwrap();
+    let slot: i32 = env
+        .eval(r#"return GetInventorySlotInfo("Bag3Slot")"#)
+        .unwrap();
     assert_eq!(slot, 23);
 }
 
@@ -555,9 +555,8 @@ fn test_get_spell_icon_unknown() {
 #[test]
 fn test_get_spell_cooldown() {
     let env = env();
-    let (start, duration, enabled): (f64, f64, i32) = env
-        .eval("return GetSpellCooldown(100)")
-        .unwrap();
+    let (start, duration, enabled): (f64, f64, i32) =
+        env.eval("return GetSpellCooldown(100)").unwrap();
     assert_eq!(start, 0.0);
     assert_eq!(duration, 0.0);
     assert_eq!(enabled, 1);
@@ -593,8 +592,16 @@ fn test_item_button_icon_has_anchors() {
         .unwrap();
     // Should have 2 anchors: TOPLEFT>parent.TOPLEFT, BOTTOMRIGHT>parent.BOTTOMRIGHT
     assert!(result.contains("2:"), "Expected 2 anchors, got: {}", result);
-    assert!(result.contains("TOPLEFT"), "Missing TOPLEFT anchor: {}", result);
-    assert!(result.contains("BOTTOMRIGHT"), "Missing BOTTOMRIGHT anchor: {}", result);
+    assert!(
+        result.contains("TOPLEFT"),
+        "Missing TOPLEFT anchor: {}",
+        result
+    );
+    assert!(
+        result.contains("BOTTOMRIGHT"),
+        "Missing BOTTOMRIGHT anchor: {}",
+        result
+    );
 }
 
 #[test]
@@ -620,5 +627,9 @@ fn test_item_button_icon_identity() {
         )
         .unwrap();
     eprintln!("icon identity: {}", result);
-    assert!(result.contains("pts=2"), "Icon should have 2 anchors: {}", result);
+    assert!(
+        result.contains("pts=2"),
+        "Icon should have 2 anchors: {}",
+        result
+    );
 }

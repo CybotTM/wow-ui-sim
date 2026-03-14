@@ -35,9 +35,10 @@ impl WowLuaEnv {
     fn dispatch_escape(&self) -> Result<()> {
         let focused = self.state.borrow().focused_frame_id;
         if let Some(fid) = focused
-            && self.fire_handler_returns_truthy(fid, "OnEscapePressed")? {
-                return Ok(());
-            }
+            && self.fire_handler_returns_truthy(fid, "OnEscapePressed")?
+        {
+            return Ok(());
+        }
         if self.clear_target_if_any()? {
             return Ok(());
         }
@@ -72,23 +73,24 @@ impl WowLuaEnv {
                 _ => None,
             };
             if let Some(handler) = special
-                && self.fire_handler_returns_truthy(fid, handler)? {
-                    return Ok(());
-                }
+                && self.fire_handler_returns_truthy(fid, handler)?
+            {
+                return Ok(());
+            }
         }
 
         let is_editbox = self.focused_is_editbox(focused);
-        if !is_editbox
-            && super::keybindings::dispatch_key_binding(&self.lua, key)? {
-                return Ok(());
-            }
+        if !is_editbox && super::keybindings::dispatch_key_binding(&self.lua, key)? {
+            return Ok(());
+        }
 
         self.dispatch_on_key_down(key)?;
 
         if let Some(fid) = focused
-            && is_editbox {
-                self.dispatch_editbox_key(fid, key, text)?;
-            }
+            && is_editbox
+        {
+            self.dispatch_editbox_key(fid, key, text)?;
+        }
 
         Ok(())
     }
@@ -96,7 +98,10 @@ impl WowLuaEnv {
     /// Returns true if the given focused frame ID refers to an EditBox widget.
     fn focused_is_editbox(&self, focused: Option<u64>) -> bool {
         focused.is_some_and(|fid| {
-            self.state.borrow().widgets.get(fid)
+            self.state
+                .borrow()
+                .widgets
+                .get(fid)
                 .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
                 .unwrap_or(false)
         })
@@ -128,16 +133,13 @@ impl WowLuaEnv {
         let start_id = {
             let state = self.state.borrow();
             state.focused_frame_id.or_else(|| {
-                state
-                    .widgets
-                    .iter_ids()
-                    .find(|&id| {
-                        state
-                            .widgets
-                            .get(id)
-                            .map(|f| f.keyboard_enabled && f.visible)
-                            .unwrap_or(false)
-                    })
+                state.widgets.iter_ids().find(|&id| {
+                    state
+                        .widgets
+                        .get(id)
+                        .map(|f| f.keyboard_enabled && f.visible)
+                        .unwrap_or(false)
+                })
             })
         };
         let Some(frame_id) = start_id else {
@@ -224,9 +226,18 @@ impl WowLuaEnv {
     /// Insert text at cursor position, fire OnChar and OnTextChanged.
     fn editbox_insert_text(&self, fid: u64, text: &str) -> Result<()> {
         // Check numeric restriction
-        let numeric = self.state.borrow().widgets.get(fid)
-            .map(|f| f.editbox_numeric).unwrap_or(false);
-        if numeric && !text.chars().all(|c| c.is_ascii_digit() || c == '.' || c == '-') {
+        let numeric = self
+            .state
+            .borrow()
+            .widgets
+            .get(fid)
+            .map(|f| f.editbox_numeric)
+            .unwrap_or(false);
+        if numeric
+            && !text
+                .chars()
+                .all(|c| c.is_ascii_digit() || c == '.' || c == '-')
+        {
             return Ok(());
         }
 
@@ -236,7 +247,8 @@ impl WowLuaEnv {
                 let current = frame.text.get_or_insert_with(String::new);
                 let char_pos = frame.editbox_cursor_pos as usize;
                 // Convert char position to byte position
-                let byte_pos = current.char_indices()
+                let byte_pos = current
+                    .char_indices()
                     .nth(char_pos)
                     .map(|(i, _)| i)
                     .unwrap_or(current.len());
@@ -313,7 +325,9 @@ impl WowLuaEnv {
     fn editbox_move_cursor(&self, fid: u64, delta: i32) -> Result<()> {
         let mut state = self.state.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(fid) {
-            let char_count = frame.text.as_ref()
+            let char_count = frame
+                .text
+                .as_ref()
                 .map(|t| t.chars().count() as i32)
                 .unwrap_or(0);
             let new_pos = (frame.editbox_cursor_pos + delta).clamp(0, char_count);
@@ -335,7 +349,9 @@ impl WowLuaEnv {
     fn editbox_cursor_end(&self, fid: u64) -> Result<()> {
         let mut state = self.state.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(fid) {
-            let char_count = frame.text.as_ref()
+            let char_count = frame
+                .text
+                .as_ref()
                 .map(|t| t.chars().count() as i32)
                 .unwrap_or(0);
             frame.editbox_cursor_pos = char_count;

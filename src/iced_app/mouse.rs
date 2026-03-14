@@ -51,7 +51,13 @@ impl App {
         // Apply incremental HitGrid updates before the next hit_test.
         self.apply_hit_grid_changes();
         // Check if Lua mutated any widget and mark affected strata dirty.
-        let dirty_mask = self.env.borrow().state().borrow().widgets.take_render_dirty();
+        let dirty_mask = self
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty();
         if dirty_mask != 0 {
             self.drain_console();
             self.mark_strata_dirty(dirty_mask);
@@ -139,8 +145,12 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
-        let Some(frame_id) = self.hit_test(pos) else { return };
-        if !self.is_frame_enabled(frame_id) { return }
+        let Some(frame_id) = self.hit_test(pos) else {
+            return;
+        };
+        if !self.is_frame_enabled(frame_id) {
+            return;
+        }
         self.right_mouse_down_frame = Some(frame_id);
         {
             let env = self.env.borrow();
@@ -178,11 +188,13 @@ impl App {
                 if self.right_mouse_down_frame == Some(frame_id) {
                     let down_val = mlua::Value::Boolean(false);
                     let _ = env.fire_script_handler(
-                        frame_id, "OnClick",
+                        frame_id,
+                        "OnClick",
                         vec![button_val.clone(), down_val.clone()],
                     );
                     let _ = env.fire_script_handler(
-                        frame_id, "PostClick",
+                        frame_id,
+                        "PostClick",
                         vec![button_val.clone(), down_val],
                     );
                 }
@@ -229,7 +241,12 @@ impl App {
                 let _ = env.fire_script_handler(id, "OnDragStart", vec![button_val]);
                 return;
             }
-            current = env.state().borrow().widgets.get(id).and_then(|f| f.parent_id);
+            current = env
+                .state()
+                .borrow()
+                .widgets
+                .get(id)
+                .and_then(|f| f.parent_id);
         }
     }
 
@@ -247,7 +264,12 @@ impl App {
                     let _ = env.fire_script_handler(id, "OnDragStop", vec![button_val]);
                     break;
                 }
-                current = env.state().borrow().widgets.get(id).and_then(|f| f.parent_id);
+                current = env
+                    .state()
+                    .borrow()
+                    .widgets
+                    .get(id)
+                    .and_then(|f| f.parent_id);
             }
         }
 
@@ -269,7 +291,12 @@ impl App {
                 let _ = env.fire_script_handler(id, "OnReceiveDrag", vec![button_val]);
                 return;
             }
-            current = env.state().borrow().widgets.get(id).and_then(|f| f.parent_id);
+            current = env
+                .state()
+                .borrow()
+                .widgets
+                .get(id)
+                .and_then(|f| f.parent_id);
         }
     }
 

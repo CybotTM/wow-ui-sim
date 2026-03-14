@@ -23,7 +23,8 @@ pub const HERO_SPEC_UNLOCK_LEVEL: i32 = 71;
 
 /// For each tree, the available hero subtree IDs per spec set.
 /// Key: (tree_id, spec_set_id), Value: sorted Vec of subtree IDs.
-static SPEC_TO_SUBTREES: LazyLock<HashMap<(u32, u32), Vec<u32>>> = LazyLock::new(compute_spec_to_subtrees);
+static SPEC_TO_SUBTREES: LazyLock<HashMap<(u32, u32), Vec<u32>>> =
+    LazyLock::new(compute_spec_to_subtrees);
 
 /// For each subtree, the SubTreeSelection node IDs that reference it.
 /// Key: subtree_id, Value: Vec of selection node IDs.
@@ -146,7 +147,10 @@ fn compute_subtree_positions() -> HashMap<u32, (i32, i32)> {
 /// Get the center X and topmost Y for a subtree's nodes.
 /// Returns (center_x, topmost_y) or (0, 0) if no nodes found.
 pub fn subtree_position(sub_tree_id: u32) -> (i32, i32) {
-    SUBTREE_POSITIONS.get(&sub_tree_id).copied().unwrap_or((0, 0))
+    SUBTREE_POSITIONS
+        .get(&sub_tree_id)
+        .copied()
+        .unwrap_or((0, 0))
 }
 
 /// Find the spec_set_id from a node's conditions (cond_type == 1).
@@ -206,14 +210,18 @@ pub fn auto_select_hero_spec(
     // Find a SubTreeSelection node visible to this spec (has matching spec condition).
     for &st_id in subtree_ids {
         for &node_id in selection_node_ids_for_subtree(st_id) {
-            let Some(node) = TRAIT_NODE_DB.get(&node_id) else { continue };
+            let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+                continue;
+            };
             // Only pick nodes visible to our spec.
             if find_spec_set_condition(node.cond_ids) != spec_set {
                 continue;
             }
             // Pick the first entry with a subtree that's in our available list.
             for &entry_id in node.entry_ids {
-                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else { continue };
+                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else {
+                    continue;
+                };
                 if entry.sub_tree_id != 0 && subtree_ids.contains(&entry.sub_tree_id) {
                     node_selections.insert(node_id, entry_id);
                     node_ranks.insert(node_id, 1);
@@ -252,50 +260,85 @@ pub fn register_c_class_talents(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
     register_config_stubs(&t, lua)?;
     register_hero_spec_apis(&t, lua, &state)?;
     let st = Rc::clone(&state);
-    t.set("HasUnspentTalentPoints", lua.create_function(move |_, ()| {
-        Ok(super::traits_api::has_unspent_talent_points(&st.borrow()))
-    })?)?;
-    t.set("HasUnspentHeroTalentPoints", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "HasUnspentTalentPoints",
+        lua.create_function(move |_, ()| {
+            Ok(super::traits_api::has_unspent_talent_points(&st.borrow()))
+        })?,
+    )?;
+    t.set(
+        "HasUnspentHeroTalentPoints",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     let st = state;
-    t.set("GetActiveHeroTalentSpec", lua.create_function(move |_, ()| {
-        match get_active_hero_subtree(&st.borrow()) {
+    t.set(
+        "GetActiveHeroTalentSpec",
+        lua.create_function(move |_, ()| match get_active_hero_subtree(&st.borrow()) {
             Some(id) => Ok(Value::Integer(id as i64)),
             None => Ok(Value::Nil),
-        }
-    })?)?;
+        })?,
+    )?;
     lua.globals().set("C_ClassTalents", t)?;
     Ok(())
 }
 
 fn register_config_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set("GetActiveConfigID", lua.create_function(|_, ()| Ok(1i32))?)?;
-    t.set("GetConfigIDsBySpecID", lua.create_function(|lua, _spec_id: Option<i32>| {
-        let t = lua.create_table()?;
-        t.set(1, 1i32)?;
-        Ok(t)
-    })?)?;
-    t.set("CanEditTalents", lua.create_function(|_, ()| Ok((true, Value::Nil)))?)?;
-    t.set("GetStarterBuildActive", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetHasStarterBuild", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetLastSelectedSavedConfigID", lua.create_function(|_, _spec_id: Option<i32>| Ok(Value::Nil))?)?;
-    t.set("CanChangeTalents", lua.create_function(|_, ()| Ok((true, false)))?)?;
+    t.set(
+        "GetConfigIDsBySpecID",
+        lua.create_function(|lua, _spec_id: Option<i32>| {
+            let t = lua.create_table()?;
+            t.set(1, 1i32)?;
+            Ok(t)
+        })?,
+    )?;
+    t.set(
+        "CanEditTalents",
+        lua.create_function(|_, ()| Ok((true, Value::Nil)))?,
+    )?;
+    t.set(
+        "GetStarterBuildActive",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "GetHasStarterBuild",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "GetLastSelectedSavedConfigID",
+        lua.create_function(|_, _spec_id: Option<i32>| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "CanChangeTalents",
+        lua.create_function(|_, ()| Ok((true, false)))?,
+    )?;
     Ok(())
 }
 
-fn register_hero_spec_apis(t: &mlua::Table, lua: &Lua, _state: &Rc<RefCell<SimState>>) -> Result<()> {
-    t.set("GetHeroTalentSpecsForClassSpec", lua.create_function(|lua, (_cfg, spec_id): (Option<i32>, Option<i32>)| {
-        let spec = spec_id.unwrap_or(66) as u32;
-        let spec_set = spec_id_to_spec_set(spec);
-        match subtree_ids_for_spec(790, spec_set) {
-            Some(ids) if !ids.is_empty() => {
-                let t = lua.create_table()?;
-                for (i, &id) in ids.iter().enumerate() {
-                    t.set(i as i64 + 1, id as i64)?;
+fn register_hero_spec_apis(
+    t: &mlua::Table,
+    lua: &Lua,
+    _state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetHeroTalentSpecsForClassSpec",
+        lua.create_function(|lua, (_cfg, spec_id): (Option<i32>, Option<i32>)| {
+            let spec = spec_id.unwrap_or(66) as u32;
+            let spec_set = spec_id_to_spec_set(spec);
+            match subtree_ids_for_spec(790, spec_set) {
+                Some(ids) if !ids.is_empty() => {
+                    let t = lua.create_table()?;
+                    for (i, &id) in ids.iter().enumerate() {
+                        t.set(i as i64 + 1, id as i64)?;
+                    }
+                    Ok((
+                        Value::Table(t),
+                        Value::Integer(HERO_SPEC_UNLOCK_LEVEL as i64),
+                    ))
                 }
-                Ok((Value::Table(t), Value::Integer(HERO_SPEC_UNLOCK_LEVEL as i64)))
+                _ => Ok((Value::Nil, Value::Integer(HERO_SPEC_UNLOCK_LEVEL as i64))),
             }
-            _ => Ok((Value::Nil, Value::Integer(HERO_SPEC_UNLOCK_LEVEL as i64))),
-        }
-    })?)?;
+        })?,
+    )?;
     Ok(())
 }

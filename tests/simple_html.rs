@@ -20,14 +20,10 @@ fn test_simple_html_is_object_type_frame() {
     env.exec(r#"local f = CreateFrame("SimpleHTML", "TestHTML2", UIParent)"#)
         .unwrap();
 
-    let is_frame: bool = env
-        .eval("return TestHTML2:IsObjectType('Frame')")
-        .unwrap();
+    let is_frame: bool = env.eval("return TestHTML2:IsObjectType('Frame')").unwrap();
     assert!(is_frame);
 
-    let is_region: bool = env
-        .eval("return TestHTML2:IsObjectType('Region')")
-        .unwrap();
+    let is_region: bool = env.eval("return TestHTML2:IsObjectType('Region')").unwrap();
     assert!(is_region);
 
     let is_html: bool = env
@@ -35,9 +31,7 @@ fn test_simple_html_is_object_type_frame() {
         .unwrap();
     assert!(is_html);
 
-    let is_button: bool = env
-        .eval("return TestHTML2:IsObjectType('Button')")
-        .unwrap();
+    let is_button: bool = env.eval("return TestHTML2:IsObjectType('Button')").unwrap();
     assert!(!is_button);
 }
 
@@ -147,9 +141,8 @@ fn test_per_texttype_set_text_color() {
     )
     .unwrap();
 
-    let (r, g, b, a): (f32, f32, f32, f32) = env
-        .eval("return TestHTMLColor:GetTextColor('h1')")
-        .unwrap();
+    let (r, g, b, a): (f32, f32, f32, f32) =
+        env.eval("return TestHTMLColor:GetTextColor('h1')").unwrap();
     assert_eq!((r, g, b, a), (1.0, 0.0, 0.0, 1.0));
 }
 
@@ -188,7 +181,11 @@ fn test_get_content_height_nonzero_with_text() {
     let height: f64 = env
         .eval("return TestHTMLHeight:GetContentHeight()")
         .unwrap();
-    assert!(height > 0.0, "GetContentHeight should return > 0 when text is set, got {}", height);
+    assert!(
+        height > 0.0,
+        "GetContentHeight should return > 0 when text is set, got {}",
+        height
+    );
 }
 
 #[test]
@@ -234,5 +231,8 @@ fn test_fontstring_settext_no_html_stripping() {
     // The methods_widget SetText overrides methods_text SetText, but only strips
     // HTML for SimpleHTML frames. Regular frames store as-is.
     let text: String = env.eval("return TestFontStr:GetText()").unwrap();
-    assert_eq!(text, "<h1>Title</h1>", "FontString should store HTML tags as-is");
+    assert_eq!(
+        text, "<h1>Title</h1>",
+        "FontString should store HTML tags as-is"
+    );
 }

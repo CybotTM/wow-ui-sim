@@ -8,7 +8,10 @@ use super::helpers_anim::generate_animation_group_code;
 
 /// Apply animation groups from the frame and its inherited templates.
 pub(super) fn apply_animation_groups(
-    env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str, inherits: &str,
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+    inherits: &str,
 ) -> Result<(), LoadError> {
     if let Some(anims) = frame.animations() {
         exec_animation_groups(env, anims, name);
@@ -47,9 +50,13 @@ fn exec_animation_groups(env: &LoaderEnv<'_>, anims: &crate::xml::AnimationsXml,
 
 /// Create the bar texture for a StatusBar from its inline `<BarTexture>` XML element.
 pub(super) fn apply_bar_texture(
-    env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str,
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
 ) -> Result<(), LoadError> {
-    let Some(bar) = frame.bar_texture() else { return Ok(()) };
+    let Some(bar) = frame.bar_texture() else {
+        return Ok(());
+    };
     let bar_name = bar
         .name
         .as_ref()
@@ -69,9 +76,8 @@ pub(super) fn apply_bar_texture(
         ));
     }
     code.push_str("        end\n");
-    env.exec(&code).map_err(|e| {
-        LoadError::Lua(format!("Failed to create bar texture on {}: {}", name, e))
-    })?;
+    env.exec(&code)
+        .map_err(|e| LoadError::Lua(format!("Failed to create bar texture on {}: {}", name, e)))?;
     Ok(())
 }
 

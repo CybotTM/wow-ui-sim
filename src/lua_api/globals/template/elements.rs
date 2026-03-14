@@ -7,7 +7,11 @@ use mlua::Lua;
 use super::{escape_lua_string, get_size_values, lua_global_ref, rand_id};
 
 /// Apply scripts from template.
-pub(super) fn apply_scripts_from_template(lua: &Lua, scripts: &crate::xml::ScriptsXml, frame_name: &str) {
+pub(super) fn apply_scripts_from_template(
+    lua: &Lua,
+    scripts: &crate::xml::ScriptsXml,
+    frame_name: &str,
+) {
     let handlers_code = generate_scripts_code(scripts);
 
     if !handlers_code.is_empty() {
@@ -40,9 +44,19 @@ pub(super) fn create_texture_from_template(
         .map(|n| n.replace("$parent", subst_parent))
         .unwrap_or_else(|| format!("__tex_{}", rand_id()));
 
-    let code = build_template_texture_lua(&resolved, parent_name, &child_name, draw_layer, is_mask, is_line);
+    let code = build_template_texture_lua(
+        &resolved,
+        parent_name,
+        &child_name,
+        draw_layer,
+        is_mask,
+        is_line,
+    );
     if let Err(e) = lua.load(&code).exec() {
-        eprintln!("[create_texture] failed for '{}' on '{}': {}", child_name, parent_name, e);
+        eprintln!(
+            "[create_texture] failed for '{}' on '{}': {}",
+            child_name, parent_name, e
+        );
     }
     apply_texture_animations(lua, &resolved, &child_name);
 }
@@ -56,10 +70,19 @@ fn build_template_texture_lua(
     is_mask: bool,
     is_line: bool,
 ) -> String {
-    let create_method = if is_line { "CreateLine" } else if is_mask { "CreateMaskTexture" } else { "CreateTexture" };
+    let create_method = if is_line {
+        "CreateLine"
+    } else if is_mask {
+        "CreateMaskTexture"
+    } else {
+        "CreateTexture"
+    };
     let mut code = format!(
         "local parent = {}\nif parent then\nlocal tex = parent:{}(\"{}\", \"{}\")\n",
-        lua_global_ref(parent_name), create_method, escape_lua_string(child_name), draw_layer,
+        lua_global_ref(parent_name),
+        create_method,
+        escape_lua_string(child_name),
+        draw_layer,
     );
     append_template_texture_mixins(&mut code, texture);
     if is_line {
@@ -69,9 +92,14 @@ fn build_template_texture_lua(
     }
     append_texture_properties(&mut code, texture, "tex", is_mask);
     append_anchors_and_parent_refs(
-        &mut code, &texture.anchors, texture.set_all_points,
-        &texture.parent_key, &texture.parent_array,
-        "tex", "parent", parent_name,
+        &mut code,
+        &texture.anchors,
+        texture.set_all_points,
+        &texture.parent_key,
+        &texture.parent_array,
+        "tex",
+        "parent",
+        parent_name,
     );
     if texture.anchors.is_none() && texture.set_all_points != Some(true) {
         code.push_str("tex:SetAllPoints(true)\n");
@@ -93,7 +121,9 @@ fn append_template_texture_mixins(code: &mut String, texture: &crate::xml::Textu
 
 /// Process animation groups on a texture.
 fn apply_texture_animations(lua: &Lua, texture: &crate::xml::TextureXml, child_name: &str) {
-    let Some(anims) = &texture.animations else { return };
+    let Some(anims) = &texture.animations else {
+        return;
+    };
     let mut anim_code = format!("local frame = {}\n", lua_global_ref(child_name));
     for group in &anims.animations {
         if group.is_virtual == Some(true) {
@@ -113,14 +143,20 @@ fn append_mask_wiring(code: &mut String, is_mask: bool, texture: &crate::xml::Te
     if !is_mask {
         return;
     }
-    let Some(ref masked) = texture.masked_textures else { return };
+    let Some(ref masked) = texture.masked_textures else {
+        return;
+    };
     for entry in &masked.entries {
-        let Some(ref key) = entry.child_key else { continue };
+        let Some(ref key) = entry.child_key else {
+            continue;
+        };
         let line = safe_add_mask_texture_code("parent", key);
         // Simple keys (same-layer siblings) — wire synchronously.
         // Dotted keys (nested children) — defer in case the target isn't created yet.
         if key.contains('.') {
-            code.push_str(&format!("            C_Timer.After(0, function() {line} end)\n"));
+            code.push_str(&format!(
+                "            C_Timer.After(0, function() {line} end)\n"
+            ));
         } else {
             code.push_str(&format!("            {line}\n"));
         }
@@ -148,7 +184,12 @@ fn safe_add_mask_texture_code(root: &str, key: &str) -> String {
 }
 
 /// Append texture source setters (file, atlas, texcoords) to Lua code.
-fn append_texture_source(code: &mut String, texture: &crate::xml::TextureXml, var: &str, is_mask: bool) {
+fn append_texture_source(
+    code: &mut String,
+    texture: &crate::xml::TextureXml,
+    var: &str,
+    is_mask: bool,
+) {
     if let Some(file) = &texture.file {
         code.push_str(&format!(
             "            {}:SetTexture(\"{}\")\n",
@@ -185,8 +226,10 @@ fn append_color_code(code: &mut String, color: &crate::xml::ColorXml, var: &str)
         ));
     } else {
         let (r, g, b, a) = (
-            color.r.unwrap_or(1.0), color.g.unwrap_or(1.0),
-            color.b.unwrap_or(1.0), color.a.unwrap_or(1.0),
+            color.r.unwrap_or(1.0),
+            color.g.unwrap_or(1.0),
+            color.b.unwrap_or(1.0),
+            color.a.unwrap_or(1.0),
         );
         code.push_str(&format!(
             "            {var}:SetColorTexture({r}, {g}, {b}, {a})\n"
@@ -207,13 +250,23 @@ fn append_gradient_code(code: &mut String, grad: &crate::xml::GradientXml, var: 
 /// Extract RGBA from an optional ColorXml with defaults (0 for RGB, custom for alpha).
 fn extract_gradient_rgba(color: Option<&crate::xml::ColorXml>, default_a: f32) -> [f32; 4] {
     match color {
-        Some(c) => [c.r.unwrap_or(0.0), c.g.unwrap_or(0.0), c.b.unwrap_or(0.0), c.a.unwrap_or(default_a)],
+        Some(c) => [
+            c.r.unwrap_or(0.0),
+            c.g.unwrap_or(0.0),
+            c.b.unwrap_or(0.0),
+            c.a.unwrap_or(default_a),
+        ],
         None => [0.0, 0.0, 0.0, default_a],
     }
 }
 
 /// Append texture-specific property setters (size, source, color, tiling, etc.) to Lua code.
-fn append_texture_properties(code: &mut String, texture: &crate::xml::TextureXml, var: &str, is_mask: bool) {
+fn append_texture_properties(
+    code: &mut String,
+    texture: &crate::xml::TextureXml,
+    var: &str,
+    is_mask: bool,
+) {
     if let Some(size) = &texture.size {
         append_size_code(code, size, var);
     }
@@ -262,14 +315,22 @@ fn append_anchors_and_parent_refs(
     parent_name: &str,
 ) {
     if let Some(anchors) = anchors {
-        code.push_str(&generate_set_point_code(anchors, var, parent_var, parent_name, parent_var));
+        code.push_str(&generate_set_point_code(
+            anchors,
+            var,
+            parent_var,
+            parent_name,
+            parent_var,
+        ));
     }
     if set_all_points == Some(true) {
         code.push_str(&format!("            {}:SetAllPoints(true)\n", var));
     }
     if let Some(parent_key) = parent_key {
         let key_escaped = escape_lua_string(parent_key);
-        code.push_str(&format!("            {parent_var}[\"{key_escaped}\"] = {var}\n"));
+        code.push_str(&format!(
+            "            {parent_var}[\"{key_escaped}\"] = {var}\n"
+        ));
     }
     if let Some(parent_array) = parent_array {
         let arr_escaped = escape_lua_string(parent_array);
@@ -360,8 +421,7 @@ fn append_fontstring_size_and_text(code: &mut String, fs: &crate::xml::FontStrin
         }
     }
     if let Some(text_key) = &fs.text {
-        let raw = crate::global_strings::get_global_string(text_key)
-            .unwrap_or(text_key.as_str());
+        let raw = crate::global_strings::get_global_string(text_key).unwrap_or(text_key.as_str());
         let resolved = resolve_lua_escapes(raw);
         code.push_str(&format!(
             "            fs:SetText(\"{}\")\n",
@@ -416,9 +476,10 @@ fn append_fontstring_wrap_and_lines(code: &mut String, fs: &crate::xml::FontStri
         code.push_str("            fs:SetWordWrap(false)\n");
     }
     if let Some(max_lines) = fs.max_lines
-        && max_lines > 0 {
-            code.push_str(&format!("            fs:SetMaxLines({})\n", max_lines));
-        }
+        && max_lines > 0
+    {
+        code.push_str(&format!("            fs:SetMaxLines({})\n", max_lines));
+    }
 }
 
 /// Create a bar texture from template XML (for StatusBars).
@@ -440,13 +501,17 @@ pub(super) fn create_bar_texture_from_template(
         if parent and parent.SetStatusBarTexture then
             local bar = parent:CreateTexture("{}", "ARTWORK")
         "#,
-        lua_global_ref(parent_name), escape_lua_string(&child_name),
+        lua_global_ref(parent_name),
+        escape_lua_string(&child_name),
     );
 
     append_texture_properties(&mut code, bar, "bar", false);
     code.push_str("            parent:SetStatusBarTexture(bar)\n");
     let parent_key = bar.parent_key.as_deref().unwrap_or("Bar");
-    code.push_str(&format!("            parent[\"{}\"] = bar\n", escape_lua_string(parent_key)));
+    code.push_str(&format!(
+        "            parent[\"{}\"] = bar\n",
+        escape_lua_string(parent_key)
+    ));
 
     code.push_str("        end\n");
     let _ = lua.load(&code).exec();
@@ -471,7 +536,8 @@ pub(super) fn create_thumb_texture_from_template(
         if parent and parent.SetThumbTexture then
             local thumb = parent:CreateTexture("{}", "ARTWORK")
         "#,
-        lua_global_ref(parent_name), escape_lua_string(&child_name),
+        lua_global_ref(parent_name),
+        escape_lua_string(&child_name),
     );
 
     if let Some(size) = &thumb.size {
@@ -498,7 +564,10 @@ pub(super) fn create_thumb_texture_from_template(
 
     code.push_str("            parent:SetThumbTexture(thumb)\n");
     if let Some(parent_key) = &thumb.parent_key {
-        code.push_str(&format!("            parent[\"{}\"] = thumb\n", escape_lua_string(parent_key)));
+        code.push_str(&format!(
+            "            parent[\"{}\"] = thumb\n",
+            escape_lua_string(parent_key)
+        ));
     } else {
         code.push_str("            parent[\"ThumbTexture\"] = thumb\n");
     }
@@ -517,10 +586,7 @@ pub(super) fn create_button_texture_from_template(
     setter_method: &str,
 ) {
     let default_parent_key = format!("{}Texture", parent_key);
-    let actual_parent_key = texture
-        .parent_key
-        .as_deref()
-        .unwrap_or(&default_parent_key);
+    let actual_parent_key = texture.parent_key.as_deref().unwrap_or(&default_parent_key);
 
     let child_name = texture
         .name
@@ -559,7 +625,10 @@ fn build_button_texture_code(
                 tex = parent:CreateTexture("{}", "ARTWORK")
             end
         "#,
-        lua_global_ref(parent_name), setter_method, key_escaped, escape_lua_string(tex_name),
+        lua_global_ref(parent_name),
+        setter_method,
+        key_escaped,
+        escape_lua_string(tex_name),
     );
 
     if let Some(size) = &texture.size {
@@ -695,7 +764,9 @@ fn collect_unatlased_masks(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, 
 /// Pattern: `BorderSheenMask` matches `sheenMaskAtlas` by stripping the common
 /// "Border" prefix, lowercasing the first char, and appending "Atlas".
 fn mask_key_matches_atlas_kv(parent_key: &str, kv_key: &str) -> bool {
-    let Some(suffix) = kv_key.strip_suffix("Atlas") else { return false };
+    let Some(suffix) = kv_key.strip_suffix("Atlas") else {
+        return false;
+    };
     // Direct: parentKey lowercased == suffix (e.g. "IconMask" → "iconMask")
     if lowercase_first(parent_key) == suffix {
         return true;

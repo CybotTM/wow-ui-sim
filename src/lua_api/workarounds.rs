@@ -43,6 +43,7 @@ pub fn apply(env: &WowLuaEnv) {
     init_console_saved_vars(env);
     init_lfg_events_in_background(env);
     patch_scrollbox_nil_dataprovider(env);
+    init_settings_panel_previews(env);
 }
 
 /// SuperTrackedFrame shows a quest navigation arrow positioned by the engine's
@@ -50,6 +51,35 @@ pub fn apply(env: &WowLuaEnv) {
 /// repositions it, so the icon renders at default (0,0) in the top-left corner.
 fn hide_super_tracked_frame(env: &WowLuaEnv) {
     let _ = env.exec("if SuperTrackedFrame then SuperTrackedFrame:Hide() end");
+}
+
+/// SettingsDefinitions_Shared registers preview handlers even on glue/login
+/// screens, but the full game-only Settings panel XML is not loaded there.
+/// Reattach minimal preview objects after addon loading so those registrants
+/// can safely call into SettingsPanel preview hooks.
+fn init_settings_panel_previews(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if SettingsPanel then
+            local function CreatePreviewStub()
+                local preview = {
+                    TitleText = { SetFontHeight = function() end },
+                    BodyText = { SetFontHeight = function() end },
+                }
+
+                function preview:RegisterWithSettingInitializer() end
+                function preview:SetValueAccessor() end
+                function preview:UpdatePreview() end
+                function preview:Layout() end
+
+                return preview
+            end
+
+            SettingsPanel.AccessibilityFontPreview = SettingsPanel.AccessibilityFontPreview or CreatePreviewStub()
+            SettingsPanel.QuestTextPreview = SettingsPanel.QuestTextPreview or CreatePreviewStub()
+        end
+    "#,
+    );
 }
 
 /// MapCanvasScrollControllerMixin:IsZoomingOut/In compare targetScale with

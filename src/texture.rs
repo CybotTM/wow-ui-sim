@@ -77,7 +77,12 @@ impl TextureManager {
                     return self.cache.get(&normalized);
                 }
                 Err(e) => {
-                    eprintln!("[TexMgr] Load error: {} -> {}: {}", wow_path, file_path.display(), e);
+                    eprintln!(
+                        "[TexMgr] Load error: {} -> {}: {}",
+                        wow_path,
+                        file_path.display(),
+                        e
+                    );
                 }
             }
         } else {
@@ -102,21 +107,31 @@ impl TextureManager {
 
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.
     pub fn preload_talent_textures(&mut self, tree_id: u32) {
-        use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_ENTRY_DB, TRAIT_DEFINITION_DB};
+        use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
         use std::collections::HashSet;
 
-        let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else { return };
+        let Some(tree) = TRAIT_TREE_DB.get(&tree_id) else {
+            return;
+        };
         let mut file_data_ids = HashSet::new();
 
         for &node_id in tree.node_ids {
-            let Some(node) = TRAIT_NODE_DB.get(&node_id) else { continue };
+            let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+                continue;
+            };
             for &entry_id in node.entry_ids {
-                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else { continue };
-                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else { continue };
+                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else {
+                    continue;
+                };
+                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else {
+                    continue;
+                };
                 let icon_id = if def.override_icon != 0 {
                     def.override_icon
                 } else {
-                    let Some(spell) = crate::spells::get_spell(def.spell_id) else { continue };
+                    let Some(spell) = crate::spells::get_spell(def.spell_id) else {
+                        continue;
+                    };
                     spell.icon_file_data_id
                 };
                 if icon_id != 0 {
@@ -134,17 +149,27 @@ impl TextureManager {
                 }
             }
         }
-        eprintln!("[TexMgr] Preloaded {} / {} talent icon textures (tree {})", loaded, file_data_ids.len(), tree_id);
+        eprintln!(
+            "[TexMgr] Preloaded {} / {} talent icon textures (tree {})",
+            loaded,
+            file_data_ids.len(),
+            tree_id
+        );
     }
 
-    /// Pre-load talent panel UI textures (node shapes, arrows, backgrounds).
-    pub fn preload_talent_panel_textures(&mut self) {
+    /// Pre-load talent panel UI textures for the active class.
+    ///
+    /// Shared talent panel assets are always included. Class background atlases
+    /// are filtered to the active class so startup does not decode every class'
+    /// legacy background textures.
+    pub fn preload_talent_panel_textures(&mut self, class_name: &str) {
         use crate::atlas::ATLAS_DB;
         use std::collections::HashSet;
 
+        let class_key = normalize_talent_class_key(class_name);
         let mut files = HashSet::new();
         for (key, info) in ATLAS_DB.entries() {
-            if key.starts_with("talents-") {
+            if should_preload_talent_atlas_key(key, class_key.as_deref()) {
                 files.insert(info.file);
             }
         }
@@ -155,7 +180,12 @@ impl TextureManager {
                 loaded += 1;
             }
         }
-        eprintln!("[TexMgr] Preloaded {} / {} talent panel textures", loaded, files.len());
+        eprintln!(
+            "[TexMgr] Preloaded {} / {} talent panel textures ({})",
+            loaded,
+            files.len(),
+            class_key.as_deref().unwrap_or("shared")
+        );
     }
 
     /// Number of entries in the texture cache.
@@ -194,13 +224,14 @@ impl TextureManager {
 
         // Load the full texture first
         if let Some(file_path) = self.resolve_path(&normalized)
-            && let Ok(full_data) = load_texture_file(&file_path) {
-                // Extract sub-region
-                if let Some(sub_data) = extract_sub_region(&full_data, x, y, width, height) {
-                    self.sub_cache.insert(key.clone(), sub_data);
-                    return self.sub_cache.get(&key);
-                }
+            && let Ok(full_data) = load_texture_file(&file_path)
+        {
+            // Extract sub-region
+            if let Some(sub_data) = extract_sub_region(&full_data, x, y, width, height) {
+                self.sub_cache.insert(key.clone(), sub_data);
+                return self.sub_cache.get(&key);
             }
+        }
 
         None
     }
@@ -213,9 +244,10 @@ impl TextureManager {
             .or_else(|| normalized_path.strip_prefix("interface/Addons/"))
             .or_else(|| normalized_path.strip_prefix("interface/addons/"))
             && let Some(addons_path) = &self.addons_path
-                && let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative) {
-                    return Some(result);
-                }
+            && let Some(result) = self.try_resolve_in_dir(addons_path, addon_relative)
+        {
+            return Some(result);
+        }
 
         // Remove "Interface/" prefix if present for game textures (case-insensitive)
         let path = if normalized_path.len() >= 10
@@ -233,9 +265,10 @@ impl TextureManager {
 
         // Try WoW Interface directory (extracted game files)
         if let Some(interface_path) = &self.interface_path
-            && let Some(result) = self.try_resolve_in_dir(interface_path, path) {
-                return Some(result);
-            }
+            && let Some(result) = self.try_resolve_in_dir(interface_path, path)
+        {
+            return Some(result);
+        }
 
         None
     }
@@ -243,7 +276,9 @@ impl TextureManager {
     /// Try to resolve a path within a given base directory.
     fn try_resolve_in_dir(&self, base: &Path, path: &str) -> Option<PathBuf> {
         // Try different extensions
-        for ext in &["webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG"] {
+        for ext in &[
+            "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
+        ] {
             let file_path = base.join(format!("{}.{}", path, ext));
             if file_path.exists() {
                 return Some(file_path);
@@ -274,7 +309,9 @@ impl TextureManager {
 
             if is_last {
                 // For the filename, try with different extensions
-                for ext in &["webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG"] {
+                for ext in &[
+                    "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
+                ] {
                     let with_ext = format!("{}.{}", component, ext);
                     if let Some(entry) = self.find_case_insensitive(&current, &with_ext) {
                         return Some(entry);
@@ -320,10 +357,35 @@ pub fn normalize_wow_path(path: &str) -> String {
     let normalized = path.replace('\\', "/");
     // Remove file extension if present
     if let Some(pos) = normalized.rfind('.')
-        && normalized[pos..].len() <= 5 {
-            return normalized[..pos].to_string();
-        }
+        && normalized[pos..].len() <= 5
+    {
+        return normalized[..pos].to_string();
+    }
     normalized
+}
+
+fn normalize_talent_class_key(class_name: &str) -> Option<String> {
+    let normalized = class_name
+        .chars()
+        .filter(|c| c.is_ascii_alphanumeric())
+        .flat_map(|c| c.to_lowercase())
+        .collect::<String>();
+    (!normalized.is_empty()).then_some(normalized)
+}
+
+fn should_preload_talent_atlas_key(key: &str, class_key: Option<&str>) -> bool {
+    if !key.starts_with("talents-") {
+        return false;
+    }
+    match key.strip_prefix("talents-background-") {
+        Some(rest) => {
+            !rest.contains('-')
+                || class_key
+                    .map(|class_key| rest.starts_with(&format!("{class_key}-")))
+                    .unwrap_or(false)
+        }
+        None => true,
+    }
 }
 
 /// Fix 1-bit alpha decoded by image-blp as literal 0/1 byte values.
@@ -488,7 +550,9 @@ mod tests {
     #[test]
     fn test_extension_priority_order() {
         // Verify the extension order in try_resolve_in_dir is webp first
-        let extensions = ["webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG"];
+        let extensions = [
+            "webp", "WEBP", "PNG", "png", "tga", "TGA", "blp", "BLP", "jpg", "JPG",
+        ];
         assert_eq!(extensions[0], "webp", "webp should be first priority");
         assert_eq!(extensions[1], "WEBP", "WEBP should be second priority");
     }
@@ -540,7 +604,10 @@ mod tests {
         let mut mgr = TextureManager::new(temp_dir.path());
 
         let result = mgr.load("this/texture/does/not/exist");
-        assert!(result.is_none(), "Should return None for nonexistent texture");
+        assert!(
+            result.is_none(),
+            "Should return None for nonexistent texture"
+        );
     }
 
     #[test]
@@ -568,7 +635,7 @@ mod tests {
     }
 
     #[test]
-    fn test_preloaded_talent_textures_cover_atlas_entries() {
+    fn test_preloaded_talent_textures_cover_active_class_atlas_entries() {
         let textures_path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("textures");
         if !textures_path.exists() {
             eprintln!("Skipping test: textures directory not found");
@@ -579,54 +646,82 @@ mod tests {
             .with_interface_path(home.join("Projects/wow/Interface"));
 
         mgr.preload_talent_textures(790);
-        mgr.preload_talent_panel_textures();
+        mgr.preload_talent_panel_textures("Paladin");
 
-        // Every talents-* atlas entry's base file should now be cached
+        // Shared talent assets and the active class' background atlases should be cached.
         let mut missing = Vec::new();
         for (key, info) in crate::atlas::ATLAS_DB.entries() {
-            if key.starts_with("talents-") && !mgr.is_cached(info.file) {
+            if should_preload_talent_atlas_key(key, Some("paladin")) && !mgr.is_cached(info.file) {
                 missing.push((key.to_string(), info.file.to_string()));
             }
         }
         assert!(
             missing.is_empty(),
-            "Talent atlas entries reference {} uncached base textures:\n{}",
+            "Active talent atlas entries reference {} uncached base textures:\n{}",
             missing.len(),
-            missing.iter().map(|(k, f)| format!("  {} -> {}", k, f)).collect::<Vec<_>>().join("\n"),
+            missing
+                .iter()
+                .map(|(k, f)| format!("  {} -> {}", k, f))
+                .collect::<Vec<_>>()
+                .join("\n"),
+        );
+
+        assert!(
+            !mgr.is_cached(r"Interface\talentframe\talentsclassbackgroundwarrior1"),
+            "Paladin preload should not eagerly cache Warrior class backgrounds",
         );
     }
 
     /// Collect talent icon paths that should be cached but aren't.
     fn find_uncached_talent_icons(mgr: &TextureManager, tree_id: u32) -> Vec<String> {
-        use crate::traits::{TRAIT_TREE_DB, TRAIT_NODE_DB, TRAIT_ENTRY_DB, TRAIT_DEFINITION_DB};
+        use crate::traits::{TRAIT_DEFINITION_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TRAIT_TREE_DB};
         let tree = TRAIT_TREE_DB.get(&tree_id).expect("tree exists");
         let mut missing = Vec::new();
         for &node_id in tree.node_ids {
-            let Some(node) = TRAIT_NODE_DB.get(&node_id) else { continue };
+            let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+                continue;
+            };
             for &entry_id in node.entry_ids {
-                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else { continue };
-                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else { continue };
+                let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) else {
+                    continue;
+                };
+                let Some(def) = TRAIT_DEFINITION_DB.get(&entry.definition_id) else {
+                    continue;
+                };
                 let icon_id = if def.override_icon != 0 {
                     def.override_icon
                 } else {
-                    let Some(spell) = crate::spells::get_spell(def.spell_id) else { continue };
+                    let Some(spell) = crate::spells::get_spell(def.spell_id) else {
+                        continue;
+                    };
                     spell.icon_file_data_id
                 };
-                if icon_id == 0 { continue; }
+                if icon_id == 0 {
+                    continue;
+                }
                 check_icon_cached(mgr, &mut missing, node_id, icon_id);
             }
         }
         missing
     }
 
-    fn check_icon_cached(mgr: &TextureManager, missing: &mut Vec<String>, node_id: u32, icon_id: u32) {
+    fn check_icon_cached(
+        mgr: &TextureManager,
+        missing: &mut Vec<String>,
+        node_id: u32,
+        icon_id: u32,
+    ) {
         let Some(path) = crate::manifest_interface_data::get_texture_path(icon_id) else {
-            missing.push(format!("  node={node_id} icon={icon_id} -> no manifest path"));
+            missing.push(format!(
+                "  node={node_id} icon={icon_id} -> no manifest path"
+            ));
             return;
         };
         let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
         if !mgr.is_cached(&wow_path) {
-            missing.push(format!("  node={node_id} icon={icon_id} -> {wow_path} NOT cached"));
+            missing.push(format!(
+                "  node={node_id} icon={icon_id} -> {wow_path} NOT cached"
+            ));
         }
     }
 
@@ -643,6 +738,10 @@ mod tests {
         mgr.preload_talent_textures(790);
 
         let missing = find_uncached_talent_icons(&mgr, 790);
-        assert!(missing.is_empty(), "Talent icon textures not cached:\n{}", missing.join("\n"));
+        assert!(
+            missing.is_empty(),
+            "Talent icon textures not cached:\n{}",
+            missing.join("\n")
+        );
     }
 }

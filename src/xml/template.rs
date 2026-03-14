@@ -119,7 +119,11 @@ pub fn get_template_chain(names: &str) -> Vec<TemplateEntry> {
 }
 
 /// Recursively collect templates in the inheritance chain.
-fn collect_template_chain(name: &str, chain: &mut Vec<TemplateEntry>, visited: &mut HashSet<String>) {
+fn collect_template_chain(
+    name: &str,
+    chain: &mut Vec<TemplateEntry>,
+    visited: &mut HashSet<String>,
+) {
     if visited.contains(name) {
         return;
     }
@@ -148,15 +152,34 @@ fn collect_template_chain(name: &str, chain: &mut Vec<TemplateEntry>, visited: &
 pub fn register_intrinsic_templates() {
     let intrinsics: &[(&str, &str, &str, &str)] = &[
         // (name, widget_type, inherits, mixin)
-        ("WoWScrollBoxList", "Frame", "ScrollBoxBaseTemplate", "ScrollBoxListMixin"),
-        ("WoWScrollBox", "Frame", "ScrollBoxBaseTemplate", "ScrollBoxBaseMixin"),
-        ("WoWTrimScrollBar", "EventFrame", "WowTrimScrollBarTemplate", ""),
+        (
+            "WoWScrollBoxList",
+            "Frame",
+            "ScrollBoxBaseTemplate",
+            "ScrollBoxListMixin",
+        ),
+        (
+            "WoWScrollBox",
+            "Frame",
+            "ScrollBoxBaseTemplate",
+            "ScrollBoxBaseMixin",
+        ),
+        (
+            "WoWTrimScrollBar",
+            "EventFrame",
+            "WowTrimScrollBarTemplate",
+            "",
+        ),
     ];
 
     for &(name, wtype, inherits, mixin) in intrinsics {
         let frame = FrameXml {
             inherits: Some(inherits.to_string()),
-            mixin: if mixin.is_empty() { None } else { Some(mixin.to_string()) },
+            mixin: if mixin.is_empty() {
+                None
+            } else {
+                Some(mixin.to_string())
+            },
             is_virtual: Some(true),
             ..Default::default()
         };
@@ -267,13 +290,14 @@ pub fn collect_texture_mixins(texture: &TextureXml) -> Vec<String> {
         let registry = texture_template_registry().read().unwrap();
         for parent_name in inherits.split(',').map(|s| s.trim()) {
             if let Some(parent) = registry.get(parent_name)
-                && let Some(ref m) = parent.mixin {
-                    for mixin in m.split(',').map(|s| s.trim()) {
-                        if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                            mixins.push(mixin.to_string());
-                        }
+                && let Some(ref m) = parent.mixin
+            {
+                for mixin in m.split(',').map(|s| s.trim()) {
+                    if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
+                        mixins.push(mixin.to_string());
                     }
                 }
+            }
         }
     }
 
@@ -306,8 +330,8 @@ pub fn register_anim_group_template(name: &str, anim_group: AnimationGroupXml) {
 }
 
 /// Read-lock the AnimationGroup template registry for lookups.
-pub fn anim_group_template_registry_read(
-) -> std::sync::RwLockReadGuard<'static, HashMap<String, AnimationGroupXml>> {
+pub fn anim_group_template_registry_read()
+-> std::sync::RwLockReadGuard<'static, HashMap<String, AnimationGroupXml>> {
     anim_group_template_registry().read().unwrap()
 }
 
@@ -320,13 +344,14 @@ pub fn collect_anim_group_mixins(anim_group: &AnimationGroupXml) -> Vec<String> 
         let registry = anim_group_template_registry().read().unwrap();
         for parent_name in inherits.split(',').map(|s| s.trim()) {
             if let Some(parent) = registry.get(parent_name)
-                && let Some(ref m) = parent.mixin {
-                    for mixin in m.split(',').map(|s| s.trim()) {
-                        if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                            mixins.push(mixin.to_string());
-                        }
+                && let Some(ref m) = parent.mixin
+            {
+                for mixin in m.split(',').map(|s| s.trim()) {
+                    if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
+                        mixins.push(mixin.to_string());
                     }
                 }
+            }
         }
     }
 

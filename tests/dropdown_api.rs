@@ -62,16 +62,9 @@ fn test_dropdown_list_buttons_exist() {
     for level in 1..=3 {
         for btn in 1..=8 {
             let exists: bool = env
-                .eval(&format!(
-                    "return DropDownList{}Button{} ~= nil",
-                    level, btn
-                ))
+                .eval(&format!("return DropDownList{}Button{} ~= nil", level, btn))
                 .unwrap();
-            assert!(
-                exists,
-                "DropDownList{}Button{} should exist",
-                level, btn
-            );
+            assert!(exists, "DropDownList{}Button{} should exist", level, btn);
         }
     }
 }
@@ -140,9 +133,7 @@ fn test_initialize_stores_init_function() {
     "#,
     )
     .unwrap();
-    let has_init: bool = env
-        .eval("return TestDropDown2.initialize ~= nil")
-        .unwrap();
+    let has_init: bool = env.eval("return TestDropDown2.initialize ~= nil").unwrap();
     assert!(has_init, "Init function should be stored on frame");
 }
 
@@ -176,9 +167,7 @@ fn test_add_button_sets_text() {
     "#,
     )
     .unwrap();
-    let text: String = env
-        .eval("return DropDownList1Button1:GetText()")
-        .unwrap();
+    let text: String = env.eval("return DropDownList1Button1:GetText()").unwrap();
     assert_eq!(text, "Test Option");
 }
 
@@ -195,9 +184,7 @@ fn test_add_button_copies_info_properties() {
     "#,
     )
     .unwrap();
-    let has_arrow: bool = env
-        .eval("return DropDownList1Button1.hasArrow")
-        .unwrap();
+    let has_arrow: bool = env.eval("return DropDownList1Button1.hasArrow").unwrap();
     assert!(has_arrow);
     let value: i32 = env.eval("return DropDownList1Button1.value").unwrap();
     assert_eq!(value, 42);
@@ -298,7 +285,10 @@ fn test_toggle_dropdown_menu_hides_on_second_toggle() {
     env.exec("ToggleDropDownMenu(1)").unwrap();
     env.exec("ToggleDropDownMenu(1)").unwrap();
     let visible: bool = env.eval("return DropDownList1:IsVisible()").unwrap();
-    assert!(!visible, "DropDownList1 should be hidden after double toggle");
+    assert!(
+        !visible,
+        "DropDownList1 should be hidden after double toggle"
+    );
 }
 
 #[test]
@@ -473,9 +463,7 @@ fn test_set_initialize_function() {
     "#,
     )
     .unwrap();
-    let has_init: bool = env
-        .eval("return TestInitFunc.initialize ~= nil")
-        .unwrap();
+    let has_init: bool = env.eval("return TestInitFunc.initialize ~= nil").unwrap();
     assert!(has_init, "SetInitializeFunction should store init on frame");
 }
 
