@@ -91,8 +91,15 @@ fn parse_item_row(line: &str) -> Option<(u32, String)> {
     let value = format!(
         "ItemInfo {{ name: \"{}\", quality: {}, item_level: {}, required_level: {}, \
          inventory_type: {}, sell_price: {}, stackable: {}, bonding: {}, expansion_id: {} }}",
-        escaped_name, quality, item_level, required_level, inventory_type, sell_price,
-        stackable, bonding, expansion_id
+        escaped_name,
+        quality,
+        item_level,
+        required_level,
+        inventory_type,
+        sell_price,
+        stackable,
+        bonding,
+        expansion_id
     );
     Some((id, value))
 }
@@ -121,7 +128,10 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "pub fn get_item(id: u32) -> Option<&'static ItemInfo> {{")?;
+    writeln!(
+        out,
+        "pub fn get_item(id: u32) -> Option<&'static ItemInfo> {{"
+    )?;
     writeln!(out, "    ITEM_DB.get(&id)")?;
     writeln!(out, "}}")?;
     Ok(())

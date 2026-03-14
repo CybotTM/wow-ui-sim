@@ -3,7 +3,7 @@
 //! Wraps the auto-generated atlas data and adds resolution logic for
 //! size-suffixed entries (e.g. "coin-copper" → "coin-copper-20x20").
 
-pub use crate::atlas_data::{AtlasInfo, AtlasLookup, ATLAS_DB};
+pub use crate::atlas_data::{ATLAS_DB, AtlasInfo, AtlasLookup};
 pub use crate::atlas_elements::get_atlas_name_by_element_id;
 
 /// A single piece of a nine-slice atlas kit.
@@ -89,7 +89,10 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     for &size in SIZE_SUFFIXES {
         let suffixed = format!("{lower}-{size}x{size}");
         if let Some(info) = ATLAS_DB.get(&suffixed as &str) {
-            return Some(AtlasLookup { info, is_2x_fallback: false });
+            return Some(AtlasLookup {
+                info,
+                is_2x_fallback: false,
+            });
         }
     }
 
@@ -97,11 +100,17 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     for sep in ["_", "-"] {
         let with_2x = format!("{lower}{sep}2x");
         if let Some(info) = ATLAS_DB.get(&with_2x as &str) {
-            return Some(AtlasLookup { info, is_2x_fallback: true });
+            return Some(AtlasLookup {
+                info,
+                is_2x_fallback: true,
+            });
         }
         let with_1x = format!("{lower}{sep}1x");
         if let Some(info) = ATLAS_DB.get(&with_1x as &str) {
-            return Some(AtlasLookup { info, is_2x_fallback: false });
+            return Some(AtlasLookup {
+                info,
+                is_2x_fallback: false,
+            });
         }
     }
 

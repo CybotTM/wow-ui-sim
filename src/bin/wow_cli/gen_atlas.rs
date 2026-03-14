@@ -46,14 +46,20 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let mut elem_out = File::create(elem_path)?;
     let elem_count = write_element_map(&mut elem_out, &elements)?;
 
-    println!("Generated {} atlas entries ({} skipped), {} element mappings", count, skipped, elem_count);
+    println!(
+        "Generated {} atlas entries ({} skipped), {} element mappings",
+        count, skipped, elem_count
+    );
     println!("Output: {}", output_path.display());
     Ok(())
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "//! Auto-generated atlas data from WoW CSV exports.")?;
-    writeln!(out, "//! Do not edit manually - regenerate with: wow-cli generate atlas")?;
+    writeln!(
+        out,
+        "//! Do not edit manually - regenerate with: wow-cli generate atlas"
+    )?;
     writeln!(out)?;
     writeln!(out, "use phf::phf_map;")?;
     writeln!(out)?;
@@ -87,11 +93,17 @@ fn write_atlas_lookup_struct(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "impl AtlasLookup {{")?;
     writeln!(out, "    pub fn width(&self) -> u32 {{")?;
-    writeln!(out, "        if self.is_2x_fallback {{ self.info.width / 2 }} else {{ self.info.width }}")?;
+    writeln!(
+        out,
+        "        if self.is_2x_fallback {{ self.info.width / 2 }} else {{ self.info.width }}"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    pub fn height(&self) -> u32 {{")?;
-    writeln!(out, "        if self.is_2x_fallback {{ self.info.height / 2 }} else {{ self.info.height }}")?;
+    writeln!(
+        out,
+        "        if self.is_2x_fallback {{ self.info.height / 2 }} else {{ self.info.height }}"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
@@ -99,30 +111,54 @@ fn write_atlas_lookup_struct(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {{")?;
+    writeln!(
+        out,
+        "pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {{"
+    )?;
     writeln!(out, "    let lower = name.to_lowercase();")?;
     writeln!(out)?;
-    writeln!(out, "    if let Some(info) = ATLAS_DB.get(&lower as &str) {{")?;
-    writeln!(out, "        return Some(AtlasLookup {{ info, is_2x_fallback: false }});")?;
+    writeln!(
+        out,
+        "    if let Some(info) = ATLAS_DB.get(&lower as &str) {{"
+    )?;
+    writeln!(
+        out,
+        "        return Some(AtlasLookup {{ info, is_2x_fallback: false }});"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    if !lower.ends_with(\"-2x\") {{")?;
     writeln!(out, "        let with_2x = format!(\"{{lower}}-2x\");")?;
-    writeln!(out, "        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {{")?;
-    writeln!(out, "            return Some(AtlasLookup {{ info, is_2x_fallback: true }});")?;
+    writeln!(
+        out,
+        "        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {{"
+    )?;
+    writeln!(
+        out,
+        "            return Some(AtlasLookup {{ info, is_2x_fallback: true }});"
+    )?;
     writeln!(out, "        }}")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
-    writeln!(out, "    if let Some(base) = lower.strip_suffix(\"-2x\") {{")?;
+    writeln!(
+        out,
+        "    if let Some(base) = lower.strip_suffix(\"-2x\") {{"
+    )?;
     writeln!(out, "        if let Some(info) = ATLAS_DB.get(base) {{")?;
-    writeln!(out, "            return Some(AtlasLookup {{ info, is_2x_fallback: false }});")?;
+    writeln!(
+        out,
+        "            return Some(AtlasLookup {{ info, is_2x_fallback: false }});"
+    )?;
     writeln!(out, "        }}")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    None")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
-    writeln!(out, "pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {{")?;
+    writeln!(
+        out,
+        "pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {{"
+    )?;
     Ok(())
 }
 
@@ -166,7 +202,9 @@ fn format_atlas_entry(
     let tiles_h = (member.flags & 0x4) != 0;
     let tiles_v = (member.flags & 0x2) != 0;
 
-    let name_lower = member.name.to_lowercase()
+    let name_lower = member
+        .name
+        .to_lowercase()
         .replace('\\', "\\\\")
         .replace('"', "\\\"");
 
@@ -176,16 +214,23 @@ fn format_atlas_entry(
 
     // Use OverrideWidth/OverrideHeight for display size when non-zero,
     // otherwise fall back to the raw atlas pixel dimensions.
-    let display_w = if member.override_width > 0 { member.override_width } else { member.width };
-    let display_h = if member.override_height > 0 { member.override_height } else { member.height };
+    let display_w = if member.override_width > 0 {
+        member.override_width
+    } else {
+        member.width
+    };
+    let display_h = if member.override_height > 0 {
+        member.override_height
+    } else {
+        member.height
+    };
 
     Some(format!(
         "\"{}\" => AtlasInfo {{ file: r\"{}\", width: {}, height: {}, \
          left_tex_coord: {:.6}, right_tex_coord: {:.6}, \
          top_tex_coord: {:.6}, bottom_tex_coord: {:.6}, \
          tiles_horizontally: {}, tiles_vertically: {} }},",
-        name_lower, wow_path, display_w, display_h,
-        left, right, top, bottom, tiles_h, tiles_v
+        name_lower, wow_path, display_w, display_h, left, right, top, bottom, tiles_h, tiles_v
     ))
 }
 
@@ -237,9 +282,10 @@ fn load_listfile(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error
     for line in reader.lines() {
         let line = line?;
         if let Some((id_str, path)) = line.split_once(';')
-            && let Ok(id) = id_str.parse::<u32>() {
-                map.insert(id, path.to_string());
-            }
+            && let Ok(id) = id_str.parse::<u32>()
+        {
+            map.insert(id, path.to_string());
+        }
     }
     Ok(map)
 }
@@ -251,7 +297,9 @@ fn load_atlas(path: &Path) -> Result<HashMap<u32, AtlasEntry>, Box<dyn std::erro
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
 
         let fields: Vec<&str> = line.split(',').collect();
         if fields.len() >= 4 {
@@ -259,7 +307,14 @@ fn load_atlas(path: &Path) -> Result<HashMap<u32, AtlasEntry>, Box<dyn std::erro
             let file_data_id: u32 = fields[1].parse()?;
             let width: u32 = fields[2].parse()?;
             let height: u32 = fields[3].parse()?;
-            map.insert(id, AtlasEntry { file_data_id, width, height });
+            map.insert(
+                id,
+                AtlasEntry {
+                    file_data_id,
+                    width,
+                    height,
+                },
+            );
         }
     }
     Ok(map)
@@ -272,7 +327,9 @@ fn load_elements(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
 
         let fields: Vec<&str> = line.split(',').collect();
         if fields.len() >= 2 {
@@ -290,22 +347,32 @@ fn write_element_map(
     elements: &HashMap<u32, String>,
 ) -> Result<u32, Box<dyn std::error::Error>> {
     writeln!(out, "//! Auto-generated atlas element ID → name map.")?;
-    writeln!(out, "//! Do not edit manually - regenerate with: wow-cli generate atlas")?;
+    writeln!(
+        out,
+        "//! Do not edit manually - regenerate with: wow-cli generate atlas"
+    )?;
     writeln!(out)?;
     writeln!(out, "use phf::phf_map;")?;
     writeln!(out)?;
-    writeln!(out, "pub fn get_atlas_name_by_element_id(id: u32) -> Option<&'static str> {{")?;
+    writeln!(
+        out,
+        "pub fn get_atlas_name_by_element_id(id: u32) -> Option<&'static str> {{"
+    )?;
     writeln!(out, "    ATLAS_ELEMENT_DB.get(&id).copied()")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
-    writeln!(out, "static ATLAS_ELEMENT_DB: phf::Map<u32, &'static str> = phf_map! {{")?;
+    writeln!(
+        out,
+        "static ATLAS_ELEMENT_DB: phf::Map<u32, &'static str> = phf_map! {{"
+    )?;
 
     let mut sorted: Vec<_> = elements.iter().collect();
     sorted.sort_by_key(|(id, _)| *id);
 
     let mut count = 0u32;
     for (id, name) in &sorted {
-        let name_lower = name.to_lowercase()
+        let name_lower = name
+            .to_lowercase()
             .replace('\\', "\\\\")
             .replace('"', "\\\"");
         writeln!(out, "    {}u32 => \"{}\",", id, name_lower)?;
@@ -322,7 +389,9 @@ fn load_members(path: &Path) -> Result<Vec<MemberEntry>, Box<dyn std::error::Err
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
 
         let fields = parse_csv_line(&line);
         if fields.len() >= 13 {

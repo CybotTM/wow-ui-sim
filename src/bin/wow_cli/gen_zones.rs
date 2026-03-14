@@ -87,7 +87,10 @@ fn parse_area_row(line: &str) -> Option<(u32, String)> {
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "//! Auto-generated area/zone data from WoW AreaTable CSV.")?;
+    writeln!(
+        out,
+        "//! Auto-generated area/zone data from WoW AreaTable CSV."
+    )?;
     writeln!(
         out,
         "//! Do not edit manually - regenerate with: wow-cli generate zones"
@@ -103,7 +106,10 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "pub fn get_area(id: u32) -> Option<&'static AreaInfo> {{")?;
+    writeln!(
+        out,
+        "pub fn get_area(id: u32) -> Option<&'static AreaInfo> {{"
+    )?;
     writeln!(out, "    AREA_DB.get(&id)")?;
     writeln!(out, "}}")?;
     Ok(())

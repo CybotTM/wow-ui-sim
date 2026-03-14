@@ -73,9 +73,15 @@ fn register_binding_key_lookups(lua: &Lua, globals: &mlua::Table) -> Result<()> 
         "GetBindingKeyForAction",
         lua.create_function(|lua, args: mlua::MultiValue| {
             let action: Option<String> = args.into_iter().next().and_then(|v| {
-                if let Value::String(s) = v { s.to_str().ok().map(|s| s.to_string()) } else { None }
+                if let Value::String(s) = v {
+                    s.to_str().ok().map(|s| s.to_string())
+                } else {
+                    None
+                }
             });
-            let Some(action) = action else { return Ok(Value::Nil) };
+            let Some(action) = action else {
+                return Ok(Value::Nil);
+            };
             let (k1, _) = keybindings::get_binding_key(lua, &action)?;
             match k1 {
                 Some(k) => Ok(Value::String(lua.create_string(&k)?)),
@@ -104,7 +110,10 @@ fn register_binding_enumeration(lua: &Lua, globals: &mlua::Table) -> Result<()> 
         lua.create_function(|lua, index: i32| {
             let (action, _header, key1, key2) = keybindings::get_binding_at(lua, index)?;
             let mut vals = vec![
-                match action { Some(a) => Value::String(lua.create_string(&a)?), None => Value::Nil },
+                match action {
+                    Some(a) => Value::String(lua.create_string(&a)?),
+                    None => Value::Nil,
+                },
                 Value::Nil, // header
             ];
             if let Some(k) = key1 {
@@ -129,11 +138,10 @@ fn register_binding_text_helpers(lua: &Lua, globals: &mlua::Table) -> Result<()>
     globals.set(
         "GetBindingText",
         lua.create_function(
-            |lua, (key, _prefix, _abbrev): (Option<String>, Option<Value>, Option<Value>)| {
-                match key {
-                    Some(k) => Ok(Value::String(lua.create_string(&k)?)),
-                    None => Ok(Value::String(lua.create_string("")?)),
-                }
+            |lua, (key, _prefix, _abbrev): (Option<String>, Option<Value>, Option<Value>)| match key
+            {
+                Some(k) => Ok(Value::String(lua.create_string(&k)?)),
+                None => Ok(Value::String(lua.create_string("")?)),
             },
         )?,
     )?;
@@ -178,8 +186,14 @@ fn register_binding_setters(lua: &Lua, globals: &mlua::Table) -> Result<()> {
 /// Register binding persistence functions (Save/Load/GetCurrentSet).
 fn register_binding_persistence(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set("GetCurrentBindingSet", lua.create_function(|_, ()| Ok(1))?)?;
-    globals.set("SaveBindings", lua.create_function(|_, _which: i32| Ok(()))?)?;
-    globals.set("LoadBindings", lua.create_function(|_, _which: i32| Ok(()))?)?;
+    globals.set(
+        "SaveBindings",
+        lua.create_function(|_, _which: i32| Ok(()))?,
+    )?;
+    globals.set(
+        "LoadBindings",
+        lua.create_function(|_, _which: i32| Ok(()))?,
+    )?;
     Ok(())
 }
 
@@ -189,7 +203,10 @@ pub fn register_tooltip_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set("TOOLTIP_DEFAULT_COLOR", make_color_table(lua, r, g, b, a)?)?;
 
     let (r, g, b, a) = TOOLTIP_DEFAULT_BG_COLOR;
-    globals.set("TOOLTIP_DEFAULT_BACKGROUND_COLOR", make_color_table(lua, r, g, b, a)?)?;
+    globals.set(
+        "TOOLTIP_DEFAULT_BACKGROUND_COLOR",
+        make_color_table(lua, r, g, b, a)?,
+    )?;
 
     Ok(())
 }
@@ -201,29 +218,59 @@ fn make_color_table(lua: &Lua, r: f64, g: f64, b: f64, a: f64) -> Result<mlua::T
     t.set("g", g)?;
     t.set("b", b)?;
     t.set("a", a)?;
-    t.set("GetRGB", lua.create_function(|_, this: mlua::Table| {
-        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?, this.get::<f64>("b")?))
-    })?)?;
-    t.set("GetRGBA", lua.create_function(|_, this: mlua::Table| {
-        Ok((this.get::<f64>("r")?, this.get::<f64>("g")?,
-            this.get::<f64>("b")?, this.get::<f64>("a")?))
-    })?)?;
-    t.set("GenerateHexColor", lua.create_function(|lua, this: mlua::Table| {
-        let r: f64 = this.get("r")?;
-        let g: f64 = this.get("g")?;
-        let b: f64 = this.get("b")?;
-        let hex = format!("{:02x}{:02x}{:02x}",
-            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8);
-        Ok(mlua::Value::String(lua.create_string(&hex)?))
-    })?)?;
-    t.set("WrapTextInColorCode", lua.create_function(|lua, (this, text): (mlua::Table, String)| {
-        let r: f64 = this.get("r")?;
-        let g: f64 = this.get("g")?;
-        let b: f64 = this.get("b")?;
-        let hex = format!("{:02x}{:02x}{:02x}",
-            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8);
-        Ok(mlua::Value::String(lua.create_string(format!("|cff{}{}|r", hex, text))?))
-    })?)?;
+    t.set(
+        "GetRGB",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok((
+                this.get::<f64>("r")?,
+                this.get::<f64>("g")?,
+                this.get::<f64>("b")?,
+            ))
+        })?,
+    )?;
+    t.set(
+        "GetRGBA",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok((
+                this.get::<f64>("r")?,
+                this.get::<f64>("g")?,
+                this.get::<f64>("b")?,
+                this.get::<f64>("a")?,
+            ))
+        })?,
+    )?;
+    t.set(
+        "GenerateHexColor",
+        lua.create_function(|lua, this: mlua::Table| {
+            let r: f64 = this.get("r")?;
+            let g: f64 = this.get("g")?;
+            let b: f64 = this.get("b")?;
+            let hex = format!(
+                "{:02x}{:02x}{:02x}",
+                (r * 255.0) as u8,
+                (g * 255.0) as u8,
+                (b * 255.0) as u8
+            );
+            Ok(mlua::Value::String(lua.create_string(&hex)?))
+        })?,
+    )?;
+    t.set(
+        "WrapTextInColorCode",
+        lua.create_function(|lua, (this, text): (mlua::Table, String)| {
+            let r: f64 = this.get("r")?;
+            let g: f64 = this.get("g")?;
+            let b: f64 = this.get("b")?;
+            let hex = format!(
+                "{:02x}{:02x}{:02x}",
+                (r * 255.0) as u8,
+                (g * 255.0) as u8,
+                (b * 255.0) as u8
+            );
+            Ok(mlua::Value::String(
+                lua.create_string(format!("|cff{}{}|r", hex, text))?,
+            ))
+        })?,
+    )?;
     Ok(t)
 }
 
@@ -388,18 +435,30 @@ fn register_unit_frame_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
 
 /// Register quest objective text color constants (engine-defined globals).
 fn register_quest_objective_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
-    globals.set("QUEST_OBJECTIVE_FONT_COLOR",
-        make_color_table(lua, 0.8, 0.8, 0.8, 1.0)?)?;
-    globals.set("QUEST_OBJECTIVE_HIGHLIGHT_FONT_COLOR",
-        make_color_table(lua, 1.0, 1.0, 1.0, 1.0)?)?;
-    globals.set("QUEST_OBJECTIVE_DISABLED_FONT_COLOR",
-        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
-    globals.set("QUEST_OBJECTIVE_DISABLED_HIGHLIGHT_FONT_COLOR",
-        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
-    globals.set("QUEST_OBJECTIVE_COMPLETED_FONT_COLOR",
-        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
-    globals.set("QUEST_OBJECTIVE_COMPLETED_FONT_COLOR_DARK_BACKGROUND",
-        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?)?;
+    globals.set(
+        "QUEST_OBJECTIVE_FONT_COLOR",
+        make_color_table(lua, 0.8, 0.8, 0.8, 1.0)?,
+    )?;
+    globals.set(
+        "QUEST_OBJECTIVE_HIGHLIGHT_FONT_COLOR",
+        make_color_table(lua, 1.0, 1.0, 1.0, 1.0)?,
+    )?;
+    globals.set(
+        "QUEST_OBJECTIVE_DISABLED_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?,
+    )?;
+    globals.set(
+        "QUEST_OBJECTIVE_DISABLED_HIGHLIGHT_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?,
+    )?;
+    globals.set(
+        "QUEST_OBJECTIVE_COMPLETED_FONT_COLOR",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?,
+    )?;
+    globals.set(
+        "QUEST_OBJECTIVE_COMPLETED_FONT_COLOR_DARK_BACKGROUND",
+        make_color_table(lua, 0.6, 0.6, 0.6, 1.0)?,
+    )?;
     Ok(())
 }
 

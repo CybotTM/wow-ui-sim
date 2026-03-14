@@ -8,23 +8,53 @@ use super::{EnumDef, SeqEnumDef};
 
 pub const LFG_ROLE: EnumDef = ("LFGRole", &[("Tank", 0), ("Healer", 1), ("Damage", 2)]);
 
-pub const UNIT_SEX: EnumDef = ("UnitSex", &[("Male", 0), ("Female", 1), ("None", 2), ("Both", 3), ("Neutral", 4)]);
+pub const UNIT_SEX: EnumDef = (
+    "UnitSex",
+    &[
+        ("Male", 0),
+        ("Female", 1),
+        ("None", 2),
+        ("Both", 3),
+        ("Neutral", 4),
+    ],
+);
 
-pub const GAME_MODE: EnumDef = ("GameMode", &[("Standard", 1), ("Plunderstorm", 2), ("WoWHack", 3)]);
+pub const GAME_MODE: EnumDef = (
+    "GameMode",
+    &[("Standard", 1), ("Plunderstorm", 2), ("WoWHack", 3)],
+);
 
 pub const PARTY_PLAYLIST_ENTRY: EnumDef = (
     "PartyPlaylistEntry",
-    &[("SoloGameMode", 0), ("DuoGameMode", 1), ("TrioGameMode", 2), ("TrainingGameMode", 3)],
+    &[
+        ("SoloGameMode", 0),
+        ("DuoGameMode", 1),
+        ("TrioGameMode", 2),
+        ("TrainingGameMode", 3),
+    ],
 );
 
 pub const CHAT_CHANNEL_TYPE: EnumDef = (
     "ChatChannelType",
-    &[("None", 0), ("Custom", 1), ("PrivateParty", 2), ("PublicParty", 3), ("Communities", 4)],
+    &[
+        ("None", 0),
+        ("Custom", 1),
+        ("PrivateParty", 2),
+        ("PublicParty", 3),
+        ("Communities", 4),
+    ],
 );
 
 pub const PVP_MATCH_STATE: EnumDef = (
     "PvPMatchState",
-    &[("Inactive", 0), ("Waiting", 1), ("StartUp", 2), ("Engaged", 3), ("PostRound", 4), ("Complete", 5)],
+    &[
+        ("Inactive", 0),
+        ("Waiting", 1),
+        ("StartUp", 2),
+        ("Engaged", 3),
+        ("PostRound", 4),
+        ("Complete", 5),
+    ],
 );
 
 pub const WORLD_ELAPSED_TIMER_TYPES: EnumDef = (
@@ -278,21 +308,40 @@ pub const UI_WIDGET_VISUALIZATION_TYPE: SeqEnumDef = (
 
 pub const UI_WIDGET_TOOLTIP_LOCATION: SeqEnumDef = (
     "UIWidgetTooltipLocation",
-    &["Default", "BottomLeft", "Left", "TopLeft", "Top", "TopRight", "Right", "BottomRight", "Bottom"],
+    &[
+        "Default",
+        "BottomLeft",
+        "Left",
+        "TopLeft",
+        "Top",
+        "TopRight",
+        "Right",
+        "BottomRight",
+        "Bottom",
+    ],
 );
 
 pub const UI_WIDGET_TEXT_SIZE_TYPE: EnumDef = (
     "UIWidgetTextSizeType",
     &[
-        ("Small12Pt", 0), ("Medium16Pt", 1), ("Large24Pt", 2), ("Huge27Pt", 3),
-        ("Standard14Pt", 4), ("Small10Pt", 5), ("Small11Pt", 6), ("Medium18Pt", 7),
+        ("Small12Pt", 0),
+        ("Medium16Pt", 1),
+        ("Large24Pt", 2),
+        ("Huge27Pt", 3),
+        ("Standard14Pt", 4),
+        ("Small10Pt", 5),
+        ("Small11Pt", 6),
+        ("Medium18Pt", 7),
         ("Large20Pt", 8),
     ],
 );
 
 pub const UI_WIDGET_FLAG: EnumDef = (
     "UIWidgetFlag",
-    &[("UniversalWidget", 1), ("KeepCenteredHorizontallyWithShift", 2)],
+    &[
+        ("UniversalWidget", 1),
+        ("KeepCenteredHorizontallyWithShift", 2),
+    ],
 );
 
 pub const FLIGHT_PATH_FACTION: SeqEnumDef = (
@@ -314,10 +363,22 @@ pub const FLIGHT_PATH_FACTION: SeqEnumDef = (
 pub const UI_WIDGET_SCALE: SeqEnumDef = (
     "UIWidgetScale",
     &[
-        "OneHundred", "Ninty", "Eighty", "Seventy", "Sixty", "Fifty",
-        "OneHundredTen", "OneHundredTwenty", "OneHundredThirty", "OneHundredForty",
-        "OneHundredFifty", "OneHundredSixty", "OneHundredSeventy", "OneHundredEighty",
-        "OneHundredNinety", "TwoHundred",
+        "OneHundred",
+        "Ninty",
+        "Eighty",
+        "Seventy",
+        "Sixty",
+        "Fifty",
+        "OneHundredTen",
+        "OneHundredTwenty",
+        "OneHundredThirty",
+        "OneHundredForty",
+        "OneHundredFifty",
+        "OneHundredSixty",
+        "OneHundredSeventy",
+        "OneHundredEighty",
+        "OneHundredNinety",
+        "TwoHundred",
     ],
 );
 
@@ -337,7 +398,9 @@ pub const WIDGET_ICON_SIZE_TYPE: SeqEnumDef = (
 
 pub const SPELL_DISPLAY_BORDER_COLOR: SeqEnumDef = (
     "SpellDisplayBorderColor",
-    &["None", "Black", "White", "Red", "Yellow", "Orange", "Purple", "Green", "Blue"],
+    &[
+        "None", "Black", "White", "Red", "Yellow", "Orange", "Purple", "Green", "Blue",
+    ],
 );
 
 pub const SPELL_DISPLAY_ICON_DISPLAY_TYPE: SeqEnumDef = (
@@ -372,7 +435,9 @@ pub const SPELL_DISPLAY_TINT: SeqEnumDef = (
 
 pub const STATUS_BAR_COLOR_TINT_VALUE: SeqEnumDef = (
     "StatusBarColorTintValue",
-    &["None", "Black", "White", "Red", "Yellow", "Orange", "Purple", "Green", "Blue"],
+    &[
+        "None", "Black", "White", "Red", "Yellow", "Orange", "Purple", "Green", "Blue",
+    ],
 );
 
 pub const STATUS_BAR_OVERRIDE_TEXT_SHOWN: SeqEnumDef = (
@@ -382,7 +447,15 @@ pub const STATUS_BAR_OVERRIDE_TEXT_SHOWN: SeqEnumDef = (
 
 pub const STATUS_BAR_VALUE_TEXT_TYPE: SeqEnumDef = (
     "StatusBarValueTextType",
-    &["Hidden", "Percentage", "Value", "Time", "TimeShowOneLevelOnly", "ValueOverMax", "ValueOverMaxNormalized"],
+    &[
+        "Hidden",
+        "Percentage",
+        "Value",
+        "Time",
+        "TimeShowOneLevelOnly",
+        "ValueOverMax",
+        "ValueOverMaxNormalized",
+    ],
 );
 
 // ============================================================================
@@ -391,34 +464,49 @@ pub const STATUS_BAR_VALUE_TEXT_TYPE: SeqEnumDef = (
 
 pub const WIDGET_SHOWN_STATE: SeqEnumDef = (
     "WidgetShownState",
-    &["Shown", "Hidden", "ShownOnMouseover", "ShownIfNotEmpty", "ShownIfEmpty"],
+    &[
+        "Shown",
+        "Hidden",
+        "ShownOnMouseover",
+        "ShownIfNotEmpty",
+        "ShownIfEmpty",
+    ],
 );
 
 pub const WIDGET_ENABLED_STATE: SeqEnumDef = (
     "WidgetEnabledState",
-    &["Disabled", "Enabled", "Red", "White", "Green", "Gold", "Artifact", "Black", "ColorTwo", "Yellow"],
+    &[
+        "Disabled", "Enabled", "Red", "White", "Green", "Gold", "Artifact", "Black", "ColorTwo",
+        "Yellow",
+    ],
 );
 
 pub const WIDGET_ANIMATION_TYPE: SeqEnumDef = ("WidgetAnimationType", &["None", "Fade"]);
 
-pub const WIDGET_SHOW_GLOW_STATE: SeqEnumDef = (
-    "WidgetShowGlowState",
-    &["HideGlow", "ShowGlow"],
-);
+pub const WIDGET_SHOW_GLOW_STATE: SeqEnumDef = ("WidgetShowGlowState", &["HideGlow", "ShowGlow"]);
 
-pub const WIDGET_GLOW_ANIM_TYPE: SeqEnumDef = (
-    "WidgetGlowAnimType",
-    &["None", "Pulse", "FullPulse"],
-);
+pub const WIDGET_GLOW_ANIM_TYPE: SeqEnumDef =
+    ("WidgetGlowAnimType", &["None", "Pulse", "FullPulse"]);
 
 pub const ICON_AND_TEXT_WIDGET_STATE: SeqEnumDef = (
     "IconAndTextWidgetState",
-    &["Hidden", "Shown", "ShownWithDynamicIconFlashing", "ShownWithDynamicIconNotFlashing"],
+    &[
+        "Hidden",
+        "Shown",
+        "ShownWithDynamicIconFlashing",
+        "ShownWithDynamicIconNotFlashing",
+    ],
 );
 
 pub const ICON_STATE: SeqEnumDef = (
     "IconState",
-    &["Hidden", "ShowState1", "ShowState2", "ShowState1Flashing", "ShowState2Flashing"],
+    &[
+        "Hidden",
+        "ShowState1",
+        "ShowState2",
+        "ShowState1Flashing",
+        "ShowState2Flashing",
+    ],
 );
 
 // ============================================================================
@@ -434,12 +522,22 @@ pub const ZONE_CONTROL_MODE: SeqEnumDef = (
 
 pub const ZONE_CONTROL_ACTIVE_STATE: SeqEnumDef = (
     "ZoneControlActiveState",
-    &["Inactive", "State1Active", "State2Active", "BothStatesActive"],
+    &[
+        "Inactive",
+        "State1Active",
+        "State2Active",
+        "BothStatesActive",
+    ],
 );
 
 pub const ZONE_CONTROL_FILL_TYPE: SeqEnumDef = (
     "ZoneControlFillType",
-    &["SingleFillClockwise", "SingleFillCounterClockwise", "DoubleFillClockwise", "DoubleFillCounterClockwise"],
+    &[
+        "SingleFillClockwise",
+        "SingleFillCounterClockwise",
+        "DoubleFillClockwise",
+        "DoubleFillCounterClockwise",
+    ],
 );
 
 pub const ZONE_CONTROL_DANGER_FLASH_TYPE: SeqEnumDef = (
@@ -447,10 +545,8 @@ pub const ZONE_CONTROL_DANGER_FLASH_TYPE: SeqEnumDef = (
     &["ShowOnHazardousState", "AlwaysShow"],
 );
 
-pub const ZONE_CONTROL_LEADING_EDGE_TYPE: SeqEnumDef = (
-    "ZoneControlLeadingEdgeType",
-    &["None", "UseLeadingEdge"],
-);
+pub const ZONE_CONTROL_LEADING_EDGE_TYPE: SeqEnumDef =
+    ("ZoneControlLeadingEdgeType", &["None", "UseLeadingEdge"]);
 
 pub const CAPTURE_BAR_FILL_DIRECTION: SeqEnumDef = (
     "CaptureBarWidgetFillDirectionType",
@@ -466,10 +562,7 @@ pub const UI_WIDGET_TEXTURE_TEXT_SIZE: SeqEnumDef = (
     &["Small", "Medium", "Large", "Huge", "Standard", "Medium2"],
 );
 
-pub const MAP_PIN_ANIMATION_TYPE: SeqEnumDef = (
-    "MapPinAnimationType",
-    &["None", "Pulse"],
-);
+pub const MAP_PIN_ANIMATION_TYPE: SeqEnumDef = ("MapPinAnimationType", &["None", "Pulse"]);
 
 pub const TUG_OF_WAR_MARKER_ARROW: SeqEnumDef = (
     "TugOfWarMarkerArrowShownState",
@@ -481,15 +574,10 @@ pub const ICON_AND_TEXT_SHIFT_TYPE: SeqEnumDef = (
     &["None", "ShiftRight", "ShiftLeft"],
 );
 
-pub const ITEM_DISPLAY_TEXT_STYLE: SeqEnumDef = (
-    "ItemDisplayTextDisplayStyle",
-    &["Default", "ShowName"],
-);
+pub const ITEM_DISPLAY_TEXT_STYLE: SeqEnumDef =
+    ("ItemDisplayTextDisplayStyle", &["Default", "ShowName"]);
 
-pub const WIDGET_ICON_SOURCE_TYPE: SeqEnumDef = (
-    "WidgetIconSourceType",
-    &["Default", "Spell"],
-);
+pub const WIDGET_ICON_SOURCE_TYPE: SeqEnumDef = ("WidgetIconSourceType", &["Default", "Spell"]);
 
 pub const WIDGET_TEXT_HORIZONTAL_ALIGNMENT: EnumDef = (
     "WidgetTextHorizontalAlignmentType",
@@ -528,5 +616,11 @@ pub const BAG_INDEX: EnumDef = (
 
 pub const NAME_PLATE_SIZE: EnumDef = (
     "NamePlateSize",
-    &[("Small", 1), ("Medium", 2), ("Large", 3), ("ExtraLarge", 4), ("Huge", 5)],
+    &[
+        ("Small", 1),
+        ("Medium", 2),
+        ("Large", 3),
+        ("ExtraLarge", 4),
+        ("Huge", 5),
+    ],
 );

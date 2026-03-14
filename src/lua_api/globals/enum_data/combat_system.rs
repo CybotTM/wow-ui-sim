@@ -9,35 +9,43 @@ use super::{EnumDef, SeqEnumDef};
 pub const COMBAT_AUDIO_ALERT_CATEGORY: SeqEnumDef = (
     "CombatAudioAlertCategory",
     &[
-        "General", "PlayerHealth", "TargetHealth", "PartyHealth",
-        "PlayerResource1", "PlayerResource2", "PlayerCast", "TargetCast",
+        "General",
+        "PlayerHealth",
+        "TargetHealth",
+        "PartyHealth",
+        "PlayerResource1",
+        "PlayerResource2",
+        "PlayerCast",
+        "TargetCast",
         "PlayerDebuffs",
     ],
 );
 
-pub const COMBAT_AUDIO_ALERT_TYPE: SeqEnumDef = (
-    "CombatAudioAlertType",
-    &["Health", "Cast"],
-);
+pub const COMBAT_AUDIO_ALERT_TYPE: SeqEnumDef = ("CombatAudioAlertType", &["Health", "Cast"]);
 
 pub const COMBAT_AUDIO_ALERT_THROTTLE: SeqEnumDef = (
     "CombatAudioAlertThrottle",
     &[
-        "Sample", "PlayerHealth", "TargetHealth", "PlayerCast",
-        "TargetCast", "PlayerResource1", "PlayerResource2",
+        "Sample",
+        "PlayerHealth",
+        "TargetHealth",
+        "PlayerCast",
+        "TargetCast",
+        "PlayerResource1",
+        "PlayerResource2",
     ],
 );
 
-pub const COMBAT_AUDIO_ALERT_UNIT: SeqEnumDef = (
-    "CombatAudioAlertUnit",
-    &["Player", "Target"],
-);
+pub const COMBAT_AUDIO_ALERT_UNIT: SeqEnumDef = ("CombatAudioAlertUnit", &["Player", "Target"]);
 
 pub const COMBAT_AUDIO_ALERT_SPEC_SETTING: SeqEnumDef = (
     "CombatAudioAlertSpecSetting",
     &[
-        "Resource1Percent", "Resource1Format", "Resource2Percent",
-        "Resource2Format", "SayIfTargeted",
+        "Resource1Percent",
+        "Resource1Format",
+        "Resource2Percent",
+        "Resource2Format",
+        "SayIfTargeted",
     ],
 );
 
@@ -67,7 +75,7 @@ pub const COMBAT_LOG_OBJECT: EnumDef = (
         ("Focus", 131072),
         ("Maintank", 262144),
         ("Mainassist", 524288),
-        ("None", -2147483648),  // 0x80000000
+        ("None", -2147483648), // 0x80000000
     ],
 );
 
@@ -108,14 +116,19 @@ pub const DAMAGECLASS: EnumDef = (
 // Cooldown Viewer Enums
 // ============================================================================
 
-pub const COOLDOWN_VIEWER_ALERT_TYPE: SeqEnumDef = (
-    "CooldownViewerAlertType",
-    &["Sound", "Visual"],
-);
+pub const COOLDOWN_VIEWER_ALERT_TYPE: SeqEnumDef =
+    ("CooldownViewerAlertType", &["Sound", "Visual"]);
 
 pub const COOLDOWN_VIEWER_ALERT_EVENT_TYPE: SeqEnumDef = (
     "CooldownViewerAlertEventType",
-    &["Available", "PandemicTime", "OnCooldown", "ChargeGained", "OnAuraApplied", "OnAuraRemoved"],
+    &[
+        "Available",
+        "PandemicTime",
+        "OnCooldown",
+        "ChargeGained",
+        "OnAuraApplied",
+        "OnAuraRemoved",
+    ],
 );
 
 pub const COOLDOWN_VIEWER_ALERT_EVENT_TYPE_META: EnumDef = (
@@ -132,17 +145,23 @@ pub const COOLDOWN_VIEWER_ADD_ALERT_STATUS: SeqEnumDef = (
 // Damage Meter Enums
 // ============================================================================
 
-pub const DAMAGE_METER_SESSION_TYPE: SeqEnumDef = (
-    "DamageMeterSessionType",
-    &["Overall", "Current", "Expired"],
-);
+pub const DAMAGE_METER_SESSION_TYPE: SeqEnumDef =
+    ("DamageMeterSessionType", &["Overall", "Current", "Expired"]);
 
 pub const DAMAGE_METER_TYPE: SeqEnumDef = (
     "DamageMeterType",
     &[
-        "DamageDone", "Dps", "HealingDone", "Hps", "Absorbs",
-        "Interrupts", "Dispels", "DamageTaken", "AvoidableDamageTaken",
-        "Deaths", "EnemyDamageTaken",
+        "DamageDone",
+        "Dps",
+        "HealingDone",
+        "Hps",
+        "Absorbs",
+        "Interrupts",
+        "Dispels",
+        "DamageTaken",
+        "AvoidableDamageTaken",
+        "Deaths",
+        "EnemyDamageTaken",
     ],
 );
 
@@ -160,25 +179,26 @@ pub const ENCOUNTER_TIMELINE_EVENT_STATE: SeqEnumDef = (
     &["Active", "Paused", "Finished", "Canceled"],
 );
 
-pub const ENCOUNTER_EVENT_SEVERITY: SeqEnumDef = (
-    "EncounterEventSeverity",
-    &["Low", "Medium", "High"],
-);
+pub const ENCOUNTER_EVENT_SEVERITY: SeqEnumDef =
+    ("EncounterEventSeverity", &["Low", "Medium", "High"]);
 
 pub const ENCOUNTER_TIMELINE_ICON_SET: SeqEnumDef = (
     "EncounterTimelineIconSet",
-    &["TankAlert", "HealerAlert", "DamageAlert", "Deadly", "Dispel", "Enrage"],
+    &[
+        "TankAlert",
+        "HealerAlert",
+        "DamageAlert",
+        "Deadly",
+        "Dispel",
+        "Enrage",
+    ],
 );
 
-pub const ENCOUNTER_TIMELINE_VIEW_TYPE: SeqEnumDef = (
-    "EncounterTimelineViewType",
-    &["Timeline", "Bars"],
-);
+pub const ENCOUNTER_TIMELINE_VIEW_TYPE: SeqEnumDef =
+    ("EncounterTimelineViewType", &["Timeline", "Bars"]);
 
-pub const STATUS_BAR_TIMER_DIRECTION: SeqEnumDef = (
-    "StatusBarTimerDirection",
-    &["RemainingTime", "ElapsedTime"],
-);
+pub const STATUS_BAR_TIMER_DIRECTION: SeqEnumDef =
+    ("StatusBarTimerDirection", &["RemainingTime", "ElapsedTime"]);
 
 // ============================================================================
 // Spell Aura Enums
@@ -193,28 +213,21 @@ pub const SPELL_AURA_VISIBILITY_TYPE: SeqEnumDef = (
 // Lua Curve Type Enum
 // ============================================================================
 
-pub const LUA_CURVE_TYPE: SeqEnumDef = (
-    "LuaCurveType",
-    &["Bezier", "Linear"],
-);
+pub const LUA_CURVE_TYPE: SeqEnumDef = ("LuaCurveType", &["Bezier", "Linear"]);
 
 // ============================================================================
 // Transmog Outfit Enums (stubs to prevent C_TransmogOutfitInfo errors)
 // ============================================================================
 
-pub const TRANSMOG_OUTFIT_FLAGS: SeqEnumDef = (
-    "TransmogOutfitFlags",
-    &["None", "NoMainhand", "NoOffhand"],
-);
+pub const TRANSMOG_OUTFIT_FLAGS: SeqEnumDef =
+    ("TransmogOutfitFlags", &["None", "NoMainhand", "NoOffhand"]);
 
 // ============================================================================
 // Prey / Hunt / UI Widget State Enums
 // ============================================================================
 
-pub const PREY_HUNT_PROGRESS_STATE: SeqEnumDef = (
-    "PreyHuntProgressState",
-    &["Cold", "Warm", "Hot", "Final"],
-);
+pub const PREY_HUNT_PROGRESS_STATE: SeqEnumDef =
+    ("PreyHuntProgressState", &["Cold", "Warm", "Hot", "Final"]);
 
 // ============================================================================
 // Status Bar Enums
@@ -240,8 +253,14 @@ pub const RAID_DISPEL_DISPLAY_TYPE: SeqEnumDef = (
 
 pub const COMBAT_AUDIO_ALERT_PERCENT_VALUES: SeqEnumDef = (
     "CombatAudioAlertPercentValues",
-    &["Off", "Every10Percent", "Every20Percent", "Every30Percent",
-      "Every40Percent", "Every50Percent"],
+    &[
+        "Off",
+        "Every10Percent",
+        "Every20Percent",
+        "Every30Percent",
+        "Every40Percent",
+        "Every50Percent",
+    ],
 );
 
 pub const COMBAT_AUDIO_ALERT_PERCENT_VALUES_META: EnumDef = (
@@ -261,8 +280,14 @@ pub const COMBAT_AUDIO_ALERT_CAST_STATE_META: EnumDef = (
 
 pub const COMBAT_AUDIO_ALERT_PLAYER_RESOURCE_FORMAT_VALUES: SeqEnumDef = (
     "CombatAudioAlertPlayerResourceFormatValues",
-    &["ResourceFull", "ResourceNoPercent", "ResourceNoPercentDiv10",
-      "NoResourceFull", "NoResourceNoPercent", "NoResourceNoPercentDiv10"],
+    &[
+        "ResourceFull",
+        "ResourceNoPercent",
+        "ResourceNoPercentDiv10",
+        "NoResourceFull",
+        "NoResourceNoPercent",
+        "NoResourceNoPercentDiv10",
+    ],
 );
 
 pub const COMBAT_AUDIO_ALERT_PLAYER_RESOURCE_FORMAT_VALUES_META: EnumDef = (
@@ -335,5 +360,12 @@ pub const COMBAT_AUDIO_ALERT_PLAYER_DEBUFF_FORMAT_VALUES_META: EnumDef = (
 
 pub const NAME_PLATE_STYLE: SeqEnumDef = (
     "NamePlateStyle",
-    &["Modern", "Thin", "Block", "HealthFocus", "CastFocus", "Legacy"],
+    &[
+        "Modern",
+        "Thin",
+        "Block",
+        "HealthFocus",
+        "CastFocus",
+        "Legacy",
+    ],
 );

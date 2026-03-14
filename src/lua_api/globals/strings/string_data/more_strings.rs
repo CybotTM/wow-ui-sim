@@ -26,7 +26,10 @@ pub const HUD_EDIT_MODE_STRINGS: &[StringDef] = &[
     ("HUD_EDIT_MODE_RAID_FRAMES_LABEL", "Raid Frames"),
     ("HUD_EDIT_MODE_VEHICLE_LEAVE_BUTTON_LABEL", "Vehicle Exit"),
     ("HUD_EDIT_MODE_ENCOUNTER_BAR_LABEL", "Encounter Bar"),
-    ("HUD_EDIT_MODE_EXTRA_ACTION_BUTTON_LABEL", "Extra Action Button"),
+    (
+        "HUD_EDIT_MODE_EXTRA_ACTION_BUTTON_LABEL",
+        "Extra Action Button",
+    ),
     ("HUD_EDIT_MODE_ZONE_ABILITY_FRAME_LABEL", "Zone Ability"),
     ("HUD_EDIT_MODE_BAGS_LABEL", "Bags"),
     ("HUD_EDIT_MODE_MICRO_MENU_LABEL", "Micro Menu"),
@@ -123,13 +126,28 @@ pub const LFG_TYPE_STRINGS: &[StringDef] = &[
 ];
 
 pub const LFG_ERROR_STRINGS: &[StringDef] = &[
-    ("ERR_LFG_PROPOSAL_FAILED", "The dungeon finder proposal failed."),
-    ("ERR_LFG_PROPOSAL_DECLINED", "A player declined the dungeon finder proposal."),
+    (
+        "ERR_LFG_PROPOSAL_FAILED",
+        "The dungeon finder proposal failed.",
+    ),
+    (
+        "ERR_LFG_PROPOSAL_DECLINED",
+        "A player declined the dungeon finder proposal.",
+    ),
     ("ERR_LFG_ROLE_CHECK_FAILED", "The role check failed."),
     ("ERR_LFG_NO_SLOTS_PLAYER", "You are not in a valid slot."),
-    ("ERR_LFG_NO_SLOTS_PARTY", "Your party is not in a valid slot."),
-    ("ERR_LFG_MISMATCHED_SLOTS", "You do not meet the requirements for that dungeon."),
-    ("ERR_LFG_DESERTER_PLAYER", "You cannot queue because you have the Deserter debuff."),
+    (
+        "ERR_LFG_NO_SLOTS_PARTY",
+        "Your party is not in a valid slot.",
+    ),
+    (
+        "ERR_LFG_MISMATCHED_SLOTS",
+        "You do not meet the requirements for that dungeon.",
+    ),
+    (
+        "ERR_LFG_DESERTER_PLAYER",
+        "You cannot queue because you have the Deserter debuff.",
+    ),
 ];
 
 // ============================================================================
@@ -158,7 +176,10 @@ pub const ITEM_MOD_STRINGS: &[StringDef] = &[
     ("ITEM_MOD_SPIRIT", "%c%s Spirit"),
     ("ITEM_MOD_SPIRIT_SHORT", "Spirit"),
     // Secondary stats
-    ("ITEM_MOD_CRIT_RATING", "Increases your critical strike by %s."),
+    (
+        "ITEM_MOD_CRIT_RATING",
+        "Increases your critical strike by %s.",
+    ),
     ("ITEM_MOD_CRIT_RATING_SHORT", "Critical Strike"),
     ("ITEM_MOD_HASTE_RATING", "Increases your haste by %s."),
     ("ITEM_MOD_HASTE_RATING_SHORT", "Haste"),
@@ -252,11 +273,23 @@ pub const BINDING_NAME_STRINGS: &[StringDef] = &[
 // ============================================================================
 
 pub const LOOT_ERROR_STRINGS: &[StringDef] = &[
-    ("ERR_LOOT_GONE", "Item is no longer available (already looted)"),
-    ("ERR_LOOT_NOTILE", "You are too far away to loot that corpse."),
+    (
+        "ERR_LOOT_GONE",
+        "Item is no longer available (already looted)",
+    ),
+    (
+        "ERR_LOOT_NOTILE",
+        "You are too far away to loot that corpse.",
+    ),
     ("ERR_LOOT_DIDNT_KILL", "You didn't kill that creature."),
-    ("ERR_LOOT_ROLL_PENDING", "You cannot loot while the roll is pending."),
-    ("ERR_LOOT_WHILE_INVULNERABLE", "You can't loot while invulnerable."),
+    (
+        "ERR_LOOT_ROLL_PENDING",
+        "You cannot loot while the roll is pending.",
+    ),
+    (
+        "ERR_LOOT_WHILE_INVULNERABLE",
+        "You can't loot while invulnerable.",
+    ),
 ];
 
 // ============================================================================
@@ -265,8 +298,14 @@ pub const LOOT_ERROR_STRINGS: &[StringDef] = &[
 
 pub const INSTANCE_STRINGS: &[StringDef] = &[
     ("INSTANCE_SAVED", "You are now saved to this instance."),
-    ("TRANSFER_ABORT_TOO_MANY_INSTANCES", "You have entered too many instances recently."),
-    ("NO_RAID_INSTANCES_SAVED", "You are not saved to any raid instances."),
+    (
+        "TRANSFER_ABORT_TOO_MANY_INSTANCES",
+        "You have entered too many instances recently.",
+    ),
+    (
+        "NO_RAID_INSTANCES_SAVED",
+        "You are not saved to any raid instances.",
+    ),
 ];
 
 // ============================================================================
@@ -274,7 +313,10 @@ pub const INSTANCE_STRINGS: &[StringDef] = &[
 // ============================================================================
 
 pub const OBJECTIVE_TRACKER_STRINGS: &[StringDef] = &[
-    ("OBJECTIVES_WATCH_TOO_MANY", "You are tracking too many quests."),
+    (
+        "OBJECTIVES_WATCH_TOO_MANY",
+        "You are tracking too many quests.",
+    ),
     ("OBJECTIVES_TRACKER_LABEL", "Objectives"),
     ("TRACKER_HEADER_WORLD_QUESTS", "World Quests"),
     ("TRACKER_HEADER_BONUS_OBJECTIVES", "Bonus Objectives"),
@@ -347,7 +389,10 @@ pub const ACHIEVEMENT_STRINGS: &[StringDef] = &[
 // ============================================================================
 
 pub const CURRENCY_STRINGS: &[StringDef] = &[
-    ("CURRENCY_GAINED_MULTIPLE_BONUS", "You receive currency: %s x%d (Bonus Roll)."),
+    (
+        "CURRENCY_GAINED_MULTIPLE_BONUS",
+        "You receive currency: %s x%d (Bonus Roll).",
+    ),
     ("CURRENCY_TOTAL", "Total: %s"),
 ];
 
@@ -420,10 +465,22 @@ pub const DUNGEON_DIFFICULTY_STRINGS: &[StringDef] = &[
     ("RAID_DIFFICULTY3", "10 Player (Heroic)"),
     ("RAID_DIFFICULTY4", "25 Player (Heroic)"),
     ("INSTANCE_RESET_SUCCESS", "%s has been reset."),
-    ("INSTANCE_RESET_FAILED", "Cannot reset %s. There are players still inside the instance."),
-    ("INSTANCE_RESET_FAILED_OFFLINE", "Cannot reset %s. There are players offline in your party."),
-    ("ERR_RAID_DIFFICULTY_CHANGED_S", "Raid difficulty changed to %s."),
-    ("ERR_DUNGEON_DIFFICULTY_CHANGED_S", "Dungeon difficulty changed to %s."),
+    (
+        "INSTANCE_RESET_FAILED",
+        "Cannot reset %s. There are players still inside the instance.",
+    ),
+    (
+        "INSTANCE_RESET_FAILED_OFFLINE",
+        "Cannot reset %s. There are players offline in your party.",
+    ),
+    (
+        "ERR_RAID_DIFFICULTY_CHANGED_S",
+        "Raid difficulty changed to %s.",
+    ),
+    (
+        "ERR_DUNGEON_DIFFICULTY_CHANGED_S",
+        "Dungeon difficulty changed to %s.",
+    ),
 ];
 
 // ============================================================================
@@ -451,7 +508,10 @@ pub const FONT_COLOR_CODE_STRINGS: &[StringDef] = &[
 // ============================================================================
 
 pub const ITEM_BINDING_STRINGS: &[StringDef] = &[
-    ("BIND_TRADE_TIME_REMAINING", "You may trade this item with players that were also eligible to loot this item for the next %s."),
+    (
+        "BIND_TRADE_TIME_REMAINING",
+        "You may trade this item with players that were also eligible to loot this item for the next %s.",
+    ),
     ("BIND_ON_PICKUP", "Binds when picked up"),
     ("BIND_ON_EQUIP", "Binds when equipped"),
     ("BIND_ON_USE", "Binds when used"),

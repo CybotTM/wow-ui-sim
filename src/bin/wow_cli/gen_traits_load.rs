@@ -118,33 +118,49 @@ pub fn load_all() -> Result<AllData, Box<dyn std::error::Error>> {
     let sub_trees = load_sub_trees(&data_dir)?;
     let currencies = load_currencies(&data_dir)?;
 
-    println!("Trees: {}, Nodes: {}, Entries: {}, Definitions: {}",
-        trees.len(), nodes.len(), entries.len(), definitions.len());
-    println!("Edges: {}, Conds: {}, SubTrees: {}, Currencies: {}",
-        edges.len(), conds.len(), sub_trees.len(), currencies.len());
+    println!(
+        "Trees: {}, Nodes: {}, Entries: {}, Definitions: {}",
+        trees.len(),
+        nodes.len(),
+        entries.len(),
+        definitions.len()
+    );
+    println!(
+        "Edges: {}, Conds: {}, SubTrees: {}, Currencies: {}",
+        edges.len(),
+        conds.len(),
+        sub_trees.len(),
+        currencies.len()
+    );
 
     let joins = load_join_tables(&data_dir)?;
-    Ok(AllData { trees, nodes, entries, definitions, edges, conds, sub_trees, currencies, joins })
+    Ok(AllData {
+        trees,
+        nodes,
+        entries,
+        definitions,
+        edges,
+        conds,
+        sub_trees,
+        currencies,
+        joins,
+    })
 }
 
 fn load_join_tables(data_dir: &Path) -> Result<JoinMaps, Box<dyn std::error::Error>> {
-    let node_to_entries = load_pair_csv(
-        &data_dir.join("TraitNodeXTraitNodeEntry.csv"), 1, 2,
-    )?;
-    let node_to_conds = load_pair_csv(
-        &data_dir.join("TraitNodeXTraitCond.csv"), 2, 1,
-    )?;
-    let tree_to_currencies = load_pair_csv(
-        &data_dir.join("TraitTreeXTraitCurrency.csv"), 2, 3,
-    )?;
-    let node_to_groups = load_pair_csv(
-        &data_dir.join("TraitNodeGroupXTraitNode.csv"), 2, 1,
-    )?;
+    let node_to_entries = load_pair_csv(&data_dir.join("TraitNodeXTraitNodeEntry.csv"), 1, 2)?;
+    let node_to_conds = load_pair_csv(&data_dir.join("TraitNodeXTraitCond.csv"), 2, 1)?;
+    let tree_to_currencies = load_pair_csv(&data_dir.join("TraitTreeXTraitCurrency.csv"), 2, 3)?;
+    let node_to_groups = load_pair_csv(&data_dir.join("TraitNodeGroupXTraitNode.csv"), 2, 1)?;
     // TraitNodeGroupXTraitCond: ID, TraitCondID, TraitNodeGroupID
-    let group_to_conds = load_pair_csv(
-        &data_dir.join("TraitNodeGroupXTraitCond.csv"), 2, 1,
-    )?;
-    Ok(JoinMaps { node_to_entries, node_to_conds, tree_to_currencies, node_to_groups, group_to_conds })
+    let group_to_conds = load_pair_csv(&data_dir.join("TraitNodeGroupXTraitCond.csv"), 2, 1)?;
+    Ok(JoinMaps {
+        node_to_entries,
+        node_to_conds,
+        tree_to_currencies,
+        node_to_groups,
+        group_to_conds,
+    })
 }
 
 /// Load a CSV join table, collecting values from `val_col` grouped by `key_col`.
@@ -159,11 +175,21 @@ fn load_pair_csv(
 
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let fields = parse_csv_line(&line);
-        if fields.len() <= key_col.max(val_col) { continue; }
-        let key: u32 = match fields[key_col].parse() { Ok(v) => v, Err(_) => continue };
-        let val: u32 = match fields[val_col].parse() { Ok(v) => v, Err(_) => continue };
+        if fields.len() <= key_col.max(val_col) {
+            continue;
+        }
+        let key: u32 = match fields[key_col].parse() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        let val: u32 = match fields[val_col].parse() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
         map.entry(key).or_default().push(val);
     }
     Ok(map)
@@ -178,10 +204,17 @@ fn load_trees(data_dir: &Path) -> Result<Vec<RawTree>, Box<dyn std::error::Error
     // TitleText_lang,ID,TraitSystemID,TraitTreeID,FirstTraitNodeID,PlayerConditionID,Flags,...
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 7 { continue; }
-        let id: u32 = match f[1].parse() { Ok(v) => v, Err(_) => continue };
+        if f.len() < 7 {
+            continue;
+        }
+        let id: u32 = match f[1].parse() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
         trees.push(RawTree {
             id,
             first_node_id: f[4].parse().unwrap_or(0),
@@ -198,9 +231,13 @@ fn load_nodes(data_dir: &Path) -> Result<Vec<RawNode>, Box<dyn std::error::Error
     // ID,TraitTreeID,PosX,PosY,Type,Flags,TraitSubTreeID
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 7 { continue; }
+        if f.len() < 7 {
+            continue;
+        }
         nodes.push(RawNode {
             id: f[0].parse()?,
             tree_id: f[1].parse()?,
@@ -221,9 +258,13 @@ fn load_entries(data_dir: &Path) -> Result<Vec<RawEntry>, Box<dyn std::error::Er
     // ID,TraitDefinitionID,MaxRanks,NodeEntryType,TraitSubTreeID
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 5 { continue; }
+        if f.len() < 5 {
+            continue;
+        }
         entries.push(RawEntry {
             id: f[0].parse()?,
             definition_id: f[1].parse().unwrap_or(0),
@@ -242,9 +283,13 @@ fn load_definitions(data_dir: &Path) -> Result<Vec<RawDefinition>, Box<dyn std::
     // OverrideName_lang,OverrideSubtext_lang,OverrideDescription_lang,ID,SpellID,OverrideIcon,OverridesSpellID,VisibleSpellID
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 8 { continue; }
+        if f.len() < 8 {
+            continue;
+        }
         defs.push(RawDefinition {
             override_name: f[0].clone(),
             override_subtext: f[1].clone(),
@@ -266,9 +311,13 @@ fn load_edges(data_dir: &Path) -> Result<Vec<RawEdge>, Box<dyn std::error::Error
     // ID,VisualStyle,LeftTraitNodeID,RightTraitNodeID,Type
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 5 { continue; }
+        if f.len() < 5 {
+            continue;
+        }
         edges.push(RawEdge {
             id: f[0].parse()?,
             visual_style: f[1].parse().unwrap_or(0),
@@ -286,9 +335,13 @@ fn load_conds(data_dir: &Path) -> Result<Vec<RawCond>, Box<dyn std::error::Error
     let mut conds = Vec::new();
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 14 { continue; }
+        if f.len() < 14 {
+            continue;
+        }
         conds.push(RawCond {
             id: f[0].parse()?,
             cond_type: f[1].parse().unwrap_or(0),
@@ -316,9 +369,13 @@ fn load_sub_trees(data_dir: &Path) -> Result<Vec<RawSubTree>, Box<dyn std::error
     // Name_lang,Description_lang,ID,UiTextureAtlasElementID,TraitTreeID
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 5 { continue; }
+        if f.len() < 5 {
+            continue;
+        }
         trees.push(RawSubTree {
             name: f[0].clone(),
             description: f[1].clone(),
@@ -337,9 +394,13 @@ fn load_currencies(data_dir: &Path) -> Result<Vec<RawCurrency>, Box<dyn std::err
     // ID,Type,CurrencyTypesID,Flags,...
     for (i, line) in reader.lines().enumerate() {
         let line = line?;
-        if i == 0 { continue; }
+        if i == 0 {
+            continue;
+        }
         let f = parse_csv_line(&line);
-        if f.len() < 4 { continue; }
+        if f.len() < 4 {
+            continue;
+        }
         currencies.push(RawCurrency {
             id: f[0].parse()?,
             currency_type: f[1].parse().unwrap_or(0),

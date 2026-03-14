@@ -26,37 +26,84 @@ pub const SCREEN_LOCATION_TYPE: SeqEnumDef = (
 
 pub const START_TIMER_TYPE: SeqEnumDef = (
     "StartTimerType",
-    &["PvPBeginTimer", "ChallengeModeCountdown", "PlayerCountdown", "PlunderstormCountdown"],
+    &[
+        "PvPBeginTimer",
+        "ChallengeModeCountdown",
+        "PlayerCountdown",
+        "PlunderstormCountdown",
+    ],
 );
 
 pub const QUEST_SESSION_RESULT: SeqEnumDef = (
     "QuestSessionResult",
     &[
-        "Ok", "NotInParty", "InvalidOwner", "AlreadyActive", "NotActive", "InRaid",
-        "OwnerRefused", "Timeout", "Disabled", "Started", "Stopped", "Joined", "Left",
-        "OwnerLeft", "ReadyCheckFailed", "PartyDestroyed", "MemberTimeout", "AlreadyMember",
-        "NotOwner", "AlreadyOwner", "AlreadyJoined", "NotMember", "Busy", "JoinRejected",
-        "Logout", "Empty", "QuestNotCompleted", "Resync", "Restricted", "InPetBattle",
-        "InvalidPublicParty", "Unknown", "InCombat", "MemberInCombat", "RestrictedCrossFaction",
+        "Ok",
+        "NotInParty",
+        "InvalidOwner",
+        "AlreadyActive",
+        "NotActive",
+        "InRaid",
+        "OwnerRefused",
+        "Timeout",
+        "Disabled",
+        "Started",
+        "Stopped",
+        "Joined",
+        "Left",
+        "OwnerLeft",
+        "ReadyCheckFailed",
+        "PartyDestroyed",
+        "MemberTimeout",
+        "AlreadyMember",
+        "NotOwner",
+        "AlreadyOwner",
+        "AlreadyJoined",
+        "NotMember",
+        "Busy",
+        "JoinRejected",
+        "Logout",
+        "Empty",
+        "QuestNotCompleted",
+        "Resync",
+        "Restricted",
+        "InPetBattle",
+        "InvalidPublicParty",
+        "Unknown",
+        "InCombat",
+        "MemberInCombat",
+        "RestrictedCrossFaction",
     ],
 );
 
-pub const REPUTATION_SORT_TYPE: SeqEnumDef = (
-    "ReputationSortType",
-    &["None", "Account", "Character"],
-);
+pub const REPUTATION_SORT_TYPE: SeqEnumDef =
+    ("ReputationSortType", &["None", "Account", "Character"]);
 
 pub const QUEST_COMPLETE_SPELL_TYPE: SeqEnumDef = (
     "QuestCompleteSpellType",
     &[
-        "LegacyBehavior", "Follower", "Tradeskill", "Ability", "Aura", "Spell", "Unlock",
-        "Companion", "QuestlineUnlock", "QuestlineReward", "QuestlineUnlockPart", "PossibleReward",
+        "LegacyBehavior",
+        "Follower",
+        "Tradeskill",
+        "Ability",
+        "Aura",
+        "Spell",
+        "Unlock",
+        "Companion",
+        "QuestlineUnlock",
+        "QuestlineReward",
+        "QuestlineUnlockPart",
+        "PossibleReward",
     ],
 );
 
 pub const BANK_LOCKED_REASON: SeqEnumDef = (
     "BankLockedReason",
-    &["None", "NoAccountInventoryLock", "BankDisabled", "BankConversionFailed"],
+    &[
+        "None",
+        "NoAccountInventoryLock",
+        "BankDisabled",
+        "BankConversionFailed",
+    ],
 );
 
 pub const QUEST_SESSION_COMMAND: SeqEnumDef = (
@@ -67,62 +114,128 @@ pub const QUEST_SESSION_COMMAND: SeqEnumDef = (
 pub const PLAYER_INTERACTION_TYPE: SeqEnumDef = (
     "PlayerInteractionType",
     &[
-        "None", "TradePartner", "Item", "Gossip", "QuestGiver", "Merchant", "TaxiNode",
-        "Trainer", "Banker", "AlliedRaceDetailsGiver", "GuildBanker", "Registrar", "Vendor",
-        "PetitionVendor", "GuildTabardVendor", "TalentMaster", "SpecializationMaster",
-        "MailInfo", "SpiritHealer", "AreaSpiritHealer", "Binder", "Auctioneer", "StableMaster",
-        "BattleMaster", "Transmogrifier", "LFGDungeon", "VoidStorageBanker",
-        "BlackMarketAuctioneer", "AdventureMap", "WorldMap", "GarrArchitect", "GarrTradeskill",
-        "GarrMission", "ShipmentCrafter", "GarrRecruitment", "GarrTalent", "Trophy",
-        "PlayerChoice", "ArtifactForge", "ObliterumForge", "ScrappingMachine",
-        "ContributionCollector", "AzeriteRespec", "IslandQueue", "ItemInteraction",
-        "ChromieTime", "CovenantPreview", "AnimaDiversion", "LegendaryCrafting",
-        "WeeklyRewards", "Soulbind", "CovenantSanctum", "NewPlayerGuide", "ItemUpgrade",
-        "AdventureJournal", "Renown", "AzeriteForge", "PerksProgramVendor",
-        "ProfessionsCraftingOrder", "Professions", "ProfessionsCustomerOrder", "TraitSystem",
-        "BarbersChoice", "JailersTowerBuffs", "MajorFactionRenown", "PersonalTabardVendor",
-        "ForgeMaster", "CharacterBanker", "AccountBanker", "ProfessionRespec",
-        "CornerstoneInteraction", "RenameNeighborhood", "HousingBulletinBoard",
-        "HousingPedestal", "CreateGuildNeighborhood", "NeighborhoodCharter", "GuildRename",
-        "OpenNeighborhoodCharterConfirmation", "OpenHouseFinder", "PlaceholderType79",
+        "None",
+        "TradePartner",
+        "Item",
+        "Gossip",
+        "QuestGiver",
+        "Merchant",
+        "TaxiNode",
+        "Trainer",
+        "Banker",
+        "AlliedRaceDetailsGiver",
+        "GuildBanker",
+        "Registrar",
+        "Vendor",
+        "PetitionVendor",
+        "GuildTabardVendor",
+        "TalentMaster",
+        "SpecializationMaster",
+        "MailInfo",
+        "SpiritHealer",
+        "AreaSpiritHealer",
+        "Binder",
+        "Auctioneer",
+        "StableMaster",
+        "BattleMaster",
+        "Transmogrifier",
+        "LFGDungeon",
+        "VoidStorageBanker",
+        "BlackMarketAuctioneer",
+        "AdventureMap",
+        "WorldMap",
+        "GarrArchitect",
+        "GarrTradeskill",
+        "GarrMission",
+        "ShipmentCrafter",
+        "GarrRecruitment",
+        "GarrTalent",
+        "Trophy",
+        "PlayerChoice",
+        "ArtifactForge",
+        "ObliterumForge",
+        "ScrappingMachine",
+        "ContributionCollector",
+        "AzeriteRespec",
+        "IslandQueue",
+        "ItemInteraction",
+        "ChromieTime",
+        "CovenantPreview",
+        "AnimaDiversion",
+        "LegendaryCrafting",
+        "WeeklyRewards",
+        "Soulbind",
+        "CovenantSanctum",
+        "NewPlayerGuide",
+        "ItemUpgrade",
+        "AdventureJournal",
+        "Renown",
+        "AzeriteForge",
+        "PerksProgramVendor",
+        "ProfessionsCraftingOrder",
+        "Professions",
+        "ProfessionsCustomerOrder",
+        "TraitSystem",
+        "BarbersChoice",
+        "JailersTowerBuffs",
+        "MajorFactionRenown",
+        "PersonalTabardVendor",
+        "ForgeMaster",
+        "CharacterBanker",
+        "AccountBanker",
+        "ProfessionRespec",
+        "CornerstoneInteraction",
+        "RenameNeighborhood",
+        "HousingBulletinBoard",
+        "HousingPedestal",
+        "CreateGuildNeighborhood",
+        "NeighborhoodCharter",
+        "GuildRename",
+        "OpenNeighborhoodCharterConfirmation",
+        "OpenHouseFinder",
+        "PlaceholderType79",
     ],
 );
 
 pub const EVENT_TOAST_DISPLAY_TYPE: SeqEnumDef = (
     "EventToastDisplayType",
     &[
-        "NormalSingleLine", "NormalBlockText", "NormalTitleAndSubTitle", "NormalTextWithIcon",
-        "LargeTextWithIcon", "NormalTextWithIconAndRarity", "Scenario", "ChallengeMode",
-        "ScenarioClickExpand", "WeeklyRewardUnlock", "WeeklyRewardUpgrade",
-        "FlightpointDiscovered", "CapstoneUnlocked", "SingleLineWithIcon", "Scoreboard",
+        "NormalSingleLine",
+        "NormalBlockText",
+        "NormalTitleAndSubTitle",
+        "NormalTextWithIcon",
+        "LargeTextWithIcon",
+        "NormalTextWithIconAndRarity",
+        "Scenario",
+        "ChallengeMode",
+        "ScenarioClickExpand",
+        "WeeklyRewardUnlock",
+        "WeeklyRewardUpgrade",
+        "FlightpointDiscovered",
+        "CapstoneUnlocked",
+        "SingleLineWithIcon",
+        "Scoreboard",
         "HouseUpgradeAvailable",
     ],
 );
 
 pub const WIDGET_UNIT_POWER_BAR_FLASH_MOMENT: SeqEnumDef = (
     "WidgetUnitPowerBarFlashMomentType",
-    &["FlashWhenMax", "FlashWhenMin", "FlashWhenEmpty", "FlashWhenFull"],
+    &[
+        "FlashWhenMax",
+        "FlashWhenMin",
+        "FlashWhenEmpty",
+        "FlashWhenFull",
+    ],
 );
 
-pub const UI_WIDGET_FONT_TYPE: SeqEnumDef = (
-    "UIWidgetFontType",
-    &["Normal", "Shadow", "Outline"],
-);
+pub const UI_WIDGET_FONT_TYPE: SeqEnumDef = ("UIWidgetFontType", &["Normal", "Shadow", "Outline"]);
 
-pub const UI_WIDGET_BLEND_MODE: SeqEnumDef = (
-    "UIWidgetBlendModeType",
-    &["Default", "Additive"],
-);
+pub const UI_WIDGET_BLEND_MODE: SeqEnumDef = ("UIWidgetBlendModeType", &["Default", "Additive"]);
 
-pub const UI_WIDGET_MOTION_TYPE: SeqEnumDef = (
-    "UIWidgetMotionType",
-    &["Instant", "Animated"],
-);
+pub const UI_WIDGET_MOTION_TYPE: SeqEnumDef = ("UIWidgetMotionType", &["Instant", "Animated"]);
 
-pub const UI_WIDGET_UPDATE_ANIM_TYPE: SeqEnumDef = (
-    "UIWidgetUpdateAnimType",
-    &["None", "Flash"],
-);
+pub const UI_WIDGET_UPDATE_ANIM_TYPE: SeqEnumDef = ("UIWidgetUpdateAnimType", &["None", "Flash"]);
 
 pub const UI_WIDGET_OVERRIDE_STATE: SeqEnumDef = (
     "UIWidgetOverrideState",
@@ -134,14 +247,20 @@ pub const UI_WIDGET_TEXT_FORMAT_TYPE: SeqEnumDef = (
     &["Default", "TooltipTitle", "TooltipBodyText"],
 );
 
-pub const UI_WIDGET_SPELL_COOLDOWN_TYPE: SeqEnumDef = (
-    "UIWidgetSpellButtonCooldownType",
-    &["None", "EdgeCooldown"],
-);
+pub const UI_WIDGET_SPELL_COOLDOWN_TYPE: SeqEnumDef =
+    ("UIWidgetSpellButtonCooldownType", &["None", "EdgeCooldown"]);
 
 pub const UI_WIDGET_BUTTON_ENABLED_STATE: SeqEnumDef = (
     "UIWidgetButtonEnabledState",
-    &["Disabled", "Enabled", "Yellow", "RedDisabled", "GoldDisabled", "Gold", "Red"],
+    &[
+        "Disabled",
+        "Enabled",
+        "Yellow",
+        "RedDisabled",
+        "GoldDisabled",
+        "Gold",
+        "Red",
+    ],
 );
 
 pub const UI_WIDGET_BUTTON_ICON_TYPE: SeqEnumDef = (
@@ -159,10 +278,8 @@ pub const UI_WIDGET_LAYOUT_DIRECTION: SeqEnumDef = (
     &["Default", "Vertical", "Horizontal", "Overlap"],
 );
 
-pub const UI_WIDGET_MODEL_SCENE_LAYER: SeqEnumDef = (
-    "UIWidgetModelSceneLayer",
-    &["None", "Front", "Back"],
-);
+pub const UI_WIDGET_MODEL_SCENE_LAYER: SeqEnumDef =
+    ("UIWidgetModelSceneLayer", &["None", "Front", "Back"]);
 
 // ============================================================================
 // Content Tracking Enums
@@ -179,7 +296,14 @@ pub const CONTENT_TRACKING_TYPE: SeqEnumDef = (
 
 pub const SEND_REPORT_RESULT: SeqEnumDef = (
     "SendReportResult",
-    &["Success", "GeneralError", "TooManyReports", "RequiresChatLine", "RequiresChatLineOrVoice", "RequiresScreenshot"],
+    &[
+        "Success",
+        "GeneralError",
+        "TooManyReports",
+        "RequiresChatLine",
+        "RequiresChatLineOrVoice",
+        "RequiresScreenshot",
+    ],
 );
 
 // ============================================================================
@@ -204,21 +328,23 @@ pub const EVENT_REALM_QUEUES: EnumDef = (
 pub const EDIT_MODE_ACTION_BAR_SYSTEM_INDICES: EnumDef = (
     "EditModeActionBarSystemIndices",
     &[
-        ("MainBar", 1), ("Bar2", 2), ("Bar3", 3), ("RightBar1", 4), ("RightBar2", 5),
-        ("ExtraBar1", 6), ("ExtraBar2", 7), ("ExtraBar3", 8),
-        ("StanceBar", 11), ("PetActionBar", 12), ("PossessActionBar", 13),
+        ("MainBar", 1),
+        ("Bar2", 2),
+        ("Bar3", 3),
+        ("RightBar1", 4),
+        ("RightBar2", 5),
+        ("ExtraBar1", 6),
+        ("ExtraBar2", 7),
+        ("ExtraBar3", 8),
+        ("StanceBar", 11),
+        ("PetActionBar", 12),
+        ("PossessActionBar", 13),
     ],
 );
 
-pub const EDIT_MODE_PRESET_LAYOUTS: SeqEnumDef = (
-    "EditModePresetLayouts",
-    &["Modern", "Classic"],
-);
+pub const EDIT_MODE_PRESET_LAYOUTS: SeqEnumDef = ("EditModePresetLayouts", &["Modern", "Classic"]);
 
-pub const BAGS_ORIENTATION: SeqEnumDef = (
-    "BagsOrientation",
-    &["Horizontal", "Vertical"],
-);
+pub const BAGS_ORIENTATION: SeqEnumDef = ("BagsOrientation", &["Horizontal", "Vertical"]);
 
 // ============================================================================
 // Settings & UI Enums
@@ -227,31 +353,57 @@ pub const BAGS_ORIENTATION: SeqEnumDef = (
 pub const COLOR_OVERRIDE: SeqEnumDef = (
     "ColorOverride",
     &[
-        "ItemQualityPoor", "ItemQualityCommon", "ItemQualityUncommon", "ItemQualityRare",
-        "ItemQualityEpic", "ItemQualityLegendary", "ItemQualityArtifact", "ItemQualityAccount",
+        "ItemQualityPoor",
+        "ItemQualityCommon",
+        "ItemQualityUncommon",
+        "ItemQualityRare",
+        "ItemQualityEpic",
+        "ItemQualityLegendary",
+        "ItemQualityArtifact",
+        "ItemQualityAccount",
     ],
 );
 
-pub const CLUB_STREAM_TYPE: SeqEnumDef = (
-    "ClubStreamType",
-    &["General", "Guild", "Officer", "Other"],
-);
+pub const CLUB_STREAM_TYPE: SeqEnumDef =
+    ("ClubStreamType", &["General", "Guild", "Officer", "Other"]);
 
 pub const RECRUIT_A_FRIEND_REWARDS_VERSION: SeqEnumDef = (
     "RecruitAFriendRewardsVersion",
-    &["InvalidVersion", "UnusedVersionOne", "VersionTwo", "VersionThree"],
+    &[
+        "InvalidVersion",
+        "UnusedVersionOne",
+        "VersionTwo",
+        "VersionThree",
+    ],
 );
 
 pub const MINIMAP_TRACKING_FILTER: EnumDef = (
     "MinimapTrackingFilter",
     &[
-        ("Unfiltered", 0), ("Auctioneer", 1), ("Banker", 2), ("Battlemaster", 4),
-        ("TaxiNode", 8), ("VenderFood", 16), ("Innkeeper", 32), ("Mailbox", 64),
-        ("TrainerProfession", 128), ("VendorReagent", 256), ("Repair", 512),
-        ("TrivialQuests", 1024), ("Stablemaster", 2048), ("Transmogrifier", 4096),
-        ("POI", 8192), ("Target", 16384), ("Focus", 32768), ("QuestPOIs", 65536),
-        ("Digsites", 131072), ("Barber", 262144), ("ItemUpgrade", 524288),
-        ("VendorPoison", 1048576), ("AccountCompletedQuests", 2097152), ("AccountBanker", 4194304),
+        ("Unfiltered", 0),
+        ("Auctioneer", 1),
+        ("Banker", 2),
+        ("Battlemaster", 4),
+        ("TaxiNode", 8),
+        ("VenderFood", 16),
+        ("Innkeeper", 32),
+        ("Mailbox", 64),
+        ("TrainerProfession", 128),
+        ("VendorReagent", 256),
+        ("Repair", 512),
+        ("TrivialQuests", 1024),
+        ("Stablemaster", 2048),
+        ("Transmogrifier", 4096),
+        ("POI", 8192),
+        ("Target", 16384),
+        ("Focus", 32768),
+        ("QuestPOIs", 65536),
+        ("Digsites", 131072),
+        ("Barber", 262144),
+        ("ItemUpgrade", 524288),
+        ("VendorPoison", 1048576),
+        ("AccountCompletedQuests", 2097152),
+        ("AccountBanker", 4194304),
     ],
 );
 
@@ -260,28 +412,43 @@ pub const CLICK_BINDING_TYPE: SeqEnumDef = (
     &["None", "Spell", "Macro", "Interaction", "PetAction"],
 );
 
-pub const CUSTOM_BINDING_TYPE: SeqEnumDef = (
-    "CustomBindingType",
-    &["VoicePushToTalk"],
-);
+pub const CUSTOM_BINDING_TYPE: SeqEnumDef = ("CustomBindingType", &["VoicePushToTalk"]);
 
 pub const CALENDAR_EVENT_TYPE: SeqEnumDef = (
     "CalendarEventType",
-    &["Raid", "Dungeon", "PvP", "Meeting", "Other", "HeroicDeprecated"],
+    &[
+        "Raid",
+        "Dungeon",
+        "PvP",
+        "Meeting",
+        "Other",
+        "HeroicDeprecated",
+    ],
 );
 
 pub const CAMERA_MODE_ASPECT_RATIO: SeqEnumDef = (
     "CameraModeAspectRatio",
-    &["Default", "LegacyLetterbox", "HighDefinition_16_X_9", "Cinemascope_2_Dot_4_X_1"],
+    &[
+        "Default",
+        "LegacyLetterbox",
+        "HighDefinition_16_X_9",
+        "Cinemascope_2_Dot_4_X_1",
+    ],
 );
 
 pub const BAG_SLOT_FLAGS: EnumDef = (
     "BagSlotFlags",
     &[
-        ("DisableAutoSort", 1), ("ClassEquipment", 2), ("ClassConsumables", 4),
-        ("ClassProfessionGoods", 8), ("ClassJunk", 16), ("ClassQuestItems", 32),
-        ("ExcludeJunkSell", 64), ("ClassReagents", 128),
-        ("ExpansionCurrent", 256), ("ExpansionLegacy", 512),
+        ("DisableAutoSort", 1),
+        ("ClassEquipment", 2),
+        ("ClassConsumables", 4),
+        ("ClassProfessionGoods", 8),
+        ("ClassJunk", 16),
+        ("ClassQuestItems", 32),
+        ("ExcludeJunkSell", 64),
+        ("ClassReagents", 128),
+        ("ExpansionCurrent", 256),
+        ("ExpansionLegacy", 512),
     ],
 );
 
@@ -308,7 +475,17 @@ pub const GARRISON_TYPE: EnumDef = (
 
 pub const CALENDAR_STATUS: SeqEnumDef = (
     "CalendarStatus",
-    &["Invited", "Available", "Declined", "Confirmed", "Out", "Standby", "Signedup", "NotSignedup", "Tentative"],
+    &[
+        "Invited",
+        "Available",
+        "Declined",
+        "Confirmed",
+        "Out",
+        "Standby",
+        "Signedup",
+        "NotSignedup",
+        "Tentative",
+    ],
 );
 
 pub const HOUSING_ITEM_TOAST_TYPE: SeqEnumDef = (
@@ -323,21 +500,34 @@ pub const HOUSING_ITEM_TOAST_TYPE: SeqEnumDef = (
 pub const VAS_SERVICE_TYPE: SeqEnumDef = (
     "VasServiceType",
     &[
-        "FactionChange", "RaceChange", "AppearanceChange", "NameChange",
-        "CharacterTransfer", "GuildNameChange", "GuildFactionChange", "GuildTransfer",
+        "FactionChange",
+        "RaceChange",
+        "AppearanceChange",
+        "NameChange",
+        "CharacterTransfer",
+        "GuildNameChange",
+        "GuildFactionChange",
+        "GuildTransfer",
     ],
 );
 
-pub const ACTION_BAR_ORIENTATION: SeqEnumDef = (
-    "ActionBarOrientation",
-    &["Horizontal", "Vertical"],
-);
+pub const ACTION_BAR_ORIENTATION: SeqEnumDef =
+    ("ActionBarOrientation", &["Horizontal", "Vertical"]);
 
 pub const WIDGET_OPACITY_TYPE: SeqEnumDef = (
     "WidgetOpacityType",
     &[
-        "OneHundred", "Ninety", "Eighty", "Seventy", "Sixty", "Fifty",
-        "Forty", "Thirty", "Twenty", "Ten", "Zero",
+        "OneHundred",
+        "Ninety",
+        "Eighty",
+        "Seventy",
+        "Sixty",
+        "Fifty",
+        "Forty",
+        "Thirty",
+        "Twenty",
+        "Ten",
+        "Zero",
     ],
 );
 
@@ -348,8 +538,16 @@ pub const WIDGET_OPACITY_TYPE: SeqEnumDef = (
 pub const EDIT_MODE_ACTION_BAR_SETTING: SeqEnumDef = (
     "EditModeActionBarSetting",
     &[
-        "Orientation", "NumRows", "NumIcons", "IconSize", "IconPadding",
-        "VisibleSetting", "HideBarArt", "DeprecatedSnapToSide", "HideBarScrolling", "AlwaysShowButtons",
+        "Orientation",
+        "NumRows",
+        "NumIcons",
+        "IconSize",
+        "IconPadding",
+        "VisibleSetting",
+        "HideBarArt",
+        "DeprecatedSnapToSide",
+        "HideBarScrolling",
+        "AlwaysShowButtons",
     ],
 );
 
@@ -360,8 +558,16 @@ pub const EDIT_MODE_ACTION_BAR_SETTING: SeqEnumDef = (
 pub const GARR_AUTO_MISSION_EVENT_TYPE: SeqEnumDef = (
     "GarrAutoMissionEventType",
     &[
-        "MeleeDamage", "RangeDamage", "SpellMeleeDamage", "SpellRangeDamage",
-        "Heal", "PeriodicDamage", "PeriodicHeal", "ApplyAura", "RemoveAura", "Died",
+        "MeleeDamage",
+        "RangeDamage",
+        "SpellMeleeDamage",
+        "SpellRangeDamage",
+        "Heal",
+        "PeriodicDamage",
+        "PeriodicHeal",
+        "ApplyAura",
+        "RemoveAura",
+        "Died",
     ],
 );
 
@@ -371,7 +577,14 @@ pub const GARR_AUTO_MISSION_EVENT_TYPE: SeqEnumDef = (
 
 pub const CLUB_MEMBER_PRESENCE: SeqEnumDef = (
     "ClubMemberPresence",
-    &["Unknown", "Online", "OnlineMobile", "Offline", "Away", "Busy"],
+    &[
+        "Unknown",
+        "Online",
+        "OnlineMobile",
+        "Offline",
+        "Away",
+        "Busy",
+    ],
 );
 
 // ============================================================================
@@ -454,26 +667,18 @@ pub const BATTLE_PET_ACTION: SeqEnumDef = (
 );
 
 /// BattlePetOwner - pet battle owner sides.
-pub const BATTLE_PET_OWNER: SeqEnumDef = (
-    "BattlePetOwner",
-    &["Ally", "Enemy", "Weather"],
-);
+pub const BATTLE_PET_OWNER: SeqEnumDef = ("BattlePetOwner", &["Ally", "Enemy", "Weather"]);
 
 // ============================================================================
 // Delves Companion Enums
 // ============================================================================
 
 /// CompanionConfigSlotTypes - Delves companion configuration slot types.
-pub const COMPANION_CONFIG_SLOT_TYPES: SeqEnumDef = (
-    "CompanionConfigSlotTypes",
-    &["Role", "Utility", "Combat"],
-);
+pub const COMPANION_CONFIG_SLOT_TYPES: SeqEnumDef =
+    ("CompanionConfigSlotTypes", &["Role", "Utility", "Combat"]);
 
 /// CurioType - Delves curio types.
-pub const CURIO_TYPE: SeqEnumDef = (
-    "CurioType",
-    &["Utility", "Combat"],
-);
+pub const CURIO_TYPE: SeqEnumDef = ("CurioType", &["Utility", "Combat"]);
 
 // ============================================================================
 // Store Enums

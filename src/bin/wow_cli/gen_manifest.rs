@@ -55,7 +55,10 @@ fn build_manifest_map(
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "//! Auto-generated file data ID to texture path mapping.")?;
+    writeln!(
+        out,
+        "//! Auto-generated file data ID to texture path mapping."
+    )?;
     writeln!(
         out,
         "//! Do not edit manually - regenerate with: wow-cli generate manifest"
@@ -65,7 +68,10 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "pub fn get_texture_path(id: u32) -> Option<&'static str> {{")?;
+    writeln!(
+        out,
+        "pub fn get_texture_path(id: u32) -> Option<&'static str> {{"
+    )?;
     writeln!(out, "    MANIFEST.get(&id).copied()")?;
     writeln!(out, "}}")?;
     Ok(())
@@ -108,15 +114,16 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_nonexistent_id() {{")?;
-    writeln!(out, "        assert!(get_texture_path(999_999_999).is_none());")?;
+    writeln!(
+        out,
+        "        assert!(get_texture_path(999_999_999).is_none());"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out, "}}")?;
     Ok(())
 }
 
-fn load_manifest(
-    path: &Path,
-) -> Result<Vec<(u32, String)>, Box<dyn std::error::Error>> {
+fn load_manifest(path: &Path) -> Result<Vec<(u32, String)>, Box<dyn std::error::Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let mut entries = Vec::new();
@@ -165,9 +172,7 @@ fn normalize_to_wow_path(raw: &str) -> String {
 }
 
 fn strip_prefix_ci<'a>(s: &'a str, prefix: &str) -> Option<&'a str> {
-    if s.len() >= prefix.len()
-        && s[..prefix.len()].eq_ignore_ascii_case(prefix)
-    {
+    if s.len() >= prefix.len() && s[..prefix.len()].eq_ignore_ascii_case(prefix) {
         Some(&s[prefix.len()..])
     } else {
         None

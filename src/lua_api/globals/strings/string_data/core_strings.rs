@@ -11,8 +11,14 @@ pub const ERROR_STRINGS: &[StringDef] = &[
     ("ERR_NOT_IN_COMBAT", "You can't do that while in combat"),
     ("ERR_GENERIC_NO_TARGET", "You have no target"),
     ("ERR_FRIEND_OFFLINE_S", "%s is offline."),
-    ("ERR_FRIEND_ONLINE_SS", "|Hplayer:%s|h[%s]|h has come online."),
-    ("ERR_FRIEND_NOT_FOUND", "That player is not on your friends list."),
+    (
+        "ERR_FRIEND_ONLINE_SS",
+        "|Hplayer:%s|h[%s]|h has come online.",
+    ),
+    (
+        "ERR_FRIEND_NOT_FOUND",
+        "That player is not on your friends list.",
+    ),
     ("ERR_FRIEND_ADDED_S", "%s added to friends."),
     ("ERR_FRIEND_REMOVED_S", "%s removed from friends."),
     ("ERR_IGNORE_ADDED_S", "%s added to ignore list."),
@@ -287,7 +293,10 @@ pub const MISC_UI_STRINGS: &[StringDef] = &[
     ("SOURCE", "Source:"),
     ("APPEARANCE_LABEL", "Appearance"),
     ("COLOR", "Color"),
-    ("COMPACT_UNIT_FRAME_PROFILE_SORTBY_ALPHABETICAL", "Alphabetical"),
+    (
+        "COMPACT_UNIT_FRAME_PROFILE_SORTBY_ALPHABETICAL",
+        "Alphabetical",
+    ),
     ("ITEM_QUALITY6_DESC", "Artifact"),
     ("ITEM_COOLDOWN_TIME", "Cooldown remaining: %s"),
     ("TOY", "Toy"),
@@ -311,7 +320,10 @@ pub const MISC_UI_STRINGS: &[StringDef] = &[
 
 pub const DUEL_STRINGS: &[StringDef] = &[
     ("DUEL_WINNER_KNOCKOUT", "%1$s has defeated %2$s in a duel"),
-    ("DUEL_WINNER_RETREAT", "%1$s has defeated %2$s in a duel (retreat)"),
+    (
+        "DUEL_WINNER_RETREAT",
+        "%1$s has defeated %2$s in a duel (retreat)",
+    ),
 ];
 
 // ============================================================================
@@ -336,10 +348,22 @@ pub const LOOT_STRINGS: &[StringDef] = &[
 // ============================================================================
 
 pub const XP_QUEST_STRINGS: &[StringDef] = &[
-    ("COMBATLOG_XPGAIN_EXHAUSTION1", "%s dies, you gain %d experience (+%d exp Rested bonus)."),
-    ("COMBATLOG_XPGAIN_QUEST", "You gain %d experience (+%d exp bonus)."),
-    ("COMBATLOG_XPGAIN_FIRSTPERSON", "%s dies, you gain %d experience."),
-    ("COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED", "You gain %d experience."),
+    (
+        "COMBATLOG_XPGAIN_EXHAUSTION1",
+        "%s dies, you gain %d experience (+%d exp Rested bonus).",
+    ),
+    (
+        "COMBATLOG_XPGAIN_QUEST",
+        "You gain %d experience (+%d exp bonus).",
+    ),
+    (
+        "COMBATLOG_XPGAIN_FIRSTPERSON",
+        "%s dies, you gain %d experience.",
+    ),
+    (
+        "COMBATLOG_XPGAIN_FIRSTPERSON_UNNAMED",
+        "You gain %d experience.",
+    ),
     ("ERR_QUEST_REWARD_EXP_I", "Experience gained: %d."),
     ("ERR_QUEST_REWARD_MONEY_S", "Received: %s"),
 ];
@@ -400,9 +424,18 @@ pub const COMBAT_TEXT_STRINGS: &[StringDef] = &[
     ("SHOW_COMBAT_HEALING_TEXT", "Show Healing"),
     ("SHOW_COMBAT_HEALING_ABSORB_SELF", "Self Absorbs"),
     ("SHOW_COMBAT_HEALING_ABSORB_TARGET", "Target Absorbs"),
-    ("OPTION_TOOLTIP_SHOW_COMBAT_HEALING", "Show combat healing numbers"),
-    ("OPTION_TOOLTIP_SHOW_COMBAT_HEALING_ABSORB_SELF", "Show self absorbs"),
-    ("OPTION_TOOLTIP_SHOW_COMBAT_HEALING_ABSORB_TARGET", "Show target absorbs"),
+    (
+        "OPTION_TOOLTIP_SHOW_COMBAT_HEALING",
+        "Show combat healing numbers",
+    ),
+    (
+        "OPTION_TOOLTIP_SHOW_COMBAT_HEALING_ABSORB_SELF",
+        "Show self absorbs",
+    ),
+    (
+        "OPTION_TOOLTIP_SHOW_COMBAT_HEALING_ABSORB_TARGET",
+        "Show target absorbs",
+    ),
     ("COMBAT_TEXT_SHOW_COMBO_POINTS_TEXT", "Combo Points"),
     ("COMBAT_TEXT_SHOW_FRIENDLY_NAMES_TEXT", "Friendly Names"),
     ("COMBAT_TEXT_SHOW_DODGE_PARRY_MISS_TEXT", "Dodge/Parry/Miss"),

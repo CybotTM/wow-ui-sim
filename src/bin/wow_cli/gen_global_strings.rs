@@ -33,20 +33,35 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
-    writeln!(out, "//! Auto-generated global strings from WoW CSV exports.")?;
-    writeln!(out, "//! Do not edit manually - regenerate with: wow-cli generate global-strings")?;
+    writeln!(
+        out,
+        "//! Auto-generated global strings from WoW CSV exports."
+    )?;
+    writeln!(
+        out,
+        "//! Do not edit manually - regenerate with: wow-cli generate global-strings"
+    )?;
     writeln!(out)?;
     writeln!(out, "use phf::phf_map;")?;
     writeln!(out)?;
-    writeln!(out, "pub fn get_global_string(name: &str) -> Option<&'static str> {{")?;
+    writeln!(
+        out,
+        "pub fn get_global_string(name: &str) -> Option<&'static str> {{"
+    )?;
     writeln!(out, "    GLOBAL_STRINGS.get(name).copied()")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
-    writeln!(out, "pub static GLOBAL_STRINGS: phf::Map<&'static str, &'static str> = phf_map! {{")?;
+    writeln!(
+        out,
+        "pub static GLOBAL_STRINGS: phf::Map<&'static str, &'static str> = phf_map! {{"
+    )?;
     Ok(())
 }
 
-fn write_string_entries(out: &mut File, reader: BufReader<File>) -> Result<u32, Box<dyn std::error::Error>> {
+fn write_string_entries(
+    out: &mut File,
+    reader: BufReader<File>,
+) -> Result<u32, Box<dyn std::error::Error>> {
     let mut count = 0u32;
 
     for (i, line) in reader.lines().enumerate() {
@@ -85,24 +100,51 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_addon_list_string() {{")?;
-    writeln!(out, "        assert_eq!(get_global_string(\"ADDON_LIST\"), Some(\"AddOn List\"));")?;
+    writeln!(
+        out,
+        "        assert_eq!(get_global_string(\"ADDON_LIST\"), Some(\"AddOn List\"));"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_common_strings_exist() {{")?;
-    writeln!(out, "        assert!(get_global_string(\"OKAY\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"CANCEL\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"ACCEPT\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"DECLINE\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"YES\").is_some());")?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"OKAY\").is_some());"
+    )?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"CANCEL\").is_some());"
+    )?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"ACCEPT\").is_some());"
+    )?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"DECLINE\").is_some());"
+    )?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"YES\").is_some());"
+    )?;
     writeln!(out, "        assert!(get_global_string(\"NO\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"ENABLE\").is_some());")?;
-    writeln!(out, "        assert!(get_global_string(\"DISABLE\").is_some());")?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"ENABLE\").is_some());"
+    )?;
+    writeln!(
+        out,
+        "        assert!(get_global_string(\"DISABLE\").is_some());"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_nonexistent_string_returns_none() {{")?;
-    writeln!(out, "        assert_eq!(get_global_string(\"THIS_STRING_DOES_NOT_EXIST_12345\"), None);")?;
+    writeln!(
+        out,
+        "        assert_eq!(get_global_string(\"THIS_STRING_DOES_NOT_EXIST_12345\"), None);"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;

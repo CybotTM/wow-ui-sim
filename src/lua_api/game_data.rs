@@ -159,16 +159,16 @@ pub fn validate_spell_target(
 /// Hardcoded spell effect amounts (damage or healing).
 pub fn spell_effect_amount(spell_id: u32) -> i32 {
     match spell_id {
-        35395 => 15_000,  // Crusader Strike (instant, harmful)
-        31935 => 25_000,  // Avenger's Shield (instant, harmful)
-        53600 => 20_000,  // Shield of the Righteous (instant, harmful)
-        24275 => 30_000,  // Hammer of Wrath (instant, harmful)
-        62124 => 5_000,   // Hand of Reckoning (instant, harmful)
-        853 => 0,         // Hammer of Justice (stun only)
-        19750 => 20_000,  // Flash of Light (cast-time, helpful)
-        82326 => 35_000,  // Holy Light (cast-time, helpful)
-        85673 => 20_000,  // Word of Glory (instant, helpful)
-        _ => 10_000,      // Default fallback
+        35395 => 15_000, // Crusader Strike (instant, harmful)
+        31935 => 25_000, // Avenger's Shield (instant, harmful)
+        53600 => 20_000, // Shield of the Righteous (instant, harmful)
+        24275 => 30_000, // Hammer of Wrath (instant, harmful)
+        62124 => 5_000,  // Hand of Reckoning (instant, harmful)
+        853 => 0,        // Hammer of Justice (stun only)
+        19750 => 20_000, // Flash of Light (cast-time, helpful)
+        82326 => 35_000, // Holy Light (cast-time, helpful)
+        85673 => 20_000, // Word of Glory (instant, helpful)
+        _ => 10_000,     // Default fallback
     }
 }
 
@@ -238,7 +238,9 @@ fn apply_heal_to_target(
     let mut s = state.borrow_mut();
     if let Some(ref mut t) = s.current_target {
         if !t.is_enemy {
-            if t.health <= 0 { return None; }
+            if t.health <= 0 {
+                return None;
+            }
             t.health = (t.health + amount).min(t.health_max);
             let healed = t.health;
             let unit_id = t.unit_id.clone();
@@ -257,16 +259,28 @@ fn apply_heal_to_target(
 }
 
 fn heal_player(s: &mut super::state::SimState, amount: i32) -> Option<String> {
-    if s.player.health <= 0 { return None; }
+    if s.player.health <= 0 {
+        return None;
+    }
     s.player.health = (s.player.health + amount).min(s.player.health_max);
     Some("player".to_string())
 }
 
 /// Class display names (index 0 = class_index 1, etc.).
 pub const CLASS_LABELS: &[&str] = &[
-    "Warrior", "Paladin", "Hunter", "Rogue", "Priest",
-    "Death Knight", "Shaman", "Mage", "Warlock", "Monk",
-    "Druid", "Demon Hunter", "Evoker",
+    "Warrior",
+    "Paladin",
+    "Hunter",
+    "Rogue",
+    "Priest",
+    "Death Knight",
+    "Shaman",
+    "Mage",
+    "Warlock",
+    "Monk",
+    "Druid",
+    "Demon Hunter",
+    "Evoker",
 ];
 
 /// Race data: (display_name, file_name, faction).
@@ -308,10 +322,26 @@ pub const XP_LEVELS: &[(&str, f64)] = &[
 /// Pick a random WoW-style player name using the current time as a seed.
 pub fn random_player_name() -> String {
     const NAMES: &[&str] = &[
-        "Arthas", "Jaina", "Thrall", "Varian", "Anduin",
-        "Garrosh", "Tyrande", "Malfurion", "Illidan", "Khadgar",
-        "Genn", "Baine", "Rokhan", "Thalyssra", "Alleria",
-        "Turalyon", "Calia", "Lothraxion", "Velen", "Yrel",
+        "Arthas",
+        "Jaina",
+        "Thrall",
+        "Varian",
+        "Anduin",
+        "Garrosh",
+        "Tyrande",
+        "Malfurion",
+        "Illidan",
+        "Khadgar",
+        "Genn",
+        "Baine",
+        "Rokhan",
+        "Thalyssra",
+        "Alleria",
+        "Turalyon",
+        "Calia",
+        "Lothraxion",
+        "Velen",
+        "Yrel",
     ];
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -322,10 +352,10 @@ pub fn random_player_name() -> String {
 
 /// Default party member definitions: (name, class_index, health_max, power, power_max, power_type, power_type_name).
 const DEFAULT_PARTY_MEMBERS: &[(&str, i32, i32, i32, i32, i32, &str)] = &[
-    ("Thrynn",   2, 120_000, 80_000, 80_000, 0, "MANA"),  // Paladin
-    ("Kazzara",  1, 180_000,      0,    100, 1, "RAGE"),   // Warrior
-    ("Sylvanas", 3, 100_000,    100,    100, 2, "FOCUS"),  // Hunter
-    ("Jaina",    8,  90_000, 64_000, 80_000, 0, "MANA"),   // Mage
+    ("Thrynn", 2, 120_000, 80_000, 80_000, 0, "MANA"), // Paladin
+    ("Kazzara", 1, 180_000, 0, 100, 1, "RAGE"),        // Warrior
+    ("Sylvanas", 3, 100_000, 100, 100, 2, "FOCUS"),    // Hunter
+    ("Jaina", 8, 90_000, 64_000, 80_000, 0, "MANA"),   // Mage
 ];
 
 /// Default 4-member party (disabled by WOW_SIM_NO_PARTY=1).
@@ -335,21 +365,23 @@ pub fn default_party() -> Vec<PartyMember> {
     }
     DEFAULT_PARTY_MEMBERS
         .iter()
-        .map(|&(name, class_index, health_max, power, power_max, power_type, power_type_name)| {
-            PartyMember {
-                name: name.to_string(),
-                class_index,
-                level: 80,
-                health: health_max,
-                health_max,
-                power,
-                power_max,
-                power_type,
-                power_type_name: power_type_name.to_string(),
-                is_leader: false,
-                dead_since: None,
-            }
-        })
+        .map(
+            |&(name, class_index, health_max, power, power_max, power_type, power_type_name)| {
+                PartyMember {
+                    name: name.to_string(),
+                    class_index,
+                    level: 80,
+                    health: health_max,
+                    health_max,
+                    power,
+                    power_max,
+                    power_type,
+                    power_type_name: power_type_name.to_string(),
+                    is_leader: false,
+                    dead_since: None,
+                }
+            },
+        )
         .collect()
 }
 
@@ -389,8 +421,10 @@ fn build_player_target(state: &super::state::SimState) -> TargetInfo {
 }
 
 fn build_party_target(unit_id: &str, state: &super::state::SimState) -> Option<TargetInfo> {
-    let idx = unit_id.strip_prefix("party")?
-        .parse::<usize>().ok()
+    let idx = unit_id
+        .strip_prefix("party")?
+        .parse::<usize>()
+        .ok()
         .filter(|&n| n >= 1)
         .map(|n| n - 1)?;
     let m = state.party_members.get(idx)?;
@@ -467,7 +501,9 @@ pub fn tick_party_health(members: &mut [PartyMember], damage_pct: f64) -> Vec<us
         (nanos, i).hash(&mut hasher);
         let hash = hasher.finish();
         let max_delta = (m.health_max as f64 * damage_pct) as i64;
-        if max_delta == 0 { continue; }
+        if max_delta == 0 {
+            continue;
+        }
         let delta = -((hash % (max_delta as u64 + 1)) as i64);
         let new_hp = (m.health as i64 + delta).clamp(0, m.health_max as i64) as i32;
         if new_hp != m.health {
@@ -483,13 +519,27 @@ pub fn tick_party_health(members: &mut [PartyMember], damage_pct: f64) -> Vec<us
 
 /// Buff pool: (name, spell_id, icon_file_id, duration_secs, source_unit, can_apply_aura).
 const BUFF_POOL: &[(&str, i32, i32, f64, &str, bool)] = &[
-    ("Power Word: Fortitude", 21562, 135987, 3600.0, "player", true),
+    (
+        "Power Word: Fortitude",
+        21562,
+        135987,
+        3600.0,
+        "player",
+        true,
+    ),
     ("Arcane Intellect", 1459, 135932, 3600.0, "party2", true),
     ("Mark of the Wild", 1126, 136078, 3600.0, "party3", true),
     ("Battle Shout", 6673, 132333, 3600.0, "party1", true),
     ("Retribution Aura", 183435, 135889, 0.0, "player", false),
     ("Devotion Aura", 465, 135893, 0.0, "player", false),
-    ("Blessing of the Bronze", 381748, 4622449, 3600.0, "party4", true),
+    (
+        "Blessing of the Bronze",
+        381748,
+        4622449,
+        3600.0,
+        "party4",
+        true,
+    ),
     ("Well Fed", 104280, 136000, 3600.0, "player", false),
 ];
 
@@ -527,7 +577,11 @@ fn build_auras_from_indices(indices: &[usize]) -> Vec<AuraInfo> {
         .enumerate()
         .map(|(i, &pool_idx)| {
             let (name, spell_id, icon, duration, source, can_apply) = BUFF_POOL[pool_idx];
-            let expiration_time = if duration > 0.0 { get_time + duration } else { 0.0 };
+            let expiration_time = if duration > 0.0 {
+                get_time + duration
+            } else {
+                0.0
+            };
             AuraInfo {
                 name: name.to_string(),
                 spell_id,
