@@ -18,6 +18,9 @@
 use mlua::{Lua, MultiValue, Result, Value};
 
 const GLUE_CHARACTER_GUID: &str = "Player-1-00000001";
+const GLUE_SELECTED_CHARACTER_KEY: &str = "__wow_ui_sim_glue_selected_character";
+const GLUE_SELECT_CHARACTER_DISPATCH_KEY: &str = "__wow_ui_sim_glue_select_character_dispatch";
+const GLUE_CHARACTER_CREATE_TYPE_KEY: &str = "__glue_character_create_type";
 
 fn has_glue_character(lua: &Lua) -> bool {
     let Some(state) =
@@ -38,6 +41,44 @@ fn glue_character_count(lua: &Lua) -> i32 {
 
 fn glue_character_guid(lua: &Lua, index: i32) -> Option<String> {
     (glue_character_count(lua) > 0 && index == 1).then(|| GLUE_CHARACTER_GUID.to_string())
+}
+
+fn glue_selected_character(lua: &Lua) -> i32 {
+    lua.globals()
+        .get::<Option<i32>>(GLUE_SELECTED_CHARACTER_KEY)
+        .ok()
+        .flatten()
+        .filter(|index| *index >= 0 && *index <= glue_character_count(lua))
+        .unwrap_or(0)
+}
+
+fn set_glue_selected_character(lua: &Lua, index: i32) -> Result<()> {
+    let selected = if glue_character_count(lua) == 0 {
+        0
+    } else {
+        index.clamp(1, glue_character_count(lua))
+    };
+    lua.globals().set(GLUE_SELECTED_CHARACTER_KEY, selected)
+}
+
+fn get_glue_character_create_type(lua: &Lua) -> Result<i32> {
+    let value: Value = lua.globals().raw_get(GLUE_CHARACTER_CREATE_TYPE_KEY)?;
+    Ok(match value {
+        Value::Integer(n) => n as i32,
+        Value::Number(n) => n as i32,
+        _ => 0,
+    })
+}
+
+fn set_glue_character_create_type(lua: &Lua, value: &Value) -> Result<()> {
+    let create_type = match value {
+        Value::Integer(n) => *n as i32,
+        Value::Number(n) => *n as i32,
+        _ => 0,
+    };
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_TYPE_KEY, create_type)?;
+    Ok(())
 }
 
 fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
@@ -820,6 +861,7 @@ fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
 /// Missing global functions referenced during startup events.
 fn register_missing_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    g.raw_set(GLUE_CHARACTER_CREATE_TYPE_KEY, 0i32)?;
     register_timer_and_bar_globals(lua, &g)?;
     register_lfg_and_guild_stubs(lua, &g)?;
     register_action_button_util(lua, &g)?;
@@ -905,6 +947,24 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _frame_name: String| Ok(()))?,
     )?;
     g.set(
+        "MoveCharactersToMapSceneFrame",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "MoveCharactersToModelFFXFrame",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetSelectBackgroundModel",
+        lua.create_function(|_, _character_id: i32| Ok(0i32))?,
+    )?;
+    g.set(
+        "SetCharSelectBackground",
+        lua.create_function(|_, _background_id: Value| Ok(()))?,
+    )?;
+    g.set("PlayGlueAmbience", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
+    g.set("StopGlueAmbience", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
+    g.set(
         "UpdateSelectionCustomizationScene",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
@@ -926,6 +986,16 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         })?,
     )?;
     g.set(
+        "GetCharacterRace",
+        lua.create_function(|_, index: i32| {
+            if index == 1 {
+                Ok((1i32, String::from("Human")))
+            } else {
+                Ok((0i32, String::new()))
+            }
+        })?,
+    )?;
+    g.set(
         "GetBasicCharacterInfo",
         lua.create_function(|lua, guid: String| glue_basic_character_info(lua, &guid))?,
     )?;
@@ -935,13 +1005,25 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     )?;
     g.set(
         "GetCharacterSelection",
-        lua.create_function(|lua, ()| Ok((glue_character_count(lua) > 0) as i32))?,
+        lua.create_function(|lua, ()| Ok(glue_selected_character(lua)))?,
     )?;
     g.set(
         "SelectCharacter",
         lua.create_function(|lua, character_id: i32| {
-            let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
-            fire_event.call::<()>(("UPDATE_SELECTED_CHARACTER", character_id))?;
+            set_glue_selected_character(lua, character_id)?;
+            let new_selection = glue_selected_character(lua);
+            let is_dispatching = lua
+                .globals()
+                .get::<Option<bool>>(GLUE_SELECT_CHARACTER_DISPATCH_KEY)
+                .ok()
+                .flatten()
+                .unwrap_or(false);
+            if new_selection > 0 && !is_dispatching {
+                lua.globals().set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, true)?;
+                let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
+                fire_event.call::<()>(("UPDATE_SELECTED_CHARACTER", new_selection))?;
+                lua.globals().set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, false)?;
+            }
             Ok(())
         })?,
     )?;
@@ -957,6 +1039,7 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     g.set(
         "GetCharacterListUpdate",
         lua.create_function(|lua, ()| {
+            set_glue_selected_character(lua, glue_selected_character(lua))?;
             let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
             fire_event.call::<()>(("CHARACTER_LIST_UPDATE", glue_character_count(lua)))?;
             Ok(())
@@ -1796,7 +1879,7 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetCharacterCreateType",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
+        lua.create_function(|lua, ()| Ok(get_glue_character_create_type(lua)?))?,
     )?;
     character_creation.set(
         "GetNumCharacterTemplates",
@@ -1834,7 +1917,10 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "SetCharacterCreateType",
-        lua.create_function(|_, _: Value| Ok(()))?,
+        lua.create_function(|lua, value: Value| {
+            set_glue_character_create_type(lua, &value)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetTimerunningSeasonID",

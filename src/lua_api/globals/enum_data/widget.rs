@@ -67,6 +67,11 @@ pub const PLAYER_MENTORSHIP_STATUS: EnumDef = (
     &[("None", 0), ("Newcomer", 1), ("Mentor", 2)],
 );
 
+pub const CHARACTER_CREATE_TYPE: EnumDef = (
+    "CharacterCreateType",
+    &[("Normal", 0), ("Boost", 1), ("TrialBoost", 2)],
+);
+
 pub const RELATIVE_CONTENT_DIFFICULTY: SeqEnumDef = (
     "RelativeContentDifficulty",
     &["Trivial", "Easy", "Fair", "Difficult", "Impossible"],
