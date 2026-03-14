@@ -93,6 +93,9 @@ pub enum XmlElement {
     // Font definitions
     Font(FontXml),
     FontFamily(FontFamilyXml),
+    // Keybinding/click definitions (no-op, parsed for clean deserialization)
+    Binding(BindingXml),
+    ModifiedClick(ModifiedClickXml),
     // Text content (from malformed XML or comments)
     #[serde(rename = "$text")]
     Text(String),
@@ -390,80 +393,34 @@ pub enum FrameChildElement {
     KeyValues(KeyValuesXml),
     Attributes(AttributesXml),
     Animations(AnimationsXml),
-    // Button-specific
-    NormalTexture(TextureXml),
-    PushedTexture(TextureXml),
-    DisabledTexture(TextureXml),
-    HighlightTexture(TextureXml),
-    CheckedTexture(TextureXml),
-    DisabledCheckedTexture(TextureXml),
+    NormalTexture(TextureXml), PushedTexture(TextureXml),
+    DisabledTexture(TextureXml), HighlightTexture(TextureXml),
+    CheckedTexture(TextureXml), DisabledCheckedTexture(TextureXml),
     ButtonText(FontStringXml),
-    NormalFont(FontRefXml),
-    HighlightFont(FontRefXml),
-    DisabledFont(FontRefXml),
-    // EditBox-specific
+    NormalFont(FontRefXml), HighlightFont(FontRefXml), DisabledFont(FontRefXml),
     FontString(FontStringXml),
-    // ScrollFrame-specific
     ScrollChild(ScrollChildXml),
-    // Slider-specific
     ThumbTexture(TextureXml),
-    // StatusBar-specific
-    BarTexture(TextureXml),
-    BarColor(ColorXml),
-    // Backdrop (legacy)
+    BarTexture(TextureXml), BarColor(ColorXml),
     Backdrop(BackdropXml),
-    // Resize bounds
     ResizeBounds(ResizeBoundsXml),
-    // Hit rect insets
-    HitRectInsets(InsetsXml),
-    // EditBox/MessageFrame text padding
-    TextInsets(InsetsXml),
-    // Button pressed text offset
+    HitRectInsets(InsetsXml), TextInsets(InsetsXml),
     PushedTextOffset(SizeXml),
-    // Cooldown-specific textures
-    SwipeTexture(TextureXml),
-    EdgeTexture(TextureXml),
-    BlingTexture(TextureXml),
-    // ColorSelect-specific textures
-    ColorWheelTexture(TextureXml),
-    ColorWheelThumbTexture(TextureXml),
-    ColorValueTexture(TextureXml),
-    ColorValueThumbTexture(TextureXml),
-    ColorAlphaTexture(TextureXml),
-    ColorAlphaThumbTexture(TextureXml),
-    // SimpleHTML header font strings
-    FontStringHeader1(FontStringXml),
-    FontStringHeader2(FontStringXml),
-    FontStringHeader3(FontStringXml),
-    // Button state colors
-    NormalColor(ColorXml),
-    HighlightColor(ColorXml),
-    DisabledColor(ColorXml),
-    // ModelScene actors container
+    SwipeTexture(TextureXml), EdgeTexture(TextureXml), BlingTexture(TextureXml),
+    ColorWheelTexture(TextureXml), ColorWheelThumbTexture(TextureXml),
+    ColorValueTexture(TextureXml), ColorValueThumbTexture(TextureXml),
+    ColorAlphaTexture(TextureXml), ColorAlphaThumbTexture(TextureXml),
+    FontStringHeader1(FontStringXml), FontStringHeader2(FontStringXml), FontStringHeader3(FontStringXml),
+    NormalColor(ColorXml), HighlightColor(ColorXml), DisabledColor(ColorXml),
     Actors(ActorsXml),
-    // Model/MapScene elements
-    FogColor(ColorXml),
-    ViewInsets(InsetsXml),
-    // Standalone frame-type children (WoW XML allows these outside <Frames> wrappers)
-    Frame(FrameXml),
-    Button(FrameXml),
-    StatusBar(FrameXml),
-    CheckButton(FrameXml),
-    EditBox(FrameXml),
-    ScrollFrame(FrameXml),
-    Slider(FrameXml),
-    Cooldown(FrameXml),
-    GameTooltip(FrameXml),
-    Model(FrameXml),
-    ModelScene(FrameXml),
-    PlayerModel(FrameXml),
-    MessageFrame(FrameXml),
-    ScrollingMessageFrame(FrameXml),
-    SimpleHTML(FrameXml),
-    ColorSelect(FrameXml),
-    ItemButton(FrameXml),
-    EventFrame(FrameXml),
-    // Additional elements we may encounter
+    FogColor(ColorXml), ViewInsets(InsetsXml),
+    Frame(FrameXml), Button(FrameXml), StatusBar(FrameXml),
+    CheckButton(FrameXml), EditBox(FrameXml), ScrollFrame(FrameXml),
+    Slider(FrameXml), Cooldown(FrameXml), GameTooltip(FrameXml),
+    Model(FrameXml), ModelScene(FrameXml), PlayerModel(FrameXml),
+    MessageFrame(FrameXml), ScrollingMessageFrame(FrameXml),
+    SimpleHTML(FrameXml), ColorSelect(FrameXml),
+    ItemButton(FrameXml), EventFrame(FrameXml),
     #[serde(other)]
     Unknown,
 }
@@ -526,6 +483,31 @@ pub struct InsetsXml {
     pub top: Option<f32>,
     #[serde(rename = "@bottom")]
     pub bottom: Option<f32>,
+    #[serde(rename = "AbsInset")]
+    pub abs_inset: Option<AbsInsetXml>,
+}
+
+impl InsetsXml {
+    pub fn left(&self) -> f32 {
+        self.left.or_else(|| self.abs_inset.as_ref()?.left).unwrap_or(0.0)
+    }
+    pub fn right(&self) -> f32 {
+        self.right.or_else(|| self.abs_inset.as_ref()?.right).unwrap_or(0.0)
+    }
+    pub fn top(&self) -> f32 {
+        self.top.or_else(|| self.abs_inset.as_ref()?.top).unwrap_or(0.0)
+    }
+    pub fn bottom(&self) -> f32 {
+        self.bottom.or_else(|| self.abs_inset.as_ref()?.bottom).unwrap_or(0.0)
+    }
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct AbsInsetXml {
+    #[serde(rename = "@left")]  pub left: Option<f32>,
+    #[serde(rename = "@right")] pub right: Option<f32>,
+    #[serde(rename = "@top")]   pub top: Option<f32>,
+    #[serde(rename = "@bottom")]pub bottom: Option<f32>,
 }
 
 /// Size definition.
@@ -666,6 +648,11 @@ pub struct ScriptsXml {
     pub on_loop: Vec<ScriptBodyXml>,
     #[serde(rename = "OnPause", default)]
     pub on_pause: Vec<ScriptBodyXml>,
+    // Button pre/post click handlers
+    #[serde(rename = "PreClick", default)]
+    pub pre_click: Vec<ScriptBodyXml>,
+    #[serde(rename = "PostClick", default)]
+    pub post_click: Vec<ScriptBodyXml>,
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -728,6 +715,19 @@ pub struct ColorXml {
     pub a: Option<f32>,
     #[serde(rename = "@color")]
     pub color: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct BindingXml {
+    #[serde(rename = "@name")]     pub name: Option<String>,
+    #[serde(rename = "@category")] pub category: Option<String>,
+    #[serde(rename = "@header")]   pub header: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct ModifiedClickXml {
+    #[serde(rename = "@action")]  pub action: Option<String>,
+    #[serde(rename = "@default")] pub default: Option<String>,
 }
 
 /// `<Gradient orientation="VERTICAL"><MinColor .../><MaxColor .../></Gradient>`

@@ -125,6 +125,21 @@ pub struct TexCoordsXml {
     pub top: Option<f32>,
     #[serde(rename = "@bottom")]
     pub bottom: Option<f32>,
+    #[serde(rename = "Rect")]
+    pub rect: Option<TexCoordsRectXml>,
+}
+
+/// Rect child for TexCoords — corner-based UV coordinates.
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct TexCoordsRectXml {
+    #[serde(rename = "@ULx")] pub ul_x: Option<f32>,
+    #[serde(rename = "@ULy")] pub ul_y: Option<f32>,
+    #[serde(rename = "@LLx")] pub ll_x: Option<f32>,
+    #[serde(rename = "@LLy")] pub ll_y: Option<f32>,
+    #[serde(rename = "@URx")] pub ur_x: Option<f32>,
+    #[serde(rename = "@URy")] pub ur_y: Option<f32>,
+    #[serde(rename = "@LRx")] pub lr_x: Option<f32>,
+    #[serde(rename = "@LRy")] pub lr_y: Option<f32>,
 }
 
 /// Container for MaskedTexture entries inside a MaskTexture element.
@@ -181,6 +196,28 @@ pub struct FontStringXml {
     pub word_wrap: Option<bool>,
     #[serde(rename = "@maxLines")]
     pub max_lines: Option<u32>,
+    #[serde(rename = "FontHeight")]
+    pub font_height: Option<FontHeightXml>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct FontHeightXml {
+    #[serde(rename = "@val")]
+    pub val: Option<f32>,
+    #[serde(rename = "AbsValue")]
+    pub abs_value: Option<AbsValueXml>,
+}
+
+impl FontHeightXml {
+    pub fn value(&self) -> Option<f32> {
+        self.val.or_else(|| self.abs_value.as_ref()?.val)
+    }
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct AbsValueXml {
+    #[serde(rename = "@val")]
+    pub val: Option<f32>,
 }
 
 /// Shadow element for FontStrings - contains offset and color.
@@ -402,6 +439,30 @@ pub struct AnimationXml {
     // Path
     #[serde(rename = "@curve")]
     pub curve: Option<String>,
+    // Child elements (parsed but not executed)
+    #[serde(rename = "Origin")]
+    pub origin: Option<OriginXml>,
+    #[serde(rename = "ControlPoints")]
+    pub control_points: Option<ControlPointsXml>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct OriginXml {
+    #[serde(rename = "@point")] pub point: Option<String>,
+    #[serde(rename = "@x")]     pub x: Option<f32>,
+    #[serde(rename = "@y")]     pub y: Option<f32>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct ControlPointsXml {
+    #[serde(rename = "ControlPoint", default)]
+    pub points: Vec<ControlPointXml>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct ControlPointXml {
+    #[serde(rename = "@offsetX")] pub offset_x: Option<f32>,
+    #[serde(rename = "@offsetY")] pub offset_y: Option<f32>,
 }
 
 /// Actors container for ModelScene.
@@ -452,5 +513,12 @@ pub struct FontFamilyXml {
     pub name: Option<String>,
     #[serde(rename = "@virtual")]
     pub is_virtual: Option<bool>,
-    // Contains Member elements with Font children, which we ignore for simulation
+    #[serde(rename = "Member", default)]
+    pub members: Vec<FontFamilyMemberXml>,
+}
+
+#[derive(Debug, Deserialize, Default, Clone)]
+pub struct FontFamilyMemberXml {
+    #[serde(rename = "@alphabet")] pub alphabet: Option<String>,
+    #[serde(rename = "Font")]      pub font: Option<FontXml>,
 }

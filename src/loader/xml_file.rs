@@ -69,9 +69,9 @@ fn process_element(
             register_virtual_anim_group(ag);
             Ok(0)
         }
-        XmlElement::Animation(_) => {
-            // Standalone virtual Animation templates (e.g. PointsOffsetAnimationTemplate)
-            // are only meaningful within AnimationGroups; ignore at top level.
+        XmlElement::Animation(_)
+        | XmlElement::Binding(_)
+        | XmlElement::ModifiedClick(_) => {
             Ok(0)
         }
         _ => {
@@ -404,5 +404,26 @@ fn create_font_family_object(
     let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", name);
     env.exec(&lua_code).map_err(|e| {
         LoadError::Lua(format!("Failed to create font family {}: {}", name, e))
-    })
+    })?;
+    // Use the roman member's font if present
+    let roman_font = font_family.members.iter()
+        .find(|m| m.alphabet.as_deref() == Some("roman"))
+        .and_then(|m| m.font.as_ref());
+    if let Some(font) = roman_font {
+        let mut overrides = String::new();
+        if let Some(path) = &font.font {
+            let p = path.replace('\\', "/");
+            overrides.push_str(&format!("{name}.__font = \"{p}\"\n"));
+        }
+        if let Some(h) = font.height {
+            overrides.push_str(&format!("{name}.__height = {h}\n"));
+        }
+        if let Some(o) = &font.outline {
+            overrides.push_str(&format!("{name}.__outline = \"{o}\"\n"));
+        }
+        if !overrides.is_empty() {
+            let _ = env.exec(&overrides);
+        }
+    }
+    Ok(())
 }

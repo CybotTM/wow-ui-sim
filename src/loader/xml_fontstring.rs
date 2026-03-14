@@ -17,14 +17,18 @@ fn resolve_fontstring_text(text_key: Option<&str>) -> Option<String> {
 /// Generate Lua code for fontstring visual properties (justification, color, size, wrapping).
 fn generate_fontstring_visual_code(fs: &crate::xml::FontStringXml) -> String {
     let mut code = String::new();
+    generate_fontstring_justify_color(&mut code, fs);
+    generate_fontstring_size_and_flags(&mut code, fs);
+    code
+}
 
+fn generate_fontstring_justify_color(code: &mut String, fs: &crate::xml::FontStringXml) {
     if let Some(justify_h) = &fs.justify_h {
         code.push_str(&format!("\n        fs:SetJustifyH(\"{}\")\n        ", justify_h));
     }
     if let Some(justify_v) = &fs.justify_v {
         code.push_str(&format!("\n        fs:SetJustifyV(\"{}\")\n        ", justify_v));
     }
-
     if let Some(color) = &fs.color {
         code.push_str(&format!(
             "\n        fs:SetTextColor({}, {}, {}, {})\n        ",
@@ -32,37 +36,33 @@ fn generate_fontstring_visual_code(fs: &crate::xml::FontStringXml) -> String {
             color.b.unwrap_or(1.0), color.a.unwrap_or(1.0)
         ));
     }
+}
 
+fn generate_fontstring_size_and_flags(code: &mut String, fs: &crate::xml::FontStringXml) {
     if let Some(size) = fs.size.last() {
         let (x, y) = get_size_values(size);
         match (x, y) {
-            (Some(x), Some(y)) => {
-                code.push_str(&format!("\n        fs:SetSize({}, {})\n        ", x, y));
-            }
-            (Some(x), None) => {
-                code.push_str(&format!("\n        fs:SetWidth({})\n        ", x));
-            }
-            (None, Some(y)) => {
-                code.push_str(&format!("\n        fs:SetHeight({})\n        ", y));
-            }
+            (Some(x), Some(y)) => code.push_str(&format!("\n        fs:SetSize({}, {})\n        ", x, y)),
+            (Some(x), None) => code.push_str(&format!("\n        fs:SetWidth({})\n        ", x)),
+            (None, Some(y)) => code.push_str(&format!("\n        fs:SetHeight({})\n        ", y)),
             _ => {}
         }
     }
-
+    if let Some(h) = fs.font_height.as_ref().and_then(|fh| fh.value()) {
+        code.push_str(&format!(
+            "\n        do local f,_,fl = fs:GetFont(); if f then fs:SetFont(f, {h}, fl) end end\n        "
+        ));
+    }
     if fs.word_wrap == Some(false) {
         code.push_str("\n        fs:SetWordWrap(false)\n        ");
     }
-
     if let Some(max_lines) = fs.max_lines
         && max_lines > 0 {
             code.push_str(&format!("\n        fs:SetMaxLines({})\n        ", max_lines));
         }
-
     if fs.set_all_points == Some(true) {
         code.push_str("\n        fs:SetAllPoints(true)\n        ");
     }
-
-    code
 }
 
 /// Generate Lua code for fontstring parent references (parentKey, parentArray).

@@ -413,6 +413,8 @@ fn frame_lifecycle_handlers(scripts: &crate::xml::ScriptsXml) -> String {
         ("OnEvent", scripts.on_event.last()),
         ("OnUpdate", scripts.on_update.last()),
         ("OnClick", scripts.on_click.last()),
+        ("PreClick", scripts.pre_click.last()),
+        ("PostClick", scripts.post_click.last()),
         ("OnShow", scripts.on_show.last()),
         ("OnHide", scripts.on_hide.last()),
         ("OnEnter", scripts.on_enter.last()),

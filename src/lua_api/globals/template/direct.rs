@@ -75,16 +75,36 @@ fn set_single_anchor(
 ) {
     let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
     let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
-
     let Some(point) = AnchorPoint::from_str(point_str) else { return };
-    let Some(relative_point) = AnchorPoint::from_str(relative_point_str) else {
-        return;
-    };
+    let Some(relative_point) = AnchorPoint::from_str(relative_point_str) else { return };
 
     let (offset_x, offset_y) = anchor_offset(anchor);
+    let relative_to_id = resolve_anchor_target(state, frame_id, anchor, frame_name);
 
-    // Resolve relative_to target (relative_key takes priority when relative_to is absent)
-    let relative_to_id = if anchor.relative_to.is_none() {
+    if let Some(rel_id) = relative_to_id {
+        if state.widgets.would_create_anchor_cycle(frame_id, rel_id) {
+            return;
+        }
+    }
+
+    update_anchor_dependents(state, frame_id, point, relative_to_id);
+
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.set_point(
+            point,
+            relative_to_id.map(|id| id as usize),
+            relative_point,
+            offset_x, offset_y,
+        );
+    }
+    state.widgets.mark_rect_dirty(frame_id);
+}
+
+/// Resolve the relative_to target ID for an anchor element.
+fn resolve_anchor_target(
+    state: &SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str,
+) -> Option<u64> {
+    if anchor.relative_to.is_none() {
         if let Some(key) = anchor.relative_key.as_deref() {
             resolve_relative_key(state, frame_id, key)
         } else {
@@ -92,43 +112,23 @@ fn set_single_anchor(
         }
     } else {
         resolve_relative_to(state, frame_id, anchor.relative_to.as_deref(), frame_name)
-    };
-
-    // Cycle detection
-    if let Some(rel_id) = relative_to_id {
-        if state.widgets.would_create_anchor_cycle(frame_id, rel_id) {
-            return;
-        }
     }
+}
 
-    // Remove old anchor dependent for this point
+/// Remove old and add new anchor dependents for a point.
+fn update_anchor_dependents(
+    state: &mut SimState, frame_id: u64, point: AnchorPoint, new_target: Option<u64>,
+) {
     if let Some(frame) = state.widgets.get(frame_id) {
         if let Some(old_anchor) = frame.anchors.iter().find(|a| a.point == point) {
             if let Some(old_target) = old_anchor.relative_to_id {
-                state
-                    .widgets
-                    .remove_anchor_dependent(old_target as u64, frame_id);
+                state.widgets.remove_anchor_dependent(old_target as u64, frame_id);
             }
         }
     }
-
-    // Add new anchor dependent
-    if let Some(rel_id) = relative_to_id {
+    if let Some(rel_id) = new_target {
         state.widgets.add_anchor_dependent(rel_id, frame_id);
     }
-
-    // Set the anchor
-    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
-        frame.set_point(
-            point,
-            relative_to_id.map(|id| id as usize),
-            relative_point,
-            offset_x,
-            offset_y,
-        );
-    }
-
-    state.widgets.mark_rect_dirty(frame_id);
 }
 
 /// Resolve the relative_to target for an anchor, returning the target frame ID.
@@ -509,12 +509,8 @@ pub fn apply_xml_hit_rect_insets(
 ) {
     if let Some(insets) = frame.hit_rect_insets() {
         set_hit_rect_insets(
-            state,
-            frame_id,
-            insets.left.unwrap_or(0.0),
-            insets.right.unwrap_or(0.0),
-            insets.top.unwrap_or(0.0),
-            insets.bottom.unwrap_or(0.0),
+            state, frame_id,
+            insets.left(), insets.right(), insets.top(), insets.bottom(),
         );
     }
 }
