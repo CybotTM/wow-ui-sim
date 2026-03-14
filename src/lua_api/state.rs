@@ -77,6 +77,14 @@ pub struct SimState {
     pub screen_kind: ScreenKind,
     /// Whether the simulated player is logged into the world.
     pub is_logged_in: bool,
+    /// Whether the current glue screen has been displayed at least once.
+    pub screen_first_displayed: bool,
+    /// Remembered account name for glue login UI helpers.
+    pub saved_account_name: String,
+    /// Remembered account list string for glue login UI helpers.
+    pub saved_account_list: String,
+    /// Whether the saved account uses token login.
+    pub uses_token: bool,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -191,6 +199,10 @@ impl SimState {
             screen_height: 1200.0,
             screen_kind: ScreenKind::Game,
             is_logged_in: false,
+            screen_first_displayed: false,
+            saved_account_name: String::new(),
+            saved_account_list: String::new(),
+            uses_token: false,
             fps: 0.0,
             rot_damage_level: 0,
             start_time: Instant::now(),
@@ -215,6 +227,7 @@ impl SimState {
 
     pub fn set_screen_kind(&mut self, screen_kind: ScreenKind) {
         self.screen_kind = screen_kind;
+        self.screen_first_displayed = false;
         if screen_kind.is_glue() {
             self.is_logged_in = false;
         }

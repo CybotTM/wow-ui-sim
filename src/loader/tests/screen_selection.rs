@@ -28,6 +28,8 @@ fn login_screen_discovers_glue_addons_not_game_base() {
     assert!(addons.iter().any(|name| name == "Blizzard_GlueParent"));
     assert!(addons.iter().any(|name| name == "Blizzard_GlueXML"));
     assert!(!addons.iter().any(|name| name == "Blizzard_UIParent"));
+    assert!(!addons.iter().any(|name| name == "Blizzard_CharacterCreate"));
+    assert!(!addons.iter().any(|name| name == "Blizzard_CharacterCustomize"));
 }
 
 #[test]
@@ -36,4 +38,5 @@ fn character_select_screen_uses_glue_addon_set() {
     assert!(addons.iter().any(|name| name == "Blizzard_GlueParent"));
     assert!(addons.iter().any(|name| name == "Blizzard_GlueXML"));
     assert!(!addons.iter().any(|name| name == "Blizzard_UIParent"));
+    assert!(addons.iter().any(|name| name == "Blizzard_CharacterCreate"));
 }

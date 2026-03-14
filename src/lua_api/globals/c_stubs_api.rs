@@ -740,6 +740,66 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     register_lfg_and_guild_stubs(lua, &g)?;
     register_action_button_util(lua, &g)?;
     g.set(
+        "GetSavedAccountName",
+        lua.create_function(|lua, ()| {
+            let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            else {
+                return Ok(String::new());
+            };
+            Ok(state.borrow().saved_account_name.clone())
+        })?,
+    )?;
+    g.set(
+        "SetSavedAccountName",
+        lua.create_function(|lua, account_name: String| {
+            if let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            {
+                let mut state = state.borrow_mut();
+                state.saved_account_name = account_name.clone();
+                if !account_name.is_empty() && state.saved_account_list.is_empty() {
+                    state.saved_account_list = account_name;
+                }
+            }
+            Ok(())
+        })?,
+    )?;
+    g.set(
+        "GetSavedAccountList",
+        lua.create_function(|lua, ()| {
+            let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            else {
+                return Ok(String::new());
+            };
+            Ok(state.borrow().saved_account_list.clone())
+        })?,
+    )?;
+    g.set(
+        "SetUsesToken",
+        lua.create_function(|lua, uses_token: bool| {
+            if let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            {
+                state.borrow_mut().uses_token = uses_token;
+            }
+            Ok(())
+        })?,
+    )?;
+    g.set(
+        "WasScreenFirstDisplayed",
+        lua.create_function(|lua, ()| {
+            let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            else {
+                return Ok(false);
+            };
+            let state = state.borrow();
+            Ok(state.screen_first_displayed || state.screen_kind.is_glue())
+        })?,
+    )?;
+    g.set(
         "UnitGetAvailableRoles",
         lua.create_function(|_, _unit: Value| Ok((true, true, true)))?,
     )?;
@@ -1090,6 +1150,46 @@ fn register_cinematic_login_nameplates(lua: &Lua, g: &mlua::Table) -> Result<()>
             };
             Ok(state.borrow().screen_kind.login_state())
         })?,
+    )?;
+    login.set(
+        "IsLoginReady",
+        lua.create_function(|lua, ()| {
+            let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            else {
+                return Ok(false);
+            };
+            Ok(matches!(state.borrow().screen_kind, crate::screen::ScreenKind::Login))
+        })?,
+    )?;
+    login.set(
+        "IsLauncherLogin",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    login.set(
+        "WasEverLauncherLogin",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    login.set(
+        "AttemptedLauncherLogin",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    login.set(
+        "IsReconnectLoginPossible",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    login.set("ReconnectLogin", lua.create_function(|_, ()| Ok(()))?)?;
+    login.set(
+        "ClearReconnectLogin",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    login.set(
+        "SelectGameAccount",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    login.set(
+        "Login",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
     )?;
     login.set("ClearLastError", lua.create_function(|_, ()| Ok(()))?)?;
     login.set("GetLastError", lua.create_function(|_, ()| Ok(Value::Nil))?)?;

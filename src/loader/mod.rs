@@ -195,6 +195,9 @@ pub fn discover_blizzard_addons_for_screen(
         if !dir_name.starts_with("Blizzard_") {
             continue;
         }
+        if excluded_addons_for_screen(screen).contains(&dir_name.as_str()) {
+            continue;
+        }
         let Some(toc_path) = find_toc_file(&path) else {
             continue;
         };
@@ -215,6 +218,17 @@ pub fn discover_blizzard_addons_for_screen(
     pull_required_lod_addons(&mut addons, &mut lod_pool);
 
     topological_sort_addons(addons, base_addons_for_screen(screen))
+}
+
+fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
+    match screen {
+        ScreenKind::Game | ScreenKind::CharacterSelect => &[],
+        ScreenKind::Login => &[
+            "Blizzard_CharacterCreate",
+            "Blizzard_CharacterCustomize",
+            "Blizzard_TimerunningCharacterCreate",
+        ],
+    }
 }
 
 /// Recursively pull LoadOnDemand addons into the main set when required by loaded addons.

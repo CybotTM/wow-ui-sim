@@ -98,7 +98,37 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
     {
         eprintln!("Error switching glue screen to {screen_name}: {e}");
     }
+    apply_glue_screen_visibility(env, screen);
+    env.state().borrow_mut().screen_first_displayed = true;
+    fire_simple_event(env, "SCREEN_FIRST_DISPLAYED");
     fire_simple_event(env, "LOGIN_STATE_CHANGED");
+}
+
+fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
+    let script = match screen {
+        ScreenKind::Game => return,
+        ScreenKind::CharacterSelect => return,
+        ScreenKind::Login => {
+            r#"
+            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "login" then
+                if AllowChatFramesToShow and ChatFrame1 and not AllowChatFramesToShow(ChatFrame1) then
+                    if GeneralDockManager then GeneralDockManager:Hide() end
+                    if ChatFrame1 then ChatFrame1:Hide() end
+                    if ChatFrame1Tab then ChatFrame1Tab:Hide() end
+                    if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
+                end
+
+                if CharCustomizeFrame then
+                    CharCustomizeFrame:Hide()
+                end
+            end
+            "#
+        }
+    };
+
+    if let Err(e) = env.exec(script) {
+        eprintln!("[Startup] glue visibility normalization failed: {e}");
+    }
 }
 
 /// Fire EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, and PLAYER_ENTERING_WORLD.
