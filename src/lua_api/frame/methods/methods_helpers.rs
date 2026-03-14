@@ -172,6 +172,11 @@ pub fn get_or_create_button_texture(
 
     let mut texture = Frame::new(WidgetType::Texture, None, Some(button_id));
     set_all_points_anchors(&mut texture, button_id);
+    // HighlightTexture defaults to ADD blend mode in WoW
+    if key == "HighlightTexture" {
+        texture.draw_layer = crate::widget::DrawLayer::Highlight;
+        texture.blend_mode = crate::render::BlendMode::Additive;
+    }
     // Inherit strata, level, and layout_rect from parent button
     if let Some(parent) = state.widgets.get(button_id) {
         texture.frame_strata = parent.frame_strata;

@@ -152,6 +152,7 @@ fn apply_set_button_texture(
     if parent_key == "HighlightTexture" {
         if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
             tex.draw_layer = crate::widget::DrawLayer::Highlight;
+            tex.blend_mode = crate::render::BlendMode::Additive;
         }
     }
     let _ = sync_child_to_lua(lua, button_id, parent_key, tex_id);
