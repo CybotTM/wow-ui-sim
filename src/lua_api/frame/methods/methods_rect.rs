@@ -10,7 +10,6 @@
 
 use super::super::handle::FrameRef;
 use crate::LayoutRect;
-use crate::lua_api::SimState;
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
 
@@ -23,22 +22,25 @@ struct ResolvedRect {
     screen_height: f32,
 }
 
-/// Check if a frame has anchors. Returns false if no frame or no anchors.
-fn has_anchors(state: &SimState, id: u64) -> bool {
-    state
-        .widgets
-        .get(id)
-        .map(|f| !f.anchors.is_empty())
-        .unwrap_or(false)
-}
-
 /// Resolve dirty flag, then extract layout_rect + effective_scale + screen_height.
 /// Returns None if the frame has no anchors or no layout_rect.
 fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state_rc = get_sim_state(lua);
-    if !has_anchors(&state_rc.borrow(), id) {
-        return None;
+
+    let needs_root_rect = {
+        let state = state_rc.borrow();
+        let frame = state.widgets.get(id)?;
+        frame.anchors.is_empty()
+            && frame.parent_id.is_none()
+            && frame.width > 0.0
+            && frame.height > 0.0
+            && frame.layout_rect.is_none()
+    };
+
+    if needs_root_rect {
+        state_rc.borrow_mut().invalidate_layout(id);
     }
+
     state_rc.borrow_mut().resolve_rect_if_dirty(id);
     let state = state_rc.borrow();
     let (_, sh) = screen_dims(&state);

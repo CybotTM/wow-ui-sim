@@ -26,6 +26,26 @@ fn test_no_anchors_return_empty() {
 }
 
 #[test]
+fn test_ui_parent_get_rect_returns_screen_rect() {
+    let (t, _) = load_test_lua(
+        "layout-pos-ui-parent-rect",
+        r#"
+        COUNT = select('#', UIParent:GetRect())
+        local left, bottom, width, height = UIParent:GetRect()
+        LEFT = left
+        BOTTOM = bottom
+        WIDTH = width
+        HEIGHT = height
+    "#,
+    );
+    assert_eq!(t.env.eval::<i32>("return COUNT").unwrap(), 4);
+    assert_f64_near(&t, "LEFT", 0.0);
+    assert_f64_near(&t, "BOTTOM", 0.0);
+    assert_f64_near(&t, "WIDTH", 1600.0);
+    assert_f64_near(&t, "HEIGHT", 1200.0);
+}
+
+#[test]
 fn test_topleft_at_origin() {
     let (t, _) = load_test_lua(
         "layout-pos-tl-origin",

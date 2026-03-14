@@ -12,16 +12,22 @@ pub struct TemplateEntry {
     pub frame: FrameXml,
 }
 
+#[derive(Default)]
+struct TemplateRegistry {
+    entries: HashMap<String, TemplateEntry>,
+    chain_cache: HashMap<String, Vec<TemplateEntry>>,
+}
+
 /// Global registry of XML templates (virtual frames).
-fn template_registry() -> &'static RwLock<HashMap<String, TemplateEntry>> {
-    static REGISTRY: OnceLock<RwLock<HashMap<String, TemplateEntry>>> = OnceLock::new();
-    REGISTRY.get_or_init(|| RwLock::new(HashMap::new()))
+fn template_registry() -> &'static RwLock<TemplateRegistry> {
+    static REGISTRY: OnceLock<RwLock<TemplateRegistry>> = OnceLock::new();
+    REGISTRY.get_or_init(|| RwLock::new(TemplateRegistry::default()))
 }
 
 /// Register a template (virtual frame) in the global registry.
 pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
     let mut registry = template_registry().write().unwrap();
-    registry.insert(
+    registry.entries.insert(
         name.to_string(),
         TemplateEntry {
             name: name.to_string(),
@@ -29,6 +35,7 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
             frame,
         },
     );
+    registry.chain_cache.clear();
 }
 
 /// Get a template by name from the registry (case-insensitive).
@@ -38,12 +45,13 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
 /// PascalCase name from the XML definition.
 pub fn get_template(name: &str) -> Option<TemplateEntry> {
     let registry = template_registry().read().unwrap();
-    if let Some(entry) = registry.get(name) {
+    if let Some(entry) = registry.entries.get(name) {
         return Some(entry.clone());
     }
     // Case-insensitive fallback
     let lower = name.to_ascii_lowercase();
     registry
+        .entries
         .values()
         .find(|e| e.name.to_ascii_lowercase() == lower)
         .cloned()
@@ -104,17 +112,37 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
 /// Get the full inheritance chain for a template (including the template itself).
 /// Returns templates in order from most base to most derived.
 pub fn get_template_chain(names: &str) -> Vec<TemplateEntry> {
+    let key = names.trim().to_string();
+    if key.is_empty() {
+        return Vec::new();
+    }
+
+    if let Some(cached) = template_registry()
+        .read()
+        .unwrap()
+        .chain_cache
+        .get(&key)
+        .cloned()
+    {
+        return cached;
+    }
+
     let mut chain = Vec::new();
     let mut visited = HashSet::new();
 
     // Process comma-separated template names
-    for name in names.split(',').map(|s| s.trim()) {
+    for name in key.split(',').map(|s| s.trim()) {
         if name.is_empty() || visited.contains(name) {
             continue;
         }
         collect_template_chain(name, &mut chain, &mut visited);
     }
 
+    template_registry()
+        .write()
+        .unwrap()
+        .chain_cache
+        .insert(key, chain.clone());
     chain
 }
 
@@ -191,7 +219,8 @@ pub fn register_intrinsic_templates() {
 #[allow(dead_code)]
 pub fn clear_templates() {
     let mut registry = template_registry().write().unwrap();
-    registry.clear();
+    registry.entries.clear();
+    registry.chain_cache.clear();
 }
 
 // ---------------------------------------------------------------------------
