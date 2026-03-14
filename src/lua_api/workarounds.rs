@@ -44,6 +44,7 @@ pub fn apply(env: &WowLuaEnv) {
     init_lfg_events_in_background(env);
     patch_scrollbox_nil_dataprovider(env);
     init_settings_panel_previews(env);
+    patch_character_create_arrays(env);
 }
 
 /// SuperTrackedFrame shows a quest navigation arrow positioned by the engine's
@@ -77,6 +78,24 @@ fn init_settings_panel_previews(env: &WowLuaEnv) {
 
             SettingsPanel.AccessibilityFontPreview = SettingsPanel.AccessibilityFontPreview or CreatePreviewStub()
             SettingsPanel.QuestTextPreview = SettingsPanel.QuestTextPreview or CreatePreviewStub()
+        end
+    "#,
+    );
+}
+
+/// CharacterCreate uses XML `parentArray="BGTex"` for its vignette textures.
+/// Rebuild that array defensively until glue-screen parentArray wiring is
+/// consistently available during this screen transition.
+fn patch_character_create_arrays(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if CharacterCreateFrame and not CharacterCreateFrame.BGTex then
+            CharacterCreateFrame.BGTex = {
+                CharacterCreateFrame.TopBackgroundOverlay,
+                CharacterCreateFrame.LeftBackgroundOverlay,
+                CharacterCreateFrame.RightBackgroundOverlay,
+                CharacterCreateFrame.BottomBackgroundOverlay,
+            }
         end
     "#,
     );

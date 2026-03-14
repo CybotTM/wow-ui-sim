@@ -72,6 +72,41 @@ pub const CHARACTER_CREATE_TYPE: EnumDef = (
     &[("Normal", 0), ("Boost", 1), ("TrialBoost", 2)],
 );
 
+pub const VALUE_ADDED_SERVICE_TYPE: EnumDef = (
+    "ValueAddedServiceType",
+    &[
+        ("PaidNameChange", 0),
+        ("PaidRaceChange", 1),
+        ("PaidFactionChange", 2),
+        ("PaidCharacterTransfer", 3),
+    ],
+);
+
+pub const CREATION_CLASS_DISABLED_REASON: EnumDef = (
+    "CreationClassDisabledReason",
+    &[
+        ("DoesNotHaveExpansion", 0),
+        ("InvalidForTemplates", 1),
+        ("InvalidForNewPlayers", 2),
+        ("LimitServer", 3),
+        ("LimitLevel", 4),
+        ("InvalidForSelectedRace", 5),
+        ("InvalidForTimerunning", 6),
+        ("LockedByAchievement", 7),
+    ],
+);
+
+pub const CREATION_RACE_DISABLED_REASON: EnumDef = (
+    "CreationRaceDisabledReason",
+    &[
+        ("DoesNotHaveAchievement", 0),
+        ("DoesNotHaveExpansion", 1),
+        ("RaceLimitServer", 2),
+        ("RaceLimitLevel", 3),
+        ("InvalidForNewPlayers", 4),
+    ],
+);
+
 pub const RELATIVE_CONTENT_DIFFICULTY: SeqEnumDef = (
     "RelativeContentDifficulty",
     &["Trivial", "Easy", "Fair", "Difficult", "Impossible"],

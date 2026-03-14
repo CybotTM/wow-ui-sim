@@ -21,6 +21,11 @@ const GLUE_CHARACTER_GUID: &str = "Player-1-00000001";
 const GLUE_SELECTED_CHARACTER_KEY: &str = "__wow_ui_sim_glue_selected_character";
 const GLUE_SELECT_CHARACTER_DISPATCH_KEY: &str = "__wow_ui_sim_glue_select_character_dispatch";
 const GLUE_CHARACTER_CREATE_TYPE_KEY: &str = "__glue_character_create_type";
+const GLUE_CHARACTER_CREATE_RACE_ID_KEY: &str = "__wow_ui_sim_glue_character_create_race_id";
+const GLUE_CHARACTER_CREATE_CLASS_ID_KEY: &str = "__wow_ui_sim_glue_character_create_class_id";
+const GLUE_CHARACTER_CREATE_SEX_ID_KEY: &str = "__wow_ui_sim_glue_character_create_sex_id";
+const GLUE_CHARACTER_CREATE_FACING_KEY: &str = "__wow_ui_sim_glue_character_create_facing";
+const GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY: &str = "__wow_ui_sim_glue_character_create_model_alpha";
 
 fn has_glue_character(lua: &Lua) -> bool {
     let Some(state) =
@@ -79,6 +84,90 @@ fn set_glue_character_create_type(lua: &Lua, value: &Value) -> Result<()> {
     lua.globals()
         .raw_set(GLUE_CHARACTER_CREATE_TYPE_KEY, create_type)?;
     Ok(())
+}
+
+fn get_glue_i32(lua: &Lua, key: &str, default: i32) -> Result<i32> {
+    let value: Value = lua.globals().raw_get(key)?;
+    Ok(match value {
+        Value::Integer(n) => n as i32,
+        Value::Number(n) => n as i32,
+        _ => default,
+    })
+}
+
+fn set_glue_i32(lua: &Lua, key: &str, value: i32) -> Result<()> {
+    lua.globals().raw_set(key, value)
+}
+
+fn get_glue_f32(lua: &Lua, key: &str, default: f32) -> Result<f32> {
+    let value: Value = lua.globals().raw_get(key)?;
+    Ok(match value {
+        Value::Integer(n) => n as f32,
+        Value::Number(n) => n as f32,
+        _ => default,
+    })
+}
+
+fn set_glue_f32(lua: &Lua, key: &str, value: f32) -> Result<()> {
+    lua.globals().raw_set(key, value)
+}
+
+fn reset_glue_character_create_state(lua: &Lua) -> Result<()> {
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, 1)?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, 2)?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, 2)?;
+    set_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, 0.0)?;
+    set_glue_f32(lua, GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY, 1.0)?;
+    Ok(())
+}
+
+fn get_glue_selected_race_id(lua: &Lua) -> Result<i32> {
+    get_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, 1)
+}
+
+fn get_glue_selected_class_id(lua: &Lua) -> Result<i32> {
+    get_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, 2)
+}
+
+fn get_glue_selected_sex_id(lua: &Lua) -> Result<i32> {
+    get_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, 2)
+}
+
+fn push_kv_str(lua: &Lua, table: &mlua::Table, key: &str, value: &str) -> Result<()> {
+    table.set(key, lua.create_string(value)?)?;
+    Ok(())
+}
+
+fn glue_race_data(lua: &Lua, race_id: i32) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set("raceID", race_id)?;
+    push_kv_str(lua, &t, "name", "Human")?;
+    push_kv_str(lua, &t, "clientFileString", "Human")?;
+    push_kv_str(lua, &t, "fileName", "Human")?;
+    push_kv_str(lua, &t, "factionInternalName", "Alliance")?;
+    push_kv_str(lua, &t, "createScreenIconAtlas", "raceicon128-human-male")?;
+    push_kv_str(lua, &t, "loreDescription", "Versatile and resilient.")?;
+    t.set("factionGroup", 1i32)?;
+    t.set("isAlliedRace", false)?;
+    t.set("isNeutralRace", false)?;
+    t.set("enabled", true)?;
+    t.set("hasHeritageArmor", true)?;
+    t.set("racialAbilities", lua.create_table()?)?;
+    Ok(t)
+}
+
+fn glue_class_data(lua: &Lua, class_id: i32) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set("classID", class_id)?;
+    push_kv_str(lua, &t, "name", "Paladin")?;
+    push_kv_str(lua, &t, "maleName", "Paladin")?;
+    push_kv_str(lua, &t, "femaleName", "Paladin")?;
+    push_kv_str(lua, &t, "fileString", "PALADIN")?;
+    push_kv_str(lua, &t, "fileName", "PALADIN")?;
+    push_kv_str(lua, &t, "description", "A holy warrior.")?;
+    push_kv_str(lua, &t, "roleInfo", "Tank, Healer, Damage")?;
+    t.set("enabled", true)?;
+    Ok(t)
 }
 
 fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
@@ -862,6 +951,7 @@ fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
 fn register_missing_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.raw_set(GLUE_CHARACTER_CREATE_TYPE_KEY, 0i32)?;
+    reset_glue_character_create_state(lua)?;
     register_timer_and_bar_globals(lua, &g)?;
     register_lfg_and_guild_stubs(lua, &g)?;
     register_action_button_util(lua, &g)?;
@@ -1874,8 +1964,42 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         lua.create_function(|_, ()| Ok(()))?,
     )?;
     character_creation.set(
+        "CreateCharacter",
+        lua.create_function(|lua, (name, _use_npe, _faction): (String, Value, Value)| {
+            if let Some(state) =
+                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+            {
+                let trimmed = name.trim();
+                if !trimmed.is_empty() {
+                    state.borrow_mut().player.name = trimmed.to_string();
+                }
+            }
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
+        "CreateAuxModel",
+        lua.create_function(|_, _: MultiValue| Ok(1i32))?,
+    )?;
+    character_creation.set(
+        "CustomizeExistingCharacter",
+        lua.create_function(|_, _character_id: i32| Ok(()))?,
+    )?;
+    character_creation.set(
+        "DestroyAuxModel",
+        lua.create_function(|_, _model_index: i32| Ok(()))?,
+    )?;
+    character_creation.set(
+        "EquipWeaponsOnAuxModel",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
         "GetCharacterTemplateInfo",
         lua.create_function(|_, _character_index: i32| Ok((String::new(), String::new())))?,
+    )?;
+    character_creation.set(
+        "GetAlliedRaceAchievementRequirements",
+        lua.create_function(|lua, _race_id: i32| lua.create_table())?,
     )?;
     character_creation.set(
         "GetCharacterCreateType",
@@ -1886,30 +2010,235 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
     character_creation.set(
-        "GetAvailableRaces",
+        "GetAvailableClasses",
+        lua.create_function(|lua, ()| {
+            let classes = lua.create_table()?;
+            classes.set(1, glue_class_data(lua, 2)?)?;
+            Ok(classes)
+        })?,
+    )?;
+    character_creation.set(
+        "GetAvailableCustomizations",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
     character_creation.set(
-        "GetRaceDataByID",
-        lua.create_function(|lua, _race_id: i32| {
-            let race_data = lua.create_table()?;
-            race_data.set("name", "Human")?;
-            race_data.set("isAlliedRace", false)?;
-            race_data.set("hasHeritageArmor", true)?;
-            Ok(Value::Table(race_data))
+        "GetAvailableRaces",
+        lua.create_function(|lua, ()| {
+            let races = lua.create_table()?;
+            races.set(1, glue_race_data(lua, 1)?)?;
+            Ok(races)
         })?,
+    )?;
+    character_creation.set(
+        "GetBlockedRaces",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    character_creation.set(
+        "GetCharacterCreateFacing",
+        lua.create_function(|lua, ()| Ok(get_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, 0.0)?))?,
+    )?;
+    character_creation.set(
+        "GetRaceDataByID",
+        lua.create_function(|lua, race_id: i32| Ok(Value::Table(glue_race_data(lua, race_id)?)))?,
     )?;
     character_creation.set(
         "GetRaceIDFromName",
         lua.create_function(|_, _race_name: String| Ok(1i32))?,
     )?;
     character_creation.set(
+        "GetCreateBackgroundModel",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    character_creation.set(
+        "GetCurrentCameraZoom",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    character_creation.set(
+        "GetDefaultCharacterCreateFacing",
+        lua.create_function(|_, ()| Ok(0.0f32))?,
+    )?;
+    character_creation.set(
+        "GetFactionForRace",
+        lua.create_function(|_, _race_id: i32| Ok(String::from("Alliance")))?,
+    )?;
+    character_creation.set(
+        "GetClassAchievementRequirements",
+        lua.create_function(|lua, _: MultiValue| lua.create_table())?,
+    )?;
+    character_creation.set(
+        "GetModelAlpha",
+        lua.create_function(|lua, ()| {
+            Ok(get_glue_f32(
+                lua,
+                GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY,
+                1.0,
+            )?)
+        })?,
+    )?;
+    character_creation.set(
+        "GetNameForRace",
+        lua.create_function(|_, _race_id: i32| Ok(String::from("Human")))?,
+    )?;
+    character_creation.set(
+        "GetSelectedClass",
+        lua.create_function(|lua, ()| {
+            Ok(Value::Table(glue_class_data(
+                lua,
+                get_glue_selected_class_id(lua)?,
+            )?))
+        })?,
+    )?;
+    character_creation.set(
+        "GetSelectedRace",
+        lua.create_function(|lua, ()| Ok(get_glue_selected_race_id(lua)?))?,
+    )?;
+    character_creation.set(
+        "GetSelectedSex",
+        lua.create_function(|lua, ()| Ok(get_glue_selected_sex_id(lua)?))?,
+    )?;
+    character_creation.set(
+        "GetStartingZoneChoices",
+        lua.create_function(|lua, ()| {
+            let first = lua.create_table()?;
+            first.set("zoneName", "Exile's Reach")?;
+            first.set("zoneImageAtlas", "charactercreate-startingzone-exilesreach")?;
+            first.set("isNPE", true)?;
+            Ok((Value::Table(first), Value::Nil))
+        })?,
+    )?;
+    character_creation.set(
+        "GetTrialBoostStartingLevel",
+        lua.create_function(|_, ()| Ok(70i32))?,
+    )?;
+    character_creation.set(
+        "GetValidRacesForClass",
+        lua.create_function(|lua, _class_id: i32| {
+            let races = lua.create_table()?;
+            races.set(1, glue_race_data(lua, 1)?)?;
+            Ok(races)
+        })?,
+    )?;
+    character_creation.set(
+        "IsCharacterNameValid",
+        lua.create_function(|_, name: String| Ok((!name.trim().is_empty(), Value::Nil)))?,
+    )?;
+    character_creation.set(
         "IsNewPlayerRestricted",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     character_creation.set(
+        "IsForcingCharacterTemplate",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "IsRaceClassValid",
+        lua.create_function(|_, (_race_id, _class_id): (i32, i32)| Ok(true))?,
+    )?;
+    character_creation.set(
+        "IsTimerunningEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "IsTrialAccountRestricted",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "IsUsingCharacterTemplate",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "IsViewingAlteredForm",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "GenerateRandomName",
+        lua.create_function(|_, ()| Ok(String::from("Newhero")))?,
+    )?;
+    character_creation.set(
+        "OnPlayerInteraction",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "PlayClassIdleAnimationOnCharacter",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "PlayCustomizationIdleAnimationOnCharacter",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "PlaySpellVisualKitOnAuxModel",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "PlaySpellVisualKitOnCharacter",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "PlaySpellVisualKitOnGround",
+        lua.create_function(|_, _: MultiValue| Ok(0i32))?,
+    )?;
+    character_creation.set(
+        "PreviewCustomizationChoice",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "ClearPreviewChoices",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "MarkCustomizationChoiceAsSeen",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "MarkCustomizationOptionAsSeen",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "RandomizeCharCustomization",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "RequestCheckNameAvailability",
+        lua.create_function(|_, _name: String| Ok(()))?,
+    )?;
+    character_creation.set(
+        "RequestRandomName",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "ResetCharCustomize",
+        lua.create_function(|lua, ()| {
+            reset_glue_character_create_state(lua)?;
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
+        "SaveSeenChoices",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetBlurEnabled",
+        lua.create_function(|_, _enabled: bool| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetCameraZoomLevel",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetCharCustomizeBackground",
+        lua.create_function(|_, _background_id: Value| Ok(()))?,
+    )?;
+    character_creation.set(
         "SetCharCustomizeFrame",
         lua.create_function(|_, _frame_name: String| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetCharacterCreateFacing",
+        lua.create_function(|lua, facing: f32| {
+            set_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, facing)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetCharacterTemplate",
@@ -1923,8 +2252,84 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         })?,
     )?;
     character_creation.set(
+        "SetCustomizationChoice",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetInCharacterCreate",
+        lua.create_function(|_, _in_character_create: bool| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetModelAlpha",
+        lua.create_function(|lua, alpha: f32| {
+            set_glue_f32(lua, GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY, alpha)?;
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
+        "SetModelDressState",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetPaidService",
+        lua.create_function(|_, _has_paid_service: bool| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetPlayerModelHiddenState",
+        lua.create_function(|_, _hidden: bool| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetSelectedClass",
+        lua.create_function(|lua, class_id: i32| {
+            set_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, class_id)?;
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
+        "SetSelectedPreviewGearType",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetSelectedRace",
+        lua.create_function(|lua, race_id: i32| {
+            set_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, race_id)?;
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
+        "SetSelectedSex",
+        lua.create_function(|lua, sex_id: i32| {
+            set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, sex_id)?;
+            Ok(())
+        })?,
+    )?;
+    character_creation.set(
         "SetTimerunningSeasonID",
         lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetAuxModelHiddenState",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    character_creation.set(
+        "SetViewingAlteredForm",
+        lua.create_function(|_, _viewing_altered_form: bool| Ok(()))?,
+    )?;
+    character_creation.set(
+        "StopAllSpellVisualKitsOnCharacter",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    character_creation.set(
+        "StopSpellVisualKit",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    character_creation.set(
+        "UseBeginnerMode",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    character_creation.set(
+        "ZoomCamera",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
     )?;
     g.set("C_CharacterCreation", character_creation)?;
     Ok(())

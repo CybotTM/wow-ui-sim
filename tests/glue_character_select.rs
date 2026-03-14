@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
-use wow_ui_sim::startup::fire_startup_events_for_screen;
+use wow_ui_sim::startup::{fire_startup_events_for_screen, run_extra_update_ticks};
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -215,5 +215,67 @@ fn character_select_builds_scrollbox_entries() {
             entry_count > 0,
             "character-select screen should populate the character list"
         );
+    }
+}
+
+#[test]
+fn character_select_can_transition_to_character_create_without_lua_errors() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterSelect);
+
+        env.exec(r#"GlueParent_SetScreen("charcreate")"#)
+            .expect("character-create screen transition should execute");
+        run_extra_update_ticks(&env, 3);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        let unexpected: Vec<String> = errors
+            .into_iter()
+            .filter(|msg| msg.contains("Blizzard_CharacterCreate"))
+            .collect();
+
+        assert!(
+            unexpected.is_empty(),
+            "character-create screen transition should not hit CharacterCreate Lua errors: {unexpected:#?}"
+        );
+
+        let character_create_visible: bool = env
+            .eval("return CharacterCreateFrame ~= nil and CharacterCreateFrame:IsShown()")
+            .expect("CharacterCreateFrame visibility should be queryable");
+        assert!(
+            character_create_visible,
+            "character-select screen should be able to show CharacterCreateFrame"
+        );
+    }
+}
+
+#[test]
+fn character_create_action_updates_player_name_without_lua_errors() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterSelect);
+
+        env.exec(
+            r#"
+            GlueParent_SetScreen("charcreate")
+            CharacterCreateFrame.NameChoiceFrame.EditBox:SetText("Newhero")
+            CharacterCreateFrame:CreateCharacter()
+            "#,
+        )
+        .expect("character creation should execute");
+        run_extra_update_ticks(&env, 3);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        let unexpected: Vec<String> = errors
+            .into_iter()
+            .filter(|msg| msg.contains("Blizzard_CharacterCreate"))
+            .collect();
+        assert!(
+            unexpected.is_empty(),
+            "character creation should not hit CharacterCreate Lua errors: {unexpected:#?}"
+        );
+
+        let player_name: String = env
+            .eval("return UnitName('player')")
+            .expect("player name should be queryable");
+        assert_eq!(player_name, "Newhero");
     }
 }
