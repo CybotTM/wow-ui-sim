@@ -124,11 +124,14 @@ impl TalentState {
                     .and_then(|entry_id| crate::traits::TRAIT_ENTRY_DB.get(&entry_id))
                     .is_some_and(|entry| Some(entry.sub_tree_id) == self.active_hero_subtree_id)
                 {
-                    self.active_hero_subtree_id = self.node_selections.values().find_map(|entry_id| {
-                        crate::traits::TRAIT_ENTRY_DB
-                            .get(entry_id)
-                            .and_then(|entry| (entry.sub_tree_id != 0).then_some(entry.sub_tree_id))
-                    });
+                    self.active_hero_subtree_id =
+                        self.node_selections.values().find_map(|entry_id| {
+                            crate::traits::TRAIT_ENTRY_DB
+                                .get(entry_id)
+                                .and_then(|entry| {
+                                    (entry.sub_tree_id != 0).then_some(entry.sub_tree_id)
+                                })
+                        });
                 }
             }
         }

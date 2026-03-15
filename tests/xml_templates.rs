@@ -155,7 +155,9 @@ fn test_create_frame_from_xml_hidden_starts_hidden() {
 
     let shown: bool = env.eval("return XmlHiddenFrame:IsShown()").unwrap();
     let visible: bool = env.eval("return XmlHiddenFrame:IsVisible()").unwrap();
-    let effective_alpha: f32 = env.eval("return XmlHiddenFrame:GetEffectiveAlpha()").unwrap();
+    let effective_alpha: f32 = env
+        .eval("return XmlHiddenFrame:GetEffectiveAlpha()")
+        .unwrap();
 
     assert!(!shown, "hidden XML frame should start with shown=false");
     assert!(!visible, "hidden XML frame should not be visible");

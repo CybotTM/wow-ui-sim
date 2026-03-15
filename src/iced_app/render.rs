@@ -424,10 +424,7 @@ impl App {
         }
     }
 
-    pub(crate) fn preload_current_render_requests(
-        &self,
-        budget: Option<std::time::Duration>,
-    ) {
+    pub(crate) fn preload_current_render_requests(&self, budget: Option<std::time::Duration>) {
         let size = self.screen_size.get();
         let dirty_strata = self.current_texture_request_batches(size);
         let overlay = self.build_overlay();

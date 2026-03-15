@@ -549,7 +549,9 @@ impl App {
         self.preload_visible_textures();
         self.gpu_failed_textures.borrow_mut().clear(); // fresh upload attempt
         self.mark_all_strata_dirty();
-        self.preload_current_render_requests_preserving_dirty(Some(std::time::Duration::from_millis(25)));
+        self.preload_current_render_requests_preserving_dirty(Some(
+            std::time::Duration::from_millis(25),
+        ));
     }
 
     /// Preload visible base textures with a bounded budget before draw.

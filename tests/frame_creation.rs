@@ -193,7 +193,9 @@ fn test_is_visible_false_when_parent_alpha_zero() {
 
     let child_shown: bool = env.eval("return AlphaZeroChild:IsShown()").unwrap();
     let child_visible: bool = env.eval("return AlphaZeroChild:IsVisible()").unwrap();
-    let child_effective_alpha: f32 = env.eval("return AlphaZeroChild:GetEffectiveAlpha()").unwrap();
+    let child_effective_alpha: f32 = env
+        .eval("return AlphaZeroChild:GetEffectiveAlpha()")
+        .unwrap();
 
     assert!(child_shown, "child should still have its own shown flag");
     assert!(
@@ -225,7 +227,10 @@ fn test_is_visible_updates_when_reparented_under_alpha_zero_parent() {
     let initially_visible: bool = env
         .eval("return ReparentedVisibilityChild:IsVisible()")
         .unwrap();
-    assert!(initially_visible, "child should start visible under visible parent");
+    assert!(
+        initially_visible,
+        "child should start visible under visible parent"
+    );
 
     env.exec(r#"ReparentedVisibilityChild:SetParent(TransparentParent)"#)
         .unwrap();

@@ -417,7 +417,6 @@ impl WidgetRegistry {
         self.pending_layout_ids.remove(&id);
     }
 
-
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.
     /// A cycle exists if relative_to (or any of its anchor dependencies) already
     /// depends on frame_id.

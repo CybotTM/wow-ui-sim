@@ -130,7 +130,10 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
             "if GlueParent_SetScreen then GlueParent_SetScreen({screen_name:?}) end"
         ))
     {
-        log_with_timestamp(env, &format!("Error switching glue screen to {screen_name}: {e}"));
+        log_with_timestamp(
+            env,
+            &format!("Error switching glue screen to {screen_name}: {e}"),
+        );
     }
     apply_glue_screen_visibility(env, screen);
     env.state().borrow_mut().screen_first_displayed = true;
@@ -180,7 +183,10 @@ fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
     };
 
     if let Err(e) = env.exec(script) {
-        log_with_timestamp(env, &format!("[Startup] glue visibility normalization failed: {e}"));
+        log_with_timestamp(
+            env,
+            &format!("[Startup] glue visibility normalization failed: {e}"),
+        );
     }
 }
 
@@ -191,7 +197,10 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
         log_with_timestamp(env, &e.to_string());
     }
 
-    log_with_timestamp(env, "[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
+    log_with_timestamp(
+        env,
+        "[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed",
+    );
     if let Err(e) = env
         .lua()
         .globals()
@@ -289,7 +298,10 @@ pub fn call_unit_frame_set_unit(env: &WowLuaEnv) {
         end
     "#,
     ) {
-        log_with_timestamp(env, &format!("[startup] call_unit_frame_set_unit error: {e}"));
+        log_with_timestamp(
+            env,
+            &format!("[startup] call_unit_frame_set_unit error: {e}"),
+        );
     }
 }
 

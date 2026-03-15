@@ -262,10 +262,11 @@ impl TextureManager {
             files.insert(path);
         }
         for (_, info) in ATLAS_DB.entries() {
-            if PREFIXES
-                .iter()
-                .any(|prefix| info.file.to_ascii_lowercase().starts_with(&prefix.to_ascii_lowercase()))
-            {
+            if PREFIXES.iter().any(|prefix| {
+                info.file
+                    .to_ascii_lowercase()
+                    .starts_with(&prefix.to_ascii_lowercase())
+            }) {
                 files.insert(info.file);
             }
         }
