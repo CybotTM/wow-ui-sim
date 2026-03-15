@@ -433,6 +433,15 @@ fn register_c_traits_node(t: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState
         "GetDefinitionInfo",
         lua.create_function(super::traits_api_node::create_definition_info)?,
     )?;
+    t.set(
+        "GetTraitDescription",
+        lua.create_function(|_, (entry_id, rank): (i32, i32)| {
+            Ok(
+                super::traits_api_node::trait_entry_description(entry_id as u32, rank as u32)
+                    .unwrap_or_default(),
+            )
+        })?,
+    )?;
 
     let st = Rc::clone(&state);
     t.set(

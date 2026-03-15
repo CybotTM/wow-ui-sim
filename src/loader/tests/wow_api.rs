@@ -395,6 +395,77 @@ fn test_c_tooltip_info_exists() {
     assert_eq!(ty, "table");
 }
 
+#[test]
+fn test_c_traits_get_node_info_exposes_non_nil_rank_delta_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let all_nodes_have_fields: bool = env
+        .eval(
+            r#"
+            local nodeIDs = C_Traits.GetTreeNodes(790)
+            for _, nodeID in ipairs(nodeIDs) do
+                local info = C_Traits.GetNodeInfo(1, nodeID)
+                if not info
+                    or info.ranksIncreased == nil
+                    or info.entryIDToRanksIncreased == nil
+                    or info.totalMaxRanks == nil
+                then
+                    return false
+                end
+            end
+
+            local missingNode = C_Traits.GetNodeInfo(1, -1)
+            return missingNode
+                and missingNode.ranksIncreased ~= nil
+                and missingNode.entryIDToRanksIncreased ~= nil
+                and missingNode.totalMaxRanks ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        all_nodes_have_fields,
+        "C_Traits.GetNodeInfo should always provide non-nil rank delta fields",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_trait_entry_returns_real_tooltip_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local nodeIDs = C_Traits.GetTreeNodes(790)
+            local entryID
+            for _, nodeID in ipairs(nodeIDs) do
+                local nodeInfo = C_Traits.GetNodeInfo(1, nodeID)
+                if nodeInfo and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    entryID = nodeInfo.entryIDs[1]
+                    break
+                end
+            end
+
+            if not entryID then
+                return false
+            end
+
+            local tooltip = C_TooltipInfo.GetTraitEntry(entryID, 1)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Spell or not tooltip.lines then
+                return false
+            end
+
+            local firstLine = tooltip.lines[1]
+            return firstLine
+                and firstLine.type == Enum.TooltipDataLineType.SpellName
+                and type(firstLine.leftText) == "string"
+                and firstLine.leftText ~= ""
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetTraitEntry should expose at least a real spell-name line",
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Global functions
 // ---------------------------------------------------------------------------

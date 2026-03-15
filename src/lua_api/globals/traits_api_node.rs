@@ -3,10 +3,39 @@
 //! Split from traits_api.rs — these are the read-side data accessors.
 
 use crate::lua_api::SimState;
-use crate::traits::{TRAIT_COND_DB, TRAIT_NODE_DB, TraitNodeInfo};
+use crate::traits::{TRAIT_COND_DB, TRAIT_ENTRY_DB, TRAIT_NODE_DB, TraitNodeInfo};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+pub fn trait_entry_display_spell_id(def: &crate::traits::TraitDefInfo) -> Option<u32> {
+    [def.visible_spell_id, def.spell_id, def.overrides_spell_id]
+        .into_iter()
+        .find(|id| *id != 0)
+}
+
+pub fn trait_entry_name(entry_id: u32) -> Option<String> {
+    let entry = TRAIT_ENTRY_DB.get(&entry_id)?;
+    let def = crate::traits::TRAIT_DEFINITION_DB.get(&entry.definition_id)?;
+
+    if !def.override_name.is_empty() {
+        return Some(def.override_name.to_string());
+    }
+
+    let spell_id = trait_entry_display_spell_id(def)?;
+    crate::spells::get_spell(spell_id).map(|spell| spell.name.to_string())
+}
+
+pub fn trait_entry_description(entry_id: u32, _rank: u32) -> Option<String> {
+    let entry = TRAIT_ENTRY_DB.get(&entry_id)?;
+    let def = crate::traits::TRAIT_DEFINITION_DB.get(&entry.definition_id)?;
+
+    if !def.override_description.is_empty() {
+        return Some(def.override_description.to_string());
+    }
+
+    None
+}
 
 pub fn create_node_info(
     lua: &Lua,
@@ -24,6 +53,7 @@ pub fn create_node_info(
     };
     let info = lua.create_table()?;
     set_node_static_fields(lua, &info, node, node_id)?;
+    set_node_contract_defaults(lua, &info, node)?;
     set_node_dynamic_fields(lua, &info, node, node_id as u32, state)?;
     Ok(Value::Table(info))
 }
@@ -47,6 +77,17 @@ fn set_node_static_fields(
     build_node_cond_ids(lua, info, node)?;
     build_node_group_ids(lua, info, node)?;
     info.set("isCascadeRepurchasable", false)?;
+    Ok(())
+}
+
+/// Populate the documented non-nil TraitNodeInfo fields that Blizzard UI reads
+/// unconditionally, even when a node is hidden or otherwise inactive.
+fn set_node_contract_defaults(lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo) -> Result<()> {
+    info.set("entryIDsWithCommittedRanks", lua.create_table()?)?;
+    info.set("isDisplayError", false)?;
+    info.set("ranksIncreased", 0)?;
+    info.set("entryIDToRanksIncreased", lua.create_table()?)?;
+    info.set("totalMaxRanks", total_node_max_ranks(node))?;
     Ok(())
 }
 
@@ -311,6 +352,7 @@ pub fn build_empty_node_info(lua: &Lua, node_id: i32) -> Result<Value> {
     info.set("type", 0)?;
     info.set("flags", 0)?;
     info.set("entryIDs", lua.create_table()?)?;
+    info.set("entryIDsWithCommittedRanks", lua.create_table()?)?;
     info.set("visibleEdges", lua.create_table()?)?;
     info.set("conditionIDs", lua.create_table()?)?;
     info.set("groupIDs", lua.create_table()?)?;
@@ -322,13 +364,17 @@ fn set_empty_node_state(lua: &Lua, info: &mlua::Table) -> Result<()> {
     info.set("currentRank", 0)?;
     info.set("activeRank", 0)?;
     info.set("ranksPurchased", 0)?;
+    info.set("ranksIncreased", 0)?;
+    info.set("entryIDToRanksIncreased", lua.create_table()?)?;
     info.set("maxRanks", 0)?;
+    info.set("totalMaxRanks", 0)?;
     let active_entry = lua.create_table()?;
     active_entry.set("entryID", 0i64)?;
     active_entry.set("rank", 0)?;
     info.set("activeEntry", active_entry)?;
     info.set("isVisible", false)?;
     info.set("isAvailable", false)?;
+    info.set("isDisplayError", false)?;
     info.set("canPurchaseRank", false)?;
     info.set("canRefundRank", false)?;
     info.set("meetsEdgeRequirements", false)?;
@@ -365,12 +411,25 @@ fn build_node_group_ids(lua: &Lua, info: &mlua::Table, node: &TraitNodeInfo) -> 
 
 /// Get max ranks for a node from its first entry.
 pub fn node_max_ranks(node: &TraitNodeInfo) -> i32 {
-    use crate::traits::TRAIT_ENTRY_DB;
     node.entry_ids
         .first()
         .and_then(|eid| TRAIT_ENTRY_DB.get(eid))
         .map(|e| e.max_ranks as i32)
         .unwrap_or(1)
+}
+
+fn total_node_max_ranks(node: &TraitNodeInfo) -> i32 {
+    let total: i32 = node
+        .entry_ids
+        .iter()
+        .filter_map(|eid| TRAIT_ENTRY_DB.get(eid))
+        .map(|entry| entry.max_ranks as i32)
+        .sum();
+    if total > 0 {
+        total
+    } else {
+        node_max_ranks(node)
+    }
 }
 
 pub fn create_entry_info(lua: &Lua, (_config_id, entry_id): (i32, i32)) -> Result<Value> {

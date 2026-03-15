@@ -14,6 +14,7 @@ use mlua::{Lua, Result, Value};
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_date_and_time(lua)?;
     register_c_scenario_info(lua)?;
+    register_c_tooltip_info_overrides(lua)?;
 
     register_c_trade_skill(lua)?;
     register_c_mythic_plus(lua)?;
@@ -209,6 +210,54 @@ fn register_c_scenario_info(lua: &Lua) -> Result<()> {
     t.set("IsInScenario", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_ScenarioInfo", t)?;
     Ok(())
+}
+
+fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    let t: mlua::Table = globals
+        .get::<mlua::Table>("C_TooltipInfo")
+        .unwrap_or_else(|_| lua.create_table().unwrap());
+    t.set(
+        "GetTraitEntry",
+        lua.create_function(create_trait_entry_tooltip)?,
+    )?;
+    globals.set("C_TooltipInfo", t)?;
+    Ok(())
+}
+
+fn create_trait_entry_tooltip(lua: &Lua, (entry_id, rank): (i32, Option<i32>)) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_SPELL: i32 = 1;
+    const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
+    const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
+
+    let rank = rank.unwrap_or(1).max(1) as u32;
+    let tooltip = lua.create_table()?;
+    tooltip.set("type", TOOLTIP_DATA_TYPE_SPELL)?;
+
+    let lines = lua.create_table()?;
+    let mut line_index = 1;
+
+    if let Some(name) = super::traits_api_node::trait_entry_name(entry_id as u32) {
+        let line = lua.create_table()?;
+        line.set("type", TOOLTIP_LINE_TYPE_SPELL_NAME)?;
+        line.set("leftText", name)?;
+        lines.set(line_index, line)?;
+        line_index += 1;
+    }
+
+    if let Some(description) =
+        super::traits_api_node::trait_entry_description(entry_id as u32, rank)
+        && !description.is_empty()
+    {
+        let line = lua.create_table()?;
+        line.set("type", TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION)?;
+        line.set("leftText", description)?;
+        line.set("wrapText", true)?;
+        lines.set(line_index, line)?;
+    }
+
+    tooltip.set("lines", lines)?;
+    Ok(Value::Table(tooltip))
 }
 
 fn register_c_trade_skill(lua: &Lua) -> Result<()> {
