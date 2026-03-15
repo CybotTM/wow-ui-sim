@@ -15,6 +15,7 @@ pub struct TemplateEntry {
 #[derive(Default)]
 struct TemplateRegistry {
     entries: HashMap<String, TemplateEntry>,
+    entries_ci: HashMap<String, String>,
     chain_cache: HashMap<String, Vec<TemplateEntry>>,
 }
 
@@ -27,6 +28,7 @@ fn template_registry() -> &'static RwLock<TemplateRegistry> {
 /// Register a template (virtual frame) in the global registry.
 pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
     let mut registry = template_registry().write().unwrap();
+    let lower = name.to_ascii_lowercase();
     registry.entries.insert(
         name.to_string(),
         TemplateEntry {
@@ -35,6 +37,7 @@ pub fn register_template(name: &str, widget_type: &str, frame: FrameXml) {
             frame,
         },
     );
+    registry.entries_ci.insert(lower, name.to_string());
     registry.chain_cache.clear();
 }
 
@@ -48,12 +51,11 @@ pub fn get_template(name: &str) -> Option<TemplateEntry> {
     if let Some(entry) = registry.entries.get(name) {
         return Some(entry.clone());
     }
-    // Case-insensitive fallback
     let lower = name.to_ascii_lowercase();
     registry
-        .entries
-        .values()
-        .find(|e| e.name.to_ascii_lowercase() == lower)
+        .entries_ci
+        .get(&lower)
+        .and_then(|canonical| registry.entries.get(canonical))
         .cloned()
 }
 

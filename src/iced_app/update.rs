@@ -343,6 +343,11 @@ impl App {
         if self.textures_pending.get() {
             self.mark_all_strata_dirty();
         }
+        if self.strata_dirty.get() != 0 || self.textures_pending.get() {
+            self.preload_current_render_requests_preserving_dirty(Some(
+                std::time::Duration::from_millis(75),
+            ));
+        }
         let total = t0.elapsed();
         if total.as_millis() > 10 {
             let n = self.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
@@ -547,17 +552,21 @@ impl App {
         self.preload_visible_textures();
         self.gpu_failed_textures.borrow_mut().clear(); // fresh upload attempt
         self.mark_all_strata_dirty();
-        self.preload_current_render_requests(Some(std::time::Duration::from_millis(25)));
+        self.preload_current_render_requests_preserving_dirty(Some(std::time::Duration::from_millis(25)));
     }
 
-    /// Preload visible textures with a ~10ms budget to avoid freezing.
+    /// Preload visible base textures with a bounded budget before draw.
+    ///
+    /// A larger budget here is worthwhile for live game UI because cached base
+    /// atlases make subsequent `@crop:` extraction cheap and avoid long draw-time
+    /// stalls when large panels first become visible.
     fn preload_visible_textures(&self) {
         let env = self.env.borrow();
         let paths = env.state().borrow().widgets.visible_texture_paths();
         drop(env);
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let before = tex_mgr.cache_len();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
         let mut remaining_uncached = false;
         for path in &paths {
             if tex_mgr.get(path).is_some() {

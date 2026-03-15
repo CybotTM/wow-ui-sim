@@ -400,6 +400,19 @@ impl App {
         self.preload_current_render_requests(None);
     }
 
+    pub(crate) fn preload_current_render_requests_preserving_dirty(
+        &self,
+        budget: Option<std::time::Duration>,
+    ) {
+        let dirty_before = self.strata_dirty.get();
+        let pending_ids_before = self.pending_dirty_ids.borrow().clone();
+        self.preload_current_render_requests(budget);
+        if dirty_before != 0 {
+            self.mark_strata_dirty(dirty_before);
+            *self.pending_dirty_ids.borrow_mut() = pending_ids_before;
+        }
+    }
+
     pub(crate) fn preload_current_render_requests(
         &self,
         budget: Option<std::time::Duration>,

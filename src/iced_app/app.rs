@@ -451,7 +451,14 @@ impl App {
         tex_mgr.preload_talent_textures(790);
         tex_mgr.preload_talent_panel_textures(&class_name);
         if !is_glue_screen {
+            if let Some(skill_line) = crate::lua_api::globals::spellbook_data::get_skill_line(2)
+                && skill_line.name != class_name
+            {
+                tex_mgr.preload_talent_panel_textures(skill_line.name);
+            }
             tex_mgr.preload_game_hud_textures();
+            tex_mgr.preload_playerspells_runtime_textures();
+            tex_mgr.preload_spellbook_icons();
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(

@@ -487,7 +487,7 @@ fn register_spec_talent_api(
     set_fn(lua, t, "SetTalentRank", {
         let s = Rc::clone(&state);
         move |_, (node_id, rank): (u32, u32)| {
-            s.borrow_mut().talents.node_ranks.insert(node_id, rank);
+            s.borrow_mut().talents.set_node_rank(node_id, rank);
             Ok(())
         }
     })?;
@@ -496,8 +496,7 @@ fn register_spec_talent_api(
         move |_, (node_id, entry_id): (u32, u32)| {
             s.borrow_mut()
                 .talents
-                .node_selections
-                .insert(node_id, entry_id);
+                .set_node_selection(node_id, Some(entry_id));
             Ok(())
         }
     })?;
@@ -505,8 +504,9 @@ fn register_spec_talent_api(
         let s = Rc::clone(&state);
         move |_, ()| {
             let mut st = s.borrow_mut();
-            st.talents.node_ranks.clear();
+            st.talents.clear_ranks();
             st.talents.node_selections.clear();
+            st.talents.active_hero_subtree_id = None;
             Ok(())
         }
     })?;

@@ -172,7 +172,7 @@ fn purchase_rank(
         return Ok(false);
     }
     let old_spent = currency_spent_before_change(&s, node_id);
-    s.talents.node_ranks.insert(node_id, current + 1);
+    s.talents.set_node_rank(node_id, current + 1);
     let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
     fire_trait_nodes_changed_for(lua, &affected)
@@ -191,10 +191,10 @@ fn refund_rank(
     }
     let old_spent = currency_spent_before_change(&s, node_id);
     if current == 1 {
-        s.talents.node_ranks.remove(&node_id);
-        s.talents.node_selections.remove(&node_id);
+        s.talents.set_node_rank(node_id, 0);
+        s.talents.set_node_selection(node_id, None);
     } else {
-        s.talents.node_ranks.insert(node_id, current - 1);
+        s.talents.set_node_rank(node_id, current - 1);
     }
     let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
@@ -213,10 +213,10 @@ fn set_selection(
     match entry_id {
         Some(eid) => {
             // Select an entry: set selection and ensure rank >= 1.
-            s.talents.node_selections.insert(node_id, eid);
+            s.talents.set_node_selection(node_id, Some(eid));
             let current = *s.talents.node_ranks.get(&node_id).unwrap_or(&0);
             if current == 0 {
-                s.talents.node_ranks.insert(node_id, 1);
+                s.talents.set_node_rank(node_id, 1);
             }
         }
         None => {
@@ -225,8 +225,8 @@ fn set_selection(
             if current == 0 {
                 return Ok(false);
             }
-            s.talents.node_ranks.remove(&node_id);
-            s.talents.node_selections.remove(&node_id);
+            s.talents.set_node_rank(node_id, 0);
+            s.talents.set_node_selection(node_id, None);
         }
     }
     let affected = compute_affected_nodes(node_id, &s, old_spent);
@@ -254,8 +254,9 @@ fn set_selection(
 
 fn reset_tree(state: &Rc<RefCell<SimState>>, lua: &Lua, config_id: i32) -> Result<bool> {
     let mut s = state.borrow_mut();
-    s.talents.node_ranks.clear();
+    s.talents.clear_ranks();
     s.talents.node_selections.clear();
+    s.talents.active_hero_subtree_id = None;
     drop(s);
     fire_trait_config_updated(lua, config_id)
 }
@@ -275,8 +276,8 @@ fn reset_tree_by_currency(
         .copied()
         .collect();
     for nid in &nodes_to_clear {
-        s.talents.node_ranks.remove(nid);
-        s.talents.node_selections.remove(nid);
+        s.talents.set_node_rank(*nid, 0);
+        s.talents.set_node_selection(*nid, None);
     }
     drop(s);
     fire_trait_config_updated(lua, config_id)

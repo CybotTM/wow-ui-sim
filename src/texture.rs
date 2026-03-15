@@ -237,6 +237,87 @@ impl TextureManager {
         );
     }
 
+    /// Pre-load non-glue UI atlases that are heavily used when opening the
+    /// PlayerSpells / talents panels in the live renderer.
+    pub fn preload_playerspells_runtime_textures(&mut self) {
+        use crate::atlas::ATLAS_DB;
+        use std::collections::HashSet;
+
+        const FILES: &[&str] = &[
+            r"Interface\Buttons\UI-Panel-Button-Up",
+            r"Interface\FrameGeneral\UI-Background-Rock",
+            r"Interface\TutorialFrame\UI-TutorialFrame-CalloutGlow",
+        ];
+        const PREFIXES: &[&str] = &[
+            r"Interface\talentframe\",
+            r"Interface\framegeneral\uiframe",
+            r"Interface\common\commondropdown",
+            r"Interface\common\commonmask",
+            r"Interface\helpframe\newplayerexperienceparts",
+            r"Interface\tutorialframe\",
+        ];
+
+        let mut files = HashSet::new();
+        for (path, _) in FILES.iter().map(|path| (*path, ())) {
+            files.insert(path);
+        }
+        for (_, info) in ATLAS_DB.entries() {
+            if PREFIXES
+                .iter()
+                .any(|prefix| info.file.to_ascii_lowercase().starts_with(&prefix.to_ascii_lowercase()))
+            {
+                files.insert(info.file);
+            }
+        }
+
+        let mut loaded = 0usize;
+        for file in &files {
+            if self.load(file).is_some() {
+                loaded += 1;
+            }
+        }
+        eprintln!(
+            "[TexMgr] Preloaded {} / {} PlayerSpells runtime textures",
+            loaded,
+            files.len()
+        );
+    }
+
+    /// Pre-load spellbook / PlayerSpells icon textures from the static spell DB.
+    pub fn preload_spellbook_icons(&mut self) {
+        use crate::lua_api::globals::spellbook_data;
+        use std::collections::HashSet;
+
+        let mut file_data_ids = HashSet::new();
+        for skill_line_index in 1..=spellbook_data::num_skill_lines() {
+            if let Some(skill_line) = spellbook_data::get_skill_line(skill_line_index) {
+                file_data_ids.insert(skill_line.icon_id);
+                for entry in skill_line.spells {
+                    if let Some(spell) = crate::spells::get_spell(entry.spell_id) {
+                        if spell.icon_file_data_id != 0 {
+                            file_data_ids.insert(spell.icon_file_data_id);
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut loaded = 0u32;
+        for id in &file_data_ids {
+            if let Some(path) = crate::manifest_interface_data::get_texture_path(*id) {
+                let wow_path = format!("Interface\\{}", path.replace('/', "\\"));
+                if self.load(&wow_path).is_some() {
+                    loaded += 1;
+                }
+            }
+        }
+        eprintln!(
+            "[TexMgr] Preloaded {} / {} spellbook icons",
+            loaded,
+            file_data_ids.len()
+        );
+    }
+
     /// Number of entries in the texture cache.
     pub fn cache_len(&self) -> usize {
         self.cache.len()
@@ -279,15 +360,16 @@ impl TextureManager {
             return self.sub_cache.get(&key);
         }
 
-        // Load the full texture first
-        if let Some(file_path) = self.resolve_path(&normalized)
-            && let Ok(full_data) = load_texture_file(&file_path)
+        // Reuse the cached base texture when available. Falling back to `load`
+        // ensures first crop extraction only pays disk I/O once per base file.
+        if !self.cache.contains_key(&normalized) && self.load(wow_path).is_none() {
+            return None;
+        }
+        if let Some(full_data) = self.cache.get(&normalized)
+            && let Some(sub_data) = extract_sub_region(full_data, x, y, width, height)
         {
-            // Extract sub-region
-            if let Some(sub_data) = extract_sub_region(&full_data, x, y, width, height) {
-                self.sub_cache.insert(key.clone(), sub_data);
-                return self.sub_cache.get(&key);
-            }
+            self.sub_cache.insert(key.clone(), sub_data);
+            return self.sub_cache.get(&key);
         }
 
         None
@@ -695,6 +777,33 @@ mod tests {
 
         // Verify same data
         assert_eq!(pixels1, result2.unwrap().pixels);
+    }
+
+    #[test]
+    fn test_sub_region_uses_cached_base_texture() {
+        let temp_dir = TempDir::new().unwrap();
+        let base = temp_dir.path();
+
+        let webp_path = base.join("cropped.webp");
+        let mut img = image::RgbaImage::new(4, 4);
+        for y in 0..4 {
+            for x in 0..4 {
+                img.put_pixel(x, y, image::Rgba([(x * 10) as u8, (y * 20) as u8, 0, 255]));
+            }
+        }
+        img.save(&webp_path).unwrap();
+
+        let mut mgr = TextureManager::new(base);
+        assert!(mgr.load("cropped").is_some(), "base texture should load");
+
+        fs::remove_file(&webp_path).unwrap();
+
+        let sub = mgr
+            .load_sub_region("cropped", 1, 1, 2, 2)
+            .expect("sub-region should load from cached base");
+        assert_eq!((sub.width, sub.height), (2, 2));
+        assert_eq!(sub.pixels[0], 10);
+        assert_eq!(sub.pixels[1], 20);
     }
 
     #[test]

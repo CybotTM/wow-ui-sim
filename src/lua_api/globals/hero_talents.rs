@@ -237,21 +237,7 @@ pub fn auto_select_hero_spec(
 /// Checks SubTreeSelection nodes for the active spec (Protection, spec_set=28)
 /// in tree 790. If one has a selection, returns the selected entry's subtree ID.
 pub fn get_active_hero_subtree(state: &SimState) -> Option<u32> {
-    let spec_set = 28u32; // Protection
-    let tree_id = 790u32;
-    let subtree_ids = subtree_ids_for_spec(tree_id, spec_set)?;
-    for &st_id in subtree_ids {
-        for &node_id in selection_node_ids_for_subtree(st_id) {
-            if let Some(&entry_id) = state.talents.node_selections.get(&node_id) {
-                if let Some(entry) = TRAIT_ENTRY_DB.get(&entry_id) {
-                    if entry.sub_tree_id != 0 {
-                        return Some(entry.sub_tree_id);
-                    }
-                }
-            }
-        }
-    }
-    None
+    state.talents.active_hero_subtree()
 }
 
 /// C_ClassTalents namespace — class talent configuration and hero spec APIs.

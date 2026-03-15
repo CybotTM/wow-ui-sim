@@ -50,7 +50,7 @@ pub struct MovementConfig {
 }
 
 fn default_class() -> String {
-    "Warrior".into()
+    "Paladin".into()
 }
 fn default_race() -> String {
     "Human".into()
