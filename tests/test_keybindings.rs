@@ -363,12 +363,20 @@ fn keybind_n_opens_talents() {
             "ClassTalentLoadoutImportDialog should stay hidden until the Import action is clicked"
         );
         assert!(
+            !frame_is_shown(&env, "ClassTalentLoadoutCreateDialog"),
+            "ClassTalentLoadoutCreateDialog should stay hidden until the New Loadout action is clicked"
+        );
+        assert!(
             !frame_is_visible(&env, "ClassTalentLoadoutImportDialogImportControl"),
             "Import dialog content should not become visible when opening the talents tab"
         );
         assert!(
             !frame_is_visible(&env, "ClassTalentLoadoutImportDialogNameControl"),
             "Import dialog name control should not become visible when opening the talents tab"
+        );
+        assert!(
+            !frame_is_visible(&env, "ClassTalentLoadoutCreateDialogNameControl"),
+            "Create dialog content should not become visible when opening the talents tab"
         );
     }
 }
