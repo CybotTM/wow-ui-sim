@@ -20,6 +20,29 @@ fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
     )
 }
 
+fn chain_effective_alpha_from(
+    start_id: Option<u64>,
+    registry: &crate::widget::WidgetRegistry,
+) -> f32 {
+    let Some(mut current_id) = start_id else {
+        return 1.0;
+    };
+    let mut alpha = 1.0;
+    loop {
+        let Some(frame) = registry.get(current_id) else {
+            return 0.0;
+        };
+        if !frame.visible {
+            return 0.0;
+        }
+        alpha *= frame.alpha;
+        let Some(parent_id) = frame.parent_id else {
+            return alpha;
+        };
+        current_id = parent_id;
+    }
+}
+
 /// Emit quads for a single strata bucket (used by headless/screenshot paths).
 ///
 /// Reads rect and effective_alpha fresh from the registry for each frame.
@@ -108,17 +131,10 @@ pub(super) fn build_render_list(
 
 /// Resolve effective alpha for a frame, with button-state-texture parent fallback.
 fn resolve_eff_alpha(f: &crate::widget::Frame, registry: &crate::widget::WidgetRegistry) -> f32 {
-    if f.effective_alpha > 0.0 {
-        return f.effective_alpha;
-    }
     if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
-        return f
-            .parent_id
-            .and_then(|pid| registry.get(pid))
-            .map(|p| p.effective_alpha)
-            .unwrap_or(0.0);
+        return chain_effective_alpha_from(f.parent_id, registry);
     }
-    0.0
+    chain_effective_alpha_from(Some(f.id), registry)
 }
 
 fn resolve_clip_rect(

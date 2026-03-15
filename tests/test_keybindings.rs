@@ -10,6 +10,7 @@
 mod common;
 
 use std::path::PathBuf;
+use wow_ui_sim::iced_app::build_quad_batch_for_registry;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::lua_api::globals::global_frames;
@@ -171,6 +172,30 @@ fn frame_is_visible(env: &WowLuaEnv, frame_name: &str) -> bool {
 fn frame_exists(env: &WowLuaEnv, frame_name: &str) -> bool {
     let code = format!("return {frame_name} ~= nil");
     env.eval::<bool>(&code).unwrap_or(false)
+}
+
+fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render::QuadBatch {
+    {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+    }
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        Some(root_name),
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    )
 }
 
 /// Install a Lua error handler that collects errors into `__test_errors`.
@@ -377,6 +402,56 @@ fn keybind_n_opens_talents() {
         assert!(
             !frame_is_visible(&env, "ClassTalentLoadoutCreateDialogNameControl"),
             "Create dialog content should not become visible when opening the talents tab"
+        );
+    }
+}
+
+#[test]
+fn hidden_talent_dialogs_do_not_emit_quads_after_opening_talents() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+
+        let ui = blizzard_ui_dir();
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![ui.clone()];
+        }
+
+        let addons = discover_blizzard_addons(&ui);
+        for (name, toc_path) in &addons {
+            if let Err(e) = load_addon(&env.loader_env(), toc_path) {
+                eprintln!("[load {name}] FAILED: {e}");
+            }
+        }
+
+        env.apply_post_load_workarounds();
+        wow_ui_sim::startup::settle_headless_startup(&env);
+        env.send_key_press("N", None).expect("N keybind failed");
+        wow_ui_sim::startup::run_extra_update_ticks(&env, 3);
+
+        let import_batch = build_batch_for_root(&env, "ClassTalentLoadoutImportDialog");
+        assert_eq!(
+            import_batch.quad_count(),
+            12,
+            "hidden import dialog should not emit quads"
+        );
+        assert_eq!(
+            import_batch.texture_requests.len(),
+            1,
+            "hidden import dialog should only contribute the tiled background"
+        );
+
+        let hero_batch = build_batch_for_root(&env, "HeroTalentsSelectionDialog");
+        assert_eq!(
+            hero_batch.quad_count(),
+            12,
+            "hidden hero talents dialog should not emit quads"
+        );
+        assert_eq!(
+            hero_batch.texture_requests.len(),
+            1,
+            "hidden hero talents dialog should only contribute the tiled background"
         );
     }
 }
