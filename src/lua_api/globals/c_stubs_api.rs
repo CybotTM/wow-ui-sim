@@ -2108,6 +2108,14 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(()))?,
     )?;
     g.set(
+        "MapSceneCharacterHighlightStart",
+        lua.create_function(|_, _guid: String| Ok(()))?,
+    )?;
+    g.set(
+        "MapSceneCharacterHighlightEnd",
+        lua.create_function(|_, _guid: String| Ok(()))?,
+    )?;
+    g.set(
         "GetSelectBackgroundModel",
         lua.create_function(|_, _character_id: i32| Ok(0i32))?,
     )?;

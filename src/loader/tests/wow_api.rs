@@ -180,6 +180,25 @@ fn test_expansion_name_globals() {
     }
 }
 
+#[test]
+fn test_character_select_map_scene_highlight_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let start_ty: String = env.eval("return type(MapSceneCharacterHighlightStart)").unwrap();
+    assert_eq!(start_ty, "function");
+
+    let end_ty: String = env.eval("return type(MapSceneCharacterHighlightEnd)").unwrap();
+    assert_eq!(end_ty, "function");
+
+    env.exec(
+        r#"
+        MapSceneCharacterHighlightStart("Player-1-00000001")
+        MapSceneCharacterHighlightEnd("Player-1-00000001")
+        "#,
+    )
+    .unwrap();
+}
+
 // WOW_PROJECT_ID, WOW_PROJECT_MAINLINE: from Blizzard_SharedXML/ProjectConstants.lua
 // Tested via Lua addon tests (run-tests), not available in bare WowLuaEnv.
 
