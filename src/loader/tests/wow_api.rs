@@ -466,6 +466,23 @@ fn test_c_tooltip_info_get_trait_entry_returns_real_tooltip_lines() {
     );
 }
 
+#[test]
+fn test_c_spell_get_spell_description_returns_compact_trait_text() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_description: bool = env
+        .eval(
+            r#"
+            local desc = C_Spell.GetSpellDescription(116)
+            return type(desc) == "string" and desc ~= ""
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_description,
+        "C_Spell.GetSpellDescription should return compact spell text for trait-linked spells",
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Global functions
 // ---------------------------------------------------------------------------

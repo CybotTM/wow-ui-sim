@@ -1,4 +1,4 @@
-//! Generator for spells.rs and spell_power.rs from WoW CSV exports.
+//! Generator for spells.rs, spell_descriptions.rs, and spell_power.rs from WoW CSV exports.
 //!
 //! Reads from ~/Projects/wow/data/:
 //!   - SpellName.csv (ID, Name_lang)
@@ -10,10 +10,10 @@
 //!   - SpellEffect.csv (ID, ..., DifficultyID[2], EffectIndex[3],
 //!     ImplicitTarget_0[34], SpellID[36])
 //!
-//! Generates: data/spells.rs, data/spell_power.rs
+//! Generates: data/spells.rs, data/spell_descriptions.rs, data/spell_power.rs
 
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -26,6 +26,9 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let spell_subtexts = load_spell_subtexts(&wow_data.join("Spell.csv"))?;
     println!("Spell (subtexts): {} entries", spell_subtexts.len());
+
+    let spell_descriptions = load_spell_descriptions(&wow_data.join("Spell.csv"))?;
+    println!("Spell (descriptions): {} entries", spell_descriptions.len());
 
     let spell_misc = load_spell_misc(&wow_data.join("SpellMisc.csv"))?;
     println!("SpellMisc (DifficultyID=0): {} entries", spell_misc.len());
@@ -53,6 +56,16 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     write_tests(&mut out)?;
     println!("Generated {} spell entries", count);
     println!("Output: {}", output_path.display());
+
+    // Generate data/spell_descriptions.rs
+    let descriptions_path = Path::new("data/spell_descriptions.rs");
+    let mut desc_out = File::create(descriptions_path)?;
+    let description_ids =
+        collect_compact_description_spell_ids("data/traits.rs", "data/spells.rs")?;
+    let description_count =
+        write_spell_descriptions(&mut desc_out, &spell_descriptions, &description_ids)?;
+    println!("Generated {} compact spell descriptions", description_count);
+    println!("Output: {}", descriptions_path.display());
 
     // Generate data/spell_power.rs
     let power_path = Path::new("data/spell_power.rs");
@@ -126,6 +139,50 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "}}")?;
     writeln!(out)?;
     Ok(())
+}
+
+fn write_spell_descriptions(
+    out: &mut File,
+    spell_descriptions: &HashMap<u32, String>,
+    include_ids: &BTreeSet<u32>,
+) -> Result<u32, Box<dyn std::error::Error>> {
+    writeln!(
+        out,
+        "//! Auto-generated compact spell descriptions used by tooltip APIs."
+    )?;
+    writeln!(
+        out,
+        "//! Contains only spell IDs referenced by trait data and the minimal spell table."
+    )?;
+    writeln!(
+        out,
+        "//! Do not edit manually - regenerate with: wow-cli generate spells"
+    )?;
+    writeln!(out)?;
+
+    let mut builder = phf_codegen::Map::new();
+    let mut count = 0u32;
+    for spell_id in include_ids {
+        let Some(description) = spell_descriptions.get(spell_id) else {
+            continue;
+        };
+        builder.entry(*spell_id, &format!("\"{}\"", escape_str(description)));
+        count += 1;
+    }
+
+    writeln!(
+        out,
+        "pub static SPELL_DESCRIPTIONS: phf::Map<u32, &'static str> = {};",
+        builder.build()
+    )?;
+    writeln!(out)?;
+    writeln!(
+        out,
+        "pub fn get_spell_description(id: u32) -> Option<&'static str> {{"
+    )?;
+    writeln!(out, "    SPELL_DESCRIPTIONS.get(&id).copied()")?;
+    writeln!(out, "}}")?;
+    Ok(count)
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
@@ -207,6 +264,75 @@ fn load_spell_subtexts(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std:
         }
     }
     Ok(map)
+}
+
+fn load_spell_descriptions(
+    path: &Path,
+) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    let mut map = HashMap::new();
+
+    for (i, line) in reader.lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue;
+        }
+        let fields = parse_csv_line(&line);
+        if fields.len() >= 3
+            && let Ok(id) = fields[0].parse::<u32>()
+        {
+            let description = &fields[2];
+            if !description.is_empty() {
+                map.insert(id, description.clone());
+            }
+        }
+    }
+    Ok(map)
+}
+
+fn collect_compact_description_spell_ids(
+    traits_path: &str,
+    spells_path: &str,
+) -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
+    let mut ids = BTreeSet::new();
+    let traits_src = std::fs::read_to_string(traits_path)?;
+    for marker in ["spell_id: ", "overrides_spell_id: ", "visible_spell_id: "] {
+        collect_number_literals_after(&traits_src, marker, &mut ids);
+    }
+
+    let spells_src = std::fs::read_to_string(spells_path)?;
+    for line in spells_src.lines() {
+        let trimmed = line.trim_start();
+        if !trimmed.starts_with('(') {
+            continue;
+        }
+        let Some((id_text, _rest)) = trimmed[1..].split_once(',') else {
+            continue;
+        };
+        if let Ok(id) = id_text.trim().parse::<u32>() {
+            ids.insert(id);
+        }
+    }
+
+    Ok(ids)
+}
+
+fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32>) {
+    let mut rest = src;
+    while let Some(idx) = rest.find(marker) {
+        rest = &rest[idx + marker.len()..];
+        let digits_len = rest.bytes().take_while(|b| b.is_ascii_digit()).count();
+        if digits_len == 0 {
+            continue;
+        }
+        if let Ok(id) = rest[..digits_len].parse::<u32>()
+            && id != 0
+        {
+            out.insert(id);
+        }
+        rest = &rest[digits_len..];
+    }
 }
 
 /// Parsed SpellPower row.

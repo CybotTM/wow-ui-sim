@@ -476,7 +476,11 @@ fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetSpellDescription",
-        lua.create_function(|lua, _spell_id: i32| Ok(Value::String(lua.create_string("")?)))?,
+        lua.create_function(|lua, spell_id: i32| {
+            let description =
+                crate::spell_descriptions::get_spell_description(spell_id as u32).unwrap_or("");
+            Ok(Value::String(lua.create_string(description)?))
+        })?,
     )?;
     t.set(
         "IsSpellHarmful",

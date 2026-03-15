@@ -34,7 +34,8 @@ pub fn trait_entry_description(entry_id: u32, _rank: u32) -> Option<String> {
         return Some(def.override_description.to_string());
     }
 
-    None
+    let spell_id = trait_entry_display_spell_id(def)?;
+    crate::spell_descriptions::get_spell_description(spell_id).map(str::to_string)
 }
 
 pub fn create_node_info(
