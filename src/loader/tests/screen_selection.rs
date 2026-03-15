@@ -44,3 +44,12 @@ fn character_select_screen_uses_glue_addon_set() {
     assert!(!addons.iter().any(|name| name == "Blizzard_UIParent"));
     assert!(addons.iter().any(|name| name == "Blizzard_CharacterCreate"));
 }
+
+#[test]
+fn character_create_screen_uses_glue_addon_set() {
+    let addons = addon_names(ScreenKind::CharacterCreate);
+    assert!(addons.iter().any(|name| name == "Blizzard_GlueParent"));
+    assert!(addons.iter().any(|name| name == "Blizzard_GlueXML"));
+    assert!(!addons.iter().any(|name| name == "Blizzard_UIParent"));
+    assert!(addons.iter().any(|name| name == "Blizzard_CharacterCreate"));
+}

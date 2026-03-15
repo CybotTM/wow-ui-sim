@@ -279,3 +279,25 @@ fn character_create_action_updates_player_name_without_lua_errors() {
         assert_eq!(player_name, "Newhero");
     }
 }
+
+#[test]
+fn character_create_screen_can_boot_directly() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterCreate);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        let unexpected: Vec<String> = errors
+            .into_iter()
+            .filter(|msg| msg.contains("Blizzard_CharacterCreate"))
+            .collect();
+        assert!(
+            unexpected.is_empty(),
+            "direct character-create boot should not hit CharacterCreate Lua errors: {unexpected:#?}"
+        );
+
+        let character_create_visible: bool = env
+            .eval("return CharacterCreateFrame ~= nil and CharacterCreateFrame:IsShown()")
+            .expect("CharacterCreateFrame visibility should be queryable");
+        assert!(character_create_visible, "direct boot should show CharacterCreateFrame");
+    }
+}

@@ -541,6 +541,13 @@ mod tests {
             .expect("screen option should parse character-select");
         assert_eq!(args.effective_screen(), ScreenKind::CharacterSelect);
     }
+
+    #[test]
+    fn explicit_screen_parses_character_create() {
+        let args = Args::try_parse_from(["wow-sim", "--screen", "character-create"])
+            .expect("screen option should parse character-create");
+        assert_eq!(args.effective_screen(), ScreenKind::CharacterCreate);
+    }
 }
 
 /// Record a successful addon load: print status and accumulate stats.

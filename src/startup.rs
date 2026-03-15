@@ -58,7 +58,9 @@ pub fn fire_startup_events(env: &WowLuaEnv) {
 pub fn fire_startup_events_for_screen(env: &WowLuaEnv, screen: ScreenKind) {
     match screen {
         ScreenKind::Game => fire_startup_events(env),
-        ScreenKind::Login | ScreenKind::CharacterSelect => fire_glue_startup_events(env, screen),
+        ScreenKind::Login | ScreenKind::CharacterSelect | ScreenKind::CharacterCreate => {
+            fire_glue_startup_events(env, screen)
+        }
     }
 }
 
@@ -132,6 +134,16 @@ fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
         ScreenKind::CharacterSelect => {
             r#"
             if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "charselect" then
+                if GeneralDockManager then GeneralDockManager:Hide() end
+                if ChatFrame1 then ChatFrame1:Hide() end
+                if ChatFrame1Tab then ChatFrame1Tab:Hide() end
+                if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
+            end
+            "#
+        }
+        ScreenKind::CharacterCreate => {
+            r#"
+            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "charcreate" then
                 if GeneralDockManager then GeneralDockManager:Hide() end
                 if ChatFrame1 then ChatFrame1:Hide() end
                 if ChatFrame1Tab then ChatFrame1Tab:Hide() end

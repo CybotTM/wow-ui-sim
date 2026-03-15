@@ -15,11 +15,18 @@ pub enum ScreenKind {
         alias = "character_select"
     )]
     CharacterSelect,
+    /// Glue character creation screen.
+    #[value(
+        alias = "character-create",
+        alias = "charcreate",
+        alias = "character_create"
+    )]
+    CharacterCreate,
 }
 
 impl ScreenKind {
     pub const fn is_glue(self) -> bool {
-        matches!(self, Self::Login | Self::CharacterSelect)
+        matches!(self, Self::Login | Self::CharacterSelect | Self::CharacterCreate)
     }
 
     pub const fn glue_screen_name(self) -> Option<&'static str> {
@@ -27,6 +34,7 @@ impl ScreenKind {
             Self::Game => None,
             Self::Login => Some("login"),
             Self::CharacterSelect => Some("charselect"),
+            Self::CharacterCreate => Some("charcreate"),
         }
     }
 
@@ -37,6 +45,7 @@ impl ScreenKind {
             Self::Game => (LE_AURORA_STATE_NONE, true, 0, false),
             Self::Login => (LE_AURORA_STATE_NONE, false, 0, false),
             Self::CharacterSelect => (LE_AURORA_STATE_NONE, true, 0, false),
+            Self::CharacterCreate => (LE_AURORA_STATE_NONE, true, 0, false),
         }
     }
 }

@@ -222,7 +222,7 @@ pub fn discover_blizzard_addons_for_screen(
 
 fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
     match screen {
-        ScreenKind::Game | ScreenKind::CharacterSelect => &[],
+        ScreenKind::Game | ScreenKind::CharacterSelect | ScreenKind::CharacterCreate => &[],
         ScreenKind::Login => &[
             "Blizzard_CharacterCreate",
             "Blizzard_CharacterCustomize",
@@ -422,7 +422,9 @@ const GLUE_BASE_ADDONS: &[&str] = &[
 fn base_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
     match screen {
         ScreenKind::Game => BASE_UI_ADDONS,
-        ScreenKind::Login | ScreenKind::CharacterSelect => GLUE_BASE_ADDONS,
+        ScreenKind::Login | ScreenKind::CharacterSelect | ScreenKind::CharacterCreate => {
+            GLUE_BASE_ADDONS
+        }
     }
 }
 

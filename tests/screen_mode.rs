@@ -42,3 +42,23 @@ fn character_select_screen_updates_glue_login_state() {
     assert_eq!(wow_connection_state, 0);
     assert!(!has_realm_list);
 }
+
+#[test]
+fn character_create_screen_updates_glue_login_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.set_screen_mode(ScreenKind::CharacterCreate);
+
+    assert!(env.eval::<bool>("return InGlue()").unwrap());
+    assert!(env.eval::<bool>("return C_Glue.IsOnGlueScreen()").unwrap());
+    assert!(!env.eval::<bool>("return IsLoggedIn()").unwrap());
+
+    let (_aurora_state, connected_to_wow, wow_connection_state, has_realm_list): (
+        i32,
+        bool,
+        i32,
+        bool,
+    ) = env.eval("return C_Login.GetState()").unwrap();
+    assert!(connected_to_wow);
+    assert_eq!(wow_connection_state, 0);
+    assert!(!has_realm_list);
+}
