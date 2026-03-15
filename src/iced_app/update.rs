@@ -340,9 +340,6 @@ impl App {
         if combined != 0 {
             self.mark_strata_dirty(combined);
         }
-        if self.textures_pending.get() {
-            self.mark_all_strata_dirty();
-        }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
             self.preload_current_render_requests_preserving_dirty(Some(
                 std::time::Duration::from_millis(75),
