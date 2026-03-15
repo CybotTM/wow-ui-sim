@@ -3,7 +3,9 @@
 //! Wraps the auto-generated atlas data and adds resolution logic for
 //! size-suffixed entries (e.g. "coin-copper" → "coin-copper-20x20").
 
-pub use crate::atlas_data::{ATLAS_DB, AtlasInfo, AtlasLookup};
+pub use crate::atlas_data::{
+    ATLAS_DB, AtlasInfo, AtlasLookup, AtlasSliceInfo, AtlasSliceMode, get_atlas_slice_info,
+};
 pub use crate::atlas_elements::get_atlas_name_by_element_id;
 
 /// A single piece of a nine-slice atlas kit.

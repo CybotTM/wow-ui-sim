@@ -2,6 +2,7 @@
 
 use iced::{Point, Rectangle, Size};
 
+use crate::atlas::{AtlasSliceMode, get_atlas_info, get_atlas_slice_info};
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::{GlyphAtlas, emit_text_quads};
 use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
@@ -266,7 +267,30 @@ fn emit_textured_quad(
     let (effective_path, effective_uvs) = remap_atlas_crop(tex_path, fill_uvs, f.atlas_tex_coords);
     let vert_before = batch.vertices.len();
 
-    if let Some((left_cap, right_cap, atlas_w)) = f.three_slice_h
+    if let Some((slice, atlas_info)) = f
+        .atlas
+        .as_deref()
+        .and_then(|name| get_atlas_slice_info(name).zip(get_atlas_info(name)))
+        && slice.mode == AtlasSliceMode::Stretch
+        && let Some((left, right, top, bottom)) = effective_uvs
+        && fill_bounds.width > (slice.left + slice.right) as f32
+        && fill_bounds.height > (slice.top + slice.bottom) as f32
+    {
+        emit_stretch_slice_atlas(
+            batch,
+            fill_bounds,
+            slice.left as f32,
+            slice.top as f32,
+            slice.right as f32,
+            slice.bottom as f32,
+            atlas_info.info.width as f32,
+            atlas_info.info.height as f32,
+            (left, right, top, bottom),
+            &effective_path,
+            tint,
+            f.blend_mode,
+        );
+    } else if let Some((left_cap, right_cap, atlas_w)) = f.three_slice_h
         && let Some((left, right, top, bottom)) = effective_uvs
         && fill_bounds.width > left_cap + right_cap
     {
@@ -364,6 +388,100 @@ fn emit_three_slice_h_atlas(
         tint,
         blend,
     );
+}
+
+#[allow(clippy::too_many_arguments)]
+fn emit_stretch_slice_atlas(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    left_px: f32,
+    top_px: f32,
+    right_px: f32,
+    bottom_px: f32,
+    atlas_width_px: f32,
+    atlas_height_px: f32,
+    (left_uv, right_uv, top_uv, bottom_uv): (f32, f32, f32, f32),
+    tex_path: &str,
+    tint: [f32; 4],
+    blend: crate::render::BlendMode,
+) {
+    let uv_w = right_uv - left_uv;
+    let uv_h = bottom_uv - top_uv;
+    let left_u = (left_px / atlas_width_px) * uv_w;
+    let right_u = (right_px / atlas_width_px) * uv_w;
+    let top_v = (top_px / atlas_height_px) * uv_h;
+    let bottom_v = (bottom_px / atlas_height_px) * uv_h;
+
+    let u1 = left_uv + left_u;
+    let u2 = right_uv - right_u;
+    let v1 = top_uv + top_v;
+    let v2 = bottom_uv - bottom_v;
+
+    let left_w = left_px;
+    let right_w = right_px;
+    let top_h = top_px;
+    let bottom_h = bottom_px;
+    let center_w = bounds.width - left_w - right_w;
+    let center_h = bounds.height - top_h - bottom_h;
+
+    let x0 = bounds.x;
+    let x1 = bounds.x + left_w;
+    let x2 = bounds.x + bounds.width - right_w;
+    let y0 = bounds.y;
+    let y1 = bounds.y + top_h;
+    let y2 = bounds.y + bounds.height - bottom_h;
+
+    let rects = [
+        (
+            Rectangle::new(Point::new(x0, y0), Size::new(left_w, top_h)),
+            Rectangle::new(
+                Point::new(left_uv, top_uv),
+                Size::new(u1 - left_uv, v1 - top_uv),
+            ),
+        ),
+        (
+            Rectangle::new(Point::new(x1, y0), Size::new(center_w, top_h)),
+            Rectangle::new(Point::new(u1, top_uv), Size::new(u2 - u1, v1 - top_uv)),
+        ),
+        (
+            Rectangle::new(Point::new(x2, y0), Size::new(right_w, top_h)),
+            Rectangle::new(
+                Point::new(u2, top_uv),
+                Size::new(right_uv - u2, v1 - top_uv),
+            ),
+        ),
+        (
+            Rectangle::new(Point::new(x0, y1), Size::new(left_w, center_h)),
+            Rectangle::new(Point::new(left_uv, v1), Size::new(u1 - left_uv, v2 - v1)),
+        ),
+        (
+            Rectangle::new(Point::new(x1, y1), Size::new(center_w, center_h)),
+            Rectangle::new(Point::new(u1, v1), Size::new(u2 - u1, v2 - v1)),
+        ),
+        (
+            Rectangle::new(Point::new(x2, y1), Size::new(right_w, center_h)),
+            Rectangle::new(Point::new(u2, v1), Size::new(right_uv - u2, v2 - v1)),
+        ),
+        (
+            Rectangle::new(Point::new(x0, y2), Size::new(left_w, bottom_h)),
+            Rectangle::new(
+                Point::new(left_uv, v2),
+                Size::new(u1 - left_uv, bottom_uv - v2),
+            ),
+        ),
+        (
+            Rectangle::new(Point::new(x1, y2), Size::new(center_w, bottom_h)),
+            Rectangle::new(Point::new(u1, v2), Size::new(u2 - u1, bottom_uv - v2)),
+        ),
+        (
+            Rectangle::new(Point::new(x2, y2), Size::new(right_w, bottom_h)),
+            Rectangle::new(Point::new(u2, v2), Size::new(right_uv - u2, bottom_uv - v2)),
+        ),
+    ];
+
+    for (dst, src) in rects {
+        batch.push_textured_path_uv(dst, src, tex_path, tint, blend);
+    }
 }
 
 /// Apply StatusBar fill clipping to bounds.

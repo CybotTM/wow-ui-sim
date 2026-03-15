@@ -4,6 +4,7 @@
 //!   - UiTextureAtlas.csv
 //!   - UiTextureAtlasElement.csv
 //!   - UiTextureAtlasMember.csv
+//!   - UiTextureAtlasElementSliceData.csv
 //!   - listfile.csv
 //!
 //! Generates: data/atlas.rs
@@ -29,6 +30,18 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let elements = load_elements(&wow_data.join("UiTextureAtlasElement.csv"))?;
     println!("  {} entries", elements.len());
 
+    println!("Loading UiTextureAtlasElementSliceData...");
+    let slice_path = {
+        let local = Path::new("data/UiTextureAtlasElementSliceData.csv");
+        if local.exists() {
+            local.to_path_buf()
+        } else {
+            wow_data.join("UiTextureAtlasElementSliceData.csv")
+        }
+    };
+    let slices = load_slices(&slice_path, &elements)?;
+    println!("  {} entries", slices.len());
+
     println!("Loading UiTextureAtlasMember...");
     let members = load_members(&wow_data.join("UiTextureAtlasMember.csv"))?;
     println!("  {} entries", members.len());
@@ -41,6 +54,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     write_header(&mut out)?;
     write_lookup_fn(&mut out)?;
     let (count, skipped) = write_atlas_entries(&mut out, &members, &atlases, &listfile)?;
+    write_slice_lookup(&mut out, &slices)?;
 
     let elem_path = Path::new("data/atlas_elements.rs");
     let mut elem_out = File::create(elem_path)?;
@@ -80,6 +94,21 @@ fn write_atlas_structs(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    pub bottom_tex_coord: f32,")?;
     writeln!(out, "    pub tiles_horizontally: bool,")?;
     writeln!(out, "    pub tiles_vertically: bool,")?;
+    writeln!(out, "}}")?;
+    writeln!(out)?;
+    writeln!(out, "#[derive(Debug, Clone, Copy, PartialEq, Eq)]")?;
+    writeln!(out, "pub enum AtlasSliceMode {{")?;
+    writeln!(out, "    Stretch,")?;
+    writeln!(out, "    Tile,")?;
+    writeln!(out, "}}")?;
+    writeln!(out)?;
+    writeln!(out, "#[derive(Debug, Clone, Copy)]")?;
+    writeln!(out, "pub struct AtlasSliceInfo {{")?;
+    writeln!(out, "    pub left: u32,")?;
+    writeln!(out, "    pub top: u32,")?;
+    writeln!(out, "    pub right: u32,")?;
+    writeln!(out, "    pub bottom: u32,")?;
+    writeln!(out, "    pub mode: AtlasSliceMode,")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
     Ok(())
@@ -157,6 +186,14 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(
         out,
+        "pub fn get_atlas_slice_info(name: &str) -> Option<AtlasSliceInfo> {{"
+    )?;
+    writeln!(out, "    let lower = name.to_lowercase();")?;
+    writeln!(out, "    ATLAS_SLICE_DB.get(&lower as &str).copied()")?;
+    writeln!(out, "}}")?;
+    writeln!(out)?;
+    writeln!(
+        out,
         "pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {{"
     )?;
     Ok(())
@@ -186,6 +223,36 @@ fn write_atlas_entries(
 
     writeln!(out, "}};")?;
     Ok((count, skipped))
+}
+
+fn write_slice_lookup(
+    out: &mut File,
+    slices: &HashMap<u32, SliceEntry>,
+) -> Result<(), Box<dyn std::error::Error>> {
+    writeln!(out)?;
+    writeln!(
+        out,
+        "pub static ATLAS_SLICE_DB: phf::Map<&'static str, AtlasSliceInfo> = phf_map! {{"
+    )?;
+
+    let mut sorted: Vec<_> = slices.iter().collect();
+    sorted.sort_by_key(|(id, _)| *id);
+
+    for (_id, slice) in sorted {
+        let mode = match slice.mode {
+            0 => "AtlasSliceMode::Stretch",
+            1 => "AtlasSliceMode::Tile",
+            _ => continue,
+        };
+        writeln!(
+            out,
+            "    \"{}\" => AtlasSliceInfo {{ left: {}u32, top: {}u32, right: {}u32, bottom: {}u32, mode: {} }},",
+            slice.name, slice.left, slice.top, slice.right, slice.bottom, mode
+        )?;
+    }
+
+    writeln!(out, "}};")?;
+    Ok(())
 }
 
 fn format_atlas_entry(
@@ -272,6 +339,15 @@ struct MemberEntry {
     override_width: u32,
     override_height: u32,
     flags: u32,
+}
+
+struct SliceEntry {
+    name: String,
+    left: u32,
+    top: u32,
+    right: u32,
+    bottom: u32,
+    mode: u8,
 }
 
 fn load_listfile(path: &Path) -> Result<HashMap<u32, String>, Box<dyn std::error::Error>> {
@@ -408,6 +484,42 @@ fn load_members(path: &Path) -> Result<Vec<MemberEntry>, Box<dyn std::error::Err
                 override_height: fields[11].parse().unwrap_or(0),
                 flags: fields[12].parse().unwrap_or(0),
             });
+        }
+    }
+    Ok(entries)
+}
+
+fn load_slices(
+    path: &Path,
+    elements: &HashMap<u32, String>,
+) -> Result<HashMap<u32, SliceEntry>, Box<dyn std::error::Error>> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+    let mut entries = HashMap::new();
+
+    for (i, line) in reader.lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue;
+        }
+
+        let fields = parse_csv_line(&line);
+        if fields.len() >= 7 {
+            let element_id: u32 = fields[1].parse()?;
+            let Some(name) = elements.get(&element_id) else {
+                continue;
+            };
+            entries.insert(
+                element_id,
+                SliceEntry {
+                    name: name.to_lowercase(),
+                    left: fields[2].parse()?,
+                    top: fields[3].parse()?,
+                    right: fields[4].parse()?,
+                    bottom: fields[5].parse()?,
+                    mode: fields[6].parse()?,
+                },
+            );
         }
     }
     Ok(entries)
