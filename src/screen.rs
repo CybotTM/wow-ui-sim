@@ -26,7 +26,10 @@ pub enum ScreenKind {
 
 impl ScreenKind {
     pub const fn is_glue(self) -> bool {
-        matches!(self, Self::Login | Self::CharacterSelect | Self::CharacterCreate)
+        matches!(
+            self,
+            Self::Login | Self::CharacterSelect | Self::CharacterCreate
+        )
     }
 
     pub const fn glue_screen_name(self) -> Option<&'static str> {

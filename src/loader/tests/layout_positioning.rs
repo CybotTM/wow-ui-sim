@@ -75,10 +75,24 @@ fn test_get_rect_recovers_pending_layout_for_anchored_frame() {
         .eval("return select('#', PendingRectFrame:GetRect())")
         .unwrap();
     assert_eq!(count, 4);
-    let width: f64 = t.env.eval("return select(3, PendingRectFrame:GetRect())").unwrap();
-    let height: f64 = t.env.eval("return select(4, PendingRectFrame:GetRect())").unwrap();
-    assert!((width - 100.0).abs() < 0.01, "expected width 100, got {}", width);
-    assert!((height - 50.0).abs() < 0.01, "expected height 50, got {}", height);
+    let width: f64 = t
+        .env
+        .eval("return select(3, PendingRectFrame:GetRect())")
+        .unwrap();
+    let height: f64 = t
+        .env
+        .eval("return select(4, PendingRectFrame:GetRect())")
+        .unwrap();
+    assert!(
+        (width - 100.0).abs() < 0.01,
+        "expected width 100, got {}",
+        width
+    );
+    assert!(
+        (height - 50.0).abs() < 0.01,
+        "expected height 50, got {}",
+        height
+    );
 }
 
 #[test]

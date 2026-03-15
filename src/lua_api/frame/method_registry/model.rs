@@ -319,6 +319,7 @@ pub static PLAYERMODEL_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "Raise",
         "RefreshCamera",
         "RefreshUnit",
+        "ResetLights",
         "RegisterAllEvents",
         "RegisterEvent",
         "RegisterEventCallback",

@@ -121,7 +121,9 @@ fn resolve_clip_rect(
     let mut current_id = registry.get(id).and_then(|f| f.parent_id);
     let mut clip_rect: Option<crate::LayoutRect> = None;
     while let Some(parent_id) = current_id {
-        let Some(parent) = registry.get(parent_id) else { break };
+        let Some(parent) = registry.get(parent_id) else {
+            break;
+        };
         if parent.clips_children
             && let Some(parent_rect) = parent.layout_rect
         {

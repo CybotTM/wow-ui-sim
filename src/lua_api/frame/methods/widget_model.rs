@@ -84,6 +84,7 @@ fn add_model_appearance_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("SetPortraitZoom", |_, _this, _zoom: f64| Ok(()));
     methods.add_method("SetDesaturation", |_, _this, _desat: f64| Ok(()));
     methods.add_method("SetLight", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("ResetLights", |_, _this, ()| Ok(()));
     methods.add_method("SetSequence", |_, _this, _seq: i32| Ok(()));
     methods.add_method("SetSequenceTime", |_, _this, (_seq, _time): (i32, i32)| {
         Ok(())
