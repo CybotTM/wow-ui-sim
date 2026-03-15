@@ -301,3 +301,46 @@ fn character_create_screen_can_boot_directly() {
         assert!(character_create_visible, "direct boot should show CharacterCreateFrame");
     }
 }
+
+#[test]
+fn character_create_screen_populates_races_classes_and_customizations() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterCreate);
+
+        let (race_count, class_count, category_count, option_count, selected_sex, back_text, forward_text): (
+            i32,
+            i32,
+            i32,
+            i32,
+            i32,
+            String,
+            String,
+        ) = env
+            .eval(
+                r#"
+                local races = C_CharacterCreation.GetAvailableRaces()
+                local classes = C_CharacterCreation.GetAvailableClasses()
+                local categories = C_CharacterCreation.GetAvailableCustomizations()
+                local optionCount = 0
+                for _, category in ipairs(categories) do
+                    optionCount = optionCount + #category.options
+                end
+                return #races, #classes, #categories, optionCount, C_CharacterCreation.GetSelectedSex(), CharacterCreateFrame.BackButton:GetText() or "", CharacterCreateFrame.ForwardButton:GetText() or ""
+                "#,
+            )
+            .expect("character create data should be queryable");
+
+        assert!(race_count >= 20, "expected a full race list, got {race_count}");
+        assert!(class_count >= 13, "expected a full class list, got {class_count}");
+        assert!(
+            category_count >= 3 && option_count >= 6,
+            "expected populated customization categories/options, got {category_count} categories and {option_count} options"
+        );
+        assert!(
+            selected_sex == 0 || selected_sex == 1,
+            "selected sex should use Enum.UnitSex male/female values, got {selected_sex}"
+        );
+        assert!(!back_text.is_empty(), "back button text should be populated");
+        assert!(!forward_text.is_empty(), "forward button text should be populated");
+    }
+}

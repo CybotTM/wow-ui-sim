@@ -25,12 +25,760 @@ const GLUE_CHARACTER_CREATE_RACE_ID_KEY: &str = "__wow_ui_sim_glue_character_cre
 const GLUE_CHARACTER_CREATE_CLASS_ID_KEY: &str = "__wow_ui_sim_glue_character_create_class_id";
 const GLUE_CHARACTER_CREATE_SEX_ID_KEY: &str = "__wow_ui_sim_glue_character_create_sex_id";
 const GLUE_CHARACTER_CREATE_FACING_KEY: &str = "__wow_ui_sim_glue_character_create_facing";
-const GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY: &str = "__wow_ui_sim_glue_character_create_model_alpha";
+const GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY: &str =
+    "__wow_ui_sim_glue_character_create_model_alpha";
+const GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY: &str =
+    "__wow_ui_sim_glue_character_create_camera_zoom";
+const GLUE_CHARACTER_CREATE_VIEWING_ALTERED_FORM_KEY: &str =
+    "__wow_ui_sim_glue_character_create_viewing_altered_form";
+const GLUE_CHARACTER_CREATE_SELECTED_PREVIEW_GEAR_KEY: &str =
+    "__wow_ui_sim_glue_character_create_selected_preview_gear";
+const GLUE_CHARACTER_CREATE_MODEL_DRESSED_KEY: &str =
+    "__wow_ui_sim_glue_character_create_model_dressed";
+const GLUE_CHARACTER_CREATE_MODEL_HIDDEN_KEY: &str =
+    "__wow_ui_sim_glue_character_create_model_hidden";
+const GLUE_CHARACTER_CREATE_BLUR_ENABLED_KEY: &str =
+    "__wow_ui_sim_glue_character_create_blur_enabled";
+const GLUE_CHARACTER_CREATE_CUSTOMIZATION_CHOICES_KEY: &str =
+    "__wow_ui_sim_glue_character_create_customization_choices";
+const GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY: &str =
+    "__wow_ui_sim_glue_character_create_customization_preview_choices";
+
+#[derive(Clone, Copy)]
+struct GlueRaceDef {
+    race_id: i32,
+    name: &'static str,
+    client_file_string: &'static str,
+    file_name: &'static str,
+    faction_internal_name: &'static str,
+    create_screen_icon_atlas: &'static str,
+    lore_description: &'static str,
+    is_allied_race: bool,
+    is_neutral_race: bool,
+    has_heritage_armor: bool,
+    alternate_form: Option<GlueAlternateFormDef>,
+}
+
+#[derive(Clone, Copy)]
+struct GlueAlternateFormDef {
+    name: &'static str,
+    create_screen_icon_atlas: &'static str,
+}
+
+#[derive(Clone, Copy)]
+struct GlueClassDef {
+    class_id: i32,
+    name: &'static str,
+    file_name: &'static str,
+    description: &'static str,
+    role_info: &'static str,
+}
+
+#[derive(Clone, Copy)]
+struct GlueCustomizationCategoryDef {
+    id: i32,
+    name: &'static str,
+    icon: &'static str,
+    selected_icon: &'static str,
+    order_index: i32,
+    camera_zoom_level: i32,
+    camera_distance_offset: f32,
+    options: &'static [GlueCustomizationOptionDef],
+}
+
+#[derive(Clone, Copy)]
+struct GlueCustomizationOptionDef {
+    id: i32,
+    name: &'static str,
+    option_type: i32,
+    order_index: i32,
+    choices: &'static [GlueCustomizationChoiceDef],
+}
+
+#[derive(Clone, Copy)]
+struct GlueCustomizationChoiceDef {
+    id: i32,
+    name: &'static str,
+}
+
+const GLUE_RACES: &[GlueRaceDef] = &[
+    GlueRaceDef {
+        race_id: 1,
+        name: "Human",
+        client_file_string: "Human",
+        file_name: "Human",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-human-male",
+        lore_description: "Versatile and resilient survivors of the Eastern Kingdoms.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 2,
+        name: "Orc",
+        client_file_string: "Orc",
+        file_name: "Orc",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-orc-male",
+        lore_description: "Fierce warriors who forged a new destiny on Azeroth.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 3,
+        name: "Dwarf",
+        client_file_string: "Dwarf",
+        file_name: "Dwarf",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-dwarf-male",
+        lore_description: "Stout defenders with ancient titan-forged roots.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 4,
+        name: "Night Elf",
+        client_file_string: "NightElf",
+        file_name: "NightElf",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-nightelf-male",
+        lore_description: "Ancient guardians of nature and the kaldorei legacy.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 5,
+        name: "Undead",
+        client_file_string: "Scourge",
+        file_name: "Scourge",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-scourge-male",
+        lore_description: "Forsaken who seized free will from the Lich King.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 6,
+        name: "Tauren",
+        client_file_string: "Tauren",
+        file_name: "Tauren",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-tauren-male",
+        lore_description: "Honorable nomads guided by the Earth Mother.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 7,
+        name: "Gnome",
+        client_file_string: "Gnome",
+        file_name: "Gnome",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-gnome-male",
+        lore_description: "Inventive tinkerers with a talent for improbable solutions.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 8,
+        name: "Troll",
+        client_file_string: "Troll",
+        file_name: "Troll",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-troll-male",
+        lore_description: "Savage hunters and priests with proud ancient empires.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 9,
+        name: "Goblin",
+        client_file_string: "Goblin",
+        file_name: "Goblin",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-goblin-male",
+        lore_description: "Profit-driven masterminds with dangerous ingenuity.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 10,
+        name: "Blood Elf",
+        client_file_string: "BloodElf",
+        file_name: "BloodElf",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-bloodelf-male",
+        lore_description: "Arcane masters rebuilding Quel'Thalas with resolve.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 11,
+        name: "Draenei",
+        client_file_string: "Draenei",
+        file_name: "Draenei",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-draenei-male",
+        lore_description: "Exiles of Argus strengthened by faith and perseverance.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 22,
+        name: "Worgen",
+        client_file_string: "Worgen",
+        file_name: "Worgen",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-worgen-male",
+        lore_description: "Cursed Gilneans who balance feral fury with discipline.",
+        is_allied_race: false,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: Some(GlueAlternateFormDef {
+            name: "Human Form",
+            create_screen_icon_atlas: "raceicon128-human-male",
+        }),
+    },
+    GlueRaceDef {
+        race_id: 24,
+        name: "Pandaren",
+        client_file_string: "Pandaren",
+        file_name: "Pandaren",
+        faction_internal_name: "Neutral",
+        create_screen_icon_atlas: "raceicon128-pandaren-male",
+        lore_description: "Wanderers from Pandaria who choose their own path.",
+        is_allied_race: false,
+        is_neutral_race: true,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 27,
+        name: "Nightborne",
+        client_file_string: "Nightborne",
+        file_name: "Nightborne",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-nightborne-male",
+        lore_description: "Arcwine-fueled survivors of Suramar's long isolation.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 28,
+        name: "Highmountain Tauren",
+        client_file_string: "HighmountainTauren",
+        file_name: "HighmountainTauren",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-highmountaintauren-male",
+        lore_description: "Tauren tribes united by Huln's enduring legacy.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 29,
+        name: "Void Elf",
+        client_file_string: "VoidElf",
+        file_name: "VoidElf",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-voidelf-male",
+        lore_description: "Ren'dorei who wield the whispers of the Void.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 30,
+        name: "Lightforged Draenei",
+        client_file_string: "LightforgedDraenei",
+        file_name: "LightforgedDraenei",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-lightforgeddraenei-male",
+        lore_description: "Veterans of the Army of the Light, marked by holy fire.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 31,
+        name: "Zandalari Troll",
+        client_file_string: "ZandalariTroll",
+        file_name: "ZandalariTroll",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-zandalaritroll-male",
+        lore_description: "Imperial trolls descended from Azeroth's oldest empire.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 32,
+        name: "Kul Tiran",
+        client_file_string: "KulTiran",
+        file_name: "KulTiran",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-kultiran-male",
+        lore_description: "Seasoned mariners hardened by storms and witchcraft.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 34,
+        name: "Dark Iron Dwarf",
+        client_file_string: "DarkIronDwarf",
+        file_name: "DarkIronDwarf",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-darkirondwarf-male",
+        lore_description: "Fire-tempered dwarves from Blackrock's shadowed halls.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 35,
+        name: "Vulpera",
+        client_file_string: "Vulpera",
+        file_name: "Vulpera",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-vulpera-male",
+        lore_description: "Resourceful nomads who thrive through speed and wit.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 36,
+        name: "Mag'har Orc",
+        client_file_string: "MagharOrc",
+        file_name: "MagharOrc",
+        faction_internal_name: "Horde",
+        create_screen_icon_atlas: "raceicon128-magharorc-male",
+        lore_description: "Uncorrupted orc clans drawn from alternate Draenor.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 37,
+        name: "Mechagnome",
+        client_file_string: "Mechagnome",
+        file_name: "Mechagnome",
+        faction_internal_name: "Alliance",
+        create_screen_icon_atlas: "raceicon128-mechagnome-male",
+        lore_description: "Augmented gnomes pursuing perfection through engineering.",
+        is_allied_race: true,
+        is_neutral_race: false,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+    GlueRaceDef {
+        race_id: 52,
+        name: "Dracthyr",
+        client_file_string: "Dracthyr",
+        file_name: "Dracthyr",
+        faction_internal_name: "Neutral",
+        create_screen_icon_atlas: "raceicon128-dracthyr-male",
+        lore_description: "Dragonkin soldiers awakened to a transformed world.",
+        is_allied_race: false,
+        is_neutral_race: true,
+        has_heritage_armor: false,
+        alternate_form: Some(GlueAlternateFormDef {
+            name: "Visage",
+            create_screen_icon_atlas: "raceicon128-human-male",
+        }),
+    },
+    GlueRaceDef {
+        race_id: 84,
+        name: "Earthen",
+        client_file_string: "Earthen",
+        file_name: "Earthen",
+        faction_internal_name: "Neutral",
+        create_screen_icon_atlas: "raceicon128-earthen-male",
+        lore_description: "Titan-forged people emerging from the depths of Khaz Algar.",
+        is_allied_race: true,
+        is_neutral_race: true,
+        has_heritage_armor: true,
+        alternate_form: None,
+    },
+];
+
+const GLUE_CLASSES: &[GlueClassDef] = &[
+    GlueClassDef {
+        class_id: 1,
+        name: "Warrior",
+        file_name: "WARRIOR",
+        description: "Battle-hardened combatants who master arms, rage, and resilience.",
+        role_info: "Tank, Damage",
+    },
+    GlueClassDef {
+        class_id: 2,
+        name: "Paladin",
+        file_name: "PALADIN",
+        description: "Holy champions who bring heavy armor, auras, and healing.",
+        role_info: "Tank, Healer, Damage",
+    },
+    GlueClassDef {
+        class_id: 3,
+        name: "Hunter",
+        file_name: "HUNTER",
+        description: "Ranged trackers who rely on pets, marksmanship, and survival skills.",
+        role_info: "Damage",
+    },
+    GlueClassDef {
+        class_id: 4,
+        name: "Rogue",
+        file_name: "ROGUE",
+        description: "Agile assassins who strike from stealth with precision.",
+        role_info: "Damage",
+    },
+    GlueClassDef {
+        class_id: 5,
+        name: "Priest",
+        file_name: "PRIEST",
+        description: "Devotees of Light and Shadow with potent healing and spellcasting.",
+        role_info: "Healer, Damage",
+    },
+    GlueClassDef {
+        class_id: 6,
+        name: "Death Knight",
+        file_name: "DEATHKNIGHT",
+        description: "Runeblade-wielding heroes of undeath who command frost and blood.",
+        role_info: "Tank, Damage",
+    },
+    GlueClassDef {
+        class_id: 7,
+        name: "Shaman",
+        file_name: "SHAMAN",
+        description: "Elemental spiritualists who answer the call of earth, air, fire, and water.",
+        role_info: "Healer, Damage",
+    },
+    GlueClassDef {
+        class_id: 8,
+        name: "Mage",
+        file_name: "MAGE",
+        description: "Pure spellcasters who bend arcane, frost, and fire to their will.",
+        role_info: "Damage",
+    },
+    GlueClassDef {
+        class_id: 9,
+        name: "Warlock",
+        file_name: "WARLOCK",
+        description: "Fel-fueled casters who command curses, demons, and draining magic.",
+        role_info: "Damage",
+    },
+    GlueClassDef {
+        class_id: 10,
+        name: "Monk",
+        file_name: "MONK",
+        description: "Pandaren martial artists who channel chi into strikes and healing.",
+        role_info: "Tank, Healer, Damage",
+    },
+    GlueClassDef {
+        class_id: 11,
+        name: "Druid",
+        file_name: "DRUID",
+        description: "Shape-shifters who protect nature through versatility and forms.",
+        role_info: "Tank, Healer, Damage",
+    },
+    GlueClassDef {
+        class_id: 12,
+        name: "Demon Hunter",
+        file_name: "DEMONHUNTER",
+        description: "Illidari vengeance seekers with fel mobility and metamorphosis.",
+        role_info: "Tank, Damage",
+    },
+    GlueClassDef {
+        class_id: 13,
+        name: "Evoker",
+        file_name: "EVOKER",
+        description: "Dracthyr spellcasters who channel all five dragonflights.",
+        role_info: "Healer, Damage",
+    },
+];
+
+const FACE_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 1001,
+        name: "Face 1",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1002,
+        name: "Face 2",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1003,
+        name: "Face 3",
+    },
+];
+const SKIN_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 1101,
+        name: "Tone 1",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1102,
+        name: "Tone 2",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1103,
+        name: "Tone 3",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1104,
+        name: "Tone 4",
+    },
+    GlueCustomizationChoiceDef {
+        id: 1105,
+        name: "Tone 5",
+    },
+];
+const HAIR_STYLE_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 2001,
+        name: "Style 1",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2002,
+        name: "Style 2",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2003,
+        name: "Style 3",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2004,
+        name: "Style 4",
+    },
+];
+const HAIR_COLOR_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 2101,
+        name: "Color 1",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2102,
+        name: "Color 2",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2103,
+        name: "Color 3",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2104,
+        name: "Color 4",
+    },
+    GlueCustomizationChoiceDef {
+        id: 2105,
+        name: "Color 5",
+    },
+];
+const FACIAL_HAIR_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 3001,
+        name: "Off",
+    },
+    GlueCustomizationChoiceDef {
+        id: 3002,
+        name: "On",
+    },
+];
+const SCAR_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 3101,
+        name: "Off",
+    },
+    GlueCustomizationChoiceDef {
+        id: 3102,
+        name: "On",
+    },
+];
+const HORN_CHOICES: &[GlueCustomizationChoiceDef] = &[
+    GlueCustomizationChoiceDef {
+        id: 3201,
+        name: "Horn 1",
+    },
+    GlueCustomizationChoiceDef {
+        id: 3202,
+        name: "Horn 2",
+    },
+    GlueCustomizationChoiceDef {
+        id: 3203,
+        name: "Horn 3",
+    },
+];
+
+const BODY_OPTIONS: &[GlueCustomizationOptionDef] = &[
+    GlueCustomizationOptionDef {
+        id: 100,
+        name: "Face",
+        option_type: 0,
+        order_index: 1,
+        choices: FACE_CHOICES,
+    },
+    GlueCustomizationOptionDef {
+        id: 101,
+        name: "Skin Tone",
+        option_type: 2,
+        order_index: 2,
+        choices: SKIN_CHOICES,
+    },
+];
+const HAIR_OPTIONS: &[GlueCustomizationOptionDef] = &[
+    GlueCustomizationOptionDef {
+        id: 200,
+        name: "Hair Style",
+        option_type: 0,
+        order_index: 1,
+        choices: HAIR_STYLE_CHOICES,
+    },
+    GlueCustomizationOptionDef {
+        id: 201,
+        name: "Hair Color",
+        option_type: 0,
+        order_index: 2,
+        choices: HAIR_COLOR_CHOICES,
+    },
+];
+const FEATURE_OPTIONS: &[GlueCustomizationOptionDef] = &[
+    GlueCustomizationOptionDef {
+        id: 300,
+        name: "Facial Hair",
+        option_type: 1,
+        order_index: 1,
+        choices: FACIAL_HAIR_CHOICES,
+    },
+    GlueCustomizationOptionDef {
+        id: 301,
+        name: "Scars",
+        option_type: 1,
+        order_index: 2,
+        choices: SCAR_CHOICES,
+    },
+    GlueCustomizationOptionDef {
+        id: 302,
+        name: "Horn Style",
+        option_type: 0,
+        order_index: 3,
+        choices: HORN_CHOICES,
+    },
+];
+
+const GLUE_CUSTOMIZATION_CATEGORIES: &[GlueCustomizationCategoryDef] = &[
+    GlueCustomizationCategoryDef {
+        id: 1,
+        name: "Body",
+        icon: "classicon-warrior",
+        selected_icon: "classicon-warrior",
+        order_index: 1,
+        camera_zoom_level: 15,
+        camera_distance_offset: 0.0,
+        options: BODY_OPTIONS,
+    },
+    GlueCustomizationCategoryDef {
+        id: 2,
+        name: "Hair",
+        icon: "classicon-mage",
+        selected_icon: "classicon-mage",
+        order_index: 2,
+        camera_zoom_level: 35,
+        camera_distance_offset: 0.0,
+        options: HAIR_OPTIONS,
+    },
+    GlueCustomizationCategoryDef {
+        id: 3,
+        name: "Features",
+        icon: "classicon-priest",
+        selected_icon: "classicon-priest",
+        order_index: 3,
+        camera_zoom_level: 50,
+        camera_distance_offset: 0.0,
+        options: FEATURE_OPTIONS,
+    },
+];
+
+fn get_sim_state_rc(
+    lua: &Lua,
+) -> Option<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>> {
+    lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
+        .map(|state| (*state).clone())
+}
+
+fn find_glue_race(race_id: i32) -> Option<&'static GlueRaceDef> {
+    GLUE_RACES.iter().find(|race| race.race_id == race_id)
+}
+
+fn find_glue_race_by_name(name: &str) -> Option<&'static GlueRaceDef> {
+    GLUE_RACES.iter().find(|race| {
+        race.name.eq_ignore_ascii_case(name)
+            || race.client_file_string.eq_ignore_ascii_case(name)
+            || race.file_name.eq_ignore_ascii_case(name)
+    })
+}
+
+fn find_glue_class(class_id: i32) -> Option<&'static GlueClassDef> {
+    GLUE_CLASSES
+        .iter()
+        .find(|class_info| class_info.class_id == class_id)
+}
+
+fn faction_group_for_name(faction: &str) -> i32 {
+    match faction {
+        "Alliance" => 1,
+        "Horde" => 0,
+        _ => -1,
+    }
+}
+
+fn default_race_id() -> i32 {
+    GLUE_RACES.first().map(|race| race.race_id).unwrap_or(1)
+}
+
+fn default_class_id() -> i32 {
+    GLUE_CLASSES
+        .first()
+        .map(|class_info| class_info.class_id)
+        .unwrap_or(1)
+}
+
+fn default_sex_id() -> i32 {
+    0
+}
 
 fn has_glue_character(lua: &Lua) -> bool {
-    let Some(state) =
-        lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
-    else {
+    let Some(state) = get_sim_state_rc(lua) else {
         return false;
     };
 
@@ -113,24 +861,49 @@ fn set_glue_f32(lua: &Lua, key: &str, value: f32) -> Result<()> {
 }
 
 fn reset_glue_character_create_state(lua: &Lua) -> Result<()> {
-    set_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, 1)?;
-    set_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, 2)?;
-    set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, 2)?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, default_race_id())?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, default_class_id())?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, default_sex_id())?;
     set_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, 0.0)?;
     set_glue_f32(lua, GLUE_CHARACTER_CREATE_MODEL_ALPHA_KEY, 1.0)?;
+    set_glue_i32(lua, GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY, 0)?;
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_VIEWING_ALTERED_FORM_KEY, false)?;
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_MODEL_DRESSED_KEY, true)?;
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_MODEL_HIDDEN_KEY, false)?;
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_BLUR_ENABLED_KEY, false)?;
+    lua.globals()
+        .raw_set(GLUE_CHARACTER_CREATE_SELECTED_PREVIEW_GEAR_KEY, Value::Nil)?;
+    lua.globals().raw_set(
+        GLUE_CHARACTER_CREATE_CUSTOMIZATION_CHOICES_KEY,
+        lua.create_table()?,
+    )?;
+    lua.globals().raw_set(
+        GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY,
+        lua.create_table()?,
+    )?;
     Ok(())
 }
 
 fn get_glue_selected_race_id(lua: &Lua) -> Result<i32> {
-    get_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, 1)
+    let race_id = get_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, default_race_id())?;
+    Ok(find_glue_race(race_id)
+        .map(|race| race.race_id)
+        .unwrap_or_else(default_race_id))
 }
 
 fn get_glue_selected_class_id(lua: &Lua) -> Result<i32> {
-    get_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, 2)
+    let class_id = get_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, default_class_id())?;
+    Ok(find_glue_class(class_id)
+        .map(|class_info| class_info.class_id)
+        .unwrap_or_else(default_class_id))
 }
 
 fn get_glue_selected_sex_id(lua: &Lua) -> Result<i32> {
-    get_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, 2)
+    Ok(get_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, default_sex_id())?.clamp(0, 1))
 }
 
 fn push_kv_str(lua: &Lua, table: &mlua::Table, key: &str, value: &str) -> Result<()> {
@@ -138,36 +911,264 @@ fn push_kv_str(lua: &Lua, table: &mlua::Table, key: &str, value: &str) -> Result
     Ok(())
 }
 
+fn glue_racial_abilities(lua: &Lua, race: &GlueRaceDef) -> Result<mlua::Table> {
+    let abilities = lua.create_table()?;
+
+    let first = lua.create_table()?;
+    push_kv_str(
+        lua,
+        &first,
+        "icon",
+        "Interface\\Icons\\INV_Misc_QuestionMark",
+    )?;
+    push_kv_str(
+        lua,
+        &first,
+        "description",
+        &format!(
+            "{} heritage is represented in the character create flow.",
+            race.name
+        ),
+    )?;
+    abilities.set(1, first)?;
+
+    let second = lua.create_table()?;
+    push_kv_str(lua, &second, "icon", "Interface\\Icons\\Ability_DualWield")?;
+    push_kv_str(
+        lua,
+        &second,
+        "description",
+        &format!("{} can pair with every simulator class option.", race.name),
+    )?;
+    abilities.set(2, second)?;
+
+    Ok(abilities)
+}
+
 fn glue_race_data(lua: &Lua, race_id: i32) -> Result<mlua::Table> {
+    let race = find_glue_race(race_id).unwrap_or_else(|| &GLUE_RACES[0]);
     let t = lua.create_table()?;
-    t.set("raceID", race_id)?;
-    push_kv_str(lua, &t, "name", "Human")?;
-    push_kv_str(lua, &t, "clientFileString", "Human")?;
-    push_kv_str(lua, &t, "fileName", "Human")?;
-    push_kv_str(lua, &t, "factionInternalName", "Alliance")?;
-    push_kv_str(lua, &t, "createScreenIconAtlas", "raceicon128-human-male")?;
-    push_kv_str(lua, &t, "loreDescription", "Versatile and resilient.")?;
-    t.set("factionGroup", 1i32)?;
-    t.set("isAlliedRace", false)?;
-    t.set("isNeutralRace", false)?;
+    t.set("raceID", race.race_id)?;
+    push_kv_str(lua, &t, "name", race.name)?;
+    push_kv_str(lua, &t, "clientFileString", race.client_file_string)?;
+    push_kv_str(lua, &t, "fileName", race.file_name)?;
+    push_kv_str(lua, &t, "factionInternalName", race.faction_internal_name)?;
+    push_kv_str(
+        lua,
+        &t,
+        "createScreenIconAtlas",
+        race.create_screen_icon_atlas,
+    )?;
+    push_kv_str(lua, &t, "loreDescription", race.lore_description)?;
+    t.set(
+        "factionGroup",
+        faction_group_for_name(race.faction_internal_name),
+    )?;
+    t.set("isAlliedRace", race.is_allied_race)?;
+    t.set("isNeutralRace", race.is_neutral_race)?;
     t.set("enabled", true)?;
-    t.set("hasHeritageArmor", true)?;
-    t.set("racialAbilities", lua.create_table()?)?;
+    t.set("hasHeritageArmor", race.has_heritage_armor)?;
+    t.set("racialAbilities", glue_racial_abilities(lua, race)?)?;
+    if let Some(alternate_form) = race.alternate_form {
+        let alternate = lua.create_table()?;
+        push_kv_str(lua, &alternate, "name", alternate_form.name)?;
+        push_kv_str(
+            lua,
+            &alternate,
+            "createScreenIconAtlas",
+            alternate_form.create_screen_icon_atlas,
+        )?;
+        t.set("alternateFormRaceData", alternate)?;
+    }
     Ok(t)
 }
 
 fn glue_class_data(lua: &Lua, class_id: i32) -> Result<mlua::Table> {
+    let class_info = find_glue_class(class_id).unwrap_or_else(|| &GLUE_CLASSES[0]);
     let t = lua.create_table()?;
-    t.set("classID", class_id)?;
-    push_kv_str(lua, &t, "name", "Paladin")?;
-    push_kv_str(lua, &t, "maleName", "Paladin")?;
-    push_kv_str(lua, &t, "femaleName", "Paladin")?;
-    push_kv_str(lua, &t, "fileString", "PALADIN")?;
-    push_kv_str(lua, &t, "fileName", "PALADIN")?;
-    push_kv_str(lua, &t, "description", "A holy warrior.")?;
-    push_kv_str(lua, &t, "roleInfo", "Tank, Healer, Damage")?;
+    t.set("classID", class_info.class_id)?;
+    push_kv_str(lua, &t, "name", class_info.name)?;
+    push_kv_str(lua, &t, "maleName", class_info.name)?;
+    push_kv_str(lua, &t, "femaleName", class_info.name)?;
+    push_kv_str(lua, &t, "fileString", class_info.file_name)?;
+    push_kv_str(lua, &t, "fileName", class_info.file_name)?;
+    push_kv_str(lua, &t, "description", class_info.description)?;
+    push_kv_str(lua, &t, "roleInfo", class_info.role_info)?;
     t.set("enabled", true)?;
     Ok(t)
+}
+
+fn choice_id_for_index(option: &GlueCustomizationOptionDef, choice_index: usize) -> i32 {
+    option
+        .choices
+        .get(choice_index)
+        .or_else(|| option.choices.first())
+        .map(|choice| choice.id)
+        .unwrap_or(0)
+}
+
+fn default_choice_id_for_option(
+    option: &GlueCustomizationOptionDef,
+    race_id: i32,
+    sex_id: i32,
+) -> i32 {
+    if option.choices.is_empty() {
+        return 0;
+    }
+    let base = (race_id as usize + sex_id as usize + option.id as usize) % option.choices.len();
+    choice_id_for_index(option, base)
+}
+
+fn customization_choices_table(lua: &Lua, key: &str) -> Result<mlua::Table> {
+    let value: Value = lua.globals().raw_get(key)?;
+    match value {
+        Value::Table(table) => Ok(table),
+        _ => {
+            let table = lua.create_table()?;
+            lua.globals().raw_set(key, table.clone())?;
+            Ok(table)
+        }
+    }
+}
+
+fn glue_selected_choice_id(lua: &Lua, option: &GlueCustomizationOptionDef) -> Result<i32> {
+    let preview =
+        customization_choices_table(lua, GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY)?;
+    if let Some(choice_id) = preview.get::<Option<i32>>(option.id).ok().flatten() {
+        return Ok(choice_id);
+    }
+
+    let choices =
+        customization_choices_table(lua, GLUE_CHARACTER_CREATE_CUSTOMIZATION_CHOICES_KEY)?;
+    if let Some(choice_id) = choices.get::<Option<i32>>(option.id).ok().flatten() {
+        return Ok(choice_id);
+    }
+
+    Ok(default_choice_id_for_option(
+        option,
+        get_glue_selected_race_id(lua)?,
+        get_glue_selected_sex_id(lua)?,
+    ))
+}
+
+fn glue_customization_option_table(
+    lua: &Lua,
+    option: &GlueCustomizationOptionDef,
+) -> Result<mlua::Table> {
+    let table = lua.create_table()?;
+    table.set("id", option.id)?;
+    push_kv_str(lua, &table, "name", option.name)?;
+    table.set("optionType", option.option_type)?;
+    table.set("orderIndex", option.order_index)?;
+    table.set("hasNewChoices", false)?;
+
+    let selected_choice_id = glue_selected_choice_id(lua, option)?;
+    let mut current_choice_index = 1i32;
+    let choices = lua.create_table()?;
+    for (index, choice) in option.choices.iter().enumerate() {
+        if choice.id == selected_choice_id {
+            current_choice_index = (index + 1) as i32;
+        }
+
+        let choice_table = lua.create_table()?;
+        choice_table.set("id", choice.id)?;
+        push_kv_str(lua, &choice_table, "name", choice.name)?;
+        choice_table.set("isNew", false)?;
+        choice_table.set("disabled", false)?;
+        choice_table.set("isLocked", false)?;
+        choice_table.set("ineligibleChoice", false)?;
+        choices.set(index + 1, choice_table)?;
+    }
+
+    table.set("currentChoiceIndex", current_choice_index)?;
+    table.set("choices", choices)?;
+    Ok(table)
+}
+
+fn glue_customization_category_table(
+    lua: &Lua,
+    category: &GlueCustomizationCategoryDef,
+) -> Result<mlua::Table> {
+    let table = lua.create_table()?;
+    table.set("id", category.id)?;
+    push_kv_str(lua, &table, "name", category.name)?;
+    push_kv_str(lua, &table, "icon", category.icon)?;
+    push_kv_str(lua, &table, "selectedIcon", category.selected_icon)?;
+    table.set("orderIndex", category.order_index)?;
+    table.set("cameraZoomLevel", category.camera_zoom_level)?;
+    table.set("cameraDistanceOffset", category.camera_distance_offset)?;
+    table.set("hasNewChoices", false)?;
+
+    let options = lua.create_table()?;
+    for (index, option) in category.options.iter().enumerate() {
+        options.set(index + 1, glue_customization_option_table(lua, option)?)?;
+    }
+    table.set("options", options)?;
+    Ok(table)
+}
+
+fn glue_available_customizations(lua: &Lua) -> Result<mlua::Table> {
+    let categories = lua.create_table()?;
+    for (index, category) in GLUE_CUSTOMIZATION_CATEGORIES.iter().enumerate() {
+        categories.set(index + 1, glue_customization_category_table(lua, category)?)?;
+    }
+    Ok(categories)
+}
+
+fn glue_fire_character_create_event(lua: &Lua, event: &str, args: &[Value]) -> Result<()> {
+    let Some(state) = get_sim_state_rc(lua) else {
+        return Ok(());
+    };
+    crate::lua_api::LoaderEnv::new(lua, state)
+        .fire_event_with_args(event, args)
+        .map_err(mlua::Error::external)
+}
+
+fn glue_random_name(lua: &Lua) -> Result<String> {
+    let race = find_glue_race(get_glue_selected_race_id(lua)?).unwrap_or(&GLUE_RACES[0]);
+    let class_info = find_glue_class(get_glue_selected_class_id(lua)?).unwrap_or(&GLUE_CLASSES[0]);
+    let suffix = if get_glue_selected_sex_id(lua)? == 0 {
+        "ar"
+    } else {
+        "ia"
+    };
+    Ok(format!(
+        "{}{}{}",
+        race.name
+            .chars()
+            .filter(|c| c.is_ascii_alphabetic())
+            .take(4)
+            .collect::<String>(),
+        class_info
+            .name
+            .chars()
+            .filter(|c| c.is_ascii_alphabetic())
+            .take(3)
+            .collect::<String>(),
+        suffix
+    ))
+}
+
+fn apply_selected_character_to_player_state(lua: &Lua, name: Option<&str>) {
+    let Some(state) = get_sim_state_rc(lua) else {
+        return;
+    };
+    let mut state = state.borrow_mut();
+    if let Some(trimmed) = name.map(str::trim).filter(|trimmed| !trimmed.is_empty()) {
+        state.player.name = trimmed.to_string();
+    }
+    state.player.class_index = get_glue_selected_class_id(lua).unwrap_or(default_class_id());
+    state.player.sex = match get_glue_selected_sex_id(lua).unwrap_or(default_sex_id()) {
+        1 => 3,
+        _ => 2,
+    };
+    state.player.race_index = GLUE_RACES
+        .iter()
+        .position(|race| {
+            race.race_id == get_glue_selected_race_id(lua).unwrap_or(default_race_id())
+        })
+        .unwrap_or(0)
+        .min(crate::lua_api::state::RACE_DATA.len().saturating_sub(1));
 }
 
 fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
@@ -176,21 +1177,20 @@ fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
     }
 
     let table = lua.create_table()?;
-    if let Some(state) =
-        lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
-    {
+    if let Some(state) = get_sim_state_rc(lua) {
         let state = state.borrow();
+        let class_info = find_glue_class(state.player.class_index).unwrap_or(&GLUE_CLASSES[0]);
         table.set("guid", guid)?;
         table.set("name", state.player.name.clone())?;
-        table.set("className", "Paladin")?;
-        table.set("classFilename", "PALADIN")?;
+        table.set("className", class_info.name)?;
+        table.set("classFilename", class_info.file_name)?;
         table.set("experienceLevel", state.player.level)?;
         table.set("areaName", state.world.zone_name.clone())?;
     } else {
         table.set("guid", guid)?;
         table.set("name", "Player")?;
-        table.set("className", "Paladin")?;
-        table.set("classFilename", "PALADIN")?;
+        table.set("className", GLUE_CLASSES[0].name)?;
+        table.set("classFilename", GLUE_CLASSES[0].file_name)?;
         table.set("experienceLevel", 70)?;
         table.set("areaName", "Stormwind City")?;
     }
@@ -1052,8 +2052,14 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         "SetCharSelectBackground",
         lua.create_function(|_, _background_id: Value| Ok(()))?,
     )?;
-    g.set("PlayGlueAmbience", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
-    g.set("StopGlueAmbience", lua.create_function(|_, _: MultiValue| Ok(()))?)?;
+    g.set(
+        "PlayGlueAmbience",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
+    g.set(
+        "StopGlueAmbience",
+        lua.create_function(|_, _: MultiValue| Ok(()))?,
+    )?;
     g.set(
         "UpdateSelectionCustomizationScene",
         lua.create_function(|_, ()| Ok(()))?,
@@ -1109,10 +2115,12 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
                 .flatten()
                 .unwrap_or(false);
             if new_selection > 0 && !is_dispatching {
-                lua.globals().set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, true)?;
+                lua.globals()
+                    .set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, true)?;
                 let fire_event: mlua::Function = lua.globals().get("FireEvent")?;
                 fire_event.call::<()>(("UPDATE_SELECTED_CHARACTER", new_selection))?;
-                lua.globals().set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, false)?;
+                lua.globals()
+                    .set(GLUE_SELECT_CHARACTER_DISPATCH_KEY, false)?;
             }
             Ok(())
         })?,
@@ -1966,14 +2974,10 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     character_creation.set(
         "CreateCharacter",
         lua.create_function(|lua, (name, _use_npe, _faction): (String, Value, Value)| {
-            if let Some(state) =
-                lua.app_data_ref::<std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>>()
-            {
-                let trimmed = name.trim();
-                if !trimmed.is_empty() {
-                    state.borrow_mut().player.name = trimmed.to_string();
-                }
-            }
+            apply_selected_character_to_player_state(lua, Some(&name));
+            let guid = Value::String(lua.create_string(GLUE_CHARACTER_GUID)?);
+            let args = [Value::Boolean(true), Value::Nil, guid];
+            glue_fire_character_create_event(lua, "CHARACTER_CREATION_RESULT", &args)?;
             Ok(())
         })?,
     )?;
@@ -2013,19 +3017,23 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         "GetAvailableClasses",
         lua.create_function(|lua, ()| {
             let classes = lua.create_table()?;
-            classes.set(1, glue_class_data(lua, 2)?)?;
+            for (index, class_info) in GLUE_CLASSES.iter().enumerate() {
+                classes.set(index + 1, glue_class_data(lua, class_info.class_id)?)?;
+            }
             Ok(classes)
         })?,
     )?;
     character_creation.set(
         "GetAvailableCustomizations",
-        lua.create_function(|lua, ()| lua.create_table())?,
+        lua.create_function(|lua, ()| glue_available_customizations(lua))?,
     )?;
     character_creation.set(
         "GetAvailableRaces",
         lua.create_function(|lua, ()| {
             let races = lua.create_table()?;
-            races.set(1, glue_race_data(lua, 1)?)?;
+            for (index, race) in GLUE_RACES.iter().enumerate() {
+                races.set(index + 1, glue_race_data(lua, race.race_id)?)?;
+            }
             Ok(races)
         })?,
     )?;
@@ -2035,15 +3043,27 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetCharacterCreateFacing",
-        lua.create_function(|lua, ()| Ok(get_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, 0.0)?))?,
+        lua.create_function(|lua, ()| {
+            Ok(get_glue_f32(lua, GLUE_CHARACTER_CREATE_FACING_KEY, 0.0)?)
+        })?,
     )?;
     character_creation.set(
         "GetRaceDataByID",
-        lua.create_function(|lua, race_id: i32| Ok(Value::Table(glue_race_data(lua, race_id)?)))?,
+        lua.create_function(|lua, race_id: i32| {
+            if find_glue_race(race_id).is_some() {
+                Ok(Value::Table(glue_race_data(lua, race_id)?))
+            } else {
+                Ok(Value::Nil)
+            }
+        })?,
     )?;
     character_creation.set(
         "GetRaceIDFromName",
-        lua.create_function(|_, _race_name: String| Ok(1i32))?,
+        lua.create_function(|_, race_name: String| {
+            Ok(find_glue_race_by_name(&race_name)
+                .map(|race| race.race_id)
+                .unwrap_or(default_race_id()))
+        })?,
     )?;
     character_creation.set(
         "GetCreateBackgroundModel",
@@ -2051,7 +3071,9 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetCurrentCameraZoom",
-        lua.create_function(|_, ()| Ok(0i32))?,
+        lua.create_function(|lua, ()| {
+            Ok(get_glue_i32(lua, GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY, 0)?)
+        })?,
     )?;
     character_creation.set(
         "GetDefaultCharacterCreateFacing",
@@ -2059,7 +3081,11 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetFactionForRace",
-        lua.create_function(|_, _race_id: i32| Ok(String::from("Alliance")))?,
+        lua.create_function(|_, race_id: i32| {
+            Ok(find_glue_race(race_id)
+                .map(|race| race.faction_internal_name.to_string())
+                .unwrap_or_else(|| "Alliance".to_string()))
+        })?,
     )?;
     character_creation.set(
         "GetClassAchievementRequirements",
@@ -2077,7 +3103,11 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetNameForRace",
-        lua.create_function(|_, _race_id: i32| Ok(String::from("Human")))?,
+        lua.create_function(|_, race_id: i32| {
+            Ok(find_glue_race(race_id)
+                .map(|race| race.name.to_string())
+                .unwrap_or_else(|| GLUE_RACES[0].name.to_string()))
+        })?,
     )?;
     character_creation.set(
         "GetSelectedClass",
@@ -2103,7 +3133,11 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
             first.set("zoneName", "Exile's Reach")?;
             first.set("zoneImageAtlas", "charactercreate-startingzone-exilesreach")?;
             first.set("isNPE", true)?;
-            Ok((Value::Table(first), Value::Nil))
+            let second = lua.create_table()?;
+            second.set("zoneName", "Starting Zone")?;
+            second.set("zoneImageAtlas", "charactercreate-startingzone-classic")?;
+            second.set("isNPE", false)?;
+            Ok((Value::Table(first), Value::Table(second)))
         })?,
     )?;
     character_creation.set(
@@ -2112,15 +3146,39 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "GetValidRacesForClass",
-        lua.create_function(|lua, _class_id: i32| {
+        lua.create_function(|lua, class_id: i32| {
             let races = lua.create_table()?;
-            races.set(1, glue_race_data(lua, 1)?)?;
+            if find_glue_class(class_id).is_none() {
+                return Ok(races);
+            }
+            for (index, race) in GLUE_RACES.iter().enumerate() {
+                races.set(index + 1, glue_race_data(lua, race.race_id)?)?;
+            }
             Ok(races)
         })?,
     )?;
     character_creation.set(
         "IsCharacterNameValid",
-        lua.create_function(|_, name: String| Ok((!name.trim().is_empty(), Value::Nil)))?,
+        lua.create_function(|lua, name: String| {
+            let trimmed = name.trim();
+            let valid = !trimmed.is_empty()
+                && trimmed.len() <= 12
+                && trimmed.chars().all(|ch| ch.is_ascii_alphabetic());
+            if valid {
+                Ok((true, Value::Nil))
+            } else {
+                Ok((
+                    false,
+                    Value::String(lua.create_string(if trimmed.is_empty() {
+                        "ERR_NAME_TOO_SHORT"
+                    } else if trimmed.len() > 12 {
+                        "ERR_NAME_TOO_LONG2"
+                    } else {
+                        "ERR_NAME_TOO_SHORT"
+                    })?),
+                ))
+            }
+        })?,
     )?;
     character_creation.set(
         "IsNewPlayerRestricted",
@@ -2132,7 +3190,9 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "IsRaceClassValid",
-        lua.create_function(|_, (_race_id, _class_id): (i32, i32)| Ok(true))?,
+        lua.create_function(|_, (race_id, class_id): (i32, i32)| {
+            Ok(find_glue_race(race_id).is_some() && find_glue_class(class_id).is_some())
+        })?,
     )?;
     character_creation.set(
         "IsTimerunningEnabled",
@@ -2148,16 +3208,18 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "IsViewingAlteredForm",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .globals()
+                .raw_get::<Option<bool>>(GLUE_CHARACTER_CREATE_VIEWING_ALTERED_FORM_KEY)?
+                .unwrap_or(false))
+        })?,
     )?;
     character_creation.set(
         "GenerateRandomName",
-        lua.create_function(|_, ()| Ok(String::from("Newhero")))?,
+        lua.create_function(|lua, ()| glue_random_name(lua))?,
     )?;
-    character_creation.set(
-        "OnPlayerInteraction",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
+    character_creation.set("OnPlayerInteraction", lua.create_function(|_, ()| Ok(()))?)?;
     character_creation.set(
         "PlayClassIdleAnimationOnCharacter",
         lua.create_function(|_, ()| Ok(()))?,
@@ -2180,11 +3242,24 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "PreviewCustomizationChoice",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(|lua, (option_id, choice_id): (i32, i32)| {
+            let preview = customization_choices_table(
+                lua,
+                GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY,
+            )?;
+            preview.set(option_id, choice_id)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "ClearPreviewChoices",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(|lua, _: MultiValue| {
+            lua.globals().raw_set(
+                GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY,
+                lua.create_table()?,
+            )?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "MarkCustomizationChoiceAsSeen",
@@ -2196,15 +3271,45 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "RandomizeCharCustomization",
-        lua.create_function(|_, ()| Ok(()))?,
+        lua.create_function(|lua, ()| {
+            let choices =
+                customization_choices_table(lua, GLUE_CHARACTER_CREATE_CUSTOMIZATION_CHOICES_KEY)?;
+            let race_id = get_glue_selected_race_id(lua)?;
+            let sex_id = get_glue_selected_sex_id(lua)?;
+            for category in GLUE_CUSTOMIZATION_CATEGORIES {
+                for option in category.options {
+                    let choice_id = default_choice_id_for_option(option, race_id + 1, sex_id + 1);
+                    choices.set(option.id, choice_id)?;
+                }
+            }
+            lua.globals().raw_set(
+                GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY,
+                lua.create_table()?,
+            )?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "RequestCheckNameAvailability",
-        lua.create_function(|_, _name: String| Ok(()))?,
+        lua.create_function(|lua, name: String| {
+            let args = [
+                Value::Boolean(true),
+                Value::String(lua.create_string(&name)?),
+                Value::Nil,
+            ];
+            glue_fire_character_create_event(lua, "CHECK_CHARACTER_NAME_AVAILABILITY_RESULT", &args)
+        })?,
     )?;
     character_creation.set(
         "RequestRandomName",
-        lua.create_function(|_, ()| Ok(()))?,
+        lua.create_function(|lua, ()| {
+            let name = glue_random_name(lua)?;
+            let args = [
+                Value::Boolean(true),
+                Value::String(lua.create_string(&name)?),
+            ];
+            glue_fire_character_create_event(lua, "RANDOM_CHARACTER_NAME_RESULT", &args)
+        })?,
     )?;
     character_creation.set(
         "ResetCharCustomize",
@@ -2213,17 +3318,27 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
             Ok(())
         })?,
     )?;
-    character_creation.set(
-        "SaveSeenChoices",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
+    character_creation.set("SaveSeenChoices", lua.create_function(|_, ()| Ok(()))?)?;
     character_creation.set(
         "SetBlurEnabled",
-        lua.create_function(|_, _enabled: bool| Ok(()))?,
+        lua.create_function(|lua, enabled: bool| {
+            lua.globals()
+                .raw_set(GLUE_CHARACTER_CREATE_BLUR_ENABLED_KEY, enabled)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetCameraZoomLevel",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(
+            |lua, (zoom_level, _keep_custom_zoom): (i32, Option<bool>)| {
+                set_glue_i32(
+                    lua,
+                    GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY,
+                    zoom_level.clamp(0, 100),
+                )?;
+                Ok(())
+            },
+        )?,
     )?;
     character_creation.set(
         "SetCharCustomizeBackground",
@@ -2253,7 +3368,17 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "SetCustomizationChoice",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(|lua, (option_id, choice_id): (i32, i32)| {
+            let choices =
+                customization_choices_table(lua, GLUE_CHARACTER_CREATE_CUSTOMIZATION_CHOICES_KEY)?;
+            choices.set(option_id, choice_id)?;
+            let preview = customization_choices_table(
+                lua,
+                GLUE_CHARACTER_CREATE_CUSTOMIZATION_PREVIEW_CHOICES_KEY,
+            )?;
+            preview.raw_set(option_id, Value::Nil)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetInCharacterCreate",
@@ -2268,7 +3393,11 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "SetModelDressState",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(|lua, dressed: bool| {
+            lua.globals()
+                .raw_set(GLUE_CHARACTER_CREATE_MODEL_DRESSED_KEY, dressed)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetPaidService",
@@ -2276,22 +3405,36 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "SetPlayerModelHiddenState",
-        lua.create_function(|_, _hidden: bool| Ok(()))?,
+        lua.create_function(|lua, hidden: bool| {
+            lua.globals()
+                .raw_set(GLUE_CHARACTER_CREATE_MODEL_HIDDEN_KEY, hidden)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetSelectedClass",
         lua.create_function(|lua, class_id: i32| {
+            let class_id = find_glue_class(class_id)
+                .map(|class_info| class_info.class_id)
+                .unwrap_or_else(default_class_id);
             set_glue_i32(lua, GLUE_CHARACTER_CREATE_CLASS_ID_KEY, class_id)?;
             Ok(())
         })?,
     )?;
     character_creation.set(
         "SetSelectedPreviewGearType",
-        lua.create_function(|_, _: Value| Ok(()))?,
+        lua.create_function(|lua, gear_type: Value| {
+            lua.globals()
+                .raw_set(GLUE_CHARACTER_CREATE_SELECTED_PREVIEW_GEAR_KEY, gear_type)?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "SetSelectedRace",
         lua.create_function(|lua, race_id: i32| {
+            let race_id = find_glue_race(race_id)
+                .map(|race| race.race_id)
+                .unwrap_or_else(default_race_id);
             set_glue_i32(lua, GLUE_CHARACTER_CREATE_RACE_ID_KEY, race_id)?;
             Ok(())
         })?,
@@ -2299,7 +3442,7 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     character_creation.set(
         "SetSelectedSex",
         lua.create_function(|lua, sex_id: i32| {
-            set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, sex_id)?;
+            set_glue_i32(lua, GLUE_CHARACTER_CREATE_SEX_ID_KEY, sex_id.clamp(0, 1))?;
             Ok(())
         })?,
     )?;
@@ -2313,7 +3456,13 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
     )?;
     character_creation.set(
         "SetViewingAlteredForm",
-        lua.create_function(|_, _viewing_altered_form: bool| Ok(()))?,
+        lua.create_function(|lua, viewing_altered_form: bool| {
+            lua.globals().raw_set(
+                GLUE_CHARACTER_CREATE_VIEWING_ALTERED_FORM_KEY,
+                viewing_altered_form,
+            )?;
+            Ok(())
+        })?,
     )?;
     character_creation.set(
         "StopAllSpellVisualKitsOnCharacter",
@@ -2323,13 +3472,20 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         "StopSpellVisualKit",
         lua.create_function(|_, _: Value| Ok(()))?,
     )?;
-    character_creation.set(
-        "UseBeginnerMode",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    character_creation.set("UseBeginnerMode", lua.create_function(|_, ()| Ok(false))?)?;
     character_creation.set(
         "ZoomCamera",
-        lua.create_function(|_, _: MultiValue| Ok(()))?,
+        lua.create_function(
+            |lua, (zoom_amount, _zoom_time, _force): (i32, Option<f32>, Option<bool>)| {
+                let current = get_glue_i32(lua, GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY, 0)?;
+                set_glue_i32(
+                    lua,
+                    GLUE_CHARACTER_CREATE_CAMERA_ZOOM_KEY,
+                    (current + zoom_amount).clamp(0, 100),
+                )?;
+                Ok(())
+            },
+        )?,
     )?;
     g.set("C_CharacterCreation", character_creation)?;
     Ok(())

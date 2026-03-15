@@ -103,14 +103,11 @@ fn set_formatted_text_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::
     let string_table: mlua::Table = lua.globals().get("string")?;
     let format_func: mlua::Function = string_table.get("format")?;
     if let Ok(Value::String(result)) = format_func.call::<Value>(args) {
-        let text = result.to_string_lossy().to_string();
-        let state_rc = get_sim_state(lua);
-        let ids_to_measure = {
-            let mut state = state_rc.borrow_mut();
-            set_text_on_frame(&mut state, id, Some(text));
-            collect_fontstring_measure_ids(&state, id, None)
-        };
-        measure_and_apply_sizes(lua, &state_rc, &ids_to_measure);
+        handle_set_text(
+            lua,
+            id,
+            mlua::MultiValue::from_vec(vec![Value::String(result)]),
+        )?;
     }
     Ok(())
 }

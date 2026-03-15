@@ -84,6 +84,7 @@ fn register_color_globals(lua: &Lua) -> Result<()> {
         RED_FONT_COLOR = makeColor(1.0, 0.1, 0.1)
         GREEN_FONT_COLOR = makeColor(0.1, 1.0, 0.1)
         GRAY_FONT_COLOR = makeColor(0.5, 0.5, 0.5)
+        BLACK_FONT_COLOR = makeColor(0.0, 0.0, 0.0)
         YELLOW_FONT_COLOR = makeColor(1.0, 1.0, 0.0)
         LIGHTYELLOW_FONT_COLOR = makeColor(1.0, 1.0, 0.6)
         ORANGE_FONT_COLOR = makeColor(1.0, 0.5, 0.25)
