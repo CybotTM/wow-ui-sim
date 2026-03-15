@@ -77,6 +77,7 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     }
     process_pending_timers(env);
     fire_one_on_update_tick(env);
+    env.apply_post_startup_workarounds();
     let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
     run_extra_update_ticks(env, 3);
 }

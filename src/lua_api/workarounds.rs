@@ -17,6 +17,11 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     hide_talent_loadout_dialogs(env);
 }
 
+/// Apply workarounds that should run after the startup timer/OnUpdate settle pass.
+pub fn apply_post_startup(env: &WowLuaEnv) {
+    warm_player_spells_talents(env);
+}
+
 /// Apply all post-load workarounds. Called after addon loading, before events.
 pub fn apply(env: &WowLuaEnv) {
     let _ = env.exec("UpdateMicroButtons = function() end");
@@ -71,6 +76,102 @@ fn hide_talent_loadout_dialogs(env: &WowLuaEnv) {
                 frame:Hide()
             end
         end
+    "#,
+    );
+}
+
+/// Warm the class talent frame once during startup, then keep its button tree
+/// cached until simulator-side invalidation marks it dirty again.
+///
+/// This shifts the expensive first-time talent tree construction out of the
+/// first interactive `N` press and lets subsequent opens reuse the warmed UI.
+fn warm_player_spells_talents(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not PlayerSpellsUtil then
+            return
+        end
+
+        if PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.__simTalentWarmReady then
+            return
+        end
+
+        local ok = pcall(function()
+            PlayerSpellsUtil.ToggleClassTalentFrame()
+        end)
+        if not ok or not PlayerSpellsFrame or not PlayerSpellsFrame.TalentsFrame then
+            return
+        end
+
+        local talents = PlayerSpellsFrame.TalentsFrame
+        if not talents.__simTalentWarmInstalled then
+            talents.__simTalentWarmInstalled = true
+            talents.__simTalentDirty = false
+
+            local function wrapDirtyMethod(methodName)
+                local raw = talents[methodName]
+                if type(raw) ~= "function" then
+                    return
+                end
+                talents["__simTalentOrig_" .. methodName] = raw
+                talents[methodName] = function(self, ...)
+                    self.__simTalentDirty = true
+                    return raw(self, ...)
+                end
+            end
+
+            local rawLoadTalentTree = talents.LoadTalentTree
+            if type(rawLoadTalentTree) == "function" then
+                talents.__simTalentOrig_LoadTalentTree = rawLoadTalentTree
+                talents.LoadTalentTree = function(self, ...)
+                    local out = { rawLoadTalentTree(self, ...) }
+                    self.__simTalentDirty = false
+                    self.__simTalentWarmConfigID = self.GetConfigID and self:GetConfigID() or nil
+                    self.__simTalentWarmTreeID = self.GetTalentTreeID and self:GetTalentTreeID() or nil
+                    return unpack(out)
+                end
+            end
+
+            local rawUpdateAllButtons = talents.UpdateAllButtons
+            if type(rawUpdateAllButtons) == "function" then
+                talents.__simTalentOrig_UpdateAllButtons = rawUpdateAllButtons
+                talents.UpdateAllButtons = function(self, ...)
+                    local configID = self.GetConfigID and self:GetConfigID() or nil
+                    local treeID = self.GetTalentTreeID and self:GetTalentTreeID() or nil
+                    if self.__simTalentWarmConfigID ~= configID or self.__simTalentWarmTreeID ~= treeID then
+                        self.__simTalentDirty = true
+                    end
+                    if not self.__simTalentDirty then
+                        return
+                    end
+                    local out = { rawUpdateAllButtons(self, ...) }
+                    self.__simTalentDirty = false
+                    self.__simTalentWarmConfigID = configID
+                    self.__simTalentWarmTreeID = treeID
+                    return unpack(out)
+                end
+            end
+
+            for _, methodName in ipairs({
+                "MarkTreeDirty",
+                "MarkDefinitionInfoCacheDirty",
+                "MarkEntryInfoCacheDirty",
+                "MarkNodeInfoCacheDirty",
+                "MarkCondInfoCacheDirty",
+                "MarkSubTreeInfoCacheDirty",
+                "SetConfigID",
+                "SetTalentTreeID",
+            }) do
+                wrapDirtyMethod(methodName)
+            end
+        end
+
+        talents.refreshOnShow = false
+        talents.__simTalentDirty = false
+        talents.__simTalentWarmConfigID = talents.GetConfigID and talents:GetConfigID() or nil
+        talents.__simTalentWarmTreeID = talents.GetTalentTreeID and talents:GetTalentTreeID() or nil
+        talents.__simTalentWarmReady = true
+        HideUIPanel(PlayerSpellsFrame)
     "#,
     );
 }

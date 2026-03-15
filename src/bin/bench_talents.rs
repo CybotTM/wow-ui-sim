@@ -1,5 +1,4 @@
-//! Benchmark binary: load UI then repeatedly open/close talent panel.
-//! Opens the talent panel 10 times so it dominates the perf profile.
+//! Benchmark binary: load UI then repeatedly open/close the class talent panel.
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
@@ -27,15 +26,14 @@ fn main() {
     env.apply_post_event_workarounds();
     wow_ui_sim::startup::process_pending_timers(&env);
     wow_ui_sim::startup::fire_one_on_update_tick(&env);
+    env.apply_post_startup_workarounds();
 
-    // First open demand-loads Blizzard_PlayerSpells
-    eprintln!("=== Opening talent panel (first, demand-load) ===");
+    eprintln!("=== Opening talent panel (first open) ===");
     let start = std::time::Instant::now();
     env.exec("PlayerSpellsUtil.ToggleClassTalentFrame()")
         .expect("Failed to open talent panel");
     eprintln!("First open: {:.2?}", start.elapsed());
 
-    // Subsequent opens: close then re-open 9 more times
     for i in 2..=10 {
         env.exec("PlayerSpellsUtil.ToggleClassTalentFrame()").ok();
         let start = std::time::Instant::now();

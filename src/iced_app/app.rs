@@ -388,6 +388,9 @@ impl App {
         fire_startup_events(env_rc);
         let env_ref = env_rc.borrow();
         env_ref.apply_post_event_workarounds();
+        super::super::startup::process_pending_timers(&env_ref);
+        super::super::startup::fire_one_on_update_tick(&env_ref);
+        env_ref.apply_post_startup_workarounds();
         let _ = crate::lua_api::hide_runtime_hidden_frames(env_ref.lua());
         env_ref.state().borrow_mut().widgets.rebuild_anchor_index();
     }

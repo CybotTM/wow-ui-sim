@@ -8,6 +8,7 @@
 
 use super::super::handle::{FrameRef, frame_ref};
 use super::combat_lockdown;
+use crate::event::ScriptHandler;
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Lua;
 
@@ -16,7 +17,7 @@ const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
 
 /// Fire OnShow on a frame and recursively on its visible children.
 pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
-    fire_script_recursive(lua, id, "OnShow")
+    fire_script_recursive(lua, id, "OnShow", ScriptHandler::OnShow)
 }
 
 /// Register Show, Hide, SetShown methods.
@@ -95,7 +96,12 @@ fn drain_visibility_handlers(lua: &Lua, id: u64, initial_target: bool) -> mlua::
     let mut target = initial_target;
     for _ in 0..SHOW_HIDE_HANDLER_LIMIT {
         let handler = if target { "OnShow" } else { "OnHide" };
-        fire_script_recursive(lua, id, handler)?;
+        let script_handler = if target {
+            ScriptHandler::OnShow
+        } else {
+            ScriptHandler::OnHide
+        };
+        fire_script_recursive(lua, id, handler, script_handler)?;
         let visible_after = state_rc
             .borrow()
             .widgets
@@ -115,11 +121,17 @@ fn drain_visibility_handlers(lua: &Lua, id: u64, initial_target: bool) -> mlua::
 /// Fire a script handler depth-first: recurse into visible children first,
 /// then fire the handler on this frame. WoW fires OnShow/OnHide on children
 /// before parents so all frames see correct visibility when their handler runs.
-fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result<()> {
-    let children: Vec<u64> = {
+fn fire_script_recursive(
+    lua: &Lua,
+    id: u64,
+    handler_name: &str,
+    handler: ScriptHandler,
+) -> mlua::Result<()> {
+    let (children, has_handler) = {
         let state_rc = get_sim_state(lua);
         let st = state_rc.borrow();
-        st.widgets
+        let children: Vec<u64> = st
+            .widgets
             .get(id)
             .map(|f| {
                 f.children
@@ -128,14 +140,18 @@ fn fire_script_recursive(lua: &Lua, id: u64, handler_name: &str) -> mlua::Result
                     .copied()
                     .collect()
             })
-            .unwrap_or_default()
+            .unwrap_or_default();
+        let has_handler = st.scripts.get(id, handler).is_some();
+        (children, has_handler)
     };
 
     for child_id in children {
-        fire_script_recursive(lua, child_id, handler_name)?;
+        fire_script_recursive(lua, child_id, handler_name, handler)?;
     }
 
-    if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, handler_name) {
+    if has_handler
+        && let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, handler_name)
+    {
         let frame_val = frame_ref(lua, id)?;
         if let Err(e) = handler.call::<()>(frame_val) {
             crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
