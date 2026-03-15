@@ -632,6 +632,11 @@ fn load_addon_runtime(
             }
             register_loaded_addon(state, addon_name, load_time_secs);
             fire_addon_loaded(&loader_env, addon_name);
+            crate::lua_api::workarounds::apply_post_runtime_addon_load_from_lua(
+                lua,
+                Rc::clone(state),
+                addon_name,
+            );
             Ok((true, Value::Nil))
         }
         Err(e) => {

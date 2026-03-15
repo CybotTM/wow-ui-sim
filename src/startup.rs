@@ -82,7 +82,6 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     }
     process_pending_timers(env);
     fire_one_on_update_tick(env);
-    env.apply_post_startup_workarounds();
     let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
     run_extra_update_ticks(env, 3);
 }
@@ -234,7 +233,6 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     fire("DISPLAY_SIZE_CHANGED");
     fire("UI_SCALE_CHANGED");
     fire("UPDATE_CHAT_WINDOWS");
-    fire("PLAYER_LEAVING_WORLD");
 }
 
 /// Fire a simple event with no arguments, logging to stderr.

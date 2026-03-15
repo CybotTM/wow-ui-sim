@@ -1,9 +1,11 @@
 //! Post-load Lua workarounds for Blizzard code that depends on
 //! unimplemented engine features (AnimationGroups, EditMode, etc.).
 
-use super::WowLuaEnv;
+use super::{SimState, WowLuaEnv};
 use super::workarounds_bags;
 use super::workarounds_editmode;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Apply workarounds that must run after startup events.
 ///
@@ -15,11 +17,27 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_editmode::init_edit_mode_layout(env);
     finish_objective_tracker(env);
     hide_talent_loadout_dialogs(env);
+    suppress_spellbook_tutorials(env);
 }
 
-/// Apply workarounds that should run after the startup timer/OnUpdate settle pass.
-pub fn apply_post_startup(env: &WowLuaEnv) {
-    warm_player_spells_talents(env);
+/// Apply targeted cleanup after a load-on-demand addon finishes loading.
+pub fn apply_post_runtime_addon_load(env: &WowLuaEnv, addon_name: &str) {
+    if addon_name == "Blizzard_PlayerSpells" {
+        hide_talent_loadout_dialogs(env);
+        suppress_spellbook_tutorials(env);
+    }
+}
+
+pub fn apply_post_runtime_addon_load_from_lua(
+    lua: &mlua::Lua,
+    state: Rc<RefCell<SimState>>,
+    addon_name: &str,
+) {
+    let env = WowLuaEnv {
+        lua: lua.clone(),
+        state,
+    };
+    apply_post_runtime_addon_load(&env, addon_name);
 }
 
 /// Apply all post-load workarounds. Called after addon loading, before events.
@@ -80,101 +98,18 @@ fn hide_talent_loadout_dialogs(env: &WowLuaEnv) {
     );
 }
 
-/// Warm the class talent frame once during startup, then keep its button tree
-/// cached until simulator-side invalidation marks it dirty again.
-///
-/// This shifts the expensive first-time talent tree construction out of the
-/// first interactive `N` press and lets subsequent opens reuse the warmed UI.
-fn warm_player_spells_talents(env: &WowLuaEnv) {
+/// Spellbook helptips are transient overlays that currently produce unstable
+/// cold-open rendering in the simulator. Suppress them so the spellbook's
+/// first visible state matches subsequent opens without faking world-exit.
+fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
-        if not PlayerSpellsUtil then
-            return
+        if SpellBookFrameTutorialsMixin then
+            SpellBookFrameTutorialsMixin.CheckShowHelpTips = function() end
         end
-
-        if PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame.__simTalentWarmReady then
-            return
+        if HelpTip then
+            HelpTip:HideAllSystem("SpellBook Helptips")
         end
-
-        local ok = pcall(function()
-            PlayerSpellsUtil.ToggleClassTalentFrame()
-        end)
-        if not ok or not PlayerSpellsFrame or not PlayerSpellsFrame.TalentsFrame then
-            return
-        end
-
-        local talents = PlayerSpellsFrame.TalentsFrame
-        if not talents.__simTalentWarmInstalled then
-            talents.__simTalentWarmInstalled = true
-            talents.__simTalentDirty = false
-
-            local function wrapDirtyMethod(methodName)
-                local raw = talents[methodName]
-                if type(raw) ~= "function" then
-                    return
-                end
-                talents["__simTalentOrig_" .. methodName] = raw
-                talents[methodName] = function(self, ...)
-                    self.__simTalentDirty = true
-                    return raw(self, ...)
-                end
-            end
-
-            local rawLoadTalentTree = talents.LoadTalentTree
-            if type(rawLoadTalentTree) == "function" then
-                talents.__simTalentOrig_LoadTalentTree = rawLoadTalentTree
-                talents.LoadTalentTree = function(self, ...)
-                    local out = { rawLoadTalentTree(self, ...) }
-                    self.__simTalentDirty = false
-                    self.__simTalentWarmConfigID = self.GetConfigID and self:GetConfigID() or nil
-                    self.__simTalentWarmTreeID = self.GetTalentTreeID and self:GetTalentTreeID() or nil
-                    return unpack(out)
-                end
-            end
-
-            local rawClearInfoCaches = talents.ClearInfoCaches
-            if type(rawClearInfoCaches) == "function" then
-                talents.__simTalentOrig_ClearInfoCaches = rawClearInfoCaches
-                talents.ClearInfoCaches = function(self, ...)
-                    if self.__simTalentSkipHideCacheClear then
-                        self.__simTalentSkipHideCacheClear = nil
-                        return
-                    end
-                    return rawClearInfoCaches(self, ...)
-                end
-            end
-
-            local rawOnHide = talents.OnHide
-            if type(rawOnHide) == "function" then
-                talents.__simTalentOrig_OnHide = rawOnHide
-                talents.OnHide = function(self, ...)
-                    if self.__simTalentWarmReady and not self.__simTalentDirty then
-                        self.__simTalentSkipHideCacheClear = true
-                    end
-                    return rawOnHide(self, ...)
-                end
-            end
-
-            for _, methodName in ipairs({
-                "MarkTreeDirty",
-                "MarkDefinitionInfoCacheDirty",
-                "MarkEntryInfoCacheDirty",
-                "MarkNodeInfoCacheDirty",
-                "MarkCondInfoCacheDirty",
-                "MarkSubTreeInfoCacheDirty",
-                "SetConfigID",
-                "SetTalentTreeID",
-            }) do
-                wrapDirtyMethod(methodName)
-            end
-        end
-
-        talents.refreshOnShow = false
-        talents.__simTalentDirty = false
-        talents.__simTalentWarmConfigID = talents.GetConfigID and talents:GetConfigID() or nil
-        talents.__simTalentWarmTreeID = talents.GetTalentTreeID and talents:GetTalentTreeID() or nil
-        talents.__simTalentWarmReady = true
-        HideUIPanel(PlayerSpellsFrame)
     "#,
     );
 }

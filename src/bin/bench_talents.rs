@@ -26,7 +26,6 @@ fn main() {
     env.apply_post_event_workarounds();
     wow_ui_sim::startup::process_pending_timers(&env);
     wow_ui_sim::startup::fire_one_on_update_tick(&env);
-    env.apply_post_startup_workarounds();
 
     eprintln!("=== Opening talent panel (first open) ===");
     let start = std::time::Instant::now();

@@ -121,11 +121,6 @@ impl WowLuaEnv {
         super::workarounds::apply_post_event(self);
     }
 
-    /// Apply workarounds that should run after startup timers/OnUpdate settle.
-    pub fn apply_post_startup_workarounds(&self) {
-        super::workarounds::apply_post_startup(self);
-    }
-
     /// Fire an event to all registered frames.
     pub fn fire_event(&self, event: &str) -> Result<()> {
         self.fire_event_with_args(event, &[])
