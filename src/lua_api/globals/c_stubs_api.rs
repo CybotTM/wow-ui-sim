@@ -17,7 +17,50 @@
 
 use mlua::{Lua, MultiValue, Result, Value};
 
-const GLUE_CHARACTER_GUID: &str = "Player-1-00000001";
+#[derive(Clone, Copy)]
+struct GlueCharacterDef {
+    guid: &'static str,
+    name: &'static str,
+    class_name: &'static str,
+    class_filename: &'static str,
+    experience_level: i32,
+    area_name: &'static str,
+    faction: &'static str,
+    realm_name: &'static str,
+    realm_address: i32,
+    race_name: &'static str,
+    last_active_time: i64,
+}
+
+const GLUE_CHARACTERS: &[GlueCharacterDef] = &[
+    GlueCharacterDef {
+        guid: "Player-1-00000001",
+        name: "Player",
+        class_name: "Warrior",
+        class_filename: "WARRIOR",
+        experience_level: 70,
+        area_name: "Stormwind City",
+        faction: "Alliance",
+        realm_name: "Burning Blade",
+        realm_address: 1,
+        race_name: "Human",
+        last_active_time: 2,
+    },
+    GlueCharacterDef {
+        guid: "Player-1-00000002",
+        name: "Secondhero",
+        class_name: "Mage",
+        class_filename: "MAGE",
+        experience_level: 70,
+        area_name: "Orgrimmar",
+        faction: "Horde",
+        realm_name: "Burning Blade",
+        realm_address: 1,
+        race_name: "Orc",
+        last_active_time: 1,
+    },
+];
+
 const GLUE_SELECTED_CHARACTER_KEY: &str = "__wow_ui_sim_glue_selected_character";
 const GLUE_SELECT_CHARACTER_DISPATCH_KEY: &str = "__wow_ui_sim_glue_select_character_dispatch";
 const GLUE_CHARACTER_CREATE_TYPE_KEY: &str = "__glue_character_create_type";
@@ -788,12 +831,27 @@ fn has_glue_character(lua: &Lua) -> bool {
     )
 }
 
+fn glue_character(index: i32) -> Option<&'static GlueCharacterDef> {
+    let index = usize::try_from(index.checked_sub(1)?).ok()?;
+    GLUE_CHARACTERS.get(index)
+}
+
+fn glue_character_by_guid(guid: &str) -> Option<&'static GlueCharacterDef> {
+    GLUE_CHARACTERS.iter().find(|character| character.guid == guid)
+}
+
 fn glue_character_count(lua: &Lua) -> i32 {
-    if has_glue_character(lua) { 1 } else { 0 }
+    if has_glue_character(lua) {
+        GLUE_CHARACTERS.len() as i32
+    } else {
+        0
+    }
 }
 
 fn glue_character_guid(lua: &Lua, index: i32) -> Option<String> {
-    (glue_character_count(lua) > 0 && index == 1).then(|| GLUE_CHARACTER_GUID.to_string())
+    has_glue_character(lua)
+        .then(|| glue_character(index).map(|character| character.guid.to_string()))
+        .flatten()
 }
 
 fn glue_selected_character(lua: &Lua) -> i32 {
@@ -1172,12 +1230,17 @@ fn apply_selected_character_to_player_state(lua: &Lua, name: Option<&str>) {
 }
 
 fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
-    if guid != GLUE_CHARACTER_GUID || !has_glue_character(lua) {
+    let Some(character) = glue_character_by_guid(guid) else {
+        return Ok(Value::Nil);
+    };
+    if !has_glue_character(lua) {
         return Ok(Value::Nil);
     }
 
     let table = lua.create_table()?;
-    if let Some(state) = get_sim_state_rc(lua) {
+    if let Some(state) = get_sim_state_rc(lua)
+        && character.guid == GLUE_CHARACTERS[0].guid
+    {
         let state = state.borrow();
         let class_info = find_glue_class(state.player.class_index).unwrap_or(&GLUE_CLASSES[0]);
         table.set("guid", guid)?;
@@ -1188,18 +1251,18 @@ fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
         table.set("areaName", state.world.zone_name.clone())?;
     } else {
         table.set("guid", guid)?;
-        table.set("name", "Player")?;
-        table.set("className", GLUE_CLASSES[0].name)?;
-        table.set("classFilename", GLUE_CLASSES[0].file_name)?;
-        table.set("experienceLevel", 70)?;
-        table.set("areaName", "Stormwind City")?;
+        table.set("name", character.name)?;
+        table.set("className", character.class_name)?;
+        table.set("classFilename", character.class_filename)?;
+        table.set("experienceLevel", character.experience_level)?;
+        table.set("areaName", character.area_name)?;
     }
 
-    table.set("faction", "Alliance")?;
-    table.set("realmName", "Burning Blade")?;
-    table.set("realmAddress", 1i32)?;
+    table.set("faction", character.faction)?;
+    table.set("realmName", character.realm_name)?;
+    table.set("realmAddress", character.realm_address)?;
     table.set("lastLoginBuild", 110205i32)?;
-    table.set("lastActiveTime", 1i64)?;
+    table.set("lastActiveTime", character.last_active_time)?;
     table.set("isLocked", false)?;
     table.set("isGhost", false)?;
     table.set("isTrialBoost", false)?;
@@ -1213,7 +1276,7 @@ fn glue_basic_character_info(lua: &Lua, guid: &str) -> Result<Value> {
 }
 
 fn glue_service_character_info(lua: &Lua, guid: &str) -> Result<Value> {
-    if guid != GLUE_CHARACTER_GUID || !has_glue_character(lua) {
+    if glue_character_by_guid(guid).is_none() || !has_glue_character(lua) {
         return Ok(Value::Nil);
     }
 
@@ -2084,8 +2147,8 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     g.set(
         "GetCharacterRace",
         lua.create_function(|_, index: i32| {
-            if index == 1 {
-                Ok((1i32, String::from("Human")))
+            if let Some(character) = glue_character(index) {
+                Ok((index, String::from(character.race_name)))
             } else {
                 Ok((0i32, String::new()))
             }
@@ -2975,7 +3038,7 @@ fn register_character_creation_namespace(lua: &Lua, g: &mlua::Table) -> Result<(
         "CreateCharacter",
         lua.create_function(|lua, (name, _use_npe, _faction): (String, Value, Value)| {
             apply_selected_character_to_player_state(lua, Some(&name));
-            let guid = Value::String(lua.create_string(GLUE_CHARACTER_GUID)?);
+            let guid = Value::String(lua.create_string(GLUE_CHARACTERS[0].guid)?);
             let args = [Value::Boolean(true), Value::Nil, guid];
             glue_fire_character_create_event(lua, "CHARACTER_CREATION_RESULT", &args)?;
             Ok(())

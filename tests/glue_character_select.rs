@@ -169,8 +169,8 @@ fn character_select_populates_character_roster() {
             .eval("return GetNumCharacters()")
             .expect("GetNumCharacters should be queryable");
         assert!(
-            num_characters > 0,
-            "character-select screen should expose at least one character"
+            num_characters >= 2,
+            "character-select screen should expose two default characters"
         );
 
         let first_guid: Option<String> = env
@@ -189,6 +189,24 @@ fn character_select_populates_character_roster() {
         assert!(
             first_name.is_some(),
             "character-select screen should expose info for the first character"
+        );
+
+        let second_guid: Option<String> = env
+            .eval("return GetCharacterGUID(2)")
+            .expect("GetCharacterGUID(2) should be queryable");
+        assert!(
+            second_guid.is_some(),
+            "character-select screen should expose a guid for the second character"
+        );
+
+        let second_name: Option<String> = env
+            .eval(
+                "local info = CharacterSelectUtil and CharacterSelectUtil.GetCharacterInfoTable(2); return info and info.name or nil",
+            )
+            .expect("CharacterSelectUtil.GetCharacterInfoTable(2) should be queryable");
+        assert!(
+            second_name.is_some(),
+            "character-select screen should expose info for the second character"
         );
     }
 }
