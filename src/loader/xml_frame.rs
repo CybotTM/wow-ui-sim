@@ -49,10 +49,11 @@ pub fn create_frame_from_xml(
     let inherits = inherits_buf
         .as_deref()
         .unwrap_or(frame.inherits.as_deref().unwrap_or(""));
+    let initial_hidden = resolve_xml_hidden(frame, inherits);
 
     let lua_code =
         build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
-    exec_create_frame_code(env, &lua_code, &name)?;
+    exec_create_frame_code(env, &lua_code, &name, initial_hidden)?;
     apply_xml_properties_direct(env, &name, frame, inherits, parent);
     apply_intrinsic_property(env, intrinsic_base, &name);
     create_children_and_finalize(env, frame, &name, inherits)?;
@@ -186,16 +187,32 @@ fn exec_create_frame_code(
     env: &LoaderEnv<'_>,
     lua_code: &str,
     name: &str,
+    initial_hidden: bool,
 ) -> Result<(), LoadError> {
     let fns = precompiled::get(env.lua());
     fns.suppress_push.call::<()>(()).ok();
+    env.state().borrow_mut().create_frame_initial_hidden = Some(initial_hidden);
     let exec_result = env
         .exec(lua_code)
         .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", name, e)));
+    env.state().borrow_mut().create_frame_initial_hidden = None;
     fns.suppress_pop.call::<()>(()).ok();
     exec_result?;
     crate::lua_api::globals::template::fire_deferred_child_onloads(env.lua());
     Ok(())
+}
+
+fn resolve_xml_hidden(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
+    let mut hidden = frame.hidden;
+    if hidden.is_none() && !inherits.is_empty() {
+        for entry in &crate::xml::get_template_chain(inherits) {
+            if let Some(h) = entry.frame.hidden {
+                hidden = Some(h);
+                break;
+            }
+        }
+    }
+    hidden == Some(true)
 }
 
 /// Set declarative frame properties directly in Rust after the Lua CreateFrame chunk.

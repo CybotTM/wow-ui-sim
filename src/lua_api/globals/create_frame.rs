@@ -348,6 +348,11 @@ fn register_new_frame(
     parent_explicit: bool,
 ) -> u64 {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
+    let initial_hidden = state.borrow().create_frame_initial_hidden.unwrap_or(false);
+    if initial_hidden {
+        frame.visible = false;
+        frame.effective_alpha = 0.0;
+    }
 
     attribute_frame_owner(&mut frame, state, parent_id);
 
@@ -391,7 +396,11 @@ fn register_new_frame(
             if parent_explicit {
                 f.frame_level = parent_level + 1;
             }
-            f.effective_alpha = parent_eff_alpha * f.alpha;
+            f.effective_alpha = if f.visible {
+                parent_eff_alpha * f.alpha
+            } else {
+                0.0
+            };
             f.effective_scale = parent_eff_scale * f.scale;
         }
     }

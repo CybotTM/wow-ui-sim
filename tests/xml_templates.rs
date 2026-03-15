@@ -136,6 +136,30 @@ fn test_create_frame_from_xml_basic() {
 }
 
 #[test]
+fn test_create_frame_from_xml_hidden_starts_hidden() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlHiddenFrame" parent="UIParent" hidden="true">
+        <Size x="200" y="100"/><Anchors><Anchor point="CENTER"/></Anchors>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let shown: bool = env.eval("return XmlHiddenFrame:IsShown()").unwrap();
+    let visible: bool = env.eval("return XmlHiddenFrame:IsVisible()").unwrap();
+    let effective_alpha: f32 = env.eval("return XmlHiddenFrame:GetEffectiveAlpha()").unwrap();
+
+    assert!(!shown, "hidden XML frame should start with shown=false");
+    assert!(!visible, "hidden XML frame should not be visible");
+    assert_eq!(
+        effective_alpha, 0.0,
+        "hidden XML frame should start with effective alpha 0"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_with_template() {
     let env = WowLuaEnv::new().unwrap();
     create_first_frame(
