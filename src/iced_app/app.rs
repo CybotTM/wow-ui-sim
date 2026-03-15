@@ -252,6 +252,11 @@ impl App {
         Self::apply_config_to_state(&env_rc, &config);
 
         Self::run_startup_sequence(&env_rc);
+        env_rc
+            .borrow()
+            .state()
+            .borrow_mut()
+            .initialize_render_state();
         // Eagerly resolve all pending layouts so the first render doesn't pay the cost.
         env_rc.borrow().state().borrow_mut().ensure_layout_rects();
         let log_messages = Self::collect_startup_logs(&env_rc);

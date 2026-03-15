@@ -235,6 +235,12 @@ impl SimState {
 }
 
 impl SimState {
+    /// Initialize derived render state that must be propagated once after startup.
+    pub fn initialize_render_state(&mut self) {
+        self.widgets.propagate_all_effective_alpha();
+        self.widgets.propagate_all_effective_scale();
+    }
+
     /// Return the per-strata buckets, building lazily if needed.
     pub fn get_strata_buckets(&mut self) -> Option<&Vec<Vec<u64>>> {
         if self.strata_buckets.is_none() {
@@ -250,11 +256,6 @@ impl SimState {
     /// but `alpha > 0`) its parent's `effective_alpha > 0`. Frames with
     /// explicit `alpha=0` (glow/anim textures) are always excluded.
     fn build_strata_buckets(&mut self) -> Vec<Vec<u64>> {
-        // Ensure effective_alpha is correct for all frames (handles direct
-        // .visible = false assignments during initialization that bypass
-        // set_frame_visible propagation).
-        self.widgets.propagate_all_effective_alpha();
-        self.widgets.propagate_all_effective_scale();
         use crate::iced_app::frame_collect::intra_strata_sort_key;
         use crate::widget::WidgetType;
         let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];

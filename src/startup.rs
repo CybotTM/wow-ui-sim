@@ -70,7 +70,11 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     let screen = env.state().borrow().screen_kind;
     fire_startup_events_for_screen(env, screen);
     env.apply_post_event_workarounds();
-    env.state().borrow_mut().widgets.rebuild_anchor_index();
+    {
+        let mut state = env.state().borrow_mut();
+        state.widgets.rebuild_anchor_index();
+        state.initialize_render_state();
+    }
     process_pending_timers(env);
     fire_one_on_update_tick(env);
     let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
