@@ -15,6 +15,12 @@ fn create_first_frame(env: &WowLuaEnv, xml: &str, widget_type: &str) {
     }
 }
 
+fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
+    let mut state = env.state().borrow_mut();
+    let _ = state.get_strata_buckets();
+    state.strata_buckets.as_ref().unwrap().clone()
+}
+
 /// Parse XML and register the first element as a template.
 fn register_first_template(xml: &str, name: &str, widget_type: &str) {
     let ui = parse_xml(xml).unwrap();
@@ -156,6 +162,33 @@ fn test_create_frame_from_xml_hidden_starts_hidden() {
     assert_eq!(
         effective_alpha, 0.0,
         "hidden XML frame should start with effective alpha 0"
+    );
+}
+
+#[test]
+fn test_create_frame_from_xml_hidden_not_in_render_buckets() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    create_first_frame(
+        &env,
+        r#"<Ui><Frame name="XmlHiddenBucketFrame" parent="UIParent" hidden="true">
+        <Size x="200" y="100"/><Anchors><Anchor point="CENTER"/></Anchors>
+    </Frame></Ui>"#,
+        "Frame",
+    );
+
+    let frame_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("XmlHiddenBucketFrame")
+        .expect("hidden XML frame should exist");
+    let buckets = build_strata_buckets(&env);
+    let in_buckets = buckets.iter().any(|bucket| bucket.contains(&frame_id));
+
+    assert!(
+        !in_buckets,
+        "hidden XML frame should never enter visible strata buckets"
     );
 }
 

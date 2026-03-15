@@ -13,6 +13,13 @@ use super::quad_builders::emit_frame_quads;
 use super::statusbar::collect_statusbar_fills;
 use super::tooltip::TooltipRenderData;
 
+fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
+    matches!(
+        frame.parent_key.as_deref(),
+        Some("NormalTexture" | "PushedTexture" | "HighlightTexture" | "DisabledTexture")
+    )
+}
+
 /// Emit quads for a single strata bucket (used by headless/screenshot paths).
 ///
 /// Reads rect and effective_alpha fresh from the registry for each frame.
@@ -104,7 +111,7 @@ fn resolve_eff_alpha(f: &crate::widget::Frame, registry: &crate::widget::WidgetR
     if f.effective_alpha > 0.0 {
         return f.effective_alpha;
     }
-    if f.alpha > 0.0 {
+    if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
         return f
             .parent_id
             .and_then(|pid| registry.get(pid))

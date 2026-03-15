@@ -27,6 +27,13 @@ pub use super::state_types::{
     LootRollInfo, MovementState, PendingTimer, PlayerState, WorldState,
 };
 
+fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
+    matches!(
+        frame.parent_key.as_deref(),
+        Some("NormalTexture" | "PushedTexture" | "HighlightTexture" | "DisabledTexture")
+    )
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -272,7 +279,7 @@ impl SimState {
             // (button state textures), NOT for frames with explicit alpha=0.
             let render_alpha = if f.effective_alpha > 0.0 {
                 f.effective_alpha
-            } else if f.alpha > 0.0 {
+            } else if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
                 f.parent_id
                     .and_then(|pid| self.widgets.get(pid))
                     .map(|p| p.effective_alpha)
@@ -534,7 +541,7 @@ impl SimState {
             queue.extend(f.children.iter().copied());
             let render_alpha = if f.effective_alpha > 0.0 {
                 f.effective_alpha
-            } else if f.alpha > 0.0 {
+            } else if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
                 f.parent_id
                     .and_then(|pid| self.widgets.get(pid))
                     .map(|p| p.effective_alpha)
