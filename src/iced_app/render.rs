@@ -438,8 +438,6 @@ impl App {
         drop(env);
 
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let before = tex_mgr.cache_len();
-        let mut warmed = 0usize;
         let mut remaining = false;
         let deadline = match budget {
             Some(budget) => Some(std::time::Instant::now() + budget),
@@ -461,19 +459,10 @@ impl App {
                     continue;
                 }
             }
-            if load_texture_or_crop(&mut tex_mgr, path).is_some() {
-                warmed += 1;
-            }
+            let _ = load_texture_or_crop(&mut tex_mgr, path);
         }
 
         self.textures_pending.set(remaining);
-        let loaded = tex_mgr.cache_len().saturating_sub(before);
-        if warmed > 0 || loaded > 0 {
-            eprintln!(
-                "[preload] warmed {warmed} render requests ({loaded} new base textures, {} total requests)",
-                paths.len()
-            );
-        }
     }
 
     fn build_overlay(&self) -> QuadBatch {
