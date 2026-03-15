@@ -28,22 +28,13 @@ pub fn load_texture_or_crop(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
 ) -> Option<GpuTextureData> {
-    if let Some(crop_start) = path.find("@crop:") {
-        let base_path = &path[..crop_start];
-        let crop_str = &path[crop_start + 6..];
-        let coords: Vec<f32> = crop_str.split(',').filter_map(|s| s.parse().ok()).collect();
-        if coords.len() != 4 {
-            return None;
-        }
-        let (cl, cr, ct, cb) = (coords[0], coords[1], coords[2], coords[3]);
-        let tex_data = tex_mgr.load(base_path)?;
-        let (w, h) = (tex_data.width, tex_data.height);
-        let (crop_w, crop_h, cropped) = crop_sub_region(&tex_data.pixels, w, h, cl, cr, ct, cb);
+    if let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) {
+        let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
         Some(GpuTextureData {
             path: path.to_string(),
-            width: crop_w,
-            height: crop_h,
-            rgba: cropped,
+            width: tex_data.width,
+            height: tex_data.height,
+            rgba: tex_data.pixels.clone(),
         })
     } else {
         let tex_data = tex_mgr.load(path)?;
@@ -56,37 +47,66 @@ pub fn load_texture_or_crop(
     }
 }
 
-/// Extract a rectangular sub-region from RGBA pixel data using UV coordinates.
-fn crop_sub_region(
-    pixels: &[u8],
-    width: u32,
-    height: u32,
-    uv_left: f32,
-    uv_right: f32,
-    uv_top: f32,
-    uv_bottom: f32,
-) -> (u32, u32, Vec<u8>) {
-    let x0 = (uv_left * width as f32).round() as u32;
-    let x1 = (uv_right * width as f32).round() as u32;
-    let y0 = (uv_top * height as f32).round() as u32;
-    let y1 = (uv_bottom * height as f32).round() as u32;
-    let crop_w = x1.saturating_sub(x0).max(1).min(width);
-    let crop_h = y1.saturating_sub(y0).max(1).min(height);
-
-    let mut cropped = vec![0u8; (crop_w * crop_h * 4) as usize];
-    for row in 0..crop_h {
-        let src_y = (y0 + row).min(height - 1);
-        let src_off = (src_y * width + x0) as usize * 4;
-        let dst_off = (row * crop_w) as usize * 4;
-        let row_bytes = (crop_w * 4) as usize;
-        let src_end = (src_off + row_bytes).min(pixels.len());
-        let copy_len = src_end.saturating_sub(src_off);
-        if copy_len > 0 {
-            cropped[dst_off..dst_off + copy_len]
-                .copy_from_slice(&pixels[src_off..src_off + copy_len]);
-        }
+fn decode_crop_request<'a>(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &'a str,
+) -> Option<(&'a str, u32, u32, u32, u32)> {
+    let crop_start = path.find("@crop:")?;
+    let base_path = &path[..crop_start];
+    let crop_str = &path[crop_start + 6..];
+    let coords: Vec<f32> = crop_str.split(',').filter_map(|s| s.parse().ok()).collect();
+    if coords.len() != 4 {
+        return None;
     }
-    (crop_w, crop_h, cropped)
+    let (cl, cr, ct, cb) = (coords[0], coords[1], coords[2], coords[3]);
+    let (w, h) = tex_mgr.get_or_load_texture_size(base_path)?;
+    let x0 = (cl * w as f32).round() as u32;
+    let x1 = (cr * w as f32).round() as u32;
+    let y0 = (ct * h as f32).round() as u32;
+    let y1 = (cb * h as f32).round() as u32;
+    let crop_w = x1.saturating_sub(x0).max(1).min(w);
+    let crop_h = y1.saturating_sub(y0).max(1).min(h);
+    Some((
+        base_path,
+        x0.min(w.saturating_sub(1)),
+        y0.min(h.saturating_sub(1)),
+        crop_w,
+        crop_h,
+    ))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::decode_crop_request;
+
+    #[test]
+    fn decode_crop_request_rejects_malformed_coords() {
+        let mut mgr = crate::texture::TextureManager::new(".");
+        assert!(decode_crop_request(&mut mgr, "foo@crop:0.1,0.2,0.3").is_none());
+    }
+
+    #[test]
+    fn decode_crop_request_uses_cached_texture_dimensions() {
+        let mut mgr = crate::texture::TextureManager::new(".");
+        mgr.insert_test_texture(
+            r"Interface\Foo\Bar",
+            crate::texture::TextureData {
+                width: 200,
+                height: 100,
+                pixels: vec![0; 200 * 100 * 4],
+            },
+        );
+        let decoded = decode_crop_request(
+            &mut mgr,
+            r"Interface\Foo\Bar@crop:0.100000,0.600000,0.200000,0.700000",
+        )
+        .expect("crop request should decode");
+        assert_eq!(decoded.0, r"Interface\Foo\Bar");
+        assert_eq!(decoded.1, 20);
+        assert_eq!(decoded.2, 20);
+        assert_eq!(decoded.3, 100);
+        assert_eq!(decoded.4, 50);
+    }
 }
 
 use crate::widget::FrameStrata;

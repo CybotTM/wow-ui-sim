@@ -275,6 +275,8 @@ impl App {
             config,
         );
 
+        app.preload_initial_texture_requests();
+
         (app, Task::none())
     }
 

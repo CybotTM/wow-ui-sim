@@ -107,16 +107,14 @@ impl shader::Program<Message> for &App {
         self.screen_size.set(size);
         self.sync_screen_size_to_state(size);
         let t0 = std::time::Instant::now();
-        let (dirty_strata, rebuilt) = self.get_or_rebuild_quads(size);
+        let (dirty_strata, _) = self.get_or_rebuild_quads(size);
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
         let (textures, tex_dur) = self.load_all_textures(&dirty_strata, &overlay);
         log_slow_draw(quad_dur, tex_dur, textures.len());
 
-        if rebuilt {
-            self.update_frame_time_avg(start.elapsed());
-        }
+        self.update_frame_time_avg(start.elapsed());
 
         let mut primitive = WowUiPrimitive {
             strata_batches: dirty_strata,
@@ -408,21 +406,20 @@ impl App {
         }
 
         let env = self.env.borrow();
-        let warmup_budget = if env.state().borrow().screen_kind.is_glue() {
-            std::time::Duration::from_millis(750)
-        } else {
-            std::time::Duration::from_millis(250)
-        };
+        let is_glue_screen = env.state().borrow().screen_kind.is_glue();
         drop(env);
 
-        let deadline = std::time::Instant::now() + warmup_budget;
         let mut tex_mgr = self.texture_manager.borrow_mut();
         let before = tex_mgr.cache_len();
         let mut warmed = 0usize;
         let mut remaining = false;
+        let deadline = (!is_glue_screen)
+            .then(|| std::time::Instant::now() + std::time::Duration::from_millis(250));
 
         for path in &paths {
-            if std::time::Instant::now() >= deadline {
+            if let Some(deadline) = deadline
+                && std::time::Instant::now() >= deadline
+            {
                 remaining = true;
                 break;
             }
@@ -789,7 +786,7 @@ fn collect_texture_request_paths(
 ) -> Vec<String> {
     let mut paths = Vec::new();
     let mut seen = HashSet::new();
-    for batch in dirty_strata.iter().flatten().chain(std::iter::once(overlay)) {
+    for batch in dirty_strata.iter().flatten() {
         for request in batch
             .texture_requests
             .iter()
@@ -800,14 +797,22 @@ fn collect_texture_request_paths(
             }
         }
     }
+    for request in overlay
+        .texture_requests
+        .iter()
+        .chain(&overlay.mask_texture_requests)
+    {
+        if seen.insert(request.path.clone()) {
+            paths.push(request.path.clone());
+        }
+    }
     paths
 }
 
 #[cfg(test)]
 mod tests {
     use super::collect_texture_request_paths;
-    use crate::render::QuadBatch;
-    use crate::render::shader::quad::TextureRequest;
+    use crate::render::{QuadBatch, TextureRequest};
     use crate::widget::FrameStrata;
     use std::sync::Arc;
 
@@ -821,7 +826,8 @@ mod tests {
 
     #[test]
     fn collect_texture_request_paths_deduplicates_across_batches() {
-        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] = std::array::from_fn(|_| None);
+        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] =
+            std::array::from_fn(|_| None);
         let mut batch = QuadBatch::new();
         batch.texture_requests.push(request("foo"));
         batch.texture_requests.push(request("foo"));
@@ -833,6 +839,9 @@ mod tests {
         overlay.texture_requests.push(request("baz"));
 
         let paths = collect_texture_request_paths(&strata, &overlay);
-        assert_eq!(paths, vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]);
+        assert_eq!(
+            paths,
+            vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]
+        );
     }
 }

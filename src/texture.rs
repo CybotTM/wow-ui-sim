@@ -204,6 +204,14 @@ impl TextureManager {
         self.cache.get(&normalized).map(|d| (d.width, d.height))
     }
 
+    /// Get dimensions for a texture, loading it first if necessary.
+    pub fn get_or_load_texture_size(&mut self, wow_path: &str) -> Option<(u32, u32)> {
+        if let Some((w, h)) = self.get_texture_size(wow_path) {
+            return Some((w, h));
+        }
+        self.load(wow_path).map(|d| (d.width, d.height))
+    }
+
     /// Load a sub-region of a texture (for texture atlases).
     /// The key format is "path#x,y,w,h" where x,y is top-left and w,h is size.
     pub fn load_sub_region(
@@ -234,6 +242,12 @@ impl TextureManager {
         }
 
         None
+    }
+
+    #[cfg(test)]
+    pub fn insert_test_texture(&mut self, wow_path: &str, data: TextureData) {
+        let normalized = normalize_wow_path(wow_path);
+        self.cache.insert(normalized, data);
     }
 
     /// Resolve a WoW texture path to a file system path.
