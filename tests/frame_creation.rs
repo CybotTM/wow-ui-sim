@@ -178,6 +178,106 @@ fn test_create_frame_with_parent() {
 }
 
 #[test]
+fn test_is_visible_false_when_parent_alpha_zero() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "AlphaZeroParent", UIParent)
+        local child = CreateFrame("Frame", "AlphaZeroChild", parent)
+        parent:SetAlpha(0)
+        child:Show()
+    "#,
+    )
+    .unwrap();
+
+    let child_shown: bool = env.eval("return AlphaZeroChild:IsShown()").unwrap();
+    let child_visible: bool = env.eval("return AlphaZeroChild:IsVisible()").unwrap();
+    let child_effective_alpha: f32 = env.eval("return AlphaZeroChild:GetEffectiveAlpha()").unwrap();
+
+    assert!(child_shown, "child should still have its own shown flag");
+    assert!(
+        !child_visible,
+        "child should not be visible when parent effective alpha is zero"
+    );
+    assert_eq!(
+        child_effective_alpha, 0.0,
+        "child effective alpha should collapse to zero with a transparent parent"
+    );
+}
+
+#[test]
+fn test_is_visible_updates_when_reparented_under_alpha_zero_parent() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local visibleParent = CreateFrame("Frame", "VisibleParent", UIParent)
+        local transparentParent = CreateFrame("Frame", "TransparentParent", UIParent)
+        transparentParent:SetAlpha(0)
+
+        local child = CreateFrame("Frame", "ReparentedVisibilityChild", visibleParent)
+        child:Show()
+    "#,
+    )
+    .unwrap();
+
+    let initially_visible: bool = env
+        .eval("return ReparentedVisibilityChild:IsVisible()")
+        .unwrap();
+    assert!(initially_visible, "child should start visible under visible parent");
+
+    env.exec(r#"ReparentedVisibilityChild:SetParent(TransparentParent)"#)
+        .unwrap();
+
+    let visible_after_reparent: bool = env
+        .eval("return ReparentedVisibilityChild:IsVisible()")
+        .unwrap();
+    let effective_alpha_after_reparent: f32 = env
+        .eval("return ReparentedVisibilityChild:GetEffectiveAlpha()")
+        .unwrap();
+
+    assert!(
+        !visible_after_reparent,
+        "child should become invisible after reparenting under alpha-zero parent"
+    );
+    assert_eq!(
+        effective_alpha_after_reparent, 0.0,
+        "reparenting should recompute child effective alpha"
+    );
+}
+
+#[test]
+fn test_is_visible_recovers_after_parent_alpha_restored() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "RestoredAlphaParent", UIParent)
+        local child = CreateFrame("Frame", "RestoredAlphaChild", parent)
+        parent:SetAlpha(0)
+        child:Show()
+        parent:SetAlpha(1)
+    "#,
+    )
+    .unwrap();
+
+    let child_visible: bool = env.eval("return RestoredAlphaChild:IsVisible()").unwrap();
+    let child_effective_alpha: f32 = env
+        .eval("return RestoredAlphaChild:GetEffectiveAlpha()")
+        .unwrap();
+
+    assert!(
+        child_visible,
+        "child should become visible again when parent alpha is restored"
+    );
+    assert_eq!(
+        child_effective_alpha, 1.0,
+        "child effective alpha should be recomputed when parent alpha changes"
+    );
+}
+
+#[test]
 fn test_create_frame_default_parent() {
     let env = WowLuaEnv::new().unwrap();
 

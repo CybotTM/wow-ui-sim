@@ -243,19 +243,9 @@ fn add_visibility_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_is_visible<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsVisible", |lua, this, ()| {
-        let id = this.0;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let mut cur = id;
-        loop {
-            match state.widgets.get(cur) {
-                Some(f) if f.visible => match f.parent_id {
-                    Some(pid) => cur = pid,
-                    None => return Ok(true),
-                },
-                _ => return Ok(false),
-            }
-        }
+        Ok(state.widgets.is_ancestor_visible(this.0))
     });
 }
 
