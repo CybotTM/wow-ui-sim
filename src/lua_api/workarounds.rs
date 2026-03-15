@@ -14,6 +14,7 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_bags::fix_bag_item_context_overlay(env);
     workarounds_editmode::init_edit_mode_layout(env);
     finish_objective_tracker(env);
+    hide_talent_loadout_dialogs(env);
 }
 
 /// Apply all post-load workarounds. Called after addon loading, before events.
@@ -52,6 +53,26 @@ pub fn apply(env: &WowLuaEnv) {
 /// repositions it, so the icon renders at default (0,0) in the top-left corner.
 fn hide_super_tracked_frame(env: &WowLuaEnv) {
     let _ = env.exec("if SuperTrackedFrame then SuperTrackedFrame:Hide() end");
+}
+
+/// Blizzard's class talent loadout dialogs are hidden XML popups that should
+/// remain closed until their dropdown actions explicitly open them. Normalize
+/// them after startup events in case intermediate handlers surfaced them.
+fn hide_talent_loadout_dialogs(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        for _, name in ipairs({
+            "ClassTalentLoadoutCreateDialog",
+            "ClassTalentLoadoutEditDialog",
+            "ClassTalentLoadoutImportDialog",
+        }) do
+            local frame = _G[name]
+            if frame then
+                frame:Hide()
+            end
+        end
+    "#,
+    );
 }
 
 /// SettingsDefinitions_Shared registers preview handlers even on glue/login
