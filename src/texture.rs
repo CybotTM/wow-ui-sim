@@ -188,6 +188,55 @@ impl TextureManager {
         );
     }
 
+    /// Pre-load common game HUD atlases that otherwise cause large first-use
+    /// stalls when PlayerSpells and other game UI panels open.
+    pub fn preload_game_hud_textures(&mut self) {
+        const FILES: &[&str] = &[
+            r"Interface\hud\uiminimap",
+            r"Interface\hud\uiminimapbackground",
+            r"Interface\hud\uiminimapvertical",
+            r"Interface\hud\uiactionbar",
+            r"Interface\hud\uiactionbarvertical",
+            r"Interface\hud\uimicromenu2x",
+            r"Interface\hud\uiunitframe",
+            r"Interface\hud\uipartyframe",
+            r"Interface\hud\uigroupmanager",
+            r"Interface\hud\uicalendar",
+            r"Interface\hud\uipartyframeportraitonmanamask",
+            r"Interface\hud\uipartyframeportraitonhealthmask",
+            r"Interface\hud\uiunitframeplayerportraitmask",
+            r"Interface\hud\uiunitframeplayermanamask",
+            r"Interface\hud\uiunitframeplayerhealthmask",
+            r"Interface\questframe\questtracker",
+            r"Interface\questframe\questimportantmapicons",
+            r"Interface\questframe\questinprogressicons",
+            r"Interface\chatframe\chatframe",
+            r"Interface\ChatFrame\ChatFrameBackground",
+            r"Interface\ChatFrame\UI-ChatFrame-BorderTop",
+            r"Interface\ChatFrame\UI-ChatFrame-BorderLeft",
+            r"Interface\ChatFrame\UI-ChatFrame-BorderCorner",
+            r"Interface\ChatFrame\ChatFrameTab-BGMid",
+            r"Interface\ChatFrame\ChatFrameTab-BGRight",
+            r"Interface\ChatFrame\ChatFrameTab-BGLeft",
+            r"Interface\containerframe\bagslots2x",
+            r"Interface\buttons\minimalscrollbarproportional",
+            r"Interface\masks\circlemask",
+            r"Interface\Minimap\placeholder-map",
+        ];
+
+        let mut loaded = 0usize;
+        for file in FILES {
+            if self.load(file).is_some() {
+                loaded += 1;
+            }
+        }
+        eprintln!(
+            "[TexMgr] Preloaded {} / {} game HUD textures",
+            loaded,
+            FILES.len()
+        );
+    }
+
     /// Number of entries in the texture cache.
     pub fn cache_len(&self) -> usize {
         self.cache.len()

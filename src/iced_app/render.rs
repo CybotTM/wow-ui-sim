@@ -397,6 +397,13 @@ fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, te
 
 impl App {
     pub(crate) fn preload_initial_texture_requests(&self) {
+        self.preload_current_render_requests(None);
+    }
+
+    pub(crate) fn preload_current_render_requests(
+        &self,
+        budget: Option<std::time::Duration>,
+    ) {
         let size = self.screen_size.get();
         let (dirty_strata, _) = self.get_or_rebuild_quads(size);
         let overlay = self.build_overlay();
@@ -413,8 +420,11 @@ impl App {
         let before = tex_mgr.cache_len();
         let mut warmed = 0usize;
         let mut remaining = false;
-        let deadline = (!is_glue_screen)
-            .then(|| std::time::Instant::now() + std::time::Duration::from_millis(250));
+        let deadline = match budget {
+            Some(budget) => Some(std::time::Instant::now() + budget),
+            None => (!is_glue_screen)
+                .then(|| std::time::Instant::now() + std::time::Duration::from_millis(250)),
+        };
 
         for path in &paths {
             if let Some(deadline) = deadline
@@ -422,6 +432,13 @@ impl App {
             {
                 remaining = true;
                 break;
+            }
+            if budget.is_some() {
+                let base = path.find("@crop:").map_or(path.as_str(), |i| &path[..i]);
+                if !tex_mgr.is_cached(base) {
+                    remaining = true;
+                    continue;
+                }
             }
             if load_texture_or_crop(&mut tex_mgr, path).is_some() {
                 warmed += 1;
@@ -483,7 +500,20 @@ impl App {
             exhausted |= hit;
         }
         self.textures_pending.set(exhausted);
-        (textures, t.elapsed())
+        let elapsed = t.elapsed();
+        if elapsed.as_millis() > 50 && !textures.is_empty() {
+            let preview: Vec<&str> = textures
+                .iter()
+                .take(12)
+                .map(|tex| tex.path.as_str())
+                .collect();
+            eprintln!(
+                "[textures] loaded {} in {elapsed:.1?}: {}",
+                textures.len(),
+                preview.join(", ")
+            );
+        }
+        (textures, elapsed)
     }
 
     fn update_frame_time_avg(&self, elapsed: std::time::Duration) {

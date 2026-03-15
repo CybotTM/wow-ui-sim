@@ -444,8 +444,15 @@ impl App {
                 .unwrap_or("Warrior")
                 .to_string()
         };
+        let is_glue_screen = {
+            let env = env_rc.borrow();
+            env.state().borrow().screen_kind.is_glue()
+        };
         tex_mgr.preload_talent_textures(790);
         tex_mgr.preload_talent_panel_textures(&class_name);
+        if !is_glue_screen {
+            tex_mgr.preload_game_hud_textures();
+        }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
             DEFAULT_FONTS_PATH,

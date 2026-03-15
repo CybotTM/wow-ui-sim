@@ -181,9 +181,12 @@ impl WidgetRegistry {
 
     /// Clear all cached layout rects (e.g. after screen resize).
     pub fn clear_all_layout_rects(&mut self) {
+        self.pending_layout_ids.clear();
         for (&id, frame) in self.widgets.iter_mut() {
             frame.layout_rect = None;
-            self.pending_layout_ids.insert(id);
+            if frame.parent_id.is_none() {
+                self.pending_layout_ids.insert(id);
+            }
         }
         self.mark_all_visual_dirty();
     }
@@ -386,6 +389,19 @@ impl WidgetRegistry {
         self.rect_dirty_ids.remove(&id);
     }
 
+    /// Clear rect-dirty for a frame and all descendants.
+    pub fn clear_rect_dirty_subtree(&mut self, id: u64) {
+        self.rect_dirty_ids.remove(&id);
+        let children = self
+            .widgets
+            .get(&id)
+            .map(|f| f.children.clone())
+            .unwrap_or_default();
+        for child_id in children {
+            self.clear_rect_dirty_subtree(child_id);
+        }
+    }
+
     /// Drain rect_dirty_ids. Returns the set for callers that need it.
     pub fn drain_rect_dirty(&mut self) -> HashSet<u64> {
         std::mem::take(&mut self.rect_dirty_ids)
@@ -400,6 +416,7 @@ impl WidgetRegistry {
     pub fn mark_layout_resolved(&mut self, id: u64) {
         self.pending_layout_ids.remove(&id);
     }
+
 
     /// Check if setting a point from `frame_id` to `relative_to_id` would create a cycle.
     /// A cycle exists if relative_to (or any of its anchor dependencies) already

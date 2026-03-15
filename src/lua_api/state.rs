@@ -389,13 +389,24 @@ impl SimState {
             let sw = self.screen_width;
             let sh = self.screen_height;
             let mut cache = crate::iced_app::layout::LayoutCache::default();
-            for id in pending {
+            let pending_root_ids: Vec<u64> = pending
+                .iter()
+                .copied()
+                .filter(|id| {
+                    self.widgets
+                        .get(*id)
+                        .and_then(|f| f.parent_id)
+                        .is_none_or(|parent_id| !pending.contains(&parent_id))
+                })
+                .collect();
+            for id in pending_root_ids {
                 if self
                     .widgets
                     .get(id)
                     .is_some_and(|f| f.layout_rect.is_none())
                 {
                     Self::recompute_layout_subtree(&mut self.widgets, id, sw, sh, &mut cache);
+                    self.widgets.clear_rect_dirty_subtree(id);
                 }
             }
         }
