@@ -830,7 +830,10 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
                     local dt = profile() - t0
                     if dt > 5 then
                         local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
-                        stderr:write(string.format("  [OnUpdate] %7.1fms  %s%s\n", dt, n, suffix))
+                        local ts = (G.GetTimePreciseSec and G.GetTimePreciseSec())
+                            or (G.GetTime and G.GetTime())
+                            or os.clock()
+                        stderr:write(string.format("[%7.3fs] [OnUpdate] %7.1fms  %s%s\n", ts, dt, n, suffix))
                     end
                     if not ok then handler(err) end
                     if owner then

@@ -7,6 +7,11 @@
 use crate::lua_api::WowLuaEnv;
 use crate::screen::ScreenKind;
 
+fn log_with_timestamp(env: &WowLuaEnv, message: &str) {
+    let start_time = env.state().borrow().start_time;
+    eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
+}
+
 /// Process any C_Timer callbacks that became ready during startup.
 pub fn process_pending_timers(env: &WowLuaEnv) {
     for _ in 0..10 {
@@ -14,7 +19,7 @@ pub fn process_pending_timers(env: &WowLuaEnv) {
             Ok(0) => break,
             Ok(_) => {}
             Err(e) => {
-                eprintln!("[Timers] error: {e}");
+                log_with_timestamp(env, &format!("[Timers] error: {e}"));
                 break;
             }
         }
@@ -24,7 +29,7 @@ pub fn process_pending_timers(env: &WowLuaEnv) {
 /// Sleep for the given number of milliseconds (if specified).
 pub fn apply_delay(delay: Option<u64>) {
     if let Some(ms) = delay {
-        eprintln!("[Startup] Delaying {}ms", ms);
+        eprintln!("[delay] sleeping {ms}ms");
         std::thread::sleep(std::time::Duration::from_millis(ms));
     }
 }
@@ -33,7 +38,7 @@ pub fn apply_delay(delay: Option<u64>) {
 /// durations) is populated in headless modes where the GUI loop never runs.
 pub fn fire_one_on_update_tick(env: &WowLuaEnv) {
     if let Err(e) = env.fire_on_update(0.016) {
-        eprintln!("[OnUpdate tick] error: {e}");
+        log_with_timestamp(env, &format!("[OnUpdate tick] error: {e}"));
     }
 }
 
@@ -95,14 +100,14 @@ fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
     env.set_logged_in(false);
     let fire = |name| fire_simple_event(env, name);
 
-    eprintln!("[Startup] Firing ADDON_LOADED");
+    log_with_timestamp(env, "[Startup] Firing ADDON_LOADED");
     if let Err(e) = env.fire_event_with_args(
         "ADDON_LOADED",
         &[mlua::Value::String(
             env.lua().create_string("WoWUISim").unwrap(),
         )],
     ) {
-        eprintln!("Error firing ADDON_LOADED: {}", e);
+        log_with_timestamp(env, &format!("Error firing ADDON_LOADED: {e}"));
     }
 
     fire("VARIABLES_LOADED");
@@ -125,7 +130,7 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
             "if GlueParent_SetScreen then GlueParent_SetScreen({screen_name:?}) end"
         ))
     {
-        eprintln!("Error switching glue screen to {screen_name}: {e}");
+        log_with_timestamp(env, &format!("Error switching glue screen to {screen_name}: {e}"));
     }
     apply_glue_screen_visibility(env, screen);
     env.state().borrow_mut().screen_first_displayed = true;
@@ -175,33 +180,33 @@ fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
     };
 
     if let Err(e) = env.exec(script) {
-        eprintln!("[Startup] glue visibility normalization failed: {e}");
+        log_with_timestamp(env, &format!("[Startup] glue visibility normalization failed: {e}"));
     }
 }
 
 /// Fire EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, and PLAYER_ENTERING_WORLD.
 fn fire_world_enter_sequence(env: &WowLuaEnv) {
-    eprintln!("[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
+    log_with_timestamp(env, "[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
     if let Err(e) = env.fire_edit_mode_layouts_updated() {
-        eprintln!("  {}", e);
+        log_with_timestamp(env, &e.to_string());
     }
 
-    eprintln!("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
+    log_with_timestamp(env, "[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
     if let Err(e) = env
         .lua()
         .globals()
         .get::<mlua::Function>("RequestTimePlayed")
         .and_then(|f| f.call::<()>(()))
     {
-        eprintln!("Error calling RequestTimePlayed: {}", e);
+        log_with_timestamp(env, &format!("Error calling RequestTimePlayed: {e}"));
     }
 
-    eprintln!("[Startup] Firing PLAYER_ENTERING_WORLD");
+    log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
     if let Err(e) = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
         &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     ) {
-        eprintln!("Error firing PLAYER_ENTERING_WORLD: {}", e);
+        log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
     }
 }
 
@@ -225,9 +230,9 @@ fn fire_post_login_events(env: &WowLuaEnv) {
 
 /// Fire a simple event with no arguments, logging to stderr.
 fn fire_simple_event(env: &WowLuaEnv, name: &str) {
-    eprintln!("[Startup] Firing {}", name);
+    log_with_timestamp(env, &format!("[Startup] Firing {name}"));
     if let Err(e) = env.fire_event(name) {
-        eprintln!("Error firing {}: {}", name, e);
+        log_with_timestamp(env, &format!("Error firing {name}: {e}"));
     }
 }
 
@@ -284,13 +289,13 @@ pub fn call_unit_frame_set_unit(env: &WowLuaEnv) {
         end
     "#,
     ) {
-        eprintln!("[startup] call_unit_frame_set_unit error: {e}");
+        log_with_timestamp(env, &format!("[startup] call_unit_frame_set_unit error: {e}"));
     }
 }
 
 /// Fire UNIT_AURA("player", {isFullUpdate=true}) to populate buff frames.
 fn fire_unit_aura(env: &WowLuaEnv) {
-    eprintln!("[Startup] Firing UNIT_AURA");
+    log_with_timestamp(env, "[Startup] Firing UNIT_AURA");
     let lua = env.lua();
     if let (Ok(unit), Ok(info)) = (lua.create_string("player"), lua.create_table()) {
         let _ = info.set("isFullUpdate", true);
@@ -298,7 +303,7 @@ fn fire_unit_aura(env: &WowLuaEnv) {
             "UNIT_AURA",
             &[mlua::Value::String(unit), mlua::Value::Table(info)],
         ) {
-            eprintln!("Error firing UNIT_AURA: {}", e);
+            log_with_timestamp(env, &format!("Error firing UNIT_AURA: {e}"));
         }
     }
 }
@@ -336,7 +341,7 @@ fn force_show_party_member_frames(env: &WowLuaEnv) {
         PartyFrame:Layout()
     "#,
     ) {
-        eprintln!("[startup] party frame safety-net error: {e}");
+        log_with_timestamp(env, &format!("[startup] party frame safety-net error: {e}"));
     }
 }
 

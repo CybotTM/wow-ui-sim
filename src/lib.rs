@@ -24,6 +24,7 @@ pub mod iced_app;
 #[path = "../data/items.rs"]
 pub mod items;
 pub mod loader;
+pub mod logging;
 pub mod lua_api;
 pub mod lua_errors;
 pub mod lua_server;
