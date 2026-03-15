@@ -1,4 +1,4 @@
-//! Minimal spell data for the simulator's Paladin flow.
+//! Minimal spell data for the simulator's Paladin flow and tests.
 //! This keeps the public API shape without carrying the full generated dump.
 
 #[derive(Debug, Clone)]
@@ -11,6 +11,26 @@ pub struct SpellInfo {
 }
 
 pub static SPELL_DB: &[(u32, SpellInfo)] = &[
+    (
+        100,
+        SpellInfo {
+            name: "Charge",
+            subtext: "",
+            icon_file_data_id: 132337,
+            school_mask: 1,
+            implicit_target: 6,
+        },
+    ),
+    (
+        116,
+        SpellInfo {
+            name: "Frostbolt",
+            subtext: "",
+            icon_file_data_id: 135846,
+            school_mask: 16,
+            implicit_target: 6,
+        },
+    ),
     (
         465,
         SpellInfo {
@@ -152,36 +172,6 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
         },
     ),
     (
-        115750,
-        SpellInfo {
-            name: "Blinding Light",
-            subtext: "",
-            icon_file_data_id: 571553,
-            school_mask: 2,
-            implicit_target: 1,
-        },
-    ),
-    (
-        121183,
-        SpellInfo {
-            name: "Contemplation",
-            subtext: "",
-            icon_file_data_id: 134916,
-            school_mask: 2,
-            implicit_target: 1,
-        },
-    ),
-    (
-        137026,
-        SpellInfo {
-            name: "Paladin",
-            subtext: "",
-            icon_file_data_id: 236216,
-            school_mask: 1,
-            implicit_target: 1,
-        },
-    ),
-    (
         19750,
         SpellInfo {
             name: "Flash of Light",
@@ -199,66 +189,6 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
             icon_file_data_id: 135972,
             school_mask: 2,
             implicit_target: 25,
-        },
-    ),
-    (
-        204019,
-        SpellInfo {
-            name: "Blessed Hammer",
-            subtext: "",
-            icon_file_data_id: 535595,
-            school_mask: 2,
-            implicit_target: 18,
-        },
-    ),
-    (
-        53563,
-        SpellInfo {
-            name: "Beacon of Light",
-            subtext: "",
-            icon_file_data_id: 236247,
-            school_mask: 2,
-            implicit_target: 21,
-        },
-    ),
-    (
-        53576,
-        SpellInfo {
-            name: "Infusion of Light",
-            subtext: "",
-            icon_file_data_id: 236254,
-            school_mask: 1,
-            implicit_target: 1,
-        },
-    ),
-    (
-        53595,
-        SpellInfo {
-            name: "Hammer of the Righteous",
-            subtext: "",
-            icon_file_data_id: 236253,
-            school_mask: 1,
-            implicit_target: 6,
-        },
-    ),
-    (
-        53600,
-        SpellInfo {
-            name: "Shield of the Righteous",
-            subtext: "",
-            icon_file_data_id: 236265,
-            school_mask: 2,
-            implicit_target: 24,
-        },
-    ),
-    (
-        62124,
-        SpellInfo {
-            name: "Hand of Reckoning",
-            subtext: "",
-            icon_file_data_id: 135984,
-            school_mask: 2,
-            implicit_target: 6,
         },
     ),
     (
@@ -308,6 +238,56 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
             subtext: "",
             icon_file_data_id: 135891,
             school_mask: 1,
+            implicit_target: 6,
+        },
+    ),
+    (
+        53563,
+        SpellInfo {
+            name: "Beacon of Light",
+            subtext: "",
+            icon_file_data_id: 236247,
+            school_mask: 2,
+            implicit_target: 21,
+        },
+    ),
+    (
+        53576,
+        SpellInfo {
+            name: "Infusion of Light",
+            subtext: "",
+            icon_file_data_id: 236254,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        53595,
+        SpellInfo {
+            name: "Hammer of the Righteous",
+            subtext: "",
+            icon_file_data_id: 236253,
+            school_mask: 1,
+            implicit_target: 6,
+        },
+    ),
+    (
+        53600,
+        SpellInfo {
+            name: "Shield of the Righteous",
+            subtext: "",
+            icon_file_data_id: 236265,
+            school_mask: 2,
+            implicit_target: 24,
+        },
+    ),
+    (
+        62124,
+        SpellInfo {
+            name: "Hand of Reckoning",
+            subtext: "",
+            icon_file_data_id: 135984,
+            school_mask: 2,
             implicit_target: 6,
         },
     ),
@@ -402,6 +382,36 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
         },
     ),
     (
+        115750,
+        SpellInfo {
+            name: "Blinding Light",
+            subtext: "",
+            icon_file_data_id: 571553,
+            school_mask: 2,
+            implicit_target: 1,
+        },
+    ),
+    (
+        121183,
+        SpellInfo {
+            name: "Contemplation",
+            subtext: "",
+            icon_file_data_id: 134916,
+            school_mask: 2,
+            implicit_target: 1,
+        },
+    ),
+    (
+        137026,
+        SpellInfo {
+            name: "Paladin",
+            subtext: "",
+            icon_file_data_id: 236216,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
         152261,
         SpellInfo {
             name: "Holy Shield",
@@ -469,6 +479,16 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
             icon_file_data_id: 1122562,
             school_mask: 2,
             implicit_target: 1,
+        },
+    ),
+    (
+        204019,
+        SpellInfo {
+            name: "Blessed Hammer",
+            subtext: "",
+            icon_file_data_id: 535595,
+            school_mask: 2,
+            implicit_target: 18,
         },
     ),
     (
@@ -629,6 +649,86 @@ pub static SPELL_DB: &[(u32, SpellInfo)] = &[
             icon_file_data_id: 1272527,
             school_mask: 2,
             implicit_target: 22,
+        },
+    ),
+    (
+        1230084,
+        SpellInfo {
+            name: "Transcribe: Blood",
+            subtext: "",
+            icon_file_data_id: 4620676,
+            school_mask: 1,
+            implicit_target: 0,
+        },
+    ),
+    (
+        1232418,
+        SpellInfo {
+            name: "Deadly Arcanocrystal Cluster",
+            subtext: "",
+            icon_file_data_id: 4549098,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1232421,
+        SpellInfo {
+            name: "Energized Ley Crystal",
+            subtext: "",
+            icon_file_data_id: 1033908,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1234430,
+        SpellInfo {
+            name: "Souls of the Caw",
+            subtext: "Uncommon",
+            icon_file_data_id: 442733,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1242031,
+        SpellInfo {
+            name: "Twin Echoes",
+            subtext: "Bronze",
+            icon_file_data_id: 6118850,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1247534,
+        SpellInfo {
+            name: "Soul Glutton",
+            subtext: "",
+            icon_file_data_id: 1120184,
+            school_mask: 106,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1272143,
+        SpellInfo {
+            name: "Broken Spirit",
+            subtext: "",
+            icon_file_data_id: 1778228,
+            school_mask: 1,
+            implicit_target: 1,
+        },
+    ),
+    (
+        1279510,
+        SpellInfo {
+            name: "Niskaran Methods",
+            subtext: "",
+            icon_file_data_id: 1717019,
+            school_mask: 32,
+            implicit_target: 1,
         },
     ),
 ];

@@ -186,8 +186,8 @@ fn register_spec_info_lookups(lua: &Lua) -> Result<()> {
     // GetSpecializationNameForSpecID(specID) -> name string
     globals.set(
         "GetSpecializationNameForSpecID",
-        lua.create_function(|lua, spec_id: i32| {
-            match specializations::spec_by_id(spec_id as u32) {
+        lua.create_function(|lua, spec_id: Option<i32>| {
+            match spec_id.and_then(|spec_id| specializations::spec_by_id(spec_id as u32)) {
                 Some(s) => Ok(Value::String(lua.create_string(s.name)?)),
                 None => Ok(Value::Nil),
             }
@@ -217,11 +217,11 @@ fn register_spec_class_lookups(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
     Ok(())
 }
 
-fn spec_info_by_id(lua: &Lua, spec_id: i32) -> Result<mlua::MultiValue> {
-    let spec = specializations::spec_by_id(spec_id as u32)
-        .or_else(|| specializations::spec_by_id(66)) // Default to Protection
-        .unwrap();
-    spec_to_multivalue(lua, spec)
+fn spec_info_by_id(lua: &Lua, spec_id: Option<i32>) -> Result<mlua::MultiValue> {
+    match spec_id.and_then(|spec_id| specializations::spec_by_id(spec_id as u32)) {
+        Some(spec) => spec_to_multivalue(lua, spec),
+        None => Ok(mlua::MultiValue::new()),
+    }
 }
 
 /// Economy functions: money, trade, buyback.

@@ -237,6 +237,40 @@ fn character_select_builds_scrollbox_entries() {
 }
 
 #[test]
+fn character_select_tooltip_tolerates_missing_spec_id() {
+    test_timeout! {
+        let env = load_blizzard_screen(ScreenKind::CharacterSelect);
+
+        let tooltip_result: bool = env
+            .eval(
+                r#"
+                local info = CharacterSelectUtil and CharacterSelectUtil.GetCharacterInfoTable(1)
+                assert(info, "character info should exist")
+                info.specID = nil
+                return CharacterSelectUtil.SetTooltipForCharacterInfo(info, 1)
+                "#,
+            )
+            .expect("character tooltip should tolerate a missing specID");
+
+        assert!(
+            tooltip_result,
+            "character tooltip should still render when specID is missing"
+        );
+
+        let errors = env.state().borrow().lua_errors.clone();
+        let unexpected: Vec<String> = errors
+            .into_iter()
+            .filter(|msg| msg.contains("GetSpecializationInfoForSpecID"))
+            .collect();
+
+        assert!(
+            unexpected.is_empty(),
+            "missing specID should not trigger specialization lookup Lua errors: {unexpected:#?}"
+        );
+    }
+}
+
+#[test]
 fn character_select_can_transition_to_character_create_without_lua_errors() {
     test_timeout! {
         let env = load_blizzard_screen(ScreenKind::CharacterSelect);

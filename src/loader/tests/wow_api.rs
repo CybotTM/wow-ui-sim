@@ -502,6 +502,39 @@ fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     );
 }
 
+#[test]
+fn test_c_spell_get_spell_texture_covers_high_id_paladin_talent_spells() {
+    let env = WowLuaEnv::new().unwrap();
+    let no_fallback_icons: bool = env
+        .eval(
+            r#"
+            local fallback = 136243
+            local ids = {
+                1272143,
+                1232418,
+                1279510,
+                1242031,
+                1247534,
+                1230084,
+                1232421,
+                1234430,
+            }
+            for _, spellID in ipairs(ids) do
+                local fileDataID = select(2, C_Spell.GetSpellTexture(spellID))
+                if fileDataID == fallback then
+                    return false
+                end
+            end
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        no_fallback_icons,
+        "high-id paladin talent spells should not fall back to Trade_Engineering icons",
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Global functions
 // ---------------------------------------------------------------------------
