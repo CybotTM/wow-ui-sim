@@ -161,6 +161,11 @@ fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
+fn frame_is_visible(env: &WowLuaEnv, frame_name: &str) -> bool {
+    let code = format!("return {frame_name} ~= nil and {frame_name}:IsVisible() == true");
+    env.eval::<bool>(&code).unwrap_or(false)
+}
+
 /// Check whether a global frame exists.
 #[allow(dead_code)]
 fn frame_exists(env: &WowLuaEnv, frame_name: &str) -> bool {
@@ -352,6 +357,18 @@ fn keybind_n_opens_talents() {
         assert!(
             frame_is_shown(&env, "PlayerSpellsFrame"),
             "PlayerSpellsFrame should be shown after pressing N (talents tab)"
+        );
+        assert!(
+            !frame_is_shown(&env, "ClassTalentLoadoutImportDialog"),
+            "ClassTalentLoadoutImportDialog should stay hidden until the Import action is clicked"
+        );
+        assert!(
+            !frame_is_visible(&env, "ClassTalentLoadoutImportDialogImportControl"),
+            "Import dialog content should not become visible when opening the talents tab"
+        );
+        assert!(
+            !frame_is_visible(&env, "ClassTalentLoadoutImportDialogNameControl"),
+            "Import dialog name control should not become visible when opening the talents tab"
         );
     }
 }
