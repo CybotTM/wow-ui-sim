@@ -143,6 +143,39 @@ fn test_load_lua_file() {
 }
 
 #[test]
+fn test_hidden_xml_parent_does_not_hide_child_shown_flag() {
+    let ctx = load_test_xml(
+        "hidden-parent-child-shown",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="HiddenParent" parent="UIParent" hidden="true">
+                <Frames>
+                    <Frame name="HiddenParentChild"/>
+                </Frames>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    ctx.assert_lua_true(
+        "return HiddenParent ~= nil and HiddenParentChild ~= nil",
+        "frames should exist",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParent:IsShown() == false",
+        "parent should start hidden",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParentChild:IsShown() == true",
+        "child should keep its own shown flag even when parent starts hidden",
+    );
+    ctx.assert_lua_true(
+        "return HiddenParentChild:IsVisible() == false",
+        "child should not be effectively visible while parent is hidden",
+    );
+}
+
+#[test]
 fn test_xml_frame_with_layers_and_scripts() {
     let t = load_test_xml(
         "test-xml",

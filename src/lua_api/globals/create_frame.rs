@@ -334,8 +334,10 @@ fn attribute_frame_owner(frame: &mut Frame, state: &Rc<RefCell<SimState>>, paren
     frame.forbidden = s.loading_forbidden;
     if frame.owner_addon.is_none() {
         eprintln!(
-            "[WARN] CreateFrame {:?} ({:?}): no owner addon (runtime creation without parent)",
-            frame.name, frame.widget_type
+            "{} [WARN] CreateFrame {:?} ({:?}): no owner addon (runtime creation without parent)",
+            crate::logging::elapsed_prefix(s.start_time),
+            frame.name,
+            frame.widget_type
         );
     }
 }
@@ -348,7 +350,11 @@ fn register_new_frame(
     parent_explicit: bool,
 ) -> u64 {
     let mut frame = Frame::new(widget_type, name.clone(), parent_id);
-    let initial_hidden = state.borrow().create_frame_initial_hidden.unwrap_or(false);
+    let initial_hidden = state
+        .borrow_mut()
+        .create_frame_initial_hidden
+        .take()
+        .unwrap_or(false);
     if initial_hidden {
         frame.visible = false;
         frame.effective_alpha = 0.0;

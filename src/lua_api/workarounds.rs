@@ -132,23 +132,26 @@ fn warm_player_spells_talents(env: &WowLuaEnv) {
                 end
             end
 
-            local rawUpdateAllButtons = talents.UpdateAllButtons
-            if type(rawUpdateAllButtons) == "function" then
-                talents.__simTalentOrig_UpdateAllButtons = rawUpdateAllButtons
-                talents.UpdateAllButtons = function(self, ...)
-                    local configID = self.GetConfigID and self:GetConfigID() or nil
-                    local treeID = self.GetTalentTreeID and self:GetTalentTreeID() or nil
-                    if self.__simTalentWarmConfigID ~= configID or self.__simTalentWarmTreeID ~= treeID then
-                        self.__simTalentDirty = true
-                    end
-                    if not self.__simTalentDirty then
+            local rawClearInfoCaches = talents.ClearInfoCaches
+            if type(rawClearInfoCaches) == "function" then
+                talents.__simTalentOrig_ClearInfoCaches = rawClearInfoCaches
+                talents.ClearInfoCaches = function(self, ...)
+                    if self.__simTalentSkipHideCacheClear then
+                        self.__simTalentSkipHideCacheClear = nil
                         return
                     end
-                    local out = { rawUpdateAllButtons(self, ...) }
-                    self.__simTalentDirty = false
-                    self.__simTalentWarmConfigID = configID
-                    self.__simTalentWarmTreeID = treeID
-                    return unpack(out)
+                    return rawClearInfoCaches(self, ...)
+                end
+            end
+
+            local rawOnHide = talents.OnHide
+            if type(rawOnHide) == "function" then
+                talents.__simTalentOrig_OnHide = rawOnHide
+                talents.OnHide = function(self, ...)
+                    if self.__simTalentWarmReady and not self.__simTalentDirty then
+                        self.__simTalentSkipHideCacheClear = true
+                    end
+                    return rawOnHide(self, ...)
                 end
             end
 
