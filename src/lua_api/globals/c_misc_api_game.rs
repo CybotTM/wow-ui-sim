@@ -60,7 +60,7 @@ fn register_c_external_event_url(lua: &Lua) -> Result<()> {
 
 fn register_c_store_public(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("IsEnabled", lua.create_function(|_, ()| Ok(true))?)?;
     t.set(
         "IsDisabledByParentalControls",
         lua.create_function(|_, ()| Ok(false))?,

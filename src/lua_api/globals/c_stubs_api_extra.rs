@@ -721,11 +721,12 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
     lua.load(
         r#"
         C_StoreSecure = setmetatable({
-            IsStoreAvailable = function() return false end,
-            IsAvailable = function() return false end,
+            IsStoreAvailable = function() return true end,
+            IsAvailable = function() return true end,
             HasPurchaseInProgress = function() return false end,
-            HasPurchaseList = function() return false end,
-            HasProductList = function() return false end,
+            HasPurchaseList = function() return true end,
+            HasProductList = function() return true end,
+            HasDistributionList = function() return true end,
         }, { __index = function() return function() end end })
     "#,
     )
