@@ -232,6 +232,7 @@ fn emit_one_frame(
     batch: &mut QuadBatch,
     id: u64,
     rect: crate::LayoutRect,
+    clip_rect: Option<crate::LayoutRect>,
     eff_alpha: f32,
     registry: &crate::widget::WidgetRegistry,
     pressed_frame: Option<u64>,
@@ -263,11 +264,18 @@ fn emit_one_frame(
         Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
         Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
     );
+    let clip_bounds = clip_rect.map(|rect| {
+        Rectangle::new(
+            Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+            Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+        )
+    });
     emit_frame_quads(
         batch,
         id,
         f,
         bounds,
+        clip_bounds,
         statusbar_fills.get(&id),
         pressed_frame,
         None,
@@ -312,7 +320,7 @@ fn emit_strata_cached(
         emitted: 0,
     };
 
-    for &(id, rect, eff_alpha) in &render_list {
+    for &(id, rect, clip_rect, eff_alpha) in &render_list {
         if try_use_cached(batch, snapshots, dirty_ids, id) {
             stats.cached += 1;
             continue;
@@ -322,6 +330,7 @@ fn emit_strata_cached(
             batch,
             id,
             rect,
+            clip_rect,
             eff_alpha,
             registry,
             pressed_frame,
@@ -389,6 +398,49 @@ fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, te
 }
 
 impl App {
+    pub(crate) fn preload_initial_texture_requests(&self) {
+        let size = self.screen_size.get();
+        let (dirty_strata, _) = self.get_or_rebuild_quads(size);
+        let overlay = self.build_overlay();
+        let paths = collect_texture_request_paths(&dirty_strata, &overlay);
+        if paths.is_empty() {
+            return;
+        }
+
+        let env = self.env.borrow();
+        let warmup_budget = if env.state().borrow().screen_kind.is_glue() {
+            std::time::Duration::from_millis(750)
+        } else {
+            std::time::Duration::from_millis(250)
+        };
+        drop(env);
+
+        let deadline = std::time::Instant::now() + warmup_budget;
+        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let before = tex_mgr.cache_len();
+        let mut warmed = 0usize;
+        let mut remaining = false;
+
+        for path in &paths {
+            if std::time::Instant::now() >= deadline {
+                remaining = true;
+                break;
+            }
+            if load_texture_or_crop(&mut tex_mgr, path).is_some() {
+                warmed += 1;
+            }
+        }
+
+        self.textures_pending.set(remaining);
+        let loaded = tex_mgr.cache_len().saturating_sub(before);
+        if warmed > 0 || loaded > 0 {
+            eprintln!(
+                "[preload] warmed {warmed} render requests ({loaded} new base textures, {} total requests)",
+                paths.len()
+            );
+        }
+    }
+
     fn build_overlay(&self) -> QuadBatch {
         let mut overlay = QuadBatch::new();
         self.append_hover_highlight(&mut overlay);
@@ -728,5 +780,59 @@ impl App {
             [1.0, 1.0, 1.0, 1.0],
             crate::render::BlendMode::Alpha,
         );
+    }
+}
+
+fn collect_texture_request_paths(
+    dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+    overlay: &QuadBatch,
+) -> Vec<String> {
+    let mut paths = Vec::new();
+    let mut seen = HashSet::new();
+    for batch in dirty_strata.iter().flatten().chain(std::iter::once(overlay)) {
+        for request in batch
+            .texture_requests
+            .iter()
+            .chain(&batch.mask_texture_requests)
+        {
+            if seen.insert(request.path.clone()) {
+                paths.push(request.path.clone());
+            }
+        }
+    }
+    paths
+}
+
+#[cfg(test)]
+mod tests {
+    use super::collect_texture_request_paths;
+    use crate::render::QuadBatch;
+    use crate::render::shader::quad::TextureRequest;
+    use crate::widget::FrameStrata;
+    use std::sync::Arc;
+
+    fn request(path: &str) -> TextureRequest {
+        TextureRequest {
+            path: path.to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        }
+    }
+
+    #[test]
+    fn collect_texture_request_paths_deduplicates_across_batches() {
+        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] = std::array::from_fn(|_| None);
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(request("foo"));
+        batch.texture_requests.push(request("foo"));
+        batch.mask_texture_requests.push(request("bar"));
+        strata[0] = Some(Arc::new(batch));
+
+        let mut overlay = QuadBatch::new();
+        overlay.texture_requests.push(request("bar"));
+        overlay.texture_requests.push(request("baz"));
+
+        let paths = collect_texture_request_paths(&strata, &overlay);
+        assert_eq!(paths, vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]);
     }
 }

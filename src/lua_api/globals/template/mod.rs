@@ -203,6 +203,7 @@ fn apply_direct_rust_properties(
     direct::set_size(state, fid, template);
     direct::set_anchors(state, fid, template, frame_name);
     direct::set_all_points(state, fid, template);
+    direct::set_clips_children(state, fid, template);
     direct::set_hidden(state, fid, template);
     if template.protected == Some(true) {
         if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(fid) {

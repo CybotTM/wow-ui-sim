@@ -131,6 +131,8 @@ pub struct FrameXml {
     pub propagate_mouse_input: Option<String>,
     #[serde(rename = "@setAllPoints")]
     pub set_all_points: Option<bool>,
+    #[serde(rename = "@clipChildren")]
+    pub clip_children: Option<bool>,
     #[serde(rename = "@enableMouse")]
     pub enable_mouse: Option<bool>,
     #[serde(rename = "@clampedToScreen")]

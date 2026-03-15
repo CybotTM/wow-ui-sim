@@ -75,15 +75,15 @@ const SIZE_SUFFIXES: &[u32] = &[16, 20, 32, 48, 64];
 /// Get atlas info by name (case-insensitive).
 ///
 /// Resolution order:
-/// 1. Exact match, then `-2x` / strip `-2x` (from generated lookup)
+/// 1. Exact match
 /// 2. With `-NxN` size suffix (e.g. `coin-copper` → `coin-copper-20x20`)
 /// 3. With `_2x` / `-2x` / `_1x` / `-1x` suffixes (e.g. `bags-item-slot64` → `-2x`)
 pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
+    let lower = name.to_lowercase();
+
     if let Some(lookup) = crate::atlas_data::get_atlas_info(name) {
         return Some(lookup);
     }
-
-    let lower = name.to_lowercase();
 
     // Try with -NxN size suffixes
     for &size in SIZE_SUFFIXES {
@@ -125,4 +125,22 @@ fn try_spelling_corrections(lower: &str) -> Option<AtlasLookup> {
         return crate::atlas_data::get_atlas_info(&corrected);
     }
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::get_atlas_info;
+
+    #[test]
+    fn exact_unsuffixed_atlas_beats_2x_fallback() {
+        let lookup = get_atlas_info("glues-characterselect-card-singles")
+            .expect("character select singles atlas should exist");
+        assert!(!lookup.is_2x_fallback);
+        assert_eq!(
+            lookup.info.file,
+            r"Interface\glues\characterselect\uicharacterselectglues"
+        );
+        assert_eq!(lookup.width(), 310);
+        assert_eq!(lookup.height(), 89);
+    }
 }

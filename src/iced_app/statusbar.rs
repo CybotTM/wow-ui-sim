@@ -14,11 +14,11 @@ pub(super) struct StatusBarFill {
 ///
 /// Only scans the render list (visible frames), not the entire registry.
 pub(super) fn collect_statusbar_fills(
-    render_list: &[(u64, crate::LayoutRect, f32)],
+    render_list: &[(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)],
     registry: &crate::widget::WidgetRegistry,
 ) -> HashMap<u64, StatusBarFill> {
     let mut fills = HashMap::new();
-    for &(id, _, _) in render_list {
+    for &(id, _, _, _) in render_list {
         let Some(frame) = registry.get(id) else {
             continue;
         };

@@ -35,7 +35,7 @@ pub(super) fn emit_single_strata(
     let render_list = build_render_list(bucket, registry);
     let statusbar_fills = collect_statusbar_fills(&render_list, registry);
 
-    for &(id, rect, eff_alpha) in &render_list {
+    for &(id, rect, clip_rect, eff_alpha) in &render_list {
         let Some(f) = registry.get(id) else { continue };
         if super::button_vis::should_skip_frame(
             f,
@@ -63,6 +63,7 @@ pub(super) fn emit_single_strata(
             id,
             f,
             bounds,
+            clip_rect.map(layout_rect_to_screen_rect),
             bar_fill,
             pressed_frame,
             hovered_frame,
@@ -80,16 +81,20 @@ pub(super) fn emit_single_strata(
 pub(super) fn build_render_list(
     bucket: &[u64],
     registry: &crate::widget::WidgetRegistry,
-) -> Vec<(u64, crate::LayoutRect, f32)> {
+) -> Vec<(u64, crate::LayoutRect, Option<crate::LayoutRect>, f32)> {
     let mut list = Vec::new();
     for &id in bucket {
         let Some(f) = registry.get(id) else { continue };
         let Some(rect) = f.layout_rect else { continue };
+        let clip_rect = resolve_clip_rect(id, registry);
         let eff_alpha = resolve_eff_alpha(f, registry);
         if eff_alpha <= 0.0 {
             continue;
         }
-        list.push((id, rect, eff_alpha));
+        if clip_rect.is_some_and(|clip| intersect_rects(rect, clip).is_none()) {
+            continue;
+        }
+        list.push((id, rect, clip_rect, eff_alpha));
     }
     list
 }
@@ -107,6 +112,47 @@ fn resolve_eff_alpha(f: &crate::widget::Frame, registry: &crate::widget::WidgetR
             .unwrap_or(0.0);
     }
     0.0
+}
+
+fn resolve_clip_rect(
+    id: u64,
+    registry: &crate::widget::WidgetRegistry,
+) -> Option<crate::LayoutRect> {
+    let mut current_id = registry.get(id).and_then(|f| f.parent_id);
+    let mut clip_rect: Option<crate::LayoutRect> = None;
+    while let Some(parent_id) = current_id {
+        let Some(parent) = registry.get(parent_id) else { break };
+        if parent.clips_children
+            && let Some(parent_rect) = parent.layout_rect
+        {
+            clip_rect = Some(match clip_rect {
+                Some(existing) => intersect_rects(existing, parent_rect)?,
+                None => parent_rect,
+            });
+        }
+        current_id = parent.parent_id;
+    }
+    clip_rect
+}
+
+fn intersect_rects(a: crate::LayoutRect, b: crate::LayoutRect) -> Option<crate::LayoutRect> {
+    let left = a.x.max(b.x);
+    let top = a.y.max(b.y);
+    let right = (a.x + a.width).min(b.x + b.width);
+    let bottom = (a.y + a.height).min(b.y + b.height);
+    (right > left && bottom > top).then_some(crate::LayoutRect {
+        x: left,
+        y: top,
+        width: right - left,
+        height: bottom - top,
+    })
+}
+
+fn layout_rect_to_screen_rect(rect: crate::LayoutRect) -> Rectangle {
+    Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    )
 }
 
 /// Build a QuadBatch from a WidgetRegistry without needing an App instance.

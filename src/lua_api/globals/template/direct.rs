@@ -226,6 +226,15 @@ pub fn set_hidden(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &Frame
     state.borrow_mut().set_frame_visible(frame_id, false);
 }
 
+/// Set frame clips-children state directly from template.
+pub fn set_clips_children(state: &Rc<RefCell<SimState>>, frame_id: u64, template: &FrameXml) {
+    if let Some(clips_children) = template.clip_children
+        && let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        frame.clips_children = clips_children;
+    }
+}
+
 /// Set frame alpha directly.
 pub fn set_alpha(state: &Rc<RefCell<SimState>>, frame_id: u64, alpha: f32) {
     let clamped = alpha.clamp(0.0, 1.0);
@@ -518,6 +527,28 @@ pub fn apply_xml_enable_mouse(
     }
     if let Some(enabled) = em {
         enable_mouse(state, frame_id, enabled);
+    }
+}
+
+/// Resolve and apply clipChildren from template chain + instance XML.
+pub fn apply_xml_clips_children(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame: &FrameXml,
+    inherits: &str,
+) {
+    let mut clips_children = frame.clip_children;
+    if clips_children.is_none() && !inherits.is_empty() {
+        for entry in &crate::xml::get_template_chain(inherits) {
+            if let Some(c) = entry.frame.clip_children {
+                clips_children = Some(c);
+            }
+        }
+    }
+    if let Some(clips) = clips_children
+        && let Some(f) = state.borrow_mut().widgets.get_mut_visual(frame_id)
+    {
+        f.clips_children = clips;
     }
 }
 
