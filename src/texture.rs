@@ -77,16 +77,16 @@ impl TextureManager {
                     return self.cache.get(&normalized);
                 }
                 Err(e) => {
-                    eprintln!(
+                    crate::logging::eprintln_elapsed(&format!(
                         "[TexMgr] Load error: {} -> {}: {}",
                         wow_path,
                         file_path.display(),
                         e
-                    );
+                    ));
                 }
             }
         } else {
-            eprintln!("[TexMgr] Not found: {}", wow_path);
+            crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
             self.not_found.insert(normalized);
         }
 
@@ -149,12 +149,12 @@ impl TextureManager {
                 }
             }
         }
-        eprintln!(
+        crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} talent icon textures (tree {})",
             loaded,
             file_data_ids.len(),
             tree_id
-        );
+        ));
     }
 
     /// Pre-load talent panel UI textures for the active class.
@@ -180,12 +180,12 @@ impl TextureManager {
                 loaded += 1;
             }
         }
-        eprintln!(
+        crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} talent panel textures ({})",
             loaded,
             files.len(),
             class_key.as_deref().unwrap_or("shared")
-        );
+        ));
     }
 
     /// Pre-load common game HUD atlases that otherwise cause large first-use
@@ -230,11 +230,11 @@ impl TextureManager {
                 loaded += 1;
             }
         }
-        eprintln!(
+        crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} game HUD textures",
             loaded,
             FILES.len()
-        );
+        ));
     }
 
     /// Pre-load non-glue UI atlases that are heavily used when opening the
@@ -277,11 +277,11 @@ impl TextureManager {
                 loaded += 1;
             }
         }
-        eprintln!(
+        crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} PlayerSpells runtime textures",
             loaded,
             files.len()
-        );
+        ));
     }
 
     /// Pre-load spellbook / PlayerSpells icon textures from the static spell DB.
@@ -312,11 +312,11 @@ impl TextureManager {
                 }
             }
         }
-        eprintln!(
+        crate::logging::eprintln_elapsed(&format!(
             "[TexMgr] Preloaded {} / {} spellbook icons",
             loaded,
             file_data_ids.len()
-        );
+        ));
     }
 
     /// Number of entries in the texture cache.

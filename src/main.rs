@@ -3,6 +3,7 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use tracing_subscriber::EnvFilter;
+use wow_ui_sim::logging;
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
     load_addon_with_saved_vars,
@@ -165,7 +166,9 @@ fn apply_resource_limits() {
         }
         libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
     }
-    println!("Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)");
+    logging::println_elapsed(&format!(
+        "Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)"
+    ));
 }
 
 /// Scan addons directory and return sorted list of addon directories
@@ -207,6 +210,7 @@ fn scan_addons(
 
 /// Initialize the simulator environment: tracing, font system, sound, addon paths.
 fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
+    logging::init_process_start_time(env.state().borrow().start_time);
     apply_resource_limits();
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
@@ -414,7 +418,7 @@ fn load_third_party_addons(
 
     let addons_path = PathBuf::from("./Interface/AddOns");
     if skip_addons && !is_test_command(args) {
-        println!("\nAddon loading disabled");
+        logging::println_elapsed("Addon loading disabled");
         return;
     }
 

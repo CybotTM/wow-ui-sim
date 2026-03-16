@@ -118,7 +118,10 @@ fn cleanup_stale_sockets() {
                 // Check if process is still alive using kill(pid, 0)
                 let exists = unsafe { libc::kill(pid, 0) } == 0;
                 if !exists && std::fs::remove_file(&entry).is_ok() {
-                    eprintln!("[wow-sim] Cleaned up stale socket: {}", entry.display());
+                    crate::logging::eprintln_elapsed(&format!(
+                        "[wow-sim] Cleaned up stale socket: {}",
+                        entry.display()
+                    ));
                 }
             }
         }
@@ -151,11 +154,11 @@ fn register_signal_handlers() {
 fn run_server(cmd_tx: mpsc::Sender<LuaCommand>, path: PathBuf) {
     let listener = match UnixListener::bind(&path) {
         Ok(l) => {
-            eprintln!("[wow-sim] Listening on {}", path.display());
+            crate::logging::eprintln_elapsed(&format!("[wow-sim] Listening on {}", path.display()));
             l
         }
         Err(e) => {
-            eprintln!("[wow-sim] Failed to bind: {}", e);
+            crate::logging::eprintln_elapsed(&format!("[wow-sim] Failed to bind: {}", e));
             return;
         }
     };
@@ -173,11 +176,11 @@ fn run_server(cmd_tx: mpsc::Sender<LuaCommand>, path: PathBuf) {
         match stream {
             Ok(stream) => {
                 if let Err(e) = handle_connection(stream, &cmd_tx) {
-                    eprintln!("[wow-sim] Connection error: {}", e);
+                    crate::logging::eprintln_elapsed(&format!("[wow-sim] Connection error: {}", e));
                 }
             }
             Err(e) => {
-                eprintln!("[wow-sim] Accept error: {}", e);
+                crate::logging::eprintln_elapsed(&format!("[wow-sim] Accept error: {}", e));
             }
         }
     }

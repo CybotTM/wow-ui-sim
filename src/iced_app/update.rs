@@ -751,13 +751,13 @@ impl App {
         if (state.screen_width - size.width).abs() > 0.5
             || (state.screen_height - size.height).abs() > 0.5
         {
-            println!(
+            crate::logging::println_elapsed(&format!(
                 "Window size: {}x{} (was {}x{})",
                 size.width as i32,
                 size.height as i32,
                 state.screen_width as i32,
                 state.screen_height as i32
-            );
+            ));
             drop(state);
             env.set_screen_size(size.width, size.height);
         }

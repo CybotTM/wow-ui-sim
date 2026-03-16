@@ -29,7 +29,7 @@ pub fn process_pending_timers(env: &WowLuaEnv) {
 /// Sleep for the given number of milliseconds (if specified).
 pub fn apply_delay(delay: Option<u64>) {
     if let Some(ms) = delay {
-        eprintln!("[delay] sleeping {ms}ms");
+        crate::logging::eprintln_elapsed(&format!("[delay] sleeping {ms}ms"));
         std::thread::sleep(std::time::Duration::from_millis(ms));
     }
 }
