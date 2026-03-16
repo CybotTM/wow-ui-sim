@@ -68,6 +68,8 @@ pub use layout::{
 // GUI-only imports and re-exports
 #[cfg(feature = "gui")]
 use std::path::PathBuf;
+#[cfg(feature = "gui")]
+use std::sync::OnceLock;
 
 #[cfg(feature = "gui")]
 use iced::window::screenshot::Screenshot;
@@ -93,6 +95,12 @@ use app::{
     FALLBACK_TEXTURES_PATH, INIT_DEBUG, INIT_ENV, INIT_SAVED_VARS, INIT_TEXTURES,
     LOCAL_TEXTURES_PATH,
 };
+
+#[cfg(feature = "gui")]
+fn perf_logging_enabled() -> bool {
+    static ENABLED: OnceLock<bool> = OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var("WOW_SIM_VERBOSE").is_ok())
+}
 
 /// Application messages.
 #[cfg(feature = "gui")]

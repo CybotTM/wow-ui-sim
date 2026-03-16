@@ -205,7 +205,7 @@ struct EmitStats {
 }
 
 fn log_strata_timing(i: usize, n: usize, stats: &EmitStats, dur: std::time::Duration) {
-    if dur.as_millis() <= 5 {
+    if !super::perf_logging_enabled() || dur.as_millis() <= 5 {
         return;
     }
     let now = std::time::SystemTime::now()
