@@ -98,7 +98,13 @@ pub fn load_addon_internal(
     // Set loading_addon_index so frames created during this addon's load
     // are attributed to it. Panic if addon not registered — caller bug.
     let addon_idx = resolve_addon_index(env, folder_name);
-    env.state().borrow_mut().loading_addon_index = Some(addon_idx);
+    {
+        let mut state = env.state().borrow_mut();
+        state.loading_addon_index = Some(addon_idx);
+        if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
+            addon.use_secure_env = toc.is_secure_env();
+        }
+    }
 
     // Blizzard base UI code runs securely (no taint). Third-party addons
     // get tainted with their folder name so issecurevariable tracks the source.

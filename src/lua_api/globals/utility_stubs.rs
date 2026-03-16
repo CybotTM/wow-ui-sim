@@ -31,6 +31,7 @@ const UTILITY_STUBS_LUA: &str = r##"
             if not border then return 0, 0, 0, 0 end
             return border.top or 0, border.bottom or 0, border.left or 0, border.right or 0
         end,
+        DisableSharpening = function() end,
     }
 
     function CreateFramePool(frameType, parent, template)

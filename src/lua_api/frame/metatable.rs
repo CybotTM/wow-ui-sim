@@ -33,6 +33,10 @@ pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
         .load("return function(ud, key) return ud[key] end")
         .eval::<mlua::Function>()?;
     lua.set_named_registry_value("__frame_index_helper", index_helper)?;
+    lua.set_named_registry_value(
+        "__frame_bind_method_helper",
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )?;
 
     // Registry table for per-frame custom metatables (used by setmetatable(frame, mt)).
     let custom_mt_store = lua.create_table()?;
@@ -183,12 +187,8 @@ fn wrap_fn_with_frame(
     f: mlua::Function,
     frame_val: Value,
 ) -> mlua::Result<mlua::Function> {
-    lua.create_function(move |_, mut args: mlua::MultiValue| {
-        if !args.is_empty() {
-            args[0] = frame_val.clone();
-        }
-        f.call::<mlua::MultiValue>(args)
-    })
+    let bind_fn: mlua::Function = lua.named_registry_value("__frame_bind_method_helper")?;
+    bind_fn.call((f, frame_val))
 }
 
 /// __index for forbidden proxy: reads __lud from proxy, forwards to frame methods.

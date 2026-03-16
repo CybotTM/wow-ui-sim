@@ -87,3 +87,24 @@ fn test_forbidden_scrollbar_track_has_thumb() {
         "Forbidden MinimalScrollBar's Track.Thumb should be accessible"
     );
 }
+
+#[test]
+fn test_forbidden_proxy_method_lookup_does_not_exhaust_aux_stack() {
+    let env = env_with_shared_xml();
+    env.state().borrow_mut().loading_forbidden = true;
+    env.exec("CreateFrame('Frame', 'ForbiddenLoopFrame', UIParent)")
+        .unwrap();
+    env.state().borrow_mut().loading_forbidden = false;
+
+    env.exec(
+        r#"
+        local proxy = _G["ForbiddenLoopFrame"]
+        for i = 1, 9000 do
+            local fn = proxy.GetName
+            assert(type(fn) == "function")
+            assert(fn(proxy) == "ForbiddenLoopFrame")
+        end
+    "#,
+    )
+    .unwrap();
+}

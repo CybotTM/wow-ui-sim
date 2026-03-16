@@ -1,0 +1,336 @@
+mod common;
+
+use std::path::PathBuf;
+use std::collections::HashSet;
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
+use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::startup::fire_startup_events_for_screen;
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn blizzard_toc(addon: &str, toc: &str) -> PathBuf {
+    blizzard_ui_dir().join(addon).join(toc)
+}
+
+fn load_store_ui_tree() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+    wow_ui_sim::xml::register_intrinsic_templates();
+
+    for (name, toc_path) in [
+        (
+            "Blizzard_SharedXMLBase",
+            blizzard_toc("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
+        ),
+        (
+            "Blizzard_SharedXML",
+            blizzard_toc("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
+        ),
+        (
+            "Blizzard_FrameXMLBase",
+            blizzard_toc("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+        ),
+        (
+            "Blizzard_StoreUI",
+            blizzard_toc("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+        ),
+    ] {
+        load_addon(&env.loader_env(), &toc_path).unwrap_or_else(|err| {
+            panic!("[load {name}] FAILED: {err}");
+        });
+    }
+
+    env.apply_post_load_workarounds();
+    env
+}
+
+fn load_full_game_ui() -> WowLuaEnv {
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
+    {
+        let mut state = env.state().borrow_mut();
+        state.addon_base_paths = vec![blizzard_ui_dir()];
+    }
+    wow_ui_sim::xml::register_intrinsic_templates();
+
+    let ui = blizzard_ui_dir();
+    let addons = discover_blizzard_addons_for_screen(&ui, ScreenKind::Game);
+    for (name, toc_path) in &addons {
+        load_addon(&env.loader_env(), toc_path).unwrap_or_else(|err| {
+            panic!("[load {name}] FAILED: {err}");
+        });
+    }
+
+    env.apply_post_load_workarounds();
+    fire_startup_events_for_screen(&env, ScreenKind::Game);
+    env
+}
+
+fn assert_no_child_cycle(
+    widgets: &wow_ui_sim::widget::WidgetRegistry,
+    id: u64,
+    path: &mut Vec<u64>,
+    seen: &mut HashSet<u64>,
+) {
+    assert!(
+        !path.contains(&id),
+        "cycle detected in child graph: {:?} -> {}",
+        path,
+        id
+    );
+    if !seen.insert(id) {
+        return;
+    }
+
+    path.push(id);
+    let children = widgets.get(id).map(|f| f.children.clone()).unwrap_or_default();
+    for child_id in children {
+        assert_no_child_cycle(widgets, child_id, path, seen);
+    }
+    path.pop();
+}
+
+#[test]
+fn store_frame_tree_contains_expected_panels_and_controls() {
+    let env = load_store_ui_tree();
+    let state = env.state().borrow();
+
+    let store_id = state.widgets.get_id_by_name("StoreFrame").expect("StoreFrame should exist");
+    let ui_parent_id = state.widgets.get_id_by_name("UIParent").expect("UIParent should exist");
+    let store = state.widgets.get(store_id).expect("StoreFrame widget should exist");
+
+    assert_eq!(store.parent_id, Some(ui_parent_id), "StoreFrame should be parented to UIParent");
+    drop(state);
+
+    for name in ["StoreConfirmationFrame", "StoreVASValidationFrame", "StoreTooltip"] {
+        let state = env.state().borrow();
+        let id = state.widgets.get_id_by_name(name).unwrap_or_else(|| panic!("{name} should exist"));
+        let frame = state.widgets.get(id).unwrap_or_else(|| panic!("{name} widget missing"));
+        assert_eq!(frame.parent_id, Some(store_id), "{name} should be parented to StoreFrame");
+    }
+
+    let tree_exists: bool = env
+        .eval(
+            r#"
+            return StoreFrame ~= nil
+                and StoreFrame.LeftInset ~= nil
+                and StoreFrame.RightInset ~= nil
+                and StoreFrame.LeftDisplay ~= nil
+                and StoreFrame.RightDisplay ~= nil
+                and StoreFrame.Cover ~= nil
+                and StoreFrame.Notice ~= nil
+                and StoreFrame.Notice.Icon ~= nil
+                and StoreFrame.Notice.Line ~= nil
+                and StoreFrame.Notice.Title ~= nil
+                and StoreFrame.Notice.Description ~= nil
+                and StoreFrame.ErrorFrame ~= nil
+                and StoreFrame.ErrorFrame.Icon ~= nil
+                and StoreFrame.ErrorFrame.Line ~= nil
+                and StoreFrame.ErrorFrame.Title ~= nil
+                and StoreFrame.ErrorFrame.Description ~= nil
+                and StoreFrame.ErrorFrame.WebsiteWarning ~= nil
+                and StoreFrame.ErrorFrame.AcceptButton ~= nil
+                and StoreFrame.ErrorFrame.WebsiteButton ~= nil
+                and StoreFrame.BuyButton ~= nil
+                and StoreFrame.PrevPageButton ~= nil
+                and StoreFrame.NextPageButton ~= nil
+                and StoreFrame.CloseButton ~= nil
+                and StoreFrame.CategoryTreeScrollContainer ~= nil
+                and StoreFrame.CategoryTreeScrollContainer.ScrollBox ~= nil
+                and StoreFrame.CategoryTreeScrollContainer.ScrollBar ~= nil
+            "#,
+        )
+        .expect("store tree should be queryable from Lua");
+    assert!(tree_exists, "StoreFrame Lua subtree should expose the expected store controls");
+}
+
+#[test]
+fn store_frame_can_be_shown_after_minimal_store_load() {
+    let env = load_store_ui_tree();
+    let shown: bool = env
+        .eval(
+            r#"
+            StoreFrame:Show()
+            return StoreFrame:IsShown() == true
+            "#,
+        )
+        .expect("StoreFrame:Show() should return");
+    assert!(shown, "StoreFrame should show after minimal store-only load");
+}
+
+#[test]
+fn store_frame_action_attribute_shows_frame_after_minimal_store_load() {
+    let env = load_store_ui_tree();
+    let (has_handler, shown, isshown_attr, global_type, secure_type): (
+        bool,
+        bool,
+        bool,
+        String,
+        String,
+    ) = env
+        .eval(
+            r#"
+            StoreFrame:SetAttribute("action", "Show")
+            return StoreFrame:GetScript("OnAttributeChanged") ~= nil,
+                StoreFrame:IsShown() == true,
+                StoreFrame:GetAttribute("isshown") == true,
+                type(StoreFrame_OnAttributeChanged),
+                type(__secureenv and __secureenv.StoreFrame_OnAttributeChanged)
+            "#,
+        )
+        .expect("StoreFrame action attribute should be processed");
+    assert!(
+        has_handler,
+        "StoreFrame should have OnAttributeChanged in minimal load (global={global_type}, secure={secure_type})"
+    );
+    assert!(shown, "action=Show should show the store in minimal load");
+    assert!(isshown_attr, "OnShow should set isshown=true in minimal load");
+}
+
+#[test]
+fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui() {
+    let env = load_full_game_ui();
+    let (global_disable, secure_disable, same_table): (String, String, bool) = env
+        .eval(
+            r#"
+            return type(NineSliceUtil and NineSliceUtil.DisableSharpening),
+                type(__secureenv and __secureenv.NineSliceUtil and __secureenv.NineSliceUtil.DisableSharpening),
+                __secureenv and __secureenv.NineSliceUtil == NineSliceUtil
+            "#,
+        )
+        .expect("NineSliceUtil should be queryable");
+
+    assert_eq!(global_disable, "function", "global NineSliceUtil.DisableSharpening should exist");
+    assert_eq!(
+        secure_disable, "function",
+        "secureenv NineSliceUtil.DisableSharpening should track the live global"
+    );
+    assert!(same_table, "secureenv should reference the current NineSliceUtil table");
+}
+
+#[test]
+fn secure_env_preserves_secure_store_free_check_function() {
+    let env = load_full_game_ui();
+    let (global_type, secure_type, same_func): (String, String, bool) = env
+        .eval(
+            r#"
+            return type(StoreFrame_CheckForFree),
+                type(__secureenv and __secureenv.StoreFrame_CheckForFree),
+                __secureenv and __secureenv.StoreFrame_CheckForFree == StoreFrame_CheckForFree
+            "#,
+        )
+        .expect("StoreFrame_CheckForFree should be queryable");
+
+    assert_eq!(global_type, "function", "global inbound StoreFrame_CheckForFree should exist");
+    assert_eq!(
+        secure_type, "function",
+        "secure StoreFrame_CheckForFree should remain bound in secureenv"
+    );
+    assert!(
+        !same_func,
+        "secureenv StoreFrame_CheckForFree should not be overwritten by the inbound wrapper"
+    );
+}
+
+#[test]
+fn store_button_full_game_path_shows_store_frame() {
+    test_timeout! {
+        let env = load_full_game_ui();
+        let (ok, err, store_shown, isshown_attr, action): (
+            bool,
+            Option<String>,
+            bool,
+            bool,
+            Option<String>,
+        ) = env
+            .eval(
+                r#"
+                local ok, err = pcall(function()
+                    StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
+                end)
+                return ok, err, StoreFrame:IsShown() == true, StoreFrame:GetAttribute("isshown") == true, StoreFrame:GetAttribute("action")
+                "#,
+            )
+            .expect("store micro button click should return");
+
+        assert_eq!(action.as_deref(), Some("Show"));
+        assert!(store_shown, "StoreFrame should be shown after the store button click");
+        assert!(isshown_attr, "OnShow should set isshown=true after the store button click");
+        assert!(ok, "store button path should return cleanly now: err={err:?}");
+    }
+}
+
+#[test]
+fn store_button_full_game_path_fires_onshow() {
+    test_timeout! {
+        let env = load_full_game_ui();
+        let (store_shown, onshow_count, onhide_count, isshown_attr, action): (
+            bool,
+            i32,
+            i32,
+            bool,
+            Option<String>,
+        ) = env
+            .eval(
+                r#"
+                local onShowCount, onHideCount = 0, 0
+                StoreFrame:HookScript("OnShow", function() onShowCount = onShowCount + 1 end)
+                StoreFrame:HookScript("OnHide", function() onHideCount = onHideCount + 1 end)
+
+                StoreMicroButton:GetScript("OnClick")(StoreMicroButton, "LeftButton", false)
+
+                return StoreFrame:IsShown() == true,
+                    onShowCount,
+                    onHideCount,
+                    StoreFrame:GetAttribute("isshown") == true,
+                    StoreFrame:GetAttribute("action")
+                "#,
+            )
+            .expect("store micro button click should return");
+
+        assert_eq!(action.as_deref(), Some("Show"));
+        assert!(
+            onshow_count >= 1,
+            "OnShow should fire when the store button successfully shows the frame"
+        );
+        assert_eq!(onhide_count, 0, "OnHide should not have fired in the broken path");
+        assert!(isshown_attr, "isshown attribute should be true after showing the store");
+        assert!(store_shown, "store should be visible after the button click");
+    }
+}
+
+#[test]
+fn store_frame_set_shown_full_game_path_shows_frame() {
+    test_timeout! {
+        let env = load_full_game_ui();
+        let result: bool = env
+            .eval(
+                r#"
+                StoreFrame_SetShown(true, "StoreMicroButton")
+                return StoreFrame:GetAttribute("action") == "Show" and StoreFrame:IsShown() == true and StoreFrame:GetAttribute("isshown") == true
+                "#,
+            )
+            .expect("direct StoreFrame_SetShown should return cleanly");
+        assert!(result, "StoreFrame_SetShown should now show the frame in the full game path");
+    }
+}
+
+#[test]
+fn store_frame_subtree_has_no_cycles_in_full_game_ui() {
+    test_timeout! {
+        let env = load_full_game_ui();
+        let state = env.state().borrow();
+        let store_id = state.widgets.get_id_by_name("StoreFrame").expect("StoreFrame should exist");
+        let mut path = Vec::new();
+        let mut seen = HashSet::new();
+        assert_no_child_cycle(&state.widgets, store_id, &mut path, &mut seen);
+    }
+}

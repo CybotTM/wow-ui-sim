@@ -16,6 +16,15 @@ pub struct LoaderEnv<'a> {
 }
 
 impl<'a> LoaderEnv<'a> {
+    fn loading_addon_uses_secure_env(&self) -> bool {
+        let state = self.state.borrow();
+        state
+            .loading_addon_index
+            .and_then(|idx| state.addons.get(idx as usize))
+            .map(|addon| addon.use_secure_env)
+            .unwrap_or(false)
+    }
+
     /// Create from a Lua reference and shared state (for runtime loading).
     pub fn new(lua: &'a Lua, state: Rc<RefCell<SimState>>) -> Self {
         Self { lua, state }
@@ -23,7 +32,12 @@ impl<'a> LoaderEnv<'a> {
 
     /// Execute Lua code.
     pub fn exec(&self, code: &str) -> Result<()> {
-        self.lua.load(code).exec()?;
+        let chunk = self.lua.load(code);
+        let func: mlua::Function = chunk.into_function()?;
+        if self.loading_addon_uses_secure_env() {
+            super::secure_env::apply_secure_env(self.lua, &func)?;
+        }
+        func.call::<()>(())?;
         Ok(())
     }
 

@@ -104,6 +104,8 @@ pub struct AddonInfo {
     pub loaded: bool,
     /// Load on demand flag.
     pub load_on_demand: bool,
+    /// Whether the addon loads Lua/XML chunks in the secure environment.
+    pub use_secure_env: bool,
     /// Total load time in seconds (for profiler metrics).
     pub load_time_secs: f64,
     /// Runtime profiler metrics (updated per frame).

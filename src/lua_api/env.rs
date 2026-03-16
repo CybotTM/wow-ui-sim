@@ -699,7 +699,7 @@ fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
             continue;
         };
         let toc = TocFile::from_file(&toc_path).ok();
-        let (title, notes, load_on_demand) = toc
+        let (title, notes, load_on_demand, use_secure_env) = toc
             .as_ref()
             .map(|t| {
                 let title = t
@@ -713,9 +713,10 @@ fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
                     .get("LoadOnDemand")
                     .map(|v| v == "1")
                     .unwrap_or(false);
-                (title, notes, lod)
+                let secure = t.is_secure_env();
+                (title, notes, lod, secure)
             })
-            .unwrap_or_else(|| (name.clone(), String::new(), false));
+            .unwrap_or_else(|| (name.clone(), String::new(), false, false));
         addons.push(AddonInfo {
             folder_name: name,
             title,
@@ -723,6 +724,7 @@ fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
             enabled: true,
             loaded: false,
             load_on_demand,
+            use_secure_env,
             load_time_secs: 0.0,
             ..Default::default()
         });

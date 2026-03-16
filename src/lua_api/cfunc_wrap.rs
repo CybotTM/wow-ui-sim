@@ -22,8 +22,36 @@ unsafe extern "C-unwind" fn wrap_one(s: *mut mlua::ffi::lua_State) -> c_int {
     1
 }
 
+/// Raw C closure: forwards all args to upvalue 1, replacing arg 1 with upvalue 2.
+unsafe extern "C-unwind" fn forward_bound_call(s: *mut mlua::ffi::lua_State) -> c_int {
+    use mlua::ffi::*;
+    let n = unsafe { lua_gettop(s) };
+    unsafe { lua_pushvalue(s, lua_upvalueindex(1)) };
+    unsafe { lua_insert(s, 1) };
+    if n > 0 {
+        unsafe { lua_pushvalue(s, lua_upvalueindex(2)) };
+        unsafe { lua_replace(s, 2) };
+    }
+    unsafe { lua_call(s, n, LUA_MULTRET) };
+    unsafe { lua_gettop(s) }
+}
+
+/// Raw C function: takes a function and bound self arg, returns a new C closure.
+unsafe extern "C-unwind" fn bind_one(s: *mut mlua::ffi::lua_State) -> c_int {
+    unsafe { mlua::ffi::lua_pushvalue(s, 1) };
+    unsafe { mlua::ffi::lua_pushvalue(s, 2) };
+    unsafe { mlua::ffi::lua_pushcclosure(s, forward_bound_call, 2) };
+    1
+}
+
 /// Create a factory function that wraps any function into a unique C closure.
 /// Uses 1 auxiliary slot for the factory itself; each call uses 0 permanent slots.
 pub fn create_wrap_factory(lua: &mlua::Lua) -> mlua::Result<mlua::Function> {
     unsafe { lua.create_c_function(wrap_one) }
+}
+
+/// Create a factory function that binds the first method argument to `frame_val`.
+/// Uses raw C closures so each bound method does not consume auxiliary stack slots.
+pub fn create_bind_factory(lua: &mlua::Lua) -> mlua::Result<mlua::Function> {
+    unsafe { lua.create_c_function(bind_one) }
 }

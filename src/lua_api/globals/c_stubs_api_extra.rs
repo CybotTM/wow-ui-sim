@@ -727,6 +727,20 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
             HasPurchaseList = function() return true end,
             HasProductList = function() return true end,
             HasDistributionList = function() return true end,
+            GetProductGroups = function() return {} end,
+            GetProducts = function() return {} end,
+            GetProductGroupInfo = function(groupID)
+                return {
+                    groupID = groupID,
+                    parentGroupID = nil,
+                    name = "",
+                    description = "",
+                    displayedOrder = 0,
+                }
+            end,
+            GetPurchaseList = function() return {} end,
+            GetProductList = function() return {} end,
+            GetFailureInfo = function() return nil, nil end,
         }, { __index = function() return function() end end })
     "#,
     )
