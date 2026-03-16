@@ -67,7 +67,17 @@ fn register_c_store_public(lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "EventStoreUISetShown",
-        lua.create_function(|_, _shown: bool| Ok(()))?,
+        lua.create_function(|_, (_shown, _context): (bool, Option<String>)| Ok(()))?,
+    )?;
+    t.set(
+        "DoesGroupHavePurchaseableProducts",
+        lua.create_function(|lua, group_id: i32| {
+            let globals = lua.globals();
+            let store_secure: mlua::Table = globals.get("C_StoreSecure")?;
+            let get_products: mlua::Function = store_secure.get("GetProducts")?;
+            let products: mlua::Table = get_products.call(group_id)?;
+            Ok(products.raw_len() > 0)
+        })?,
     )?;
     lua.globals().set("C_StorePublic", t)?;
     Ok(())

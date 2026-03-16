@@ -196,6 +196,32 @@ fn store_frame_action_attribute_shows_frame_after_minimal_store_load() {
 }
 
 #[test]
+fn store_catalog_exposes_fake_products_after_product_refresh() {
+    let env = load_store_ui_tree();
+    let (group_count, selected_category, product_count, first_name): (i32, i32, i32, String) = env
+        .eval(
+            r#"
+            StoreFrame:Show()
+            C_StoreSecure.GetProductList()
+            local selectedCategoryGetter = StoreFrame_GetSelectedCategoryID or (__secureenv and __secureenv.StoreFrame_GetSelectedCategoryID)
+            local selectedCategory = selectedCategoryGetter and selectedCategoryGetter()
+            local products = C_StoreSecure.GetProducts(selectedCategory)
+            local firstEntry = products and products[1] and C_StoreSecure.GetEntryInfo(products[1])
+            return #C_StoreSecure.GetProductGroups(),
+                selectedCategory or 0,
+                products and #products or 0,
+                firstEntry and firstEntry.sharedData and firstEntry.sharedData.name or ""
+            "#,
+        )
+        .expect("store catalog should be queryable after product refresh");
+
+    assert!(group_count > 0, "fake store catalog should expose at least one category");
+    assert!(selected_category > 0, "product refresh should select a default category");
+    assert!(product_count > 0, "selected category should expose at least one product");
+    assert_eq!(first_name, "Apprentice Rider Bundle");
+}
+
+#[test]
 fn secure_env_tracks_latest_ninesliceutil_in_full_game_ui() {
     let env = load_full_game_ui();
     let (global_disable, secure_disable, same_table): (String, String, bool) = env

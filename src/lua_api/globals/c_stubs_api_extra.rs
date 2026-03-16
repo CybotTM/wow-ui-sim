@@ -717,9 +717,136 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
     )
     .exec()?;
 
-    // C_StoreSecure - uses noop metatable for ~40 methods
+    // C_StoreSecure - fake catalog with enough data for the Blizzard store UI to render.
     lua.load(
         r#"
+        local STORE_GROUPS = {
+            {
+                groupID = WOW_GAMES_CATEGORY_ID or 33,
+                parentGroupID = 0,
+                name = "Featured",
+                groupName = "Featured",
+                description = "Simulator featured products",
+                displayedOrder = 1,
+                texture = "Interface\\Icons\\INV_Box_02",
+                flags = Enum.BattlepayProductGroupFlags.EnabledForTrial + Enum.BattlepayProductGroupFlags.EnabledForVeteran,
+                disabledTooltip = "",
+            },
+            {
+                groupID = WOW_SERVICES_CATEGORY_ID or 22,
+                parentGroupID = 0,
+                name = "Services",
+                groupName = "Services",
+                description = "Simulator account services",
+                displayedOrder = 2,
+                texture = "Interface\\Icons\\INV_Misc_Note_02",
+                flags = Enum.BattlepayProductGroupFlags.EnabledForTrial + Enum.BattlepayProductGroupFlags.EnabledForVeteran,
+                disabledTooltip = "",
+            },
+        }
+
+        local STORE_ENTRIES = {
+            [1001] = {
+                entryID = 1001,
+                productID = 2001,
+                browseBuyButtonText = "Buy Now",
+                sharedData = {
+                    name = "Apprentice Rider Bundle",
+                    description = "A starter bundle for simulator storefront testing.",
+                    tooltip = "Includes a mock mount token and a tabard for store card rendering.",
+                    currentDollars = 14,
+                    currentCents = 99,
+                    normalDollars = 19,
+                    normalCents = 99,
+                    cardType = Enum.BattlepayCardType.MediumCard,
+                    flags = 0,
+                    buyableHere = true,
+                    eligibility = Enum.PurchaseEligibility.Ok,
+                    productDecorator = nil,
+                    texture = "Interface\\Icons\\Ability_Mount_RidingHorse",
+                    overrideTexture = nil,
+                    overrideBackground = nil,
+                    cards = {},
+                    deliverables = {},
+                    itemQuantity = 1,
+                },
+            },
+            [1002] = {
+                entryID = 1002,
+                productID = 2002,
+                browseBuyButtonText = "Buy Now",
+                sharedData = {
+                    name = "Griffon Skycharger",
+                    description = "A mock flying mount for the fake simulator store catalog.",
+                    tooltip = "Built to exercise icon rendering and price display in the store UI.",
+                    currentDollars = 24,
+                    currentCents = 99,
+                    normalDollars = 24,
+                    normalCents = 99,
+                    cardType = Enum.BattlepayCardType.MediumCardWithBuyButton,
+                    flags = Enum.BattlepayDisplayFlags.UseSquareIconBorder,
+                    buyableHere = true,
+                    eligibility = Enum.PurchaseEligibility.Ok,
+                    productDecorator = nil,
+                    texture = "Interface\\Icons\\Ability_Mount_Gryphon_01",
+                    overrideTexture = nil,
+                    overrideBackground = nil,
+                    cards = {},
+                    deliverables = {},
+                    itemQuantity = 1,
+                },
+            },
+            [1003] = {
+                entryID = 1003,
+                productID = 2003,
+                browseBuyButtonText = "Purchase",
+                sharedData = {
+                    name = "Name Change Service",
+                    description = "A mock account service entry for the simulator.",
+                    tooltip = "Useful for validating multiple top-level groups in the fake store catalog.",
+                    currentDollars = 10,
+                    currentCents = 0,
+                    normalDollars = 10,
+                    normalCents = 0,
+                    cardType = Enum.BattlepayCardType.MediumCard,
+                    flags = 0,
+                    buyableHere = true,
+                    eligibility = Enum.PurchaseEligibility.Ok,
+                    productDecorator = nil,
+                    texture = "Interface\\Icons\\INV_Misc_Note_02",
+                    overrideTexture = nil,
+                    overrideBackground = nil,
+                    cards = {},
+                    deliverables = {},
+                    itemQuantity = 0,
+                },
+            },
+        }
+
+        local STORE_PRODUCTS_BY_GROUP = {
+            [(WOW_GAMES_CATEGORY_ID or 33)] = { 1001, 1002 },
+            [(WOW_SERVICES_CATEGORY_ID or 22)] = { 1003 },
+        }
+
+        local STORE_PRODUCT_INFO = {
+            [2001] = { productID = 2001, sharedData = STORE_ENTRIES[1001].sharedData },
+            [2002] = { productID = 2002, sharedData = STORE_ENTRIES[1002].sharedData },
+            [2003] = { productID = 2003, sharedData = STORE_ENTRIES[1003].sharedData },
+        }
+
+        local STORE_CURRENCY_INFO = {
+            sharedData = {
+                regionID = 1,
+                formatShort = "$%s",
+                formatLong = "$%s",
+                licenseAcceptText = "",
+                requireLicenseAccept = false,
+                browseHasStar = false,
+                hideBrowseNotice = false,
+                hideConfirmationBrowseNotice = false,
+            },
+        }
+
         C_StoreSecure = setmetatable({
             IsStoreAvailable = function() return true end,
             IsAvailable = function() return true end,
@@ -727,20 +854,32 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
             HasPurchaseList = function() return true end,
             HasProductList = function() return true end,
             HasDistributionList = function() return true end,
-            GetProductGroups = function() return {} end,
-            GetProducts = function() return {} end,
+            GetCurrencyInfo = function() return STORE_CURRENCY_INFO end,
+            GetCurrencyID = function() return 1 end,
+            GetProductGroups = function() return STORE_GROUPS end,
+            GetProducts = function(groupID) return STORE_PRODUCTS_BY_GROUP[groupID] or {} end,
             GetProductGroupInfo = function(groupID)
-                return {
-                    groupID = groupID,
-                    parentGroupID = nil,
-                    name = "",
-                    description = "",
-                    displayedOrder = 0,
-                }
+                for _, groupInfo in ipairs(STORE_GROUPS) do
+                    if groupInfo.groupID == groupID then
+                        return groupInfo
+                    end
+                end
+                return nil
             end,
+            GetEntryInfo = function(entryID) return STORE_ENTRIES[entryID] end,
+            GetProductInfo = function(productID) return STORE_PRODUCT_INFO[productID] end,
             GetPurchaseList = function() return {} end,
-            GetProductList = function() return {} end,
+            GetProductList = function()
+                FireEvent("STORE_PRODUCTS_UPDATED")
+                FireEvent("PRODUCT_DISTRIBUTIONS_UPDATED")
+                return STORE_PRODUCTS_BY_GROUP
+            end,
             GetFailureInfo = function() return nil, nil end,
+            IsDynamicBundle = function() return false end,
+            HasDynamicPriceData = function() return true end,
+            RequestAllDynamicPriceInfo = function() end,
+            PurchaseProduct = function() return true end,
+            PurchaseProductConfirm = function() return true end,
         }, { __index = function() return function() end end })
     "#,
     )
