@@ -77,7 +77,11 @@ fn decode_crop_request<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::decode_crop_request;
+    use super::{decode_crop_request, resolve_and_scale_quads, WowUiPipeline};
+    use crate::render::shader::QuadBatch;
+    use crate::render::BlendMode;
+    use iced::{Point, Rectangle, Size};
+    use iced::widget::shader::Pipeline;
 
     #[test]
     fn decode_crop_request_rejects_malformed_coords() {
@@ -106,6 +110,35 @@ mod tests {
         assert_eq!(decoded.2, 20);
         assert_eq!(decoded.3, 100);
         assert_eq!(decoded.4, 50);
+    }
+
+    #[test]
+    fn unresolved_pending_textures_become_transparent() {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let (device, queue) = pollster::block_on(async {
+            let adapter = instance
+                .request_adapter(&wgpu::RequestAdapterOptions::default())
+                .await
+                .expect("adapter");
+            adapter
+                .request_device(&wgpu::DeviceDescriptor::default())
+                .await
+                .expect("device")
+        });
+
+        let mut pipeline =
+            WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+        let mut batch = QuadBatch::default();
+        batch.push_textured_path(
+            Rectangle::new(Point::ORIGIN, Size::new(16.0, 16.0)),
+            r"Interface\Missing\Pending",
+            [1.0, 1.0, 1.0, 1.0],
+            BlendMode::Alpha,
+        );
+
+        let resolved = resolve_and_scale_quads(&mut pipeline, &batch, 1.0);
+        assert!(resolved.vertices.iter().all(|v| v.tex_index == -1));
+        assert!(resolved.vertices.iter().all(|v| v.color[3] == 0.0));
     }
 }
 
@@ -261,6 +294,18 @@ fn resolve_and_scale_quads(
                         entry.uv_y + vertex.mask_tex_coords[1] * entry.uv_height;
                 }
             }
+        }
+    }
+
+    // Pending textured quads should be transparent until their texture is uploaded.
+    // Rendering them as plain vertex color produces bright white placeholders.
+    for vertex in resolved.vertices.iter_mut() {
+        if vertex.tex_index == -2 {
+            vertex.color[3] = 0.0;
+            vertex.tex_index = -1;
+        }
+        if vertex.mask_tex_index == -2 {
+            vertex.mask_tex_index = -1;
         }
     }
 
