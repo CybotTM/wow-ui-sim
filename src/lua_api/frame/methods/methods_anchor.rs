@@ -32,6 +32,12 @@ fn get_number(v: &Value) -> Option<f32> {
 fn get_frame_id(lua: &mlua::Lua, v: &Value) -> Option<usize> {
     match v {
         ref v @ Value::UserData(_) => extract_frame_id(v).map(|id| id as usize),
+        Value::Table(t) => {
+            if let Ok(inner) = t.raw_get::<Value>("__lud") {
+                return extract_frame_id(&inner).map(|id| id as usize);
+            }
+            None
+        }
         Value::String(s) => {
             let name = s.to_string_lossy();
             if let Ok(val) = lua.globals().get::<Value>(name.as_str()) {

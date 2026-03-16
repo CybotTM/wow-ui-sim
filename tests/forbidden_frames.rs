@@ -108,3 +108,35 @@ fn test_forbidden_proxy_method_lookup_does_not_exhaust_aux_stack() {
     )
     .unwrap();
 }
+
+#[test]
+fn test_set_point_accepts_forbidden_proxy_relative_to() {
+    let env = env_with_shared_xml();
+    env.state().borrow_mut().loading_forbidden = true;
+
+    let result: String = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "ForbiddenAnchorParent", UIParent)
+        parent:SetSize(80, 35)
+        parent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -10)
+
+        local child = parent:CreateTexture("ForbiddenAnchorChild", "BACKGROUND")
+        child:SetSize(20, 35)
+        child:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        child:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 0, 0)
+
+        local _, _, parentW, parentH = parent:GetRect()
+        local _, _, childW, childH = child:GetRect()
+        return string.format("%.0f,%.0f,%.0f,%.0f", parentW or 0, parentH or 0, childW or 0, childH or 0)
+    "#,
+        )
+        .unwrap();
+
+    env.state().borrow_mut().loading_forbidden = false;
+
+    assert_eq!(
+        result, "80,35,20,35",
+        "SetPoint should unwrap forbidden proxy relativeTo instead of anchoring to the screen"
+    );
+}
