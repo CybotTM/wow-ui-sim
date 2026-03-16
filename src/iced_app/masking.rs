@@ -48,9 +48,18 @@ pub fn apply_mask_texture(
         return;
     }
     let (tl, tr, tt, tb) = mask_frame.tex_coords.unwrap_or((0.0, 1.0, 0.0, 1.0));
-    let mask_uvs = compute_mask_uvs_from_rects(mask_screen, icon_bounds, tl, tr, tt, tb);
     for i in (vert_before..batch.vertices.len()).step_by(4) {
         let end = (i + 4).min(batch.vertices.len());
+        if end - i < 4 {
+            continue;
+        }
+        let quad_bounds = quad_rect(&batch.vertices[i..end]);
+        let Some(clipped) = rect_intersection(quad_bounds, mask_screen) else {
+            hide_quad(&mut batch.vertices[i..end]);
+            continue;
+        };
+        clip_quad_to_rect(&mut batch.vertices[i..end], quad_bounds, clipped);
+        let mask_uvs = compute_mask_uvs_from_rects(mask_screen, clipped, tl, tr, tt, tb);
         for (j, v) in batch.vertices[i..end].iter_mut().enumerate() {
             v.mask_tex_index = -2;
             v.mask_tex_coords = mask_uvs[j];
@@ -72,6 +81,92 @@ fn mask_to_screen_rect(r: crate::LayoutRect) -> Rectangle {
 
 fn rects_overlap(a: Rectangle, b: Rectangle) -> bool {
     a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y
+}
+
+fn rect_intersection(a: Rectangle, b: Rectangle) -> Option<Rectangle> {
+    let left = a.x.max(b.x);
+    let top = a.y.max(b.y);
+    let right = (a.x + a.width).min(b.x + b.width);
+    let bottom = (a.y + a.height).min(b.y + b.height);
+    (right > left && bottom > top).then(|| {
+        Rectangle::new(
+            iced::Point::new(left, top),
+            iced::Size::new(right - left, bottom - top),
+        )
+    })
+}
+
+fn quad_rect(vertices: &[crate::render::shader::QuadVertex]) -> Rectangle {
+    debug_assert!(vertices.len() >= 4);
+    let left = vertices[0].position[0];
+    let top = vertices[0].position[1];
+    let right = vertices[2].position[0];
+    let bottom = vertices[2].position[1];
+    Rectangle::new(
+        iced::Point::new(left, top),
+        iced::Size::new(right - left, bottom - top),
+    )
+}
+
+fn hide_quad(vertices: &mut [crate::render::shader::QuadVertex]) {
+    let x = vertices[0].position[0];
+    let y = vertices[0].position[1];
+    for vertex in vertices.iter_mut() {
+        vertex.position = [x, y];
+        vertex.color[3] = 0.0;
+        vertex.mask_tex_index = -1;
+        vertex.mask_tex_coords = [0.0, 0.0];
+    }
+}
+
+fn clip_quad_to_rect(
+    vertices: &mut [crate::render::shader::QuadVertex],
+    original: Rectangle,
+    clipped: Rectangle,
+) {
+    let x0 = fraction_within(original.x, original.width, clipped.x);
+    let x1 = fraction_within(original.x, original.width, clipped.x + clipped.width);
+    let y0 = fraction_within(original.y, original.height, clipped.y);
+    let y1 = fraction_within(original.y, original.height, clipped.y + clipped.height);
+
+    let orig = [vertices[0], vertices[1], vertices[2], vertices[3]];
+    let positions = [
+        [clipped.x, clipped.y],
+        [clipped.x + clipped.width, clipped.y],
+        [clipped.x + clipped.width, clipped.y + clipped.height],
+        [clipped.x, clipped.y + clipped.height],
+    ];
+    let x_fracs = [x0, x1, x1, x0];
+    let y_fracs = [y0, y0, y1, y1];
+
+    for (idx, vertex) in vertices.iter_mut().enumerate().take(4) {
+        vertex.position = positions[idx];
+        vertex.tex_coords = remap_uv(&orig, x_fracs[idx], y_fracs[idx], |v| v.tex_coords);
+        vertex.local_uv = remap_uv(&orig, x_fracs[idx], y_fracs[idx], |v| v.local_uv);
+    }
+}
+
+fn fraction_within(start: f32, span: f32, value: f32) -> f32 {
+    if span.abs() <= f32::EPSILON {
+        0.0
+    } else {
+        ((value - start) / span).clamp(0.0, 1.0)
+    }
+}
+
+fn remap_uv(
+    original: &[crate::render::shader::QuadVertex; 4],
+    x_frac: f32,
+    y_frac: f32,
+    getter: impl Fn(&crate::render::shader::QuadVertex) -> [f32; 2],
+) -> [f32; 2] {
+    let tl = getter(&original[0]);
+    let tr = getter(&original[1]);
+    let bl = getter(&original[3]);
+    [
+        tl[0] + (tr[0] - tl[0]) * x_frac,
+        tl[1] + (bl[1] - tl[1]) * y_frac,
+    ]
 }
 
 /// Compute mask UVs from pre-computed screen-space rectangles.
@@ -104,4 +199,64 @@ fn compute_mask_uvs_from_rects(
     let ut = (tt + v0 * (tb - tt)).clamp(tt, tb);
     let ub = (tt + v1 * (tb - tt)).clamp(tt, tb);
     [[ul, ut], [ur, ut], [ur, ub], [ul, ub]]
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::render::shader::QuadVertex;
+
+    fn quad(bounds: Rectangle) -> [QuadVertex; 4] {
+        let positions = [
+            [bounds.x, bounds.y],
+            [bounds.x + bounds.width, bounds.y],
+            [bounds.x + bounds.width, bounds.y + bounds.height],
+            [bounds.x, bounds.y + bounds.height],
+        ];
+        let tex = [[0.0, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
+        positions.map(|position| QuadVertex {
+            position,
+            tex_coords: tex[0],
+            color: [1.0; 4],
+            tex_index: -2,
+            flags: 0,
+            local_uv: tex[0],
+            mask_tex_index: -1,
+            mask_tex_coords: [0.0, 0.0],
+        })
+    }
+
+    #[test]
+    fn clip_quad_to_mask_intersection_remaps_positions_and_uvs() {
+        let original = Rectangle::new(iced::Point::new(0.0, 0.0), iced::Size::new(100.0, 20.0));
+        let clipped = Rectangle::new(iced::Point::new(25.0, 0.0), iced::Size::new(50.0, 20.0));
+        let mut vertices = quad(original);
+        vertices[0].tex_coords = [0.0, 0.0];
+        vertices[1].tex_coords = [1.0, 0.0];
+        vertices[2].tex_coords = [1.0, 1.0];
+        vertices[3].tex_coords = [0.0, 1.0];
+        vertices[0].local_uv = [0.0, 0.0];
+        vertices[1].local_uv = [1.0, 0.0];
+        vertices[2].local_uv = [1.0, 1.0];
+        vertices[3].local_uv = [0.0, 1.0];
+
+        clip_quad_to_rect(&mut vertices, original, clipped);
+
+        assert_eq!(vertices[0].position, [25.0, 0.0]);
+        assert_eq!(vertices[1].position, [75.0, 0.0]);
+        assert_eq!(vertices[2].position, [75.0, 20.0]);
+        assert_eq!(vertices[3].position, [25.0, 20.0]);
+        assert_eq!(vertices[0].tex_coords, [0.25, 0.0]);
+        assert_eq!(vertices[1].tex_coords, [0.75, 0.0]);
+        assert_eq!(vertices[2].tex_coords, [0.75, 1.0]);
+        assert_eq!(vertices[3].tex_coords, [0.25, 1.0]);
+    }
+
+    #[test]
+    fn compute_mask_uvs_for_partial_overlap_tracks_clipped_rect() {
+        let mask = Rectangle::new(iced::Point::new(50.0, 50.0), iced::Size::new(20.0, 20.0));
+        let clipped = Rectangle::new(iced::Point::new(55.0, 50.0), iced::Size::new(10.0, 20.0));
+        let uvs = compute_mask_uvs_from_rects(mask, clipped, 0.0, 1.0, 0.0, 1.0);
+        assert_eq!(uvs, [[0.25, 0.0], [0.75, 0.0], [0.75, 1.0], [0.25, 1.0]]);
+    }
 }
