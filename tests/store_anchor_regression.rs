@@ -31,7 +31,10 @@ fn load_store_ui_tree() -> WowLuaEnv {
         ),
         (
             "Blizzard_FrameXMLBase",
-            blizzard_toc("Blizzard_FrameXMLBase", "Blizzard_FrameXMLBase_Mainline.toc"),
+            blizzard_toc(
+                "Blizzard_FrameXMLBase",
+                "Blizzard_FrameXMLBase_Mainline.toc",
+            ),
         ),
         (
             "Blizzard_StoreUI",

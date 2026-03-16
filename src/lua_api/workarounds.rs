@@ -1,9 +1,9 @@
 //! Post-load Lua workarounds for Blizzard code that depends on
 //! unimplemented engine features (AnimationGroups, EditMode, etc.).
 
-use super::{SimState, WowLuaEnv};
 use super::workarounds_bags;
 use super::workarounds_editmode;
+use super::{SimState, WowLuaEnv};
 use std::cell::RefCell;
 use std::rc::Rc;
 

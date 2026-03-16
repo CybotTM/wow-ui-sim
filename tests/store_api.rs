@@ -19,10 +19,22 @@ fn store_apis_report_enabled_and_available() {
         )
         .expect("store API flags should be queryable");
 
-    assert!(store_public_enabled, "C_StorePublic.IsEnabled() should be true");
-    assert!(store_secure_available, "C_StoreSecure.IsAvailable() should be true");
-    assert!(has_purchase_list, "C_StoreSecure.HasPurchaseList() should be true");
-    assert!(has_product_list, "C_StoreSecure.HasProductList() should be true");
+    assert!(
+        store_public_enabled,
+        "C_StorePublic.IsEnabled() should be true"
+    );
+    assert!(
+        store_secure_available,
+        "C_StoreSecure.IsAvailable() should be true"
+    );
+    assert!(
+        has_purchase_list,
+        "C_StoreSecure.HasPurchaseList() should be true"
+    );
+    assert!(
+        has_product_list,
+        "C_StoreSecure.HasProductList() should be true"
+    );
     assert!(
         has_distribution_list,
         "C_StoreSecure.HasDistributionList() should be true"

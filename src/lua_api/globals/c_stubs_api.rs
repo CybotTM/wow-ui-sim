@@ -837,7 +837,9 @@ fn glue_character(index: i32) -> Option<&'static GlueCharacterDef> {
 }
 
 fn glue_character_by_guid(guid: &str) -> Option<&'static GlueCharacterDef> {
-    GLUE_CHARACTERS.iter().find(|character| character.guid == guid)
+    GLUE_CHARACTERS
+        .iter()
+        .find(|character| character.guid == guid)
 }
 
 fn glue_character_count(lua: &Lua) -> i32 {
