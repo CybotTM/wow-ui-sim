@@ -73,6 +73,10 @@ pub fn sync_child_to_lua(lua: &Lua, parent_id: u64, key: &str, child_id: u64) ->
 pub fn extract_frame_id(value: &Value) -> Option<u64> {
     match value {
         Value::UserData(ud) => ud.borrow::<FrameRef>().ok().map(|r| r.0),
+        Value::Table(t) => t
+            .raw_get::<Value>("__lud")
+            .ok()
+            .and_then(|inner| extract_frame_id(&inner)),
         _ => None,
     }
 }
