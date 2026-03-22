@@ -227,6 +227,14 @@ impl TocFile {
             .unwrap_or(false)
     }
 
+    /// Check if addon requests early loading via `## LoadFirst: 1`.
+    pub fn is_load_first(&self) -> bool {
+        self.metadata
+            .get("LoadFirst")
+            .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
+            .unwrap_or(false)
+    }
+
     /// Check if addon is glue-only (login/character-select screen).
     /// These addons have `AllowLoad: Glue` and should not load in game mode.
     pub fn is_glue_only(&self) -> bool {
@@ -440,6 +448,18 @@ Core.lua
             toc.optional_deps(),
             vec!["Ace3", "LibDBIcon-1.0", "LibSharedMedia-3.0"]
         );
+    }
+
+    #[test]
+    fn test_load_first_metadata() {
+        let contents = r#"
+## Title: TestAddon
+## LoadFirst: 1
+Core.lua
+"#;
+        let toc = TocFile::parse(Path::new("/addons/TestAddon"), contents);
+
+        assert!(toc.is_load_first());
     }
 
     #[test]
