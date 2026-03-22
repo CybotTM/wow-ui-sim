@@ -163,6 +163,7 @@ fn apply_set_button_texture(
     if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
         tex.anchors.clear();
         super::methods_helpers::set_all_points_anchors_pub(tex, button_id);
+        tex.parent_key = Some(parent_key.to_string());
     }
     if let Some(btn) = state.widgets.get_mut_visual(button_id) {
         btn.children_keys.insert(parent_key.to_string(), tex_id);

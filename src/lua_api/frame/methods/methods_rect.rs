@@ -22,6 +22,10 @@ struct ResolvedRect {
     screen_height: f32,
 }
 
+fn has_queryable_rect(frame: &crate::widget::Frame, id: u64) -> bool {
+    !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1
+}
+
 /// Resolve dirty flag, then extract layout_rect + effective_scale + screen_height.
 /// Returns None if the frame has no anchors or no layout_rect.
 fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
@@ -30,9 +34,10 @@ fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let needs_layout_rect = {
         let state = state_rc.borrow();
         let frame = state.widgets.get(id)?;
+        if !has_queryable_rect(frame, id) {
+            return None;
+        }
         frame.layout_rect.is_none()
-            && (!frame.anchors.is_empty()
-                || (frame.parent_id.is_none() && frame.width > 0.0 && frame.height > 0.0))
     };
 
     if needs_layout_rect {
@@ -43,6 +48,9 @@ fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state = state_rc.borrow();
     let (_, sh) = screen_dims(&state);
     let frame = state.widgets.get(id)?;
+    if !has_queryable_rect(frame, id) {
+        return None;
+    }
     let rect = frame.layout_rect?;
     Some(ResolvedRect {
         rect,

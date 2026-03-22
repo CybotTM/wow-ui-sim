@@ -181,14 +181,26 @@ pub fn get_or_create_button_texture(
             .get(tex_id)
             .map(|t| t.anchors.is_empty())
             .unwrap_or(false);
-        if needs_anchors && let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-            set_all_points_anchors(tex, button_id);
+        let needs_parent_key = state
+            .widgets
+            .get(tex_id)
+            .map(|t| t.parent_key.as_deref() != Some(key))
+            .unwrap_or(false);
+        if needs_anchors || needs_parent_key {
+            if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
+                if needs_anchors {
+                    set_all_points_anchors(tex, button_id);
+                }
+                tex.parent_key = Some(key.to_string());
+            }
+            state.widgets.mark_rect_dirty(button_id);
         }
         return tex_id;
     }
 
     let mut texture = Frame::new(WidgetType::Texture, None, Some(button_id));
     set_all_points_anchors(&mut texture, button_id);
+    texture.parent_key = Some(key.to_string());
     // HighlightTexture defaults to ADD blend mode in WoW
     if key == "HighlightTexture" {
         texture.draw_layer = crate::widget::DrawLayer::Highlight;
@@ -208,6 +220,7 @@ pub fn get_or_create_button_texture(
     if let Some(frame) = state.widgets.get_mut_visual(button_id) {
         frame.children_keys.insert(key.to_string(), texture_id);
     }
+    state.widgets.mark_rect_dirty(button_id);
     let _ = sync_child_to_lua(lua, button_id, key, texture_id);
 
     texture_id
