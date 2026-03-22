@@ -77,11 +77,11 @@ fn decode_crop_request<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::{decode_crop_request, resolve_and_scale_quads, WowUiPipeline};
-    use crate::render::shader::QuadBatch;
+    use super::{WowUiPipeline, decode_crop_request, resolve_and_scale_quads};
     use crate::render::BlendMode;
-    use iced::{Point, Rectangle, Size};
+    use crate::render::shader::QuadBatch;
     use iced::widget::shader::Pipeline;
+    use iced::{Point, Rectangle, Size};
 
     #[test]
     fn decode_crop_request_rejects_malformed_coords() {
@@ -126,8 +126,7 @@ mod tests {
                 .expect("device")
         });
 
-        let mut pipeline =
-            WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+        let mut pipeline = WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
         let mut batch = QuadBatch::default();
         batch.push_textured_path(
             Rectangle::new(Point::ORIGIN, Size::new(16.0, 16.0)),

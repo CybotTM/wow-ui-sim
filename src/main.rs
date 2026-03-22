@@ -3,11 +3,11 @@ use std::cell::RefCell;
 use std::path::{Path, PathBuf};
 use std::rc::Rc;
 use tracing_subscriber::EnvFilter;
-use wow_ui_sim::logging;
 use wow_ui_sim::loader::{
     LoadResult, LoadTiming, discover_blizzard_addons_for_screen, load_addon,
     load_addon_with_saved_vars,
 };
+use wow_ui_sim::logging;
 use wow_ui_sim::lua_api::{AddonInfo, WowLuaEnv};
 use wow_ui_sim::render::WowFontSystem;
 use wow_ui_sim::saved_variables::{SavedVariablesManager, WtfConfig};
