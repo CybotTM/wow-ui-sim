@@ -117,7 +117,7 @@ Core.lua
 }
 
 #[test]
-fn cyclic_addons_are_still_discovered_with_load_first_priority() {
+fn cyclic_addons_still_emit_dependencies_before_load_first_addon() {
     let ui = TempBlizzardUiDir::new("load-first-cycle");
     ui.add_addon(
         "Blizzard_A_Normal",
@@ -146,8 +146,8 @@ Core.lua
 
     assert_eq!(
         addons,
-        vec!["Blizzard_Z_LoadFirst", "Blizzard_A_Normal"],
-        "Cyclic addons should still be emitted, with LoadFirst breaking ties",
+        vec!["Blizzard_A_Normal", "Blizzard_Z_LoadFirst"],
+        "LoadFirst triggers first-pass loading, but declared dependencies still emit first",
     );
 }
 

@@ -260,43 +260,97 @@ fn pull_required_lod_addons(
     }
 }
 
-/// Topologically sort addons by their declared dependencies.
+/// Order Blizzard addons using a two-pass eager load model.
 ///
-/// `LoadFirst` only acts as a priority signal among otherwise eligible addons;
-/// declared dependencies still win. When cycles remain, we break them
-/// deterministically by preferring `LoadFirst` addons, then alphabetical order.
+/// First pass eagerly emits addons marked `LoadFirst` or `UseSecureEnvironment`,
+/// recursively pulling in any declared dependencies first. Second pass emits the
+/// remaining addons the same way. This matches wowless's "load first pass, then
+/// load the rest" behavior more closely than treating `LoadFirst` as a mere sort
+/// tiebreaker.
+///
 /// After emitting each addon, any addon with `LoadWith` pointing to it is emitted
 /// immediately (matching WoW's inline load-on-trigger behavior).
 fn topological_sort_addons(
     mut addons: HashMap<String, (PathBuf, TocFile)>,
 ) -> Vec<(String, PathBuf)> {
-    // Build LoadWith reverse index: parent_name -> list of addon names to load inline.
     let load_with_map = build_load_with_map(&addons);
-    let load_first = build_load_first_set(&addons);
-
     let mut result = Vec::with_capacity(addons.len());
     let mut loaded: HashSet<String> = HashSet::new();
+    let mut visiting: HashSet<String> = HashSet::new();
 
-    // Sort remaining addons by declared dependencies.
-    // Collect to owned strings so we can mutate `addons` during iteration.
-    let sorted: Vec<String> = {
-        let available: HashSet<&str> = addons.keys().map(|s| s.as_str()).collect();
-        let deps = build_dependency_graph(&addons, &available);
-        kahns_sort(&deps, addons.len(), &load_first)
-            .into_iter()
-            .map(|s| s.to_string())
-            .collect()
-    };
+    let mut early: Vec<String> = addons
+        .iter()
+        .filter_map(|(name, (_, toc))| {
+            (toc.is_load_first() || toc.is_secure_env()).then_some(name.clone())
+        })
+        .collect();
+    early.sort();
+    for name in early {
+        emit_addon_recursive(
+            &name,
+            &mut addons,
+            &load_with_map,
+            &mut result,
+            &mut loaded,
+            &mut visiting,
+        );
+    }
 
-    for name in &sorted {
-        if let Some((toc_path, _)) = addons.remove(name.as_str()) {
-            result.push((name.clone(), toc_path));
-            loaded.insert(name.clone());
-            emit_load_with(name, &load_with_map, &mut addons, &mut result, &mut loaded);
-        }
+    let mut remaining: Vec<String> = addons.keys().cloned().collect();
+    remaining.sort();
+    for name in remaining {
+        emit_addon_recursive(
+            &name,
+            &mut addons,
+            &load_with_map,
+            &mut result,
+            &mut loaded,
+            &mut visiting,
+        );
     }
 
     result
+}
+
+fn emit_addon_recursive(
+    name: &str,
+    addons: &mut HashMap<String, (PathBuf, TocFile)>,
+    load_with_map: &HashMap<String, Vec<String>>,
+    result: &mut Vec<(String, PathBuf)>,
+    loaded: &mut HashSet<String>,
+    visiting: &mut HashSet<String>,
+) {
+    if loaded.contains(name) || !addons.contains_key(name) {
+        return;
+    }
+    if !visiting.insert(name.to_string()) {
+        return;
+    }
+
+    let deps = addons
+        .get(name)
+        .map(|(_, toc)| {
+            let mut deps = toc.dependencies();
+            for dep in toc.optional_deps() {
+                if addons.contains_key(&dep) && !deps.contains(&dep) {
+                    deps.push(dep);
+                }
+            }
+            deps
+        })
+        .unwrap_or_default();
+
+    for dep in deps {
+        emit_addon_recursive(&dep, addons, load_with_map, result, loaded, visiting);
+    }
+
+    visiting.remove(name);
+
+    if let Some((toc_path, _)) = addons.remove(name) {
+        result.push((name.to_string(), toc_path));
+        loaded.insert(name.to_string());
+        emit_load_with(name, load_with_map, addons, result, loaded);
+    }
 }
 
 /// Build reverse index: for each addon name, which addons have `LoadWith` pointing to it.
