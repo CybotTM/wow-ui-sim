@@ -21,14 +21,22 @@ pub fn load_xml_file(
     timing: &mut LoadTiming,
 ) -> Result<usize, LoadError> {
     let xml_start = Instant::now();
-    let ui = parse_xml_file(path)?;
+    let ui = parse_xml_file(path).map_err(|e| {
+        crate::lua_api::script_helpers::call_error_handler(env.lua(), &e.to_string());
+        LoadError::Xml(e)
+    })?;
     timing.xml_parse_time += xml_start.elapsed();
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
     let mut lua_count = 0;
 
     for element in &ui.elements {
-        lua_count += process_element(env, element, xml_dir, ctx, timing)?;
+        lua_count += process_element(env, element, xml_dir, ctx, timing).map_err(|e| {
+            if !matches!(e, LoadError::Lua(_)) {
+                crate::lua_api::script_helpers::call_error_handler(env.lua(), &e.to_string());
+            }
+            e
+        })?;
     }
 
     Ok(lua_count)
@@ -117,14 +125,21 @@ fn process_script(
             .load(inline.as_str())
             .set_name("@inline")
             .into_function()
-            .map_err(|e| LoadError::Lua(e.to_string()))?;
+            .map_err(|e| {
+                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+                LoadError::Lua(e.to_string())
+            })?;
         if ctx.use_secure_env {
             crate::lua_api::secure_env::apply_secure_env(lua, &func)
-                .map_err(|e| LoadError::Lua(e.to_string()))?;
+                .map_err(|e| {
+                    crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+                    LoadError::Lua(e.to_string())
+                })?;
         }
         // In WoW, runtime errors in inline <Script> elements are caught by the
         // error handler and don't abort XML file processing.
         if let Err(e) = func.call::<()>((ctx.name.to_string(), table_clone)) {
+            crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
             tracing::warn!("Inline script error: {}", e);
         }
         timing.lua_exec_time += lua_start.elapsed();

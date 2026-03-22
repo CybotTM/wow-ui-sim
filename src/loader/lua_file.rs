@@ -39,10 +39,15 @@ pub fn load_lua_file(
 
     if ctx.use_secure_env {
         crate::lua_api::secure_env::apply_secure_env(lua, &func)
-            .map_err(|e| LoadError::Lua(e.to_string()))?;
+            .map_err(|e| report_lua_load_error(lua, e))?;
     }
 
-    exec_addon_func(lua, func, ctx)?;
+    exec_addon_func(lua, func, ctx).map_err(|e| {
+        if let LoadError::Lua(msg) = &e {
+            crate::lua_api::script_helpers::call_error_handler(lua, msg);
+        }
+        e
+    })?;
     timing.lua_exec_time += lua_start.elapsed();
 
     Ok(())
@@ -109,6 +114,12 @@ fn set_object_taint(lua: &mlua::Lua, func: &mlua::Function, taint: &str) {
     }
 }
 
+fn report_lua_load_error(lua: &mlua::Lua, err: impl ToString) -> LoadError {
+    let msg = err.to_string();
+    crate::lua_api::script_helpers::call_error_handler(lua, &msg);
+    LoadError::Lua(msg)
+}
+
 /// Compile Lua source code into a function.
 fn compile_from_source(
     lua: &mlua::Lua,
@@ -121,7 +132,7 @@ fn compile_from_source(
     lua.load(code)
         .set_name(chunk_name)
         .into_function()
-        .map_err(|e| LoadError::Lua(e.to_string()))
+        .map_err(|e| report_lua_load_error(lua, e))
 }
 
 #[cfg(test)]

@@ -1,5 +1,6 @@
 use super::super::LoadTiming;
 use super::super::addon::AddonContext;
+use super::super::lua_file::load_lua_file;
 use super::super::xml_file::load_xml_file;
 use crate::lua_api::WowLuaEnv;
 use crate::xml::parse_xml_file;
@@ -52,6 +53,7 @@ fn test_xml_inline_script_error_continues() {
         use_secure_env: false,
         taint: false,
     };
+    let before_errors = env.state().borrow().lua_errors.len();
     // Should not return an error — inline script errors are non-fatal
     let result = load_xml_file(
         &env.loader_env(),
@@ -71,6 +73,48 @@ fn test_xml_inline_script_error_continues() {
     // Third script should also run despite second erroring
     let after: String = env.eval("return ScriptErrorTestAfter").unwrap();
     assert_eq!(after, "still running");
+    let state = env.state().borrow();
+    let new_errors = &state.lua_errors[before_errors..];
+    assert!(
+        new_errors.iter().any(|msg| msg.contains("intentional error")),
+        "inline XML script error should be collected in state.lua_errors: {new_errors:?}"
+    );
+
+    let _ = std::fs::remove_dir_all(&temp_dir);
+}
+
+#[test]
+fn test_load_lua_file_runtime_error_collects_lua_error() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-load-lua-file-runtime-error");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let lua_path = temp_dir.join("test.lua");
+    std::fs::write(&lua_path, r#"error("load lua failed")"#).unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+
+    let before_errors = env.state().borrow().lua_errors.len();
+    let result = load_lua_file(
+        &env.loader_env(),
+        &lua_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    );
+    assert!(result.is_err(), "runtime error should fail load_lua_file");
+
+    let state = env.state().borrow();
+    let new_errors = &state.lua_errors[before_errors..];
+    assert!(
+        new_errors.iter().any(|msg| msg.contains("load lua failed")),
+        "load_lua_file runtime errors should be collected in state.lua_errors: {new_errors:?}"
+    );
 
     let _ = std::fs::remove_dir_all(&temp_dir);
 }
