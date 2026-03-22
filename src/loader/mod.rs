@@ -19,7 +19,8 @@ use crate::lua_api::LoaderEnv;
 use crate::saved_variables::SavedVariablesManager;
 use crate::screen::ScreenKind;
 use crate::toc::TocFile;
-use std::collections::HashMap;
+use std::cmp::Ordering;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
@@ -141,9 +142,10 @@ pub fn sort_addons_by_dependencies(addons: &mut Vec<(String, PathBuf)>) {
         }
     }
 
-    let available: std::collections::HashSet<&str> = toc_map.keys().map(|s| s.as_str()).collect();
+    let available: HashSet<&str> = toc_map.keys().map(|s| s.as_str()).collect();
     let deps = build_dependency_graph(&toc_map, &available);
-    let sorted = kahns_sort(&deps, toc_map.len());
+    let load_first = build_load_first_set(&toc_map);
+    let sorted = kahns_sort(&deps, toc_map.len(), &load_first);
 
     // Rebuild the vec in sorted order, appending any addons not in the graph at the end
     let name_to_path: HashMap<&str, &PathBuf> =
@@ -217,7 +219,7 @@ pub fn discover_blizzard_addons_for_screen(
     // Pull LOD addons that are required by non-LOD addons
     pull_required_lod_addons(&mut addons, &mut lod_pool);
 
-    topological_sort_addons(addons, base_addons_for_screen(screen))
+    topological_sort_addons(addons)
 }
 
 fn excluded_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
@@ -258,44 +260,29 @@ fn pull_required_lod_addons(
     }
 }
 
-/// Topologically sort addons by their declared dependencies (Kahn's algorithm).
-/// Base UI addons are placed first in a fixed order, then remaining addons are sorted.
+/// Topologically sort addons by their declared dependencies.
+///
+/// `LoadFirst` only acts as a priority signal among otherwise eligible addons;
+/// declared dependencies still win. When cycles remain, we break them
+/// deterministically by preferring `LoadFirst` addons, then alphabetical order.
 /// After emitting each addon, any addon with `LoadWith` pointing to it is emitted
 /// immediately (matching WoW's inline load-on-trigger behavior).
 fn topological_sort_addons(
     mut addons: HashMap<String, (PathBuf, TocFile)>,
-    base_addons: &[&str],
 ) -> Vec<(String, PathBuf)> {
     // Build LoadWith reverse index: parent_name -> list of addon names to load inline.
     let load_with_map = build_load_with_map(&addons);
+    let load_first = build_load_first_set(&addons);
 
-    // Extract base UI addons in fixed order, pulling their non-base dependencies first.
-    let base_set: std::collections::HashSet<&str> = base_addons.iter().copied().collect();
     let mut result = Vec::with_capacity(addons.len());
-    let mut loaded: std::collections::HashSet<String> = std::collections::HashSet::new();
-    for &base in base_addons {
-        // Pull non-base dependencies before this base addon
-        let deps = addons
-            .get(base)
-            .map(|(_, toc)| toc.dependencies())
-            .unwrap_or_default();
-        for dep in deps {
-            pull_base_deps(&dep, &mut addons, &mut result, &mut loaded, &base_set);
-        }
-        if let Some((toc_path, _)) = addons.remove(base) {
-            result.push((base.to_string(), toc_path));
-            loaded.insert(base.to_string());
-        }
-        emit_load_with(base, &load_with_map, &mut addons, &mut result, &mut loaded);
-    }
+    let mut loaded: HashSet<String> = HashSet::new();
 
     // Sort remaining addons by declared dependencies.
     // Collect to owned strings so we can mutate `addons` during iteration.
     let sorted: Vec<String> = {
-        let available: std::collections::HashSet<&str> =
-            addons.keys().map(|s| s.as_str()).collect();
+        let available: HashSet<&str> = addons.keys().map(|s| s.as_str()).collect();
         let deps = build_dependency_graph(&addons, &available);
-        kahns_sort(&deps, addons.len())
+        kahns_sort(&deps, addons.len(), &load_first)
             .into_iter()
             .map(|s| s.to_string())
             .collect()
@@ -354,80 +341,6 @@ fn emit_load_with(
     }
 }
 
-/// Recursively pull non-base dependencies from the addon pool into the result list.
-/// Refuses to pull an addon that depends on a not-yet-loaded base addon — those
-/// will be correctly ordered by Kahn's sort in the second phase.
-fn pull_base_deps(
-    name: &str,
-    addons: &mut HashMap<String, (PathBuf, TocFile)>,
-    result: &mut Vec<(String, PathBuf)>,
-    loaded: &mut std::collections::HashSet<String>,
-    base_set: &std::collections::HashSet<&str>,
-) {
-    if loaded.contains(name) || base_set.contains(name) {
-        return;
-    }
-    let deps = addons
-        .get(name)
-        .map(|(_, toc)| toc.dependencies())
-        .unwrap_or_default();
-    // If this addon depends on a base addon that hasn't loaded yet, defer it
-    // to the Kahn's sort phase where all base addons will already be present.
-    if deps
-        .iter()
-        .any(|d| base_set.contains(d.as_str()) && !loaded.contains(d))
-    {
-        return;
-    }
-    for dep in deps {
-        pull_base_deps(&dep, addons, result, loaded, base_set);
-    }
-    if let Some((toc_path, _)) = addons.remove(name) {
-        result.push((name.to_string(), toc_path));
-        loaded.insert(name.to_string());
-    }
-}
-
-/// Foundational addons that form the base UI layer.
-/// In WoW these are loaded before all other addons as part of FrameXML.
-/// They have circular declared dependencies, so we load them in this fixed order.
-///
-/// Blizzard_Colors and Blizzard_ObjectAPI are placed before Blizzard_SharedXML
-/// because Blizzard_FrameXML (via EventToastManager.lua) uses ItemMixin at file
-/// scope, which is defined in Blizzard_ObjectAPI. Blizzard_ObjectAPI depends only
-/// on Blizzard_Colors, which depends only on Blizzard_SharedXMLBase — both are
-/// safe to load early.
-const BASE_UI_ADDONS: &[&str] = &[
-    "Blizzard_SharedXMLBase",
-    "Blizzard_Colors",
-    "Blizzard_ObjectAPI",
-    "Blizzard_SharedXML",
-    "Blizzard_SharedXMLGame",
-    "Blizzard_FrameXML",
-    "Blizzard_UIParent",
-];
-
-const GLUE_BASE_ADDONS: &[&str] = &[
-    "Blizzard_SharedXMLBase",
-    "Blizzard_Colors",
-    "Blizzard_ObjectAPI",
-    "Blizzard_SharedXML",
-    "Blizzard_ScriptErrorsFrame",
-    "Blizzard_StaticPopup_Glue",
-    "Blizzard_GlueXMLBase",
-    "Blizzard_GlueParent",
-    "Blizzard_GlueXML",
-];
-
-fn base_addons_for_screen(screen: ScreenKind) -> &'static [&'static str] {
-    match screen {
-        ScreenKind::Game => BASE_UI_ADDONS,
-        ScreenKind::Login | ScreenKind::CharacterSelect | ScreenKind::CharacterCreate => {
-            GLUE_BASE_ADDONS
-        }
-    }
-}
-
 /// Build a map of addon name -> list of available addon names it depends on.
 /// Includes both required and optional dependencies (WoW loads optional deps
 /// before the addon if they are present).
@@ -455,9 +368,37 @@ fn build_dependency_graph<'a>(
         .collect()
 }
 
+fn build_load_first_set<'a>(addons: &'a HashMap<String, (PathBuf, TocFile)>) -> HashSet<&'a str> {
+    addons
+        .iter()
+        .filter_map(|(name, (_, toc))| toc.is_load_first().then_some(name.as_str()))
+        .collect()
+}
+
+fn addon_priority_cmp(a: &str, b: &str, load_first: &HashSet<&str>) -> Ordering {
+    match (load_first.contains(a), load_first.contains(b)) {
+        (true, false) => Ordering::Greater,
+        (false, true) => Ordering::Less,
+        _ => b.cmp(a),
+    }
+}
+
+fn insert_by_priority<'a>(queue: &mut Vec<&'a str>, name: &'a str, load_first: &HashSet<&'a str>) {
+    let pos = queue.partition_point(|&existing| {
+        addon_priority_cmp(existing, name, load_first) == Ordering::Less
+    });
+    queue.insert(pos, name);
+}
+
 /// Run Kahn's algorithm on a dependency graph. Returns names in topological order.
-/// Ties are broken alphabetically for deterministic output.
-fn kahns_sort<'a>(deps: &HashMap<&'a str, Vec<&'a str>>, count: usize) -> Vec<&'a str> {
+/// Ties are broken by `LoadFirst`, then alphabetically. If the remaining graph
+/// contains a cycle, we still emit every addon by breaking the cycle using the
+/// same priority order.
+fn kahns_sort<'a>(
+    deps: &HashMap<&'a str, Vec<&'a str>>,
+    count: usize,
+    load_first: &HashSet<&'a str>,
+) -> Vec<&'a str> {
     let mut in_degree: HashMap<&str, usize> = deps.keys().map(|&n| (n, 0)).collect();
     let mut dependents: HashMap<&str, Vec<&str>> = HashMap::new();
     for (&node, reqs) in deps {
@@ -473,17 +414,30 @@ fn kahns_sort<'a>(deps: &HashMap<&'a str, Vec<&'a str>>, count: usize) -> Vec<&'
         .filter(|&(_, deg)| *deg == 0)
         .map(|(&name, _)| name)
         .collect();
-    queue.sort_by(|a, b| b.cmp(a));
+    queue.sort_by(|a, b| addon_priority_cmp(a, b, load_first));
 
     let mut result = Vec::with_capacity(count);
-    while let Some(name) = queue.pop() {
+    let mut emitted: HashSet<&str> = HashSet::new();
+    while result.len() < count {
+        let Some(name) = queue.pop().or_else(|| {
+            in_degree
+                .keys()
+                .filter(|name| !emitted.contains(**name))
+                .max_by(|a, b| addon_priority_cmp(a, b, load_first))
+                .copied()
+        }) else {
+            break;
+        };
+
+        if !emitted.insert(name) {
+            continue;
+        }
         result.push(name);
         for &dep in dependents.get(name).unwrap_or(&Vec::new()) {
             if let Some(deg) = in_degree.get_mut(dep) {
-                *deg -= 1;
+                *deg = deg.saturating_sub(1);
                 if *deg == 0 {
-                    let pos = queue.partition_point(|&x| x > dep);
-                    queue.insert(pos, dep);
+                    insert_by_priority(&mut queue, dep, load_first);
                 }
             }
         }
