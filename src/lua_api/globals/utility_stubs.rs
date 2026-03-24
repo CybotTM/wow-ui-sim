@@ -21,6 +21,34 @@ const SCROLLBOX_GLOBALS_LUA: &str = r##"
 "##;
 
 const UTILITY_STUBS_LUA: &str = r##"
+    local function MakeActiveEnumerator(active)
+        local i = 0
+        return function()
+            i = i + 1
+            return active[i]
+        end
+    end
+
+    local function ReleaseTrackedFrame(pool, frame, resetFunc)
+        if not frame then
+            return
+        end
+
+        for i, activeFrame in ipairs(pool.active) do
+            if activeFrame == frame then
+                table.remove(pool.active, i)
+                break
+            end
+        end
+
+        if resetFunc then
+            resetFunc(pool, frame)
+        else
+            frame:Hide()
+            frame:ClearAllPoints()
+        end
+    end
+
     function GetFinalNameFromTextureKit(kit)
         if not kit or not kit.name then return "" end
         return kit.name
@@ -34,16 +62,103 @@ const UTILITY_STUBS_LUA: &str = r##"
         DisableSharpening = function() end,
     }
 
-    function CreateFramePool(frameType, parent, template)
+    function CreateFramePool(frameType, parent, template, resetFunc)
         local pool = {}
+        pool.active = {}
+
         function pool:Acquire()
-            return CreateFrame(frameType or "Frame", nil, parent, template)
+            local frame = CreateFrame(frameType or "Frame", nil, parent, template)
+            table.insert(self.active, frame)
+            return frame
         end
+
         function pool:Release(frame)
-            if frame then frame:Hide(); frame:ClearAllPoints() end
+            ReleaseTrackedFrame(self, frame, resetFunc)
         end
-        function pool:EnumerateActive() return function() end end
+
+        function pool:ReleaseAll()
+            while #self.active > 0 do
+                self:Release(self.active[#self.active])
+            end
+        end
+
+        function pool:IsActive(frame)
+            for _, activeFrame in ipairs(self.active) do
+                if activeFrame == frame then
+                    return true
+                end
+            end
+            return false
+        end
+
+        function pool:EnumerateActive()
+            return MakeActiveEnumerator(self.active)
+        end
+
         return pool
+    end
+
+    function CreateFramePoolCollection()
+        local collection = {}
+        collection.pools = {}
+
+        local function poolKey(template)
+            return template or false
+        end
+
+        function collection:CreatePool(frameType, parent, template, resetFunc)
+            local pool = CreateFramePool(frameType, parent, template, resetFunc)
+            self.pools[poolKey(template)] = pool
+            return pool
+        end
+
+        function collection:GetPool(template)
+            return self.pools[poolKey(template)]
+        end
+
+        function collection:Acquire(template)
+            local pool = self:GetPool(template)
+            if not pool then
+                error("CreateFramePoolCollection: missing pool for template")
+            end
+            return pool:Acquire()
+        end
+
+        function collection:Release(frame)
+            for _, pool in pairs(self.pools) do
+                if pool:IsActive(frame) then
+                    pool:Release(frame)
+                    return
+                end
+            end
+        end
+
+        function collection:ReleaseAll()
+            for _, pool in pairs(self.pools) do
+                pool:ReleaseAll()
+            end
+        end
+
+        function collection:IsActive(frame)
+            for _, pool in pairs(self.pools) do
+                if pool:IsActive(frame) then
+                    return true
+                end
+            end
+            return false
+        end
+
+        function collection:EnumerateActive()
+            local active = {}
+            for _, pool in pairs(self.pools) do
+                for frame in pool:EnumerateActive() do
+                    table.insert(active, frame)
+                end
+            end
+            return MakeActiveEnumerator(active)
+        end
+
+        return collection
     end
 
     function CreateTexturePool(parent, template)
