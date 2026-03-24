@@ -1,5 +1,6 @@
 //! Template element creation: textures, fontstrings, thumb/button textures.
 
+use crate::loader::chunk_cache;
 use crate::loader::helpers::{generate_scripts_code, generate_set_point_code, resolve_lua_escapes};
 use crate::loader::helpers_anim::generate_animation_group_code;
 use mlua::Lua;
@@ -19,7 +20,7 @@ pub(super) fn apply_scripts_from_template(
         let code = format!(
             "\n        local frame = {frame_ref}\n        if frame then\n        {handlers_code}\n        end\n"
         );
-        let _ = lua.load(&code).exec();
+        let _ = chunk_cache::exec(lua, &code, "template-elements");
     }
 }
 
@@ -52,7 +53,7 @@ pub(super) fn create_texture_from_template(
         is_mask,
         is_line,
     );
-    if let Err(e) = lua.load(&code).exec() {
+    if let Err(e) = chunk_cache::exec(lua, &code, "template-elements") {
         eprintln!(
             "[create_texture] failed for '{}' on '{}': {}",
             child_name, parent_name, e
@@ -131,7 +132,7 @@ fn apply_texture_animations(lua: &Lua, texture: &crate::xml::TextureXml, child_n
         }
         anim_code.push_str(&generate_animation_group_code(group, "frame"));
     }
-    let _ = lua.load(&anim_code).exec();
+    let _ = chunk_cache::exec(lua, &anim_code, "template-elements-anim");
 }
 
 /// Wire MaskedTextures: call AddMaskTexture on each referenced sibling.
@@ -418,7 +419,7 @@ pub(super) fn create_fontstring_from_template(
     }
 
     code.push_str("        end\n");
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Append size and text setters for a fontstring.
@@ -532,7 +533,7 @@ pub(super) fn create_bar_texture_from_template(
     ));
 
     code.push_str("        end\n");
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Create a thumb texture from template XML (for sliders).
@@ -591,7 +592,7 @@ pub(super) fn create_thumb_texture_from_template(
     }
 
     code.push_str("        end\n");
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Create a button texture from template XML (NormalTexture, PushedTexture, etc.).
@@ -622,7 +623,7 @@ pub(super) fn create_button_texture_from_template(
         actual_parent_key,
         &tex_name,
     );
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Build Lua code to create or reuse a button texture with properties applied.
@@ -702,7 +703,7 @@ pub fn apply_button_text_attribute(lua: &Lua, frame: &crate::xml::FrameXml, fram
          if f.Text and f.Text.SetText then f.Text:SetText(\"{escaped}\") end \
          end end"
     );
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Apply deferred mask atlases from KeyValues after all templates are applied.
@@ -735,7 +736,7 @@ pub(super) fn apply_deferred_mask_atlases(
         }
     }
     code.push_str("end\nend");
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-elements");
 }
 
 /// Collect KeyValues whose key ends with "Atlas" and has a string type.

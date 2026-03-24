@@ -6,8 +6,10 @@
 pub(crate) mod direct;
 mod elements;
 
+use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
 use crate::loader::helpers_anim::generate_animation_group_code;
+use crate::loader::precompiled;
 use crate::lua_api::SimState;
 use crate::xml::{FrameElement, FrameXml, LayerElement, TemplateEntry, get_template_chain};
 use mlua::Lua;
@@ -220,15 +222,17 @@ fn apply_direct_rust_properties(
 
 /// Apply key values from a template to a frame.
 fn apply_key_values(lua: &Lua, key_values: &crate::xml::KeyValuesXml, frame_name: &str) {
+    if key_values.values.is_empty() {
+        return;
+    }
     let frame_ref = lua_global_ref(frame_name);
+    let mut code = format!("do local f = {} if f then ", frame_ref);
     for kv in &key_values.values {
         let value = format_key_value(&kv.value, kv.value_type.as_deref());
-        let code = format!(
-            "do local f = {} if f then f.{} = {} end end",
-            frame_ref, kv.key, value
-        );
-        let _ = lua.load(&code).exec();
+        code.push_str(&format!("f.{} = {} ", kv.key, value));
     }
+    code.push_str("end end");
+    let _ = chunk_cache::exec(lua, &code, "template-key-values");
 }
 
 /// Format a key value for Lua assignment.
@@ -358,7 +362,7 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
         parts.join(" "),
         post_init,
     );
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-mod");
 }
 
 /// Build post-initialization code for known mixins that need pre-seeded fields.
@@ -434,9 +438,14 @@ fn defer_child_onload(lua: &Lua, name: &str) {
 /// methods are invoked via `<Scripts><OnLoad method="OnLoad"/></Scripts>` which
 /// generates a `SetScript("OnLoad", function(self) self:OnLoad() end)` call.
 pub(crate) fn fire_on_load(lua: &Lua, frame_name: &str) {
+    if let Some(fns) = precompiled::try_get(lua) {
+        if let Err(e) = fns.fire_onload.call::<()>(frame_name) {
+            eprintln!("[fire_on_load] {} error: {}", frame_name, e);
+        }
+        return;
+    }
+
     let frame_ref = lua_global_ref(frame_name);
-    // Fire intrinsic OnLoad_Intrinsic first (e.g. EventFrameMixin) — in WoW,
-    // intrinsic scripts always fire regardless of what user templates set.
     let code = format!(
         r#"
         local frame = {frame_ref}
@@ -524,7 +533,7 @@ fn create_child_frame_from_template(
     push_suppress(lua);
 
     let code = build_create_child_code(frame, widget_type, parent_name, &child_name);
-    if let Err(e) = lua.load(&code).exec() {
+    if let Err(e) = chunk_cache::exec(lua, &code, "template-mod") {
         eprintln!(
             "[template] Failed to create child '{}' (type={}) under '{}': {}",
             child_name, widget_type, parent_name, e
@@ -540,7 +549,7 @@ fn create_child_frame_from_template(
             lua_global_ref(&child_name),
             intrinsic_name
         );
-        let _ = lua.load(&code).exec();
+        let _ = chunk_cache::exec(lua, &code, "template-mod");
     }
 
     // Apply inherited templates AFTER CreateFrame but BEFORE inline content.
@@ -741,21 +750,23 @@ fn apply_animation_groups(lua: &Lua, frame: &FrameXml, frame_name: &str) {
         }
         code.push_str(&generate_animation_group_code(group, "frame"));
     }
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-mod");
 }
 
 /// Apply KeyValues from inline frame content (handles multiple `<KeyValues>` blocks).
 fn apply_inline_key_values(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str) {
     let frame_ref = lua_global_ref(frame_name);
     for key_values in frame.all_key_values() {
+        if key_values.values.is_empty() {
+            continue;
+        }
+        let mut code = format!("do local f = {} if f then ", frame_ref);
         for kv in &key_values.values {
             let value = format_key_value(&kv.value, kv.value_type.as_deref());
-            let code = format!(
-                "do local f = {} if f then f.{} = {} end end",
-                frame_ref, kv.key, value
-            );
-            let _ = lua.load(&code).exec();
+            code.push_str(&format!("f.{} = {} ", kv.key, value));
         }
+        code.push_str("end end");
+        let _ = chunk_cache::exec(lua, &code, "template-key-values");
     }
 }
 
@@ -829,7 +840,7 @@ fn apply_button_text(
          end end",
         lua_global_ref(frame_name)
     );
-    let _ = lua.load(&code).exec();
+    let _ = chunk_cache::exec(lua, &code, "template-mod");
 }
 
 /// Apply NormalFont/HighlightFont/DisabledFont from template XML.
@@ -844,7 +855,7 @@ fn apply_button_fonts(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: &str)
             "do local f={frame_ref} local fo={style} if f and fo then f:{setter}(fo) \
              if f.Text and f.Text.SetFontObject then f.Text:SetFontObject(fo) end end end"
         );
-        let _ = lua.load(&code).exec();
+        let _ = chunk_cache::exec(lua, &code, "template-mod");
     }
 }
 

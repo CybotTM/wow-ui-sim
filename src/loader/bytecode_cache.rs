@@ -8,7 +8,8 @@
 //! (different hash). Invalid bytecode (Lua version change, corruption)
 //! triggers automatic recompilation via the fallback path.
 //!
-//! Enable with `WOW_SIM_ENABLE_BYTECODE_CACHE=1`.
+//! Enabled by default. Set `WOW_SIM_DISABLE_BYTECODE_CACHE=1` to opt out.
+//! `WOW_SIM_ENABLE_BYTECODE_CACHE=0` also disables it for backward compatibility.
 //!
 //! The cache store uses a single append-only pack file to avoid thousands of
 //! tiny filesystem reads on warm startup. Existing per-file cache entries are
@@ -44,10 +45,13 @@ fn cache_state() -> &'static Mutex<CacheState> {
 pub fn is_disabled() -> bool {
     static DISABLED: OnceLock<bool> = OnceLock::new();
     *DISABLED.get_or_init(|| {
-        let enable = std::env::var("WOW_SIM_ENABLE_BYTECODE_CACHE")
+        if let Ok(enable) = std::env::var("WOW_SIM_ENABLE_BYTECODE_CACHE") {
+            return !(enable == "1" || enable.eq_ignore_ascii_case("true"));
+        }
+
+        std::env::var("WOW_SIM_DISABLE_BYTECODE_CACHE")
             .map(|v| v == "1" || v.eq_ignore_ascii_case("true"))
-            .unwrap_or(false);
-        !enable
+            .unwrap_or(false)
     })
 }
 

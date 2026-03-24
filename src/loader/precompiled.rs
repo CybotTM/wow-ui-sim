@@ -157,6 +157,19 @@ pub fn get(lua: &Lua) -> PrecompiledFnsRef {
     }
 }
 
+/// Retrieve precompiled functions when available.
+pub fn try_get(lua: &Lua) -> Option<PrecompiledFnsRef> {
+    let fns = lua.app_data_ref::<PrecompiledFns>()?;
+    Some(PrecompiledFnsRef {
+        fire_onload: fns.fire_onload.clone(),
+        fire_onshow: fns.fire_onshow.clone(),
+        suppress_push: fns.suppress_push.clone(),
+        suppress_pop: fns.suppress_pop.clone(),
+        assign_parent_key: fns.assign_parent_key.clone(),
+        set_intrinsic: fns.set_intrinsic.clone(),
+    })
+}
+
 /// Owned copy of precompiled function handles (cheap Rc clones).
 ///
 /// This avoids holding a `Ref<PrecompiledFns>` borrow across Lua calls.

@@ -3,6 +3,7 @@
 mod addon;
 mod button;
 pub(crate) mod bytecode_cache;
+pub(crate) mod chunk_cache;
 mod error;
 pub(crate) mod helpers;
 pub(crate) mod helpers_anim;

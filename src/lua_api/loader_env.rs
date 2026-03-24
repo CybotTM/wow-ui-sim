@@ -32,8 +32,7 @@ impl<'a> LoaderEnv<'a> {
 
     /// Execute Lua code.
     pub fn exec(&self, code: &str) -> Result<()> {
-        let chunk = self.lua.load(code);
-        let func: mlua::Function = chunk.into_function()?;
+        let func = crate::loader::chunk_cache::load_chunk(self.lua, code, "loader-exec")?;
         if self.loading_addon_uses_secure_env() {
             super::secure_env::apply_secure_env(self.lua, &func)?;
         }
