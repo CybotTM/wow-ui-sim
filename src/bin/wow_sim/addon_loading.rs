@@ -77,8 +77,12 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
         t.xml_frame_setup_time, t.xml_frame_finalize_time, t.frame_count
     );
     println!(
-        "  setup: exec_lua={:.2?} props={:.2?} | finalize: layers={:.2?} ({} tex, {} fs) lifecycle={:.2?} ({} fires)",
-        t.frame_exec_lua_time, t.frame_apply_props_time, t.frame_layer_children_time, t.texture_count, t.fontstring_count, t.frame_lifecycle_time, t.lifecycle_fire_count
+        "  setup: code_build={:.2?} exec_lua={:.2?} props={:.2?}",
+        t.frame_code_build_time, t.frame_exec_lua_time, t.frame_apply_props_time
+    );
+    println!(
+        "  finalize: layers={:.2?} ({} tex, {} fs) anim={:.2?} button={:.2?} lifecycle={:.2?} ({} fires)",
+        t.frame_layer_children_time, t.texture_count, t.fontstring_count, t.frame_anim_time, t.frame_button_time, t.frame_lifecycle_time, t.lifecycle_fire_count
     );
 }
 
@@ -372,9 +376,9 @@ fn print_timing_breakdown(t: &LoadTiming) {
 
 fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
     println!("  XML frames: {:.2?} ({:.1}%, subset of XML proc)", t.xml_frame_create_time, pct(t.xml_frame_create_time));
-    println!("    setup:  {:.2?}  (exec_lua={:.2?} apply_props={:.2?})", t.xml_frame_setup_time, t.frame_exec_lua_time, t.frame_apply_props_time);
-    println!("    finalize: {:.2?}  (layers={:.2?} lifecycle={:.2?}, {} fires)", t.xml_frame_finalize_time, t.frame_layer_children_time, t.frame_lifecycle_time, t.lifecycle_fire_count);
-    println!("    {} frames, {} textures, {} fontstrings", t.frame_count, t.texture_count, t.fontstring_count);
+    println!("    setup:  {:.2?}  (code_build={:.2?} exec_lua={:.2?} props={:.2?})", t.xml_frame_setup_time, t.frame_code_build_time, t.frame_exec_lua_time, t.frame_apply_props_time);
+    println!("    finalize: {:.2?}  (layers={:.2?} anim={:.2?} button={:.2?} lifecycle={:.2?})", t.xml_frame_finalize_time, t.frame_layer_children_time, t.frame_anim_time, t.frame_button_time, t.frame_lifecycle_time);
+    println!("    {} frames, {} textures, {} fontstrings, {} lifecycle fires", t.frame_count, t.texture_count, t.fontstring_count, t.lifecycle_fire_count);
 }
 
 fn print_cache_stats(hits: u32, misses: u32) {

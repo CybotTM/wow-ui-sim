@@ -109,6 +109,12 @@ pub struct LoadTiming {
     pub texture_count: u32,
     /// Number of fontstrings created
     pub fontstring_count: u32,
+    /// Time building Lua code strings (template chain, mixins, etc., subset of setup)
+    pub frame_code_build_time: Duration,
+    /// Time in animation groups (subset of finalize)
+    pub frame_anim_time: Duration,
+    /// Time in button textures+text (subset of finalize)
+    pub frame_button_time: Duration,
     /// Time executing Lua (compile + call; on cache hit, compile is near-zero)
     pub lua_exec_time: Duration,
     /// Time loading SavedVariables
@@ -144,6 +150,9 @@ impl LoadTiming {
         self.lifecycle_fire_count += other.lifecycle_fire_count;
         self.texture_count += other.texture_count;
         self.fontstring_count += other.fontstring_count;
+        self.frame_code_build_time += other.frame_code_build_time;
+        self.frame_anim_time += other.frame_anim_time;
+        self.frame_button_time += other.frame_button_time;
         self.lua_exec_time += other.lua_exec_time;
         self.saved_vars_time += other.saved_vars_time;
     }
