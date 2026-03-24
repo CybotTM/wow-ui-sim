@@ -1,10 +1,12 @@
 //! Frame creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
+use std::time::Instant;
 
 use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, rand_id};
+use super::LoadTiming;
 use super::precompiled;
 use super::xml_fontstring::create_fontstring_from_xml;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
@@ -23,6 +25,7 @@ pub fn create_frame_from_xml(
     widget_type: &str,
     parent_override: Option<&str>,
     intrinsic_base: Option<&str>,
+    timing: &mut LoadTiming,
 ) -> Result<Option<String>, LoadError> {
     if let Some(early) = register_virtual_or_intrinsic(env, frame, widget_type, parent_override) {
         return Ok(early);
@@ -53,10 +56,15 @@ pub fn create_frame_from_xml(
 
     let lua_code =
         build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
+    let setup_start = Instant::now();
     exec_create_frame_code(env, &lua_code, &name, initial_hidden)?;
     apply_xml_properties_direct(env, &name, frame, inherits, parent);
     apply_intrinsic_property(env, intrinsic_base, &name);
-    create_children_and_finalize(env, frame, &name, inherits)?;
+    timing.xml_frame_setup_time += setup_start.elapsed();
+
+    let finalize_start = Instant::now();
+    create_children_and_finalize(env, frame, &name, inherits, timing)?;
+    timing.xml_frame_finalize_time += finalize_start.elapsed();
     Ok(Some(name))
 }
 
@@ -141,8 +149,9 @@ fn create_children_and_finalize(
     frame: &crate::xml::FrameXml,
     name: &str,
     inherits: &str,
+    timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    create_child_frames(env, frame, name)?;
+    create_child_frames(env, frame, name, timing)?;
     create_layer_children(env, frame, name)?;
     apply_animation_groups(env, frame, name, inherits)?;
     apply_button_textures(env, frame, name)?;
@@ -581,16 +590,17 @@ fn create_child_frames(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     // Use all_frame_elements() to handle multiple <Frames> sections in the XML
     // and standalone frame-type children outside <Frames> wrappers
     let elements = frame.all_frame_elements();
     for child in &elements {
-        create_single_child_frame(env, child, name)?;
+        create_single_child_frame(env, child, name, timing)?;
     }
     // ScrollChild children are parented to the ScrollFrame just like regular children
     if let Some(scroll_child) = frame.scroll_child() {
-        create_frame_elements(env, &scroll_child.children, name)?;
+        create_frame_elements(env, &scroll_child.children, name, timing)?;
     }
     Ok(())
 }
@@ -600,13 +610,14 @@ fn create_single_child_frame(
     env: &LoaderEnv<'_>,
     child: &crate::xml::FrameElement,
     parent_name: &str,
+    timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
         Some(triple) => triple,
         None => return Ok(()),
     };
     let child_name =
-        create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
+        create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic, timing)?;
     if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
         let fns = precompiled::get(env.lua());
         fns.assign_parent_key
@@ -621,6 +632,7 @@ fn create_frame_elements(
     env: &LoaderEnv<'_>,
     elements: &[crate::xml::FrameElement],
     parent_name: &str,
+    timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     for child in elements {
         let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
@@ -628,7 +640,7 @@ fn create_frame_elements(
             None => continue,
         };
         let child_name =
-            create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic)?;
+            create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic, timing)?;
 
         // Assign parentKey so the parent can reference the child.
         // The Lua assignment triggers __newindex which syncs to Rust children_keys.

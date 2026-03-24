@@ -373,6 +373,10 @@ fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
                 }
                 total_timing.io_time += r.timing.io_time;
                 total_timing.xml_parse_time += r.timing.xml_parse_time;
+                total_timing.xml_process_time += r.timing.xml_process_time;
+                total_timing.xml_frame_create_time += r.timing.xml_frame_create_time;
+                total_timing.xml_frame_setup_time += r.timing.xml_frame_setup_time;
+                total_timing.xml_frame_finalize_time += r.timing.xml_frame_finalize_time;
                 total_timing.lua_exec_time += r.timing.lua_exec_time;
                 total_timing.cache_hits += r.timing.cache_hits;
                 total_timing.cache_misses += r.timing.cache_misses;
@@ -391,8 +395,16 @@ fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
         String::new()
     };
     println!(
-        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} lua={:.2?}{cache_info})",
-        total_timing.io_time, total_timing.xml_parse_time, total_timing.lua_exec_time
+        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?}{cache_info})",
+        total_timing.io_time,
+        total_timing.xml_parse_time,
+        total_timing.xml_process_time,
+        total_timing.xml_frame_create_time,
+        total_timing.lua_exec_time
+    );
+    println!(
+        "  frame breakdown: setup={:.2?} finalize={:.2?}",
+        total_timing.xml_frame_setup_time, total_timing.xml_frame_finalize_time
     );
 }
 
@@ -560,7 +572,7 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
         let status = if r.warnings.is_empty() { "✓" } else { "⚠" };
         let t = &r.timing;
         println!(
-            "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} lua={:.1?} sv={:.1?})",
+            "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} xmlproc={:.1?} frames⊂xmlproc={:.1?} setup⊂frames={:.1?} finalize⊂frames={:.1?} lua={:.1?} sv={:.1?})",
             status,
             name,
             r.lua_files,
@@ -569,6 +581,10 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
             t.total(),
             t.io_time,
             t.xml_parse_time,
+            t.xml_process_time,
+            t.xml_frame_create_time,
+            t.xml_frame_setup_time,
+            t.xml_frame_finalize_time,
             t.lua_exec_time,
             t.saved_vars_time
         );
@@ -580,6 +596,10 @@ fn record_addon_success(name: &str, r: &LoadResult, stats: &mut LoadStats) {
     stats.total_warnings += r.warnings.len();
     stats.total_timing.io_time += r.timing.io_time;
     stats.total_timing.xml_parse_time += r.timing.xml_parse_time;
+    stats.total_timing.xml_process_time += r.timing.xml_process_time;
+    stats.total_timing.xml_frame_create_time += r.timing.xml_frame_create_time;
+    stats.total_timing.xml_frame_setup_time += r.timing.xml_frame_setup_time;
+    stats.total_timing.xml_frame_finalize_time += r.timing.xml_frame_finalize_time;
     stats.total_timing.lua_exec_time += r.timing.lua_exec_time;
     stats.total_timing.saved_vars_time += r.timing.saved_vars_time;
     stats.cache_hits += r.timing.cache_hits;
@@ -683,6 +703,26 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
             "  XML parse:  {:.2?} ({:.1}%)",
             stats.total_timing.xml_parse_time,
             pct(stats.total_timing.xml_parse_time)
+        );
+        println!(
+            "  XML proc:   {:.2?} ({:.1}%)",
+            stats.total_timing.xml_process_time,
+            pct(stats.total_timing.xml_process_time)
+        );
+        println!(
+            "  XML frames: {:.2?} ({:.1}%, subset of XML proc)",
+            stats.total_timing.xml_frame_create_time,
+            pct(stats.total_timing.xml_frame_create_time)
+        );
+        println!(
+            "  Frame setup: {:.2?} ({:.1}%, subset of XML frames)",
+            stats.total_timing.xml_frame_setup_time,
+            pct(stats.total_timing.xml_frame_setup_time)
+        );
+        println!(
+            "  Frame final: {:.2?} ({:.1}%, subset of XML frames)",
+            stats.total_timing.xml_frame_finalize_time,
+            pct(stats.total_timing.xml_frame_finalize_time)
         );
         println!(
             "  Lua exec:   {:.2?} ({:.1}%)",

@@ -29,6 +29,7 @@ pub fn load_xml_file(
 
     let xml_dir = path.parent().unwrap_or(Path::new("."));
     let mut lua_count = 0;
+    let process_start = Instant::now();
 
     for element in &ui.elements {
         lua_count += process_element(env, element, xml_dir, ctx, timing).map_err(|e| {
@@ -38,6 +39,7 @@ pub fn load_xml_file(
             e
         })?;
     }
+    timing.xml_process_time += process_start.elapsed();
 
     Ok(lua_count)
 }
@@ -79,7 +81,9 @@ fn process_element(
         }
         XmlElement::Animation(_) | XmlElement::Binding(_) | XmlElement::ModifiedClick(_) => Ok(0),
         _ => {
-            process_frame_element(env, element)?;
+            let frame_start = Instant::now();
+            process_frame_element(env, element, timing)?;
+            timing.xml_frame_create_time += frame_start.elapsed();
             Ok(0)
         }
     }
@@ -260,9 +264,13 @@ fn register_virtual_anim_group(anim_group: &crate::xml::AnimationGroupXml) {
 }
 
 /// Process a frame-type XML element by dispatching to create_frame_from_xml.
-fn process_frame_element(env: &LoaderEnv<'_>, element: &XmlElement) -> Result<(), LoadError> {
+fn process_frame_element(
+    env: &LoaderEnv<'_>,
+    element: &XmlElement,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
     if let Some((frame_xml, widget_type, intrinsic)) = resolve_frame_element(element) {
-        create_frame_from_xml(env, frame_xml, widget_type, None, intrinsic)?;
+        create_frame_from_xml(env, frame_xml, widget_type, None, intrinsic, timing)?;
     }
     Ok(())
 }

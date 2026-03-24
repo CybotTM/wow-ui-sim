@@ -83,6 +83,14 @@ pub struct LoadTiming {
     pub io_time: Duration,
     /// Time parsing XML
     pub xml_parse_time: Duration,
+    /// Time processing parsed XML elements (excludes raw parse time)
+    pub xml_process_time: Duration,
+    /// Time creating/configuring frames from XML
+    pub xml_frame_create_time: Duration,
+    /// Time in the initial frame creation/setup phase (subset of xml_frame_create_time)
+    pub xml_frame_setup_time: Duration,
+    /// Time in child creation/finalization (subset of xml_frame_create_time)
+    pub xml_frame_finalize_time: Duration,
     /// Time executing Lua (compile + call; on cache hit, compile is near-zero)
     pub lua_exec_time: Duration,
     /// Time loading SavedVariables
@@ -95,7 +103,11 @@ pub struct LoadTiming {
 
 impl LoadTiming {
     pub fn total(&self) -> Duration {
-        self.io_time + self.xml_parse_time + self.lua_exec_time + self.saved_vars_time
+        self.io_time
+            + self.xml_parse_time
+            + self.xml_process_time
+            + self.lua_exec_time
+            + self.saved_vars_time
     }
 }
 
