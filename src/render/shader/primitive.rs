@@ -77,7 +77,7 @@ fn decode_crop_request<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::{WowUiPipeline, decode_crop_request, resolve_and_scale_quads};
+    use super::{WowUiPipeline, decode_crop_request, remap_entry_uv, resolve_and_scale_quads};
     use crate::render::BlendMode;
     use crate::render::shader::QuadBatch;
     use iced::widget::shader::Pipeline;
@@ -110,6 +110,15 @@ mod tests {
         assert_eq!(decoded.2, 20);
         assert_eq!(decoded.3, 100);
         assert_eq!(decoded.4, 50);
+    }
+
+    #[test]
+    fn remap_entry_uv_insets_slot_edges_by_half_texel() {
+        let left = remap_entry_uv(0.0, 0.25, 32.0 / 4096.0, 32, 0);
+        let right = remap_entry_uv(1.0, 0.25, 32.0 / 4096.0, 32, 0);
+
+        assert!((left - (0.25 + 0.5 / 4096.0)).abs() < 1e-6);
+        assert!((right - (0.25 + 31.5 / 4096.0)).abs() < 1e-6);
     }
 
     #[test]
@@ -281,8 +290,20 @@ fn resolve_texture_requests(
             for vertex in vertices[start..end].iter_mut() {
                 if vertex.tex_index == -2 {
                     vertex.tex_index = tex_idx;
-                    vertex.tex_coords[0] = entry.uv_x + vertex.tex_coords[0] * entry.uv_width;
-                    vertex.tex_coords[1] = entry.uv_y + vertex.tex_coords[1] * entry.uv_height;
+                    vertex.tex_coords[0] = remap_entry_uv(
+                        vertex.tex_coords[0],
+                        entry.uv_x,
+                        entry.uv_width,
+                        entry.original_width,
+                        entry.tier,
+                    );
+                    vertex.tex_coords[1] = remap_entry_uv(
+                        vertex.tex_coords[1],
+                        entry.uv_y,
+                        entry.uv_height,
+                        entry.original_height,
+                        entry.tier,
+                    );
                 }
             }
         }
@@ -303,14 +324,35 @@ fn resolve_mask_requests(
             for vertex in vertices[start..end].iter_mut() {
                 if vertex.mask_tex_index == -2 {
                     vertex.mask_tex_index = tex_idx;
-                    vertex.mask_tex_coords[0] =
-                        entry.uv_x + vertex.mask_tex_coords[0] * entry.uv_width;
-                    vertex.mask_tex_coords[1] =
-                        entry.uv_y + vertex.mask_tex_coords[1] * entry.uv_height;
+                    vertex.mask_tex_coords[0] = remap_entry_uv(
+                        vertex.mask_tex_coords[0],
+                        entry.uv_x,
+                        entry.uv_width,
+                        entry.original_width,
+                        entry.tier,
+                    );
+                    vertex.mask_tex_coords[1] = remap_entry_uv(
+                        vertex.mask_tex_coords[1],
+                        entry.uv_y,
+                        entry.uv_height,
+                        entry.original_height,
+                        entry.tier,
+                    );
                 }
             }
         }
     }
+}
+
+fn remap_entry_uv(local_uv: f32, base_uv: f32, span_uv: f32, original_size: u32, tier: u32) -> f32 {
+    let cell_size = crate::render::shader::atlas::TIER_SIZES[tier as usize];
+    let uploaded_size = original_size.min(cell_size).max(1) as f32;
+    let inset = if uploaded_size > 1.0 {
+        (span_uv * 0.5 / uploaded_size).min(span_uv * 0.5)
+    } else {
+        0.0
+    };
+    base_uv + inset + local_uv * (span_uv - inset * 2.0).max(0.0)
 }
 
 /// Hide unresolved textures and scale positions to physical pixels.

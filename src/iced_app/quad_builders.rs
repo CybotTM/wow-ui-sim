@@ -91,11 +91,17 @@ fn emit_button_texture(
 ) {
     let Some(tex_path) = texture_path else { return };
     if let Some((left, right, top, bottom)) = tex_coords {
+        let (effective_path, effective_uvs) = remap_atlas_crop(
+            tex_path,
+            Some((left, right, top, bottom)),
+            Some((left, right, top, bottom)),
+        );
+        let (left, right, top, bottom) = effective_uvs.unwrap_or((0.0, 1.0, 0.0, 1.0));
         let uvs = Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
         batch.push_textured_path_uv(
             bounds,
             uvs,
-            tex_path,
+            &effective_path,
             [1.0, 1.0, 1.0, alpha],
             BlendMode::Alpha,
         );
@@ -122,11 +128,17 @@ pub(super) fn emit_button_highlight(
 ) {
     if let Some(highlight_path) = &f.highlight_texture {
         if let Some((left, right, top, bottom)) = f.highlight_tex_coords {
+            let (effective_path, effective_uvs) = remap_atlas_crop(
+                highlight_path,
+                Some((left, right, top, bottom)),
+                Some((left, right, top, bottom)),
+            );
+            let (left, right, top, bottom) = effective_uvs.unwrap_or((0.0, 1.0, 0.0, 1.0));
             let uvs = Rectangle::new(Point::new(left, top), Size::new(right - left, bottom - top));
             batch.push_textured_path_uv(
                 bounds,
                 uvs,
-                highlight_path,
+                &effective_path,
                 [1.0, 1.0, 1.0, 0.5 * alpha],
                 BlendMode::Additive,
             );
@@ -1146,4 +1158,24 @@ fn emit_line_vertices(
     batch
         .indices
         .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::remap_atlas_crop;
+
+    #[test]
+    fn remap_atlas_crop_rewrites_subregion_to_crop_key() {
+        let (path, uvs) = remap_atlas_crop(
+            r"Interface\Glues\CharacterSelect\Glues-AddOn-Icons",
+            Some((0.25, 0.5, 0.125, 0.625)),
+            Some((0.25, 0.5, 0.125, 0.625)),
+        );
+
+        assert_eq!(
+            path,
+            r"Interface\Glues\CharacterSelect\Glues-AddOn-Icons@crop:0.250000,0.500000,0.125000,0.625000"
+        );
+        assert_eq!(uvs, Some((0.0, 1.0, 0.0, 1.0)));
+    }
 }
