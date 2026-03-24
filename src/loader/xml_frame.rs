@@ -46,14 +46,15 @@ pub fn create_frame_from_xml(
         .or(inherited_parent_buf.as_deref());
     let parent = explicit_parent.unwrap_or("UIParent");
 
+    let build_start = Instant::now();
     let inherits_buf = build_inherits_chain(frame, intrinsic_base);
     let inherits = inherits_buf
         .as_deref()
         .unwrap_or(frame.inherits.as_deref().unwrap_or(""));
     let initial_hidden = resolve_xml_hidden(frame, inherits);
-
     let lua_code =
         build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
+    timing.frame_code_build_time += build_start.elapsed();
     setup_frame(env, &lua_code, &name, initial_hidden, frame, inherits, parent, intrinsic_base, timing)?;
     finalize_frame(env, frame, &name, inherits, timing)?;
     Ok(Some(name))
@@ -186,11 +187,15 @@ fn create_children_and_finalize(
     let layer_start = Instant::now();
     create_layer_children(env, frame, name, timing)?;
     timing.frame_layer_children_time += layer_start.elapsed();
+    let anim_start = Instant::now();
     apply_animation_groups(env, frame, name, inherits)?;
+    timing.frame_anim_time += anim_start.elapsed();
+    let btn_start = Instant::now();
     apply_button_textures(env, frame, name)?;
     apply_button_text(env, frame, name, inherits)?;
     apply_bar_texture(env, frame, name)?;
-    init_action_bar_tables(env, name);
+    init_action_bar_tables(env, frame, name);
+    timing.frame_button_time += btn_start.elapsed();
     if has_lifecycle_scripts(frame, inherits) {
         let lc_start = Instant::now();
         fire_lifecycle_scripts(env, name);

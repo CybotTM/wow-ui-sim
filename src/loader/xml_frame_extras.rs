@@ -117,11 +117,17 @@ fn append_bar_texture_properties(code: &mut String, bar: &crate::xml::TextureXml
 }
 
 /// Initialize tables expected by action bar OnLoad handlers.
-/// Frames with `numButtons` KeyValue are action bars that need `actionButtons = {}`.
-pub(super) fn init_action_bar_tables(env: &LoaderEnv<'_>, name: &str) {
+/// Only runs Lua when the frame has a `numButtons` KeyValue (rare).
+pub(super) fn init_action_bar_tables(env: &LoaderEnv<'_>, frame: &crate::xml::FrameXml, name: &str) {
+    let has_num_buttons = frame.all_key_values().any(|kv| {
+        kv.values.iter().any(|v| v.key == "numButtons")
+    });
+    if !has_num_buttons {
+        return;
+    }
     let code = format!(
         r#"do local f = {}
-        if f and f.numButtons and not f.actionButtons then
+        if f and not f.actionButtons then
             f.actionButtons = {{}}
         end end"#,
         lua_global_ref(name)
