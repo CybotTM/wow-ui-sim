@@ -49,12 +49,12 @@ pub fn collect_subtree_ids(
 pub type IntraStrataKey = (
     i32,
     i32,
-    std::cmp::Reverse<u64>,
+    u64,
     u8,
     i32,
     i32,
     u8,
-    std::cmp::Reverse<u64>,
+    u64,
 );
 
 /// Intra-strata sort key for rendering order within the same frame strata.
@@ -64,13 +64,13 @@ pub type IntraStrataKey = (
 /// their parent via `parent_id`, ensuring all regions of a frame render
 /// immediately after that frame (before any higher-level content).
 ///
-/// Non-regions sort by `(frame_level, raise_order, Reverse(id))` — higher
-/// frame_level renders on top; within the same level, raise_order (adjusted by
-/// Raise()/Lower()) breaks ties; within the same raise_order, lower IDs
-/// (earlier-created frames) render on top. This matches WoW's stacking where
-/// action bar icon textures (created early) render above the bar background.
-/// FontStrings (type_flag=1) render above Textures (type_flag=0) in the same
-/// draw layer per WoW rules.
+/// Non-regions sort by `(frame_level, raise_order, id)` — higher frame_level
+/// renders on top; within the same level, raise_order (adjusted by
+/// Raise()/Lower()) breaks ties; within the same raise_order, later-created
+/// frames render on top. Regions follow the same rule within the same parent
+/// draw layer so later-created overlays do not get buried under earlier
+/// background textures. FontStrings (type_flag=1) render above Textures
+/// (type_flag=0) in the same draw layer per WoW rules.
 pub fn intra_strata_sort_key(
     f: &crate::widget::Frame,
     id: u64,
@@ -96,24 +96,15 @@ pub fn intra_strata_sort_key(
         (
             parent_level,
             parent_raise_order,
-            std::cmp::Reverse(parent_id),
+            parent_id,
             1,
             f.draw_layer as i32,
             f.draw_sub_layer,
             type_flag,
-            std::cmp::Reverse(id),
+            id,
         )
     } else {
-        (
-            f.frame_level,
-            f.raise_order,
-            std::cmp::Reverse(id),
-            0,
-            0,
-            0,
-            0,
-            std::cmp::Reverse(0),
-        )
+        (f.frame_level, f.raise_order, id, 0, 0, 0, 0, 0)
     }
 }
 
@@ -152,5 +143,39 @@ pub fn collect_hittable_frames(
 
     CollectedFrames {
         hittable: hittable.into_iter().map(|(id, _, _, r)| (id, r)).collect(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::intra_strata_sort_key;
+    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+
+    #[test]
+    fn later_created_regions_sort_after_earlier_regions_in_same_layer() {
+        let mut registry = WidgetRegistry::new();
+
+        let parent = Frame::new(WidgetType::Frame, Some("Parent".to_string()), None);
+        let parent_id = parent.id;
+        registry.register(parent);
+
+        let first = Frame::new(WidgetType::Texture, Some("First".to_string()), Some(parent_id));
+        let first_id = first.id;
+        registry.register(first);
+        registry.add_child(parent_id, first_id);
+
+        let second = Frame::new(WidgetType::Texture, Some("Second".to_string()), Some(parent_id));
+        let second_id = second.id;
+        registry.register(second);
+        registry.add_child(parent_id, second_id);
+
+        let first_key = intra_strata_sort_key(registry.get(first_id).unwrap(), first_id, &registry);
+        let second_key =
+            intra_strata_sort_key(registry.get(second_id).unwrap(), second_id, &registry);
+
+        assert!(
+            first_key < second_key,
+            "later-created texture should sort later/on top within the same parent layer"
+        );
     }
 }
