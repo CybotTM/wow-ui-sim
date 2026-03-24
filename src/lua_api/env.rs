@@ -358,7 +358,7 @@ impl WowLuaEnv {
 
     /// Scan an addons directory and register all found addons (metadata only, no loading).
     pub fn scan_and_register_addons(&self, addons_path: &std::path::Path) {
-        let mut addons = scan_addon_entries(addons_path);
+        let mut addons = super::addon_scan::scan_addon_entries(addons_path);
         addons.sort_by(|a, b| {
             a.folder_name
                 .to_lowercase()
@@ -406,87 +406,8 @@ impl WowLuaEnv {
 
     /// Fire OnUpdate handlers for all frames that have them registered,
     /// then tick animation groups.
-    /// `elapsed` is the time in seconds since the last frame.
     pub fn fire_on_update(&self, elapsed: f64) -> Result<()> {
-        let frame_ids = self.get_visible_on_update_frames();
-
-        if !frame_ids.is_empty() {
-            let t = Instant::now();
-            self.dispatch_on_update_with_dirty_tracking(&frame_ids, elapsed);
-            let on_update_dur = t.elapsed();
-            for &id in &frame_ids {
-                let addon_idx = self
-                    .state
-                    .borrow()
-                    .widgets
-                    .get(id)
-                    .and_then(|f| f.owner_addon);
-                self.state.borrow_mut().executing_addon_index = addon_idx;
-                self.dispatch_handlers_lua(&[id], elapsed, "_OnPostUpdate");
-                self.state.borrow_mut().executing_addon_index = None;
-            }
-            let total = t.elapsed();
-            if total.as_millis() > 20 {
-                eprintln!(
-                    "[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
-                    frame_ids.len()
-                );
-            }
-        }
-
-        // Tick animation groups
-        super::animation::tick_animation_groups(&self.state, &self.lua, elapsed)?;
-
-        // Finalize per-addon metrics for this frame.
-        // elapsed is delta-time in seconds; convert to ms for metrics.
-        self.finalize_frame_metrics(elapsed * 1000.0);
-
-        Ok(())
-    }
-
-    fn dispatch_on_update_with_dirty_tracking(&self, frame_ids: &[u64], elapsed: f64) {
-        for &id in frame_ids {
-            let addon_idx = self
-                .state
-                .borrow()
-                .widgets
-                .get(id)
-                .and_then(|f| f.owner_addon);
-            self.state.borrow_mut().executing_addon_index = addon_idx;
-            self.dispatch_handlers_lua(&[id], elapsed, "_OnUpdate");
-            self.state.borrow_mut().executing_addon_index = None;
-        }
-    }
-
-    fn get_visible_on_update_frames(&self) -> Vec<u64> {
-        let mut state = self.state.borrow_mut();
-        if let Some(ref cached) = state.visible_on_update_cache {
-            return cached.clone();
-        }
-        // Initial build: filter all on_update_frames by ancestor visibility.
-        let ids: Vec<u64> = state
-            .on_update_frames
-            .iter()
-            .copied()
-            .filter(|&id| state.widgets.is_ancestor_visible(id))
-            .collect();
-        state.visible_on_update_cache = Some(ids.clone());
-        ids
-    }
-
-    /// Dispatch OnUpdate/OnPostUpdate via a Lua-side loop (avoids per-handler FFI overhead).
-    fn dispatch_handlers_lua(&self, frame_ids: &[u64], elapsed: f64, suffix: &str) {
-        let dispatch: mlua::Function = self
-            .lua
-            .named_registry_value("__dispatch_on_update")
-            .expect("__dispatch_on_update not registered");
-        let ids_table = self.lua.create_table().unwrap();
-        for (i, id) in frame_ids.iter().enumerate() {
-            ids_table.set(i + 1, *id as i64).unwrap();
-        }
-        if let Err(e) = dispatch.call::<()>((ids_table, elapsed, suffix)) {
-            eprintln!("[OnUpdate] dispatch error: {e}");
-        }
+        super::on_update::fire(self, elapsed)
     }
 
     /// Read and clear `__addon_timing`, applying accumulated ms to each addon.
@@ -514,7 +435,7 @@ impl WowLuaEnv {
         }
     }
 
-    fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
+    pub(crate) fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
         self.drain_addon_timing();
         let mut state = self.state.borrow_mut();
         // Update app-level frame metrics (total frame time for percentage calculations).
@@ -679,59 +600,6 @@ fn record_addon_time(
     }
 }
 
-/// Scan an addons directory and return AddonInfo for each valid addon folder.
-fn scan_addon_entries(addons_path: &std::path::Path) -> Vec<AddonInfo> {
-    use crate::toc::TocFile;
-    let Ok(entries) = std::fs::read_dir(addons_path) else {
-        return Vec::new();
-    };
-    let mut addons = Vec::new();
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if !path.is_dir() {
-            continue;
-        }
-        let name = path.file_name().unwrap().to_str().unwrap().to_string();
-        if name.starts_with('.') || name == "BlizzardUI" {
-            continue;
-        }
-        let Some(toc_path) = crate::loader::find_toc_file(&path) else {
-            continue;
-        };
-        let toc = TocFile::from_file(&toc_path).ok();
-        let (title, notes, load_on_demand, use_secure_env) = toc
-            .as_ref()
-            .map(|t| {
-                let title = t
-                    .metadata
-                    .get("Title")
-                    .cloned()
-                    .unwrap_or_else(|| name.clone());
-                let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-                let lod = t
-                    .metadata
-                    .get("LoadOnDemand")
-                    .map(|v| v == "1")
-                    .unwrap_or(false);
-                let secure = t.is_secure_env();
-                (title, notes, lod, secure)
-            })
-            .unwrap_or_else(|| (name.clone(), String::new(), false, false));
-        addons.push(AddonInfo {
-            folder_name: name,
-            title,
-            notes,
-            enabled: true,
-            loaded: false,
-            load_on_demand,
-            use_secure_env,
-            load_time_secs: 0.0,
-            ..Default::default()
-        });
-    }
-    addons
-}
-
 /// Create built-in frames in the widget registry before Lua loads.
 /// Registers a `__BuiltIn` pseudo-addon as their owner.
 fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
@@ -752,7 +620,7 @@ fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
 fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> {
     load_elune_security(lua)?;
     patch_elune_userdata_compat(lua)?;
-    init_registry_tables(lua)?;
+    init_registry_tables(lua, &state)?;
     super::globals::register_globals(lua, Rc::clone(&state))?;
     super::secure_env::create_secure_environment(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
@@ -787,7 +655,7 @@ fn patch_elune_userdata_compat(lua: &Lua) -> crate::Result<()> {
 }
 
 /// Set up registry tables for event dispatch and taint fallback.
-fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
+fn init_registry_tables(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
     lua.set_named_registry_value("__event_individual", lua.create_table()?)?;
     lua.set_named_registry_value("__event_all", lua.create_table()?)?;
     // Persistent tables for OnUpdate profiler attribution.
@@ -797,56 +665,7 @@ fn init_registry_tables(lua: &Lua) -> mlua::Result<()> {
     let taint_fallback: mlua::Function =
         lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
-    register_on_update_dispatcher(lua)
-}
-
-/// OnUpdate dispatch loop: per-handler taint, profiling, error handling — all in pure Lua.
-const ON_UPDATE_DISPATCH_LUA: &str = r#"
-    local reg = debug.getregistry()
-    local scripts = reg.__scripts
-    local owners = reg.__frame_owners
-    local timing = reg.__addon_timing
-    local addon_names = reg.__addon_names
-    local setobjecttaint = debug.setobjecttaint
-    local G = _G
-    local stderr = io.stderr
-    return function(ids, elapsed, suffix)
-        local profile = debugprofilestop
-        local handler = geterrorhandler()
-        for i = 1, #ids do
-            local id = ids[i]
-            local func = scripts[id .. suffix]
-            if func then
-                local frame = rawget(G, "__frame_" .. id)
-                if frame then
-                    local owner = owners[id]
-                    local taint = owner and addon_names[owner]
-                    if taint then setobjecttaint(func, taint) end
-                    local t0 = profile()
-                    local ok, err = pcall(func, frame, elapsed)
-                    local dt = profile() - t0
-                    if dt > 5 then
-                        local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
-                        local ts = (G.GetTimePreciseSec and G.GetTimePreciseSec())
-                            or (G.GetTime and G.GetTime())
-                            or os.clock()
-                        stderr:write(string.format("[%7.3fs] [OnUpdate] %7.1fms  %s%s\n", ts, dt, n, suffix))
-                    end
-                    if not ok then handler(err) end
-                    if owner then
-                        timing[owner] = (timing[owner] or 0) + dt
-                    end
-                end
-            end
-        end
-    end
-"#;
-
-fn register_on_update_dispatcher(lua: &Lua) -> mlua::Result<()> {
-    super::script_helpers::get_or_create_scripts_table(lua);
-    let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;
-    let dispatch = factory.call::<mlua::Function>(())?;
-    lua.set_named_registry_value("__dispatch_on_update", dispatch)
+    super::on_update::register(lua, state)
 }
 
 /// Enable Elune taint tracking and wrap loadstring as secure.

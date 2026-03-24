@@ -1,5 +1,6 @@
 //! Lua API bindings implementing WoW's addon API.
 
+mod addon_scan;
 pub mod animation;
 mod builtin_frames;
 mod cfunc_wrap;
@@ -11,6 +12,7 @@ pub(crate) mod game_data;
 pub mod globals;
 mod globals_legacy;
 mod key_dispatch;
+pub(crate) mod on_update;
 pub(crate) mod keybindings;
 mod layout;
 pub(crate) mod loader_env;
