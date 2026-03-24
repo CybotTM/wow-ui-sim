@@ -117,7 +117,8 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
         let total = t.elapsed();
         if total.as_millis() > 20 {
             eprintln!(
-                "[fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
+                "{} [fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
+                crate::logging::global_elapsed_prefix(),
                 frame_ids.len()
             );
         }

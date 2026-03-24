@@ -241,7 +241,8 @@ fn log_gpu_memory_once(atlas: &crate::render::shader::atlas::GpuTextureAtlas) {
     }
     let stats = atlas.memory_stats();
     eprintln!(
-        "[GPU] Atlas memory: {:.0} MB allocated, {:.1} MB used | slots: 64px={} 128px={} 256px={} 512px={} 2048px={}",
+        "{} [GPU] Atlas memory: {:.0} MB allocated, {:.1} MB used | slots: 64px={} 128px={} 256px={} 512px={} 2048px={}",
+        crate::logging::global_elapsed_prefix(),
         stats.allocated_bytes as f64 / (1024.0 * 1024.0),
         stats.used_bytes as f64 / (1024.0 * 1024.0),
         stats.used_slots[0],
@@ -260,15 +261,24 @@ fn resolve_and_scale_quads(
 ) -> QuadBatch {
     let mut resolved = quads.clone();
     let atlas = pipeline.texture_atlas_mut();
+    resolve_texture_requests(atlas, &quads.texture_requests, &mut resolved.vertices);
+    resolve_mask_requests(atlas, &quads.mask_texture_requests, &mut resolved.vertices);
+    clear_pending_and_scale(&mut resolved.vertices, scale);
+    resolved
+}
 
-    // Resolve texture indices for pending vertices
-    for request in &quads.texture_requests {
+/// Remap primary texture UVs for resolved atlas entries.
+fn resolve_texture_requests(
+    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    requests: &[crate::render::TextureRequest],
+    vertices: &mut [crate::render::QuadVertex],
+) {
+    for request in requests {
         if let Some(entry) = atlas.get(&request.path) {
             let start = request.vertex_start as usize;
             let end = start + request.vertex_count as usize;
             let tex_idx = entry.tex_index();
-
-            for vertex in resolved.vertices[start..end].iter_mut() {
+            for vertex in vertices[start..end].iter_mut() {
                 if vertex.tex_index == -2 {
                     vertex.tex_index = tex_idx;
                     vertex.tex_coords[0] = entry.uv_x + vertex.tex_coords[0] * entry.uv_width;
@@ -277,14 +287,20 @@ fn resolve_and_scale_quads(
             }
         }
     }
+}
 
-    // Resolve mask texture indices for pending mask vertices
-    for request in &quads.mask_texture_requests {
+/// Remap mask texture UVs for resolved atlas entries.
+fn resolve_mask_requests(
+    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    requests: &[crate::render::TextureRequest],
+    vertices: &mut [crate::render::QuadVertex],
+) {
+    for request in requests {
         if let Some(entry) = atlas.get(&request.path) {
             let start = request.vertex_start as usize;
             let end = start + request.vertex_count as usize;
             let tex_idx = entry.tex_index();
-            for vertex in resolved.vertices[start..end].iter_mut() {
+            for vertex in vertices[start..end].iter_mut() {
                 if vertex.mask_tex_index == -2 {
                     vertex.mask_tex_index = tex_idx;
                     vertex.mask_tex_coords[0] =
@@ -295,10 +311,11 @@ fn resolve_and_scale_quads(
             }
         }
     }
+}
 
-    // Pending textured quads should be transparent until their texture is uploaded.
-    // Rendering them as plain vertex color produces bright white placeholders.
-    for vertex in resolved.vertices.iter_mut() {
+/// Hide unresolved textures and scale positions to physical pixels.
+fn clear_pending_and_scale(vertices: &mut [crate::render::QuadVertex], scale: f32) {
+    for vertex in vertices.iter_mut() {
         if vertex.tex_index == -2 {
             vertex.color[3] = 0.0;
             vertex.tex_index = -1;
@@ -306,15 +323,9 @@ fn resolve_and_scale_quads(
         if vertex.mask_tex_index == -2 {
             vertex.mask_tex_index = -1;
         }
-    }
-
-    // Scale vertex positions to physical pixels
-    for vertex in resolved.vertices.iter_mut() {
         vertex.position[0] *= scale;
         vertex.position[1] *= scale;
     }
-
-    resolved
 }
 
 impl shader::Primitive for WowUiPrimitive {

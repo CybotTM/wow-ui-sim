@@ -56,64 +56,51 @@ pub fn fire_startup_events(env: &Rc<RefCell<WowLuaEnv>>) {
     crate::startup::fire_startup_events_for_screen(&env, screen);
 }
 
-/// ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN, TIME_PLAYED_MSG, PLAYER_ENTERING_WORLD.
+/// ADDON_LOADED, VARIABLES_LOADED, PLAYER_LOGIN, then world-enter events.
 #[allow(dead_code)]
 fn fire_login_events(env: &WowLuaEnv) {
-    println!("[Startup] Firing ADDON_LOADED");
-    if let Err(e) = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(
-            env.lua().create_string("WoWUISim").unwrap(),
-        )],
-    ) {
-        eprintln!("Error firing ADDON_LOADED: {}", e);
-    }
-
+    fire_simple_startup(env, "ADDON_LOADED");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
-        println!("[Startup] Firing {event}");
-        if let Err(e) = env.fire_event(event) {
-            eprintln!("Error firing {event}: {}", e);
-        }
+        fire_simple_startup(env, event);
     }
-
-    println!("[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
-    if let Err(e) = env.fire_edit_mode_layouts_updated() {
-        eprintln!("  {}", e);
-    }
-
-    println!("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
-    if let Err(e) = env
-        .lua()
-        .globals()
-        .get::<mlua::Function>("RequestTimePlayed")
-        .and_then(|f| f.call::<()>(()))
-    {
-        eprintln!("Error calling RequestTimePlayed: {}", e);
-    }
-
-    println!("[Startup] Firing PLAYER_ENTERING_WORLD");
-    if let Err(e) = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    ) {
-        eprintln!("Error firing PLAYER_ENTERING_WORLD: {}", e);
-    }
-
+    fire_world_enter_events(env);
     crate::startup::call_unit_frame_set_unit(env);
     fire_unit_aura_event(env);
     crate::startup::seed_buff_durations(env);
 }
 
+/// EDIT_MODE_LAYOUTS_UPDATED, TIME_PLAYED_MSG, PLAYER_ENTERING_WORLD.
+#[allow(dead_code)]
+fn fire_world_enter_events(env: &WowLuaEnv) {
+    crate::logging::eprintln_elapsed("[Startup] Firing EDIT_MODE_LAYOUTS_UPDATED");
+    if let Err(e) = env.fire_edit_mode_layouts_updated() {
+        eprintln!("  {}", e);
+    }
+    crate::logging::eprintln_elapsed("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
+    if let Err(e) = env.lua().globals()
+        .get::<mlua::Function>("RequestTimePlayed")
+        .and_then(|f| f.call::<()>(()))
+    {
+        eprintln!("Error calling RequestTimePlayed: {}", e);
+    }
+    fire_simple_startup(env, "PLAYER_ENTERING_WORLD");
+}
+
+#[allow(dead_code)]
+fn fire_simple_startup(env: &WowLuaEnv, name: &str) {
+    crate::logging::eprintln_elapsed(&format!("[Startup] Firing {name}"));
+    if let Err(e) = env.fire_event(name) {
+        eprintln!("Error firing {name}: {}", e);
+    }
+}
+
 /// Fire UNIT_AURA("player", {isFullUpdate=true}) to trigger buff frame population.
 #[allow(dead_code)]
 fn fire_unit_aura_event(env: &WowLuaEnv) {
-    println!("[Startup] Firing UNIT_AURA");
+    crate::logging::eprintln_elapsed("[Startup] Firing UNIT_AURA");
     let lua = env.lua();
     let update_info = match lua.create_table() {
-        Ok(t) => {
-            let _ = t.set("isFullUpdate", true);
-            mlua::Value::Table(t)
-        }
+        Ok(t) => { let _ = t.set("isFullUpdate", true); mlua::Value::Table(t) }
         Err(_) => return,
     };
     let unit = match lua.create_string("player") {
@@ -129,16 +116,10 @@ fn fire_unit_aura_event(env: &WowLuaEnv) {
 #[allow(dead_code)]
 fn fire_world_and_ui_events(env: &WowLuaEnv) {
     for event in [
-        "BAG_UPDATE_DELAYED",
-        "UPDATE_BINDINGS",
-        "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED",
-        "UPDATE_CHAT_WINDOWS",
+        "BAG_UPDATE_DELAYED", "UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED", "UPDATE_CHAT_WINDOWS",
     ] {
-        println!("[Startup] Firing {event}");
-        if let Err(e) = env.fire_event(event) {
-            eprintln!("Error firing {event}: {}", e);
-        }
+        fire_simple_startup(env, event);
     }
 }
 
@@ -591,8 +572,8 @@ impl Drop for App {
         if let Some(ref saved_vars) = self.saved_vars {
             let env = self.env.borrow();
             match saved_vars.save_all(env.lua()) {
-                Ok(()) => eprintln!("[wow-sim] SavedVariables saved"),
-                Err(e) => eprintln!("[wow-sim] SavedVariables save error: {}", e),
+                Ok(()) => crate::logging::eprintln_elapsed("[wow-sim] SavedVariables saved"),
+                Err(e) => crate::logging::eprintln_elapsed(&format!("[wow-sim] SavedVariables save error: {e}")),
             }
         }
     }

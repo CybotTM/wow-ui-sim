@@ -22,6 +22,45 @@ use super::statusbar::collect_statusbar_fills;
 use super::strata_emit::{build_hittable_rects, build_render_list};
 use super::tooltip::TooltipRenderData;
 
+/// Map a mouse event inside `bounds` to a canvas message action.
+fn handle_mouse_event(
+    mouse_event: &mouse::Event,
+    bounds: Rectangle,
+    cursor: mouse::Cursor,
+) -> Option<shader::Action<Message>> {
+    match mouse_event {
+        mouse::Event::CursorMoved { position } if bounds.contains(*position) => {
+            let local = Point::new(position.x - bounds.x, position.y - bounds.y);
+            Some(shader::Action::publish(Message::CanvasEvent(
+                CanvasMessage::MouseMove(local),
+            )))
+        }
+        mouse::Event::ButtonPressed(mouse::Button::Left) => cursor.position_in(bounds).map(|p| {
+            shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseDown(p)))
+        }),
+        mouse::Event::ButtonReleased(mouse::Button::Left) => cursor.position_in(bounds).map(|p| {
+            shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseUp(p)))
+        }),
+        mouse::Event::ButtonPressed(mouse::Button::Right) => cursor
+            .position_in(bounds)
+            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::RightMouseDown(p)))),
+        mouse::Event::ButtonReleased(mouse::Button::Right) => cursor
+            .position_in(bounds)
+            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::RightMouseUp(p)))),
+        mouse::Event::ButtonPressed(mouse::Button::Middle) => cursor
+            .position_in(bounds)
+            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::MiddleClick(p)))),
+        mouse::Event::WheelScrolled { delta } => {
+            let dy = match delta {
+                mouse::ScrollDelta::Lines { y, .. } => *y,
+                mouse::ScrollDelta::Pixels { y, .. } => *y / 30.0,
+            };
+            Some(shader::Action::publish(Message::Scroll(0.0, dy)))
+        }
+        _ => None,
+    }
+}
+
 /// Shader program implementation for GPU rendering of WoW frames.
 impl shader::Program<Message> for &App {
     type State = ();
@@ -35,63 +74,9 @@ impl shader::Program<Message> for &App {
         cursor: mouse::Cursor,
     ) -> Option<shader::Action<Message>> {
         match event {
-            Event::Mouse(mouse_event) => match mouse_event {
-                mouse::Event::CursorMoved { position } => {
-                    if bounds.contains(*position) {
-                        let local = Point::new(position.x - bounds.x, position.y - bounds.y);
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::MouseMove(local),
-                        )));
-                    }
-                }
-                mouse::Event::ButtonPressed(mouse::Button::Left) => {
-                    if let Some(pos) = cursor.position_in(bounds) {
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::MouseDown(pos),
-                        )));
-                    }
-                }
-                mouse::Event::ButtonReleased(mouse::Button::Left) => {
-                    if let Some(pos) = cursor.position_in(bounds) {
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::MouseUp(pos),
-                        )));
-                    }
-                }
-                mouse::Event::ButtonPressed(mouse::Button::Right) => {
-                    if let Some(pos) = cursor.position_in(bounds) {
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::RightMouseDown(pos),
-                        )));
-                    }
-                }
-                mouse::Event::ButtonReleased(mouse::Button::Right) => {
-                    if let Some(pos) = cursor.position_in(bounds) {
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::RightMouseUp(pos),
-                        )));
-                    }
-                }
-                mouse::Event::ButtonPressed(mouse::Button::Middle) => {
-                    if let Some(pos) = cursor.position_in(bounds) {
-                        return Some(shader::Action::publish(Message::CanvasEvent(
-                            CanvasMessage::MiddleClick(pos),
-                        )));
-                    }
-                }
-                mouse::Event::WheelScrolled { delta } => {
-                    let dy = match delta {
-                        mouse::ScrollDelta::Lines { y, .. } => *y,
-                        mouse::ScrollDelta::Pixels { y, .. } => *y / 30.0,
-                    };
-                    return Some(shader::Action::publish(Message::Scroll(0.0, dy)));
-                }
-                _ => {}
-            },
-            Event::Keyboard(_) => {}
-            _ => {}
+            Event::Mouse(me) => handle_mouse_event(me, bounds, cursor),
+            _ => None,
         }
-        None
     }
 
     fn draw(
@@ -208,19 +193,11 @@ fn log_strata_timing(i: usize, n: usize, stats: &EmitStats, dur: std::time::Dura
     if !super::perf_logging_enabled() || dur.as_millis() <= 5 {
         return;
     }
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default();
-    let secs = now.as_secs() % 86400;
-    let (h, m, s, ms) = (
-        secs / 3600,
-        (secs % 3600) / 60,
-        secs % 60,
-        now.subsec_millis(),
-    );
     eprintln!(
-        "[{h:02}:{m:02}:{s:02}.{ms:03}] [render] strata {i}: {n} frames, {dur:.1?} (cached={} emitted={})",
-        stats.cached, stats.emitted
+        "{} [render] strata {i}: {n} frames, {dur:.1?} (cached={} emitted={})",
+        crate::logging::global_elapsed_prefix(),
+        stats.cached,
+        stats.emitted
     );
 }
 
@@ -381,16 +358,9 @@ use std::sync::Arc;
 
 fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
     if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
-        let now = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .unwrap_or_default();
-        let secs = now.as_secs() % 86400;
-        let h = secs / 3600;
-        let m = (secs % 3600) / 60;
-        let s = secs % 60;
-        let ms = now.subsec_millis();
         eprintln!(
-            "[{h:02}:{m:02}:{s:02}.{ms:03}] [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)"
+            "{} [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)",
+            crate::logging::global_elapsed_prefix()
         );
     }
 }
@@ -512,16 +482,7 @@ impl App {
         self.textures_pending.set(exhausted);
         let elapsed = t.elapsed();
         if elapsed.as_millis() > 50 && !textures.is_empty() {
-            let preview: Vec<&str> = textures
-                .iter()
-                .take(12)
-                .map(|tex| tex.path.as_str())
-                .collect();
-            eprintln!(
-                "[textures] loaded {} in {elapsed:.1?}: {}",
-                textures.len(),
-                preview.join(", ")
-            );
+            log_slow_texture_load(&textures, elapsed);
         }
         (textures, elapsed)
     }
@@ -584,14 +545,33 @@ impl App {
         let env = self.env.borrow();
         let mut font_sys = self.font_system.borrow_mut();
         let strata_buckets = self.resolve_layout_and_buckets(&env, &mut font_sys);
-
         let state = env.state().borrow();
+
+        self.emit_and_finalize_strata(
+            dirty, dirty_ids.as_ref(), size, &strata_buckets, &state, &mut font_sys,
+        );
+        self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
+        drop(state);
+        self.apply_hit_grid_changes();
+        env.state().borrow_mut().strata_buckets = Some(strata_buckets);
+    }
+
+    /// Emit quads for dirty strata into the cache.
+    fn emit_and_finalize_strata(
+        &self,
+        dirty: u16,
+        dirty_ids: Option<&HashSet<u64>>,
+        size: Size,
+        strata_buckets: &[Vec<u64>],
+        state: &crate::lua_api::SimState,
+        font_sys: &mut WowFontSystem,
+    ) {
         let elapsed_secs = state.start_time.elapsed().as_secs_f64();
-        let tooltip_data = super::tooltip::collect_tooltip_data(&state);
+        let tooltip_data = super::tooltip::collect_tooltip_data(state);
         let mut glyph_atlas = self.glyph_atlas.borrow_mut();
         glyph_atlas.advance_generation();
         let mut text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)> =
-            Some((&mut font_sys, &mut glyph_atlas));
+            Some((font_sys, &mut glyph_atlas));
 
         let mut strata_cache = self.cached_strata_quads.borrow_mut();
         let mut snap_cache = self.cached_frame_snapshots.borrow_mut();
@@ -599,9 +579,9 @@ impl App {
             &mut strata_cache,
             &mut snap_cache,
             dirty,
-            dirty_ids.as_ref(),
+            dirty_ids,
             size,
-            &strata_buckets,
+            strata_buckets,
             &state.widgets,
             self.pressed_frame,
             &mut text_ctx,
@@ -609,13 +589,6 @@ impl App {
             &tooltip_data,
             elapsed_secs,
         );
-        drop(strata_cache);
-        drop(snap_cache);
-        self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
-        drop(state);
-        self.apply_hit_grid_changes();
-
-        env.state().borrow_mut().strata_buckets = Some(strata_buckets);
     }
 
     /// Resolve layout rects and build strata buckets, logging slow phases.
@@ -633,18 +606,9 @@ impl App {
         let _ = state.get_strata_buckets();
         let bucket_dur = t1.elapsed();
         if layout_dur.as_millis() > 5 || bucket_dur.as_millis() > 5 {
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap_or_default();
-            let secs = now.as_secs() % 86400;
-            let (h, m, s, ms) = (
-                secs / 3600,
-                (secs % 3600) / 60,
-                secs % 60,
-                now.subsec_millis(),
-            );
             eprintln!(
-                "[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}"
+                "{} [rebuild] layout={layout_dur:.1?} buckets={bucket_dur:.1?}",
+                crate::logging::global_elapsed_prefix()
             );
         }
         state.strata_buckets.take().unwrap()
@@ -659,9 +623,6 @@ impl App {
         if self.cached_hittable.borrow().is_some() {
             return;
         }
-        // Interaction has to work while textures are still streaming. Building
-        // the hit grid here keeps early clicks on glue/login screens from
-        // being dropped until texture preloading finishes.
         let t = std::time::Instant::now();
         let collected = collect_hittable_frames(&state.widgets, buckets);
         let hittable = build_hittable_rects(&collected, &state.widgets);
@@ -669,17 +630,10 @@ impl App {
         *self.cached_hittable.borrow_mut() = Some(grid);
         let dur = t.elapsed();
         if dur.as_millis() > 5 {
-            let now = std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap_or_default();
-            let secs = now.as_secs() % 86400;
-            let (h, m, s, ms) = (
-                secs / 3600,
-                (secs % 3600) / 60,
-                secs % 60,
-                now.subsec_millis(),
+            eprintln!(
+                "{} [rebuild] hit_grid={dur:.1?}",
+                crate::logging::global_elapsed_prefix()
             );
-            eprintln!("[{h:02}:{m:02}:{s:02}.{ms:03}] [rebuild] hit_grid={dur:.1?}");
         }
     }
 
@@ -818,6 +772,20 @@ impl App {
             crate::render::BlendMode::Alpha,
         );
     }
+}
+
+fn log_slow_texture_load(textures: &[GpuTextureData], elapsed: std::time::Duration) {
+    let preview: Vec<&str> = textures
+        .iter()
+        .take(12)
+        .map(|tex| tex.path.as_str())
+        .collect();
+    eprintln!(
+        "{} [textures] loaded {} in {elapsed:.1?}: {}",
+        crate::logging::global_elapsed_prefix(),
+        textures.len(),
+        preview.join(", ")
+    );
 }
 
 fn collect_texture_request_paths(

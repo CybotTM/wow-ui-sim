@@ -110,6 +110,18 @@ impl LoadTiming {
             + self.lua_exec_time
             + self.saved_vars_time
     }
+
+    /// Add another timing's fields into this one.
+    pub fn accumulate(&mut self, other: &LoadTiming) {
+        self.io_time += other.io_time;
+        self.xml_parse_time += other.xml_parse_time;
+        self.xml_process_time += other.xml_process_time;
+        self.xml_frame_create_time += other.xml_frame_create_time;
+        self.xml_frame_setup_time += other.xml_frame_setup_time;
+        self.xml_frame_finalize_time += other.xml_frame_finalize_time;
+        self.lua_exec_time += other.lua_exec_time;
+        self.saved_vars_time += other.saved_vars_time;
+    }
 }
 
 /// Load an addon from its TOC file.
@@ -290,7 +302,20 @@ fn topological_sort_addons(
     let mut result = Vec::with_capacity(addons.len());
     let mut loaded: HashSet<String> = HashSet::new();
     let mut visiting: HashSet<String> = HashSet::new();
+    let ctx = (&load_with_map, &mut result, &mut loaded, &mut visiting);
 
+    emit_early_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3);
+    emit_remaining_addons(&mut addons, ctx.0, ctx.1, ctx.2, ctx.3);
+    result
+}
+
+fn emit_early_addons(
+    addons: &mut HashMap<String, (PathBuf, TocFile)>,
+    load_with_map: &HashMap<String, Vec<String>>,
+    result: &mut Vec<(String, PathBuf)>,
+    loaded: &mut HashSet<String>,
+    visiting: &mut HashSet<String>,
+) {
     let mut early: Vec<String> = addons
         .iter()
         .filter_map(|(name, (_, toc))| {
@@ -299,30 +324,22 @@ fn topological_sort_addons(
         .collect();
     early.sort();
     for name in early {
-        emit_addon_recursive(
-            &name,
-            &mut addons,
-            &load_with_map,
-            &mut result,
-            &mut loaded,
-            &mut visiting,
-        );
+        emit_addon_recursive(&name, addons, load_with_map, result, loaded, visiting);
     }
+}
 
+fn emit_remaining_addons(
+    addons: &mut HashMap<String, (PathBuf, TocFile)>,
+    load_with_map: &HashMap<String, Vec<String>>,
+    result: &mut Vec<(String, PathBuf)>,
+    loaded: &mut HashSet<String>,
+    visiting: &mut HashSet<String>,
+) {
     let mut remaining: Vec<String> = addons.keys().cloned().collect();
     remaining.sort();
     for name in remaining {
-        emit_addon_recursive(
-            &name,
-            &mut addons,
-            &load_with_map,
-            &mut result,
-            &mut loaded,
-            &mut visiting,
-        );
+        emit_addon_recursive(&name, addons, load_with_map, result, loaded, visiting);
     }
-
-    result
 }
 
 fn emit_addon_recursive(

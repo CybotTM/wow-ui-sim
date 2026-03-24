@@ -1,0 +1,102 @@
+//! Helper functions extracted from update.rs for hit-grid, checkbutton, and dirty-ID merging.
+
+/// Merge three optional dirty-ID sets into one.
+pub(super) fn merge_dirty_ids(
+    ids1: Option<std::collections::HashSet<u64>>,
+    ids2: Option<std::collections::HashSet<u64>>,
+    ids3: Option<std::collections::HashSet<u64>>,
+) -> Option<std::collections::HashSet<u64>> {
+    match (ids1, ids2, ids3) {
+        (Some(mut a), Some(b), Some(c)) => {
+            a.extend(b);
+            a.extend(c);
+            Some(a)
+        }
+        _ => None,
+    }
+}
+
+/// Walk a subtree and insert/remove hittable frames from the grid.
+pub(super) fn apply_subtree_hit_grid_change(
+    grid: &mut super::hit_grid::HitGrid,
+    registry: &crate::widget::WidgetRegistry,
+    root_id: u64,
+    became_visible: bool,
+) {
+    let mut stack = vec![root_id];
+    while let Some(id) = stack.pop() {
+        let Some(f) = registry.get(id) else { continue };
+        if became_visible {
+            grid.remove(id);
+            if let Some(rect) = hittable_rect(f) {
+                grid.insert(id, rect);
+            }
+        } else {
+            grid.remove(id);
+        }
+        stack.extend_from_slice(&f.children);
+    }
+}
+
+/// Compute the hit-testable rectangle for a frame, if eligible.
+fn hittable_rect(f: &crate::widget::Frame) -> Option<iced::Rectangle> {
+    if !f.visible || f.effective_alpha <= 0.0 || !f.mouse_enabled {
+        return None;
+    }
+    if f.name
+        .as_deref()
+        .is_some_and(|n| super::frame_collect::HIT_TEST_EXCLUDED.contains(&n))
+    {
+        return None;
+    }
+    let rect = f.layout_rect?;
+    let (il, ir, it, ib) = f.hit_rect_insets;
+    Some(iced::Rectangle::new(
+        iced::Point::new(
+            (rect.x + il) * crate::render::texture::UI_SCALE,
+            (rect.y + it) * crate::render::texture::UI_SCALE,
+        ),
+        iced::Size::new(
+            (rect.width - il - ir).max(0.0) * crate::render::texture::UI_SCALE,
+            (rect.height - it - ib).max(0.0) * crate::render::texture::UI_SCALE,
+        ),
+    ))
+}
+
+/// Check if a frame is a CheckButton that should be auto-toggled (not an action bar button).
+pub(super) fn is_toggleable_checkbutton(
+    state: &crate::lua_api::SimState,
+    frame_id: u64,
+) -> bool {
+    let is_checkbutton = state
+        .widgets
+        .get(frame_id)
+        .map(|f| f.widget_type == crate::widget::WidgetType::CheckButton)
+        .unwrap_or(false);
+    if !is_checkbutton {
+        return false;
+    }
+    !state
+        .action_ui_buttons
+        .iter()
+        .any(|(id, _)| *id == frame_id)
+}
+
+/// Read the `__checked` attribute from a frame (defaults to false).
+pub(super) fn get_checked_attribute(
+    state: &crate::lua_api::SimState,
+    frame_id: u64,
+) -> bool {
+    state
+        .widgets
+        .get(frame_id)
+        .and_then(|f| f.attributes.get("__checked"))
+        .and_then(|v| {
+            if let crate::widget::AttributeValue::Boolean(b) = v {
+                Some(*b)
+            } else {
+                None
+            }
+        })
+        .unwrap_or(false)
+}

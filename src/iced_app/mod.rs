@@ -55,6 +55,8 @@ mod tree_dump;
 #[cfg(feature = "gui")]
 mod update;
 #[cfg(feature = "gui")]
+mod update_helpers;
+#[cfg(feature = "gui")]
 mod update_servers;
 #[cfg(feature = "gui")]
 mod view;

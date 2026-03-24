@@ -8,116 +8,61 @@ use crate::lua_api::WowLuaEnv;
 use super::Message;
 use super::app::App;
 use super::state::CanvasMessage;
+use super::update_helpers::{
+    apply_subtree_hit_grid_change, get_checked_attribute, is_toggleable_checkbutton,
+    merge_dirty_ids,
+};
 
 impl App {
     pub fn update(&mut self, message: Message) -> Task<Message> {
-        // Always drain IPC so commands from the inspector/REPL are processed
-        // even when idle (no timer subscription active).
         let ipc_task = self.process_ipc();
-
         let task = match message {
-            Message::FireEvent(event) => {
-                self.handle_fire_event(&event);
-                Task::none()
-            }
-            Message::CanvasEvent(canvas_msg) => self.handle_canvas_event(canvas_msg),
-            Message::Scroll(dx, dy) => {
-                self.handle_scroll(dx, dy);
-                Task::none()
-            }
-            Message::ReloadUI => {
-                self.handle_reload_ui();
-                Task::none()
-            }
-            Message::CommandInputChanged(input) => {
-                self.command_input = input;
-                Task::none()
-            }
-            Message::ExecuteCommand => {
-                self.handle_execute_command();
-                Task::none()
-            }
+            Message::CanvasEvent(cm) => self.handle_canvas_event(cm),
             Message::ProcessTimers => self.handle_process_timers(),
-            Message::ScreenshotTaken(screenshot) => {
-                self.handle_screenshot_taken(screenshot);
+            msg => {
+                self.dispatch_simple_message(msg);
                 Task::none()
             }
-            Message::FpsTick => Task::none(),
-            Message::InspectorClose => {
-                self.handle_inspector_close();
-                Task::none()
-            }
-            Message::InspectorWidthChanged(val) => {
-                self.inspector_state.width = val;
-                Task::none()
-            }
-            Message::InspectorHeightChanged(val) => {
-                self.inspector_state.height = val;
-                Task::none()
-            }
-            Message::InspectorAlphaChanged(val) => {
-                self.inspector_state.alpha = val;
-                Task::none()
-            }
-            Message::InspectorLevelChanged(val) => {
-                self.inspector_state.frame_level = val;
-                Task::none()
-            }
-            Message::InspectorVisibleToggled(val) => {
-                self.inspector_state.visible = val;
-                Task::none()
-            }
-            Message::InspectorMouseEnabledToggled(val) => {
-                self.inspector_state.mouse_enabled = val;
-                Task::none()
-            }
-            Message::InspectorApply => {
-                self.handle_inspector_apply();
-                Task::none()
-            }
-            Message::ToggleFramesPanel => {
-                self.frames_panel_collapsed = !self.frames_panel_collapsed;
-                Task::none()
-            }
-            Message::XpLevelChanged(ref label) => {
-                self.handle_xp_level_changed(label);
-                Task::none()
-            }
+        };
+        Task::batch([task, ipc_task])
+    }
+
+    /// Handle messages that always return `Task::none()`.
+    fn dispatch_simple_message(&mut self, message: Message) {
+        match message {
+            Message::FireEvent(event) => self.handle_fire_event(&event),
+            Message::Scroll(dx, dy) => self.handle_scroll(dx, dy),
+            Message::ReloadUI => self.handle_reload_ui(),
+            Message::CommandInputChanged(input) => self.command_input = input,
+            Message::ExecuteCommand => self.handle_execute_command(),
+            Message::ScreenshotTaken(ss) => self.handle_screenshot_taken(ss),
+            Message::FpsTick => {}
+            Message::InspectorClose => self.handle_inspector_close(),
+            Message::InspectorWidthChanged(v) => self.inspector_state.width = v,
+            Message::InspectorHeightChanged(v) => self.inspector_state.height = v,
+            Message::InspectorAlphaChanged(v) => self.inspector_state.alpha = v,
+            Message::InspectorLevelChanged(v) => self.inspector_state.frame_level = v,
+            Message::InspectorVisibleToggled(v) => self.inspector_state.visible = v,
+            Message::InspectorMouseEnabledToggled(v) => self.inspector_state.mouse_enabled = v,
+            Message::InspectorApply => self.handle_inspector_apply(),
+            Message::ToggleFramesPanel => self.frames_panel_collapsed = !self.frames_panel_collapsed,
+            Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::KeyPress(ref key, ref text) => {
                 if key == "ESCAPE" && self.options_modal_visible {
                     self.options_modal_visible = false;
                 } else {
                     self.handle_key_press(key, text.as_deref());
                 }
-                Task::none()
             }
-            Message::PlayerClassChanged(ref name) => {
-                self.handle_player_class_changed(name);
-                Task::none()
-            }
-            Message::PlayerRaceChanged(ref name) => {
-                self.handle_player_race_changed(name);
-                Task::none()
-            }
-            Message::RotDamageLevelChanged(ref label) => {
-                self.handle_rot_damage_level_changed(label);
-                Task::none()
-            }
-            Message::ToggleOptionsModal => {
-                self.options_modal_visible = !self.options_modal_visible;
-                Task::none()
-            }
-            Message::CloseOptionsModal => {
-                self.options_modal_visible = false;
-                Task::none()
-            }
-            Message::MovementToggled(field, val) => {
-                self.handle_movement_toggled(field, val);
-                Task::none()
-            }
-        };
-
-        Task::batch([task, ipc_task])
+            Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
+            Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
+            Message::RotDamageLevelChanged(ref label) => self.handle_rot_damage_level_changed(label),
+            Message::ToggleOptionsModal => self.options_modal_visible = !self.options_modal_visible,
+            Message::CloseOptionsModal => self.options_modal_visible = false,
+            Message::MovementToggled(field, val) => self.handle_movement_toggled(field, val),
+            // Handled in update() directly:
+            Message::CanvasEvent(_) | Message::ProcessTimers => unreachable!(),
+        }
     }
 
     // ── Event handlers ──────────────────────────────────────────────────
@@ -165,11 +110,7 @@ impl App {
             .map(|(_, f)| *f)
             .unwrap_or(0.0);
         let at_max = fraction == 0.0;
-        let event = if at_max {
-            "DISABLE_XP_GAIN"
-        } else {
-            "ENABLE_XP_GAIN"
-        };
+        let event = if at_max { "DISABLE_XP_GAIN" } else { "ENABLE_XP_GAIN" };
         {
             let env = self.env.borrow();
             let xp_max = 89_750i32;
@@ -259,7 +200,6 @@ impl App {
         self.save_config();
     }
 
-    /// Fire UNIT_PORTRAIT_UPDATE + PLAYER_ENTERING_WORLD to refresh unit frames.
     fn fire_portrait_update(&self, env: &WowLuaEnv) {
         let _ = env.fire_event_with_args(
             "UNIT_PORTRAIT_UPDATE",
@@ -299,7 +239,6 @@ impl App {
         if cmd.is_empty() {
             return;
         }
-
         self.log_messages.push(format!("> {}", cmd));
         self.execute_command_inner(&cmd);
         self.drain_console();
@@ -320,12 +259,8 @@ impl App {
             let env = self.env.borrow();
             match env.dispatch_slash_command(cmd) {
                 Ok(true) => {}
-                Ok(false) => {
-                    self.log_messages.push(format!("Unknown command: {}", cmd));
-                }
-                Err(e) => {
-                    self.log_messages.push(format!("Command error: {}", e));
-                }
+                Ok(false) => self.log_messages.push(format!("Unknown command: {}", cmd)),
+                Err(e) => self.log_messages.push(format!("Command error: {}", e)),
             }
         }
     }
@@ -345,67 +280,37 @@ impl App {
                 std::time::Duration::from_millis(75),
             ));
         }
-        let total = t0.elapsed();
-        if super::perf_logging_enabled() && total.as_millis() > 10 {
-            let n = self.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
-            eprintln!(
-                "[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
-                self.textures_pending.get()
-            );
-        }
+        log_slow_tick(t0.elapsed(), layout_dur, combined, self);
         Task::none()
     }
 
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
     fn collect_tick_dirty(&mut self) -> (u16, std::time::Duration) {
-        self.env
-            .borrow()
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty();
+        self.take_render_dirty(); // discard pre-timer dirty
         self.run_wow_timers();
-        let (m1, ids1) = self
-            .env
-            .borrow()
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty_with_ids();
+        let (m1, ids1) = self.take_render_dirty_with_ids();
 
         let t_layout = std::time::Instant::now();
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
         let layout_dur = t_layout.elapsed();
 
         self.fire_on_update();
-        let (m2, ids2) = self
-            .env
-            .borrow()
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty_with_ids();
+        let (m2, ids2) = self.take_render_dirty_with_ids();
 
         self.tick_party_health();
         self.tick_casting();
-        let (m3, ids3) = self
-            .env
-            .borrow()
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty_with_ids();
+        let (m3, ids3) = self.take_render_dirty_with_ids();
 
-        let combined_ids = match (ids1, ids2, ids3) {
-            (Some(mut a), Some(b), Some(c)) => {
-                a.extend(b);
-                a.extend(c);
-                Some(a)
-            }
-            _ => None,
-        };
-        *self.pending_dirty_ids.borrow_mut() = combined_ids;
+        *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids(ids1, ids2, ids3);
         (m1 | m2 | m3, layout_dur)
+    }
+
+    fn take_render_dirty(&self) {
+        self.env.borrow().state().borrow().widgets.take_render_dirty();
+    }
+
+    fn take_render_dirty_with_ids(&self) -> (u16, Option<std::collections::HashSet<u64>>) {
+        self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids()
     }
 
     fn update_fps_counter(&mut self) {
@@ -432,18 +337,14 @@ impl App {
     fn fire_on_update(&mut self) {
         let now = std::time::Instant::now();
         let elapsed = now.duration_since(self.last_on_update_time);
-        // Throttle: skip if less than 16ms since last completion.
-        // Prevents queued ProcessTimers messages from starving draw().
         if elapsed.as_millis() < 16 {
             return;
         }
         self.last_on_update_time = now;
         let env = self.env.borrow();
         if let Err(e) = env.fire_on_update(elapsed.as_secs_f64()) {
-            let ts = now.duration_since(self.fps_last_time);
-            eprintln!("[{ts:.1?}] [OnUpdate] error: {e}");
+            crate::logging::eprintln_elapsed(&format!("[OnUpdate] error: {e}"));
         }
-        // Update timestamp to after completion so throttle measures from end.
         self.last_on_update_time = std::time::Instant::now();
     }
 
@@ -469,9 +370,7 @@ impl App {
             let unit_id = format!("party{idx}");
             let _ = env.fire_event_with_args(
                 "UNIT_HEALTH",
-                &[mlua::Value::String(
-                    env.lua().create_string(&unit_id).unwrap(),
-                )],
+                &[mlua::Value::String(env.lua().create_string(&unit_id).unwrap())],
             );
         }
     }
@@ -523,7 +422,6 @@ impl App {
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    /// Save current UI settings to config file.
     fn save_config(&self) {
         let mut config = crate::config::SimConfig::load();
         config.player_class = self.selected_class.clone();
@@ -534,31 +432,22 @@ impl App {
         config.save();
     }
 
-    /// Resolve layout and fire OnUpdate after script handlers so that handlers
-    /// registered during events (e.g. talent UI dirty-node processing) run in
-    /// the same frame as the triggering click, then invalidate the render.
     pub(super) fn flush_post_script_updates(&mut self) {
         self.env.borrow().state().borrow_mut().ensure_layout_rects();
         self.fire_on_update();
         self.invalidate();
     }
 
-    /// Drain console, preload textures, and mark all strata dirty.
     pub(super) fn invalidate(&mut self) {
         self.drain_console();
         self.preload_visible_textures();
-        self.gpu_failed_textures.borrow_mut().clear(); // fresh upload attempt
+        self.gpu_failed_textures.borrow_mut().clear();
         self.mark_all_strata_dirty();
         self.preload_current_render_requests_preserving_dirty(Some(
             std::time::Duration::from_millis(25),
         ));
     }
 
-    /// Preload visible base textures with a bounded budget before draw.
-    ///
-    /// A larger budget here is worthwhile for live game UI because cached base
-    /// atlases make subsequent `@crop:` extraction cheap and avoid long draw-time
-    /// stalls when large panels first become visible.
     fn preload_visible_textures(&self) {
         let env = self.env.borrow();
         let paths = env.state().borrow().widgets.visible_texture_paths();
@@ -580,14 +469,12 @@ impl App {
         self.textures_pending.set(remaining_uncached);
         let loaded = tex_mgr.cache_len() - before;
         if loaded > 0 {
-            eprintln!("[preload] {loaded} new textures ({} total)", paths.len());
+            crate::logging::eprintln_elapsed(
+                &format!("[preload] {loaded} new textures ({} total)", paths.len()),
+            );
         }
     }
 
-    /// Apply pending HitGrid changes from `set_frame_visible` calls.
-    ///
-    /// Walks the subtree of each changed root and inserts/removes hittable
-    /// frames from the grid. Called after Lua handlers fire.
     pub(super) fn apply_hit_grid_changes(&self) {
         let env = self.env.borrow();
         let mut state = env.state().borrow_mut();
@@ -601,52 +488,12 @@ impl App {
         let Some(grid) = grid_ref.as_mut() else {
             return;
         };
-
         let state = env.state().borrow();
-        let registry = &state.widgets;
-
         for (root_id, became_visible) in changes {
-            // Walk subtree and update each frame in the grid.
-            let mut stack = vec![root_id];
-            while let Some(id) = stack.pop() {
-                let Some(f) = registry.get(id) else { continue };
-                if became_visible {
-                    // Remove first so moved frames get old cell entries cleaned up.
-                    grid.remove(id);
-                    if f.visible
-                        && f.effective_alpha > 0.0
-                        && f.mouse_enabled
-                        && !f
-                            .name
-                            .as_deref()
-                            .is_some_and(|n| super::frame_collect::HIT_TEST_EXCLUDED.contains(&n))
-                    {
-                        if let Some(rect) = f.layout_rect {
-                            let (il, ir, it, ib) = f.hit_rect_insets;
-                            let scaled = iced::Rectangle::new(
-                                iced::Point::new(
-                                    (rect.x + il) * crate::render::texture::UI_SCALE,
-                                    (rect.y + it) * crate::render::texture::UI_SCALE,
-                                ),
-                                iced::Size::new(
-                                    (rect.width - il - ir).max(0.0)
-                                        * crate::render::texture::UI_SCALE,
-                                    (rect.height - it - ib).max(0.0)
-                                        * crate::render::texture::UI_SCALE,
-                                ),
-                            );
-                            grid.insert(id, scaled);
-                        }
-                    }
-                } else {
-                    grid.remove(id);
-                }
-                stack.extend_from_slice(&f.children);
-            }
+            apply_subtree_hit_grid_change(grid, &state.widgets, root_id, became_visible);
         }
     }
 
-    /// Check whether a frame's `__enabled` attribute is true (default: true).
     pub(super) fn is_frame_enabled(&self, frame_id: u64) -> bool {
         let env = self.env.borrow();
         let state = env.state().borrow();
@@ -654,17 +501,13 @@ impl App {
             .widgets
             .get(frame_id)
             .and_then(|f| f.attributes.get("__enabled"))
-            .and_then(|v| {
-                if let crate::widget::AttributeValue::Boolean(b) = v {
-                    Some(*b)
-                } else {
-                    None
-                }
+            .and_then(|v| match v {
+                crate::widget::AttributeValue::Boolean(b) => Some(*b),
+                _ => None,
             })
             .unwrap_or(true)
     }
 
-    /// Focus an EditBox on click, or clear focus when clicking elsewhere.
     pub(super) fn update_editbox_focus(&self, clicked_frame: Option<u64>) {
         let env = self.env.borrow();
         let editbox_target = env.resolve_editbox_focus_target(clicked_frame);
@@ -672,62 +515,24 @@ impl App {
 
         if let Some(fid) = editbox_target {
             if old_focus != Some(fid) {
-                // Focus the clicked EditBox via Lua SetFocus logic
-                {
-                    let mut state = env.state().borrow_mut();
-                    state.focused_frame_id = Some(fid);
-                }
+                env.state().borrow_mut().focused_frame_id = Some(fid);
                 if let Some(old_id) = old_focus {
                     let _ = env.fire_script_handler(old_id, "OnEditFocusLost", vec![]);
                 }
                 let _ = env.fire_script_handler(fid, "OnEditFocusGained", vec![]);
             }
         } else if let Some(old_id) = old_focus {
-            // Clicked on non-EditBox: clear focus
-            {
-                let mut state = env.state().borrow_mut();
-                state.focused_frame_id = None;
-            }
+            env.state().borrow_mut().focused_frame_id = None;
             let _ = env.fire_script_handler(old_id, "OnEditFocusLost", vec![]);
         }
     }
 
-    /// Toggle CheckButton checked state before OnClick (WoW behavior).
-    /// Skip action bar buttons — they manage checked state via UpdateState().
     pub(super) fn toggle_checkbutton_if_needed(&self, frame_id: u64, env: &WowLuaEnv) {
         let mut state = env.state().borrow_mut();
-        let is_checkbutton = state
-            .widgets
-            .get(frame_id)
-            .map(|f| f.widget_type == crate::widget::WidgetType::CheckButton)
-            .unwrap_or(false);
-        if !is_checkbutton {
+        if !is_toggleable_checkbutton(&state, frame_id) {
             return;
         }
-        // Action bar buttons registered via SetActionUIButton manage their own
-        // checked state through UpdateState() — don't auto-toggle them.
-        let is_action_button = state
-            .action_ui_buttons
-            .iter()
-            .any(|(id, _)| *id == frame_id);
-        if is_action_button {
-            return;
-        }
-
-        let old_checked = state
-            .widgets
-            .get(frame_id)
-            .and_then(|f| f.attributes.get("__checked"))
-            .and_then(|v| {
-                if let crate::widget::AttributeValue::Boolean(b) = v {
-                    Some(*b)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or(false);
-        let new_checked = !old_checked;
-
+        let new_checked = !get_checked_attribute(&state, frame_id);
         if let Some(frame) = state.widgets.get_mut(frame_id) {
             frame.attributes.insert(
                 "__checked".to_string(),
@@ -743,8 +548,6 @@ impl App {
         }
     }
 
-    /// Sync the iced canvas size to SimState and UIParent/WorldFrame dimensions.
-    /// Called from the render path when the window is resized by the window manager.
     pub(crate) fn sync_screen_size_to_state(&self, size: iced::Size) {
         let env = self.env.borrow();
         let state = env.state().borrow();
@@ -753,10 +556,8 @@ impl App {
         {
             crate::logging::println_elapsed(&format!(
                 "Window size: {}x{} (was {}x{})",
-                size.width as i32,
-                size.height as i32,
-                state.screen_width as i32,
-                state.screen_height as i32
+                size.width as i32, size.height as i32,
+                state.screen_width as i32, state.screen_height as i32
             ));
             drop(state);
             env.set_screen_size(size.width, size.height);
@@ -767,5 +568,15 @@ impl App {
         let env = self.env.borrow();
         let mut state = env.state().borrow_mut();
         self.log_messages.append(&mut state.console_output);
+    }
+}
+
+fn log_slow_tick(total: std::time::Duration, layout_dur: std::time::Duration, combined: u16, app: &App) {
+    if super::perf_logging_enabled() && total.as_millis() > 10 {
+        let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
+        eprintln!(
+            "[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
+            app.textures_pending.get()
+        );
     }
 }
