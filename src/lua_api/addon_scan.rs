@@ -6,9 +6,17 @@ use crate::toc::TocFile;
 fn addon_info_from_toc(name: &str, toc: Option<&TocFile>) -> AddonInfo {
     let (title, notes, load_on_demand, use_secure_env) = toc
         .map(|t| {
-            let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.to_string());
+            let title = t
+                .metadata
+                .get("Title")
+                .cloned()
+                .unwrap_or_else(|| name.to_string());
             let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-            let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
+            let lod = t
+                .metadata
+                .get("LoadOnDemand")
+                .map(|v| v == "1")
+                .unwrap_or(false);
             (title, notes, lod, t.is_secure_env())
         })
         .unwrap_or_else(|| (name.to_string(), String::new(), false, false));

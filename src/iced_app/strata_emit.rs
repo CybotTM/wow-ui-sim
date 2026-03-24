@@ -132,7 +132,7 @@ pub(super) fn build_render_list(
 /// Resolve effective alpha for a frame, with button-state-texture parent fallback.
 fn resolve_eff_alpha(f: &crate::widget::Frame, registry: &crate::widget::WidgetRegistry) -> f32 {
     if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
-        return chain_effective_alpha_from(f.parent_id, registry);
+        return chain_effective_alpha_from(f.parent_id, registry) * f.alpha;
     }
     chain_effective_alpha_from(Some(f.id), registry)
 }
@@ -284,4 +284,45 @@ pub fn build_quad_batch_with_cache(
         );
     }
     (batch, collected)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::resolve_eff_alpha;
+    use crate::widget::{Frame, WidgetRegistry, WidgetType};
+
+    #[test]
+    fn button_state_texture_alpha_fallback_multiplies_own_alpha() {
+        let mut registry = WidgetRegistry::new();
+
+        let root = Frame::new(WidgetType::Frame, Some("UIParent".to_string()), None);
+        let root_id = root.id;
+        registry.register(root);
+
+        let mut button = Frame::new(
+            WidgetType::Button,
+            Some("GameMenuButton".to_string()),
+            Some(root_id),
+        );
+        button.alpha = 0.8;
+        let button_id = button.id;
+        registry.register(button);
+        registry.add_child(root_id, button_id);
+
+        let mut normal = Frame::new(WidgetType::Texture, None, Some(button_id));
+        normal.visible = false;
+        normal.alpha = 0.4;
+        normal.parent_key = Some("NormalTexture".to_string());
+        let normal_id = normal.id;
+        registry.register(normal);
+        registry.add_child(button_id, normal_id);
+
+        registry.propagate_all_effective_alpha();
+
+        let alpha = resolve_eff_alpha(registry.get(normal_id).unwrap(), &registry);
+        assert!(
+            (alpha - 0.32).abs() < f32::EPSILON,
+            "expected hidden button texture alpha fallback to keep child alpha, got {alpha}"
+        );
+    }
 }

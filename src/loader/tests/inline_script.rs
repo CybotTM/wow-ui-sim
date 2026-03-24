@@ -76,7 +76,9 @@ fn test_xml_inline_script_error_continues() {
     let state = env.state().borrow();
     let new_errors = &state.lua_errors[before_errors..];
     assert!(
-        new_errors.iter().any(|msg| msg.contains("intentional error")),
+        new_errors
+            .iter()
+            .any(|msg| msg.contains("intentional error")),
         "inline XML script error should be collected in state.lua_errors: {new_errors:?}"
     );
 

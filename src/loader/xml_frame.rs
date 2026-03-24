@@ -3,10 +3,10 @@
 use crate::lua_api::LoaderEnv;
 use std::time::Instant;
 
+use super::LoadTiming;
 use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, rand_id};
-use super::LoadTiming;
 use super::precompiled;
 use super::xml_fontstring::create_fontstring_from_xml;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
@@ -616,8 +616,14 @@ fn create_single_child_frame(
         Some(triple) => triple,
         None => return Ok(()),
     };
-    let child_name =
-        create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic, timing)?;
+    let child_name = create_frame_from_xml(
+        env,
+        child_frame,
+        child_type,
+        Some(parent_name),
+        intrinsic,
+        timing,
+    )?;
     if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
         let fns = precompiled::get(env.lua());
         fns.assign_parent_key
@@ -639,8 +645,14 @@ fn create_frame_elements(
             Some(triple) => triple,
             None => continue,
         };
-        let child_name =
-            create_frame_from_xml(env, child_frame, child_type, Some(parent_name), intrinsic, timing)?;
+        let child_name = create_frame_from_xml(
+            env,
+            child_frame,
+            child_type,
+            Some(parent_name),
+            intrinsic,
+            timing,
+        )?;
 
         // Assign parentKey so the parent can reference the child.
         // The Lua assignment triggers __newindex which syncs to Rust children_keys.

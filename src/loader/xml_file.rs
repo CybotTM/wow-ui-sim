@@ -134,11 +134,10 @@ fn process_script(
                 LoadError::Lua(e.to_string())
             })?;
         if ctx.use_secure_env {
-            crate::lua_api::secure_env::apply_secure_env(lua, &func)
-                .map_err(|e| {
-                    crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                    LoadError::Lua(e.to_string())
-                })?;
+            crate::lua_api::secure_env::apply_secure_env(lua, &func).map_err(|e| {
+                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+                LoadError::Lua(e.to_string())
+            })?;
         }
         // In WoW, runtime errors in inline <Script> elements are caught by the
         // error handler and don't abort XML file processing.
