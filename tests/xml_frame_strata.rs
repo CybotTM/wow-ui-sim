@@ -1,6 +1,6 @@
 //! Tests for XML frameStrata and frameLevel attribute parsing.
 
-use wow_ui_sim::loader::create_frame_from_xml;
+use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, clear_templates, parse_xml};
 
@@ -19,7 +19,7 @@ fn test_create_frame_from_xml_frame_strata() {
 
     let ui = parse_xml(xml).unwrap();
     if let XmlElement::Frame(frame) = &ui.elements[0] {
-        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
+        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None, &mut LoadTiming::default()).unwrap();
     }
 
     let strata: String = env
@@ -53,7 +53,7 @@ fn test_frame_strata_inherited_from_template() {
     "#;
     let ui = parse_xml(template_xml).unwrap();
     if let XmlElement::Frame(frame) = &ui.elements[0] {
-        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
+        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None, &mut LoadTiming::default()).unwrap();
     }
 
     let frame_xml = r#"
@@ -65,7 +65,7 @@ fn test_frame_strata_inherited_from_template() {
     "#;
     let ui2 = parse_xml(frame_xml).unwrap();
     if let XmlElement::Frame(frame) = &ui2.elements[0] {
-        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
+        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None, &mut LoadTiming::default()).unwrap();
     }
 
     let strata: String = env

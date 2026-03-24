@@ -13,6 +13,7 @@ mod xml_file;
 mod xml_fontstring;
 mod xml_frame;
 mod xml_frame_extras;
+mod xml_layer_batch;
 mod xml_lifecycle;
 mod xml_texture;
 
@@ -92,6 +93,22 @@ pub struct LoadTiming {
     pub xml_frame_setup_time: Duration,
     /// Time in child creation/finalization (subset of xml_frame_create_time)
     pub xml_frame_finalize_time: Duration,
+    /// Time executing CreateFrame Lua code (subset of setup)
+    pub frame_exec_lua_time: Duration,
+    /// Time applying XML properties in Rust (subset of setup)
+    pub frame_apply_props_time: Duration,
+    /// Time creating layer children (textures/fontstrings, subset of finalize)
+    pub frame_layer_children_time: Duration,
+    /// Time firing OnLoad/OnShow lifecycle scripts (subset of finalize)
+    pub frame_lifecycle_time: Duration,
+    /// Number of frames created
+    pub frame_count: u32,
+    /// Number of OnLoad/OnShow fires
+    pub lifecycle_fire_count: u32,
+    /// Number of textures created
+    pub texture_count: u32,
+    /// Number of fontstrings created
+    pub fontstring_count: u32,
     /// Time executing Lua (compile + call; on cache hit, compile is near-zero)
     pub lua_exec_time: Duration,
     /// Time loading SavedVariables
@@ -119,6 +136,14 @@ impl LoadTiming {
         self.xml_frame_create_time += other.xml_frame_create_time;
         self.xml_frame_setup_time += other.xml_frame_setup_time;
         self.xml_frame_finalize_time += other.xml_frame_finalize_time;
+        self.frame_exec_lua_time += other.frame_exec_lua_time;
+        self.frame_apply_props_time += other.frame_apply_props_time;
+        self.frame_layer_children_time += other.frame_layer_children_time;
+        self.frame_lifecycle_time += other.frame_lifecycle_time;
+        self.frame_count += other.frame_count;
+        self.lifecycle_fire_count += other.lifecycle_fire_count;
+        self.texture_count += other.texture_count;
+        self.fontstring_count += other.fontstring_count;
         self.lua_exec_time += other.lua_exec_time;
         self.saved_vars_time += other.saved_vars_time;
     }

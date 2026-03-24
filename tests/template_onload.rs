@@ -3,7 +3,7 @@
 //! Verifies that fire_on_load does NOT fire the mixin's OnLoad on child frames
 //! that share the parent's mixin but have no <Scripts> section.
 
-use wow_ui_sim::loader::create_frame_from_xml;
+use wow_ui_sim::loader::{LoadTiming, create_frame_from_xml};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, clear_templates, parse_xml, register_template};
 
@@ -93,7 +93,7 @@ fn template_child_shared_mixin_no_onload_xml() {
     "#;
     let ui = parse_xml(xml).unwrap();
     if let XmlElement::Frame(frame) = &ui.elements[0] {
-        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None).unwrap();
+        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None, &mut LoadTiming::default()).unwrap();
     }
 
     let result = check_onload_only_on_parent(&env, "SpellBtnXml");

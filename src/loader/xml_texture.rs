@@ -9,6 +9,61 @@ use super::helpers::{
 };
 use super::helpers_anim::generate_animation_group_code;
 
+fn emit_file_code(texture: &crate::xml::TextureXml) -> String {
+    if let Some(file) = &texture.file {
+        return format!(
+            r#"
+        tex:SetTexture("{}")
+        "#,
+            escape_lua_string(file)
+        );
+    }
+    String::new()
+}
+
+fn emit_atlas_code(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
+    if let Some(atlas) = &texture.atlas {
+        let use_atlas_size = texture.use_atlas_size.unwrap_or(is_mask);
+        return format!(
+            r#"
+        tex:SetAtlas("{}", {})
+        "#,
+            escape_lua_string(atlas),
+            use_atlas_size
+        );
+    }
+    String::new()
+}
+
+fn emit_tex_coords_code(texture: &crate::xml::TextureXml) -> String {
+    if let Some(tc) = &texture.tex_coords {
+        let left = tc.left.unwrap_or(0.0);
+        let right = tc.right.unwrap_or(1.0);
+        let top = tc.top.unwrap_or(0.0);
+        let bottom = tc.bottom.unwrap_or(1.0);
+        return format!(
+            r#"
+        tex:SetTexCoord({}, {}, {}, {})
+        "#,
+            left, right, top, bottom
+        );
+    }
+    String::new()
+}
+
+fn emit_size_code(texture: &crate::xml::TextureXml) -> String {
+    if let Some(size) = &texture.size {
+        let (x, y) = get_size_values(size);
+        return match (x, y) {
+            (Some(x), Some(y)) => format!("\n        tex:SetSize({}, {})\n        ", x, y),
+            (Some(x), None) => format!("\n        tex:SetWidth({})\n        ", x),
+            (None, Some(y)) => format!("\n        tex:SetHeight({})\n        ", y),
+            _ => String::new(),
+        };
+    }
+    String::new()
+}
+
 /// Generate Lua code for texture source (file or atlas) and size.
 ///
 /// `is_mask`: MaskTextures default to `useAtlasSize=true` when not explicit,
@@ -17,68 +72,20 @@ use super::helpers_anim::generate_animation_group_code;
 /// the opaque center of the mask texture.
 fn generate_texture_source_code(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
     let mut code = String::new();
-
-    if let Some(file) = &texture.file {
-        code.push_str(&format!(
-            r#"
-        tex:SetTexture("{}")
-        "#,
-            escape_lua_string(file)
-        ));
-    }
-
-    if let Some(atlas) = &texture.atlas {
-        let default_use_atlas_size = is_mask;
-        let use_atlas_size = texture.use_atlas_size.unwrap_or(default_use_atlas_size);
-        code.push_str(&format!(
-            r#"
-        tex:SetAtlas("{}", {})
-        "#,
-            escape_lua_string(atlas),
-            use_atlas_size
-        ));
-    }
-
-    if let Some(tc) = &texture.tex_coords {
-        let left = tc.left.unwrap_or(0.0);
-        let right = tc.right.unwrap_or(1.0);
-        let top = tc.top.unwrap_or(0.0);
-        let bottom = tc.bottom.unwrap_or(1.0);
-        code.push_str(&format!(
-            r#"
-        tex:SetTexCoord({}, {}, {}, {})
-        "#,
-            left, right, top, bottom
-        ));
-    }
-
-    if let Some(size) = &texture.size {
-        let (x, y) = get_size_values(size);
-        match (x, y) {
-            (Some(x), Some(y)) => {
-                code.push_str(&format!("\n        tex:SetSize({}, {})\n        ", x, y));
-            }
-            (Some(x), None) => {
-                code.push_str(&format!("\n        tex:SetWidth({})\n        ", x));
-            }
-            (None, Some(y)) => {
-                code.push_str(&format!("\n        tex:SetHeight({})\n        ", y));
-            }
-            _ => {}
-        }
-    }
-
+    code.push_str(&emit_file_code(texture));
+    code.push_str(&emit_atlas_code(texture, is_mask));
+    code.push_str(&emit_tex_coords_code(texture));
+    code.push_str(&emit_size_code(texture));
     code
 }
 
-/// Generate Lua code for texture visual properties (color, tiling, parentKey).
-fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
-    let mut code = String::new();
-
-    if let Some(color) = &texture.color {
-        if let Some(name) = &color.color {
-            code.push_str(&format!(
-                r#"
+fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
+    let Some(color) = &texture.color else {
+        return String::new();
+    };
+    if let Some(name) = &color.color {
+        format!(
+            r#"
         do
             local c = {name}
             if c then
@@ -86,33 +93,37 @@ fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
             end
         end
         "#,
-                name = name
-            ));
-        } else {
-            code.push_str(&format!(
-                r#"
+            name = name
+        )
+    } else {
+        format!(
+            r#"
         tex:SetVertexColor({}, {}, {}, {})
         "#,
-                color.r.unwrap_or(1.0),
-                color.g.unwrap_or(1.0),
-                color.b.unwrap_or(1.0),
-                color.a.unwrap_or(1.0)
-            ));
-        }
+            color.r.unwrap_or(1.0),
+            color.g.unwrap_or(1.0),
+            color.b.unwrap_or(1.0),
+            color.a.unwrap_or(1.0)
+        )
     }
+}
 
+fn emit_tiling_flags_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if texture.horiz_tile == Some(true) {
         code.push_str("\n        tex:SetHorizTile(true)\n        ");
     }
-
     if texture.vert_tile == Some(true) {
         code.push_str("\n        tex:SetVertTile(true)\n        ");
     }
-
     if texture.set_all_points == Some(true) {
         code.push_str("\n        tex:SetAllPoints(true)\n        ");
     }
+    code
+}
 
+fn emit_parent_key_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if let Some(key) = &texture.parent_key {
         code.push_str(&format!(
             r#"
@@ -121,7 +132,6 @@ fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
             key
         ));
     }
-
     if let Some(parent_array) = &texture.parent_array {
         code.push_str(&format!(
             r#"
@@ -130,7 +140,15 @@ fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
         "#,
         ));
     }
+    code
+}
 
+/// Generate Lua code for texture visual properties (color, tiling, parentKey).
+fn generate_texture_visual_code(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
+    code.push_str(&emit_color_code(texture));
+    code.push_str(&emit_tiling_flags_code(texture));
+    code.push_str(&emit_parent_key_code(texture));
     code
 }
 
@@ -150,8 +168,9 @@ fn generate_mixin_code(texture: &crate::xml::TextureXml) -> String {
     code
 }
 
-/// Create a texture from XML definition.
-pub fn create_texture_from_xml(
+/// Create a texture from XML definition (used only by tests/standalone callers).
+#[allow(dead_code)]
+fn create_texture_from_xml(
     env: &LoaderEnv<'_>,
     texture: &crate::xml::TextureXml,
     parent_name: &str,
@@ -189,23 +208,13 @@ pub fn create_texture_from_xml(
     Ok(())
 }
 
-/// Build the Lua code string that creates and configures a texture.
-fn build_texture_lua(
+fn emit_create_header(
     tex_name: &str,
-    texture: &crate::xml::TextureXml,
     parent_name: &str,
+    create_method: &str,
     draw_layer: &str,
-    is_mask: bool,
-    is_line: bool,
     sub_level: i32,
 ) -> String {
-    let create_method = if is_line {
-        "CreateLine"
-    } else if is_mask {
-        "CreateMaskTexture"
-    } else {
-        "CreateTexture"
-    };
     let mut code = format!(
         r#"
         local parent = {}
@@ -222,15 +231,20 @@ fn build_texture_lua(
             draw_layer, sub_level
         ));
     }
-    code.push_str(&generate_mixin_code(texture));
+    code
+}
+
+fn emit_line_thickness(texture: &crate::xml::TextureXml, is_line: bool) -> String {
     if is_line {
         if let Some(t) = texture.thickness {
-            code.push_str(&format!("\n        tex:SetThickness({})\n        ", t));
+            return format!("\n        tex:SetThickness({})\n        ", t);
         }
     }
-    code.push_str(&generate_texture_source_code(texture, is_mask));
-    code.push_str(&generate_texture_visual_code(texture));
-    append_texture_anchors(&mut code, texture, parent_name);
+    String::new()
+}
+
+fn emit_texture_visibility(texture: &crate::xml::TextureXml) -> String {
+    let mut code = String::new();
     if texture.hidden == Some(true) {
         code.push_str("\n        tex:Hide()\n        ");
     }
@@ -243,20 +257,53 @@ fn build_texture_lua(
             mode
         ));
     }
-    // Wire up MaskedTextures: call AddMaskTexture on each referenced sibling.
-    if is_mask {
-        if let Some(ref masked) = texture.masked_textures {
-            for entry in &masked.entries {
-                if let Some(ref key) = entry.child_key {
-                    code.push_str(&format!(
-                        r#"
+    code
+}
+
+fn emit_masked_textures(texture: &crate::xml::TextureXml, is_mask: bool) -> String {
+    if !is_mask {
+        return String::new();
+    }
+    let mut code = String::new();
+    if let Some(ref masked) = texture.masked_textures {
+        for entry in &masked.entries {
+            if let Some(ref key) = entry.child_key {
+                code.push_str(&format!(
+                    r#"
         if parent.{key} then parent.{key}:AddMaskTexture(tex) end
         "#,
-                    ));
-                }
+                ));
             }
         }
     }
+    code
+}
+
+/// Build the Lua code string that creates and configures a texture.
+pub(super) fn build_texture_lua(
+    tex_name: &str,
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+    draw_layer: &str,
+    is_mask: bool,
+    is_line: bool,
+    sub_level: i32,
+) -> String {
+    let create_method = if is_line {
+        "CreateLine"
+    } else if is_mask {
+        "CreateMaskTexture"
+    } else {
+        "CreateTexture"
+    };
+    let mut code = emit_create_header(tex_name, parent_name, create_method, draw_layer, sub_level);
+    code.push_str(&generate_mixin_code(texture));
+    code.push_str(&emit_line_thickness(texture, is_line));
+    code.push_str(&generate_texture_source_code(texture, is_mask));
+    code.push_str(&generate_texture_visual_code(texture));
+    append_texture_anchors(&mut code, texture, parent_name);
+    code.push_str(&emit_texture_visibility(texture));
+    code.push_str(&emit_masked_textures(texture, is_mask));
     code
 }
 
@@ -276,7 +323,7 @@ fn append_texture_anchors(code: &mut String, texture: &crate::xml::TextureXml, p
 }
 
 /// Process animation groups on a texture created from XML.
-fn apply_texture_animations_xml(
+pub(super) fn apply_texture_animations_xml(
     env: &LoaderEnv<'_>,
     texture: &crate::xml::TextureXml,
     tex_name: &str,

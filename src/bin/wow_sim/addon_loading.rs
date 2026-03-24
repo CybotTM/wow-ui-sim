@@ -46,7 +46,10 @@ fn load_one_blizzard_addon(
             if verbose {
                 println!(
                     "{} loaded: {} Lua, {} XML, {} warnings",
-                    name, r.lua_files, r.xml_files, r.warnings.len()
+                    name,
+                    r.lua_files,
+                    r.xml_files,
+                    r.warnings.len()
                 );
             }
             for w in &r.warnings {
@@ -70,8 +73,12 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
         t.io_time, t.xml_parse_time, t.xml_process_time, t.xml_frame_create_time, t.lua_exec_time
     ));
     println!(
-        "  frame breakdown: setup={:.2?} finalize={:.2?}",
-        t.xml_frame_setup_time, t.xml_frame_finalize_time
+        "  frame breakdown: setup={:.2?} finalize={:.2?} ({} frames)",
+        t.xml_frame_setup_time, t.xml_frame_finalize_time, t.frame_count
+    );
+    println!(
+        "  setup: exec_lua={:.2?} props={:.2?} | finalize: layers={:.2?} ({} tex, {} fs) lifecycle={:.2?} ({} fires)",
+        t.frame_exec_lua_time, t.frame_apply_props_time, t.frame_layer_children_time, t.texture_count, t.fontstring_count, t.frame_lifecycle_time, t.lifecycle_fire_count
     );
 }
 
@@ -157,9 +164,17 @@ fn parse_addon_metadata(name: &str, toc_path: &Path) -> (String, String, bool) {
     let toc = TocFile::from_file(toc_path).ok();
     toc.as_ref()
         .map(|t| {
-            let title = t.metadata.get("Title").cloned().unwrap_or_else(|| name.to_string());
+            let title = t
+                .metadata
+                .get("Title")
+                .cloned()
+                .unwrap_or_else(|| name.to_string());
             let notes = t.metadata.get("Notes").cloned().unwrap_or_default();
-            let lod = t.metadata.get("LoadOnDemand").map(|v| v == "1").unwrap_or(false);
+            let lod = t
+                .metadata
+                .get("LoadOnDemand")
+                .map(|v| v == "1")
+                .unwrap_or(false);
             (title, notes, lod)
         })
         .unwrap_or_else(|| (name.to_string(), String::new(), false))
@@ -229,26 +244,81 @@ fn print_verbose_addon_status(name: &str, r: &LoadResult) {
     let t = &r.timing;
     println!(
         "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} xmlproc={:.1?} frames⊂xmlproc={:.1?} setup⊂frames={:.1?} finalize⊂frames={:.1?} lua={:.1?} sv={:.1?})",
-        status, name, r.lua_files, r.xml_files, r.warnings.len(),
-        t.total(), t.io_time, t.xml_parse_time, t.xml_process_time,
-        t.xml_frame_create_time, t.xml_frame_setup_time, t.xml_frame_finalize_time,
-        t.lua_exec_time, t.saved_vars_time
+        status,
+        name,
+        r.lua_files,
+        r.xml_files,
+        r.warnings.len(),
+        t.total(),
+        t.io_time,
+        t.xml_parse_time,
+        t.xml_process_time,
+        t.xml_frame_create_time,
+        t.xml_frame_setup_time,
+        t.xml_frame_finalize_time,
+        t.lua_exec_time,
+        t.saved_vars_time
     );
 }
 
 const VERBOSE_WARNING_ADDONS: &[&str] = &[
-    "BetterWardrobe", "Plumber", "BetterBlizzFrames", "Baganator", "Angleur",
-    "ExtraQuestButton", "WaypointUI", "TomTom", "WorldQuestTracker", "SavedInstances",
-    "Rarity", "SimpleItemLevel", "TalentLoadoutManager", "Simulationcraft", "TomCats",
-    "RaiderIO", "!BugGrabber", "CraftSim", "AdvancedInterfaceOptions", "BlizzMove_Debug",
-    "ClickableRaidBuffs", "Dejunk", "Cell", "AngryKeystones", "AutoPotion",
-    "BigWigs_Plugins", "BugSack", "Clicked", "DeathNote", "DeModal",
-    "ElvUI_OptionsUI", "DragonRaceTimes", "DynamicCam", "DialogueUI", "Chattynator",
-    "AstralKeys", "Leatrix_Plus", "CooldownToGo_Options", "HousingItemTracker", "idTip",
-    "Macroriffic", "NameplateSCT", "Krowi_ExtendedVendorUI", "OmniCD", "Auctionator",
-    "EditModeExpanded", "GlobalIgnoreList", "AllTheThings", "BigWigs_KhazAlgar",
-    "LegionRemixHelper", "Collectionator", "Syndicator", "BigWigs",
-    "!KalielsTracker", "KRaidSkipTracker", "MacroToolkit", "MinimapButtonButton",
+    "BetterWardrobe",
+    "Plumber",
+    "BetterBlizzFrames",
+    "Baganator",
+    "Angleur",
+    "ExtraQuestButton",
+    "WaypointUI",
+    "TomTom",
+    "WorldQuestTracker",
+    "SavedInstances",
+    "Rarity",
+    "SimpleItemLevel",
+    "TalentLoadoutManager",
+    "Simulationcraft",
+    "TomCats",
+    "RaiderIO",
+    "!BugGrabber",
+    "CraftSim",
+    "AdvancedInterfaceOptions",
+    "BlizzMove_Debug",
+    "ClickableRaidBuffs",
+    "Dejunk",
+    "Cell",
+    "AngryKeystones",
+    "AutoPotion",
+    "BigWigs_Plugins",
+    "BugSack",
+    "Clicked",
+    "DeathNote",
+    "DeModal",
+    "ElvUI_OptionsUI",
+    "DragonRaceTimes",
+    "DynamicCam",
+    "DialogueUI",
+    "Chattynator",
+    "AstralKeys",
+    "Leatrix_Plus",
+    "CooldownToGo_Options",
+    "HousingItemTracker",
+    "idTip",
+    "Macroriffic",
+    "NameplateSCT",
+    "Krowi_ExtendedVendorUI",
+    "OmniCD",
+    "Auctionator",
+    "EditModeExpanded",
+    "GlobalIgnoreList",
+    "AllTheThings",
+    "BigWigs_KhazAlgar",
+    "LegionRemixHelper",
+    "Collectionator",
+    "Syndicator",
+    "BigWigs",
+    "!KalielsTracker",
+    "KRaidSkipTracker",
+    "MacroToolkit",
+    "MinimapButtonButton",
     "OribosExchange",
 ];
 
@@ -285,13 +355,26 @@ fn print_timing_breakdown(t: &LoadTiming) {
     let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
     println!("Total time: {:.2?}", total_time);
     println!("  IO:         {:.2?} ({:.1}%)", t.io_time, pct(t.io_time));
-    println!("  XML parse:  {:.2?} ({:.1}%)", t.xml_parse_time, pct(t.xml_parse_time));
-    println!("  XML proc:   {:.2?} ({:.1}%)", t.xml_process_time, pct(t.xml_process_time));
-    println!("  XML frames: {:.2?} ({:.1}%, subset of XML proc)", t.xml_frame_create_time, pct(t.xml_frame_create_time));
-    println!("  Frame setup: {:.2?} ({:.1}%, subset of XML frames)", t.xml_frame_setup_time, pct(t.xml_frame_setup_time));
-    println!("  Frame final: {:.2?} ({:.1}%, subset of XML frames)", t.xml_frame_finalize_time, pct(t.xml_frame_finalize_time));
+    println!(
+        "  XML parse:  {:.2?} ({:.1}%)",
+        t.xml_parse_time,
+        pct(t.xml_parse_time)
+    );
+    println!(
+        "  XML proc:   {:.2?} ({:.1}%)",
+        t.xml_process_time,
+        pct(t.xml_process_time)
+    );
+    print_frame_timing_detail(t, &pct);
     println!("  Lua exec:   {:.2?} ({:.1}%)", t.lua_exec_time, pct(t.lua_exec_time));
     println!("  SavedVars:  {:.2?} ({:.1}%)", t.saved_vars_time, pct(t.saved_vars_time));
+}
+
+fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
+    println!("  XML frames: {:.2?} ({:.1}%, subset of XML proc)", t.xml_frame_create_time, pct(t.xml_frame_create_time));
+    println!("    setup:  {:.2?}  (exec_lua={:.2?} apply_props={:.2?})", t.xml_frame_setup_time, t.frame_exec_lua_time, t.frame_apply_props_time);
+    println!("    finalize: {:.2?}  (layers={:.2?} lifecycle={:.2?}, {} fires)", t.xml_frame_finalize_time, t.frame_layer_children_time, t.frame_lifecycle_time, t.lifecycle_fire_count);
+    println!("    {} frames, {} textures, {} fontstrings", t.frame_count, t.texture_count, t.fontstring_count);
 }
 
 fn print_cache_stats(hits: u32, misses: u32) {

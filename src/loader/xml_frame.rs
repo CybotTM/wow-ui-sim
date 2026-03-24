@@ -8,10 +8,8 @@ use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::{escape_lua_string, generate_scripts_code, lua_global_ref, rand_id};
 use super::precompiled;
-use super::xml_fontstring::create_fontstring_from_xml;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
 use super::xml_lifecycle::fire_lifecycle_scripts;
-use super::xml_texture::create_texture_from_xml;
 
 /// Create a frame from XML definition.
 /// Returns the name of the created frame (or None if skipped).
@@ -56,16 +54,49 @@ pub fn create_frame_from_xml(
 
     let lua_code =
         build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
-    let setup_start = Instant::now();
-    exec_create_frame_code(env, &lua_code, &name, initial_hidden)?;
-    apply_xml_properties_direct(env, &name, frame, inherits, parent);
-    apply_intrinsic_property(env, intrinsic_base, &name);
-    timing.xml_frame_setup_time += setup_start.elapsed();
-
-    let finalize_start = Instant::now();
-    create_children_and_finalize(env, frame, &name, inherits, timing)?;
-    timing.xml_frame_finalize_time += finalize_start.elapsed();
+    setup_frame(env, &lua_code, &name, initial_hidden, frame, inherits, parent, intrinsic_base, timing)?;
+    finalize_frame(env, frame, &name, inherits, timing)?;
     Ok(Some(name))
+}
+
+/// Execute CreateFrame Lua, apply XML properties, and record setup timing.
+#[allow(clippy::too_many_arguments)]
+fn setup_frame(
+    env: &LoaderEnv<'_>,
+    lua_code: &str,
+    name: &str,
+    initial_hidden: bool,
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+    parent: &str,
+    intrinsic_base: Option<&str>,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
+    let setup_start = Instant::now();
+    let exec_start = Instant::now();
+    exec_create_frame_code(env, lua_code, name, initial_hidden)?;
+    timing.frame_exec_lua_time += exec_start.elapsed();
+    let props_start = Instant::now();
+    apply_xml_properties_direct(env, name, frame, inherits, parent);
+    apply_intrinsic_property(env, intrinsic_base, name);
+    timing.frame_apply_props_time += props_start.elapsed();
+    timing.xml_frame_setup_time += setup_start.elapsed();
+    timing.frame_count += 1;
+    Ok(())
+}
+
+/// Create children, layers, animations, and fire lifecycle scripts with timing.
+fn finalize_frame(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    name: &str,
+    inherits: &str,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
+    let finalize_start = Instant::now();
+    create_children_and_finalize(env, frame, name, inherits, timing)?;
+    timing.xml_frame_finalize_time += finalize_start.elapsed();
+    Ok(())
 }
 
 /// Register virtual/intrinsic frames as templates. Returns Some(None) to skip instantiation
@@ -152,14 +183,19 @@ fn create_children_and_finalize(
     timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
     create_child_frames(env, frame, name, timing)?;
-    create_layer_children(env, frame, name)?;
+    let layer_start = Instant::now();
+    create_layer_children(env, frame, name, timing)?;
+    timing.frame_layer_children_time += layer_start.elapsed();
     apply_animation_groups(env, frame, name, inherits)?;
     apply_button_textures(env, frame, name)?;
     apply_button_text(env, frame, name, inherits)?;
     apply_bar_texture(env, frame, name)?;
     init_action_bar_tables(env, name);
     if has_lifecycle_scripts(frame, inherits) {
+        let lc_start = Instant::now();
         fire_lifecycle_scripts(env, name);
+        timing.frame_lifecycle_time += lc_start.elapsed();
+        timing.lifecycle_fire_count += 1;
     }
     Ok(())
 }
@@ -186,12 +222,7 @@ fn has_lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
         })
 }
 
-/// Execute the CreateFrame Lua code with OnLoad suppression.
-///
-/// Suppresses OnLoad during CreateFrame so the XML loader controls when it fires.
-/// Template children created during CreateFrame have their OnLoad deferred until
-/// instance-level KeyValues (e.g. layoutIndex) are applied in the Lua chunk.
-/// Uses a depth counter to handle recursive create_frame_from_xml calls correctly.
+/// Execute CreateFrame Lua with OnLoad suppression (depth-counted for recursion).
 fn exec_create_frame_code(
     env: &LoaderEnv<'_>,
     lua_code: &str,
@@ -493,26 +524,12 @@ fn create_layer_children(
     env: &LoaderEnv<'_>,
     frame: &crate::xml::FrameXml,
     name: &str,
+    timing: &mut LoadTiming,
 ) -> Result<(), LoadError> {
-    for layers in frame.layers() {
-        for layer in &layers.layers {
-            let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
-            let sub_level = layer.texture_sub_level.unwrap_or(0);
-            for (texture, is_mask, is_line) in layer.textures() {
-                create_texture_from_xml(
-                    env, texture, name, draw_layer, is_mask, is_line, sub_level,
-                )?;
-            }
-            for fontstring in layer.font_strings() {
-                create_fontstring_from_xml(env, fontstring, name, draw_layer, sub_level)?;
-            }
-        }
-    }
-    Ok(())
+    super::xml_layer_batch::create_layer_children_batched(env, frame, name, timing)
 }
 
-/// Map a FrameElement variant to its (FrameXml, widget_type, intrinsic_name) triple.
-/// Returns None for unsupported element types.
+/// Map a FrameElement to its (FrameXml, widget_type, intrinsic_name) triple.
 fn frame_element_to_type(
     child: &crate::xml::FrameElement,
 ) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {

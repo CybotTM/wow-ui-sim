@@ -9,7 +9,7 @@ use super::helpers::{
 };
 
 /// Resolve a text key through the global strings table.
-fn resolve_fontstring_text(text_key: Option<&str>) -> Option<String> {
+pub(super) fn resolve_fontstring_text(text_key: Option<&str>) -> Option<String> {
     text_key.map(|key| {
         crate::global_strings::get_global_string(key)
             .map(|s| resolve_lua_escapes(s))
@@ -102,7 +102,7 @@ fn generate_fontstring_parent_code(fs: &crate::xml::FontStringXml) -> String {
 
 /// Sync fontstring text directly in Rust widget state.
 /// Height/width auto-sizing is handled by the Lua SetText path.
-fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) {
+pub(super) fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) {
     let state = env.state();
     let mut state_ref = state.borrow_mut();
     if let Some(frame_id) = state_ref.widgets.get_id_by_name(fs_name) {
@@ -111,6 +111,86 @@ fn sync_fontstring_text_to_rust(env: &LoaderEnv<'_>, fs_name: &str, text: &str) 
             frame.text = Some(text.to_string());
         }
     }
+}
+
+/// Generate the CreateFontString call and draw layer setup.
+fn build_fontstring_create_code(
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+    draw_layer: &str,
+    sub_level: i32,
+    fs_name: &str,
+) -> String {
+    let inherits = fontstring.inherits.as_deref().unwrap_or("");
+    let mut code = format!(
+        r#"
+        local parent = {}
+        local fs = parent:CreateFontString("{}", "{}", {})
+        "#,
+        lua_global_ref(parent_name),
+        fs_name,
+        draw_layer,
+        if inherits.is_empty() {
+            "nil".to_string()
+        } else {
+            format!("\"{}\"", inherits)
+        }
+    );
+    if sub_level != 0 {
+        code.push_str(&format!(
+            "\n        fs:SetDrawLayer(\"{}\", {})\n        ",
+            draw_layer, sub_level
+        ));
+    }
+    code
+}
+
+/// Generate Lua code for fontstring text, anchors, alpha, and visibility.
+fn build_fontstring_extra_code(
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+    resolved_text: &Option<String>,
+) -> String {
+    let mut code = String::new();
+    if let Some(text) = resolved_text {
+        code.push_str(&format!(
+            "\n        fs:SetText(\"{}\")\n        ",
+            escape_lua_string(text)
+        ));
+    }
+    code.push_str(&generate_fontstring_visual_code(fontstring));
+    code.push_str(&generate_fontstring_parent_code(fontstring));
+    if let Some(anchors) = &fontstring.anchors {
+        code.push_str(&generate_set_point_code(
+            anchors,
+            "fs",
+            "parent",
+            parent_name,
+            "parent",
+        ));
+    }
+    if let Some(a) = fontstring.alpha {
+        code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));
+    }
+    if fontstring.hidden == Some(true) {
+        code.push_str("\n        fs:Hide()\n        ");
+    }
+    code
+}
+
+/// Build the Lua code string that creates and configures a fontstring.
+pub(super) fn build_fontstring_lua(
+    fontstring: &crate::xml::FontStringXml,
+    parent_name: &str,
+    draw_layer: &str,
+    sub_level: i32,
+    fs_name: &str,
+    resolved_text: &Option<String>,
+) -> String {
+    let mut code =
+        build_fontstring_create_code(fontstring, parent_name, draw_layer, sub_level, fs_name);
+    code.push_str(&build_fontstring_extra_code(fontstring, parent_name, resolved_text));
+    code
 }
 
 /// Create a fontstring from XML definition.
@@ -148,62 +228,6 @@ pub fn create_fontstring_from_xml(
     }
 
     Ok(())
-}
-
-/// Build the Lua code string that creates and configures a fontstring.
-fn build_fontstring_lua(
-    fontstring: &crate::xml::FontStringXml,
-    parent_name: &str,
-    draw_layer: &str,
-    sub_level: i32,
-    fs_name: &str,
-    resolved_text: &Option<String>,
-) -> String {
-    let inherits = fontstring.inherits.as_deref().unwrap_or("");
-    let mut code = format!(
-        r#"
-        local parent = {}
-        local fs = parent:CreateFontString("{}", "{}", {})
-        "#,
-        lua_global_ref(parent_name),
-        fs_name,
-        draw_layer,
-        if inherits.is_empty() {
-            "nil".to_string()
-        } else {
-            format!("\"{}\"", inherits)
-        }
-    );
-    if sub_level != 0 {
-        code.push_str(&format!(
-            "\n        fs:SetDrawLayer(\"{}\", {})\n        ",
-            draw_layer, sub_level
-        ));
-    }
-    if let Some(text) = resolved_text {
-        code.push_str(&format!(
-            "\n        fs:SetText(\"{}\")\n        ",
-            escape_lua_string(text)
-        ));
-    }
-    code.push_str(&generate_fontstring_visual_code(fontstring));
-    code.push_str(&generate_fontstring_parent_code(fontstring));
-    if let Some(anchors) = &fontstring.anchors {
-        code.push_str(&generate_set_point_code(
-            anchors,
-            "fs",
-            "parent",
-            parent_name,
-            "parent",
-        ));
-    }
-    if let Some(a) = fontstring.alpha {
-        code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));
-    }
-    if fontstring.hidden == Some(true) {
-        code.push_str("\n        fs:Hide()\n        ");
-    }
-    code
 }
 
 #[cfg(test)]
