@@ -48,6 +48,7 @@ pub mod spells;
 pub mod stack;
 pub mod startup;
 pub mod texture;
+pub(crate) mod texture_cache;
 pub mod toc;
 #[path = "../data/traits.rs"]
 pub mod traits;

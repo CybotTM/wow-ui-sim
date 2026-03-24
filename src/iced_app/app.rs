@@ -77,7 +77,9 @@ fn fire_world_enter_events(env: &WowLuaEnv) {
         eprintln!("  {}", e);
     }
     crate::logging::eprintln_elapsed("[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed");
-    if let Err(e) = env.lua().globals()
+    if let Err(e) = env
+        .lua()
+        .globals()
         .get::<mlua::Function>("RequestTimePlayed")
         .and_then(|f| f.call::<()>(()))
     {
@@ -100,7 +102,10 @@ fn fire_unit_aura_event(env: &WowLuaEnv) {
     crate::logging::eprintln_elapsed("[Startup] Firing UNIT_AURA");
     let lua = env.lua();
     let update_info = match lua.create_table() {
-        Ok(t) => { let _ = t.set("isFullUpdate", true); mlua::Value::Table(t) }
+        Ok(t) => {
+            let _ = t.set("isFullUpdate", true);
+            mlua::Value::Table(t)
+        }
         Err(_) => return,
     };
     let unit = match lua.create_string("player") {
@@ -116,8 +121,11 @@ fn fire_unit_aura_event(env: &WowLuaEnv) {
 #[allow(dead_code)]
 fn fire_world_and_ui_events(env: &WowLuaEnv) {
     for event in [
-        "BAG_UPDATE_DELAYED", "UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED",
-        "UI_SCALE_CHANGED", "UPDATE_CHAT_WINDOWS",
+        "BAG_UPDATE_DELAYED",
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+        "UPDATE_CHAT_WINDOWS",
     ] {
         fire_simple_startup(env, event);
     }
@@ -415,7 +423,8 @@ impl App {
     ) {
         let mut tex_mgr = TextureManager::new(textures_path)
             .with_interface_path(DEFAULT_INTERFACE_PATH)
-            .with_addons_path(DEFAULT_ADDONS_PATH);
+            .with_addons_path(DEFAULT_ADDONS_PATH)
+            .with_disk_cache("./cache/textures");
         let class_name = {
             let env = env_rc.borrow();
             let state = env.state().borrow();
@@ -573,7 +582,9 @@ impl Drop for App {
             let env = self.env.borrow();
             match saved_vars.save_all(env.lua()) {
                 Ok(()) => crate::logging::eprintln_elapsed("[wow-sim] SavedVariables saved"),
-                Err(e) => crate::logging::eprintln_elapsed(&format!("[wow-sim] SavedVariables save error: {e}")),
+                Err(e) => crate::logging::eprintln_elapsed(&format!(
+                    "[wow-sim] SavedVariables save error: {e}"
+                )),
             }
         }
     }

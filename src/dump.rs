@@ -747,6 +747,7 @@ fn resolve_texture_format(wow_path: &str) -> String {
         TextureManager::new(base)
             .with_interface_path(home.join("Projects/wow/Interface"))
             .with_addons_path(std::path::PathBuf::from("./Interface/AddOns"))
+            .with_disk_cache("./cache/textures")
     });
 
     let normalized = normalize_wow_path(wow_path);

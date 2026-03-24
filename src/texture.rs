@@ -15,6 +15,8 @@ pub struct TextureManager {
     interface_path: Option<PathBuf>,
     /// Base path to addons directory (for addon textures).
     addons_path: Option<PathBuf>,
+    /// Directory for decoded RGBA disk cache (lz4 compressed).
+    disk_cache_dir: Option<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
     /// Cache of sub-region textures (path#region -> RGBA pixels).
@@ -38,6 +40,7 @@ impl TextureManager {
             textures_path: textures_path.into(),
             interface_path: None,
             addons_path: None,
+            disk_cache_dir: None,
             cache: HashMap::new(),
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
@@ -47,6 +50,14 @@ impl TextureManager {
     /// Set the WoW Interface directory path for extracted game files.
     pub fn with_interface_path(mut self, path: impl Into<PathBuf>) -> Self {
         self.interface_path = Some(path.into());
+        self
+    }
+
+    /// Set the disk cache directory for decoded RGBA textures.
+    pub fn with_disk_cache(mut self, path: impl Into<PathBuf>) -> Self {
+        let dir = path.into();
+        std::fs::create_dir_all(&dir).ok();
+        self.disk_cache_dir = Some(dir);
         self
     }
 
@@ -69,21 +80,11 @@ impl TextureManager {
             return None;
         }
 
-        // Try to load from disk
+        // Try to load from disk (disk cache → decode → write cache)
         if let Some(file_path) = self.resolve_path(&normalized) {
-            match load_texture_file(&file_path) {
-                Ok(data) => {
-                    self.cache.insert(normalized.clone(), data);
-                    return self.cache.get(&normalized);
-                }
-                Err(e) => {
-                    crate::logging::eprintln_elapsed(&format!(
-                        "[TexMgr] Load error: {} -> {}: {}",
-                        wow_path,
-                        file_path.display(),
-                        e
-                    ));
-                }
+            if let Some(data) = self.load_with_disk_cache(&normalized, &file_path) {
+                self.cache.insert(normalized.clone(), data);
+                return self.cache.get(&normalized);
             }
         } else {
             crate::logging::eprintln_elapsed(&format!("[TexMgr] Not found: {}", wow_path));
@@ -103,6 +104,31 @@ impl TextureManager {
     pub fn is_cached(&self, wow_path: &str) -> bool {
         let normalized = normalize_wow_path(wow_path);
         self.cache.contains_key(&normalized)
+    }
+
+    /// Load a texture, checking the lz4 disk cache before falling back to decode.
+    fn load_with_disk_cache(&self, normalized: &str, file_path: &Path) -> Option<TextureData> {
+        // Try disk cache first
+        if let Some(cache_dir) = &self.disk_cache_dir {
+            if let Some(data) = crate::texture_cache::load_from_disk_cache(cache_dir, normalized, file_path) {
+                return Some(data);
+            }
+        }
+        // Decode from source
+        match load_texture_file(file_path) {
+            Ok(data) => {
+                if let Some(cache_dir) = &self.disk_cache_dir {
+                    crate::texture_cache::write_to_disk_cache(cache_dir, normalized, &data);
+                }
+                Some(data)
+            }
+            Err(e) => {
+                crate::logging::eprintln_elapsed(&format!(
+                    "[TexMgr] Load error: {} -> {}: {}", normalized, file_path.display(), e
+                ));
+                None
+            }
+        }
     }
 
     /// Pre-load talent icon textures for the given tree to avoid on-demand lag.

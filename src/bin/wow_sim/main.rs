@@ -100,9 +100,7 @@ enum Commands {
     },
 
     /// Run test Lua files from Interface/AddOns/<name>/tests/
-    RunTests {
-        addon_name: String,
-    },
+    RunTests { addon_name: String },
 
     /// Dump textures used by frames to disk (for debugging atlas crops)
     #[cfg(feature = "gui")]
@@ -118,7 +116,11 @@ enum Commands {
 
 impl Args {
     fn effective_screen(&self) -> ScreenKind {
-        if self.character_select { ScreenKind::CharacterSelect } else { self.screen }
+        if self.character_select {
+            ScreenKind::CharacterSelect
+        } else {
+            self.screen
+        }
     }
 
     fn is_test_command(&self) -> bool {
@@ -148,10 +150,16 @@ fn run_main() -> Result<(), Box<dyn std::error::Error>> {
     let (env, font_system, saved_vars) = init_and_load(&args, screen);
 
     dispatch_command(
-        args.command, env, font_system, args.delay,
+        args.command,
+        env,
+        font_system,
+        args.delay,
         resolve_exec_lua(&args.exec_lua),
-        saved_stdout, saved_vars,
-        args.debug_borders, args.debug_anchors, args.debug_elements,
+        saved_stdout,
+        saved_vars,
+        args.debug_borders,
+        args.debug_anchors,
+        args.debug_elements,
     )
 }
 
@@ -160,13 +168,21 @@ fn redirect_if_quiet(args: &Args) -> Option<i32> {
         args.command,
         Some(Commands::LuaErrors) | Some(Commands::SelfTest { .. })
     );
-    if quiet { wow_ui_sim::lua_errors::redirect_stdout_to_stderr() } else { None }
+    if quiet {
+        wow_ui_sim::lua_errors::redirect_stdout_to_stderr()
+    } else {
+        None
+    }
 }
 
 fn init_and_load(
     args: &Args,
     screen: ScreenKind,
-) -> (WowLuaEnv, Rc<RefCell<WowFontSystem>>, Option<SavedVariablesManager>) {
+) -> (
+    WowLuaEnv,
+    Rc<RefCell<WowFontSystem>>,
+    Option<SavedVariablesManager>,
+) {
     let env = WowLuaEnv::new().expect("failed to create Lua env");
     let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))));
     init_environment(args, &env, &font_system);
@@ -175,7 +191,11 @@ fn init_and_load(
     let mut saved_vars = configure_saved_vars(args);
     addon_loading::load_blizzard_addons(&env, screen);
     addon_loading::load_third_party_addons(
-        args.skip_addons(), args.is_test_command(), &env, &mut saved_vars, screen,
+        args.skip_addons(),
+        args.is_test_command(),
+        &env,
+        &mut saved_vars,
+        screen,
     );
     env.sync_addon_names_to_lua();
     env.apply_post_load_workarounds();
@@ -198,7 +218,9 @@ fn resolve_exec_lua(arg: &Option<String>) -> Option<String> {
 fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
     use wow_ui_sim::saved_variables::WtfConfig;
     let skip = args.no_saved_vars
-        || std::env::var("WOW_SIM_NO_SAVED_VARS").map(|v| v == "1").unwrap_or(false);
+        || std::env::var("WOW_SIM_NO_SAVED_VARS")
+            .map(|v| v == "1")
+            .unwrap_or(false);
     if skip {
         logging::println_elapsed("SavedVariables loading disabled");
         return None;
@@ -207,7 +229,10 @@ fn configure_saved_vars(args: &Args) -> Option<SavedVariablesManager> {
     let wtf_path = PathBuf::from("/syncthing/Sync/Projects/wow/WTF");
     if wtf_path.exists() {
         let wtf = WtfConfig::new(wtf_path, "50868465#2", "Burning Blade", "Haky");
-        logging::println_elapsed(&format!("WTF config: {} @ {}/{}", wtf.account, wtf.realm, wtf.character));
+        logging::println_elapsed(&format!(
+            "WTF config: {} @ {}/{}",
+            wtf.account, wtf.realm, wtf.character
+        ));
         saved_vars.set_wtf_config(wtf);
     }
     Some(saved_vars)
@@ -233,24 +258,39 @@ fn init_sound(env: &WowLuaEnv) {
 
 fn apply_resource_limits() {
     let max_mem_gb: u64 = std::env::var("WOW_SIM_MAX_MEM_GB")
-        .ok().and_then(|s| s.parse().ok()).unwrap_or(10);
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(10);
     let max_mem_bytes = max_mem_gb * 1024 * 1024 * 1024;
-    let mem_limit = libc::rlimit { rlim_cur: max_mem_bytes, rlim_max: max_mem_bytes };
-    unsafe { libc::setrlimit(libc::RLIMIT_AS, &mem_limit); }
+    let mem_limit = libc::rlimit {
+        rlim_cur: max_mem_bytes,
+        rlim_max: max_mem_bytes,
+    };
+    unsafe {
+        libc::setrlimit(libc::RLIMIT_AS, &mem_limit);
+    }
     let max_cores: usize = std::env::var("WOW_SIM_MAX_CORES")
-        .ok().and_then(|s| s.parse().ok()).unwrap_or(1);
+        .ok()
+        .and_then(|s| s.parse().ok())
+        .unwrap_or(1);
     unsafe {
         let mut cpuset: libc::cpu_set_t = std::mem::zeroed();
-        for i in 0..max_cores { libc::CPU_SET(i, &mut cpuset); }
+        for i in 0..max_cores {
+            libc::CPU_SET(i, &mut cpuset);
+        }
         libc::sched_setaffinity(0, std::mem::size_of::<libc::cpu_set_t>(), &cpuset);
     }
-    logging::println_elapsed(&format!("Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)"));
+    logging::println_elapsed(&format!(
+        "Resource limits: {max_mem_gb}GB memory, {max_cores} CPU core(s)"
+    ));
 }
 
 fn init_environment(_args: &Args, env: &WowLuaEnv, font_system: &Rc<RefCell<WowFontSystem>>) {
     logging::init_process_start_time(env.state().borrow().start_time);
     apply_resource_limits();
-    tracing_subscriber::fmt().with_env_filter(EnvFilter::from_default_env()).init();
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .init();
     env.set_font_system(Rc::clone(font_system));
     init_sound(env);
     {
@@ -279,18 +319,56 @@ fn dispatch_command(
     debug_elements: bool,
 ) -> Result<(), Box<dyn std::error::Error>> {
     match command {
-        Some(Commands::DumpTree { filter, filter_key, visible_only, width, height }) => {
-            run_dump_tree(&env, filter, filter_key, visible_only, width, height, delay, exec_lua.as_deref());
+        Some(Commands::DumpTree {
+            filter,
+            filter_key,
+            visible_only,
+            width,
+            height,
+        }) => {
+            run_dump_tree(
+                &env,
+                filter,
+                filter_key,
+                visible_only,
+                width,
+                height,
+                delay,
+                exec_lua.as_deref(),
+            );
         }
         #[cfg(feature = "gui")]
-        Some(Commands::Screenshot { output, width, height, filter, crop, dump_tree }) => {
-            run_screenshot(&env, &font_system, output, width, height, filter, crop, delay, exec_lua.as_deref(), dump_tree);
+        Some(Commands::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            dump_tree,
+        }) => {
+            run_screenshot(
+                &env,
+                &font_system,
+                output,
+                width,
+                height,
+                filter,
+                crop,
+                delay,
+                exec_lua.as_deref(),
+                dump_tree,
+            );
         }
         Some(Commands::LuaErrors) => {
             wow_ui_sim::lua_errors::run_lua_errors(&env, saved_stdout, exec_lua.as_deref());
         }
-        Some(Commands::SelfTest { max_ticks, categories }) => {
-            if let Some(c) = &categories { wow_ui_sim::self_test::inject_category_filter(&env, c); }
+        Some(Commands::SelfTest {
+            max_ticks,
+            categories,
+        }) => {
+            if let Some(c) = &categories {
+                wow_ui_sim::self_test::inject_category_filter(&env, c);
+            }
             wow_ui_sim::self_test::run_startup(&env);
             wow_ui_sim::self_test::run_test(&env, max_ticks, exec_lua.as_deref(), saved_stdout);
         }
@@ -299,7 +377,11 @@ fn dispatch_command(
             wow_ui_sim::addon_tests::run_addon_tests(&env, &addon_name, exec_lua.as_deref());
         }
         #[cfg(feature = "gui")]
-        Some(Commands::DumpTexture { output, filter, frame_filter }) => {
+        Some(Commands::DumpTexture {
+            output,
+            filter,
+            frame_filter,
+        }) => {
             run_dump_texture(&env, &font_system, output, filter, frame_filter);
         }
         #[cfg(feature = "gui")]
@@ -341,9 +423,13 @@ fn run_dump_tree(
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
-        &state.widgets, &addon_names,
-        filter.as_deref(), filter_key.as_deref(),
-        visible_only, width as f32, height as f32,
+        &state.widgets,
+        &addon_names,
+        filter.as_deref(),
+        filter_key.as_deref(),
+        visible_only,
+        width as f32,
+        height as f32,
     );
 }
 
@@ -352,7 +438,12 @@ fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
     let (dims, rest) = s.split_once('+')?;
     let (x_str, y_str) = rest.split_once('+')?;
     let (w_str, h_str) = dims.split_once('x')?;
-    Some((w_str.parse().ok()?, h_str.parse().ok()?, x_str.parse().ok()?, y_str.parse().ok()?))
+    Some((
+        w_str.parse().ok()?,
+        h_str.parse().ok()?,
+        x_str.parse().ok()?,
+        y_str.parse().ok()?,
+    ))
 }
 
 #[cfg(feature = "gui")]
@@ -376,7 +467,10 @@ fn build_screenshot_batch(
     width: u32,
     height: u32,
     filter: Option<&str>,
-) -> (wow_ui_sim::render::QuadBatch, wow_ui_sim::render::GlyphAtlas) {
+) -> (
+    wow_ui_sim::render::QuadBatch,
+    wow_ui_sim::render::GlyphAtlas,
+) {
     use wow_ui_sim::iced_app::build_quad_batch_for_registry;
     use wow_ui_sim::render::GlyphAtlas;
     let mut glyph_atlas = GlyphAtlas::new();
@@ -392,9 +486,15 @@ fn build_screenshot_batch(
         let state = env.state().borrow();
         let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
         build_quad_batch_for_registry(
-            &state.widgets, (width as f32, height as f32), filter,
-            None, None, Some((&mut fs, &mut glyph_atlas)),
-            Some(&state.message_frames), Some(&tooltip_data), &buckets,
+            &state.widgets,
+            (width as f32, height as f32),
+            filter,
+            None,
+            None,
+            Some((&mut fs, &mut glyph_atlas)),
+            Some(&state.message_frames),
+            Some(&tooltip_data),
+            &buckets,
         )
     };
     (batch, glyph_atlas)
@@ -425,11 +525,16 @@ fn run_screenshot(
     }
     run_extra_update_ticks(env, 3);
     apply_delay(delay);
-    let (batch, glyph_atlas) = build_screenshot_batch(env, font_system, width, height, filter.as_deref());
+    let (batch, glyph_atlas) =
+        build_screenshot_batch(env, font_system, width, height, filter.as_deref());
     if let Some(dump_filter) = &dump_tree {
         dump_screenshot_tree(env, dump_filter.as_deref(), width, height);
     }
-    eprintln!("QuadBatch: {} quads, {} texture requests", batch.quad_count(), batch.texture_requests.len());
+    eprintln!(
+        "QuadBatch: {} quads, {} texture requests",
+        batch.quad_count(),
+        batch.texture_requests.len()
+    );
 
     let mut tex_mgr = create_texture_manager();
     let glyph_data = glyph_atlas.is_dirty().then(|| {
@@ -443,7 +548,12 @@ fn run_screenshot(
     };
     let output = output.with_extension("webp");
     save_screenshot(&img, &output);
-    eprintln!("Saved {}x{} screenshot to {}", img.width(), img.height(), output.display());
+    eprintln!(
+        "Saved {}x{} screenshot to {}",
+        img.width(),
+        img.height(),
+        output.display()
+    );
 }
 
 #[cfg(feature = "gui")]
@@ -451,7 +561,13 @@ fn dump_screenshot_tree(env: &WowLuaEnv, filter_key: Option<&str>, w: u32, h: u3
     let state = env.state().borrow();
     let addon_names: Vec<String> = state.addons.iter().map(|a| a.folder_name.clone()).collect();
     wow_ui_sim::dump::print_frame_tree(
-        &state.widgets, &addon_names, None, filter_key, false, w as f32, h as f32,
+        &state.widgets,
+        &addon_names,
+        None,
+        filter_key,
+        false,
+        w as f32,
+        h as f32,
     );
 }
 
@@ -477,7 +593,11 @@ fn run_dump_texture(
     env.set_screen_size(1600.0, 1200.0);
     settle_headless_startup(env);
     let (batch, _) = build_screenshot_batch(env, font_system, 1600, 1200, frame_filter.as_deref());
-    eprintln!("QuadBatch: {} quads, {} tex requests", batch.quad_count(), batch.texture_requests.len());
+    eprintln!(
+        "QuadBatch: {} quads, {} tex requests",
+        batch.quad_count(),
+        batch.texture_requests.len()
+    );
     let mut tex_mgr = create_texture_manager();
     wow_ui_sim::dump_texture::dump_batch_textures(&batch, &mut tex_mgr, &output, filter.as_deref());
 }
@@ -488,10 +608,15 @@ fn create_texture_manager() -> wow_ui_sim::texture::TextureManager {
     let config = wow_ui_sim::config::SimConfig::load();
     let home = dirs::home_dir().unwrap_or_default();
     let local_textures = PathBuf::from("./textures");
-    let textures_path = if local_textures.exists() { local_textures } else { home.join("Repos/wow-ui-textures") };
+    let textures_path = if local_textures.exists() {
+        local_textures
+    } else {
+        home.join("Repos/wow-ui-textures")
+    };
     let mut mgr = TextureManager::new(textures_path)
         .with_interface_path(home.join("Projects/wow/Interface"))
-        .with_addons_path(PathBuf::from("./Interface/AddOns"));
+        .with_addons_path(PathBuf::from("./Interface/AddOns"))
+        .with_disk_cache("./cache/textures");
     mgr.preload_talent_textures(790);
     mgr.preload_talent_panel_textures(&config.player_class);
     mgr
