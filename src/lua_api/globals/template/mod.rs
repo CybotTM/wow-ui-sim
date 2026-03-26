@@ -105,6 +105,11 @@ pub fn apply_templates_from_registry(
     for entry in &chain {
         apply_single_template(lua, state, frame_name, entry);
     }
+    for entry in &chain {
+        if let Some(scripts) = entry.frame.scripts() {
+            elements::apply_missing_scripts_from_template(lua, scripts, frame_name);
+        }
+    }
     elements::apply_deferred_mask_atlases(lua, frame_name, &chain);
 }
 

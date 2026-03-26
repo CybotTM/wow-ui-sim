@@ -24,6 +24,55 @@ pub(super) fn apply_scripts_from_template(
     }
 }
 
+pub(super) fn apply_missing_scripts_from_template(
+    lua: &Lua,
+    scripts: &crate::xml::ScriptsXml,
+    frame_name: &str,
+) {
+    let mut handlers_code = String::new();
+    append_missing_method_handler(
+        &mut handlers_code,
+        "OnDragStart",
+        scripts.on_drag_start.last(),
+    );
+    append_missing_method_handler(
+        &mut handlers_code,
+        "OnDragStop",
+        scripts.on_drag_stop.last(),
+    );
+    append_missing_method_handler(
+        &mut handlers_code,
+        "OnReceiveDrag",
+        scripts.on_receive_drag.last(),
+    );
+    if !handlers_code.is_empty() {
+        let frame_ref = lua_global_ref(frame_name);
+        let code = format!(
+            "
+        local frame = {frame_ref}
+        if frame then
+        {handlers_code}
+        end
+"
+        );
+        let _ = chunk_cache::exec(lua, &code, "template-elements");
+    }
+}
+
+fn append_missing_method_handler(
+    code: &mut String,
+    handler_name: &str,
+    script: Option<&crate::xml::ScriptBodyXml>,
+) {
+    let Some(method) = script.and_then(|script| script.method.as_deref()) else {
+        return;
+    };
+    code.push_str(&format!(
+        "if frame:GetScript(\"{handler_name}\") == nil then frame:SetScript(\"{handler_name}\", function(self, ...) self:{method}(...) end) end
+"
+    ));
+}
+
 /// Create a texture from template XML.
 ///
 /// `parent_name` is the actual Lua frame name (for parent reference).
