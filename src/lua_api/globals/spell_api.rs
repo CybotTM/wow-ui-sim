@@ -167,7 +167,7 @@ fn register_c_spell_book_actions(
     let st2 = Rc::clone(&state);
     t.set(
         "PickupSpellBookItem",
-        lua.create_function(move |_, (slot, _bank): (i32, Option<i32>)| {
+        lua.create_function(move |lua, (slot, _bank): (i32, Option<i32>)| {
             let spell_id =
                 spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id);
             if let Some(spell_id) = spell_id {
@@ -177,6 +177,7 @@ fn register_c_spell_book_actions(
                 );
                 st2.borrow_mut().cursor_item =
                     Some(crate::lua_api::state::CursorInfo::Spell { spell_id });
+                super::cursor_api::fire_cursor_changed(lua)?;
             }
             Ok(())
         })?,

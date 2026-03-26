@@ -217,7 +217,7 @@ fn put_action_in_slot(
 }
 
 /// Fire CURSOR_CHANGED event.
-fn fire_cursor_changed(lua: &Lua) -> Result<()> {
+pub(crate) fn fire_cursor_changed(lua: &Lua) -> Result<()> {
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     fire.call::<()>(lua.create_string("CURSOR_CHANGED")?)?;
     Ok(())

@@ -94,6 +94,30 @@ fn test_spellbook_is_spell_known() {
     assert!(!known);
 }
 
+#[test]
+fn test_spellbook_pickup_item_fires_cursor_changed() {
+    let env = env();
+    let changed_count: i32 = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            local count = 0
+            f:SetScript("OnEvent", function(_, event)
+                if event == "CURSOR_CHANGED" then
+                    count = count + 1
+                end
+            end)
+            f:RegisterEvent("CURSOR_CHANGED")
+
+            C_SpellBook.PickupSpellBookItem(1)
+
+            return count
+            "#,
+        )
+        .unwrap();
+    assert_eq!(changed_count, 1, "PickupSpellBookItem should fire CURSOR_CHANGED");
+}
+
 // ============================================================================
 // C_Spell
 // ============================================================================
@@ -174,6 +198,30 @@ fn test_spell_get_spell_name_unknown() {
     let env = env();
     let name: String = env.eval("return C_Spell.GetSpellName(999999999)").unwrap();
     assert_eq!(name, "Unknown");
+}
+
+#[test]
+fn test_spell_pickup_fires_cursor_changed() {
+    let env = env();
+    let changed_count: i32 = env
+        .eval(
+            r#"
+            local f = CreateFrame("Frame")
+            local count = 0
+            f:SetScript("OnEvent", function(_, event)
+                if event == "CURSOR_CHANGED" then
+                    count = count + 1
+                end
+            end)
+            f:RegisterEvent("CURSOR_CHANGED")
+
+            C_Spell.PickupSpell(100)
+
+            return count
+            "#,
+        )
+        .unwrap();
+    assert_eq!(changed_count, 1, "PickupSpell should fire CURSOR_CHANGED");
 }
 
 #[test]
