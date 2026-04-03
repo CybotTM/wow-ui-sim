@@ -24,6 +24,46 @@ pub struct Artifacts {
     libs: Vec<String>,
 }
 
+const LUA_SOURCE_FILES: &[&str] = &[
+    "lapi.c",
+    "lauxlib.c",
+    "lbaselib.c",
+    "lbitlib.c",
+    "lcode.c",
+    "lcompatlib.c",
+    "lcorolib.c",
+    "ldblib.c",
+    "ldebug.c",
+    "ldo.c",
+    "ldump.c",
+    "lfunc.c",
+    "lgc.c",
+    "linit.c",
+    "liolib.c",
+    "llex.c",
+    "lmanip.c",
+    "lmathlib.c",
+    "lmem.c",
+    "loadlib.c",
+    "lobject.c",
+    "lopcodes.c",
+    "loslib.c",
+    "lparser.c",
+    "lreadline.c",
+    "lsec.c",
+    "lseclib.c",
+    "lstate.c",
+    "lstatslib.c",
+    "lstring.c",
+    "lstrlib.c",
+    "ltable.c",
+    "ltablib.c",
+    "ltm.c",
+    "lundump.c",
+    "lvm.c",
+    "lzio.c",
+];
+
 impl Build {
     #[allow(clippy::new_without_default)]
     pub fn new() -> Build {
@@ -157,47 +197,8 @@ fn apply_platform_defines(config: &mut cc::Build, target: &str) {
 }
 
 fn add_source_files(config: &mut cc::Build, source_dir: &Path) {
-    let files = [
-        "lapi.c",
-        "lauxlib.c",
-        "lbaselib.c",
-        "lbitlib.c",
-        "lcode.c",
-        "lcompatlib.c",
-        "lcorolib.c",
-        "ldblib.c",
-        "ldebug.c",
-        "ldo.c",
-        "ldump.c",
-        "lfunc.c",
-        "lgc.c",
-        "linit.c",
-        "liolib.c",
-        "llex.c",
-        "lmanip.c",
-        "lmathlib.c",
-        "lmem.c",
-        "loadlib.c",
-        "lobject.c",
-        "lopcodes.c",
-        "loslib.c",
-        "lparser.c",
-        "lreadline.c",
-        "lsec.c",
-        "lseclib.c",
-        "lstate.c",
-        "lstatslib.c",
-        "lstring.c",
-        "lstrlib.c",
-        "ltable.c",
-        "ltablib.c",
-        "ltm.c",
-        "lundump.c",
-        "lvm.c",
-        "lzio.c",
-    ];
-    for f in &files {
-        config.file(source_dir.join(f));
+    for file in LUA_SOURCE_FILES {
+        config.file(source_dir.join(file));
     }
 }
 
