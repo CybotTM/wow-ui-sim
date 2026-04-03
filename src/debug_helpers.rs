@@ -41,6 +41,13 @@ fn dump_game_menu_buttons(env: &WowLuaEnv) {
     let Some(gmf) = state.widgets.get(gmf_id) else {
         return;
     };
+    log_game_menu_frame(gmf);
+    for (i, &cid) in gmf.children.iter().enumerate() {
+        log_game_menu_child(&state.widgets, i, cid);
+    }
+}
+
+fn log_game_menu_frame(gmf: &crate::widget::Frame) {
     eprintln!(
         "  vis={} strata={:?} lvl={} {}x{} children={}",
         gmf.visible,
@@ -50,35 +57,40 @@ fn dump_game_menu_buttons(env: &WowLuaEnv) {
         gmf.height,
         gmf.children.len()
     );
-    for (i, &cid) in gmf.children.iter().enumerate() {
-        let Some(c) = state.widgets.get(cid) else {
-            continue;
-        };
-        let nm = c.name.as_deref().unwrap_or("(anon)");
+}
+
+fn log_game_menu_child(state: &crate::widget::WidgetRegistry, i: usize, cid: u64) {
+    let Some(c) = state.get(cid) else {
+        return;
+    };
+    let nm = c.name.as_deref().unwrap_or("(anon)");
+    eprintln!(
+        "  [{i}] {cid} {nm} [{:?}] {}x{} strata={:?} lvl={} vis={} text={:?}",
+        c.widget_type, c.width, c.height, c.frame_strata, c.frame_level, c.visible, c.text
+    );
+    if c.widget_type == WidgetType::Button {
+        log_game_menu_button(state, c);
+    }
+}
+
+fn log_game_menu_button(state: &crate::widget::WidgetRegistry, button: &crate::widget::Frame) {
+    eprintln!(
+        "      font={:?} fsz={} color={:?}",
+        button.font, button.font_size, button.text_color
+    );
+    if let Some(&tid) = button.children_keys.get("Text")
+        && let Some(tf) = state.get(tid)
+    {
         eprintln!(
-            "  [{i}] {cid} {nm} [{:?}] {}x{} strata={:?} lvl={} vis={} text={:?}",
-            c.widget_type, c.width, c.height, c.frame_strata, c.frame_level, c.visible, c.text
+            "      TextFS {tid}: text={:?} {}x{} vis={} strata={:?} lvl={} draw={:?} anch={}",
+            tf.text,
+            tf.width,
+            tf.height,
+            tf.visible,
+            tf.frame_strata,
+            tf.frame_level,
+            tf.draw_layer,
+            tf.anchors.len()
         );
-        if c.widget_type == WidgetType::Button {
-            eprintln!(
-                "      font={:?} fsz={} color={:?}",
-                c.font, c.font_size, c.text_color
-            );
-            if let Some(&tid) = c.children_keys.get("Text")
-                && let Some(tf) = state.widgets.get(tid)
-            {
-                eprintln!(
-                    "      TextFS {tid}: text={:?} {}x{} vis={} strata={:?} lvl={} draw={:?} anch={}",
-                    tf.text,
-                    tf.width,
-                    tf.height,
-                    tf.visible,
-                    tf.frame_strata,
-                    tf.frame_level,
-                    tf.draw_layer,
-                    tf.anchors.len()
-                );
-            }
-        }
     }
 }
