@@ -143,6 +143,18 @@ pub fn write_header(out: &mut File) -> std::io::Result<()> {
 }
 
 pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
+    write_trait_tree_info_struct(out)?;
+    write_trait_node_info_struct(out)?;
+    write_trait_entry_info_struct(out)?;
+    write_trait_def_info_struct(out)?;
+    write_trait_cond_info_struct(out)?;
+    write_trait_sub_tree_info_struct(out)?;
+    write_trait_currency_info_struct(out)?;
+    write_trait_edge_info_struct(out)?;
+    Ok(())
+}
+
+fn write_trait_tree_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitTreeInfo",
@@ -153,7 +165,10 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub node_ids: &'static [u32]",
             "pub currency_ids: &'static [u32]",
         ],
-    )?;
+    )
+}
+
+fn write_trait_node_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitNodeInfo",
@@ -171,7 +186,10 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub group_ids: &'static [u32]",
             "pub group_cond_ids: &'static [u32]",
         ],
-    )?;
+    )
+}
+
+fn write_trait_entry_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitEntryInfo",
@@ -182,7 +200,10 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub entry_type: u32",
             "pub sub_tree_id: u32",
         ],
-    )?;
+    )
+}
+
+fn write_trait_def_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitDefInfo",
@@ -196,7 +217,10 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub override_subtext: &'static str",
             "pub override_description: &'static str",
         ],
-    )?;
+    )
+}
+
+fn write_trait_cond_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitCondInfo",
@@ -216,7 +240,10 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub flags: u32",
             "pub required_level: u32",
         ],
-    )?;
+    )
+}
+
+fn write_trait_sub_tree_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitSubTreeInfo",
@@ -227,12 +254,18 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub atlas_element_id: u32",
             "pub tree_id: u32",
         ],
-    )?;
+    )
+}
+
+fn write_trait_currency_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitCurrencyInfo",
         &["pub id: u32", "pub currency_type: u32", "pub flags: u32"],
-    )?;
+    )
+}
+
+fn write_trait_edge_info_struct(out: &mut File) -> std::io::Result<()> {
     write_struct(
         out,
         "TraitEdgeInfo",
@@ -241,8 +274,7 @@ pub fn write_struct_defs(out: &mut File) -> std::io::Result<()> {
             "pub edge_type: u32",
             "pub visual_style: u32",
         ],
-    )?;
-    Ok(())
+    )
 }
 
 fn write_struct(out: &mut File, name: &str, fields: &[&str]) -> std::io::Result<()> {
