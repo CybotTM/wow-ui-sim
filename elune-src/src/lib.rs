@@ -50,67 +50,88 @@ impl Build {
     }
 
     pub fn build(&mut self, version: Version) -> Artifacts {
-        if version != Lua51 {
-            panic!("only Lua 5.1 (Elune) is supported by this crate");
-        }
-
+        let lib_name = "lua5.1";
+        validate_version(version);
         let target = self.target.as_ref().expect("TARGET not set");
         let host = self.host.as_ref().expect("HOST not set");
-        let out_dir = self.out_dir.as_ref().expect("OUT_DIR not set");
-        let lib_dir = out_dir.join("lib");
-        let include_dir = out_dir.join("include");
+        let paths = build_paths(self.out_dir.as_ref().expect("OUT_DIR not set"));
 
-        let source_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("elune/liblua");
-        let vendor_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("vendor");
+        prepare_output_dirs(&paths);
+        generate_luaconf(&paths.source_dir, &paths.generated_dir, target);
 
-        recreate_dir(&lib_dir);
-        recreate_dir(&include_dir);
+        let mut config = configure_build(host, target, &paths);
+        add_source_files(&mut config, &paths.source_dir);
+        config.out_dir(&paths.lib_dir).compile(lib_name);
 
-        let generated_dir = out_dir.join("generated");
-        recreate_dir(&generated_dir);
+        copy_public_headers(&paths.source_dir, &paths.generated_dir, &paths.include_dir);
+        paths.into_artifacts(lib_name)
+    }
+}
 
-        generate_luaconf(&source_dir, &generated_dir, target);
+struct BuildPaths {
+    source_dir: PathBuf,
+    vendor_dir: PathBuf,
+    generated_dir: PathBuf,
+    lib_dir: PathBuf,
+    include_dir: PathBuf,
+}
 
-        let mut config = cc::Build::new();
-        config
-            .target(target)
-            .host(host)
-            .warnings(false)
-            .opt_level(2)
-            .cargo_metadata(false)
-            .std("c11");
-
-        config.define("LUA_BUILD_EXPORT", None);
-        config.define("_GNU_SOURCE", None);
-
-        apply_platform_defines(&mut config, target);
-
-        if cfg!(debug_assertions) {
-            config.define("LUA_USE_APICHECK", None);
-        }
-
-        config
-            .include(&generated_dir)
-            .include(source_dir.join("include"))
-            .include(&source_dir)
-            .include(&vendor_dir);
-
-        config.flag("-w");
-        config.flag_if_supported("-fno-common");
-
-        add_source_files(&mut config, &source_dir);
-
-        let lib_name = "lua5.1";
-        config.out_dir(&lib_dir).compile(lib_name);
-
-        copy_public_headers(&source_dir, &generated_dir, &include_dir);
-
+impl BuildPaths {
+    fn into_artifacts(self, lib_name: &str) -> Artifacts {
         Artifacts {
-            lib_dir,
-            include_dir,
+            lib_dir: self.lib_dir,
+            include_dir: self.include_dir,
             libs: vec![lib_name.to_string()],
         }
     }
+}
+
+fn validate_version(version: Version) {
+    assert_eq!(
+        version, Lua51,
+        "only Lua 5.1 (Elune) is supported by this crate"
+    );
+}
+
+fn build_paths(out_dir: &Path) -> BuildPaths {
+    let manifest_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
+    BuildPaths {
+        source_dir: manifest_dir.join("elune/liblua"),
+        vendor_dir: manifest_dir.join("vendor"),
+        generated_dir: out_dir.join("generated"),
+        lib_dir: out_dir.join("lib"),
+        include_dir: out_dir.join("include"),
+    }
+}
+
+fn prepare_output_dirs(paths: &BuildPaths) {
+    recreate_dir(&paths.lib_dir);
+    recreate_dir(&paths.include_dir);
+    recreate_dir(&paths.generated_dir);
+}
+
+fn configure_build(host: &str, target: &str, paths: &BuildPaths) -> cc::Build {
+    let mut config = cc::Build::new();
+    config
+        .target(target)
+        .host(host)
+        .warnings(false)
+        .opt_level(2)
+        .cargo_metadata(false)
+        .std("c11")
+        .include(&paths.generated_dir)
+        .include(paths.source_dir.join("include"))
+        .include(&paths.source_dir)
+        .include(&paths.vendor_dir);
+    config.define("LUA_BUILD_EXPORT", None);
+    config.define("_GNU_SOURCE", None);
+    apply_platform_defines(&mut config, target);
+    if cfg!(debug_assertions) {
+        config.define("LUA_USE_APICHECK", None);
+    }
+    config.flag("-w");
+    config.flag_if_supported("-fno-common");
+    config
 }
 
 fn recreate_dir(dir: &Path) {
