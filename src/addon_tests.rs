@@ -76,15 +76,35 @@ fn load_test_framework(env: &WowLuaEnv) {
 
 /// Run all .lua test files from `Interface/AddOns/<addon_name>/tests/`.
 pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>) {
+    run_exec_lua(env, exec_lua);
+    load_test_framework(env);
+    let (tests_dir, test_files) = load_test_files(addon_name);
+    eprintln!(
+        "Running {} test file(s) from {}\n",
+        test_files.len(),
+        tests_dir.display()
+    );
+
+    let mut total_passed = 0u32;
+    let mut total_failed = 0u32;
+    for path in &test_files {
+        let (passed, failed) = report_test_file_result(env, path);
+        total_passed += passed;
+        total_failed += failed;
+        flush_console(env);
+    }
+    print_summary_and_exit(total_passed, total_failed);
+}
+
+fn run_exec_lua(env: &WowLuaEnv, exec_lua: Option<&str>) {
     if let Some(code) = exec_lua {
         if let Err(e) = env.exec(code) {
             eprintln!("[exec-lua] error: {e}");
         }
     }
+}
 
-    // Always load TestFramework first
-    load_test_framework(env);
-
+fn load_test_files(addon_name: &str) -> (PathBuf, Vec<PathBuf>) {
     let tests_dir = PathBuf::from(format!("./Interface/AddOns/{addon_name}/tests"));
     if !tests_dir.exists() {
         eprintln!("No tests directory found: {}", tests_dir.display());
@@ -99,35 +119,27 @@ pub fn run_addon_tests(env: &WowLuaEnv, addon_name: &str, exec_lua: Option<&str>
         }
     };
     test_files.sort();
+    (tests_dir, test_files)
+}
 
-    eprintln!(
-        "Running {} test file(s) from {}\n",
-        test_files.len(),
-        tests_dir.display()
-    );
-
-    let mut total_passed = 0u32;
-    let mut total_failed = 0u32;
-
-    for path in &test_files {
-        let file_name = path.file_name().unwrap().to_string_lossy();
-        match run_test_file(env, path) {
-            Ok((passed, failed)) => {
-                total_passed += passed;
-                total_failed += failed;
-                if failed == 0 {
-                    eprintln!("  \x1b[32m\u{2713}\x1b[0m {file_name} ({passed} tests)");
-                }
+fn report_test_file_result(env: &WowLuaEnv, path: &PathBuf) -> (u32, u32) {
+    let file_name = path.file_name().unwrap().to_string_lossy();
+    match run_test_file(env, path) {
+        Ok((passed, failed)) => {
+            if failed == 0 {
+                eprintln!("  \x1b[32m\u{2713}\x1b[0m {file_name} ({passed} tests)");
             }
-            Err(e) => {
-                eprintln!("  \x1b[31m\u{2717}\x1b[0m {file_name} (load error)");
-                eprintln!("    {e}");
-                total_failed += 1;
-            }
+            (passed, failed)
         }
-        flush_console(env);
+        Err(e) => {
+            eprintln!("  \x1b[31m\u{2717}\x1b[0m {file_name} (load error)");
+            eprintln!("    {e}");
+            (0, 1)
+        }
     }
+}
 
+fn print_summary_and_exit(total_passed: u32, total_failed: u32) {
     let total = total_passed + total_failed;
     eprintln!(
         "\n{total} tests, \x1b[32m{total_passed} passed\x1b[0m, \x1b[31m{total_failed} failed\x1b[0m"
