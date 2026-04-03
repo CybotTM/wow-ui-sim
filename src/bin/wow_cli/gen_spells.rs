@@ -20,7 +20,24 @@ use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
+    let spell_data = load_spell_data(&wow_data)?;
+    std::fs::create_dir_all("data")?;
+    generate_spell_table(&spell_data)?;
+    generate_spell_descriptions(&spell_data)?;
+    generate_spell_power_table(&spell_data)?;
+    Ok(())
+}
 
+struct SpellData {
+    spell_names: HashMap<u32, String>,
+    spell_subtexts: HashMap<u32, String>,
+    spell_descriptions: HashMap<u32, String>,
+    spell_misc: HashMap<u32, (u32, u32)>,
+    spell_power: HashMap<u32, Vec<SpellPowerRow>>,
+    spell_targets: HashMap<u32, u8>,
+}
+
+fn load_spell_data(wow_data: &Path) -> Result<SpellData, Box<dyn std::error::Error>> {
     let spell_names = load_spell_names(&wow_data.join("SpellName.csv"))?;
     println!("SpellName: {} entries", spell_names.len());
 
@@ -39,41 +56,55 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let spell_targets = load_spell_effect_targets(&wow_data.join("SpellEffect.csv"))?;
     println!("SpellEffect (targets): {} spells", spell_targets.len());
 
-    std::fs::create_dir_all("data")?;
+    Ok(SpellData {
+        spell_names,
+        spell_subtexts,
+        spell_descriptions,
+        spell_misc,
+        spell_power,
+        spell_targets,
+    })
+}
 
-    // Generate data/spells.rs
+fn generate_spell_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
     let output_path = Path::new("data/spells.rs");
     let mut out = File::create(output_path)?;
     write_header(&mut out)?;
     let count = build_spell_map(
         &mut out,
-        &spell_names,
-        &spell_subtexts,
-        &spell_misc,
-        &spell_targets,
+        &spell_data.spell_names,
+        &spell_data.spell_subtexts,
+        &spell_data.spell_misc,
+        &spell_data.spell_targets,
     )?;
     write_lookup_fn(&mut out)?;
     write_tests(&mut out)?;
     println!("Generated {} spell entries", count);
     println!("Output: {}", output_path.display());
+    Ok(())
+}
 
-    // Generate data/spell_descriptions.rs
+fn generate_spell_descriptions(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
     let descriptions_path = Path::new("data/spell_descriptions.rs");
     let mut desc_out = File::create(descriptions_path)?;
     let description_ids =
         collect_compact_description_spell_ids("data/traits.rs", "data/spells.rs")?;
-    let description_count =
-        write_spell_descriptions(&mut desc_out, &spell_descriptions, &description_ids)?;
+    let description_count = write_spell_descriptions(
+        &mut desc_out,
+        &spell_data.spell_descriptions,
+        &description_ids,
+    )?;
     println!("Generated {} compact spell descriptions", description_count);
     println!("Output: {}", descriptions_path.display());
+    Ok(())
+}
 
-    // Generate data/spell_power.rs
+fn generate_spell_power_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
     let power_path = Path::new("data/spell_power.rs");
     let mut power_out = File::create(power_path)?;
-    let power_count = write_spell_power(&mut power_out, &spell_power)?;
+    let power_count = write_spell_power(&mut power_out, &spell_data.spell_power)?;
     println!("Generated {} spell power entries", power_count);
     println!("Output: {}", power_path.display());
-
     Ok(())
 }
 
