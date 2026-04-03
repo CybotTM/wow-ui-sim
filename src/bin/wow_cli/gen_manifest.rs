@@ -83,11 +83,24 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "mod tests {{")?;
     writeln!(out, "    use super::*;")?;
     writeln!(out)?;
+    write_test_manifest_count(out)?;
+    write_test_default_icon(out)?;
+    write_test_paladin_icon(out)?;
+    write_test_nonexistent_id(out)?;
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+fn write_test_manifest_count(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_manifest_count() {{")?;
     writeln!(out, "        assert!(MANIFEST.len() > 100_000);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_default_icon(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_default_icon() {{")?;
     writeln!(
@@ -100,6 +113,10 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_paladin_icon(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_paladin_icon() {{")?;
     writeln!(
@@ -112,6 +129,10 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_nonexistent_id(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_nonexistent_id() {{")?;
     writeln!(
@@ -119,7 +140,6 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
         "        assert!(get_texture_path(999_999_999).is_none());"
     )?;
     writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
     Ok(())
 }
 
