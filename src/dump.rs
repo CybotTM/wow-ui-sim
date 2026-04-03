@@ -52,50 +52,94 @@ pub fn build_tree(
     });
 
     let mut lines = Vec::new();
-    let compile_re = |pat: &str| {
-        RegexBuilder::new(pat)
-            .case_insensitive(true)
-            .build()
-            .unwrap_or_else(|_| {
-                // Fall back to escaped literal if regex is invalid
-                RegexBuilder::new(&regex::escape(pat))
-                    .case_insensitive(true)
-                    .build()
-                    .unwrap()
-            })
-    };
     if let Some(key_filter) = filter_key {
-        let re = compile_re(key_filter);
-        let matching = collect_key_matches(widgets, &roots, &re);
-        for id in matching {
-            emit_subtree(
-                widgets,
-                addon_names,
-                id,
-                0,
-                visible_only,
-                screen_width,
-                screen_height,
-                &mut lines,
-            );
-        }
+        emit_key_filtered_subtrees(
+            widgets,
+            addon_names,
+            &roots,
+            key_filter,
+            visible_only,
+            screen_width,
+            screen_height,
+            &mut lines,
+        );
     } else {
-        let re = filter.map(|f| compile_re(f));
-        for (id, _) in &roots {
-            emit_filtered(
-                widgets,
-                addon_names,
-                *id,
-                0,
-                re.as_ref(),
-                visible_only,
-                screen_width,
-                screen_height,
-                &mut lines,
-            );
-        }
+        emit_roots_with_filter(
+            widgets,
+            addon_names,
+            &roots,
+            filter,
+            visible_only,
+            screen_width,
+            screen_height,
+            &mut lines,
+        );
     }
     lines
+}
+
+fn compile_dump_regex(pat: &str) -> regex::Regex {
+    RegexBuilder::new(pat)
+        .case_insensitive(true)
+        .build()
+        .unwrap_or_else(|_| {
+            RegexBuilder::new(&regex::escape(pat))
+                .case_insensitive(true)
+                .build()
+                .unwrap()
+        })
+}
+
+fn emit_key_filtered_subtrees(
+    widgets: &WidgetRegistry,
+    addon_names: &[String],
+    roots: &[(u64, Option<String>)],
+    key_filter: &str,
+    visible_only: bool,
+    screen_width: f32,
+    screen_height: f32,
+    lines: &mut Vec<String>,
+) {
+    let re = compile_dump_regex(key_filter);
+    let matching = collect_key_matches(widgets, roots, &re);
+    for id in matching {
+        emit_subtree(
+            widgets,
+            addon_names,
+            id,
+            0,
+            visible_only,
+            screen_width,
+            screen_height,
+            lines,
+        );
+    }
+}
+
+fn emit_roots_with_filter(
+    widgets: &WidgetRegistry,
+    addon_names: &[String],
+    roots: &[(u64, Option<String>)],
+    filter: Option<&str>,
+    visible_only: bool,
+    screen_width: f32,
+    screen_height: f32,
+    lines: &mut Vec<String>,
+) {
+    let re = filter.map(compile_dump_regex);
+    for (id, _) in roots {
+        emit_filtered(
+            widgets,
+            addon_names,
+            *id,
+            0,
+            re.as_ref(),
+            visible_only,
+            screen_width,
+            screen_height,
+            lines,
+        );
+    }
 }
 
 /// Build a compact dump with warning flags (for debug server Dump command).
