@@ -8,8 +8,6 @@ use crate::iced_app::layout::{anchor_position, compute_frame_rect};
 use crate::widget::{Frame, WidgetRegistry, WidgetType};
 use regex::RegexBuilder;
 
-// ── Public entry points ─────────────────────────────────────────────
-
 /// Print the frame tree to stdout (headless subcommand).
 pub fn print_frame_tree(
     widgets: &WidgetRegistry,
@@ -139,9 +137,6 @@ pub fn build_warning_dump(
     }
     lines
 }
-
-// ── Frame line formatting ───────────────────────────────────────────
-
 /// Emit a single frame line with computed rect, stored size, anchors, texture.
 #[allow(clippy::too_many_arguments)]
 fn emit_frame_line(
@@ -254,9 +249,6 @@ fn emit_anchor_lines(
         ));
     }
 }
-
-// ── Formatters ──────────────────────────────────────────────────────
-
 /// Computed rect, with stored size annotation when it differs.
 fn format_size_str(frame: &Frame, rect: &LayoutRect) -> String {
     let differs =
@@ -319,9 +311,6 @@ fn format_font_str(frame: &Frame) -> String {
         String::new()
     }
 }
-
-// ── Tree traversal ──────────────────────────────────────────────────
-
 /// Emit a full subtree unconditionally (for filter_key matches).
 fn emit_subtree(
     widgets: &WidgetRegistry,
@@ -478,9 +467,6 @@ fn build_warnings(
     }
     w
 }
-
-// ── Key-match filter ────────────────────────────────────────────────
-
 fn collect_key_matches(
     widgets: &WidgetRegistry,
     roots: &[(u64, Option<String>)],
@@ -509,9 +495,6 @@ fn collect_key_matches_recursive(
         collect_key_matches_recursive(widgets, child_id, re, result);
     }
 }
-
-// ── Name / text resolution ──────────────────────────────────────────
-
 fn collect_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
     widgets
         .iter_ids()
@@ -574,9 +557,6 @@ fn resolve_display_text(widgets: &WidgetRegistry, frame: &Frame) -> Option<Strin
     }
     None
 }
-
-// ── Anchor diagnostic (headless only) ───────────────────────────────
-
 fn print_anchor_diagnostic(widgets: &WidgetRegistry) {
     let mut anchored = 0;
     let mut unanchored = 0;
@@ -643,9 +623,6 @@ fn find_parent_key(widgets: &WidgetRegistry, w: &Frame, id: u64) -> Option<Strin
         .find(|(_, cid)| **cid == id)
         .map(|(k, _)| k.clone())
 }
-
-// ── WoW escape stripping ───────────────────────────────────────────
-
 /// Strip WoW escape sequences (|T...|t texture, |c...|r color) for cleaner display.
 pub fn strip_wow_escapes(s: &str) -> String {
     let mut result = String::with_capacity(s.len());
@@ -699,9 +676,6 @@ fn skip_wow_escape(chars: &mut std::iter::Peekable<std::str::Chars>) {
         _ => {}
     }
 }
-
-// ── Button state texture lookup ──────────────────────────────────────
-
 /// For Texture children with parentKey like NormalTexture/PushedTexture/etc.,
 /// look up the texture path from the parent button's corresponding field.
 fn resolve_button_state_texture<'a>(
@@ -726,9 +700,6 @@ fn resolve_button_state_texture<'a>(
         _ => None,
     }
 }
-
-// ── Texture resolution for dump ─────────────────────────────────────
-
 /// Resolve a WoW texture path and return a suffix indicating the format found.
 /// Returns e.g. " (webp)", " (BLP)", or " (MISSING)".
 fn resolve_texture_format(wow_path: &str) -> String {
