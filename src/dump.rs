@@ -5,7 +5,7 @@
 
 use crate::LayoutRect;
 use crate::iced_app::layout::{anchor_position, compute_frame_rect};
-use crate::widget::{Frame, WidgetRegistry, WidgetType};
+use crate::widget::{Anchor, Frame, WidgetRegistry, WidgetType};
 use regex::RegexBuilder;
 
 /// Print the frame tree to stdout (headless subcommand).
@@ -250,7 +250,22 @@ fn emit_anchor_lines(
     if frame.anchors.is_empty() {
         return;
     }
-    let parent_rect = frame
+    let parent_rect = anchor_parent_rect(widgets, frame, screen_width, screen_height);
+
+    for anchor in &frame.anchors {
+        let (rel_name, rel_rect) =
+            resolve_anchor_target(widgets, anchor, parent_rect, screen_width, screen_height);
+        lines.push(format_anchor_line(indent, anchor, rel_name, rel_rect));
+    }
+}
+
+fn anchor_parent_rect(
+    widgets: &WidgetRegistry,
+    frame: &Frame,
+    screen_width: f32,
+    screen_height: f32,
+) -> LayoutRect {
+    frame
         .parent_id
         .map(|pid| compute_frame_rect(widgets, pid, screen_width, screen_height))
         .unwrap_or(LayoutRect {
@@ -258,40 +273,54 @@ fn emit_anchor_lines(
             y: 0.0,
             width: screen_width,
             height: screen_height,
-        });
+        })
+}
 
-    for anchor in &frame.anchors {
-        let (rel_name, rel_rect) = if let Some(rel_id) = anchor.relative_to_id {
-            let rect = compute_frame_rect(widgets, rel_id as u64, screen_width, screen_height);
-            let name = widgets
-                .get(rel_id as u64)
-                .and_then(|f| f.name.as_deref())
-                .unwrap_or("(anon)");
-            (name, rect)
-        } else {
-            (
-                anchor.relative_to.as_deref().unwrap_or("$parent"),
-                parent_rect,
-            )
-        };
-        let (ax, ay) = anchor_position(
-            anchor.relative_point,
-            rel_rect.x,
-            rel_rect.y,
-            rel_rect.width,
-            rel_rect.height,
-        );
-        lines.push(format!(
-            "{indent}  [anchor] {} -> {}:{} offset({:.0},{:.0}) -> ({:.0},{:.0})",
-            anchor.point.as_str(),
-            rel_name,
-            anchor.relative_point.as_str(),
-            anchor.x_offset,
-            anchor.y_offset,
-            ax + anchor.x_offset,
-            ay - anchor.y_offset,
-        ));
+fn resolve_anchor_target<'a>(
+    widgets: &'a WidgetRegistry,
+    anchor: &'a Anchor,
+    parent_rect: LayoutRect,
+    screen_width: f32,
+    screen_height: f32,
+) -> (&'a str, LayoutRect) {
+    if let Some(rel_id) = anchor.relative_to_id {
+        let rect = compute_frame_rect(widgets, rel_id as u64, screen_width, screen_height);
+        let name = widgets
+            .get(rel_id as u64)
+            .and_then(|f| f.name.as_deref())
+            .unwrap_or("(anon)");
+        (name, rect)
+    } else {
+        (
+            anchor.relative_to.as_deref().unwrap_or("$parent"),
+            parent_rect,
+        )
     }
+}
+
+fn format_anchor_line(
+    indent: &str,
+    anchor: &Anchor,
+    rel_name: &str,
+    rel_rect: LayoutRect,
+) -> String {
+    let (ax, ay) = anchor_position(
+        anchor.relative_point,
+        rel_rect.x,
+        rel_rect.y,
+        rel_rect.width,
+        rel_rect.height,
+    );
+    format!(
+        "{indent}  [anchor] {} -> {}:{} offset({:.0},{:.0}) -> ({:.0},{:.0})",
+        anchor.point.as_str(),
+        rel_name,
+        anchor.relative_point.as_str(),
+        anchor.x_offset,
+        anchor.y_offset,
+        ax + anchor.x_offset,
+        ay - anchor.y_offset,
+    )
 }
 /// Computed rect, with stored size annotation when it differs.
 fn format_size_str(frame: &Frame, rect: &LayoutRect) -> String {
