@@ -98,6 +98,15 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "mod tests {{")?;
     writeln!(out, "    use super::*;")?;
     writeln!(out)?;
+    write_test_addon_list_string(out)?;
+    write_test_common_strings_exist(out)?;
+    write_test_nonexistent_string_returns_none(out)?;
+    write_test_string_count(out)?;
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+fn write_test_addon_list_string(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_addon_list_string() {{")?;
     writeln!(
@@ -106,6 +115,10 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_common_strings_exist(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_common_strings_exist() {{")?;
     writeln!(
@@ -139,6 +152,10 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_nonexistent_string_returns_none(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_nonexistent_string_returns_none() {{")?;
     writeln!(
@@ -147,10 +164,13 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_string_count(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_string_count() {{")?;
     writeln!(out, "        assert!(GLOBAL_STRINGS.len() > 20000);")?;
     writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
     Ok(())
 }
