@@ -504,11 +504,24 @@ pub fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "mod tests {{")?;
     writeln!(out, "    use super::*;")?;
     writeln!(out)?;
+    write_test_tree_count(out)?;
+    write_test_paladin_tree_790(out)?;
+    write_test_node_has_entries(out)?;
+    write_test_definition_count(out)?;
+    writeln!(out, "}}")?;
+    Ok(())
+}
+
+fn write_test_tree_count(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_tree_count() {{")?;
     writeln!(out, "        assert!(TRAIT_TREE_DB.len() > 100);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_paladin_tree_790(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_paladin_tree_790() {{")?;
     writeln!(
@@ -518,6 +531,10 @@ pub fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "        assert_eq!(tree.node_ids.len(), 237);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_node_has_entries(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_node_has_entries() {{")?;
     writeln!(
@@ -532,11 +549,14 @@ pub fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "        assert!(!node.entry_ids.is_empty());")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_test_definition_count(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_definition_count() {{")?;
     writeln!(out, "        assert!(TRAIT_DEFINITION_DB.len() > 10_000);")?;
     writeln!(out, "    }}")?;
-    writeln!(out, "}}")?;
     Ok(())
 }
 
