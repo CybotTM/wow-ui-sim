@@ -110,7 +110,9 @@ impl TextureManager {
     fn load_with_disk_cache(&self, normalized: &str, file_path: &Path) -> Option<TextureData> {
         // Try disk cache first
         if let Some(cache_dir) = &self.disk_cache_dir {
-            if let Some(data) = crate::texture_cache::load_from_disk_cache(cache_dir, normalized, file_path) {
+            if let Some(data) =
+                crate::texture_cache::load_from_disk_cache(cache_dir, normalized, file_path)
+            {
                 return Some(data);
             }
         }
@@ -124,7 +126,10 @@ impl TextureManager {
             }
             Err(e) => {
                 crate::logging::eprintln_elapsed(&format!(
-                    "[TexMgr] Load error: {} -> {}: {}", normalized, file_path.display(), e
+                    "[TexMgr] Load error: {} -> {}: {}",
+                    normalized,
+                    file_path.display(),
+                    e
                 ));
                 None
             }

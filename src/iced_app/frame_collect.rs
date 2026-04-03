@@ -46,16 +46,7 @@ pub fn collect_subtree_ids(
 }
 
 /// Sort key type for frame rendering order within a strata bucket.
-pub type IntraStrataKey = (
-    i32,
-    i32,
-    u64,
-    u8,
-    i32,
-    i32,
-    u8,
-    u64,
-);
+pub type IntraStrataKey = (i32, i32, u64, u8, i32, i32, u8, u64);
 
 /// Intra-strata sort key for rendering order within the same frame strata.
 ///
@@ -159,12 +150,20 @@ mod tests {
         let parent_id = parent.id;
         registry.register(parent);
 
-        let first = Frame::new(WidgetType::Texture, Some("First".to_string()), Some(parent_id));
+        let first = Frame::new(
+            WidgetType::Texture,
+            Some("First".to_string()),
+            Some(parent_id),
+        );
         let first_id = first.id;
         registry.register(first);
         registry.add_child(parent_id, first_id);
 
-        let second = Frame::new(WidgetType::Texture, Some("Second".to_string()), Some(parent_id));
+        let second = Frame::new(
+            WidgetType::Texture,
+            Some("Second".to_string()),
+            Some(parent_id),
+        );
         let second_id = second.id;
         registry.register(second);
         registry.add_child(parent_id, second_id);

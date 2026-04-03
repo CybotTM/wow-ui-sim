@@ -93,7 +93,15 @@ fn template_child_shared_mixin_no_onload_xml() {
     "#;
     let ui = parse_xml(xml).unwrap();
     if let XmlElement::Frame(frame) = &ui.elements[0] {
-        create_frame_from_xml(&env.loader_env(), frame, "Frame", None, None, &mut LoadTiming::default()).unwrap();
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
     }
 
     let result = check_onload_only_on_parent(&env, "SpellBtnXml");

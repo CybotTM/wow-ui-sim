@@ -189,7 +189,11 @@ pub(super) fn build_fontstring_lua(
 ) -> String {
     let mut code =
         build_fontstring_create_code(fontstring, parent_name, draw_layer, sub_level, fs_name);
-    code.push_str(&build_fontstring_extra_code(fontstring, parent_name, resolved_text));
+    code.push_str(&build_fontstring_extra_code(
+        fontstring,
+        parent_name,
+        resolved_text,
+    ));
     code
 }
 

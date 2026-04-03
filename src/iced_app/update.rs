@@ -45,7 +45,9 @@ impl App {
             Message::InspectorVisibleToggled(v) => self.inspector_state.visible = v,
             Message::InspectorMouseEnabledToggled(v) => self.inspector_state.mouse_enabled = v,
             Message::InspectorApply => self.handle_inspector_apply(),
-            Message::ToggleFramesPanel => self.frames_panel_collapsed = !self.frames_panel_collapsed,
+            Message::ToggleFramesPanel => {
+                self.frames_panel_collapsed = !self.frames_panel_collapsed
+            }
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::KeyPress(ref key, ref text) => {
                 if key == "ESCAPE" && self.options_modal_visible {
@@ -56,7 +58,9 @@ impl App {
             }
             Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
             Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
-            Message::RotDamageLevelChanged(ref label) => self.handle_rot_damage_level_changed(label),
+            Message::RotDamageLevelChanged(ref label) => {
+                self.handle_rot_damage_level_changed(label)
+            }
             Message::ToggleOptionsModal => self.options_modal_visible = !self.options_modal_visible,
             Message::CloseOptionsModal => self.options_modal_visible = false,
             Message::MovementToggled(field, val) => self.handle_movement_toggled(field, val),
@@ -110,7 +114,11 @@ impl App {
             .map(|(_, f)| *f)
             .unwrap_or(0.0);
         let at_max = fraction == 0.0;
-        let event = if at_max { "DISABLE_XP_GAIN" } else { "ENABLE_XP_GAIN" };
+        let event = if at_max {
+            "DISABLE_XP_GAIN"
+        } else {
+            "ENABLE_XP_GAIN"
+        };
         {
             let env = self.env.borrow();
             let xp_max = 89_750i32;
@@ -306,11 +314,21 @@ impl App {
     }
 
     fn take_render_dirty(&self) {
-        self.env.borrow().state().borrow().widgets.take_render_dirty();
+        self.env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty();
     }
 
     fn take_render_dirty_with_ids(&self) -> (u16, Option<std::collections::HashSet<u64>>) {
-        self.env.borrow().state().borrow().widgets.take_render_dirty_with_ids()
+        self.env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .take_render_dirty_with_ids()
     }
 
     fn update_fps_counter(&mut self) {
@@ -370,7 +388,9 @@ impl App {
             let unit_id = format!("party{idx}");
             let _ = env.fire_event_with_args(
                 "UNIT_HEALTH",
-                &[mlua::Value::String(env.lua().create_string(&unit_id).unwrap())],
+                &[mlua::Value::String(
+                    env.lua().create_string(&unit_id).unwrap(),
+                )],
             );
         }
     }
@@ -469,9 +489,10 @@ impl App {
         self.textures_pending.set(remaining_uncached);
         let loaded = tex_mgr.cache_len() - before;
         if loaded > 0 {
-            crate::logging::eprintln_elapsed(
-                &format!("[preload] {loaded} new textures ({} total)", paths.len()),
-            );
+            crate::logging::eprintln_elapsed(&format!(
+                "[preload] {loaded} new textures ({} total)",
+                paths.len()
+            ));
         }
     }
 
@@ -556,8 +577,10 @@ impl App {
         {
             crate::logging::println_elapsed(&format!(
                 "Window size: {}x{} (was {}x{})",
-                size.width as i32, size.height as i32,
-                state.screen_width as i32, state.screen_height as i32
+                size.width as i32,
+                size.height as i32,
+                state.screen_width as i32,
+                state.screen_height as i32
             ));
             drop(state);
             env.set_screen_size(size.width, size.height);
@@ -571,7 +594,12 @@ impl App {
     }
 }
 
-fn log_slow_tick(total: std::time::Duration, layout_dur: std::time::Duration, combined: u16, app: &App) {
+fn log_slow_tick(
+    total: std::time::Duration,
+    layout_dur: std::time::Duration,
+    combined: u16,
+    app: &App,
+) {
     if super::perf_logging_enabled() && total.as_millis() > 10 {
         let n = app.pending_dirty_ids.borrow().as_ref().map(|s| s.len());
         eprintln!(

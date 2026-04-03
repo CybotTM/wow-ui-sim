@@ -55,7 +55,17 @@ pub fn create_frame_from_xml(
     let lua_code =
         build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
     timing.frame_code_build_time += build_start.elapsed();
-    setup_frame(env, &lua_code, &name, initial_hidden, frame, inherits, parent, intrinsic_base, timing)?;
+    setup_frame(
+        env,
+        &lua_code,
+        &name,
+        initial_hidden,
+        frame,
+        inherits,
+        parent,
+        intrinsic_base,
+        timing,
+    )?;
     finalize_frame(env, frame, &name, inherits, timing)?;
     Ok(Some(name))
 }

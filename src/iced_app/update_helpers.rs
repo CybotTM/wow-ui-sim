@@ -64,10 +64,7 @@ fn hittable_rect(f: &crate::widget::Frame) -> Option<iced::Rectangle> {
 }
 
 /// Check if a frame is a CheckButton that should be auto-toggled (not an action bar button).
-pub(super) fn is_toggleable_checkbutton(
-    state: &crate::lua_api::SimState,
-    frame_id: u64,
-) -> bool {
+pub(super) fn is_toggleable_checkbutton(state: &crate::lua_api::SimState, frame_id: u64) -> bool {
     let is_checkbutton = state
         .widgets
         .get(frame_id)
@@ -83,10 +80,7 @@ pub(super) fn is_toggleable_checkbutton(
 }
 
 /// Read the `__checked` attribute from a frame (defaults to false).
-pub(super) fn get_checked_attribute(
-    state: &crate::lua_api::SimState,
-    frame_id: u64,
-) -> bool {
+pub(super) fn get_checked_attribute(state: &crate::lua_api::SimState, frame_id: u64) -> bool {
     state
         .widgets
         .get(frame_id)

@@ -9,7 +9,15 @@ fn create_first_frame(env: &WowLuaEnv, xml: &str, widget_type: &str) {
     let ui = parse_xml(xml).unwrap();
     match &ui.elements[0] {
         XmlElement::Frame(f) | XmlElement::Button(f) => {
-            create_frame_from_xml(&env.loader_env(), f, widget_type, None, None, &mut LoadTiming::default()).unwrap();
+            create_frame_from_xml(
+                &env.loader_env(),
+                f,
+                widget_type,
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
         }
         _ => panic!("Expected Frame or Button element"),
     }

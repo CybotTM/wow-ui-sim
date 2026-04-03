@@ -1,7 +1,7 @@
 //! Tests for the addon loader.
 
-mod screen_selection;
 mod account_store;
+mod screen_selection;
 
 use super::addon::AddonContext;
 use super::lua_file::load_lua_file;

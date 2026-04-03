@@ -35,15 +35,15 @@ fn handle_mouse_event(
                 CanvasMessage::MouseMove(local),
             )))
         }
-        mouse::Event::ButtonPressed(mouse::Button::Left) => cursor.position_in(bounds).map(|p| {
-            shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseDown(p)))
-        }),
-        mouse::Event::ButtonReleased(mouse::Button::Left) => cursor.position_in(bounds).map(|p| {
-            shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseUp(p)))
-        }),
-        mouse::Event::ButtonPressed(mouse::Button::Right) => cursor
+        mouse::Event::ButtonPressed(mouse::Button::Left) => cursor
             .position_in(bounds)
-            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::RightMouseDown(p)))),
+            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseDown(p)))),
+        mouse::Event::ButtonReleased(mouse::Button::Left) => cursor
+            .position_in(bounds)
+            .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::MouseUp(p)))),
+        mouse::Event::ButtonPressed(mouse::Button::Right) => cursor.position_in(bounds).map(|p| {
+            shader::Action::publish(Message::CanvasEvent(CanvasMessage::RightMouseDown(p)))
+        }),
         mouse::Event::ButtonReleased(mouse::Button::Right) => cursor
             .position_in(bounds)
             .map(|p| shader::Action::publish(Message::CanvasEvent(CanvasMessage::RightMouseUp(p)))),
@@ -548,7 +548,12 @@ impl App {
         let state = env.state().borrow();
 
         self.emit_and_finalize_strata(
-            dirty, dirty_ids.as_ref(), size, &strata_buckets, &state, &mut font_sys,
+            dirty,
+            dirty_ids.as_ref(),
+            size,
+            &strata_buckets,
+            &state,
+            &mut font_sys,
         );
         self.rebuild_hit_grid_if_needed(&state, &strata_buckets, size);
         drop(state);

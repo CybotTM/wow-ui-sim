@@ -64,13 +64,14 @@ fn read_cache_file(path: &Path) -> Option<TextureData> {
     if pixels.len() != expected_size {
         return None;
     }
-    Some(TextureData { width, height, pixels })
+    Some(TextureData {
+        width,
+        height,
+        pixels,
+    })
 }
 
-fn write_cache_file(
-    path: &Path,
-    data: &TextureData,
-) -> Result<(), Box<dyn std::error::Error>> {
+fn write_cache_file(path: &Path, data: &TextureData) -> Result<(), Box<dyn std::error::Error>> {
     let mut buf = Vec::with_capacity(8 + data.pixels.len() / 2);
     buf.extend_from_slice(&data.width.to_le_bytes());
     buf.extend_from_slice(&data.height.to_le_bytes());

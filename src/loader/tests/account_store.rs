@@ -21,7 +21,9 @@ fn extract_icon_card_update_lua() -> String {
         .join("Interface/BlizzardUI/Blizzard_AccountStore/Blizzard_AccountStoreCardTemplates.lua");
     let source = std::fs::read_to_string(path).unwrap();
     let start = source.find("AccountStoreIconCardMixin = {};").unwrap();
-    let end = source.find("AccountStoreTransmogSetCardMixin = {};").unwrap();
+    let end = source
+        .find("AccountStoreTransmogSetCardMixin = {};")
+        .unwrap();
     source[start..end].to_string()
 }
 

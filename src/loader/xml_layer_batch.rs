@@ -10,7 +10,9 @@ use crate::xml;
 use super::LoadTiming;
 use super::error::LoadError;
 use super::helpers::resolve_child_name;
-use super::xml_fontstring::{build_fontstring_lua, resolve_fontstring_text, sync_fontstring_text_to_rust};
+use super::xml_fontstring::{
+    build_fontstring_lua, resolve_fontstring_text, sync_fontstring_text_to_rust,
+};
 use super::xml_texture::{apply_texture_animations_xml, build_texture_lua};
 
 struct CollectedTexture<'a> {
@@ -35,9 +37,8 @@ fn exec_batch(env: &LoaderEnv<'_>, batch: &str, parent_name: &str) -> Result<(),
     if batch.is_empty() {
         return Ok(());
     }
-    env.exec(batch).map_err(|e| {
-        LoadError::Lua(format!("layer children on {}: {}", parent_name, e))
-    })
+    env.exec(batch)
+        .map_err(|e| LoadError::Lua(format!("layer children on {}: {}", parent_name, e)))
 }
 
 fn collect_textures<'a>(frame: &'a xml::FrameXml) -> Vec<CollectedTexture<'a>> {
@@ -77,13 +78,22 @@ fn append_texture_code<'a>(
         let resolved = xml::resolve_texture_inheritance(ct.texture);
         let tex_name = resolve_child_name(resolved.name.as_deref(), parent_name, "__tex_");
         let code = build_texture_lua(
-            &tex_name, &resolved, parent_name, &ct.draw_layer, ct.is_mask, ct.is_line, ct.sub_level,
+            &tex_name,
+            &resolved,
+            parent_name,
+            &ct.draw_layer,
+            ct.is_mask,
+            ct.is_line,
+            ct.sub_level,
         );
         batch.push_str("do ");
         batch.push_str(&code);
         batch.push_str(" end\n");
         if ct.texture.animations.is_some() {
-            anim_entries.push(AnimEntry { texture: ct.texture, tex_name });
+            anim_entries.push(AnimEntry {
+                texture: ct.texture,
+                tex_name,
+            });
         }
         timing.texture_count += 1;
     }
@@ -101,7 +111,15 @@ fn append_fontstring_code(
             let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
             let sub_level = layer.texture_sub_level.unwrap_or(0);
             for fs in layer.font_strings() {
-                append_single_fontstring(fs, parent_name, draw_layer, sub_level, batch, text_syncs, timing);
+                append_single_fontstring(
+                    fs,
+                    parent_name,
+                    draw_layer,
+                    sub_level,
+                    batch,
+                    text_syncs,
+                    timing,
+                );
             }
         }
     }
@@ -121,12 +139,22 @@ fn append_single_fontstring(
     }
     let fs_name = resolve_child_name(fontstring.name.as_deref(), parent_name, "__fs_");
     let resolved_text = resolve_fontstring_text(fontstring.text.as_deref());
-    let code = build_fontstring_lua(fontstring, parent_name, draw_layer, sub_level, &fs_name, &resolved_text);
+    let code = build_fontstring_lua(
+        fontstring,
+        parent_name,
+        draw_layer,
+        sub_level,
+        &fs_name,
+        &resolved_text,
+    );
     batch.push_str("do ");
     batch.push_str(&code);
     batch.push_str(" end\n");
     if let Some(text) = resolved_text {
-        text_syncs.push(TextSync { name: fs_name, text });
+        text_syncs.push(TextSync {
+            name: fs_name,
+            text,
+        });
     }
     timing.fontstring_count += 1;
 }
@@ -155,7 +183,13 @@ pub fn create_layer_children_batched(
     let mut anim_entries: Vec<AnimEntry<'_>> = Vec::new();
     let all_textures = collect_textures(frame);
 
-    append_texture_code(&all_textures, parent_name, &mut batch, &mut anim_entries, timing);
+    append_texture_code(
+        &all_textures,
+        parent_name,
+        &mut batch,
+        &mut anim_entries,
+        timing,
+    );
     append_fontstring_code(frame, parent_name, &mut batch, &mut text_syncs, timing);
     exec_batch(env, &batch, parent_name)?;
     apply_texture_anims(env, &anim_entries);
