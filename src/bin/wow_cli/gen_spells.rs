@@ -18,6 +18,26 @@ use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
 
+const POWER_TYPE_NAMES: &[(&str, &str)] = &[
+    ("-2", "HEALTH"),
+    ("0", "MANA"),
+    ("1", "RAGE"),
+    ("2", "FOCUS"),
+    ("3", "ENERGY"),
+    ("4", "COMBO_POINTS"),
+    ("5", "RUNES"),
+    ("6", "RUNIC_POWER"),
+    ("7", "SOUL_SHARDS"),
+    ("8", "LUNAR_POWER"),
+    ("9", "HOLY_POWER"),
+    ("10", "ALTERNATE_POWER"),
+    ("11", "MAELSTROM"),
+    ("12", "CHI"),
+    ("13", "INSANITY"),
+    ("17", "FURY"),
+    ("19", "ESSENCE"),
+];
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
     let spell_data = load_spell_data(&wow_data)?;
@@ -533,6 +553,12 @@ fn write_spell_power_phf_map(
 }
 
 fn write_spell_power_lookup_fns(out: &mut File) -> std::io::Result<()> {
+    write_get_spell_power_fn(out)?;
+    write_power_type_name_fn(out)?;
+    Ok(())
+}
+
+fn write_get_spell_power_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "pub fn get_spell_power(id: u32) -> Option<&'static [SpellPowerCost]> {{"
@@ -540,30 +566,16 @@ fn write_spell_power_lookup_fns(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    SPELL_POWER_DB.get(&id).copied()")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_power_type_name_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "pub fn power_type_name(power_type: i8) -> &'static str {{"
     )?;
     writeln!(out, "    match power_type {{")?;
-    for (val, name) in [
-        ("-2", "HEALTH"),
-        ("0", "MANA"),
-        ("1", "RAGE"),
-        ("2", "FOCUS"),
-        ("3", "ENERGY"),
-        ("4", "COMBO_POINTS"),
-        ("5", "RUNES"),
-        ("6", "RUNIC_POWER"),
-        ("7", "SOUL_SHARDS"),
-        ("8", "LUNAR_POWER"),
-        ("9", "HOLY_POWER"),
-        ("10", "ALTERNATE_POWER"),
-        ("11", "MAELSTROM"),
-        ("12", "CHI"),
-        ("13", "INSANITY"),
-        ("17", "FURY"),
-        ("19", "ESSENCE"),
-    ] {
+    for (val, name) in POWER_TYPE_NAMES {
         writeln!(out, "        {val} => \"{name}\",")?;
     }
     writeln!(out, "        _ => \"MANA\",")?;
