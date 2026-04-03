@@ -108,16 +108,66 @@ pub struct AllData {
 
 pub fn load_all() -> Result<AllData, Box<dyn std::error::Error>> {
     let data_dir = wow_data_dir();
+    let (trees, nodes, entries, definitions, edges, conds, sub_trees, currencies) =
+        load_raw_trait_tables(&data_dir)?;
+    log_loaded_counts(
+        &trees,
+        &nodes,
+        &entries,
+        &definitions,
+        &edges,
+        &conds,
+        &sub_trees,
+        &currencies,
+    );
+    let joins = load_join_tables(&data_dir)?;
+    Ok(AllData {
+        trees,
+        nodes,
+        entries,
+        definitions,
+        edges,
+        conds,
+        sub_trees,
+        currencies,
+        joins,
+    })
+}
 
-    let trees = load_trees(&data_dir)?;
-    let nodes = load_nodes(&data_dir)?;
-    let entries = load_entries(&data_dir)?;
-    let definitions = load_definitions(&data_dir)?;
-    let edges = load_edges(&data_dir)?;
-    let conds = load_conds(&data_dir)?;
-    let sub_trees = load_sub_trees(&data_dir)?;
-    let currencies = load_currencies(&data_dir)?;
+type RawTraitTables = (
+    Vec<RawTree>,
+    Vec<RawNode>,
+    Vec<RawEntry>,
+    Vec<RawDefinition>,
+    Vec<RawEdge>,
+    Vec<RawCond>,
+    Vec<RawSubTree>,
+    Vec<RawCurrency>,
+);
 
+fn load_raw_trait_tables(data_dir: &Path) -> Result<RawTraitTables, Box<dyn std::error::Error>> {
+    Ok((
+        load_trees(data_dir)?,
+        load_nodes(data_dir)?,
+        load_entries(data_dir)?,
+        load_definitions(data_dir)?,
+        load_edges(data_dir)?,
+        load_conds(data_dir)?,
+        load_sub_trees(data_dir)?,
+        load_currencies(data_dir)?,
+    ))
+}
+
+fn log_loaded_counts(
+    trees: &[RawTree],
+    nodes: &[RawNode],
+    entries: &[RawEntry],
+    definitions: &[RawDefinition],
+    edges: &[RawEdge],
+    conds: &[RawCond],
+    sub_trees: &[RawSubTree],
+    currencies: &[RawCurrency],
+) {
     println!(
         "Trees: {}, Nodes: {}, Entries: {}, Definitions: {}",
         trees.len(),
@@ -132,19 +182,6 @@ pub fn load_all() -> Result<AllData, Box<dyn std::error::Error>> {
         sub_trees.len(),
         currencies.len()
     );
-
-    let joins = load_join_tables(&data_dir)?;
-    Ok(AllData {
-        trees,
-        nodes,
-        entries,
-        definitions,
-        edges,
-        conds,
-        sub_trees,
-        currencies,
-        joins,
-    })
 }
 
 fn load_join_tables(data_dir: &Path) -> Result<JoinMaps, Box<dyn std::error::Error>> {
