@@ -315,30 +315,10 @@ pub fn write_tree_db(out: &mut File, trees: &[TreeInfo]) -> Result<(), Box<dyn s
 }
 
 pub fn write_node_db(out: &mut File, nodes: &[NodeInfo]) -> Result<(), Box<dyn std::error::Error>> {
-    for n in nodes {
-        emit_u32_array(out, &format!("NODE_{}_ENTRIES", n.id), &n.entry_ids)?;
-        emit_u32_array(out, &format!("NODE_{}_CONDS", n.id), &n.cond_ids)?;
-        emit_edge_array(out, &format!("NODE_{}_EDGES", n.id), &n.edges)?;
-        emit_u32_array(out, &format!("NODE_{}_GROUPS", n.id), &n.group_ids)?;
-        emit_u32_array(out, &format!("NODE_{}_GCONDS", n.id), &n.group_cond_ids)?;
-    }
+    write_node_arrays(out, nodes)?;
     let mut builder = phf_codegen::Map::new();
     for n in nodes {
-        let value = format!(
-            "TraitNodeInfo {{ id: {}, tree_id: {}, pos_x: {}, pos_y: {}, \
-             node_type: {}, flags: {}, sub_tree_id: {}, \
-             entry_ids: &NODE_{id}_ENTRIES, cond_ids: &NODE_{id}_CONDS, \
-             edges: &NODE_{id}_EDGES, group_ids: &NODE_{id}_GROUPS, \
-             group_cond_ids: &NODE_{id}_GCONDS }}",
-            n.id,
-            n.tree_id,
-            n.pos_x,
-            n.pos_y,
-            n.node_type,
-            n.flags,
-            n.sub_tree_id,
-            id = n.id
-        );
+        let value = format_node_info_value(n);
         builder.entry(n.id, &value);
     }
     writeln!(
@@ -349,6 +329,35 @@ pub fn write_node_db(out: &mut File, nodes: &[NodeInfo]) -> Result<(), Box<dyn s
     writeln!(out)?;
     println!("  TRAIT_NODE_DB: {} nodes", nodes.len());
     Ok(())
+}
+
+fn write_node_arrays(out: &mut File, nodes: &[NodeInfo]) -> std::io::Result<()> {
+    for n in nodes {
+        emit_u32_array(out, &format!("NODE_{}_ENTRIES", n.id), &n.entry_ids)?;
+        emit_u32_array(out, &format!("NODE_{}_CONDS", n.id), &n.cond_ids)?;
+        emit_edge_array(out, &format!("NODE_{}_EDGES", n.id), &n.edges)?;
+        emit_u32_array(out, &format!("NODE_{}_GROUPS", n.id), &n.group_ids)?;
+        emit_u32_array(out, &format!("NODE_{}_GCONDS", n.id), &n.group_cond_ids)?;
+    }
+    Ok(())
+}
+
+fn format_node_info_value(node: &NodeInfo) -> String {
+    format!(
+        "TraitNodeInfo {{ id: {}, tree_id: {}, pos_x: {}, pos_y: {}, \
+         node_type: {}, flags: {}, sub_tree_id: {}, \
+         entry_ids: &NODE_{id}_ENTRIES, cond_ids: &NODE_{id}_CONDS, \
+         edges: &NODE_{id}_EDGES, group_ids: &NODE_{id}_GROUPS, \
+         group_cond_ids: &NODE_{id}_GCONDS }}",
+        node.id,
+        node.tree_id,
+        node.pos_x,
+        node.pos_y,
+        node.node_type,
+        node.flags,
+        node.sub_tree_id,
+        id = node.id
+    )
 }
 
 pub fn write_entry_db(
