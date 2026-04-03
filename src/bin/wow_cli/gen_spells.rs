@@ -177,6 +177,13 @@ fn write_spell_descriptions(
     spell_descriptions: &HashMap<u32, String>,
     include_ids: &BTreeSet<u32>,
 ) -> Result<u32, Box<dyn std::error::Error>> {
+    write_spell_description_header(out)?;
+    let (builder, count) = build_spell_description_map(spell_descriptions, include_ids);
+    write_spell_description_lookup(out, builder)?;
+    Ok(count)
+}
+
+fn write_spell_description_header(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "//! Auto-generated compact spell descriptions used by tooltip APIs."
@@ -190,7 +197,13 @@ fn write_spell_descriptions(
         "//! Do not edit manually - regenerate with: wow-cli generate spells"
     )?;
     writeln!(out)?;
+    Ok(())
+}
 
+fn build_spell_description_map(
+    spell_descriptions: &HashMap<u32, String>,
+    include_ids: &BTreeSet<u32>,
+) -> (phf_codegen::Map<u32>, u32) {
     let mut builder = phf_codegen::Map::new();
     let mut count = 0u32;
     for spell_id in include_ids {
@@ -200,7 +213,13 @@ fn write_spell_descriptions(
         builder.entry(*spell_id, &format!("\"{}\"", escape_str(description)));
         count += 1;
     }
+    (builder, count)
+}
 
+fn write_spell_description_lookup(
+    out: &mut File,
+    builder: phf_codegen::Map<u32>,
+) -> std::io::Result<()> {
     writeln!(
         out,
         "pub static SPELL_DESCRIPTIONS: phf::Map<u32, &'static str> = {};",
@@ -213,7 +232,7 @@ fn write_spell_descriptions(
     )?;
     writeln!(out, "    SPELL_DESCRIPTIONS.get(&id).copied()")?;
     writeln!(out, "}}")?;
-    Ok(count)
+    Ok(())
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
