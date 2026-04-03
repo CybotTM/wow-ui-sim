@@ -480,6 +480,13 @@ fn write_element_map(
     out: &mut File,
     elements: &HashMap<u32, String>,
 ) -> Result<u32, Box<dyn std::error::Error>> {
+    write_element_map_header(out)?;
+    let count = write_element_entries(out, elements)?;
+    writeln!(out, "}};")?;
+    Ok(count)
+}
+
+fn write_element_map_header(out: &mut File) -> Result<(), Box<dyn std::error::Error>> {
     writeln!(out, "//! Auto-generated atlas element ID → name map.")?;
     writeln!(
         out,
@@ -499,7 +506,13 @@ fn write_element_map(
         out,
         "static ATLAS_ELEMENT_DB: phf::Map<u32, &'static str> = phf_map! {{"
     )?;
+    Ok(())
+}
 
+fn write_element_entries(
+    out: &mut File,
+    elements: &HashMap<u32, String>,
+) -> Result<u32, Box<dyn std::error::Error>> {
     let mut sorted: Vec<_> = elements.iter().collect();
     sorted.sort_by_key(|(id, _)| *id);
 
@@ -512,7 +525,6 @@ fn write_element_map(
         writeln!(out, "    {}u32 => \"{}\",", id, name_lower)?;
         count += 1;
     }
-    writeln!(out, "}};")?;
     Ok(count)
 }
 
