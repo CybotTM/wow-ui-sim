@@ -183,6 +183,13 @@ fn write_atlas_lookup_struct(out: &mut File) -> std::io::Result<()> {
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
+    write_get_atlas_info_fn(out)?;
+    write_get_atlas_slice_info_fn(out)?;
+    write_atlas_db_header(out)?;
+    Ok(())
+}
+
+fn write_get_atlas_info_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {{"
@@ -227,6 +234,10 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    None")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_get_atlas_slice_info_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "pub fn get_atlas_slice_info(name: &str) -> Option<AtlasSliceInfo> {{"
@@ -235,6 +246,10 @@ fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    ATLAS_SLICE_DB.get(&lower as &str).copied()")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
+    Ok(())
+}
+
+fn write_atlas_db_header(out: &mut File) -> std::io::Result<()> {
     writeln!(
         out,
         "pub static ATLAS_DB: phf::Map<&'static str, AtlasInfo> = phf_map! {{"
