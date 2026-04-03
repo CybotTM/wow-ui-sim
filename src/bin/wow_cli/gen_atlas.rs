@@ -17,7 +17,32 @@ use std::path::Path;
 
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
+    let atlas_data = load_atlas_data(&wow_data)?;
+    let output = generate_output_files(&atlas_data)?;
+    println!(
+        "Generated {} atlas entries ({} skipped), {} element mappings",
+        output.count, output.skipped, output.elem_count
+    );
+    println!("Output: {}", output.output_path.display());
+    Ok(())
+}
 
+struct AtlasData {
+    listfile: HashMap<u32, String>,
+    atlases: HashMap<u32, AtlasEntry>,
+    elements: HashMap<u32, String>,
+    slices: HashMap<u32, SliceEntry>,
+    members: Vec<MemberEntry>,
+}
+
+struct GeneratedOutput {
+    count: u32,
+    skipped: u32,
+    elem_count: u32,
+    output_path: &'static Path,
+}
+
+fn load_atlas_data(wow_data: &Path) -> Result<AtlasData, Box<dyn std::error::Error>> {
     println!("Loading listfile...");
     let listfile = load_listfile(&wow_data.join("listfile.csv"))?;
     println!("  {} entries", listfile.len());
@@ -31,21 +56,34 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("  {} entries", elements.len());
 
     println!("Loading UiTextureAtlasElementSliceData...");
-    let slice_path = {
-        let local = Path::new("data/UiTextureAtlasElementSliceData.csv");
-        if local.exists() {
-            local.to_path_buf()
-        } else {
-            wow_data.join("UiTextureAtlasElementSliceData.csv")
-        }
-    };
-    let slices = load_slices(&slice_path, &elements)?;
+    let slices = load_slices(&slice_data_path(wow_data), &elements)?;
     println!("  {} entries", slices.len());
 
     println!("Loading UiTextureAtlasMember...");
     let members = load_members(&wow_data.join("UiTextureAtlasMember.csv"))?;
     println!("  {} entries", members.len());
 
+    Ok(AtlasData {
+        listfile,
+        atlases,
+        elements,
+        slices,
+        members,
+    })
+}
+
+fn slice_data_path(wow_data: &Path) -> std::path::PathBuf {
+    let local = Path::new("data/UiTextureAtlasElementSliceData.csv");
+    if local.exists() {
+        local.to_path_buf()
+    } else {
+        wow_data.join("UiTextureAtlasElementSliceData.csv")
+    }
+}
+
+fn generate_output_files(
+    atlas_data: &AtlasData,
+) -> Result<GeneratedOutput, Box<dyn std::error::Error>> {
     println!("Generating atlas_data.rs...");
     std::fs::create_dir_all("data")?;
     let output_path = Path::new("data/atlas.rs");
@@ -53,19 +91,24 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     write_header(&mut out)?;
     write_lookup_fn(&mut out)?;
-    let (count, skipped) = write_atlas_entries(&mut out, &members, &atlases, &listfile)?;
-    write_slice_lookup(&mut out, &slices)?;
+    let (count, skipped) = write_atlas_entries(
+        &mut out,
+        &atlas_data.members,
+        &atlas_data.atlases,
+        &atlas_data.listfile,
+    )?;
+    write_slice_lookup(&mut out, &atlas_data.slices)?;
 
     let elem_path = Path::new("data/atlas_elements.rs");
     let mut elem_out = File::create(elem_path)?;
-    let elem_count = write_element_map(&mut elem_out, &elements)?;
+    let elem_count = write_element_map(&mut elem_out, &atlas_data.elements)?;
 
-    println!(
-        "Generated {} atlas entries ({} skipped), {} element mappings",
-        count, skipped, elem_count
-    );
-    println!("Output: {}", output_path.display());
-    Ok(())
+    Ok(GeneratedOutput {
+        count,
+        skipped,
+        elem_count,
+        output_path,
+    })
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
