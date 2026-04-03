@@ -149,50 +149,49 @@ fn default_interface_path() -> PathBuf {
 
 fn main() {
     let cli = Cli::parse();
+    handle_command(cli.command);
+}
 
-    match cli.command {
-        Commands::Lua { exec, file, list } => {
-            if list {
-                list_servers();
-            } else if let Some(code) = exec {
-                execute_and_exit(&code);
-            } else if let Some(path) = file {
-                execute_file_and_exit(&path);
-            } else {
-                run_repl();
-            }
-        }
+fn handle_command(command: Commands) {
+    match command {
+        Commands::Lua { exec, file, list } => handle_lua_command(exec, file, list),
         Commands::DumpTree {
             filter,
             visible_only,
-        } => {
-            dump_tree(filter, visible_only);
-        }
+        } => dump_tree(filter, visible_only),
         Commands::Screenshot {
             output,
             width,
             height,
             filter,
             crop,
-        } => {
-            take_screenshot(&output, width, height, filter, crop);
-        }
+        } => take_screenshot(&output, width, height, filter, crop),
         Commands::ExtractTextures {
             addons,
             interface,
             output,
-        } => {
-            let (found, missing) =
-                wow_ui_sim::extract_textures::extract_textures(&addons, &interface, &output);
-            println!("\nSummary: {} converted, {} missing", found, missing);
-        }
-        Commands::ConvertTexture { input, output } => {
-            convert_texture(&input, output.as_ref());
-        }
-        Commands::Generate { what } => {
-            run_generator(what);
-        }
+        } => handle_extract_textures_command(addons, interface, output),
+        Commands::ConvertTexture { input, output } => convert_texture(&input, output.as_ref()),
+        Commands::Generate { what } => run_generator(what),
     }
+}
+
+fn handle_lua_command(exec: Option<String>, file: Option<PathBuf>, list: bool) {
+    if list {
+        list_servers();
+    } else if let Some(code) = exec {
+        execute_and_exit(&code);
+    } else if let Some(path) = file {
+        execute_file_and_exit(&path);
+    } else {
+        run_repl();
+    }
+}
+
+fn handle_extract_textures_command(addons: PathBuf, interface: PathBuf, output: PathBuf) {
+    let (found, missing) =
+        wow_ui_sim::extract_textures::extract_textures(&addons, &interface, &output);
+    println!("\nSummary: {} converted, {} missing", found, missing);
 }
 
 fn run_generator(target: GenerateTarget) {
