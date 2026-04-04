@@ -44,38 +44,67 @@ pub fn build_tree(
     screen_width: f32,
     screen_height: f32,
 ) -> Vec<String> {
+    let mut lines = Vec::new();
+    let roots = sorted_root_frames(widgets);
+    emit_tree_lines(
+        widgets,
+        addon_names,
+        &roots,
+        filter,
+        filter_key,
+        visible_only,
+        screen_width,
+        screen_height,
+        &mut lines,
+    );
+    lines
+}
+
+fn sorted_root_frames(widgets: &WidgetRegistry) -> Vec<(u64, Option<String>)> {
     let mut roots = collect_root_frames(widgets);
     roots.sort_by(|a, b| {
-        let na = a.1.as_deref().unwrap_or("");
-        let nb = b.1.as_deref().unwrap_or("");
-        na.cmp(nb)
+        let left_name = a.1.as_deref().unwrap_or("");
+        let right_name = b.1.as_deref().unwrap_or("");
+        left_name.cmp(right_name)
     });
+    roots
+}
 
-    let mut lines = Vec::new();
+fn emit_tree_lines(
+    widgets: &WidgetRegistry,
+    addon_names: &[String],
+    roots: &[(u64, Option<String>)],
+    filter: Option<&str>,
+    filter_key: Option<&str>,
+    visible_only: bool,
+    screen_width: f32,
+    screen_height: f32,
+    lines: &mut Vec<String>,
+) {
     if let Some(key_filter) = filter_key {
         emit_key_filtered_subtrees(
             widgets,
             addon_names,
-            &roots,
+            roots,
             key_filter,
             visible_only,
             screen_width,
             screen_height,
-            &mut lines,
+            lines,
         );
-    } else {
-        emit_roots_with_filter(
-            widgets,
-            addon_names,
-            &roots,
-            filter,
-            visible_only,
-            screen_width,
-            screen_height,
-            &mut lines,
-        );
+        return;
     }
-    lines
+
+    emit_roots_with_filter(
+        widgets,
+        addon_names,
+        roots,
+        filter,
+        visible_only,
+        screen_width,
+        screen_height,
+        lines,
+    );
 }
 
 fn compile_dump_regex(pat: &str) -> regex::Regex {
