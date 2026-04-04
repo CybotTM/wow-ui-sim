@@ -120,55 +120,41 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
             Ok(())
         }
     })?;
-    super::admin_api::set_fn(lua, t, "SetMountCollected", {
-        let s = Rc::clone(&state);
-        move |_, (id, collected): (i32, bool)| {
-            let mut st = s.borrow_mut();
-            if collected {
-                st.world.collected_mounts.insert(id);
-            } else {
-                st.world.collected_mounts.remove(&id);
-            }
-            Ok(())
-        }
+    add_world_toggle_setter(lua, t, "SetMountCollected", Rc::clone(&state), |state| {
+        &mut state.world.collected_mounts
     })?;
-    super::admin_api::set_fn(lua, t, "SetPetCollected", {
-        let s = Rc::clone(&state);
-        move |_, (id, collected): (i32, bool)| {
-            let mut st = s.borrow_mut();
-            if collected {
-                st.world.collected_pets.insert(id);
-            } else {
-                st.world.collected_pets.remove(&id);
-            }
-            Ok(())
-        }
+    add_world_toggle_setter(lua, t, "SetPetCollected", Rc::clone(&state), |state| {
+        &mut state.world.collected_pets
     })?;
-    super::admin_api::set_fn(lua, t, "SetToyCollected", {
-        let s = Rc::clone(&state);
-        move |_, (id, collected): (i32, bool)| {
-            let mut st = s.borrow_mut();
-            if collected {
-                st.world.collected_toys.insert(id);
-            } else {
-                st.world.collected_toys.remove(&id);
-            }
-            Ok(())
-        }
+    add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |state| {
+        &mut state.world.collected_toys
     })?;
-    super::admin_api::set_fn(lua, t, "SetAchievementEarned", {
-        let s = Rc::clone(&state);
-        move |_, (id, earned): (i32, bool)| {
-            let mut st = s.borrow_mut();
-            if earned {
-                st.world.earned_achievements.insert(id);
-            } else {
-                st.world.earned_achievements.remove(&id);
-            }
-            Ok(())
-        }
+    add_world_toggle_setter(lua, t, "SetAchievementEarned", state, |state| {
+        &mut state.world.earned_achievements
     })?;
     Ok(())
+}
+
+fn add_world_toggle_setter<F>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    set_ref: F,
+) -> Result<()>
+where
+    F: Fn(&mut SimState) -> &mut std::collections::HashSet<i32> + 'static,
+{
+    super::admin_api::set_fn(lua, t, name, move |_, (id, collected): (i32, bool)| {
+        let mut state = state.borrow_mut();
+        let set = set_ref(&mut state);
+        if collected {
+            set.insert(id);
+        } else {
+            set.remove(&id);
+        }
+        Ok(())
+    })
 }
 
 fn register_pvp_guild_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
