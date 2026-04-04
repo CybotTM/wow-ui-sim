@@ -46,40 +46,64 @@ fn format_frame_entry(
 ) {
     use std::fmt::Write;
 
-    let name = frame.name.as_deref().unwrap_or("(anon)");
-    let vis = if frame.visible { "" } else { " HIDDEN" };
-    let mouse = if frame.mouse_enabled { " mouse" } else { "" };
-    let depth = get_parent_depth(widgets, id);
-    let indent = "  ".repeat(depth);
-    let parent_name = frame
-        .parent_id
-        .and_then(|pid| widgets.get(pid))
-        .and_then(|p| p.name.as_deref())
-        .unwrap_or("(root)");
+    let display = frame_entry_display(widgets, id, frame);
 
     let _ = writeln!(
         output,
         "{}{} [{}] ({:.0},{:.0} {:.0}x{:.0}){}{} parent={}",
-        indent,
-        name,
+        display.indent,
+        display.name,
         frame.widget_type.as_str(),
         rect.x,
         rect.y,
         rect.width,
         rect.height,
-        vis,
-        mouse,
-        parent_name,
+        display.visibility_suffix,
+        display.mouse_suffix,
+        display.parent_name,
     );
 
-    if !frame.anchors.is_empty() {
-        let anchor = &frame.anchors[0];
+    write_anchor_line(output, frame, &display.indent);
+}
+
+struct FrameEntryDisplay<'a> {
+    name: &'a str,
+    visibility_suffix: &'static str,
+    mouse_suffix: &'static str,
+    indent: String,
+    parent_name: &'a str,
+}
+
+fn frame_entry_display<'a>(
+    widgets: &'a crate::widget::WidgetRegistry,
+    id: u64,
+    frame: &'a crate::widget::Frame,
+) -> FrameEntryDisplay<'a> {
+    let depth = get_parent_depth(widgets, id);
+    FrameEntryDisplay {
+        name: frame.name.as_deref().unwrap_or("(anon)"),
+        visibility_suffix: if frame.visible { "" } else { " HIDDEN" },
+        mouse_suffix: if frame.mouse_enabled { " mouse" } else { "" },
+        indent: "  ".repeat(depth),
+        parent_name: frame
+            .parent_id
+            .and_then(|pid| widgets.get(pid))
+            .and_then(|parent| parent.name.as_deref())
+            .unwrap_or("(root)"),
+    }
+}
+
+fn write_anchor_line(output: &mut String, frame: &crate::widget::Frame, indent: &str) {
+    use std::fmt::Write;
+
+    if let Some(anchor) = frame.anchors.first() {
         let _ = writeln!(
             output,
             "{}  └─ {:?} -> {:?} offset ({:.0},{:.0})",
             indent, anchor.point, anchor.relative_point, anchor.x_offset, anchor.y_offset
         );
-    } else {
-        let _ = writeln!(output, "{}  └─ (no anchors - topleft of parent)", indent);
+        return;
     }
+
+    let _ = writeln!(output, "{}  └─ (no anchors - topleft of parent)", indent);
 }
