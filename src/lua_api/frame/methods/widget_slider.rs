@@ -275,49 +275,55 @@ fn add_get_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_statusbar_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_statusbar_color(methods);
+    add_get_statusbar_color(methods);
+}
+
+fn add_set_statusbar_color<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetStatusBarColor", |lua, this, args: mlua::MultiValue| {
-        let id = this.0;
-        let mut it = args.into_iter();
-        let r = val_to_f32(it.next(), 1.0);
-        let g = val_to_f32(it.next(), 1.0);
-        let b = val_to_f32(it.next(), 1.0);
-        let a = val_to_f32(it.next(), 1.0);
+        let color = parse_statusbar_color(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
-        if let Some(bar_id) = bar_id {
-            let is_child = state
-                .widgets
-                .get(bar_id)
-                .is_some_and(|f| f.parent_id == Some(id));
-            if is_child && let Some(bar) = state.widgets.get_mut_visual(bar_id) {
-                bar.vertex_color = Some(Color::new(r, g, b, a));
-            }
+        if let Some(bar_id) = statusbar_child_id(&state.widgets, this.0)
+            && let Some(bar) = state.widgets.get_mut_visual(bar_id)
+        {
+            bar.vertex_color = Some(color);
         }
         Ok(())
     });
+}
 
+fn add_get_statusbar_color<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetStatusBarColor", |lua, this, ()| {
-        let id = this.0;
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let bar_id = state.widgets.get(id).and_then(|f| f.statusbar_bar_id);
-        if let Some(bar_id) = bar_id {
-            let is_child = state
+        if let Some(bar_id) = statusbar_child_id(&state.widgets, this.0)
+            && let Some(c) = state
                 .widgets
                 .get(bar_id)
-                .is_some_and(|f| f.parent_id == Some(id));
-            if is_child
-                && let Some(c) = state
-                    .widgets
-                    .get(bar_id)
-                    .and_then(|f| f.vertex_color.as_ref())
-            {
-                return Ok((c.r, c.g, c.b, c.a));
-            }
+                .and_then(|f| f.vertex_color.as_ref())
+        {
+            return Ok((c.r, c.g, c.b, c.a));
         }
         Ok((1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32))
     });
+}
+
+fn parse_statusbar_color(args: mlua::MultiValue) -> Color {
+    let mut it = args.into_iter();
+    let r = val_to_f32(it.next(), 1.0);
+    let g = val_to_f32(it.next(), 1.0);
+    let b = val_to_f32(it.next(), 1.0);
+    let a = val_to_f32(it.next(), 1.0);
+    Color::new(r, g, b, a)
+}
+
+fn statusbar_child_id(widgets: &crate::widget::WidgetRegistry, id: u64) -> Option<u64> {
+    let bar_id = widgets.get(id).and_then(|frame| frame.statusbar_bar_id)?;
+    widgets
+        .get(bar_id)
+        .is_some_and(|frame| frame.parent_id == Some(id))
+        .then_some(bar_id)
 }
 
 fn add_statusbar_fill_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
