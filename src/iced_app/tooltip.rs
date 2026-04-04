@@ -184,22 +184,16 @@ fn tooltip_line_font_size(index: usize) -> f32 {
 }
 
 /// Emit quads for a GameTooltip frame: background, border, and text lines.
-#[allow(clippy::too_many_arguments)]
 pub fn build_tooltip_quads(
-    batch: &mut QuadBatch,
-    bounds: Rectangle,
-    _f: &crate::widget::Frame,
-    tooltip_data: Option<&HashMap<u64, TooltipRenderData>>,
-    id: u64,
+    tooltip: TooltipRender<'_>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    eff_alpha: f32,
 ) {
     // Only render when there are lines to display — otherwise the tooltip is
     // "owned" but has no content yet (e.g. during addon init).
-    let data = tooltip_data.and_then(|map| map.get(&id));
+    let data = tooltip.tooltip_data.and_then(|map| map.get(&tooltip.id));
     let Some(data) = data else { return };
 
-    let alpha = eff_alpha;
+    let alpha = tooltip.eff_alpha;
 
     // Tooltip border and background via nine-slice atlas (rounded corners).
     // WoW calls SetCenterColor(0, 0, 0, 1) — TOOLTIP_DEFAULT_BACKGROUND_COLOR is black.
@@ -207,56 +201,80 @@ pub fn build_tooltip_quads(
         let center = [0.0, 0.0, 0.0, alpha];
         // WoW's TooltipDefaultLayout anchors center with (-4,4,4,-4) offsets,
         // extending the fill 4px into each corner to cover transparent inner areas.
-        super::nine_slice::emit_nine_slice_with_center_color(batch, bounds, ns, alpha, center, 4.0);
+        super::nine_slice::emit_nine_slice_with_center_color(
+            tooltip.batch,
+            tooltip.bounds,
+            ns,
+            alpha,
+            center,
+            4.0,
+        );
     } else {
         // Fallback if atlas entries are missing
-        batch.push_solid(bounds, [0.0, 0.0, 0.0, alpha]);
-        batch.push_border(bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
+        tooltip
+            .batch
+            .push_solid(tooltip.bounds, [0.0, 0.0, 0.0, alpha]);
+        tooltip
+            .batch
+            .push_border(tooltip.bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
     }
 
     let Some((font_sys, glyph_atlas)) = text_ctx else {
         return;
     };
+    let mut text_renderer = TooltipTextRenderer {
+        batch: tooltip.batch,
+        font_sys,
+        glyph_atlas,
+    };
 
-    let content_x = bounds.x + TOOLTIP_PADDING_H;
-    let content_width = bounds.width - TOOLTIP_PADDING_H * 2.0;
-    let mut y = bounds.y + TOOLTIP_PADDING_V;
+    let content_x = tooltip.bounds.x + TOOLTIP_PADDING_H;
+    let content_width = tooltip.bounds.width - TOOLTIP_PADDING_H * 2.0;
+    let mut y = tooltip.bounds.y + TOOLTIP_PADDING_V;
 
     for line in &data.lines {
         let line_height = (line.font_size * 1.2).ceil();
 
         emit_tooltip_line(
-            batch,
-            font_sys,
-            glyph_atlas,
+            &mut text_renderer,
             line,
-            content_x,
-            y,
-            content_width,
-            line_height,
+            TooltipLinePlacement {
+                x: content_x,
+                y,
+                width: content_width,
+                height: line_height,
+            },
         );
 
         y += line_height + TOOLTIP_LINE_SPACING;
     }
 }
 
+pub struct TooltipRender<'a> {
+    pub batch: &'a mut QuadBatch,
+    pub bounds: Rectangle,
+    pub tooltip_data: Option<&'a HashMap<u64, TooltipRenderData>>,
+    pub id: u64,
+    pub eff_alpha: f32,
+}
+
+struct TooltipTextRenderer<'a> {
+    batch: &'a mut QuadBatch,
+    font_sys: &'a mut WowFontSystem,
+    glyph_atlas: &'a mut GlyphAtlas,
+}
+
 /// Emit quads for a single tooltip line (left text, optional right text).
-#[allow(clippy::too_many_arguments)]
 fn emit_tooltip_line(
-    batch: &mut QuadBatch,
-    font_sys: &mut WowFontSystem,
-    glyph_atlas: &mut GlyphAtlas,
+    text_renderer: &mut TooltipTextRenderer<'_>,
     line: &TooltipLineRender,
-    x: f32,
-    y: f32,
-    width: f32,
-    height: f32,
+    placement: TooltipLinePlacement,
 ) {
-    let bounds = tooltip_line_bounds(x, y, width, height);
+    let bounds = tooltip_line_bounds(placement.x, placement.y, placement.width, placement.height);
     emit_tooltip_text_run(
-        batch,
-        font_sys,
-        glyph_atlas,
+        text_renderer.batch,
+        text_renderer.font_sys,
+        text_renderer.glyph_atlas,
         &line.left_text,
         bounds,
         TextJustify::Left,
@@ -267,9 +285,9 @@ fn emit_tooltip_line(
 
     if let Some(ref right_text) = line.right_text {
         emit_tooltip_text_run(
-            batch,
-            font_sys,
-            glyph_atlas,
+            text_renderer.batch,
+            text_renderer.font_sys,
+            text_renderer.glyph_atlas,
             right_text,
             bounds,
             TextJustify::Right,
@@ -278,6 +296,13 @@ fn emit_tooltip_line(
             false,
         );
     }
+}
+
+struct TooltipLinePlacement {
+    x: f32,
+    y: f32,
+    width: f32,
+    height: f32,
 }
 
 fn tooltip_line_bounds(x: f32, y: f32, width: f32, height: f32) -> Rectangle {

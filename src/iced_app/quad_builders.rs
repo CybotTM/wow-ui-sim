@@ -278,13 +278,14 @@ pub fn emit_frame_quads(
         }
         WidgetType::GameTooltip => {
             super::tooltip::build_tooltip_quads(
-                batch,
-                frame.bounds,
-                frame.widget,
-                frame.tooltip_data,
-                frame.id,
+                super::tooltip::TooltipRender {
+                    batch,
+                    bounds: frame.bounds,
+                    tooltip_data: frame.tooltip_data,
+                    id: frame.id,
+                    eff_alpha: frame.eff_alpha,
+                },
                 text_ctx,
-                frame.eff_alpha,
             );
         }
         WidgetType::Minimap => {
