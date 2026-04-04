@@ -28,6 +28,7 @@ pub mod tooltip;
 pub(crate) mod workarounds;
 pub(crate) mod workarounds_bags;
 pub(crate) mod workarounds_editmode;
+pub(crate) mod workarounds_tracker;
 
 // Re-export public types
 pub use env::WowLuaEnv;
