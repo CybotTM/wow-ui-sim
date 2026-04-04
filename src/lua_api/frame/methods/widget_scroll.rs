@@ -69,42 +69,42 @@ fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
 }
 
 fn add_scrollframe_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetHorizontalScroll", |lua, this, offset: f64| {
+    add_scroll_offset_setter(methods, "SetHorizontalScroll", |frame, offset| {
+        frame.scroll_horizontal = offset
+    });
+    add_scroll_offset_getter(methods, "GetHorizontalScroll", |frame| {
+        frame.scroll_horizontal
+    });
+    add_scroll_offset_setter(methods, "SetVerticalScroll", |frame, offset| {
+        frame.scroll_vertical = offset
+    });
+    add_scroll_offset_getter(methods, "GetVerticalScroll", |frame| frame.scroll_vertical);
+}
+
+fn add_scroll_offset_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, f64) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, offset: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.scroll_horizontal = offset;
+            setter(frame, offset);
         }
         Ok(())
     });
+}
 
-    methods.add_method("GetHorizontalScroll", |lua, this, ()| {
+fn add_scroll_offset_getter<M, F>(methods: &mut M, name: &'static str, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> f64 + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.scroll_horizontal)
-            .unwrap_or(0.0))
-    });
-
-    methods.add_method("SetVerticalScroll", |lua, this, offset: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.scroll_vertical = offset;
-        }
-        Ok(())
-    });
-
-    methods.add_method("GetVerticalScroll", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.scroll_vertical)
-            .unwrap_or(0.0))
+        Ok(state.widgets.get(this.0).map(getter).unwrap_or(0.0))
     });
 }
 
