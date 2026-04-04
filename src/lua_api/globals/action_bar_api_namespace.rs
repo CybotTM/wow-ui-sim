@@ -329,6 +329,16 @@ fn register_c_action_bar_cooldowns(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_c_action_bar_cooldown_query(lua, t, state)?;
+    register_c_action_bar_charges_query(lua, t)?;
+    Ok(())
+}
+
+fn register_c_action_bar_cooldown_query(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let st = Rc::clone(state);
     t.set(
         "GetActionCooldown",
@@ -341,25 +351,35 @@ fn register_c_action_bar_cooldowns(
                     })
                 })
                 .unwrap_or((0.0, 0.0));
-            let info = lua.create_table()?;
-            info.set("startTime", start)?;
-            info.set("duration", dur)?;
-            info.set("isEnabled", true)?;
-            info.set("modRate", 1.0_f64)?;
-            Ok(info)
-        })?,
-    )?;
-    t.set(
-        "GetActionCharges",
-        lua.create_function(|lua, _: Value| {
-            let info = lua.create_table()?;
-            info.set("currentCharges", 0)?;
-            info.set("maxCharges", 0)?;
-            info.set("cooldownStartTime", 0.0_f64)?;
-            info.set("cooldownDuration", 0.0_f64)?;
-            info.set("chargeModRate", 1.0_f64)?;
-            Ok(info)
+            action_cooldown_info(lua, start, dur)
         })?,
     )?;
     Ok(())
+}
+
+fn register_c_action_bar_charges_query(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "GetActionCharges",
+        lua.create_function(|lua, _: Value| action_charges_info(lua))?,
+    )?;
+    Ok(())
+}
+
+fn action_cooldown_info(lua: &Lua, start: f64, dur: f64) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("startTime", start)?;
+    info.set("duration", dur)?;
+    info.set("isEnabled", true)?;
+    info.set("modRate", 1.0_f64)?;
+    Ok(info)
+}
+
+fn action_charges_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("currentCharges", 0)?;
+    info.set("maxCharges", 0)?;
+    info.set("cooldownStartTime", 0.0_f64)?;
+    info.set("cooldownDuration", 0.0_f64)?;
+    info.set("chargeModRate", 1.0_f64)?;
+    Ok(info)
 }
