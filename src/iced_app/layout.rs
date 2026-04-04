@@ -46,15 +46,15 @@ fn resolve_multi_anchor_edges(
     let mut edges = empty_anchor_edges();
 
     for anchor in &frame.anchors {
-        let relative_rect = resolve_multi_anchor_relative_rect(
+        apply_multi_anchor_edge(
+            &mut edges,
             registry,
             anchor,
+            eff_scale,
             screen_width,
             screen_height,
             cache,
         );
-        let target = resolve_anchor_target(anchor, relative_rect, eff_scale);
-        apply_anchor_target(&mut edges, anchor.point, target);
     }
 
     edges
@@ -97,6 +97,21 @@ fn resolve_multi_anchor_relative_rect(
         width: screen_width,
         height: screen_height,
     }
+}
+
+fn apply_multi_anchor_edge(
+    edges: &mut AnchorEdges,
+    registry: &WidgetRegistry,
+    anchor: &crate::widget::Anchor,
+    eff_scale: f32,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) {
+    let relative_rect =
+        resolve_multi_anchor_relative_rect(registry, anchor, screen_width, screen_height, cache);
+    let target = resolve_anchor_target(anchor, relative_rect, eff_scale);
+    apply_anchor_target(edges, anchor.point, target);
 }
 
 fn resolve_anchor_target(
