@@ -30,6 +30,12 @@ fn register_c_item(lua: &Lua) -> Result<()> {
 /// C_Item methods: GetItemInfo, GetItemInfoInstant, GetItemIDForItemInfo.
 fn register_c_item_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetItemInfo", make_c_item_get_item_info(lua)?)?;
+    add_c_item_info_instant(lua, t)?;
+    add_c_item_id_for_item_info(lua, t)?;
+    Ok(())
+}
+
+fn add_c_item_info_instant(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemInfoInstant",
         lua.create_function(|lua, item_id: Value| {
@@ -37,26 +43,13 @@ fn register_c_item_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
             if id == 0 {
                 return Ok(mlua::MultiValue::new());
             }
-            let (class_name, subclass_name) = if let Some(item) = crate::items::get_item(id as u32)
-            {
-                (
-                    item_class_from_inv_type(item.inventory_type),
-                    inv_type_to_subclass(item.inventory_type),
-                )
-            } else {
-                ("Miscellaneous", "Junk")
-            };
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::Integer(id as i64),
-                Value::String(lua.create_string(class_name)?),
-                Value::String(lua.create_string(subclass_name)?),
-                Value::String(lua.create_string("")?),
-                Value::Integer(134400),
-                Value::Integer(15),
-                Value::Integer(0),
-            ]))
+            Ok(item_info_instant_multi_value(lua, id)?)
         })?,
     )?;
+    Ok(())
+}
+
+fn add_c_item_id_for_item_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemIDForItemInfo",
         lua.create_function(|_, item_id: Value| {
@@ -120,6 +113,30 @@ fn item_info_multi_value(
         Value::Integer(0),                      // 16 setID
         Value::Boolean(false),                  // 17 isCraftingReagent
     ]))
+}
+
+fn item_info_instant_multi_value(lua: &Lua, id: i32) -> Result<mlua::MultiValue> {
+    let (class_name, subclass_name) = item_info_instant_names(id);
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::Integer(id as i64),
+        Value::String(lua.create_string(class_name)?),
+        Value::String(lua.create_string(subclass_name)?),
+        Value::String(lua.create_string("")?),
+        Value::Integer(134400),
+        Value::Integer(15),
+        Value::Integer(0),
+    ]))
+}
+
+fn item_info_instant_names(id: i32) -> (&'static str, &'static str) {
+    if let Some(item) = crate::items::get_item(id as u32) {
+        (
+            item_class_from_inv_type(item.inventory_type),
+            inv_type_to_subclass(item.inventory_type),
+        )
+    } else {
+        ("Miscellaneous", "Junk")
+    }
 }
 
 /// C_Item query methods: icon, subclass, count, class, spec, name, level.
