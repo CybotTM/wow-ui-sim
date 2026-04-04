@@ -666,27 +666,9 @@ fn add_anim_progress<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_anim_target<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetTarget", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let Some(&(gid, idx)) = state.anim_frame_to_anim.get(&this.0) else {
+        let Some(id) = anim_target_frame_id(lua, this.0) else {
             return Ok(Value::Nil);
         };
-        let Some(group) = state.animation_groups.get(&gid) else {
-            return Ok(Value::Nil);
-        };
-        let owner_id = group.owner_frame_id;
-        let child_key = group.animations.get(idx).and_then(|a| a.child_key.clone());
-        let target_id = match &child_key {
-            Some(key) => state
-                .widgets
-                .get(owner_id)
-                .and_then(|o| o.children_keys.get(key.as_str()).copied()),
-            None => Some(owner_id),
-        };
-        let Some(id) = target_id else {
-            return Ok(Value::Nil);
-        };
-        drop(state);
         frame_ref(lua, id)
     });
     methods.add_method("SetTarget", |_, _this, target: Value| {
@@ -698,16 +680,46 @@ fn add_anim_target<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         Ok(())
     });
     methods.add_method("SetChildKey", |lua, this, key: String| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.child_key = Some(key);
-        }
+        set_anim_child_key(lua, this.0, key);
         Ok(())
     });
     methods.add_method("SetTargetKey", |_, _this, _key: String| Ok(()));
     methods.add_method("SetTargetName", |_, _this, _name: String| Ok(()));
     methods.add_method("SetTargetParent", |_, _this, ()| Ok(()));
+}
+
+fn anim_target_frame_id(lua: &mlua::Lua, frame_id: u64) -> Option<u64> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    let (group_id, anim_index) = *state.anim_frame_to_anim.get(&frame_id)?;
+    let group = state.animation_groups.get(&group_id)?;
+    let child_key = group
+        .animations
+        .get(anim_index)
+        .and_then(|anim| anim.child_key.as_deref());
+    resolve_anim_target_id(&state, group.owner_frame_id, child_key)
+}
+
+fn resolve_anim_target_id(
+    state: &crate::lua_api::SimState,
+    owner_id: u64,
+    child_key: Option<&str>,
+) -> Option<u64> {
+    match child_key {
+        Some(key) => state
+            .widgets
+            .get(owner_id)
+            .and_then(|owner| owner.children_keys.get(key).copied()),
+        None => Some(owner_id),
+    }
+}
+
+fn set_anim_child_key(lua: &mlua::Lua, frame_id: u64, key: String) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id) {
+        anim.child_key = Some(key);
+    }
 }
 
 fn add_anim_get_animations<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
