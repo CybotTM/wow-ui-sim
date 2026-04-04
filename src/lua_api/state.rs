@@ -266,6 +266,30 @@ impl EmptyRuntimeState {
     }
 }
 
+struct StrataBucketEntry {
+    frame_id: u64,
+    strata: crate::widget::FrameStrata,
+    sort_key: crate::iced_app::frame_collect::IntraStrataKey,
+}
+
+fn insert_into_strata_bucket(
+    buckets: &mut [Vec<u64>],
+    widgets: &WidgetRegistry,
+    entry: StrataBucketEntry,
+) {
+    let bucket = &mut buckets[entry.strata.as_index()];
+    let insert_at = bucket.partition_point(|&existing_id| {
+        widgets
+            .get(existing_id)
+            .map(|frame| {
+                crate::iced_app::frame_collect::intra_strata_sort_key(frame, existing_id, widgets)
+            })
+            .unwrap_or_default()
+            < entry.sort_key
+    });
+    bucket.insert(insert_at, entry.frame_id);
+}
+
 impl Default for SimState {
     fn default() -> Self {
         let mut state = Self::new_empty();
@@ -644,53 +668,80 @@ impl SimState {
     /// Walks all descendants and inserts those with render_alpha > 0
     /// (own effective_alpha, or parent's for button state textures with alpha > 0).
     fn insert_subtree_into_buckets(&mut self, root_id: u64) {
+        let subtree_ids = self.collect_subtree_ids(root_id);
+        let mut bucket_entries = Vec::with_capacity(subtree_ids.len());
+        for frame_id in subtree_ids {
+            let Some(bucket_entry) = self.subtree_bucket_entry(frame_id) else {
+                continue;
+            };
+            bucket_entries.push(bucket_entry);
+        }
         let Some(buckets) = self.strata_buckets.as_mut() else {
             return;
         };
-        use crate::iced_app::frame_collect::intra_strata_sort_key;
-        use crate::widget::WidgetType;
-        // Walk all descendants.
-        let mut queue = vec![root_id];
-        while let Some(fid) = queue.pop() {
-            let Some(f) = self.widgets.get(fid) else {
-                continue;
-            };
-            queue.extend(f.children.iter().copied());
-            let render_alpha = if f.effective_alpha > 0.0 {
-                f.effective_alpha
-            } else if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
-                f.parent_id
-                    .and_then(|pid| self.widgets.get(pid))
-                    .map(|p| p.effective_alpha)
-                    .unwrap_or(0.0)
-            } else {
-                0.0
-            };
-            if render_alpha <= 0.0 {
-                continue;
-            }
-            let strata = if matches!(
-                f.widget_type,
-                WidgetType::Texture | WidgetType::FontString | WidgetType::Line
-            ) {
-                f.parent_id
-                    .and_then(|pid| self.widgets.get(pid))
-                    .map(|p| p.frame_strata)
-                    .unwrap_or(f.frame_strata)
-            } else {
-                f.frame_strata
-            };
-            let key = intra_strata_sort_key(f, fid, &self.widgets);
-            let bucket = &mut buckets[strata.as_index()];
-            let pos = bucket.partition_point(|&existing_id| {
-                self.widgets
-                    .get(existing_id)
-                    .map(|ef| intra_strata_sort_key(ef, existing_id, &self.widgets))
-                    .unwrap_or_default()
-                    < key
-            });
-            bucket.insert(pos, fid);
+        for bucket_entry in bucket_entries {
+            insert_into_strata_bucket(buckets, &self.widgets, bucket_entry);
         }
+    }
+
+    fn collect_subtree_ids(&self, root_id: u64) -> Vec<u64> {
+        let mut queue = vec![root_id];
+        let mut subtree_ids = Vec::with_capacity(8);
+        while let Some(frame_id) = queue.pop() {
+            let Some(frame) = self.widgets.get(frame_id) else {
+                continue;
+            };
+            queue.extend(frame.children.iter().copied());
+            subtree_ids.push(frame_id);
+        }
+        subtree_ids
+    }
+
+    fn subtree_bucket_entry(&self, frame_id: u64) -> Option<StrataBucketEntry> {
+        let frame = self.widgets.get(frame_id)?;
+        if self.frame_render_alpha(frame) <= 0.0 {
+            return None;
+        }
+
+        Some(StrataBucketEntry {
+            frame_id,
+            strata: self.frame_bucket_strata(frame),
+            sort_key: crate::iced_app::frame_collect::intra_strata_sort_key(
+                frame,
+                frame_id,
+                &self.widgets,
+            ),
+        })
+    }
+
+    fn frame_render_alpha(&self, frame: &crate::widget::Frame) -> f32 {
+        if frame.effective_alpha > 0.0 {
+            return frame.effective_alpha;
+        }
+        if frame.alpha > 0.0 && uses_parent_alpha_fallback(frame) {
+            return frame
+                .parent_id
+                .and_then(|parent_id| self.widgets.get(parent_id))
+                .map(|parent| parent.effective_alpha)
+                .unwrap_or(0.0);
+        }
+        0.0
+    }
+
+    fn frame_bucket_strata(&self, frame: &crate::widget::Frame) -> crate::widget::FrameStrata {
+        use crate::widget::WidgetType;
+
+        if matches!(
+            frame.widget_type,
+            WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+        ) {
+            return frame
+                .parent_id
+                .and_then(|parent_id| self.widgets.get(parent_id))
+                .map(|parent| parent.frame_strata)
+                .unwrap_or(frame.frame_strata);
+        }
+        frame.frame_strata
     }
 
     /// Raise a frame above all siblings in the same strata+level.
