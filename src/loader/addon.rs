@@ -176,32 +176,67 @@ fn load_addon_files(
     let overlay_dir = Path::new("Interface/AddOns").join(folder_name);
 
     for (file_rel, file) in toc.files.iter().zip(toc.file_paths()) {
-        let file = {
-            let overlay = overlay_dir.join(file_rel);
-            if overlay.exists() { overlay } else { file }
-        };
-        let ext = file.extension().and_then(|e| e.to_str()).unwrap_or("");
-        match ext {
-            "lua" => {
-                match load_lua_file(env, &file, ctx, &mut result.timing) {
-                    Ok(()) => result.lua_files += 1,
-                    Err(e) => result.warnings.push(format!("{}: {}", file.display(), e)),
-                }
-                apply_cpp_mixin_stubs(env);
-            }
-            "xml" => match load_xml_file(env, &file, ctx, &mut result.timing) {
-                Ok(count) => {
-                    result.xml_files += 1;
-                    result.lua_files += count;
-                }
-                Err(e) => result.warnings.push(format!("{}: {}", file.display(), e)),
-            },
-            _ => {
-                result
-                    .warnings
-                    .push(format!("{}: unknown file type", file.display()));
-            }
+        let resolved_file = resolve_addon_file_path(&overlay_dir, file_rel, file);
+        load_addon_file(env, ctx, result, &resolved_file);
+    }
+}
+
+fn resolve_addon_file_path(
+    overlay_dir: &Path,
+    file_rel: &Path,
+    default_file: std::path::PathBuf,
+) -> std::path::PathBuf {
+    let overlay_file = overlay_dir.join(file_rel);
+    if overlay_file.exists() {
+        return overlay_file;
+    }
+    default_file
+}
+
+fn load_addon_file(
+    env: &LoaderEnv<'_>,
+    ctx: &AddonContext<'_>,
+    result: &mut LoadResult,
+    file: &std::path::Path,
+) {
+    match file.extension().and_then(|ext| ext.to_str()).unwrap_or("") {
+        "lua" => load_addon_lua_file(env, ctx, result, file),
+        "xml" => load_addon_xml_file(env, ctx, result, file),
+        _ => result
+            .warnings
+            .push(format!("{}: unknown file type", file.display())),
+    }
+}
+
+fn load_addon_lua_file(
+    env: &LoaderEnv<'_>,
+    ctx: &AddonContext<'_>,
+    result: &mut LoadResult,
+    file: &std::path::Path,
+) {
+    match load_lua_file(env, file, ctx, &mut result.timing) {
+        Ok(()) => result.lua_files += 1,
+        Err(error) => result
+            .warnings
+            .push(format!("{}: {}", file.display(), error)),
+    }
+    apply_cpp_mixin_stubs(env);
+}
+
+fn load_addon_xml_file(
+    env: &LoaderEnv<'_>,
+    ctx: &AddonContext<'_>,
+    result: &mut LoadResult,
+    file: &std::path::Path,
+) {
+    match load_xml_file(env, file, ctx, &mut result.timing) {
+        Ok(count) => {
+            result.xml_files += 1;
+            result.lua_files += count;
         }
+        Err(error) => result
+            .warnings
+            .push(format!("{}: {}", file.display(), error)),
     }
 }
 
