@@ -105,43 +105,81 @@ fn message_frame_max_lines(state: &SimState, id: u64) -> usize {
 }
 
 fn add_message_frame_fade_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFading", |lua, this, fading: bool| {
+    add_message_frame_bool_setter(methods, "SetFading", |data, value| data.fading = value);
+    add_message_frame_bool_getter(methods, "GetFading", true, |data| data.fading);
+    add_message_frame_f64_setter(methods, "SetTimeVisible", |data, value| {
+        data.time_visible = value
+    });
+    add_message_frame_f64_getter(methods, "GetTimeVisible", 10.0, |data| data.time_visible);
+}
+
+fn add_message_frame_bool_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::message_frame::MessageFrameData, bool) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state
+        let data = state
             .message_frames
             .entry(this.0)
-            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
-            .fading = fading;
+            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+        setter(data, value);
         Ok(())
     });
-    methods.add_method("GetFading", |lua, this, ()| {
+}
+
+fn add_message_frame_bool_getter<M, F>(
+    methods: &mut M,
+    name: &'static str,
+    default: bool,
+    getter: F,
+) where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::lua_api::message_frame::MessageFrameData) -> bool + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         Ok(state
             .message_frames
             .get(&this.0)
-            .map(|d| d.fading)
-            .unwrap_or(true))
+            .map(getter)
+            .unwrap_or(default))
     });
-    methods.add_method("SetTimeVisible", |lua, this, secs: f64| {
+}
+
+fn add_message_frame_f64_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::message_frame::MessageFrameData, f64) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state
+        let data = state
             .message_frames
             .entry(this.0)
-            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
-            .time_visible = secs;
+            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+        setter(data, value);
         Ok(())
     });
-    methods.add_method("GetTimeVisible", |lua, this, ()| {
+}
+
+fn add_message_frame_f64_getter<M, F>(methods: &mut M, name: &'static str, default: f64, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::lua_api::message_frame::MessageFrameData) -> f64 + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         Ok(state
             .message_frames
             .get(&this.0)
-            .map(|d| d.time_visible)
-            .unwrap_or(10.0))
+            .map(getter)
+            .unwrap_or(default))
     });
 }
 
