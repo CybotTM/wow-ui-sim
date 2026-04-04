@@ -194,24 +194,27 @@ fn add_total_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(me
 }
 
 fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
+    add_reset_methods(methods);
+    add_mode_setter_methods(methods);
+    add_value_setter_methods(methods);
+}
+
+fn add_reset_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
     methods.add_method("Reset", |_, this, ()| {
-        *this.inner.incoming_heals.borrow_mut() = 0.0;
-        *this.inner.damage_absorbs.borrow_mut() = 0.0;
-        *this.inner.heal_absorbs.borrow_mut() = 0.0;
-        *this.inner.incoming_heal_overflow_percent.borrow_mut() = 0.0;
-        *this.inner.damage_absorb_clamp_mode.borrow_mut() = 0;
-        *this.inner.heal_absorb_clamp_mode.borrow_mut() = 0;
-        *this.inner.heal_absorb_mode.borrow_mut() = 0;
-        *this.inner.incoming_heal_clamp_mode.borrow_mut() = 0;
-        *this.inner.maximum_health_mode.borrow_mut() = 0;
+        reset_all_prediction_state(&this.inner);
         Ok(())
     });
     methods.add_method("ResetPredictedValues", |_, this, ()| {
-        *this.inner.incoming_heals.borrow_mut() = 0.0;
-        *this.inner.damage_absorbs.borrow_mut() = 0.0;
-        *this.inner.heal_absorbs.borrow_mut() = 0.0;
+        reset_predicted_values(&this.inner);
         Ok(())
     });
+    methods.add_method("SetToDefaults", |_, this, ()| {
+        reset_all_prediction_state(&this.inner);
+        Ok(())
+    });
+}
+
+fn add_mode_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
     methods.add_method("SetDamageAbsorbClampMode", |_, this, mode: i32| {
         *this.inner.damage_absorb_clamp_mode.borrow_mut() = mode;
         Ok(())
@@ -228,12 +231,15 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
         *this.inner.incoming_heal_clamp_mode.borrow_mut() = mode;
         Ok(())
     });
-    methods.add_method("SetIncomingHealOverflowPercent", |_, this, pct: f64| {
-        *this.inner.incoming_heal_overflow_percent.borrow_mut() = pct;
-        Ok(())
-    });
     methods.add_method("SetMaximumHealthMode", |_, this, mode: i32| {
         *this.inner.maximum_health_mode.borrow_mut() = mode;
+        Ok(())
+    });
+}
+
+fn add_value_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
+    methods.add_method("SetIncomingHealOverflowPercent", |_, this, pct: f64| {
+        *this.inner.incoming_heal_overflow_percent.borrow_mut() = pct;
         Ok(())
     });
     methods.add_method(
@@ -246,18 +252,22 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
             Ok(())
         },
     );
-    methods.add_method("SetToDefaults", |_, this, ()| {
-        *this.inner.incoming_heals.borrow_mut() = 0.0;
-        *this.inner.damage_absorbs.borrow_mut() = 0.0;
-        *this.inner.heal_absorbs.borrow_mut() = 0.0;
-        *this.inner.incoming_heal_overflow_percent.borrow_mut() = 0.0;
-        *this.inner.damage_absorb_clamp_mode.borrow_mut() = 0;
-        *this.inner.heal_absorb_clamp_mode.borrow_mut() = 0;
-        *this.inner.heal_absorb_mode.borrow_mut() = 0;
-        *this.inner.incoming_heal_clamp_mode.borrow_mut() = 0;
-        *this.inner.maximum_health_mode.borrow_mut() = 0;
-        Ok(())
-    });
+}
+
+fn reset_predicted_values(inner: &HealPredictionInner) {
+    *inner.incoming_heals.borrow_mut() = 0.0;
+    *inner.damage_absorbs.borrow_mut() = 0.0;
+    *inner.heal_absorbs.borrow_mut() = 0.0;
+}
+
+fn reset_all_prediction_state(inner: &HealPredictionInner) {
+    reset_predicted_values(inner);
+    *inner.incoming_heal_overflow_percent.borrow_mut() = 0.0;
+    *inner.damage_absorb_clamp_mode.borrow_mut() = 0;
+    *inner.heal_absorb_clamp_mode.borrow_mut() = 0;
+    *inner.heal_absorb_mode.borrow_mut() = 0;
+    *inner.incoming_heal_clamp_mode.borrow_mut() = 0;
+    *inner.maximum_health_mode.borrow_mut() = 0;
 }
 
 fn add_index_metamethod<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
