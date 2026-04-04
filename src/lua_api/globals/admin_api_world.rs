@@ -259,47 +259,70 @@ fn register_vault_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) 
     super::admin_api::set_fn(lua, t, "SetVaultActivity", {
         let s = Rc::clone(&state);
         move |_, (atype, index, threshold, progress, level): (i32, i32, i32, i32, i32)| {
-            let mut st = s.borrow_mut();
-            let activity = crate::lua_api::state::GreatVaultActivity {
-                activity_type: atype,
+            upsert_vault_activity(
+                &mut s.borrow_mut(),
+                atype,
                 index,
                 threshold,
                 progress,
                 level,
-            };
-            if let Some(existing) = st
-                .world
-                .great_vault_activities
-                .iter_mut()
-                .find(|a| a.activity_type == atype && a.index == index)
-            {
-                *existing = activity;
-            } else {
-                st.world.great_vault_activities.push(activity);
-            }
+            );
             Ok(())
         }
     })?;
     super::admin_api::set_fn(lua, t, "SetVaultRewards", {
         let s = Rc::clone(&state);
         move |_, (has, can_claim): (bool, Option<bool>)| {
-            let mut st = s.borrow_mut();
-            st.world.great_vault_has_rewards = has;
-            st.world.great_vault_can_claim = can_claim.unwrap_or(has);
+            set_vault_rewards(&mut s.borrow_mut(), has, can_claim);
             Ok(())
         }
     })?;
     super::admin_api::set_fn(lua, t, "ClearVault", {
         let s = Rc::clone(&state);
         move |_, ()| {
-            let mut st = s.borrow_mut();
-            st.world.great_vault_activities.clear();
-            st.world.great_vault_has_rewards = false;
-            st.world.great_vault_can_claim = false;
+            clear_vault(&mut s.borrow_mut());
             Ok(())
         }
     })?;
     Ok(())
+}
+
+fn upsert_vault_activity(
+    state: &mut SimState,
+    atype: i32,
+    index: i32,
+    threshold: i32,
+    progress: i32,
+    level: i32,
+) {
+    let activity = crate::lua_api::state::GreatVaultActivity {
+        activity_type: atype,
+        index,
+        threshold,
+        progress,
+        level,
+    };
+    if let Some(existing) = state
+        .world
+        .great_vault_activities
+        .iter_mut()
+        .find(|a| a.activity_type == atype && a.index == index)
+    {
+        *existing = activity;
+    } else {
+        state.world.great_vault_activities.push(activity);
+    }
+}
+
+fn set_vault_rewards(state: &mut SimState, has: bool, can_claim: Option<bool>) {
+    state.world.great_vault_has_rewards = has;
+    state.world.great_vault_can_claim = can_claim.unwrap_or(has);
+}
+
+fn clear_vault(state: &mut SimState) {
+    state.world.great_vault_activities.clear();
+    state.world.great_vault_has_rewards = false;
+    state.world.great_vault_can_claim = false;
 }
 
 fn register_bag_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
