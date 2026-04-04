@@ -599,47 +599,66 @@ fn build_line_quads(
     registry: &crate::widget::WidgetRegistry,
     alpha: f32,
 ) {
+    let Some((positions, uvs, tint)) = resolve_line_quad_inputs(f, registry, alpha) else {
+        return;
+    };
+    emit_resolved_line_quad(batch, f, alpha, &positions, &uvs, tint);
+}
+
+fn resolve_line_quad_inputs(
+    f: &crate::widget::Frame,
+    registry: &crate::widget::WidgetRegistry,
+    alpha: f32,
+) -> Option<([[f32; 2]; 4], [[f32; 2]; 4], [f32; 4])> {
     let (Some(start_anchor), Some(end_anchor)) = (&f.line_start, &f.line_end) else {
-        return;
+        return None;
     };
-    let Some(sp) = resolve_line_endpoint(start_anchor, registry) else {
-        return;
-    };
-    let Some(ep) = resolve_line_endpoint(end_anchor, registry) else {
-        return;
-    };
-
+    let sp = resolve_line_endpoint(start_anchor, registry)?;
+    let ep = resolve_line_endpoint(end_anchor, registry)?;
     let thickness = f.line_thickness * crate::render::texture::UI_SCALE;
-    let Some(positions) = line_quad_positions(sp, ep, thickness) else {
-        return;
-    };
+    let positions = line_quad_positions(sp, ep, thickness)?;
+    Some((positions, line_uvs(f), line_tint(f, alpha)))
+}
 
-    // Use atlas/SetTexCoord UVs when available, otherwise full texture.
-    let uvs = if let Some((left, right, top, bottom)) = f.tex_coords {
+fn line_uvs(f: &crate::widget::Frame) -> [[f32; 2]; 4] {
+    if let Some((left, right, top, bottom)) = f.tex_coords {
         [[left, top], [left, bottom], [right, bottom], [right, top]]
     } else {
         [[0.0, 0.0], [0.0, 1.0], [1.0, 1.0], [1.0, 0.0]]
-    };
+    }
+}
 
+fn line_tint(f: &crate::widget::Frame, alpha: f32) -> [f32; 4] {
     let vc = f.vertex_color.as_ref();
-    let tint = [
+    [
         vc.map_or(1.0, |c| c.r),
         vc.map_or(1.0, |c| c.g),
         vc.map_or(1.0, |c| c.b),
         vc.map_or(1.0, |c| c.a) * alpha,
-    ];
+    ]
+}
 
+fn emit_resolved_line_quad(
+    batch: &mut QuadBatch,
+    f: &crate::widget::Frame,
+    alpha: f32,
+    positions: &[[f32; 2]; 4],
+    uvs: &[[f32; 2]; 4],
+    tint: [f32; 4],
+) {
     if let Some(color) = f.color_texture {
-        let c = [
+        let color_tint = [
             color.r * tint[0],
             color.g * tint[1],
             color.b * tint[2],
             color.a * alpha,
         ];
-        emit_line_vertices(batch, &positions, &uvs, c, -1, f.blend_mode);
-    } else if let Some(ref tex_path) = f.texture {
+        emit_line_vertices(batch, positions, uvs, color_tint, -1, f.blend_mode);
+        return;
+    }
+    if let Some(ref tex_path) = f.texture {
         let vertex_start = batch.vertices.len() as u32;
-        emit_line_vertices(batch, &positions, &uvs, tint, -2, f.blend_mode);
+        emit_line_vertices(batch, positions, uvs, tint, -2, f.blend_mode);
         batch
             .texture_requests
             .push(crate::render::shader::TextureRequest {
@@ -647,9 +666,9 @@ fn build_line_quads(
                 vertex_start,
                 vertex_count: 4,
             });
-    } else {
-        emit_line_vertices(batch, &positions, &uvs, tint, -1, f.blend_mode);
+        return;
     }
+    emit_line_vertices(batch, positions, uvs, tint, -1, f.blend_mode);
 }
 
 /// Push 4 vertices and 6 indices for a line quad with arbitrary positions.
@@ -681,4 +700,29 @@ fn emit_line_vertices(
     batch
         .indices
         .extend_from_slice(&[base, base + 1, base + 2, base, base + 2, base + 3]);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::{Color, Frame};
+
+    #[test]
+    fn line_uvs_uses_tex_coords_when_present() {
+        let mut frame = Frame::default();
+        frame.tex_coords = Some((0.1, 0.9, 0.2, 0.8));
+
+        assert_eq!(
+            line_uvs(&frame),
+            [[0.1, 0.2], [0.1, 0.8], [0.9, 0.8], [0.9, 0.2]]
+        );
+    }
+
+    #[test]
+    fn line_tint_uses_vertex_color_and_alpha() {
+        let mut frame = Frame::default();
+        frame.vertex_color = Some(Color::new(0.2, 0.4, 0.6, 0.5));
+
+        assert_eq!(line_tint(&frame, 0.8), [0.2, 0.4, 0.6, 0.4]);
+    }
 }
