@@ -270,49 +270,47 @@ fn register_c_item_link_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 /// C_Item stub methods (transmog, load, sockets).
 /// DoesItemExist, IsBound, etc. are in c_item_location_api.rs (state-aware).
 fn register_c_item_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    add_nil_value_stub(lua, t, "GetItemLearnTransmogSet")?;
+    add_unit_stub(lua, t, "RequestLoadItemDataByID")?;
+    add_bool_value_stub(lua, t, "CanViewItemPowers")?;
+    add_i32_value_stub(lua, t, "GetItemNumSockets", 0)?;
+    add_i32_multivalue_stub(lua, t, "GetItemGemID", 0)?;
+    add_bool_value_stub(lua, t, "IsCorruptedItem")?;
+    add_bool_value_stub(lua, t, "IsCosmeticItem")?;
+    add_bool_value_stub(lua, t, "IsCurioItem")?;
+    add_bool_value_stub(lua, t, "IsRelicItem")?;
+    add_bool_value_stub(lua, t, "IsDecorItem")?;
+    add_bool_value_stub(lua, t, "IsBoundToAccountUntilEquip")?;
+    Ok(())
+}
+
+fn add_nil_value_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
+    t.set(name, lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
+    Ok(())
+}
+
+fn add_unit_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
+    t.set(name, lua.create_function(|_, _id: i32| Ok(()))?)?;
+    Ok(())
+}
+
+fn add_bool_value_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
+    t.set(name, lua.create_function(|_, _value: Value| Ok(false))?)?;
+    Ok(())
+}
+
+fn add_i32_value_stub(lua: &Lua, t: &mlua::Table, name: &str, value: i32) -> Result<()> {
     t.set(
-        "GetItemLearnTransmogSet",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+        name,
+        lua.create_function(move |_, _value: Value| Ok(value))?,
     )?;
+    Ok(())
+}
+
+fn add_i32_multivalue_stub(lua: &Lua, t: &mlua::Table, name: &str, value: i32) -> Result<()> {
     t.set(
-        "RequestLoadItemDataByID",
-        lua.create_function(|_, _id: i32| Ok(()))?,
-    )?;
-    t.set(
-        "CanViewItemPowers",
-        lua.create_function(|_, _loc: Value| Ok(false))?,
-    )?;
-    t.set(
-        "GetItemNumSockets",
-        lua.create_function(|_, _loc: Value| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetItemGemID",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0i32))?,
-    )?;
-    t.set(
-        "IsCorruptedItem",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    t.set(
-        "IsCosmeticItem",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    t.set(
-        "IsCurioItem",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    t.set(
-        "IsRelicItem",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    t.set(
-        "IsDecorItem",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    t.set(
-        "IsBoundToAccountUntilEquip",
-        lua.create_function(|_, _loc: Value| Ok(false))?,
+        name,
+        lua.create_function(move |_, _args: mlua::MultiValue| Ok(value))?,
     )?;
     Ok(())
 }
