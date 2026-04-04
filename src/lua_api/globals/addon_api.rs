@@ -242,6 +242,18 @@ fn register_query_functions(
     c_addons: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_is_addon_loaded(lua, c_addons, state)?;
+    register_is_addon_loadable(lua, c_addons)?;
+    register_is_addon_load_on_demand(lua, c_addons, state)?;
+    register_does_addon_exist(lua, c_addons, state)?;
+    Ok(())
+}
+
+fn register_is_addon_loaded(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "IsAddOnLoaded",
@@ -252,12 +264,22 @@ fn register_query_functions(
                 .unwrap_or(false))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_is_addon_loadable(lua: &Lua, c_addons: &mlua::Table) -> Result<()> {
     c_addons.set(
         "IsAddOnLoadable",
         lua.create_function(|_, _addon: String| Ok(true))?,
     )?;
+    Ok(())
+}
 
+fn register_is_addon_load_on_demand(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "IsAddOnLoadOnDemand",
@@ -268,7 +290,14 @@ fn register_query_functions(
                 .unwrap_or(false))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_does_addon_exist(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "DoesAddOnExist",
@@ -277,7 +306,6 @@ fn register_query_functions(
             Ok(find_addon_by_value(&state.addons, &addon).is_some())
         })?,
     )?;
-
     Ok(())
 }
 
