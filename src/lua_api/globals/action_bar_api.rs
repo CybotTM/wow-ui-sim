@@ -76,19 +76,28 @@ pub(crate) fn action_texture_path(state: &SimState, slot: u32) -> Option<String>
 
 /// HasAction, GetActionInfo, GetActionTexture, IsUsableAction.
 fn register_action_bar_queries(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
+    register_has_action(lua, state)?;
+    register_get_action_info(lua, state)?;
+    register_get_action_texture(lua, state)?;
+    register_is_usable_action(lua, state)?;
+    Ok(())
+}
 
+fn register_has_action(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "HasAction",
         lua.create_function(move |_, slot: Value| {
             let s = st.borrow();
             Ok(slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_get_action_info(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "GetActionInfo",
         lua.create_function(move |lua, slot: Value| {
             let s = st.borrow();
@@ -98,16 +107,15 @@ fn register_action_bar_queries(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
             let Some(&spell_id) = s.action_bars.get(&n) else {
                 return Ok(mlua::MultiValue::new());
             };
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string("spell")?),
-                Value::Integer(spell_id as i64),
-                Value::String(lua.create_string("spell")?),
-            ]))
+            Ok(action_info_value(lua, spell_id)?)
         })?,
     )?;
+    Ok(())
+}
 
+fn register_get_action_texture(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "GetActionTexture",
         lua.create_function(move |lua, slot: Value| {
             let s = st.borrow();
@@ -120,18 +128,31 @@ fn register_action_bar_queries(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
             }
         })?,
     )?;
+    Ok(())
+}
 
+fn register_is_usable_action(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "IsUsableAction",
         lua.create_function(move |_, slot: Value| {
             let s = st.borrow();
-            let has = slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n));
-            Ok((has, false))
+            Ok((action_slot_exists(&s, &slot), false))
         })?,
     )?;
-
     Ok(())
+}
+
+fn action_info_value(lua: &Lua, spell_id: u32) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string("spell")?),
+        Value::Integer(spell_id as i64),
+        Value::String(lua.create_string("spell")?),
+    ]))
+}
+
+fn action_slot_exists(state: &SimState, slot: &Value) -> bool {
+    slot_from_value(slot).is_some_and(|n| state.action_bars.contains_key(&n))
 }
 
 /// GetActionCooldown(slot) — returns (start, duration, enable, modRate).
