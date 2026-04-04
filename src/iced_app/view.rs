@@ -101,18 +101,24 @@ impl App {
         if self.frames_panel_collapsed {
             container(toggle_btn).padding(6).style(panel_style)
         } else {
-            let frames_list = self.build_frames_sidebar();
-            container(
-                column![
-                    toggle_btn,
-                    scrollable(frames_list).width(Length::Fill).height(600)
-                ]
-                .spacing(4),
-            )
-            .width(240)
-            .padding(6)
-            .style(panel_style)
+            self.build_expanded_sidebar(toggle_btn).style(panel_style)
         }
+    }
+
+    fn build_expanded_sidebar<'a>(
+        &'a self,
+        toggle_btn: button::Button<'a, Message>,
+    ) -> Container<'a, Message> {
+        let frames_list = self.build_frames_sidebar();
+        container(
+            column![
+                toggle_btn,
+                scrollable(frames_list).width(Length::Fill).height(600)
+            ]
+            .spacing(4),
+        )
+        .width(240)
+        .padding(6)
     }
 
     /// Build the event trigger buttons row.
