@@ -498,26 +498,9 @@ impl AnimHandle {
     /// Register target accessor and key methods.
     fn add_target_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetTarget", |lua, this, ()| {
-            let state = this.state.borrow();
-            let Some(group) = state.animation_groups.get(&this.group_id) else {
+            let Some(id) = this.target_frame_id() else {
                 return Ok(Value::Nil);
             };
-            let owner_id = group.owner_frame_id;
-            let child_key = group
-                .animations
-                .get(this.anim_index)
-                .and_then(|a| a.child_key.clone());
-            let target_id = match &child_key {
-                Some(key) => state
-                    .widgets
-                    .get(owner_id)
-                    .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
-                None => Some(owner_id),
-            };
-            let Some(id) = target_id else {
-                return Ok(Value::Nil);
-            };
-            drop(state);
             frame_ref(lua, id)
         });
 
@@ -543,6 +526,17 @@ impl AnimHandle {
         methods.add_method("SetTargetKey", |_, _this, _key: String| Ok(()));
         methods.add_method("SetTargetName", |_, _this, _name: String| Ok(()));
         methods.add_method("SetTargetParent", |_, _this, ()| Ok(()));
+    }
+
+    fn target_frame_id(&self) -> Option<u64> {
+        let state = self.state.borrow();
+        let group = state.animation_groups.get(&self.group_id)?;
+        let owner_id = group.owner_frame_id;
+        let child_key = group
+            .animations
+            .get(self.anim_index)
+            .and_then(|a| a.child_key.as_deref());
+        resolve_target_frame_id(&state, owner_id, child_key)
     }
 
     /// Register parent, name, and target accessor methods.
@@ -619,6 +613,20 @@ impl AnimHandle {
     fn add_script_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         Self::add_set_get_script_methods(methods);
         Self::add_hook_script_method(methods);
+    }
+}
+
+fn resolve_target_frame_id(
+    state: &SimState,
+    owner_id: u64,
+    child_key: Option<&str>,
+) -> Option<u64> {
+    match child_key {
+        Some(key) => state
+            .widgets
+            .get(owner_id)
+            .and_then(|owner| owner.children_keys.get(key).copied()),
+        None => Some(owner_id),
     }
 }
 
