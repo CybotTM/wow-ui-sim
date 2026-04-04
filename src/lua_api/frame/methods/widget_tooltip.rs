@@ -209,54 +209,88 @@ fn add_tooltip_minwidth_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
 
 fn add_tooltip_padding_override_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetPadding", |lua, this, args: mlua::MultiValue| {
-        let id = this.0;
-        if let Some((func, self_val)) = get_mixin_override(lua, id, "SetPadding") {
-            let mut call_args = vec![self_val];
-            call_args.extend(args);
-            return func.call::<()>(mlua::MultiValue::from_iter(call_args));
+        if call_tooltip_padding_override(lua, this.0, "SetPadding", args.clone())? {
+            return Ok(());
         }
-        let padding = args
-            .into_iter()
-            .next()
-            .and_then(|v| match v {
-                Value::Number(n) => Some(n as f32),
-                Value::Integer(n) => Some(n as f32),
-                _ => None,
-            })
-            .unwrap_or(0.0);
+        let padding = parse_padding_arg(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&id) {
+        if let Some(td) = state.tooltips.get_mut(&this.0) {
             td.padding = padding;
         }
         Ok(())
     });
 
     methods.add_method("GetPadding", |lua, this, ()| {
-        let id = this.0;
-        if let Some((func, self_val)) = get_mixin_override(lua, id, "GetPadding") {
-            return func.call::<mlua::MultiValue>(self_val);
+        if let Some(override_value) = get_tooltip_padding_override(lua, this.0, "GetPadding")? {
+            return Ok(override_value);
         }
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let p = state
-            .tooltips
-            .get(&id)
-            .map(|td| td.padding as f64)
-            .unwrap_or(0.0);
-        Ok(mlua::MultiValue::from_iter(std::iter::once(Value::Number(
-            p,
-        ))))
+        Ok(padding_multi_value(read_tooltip_padding(lua, this.0)))
     });
 
     methods.add_method("ClearPadding", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&this.0) {
-            td.padding = 0.0;
-        }
-        Ok(())
+        clear_tooltip_padding(lua, this.0)
     });
+}
+
+fn call_tooltip_padding_override(
+    lua: &mlua::Lua,
+    id: u64,
+    method: &str,
+    args: mlua::MultiValue,
+) -> mlua::Result<bool> {
+    if let Some((func, self_val)) = get_mixin_override(lua, id, method) {
+        let mut call_args = vec![self_val];
+        call_args.extend(args);
+        func.call::<()>(mlua::MultiValue::from_iter(call_args))?;
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+fn get_tooltip_padding_override(
+    lua: &mlua::Lua,
+    id: u64,
+    method: &str,
+) -> mlua::Result<Option<mlua::MultiValue>> {
+    if let Some((func, self_val)) = get_mixin_override(lua, id, method) {
+        return func.call::<mlua::MultiValue>(self_val).map(Some);
+    }
+    Ok(None)
+}
+
+fn parse_padding_arg(args: mlua::MultiValue) -> f32 {
+    args.into_iter()
+        .next()
+        .and_then(|value| match value {
+            Value::Number(n) => Some(n as f32),
+            Value::Integer(n) => Some(n as f32),
+            _ => None,
+        })
+        .unwrap_or(0.0)
+}
+
+fn read_tooltip_padding(lua: &mlua::Lua, id: u64) -> f64 {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .tooltips
+        .get(&id)
+        .map(|td| td.padding as f64)
+        .unwrap_or(0.0)
+}
+
+fn padding_multi_value(padding: f64) -> mlua::MultiValue {
+    mlua::MultiValue::from_iter(std::iter::once(Value::Number(padding)))
+}
+
+fn clear_tooltip_padding(lua: &mlua::Lua, id: u64) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(td) = state.tooltips.get_mut(&id) {
+        td.padding = 0.0;
+    }
+    Ok(())
 }
 
 fn add_tooltip_settext_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
