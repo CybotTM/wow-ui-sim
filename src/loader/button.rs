@@ -108,7 +108,18 @@ pub fn apply_button_textures(
     frame_xml: &crate::xml::FrameXml,
     button_name: &str,
 ) -> Result<(), LoadError> {
-    let texture_slots: [(&str, &str, Option<&crate::xml::TextureXml>); 4] = [
+    let texture_slots = button_texture_slots(frame_xml);
+
+    // Create texture children for ALL slots BEFORE running Lua code.
+    // The Lua atlas path calls Get*Texture() which needs the child to exist.
+    ensure_button_texture_children(env, &texture_slots, button_name);
+    apply_button_texture_lua(env, &texture_slots, button_name)
+}
+
+fn button_texture_slots(
+    frame_xml: &crate::xml::FrameXml,
+) -> [(&str, &str, Option<&crate::xml::TextureXml>); 4] {
+    [
         (
             "SetNormalTexture",
             "NormalTexture",
@@ -129,12 +140,14 @@ pub fn apply_button_textures(
             "DisabledTexture",
             frame_xml.disabled_texture(),
         ),
-    ];
+    ]
+}
 
-    // Create texture children for ALL slots BEFORE running Lua code.
-    // The Lua atlas path calls Get*Texture() which needs the child to exist.
-    ensure_button_texture_children(env, &texture_slots, button_name);
-
+fn apply_button_texture_lua(
+    env: &LoaderEnv<'_>,
+    texture_slots: &[(&str, &str, Option<&crate::xml::TextureXml>); 4],
+    button_name: &str,
+) -> Result<(), LoadError> {
     let lua_code: String = texture_slots
         .iter()
         .filter_map(|(method, _, tex)| {
