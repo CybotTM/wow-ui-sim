@@ -42,14 +42,16 @@ impl QuadBatch {
         push_corners(self, bounds, corner_size, textures, color, full_uv);
         push_edges(
             self,
-            bounds,
-            corner_size,
-            edge_size,
-            inner_width,
-            inner_height,
-            textures,
-            color,
-            full_uv,
+            NineSliceEdgeStrip {
+                bounds,
+                corner_size,
+                edge_size,
+                inner_width,
+                inner_height,
+                textures,
+                color,
+                full_uv,
+            },
         );
     }
 }
@@ -115,44 +117,50 @@ fn push_corners(
     }
 }
 
-#[allow(clippy::too_many_arguments)]
-fn push_edges(
-    batch: &mut QuadBatch,
+fn push_edges(batch: &mut QuadBatch, strip: NineSliceEdgeStrip<'_>) {
+    if let Some(tex) = strip.textures.top {
+        let edge = Rectangle::new(
+            iced::Point::new(strip.bounds.x + strip.corner_size, strip.bounds.y),
+            iced::Size::new(strip.inner_width, strip.edge_size),
+        );
+        batch.push_quad(edge, strip.full_uv, strip.color, tex, BlendMode::Alpha);
+    }
+    if let Some(tex) = strip.textures.bottom {
+        let edge = Rectangle::new(
+            iced::Point::new(
+                strip.bounds.x + strip.corner_size,
+                strip.bounds.y + strip.bounds.height - strip.edge_size,
+            ),
+            iced::Size::new(strip.inner_width, strip.edge_size),
+        );
+        batch.push_quad(edge, strip.full_uv, strip.color, tex, BlendMode::Alpha);
+    }
+    if let Some(tex) = strip.textures.left {
+        let edge = Rectangle::new(
+            iced::Point::new(strip.bounds.x, strip.bounds.y + strip.corner_size),
+            iced::Size::new(strip.edge_size, strip.inner_height),
+        );
+        batch.push_quad(edge, strip.full_uv, strip.color, tex, BlendMode::Alpha);
+    }
+    if let Some(tex) = strip.textures.right {
+        let edge = Rectangle::new(
+            iced::Point::new(
+                strip.bounds.x + strip.bounds.width - strip.edge_size,
+                strip.bounds.y + strip.corner_size,
+            ),
+            iced::Size::new(strip.edge_size, strip.inner_height),
+        );
+        batch.push_quad(edge, strip.full_uv, strip.color, tex, BlendMode::Alpha);
+    }
+}
+
+struct NineSliceEdgeStrip<'a> {
     bounds: Rectangle,
     corner_size: f32,
     edge_size: f32,
     inner_width: f32,
     inner_height: f32,
-    textures: &NineSliceTextures,
+    textures: &'a NineSliceTextures,
     color: [f32; 4],
     full_uv: Rectangle,
-) {
-    if let Some(tex) = textures.top {
-        let edge = Rectangle::new(
-            iced::Point::new(bounds.x + corner_size, bounds.y),
-            iced::Size::new(inner_width, edge_size),
-        );
-        batch.push_quad(edge, full_uv, color, tex, BlendMode::Alpha);
-    }
-    if let Some(tex) = textures.bottom {
-        let edge = Rectangle::new(
-            iced::Point::new(bounds.x + corner_size, bounds.y + bounds.height - edge_size),
-            iced::Size::new(inner_width, edge_size),
-        );
-        batch.push_quad(edge, full_uv, color, tex, BlendMode::Alpha);
-    }
-    if let Some(tex) = textures.left {
-        let edge = Rectangle::new(
-            iced::Point::new(bounds.x, bounds.y + corner_size),
-            iced::Size::new(edge_size, inner_height),
-        );
-        batch.push_quad(edge, full_uv, color, tex, BlendMode::Alpha);
-    }
-    if let Some(tex) = textures.right {
-        let edge = Rectangle::new(
-            iced::Point::new(bounds.x + bounds.width - edge_size, bounds.y + corner_size),
-            iced::Size::new(edge_size, inner_height),
-        );
-        batch.push_quad(edge, full_uv, color, tex, BlendMode::Alpha);
-    }
 }
