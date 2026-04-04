@@ -4,7 +4,7 @@ use super::super::SimState;
 use super::super::frame::{extract_frame_id, frame_ref, sync_child_to_lua};
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
-use crate::widget::{Frame, WidgetType};
+use crate::widget::{Frame, WidgetRegistry, WidgetType};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -432,78 +432,118 @@ fn register_new_frame(
     parent_id: Option<u64>,
     parent_explicit: bool,
 ) -> u64 {
-    let mut frame = Frame::new(widget_type, name.clone(), parent_id);
-    let initial_hidden = state
-        .borrow_mut()
-        .create_frame_initial_hidden
-        .take()
-        .unwrap_or(false);
-    if initial_hidden {
+    let frame = build_new_frame(state, widget_type, name.clone(), parent_id);
+    let frame_id = frame.id;
+    let mut state = state.borrow_mut();
+    register_frame_instance(&mut state, name.as_deref(), frame);
+    apply_new_frame_parent_state(&mut state, frame_id, parent_id, parent_explicit);
+    frame_id
+}
+
+fn build_new_frame(
+    state: &Rc<RefCell<SimState>>,
+    widget_type: WidgetType,
+    name: Option<String>,
+    parent_id: Option<u64>,
+) -> Frame {
+    let mut frame = Frame::new(widget_type, name, parent_id);
+    if take_create_frame_initial_hidden(state) {
         frame.visible = false;
         frame.effective_alpha = 0.0;
     }
-
     attribute_frame_owner(&mut frame, state, parent_id);
+    frame
+}
 
+fn take_create_frame_initial_hidden(state: &Rc<RefCell<SimState>>) -> bool {
+    state
+        .borrow_mut()
+        .create_frame_initial_hidden
+        .take()
+        .unwrap_or(false)
+}
+
+fn register_frame_instance(state: &mut SimState, name: Option<&str>, frame: Frame) {
     let frame_id = frame.id;
-
-    let mut state = state.borrow_mut();
-
-    // If a frame with this name already exists, orphan it (WoW behavior: old frame
-    // becomes unreachable via global, but still exists in the registry).
-    let old_same_name = name.as_ref().and_then(|n| state.widgets.get_id_by_name(n));
-    if let Some(old_id) = old_same_name {
-        orphan_old_frame(&mut state.widgets, old_id);
-    }
-
+    let old_same_name = name.and_then(|name| state.widgets.get_id_by_name(name));
+    orphan_same_name_frame(&mut state.widgets, old_same_name);
     state.widgets.register(frame);
+    migrate_recreated_frame_children(&mut state.widgets, old_same_name, frame_id);
+}
 
-    // Migrate children AFTER register so the new frame exists in the registry.
+fn orphan_same_name_frame(widgets: &mut WidgetRegistry, old_same_name: Option<u64>) {
     if let Some(old_id) = old_same_name {
-        migrate_children_to_new_frame(&mut state.widgets, old_id, frame_id);
+        // WoW behavior: old frame becomes unreachable via global,
+        // but still exists in the registry.
+        orphan_old_frame(widgets, old_id);
     }
+}
 
+fn migrate_recreated_frame_children(
+    widgets: &mut WidgetRegistry,
+    old_same_name: Option<u64>,
+    frame_id: u64,
+) {
+    if let Some(old_id) = old_same_name {
+        // Migrate children AFTER register so the new frame exists in the registry.
+        migrate_children_to_new_frame(widgets, old_id, frame_id);
+    }
+}
+
+fn apply_new_frame_parent_state(
+    state: &mut SimState,
+    frame_id: u64,
+    parent_id: Option<u64>,
+    parent_explicit: bool,
+) {
     if let Some(pid) = parent_id {
         state.widgets.add_child(pid, frame_id);
-
-        // Inherit strata, level, effective_alpha, and effective_scale from parent.
-        // When parent was defaulted to UIParent (not explicitly specified),
-        // skip frame_level inheritance — WoW keeps level at 0 in that case.
-        let parent_props = state.widgets.get(pid).map(|p| {
-            (
-                p.frame_strata,
-                p.frame_level,
-                p.effective_alpha,
-                p.effective_scale,
-            )
-        });
-        if let Some((parent_strata, parent_level, parent_eff_alpha, parent_eff_scale)) =
-            parent_props
-            && let Some(f) = state.widgets.get_mut_visual(frame_id)
-        {
-            f.frame_strata = parent_strata;
-            if parent_explicit {
-                f.frame_level = parent_level + 1;
-            }
-            f.effective_alpha = if f.visible {
-                parent_eff_alpha * f.alpha
-            } else {
-                0.0
-            };
-            f.effective_scale = parent_eff_scale * f.scale;
-        }
+        inherit_parent_frame_state(&mut state.widgets, frame_id, pid, parent_explicit);
     }
+    if !parent_explicit {
+        mark_default_parent(&mut state.widgets, frame_id);
+    }
+}
 
-    // Track whether the parent was defaulted (not explicitly provided).
+fn inherit_parent_frame_state(
+    widgets: &mut WidgetRegistry,
+    frame_id: u64,
+    parent_id: u64,
+    parent_explicit: bool,
+) {
+    let parent_props = widgets.get(parent_id).map(|parent| {
+        (
+            parent.frame_strata,
+            parent.frame_level,
+            parent.effective_alpha,
+            parent.effective_scale,
+        )
+    });
+    let Some((parent_strata, parent_level, parent_eff_alpha, parent_eff_scale)) = parent_props
+    else {
+        return;
+    };
+    let Some(frame) = widgets.get_mut_visual(frame_id) else {
+        return;
+    };
+    frame.frame_strata = parent_strata;
+    if parent_explicit {
+        frame.frame_level = parent_level + 1;
+    }
+    frame.effective_alpha = if frame.visible {
+        parent_eff_alpha * frame.alpha
+    } else {
+        0.0
+    };
+    frame.effective_scale = parent_eff_scale * frame.scale;
+}
+
+fn mark_default_parent(widgets: &mut WidgetRegistry, frame_id: u64) {
     // SetAllPoints() with no args uses this to decide whether to store nil
     // or the actual parent ID as relativeTo (matching wowless headless behavior).
-    if !parent_explicit {
-        if let Some(f) = state.widgets.get_mut_visual(frame_id) {
-            f.default_parent = true;
-        }
+    if let Some(frame) = widgets.get_mut_visual(frame_id) {
+        frame.default_parent = true;
     }
-
-    frame_id
 }
 
 /// Create a FrameRef UserData value for a frame and cache it in `_G`.
