@@ -55,6 +55,7 @@ pub mod c_quest_api;
 pub mod c_stubs_achievement;
 pub mod c_stubs_api;
 pub mod c_stubs_api_combat;
+mod c_stubs_api_combat_curve;
 pub mod c_stubs_api_extra;
 pub mod c_stubs_api_glue;
 pub mod c_stubs_api_professions;
