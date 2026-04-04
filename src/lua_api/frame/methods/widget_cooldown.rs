@@ -163,24 +163,44 @@ fn add_cooldown_bool_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods
 }
 
 fn add_cooldown_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetEdgeTexture", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method(
-        "SetSwipeTexture",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method(
-        "SetBlingTexture",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("SetEdgeScale", |_, _this, _scale: Value| Ok(()));
-    methods.add_method("SetUseCircularEdge", |_, _this, _use_circular: bool| Ok(()));
-    methods.add_method(
-        "SetCountdownAbbrevThreshold",
-        |_, _this, _seconds: Value| Ok(()),
-    );
-    methods.add_method("SetCountdownFont", |_, _this, _font: Value| Ok(()));
-    methods.add_method("SetUseAuraDisplayTime", |_, _this, _use: Value| Ok(()));
+    add_cooldown_texture_stubs(methods);
+    add_get_reverse(methods);
+    add_set_cooldown_duration(methods);
+}
 
+fn add_cooldown_texture_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_cooldown_texture_variadic_stub(methods, "SetEdgeTexture");
+    add_cooldown_texture_variadic_stub(methods, "SetSwipeTexture");
+    add_cooldown_texture_variadic_stub(methods, "SetBlingTexture");
+    add_cooldown_texture_value_stub(methods, "SetEdgeScale");
+    add_cooldown_texture_bool_stub(methods, "SetUseCircularEdge");
+    add_cooldown_texture_value_stub(methods, "SetCountdownAbbrevThreshold");
+    add_cooldown_texture_value_stub(methods, "SetCountdownFont");
+    add_cooldown_texture_value_stub(methods, "SetUseAuraDisplayTime");
+}
+
+fn add_cooldown_texture_variadic_stub<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+) {
+    methods.add_method(name, |_, _this, _args: mlua::MultiValue| Ok(()));
+}
+
+fn add_cooldown_texture_value_stub<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+) {
+    methods.add_method(name, |_, _this, _value: Value| Ok(()));
+}
+
+fn add_cooldown_texture_bool_stub<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+) {
+    methods.add_method(name, |_, _this, _value: bool| Ok(()));
+}
+
+fn add_get_reverse<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetReverse", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -190,15 +210,13 @@ fn add_cooldown_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
             .map(|f| f.cooldown_reverse)
             .unwrap_or(false))
     });
+}
 
+fn add_set_cooldown_duration<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetCooldownDuration",
         |lua, this, args: mlua::MultiValue| {
-            let duration = match args.into_iter().next() {
-                Some(Value::Number(n)) => n,
-                Some(Value::Integer(n)) => n as f64,
-                _ => 0.0,
-            };
+            let duration = parse_f64_arg(args.into_iter().next());
             let state_rc = get_sim_state(lua);
             let mut state = state_rc.borrow_mut();
             if let Some(frame) = state.widgets.get_mut_visual(this.0) {
