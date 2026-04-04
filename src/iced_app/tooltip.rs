@@ -252,51 +252,69 @@ fn emit_tooltip_line(
     width: f32,
     height: f32,
 ) {
-    // Left-aligned text
-    let left_bounds = Rectangle::new(Point::new(x, y), Size::new(width, height));
-    emit_text_quads(
+    let bounds = tooltip_line_bounds(x, y, width, height);
+    emit_tooltip_text_run(
         batch,
         font_sys,
         glyph_atlas,
         &line.left_text,
-        left_bounds,
-        None,
+        bounds,
+        TextJustify::Left,
         line.font_size,
         line.left_color,
-        TextJustify::Left,
+        line.wrap,
+    );
+
+    if let Some(ref right_text) = line.right_text {
+        emit_tooltip_text_run(
+            batch,
+            font_sys,
+            glyph_atlas,
+            right_text,
+            bounds,
+            TextJustify::Right,
+            line.font_size,
+            line.right_color,
+            false,
+        );
+    }
+}
+
+fn tooltip_line_bounds(x: f32, y: f32, width: f32, height: f32) -> Rectangle {
+    Rectangle::new(Point::new(x, y), Size::new(width, height))
+}
+
+#[allow(clippy::too_many_arguments)]
+fn emit_tooltip_text_run(
+    batch: &mut QuadBatch,
+    font_sys: &mut WowFontSystem,
+    glyph_atlas: &mut GlyphAtlas,
+    text: &str,
+    bounds: Rectangle,
+    horiz_justify: TextJustify,
+    font_size: f32,
+    color: [f32; 4],
+    wrap: bool,
+) {
+    emit_text_quads(
+        batch,
+        font_sys,
+        glyph_atlas,
+        text,
+        bounds,
+        None,
+        font_size,
+        color,
+        horiz_justify,
         TextJustify::Center,
         GLYPH_ATLAS_TEX_INDEX,
         None,
         (0.0, 0.0),
         TextOutline::None,
-        line.wrap,
+        wrap,
         0,
         None,
     );
-
-    // Right-aligned text (for double lines)
-    if let Some(ref right_text) = line.right_text {
-        let right_bounds = Rectangle::new(Point::new(x, y), Size::new(width, height));
-        emit_text_quads(
-            batch,
-            font_sys,
-            glyph_atlas,
-            right_text,
-            right_bounds,
-            None,
-            line.font_size,
-            line.right_color,
-            TextJustify::Right,
-            TextJustify::Center,
-            GLYPH_ATLAS_TEX_INDEX,
-            None,
-            (0.0, 0.0),
-            TextOutline::None,
-            false,
-            0,
-            None,
-        );
-    }
 }
 
 #[cfg(test)]
