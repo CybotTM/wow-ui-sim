@@ -288,16 +288,26 @@ pub fn compute_frame_rect_cached(
         return cached;
     }
 
-    let Some(frame) = registry.get(id) else {
-        return cache_layout_result(cache, id, missing_frame_layout());
-    };
+    let result = registry
+        .get(id)
+        .map(|frame| {
+            resolve_uncached_frame_layout(registry, id, frame, screen_width, screen_height, cache)
+        })
+        .unwrap_or_else(missing_frame_layout);
 
+    cache_layout_result(cache, id, result)
+}
+
+fn resolve_uncached_frame_layout(
+    registry: &WidgetRegistry,
+    id: u64,
+    frame: &crate::widget::Frame,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> CachedFrameLayout {
     if is_root_screen_frame(frame, id) {
-        let result = CachedFrameLayout {
-            rect: full_screen_rect(screen_width, screen_height),
-            eff_scale: frame.effective_scale,
-        };
-        return cache_layout_result(cache, id, result);
+        return root_frame_layout(frame, screen_width, screen_height);
     }
 
     let parent_rect = resolve_parent_rect(registry, frame, screen_width, screen_height, cache);
@@ -322,20 +332,27 @@ pub fn compute_frame_rect_cached(
     );
     maybe_clamp_frame_rect(frame, &mut rect, screen_width, screen_height);
 
-    cache_layout_result(
-        cache,
-        id,
-        CachedFrameLayout {
-            rect,
-            eff_scale: scale,
-        },
-    )
+    CachedFrameLayout {
+        rect,
+        eff_scale: scale,
+    }
 }
 
 fn missing_frame_layout() -> CachedFrameLayout {
     CachedFrameLayout {
         rect: LayoutRect::default(),
         eff_scale: 1.0,
+    }
+}
+
+fn root_frame_layout(
+    frame: &crate::widget::Frame,
+    screen_width: f32,
+    screen_height: f32,
+) -> CachedFrameLayout {
+    CachedFrameLayout {
+        rect: full_screen_rect(screen_width, screen_height),
+        eff_scale: frame.effective_scale,
     }
 }
 
