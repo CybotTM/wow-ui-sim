@@ -218,38 +218,63 @@ fn emit_uv_repeat_tiled(
             tint,
             f.blend_mode,
         );
-    } else {
-        let base_uvs = Rectangle::new(
-            Point::new(info.u_min, info.v_start),
-            Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
-        );
-        let (cropped_path, cropped_uvs) = crop_path_for_subregion(tex_path, &base_uvs);
-        match info.dir {
-            TileDir::Vertical => {
-                emit_vert_tiles(
-                    batch,
-                    bounds,
-                    &cropped_uvs,
-                    &cropped_path,
-                    tile_size.1,
-                    tint,
-                    f.blend_mode,
-                );
-            }
-            _ => {
-                emit_grid_tiles(
-                    batch,
-                    bounds,
-                    &cropped_uvs,
-                    &cropped_path,
-                    tile_size.0,
-                    tile_size.1,
-                    tint,
-                    f.blend_mode,
-                );
-            }
+        return;
+    }
+
+    emit_standard_uv_repeat_tiles(
+        batch,
+        bounds,
+        tex_path,
+        &info,
+        tile_size,
+        tint,
+        f.blend_mode,
+    );
+}
+
+fn emit_standard_uv_repeat_tiles(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    tex_path: &str,
+    info: &UvRepeatInfo,
+    tile_size: (f32, f32),
+    tint: [f32; 4],
+    blend: BlendMode,
+) {
+    let (cropped_path, cropped_uvs) = uv_repeat_region(tex_path, info);
+    match info.dir {
+        TileDir::Vertical => {
+            emit_vert_tiles(
+                batch,
+                bounds,
+                &cropped_uvs,
+                &cropped_path,
+                tile_size.1,
+                tint,
+                blend,
+            );
+        }
+        _ => {
+            emit_grid_tiles(
+                batch,
+                bounds,
+                &cropped_uvs,
+                &cropped_path,
+                tile_size.0,
+                tile_size.1,
+                tint,
+                blend,
+            );
         }
     }
+}
+
+fn uv_repeat_region(tex_path: &str, info: &UvRepeatInfo) -> (String, Rectangle) {
+    let base_uvs = Rectangle::new(
+        Point::new(info.u_min, info.v_start),
+        Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
+    );
+    crop_path_for_subregion(tex_path, &base_uvs)
 }
 
 /// Emit horizontally tiled quads with rotated UV mapping (U→vertical, V→horizontal).
@@ -381,5 +406,29 @@ fn emit_grid_tiles(
             x += tile_w;
         }
         y += tile_h;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn uv_repeat_region_crops_to_repeat_strip() {
+        let info = UvRepeatInfo {
+            u_min: 0.25,
+            u_max: 0.75,
+            v_start: 0.4,
+            dir: TileDir::Grid,
+            rotated: false,
+        };
+
+        let (path, uvs) = uv_repeat_region("Interface/Test", &info);
+
+        assert_eq!(
+            path,
+            "Interface/Test@crop:0.250000,0.750000,0.400000,1.000000"
+        );
+        assert_eq!(uvs, Rectangle::new(Point::ORIGIN, Size::new(1.0, 1.0)));
     }
 }
