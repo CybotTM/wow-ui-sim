@@ -83,45 +83,66 @@ pub fn load_addon_internal(
         warnings: Vec::new(),
     };
 
-    if let Some(mgr) = saved_vars_mgr {
-        let sv_start = Instant::now();
-        result
-            .warnings
-            .extend(init_saved_variables(env, toc, folder_name, mgr));
-        result.timing.saved_vars_time = sv_start.elapsed();
-    }
+    maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
+    let ctx = build_addon_context(env, toc, folder_name)?;
 
+    load_addon_files(env, toc, folder_name, &ctx, &mut result);
+    env.state().borrow_mut().loading_addon_index = None;
+    Ok(result)
+}
+
+fn maybe_init_saved_variables(
+    env: &LoaderEnv<'_>,
+    toc: &TocFile,
+    folder_name: &str,
+    saved_vars_mgr: Option<&mut SavedVariablesManager>,
+    result: &mut LoadResult,
+) {
+    let Some(mgr) = saved_vars_mgr else {
+        return;
+    };
+
+    let sv_start = Instant::now();
+    result
+        .warnings
+        .extend(init_saved_variables(env, toc, folder_name, mgr));
+    result.timing.saved_vars_time = sv_start.elapsed();
+}
+
+fn build_addon_context<'a>(
+    env: &LoaderEnv<'a>,
+    toc: &'a TocFile,
+    folder_name: &'a str,
+) -> Result<AddonContext<'a>, LoadError> {
     let addon_table = env
         .create_addon_table()
         .map_err(|e| LoadError::Lua(e.to_string()))?;
+    register_loading_addon(env, folder_name, toc.is_secure_env());
 
-    // Set loading_addon_index so frames created during this addon's load
-    // are attributed to it. Panic if addon not registered — caller bug.
-    let addon_idx = resolve_addon_index(env, folder_name);
-    {
-        let mut state = env.state().borrow_mut();
-        state.loading_addon_index = Some(addon_idx);
-        if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
-            addon.use_secure_env = toc.is_secure_env();
-        }
-    }
-
-    // Blizzard base UI code runs securely (no taint). Third-party addons
-    // get tainted with their folder name so issecurevariable tracks the source.
-    let is_blizzard = toc.addon_dir.to_string_lossy().contains("BlizzardUI");
-    let ctx = AddonContext {
+    Ok(AddonContext {
         name: folder_name,
         table: addon_table,
         addon_root: &toc.addon_dir,
         use_secure_env: toc.is_secure_env(),
-        taint: !is_blizzard,
-    };
+        taint: !is_blizzard_addon(toc),
+    })
+}
 
-    load_addon_files(env, toc, folder_name, &ctx, &mut result);
+fn register_loading_addon(env: &LoaderEnv<'_>, folder_name: &str, use_secure_env: bool) {
+    // Set loading_addon_index so frames created during this addon's load
+    // are attributed to it. Panic if addon not registered — caller bug.
+    let addon_idx = resolve_addon_index(env, folder_name);
+    let mut state = env.state().borrow_mut();
+    state.loading_addon_index = Some(addon_idx);
+    if let Some(addon) = state.addons.get_mut(addon_idx as usize) {
+        addon.use_secure_env = use_secure_env;
+    }
+}
 
-    env.state().borrow_mut().loading_addon_index = None;
-
-    Ok(result)
+fn is_blizzard_addon(toc: &TocFile) -> bool {
+    // Blizzard base UI code runs securely (no taint). Third-party addons
+    // get tainted with their folder name so issecurevariable tracks the source.
+    toc.addon_dir.to_string_lossy().contains("BlizzardUI")
 }
 
 /// Find or auto-register addon in the addon list, returning its index.
