@@ -13,48 +13,77 @@ pub(super) fn add_texture_visual_methods<M: mlua::UserDataMethods<FrameRef>>(met
 }
 
 fn add_vertex_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_vertex_color(methods);
+    add_get_vertex_color(methods);
+    methods.add_method("SetCenterColor", |_, _this, _args: mlua::MultiValue| Ok(()));
+}
+
+fn add_set_vertex_color<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetVertexColor",
         |lua, this, (r, g, b, a): (Option<f32>, Option<f32>, Option<f32>, Option<f32>)| {
-            let (Some(r), Some(g), Some(b)) = (r, g, b) else {
+            let Some(new_color) = vertex_color_from_args(r, g, b, a) else {
                 return Ok(());
             };
-            let id = this.0;
-            let new_color = crate::widget::Color::new(r, g, b, a.unwrap_or(1.0));
             let state_rc = get_sim_state(lua);
-            let already_set = state_rc
-                .borrow()
-                .widgets
-                .get(id)
-                .and_then(|f| f.vertex_color.as_ref())
-                .map(|c| {
-                    c.r == new_color.r
-                        && c.g == new_color.g
-                        && c.b == new_color.b
-                        && c.a == new_color.a
-                })
-                .unwrap_or(false);
-            if !already_set {
-                let mut state = state_rc.borrow_mut();
-                if let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.vertex_color = Some(new_color);
-                    frame.alpha = new_color.a;
-                }
+            if vertex_color_matches(&state_rc.borrow(), this.0, &new_color) {
+                return Ok(());
+            }
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+                apply_vertex_color(frame, new_color);
             }
             Ok(())
         },
     );
+}
+
+fn add_get_vertex_color<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetVertexColor", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(this.0)
-            && let Some(color) = &frame.vertex_color
-        {
-            return Ok((color.r, color.g, color.b, color.a));
-        }
-        Ok((1.0f32, 1.0f32, 1.0f32, 1.0f32))
+        Ok(read_vertex_color(&state, this.0))
     });
-    methods.add_method("SetCenterColor", |_, _this, _args: mlua::MultiValue| Ok(()));
+}
+
+fn vertex_color_from_args(
+    r: Option<f32>,
+    g: Option<f32>,
+    b: Option<f32>,
+    a: Option<f32>,
+) -> Option<crate::widget::Color> {
+    Some(crate::widget::Color::new(r?, g?, b?, a.unwrap_or(1.0)))
+}
+
+fn vertex_color_matches(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    new_color: &crate::widget::Color,
+) -> bool {
+    state
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.vertex_color.as_ref())
+        .map(|color| same_vertex_color(color, new_color))
+        .unwrap_or(false)
+}
+
+fn same_vertex_color(a: &crate::widget::Color, b: &crate::widget::Color) -> bool {
+    a.r == b.r && a.g == b.g && a.b == b.b && a.a == b.a
+}
+
+fn apply_vertex_color(frame: &mut crate::widget::Frame, new_color: crate::widget::Color) {
+    frame.vertex_color = Some(new_color);
+    frame.alpha = new_color.a;
+}
+
+fn read_vertex_color(state: &crate::lua_api::SimState, id: u64) -> (f32, f32, f32, f32) {
+    state
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.vertex_color.as_ref())
+        .map(|color| (color.r, color.g, color.b, color.a))
+        .unwrap_or((1.0, 1.0, 1.0, 1.0))
 }
 
 fn add_gradient_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
