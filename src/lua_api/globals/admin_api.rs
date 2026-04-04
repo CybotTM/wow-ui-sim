@@ -196,69 +196,37 @@ fn make_target_info(
 // ---------------------------------------------------------------------------
 
 fn register_party_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    set_fn(lua, t, "SetPartySize", {
-        let s = Rc::clone(&state);
-        move |_, n: i32| {
-            let mut st = s.borrow_mut();
-            let n = n.max(0) as usize;
-            while st.party_members.len() < n {
-                st.party_members.push(default_party_member());
-            }
-            st.party_members.truncate(n);
-            Ok(())
-        }
+    add_party_size_setter(lua, t, Rc::clone(&state))?;
+    add_party_member_setter(
+        lua,
+        t,
+        "SetPartyMember",
+        Rc::clone(&state),
+        |member, args| {
+            let (name, class_index, level) = args;
+            member.name = name;
+            member.class_index = class_index;
+            member.level = level;
+        },
+    )?;
+    add_party_member_setter(
+        lua,
+        t,
+        "SetPartyMemberHealth",
+        Rc::clone(&state),
+        |member, args| {
+            let (cur, max) = args;
+            member.health = cur;
+            member.health_max = max;
+        },
+    )?;
+    add_party_member_index_action(lua, t, "KillPartyMember", Rc::clone(&state), |member| {
+        member.dead_since = Some(Instant::now());
     })?;
-    set_fn(lua, t, "SetPartyMember", {
-        let s = Rc::clone(&state);
-        move |_, (idx, name, class_index, level): (i32, String, i32, i32)| {
-            let mut st = s.borrow_mut();
-            let i = (idx - 1) as usize;
-            if let Some(m) = st.party_members.get_mut(i) {
-                m.name = name;
-                m.class_index = class_index;
-                m.level = level;
-            }
-            Ok(())
-        }
+    add_party_member_index_action(lua, t, "ResPartyMember", Rc::clone(&state), |member| {
+        member.dead_since = None;
     })?;
-    set_fn(lua, t, "SetPartyMemberHealth", {
-        let s = Rc::clone(&state);
-        move |_, (idx, cur, max): (i32, i32, i32)| {
-            let mut st = s.borrow_mut();
-            if let Some(m) = st.party_members.get_mut((idx - 1) as usize) {
-                m.health = cur;
-                m.health_max = max;
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "KillPartyMember", {
-        let s = Rc::clone(&state);
-        move |_, idx: i32| {
-            let mut st = s.borrow_mut();
-            if let Some(m) = st.party_members.get_mut((idx - 1) as usize) {
-                m.dead_since = Some(Instant::now());
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "ResPartyMember", {
-        let s = Rc::clone(&state);
-        move |_, idx: i32| {
-            let mut st = s.borrow_mut();
-            if let Some(m) = st.party_members.get_mut((idx - 1) as usize) {
-                m.dead_since = None;
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetRotDamage", {
-        let s = Rc::clone(&state);
-        move |_, level: i32| {
-            s.borrow_mut().rot_damage_level = level as usize;
-            Ok(())
-        }
-    })?;
+    add_rot_damage_setter(lua, t, state)?;
     Ok(())
 }
 
@@ -638,4 +606,71 @@ fn target_classification() -> &'static str {
 
 fn target_creature_type() -> &'static str {
     "Humanoid"
+}
+
+fn add_party_member_setter<F, A>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    apply: F,
+) -> Result<()>
+where
+    F: Fn(&mut PartyMember, A) + 'static,
+    A: mlua::FromLuaMulti,
+{
+    set_fn(lua, t, name, move |_, (idx, args): (i32, A)| {
+        with_party_member(&mut state.borrow_mut(), idx, |member| apply(member, args));
+        Ok(())
+    })
+}
+
+fn add_party_member_index_action<F>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    apply: F,
+) -> Result<()>
+where
+    F: Fn(&mut PartyMember) + 'static,
+{
+    set_fn(lua, t, name, move |_, idx: i32| {
+        with_party_member(&mut state.borrow_mut(), idx, &apply);
+        Ok(())
+    })
+}
+
+fn with_party_member<F>(state: &mut SimState, idx: i32, apply: F)
+where
+    F: FnOnce(&mut PartyMember),
+{
+    if let Some(member) = party_member_mut(state, idx) {
+        apply(member);
+    }
+}
+
+fn add_party_size_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    set_fn(lua, t, "SetPartySize", move |_, n: i32| {
+        resize_party_members(&mut state.borrow_mut(), n.max(0) as usize);
+        Ok(())
+    })
+}
+
+fn add_rot_damage_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    set_fn(lua, t, "SetRotDamage", move |_, level: i32| {
+        state.borrow_mut().rot_damage_level = level as usize;
+        Ok(())
+    })
+}
+
+fn resize_party_members(state: &mut SimState, size: usize) {
+    while state.party_members.len() < size {
+        state.party_members.push(default_party_member());
+    }
+    state.party_members.truncate(size);
+}
+
+fn party_member_mut(state: &mut SimState, idx: i32) -> Option<&mut PartyMember> {
+    state.party_members.get_mut((idx - 1) as usize)
 }
