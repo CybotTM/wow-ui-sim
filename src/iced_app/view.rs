@@ -283,6 +283,15 @@ impl App {
 
     /// Vertical layout of player config options for the modal.
     fn build_player_config_column(&self) -> Element<'_, Message> {
+        column![
+            self.build_player_pick_lists(),
+            self.build_movement_controls(),
+        ]
+        .spacing(8)
+        .into()
+    }
+
+    fn build_player_pick_lists(&self) -> Column<'_, Message> {
         use crate::lua_api::state::{CLASS_LABELS, RACE_DATA, ROT_DAMAGE_LEVELS, XP_LEVELS};
 
         let class_opts: Vec<String> = CLASS_LABELS.iter().map(|s| s.to_string()).collect();
@@ -293,7 +302,6 @@ impl App {
             .map(|(l, _)| l.to_string())
             .collect();
 
-        let m = &self.movement;
         column![
             labeled_pick_list(
                 "Class:",
@@ -319,6 +327,13 @@ impl App {
                 &self.selected_rot_level,
                 Message::RotDamageLevelChanged
             ),
+        ]
+        .spacing(8)
+    }
+
+    fn build_movement_controls(&self) -> Column<'_, Message> {
+        let m = &self.movement;
+        column![
             text("Movement").size(12).color(palette::TEXT_SECONDARY),
             labeled_checkbox("Moving", m.moving, |v| Message::MovementToggled(
                 "moving", v
@@ -337,7 +352,6 @@ impl App {
             )),
         ]
         .spacing(8)
-        .into()
     }
 
     pub fn subscription(&self) -> Subscription<Message> {
