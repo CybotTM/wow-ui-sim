@@ -47,34 +47,26 @@ fn chain_effective_alpha_from(
 ///
 /// Reads rect and effective_alpha fresh from the registry for each frame.
 /// Button state textures use parent's effective_alpha as fallback.
-#[allow(clippy::too_many_arguments)]
 pub(super) fn emit_single_strata(
     batch: &mut QuadBatch,
-    bucket: &[u64],
-    registry: &crate::widget::WidgetRegistry,
-    visible_ids: &Option<std::collections::HashSet<u64>>,
-    pressed_frame: Option<u64>,
-    hovered_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: Option<
-        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
-    >,
-    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
-    elapsed_secs: f64,
+    params: SingleStrataEmit<'_>,
 ) {
-    let render_list = build_render_list(bucket, registry);
-    let statusbar_fills = collect_statusbar_fills(&render_list, registry);
+    let render_list = build_render_list(params.bucket, params.registry);
+    let statusbar_fills = collect_statusbar_fills(&render_list, params.registry);
 
     for &(id, rect, clip_rect, eff_alpha) in &render_list {
-        let Some(f) = registry.get(id) else { continue };
+        let Some(f) = params.registry.get(id) else {
+            continue;
+        };
         if super::button_vis::should_skip_frame(
             f,
             id,
             eff_alpha,
-            visible_ids,
-            registry,
-            pressed_frame,
-            hovered_frame,
+            params.visible_ids,
+            params.registry,
+            params.pressed_frame,
+            params.hovered_frame,
         ) {
             continue;
         }
@@ -97,16 +89,28 @@ pub(super) fn emit_single_strata(
                 bounds,
                 clip_bounds: clip_rect.map(layout_rect_to_screen_rect),
                 bar_fill,
-                pressed_frame,
-                hovered_frame,
-                message_frames,
-                tooltip_data,
-                registry,
-                elapsed_secs,
+                pressed_frame: params.pressed_frame,
+                hovered_frame: params.hovered_frame,
+                message_frames: params.message_frames,
+                tooltip_data: params.tooltip_data,
+                registry: params.registry,
+                elapsed_secs: params.elapsed_secs,
                 eff_alpha,
             },
         );
     }
+}
+
+pub(super) struct SingleStrataEmit<'a> {
+    bucket: &'a [u64],
+    registry: &'a crate::widget::WidgetRegistry,
+    visible_ids: &'a Option<std::collections::HashSet<u64>>,
+    pressed_frame: Option<u64>,
+    hovered_frame: Option<u64>,
+    message_frames:
+        Option<&'a std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
+    tooltip_data: Option<&'a std::collections::HashMap<u64, TooltipRenderData>>,
+    elapsed_secs: f64,
 }
 
 /// Build the render list: visible frames with resolved rects and effective alpha.
@@ -274,15 +278,17 @@ pub fn build_quad_batch_with_cache(
     for bucket in strata_buckets {
         emit_single_strata(
             &mut batch,
-            bucket,
-            registry,
-            &visible_ids,
-            pressed_frame,
-            hovered_frame,
             text_ctx,
-            message_frames,
-            tooltip_data,
-            elapsed_secs,
+            SingleStrataEmit {
+                bucket,
+                registry,
+                visible_ids: &visible_ids,
+                pressed_frame,
+                hovered_frame,
+                message_frames,
+                tooltip_data,
+                elapsed_secs,
+            },
         );
     }
     (batch, collected)
