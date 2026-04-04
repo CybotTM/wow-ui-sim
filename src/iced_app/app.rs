@@ -441,14 +441,7 @@ impl App {
         tex_mgr.preload_talent_textures(790);
         tex_mgr.preload_talent_panel_textures(&class_name);
         if !is_glue_screen {
-            if let Some(skill_line) = crate::lua_api::globals::spellbook_data::get_skill_line(2)
-                && skill_line.name != class_name
-            {
-                tex_mgr.preload_talent_panel_textures(skill_line.name);
-            }
-            tex_mgr.preload_game_hud_textures();
-            tex_mgr.preload_playerspells_runtime_textures();
-            tex_mgr.preload_spellbook_icons();
+            Self::preload_non_glue_textures(&mut tex_mgr, &class_name);
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
@@ -457,6 +450,17 @@ impl App {
         env_rc.borrow().set_font_system(Rc::clone(&font_system));
         let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
         (texture_manager, font_system, glyph_atlas)
+    }
+
+    fn preload_non_glue_textures(tex_mgr: &mut TextureManager, class_name: &str) {
+        if let Some(skill_line) = crate::lua_api::globals::spellbook_data::get_skill_line(2)
+            && skill_line.name != class_name
+        {
+            tex_mgr.preload_talent_panel_textures(skill_line.name);
+        }
+        tex_mgr.preload_game_hud_textures();
+        tex_mgr.preload_playerspells_runtime_textures();
+        tex_mgr.preload_spellbook_icons();
     }
 
     /// Start debug server and Lua REPL server.
