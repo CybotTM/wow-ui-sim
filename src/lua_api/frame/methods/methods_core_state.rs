@@ -411,51 +411,45 @@ fn add_keyboard_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_mouse_motion_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("EnableMouseMotion", |lua, this, enable: bool| {
+    add_bool_frame_setter(methods, "EnableMouseMotion", |frame, enable| {
+        frame.mouse_motion_enabled = enable;
+    });
+    add_bool_frame_getter(methods, "IsMouseMotionEnabled", |frame| {
+        frame.mouse_motion_enabled
+    });
+    add_bool_frame_setter(methods, "SetMouseMotionEnabled", |frame, enable| {
+        frame.mouse_motion_enabled = enable;
+    });
+    add_bool_frame_setter(methods, "SetMouseClickEnabled", |frame, enable| {
+        frame.mouse_enabled = enable;
+    });
+    add_bool_frame_getter(methods, "IsMouseClickEnabled", |frame| frame.mouse_enabled);
+}
+
+fn add_bool_frame_setter<M, F>(methods: &mut M, name: &str, update: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, bool) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, enable: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.mouse_motion_enabled = enable;
+            update(frame, enable);
         }
         Ok(())
     });
+}
 
-    methods.add_method("IsMouseMotionEnabled", |lua, this, ()| {
+fn add_bool_frame_getter<M, F>(methods: &mut M, name: &str, read: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> bool + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.mouse_motion_enabled)
-            .unwrap_or(false))
-    });
-
-    methods.add_method("SetMouseMotionEnabled", |lua, this, enable: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.mouse_motion_enabled = enable;
-        }
-        Ok(())
-    });
-
-    methods.add_method("SetMouseClickEnabled", |lua, this, enable: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.mouse_enabled = enable;
-        }
-        Ok(())
-    });
-
-    methods.add_method("IsMouseClickEnabled", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.mouse_enabled)
-            .unwrap_or(false))
+        Ok(state.widgets.get(this.0).map(read).unwrap_or(false))
     });
 }
 
