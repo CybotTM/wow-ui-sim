@@ -203,7 +203,7 @@ fn parse_create_frame_args(
     let frame_type = parse_frame_type_arg(lua, args_iter.next());
     let (name_raw, name_arg_invalid) = parse_name_arg(lua, args_iter.next());
     let (parent_id, parent_explicit, explicit_parent) =
-        parse_parent_arg(&mut args_iter, name_arg_invalid)?;
+        parse_parent_arg(&mut args_iter, name_arg_invalid, state)?;
     let template = coerce_string_arg(lua, args_iter.next());
     let id = parse_id_arg(args_iter.next());
     let name = name_raw.map(|n| substitute_parent_name(n, explicit_parent, state));
@@ -239,6 +239,7 @@ fn parse_name_arg(lua: &Lua, v: Option<&Value>) -> (Option<String>, bool) {
 fn parse_parent_arg(
     args_iter: &mut std::collections::vec_deque::Iter<'_, Value>,
     name_arg_invalid: bool,
+    state: &Rc<RefCell<SimState>>,
 ) -> Result<(Option<u64>, bool, Option<u64>)> {
     if name_arg_invalid {
         return Ok((None, false, None));
@@ -251,7 +252,12 @@ fn parse_parent_arg(
     }
     let explicit_parent = parent_arg.and_then(|v| extract_frame_id_or_proxy(v));
     let parent_explicit = explicit_parent.is_some();
-    Ok((explicit_parent, parent_explicit, explicit_parent))
+    let parent_id = explicit_parent.or_else(|| default_parent_id(state));
+    Ok((parent_id, parent_explicit, explicit_parent))
+}
+
+fn default_parent_id(state: &Rc<RefCell<SimState>>) -> Option<u64> {
+    state.borrow().widgets.get_id_by_name("UIParent")
 }
 
 fn coerce_string_arg(lua: &Lua, v: Option<&Value>) -> Option<String> {
