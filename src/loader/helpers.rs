@@ -119,52 +119,33 @@ pub fn resolve_lua_escapes(s: &str) -> String {
 /// Decode one Lua escape sequence starting at `i` (which must be `\\`).
 /// Returns the index after the consumed escape.
 fn apply_lua_escape(bytes: &[u8], i: usize, result: &mut String) -> usize {
-    match bytes[i + 1] {
-        b'a' => {
-            result.push('\x07');
-            i + 2
-        }
-        b'b' => {
-            result.push('\x08');
-            i + 2
-        }
-        b'f' => {
-            result.push('\x0C');
-            i + 2
-        }
-        b'n' => {
-            result.push('\n');
-            i + 2
-        }
-        b'r' => {
-            result.push('\r');
-            i + 2
-        }
-        b't' => {
-            result.push('\t');
-            i + 2
-        }
-        b'v' => {
-            result.push('\x0B');
-            i + 2
-        }
-        b'\\' => {
-            result.push('\\');
-            i + 2
-        }
-        b'"' => {
-            result.push('"');
-            i + 2
-        }
-        b'\'' => {
-            result.push('\'');
-            i + 2
-        }
-        d if d.is_ascii_digit() => decode_decimal_escape(bytes, i, result),
-        _ => {
-            result.push('\\');
-            i + 1
-        }
+    let escape = bytes[i + 1];
+    if let Some(ch) = simple_lua_escape_char(escape) {
+        result.push(ch);
+        return i + 2;
+    }
+
+    if escape.is_ascii_digit() {
+        return decode_decimal_escape(bytes, i, result);
+    }
+
+    result.push('\\');
+    i + 1
+}
+
+fn simple_lua_escape_char(byte: u8) -> Option<char> {
+    match byte {
+        b'a' => Some('\x07'),
+        b'b' => Some('\x08'),
+        b'f' => Some('\x0C'),
+        b'n' => Some('\n'),
+        b'r' => Some('\r'),
+        b't' => Some('\t'),
+        b'v' => Some('\x0B'),
+        b'\\' => Some('\\'),
+        b'"' => Some('"'),
+        b'\'' => Some('\''),
+        _ => None,
     }
 }
 
