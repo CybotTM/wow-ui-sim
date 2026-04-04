@@ -124,7 +124,27 @@ fn emit_textured_quad(
     let (fill_bounds, fill_uvs) = apply_bar_fill_with_uvs(bounds, f.tex_coords, bar_fill);
     let (effective_path, effective_uvs) = remap_atlas_crop(tex_path, fill_uvs, f.atlas_tex_coords);
     let vert_before = batch.vertices.len();
+    emit_texture_fill(
+        batch,
+        fill_bounds,
+        effective_uvs,
+        &effective_path,
+        f,
+        tint,
+        alpha,
+    );
+    finalize_textured_quad(batch, vert_before, f);
+}
 
+fn emit_texture_fill(
+    batch: &mut QuadBatch,
+    fill_bounds: Rectangle,
+    effective_uvs: Option<(f32, f32, f32, f32)>,
+    effective_path: &str,
+    f: &crate::widget::Frame,
+    tint: [f32; 4],
+    alpha: f32,
+) {
     if let Some((slice, atlas_info)) = f
         .atlas
         .as_deref()
@@ -173,7 +193,9 @@ fn emit_textured_quad(
     } else {
         batch.push_textured_path(fill_bounds, &effective_path, tint, f.blend_mode);
     }
+}
 
+fn finalize_textured_quad(batch: &mut QuadBatch, vert_before: usize, f: &crate::widget::Frame) {
     if f.rotation != 0.0 {
         apply_uv_rotation(batch, vert_before, f.rotation);
     }
