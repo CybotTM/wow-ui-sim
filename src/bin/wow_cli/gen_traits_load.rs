@@ -44,8 +44,6 @@ pub struct RawDefinition {
 }
 
 pub struct RawEdge {
-    #[allow(dead_code)]
-    pub id: u32,
     pub visual_style: u32,
     pub left_node_id: u32,
     pub right_node_id: u32,
@@ -356,7 +354,6 @@ fn load_edges(data_dir: &Path) -> Result<Vec<RawEdge>, Box<dyn std::error::Error
             continue;
         }
         edges.push(RawEdge {
-            id: f[0].parse()?,
             visual_style: f[1].parse().unwrap_or(0),
             left_node_id: f[2].parse().unwrap_or(0),
             right_node_id: f[3].parse().unwrap_or(0),
