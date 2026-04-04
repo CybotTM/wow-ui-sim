@@ -46,6 +46,8 @@ mod c_item_location_api;
 pub mod c_map_api;
 pub mod c_misc_api;
 mod c_misc_api_core;
+mod c_misc_api_core_progression;
+mod c_misc_api_core_social;
 mod c_misc_api_game;
 mod c_misc_api_ui;
 pub mod c_quest_api;
