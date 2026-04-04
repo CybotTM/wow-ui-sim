@@ -141,10 +141,25 @@ fn item_info_instant_names(id: i32) -> (&'static str, &'static str) {
 
 /// C_Item query methods: icon, subclass, count, class, spec, name, level.
 fn register_c_item_query_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    add_item_icon_by_id(lua, t)?;
+    add_item_subclass_info(lua, t)?;
+    add_item_count(lua, t)?;
+    add_item_class_info(lua, t)?;
+    add_item_spec_info(lua, t)?;
+    add_item_name_by_id(lua, t)?;
+    add_detailed_item_level_info(lua, t)?;
+    Ok(())
+}
+
+fn add_item_icon_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemIconByID",
         lua.create_function(|_, _id: i32| Ok(134400i32))?,
     )?;
+    Ok(())
+}
+
+fn add_item_subclass_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemSubClassInfo",
         lua.create_function(|lua, (class_id, subclass_id): (i32, i32)| {
@@ -154,42 +169,70 @@ fn register_c_item_query_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
             ))?))
         })?,
     )?;
+    Ok(())
+}
+
+fn add_item_count(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemCount",
         lua.create_function(
             |_, (_id, _b, _c, _r): (Value, Option<bool>, Option<bool>, Option<bool>)| Ok(0),
         )?,
     )?;
+    Ok(())
+}
+
+fn add_item_class_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemClassInfo",
         lua.create_function(|lua, class_id: i32| {
             Ok(Value::String(lua.create_string(item_class_name(class_id))?))
         })?,
     )?;
+    Ok(())
+}
+
+fn add_item_spec_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemSpecInfo",
         lua.create_function(|lua, _id: Value| lua.create_table())?,
     )?;
+    Ok(())
+}
+
+fn add_item_name_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemNameByID",
         lua.create_function(|lua, item_id: i32| {
-            let name = crate::items::get_item(item_id as u32)
-                .map(|i| i.name)
-                .unwrap_or("Unknown");
+            let name = item_name(item_id);
             Ok(Value::String(lua.create_string(name)?))
         })?,
     )?;
+    Ok(())
+}
+
+fn add_detailed_item_level_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetDetailedItemLevelInfo",
         lua.create_function(|_, item_link: Value| {
-            let id = parse_item_id_from_value(&item_link);
-            let level = crate::items::get_item(id as u32)
-                .map(|i| i.item_level as i32)
-                .unwrap_or(0);
+            let level = item_level_for_value(&item_link);
             Ok((level, 0i32, level))
         })?,
     )?;
     Ok(())
+}
+
+fn item_name(item_id: i32) -> &'static str {
+    crate::items::get_item(item_id as u32)
+        .map(|i| i.name)
+        .unwrap_or("Unknown")
+}
+
+fn item_level_for_value(item_link: &Value) -> i32 {
+    let id = parse_item_id_from_value(item_link);
+    crate::items::get_item(id as u32)
+        .map(|i| i.item_level as i32)
+        .unwrap_or(0)
 }
 
 /// C_Item link and quality methods.
