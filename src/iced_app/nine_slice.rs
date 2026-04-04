@@ -63,36 +63,37 @@ fn emit_horiz_edges(batch: &mut QuadBatch, bounds: Rectangle, ns: &NineSliceAtla
     if edge_w <= 0.0 {
         return;
     }
-
-    let top_bounds = Rectangle::new(
-        Point::new(edge_x, bounds.y),
-        Size::new(edge_w, ns.edge_top.height as f32),
-    );
-    let (top_path, top_uvs) = crop_piece(&ns.edge_top);
-    emit_horiz_tiles(
+    emit_horiz_edge(
         batch,
-        top_bounds,
-        &top_uvs,
-        &top_path,
-        ns.edge_top.width as f32,
-        [1.0, 1.0, 1.0, alpha],
-        BlendMode::Alpha,
-    );
-
-    let bot_bounds = Rectangle::new(
-        Point::new(
-            edge_x,
-            bounds.y + bounds.height - ns.edge_bottom.height as f32,
+        Rectangle::new(
+            Point::new(edge_x, bounds.y),
+            Size::new(edge_w, ns.edge_top.height as f32),
         ),
-        Size::new(edge_w, ns.edge_bottom.height as f32),
+        &ns.edge_top,
+        alpha,
     );
-    let (bot_path, bot_uvs) = crop_piece(&ns.edge_bottom);
+    emit_horiz_edge(
+        batch,
+        Rectangle::new(
+            Point::new(
+                edge_x,
+                bounds.y + bounds.height - ns.edge_bottom.height as f32,
+            ),
+            Size::new(edge_w, ns.edge_bottom.height as f32),
+        ),
+        &ns.edge_bottom,
+        alpha,
+    );
+}
+
+fn emit_horiz_edge(batch: &mut QuadBatch, bounds: Rectangle, piece: &NineSlicePiece, alpha: f32) {
+    let (path, uvs) = crop_piece(piece);
     emit_horiz_tiles(
         batch,
-        bot_bounds,
-        &bot_uvs,
-        &bot_path,
-        ns.edge_bottom.width as f32,
+        bounds,
+        &uvs,
+        &path,
+        piece.width as f32,
         [1.0, 1.0, 1.0, alpha],
         BlendMode::Alpha,
     );
@@ -196,4 +197,61 @@ pub fn emit_nine_slice_with_center_color(
     emit_corners(batch, bounds, ns, alpha);
     emit_horiz_edges(batch, bounds, ns, alpha);
     emit_vert_edges(batch, bounds, ns, alpha);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn piece(file: &'static str, width: u32, height: u32) -> NineSlicePiece {
+        NineSlicePiece {
+            file,
+            left: 0.0,
+            right: 1.0,
+            top: 0.0,
+            bottom: 1.0,
+            width,
+            height,
+        }
+    }
+
+    fn test_nine_slice_info() -> NineSliceAtlasInfo {
+        NineSliceAtlasInfo {
+            corner_tl: piece("corner_tl", 4, 5),
+            corner_tr: piece("corner_tr", 6, 5),
+            corner_bl: piece("corner_bl", 4, 7),
+            corner_br: piece("corner_br", 6, 7),
+            edge_top: piece("edge_top", 8, 3),
+            edge_bottom: piece("edge_bottom", 8, 2),
+            edge_left: piece("edge_left", 3, 8),
+            edge_right: piece("edge_right", 3, 8),
+            center: None,
+        }
+    }
+
+    #[test]
+    fn emit_horiz_edges_adds_top_and_bottom_requests() {
+        let mut batch = QuadBatch::new();
+        emit_horiz_edges(
+            &mut batch,
+            Rectangle::new(Point::new(10.0, 20.0), Size::new(40.0, 30.0)),
+            &test_nine_slice_info(),
+            0.75,
+        );
+
+        assert!(!batch.texture_requests.is_empty());
+        assert!(batch.vertices.len() >= 8);
+        assert!(
+            batch
+                .texture_requests
+                .iter()
+                .any(|request| request.path.contains("edge_top"))
+        );
+        assert!(
+            batch
+                .texture_requests
+                .iter()
+                .any(|request| request.path.contains("edge_bottom"))
+        );
+    }
 }
