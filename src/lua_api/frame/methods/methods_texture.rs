@@ -178,47 +178,63 @@ fn add_blend_mode_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_desaturation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_desaturated_bool_setter(methods);
+    add_desaturated_bool_getter(methods);
+    add_desaturation_value_getter(methods);
+    add_desaturation_value_setter(methods);
+}
+
+fn add_desaturated_bool_setter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetDesaturated", |lua, this, desaturated: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(this.0) {
-            f.desaturated = desaturated;
-        }
+        set_desaturated(get_sim_state(lua), this.0, desaturated);
         Ok(())
     });
+}
+
+fn add_desaturated_bool_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsDesaturated", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.desaturated)
-            .unwrap_or(false))
+        Ok(read_desaturated(get_sim_state(lua), this.0))
     });
+}
+
+fn add_desaturation_value_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetDesaturation", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(
-            if state
-                .widgets
-                .get(this.0)
-                .map(|f| f.desaturated)
-                .unwrap_or(false)
-            {
-                1.0_f64
-            } else {
-                0.0
-            },
-        )
+        Ok(if read_desaturated(get_sim_state(lua), this.0) {
+            1.0_f64
+        } else {
+            0.0
+        })
     });
+}
+
+fn add_desaturation_value_setter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetDesaturation", |lua, this, desat: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut_visual(this.0) {
-            f.desaturated = desat > 0.0;
-        }
+        set_desaturated(get_sim_state(lua), this.0, desat > 0.0);
         Ok(())
     });
+}
+
+fn set_desaturated(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    value: bool,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(f) = state.widgets.get_mut_visual(id) {
+        f.desaturated = value;
+    }
+}
+
+fn read_desaturated(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+) -> bool {
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|f| f.desaturated)
+        .unwrap_or(false)
 }
 
 /// Resolve atlas name from a Lua value (string or numeric element ID).
