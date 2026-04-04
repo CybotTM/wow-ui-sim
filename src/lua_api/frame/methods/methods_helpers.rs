@@ -72,14 +72,14 @@ pub fn calculate_frame_height(widgets: &crate::widget::WidgetRegistry, id: u64) 
     ) else {
         return frame.height;
     };
-    if top_anchor.relative_to_id != bottom_anchor.relative_to_id {
-        return scaled_layout_height(widgets, frame, id).unwrap_or(frame.height);
+    if anchors_use_different_relative_frames(top_anchor, bottom_anchor) {
+        return height_from_layout_or_explicit(widgets, frame, id);
     }
     if let Some(height) = same_relative_height(widgets, frame, top_anchor, bottom_anchor) {
         return height;
     }
     if top_anchor.relative_to_id.is_none() {
-        return scaled_layout_height(widgets, frame, id).unwrap_or(frame.height);
+        return height_from_layout_or_explicit(widgets, frame, id);
     }
     frame.height
 }
@@ -110,6 +110,14 @@ fn width_from_layout_or_explicit(
     id: u64,
 ) -> f32 {
     scaled_layout_width(widgets, frame, id).unwrap_or(frame.width)
+}
+
+fn height_from_layout_or_explicit(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+) -> f32 {
+    scaled_layout_height(widgets, frame, id).unwrap_or(frame.height)
 }
 
 fn scaled_layout_width(
