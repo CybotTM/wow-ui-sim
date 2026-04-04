@@ -63,41 +63,53 @@ fn register_mount_journal(lua: &Lua) -> Result<()> {
 
 /// Mount info query methods: counts, GetMountInfoByID, GetMountIDs.
 fn register_mount_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetNumMounts", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "GetNumDisplayedMounts",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    add_i32_stub(lua, t, "GetNumMounts", 0)?;
+    add_i32_stub(lua, t, "GetNumDisplayedMounts", 0)?;
     t.set(
         "GetMountInfoByID",
-        lua.create_function(|_, _mount_id: i32| {
-            // Returns: name, spellID, icon, isActive, isUsable, sourceType, isFavorite,
-            // isFactionSpecific, faction, shouldHideOnChar, isCollected, mountID
-            Ok((
-                Value::Nil,
-                Value::Nil,
-                Value::Nil,
-                false,
-                false,
-                0i32,
-                false,
-                false,
-                Value::Nil,
-                false,
-                false,
-                0i32,
-            ))
-        })?,
+        lua.create_function(|_, _mount_id: i32| empty_mount_info())?,
     )?;
-    t.set(
-        "GetMountIDs",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetNumMountsNeedingFanfare",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    add_empty_table_stub(lua, t, "GetMountIDs")?;
+    add_i32_stub(lua, t, "GetNumMountsNeedingFanfare", 0)?;
     Ok(())
+}
+
+fn add_i32_stub(lua: &Lua, t: &mlua::Table, name: &str, value: i32) -> Result<()> {
+    t.set(name, lua.create_function(move |_, ()| Ok(value))?)
+}
+
+fn add_empty_table_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
+    t.set(name, lua.create_function(|lua, ()| lua.create_table())?)
+}
+
+fn empty_mount_info() -> Result<(
+    Value,
+    Value,
+    Value,
+    bool,
+    bool,
+    i32,
+    bool,
+    bool,
+    Value,
+    bool,
+    bool,
+    i32,
+)> {
+    Ok((
+        Value::Nil,
+        Value::Nil,
+        Value::Nil,
+        false,
+        false,
+        0i32,
+        false,
+        false,
+        Value::Nil,
+        false,
+        false,
+        0i32,
+    ))
 }
 
 /// Mount filter and favorite methods: collected filter, favorites, summon/dismiss.
