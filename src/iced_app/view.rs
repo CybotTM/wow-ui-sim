@@ -402,48 +402,22 @@ impl App {
 
         let mut count = 0;
         for id in state.widgets.iter_ids() {
-            if let Some(frame) = state.widgets.get(id) {
-                let name = match &frame.name {
-                    Some(n) => n.as_str(),
-                    None => continue,
-                };
-                if name.starts_with("__")
-                    || name.starts_with("DBM")
-                    || name.starts_with("Details")
-                    || name.starts_with("Avatar")
-                    || name.starts_with("Plater")
-                    || name.starts_with("WeakAuras")
-                    || name.starts_with("UIWidget")
-                    || name.starts_with("GameMenu")
-                {
-                    continue;
-                }
-                if frame.width <= 0.0 || frame.height <= 0.0 {
-                    continue;
-                }
+            let Some(frame) = state.widgets.get(id) else {
+                continue;
+            };
+            if frame_should_be_hidden_in_sidebar(frame) {
+                continue;
+            }
 
-                let visible = if frame.visible { "visible" } else { "hidden" };
-                let display = format!(
-                    "{} [{}] {}x{} ({})",
-                    name,
-                    frame.widget_type.as_str(),
-                    frame.width as i32,
-                    frame.height as i32,
-                    visible
-                );
+            col = col.push(
+                text(sidebar_frame_label(frame))
+                    .size(14)
+                    .color(palette::TEXT_MUTED),
+            );
 
-                let display = if display.len() > 30 {
-                    format!("{}...", &display[..27])
-                } else {
-                    display
-                };
-
-                col = col.push(text(display).size(14).color(palette::TEXT_MUTED));
-
-                count += 1;
-                if count >= 15 {
-                    break;
-                }
+            count += 1;
+            if count >= 15 {
+                break;
             }
         }
 
@@ -715,6 +689,50 @@ impl App {
         }
 
         Some(current)
+    }
+}
+
+fn frame_should_be_hidden_in_sidebar(frame: &crate::widget::Frame) -> bool {
+    let Some(name) = frame.name.as_deref() else {
+        return true;
+    };
+    if [
+        "__",
+        "DBM",
+        "Details",
+        "Avatar",
+        "Plater",
+        "WeakAuras",
+        "UIWidget",
+        "GameMenu",
+    ]
+    .iter()
+    .any(|prefix| name.starts_with(prefix))
+    {
+        return true;
+    }
+
+    frame.width <= 0.0 || frame.height <= 0.0
+}
+
+fn sidebar_frame_label(frame: &crate::widget::Frame) -> String {
+    let name = frame.name.as_deref().unwrap_or("(anon)");
+    let visible = if frame.visible { "visible" } else { "hidden" };
+    truncate_sidebar_label(format!(
+        "{} [{}] {}x{} ({})",
+        name,
+        frame.widget_type.as_str(),
+        frame.width as i32,
+        frame.height as i32,
+        visible
+    ))
+}
+
+fn truncate_sidebar_label(display: String) -> String {
+    if display.len() > 30 {
+        format!("{}...", &display[..27])
+    } else {
+        display
     }
 }
 
