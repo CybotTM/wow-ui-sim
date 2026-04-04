@@ -42,33 +42,35 @@ fn register_identity_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
             Ok(())
         }
     })?;
-    set_fn(lua, t, "SetPlayerClass", {
-        let s = Rc::clone(&state);
-        move |_, class_index: i32| {
-            s.borrow_mut().player.class_index = class_index;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetPlayerRace", {
-        let s = Rc::clone(&state);
-        move |_, race_index: i32| {
-            s.borrow_mut().player.race_index = race_index as usize;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetPlayerLevel", {
-        let s = Rc::clone(&state);
-        move |_, level: i32| {
-            s.borrow_mut().player.level = level;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetPlayerSex", {
-        let s = Rc::clone(&state);
-        move |_, sex: i32| {
-            s.borrow_mut().player.sex = sex;
-            Ok(())
-        }
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerClass",
+        Rc::clone(&state),
+        |player, class_index| {
+            player.class_index = class_index;
+        },
+    )?;
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerRace",
+        Rc::clone(&state),
+        |player, race_index| {
+            player.race_index = race_index as usize;
+        },
+    )?;
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerLevel",
+        Rc::clone(&state),
+        |player, level| {
+            player.level = level;
+        },
+    )?;
+    add_player_i32_setter(lua, t, "SetPlayerSex", state, |player, sex| {
+        player.sex = sex;
     })?;
     Ok(())
 }
@@ -566,4 +568,20 @@ where
     R: mlua::IntoLuaMulti,
 {
     t.set(name, lua.create_function(f)?)
+}
+
+fn add_player_i32_setter<F>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    apply: F,
+) -> Result<()>
+where
+    F: Fn(&mut crate::lua_api::state::PlayerState, i32) + 'static,
+{
+    set_fn(lua, t, name, move |_, value: i32| {
+        apply(&mut state.borrow_mut().player, value);
+        Ok(())
+    })
 }
