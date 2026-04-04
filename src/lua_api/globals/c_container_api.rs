@@ -147,85 +147,23 @@ fn register_c_container_stubs(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    t.set(
-        "IsContainerFiltered",
-        lua.create_function(|_, _bag: i32| Ok(false))?,
-    )?;
-    t.set(
-        "GetBagName",
-        lua.create_function(|lua, bag: i32| {
-            let name = if bag == 0 { "Backpack" } else { "Bag" };
-            Ok(Value::String(lua.create_string(name)?))
-        })?,
-    )?;
-    t.set(
-        "ContainerIDToInventoryID",
-        lua.create_function(|_, bag: i32| Ok(if bag > 0 { 19 + bag } else { 0 }))?,
-    )?;
-    let s = Rc::clone(state);
-    t.set(
-        "HasContainerItem",
-        lua.create_function(move |_, (bag, slot): (i32, i32)| {
-            Ok(s.borrow().get_bag_item(bag, slot).is_some())
-        })?,
-    )?;
-    t.set(
-        "GetBagSlotFlag",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    t.set(
-        "SetBagSlotFlag",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "GetBackpackAutosortDisabled",
-        lua.create_function(|_, _: ()| Ok(false))?,
-    )?;
-    t.set(
-        "SetBackpackAutosortDisabled",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "GetBackpackSellJunkDisabled",
-        lua.create_function(|_, _: ()| Ok(false))?,
-    )?;
-    t.set(
-        "SetBackpackSellJunkDisabled",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "GetContainerItemPurchaseInfo",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "UseContainerItem",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "PickupContainerItem",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "SplitContainerItem",
-        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
-    )?;
-    t.set(
-        "IsBattlePayItem",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    t.set(
-        "SetBagPortraitTexture",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
-    let s = Rc::clone(state);
-    t.set(
-        "GetContainerNumFreeSlots",
-        lua.create_function(move |_, bag: i32| {
-            let total = bag_slot_count(bag);
-            let occupied = s.borrow().bag_occupied_slots(bag);
-            Ok((total - occupied, 0i32))
-        })?,
-    )?;
+    add_bool_stub_with_arg::<i32>(lua, t, "IsContainerFiltered", false)?;
+    add_bag_name_getter(lua, t)?;
+    add_inventory_id_getter(lua, t)?;
+    add_has_container_item(lua, t, Rc::clone(state))?;
+    add_bool_stub_with_arg::<mlua::MultiValue>(lua, t, "GetBagSlotFlag", false)?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "SetBagSlotFlag")?;
+    add_bool_stub(lua, t, "GetBackpackAutosortDisabled", false)?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "SetBackpackAutosortDisabled")?;
+    add_bool_stub(lua, t, "GetBackpackSellJunkDisabled", false)?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "SetBackpackSellJunkDisabled")?;
+    add_nil_stub_with_arg::<mlua::MultiValue>(lua, t, "GetContainerItemPurchaseInfo")?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "UseContainerItem")?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "PickupContainerItem")?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "SplitContainerItem")?;
+    add_bool_stub_with_arg::<mlua::MultiValue>(lua, t, "IsBattlePayItem", false)?;
+    add_void_stub_with_arg::<mlua::MultiValue>(lua, t, "SetBagPortraitTexture")?;
+    add_container_num_free_slots(lua, t, Rc::clone(state))?;
     Ok(())
 }
 
@@ -240,6 +178,76 @@ fn register_c_container(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_c_container_stubs(lua, &c_container, &state)?;
     lua.globals().set("C_Container", c_container)?;
     Ok(())
+}
+
+fn add_bool_stub(lua: &Lua, t: &mlua::Table, name: &str, value: bool) -> Result<()> {
+    t.set(name, lua.create_function(move |_, ()| Ok(value))?)
+}
+
+fn add_bool_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    value: bool,
+) -> Result<()> {
+    t.set(name, lua.create_function(move |_, _: A| Ok(value))?)
+}
+
+fn add_nil_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+) -> Result<()> {
+    t.set(name, lua.create_function(|_, _: A| Ok(Value::Nil))?)
+}
+
+fn add_bag_name_getter(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "GetBagName",
+        lua.create_function(|lua, bag: i32| {
+            let name = if bag == 0 { "Backpack" } else { "Bag" };
+            Ok(Value::String(lua.create_string(name)?))
+        })?,
+    )
+}
+
+fn add_inventory_id_getter(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "ContainerIDToInventoryID",
+        lua.create_function(|_, bag: i32| Ok(if bag > 0 { 19 + bag } else { 0 }))?,
+    )
+}
+
+fn add_has_container_item(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    t.set(
+        "HasContainerItem",
+        lua.create_function(move |_, (bag, slot): (i32, i32)| {
+            Ok(state.borrow().get_bag_item(bag, slot).is_some())
+        })?,
+    )
+}
+
+fn add_container_num_free_slots(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetContainerNumFreeSlots",
+        lua.create_function(move |_, bag: i32| {
+            let total = bag_slot_count(bag);
+            let occupied = state.borrow().bag_occupied_slots(bag);
+            Ok((total - occupied, 0i32))
+        })?,
+    )
+}
+
+fn add_void_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+) -> Result<()> {
+    t.set(name, lua.create_function(|_, _: A| Ok(()))?)
 }
 
 /// Register legacy global container functions (GetContainerNumSlots, etc.).
