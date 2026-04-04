@@ -183,46 +183,59 @@ impl GlyphAtlas {
             return None;
         }
 
-        // Advance to next row if no space
-        if self.cursor_x + width > GLYPH_ATLAS_SIZE {
-            self.cursor_x = 0;
-            self.cursor_y += self.row_height + 1; // 1px padding
-            self.row_height = 0;
-        }
-
-        // Check if we've run out of vertical space
-        if self.cursor_y + height > GLYPH_ATLAS_SIZE {
-            tracing::warn!("Glyph atlas full ({} glyphs)", self.entries.len());
-            return None;
-        }
+        let (atlas_x, atlas_y) = self.reserve_glyph_slot(width, height)?;
 
         // Write glyph pixels into atlas
         write_glyph_pixels(
             &mut self.pixels,
-            self.cursor_x,
-            self.cursor_y,
+            atlas_x,
+            atlas_y,
             width,
             height,
             &image.data,
             image.content,
         );
 
-        let entry = GlyphEntry {
-            uv_x: self.cursor_x as f32 / GLYPH_ATLAS_SIZE as f32,
-            uv_y: self.cursor_y as f32 / GLYPH_ATLAS_SIZE as f32,
-            uv_w: width as f32 / GLYPH_ATLAS_SIZE as f32,
-            uv_h: height as f32 / GLYPH_ATLAS_SIZE as f32,
-            width,
-            height,
-            top: image.placement.top,
-        };
+        let entry = build_glyph_entry(atlas_x, atlas_y, width, height, image.placement.top);
 
         self.entries.insert(cache_key, entry);
-        self.cursor_x += width + 1; // 1px padding
-        self.row_height = self.row_height.max(height);
         self.dirty = true;
 
         Some(entry)
+    }
+
+    fn reserve_glyph_slot(&mut self, width: u32, height: u32) -> Option<(u32, u32)> {
+        if self.cursor_x + width > GLYPH_ATLAS_SIZE {
+            self.start_next_glyph_row();
+        }
+
+        if self.cursor_y + height > GLYPH_ATLAS_SIZE {
+            tracing::warn!("Glyph atlas full ({} glyphs)", self.entries.len());
+            return None;
+        }
+
+        let slot = (self.cursor_x, self.cursor_y);
+        self.cursor_x += width + 1; // 1px padding
+        self.row_height = self.row_height.max(height);
+        Some(slot)
+    }
+
+    fn start_next_glyph_row(&mut self) {
+        self.cursor_x = 0;
+        self.cursor_y += self.row_height + 1; // 1px padding
+        self.row_height = 0;
+    }
+}
+
+fn build_glyph_entry(atlas_x: u32, atlas_y: u32, width: u32, height: u32, top: i32) -> GlyphEntry {
+    GlyphEntry {
+        uv_x: atlas_x as f32 / GLYPH_ATLAS_SIZE as f32,
+        uv_y: atlas_y as f32 / GLYPH_ATLAS_SIZE as f32,
+        uv_w: width as f32 / GLYPH_ATLAS_SIZE as f32,
+        uv_h: height as f32 / GLYPH_ATLAS_SIZE as f32,
+        width,
+        height,
+        top,
     }
 }
 
