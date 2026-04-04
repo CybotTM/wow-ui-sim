@@ -184,49 +184,74 @@ fn apply_effects(
     effects: &HashMap<Option<String>, TargetEffects>,
 ) {
     for (child_key, fx) in effects {
-        let target_id = match child_key {
-            Some(key) => state
-                .widgets
-                .get(owner_frame_id)
-                .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
-            None => Some(owner_frame_id),
-        };
-        let Some(id) = target_id else { continue };
-        let alpha_changed = fx
-            .alpha
-            .is_some_and(|a| state.widgets.get(id).map(|f| f.alpha != a).unwrap_or(false));
-        let Some(frame) = state.widgets.get_mut(id) else {
+        let Some(id) = resolve_effect_target_id(state, owner_frame_id, child_key.as_deref()) else {
             continue;
         };
-        if let Some(alpha) = fx.alpha {
-            frame.alpha = alpha;
-        }
-        let offset_changed =
-            frame.anim_offset_x != fx.offset_x || frame.anim_offset_y != fx.offset_y;
-        frame.anim_offset_x = fx.offset_x;
-        frame.anim_offset_y = fx.offset_y;
-        if let Some((rows, cols, frames, progress)) = fx.flipbook {
-            apply_flipbook_uv(frame, rows, cols, frames, progress);
-        }
-        // Only mark dirty when something actually changed — animations tick
-        // every frame and the render pipeline already picks up changes via
-        // the 33ms rebuild throttle.
-        if alpha_changed || offset_changed {
-            state.widgets.mark_visual_dirty(id);
-        }
-        if offset_changed {
-            state.invalidate_layout(id);
-        }
-        if alpha_changed {
-            let parent_eff = state
-                .widgets
-                .get(id)
-                .and_then(|f| f.parent_id)
-                .and_then(|pid| state.widgets.get(pid))
-                .map(|p| p.effective_alpha)
-                .unwrap_or(1.0);
-            state.widgets.propagate_effective_alpha(id, parent_eff);
-        }
+        apply_target_effects(state, id, fx);
+    }
+}
+
+fn resolve_effect_target_id(
+    state: &SimState,
+    owner_frame_id: u64,
+    child_key: Option<&str>,
+) -> Option<u64> {
+    match child_key {
+        Some(key) => state
+            .widgets
+            .get(owner_frame_id)
+            .and_then(|owner| owner.children_keys.get(key).copied()),
+        None => Some(owner_frame_id),
+    }
+}
+
+fn apply_target_effects(state: &mut SimState, id: u64, fx: &TargetEffects) {
+    let alpha_changed = fx.alpha.is_some_and(|alpha| {
+        state
+            .widgets
+            .get(id)
+            .map(|frame| frame.alpha != alpha)
+            .unwrap_or(false)
+    });
+    let Some(frame) = state.widgets.get_mut(id) else {
+        return;
+    };
+    if let Some(alpha) = fx.alpha {
+        frame.alpha = alpha;
+    }
+    let offset_changed = frame.anim_offset_x != fx.offset_x || frame.anim_offset_y != fx.offset_y;
+    frame.anim_offset_x = fx.offset_x;
+    frame.anim_offset_y = fx.offset_y;
+    if let Some((rows, cols, frames, progress)) = fx.flipbook {
+        apply_flipbook_uv(frame, rows, cols, frames, progress);
+    }
+    update_effect_dirty_state(state, id, alpha_changed, offset_changed);
+}
+
+fn update_effect_dirty_state(
+    state: &mut SimState,
+    id: u64,
+    alpha_changed: bool,
+    offset_changed: bool,
+) {
+    // Only mark dirty when something actually changed — animations tick
+    // every frame and the render pipeline already picks up changes via
+    // the 33ms rebuild throttle.
+    if alpha_changed || offset_changed {
+        state.widgets.mark_visual_dirty(id);
+    }
+    if offset_changed {
+        state.invalidate_layout(id);
+    }
+    if alpha_changed {
+        let parent_eff = state
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.parent_id)
+            .and_then(|parent_id| state.widgets.get(parent_id))
+            .map(|parent| parent.effective_alpha)
+            .unwrap_or(1.0);
+        state.widgets.propagate_effective_alpha(id, parent_eff);
     }
 }
 
