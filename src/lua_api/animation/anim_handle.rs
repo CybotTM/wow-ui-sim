@@ -395,45 +395,41 @@ impl AnimHandle {
 
     /// Register playback control stubs and state queries.
     fn add_playback_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("Play", |_, _this, ()| Ok(()));
-        methods.add_method("Stop", |_, _this, ()| Ok(()));
-        methods.add_method("Pause", |_, _this, ()| Ok(()));
-        methods.add_method("Restart", |_, _this, ()| Ok(()));
-        methods.add_method("Finish", |_, _this, ()| Ok(()));
+        Self::add_playback_stub_methods(methods);
 
         methods.add_method("IsPlaying", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.playing))
+            Ok(this.group_state_flag(|g| Some(g.playing)).unwrap_or(false))
         });
 
         methods.add_method("IsPaused", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.paused))
+            Ok(this.group_state_flag(|g| Some(g.paused)).unwrap_or(false))
         });
 
         methods.add_method("IsDone", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_none_or(|g| g.done))
+            Ok(this.group_state_flag(|g| Some(g.done)).unwrap_or(true))
         });
 
         methods.add_method("IsStopped", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_none_or(|g| !g.playing && !g.paused))
+            Ok(this
+                .group_state_flag(|g| Some(!g.playing && !g.paused))
+                .unwrap_or(true))
         });
 
         methods.add_method("IsDelaying", |_, _this, ()| Ok(false));
+    }
+
+    fn add_playback_stub_methods<M: UserDataMethods<Self>>(methods: &mut M) {
+        for name in ["Play", "Stop", "Pause", "Restart", "Finish"] {
+            methods.add_method(name, |_, _this, ()| Ok(()));
+        }
+    }
+
+    fn group_state_flag<F>(&self, read: F) -> Option<bool>
+    where
+        F: FnOnce(&super::AnimGroupState) -> Option<bool>,
+    {
+        let state = self.state.borrow();
+        state.animation_groups.get(&self.group_id).and_then(read)
     }
 
     /// Register progress query methods.
