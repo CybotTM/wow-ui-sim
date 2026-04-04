@@ -172,27 +172,37 @@ fn register_pvp_guild_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
             Ok(())
         }
     })?;
-    super::admin_api::set_fn(lua, t, "SetGuildInfo", {
-        let s = Rc::clone(&state);
-        move |_, (name, rank, num_members): (String, String, i32)| {
-            let mut st = s.borrow_mut();
-            st.world.guild_name = Some(name);
-            st.world.guild_rank = Some(rank);
-            st.world.guild_num_members = num_members;
-            Ok(())
-        }
-    })?;
-    super::admin_api::set_fn(lua, t, "ClearGuild", {
-        let s = Rc::clone(&state);
-        move |_, ()| {
-            let mut st = s.borrow_mut();
-            st.world.guild_name = None;
-            st.world.guild_rank = None;
-            st.world.guild_num_members = 0;
-            Ok(())
-        }
-    })?;
+    add_guild_info_setter(lua, t, Rc::clone(&state))?;
+    add_clear_guild_setter(lua, t, state)?;
     Ok(())
+}
+
+fn add_guild_info_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(
+        lua,
+        t,
+        "SetGuildInfo",
+        move |_, (name, rank, num_members): (String, String, i32)| {
+            let mut state = state.borrow_mut();
+            state.world.guild_name = Some(name);
+            state.world.guild_rank = Some(rank);
+            state.world.guild_num_members = num_members;
+            Ok(())
+        },
+    )
+}
+
+fn add_clear_guild_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "ClearGuild", move |_, ()| {
+        clear_guild_info(&mut state.borrow_mut());
+        Ok(())
+    })
+}
+
+fn clear_guild_info(state: &mut SimState) {
+    state.world.guild_name = None;
+    state.world.guild_rank = None;
+    state.world.guild_num_members = 0;
 }
 
 fn register_event_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
