@@ -376,48 +376,46 @@ impl AnimGroupHandle {
     /// Register timing methods: GetDuration, GetElapsed, GetProgress, speed multiplier.
     fn add_timing_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetDuration", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .map_or(0.0, |g| g.total_duration()))
+            Ok(this.read_group_timing(|group| group.total_duration(), 0.0))
         });
 
         methods.add_method("GetElapsed", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .map_or(0.0, |g| g.elapsed))
+            Ok(this.read_group_timing(|group| group.elapsed, 0.0))
         });
 
         methods.add_method("GetProgress", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state.animation_groups.get(&this.group_id).map_or(0.0, |g| {
-                let dur = g.total_duration();
-                if dur <= 0.0 {
-                    0.0
-                } else {
-                    (g.elapsed / dur).clamp(0.0, 1.0)
-                }
-            }))
+            Ok(this.read_group_timing(progress_from_group, 0.0))
         });
 
         methods.add_method("SetAnimationSpeedMultiplier", |_, this, mult: f64| {
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id) {
-                group.speed_multiplier = mult;
-            }
+            this.update_group_timing(|group| group.speed_multiplier = mult);
             Ok(())
         });
 
         methods.add_method("GetAnimationSpeedMultiplier", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .map_or(1.0, |g| g.speed_multiplier))
+            Ok(this.read_group_timing(|group| group.speed_multiplier, 1.0))
         });
+    }
+
+    fn read_group_timing<F>(&self, read: F, default: f64) -> f64
+    where
+        F: FnOnce(&AnimGroupState) -> f64,
+    {
+        let state = self.state.borrow();
+        state
+            .animation_groups
+            .get(&self.group_id)
+            .map_or(default, read)
+    }
+
+    fn update_group_timing<F>(&self, update: F)
+    where
+        F: FnOnce(&mut AnimGroupState),
+    {
+        let mut state = self.state.borrow_mut();
+        if let Some(group) = state.animation_groups.get_mut(&self.group_id) {
+            update(group);
+        }
     }
 
     /// Register alpha methods.
@@ -569,6 +567,15 @@ impl AnimGroupHandle {
             }
             Ok(())
         });
+    }
+}
+
+fn progress_from_group(group: &AnimGroupState) -> f64 {
+    let duration = group.total_duration();
+    if duration <= 0.0 {
+        0.0
+    } else {
+        (group.elapsed / duration).clamp(0.0, 1.0)
     }
 }
 
