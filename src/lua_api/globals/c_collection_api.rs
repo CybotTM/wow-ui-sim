@@ -408,47 +408,28 @@ fn empty_heirloom_info() -> Result<(Value, Value, bool, i32, i32, i32, bool, i32
 /// C_TransmogSets namespace - transmog set collection.
 fn register_transmog_sets(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetBaseSetID",
-        lua.create_function(|_, _set_id: i32| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetVariantSets",
-        lua.create_function(|lua, _set_id: i32| lua.create_table())?,
-    )?;
+    add_i32_stub_with_arg::<i32>(lua, &t, "GetBaseSetID", 0)?;
+    add_table_stub_with_arg::<i32>(lua, &t, "GetVariantSets")?;
     t.set(
         "GetSetInfo",
-        lua.create_function(|lua, _set_id: i32| {
-            let info = lua.create_table()?;
-            info.set("setID", 0)?;
-            info.set("name", "")?;
-            info.set("description", "")?;
-            info.set("label", "")?;
-            info.set("expansionID", 0)?;
-            info.set("collected", false)?;
-            Ok(info)
-        })?,
+        lua.create_function(|lua, _set_id: i32| build_empty_set_info(lua))?,
     )?;
-    t.set(
-        "GetSetPrimaryAppearances",
-        lua.create_function(|lua, _set_id: i32| lua.create_table())?,
-    )?;
-    t.set(
-        "GetAllSets",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetUsableSets",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "IsBaseSetCollected",
-        lua.create_function(|_, _set_id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "GetSourcesForSlot",
-        lua.create_function(|lua, (_set_id, _slot): (i32, i32)| lua.create_table())?,
-    )?;
+    add_table_stub_with_arg::<i32>(lua, &t, "GetSetPrimaryAppearances")?;
+    add_empty_table_stub(lua, &t, "GetAllSets")?;
+    add_empty_table_stub(lua, &t, "GetUsableSets")?;
+    add_bool_stub_with_arg::<i32>(lua, &t, "IsBaseSetCollected", false)?;
+    add_table_stub_with_arg::<(i32, i32)>(lua, &t, "GetSourcesForSlot")?;
     lua.globals().set("C_TransmogSets", t)?;
     Ok(())
+}
+
+fn build_empty_set_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("setID", 0)?;
+    info.set("name", "")?;
+    info.set("description", "")?;
+    info.set("label", "")?;
+    info.set("expansionID", 0)?;
+    info.set("collected", false)?;
+    Ok(info)
 }
