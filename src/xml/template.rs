@@ -218,7 +218,6 @@ pub fn register_intrinsic_templates() {
 }
 
 /// Clear the template registry (useful for testing).
-#[allow(dead_code)]
 pub fn clear_templates() {
     let mut registry = template_registry().write().unwrap();
     registry.entries.clear();
