@@ -52,7 +52,11 @@ fn quality_color(quality: u8) -> &'static str {
 fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
     let item = lua.create_table()?;
     item.set("itemID", item_id)?;
+    register_item_methods(lua, &item)?;
+    Ok(item)
+}
 
+fn register_item_methods(lua: &Lua, item: &mlua::Table) -> Result<()> {
     item.set(
         "ContinueOnItemLoad",
         lua.create_function(|_, (_this, callback): (mlua::Table, mlua::Function)| {
@@ -70,9 +74,7 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
         "GetItemName",
         lua.create_function(|lua, this: mlua::Table| {
             let id: i32 = this.get("itemID")?;
-            let name = crate::items::get_item(id as u32)
-                .map(|i| i.name)
-                .unwrap_or("Unknown");
+            let name = item_name(id);
             Ok(Value::String(lua.create_string(name)?))
         })?,
     )?;
@@ -81,12 +83,7 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
         "GetItemLink",
         lua.create_function(|lua, this: mlua::Table| {
             let id: i32 = this.get("itemID")?;
-            let (name, color) = if let Some(item) = crate::items::get_item(id as u32) {
-                (item.name, quality_color(item.quality))
-            } else {
-                ("Unknown", "ffffff")
-            };
-            let link = format!("|cff{}|Hitem:{}::::::::60:::::|h[{}]|h|r", color, id, name);
+            let link = item_link(id);
             Ok(Value::String(lua.create_string(&link)?))
         })?,
     )?;
@@ -100,10 +97,7 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
         "GetItemQuality",
         lua.create_function(|_, this: mlua::Table| {
             let id: i32 = this.get("itemID")?;
-            let quality = crate::items::get_item(id as u32)
-                .map(|i| i.quality as i32)
-                .unwrap_or(1);
-            Ok(quality)
+            Ok(item_quality(id))
         })?,
     )?;
 
@@ -111,6 +105,26 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
         "IsItemDataCached",
         lua.create_function(|_, _this: mlua::Table| Ok(true))?,
     )?;
+    Ok(())
+}
 
-    Ok(item)
+fn item_name(item_id: i32) -> &'static str {
+    crate::items::get_item(item_id as u32)
+        .map(|item| item.name)
+        .unwrap_or("Unknown")
+}
+
+fn item_quality(item_id: i32) -> i32 {
+    crate::items::get_item(item_id as u32)
+        .map(|item| item.quality as i32)
+        .unwrap_or(1)
+}
+
+fn item_link(item_id: i32) -> String {
+    let color = quality_color(item_quality(item_id) as u8);
+    let name = item_name(item_id);
+    format!(
+        "|cff{}|Hitem:{}::::::::60:::::|h[{}]|h|r",
+        color, item_id, name
+    )
 }
