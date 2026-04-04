@@ -22,54 +22,95 @@ pub fn apply_mask_texture(
     if count == 0 || mask_textures.is_empty() {
         return;
     }
-    let mask_id = mask_textures[0];
-    let Some(mask_frame) = registry.get(mask_id) else {
+    let Some(mask_info) =
+        resolve_mask_info(mask_textures, registry, icon_bounds, batch, vert_before)
+    else {
         return;
     };
-    let Some(ref mask_path) = mask_frame.texture else {
-        return;
-    };
-    // Check if icon overlaps the mask area at all. If not, remove the quads
-    // entirely — the texture is fully outside the mask (e.g., animation-driven
-    // textures at rest position).
-    let Some(mask_rect) = mask_frame.layout_rect else {
-        return;
-    };
-    let mask_screen = mask_to_screen_rect(mask_rect);
+    let mask_path = mask_info.path.clone();
+    apply_mask_to_quads(batch, vert_before, mask_info);
+    batch.mask_texture_requests.push(TextureRequest {
+        path: mask_path,
+        vertex_start: vert_before as u32,
+        vertex_count: count as u32,
+    });
+}
+
+struct MaskInfo {
+    path: String,
+    screen_rect: Rectangle,
+    tex_coords: (f32, f32, f32, f32),
+}
+
+fn resolve_mask_info(
+    mask_textures: &[u64],
+    registry: &crate::widget::WidgetRegistry,
+    icon_bounds: Rectangle,
+    batch: &mut QuadBatch,
+    vert_before: usize,
+) -> Option<MaskInfo> {
+    let mask_frame = registry.get(mask_textures[0])?;
+    let path = mask_frame.texture.clone()?;
+    let mask_screen = mask_to_screen_rect(mask_frame.layout_rect?);
     if !rects_overlap(icon_bounds, mask_screen) {
-        batch.vertices.truncate(vert_before);
-        batch.indices.truncate(vert_before / 4 * 6);
-        // Remove texture requests that reference the truncated vertices.
-        // Without this, orphaned requests resolve later frames' vertices
-        // to the wrong texture (the truncated frame's texture instead of
-        // the correct one).
-        let vb = vert_before as u32;
-        batch.texture_requests.retain(|r| r.vertex_start < vb);
-        return;
+        truncate_masked_vertices(batch, vert_before);
+        return None;
     }
-    let (tl, tr, tt, tb) = mask_frame.tex_coords.unwrap_or((0.0, 1.0, 0.0, 1.0));
+    Some(MaskInfo {
+        path,
+        screen_rect: mask_screen,
+        tex_coords: mask_frame.tex_coords.unwrap_or((0.0, 1.0, 0.0, 1.0)),
+    })
+}
+
+fn truncate_masked_vertices(batch: &mut QuadBatch, vert_before: usize) {
+    batch.vertices.truncate(vert_before);
+    batch.indices.truncate(vert_before / 4 * 6);
+    // Remove texture requests that reference the truncated vertices.
+    // Without this, orphaned requests resolve later frames' vertices
+    // to the wrong texture (the truncated frame's texture instead of
+    // the correct one).
+    let vb = vert_before as u32;
+    batch.texture_requests.retain(|r| r.vertex_start < vb);
+}
+
+fn apply_mask_to_quads(batch: &mut QuadBatch, vert_before: usize, mask_info: MaskInfo) {
+    let (tl, tr, tt, tb) = mask_info.tex_coords;
     for i in (vert_before..batch.vertices.len()).step_by(4) {
         let end = (i + 4).min(batch.vertices.len());
         if end - i < 4 {
             continue;
         }
-        let quad_bounds = quad_rect(&batch.vertices[i..end]);
-        let Some(clipped) = rect_intersection(quad_bounds, mask_screen) else {
-            hide_quad(&mut batch.vertices[i..end]);
-            continue;
-        };
-        clip_quad_to_rect(&mut batch.vertices[i..end], quad_bounds, clipped);
-        let mask_uvs = compute_mask_uvs_from_rects(mask_screen, clipped, tl, tr, tt, tb);
-        for (j, v) in batch.vertices[i..end].iter_mut().enumerate() {
-            v.mask_tex_index = -2;
-            v.mask_tex_coords = mask_uvs[j];
-        }
+        apply_mask_to_quad(
+            &mut batch.vertices[i..end],
+            mask_info.screen_rect,
+            tl,
+            tr,
+            tt,
+            tb,
+        );
     }
-    batch.mask_texture_requests.push(TextureRequest {
-        path: mask_path.clone(),
-        vertex_start: vert_before as u32,
-        vertex_count: count as u32,
-    });
+}
+
+fn apply_mask_to_quad(
+    vertices: &mut [crate::render::shader::QuadVertex],
+    mask_screen: Rectangle,
+    tl: f32,
+    tr: f32,
+    tt: f32,
+    tb: f32,
+) {
+    let quad_bounds = quad_rect(vertices);
+    let Some(clipped) = rect_intersection(quad_bounds, mask_screen) else {
+        hide_quad(vertices);
+        return;
+    };
+    clip_quad_to_rect(vertices, quad_bounds, clipped);
+    let mask_uvs = compute_mask_uvs_from_rects(mask_screen, clipped, tl, tr, tt, tb);
+    for (index, vertex) in vertices.iter_mut().enumerate() {
+        vertex.mask_tex_index = -2;
+        vertex.mask_tex_coords = mask_uvs[index];
+    }
 }
 
 fn mask_to_screen_rect(r: crate::LayoutRect) -> Rectangle {
@@ -205,6 +246,7 @@ fn compute_mask_uvs_from_rects(
 mod tests {
     use super::*;
     use crate::render::shader::QuadVertex;
+    use crate::widget::{Frame, WidgetRegistry};
 
     fn quad(bounds: Rectangle) -> [QuadVertex; 4] {
         let positions = [
@@ -258,5 +300,36 @@ mod tests {
         let clipped = Rectangle::new(iced::Point::new(55.0, 50.0), iced::Size::new(10.0, 20.0));
         let uvs = compute_mask_uvs_from_rects(mask, clipped, 0.0, 1.0, 0.0, 1.0);
         assert_eq!(uvs, [[0.25, 0.0], [0.75, 0.0], [0.75, 1.0], [0.25, 1.0]]);
+    }
+
+    #[test]
+    fn apply_mask_texture_marks_vertices_and_adds_mask_request() {
+        let mut batch = QuadBatch::new();
+        let bounds = Rectangle::new(iced::Point::new(0.0, 0.0), iced::Size::new(20.0, 20.0));
+        batch.vertices.extend(quad(bounds));
+        batch.indices.extend([0, 1, 2, 0, 2, 3]);
+
+        let mut registry = WidgetRegistry::new();
+        let mut mask = Frame::default();
+        mask.id = 1;
+        mask.texture = Some("Interface/Mask".to_string());
+        mask.layout_rect = Some(crate::LayoutRect {
+            x: 0.0,
+            y: 0.0,
+            width: 20.0 / UI_SCALE,
+            height: 20.0 / UI_SCALE,
+        });
+        registry.register(mask);
+
+        apply_mask_texture(&mut batch, 0, bounds, &[1], &registry);
+
+        assert_eq!(batch.mask_texture_requests.len(), 1);
+        assert_eq!(batch.mask_texture_requests[0].path, "Interface/Mask");
+        assert!(
+            batch
+                .vertices
+                .iter()
+                .all(|vertex| vertex.mask_tex_index == -2)
+        );
     }
 }
