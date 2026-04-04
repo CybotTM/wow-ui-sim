@@ -9,7 +9,7 @@ use crate::render::{BlendMode, QuadBatch};
 use crate::widget::{TextJustify, WidgetType};
 
 use super::masking::apply_mask_texture;
-use super::message_frame_render::emit_message_frame_text;
+use super::message_frame_render::{MessageFrameTextRenderer, emit_message_frame_text};
 use super::statusbar::StatusBarFill;
 use super::tooltip::TooltipRenderData;
 use textures::remap_atlas_crop;
@@ -265,10 +265,13 @@ pub fn emit_frame_quads(
             if let Some((fs, ga)) = text_ctx
                 && let Some(mf_map) = message_frames
             {
-                emit_message_frame_text(
+                let mut render = MessageFrameTextRenderer {
                     batch,
-                    fs,
-                    ga,
+                    font_sys: fs,
+                    glyph_atlas: ga,
+                };
+                emit_message_frame_text(
+                    &mut render,
                     f,
                     id,
                     bounds,

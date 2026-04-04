@@ -14,11 +14,8 @@ use crate::widget::TextJustify;
 /// Messages are word-wrapped to the frame width. We work backwards from
 /// the most recent message, measuring each one's wrapped height, until
 /// the available vertical space is exhausted.
-#[allow(clippy::too_many_arguments)]
 pub fn emit_message_frame_text(
-    batch: &mut QuadBatch,
-    font_sys: &mut WowFontSystem,
-    glyph_atlas: &mut GlyphAtlas,
+    render: &mut MessageFrameTextRenderer<'_>,
     f: &crate::widget::Frame,
     id: u64,
     bounds: Rectangle,
@@ -41,8 +38,8 @@ pub fn emit_message_frame_text(
     // Pre-measure wrapped heights from newest to oldest, stopping when
     // we've filled the available vertical space.
     let measured = measure_visible_messages(
-        font_sys,
-        glyph_atlas,
+        render.font_sys,
+        render.glyph_atlas,
         f,
         &data.messages[..end],
         bounds.width,
@@ -58,17 +55,23 @@ pub fn emit_message_frame_text(
             continue;
         }
         render_message(
-            batch,
-            font_sys,
-            glyph_atlas,
+            render,
             f,
-            bounds,
-            &data.messages[msg_idx],
-            y,
-            height,
-            alpha * msg_alpha,
+            MessageLine {
+                bounds,
+                msg: &data.messages[msg_idx],
+                y,
+                height,
+                alpha: alpha * msg_alpha,
+            },
         );
     }
+}
+
+pub struct MessageFrameTextRenderer<'a> {
+    pub batch: &'a mut QuadBatch,
+    pub font_sys: &'a mut WowFontSystem,
+    pub glyph_atlas: &'a mut GlyphAtlas,
 }
 
 /// Compute fade alpha for a single message.
@@ -132,32 +135,25 @@ fn measure_visible_messages(
 }
 
 /// Render a single message at the given y position with word wrapping.
-#[allow(clippy::too_many_arguments)]
 fn render_message(
-    batch: &mut QuadBatch,
-    font_sys: &mut WowFontSystem,
-    glyph_atlas: &mut GlyphAtlas,
+    render: &mut MessageFrameTextRenderer<'_>,
     f: &crate::widget::Frame,
-    bounds: Rectangle,
-    msg: &crate::lua_api::message_frame::Message,
-    y: f32,
-    height: f32,
-    alpha: f32,
+    line: MessageLine<'_>,
 ) {
     let line_bounds = Rectangle {
-        x: bounds.x,
-        y,
-        width: bounds.width,
-        height,
+        x: line.bounds.x,
+        y: line.y,
+        width: line.bounds.width,
+        height: line.height,
     };
-    let color = [msg.r, msg.g, msg.b, msg.a * alpha];
-    let shadow = Some([0.0, 0.0, 0.0, alpha]);
+    let color = [line.msg.r, line.msg.g, line.msg.b, line.msg.a * line.alpha];
+    let shadow = Some([0.0, 0.0, 0.0, line.alpha]);
 
     emit_text_quads(
-        batch,
-        font_sys,
-        glyph_atlas,
-        &msg.text,
+        render.batch,
+        render.font_sys,
+        render.glyph_atlas,
+        &line.msg.text,
         line_bounds,
         f.font.as_deref(),
         f.font_size,
@@ -172,4 +168,12 @@ fn render_message(
         0,    // word_wrap=true, no line limit
         None, // message frames don't pre-strip
     );
+}
+
+struct MessageLine<'a> {
+    bounds: Rectangle,
+    msg: &'a crate::lua_api::message_frame::Message,
+    y: f32,
+    height: f32,
+    alpha: f32,
 }
