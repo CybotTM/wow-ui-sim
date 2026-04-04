@@ -453,55 +453,65 @@ impl AnimGroupHandle {
         methods.add_method(
             "SetScript",
             |lua, this, (event, handler): (String, Option<mlua::Function>)| {
-                let mut state = this.state.borrow_mut();
-                if let Some(group) = state.animation_groups.get_mut(&this.group_id) {
-                    if let Some(old_key) = group.scripts.remove(&event) {
-                        lua.remove_registry_value(old_key).ok();
-                    }
-                    if let Some(func) = handler {
-                        let key = lua.create_registry_value(func)?;
-                        group.scripts.insert(event, key);
-                    }
-                }
+                this.replace_group_script(lua, event, handler)?;
                 Ok(())
             },
         );
 
         methods.add_method("GetScript", |lua, this, event: String| {
-            let state = this.state.borrow();
-            if let Some(group) = state.animation_groups.get(&this.group_id)
-                && let Some(key) = group.scripts.get(&event)
-                && let Ok(func) = lua.registry_value::<mlua::Function>(key)
-            {
+            if let Some(func) = this.group_script(lua, &event) {
                 return Ok(Value::Function(func));
             }
             Ok(Value::Nil)
         });
 
         methods.add_method("HasScript", |_, this, event: String| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.scripts.contains_key(&event)))
+            Ok(this.has_group_script(&event))
         });
 
         methods.add_method(
             "HookScript",
             |lua, this, (event, handler): (String, Option<mlua::Function>)| {
-                let mut state = this.state.borrow_mut();
-                if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                    && let Some(func) = handler
-                {
-                    if let Some(old_key) = group.scripts.remove(&event) {
-                        lua.remove_registry_value(old_key).ok();
-                    }
-                    let key = lua.create_registry_value(func)?;
-                    group.scripts.insert(event, key);
+                if let Some(func) = handler {
+                    this.replace_group_script(lua, event, Some(func))?;
                 }
                 Ok(())
             },
         );
+    }
+
+    fn replace_group_script(
+        &self,
+        lua: &Lua,
+        event: String,
+        handler: Option<mlua::Function>,
+    ) -> mlua::Result<()> {
+        let mut state = self.state.borrow_mut();
+        if let Some(group) = state.animation_groups.get_mut(&self.group_id) {
+            if let Some(old_key) = group.scripts.remove(&event) {
+                lua.remove_registry_value(old_key).ok();
+            }
+            if let Some(func) = handler {
+                let key = lua.create_registry_value(func)?;
+                group.scripts.insert(event, key);
+            }
+        }
+        Ok(())
+    }
+
+    fn group_script(&self, lua: &Lua, event: &str) -> Option<mlua::Function> {
+        let state = self.state.borrow();
+        let group = state.animation_groups.get(&self.group_id)?;
+        let key = group.scripts.get(event)?;
+        lua.registry_value::<mlua::Function>(key).ok()
+    }
+
+    fn has_group_script(&self, event: &str) -> bool {
+        let state = self.state.borrow();
+        state
+            .animation_groups
+            .get(&self.group_id)
+            .is_some_and(|group| group.scripts.contains_key(event))
     }
 
     /// Register identity/hierarchy methods: GetObjectType, GetName, GetParent.
