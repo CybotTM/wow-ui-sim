@@ -455,3 +455,4 @@ mod layout_positioning;
 mod layout_scale;
 mod layout_size;
 mod wow_api;
+mod wow_api_globals;
