@@ -184,33 +184,51 @@ fn compute_rect_from_edges(
     parent_rect: LayoutRect,
     scale: f32,
 ) -> LayoutRect {
-    let (left_x, right_x) = normalize_bounds(edges.left_x, edges.right_x);
-    let (top_y, bottom_y) = normalize_bounds(edges.top_y, edges.bottom_y);
-    let width = resolve_axis_size(left_x, right_x, frame.width, scale);
-    let height = resolve_axis_size(top_y, bottom_y, frame.height, scale);
-    let x = resolve_axis_position(
-        left_x,
-        right_x,
+    let horizontal = resolve_axis_layout(
+        edges.left_x,
+        edges.right_x,
         edges.center_x,
-        width,
+        frame.width,
+        scale,
         parent_rect.x,
         parent_rect.width,
     );
-    let y = resolve_axis_position(
-        top_y,
-        bottom_y,
+    let vertical = resolve_axis_layout(
+        edges.top_y,
+        edges.bottom_y,
         edges.center_y,
-        height,
+        frame.height,
+        scale,
         parent_rect.y,
         parent_rect.height,
     );
 
     LayoutRect {
-        x,
-        y,
-        width,
-        height,
+        x: horizontal.position,
+        y: vertical.position,
+        width: horizontal.size,
+        height: vertical.size,
     }
+}
+
+struct AxisLayout {
+    position: f32,
+    size: f32,
+}
+
+fn resolve_axis_layout(
+    start: Option<f32>,
+    end: Option<f32>,
+    center: Option<f32>,
+    explicit_size: f32,
+    scale: f32,
+    parent_start: f32,
+    parent_size: f32,
+) -> AxisLayout {
+    let (start, end) = normalize_bounds(start, end);
+    let size = resolve_axis_size(start, end, explicit_size, scale);
+    let position = resolve_axis_position(start, end, center, size, parent_start, parent_size);
+    AxisLayout { position, size }
 }
 
 fn normalize_bounds(start: Option<f32>, end: Option<f32>) -> (Option<f32>, Option<f32>) {
