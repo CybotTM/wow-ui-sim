@@ -113,47 +113,74 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
 pub fn collect_tooltip_data(state: &SimState) -> HashMap<u64, TooltipRenderData> {
     let mut result = HashMap::new();
     for (&id, td) in &state.tooltips {
-        if td.lines.is_empty() {
+        let Some(alpha) = tooltip_alpha(state, id, td) else {
             continue;
-        }
-        let visible = state.widgets.get(id).map(|f| f.visible).unwrap_or(false);
-        if !visible {
-            continue;
-        }
-        let alpha = state.widgets.get(id).map(|f| f.alpha).unwrap_or(1.0);
-        let lines = td
-            .lines
-            .iter()
-            .enumerate()
-            .map(|(i, line)| {
-                let font_size = if i == 0 {
-                    TOOLTIP_HEADER_FONT_SIZE
-                } else {
-                    TOOLTIP_BODY_FONT_SIZE
-                };
-                TooltipLineRender {
-                    left_text: line.left_text.clone(),
-                    left_color: [
-                        line.left_color.0,
-                        line.left_color.1,
-                        line.left_color.2,
-                        alpha,
-                    ],
-                    right_text: line.right_text.clone(),
-                    right_color: [
-                        line.right_color.0,
-                        line.right_color.1,
-                        line.right_color.2,
-                        alpha,
-                    ],
-                    font_size,
-                    wrap: line.wrap,
-                }
-            })
-            .collect();
+        };
+        let lines = collect_tooltip_lines(td, alpha);
         result.insert(id, TooltipRenderData { lines });
     }
     result
+}
+
+fn tooltip_alpha(
+    state: &SimState,
+    id: u64,
+    td: &crate::lua_api::tooltip::TooltipData,
+) -> Option<f32> {
+    if td.lines.is_empty() {
+        return None;
+    }
+
+    let frame = state.widgets.get(id)?;
+    if !frame.visible {
+        return None;
+    }
+
+    Some(frame.alpha)
+}
+
+fn collect_tooltip_lines(
+    td: &crate::lua_api::tooltip::TooltipData,
+    alpha: f32,
+) -> Vec<TooltipLineRender> {
+    td.lines
+        .iter()
+        .enumerate()
+        .map(|(i, line)| tooltip_line_render(i, line, alpha))
+        .collect()
+}
+
+fn tooltip_line_render(
+    index: usize,
+    line: &crate::lua_api::tooltip::TooltipLine,
+    alpha: f32,
+) -> TooltipLineRender {
+    TooltipLineRender {
+        left_text: line.left_text.clone(),
+        left_color: [
+            line.left_color.0,
+            line.left_color.1,
+            line.left_color.2,
+            alpha,
+        ],
+        right_text: line.right_text.clone(),
+        right_color: [
+            line.right_color.0,
+            line.right_color.1,
+            line.right_color.2,
+            alpha,
+        ],
+        font_size: tooltip_line_font_size(index),
+        wrap: line.wrap,
+    }
+}
+
+fn tooltip_line_font_size(index: usize) -> f32 {
+    if index == 0 {
+        TOOLTIP_HEADER_FONT_SIZE
+    } else {
+        TOOLTIP_BODY_FONT_SIZE
+    }
 }
 
 /// Emit quads for a GameTooltip frame: background, border, and text lines.
@@ -269,5 +296,55 @@ fn emit_tooltip_line(
             0,
             None,
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::tooltip::{TooltipData, TooltipLine};
+    use crate::widget::{Frame, WidgetType};
+
+    #[test]
+    fn collect_tooltip_data_applies_alpha_and_font_sizes() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::Frame, Some("GameTooltip".to_string()), None);
+        frame.id = 42;
+        frame.visible = true;
+        frame.alpha = 0.35;
+        state.widgets.register(frame);
+        state.tooltips.insert(
+            42,
+            TooltipData {
+                lines: vec![
+                    TooltipLine {
+                        left_text: "Header".to_string(),
+                        left_color: (1.0, 0.5, 0.25),
+                        right_text: Some("Right".to_string()),
+                        right_color: (0.2, 0.3, 0.4),
+                        wrap: false,
+                    },
+                    TooltipLine {
+                        left_text: "Body".to_string(),
+                        left_color: (0.1, 0.2, 0.3),
+                        right_text: None,
+                        right_color: (0.0, 0.0, 0.0),
+                        wrap: true,
+                    },
+                ],
+                ..TooltipData::default()
+            },
+        );
+
+        let data = collect_tooltip_data(&state);
+        let lines = &data.get(&42).unwrap().lines;
+
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0].font_size, TOOLTIP_HEADER_FONT_SIZE);
+        assert_eq!(lines[1].font_size, TOOLTIP_BODY_FONT_SIZE);
+        assert_eq!(lines[0].left_color, [1.0, 0.5, 0.25, 0.35]);
+        assert_eq!(lines[0].right_color, [0.2, 0.3, 0.4, 0.35]);
+        assert_eq!(lines[1].left_color, [0.1, 0.2, 0.3, 0.35]);
+        assert!(lines[1].wrap);
     }
 }
