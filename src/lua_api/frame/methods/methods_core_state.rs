@@ -459,12 +459,24 @@ fn add_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_get_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetScale", |lua, this, ()| {
+    add_scale_getter(methods, "GetScale", |frame| frame.scale);
+    add_set_scale(methods);
+    add_scale_getter(methods, "GetEffectiveScale", |frame| frame.effective_scale);
+}
+
+fn add_scale_getter<M, F>(methods: &mut M, name: &str, read: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> f32 + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).map(|f| f.scale).unwrap_or(1.0))
+        Ok(state.widgets.get(this.0).map(read).unwrap_or(1.0))
     });
+}
 
+fn add_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScale", |lua, this, scale: f32| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
@@ -489,16 +501,6 @@ fn add_get_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .propagate_effective_scale(id, parent_eff_scale);
         state.widgets.mark_rect_dirty(id);
         Ok(())
-    });
-
-    methods.add_method("GetEffectiveScale", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.effective_scale)
-            .unwrap_or(1.0))
     });
 }
 
