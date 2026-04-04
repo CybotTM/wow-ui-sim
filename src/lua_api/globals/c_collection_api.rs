@@ -374,50 +374,35 @@ fn register_heirloom(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
         "GetHeirloomInfo",
-        lua.create_function(|_, _item_id: i32| {
-            // Returns: name, itemEquipLoc, isPvP, itemTexture, upgradeLevel, source,
-            // searchFiltered, effectiveLevel, minLevel, maxLevel
-            Ok((
-                Value::Nil,
-                Value::Nil,
-                false,
-                0i32,
-                0i32,
-                0i32,
-                false,
-                0i32,
-                0i32,
-                0i32,
-            ))
-        })?,
+        lua.create_function(|_, _item_id: i32| empty_heirloom_info())?,
     )?;
-    t.set(
-        "GetHeirloomMaxUpgradeLevel",
-        lua.create_function(|_, _item_id: i32| Ok(0i32))?,
-    )?;
-    t.set("GetNumHeirlooms", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "GetNumKnownHeirlooms",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    t.set(
-        "PlayerHasHeirloom",
-        lua.create_function(|_, _item_id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "GetHeirloomLink",
-        lua.create_function(|_, _item_id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "CanHeirloomUpgradeFromPending",
-        lua.create_function(|_, _item_id: i32| Ok(false))?,
-    )?;
+    add_i32_stub_with_arg::<i32>(lua, &t, "GetHeirloomMaxUpgradeLevel", 0)?;
+    add_i32_stub(lua, &t, "GetNumHeirlooms", 0)?;
+    add_i32_stub(lua, &t, "GetNumKnownHeirlooms", 0)?;
+    add_bool_stub_with_arg::<i32>(lua, &t, "PlayerHasHeirloom", false)?;
+    add_nil_stub_with_arg::<i32>(lua, &t, "GetHeirloomLink")?;
+    add_bool_stub_with_arg::<i32>(lua, &t, "CanHeirloomUpgradeFromPending", false)?;
     t.set(
         "GetClassAndSpecFilters",
         lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
     )?;
     lua.globals().set("C_Heirloom", t)?;
     Ok(())
+}
+
+fn empty_heirloom_info() -> Result<(Value, Value, bool, i32, i32, i32, bool, i32, i32, i32)> {
+    Ok((
+        Value::Nil,
+        Value::Nil,
+        false,
+        0i32,
+        0i32,
+        0i32,
+        false,
+        0i32,
+        0i32,
+        0i32,
+    ))
 }
 
 /// C_TransmogSets namespace - transmog set collection.
