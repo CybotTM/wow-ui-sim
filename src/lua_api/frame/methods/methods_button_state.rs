@@ -10,32 +10,29 @@ pub(super) fn add_button_state_methods<M: mlua::UserDataMethods<FrameRef>>(metho
 }
 
 fn add_enable_disable_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_set_enabled_method(methods);
-    add_enable_method(methods);
-    add_disable_method(methods);
+    add_enabled_mutator_method(methods, "SetEnabled", Some(true));
+    add_enabled_mutator_method(methods, "Enable", None);
+    add_enabled_mutator_method(methods, "Disable", Some(false));
     add_is_enabled_method(methods);
 }
 
-fn add_set_enabled_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetEnabled", |lua, this, enabled: bool| {
+fn add_enabled_mutator_method<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &str,
+    explicit_value: Option<bool>,
+) {
+    if let Some(enabled) = explicit_value {
+        methods.add_method(name, move |lua, this, (): ()| {
+            let state_rc = get_sim_state(lua);
+            set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, enabled);
+            Ok(())
+        });
+        return;
+    }
+
+    methods.add_method(name, |lua, this, enabled: bool| {
         let state_rc = get_sim_state(lua);
         set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, enabled);
-        Ok(())
-    });
-}
-
-fn add_enable_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("Enable", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, true);
-        Ok(())
-    });
-}
-
-fn add_disable_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("Disable", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, false);
         Ok(())
     });
 }
