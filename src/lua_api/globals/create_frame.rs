@@ -49,59 +49,136 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             .name
             .as_ref()
             .and_then(|name| state_clone.borrow().widgets.get_id_by_name(name));
-        let frame_id = register_new_frame(
+        let frame_id = register_frame_from_args(&state_clone, widget_type, &cfa);
+        configure_frame_metadata(
+            lua,
             &state_clone,
+            frame_id,
             widget_type,
-            cfa.name.clone(),
-            cfa.parent_id,
-            cfa.parent_explicit,
+            &cfa.frame_type,
+            cfa.id,
         );
-        sync_frame_owner_to_lua(lua, &state_clone, frame_id);
-        // Store original type name when it differs from the WidgetType enum name,
-        // so GetObjectType() returns e.g. "ArchaeologyDigSiteFrame" instead of "Frame".
-        if !widget_type.as_str().eq_ignore_ascii_case(&cfa.frame_type) {
-            let obj_name = resolve_object_type_name(&cfa.frame_type);
-            if let Some(f) = state_clone.borrow_mut().widgets.get_mut_visual(frame_id) {
-                f.object_type_name = Some(obj_name);
-            }
-        }
-        apply_frame_id_arg(&state_clone, frame_id, cfa.id);
-        create_widget_type_defaults(lua, &mut state_clone.borrow_mut(), frame_id, widget_type);
-        if cfa.frame_type == "ItemButton" {
-            create_item_button_intrinsics(lua, &mut state_clone.borrow_mut(), frame_id);
-        }
-        let is_forbidden = state_clone
-            .borrow()
-            .widgets
-            .get(frame_id)
-            .map(|f| f.forbidden)
-            .unwrap_or(false);
+        let is_forbidden = frame_is_forbidden(&state_clone, frame_id);
         let ud = create_frame_userdata(lua, frame_id, cfa.name.as_deref(), is_forbidden)?;
         if let Some(old_id) = old_same_name {
             migrate_lua_fields_to_new_frame(lua, old_id, frame_id)?;
         }
-        store_widget_type_key(lua, &ud, widget_type, &cfa.frame_type)?;
-        if matches!(widget_type, WidgetType::Button | WidgetType::CheckButton)
-            && let Some(ref btn_name) = cfa.name
-        {
-            register_button_child_globals(lua, &state_clone, frame_id, btn_name)?;
-        }
-        if cfa.frame_type == "ItemButton" {
-            apply_item_button_mixin(lua, frame_id);
-        }
-        let ref_name = cfa.name.unwrap_or_else(|| format!("__frame_{}", frame_id));
-        apply_intrinsic_and_templates(
-            lua,
-            &state_clone,
-            &cfa.frame_type,
-            &ref_name,
-            cfa.template.as_deref(),
-            cfa.parent_id,
-            frame_id,
-        )?;
+        finalize_registered_frame(lua, &state_clone, frame_id, widget_type, &cfa, &ud)?;
         Ok(ud)
     })?;
     Ok(create_frame)
+}
+
+fn register_frame_from_args(
+    state: &Rc<RefCell<SimState>>,
+    widget_type: WidgetType,
+    cfa: &CreateFrameArgs,
+) -> u64 {
+    register_new_frame(
+        state,
+        widget_type,
+        cfa.name.clone(),
+        cfa.parent_id,
+        cfa.parent_explicit,
+    )
+}
+
+fn configure_frame_metadata(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    widget_type: WidgetType,
+    frame_type: &str,
+    frame_lua_id: Option<i32>,
+) {
+    sync_frame_owner_to_lua(lua, state, frame_id);
+    apply_object_type_name(state, frame_id, widget_type, frame_type);
+    apply_frame_id_arg(state, frame_id, frame_lua_id);
+    create_frame_widget_defaults(lua, state, frame_id, frame_type, widget_type);
+}
+
+fn apply_object_type_name(
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    widget_type: WidgetType,
+    frame_type: &str,
+) {
+    if widget_type.as_str().eq_ignore_ascii_case(frame_type) {
+        return;
+    }
+
+    let object_type_name = resolve_object_type_name(frame_type);
+    if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(frame_id) {
+        frame.object_type_name = Some(object_type_name);
+    }
+}
+
+fn create_frame_widget_defaults(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    frame_type: &str,
+    widget_type: WidgetType,
+) {
+    create_widget_type_defaults(lua, &mut state.borrow_mut(), frame_id, widget_type);
+    if frame_type == "ItemButton" {
+        create_item_button_intrinsics(lua, &mut state.borrow_mut(), frame_id);
+    }
+}
+
+fn frame_is_forbidden(state: &Rc<RefCell<SimState>>, frame_id: u64) -> bool {
+    state
+        .borrow()
+        .widgets
+        .get(frame_id)
+        .map(|frame| frame.forbidden)
+        .unwrap_or(false)
+}
+
+fn finalize_registered_frame(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    widget_type: WidgetType,
+    cfa: &CreateFrameArgs,
+    ud: &Value,
+) -> mlua::Result<()> {
+    store_widget_type_key(lua, ud, widget_type, &cfa.frame_type)?;
+    register_named_button_children(lua, state, frame_id, widget_type, cfa.name.as_deref())?;
+    if cfa.frame_type == "ItemButton" {
+        apply_item_button_mixin(lua, frame_id);
+    }
+
+    let ref_name = cfa
+        .name
+        .clone()
+        .unwrap_or_else(|| format!("__frame_{}", frame_id));
+    apply_intrinsic_and_templates(
+        lua,
+        state,
+        &cfa.frame_type,
+        &ref_name,
+        cfa.template.as_deref(),
+        cfa.parent_id,
+        frame_id,
+    )
+}
+
+fn register_named_button_children(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+    widget_type: WidgetType,
+    frame_name: Option<&str>,
+) -> mlua::Result<()> {
+    if !matches!(widget_type, WidgetType::Button | WidgetType::CheckButton) {
+        return Ok(());
+    }
+
+    let Some(button_name) = frame_name else {
+        return Ok(());
+    };
+    register_button_child_globals(lua, state, frame_id, button_name)
 }
 
 fn resolve_object_type_name(frame_type: &str) -> String {
