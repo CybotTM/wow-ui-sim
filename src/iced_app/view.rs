@@ -441,7 +441,30 @@ impl App {
             self.screen_size.get().height,
         );
 
-        let title = Self::inspector_title_bar(&name, &widget_type);
+        let content = self.inspector_panel_content(
+            frame,
+            frame_id,
+            &state.widgets,
+            &state.addons,
+            &name,
+            &widget_type,
+            computed_rect,
+        );
+
+        Self::position_inspector_panel(content, self.inspector_position)
+    }
+
+    fn inspector_panel_content(
+        &self,
+        frame: Option<&crate::widget::Frame>,
+        frame_id: u64,
+        widgets: &crate::widget::WidgetRegistry,
+        addons: &[crate::lua_api::state::AddonInfo],
+        name: &str,
+        widget_type: &str,
+        computed_rect: LayoutRect,
+    ) -> Column<'_, Message> {
+        let title = Self::inspector_title_bar(name, widget_type);
         let id_row = text(format!(
             "ID: {}  Pos: ({:.0}, {:.0})",
             frame_id, computed_rect.x, computed_rect.y
@@ -451,15 +474,13 @@ impl App {
         let size_row = self.inspector_size_row();
         let alpha_level_row = self.inspector_alpha_level_row();
         let checkbox_row = self.inspector_checkbox_row();
+        let parent_chain = Self::inspector_parent_chain(widgets, addons, frame_id);
         let anchors_display = Self::inspector_anchors_display(frame);
-
         let apply_btn = button(text("Apply").size(12))
             .on_press(Message::InspectorApply)
             .padding(Padding::from([4, 12]));
 
-        let parent_chain = Self::inspector_parent_chain(&state.widgets, &state.addons, frame_id);
-
-        let content = column![
+        column![
             title,
             id_row,
             size_row,
@@ -471,9 +492,7 @@ impl App {
             apply_btn,
         ]
         .spacing(6)
-        .padding(8);
-
-        Self::position_inspector_panel(content, self.inspector_position)
+        .padding(8)
     }
 
     /// Extract name, type, and computed rect for the inspected frame.
