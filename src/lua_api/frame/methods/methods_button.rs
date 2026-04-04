@@ -1,6 +1,7 @@
 //! Button-specific methods: SetNormalTexture, SetPushedTexture, font objects, etc.
 
 use super::super::handle::FrameRef;
+use super::methods_button_state;
 use super::methods_helpers::get_or_create_button_texture;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state, sync_child_to_lua};
 use mlua::Value;
@@ -17,9 +18,7 @@ pub fn add_button_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_clear_texture_methods(methods);
     add_three_slice_methods(methods);
     add_font_string_methods(methods);
-    add_enable_disable_methods(methods);
-    add_click_methods(methods);
-    add_button_state_methods(methods);
+    methods_button_state::add_button_state_methods(methods);
 }
 
 /// Set/Get font objects for normal, highlight, and disabled states.
@@ -214,7 +213,7 @@ fn apply_set_button_texture_path(
 }
 
 /// Determine if a button texture child should be visible based on button state.
-fn button_texture_should_show(
+pub(super) fn button_texture_should_show(
     state: &crate::lua_api::SimState,
     button_id: u64,
     parent_key: &str,
@@ -601,181 +600,4 @@ fn set_font_string_impl(lua: &mlua::Lua, button_id: u64, fontstring: Value) -> m
         sync_child_to_lua(lua, button_id, "Text", fs_id)?;
     }
     Ok(())
-}
-
-/// SetEnabled, Enable, Disable, IsEnabled.
-fn add_enable_disable_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetEnabled", |lua, this, enabled: bool| {
-        let state_rc = get_sim_state(lua);
-        set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, enabled);
-        Ok(())
-    });
-
-    methods.add_method("Enable", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, true);
-        Ok(())
-    });
-
-    methods.add_method("Disable", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        set_enabled_attribute(&mut state_rc.borrow_mut(), this.0, false);
-        Ok(())
-    });
-
-    methods.add_method("IsEnabled", |lua, this, ()| {
-        let id = this.0;
-        if let Some((func, ud_val)) =
-            super::methods_helpers::get_mixin_override(lua, id, "IsEnabled")
-        {
-            return func.call::<Value>(ud_val);
-        }
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let enabled = state
-            .widgets
-            .get(id)
-            .and_then(|f| f.attributes.get("__enabled"))
-            .and_then(|v| {
-                if let crate::widget::AttributeValue::Boolean(b) = v {
-                    Some(*b)
-                } else {
-                    None
-                }
-            })
-            .unwrap_or(true);
-        Ok(Value::Boolean(enabled))
-    });
-}
-
-/// Update the `__enabled` attribute on a widget.
-fn set_enabled_attribute(state: &mut crate::lua_api::SimState, id: u64, enabled: bool) {
-    if let Some(frame) = state.widgets.get(id) {
-        if let Some(crate::widget::AttributeValue::Boolean(cur)) = frame.attributes.get("__enabled")
-        {
-            if *cur == enabled {
-                return;
-            }
-        }
-    }
-    if let Some(frame) = state.widgets.get_mut_visual(id) {
-        frame.attributes.insert(
-            "__enabled".to_string(),
-            crate::widget::AttributeValue::Boolean(enabled),
-        );
-        if !enabled {
-            frame.button_state = 0;
-        }
-    }
-    update_button_texture_visibility(state, id);
-}
-
-/// Update visibility of all button texture children based on current state.
-fn update_button_texture_visibility(state: &mut crate::lua_api::SimState, button_id: u64) {
-    let keys: Vec<(String, u64)> = state
-        .widgets
-        .get(button_id)
-        .map(|f| {
-            [
-                "NormalTexture",
-                "PushedTexture",
-                "DisabledTexture",
-                "HighlightTexture",
-            ]
-            .iter()
-            .filter_map(|k| f.children_keys.get(*k).map(|&id| (k.to_string(), id)))
-            .collect()
-        })
-        .unwrap_or_default();
-    for (key, tex_id) in keys {
-        let should_show = button_texture_should_show(state, button_id, &key);
-        state.widgets.set_visible(tex_id, should_show);
-    }
-}
-
-/// Click, RegisterForClicks.
-fn add_click_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("Click", |lua, this, ()| {
-        let id = this.0;
-        if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, id, "OnClick") {
-            let frame_val = frame_ref(lua, id)?;
-            let button = lua.create_string("LeftButton")?;
-            handler.call::<()>((frame_val, button, false))?;
-        }
-        Ok(())
-    });
-
-    methods.add_method("RegisterForClicks", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
-}
-
-/// SetButtonState / GetButtonState.
-fn add_button_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_set_button_state(methods);
-    add_get_button_state(methods);
-    methods.add_method("LockHighlight", |_, _this, ()| Ok(()));
-    methods.add_method("UnlockHighlight", |_, _this, ()| Ok(()));
-}
-
-fn add_set_button_state<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "SetButtonState",
-        |lua, this, (state_str, _locked): (String, Option<bool>)| {
-            let id = this.0;
-            let state_rc = get_sim_state(lua);
-            if state_str.eq_ignore_ascii_case("PUSHED") {
-                let mut state = state_rc.borrow_mut();
-                if let Some(f) = state.widgets.get_mut_visual(id) {
-                    f.button_state = 1;
-                }
-                set_enabled_attribute(&mut state, id, true);
-                update_button_texture_visibility(&mut state, id);
-            } else if state_str.eq_ignore_ascii_case("NORMAL") {
-                let mut state = state_rc.borrow_mut();
-                if let Some(f) = state.widgets.get_mut_visual(id) {
-                    f.button_state = 0;
-                }
-                set_enabled_attribute(&mut state, id, true);
-                update_button_texture_visibility(&mut state, id);
-            } else if state_str.eq_ignore_ascii_case("DISABLED") {
-                let mut state = state_rc.borrow_mut();
-                set_enabled_attribute(&mut state, id, false);
-            } else {
-                return Err(mlua::Error::runtime(format!(
-                    "Usage: Button:SetButtonState(\"state\"): Unknown button state ({})",
-                    state_str
-                )));
-            }
-            Ok(())
-        },
-    );
-}
-
-fn add_get_button_state<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetButtonState", |lua, this, ()| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        if let Some(f) = state.widgets.get(id) {
-            let enabled = f
-                .attributes
-                .get("__enabled")
-                .and_then(|v| match v {
-                    crate::widget::AttributeValue::Boolean(b) => Some(*b),
-                    _ => None,
-                })
-                .unwrap_or(true);
-            if !enabled {
-                return Ok("DISABLED".to_string());
-            }
-            return Ok(if f.button_state == 1 {
-                "PUSHED"
-            } else {
-                "NORMAL"
-            }
-            .to_string());
-        }
-        Ok("NORMAL".to_string())
-    });
 }

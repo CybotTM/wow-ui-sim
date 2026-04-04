@@ -9,6 +9,7 @@ mod methods_anim_proxy;
 mod methods_attribute;
 mod methods_backdrop;
 mod methods_button;
+mod methods_button_state;
 pub(crate) mod methods_core;
 mod methods_create;
 mod methods_event;
