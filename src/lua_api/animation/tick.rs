@@ -287,47 +287,48 @@ fn apply_flipbook_uv(
 
 /// Apply flipbook UV effects for a group (used when pausing to show current frame).
 pub fn apply_flipbook_for_group(state: &mut SimState, group_id: u64) {
-    let flipbook_data: Vec<(Option<String>, u32, u32, u32, f64)> = {
-        let Some(group) = state.animation_groups.get(&group_id) else {
-            return;
-        };
-        group
-            .animations
-            .iter()
-            .filter(|a| a.anim_type == AnimationType::FlipBook)
-            .map(|a| {
-                let progress = a.smooth_progress();
-                (
-                    a.child_key.clone(),
-                    a.flip_book_rows,
-                    a.flip_book_columns,
-                    a.flip_book_frames,
-                    progress,
-                )
-            })
-            .collect()
+    let Some((owner_id, flipbook_data)) = collect_flipbook_group_data(state, group_id) else {
+        return;
     };
 
-    let owner_id = {
-        let Some(group) = state.animation_groups.get(&group_id) else {
-            return;
-        };
-        group.owner_frame_id
-    };
+    for flipbook in &flipbook_data {
+        apply_flipbook_to_target(state, owner_id, flipbook);
+    }
+}
 
-    for (child_key, rows, cols, frames, progress) in flipbook_data {
-        let target_id = match &child_key {
-            Some(key) => state
-                .widgets
-                .get(owner_id)
-                .and_then(|owner| owner.children_keys.get(key.as_str()).copied()),
-            None => Some(owner_id),
-        };
-        if let Some(id) = target_id {
-            if let Some(frame) = state.widgets.get_mut(id) {
-                apply_flipbook_uv(frame, rows, cols, frames, progress);
-            }
-        }
+fn collect_flipbook_group_data(
+    state: &SimState,
+    group_id: u64,
+) -> Option<(u64, Vec<(Option<String>, u32, u32, u32, f64)>)> {
+    let group = state.animation_groups.get(&group_id)?;
+    let flipbook_data = group
+        .animations
+        .iter()
+        .filter(|anim| anim.anim_type == AnimationType::FlipBook)
+        .map(|anim| {
+            (
+                anim.child_key.clone(),
+                anim.flip_book_rows,
+                anim.flip_book_columns,
+                anim.flip_book_frames,
+                anim.smooth_progress(),
+            )
+        })
+        .collect();
+    Some((group.owner_frame_id, flipbook_data))
+}
+
+fn apply_flipbook_to_target(
+    state: &mut SimState,
+    owner_id: u64,
+    flipbook: &(Option<String>, u32, u32, u32, f64),
+) {
+    let (child_key, rows, cols, frames, progress) = flipbook;
+    let target_id = resolve_effect_target_id(state, owner_id, child_key.as_deref());
+    if let Some(id) = target_id
+        && let Some(frame) = state.widgets.get_mut(id)
+    {
+        apply_flipbook_uv(frame, *rows, *cols, *frames, *progress);
     }
 }
 
