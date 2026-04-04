@@ -33,44 +33,83 @@ pub fn add_misc_widget_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 // --- SimpleHTML ---
 
 fn add_simplehtml_hyperlink_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetHyperlinkFormat", |lua, this, format: String| {
+    add_simplehtml_string_setter(methods, "SetHyperlinkFormat", |data, value| {
+        data.hyperlink_format = value
+    });
+    add_simplehtml_string_getter(methods, "GetHyperlinkFormat", "|H%s|h%s|h", |data| {
+        data.hyperlink_format.clone()
+    });
+    add_simplehtml_bool_setter(methods, "SetHyperlinksEnabled", |data, value| {
+        data.hyperlinks_enabled = value
+    });
+    add_simplehtml_bool_getter(methods, "GetHyperlinksEnabled", true, |data| {
+        data.hyperlinks_enabled
+    });
+}
+
+fn add_simplehtml_string_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::simple_html::SimpleHtmlData, String) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(data) = state.simple_htmls.get_mut(&this.0) {
-            data.hyperlink_format = format;
+            setter(data, value);
         }
         Ok(())
     });
+}
 
-    methods.add_method("GetHyperlinkFormat", |lua, this, ()| {
+fn add_simplehtml_string_getter<M, F>(
+    methods: &mut M,
+    name: &'static str,
+    default: &'static str,
+    getter: F,
+) where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::lua_api::simple_html::SimpleHtmlData) -> String + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let format = state
+        Ok(state
             .simple_htmls
             .get(&this.0)
-            .map(|d| d.hyperlink_format.clone())
-            .unwrap_or_else(|| "|H%s|h%s|h".to_string());
-        Ok(format)
+            .map(getter)
+            .unwrap_or_else(|| default.to_string()))
     });
+}
 
-    methods.add_method("SetHyperlinksEnabled", |lua, this, enabled: bool| {
+fn add_simplehtml_bool_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::simple_html::SimpleHtmlData, bool) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(data) = state.simple_htmls.get_mut(&this.0) {
-            data.hyperlinks_enabled = enabled;
+            setter(data, value);
         }
         Ok(())
     });
+}
 
-    methods.add_method("GetHyperlinksEnabled", |lua, this, ()| {
+fn add_simplehtml_bool_getter<M, F>(methods: &mut M, name: &'static str, default: bool, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::lua_api::simple_html::SimpleHtmlData) -> bool + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let enabled = state
+        Ok(state
             .simple_htmls
             .get(&this.0)
-            .map(|d| d.hyperlinks_enabled)
-            .unwrap_or(true);
-        Ok(enabled)
+            .map(getter)
+            .unwrap_or(default))
     });
 }
 
