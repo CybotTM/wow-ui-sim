@@ -102,6 +102,17 @@ fn register_metadata_by_index(
     c_addons: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_addon_name_by_index(lua, c_addons, state)?;
+    register_addon_title_by_index(lua, c_addons, state)?;
+    register_addon_notes_by_index(lua, c_addons, state)?;
+    Ok(())
+}
+
+fn register_addon_name_by_index(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "GetAddOnName",
@@ -113,7 +124,14 @@ fn register_metadata_by_index(
             }
         })?,
     )?;
+    Ok(())
+}
 
+fn register_addon_title_by_index(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "GetAddOnTitle",
@@ -125,7 +143,14 @@ fn register_metadata_by_index(
             }
         })?,
     )?;
+    Ok(())
+}
 
+fn register_addon_notes_by_index(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "GetAddOnNotes",
