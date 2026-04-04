@@ -22,6 +22,7 @@ mod methods_rect;
 mod methods_script;
 mod methods_text;
 mod methods_texture;
+mod methods_texture_visual;
 pub(crate) mod methods_visibility;
 mod methods_widget;
 mod widget_cooldown;
