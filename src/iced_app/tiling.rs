@@ -211,12 +211,14 @@ fn emit_uv_repeat_tiled(
     if info.rotated {
         emit_rotated_horiz_tiles(
             batch,
-            bounds,
-            &info,
-            tex_path,
-            tile_size.0,
-            tint,
-            f.blend_mode,
+            RotatedHorizTileStrip {
+                bounds,
+                info: &info,
+                tex_path,
+                tile_w: tile_size.0,
+                tint,
+                blend: f.blend_mode,
+            },
         );
         return;
     }
@@ -279,34 +281,31 @@ fn uv_repeat_region(tex_path: &str, info: &UvRepeatInfo) -> (String, Rectangle) 
 
 /// Emit horizontally tiled quads with rotated UV mapping (U→vertical, V→horizontal).
 /// Used for BackdropTemplateMixin TopEdge/BottomEdge where V maps to screen horizontal.
-#[allow(clippy::too_many_arguments)]
-fn emit_rotated_horiz_tiles(
-    batch: &mut QuadBatch,
-    bounds: Rectangle,
-    info: &UvRepeatInfo,
-    tex_path: &str,
-    tile_w: f32,
-    tint: [f32; 4],
-    blend: BlendMode,
-) {
+fn emit_rotated_horiz_tiles(batch: &mut QuadBatch, strip: RotatedHorizTileStrip<'_>) {
     // Crop the UV sub-region into its own atlas slot to prevent bilinear bleed.
     let sub_uvs = Rectangle::new(
-        Point::new(info.u_min, info.v_start),
-        Size::new(info.u_max - info.u_min, 1.0 - info.v_start),
+        Point::new(strip.info.u_min, strip.info.v_start),
+        Size::new(
+            strip.info.u_max - strip.info.u_min,
+            1.0 - strip.info.v_start,
+        ),
     );
-    let (cropped_path, _) = crop_path_for_subregion(tex_path, &sub_uvs);
+    let (cropped_path, _) = crop_path_for_subregion(strip.tex_path, &sub_uvs);
     // After cropping, UVs are remapped to full [0,1] range within the cropped slot.
     let u_min = 0.0_f32;
     let u_max = 1.0_f32;
     let v_start = 0.0_f32;
     let v_range = 1.0_f32;
 
-    let mut x = bounds.x;
-    while x < bounds.x + bounds.width {
-        let w = (bounds.x + bounds.width - x).min(tile_w);
-        let tile_bounds = Rectangle::new(Point::new(x, bounds.y), Size::new(w, bounds.height));
-        let v_extent = if w < tile_w {
-            v_range * (w / tile_w)
+    let mut x = strip.bounds.x;
+    while x < strip.bounds.x + strip.bounds.width {
+        let w = (strip.bounds.x + strip.bounds.width - x).min(strip.tile_w);
+        let tile_bounds = Rectangle::new(
+            Point::new(x, strip.bounds.y),
+            Size::new(w, strip.bounds.height),
+        );
+        let v_extent = if w < strip.tile_w {
+            v_range * (w / strip.tile_w)
         } else {
             v_range
         };
@@ -317,9 +316,18 @@ fn emit_rotated_horiz_tiles(
             [u_max, v_start],            // BR: bottom of strip, left side of V tile
             [u_max, v_start + v_extent], // BL: bottom of strip, right side of V tile
         ];
-        batch.push_textured_path_uv4(tile_bounds, uvs, &cropped_path, tint, blend);
-        x += tile_w;
+        batch.push_textured_path_uv4(tile_bounds, uvs, &cropped_path, strip.tint, strip.blend);
+        x += strip.tile_w;
     }
+}
+
+struct RotatedHorizTileStrip<'a> {
+    bounds: Rectangle,
+    info: &'a UvRepeatInfo,
+    tex_path: &'a str,
+    tile_w: f32,
+    tint: [f32; 4],
+    blend: BlendMode,
 }
 
 /// Emit horizontally tiled texture quads.
