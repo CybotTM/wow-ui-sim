@@ -4,6 +4,31 @@ use super::super::handle::FrameRef;
 use super::widget_tooltip::{fire_tooltip_script, val_to_f32};
 use crate::lua_api::frame::handle::get_sim_state;
 
+const EDITBOX_VARIADIC_STUBS: &[&str] = &[
+    "ClearHighlightText",
+    "ClearHistory",
+    "ResetInputMode",
+    "SetAlphabeticOnly",
+    "SetAltArrowKeyMode",
+    "SetHighlightColor",
+    "SetNumericFullRange",
+    "SetSecureText",
+    "SetSecurityDisablePaste",
+    "SetVisibleTextByteLimit",
+    "ToggleInputLanguage",
+];
+
+const EDITBOX_FALSE_GETTERS: &[&str] = &[
+    "GetAltArrowKeyMode",
+    "GetIndentedWordWrap",
+    "HasText",
+    "IsAlphabeticOnly",
+    "IsCountInvisibleLetters",
+    "IsInIMECompositionMode",
+    "IsNumericFullRange",
+    "IsSecureText",
+];
+
 pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_editbox_focus_methods(methods);
     add_editbox_cursor_methods(methods);
@@ -19,64 +44,40 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 }
 
 fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "ClearHighlightText",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "ClearHistory",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method("GetAltArrowKeyMode", |_, _this, ()| Ok(false));
+    add_editbox_variadic_stubs(methods, EDITBOX_VARIADIC_STUBS);
+    add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
+    add_editbox_i32_getter(methods, "GetUTF8CursorPosition", 0);
+    add_editbox_i32_getter(methods, "GetVisibleTextByteLimit", 0);
     methods.add_method("GetDisplayText", |_, _this, ()| Ok("".to_string()));
     methods.add_method("GetHighlightColor", |_, _this, ()| {
         Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
     });
-    methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
-    methods.add_method("GetUTF8CursorPosition", |_, _this, ()| Ok(0i32));
-    methods.add_method("GetVisibleTextByteLimit", |_, _this, ()| Ok(0i32));
-    methods.add_method("HasText", |_, _this, ()| Ok(false));
-    methods.add_method("IsAlphabeticOnly", |_, _this, ()| Ok(false));
-    methods.add_method("IsCountInvisibleLetters", |_, _this, ()| Ok(false));
-    methods.add_method("IsInIMECompositionMode", |_, _this, ()| Ok(false));
-    methods.add_method("IsNumericFullRange", |_, _this, ()| Ok(false));
-    methods.add_method("IsSecureText", |_, _this, ()| Ok(false));
-    methods.add_method(
-        "ResetInputMode",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetAlphabeticOnly",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetAltArrowKeyMode",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetHighlightColor",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetNumericFullRange",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetSecureText",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetSecurityDisablePaste",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetVisibleTextByteLimit",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
-    methods.add_method(
-        "ToggleInputLanguage",
-        |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()),
-    );
+}
+
+fn add_editbox_variadic_stubs<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    names: &[&'static str],
+) {
+    for name in names {
+        methods.add_method(*name, |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
+    }
+}
+
+fn add_editbox_false_getters<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    names: &[&'static str],
+) {
+    for name in names {
+        methods.add_method(*name, |_, _this, ()| Ok(false));
+    }
+}
+
+fn add_editbox_i32_getter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    value: i32,
+) {
+    methods.add_method(name, move |_, _this, ()| Ok(value));
 }
 
 fn add_editbox_focus_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
