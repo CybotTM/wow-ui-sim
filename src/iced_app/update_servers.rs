@@ -1,5 +1,7 @@
 //! Debug server, Lua REPL, and inspector update handlers.
 
+use std::sync::mpsc;
+
 use iced::{Task, window};
 use iced_layout_inspector::server::Command as DebugCommand;
 
@@ -56,45 +58,45 @@ impl App {
     }
 
     pub(crate) fn process_lua_commands(&mut self) {
-        let commands: Vec<_> = self
-            .lua_rx
-            .as_ref()
-            .map(|rx| std::iter::from_fn(|| rx.try_recv().ok()).collect())
-            .unwrap_or_default();
+        let commands = drain_lua_commands(self.lua_rx.as_ref());
 
         for cmd in commands {
-            match cmd {
-                LuaCommand::Exec { code, respond } => {
-                    let response = self.exec_lua_command(&code);
-                    let _ = respond.send(response);
-                    self.drain_console();
-                    self.mark_all_strata_dirty();
-                }
-                LuaCommand::DumpTree {
-                    filter,
-                    visible_only,
-                    respond,
-                } => {
-                    let tree = self.build_frame_tree_dump(filter.as_deref(), visible_only);
-                    let _ = respond.send(LuaResponse::Tree(tree));
-                }
-                LuaCommand::Screenshot {
-                    output,
+            self.handle_lua_command(cmd);
+        }
+    }
+
+    fn handle_lua_command(&mut self, cmd: LuaCommand) {
+        match cmd {
+            LuaCommand::Exec { code, respond } => {
+                let response = self.exec_lua_command(&code);
+                let _ = respond.send(response);
+                self.drain_console();
+                self.mark_all_strata_dirty();
+            }
+            LuaCommand::DumpTree {
+                filter,
+                visible_only,
+                respond,
+            } => {
+                let tree = self.build_frame_tree_dump(filter.as_deref(), visible_only);
+                let _ = respond.send(LuaResponse::Tree(tree));
+            }
+            LuaCommand::Screenshot {
+                output,
+                width,
+                height,
+                filter,
+                crop,
+                respond,
+            } => {
+                let result = self.render_screenshot(
+                    &output,
                     width,
                     height,
-                    filter,
-                    crop,
-                    respond,
-                } => {
-                    let result = self.render_screenshot(
-                        &output,
-                        width,
-                        height,
-                        filter.as_deref(),
-                        crop.as_deref(),
-                    );
-                    let _ = respond.send(result);
-                }
+                    filter.as_deref(),
+                    crop.as_deref(),
+                );
+                let _ = respond.send(result);
             }
         }
     }
@@ -221,9 +223,16 @@ fn combine_console_and_captured(console: String, captured: String) -> String {
     }
 }
 
+fn drain_lua_commands(rx: Option<&mpsc::Receiver<LuaCommand>>) -> Vec<LuaCommand> {
+    rx.map(|rx| std::iter::from_fn(|| rx.try_recv().ok()).collect())
+        .unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
-    use super::combine_console_and_captured;
+    use super::{combine_console_and_captured, drain_lua_commands};
+    use crate::lua_server::LuaCommand;
+    use std::sync::mpsc;
 
     #[test]
     fn combine_console_and_captured_prefers_newline_when_both_present() {
@@ -239,5 +248,29 @@ mod tests {
             combine_console_and_captured("console".to_string(), String::new()),
             "console"
         );
+    }
+
+    #[test]
+    fn drain_lua_commands_collects_all_pending_messages() {
+        let (tx, rx) = mpsc::channel();
+        let (respond, _recv) = mpsc::channel();
+        tx.send(LuaCommand::Exec {
+            code: "print('one')".to_string(),
+            respond: respond.clone(),
+        })
+        .unwrap();
+        tx.send(LuaCommand::DumpTree {
+            filter: Some("Foo".to_string()),
+            visible_only: true,
+            respond,
+        })
+        .unwrap();
+
+        let commands = drain_lua_commands(Some(&rx));
+
+        assert_eq!(commands.len(), 2);
+        assert!(matches!(commands[0], LuaCommand::Exec { .. }));
+        assert!(matches!(commands[1], LuaCommand::DumpTree { .. }));
+        assert!(drain_lua_commands(Some(&rx)).is_empty());
     }
 }
