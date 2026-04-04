@@ -184,24 +184,8 @@ fn add_colorselect_hsv_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame
-                .attributes
-                .insert("colorR".to_string(), AttributeValue::Number(r));
-            frame
-                .attributes
-                .insert("colorG".to_string(), AttributeValue::Number(g));
-            frame
-                .attributes
-                .insert("colorB".to_string(), AttributeValue::Number(b));
-            frame
-                .attributes
-                .insert("colorH".to_string(), AttributeValue::Number(h % 360.0));
-            frame
-                .attributes
-                .insert("colorS".to_string(), AttributeValue::Number(s));
-            frame
-                .attributes
-                .insert("colorV".to_string(), AttributeValue::Number(v));
+            set_color_rgb_attrs(frame, r, g, b);
+            set_color_hsv_attrs(frame, h, s, v);
         }
         Ok(())
     });
@@ -214,6 +198,30 @@ fn add_colorselect_hsv_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         }
         Ok((0.0, 0.0, 1.0))
     });
+}
+
+fn set_color_rgb_attrs(frame: &mut crate::widget::Frame, r: f64, g: f64, b: f64) {
+    frame
+        .attributes
+        .insert("colorR".to_string(), AttributeValue::Number(r));
+    frame
+        .attributes
+        .insert("colorG".to_string(), AttributeValue::Number(g));
+    frame
+        .attributes
+        .insert("colorB".to_string(), AttributeValue::Number(b));
+}
+
+fn set_color_hsv_attrs(frame: &mut crate::widget::Frame, h: f64, s: f64, v: f64) {
+    frame
+        .attributes
+        .insert("colorH".to_string(), AttributeValue::Number(h % 360.0));
+    frame
+        .attributes
+        .insert("colorS".to_string(), AttributeValue::Number(s));
+    frame
+        .attributes
+        .insert("colorV".to_string(), AttributeValue::Number(v));
 }
 
 fn get_color_hsv_from_attrs(
