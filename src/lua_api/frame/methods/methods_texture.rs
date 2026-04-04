@@ -113,39 +113,38 @@ fn add_set_color_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// SetHorizTile, GetHorizTile, SetVertTile, GetVertTile.
 fn add_tiling_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetHorizTile", |lua, this, tile: bool| {
+    add_tile_setter(methods, "SetHorizTile", |frame, tile| {
+        frame.horiz_tile = tile
+    });
+    add_tile_getter(methods, "GetHorizTile", |frame| frame.horiz_tile);
+    add_tile_setter(methods, "SetVertTile", |frame, tile| frame.vert_tile = tile);
+    add_tile_getter(methods, "GetVertTile", |frame| frame.vert_tile);
+}
+
+fn add_tile_setter<M, F>(methods: &mut M, name: &str, update: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut Frame, bool) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, tile: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.horiz_tile = tile;
+            update(frame, tile);
         }
         Ok(())
     });
-    methods.add_method("GetHorizTile", |lua, this, ()| {
+}
+
+fn add_tile_getter<M, F>(methods: &mut M, name: &str, read: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&Frame) -> bool + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.horiz_tile)
-            .unwrap_or(false))
-    });
-    methods.add_method("SetVertTile", |lua, this, tile: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.vert_tile = tile;
-        }
-        Ok(())
-    });
-    methods.add_method("GetVertTile", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.vert_tile)
-            .unwrap_or(false))
+        Ok(state.widgets.get(this.0).map(read).unwrap_or(false))
     });
 }
 
