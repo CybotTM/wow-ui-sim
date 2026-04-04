@@ -252,40 +252,32 @@ fn default_party_member() -> PartyMember {
 // ---------------------------------------------------------------------------
 
 fn register_movement_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    set_fn(lua, t, "SetMoving", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().player.movement.moving = v;
-            Ok(())
-        }
+    add_movement_bool_setter(lua, t, "SetMoving", Rc::clone(&state), |movement, value| {
+        movement.moving = value;
     })?;
-    set_fn(lua, t, "SetMounted", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().player.movement.mounted = v;
-            Ok(())
-        }
+    add_movement_bool_setter(
+        lua,
+        t,
+        "SetMounted",
+        Rc::clone(&state),
+        |movement, value| {
+            movement.mounted = value;
+        },
+    )?;
+    add_movement_bool_setter(lua, t, "SetFlying", Rc::clone(&state), |movement, value| {
+        movement.flying = value;
     })?;
-    set_fn(lua, t, "SetFlying", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().player.movement.flying = v;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetFalling", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().player.movement.falling = v;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetSwimming", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().player.movement.swimming = v;
-            Ok(())
-        }
+    add_movement_bool_setter(
+        lua,
+        t,
+        "SetFalling",
+        Rc::clone(&state),
+        |movement, value| {
+            movement.falling = value;
+        },
+    )?;
+    add_movement_bool_setter(lua, t, "SetSwimming", state, |movement, value| {
+        movement.swimming = value;
     })?;
     Ok(())
 }
@@ -410,6 +402,22 @@ where
 {
     set_fn(lua, t, name, move |_, value: i32| {
         apply(&mut state.borrow_mut().player, value);
+        Ok(())
+    })
+}
+
+fn add_movement_bool_setter<F>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    apply: F,
+) -> Result<()>
+where
+    F: Fn(&mut crate::lua_api::state::MovementState, bool) + 'static,
+{
+    set_fn(lua, t, name, move |_, value: bool| {
+        apply(&mut state.borrow_mut().player.movement, value);
         Ok(())
     })
 }
