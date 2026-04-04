@@ -6,6 +6,7 @@
 mod children;
 pub(crate) mod direct;
 mod elements;
+mod elements_text;
 
 use crate::loader::chunk_cache;
 use crate::loader::helpers_anim::generate_animation_group_code;
@@ -158,17 +159,17 @@ fn apply_single_template(
 
     // Apply StatusBar BarTexture
     if let Some(bar) = template.bar_texture() {
-        elements::create_bar_texture_from_template(lua, bar, frame_name, frame_name);
+        elements_text::create_bar_texture_from_template(lua, bar, frame_name, frame_name);
     }
 
     // Apply Slider ThumbTexture
     if let Some(thumb) = template.thumb_texture() {
-        elements::create_thumb_texture_from_template(lua, thumb, frame_name, frame_name);
+        elements_text::create_thumb_texture_from_template(lua, thumb, frame_name, frame_name);
     }
 
     // Apply ButtonText and EditBox FontString
     apply_button_text(lua, template, frame_name, frame_name);
-    elements::apply_button_text_attribute(lua, template, frame_name);
+    elements_text::apply_button_text_attribute(lua, template, frame_name);
     apply_editbox_fontstring(lua, template, frame_name, frame_name);
     apply_button_fonts(lua, template, frame_name);
     apply_animation_groups(lua, template, frame_name);
@@ -303,7 +304,7 @@ fn apply_layers(lua: &Lua, template: &FrameXml, frame_name: &str, subst_parent: 
                         );
                     }
                     LayerElement::FontString(f) => {
-                        elements::create_fontstring_from_template(
+                        elements_text::create_fontstring_from_template(
                             lua,
                             f,
                             frame_name,
@@ -341,7 +342,7 @@ fn apply_button_textures(lua: &Lua, template: &FrameXml, frame_name: &str, subst
     ];
     for &(parent_key, setter, tex_opt) in texture_specs {
         if let Some(tex) = tex_opt {
-            elements::create_button_texture_from_template(
+            elements_text::create_button_texture_from_template(
                 lua,
                 tex,
                 frame_name,
@@ -541,7 +542,7 @@ fn apply_inline_button_textures(
     ];
     for &(parent_key, setter, tex_opt) in texture_specs {
         if let Some(tex) = tex_opt {
-            elements::create_button_texture_from_template(
+            elements_text::create_button_texture_from_template(
                 lua,
                 tex,
                 frame_name,
@@ -563,7 +564,7 @@ fn apply_button_text(
     let Some(fs) = frame.button_text() else {
         return;
     };
-    elements::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
+    elements_text::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
     // Only apply SetAllPoints when the ButtonText has no explicit anchors.
     // Templates like ChatTabTemplate define explicit anchors (e.g. CENTER 0 -5)
     // that would be wiped by SetAllPoints.
@@ -615,7 +616,7 @@ fn apply_editbox_fontstring(
     let Some(fs) = frame.font_string_child() else {
         return;
     };
-    elements::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
+    elements_text::create_fontstring_from_template(lua, fs, frame_name, subst_parent, "OVERLAY");
 }
 
 /// Get size values from a SizeXml.

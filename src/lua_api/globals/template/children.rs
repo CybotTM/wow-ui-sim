@@ -1,8 +1,8 @@
 use super::{
     apply_animation_groups, apply_button_text, apply_editbox_fontstring,
     apply_inline_button_textures, apply_inline_key_values, apply_mixin,
-    apply_templates_from_registry, defer_child_onload, direct, elements, frame_element_type,
-    lua_global_ref, pop_suppress, push_suppress, rand_id,
+    apply_templates_from_registry, defer_child_onload, direct, elements, elements_text,
+    frame_element_type, lua_global_ref, pop_suppress, push_suppress, rand_id,
 };
 use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
@@ -223,15 +223,15 @@ fn apply_inline_frame_content(
     super::apply_layers(lua, frame, frame_name, subst_parent);
 
     if let Some(thumb) = frame.thumb_texture() {
-        elements::create_thumb_texture_from_template(lua, thumb, frame_name, subst_parent);
+        elements_text::create_thumb_texture_from_template(lua, thumb, frame_name, subst_parent);
     }
     if let Some(bar) = frame.bar_texture() {
-        elements::create_bar_texture_from_template(lua, bar, frame_name, subst_parent);
+        elements_text::create_bar_texture_from_template(lua, bar, frame_name, subst_parent);
     }
 
     apply_inline_button_textures(lua, frame, frame_name, subst_parent);
     apply_button_text(lua, frame, frame_name, subst_parent);
-    elements::apply_button_text_attribute(lua, frame, frame_name);
+    elements_text::apply_button_text_attribute(lua, frame, frame_name);
     apply_editbox_fontstring(lua, frame, frame_name, subst_parent);
     apply_animation_groups(lua, frame, frame_name);
 
