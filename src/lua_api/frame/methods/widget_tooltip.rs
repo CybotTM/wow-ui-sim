@@ -7,6 +7,27 @@ use crate::lua_api::tooltip::TooltipLine;
 use crate::widget::{Anchor, AnchorPoint};
 use mlua::Value;
 
+const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &[
+    "SetUnitBuff",
+    "SetUnitDebuff",
+    "SetUnitAura",
+    "SetUnitBuffByAuraInstanceID",
+    "SetUnitDebuffByAuraInstanceID",
+    "AddAtlas",
+    "AddFontStrings",
+];
+
+const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
+    "CopyTooltip",
+    "SetAllowShowWithNoLines",
+    "SetAnchorType",
+    "SetCustomLineSpacing",
+    "SetCustomWordWrapMinWidth",
+    "SetFrameStack",
+    "SetObjectTooltipPosition",
+    "SetShrinkToFitWrapped",
+];
+
 pub fn add_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_tooltip_setup_methods(methods);
     add_tooltip_addline_methods(methods);
@@ -86,59 +107,68 @@ fn add_tooltip_doubleline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 }
 
 fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetSpellByID", |_, _this, _spell_id: i32| Ok(()));
-    methods.add_method("SetItemByID", |_, _this, _item_id: i32| Ok(()));
-    methods.add_method("SetHyperlink", |_, _this, _link: String| Ok(()));
-    methods.add_method("SetUnitBuff", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetUnitDebuff", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetUnitAura", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method(
-        "SetUnitBuffByAuraInstanceID",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method(
-        "SetUnitDebuffByAuraInstanceID",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("AddAtlas", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("AddFontStrings", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("CopyTooltip", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
-    methods.add_method("GetLeftLine", |_, _this, ()| Ok(Value::Nil));
-    methods.add_method("GetRightLine", |_, _this, ()| Ok(Value::Nil));
-    methods.add_method(
-        "SetAllowShowWithNoLines",
-        |_, _this, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("SetAnchorType", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method(
-        "SetCustomLineSpacing",
-        |_, _this, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetCustomWordWrapMinWidth",
-        |_, _this, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("SetFrameStack", |_, _this, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method(
-        "SetObjectTooltipPosition",
-        |_, _this, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method(
-        "SetShrinkToFitWrapped",
-        |_, _this, _: mlua::Variadic<Value>| Ok(()),
-    );
+    add_tooltip_i32_stub(methods, "SetSpellByID");
+    add_tooltip_i32_stub(methods, "SetItemByID");
+    add_tooltip_string_stub(methods, "SetHyperlink");
+    add_tooltip_multivalue_stubs(methods, TOOLTIP_MULTIVALUE_STUBS);
+    add_tooltip_variadic_stubs(methods, TOOLTIP_VARIADIC_STUBS);
+    add_custom_line_spacing_getter(methods);
+    add_tooltip_nil_getter(methods, "GetLeftLine");
+    add_tooltip_nil_getter(methods, "GetRightLine");
+    add_num_lines(methods);
+    add_get_num_lines_stub(methods);
+}
 
+fn add_tooltip_i32_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &'static str) {
+    methods.add_method(name, |_, _this, _value: i32| Ok(()));
+}
+
+fn add_tooltip_string_stub<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+) {
+    methods.add_method(name, |_, _this, _value: String| Ok(()));
+}
+
+fn add_tooltip_multivalue_stubs<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    names: &[&'static str],
+) {
+    for name in names {
+        methods.add_method(*name, |_, _this, _args: mlua::MultiValue| Ok(()));
+    }
+}
+
+fn add_tooltip_variadic_stubs<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    names: &[&'static str],
+) {
+    for name in names {
+        methods.add_method(*name, |_, _this, _: mlua::Variadic<Value>| Ok(()));
+    }
+}
+
+fn add_tooltip_nil_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &'static str) {
+    methods.add_method(name, |_, _this, ()| Ok(Value::Nil));
+}
+
+fn add_custom_line_spacing_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
+}
+
+fn add_num_lines<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("NumLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state
+        Ok(state
             .tooltips
             .get(&this.0)
             .map(|td| td.lines.len())
-            .unwrap_or(0);
-        Ok(count as i32)
+            .unwrap_or(0) as i32)
     });
+}
+
+fn add_get_num_lines_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetNumLines", |_, _this, ()| Ok(0_i32));
 }
 
