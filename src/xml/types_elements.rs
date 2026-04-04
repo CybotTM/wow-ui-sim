@@ -2,9 +2,9 @@
 
 use serde::Deserialize;
 
-use super::types::{
-    AbsDimensionXml, AnchorsXml, AnimationsXml, ColorXml, FrameXml, KeyValuesXml, ScriptsXml,
-    SizeXml,
+use super::types::FrameXml;
+use super::types_support::{
+    AbsDimensionXml, AnchorsXml, AnimationsXml, ColorXml, KeyValuesXml, ScriptsXml, SizeXml,
 };
 
 /// Layers container (for textures and font strings).
@@ -101,7 +101,7 @@ pub struct TextureXml {
     #[serde(rename = "Color")]
     pub color: Option<ColorXml>,
     #[serde(rename = "Gradient")]
-    pub gradient: Option<crate::xml::types::GradientXml>,
+    pub gradient: Option<crate::xml::GradientXml>,
     #[serde(rename = "Animations")]
     pub animations: Option<AnimationsXml>,
     #[serde(rename = "Scripts")]

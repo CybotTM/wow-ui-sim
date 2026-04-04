@@ -4,6 +4,7 @@ mod parse;
 mod template;
 mod types;
 mod types_elements;
+mod types_support;
 
 // Re-export all public types and functions
 pub use parse::{XmlLoadError, parse_xml, parse_xml_file};
@@ -13,16 +14,17 @@ pub use template::{
     get_template_info, register_anim_group_template, register_intrinsic_templates,
     register_template, register_texture_template, resolve_texture_inheritance,
 };
-pub use types::{
-    AbsDimensionXml, AnchorXml, AnchorsXml, AnimationsXml, AttributeXml, AttributesXml,
-    BackdropXml, ColorXml, FontRefXml, FrameChildElement, FrameXml, GradientXml, InsetsXml,
-    KeyValueXml, KeyValuesXml, OffsetXml, ResizeBoundsXml, ScopedModifierXml, ScriptBodyXml,
-    ScriptsXml, ScrollChildXml, SizeXml, UiXml, XmlElement,
-};
+pub use types::{FrameChildElement, FrameXml, ScopedModifierXml, UiXml, XmlElement};
 pub use types_elements::{
     ActorXml, ActorsXml, AnimationElement, AnimationGroupXml, AnimationXml, FontFamilyXml,
     FontStringXml, FontXml, FrameElement, FramesXml, IncludeXml, LayerElement, LayerXml, LayersXml,
     ScriptXml, TextureXml,
+};
+pub use types_support::{
+    AbsDimensionXml, AnchorXml, AnchorsXml, AnimationsXml, AttributeXml, AttributesXml,
+    BackdropXml, BindingXml, ColorXml, FontRefXml, GradientXml, InsetsXml, KeyValueXml,
+    KeyValuesXml, ModifiedClickXml, OffsetXml, ResizeBoundsXml, ScriptBodyXml, ScriptsXml,
+    ScrollChildXml, SizeXml,
 };
 
 #[cfg(test)]
