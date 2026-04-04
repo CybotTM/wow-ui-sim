@@ -283,58 +283,107 @@ pub fn compute_frame_rect_cached(
         return cached;
     }
 
-    let frame = match registry.get(id) {
-        Some(f) => f,
-        None => {
-            let result = CachedFrameLayout {
-                rect: LayoutRect::default(),
-                eff_scale: 1.0,
-            };
-            cache.insert(id, result);
-            return result;
-        }
+    let Some(frame) = registry.get(id) else {
+        return cache_layout_result(cache, id, missing_frame_layout());
     };
 
-    // Special case: UIParent (id=1) fills the entire screen
-    if frame.name.as_deref() == Some("UIParent") || (frame.parent_id.is_none() && id == 1) {
+    if is_root_screen_frame(frame, id) {
         let result = CachedFrameLayout {
-            rect: LayoutRect {
-                x: 0.0,
-                y: 0.0,
-                width: screen_width,
-                height: screen_height,
-            },
+            rect: full_screen_rect(screen_width, screen_height),
             eff_scale: frame.effective_scale,
         };
-        cache.insert(id, result);
-        return result;
+        return cache_layout_result(cache, id, result);
     }
 
-    // Compute parent layout (cache hit for siblings)
-    let parent_rect = if let Some(parent_id) = frame.parent_id {
-        compute_frame_rect_cached(registry, parent_id, screen_width, screen_height, cache).rect
-    } else {
-        LayoutRect {
-            x: 0.0,
-            y: 0.0,
-            width: screen_width,
-            height: screen_height,
-        }
-    };
-
-    // Effective scale is eagerly propagated on frames.
+    let parent_rect = resolve_parent_rect(registry, frame, screen_width, screen_height, cache);
     let scale = frame.effective_scale;
+    let base_rect = resolve_frame_layout_rect(
+        registry,
+        frame,
+        parent_rect,
+        scale,
+        screen_width,
+        screen_height,
+        cache,
+    );
+    let mut rect = apply_frame_layout_adjustments(
+        base_rect,
+        registry,
+        frame,
+        scale,
+        screen_width,
+        screen_height,
+        cache,
+    );
+    maybe_clamp_frame_rect(frame, &mut rect, screen_width, screen_height);
 
-    let mut rect = if frame.anchors.is_empty() {
-        let w = frame.width * scale;
-        let h = frame.height * scale;
-        LayoutRect {
-            x: parent_rect.x,
-            y: parent_rect.y,
-            width: w,
-            height: h,
-        }
-    } else if frame.anchors.len() >= 2 {
+    cache_layout_result(
+        cache,
+        id,
+        CachedFrameLayout {
+            rect,
+            eff_scale: scale,
+        },
+    )
+}
+
+fn missing_frame_layout() -> CachedFrameLayout {
+    CachedFrameLayout {
+        rect: LayoutRect::default(),
+        eff_scale: 1.0,
+    }
+}
+
+fn cache_layout_result(
+    cache: &mut LayoutCache,
+    id: u64,
+    result: CachedFrameLayout,
+) -> CachedFrameLayout {
+    cache.insert(id, result);
+    result
+}
+
+fn is_root_screen_frame(frame: &crate::widget::Frame, id: u64) -> bool {
+    frame.name.as_deref() == Some("UIParent") || (frame.parent_id.is_none() && id == 1)
+}
+
+fn full_screen_rect(screen_width: f32, screen_height: f32) -> LayoutRect {
+    LayoutRect {
+        x: 0.0,
+        y: 0.0,
+        width: screen_width,
+        height: screen_height,
+    }
+}
+
+fn resolve_parent_rect(
+    registry: &WidgetRegistry,
+    frame: &crate::widget::Frame,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> LayoutRect {
+    frame
+        .parent_id
+        .map(|parent_id| {
+            compute_frame_rect_cached(registry, parent_id, screen_width, screen_height, cache).rect
+        })
+        .unwrap_or_else(|| full_screen_rect(screen_width, screen_height))
+}
+
+fn resolve_frame_layout_rect(
+    registry: &WidgetRegistry,
+    frame: &crate::widget::Frame,
+    parent_rect: LayoutRect,
+    scale: f32,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> LayoutRect {
+    if frame.anchors.is_empty() {
+        return anchorless_rect(frame, parent_rect, scale);
+    }
+    if frame.anchors.len() >= 2 {
         let edges = resolve_multi_anchor_edges(
             registry,
             frame,
@@ -344,43 +393,83 @@ pub fn compute_frame_rect_cached(
             screen_height,
             cache,
         );
-        compute_rect_from_edges(edges, frame, parent_rect, scale)
-    } else {
-        resolve_single_anchor(
-            registry,
-            frame,
-            parent_rect,
-            scale,
-            screen_width,
-            screen_height,
-            cache,
-        )
-    };
+        return compute_rect_from_edges(edges, frame, parent_rect, scale);
+    }
+    resolve_single_anchor(
+        registry,
+        frame,
+        parent_rect,
+        scale,
+        screen_width,
+        screen_height,
+        cache,
+    )
+}
 
+fn anchorless_rect(
+    frame: &crate::widget::Frame,
+    parent_rect: LayoutRect,
+    scale: f32,
+) -> LayoutRect {
+    LayoutRect {
+        x: parent_rect.x,
+        y: parent_rect.y,
+        width: frame.width * scale,
+        height: frame.height * scale,
+    }
+}
+
+fn apply_frame_layout_adjustments(
+    mut rect: LayoutRect,
+    registry: &WidgetRegistry,
+    frame: &crate::widget::Frame,
+    scale: f32,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> LayoutRect {
     rect.x += frame.anim_offset_x;
     rect.y += frame.anim_offset_y;
-
-    if frame.widget_type == WidgetType::Line {
-        if let (Some(start), Some(end)) = (&frame.line_start, &frame.line_end) {
-            if let (Some(sp), Some(ep)) = (
-                resolve_line_anchor(start, registry, screen_width, screen_height, cache),
-                resolve_line_anchor(end, registry, screen_width, screen_height, cache),
-            ) {
-                rect = line_bounding_box(sp, ep, frame.line_thickness * scale);
-            }
-        }
+    if let Some(line_rect) =
+        resolve_line_frame_rect(frame, registry, scale, screen_width, screen_height, cache)
+    {
+        return line_rect;
     }
+    rect
+}
 
-    if frame.clamped_to_screen && rect.width > 0.0 && rect.height > 0.0 {
-        clamp_rect_to_screen(&mut rect, screen_width, screen_height);
+fn resolve_line_frame_rect(
+    frame: &crate::widget::Frame,
+    registry: &WidgetRegistry,
+    scale: f32,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> Option<LayoutRect> {
+    if frame.widget_type != WidgetType::Line {
+        return None;
     }
-
-    let result = CachedFrameLayout {
-        rect,
-        eff_scale: scale,
+    let (Some(start), Some(end)) = (&frame.line_start, &frame.line_end) else {
+        return None;
     };
-    cache.insert(id, result);
-    result
+    let (Some(sp), Some(ep)) = (
+        resolve_line_anchor(start, registry, screen_width, screen_height, cache),
+        resolve_line_anchor(end, registry, screen_width, screen_height, cache),
+    ) else {
+        return None;
+    };
+    Some(line_bounding_box(sp, ep, frame.line_thickness * scale))
+}
+
+fn maybe_clamp_frame_rect(
+    frame: &crate::widget::Frame,
+    rect: &mut LayoutRect,
+    screen_width: f32,
+    screen_height: f32,
+) {
+    if frame.clamped_to_screen && rect.width > 0.0 && rect.height > 0.0 {
+        clamp_rect_to_screen(rect, screen_width, screen_height);
+    }
 }
 
 /// Compute frame rect with anchor resolution (uncached).
