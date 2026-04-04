@@ -58,14 +58,15 @@ fn register_binding_key_lookups(lua: &Lua, globals: &mlua::Table) -> Result<()> 
         "GetBindingKey",
         lua.create_function(|lua, action: String| {
             let (k1, k2) = keybindings::get_binding_key(lua, &action)?;
-            let mut vals = Vec::new();
-            match k1 {
-                Some(k) => vals.push(Value::String(lua.create_string(&k)?)),
-                None => vals.push(Value::Nil),
-            }
-            if let Some(k) = k2 {
-                vals.push(Value::String(lua.create_string(&k)?));
-            }
+            let first = match k1 {
+                Some(k) => Value::String(lua.create_string(&k)?),
+                None => Value::Nil,
+            };
+            let second = match k2 {
+                Some(k) => Some(Value::String(lua.create_string(&k)?)),
+                None => None,
+            };
+            let vals = std::iter::once(first).chain(second).collect();
             Ok(mlua::MultiValue::from_vec(vals))
         })?,
     )?;
@@ -214,64 +215,68 @@ pub fn register_tooltip_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
 /// Create a color table with r/g/b/a fields and GetRGB/GetRGBA/WrapTextInColorCode methods.
 fn make_color_table(lua: &Lua, r: f64, g: f64, b: f64, a: f64) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    t.set("r", r)?;
-    t.set("g", g)?;
-    t.set("b", b)?;
-    t.set("a", a)?;
-    t.set(
+    set_color_fields(&t, r, g, b, a)?;
+    register_color_table_methods(lua, &t)?;
+    Ok(t)
+}
+
+fn set_color_fields(table: &mlua::Table, r: f64, g: f64, b: f64, a: f64) -> Result<()> {
+    table.set("r", r)?;
+    table.set("g", g)?;
+    table.set("b", b)?;
+    table.set("a", a)?;
+    Ok(())
+}
+
+fn register_color_table_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetRGB",
-        lua.create_function(|_, this: mlua::Table| {
-            Ok((
-                this.get::<f64>("r")?,
-                this.get::<f64>("g")?,
-                this.get::<f64>("b")?,
-            ))
-        })?,
+        lua.create_function(|_, this: mlua::Table| Ok(read_rgb(&this)?))?,
     )?;
-    t.set(
+    table.set(
         "GetRGBA",
         lua.create_function(|_, this: mlua::Table| {
-            Ok((
-                this.get::<f64>("r")?,
-                this.get::<f64>("g")?,
-                this.get::<f64>("b")?,
-                this.get::<f64>("a")?,
-            ))
+            let (r, g, b) = read_rgb(&this)?;
+            let a = this.get::<f64>("a")?;
+            Ok((r, g, b, a))
         })?,
     )?;
-    t.set(
+    table.set(
         "GenerateHexColor",
         lua.create_function(|lua, this: mlua::Table| {
-            let r: f64 = this.get("r")?;
-            let g: f64 = this.get("g")?;
-            let b: f64 = this.get("b")?;
-            let hex = format!(
-                "{:02x}{:02x}{:02x}",
-                (r * 255.0) as u8,
-                (g * 255.0) as u8,
-                (b * 255.0) as u8
-            );
-            Ok(mlua::Value::String(lua.create_string(&hex)?))
+            color_hex_value(lua, rgb_hex_from_table(&this)?)
         })?,
     )?;
-    t.set(
+    table.set(
         "WrapTextInColorCode",
         lua.create_function(|lua, (this, text): (mlua::Table, String)| {
-            let r: f64 = this.get("r")?;
-            let g: f64 = this.get("g")?;
-            let b: f64 = this.get("b")?;
-            let hex = format!(
-                "{:02x}{:02x}{:02x}",
-                (r * 255.0) as u8,
-                (g * 255.0) as u8,
-                (b * 255.0) as u8
-            );
-            Ok(mlua::Value::String(
-                lua.create_string(format!("|cff{}{}|r", hex, text))?,
-            ))
+            let wrapped = format!("|cff{}{}|r", rgb_hex_from_table(&this)?, text);
+            Ok(mlua::Value::String(lua.create_string(&wrapped)?))
         })?,
     )?;
-    Ok(t)
+    Ok(())
+}
+
+fn read_rgb(table: &mlua::Table) -> Result<(f64, f64, f64)> {
+    Ok((
+        table.get::<f64>("r")?,
+        table.get::<f64>("g")?,
+        table.get::<f64>("b")?,
+    ))
+}
+
+fn rgb_hex_from_table(table: &mlua::Table) -> Result<String> {
+    let (r, g, b) = read_rgb(table)?;
+    Ok(format!(
+        "{:02x}{:02x}{:02x}",
+        (r * 255.0) as u8,
+        (g * 255.0) as u8,
+        (b * 255.0) as u8
+    ))
+}
+
+fn color_hex_value(lua: &Lua, hex: String) -> Result<mlua::Value> {
+    Ok(mlua::Value::String(lua.create_string(&hex)?))
 }
 
 /// Registers item quality colors table (requires Lua for table creation).
