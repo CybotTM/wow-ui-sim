@@ -294,23 +294,16 @@ fn write_glyph_pixels(
 }
 
 /// Shape text into a cosmic-text buffer and return total text height.
-#[allow(clippy::too_many_arguments)]
 fn shape_text_to_runs(
     font_system: &mut WowFontSystem,
-    text: &str,
-    font_path: Option<&str>,
-    font_size: f32,
-    bounds_width: f32,
-    bounds_height: f32,
-    word_wrap: bool,
-    max_lines: u32,
+    shape: TextShapeRequest<'_>,
 ) -> (Buffer, f32) {
-    let line_height = (font_size * 1.2).ceil();
-    let metrics = Metrics::new(font_size, line_height);
-    let attrs = font_system.attrs_owned(font_path);
+    let line_height = (shape.font_size * 1.2).ceil();
+    let metrics = Metrics::new(shape.font_size, line_height);
+    let attrs = font_system.attrs_owned(shape.font_path);
 
-    let shape_width = if word_wrap && bounds_width > 0.0 {
-        bounds_width
+    let shape_width = if shape.word_wrap && shape.bounds_width > 0.0 {
+        shape.bounds_width
     } else {
         10000.0
     };
@@ -319,11 +312,11 @@ fn shape_text_to_runs(
     buffer.set_size(
         &mut font_system.font_system,
         Some(shape_width),
-        Some(bounds_height),
+        Some(shape.bounds_height),
     );
     buffer.set_text(
         &mut font_system.font_system,
-        text,
+        shape.text,
         &attrs.as_attrs(),
         Shaping::Advanced,
         None,
@@ -332,8 +325,8 @@ fn shape_text_to_runs(
 
     // Calculate total text height (for vertical justification).
     let mut runs: Vec<_> = buffer.layout_runs().collect();
-    if max_lines > 0 {
-        runs.truncate(max_lines as usize);
+    if shape.max_lines > 0 {
+        runs.truncate(shape.max_lines as usize);
     }
     let total_height = if runs.len() <= 1 {
         line_height
@@ -348,6 +341,16 @@ fn shape_text_to_runs(
     // The runs are re-collected from buffer later via layout_runs().
     drop(runs);
     (buffer, total_height)
+}
+
+struct TextShapeRequest<'a> {
+    text: &'a str,
+    font_path: Option<&'a str>,
+    font_size: f32,
+    bounds_width: f32,
+    bounds_height: f32,
+    word_wrap: bool,
+    max_lines: u32,
 }
 
 /// Extract glyph positions from layout runs into cacheable data.
@@ -463,13 +466,15 @@ pub fn measure_text_height(
     }
     let (buffer, total_height) = shape_text_to_runs(
         font_system,
-        &stripped,
-        font_path,
-        font_size,
-        bounds_width,
-        10000.0,
-        word_wrap,
-        0,
+        TextShapeRequest {
+            text: &stripped,
+            font_path,
+            font_size,
+            bounds_width,
+            bounds_height: 10000.0,
+            word_wrap,
+            max_lines: 0,
+        },
     );
     let runs = extract_layout_runs(&buffer, 0);
     let generation = glyph_atlas.shape_cache_generation;
@@ -542,13 +547,15 @@ pub fn emit_text_quads(
     if !glyph_atlas.shape_cache.contains_key(&key) {
         let (buffer, total_height) = shape_text_to_runs(
             font_system,
-            stripped,
-            font_path,
-            font_size,
-            bounds.width,
-            bounds.height,
-            word_wrap,
-            max_lines,
+            TextShapeRequest {
+                text: stripped,
+                font_path,
+                font_size,
+                bounds_width: bounds.width,
+                bounds_height: bounds.height,
+                word_wrap,
+                max_lines,
+            },
         );
         let runs = extract_layout_runs(&buffer, max_lines);
         glyph_atlas.shape_cache.insert(
