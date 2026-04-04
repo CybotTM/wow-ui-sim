@@ -9,35 +9,31 @@ use mlua::{Lua, Result, Value};
 /// Register the C_EditMode namespace.
 pub fn register_c_editmode_api(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
+    register_layout_queries(lua, &t)?;
+    register_account_settings(lua, &t)?;
+    register_editmode_noop_stubs(lua, &t)?;
+    register_editmode_conversion_stubs(lua, &t)?;
+    lua.globals().set("C_EditMode", t)?;
+    Ok(())
+}
 
-    // GetLayouts: returns { activeLayout = 1, layouts = {} }
-    // Empty layouts table — presets are prepended automatically by UpdateLayoutInfo.
+fn register_layout_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetLayouts",
-        lua.create_function(|lua, ()| {
-            let info = lua.create_table()?;
-            info.set("activeLayout", 1)?;
-            info.set("layouts", lua.create_table()?)?;
-            Ok(info)
-        })?,
+        lua.create_function(|lua, ()| empty_layouts_info(lua))?,
     )?;
+    Ok(())
+}
 
-    // GetAccountSettings: returns array of { setting, value } entries for enums 0–32.
+fn register_account_settings(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetAccountSettings",
-        lua.create_function(|lua, ()| {
-            let settings = lua.create_table()?;
-            for i in 0..=32 {
-                let entry = lua.create_table()?;
-                entry.set("setting", i)?;
-                entry.set("value", account_setting_default(i))?;
-                settings.set(i + 1, entry)?;
-            }
-            Ok(settings)
-        })?,
+        lua.create_function(|lua, ()| build_account_settings(lua))?,
     )?;
+    Ok(())
+}
 
-    // No-op stubs
+fn register_editmode_noop_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     for name in [
         "SaveLayouts",
         "SetActiveLayout",
@@ -51,8 +47,10 @@ pub fn register_c_editmode_api(lua: &Lua) -> Result<()> {
             lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
         )?;
     }
+    Ok(())
+}
 
-    // Simple return stubs
+fn register_editmode_conversion_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsValidLayoutName",
         lua.create_function(|_, _name: Value| Ok(true))?,
@@ -69,9 +67,25 @@ pub fn register_c_editmode_api(lua: &Lua) -> Result<()> {
         "ConvertLayoutInfoToHyperlink",
         lua.create_function(|lua, _info: Value| lua.create_string(""))?,
     )?;
-
-    lua.globals().set("C_EditMode", t)?;
     Ok(())
+}
+
+fn empty_layouts_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("activeLayout", 1)?;
+    info.set("layouts", lua.create_table()?)?;
+    Ok(info)
+}
+
+fn build_account_settings(lua: &Lua) -> Result<mlua::Table> {
+    let settings = lua.create_table()?;
+    for i in 0..=32 {
+        let entry = lua.create_table()?;
+        entry.set("setting", i)?;
+        entry.set("value", account_setting_default(i))?;
+        settings.set(i + 1, entry)?;
+    }
+    Ok(settings)
 }
 
 /// Default value for an account setting enum index.
