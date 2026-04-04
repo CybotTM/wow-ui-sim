@@ -37,24 +37,20 @@ impl App {
             Message::ExecuteCommand => self.handle_execute_command(),
             Message::ScreenshotTaken(ss) => self.handle_screenshot_taken(ss),
             Message::FpsTick => {}
-            Message::InspectorClose => self.handle_inspector_close(),
-            Message::InspectorWidthChanged(v) => self.inspector_state.width = v,
-            Message::InspectorHeightChanged(v) => self.inspector_state.height = v,
-            Message::InspectorAlphaChanged(v) => self.inspector_state.alpha = v,
-            Message::InspectorLevelChanged(v) => self.inspector_state.frame_level = v,
-            Message::InspectorVisibleToggled(v) => self.inspector_state.visible = v,
-            Message::InspectorMouseEnabledToggled(v) => self.inspector_state.mouse_enabled = v,
-            Message::InspectorApply => self.handle_inspector_apply(),
+            Message::InspectorClose
+            | Message::InspectorWidthChanged(_)
+            | Message::InspectorHeightChanged(_)
+            | Message::InspectorAlphaChanged(_)
+            | Message::InspectorLevelChanged(_)
+            | Message::InspectorVisibleToggled(_)
+            | Message::InspectorMouseEnabledToggled(_)
+            | Message::InspectorApply => self.handle_inspector_message(message),
             Message::ToggleFramesPanel => {
                 self.frames_panel_collapsed = !self.frames_panel_collapsed
             }
             Message::XpLevelChanged(ref label) => self.handle_xp_level_changed(label),
             Message::KeyPress(ref key, ref text) => {
-                if key == "ESCAPE" && self.options_modal_visible {
-                    self.options_modal_visible = false;
-                } else {
-                    self.handle_key_press(key, text.as_deref());
-                }
+                self.handle_simple_key_press(key, text.as_deref())
             }
             Message::PlayerClassChanged(ref name) => self.handle_player_class_changed(name),
             Message::PlayerRaceChanged(ref name) => self.handle_player_race_changed(name),
@@ -67,6 +63,29 @@ impl App {
             // Handled in update() directly:
             Message::CanvasEvent(_) | Message::ProcessTimers => unreachable!(),
         }
+    }
+
+    fn handle_inspector_message(&mut self, message: Message) {
+        match message {
+            Message::InspectorClose => self.handle_inspector_close(),
+            Message::InspectorWidthChanged(v) => self.inspector_state.width = v,
+            Message::InspectorHeightChanged(v) => self.inspector_state.height = v,
+            Message::InspectorAlphaChanged(v) => self.inspector_state.alpha = v,
+            Message::InspectorLevelChanged(v) => self.inspector_state.frame_level = v,
+            Message::InspectorVisibleToggled(v) => self.inspector_state.visible = v,
+            Message::InspectorMouseEnabledToggled(v) => self.inspector_state.mouse_enabled = v,
+            Message::InspectorApply => self.handle_inspector_apply(),
+            _ => unreachable!(),
+        }
+    }
+
+    fn handle_simple_key_press(&mut self, key: &str, text: Option<&str>) {
+        if key == "ESCAPE" && self.options_modal_visible {
+            self.options_modal_visible = false;
+            return;
+        }
+
+        self.handle_key_press(key, text);
     }
 
     // ── Event handlers ──────────────────────────────────────────────────
