@@ -27,6 +27,7 @@
 
 pub mod abbreviate_config;
 pub mod action_bar_api;
+mod action_bar_api_namespace;
 pub mod addon_api;
 pub mod admin_api;
 pub mod admin_combat;
