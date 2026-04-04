@@ -7,7 +7,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::tick::apply_flipbook_for_group;
-use super::{AnimHandle, AnimState, AnimationType, LoopType};
+use super::{AnimGroupState, AnimHandle, AnimState, AnimationType, LoopType};
 
 /// Parse Play/Restart arguments: (reverse: bool, offset: f64).
 fn parse_play_args(args: MultiValue) -> (bool, f64) {
@@ -314,44 +314,34 @@ impl AnimGroupHandle {
     /// Register state query methods: IsPlaying, IsPaused, IsDone, IsPendingFinish, IsReverse.
     fn add_state_query_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("IsPlaying", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.playing))
+            Ok(this.group_state_flag(|g| Some(g.playing)).unwrap_or(false))
         });
 
         methods.add_method("IsPaused", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.paused))
+            Ok(this.group_state_flag(|g| Some(g.paused)).unwrap_or(false))
         });
 
         methods.add_method("IsDone", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_none_or(|g| g.done))
+            Ok(this.group_state_flag(|g| Some(g.done)).unwrap_or(true))
         });
 
         methods.add_method("IsPendingFinish", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.pending_finish))
+            Ok(this
+                .group_state_flag(|g| Some(g.pending_finish))
+                .unwrap_or(false))
         });
 
         methods.add_method("IsReverse", |_, this, ()| {
-            let state = this.state.borrow();
-            Ok(state
-                .animation_groups
-                .get(&this.group_id)
-                .is_some_and(|g| g.reverse))
+            Ok(this.group_state_flag(|g| Some(g.reverse)).unwrap_or(false))
         });
+    }
+
+    fn group_state_flag<F>(&self, read: F) -> Option<bool>
+    where
+        F: FnOnce(&AnimGroupState) -> Option<bool>,
+    {
+        let state = self.state.borrow();
+        state.animation_groups.get(&self.group_id).and_then(read)
     }
 
     /// Register looping methods: SetLooping, GetLooping, GetLoopState.
