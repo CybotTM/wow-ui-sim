@@ -16,7 +16,7 @@ use crate::widget::WidgetType;
 use super::Message;
 use super::app::App;
 use super::frame_collect::collect_hittable_frames;
-use super::quad_builders::emit_frame_quads;
+use super::quad_builders::{FrameQuadEmit, emit_frame_quads};
 use super::state::CanvasMessage;
 use super::statusbar::collect_statusbar_fills;
 use super::strata_emit::{build_hittable_rects, build_render_list};
@@ -250,19 +250,21 @@ fn emit_one_frame(
     });
     emit_frame_quads(
         batch,
-        id,
-        f,
-        bounds,
-        clip_bounds,
-        statusbar_fills.get(&id),
-        pressed_frame,
-        None,
         text_ctx,
-        Some(message_frames),
-        Some(tooltip_data),
-        registry,
-        elapsed_secs,
-        eff_alpha,
+        FrameQuadEmit {
+            id,
+            widget: f,
+            bounds,
+            clip_bounds,
+            bar_fill: statusbar_fills.get(&id),
+            pressed_frame,
+            hovered_frame: None,
+            message_frames: Some(message_frames),
+            tooltip_data: Some(tooltip_data),
+            registry,
+            elapsed_secs,
+            eff_alpha,
+        },
     );
     true
 }

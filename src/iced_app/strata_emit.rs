@@ -9,7 +9,7 @@ use crate::render::texture::UI_SCALE;
 use crate::widget::WidgetType;
 
 use super::frame_collect::{CollectedFrames, collect_hittable_frames, collect_subtree_ids};
-use super::quad_builders::emit_frame_quads;
+use super::quad_builders::{FrameQuadEmit, emit_frame_quads};
 use super::statusbar::collect_statusbar_fills;
 use super::tooltip::TooltipRenderData;
 
@@ -90,19 +90,21 @@ pub(super) fn emit_single_strata(
         let bar_fill = statusbar_fills.get(&id);
         emit_frame_quads(
             batch,
-            id,
-            f,
-            bounds,
-            clip_rect.map(layout_rect_to_screen_rect),
-            bar_fill,
-            pressed_frame,
-            hovered_frame,
             text_ctx,
-            message_frames,
-            tooltip_data,
-            registry,
-            elapsed_secs,
-            eff_alpha,
+            FrameQuadEmit {
+                id,
+                widget: f,
+                bounds,
+                clip_bounds: clip_rect.map(layout_rect_to_screen_rect),
+                bar_fill,
+                pressed_frame,
+                hovered_frame,
+                message_frames,
+                tooltip_data,
+                registry,
+                elapsed_secs,
+                eff_alpha,
+            },
         );
     }
 }
