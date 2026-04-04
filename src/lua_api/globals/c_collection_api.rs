@@ -82,6 +82,32 @@ fn add_empty_table_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
     t.set(name, lua.create_function(|lua, ()| lua.create_table())?)
 }
 
+fn add_i32_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    value: i32,
+) -> Result<()> {
+    t.set(name, lua.create_function(move |_, _: A| Ok(value))?)
+}
+
+fn add_bool_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    value: bool,
+) -> Result<()> {
+    t.set(name, lua.create_function(move |_, _: A| Ok(value))?)
+}
+
+fn add_table_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+) -> Result<()> {
+    t.set(name, lua.create_function(|lua, _: A| lua.create_table())?)
+}
+
 fn empty_mount_info() -> Result<(
     Value,
     Value,
@@ -171,39 +197,26 @@ fn register_transmog_collection(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
 
 /// Appearance query methods: sources, info, camera, categories.
 fn register_transmog_appearance_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set(
-        "GetAppearanceSources",
-        lua.create_function(|lua, _appearance_id: i32| lua.create_table())?,
-    )?;
+    add_table_stub_with_arg::<i32>(lua, t, "GetAppearanceSources")?;
     t.set(
         "GetSourceInfo",
-        lua.create_function(|lua, _source_id: i32| {
-            let info = lua.create_table()?;
-            info.set("sourceID", 0)?;
-            info.set("visualID", 0)?;
-            info.set("categoryID", 0)?;
-            info.set("itemID", 0)?;
-            info.set("isCollected", false)?;
-            Ok(info)
-        })?,
+        lua.create_function(|lua, _source_id: i32| build_empty_source_info(lua))?,
     )?;
-    t.set(
-        "GetAllAppearanceSources",
-        lua.create_function(|lua, _visual_id: i32| lua.create_table())?,
-    )?;
-    t.set(
-        "GetAppearanceCameraID",
-        lua.create_function(|_, _appearance_id: i32| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetCategoryAppearances",
-        lua.create_function(|lua, (_category, _location): (i32, Value)| lua.create_table())?,
-    )?;
-    t.set(
-        "IsAppearanceHiddenVisual",
-        lua.create_function(|_, _appearance_id: i32| Ok(false))?,
-    )?;
+    add_table_stub_with_arg::<i32>(lua, t, "GetAllAppearanceSources")?;
+    add_i32_stub_with_arg::<i32>(lua, t, "GetAppearanceCameraID", 0)?;
+    add_table_stub_with_arg::<(i32, Value)>(lua, t, "GetCategoryAppearances")?;
+    add_bool_stub_with_arg::<i32>(lua, t, "IsAppearanceHiddenVisual", false)?;
     Ok(())
+}
+
+fn build_empty_source_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("sourceID", 0)?;
+    info.set("visualID", 0)?;
+    info.set("categoryID", 0)?;
+    info.set("itemID", 0)?;
+    info.set("isCollected", false)?;
+    Ok(info)
 }
 
 /// Outfit methods: illusions, outfits, outfit info.
