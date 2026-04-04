@@ -293,37 +293,58 @@ pub fn start_cast(
     spell_id: u32,
     cast_time_ms: i32,
 ) -> Result<()> {
-    use crate::lua_api::state::CastingState;
+    let (spell_name, icon_path) = cast_spell_display(spell_id);
+    let cast_id = store_cast_state(state, spell_id, cast_time_ms, &spell_name, icon_path);
+    log_cast_start(&spell_name, cast_id, cast_time_ms);
+    fire_cast_start_event(lua, cast_id, spell_id)?;
+    push_action_button_state_update(state, lua)?;
+    Ok(())
+}
 
+fn cast_spell_display(spell_id: u32) -> (String, String) {
     let spell = crate::spells::get_spell(spell_id);
     let spell_name = spell.map(|s| s.name).unwrap_or("Unknown").to_string();
     let icon_id = spell.map(|s| s.icon_file_data_id).unwrap_or(136243);
     let icon_path = crate::manifest_interface_data::get_texture_path(icon_id)
         .map(|p| format!("Interface\\{}", p.replace('/', "\\")))
         .unwrap_or_default();
+    (spell_name, icon_path)
+}
 
-    let cast_id = {
-        let mut s = state.borrow_mut();
-        let cast_id = s.next_cast_id;
-        s.next_cast_id += 1;
-        let now = s.start_time.elapsed().as_secs_f64();
-        s.casting = Some(CastingState {
-            spell_id,
-            spell_name: spell_name.clone(),
-            icon_path,
-            start_time: now,
-            end_time: now + cast_time_ms as f64 / 1000.0,
-            cast_id,
-        });
-        cast_id
-    };
+fn store_cast_state(
+    state: &Rc<RefCell<SimState>>,
+    spell_id: u32,
+    cast_time_ms: i32,
+    spell_name: &str,
+    icon_path: String,
+) -> u32 {
+    use crate::lua_api::state::CastingState;
 
+    let mut s = state.borrow_mut();
+    let cast_id = s.next_cast_id;
+    s.next_cast_id += 1;
+    let now = s.start_time.elapsed().as_secs_f64();
+    s.casting = Some(CastingState {
+        spell_id,
+        spell_name: spell_name.to_string(),
+        icon_path,
+        start_time: now,
+        end_time: now + cast_time_ms as f64 / 1000.0,
+        cast_id,
+    });
+    cast_id
+}
+
+fn log_cast_start(spell_name: &str, cast_id: u32, cast_time_ms: i32) {
     eprintln!(
         "[cast] Starting {} (id={}, {:.1}s)",
         spell_name,
         cast_id,
         cast_time_ms as f64 / 1000.0
     );
+}
+
+fn fire_cast_start_event(lua: &Lua, cast_id: u32, spell_id: u32) -> Result<()> {
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     fire.call::<()>((
         lua.create_string("UNIT_SPELLCAST_START")?,
@@ -331,8 +352,6 @@ pub fn start_cast(
         cast_id as i64,
         spell_id as i64,
     ))?;
-    // Push state update to registered action UI buttons (replaces ACTIONBAR_UPDATE_STATE).
-    push_action_button_state_update(state, lua)?;
     Ok(())
 }
 
