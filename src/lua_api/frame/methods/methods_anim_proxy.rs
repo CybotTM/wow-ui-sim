@@ -528,28 +528,11 @@ fn add_anim_scale_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_anim_rotation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetDegrees", |lua, this, deg: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.degrees = deg;
-        }
+        set_anim_rotation_degrees(lua, this.0, deg);
         Ok(())
     });
     methods.add_method("SetOrigin", |lua, this, args: MultiValue| {
-        let mut iter = args.into_iter();
-        let point = match iter.next() {
-            Some(Value::String(s)) => s.to_string_lossy().to_string(),
-            _ => "CENTER".to_string(),
-        };
-        let ox = extract_num_iter(&mut iter);
-        let oy = extract_num_iter(&mut iter);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.origin_point = point;
-            a.origin_offset_x = ox;
-            a.origin_offset_y = oy;
-        }
+        set_anim_rotation_origin(lua, this.0, args);
         Ok(())
     });
     methods.add_method("GetOrigin", |lua, this, ()| {
@@ -568,6 +551,36 @@ fn add_anim_rotation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
             Value::Number(0.0),
         ]))
     });
+}
+
+fn set_anim_rotation_degrees(lua: &mlua::Lua, frame_id: u64, degrees: f64) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id) {
+        anim.degrees = degrees;
+    }
+}
+
+fn set_anim_rotation_origin(lua: &mlua::Lua, frame_id: u64, args: MultiValue) {
+    let (point, offset_x, offset_y) = parse_anim_rotation_origin(args);
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id) {
+        anim.origin_point = point;
+        anim.origin_offset_x = offset_x;
+        anim.origin_offset_y = offset_y;
+    }
+}
+
+fn parse_anim_rotation_origin(args: MultiValue) -> (String, f64, f64) {
+    let mut iter = args.into_iter();
+    let point = match iter.next() {
+        Some(Value::String(s)) => s.to_string_lossy().to_string(),
+        _ => "CENTER".to_string(),
+    };
+    let offset_x = extract_num_iter(&mut iter);
+    let offset_y = extract_num_iter(&mut iter);
+    (point, offset_x, offset_y)
 }
 
 fn add_anim_flipbook_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
