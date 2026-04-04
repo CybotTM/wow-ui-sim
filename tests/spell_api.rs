@@ -115,7 +115,10 @@ fn test_spellbook_pickup_item_fires_cursor_changed() {
             "#,
         )
         .unwrap();
-    assert_eq!(changed_count, 1, "PickupSpellBookItem should fire CURSOR_CHANGED");
+    assert_eq!(
+        changed_count, 1,
+        "PickupSpellBookItem should fire CURSOR_CHANGED"
+    );
 }
 
 // ============================================================================

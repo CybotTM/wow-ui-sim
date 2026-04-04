@@ -805,27 +805,17 @@ fn create_child_widget(state: &mut SimState, widget_type: WidgetType, parent_id:
 /// ItemButton defines: icon (Texture), Count (FontString), Stock (FontString),
 /// searchOverlay, ItemContextOverlay, IconBorder, IconOverlay, IconOverlay2 (Textures).
 fn create_item_button_intrinsics(lua: &Lua, state: &mut SimState, frame_id: u64) {
-    let icon_id = create_item_button_icon(state, frame_id);
-    let count_id = create_item_button_count(state, frame_id);
-    let stock_id = create_hidden_artwork_fontstring(state, frame_id);
-    let icon_border_id = create_hidden_overlay(state, frame_id);
-    let icon_overlay_id = create_hidden_overlay(state, frame_id);
-    let icon_overlay2_id = create_hidden_overlay(state, frame_id);
-    let search_overlay_id = create_fill_parent_overlay(state, frame_id);
-    let context_overlay_id = create_hidden_overlay(state, frame_id);
-    register_item_button_children(
-        lua,
-        state,
-        frame_id,
-        icon_id,
-        count_id,
-        stock_id,
-        icon_border_id,
-        icon_overlay_id,
-        icon_overlay2_id,
-        search_overlay_id,
-        context_overlay_id,
-    );
+    let children = ItemButtonChildren {
+        icon_id: create_item_button_icon(state, frame_id),
+        count_id: create_item_button_count(state, frame_id),
+        stock_id: create_hidden_artwork_fontstring(state, frame_id),
+        icon_border_id: create_hidden_overlay(state, frame_id),
+        icon_overlay_id: create_hidden_overlay(state, frame_id),
+        icon_overlay2_id: create_hidden_overlay(state, frame_id),
+        search_overlay_id: create_fill_parent_overlay(state, frame_id),
+        context_overlay_id: create_hidden_overlay(state, frame_id),
+    };
+    register_item_button_children(lua, state, frame_id, &children);
 }
 
 fn create_item_button_icon(state: &mut SimState, frame_id: u64) -> u64 {
@@ -874,11 +864,24 @@ fn create_fill_parent_overlay(state: &mut SimState, frame_id: u64) -> u64 {
     id
 }
 
-#[allow(clippy::too_many_arguments)]
 fn register_item_button_children(
     lua: &Lua,
     state: &mut SimState,
     frame_id: u64,
+    children: &ItemButtonChildren,
+) {
+    let child_pairs = children.as_pairs();
+    if let Some(btn) = state.widgets.get_mut_visual(frame_id) {
+        for (key, child_id) in child_pairs {
+            btn.children_keys.insert(key.to_string(), child_id);
+        }
+    }
+    for (key, child_id) in child_pairs {
+        let _ = sync_child_to_lua(lua, frame_id, key, child_id);
+    }
+}
+
+struct ItemButtonChildren {
     icon_id: u64,
     count_id: u64,
     stock_id: u64,
@@ -887,30 +890,21 @@ fn register_item_button_children(
     icon_overlay2_id: u64,
     search_overlay_id: u64,
     context_overlay_id: u64,
-) {
-    if let Some(btn) = state.widgets.get_mut_visual(frame_id) {
-        btn.children_keys.insert("icon".to_string(), icon_id);
-        btn.children_keys.insert("Count".to_string(), count_id);
-        btn.children_keys.insert("Stock".to_string(), stock_id);
-        btn.children_keys
-            .insert("IconBorder".to_string(), icon_border_id);
-        btn.children_keys
-            .insert("IconOverlay".to_string(), icon_overlay_id);
-        btn.children_keys
-            .insert("IconOverlay2".to_string(), icon_overlay2_id);
-        btn.children_keys
-            .insert("searchOverlay".to_string(), search_overlay_id);
-        btn.children_keys
-            .insert("ItemContextOverlay".to_string(), context_overlay_id);
+}
+
+impl ItemButtonChildren {
+    fn as_pairs(&self) -> [(&'static str, u64); 8] {
+        [
+            ("icon", self.icon_id),
+            ("Count", self.count_id),
+            ("Stock", self.stock_id),
+            ("IconBorder", self.icon_border_id),
+            ("IconOverlay", self.icon_overlay_id),
+            ("IconOverlay2", self.icon_overlay2_id),
+            ("searchOverlay", self.search_overlay_id),
+            ("ItemContextOverlay", self.context_overlay_id),
+        ]
     }
-    let _ = sync_child_to_lua(lua, frame_id, "icon", icon_id);
-    let _ = sync_child_to_lua(lua, frame_id, "Count", count_id);
-    let _ = sync_child_to_lua(lua, frame_id, "Stock", stock_id);
-    let _ = sync_child_to_lua(lua, frame_id, "IconBorder", icon_border_id);
-    let _ = sync_child_to_lua(lua, frame_id, "IconOverlay", icon_overlay_id);
-    let _ = sync_child_to_lua(lua, frame_id, "IconOverlay2", icon_overlay2_id);
-    let _ = sync_child_to_lua(lua, frame_id, "searchOverlay", search_overlay_id);
-    let _ = sync_child_to_lua(lua, frame_id, "ItemContextOverlay", context_overlay_id);
 }
 
 /// Check the template chain for a `parentArray` attribute and insert the frame
