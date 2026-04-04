@@ -134,47 +134,54 @@ impl shader::Program<Message> for &App {
 ///
 /// When `dirty_ids` is `Some`, uses per-frame snapshot cache for incremental
 /// rebuild — only re-emitting dirty frames, copying cached quads for the rest.
-#[allow(clippy::too_many_arguments)]
 fn rebuild_strata_batches(
     strata_cache: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
     snapshot_cache: &mut [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT],
-    dirty: u16,
-    dirty_ids: Option<&HashSet<u64>>,
-    size: Size,
-    strata_buckets: &[Vec<u64>],
-    widgets: &crate::widget::WidgetRegistry,
-    pressed_frame: Option<u64>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
-    message_frames: &HashMap<u64, crate::lua_api::MessageFrameData>,
-    tooltip_data: &HashMap<u64, super::tooltip::TooltipRenderData>,
-    elapsed_secs: f64,
+    params: RebuildStrataBatches<'_>,
 ) {
     for i in 0..FrameStrata::COUNT {
-        if dirty & (1 << i) == 0 && strata_cache[i].is_some() {
+        if params.dirty & (1 << i) == 0 && strata_cache[i].is_some() {
             continue;
         }
-        let bucket = strata_buckets.get(i).map(|b| b.as_slice()).unwrap_or(&[]);
+        let bucket = params
+            .strata_buckets
+            .get(i)
+            .map(|b| b.as_slice())
+            .unwrap_or(&[]);
         let strata_start = std::time::Instant::now();
         let mut batch = QuadBatch::new();
         if i == 0 {
-            emit_marble_background(&mut batch, size);
+            emit_marble_background(&mut batch, params.size);
         }
         let snapshots = snapshot_cache[i].get_or_insert_with(HashMap::new);
         let stats = emit_strata_cached(
             &mut batch,
             snapshots,
             bucket,
-            dirty_ids,
-            widgets,
-            pressed_frame,
+            params.dirty_ids,
+            params.widgets,
+            params.pressed_frame,
             text_ctx,
-            message_frames,
-            tooltip_data,
-            elapsed_secs,
+            params.message_frames,
+            params.tooltip_data,
+            params.elapsed_secs,
         );
         log_strata_timing(i, bucket.len(), &stats, strata_start.elapsed());
         strata_cache[i] = Some(Arc::new(batch));
     }
+}
+
+struct RebuildStrataBatches<'a> {
+    dirty: u16,
+    dirty_ids: Option<&'a HashSet<u64>>,
+    size: Size,
+    strata_buckets: &'a [Vec<u64>],
+    widgets: &'a crate::widget::WidgetRegistry,
+    pressed_frame: Option<u64>,
+    message_frames: &'a HashMap<u64, crate::lua_api::MessageFrameData>,
+    tooltip_data: &'a HashMap<u64, super::tooltip::TooltipRenderData>,
+    elapsed_secs: f64,
 }
 
 fn emit_marble_background(batch: &mut QuadBatch, size: Size) {
@@ -536,16 +543,18 @@ impl App {
         rebuild_strata_batches(
             &mut strata_cache,
             &mut snap_cache,
-            dirty,
-            dirty_ids,
-            size,
-            strata_buckets,
-            &state.widgets,
-            self.pressed_frame,
             &mut text_ctx,
-            &state.message_frames,
-            &tooltip_data,
-            elapsed_secs,
+            RebuildStrataBatches {
+                dirty,
+                dirty_ids,
+                size,
+                strata_buckets,
+                widgets: &state.widgets,
+                pressed_frame: self.pressed_frame,
+                message_frames: &state.message_frames,
+                tooltip_data: &tooltip_data,
+                elapsed_secs,
+            },
         );
     }
 
