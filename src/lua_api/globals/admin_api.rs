@@ -42,36 +42,7 @@ fn register_identity_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
             Ok(())
         }
     })?;
-    add_player_i32_setter(
-        lua,
-        t,
-        "SetPlayerClass",
-        Rc::clone(&state),
-        |player, class_index| {
-            player.class_index = class_index;
-        },
-    )?;
-    add_player_i32_setter(
-        lua,
-        t,
-        "SetPlayerRace",
-        Rc::clone(&state),
-        |player, race_index| {
-            player.race_index = race_index as usize;
-        },
-    )?;
-    add_player_i32_setter(
-        lua,
-        t,
-        "SetPlayerLevel",
-        Rc::clone(&state),
-        |player, level| {
-            player.level = level;
-        },
-    )?;
-    add_player_i32_setter(lua, t, "SetPlayerSex", state, |player, sex| {
-        player.sex = sex;
-    })?;
+    register_identity_scalar_setters(lua, t, state)?;
     Ok(())
 }
 
@@ -158,131 +129,33 @@ fn register_health_power_api(
 // ---------------------------------------------------------------------------
 
 fn register_targeting_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    set_fn(lua, t, "SetTarget", {
-        let s = Rc::clone(&state);
-        move |_, (name, level, class_index, is_enemy): (String, i32, i32, bool)| {
-            s.borrow_mut().current_target = Some(make_target_info(
-                "target",
-                &name,
-                level,
-                class_index,
-                is_enemy,
-            ));
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "ClearTarget", {
-        let s = Rc::clone(&state);
-        move |_, ()| {
-            s.borrow_mut().current_target = None;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetFocus", {
-        let s = Rc::clone(&state);
-        move |_, (name, level, class_index, is_enemy): (String, i32, i32, bool)| {
-            s.borrow_mut().current_focus = Some(make_target_info(
-                "focus",
-                &name,
-                level,
-                class_index,
-                is_enemy,
-            ));
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "ClearFocus", {
-        let s = Rc::clone(&state);
-        move |_, ()| {
-            s.borrow_mut().current_focus = None;
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetTargetPower", {
-        let s = Rc::clone(&state);
-        move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
-            let mut st = s.borrow_mut();
-            if let Some(t) = st.current_target.as_mut() {
-                t.power = cur;
-                t.power_max = max;
-                if let Some(pt) = power_type {
-                    t.power_type = pt;
-                }
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetFocusPower", {
-        let s = Rc::clone(&state);
-        move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
-            let mut st = s.borrow_mut();
-            if let Some(f) = st.current_focus.as_mut() {
-                f.power = cur;
-                f.power_max = max;
-                if let Some(pt) = power_type {
-                    f.power_type = pt;
-                }
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetTargetType", {
-        let s = Rc::clone(&state);
-        move |_,
-              (classification, creature_type, reaction): (
-            Option<String>,
-            Option<String>,
-            Option<i32>,
-        )| {
-            let mut st = s.borrow_mut();
-            if let Some(t) = st.current_target.as_mut() {
-                if let Some(c) = classification {
-                    t.classification = c;
-                }
-                if let Some(ct) = creature_type {
-                    t.creature_type = ct;
-                }
-                if let Some(r) = reaction {
-                    t.reaction = r;
-                }
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetFocusType", {
-        let s = Rc::clone(&state);
-        move |_,
-              (classification, creature_type, reaction): (
-            Option<String>,
-            Option<String>,
-            Option<i32>,
-        )| {
-            let mut st = s.borrow_mut();
-            if let Some(f) = st.current_focus.as_mut() {
-                if let Some(c) = classification {
-                    f.classification = c;
-                }
-                if let Some(ct) = creature_type {
-                    f.creature_type = ct;
-                }
-                if let Some(r) = reaction {
-                    f.reaction = r;
-                }
-            }
-            Ok(())
-        }
-    })?;
-    set_fn(lua, t, "SetFocusHealth", {
-        let s = Rc::clone(&state);
-        move |_, (cur, max): (i32, i32)| {
-            let mut st = s.borrow_mut();
-            if let Some(f) = st.current_focus.as_mut() {
-                f.health = cur;
-                f.health_max = max;
-            }
-            Ok(())
-        }
-    })?;
+    add_target_unit_setter(lua, t, "SetTarget", Rc::clone(&state), TargetSlot::Target)?;
+    add_target_unit_clearer(lua, t, "ClearTarget", Rc::clone(&state), TargetSlot::Target)?;
+    add_target_unit_setter(lua, t, "SetFocus", Rc::clone(&state), TargetSlot::Focus)?;
+    add_target_unit_clearer(lua, t, "ClearFocus", Rc::clone(&state), TargetSlot::Focus)?;
+    add_target_power_setter(
+        lua,
+        t,
+        "SetTargetPower",
+        Rc::clone(&state),
+        TargetSlot::Target,
+    )?;
+    add_target_power_setter(
+        lua,
+        t,
+        "SetFocusPower",
+        Rc::clone(&state),
+        TargetSlot::Focus,
+    )?;
+    add_target_type_setter(
+        lua,
+        t,
+        "SetTargetType",
+        Rc::clone(&state),
+        TargetSlot::Target,
+    )?;
+    add_target_type_setter(lua, t, "SetFocusType", Rc::clone(&state), TargetSlot::Focus)?;
+    add_target_health_setter(lua, t, "SetFocusHealth", state, TargetSlot::Focus)?;
     Ok(())
 }
 
@@ -584,4 +457,182 @@ where
         apply(&mut state.borrow_mut().player, value);
         Ok(())
     })
+}
+
+fn register_identity_scalar_setters(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerClass",
+        Rc::clone(&state),
+        |player, class_index| {
+            player.class_index = class_index;
+        },
+    )?;
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerRace",
+        Rc::clone(&state),
+        |player, race_index| {
+            player.race_index = race_index as usize;
+        },
+    )?;
+    add_player_i32_setter(
+        lua,
+        t,
+        "SetPlayerLevel",
+        Rc::clone(&state),
+        |player, level| {
+            player.level = level;
+        },
+    )?;
+    add_player_i32_setter(lua, t, "SetPlayerSex", state, |player, sex| {
+        player.sex = sex;
+    })
+}
+
+#[derive(Clone, Copy)]
+enum TargetSlot {
+    Target,
+    Focus,
+}
+
+fn add_target_unit_setter(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    slot: TargetSlot,
+) -> Result<()> {
+    set_fn(
+        lua,
+        t,
+        name,
+        move |_, (name, level, class_index, is_enemy): (String, i32, i32, bool)| {
+            set_target_slot(
+                &mut state.borrow_mut(),
+                slot,
+                Some(make_target_info(
+                    unit_id_for_slot(slot),
+                    &name,
+                    level,
+                    class_index,
+                    is_enemy,
+                )),
+            );
+            Ok(())
+        },
+    )
+}
+
+fn add_target_unit_clearer(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    slot: TargetSlot,
+) -> Result<()> {
+    set_fn(lua, t, name, move |_, ()| {
+        set_target_slot(&mut state.borrow_mut(), slot, None);
+        Ok(())
+    })
+}
+
+fn add_target_power_setter(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    slot: TargetSlot,
+) -> Result<()> {
+    set_fn(
+        lua,
+        t,
+        name,
+        move |_, (cur, max, power_type): (i32, i32, Option<i32>)| {
+            if let Some(unit) = target_slot_mut(&mut state.borrow_mut(), slot) {
+                unit.power = cur;
+                unit.power_max = max;
+                if let Some(power_type) = power_type {
+                    unit.power_type = power_type;
+                }
+            }
+            Ok(())
+        },
+    )
+}
+
+fn add_target_type_setter(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    slot: TargetSlot,
+) -> Result<()> {
+    set_fn(
+        lua,
+        t,
+        name,
+        move |_,
+              (classification, creature_type, reaction): (
+            Option<String>,
+            Option<String>,
+            Option<i32>,
+        )| {
+            if let Some(unit) = target_slot_mut(&mut state.borrow_mut(), slot) {
+                if let Some(classification) = classification {
+                    unit.classification = classification;
+                }
+                if let Some(creature_type) = creature_type {
+                    unit.creature_type = creature_type;
+                }
+                if let Some(reaction) = reaction {
+                    unit.reaction = reaction;
+                }
+            }
+            Ok(())
+        },
+    )
+}
+
+fn add_target_health_setter(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+    state: Rc<RefCell<SimState>>,
+    slot: TargetSlot,
+) -> Result<()> {
+    set_fn(lua, t, name, move |_, (cur, max): (i32, i32)| {
+        if let Some(unit) = target_slot_mut(&mut state.borrow_mut(), slot) {
+            unit.health = cur;
+            unit.health_max = max;
+        }
+        Ok(())
+    })
+}
+
+fn set_target_slot(state: &mut SimState, slot: TargetSlot, target: Option<TargetInfo>) {
+    match slot {
+        TargetSlot::Target => state.current_target = target,
+        TargetSlot::Focus => state.current_focus = target,
+    }
+}
+
+fn target_slot_mut(state: &mut SimState, slot: TargetSlot) -> Option<&mut TargetInfo> {
+    match slot {
+        TargetSlot::Target => state.current_target.as_mut(),
+        TargetSlot::Focus => state.current_focus.as_mut(),
+    }
+}
+
+fn unit_id_for_slot(slot: TargetSlot) -> &'static str {
+    match slot {
+        TargetSlot::Target => "target",
+        TargetSlot::Focus => "focus",
+    }
 }
