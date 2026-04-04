@@ -257,22 +257,40 @@ fn find_cycle_node(
 ) -> Option<(u64, HashMap<u64, u64>)> {
     let mut stack: Vec<u64> = vec![rel_id];
     let mut seen: HashMap<u64, u64> = HashMap::new();
-    while let Some(x) = stack.pop() {
-        if let Some(frame) = state.widgets.get(x) {
-            for anchor in &frame.anchors {
-                if let Some(anchor_target) = anchor.relative_to_id {
-                    let y = anchor_target as u64;
-                    if y == id {
-                        return Some((x, seen));
-                    } else if !seen.contains_key(&y) {
-                        seen.insert(y, x);
-                        stack.push(y);
-                    }
-                }
-            }
+    while let Some(frame_id) = stack.pop() {
+        let Some(frame) = state.widgets.get(frame_id) else {
+            continue;
+        };
+        if visit_anchor_targets(frame_id, frame, id, &mut seen, &mut stack) {
+            return Some((frame_id, seen));
         }
     }
     None
+}
+
+fn visit_anchor_targets(
+    frame_id: u64,
+    frame: &crate::widget::Frame,
+    target_id: u64,
+    seen: &mut HashMap<u64, u64>,
+    stack: &mut Vec<u64>,
+) -> bool {
+    for anchor_target in frame_anchor_targets(frame) {
+        if anchor_target == target_id {
+            return true;
+        }
+        if seen.insert(anchor_target, frame_id).is_none() {
+            stack.push(anchor_target);
+        }
+    }
+    false
+}
+
+fn frame_anchor_targets(frame: &crate::widget::Frame) -> impl Iterator<Item = u64> + '_ {
+    frame
+        .anchors
+        .iter()
+        .filter_map(|anchor| anchor.relative_to_id.map(|id| id as u64))
 }
 
 /// Format a frame ID for error messages like WoW: 8-digit uppercase hex.
