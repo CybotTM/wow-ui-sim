@@ -82,49 +82,60 @@ fn add_editbox_i32_getter<M: mlua::UserDataMethods<FrameRef>>(
 
 fn add_editbox_focus_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFocus", |lua, this, ()| {
-        let id = this.0;
-        let old_focus = {
-            let state_rc = get_sim_state(lua);
-            let mut s = state_rc.borrow_mut();
-            let old = s.focused_frame_id;
-            s.focused_frame_id = Some(id);
-            old
-        };
-        if old_focus == Some(id) {
-            return Ok(());
+        if let Some(old_focus) = set_editbox_focus(lua, this.0) {
+            dispatch_focus_gain(lua, this.0, old_focus)?;
         }
-        if let Some(old_id) = old_focus {
-            fire_focus_handler(lua, old_id, "OnEditFocusLost")?;
-        }
-        fire_focus_handler(lua, id, "OnEditFocusGained")?;
         Ok(())
     });
 
     methods.add_method("ClearFocus", |lua, this, ()| {
-        let id = this.0;
-        let had_focus = {
-            let state_rc = get_sim_state(lua);
-            let mut s = state_rc.borrow_mut();
-            if s.focused_frame_id == Some(id) {
-                s.focused_frame_id = None;
-                true
-            } else {
-                false
-            }
-        };
-        if had_focus {
-            fire_focus_handler(lua, id, "OnEditFocusLost")?;
+        if clear_editbox_focus(lua, this.0) {
+            fire_focus_handler(lua, this.0, "OnEditFocusLost")?;
         }
         Ok(())
     });
 
     methods.add_method("HasFocus", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        if let Ok(s) = state_rc.try_borrow() {
-            return Ok(s.focused_frame_id == Some(this.0));
-        }
-        Ok(false)
+        Ok(editbox_has_focus(lua, this.0))
     });
+}
+
+fn set_editbox_focus(lua: &mlua::Lua, id: u64) -> Option<Option<u64>> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let old_focus = state.focused_frame_id;
+    state.focused_frame_id = Some(id);
+    if old_focus == Some(id) {
+        return None;
+    }
+    Some(old_focus)
+}
+
+fn dispatch_focus_gain(lua: &mlua::Lua, id: u64, old_focus: Option<u64>) -> mlua::Result<()> {
+    if let Some(old_id) = old_focus {
+        fire_focus_handler(lua, old_id, "OnEditFocusLost")?;
+    }
+    fire_focus_handler(lua, id, "OnEditFocusGained")?;
+    Ok(())
+}
+
+fn clear_editbox_focus(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if state.focused_frame_id == Some(id) {
+        state.focused_frame_id = None;
+        true
+    } else {
+        false
+    }
+}
+
+fn editbox_has_focus(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    if let Ok(state) = state_rc.try_borrow() {
+        return state.focused_frame_id == Some(id);
+    }
+    false
 }
 
 fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
