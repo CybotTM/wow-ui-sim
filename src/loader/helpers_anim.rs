@@ -190,7 +190,13 @@ fn generate_animation_code(
     _frame_ref: &str,
 ) -> String {
     let mut code = String::new();
+    emit_animation_header(&mut code, anim, anim_type);
+    emit_animation_common_props(&mut code, anim);
+    emit_animation_flipbook_props(&mut code, anim);
+    code
+}
 
+fn emit_animation_header(code: &mut String, anim: &crate::xml::AnimationXml, anim_type: &str) {
     code.push_str(&format!(
         "\n        local __anim = __ag:CreateAnimation(\"{anim_type}\", {})\n        ",
         lua_opt_str(anim.name.as_deref()),
@@ -199,39 +205,29 @@ fn generate_animation_code(
     if let Some(parent_key) = &anim.parent_key {
         code.push_str(&format!("\n        __ag.{parent_key} = __anim\n        "));
     }
+}
 
-    emit_num_call(&mut code, "__anim", "SetDuration", anim.duration);
+fn emit_animation_common_props(code: &mut String, anim: &crate::xml::AnimationXml) {
+    emit_num_call(code, "__anim", "SetDuration", anim.duration);
     if let Some(order) = anim.order {
         code.push_str(&format!("\n        __anim:SetOrder({order})\n        "));
     }
-    emit_num_call(&mut code, "__anim", "SetStartDelay", anim.start_delay);
-    emit_num_call(&mut code, "__anim", "SetEndDelay", anim.end_delay);
-    emit_str_call(
-        &mut code,
-        "__anim",
-        "SetSmoothing",
-        anim.smoothing.as_deref(),
-    );
-    emit_num_call(&mut code, "__anim", "SetFromAlpha", anim.from_alpha);
-    emit_num_call(&mut code, "__anim", "SetToAlpha", anim.to_alpha);
+    emit_num_call(code, "__anim", "SetStartDelay", anim.start_delay);
+    emit_num_call(code, "__anim", "SetEndDelay", anim.end_delay);
+    emit_str_call(code, "__anim", "SetSmoothing", anim.smoothing.as_deref());
+    emit_num_call(code, "__anim", "SetFromAlpha", anim.from_alpha);
+    emit_num_call(code, "__anim", "SetToAlpha", anim.to_alpha);
     emit_pair_call(
-        &mut code,
+        code,
         "__anim",
         "SetOffset",
         anim.offset_x,
         anim.offset_y,
         0.0,
     );
+    emit_pair_call(code, "__anim", "SetScale", anim.scale_x, anim.scale_y, 1.0);
     emit_pair_call(
-        &mut code,
-        "__anim",
-        "SetScale",
-        anim.scale_x,
-        anim.scale_y,
-        1.0,
-    );
-    emit_pair_call(
-        &mut code,
+        code,
         "__anim",
         "SetScaleFrom",
         anim.from_scale_x,
@@ -239,28 +235,20 @@ fn generate_animation_code(
         1.0,
     );
     emit_pair_call(
-        &mut code,
+        code,
         "__anim",
         "SetScaleTo",
         anim.to_scale_x,
         anim.to_scale_y,
         1.0,
     );
-    emit_num_call(&mut code, "__anim", "SetDegrees", anim.degrees);
-    emit_str_call(
-        &mut code,
-        "__anim",
-        "SetChildKey",
-        anim.child_key.as_deref(),
-    );
-    emit_str_call(&mut code, "__anim", "SetTargetName", anim.target.as_deref());
-    emit_str_call(
-        &mut code,
-        "__anim",
-        "SetTargetKey",
-        anim.target_key.as_deref(),
-    );
+    emit_num_call(code, "__anim", "SetDegrees", anim.degrees);
+    emit_str_call(code, "__anim", "SetChildKey", anim.child_key.as_deref());
+    emit_str_call(code, "__anim", "SetTargetName", anim.target.as_deref());
+    emit_str_call(code, "__anim", "SetTargetKey", anim.target_key.as_deref());
+}
 
+fn emit_animation_flipbook_props(code: &mut String, anim: &crate::xml::AnimationXml) {
     // FlipBook properties
     if let Some(rows) = anim.flip_book_rows {
         code.push_str(&format!(
@@ -277,8 +265,6 @@ fn generate_animation_code(
             "\n        __anim:SetFlipBookFrames({frames})\n        "
         ));
     }
-
-    code
 }
 
 /// Generate Lua code for animation group script handlers (OnPlay, OnFinished, etc.).
