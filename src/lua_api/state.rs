@@ -152,24 +152,31 @@ pub struct SimState {
     pub bag_items: HashMap<(i32, i32), BagItem>,
 }
 
-impl Default for SimState {
-    fn default() -> Self {
-        let mut state = Self::new_empty();
-        state.action_bars = default_action_bars();
-        state.party_members = default_party();
-        state.player.name = random_player_name();
-        state.player.buffs = default_player_buffs();
-        state
-    }
+struct EmptyStateCollections {
+    console_output: Vec<String>,
+    timers: VecDeque<PendingTimer>,
+    addons: Vec<AddonInfo>,
+    lua_errors: Vec<String>,
+    tooltips: HashMap<u64, TooltipData>,
+    simple_htmls: HashMap<u64, SimpleHtmlData>,
+    message_frames: HashMap<u64, MessageFrameData>,
+    animation_groups: HashMap<u64, AnimGroupState>,
+    anim_sync_times: HashMap<String, std::time::Duration>,
+    anim_frame_to_group: HashMap<u64, u64>,
+    anim_frame_to_anim: HashMap<u64, (u64, usize)>,
+    on_update_frames: HashSet<u64>,
+    pending_hit_grid_changes: Vec<(u64, bool)>,
+    action_bars: HashMap<u32, u32>,
+    addon_base_paths: Vec<PathBuf>,
+    spell_cooldowns: HashMap<u32, SpellCooldownState>,
+    action_ui_buttons: Vec<(u64, u32)>,
+    party_members: Vec<PartyMember>,
+    bag_items: HashMap<(i32, i32), BagItem>,
 }
 
-impl SimState {
-    fn new_empty() -> Self {
+impl EmptyStateCollections {
+    fn new() -> Self {
         Self {
-            widgets: WidgetRegistry::default(),
-            events: EventQueue::default(),
-            scripts: ScriptRegistry::default(),
-            cvars: CVarStorage::new(),
             console_output: Vec::new(),
             timers: VecDeque::new(),
             addons: Vec::new(),
@@ -185,14 +192,52 @@ impl SimState {
             pending_hit_grid_changes: Vec::new(),
             action_bars: HashMap::new(),
             addon_base_paths: Vec::new(),
-            create_frame_initial_hidden: None,
             spell_cooldowns: HashMap::new(),
             action_ui_buttons: Vec::new(),
             party_members: Vec::new(),
             bag_items: HashMap::new(),
+        }
+    }
+}
+
+struct EmptyRuntimeState {
+    focused_frame_id: Option<u64>,
+    visible_on_update_cache: Option<Vec<u64>>,
+    strata_buckets: Option<Vec<Vec<u64>>>,
+    create_frame_initial_hidden: Option<bool>,
+    mouse_position: Option<(f32, f32)>,
+    hovered_frame: Option<u64>,
+    current_target: Option<TargetInfo>,
+    current_focus: Option<TargetInfo>,
+    sound_manager: Option<SoundManager>,
+    casting: Option<CastingState>,
+    gcd: Option<(f64, f64)>,
+    cursor_item: Option<CursorInfo>,
+    loading_addon_index: Option<u16>,
+    executing_addon_index: Option<u16>,
+    loading_forbidden: bool,
+    next_anim_group_id: u64,
+    next_cast_id: u32,
+    screen_width: f32,
+    screen_height: f32,
+    screen_kind: ScreenKind,
+    is_logged_in: bool,
+    screen_first_displayed: bool,
+    saved_account_name: String,
+    saved_account_list: String,
+    uses_token: bool,
+    fps: f32,
+    rot_damage_level: usize,
+    start_time: Instant,
+}
+
+impl EmptyRuntimeState {
+    fn new() -> Self {
+        Self {
             focused_frame_id: None,
             visible_on_update_cache: None,
             strata_buckets: None,
+            create_frame_initial_hidden: None,
             mouse_position: None,
             hovered_frame: None,
             current_target: None,
@@ -217,6 +262,78 @@ impl SimState {
             fps: 0.0,
             rot_damage_level: 0,
             start_time: Instant::now(),
+        }
+    }
+}
+
+impl Default for SimState {
+    fn default() -> Self {
+        let mut state = Self::new_empty();
+        state.action_bars = default_action_bars();
+        state.party_members = default_party();
+        state.player.name = random_player_name();
+        state.player.buffs = default_player_buffs();
+        state
+    }
+}
+
+impl SimState {
+    fn new_empty() -> Self {
+        let collections = EmptyStateCollections::new();
+        let runtime = EmptyRuntimeState::new();
+
+        Self {
+            widgets: WidgetRegistry::default(),
+            events: EventQueue::default(),
+            scripts: ScriptRegistry::default(),
+            cvars: CVarStorage::new(),
+            console_output: collections.console_output,
+            timers: collections.timers,
+            addons: collections.addons,
+            lua_errors: collections.lua_errors,
+            tooltips: collections.tooltips,
+            simple_htmls: collections.simple_htmls,
+            message_frames: collections.message_frames,
+            animation_groups: collections.animation_groups,
+            anim_sync_times: collections.anim_sync_times,
+            anim_frame_to_group: collections.anim_frame_to_group,
+            anim_frame_to_anim: collections.anim_frame_to_anim,
+            on_update_frames: collections.on_update_frames,
+            pending_hit_grid_changes: collections.pending_hit_grid_changes,
+            action_bars: collections.action_bars,
+            addon_base_paths: collections.addon_base_paths,
+            create_frame_initial_hidden: runtime.create_frame_initial_hidden,
+            spell_cooldowns: collections.spell_cooldowns,
+            action_ui_buttons: collections.action_ui_buttons,
+            party_members: collections.party_members,
+            bag_items: collections.bag_items,
+            focused_frame_id: runtime.focused_frame_id,
+            visible_on_update_cache: runtime.visible_on_update_cache,
+            strata_buckets: runtime.strata_buckets,
+            mouse_position: runtime.mouse_position,
+            hovered_frame: runtime.hovered_frame,
+            current_target: runtime.current_target,
+            current_focus: runtime.current_focus,
+            sound_manager: runtime.sound_manager,
+            casting: runtime.casting,
+            gcd: runtime.gcd,
+            cursor_item: runtime.cursor_item,
+            loading_addon_index: runtime.loading_addon_index,
+            executing_addon_index: runtime.executing_addon_index,
+            loading_forbidden: runtime.loading_forbidden,
+            next_anim_group_id: runtime.next_anim_group_id,
+            next_cast_id: runtime.next_cast_id,
+            screen_width: runtime.screen_width,
+            screen_height: runtime.screen_height,
+            screen_kind: runtime.screen_kind,
+            is_logged_in: runtime.is_logged_in,
+            screen_first_displayed: runtime.screen_first_displayed,
+            saved_account_name: runtime.saved_account_name,
+            saved_account_list: runtime.saved_account_list,
+            uses_token: runtime.uses_token,
+            fps: runtime.fps,
+            rot_damage_level: runtime.rot_damage_level,
+            start_time: runtime.start_time,
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             player: PlayerState::default(),
