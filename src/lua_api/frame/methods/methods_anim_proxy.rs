@@ -429,43 +429,59 @@ fn add_anim_smoothing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_anim_alpha_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFromAlpha", |lua, this, v: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.from_alpha = v;
-        }
+        set_anim_alpha_value(lua, this.0, v, |anim, value| anim.from_alpha = value);
         Ok(())
     });
     methods.add_method("GetFromAlpha", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(lookup_anim(&state, this.0).map_or(0.0, |a| a.from_alpha))
+        Ok(read_anim_alpha_value(lua, this.0, 0.0, |anim| {
+            anim.from_alpha
+        }))
     });
     methods.add_method("SetToAlpha", |lua, this, v: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.to_alpha = v;
-        }
+        set_anim_alpha_value(lua, this.0, v, |anim, value| anim.to_alpha = value);
         Ok(())
     });
     methods.add_method("GetToAlpha", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(lookup_anim(&state, this.0).map_or(1.0, |a| a.to_alpha))
+        Ok(read_anim_alpha_value(lua, this.0, 1.0, |anim| {
+            anim.to_alpha
+        }))
     });
     methods.add_method("SetChange", |lua, this, args: MultiValue| {
         let args: Vec<Value> = args.into_iter().collect();
         let val = crate::lua_api::animation::extract_number(&args, 0).unwrap_or(0.0);
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            if a.anim_type == AnimationType::Alpha {
-                a.to_alpha = a.from_alpha + val;
-            }
-        }
+        set_anim_alpha_change(lua, this.0, val);
         Ok(())
     });
+}
+
+fn set_anim_alpha_value<F>(lua: &mlua::Lua, frame_id: u64, value: f64, update: F)
+where
+    F: FnOnce(&mut crate::lua_api::animation::AnimState, f64),
+{
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id) {
+        update(anim, value);
+    }
+}
+
+fn read_anim_alpha_value<F>(lua: &mlua::Lua, frame_id: u64, default: f64, read: F) -> f64
+where
+    F: FnOnce(&crate::lua_api::animation::AnimState) -> f64,
+{
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    lookup_anim(&state, frame_id).map_or(default, read)
+}
+
+fn set_anim_alpha_change(lua: &mlua::Lua, frame_id: u64, delta: f64) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id)
+        && anim.anim_type == AnimationType::Alpha
+    {
+        anim.to_alpha = anim.from_alpha + delta;
+    }
 }
 
 fn add_anim_translation_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
