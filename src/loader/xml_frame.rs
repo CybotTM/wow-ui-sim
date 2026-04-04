@@ -44,14 +44,16 @@ pub fn create_frame_from_xml(
     timing.frame_code_build_time += build_start.elapsed();
     setup_frame(
         env,
-        &lua_code,
-        &prepared.name,
-        prepared.initial_hidden,
-        frame,
-        &prepared.inherits,
-        &prepared.parent,
-        intrinsic_base,
         timing,
+        SetupFrame {
+            lua_code: &lua_code,
+            name: &prepared.name,
+            initial_hidden: prepared.initial_hidden,
+            frame,
+            inherits: &prepared.inherits,
+            parent: &prepared.parent,
+            intrinsic_base,
+        },
     )?;
     finalize_frame(env, frame, &prepared.name, &prepared.inherits, timing)?;
     Ok(Some(prepared.name))
@@ -105,29 +107,32 @@ fn current_loading_addon_name(env: &LoaderEnv<'_>) -> Option<String> {
 }
 
 /// Execute CreateFrame Lua, apply XML properties, and record setup timing.
-#[allow(clippy::too_many_arguments)]
 fn setup_frame(
     env: &LoaderEnv<'_>,
-    lua_code: &str,
-    name: &str,
-    initial_hidden: bool,
-    frame: &crate::xml::FrameXml,
-    inherits: &str,
-    parent: &str,
-    intrinsic_base: Option<&str>,
     timing: &mut LoadTiming,
+    setup: SetupFrame<'_>,
 ) -> Result<(), LoadError> {
     let setup_start = Instant::now();
     let exec_start = Instant::now();
-    exec_create_frame_code(env, lua_code, name, initial_hidden)?;
+    exec_create_frame_code(env, setup.lua_code, setup.name, setup.initial_hidden)?;
     timing.frame_exec_lua_time += exec_start.elapsed();
     let props_start = Instant::now();
-    apply_xml_properties_direct(env, name, frame, inherits, parent);
-    apply_intrinsic_property(env, intrinsic_base, name);
+    apply_xml_properties_direct(env, setup.name, setup.frame, setup.inherits, setup.parent);
+    apply_intrinsic_property(env, setup.intrinsic_base, setup.name);
     timing.frame_apply_props_time += props_start.elapsed();
     timing.xml_frame_setup_time += setup_start.elapsed();
     timing.frame_count += 1;
     Ok(())
+}
+
+struct SetupFrame<'a> {
+    lua_code: &'a str,
+    name: &'a str,
+    initial_hidden: bool,
+    frame: &'a crate::xml::FrameXml,
+    inherits: &'a str,
+    parent: &'a str,
+    intrinsic_base: Option<&'a str>,
 }
 
 /// Create children, layers, animations, and fire lifecycle scripts with timing.
