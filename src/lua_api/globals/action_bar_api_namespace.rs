@@ -239,6 +239,19 @@ fn register_c_action_bar_stateful(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_c_action_bar_has_action(lua, t, state)?;
+    register_c_action_bar_texture_query(lua, t, state)?;
+    register_c_action_bar_usable_query(lua, t, state)?;
+    register_c_action_bar_current_query(lua, t, state)?;
+    register_c_action_bar_cooldowns(lua, t, state)?;
+    Ok(())
+}
+
+fn register_c_action_bar_has_action(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let st = Rc::clone(state);
     t.set(
         "HasAction",
@@ -247,6 +260,14 @@ fn register_c_action_bar_stateful(
             Ok(slot_from_value(&slot).is_some_and(|n| s.action_bars.contains_key(&n)))
         })?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_texture_query(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let st = Rc::clone(state);
     t.set(
         "GetActionTexture",
@@ -261,6 +282,14 @@ fn register_c_action_bar_stateful(
             }
         })?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_usable_query(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let st = Rc::clone(state);
     t.set(
         "IsUsableAction",
@@ -272,6 +301,14 @@ fn register_c_action_bar_stateful(
             ))
         })?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_current_query(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let st = Rc::clone(state);
     t.set(
         "IsCurrentAction",
@@ -284,7 +321,6 @@ fn register_c_action_bar_stateful(
             Ok(s.action_bars.get(&n).copied() == Some(casting))
         })?,
     )?;
-    register_c_action_bar_cooldowns(lua, t, state)?;
     Ok(())
 }
 
