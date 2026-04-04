@@ -16,6 +16,13 @@ pub fn register_c_action_bar_namespace(lua: &Lua, state: Rc<RefCell<SimState>>) 
 }
 
 fn register_c_action_bar_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_c_action_bar_general_stubs(lua, t)?;
+    register_c_action_bar_page_methods(lua, t)?;
+    register_c_action_bar_state_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_c_action_bar_general_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetBonusBarIndexForSlot",
         lua.create_function(|_, _s: i32| Ok(0i32))?,
@@ -48,6 +55,10 @@ fn register_c_action_bar_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> 
         "HasAssistedCombatActionButtons",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_page_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetActionBarPage", lua.create_function(|_, ()| Ok(1i32))?)?;
     t.set(
         "SetActionBarPage",
@@ -75,6 +86,10 @@ fn register_c_action_bar_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> 
         "GetOverrideBarSkin",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_state_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "HasVehicleActionBar",
         lua.create_function(|_, ()| Ok(false))?,
