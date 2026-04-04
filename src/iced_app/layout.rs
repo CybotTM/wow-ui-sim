@@ -650,10 +650,21 @@ mod tests {
     /// nil relativeTo to the parent ID before storage).
     fn build_three_slice_registry() -> WidgetRegistry {
         let mut reg = WidgetRegistry::new();
+        register_ui_parent(&mut reg);
+        register_button_frame(&mut reg);
+        register_edge_frame(&mut reg, 20, AnchorPoint::Left);
+        register_edge_frame(&mut reg, 21, AnchorPoint::Right);
+        register_center_frame(&mut reg);
+        reg
+    }
+
+    fn register_ui_parent(reg: &mut WidgetRegistry) {
         let mut uip = make_frame(1, None, 1024.0, 768.0, vec![10], vec![]);
         uip.name = Some("UIParent".to_string());
         reg.register(uip);
-        // Button (10): CENTER anchor to UIParent (id=1) — explicit parent ID as XML loading stores
+    }
+
+    fn register_button_frame(reg: &mut WidgetRegistry) {
         reg.register(make_frame(
             10,
             Some(1),
@@ -662,24 +673,20 @@ mod tests {
             vec![20, 21, 22],
             vec![anchor(AnchorPoint::Center, Some(1), AnchorPoint::Center)],
         ));
-        // Left (20): LEFT anchor to button (id=10)
+    }
+
+    fn register_edge_frame(reg: &mut WidgetRegistry, id: u64, point: AnchorPoint) {
         reg.register(make_frame(
-            20,
+            id,
             Some(10),
             32.0,
             39.0,
             vec![],
-            vec![anchor(AnchorPoint::Left, Some(10), AnchorPoint::Left)],
+            vec![anchor(point, Some(10), point)],
         ));
-        // Right (21): RIGHT anchor to button (id=10)
-        reg.register(make_frame(
-            21,
-            Some(10),
-            32.0,
-            39.0,
-            vec![],
-            vec![anchor(AnchorPoint::Right, Some(10), AnchorPoint::Right)],
-        ));
+    }
+
+    fn register_center_frame(reg: &mut WidgetRegistry) {
         reg.register(make_frame(
             22,
             Some(10),
@@ -691,7 +698,6 @@ mod tests {
                 anchor(AnchorPoint::BottomRight, Some(21), AnchorPoint::BottomLeft),
             ],
         ));
-        reg
     }
 
     /// Three-slice Center texture with cross-frame anchors must have non-zero size.
