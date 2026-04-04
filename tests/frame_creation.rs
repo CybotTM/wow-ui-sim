@@ -105,6 +105,48 @@ fn test_create_frame_types() {
 }
 
 #[test]
+fn test_model_type_hierarchy_queries() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local model = CreateFrame("Model", "TypeHierarchyModel", UIParent)
+        local playerModel = CreateFrame("PlayerModel", "TypeHierarchyPlayerModel", UIParent)
+        local scene = CreateFrame("ModelScene", "TypeHierarchyScene", UIParent)
+    "#,
+    )
+    .unwrap();
+
+    let model_is_model: bool = env
+        .eval("return TypeHierarchyModel:IsObjectType('Model')")
+        .unwrap();
+    let player_model_is_model: bool = env
+        .eval("return TypeHierarchyPlayerModel:IsObjectType('Model')")
+        .unwrap();
+    let player_model_is_player_model: bool = env
+        .eval("return TypeHierarchyPlayerModel:IsObjectType('PlayerModel')")
+        .unwrap();
+    let scene_is_frame: bool = env
+        .eval("return TypeHierarchyScene:IsObjectType('Frame')")
+        .unwrap();
+    let scene_is_model: bool = env
+        .eval("return TypeHierarchyScene:IsObjectType('Model')")
+        .unwrap();
+
+    assert!(model_is_model, "Model should report Model type");
+    assert!(
+        player_model_is_model,
+        "PlayerModel should inherit Model in IsObjectType"
+    );
+    assert!(
+        player_model_is_player_model,
+        "PlayerModel should report PlayerModel type"
+    );
+    assert!(scene_is_frame, "ModelScene should behave like a frame type");
+    assert!(!scene_is_model, "ModelScene should not behave like Model");
+}
+
+#[test]
 fn test_editbox_mouse_enabled_by_default() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(r#"local eb = CreateFrame("EditBox", "TestEBMouse", UIParent)"#)

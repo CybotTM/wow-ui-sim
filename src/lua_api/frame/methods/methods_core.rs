@@ -2,10 +2,13 @@
 
 use super::super::handle::FrameRef;
 use super::combat_lockdown;
+use super::methods_core_identity;
 use super::methods_core_state;
 use super::methods_helpers::{calculate_frame_height, calculate_frame_width};
 use crate::lua_api::SimState;
 use crate::lua_api::frame::handle::get_sim_state;
+
+pub(crate) use methods_core_identity::is_anim_type;
 
 /// Read screen dimensions from SimState.
 pub(crate) fn screen_dims(state: &SimState) -> (f32, f32) {
@@ -21,88 +24,10 @@ pub(super) fn lockdown_blocked(lua: &mlua::Lua, id: u64, method_name: &str) -> b
 
 /// Add core frame methods to the shared methods table.
 pub fn add_core_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_identity_methods(methods);
+    methods_core_identity::add_identity_methods(methods);
     add_size_methods(methods);
     super::methods_rect::add_rect_methods(methods);
     methods_core_state::add_core_state_methods(methods);
-}
-
-fn add_identity_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_get_name(methods);
-    add_get_debug_name(methods);
-    add_get_object_type(methods);
-    add_is_object_type(methods);
-}
-
-fn add_get_name<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetName", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state.widgets.get(this.0).and_then(|f| f.name.clone()))
-    });
-}
-
-fn add_get_debug_name<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetDebugName", |lua, this, ()| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let Some(frame) = state.widgets.get(id) else {
-            return Ok("[Unknown]".to_string());
-        };
-        if let Some(ref name) = frame.name {
-            return Ok(name.clone());
-        }
-        if let Some(pid) = frame.parent_id
-            && let Some(parent) = state.widgets.get(pid)
-        {
-            for (key, &cid) in &parent.children_keys {
-                if cid == id {
-                    let parent_name = parent.name.as_deref().unwrap_or("?");
-                    return Ok(format!("{}.{}", parent_name, key));
-                }
-            }
-        }
-        Ok(format!("[{}]", frame.widget_type.as_str()))
-    });
-}
-
-fn add_get_object_type<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetObjectType", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let obj_type = state
-            .widgets
-            .get(this.0)
-            .map(|f| {
-                f.object_type_name
-                    .as_deref()
-                    .unwrap_or(f.widget_type.as_str())
-            })
-            .unwrap_or("Frame");
-        Ok(obj_type.to_string())
-    });
-}
-
-fn add_is_object_type<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("IsObjectType", |lua, this, type_name: String| {
-        use crate::widget::WidgetType;
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let frame = state.widgets.get(this.0);
-        let wt = frame.map(|f| f.widget_type).unwrap_or(WidgetType::Frame);
-        // Check object_type_name first (e.g., "ArchaeologyDigSiteFrame")
-        if let Some(otn) = frame.and_then(|f| f.object_type_name.as_deref()) {
-            if otn.eq_ignore_ascii_case(&type_name) {
-                return Ok(true);
-            }
-            // Animation/Actor/ControlPoint types have their own hierarchy (not Frame)
-            if is_anim_type(otn) {
-                return Ok(anim_object_type_is_a(otn, &type_name));
-            }
-        }
-        Ok(widget_type_is_a(wt, &type_name))
-    });
 }
 
 fn add_size_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -260,88 +185,4 @@ fn add_set_height<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
-}
-
-/// Check if an object_type_name belongs to the animation/actor/controlpoint family.
-pub(crate) fn is_anim_type(otn: &str) -> bool {
-    matches!(
-        otn,
-        "AnimationGroup"
-            | "Animation"
-            | "Alpha"
-            | "Rotation"
-            | "Scale"
-            | "Translation"
-            | "LineTranslation"
-            | "LineScale"
-            | "Path"
-            | "FlipBook"
-            | "VertexColor"
-            | "TextureCoordTranslation"
-            | "ControlPoint"
-            | "Actor"
-            | "ModelSceneActor"
-    )
-}
-
-/// Check IsObjectType for animation/actor/controlpoint types using WoW's hierarchy.
-///
-/// Hierarchy:
-/// - AnimationGroup → UIObject only (NOT Frame, NOT Region)
-/// - Animation subtypes → their type + parent chain + Animation + UIObject
-///   - LineScale → Scale → Animation
-///   - LineTranslation → Translation → Animation
-///   - All others → Animation directly
-/// - ControlPoint → UIObject only
-/// - Actor → UIObject only
-fn anim_object_type_is_a(obj_type: &str, query: &str) -> bool {
-    // "Object" is the root for everything
-    if query.eq_ignore_ascii_case("object") {
-        return true;
-    }
-    // Animation types are NOT Region or Frame
-    if query.eq_ignore_ascii_case("region") || query.eq_ignore_ascii_case("frame") {
-        return false;
-    }
-    match obj_type {
-        // These only match themselves + UIObject
-        "AnimationGroup" | "ControlPoint" | "Actor" | "ModelSceneActor" => false,
-        // LineScale inherits Scale → Animation
-        "LineScale" => {
-            query.eq_ignore_ascii_case("scale") || query.eq_ignore_ascii_case("animation")
-        }
-        // LineTranslation inherits Translation → Animation
-        "LineTranslation" => {
-            query.eq_ignore_ascii_case("translation") || query.eq_ignore_ascii_case("animation")
-        }
-        // All other animation subtypes inherit Animation directly
-        _ => query.eq_ignore_ascii_case("animation"),
-    }
-}
-
-/// Check if a widget type is or inherits from the given type name.
-/// WorldFrame is special: GetObjectType() returns "Frame" but IsObjectType("Frame") is false.
-fn widget_type_is_a(wt: crate::widget::WidgetType, type_name: &str) -> bool {
-    use crate::widget::WidgetType;
-    // WorldFrame: IsObjectType("WorldFrame") → true, IsObjectType("Frame") → false
-    if wt == WidgetType::WorldFrame {
-        return type_name.eq_ignore_ascii_case("worldframe")
-            || type_name.eq_ignore_ascii_case("region");
-    }
-    if wt.as_str().eq_ignore_ascii_case(type_name) {
-        return true;
-    }
-    match type_name.to_ascii_lowercase().as_str() {
-        "object" | "region" => true,
-        "frame" => !matches!(
-            wt,
-            WidgetType::FontString | WidgetType::Texture | WidgetType::Line
-        ),
-        "texture" => matches!(wt, WidgetType::Texture | WidgetType::Line),
-        "line" => matches!(wt, WidgetType::Line),
-        "button" => matches!(wt, WidgetType::Button | WidgetType::CheckButton),
-        "model" => matches!(wt, WidgetType::Model | WidgetType::PlayerModel),
-        "playermodel" => matches!(wt, WidgetType::PlayerModel),
-        _ => false,
-    }
 }
