@@ -12,10 +12,7 @@ pub fn register_c_item_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
     register_c_item(lua)?;
     super::c_item_location_api::register(lua, state.clone())?;
     super::c_container_api::register_c_container_api(lua, state)?;
-    register_c_encoding_util(lua)?;
-    register_legacy_item_globals(lua)?;
-    register_spell_globals(lua)?;
-    register_inventory_globals(lua)?;
+    super::c_item_api_globals::register_item_global_apis(lua)?;
     Ok(())
 }
 
@@ -260,280 +257,6 @@ fn register_c_item_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// Register the C_EncodingUtil namespace (stub compression/encoding).
-fn register_c_encoding_util(lua: &Lua) -> Result<()> {
-    let c_encoding = lua.create_table()?;
-
-    c_encoding.set(
-        "CompressString",
-        lua.create_function(|lua, (data, _method): (String, Option<i32>)| {
-            Ok(Value::String(lua.create_string(&data)?))
-        })?,
-    )?;
-    c_encoding.set(
-        "DecompressString",
-        lua.create_function(|lua, (data, _method): (String, Option<i32>)| {
-            Ok(Value::String(lua.create_string(&data)?))
-        })?,
-    )?;
-    c_encoding.set(
-        "EncodeBase64",
-        lua.create_function(|lua, data: String| Ok(Value::String(lua.create_string(&data)?)))?,
-    )?;
-    c_encoding.set(
-        "DecodeBase64",
-        lua.create_function(|lua, data: String| Ok(Value::String(lua.create_string(&data)?)))?,
-    )?;
-
-    lua.globals().set("C_EncodingUtil", c_encoding)?;
-    Ok(())
-}
-
-/// Register legacy global item functions (GetItemInfo, GetItemID, etc.).
-fn register_legacy_item_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-    globals.set("GetItemInfo", make_legacy_get_item_info(lua)?)?;
-    globals.set(
-        "GetItemID",
-        lua.create_function(|_, item_link: Option<String>| {
-            Ok(item_link.and_then(|link| parse_item_id_from_link(&link)))
-        })?,
-    )?;
-    globals.set(
-        "GetItemCount",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0))?,
-    )?;
-    register_legacy_item_stubs(lua)?;
-    Ok(())
-}
-
-/// Legacy global stubs: GetItemClassInfo, GetItemSpecInfo, IsArtifactRelicItem, etc.
-fn register_legacy_item_stubs(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-    globals.set(
-        "GetItemClassInfo",
-        lua.create_function(|lua, class_id: i32| {
-            let name = item_class_name_extended(class_id);
-            if name.is_empty() {
-                Ok(Value::Nil)
-            } else {
-                Ok(Value::String(lua.create_string(name)?))
-            }
-        })?,
-    )?;
-    globals.set(
-        "GetItemSpecInfo",
-        lua.create_function(|_, _item_id: i32| Ok(Value::Nil))?,
-    )?;
-    globals.set(
-        "IsArtifactRelicItem",
-        lua.create_function(|_, _item_id: i32| Ok(false))?,
-    )?;
-    globals.set(
-        "GetTradeSkillTexture",
-        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
-    )?;
-    Ok(())
-}
-
-/// Build the legacy global GetItemInfo closure (returns 17 positional values).
-fn make_legacy_get_item_info(lua: &Lua) -> Result<mlua::Function> {
-    lua.create_function(|lua, item_id: Value| {
-        let id = parse_item_id_from_value(&item_id);
-        if id == 0 {
-            return Ok(mlua::MultiValue::new());
-        }
-        let Some(item) = crate::items::get_item(id as u32) else {
-            return Ok(mlua::MultiValue::new());
-        };
-        let color = quality_color(item.quality);
-        let link = format!(
-            "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",
-            color, id, item.name
-        );
-        Ok(mlua::MultiValue::from_vec(vec![
-            Value::String(lua.create_string(item.name)?),
-            Value::String(lua.create_string(&link)?),
-            Value::Integer(item.quality as i64),
-            Value::Integer(item.item_level as i64),
-            Value::Integer(item.required_level as i64),
-            Value::String(lua.create_string(item_class_from_inv_type(item.inventory_type))?),
-            Value::String(lua.create_string("")?),
-            Value::Integer(item.stackable as i64),
-            Value::String(lua.create_string(inv_type_to_equip_loc(item.inventory_type))?),
-            Value::Integer(134400),
-            Value::Integer(item.sell_price as i64),
-            Value::Integer(15),
-            Value::Integer(0),
-            Value::Integer(item.bonding as i64),
-            Value::Integer(item.expansion_id as i64),
-            Value::Nil,
-            Value::Boolean(false),
-        ]))
-    })
-}
-
-/// Register spell-related global functions.
-fn register_spell_globals(lua: &Lua) -> Result<()> {
-    register_spell_query_globals(lua)?;
-    register_spell_stub_globals(lua)?;
-    Ok(())
-}
-
-/// Spell query globals: link, icon, texture.
-fn register_spell_query_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
-        "GetSpellLink",
-        lua.create_function(|lua, spell_id: i32| {
-            let name = crate::spells::get_spell(spell_id as u32)
-                .map(|s| s.name)
-                .unwrap_or("Unknown");
-            let link = format!("|cff71d5ff|Hspell:{}|h[{}]|h|r", spell_id, name);
-            Ok(Value::String(lua.create_string(&link)?))
-        })?,
-    )?;
-
-    globals.set(
-        "GetSpellIcon",
-        lua.create_function(|_, spell_id: i32| {
-            let icon = crate::spells::get_spell(spell_id as u32)
-                .map(|s| s.icon_file_data_id)
-                .unwrap_or(136243);
-            Ok(icon)
-        })?,
-    )?;
-
-    globals.set(
-        "GetSpellTexture",
-        lua.create_function(|_, spell_id: i32| {
-            let file_id = crate::spells::get_spell(spell_id as u32)
-                .map(|s| s.icon_file_data_id)
-                .unwrap_or(136243);
-            Ok(crate::manifest_interface_data::get_texture_path(file_id).unwrap_or(""))
-        })?,
-    )?;
-
-    Ok(())
-}
-
-/// Spell stub globals: cooldown, known checks, chat.
-fn register_spell_stub_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
-        "GetSpellCooldown",
-        lua.create_function(|_, _spell_id: Value| Ok((0.0_f64, 0.0_f64, 1, 1.0_f64)))?,
-    )?;
-
-    globals.set(
-        "IsSpellKnown",
-        lua.create_function(|_, args: mlua::MultiValue| {
-            let spell_id = args
-                .iter()
-                .next()
-                .and_then(|v| match v {
-                    mlua::Value::Integer(n) => Some(*n as u32),
-                    _ => None,
-                })
-                .unwrap_or(0);
-            Ok(super::spellbook_data::is_spell_known(spell_id))
-        })?,
-    )?;
-
-    globals.set(
-        "IsPlayerSpell",
-        lua.create_function(|_, spell_id: i32| {
-            Ok(super::spellbook_data::is_spell_known(spell_id as u32))
-        })?,
-    )?;
-
-    globals.set(
-        "IsSpellKnownOrOverridesKnown",
-        lua.create_function(|_, spell_id: i32| {
-            Ok(super::spellbook_data::find_spell_slot(spell_id as u32).is_some())
-        })?,
-    )?;
-
-    globals.set(
-        "SpellCanTargetItem",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    globals.set(
-        "SpellCanTargetItemID",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-
-    globals.set(
-        "SendChatMessage",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
-
-    // SpellGetVisibilityInfo(spellId, context) -> hasCustom, alwaysShowMine, showForMySpec
-    globals.set(
-        "SpellGetVisibilityInfo",
-        lua.create_function(|_, (_spell_id, _ctx): (i32, String)| Ok((false, false, false)))?,
-    )?;
-
-    Ok(())
-}
-
-/// Register inventory slot functions.
-fn register_inventory_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    // Returns (slotID, textureFileDataID) — WoW returns the slot's background icon as a fileDataID.
-    globals.set(
-        "GetInventorySlotInfo",
-        lua.create_function(|_, slot_name: String| {
-            Ok((
-                inventory_slot_id(&slot_name),
-                slot_texture_file_data_id(&slot_name),
-            ))
-        })?,
-    )?;
-    globals.set(
-        "GetInventoryItemLink",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(Value::Nil))?,
-    )?;
-    globals.set(
-        "GetInventoryItemID",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(Value::Nil))?,
-    )?;
-    globals.set(
-        "GetInventoryItemTexture",
-        lua.create_function(|lua, (_unit, slot): (String, i32)| {
-            // Slots 20-23 are bag slots; simulate 4 equipped bags.
-            if (20..=24).contains(&slot) {
-                Ok(Value::String(
-                    lua.create_string("Interface\\Icons\\INV_Misc_Bag_08")?,
-                ))
-            } else {
-                Ok(Value::Nil)
-            }
-        })?,
-    )?;
-    globals.set(
-        "GetInventoryItemCount",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(0))?,
-    )?;
-    globals.set(
-        "GetInventoryItemBroken",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(false))?,
-    )?;
-    globals.set(
-        "GetInventoryItemEquippedUnusable",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(false))?,
-    )?;
-    globals.set(
-        "GetInventoryItemCooldown",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok((0.0_f64, 0.0_f64, 1i32)))?,
-    )?;
-
-    Ok(())
-}
-
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
@@ -594,7 +317,7 @@ fn item_class_name(class_id: i32) -> &'static str {
 }
 
 /// Map item class ID to name (legacy global version — includes Profession, returns empty for unknown).
-fn item_class_name_extended(class_id: i32) -> &'static str {
+pub(super) fn item_class_name_extended(class_id: i32) -> &'static str {
     match class_id {
         0 => "Consumable",
         1 => "Container",
@@ -667,7 +390,7 @@ pub(super) fn quality_color(quality: u8) -> &'static str {
 }
 
 /// Map inventory type to a rough item class name.
-fn item_class_from_inv_type(inv_type: u8) -> &'static str {
+pub(super) fn item_class_from_inv_type(inv_type: u8) -> &'static str {
     match inv_type {
         13 | 15 | 17 | 21 | 22 | 25 | 26 => "Weapon",
         1..=12 | 14 | 16 | 23 => "Armor",
@@ -707,7 +430,7 @@ fn inv_type_to_subclass(inv_type: u8) -> &'static str {
 }
 
 /// Map inventory type to WoW equip location string.
-fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
+pub(super) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
     match inv_type {
         1 => "INVTYPE_HEAD",
         2 => "INVTYPE_NECK",
@@ -733,63 +456,5 @@ fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
         25 => "INVTYPE_THROWN",
         26 => "INVTYPE_RANGEDRIGHT",
         _ => "",
-    }
-}
-
-/// Map inventory slot name to slot ID.
-fn inventory_slot_id(slot_name: &str) -> i32 {
-    match slot_name {
-        "HeadSlot" => 1,
-        "NeckSlot" => 2,
-        "ShoulderSlot" => 3,
-        "BackSlot" => 15,
-        "ChestSlot" => 5,
-        "ShirtSlot" => 4,
-        "TabardSlot" => 19,
-        "WristSlot" => 9,
-        "HandsSlot" => 10,
-        "WaistSlot" => 6,
-        "LegsSlot" => 7,
-        "FeetSlot" => 8,
-        "Finger0Slot" => 11,
-        "Finger1Slot" => 12,
-        "Trinket0Slot" => 13,
-        "Trinket1Slot" => 14,
-        "MainHandSlot" => 16,
-        "SecondaryHandSlot" => 17,
-        "RangedSlot" => 18,
-        "AmmoSlot" => 0,
-        "Bag0Slot" => 20,
-        "Bag1Slot" => 21,
-        "Bag2Slot" => 22,
-        "Bag3Slot" => 23,
-        "ReagentBag0Slot" => 24,
-        _ => 0,
-    }
-}
-
-/// Map inventory slot name to the fileDataID for its background icon texture.
-fn slot_texture_file_data_id(slot_name: &str) -> i32 {
-    match slot_name {
-        "HeadSlot" => 136516,
-        "NeckSlot" => 136519,
-        "ShoulderSlot" => 136526,
-        "ShirtSlot" => 136525,
-        "ChestSlot" => 136512,
-        "WaistSlot" => 136529,
-        "LegsSlot" => 136517,
-        "FeetSlot" => 136513,
-        "WristSlot" => 136530,
-        "HandsSlot" => 136515,
-        "Finger0Slot" | "Finger1Slot" => 136514,
-        "Trinket0Slot" | "Trinket1Slot" => 136528,
-        "BackSlot" => 136521,
-        "MainHandSlot" => 136518,
-        "SecondaryHandSlot" => 136524,
-        "RangedSlot" => 136520,
-        "TabardSlot" => 136527,
-        "AmmoSlot" => 136510,
-        "Bag0Slot" | "Bag1Slot" | "Bag2Slot" | "Bag3Slot" | "ReagentBag0Slot" => 136511,
-        _ => 136516, // fallback to head slot icon
     }
 }
