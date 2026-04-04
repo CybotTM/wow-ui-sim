@@ -238,42 +238,40 @@ fn add_editbox_number_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 }
 
 fn add_editbox_limit_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetMaxLetters", |lua, this, max: i32| {
+    add_editbox_i32_setter(methods, "SetMaxLetters", |frame, max| {
+        frame.editbox_max_letters = max
+    });
+    add_editbox_i32_getter_from_frame(methods, "GetMaxLetters", |frame| frame.editbox_max_letters);
+    add_editbox_i32_setter(methods, "SetMaxBytes", |frame, max| {
+        frame.editbox_max_bytes = max
+    });
+    add_editbox_i32_getter_from_frame(methods, "GetMaxBytes", |frame| frame.editbox_max_bytes);
+}
+
+fn add_editbox_i32_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, i32) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_max_letters = max;
+            setter(frame, value);
         }
         Ok(())
     });
+}
 
-    methods.add_method("GetMaxLetters", |lua, this, ()| {
+fn add_editbox_i32_getter_from_frame<M, F>(methods: &mut M, name: &'static str, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> i32 + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_max_letters)
-            .unwrap_or(0))
-    });
-
-    methods.add_method("SetMaxBytes", |lua, this, max: i32| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_max_bytes = max;
-        }
-        Ok(())
-    });
-
-    methods.add_method("GetMaxBytes", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_max_bytes)
-            .unwrap_or(0))
+        Ok(state.widgets.get(this.0).map(getter).unwrap_or(0))
     });
 }
 
