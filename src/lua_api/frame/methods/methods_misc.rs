@@ -251,38 +251,31 @@ fn add_minimap_texture_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 
 /// Minimap quest/task/arch blob setters (no-op stubs).
 fn add_minimap_blob_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "SetQuestBlobInsideTexture",
-        |_, _this, _asset: Value| Ok(()),
-    );
-    methods.add_method("SetQuestBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetQuestBlobOutsideTexture", |_, _this, _asset: Value| {
-        Ok(())
-    });
-    methods.add_method("SetQuestBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetQuestBlobRingTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetQuestBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
-    methods.add_method("SetQuestBlobRingAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetTaskBlobInsideTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetTaskBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method(
-        "SetTaskBlobOutsideTexture",
-        |_, _this, _asset: Value| Ok(()),
-    );
-    methods.add_method("SetTaskBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetTaskBlobRingTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetTaskBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
-    methods.add_method("SetTaskBlobRingAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetArchBlobInsideTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetArchBlobInsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method(
-        "SetArchBlobOutsideTexture",
-        |_, _this, _asset: Value| Ok(()),
-    );
-    methods.add_method("SetArchBlobOutsideAlpha", |_, _this, _alpha: f32| Ok(()));
-    methods.add_method("SetArchBlobRingTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetArchBlobRingScalar", |_, _this, _scalar: f32| Ok(()));
-    methods.add_method("SetArchBlobRingAlpha", |_, _this, _alpha: f32| Ok(()));
+    add_minimap_blob_family(methods, "Quest");
+    add_minimap_blob_family(methods, "Task");
+    add_minimap_blob_family(methods, "Arch");
+}
+
+fn add_minimap_blob_family<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, prefix: &str) {
+    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobInsideTexture"));
+    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobInsideAlpha"));
+    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobOutsideTexture"));
+    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobOutsideAlpha"));
+    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobRingTexture"));
+    add_minimap_blob_scalar_stub(methods, &format!("Set{prefix}BlobRingScalar"));
+    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobRingAlpha"));
+}
+
+fn add_minimap_blob_texture_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
+    methods.add_method(name, |_, _this, _asset: Value| Ok(()));
+}
+
+fn add_minimap_blob_alpha_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
+    methods.add_method(name, |_, _this, _alpha: f32| Ok(()));
+}
+
+fn add_minimap_blob_scalar_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
+    methods.add_method(name, |_, _this, _scalar: f32| Ok(()));
 }
 
 /// ScrollingMessageFrame and EditBox stubs.
