@@ -215,46 +215,43 @@ impl AnimHandle {
     /// Register scale methods: SetScale, SetScaleFrom, SetScaleTo.
     fn add_scale_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("SetScale", |_, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let x = extract_number(&args, 0).unwrap_or(1.0);
-            let y = extract_number(&args, 1).unwrap_or(1.0);
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index)
-            {
+            this.update_scale_values(args, |anim, x, y| {
                 anim.scale_x = x;
                 anim.scale_y = y;
-            }
+            });
             Ok(())
         });
 
         methods.add_method("SetScaleFrom", |_, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let x = extract_number(&args, 0).unwrap_or(1.0);
-            let y = extract_number(&args, 1).unwrap_or(1.0);
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index)
-            {
+            this.update_scale_values(args, |anim, x, y| {
                 anim.from_scale_x = x;
                 anim.from_scale_y = y;
-            }
+            });
             Ok(())
         });
 
         methods.add_method("SetScaleTo", |_, this, args: MultiValue| {
-            let args: Vec<Value> = args.into_iter().collect();
-            let x = extract_number(&args, 0).unwrap_or(1.0);
-            let y = extract_number(&args, 1).unwrap_or(1.0);
-            let mut state = this.state.borrow_mut();
-            if let Some(group) = state.animation_groups.get_mut(&this.group_id)
-                && let Some(anim) = group.animations.get_mut(this.anim_index)
-            {
+            this.update_scale_values(args, |anim, x, y| {
                 anim.to_scale_x = x;
                 anim.to_scale_y = y;
-            }
+            });
             Ok(())
         });
+    }
+
+    fn update_scale_values<F>(&self, args: MultiValue, mut apply: F)
+    where
+        F: FnMut(&mut super::AnimState, f64, f64),
+    {
+        let args: Vec<Value> = args.into_iter().collect();
+        let x = extract_number(&args, 0).unwrap_or(1.0);
+        let y = extract_number(&args, 1).unwrap_or(1.0);
+        let mut state = self.state.borrow_mut();
+        if let Some(group) = state.animation_groups.get_mut(&self.group_id)
+            && let Some(anim) = group.animations.get_mut(self.anim_index)
+        {
+            apply(anim, x, y);
+        }
     }
 
     /// Parse origin args from a Lua MultiValue into (point, offset_x, offset_y).
