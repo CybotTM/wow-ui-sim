@@ -23,64 +23,91 @@ fn load_addon_runtime(
     state: &Rc<RefCell<SimState>>,
     addon_name: &str,
 ) -> Result<(bool, Value)> {
-    {
-        let s = state.borrow();
-        if s.addons
-            .iter()
-            .any(|a| a.folder_name == addon_name && a.loaded)
-        {
-            return Ok((true, Value::Nil));
-        }
+    if addon_is_loaded(state, addon_name) {
+        return Ok((true, Value::Nil));
     }
 
-    let toc_path = match find_addon_toc(state, addon_name) {
-        Some(path) => path,
-        None => {
-            let reason = lua.create_string("MISSING")?;
-            return Ok((false, Value::String(reason)));
-        }
+    let Some(toc_path) = find_addon_toc(state, addon_name) else {
+        return missing_addon_result(lua);
     };
+    load_addon_dependencies(lua, state, &toc_path);
+    execute_addon_load(lua, state, addon_name, &toc_path)
+}
 
-    if let Ok(toc) = crate::toc::TocFile::from_file(&toc_path) {
+fn addon_is_loaded(state: &Rc<RefCell<SimState>>, addon_name: &str) -> bool {
+    let s = state.borrow();
+    s.addons
+        .iter()
+        .any(|a| a.folder_name == addon_name && a.loaded)
+}
+
+fn missing_addon_result(lua: &Lua) -> Result<(bool, Value)> {
+    let reason = lua.create_string("MISSING")?;
+    Ok((false, Value::String(reason)))
+}
+
+fn load_addon_dependencies(lua: &Lua, state: &Rc<RefCell<SimState>>, toc_path: &std::path::Path) {
+    if let Ok(toc) = crate::toc::TocFile::from_file(toc_path) {
         for dep in toc.dependencies() {
-            let already_loaded = {
-                let s = state.borrow();
-                s.addons.iter().any(|a| a.folder_name == dep && a.loaded)
-            };
-            if !already_loaded {
+            if !addon_is_loaded(state, &dep) {
                 let _ = load_addon_runtime(lua, state, &dep);
             }
         }
     }
+}
 
+fn execute_addon_load(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    addon_name: &str,
+    toc_path: &std::path::Path,
+) -> Result<(bool, Value)> {
     let loader_env = crate::lua_api::LoaderEnv::new(lua, Rc::clone(state));
-    match crate::loader::load_addon(&loader_env, &toc_path) {
-        Ok(result) => {
-            let load_time_secs = result.timing.total().as_secs_f64();
-            if std::env::var("WOW_SIM_VERBOSE").is_ok() {
-                eprintln!(
-                    "[LoadAddOn] {} loaded: {} Lua, {} XML ({:.1?})",
-                    addon_name,
-                    result.lua_files,
-                    result.xml_files,
-                    result.timing.total()
-                );
-            }
-            register_loaded_addon(state, addon_name, load_time_secs);
-            fire_addon_loaded(&loader_env, addon_name);
-            crate::lua_api::workarounds::apply_post_runtime_addon_load_from_lua(
-                lua,
-                Rc::clone(state),
-                addon_name,
-            );
-            Ok((true, Value::Nil))
-        }
-        Err(e) => {
-            eprintln!("[LoadAddOn] {} failed: {}", addon_name, e);
-            let reason = lua.create_string("CORRUPT")?;
-            Ok((false, Value::String(reason)))
-        }
+    match crate::loader::load_addon(&loader_env, toc_path) {
+        Ok(result) => handle_addon_load_success(lua, state, addon_name, &loader_env, result),
+        Err(e) => addon_load_failure(lua, addon_name, &e),
     }
+}
+
+fn handle_addon_load_success(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    addon_name: &str,
+    loader_env: &crate::lua_api::LoaderEnv<'_>,
+    result: crate::loader::LoadResult,
+) -> Result<(bool, Value)> {
+    let load_time_secs = result.timing.total().as_secs_f64();
+    log_addon_load(addon_name, &result);
+    register_loaded_addon(state, addon_name, load_time_secs);
+    fire_addon_loaded(loader_env, addon_name);
+    crate::lua_api::workarounds::apply_post_runtime_addon_load_from_lua(
+        lua,
+        Rc::clone(state),
+        addon_name,
+    );
+    Ok((true, Value::Nil))
+}
+
+fn log_addon_load(addon_name: &str, result: &crate::loader::LoadResult) {
+    if std::env::var("WOW_SIM_VERBOSE").is_ok() {
+        eprintln!(
+            "[LoadAddOn] {} loaded: {} Lua, {} XML ({:.1?})",
+            addon_name,
+            result.lua_files,
+            result.xml_files,
+            result.timing.total()
+        );
+    }
+}
+
+fn addon_load_failure(
+    lua: &Lua,
+    addon_name: &str,
+    err: &impl std::fmt::Display,
+) -> Result<(bool, Value)> {
+    eprintln!("[LoadAddOn] {} failed: {}", addon_name, err);
+    let reason = lua.create_string("CORRUPT")?;
+    Ok((false, Value::String(reason)))
 }
 
 /// Search addon_base_paths for an addon's TOC file.
