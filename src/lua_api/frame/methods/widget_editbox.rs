@@ -139,16 +139,25 @@ fn editbox_has_focus(lua: &mlua::Lua, id: u64) -> bool {
 }
 
 fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_cursor_position(methods);
+    add_get_cursor_position(methods);
+    methods.add_method("HighlightText", |_, _this, _args: mlua::MultiValue| Ok(()));
+    add_insert_text(methods);
+    add_get_num_letters(methods);
+}
+
+fn add_set_cursor_position<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetCursorPosition", |lua, this, pos: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            let char_count = frame.text.as_deref().unwrap_or("").chars().count() as i32;
-            frame.editbox_cursor_pos = pos.clamp(0, char_count);
+            frame.editbox_cursor_pos = clamp_cursor_position(frame, pos);
         }
         Ok(())
     });
+}
 
+fn add_get_cursor_position<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetCursorPosition", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -158,32 +167,50 @@ fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
             .map(|f| f.editbox_cursor_pos)
             .unwrap_or(0))
     });
+}
 
-    methods.add_method("HighlightText", |_, _this, _args: mlua::MultiValue| Ok(()));
-
+fn add_insert_text<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("Insert", |lua, this, text: String| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            let current = frame.text.get_or_insert_with(String::new);
-            let pos = (frame.editbox_cursor_pos as usize).min(current.len());
-            current.insert_str(pos, &text);
-            frame.editbox_cursor_pos = (pos + text.len()) as i32;
+            insert_editbox_text(frame, &text);
         }
         Ok(())
     });
+}
 
+fn add_get_num_letters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetNumLetters", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let len = state
-            .widgets
-            .get(this.0)
-            .and_then(|f| f.text.as_ref())
-            .map(|t| t.chars().count())
-            .unwrap_or(0);
-        Ok(len as i32)
+        Ok(editbox_text_len(&state, this.0) as i32)
     });
+}
+
+fn clamp_cursor_position(frame: &crate::widget::Frame, pos: i32) -> i32 {
+    pos.clamp(0, editbox_char_count(frame))
+}
+
+fn editbox_char_count(frame: &crate::widget::Frame) -> i32 {
+    frame.text.as_deref().unwrap_or("").chars().count() as i32
+}
+
+fn insert_editbox_text(frame: &mut crate::widget::Frame, text: &str) {
+    let pos = frame.editbox_cursor_pos.max(0) as usize;
+    let current = frame.text.get_or_insert_with(String::new);
+    let insert_at = pos.min(current.len());
+    current.insert_str(insert_at, text);
+    frame.editbox_cursor_pos = (insert_at + text.len()) as i32;
+}
+
+fn editbox_text_len(state: &crate::lua_api::SimState, id: u64) -> usize {
+    state
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.text.as_ref())
+        .map(|text| text.chars().count())
+        .unwrap_or(0)
 }
 
 fn add_editbox_number_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
