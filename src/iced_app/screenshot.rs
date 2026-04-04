@@ -9,6 +9,8 @@ use crate::render::headless::render_to_image;
 use super::app::App;
 use super::strata_emit::build_quad_batch_for_registry;
 
+const CROP_FORMAT_EXAMPLE: &str = "700x150+400+650";
+
 impl App {
     /// Render a screenshot from the live app state and save to disk.
     pub(crate) fn render_screenshot(
@@ -20,7 +22,34 @@ impl App {
         crop: Option<&str>,
     ) -> LuaResponse {
         let output_path = Path::new(output).with_extension("webp");
+        let (batch, mut glyph_atlas) = self.build_screenshot_batch(width, height, filter);
+        let glyph_data = glyph_atlas_data(&mut glyph_atlas);
+        let mut tex_mgr = self.texture_manager.borrow_mut();
+        let img = render_to_image(&batch, &mut tex_mgr, width, height, glyph_data);
+        let img = match maybe_crop_image(img, crop) {
+            Ok(img) => img,
+            Err(e) => return LuaResponse::Error(e),
+        };
 
+        if let Err(e) = save_screenshot(&img, &output_path) {
+            return LuaResponse::Error(format!("Failed to save screenshot: {}", e));
+        }
+
+        LuaResponse::Output(format_screenshot_saved_message(
+            &img,
+            &output_path,
+            width,
+            height,
+            crop.is_some(),
+        ))
+    }
+
+    fn build_screenshot_batch(
+        &self,
+        width: u32,
+        height: u32,
+        filter: Option<&str>,
+    ) -> (crate::render::QuadBatch, GlyphAtlas) {
         let mut glyph_atlas = GlyphAtlas::new();
         let batch = {
             let env = self.env.borrow();
@@ -45,46 +74,49 @@ impl App {
                 &buckets,
             )
         };
-
-        let glyph_data = if glyph_atlas.is_dirty() {
-            let (data, size, _) = glyph_atlas.texture_data();
-            Some((data, size))
-        } else {
-            None
-        };
-
-        let mut tex_mgr = self.texture_manager.borrow_mut();
-        let img = render_to_image(&batch, &mut tex_mgr, width, height, glyph_data);
-
-        let img = match crop {
-            Some(crop_str) => match apply_crop(img, crop_str) {
-                Ok(cropped) => cropped,
-                Err(e) => return LuaResponse::Error(e),
-            },
-            None => img,
-        };
-
-        if let Err(e) = save_screenshot(&img, &output_path) {
-            return LuaResponse::Error(format!("Failed to save screenshot: {}", e));
-        }
-
-        let size_label = if crop.is_some() {
-            format!(
-                "{}x{} (cropped from {}x{})",
-                img.width(),
-                img.height(),
-                width,
-                height
-            )
-        } else {
-            format!("{}x{}", width, height)
-        };
-        LuaResponse::Output(format!(
-            "Saved {} screenshot to {}",
-            size_label,
-            output_path.display()
-        ))
+        (batch, glyph_atlas)
     }
+}
+
+fn glyph_atlas_data(glyph_atlas: &mut GlyphAtlas) -> Option<(&[u8], u32)> {
+    if glyph_atlas.is_dirty() {
+        let (data, size, _) = glyph_atlas.texture_data();
+        Some((data, size))
+    } else {
+        None
+    }
+}
+
+fn maybe_crop_image(img: image::RgbaImage, crop: Option<&str>) -> Result<image::RgbaImage, String> {
+    match crop {
+        Some(crop_str) => apply_crop(img, crop_str),
+        None => Ok(img),
+    }
+}
+
+fn format_screenshot_saved_message(
+    img: &image::RgbaImage,
+    output_path: &Path,
+    width: u32,
+    height: u32,
+    cropped: bool,
+) -> String {
+    let size_label = if cropped {
+        format!(
+            "{}x{} (cropped from {}x{})",
+            img.width(),
+            img.height(),
+            width,
+            height
+        )
+    } else {
+        format!("{}x{}", width, height)
+    };
+    format!(
+        "Saved {} screenshot to {}",
+        size_label,
+        output_path.display()
+    )
 }
 
 /// Parse a crop string in WxH+X+Y format (e.g., "700x150+400+650").
@@ -104,10 +136,7 @@ fn parse_crop(s: &str) -> Option<(u32, u32, u32, u32)> {
 fn apply_crop(img: image::RgbaImage, crop_str: &str) -> Result<image::RgbaImage, String> {
     use image::GenericImageView;
     let (cw, ch, cx, cy) = parse_crop(crop_str).ok_or_else(|| {
-        format!(
-            "Invalid crop format '{}', expected WxH+X+Y (e.g., 700x150+400+650)",
-            crop_str
-        )
+        format!("Invalid crop format '{crop_str}', expected WxH+X+Y (e.g., {CROP_FORMAT_EXAMPLE})")
     })?;
     if cx + cw > img.width() || cy + ch > img.height() {
         return Err(format!(
