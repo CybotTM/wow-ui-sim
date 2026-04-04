@@ -35,105 +35,136 @@ fn eff_scale(widgets: &crate::widget::WidgetRegistry, id: u64) -> f32 {
 /// Calculate frame width from anchors or explicit size (recursive).
 /// WoW behavior: anchors defining opposite edges override explicit size.
 pub fn calculate_frame_width(widgets: &crate::widget::WidgetRegistry, id: u64) -> f32 {
-    if let Some(frame) = widgets.get(id) {
-        use crate::widget::AnchorPoint::*;
-        let left_anchors = [TopLeft, BottomLeft, Left];
-        let right_anchors = [TopRight, BottomRight, Right];
-        let left = frame
-            .anchors
-            .iter()
-            .find(|a| left_anchors.contains(&a.point));
-        let right = frame
-            .anchors
-            .iter()
-            .find(|a| right_anchors.contains(&a.point));
-        if let (Some(left_anchor), Some(right_anchor)) = (left, right) {
-            if left_anchor.relative_to_id == right_anchor.relative_to_id {
-                // Same frame: compute from relative frame width
-                let parent_id = left_anchor
-                    .relative_to_id
-                    .map(|id| id as u64)
-                    .or(frame.parent_id);
-                if let Some(pid) = parent_id {
-                    let parent_width = calculate_frame_width(widgets, pid);
-                    if parent_width > 0.0 {
-                        return (parent_width - left_anchor.x_offset + right_anchor.x_offset)
-                            .max(0.0);
-                    }
-                }
-                // Screen-anchored (both relative_to_id == None, no parent): use layout_rect
-                if left_anchor.relative_to_id.is_none() {
-                    if let Some(rect) = frame.layout_rect {
-                        let s = eff_scale(widgets, id);
-                        if s > 0.0 && rect.width > 0.0 {
-                            return rect.width / s;
-                        }
-                    }
-                }
-            } else if let Some(rect) = frame.layout_rect {
-                // Cross-frame anchors: use pre-computed layout_rect
-                let s = eff_scale(widgets, id);
-                if s > 0.0 && rect.width > 0.0 {
-                    return rect.width / s;
-                }
-            }
-        }
-        frame.width
-    } else {
-        0.0
+    use crate::widget::AnchorPoint::*;
+    let Some(frame) = widgets.get(id) else {
+        return 0.0;
+    };
+    let Some((left_anchor, right_anchor)) = find_opposite_anchors(
+        frame,
+        &[TopLeft, BottomLeft, Left],
+        &[TopRight, BottomRight, Right],
+    ) else {
+        return frame.width;
+    };
+    if left_anchor.relative_to_id != right_anchor.relative_to_id {
+        return scaled_layout_width(widgets, frame, id).unwrap_or(frame.width);
     }
+    if let Some(width) = same_relative_width(widgets, frame, left_anchor, right_anchor) {
+        return width;
+    }
+    if left_anchor.relative_to_id.is_none() {
+        return scaled_layout_width(widgets, frame, id).unwrap_or(frame.width);
+    }
+    frame.width
 }
 
 /// Calculate frame height from anchors or explicit size (recursive).
 /// WoW behavior: anchors defining opposite edges override explicit size.
 pub fn calculate_frame_height(widgets: &crate::widget::WidgetRegistry, id: u64) -> f32 {
-    if let Some(frame) = widgets.get(id) {
-        use crate::widget::AnchorPoint::*;
-        let top_anchors = [TopLeft, TopRight, Top];
-        let bottom_anchors = [BottomLeft, BottomRight, Bottom];
-        let top = frame
-            .anchors
-            .iter()
-            .find(|a| top_anchors.contains(&a.point));
-        let bottom = frame
-            .anchors
-            .iter()
-            .find(|a| bottom_anchors.contains(&a.point));
-        if let (Some(top_anchor), Some(bottom_anchor)) = (top, bottom) {
-            if top_anchor.relative_to_id == bottom_anchor.relative_to_id {
-                // Same frame: compute from relative frame height
-                let parent_id = top_anchor
-                    .relative_to_id
-                    .map(|id| id as u64)
-                    .or(frame.parent_id);
-                if let Some(pid) = parent_id {
-                    let parent_height = calculate_frame_height(widgets, pid);
-                    if parent_height > 0.0 {
-                        return (parent_height + top_anchor.y_offset - bottom_anchor.y_offset)
-                            .max(0.0);
-                    }
-                }
-                // Screen-anchored (both relative_to_id == None, no parent): use layout_rect
-                if top_anchor.relative_to_id.is_none() {
-                    if let Some(rect) = frame.layout_rect {
-                        let s = eff_scale(widgets, id);
-                        if s > 0.0 && rect.height > 0.0 {
-                            return rect.height / s;
-                        }
-                    }
-                }
-            } else if let Some(rect) = frame.layout_rect {
-                // Cross-frame anchors: use pre-computed layout_rect
-                let s = eff_scale(widgets, id);
-                if s > 0.0 && rect.height > 0.0 {
-                    return rect.height / s;
-                }
-            }
-        }
-        frame.height
-    } else {
-        0.0
+    use crate::widget::AnchorPoint::*;
+    let Some(frame) = widgets.get(id) else {
+        return 0.0;
+    };
+    let Some((top_anchor, bottom_anchor)) = find_opposite_anchors(
+        frame,
+        &[TopLeft, TopRight, Top],
+        &[BottomLeft, BottomRight, Bottom],
+    ) else {
+        return frame.height;
+    };
+    if top_anchor.relative_to_id != bottom_anchor.relative_to_id {
+        return scaled_layout_height(widgets, frame, id).unwrap_or(frame.height);
     }
+    if let Some(height) = same_relative_height(widgets, frame, top_anchor, bottom_anchor) {
+        return height;
+    }
+    if top_anchor.relative_to_id.is_none() {
+        return scaled_layout_height(widgets, frame, id).unwrap_or(frame.height);
+    }
+    frame.height
+}
+
+fn find_opposite_anchors<'a>(
+    frame: &'a Frame,
+    start_points: &[AnchorPoint],
+    end_points: &[AnchorPoint],
+) -> Option<(&'a Anchor, &'a Anchor)> {
+    let start = frame
+        .anchors
+        .iter()
+        .find(|a| start_points.contains(&a.point))?;
+    let end = frame
+        .anchors
+        .iter()
+        .find(|a| end_points.contains(&a.point))?;
+    Some((start, end))
+}
+
+fn scaled_layout_width(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+) -> Option<f32> {
+    scaled_layout_axis(widgets, frame, id, |rect| rect.width)
+}
+
+fn scaled_layout_height(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+) -> Option<f32> {
+    scaled_layout_axis(widgets, frame, id, |rect| rect.height)
+}
+
+fn scaled_layout_axis<F>(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+    read_axis: F,
+) -> Option<f32>
+where
+    F: FnOnce(crate::LayoutRect) -> f32,
+{
+    let rect = frame.layout_rect?;
+    let axis = read_axis(rect);
+    let scale = eff_scale(widgets, id);
+    (scale > 0.0 && axis > 0.0).then_some(axis / scale)
+}
+
+fn same_relative_width(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    left_anchor: &Anchor,
+    right_anchor: &Anchor,
+) -> Option<f32> {
+    let parent_width = same_relative_axis_size(frame, left_anchor, calculate_frame_width, widgets)?;
+    (parent_width > 0.0)
+        .then_some((parent_width - left_anchor.x_offset + right_anchor.x_offset).max(0.0))
+}
+
+fn same_relative_height(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    top_anchor: &Anchor,
+    bottom_anchor: &Anchor,
+) -> Option<f32> {
+    let parent_height =
+        same_relative_axis_size(frame, top_anchor, calculate_frame_height, widgets)?;
+    (parent_height > 0.0)
+        .then_some((parent_height + top_anchor.y_offset - bottom_anchor.y_offset).max(0.0))
+}
+
+fn same_relative_axis_size(
+    frame: &Frame,
+    anchor: &Anchor,
+    calculate_axis: fn(&crate::widget::WidgetRegistry, u64) -> f32,
+    widgets: &crate::widget::WidgetRegistry,
+) -> Option<f32> {
+    let parent_id = anchor
+        .relative_to_id
+        .map(|id| id as u64)
+        .or(frame.parent_id)?;
+    Some(calculate_axis(widgets, parent_id))
 }
 
 /// Add fill-parent anchors (TopLeft + BottomRight) to a frame, equivalent to SetAllPoints.
