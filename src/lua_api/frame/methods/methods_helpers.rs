@@ -46,14 +46,14 @@ pub fn calculate_frame_width(widgets: &crate::widget::WidgetRegistry, id: u64) -
     ) else {
         return frame.width;
     };
-    if left_anchor.relative_to_id != right_anchor.relative_to_id {
-        return scaled_layout_width(widgets, frame, id).unwrap_or(frame.width);
+    if anchors_use_different_relative_frames(left_anchor, right_anchor) {
+        return width_from_layout_or_explicit(widgets, frame, id);
     }
     if let Some(width) = same_relative_width(widgets, frame, left_anchor, right_anchor) {
         return width;
     }
     if left_anchor.relative_to_id.is_none() {
-        return scaled_layout_width(widgets, frame, id).unwrap_or(frame.width);
+        return width_from_layout_or_explicit(widgets, frame, id);
     }
     frame.width
 }
@@ -98,6 +98,18 @@ fn find_opposite_anchors<'a>(
         .iter()
         .find(|a| end_points.contains(&a.point))?;
     Some((start, end))
+}
+
+fn anchors_use_different_relative_frames(left_anchor: &Anchor, right_anchor: &Anchor) -> bool {
+    left_anchor.relative_to_id != right_anchor.relative_to_id
+}
+
+fn width_from_layout_or_explicit(
+    widgets: &crate::widget::WidgetRegistry,
+    frame: &Frame,
+    id: u64,
+) -> f32 {
+    scaled_layout_width(widgets, frame, id).unwrap_or(frame.width)
 }
 
 fn scaled_layout_width(
