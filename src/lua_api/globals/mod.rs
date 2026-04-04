@@ -96,6 +96,7 @@ pub mod spell_api;
 pub mod spellbook_data;
 pub mod strings;
 pub mod system_api;
+mod system_api_runtime;
 pub mod targeting_api;
 pub mod template;
 pub mod timer_api;
