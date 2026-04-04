@@ -165,42 +165,72 @@ fn add_model_transform_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: 
 
 fn add_model_rendering_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     // GetDrawLayer/SetDrawLayer are implemented in methods_texture.rs — don't override with stubs.
-    methods.add_method(
-        "GetModelDrawLayer",
-        |_, _this, ()| Ok("ARTWORK".to_string()),
+    add_model_string_getter(methods, "GetModelDrawLayer", "ARTWORK");
+    add_model_variadic_stub(
+        methods,
+        &[
+            "SetModelDrawLayer",
+            "SetModelAlpha",
+            "SetShadowEffect",
+            "ReplaceIconTexture",
+            "SetGlow",
+            "SetGradientMask",
+            "SetParticlesEnabled",
+            "SetUseGBuffer",
+        ],
     );
-    methods.add_method("SetModelDrawLayer", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
-    methods.add_method("GetModelAlpha", |_, _this, ()| Ok(1.0_f64));
-    methods.add_method("SetModelAlpha", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("GetModelFileID", |_, _this, ()| Ok(0i64));
-    methods.add_method("GetShadowEffect", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method(
-        "SetShadowEffect",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("GetPaused", |_, _this, ()| Ok(false));
-    methods.add_method("HasAttachmentPoints", |_, _this, ()| Ok(false));
+    add_model_f64_getter(methods, "GetModelAlpha", 1.0);
+    add_model_i64_getter(methods, "GetModelFileID", 0);
+    add_model_f64_getter(methods, "GetShadowEffect", 0.0);
+    add_model_bool_getter(methods, "GetPaused", false);
+    add_model_bool_getter(methods, "HasAttachmentPoints", false);
     methods.add_method("GetLight", |_, _this, ()| Ok(mlua::Value::Nil));
     methods.add_method("GetFogColor", |_, _this, ()| {
         Ok((0.0_f64, 0.0_f64, 0.0_f64))
     });
-    methods.add_method("GetFogFar", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method("GetFogNear", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method("ReplaceIconTexture", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
-    methods.add_method("SetGlow", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method(
-        "SetGradientMask",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method(
-        "SetParticlesEnabled",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("SetUseGBuffer", |_, _this, _args: mlua::MultiValue| Ok(()));
+    add_model_f64_getter(methods, "GetFogFar", 0.0);
+    add_model_f64_getter(methods, "GetFogNear", 0.0);
+}
+
+fn add_model_variadic_stub<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    names: &[&'static str],
+) {
+    for name in names {
+        methods.add_method(*name, |_, _this, _args: mlua::MultiValue| Ok(()));
+    }
+}
+
+fn add_model_string_getter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    value: &'static str,
+) {
+    methods.add_method(name, move |_, _this, ()| Ok(value.to_string()));
+}
+
+fn add_model_bool_getter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    value: bool,
+) {
+    methods.add_method(name, move |_, _this, ()| Ok(value));
+}
+
+fn add_model_f64_getter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    value: f64,
+) {
+    methods.add_method(name, move |_, _this, ()| Ok(value));
+}
+
+fn add_model_i64_getter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    value: i64,
+) {
+    methods.add_method(name, move |_, _this, ()| Ok(value));
 }
 
 fn add_player_model_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
