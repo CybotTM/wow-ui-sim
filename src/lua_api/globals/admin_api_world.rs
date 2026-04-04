@@ -21,42 +21,70 @@ pub(crate) fn register_world_admin_api(
 }
 
 fn register_zone_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    super::admin_api::set_fn(lua, t, "SetZone", {
-        let s = Rc::clone(&state);
-        move |_, (name, id): (String, i32)| {
-            let mut st = s.borrow_mut();
-            st.world.zone_name = name;
-            st.world.zone_id = id;
-            Ok(())
-        }
-    })?;
-    super::admin_api::set_fn(lua, t, "SetSubZone", {
-        let s = Rc::clone(&state);
-        move |_, name: String| {
-            s.borrow_mut().world.sub_zone_name = name;
-            Ok(())
-        }
-    })?;
-    super::admin_api::set_fn(lua, t, "SetInstanceInfo", {
-        let s = Rc::clone(&state);
-        move |_, (name, inst_type, difficulty, max_players): (String, String, i32, i32)| {
-            let mut st = s.borrow_mut();
-            st.world.instance_name = name;
-            st.world.instance_type = inst_type;
-            st.world.instance_difficulty = difficulty;
-            st.world.instance_max_players = max_players;
-            st.world.in_instance = true;
-            Ok(())
-        }
-    })?;
-    super::admin_api::set_fn(lua, t, "SetInInstance", {
-        let s = Rc::clone(&state);
-        move |_, v: bool| {
-            s.borrow_mut().world.in_instance = v;
-            Ok(())
-        }
-    })?;
+    add_zone_setter(lua, t, Rc::clone(&state))?;
+    add_sub_zone_setter(lua, t, Rc::clone(&state))?;
+    add_instance_info_setter(lua, t, Rc::clone(&state))?;
+    add_in_instance_setter(lua, t, state)?;
     Ok(())
+}
+
+fn apply_instance_info(
+    state: &mut SimState,
+    name: String,
+    inst_type: String,
+    difficulty: i32,
+    max_players: i32,
+) {
+    state.world.instance_name = name;
+    state.world.instance_type = inst_type;
+    state.world.instance_difficulty = difficulty;
+    state.world.instance_max_players = max_players;
+    state.world.in_instance = true;
+}
+
+fn add_zone_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "SetZone", move |_, (name, id): (String, i32)| {
+        let mut state = state.borrow_mut();
+        state.world.zone_name = name;
+        state.world.zone_id = id;
+        Ok(())
+    })
+}
+
+fn add_sub_zone_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "SetSubZone", move |_, name: String| {
+        state.borrow_mut().world.sub_zone_name = name;
+        Ok(())
+    })
+}
+
+fn add_instance_info_setter(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    super::admin_api::set_fn(
+        lua,
+        t,
+        "SetInstanceInfo",
+        move |_, (name, inst_type, difficulty, max_players): (String, String, i32, i32)| {
+            apply_instance_info(
+                &mut state.borrow_mut(),
+                name,
+                inst_type,
+                difficulty,
+                max_players,
+            );
+            Ok(())
+        },
+    )
+}
+
+fn add_in_instance_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "SetInInstance", move |_, v: bool| {
+        state.borrow_mut().world.in_instance = v;
+        Ok(())
+    })
 }
 
 fn register_economy_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
