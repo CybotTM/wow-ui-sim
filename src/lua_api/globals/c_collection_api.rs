@@ -100,12 +100,24 @@ fn add_bool_stub_with_arg<A: mlua::FromLuaMulti>(
     t.set(name, lua.create_function(move |_, _: A| Ok(value))?)
 }
 
+fn add_bool_stub(lua: &Lua, t: &mlua::Table, name: &str, value: bool) -> Result<()> {
+    t.set(name, lua.create_function(move |_, ()| Ok(value))?)
+}
+
 fn add_table_stub_with_arg<A: mlua::FromLuaMulti>(
     lua: &Lua,
     t: &mlua::Table,
     name: &str,
 ) -> Result<()> {
     t.set(name, lua.create_function(|lua, _: A| lua.create_table())?)
+}
+
+fn add_nil_stub_with_arg<A: mlua::FromLuaMulti>(
+    lua: &Lua,
+    t: &mlua::Table,
+    name: &str,
+) -> Result<()> {
+    t.set(name, lua.create_function(|_, _: A| Ok(Value::Nil))?)
 }
 
 fn empty_mount_info() -> Result<(
@@ -245,50 +257,62 @@ fn register_transmog_source_methods(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    let s = Rc::clone(state);
+    add_player_has_transmog(lua, t, Rc::clone(state))?;
+    add_player_has_transmog_by_item_info(lua, t, Rc::clone(state))?;
+    add_player_has_transmog_item_modified_appearance(lua, t, Rc::clone(state))?;
+    add_nil_stub_with_arg::<i32>(lua, t, "GetItemInfo")?;
+    add_bool_stub_with_arg::<i32>(lua, t, "PlayerKnowsSource", false)?;
+    add_bool_stub_with_arg::<i32>(lua, t, "IsSourceTypeFilterChecked", true)?;
+    add_bool_stub(lua, t, "GetShowMissingSourceInItemTooltips", true)?;
+    Ok(())
+}
+
+fn add_player_has_transmog(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set(
         "PlayerHasTransmog",
         lua.create_function(move |_, (item_id, _appearance_mod): (i32, Option<i32>)| {
-            Ok(s.borrow().world.collected_transmogs.contains(&item_id))
+            Ok(player_has_transmog(&state.borrow(), item_id))
         })?,
-    )?;
-    let s = Rc::clone(state);
+    )
+}
+
+fn add_player_has_transmog_by_item_info(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set(
         "PlayerHasTransmogByItemInfo",
         lua.create_function(move |_, item_info: String| {
-            // Parse item_id from "item:12345:..." link format.
-            let id = item_info
-                .split(':')
-                .nth(1)
-                .and_then(|s| s.parse::<i32>().ok())
-                .unwrap_or(0);
-            Ok(s.borrow().world.collected_transmogs.contains(&id))
+            Ok(player_has_transmog(
+                &state.borrow(),
+                item_id_from_item_info(&item_info),
+            ))
         })?,
-    )?;
-    let s = Rc::clone(state);
+    )
+}
+
+fn add_player_has_transmog_item_modified_appearance(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set(
         "PlayerHasTransmogItemModifiedAppearance",
-        lua.create_function(move |_, id: i32| {
-            Ok(s.borrow().world.collected_transmogs.contains(&id))
-        })?,
-    )?;
-    t.set(
-        "GetItemInfo",
-        lua.create_function(|_, _item_modified_appearance_id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "PlayerKnowsSource",
-        lua.create_function(|_, _source_id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "IsSourceTypeFilterChecked",
-        lua.create_function(|_, _filter: i32| Ok(true))?,
-    )?;
-    t.set(
-        "GetShowMissingSourceInItemTooltips",
-        lua.create_function(|_, ()| Ok(true))?,
-    )?;
-    Ok(())
+        lua.create_function(move |_, id: i32| Ok(player_has_transmog(&state.borrow(), id)))?,
+    )
+}
+
+fn player_has_transmog(state: &crate::lua_api::state::SimState, item_id: i32) -> bool {
+    state.world.collected_transmogs.contains(&item_id)
+}
+
+fn item_id_from_item_info(item_info: &str) -> i32 {
+    item_info
+        .split(':')
+        .nth(1)
+        .and_then(|s| s.parse::<i32>().ok())
+        .unwrap_or(0)
 }
 
 /// C_Transmog namespace - transmogrification API.
