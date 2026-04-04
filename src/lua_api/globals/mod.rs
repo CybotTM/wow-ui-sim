@@ -101,6 +101,7 @@ pub mod tooltip_api;
 pub mod traits_api;
 pub mod traits_api_node;
 pub mod unit_api;
+mod unit_api_extra;
 pub mod unit_combat_api;
 pub mod unit_heal_prediction;
 pub mod unit_health_power_api;
