@@ -53,6 +53,7 @@ pub mod c_stubs_achievement;
 pub mod c_stubs_api;
 pub mod c_stubs_api_combat;
 pub mod c_stubs_api_extra;
+pub mod c_stubs_api_glue;
 pub mod c_stubs_api_professions;
 pub mod c_stubs_api_store;
 pub mod c_system_api;
