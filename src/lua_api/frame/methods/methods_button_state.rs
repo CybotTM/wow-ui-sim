@@ -10,8 +10,8 @@ pub(super) fn add_button_state_methods<M: mlua::UserDataMethods<FrameRef>>(metho
 }
 
 fn add_enable_disable_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_enabled_mutator_method(methods, "SetEnabled", Some(true));
-    add_enabled_mutator_method(methods, "Enable", None);
+    add_enabled_mutator_method(methods, "SetEnabled", None);
+    add_enabled_mutator_method(methods, "Enable", Some(true));
     add_enabled_mutator_method(methods, "Disable", Some(false));
     add_is_enabled_method(methods);
 }
