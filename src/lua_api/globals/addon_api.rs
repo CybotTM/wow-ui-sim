@@ -171,46 +171,57 @@ fn register_enable_disable(
     c_addons: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_set_addon_enabled(lua, c_addons, state, "EnableAddOn", true)?;
+    register_set_addon_enabled(lua, c_addons, state, "DisableAddOn", false)?;
+    register_set_all_addons_enabled(lua, c_addons, state, "EnableAllAddOns", true)?;
+    register_set_all_addons_enabled(lua, c_addons, state, "DisableAllAddOns", false)?;
+    register_addon_enable_state_query(lua, c_addons, state)?;
+    Ok(())
+}
+
+fn register_set_addon_enabled(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+    name: &str,
+    enabled: bool,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
-        "EnableAddOn",
+        name,
         lua.create_function(move |_, (addon, _character): (Value, Option<String>)| {
-            set_addon_enabled(&s, &addon, true);
+            set_addon_enabled(&s, &addon, enabled);
             Ok(())
         })?,
     )?;
+    Ok(())
+}
 
+fn register_set_all_addons_enabled(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+    name: &str,
+    enabled: bool,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
-        "DisableAddOn",
-        lua.create_function(move |_, (addon, _character): (Value, Option<String>)| {
-            set_addon_enabled(&s, &addon, false);
-            Ok(())
-        })?,
-    )?;
-
-    let s = Rc::clone(state);
-    c_addons.set(
-        "EnableAllAddOns",
+        name,
         lua.create_function(move |_, _character: Option<String>| {
             for addon in &mut s.borrow_mut().addons {
-                addon.enabled = true;
+                addon.enabled = enabled;
             }
             Ok(())
         })?,
     )?;
+    Ok(())
+}
 
-    let s = Rc::clone(state);
-    c_addons.set(
-        "DisableAllAddOns",
-        lua.create_function(move |_, _character: Option<String>| {
-            for addon in &mut s.borrow_mut().addons {
-                addon.enabled = false;
-            }
-            Ok(())
-        })?,
-    )?;
-
+fn register_addon_enable_state_query(
+    lua: &Lua,
+    c_addons: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     c_addons.set(
         "GetAddOnEnableState",
@@ -222,7 +233,6 @@ fn register_enable_disable(
             Ok(if enabled { 2i32 } else { 0i32 })
         })?,
     )?;
-
     Ok(())
 }
 
