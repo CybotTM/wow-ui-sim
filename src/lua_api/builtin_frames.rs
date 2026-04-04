@@ -186,69 +186,53 @@ fn create_debuff_frame(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) 
 // ---------------------------------------------------------------------------
 
 fn create_stub_frames(widgets: &mut WidgetRegistry, ui_parent_id: u64, o: u16) {
-    // Blizzard_ObjectiveTracker (not loaded)
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "ObjectiveTrackerFrame",
-        Some(ui_parent_id),
-        Some((248.0, 600.0)),
-        o,
-    );
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "ScenarioObjectiveTracker",
-        Some(ui_parent_id),
-        None,
-        o,
-    );
+    register_stub_frame_specs(widgets, ui_parent_id, o, VISIBLE_STUB_FRAMES);
+    register_hidden_stub_frame_specs(widgets, ui_parent_id, o, HIDDEN_STUB_FRAMES);
+}
 
-    // Blizzard_GroupFinder (not loaded)
-    register_hidden_frame(
-        widgets,
-        WidgetType::Frame,
-        "LFGListFrame",
-        Some(ui_parent_id),
-        Some((400.0, 500.0)),
-        o,
-    );
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "LFGEventFrame",
-        Some(ui_parent_id),
-        None,
-        o,
-    );
+const VISIBLE_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[
+    ("ObjectiveTrackerFrame", Some((248.0, 600.0))),
+    ("ScenarioObjectiveTracker", None),
+    ("LFGEventFrame", None),
+    ("NamePlateDriverFrame", None),
+    ("AuctionHouseFrame", None),
+    ("InterfaceOptionsFrame", None),
+];
 
-    // Blizzard_NamePlates (not loaded)
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "NamePlateDriverFrame",
-        Some(ui_parent_id),
-        None,
-        o,
-    );
+const HIDDEN_STUB_FRAMES: &[(&str, Option<(f32, f32)>)] = &[("LFGListFrame", Some((400.0, 500.0)))];
 
-    // Blizzard_AuctionHouseUI (not loaded)
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "AuctionHouseFrame",
-        Some(ui_parent_id),
-        None,
-        o,
-    );
+fn register_stub_frame_specs(
+    widgets: &mut WidgetRegistry,
+    ui_parent_id: u64,
+    owner: u16,
+    specs: &[(&str, Option<(f32, f32)>)],
+) {
+    for (name, size) in specs {
+        register_frame(
+            widgets,
+            WidgetType::Frame,
+            name,
+            Some(ui_parent_id),
+            *size,
+            owner,
+        );
+    }
+}
 
-    // Engine-only (no XML definition)
-    register_frame(
-        widgets,
-        WidgetType::Frame,
-        "InterfaceOptionsFrame",
-        Some(ui_parent_id),
-        None,
-        o,
-    );
+fn register_hidden_stub_frame_specs(
+    widgets: &mut WidgetRegistry,
+    ui_parent_id: u64,
+    owner: u16,
+    specs: &[(&str, Option<(f32, f32)>)],
+) {
+    for (name, size) in specs {
+        register_hidden_frame(
+            widgets,
+            WidgetType::Frame,
+            name,
+            Some(ui_parent_id),
+            *size,
+            owner,
+        );
+    }
 }
