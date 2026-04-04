@@ -165,24 +165,15 @@ fn parse_validated_set_point(
 }
 
 fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
-    {
-        let state_rc = get_sim_state(lua);
-        if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetPoint") {
-            return Ok(());
-        }
-    }
     let args: Vec<Value> = args.into_iter().collect();
-    if args.is_empty() {
-        return Err(lua_error(
-            lua,
-            "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]",
-        ));
+    if should_skip_set_point(lua, id, &args)? {
+        return Ok(());
     }
     let (point, relative_to, relative_point, x_ofs, y_ofs) =
         parse_validated_set_point(lua, id, args)?;
     let state_rc = get_sim_state(lua);
     check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
-    if is_duplicate_anchor(
+    if has_duplicate_set_point(
         &state_rc.borrow(),
         id,
         relative_to,
@@ -203,6 +194,32 @@ fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Resul
         y_ofs,
     );
     Ok(())
+}
+
+fn should_skip_set_point(lua: &mlua::Lua, id: u64, args: &[Value]) -> mlua::Result<bool> {
+    let state_rc = get_sim_state(lua);
+    if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetPoint") {
+        return Ok(true);
+    }
+    if args.is_empty() {
+        return Err(lua_error(
+            lua,
+            "Frame:SetPoint(): Usage: (\"point\" [, region or nil] [, \"relativePoint\"] [, offsetX, offsetY]",
+        ));
+    }
+    Ok(false)
+}
+
+fn has_duplicate_set_point(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    relative_to: Option<usize>,
+    point: crate::widget::AnchorPoint,
+    relative_point: crate::widget::AnchorPoint,
+    x_ofs: f32,
+    y_ofs: f32,
+) -> bool {
+    is_duplicate_anchor(state, id, relative_to, point, relative_point, x_ofs, y_ofs)
 }
 
 /// Raise a Lua error if anchoring `id` to `relative_to` would create a cycle.
