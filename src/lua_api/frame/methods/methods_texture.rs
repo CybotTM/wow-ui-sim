@@ -38,40 +38,54 @@ fn extract_file_data_id(value: &Value) -> Option<i64> {
 fn add_set_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetTexture", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let file_data_id = args_vec.first().and_then(extract_file_data_id);
-        let path = args_vec
-            .first()
-            .map(resolve_file_data_id_or_path)
-            .unwrap_or(None);
-        let horiz_tile = args_vec.get(1).and_then(|v| {
-            if let Value::Boolean(b) = v {
-                Some(*b)
-            } else {
-                None
-            }
-        });
-        let vert_tile = args_vec.get(2).and_then(|v| {
-            if let Value::Boolean(b) = v {
-                Some(*b)
-            } else {
-                None
-            }
-        });
+        let texture_args = parse_set_texture_args(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.texture = path;
-            frame.texture_file_data_id = file_data_id;
-            if let Some(h) = horiz_tile {
-                frame.horiz_tile = h;
-            }
-            if let Some(v) = vert_tile {
-                frame.vert_tile = v;
-            }
+            apply_set_texture_args(frame, texture_args);
         }
         Ok(())
     });
+}
+
+fn parse_set_texture_args(args: mlua::MultiValue) -> SetTextureArgs {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    let file_data_id = args_vec.first().and_then(extract_file_data_id);
+    let path = args_vec
+        .first()
+        .map(resolve_file_data_id_or_path)
+        .unwrap_or(None);
+    SetTextureArgs {
+        path,
+        file_data_id,
+        horiz_tile: bool_arg(&args_vec, 1),
+        vert_tile: bool_arg(&args_vec, 2),
+    }
+}
+
+fn bool_arg(args: &[Value], index: usize) -> Option<bool> {
+    match args.get(index) {
+        Some(Value::Boolean(value)) => Some(*value),
+        _ => None,
+    }
+}
+
+fn apply_set_texture_args(frame: &mut Frame, texture_args: SetTextureArgs) {
+    frame.texture = texture_args.path;
+    frame.texture_file_data_id = texture_args.file_data_id;
+    if let Some(horiz_tile) = texture_args.horiz_tile {
+        frame.horiz_tile = horiz_tile;
+    }
+    if let Some(vert_tile) = texture_args.vert_tile {
+        frame.vert_tile = vert_tile;
+    }
+}
+
+struct SetTextureArgs {
+    path: Option<String>,
+    file_data_id: Option<i64>,
+    horiz_tile: Option<bool>,
+    vert_tile: Option<bool>,
 }
 
 fn add_get_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
