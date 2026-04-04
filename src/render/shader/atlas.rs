@@ -140,8 +140,6 @@ pub struct GpuTextureAtlas {
     tiers: [TierAtlas; NUM_TIERS],
     /// Glyph atlas texture for text rendering.
     glyph_texture: wgpu::Texture,
-    #[allow(dead_code)] // Kept alive for bind group reference
-    glyph_view: wgpu::TextureView,
     glyph_atlas_size: u32,
     /// Bind group for shader access.
     bind_group: wgpu::BindGroup,
@@ -176,7 +174,6 @@ impl GpuTextureAtlas {
         Self {
             tiers,
             glyph_texture,
-            glyph_view,
             glyph_atlas_size,
             bind_group,
             bind_group_layout,
