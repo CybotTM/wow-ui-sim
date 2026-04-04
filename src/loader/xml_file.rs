@@ -332,45 +332,70 @@ fn create_font_object(env: &LoaderEnv<'_>, font: &crate::xml::FontXml) -> Result
         return Ok(());
     }
 
-    let font_path = font
-        .font
-        .as_deref()
-        .unwrap_or("Fonts/FRIZQT__.TTF")
-        .replace('\\', "/");
-    let lua_code = FONT_LUA_TEMPLATE
-        .replace("{name}", name)
-        .replace("{font_path}", &font_path)
-        .replace("{font_height}", &font.height.unwrap_or(12.0).to_string())
-        .replace("{font_outline}", font.outline.as_deref().unwrap_or(""))
-        .replace("{justify_h}", font.justify_h.as_deref().unwrap_or("CENTER"))
-        .replace("{justify_v}", font.justify_v.as_deref().unwrap_or("MIDDLE"));
-
+    let font_path = font_path(font);
+    let lua_code = build_font_lua_code(name, font, &font_path);
     env.exec(&lua_code)
         .map_err(|e| LoadError::Lua(format!("Failed to create font {}: {}", name, e)))?;
 
     // Apply inheritance: copy properties from parent, then re-apply explicit overrides.
     if let Some(parent) = &font.inherits {
-        let mut copy_code = format!("if {parent} then {name}:CopyFontObject({parent}) end\n",);
-        // Re-apply explicit overrides from the XML (they take precedence over inherited values).
-        if font.font.is_some() {
-            copy_code.push_str(&format!("{name}.__font = \"{font_path}\"\n"));
-        }
-        if let Some(h) = font.height {
-            copy_code.push_str(&format!("{name}.__height = {h}\n"));
-        }
-        if let Some(o) = &font.outline {
-            copy_code.push_str(&format!("{name}.__outline = \"{o}\"\n"));
-        }
-        if let Some(jh) = &font.justify_h {
-            copy_code.push_str(&format!("{name}.__justifyH = \"{jh}\"\n"));
-        }
-        if let Some(jv) = &font.justify_v {
-            copy_code.push_str(&format!("{name}.__justifyV = \"{jv}\"\n"));
-        }
+        let copy_code = build_font_inheritance_code(name, parent, font, &font_path);
         let _ = env.exec(&copy_code);
     }
 
     Ok(())
+}
+
+fn font_path(font: &crate::xml::FontXml) -> String {
+    font.font
+        .as_deref()
+        .unwrap_or("Fonts/FRIZQT__.TTF")
+        .replace('\\', "/")
+}
+
+fn build_font_lua_code(name: &str, font: &crate::xml::FontXml, font_path: &str) -> String {
+    FONT_LUA_TEMPLATE
+        .replace("{name}", name)
+        .replace("{font_path}", font_path)
+        .replace("{font_height}", &font.height.unwrap_or(12.0).to_string())
+        .replace("{font_outline}", font.outline.as_deref().unwrap_or(""))
+        .replace("{justify_h}", font.justify_h.as_deref().unwrap_or("CENTER"))
+        .replace("{justify_v}", font.justify_v.as_deref().unwrap_or("MIDDLE"))
+}
+
+fn build_font_inheritance_code(
+    name: &str,
+    parent: &str,
+    font: &crate::xml::FontXml,
+    font_path: &str,
+) -> String {
+    let mut copy_code = format!("if {parent} then {name}:CopyFontObject({parent}) end\n");
+    append_font_override_lines(&mut copy_code, name, font, font_path);
+    copy_code
+}
+
+fn append_font_override_lines(
+    copy_code: &mut String,
+    name: &str,
+    font: &crate::xml::FontXml,
+    font_path: &str,
+) {
+    // Re-apply explicit overrides from the XML so they win over inherited values.
+    if font.font.is_some() {
+        copy_code.push_str(&format!("{name}.__font = \"{font_path}\"\n"));
+    }
+    if let Some(h) = font.height {
+        copy_code.push_str(&format!("{name}.__height = {h}\n"));
+    }
+    if let Some(o) = &font.outline {
+        copy_code.push_str(&format!("{name}.__outline = \"{o}\"\n"));
+    }
+    if let Some(jh) = &font.justify_h {
+        copy_code.push_str(&format!("{name}.__justifyH = \"{jh}\"\n"));
+    }
+    if let Some(jv) = &font.justify_v {
+        copy_code.push_str(&format!("{name}.__justifyV = \"{jv}\"\n"));
+    }
 }
 
 /// Create a FontFamily object in Lua from XML definition.
