@@ -112,6 +112,13 @@ fn register_c_action_bar_state_queries(lua: &Lua, t: &mlua::Table) -> Result<()>
 }
 
 fn register_c_action_bar_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_c_action_bar_basic_slot_stubs(lua, t)?;
+    register_c_action_bar_cooldown_slot_stubs(lua, t)?;
+    register_c_action_bar_pet_slot_stubs(lua, t)?;
+    Ok(())
+}
+
+fn register_c_action_bar_basic_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetActionText",
         lua.create_function(|_, _: Value| Ok(Value::Nil))?,
@@ -164,6 +171,10 @@ fn register_c_action_bar_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "IsHarmfulAction",
         lua.create_function(|_, (_, _): (Value, Value)| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_cooldown_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetActionLossOfControlCooldown",
         lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64)))?,
@@ -188,6 +199,10 @@ fn register_c_action_bar_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetItemActionOnEquipSpellID",
         lua.create_function(|_, _: Value| Ok(Value::Nil))?,
     )?;
+    Ok(())
+}
+
+fn register_c_action_bar_pet_slot_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "FindFlyoutActionButtons",
         lua.create_function(|lua, _: i32| lua.create_table())?,
