@@ -210,60 +210,72 @@ pub fn build_warning_dump(
     }
     lines
 }
+
+struct DumpRenderCtx<'a> {
+    widgets: &'a WidgetRegistry,
+    addon_names: &'a [String],
+    screen_width: f32,
+    screen_height: f32,
+    lines: &'a mut Vec<String>,
+}
+
 /// Emit a single frame line with computed rect, stored size, anchors, texture.
-#[allow(clippy::too_many_arguments)]
 fn emit_frame_line(
     frame: &Frame,
     id: u64,
     display_name: &str,
     depth: usize,
-    widgets: &WidgetRegistry,
-    addon_names: &[String],
-    screen_width: f32,
-    screen_height: f32,
-    lines: &mut Vec<String>,
+    ctx: &mut DumpRenderCtx<'_>,
 ) {
     let indent = "  ".repeat(depth);
     let vis = if frame.visible { "visible" } else { "hidden" };
-    let rect = compute_frame_rect(widgets, id, screen_width, screen_height);
+    let rect = compute_frame_rect(ctx.widgets, id, ctx.screen_width, ctx.screen_height);
     let size_str = format_size_str(frame, &rect);
     let stale_str = format_stale_str(frame, &rect);
     let info_str = format_info_str(frame, &rect);
-    let text_str = format_text_str(widgets, frame);
+    let text_str = format_text_str(ctx.widgets, frame);
     let font_str = format_font_str(frame);
     let strata_str = format!(" {}:{}", frame.frame_strata.as_str(), frame.frame_level);
     let mask_str = if frame.is_mask { " MASK" } else { "" };
-    let owner_str = resolve_addon_name(addon_names, frame.owner_addon)
+    let owner_str = resolve_addon_name(ctx.addon_names, frame.owner_addon)
         .map(|name| format!(" @{name}"))
         .unwrap_or_default();
-    lines.push(format!(
+    ctx.lines.push(format!(
         "{indent}{display_name} [{:?}] {size_str} {vis}{strata_str}{mask_str}{owner_str}{stale_str}{info_str}{text_str}{font_str}",
         frame.widget_type,
     ));
-    emit_anchor_lines(widgets, frame, &indent, screen_width, screen_height, lines);
+    emit_anchor_lines(
+        ctx.widgets,
+        frame,
+        &indent,
+        ctx.screen_width,
+        ctx.screen_height,
+        ctx.lines,
+    );
     let tex_path = frame
         .texture
         .as_deref()
-        .or_else(|| resolve_button_state_texture(widgets, frame, id));
+        .or_else(|| resolve_button_state_texture(ctx.widgets, frame, id));
     if let Some(path) = tex_path {
         let fmt = resolve_texture_format(path);
-        lines.push(format!("{indent}  [texture] {path}{fmt}"));
+        ctx.lines.push(format!("{indent}  [texture] {path}{fmt}"));
     }
     if let Some(ref atlas) = frame.atlas {
-        lines.push(format!("{indent}  [atlas] {atlas}"));
+        ctx.lines.push(format!("{indent}  [atlas] {atlas}"));
     }
     if !frame.mask_textures.is_empty() {
         let mask_names: Vec<_> = frame
             .mask_textures
             .iter()
             .map(|mid| {
-                widgets
+                ctx.widgets
                     .get(*mid)
                     .map(|m| m.texture.as_deref().unwrap_or("?"))
                     .unwrap_or("missing")
             })
             .collect();
-        lines.push(format!("{indent}  [masks] {}", mask_names.join(", ")));
+        ctx.lines
+            .push(format!("{indent}  [masks] {}", mask_names.join(", ")));
     }
 }
 
@@ -429,17 +441,14 @@ fn emit_subtree(
         return;
     }
     let name = resolve_display_name(widgets, frame, id);
-    emit_frame_line(
-        frame,
-        id,
-        &name,
-        depth,
+    let mut render = DumpRenderCtx {
         widgets,
         addon_names,
         screen_width,
         screen_height,
         lines,
-    );
+    };
+    emit_frame_line(frame, id, &name, depth, &mut render);
     for &child_id in &frame.children {
         emit_subtree(
             widgets,
@@ -474,17 +483,14 @@ fn emit_filtered(
     let name = resolve_display_name(widgets, frame, id);
     let matches = filter.map(|re| re.is_match(&name)).unwrap_or(true);
     if matches {
-        emit_frame_line(
-            frame,
-            id,
-            &name,
-            depth,
+        let mut render = DumpRenderCtx {
             widgets,
             addon_names,
             screen_width,
             screen_height,
             lines,
-        );
+        };
+        emit_frame_line(frame, id, &name, depth, &mut render);
     }
     for &child_id in &frame.children {
         emit_filtered(
