@@ -51,47 +51,59 @@ impl TextRenderer {
     }
 
     /// Draw text on a canvas frame with WoW-style justification.
-    #[allow(clippy::too_many_arguments)]
-    pub fn draw_justified_text(
-        frame: &mut Frame,
-        text: &str,
-        bounds: Rectangle,
-        font_size: f32,
-        color: Color,
-        font: Font,
-        justify_h: TextJustify,
-        justify_v: TextJustify,
-    ) {
-        if text.is_empty() {
+    pub fn draw_justified_text(frame: &mut Frame, text: JustifiedText<'_>) {
+        if text.content.is_empty() {
             return;
         }
 
         // Convert WoW justification to iced alignment
-        let (align_x, x_pos) = match justify_h {
-            TextJustify::Left => (alignment::Horizontal::Left, bounds.x),
-            TextJustify::Center => (alignment::Horizontal::Center, bounds.x + bounds.width / 2.0),
-            TextJustify::Right => (alignment::Horizontal::Right, bounds.x + bounds.width),
+        let (align_x, x_pos) = match text.justify_h {
+            TextJustify::Left => (alignment::Horizontal::Left, text.bounds.x),
+            TextJustify::Center => (
+                alignment::Horizontal::Center,
+                text.bounds.x + text.bounds.width / 2.0,
+            ),
+            TextJustify::Right => (
+                alignment::Horizontal::Right,
+                text.bounds.x + text.bounds.width,
+            ),
         };
 
-        let (align_y, y_pos) = match justify_v {
-            TextJustify::Left => (alignment::Vertical::Top, bounds.y), // TOP
-            TextJustify::Center => (alignment::Vertical::Center, bounds.y + bounds.height / 2.0), // MIDDLE
-            TextJustify::Right => (alignment::Vertical::Bottom, bounds.y + bounds.height), // BOTTOM
+        let (align_y, y_pos) = match text.justify_v {
+            TextJustify::Left => (alignment::Vertical::Top, text.bounds.y), // TOP
+            TextJustify::Center => (
+                alignment::Vertical::Center,
+                text.bounds.y + text.bounds.height / 2.0,
+            ), // MIDDLE
+            TextJustify::Right => (
+                alignment::Vertical::Bottom,
+                text.bounds.y + text.bounds.height,
+            ), // BOTTOM
         };
 
         frame.fill_text(canvas::Text {
-            content: text.to_string(),
+            content: text.content.to_string(),
             position: Point::new(x_pos, y_pos),
-            color,
-            size: Pixels(font_size),
+            color: text.color,
+            size: Pixels(text.font_size),
             line_height: iced::widget::text::LineHeight::default(),
-            font,
+            font: text.font,
             align_x: align_x.into(),
             align_y,
             shaping: iced::widget::text::Shaping::Advanced,
-            max_width: bounds.width,
+            max_width: text.bounds.width,
         });
     }
+}
+
+pub struct JustifiedText<'a> {
+    pub content: &'a str,
+    pub bounds: Rectangle,
+    pub font_size: f32,
+    pub color: Color,
+    pub font: Font,
+    pub justify_h: TextJustify,
+    pub justify_v: TextJustify,
 }
 
 /// Map WoW font paths to system fonts.
