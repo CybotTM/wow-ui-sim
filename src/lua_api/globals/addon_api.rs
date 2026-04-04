@@ -467,13 +467,24 @@ fn register_profiler_metrics(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_application_metric(lua, t, state)?;
+    register_overall_metric(lua, t, state)?;
+    register_addon_metric(lua, t, state)?;
+    register_topk_addon_metric(lua, t, state)?;
+    Ok(())
+}
+
+fn register_application_metric(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     t.set(
         "GetApplicationMetric",
         lua.create_function(move |_, metric: Value| {
             let state = s.borrow();
             let m = metric_index(&metric);
-            // App metric = total frame time (for time-based metrics) or sum of addons (counters).
             let app_val = app_metric_value(&state.app_frame_metrics, m);
             if app_val > 0.0 {
                 Ok(app_val)
@@ -486,7 +497,14 @@ fn register_profiler_metrics(
             }
         })?,
     )?;
+    Ok(())
+}
 
+fn register_overall_metric(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     t.set(
         "GetOverallMetric",
@@ -500,7 +518,10 @@ fn register_profiler_metrics(
                 .sum::<f64>())
         })?,
     )?;
+    Ok(())
+}
 
+fn register_addon_metric(lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let s = Rc::clone(state);
     t.set(
         "GetAddOnMetric",
@@ -513,7 +534,14 @@ fn register_profiler_metrics(
             Ok(val)
         })?,
     )?;
+    Ok(())
+}
 
+fn register_topk_addon_metric(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     let s = Rc::clone(state);
     t.set(
         "GetTopKAddOnsForMetric",
@@ -526,17 +554,20 @@ fn register_profiler_metrics(
                     .partial_cmp(&addon_metric_value(a, m))
                     .unwrap()
             });
-            let result = lua.create_table()?;
-            for (i, addon) in sorted.iter().take(k).enumerate() {
-                let entry = lua.create_table()?;
-                entry.set("addOnName", addon.folder_name.as_str())?;
-                result.set(i + 1, entry)?;
-            }
-            Ok(result)
+            topk_addon_metric_table(lua, &sorted, k)
         })?,
     )?;
-
     Ok(())
+}
+
+fn topk_addon_metric_table(lua: &Lua, sorted: &[&AddonInfo], k: usize) -> Result<mlua::Table> {
+    let result = lua.create_table()?;
+    for (i, addon) in sorted.iter().take(k).enumerate() {
+        let entry = lua.create_table()?;
+        entry.set("addOnName", addon.folder_name.as_str())?;
+        result.set(i + 1, entry)?;
+    }
+    Ok(result)
 }
 
 fn register_legacy_memory_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
