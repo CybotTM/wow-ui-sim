@@ -136,12 +136,29 @@ fn add_frame_level_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Secret/Protected stubs.
 fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("HasAnySecretAspect", |_, _this, ()| Ok(false));
-    methods.add_method("HasSecretAspect", |_, _this, _aspect: Value| Ok(false));
-    methods.add_method("HasSecretValues", |_, _this, ()| Ok(false));
-    methods.add_method("IsAnchoringRestricted", |_, _this, ()| Ok(false));
-    methods.add_method("IsAnchoringSecret", |_, _this, ()| Ok(false));
-    methods.add_method("IsPreventingSecretValues", |_, _this, ()| Ok(false));
+    add_secret_boolean_stub(methods, "HasAnySecretAspect");
+    add_secret_boolean_stub_with_arg(methods, "HasSecretAspect");
+    add_secret_boolean_stub(methods, "HasSecretValues");
+    add_secret_boolean_stub(methods, "IsAnchoringRestricted");
+    add_secret_boolean_stub(methods, "IsAnchoringSecret");
+    add_secret_boolean_stub(methods, "IsPreventingSecretValues");
+    add_is_protected_stub(methods);
+    add_protect_method(methods);
+    methods.add_method("SetPreventSecretValues", |_, _this, _: bool| Ok(()));
+}
+
+fn add_secret_boolean_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
+    methods.add_method(name, |_, _this, ()| Ok(false));
+}
+
+fn add_secret_boolean_stub_with_arg<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &str,
+) {
+    methods.add_method(name, |_, _this, _arg: Value| Ok(false));
+}
+
+fn add_is_protected_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsProtected", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -150,15 +167,12 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
             .get(this.0)
             .map(|f| f.is_protected)
             .unwrap_or(false);
-        // (isProtected, isProtectedExplicitly) — both are static frame properties,
-        // NOT affected by combat state. Combat lockdown controls whether
-        // protected frames block insecure calls, but IsProtected() itself
-        // always returns the same values.
         Ok((is_protected, is_protected))
     });
+}
 
+fn add_protect_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("Protect", |lua, this, ()| {
-        // Only secure (Blizzard) code can protect a frame.
         let caller_secure = lua
             .globals()
             .get::<mlua::Function>("issecure")
@@ -174,8 +188,6 @@ fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         }
         Ok(())
     });
-
-    methods.add_method("SetPreventSecretValues", |_, _this, _: bool| Ok(()));
 }
 
 /// Flatten/Render stubs.
