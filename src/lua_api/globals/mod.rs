@@ -49,6 +49,7 @@ mod c_misc_api_core;
 mod c_misc_api_core_progression;
 mod c_misc_api_core_social;
 mod c_misc_api_game;
+mod c_misc_api_game_systems;
 mod c_misc_api_ui;
 pub mod c_quest_api;
 pub mod c_stubs_achievement;
