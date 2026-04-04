@@ -98,19 +98,7 @@ fn create_engine_frames(
         o,
     );
 
-    // Set UIParent panel attributes (from UIParent.xml <Attributes>).
-    // Must be present before UIParentPanelManager loads, which reads
-    // them via GetAttribute during SetAttribute callbacks.
-    if let Some(frame) = widgets.get_mut(ui_parent_id) {
-        let attrs = &mut frame.attributes;
-        attrs.insert("DEFAULT_FRAME_WIDTH".into(), AttributeValue::Number(384.0));
-        attrs.insert("TOP_OFFSET".into(), AttributeValue::Number(-116.0));
-        attrs.insert("LEFT_OFFSET".into(), AttributeValue::Number(16.0));
-        attrs.insert("CENTER_OFFSET".into(), AttributeValue::Number(384.0));
-        attrs.insert("RIGHT_OFFSET".into(), AttributeValue::Number(768.0));
-        attrs.insert("RIGHT_OFFSET_BUFFER".into(), AttributeValue::Number(80.0));
-        attrs.insert("PANEl_SPACING_X".into(), AttributeValue::Number(32.0));
-    }
+    set_ui_parent_panel_attributes(widgets, ui_parent_id);
 
     // WorldFrame (3D world rendering area, same level as UIParent)
     register_frame(
@@ -133,6 +121,20 @@ fn create_engine_frames(
     );
 
     ui_parent_id
+}
+
+fn set_ui_parent_panel_attributes(widgets: &mut WidgetRegistry, ui_parent_id: u64) {
+    // From UIParent.xml <Attributes>. Must exist before UIParentPanelManager loads.
+    if let Some(frame) = widgets.get_mut(ui_parent_id) {
+        let attrs = &mut frame.attributes;
+        attrs.insert("DEFAULT_FRAME_WIDTH".into(), AttributeValue::Number(384.0));
+        attrs.insert("TOP_OFFSET".into(), AttributeValue::Number(-116.0));
+        attrs.insert("LEFT_OFFSET".into(), AttributeValue::Number(16.0));
+        attrs.insert("CENTER_OFFSET".into(), AttributeValue::Number(384.0));
+        attrs.insert("RIGHT_OFFSET".into(), AttributeValue::Number(768.0));
+        attrs.insert("RIGHT_OFFSET_BUFFER".into(), AttributeValue::Number(80.0));
+        attrs.insert("PANEl_SPACING_X".into(), AttributeValue::Number(32.0));
+    }
 }
 
 // ---------------------------------------------------------------------------
