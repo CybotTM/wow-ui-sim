@@ -93,55 +93,48 @@ pub fn draw_texture_with_texcoords(
 ///
 /// Note: For proper 3-slice rendering, we need pre-sliced textures.
 /// This version draws the full texture scaled as a fallback.
-#[allow(clippy::too_many_arguments)]
-pub fn draw_horizontal_slice_texture(
-    frame: &mut Frame,
-    bounds: Rectangle,
-    handle: &ImageHandle,
-    left_handle: Option<&ImageHandle>,
-    middle_handle: Option<&ImageHandle>,
-    right_handle: Option<&ImageHandle>,
-    left_cap_width: f32,
-    right_cap_width: f32,
-    alpha: f32,
-) {
-    if bounds.width <= 0.0 || bounds.height <= 0.0 {
+pub fn draw_horizontal_slice_texture(frame: &mut Frame, texture: HorizontalSliceTexture<'_>) {
+    if texture.bounds.width <= 0.0 || texture.bounds.height <= 0.0 {
         return;
     }
 
-    let _ = alpha;
+    let _ = texture.alpha;
 
     // If we have sliced handles, use them
-    if let (Some(left), Some(middle), Some(right)) = (left_handle, middle_handle, right_handle) {
-        let dst_left_cap = left_cap_width * UI_SCALE;
-        let dst_right_cap = right_cap_width * UI_SCALE;
-        let dst_middle = bounds.width - dst_left_cap - dst_right_cap;
+    if let (Some(left), Some(middle), Some(right)) = (
+        texture.left_handle,
+        texture.middle_handle,
+        texture.right_handle,
+    ) {
+        let dst_left_cap = texture.left_cap_width * UI_SCALE;
+        let dst_right_cap = texture.right_cap_width * UI_SCALE;
+        let dst_middle = texture.bounds.width - dst_left_cap - dst_right_cap;
 
         if dst_middle >= 0.0 {
             // Left cap
             let left_bounds = Rectangle {
-                x: bounds.x,
-                y: bounds.y,
+                x: texture.bounds.x,
+                y: texture.bounds.y,
                 width: dst_left_cap,
-                height: bounds.height,
+                height: texture.bounds.height,
             };
             frame.draw_image(left_bounds, canvas::Image::new(left.clone()));
 
             // Middle (stretched)
             let middle_bounds = Rectangle {
-                x: bounds.x + dst_left_cap,
-                y: bounds.y,
+                x: texture.bounds.x + dst_left_cap,
+                y: texture.bounds.y,
                 width: dst_middle,
-                height: bounds.height,
+                height: texture.bounds.height,
             };
             frame.draw_image(middle_bounds, canvas::Image::new(middle.clone()));
 
             // Right cap
             let right_bounds = Rectangle {
-                x: bounds.x + bounds.width - dst_right_cap,
-                y: bounds.y,
+                x: texture.bounds.x + texture.bounds.width - dst_right_cap,
+                y: texture.bounds.y,
                 width: dst_right_cap,
-                height: bounds.height,
+                height: texture.bounds.height,
             };
             frame.draw_image(right_bounds, canvas::Image::new(right.clone()));
 
@@ -150,7 +143,18 @@ pub fn draw_horizontal_slice_texture(
     }
 
     // Fallback: draw the full texture scaled
-    frame.draw_image(bounds, canvas::Image::new(handle.clone()));
+    frame.draw_image(texture.bounds, canvas::Image::new(texture.handle.clone()));
+}
+
+pub struct HorizontalSliceTexture<'a> {
+    pub bounds: Rectangle,
+    pub handle: &'a ImageHandle,
+    pub left_handle: Option<&'a ImageHandle>,
+    pub middle_handle: Option<&'a ImageHandle>,
+    pub right_handle: Option<&'a ImageHandle>,
+    pub left_cap_width: f32,
+    pub right_cap_width: f32,
+    pub alpha: f32,
 }
 
 /// Draw a texture using 9-slice scaling (corners fixed, edges stretch).
