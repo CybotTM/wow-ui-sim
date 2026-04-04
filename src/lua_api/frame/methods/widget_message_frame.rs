@@ -49,39 +49,59 @@ fn add_message_frame_add_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
 }
 
 fn add_message_frame_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_get_num_messages(methods);
+    add_set_max_lines(methods);
+    add_get_max_lines(methods);
+}
+
+fn add_get_num_messages<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetNumMessages", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let count = state
-            .message_frames
-            .get(&this.0)
-            .map(|d| d.messages.len())
-            .unwrap_or(0);
-        Ok(count as i32)
+        Ok(message_frame_message_count(&state, this.0) as i32)
     });
+}
 
+fn add_set_max_lines<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMaxLines", |lua, this, max_lines: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let data = state
-            .message_frames
-            .entry(this.0)
-            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
-        data.max_lines = max_lines.max(1) as usize;
-        data.messages.truncate(data.max_lines);
+        set_message_frame_max_lines(&mut state, this.0, max_lines);
         Ok(())
     });
+}
 
+fn add_get_max_lines<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetMaxLines", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        let max = state
-            .message_frames
-            .get(&this.0)
-            .map(|d| d.max_lines)
-            .unwrap_or(120);
-        Ok(max as i32)
+        Ok(message_frame_max_lines(&state, this.0) as i32)
     });
+}
+
+fn message_frame_message_count(state: &SimState, id: u64) -> usize {
+    state
+        .message_frames
+        .get(&id)
+        .map(|data| data.messages.len())
+        .unwrap_or(0)
+}
+
+fn set_message_frame_max_lines(state: &mut SimState, id: u64, max_lines: i32) {
+    let data = state
+        .message_frames
+        .entry(id)
+        .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+    data.max_lines = max_lines.max(1) as usize;
+    data.messages.truncate(data.max_lines);
+}
+
+fn message_frame_max_lines(state: &SimState, id: u64) -> usize {
+    state
+        .message_frames
+        .get(&id)
+        .map(|data| data.max_lines)
+        .unwrap_or(120)
 }
 
 fn add_message_frame_fade_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
