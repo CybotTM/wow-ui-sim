@@ -418,6 +418,13 @@ fn register_release_and_highlight_functions(lua: &Lua) -> Result<()> {
 
 /// Action slot query stubs (GetActionCooldown is overridden by stateful version).
 fn register_action_slot_query_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    register_simple_action_slot_stubs(lua)?;
+    register_is_current_action(lua, state)?;
+    register_set_action_ui_button(lua, state)?;
+    Ok(())
+}
+
+fn register_simple_action_slot_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set(
         "GetActionText",
@@ -443,19 +450,6 @@ fn register_action_slot_query_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) ->
         "IsAutoRepeatAction",
         lua.create_function(|_, _slot: Value| Ok(false))?,
     )?;
-    let st = Rc::clone(state);
-    globals.set(
-        "IsCurrentAction",
-        lua.create_function(move |_, slot: Value| {
-            let slot = slot_from_value(&slot).unwrap_or(0);
-            let state = st.borrow();
-            let casting = match &state.casting {
-                Some(c) => c.spell_id,
-                None => return Ok(false),
-            };
-            Ok(state.action_bars.get(&slot).copied() == Some(casting))
-        })?,
-    )?;
     globals.set(
         "GetActionCharges",
         lua.create_function(|_, _slot: Value| Ok((0, 0, 0.0_f64, 0.0_f64, 1.0_f64)))?,
@@ -464,25 +458,53 @@ fn register_action_slot_query_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) ->
         "GetPossessInfo",
         lua.create_function(|_, _index: Value| Ok(Value::Nil))?,
     )?;
+    Ok(())
+}
+
+fn register_is_current_action(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
+        "IsCurrentAction",
+        lua.create_function(move |_, slot: Value| {
+            let state = st.borrow();
+            Ok(is_current_action(&state, &slot))
+        })?,
+    )?;
+    Ok(())
+}
+
+fn register_set_action_ui_button(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    let st = Rc::clone(state);
+    lua.globals().set(
         "SetActionUIButton",
         lua.create_function(move |_, args: mlua::MultiValue| {
-            let mut iter = args.iter();
-            let frame_id = iter
-                .next()
-                .and_then(|v| crate::lua_api::frame::extract_frame_id(v));
-            let action = iter.next().and_then(|v| slot_from_value(v));
-            if let (Some(fid), Some(slot)) = (frame_id, action) {
-                let mut s = st.borrow_mut();
-                // Remove any previous registration for this frame.
-                s.action_ui_buttons.retain(|(id, _)| *id != fid);
-                s.action_ui_buttons.push((fid, slot));
-            }
+            let Some((frame_id, slot)) = action_ui_button_args(&args) else {
+                return Ok(());
+            };
+            let mut s = st.borrow_mut();
+            s.action_ui_buttons.retain(|(id, _)| *id != frame_id);
+            s.action_ui_buttons.push((frame_id, slot));
             Ok(())
         })?,
     )?;
     Ok(())
+}
+
+fn is_current_action(state: &SimState, slot: &Value) -> bool {
+    let Some(casting) = state.casting.as_ref().map(|c| c.spell_id) else {
+        return false;
+    };
+    let slot = slot_from_value(slot).unwrap_or(0);
+    state.action_bars.get(&slot).copied() == Some(casting)
+}
+
+fn action_ui_button_args(args: &mlua::MultiValue) -> Option<(u64, u32)> {
+    let mut iter = args.iter();
+    let frame_id = iter
+        .next()
+        .and_then(crate::lua_api::frame::extract_frame_id)?;
+    let slot = iter.next().and_then(slot_from_value)?;
+    Some((frame_id, slot))
 }
 
 /// Action bar page/index stubs.
