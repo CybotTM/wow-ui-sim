@@ -318,47 +318,45 @@ where
 }
 
 fn add_editbox_input_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetPassword", |lua, this, pw: bool| {
+    add_editbox_bool_setter(methods, "SetPassword", |frame, value| {
+        frame.editbox_password = value
+    });
+    add_editbox_bool_getter(methods, "IsPassword", |frame| frame.editbox_password);
+    add_editbox_f64_setter(methods, "SetBlinkSpeed", |frame, value| {
+        frame.editbox_blink_speed = value
+    });
+    add_editbox_f64_getter(methods, "GetBlinkSpeed", 0.5, |frame| {
+        frame.editbox_blink_speed
+    });
+    add_editbox_bool_setter(methods, "SetCountInvisibleLetters", |frame, value| {
+        frame.editbox_count_invisible_letters = value
+    });
+}
+
+fn add_editbox_f64_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, f64) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_password = pw;
+            setter(frame, value);
         }
         Ok(())
     });
-    methods.add_method("IsPassword", |lua, this, ()| {
+}
+
+fn add_editbox_f64_getter<M, F>(methods: &mut M, name: &'static str, default: f64, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> f64 + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_password)
-            .unwrap_or(false))
-    });
-    methods.add_method("SetBlinkSpeed", |lua, this, speed: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_blink_speed = speed;
-        }
-        Ok(())
-    });
-    methods.add_method("GetBlinkSpeed", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_blink_speed)
-            .unwrap_or(0.5))
-    });
-    methods.add_method("SetCountInvisibleLetters", |lua, this, count: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_count_invisible_letters = count;
-        }
-        Ok(())
+        Ok(state.widgets.get(this.0).map(getter).unwrap_or(default))
     });
 }
 
