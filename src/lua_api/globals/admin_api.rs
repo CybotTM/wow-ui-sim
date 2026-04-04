@@ -336,23 +336,8 @@ fn register_buff_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
         let s = Rc::clone(&state);
         move |_, (spell_id, name, icon, duration, stacks): (i32, String, String, f64, i32)| {
             let mut st = s.borrow_mut();
-            let now = st.start_time.elapsed().as_secs_f64();
-            let expiration_time = if duration > 0.0 { now + duration } else { 0.0 };
-            let aura_instance_id = (st.player.buffs.len() + 1) as i32;
-            st.player.buffs.push(AuraInfo {
-                name,
-                spell_id,
-                icon: icon.parse::<i32>().unwrap_or(0),
-                duration,
-                expiration_time,
-                applications: stacks,
-                source_unit: "player".to_string(),
-                is_helpful: true,
-                is_stealable: false,
-                can_apply_aura: true,
-                is_from_player_or_player_pet: true,
-                aura_instance_id,
-            });
+            let buff = build_admin_buff(&st, spell_id, name, icon, duration, stacks);
+            st.player.buffs.push(buff);
             Ok(())
         }
     })?;
@@ -681,4 +666,44 @@ fn resize_party_members(state: &mut SimState, size: usize) {
 
 fn party_member_mut(state: &mut SimState, idx: i32) -> Option<&mut PartyMember> {
     state.party_members.get_mut((idx - 1) as usize)
+}
+
+fn build_admin_buff(
+    state: &SimState,
+    spell_id: i32,
+    name: String,
+    icon: String,
+    duration: f64,
+    stacks: i32,
+) -> AuraInfo {
+    AuraInfo {
+        name,
+        spell_id,
+        icon: parse_admin_buff_icon(&icon),
+        duration,
+        expiration_time: admin_buff_expiration_time(state, duration),
+        applications: stacks,
+        source_unit: "player".to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: true,
+        aura_instance_id: next_admin_buff_instance_id(state),
+    }
+}
+
+fn parse_admin_buff_icon(icon: &str) -> i32 {
+    icon.parse::<i32>().unwrap_or(0)
+}
+
+fn admin_buff_expiration_time(state: &SimState, duration: f64) -> f64 {
+    if duration > 0.0 {
+        state.start_time.elapsed().as_secs_f64() + duration
+    } else {
+        0.0
+    }
+}
+
+fn next_admin_buff_instance_id(state: &SimState) -> i32 {
+    (state.player.buffs.len() + 1) as i32
 }
