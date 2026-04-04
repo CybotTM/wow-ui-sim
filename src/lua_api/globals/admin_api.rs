@@ -171,11 +171,6 @@ fn make_target_info(
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.subsec_nanos())
         .unwrap_or(0);
-    let guid = if is_enemy {
-        format!("Creature-0-0-0-0-0-{}", nanos % 1_000_000)
-    } else {
-        format!("Player-0000-{:08}", nanos % 100_000_000)
-    };
     TargetInfo {
         unit_id: unit_id.to_string(),
         name: name.to_string(),
@@ -189,17 +184,9 @@ fn make_target_info(
         power_type_name: "MANA".to_string(),
         is_player: !is_enemy,
         is_enemy,
-        guid,
-        classification: if is_enemy {
-            "normal".to_string()
-        } else {
-            "normal".to_string()
-        },
-        creature_type: if is_enemy {
-            "Humanoid".to_string()
-        } else {
-            "Humanoid".to_string()
-        },
+        guid: target_guid(is_enemy, nanos),
+        classification: target_classification().to_string(),
+        creature_type: target_creature_type().to_string(),
         reaction: if is_enemy { 2 } else { 5 },
     }
 }
@@ -635,4 +622,20 @@ fn unit_id_for_slot(slot: TargetSlot) -> &'static str {
         TargetSlot::Target => "target",
         TargetSlot::Focus => "focus",
     }
+}
+
+fn target_guid(is_enemy: bool, nanos: u32) -> String {
+    if is_enemy {
+        format!("Creature-0-0-0-0-0-{}", nanos % 1_000_000)
+    } else {
+        format!("Player-0000-{:08}", nanos % 100_000_000)
+    }
+}
+
+fn target_classification() -> &'static str {
+    "normal"
+}
+
+fn target_creature_type() -> &'static str {
+    "Humanoid"
 }
