@@ -78,23 +78,7 @@ fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) 
     let lua_path = temp_dir.join("test.lua");
     std::fs::write(&lua_path, lua_content).unwrap();
 
-    // Register TestAddon so CreateFrame can attribute frames to it.
-    env.register_addon(crate::lua_api::AddonInfo {
-        folder_name: "TestAddon".to_string(),
-        title: "TestAddon".to_string(),
-        enabled: true,
-        loaded: true,
-        ..Default::default()
-    });
-    {
-        let mut s = env.state().borrow_mut();
-        let idx = s
-            .addons
-            .iter()
-            .position(|a| a.folder_name == "TestAddon")
-            .unwrap();
-        s.loading_addon_index = Some(idx as u16);
-    }
+    register_loading_test_addon(&env);
 
     let addon_table = env.create_addon_table().unwrap();
     let ctx = AddonContext {
@@ -113,6 +97,27 @@ fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, mlua::Table) 
     .unwrap();
 
     (TestCtx { env, temp_dir }, addon_table)
+}
+
+fn register_loading_test_addon(env: &WowLuaEnv) {
+    env.register_addon(crate::lua_api::AddonInfo {
+        folder_name: "TestAddon".to_string(),
+        title: "TestAddon".to_string(),
+        enabled: true,
+        loaded: true,
+        ..Default::default()
+    });
+    set_loading_addon_index(env, "TestAddon");
+}
+
+fn set_loading_addon_index(env: &WowLuaEnv, addon_name: &str) {
+    let mut s = env.state().borrow_mut();
+    let idx = s
+        .addons
+        .iter()
+        .position(|a| a.folder_name == addon_name)
+        .unwrap();
+    s.loading_addon_index = Some(idx as u16);
 }
 
 #[test]
