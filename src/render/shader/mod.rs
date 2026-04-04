@@ -8,6 +8,7 @@ mod pipeline;
 mod primitive;
 mod program;
 mod quad;
+mod quad_batch_extras;
 mod quad_nine_slice;
 
 pub use atlas::{GLYPH_ATLAS_TEX_INDEX, GpuTextureAtlas, TextureEntry};
