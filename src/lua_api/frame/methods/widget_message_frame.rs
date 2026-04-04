@@ -184,44 +184,14 @@ where
 }
 
 fn add_message_frame_fade_duration_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFadeDuration", |lua, this, secs: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        state
-            .message_frames
-            .entry(this.0)
-            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
-            .fade_duration = secs;
-        Ok(())
+    add_message_frame_f64_setter(methods, "SetFadeDuration", |data, value| {
+        data.fade_duration = value
     });
-    methods.add_method("GetFadeDuration", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .message_frames
-            .get(&this.0)
-            .map(|d| d.fade_duration)
-            .unwrap_or(3.0))
+    add_message_frame_f64_getter(methods, "GetFadeDuration", 3.0, |data| data.fade_duration);
+    add_message_frame_f64_setter(methods, "SetFadePower", |data, value| {
+        data.fade_power = value
     });
-    methods.add_method("SetFadePower", |lua, this, power: f64| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        state
-            .message_frames
-            .entry(this.0)
-            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default)
-            .fade_power = power;
-        Ok(())
-    });
-    methods.add_method("GetFadePower", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .message_frames
-            .get(&this.0)
-            .map(|d| d.fade_power)
-            .unwrap_or(1.0))
-    });
+    add_message_frame_f64_getter(methods, "GetFadePower", 1.0, |data| data.fade_power);
 }
 
 fn add_message_frame_insert_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
