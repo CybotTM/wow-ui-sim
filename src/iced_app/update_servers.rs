@@ -3,6 +3,7 @@
 use iced::{Task, window};
 use iced_layout_inspector::server::Command as DebugCommand;
 
+use crate::lua_api::WowLuaEnv;
 use crate::lua_server::{LuaCommand, Response as LuaResponse};
 
 use super::Message;
@@ -42,51 +43,14 @@ impl App {
     fn exec_lua_command(&self, code: &str) -> LuaResponse {
         let env = self.env.borrow();
         env.state().borrow_mut().console_output.clear();
-
-        // Install print interceptor that captures output to a Lua table.
-        // Blizzard_PrintHandler overwrites the Rust `print` during addon load,
-        // so console_output is never populated. This wrapper captures print
-        // calls at the Lua level regardless of which print is active.
-        let _ = env.exec(
-            r##"
-            __repl_prev_print = print
-            __repl_captured = {}
-            print = function(...)
-                __repl_prev_print(...)
-                local parts = {}
-                for i = 1, select("#", ...) do
-                    parts[#parts + 1] = tostring(select(i, ...))
-                end
-                __repl_captured[#__repl_captured + 1] = table.concat(parts, "\t")
-            end
-        "##,
-        );
+        install_repl_print_capture(&env);
 
         let result = env.exec(code);
 
-        // Restore original print
-        let _ = env.exec("print = __repl_prev_print");
+        restore_repl_print(&env);
 
         match result {
-            Ok(()) => {
-                // Read captured print output from Lua table
-                let captured: String = env
-                    .eval(r#"return table.concat(__repl_captured or {}, "\n")"#)
-                    .unwrap_or_default();
-
-                let mut state = env.state().borrow_mut();
-                let console = state.console_output.join("\n");
-                state.console_output.clear();
-
-                // Combine console output and captured print output
-                let output = match (console.is_empty(), captured.is_empty()) {
-                    (true, true) => String::new(),
-                    (false, true) => console,
-                    (true, false) => captured,
-                    (false, false) => format!("{}\n{}", console, captured),
-                };
-                LuaResponse::Output(output)
-            }
+            Ok(()) => LuaResponse::Output(collect_lua_command_output(&env)),
             Err(e) => LuaResponse::Error(e.to_string()),
         }
     }
@@ -210,5 +174,70 @@ impl App {
             frame.visible = self.inspector_state.visible;
             frame.mouse_enabled = self.inspector_state.mouse_enabled;
         }
+    }
+}
+
+fn install_repl_print_capture(env: &WowLuaEnv) {
+    // Blizzard_PrintHandler overwrites the Rust `print` during addon load,
+    // so console_output is never populated. This wrapper captures print
+    // calls at the Lua level regardless of which print is active.
+    let _ = env.exec(
+        r##"
+        __repl_prev_print = print
+        __repl_captured = {}
+        print = function(...)
+            __repl_prev_print(...)
+            local parts = {}
+            for i = 1, select("#", ...) do
+                parts[#parts + 1] = tostring(select(i, ...))
+            end
+            __repl_captured[#__repl_captured + 1] = table.concat(parts, "\t")
+        end
+    "##,
+    );
+}
+
+fn restore_repl_print(env: &WowLuaEnv) {
+    let _ = env.exec("print = __repl_prev_print");
+}
+
+fn collect_lua_command_output(env: &WowLuaEnv) -> String {
+    let captured: String = env
+        .eval(r#"return table.concat(__repl_captured or {}, "\n")"#)
+        .unwrap_or_default();
+
+    let mut state = env.state().borrow_mut();
+    let console = state.console_output.join("\n");
+    state.console_output.clear();
+    combine_console_and_captured(console, captured)
+}
+
+fn combine_console_and_captured(console: String, captured: String) -> String {
+    match (console.is_empty(), captured.is_empty()) {
+        (true, true) => String::new(),
+        (false, true) => console,
+        (true, false) => captured,
+        (false, false) => format!("{}\n{}", console, captured),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::combine_console_and_captured;
+
+    #[test]
+    fn combine_console_and_captured_prefers_newline_when_both_present() {
+        assert_eq!(
+            combine_console_and_captured("console".to_string(), "captured".to_string()),
+            "console\ncaptured"
+        );
+        assert_eq!(
+            combine_console_and_captured(String::new(), "captured".to_string()),
+            "captured"
+        );
+        assert_eq!(
+            combine_console_and_captured("console".to_string(), String::new()),
+            "console"
+        );
     }
 }
