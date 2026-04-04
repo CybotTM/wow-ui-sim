@@ -174,31 +174,14 @@ fn register_for_each_aura(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
                 mlua::Function,
                 Option<bool>,
             )| {
-                if unit != "player" {
+                if should_skip_for_each_aura(&unit, &filter) {
                     return Ok(());
                 }
-                let is_harmful = filter.contains("HARMFUL");
-                let is_helpful = filter.contains("HELPFUL");
-                if !is_harmful && !is_helpful {
-                    return Ok(());
-                }
-                // We only have player buffs; debuffs return nothing.
-                if is_harmful {
-                    return Ok(());
-                }
-                let limit = max.unwrap_or(i32::MAX) as usize;
-                let s = state.borrow();
-                for (i, aura) in s.player.buffs.iter().enumerate() {
-                    if i >= limit {
-                        break;
-                    }
-                    let tbl = build_aura_data_table(lua, aura)?;
-                    let done: Option<bool> = if use_packed.unwrap_or(false) {
-                        cb.call(Value::Table(tbl))?
-                    } else {
-                        cb.call(build_aura_multi_value(lua, aura)?)?
-                    };
-                    if done == Some(true) {
+                let use_packed = use_packed.unwrap_or(false);
+                let limit = for_each_aura_limit(max);
+                let state = state.borrow();
+                for (i, aura) in state.player.buffs.iter().enumerate() {
+                    if i >= limit || invoke_for_each_aura_callback(lua, &cb, aura, use_packed)? {
                         break;
                     }
                 }
@@ -206,6 +189,33 @@ fn register_for_each_aura(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
             },
         )?,
     )
+}
+
+fn should_skip_for_each_aura(unit: &str, filter: &str) -> bool {
+    if unit != "player" {
+        return true;
+    }
+    let is_harmful = filter.contains("HARMFUL");
+    let is_helpful = filter.contains("HELPFUL");
+    !is_helpful || is_harmful
+}
+
+fn for_each_aura_limit(max: Option<i32>) -> usize {
+    max.unwrap_or(i32::MAX) as usize
+}
+
+fn invoke_for_each_aura_callback(
+    lua: &Lua,
+    callback: &mlua::Function,
+    aura: &crate::lua_api::state::AuraInfo,
+    use_packed: bool,
+) -> Result<bool> {
+    let done: Option<bool> = if use_packed {
+        callback.call(Value::Table(build_aura_data_table(lua, aura)?))?
+    } else {
+        callback.call(build_aura_multi_value(lua, aura)?)?
+    };
+    Ok(done == Some(true))
 }
 
 /// AuraUtil namespace (may be overridden by Blizzard AuraUtil.lua in full sim).
