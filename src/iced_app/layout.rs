@@ -38,82 +38,120 @@ fn resolve_multi_anchor_edges(
     screen_height: f32,
     cache: &mut LayoutCache,
 ) -> AnchorEdges {
-    let mut edges = AnchorEdges {
+    let mut edges = empty_anchor_edges();
+
+    for anchor in &frame.anchors {
+        let relative_rect = resolve_multi_anchor_relative_rect(
+            registry,
+            anchor,
+            screen_width,
+            screen_height,
+            cache,
+        );
+        let target = resolve_anchor_target(anchor, relative_rect, eff_scale);
+        apply_anchor_target(&mut edges, anchor.point, target);
+    }
+
+    edges
+}
+
+fn empty_anchor_edges() -> AnchorEdges {
+    AnchorEdges {
         left_x: None,
         right_x: None,
         top_y: None,
         bottom_y: None,
         center_x: None,
         center_y: None,
-    };
+    }
+}
 
-    for anchor in &frame.anchors {
-        let relative_rect = if let Some(rel_id) = anchor.relative_to_id {
-            compute_frame_rect_cached(registry, rel_id as u64, screen_width, screen_height, cache)
-                .rect
-        } else {
-            // nil relativeTo in SetPoint anchors to the screen (UIParent), not the parent frame.
-            // XML anchors with no relativeTo are resolved to an explicit parent_id before storage,
-            // so they never reach this branch with None.
-            LayoutRect {
-                x: 0.0,
-                y: 0.0,
-                width: screen_width,
-                height: screen_height,
-            }
-        };
+fn resolve_multi_anchor_relative_rect(
+    registry: &WidgetRegistry,
+    anchor: &crate::widget::Anchor,
+    screen_width: f32,
+    screen_height: f32,
+    cache: &mut LayoutCache,
+) -> LayoutRect {
+    if let Some(rel_id) = anchor.relative_to_id {
+        return compute_frame_rect_cached(
+            registry,
+            rel_id as u64,
+            screen_width,
+            screen_height,
+            cache,
+        )
+        .rect;
+    }
+    // nil relativeTo in SetPoint anchors to the screen (UIParent), not the parent frame.
+    // XML anchors with no relativeTo are resolved to an explicit parent_id before storage,
+    // so they never reach this branch with None.
+    LayoutRect {
+        x: 0.0,
+        y: 0.0,
+        width: screen_width,
+        height: screen_height,
+    }
+}
 
-        let (anchor_x, anchor_y) = anchor_position(
-            anchor.relative_point,
-            relative_rect.x,
-            relative_rect.y,
-            relative_rect.width,
-            relative_rect.height,
-        );
-        let target_x = anchor_x + anchor.x_offset * eff_scale;
-        let target_y = anchor_y - anchor.y_offset * eff_scale;
+fn resolve_anchor_target(
+    anchor: &crate::widget::Anchor,
+    relative_rect: LayoutRect,
+    eff_scale: f32,
+) -> (f32, f32) {
+    let (anchor_x, anchor_y) = anchor_position(
+        anchor.relative_point,
+        relative_rect.x,
+        relative_rect.y,
+        relative_rect.width,
+        relative_rect.height,
+    );
+    (
+        anchor_x + anchor.x_offset * eff_scale,
+        anchor_y - anchor.y_offset * eff_scale,
+    )
+}
 
-        match anchor.point {
-            AnchorPoint::TopLeft => {
-                edges.left_x = Some(target_x);
-                edges.top_y = Some(target_y);
-            }
-            AnchorPoint::TopRight => {
-                edges.right_x = Some(target_x);
-                edges.top_y = Some(target_y);
-            }
-            AnchorPoint::BottomLeft => {
-                edges.left_x = Some(target_x);
-                edges.bottom_y = Some(target_y);
-            }
-            AnchorPoint::BottomRight => {
-                edges.right_x = Some(target_x);
-                edges.bottom_y = Some(target_y);
-            }
-            AnchorPoint::Top => {
-                edges.top_y = Some(target_y);
-                edges.center_x = Some(target_x);
-            }
-            AnchorPoint::Bottom => {
-                edges.bottom_y = Some(target_y);
-                edges.center_x = Some(target_x);
-            }
-            AnchorPoint::Left => {
-                edges.left_x = Some(target_x);
-                edges.center_y = Some(target_y);
-            }
-            AnchorPoint::Right => {
-                edges.right_x = Some(target_x);
-                edges.center_y = Some(target_y);
-            }
-            AnchorPoint::Center => {
-                edges.center_x = Some(target_x);
-                edges.center_y = Some(target_y);
-            }
+fn apply_anchor_target(edges: &mut AnchorEdges, point: AnchorPoint, target: (f32, f32)) {
+    let (target_x, target_y) = target;
+    match point {
+        AnchorPoint::TopLeft => {
+            edges.left_x = Some(target_x);
+            edges.top_y = Some(target_y);
+        }
+        AnchorPoint::TopRight => {
+            edges.right_x = Some(target_x);
+            edges.top_y = Some(target_y);
+        }
+        AnchorPoint::BottomLeft => {
+            edges.left_x = Some(target_x);
+            edges.bottom_y = Some(target_y);
+        }
+        AnchorPoint::BottomRight => {
+            edges.right_x = Some(target_x);
+            edges.bottom_y = Some(target_y);
+        }
+        AnchorPoint::Top => {
+            edges.top_y = Some(target_y);
+            edges.center_x = Some(target_x);
+        }
+        AnchorPoint::Bottom => {
+            edges.bottom_y = Some(target_y);
+            edges.center_x = Some(target_x);
+        }
+        AnchorPoint::Left => {
+            edges.left_x = Some(target_x);
+            edges.center_y = Some(target_y);
+        }
+        AnchorPoint::Right => {
+            edges.right_x = Some(target_x);
+            edges.center_y = Some(target_y);
+        }
+        AnchorPoint::Center => {
+            edges.center_x = Some(target_x);
+            edges.center_y = Some(target_y);
         }
     }
-
-    edges
 }
 
 /// Compute final rect from resolved edge constraints and frame size.
@@ -570,5 +608,35 @@ mod tests {
             "Center height should be ~39, got {}",
             rect.height
         );
+    }
+
+    #[test]
+    fn test_nil_relative_to_anchors_multi_anchor_frame_to_screen() {
+        let mut registry = WidgetRegistry::new();
+        let mut root = make_frame(1, None, 1024.0, 768.0, vec![2], vec![]);
+        root.name = Some("UIParent".to_string());
+        registry.register(root);
+        let mut frame = make_frame(
+            2,
+            Some(1),
+            100.0,
+            40.0,
+            vec![],
+            vec![
+                anchor(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft),
+                anchor(AnchorPoint::BottomRight, None, AnchorPoint::BottomRight),
+            ],
+        );
+        frame.anchors[0].x_offset = 10.0;
+        frame.anchors[0].y_offset = -20.0;
+        frame.anchors[1].x_offset = -30.0;
+        frame.anchors[1].y_offset = 40.0;
+        registry.register(frame);
+
+        let rect = compute_frame_rect(&registry, 2, 1024.0, 768.0);
+        assert_eq!(rect.x, 10.0);
+        assert_eq!(rect.y, 20.0);
+        assert_eq!(rect.width, 984.0);
+        assert_eq!(rect.height, 708.0);
     }
 }
