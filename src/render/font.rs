@@ -22,6 +22,30 @@ struct FontEntry {
     family: String,
 }
 
+struct WowFontFile {
+    filename: &'static str,
+    wow_paths: &'static [&'static str],
+}
+
+const WOW_FONT_FILES: &[WowFontFile] = &[
+    WowFontFile {
+        filename: "FRIZQT__.TTF",
+        wow_paths: &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"],
+    },
+    WowFontFile {
+        filename: "ARIALN.ttf",
+        wow_paths: &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"],
+    },
+    WowFontFile {
+        filename: "frizqt___cyr.ttf",
+        wow_paths: &["Fonts\\frizqt___cyr.ttf"],
+    },
+    WowFontFile {
+        filename: "TrajanPro3SemiBold.ttf",
+        wow_paths: &["Fonts\\TrajanPro3SemiBold.ttf"],
+    },
+];
+
 /// Manages WoW fonts via cosmic-text.
 ///
 /// Holds a `FontSystem` with only the WoW TTF fonts loaded (no system fonts),
@@ -50,50 +74,8 @@ impl WowFontSystem {
         let mut db = fontdb::Database::new();
         let mut font_map = HashMap::new();
 
-        // Load each TTF file and record its family name
-        let font_files = [
-            ("FRIZQT__.TTF", &[WOW_FONT_FRIZ, "Fonts\\frizqt__.ttf"][..]),
-            (
-                "ARIALN.ttf",
-                &[WOW_FONT_ARIAL_NARROW, "Fonts\\arialn.ttf"][..],
-            ),
-            ("frizqt___cyr.ttf", &["Fonts\\frizqt___cyr.ttf"][..]),
-            (
-                "TrajanPro3SemiBold.ttf",
-                &["Fonts\\TrajanPro3SemiBold.ttf"][..],
-            ),
-        ];
-
-        for (filename, wow_paths) in &font_files {
-            let path = fonts_dir.join(filename);
-            if !path.exists() {
-                tracing::warn!("Font file not found: {}", path.display());
-                continue;
-            }
-
-            let data = match std::fs::read(&path) {
-                Ok(d) => d,
-                Err(e) => {
-                    tracing::warn!("Failed to read font {}: {}", path.display(), e);
-                    continue;
-                }
-            };
-
-            // Query the family name before loading into fontdb
-            let family_name = fontdb_family_name(&data).unwrap_or_else(|| filename.to_string());
-
-            db.load_font_data(data);
-
-            let entry = FontEntry {
-                family: family_name.clone(),
-            };
-
-            for wow_path in *wow_paths {
-                let key = normalize_wow_path(wow_path);
-                font_map.insert(key, entry.clone());
-            }
-
-            tracing::debug!("Loaded font {} -> family '{}'", filename, family_name);
+        for font_file in WOW_FONT_FILES {
+            load_wow_font(fonts_dir, font_file, &mut db, &mut font_map);
         }
 
         let font_system = cosmic_text::FontSystem::new_with_locale_and_db("en-US".to_string(), db);
@@ -215,6 +197,58 @@ impl WowFontSystem {
                 .map(|run| run.line_y + line_height)
                 .unwrap_or(line_height)
         }
+    }
+}
+
+fn load_wow_font(
+    fonts_dir: &Path,
+    font_file: &WowFontFile,
+    db: &mut fontdb::Database,
+    font_map: &mut HashMap<String, FontEntry>,
+) {
+    let path = fonts_dir.join(font_file.filename);
+    let Some(data) = read_font_file(&path) else {
+        return;
+    };
+
+    let family_name = fontdb_family_name(&data).unwrap_or_else(|| font_file.filename.to_string());
+    db.load_font_data(data);
+    register_font_aliases(font_file.wow_paths, &family_name, font_map);
+
+    tracing::debug!(
+        "Loaded font {} -> family '{}'",
+        font_file.filename,
+        family_name
+    );
+}
+
+fn read_font_file(path: &Path) -> Option<Vec<u8>> {
+    if !path.exists() {
+        tracing::warn!("Font file not found: {}", path.display());
+        return None;
+    }
+
+    match std::fs::read(path) {
+        Ok(data) => Some(data),
+        Err(error) => {
+            tracing::warn!("Failed to read font {}: {}", path.display(), error);
+            None
+        }
+    }
+}
+
+fn register_font_aliases(
+    wow_paths: &[&str],
+    family_name: &str,
+    font_map: &mut HashMap<String, FontEntry>,
+) {
+    let entry = FontEntry {
+        family: family_name.to_string(),
+    };
+
+    for wow_path in wow_paths {
+        let key = normalize_wow_path(wow_path);
+        font_map.insert(key, entry.clone());
     }
 }
 
