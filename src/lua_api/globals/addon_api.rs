@@ -599,16 +599,25 @@ fn register_legacy_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
 }
 
 fn register_legacy_addon_query(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
+    register_legacy_num_addons(lua, state)?;
+    register_legacy_is_addon_loaded(lua, state)?;
+    register_legacy_is_addon_load_on_demand(lua, state)?;
+    register_legacy_get_addon_metadata(lua, state)?;
+    Ok(())
+}
 
+fn register_legacy_num_addons(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let s = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "GetNumAddOns",
         lua.create_function(move |_, ()| Ok(s.borrow().addons.len() as i32))?,
     )?;
+    Ok(())
+}
 
+fn register_legacy_is_addon_loaded(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let s = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "IsAddOnLoaded",
         lua.create_function(move |_, addon: Value| {
             let state = s.borrow();
@@ -617,9 +626,12 @@ fn register_legacy_addon_query(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
                 .unwrap_or(false))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_legacy_is_addon_load_on_demand(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let s = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "IsAddOnLoadOnDemand",
         lua.create_function(move |_, addon: Value| {
             let state = s.borrow();
@@ -628,9 +640,12 @@ fn register_legacy_addon_query(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
                 .unwrap_or(false))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_legacy_get_addon_metadata(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let s = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "GetAddOnMetadata",
         lua.create_function(move |lua, (addon, field): (String, String)| {
             resolve_metadata(&s, lua, &addon, &field)
@@ -660,10 +675,6 @@ fn register_legacy_addon_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
     )?;
     Ok(())
 }
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 use crate::lua_api::AddonInfo;
 
