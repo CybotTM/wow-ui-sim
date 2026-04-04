@@ -174,6 +174,13 @@ fn register_map_canvas_pin_mixin(lua: &Lua) -> Result<mlua::Table> {
 
 /// Add pin positioning and frame level methods.
 fn add_pin_positioning_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    add_pin_map_methods(lua, t)?;
+    add_pin_frame_level_methods(lua, t)?;
+    add_pin_visual_methods(lua, t)?;
+    Ok(())
+}
+
+fn add_pin_map_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetMap",
         lua.create_function(|_, _self: Value| Ok(Value::Nil))?,
@@ -182,6 +189,10 @@ fn add_pin_positioning_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "SetPosition",
         lua.create_function(|_, (_self, _x, _y): (Value, f64, f64)| Ok(()))?,
     )?;
+    Ok(())
+}
+
+fn add_pin_frame_level_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "SetFrameLevelType",
         lua.create_function(|_, (_self, _type): (Value, String)| Ok(()))?,
@@ -200,6 +211,10 @@ fn add_pin_positioning_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "ApplyFrameLevel",
         lua.create_function(|_, _self: Value| Ok(()))?,
     )?;
+    Ok(())
+}
+
+fn add_pin_visual_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "ApplyCurrentPosition",
         lua.create_function(|_, _self: Value| Ok(()))?,
