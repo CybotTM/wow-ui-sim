@@ -567,15 +567,36 @@ fn line_bounding_box(start: (f32, f32), end: (f32, f32), thickness: f32) -> Layo
             height: 0.0,
         };
     }
+    let corners = line_box_corners(start, end, dx, dy, len, thickness);
+    let ((min_x, max_x), (min_y, max_y)) = corner_bounds(&corners);
+    LayoutRect {
+        x: min_x,
+        y: min_y,
+        width: max_x - min_x,
+        height: max_y - min_y,
+    }
+}
+
+fn line_box_corners(
+    start: (f32, f32),
+    end: (f32, f32),
+    dx: f32,
+    dy: f32,
+    len: f32,
+    thickness: f32,
+) -> [(f32, f32); 4] {
     let half_t = thickness / 2.0;
     let px = -dy / len * half_t;
     let py = dx / len * half_t;
-    let corners = [
+    [
         (start.0 + px, start.1 + py),
         (start.0 - px, start.1 - py),
         (end.0 + px, end.1 + py),
         (end.0 - px, end.1 - py),
-    ];
+    ]
+}
+
+fn corner_bounds(corners: &[(f32, f32); 4]) -> ((f32, f32), (f32, f32)) {
     let min_x = corners.iter().map(|c| c.0).fold(f32::INFINITY, f32::min);
     let max_x = corners
         .iter()
@@ -586,12 +607,7 @@ fn line_bounding_box(start: (f32, f32), end: (f32, f32), thickness: f32) -> Layo
         .iter()
         .map(|c| c.1)
         .fold(f32::NEG_INFINITY, f32::max);
-    LayoutRect {
-        x: min_x,
-        y: min_y,
-        width: max_x - min_x,
-        height: max_y - min_y,
-    }
+    ((min_x, max_x), (min_y, max_y))
 }
 
 #[cfg(test)]
@@ -724,5 +740,14 @@ mod tests {
         assert_eq!(rect.y, 20.0);
         assert_eq!(rect.width, 984.0);
         assert_eq!(rect.height, 708.0);
+    }
+
+    #[test]
+    fn test_line_bounding_box_for_horizontal_line() {
+        let rect = line_bounding_box((10.0, 20.0), (30.0, 20.0), 4.0);
+        assert_eq!(rect.x, 10.0);
+        assert_eq!(rect.y, 18.0);
+        assert_eq!(rect.width, 20.0);
+        assert_eq!(rect.height, 4.0);
     }
 }
