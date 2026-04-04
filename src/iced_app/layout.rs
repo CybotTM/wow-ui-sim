@@ -164,58 +164,26 @@ fn compute_rect_from_edges(
     parent_rect: LayoutRect,
     scale: f32,
 ) -> LayoutRect {
-    // Swap inverted horizontal bounds
-    let (left_x, right_x) = if let (Some(lx), Some(rx)) = (edges.left_x, edges.right_x) {
-        if lx > rx {
-            (Some(rx), Some(lx))
-        } else {
-            (Some(lx), Some(rx))
-        }
-    } else {
-        (edges.left_x, edges.right_x)
-    };
-
-    // Swap inverted vertical bounds
-    let (top_y, bottom_y) = if let (Some(ty), Some(by)) = (edges.top_y, edges.bottom_y) {
-        if ty > by {
-            (Some(by), Some(ty))
-        } else {
-            (Some(ty), Some(by))
-        }
-    } else {
-        (edges.top_y, edges.bottom_y)
-    };
-
-    let width = match (left_x, right_x) {
-        (Some(lx), Some(rx)) => rx - lx,
-        _ if frame.width > 0.0 => frame.width * scale,
-        _ => 0.0,
-    };
-
-    let height = match (top_y, bottom_y) {
-        (Some(ty), Some(by)) => by - ty,
-        _ if frame.height > 0.0 => frame.height * scale,
-        _ => 0.0,
-    };
-
-    // Horizontal position priority: left > right > center > parent center
-    let x = left_x.unwrap_or_else(|| {
-        right_x.map(|rx| rx - width).unwrap_or_else(|| {
-            edges
-                .center_x
-                .map(|cx| cx - width / 2.0)
-                .unwrap_or_else(|| parent_rect.x + (parent_rect.width - width) / 2.0)
-        })
-    });
-    // Vertical position priority: top > bottom > center > parent center
-    let y = top_y.unwrap_or_else(|| {
-        bottom_y.map(|by| by - height).unwrap_or_else(|| {
-            edges
-                .center_y
-                .map(|cy| cy - height / 2.0)
-                .unwrap_or_else(|| parent_rect.y + (parent_rect.height - height) / 2.0)
-        })
-    });
+    let (left_x, right_x) = normalize_bounds(edges.left_x, edges.right_x);
+    let (top_y, bottom_y) = normalize_bounds(edges.top_y, edges.bottom_y);
+    let width = resolve_axis_size(left_x, right_x, frame.width, scale);
+    let height = resolve_axis_size(top_y, bottom_y, frame.height, scale);
+    let x = resolve_axis_position(
+        left_x,
+        right_x,
+        edges.center_x,
+        width,
+        parent_rect.x,
+        parent_rect.width,
+    );
+    let y = resolve_axis_position(
+        top_y,
+        bottom_y,
+        edges.center_y,
+        height,
+        parent_rect.y,
+        parent_rect.height,
+    );
 
     LayoutRect {
         x,
@@ -223,6 +191,35 @@ fn compute_rect_from_edges(
         width,
         height,
     }
+}
+
+fn normalize_bounds(start: Option<f32>, end: Option<f32>) -> (Option<f32>, Option<f32>) {
+    match (start, end) {
+        (Some(a), Some(b)) if a > b => (Some(b), Some(a)),
+        _ => (start, end),
+    }
+}
+
+fn resolve_axis_size(start: Option<f32>, end: Option<f32>, explicit_size: f32, scale: f32) -> f32 {
+    match (start, end) {
+        (Some(start), Some(end)) => end - start,
+        _ if explicit_size > 0.0 => explicit_size * scale,
+        _ => 0.0,
+    }
+}
+
+fn resolve_axis_position(
+    start: Option<f32>,
+    end: Option<f32>,
+    center: Option<f32>,
+    size: f32,
+    parent_start: f32,
+    parent_size: f32,
+) -> f32 {
+    start
+        .or_else(|| end.map(|end| end - size))
+        .or_else(|| center.map(|center| center - size / 2.0))
+        .unwrap_or_else(|| parent_start + (parent_size - size) / 2.0)
 }
 
 /// Resolve a single-anchor frame's position.
