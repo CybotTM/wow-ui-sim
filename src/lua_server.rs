@@ -213,48 +213,59 @@ fn handle_connection(
             continue;
         }
 
-        let request: Request = match serde_json::from_str(&line) {
-            Ok(r) => r,
-            Err(e) => {
-                let resp = Response::Error(format!("Invalid request: {}", e));
-                writeln!(stream, "{}", serde_json::to_string(&resp).unwrap())?;
+        let request = match parse_request(&line) {
+            Ok(request) => request,
+            Err(response) => {
+                write_response(&mut stream, &response)?;
                 continue;
             }
         };
 
-        let response = match request {
-            Request::Ping => Response::Pong,
-            Request::Exec { code } => {
-                send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
-            }
-            Request::DumpTree {
-                filter,
-                visible_only,
-            } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
-                filter,
-                visible_only,
-                respond,
-            }),
-            Request::Screenshot {
-                output,
-                width,
-                height,
-                filter,
-                crop,
-            } => send_command(cmd_tx, |respond| LuaCommand::Screenshot {
-                output,
-                width,
-                height,
-                filter,
-                crop,
-                respond,
-            }),
-        };
-
-        writeln!(stream, "{}", serde_json::to_string(&response).unwrap())?;
+        let response = handle_request(request, cmd_tx);
+        write_response(&mut stream, &response)?;
     }
 
     Ok(())
+}
+
+fn parse_request(line: &str) -> Result<Request, Response> {
+    serde_json::from_str(line)
+        .map_err(|error| Response::Error(format!("Invalid request: {}", error)))
+}
+
+fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Response {
+    match request {
+        Request::Ping => Response::Pong,
+        Request::Exec { code } => {
+            send_command(cmd_tx, |respond| LuaCommand::Exec { code, respond })
+        }
+        Request::DumpTree {
+            filter,
+            visible_only,
+        } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
+            filter,
+            visible_only,
+            respond,
+        }),
+        Request::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+        } => send_command(cmd_tx, |respond| LuaCommand::Screenshot {
+            output,
+            width,
+            height,
+            filter,
+            crop,
+            respond,
+        }),
+    }
+}
+
+fn write_response(stream: &mut UnixStream, response: &Response) -> std::io::Result<()> {
+    writeln!(stream, "{}", serde_json::to_string(response).unwrap())
 }
 
 /// Client module for connecting to the Lua server.
