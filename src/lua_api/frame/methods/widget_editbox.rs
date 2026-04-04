@@ -276,56 +276,44 @@ where
 }
 
 fn add_editbox_mode_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetMultiLine", |lua, this, multi: bool| {
+    add_editbox_bool_setter(methods, "SetMultiLine", |frame, value| {
+        frame.editbox_multi_line = value
+    });
+    add_editbox_bool_getter(methods, "IsMultiLine", |frame| frame.editbox_multi_line);
+    add_editbox_bool_setter(methods, "SetAutoFocus", |frame, value| {
+        frame.editbox_auto_focus = value
+    });
+    add_editbox_bool_getter(methods, "IsAutoFocus", |frame| frame.editbox_auto_focus);
+    add_editbox_bool_setter(methods, "SetNumeric", |frame, value| {
+        frame.editbox_numeric = value
+    });
+    add_editbox_bool_getter(methods, "IsNumeric", |frame| frame.editbox_numeric);
+}
+
+fn add_editbox_bool_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, bool) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_multi_line = multi;
+            setter(frame, value);
         }
         Ok(())
     });
-    methods.add_method("IsMultiLine", |lua, this, ()| {
+}
+
+fn add_editbox_bool_getter<M, F>(methods: &mut M, name: &'static str, getter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&crate::widget::Frame) -> bool + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_multi_line)
-            .unwrap_or(false))
-    });
-    methods.add_method("SetAutoFocus", |lua, this, auto: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_auto_focus = auto;
-        }
-        Ok(())
-    });
-    methods.add_method("IsAutoFocus", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_auto_focus)
-            .unwrap_or(false))
-    });
-    methods.add_method("SetNumeric", |lua, this, numeric: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.editbox_numeric = numeric;
-        }
-        Ok(())
-    });
-    methods.add_method("IsNumeric", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.editbox_numeric)
-            .unwrap_or(false))
+        Ok(state.widgets.get(this.0).map(getter).unwrap_or(false))
     });
 }
 
