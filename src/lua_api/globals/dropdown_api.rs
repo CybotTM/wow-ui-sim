@@ -13,6 +13,19 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+type ToggleDropDownArgs = (
+    Option<i32>,
+    Option<Value>,
+    Option<Value>,
+    Option<String>,
+    Option<f32>,
+    Option<f32>,
+    Option<mlua::Table>,
+    Option<Value>,
+    Option<f32>,
+    Option<String>,
+);
+
 /// Get or create the `__frame_fields` table for a given frame ID.
 fn get_or_create_frame_fields(lua: &Lua, frame_id: u64) -> Result<mlua::Table> {
     Ok(crate::lua_api::script_helpers::get_or_create_frame_fields(
@@ -397,7 +410,6 @@ fn register_toggle_and_close(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result
     register_close_dropdown_menus(lua, state)
 }
 
-#[allow(clippy::type_complexity)]
 fn register_toggle_dropdown(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let state_t = Rc::clone(state);
     lua.globals().set(
@@ -415,18 +427,7 @@ fn register_toggle_dropdown(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
                 _button,
                 _auto_hide_delay,
                 _display_mode,
-            ): (
-                Option<i32>,
-                Option<Value>,
-                Option<Value>,
-                Option<String>,
-                Option<f32>,
-                Option<f32>,
-                Option<mlua::Table>,
-                Option<Value>,
-                Option<f32>,
-                Option<String>,
-            )| {
+            ): ToggleDropDownArgs| {
                 let level = level.unwrap_or(1);
                 let list_val: Value = lua
                     .globals()
