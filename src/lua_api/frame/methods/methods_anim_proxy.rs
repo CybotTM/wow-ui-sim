@@ -585,44 +585,52 @@ fn parse_anim_rotation_origin(args: MultiValue) -> (String, f64, f64) {
 
 fn add_anim_flipbook_props<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFlipBookRows", |lua, this, v: u32| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.flip_book_rows = v;
-        }
+        set_anim_flipbook_value(lua, this.0, v, |anim, value| anim.flip_book_rows = value);
         Ok(())
     });
     methods.add_method("GetFlipBookRows", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(lookup_anim(&state, this.0).map_or(1u32, |a| a.flip_book_rows))
+        Ok(read_anim_flipbook_value(lua, this.0, 1, |anim| {
+            anim.flip_book_rows
+        }))
     });
     methods.add_method("SetFlipBookColumns", |lua, this, v: u32| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.flip_book_columns = v;
-        }
+        set_anim_flipbook_value(lua, this.0, v, |anim, value| anim.flip_book_columns = value);
         Ok(())
     });
     methods.add_method("GetFlipBookColumns", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(lookup_anim(&state, this.0).map_or(1u32, |a| a.flip_book_columns))
+        Ok(read_anim_flipbook_value(lua, this.0, 1, |anim| {
+            anim.flip_book_columns
+        }))
     });
     methods.add_method("SetFlipBookFrames", |lua, this, v: u32| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(a) = lookup_anim_mut(&mut state, this.0) {
-            a.flip_book_frames = v;
-        }
+        set_anim_flipbook_value(lua, this.0, v, |anim, value| anim.flip_book_frames = value);
         Ok(())
     });
     methods.add_method("GetFlipBookFrames", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(lookup_anim(&state, this.0).map_or(1u32, |a| a.flip_book_frames))
+        Ok(read_anim_flipbook_value(lua, this.0, 1, |anim| {
+            anim.flip_book_frames
+        }))
     });
+}
+
+fn set_anim_flipbook_value<F>(lua: &mlua::Lua, frame_id: u64, value: u32, update: F)
+where
+    F: FnOnce(&mut crate::lua_api::animation::AnimState, u32),
+{
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(anim) = lookup_anim_mut(&mut state, frame_id) {
+        update(anim, value);
+    }
+}
+
+fn read_anim_flipbook_value<F>(lua: &mlua::Lua, frame_id: u64, default: u32, read: F) -> u32
+where
+    F: FnOnce(&crate::lua_api::animation::AnimState) -> u32,
+{
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    lookup_anim(&state, frame_id).map_or(default, read)
 }
 
 fn add_anim_progress<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
