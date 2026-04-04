@@ -29,45 +29,79 @@ pub fn create_frame_from_xml(
         return Ok(early);
     }
 
-    let creator_name = {
-        let s = env.state().borrow();
-        s.loading_addon_index
-            .and_then(|idx| s.addons.get(idx as usize))
-            .map(|a| a.folder_name.clone())
+    let Some(prepared) = prepare_frame_creation(env, frame, parent_override, intrinsic_base) else {
+        return Ok(None);
     };
-    let name = match resolve_frame_name(frame, parent_override, creator_name.as_deref()) {
-        Some(n) => n,
-        None => return Ok(None),
-    };
-
-    let inherited_parent_buf = resolve_parent(frame, parent_override);
-    let explicit_parent = parent_override
-        .or(frame.parent.as_deref())
-        .or(inherited_parent_buf.as_deref());
-    let parent = explicit_parent.unwrap_or("UIParent");
-
     let build_start = Instant::now();
-    let inherits_buf = build_inherits_chain(frame, intrinsic_base);
-    let inherits = inherits_buf
-        .as_deref()
-        .unwrap_or(frame.inherits.as_deref().unwrap_or(""));
-    let initial_hidden = resolve_xml_hidden(frame, inherits);
-    let lua_code =
-        build_frame_lua_code(widget_type, &name, explicit_parent, inherits, frame, parent);
+    let lua_code = build_frame_lua_code(
+        widget_type,
+        &prepared.name,
+        prepared.explicit_parent.as_deref(),
+        &prepared.inherits,
+        frame,
+        &prepared.parent,
+    );
     timing.frame_code_build_time += build_start.elapsed();
     setup_frame(
         env,
         &lua_code,
-        &name,
-        initial_hidden,
+        &prepared.name,
+        prepared.initial_hidden,
         frame,
-        inherits,
-        parent,
+        &prepared.inherits,
+        &prepared.parent,
         intrinsic_base,
         timing,
     )?;
-    finalize_frame(env, frame, &name, inherits, timing)?;
-    Ok(Some(name))
+    finalize_frame(env, frame, &prepared.name, &prepared.inherits, timing)?;
+    Ok(Some(prepared.name))
+}
+
+struct PreparedFrameCreation {
+    name: String,
+    explicit_parent: Option<String>,
+    parent: String,
+    inherits: String,
+    initial_hidden: bool,
+}
+
+fn prepare_frame_creation(
+    env: &LoaderEnv<'_>,
+    frame: &crate::xml::FrameXml,
+    parent_override: Option<&str>,
+    intrinsic_base: Option<&str>,
+) -> Option<PreparedFrameCreation> {
+    let creator_name = current_loading_addon_name(env);
+    let name = resolve_frame_name(frame, parent_override, creator_name.as_deref())?;
+    let inherited_parent_buf = resolve_parent(frame, parent_override);
+    let explicit_parent = parent_override
+        .or(frame.parent.as_deref())
+        .or(inherited_parent_buf.as_deref())
+        .map(str::to_string);
+    let parent = explicit_parent
+        .clone()
+        .unwrap_or_else(|| "UIParent".to_string());
+    let inherits_buf = build_inherits_chain(frame, intrinsic_base);
+    let inherits = inherits_buf
+        .as_deref()
+        .unwrap_or(frame.inherits.as_deref().unwrap_or(""))
+        .to_string();
+    let initial_hidden = resolve_xml_hidden(frame, &inherits);
+
+    Some(PreparedFrameCreation {
+        name,
+        explicit_parent,
+        parent,
+        inherits,
+        initial_hidden,
+    })
+}
+
+fn current_loading_addon_name(env: &LoaderEnv<'_>) -> Option<String> {
+    let s = env.state().borrow();
+    s.loading_addon_index
+        .and_then(|idx| s.addons.get(idx as usize))
+        .map(|a| a.folder_name.clone())
 }
 
 /// Execute CreateFrame Lua, apply XML properties, and record setup timing.
