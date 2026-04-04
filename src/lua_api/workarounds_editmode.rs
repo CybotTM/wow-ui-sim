@@ -438,6 +438,51 @@ fn patch_hide_ui_panel_and_close_all(env: &WowLuaEnv) {
     );
 }
 
+const PATCH_ENTER_EXIT_EDIT_MODE_LUA: &str = r#"
+    if not EditModeManagerFrame then return end
+    local emm = EditModeManagerFrame
+
+    function emm:EnterEditMode()
+        self.editModeActive = true
+        pcall(self.ClearActiveChangesFlags, self)
+        pcall(self.UpdateDropdownOptions, self)
+        pcall(self.ShowSystemSelections, self)
+        if self.AccountSettings
+            and self.AccountSettings.OnEditModeEnter then
+            pcall(
+                self.AccountSettings.OnEditModeEnter,
+                self.AccountSettings
+            )
+        end
+        pcall(EventRegistry.TriggerEvent,
+            EventRegistry, "EditMode.Enter")
+    end
+
+    function emm:ExitEditMode()
+        self.editModeActive = false
+        pcall(self.ClearSelectedSystem, self)
+        pcall(function()
+            secureexecuterange(
+                self.registeredSystemFrames,
+                function(_, f)
+                    if f.OnEditModeExit then
+                        pcall(f.OnEditModeExit, f)
+                    end
+                end
+            )
+        end)
+        if self.AccountSettings
+            and self.AccountSettings.OnEditModeExit then
+            pcall(
+                self.AccountSettings.OnEditModeExit,
+                self.AccountSettings
+            )
+        end
+        pcall(EventRegistry.TriggerEvent,
+            EventRegistry, "EditMode.Exit")
+    end
+"#;
+
 /// Wrap EnterEditMode/ExitEditMode with pcall protection.
 ///
 /// EnterEditMode calls crash-prone functions: ShowSystemSelections
@@ -445,50 +490,5 @@ fn patch_hide_ui_panel_and_close_all(env: &WowLuaEnv) {
 /// Wrapping each step with pcall lets edit mode activate even when
 /// individual subsystems fail.
 fn patch_enter_exit_edit_mode(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeManagerFrame then return end
-        local emm = EditModeManagerFrame
-
-        function emm:EnterEditMode()
-            self.editModeActive = true
-            pcall(self.ClearActiveChangesFlags, self)
-            pcall(self.UpdateDropdownOptions, self)
-            pcall(self.ShowSystemSelections, self)
-            if self.AccountSettings
-                and self.AccountSettings.OnEditModeEnter then
-                pcall(
-                    self.AccountSettings.OnEditModeEnter,
-                    self.AccountSettings
-                )
-            end
-            pcall(EventRegistry.TriggerEvent,
-                EventRegistry, "EditMode.Enter")
-        end
-
-        function emm:ExitEditMode()
-            self.editModeActive = false
-            pcall(self.ClearSelectedSystem, self)
-            pcall(function()
-                secureexecuterange(
-                    self.registeredSystemFrames,
-                    function(_, f)
-                        if f.OnEditModeExit then
-                            pcall(f.OnEditModeExit, f)
-                        end
-                    end
-                )
-            end)
-            if self.AccountSettings
-                and self.AccountSettings.OnEditModeExit then
-                pcall(
-                    self.AccountSettings.OnEditModeExit,
-                    self.AccountSettings
-                )
-            end
-            pcall(EventRegistry.TriggerEvent,
-                EventRegistry, "EditMode.Exit")
-        end
-    "#,
-    );
+    let _ = env.exec(PATCH_ENTER_EXIT_EDIT_MODE_LUA);
 }
