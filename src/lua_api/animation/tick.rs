@@ -349,57 +349,64 @@ fn get_group_script(group: &AnimGroupState, lua: &Lua, name: &str) -> Option<mlu
 /// Handle a finished animation group: update state and collect scripts to fire.
 fn handle_group_finish(group: &mut AnimGroupState, lua: &Lua) -> Vec<mlua::Function> {
     let mut scripts = Vec::new();
-    let total_dur = group.total_duration();
 
     match group.looping {
-        LoopType::None => {
-            group.playing = false;
-            group.done = true;
-            group.pending_finish = false;
-            if let Some(func) = get_group_script(group, lua, "OnFinished") {
-                scripts.push(func);
-            }
-        }
+        LoopType::None => finish_group(group, lua, &mut scripts),
         LoopType::Repeat => {
             if group.pending_finish {
-                group.playing = false;
-                group.done = true;
-                group.pending_finish = false;
-                if let Some(func) = get_group_script(group, lua, "OnFinished") {
-                    scripts.push(func);
-                }
+                finish_group(group, lua, &mut scripts);
             } else {
-                group.elapsed -= total_dur;
-                for anim in &mut group.animations {
-                    anim.elapsed = 0.0;
-                }
-                if let Some(func) = get_group_script(group, lua, "OnLoop") {
-                    scripts.push(func);
-                }
+                restart_group_loop(group, false, lua, &mut scripts);
             }
         }
         LoopType::Bounce => {
             if group.pending_finish {
-                group.playing = false;
-                group.done = true;
-                group.pending_finish = false;
-                if let Some(func) = get_group_script(group, lua, "OnFinished") {
-                    scripts.push(func);
-                }
+                finish_group(group, lua, &mut scripts);
             } else {
-                group.elapsed -= total_dur;
-                group.reverse = !group.reverse;
-                for anim in &mut group.animations {
-                    anim.elapsed = 0.0;
-                }
-                if let Some(func) = get_group_script(group, lua, "OnLoop") {
-                    scripts.push(func);
-                }
+                restart_group_loop(group, true, lua, &mut scripts);
             }
         }
     }
 
     scripts
+}
+
+fn finish_group(group: &mut AnimGroupState, lua: &Lua, scripts: &mut Vec<mlua::Function>) {
+    group.playing = false;
+    group.done = true;
+    group.pending_finish = false;
+    push_group_script(group, lua, "OnFinished", scripts);
+}
+
+fn restart_group_loop(
+    group: &mut AnimGroupState,
+    toggle_reverse: bool,
+    lua: &Lua,
+    scripts: &mut Vec<mlua::Function>,
+) {
+    group.elapsed -= group.total_duration();
+    if toggle_reverse {
+        group.reverse = !group.reverse;
+    }
+    reset_group_animation_elapsed(group);
+    push_group_script(group, lua, "OnLoop", scripts);
+}
+
+fn reset_group_animation_elapsed(group: &mut AnimGroupState) {
+    for anim in &mut group.animations {
+        anim.elapsed = 0.0;
+    }
+}
+
+fn push_group_script(
+    group: &AnimGroupState,
+    lua: &Lua,
+    name: &str,
+    scripts: &mut Vec<mlua::Function>,
+) {
+    if let Some(func) = get_group_script(group, lua, name) {
+        scripts.push(func);
+    }
 }
 
 /// Fire collected animation scripts and OnUpdate callback for a group.
