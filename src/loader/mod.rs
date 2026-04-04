@@ -526,24 +526,12 @@ fn kahns_sort<'a>(
         }
     }
 
-    // Seed queue with zero-dependency addons, sorted descending (pop takes last = smallest)
-    let mut queue: Vec<&str> = in_degree
-        .iter()
-        .filter(|&(_, deg)| *deg == 0)
-        .map(|(&name, _)| name)
-        .collect();
-    queue.sort_by(|a, b| addon_priority_cmp(a, b, load_first));
+    let mut queue = build_zero_degree_queue(&in_degree, load_first);
 
     let mut result = Vec::with_capacity(count);
     let mut emitted: HashSet<&str> = HashSet::new();
     while result.len() < count {
-        let Some(name) = queue.pop().or_else(|| {
-            in_degree
-                .keys()
-                .filter(|name| !emitted.contains(**name))
-                .max_by(|a, b| addon_priority_cmp(a, b, load_first))
-                .copied()
-        }) else {
+        let Some(name) = next_kahn_node(&mut queue, &in_degree, &emitted, load_first) else {
             break;
         };
 
@@ -562,6 +550,35 @@ fn kahns_sort<'a>(
     }
 
     result
+}
+
+fn build_zero_degree_queue<'a>(
+    in_degree: &HashMap<&'a str, usize>,
+    load_first: &HashSet<&'a str>,
+) -> Vec<&'a str> {
+    // Seed queue with zero-dependency addons, sorted descending (pop takes last = smallest)
+    let mut queue: Vec<&str> = in_degree
+        .iter()
+        .filter(|&(_, deg)| *deg == 0)
+        .map(|(&name, _)| name)
+        .collect();
+    queue.sort_by(|a, b| addon_priority_cmp(a, b, load_first));
+    queue
+}
+
+fn next_kahn_node<'a>(
+    queue: &mut Vec<&'a str>,
+    in_degree: &HashMap<&'a str, usize>,
+    emitted: &HashSet<&'a str>,
+    load_first: &HashSet<&'a str>,
+) -> Option<&'a str> {
+    queue.pop().or_else(|| {
+        in_degree
+            .keys()
+            .filter(|name| !emitted.contains(**name))
+            .max_by(|a, b| addon_priority_cmp(a, b, load_first))
+            .copied()
+    })
 }
 
 #[cfg(test)]
