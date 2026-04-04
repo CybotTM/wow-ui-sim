@@ -136,44 +136,8 @@ pub fn start_group_playback_at(state: &mut SimState, group_id: u64, reverse: boo
 /// Stop a group: restore pre-animation alphas (unless setToFinalAlpha),
 /// clear translation offsets, mark finished.
 pub fn stop_group(state: &mut SimState, group_id: u64) {
-    // Collect restoration data before mutating.
-    let restore: Option<(bool, Vec<(u64, f32)>, Vec<u64>)> =
-        state.animation_groups.get(&group_id).map(|group| {
-            let keep_alpha = group.set_to_final_alpha;
-            let saved = group.saved_alphas.iter().map(|(&id, &a)| (id, a)).collect();
-            let owner_id = group.owner_frame_id;
-            let translation_targets: Vec<u64> = group
-                .animations
-                .iter()
-                .filter(|a| a.anim_type == AnimationType::Translation)
-                .filter_map(|a| resolve_child(state, owner_id, &a.child_key))
-                .collect();
-            (keep_alpha, saved, translation_targets)
-        });
-
-    if let Some((keep_alpha, saved_alphas, translation_targets)) = restore {
-        // Restore alphas if not keeping final values
-        if !keep_alpha {
-            for (id, alpha) in &saved_alphas {
-                if let Some(frame) = state.widgets.get_mut_visual(*id) {
-                    frame.alpha = *alpha;
-                }
-            }
-        }
-        // Always clear translation offsets (they don't persist)
-        for id in &translation_targets {
-            let had_offset = state
-                .widgets
-                .get(*id)
-                .is_some_and(|f| f.anim_offset_x != 0.0 || f.anim_offset_y != 0.0);
-            if let Some(frame) = state.widgets.get_mut_visual(*id) {
-                frame.anim_offset_x = 0.0;
-                frame.anim_offset_y = 0.0;
-            }
-            if had_offset {
-                state.invalidate_layout(*id);
-            }
-        }
+    if let Some(restore) = collect_group_restore_data(state, group_id) {
+        restore_group_visual_state(state, &restore);
     }
 
     if let Some(group) = state.animation_groups.get_mut(&group_id) {
@@ -181,6 +145,69 @@ pub fn stop_group(state: &mut SimState, group_id: u64) {
         group.paused = false;
         group.done = true;
         group.pending_finish = false;
+    }
+}
+
+struct GroupRestoreData {
+    keep_alpha: bool,
+    saved_alphas: Vec<(u64, f32)>,
+    translation_targets: Vec<u64>,
+}
+
+fn collect_group_restore_data(state: &SimState, group_id: u64) -> Option<GroupRestoreData> {
+    state.animation_groups.get(&group_id).map(|group| {
+        let keep_alpha = group.set_to_final_alpha;
+        let saved_alphas = group.saved_alphas.iter().map(|(&id, &a)| (id, a)).collect();
+        let translation_targets = translation_target_ids(state, group);
+        GroupRestoreData {
+            keep_alpha,
+            saved_alphas,
+            translation_targets,
+        }
+    })
+}
+
+fn translation_target_ids(
+    state: &SimState,
+    group: &crate::lua_api::animation::AnimGroupState,
+) -> Vec<u64> {
+    let owner_id = group.owner_frame_id;
+    group
+        .animations
+        .iter()
+        .filter(|anim| anim.anim_type == AnimationType::Translation)
+        .filter_map(|anim| resolve_child(state, owner_id, &anim.child_key))
+        .collect()
+}
+
+fn restore_group_visual_state(state: &mut SimState, restore: &GroupRestoreData) {
+    if !restore.keep_alpha {
+        restore_saved_alphas(state, &restore.saved_alphas);
+    }
+    clear_translation_offsets(state, &restore.translation_targets);
+}
+
+fn restore_saved_alphas(state: &mut SimState, saved_alphas: &[(u64, f32)]) {
+    for (id, alpha) in saved_alphas {
+        if let Some(frame) = state.widgets.get_mut_visual(*id) {
+            frame.alpha = *alpha;
+        }
+    }
+}
+
+fn clear_translation_offsets(state: &mut SimState, translation_targets: &[u64]) {
+    for id in translation_targets {
+        let had_offset = state
+            .widgets
+            .get(*id)
+            .is_some_and(|f| f.anim_offset_x != 0.0 || f.anim_offset_y != 0.0);
+        if let Some(frame) = state.widgets.get_mut_visual(*id) {
+            frame.anim_offset_x = 0.0;
+            frame.anim_offset_y = 0.0;
+        }
+        if had_offset {
+            state.invalidate_layout(*id);
+        }
     }
 }
 
