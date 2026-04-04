@@ -111,55 +111,87 @@ fn add_size_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_size_getters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_get_width(methods);
+    add_get_height(methods);
+    add_get_size(methods);
+}
+
+fn add_get_width<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetWidth", |lua, this, ignore: Option<bool>| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        if ignore == Some(true) {
-            return Ok(state_rc
-                .borrow()
-                .widgets
-                .get(id)
-                .map(|f| f.width)
-                .unwrap_or(0.0));
-        }
-        let mut state = state_rc.borrow_mut();
-        state.resolve_rect_if_dirty(id);
-        Ok(calculate_frame_width(&state.widgets, id))
+        size_value_or_raw(
+            lua,
+            this.0,
+            ignore,
+            |f| f.width,
+            |widgets, id| calculate_frame_width(widgets, id),
+        )
     });
+}
 
+fn add_get_height<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetHeight", |lua, this, ignore: Option<bool>| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
-        if ignore == Some(true) {
-            return Ok(state_rc
-                .borrow()
-                .widgets
-                .get(id)
-                .map(|f| f.height)
-                .unwrap_or(0.0));
-        }
-        let mut state = state_rc.borrow_mut();
-        state.resolve_rect_if_dirty(id);
-        Ok(calculate_frame_height(&state.widgets, id))
+        size_value_or_raw(
+            lua,
+            this.0,
+            ignore,
+            |f| f.height,
+            |widgets, id| calculate_frame_height(widgets, id),
+        )
     });
+}
 
+fn add_get_size<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetSize", |lua, this, ignore: Option<bool>| {
-        let id = this.0;
-        let state_rc = get_sim_state(lua);
         if ignore == Some(true) {
-            let state = state_rc.borrow();
-            return Ok(state
-                .widgets
-                .get(id)
-                .map(|f| (f.width, f.height))
-                .unwrap_or((0.0, 0.0)));
+            return Ok(raw_frame_size(lua, this.0));
         }
+        let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        state.resolve_rect_if_dirty(id);
-        let width = calculate_frame_width(&state.widgets, id);
-        let height = calculate_frame_height(&state.widgets, id);
-        Ok((width, height))
+        state.resolve_rect_if_dirty(this.0);
+        Ok((
+            calculate_frame_width(&state.widgets, this.0),
+            calculate_frame_height(&state.widgets, this.0),
+        ))
     });
+}
+
+fn size_value_or_raw<Raw, Resolved>(
+    lua: &mlua::Lua,
+    id: u64,
+    ignore: Option<bool>,
+    raw: Raw,
+    resolved: Resolved,
+) -> mlua::Result<f32>
+where
+    Raw: FnOnce(&crate::widget::Frame) -> f32,
+    Resolved: FnOnce(&crate::widget::WidgetRegistry, u64) -> f32,
+{
+    if ignore == Some(true) {
+        return Ok(raw_size_value(lua, id, raw));
+    }
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    state.resolve_rect_if_dirty(id);
+    Ok(resolved(&state.widgets, id))
+}
+
+fn raw_size_value<F>(lua: &mlua::Lua, id: u64, raw: F) -> f32
+where
+    F: FnOnce(&crate::widget::Frame) -> f32,
+{
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state.widgets.get(id).map(raw).unwrap_or(0.0)
+}
+
+fn raw_frame_size(lua: &mlua::Lua, id: u64) -> (f32, f32) {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|f| (f.width, f.height))
+        .unwrap_or((0.0, 0.0))
 }
 
 fn add_size_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
