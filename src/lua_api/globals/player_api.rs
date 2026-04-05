@@ -610,62 +610,50 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
 /// Spell power, regen, defense, and PVP stat stubs.
 fn register_spell_and_defense_stat_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_spell_defense_bulk_stubs(lua, &g)?;
     g.set(
         "GetSpellBonusDamage",
-        lua.create_function(|_, _school: Value| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetSpellBonusHealing",
-        lua.create_function(|_, ()| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetManaRegen",
-        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
-    )?;
-    g.set(
-        "GetPowerRegen",
-        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
-    )?;
-    g.set(
-        "GetPetSpellBonusDamage",
-        lua.create_function(|_, ()| Ok(0.0_f64))?,
+        lua.create_function(|_, _: Value| Ok(0.0_f64))?,
     )?;
     g.set(
         "GetArmorEffectiveness",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetDodgeChanceFromAttribute",
-        lua.create_function(|_, ()| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetParryChanceFromAttribute",
-        lua.create_function(|_, ()| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetCritChanceProvidesParryEffect",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(|_, _: mlua::MultiValue| Ok(0.0_f64))?,
     )?;
     g.set(
         "GetExpertise",
         lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64, 0.0_f64)))?,
     )?;
     g.set(
-        "GetModResilienceDamageReduction",
-        lua.create_function(|_, ()| Ok(0.0_f64))?,
-    )?;
-    g.set(
-        "GetPVPGearStatRules",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    g.set(
         "GetUnitMaxHealthModifier",
-        lua.create_function(|_, _unit: Value| Ok(1.0_f64))?,
+        lua.create_function(|_, _: Value| Ok(1.0_f64))?,
     )?;
     g.set(
         "UnitHPPerStamina",
-        lua.create_function(|_, _unit: Value| Ok(20.0_f64))?,
+        lua.create_function(|_, _: Value| Ok(20.0_f64))?,
     )?;
+    Ok(())
+}
+
+/// Bulk spell/defense stubs: zero floats, zero pairs, and false returns.
+fn register_spell_defense_bulk_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let zero = lua.create_function(|_, ()| Ok(0.0_f64))?;
+    for name in [
+        "GetSpellBonusHealing",
+        "GetPetSpellBonusDamage",
+        "GetDodgeChanceFromAttribute",
+        "GetParryChanceFromAttribute",
+        "GetModResilienceDamageReduction",
+    ] {
+        g.set(name, zero.clone())?;
+    }
+    let zero_pair = lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?;
+    for name in ["GetManaRegen", "GetPowerRegen"] {
+        g.set(name, zero_pair.clone())?;
+    }
+    let false_stub = lua.create_function(|_, ()| Ok(false))?;
+    for name in ["GetCritChanceProvidesParryEffect", "GetPVPGearStatRules"] {
+        g.set(name, false_stub.clone())?;
+    }
     Ok(())
 }
 
