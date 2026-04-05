@@ -117,19 +117,6 @@ fn init_settings_panel_previews(env: &WowLuaEnv) {
     );
 }
 
-/// CharacterCreate uses XML `parentArray="BGTex"` for its vignette textures.
-/// Rebuild that array defensively until glue-screen parentArray wiring is
-/// consistently available during this screen transition.
-/// MapCanvasScrollControllerMixin:IsZoomingOut/In compare targetScale with
-/// GetCanvasScale(), but OnUpdate fires before CalculateScaleExtents sets
-/// targetScale. Initialize it on the WorldMapFrame scroll container.
-/// GradualAnimatedStatusBarTemplate XML defines an AnimationGroup with
-/// parentKey="LevelUpMaxAlphaAnimation", but the simulator doesn't create
-/// AnimationGroups from templates. Patch existing instances and the mixin.
-/// CompactRaidFrameContainer.dividerVerticalPool/dividerHorizontalPool are
-/// initialized in CompactRaidFrameManager_OnLoad, which may fail before
-/// reaching the pool creation code. Create stub pools so event handlers
-/// that call ReleaseAll() don't error.
 /// GlowEmitterFactory is a C++ object in WoW managing spell overlay glow effects.
 /// Stub with no-ops until properly implemented (see docs/glow-plan.md).
 fn stub_glow_emitter_factory(env: &WowLuaEnv) {
