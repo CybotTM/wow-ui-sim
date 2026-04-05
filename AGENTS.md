@@ -305,9 +305,11 @@ cargo test                          # Run all tests (slow — loads Blizzard UI 
 
 Lua-level tests in `Interface/AddOns/<name>/tests/`. Use for addon-facing API integration tests. **Avoid for internal logic — use Rust tests instead.**
 
+**Do NOT run `run-tests Wowless` or `run-tests WowBehaviorTest` during normal development** — they load the full Wowless/WowBehaviorTest suites which take 60s+ and may hang on async tests. Use `cargo test` instead.
+
 ```bash
-wow-sim --no-addons --no-saved-vars run-tests Wowless    # Run Wowless tests (fast, no third-party addons)
-wow-sim --no-saved-vars run-tests Wowless                # Run with all addons loaded
+wow-sim --no-addons --no-saved-vars run-tests Wowless    # Slow — only for Wowless compat debugging
+wow-sim --no-saved-vars run-tests Wowless                # Full load — even slower
 ```
 
 **Test file syntax** (`Interface/AddOns/<name>/tests/something.lua`):
