@@ -19,10 +19,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     println!("Loading ItemSparse from {}...", csv_path.display());
 
     let required_ids = collect_required_item_ids();
-    println!(
-        "Required item IDs: {} (deduplicated)",
-        required_ids.len()
-    );
+    println!("Required item IDs: {} (deduplicated)", required_ids.len());
 
     let file = File::open(&csv_path)?;
     let reader = BufReader::new(file);
@@ -101,32 +98,17 @@ fn build_icon_map(
     wow_data: &Path,
     required_ids: &BTreeSet<u32>,
 ) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
-    // ItemAppearance: ID → DefaultIconFileDataID
-    let appearance_path = wow_data.join("ItemAppearance.csv");
-    let appearance_file = File::open(&appearance_path)?;
-    let mut appearance_map: HashMap<u32, u32> = HashMap::new();
-    for (i, line) in BufReader::new(appearance_file).lines().enumerate() {
-        let line = line?;
-        if i == 0 {
-            continue;
-        }
-        let fields = parse_csv_line(&line);
-        if fields.len() < 4 {
-            continue;
-        }
-        let appearance_id: u32 = match fields[0].parse() {
-            Ok(v) => v,
-            Err(_) => continue,
-        };
-        let icon_file_data_id: u32 = fields[3].parse().unwrap_or(0);
-        appearance_map.insert(appearance_id, icon_file_data_id);
-    }
+    let appearance_map = parse_appearance_icons(wow_data)?;
+    resolve_item_icons(wow_data, required_ids, &appearance_map)
+}
 
-    // ItemModifiedAppearance: ItemID → ItemAppearanceID (first match per ItemID)
-    let ima_path = wow_data.join("ItemModifiedAppearance.csv");
-    let ima_file = File::open(&ima_path)?;
-    let mut icon_map: HashMap<u32, u32> = HashMap::new();
-    for (i, line) in BufReader::new(ima_file).lines().enumerate() {
+/// Parse ItemAppearance.csv: appearance_id → icon fileDataID.
+fn parse_appearance_icons(
+    wow_data: &Path,
+) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
+    let file = File::open(wow_data.join("ItemAppearance.csv"))?;
+    let mut map: HashMap<u32, u32> = HashMap::new();
+    for (i, line) in BufReader::new(file).lines().enumerate() {
         let line = line?;
         if i == 0 {
             continue;
@@ -135,21 +117,44 @@ fn build_icon_map(
         if fields.len() < 4 {
             continue;
         }
-        let item_id: u32 = match fields[1].parse() {
-            Ok(v) => v,
-            Err(_) => continue,
+        let Ok(appearance_id) = fields[0].parse::<u32>() else {
+            continue;
+        };
+        let icon: u32 = fields[3].parse().unwrap_or(0);
+        map.insert(appearance_id, icon);
+    }
+    Ok(map)
+}
+
+/// Parse ItemModifiedAppearance.csv: item_id → icon fileDataID (first match per item).
+fn resolve_item_icons(
+    wow_data: &Path,
+    required_ids: &BTreeSet<u32>,
+    appearance_map: &HashMap<u32, u32>,
+) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
+    let file = File::open(wow_data.join("ItemModifiedAppearance.csv"))?;
+    let mut icon_map: HashMap<u32, u32> = HashMap::new();
+    for (i, line) in BufReader::new(file).lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue;
+        }
+        let fields = parse_csv_line(&line);
+        if fields.len() < 4 {
+            continue;
+        }
+        let Ok(item_id) = fields[1].parse::<u32>() else {
+            continue;
         };
         if !required_ids.contains(&item_id) || icon_map.contains_key(&item_id) {
             continue;
         }
         let appearance_id: u32 = fields[3].parse().unwrap_or(0);
-        if let Some(&icon) = appearance_map.get(&appearance_id) {
-            if icon != 0 {
-                icon_map.insert(item_id, icon);
-            }
+        let icon = appearance_map.get(&appearance_id).copied().unwrap_or(0);
+        if icon != 0 {
+            icon_map.insert(item_id, icon);
         }
     }
-
     Ok(icon_map)
 }
 
