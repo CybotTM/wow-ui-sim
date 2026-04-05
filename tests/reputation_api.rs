@@ -163,3 +163,53 @@ fn test_standing_text_via_gettext() {
         "unexpected standing text: {text}"
     );
 }
+
+#[test]
+fn test_reputation_sort_type_persists() {
+    let env = env();
+    let initial: i32 = env
+        .eval("return C_Reputation.GetReputationSortType()")
+        .unwrap();
+    assert_eq!(initial, 0, "default sort type should be None (0)");
+
+    env.exec("C_Reputation.SetReputationSortType(1)").unwrap();
+    let after: i32 = env
+        .eval("return C_Reputation.GetReputationSortType()")
+        .unwrap();
+    assert_eq!(after, 1, "sort type should persist as Account (1)");
+
+    env.exec("C_Reputation.SetReputationSortType(2)").unwrap();
+    let character: i32 = env
+        .eval("return C_Reputation.GetReputationSortType()")
+        .unwrap();
+    assert_eq!(character, 2, "sort type should persist as Character (2)");
+}
+
+#[test]
+fn test_legacy_reputations_shown_persists() {
+    let env = env();
+    let initial: bool = env
+        .eval("return C_Reputation.AreLegacyReputationsShown()")
+        .unwrap();
+    assert!(initial, "legacy reps should be shown by default");
+
+    env.exec("C_Reputation.SetLegacyReputationsShown(false)")
+        .unwrap();
+    let after: bool = env
+        .eval("return C_Reputation.AreLegacyReputationsShown()")
+        .unwrap();
+    assert!(!after, "legacy reps shown should persist as false");
+}
+
+#[test]
+fn test_reputation_sort_type_enum_values() {
+    let env = env();
+    let none: i32 = env.eval("return Enum.ReputationSortType.None").unwrap();
+    let account: i32 = env.eval("return Enum.ReputationSortType.Account").unwrap();
+    let character: i32 = env
+        .eval("return Enum.ReputationSortType.Character")
+        .unwrap();
+    assert_eq!(none, 0);
+    assert_eq!(account, 1);
+    assert_eq!(character, 2);
+}

@@ -16,6 +16,8 @@ use std::cell::RefCell;
 
 thread_local! {
     static COLLAPSED_HEADERS: RefCell<Option<Vec<bool>>> = const { RefCell::new(None) };
+    static REPUTATION_SORT_TYPE: RefCell<i32> = const { RefCell::new(0) };
+    static LEGACY_REPS_SHOWN: RefCell<bool> = const { RefCell::new(true) };
 }
 
 fn with_collapsed_headers<F, R>(f: F) -> R
@@ -283,19 +285,25 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "GetReputationSortType",
-        lua.create_function(|_, ()| Ok(0i32))?,
+        lua.create_function(|_, ()| REPUTATION_SORT_TYPE.with(|v| Ok(*v.borrow())))?,
     )?;
     t.set(
         "SetReputationSortType",
-        lua.create_function(|_, _t: i32| Ok(()))?,
+        lua.create_function(|_, sort_type: i32| {
+            REPUTATION_SORT_TYPE.with(|v| *v.borrow_mut() = sort_type);
+            Ok(())
+        })?,
     )?;
     t.set(
         "AreLegacyReputationsShown",
-        lua.create_function(|_, ()| Ok(true))?,
+        lua.create_function(|_, ()| LEGACY_REPS_SHOWN.with(|v| Ok(*v.borrow())))?,
     )?;
     t.set(
         "SetLegacyReputationsShown",
-        lua.create_function(|_, _s: bool| Ok(()))?,
+        lua.create_function(|_, shown: bool| {
+            LEGACY_REPS_SHOWN.with(|v| *v.borrow_mut() = shown);
+            Ok(())
+        })?,
     )?;
     t.set("GetSelectedFaction", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set(
