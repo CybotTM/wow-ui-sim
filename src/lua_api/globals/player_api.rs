@@ -240,43 +240,40 @@ fn register_economy_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
 
 /// Instance/dungeon info functions.
 fn register_instance_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
-    // GetInstanceInfo() -> name, instanceType, difficultyID, difficultyName,
-    //   maxPlayers, dynamicDifficulty, isDynamic, instanceID, instanceGroupSize, LfgDungeonID
-    // GetRaidDifficultyID() -> difficultyID (14 = Normal Raid)
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "GetRaidDifficultyID",
         lua.create_function(|_, ()| Ok(14i32))?,
     )?;
-    // GetLegacyRaidDifficultyID() -> difficultyID (1 = Normal legacy 40-man)
-    globals.set(
+    g.set(
         "GetLegacyRaidDifficultyID",
         lua.create_function(|_, ()| Ok(1i32))?,
     )?;
-    // GetMirrorTimerProgress(timer) -> value (0 = timer not active; sim has no active timers)
-    globals.set(
+    g.set(
         "GetMirrorTimerProgress",
-        lua.create_function(|_, _timer: String| Ok(0i32))?,
+        lua.create_function(|_, _: String| Ok(0i32))?,
     )?;
-    globals.set(
+    g.set(
         "GetInstanceInfo",
-        lua.create_function(move |lua, ()| {
-            let s = state.borrow();
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string(&s.world.instance_name)?), // name
-                Value::String(lua.create_string(&s.world.instance_type)?), // instanceType
-                Value::Integer(s.world.instance_difficulty as i64),        // difficultyID
-                Value::String(lua.create_string("")?),                     // difficultyName
-                Value::Integer(s.world.instance_max_players as i64),       // maxPlayers
-                Value::Integer(0),                                         // dynamicDifficulty
-                Value::Boolean(false),                                     // isDynamic
-                Value::Integer(0),                                         // instanceID
-                Value::Integer(0),                                         // instanceGroupSize
-                Value::Integer(0),                                         // LfgDungeonID
-            ]))
-        })?,
+        lua.create_function(move |lua, ()| build_instance_info(lua, &state.borrow()))?,
     )?;
     Ok(())
+}
+
+/// Returns 10 values: name, type, difficultyID, difficultyName, maxPlayers, ...
+fn build_instance_info(lua: &Lua, world: &SimState) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string(&world.world.instance_name)?),
+        Value::String(lua.create_string(&world.world.instance_type)?),
+        Value::Integer(world.world.instance_difficulty as i64),
+        Value::String(lua.create_string("")?),
+        Value::Integer(world.world.instance_max_players as i64),
+        Value::Integer(0),
+        Value::Boolean(false),
+        Value::Integer(0),
+        Value::Integer(0),
+        Value::Integer(0),
+    ]))
 }
 
 /// Character info functions: titles, item level, RPE state, inventory.
