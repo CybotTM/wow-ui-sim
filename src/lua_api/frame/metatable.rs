@@ -17,42 +17,55 @@ pub fn add_meta_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_eq_metamethod(methods);
 }
 
-/// Build and install shared Lua helper values (assign fn, index helper, forbidden proxy mt).
-/// Called once during Lua env setup (replaces the old setup_frame_metatable).
+/// Install shared Lua helpers and metatable overrides for FrameRef.
+/// Called once during Lua env setup.
 pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
-    // Helper function for triggering __newindex from Rust (used by SetParentKey).
-    // Doing `parent[key] = value` in Lua triggers the UserData's __newindex.
+    register_assign_helper(lua)?;
+    register_index_helper(lua)?;
+    register_bind_method_helper(lua)?;
+    register_custom_metatable_store(lua)?;
+    install_forbidden_proxy_metatable(lua)?;
+    patch_metatable_index(lua)?;
+    Ok(())
+}
+
+/// Lua function that triggers __newindex from Rust: `parent[key] = value`.
+/// Used by SetParentKey to sync children through the UserData metamethod.
+fn register_assign_helper(lua: &Lua) -> mlua::Result<()> {
     let assign_fn = lua
         .load("return function(parent, key, value) parent[key] = value end")
         .eval::<mlua::Function>()?;
-    lua.set_named_registry_value("__frame_assign_fn", assign_fn)?;
+    lua.set_named_registry_value("__frame_assign_fn", assign_fn)
+}
 
-    // Helper for forbidden proxy __index fallback: access a property on a FrameRef
-    // frame via its __index metamethod (handles script handlers, children, custom fields).
+/// Lua function that reads a property via UserData __index.
+/// Used by forbidden proxy to forward property access to the underlying frame.
+fn register_index_helper(lua: &Lua) -> mlua::Result<()> {
     let index_helper = lua
         .load("return function(ud, key) return ud[key] end")
         .eval::<mlua::Function>()?;
-    lua.set_named_registry_value("__frame_index_helper", index_helper)?;
+    lua.set_named_registry_value("__frame_index_helper", index_helper)
+}
+
+/// Factory that binds a method's first argument to a frame value.
+/// Used by forbidden proxy to rebind method `self` from proxy to frame.
+fn register_bind_method_helper(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value(
         "__frame_bind_method_helper",
         crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
-    )?;
+    )
+}
 
-    // Registry table for per-frame custom metatables (used by setmetatable(frame, mt)).
-    let custom_mt_store = lua.create_table()?;
-    lua.set_named_registry_value("__frame_custom_mt", custom_mt_store)?;
+/// Empty table for storing per-frame custom metatables (used by setmetatable(frame, mt)).
+fn register_custom_metatable_store(lua: &Lua) -> mlua::Result<()> {
+    let store = lua.create_table()?;
+    lua.set_named_registry_value("__frame_custom_mt", store)
+}
 
-    // Shared metatable for all forbidden proxy tables.
-    let forbidden_mt = create_forbidden_proxy_metatable(lua)?;
-    lua.set_named_registry_value("__forbidden_proxy_mt", forbidden_mt)?;
-
-    // Patch __index to check user_value (fenv) BEFORE mlua's method table.
-    // mlua's generated __index checks methods first, so children with names matching
-    // methods (e.g. parentKey="Lower" vs frame:Lower()) get shadowed. This wraps
-    // the existing __index to check the per-frame fields table first.
-    patch_metatable_index(lua)?;
-
-    Ok(())
+/// Shared metatable reused by all forbidden proxy tables.
+fn install_forbidden_proxy_metatable(lua: &Lua) -> mlua::Result<()> {
+    let mt = create_forbidden_proxy_metatable(lua)?;
+    lua.set_named_registry_value("__forbidden_proxy_mt", mt)
 }
 
 // ── Meta method registration ──────────────────────────────────────────────────

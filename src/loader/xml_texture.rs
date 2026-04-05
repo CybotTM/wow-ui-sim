@@ -1,11 +1,10 @@
 //! Texture creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
-use crate::xml::{collect_texture_mixins, register_texture_template, resolve_texture_inheritance};
+use crate::xml::collect_texture_mixins;
 
-use super::error::LoadError;
 use super::helpers::{
-    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref, resolve_child_name,
+    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
 };
 use super::helpers_anim::generate_animation_group_code;
 
@@ -166,46 +165,6 @@ fn generate_mixin_code(texture: &crate::xml::TextureXml) -> String {
         ));
     }
     code
-}
-
-/// Create a texture from XML definition (used only by tests/standalone callers).
-#[allow(dead_code)]
-fn create_texture_from_xml(
-    env: &LoaderEnv<'_>,
-    texture: &crate::xml::TextureXml,
-    parent_name: &str,
-    draw_layer: &str,
-    is_mask: bool,
-    is_line: bool,
-    sub_level: i32,
-) -> Result<(), LoadError> {
-    if texture.is_virtual == Some(true) {
-        if let Some(ref name) = texture.name {
-            register_texture_template(name, texture.clone());
-        }
-        return Ok(());
-    }
-
-    let resolved = resolve_texture_inheritance(texture);
-    let tex_name = resolve_child_name(resolved.name.as_deref(), parent_name, "__tex_");
-    let lua_code = build_texture_lua(
-        &tex_name,
-        &resolved,
-        parent_name,
-        draw_layer,
-        is_mask,
-        is_line,
-        sub_level,
-    );
-    env.exec(&lua_code).map_err(|e| {
-        LoadError::Lua(format!(
-            "Failed to create texture {} on {}: {}",
-            tex_name, parent_name, e
-        ))
-    })?;
-
-    apply_texture_animations_xml(env, texture, &tex_name);
-    Ok(())
 }
 
 fn emit_create_header(

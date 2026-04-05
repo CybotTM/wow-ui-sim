@@ -224,11 +224,6 @@ impl AnimState {
         self.elapsed >= self.start_delay
     }
 
-    /// Whether this animation has finished its total time.
-    #[allow(dead_code)]
-    pub(crate) fn is_finished(&self) -> bool {
-        self.elapsed >= self.total_time()
-    }
 }
 
 /// State for an animation group.

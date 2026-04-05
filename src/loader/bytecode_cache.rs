@@ -20,7 +20,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::ffi::OsStr;
 use std::hash::{Hash, Hasher};
 use std::io::{Read, Write};
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 
 const CACHE_DIR: &str = ".cache/lua-bytecode";
@@ -73,10 +73,6 @@ fn cache_dir() -> PathBuf {
 
 fn pack_path() -> PathBuf {
     cache_dir().join(PACK_FILE)
-}
-
-fn legacy_cache_path(hash: u64) -> PathBuf {
-    cache_dir().join(format!("{hash:016x}.luac"))
 }
 
 /// Load cached bytecode for the given content hash.
@@ -221,7 +217,3 @@ fn write_pack_entry(file: &mut std::fs::File, hash: u64, bytecode: &[u8]) -> std
     Ok(())
 }
 
-#[allow(dead_code)]
-fn _legacy_entry_exists(hash: u64) -> bool {
-    Path::new(&legacy_cache_path(hash)).exists()
-}

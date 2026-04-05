@@ -80,12 +80,10 @@ pub struct App {
     pub(crate) lua_rx: Option<std::sync::mpsc::Receiver<lua_server::LuaCommand>>,
     /// Draw red debug borders around all frames when true.
     /// TODO: Re-implement as shader quads in build_quad_batch_for_registry.
-    #[allow(dead_code)]
-    pub(crate) debug_borders: bool,
+    pub(crate) _debug_borders: bool,
     /// Draw green anchor points on all frames when true.
     /// TODO: Re-implement as shader quads in build_quad_batch_for_registry.
-    #[allow(dead_code)]
-    pub(crate) debug_anchors: bool,
+    pub(crate) _debug_anchors: bool,
     /// Track which textures have been uploaded to GPU atlas (avoid re-sending pixel data).
     pub(crate) gpu_uploaded_textures: RefCell<std::collections::HashSet<String>>,
     /// Track texture paths that failed to load (avoid infinite retry loops).
@@ -233,8 +231,8 @@ impl App {
             debug_rx: Some(cmd_rx),
             pending_screenshot: None,
             lua_rx: Some(lua_rx),
-            debug_borders,
-            debug_anchors,
+            _debug_borders: debug_borders,
+            _debug_anchors: debug_anchors,
             gpu_uploaded_textures: RefCell::new(std::collections::HashSet::new()),
             gpu_failed_textures: RefCell::new(std::collections::HashSet::new()),
             cached_quads: RefCell::new(None),
