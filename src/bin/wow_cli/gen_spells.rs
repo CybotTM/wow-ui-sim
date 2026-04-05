@@ -115,11 +115,8 @@ fn generate_spell_descriptions(
 ) -> Result<(), Box<dyn std::error::Error>> {
     let descriptions_path = Path::new("data/spell_descriptions.rs");
     let mut desc_out = File::create(descriptions_path)?;
-    let description_count = write_spell_descriptions(
-        &mut desc_out,
-        &spell_data.spell_descriptions,
-        required_ids,
-    )?;
+    let description_count =
+        write_spell_descriptions(&mut desc_out, &spell_data.spell_descriptions, required_ids)?;
     println!("Generated {} compact spell descriptions", description_count);
     println!("Output: {}", descriptions_path.display());
     Ok(())
@@ -388,29 +385,20 @@ fn load_spell_descriptions(
 /// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
 /// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
 fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
-    const BASELINE: &[u32] = &[
-        100, 116, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534, 1272143, 1279510,
-    ];
-
-    let mut trait_ids = BTreeSet::new();
-    let traits_src = std::fs::read_to_string("data/traits.rs")?;
-    for marker in [
-        "spell_id: ",
-        "overrides_spell_id: ",
-        "visible_spell_id: ",
-        "override_icon: ",
-    ] {
-        collect_number_literals_after(&traits_src, marker, &mut trait_ids);
-    }
-
-    let mut spellbook_ids = BTreeSet::new();
-    let spellbook_src =
-        std::fs::read_to_string("src/lua_api/globals/spellbook_data.rs")?;
-    for marker in ["spell(", "passive("] {
-        collect_number_literals_after(&spellbook_src, marker, &mut spellbook_ids);
-    }
-
-    let baseline_ids: BTreeSet<u32> = BASELINE.iter().copied().collect();
+    let trait_ids = collect_ids_from_file(
+        "data/traits.rs",
+        &[
+            "spell_id: ",
+            "overrides_spell_id: ",
+            "visible_spell_id: ",
+            "override_icon: ",
+        ],
+    )?;
+    let spellbook_ids = collect_ids_from_file(
+        "src/lua_api/globals/spellbook_data.rs",
+        &["spell(", "passive("],
+    )?;
+    let baseline_ids: BTreeSet<u32> = BASELINE_SPELL_IDS.iter().copied().collect();
 
     println!(
         "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {})",
@@ -420,13 +408,27 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
         baseline_ids.len(),
     );
 
-    let mut all = BTreeSet::new();
-    all.extend(&trait_ids);
+    let mut all = trait_ids;
     all.extend(&spellbook_ids);
     all.extend(&baseline_ids);
-
     println!("Required spell IDs (deduplicated): {}", all.len());
     Ok(all)
+}
+
+const BASELINE_SPELL_IDS: &[u32] = &[
+    100, 116, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534, 1272143, 1279510,
+];
+
+fn collect_ids_from_file(
+    path: &str,
+    markers: &[&str],
+) -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
+    let src = std::fs::read_to_string(path)?;
+    let mut ids = BTreeSet::new();
+    for marker in markers {
+        collect_number_literals_after(&src, marker, &mut ids);
+    }
+    Ok(ids)
 }
 
 fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32>) {
