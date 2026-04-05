@@ -320,35 +320,16 @@ fn register_c_trade_skill(lua: &Lua) -> Result<()> {
 }
 
 fn register_trade_skill_profession_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    use super::profession_data;
-
-    t.set(
-        "GetBaseProfessionInfo",
-        lua.create_function(|lua, ()| {
-            build_profession_table(lua, profession_data::get_profession_by_index(0))
-        })?,
-    )?;
-    t.set(
-        "GetChildProfessionInfo",
-        lua.create_function(|lua, ()| {
-            build_profession_table(lua, profession_data::get_profession_by_index(0))
-        })?,
-    )?;
+    let first_prof = lua.create_function(stub_first_profession_table)?;
+    t.set("GetBaseProfessionInfo", first_prof.clone())?;
+    t.set("GetChildProfessionInfo", first_prof)?;
     t.set(
         "GetChildProfessionInfos",
-        lua.create_function(|lua, ()| {
-            let tbl = lua.create_table()?;
-            for (i, p) in profession_data::PROFESSIONS.iter().enumerate() {
-                tbl.set(i + 1, build_profession_table_inner(lua, p)?)?;
-            }
-            Ok(tbl)
-        })?,
+        lua.create_function(build_all_profession_tables)?,
     )?;
     t.set(
         "GetTradeSkillTexture",
-        lua.create_function(|_, _id: Value| {
-            Ok(profession_data::get_profession_by_index(0).map_or(0, |p| p.icon))
-        })?,
+        lua.create_function(stub_trade_skill_texture)?,
     )?;
     t.set(
         "GetProfessionSkillLineID",
@@ -359,6 +340,25 @@ fn register_trade_skill_profession_info(lua: &Lua, t: &mlua::Table) -> Result<()
         lua.create_function(|_, _id: Value| Ok(()))?,
     )?;
     Ok(())
+}
+
+/// Returns profession table for the first (primary) profession.
+fn stub_first_profession_table(lua: &Lua, _: ()) -> Result<Value> {
+    build_profession_table(lua, super::profession_data::get_profession_by_index(0))
+}
+
+/// Returns a table of all profession info tables (1-indexed).
+fn build_all_profession_tables(lua: &Lua, _: ()) -> Result<mlua::Table> {
+    let tbl = lua.create_table()?;
+    for (i, p) in super::profession_data::PROFESSIONS.iter().enumerate() {
+        tbl.set(i + 1, build_profession_table_inner(lua, p)?)?;
+    }
+    Ok(tbl)
+}
+
+/// Returns the icon fileDataID of the first profession.
+fn stub_trade_skill_texture(_: &Lua, _id: Value) -> Result<i32> {
+    Ok(super::profession_data::get_profession_by_index(0).map_or(0, |p| p.icon))
 }
 
 fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
