@@ -220,6 +220,14 @@ fn apply_inline_frame_content(
         direct::set_size_partial(state, frame_id, frame);
     }
 
+    // Create child frames before layers so that relativeKey anchors
+    // from FontStrings/Textures to sibling child frames resolve correctly
+    // (e.g. $parent.AccountWideIcon in ReputationEntryTemplate).
+    create_child_frames(lua, state, frame, frame_name, subst_parent);
+    if let Some(scroll_child) = frame.scroll_child() {
+        create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent);
+    }
+
     super::apply_layers(lua, frame, frame_name, subst_parent);
 
     if let Some(thumb) = frame.thumb_texture() {
@@ -234,11 +242,6 @@ fn apply_inline_frame_content(
     elements_text::apply_button_text_attribute(lua, frame, frame_name);
     apply_editbox_fontstring(lua, frame, frame_name, subst_parent);
     apply_animation_groups(lua, frame, frame_name);
-
-    create_child_frames(lua, state, frame, frame_name, subst_parent);
-    if let Some(scroll_child) = frame.scroll_child() {
-        create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent);
-    }
 
     if let Some(scripts) = frame.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
