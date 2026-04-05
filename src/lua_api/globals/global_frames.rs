@@ -359,8 +359,8 @@ fn register_misc_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
     register_frame_global(lua, state, "NamePlateDriverFrame")?;
     register_frame_global(lua, state, "UIErrorsFrame")?;
 
-    // Bag/loot frames hidden by default
-    register_hidden_frame_global(lua, state, "ContainerFrameContainer")?;
+    // ContainerFrameContainer is visible — individual bag frames inside it start hidden.
+    register_frame_global(lua, state, "ContainerFrameContainer")?;
     setup_container_frame(lua)?;
 
     register_hidden_frame_global(lua, state, "ContainerFrameCombinedBags")?;
@@ -501,8 +501,7 @@ const RUNTIME_HIDDEN_FRAMES: &[&str] = &[
     "EncounterBar",
     // Casting bar: not casting
     "PlayerCastingBarFrame",
-    // Bags/loot not open
-    "ContainerFrameContainer",
+    // Bags/loot not open (ContainerFrameContainer is always visible — child frames start hidden)
     "ContainerFrameCombinedBags",
     "LootFrame",
     // Misc UI not shown at login
