@@ -285,16 +285,25 @@ Empty output (no JSON array) means zero errors. Non-empty output lists unique er
 
 ### Self-Test (Wowless Suite)
 
-Run the Wowless test suite headlessly. Polls `WowlessTestsDone`/`WowlessTestFailures` globals via OnUpdate ticks. Outputs failures as JSON to stdout.
+**Do NOT run during normal development** — takes 60s+ and hangs waiting for async test completion. Only run when specifically debugging Wowless compatibility.
 
 ```bash
 wow-sim --no-saved-vars self-test                    # Run Wowless tests (exit 0=pass, 1=fail, 2=timeout)
 wow-sim --no-saved-vars self-test --max-ticks 20000  # Increase timeout
 ```
 
+### Rust Tests
+
+**Primary test location.** Write new tests as Rust integration tests in `tests/`. These test the Lua API surface via `WowLuaEnv::eval()` and internal Rust logic directly. Run with `cargo test`.
+
+```bash
+cargo test test_character_stats     # Run specific test
+cargo test                          # Run all tests (slow — loads Blizzard UI per test)
+```
+
 ### Run Tests (Addon Test Runner)
 
-Run Lua test files from `Interface/AddOns/<name>/tests/`. Loads the `TestFramework` addon automatically (even with `--no-addons`).
+Lua-level tests in `Interface/AddOns/<name>/tests/`. Use for addon-facing API integration tests. **Avoid for internal logic — use Rust tests instead.**
 
 ```bash
 wow-sim --no-addons --no-saved-vars run-tests Wowless    # Run Wowless tests (fast, no third-party addons)

@@ -337,12 +337,32 @@ fn register_character_info_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     Ok(())
 }
 
-/// Combat stat stubs: UnitStat, attack power conversions.
+/// Combat stat functions reading from PlayerState.stats (computed from gear).
 fn register_character_combat_stubs(lua: &Lua) -> Result<()> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
     let globals = lua.globals();
+    // UnitStat(unit, statIndex) -> stat, effectiveStat, posBuff, negBuff
+    // 1=Str, 2=Agi, 3=Sta, 4=Int
     globals.set(
         "UnitStat",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok((0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)))?,
+        lua.create_function(|lua, (_unit, stat_idx): (String, i32)| {
+            let val = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| {
+                    let st = &s.borrow().player.stats;
+                    match stat_idx {
+                        1 => st.strength,
+                        2 => st.agility,
+                        3 => st.stamina,
+                        4 => st.intellect,
+                        _ => 0.0,
+                    }
+                })
+                .unwrap_or(0.0);
+            Ok((val, val, 0.0_f64, 0.0_f64))
+        })?,
     )?;
     globals.set(
         "GetAttackPowerForStat",
@@ -416,13 +436,20 @@ fn register_attack_power_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Avoidance and crit chance stubs.
+/// Avoidance and crit chance — reads from PlayerState.stats.
 fn register_avoidance_and_crit_stubs(lua: &Lua) -> Result<()> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
     let g = lua.globals();
-    g.set("GetBlockChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetParryChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetDodgeChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetCritChance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
+    g.set("GetBlockChance", lua.create_function(|_, ()| Ok(12.5_f64))?)?;
+    g.set("GetParryChance", lua.create_function(|_, ()| Ok(3.0_f64))?)?;
+    g.set("GetDodgeChance", lua.create_function(|_, ()| Ok(3.0_f64))?)?;
+    g.set("GetCritChance", lua.create_function(|lua, ()| {
+        Ok(5.0 + lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.crit_pct())
+            .unwrap_or(0.0))
+    })?)?;
     g.set(
         "GetRangedCritChance",
         lua.create_function(|_, ()| Ok(0.0_f64))?,
@@ -434,21 +461,54 @@ fn register_avoidance_and_crit_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Combat rating query stubs.
+/// Combat rating queries reading from PlayerState.stats.
 fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
     let g = lua.globals();
     g.set(
         "GetCombatRating",
-        lua.create_function(|_, _id: Value| Ok(0i32))?,
+        lua.create_function(|lua, id: i32| {
+            let rating = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| {
+                    let st = &s.borrow().player.stats;
+                    match id {
+                        9 => st.crit_rating,
+                        6 => st.haste_rating,
+                        26 => st.mastery_rating,
+                        14 => st.versatility_rating,
+                        15 => st.speed_rating,
+                        17 => st.leech_rating,
+                        18 => st.avoidance_rating,
+                        _ => 0,
+                    }
+                })
+                .unwrap_or(0);
+            Ok(rating)
+        })?,
     )?;
     g.set(
         "GetCombatRatingBonus",
-        lua.create_function(|_, _id: Value| Ok(0.0_f64))?,
+        lua.create_function(|lua, id: i32| {
+            let bonus = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| {
+                    let st = &s.borrow().player.stats;
+                    match id {
+                        9 => st.crit_pct(),
+                        6 => st.haste_pct(),
+                        26 => st.mastery_pct(),
+                        14 => st.versatility_pct(),
+                        _ => 0.0,
+                    }
+                })
+                .unwrap_or(0.0);
+            Ok(bonus)
+        })?,
     )?;
-    // GetMaxCombatRatingBonus(ratingIndex) -> maxBonus
     g.set(
         "GetMaxCombatRatingBonus",
-        lua.create_function(|_, _rating_index: i32| Ok(0.0_f64))?,
+        lua.create_function(|_, _rating_index: i32| Ok(100.0_f64))?,
     )?;
     Ok(())
 }
@@ -460,8 +520,11 @@ fn register_character_stat_functions_2(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Secondary stat stubs: mastery, haste, versatility, lifesteal, speed, etc.
+/// Secondary stats reading from PlayerState.stats.
 fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
     let g = lua.globals();
     g.set(
         "GetCombatRatingBonusForCombatRatingValue",
@@ -469,17 +532,46 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
     )?;
     g.set(
         "GetMasteryEffect",
-        lua.create_function(|_, ()| Ok((0.0_f64, 0.0_f64)))?,
+        lua.create_function(|lua, ()| {
+            let m = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.mastery_pct())
+                .unwrap_or(0.0);
+            Ok((m + 8.0, m)) // base mastery + rating mastery
+        })?,
     )?;
-    g.set("GetHaste", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetMeleeHaste", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
+    g.set("GetHaste", lua.create_function(|lua, ()| {
+        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.haste_pct())
+            .unwrap_or(0.0))
+    })?)?;
+    g.set("GetMeleeHaste", lua.create_function(|lua, ()| {
+        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.haste_pct())
+            .unwrap_or(0.0))
+    })?)?;
     g.set(
         "GetVersatilityBonus",
-        lua.create_function(|_, _id: Value| Ok(0.0_f64))?,
+        lua.create_function(|lua, _id: Value| {
+            Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.versatility_pct())
+                .unwrap_or(0.0))
+        })?,
     )?;
-    g.set("GetLifesteal", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetAvoidance", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
-    g.set("GetSpeed", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
+    g.set("GetLifesteal", lua.create_function(|lua, ()| {
+        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.leech_rating as f64 / 100.0)
+            .unwrap_or(0.0))
+    })?)?;
+    g.set("GetAvoidance", lua.create_function(|lua, ()| {
+        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.avoidance_rating as f64 / 72.0)
+            .unwrap_or(0.0))
+    })?)?;
+    g.set("GetSpeed", lua.create_function(|lua, ()| {
+        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            .map(|s| s.borrow().player.stats.speed_rating as f64 / 50.0)
+            .unwrap_or(0.0))
+    })?)?;
     g.set(
         "GetStaggerPercentage",
         lua.create_function(|_, ()| Ok(0.0_f64))?,

@@ -142,6 +142,93 @@ pub struct EquippedItem {
     pub gem_ids: [u32; 3],
 }
 
+/// Computed character stats (base + gear).
+#[derive(Debug, Clone)]
+pub struct CharacterStats {
+    pub strength: f64,
+    pub agility: f64,
+    pub stamina: f64,
+    pub intellect: f64,
+    pub armor: i32,
+    pub crit_rating: i32,
+    pub haste_rating: i32,
+    pub mastery_rating: i32,
+    pub versatility_rating: i32,
+    pub speed_rating: i32,
+    pub avoidance_rating: i32,
+    pub leech_rating: i32,
+}
+
+impl CharacterStats {
+    /// Compute stats from base class stats + equipped item levels.
+    /// Uses a simplified model: each equipped piece contributes stats proportional to ilvl.
+    pub fn compute(equipped_items: &HashMap<i32, EquippedItem>, class_index: i32) -> Self {
+        // Base stats for a level 80 character (class-agnostic baseline).
+        let mut stats = Self {
+            strength: 120.0,
+            agility: 100.0,
+            stamina: 350.0,
+            intellect: 100.0,
+            armor: 1200,
+            crit_rating: 0,
+            haste_rating: 0,
+            mastery_rating: 0,
+            versatility_rating: 0,
+            speed_rating: 0,
+            avoidance_rating: 0,
+            leech_rating: 0,
+        };
+
+        // Primary stat bonus based on class.
+        // 2=Paladin(Str), 1=Warrior(Str), 3=Hunter(Agi), 4=Rogue(Agi),
+        // 5=Priest(Int), 6=DK(Str), 7=Shaman(Int/Agi), 8=Mage(Int),
+        // 9=Warlock(Int), 10=Monk(Agi), 11=Druid(Agi/Int), 12=DH(Agi), 13=Evoker(Int)
+        let primary_is_str = matches!(class_index, 1 | 2 | 6);
+        let primary_is_agi = matches!(class_index, 3 | 4 | 10 | 12);
+        let _primary_is_int = matches!(class_index, 5 | 8 | 9 | 13);
+
+        // Sum item levels from equipped gear to estimate stat budget.
+        let total_ilvl: f64 = equipped_items
+            .values()
+            .filter_map(|e| crate::items::get_item(e.item_id))
+            .map(|item| item.item_level as f64)
+            .sum();
+
+        // Each ilvl point contributes roughly: primary ~1.2, stamina ~1.8, secondary ~0.4
+        let primary_from_gear = total_ilvl * 1.2;
+        let stamina_from_gear = total_ilvl * 1.8;
+        let secondary_per_stat = total_ilvl * 0.15;
+
+        if primary_is_str {
+            stats.strength += primary_from_gear;
+        } else if primary_is_agi {
+            stats.agility += primary_from_gear;
+        } else {
+            stats.intellect += primary_from_gear;
+        }
+        stats.stamina += stamina_from_gear;
+
+        // Distribute secondary ratings (simplified: spread across common stats)
+        stats.crit_rating = secondary_per_stat as i32;
+        stats.haste_rating = (secondary_per_stat * 0.9) as i32;
+        stats.mastery_rating = (secondary_per_stat * 1.1) as i32;
+        stats.versatility_rating = (secondary_per_stat * 0.7) as i32;
+
+        // Armor from gear: ~200 per equipped plate piece at ilvl 600+
+        let armor_pieces = equipped_items.keys()
+            .filter(|s| matches!(**s, 1 | 3 | 5 | 6 | 7 | 8 | 9 | 10))
+            .count();
+        stats.armor += (armor_pieces as i32) * 4500;
+
+        stats
+    }
+
+    pub fn crit_pct(&self) -> f64 { self.crit_rating as f64 / 180.0 }
+    pub fn haste_pct(&self) -> f64 { self.haste_rating as f64 / 170.0 }
+    pub fn mastery_pct(&self) -> f64 { self.mastery_rating as f64 / 130.0 }
+    pub fn versatility_pct(&self) -> f64 { self.versatility_rating as f64 / 205.0 }
+}
+
 /// Player character state: identity, combat, power, health, buffs, spec.
 #[derive(Debug, Clone)]
 pub struct PlayerState {
@@ -160,6 +247,7 @@ pub struct PlayerState {
     pub money: i64,
     pub item_level: f32,
     pub equipped_items: HashMap<i32, EquippedItem>,
+    pub stats: CharacterStats,
     pub pvp_enabled: bool,
     pub honor_level: i32,
     pub buffs: Vec<AuraInfo>,
@@ -186,6 +274,7 @@ impl Default for PlayerState {
             money: 0,
             item_level: 615.0,
             equipped_items: default_equipped_items(),
+            stats: CharacterStats::compute(&default_equipped_items(), 2),
             pvp_enabled: false,
             honor_level: 0,
             buffs: Vec::new(),

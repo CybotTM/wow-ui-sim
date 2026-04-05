@@ -284,14 +284,15 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
             }
             match get_equipped_item_id(lua, slot) {
                 Some(id) if id > 0 => {
-                    let icon = crate::items::get_item(id as u32)
-                        .map(|i| i.icon_file_data_id)
-                        .unwrap_or(134400);
-                    if icon != 0 {
-                        Ok(Value::Integer(icon as i64))
+                    let item = crate::items::get_item(id as u32);
+                    let icon = item.map(|i| i.icon_file_data_id).unwrap_or(0);
+                    let icon = if icon != 0 {
+                        icon
                     } else {
-                        Ok(Value::Integer(134400))
-                    }
+                        item.map(|i| fallback_icon_for_inv_type(i.inventory_type))
+                            .unwrap_or(134400)
+                    };
+                    Ok(Value::Integer(icon as i64))
                 }
                 _ => Ok(Value::Nil),
             }
@@ -315,6 +316,16 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
     )?;
 
     Ok(())
+}
+
+/// Fallback icon fileDataID for items missing icon data, keyed by inventory_type.
+fn fallback_icon_for_inv_type(inv_type: u8) -> u32 {
+    match inv_type {
+        2 => 133294,   // Neck: INV_Jewelry_Necklace_07
+        11 => 133345,  // Finger: INV_Jewelry_Ring_36
+        12 => 133282,  // Trinket: INV_Jewelry_TrinketPVP_01
+        _ => 134400,   // Generic: INV_Misc_QuestionMark
+    }
 }
 
 fn get_equipped_item_id(lua: &Lua, slot: i32) -> Option<u32> {
