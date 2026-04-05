@@ -105,7 +105,8 @@ fn test_expand_header_restores_children() {
 fn test_collapse_all_shows_only_headers() {
     let env = env();
     env.exec("C_Reputation.ExpandAllFactionHeaders()").unwrap();
-    env.exec("C_Reputation.CollapseAllFactionHeaders()").unwrap();
+    env.exec("C_Reputation.CollapseAllFactionHeaders()")
+        .unwrap();
     let count: i32 = env.eval("return C_Reputation.GetNumFactions()").unwrap();
     let headers: i32 = env
         .eval(
@@ -122,8 +123,43 @@ fn test_collapse_all_shows_only_headers() {
 #[test]
 fn test_expand_all_shows_more_than_headers() {
     let env = env();
-    env.exec("C_Reputation.CollapseAllFactionHeaders()").unwrap();
+    env.exec("C_Reputation.CollapseAllFactionHeaders()")
+        .unwrap();
     env.exec("C_Reputation.ExpandAllFactionHeaders()").unwrap();
     let count: i32 = env.eval("return C_Reputation.GetNumFactions()").unwrap();
     assert!(count > 4, "should have headers + children: {count}");
+}
+
+#[test]
+fn test_max_reputation_reaction_constant() {
+    let env = env();
+    let val: i32 = env.eval("return MAX_REPUTATION_REACTION").unwrap();
+    assert_eq!(val, 8);
+}
+
+#[test]
+fn test_standing_text_via_gettext() {
+    let env = env();
+    let text: String = env
+        .eval(
+            "local d = C_Reputation.GetFactionDataByIndex(2); \
+             local gender = UnitSex('player'); \
+             return GetText('FACTION_STANDING_LABEL' .. d.reaction, gender)",
+        )
+        .unwrap();
+    assert!(!text.is_empty(), "standing text should not be empty");
+    assert!(
+        [
+            "Hated",
+            "Hostile",
+            "Unfriendly",
+            "Neutral",
+            "Friendly",
+            "Honored",
+            "Revered",
+            "Exalted"
+        ]
+        .contains(&text.as_str()),
+        "unexpected standing text: {text}"
+    );
 }
