@@ -59,59 +59,49 @@ fn create_item_table(lua: &Lua, item_id: i32) -> Result<mlua::Table> {
 fn register_item_methods(lua: &Lua, item: &mlua::Table) -> Result<()> {
     item.set(
         "ContinueOnItemLoad",
-        lua.create_function(|_, (_this, callback): (mlua::Table, mlua::Function)| {
-            callback.call::<()>(())?;
-            Ok(())
-        })?,
+        lua.create_function(continue_on_item_load)?,
     )?;
-
     item.set(
         "GetItemID",
         lua.create_function(|_, this: mlua::Table| this.get::<i32>("itemID"))?,
     )?;
-
-    item.set(
-        "GetItemName",
-        lua.create_function(|lua, this: mlua::Table| {
-            let id: i32 = this.get("itemID")?;
-            let name = item_name(id);
-            Ok(Value::String(lua.create_string(name)?))
-        })?,
-    )?;
-
-    item.set(
-        "GetItemLink",
-        lua.create_function(|lua, this: mlua::Table| {
-            let id: i32 = this.get("itemID")?;
-            let link = item_link(id);
-            Ok(Value::String(lua.create_string(&link)?))
-        })?,
-    )?;
-
-    item.set(
-        "GetItemIcon",
-        lua.create_function(|_, this: mlua::Table| {
-            let id: i32 = this.get("itemID")?;
-            let icon = crate::items::get_item(id as u32)
-                .map(|i| i.icon_file_data_id)
-                .unwrap_or(134400);
-            Ok(if icon != 0 { icon } else { 134400u32 })
-        })?,
-    )?;
-
+    item.set("GetItemName", lua.create_function(get_item_name)?)?;
+    item.set("GetItemLink", lua.create_function(get_item_link)?)?;
+    item.set("GetItemIcon", lua.create_function(get_item_icon)?)?;
     item.set(
         "GetItemQuality",
-        lua.create_function(|_, this: mlua::Table| {
-            let id: i32 = this.get("itemID")?;
-            Ok(item_quality(id))
-        })?,
+        lua.create_function(|_, this: mlua::Table| Ok(item_quality(this.get::<i32>("itemID")?)))?,
     )?;
-
     item.set(
         "IsItemDataCached",
-        lua.create_function(|_, _this: mlua::Table| Ok(true))?,
+        lua.create_function(|_, _: mlua::Table| Ok(true))?,
     )?;
     Ok(())
+}
+
+fn continue_on_item_load(_: &Lua, (_this, callback): (mlua::Table, mlua::Function)) -> Result<()> {
+    callback.call::<()>(())?;
+    Ok(())
+}
+
+fn get_item_name(lua: &Lua, this: mlua::Table) -> Result<Value> {
+    let id: i32 = this.get("itemID")?;
+    Ok(Value::String(lua.create_string(item_name(id))?))
+}
+
+fn get_item_link(lua: &Lua, this: mlua::Table) -> Result<Value> {
+    let id: i32 = this.get("itemID")?;
+    Ok(Value::String(lua.create_string(&item_link(id))?))
+}
+
+const DEFAULT_ICON: u32 = 134400;
+
+fn get_item_icon(_: &Lua, this: mlua::Table) -> Result<u32> {
+    let id: i32 = this.get("itemID")?;
+    let icon = crate::items::get_item(id as u32)
+        .map(|i| i.icon_file_data_id)
+        .unwrap_or(0);
+    Ok(if icon != 0 { icon } else { DEFAULT_ICON })
 }
 
 fn item_name(item_id: i32) -> &'static str {
