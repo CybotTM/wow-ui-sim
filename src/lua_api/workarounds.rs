@@ -48,7 +48,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     workarounds_bags::init_bag_bar(env);
     workarounds_bags::init_bag_token_tracker(env);
-    hide_super_tracked_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     patch_compact_raid_container_pools(env);
@@ -59,13 +58,6 @@ pub fn apply(env: &WowLuaEnv) {
     patch_scrollbox_nil_dataprovider(env);
     init_settings_panel_previews(env);
     patch_character_create_arrays(env);
-}
-
-/// SuperTrackedFrame shows a quest navigation arrow positioned by the engine's
-/// 3D-to-screen projection (C_SuperTrack). Without the 3D world, OnUpdate never
-/// repositions it, so the icon renders at default (0,0) in the top-left corner.
-fn hide_super_tracked_frame(env: &WowLuaEnv) {
-    let _ = env.exec("if SuperTrackedFrame then SuperTrackedFrame:Hide() end");
 }
 
 /// Blizzard's class talent loadout dialogs are hidden XML popups that should
