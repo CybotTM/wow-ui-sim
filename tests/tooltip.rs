@@ -825,6 +825,48 @@ fn test_get_num_lines_returns_actual_count() {
     assert!(count > 0, "GetNumLines should be > 0 after SetItemByID");
 }
 
+#[test]
+fn test_set_unit_aura_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    // Player has default buffs; buff 1 should exist
+    let has_buff: bool = env.eval("return UnitBuff('player', 1) ~= nil").unwrap();
+    assert!(has_buff, "Player should have at least one buff");
+
+    env.exec(r#"GameTooltip:SetUnitAura("player", 1, "HELPFUL")"#)
+        .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(count > 0, "SetUnitAura should populate tooltip lines");
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(visible, "SetUnitAura should make tooltip visible");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert!(
+        !td.lines[0].left_text.is_empty(),
+        "First line should be the buff name"
+    );
+}
+
+#[test]
+fn test_set_unit_buff_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"GameTooltip:SetUnitBuff("player", 1)"#).unwrap();
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(count > 0, "SetUnitBuff should populate tooltip lines");
+}
+
+#[test]
+fn test_set_unit_aura_invalid_index_no_crash() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"GameTooltip:SetUnitAura("player", 999, "HELPFUL")"#)
+        .unwrap();
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 0, "Invalid index should leave tooltip empty");
+}
+
 fn fire_tooltip_test_startup_events(env: &WowLuaEnv) {
     let lua = env.lua();
     let _ = env.fire_event_with_args(

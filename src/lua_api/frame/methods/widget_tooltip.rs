@@ -7,15 +7,7 @@ use crate::lua_api::tooltip::TooltipLine;
 use crate::widget::{Anchor, AnchorPoint};
 use mlua::Value;
 
-const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &[
-    "SetUnitBuff",
-    "SetUnitDebuff",
-    "SetUnitAura",
-    "SetUnitBuffByAuraInstanceID",
-    "SetUnitDebuffByAuraInstanceID",
-    "AddAtlas",
-    "AddFontStrings",
-];
+const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddAtlas", "AddFontStrings"];
 
 const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
     "CopyTooltip",
@@ -110,6 +102,7 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_tooltip_i32_stub(methods, "SetSpellByID");
     add_set_item_by_id(methods);
     add_set_hyperlink(methods);
+    add_aura_tooltip_methods(methods);
     add_tooltip_multivalue_stubs(methods, TOOLTIP_MULTIVALUE_STUBS);
     add_tooltip_variadic_stubs(methods, TOOLTIP_VARIADIC_STUBS);
     add_custom_line_spacing_getter(methods);
@@ -278,6 +271,106 @@ fn equip_slot_label(inv_type: u8) -> &'static str {
         25 => "Thrown",
         26 => "Ranged",
         _ => "",
+    }
+}
+
+fn add_aura_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    for name in [
+        "SetUnitBuff",
+        "SetUnitDebuff",
+        "SetUnitAura",
+        "SetUnitBuffByAuraInstanceID",
+        "SetUnitDebuffByAuraInstanceID",
+    ] {
+        methods.add_method(name, |lua, this, args: mlua::MultiValue| {
+            let tooltip_id = this.0;
+            let aura = lookup_aura_from_args(lua, &args);
+            if let Some(aura) = aura {
+                populate_aura_tooltip(lua, tooltip_id, &aura)?;
+            }
+            Ok(())
+        });
+    }
+}
+
+fn lookup_aura_from_args(
+    lua: &mlua::Lua,
+    args: &mlua::MultiValue,
+) -> Option<crate::lua_api::game_data::AuraInfo> {
+    let mut iter = args.iter();
+    let _unit = iter.next(); // unit string (e.g. "player")
+    let index_or_id = match iter.next()? {
+        Value::Integer(n) => *n as i32,
+        Value::Number(n) => *n as i32,
+        _ => return None,
+    };
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    // Try as 1-based index first
+    if index_or_id >= 1 {
+        if let Some(aura) = state.player.buffs.get((index_or_id - 1) as usize) {
+            return Some(aura.clone());
+        }
+    }
+    // Try as aura instance ID
+    state
+        .player
+        .buffs
+        .iter()
+        .find(|a| a.aura_instance_id == index_or_id)
+        .cloned()
+}
+
+fn populate_aura_tooltip(
+    lua: &mlua::Lua,
+    tooltip_id: u64,
+    aura: &crate::lua_api::game_data::AuraInfo,
+) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
+        td.lines.clear();
+        td.lines.push(TooltipLine {
+            left_text: aura.name.clone(),
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+        });
+        if aura.duration > 0.0 {
+            td.lines.push(TooltipLine {
+                left_text: format_aura_duration(aura.duration),
+                left_color: (1.0, 1.0, 1.0),
+                right_text: None,
+                right_color: (1.0, 1.0, 1.0),
+                wrap: false,
+            });
+        }
+    }
+    state.set_frame_visible(tooltip_id, true);
+    Ok(())
+}
+
+fn format_aura_duration(seconds: f64) -> String {
+    let secs = seconds as u64;
+    if secs >= 3600 {
+        let hours = secs / 3600;
+        let mins = (secs % 3600) / 60;
+        if mins > 0 {
+            format!("{hours} hr {mins} min")
+        } else {
+            format!("{hours} hr")
+        }
+    } else if secs >= 60 {
+        let mins = secs / 60;
+        let remaining = secs % 60;
+        if remaining > 0 {
+            format!("{mins} min {remaining} sec")
+        } else {
+            format!("{mins} min")
+        }
+    } else {
+        format!("{secs} sec")
     }
 }
 
