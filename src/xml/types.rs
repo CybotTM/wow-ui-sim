@@ -109,6 +109,24 @@ pub enum XmlElement {
     Unknown,
 }
 
+impl XmlElement {
+    /// Extract the inner `FrameXml` and variant tag name for frame-like elements.
+    /// Returns `None` for non-frame elements (Script, Include, Font, etc.).
+    pub fn as_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
+        use super::types_elements::frame_variant_data;
+        frame_variant_data!(
+            self, Frame, Button, ItemButton, CheckButton, EditBox, ScrollFrame, Slider, StatusBar,
+            GameTooltip, ColorSelect, Model, ModelScene, EventFrame, CinematicModel, PlayerModel,
+            DressUpModel, Browser, Minimap, MessageFrame, MovieFrame, ScrollingMessageFrame,
+            SimpleHTML, WorldFrame, DropDownToggleButton, DropdownButton, EventButton, EventEditBox,
+            Cooldown, TaxiRouteFrame, ModelFFX, TabardModel, UiCamera, UnitPositionFrame,
+            OffScreenFrame, Checkout, FogOfWarFrame, QuestPOIFrame, ArchaeologyDigSiteFrame,
+            ScenarioPOIFrame, UIThemeContainerFrame, EventScrollFrame, ContainedAlertFrame,
+            MapScene, Line
+        )
+    }
+}
+
 /// Frame definition in XML.
 #[derive(Debug, Deserialize, Default, Clone)]
 pub struct FrameXml {

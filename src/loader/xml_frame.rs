@@ -584,76 +584,19 @@ fn create_layer_children(
 }
 
 /// Map a FrameElement to its (FrameXml, widget_type, intrinsic_name) triple.
+///
+/// FrameElement-specific overrides vs the shared `widget_type_for_tag`:
+/// - `DropDownToggleButton` / `EventButton` get intrinsic names (shared treats them as unknown)
 fn frame_element_to_type(
     child: &crate::xml::FrameElement,
 ) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
-    specialized_element_type(child).or_else(|| frame_like_element_type(child))
-}
-
-/// Specialized widget types with distinct type strings or intrinsic bases.
-fn specialized_element_type(
-    child: &crate::xml::FrameElement,
-) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
-    use crate::xml::FrameElement;
-    match child {
-        FrameElement::Frame(f) => Some((f, "Frame", None)),
-        FrameElement::Button(f) => Some((f, "Button", None)),
-        FrameElement::DropdownButton(f) => Some((f, "Button", Some("DropdownButton"))),
-        FrameElement::DropDownToggleButton(f) => Some((f, "Button", Some("DropDownToggleButton"))),
-        FrameElement::EventButton(f) => Some((f, "Button", Some("EventButton"))),
-        FrameElement::ContainedAlertFrame(f) => Some((f, "Button", Some("ContainedAlertFrame"))),
-        FrameElement::ItemButton(f) => Some((f, "ItemButton", None)),
-        FrameElement::CheckButton(f) => Some((f, "CheckButton", None)),
-        FrameElement::EditBox(f) | FrameElement::EventEditBox(f) => Some((f, "EditBox", None)),
-        FrameElement::ScrollFrame(f) | FrameElement::EventScrollFrame(f) => {
-            Some((f, "ScrollFrame", None))
-        }
-        FrameElement::Slider(f) => Some((f, "Slider", None)),
-        FrameElement::StatusBar(f) => Some((f, "StatusBar", None)),
-        FrameElement::Cooldown(f) => Some((f, "Cooldown", None)),
-        FrameElement::GameTooltip(f) => Some((f, "GameTooltip", None)),
-        FrameElement::ColorSelect(f) => Some((f, "ColorSelect", None)),
-        FrameElement::Model(f) => Some((f, "Model", None)),
-        FrameElement::ModelScene(f) => Some((f, "ModelScene", None)),
-        FrameElement::PlayerModel(f)
-        | FrameElement::CinematicModel(f)
-        | FrameElement::TabardModel(f)
-        | FrameElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
-        FrameElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
-        FrameElement::ScrollingMessageFrame(f) => {
-            Some((f, "MessageFrame", Some("ScrollingMessageFrame")))
-        }
-        FrameElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
-        FrameElement::Minimap(f) => Some((f, "Minimap", None)),
-        _ => None,
-    }
-}
-
-/// Frame-like elements that all map to widget type "Frame".
-fn frame_like_element_type(
-    child: &crate::xml::FrameElement,
-) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
-    use crate::xml::FrameElement;
-    match child {
-        FrameElement::EventFrame(f)
-        | FrameElement::TaxiRouteFrame(f)
-        | FrameElement::ModelFFX(f)
-        | FrameElement::UiCamera(f)
-        | FrameElement::UnitPositionFrame(f)
-        | FrameElement::OffScreenFrame(f)
-        | FrameElement::Checkout(f)
-        | FrameElement::FogOfWarFrame(f)
-        | FrameElement::QuestPOIFrame(f)
-        | FrameElement::ArchaeologyDigSiteFrame(f)
-        | FrameElement::ScenarioPOIFrame(f)
-        | FrameElement::UIThemeContainerFrame(f)
-        | FrameElement::MapScene(f)
-        | FrameElement::Line(f)
-        | FrameElement::Browser(f)
-        | FrameElement::MovieFrame(f)
-        | FrameElement::WorldFrame(f) => Some((f, "Frame", None)),
-        _ => None,
-    }
+    let (f, tag) = child.as_frame_data()?;
+    let (wt, intrinsic) = match tag {
+        "DropDownToggleButton" => ("Button", Some("DropDownToggleButton")),
+        "EventButton" => ("Button", Some("EventButton")),
+        _ => crate::xml::widget_type_for_tag(tag)?,
+    };
+    Some((f, wt, intrinsic))
 }
 
 /// Recursively create child frames and assign parentKey references.

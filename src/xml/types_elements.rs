@@ -326,6 +326,72 @@ pub enum FrameElement {
     Line(FrameXml),
 }
 
+/// Shared mapping from XML element tag name to (widget_type, intrinsic_name).
+///
+/// Covers the common mappings used by both `FrameElement` (inside `<Frames>`)
+/// and `XmlElement` (top-level). Callers handle divergences before calling this.
+pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
+    match tag {
+        "Frame" => Some(("Frame", None)),
+        "Button" => Some(("Button", None)),
+        "ItemButton" => Some(("ItemButton", None)),
+        "CheckButton" => Some(("CheckButton", None)),
+        "EditBox" | "EventEditBox" => Some(("EditBox", None)),
+        "ScrollFrame" | "EventScrollFrame" => Some(("ScrollFrame", None)),
+        "Slider" => Some(("Slider", None)),
+        "StatusBar" => Some(("StatusBar", None)),
+        "Cooldown" => Some(("Cooldown", None)),
+        "GameTooltip" => Some(("GameTooltip", None)),
+        "ColorSelect" => Some(("ColorSelect", None)),
+        "Model" => Some(("Model", None)),
+        "ModelScene" => Some(("ModelScene", None)),
+        "PlayerModel" | "CinematicModel" | "TabardModel" | "DressUpModel" => {
+            Some(("PlayerModel", None))
+        }
+        "MessageFrame" => Some(("MessageFrame", None)),
+        "ScrollingMessageFrame" => Some(("MessageFrame", Some("ScrollingMessageFrame"))),
+        "SimpleHTML" => Some(("SimpleHTML", None)),
+        "Minimap" => Some(("Minimap", None)),
+        "DropdownButton" => Some(("Button", Some("DropdownButton"))),
+        "ContainedAlertFrame" => Some(("Button", Some("ContainedAlertFrame"))),
+        // Frame-like elements (specialized XML tags that map to widget type "Frame")
+        "EventFrame" | "TaxiRouteFrame" | "ModelFFX" | "UiCamera" | "UnitPositionFrame"
+        | "OffScreenFrame" | "Checkout" | "FogOfWarFrame" | "QuestPOIFrame"
+        | "ArchaeologyDigSiteFrame" | "ScenarioPOIFrame" | "UIThemeContainerFrame"
+        | "MapScene" | "Line" | "Browser" | "MovieFrame" | "WorldFrame" => {
+            Some(("Frame", None))
+        }
+        _ => None,
+    }
+}
+
+macro_rules! frame_variant_data {
+    ($self:expr, $($variant:ident),+ $(,)?) => {
+        match $self {
+            $(Self::$variant(f) => Some((f, stringify!($variant))),)+
+            _ => None,
+        }
+    };
+}
+pub(crate) use frame_variant_data;
+
+impl FrameElement {
+    /// Extract the inner `FrameXml` and variant tag name (e.g. `"Button"`, `"EditBox"`).
+    /// Returns `None` for `ScopedModifier` which has no `FrameXml`.
+    pub fn as_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
+        frame_variant_data!(
+            self, Frame, Button, ItemButton, CheckButton, EditBox, ScrollFrame, Slider, StatusBar,
+            GameTooltip, ColorSelect, Model, ModelScene, EventFrame, CinematicModel, PlayerModel,
+            DressUpModel, Browser, Minimap, MessageFrame, MovieFrame, ScrollingMessageFrame,
+            SimpleHTML, WorldFrame, DropDownToggleButton, DropdownButton, EventButton, EventEditBox,
+            Cooldown, TaxiRouteFrame, ModelFFX, TabardModel, UiCamera, UnitPositionFrame,
+            OffScreenFrame, Checkout, FogOfWarFrame, QuestPOIFrame, ArchaeologyDigSiteFrame,
+            ScenarioPOIFrame, UIThemeContainerFrame, EventScrollFrame, ContainedAlertFrame,
+            MapScene, Line
+        )
+    }
+}
+
 /// Script include (file attribute is optional for inline scripts).
 #[derive(Debug, Deserialize, Clone)]
 pub struct ScriptXml {

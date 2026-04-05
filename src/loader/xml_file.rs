@@ -174,74 +174,18 @@ fn process_include(
 }
 
 /// Extract the FrameXml data, widget type, and optional intrinsic name from an XmlElement.
+///
+/// XmlElement-specific overrides vs the shared `widget_type_for_tag`:
+/// - `ItemButton`, `DropDownToggleButton`, `EventButton` all map to plain `"Button"` (no intrinsic)
 fn resolve_frame_element(
     element: &XmlElement,
 ) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
-    resolve_specialized_element(element).or_else(|| resolve_frame_like_element(element))
-}
-
-/// Specialized widget types with distinct widget type strings or intrinsic bases.
-fn resolve_specialized_element(
-    element: &XmlElement,
-) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
-    match element {
-        XmlElement::Frame(f) => Some((f, "Frame", None)),
-        XmlElement::Button(f)
-        | XmlElement::ItemButton(f)
-        | XmlElement::DropDownToggleButton(f)
-        | XmlElement::EventButton(f) => Some((f, "Button", None)),
-        XmlElement::DropdownButton(f) => Some((f, "Button", Some("DropdownButton"))),
-        XmlElement::ContainedAlertFrame(f) => Some((f, "Button", Some("ContainedAlertFrame"))),
-        XmlElement::CheckButton(f) => Some((f, "CheckButton", None)),
-        XmlElement::EditBox(f) | XmlElement::EventEditBox(f) => Some((f, "EditBox", None)),
-        XmlElement::ScrollFrame(f) | XmlElement::EventScrollFrame(f) => {
-            Some((f, "ScrollFrame", None))
-        }
-        XmlElement::Slider(f) => Some((f, "Slider", None)),
-        XmlElement::StatusBar(f) => Some((f, "StatusBar", None)),
-        XmlElement::Cooldown(f) => Some((f, "Cooldown", None)),
-        XmlElement::GameTooltip(f) => Some((f, "GameTooltip", None)),
-        XmlElement::ColorSelect(f) => Some((f, "ColorSelect", None)),
-        XmlElement::Model(f) => Some((f, "Model", None)),
-        XmlElement::ModelScene(f) => Some((f, "ModelScene", None)),
-        XmlElement::PlayerModel(f)
-        | XmlElement::CinematicModel(f)
-        | XmlElement::TabardModel(f)
-        | XmlElement::DressUpModel(f) => Some((f, "PlayerModel", None)),
-        XmlElement::MessageFrame(f) => Some((f, "MessageFrame", None)),
-        XmlElement::ScrollingMessageFrame(f) => {
-            Some((f, "MessageFrame", Some("ScrollingMessageFrame")))
-        }
-        XmlElement::SimpleHTML(f) => Some((f, "SimpleHTML", None)),
-        XmlElement::Minimap(f) => Some((f, "Minimap", None)),
-        _ => None,
-    }
-}
-
-/// Frame-like elements that all map to widget type "Frame".
-fn resolve_frame_like_element(
-    element: &XmlElement,
-) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
-    match element {
-        XmlElement::EventFrame(f)
-        | XmlElement::TaxiRouteFrame(f)
-        | XmlElement::ModelFFX(f)
-        | XmlElement::UiCamera(f)
-        | XmlElement::UnitPositionFrame(f)
-        | XmlElement::OffScreenFrame(f)
-        | XmlElement::Checkout(f)
-        | XmlElement::FogOfWarFrame(f)
-        | XmlElement::QuestPOIFrame(f)
-        | XmlElement::ArchaeologyDigSiteFrame(f)
-        | XmlElement::ScenarioPOIFrame(f)
-        | XmlElement::UIThemeContainerFrame(f)
-        | XmlElement::MapScene(f)
-        | XmlElement::Line(f)
-        | XmlElement::Browser(f)
-        | XmlElement::MovieFrame(f)
-        | XmlElement::WorldFrame(f) => Some((f, "Frame", None)),
-        _ => None,
-    }
+    let (f, tag) = element.as_frame_data()?;
+    let (wt, intrinsic) = match tag {
+        "ItemButton" | "DropDownToggleButton" | "EventButton" => ("Button", None),
+        _ => crate::xml::widget_type_for_tag(tag)?,
+    };
+    Some((f, wt, intrinsic))
 }
 
 /// Register a top-level virtual Texture template (e.g. TextStatusBarSparkTemplate).
