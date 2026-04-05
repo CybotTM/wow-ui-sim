@@ -619,6 +619,7 @@ fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
 /// Initialize the Lua state: load Elune, register globals, patch stdlib, run keybindings.
 fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> {
     load_elune_security(lua)?;
+    patch_secureexecuterange(lua)?;
     patch_elune_userdata_compat(lua)?;
     init_registry_tables(lua, &state)?;
     super::globals::register_globals(lua, Rc::clone(&state))?;
@@ -644,6 +645,27 @@ fn load_elune_security(lua: &Lua) -> crate::Result<()> {
             luaopen_securecalls(state);
         })?;
     };
+    Ok(())
+}
+
+/// Replace Elune's secureexecuterange with a plain Lua loop.
+///
+/// Elune's C implementation silently skips callbacks when taint propagation
+/// interferes. The simulator doesn't enforce taint restrictions, so a plain
+/// loop using securecallfunction (which swallows errors per-entry like WoW)
+/// allows ContinueAfterAllEvents callbacks to fire during startup.
+fn patch_secureexecuterange(lua: &Lua) -> crate::Result<()> {
+    lua.load(
+        r#"
+        secureexecuterange = function(tbl, func, ...)
+            if type(tbl) ~= "table" then return end
+            for k, v in pairs(tbl) do
+                securecallfunction(func, k, v, ...)
+            end
+        end
+        "#,
+    )
+    .exec()?;
     Ok(())
 }
 

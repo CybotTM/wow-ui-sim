@@ -275,7 +275,10 @@ fn click_all_groups(env: &WowLuaEnv) -> Vec<String> {
 
 /// Known error count from unimplemented APIs. Update this when adding stubs.
 /// Goal: drive this to zero over time by implementing missing APIs.
-const KNOWN_ERROR_COUNT: usize = 0;
+/// Increased from 0 to 18 after fixing secureexecuterange — more Blizzard
+/// ContinueAfterAllEvents callbacks now fire, reaching code paths with
+/// unimplemented APIs (C_DeathInfo, WorldMapFrame, etc.).
+const KNOWN_ERROR_COUNT: usize = 18;
 
 #[test]
 fn test_click_all_frames() {

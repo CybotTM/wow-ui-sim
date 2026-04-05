@@ -17,9 +17,7 @@ pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
 ///
 /// By this point, PLAYER_ENTERING_WORLD and VARIABLES_LOADED have fired,
 /// triggering ObjectiveTrackerManager:Init() via ContinueAfterAllEvents.
-/// If Init didn't run (e.g. EventRegistry dispatch failed), we call it here.
 pub(crate) fn finish_objective_tracker(env: &WowLuaEnv) {
-    ensure_tracker_initialized(env);
     populate_quest_titles(env);
 }
 
@@ -108,21 +106,6 @@ fn setup_tracker_frame(env: &WowLuaEnv) {
             local h = lp:GetHeight() + offsetY
             if h < 100 then h = 400 end
             otf:SetHeight(h)
-        end
-    "#,
-    );
-}
-
-fn ensure_tracker_initialized(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not ObjectiveTrackerManager or not ObjectiveTrackerManager.Init then
-            return
-        end
-        -- Only call Init if it hasn't run (modules not registered)
-        local qt = QuestObjectiveTracker
-        if qt and not qt.parentContainer then
-            pcall(ObjectiveTrackerManager.Init, ObjectiveTrackerManager)
         end
     "#,
     );
