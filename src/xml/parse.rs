@@ -74,44 +74,35 @@ fn strip_duplicate_self_closing(xml: &str, tag: &str) -> String {
 
     let prefix = format!("<{tag} ");
     let lines: Vec<&str> = xml.lines().collect();
-    let mut result: Vec<Option<usize>> = Vec::with_capacity(lines.len());
-
-    // Track element line indices per indentation depth.
-    // When we see a second one at the same depth, remove the first.
+    let mut remove = vec![false; lines.len()];
     let mut seen_at_depth: HashMap<usize, usize> = HashMap::new();
 
     for (i, line) in lines.iter().enumerate() {
         let trimmed = line.trim();
         let depth = line.len() - line.trim_start().len();
 
-        // Closing tags end a child scope - clear tracked elements inside it
         if trimmed.starts_with("</") {
             seen_at_depth.retain(|&d, _| d <= depth);
         }
 
-        // Strip trailing XML comments for matching (e.g. `<TexCoords .../> <!-- comment -->`)
-        let effective = trimmed
-            .find("<!--")
-            .map_or(trimmed, |pos| trimmed[..pos].trim());
-        if effective.starts_with(&prefix) && effective.ends_with("/>") {
+        if is_self_closing_tag(trimmed, &prefix) {
             if let Some(prev_idx) = seen_at_depth.insert(depth, i) {
-                // Mark previous line for removal
-                result[prev_idx] = None;
+                remove[prev_idx] = true;
             }
-            result.push(Some(i));
-        } else {
-            result.push(Some(i));
         }
     }
 
-    let mut out = String::with_capacity(xml.len());
-    for idx in result.iter().flatten() {
-        if !out.is_empty() {
-            out.push('\n');
-        }
-        out.push_str(lines[*idx]);
-    }
-    out
+    collect_kept_lines(&lines, &remove)
+}
+
+/// Check if a trimmed line is a self-closing instance of the target tag.
+///
+/// Strips trailing XML comments before checking (e.g. `<TexCoords .../> <!-- old -->`).
+fn is_self_closing_tag(trimmed: &str, prefix: &str) -> bool {
+    let effective = trimmed
+        .find("<!--")
+        .map_or(trimmed, |pos| trimmed[..pos].trim());
+    effective.starts_with(prefix) && effective.ends_with("/>")
 }
 
 /// Remove duplicate script handler elements within `<Scripts>` blocks.
@@ -332,6 +323,45 @@ mod tests {
         let result = strip_duplicate_script_handlers(xml);
         assert!(result.contains("Handler1"));
         assert!(result.contains("Handler2"));
+    }
+
+    #[test]
+    fn test_strip_self_closing_triple_duplicate_keeps_last() {
+        let xml = r#"<Frame>
+    <Size x="1" y="1"/>
+    <Size x="2" y="2"/>
+    <Size x="3" y="3"/>
+</Frame>"#;
+        let result = strip_duplicate_self_closing(xml, "Size");
+        assert!(!result.contains(r#"<Size x="1" y="1"/>"#));
+        assert!(!result.contains(r#"<Size x="2" y="2"/>"#));
+        assert!(result.contains(r#"<Size x="3" y="3"/>"#));
+    }
+
+    #[test]
+    fn test_strip_self_closing_with_trailing_comment() {
+        let xml = r#"<Frame>
+    <TexCoords left="0" right="1" top="0" bottom="0.5"/> <!-- old -->
+    <TexCoords left="0" right="1" top="0" bottom="1"/>
+</Frame>"#;
+        let result = strip_duplicate_self_closing(xml, "TexCoords");
+        assert!(!result.contains("bottom=\"0.5\""));
+        assert!(result.contains(r#"bottom="1""#));
+    }
+
+    #[test]
+    fn test_strip_self_closing_empty_input() {
+        let result = strip_duplicate_self_closing("", "Size");
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_strip_self_closing_no_matching_tags() {
+        let xml = r#"<Frame>
+    <Color r="1" g="0" b="0"/>
+</Frame>"#;
+        let result = strip_duplicate_self_closing(xml, "Size");
+        assert!(result.contains(r#"<Color r="1" g="0" b="0"/>"#));
     }
 
     #[test]

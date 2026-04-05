@@ -17,7 +17,8 @@ pub use template::{
 pub use types::{FrameChildElement, FrameXml, ScopedModifierXml, UiXml, XmlElement};
 pub use types_elements::{
     ActorXml, ActorsXml, AnimationElement, AnimationGroupXml, AnimationXml, FontFamilyXml,
-    FontStringXml, FontXml, FrameElement, FramesXml, IncludeXml, LayerElement, LayerXml, LayersXml,
+    FontFamilyMemberXml, FontStringXml, FontXml, FrameElement, FramesXml, IncludeXml, LayerElement,
+    LayerXml, LayersXml,
     ScriptXml, TextureXml, widget_type_for_tag,
 };
 pub use types_support::{

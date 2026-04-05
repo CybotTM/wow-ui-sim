@@ -401,29 +401,44 @@ fn create_font_family_object(
     let lua_code = FONT_FAMILY_LUA_TEMPLATE.replace("{name}", name);
     env.exec(&lua_code)
         .map_err(|e| LoadError::Lua(format!("Failed to create font family {}: {}", name, e)))?;
-    // Use the roman member's font if present
-    let roman_font = font_family
+
+    let overrides = build_roman_font_overrides(name, font_family);
+    if !overrides.is_empty() {
+        let _ = env.exec(&overrides);
+    }
+    Ok(())
+}
+
+/// Build Lua override statements from the roman member's font properties.
+fn build_roman_font_overrides(
+    name: &str,
+    font_family: &crate::xml::FontFamilyXml,
+) -> String {
+    let font = match find_roman_font(font_family) {
+        Some(f) => f,
+        None => return String::new(),
+    };
+    let mut code = String::new();
+    if let Some(path) = &font.font {
+        let p = path.replace('\\', "/");
+        code.push_str(&format!("{name}.__font = \"{p}\"\n"));
+    }
+    if let Some(h) = font.height {
+        code.push_str(&format!("{name}.__height = {h}\n"));
+    }
+    if let Some(o) = &font.outline {
+        code.push_str(&format!("{name}.__outline = \"{o}\"\n"));
+    }
+    code
+}
+
+/// Find the roman alphabet member's font definition.
+fn find_roman_font(font_family: &crate::xml::FontFamilyXml) -> Option<&crate::xml::FontXml> {
+    font_family
         .members
         .iter()
         .find(|m| m.alphabet.as_deref() == Some("roman"))
-        .and_then(|m| m.font.as_ref());
-    if let Some(font) = roman_font {
-        let mut overrides = String::new();
-        if let Some(path) = &font.font {
-            let p = path.replace('\\', "/");
-            overrides.push_str(&format!("{name}.__font = \"{p}\"\n"));
-        }
-        if let Some(h) = font.height {
-            overrides.push_str(&format!("{name}.__height = {h}\n"));
-        }
-        if let Some(o) = &font.outline {
-            overrides.push_str(&format!("{name}.__outline = \"{o}\"\n"));
-        }
-        if !overrides.is_empty() {
-            let _ = env.exec(&overrides);
-        }
-    }
-    Ok(())
+        .and_then(|m| m.font.as_ref())
 }
 
 #[cfg(test)]
@@ -559,5 +574,59 @@ mod tests {
         );
         // XmlElement::EventButton -> ("Button", None) — no intrinsic
         assert_eq!(resolve(&XmlElement::EventButton(f.clone())), Some(("Button", None)));
+    }
+
+    #[test]
+    fn roman_font_overrides_with_all_fields() {
+        let ff = crate::xml::FontFamilyXml {
+            name: Some("TestFont".to_string()),
+            is_virtual: None,
+            members: vec![crate::xml::FontFamilyMemberXml {
+                alphabet: Some("roman".to_string()),
+                font: Some(crate::xml::FontXml {
+                    font: Some("Fonts\\Test.TTF".to_string()),
+                    height: Some(14.0),
+                    outline: Some("OUTLINE".to_string()),
+                    ..Default::default()
+                }),
+            }],
+        };
+        let code = build_roman_font_overrides("TestFont", &ff);
+        assert!(code.contains("TestFont.__font = \"Fonts/Test.TTF\""));
+        assert!(code.contains("TestFont.__height = 14"));
+        assert!(code.contains("TestFont.__outline = \"OUTLINE\""));
+    }
+
+    #[test]
+    fn roman_font_overrides_no_roman_member() {
+        let ff = crate::xml::FontFamilyXml {
+            name: Some("TestFont".to_string()),
+            is_virtual: None,
+            members: vec![crate::xml::FontFamilyMemberXml {
+                alphabet: Some("hangul".to_string()),
+                font: Some(crate::xml::FontXml::default()),
+            }],
+        };
+        let code = build_roman_font_overrides("TestFont", &ff);
+        assert!(code.is_empty());
+    }
+
+    #[test]
+    fn roman_font_overrides_partial_fields() {
+        let ff = crate::xml::FontFamilyXml {
+            name: Some("TestFont".to_string()),
+            is_virtual: None,
+            members: vec![crate::xml::FontFamilyMemberXml {
+                alphabet: Some("roman".to_string()),
+                font: Some(crate::xml::FontXml {
+                    height: Some(16.0),
+                    ..Default::default()
+                }),
+            }],
+        };
+        let code = build_roman_font_overrides("TestFont", &ff);
+        assert!(!code.contains("__font"));
+        assert!(code.contains("TestFont.__height = 16"));
+        assert!(!code.contains("__outline"));
     }
 }
