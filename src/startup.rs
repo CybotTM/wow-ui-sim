@@ -227,6 +227,7 @@ fn fire_post_login_events(env: &WowLuaEnv) {
     seed_buff_durations(env);
 
     fire("BAG_UPDATE_DELAYED");
+    fire("QUEST_LOG_UPDATE");
     fire("GROUP_ROSTER_UPDATE");
     force_show_party_member_frames(env);
     fire("UPDATE_BINDINGS");
