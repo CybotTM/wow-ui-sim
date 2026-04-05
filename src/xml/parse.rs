@@ -134,31 +134,38 @@ fn strip_duplicate_script_handlers(xml: &str) -> String {
             continue;
         }
         handlers.clear();
-        i += 1;
-
-        // Process handlers inside this <Scripts> block
-        while i < lines.len() {
-            let trimmed = lines[i].trim();
-            if trimmed == "</Scripts>" {
-                i += 1;
-                break;
-            }
-
-            let Some((tag_name, end)) = detect_handler_span(trimmed, &lines, i) else {
-                i += 1;
-                continue;
-            };
-
-            if let Some((prev_start, prev_end)) =
-                handlers.insert(tag_name, (i, end))
-            {
-                remove[prev_start..=prev_end].fill(true);
-            }
-            i = end + 1;
-        }
+        i = dedup_scripts_block(&lines, i + 1, &mut handlers, &mut remove);
     }
 
     collect_kept_lines(&lines, &remove)
+}
+
+/// Scan one `<Scripts>` block starting after the opening tag at `start`.
+/// Returns the line index after the closing `</Scripts>` tag.
+fn dedup_scripts_block(
+    lines: &[&str],
+    start: usize,
+    handlers: &mut std::collections::HashMap<String, (usize, usize)>,
+    remove: &mut [bool],
+) -> usize {
+    let mut i = start;
+    while i < lines.len() {
+        let trimmed = lines[i].trim();
+        if trimmed == "</Scripts>" {
+            return i + 1;
+        }
+
+        let Some((tag_name, end)) = detect_handler_span(trimmed, lines, i) else {
+            i += 1;
+            continue;
+        };
+
+        if let Some((prev_start, prev_end)) = handlers.insert(tag_name, (i, end)) {
+            remove[prev_start..=prev_end].fill(true);
+        }
+        i = end + 1;
+    }
+    i
 }
 
 /// Check if a line opens a `<Scripts>` block (not self-closing).
