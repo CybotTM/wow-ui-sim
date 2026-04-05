@@ -90,7 +90,13 @@ fn register_item_methods(lua: &Lua, item: &mlua::Table) -> Result<()> {
 
     item.set(
         "GetItemIcon",
-        lua.create_function(|_, _this: mlua::Table| Ok(134400i32))?,
+        lua.create_function(|_, this: mlua::Table| {
+            let id: i32 = this.get("itemID")?;
+            let icon = crate::items::get_item(id as u32)
+                .map(|i| i.icon_file_data_id)
+                .unwrap_or(134400);
+            Ok(if icon != 0 { icon } else { 134400u32 })
+        })?,
     )?;
 
     item.set(

@@ -2,10 +2,13 @@
 //!
 //! Reads from ~/Projects/wow/data/:
 //!   - ItemSparse.csv
+//!   - ItemModifiedAppearance.csv
+//!   - ItemAppearance.csv
 //!
 //! Generates: data/items.rs
 
 use super::csv_util::{escape_str, parse_csv_line, wow_data_dir};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader, Write};
 use std::path::Path;
@@ -18,13 +21,15 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let file = File::open(&csv_path)?;
     let reader = BufReader::new(file);
 
+    let icon_map = build_icon_map(&wow_data)?;
+
     std::fs::create_dir_all("data")?;
     let output_path = Path::new("data/items.rs");
     let mut out = File::create(output_path)?;
 
     write_header(&mut out)?;
 
-    let (count, skipped) = build_item_map(&mut out, reader)?;
+    let (count, skipped) = build_item_map(&mut out, reader, &icon_map)?;
 
     write_lookup_fn(&mut out)?;
     write_tests(&mut out)?;
@@ -34,9 +39,66 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
+/// Build a HashMap<item_id, icon_file_data_id> from ItemModifiedAppearance + ItemAppearance CSVs.
+fn build_icon_map(
+    wow_data: &Path,
+) -> Result<HashMap<u32, u32>, Box<dyn std::error::Error>> {
+    // ItemAppearance: ID → DefaultIconFileDataID
+    let appearance_path = wow_data.join("ItemAppearance.csv");
+    let appearance_file = File::open(&appearance_path)?;
+    let mut appearance_map: HashMap<u32, u32> = HashMap::new();
+    for (i, line) in BufReader::new(appearance_file).lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue;
+        }
+        let fields = parse_csv_line(&line);
+        if fields.len() < 4 {
+            continue;
+        }
+        let appearance_id: u32 = match fields[0].parse() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        let icon_file_data_id: u32 = fields[3].parse().unwrap_or(0);
+        appearance_map.insert(appearance_id, icon_file_data_id);
+    }
+
+    // ItemModifiedAppearance: ItemID → ItemAppearanceID (first match per ItemID)
+    let ima_path = wow_data.join("ItemModifiedAppearance.csv");
+    let ima_file = File::open(&ima_path)?;
+    let mut icon_map: HashMap<u32, u32> = HashMap::new();
+    for (i, line) in BufReader::new(ima_file).lines().enumerate() {
+        let line = line?;
+        if i == 0 {
+            continue;
+        }
+        let fields = parse_csv_line(&line);
+        if fields.len() < 4 {
+            continue;
+        }
+        let item_id: u32 = match fields[1].parse() {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        if icon_map.contains_key(&item_id) {
+            continue;
+        }
+        let appearance_id: u32 = fields[3].parse().unwrap_or(0);
+        if let Some(&icon) = appearance_map.get(&appearance_id) {
+            if icon != 0 {
+                icon_map.insert(item_id, icon);
+            }
+        }
+    }
+
+    Ok(icon_map)
+}
+
 fn build_item_map(
     out: &mut File,
     reader: BufReader<File>,
+    icon_map: &HashMap<u32, u32>,
 ) -> Result<(u32, u32), Box<dyn std::error::Error>> {
     let mut builder = phf_codegen::Map::new();
     let mut count = 0u32;
@@ -47,7 +109,7 @@ fn build_item_map(
         if i == 0 {
             continue;
         }
-        match parse_item_row(&line) {
+        match parse_item_row(&line, icon_map) {
             Some((id, value)) => {
                 builder.entry(id, &value);
                 count += 1;
@@ -67,7 +129,7 @@ fn build_item_map(
     Ok((count, skipped))
 }
 
-fn parse_item_row(line: &str) -> Option<(u32, String)> {
+fn parse_item_row(line: &str, icon_map: &HashMap<u32, u32>) -> Option<(u32, String)> {
     let fields = parse_csv_line(line);
     if fields.len() < 102 {
         return None;
@@ -87,10 +149,12 @@ fn parse_item_row(line: &str) -> Option<(u32, String)> {
     let required_level: u16 = fields[99].parse().unwrap_or(0);
     let inventory_type: u8 = fields[100].parse().unwrap_or(0);
     let quality: u8 = fields[101].parse().unwrap_or(0);
+    let icon_file_data_id: u32 = icon_map.get(&id).copied().unwrap_or(0);
 
     let value = format!(
         "ItemInfo {{ name: \"{}\", quality: {}, item_level: {}, required_level: {}, \
-         inventory_type: {}, sell_price: {}, stackable: {}, bonding: {}, expansion_id: {} }}",
+         inventory_type: {}, sell_price: {}, stackable: {}, bonding: {}, expansion_id: {}, \
+         icon_file_data_id: {} }}",
         escaped_name,
         quality,
         item_level,
@@ -99,7 +163,8 @@ fn parse_item_row(line: &str) -> Option<(u32, String)> {
         sell_price,
         stackable,
         bonding,
-        expansion_id
+        expansion_id,
+        icon_file_data_id
     );
     Some((id, value))
 }
@@ -122,6 +187,7 @@ fn write_header(out: &mut File) -> std::io::Result<()> {
     writeln!(out, "    pub stackable: u32,")?;
     writeln!(out, "    pub bonding: u8,")?;
     writeln!(out, "    pub expansion_id: u8,")?;
+    writeln!(out, "    pub icon_file_data_id: u32,")?;
     writeln!(out, "}}")?;
     writeln!(out)?;
     Ok(())
@@ -156,6 +222,7 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     )?;
     writeln!(out, "        assert_eq!(item.name, \"Hearthstone\");")?;
     writeln!(out, "        assert_eq!(item.quality, 1);")?;
+    writeln!(out, "        assert!(item.icon_file_data_id != 0, \"Hearthstone should have a non-zero icon\");")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;

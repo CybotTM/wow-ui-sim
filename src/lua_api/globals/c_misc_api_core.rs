@@ -275,7 +275,7 @@ fn register_profession_globals(lua: &Lua) -> Result<()> {
                     Value::Integer(p.icon as i64),
                     Value::Integer(p.skill_level as i64),
                     Value::Integer(p.max_skill_level as i64),
-                    Value::Integer(2), // numAbilities
+                    Value::Integer(0), // numAbilities (no profession spells in spellbook yet)
                     Value::Integer(0), // spellOffset
                     Value::Integer(p.skill_line_id as i64),
                     Value::Integer(p.skill_modifier as i64),

@@ -104,7 +104,7 @@ fn item_info_multi_value(
         Value::String(lua.create_string(inv_type_to_subclass(item.inventory_type))?), // 7 itemSubType
         Value::Integer(item.stackable as i64), // 8  itemStackCount
         Value::String(lua.create_string(inv_type_to_equip_loc(item.inventory_type))?), // 9 itemEquipLoc
-        Value::Integer(134400),                 // 10 itemTexture
+        Value::Integer(if item.icon_file_data_id != 0 { item.icon_file_data_id as i64 } else { 134400 }), // 10 itemTexture
         Value::Integer(item.sell_price as i64), // 11 sellPrice
         Value::Integer(inv_type_to_class_id(item.inventory_type) as i64), // 12 classID
         Value::Integer(0),                      // 13 subclassID
@@ -117,12 +117,16 @@ fn item_info_multi_value(
 
 fn item_info_instant_multi_value(lua: &Lua, id: i32) -> Result<mlua::MultiValue> {
     let (class_name, subclass_name) = item_info_instant_names(id);
+    let icon = crate::items::get_item(id as u32)
+        .map(|i| i.icon_file_data_id)
+        .unwrap_or(0);
+    let icon = if icon != 0 { icon as i64 } else { 134400 };
     Ok(mlua::MultiValue::from_vec(vec![
         Value::Integer(id as i64),
         Value::String(lua.create_string(class_name)?),
         Value::String(lua.create_string(subclass_name)?),
         Value::String(lua.create_string("")?),
-        Value::Integer(134400),
+        Value::Integer(icon),
         Value::Integer(15),
         Value::Integer(0),
     ]))
@@ -154,7 +158,12 @@ fn register_c_item_query_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 fn add_item_icon_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetItemIconByID",
-        lua.create_function(|_, _id: i32| Ok(134400i32))?,
+        lua.create_function(|_, id: i32| {
+            let icon = crate::items::get_item(id as u32)
+                .map(|i| i.icon_file_data_id)
+                .unwrap_or(0);
+            Ok(if icon != 0 { icon } else { 134400u32 })
+        })?,
     )?;
     Ok(())
 }

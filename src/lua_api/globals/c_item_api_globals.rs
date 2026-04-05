@@ -284,8 +284,14 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
             }
             match get_equipped_item_id(lua, slot) {
                 Some(id) if id > 0 => {
-                    // Return a generic icon fileDataID (items don't store icon yet)
-                    Ok(Value::Integer(134400))
+                    let icon = crate::items::get_item(id as u32)
+                        .map(|i| i.icon_file_data_id)
+                        .unwrap_or(134400);
+                    if icon != 0 {
+                        Ok(Value::Integer(icon as i64))
+                    } else {
+                        Ok(Value::Integer(134400))
+                    }
                 }
                 _ => Ok(Value::Nil),
             }

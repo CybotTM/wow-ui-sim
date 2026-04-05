@@ -42,9 +42,10 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let wow_data = wow_data_dir();
     let spell_data = load_spell_data(&wow_data)?;
     std::fs::create_dir_all("data")?;
-    generate_spell_table(&spell_data)?;
-    generate_spell_descriptions(&spell_data)?;
-    generate_spell_power_table(&spell_data)?;
+    let required_ids = collect_required_spell_ids()?;
+    generate_spell_table(&spell_data, &required_ids)?;
+    generate_spell_descriptions(&spell_data, &required_ids)?;
+    generate_spell_power_table(&spell_data, &required_ids)?;
     Ok(())
 }
 
@@ -86,7 +87,10 @@ fn load_spell_data(wow_data: &Path) -> Result<SpellData, Box<dyn std::error::Err
     })
 }
 
-fn generate_spell_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_spell_table(
+    spell_data: &SpellData,
+    required_ids: &BTreeSet<u32>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let output_path = Path::new("data/spells.rs");
     let mut out = File::create(output_path)?;
     write_header(&mut out)?;
@@ -96,6 +100,7 @@ fn generate_spell_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error
         &spell_data.spell_subtexts,
         &spell_data.spell_misc,
         &spell_data.spell_targets,
+        required_ids,
     )?;
     write_lookup_fn(&mut out)?;
     write_tests(&mut out)?;
@@ -104,25 +109,36 @@ fn generate_spell_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error
     Ok(())
 }
 
-fn generate_spell_descriptions(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_spell_descriptions(
+    spell_data: &SpellData,
+    required_ids: &BTreeSet<u32>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let descriptions_path = Path::new("data/spell_descriptions.rs");
     let mut desc_out = File::create(descriptions_path)?;
-    let description_ids =
-        collect_compact_description_spell_ids("data/traits.rs", "data/spells.rs")?;
     let description_count = write_spell_descriptions(
         &mut desc_out,
         &spell_data.spell_descriptions,
-        &description_ids,
+        required_ids,
     )?;
     println!("Generated {} compact spell descriptions", description_count);
     println!("Output: {}", descriptions_path.display());
     Ok(())
 }
 
-fn generate_spell_power_table(spell_data: &SpellData) -> Result<(), Box<dyn std::error::Error>> {
+fn generate_spell_power_table(
+    spell_data: &SpellData,
+    required_ids: &BTreeSet<u32>,
+) -> Result<(), Box<dyn std::error::Error>> {
     let power_path = Path::new("data/spell_power.rs");
     let mut power_out = File::create(power_path)?;
-    let power_count = write_spell_power(&mut power_out, &spell_data.spell_power)?;
+    // Only include power data for required spells
+    let filtered_power: HashMap<u32, Vec<SpellPowerRow>> = spell_data
+        .spell_power
+        .iter()
+        .filter(|(id, _)| required_ids.contains(id))
+        .map(|(id, rows)| (*id, rows.clone()))
+        .collect();
+    let power_count = write_spell_power(&mut power_out, &filtered_power)?;
     println!("Generated {} spell power entries", power_count);
     println!("Output: {}", power_path.display());
     Ok(())
@@ -134,11 +150,15 @@ fn build_spell_map(
     spell_subtexts: &HashMap<u32, String>,
     spell_misc: &HashMap<u32, (u32, u32)>,
     spell_targets: &HashMap<u32, u8>,
+    required_ids: &BTreeSet<u32>,
 ) -> Result<u32, Box<dyn std::error::Error>> {
     let mut builder = phf_codegen::Map::new();
     let mut count = 0u32;
 
-    for (&spell_id, name) in spell_names {
+    for &spell_id in required_ids {
+        let Some(name) = spell_names.get(&spell_id) else {
+            continue;
+        };
         let escaped_name = escape_str(name);
         let subtext = spell_subtexts
             .get(&spell_id)
@@ -273,7 +293,7 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_spell_count() {{")?;
-    writeln!(out, "        assert!(SPELL_DB.len() > 300_000);")?;
+    writeln!(out, "        assert!(SPELL_DB.len() > 100);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
@@ -361,31 +381,52 @@ fn load_spell_descriptions(
     Ok(map)
 }
 
-fn collect_compact_description_spell_ids(
-    traits_path: &str,
-    spells_path: &str,
-) -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
-    let mut ids = BTreeSet::new();
-    let traits_src = std::fs::read_to_string(traits_path)?;
-    for marker in ["spell_id: ", "overrides_spell_id: ", "visible_spell_id: "] {
-        collect_number_literals_after(&traits_src, marker, &mut ids);
+/// Collect all spell IDs the simulator actually needs.
+///
+/// Sources:
+/// - `data/traits.rs`: spell_id, overrides_spell_id, visible_spell_id, override_icon fields
+/// - `src/lua_api/globals/spellbook_data.rs`: spell(N) and passive(N) calls
+/// - Hardcoded baseline: action bar spells, trinket/item procs not covered elsewhere
+fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Error>> {
+    const BASELINE: &[u32] = &[
+        100, 116, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534, 1272143, 1279510,
+    ];
+
+    let mut trait_ids = BTreeSet::new();
+    let traits_src = std::fs::read_to_string("data/traits.rs")?;
+    for marker in [
+        "spell_id: ",
+        "overrides_spell_id: ",
+        "visible_spell_id: ",
+        "override_icon: ",
+    ] {
+        collect_number_literals_after(&traits_src, marker, &mut trait_ids);
     }
 
-    let spells_src = std::fs::read_to_string(spells_path)?;
-    for line in spells_src.lines() {
-        let trimmed = line.trim_start();
-        if !trimmed.starts_with('(') {
-            continue;
-        }
-        let Some((id_text, _rest)) = trimmed[1..].split_once(',') else {
-            continue;
-        };
-        if let Ok(id) = id_text.trim().parse::<u32>() {
-            ids.insert(id);
-        }
+    let mut spellbook_ids = BTreeSet::new();
+    let spellbook_src =
+        std::fs::read_to_string("src/lua_api/globals/spellbook_data.rs")?;
+    for marker in ["spell(", "passive("] {
+        collect_number_literals_after(&spellbook_src, marker, &mut spellbook_ids);
     }
 
-    Ok(ids)
+    let baseline_ids: BTreeSet<u32> = BASELINE.iter().copied().collect();
+
+    println!(
+        "Required spell IDs: {} (traits: {}, spellbook: {}, baseline: {})",
+        trait_ids.len() + spellbook_ids.len() + baseline_ids.len(),
+        trait_ids.len(),
+        spellbook_ids.len(),
+        baseline_ids.len(),
+    );
+
+    let mut all = BTreeSet::new();
+    all.extend(&trait_ids);
+    all.extend(&spellbook_ids);
+    all.extend(&baseline_ids);
+
+    println!("Required spell IDs (deduplicated): {}", all.len());
+    Ok(all)
 }
 
 fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32>) {
@@ -406,6 +447,7 @@ fn collect_number_literals_after(src: &str, marker: &str, out: &mut BTreeSet<u32
 }
 
 /// Parsed SpellPower row.
+#[derive(Clone)]
 struct SpellPowerRow {
     power_type: i8,
     mana_cost: i32,
@@ -601,7 +643,7 @@ fn write_spell_power_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_spell_power_count() {{")?;
-    writeln!(out, "        assert!(SPELL_POWER_DB.len() > 5000);")?;
+    writeln!(out, "        assert!(SPELL_POWER_DB.len() > 100);")?;
     writeln!(out, "    }}")?;
     writeln!(out)?;
     writeln!(out, "    #[test]")?;

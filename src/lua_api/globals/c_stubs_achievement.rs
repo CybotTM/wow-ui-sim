@@ -1,6 +1,9 @@
 //! Achievement, tracking, and SimulatePing stubs split from c_stubs_api_extra.rs.
 
+use crate::lua_api::state::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Achievement category API stubs needed by Blizzard_AchievementUI at parse time.
 pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
@@ -48,20 +51,28 @@ pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Stub for GetAchievementInfo — returns 14 values matching WoW's signature.
+fn is_achievement_earned(lua: &Lua, aid: i32) -> bool {
+    lua.app_data_ref::<Rc<RefCell<SimState>>>()
+        .map(|s| s.borrow().world.earned_achievements.contains(&aid))
+        .unwrap_or(false)
+}
+
+/// GetAchievementInfo — returns 14 values matching WoW's signature.
+/// Checks earned_achievements HashSet for the completed flag.
 fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
     let aid = match &id {
-        Value::Integer(n) => *n,
-        Value::Number(n) => *n as i64,
+        Value::Integer(n) => *n as i32,
+        Value::Number(n) => *n as i32,
         _ => return Ok(mlua::MultiValue::from_vec(vec![Value::Nil])),
     };
+    let completed = is_achievement_earned(lua, aid);
     Ok(mlua::MultiValue::from_vec(vec![
-        Value::Integer(aid),
+        Value::Integer(aid as i64),
         Value::String(lua.create_string("Achievement")?),
         Value::Integer(10),
-        Value::Boolean(false),
-        Value::Integer(1),
-        Value::Integer(1),
+        Value::Boolean(completed),
+        Value::Integer(if completed { 1 } else { 0 }),
+        Value::Integer(if completed { 1 } else { 0 }),
         Value::Integer(2025),
         Value::String(lua.create_string("Achievement description")?),
         Value::Integer(0),

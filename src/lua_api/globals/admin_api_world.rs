@@ -129,8 +129,12 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
     add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |state| {
         &mut state.world.collected_toys
     })?;
-    add_world_toggle_setter(lua, t, "SetAchievementEarned", state, |state| {
+    add_world_toggle_setter(lua, t, "SetAchievementEarned", Rc::clone(&state), |state| {
         &mut state.world.earned_achievements
+    })?;
+    super::admin_api::set_fn(lua, t, "HasAchievement", {
+        let s = state;
+        move |_, id: i32| Ok(s.borrow().world.earned_achievements.contains(&id))
     })?;
     Ok(())
 }

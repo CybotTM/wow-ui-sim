@@ -203,21 +203,21 @@ fn default_equipped_items() -> HashMap<i32, EquippedItem> {
         gem_ids: [0, 0, 0],
     };
     [
-        (1, e(221096)),  // Head: Entombed Seraph's Casque
-        (2, e(225577)),  // Neck: Sureki Zealot's Insignia
-        (3, e(221094)),  // Shoulder: Entombed Seraph's Mantle
-        (5, e(221091)),  // Chest: Entombed Seraph's Castigation
-        (6, e(221086)),  // Waist: Devoted Priest's Sash
-        (7, e(221095)),  // Legs: Entombed Seraph's Greaves
-        (8, e(221087)),  // Feet: Devoted Priest's Treads
-        (9, e(221088)),  // Wrist: Devoted Priest's Wristguards
-        (10, e(221092)), // Hands: Entombed Seraph's Hallowed Grasp
-        (11, e(225578)), // Ring1: Seal of the Poisoned Pact
-        (12, e(225579)), // Ring2: Loop of Hovering Menace
-        (13, e(225580)), // Trinket1: Skarmorak Shard
-        (14, e(225581)), // Trinket2: Void Reaper's Contract
-        (15, e(225582)), // Back: Shroud of the Priory
-        (16, e(225583)), // MainHand: Greatsword of Radiant Dawn
+        (1, e(211993)),  // Head: Entombed Seraph's Casque
+        (2, e(230637)),  // Neck: Astral Gladiator's Amulet
+        (3, e(211991)),  // Shoulder: Entombed Seraph's Plumes
+        (5, e(211996)),  // Chest: Entombed Seraph's Breastplate
+        (6, e(211990)),  // Waist: Entombed Seraph's Waistguard
+        (7, e(211992)),  // Legs: Entombed Seraph's Greaves
+        (8, e(211995)),  // Feet: Entombed Seraph's Sabatons
+        (9, e(211989)),  // Wrist: Entombed Seraph's Shackles
+        (10, e(211994)), // Hands: Entombed Seraph's Castigation
+        (11, e(225748)), // Ring1: Seal of the Silent Vigil
+        (12, e(215135)), // Ring2: Ring of Earthen Craftsmanship
+        (13, e(218715)), // Trinket1: Forged Gladiator's Emblem
+        (14, e(236914)), // Trinket2: Unbound Vision Journal
+        (15, e(211988)), // Back: Entombed Seraph's Greatcloak
+        (16, e(229181)), // MainHand: Ordained Forge Maul
     ]
     .into_iter()
     .collect()
