@@ -29,67 +29,65 @@ fn register_c_traits_config(
 
 /// Stateless config stubs.
 fn register_config_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
-    t.set(
-        "GenerateImportString",
-        lua.create_function(|_, _id: i32| Ok("dummy_talent_string".to_string()))?,
-    )?;
-    t.set(
-        "GetConfigIDBySystemID",
-        lua.create_function(|_, _id: i32| Ok(1i32))?,
-    )?;
-    t.set(
-        "GetConfigIDByTreeID",
-        lua.create_function(|_, _id: i32| Ok(1i32))?,
-    )?;
+    register_config_bulk_stubs(t, lua)?;
     t.set("GetConfigInfo", lua.create_function(create_config_info)?)?;
-    t.set(
-        "CanPurchaseRank",
-        lua.create_function(|_, (_a, _b, _c): (i32, i32, i32)| Ok(false))?,
-    )?;
     t.set(
         "GetLoadoutSerializationVersion",
         lua.create_function(|_, ()| Ok(2i32))?,
     )?;
-    t.set("CommitConfig", lua.create_function(|_, _id: i32| Ok(true))?)?;
-    t.set(
-        "RollbackConfig",
-        lua.create_function(|_, _id: i32| Ok(true))?,
-    )?;
     t.set(
         "GetStagedChanges",
-        lua.create_function(|lua, _id: i32| {
-            Ok((
-                lua.create_table()?,
-                lua.create_table()?,
-                lua.create_table()?,
-            ))
-        })?,
+        lua.create_function(stub_staged_changes)?,
     )?;
     t.set(
         "GetStagedChangesCost",
-        lua.create_function(|lua, _id: i32| lua.create_table())?,
+        lua.create_function(|lua, _: i32| lua.create_table())?,
     )?;
     t.set(
-        "RefundAllRanks",
-        lua.create_function(|_, (_a, _b): (i32, i32)| Ok(false))?,
-    )?;
-    t.set(
-        "CascadeRepurchaseRanks",
-        lua.create_function(|_, (_a, _b): (i32, i32)| Ok(false))?,
-    )?;
-    t.set(
-        "ClearCascadeRepurchaseHistory",
-        lua.create_function(|_, _id: i32| Ok(()))?,
+        "GenerateImportString",
+        lua.create_function(|_, _: i32| Ok("dummy_talent_string".to_string()))?,
     )?;
     t.set(
         "GenerateInspectImportString",
-        lua.create_function(|_, _unit: String| Ok("".to_string()))?,
+        lua.create_function(|_, _: String| Ok("".to_string()))?,
     )?;
     t.set(
         "GetTreeHash",
-        lua.create_function(|_, _id: i32| Ok("0".to_string()))?,
+        lua.create_function(|_, _: i32| Ok("0".to_string()))?,
     )?;
     Ok(())
+}
+
+fn register_config_bulk_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
+    let one = lua.create_function(|_, _: i32| Ok(1i32))?;
+    for name in ["GetConfigIDBySystemID", "GetConfigIDByTreeID"] {
+        t.set(name, one.clone())?;
+    }
+    let true_stub = lua.create_function(|_, _: i32| Ok(true))?;
+    for name in ["CommitConfig", "RollbackConfig"] {
+        t.set(name, true_stub.clone())?;
+    }
+    let false_pair = lua.create_function(|_, _: (i32, i32)| Ok(false))?;
+    for name in ["RefundAllRanks", "CascadeRepurchaseRanks"] {
+        t.set(name, false_pair.clone())?;
+    }
+    t.set(
+        "CanPurchaseRank",
+        lua.create_function(|_, _: (i32, i32, i32)| Ok(false))?,
+    )?;
+    t.set(
+        "ClearCascadeRepurchaseHistory",
+        lua.create_function(|_, _: i32| Ok(()))?,
+    )?;
+    Ok(())
+}
+
+fn stub_staged_changes(lua: &Lua, _id: i32) -> Result<(mlua::Table, mlua::Table, mlua::Table)> {
+    Ok((
+        lua.create_table()?,
+        lua.create_table()?,
+        lua.create_table()?,
+    ))
 }
 
 /// State-aware config mutations: PurchaseRank, RefundRank, SetSelection, Reset, etc.
@@ -237,17 +235,21 @@ fn set_selection(
 }
 
 /// Fire TRAIT_SUB_TREE_CHANGED when a SubTreeSelection node (type 3) gets a new entry.
-fn fire_sub_tree_changed_if_needed(
-    lua: &Lua,
-    node_id: u32,
-    entry_id: Option<u32>,
-) -> Result<()> {
+fn fire_sub_tree_changed_if_needed(lua: &Lua, node_id: u32, entry_id: Option<u32>) -> Result<()> {
     use crate::traits::{TRAIT_ENTRY_DB, TRAIT_NODE_DB};
     let Some(eid) = entry_id else { return Ok(()) };
-    let Some(node) = TRAIT_NODE_DB.get(&node_id) else { return Ok(()) };
-    if node.node_type != 3 { return Ok(()) }
-    let Some(entry) = TRAIT_ENTRY_DB.get(&eid) else { return Ok(()) };
-    if entry.sub_tree_id == 0 { return Ok(()) }
+    let Some(node) = TRAIT_NODE_DB.get(&node_id) else {
+        return Ok(());
+    };
+    if node.node_type != 3 {
+        return Ok(());
+    }
+    let Some(entry) = TRAIT_ENTRY_DB.get(&eid) else {
+        return Ok(());
+    };
+    if entry.sub_tree_id == 0 {
+        return Ok(());
+    }
     let fire: mlua::Function = lua.globals().get("FireEvent")?;
     fire.call::<()>((
         lua.create_string("TRAIT_SUB_TREE_CHANGED")?,
