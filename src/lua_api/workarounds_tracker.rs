@@ -5,20 +5,25 @@ use super::WowLuaEnv;
 ///
 /// Module registration happens automatically when PLAYER_ENTERING_WORLD and
 /// VARIABLES_LOADED fire (via EventUtil.ContinueAfterAllEvents → Init).
-/// Post-event work (quest title callbacks, height fix) runs in
-/// `finish_objective_tracker`.
+/// Quest titles populate via QUEST_LOG_UPDATE fired in startup events.
 pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
     hide_empty_managed_frames(env);
     setup_tracker_frame(env);
 }
 
-/// Post-event objective tracker setup: ensure modules are registered,
-/// populate quest titles, update the quest module, and force height.
-///
-/// By this point, PLAYER_ENTERING_WORLD and VARIABLES_LOADED have fired,
-/// triggering ObjectiveTrackerManager:Init() via ContinueAfterAllEvents.
-pub(crate) fn finish_objective_tracker(env: &WowLuaEnv) {
-    populate_quest_titles(env);
+/// Fire QuestEventListener callbacks for tracked quests so quest block
+/// headers get their titles. QUEST_LOG_UPDATE refreshes the tracker
+/// structure, but header text comes from QuestEventListener.FireCallbacks.
+pub(crate) fn fire_quest_callbacks(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if QuestEventListener and QuestEventListener.FireCallbacks then
+            for _, qid in ipairs({80000, 80001, 80002}) do
+                pcall(QuestEventListener.FireCallbacks, QuestEventListener, qid)
+            end
+        end
+    "#,
+    );
 }
 
 /// Show ChatFrame1 and set DEFAULT_CHAT_FRAME after addon loading.
@@ -106,34 +111,6 @@ fn setup_tracker_frame(env: &WowLuaEnv) {
             local h = lp:GetHeight() + offsetY
             if h < 100 then h = 400 end
             otf:SetHeight(h)
-        end
-    "#,
-    );
-}
-
-fn populate_quest_titles(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if QuestEventListener and QuestEventListener.FireCallbacks then
-            for _, qid in ipairs({80000, 80001, 80002}) do
-                pcall(QuestEventListener.FireCallbacks, QuestEventListener, qid)
-            end
-        end
-        -- Update quest module directly (bypass container loop which
-        -- crashes on MawBuffs/ScenarioObjectiveTracker stubs)
-        local qt = QuestObjectiveTracker
-        if not qt then return end
-        if not qt.parentContainer then return end
-        local c = qt.parentContainer
-        local avail = c:GetAvailableHeight()
-        pcall(qt.Update, qt, avail, false)
-        local h = qt.contentsHeight or 0
-        if h > 0 then
-            qt:SetHeight(h + (qt.bottomSpacing or 0))
-            qt:ClearAllPoints()
-            qt:SetPoint("TOP", c, "TOP", 0, -(c.topModulePadding or 0))
-            qt:SetPoint("LEFT", c, "LEFT", qt.leftMargin or 0, 0)
-            qt:Show()
         end
     "#,
     );
