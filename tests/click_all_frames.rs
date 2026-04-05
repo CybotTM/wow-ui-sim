@@ -287,6 +287,9 @@ fn test_click_all_frames() {
         let report = click_all_groups(&env);
         let count = report.len();
 
+        for line in &report {
+            eprintln!("  {line}");
+        }
         if count > KNOWN_ERROR_COUNT {
             let mut msg = format!(
                 "New click errors! Expected at most {KNOWN_ERROR_COUNT}, got {count}.\n\
