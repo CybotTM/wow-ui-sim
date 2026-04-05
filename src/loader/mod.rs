@@ -12,6 +12,7 @@ pub(crate) mod precompiled;
 mod xml_file;
 mod xml_fontstring;
 mod xml_frame;
+mod xml_frame_codegen;
 mod xml_frame_extras;
 mod xml_layer_batch;
 mod xml_lifecycle;
