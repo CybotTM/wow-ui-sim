@@ -232,84 +232,91 @@ fn register_spell_misc_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// Register inventory slot functions.
 fn register_inventory_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "GetInventorySlotInfo",
-        lua.create_function(|_, slot_name: String| {
-            Ok((
-                inventory_slot_id(&slot_name),
-                slot_texture_file_data_id(&slot_name),
-            ))
-        })?,
+        lua.create_function(lookup_inventory_slot_info)?,
     )?;
-    globals.set(
+    g.set(
         "GetInventoryItemLink",
-        lua.create_function(|lua, (_unit, slot): (String, i32)| {
-            let item_id = get_equipped_item_id(lua, slot);
-            match item_id {
-                Some(id) if id > 0 => {
-                    let item = crate::items::get_item(id);
-                    let name = item.map_or("Unknown", |i| i.name);
-                    let quality = item.map_or(4, |i| i.quality);
-                    let color = quality_color(quality);
-                    let link = format!("|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r");
-                    Ok(Value::String(lua.create_string(&link)?))
-                }
-                _ => Ok(Value::Nil),
-            }
-        })?,
+        lua.create_function(build_inventory_item_link)?,
     )?;
-    globals.set(
+    g.set(
         "GetInventoryItemID",
-        lua.create_function(|lua, (_unit, slot): (String, i32)| {
-            match get_equipped_item_id(lua, slot) {
-                Some(id) if id > 0 => Ok(Value::Integer(id as i64)),
-                _ => Ok(Value::Nil),
-            }
-        })?,
+        lua.create_function(lookup_inventory_item_id)?,
     )?;
-    globals.set(
+    g.set(
         "GetInventoryItemTexture",
-        lua.create_function(|lua, (_unit, slot): (String, i32)| {
-            if (20..=24).contains(&slot) {
-                return Ok(Value::String(
-                    lua.create_string("Interface\\Icons\\INV_Misc_Bag_08")?,
-                ));
-            }
-            match get_equipped_item_id(lua, slot) {
-                Some(id) if id > 0 => {
-                    let item = crate::items::get_item(id as u32);
-                    let icon = item.map(|i| i.icon_file_data_id).unwrap_or(0);
-                    let icon = if icon != 0 {
-                        icon
-                    } else {
-                        item.map(|i| fallback_icon_for_inv_type(i.inventory_type))
-                            .unwrap_or(134400)
-                    };
-                    Ok(Value::Integer(icon as i64))
-                }
-                _ => Ok(Value::Nil),
-            }
-        })?,
+        lua.create_function(lookup_inventory_item_texture)?,
     )?;
-    globals.set(
-        "GetInventoryItemCount",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(0))?,
-    )?;
-    globals.set(
-        "GetInventoryItemBroken",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(false))?,
-    )?;
-    globals.set(
-        "GetInventoryItemEquippedUnusable",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(false))?,
-    )?;
-    globals.set(
-        "GetInventoryItemCooldown",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok((0.0_f64, 0.0_f64, 1i32)))?,
-    )?;
+    register_inventory_stubs(lua, &g)?;
+    Ok(())
+}
 
+fn lookup_inventory_slot_info(_: &Lua, slot_name: String) -> Result<(i32, i32)> {
+    Ok((
+        inventory_slot_id(&slot_name),
+        slot_texture_file_data_id(&slot_name),
+    ))
+}
+
+fn build_inventory_item_link(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
+    let Some(id) = get_equipped_item_id(lua, slot).filter(|&id| id > 0) else {
+        return Ok(Value::Nil);
+    };
+    let item = crate::items::get_item(id);
+    let name = item.map_or("Unknown", |i| i.name);
+    let quality = item.map_or(4, |i| i.quality);
+    let color = quality_color(quality);
+    let link = format!("|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r");
+    Ok(Value::String(lua.create_string(&link)?))
+}
+
+fn lookup_inventory_item_id(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
+    match get_equipped_item_id(lua, slot) {
+        Some(id) if id > 0 => Ok(Value::Integer(id as i64)),
+        _ => Ok(Value::Nil),
+    }
+}
+
+fn lookup_inventory_item_texture(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
+    let is_bag_slot = (20..=24).contains(&slot);
+    if is_bag_slot {
+        return Ok(Value::String(
+            lua.create_string("Interface\\Icons\\INV_Misc_Bag_08")?,
+        ));
+    }
+    let Some(id) = get_equipped_item_id(lua, slot).filter(|&id| id > 0) else {
+        return Ok(Value::Nil);
+    };
+    let item = crate::items::get_item(id as u32);
+    let icon = item.map(|i| i.icon_file_data_id).unwrap_or(0);
+    let icon = if icon != 0 {
+        icon
+    } else {
+        item.map(|i| fallback_icon_for_inv_type(i.inventory_type))
+            .unwrap_or(134400)
+    };
+    Ok(Value::Integer(icon as i64))
+}
+
+fn register_inventory_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "GetInventoryItemCount",
+        lua.create_function(|_, _: (String, i32)| Ok(0))?,
+    )?;
+    g.set(
+        "GetInventoryItemBroken",
+        lua.create_function(|_, _: (String, i32)| Ok(false))?,
+    )?;
+    g.set(
+        "GetInventoryItemEquippedUnusable",
+        lua.create_function(|_, _: (String, i32)| Ok(false))?,
+    )?;
+    g.set(
+        "GetInventoryItemCooldown",
+        lua.create_function(|_, _: (String, i32)| Ok((0.0_f64, 0.0_f64, 1i32)))?,
+    )?;
     Ok(())
 }
 
