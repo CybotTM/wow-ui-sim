@@ -286,50 +286,50 @@ fn register_character_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
 
 /// Character info stubs: title, item level, inventory quality.
 fn register_character_info_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    let globals = lua.globals();
-    globals.set("GetCurrentTitle", lua.create_function(|_, ()| Ok(0i32))?)?;
-    globals.set(
+    let g = lua.globals();
+    register_character_info_simple_stubs(lua, &g)?;
+    g.set(
         "GetAverageItemLevel",
         lua.create_function(move |_, ()| {
             let ilvl = state.borrow().player.item_level as f64;
             Ok((ilvl, ilvl, ilvl))
         })?,
     )?;
-    globals.set("IsPlayerInRPE", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set(
+    g.set(
         "GetInventoryItemQuality",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(Value::Nil))?,
+        lua.create_function(|_, _: mlua::MultiValue| Ok(Value::Nil))?,
     )?;
-    // GetInventoryItemTexture, GetInventoryItemID, GetInventoryItemLink,
-    // GetInventoryItemCount are registered in c_item_api.rs (loaded after this).
-    globals.set(
-        "GetSpecializationRoleEnum",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    globals.set(
+    g.set(
         "GetPlayerTradeMoney",
         lua.create_function(|_, ()| Ok(0i64))?,
     )?;
-    globals.set(
-        "IsInventoryItemLocked",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    globals.set(
+    g.set(
         "GetRestrictedAccountData",
         lua.create_function(|_, ()| Ok((false, false, false)))?,
     )?;
-    globals.set("IsAccountSecured", lua.create_function(|_, ()| Ok(true))?)?;
-    globals.set(
+    g.set("GetSheathState", lua.create_function(|_, ()| Ok(1i32))?)?;
+    Ok(())
+}
+
+/// Bool and zero-returning character info stubs.
+fn register_character_info_simple_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let false_stub = lua.create_function(|_, _: mlua::MultiValue| Ok(false))?;
+    for name in [
+        "IsPlayerInRPE",
+        "IsInventoryItemLocked",
         "IsActivePlayerNewcomer",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    // GetResSicknessDuration() -> seconds of resurrection sickness remaining (0 = none)
-    globals.set(
+    ] {
+        g.set(name, false_stub.clone())?;
+    }
+    g.set("IsAccountSecured", lua.create_function(|_, ()| Ok(true))?)?;
+    let zero = lua.create_function(|_, ()| Ok(0i32))?;
+    for name in [
+        "GetCurrentTitle",
+        "GetSpecializationRoleEnum",
         "GetResSicknessDuration",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    // GetSheathState() -> 1=none (sheathed), 2=melee, 3=ranged
-    globals.set("GetSheathState", lua.create_function(|_, ()| Ok(1i32))?)?;
+    ] {
+        g.set(name, zero.clone())?;
+    }
     Ok(())
 }
 
