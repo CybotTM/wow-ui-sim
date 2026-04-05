@@ -675,43 +675,43 @@ fn register_cinematic_functions(lua: &Lua) -> Result<()> {
 
 /// Difficulty queries and misc utility stubs.
 fn register_difficulty_and_utility_stubs(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-    // GetItemLevelColor(itemLevel) -> r, g, b
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "GetItemLevelColor",
-        lua.create_function(|_, _ilvl: Value| Ok((1.0_f64, 1.0_f64, 1.0_f64)))?,
+        lua.create_function(|_, _: Value| Ok((1.0_f64, 1.0_f64, 1.0_f64)))?,
     )?;
-    // GetDifficultyInfo(id) -> name, groupType, isHeroic, isChallengeMode, toggleDifficultyID
-    globals.set(
+    g.set(
         "GetDifficultyInfo",
-        lua.create_function(|lua, _id: Value| {
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::String(lua.create_string("")?),
-                Value::String(lua.create_string("")?),
-                Value::Boolean(false),
-                Value::Boolean(false),
-                Value::Integer(0),
-            ]))
-        })?,
+        lua.create_function(stub_difficulty_info)?,
     )?;
-    // IsLegacyDifficulty(difficultyID) -> bool
-    globals.set(
+    g.set(
         "IsLegacyDifficulty",
-        lua.create_function(|_, _id: Value| Ok(false))?,
+        lua.create_function(|_, _: Value| Ok(false))?,
     )?;
-    // BreakUpLargeNumbers(amount) -> formatted string
-    globals.set(
+    g.set(
         "BreakUpLargeNumbers",
-        lua.create_function(|_, amount: Value| {
-            let s = match amount {
-                Value::Integer(n) => n.to_string(),
-                Value::Number(n) => format!("{:.0}", n),
-                _ => "0".to_string(),
-            };
-            Ok(s)
-        })?,
+        lua.create_function(format_large_number)?,
     )?;
     Ok(())
+}
+
+/// Returns (name, groupType, isHeroic, isChallengeMode, toggleDifficultyID).
+fn stub_difficulty_info(lua: &Lua, _id: Value) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string("")?),
+        Value::String(lua.create_string("")?),
+        Value::Boolean(false),
+        Value::Boolean(false),
+        Value::Integer(0),
+    ]))
+}
+
+fn format_large_number(_: &Lua, amount: Value) -> Result<String> {
+    Ok(match amount {
+        Value::Integer(n) => n.to_string(),
+        Value::Number(n) => format!("{:.0}", n),
+        _ => "0".to_string(),
+    })
 }
 
 /// Player movement state functions (read from SimState.movement toggles).
