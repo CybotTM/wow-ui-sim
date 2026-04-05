@@ -42,43 +42,42 @@ fn register_timerunning_functions(lua: &Lua) -> Result<()> {
 
 /// Register BattleNet social functions.
 fn register_battlenet_functions(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set("BNFeaturesEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set(
+    let g = lua.globals();
+    let bn_false = lua.create_function(|_, ()| Ok(false))?;
+    for name in [
+        "BNFeaturesEnabled",
         "BNFeaturesEnabledAndConnected",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    globals.set("BNConnected", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set(
+        "BNConnected",
+    ] {
+        g.set(name, bn_false.clone())?;
+    }
+    g.set(
         "BNGetFriendInfo",
-        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+        lua.create_function(|_, _: i32| Ok(Value::Nil))?,
     )?;
-    globals.set(
+    g.set(
         "BNGetNumFriends",
         lua.create_function(|_, ()| Ok((0, 0, 0, 0)))?,
-    )?; // total, online, favorites, favoritesOnline
-    globals.set(
+    )?;
+    g.set(
         "BNGetNumFriendInvites",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    globals.set(
-        "BNGetInfo",
-        lua.create_function(|lua, ()| {
-            // Return: presenceID, battleTag, toonID, currentBroadcast, bnetAFK, bnetDND, isRIDEnabled
-            Ok((
-                Value::Integer(0),
-                Value::String(lua.create_string("SimPlayer#0000")?),
-                Value::Nil,
-                Value::String(lua.create_string("")?),
-                Value::Boolean(false),
-                Value::Boolean(false),
-                Value::Boolean(false),
-            ))
-        })?,
-    )?;
-
+    g.set("BNGetInfo", lua.create_function(stub_bn_get_info)?)?;
     Ok(())
+}
+
+/// Returns (presenceID, battleTag, toonID, broadcast, AFK, DND, RIDEnabled).
+fn stub_bn_get_info(lua: &Lua, _: ()) -> Result<(Value, Value, Value, Value, Value, Value, Value)> {
+    Ok((
+        Value::Integer(0),
+        Value::String(lua.create_string("SimPlayer#0000")?),
+        Value::Nil,
+        Value::String(lua.create_string("")?),
+        Value::Boolean(false),
+        Value::Boolean(false),
+        Value::Boolean(false),
+    ))
 }
 
 /// Register specialization query functions.
@@ -349,7 +348,8 @@ fn register_character_combat_stubs(lua: &Lua) -> Result<()> {
     globals.set(
         "UnitStat",
         lua.create_function(|lua, (_unit, stat_idx): (String, i32)| {
-            let val = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            let val = lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
                 .map(|s| {
                     let st = &s.borrow().player.stats;
                     match stat_idx {
@@ -445,11 +445,16 @@ fn register_avoidance_and_crit_stubs(lua: &Lua) -> Result<()> {
     g.set("GetBlockChance", lua.create_function(|_, ()| Ok(12.5_f64))?)?;
     g.set("GetParryChance", lua.create_function(|_, ()| Ok(3.0_f64))?)?;
     g.set("GetDodgeChance", lua.create_function(|_, ()| Ok(3.0_f64))?)?;
-    g.set("GetCritChance", lua.create_function(|lua, ()| {
-        Ok(5.0 + lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.crit_pct())
-            .unwrap_or(0.0))
-    })?)?;
+    g.set(
+        "GetCritChance",
+        lua.create_function(|lua, ()| {
+            Ok(5.0
+                + lua
+                    .app_data_ref::<Rc<RefCell<SimState>>>()
+                    .map(|s| s.borrow().player.stats.crit_pct())
+                    .unwrap_or(0.0))
+        })?,
+    )?;
     g.set(
         "GetRangedCritChance",
         lua.create_function(|_, ()| Ok(0.0_f64))?,
@@ -470,7 +475,8 @@ fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
     g.set(
         "GetCombatRating",
         lua.create_function(|lua, id: i32| {
-            let rating = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            let rating = lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
                 .map(|s| {
                     let st = &s.borrow().player.stats;
                     match id {
@@ -491,7 +497,8 @@ fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
     g.set(
         "GetCombatRatingBonus",
         lua.create_function(|lua, id: i32| {
-            let bonus = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            let bonus = lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
                 .map(|s| {
                     let st = &s.borrow().player.stats;
                     match id {
@@ -533,45 +540,67 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
     g.set(
         "GetMasteryEffect",
         lua.create_function(|lua, ()| {
-            let m = lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            let m = lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
                 .map(|s| s.borrow().player.stats.mastery_pct())
                 .unwrap_or(0.0);
             Ok((m + 8.0, m)) // base mastery + rating mastery
         })?,
     )?;
-    g.set("GetHaste", lua.create_function(|lua, ()| {
-        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.haste_pct())
-            .unwrap_or(0.0))
-    })?)?;
-    g.set("GetMeleeHaste", lua.create_function(|lua, ()| {
-        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.haste_pct())
-            .unwrap_or(0.0))
-    })?)?;
+    g.set(
+        "GetHaste",
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.haste_pct())
+                .unwrap_or(0.0))
+        })?,
+    )?;
+    g.set(
+        "GetMeleeHaste",
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.haste_pct())
+                .unwrap_or(0.0))
+        })?,
+    )?;
     g.set(
         "GetVersatilityBonus",
         lua.create_function(|lua, _id: Value| {
-            Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
                 .map(|s| s.borrow().player.stats.versatility_pct())
                 .unwrap_or(0.0))
         })?,
     )?;
-    g.set("GetLifesteal", lua.create_function(|lua, ()| {
-        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.leech_rating as f64 / 100.0)
-            .unwrap_or(0.0))
-    })?)?;
-    g.set("GetAvoidance", lua.create_function(|lua, ()| {
-        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.avoidance_rating as f64 / 72.0)
-            .unwrap_or(0.0))
-    })?)?;
-    g.set("GetSpeed", lua.create_function(|lua, ()| {
-        Ok(lua.app_data_ref::<Rc<RefCell<SimState>>>()
-            .map(|s| s.borrow().player.stats.speed_rating as f64 / 50.0)
-            .unwrap_or(0.0))
-    })?)?;
+    g.set(
+        "GetLifesteal",
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.leech_rating as f64 / 100.0)
+                .unwrap_or(0.0))
+        })?,
+    )?;
+    g.set(
+        "GetAvoidance",
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.avoidance_rating as f64 / 72.0)
+                .unwrap_or(0.0))
+        })?,
+    )?;
+    g.set(
+        "GetSpeed",
+        lua.create_function(|lua, ()| {
+            Ok(lua
+                .app_data_ref::<Rc<RefCell<SimState>>>()
+                .map(|s| s.borrow().player.stats.speed_rating as f64 / 50.0)
+                .unwrap_or(0.0))
+        })?,
+    )?;
     g.set(
         "GetStaggerPercentage",
         lua.create_function(|_, ()| Ok(0.0_f64))?,
