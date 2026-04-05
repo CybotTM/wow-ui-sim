@@ -322,6 +322,112 @@ mod tests {
     }
 
     #[test]
+    fn test_strip_scripts_nested_scripts_blocks() {
+        // A Scripts block nested inside another frame's Scripts block (shouldn't happen
+        // in practice, but tests that the parser resets state at </Scripts>).
+        let xml = r#"<Scripts>
+    <OnLoad>first_load();</OnLoad>
+</Scripts>
+<Scripts>
+    <OnLoad>second_load();</OnLoad>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        // Both OnLoad handlers should survive — they're in separate blocks
+        assert!(result.contains("first_load()"));
+        assert!(result.contains("second_load()"));
+    }
+
+    #[test]
+    fn test_strip_scripts_empty_block() {
+        let xml = r#"<Scripts>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        assert!(result.contains("<Scripts>"));
+        assert!(result.contains("</Scripts>"));
+    }
+
+    #[test]
+    fn test_strip_scripts_unclosed_handler() {
+        // A multiline handler without a matching closing tag — the search runs to end of file.
+        // The function should not panic and should still remove the first occurrence.
+        let xml = r#"<Scripts>
+    <OnEnter>
+        first_enter();
+    </OnEnter>
+    <OnEnter>
+        second_enter();
+"#;
+        let result = strip_duplicate_script_handlers(xml);
+        // First OnEnter should be removed (duplicate), second kept
+        assert!(!result.contains("first_enter()"));
+        assert!(result.contains("second_enter()"));
+    }
+
+    #[test]
+    fn test_strip_scripts_self_closing_then_multiline_same_name() {
+        // Self-closing handler followed by multiline handler with same tag name.
+        let xml = r#"<Scripts>
+    <OnEnter function="OldHandler"/>
+    <OnEnter>
+        new_handler();
+    </OnEnter>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        // Self-closing first occurrence removed, multiline last occurrence kept
+        assert!(!result.contains("OldHandler"));
+        assert!(result.contains("new_handler()"));
+    }
+
+    #[test]
+    fn test_strip_scripts_multiline_then_self_closing_same_name() {
+        // Multiline handler followed by self-closing handler with same tag name.
+        let xml = r#"<Scripts>
+    <OnEnter>
+        old_handler();
+    </OnEnter>
+    <OnEnter function="NewHandler"/>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        // Multiline first occurrence removed, self-closing last occurrence kept
+        assert!(!result.contains("old_handler()"));
+        assert!(result.contains("NewHandler"));
+    }
+
+    #[test]
+    fn test_strip_scripts_scripts_with_inherit_attribute() {
+        // <Scripts inherit="prepend"> is recognized as a Scripts block.
+        // Uses multiline handlers so dedup works (single-line <Tag>code</Tag> is not
+        // recognized as self-closing by the current implementation).
+        let xml = r#"<Scripts inherit="prepend">
+    <OnLoad>
+        first();
+    </OnLoad>
+    <OnLoad>
+        second();
+    </OnLoad>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        assert!(!result.contains("first()"));
+        assert!(result.contains("second()"));
+    }
+
+    #[test]
+    fn test_strip_scripts_single_line_handler_not_detected() {
+        // Single-line <Tag>content</Tag> is NOT recognized as self-closing (only `/>` is).
+        // The function treats it as an unclosed multiline handler and overshoots.
+        // This documents a known limitation — all Blizzard handlers use either
+        // `<Tag function="..."/>` or multiline `<Tag>\n...\n</Tag>`.
+        let xml = r#"<Scripts>
+    <OnLoad>first();</OnLoad>
+    <OnLoad>second();</OnLoad>
+</Scripts>"#;
+        let result = strip_duplicate_script_handlers(xml);
+        // Both survive because the parser doesn't detect the close on the same line
+        assert!(result.contains("first()"));
+        assert!(result.contains("second()"));
+    }
+
+    #[test]
     fn test_strip_packager_self_closing_non_debug() {
         // BlizzMove Libs.xml style: self-closing comment markers, content is already valid
         let xml = r#"<Ui>
