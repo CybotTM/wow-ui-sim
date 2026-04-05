@@ -72,6 +72,7 @@ fn partition_children(
 /// Sort regions by (draw_layer, draw_sub_layer, type_flag, id).
 /// FontStrings sort after Textures within the same layer (type_flag=1 vs 0).
 fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
+    use std::cmp::Reverse;
     regions.sort_by(|&a, &b| {
         let (fa, fb) = match (widgets.get(a), widgets.get(b)) {
             (Some(fa), Some(fb)) => (fa, fb),
@@ -80,12 +81,21 @@ fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
         let type_flag = |f: &crate::widget::Frame| -> u8 {
             u8::from(f.widget_type == crate::widget::WidgetType::FontString)
         };
-        (fa.draw_layer as i32, fa.draw_sub_layer, type_flag(fa), a).cmp(&(
-            fb.draw_layer as i32,
-            fb.draw_sub_layer,
-            type_flag(fb),
-            b,
-        ))
+        // Reverse(id): earlier-created regions (lower ID) render on top within
+        // the same draw layer, matching WoW's behavior where the icon texture
+        // (created first in XML) renders above SlotArt (created later).
+        (
+            fa.draw_layer as i32,
+            fa.draw_sub_layer,
+            type_flag(fa),
+            Reverse(a),
+        )
+            .cmp(&(
+                fb.draw_layer as i32,
+                fb.draw_sub_layer,
+                type_flag(fb),
+                Reverse(b),
+            ))
     });
 }
 
