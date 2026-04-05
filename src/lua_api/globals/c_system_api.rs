@@ -12,6 +12,45 @@
 //! - C_Soulbinds - Shadowlands soulbind system
 
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+
+thread_local! {
+    static COLLAPSED_HEADERS: RefCell<Option<Vec<bool>>> = const { RefCell::new(None) };
+}
+
+fn with_collapsed_headers<F, R>(f: F) -> R
+where
+    F: FnOnce(&mut Vec<bool>) -> R,
+{
+    COLLAPSED_HEADERS.with(|cell| {
+        let mut opt = cell.borrow_mut();
+        if opt.is_none() {
+            let state = super::reputation_data::faction_list()
+                .iter()
+                .map(|e| e.is_header && e.is_collapsed)
+                .collect();
+            *opt = Some(state);
+        }
+        f(opt.as_mut().unwrap())
+    })
+}
+
+fn visible_faction_indices() -> Vec<usize> {
+    let list = super::reputation_data::faction_list();
+    with_collapsed_headers(|collapsed| {
+        let mut visible = Vec::new();
+        let mut header_collapsed = false;
+        for (i, entry) in list.iter().enumerate() {
+            if entry.is_header {
+                header_collapsed = collapsed.get(i).copied().unwrap_or(false);
+                visible.push(i);
+            } else if !header_collapsed {
+                visible.push(i);
+            }
+        }
+        visible
+    })
+}
 
 /// Register system-related C_* namespaces.
 pub fn register_c_system_api(lua: &Lua) -> Result<()> {
@@ -154,7 +193,7 @@ fn register_c_reputation(lua: &Lua) -> Result<mlua::Table> {
     )?;
     t.set(
         "GetNumFactions",
-        lua.create_function(|_, ()| Ok(super::reputation_data::num_factions()))?,
+        lua.create_function(|_, ()| Ok(visible_faction_indices().len() as i32))?,
     )?;
     t.set(
         "GetFactionInfo",
@@ -193,19 +232,48 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "ExpandFactionHeader",
-        lua.create_function(|_, _i: i32| Ok(()))?,
+        lua.create_function(|_, visible_index: i32| {
+            let visible = visible_faction_indices();
+            if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
+                with_collapsed_headers(|c| {
+                    if let Some(v) = c.get_mut(actual_idx) { *v = false; }
+                });
+            }
+            Ok(())
+        })?,
     )?;
     t.set(
         "CollapseFactionHeader",
-        lua.create_function(|_, _i: i32| Ok(()))?,
+        lua.create_function(|_, visible_index: i32| {
+            let visible = visible_faction_indices();
+            if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
+                with_collapsed_headers(|c| {
+                    if let Some(v) = c.get_mut(actual_idx) { *v = true; }
+                });
+            }
+            Ok(())
+        })?,
     )?;
     t.set(
         "ExpandAllFactionHeaders",
-        lua.create_function(|_, ()| Ok(()))?,
+        lua.create_function(|_, ()| {
+            with_collapsed_headers(|c| c.iter_mut().for_each(|v| *v = false));
+            Ok(())
+        })?,
     )?;
     t.set(
         "CollapseAllFactionHeaders",
-        lua.create_function(|_, ()| Ok(()))?,
+        lua.create_function(|_, ()| {
+            let list = super::reputation_data::faction_list();
+            with_collapsed_headers(|c| {
+                for (i, entry) in list.iter().enumerate() {
+                    if entry.is_header {
+                        if let Some(v) = c.get_mut(i) { *v = true; }
+                    }
+                }
+            });
+            Ok(())
+        })?,
     )?;
     t.set(
         "GetReputationSortType",
@@ -225,7 +293,7 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "GetSelectedFaction",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
+        lua.create_function(|_, ()| Ok(0i32))?,
     )?;
     t.set(
         "SetSelectedFaction",
@@ -259,6 +327,7 @@ fn build_faction_table(
     lua: &Lua,
     f: &super::reputation_data::FactionEntry,
     index: i32,
+    is_collapsed: bool,
 ) -> Result<Value> {
     let info = lua.create_table()?;
     info.set("factionID", f.faction_id)?;
@@ -269,7 +338,7 @@ fn build_faction_table(
     info.set("currentReactionThreshold", 0)?;
     info.set("nextReactionThreshold", f.top_value)?;
     info.set("isHeader", f.is_header)?;
-    info.set("isCollapsed", f.is_collapsed)?;
+    info.set("isCollapsed", is_collapsed)?;
     info.set("isChild", f.is_child)?;
     info.set("isAccountWide", f.is_account_wide)?;
     info.set("factionIndex", index)?;
@@ -281,28 +350,29 @@ fn build_faction_table(
 }
 
 fn faction_data_by_id(lua: &Lua, faction_id: i32) -> Result<Value> {
-    use super::reputation_data;
-    match reputation_data::get_faction_by_id(faction_id) {
-        Some(f) => build_faction_table(lua, f, 0),
+    match super::reputation_data::get_faction_by_id(faction_id) {
+        Some(f) => build_faction_table(lua, f, 0, false),
         None => Ok(Value::Nil),
     }
 }
 
 fn faction_data_by_index(lua: &Lua, index: Option<i32>) -> Result<Value> {
-    use super::reputation_data;
     let Some(index) = index else {
         return Ok(Value::Nil);
     };
-    match reputation_data::get_faction_by_index(index) {
-        Some(f) => build_faction_table(lua, f, index),
-        None => Ok(Value::Nil),
-    }
+    let visible = visible_faction_indices();
+    let Some(&actual_idx) = visible.get((index - 1) as usize) else {
+        return Ok(Value::Nil);
+    };
+    let list = super::reputation_data::faction_list();
+    let f = &list[actual_idx];
+    let is_collapsed = with_collapsed_headers(|c| c.get(actual_idx).copied().unwrap_or(false));
+    build_faction_table(lua, f, index, is_collapsed)
 }
 
 fn watched_faction_data(lua: &Lua, _: ()) -> Result<Value> {
-    use super::reputation_data;
-    match reputation_data::watched_faction() {
-        Some(f) => build_faction_table(lua, f, 0),
+    match super::reputation_data::watched_faction() {
+        Some(f) => build_faction_table(lua, f, 0, false),
         None => Ok(Value::Nil),
     }
 }

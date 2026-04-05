@@ -30,15 +30,11 @@ impl<'a> LoaderEnv<'a> {
         Self { lua, state }
     }
 
-    /// Execute Lua code (generated frame creation code, mixins, etc.).
-    ///
-    /// For secure addons, applies `setfenv` but skips the expensive
-    /// `refresh_secure_environment` — that's only needed when loading actual
-    /// Lua files that may define new globals (see `apply_secure_env`).
+    /// Execute Lua code.
     pub fn exec(&self, code: &str) -> Result<()> {
         let func = crate::loader::chunk_cache::load_chunk(self.lua, code, "loader-exec")?;
         if self.loading_addon_uses_secure_env() {
-            super::secure_env::apply_secure_env_no_refresh(self.lua, &func)?;
+            super::secure_env::apply_secure_env(self.lua, &func)?;
         }
         func.call::<()>(())?;
         Ok(())

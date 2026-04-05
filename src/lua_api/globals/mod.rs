@@ -91,6 +91,7 @@ pub mod mixin_api;
 pub mod player_api;
 pub mod protected_call;
 pub mod quest_frames;
+pub mod profession_data;
 pub mod reputation_data;
 pub mod security_api;
 pub mod settings_api;

@@ -188,6 +188,11 @@ static FACTION_LIST: &[FactionEntry] = &[
     ),
 ];
 
+/// Access the full static faction list.
+pub fn faction_list() -> &'static [FactionEntry] {
+    FACTION_LIST
+}
+
 /// Number of factions in the list (visible, considering expansion state).
 pub fn num_factions() -> i32 {
     FACTION_LIST.len() as i32

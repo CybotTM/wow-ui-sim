@@ -14,6 +14,7 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_date_and_time(lua)?;
     register_c_scenario_info(lua)?;
     register_c_tooltip_info_overrides(lua)?;
+    register_profession_globals(lua)?;
 
     register_c_trade_skill(lua)?;
     register_c_mythic_plus(lua)?;
@@ -247,47 +248,176 @@ fn create_trait_entry_tooltip(lua: &Lua, (entry_id, rank): (i32, Option<i32>)) -
     Ok(Value::Table(tooltip))
 }
 
+fn register_profession_globals(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    // GetProfessions() -> prof1, prof2, archaeology, fishing, cooking
+    // We have Blacksmithing (index 1) and Mining (index 2)
+    g.set(
+        "GetProfessions",
+        lua.create_function(|_, ()| {
+            Ok((
+                Value::Integer(1), // prof1 = Blacksmithing
+                Value::Integer(2), // prof2 = Mining
+                Value::Nil,        // archaeology
+                Value::Nil,        // fishing
+                Value::Nil,        // cooking
+            ))
+        })?,
+    )?;
+    // GetProfessionInfo(index) -> name, icon, skillLevel, maxSkillLevel, ...
+    g.set(
+        "GetProfessionInfo",
+        lua.create_function(|lua, index: i32| {
+            use super::profession_data;
+            match profession_data::get_profession_by_index((index - 1) as usize) {
+                Some(p) => Ok(mlua::MultiValue::from_vec(vec![
+                    Value::String(lua.create_string(p.name)?),
+                    Value::Integer(p.icon as i64),
+                    Value::Integer(p.skill_level as i64),
+                    Value::Integer(p.max_skill_level as i64),
+                    Value::Integer(2), // numAbilities
+                    Value::Integer(0), // spellOffset
+                    Value::Integer(p.skill_line_id as i64),
+                    Value::Integer(p.skill_modifier as i64),
+                    Value::Integer(0), // specializationIndex
+                    Value::Integer(0), // specializationOffset
+                ])),
+                None => Ok(mlua::MultiValue::new()),
+            }
+        })?,
+    )?;
+    Ok(())
+}
+
 fn register_c_trade_skill(lua: &Lua) -> Result<()> {
+    use super::profession_data;
+
     let t = lua.create_table()?;
 
     t.set(
         "GetTradeSkillLine",
-        lua.create_function(|_, ()| Ok((0i32, Value::Nil, 0i32, 0i32)))?,
-    )?;
-    t.set(
-        "GetRecipeInfo",
-        lua.create_function(|lua, _id: i32| {
-            let info = lua.create_table()?;
-            info.set("recipeID", 0)?;
-            info.set("name", Value::Nil)?;
-            info.set("craftable", false)?;
-            Ok(info)
+        lua.create_function(|_, ()| {
+            let p = profession_data::get_profession_by_index(0);
+            match p {
+                Some(p) => Ok((p.skill_line_id, Value::Nil, p.skill_level, p.max_skill_level)),
+                None => Ok((0i32, Value::Nil, 0i32, 0i32)),
+            }
         })?,
     )?;
-    t.set(
-        "GetRecipeSchematic",
-        lua.create_function(|lua, _id: i32| {
-            let s = lua.create_table()?;
-            s.set("recipeID", 0)?;
-            Ok(s)
-        })?,
-    )?;
-    t.set(
-        "IsTradeSkillLinked",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    t.set("IsTradeSkillReady", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("IsTradeSkillLinked", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("IsNPCCrafting", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("IsRuneforging", lua.create_function(|_, ()| Ok(false))?)?;
+    register_trade_skill_profession_info(lua, &t)?;
+    register_trade_skill_recipe_funcs(lua, &t)?;
+    register_trade_skill_stubs(lua, &t)?;
+
+    lua.globals().set("C_TradeSkillUI", t)?;
+    Ok(())
+}
+
+fn register_trade_skill_profession_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    use super::profession_data;
+
     t.set(
-        "GetAllRecipeIDs",
-        lua.create_function(|lua, ()| lua.create_table())?,
+        "GetBaseProfessionInfo",
+        lua.create_function(|lua, ()| {
+            build_profession_table(lua, profession_data::get_profession_by_index(0))
+        })?,
+    )?;
+    t.set(
+        "GetChildProfessionInfo",
+        lua.create_function(|lua, ()| {
+            build_profession_table(lua, profession_data::get_profession_by_index(0))
+        })?,
+    )?;
+    t.set(
+        "GetChildProfessionInfos",
+        lua.create_function(|lua, ()| {
+            let tbl = lua.create_table()?;
+            for (i, p) in profession_data::PROFESSIONS.iter().enumerate() {
+                tbl.set(i + 1, build_profession_table_inner(lua, p)?)?;
+            }
+            Ok(tbl)
+        })?,
+    )?;
+    t.set(
+        "GetTradeSkillTexture",
+        lua.create_function(|_, _id: Value| {
+            Ok(profession_data::get_profession_by_index(0).map_or(0, |p| p.icon))
+        })?,
     )?;
     t.set(
         "GetProfessionSkillLineID",
-        lua.create_function(|_, _p: Value| Ok(0i32))?,
+        lua.create_function(|_, _p: Value| Ok(164i32))?,
     )?;
     t.set(
+        "SetProfessionChildSkillLineID",
+        lua.create_function(|_, _id: Value| Ok(()))?,
+    )?;
+    Ok(())
+}
+
+fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    use super::profession_data;
+
+    t.set(
+        "GetAllRecipeIDs",
+        lua.create_function(|lua, ()| {
+            let ids = profession_data::get_all_recipe_ids();
+            let tbl = lua.create_table()?;
+            for (i, id) in ids.iter().enumerate() {
+                tbl.set(i + 1, *id)?;
+            }
+            Ok(tbl)
+        })?,
+    )?;
+    t.set(
+        "GetFilteredRecipeIDs",
+        lua.create_function(|lua, ()| {
+            let ids = profession_data::get_filtered_recipe_ids();
+            let tbl = lua.create_table()?;
+            for (i, id) in ids.iter().enumerate() {
+                tbl.set(i + 1, *id)?;
+            }
+            Ok(tbl)
+        })?,
+    )?;
+    t.set(
+        "GetRecipeInfo",
+        lua.create_function(|lua, id: i32| build_recipe_info_table(lua, id))?,
+    )?;
+    t.set(
+        "GetRecipeSchematic",
+        lua.create_function(|lua, id: i32| build_recipe_schematic_table(lua, id))?,
+    )?;
+    t.set(
+        "GetCategoryInfo",
+        lua.create_function(|lua, cat_id: i32| {
+            match profession_data::get_category(cat_id) {
+                Some(c) => {
+                    let tbl = lua.create_table()?;
+                    tbl.set("categoryID", c.category_id)?;
+                    tbl.set("name", c.name)?;
+                    tbl.set("parentCategoryID", c.parent_category_id)?;
+                    tbl.set("uiOrder", c.ui_order)?;
+                    Ok(Value::Table(tbl))
+                }
+                None => Ok(Value::Nil),
+            }
+        })?,
+    )?;
+    t.set(
+        "IsRecipeInSkillLine",
+        lua.create_function(|_, (_recipe_id, _prof_id): (i32, i32)| Ok(true))?,
+    )?;
+    Ok(())
+}
+
+fn register_trade_skill_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
         "GetRecipesTracked",
-        lua.create_function(|lua, _is_recraft: bool| lua.create_table())?,
+        lua.create_function(|lua, _is_recraft: Value| lua.create_table())?,
     )?;
     t.set(
         "GetItemReagentQualityByItemInfo",
@@ -305,9 +435,106 @@ fn register_c_trade_skill(lua: &Lua) -> Result<()> {
         "GetItemCraftedQualityInfo",
         lua.create_function(|_, _item: Value| Ok(Value::Nil))?,
     )?;
-
-    lua.globals().set("C_TradeSkillUI", t)?;
+    t.set(
+        "GetRecipeRequirements",
+        lua.create_function(|lua, _id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetQualitiesForRecipe",
+        lua.create_function(|lua, _id: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "IsRecipeFavorite",
+        lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "SetRecipeFavorite",
+        lua.create_function(|_, (_id, _fav): (i32, bool)| Ok(()))?,
+    )?;
+    t.set(
+        "CraftRecipe",
+        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
+    )?;
     Ok(())
+}
+
+fn build_profession_table(lua: &Lua, prof: Option<&super::profession_data::ProfessionInfo>) -> mlua::Result<Value> {
+    match prof {
+        Some(p) => Ok(Value::Table(build_profession_table_inner(lua, p)?)),
+        None => {
+            let tbl = lua.create_table()?;
+            tbl.set("professionID", 0)?;
+            Ok(Value::Table(tbl))
+        }
+    }
+}
+
+fn build_profession_table_inner(lua: &Lua, p: &super::profession_data::ProfessionInfo) -> mlua::Result<mlua::Table> {
+    let tbl = lua.create_table()?;
+    tbl.set("professionID", p.profession_id)?;
+    tbl.set("professionName", p.name)?;
+    tbl.set("parentProfessionName", p.parent_profession_name)?;
+    tbl.set("skillLevel", p.skill_level)?;
+    tbl.set("maxSkillLevel", p.max_skill_level)?;
+    tbl.set("skillModifier", p.skill_modifier)?;
+    tbl.set("skillLineID", p.skill_line_id)?;
+    Ok(tbl)
+}
+
+fn build_recipe_info_table(lua: &Lua, recipe_id: i32) -> mlua::Result<Value> {
+    use super::profession_data;
+    match profession_data::get_recipe(recipe_id) {
+        Some(r) => {
+            let tbl = lua.create_table()?;
+            tbl.set("recipeID", r.recipe_id)?;
+            tbl.set("name", r.name)?;
+            tbl.set("learned", r.learned)?;
+            tbl.set("craftable", r.craftable)?;
+            tbl.set("difficulty", r.difficulty)?;
+            tbl.set("categoryID", r.category_id)?;
+            tbl.set("itemLevel", r.item_level)?;
+            tbl.set("favorite", false)?;
+            Ok(Value::Table(tbl))
+        }
+        None => {
+            let tbl = lua.create_table()?;
+            tbl.set("recipeID", 0)?;
+            tbl.set("name", Value::Nil)?;
+            tbl.set("craftable", false)?;
+            Ok(Value::Table(tbl))
+        }
+    }
+}
+
+fn build_recipe_schematic_table(lua: &Lua, recipe_id: i32) -> mlua::Result<Value> {
+    use super::profession_data;
+    let tbl = lua.create_table()?;
+    match profession_data::get_recipe(recipe_id) {
+        Some(r) => {
+            tbl.set("recipeID", r.recipe_id)?;
+            tbl.set("name", r.name)?;
+            tbl.set("outputItemID", r.output_item_id)?;
+            tbl.set("quantityMin", r.output_quantity)?;
+            tbl.set("quantityMax", r.output_quantity)?;
+            let reagents_tbl = lua.create_table()?;
+            for (i, reagent) in r.reagents.iter().enumerate() {
+                let slot = lua.create_table()?;
+                let items = lua.create_table()?;
+                let item = lua.create_table()?;
+                item.set("itemID", reagent.item_id)?;
+                item.set("quantity", reagent.quantity)?;
+                items.set(1, item)?;
+                slot.set("reagents", items)?;
+                slot.set("quantityRequired", reagent.quantity)?;
+                reagents_tbl.set(i + 1, slot)?;
+            }
+            tbl.set("reagentSlotSchematics", reagents_tbl)?;
+        }
+        None => {
+            tbl.set("recipeID", 0)?;
+        }
+    }
+    Ok(Value::Table(tbl))
 }
 
 fn register_c_mythic_plus(lua: &Lua) -> Result<()> {

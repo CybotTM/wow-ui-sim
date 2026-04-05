@@ -4,7 +4,10 @@ use super::c_item_api::{
     inv_type_to_equip_loc, item_class_from_inv_type, item_class_name_extended, parse_item_id,
     quality_color,
 };
+use crate::lua_api::state::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 pub fn register_item_global_apis(lua: &Lua) -> Result<()> {
     register_c_encoding_util(lua)?;
@@ -245,21 +248,46 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
     )?;
     globals.set(
         "GetInventoryItemLink",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(Value::Nil))?,
+        lua.create_function(|lua, (_unit, slot): (String, i32)| {
+            let item_id = get_equipped_item_id(lua, slot);
+            match item_id {
+                Some(id) if id > 0 => {
+                    let item = crate::items::get_item(id);
+                    let name = item.map_or("Unknown", |i| i.name);
+                    let quality = item.map_or(4, |i| i.quality);
+                    let color = quality_color(quality);
+                    let link = format!(
+                        "|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r"
+                    );
+                    Ok(Value::String(lua.create_string(&link)?))
+                }
+                _ => Ok(Value::Nil),
+            }
+        })?,
     )?;
     globals.set(
         "GetInventoryItemID",
-        lua.create_function(|_, (_unit, _slot): (String, i32)| Ok(Value::Nil))?,
+        lua.create_function(|lua, (_unit, slot): (String, i32)| {
+            match get_equipped_item_id(lua, slot) {
+                Some(id) if id > 0 => Ok(Value::Integer(id as i64)),
+                _ => Ok(Value::Nil),
+            }
+        })?,
     )?;
     globals.set(
         "GetInventoryItemTexture",
         lua.create_function(|lua, (_unit, slot): (String, i32)| {
             if (20..=24).contains(&slot) {
-                Ok(Value::String(
+                return Ok(Value::String(
                     lua.create_string("Interface\\Icons\\INV_Misc_Bag_08")?,
-                ))
-            } else {
-                Ok(Value::Nil)
+                ));
+            }
+            match get_equipped_item_id(lua, slot) {
+                Some(id) if id > 0 => {
+                    // Return a generic icon fileDataID (items don't store icon yet)
+                    Ok(Value::Integer(134400))
+                }
+                _ => Ok(Value::Nil),
             }
         })?,
     )?;
@@ -281,6 +309,12 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
     )?;
 
     Ok(())
+}
+
+fn get_equipped_item_id(lua: &Lua, slot: i32) -> Option<u32> {
+    let state_rc = lua.app_data_ref::<Rc<RefCell<SimState>>>()?;
+    let state = state_rc.borrow();
+    state.player.equipped_items.get(&slot).map(|e| e.item_id)
 }
 
 fn parse_item_id_from_link(link: &str) -> Option<i32> {

@@ -134,6 +134,14 @@ pub struct BagItem {
     pub stack_count: i32,
 }
 
+/// An equipped item in an inventory slot.
+#[derive(Debug, Clone)]
+pub struct EquippedItem {
+    pub item_id: u32,
+    pub enchant_id: u32,
+    pub gem_ids: [u32; 3],
+}
+
 /// Player character state: identity, combat, power, health, buffs, spec.
 #[derive(Debug, Clone)]
 pub struct PlayerState {
@@ -151,6 +159,7 @@ pub struct PlayerState {
     pub is_resting: bool,
     pub money: i64,
     pub item_level: f32,
+    pub equipped_items: HashMap<i32, EquippedItem>,
     pub pvp_enabled: bool,
     pub honor_level: i32,
     pub buffs: Vec<AuraInfo>,
@@ -175,7 +184,8 @@ impl Default for PlayerState {
             in_combat: false,
             is_resting: false,
             money: 0,
-            item_level: 0.0,
+            item_level: 615.0,
+            equipped_items: default_equipped_items(),
             pvp_enabled: false,
             honor_level: 0,
             buffs: Vec::new(),
@@ -184,6 +194,33 @@ impl Default for PlayerState {
             pending_spec_change: None,
         }
     }
+}
+
+fn default_equipped_items() -> HashMap<i32, EquippedItem> {
+    let e = |item_id| EquippedItem {
+        item_id,
+        enchant_id: 0,
+        gem_ids: [0, 0, 0],
+    };
+    [
+        (1, e(221096)),  // Head: Entombed Seraph's Casque
+        (2, e(225577)),  // Neck: Sureki Zealot's Insignia
+        (3, e(221094)),  // Shoulder: Entombed Seraph's Mantle
+        (5, e(221091)),  // Chest: Entombed Seraph's Castigation
+        (6, e(221086)),  // Waist: Devoted Priest's Sash
+        (7, e(221095)),  // Legs: Entombed Seraph's Greaves
+        (8, e(221087)),  // Feet: Devoted Priest's Treads
+        (9, e(221088)),  // Wrist: Devoted Priest's Wristguards
+        (10, e(221092)), // Hands: Entombed Seraph's Hallowed Grasp
+        (11, e(225578)), // Ring1: Seal of the Poisoned Pact
+        (12, e(225579)), // Ring2: Loop of Hovering Menace
+        (13, e(225580)), // Trinket1: Skarmorak Shard
+        (14, e(225581)), // Trinket2: Void Reaper's Contract
+        (15, e(225582)), // Back: Shroud of the Priory
+        (16, e(225583)), // MainHand: Greatsword of Radiant Dawn
+    ]
+    .into_iter()
+    .collect()
 }
 
 /// World/instance state: zone, guild, collections, vault, loot.

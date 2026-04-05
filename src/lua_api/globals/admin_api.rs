@@ -25,6 +25,7 @@ pub fn register_admin_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_buff_api(lua, &admin, Rc::clone(&state))?;
     super::admin_api_world::register_world_admin_api(lua, &admin, Rc::clone(&state))?;
     super::admin_encounter::register_encounter_api(lua, &admin, Rc::clone(&state))?;
+    register_equipment_api(lua, &admin, Rc::clone(&state))?;
 
     lua.globals().set("A_Admin", admin)?;
     Ok(())
@@ -355,6 +356,37 @@ fn register_buff_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
         let s = Rc::clone(&state);
         move |_, ()| {
             s.borrow_mut().player.buffs.clear();
+            Ok(())
+        }
+    })?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Equipment
+// ---------------------------------------------------------------------------
+
+fn register_equipment_api(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    use crate::lua_api::state_types::EquippedItem;
+
+    set_fn(lua, t, "EquipItem", {
+        let s = Rc::clone(&state);
+        move |_, (slot, item_id): (i32, u32)| {
+            s.borrow_mut().player.equipped_items.insert(
+                slot,
+                EquippedItem { item_id, enchant_id: 0, gem_ids: [0, 0, 0] },
+            );
+            Ok(())
+        }
+    })?;
+    set_fn(lua, t, "UnequipItem", {
+        let s = Rc::clone(&state);
+        move |_, slot: i32| {
+            s.borrow_mut().player.equipped_items.remove(&slot);
             Ok(())
         }
     })?;
