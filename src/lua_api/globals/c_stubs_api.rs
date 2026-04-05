@@ -821,6 +821,20 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     )?;
     register_paperdoll_container_and_misc_stubs(lua, &g)?;
     register_secure_env_globals(lua, &g)?;
+    // C API stubs previously in workarounds.rs Lua patches
+    g.set(
+        "GetArenaOpponentSpec",
+        lua.create_function(|_, _slot: Value| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetLFGStringFromEnum",
+        lua.create_function(|_, _enum_val: Value| Ok(String::new()))?,
+    )?;
+    g.set("UpdateMicroButtons", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set(
+        "CompactUnitFrame_GetOptionDisplayOnlyDispellableDebuffs",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(())
 }
 
