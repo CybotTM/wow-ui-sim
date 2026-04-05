@@ -531,78 +531,25 @@ fn register_character_stat_functions_2(lua: &Lua) -> Result<()> {
 
 /// Secondary stats reading from PlayerState.stats.
 fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
-    use crate::lua_api::state::SimState;
-    use std::cell::RefCell;
-    use std::rc::Rc;
     let g = lua.globals();
     g.set(
         "GetCombatRatingBonusForCombatRatingValue",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0.0_f64))?,
+        lua.create_function(|_, _: mlua::MultiValue| Ok(0.0_f64))?,
     )?;
     g.set(
         "GetMasteryEffect",
-        lua.create_function(|lua, ()| {
-            let m = lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.mastery_pct())
-                .unwrap_or(0.0);
-            Ok((m + 8.0, m)) // base mastery + rating mastery
-        })?,
+        lua.create_function(lookup_mastery_effect)?,
     )?;
-    g.set(
-        "GetHaste",
-        lua.create_function(|lua, ()| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.haste_pct())
-                .unwrap_or(0.0))
-        })?,
-    )?;
-    g.set(
-        "GetMeleeHaste",
-        lua.create_function(|lua, ()| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.haste_pct())
-                .unwrap_or(0.0))
-        })?,
-    )?;
+    let haste_fn = lua.create_function(lookup_haste)?;
+    g.set("GetHaste", haste_fn.clone())?;
+    g.set("GetMeleeHaste", haste_fn)?;
     g.set(
         "GetVersatilityBonus",
-        lua.create_function(|lua, _id: Value| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.versatility_pct())
-                .unwrap_or(0.0))
-        })?,
+        lua.create_function(lookup_versatility)?,
     )?;
-    g.set(
-        "GetLifesteal",
-        lua.create_function(|lua, ()| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.leech_rating as f64 / 100.0)
-                .unwrap_or(0.0))
-        })?,
-    )?;
-    g.set(
-        "GetAvoidance",
-        lua.create_function(|lua, ()| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.avoidance_rating as f64 / 72.0)
-                .unwrap_or(0.0))
-        })?,
-    )?;
-    g.set(
-        "GetSpeed",
-        lua.create_function(|lua, ()| {
-            Ok(lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| s.borrow().player.stats.speed_rating as f64 / 50.0)
-                .unwrap_or(0.0))
-        })?,
-    )?;
+    g.set("GetLifesteal", lua.create_function(lookup_lifesteal)?)?;
+    g.set("GetAvoidance", lua.create_function(lookup_avoidance)?)?;
+    g.set("GetSpeed", lua.create_function(lookup_speed)?)?;
     g.set(
         "GetStaggerPercentage",
         lua.create_function(|_, ()| Ok(0.0_f64))?,
@@ -610,6 +557,44 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
     g.set("GetBonusBarIndex", lua.create_function(|_, ()| Ok(0i32))?)?;
     g.set("GetShieldBlock", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     Ok(())
+}
+
+/// Helper: read a f64 stat from PlayerState via app_data_ref.
+fn read_player_stat(
+    lua: &Lua,
+    f: impl Fn(&crate::lua_api::state_types::CharacterStats) -> f64,
+) -> f64 {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    lua.app_data_ref::<Rc<RefCell<SimState>>>()
+        .map(|s| f(&s.borrow().player.stats))
+        .unwrap_or(0.0)
+}
+
+fn lookup_mastery_effect(lua: &Lua, _: ()) -> Result<(f64, f64)> {
+    let m = read_player_stat(lua, |s| s.mastery_pct());
+    Ok((m + 8.0, m))
+}
+
+fn lookup_haste(lua: &Lua, _: ()) -> Result<f64> {
+    Ok(read_player_stat(lua, |s| s.haste_pct()))
+}
+
+fn lookup_versatility(lua: &Lua, _: Value) -> Result<f64> {
+    Ok(read_player_stat(lua, |s| s.versatility_pct()))
+}
+
+fn lookup_lifesteal(lua: &Lua, _: ()) -> Result<f64> {
+    Ok(read_player_stat(lua, |s| s.leech_rating as f64 / 100.0))
+}
+
+fn lookup_avoidance(lua: &Lua, _: ()) -> Result<f64> {
+    Ok(read_player_stat(lua, |s| s.avoidance_rating as f64 / 72.0))
+}
+
+fn lookup_speed(lua: &Lua, _: ()) -> Result<f64> {
+    Ok(read_player_stat(lua, |s| s.speed_rating as f64 / 50.0))
 }
 
 /// Spell power, regen, defense, and PVP stat stubs.
