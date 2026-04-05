@@ -420,46 +420,45 @@ fn build_category_info_table(lua: &Lua, cat_id: i32) -> Result<Value> {
 }
 
 fn register_trade_skill_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_trade_skill_nil_stubs(lua, t)?;
     t.set(
         "GetRecipesTracked",
-        lua.create_function(|lua, _is_recraft: Value| lua.create_table())?,
-    )?;
-    t.set(
-        "GetItemReagentQualityByItemInfo",
-        lua.create_function(|_, _item: Value| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetItemCraftedQualityByItemInfo",
-        lua.create_function(|_, _item: Value| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetItemReagentQualityInfo",
-        lua.create_function(|_, _item: Value| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetItemCraftedQualityInfo",
-        lua.create_function(|_, _item: Value| Ok(Value::Nil))?,
+        lua.create_function(|lua, _: Value| lua.create_table())?,
     )?;
     t.set(
         "GetRecipeRequirements",
-        lua.create_function(|lua, _id: i32| lua.create_table())?,
+        lua.create_function(|lua, _: i32| lua.create_table())?,
     )?;
     t.set(
         "GetQualitiesForRecipe",
-        lua.create_function(|lua, _id: i32| lua.create_table())?,
+        lua.create_function(|lua, _: i32| lua.create_table())?,
     )?;
     t.set(
         "IsRecipeFavorite",
-        lua.create_function(|_, _id: i32| Ok(false))?,
+        lua.create_function(|_, _: i32| Ok(false))?,
     )?;
     t.set(
         "SetRecipeFavorite",
-        lua.create_function(|_, (_id, _fav): (i32, bool)| Ok(()))?,
+        lua.create_function(|_, _: (i32, bool)| Ok(()))?,
     )?;
     t.set(
         "CraftRecipe",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
+        lua.create_function(|_, _: mlua::Variadic<Value>| Ok(()))?,
     )?;
+    Ok(())
+}
+
+/// Quality/reagent info stubs that all return nil for a single Value arg.
+fn register_trade_skill_nil_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    let nil_stub = lua.create_function(|_, _: Value| Ok(Value::Nil))?;
+    for name in [
+        "GetItemReagentQualityByItemInfo",
+        "GetItemCraftedQualityByItemInfo",
+        "GetItemReagentQualityInfo",
+        "GetItemCraftedQualityInfo",
+    ] {
+        t.set(name, nil_stub.clone())?;
+    }
     Ok(())
 }
 
