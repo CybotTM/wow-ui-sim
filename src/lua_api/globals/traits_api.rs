@@ -427,14 +427,12 @@ fn register_c_traits_tree(t: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState
 
 /// C_Traits node/entry/definition-level APIs.
 fn register_c_traits_node(t: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    let st = Rc::clone(&state);
-    t.set(
-        "GetNodeInfo",
-        lua.create_function(move |lua, (cfg, nid): (Value, Value)| {
-            super::traits_api_node::create_node_info(lua, &st, cfg, nid)
-        })?,
-    )?;
+    register_traits_node_stateless(t, lua)?;
+    register_traits_node_stateful(t, lua, &state)?;
+    Ok(())
+}
 
+fn register_traits_node_stateless(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "GetEntryInfo",
         lua.create_function(super::traits_api_node::create_entry_info)?,
@@ -445,38 +443,49 @@ fn register_c_traits_node(t: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState
     )?;
     t.set(
         "GetTraitDescription",
-        lua.create_function(|_, (entry_id, rank): (i32, i32)| {
+        lua.create_function(|_, (eid, rank): (i32, i32)| {
             Ok(
-                super::traits_api_node::trait_entry_description(entry_id as u32, rank as u32)
+                super::traits_api_node::trait_entry_description(eid as u32, rank as u32)
                     .unwrap_or_default(),
             )
         })?,
     )?;
+    Ok(())
+}
 
-    let st = Rc::clone(&state);
+fn register_traits_node_stateful(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let st = Rc::clone(state);
+    t.set(
+        "GetNodeInfo",
+        lua.create_function(move |lua, (cfg, nid): (Value, Value)| {
+            super::traits_api_node::create_node_info(lua, &st, cfg, nid)
+        })?,
+    )?;
+    let st = Rc::clone(state);
     t.set(
         "GetConditionInfo",
         lua.create_function(move |lua, (_cfg, cid): (i32, i32)| {
             super::traits_api_node::create_condition_info(lua, &st, cid)
         })?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "GetSubTreeInfo",
-        lua.create_function(move |lua, (config_id, sub_tree_id): (i32, i32)| {
-            super::traits_api_node::create_sub_tree_info(lua, &st, config_id, sub_tree_id)
+        lua.create_function(move |lua, (cid, stid): (i32, i32)| {
+            super::traits_api_node::create_sub_tree_info(lua, &st, cid, stid)
         })?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "GetNodeCost",
-        lua.create_function(move |lua, (_cfg, node_id): (i32, i32)| {
-            create_node_cost(lua, &st, node_id as u32)
+        lua.create_function(move |lua, (_cfg, nid): (i32, i32)| {
+            create_node_cost(lua, &st, nid as u32)
         })?,
     )?;
-
     Ok(())
 }
 
