@@ -49,7 +49,6 @@ pub fn apply(env: &WowLuaEnv) {
          CompactUnitFrame_GetOptionDisplayOnlyDispellableDebuffs = function() return false end end",
     );
     patch_map_canvas_scroll(env);
-    patch_gradual_animated_status_bar(env);
     patch_spell_alert_animations(env);
     patch_character_frame_subframes(env);
     super::workarounds_tracker::init_objective_tracker(env);
@@ -179,35 +178,6 @@ fn patch_map_canvas_scroll(env: &WowLuaEnv) {
 /// GradualAnimatedStatusBarTemplate XML defines an AnimationGroup with
 /// parentKey="LevelUpMaxAlphaAnimation", but the simulator doesn't create
 /// AnimationGroups from templates. Patch existing instances and the mixin.
-fn patch_gradual_animated_status_bar(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local stub = { IsPlaying = function() return false end }
-
-        if StatusTrackingBarManager and StatusTrackingBarManager.barContainers then
-            for _, container in ipairs(StatusTrackingBarManager.barContainers) do
-                for _, bar in pairs(container.bars or {}) do
-                    if bar.StatusBar then
-                        if not bar.StatusBar.LevelUpMaxAlphaAnimation then
-                            bar.StatusBar.LevelUpMaxAlphaAnimation = stub
-                        end
-                    end
-                end
-            end
-        end
-
-        if GradualAnimatedStatusBarMixin then
-            function GradualAnimatedStatusBarMixin:IsAnimating()
-                return self.targetValue and self:GetValue() < self.targetValue
-                    or self.gainFinishedAnimation and self.gainFinishedAnimation:IsPlaying()
-                    or self.LevelUpMaxAlphaAnimation and self.LevelUpMaxAlphaAnimation:IsPlaying()
-                    or self.overrideLevelUpMaxAlphaAnimation and self.overrideLevelUpMaxAlphaAnimation:IsPlaying()
-            end
-        end
-    "#,
-    );
-}
-
 /// Stub AnimationGroup methods on ActionButtonSpellAlert frames.
 ///
 /// ActionButtonSpellAlertManager uses local functions (ShowAlert/HideAlert)
