@@ -203,7 +203,11 @@ fn parse_item_row(line: &str, icon_map: &HashMap<u32, u32>) -> Option<(u32, Stri
     if name.is_empty() {
         return None;
     }
+    let icon_file_data_id = icon_map.get(&id).copied().unwrap_or(0);
+    Some((id, format_item_info(&fields, name, icon_file_data_id)))
+}
 
+fn format_item_info(fields: &[String], name: &str, icon_file_data_id: u32) -> String {
     let escaped_name = escape_str(name);
     let expansion_id: u8 = fields[7].parse().unwrap_or(0);
     let stackable: u32 = fields[46].parse().unwrap_or(1);
@@ -213,24 +217,12 @@ fn parse_item_row(line: &str, icon_map: &HashMap<u32, u32>) -> Option<(u32, Stri
     let required_level: u16 = fields[99].parse().unwrap_or(0);
     let inventory_type: u8 = fields[100].parse().unwrap_or(0);
     let quality: u8 = fields[101].parse().unwrap_or(0);
-    let icon_file_data_id: u32 = icon_map.get(&id).copied().unwrap_or(0);
-
-    let value = format!(
-        "ItemInfo {{ name: \"{}\", quality: {}, item_level: {}, required_level: {}, \
-         inventory_type: {}, sell_price: {}, stackable: {}, bonding: {}, expansion_id: {}, \
-         icon_file_data_id: {} }}",
-        escaped_name,
-        quality,
-        item_level,
-        required_level,
-        inventory_type,
-        sell_price,
-        stackable,
-        bonding,
-        expansion_id,
-        icon_file_data_id
-    );
-    Some((id, value))
+    format!(
+        "ItemInfo {{ name: \"{escaped_name}\", quality: {quality}, item_level: {item_level}, \
+         required_level: {required_level}, inventory_type: {inventory_type}, \
+         sell_price: {sell_price}, stackable: {stackable}, bonding: {bonding}, \
+         expansion_id: {expansion_id}, icon_file_data_id: {icon_file_data_id} }}"
+    )
 }
 
 fn write_header(out: &mut File) -> std::io::Result<()> {
