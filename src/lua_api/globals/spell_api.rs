@@ -38,6 +38,13 @@ fn register_c_spell_book(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua
 
 /// Item-level C_SpellBook methods (info, name, type, texture, cooldown, etc.).
 fn register_c_spell_book_item_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
+    register_c_spell_book_info_methods(t, lua)?;
+    register_c_spell_book_state_methods(t, lua)?;
+    Ok(())
+}
+
+/// Info/lookup methods: skill lines, item info, name, type, level.
+fn register_c_spell_book_info_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "GetNumSpellBookSkillLines",
         lua.create_function(|_, ()| Ok(spellbook_data::num_skill_lines()))?,
@@ -64,6 +71,11 @@ fn register_c_spell_book_item_methods(t: &mlua::Table, lua: &Lua) -> Result<()> 
             Ok(1i32) // All spells learned at level 1 for now
         })?,
     )?;
+    Ok(())
+}
+
+/// State methods: passive, cooldown, power cost, auto-cast, texture.
+fn register_c_spell_book_state_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "IsSpellBookItemPassive",
         lua.create_function(|_, (slot, _bank): (i32, Option<i32>)| {
@@ -363,6 +375,13 @@ fn register_c_spell(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Tab
 }
 
 fn register_c_spell_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_c_spell_info_queries(lua, t)?;
+    register_c_spell_lookup_queries(lua, t)?;
+    Ok(())
+}
+
+/// Spell info, charges, passive, override, school queries.
+fn register_c_spell_info_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetSpellInfo", lua.create_function(create_spell_info)?)?;
     t.set(
         "GetSpellCharges",
@@ -384,6 +403,11 @@ fn register_c_spell_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetSchoolString",
         lua.create_function(create_school_string)?,
     )?;
+    Ok(())
+}
+
+/// Texture, link, name, existence, power cost, usability queries.
+fn register_c_spell_lookup_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetSpellTexture",
         lua.create_function(create_spell_texture)?,
@@ -450,6 +474,13 @@ fn register_c_spell_cooldown(
 }
 
 fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_c_spell_request_stubs(lua, t)?;
+    register_c_spell_aura_stubs(lua, t)?;
+    Ok(())
+}
+
+/// Request/attack/hold-release/visibility stubs.
+fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "RequestLoadSpellData",
         lua.create_function(|_, _spell_id: i32| Ok(()))?,
@@ -475,6 +506,11 @@ fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetVisibilityInfo",
         lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| Ok((false, false, false)))?,
     )?;
+    Ok(())
+}
+
+/// Buff/aura classification and description stubs.
+fn register_c_spell_aura_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsSelfBuff",
         lua.create_function(|_, _spell_id: i32| Ok(false))?,

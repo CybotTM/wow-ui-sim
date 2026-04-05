@@ -64,6 +64,14 @@ fn register_missing_c_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_AccountServices, C_ArrowCalloutManager, C_EncounterEvents, C_PrototypeDialog stubs.
 fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_c_account_services(lua, g)?;
+    register_c_arrow_callout_manager(lua, g)?;
+    register_c_encounter_events(lua, g)?;
+    register_c_prototype_dialog(lua, g)?;
+    Ok(())
+}
+
+fn register_c_account_services(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let acct = lua.create_table()?;
     acct.set(
         "IsAccountLockedPostSave",
@@ -78,16 +86,20 @@ fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Re
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     acct.set("SaveAccountData", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("C_AccountServices", acct)?;
+    g.set("C_AccountServices", acct)
+}
 
+fn register_c_arrow_callout_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let arrow = lua.create_table()?;
     arrow.set(
         "AcknowledgeCallout",
         lua.create_function(|_, _id: Value| Ok(()))?,
     )?;
     arrow.set("HideCallout", lua.create_function(|_, _id: Value| Ok(()))?)?;
-    g.set("C_ArrowCalloutManager", arrow)?;
+    g.set("C_ArrowCalloutManager", arrow)
+}
 
+fn register_c_encounter_events(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let ee = lua.create_table()?;
     ee.set(
         "GetEventColor",
@@ -121,8 +133,10 @@ fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Re
         "SetEventSound",
         lua.create_function(|_, (_event_id, _sound): (Value, Value)| Ok(()))?,
     )?;
-    g.set("C_EncounterEvents", ee)?;
+    g.set("C_EncounterEvents", ee)
+}
 
+fn register_c_prototype_dialog(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let pd = lua.create_table()?;
     pd.set(
         "EnsureRemoved",
@@ -132,9 +146,7 @@ fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Re
         "SelectOption",
         lua.create_function(|_, (_dialog_id, _option_id): (Value, Value)| Ok(()))?,
     )?;
-    g.set("C_PrototypeDialog", pd)?;
-
-    Ok(())
+    g.set("C_PrototypeDialog", pd)
 }
 
 /// C_Reincarnation and C_TableUtil stubs.
@@ -161,6 +173,13 @@ fn register_reincarnation_table_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_ItemSocketInfo, C_PetInfo, C_UnitAurasPrivate stubs.
 fn register_item_pet_aura_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_c_item_socket_info(lua, g)?;
+    register_c_pet_info(lua, g)?;
+    register_c_unit_auras_private(lua, g)?;
+    Ok(())
+}
+
+fn register_c_item_socket_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let isi = lua.create_table()?;
     isi.set("GetCurrUIType", lua.create_function(|_, ()| Ok(0i32))?)?;
     isi.set(
@@ -173,8 +192,10 @@ fn register_item_pet_aura_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "IsArtifactRelicItem",
         lua.create_function(|_, _item: Value| Ok(false))?,
     )?;
-    g.set("C_ItemSocketInfo", isi)?;
+    g.set("C_ItemSocketInfo", isi)
+}
 
+fn register_c_pet_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let pi = lua.create_table()?;
     pi.set(
         "GetPetTamersForMap",
@@ -188,8 +209,10 @@ fn register_item_pet_aura_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "IsPetActionPassive",
         lua.create_function(|_, _action: Value| Ok(false))?,
     )?;
-    g.set("C_PetInfo", pi)?;
+    g.set("C_PetInfo", pi)
+}
 
+fn register_c_unit_auras_private(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let uap = lua.create_table()?;
     uap.set(
         "GetAuraDataBySlot",
@@ -219,8 +242,7 @@ fn register_item_pet_aura_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "SetShowDispelTypeCallback",
         lua.create_function(|_, _cb: Value| Ok(()))?,
     )?;
-    g.set("C_UnitAurasPrivate", uap)?;
-    Ok(())
+    g.set("C_UnitAurasPrivate", uap)
 }
 
 /// C_LevelLink, C_EventScheduler, C_RestrictedActions, C_TransmogOutfitInfo stubs.
@@ -703,14 +725,21 @@ fn register_secure_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_AuthChallenge, C_PingSecure, C_Ping, C_StoreSecure stubs.
 fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let auth_challenge = lua.create_table()?;
-    auth_challenge.set("SetFrame", lua.create_function(|_, _frame: Value| Ok(()))?)?;
-    g.set("C_AuthChallenge", auth_challenge)?;
-
+    register_c_auth_challenge(lua, g)?;
     register_c_ping_secure(lua)?;
     register_c_ping(lua)?;
+    register_c_store_secure(lua)?;
+    Ok(())
+}
 
-    // C_WowTokenSecure - secure token operations (noop metatable)
+fn register_c_auth_challenge(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let auth_challenge = lua.create_table()?;
+    auth_challenge.set("SetFrame", lua.create_function(|_, _frame: Value| Ok(()))?)?;
+    g.set("C_AuthChallenge", auth_challenge)
+}
+
+/// C_WowTokenSecure + C_StoreSecure — fake catalog for Blizzard store UI.
+fn register_c_store_secure(lua: &Lua) -> Result<()> {
     lua.load(
         r#"
         C_WowTokenSecure = setmetatable({}, {
@@ -719,10 +748,11 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
     "#,
     )
     .exec()?;
+    lua.load(c_store_secure_lua_src()).exec()
+}
 
-    // C_StoreSecure - fake catalog with enough data for the Blizzard store UI to render.
-    lua.load(
-        r#"
+fn c_store_secure_lua_src() -> &'static str {
+    r#"
         local STORE_GROUPS = {
             {
                 groupID = WOW_GAMES_CATEGORY_ID or 33,
@@ -884,10 +914,7 @@ fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
             PurchaseProduct = function() return true end,
             PurchaseProductConfirm = function() return true end,
         }, { __index = function() return function() end end })
-    "#,
-    )
-    .exec()?;
-    Ok(())
+    "#
 }
 
 /// C_PingSecure - stores callbacks for Blizzard PingUI, implements action methods.
