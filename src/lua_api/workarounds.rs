@@ -51,7 +51,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
-    patch_lfg_backfill(env);
     init_console_saved_vars(env);
     patch_scrollbox_nil_dataprovider(env);
     init_settings_panel_previews(env);
@@ -187,20 +186,6 @@ fn stub_glow_emitter_factory(env: &WowLuaEnv) {
 /// LFGBackfillCover_Update is called with LFDQueueFrame.PartyBackfill which
 /// is nil when the template child isn't created. Wrap the function to
 /// silently ignore nil self.
-fn patch_lfg_backfill(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if LFGBackfillCover_Update then
-            local orig = LFGBackfillCover_Update
-            LFGBackfillCover_Update = function(self, ...)
-                if not self then return end
-                return orig(self, ...)
-            end
-        end
-    "#,
-    );
-}
-
 /// Blizzard_Console_SavedVars is normally loaded from WTF/SavedVariables.
 /// Without it, DeveloperConsoleMixin:OnLoad sets self.savedVars = nil, and
 /// ShouldEditBoxTakeFocus (called via OnUpdate) crashes accessing .isShown.
