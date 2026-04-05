@@ -152,52 +152,47 @@ fn calendar_time_to_total_minutes(date: &mlua::Table) -> mlua::Result<i64> {
 
 fn register_c_scenario_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetScenarioInfo",
-        lua.create_function(|_, ()| {
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::Nil,
-                Value::Integer(0),
-                Value::Integer(0),
-                Value::Integer(0),
-                Value::Boolean(false),
-                Value::Boolean(false),
-            ]))
-        })?,
-    )?;
+    t.set("GetScenarioInfo", lua.create_function(stub_scenario_info)?)?;
     t.set(
         "GetScenarioStepInfo",
-        lua.create_function(|_, _step: Option<i32>| {
-            Ok((Value::Nil, Value::Nil, Value::Integer(0), Value::Integer(0)))
-        })?,
+        lua.create_function(stub_scenario_step_info)?,
     )?;
-    t.set(
-        "GetCriteriaInfo",
-        lua.create_function(|_, _: mlua::MultiValue| {
-            Ok((
-                Value::Nil,
-                Value::Nil,
-                Value::Boolean(false),
-                Value::Integer(0),
-                Value::Integer(0),
-            ))
-        })?,
-    )?;
+    t.set("GetCriteriaInfo", lua.create_function(stub_criteria_info)?)?;
     t.set(
         "GetCriteriaInfoByStep",
-        lua.create_function(|_, _: mlua::MultiValue| {
-            Ok((
-                Value::Nil,
-                Value::Nil,
-                Value::Boolean(false),
-                Value::Integer(0),
-                Value::Integer(0),
-            ))
-        })?,
+        lua.create_function(stub_criteria_info)?,
     )?;
     t.set("IsInScenario", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_ScenarioInfo", t)?;
     Ok(())
+}
+
+/// Stub: returns (nil, 0, 0, 0, false, false) — no active scenario.
+fn stub_scenario_info(_: &Lua, _: ()) -> Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::Nil,
+        Value::Integer(0),
+        Value::Integer(0),
+        Value::Integer(0),
+        Value::Boolean(false),
+        Value::Boolean(false),
+    ]))
+}
+
+/// Stub: returns (nil, nil, 0, 0) — no step info.
+fn stub_scenario_step_info(_: &Lua, _step: Option<i32>) -> Result<(Value, Value, Value, Value)> {
+    Ok((Value::Nil, Value::Nil, Value::Integer(0), Value::Integer(0)))
+}
+
+/// Stub: returns (nil, nil, false, 0, 0) — no criteria data.
+fn stub_criteria_info(_: &Lua, _: mlua::MultiValue) -> Result<(Value, Value, Value, Value, Value)> {
+    Ok((
+        Value::Nil,
+        Value::Nil,
+        Value::Boolean(false),
+        Value::Integer(0),
+        Value::Integer(0),
+    ))
 }
 
 fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
@@ -250,43 +245,43 @@ fn create_trait_entry_tooltip(lua: &Lua, (entry_id, rank): (i32, Option<i32>)) -
 
 fn register_profession_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    // GetProfessions() -> prof1, prof2, archaeology, fishing, cooking
-    // We have Blacksmithing (index 1) and Mining (index 2)
-    g.set(
-        "GetProfessions",
-        lua.create_function(|_, ()| {
-            Ok((
-                Value::Integer(1), // prof1 = Blacksmithing
-                Value::Integer(2), // prof2 = Mining
-                Value::Nil,        // archaeology
-                Value::Nil,        // fishing
-                Value::Nil,        // cooking
-            ))
-        })?,
-    )?;
-    // GetProfessionInfo(index) -> name, icon, skillLevel, maxSkillLevel, ...
+    g.set("GetProfessions", lua.create_function(stub_get_professions)?)?;
     g.set(
         "GetProfessionInfo",
-        lua.create_function(|lua, index: i32| {
-            use super::profession_data;
-            match profession_data::get_profession_by_index((index - 1) as usize) {
-                Some(p) => Ok(mlua::MultiValue::from_vec(vec![
-                    Value::String(lua.create_string(p.name)?),
-                    Value::Integer(p.icon as i64),
-                    Value::Integer(p.skill_level as i64),
-                    Value::Integer(p.max_skill_level as i64),
-                    Value::Integer(0), // numAbilities (no profession spells in spellbook yet)
-                    Value::Integer(0), // spellOffset
-                    Value::Integer(p.skill_line_id as i64),
-                    Value::Integer(p.skill_modifier as i64),
-                    Value::Integer(0), // specializationIndex
-                    Value::Integer(0), // specializationOffset
-                ])),
-                None => Ok(mlua::MultiValue::new()),
-            }
-        })?,
+        lua.create_function(build_profession_info)?,
     )?;
     Ok(())
+}
+
+/// Returns (prof1, prof2, archaeology, fishing, cooking) — Blacksmithing + Mining.
+fn stub_get_professions(_: &Lua, _: ()) -> Result<(Value, Value, Value, Value, Value)> {
+    Ok((
+        Value::Integer(1), // Blacksmithing
+        Value::Integer(2), // Mining
+        Value::Nil,        // archaeology
+        Value::Nil,        // fishing
+        Value::Nil,        // cooking
+    ))
+}
+
+/// Returns (name, icon, skillLevel, maxSkillLevel, ...) for a 1-based profession index.
+fn build_profession_info(lua: &Lua, index: i32) -> Result<mlua::MultiValue> {
+    use super::profession_data;
+    let Some(p) = profession_data::get_profession_by_index((index - 1) as usize) else {
+        return Ok(mlua::MultiValue::new());
+    };
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string(p.name)?),
+        Value::Integer(p.icon as i64),
+        Value::Integer(p.skill_level as i64),
+        Value::Integer(p.max_skill_level as i64),
+        Value::Integer(0), // numAbilities
+        Value::Integer(0), // spellOffset
+        Value::Integer(p.skill_line_id as i64),
+        Value::Integer(p.skill_modifier as i64),
+        Value::Integer(0), // specializationIndex
+        Value::Integer(0), // specializationOffset
+    ]))
 }
 
 fn register_c_trade_skill(lua: &Lua) -> Result<()> {
@@ -299,13 +294,21 @@ fn register_c_trade_skill(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| {
             let p = profession_data::get_profession_by_index(0);
             match p {
-                Some(p) => Ok((p.skill_line_id, Value::Nil, p.skill_level, p.max_skill_level)),
+                Some(p) => Ok((
+                    p.skill_line_id,
+                    Value::Nil,
+                    p.skill_level,
+                    p.max_skill_level,
+                )),
                 None => Ok((0i32, Value::Nil, 0i32, 0i32)),
             }
         })?,
     )?;
     t.set("IsTradeSkillReady", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("IsTradeSkillLinked", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "IsTradeSkillLinked",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     t.set("IsNPCCrafting", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("IsRuneforging", lua.create_function(|_, ()| Ok(false))?)?;
     register_trade_skill_profession_info(lua, &t)?;
@@ -393,8 +396,8 @@ fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetCategoryInfo",
-        lua.create_function(|lua, cat_id: i32| {
-            match profession_data::get_category(cat_id) {
+        lua.create_function(
+            |lua, cat_id: i32| match profession_data::get_category(cat_id) {
                 Some(c) => {
                     let tbl = lua.create_table()?;
                     tbl.set("categoryID", c.category_id)?;
@@ -404,8 +407,8 @@ fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
                     Ok(Value::Table(tbl))
                 }
                 None => Ok(Value::Nil),
-            }
-        })?,
+            },
+        )?,
     )?;
     t.set(
         "IsRecipeInSkillLine",
@@ -458,7 +461,10 @@ fn register_trade_skill_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-fn build_profession_table(lua: &Lua, prof: Option<&super::profession_data::ProfessionInfo>) -> mlua::Result<Value> {
+fn build_profession_table(
+    lua: &Lua,
+    prof: Option<&super::profession_data::ProfessionInfo>,
+) -> mlua::Result<Value> {
     match prof {
         Some(p) => Ok(Value::Table(build_profession_table_inner(lua, p)?)),
         None => {
@@ -469,7 +475,10 @@ fn build_profession_table(lua: &Lua, prof: Option<&super::profession_data::Profe
     }
 }
 
-fn build_profession_table_inner(lua: &Lua, p: &super::profession_data::ProfessionInfo) -> mlua::Result<mlua::Table> {
+fn build_profession_table_inner(
+    lua: &Lua,
+    p: &super::profession_data::ProfessionInfo,
+) -> mlua::Result<mlua::Table> {
     let tbl = lua.create_table()?;
     tbl.set("professionID", p.profession_id)?;
     tbl.set("professionName", p.name)?;
