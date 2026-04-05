@@ -232,24 +232,27 @@ fn set_selection(
     let affected = compute_affected_nodes(node_id, &s, old_spent);
     drop(s);
     fire_trait_nodes_changed_for(lua, &affected)?;
-    // Fire TRAIT_SUB_TREE_CHANGED for SubTreeSelection nodes (node_type == 3).
-    if let Some(eid) = entry_id {
-        use crate::traits::{TRAIT_ENTRY_DB, TRAIT_NODE_DB};
-        if let Some(node) = TRAIT_NODE_DB.get(&node_id) {
-            if node.node_type == 3 {
-                if let Some(entry) = TRAIT_ENTRY_DB.get(&eid) {
-                    if entry.sub_tree_id != 0 {
-                        let fire: mlua::Function = lua.globals().get("FireEvent")?;
-                        fire.call::<()>((
-                            lua.create_string("TRAIT_SUB_TREE_CHANGED")?,
-                            entry.sub_tree_id as i64,
-                        ))?;
-                    }
-                }
-            }
-        }
-    }
+    fire_sub_tree_changed_if_needed(lua, node_id, entry_id)?;
     Ok(true)
+}
+
+/// Fire TRAIT_SUB_TREE_CHANGED when a SubTreeSelection node (type 3) gets a new entry.
+fn fire_sub_tree_changed_if_needed(
+    lua: &Lua,
+    node_id: u32,
+    entry_id: Option<u32>,
+) -> Result<()> {
+    use crate::traits::{TRAIT_ENTRY_DB, TRAIT_NODE_DB};
+    let Some(eid) = entry_id else { return Ok(()) };
+    let Some(node) = TRAIT_NODE_DB.get(&node_id) else { return Ok(()) };
+    if node.node_type != 3 { return Ok(()) }
+    let Some(entry) = TRAIT_ENTRY_DB.get(&eid) else { return Ok(()) };
+    if entry.sub_tree_id == 0 { return Ok(()) }
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    fire.call::<()>((
+        lua.create_string("TRAIT_SUB_TREE_CHANGED")?,
+        entry.sub_tree_id as i64,
+    ))
 }
 
 fn reset_tree(state: &Rc<RefCell<SimState>>, lua: &Lua, config_id: i32) -> Result<bool> {
