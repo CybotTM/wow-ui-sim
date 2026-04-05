@@ -867,6 +867,40 @@ fn test_set_unit_aura_invalid_index_no_crash() {
     assert_eq!(count, 0, "Invalid index should leave tooltip empty");
 }
 
+#[test]
+fn test_set_unit_player_populates_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: bool = env
+        .eval(r#"return GameTooltip:SetUnit("player") == true"#)
+        .unwrap();
+    assert!(result, "SetUnit('player') should return true");
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(count >= 2, "Should have at least name + level lines");
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(visible, "SetUnit should make tooltip visible");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, state.player.name);
+    assert!(
+        td.lines[1].left_text.contains("Level"),
+        "Second line should contain level info"
+    );
+}
+
+#[test]
+fn test_set_unit_invalid_returns_false() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(r#"return GameTooltip:SetUnit("nonexistent")"#)
+        .unwrap();
+    assert!(!result, "SetUnit with invalid unit should return false");
+}
+
 fn fire_tooltip_test_startup_events(env: &WowLuaEnv) {
     let lua = env.lua();
     let _ = env.fire_event_with_args(

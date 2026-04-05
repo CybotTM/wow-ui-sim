@@ -61,14 +61,23 @@ fn add_model_set_rotation<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_model_appearance_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetUnit", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
+        // GameTooltip:SetUnit populates tooltip with unit info and returns bool
+        {
+            let state_rc = super::super::handle::get_sim_state(lua);
+            let state = state_rc.borrow();
+            if state.tooltips.contains_key(&id) {
+                drop(state);
+                return super::widget_tooltip::set_unit_for_tooltip(lua, id, args);
+            }
+        }
         if let Some((func, frame_ud)) =
             super::methods_helpers::get_mixin_override(lua, id, "SetUnit")
         {
             let mut call_args = vec![frame_ud];
             call_args.extend(args);
-            return func.call::<()>(mlua::MultiValue::from_iter(call_args));
+            return func.call::<mlua::Value>(mlua::MultiValue::from_iter(call_args));
         }
-        Ok(())
+        Ok(mlua::Value::Nil)
     });
     add_model_appearance_stubs(methods);
 }
