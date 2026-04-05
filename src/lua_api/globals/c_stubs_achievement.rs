@@ -8,46 +8,43 @@ use std::rc::Rc;
 /// Achievement category API stubs needed by Blizzard_AchievementUI at parse time.
 pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set(
-        "GetCategoryList",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    g.set(
-        "GetGuildCategoryList",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    g.set(
-        "GetStatisticsCategoryList",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
+    register_achievement_empty_table_stubs(lua, &g)?;
     g.set(
         "GetCategoryInfo",
-        lua.create_function(|_, _id: Value| Ok((Value::Nil, -1i32, -1i32)))?,
+        lua.create_function(|_, _: Value| Ok((Value::Nil, -1i32, -1i32)))?,
     )?;
     g.set(
         "GetCategoryNumAchievements",
-        lua.create_function(|_, _id: Value| Ok((0i32, 0i32, 0i32)))?,
+        lua.create_function(|_, _: Value| Ok((0i32, 0i32, 0i32)))?,
     )?;
     g.set(
         "GetTotalAchievementPoints",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(0i32))?,
-    )?;
-    g.set(
-        "GetLatestCompletedAchievements",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(mlua::MultiValue::new()))?,
+        lua.create_function(|_, _: mlua::MultiValue| Ok(0i32))?,
     )?;
     g.set(
         "GetAchievementInfo",
         lua.create_function(stub_get_achievement_info)?,
     )?;
     g.set(
-        "GetTrackedAchievements",
-        lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?,
-    )?;
-    g.set(
         "GetNumCompletedAchievements",
-        lua.create_function(|_, _for_guild: Option<bool>| Ok((0i32, 0i32)))?,
+        lua.create_function(|_, _: Option<bool>| Ok((0i32, 0i32)))?,
     )?;
+    Ok(())
+}
+
+fn register_achievement_empty_table_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let empty_table = lua.create_function(|lua, ()| lua.create_table())?;
+    for name in [
+        "GetCategoryList",
+        "GetGuildCategoryList",
+        "GetStatisticsCategoryList",
+    ] {
+        g.set(name, empty_table.clone())?;
+    }
+    let empty_multi = lua.create_function(|_, _: mlua::MultiValue| Ok(mlua::MultiValue::new()))?;
+    for name in ["GetLatestCompletedAchievements", "GetTrackedAchievements"] {
+        g.set(name, empty_multi.clone())?;
+    }
     Ok(())
 }
 
