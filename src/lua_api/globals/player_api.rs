@@ -465,56 +465,61 @@ fn register_avoidance_and_crit_stubs(lua: &Lua) -> Result<()> {
 
 /// Combat rating queries reading from PlayerState.stats.
 fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
-    use crate::lua_api::state::SimState;
-    use std::cell::RefCell;
-    use std::rc::Rc;
     let g = lua.globals();
     g.set(
         "GetCombatRating",
-        lua.create_function(|lua, id: i32| {
-            let rating = lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| {
-                    let st = &s.borrow().player.stats;
-                    match id {
-                        9 => st.crit_rating,
-                        6 => st.haste_rating,
-                        26 => st.mastery_rating,
-                        14 => st.versatility_rating,
-                        15 => st.speed_rating,
-                        17 => st.leech_rating,
-                        18 => st.avoidance_rating,
-                        _ => 0,
-                    }
-                })
-                .unwrap_or(0);
-            Ok(rating)
-        })?,
+        lua.create_function(lookup_combat_rating)?,
     )?;
     g.set(
         "GetCombatRatingBonus",
-        lua.create_function(|lua, id: i32| {
-            let bonus = lua
-                .app_data_ref::<Rc<RefCell<SimState>>>()
-                .map(|s| {
-                    let st = &s.borrow().player.stats;
-                    match id {
-                        9 => st.crit_pct(),
-                        6 => st.haste_pct(),
-                        26 => st.mastery_pct(),
-                        14 => st.versatility_pct(),
-                        _ => 0.0,
-                    }
-                })
-                .unwrap_or(0.0);
-            Ok(bonus)
-        })?,
+        lua.create_function(lookup_combat_rating_bonus)?,
     )?;
     g.set(
         "GetMaxCombatRatingBonus",
-        lua.create_function(|_, _rating_index: i32| Ok(100.0_f64))?,
+        lua.create_function(|_, _: i32| Ok(100.0_f64))?,
     )?;
     Ok(())
+}
+
+fn lookup_combat_rating(lua: &Lua, id: i32) -> Result<i32> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    Ok(lua
+        .app_data_ref::<Rc<RefCell<SimState>>>()
+        .map(|s| {
+            let st = &s.borrow().player.stats;
+            match id {
+                9 => st.crit_rating,
+                6 => st.haste_rating,
+                26 => st.mastery_rating,
+                14 => st.versatility_rating,
+                15 => st.speed_rating,
+                17 => st.leech_rating,
+                18 => st.avoidance_rating,
+                _ => 0,
+            }
+        })
+        .unwrap_or(0))
+}
+
+fn lookup_combat_rating_bonus(lua: &Lua, id: i32) -> Result<f64> {
+    use crate::lua_api::state::SimState;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    Ok(lua
+        .app_data_ref::<Rc<RefCell<SimState>>>()
+        .map(|s| {
+            let st = &s.borrow().player.stats;
+            match id {
+                9 => st.crit_pct(),
+                6 => st.haste_pct(),
+                26 => st.mastery_pct(),
+                14 => st.versatility_pct(),
+                _ => 0.0,
+            }
+        })
+        .unwrap_or(0.0))
 }
 
 /// Additional character stat query stubs: secondary stats, regen, spell power.
