@@ -49,7 +49,6 @@ pub fn apply(env: &WowLuaEnv) {
          CompactUnitFrame_GetOptionDisplayOnlyDispellableDebuffs = function() return false end end",
     );
     patch_map_canvas_scroll(env);
-    patch_spell_alert_animations(env);
     patch_character_frame_subframes(env);
     super::workarounds_tracker::init_objective_tracker(env);
     super::chat_init::show_chat_frame(env);
@@ -180,22 +179,6 @@ fn patch_map_canvas_scroll(env: &WowLuaEnv) {
 /// AnimationGroups from templates. Patch existing instances and the mixin.
 /// Stub AnimationGroup methods on ActionButtonSpellAlert frames.
 ///
-/// ActionButtonSpellAlertManager uses local functions (ShowAlert/HideAlert)
-/// that access alertFrame.ProcStartAnim, an AnimationGroup defined in XML
-/// with parentKey. The simulator doesn't create AnimationGroups from templates,
-/// so these are nil. Replace the manager methods with no-ops since spell alert
-/// animations aren't needed in the simulator.
-fn patch_spell_alert_animations(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if ActionButtonSpellAlertManager then
-            function ActionButtonSpellAlertManager:ShowAlert() end
-            function ActionButtonSpellAlertManager:HideAlert() end
-        end
-    "#,
-    );
-}
-
 /// CHARACTERFRAME_SUBFRAMES lists PaperDollFrame, ReputationFrame, TokenFrame.
 /// TokenFrame is in Blizzard_TokenUI (not always loaded). Create stub frames
 /// for any missing subframes so ShowSubFrame doesn't crash.
