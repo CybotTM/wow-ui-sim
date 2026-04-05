@@ -344,3 +344,40 @@ fn test_clamped_to_screen_set_get() {
     let clamped: bool = env.eval("return TestClamped:IsClampedToScreen()").unwrap();
     assert!(clamped);
 }
+
+// ============================================================================
+// Button / CheckButton / EditBox: mouse enabled by default
+// ============================================================================
+
+#[test]
+fn test_button_mouse_enabled_by_default() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"CreateFrame("Button", "TestMouseBtn", UIParent)"#)
+        .unwrap();
+    let enabled: bool = env
+        .eval("return TestMouseBtn:IsMouseClickEnabled()")
+        .unwrap();
+    assert!(enabled, "Button should have mouse enabled by default");
+}
+
+#[test]
+fn test_checkbutton_mouse_enabled_by_default() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"CreateFrame("CheckButton", "TestMouseCB", UIParent)"#)
+        .unwrap();
+    let enabled: bool = env
+        .eval("return TestMouseCB:IsMouseClickEnabled()")
+        .unwrap();
+    assert!(enabled, "CheckButton should have mouse enabled by default");
+}
+
+#[test]
+fn test_frame_mouse_disabled_by_default() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(r#"CreateFrame("Frame", "TestMouseFrame", UIParent)"#)
+        .unwrap();
+    let enabled: bool = env
+        .eval("return TestMouseFrame:IsMouseClickEnabled()")
+        .unwrap();
+    assert!(!enabled, "Frame should not have mouse enabled by default");
+}

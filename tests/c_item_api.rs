@@ -492,19 +492,31 @@ fn test_get_inventory_item_texture_bag_slots() {
         .eval(r#"return GetInventoryItemTexture("player", 20)"#)
         .unwrap();
     assert!(tex.contains("INV_Misc_Bag_08"));
-    let is_nil: bool = env
-        .eval(r#"return GetInventoryItemTexture("player", 1) == nil"#)
+    // Slot 1 (head) has default gear, so it returns a texture
+    let has_tex: bool = env
+        .eval(r#"return GetInventoryItemTexture("player", 1) ~= nil"#)
         .unwrap();
-    assert!(is_nil, "Non-bag slot should return nil");
+    assert!(has_tex, "Equipped slot should return a texture");
+    // Slot 19 (tabard) is typically empty
+    let is_nil: bool = env
+        .eval(r#"return GetInventoryItemTexture("player", 19) == nil"#)
+        .unwrap();
+    assert!(is_nil, "Empty slot should return nil");
 }
 
 #[test]
-fn test_get_inventory_item_link_nil() {
+fn test_get_inventory_item_link_empty_slot() {
     let env = env();
+    // Slot 19 (tabard) is typically empty
     let is_nil: bool = env
-        .eval(r#"return GetInventoryItemLink("player", 1) == nil"#)
+        .eval(r#"return GetInventoryItemLink("player", 19) == nil"#)
         .unwrap();
-    assert!(is_nil);
+    assert!(is_nil, "Empty slot should return nil");
+    // Slot 1 (head) has default gear
+    let has_link: bool = env
+        .eval(r#"return GetInventoryItemLink("player", 1) ~= nil"#)
+        .unwrap();
+    assert!(has_link, "Equipped slot should return a link");
 }
 
 #[test]

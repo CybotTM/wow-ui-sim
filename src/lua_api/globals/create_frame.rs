@@ -454,8 +454,19 @@ fn build_new_frame(
         frame.visible = false;
         frame.effective_alpha = 0.0;
     }
+    if widget_type_defaults_mouse_enabled(widget_type) {
+        frame.mouse_enabled = true;
+    }
     attribute_frame_owner(&mut frame, state, parent_id);
     frame
+}
+
+/// WoW enables mouse interaction by default on interactive widget types.
+fn widget_type_defaults_mouse_enabled(widget_type: WidgetType) -> bool {
+    matches!(
+        widget_type,
+        WidgetType::Button | WidgetType::CheckButton | WidgetType::EditBox
+    )
 }
 
 fn take_create_frame_initial_hidden(state: &Rc<RefCell<SimState>>) -> bool {
