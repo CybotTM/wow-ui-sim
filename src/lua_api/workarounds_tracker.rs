@@ -8,10 +8,8 @@ use super::WowLuaEnv;
 /// Post-event work (quest title callbacks, height fix) runs in
 /// `finish_objective_tracker`.
 pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
-    setup_managed_frame_containers(env);
     hide_empty_managed_frames(env);
     setup_tracker_frame(env);
-    update_managed_frame_containers(env);
 }
 
 /// Post-event objective tracker setup: ensure modules are registered,
@@ -77,60 +75,6 @@ fn hide_empty_managed_frames(env: &WowLuaEnv) {
                 f:Hide()
                 -- Prevent OnShow from re-showing during events
                 f.ignoreInLayout = true
-            end
-        end
-    "#,
-    );
-}
-
-fn update_managed_frame_containers(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if UIParentRightManagedFrameContainer
-            and UIParentRightManagedFrameContainer.UpdateManagedFrames then
-            UIParentRightManagedFrameContainer:UpdateManagedFrames()
-        end
-        if UIParentBottomManagedFrameContainer
-            and UIParentBottomManagedFrameContainer.UpdateManagedFrames then
-            UIParentBottomManagedFrameContainer:UpdateManagedFrames()
-        end
-    "#,
-    );
-}
-
-fn setup_managed_frame_containers(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        -- Position UIParentRightManagedFrameContainer
-        -- Offsets match EditModeUtil:GetRightContainerAnchor() defaults:
-        -- TOPRIGHT, UIParent, TOPRIGHT, xOffset=-5, yOffset=-260
-        if UIParentRightManagedFrameContainer then
-            UIParentRightManagedFrameContainer:ClearAllPoints()
-            UIParentRightManagedFrameContainer:SetPoint(
-                "TOPRIGHT", UIParent, "TOPRIGHT", -5, -260
-            )
-            local minimapHeight = 0
-            if MinimapCluster and MinimapCluster.GetHeight then
-                minimapHeight = MinimapCluster:GetHeight()
-            end
-            UIParentRightManagedFrameContainer.fixedHeight =
-                UIParent:GetHeight() - minimapHeight - 100
-            UIParentRightManagedFrameContainer:Layout()
-            if UIParentRightManagedFrameContainer.BottomManagedLayoutContainer then
-                UIParentRightManagedFrameContainer.BottomManagedLayoutContainer:Layout()
-            end
-        end
-
-        -- Position UIParentBottomManagedFrameContainer
-        if UIParentBottomManagedFrameContainer then
-            UIParentBottomManagedFrameContainer.fixedWidth = 573
-            UIParentBottomManagedFrameContainer:ClearAllPoints()
-            UIParentBottomManagedFrameContainer:SetPoint(
-                "BOTTOM", UIParent, "BOTTOM", 0, 90
-            )
-            UIParentBottomManagedFrameContainer:Layout()
-            if UIParentBottomManagedFrameContainer.BottomManagedLayoutContainer then
-                UIParentBottomManagedFrameContainer.BottomManagedLayoutContainer:Layout()
             end
         end
     "#,

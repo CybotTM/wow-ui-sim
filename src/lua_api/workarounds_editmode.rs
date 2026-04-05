@@ -177,14 +177,46 @@ const REAPPLY_PRESET_ANCHOR_FN: &str = r#"
 /// container as relativeTo works correctly. Re-run UpdateManagedFrames which
 /// triggers Layout() to reposition all managed children.
 fn reposition_managed_frames(env: &WowLuaEnv) {
+    position_right_managed_container(env);
+    position_bottom_managed_container(env);
+}
+
+/// Position UIParentRightManagedFrameContainer using EditMode default offsets.
+fn position_right_managed_container(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
-        if UIParentRightManagedFrameContainer then
-            UIParentRightManagedFrameContainer:UpdateManagedFrames()
+        local f = UIParentRightManagedFrameContainer
+        if not f then return end
+        f:ClearAllPoints()
+        f:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -5, -260)
+        local minimapHeight = 0
+        if MinimapCluster and MinimapCluster.GetHeight then
+            minimapHeight = MinimapCluster:GetHeight()
         end
-        if UIParentBottomManagedFrameContainer then
-            UIParentBottomManagedFrameContainer:UpdateManagedFrames()
+        f.fixedHeight = UIParent:GetHeight() - minimapHeight - 100
+        f:Layout()
+        if f.BottomManagedLayoutContainer then
+            f.BottomManagedLayoutContainer:Layout()
         end
+        f:UpdateManagedFrames()
+    "#,
+    );
+}
+
+/// Position UIParentBottomManagedFrameContainer at screen bottom center.
+fn position_bottom_managed_container(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local f = UIParentBottomManagedFrameContainer
+        if not f then return end
+        f.fixedWidth = 573
+        f:ClearAllPoints()
+        f:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 90)
+        f:Layout()
+        if f.BottomManagedLayoutContainer then
+            f.BottomManagedLayoutContainer:Layout()
+        end
+        f:UpdateManagedFrames()
     "#,
     );
 }
