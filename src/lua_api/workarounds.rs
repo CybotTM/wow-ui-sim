@@ -49,7 +49,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
-    init_console_saved_vars(env);
     init_settings_panel_previews(env);
 }
 
@@ -142,32 +141,6 @@ fn stub_glow_emitter_factory(env: &WowLuaEnv) {
                 Hide = function() end,
                 SetShown = function() end,
             }
-        end
-    "#,
-    );
-}
-
-/// LFGBackfillCover_Update is called with LFDQueueFrame.PartyBackfill which
-/// is nil when the template child isn't created. Wrap the function to
-/// silently ignore nil self.
-/// Blizzard_Console_SavedVars is normally loaded from WTF/SavedVariables.
-/// Without it, DeveloperConsoleMixin:OnLoad sets self.savedVars = nil, and
-/// ShouldEditBoxTakeFocus (called via OnUpdate) crashes accessing .isShown.
-/// Initialize the global and patch the existing frame since OnLoad already ran.
-fn init_console_saved_vars(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not Blizzard_Console_SavedVars then
-            Blizzard_Console_SavedVars = {
-                isShown = false,
-                commandHistory = {},
-                messageHistory = {},
-                height = 300,
-                fontHeight = 14,
-            }
-        end
-        if DeveloperConsole and not DeveloperConsole.savedVars then
-            DeveloperConsole.savedVars = Blizzard_Console_SavedVars
         end
     "#,
     );
