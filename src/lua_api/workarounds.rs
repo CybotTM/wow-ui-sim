@@ -49,7 +49,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
-    init_settings_panel_previews(env);
 }
 
 /// Blizzard's class talent loadout dialogs are hidden XML popups that should
@@ -83,35 +82,6 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         end
         if HelpTip then
             HelpTip:HideAllSystem("SpellBook Helptips")
-        end
-    "#,
-    );
-}
-
-/// SettingsDefinitions_Shared registers preview handlers even on glue/login
-/// screens, but the full game-only Settings panel XML is not loaded there.
-/// Reattach minimal preview objects after addon loading so those registrants
-/// can safely call into SettingsPanel preview hooks.
-fn init_settings_panel_previews(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if SettingsPanel then
-            local function CreatePreviewStub()
-                local preview = {
-                    TitleText = { SetFontHeight = function() end },
-                    BodyText = { SetFontHeight = function() end },
-                }
-
-                function preview:RegisterWithSettingInitializer() end
-                function preview:SetValueAccessor() end
-                function preview:UpdatePreview() end
-                function preview:Layout() end
-
-                return preview
-            end
-
-            SettingsPanel.AccessibilityFontPreview = SettingsPanel.AccessibilityFontPreview or CreatePreviewStub()
-            SettingsPanel.QuestTextPreview = SettingsPanel.QuestTextPreview or CreatePreviewStub()
         end
     "#,
     );
