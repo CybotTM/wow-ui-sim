@@ -42,7 +42,6 @@ pub fn apply_post_runtime_addon_load_from_lua(
 
 /// Apply all post-load workarounds. Called after addon loading, before events.
 pub fn apply(env: &WowLuaEnv) {
-    patch_map_canvas_scroll(env);
     super::workarounds_tracker::init_objective_tracker(env);
     super::chat_init::show_chat_frame(env);
     workarounds_bags::init_bag_bar(env);
@@ -125,19 +124,6 @@ fn init_settings_panel_previews(env: &WowLuaEnv) {
 /// MapCanvasScrollControllerMixin:IsZoomingOut/In compare targetScale with
 /// GetCanvasScale(), but OnUpdate fires before CalculateScaleExtents sets
 /// targetScale. Initialize it on the WorldMapFrame scroll container.
-fn patch_map_canvas_scroll(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if WorldMapFrame and WorldMapFrame.ScrollContainer then
-            local sc = WorldMapFrame.ScrollContainer
-            sc.targetScale = sc.targetScale or 1
-            sc.currentScale = sc.currentScale or 1
-            sc.zoomLevels = sc.zoomLevels or {{ scale = 1 }}
-        end
-    "#,
-    );
-}
-
 /// GradualAnimatedStatusBarTemplate XML defines an AnimationGroup with
 /// parentKey="LevelUpMaxAlphaAnimation", but the simulator doesn't create
 /// AnimationGroups from templates. Patch existing instances and the mixin.
