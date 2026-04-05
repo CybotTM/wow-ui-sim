@@ -362,29 +362,13 @@ fn stub_trade_skill_texture(_: &Lua, _id: Value) -> Result<i32> {
 }
 
 fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    use super::profession_data;
-
     t.set(
         "GetAllRecipeIDs",
-        lua.create_function(|lua, ()| {
-            let ids = profession_data::get_all_recipe_ids();
-            let tbl = lua.create_table()?;
-            for (i, id) in ids.iter().enumerate() {
-                tbl.set(i + 1, *id)?;
-            }
-            Ok(tbl)
-        })?,
+        lua.create_function(build_all_recipe_id_table)?,
     )?;
     t.set(
         "GetFilteredRecipeIDs",
-        lua.create_function(|lua, ()| {
-            let ids = profession_data::get_filtered_recipe_ids();
-            let tbl = lua.create_table()?;
-            for (i, id) in ids.iter().enumerate() {
-                tbl.set(i + 1, *id)?;
-            }
-            Ok(tbl)
-        })?,
+        lua.create_function(build_filtered_recipe_id_table)?,
     )?;
     t.set(
         "GetRecipeInfo",
@@ -396,25 +380,43 @@ fn register_trade_skill_recipe_funcs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetCategoryInfo",
-        lua.create_function(
-            |lua, cat_id: i32| match profession_data::get_category(cat_id) {
-                Some(c) => {
-                    let tbl = lua.create_table()?;
-                    tbl.set("categoryID", c.category_id)?;
-                    tbl.set("name", c.name)?;
-                    tbl.set("parentCategoryID", c.parent_category_id)?;
-                    tbl.set("uiOrder", c.ui_order)?;
-                    Ok(Value::Table(tbl))
-                }
-                None => Ok(Value::Nil),
-            },
-        )?,
+        lua.create_function(build_category_info_table)?,
     )?;
     t.set(
         "IsRecipeInSkillLine",
-        lua.create_function(|_, (_recipe_id, _prof_id): (i32, i32)| Ok(true))?,
+        lua.create_function(|_, (_rid, _pid): (i32, i32)| Ok(true))?,
     )?;
     Ok(())
+}
+
+/// Converts an i32 slice to a 1-indexed Lua table.
+fn ids_to_lua_table(lua: &Lua, ids: &[i32]) -> Result<mlua::Table> {
+    let tbl = lua.create_table()?;
+    for (i, id) in ids.iter().enumerate() {
+        tbl.set(i + 1, *id)?;
+    }
+    Ok(tbl)
+}
+
+fn build_all_recipe_id_table(lua: &Lua, _: ()) -> Result<mlua::Table> {
+    ids_to_lua_table(lua, &super::profession_data::get_all_recipe_ids())
+}
+
+fn build_filtered_recipe_id_table(lua: &Lua, _: ()) -> Result<mlua::Table> {
+    ids_to_lua_table(lua, &super::profession_data::get_filtered_recipe_ids())
+}
+
+/// Returns category info table {categoryID, name, parentCategoryID, uiOrder}.
+fn build_category_info_table(lua: &Lua, cat_id: i32) -> Result<Value> {
+    let Some(c) = super::profession_data::get_category(cat_id) else {
+        return Ok(Value::Nil);
+    };
+    let tbl = lua.create_table()?;
+    tbl.set("categoryID", c.category_id)?;
+    tbl.set("name", c.name)?;
+    tbl.set("parentCategoryID", c.parent_category_id)?;
+    tbl.set("uiOrder", c.ui_order)?;
+    Ok(Value::Table(tbl))
 }
 
 fn register_trade_skill_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
