@@ -634,37 +634,52 @@ fn apply_mixin_to_object(
     let mut newsecfn: Option<Function> = None;
     for pair in source.pairs::<Value, Value>() {
         let (k, mut v) = pair?;
-        // Wrap secure mixin functions using Elune's debug.newsecurefunction
         if is_secure && is_userdata {
-            if let Value::Function(ref f) = v {
-                if newsecfn.is_none() {
-                    newsecfn = Some(
-                        lua.load("return debug.newsecurefunction")
-                            .eval::<Function>()?,
-                    );
-                }
-                let wrapped = newsecfn.as_ref().unwrap().call::<Function>(f.clone())?;
-                v = Value::Function(wrapped);
+            v = wrap_secure_function(lua, v, &mut newsecfn)?;
+        }
+        if is_userdata && matches!(&v, Value::Function(_)) {
+            if let Some(f) = set_override {
+                f.call::<()>((object.clone(), k.clone(), v.clone()))?;
             }
         }
-        if is_userdata {
-            if let Value::Function(_) = &v {
-                if let Some(f) = set_override {
-                    f.call::<()>((object.clone(), k.clone(), v.clone()))?;
-                }
-            }
-        }
-        match object {
-            Value::Table(t) => t.set(k, v)?,
-            _ if is_userdata => {
-                if let Some(ref setter) = ud_setter {
-                    setter.call::<()>((object.clone(), k, v))?;
-                }
-            }
-            _ => {}
-        }
+        store_mixin_value(object, k, v, &ud_setter)?;
     }
     Ok(())
+}
+
+/// Wrap function values with `debug.newsecurefunction` for secure mixins.
+/// Non-function values pass through unchanged.
+fn wrap_secure_function(
+    lua: &Lua,
+    v: Value,
+    newsecfn: &mut Option<Function>,
+) -> Result<Value> {
+    let Value::Function(ref f) = v else {
+        return Ok(v);
+    };
+    if newsecfn.is_none() {
+        *newsecfn = Some(lua.load("return debug.newsecurefunction").eval::<Function>()?);
+    }
+    let wrapped = newsecfn.as_ref().unwrap().call::<Function>(f.clone())?;
+    Ok(Value::Function(wrapped))
+}
+
+/// Store a key-value pair on the target object (table rawset or userdata setter).
+fn store_mixin_value(
+    object: &Value,
+    key: Value,
+    value: Value,
+    ud_setter: &Option<Function>,
+) -> Result<()> {
+    match object {
+        Value::Table(t) => t.set(key, value),
+        _ => {
+            if let Some(setter) = ud_setter {
+                setter.call::<()>((object.clone(), key, value))?;
+            }
+            Ok(())
+        }
+    }
 }
 
 /// Mixin(object, ...) — copy k/v from each mixin into object, return object.

@@ -44,12 +44,20 @@ fn load_one_blizzard_addon(
     match load_addon(&env.loader_env(), toc_path) {
         Ok(r) => {
             if verbose {
+                let t = &r.timing;
                 println!(
-                    "{} loaded: {} Lua, {} XML, {} warnings",
+                    "{} loaded: {} Lua, {} XML, {} warnings ({:.1?}: xmlproc={:.1?} exec_lua={:.1?} lifecycle={:.1?} layers={:.1?} lua={:.1?} frames={})",
                     name,
                     r.lua_files,
                     r.xml_files,
-                    r.warnings.len()
+                    r.warnings.len(),
+                    t.total(),
+                    t.xml_process_time,
+                    t.frame_exec_lua_time,
+                    t.frame_lifecycle_time,
+                    t.frame_layer_children_time,
+                    t.lua_exec_time,
+                    t.frame_count
                 );
             }
             for w in &r.warnings {

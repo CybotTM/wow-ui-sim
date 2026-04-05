@@ -115,21 +115,15 @@ fn append_parent_array_code(lua_code: &mut String, frame: &crate::xml::FrameXml,
     }
 }
 
-/// Collect mixins from inherited templates and the frame itself, then append Mixin() calls.
-fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, inherits: &str) {
+/// Append Mixin() calls for the frame's own (direct) mixins only.
+///
+/// Template-inherited mixins are already applied inside CreateFrame by
+/// `apply_templates_from_registry` → `apply_single_template` → `apply_mixin`,
+/// so we only need the frame's own mixin attribute here.
+fn append_mixins_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inherits: &str) {
     let mut all_mixins: Vec<String> = Vec::new();
 
-    // Collect from inherited templates (base mixins first)
-    if !inherits.is_empty() {
-        for template_entry in &crate::xml::get_template_chain(inherits) {
-            collect_mixins_from_attr(
-                &mut all_mixins,
-                template_entry.frame.combined_mixin().as_deref(),
-            );
-        }
-    }
-
-    // Direct mixins (override templates)
+    // Only direct mixins — template mixins are applied during CreateFrame
     collect_mixins_from_attr(&mut all_mixins, frame.combined_mixin().as_deref());
 
     for m in &all_mixins {
@@ -151,15 +145,11 @@ fn collect_mixins_from_attr(all_mixins: &mut Vec<String>, mixin_attr: Option<&st
     }
 }
 
-/// Append KeyValue assignments from templates and the frame itself.
-fn append_key_values_code(lua_code: &mut String, frame: &crate::xml::FrameXml, inherits: &str) {
-    if !inherits.is_empty() {
-        for template_entry in &crate::xml::get_template_chain(inherits) {
-            for kv in template_entry.frame.all_key_values() {
-                append_key_values_from_xml(lua_code, Some(kv));
-            }
-        }
-    }
+/// Append KeyValue assignments from the frame's own XML only.
+///
+/// Template-inherited key values are already applied inside CreateFrame by
+/// `apply_templates_from_registry` → `apply_single_template` → `apply_key_values`.
+fn append_key_values_code(lua_code: &mut String, frame: &crate::xml::FrameXml, _inherits: &str) {
     for kv in frame.all_key_values() {
         append_key_values_from_xml(lua_code, Some(kv));
     }

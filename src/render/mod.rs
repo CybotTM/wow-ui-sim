@@ -25,31 +25,8 @@ pub fn strip_wow_markup(text: &str) -> String {
     let mut chars = text.chars().peekable();
 
     while let Some(c) = chars.next() {
-        if c == '|' {
-            if let Some(&next) = chars.peek() {
-                if next == 'T' || next == 'A' {
-                    let end = if next == 'T' { 't' } else { 'a' };
-                    chars.next();
-                    skip_until_marker(&mut chars, end);
-                    continue;
-                }
-                if next == 'H' {
-                    chars.next();
-                    skip_until_marker(&mut chars, 'h');
-                    continue;
-                }
-                if next == 'h' || next == 'r' {
-                    chars.next();
-                    continue;
-                }
-                if next == 'c' {
-                    chars.next();
-                    for _ in 0..8 {
-                        chars.next();
-                    }
-                    continue;
-                }
-            }
+        if c == '|' && consume_escape(&mut chars) {
+            continue;
         }
         result.push(c);
     }
@@ -57,13 +34,30 @@ pub fn strip_wow_markup(text: &str) -> String {
     result
 }
 
-fn skip_until_marker(chars: &mut std::iter::Peekable<std::str::Chars<'_>>, marker: char) {
+/// Try to consume a WoW escape sequence after `|`. Returns true if consumed.
+fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
+    let Some(&next) = chars.peek() else {
+        return false;
+    };
+    match next {
+        'T' | 'A' => skip_delimited_span(chars, if next == 'T' { 't' } else { 'a' }),
+        'H' => skip_delimited_span(chars, 'h'),
+        'h' | 'r' => { chars.next(); true }
+        'c' => { chars.next(); for _ in 0..8 { chars.next(); } true }
+        _ => false,
+    }
+}
+
+/// Skip from current position to `|{end_marker}` (e.g. `|T...|t`).
+fn skip_delimited_span(chars: &mut std::iter::Peekable<std::str::Chars>, end_marker: char) -> bool {
+    chars.next(); // consume the opening letter
     while let Some(ch) = chars.next() {
-        if ch == '|' && chars.peek() == Some(&marker) {
+        if ch == '|' && chars.peek() == Some(&end_marker) {
             chars.next();
-            break;
+            return true;
         }
     }
+    true
 }
 
 #[cfg(feature = "gui")]

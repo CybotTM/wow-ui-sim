@@ -477,23 +477,18 @@ fn collect_atlas_key_values(chain: &[crate::xml::TemplateEntry]) -> Vec<(String,
 
 /// Collect MaskTextures with `useAtlasSize=true` and no atlas attribute.
 fn collect_unatlased_masks(chain: &[crate::xml::TemplateEntry]) -> Vec<(String, bool)> {
-    let mut result = Vec::new();
-    for entry in chain {
-        for layers in entry.frame.layers() {
-            for layer in &layers.layers {
-                for elem in &layer.elements {
-                    if let crate::xml::LayerElement::MaskTexture(t) = elem {
-                        if t.atlas.is_none() && t.use_atlas_size == Some(true) {
-                            if let Some(pk) = &t.parent_key {
-                                result.push((pk.clone(), true));
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    result
+    chain
+        .iter()
+        .flat_map(|entry| entry.frame.layers())
+        .flat_map(|layers| &layers.layers)
+        .flat_map(|layer| &layer.elements)
+        .filter_map(|elem| match elem {
+            crate::xml::LayerElement::MaskTexture(t) => Some(t),
+            _ => None,
+        })
+        .filter(|t| t.atlas.is_none() && t.use_atlas_size == Some(true))
+        .filter_map(|t| t.parent_key.as_ref().map(|pk| (pk.clone(), true)))
+        .collect()
 }
 
 /// Check if a MaskTexture parentKey matches an atlas KeyValue key.
