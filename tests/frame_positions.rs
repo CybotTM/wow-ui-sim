@@ -141,8 +141,8 @@ fn position_tests() -> Vec<TestCase> {
             "CompactPartyFrame",
             22.0,
             147.0,
-            90.0,
-            224.0,
+            98.0,
+            234.0,
             1.0,
         ),
         // HUD elements
