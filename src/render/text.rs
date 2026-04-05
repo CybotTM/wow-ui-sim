@@ -132,56 +132,100 @@ pub fn strip_wow_markup(text: &str) -> String {
     let mut chars = text.chars().peekable();
 
     while let Some(c) = chars.next() {
-        if c == '|' {
-            if let Some(&next) = chars.peek() {
-                // |T...|t or |A...|a — inline texture/atlas
-                if next == 'T' || next == 'A' {
-                    let end_marker = if next == 'T' { 't' } else { 'a' };
-                    chars.next();
-                    while let Some(ch) = chars.next() {
-                        if ch == '|'
-                            && let Some(&marker) = chars.peek()
-                            && marker == end_marker
-                        {
-                            chars.next();
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                // |H...|h — hyperlink open tag (skip tag, keep linked text)
-                if next == 'H' {
-                    chars.next();
-                    while let Some(ch) = chars.next() {
-                        if ch == '|' && chars.peek() == Some(&'h') {
-                            chars.next();
-                            break;
-                        }
-                    }
-                    continue;
-                }
-                // |h — hyperlink close tag
-                if next == 'h' {
-                    chars.next();
-                    continue;
-                }
-                // |cXXXXXXXX — color start
-                if next == 'c' {
-                    chars.next();
-                    for _ in 0..8 {
-                        chars.next();
-                    }
-                    continue;
-                }
-                // |r — color reset
-                if next == 'r' {
-                    chars.next();
-                    continue;
-                }
-            }
+        if c == '|' && consume_escape(&mut chars) {
+            continue;
         }
         result.push(c);
     }
 
     result
+}
+
+/// Try to consume a WoW escape sequence after `|`. Returns true if consumed.
+fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
+    let Some(&next) = chars.peek() else {
+        return false;
+    };
+    match next {
+        'T' | 'A' => skip_delimited_span(chars, if next == 'T' { 't' } else { 'a' }),
+        'H' => skip_delimited_span(chars, 'h'),
+        'h' | 'r' => { chars.next(); true }
+        'c' => { chars.next(); skip_n(chars, 8); true }
+        _ => false,
+    }
+}
+
+/// Skip from current position to `|{end_marker}` (e.g. `|T...|t`).
+fn skip_delimited_span(chars: &mut std::iter::Peekable<std::str::Chars>, end_marker: char) -> bool {
+    chars.next(); // consume the opening letter (T, A, H)
+    while let Some(ch) = chars.next() {
+        if ch == '|' && chars.peek() == Some(&end_marker) {
+            chars.next();
+            return true;
+        }
+    }
+    true // consumed the opening, even if unclosed
+}
+
+/// Skip N characters.
+fn skip_n(chars: &mut std::iter::Peekable<std::str::Chars>, n: usize) {
+    for _ in 0..n {
+        chars.next();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plain_text_unchanged() {
+        assert_eq!(strip_wow_markup("Hello World"), "Hello World");
+    }
+
+    #[test]
+    fn strips_color_codes() {
+        assert_eq!(strip_wow_markup("|cFF00FF00Green|r text"), "Green text");
+    }
+
+    #[test]
+    fn strips_inline_texture() {
+        assert_eq!(strip_wow_markup("Icon|TInterface\\Icons\\Spell:16|tEnd"), "IconEnd");
+    }
+
+    #[test]
+    fn strips_inline_atlas() {
+        assert_eq!(strip_wow_markup("Before|Aatlasname|aAfter"), "BeforeAfter");
+    }
+
+    #[test]
+    fn strips_hyperlink_keeps_text() {
+        assert_eq!(
+            strip_wow_markup("|Hitem:12345|hCool Sword|h"),
+            "Cool Sword"
+        );
+    }
+
+    #[test]
+    fn strips_nested_color_in_hyperlink() {
+        assert_eq!(
+            strip_wow_markup("|cFF0070DD|Hitem:123|h[Blade]|h|r"),
+            "[Blade]"
+        );
+    }
+
+    #[test]
+    fn empty_string() {
+        assert_eq!(strip_wow_markup(""), "");
+    }
+
+    #[test]
+    fn lone_pipe_preserved() {
+        assert_eq!(strip_wow_markup("a|b"), "a|b");
+    }
+
+    #[test]
+    fn pipe_at_end_preserved() {
+        assert_eq!(strip_wow_markup("text|"), "text|");
+    }
 }
