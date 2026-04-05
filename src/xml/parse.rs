@@ -124,62 +124,85 @@ fn strip_duplicate_script_handlers(xml: &str) -> String {
     use std::collections::HashMap;
 
     let lines: Vec<&str> = xml.lines().collect();
-    let mut remove: Vec<bool> = vec![false; lines.len()];
-
-    let mut in_scripts = false;
-    // handler tag name -> (start_line, end_line) of most recent occurrence
+    let mut remove = vec![false; lines.len()];
     let mut handlers: HashMap<String, (usize, usize)> = HashMap::new();
 
     let mut i = 0;
     while i < lines.len() {
-        let trimmed = lines[i].trim();
+        if !is_scripts_open(lines[i]) {
+            i += 1;
+            continue;
+        }
+        handlers.clear();
+        i += 1;
 
-        if !in_scripts {
-            if trimmed.starts_with("<Scripts") && trimmed.ends_with('>') && !trimmed.ends_with("/>")
-            {
-                in_scripts = true;
-                handlers.clear();
+        // Process handlers inside this <Scripts> block
+        while i < lines.len() {
+            let trimmed = lines[i].trim();
+            if trimmed == "</Scripts>" {
+                i += 1;
+                break;
             }
-        } else if trimmed == "</Scripts>" {
-            in_scripts = false;
-            handlers.clear();
-        } else if trimmed.starts_with('<') && !trimmed.starts_with("</") {
-            // Extract tag name (e.g. "OnEnter" from "<OnEnter ...>")
-            let after_lt = &trimmed[1..];
-            let tag_end = after_lt.find([' ', '>', '/']).unwrap_or(after_lt.len());
-            let tag_name = &after_lt[..tag_end];
 
-            let start = i;
-            let end = if trimmed.ends_with("/>") {
-                i
-            } else {
-                // Find closing tag
-                let closing = format!("</{tag_name}>");
-                let mut j = i + 1;
-                while j < lines.len() {
-                    if lines[j].trim().starts_with(&closing) {
-                        break;
-                    }
-                    j += 1;
-                }
-                j
+            let Some((tag_name, end)) = detect_handler_span(trimmed, &lines, i) else {
+                i += 1;
+                continue;
             };
 
             if let Some((prev_start, prev_end)) =
-                handlers.insert(tag_name.to_string(), (start, end))
+                handlers.insert(tag_name, (i, end))
             {
-                for flag in &mut remove[prev_start..=prev_end] {
-                    *flag = true;
-                }
+                remove[prev_start..=prev_end].fill(true);
             }
-
-            i = end;
+            i = end + 1;
         }
-
-        i += 1;
     }
 
-    let mut out = String::with_capacity(xml.len());
+    collect_kept_lines(&lines, &remove)
+}
+
+/// Check if a line opens a `<Scripts>` block (not self-closing).
+fn is_scripts_open(line: &str) -> bool {
+    let trimmed = line.trim();
+    trimmed.starts_with("<Scripts") && trimmed.ends_with('>') && !trimmed.ends_with("/>")
+}
+
+/// Detect a handler element starting at `start`, returning `(tag_name, end_line)`.
+///
+/// Returns `None` if the line isn't an opening tag. For self-closing tags (`/>`),
+/// `end_line == start`. For multiline tags, scans forward for the closing tag.
+fn detect_handler_span(
+    trimmed: &str,
+    lines: &[&str],
+    start: usize,
+) -> Option<(String, usize)> {
+    if !trimmed.starts_with('<') || trimmed.starts_with("</") {
+        return None;
+    }
+
+    let tag_name = extract_tag_name(trimmed);
+
+    if trimmed.ends_with("/>") {
+        return Some((tag_name.to_string(), start));
+    }
+
+    let closing_prefix = format!("</{tag_name}>");
+    let end = (start + 1..lines.len())
+        .find(|&j| lines[j].trim().starts_with(&closing_prefix))
+        .unwrap_or(lines.len() - 1);
+    Some((tag_name.to_string(), end))
+}
+
+/// Extract the tag name from an opening XML tag (e.g. `"OnEnter"` from `"<OnEnter function=...>"`).
+fn extract_tag_name(trimmed: &str) -> &str {
+    let after_lt = &trimmed[1..];
+    let tag_end = after_lt.find([' ', '>', '/']).unwrap_or(after_lt.len());
+    &after_lt[..tag_end]
+}
+
+/// Build output string from lines not marked for removal.
+fn collect_kept_lines(lines: &[&str], remove: &[bool]) -> String {
+    let mut out = String::with_capacity(lines.iter().map(|l| l.len() + 1).sum());
     for (idx, line) in lines.iter().enumerate() {
         if !remove[idx] {
             if !out.is_empty() {
