@@ -34,6 +34,90 @@ fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
     )
 }
 
+fn is_region(wt: crate::widget::WidgetType) -> bool {
+    matches!(
+        wt,
+        crate::widget::WidgetType::Texture
+            | crate::widget::WidgetType::FontString
+            | crate::widget::WidgetType::Line
+    )
+}
+
+/// DFS emit: parent frame, then its regions (sorted by draw_layer), then child
+/// frames (sorted by frame_level/raise_order/id, recursively).
+/// This ensures all descendants of a frame render as a contiguous group.
+fn dfs_emit(
+    id: u64,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &std::collections::HashSet<u64>,
+    out: &mut Vec<u64>,
+) {
+    let Some(f) = widgets.get(id) else { return };
+
+    // Emit the frame itself.
+    out.push(id);
+
+    // Collect visible children, split into regions and child frames.
+    let mut regions: Vec<u64> = Vec::new();
+    let mut child_frames: Vec<u64> = Vec::new();
+    for &child_id in &f.children {
+        if !visible.contains(&child_id) {
+            continue;
+        }
+        let Some(child) = widgets.get(child_id) else { continue };
+        if is_region(child.widget_type) {
+            regions.push(child_id);
+        } else {
+            // Only include children in the same strata.
+            let child_strata = if is_region(child.widget_type) {
+                child
+                    .parent_id
+                    .and_then(|pid| widgets.get(pid))
+                    .map(|p| p.frame_strata)
+                    .unwrap_or(child.frame_strata)
+            } else {
+                child.frame_strata
+            };
+            if child_strata.as_index() == strata_idx {
+                child_frames.push(child_id);
+            }
+        }
+    }
+
+    // Emit regions sorted by (draw_layer, draw_sub_layer, type_flag, id).
+    regions.sort_by(|&a, &b| {
+        let fa = widgets.get(a);
+        let fb = widgets.get(b);
+        match (fa, fb) {
+            (Some(fa), Some(fb)) => {
+                let ta = if fa.widget_type == crate::widget::WidgetType::FontString { 1u8 } else { 0u8 };
+                let tb = if fb.widget_type == crate::widget::WidgetType::FontString { 1u8 } else { 0u8 };
+                (fa.draw_layer as i32, fa.draw_sub_layer, ta, a)
+                    .cmp(&(fb.draw_layer as i32, fb.draw_sub_layer, tb, b))
+            }
+            _ => a.cmp(&b),
+        }
+    });
+    for region_id in regions {
+        out.push(region_id);
+    }
+
+    // Sort child frames by (frame_level, raise_order, id) and recurse.
+    child_frames.sort_by(|&a, &b| {
+        let fa = widgets.get(a);
+        let fb = widgets.get(b);
+        match (fa, fb) {
+            (Some(fa), Some(fb)) => (fa.frame_level, fa.raise_order, a)
+                .cmp(&(fb.frame_level, fb.raise_order, b)),
+            _ => a.cmp(&b),
+        }
+    });
+    for child_id in child_frames {
+        dfs_emit(child_id, strata_idx, widgets, visible, out);
+    }
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -266,30 +350,6 @@ impl EmptyRuntimeState {
     }
 }
 
-struct StrataBucketEntry {
-    frame_id: u64,
-    strata: crate::widget::FrameStrata,
-    sort_key: crate::iced_app::frame_collect::IntraStrataKey,
-}
-
-fn insert_into_strata_bucket(
-    buckets: &mut [Vec<u64>],
-    widgets: &WidgetRegistry,
-    entry: StrataBucketEntry,
-) {
-    let bucket = &mut buckets[entry.strata.as_index()];
-    let insert_at = bucket.partition_point(|&existing_id| {
-        widgets
-            .get(existing_id)
-            .map(|frame| {
-                crate::iced_app::frame_collect::intra_strata_sort_key(frame, existing_id, widgets)
-            })
-            .unwrap_or_default()
-            < entry.sort_key
-    });
-    bucket.insert(insert_at, entry.frame_id);
-}
-
 impl Default for SimState {
     fn default() -> Self {
         let mut state = Self::new_empty();
@@ -408,48 +468,64 @@ impl SimState {
     /// but `alpha > 0`) its parent's `effective_alpha > 0`. Frames with
     /// explicit `alpha=0` (glow/anim textures) are always excluded.
     fn build_strata_buckets(&mut self) -> Vec<Vec<u64>> {
-        use crate::iced_app::frame_collect::intra_strata_sort_key;
         use crate::widget::WidgetType;
-        let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
+        use std::collections::HashSet;
+
+        // Step 1: Collect visible frame IDs per strata (unordered).
+        let mut visible: HashSet<u64> = HashSet::new();
+        let mut strata_map: Vec<Vec<u64>> = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
         for id in self.widgets.iter_ids() {
             let Some(f) = self.widgets.get(id) else {
                 continue;
             };
-            // Visibility filter: skip frames with no render alpha.
-            // Fall back to parent alpha only for frames hidden via visible=false
-            // (button state textures), NOT for frames with explicit alpha=0.
-            let render_alpha = if f.effective_alpha > 0.0 {
-                f.effective_alpha
-            } else if f.alpha > 0.0 && uses_parent_alpha_fallback(f) {
-                f.parent_id
-                    .and_then(|pid| self.widgets.get(pid))
-                    .map(|p| p.effective_alpha)
-                    .unwrap_or(0.0)
-            } else {
-                0.0
-            };
-            if render_alpha <= 0.0 {
+            if self.frame_render_alpha(f) <= 0.0 {
                 continue;
             }
-            let strata = if matches!(
-                f.widget_type,
-                WidgetType::Texture | WidgetType::FontString | WidgetType::Line
-            ) {
-                f.parent_id
-                    .and_then(|pid| self.widgets.get(pid))
-                    .map(|p| p.frame_strata)
-                    .unwrap_or(f.frame_strata)
-            } else {
-                f.frame_strata
-            };
-            buckets[strata.as_index()].push(id);
+            visible.insert(id);
+            let strata = self.frame_bucket_strata(f);
+            strata_map[strata.as_index()].push(id);
         }
-        for bucket in &mut buckets {
-            bucket.sort_by(|&a, &b| match (self.widgets.get(a), self.widgets.get(b)) {
-                (Some(fa), Some(fb)) => intra_strata_sort_key(fa, a, &self.widgets)
-                    .cmp(&intra_strata_sort_key(fb, b, &self.widgets)),
-                _ => a.cmp(&b),
+
+        // Step 2: For each strata, identify roots and DFS-emit in grouped order.
+        let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
+        for (si, ids) in strata_map.iter().enumerate() {
+            // Find root frames: no parent, or parent in a different strata, or parent not visible.
+            let mut roots: Vec<u64> = Vec::new();
+            for &id in ids {
+                let Some(f) = self.widgets.get(id) else { continue };
+                if is_region(f.widget_type) {
+                    continue; // regions are emitted as part of their parent's DFS
+                }
+                let is_root = match f.parent_id {
+                    None => true,
+                    Some(pid) => {
+                        let parent_in_same_strata = self.widgets.get(pid).map_or(false, |p| {
+                            self.frame_bucket_strata(p).as_index() == si
+                        });
+                        !parent_in_same_strata || !visible.contains(&pid)
+                    }
+                };
+                if is_root {
+                    roots.push(id);
+                }
+            }
+
+            // Sort roots by (frame_level, raise_order, id).
+            roots.sort_by(|&a, &b| {
+                let fa = self.widgets.get(a);
+                let fb = self.widgets.get(b);
+                match (fa, fb) {
+                    (Some(fa), Some(fb)) => (fa.frame_level, fa.raise_order, a)
+                        .cmp(&(fb.frame_level, fb.raise_order, b)),
+                    _ => a.cmp(&b),
+                }
             });
+
+            // DFS from each root, emitting frames grouped with their descendants.
+            let bucket = &mut buckets[si];
+            for root_id in roots {
+                dfs_emit(root_id, si, &self.widgets, &visible, bucket);
+            }
         }
         buckets
     }
@@ -638,7 +714,7 @@ impl SimState {
         self.widgets.propagate_effective_alpha(id, parent_eff);
         if visible {
             // Show: insert newly-visible frames AFTER propagating alpha.
-            self.insert_subtree_into_buckets(id);
+            self.invalidate_strata_buckets();
         }
         // Record for incremental HitGrid update (applied by App after Lua runs).
         self.pending_hit_grid_changes.push((id, visible));
@@ -663,55 +739,10 @@ impl SimState {
         }
     }
 
-    /// Insert newly-visible frames from a subtree into strata_buckets.
-    ///
-    /// Walks all descendants and inserts those with render_alpha > 0
-    /// (own effective_alpha, or parent's for button state textures with alpha > 0).
-    fn insert_subtree_into_buckets(&mut self, root_id: u64) {
-        let subtree_ids = self.collect_subtree_ids(root_id);
-        let mut bucket_entries = Vec::with_capacity(subtree_ids.len());
-        for frame_id in subtree_ids {
-            let Some(bucket_entry) = self.subtree_bucket_entry(frame_id) else {
-                continue;
-            };
-            bucket_entries.push(bucket_entry);
-        }
-        let Some(buckets) = self.strata_buckets.as_mut() else {
-            return;
-        };
-        for bucket_entry in bucket_entries {
-            insert_into_strata_bucket(buckets, &self.widgets, bucket_entry);
-        }
-    }
-
-    fn collect_subtree_ids(&self, root_id: u64) -> Vec<u64> {
-        let mut queue = vec![root_id];
-        let mut subtree_ids = Vec::with_capacity(8);
-        while let Some(frame_id) = queue.pop() {
-            let Some(frame) = self.widgets.get(frame_id) else {
-                continue;
-            };
-            queue.extend(frame.children.iter().copied());
-            subtree_ids.push(frame_id);
-        }
-        subtree_ids
-    }
-
-    fn subtree_bucket_entry(&self, frame_id: u64) -> Option<StrataBucketEntry> {
-        let frame = self.widgets.get(frame_id)?;
-        if self.frame_render_alpha(frame) <= 0.0 {
-            return None;
-        }
-
-        Some(StrataBucketEntry {
-            frame_id,
-            strata: self.frame_bucket_strata(frame),
-            sort_key: crate::iced_app::frame_collect::intra_strata_sort_key(
-                frame,
-                frame_id,
-                &self.widgets,
-            ),
-        })
+    /// Invalidate strata buckets so they rebuild on next access.
+    /// Used after show/reparent operations that change DFS traversal order.
+    fn invalidate_strata_buckets(&mut self) {
+        self.strata_buckets = None;
     }
 
     fn frame_render_alpha(&self, frame: &crate::widget::Frame) -> f32 {
@@ -768,7 +799,7 @@ impl SimState {
         // same handler chain rely on buckets being Some for surgical insert/remove.
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
-            self.insert_subtree_into_buckets(id);
+            self.invalidate_strata_buckets();
         }
     }
 
@@ -793,7 +824,7 @@ impl SimState {
         }
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
-            self.insert_subtree_into_buckets(id);
+            self.invalidate_strata_buckets();
         }
     }
 
