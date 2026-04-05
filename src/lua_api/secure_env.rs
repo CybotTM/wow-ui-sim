@@ -47,8 +47,19 @@ pub fn create_secure_environment(lua: &Lua) -> Result<()> {
 /// Apply `setfenv` to a compiled function so it runs in the secure environment.
 ///
 /// Called before executing Lua files from `UseSecureEnvironment` addons.
+/// Refreshes secureenv first to pick up any new globals defined since last refresh.
 pub fn apply_secure_env(lua: &Lua, func: &mlua::Function) -> Result<()> {
     refresh_secure_environment(lua)?;
+    let setfenv: mlua::Function = lua.globals().get("setfenv")?;
+    let secureenv: mlua::Table = lua.named_registry_value("__secureenv")?;
+    setfenv.call::<()>((func.clone(), secureenv))
+}
+
+/// Apply `setfenv` without refreshing the secure environment.
+///
+/// Used for generated Lua code (frame creation, mixins, texture batches) that
+/// doesn't define new globals, avoiding the O(N) scan of 100K+ globals.
+pub fn apply_secure_env_no_refresh(lua: &Lua, func: &mlua::Function) -> Result<()> {
     let setfenv: mlua::Function = lua.globals().get("setfenv")?;
     let secureenv: mlua::Table = lua.named_registry_value("__secureenv")?;
     setfenv.call::<()>((func.clone(), secureenv))
