@@ -109,40 +109,46 @@ pub fn register_simulate_ping(lua: &Lua) -> Result<()> {
 /// Loot, content-tracking, and achievement telemetry namespace stubs.
 pub fn register_tracking_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    g.set("C_Loot", register_c_loot(lua)?)?;
+    g.set("C_ContentTracking", register_c_content_tracking(lua)?)?;
+    g.set(
+        "C_AchievementTelemetry",
+        register_c_achievement_telemetry(lua)?,
+    )?;
+    Ok(())
+}
 
-    let cl = lua.create_table()?;
-    cl.set(
+fn register_c_loot(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set(
         "GetLootRollDuration",
-        lua.create_function(|_, _id: Value| Ok(0i32))?,
+        lua.create_function(|_, _: Value| Ok(0i32))?,
     )?;
-    g.set("C_Loot", cl)?;
+    Ok(t)
+}
 
-    let ct = lua.create_table()?;
-    ct.set(
+fn register_c_content_tracking(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set(
         "GetTrackedIDs",
-        lua.create_function(|lua, _type: Value| lua.create_table())?,
+        lua.create_function(|lua, _: Value| lua.create_table())?,
     )?;
-    ct.set(
+    t.set(
         "IsTracking",
-        lua.create_function(|_, (_type, _id): (Value, Value)| Ok(false))?,
+        lua.create_function(|_, _: (Value, Value)| Ok(false))?,
     )?;
-    ct.set(
+    t.set(
         "GetCollectableSourceTrackingEnabled",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    g.set("C_ContentTracking", ct)?;
+    Ok(t)
+}
 
-    let at = lua.create_table()?;
-    at.set("ShowAchievements", lua.create_function(|_, ()| Ok(()))?)?;
-    at.set(
-        "LinkAchievementInWhisper",
-        lua.create_function(|_, _id: Value| Ok(()))?,
-    )?;
-    at.set(
-        "LinkAchievementInClub",
-        lua.create_function(|_, _id: Value| Ok(()))?,
-    )?;
-    g.set("C_AchievementTelemetry", at)?;
-
-    Ok(())
+fn register_c_achievement_telemetry(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set("ShowAchievements", lua.create_function(|_, ()| Ok(()))?)?;
+    let noop = lua.create_function(|_, _: Value| Ok(()))?;
+    t.set("LinkAchievementInWhisper", noop.clone())?;
+    t.set("LinkAchievementInClub", noop)?;
+    Ok(t)
 }
