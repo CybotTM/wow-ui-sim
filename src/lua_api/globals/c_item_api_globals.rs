@@ -177,59 +177,56 @@ fn register_spell_query_globals(lua: &Lua) -> Result<()> {
 
 /// Spell stub globals: cooldown, known checks, chat.
 fn register_spell_stub_globals(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "GetSpellCooldown",
-        lua.create_function(|_, _spell_id: Value| Ok((0.0_f64, 0.0_f64, 1, 1.0_f64)))?,
+        lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64, 1, 1.0_f64)))?,
     )?;
-
-    globals.set(
+    g.set(
         "IsSpellKnown",
-        lua.create_function(|_, args: mlua::MultiValue| {
-            let spell_id = args
-                .iter()
-                .next()
-                .and_then(|v| match v {
-                    mlua::Value::Integer(n) => Some(*n as u32),
-                    _ => None,
-                })
-                .unwrap_or(0);
-            Ok(super::spellbook_data::is_spell_known(spell_id))
-        })?,
+        lua.create_function(is_spell_known_variadic)?,
     )?;
-
-    globals.set(
-        "IsPlayerSpell",
-        lua.create_function(|_, spell_id: i32| {
-            Ok(super::spellbook_data::is_spell_known(spell_id as u32))
-        })?,
-    )?;
-
-    globals.set(
+    g.set("IsPlayerSpell", lua.create_function(is_player_spell)?)?;
+    g.set(
         "IsSpellKnownOrOverridesKnown",
-        lua.create_function(|_, spell_id: i32| {
-            Ok(super::spellbook_data::find_spell_slot(spell_id as u32).is_some())
-        })?,
+        lua.create_function(is_spell_known_or_overrides)?,
     )?;
+    register_spell_misc_stubs(lua, &g)?;
+    Ok(())
+}
 
-    globals.set(
-        "SpellCanTargetItem",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    globals.set(
-        "SpellCanTargetItemID",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
-    )?;
-    globals.set(
+fn is_spell_known_variadic(_: &Lua, args: mlua::MultiValue) -> Result<bool> {
+    let spell_id = args
+        .iter()
+        .next()
+        .and_then(|v| match v {
+            mlua::Value::Integer(n) => Some(*n as u32),
+            _ => None,
+        })
+        .unwrap_or(0);
+    Ok(super::spellbook_data::is_spell_known(spell_id))
+}
+
+fn is_player_spell(_: &Lua, spell_id: i32) -> Result<bool> {
+    Ok(super::spellbook_data::is_spell_known(spell_id as u32))
+}
+
+fn is_spell_known_or_overrides(_: &Lua, spell_id: i32) -> Result<bool> {
+    Ok(super::spellbook_data::find_spell_slot(spell_id as u32).is_some())
+}
+
+fn register_spell_misc_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let false_stub = lua.create_function(|_, _: mlua::MultiValue| Ok(false))?;
+    g.set("SpellCanTargetItem", false_stub.clone())?;
+    g.set("SpellCanTargetItemID", false_stub)?;
+    g.set(
         "SendChatMessage",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "SpellGetVisibilityInfo",
-        lua.create_function(|_, (_spell_id, _ctx): (i32, String)| Ok((false, false, false)))?,
+        lua.create_function(|_, _: (i32, String)| Ok((false, false, false)))?,
     )?;
-
     Ok(())
 }
 
@@ -256,9 +253,7 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
                     let name = item.map_or("Unknown", |i| i.name);
                     let quality = item.map_or(4, |i| i.quality);
                     let color = quality_color(quality);
-                    let link = format!(
-                        "|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r"
-                    );
+                    let link = format!("|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r");
                     Ok(Value::String(lua.create_string(&link)?))
                 }
                 _ => Ok(Value::Nil),
@@ -321,10 +316,10 @@ fn register_inventory_globals(lua: &Lua) -> Result<()> {
 /// Fallback icon fileDataID for items missing icon data, keyed by inventory_type.
 fn fallback_icon_for_inv_type(inv_type: u8) -> u32 {
     match inv_type {
-        2 => 133294,   // Neck: INV_Jewelry_Necklace_07
-        11 => 133345,  // Finger: INV_Jewelry_Ring_36
-        12 => 133282,  // Trinket: INV_Jewelry_TrinketPVP_01
-        _ => 134400,   // Generic: INV_Misc_QuestionMark
+        2 => 133294,  // Neck: INV_Jewelry_Necklace_07
+        11 => 133345, // Finger: INV_Jewelry_Ring_36
+        12 => 133282, // Trinket: INV_Jewelry_TrinketPVP_01
+        _ => 134400,  // Generic: INV_Misc_QuestionMark
     }
 }
 
