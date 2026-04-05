@@ -65,7 +65,9 @@ fn dfs_emit(
         if !visible.contains(&child_id) {
             continue;
         }
-        let Some(child) = widgets.get(child_id) else { continue };
+        let Some(child) = widgets.get(child_id) else {
+            continue;
+        };
         if is_region(child.widget_type) {
             regions.push(child_id);
         } else {
@@ -91,10 +93,22 @@ fn dfs_emit(
         let fb = widgets.get(b);
         match (fa, fb) {
             (Some(fa), Some(fb)) => {
-                let ta = if fa.widget_type == crate::widget::WidgetType::FontString { 1u8 } else { 0u8 };
-                let tb = if fb.widget_type == crate::widget::WidgetType::FontString { 1u8 } else { 0u8 };
-                (fa.draw_layer as i32, fa.draw_sub_layer, ta, a)
-                    .cmp(&(fb.draw_layer as i32, fb.draw_sub_layer, tb, b))
+                let ta = if fa.widget_type == crate::widget::WidgetType::FontString {
+                    1u8
+                } else {
+                    0u8
+                };
+                let tb = if fb.widget_type == crate::widget::WidgetType::FontString {
+                    1u8
+                } else {
+                    0u8
+                };
+                (fa.draw_layer as i32, fa.draw_sub_layer, ta, a).cmp(&(
+                    fb.draw_layer as i32,
+                    fb.draw_sub_layer,
+                    tb,
+                    b,
+                ))
             }
             _ => a.cmp(&b),
         }
@@ -108,8 +122,9 @@ fn dfs_emit(
         let fa = widgets.get(a);
         let fb = widgets.get(b);
         match (fa, fb) {
-            (Some(fa), Some(fb)) => (fa.frame_level, fa.raise_order, a)
-                .cmp(&(fb.frame_level, fb.raise_order, b)),
+            (Some(fa), Some(fb)) => {
+                (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
+            }
             _ => a.cmp(&b),
         }
     });
@@ -363,61 +378,61 @@ impl Default for SimState {
 
 impl SimState {
     fn new_empty() -> Self {
-        let collections = EmptyStateCollections::new();
-        let runtime = EmptyRuntimeState::new();
+        let c = EmptyStateCollections::new();
+        let r = EmptyRuntimeState::new();
 
         Self {
             widgets: WidgetRegistry::default(),
             events: EventQueue::default(),
             scripts: ScriptRegistry::default(),
             cvars: CVarStorage::new(),
-            console_output: collections.console_output,
-            timers: collections.timers,
-            addons: collections.addons,
-            lua_errors: collections.lua_errors,
-            tooltips: collections.tooltips,
-            simple_htmls: collections.simple_htmls,
-            message_frames: collections.message_frames,
-            animation_groups: collections.animation_groups,
-            anim_sync_times: collections.anim_sync_times,
-            anim_frame_to_group: collections.anim_frame_to_group,
-            anim_frame_to_anim: collections.anim_frame_to_anim,
-            on_update_frames: collections.on_update_frames,
-            pending_hit_grid_changes: collections.pending_hit_grid_changes,
-            action_bars: collections.action_bars,
-            addon_base_paths: collections.addon_base_paths,
-            create_frame_initial_hidden: runtime.create_frame_initial_hidden,
-            spell_cooldowns: collections.spell_cooldowns,
-            action_ui_buttons: collections.action_ui_buttons,
-            party_members: collections.party_members,
-            bag_items: collections.bag_items,
-            focused_frame_id: runtime.focused_frame_id,
-            visible_on_update_cache: runtime.visible_on_update_cache,
-            strata_buckets: runtime.strata_buckets,
-            mouse_position: runtime.mouse_position,
-            hovered_frame: runtime.hovered_frame,
-            current_target: runtime.current_target,
-            current_focus: runtime.current_focus,
-            sound_manager: runtime.sound_manager,
-            casting: runtime.casting,
-            gcd: runtime.gcd,
-            cursor_item: runtime.cursor_item,
-            loading_addon_index: runtime.loading_addon_index,
-            executing_addon_index: runtime.executing_addon_index,
-            loading_forbidden: runtime.loading_forbidden,
-            next_anim_group_id: runtime.next_anim_group_id,
-            next_cast_id: runtime.next_cast_id,
-            screen_width: runtime.screen_width,
-            screen_height: runtime.screen_height,
-            screen_kind: runtime.screen_kind,
-            is_logged_in: runtime.is_logged_in,
-            screen_first_displayed: runtime.screen_first_displayed,
-            saved_account_name: runtime.saved_account_name,
-            saved_account_list: runtime.saved_account_list,
-            uses_token: runtime.uses_token,
-            fps: runtime.fps,
-            rot_damage_level: runtime.rot_damage_level,
-            start_time: runtime.start_time,
+            console_output: c.console_output,
+            timers: c.timers,
+            addons: c.addons,
+            lua_errors: c.lua_errors,
+            tooltips: c.tooltips,
+            simple_htmls: c.simple_htmls,
+            message_frames: c.message_frames,
+            animation_groups: c.animation_groups,
+            anim_sync_times: c.anim_sync_times,
+            anim_frame_to_group: c.anim_frame_to_group,
+            anim_frame_to_anim: c.anim_frame_to_anim,
+            on_update_frames: c.on_update_frames,
+            pending_hit_grid_changes: c.pending_hit_grid_changes,
+            action_bars: c.action_bars,
+            addon_base_paths: c.addon_base_paths,
+            create_frame_initial_hidden: r.create_frame_initial_hidden,
+            spell_cooldowns: c.spell_cooldowns,
+            action_ui_buttons: c.action_ui_buttons,
+            party_members: c.party_members,
+            bag_items: c.bag_items,
+            focused_frame_id: r.focused_frame_id,
+            visible_on_update_cache: r.visible_on_update_cache,
+            strata_buckets: r.strata_buckets,
+            mouse_position: r.mouse_position,
+            hovered_frame: r.hovered_frame,
+            current_target: r.current_target,
+            current_focus: r.current_focus,
+            sound_manager: r.sound_manager,
+            casting: r.casting,
+            gcd: r.gcd,
+            cursor_item: r.cursor_item,
+            loading_addon_index: r.loading_addon_index,
+            executing_addon_index: r.executing_addon_index,
+            loading_forbidden: r.loading_forbidden,
+            next_anim_group_id: r.next_anim_group_id,
+            next_cast_id: r.next_cast_id,
+            screen_width: r.screen_width,
+            screen_height: r.screen_height,
+            screen_kind: r.screen_kind,
+            is_logged_in: r.is_logged_in,
+            screen_first_displayed: r.screen_first_displayed,
+            saved_account_name: r.saved_account_name,
+            saved_account_list: r.saved_account_list,
+            uses_token: r.uses_token,
+            fps: r.fps,
+            rot_damage_level: r.rot_damage_level,
+            start_time: r.start_time,
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             player: PlayerState::default(),
@@ -488,45 +503,57 @@ impl SimState {
         // Step 2: For each strata, identify roots and DFS-emit in grouped order.
         let mut buckets = vec![Vec::new(); crate::widget::FrameStrata::COUNT];
         for (si, ids) in strata_map.iter().enumerate() {
-            // Find root frames: no parent, or parent in a different strata, or parent not visible.
-            let mut roots: Vec<u64> = Vec::new();
-            for &id in ids {
-                let Some(f) = self.widgets.get(id) else { continue };
-                if is_region(f.widget_type) {
-                    continue; // regions are emitted as part of their parent's DFS
-                }
-                let is_root = match f.parent_id {
-                    None => true,
-                    Some(pid) => {
-                        let parent_in_same_strata = self.widgets.get(pid).map_or(false, |p| {
-                            self.frame_bucket_strata(p).as_index() == si
-                        });
-                        !parent_in_same_strata || !visible.contains(&pid)
-                    }
-                };
-                if is_root {
-                    roots.push(id);
-                }
-            }
-
-            // Sort roots by (frame_level, raise_order, id).
-            roots.sort_by(|&a, &b| {
-                let fa = self.widgets.get(a);
-                let fb = self.widgets.get(b);
-                match (fa, fb) {
-                    (Some(fa), Some(fb)) => (fa.frame_level, fa.raise_order, a)
-                        .cmp(&(fb.frame_level, fb.raise_order, b)),
-                    _ => a.cmp(&b),
-                }
-            });
-
-            // DFS from each root, emitting frames grouped with their descendants.
+            let mut roots = self.find_strata_roots(ids, si, &visible);
+            self.sort_by_frame_level(&mut roots);
             let bucket = &mut buckets[si];
             for root_id in roots {
                 dfs_emit(root_id, si, &self.widgets, &visible, bucket);
             }
         }
         buckets
+    }
+
+    /// Find root frames in a strata: no parent, parent in different strata, or parent not visible.
+    fn find_strata_roots(
+        &self,
+        ids: &[u64],
+        strata_idx: usize,
+        visible: &HashSet<u64>,
+    ) -> Vec<u64> {
+        ids.iter()
+            .copied()
+            .filter(|&id| {
+                let Some(f) = self.widgets.get(id) else {
+                    return false;
+                };
+                if is_region(f.widget_type) {
+                    return false;
+                }
+                match f.parent_id {
+                    None => true,
+                    Some(pid) => {
+                        let same_strata = self.widgets.get(pid).map_or(false, |p| {
+                            self.frame_bucket_strata(p).as_index() == strata_idx
+                        });
+                        !same_strata || !visible.contains(&pid)
+                    }
+                }
+            })
+            .collect()
+    }
+
+    /// Sort frame IDs by (frame_level, raise_order, id).
+    fn sort_by_frame_level(&self, ids: &mut [u64]) {
+        ids.sort_by(|&a, &b| {
+            let fa = self.widgets.get(a);
+            let fb = self.widgets.get(b);
+            match (fa, fb) {
+                (Some(fa), Some(fb)) => {
+                    (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
+                }
+                _ => a.cmp(&b),
+            }
+        });
     }
 
     /// Eagerly recompute layout rect for a frame and all its descendants.
