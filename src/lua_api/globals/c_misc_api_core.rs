@@ -549,33 +549,10 @@ fn build_recipe_schematic_table(lua: &Lua, recipe_id: i32) -> mlua::Result<Value
 
 fn register_c_mythic_plus(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetRunHistory",
-        lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?,
-    )?;
-    t.set(
-        "GetOwnedKeystoneLevel",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetOwnedKeystoneChallengeMapID",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetOwnedKeystoneMapID",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetCurrentAffixes",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetRewardLevelFromKeystoneLevel",
-        lua.create_function(|_, _l: i32| Ok(0i32))?,
-    )?;
+    register_mythic_plus_stubs(lua, &t)?;
     t.set(
         "GetWeeklyBestForMap",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+        lua.create_function(|_, _: i32| Ok(Value::Nil))?,
     )?;
     t.set(
         "GetSeasonInfo",
@@ -591,6 +568,26 @@ fn register_c_mythic_plus(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     lua.globals().set("C_MythicPlus", t)?;
+    Ok(())
+}
+
+/// Bulk-register mythic+ stubs: zero-returning keystone info and empty-table getters.
+fn register_mythic_plus_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    let zero = lua.create_function(|_, ()| Ok(0i32))?;
+    for name in [
+        "GetOwnedKeystoneLevel",
+        "GetOwnedKeystoneChallengeMapID",
+        "GetOwnedKeystoneMapID",
+    ] {
+        t.set(name, zero.clone())?;
+    }
+    t.set(
+        "GetRewardLevelFromKeystoneLevel",
+        lua.create_function(|_, _: i32| Ok(0i32))?,
+    )?;
+    let empty_table = lua.create_function(|lua, _: mlua::MultiValue| lua.create_table())?;
+    t.set("GetRunHistory", empty_table.clone())?;
+    t.set("GetCurrentAffixes", empty_table)?;
     Ok(())
 }
 
