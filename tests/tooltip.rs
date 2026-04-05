@@ -741,6 +741,90 @@ fn load_blizzard_addons(env: &WowLuaEnv, ui: &std::path::Path) {
     }
 }
 
+#[test]
+fn test_set_item_by_id_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Item 229181: Ordained Forge Maul, epic (quality 4), ilvl 610, Two-Hand
+    env.exec("GameTooltip:SetItemByID(229181)").unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(num_lines > 0, "SetItemByID should populate tooltip lines");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Ordained Forge Maul");
+    // Epic quality is purple (0.64, 0.21, 0.93)
+    assert!((td.lines[0].left_color.0 - 0.64).abs() < 0.01);
+    assert_eq!(td.lines[1].left_text, "Item Level 610");
+    assert_eq!(td.lines[2].left_text, "Two-Hand");
+}
+
+#[test]
+fn test_set_item_by_id_makes_tooltip_visible() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let initially_visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(!initially_visible);
+
+    env.exec("GameTooltip:SetItemByID(229181)").unwrap();
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(visible, "SetItemByID should make tooltip visible");
+}
+
+#[test]
+fn test_set_hyperlink_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Standard WoW hyperlink format
+    env.exec(
+        r#"GameTooltip:SetHyperlink("|Hitem:229181:0:0:0:0:0:0:0:0:0|h[Ordained Forge Maul]|h")"#,
+    )
+    .unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(num_lines > 0, "SetHyperlink should populate tooltip lines");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Ordained Forge Maul");
+}
+
+#[test]
+fn test_set_hyperlink_short_format() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:SetHyperlink("item:229181")"#)
+        .unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        num_lines > 0,
+        "SetHyperlink with short format should populate lines"
+    );
+}
+
+#[test]
+fn test_get_num_lines_returns_actual_count() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let zero: i32 = env.eval("return GameTooltip:GetNumLines()").unwrap();
+    assert_eq!(zero, 0, "GetNumLines should return 0 when no lines");
+
+    env.exec("GameTooltip:SetItemByID(229181)").unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:GetNumLines()").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(
+        count, num_lines,
+        "GetNumLines should match NumLines: got {count} vs {num_lines}"
+    );
+    assert!(count > 0, "GetNumLines should be > 0 after SetItemByID");
+}
+
 fn fire_tooltip_test_startup_events(env: &WowLuaEnv) {
     let lua = env.lua();
     let _ = env.fire_event_with_args(

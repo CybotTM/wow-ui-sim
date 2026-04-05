@@ -108,26 +108,18 @@ fn add_tooltip_doubleline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 
 fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_tooltip_i32_stub(methods, "SetSpellByID");
-    add_tooltip_i32_stub(methods, "SetItemByID");
-    add_tooltip_string_stub(methods, "SetHyperlink");
+    add_set_item_by_id(methods);
+    add_set_hyperlink(methods);
     add_tooltip_multivalue_stubs(methods, TOOLTIP_MULTIVALUE_STUBS);
     add_tooltip_variadic_stubs(methods, TOOLTIP_VARIADIC_STUBS);
     add_custom_line_spacing_getter(methods);
     add_tooltip_nil_getter(methods, "GetLeftLine");
     add_tooltip_nil_getter(methods, "GetRightLine");
-    add_num_lines(methods);
-    add_get_num_lines_stub(methods);
+    add_line_count_methods(methods);
 }
 
 fn add_tooltip_i32_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &'static str) {
     methods.add_method(name, |_, _this, _value: i32| Ok(()));
-}
-
-fn add_tooltip_string_stub<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &'static str,
-) {
-    methods.add_method(name, |_, _this, _value: String| Ok(()));
 }
 
 fn add_tooltip_multivalue_stubs<M: mlua::UserDataMethods<FrameRef>>(
@@ -156,20 +148,137 @@ fn add_custom_line_spacing_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &
     methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
 }
 
-fn add_num_lines<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("NumLines", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .tooltips
-            .get(&this.0)
-            .map(|td| td.lines.len())
-            .unwrap_or(0) as i32)
+fn add_line_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    for name in ["NumLines", "GetNumLines"] {
+        methods.add_method(name, |lua, this, ()| {
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            Ok(state
+                .tooltips
+                .get(&this.0)
+                .map(|td| td.lines.len())
+                .unwrap_or(0) as i32)
+        });
+    }
+}
+
+fn add_set_item_by_id<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetItemByID", |lua, this, args: mlua::MultiValue| {
+        let item_id = match args.into_iter().next() {
+            Some(Value::Integer(n)) => n as u32,
+            Some(Value::Number(n)) => n as u32,
+            _ => return Ok(()),
+        };
+        populate_item_tooltip(lua, this.0, item_id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetItem")
     });
 }
 
-fn add_get_num_lines_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetNumLines", |_, _this, ()| Ok(0_i32));
+fn add_set_hyperlink<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetHyperlink", |lua, this, args: mlua::MultiValue| {
+        let link = match args.into_iter().next() {
+            Some(Value::String(s)) => s.to_string_lossy().to_string(),
+            _ => return Ok(()),
+        };
+        let item_id = parse_item_id_from_hyperlink(&link);
+        if let Some(id) = item_id {
+            populate_item_tooltip(lua, this.0, id)?;
+            fire_tooltip_script(lua, this.0, "OnTooltipSetItem")?;
+        }
+        Ok(())
+    });
+}
+
+fn populate_item_tooltip(lua: &mlua::Lua, tooltip_id: u64, item_id: u32) -> mlua::Result<()> {
+    let item = match crate::items::get_item(item_id) {
+        Some(i) => i,
+        None => return Ok(()),
+    };
+    let (nr, ng, nb) = quality_color_rgb(item.quality);
+    let slot_label = equip_slot_label(item.inventory_type);
+    {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
+            td.lines.clear();
+            td.lines.push(TooltipLine {
+                left_text: item.name.to_string(),
+                left_color: (nr, ng, nb),
+                right_text: None,
+                right_color: (1.0, 1.0, 1.0),
+                wrap: false,
+            });
+            td.lines.push(TooltipLine {
+                left_text: format!("Item Level {}", item.item_level),
+                left_color: (1.0, 0.82, 0.0),
+                right_text: None,
+                right_color: (1.0, 1.0, 1.0),
+                wrap: false,
+            });
+            if item.inventory_type > 0 && !slot_label.is_empty() {
+                td.lines.push(TooltipLine {
+                    left_text: slot_label.to_string(),
+                    left_color: (1.0, 1.0, 1.0),
+                    right_text: None,
+                    right_color: (1.0, 1.0, 1.0),
+                    wrap: false,
+                });
+            }
+        }
+        state.set_frame_visible(tooltip_id, true);
+    }
+    Ok(())
+}
+
+fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
+    let start = link.find("item:")?;
+    let after = &link[start + 5..];
+    let end = after
+        .find(|c: char| c == ':' || c == '|')
+        .unwrap_or(after.len());
+    after[..end].parse::<u32>().ok()
+}
+
+fn quality_color_rgb(quality: u8) -> (f32, f32, f32) {
+    match quality {
+        0 => (0.62, 0.62, 0.62),
+        1 => (1.0, 1.0, 1.0),
+        2 => (0.12, 1.0, 0.0),
+        3 => (0.0, 0.44, 0.87),
+        4 => (0.64, 0.21, 0.93),
+        5 => (1.0, 0.5, 0.0),
+        6 => (0.9, 0.8, 0.5),
+        7 => (0.0, 0.8, 1.0),
+        _ => (1.0, 1.0, 1.0),
+    }
+}
+
+fn equip_slot_label(inv_type: u8) -> &'static str {
+    match inv_type {
+        1 => "Head",
+        2 => "Neck",
+        3 => "Shoulder",
+        4 => "Shirt",
+        5 | 20 => "Chest",
+        6 => "Waist",
+        7 => "Legs",
+        8 => "Feet",
+        9 => "Wrist",
+        10 => "Hands",
+        11 => "Finger",
+        12 => "Trinket",
+        13 => "One-Hand",
+        14 => "Off Hand",
+        15 => "Ranged",
+        16 => "Back",
+        17 => "Two-Hand",
+        21 => "Main Hand",
+        22 => "Off Hand",
+        23 => "Held In Off-hand",
+        25 => "Thrown",
+        26 => "Ranged",
+        _ => "",
+    }
 }
 
 fn add_tooltip_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -387,6 +496,7 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
             td.anchor_type = anchor.clone();
         }
         position_tooltip(&mut state, id, owner_id, &anchor);
+        state.set_frame_visible(id, true);
     }
     fire_tooltip_script(lua, id, "OnTooltipCleared")?;
     Ok(())
