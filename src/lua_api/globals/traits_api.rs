@@ -96,60 +96,64 @@ fn register_config_mutations(
     lua: &Lua,
     state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    let st = Rc::clone(&state);
+    register_rank_mutations(t, lua, &state)?;
+    register_reset_mutations(t, lua, &state)?;
+    Ok(())
+}
+
+fn register_rank_mutations(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let st = Rc::clone(state);
     t.set(
         "PurchaseRank",
-        lua.create_function(move |lua, (config_id, node_id): (i32, i32)| {
-            purchase_rank(&st, lua, config_id, node_id as u32)
+        lua.create_function(move |lua, (cid, nid): (i32, i32)| {
+            purchase_rank(&st, lua, cid, nid as u32)
         })?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "RefundRank",
-        lua.create_function(move |lua, (config_id, node_id): (i32, i32)| {
-            refund_rank(&st, lua, config_id, node_id as u32)
+        lua.create_function(move |lua, (cid, nid): (i32, i32)| {
+            refund_rank(&st, lua, cid, nid as u32)
         })?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "SetSelection",
-        lua.create_function(
-            move |lua, (config_id, node_id, entry_id): (i32, i32, Option<i32>)| {
-                set_selection(
-                    &st,
-                    lua,
-                    config_id,
-                    node_id as u32,
-                    entry_id.map(|id| id as u32),
-                )
-            },
-        )?,
+        lua.create_function(move |lua, (cid, nid, eid): (i32, i32, Option<i32>)| {
+            set_selection(&st, lua, cid, nid as u32, eid.map(|id| id as u32))
+        })?,
     )?;
+    Ok(())
+}
 
-    let st = Rc::clone(&state);
+fn register_reset_mutations(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let st = Rc::clone(state);
     t.set(
         "ConfigHasStagedChanges",
-        lua.create_function(move |_, _id: i32| {
+        lua.create_function(move |_, _: i32| {
             Ok(st.borrow().talents.node_ranks.values().any(|&r| r > 0))
         })?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "ResetTree",
-        lua.create_function(move |lua, config_id: i32| reset_tree(&st, lua, config_id))?,
+        lua.create_function(move |lua, cid: i32| reset_tree(&st, lua, cid))?,
     )?;
-
-    let st = Rc::clone(&state);
+    let st = Rc::clone(state);
     t.set(
         "ResetTreeByCurrency",
-        lua.create_function(move |lua, (config_id, currency_id): (i32, i32)| {
-            reset_tree_by_currency(&st, lua, config_id, currency_id as u32)
+        lua.create_function(move |lua, (cid, cur): (i32, i32)| {
+            reset_tree_by_currency(&st, lua, cid, cur as u32)
         })?,
     )?;
-
     Ok(())
 }
 
