@@ -7,7 +7,6 @@ use super::WowLuaEnv;
 /// VARIABLES_LOADED fire (via EventUtil.ContinueAfterAllEvents → Init).
 /// Quest titles populate via QUEST_LOG_UPDATE fired in startup events.
 pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
-    hide_empty_managed_frames(env);
     setup_tracker_frame(env);
 }
 
@@ -62,22 +61,6 @@ pub(crate) fn init_chat_type_colors(env: &WowLuaEnv) {
             if not info.r then
                 local d = defaults[key] or {1, 1, 1}
                 info.r, info.g, info.b = d[1], d[2], d[3]
-            end
-        end
-    "#,
-    );
-}
-
-fn hide_empty_managed_frames(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local frames = { "BossTargetFrameContainer", "DurabilityFrame" }
-        for _, name in ipairs(frames) do
-            local f = _G[name]
-            if f and f.Hide then
-                f:Hide()
-                -- Prevent OnShow from re-showing during events
-                f.ignoreInLayout = true
             end
         end
     "#,
