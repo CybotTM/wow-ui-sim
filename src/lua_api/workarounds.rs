@@ -50,7 +50,6 @@ pub fn apply(env: &WowLuaEnv) {
     workarounds_bags::init_bag_token_tracker(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
-    patch_compact_raid_container_pools(env);
     stub_glow_emitter_factory(env);
     patch_lfg_backfill(env);
     init_console_saved_vars(env);
@@ -170,23 +169,6 @@ fn patch_character_frame_subframes(env: &WowLuaEnv) {
 /// initialized in CompactRaidFrameManager_OnLoad, which may fail before
 /// reaching the pool creation code. Create stub pools so event handlers
 /// that call ReleaseAll() don't error.
-fn patch_compact_raid_container_pools(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if CompactRaidFrameContainer then
-            local c = CompactRaidFrameContainer
-            local stubPool = { ReleaseAll = function() end, Acquire = function() end }
-            if not c.dividerVerticalPool then
-                c.dividerVerticalPool = stubPool
-            end
-            if not c.dividerHorizontalPool then
-                c.dividerHorizontalPool = stubPool
-            end
-        end
-    "#,
-    );
-}
-
 /// GlowEmitterFactory is a C++ object in WoW managing spell overlay glow effects.
 /// Stub with no-ops until properly implemented (see docs/glow-plan.md).
 fn stub_glow_emitter_factory(env: &WowLuaEnv) {
