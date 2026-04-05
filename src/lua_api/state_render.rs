@@ -32,13 +32,27 @@ fn dfs_emit(
     out: &mut Vec<u64>,
 ) {
     let Some(f) = widgets.get(id) else { return };
-
-    // Emit the frame itself.
     out.push(id);
 
-    // Collect visible children, split into regions and child frames.
-    let mut regions: Vec<u64> = Vec::new();
-    let mut child_frames: Vec<u64> = Vec::new();
+    let (mut regions, mut child_frames) = partition_children(f, strata_idx, widgets, visible);
+    sort_regions(&mut regions, widgets);
+    out.extend(regions);
+
+    sort_child_frames(&mut child_frames, widgets);
+    for child_id in child_frames {
+        dfs_emit(child_id, strata_idx, widgets, visible, out);
+    }
+}
+
+/// Split visible children into regions (textures/fontstrings) and child frames in same strata.
+fn partition_children(
+    f: &crate::widget::Frame,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    visible: &HashSet<u64>,
+) -> (Vec<u64>, Vec<u64>) {
+    let mut regions = Vec::new();
+    let mut child_frames = Vec::new();
     for &child_id in &f.children {
         if !visible.contains(&child_id) {
             continue;
@@ -48,67 +62,41 @@ fn dfs_emit(
         };
         if is_region(child.widget_type) {
             regions.push(child_id);
-        } else {
-            // Only include children in the same strata.
-            let child_strata = if is_region(child.widget_type) {
-                child
-                    .parent_id
-                    .and_then(|pid| widgets.get(pid))
-                    .map(|p| p.frame_strata)
-                    .unwrap_or(child.frame_strata)
-            } else {
-                child.frame_strata
-            };
-            if child_strata.as_index() == strata_idx {
-                child_frames.push(child_id);
-            }
+        } else if child.frame_strata.as_index() == strata_idx {
+            child_frames.push(child_id);
         }
     }
+    (regions, child_frames)
+}
 
-    // Emit regions sorted by (draw_layer, draw_sub_layer, type_flag, id).
+/// Sort regions by (draw_layer, draw_sub_layer, type_flag, id).
+/// FontStrings sort after Textures within the same layer (type_flag=1 vs 0).
+fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
     regions.sort_by(|&a, &b| {
-        let fa = widgets.get(a);
-        let fb = widgets.get(b);
-        match (fa, fb) {
-            (Some(fa), Some(fb)) => {
-                let ta = if fa.widget_type == crate::widget::WidgetType::FontString {
-                    1u8
-                } else {
-                    0u8
-                };
-                let tb = if fb.widget_type == crate::widget::WidgetType::FontString {
-                    1u8
-                } else {
-                    0u8
-                };
-                (fa.draw_layer as i32, fa.draw_sub_layer, ta, a).cmp(&(
-                    fb.draw_layer as i32,
-                    fb.draw_sub_layer,
-                    tb,
-                    b,
-                ))
-            }
-            _ => a.cmp(&b),
-        }
+        let (fa, fb) = match (widgets.get(a), widgets.get(b)) {
+            (Some(fa), Some(fb)) => (fa, fb),
+            _ => return a.cmp(&b),
+        };
+        let type_flag = |f: &crate::widget::Frame| -> u8 {
+            u8::from(f.widget_type == crate::widget::WidgetType::FontString)
+        };
+        (fa.draw_layer as i32, fa.draw_sub_layer, type_flag(fa), a).cmp(&(
+            fb.draw_layer as i32,
+            fb.draw_sub_layer,
+            type_flag(fb),
+            b,
+        ))
     });
-    for region_id in regions {
-        out.push(region_id);
-    }
+}
 
-    // Sort child frames by (frame_level, raise_order, id) and recurse.
-    child_frames.sort_by(|&a, &b| {
-        let fa = widgets.get(a);
-        let fb = widgets.get(b);
-        match (fa, fb) {
-            (Some(fa), Some(fb)) => {
-                (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
-            }
-            _ => a.cmp(&b),
+/// Sort child frames by (frame_level, raise_order, id).
+fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
+    frames.sort_by(|&a, &b| match (widgets.get(a), widgets.get(b)) {
+        (Some(fa), Some(fb)) => {
+            (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
         }
+        _ => a.cmp(&b),
     });
-    for child_id in child_frames {
-        dfs_emit(child_id, strata_idx, widgets, visible, out);
-    }
 }
 
 impl SimState {
