@@ -43,7 +43,6 @@ pub fn apply_post_runtime_addon_load_from_lua(
 /// Apply all post-load workarounds. Called after addon loading, before events.
 pub fn apply(env: &WowLuaEnv) {
     patch_map_canvas_scroll(env);
-    patch_character_frame_subframes(env);
     super::workarounds_tracker::init_objective_tracker(env);
     super::chat_init::show_chat_frame(env);
     workarounds_bags::init_bag_bar(env);
@@ -142,26 +141,6 @@ fn patch_map_canvas_scroll(env: &WowLuaEnv) {
 /// GradualAnimatedStatusBarTemplate XML defines an AnimationGroup with
 /// parentKey="LevelUpMaxAlphaAnimation", but the simulator doesn't create
 /// AnimationGroups from templates. Patch existing instances and the mixin.
-/// Stub AnimationGroup methods on ActionButtonSpellAlert frames.
-///
-/// CHARACTERFRAME_SUBFRAMES lists PaperDollFrame, ReputationFrame, TokenFrame.
-/// TokenFrame is in Blizzard_TokenUI (not always loaded). Create stub frames
-/// for any missing subframes so ShowSubFrame doesn't crash.
-fn patch_character_frame_subframes(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if CHARACTERFRAME_SUBFRAMES then
-            for _, name in ipairs(CHARACTERFRAME_SUBFRAMES) do
-                if not _G[name] then
-                    _G[name] = CreateFrame("Frame", name, CharacterFrame)
-                    _G[name]:Hide()
-                end
-            end
-        end
-    "#,
-    );
-}
-
 /// CompactRaidFrameContainer.dividerVerticalPool/dividerHorizontalPool are
 /// initialized in CompactRaidFrameManager_OnLoad, which may fail before
 /// reaching the pool creation code. Create stub pools so event handlers
