@@ -161,17 +161,37 @@ const UTILITY_STUBS_LUA: &str = r##"
         return collection
     end
 
-    function CreateTexturePool(parent, template)
+    function CreateTexturePool(parent, layer, subLayer, template)
         local pool = {}
+        pool.active = {}
         function pool:Acquire()
             local parent_frame = type(parent) == "string" and _G[parent] or parent
             if not parent_frame then parent_frame = UIParent end
-            return parent_frame:CreateTexture(nil, template)
+            local tex = parent_frame:CreateTexture(nil, layer or "ARTWORK")
+            table.insert(self.active, tex)
+            return tex
         end
         function pool:Release(texture)
             if texture then texture:SetTexture(nil) end
+            for i, t in ipairs(self.active) do
+                if t == texture then
+                    table.remove(self.active, i)
+                    break
+                end
+            end
         end
-        function pool:EnumerateActive() return function() end end
+        function pool:ReleaseAll()
+            while #self.active > 0 do
+                self:Release(self.active[#self.active])
+            end
+        end
+        function pool:EnumerateActive()
+            local i = 0
+            return function()
+                i = i + 1
+                return self.active[i]
+            end
+        end
         return pool
     end
 "##;

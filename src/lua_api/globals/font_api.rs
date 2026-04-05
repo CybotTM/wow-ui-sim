@@ -38,8 +38,23 @@ fn add_font_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-/// SetFont, GetFont.
+/// SetFont, GetFont, SetFontHeight, GetFontHeight.
 fn add_font_path_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
+    font.set(
+        "SetFontHeight",
+        lua.create_function(|_, (this, height): (mlua::Table, f64)| {
+            this.set("__fontHeight", height)?;
+            Ok(())
+        })?,
+    )?;
+
+    font.set(
+        "GetFontHeight",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok(this.get::<f64>("__fontHeight").unwrap_or(0.0))
+        })?,
+    )?;
+
     font.set(
         "SetFont",
         lua.create_function(

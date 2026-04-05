@@ -4,6 +4,7 @@
 
 - **NEVER modify files in `Interface/AddOns/Wowless/`** — this is an external test suite, not our code.
 - **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
+- **NEVER modify files in `Interface/BlizzardUI/`** — this is a symlink to `vendor/wow-ui-source/Interface/AddOns` (sparse checkout of [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source)). To update, run `./scripts/setup-blizzard-ui.sh <TAG>`.
 
 ## Architecture Docs
 
@@ -57,7 +58,7 @@ The image is optimized for headless test commands (`run-tests`, `self-test`, `lu
 
 ## WoW Game Files
 
-- `./Interface/BlizzardUI/` - Blizzard base UI code (loaded before addons, not scanned as addon)
+- `./Interface/BlizzardUI/` - Symlink → `vendor/wow-ui-source/Interface/AddOns` (Gethe/wow-ui-source sparse checkout, pinned to tag). Run `./scripts/setup-blizzard-ui.sh` to set up.
 - `~/Projects/wow/Interface` - art extract from WoW game files (BLP textures, fallback for texture loading)
 - `~/Projects/wow/WTF` - SavedVariables from real WoW installation
 

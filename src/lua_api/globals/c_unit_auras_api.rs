@@ -16,7 +16,16 @@ pub fn patch_c_unit_auras(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
     patch_get_buff_data_by_index(lua, t, state.clone())?;
     patch_get_player_aura_by_spell_id(lua, t, state.clone())?;
     patch_get_aura_data_by_spell_name(lua, t, state)?;
+    patch_clear_blocked_auras(lua, t)?;
     Ok(())
+}
+
+/// ClearBlockedAuras(unitToken) — no-op stub (private aura blocking not simulated).
+fn patch_clear_blocked_auras(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "ClearBlockedAuras",
+        lua.create_function(|_, _unit: Value| Ok(()))?,
+    )
 }
 
 /// GetAuraSlots(unit, filter, maxSlots, token) -> (token, slot1, slot2, ...).

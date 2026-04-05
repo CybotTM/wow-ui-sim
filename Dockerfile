@@ -44,6 +44,20 @@ RUN cargo build --release --bin wow-sim --no-default-features --locked \
     && strip /build/target/release/wow-sim
 
 # =============================================================================
+# BlizzardUI Stage — sparse-checkout from Gethe/wow-ui-source
+# =============================================================================
+FROM alpine/git AS blizzard-ui
+
+ARG BLIZZARD_UI_TAG=12.0.5
+RUN git clone --filter=blob:none --no-checkout --depth=1 --branch ${BLIZZARD_UI_TAG} \
+        https://github.com/Gethe/wow-ui-source.git /wow-ui-source \
+    && cd /wow-ui-source \
+    && git sparse-checkout init --cone \
+    && git sparse-checkout set Interface/AddOns \
+    && git checkout ${BLIZZARD_UI_TAG} \
+    && rm -rf /wow-ui-source/.git
+
+# =============================================================================
 # Runtime Stage
 # =============================================================================
 FROM gcr.io/distroless/cc-debian12
@@ -57,7 +71,7 @@ COPY --from=builder /build/target/release/wow-sim /app/wow-sim
 # These are read at runtime and are NOT compiled into the binary.
 #
 # BlizzardUI: Blizzard's base UI Lua/XML (loaded before addons)
-COPY Interface/BlizzardUI/ /app/Interface/BlizzardUI/
+COPY --from=blizzard-ui /wow-ui-source/Interface/AddOns/ /app/Interface/BlizzardUI/
 # TestFramework: assertion library loaded automatically by `run-tests`
 COPY Interface/AddOns/TestFramework/ /app/Interface/AddOns/TestFramework/
 # fonts: TTF fonts used for text rendering

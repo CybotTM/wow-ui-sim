@@ -48,6 +48,10 @@ pub fn is_restricted_event(name: &str) -> bool {
 
 /// Events that support RegisterEventCallback (from wowless events.yaml callback: true).
 const CALLBACK_EVENTS: &[&str] = &[
+    "CLASS_TALENTS_SWITCH_TO_LOADOUT_BY_INDEX",
+    "CLASS_TALENTS_SWITCH_TO_LOADOUT_BY_NAME",
+    "CLASS_TALENTS_SWITCH_TO_SPECIALIZATION_BY_INDEX",
+    "CLASS_TALENTS_SWITCH_TO_SPECIALIZATION_BY_NAME",
     "COMBAT_LOG_APPLY_FILTER_SETTINGS",
     "COMBAT_LOG_EVENT",
     "COMBAT_LOG_EVENT_UNFILTERED",

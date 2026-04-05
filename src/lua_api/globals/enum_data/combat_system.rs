@@ -33,6 +33,10 @@ pub const COMBAT_AUDIO_ALERT_THROTTLE: SeqEnumDef = (
         "TargetCast",
         "PlayerResource1",
         "PlayerResource2",
+        "PlayerHealthSamePercent",
+        "TargetHealthSamePercent",
+        "PlayerResource1SamePercent",
+        "PlayerResource2SamePercent",
     ],
 );
 

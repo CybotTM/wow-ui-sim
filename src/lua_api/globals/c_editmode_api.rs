@@ -14,6 +14,29 @@ pub fn register_c_editmode_api(lua: &Lua) -> Result<()> {
     register_editmode_noop_stubs(lua, &t)?;
     register_editmode_conversion_stubs(lua, &t)?;
     lua.globals().set("C_EditMode", t)?;
+    register_setting_display_info_manager_stub(lua)?;
+    Ok(())
+}
+
+/// Register a stub EditModeSettingDisplayInfoManager so frames using EditModeSystemMixin
+/// can call GetSystemSettingDisplayInfoMap during OnLoad before Blizzard_EditMode loads.
+/// The real Blizzard_EditMode/Shared/EditModeSettingDisplayInfo.lua overwrites this.
+fn register_setting_display_info_manager_stub(lua: &Lua) -> Result<()> {
+    let manager = lua.create_table()?;
+    manager.set(
+        "GetSystemSettingDisplayInfoMap",
+        lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?,
+    )?;
+    manager.set(
+        "GetSystemSettingDisplayInfo",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(Value::Nil))?,
+    )?;
+    manager.set(
+        "GetMirroredSettings",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(Value::Nil))?,
+    )?;
+    lua.globals()
+        .set("EditModeSettingDisplayInfoManager", manager)?;
     Ok(())
 }
 

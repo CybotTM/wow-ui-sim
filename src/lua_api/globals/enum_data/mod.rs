@@ -160,6 +160,7 @@ pub const SEQUENTIAL_ENUMS: &[SeqEnumDef] = &[
     STATUS_BAR_FILL_STYLE,
     RAID_DISPEL_DISPLAY_TYPE,
     NAME_PLATE_STYLE,
+    AUTO_COMPLETE_PRIORITY,
 ];
 
 // All explicit value enums (for batch registration)
@@ -195,6 +196,7 @@ pub const EXPLICIT_ENUMS: &[EnumDef] = &[
     CLUB_REMOVED_REASON,
     SPELL_BOOK_SKILL_LINE_INDEX,
     ACCOUNT_STORE_CATEGORY_TYPE,
+    AUTO_COMPLETE_ENTRY_FLAG,
     // Combat system explicit enums (bitmask values)
     COMBAT_AUDIO_ALERT_PARTY_PERCENT_VALUES_META,
     COMBAT_AUDIO_ALERT_PLAYER_CAST_FORMAT_VALUES_META,

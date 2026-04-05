@@ -15,6 +15,9 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Fetch Blizzard UI source
+        run: ./scripts/setup-blizzard-ui.sh
+
       - name: Use CI cargo config
         run: cp .cargo/config.ci.toml .cargo/config.toml
 

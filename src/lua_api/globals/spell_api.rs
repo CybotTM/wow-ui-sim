@@ -434,6 +434,18 @@ fn register_c_spell_cooldown(
         "GetSpellLossOfControlCooldown",
         lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?,
     )?;
+    t.set(
+        "GetSpellLossOfControlCooldownInfo",
+        lua.create_function(|lua, _spell_id: i32| {
+            let info = lua.create_table()?;
+            info.set("isActive", false)?;
+            info.set("startTime", 0)?;
+            info.set("duration", 0)?;
+            info.set("modRate", 1.0_f64)?;
+            info.set("shouldReplaceNormalCooldown", false)?;
+            Ok(info)
+        })?,
+    )?;
     Ok(())
 }
 

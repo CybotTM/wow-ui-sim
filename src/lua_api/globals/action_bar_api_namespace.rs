@@ -180,6 +180,22 @@ fn register_c_action_bar_cooldown_slot_stubs(lua: &Lua, t: &mlua::Table) -> Resu
         lua.create_function(|_, _: Value| Ok((0.0_f64, 0.0_f64)))?,
     )?;
     t.set(
+        "GetActionLossOfControlCooldownInfo",
+        lua.create_function(|lua, _: Value| {
+            let info = lua.create_table()?;
+            info.set("isActive", false)?;
+            info.set("startTime", 0)?;
+            info.set("duration", 0)?;
+            info.set("modRate", 1.0_f64)?;
+            info.set("shouldReplaceNormalCooldown", false)?;
+            Ok(info)
+        })?,
+    )?;
+    t.set(
+        "UsesActionText",
+        lua.create_function(|_, _: Value| Ok(false))?,
+    )?;
+    t.set(
         "GetActionChargeDuration",
         lua.create_function(|_, _: Value| Ok(LuaDurationObject::new()))?,
     )?;

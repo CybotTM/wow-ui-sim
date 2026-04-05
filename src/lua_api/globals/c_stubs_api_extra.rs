@@ -57,6 +57,8 @@ fn register_missing_c_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_utility_namespaces(lua, g)?;
     register_account_encounter_proto_namespaces(lua, g)?;
     register_reincarnation_table_util(lua, g)?;
+    register_c_auto_complete(lua, g)?;
+    register_c_photo_sharing(lua, g)?;
     Ok(())
 }
 
@@ -246,6 +248,7 @@ fn register_missing_global_functions(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_legacy_constants(g)?;
     register_combat_log_globals(lua, g)?;
     register_taint_and_env_globals(lua, g)?;
+    register_auto_complete_globals(lua, g)?;
     Ok(())
 }
 
@@ -1190,6 +1193,81 @@ fn register_c_zone_ability(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _spell_id: Value| Ok(Value::Nil))?,
     )?;
     lua.globals().set("C_ZoneAbility", t)?;
+    Ok(())
+}
+
+/// C_AutoComplete namespace - player name autocomplete results.
+fn register_c_auto_complete(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set(
+        "GetAutoCompleteResults",
+        lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?,
+    )?;
+    t.set(
+        "GetAutoCompletePresenceID",
+        lua.create_function(|_, _name: Value| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetAutoCompleteRealms",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "IsRecognizedName",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
+    )?;
+    g.set("C_AutoComplete", t)
+}
+
+/// C_PhotoSharing namespace - social photo sharing feature.
+fn register_c_photo_sharing(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t = lua.create_table()?;
+    t.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("IsAuthorized", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "BeginAuthorizationFlow",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    t.set(
+        "CompleteAuthorizationFlow",
+        lua.create_function(|_, _url: Value| Ok(()))?,
+    )?;
+    t.set(
+        "ClearAuthorization",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    t.set(
+        "GetPhotoSharingAuthURL",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetCropRatio",
+        lua.create_function(|_, ()| Ok(1.0f64))?,
+    )?;
+    t.set(
+        "SetScreenshotPreviewTexture",
+        lua.create_function(|_, _frame: Value| Ok(()))?,
+    )?;
+    t.set(
+        "UploadPhotoToService",
+        lua.create_function(|_, (_title, _desc): (Value, Value)| Ok(()))?,
+    )?;
+    t.set(
+        "GetStatus",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set("C_PhotoSharing", t)
+}
+
+/// AutoComplete-related global function stubs.
+fn register_auto_complete_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "AutoCompleteEditBox_SetCustomAutoCompleteFunction",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    g.set(
+        "AutoCompleteEditBox_SetAutoCompleteSource",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
     Ok(())
 }
 

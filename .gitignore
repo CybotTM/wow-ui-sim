@@ -7,5 +7,7 @@
 /Interface/AddOns/*
 !/Interface/AddOns/TestFramework
 !/Interface/AddOns/Admin
+/Interface/BlizzardUI
+/vendor/
 /docs/local/
 cache/

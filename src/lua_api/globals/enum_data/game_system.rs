@@ -693,3 +693,37 @@ pub const ACCOUNT_STORE_CATEGORY_TYPE: EnumDef = (
         ("Icon", 4),
     ],
 );
+
+// ============================================================================
+// AutoComplete Enums
+// ============================================================================
+
+/// AutoCompletePriority - priority ordering for autocomplete results.
+pub const AUTO_COMPLETE_PRIORITY: SeqEnumDef = (
+    "AutoCompletePriority",
+    &[
+        "Other",
+        "Interacted",
+        "InGroup",
+        "Guild",
+        "Friend",
+        "AccountCharacter",
+        "AccountCharacterSameRealm",
+    ],
+);
+
+/// AutoCompleteEntryFlag - bitmask flags for filtering autocomplete results.
+pub const AUTO_COMPLETE_ENTRY_FLAG: EnumDef = (
+    "AutoCompleteEntryFlag",
+    &[
+        ("InGroup", 1),
+        ("InGuild", 2),
+        ("Friend", 4),
+        ("Bnet", 8),
+        ("InteractedWith", 16),
+        ("Online", 32),
+        ("InAOI", 64),
+        ("AccountCharacter", 128),
+        ("RecentPlayer", 256),
+    ],
+);

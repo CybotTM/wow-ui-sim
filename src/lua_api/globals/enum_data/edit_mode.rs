@@ -38,6 +38,7 @@ pub const EDIT_MODE_SYSTEM: SeqEnumDef = (
         "PersonalResourceDisplay",
         "EncounterEvents",
         "DamageMeter",
+        "TotemActionBar",
     ],
 );
 
@@ -119,6 +120,7 @@ pub const EDIT_MODE_UNIT_FRAME_SETTING: SeqEnumDef = (
         "AuraOrganizationType",
         "IconSize",
         "Opacity",
+        "BigDefensiveIconSize",
     ],
 );
 
@@ -189,7 +191,7 @@ pub const EDIT_MODE_OBJECTIVE_TRACKER_SETTING: SeqEnumDef = (
 
 pub const EDIT_MODE_STATUS_TRACKING_BAR_SETTING: SeqEnumDef = (
     "EditModeStatusTrackingBarSetting",
-    &["Height", "Width", "TextSize"],
+    &["Size"],
 );
 
 pub const EDIT_MODE_STATUS_TRACKING_BAR_SYSTEM_INDICES: EnumDef = (

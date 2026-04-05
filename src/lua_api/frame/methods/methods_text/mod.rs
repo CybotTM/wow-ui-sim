@@ -49,6 +49,8 @@ pub fn add_text_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     decor::add_decor_methods(methods);
     add_set_font_method(methods);
     add_get_font_method(methods);
+    add_set_font_height_method(methods);
+    add_get_font_height_method(methods);
     font_object::add_font_object_methods(methods);
     font_object::add_font_object_extra_methods(methods);
     add_text_color_methods(methods);
@@ -474,6 +476,32 @@ fn add_get_font_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
 
         get_font_standard(lua, id)
+    });
+}
+
+/// SetFontHeight(height) — sets the font size on a FontString or similar widget.
+fn add_set_font_height_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetFontHeight", |lua, this, height: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.font_size = height as f32;
+        }
+        Ok(())
+    });
+}
+
+/// GetFontHeight() — returns the font size of a FontString or similar widget.
+fn add_get_font_height_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetFontHeight", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let size = state
+            .widgets
+            .get(this.0)
+            .map(|f| f.font_size)
+            .unwrap_or(12.0);
+        Ok(size as f64)
     });
 }
 

@@ -46,6 +46,15 @@ fn add_message_frame_add_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         }
         Ok(())
     });
+    methods.add_method("ClearText", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(data) = state.message_frames.get_mut(&this.0) {
+            data.messages.clear();
+            data.scroll_offset = 0;
+        }
+        Ok(())
+    });
 }
 
 fn add_message_frame_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

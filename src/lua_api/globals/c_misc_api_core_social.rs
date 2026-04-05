@@ -289,6 +289,10 @@ fn register_c_chat_info_extras(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetGeneralChannelID",
         lua.create_function(|_, ()| Ok(1i32))?,
     )?;
+    t.set(
+        "AreOutgoingAddonChatMessagesRestricted",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(())
 }
 
