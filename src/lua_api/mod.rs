@@ -4,6 +4,7 @@ mod addon_scan;
 pub mod animation;
 mod builtin_frames;
 mod cfunc_wrap;
+pub(crate) mod chat_init;
 mod diagnostics;
 mod env;
 pub(crate) mod frame;

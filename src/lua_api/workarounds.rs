@@ -53,11 +53,11 @@ pub fn apply(env: &WowLuaEnv) {
     patch_spell_alert_animations(env);
     patch_character_frame_subframes(env);
     super::workarounds_tracker::init_objective_tracker(env);
-    super::workarounds_tracker::show_chat_frame(env);
+    super::chat_init::show_chat_frame(env);
     workarounds_bags::init_bag_bar(env);
     workarounds_bags::init_bag_token_tracker(env);
     hide_super_tracked_frame(env);
-    super::workarounds_tracker::init_chat_type_colors(env);
+    super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     patch_compact_raid_container_pools(env);
     stub_arena_globals(env);
