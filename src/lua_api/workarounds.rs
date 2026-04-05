@@ -52,7 +52,6 @@ pub fn apply(env: &WowLuaEnv) {
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
     init_console_saved_vars(env);
-    patch_scrollbox_nil_dataprovider(env);
     init_settings_panel_previews(env);
 }
 
@@ -204,31 +203,6 @@ fn init_console_saved_vars(env: &WowLuaEnv) {
         end
         if DeveloperConsole and not DeveloperConsole.savedVars then
             DeveloperConsole.savedVars = Blizzard_Console_SavedVars
-        end
-    "#,
-    );
-}
-
-/// LFGListFrame_OnLoad initializes EventsInBackground after registering
-/// events. If OnLoad fails partway through (e.g. missing API), events fire
-/// with EventsInBackground still nil. Initialize it as an empty table.
-/// Guard ScrollBoxListViewMixin methods against nil DataProvider.
-///
-/// CommunitiesFrame opens before its ScrollBox has a DataProvider set,
-/// causing nil index errors in FindElementDataIndexByPredicate etc.
-fn patch_scrollbox_nil_dataprovider(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local cl = CommunitiesFrameCommunitiesList
-        if cl then
-            cl.ScrollToClub = function(self, clubId)
-                if self.ScrollBox and self.ScrollBox.HasDataProvider
-                   and self.ScrollBox:HasDataProvider() then
-                    self.ScrollBox:ScrollToElementDataByPredicate(function(elementData)
-                        return elementData.clubInfo and elementData.clubInfo.clubId == clubId
-                    end, ScrollBoxConstants.AlignCenter)
-                end
-            end
         end
     "#,
     );
