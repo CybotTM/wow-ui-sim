@@ -56,42 +56,6 @@ pub fn apply_secure_env(lua: &Lua, func: &mlua::Function) -> Result<()> {
     setfenv.call::<()>((func.clone(), secureenv))
 }
 
-/// Snapshot secure APIs into secureenv before EnvironmentCleanup nils them
-/// from `_G`. After cleanup, `__index = _G` would return nil for these,
-/// so we store them directly in secureenv.
-///
-/// Also snapshots Enum (EnvironmentCleanup nils individual Enum fields).
-pub fn snapshot_secure_apis(lua: &Lua) -> Result<()> {
-    lua.load(
-        r##"
-        local secureenv = __secureenv
-        local genv = _G
-        -- Snapshot Enum (EnvironmentCleanup nils individual fields)
-        if genv.Enum then
-            local se = {}
-            for k, v in pairs(genv.Enum) do se[k] = v end
-            rawset(secureenv, "Enum", se)
-        end
-        -- Snapshot capsule APIs that EnvironmentCleanup will nil
-        local secure_apis = {
-            "C_AuthChallenge", "C_SecureTransfer", "C_StoreSecure",
-            "C_WowTokenSecure", "C_WowTokenPublic", "C_AccountStore",
-            "CreateForbiddenFrame", "CreateSecureDelegate",
-            "loadstring_untainted", "secretunwrap", "SecureMixin",
-            "NineSliceUtil", "NineSlicePanelMixin",
-        }
-        for _, name in ipairs(secure_apis) do
-            local v = rawget(genv, name)
-            if v ~= nil then
-                rawset(secureenv, name, v)
-            end
-        end
-    "##,
-    )
-    .exec()?;
-    Ok(())
-}
-
 /// Set a key/value in both `_G` (genv) and `secureenv`.
 ///
 /// Used when registering named frames so they're accessible from both environments.

@@ -80,35 +80,32 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
         .map(|e| e.widget_type.clone())
         .unwrap_or_else(|| "Frame".to_string());
 
-    // Resolve size by looking through inheritance chain (most derived wins)
-    let mut width: f32 = 0.0;
-    let mut height: f32 = 0.0;
-
-    for entry in &chain {
-        if let Some(size) = entry.frame.size() {
-            // Check AbsDimension first, then direct attributes
-            if let Some(ref abs) = size.abs_dimension {
-                if let Some(x) = abs.x {
-                    width = x;
-                }
-                if let Some(y) = abs.y {
-                    height = y;
-                }
-            }
-            if let Some(x) = size.x {
-                width = x;
-            }
-            if let Some(y) = size.y {
-                height = y;
-            }
-        }
-    }
+    let (width, height) = resolve_chain_size(&chain);
 
     Some(TemplateInfo {
         frame_type,
         width,
         height,
     })
+}
+
+/// Resolve (width, height) across the inheritance chain.
+/// Most derived entry wins. Within an entry, direct `x`/`y` attrs override `AbsDimension`.
+fn resolve_chain_size(chain: &[TemplateEntry]) -> (f32, f32) {
+    let mut width: f32 = 0.0;
+    let mut height: f32 = 0.0;
+    for entry in chain {
+        let Some(size) = entry.frame.size() else {
+            continue;
+        };
+        if let Some(ref abs) = size.abs_dimension {
+            if let Some(x) = abs.x { width = x; }
+            if let Some(y) = abs.y { height = y; }
+        }
+        if let Some(x) = size.x { width = x; }
+        if let Some(y) = size.y { height = y; }
+    }
+    (width, height)
 }
 
 /// Get the full inheritance chain for a template (including the template itself).
@@ -314,32 +311,15 @@ fn merge_texture_fields(dst: &mut TextureXml, src: &TextureXml) {
 /// Collect all mixins for a texture by resolving its `inherits` chain.
 pub fn collect_texture_mixins(texture: &TextureXml) -> Vec<String> {
     let mut mixins = Vec::new();
-
-    // Collect mixins from inherited templates
     if let Some(ref inherits) = texture.inherits {
         let registry = texture_template_registry().read().unwrap();
         for parent_name in inherits.split(',').map(|s| s.trim()) {
-            if let Some(parent) = registry.get(parent_name)
-                && let Some(ref m) = parent.mixin
-            {
-                for mixin in m.split(',').map(|s| s.trim()) {
-                    if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                        mixins.push(mixin.to_string());
-                    }
-                }
+            if let Some(parent) = registry.get(parent_name) {
+                append_unique_mixins(&mut mixins, parent.mixin.as_deref());
             }
         }
     }
-
-    // Collect direct mixins on the texture itself
-    if let Some(ref m) = texture.mixin {
-        for mixin in m.split(',').map(|s| s.trim()) {
-            if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                mixins.push(mixin.to_string());
-            }
-        }
-    }
-
+    append_unique_mixins(&mut mixins, texture.mixin.as_deref());
     mixins
 }
 
@@ -368,31 +348,24 @@ pub fn anim_group_template_registry_read()
 /// Collect all mixins for an AnimationGroup by resolving its `inherits` chain.
 pub fn collect_anim_group_mixins(anim_group: &AnimationGroupXml) -> Vec<String> {
     let mut mixins = Vec::new();
-
-    // Collect mixins from inherited templates
     if let Some(ref inherits) = anim_group.inherits {
         let registry = anim_group_template_registry().read().unwrap();
         for parent_name in inherits.split(',').map(|s| s.trim()) {
-            if let Some(parent) = registry.get(parent_name)
-                && let Some(ref m) = parent.mixin
-            {
-                for mixin in m.split(',').map(|s| s.trim()) {
-                    if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                        mixins.push(mixin.to_string());
-                    }
-                }
+            if let Some(parent) = registry.get(parent_name) {
+                append_unique_mixins(&mut mixins, parent.mixin.as_deref());
             }
         }
     }
-
-    // Collect direct mixins on the animation group itself
-    if let Some(ref m) = anim_group.mixin {
-        for mixin in m.split(',').map(|s| s.trim()) {
-            if !mixin.is_empty() && !mixins.contains(&mixin.to_string()) {
-                mixins.push(mixin.to_string());
-            }
-        }
-    }
-
+    append_unique_mixins(&mut mixins, anim_group.mixin.as_deref());
     mixins
+}
+
+/// Append unique mixin names from a comma-separated string.
+fn append_unique_mixins(mixins: &mut Vec<String>, attr: Option<&str>) {
+    let Some(attr) = attr else { return };
+    for name in attr.split(',').map(|s| s.trim()) {
+        if !name.is_empty() && !mixins.contains(&name.to_string()) {
+            mixins.push(name.to_string());
+        }
+    }
 }

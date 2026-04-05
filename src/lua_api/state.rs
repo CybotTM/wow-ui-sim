@@ -468,7 +468,6 @@ impl SimState {
     /// but `alpha > 0`) its parent's `effective_alpha > 0`. Frames with
     /// explicit `alpha=0` (glow/anim textures) are always excluded.
     fn build_strata_buckets(&mut self) -> Vec<Vec<u64>> {
-        use crate::widget::WidgetType;
         use std::collections::HashSet;
 
         // Step 1: Collect visible frame IDs per strata (unordered).
