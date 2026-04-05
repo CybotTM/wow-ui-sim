@@ -205,39 +205,53 @@ pub fn resolve_anchor_offset(anchor: &crate::xml::AnchorXml) -> (f32, f32) {
 /// Handles `$parent` both as a complete segment (`$parent.Foo`) and as a prefix
 /// (`$parentPanelContainer`), matching WoW's substitution behavior.
 fn resolve_relative_key(key: &str, parent_expr: &str) -> String {
-    if !key.contains("$parent") && !key.contains("$Parent") && !key.contains("$parentKey") {
+    let has_parent_ref =
+        key.contains("$parent") || key.contains("$Parent") || key.contains("$parentKey");
+    if !has_parent_ref {
         return key.to_string();
     }
+
     let mut expr = String::new();
-    for part in key.split('.') {
-        if part == "$parent" || part == "$Parent" || part == "$parentKey" {
-            if expr.is_empty() {
-                expr = parent_expr.to_string();
-            } else {
-                expr = format!("{}:GetParent()", expr);
-            }
-        } else if let Some(suffix) = part
-            .strip_prefix("$parent")
-            .or_else(|| part.strip_prefix("$Parent"))
-        {
-            // Handle $parent as a prefix: "$parentPanelContainer" → parent["PanelContainer"]
-            if expr.is_empty() {
-                expr = parent_expr.to_string();
-            } else {
-                expr = format!("{}:GetParent()", expr);
-            }
-            if !suffix.is_empty() {
-                expr = format!("{}[\"{}\"]", expr, suffix);
-            }
-        } else if !part.is_empty() {
-            expr = format!("{}[\"{}\"]", expr, part);
+    for segment in key.split('.') {
+        resolve_segment(segment, parent_expr, &mut expr);
+    }
+
+    if expr.is_empty() { parent_expr.to_string() } else { expr }
+}
+
+/// Resolve a single dot-separated segment of a relativeKey expression.
+///
+/// `$parent` / `$Parent` / `$parentKey` → navigate to parent.
+/// `$parentFoo` → navigate to parent, then index `["Foo"]`.
+/// Anything else → index `["segment"]`.
+fn resolve_segment(segment: &str, parent_expr: &str, expr: &mut String) {
+    let parent_suffix = strip_parent_prefix(segment);
+
+    if let Some(suffix) = parent_suffix {
+        // Navigate to parent: first $parent uses parent_expr, subsequent use :GetParent()
+        if expr.is_empty() {
+            expr.push_str(parent_expr);
+        } else {
+            *expr = format!("{expr}:GetParent()");
         }
+        if !suffix.is_empty() {
+            *expr = format!("{expr}[\"{suffix}\"]");
+        }
+    } else if !segment.is_empty() {
+        *expr = format!("{expr}[\"{segment}\"]");
     }
-    if expr.is_empty() {
-        parent_expr.to_string()
-    } else {
-        expr
+}
+
+/// Strip a `$parent`/`$Parent`/`$parentKey` prefix from a segment, returning
+/// the remaining suffix (empty string for exact matches like `$parent`).
+/// Returns `None` if the segment doesn't start with a parent marker.
+fn strip_parent_prefix(segment: &str) -> Option<&str> {
+    if segment == "$parentKey" {
+        return Some("");
     }
+    segment
+        .strip_prefix("$parent")
+        .or_else(|| segment.strip_prefix("$Parent"))
 }
 
 /// Resolve the relative target for an anchor.
