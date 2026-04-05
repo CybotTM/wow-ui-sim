@@ -16,7 +16,10 @@ fn test_unit_stat_strength_positive_with_default_gear() {
     let str_val: f64 = env
         .eval("local b, e = UnitStat('player', 1); return b")
         .unwrap();
-    assert!(str_val > 100.0, "strength={str_val}, expected > 100 with gear");
+    assert!(
+        str_val > 100.0,
+        "strength={str_val}, expected > 100 with gear"
+    );
 }
 
 #[test]
@@ -25,7 +28,10 @@ fn test_unit_stat_stamina_high_with_gear() {
     let sta: f64 = env
         .eval("local b, e = UnitStat('player', 3); return b")
         .unwrap();
-    assert!(sta > 1000.0, "stamina={sta}, expected > 1000 with full gear");
+    assert!(
+        sta > 1000.0,
+        "stamina={sta}, expected > 1000 with full gear"
+    );
 }
 
 #[test]
@@ -52,9 +58,8 @@ fn test_unit_stat_strength_is_primary_for_paladin() {
 #[test]
 fn test_unit_stat_returns_four_values() {
     let env = env();
-    let (base, eff, pos, neg): (f64, f64, f64, f64) = env
-        .eval("return UnitStat('player', 1)")
-        .unwrap();
+    let (base, eff, pos, neg): (f64, f64, f64, f64) =
+        env.eval("return UnitStat('player', 1)").unwrap();
     assert_eq!(base, eff);
     assert_eq!(pos, 0.0);
     assert_eq!(neg, 0.0);
@@ -125,7 +130,10 @@ fn test_get_mastery_effect_two_values() {
     let (total, from_rating): (f64, f64) = env.eval("return GetMasteryEffect()").unwrap();
     assert!(total > 0.0, "total mastery={total}");
     assert!(from_rating > 0.0, "mastery from rating={from_rating}");
-    assert!(total > from_rating, "total={total} should include base mastery");
+    assert!(
+        total > from_rating,
+        "total={total} should include base mastery"
+    );
 }
 
 #[test]

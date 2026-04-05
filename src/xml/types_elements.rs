@@ -355,12 +355,23 @@ pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static s
         "DropdownButton" => Some(("Button", Some("DropdownButton"))),
         "ContainedAlertFrame" => Some(("Button", Some("ContainedAlertFrame"))),
         // Frame-like elements (specialized XML tags that map to widget type "Frame")
-        "EventFrame" | "TaxiRouteFrame" | "ModelFFX" | "UiCamera" | "UnitPositionFrame"
-        | "OffScreenFrame" | "Checkout" | "FogOfWarFrame" | "QuestPOIFrame"
-        | "ArchaeologyDigSiteFrame" | "ScenarioPOIFrame" | "UIThemeContainerFrame"
-        | "MapScene" | "Line" | "Browser" | "MovieFrame" | "WorldFrame" => {
-            Some(("Frame", None))
-        }
+        "EventFrame"
+        | "TaxiRouteFrame"
+        | "ModelFFX"
+        | "UiCamera"
+        | "UnitPositionFrame"
+        | "OffScreenFrame"
+        | "Checkout"
+        | "FogOfWarFrame"
+        | "QuestPOIFrame"
+        | "ArchaeologyDigSiteFrame"
+        | "ScenarioPOIFrame"
+        | "UIThemeContainerFrame"
+        | "MapScene"
+        | "Line"
+        | "Browser"
+        | "MovieFrame"
+        | "WorldFrame" => Some(("Frame", None)),
         _ => None,
     }
 }
@@ -380,14 +391,51 @@ impl FrameElement {
     /// Returns `None` for `ScopedModifier` which has no `FrameXml`.
     pub fn as_frame_data(&self) -> Option<(&FrameXml, &'static str)> {
         frame_variant_data!(
-            self, Frame, Button, ItemButton, CheckButton, EditBox, ScrollFrame, Slider, StatusBar,
-            GameTooltip, ColorSelect, Model, ModelScene, EventFrame, CinematicModel, PlayerModel,
-            DressUpModel, Browser, Minimap, MessageFrame, MovieFrame, ScrollingMessageFrame,
-            SimpleHTML, WorldFrame, DropDownToggleButton, DropdownButton, EventButton, EventEditBox,
-            Cooldown, TaxiRouteFrame, ModelFFX, TabardModel, UiCamera, UnitPositionFrame,
-            OffScreenFrame, Checkout, FogOfWarFrame, QuestPOIFrame, ArchaeologyDigSiteFrame,
-            ScenarioPOIFrame, UIThemeContainerFrame, EventScrollFrame, ContainedAlertFrame,
-            MapScene, Line
+            self,
+            Frame,
+            Button,
+            ItemButton,
+            CheckButton,
+            EditBox,
+            ScrollFrame,
+            Slider,
+            StatusBar,
+            GameTooltip,
+            ColorSelect,
+            Model,
+            ModelScene,
+            EventFrame,
+            CinematicModel,
+            PlayerModel,
+            DressUpModel,
+            Browser,
+            Minimap,
+            MessageFrame,
+            MovieFrame,
+            ScrollingMessageFrame,
+            SimpleHTML,
+            WorldFrame,
+            DropDownToggleButton,
+            DropdownButton,
+            EventButton,
+            EventEditBox,
+            Cooldown,
+            TaxiRouteFrame,
+            ModelFFX,
+            TabardModel,
+            UiCamera,
+            UnitPositionFrame,
+            OffScreenFrame,
+            Checkout,
+            FogOfWarFrame,
+            QuestPOIFrame,
+            ArchaeologyDigSiteFrame,
+            ScenarioPOIFrame,
+            UIThemeContainerFrame,
+            EventScrollFrame,
+            ContainedAlertFrame,
+            MapScene,
+            Line
         )
     }
 }

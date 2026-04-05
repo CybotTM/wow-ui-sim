@@ -169,11 +169,7 @@ fn is_scripts_open(line: &str) -> bool {
 ///
 /// Returns `None` if the line isn't an opening tag. For self-closing tags (`/>`),
 /// `end_line == start`. For multiline tags, scans forward for the closing tag.
-fn detect_handler_span(
-    trimmed: &str,
-    lines: &[&str],
-    start: usize,
-) -> Option<(String, usize)> {
+fn detect_handler_span(trimmed: &str, lines: &[&str], start: usize) -> Option<(String, usize)> {
     if !trimmed.starts_with('<') || trimmed.starts_with("</") {
         return None;
     }

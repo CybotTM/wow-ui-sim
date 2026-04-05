@@ -649,16 +649,15 @@ fn apply_mixin_to_object(
 
 /// Wrap function values with `debug.newsecurefunction` for secure mixins.
 /// Non-function values pass through unchanged.
-fn wrap_secure_function(
-    lua: &Lua,
-    v: Value,
-    newsecfn: &mut Option<Function>,
-) -> Result<Value> {
+fn wrap_secure_function(lua: &Lua, v: Value, newsecfn: &mut Option<Function>) -> Result<Value> {
     let Value::Function(ref f) = v else {
         return Ok(v);
     };
     if newsecfn.is_none() {
-        *newsecfn = Some(lua.load("return debug.newsecurefunction").eval::<Function>()?);
+        *newsecfn = Some(
+            lua.load("return debug.newsecurefunction")
+                .eval::<Function>()?,
+        );
     }
     let wrapped = newsecfn.as_ref().unwrap().call::<Function>(f.clone())?;
     Ok(Value::Function(wrapped))

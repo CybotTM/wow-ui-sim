@@ -66,50 +66,123 @@ pub static PROFESSIONS: &[ProfessionInfo] = &[
 ];
 
 pub static RECIPE_CATEGORIES: &[RecipeCategory] = &[
-    RecipeCategory { category_id: 1, name: "Armor", parent_category_id: 0, ui_order: 1 },
-    RecipeCategory { category_id: 2, name: "Weapons", parent_category_id: 0, ui_order: 2 },
-    RecipeCategory { category_id: 3, name: "Reagents", parent_category_id: 0, ui_order: 3 },
-    RecipeCategory { category_id: 4, name: "Miscellaneous", parent_category_id: 0, ui_order: 4 },
+    RecipeCategory {
+        category_id: 1,
+        name: "Armor",
+        parent_category_id: 0,
+        ui_order: 1,
+    },
+    RecipeCategory {
+        category_id: 2,
+        name: "Weapons",
+        parent_category_id: 0,
+        ui_order: 2,
+    },
+    RecipeCategory {
+        category_id: 3,
+        name: "Reagents",
+        parent_category_id: 0,
+        ui_order: 3,
+    },
+    RecipeCategory {
+        category_id: 4,
+        name: "Miscellaneous",
+        parent_category_id: 0,
+        ui_order: 4,
+    },
 ];
 
 static HELM_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 12 },
-    ReagentSlot { item_id: 210937, quantity: 2 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 12,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 2,
+    },
 ];
 static CHEST_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 16 },
-    ReagentSlot { item_id: 210937, quantity: 3 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 16,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 3,
+    },
 ];
 static GAUNTLETS_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 8 },
-    ReagentSlot { item_id: 210937, quantity: 2 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 8,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 2,
+    },
 ];
 static GREAVES_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 14 },
-    ReagentSlot { item_id: 210937, quantity: 2 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 14,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 2,
+    },
 ];
 static GREATSWORD_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 20 },
-    ReagentSlot { item_id: 210937, quantity: 4 },
-    ReagentSlot { item_id: 210935, quantity: 2 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 20,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 4,
+    },
+    ReagentSlot {
+        item_id: 210935,
+        quantity: 2,
+    },
 ];
 static MACE_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 10 },
-    ReagentSlot { item_id: 210937, quantity: 2 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 10,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 2,
+    },
 ];
-static INGOT_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210930, quantity: 3 },
-];
-static AQIRITE_INGOT_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210931, quantity: 3 },
-];
+static INGOT_REAGENTS: &[ReagentSlot] = &[ReagentSlot {
+    item_id: 210930,
+    quantity: 3,
+}];
+static AQIRITE_INGOT_REAGENTS: &[ReagentSlot] = &[ReagentSlot {
+    item_id: 210931,
+    quantity: 3,
+}];
 static SPIKE_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 6 },
-    ReagentSlot { item_id: 210937, quantity: 1 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 6,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 1,
+    },
 ];
 static CHAIN_REAGENTS: &[ReagentSlot] = &[
-    ReagentSlot { item_id: 210934, quantity: 8 },
-    ReagentSlot { item_id: 210937, quantity: 1 },
+    ReagentSlot {
+        item_id: 210934,
+        quantity: 8,
+    },
+    ReagentSlot {
+        item_id: 210937,
+        quantity: 1,
+    },
 ];
 
 pub static BLACKSMITHING_RECIPES: &[RecipeEntry] = &[
@@ -236,7 +309,9 @@ pub static BLACKSMITHING_RECIPES: &[RecipeEntry] = &[
 ];
 
 pub fn get_profession(profession_id: i32) -> Option<&'static ProfessionInfo> {
-    PROFESSIONS.iter().find(|p| p.profession_id == profession_id)
+    PROFESSIONS
+        .iter()
+        .find(|p| p.profession_id == profession_id)
 }
 
 pub fn get_profession_by_index(index: usize) -> Option<&'static ProfessionInfo> {
@@ -244,7 +319,9 @@ pub fn get_profession_by_index(index: usize) -> Option<&'static ProfessionInfo> 
 }
 
 pub fn get_recipe(recipe_id: i32) -> Option<&'static RecipeEntry> {
-    BLACKSMITHING_RECIPES.iter().find(|r| r.recipe_id == recipe_id)
+    BLACKSMITHING_RECIPES
+        .iter()
+        .find(|r| r.recipe_id == recipe_id)
 }
 
 pub fn get_all_recipe_ids() -> Vec<i32> {
@@ -260,5 +337,7 @@ pub fn get_filtered_recipe_ids() -> Vec<i32> {
 }
 
 pub fn get_category(category_id: i32) -> Option<&'static RecipeCategory> {
-    RECIPE_CATEGORIES.iter().find(|c| c.category_id == category_id)
+    RECIPE_CATEGORIES
+        .iter()
+        .find(|c| c.category_id == category_id)
 }

@@ -149,8 +149,15 @@ fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
     match next {
         'T' | 'A' => skip_delimited_span(chars, if next == 'T' { 't' } else { 'a' }),
         'H' => skip_delimited_span(chars, 'h'),
-        'h' | 'r' => { chars.next(); true }
-        'c' => { chars.next(); skip_n(chars, 8); true }
+        'h' | 'r' => {
+            chars.next();
+            true
+        }
+        'c' => {
+            chars.next();
+            skip_n(chars, 8);
+            true
+        }
         _ => false,
     }
 }
@@ -190,7 +197,10 @@ mod tests {
 
     #[test]
     fn strips_inline_texture() {
-        assert_eq!(strip_wow_markup("Icon|TInterface\\Icons\\Spell:16|tEnd"), "IconEnd");
+        assert_eq!(
+            strip_wow_markup("Icon|TInterface\\Icons\\Spell:16|tEnd"),
+            "IconEnd"
+        );
     }
 
     #[test]
@@ -200,10 +210,7 @@ mod tests {
 
     #[test]
     fn strips_hyperlink_keeps_text() {
-        assert_eq!(
-            strip_wow_markup("|Hitem:12345|hCool Sword|h"),
-            "Cool Sword"
-        );
+        assert_eq!(strip_wow_markup("|Hitem:12345|hCool Sword|h"), "Cool Sword");
     }
 
     #[test]

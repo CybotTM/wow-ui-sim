@@ -104,7 +104,11 @@ fn item_info_multi_value(
         Value::String(lua.create_string(inv_type_to_subclass(item.inventory_type))?), // 7 itemSubType
         Value::Integer(item.stackable as i64), // 8  itemStackCount
         Value::String(lua.create_string(inv_type_to_equip_loc(item.inventory_type))?), // 9 itemEquipLoc
-        Value::Integer(if item.icon_file_data_id != 0 { item.icon_file_data_id as i64 } else { 134400 }), // 10 itemTexture
+        Value::Integer(if item.icon_file_data_id != 0 {
+            item.icon_file_data_id as i64
+        } else {
+            134400
+        }), // 10 itemTexture
         Value::Integer(item.sell_price as i64), // 11 sellPrice
         Value::Integer(inv_type_to_class_id(item.inventory_type) as i64), // 12 classID
         Value::Integer(0),                      // 13 subclassID

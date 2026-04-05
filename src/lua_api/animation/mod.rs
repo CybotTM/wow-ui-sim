@@ -223,7 +223,6 @@ impl AnimState {
     pub(crate) fn is_active(&self) -> bool {
         self.elapsed >= self.start_delay
     }
-
 }
 
 /// State for an animation group.

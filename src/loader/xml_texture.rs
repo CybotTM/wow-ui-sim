@@ -3,9 +3,7 @@
 use crate::lua_api::LoaderEnv;
 use crate::xml::collect_texture_mixins;
 
-use super::helpers::{
-    escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref,
-};
+use super::helpers::{escape_lua_string, generate_set_point_code, get_size_values, lua_global_ref};
 use super::helpers_anim::generate_animation_group_code;
 
 fn emit_file_code(texture: &crate::xml::TextureXml) -> String {

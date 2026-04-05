@@ -216,4 +216,3 @@ fn write_pack_entry(file: &mut std::fs::File, hash: u64, bytecode: &[u8]) -> std
     file.write_all(bytecode)?;
     Ok(())
 }
-

@@ -7,8 +7,8 @@ use super::LoadTiming;
 use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::rand_id;
-use super::xml_frame_codegen::build_frame_lua_code;
 use super::precompiled;
+use super::xml_frame_codegen::build_frame_lua_code;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
 use super::xml_lifecycle::fire_lifecycle_scripts;
 
@@ -530,33 +530,99 @@ mod tests {
     #[test]
     fn specialized_widget_types() {
         let f = default_frame();
-        assert_eq!(resolve(&FrameElement::Frame(f.clone())), Some(("Frame", None)));
-        assert_eq!(resolve(&FrameElement::Button(f.clone())), Some(("Button", None)));
-        assert_eq!(resolve(&FrameElement::ItemButton(f.clone())), Some(("ItemButton", None)));
-        assert_eq!(resolve(&FrameElement::CheckButton(f.clone())), Some(("CheckButton", None)));
-        assert_eq!(resolve(&FrameElement::EditBox(f.clone())), Some(("EditBox", None)));
-        assert_eq!(resolve(&FrameElement::EventEditBox(f.clone())), Some(("EditBox", None)));
-        assert_eq!(resolve(&FrameElement::ScrollFrame(f.clone())), Some(("ScrollFrame", None)));
-        assert_eq!(resolve(&FrameElement::EventScrollFrame(f.clone())), Some(("ScrollFrame", None)));
-        assert_eq!(resolve(&FrameElement::Slider(f.clone())), Some(("Slider", None)));
-        assert_eq!(resolve(&FrameElement::StatusBar(f.clone())), Some(("StatusBar", None)));
-        assert_eq!(resolve(&FrameElement::Cooldown(f.clone())), Some(("Cooldown", None)));
-        assert_eq!(resolve(&FrameElement::GameTooltip(f.clone())), Some(("GameTooltip", None)));
-        assert_eq!(resolve(&FrameElement::ColorSelect(f.clone())), Some(("ColorSelect", None)));
-        assert_eq!(resolve(&FrameElement::Model(f.clone())), Some(("Model", None)));
-        assert_eq!(resolve(&FrameElement::ModelScene(f.clone())), Some(("ModelScene", None)));
-        assert_eq!(resolve(&FrameElement::SimpleHTML(f.clone())), Some(("SimpleHTML", None)));
-        assert_eq!(resolve(&FrameElement::Minimap(f.clone())), Some(("Minimap", None)));
-        assert_eq!(resolve(&FrameElement::MessageFrame(f.clone())), Some(("MessageFrame", None)));
+        assert_eq!(
+            resolve(&FrameElement::Frame(f.clone())),
+            Some(("Frame", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::Button(f.clone())),
+            Some(("Button", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::ItemButton(f.clone())),
+            Some(("ItemButton", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::CheckButton(f.clone())),
+            Some(("CheckButton", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::EditBox(f.clone())),
+            Some(("EditBox", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::EventEditBox(f.clone())),
+            Some(("EditBox", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::ScrollFrame(f.clone())),
+            Some(("ScrollFrame", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::EventScrollFrame(f.clone())),
+            Some(("ScrollFrame", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::Slider(f.clone())),
+            Some(("Slider", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::StatusBar(f.clone())),
+            Some(("StatusBar", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::Cooldown(f.clone())),
+            Some(("Cooldown", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::GameTooltip(f.clone())),
+            Some(("GameTooltip", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::ColorSelect(f.clone())),
+            Some(("ColorSelect", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::Model(f.clone())),
+            Some(("Model", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::ModelScene(f.clone())),
+            Some(("ModelScene", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::SimpleHTML(f.clone())),
+            Some(("SimpleHTML", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::Minimap(f.clone())),
+            Some(("Minimap", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::MessageFrame(f.clone())),
+            Some(("MessageFrame", None))
+        );
     }
 
     #[test]
     fn player_model_variants_all_map_to_player_model() {
         let f = default_frame();
-        assert_eq!(resolve(&FrameElement::PlayerModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&FrameElement::CinematicModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&FrameElement::TabardModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&FrameElement::DressUpModel(f.clone())), Some(("PlayerModel", None)));
+        assert_eq!(
+            resolve(&FrameElement::PlayerModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::CinematicModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::TabardModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&FrameElement::DressUpModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
     }
 
     #[test]

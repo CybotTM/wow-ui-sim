@@ -236,7 +236,9 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
             let visible = visible_faction_indices();
             if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
                 with_collapsed_headers(|c| {
-                    if let Some(v) = c.get_mut(actual_idx) { *v = false; }
+                    if let Some(v) = c.get_mut(actual_idx) {
+                        *v = false;
+                    }
                 });
             }
             Ok(())
@@ -248,7 +250,9 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
             let visible = visible_faction_indices();
             if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
                 with_collapsed_headers(|c| {
-                    if let Some(v) = c.get_mut(actual_idx) { *v = true; }
+                    if let Some(v) = c.get_mut(actual_idx) {
+                        *v = true;
+                    }
                 });
             }
             Ok(())
@@ -268,7 +272,9 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
             with_collapsed_headers(|c| {
                 for (i, entry) in list.iter().enumerate() {
                     if entry.is_header {
-                        if let Some(v) = c.get_mut(i) { *v = true; }
+                        if let Some(v) = c.get_mut(i) {
+                            *v = true;
+                        }
                     }
                 }
             });
@@ -291,10 +297,7 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
         "SetLegacyReputationsShown",
         lua.create_function(|_, _s: bool| Ok(()))?,
     )?;
-    t.set(
-        "GetSelectedFaction",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    t.set("GetSelectedFaction", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set(
         "SetSelectedFaction",
         lua.create_function(|_, _i: i32| Ok(()))?,

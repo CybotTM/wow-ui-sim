@@ -366,11 +366,7 @@ fn register_buff_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
 // Equipment
 // ---------------------------------------------------------------------------
 
-fn register_equipment_api(
-    lua: &Lua,
-    t: &mlua::Table,
-    state: Rc<RefCell<SimState>>,
-) -> Result<()> {
+fn register_equipment_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     use crate::lua_api::state_types::{CharacterStats, EquippedItem};
 
     set_fn(lua, t, "EquipItem", {
@@ -379,12 +375,14 @@ fn register_equipment_api(
             let mut state = s.borrow_mut();
             state.player.equipped_items.insert(
                 slot,
-                EquippedItem { item_id, enchant_id: 0, gem_ids: [0, 0, 0] },
+                EquippedItem {
+                    item_id,
+                    enchant_id: 0,
+                    gem_ids: [0, 0, 0],
+                },
             );
-            state.player.stats = CharacterStats::compute(
-                &state.player.equipped_items,
-                state.player.class_index,
-            );
+            state.player.stats =
+                CharacterStats::compute(&state.player.equipped_items, state.player.class_index);
             Ok(())
         }
     })?;
@@ -393,10 +391,8 @@ fn register_equipment_api(
         move |_, slot: i32| {
             let mut state = s.borrow_mut();
             state.player.equipped_items.remove(&slot);
-            state.player.stats = CharacterStats::compute(
-                &state.player.equipped_items,
-                state.player.class_index,
-            );
+            state.player.stats =
+                CharacterStats::compute(&state.player.equipped_items, state.player.class_index);
             Ok(())
         }
     })?;

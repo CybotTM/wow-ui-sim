@@ -189,10 +189,8 @@ pub const EDIT_MODE_OBJECTIVE_TRACKER_SETTING: SeqEnumDef = (
     &["Height", "Opacity", "TextSize"],
 );
 
-pub const EDIT_MODE_STATUS_TRACKING_BAR_SETTING: SeqEnumDef = (
-    "EditModeStatusTrackingBarSetting",
-    &["Size"],
-);
+pub const EDIT_MODE_STATUS_TRACKING_BAR_SETTING: SeqEnumDef =
+    ("EditModeStatusTrackingBarSetting", &["Size"]);
 
 pub const EDIT_MODE_STATUS_TRACKING_BAR_SYSTEM_INDICES: EnumDef = (
     "EditModeStatusTrackingBarSystemIndices",

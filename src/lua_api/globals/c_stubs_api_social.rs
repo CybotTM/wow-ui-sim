@@ -276,18 +276,12 @@ fn register_c_photo_sharing(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "CompleteAuthorizationFlow",
         lua.create_function(|_, _url: Value| Ok(()))?,
     )?;
-    t.set(
-        "ClearAuthorization",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
+    t.set("ClearAuthorization", lua.create_function(|_, ()| Ok(()))?)?;
     t.set(
         "GetPhotoSharingAuthURL",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
-    t.set(
-        "GetCropRatio",
-        lua.create_function(|_, ()| Ok(1.0f64))?,
-    )?;
+    t.set("GetCropRatio", lua.create_function(|_, ()| Ok(1.0f64))?)?;
     t.set(
         "SetScreenshotPreviewTexture",
         lua.create_function(|_, _frame: Value| Ok(()))?,
@@ -296,10 +290,7 @@ fn register_c_photo_sharing(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "UploadPhotoToService",
         lua.create_function(|_, (_title, _desc): (Value, Value)| Ok(()))?,
     )?;
-    t.set(
-        "GetStatus",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
+    t.set("GetStatus", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set("C_PhotoSharing", t)
 }
 

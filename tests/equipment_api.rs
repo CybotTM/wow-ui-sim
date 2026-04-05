@@ -9,9 +9,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_default_gear_head_slot() {
     let env = env();
-    let id: i64 = env
-        .eval("return GetInventoryItemID('player', 1)")
-        .unwrap();
+    let id: i64 = env.eval("return GetInventoryItemID('player', 1)").unwrap();
     assert_eq!(id, 211993);
 }
 
@@ -74,9 +72,7 @@ fn test_bag_slot_texture() {
 fn test_admin_equip_item() {
     let env = env();
     env.exec("A_Admin.EquipItem(17, 229181)").unwrap();
-    let id: i64 = env
-        .eval("return GetInventoryItemID('player', 17)")
-        .unwrap();
+    let id: i64 = env.eval("return GetInventoryItemID('player', 17)").unwrap();
     assert_eq!(id, 229181);
 }
 
@@ -94,9 +90,8 @@ fn test_admin_unequip_item() {
 #[test]
 fn test_inventory_slot_info() {
     let env = env();
-    let (slot_id, tex_id): (i32, i32) = env
-        .eval("return GetInventorySlotInfo('HeadSlot')")
-        .unwrap();
+    let (slot_id, tex_id): (i32, i32) =
+        env.eval("return GetInventorySlotInfo('HeadSlot')").unwrap();
     assert_eq!(slot_id, 1);
     assert!(tex_id > 0);
 }

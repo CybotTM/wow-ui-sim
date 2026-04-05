@@ -42,8 +42,17 @@ fn consume_escape(chars: &mut std::iter::Peekable<std::str::Chars>) -> bool {
     match next {
         'T' | 'A' => skip_delimited_span(chars, if next == 'T' { 't' } else { 'a' }),
         'H' => skip_delimited_span(chars, 'h'),
-        'h' | 'r' => { chars.next(); true }
-        'c' => { chars.next(); for _ in 0..8 { chars.next(); } true }
+        'h' | 'r' => {
+            chars.next();
+            true
+        }
+        'c' => {
+            chars.next();
+            for _ in 0..8 {
+                chars.next();
+            }
+            true
+        }
         _ => false,
     }
 }

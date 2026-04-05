@@ -216,7 +216,11 @@ fn resolve_relative_key(key: &str, parent_expr: &str) -> String {
         resolve_segment(segment, parent_expr, &mut expr);
     }
 
-    if expr.is_empty() { parent_expr.to_string() } else { expr }
+    if expr.is_empty() {
+        parent_expr.to_string()
+    } else {
+        expr
+    }
 }
 
 /// Resolve a single dot-separated segment of a relativeKey expression.

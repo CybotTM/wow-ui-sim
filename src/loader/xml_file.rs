@@ -410,10 +410,7 @@ fn create_font_family_object(
 }
 
 /// Build Lua override statements from the roman member's font properties.
-fn build_roman_font_overrides(
-    name: &str,
-    font_family: &crate::xml::FontFamilyXml,
-) -> String {
+fn build_roman_font_overrides(name: &str, font_family: &crate::xml::FontFamilyXml) -> String {
     let font = match find_roman_font(font_family) {
         Some(f) => f,
         None => return String::new(),
@@ -457,33 +454,99 @@ mod tests {
     #[test]
     fn specialized_widget_types() {
         let f = default_frame();
-        assert_eq!(resolve(&XmlElement::Frame(f.clone())), Some(("Frame", None)));
-        assert_eq!(resolve(&XmlElement::Button(f.clone())), Some(("Button", None)));
-        assert_eq!(resolve(&XmlElement::ItemButton(f.clone())), Some(("Button", None)));
-        assert_eq!(resolve(&XmlElement::CheckButton(f.clone())), Some(("CheckButton", None)));
-        assert_eq!(resolve(&XmlElement::EditBox(f.clone())), Some(("EditBox", None)));
-        assert_eq!(resolve(&XmlElement::EventEditBox(f.clone())), Some(("EditBox", None)));
-        assert_eq!(resolve(&XmlElement::ScrollFrame(f.clone())), Some(("ScrollFrame", None)));
-        assert_eq!(resolve(&XmlElement::EventScrollFrame(f.clone())), Some(("ScrollFrame", None)));
-        assert_eq!(resolve(&XmlElement::Slider(f.clone())), Some(("Slider", None)));
-        assert_eq!(resolve(&XmlElement::StatusBar(f.clone())), Some(("StatusBar", None)));
-        assert_eq!(resolve(&XmlElement::Cooldown(f.clone())), Some(("Cooldown", None)));
-        assert_eq!(resolve(&XmlElement::GameTooltip(f.clone())), Some(("GameTooltip", None)));
-        assert_eq!(resolve(&XmlElement::ColorSelect(f.clone())), Some(("ColorSelect", None)));
-        assert_eq!(resolve(&XmlElement::Model(f.clone())), Some(("Model", None)));
-        assert_eq!(resolve(&XmlElement::ModelScene(f.clone())), Some(("ModelScene", None)));
-        assert_eq!(resolve(&XmlElement::SimpleHTML(f.clone())), Some(("SimpleHTML", None)));
-        assert_eq!(resolve(&XmlElement::Minimap(f.clone())), Some(("Minimap", None)));
-        assert_eq!(resolve(&XmlElement::MessageFrame(f.clone())), Some(("MessageFrame", None)));
+        assert_eq!(
+            resolve(&XmlElement::Frame(f.clone())),
+            Some(("Frame", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::Button(f.clone())),
+            Some(("Button", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::ItemButton(f.clone())),
+            Some(("Button", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::CheckButton(f.clone())),
+            Some(("CheckButton", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::EditBox(f.clone())),
+            Some(("EditBox", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::EventEditBox(f.clone())),
+            Some(("EditBox", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::ScrollFrame(f.clone())),
+            Some(("ScrollFrame", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::EventScrollFrame(f.clone())),
+            Some(("ScrollFrame", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::Slider(f.clone())),
+            Some(("Slider", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::StatusBar(f.clone())),
+            Some(("StatusBar", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::Cooldown(f.clone())),
+            Some(("Cooldown", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::GameTooltip(f.clone())),
+            Some(("GameTooltip", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::ColorSelect(f.clone())),
+            Some(("ColorSelect", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::Model(f.clone())),
+            Some(("Model", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::ModelScene(f.clone())),
+            Some(("ModelScene", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::SimpleHTML(f.clone())),
+            Some(("SimpleHTML", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::Minimap(f.clone())),
+            Some(("Minimap", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::MessageFrame(f.clone())),
+            Some(("MessageFrame", None))
+        );
     }
 
     #[test]
     fn player_model_variants_all_map_to_player_model() {
         let f = default_frame();
-        assert_eq!(resolve(&XmlElement::PlayerModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&XmlElement::CinematicModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&XmlElement::TabardModel(f.clone())), Some(("PlayerModel", None)));
-        assert_eq!(resolve(&XmlElement::DressUpModel(f.clone())), Some(("PlayerModel", None)));
+        assert_eq!(
+            resolve(&XmlElement::PlayerModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::CinematicModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::TabardModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
+        assert_eq!(
+            resolve(&XmlElement::DressUpModel(f.clone())),
+            Some(("PlayerModel", None))
+        );
     }
 
     #[test]
@@ -494,7 +557,10 @@ mod tests {
             resolve(&XmlElement::DropDownToggleButton(f.clone())),
             Some(("Button", None))
         );
-        assert_eq!(resolve(&XmlElement::EventButton(f.clone())), Some(("Button", None)));
+        assert_eq!(
+            resolve(&XmlElement::EventButton(f.clone())),
+            Some(("Button", None))
+        );
         // DropdownButton has intrinsic
         assert_eq!(
             resolve(&XmlElement::DropdownButton(f.clone())),
@@ -552,7 +618,10 @@ mod tests {
     fn non_frame_elements_return_none() {
         use crate::xml::ScriptXml;
         assert_eq!(
-            resolve(&XmlElement::Script(ScriptXml { file: None, inline: None })),
+            resolve(&XmlElement::Script(ScriptXml {
+                file: None,
+                inline: None
+            })),
             None
         );
         assert_eq!(resolve(&XmlElement::Text("hello".into())), None);
@@ -566,14 +635,20 @@ mod tests {
     fn xml_vs_frame_element_divergences() {
         let f = default_frame();
         // XmlElement::ItemButton -> ("Button", None)
-        assert_eq!(resolve(&XmlElement::ItemButton(f.clone())), Some(("Button", None)));
+        assert_eq!(
+            resolve(&XmlElement::ItemButton(f.clone())),
+            Some(("Button", None))
+        );
         // XmlElement::DropDownToggleButton -> ("Button", None) — no intrinsic
         assert_eq!(
             resolve(&XmlElement::DropDownToggleButton(f.clone())),
             Some(("Button", None))
         );
         // XmlElement::EventButton -> ("Button", None) — no intrinsic
-        assert_eq!(resolve(&XmlElement::EventButton(f.clone())), Some(("Button", None)));
+        assert_eq!(
+            resolve(&XmlElement::EventButton(f.clone())),
+            Some(("Button", None))
+        );
     }
 
     #[test]
