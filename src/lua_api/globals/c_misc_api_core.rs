@@ -593,37 +593,18 @@ fn register_mythic_plus_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 fn register_c_lfg_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
+    register_lfg_info_stubs(lua, &t)?;
     t.set(
         "GetRoleCheckDifficultyDetails",
         lua.create_function(|_, ()| Ok((false, false, false)))?,
-    )?;
-    t.set(
-        "GetDungeonInfo",
-        lua.create_function(|lua, _id: i32| lua.create_table())?,
-    )?;
-    t.set(
-        "GetLFDLockStates",
-        lua.create_function(|lua, ()| lua.create_table())?,
     )?;
     t.set(
         "CanPartyLFGBackfill",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     t.set(
-        "GetAllEntriesForCategory",
-        lua.create_function(|lua, _cat: i32| lua.create_table())?,
-    )?;
-    t.set(
         "HideNameFromUI",
-        lua.create_function(|_, _id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "CanPlayerUseLFD",
-        lua.create_function(|_, ()| Ok((true, Value::Nil)))?,
-    )?;
-    t.set(
-        "CanPlayerUseLFR",
-        lua.create_function(|_, ()| Ok((true, Value::Nil)))?,
+        lua.create_function(|_, _: i32| Ok(false))?,
     )?;
     t.set(
         "CanPlayerUsePremadeGroup",
@@ -634,5 +615,22 @@ fn register_c_lfg_info(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(true))?,
     )?;
     lua.globals().set("C_LFGInfo", t)?;
+    Ok(())
+}
+
+/// LFG stubs: empty-table getters and (true, nil) capability checks.
+fn register_lfg_info_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    let empty = lua.create_function(|lua, _: mlua::MultiValue| lua.create_table())?;
+    for name in [
+        "GetDungeonInfo",
+        "GetLFDLockStates",
+        "GetAllEntriesForCategory",
+    ] {
+        t.set(name, empty.clone())?;
+    }
+    let can_use = lua.create_function(|_, ()| Ok((true, Value::Nil)))?;
+    for name in ["CanPlayerUseLFD", "CanPlayerUseLFR"] {
+        t.set(name, can_use.clone())?;
+    }
     Ok(())
 }
