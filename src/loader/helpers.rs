@@ -617,6 +617,74 @@ mod tests {
     }
 
     #[test]
+    fn test_resolve_relative_key_parent_key_alias() {
+        // $parentKey is treated identically to $parent
+        let result = resolve_relative_key("$parentKey", "parent");
+        assert_eq!(result, "parent");
+    }
+
+    #[test]
+    fn test_resolve_relative_key_parent_key_with_child() {
+        let result = resolve_relative_key("$parentKey.Foo", "parent");
+        assert_eq!(result, r#"parent["Foo"]"#);
+    }
+
+    #[test]
+    fn test_resolve_relative_key_capital_parent() {
+        // $Parent (capital P) is treated identically to $parent
+        let result = resolve_relative_key("$Parent", "parent");
+        assert_eq!(result, "parent");
+    }
+
+    #[test]
+    fn test_resolve_relative_key_capital_parent_with_child() {
+        let result = resolve_relative_key("$Parent.Foo", "parent");
+        assert_eq!(result, r#"parent["Foo"]"#);
+    }
+
+    #[test]
+    fn test_resolve_relative_key_parent_prefix_suffix() {
+        // $parentFoo → parent["Foo"] (prefix substitution)
+        let result = resolve_relative_key("$parentPanelContainer", "parent");
+        assert_eq!(result, r#"parent["PanelContainer"]"#);
+    }
+
+    #[test]
+    fn test_resolve_relative_key_capital_parent_prefix_suffix() {
+        // $ParentFoo → parent["Foo"] (capital P prefix substitution)
+        let result = resolve_relative_key("$ParentPanelContainer", "parent");
+        assert_eq!(result, r#"parent["PanelContainer"]"#);
+    }
+
+    #[test]
+    fn test_resolve_relative_key_triple_chained_parent() {
+        let result = resolve_relative_key("$parent.$parent.$parent.Bar", "parent");
+        assert_eq!(result, r#"parent:GetParent():GetParent()["Bar"]"#);
+    }
+
+    #[test]
+    fn test_resolve_relative_key_empty_key() {
+        // Empty key returns the key itself (no $parent marker)
+        let result = resolve_relative_key("", "parent");
+        assert_eq!(result, "");
+    }
+
+    #[test]
+    fn test_resolve_relative_key_just_dollar_parent_prefix_no_suffix() {
+        // "$parent" as a prefix with empty suffix after strip — equivalent to bare $parent
+        // This tests the `if !suffix.is_empty()` branch in the prefix handler
+        let result = resolve_relative_key("$parent", "myframe");
+        assert_eq!(result, "myframe");
+    }
+
+    #[test]
+    fn test_resolve_relative_key_parent_prefix_in_chained() {
+        // $parent.$parentFoo → parent:GetParent()["Foo"]
+        let result = resolve_relative_key("$parent.$parentFoo", "parent");
+        assert_eq!(result, r#"parent:GetParent()["Foo"]"#);
+    }
+
+    #[test]
     fn test_get_size_values_direct() {
         let size = crate::xml::SizeXml {
             x: Some(100.0),
