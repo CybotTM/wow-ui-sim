@@ -1,7 +1,7 @@
 use super::WowLuaEnv;
 
-/// Pre-event objective tracker setup: hide empty frames, configure the
-/// tracker frame container, and patch animation stubs.
+/// Pre-event objective tracker setup: hide empty frames and configure the
+/// tracker frame container.
 ///
 /// Module registration happens automatically when PLAYER_ENTERING_WORLD and
 /// VARIABLES_LOADED fire (via EventUtil.ContinueAfterAllEvents → Init).
@@ -11,7 +11,6 @@ pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
     setup_managed_frame_containers(env);
     hide_empty_managed_frames(env);
     setup_tracker_frame(env);
-    patch_tracker_animations(env);
     update_managed_frame_containers(env);
 }
 
@@ -94,45 +93,6 @@ fn update_managed_frame_containers(env: &WowLuaEnv) {
         if UIParentBottomManagedFrameContainer
             and UIParentBottomManagedFrameContainer.UpdateManagedFrames then
             UIParentBottomManagedFrameContainer:UpdateManagedFrames()
-        end
-    "#,
-    );
-}
-
-fn patch_tracker_animations(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local animStub = {
-            Play = function() end,
-            Stop = function() end,
-            IsPlaying = function() return false end,
-            IsDelaying = function() return false end,
-            SetScript = function() end,
-        }
-        -- Patch SetState to inject animation stubs before calling Play()
-        local iconStub = { Hide = function() end, Show = function() end }
-        local function patchedSetState(self, state)
-            self.CheckAnim = self.CheckAnim or animStub
-            self.GlowAnim = self.GlowAnim or animStub
-            self.FadeOutAnim = self.FadeOutAnim or animStub
-            self.FadeInAnim = self.FadeInAnim or animStub
-            self.Icon = self.Icon or iconStub
-            if not self.Icon.Hide then self.Icon = iconStub end
-            self.state = state
-        end
-        -- Apply to both the base mixin and all derived mixins
-        if ObjectiveTrackerAnimLineMixin then
-            ObjectiveTrackerAnimLineMixin.SetState = patchedSetState
-        end
-        if QuestObjectiveLineMixin then
-            QuestObjectiveLineMixin.SetState = patchedSetState
-        end
-        -- Stub PlayAddAnimation on header mixin
-        local function patchedPlayAdd(self)
-            self.AddAnim = self.AddAnim or animStub
-        end
-        if ObjectiveTrackerAnimBlockHeaderMixin then
-            ObjectiveTrackerAnimBlockHeaderMixin.PlayAddAnimation = patchedPlayAdd
         end
     "#,
     );
