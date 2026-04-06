@@ -22,16 +22,17 @@ fn sim_commands_addon_loads() {
 #[test]
 fn sim_commands_register_and_list() {
     let env = env();
-    let count: i32 = env
+    let added: i32 = env
         .eval(
             r#"
+            local before = #SimCommands:GetCommands()
             SimCommands:Register("Test Command", "A test", function() end, "Debug")
             SimCommands:Register("Another", "Second test", function() end)
-            return #SimCommands:GetCommands()
+            return #SimCommands:GetCommands() - before
             "#,
         )
         .unwrap();
-    assert_eq!(count, 2, "Should have 2 registered commands");
+    assert_eq!(added, 2, "Should have added 2 commands");
 }
 
 #[test]
@@ -40,13 +41,14 @@ fn sim_commands_entry_fields() {
     let result: String = env
         .eval(
             r#"
-            SimCommands:Register("Open Mail", "Open the mailbox", function() end, "UI Panels")
-            local cmd = SimCommands:GetCommands()[1]
+            SimCommands:Register("Test Entry", "A test entry", function() end, "Debug")
+            local cmds = SimCommands:GetCommands()
+            local cmd = cmds[#cmds]  -- last registered
             return cmd.name .. "|" .. cmd.description .. "|" .. cmd.category
             "#,
         )
         .unwrap();
-    assert_eq!(result, "Open Mail|Open the mailbox|UI Panels");
+    assert_eq!(result, "Test Entry|A test entry|Debug");
 }
 
 #[test]
@@ -56,7 +58,8 @@ fn sim_commands_default_category() {
         .eval(
             r#"
             SimCommands:Register("No Category", "desc", function() end)
-            return SimCommands:GetCommands()[1].category
+            local cmds = SimCommands:GetCommands()
+            return cmds[#cmds].category
             "#,
         )
         .unwrap();
@@ -66,47 +69,49 @@ fn sim_commands_default_category() {
 #[test]
 fn sim_commands_filter_by_name() {
     let env = env();
-    let count: i32 = env
+    let result: String = env
         .eval(
             r#"
-            SimCommands:Register("Open Mailbox", "Show mail UI", function() end)
+            SimCommands:Register("Zzz Open Alpha", "Show alpha UI", function() end)
             SimCommands:Register("Set Level", "Change player level", function() end)
-            SimCommands:Register("Open Bank", "Show bank UI", function() end)
-            return #SimCommands:Filter("open")
+            SimCommands:Register("Zzz Open Beta", "Show beta UI", function() end)
+            -- Filter for "zzz open" to match only our test entries
+            local matches = SimCommands:Filter("zzz open")
+            return tostring(#matches)
             "#,
         )
         .unwrap();
-    assert_eq!(count, 2, "Filter 'open' should match 2 commands");
+    assert_eq!(result, "2", "Filter 'zzz open' should match 2 test commands");
 }
 
 #[test]
 fn sim_commands_filter_by_description() {
     let env = env();
-    let count: i32 = env
+    let result: String = env
         .eval(
             r#"
-            SimCommands:Register("Do Thing", "mail related", function() end)
+            SimCommands:Register("Do Thing", "xyzzy unique desc", function() end)
             SimCommands:Register("Other", "unrelated", function() end)
-            return #SimCommands:Filter("mail")
+            return tostring(#SimCommands:Filter("xyzzy"))
             "#,
         )
         .unwrap();
-    assert_eq!(count, 1, "Filter 'mail' should match description");
+    assert_eq!(result, "1", "Filter 'xyzzy' should match description");
 }
 
 #[test]
 fn sim_commands_filter_empty_returns_all() {
     let env = env();
-    let count: i32 = env
+    let result: bool = env
         .eval(
             r#"
-            SimCommands:Register("A", "", function() end)
-            SimCommands:Register("B", "", function() end)
-            return #SimCommands:Filter("")
+            local total = #SimCommands:GetCommands()
+            local filtered = #SimCommands:Filter("")
+            return total == filtered and total > 0
             "#,
         )
         .unwrap();
-    assert_eq!(count, 2, "Empty filter should return all commands");
+    assert!(result, "Empty filter should return all commands");
 }
 
 #[test]
@@ -197,4 +202,45 @@ fn sim_commands_minimap_button_toggles_palette() {
         )
         .unwrap();
     assert_eq!(result, "ok", "Minimap button click should toggle palette: {result}");
+}
+
+#[test]
+fn builtin_open_mailbox_registered() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Open Mailbox" then return true end
+            end
+            return false
+            "#,
+        )
+        .unwrap();
+    assert!(found, "Open Mailbox command should be registered");
+}
+
+#[test]
+fn builtin_open_mailbox_fires_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("MAIL_SHOW")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "MAIL_SHOW" then fired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Open Mailbox" then
+                    cmd.action()
+                    break
+                end
+            end
+            return fired and "ok" or "not_fired"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Open Mailbox should fire MAIL_SHOW: {result}");
 }

@@ -4,3 +4,4 @@
 ## LoadOnDemand: 0
 
 SimCommands.lua
+BuiltinCommands.lua
