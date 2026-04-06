@@ -127,6 +127,18 @@ pub struct GreatVaultActivity {
     pub level: i32,
 }
 
+/// A mount in the mount journal.
+#[derive(Debug, Clone)]
+pub struct MountData {
+    pub mount_id: u32,
+    pub name: String,
+    pub spell_id: u32,
+    pub icon: u32,
+    pub is_collected: bool,
+    pub is_usable: bool,
+    pub mount_type: u32,
+}
+
 /// An item attachment in a mail message.
 #[derive(Debug, Clone)]
 pub struct MailAttachment {
