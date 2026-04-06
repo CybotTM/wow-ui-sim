@@ -476,41 +476,33 @@ fn create_get_class_info(lua: &Lua, class_id: i32) -> Result<Value> {
 }
 
 fn create_get_race_info(lua: &Lua, race_id: i32) -> Result<Value> {
+    let (race_name, client_file) = race_name_and_file(race_id);
     let info = lua.create_table()?;
-    let (race_name, client_file) = match race_id {
-        1 => ("Human", "Human"),
-        2 => ("Orc", "Orc"),
-        3 => ("Dwarf", "Dwarf"),
-        4 => ("Night Elf", "NightElf"),
-        5 => ("Undead", "Scourge"),
-        6 => ("Tauren", "Tauren"),
-        7 => ("Gnome", "Gnome"),
-        8 => ("Troll", "Troll"),
-        9 => ("Goblin", "Goblin"),
-        10 => ("Blood Elf", "BloodElf"),
-        11 => ("Draenei", "Draenei"),
-        22 => ("Worgen", "Worgen"),
-        24 => ("Pandaren", "Pandaren"),
-        25 => ("Pandaren", "Pandaren"),
-        26 => ("Pandaren", "Pandaren"),
-        27 => ("Nightborne", "Nightborne"),
-        28 => ("Highmountain Tauren", "HighmountainTauren"),
-        29 => ("Void Elf", "VoidElf"),
-        30 => ("Lightforged Draenei", "LightforgedDraenei"),
-        31 => ("Zandalari Troll", "ZandalariTroll"),
-        32 => ("Kul Tiran", "KulTiran"),
-        34 => ("Dark Iron Dwarf", "DarkIronDwarf"),
-        35 => ("Vulpera", "Vulpera"),
-        36 => ("Mag'har Orc", "MagharOrc"),
-        37 => ("Mechagnome", "Mechagnome"),
-        52 | 70 => ("Dracthyr", "Dracthyr"),
-        84 | 85 => ("Earthen", "Earthen"),
-        _ => ("Unknown", "Unknown"),
-    };
     info.set("raceName", race_name)?;
     info.set("raceID", race_id)?;
     info.set("clientFileString", client_file)?;
     Ok(Value::Table(info))
+}
+
+#[rustfmt::skip]
+fn race_name_and_file(race_id: i32) -> (&'static str, &'static str) {
+    match race_id {
+        1  => ("Human", "Human"),           2  => ("Orc", "Orc"),
+        3  => ("Dwarf", "Dwarf"),           4  => ("Night Elf", "NightElf"),
+        5  => ("Undead", "Scourge"),        6  => ("Tauren", "Tauren"),
+        7  => ("Gnome", "Gnome"),           8  => ("Troll", "Troll"),
+        9  => ("Goblin", "Goblin"),         10 => ("Blood Elf", "BloodElf"),
+        11 => ("Draenei", "Draenei"),       22 => ("Worgen", "Worgen"),
+        24..=26 => ("Pandaren", "Pandaren"),
+        27 => ("Nightborne", "Nightborne"), 28 => ("Highmountain Tauren", "HighmountainTauren"),
+        29 => ("Void Elf", "VoidElf"),      30 => ("Lightforged Draenei", "LightforgedDraenei"),
+        31 => ("Zandalari Troll", "ZandalariTroll"), 32 => ("Kul Tiran", "KulTiran"),
+        34 => ("Dark Iron Dwarf", "DarkIronDwarf"),  35 => ("Vulpera", "Vulpera"),
+        36 => ("Mag'har Orc", "MagharOrc"), 37 => ("Mechagnome", "Mechagnome"),
+        52 | 70 => ("Dracthyr", "Dracthyr"),
+        84 | 85 => ("Earthen", "Earthen"),
+        _ => ("Unknown", "Unknown"),
+    }
 }
 
 fn create_get_creature_type_info(lua: &Lua, creature_type_id: i32) -> Result<Value> {
