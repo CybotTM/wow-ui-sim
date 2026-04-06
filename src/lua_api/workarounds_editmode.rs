@@ -236,9 +236,9 @@ pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     patch_get_active_layout(env);
     patch_get_setting_value(env);
     patch_apply_system_anchor_nil_guard(env);
+    guard_action_bar_limits(env);
     patch_init_anchors(env);
     patch_update_systems(env);
-    patch_update_layout_info(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
 }
@@ -313,6 +313,37 @@ fn patch_apply_system_anchor_nil_guard(env: &WowLuaEnv) {
     );
 }
 
+/// Guard action bar positioning methods against nil frame positions.
+///
+/// `GetRightActionBarTopLimit` calls `MinimapCluster:GetBottom() - 10`, which
+/// returns nil when MinimapCluster hasn't been laid out yet. Similarly,
+/// `GetRightActionBarBottomLimit` calls `MicroButtonAndBagsBar:GetTop() + 24`.
+/// During the real UpdateLayoutInfo (EDIT_MODE_LAYOUTS_UPDATED event), layout
+/// hasn't run yet, so these frame positions are nil. Fall back to UIParent
+/// boundaries when the frame position isn't available.
+fn guard_action_bar_limits(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not EditModeManagerFrameMixin then return end
+        function EditModeManagerFrameMixin:GetRightActionBarTopLimit()
+            if MinimapCluster and MinimapCluster.IsInDefaultPosition
+                    and MinimapCluster:IsInDefaultPosition() then
+                local bottom = MinimapCluster:GetBottom()
+                if bottom then return bottom - 10 end
+            end
+            return UIParent:GetTop()
+        end
+        function EditModeManagerFrameMixin:GetRightActionBarBottomLimit()
+            if MicroButtonAndBagsBar then
+                local top = MicroButtonAndBagsBar:GetTop()
+                if top then return top + 24 end
+            end
+            return 0
+        end
+    "#,
+    );
+}
+
 /// Custom InitSystemAnchors: apply preset layout anchors to non-managed frames.
 ///
 /// Skips managed frames (OTF, etc.) whose position comes from the container
@@ -370,23 +401,6 @@ fn patch_update_systems(env: &WowLuaEnv) {
             end
             secureexecuterange(self.registeredSystemFrames, callUpdateSystem)
         end
-    "#,
-    );
-}
-
-/// Override UpdateLayoutInfo to prevent double initialization.
-///
-/// The EDIT_MODE_LAYOUTS_UPDATED event handler in EditModeManager.lua:178
-/// calls UpdateLayoutInfo after init_edit_mode_layout already ran the full
-/// InitSystemAnchors + UpdateSystems + UpdateActionBarPositions flow. The
-/// second pass produces NaN coordinates because Layout() → GetExtents()
-/// fails on children that haven't been sized yet in the live GUI context.
-/// Replace with a no-op since init_edit_mode_layout handles everything.
-fn patch_update_layout_info(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeManagerFrame then return end
-        function EditModeManagerFrame:UpdateLayoutInfo() end
     "#,
     );
 }

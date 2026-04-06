@@ -250,7 +250,7 @@ fn test_main_action_bar_size() {
     // 12 buttons (45px) + padding + margins computed by ResizeLayoutFrame:Layout()
     assert_eq!(
         size,
-        (570.0, 52.0),
-        "MainActionBar should be 570x52 after layout"
+        (566.0, 52.0),
+        "MainActionBar should be 566x52 after layout"
     );
 }
