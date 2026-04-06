@@ -46,7 +46,14 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     // Blob frame (QuestBlobDataProvider)
     methods.add_method("DrawNone", |_, _, ()| Ok(()));
     methods.add_method("DrawBlob", |_, _, _: mlua::MultiValue| Ok(()));
-    // UnitPositionFrame
+    // UnitPositionFrame — C++ methods for unit map rendering
+    methods.add_method("ClearUnits", |_, _, ()| Ok(()));
+    methods.add_method("AddUnit", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("FinalizeUnits", |_, _, ()| Ok(()));
+    methods.add_method("SetUiMapID", |_, _, _map_id: i32| Ok(()));
+    methods.add_method("SetUnitColor", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("GetMouseOverUnits", |lua, _, ()| lua.create_table());
+    methods.add_method("GetPlayerPingScale", |_, _, ()| Ok(1.0_f64));
     methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
