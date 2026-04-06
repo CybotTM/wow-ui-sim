@@ -35,6 +35,8 @@ mod nine_slice;
 #[cfg(feature = "gui")]
 mod quad_builders;
 #[cfg(feature = "gui")]
+mod quad_builders_line;
+#[cfg(feature = "gui")]
 mod render;
 #[cfg(feature = "gui")]
 mod screenshot;
