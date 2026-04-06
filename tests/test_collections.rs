@@ -104,6 +104,27 @@ fn mount_journal_get_mount_info_by_id_invalid() {
 }
 
 #[test]
+fn pet_journal_num_pets() {
+    let env = env();
+    let count: i32 = env.eval("return C_PetJournal.GetNumPets()").unwrap();
+    assert_eq!(count, 10, "Should have 10 default pets");
+}
+
+#[test]
+fn pet_journal_num_collected_info() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local collected, total = C_PetJournal.GetNumCollectedInfo(0)
+            return collected .. "," .. total
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "9,10", "9 collected out of 10 total");
+}
+
+#[test]
 fn mount_journal_get_mount_info_extra_by_id() {
     let env = env();
     let result: String = env

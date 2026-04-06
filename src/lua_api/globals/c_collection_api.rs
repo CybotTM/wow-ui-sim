@@ -9,7 +9,7 @@ use std::rc::Rc;
 
 /// Register collection-related C_* namespaces.
 pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
-    register_pet_journal(lua)?;
+    register_pet_journal(lua, Rc::clone(&state))?;
     register_mount_journal(lua, Rc::clone(&state))?;
     register_toy_box(lua)?;
     register_transmog_collection(lua, state)?;
@@ -21,35 +21,40 @@ pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
 }
 
 /// C_PetJournal namespace - battle pet utilities.
-fn register_pet_journal(lua: &Lua) -> Result<()> {
+fn register_pet_journal(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetNumPets", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "GetPetInfoByIndex",
-        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetPetInfoByPetID",
-        lua.create_function(|_, _pet_id: String| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetPetInfoBySpeciesID",
-        lua.create_function(|_, _species_id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "PetIsSummonable",
-        lua.create_function(|_, _pet_id: String| Ok(false))?,
-    )?;
-    t.set(
-        "GetNumCollectedInfo",
-        lua.create_function(|_, _species_id: i32| Ok((0i32, 0i32)))?,
-    )?;
-    t.set(
-        "GetNumPetsNeedingFanfare",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
+    register_pet_count_methods(lua, &t, state)?;
+    register_pet_info_stubs(lua, &t)?;
     lua.globals().set("C_PetJournal", t)?;
     Ok(())
+}
+
+fn register_pet_count_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetNumPets", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.pets.len() as i32)
+    })?)?;
+    t.set("GetNumCollectedInfo", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, _species_id: i32| {
+            let st = s.borrow();
+            let collected = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
+            let total = st.world.pets.len() as i32;
+            Ok((collected, total))
+        }
+    })?)?;
+    add_i32_stub(lua, t, "GetNumPetsNeedingFanfare", 0)
+}
+
+fn register_pet_info_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set("GetPetInfoByIndex", lua.create_function(|_, _: i32| Ok(Value::Nil))?)?;
+    t.set("GetPetInfoByPetID", lua.create_function(|_, _: String| Ok(Value::Nil))?)?;
+    t.set("GetPetInfoBySpeciesID", lua.create_function(|_, _: i32| Ok(Value::Nil))?)?;
+    t.set("PetIsSummonable", lua.create_function(|_, _: String| Ok(false))?)
 }
 
 /// C_MountJournal namespace - mount collection.
