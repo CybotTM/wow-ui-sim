@@ -205,3 +205,46 @@ end
 function SimCommands:IsShown()
     return palette and palette:IsShown() or false
 end
+
+---------------------------------------------------------------------------
+-- Minimap button
+---------------------------------------------------------------------------
+
+local function CreateMinimapButton()
+    local btn = CreateFrame("Button", "SimCommandsMinimapButton", Minimap or UIParent)
+    btn:SetSize(28, 28)
+    btn:SetPoint("BOTTOMLEFT", Minimap or UIParent, "BOTTOMLEFT", 2, 2)
+    btn:SetFrameStrata("MEDIUM")
+    btn:SetFrameLevel(8)
+
+    local bg = btn:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.2, 0.2, 0.3, 0.85)
+
+    local border = btn:CreateTexture(nil, "BORDER")
+    border:SetPoint("TOPLEFT", -1, 1)
+    border:SetPoint("BOTTOMRIGHT", 1, -1)
+    border:SetColorTexture(0.5, 0.5, 0.6, 1)
+
+    local inner = btn:CreateTexture(nil, "ARTWORK")
+    inner:SetAllPoints()
+    inner:SetColorTexture(0.2, 0.2, 0.3, 0.85)
+
+    local label = btn:CreateFontString(nil, "OVERLAY")
+    label:SetFontObject(GameFontNormalSmall or "GameFontNormalSmall")
+    label:SetPoint("CENTER", 0, 0)
+    label:SetText("Sim")
+
+    local hl = btn:CreateTexture(nil, "HIGHLIGHT")
+    hl:SetAllPoints()
+    hl:SetColorTexture(0.4, 0.4, 0.6, 0.3)
+
+    btn:SetScript("OnClick", function()
+        SimCommands:Toggle()
+    end)
+
+    return btn
+end
+
+-- Create the minimap button at load time (does not depend on palette UI)
+CreateMinimapButton()

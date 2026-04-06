@@ -168,3 +168,33 @@ fn sim_commands_ctrl_p_toggles() {
     let hidden: bool = env.eval("return not SimCommands:IsShown()").unwrap();
     assert!(hidden, "CTRL-P again should close the command palette");
 }
+
+#[test]
+fn sim_commands_minimap_button_exists() {
+    let env = env();
+    let exists: bool = env
+        .eval("return SimCommandsMinimapButton ~= nil")
+        .unwrap();
+    assert!(exists, "Minimap button should be created at load time");
+}
+
+#[test]
+fn sim_commands_minimap_button_toggles_palette() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local btn = SimCommandsMinimapButton
+            if not btn then return "no_button" end
+            local click = btn:GetScript("OnClick")
+            if not click then return "no_onclick" end
+            click(btn)
+            if not SimCommands:IsShown() then return "not_shown" end
+            click(btn)
+            if SimCommands:IsShown() then return "not_hidden" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Minimap button click should toggle palette: {result}");
+}
