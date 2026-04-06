@@ -512,7 +512,7 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
     )?;
     housing.set(
         "IsHousingServiceEnabled",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(|_, ()| Ok(true))?,
     )?;
     housing.set(
         "GetPlayerOwnedHouses",
