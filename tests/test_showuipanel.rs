@@ -192,3 +192,54 @@ fn show_ui_panel_is_function() {
         assert_eq!(hide_type, "function", "HideUIPanel should be a function");
     }
 }
+
+#[test]
+fn show_ui_panel_displaces_previous_occupant() {
+    test_timeout! {
+        let env = setup_env();
+        // UIParentPanelManager manages left/center/right slots. When two panels both
+        // have pushable=0 and a left slot is occupied, the new panel replaces the old.
+        // CharacterFrame (pushable=3) gets pushed to center instead of replaced.
+        //
+        // Test 1: Pushable panel gets pushed to center (not closed)
+        // CharacterFrame (pushable=3) in left, then FriendsFrame (pushable=0) opens
+        // → CharacterFrame pushed to center, both visible
+        let result: String = env.eval(r#"
+            if not CharacterFrame or not FriendsFrame then
+                return "missing_frames"
+            end
+            ShowUIPanel(CharacterFrame)
+            if not CharacterFrame:IsShown() then return "char_not_shown" end
+            ShowUIPanel(FriendsFrame)
+            if not FriendsFrame:IsShown() then return "friends_not_shown" end
+            -- CharacterFrame should be pushed to center, still visible
+            if not CharacterFrame:IsShown() then return "char_should_be_pushed_not_closed" end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "Pushable panel should be pushed to center, not closed: {result}");
+
+        // Test 2: Non-pushable panel replaces another non-pushable panel
+        // When both panels have pushable=0, the old one is replaced (hidden).
+        let result: String = env.eval(r#"
+            -- Close everything first
+            CloseAllWindows()
+            -- Register two test panels with pushable=0
+            local a = CreateFrame("Frame", "TestPanelA", UIParent)
+            a:SetSize(300, 400)
+            a:Hide()
+            UIPanelWindows["TestPanelA"] = { area = "left", pushable = 0, whileDead = 1 }
+            local b = CreateFrame("Frame", "TestPanelB", UIParent)
+            b:SetSize(300, 400)
+            b:Hide()
+            UIPanelWindows["TestPanelB"] = { area = "left", pushable = 0, whileDead = 1 }
+
+            ShowUIPanel(a)
+            if not a:IsShown() then return "a_not_shown" end
+            ShowUIPanel(b)
+            if not b:IsShown() then return "b_not_shown" end
+            if a:IsShown() then return "a_not_replaced" end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "Non-pushable panel should replace previous non-pushable occupant: {result}");
+    }
+}
