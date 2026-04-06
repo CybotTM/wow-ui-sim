@@ -458,3 +458,80 @@ fn return_inbox_item_removes_mail() {
         .unwrap();
     assert_eq!(result, "0", "ReturnInboxItem should remove mail");
 }
+
+#[test]
+fn send_mail_money_round_trip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            SetSendMailMoney(5000)
+            local m = GetSendMailMoney()
+            return tostring(m)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "5000");
+}
+
+#[test]
+fn send_mail_cod_round_trip() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            SetSendMailCOD(1000)
+            local c = GetSendMailCOD()
+            return tostring(c)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "1000");
+}
+
+#[test]
+fn get_send_mail_price() {
+    let env = env();
+    let price: i32 = env.eval("return GetSendMailPrice()").unwrap();
+    assert_eq!(price, 30, "Base send mail cost is 30 copper");
+}
+
+#[test]
+fn send_mail_clears_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            SetSendMailMoney(5000)
+            SetSendMailCOD(200)
+            SendMail("Target", "Subject", "Body")
+            local m = GetSendMailMoney()
+            local c = GetSendMailCOD()
+            if m ~= 0 then return "money=" .. tostring(m) end
+            if c ~= 0 then return "cod=" .. tostring(c) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "SendMail should clear send state: {result}");
+}
+
+#[test]
+fn close_mail_fires_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("MAIL_CLOSED")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "MAIL_CLOSED" then fired = true end
+            end)
+            CloseMail()
+            return fired and "ok" or "not_fired"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "CloseMail should fire MAIL_CLOSED: {result}");
+}
