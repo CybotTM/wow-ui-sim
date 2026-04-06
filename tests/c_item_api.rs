@@ -235,12 +235,12 @@ fn test_c_container_get_num_slots_other_bag() {
 }
 
 #[test]
-fn test_c_container_get_item_id_empty_by_default() {
+fn test_c_container_get_item_id_empty_slot() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_Container.GetContainerItemID(0, 1) == nil")
+        .eval("return C_Container.GetContainerItemID(0, 10) == nil")
         .unwrap();
-    assert!(is_nil, "Bags should be empty by default");
+    assert!(is_nil, "Unpopulated slot should be nil");
 }
 
 #[test]
@@ -267,7 +267,7 @@ fn test_c_container_get_item_info_after_add() {
 fn test_c_container_get_item_info_empty_slot_nil() {
     let env = env();
     let is_nil: bool = env
-        .eval("return C_Container.GetContainerItemInfo(0, 1) == nil")
+        .eval("return C_Container.GetContainerItemInfo(0, 10) == nil")
         .unwrap();
     assert!(is_nil, "Empty slot should return nil");
 }
@@ -298,28 +298,29 @@ fn test_c_container_clear_bags() {
 #[test]
 fn test_c_container_free_slots_tracks_items() {
     let env = env();
+    // Backpack starts with 4 default items → 12 free slots
     let (free, _): (i32, i32) = env
         .eval("return C_Container.GetContainerNumFreeSlots(0)")
         .unwrap();
-    assert_eq!(free, 16, "Empty backpack should have 16 free slots");
-    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
-    env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
+    assert_eq!(free, 12, "Backpack with 4 default items should have 12 free slots");
+    env.exec("A_Admin.AddBagItem(0, 10, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 11, 6948, 1)").unwrap();
     let (free2, _): (i32, i32) = env
         .eval("return C_Container.GetContainerNumFreeSlots(0)")
         .unwrap();
-    assert_eq!(free2, 14, "Should have 14 free after adding 2 items");
+    assert_eq!(free2, 10, "Should have 10 free after adding 2 more items");
 }
 
 #[test]
 fn test_c_container_has_item() {
     let env = env();
     let has: bool = env
-        .eval("return C_Container.HasContainerItem(0, 1)")
+        .eval("return C_Container.HasContainerItem(0, 10)")
         .unwrap();
     assert!(!has, "Empty slot should return false");
-    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap();
+    env.exec("A_Admin.AddBagItem(0, 10, 6948, 1)").unwrap();
     let has: bool = env
-        .eval("return C_Container.HasContainerItem(0, 1)")
+        .eval("return C_Container.HasContainerItem(0, 10)")
         .unwrap();
     assert!(has, "Occupied slot should return true");
 }

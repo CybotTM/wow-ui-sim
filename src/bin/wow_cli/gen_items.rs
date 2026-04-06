@@ -68,6 +68,11 @@ fn collect_required_item_ids() -> BTreeSet<u32> {
         collect_number_literals_after(&src, "itemID = ", &mut ids);
     }
 
+    // Bag items from state.rs default backpack
+    if let Ok(src) = std::fs::read_to_string("src/lua_api/state.rs") {
+        collect_number_literals_after(&src, "item_id: ", &mut ids);
+    }
+
     // Baseline items always needed
     ids.insert(6948); // Hearthstone (test)
 

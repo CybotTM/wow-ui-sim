@@ -260,16 +260,15 @@ fn test_bags_open_with_items() {
     let env = setup_env();
     install_test_error_handler(&env);
 
-    // Populate bags via admin API (bags start empty)
-    env.exec("A_Admin.AddBagItem(0, 1, 6948, 1)").unwrap(); // Hearthstone
-    env.exec("A_Admin.AddBagItem(0, 3, 6948, 1)").unwrap();
+    // Backpack starts with 4 default items (Hearthstone, Water, Bread, Skinning Knife)
+    // Add one more via admin API
     env.exec("A_Admin.AddBagItem(0, 5, 6948, 1)").unwrap();
 
     open_all_bags(&env);
     assert_bag_frame_visible(&env);
-    assert_backpack_item_count(&env, 3);
+    assert_backpack_item_count(&env, 5);
 
-    // Verify item data fields are correct for a known slot
+    // Verify default Hearthstone in slot 1
     let item_link: String = env
         .eval(r#"return C_Container.GetContainerItemInfo(0, 1).hyperlink"#)
         .unwrap();
@@ -280,7 +279,7 @@ fn test_bags_open_with_items() {
 
     // Verify empty slots return nil
     let empty: bool = env
-        .eval("return C_Container.GetContainerItemInfo(0, 2) == nil")
+        .eval("return C_Container.GetContainerItemInfo(0, 6) == nil")
         .unwrap();
-    assert!(empty, "Slot 2 should be empty");
+    assert!(empty, "Slot 6 should be empty");
 }
