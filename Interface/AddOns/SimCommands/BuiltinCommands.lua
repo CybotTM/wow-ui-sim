@@ -135,3 +135,55 @@ SimCommands:Register("Set Player Level", "Change player level (1-80)", function(
         end
     end)
 end, "Player State")
+
+---------------------------------------------------------------------------
+-- Premade Group Finder live simulation
+---------------------------------------------------------------------------
+
+local premadeSimRunning = false
+
+local function TickPremadeSimulation()
+    if not premadeSimRunning then return end
+    local _, results = C_LFGList.GetSearchResults()
+    if not results then return end
+    for _, resultID in ipairs(results) do
+        local info = C_LFGList.GetSearchResultInfo(resultID)
+        if info and not info.isDelisted then
+            -- Randomly increment member count
+            if info.numMembers < info.maxMembers and math.random() < 0.3 then
+                A_Admin.UpdatePremadeListing(resultID, "numMembers", info.numMembers + 1)
+            end
+            -- Mark full groups as delisted
+            if info.numMembers >= info.maxMembers and math.random() < 0.5 then
+                A_Admin.UpdatePremadeListing(resultID, "isDelisted", true)
+            end
+        end
+    end
+    if C_Timer and C_Timer.After then
+        C_Timer.After(5, TickPremadeSimulation)
+    end
+end
+
+function SimCommands.StartPremadeSimulation()
+    if premadeSimRunning then return end
+    premadeSimRunning = true
+    if C_Timer and C_Timer.After then
+        C_Timer.After(5, TickPremadeSimulation)
+    end
+end
+
+function SimCommands.StopPremadeSimulation()
+    premadeSimRunning = false
+end
+
+function SimCommands.IsPremadeSimulationRunning()
+    return premadeSimRunning
+end
+
+SimCommands:Register("Toggle Premade Simulation", "Start/stop live group fill simulation", function()
+    if premadeSimRunning then
+        SimCommands.StopPremadeSimulation()
+    else
+        SimCommands.StartPremadeSimulation()
+    end
+end, "Debug")

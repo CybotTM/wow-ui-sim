@@ -91,3 +91,54 @@ fn get_activity_info_table() {
         .unwrap();
     assert_eq!(result, "ok", "GetActivityInfoTable: {result}");
 }
+
+#[test]
+fn admin_add_premade_listing() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local before = select(1, C_LFGList.GetSearchResults())
+            A_Admin.AddPremadeListing("Test Group", "Testing", 1195, 2, 5)
+            local after = select(1, C_LFGList.GetSearchResults())
+            if after ~= before + 1 then return "count=" .. after end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "AddPremadeListing: {result}");
+}
+
+#[test]
+fn admin_update_premade_listing() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.UpdatePremadeListing(1, "numMembers", 5)
+            local info = C_LFGList.GetSearchResultInfo(1)
+            if info.numMembers ~= 5 then return "num=" .. tostring(info.numMembers) end
+            A_Admin.UpdatePremadeListing(1, "isDelisted", true)
+            local info2 = C_LFGList.GetSearchResultInfo(1)
+            if info2.isDelisted ~= true then return "delisted=" .. tostring(info2.isDelisted) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "UpdatePremadeListing: {result}");
+}
+
+#[test]
+fn admin_clear_premade_listings() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.ClearPremadeListings()
+            local count = select(1, C_LFGList.GetSearchResults())
+            return tostring(count)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "0");
+}

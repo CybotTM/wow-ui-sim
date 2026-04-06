@@ -18,6 +18,7 @@ pub(crate) fn register_world_admin_api(
     register_action_bar_api(lua, t, Rc::clone(&state))?;
     register_bag_api(lua, t, Rc::clone(&state))?;
     register_mail_admin_api(lua, t, Rc::clone(&state))?;
+    register_premade_admin_api(lua, t, Rc::clone(&state))?;
     register_debug_toggle_api(lua, t, state)?;
     Ok(())
 }
@@ -645,4 +646,93 @@ fn parse_mail_items(
         }
     }
     Ok(items)
+}
+
+fn register_premade_admin_api(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    register_add_premade_listing(lua, t, Rc::clone(&state))?;
+    register_clear_premade_listings(lua, t, Rc::clone(&state))?;
+    register_update_premade_listing(lua, t, state)?;
+    Ok(())
+}
+
+fn register_add_premade_listing(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    use crate::lua_api::state_types::PremadeListing;
+    super::admin_api::set_fn(
+        lua,
+        t,
+        "AddPremadeListing",
+        move |_, (name, comment, activity_id, num, max): (String, String, u32, i32, i32)| {
+            let mut st = state.borrow_mut();
+            let id = st.world.premade_listings.len() as u32 + 1;
+            st.world.premade_listings.push(PremadeListing {
+                search_result_id: id,
+                name,
+                comment,
+                leader_name: "Player".to_string(),
+                activity_id,
+                num_members: num,
+                max_members: max,
+                voice_chat: false,
+                auto_accept: false,
+                is_delisted: false,
+            });
+            Ok(id)
+        },
+    )
+}
+
+fn register_clear_premade_listings(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "ClearPremadeListings", move |_, ()| {
+        state.borrow_mut().world.premade_listings.clear();
+        Ok(())
+    })
+}
+
+fn register_update_premade_listing(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    super::admin_api::set_fn(
+        lua,
+        t,
+        "UpdatePremadeListing",
+        move |_, (result_id, field, value): (u32, String, Value)| {
+            let mut st = state.borrow_mut();
+            let Some(listing) = st
+                .world
+                .premade_listings
+                .iter_mut()
+                .find(|l| l.search_result_id == result_id)
+            else {
+                return Ok(());
+            };
+            match field.as_str() {
+                "numMembers" => {
+                    if let Value::Integer(n) = value {
+                        listing.num_members = n as i32;
+                    }
+                }
+                "isDelisted" => {
+                    if let Value::Boolean(b) = value {
+                        listing.is_delisted = b;
+                    }
+                }
+                _ => {}
+            }
+            Ok(())
+        },
+    )
 }
