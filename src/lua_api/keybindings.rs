@@ -178,6 +178,11 @@ const BINDING_ACTIONS: &[BindingAction] = &[
         action: "ACTIONBUTTON12",
         lua_code: "ActionButtonDown(12) UseAction(12) ActionButtonUp(12)",
     },
+    // Simulator-only bindings
+    BindingAction {
+        action: "TOGGLESIMCOMMANDS",
+        lua_code: "if SimCommands then SimCommands:Toggle() end",
+    },
 ];
 
 /// Default key→action assignments (WoW defaults + simulator overrides).
@@ -317,6 +322,10 @@ const DEFAULT_KEYS: &[DefaultKey] = &[
     DefaultKey {
         key: "=",
         action: "ACTIONBUTTON12",
+    },
+    DefaultKey {
+        key: "CTRL-P",
+        action: "TOGGLESIMCOMMANDS",
     },
 ];
 

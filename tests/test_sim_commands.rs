@@ -154,3 +154,17 @@ fn sim_commands_search_box_exists() {
         .unwrap();
     assert!(exists, "SimCommandsSearchBox should exist after Show()");
 }
+
+#[test]
+fn sim_commands_ctrl_p_toggles() {
+    let env = env();
+    env.send_key_press("CTRL-P", None)
+        .expect("CTRL-P keybind failed");
+    let shown: bool = env.eval("return SimCommands:IsShown()").unwrap();
+    assert!(shown, "CTRL-P should open the command palette");
+
+    env.send_key_press("CTRL-P", None)
+        .expect("CTRL-P keybind failed");
+    let hidden: bool = env.eval("return not SimCommands:IsShown()").unwrap();
+    assert!(hidden, "CTRL-P again should close the command palette");
+}

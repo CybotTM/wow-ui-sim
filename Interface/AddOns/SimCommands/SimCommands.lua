@@ -166,6 +166,13 @@ local function InitUI()
         end
     end)
 
+    -- Handle CTRL-P while the search box has focus (EditBox focus blocks keybind dispatch)
+    searchBox:SetScript("OnKeyDown", function(self, key)
+        if key == "CTRL-P" then
+            palette:Hide()
+        end
+    end)
+
     palette:SetScript("OnShow", function()
         searchBox:SetText("")
         searchBox:SetFocus()
