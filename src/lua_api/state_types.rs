@@ -444,6 +444,28 @@ fn default_pets() -> Vec<PetData> {
     ]
 }
 
+fn default_toys() -> Vec<ToyData> {
+    let t = |item_id, name: &str, icon, collected| ToyData {
+        item_id,
+        name: name.to_string(),
+        icon,
+        is_collected: collected,
+        is_usable: collected,
+    };
+    vec![
+        t(166779, "Hearthstone Game Table",       648323,  true),
+        t(13379,  "Piccolo of the Flaming Fire",  134208,  true),
+        t(34480,  "Romantic Picnic Basket",        236571,  true),
+        t(33927,  "Brewfest Pony Keg",             132790,  true),
+        t(119210, "Hearthstone Board",             1053079, true),
+        t(69227,  "Foam Sword Rack",               318656,  true),
+        t(88589,  "Gin-Ji Knife Set",              462768,  true),
+        t(86575,  "Foxicopter Controller",         463485,  true),
+        t(104324, "Foot Ball",                     620832,  true),
+        t(187421, "Earpieces of Tranquil Focus",   4217589, false),
+    ]
+}
+
 /// World/instance state: zone, guild, collections, vault, loot.
 #[derive(Debug, Clone)]
 pub struct WorldState {
@@ -468,6 +490,7 @@ pub struct WorldState {
     pub collected_pets: HashSet<i32>,
     pub pets: Vec<PetData>,
     pub collected_toys: HashSet<i32>,
+    pub toys: Vec<ToyData>,
     pub earned_achievements: HashSet<i32>,
 }
 
@@ -495,6 +518,7 @@ impl Default for WorldState {
             collected_pets: HashSet::new(),
             pets: default_pets(),
             collected_toys: HashSet::new(),
+            toys: default_toys(),
             earned_achievements: HashSet::new(),
         }
     }
