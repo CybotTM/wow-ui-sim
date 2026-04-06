@@ -405,6 +405,35 @@ fn default_mounts() -> Vec<MountData> {
     ]
 }
 
+fn default_pets() -> Vec<PetData> {
+    let mut id = 0u32;
+    let p = |id: &mut u32, species: u32, name: &str, icon: u32, pet_type: i32, level: i32, quality: i32, collected: bool| {
+        *id += 1;
+        PetData {
+            pet_id: format!("BattlePet-0-{:08X}", *id),
+            species_id: species,
+            name: name.to_string(),
+            icon,
+            pet_type,
+            level,
+            quality,
+            is_collected: collected,
+        }
+    };
+    vec![
+        p(&mut id, 39,   "Mechanical Squirrel",   132932, 9, 25, 3, true),  // Mechanical
+        p(&mut id, 87,   "Phoenix Hatchling",      132837, 3, 25, 3, true),  // Elemental
+        p(&mut id, 68,   "Cat",                    132576, 7, 1,  1, true),  // Beast
+        p(&mut id, 254,  "Lil' Ragnaros",          134153, 3, 25, 4, true),  // Elemental (legendary)
+        p(&mut id, 1266, "Xu-Fu, Cub of Xuen",     648459, 7, 25, 4, true),  // Beast (legendary)
+        p(&mut id, 630,  "Clockwork Gnome",        425954, 9, 25, 3, true),  // Mechanical
+        p(&mut id, 846,  "Anubisath Idol",         607552, 10,25, 3, true),  // Humanoid
+        p(&mut id, 40,   "Bombay Cat",             132576, 7, 1,  1, true),  // Beast
+        p(&mut id, 1395, "Iron Starlette",         971374, 9, 25, 3, true),  // Mechanical
+        p(&mut id, 2403, "Pocopoc",                4038816,9, 25, 4, false), // Mechanical (not collected)
+    ]
+}
+
 /// World/instance state: zone, guild, collections, vault, loot.
 #[derive(Debug, Clone)]
 pub struct WorldState {
@@ -427,6 +456,7 @@ pub struct WorldState {
     pub collected_mounts: HashSet<i32>,
     pub mounts: Vec<MountData>,
     pub collected_pets: HashSet<i32>,
+    pub pets: Vec<PetData>,
     pub collected_toys: HashSet<i32>,
     pub earned_achievements: HashSet<i32>,
 }
@@ -453,6 +483,7 @@ impl Default for WorldState {
             collected_mounts: HashSet::new(),
             mounts: default_mounts(),
             collected_pets: HashSet::new(),
+            pets: default_pets(),
             collected_toys: HashSet::new(),
             earned_achievements: HashSet::new(),
         }
