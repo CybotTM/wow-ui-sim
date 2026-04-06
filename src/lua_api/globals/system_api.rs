@@ -246,11 +246,19 @@ fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
 /// Register secure environment stubs.
 fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
+    register_swap_to_global_environment(lua, &globals)?;
+    globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set("RegisterStaticConstants", lua.create_function(|_, _: Value| Ok(()))?)?;
+    register_metatable_getters(lua, &globals)?;
+    globals.set("C_GamePad", register_c_gamepad(lua)?)?;
+    globals.set("C_AssistedCombat", register_c_assisted_combat(lua)?)?;
+    globals.set("C_Widget", register_c_widget(lua)?)?;
+    Ok(())
+}
 
-    // SwapToGlobalEnvironment: sets the caller's environment back to _G.
-    // Implemented as a Rust closure so it's a C function (passes impltype test).
-    // Unlike newsecurefunction, C closures don't clear taint — issecure()
-    // correctly detects insecure callers.
+/// SwapToGlobalEnvironment: sets the caller's environment back to _G.
+/// Implemented as a Rust closure so it's a C function (passes impltype test).
+fn register_swap_to_global_environment(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "SwapToGlobalEnvironment",
         lua.create_function(|lua, ()| {
@@ -260,23 +268,15 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
                     "cannot modify function environment from a tainted context".to_string(),
                 ));
             }
-            // setfenv(N, _G) where N must target the actual Lua caller.
-            // From this C closure, the caller is at stack level 2.
             let setfenv: mlua::Function = lua.globals().get("setfenv")?;
             setfenv.call::<()>((2, lua.globals()))?;
             Ok(())
         })?,
-    )?;
-    globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set(
-        "RegisterStaticConstants",
-        lua.create_function(|_, _tbl: Value| Ok(()))?,
-    )?;
+    )
+}
 
-    // GetFrameMetatable/GetButtonMetatable - return metatables with __index
-    // The __index table must contain forwarding functions so that
-    // CopyTable(GetFrameMetatable().__index) produces a table where
-    // e.g. LOCAL_CHECK_Frame.GetAttribute(frame, ...) works.
+/// GetFrameMetatable/GetButtonMetatable — return metatables with __index forwarding.
+fn register_metatable_getters(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     for name in &["GetFrameMetatable", "GetButtonMetatable"] {
         globals.set(
             *name,
@@ -288,10 +288,6 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
             })?,
         )?;
     }
-
-    globals.set("C_GamePad", register_c_gamepad(lua)?)?;
-    globals.set("C_AssistedCombat", register_c_assisted_combat(lua)?)?;
-    globals.set("C_Widget", register_c_widget(lua)?)?;
     Ok(())
 }
 
