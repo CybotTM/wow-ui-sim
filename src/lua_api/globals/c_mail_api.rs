@@ -9,7 +9,11 @@ pub fn register(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_get_inbox_item_link(lua, Rc::clone(&state))?;
     register_get_inbox_item(lua, Rc::clone(&state))?;
     register_get_inbox_text(lua, Rc::clone(&state))?;
-    register_get_inbox_invoice_info(lua, state)?;
+    register_get_inbox_invoice_info(lua, Rc::clone(&state))?;
+    register_has_inbox_item(lua, Rc::clone(&state))?;
+    register_inbox_item_can_delete(lua, Rc::clone(&state))?;
+    register_check_inbox(lua, Rc::clone(&state))?;
+    register_c_mail(lua, state)?;
     Ok(())
 }
 
@@ -144,4 +148,80 @@ fn register_get_inbox_invoice_info(lua: &Lua, _state: Rc<RefCell<SimState>>) -> 
         "GetInboxInvoiceInfo",
         lua.create_function(|_, _index: i32| Ok(mlua::MultiValue::new()))?,
     )
+}
+
+fn register_has_inbox_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "HasInboxItem",
+        lua.create_function(move |_, (index, slot): (i32, i32)| {
+            let st = state.borrow();
+            let has = st
+                .player
+                .inbox
+                .get((index - 1) as usize)
+                .map_or(false, |m| m.items.get((slot - 1) as usize).is_some());
+            Ok(has)
+        })?,
+    )
+}
+
+fn register_inbox_item_can_delete(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "InboxItemCanDelete",
+        lua.create_function(move |_, index: i32| {
+            let st = state.borrow();
+            let can = st
+                .player
+                .inbox
+                .get((index - 1) as usize)
+                .map_or(false, |m| m.items.is_empty() && m.money == 0);
+            Ok(can)
+        })?,
+    )
+}
+
+fn register_check_inbox(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "CheckInbox",
+        lua.create_function(move |lua, ()| {
+            let count = state.borrow().player.inbox.len();
+            if count > 0 {
+                let fire: mlua::Function = lua.globals().get("FireEvent")?;
+                fire.call::<()>(("MAIL_INBOX_UPDATE",))?;
+            }
+            Ok(())
+        })?,
+    )
+}
+
+fn register_c_mail(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let g = lua.globals();
+    let t: mlua::Table = match g.get::<Value>("C_Mail")? {
+        Value::Table(t) => t,
+        _ => {
+            let t = lua.create_table()?;
+            g.set("C_Mail", t.clone())?;
+            t
+        }
+    };
+    t.set(
+        "CanCheckInbox",
+        lua.create_function(|_, ()| Ok((true, 0)))?,
+    )?;
+    t.set(
+        "HasInboxMoney",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, index: i32| {
+                let st = s.borrow();
+                let has = st
+                    .player
+                    .inbox
+                    .get((index - 1) as usize)
+                    .map_or(false, |m| m.money > 0);
+                Ok(has)
+            }
+        })?,
+    )?;
+    Ok(())
 }

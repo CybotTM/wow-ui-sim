@@ -312,3 +312,75 @@ fn get_inbox_invoice_info_returns_nil() {
         .unwrap();
     assert_eq!(result, "nil", "Invoice info stub should return nil");
 }
+
+#[test]
+fn has_inbox_item() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Won", "", 0, {{item_id=6948, count=1}})
+            local has = HasInboxItem(1, 1)
+            local no = HasInboxItem(1, 2)
+            if has ~= true then return "has=" .. tostring(has) end
+            if no ~= false then return "no=" .. tostring(no) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "HasInboxItem: {result}");
+}
+
+#[test]
+fn inbox_item_can_delete() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "Empty", "")
+            A_Admin.AddMail("B", "With Gold", "", 100)
+            local empty_ok = InboxItemCanDelete(1)
+            local gold_no = InboxItemCanDelete(2)
+            if empty_ok ~= true then return "empty=" .. tostring(empty_ok) end
+            if gold_no ~= false then return "gold=" .. tostring(gold_no) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "InboxItemCanDelete: {result}");
+}
+
+#[test]
+fn c_mail_can_check_inbox() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local can, secs = C_Mail.CanCheckInbox()
+            if can ~= true then return "can=" .. tostring(can) end
+            if secs ~= 0 then return "secs=" .. tostring(secs) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "C_Mail.CanCheckInbox: {result}");
+}
+
+#[test]
+fn c_mail_has_inbox_money() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "No gold", "")
+            A_Admin.AddMail("B", "With gold", "", 500)
+            local no = C_Mail.HasInboxMoney(1)
+            local yes = C_Mail.HasInboxMoney(2)
+            if no ~= false then return "no=" .. tostring(no) end
+            if yes ~= true then return "yes=" .. tostring(yes) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "C_Mail.HasInboxMoney: {result}");
+}
