@@ -75,10 +75,8 @@ fn register_mount_info_methods(
         let s = Rc::clone(&state);
         move |_, ()| Ok(s.borrow().world.mounts.len() as i32)
     })?)?;
-    t.set(
-        "GetMountInfoByID",
-        lua.create_function(|_, _mount_id: i32| empty_mount_info())?,
-    )?;
+    register_get_mount_info_by_id(lua, t, Rc::clone(&state))?;
+    register_get_mount_info_extra_by_id(lua, t, Rc::clone(&state))?;
     register_get_displayed_mount_info(lua, t, Rc::clone(&state))?;
     add_empty_table_stub(lua, t, "GetMountIDs")?;
     add_i32_stub(lua, t, "GetNumMountsNeedingFanfare", 0)?;
@@ -111,6 +109,60 @@ fn register_get_displayed_mount_info(
             Value::Boolean(false),
             Value::Boolean(m.is_collected),
             Value::Integer(m.mount_id as i64),
+        ]))
+    })?)
+}
+
+/// GetMountInfoByID returns the same 12 values as GetDisplayedMountInfo but keyed by mount_id.
+fn register_get_mount_info_by_id(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetMountInfoByID", lua.create_function(move |lua, mount_id: u32| {
+        let st = state.borrow();
+        let Some(m) = st.world.mounts.iter().find(|m| m.mount_id == mount_id) else {
+            return Ok(mlua::MultiValue::new());
+        };
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::String(lua.create_string(&m.name)?),
+            Value::Integer(m.spell_id as i64),
+            Value::Integer(m.icon as i64),
+            Value::Boolean(false),
+            Value::Boolean(m.is_usable),
+            Value::Integer(0),
+            Value::Boolean(false),
+            Value::Boolean(false),
+            Value::Nil,
+            Value::Boolean(false),
+            Value::Boolean(m.is_collected),
+            Value::Integer(m.mount_id as i64),
+        ]))
+    })?)
+}
+
+/// GetMountInfoExtraByID returns: creatureDisplayInfoID, description, source, isSelfMount,
+/// mountTypeID, uiModelSceneID, animID, spellVisualKitID, disablePlayerMountPreview.
+fn register_get_mount_info_extra_by_id(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetMountInfoExtraByID", lua.create_function(move |lua, mount_id: u32| {
+        let st = state.borrow();
+        let Some(m) = st.world.mounts.iter().find(|m| m.mount_id == mount_id) else {
+            return Ok(mlua::MultiValue::new());
+        };
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::Integer(0),                                 // creatureDisplayInfoID
+            Value::String(lua.create_string("")?),             // description
+            Value::String(lua.create_string("Drop")?),         // source
+            Value::Boolean(false),                             // isSelfMount
+            Value::Integer(m.mount_type as i64),               // mountTypeID
+            Value::Integer(0),                                 // uiModelSceneID
+            Value::Integer(0),                                 // animID
+            Value::Integer(0),                                 // spellVisualKitID
+            Value::Boolean(false),                             // disablePlayerMountPreview
         ]))
     })?)
 }
@@ -159,36 +211,6 @@ fn add_nil_stub_with_arg<A: mlua::FromLuaMulti>(
     name: &str,
 ) -> Result<()> {
     t.set(name, lua.create_function(|_, _: A| Ok(Value::Nil))?)
-}
-
-fn empty_mount_info() -> Result<(
-    Value,
-    Value,
-    Value,
-    bool,
-    bool,
-    i32,
-    bool,
-    bool,
-    Value,
-    bool,
-    bool,
-    i32,
-)> {
-    Ok((
-        Value::Nil,
-        Value::Nil,
-        Value::Nil,
-        false,
-        false,
-        0i32,
-        false,
-        false,
-        Value::Nil,
-        false,
-        false,
-        0i32,
-    ))
 }
 
 /// Mount filter and favorite methods: collected filter, favorites, summon/dismiss.
