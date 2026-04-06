@@ -538,3 +538,19 @@ fn builtin_add_mount_registered() {
         .unwrap();
     assert!(found, "Add Mount command should be registered");
 }
+
+#[test]
+fn builtin_add_battle_pet_registered() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Add Battle Pet" then return true end
+            end
+            return false
+            "#,
+        )
+        .unwrap();
+    assert!(found, "Add Battle Pet command should be registered");
+}
