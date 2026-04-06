@@ -164,6 +164,7 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         let s = Rc::clone(&state);
         move |_, id: i32| Ok(s.borrow().world.earned_achievements.contains(&id))
     })?;
+    register_collect_helpers(lua, t, Rc::clone(&state))?;
     super::admin_api::set_fn(lua, t, "EarnAchievement", {
         let s = state;
         move |lua, id: i32| {
@@ -177,6 +178,92 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         }
     })?;
     Ok(())
+}
+
+fn register_collect_helpers(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    register_mount_collect(lua, t, Rc::clone(&state))?;
+    register_pet_collect(lua, t, Rc::clone(&state))?;
+    register_toy_collect(lua, t, state)
+}
+
+fn register_mount_collect(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "CollectMount", {
+        let s = Rc::clone(&state);
+        move |_, mount_id: u32| {
+            let mut st = s.borrow_mut();
+            st.world.collected_mounts.insert(mount_id as i32);
+            if let Some(m) = st.world.mounts.iter_mut().find(|m| m.mount_id == mount_id) {
+                m.is_collected = true;
+                m.is_usable = true;
+            }
+            Ok(())
+        }
+    })?;
+    super::admin_api::set_fn(lua, t, "UncollectMount", {
+        move |_, mount_id: u32| {
+            let mut st = state.borrow_mut();
+            st.world.collected_mounts.remove(&(mount_id as i32));
+            if let Some(m) = st.world.mounts.iter_mut().find(|m| m.mount_id == mount_id) {
+                m.is_collected = false;
+                m.is_usable = false;
+            }
+            Ok(())
+        }
+    })
+}
+
+fn register_pet_collect(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "CollectPet", {
+        let s = Rc::clone(&state);
+        move |_, species_id: u32| {
+            let mut st = s.borrow_mut();
+            st.world.collected_pets.insert(species_id as i32);
+            if let Some(p) = st.world.pets.iter_mut().find(|p| p.species_id == species_id) {
+                p.is_collected = true;
+            }
+            Ok(())
+        }
+    })?;
+    super::admin_api::set_fn(lua, t, "UncollectPet", {
+        move |_, species_id: u32| {
+            let mut st = state.borrow_mut();
+            st.world.collected_pets.remove(&(species_id as i32));
+            if let Some(p) = st.world.pets.iter_mut().find(|p| p.species_id == species_id) {
+                p.is_collected = false;
+            }
+            Ok(())
+        }
+    })
+}
+
+fn register_toy_collect(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "CollectToy", {
+        let s = Rc::clone(&state);
+        move |_, item_id: u32| {
+            let mut st = s.borrow_mut();
+            st.world.collected_toys.insert(item_id as i32);
+            if let Some(toy) = st.world.toys.iter_mut().find(|t| t.item_id == item_id) {
+                toy.is_collected = true;
+                toy.is_usable = true;
+            }
+            Ok(())
+        }
+    })?;
+    super::admin_api::set_fn(lua, t, "UncollectToy", {
+        move |_, item_id: u32| {
+            let mut st = state.borrow_mut();
+            st.world.collected_toys.remove(&(item_id as i32));
+            if let Some(toy) = st.world.toys.iter_mut().find(|t| t.item_id == item_id) {
+                toy.is_collected = false;
+                toy.is_usable = false;
+            }
+            Ok(())
+        }
+    })
 }
 
 fn add_world_toggle_setter<F>(

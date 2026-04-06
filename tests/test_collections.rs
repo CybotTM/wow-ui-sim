@@ -225,3 +225,69 @@ fn toy_box_get_toy_info() {
         .unwrap();
     assert_eq!(result, "ok", "GetToyInfo: {result}");
 }
+
+// --- Admin collect/uncollect ---
+
+#[test]
+fn admin_collect_uncollect_mount() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Brutosaur (mount 1039) is not collected by default
+            local _, _, _, _, _, _, _, _, _, _, collected = C_MountJournal.GetMountInfoByID(1039)
+            if collected then return "already_collected" end
+            A_Admin.CollectMount(1039)
+            local _, _, _, _, _, _, _, _, _, _, collected2 = C_MountJournal.GetMountInfoByID(1039)
+            if not collected2 then return "not_collected_after" end
+            A_Admin.UncollectMount(1039)
+            local _, _, _, _, _, _, _, _, _, _, collected3 = C_MountJournal.GetMountInfoByID(1039)
+            if collected3 then return "still_collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "CollectMount/UncollectMount: {result}");
+}
+
+#[test]
+fn admin_collect_uncollect_pet() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Pocopoc (species 2403) is not collected by default
+            local _, _, owned = C_PetJournal.GetPetInfoBySpeciesID(2403)
+            if owned then return "already_collected" end
+            A_Admin.CollectPet(2403)
+            local _, _, owned2 = C_PetJournal.GetPetInfoBySpeciesID(2403)
+            if not owned2 then return "not_collected_after" end
+            A_Admin.UncollectPet(2403)
+            local _, _, owned3 = C_PetJournal.GetPetInfoBySpeciesID(2403)
+            if owned3 then return "still_collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "CollectPet/UncollectPet: {result}");
+}
+
+#[test]
+fn admin_collect_uncollect_toy() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Earpieces (187421) is not collected by default
+            A_Admin.CollectToy(187421)
+            local learned = C_ToyBox.GetNumLearnedDisplayedToys()
+            if learned ~= 10 then return "learned=" .. tostring(learned) end
+            A_Admin.UncollectToy(187421)
+            local learned2 = C_ToyBox.GetNumLearnedDisplayedToys()
+            if learned2 ~= 9 then return "learned2=" .. tostring(learned2) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "CollectToy/UncollectToy: {result}");
+}
