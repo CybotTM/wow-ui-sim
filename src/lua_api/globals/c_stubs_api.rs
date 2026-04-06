@@ -30,7 +30,7 @@ fn register_core_namespaces(
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
     register_c_guild(lua, std::rc::Rc::clone(&state))?;
     register_c_guild_info(lua)?;
-    register_c_lfg_list(lua)?;
+    register_c_lfg_list(lua, std::rc::Rc::clone(&state))?;
     register_c_loss_of_control(lua)?;
     register_c_mail(lua)?;
     register_c_stable_info(lua)?;
@@ -127,44 +127,52 @@ fn register_c_guild_info(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_lfg_list(lua: &Lua) -> Result<()> {
+fn register_c_lfg_list(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetActiveEntryInfo",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "HasActiveEntryInfo",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    t.set(
-        "GetSearchResultInfo",
-        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "CanCreateQuestGroup",
-        lua.create_function(|_, _quest_id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "GetAvailableRoles",
-        lua.create_function(|_, ()| Ok((true, true, true)))?,
-    )?;
-    t.set(
-        "GetApplications",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetNumApplications",
-        lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
-    )?;
-    t.set("IsSquelched", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set(
-        "GetAvailableCategories",
-        lua.create_function(|lua, _args: mlua::MultiValue| lua.create_table())?,
-    )?;
-    t.set("HasActivityList", lua.create_function(|_, ()| Ok(false))?)?;
+    register_lfg_list_stubs(lua, &t)?;
+    register_lfg_search_result_info(lua, &t, state)?;
     lua.globals().set("C_LFGList", t)?;
     Ok(())
+}
+
+fn register_lfg_list_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set("GetActiveEntryInfo", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set("HasActiveEntryInfo", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("CanCreateQuestGroup", lua.create_function(|_, _: i32| Ok(false))?)?;
+    t.set("GetAvailableRoles", lua.create_function(|_, ()| Ok((true, true, true)))?)?;
+    t.set("GetApplications", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set("GetNumApplications", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
+    t.set("IsSquelched", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set("GetAvailableCategories", lua.create_function(|lua, _: mlua::MultiValue| lua.create_table())?)?;
+    t.set("HasActivityList", lua.create_function(|_, ()| Ok(false))?)
+}
+
+fn register_lfg_search_result_info(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    t.set("GetSearchResultInfo", lua.create_function(move |lua, result_id: u32| {
+        let st = state.borrow();
+        let Some(listing) = st.world.premade_listings.iter().find(|l| l.search_result_id == result_id) else {
+            return Ok(Value::Nil);
+        };
+        let tbl = lua.create_table()?;
+        tbl.set("searchResultID", listing.search_result_id)?;
+        tbl.set("name", lua.create_string(&listing.name)?)?;
+        tbl.set("comment", lua.create_string(&listing.comment)?)?;
+        tbl.set("leaderName", lua.create_string(&listing.leader_name)?)?;
+        tbl.set("numMembers", listing.num_members)?;
+        tbl.set("maxMembers", listing.max_members)?;
+        tbl.set("activityID", listing.activity_id)?;
+        tbl.set("voiceChat", listing.voice_chat)?;
+        tbl.set("autoAccept", listing.auto_accept)?;
+        tbl.set("isDelisted", listing.is_delisted)?;
+        Ok(Value::Table(tbl))
+    })?)
 }
 
 fn register_c_loss_of_control(lua: &Lua) -> Result<()> {
