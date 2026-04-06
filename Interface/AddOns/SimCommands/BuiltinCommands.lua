@@ -106,6 +106,14 @@ SimCommands:Register("Earn Achievement", "Earn an achievement by ID", function()
     end)
 end, "Collections")
 
+SimCommands:Register("Toggle Debug Borders", "Red borders around elements", function()
+    A_Admin.ToggleDebugBorders()
+end, "Debug")
+
+SimCommands:Register("Toggle Debug Anchors", "Green dots at anchor points", function()
+    A_Admin.ToggleDebugAnchors()
+end, "Debug")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)

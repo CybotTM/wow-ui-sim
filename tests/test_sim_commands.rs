@@ -586,3 +586,38 @@ fn builtin_earn_achievement_registered() {
         .unwrap();
     assert!(found, "Earn Achievement command should be registered");
 }
+
+#[test]
+fn builtin_toggle_debug_borders() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local first = A_Admin.ToggleDebugBorders()
+            local second = A_Admin.ToggleDebugBorders()
+            if first == true and second == false then return "ok" end
+            return "first=" .. tostring(first) .. " second=" .. tostring(second)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "ToggleDebugBorders should toggle: {result}");
+}
+
+#[test]
+fn builtin_toggle_debug_commands_registered() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local borders, anchors = false, false
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Toggle Debug Borders" then borders = true end
+                if cmd.name == "Toggle Debug Anchors" then anchors = true end
+            end
+            if borders and anchors then return "ok" end
+            return "borders=" .. tostring(borders) .. " anchors=" .. tostring(anchors)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Debug toggle commands should be registered: {result}");
+}

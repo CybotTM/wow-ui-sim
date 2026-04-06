@@ -16,7 +16,34 @@ pub(crate) fn register_world_admin_api(
     register_event_api(lua, t, Rc::clone(&state))?;
     register_vault_api(lua, t, Rc::clone(&state))?;
     register_action_bar_api(lua, t, Rc::clone(&state))?;
-    register_bag_api(lua, t, state)?;
+    register_bag_api(lua, t, Rc::clone(&state))?;
+    register_debug_toggle_api(lua, t, state)?;
+    Ok(())
+}
+
+fn register_debug_toggle_api(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    super::admin_api::set_fn(lua, t, "ToggleDebugBorders", {
+        let s = Rc::clone(&state);
+        move |_, ()| {
+            let mut st = s.borrow_mut();
+            st.debug_borders = !st.debug_borders;
+            st.invalidate_strata_buckets();
+            Ok(st.debug_borders)
+        }
+    })?;
+    super::admin_api::set_fn(lua, t, "ToggleDebugAnchors", {
+        let s = Rc::clone(&state);
+        move |_, ()| {
+            let mut st = s.borrow_mut();
+            st.debug_anchors = !st.debug_anchors;
+            st.invalidate_strata_buckets();
+            Ok(st.debug_anchors)
+        }
+    })?;
     Ok(())
 }
 

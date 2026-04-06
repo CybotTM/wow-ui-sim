@@ -143,6 +143,10 @@ pub struct SimState {
     pub world: WorldState,
     /// Bags/Inventory: (bag_index, slot_index) → BagItem.
     pub bag_items: HashMap<(i32, i32), BagItem>,
+    /// Debug visualization: red borders around elements.
+    pub debug_borders: bool,
+    /// Debug visualization: green dots at anchor points.
+    pub debug_anchors: bool,
 }
 
 struct EmptyStateCollections {
@@ -344,6 +348,8 @@ impl SimState {
             talents: super::talent_state::TalentState::new(),
             player: PlayerState::default(),
             world: WorldState::default(),
+            debug_borders: false,
+            debug_anchors: false,
         }
     }
 
