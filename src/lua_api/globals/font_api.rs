@@ -301,9 +301,22 @@ fn add_font_type_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     )?;
 
     // Font:SetFontObject(target) — set inherited font object with cycle detection.
+    // Accepts a table (font object) or string (font name resolved via _G).
     font.set(
         "SetFontObject",
-        lua.create_function(|lua, (this, target): (mlua::Table, mlua::Table)| {
+        lua.create_function(|lua, (this, raw_target): (mlua::Table, Value)| {
+            let target: mlua::Table = match raw_target {
+                Value::Table(t) => t,
+                Value::String(s) => {
+                    let name_str = s.to_string_lossy().to_string();
+                    lua.globals().get::<mlua::Table>(name_str)?
+                }
+                _ => {
+                    return Err(mlua::Error::runtime(
+                        "Usage: SetFontObject(fontObj or \"name\")",
+                    ));
+                }
+            };
             let name: String = this
                 .get::<String>("__name")
                 .unwrap_or_else(|_| "Font".to_string());

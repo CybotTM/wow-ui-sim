@@ -355,3 +355,63 @@ fn test_set_font_object_nil_errors() {
         .unwrap();
     assert!(errors, "SetFontObject(nil) should throw an error");
 }
+
+// ============================================================================
+// XML Font table: SetFontObject / GetFontObject
+// ============================================================================
+
+#[test]
+fn test_create_font_set_font_object_by_name() {
+    let env = env();
+    let got_it: bool = env
+        .eval(
+            r#"
+            local src = CreateFont('NameTarget')
+            src:SetFont("Fonts/Big.ttf", 24)
+            local dst = CreateFont('NameCaller')
+            dst:SetFontObject("NameTarget")
+            return dst:GetFontObject() == src
+            "#,
+        )
+        .unwrap();
+    assert!(got_it, "SetFontObject(name) should resolve and store");
+}
+
+#[test]
+fn test_xml_font_set_font_object_by_table() {
+    let env = env();
+    let got_it: bool = env
+        .eval(
+            r#"
+            local src = CreateFont('TableTarget')
+            src:SetFont("Fonts/Table.ttf", 18)
+            local dst = CreateFont('TableCaller')
+            dst:SetFontObject(src)
+            return dst:GetFontObject() == src
+            "#,
+        )
+        .unwrap();
+    assert!(got_it, "SetFontObject(table) should store and retrieve");
+}
+
+#[test]
+fn test_xml_font_get_object_type() {
+    let env = env();
+    let obj_type: String = env.eval("return GameFontNormal:GetObjectType()").unwrap();
+    assert_eq!(obj_type, "Font");
+}
+
+#[test]
+fn test_xml_font_is_object_type() {
+    let env = env();
+    let (is_font, is_frame): (bool, bool) = env
+        .eval(
+            r#"
+            return GameFontNormal:IsObjectType("Font"),
+                   GameFontNormal:IsObjectType("Frame")
+            "#,
+        )
+        .unwrap();
+    assert!(is_font);
+    assert!(!is_frame);
+}

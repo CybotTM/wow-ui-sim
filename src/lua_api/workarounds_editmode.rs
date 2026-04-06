@@ -235,6 +235,7 @@ fn position_bottom_managed_container(env: &WowLuaEnv) {
 pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     patch_get_active_layout(env);
     patch_get_setting_value(env);
+    patch_apply_system_anchor_nil_guard(env);
     patch_init_anchors(env);
     patch_update_systems(env);
     patch_update_layout_info(env);
@@ -286,6 +287,27 @@ fn patch_get_setting_value(env: &WowLuaEnv) {
             else
                 return self.settingMap[setting].displayValue or self.settingMap[setting].value
             end
+        end
+    "#,
+    );
+}
+
+/// Guard ApplySystemAnchor against nil systemInfo.
+///
+/// `EditModePlayerFrameSystemMixin:ApplySystemAnchor` calls
+/// `PlayerCastingBarFrame:ApplySystemAnchor()` as a side effect, but
+/// PlayerCastingBarFrame (and 13 other frames) have nil systemInfo because
+/// the preset layout doesn't include entries for all system types.
+/// The original Blizzard code at EditModeSystemTemplates.lua:375 accesses
+/// `self.systemInfo.anchorInfo` without a nil check.
+fn patch_apply_system_anchor_nil_guard(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not EditModeSystemMixin then return end
+        local orig = EditModeSystemMixin.ApplySystemAnchor
+        function EditModeSystemMixin:ApplySystemAnchor()
+            if not self.systemInfo then return end
+            return orig(self)
         end
     "#,
     );
@@ -386,7 +408,6 @@ fn patch_default_anchor(env: &WowLuaEnv) {
     "#,
     );
 }
-
 
 const PATCH_ENTER_EXIT_EDIT_MODE_LUA: &str = r#"
     if not EditModeManagerFrame then return end

@@ -261,6 +261,15 @@ const FONT_LUA_TEMPLATE: &str = r#"
         if source.__justifyH then self.__justifyH = source.__justifyH end
         if source.__justifyV then self.__justifyV = source.__justifyV end
     end,
+    SetFontObject = function(self, target)
+        if type(target) == "string" then target = _G[target] end
+        if target then self.__fontObject = target end
+    end,
+    GetFontObject = function(self)
+        return self.__fontObject
+    end,
+    GetObjectType = function() return "Font" end,
+    IsObjectType = function(_, t) return t == "Font" end,
 }
 "#;
 
