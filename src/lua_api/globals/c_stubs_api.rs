@@ -775,6 +775,16 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
     register_player_location_stub(lua, &g)?;
     super::c_stubs_api_glue::register_login_state_globals(lua, &g)?;
     super::c_stubs_api_glue::register_character_select_globals(lua, &g)?;
+    register_server_and_timerunning_stubs(lua, &g)?;
+    register_misc_startup_stubs(lua, &g)?;
+    register_paperdoll_container_and_misc_stubs(lua, &g)?;
+    register_secure_env_globals(lua, &g)?;
+    register_former_workaround_stubs(lua, &g)?;
+    Ok(())
+}
+
+/// Server info, character undelete, timerunning, and system requirements stubs.
+fn register_server_and_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CheckCharacterUndeleteCooldown",
         lua.create_function(|_, ()| Ok(()))?,
@@ -835,6 +845,11 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         "SetCheckedSystemRequirements",
         lua.create_function(|_, _checked: bool| Ok(()))?,
     )?;
+    Ok(())
+}
+
+/// AlertFrame, unit roles, LFG role update stubs.
+fn register_misc_startup_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "AlertFrame_SetDuration",
         lua.create_function(|_, _: MultiValue| Ok(()))?,
@@ -851,9 +866,11 @@ fn register_missing_globals(lua: &Lua) -> Result<()> {
         "GetLFGRoleUpdate",
         lua.create_function(|_, ()| Ok((false, 0i32, 0i32, 0i32, 0i32, false)))?,
     )?;
-    register_paperdoll_container_and_misc_stubs(lua, &g)?;
-    register_secure_env_globals(lua, &g)?;
-    // C API stubs previously in workarounds.rs Lua patches
+    Ok(())
+}
+
+/// C API stubs previously in workarounds.rs Lua patches.
+fn register_former_workaround_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetArenaOpponentSpec",
         lua.create_function(|_, _slot: Value| Ok(0i32))?,
