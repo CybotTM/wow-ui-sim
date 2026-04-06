@@ -9,7 +9,7 @@ const CHALLENGE_MODE_MAP_IDS: [i32; 8] = [506, 504, 370, 525, 499, 247, 500, 382
 
 pub(super) fn register_game_system_support(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_c_challenge_mode(lua)?;
-    register_c_club(lua)?;
+    register_c_club(lua, Rc::clone(&state))?;
     register_c_club_finder(lua)?;
     register_global_game_stubs(lua, state)?;
     Ok(())
@@ -125,17 +125,41 @@ fn register_c_challenge_mode(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_club(lua: &Lua) -> Result<()> {
+fn register_c_club(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let table = lua.create_table()?;
-    table.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    table.set(
-        "GetSubscribedClubs",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    table.set(
-        "GetClubInfo",
-        lua.create_function(|_, _id: i64| Ok(Value::Nil))?,
-    )?;
+    table.set("IsEnabled", lua.create_function(|_, ()| Ok(true))?)?;
+    table.set("GetSubscribedClubs", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, ()| {
+            let st = s.borrow();
+            let clubs = lua.create_table()?;
+            if let Some(ref guild_name) = st.world.guild_name {
+                let club = lua.create_table()?;
+                club.set("clubId", 1)?;
+                club.set("name", lua.create_string(guild_name.as_str())?)?;
+                club.set("clubType", 2)?;
+                club.set("memberCount", st.world.guild_num_members)?;
+                clubs.set(1, club)?;
+            }
+            Ok(clubs)
+        }
+    })?)?;
+    table.set("GetClubInfo", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, _id: i64| {
+            let st = s.borrow();
+            if let Some(ref guild_name) = st.world.guild_name {
+                let info = lua.create_table()?;
+                info.set("clubId", 1)?;
+                info.set("name", lua.create_string(guild_name.as_str())?)?;
+                info.set("clubType", 2)?;
+                info.set("memberCount", st.world.guild_num_members)?;
+                Ok(Value::Table(info))
+            } else {
+                Ok(Value::Nil)
+            }
+        }
+    })?)?;
     table.set(
         "GetStreams",
         lua.create_function(|lua, _id: i64| lua.create_table())?,

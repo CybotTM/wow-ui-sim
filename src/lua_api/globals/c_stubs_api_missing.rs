@@ -537,6 +537,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, _unit: String| Ok(0i32))?,
     )?;
     g.set(
+        "UnitHonorMax",
+        lua.create_function(|_, _unit: String| Ok(100i32))?,
+    )?;
+    g.set(
         "UnitPowerBarTimerInfo",
         lua.create_function(|_, (_unit, _index): (String, i32)| Ok(Value::Nil))?,
     )?;
