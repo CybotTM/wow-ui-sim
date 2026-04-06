@@ -188,3 +188,40 @@ fn mount_journal_get_mount_info_extra_by_id() {
         .unwrap();
     assert_eq!(result, "ok", "GetMountInfoExtraByID: {result}");
 }
+
+#[test]
+fn toy_box_num_total_displayed() {
+    let env = env();
+    let count: i32 = env.eval("return C_ToyBox.GetNumTotalDisplayedToys()").unwrap();
+    assert_eq!(count, 10);
+}
+
+#[test]
+fn toy_box_num_learned_displayed() {
+    let env = env();
+    let count: i32 = env.eval("return C_ToyBox.GetNumLearnedDisplayedToys()").unwrap();
+    assert_eq!(count, 9, "9 collected out of 10");
+}
+
+#[test]
+fn toy_box_get_toy_from_index() {
+    let env = env();
+    let id: i32 = env.eval("return C_ToyBox.GetToyFromIndex(1)").unwrap();
+    assert_eq!(id, 166779, "First toy should be Hearthstone Game Table");
+}
+
+#[test]
+fn toy_box_get_toy_info() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local itemID, name, icon = C_ToyBox.GetToyInfo(13379)
+            if name ~= "Piccolo of the Flaming Fire" then return "name=" .. tostring(name) end
+            if itemID ~= 13379 then return "id=" .. tostring(itemID) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetToyInfo: {result}");
+}

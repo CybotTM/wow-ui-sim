@@ -11,7 +11,7 @@ use std::rc::Rc;
 pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_pet_journal(lua, Rc::clone(&state))?;
     register_mount_journal(lua, Rc::clone(&state))?;
-    register_toy_box(lua)?;
+    register_toy_box(lua, Rc::clone(&state))?;
     register_transmog_collection(lua, state)?;
     register_transmog(lua)?;
     register_transmog_util(lua)?;
@@ -309,27 +309,71 @@ fn register_mount_filter_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 }
 
 /// C_ToyBox namespace - toy collection.
-fn register_toy_box(lua: &Lua) -> Result<()> {
+fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetToyInfo",
-        lua.create_function(|_, _item_id: i32| {
-            // Returns: itemID, toyName, icon, isFavorite, hasFanfare, itemQuality
-            Ok((0i32, "", 0i32, false, false, 0i32))
-        })?,
-    )?;
-    t.set(
-        "IsToyUsable",
-        lua.create_function(|_, _item_id: i32| Ok(false))?,
-    )?;
-    t.set("GetNumToys", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "GetToyFromIndex",
-        lua.create_function(|_, _index: i32| Ok(0i32))?,
-    )?;
-    t.set("GetNumFilteredToys", lua.create_function(|_, ()| Ok(0i32))?)?;
+    register_toy_count_methods(lua, &t, Rc::clone(&state))?;
+    register_toy_info_methods(lua, &t, state)?;
+    t.set("IsToyUsable", lua.create_function(|_, _: i32| Ok(true))?)?;
     lua.globals().set("C_ToyBox", t)?;
     Ok(())
+}
+
+fn register_toy_count_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetNumTotalDisplayedToys", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.toys.len() as i32)
+    })?)?;
+    t.set("GetNumLearnedDisplayedToys", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| {
+            Ok(s.borrow().world.toys.iter().filter(|t| t.is_collected).count() as i32)
+        }
+    })?)?;
+    t.set("GetNumToys", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.toys.len() as i32)
+    })?)?;
+    t.set("GetNumFilteredToys", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.toys.len() as i32)
+    })?)
+}
+
+fn register_toy_info_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetToyFromIndex", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, index: i32| {
+            let st = s.borrow();
+            let i = (index - 1) as usize;
+            Ok(st.world.toys.get(i).map_or(0, |t| t.item_id as i32))
+        }
+    })?)?;
+    t.set("GetToyInfo", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, item_id: u32| {
+            let st = s.borrow();
+            let Some(toy) = st.world.toys.iter().find(|t| t.item_id == item_id) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            // itemID, toyName, icon, isFavorite, hasFanfare, itemQuality
+            Ok(mlua::MultiValue::from_vec(vec![
+                Value::Integer(toy.item_id as i64),
+                Value::String(lua.create_string(&toy.name)?),
+                Value::Integer(toy.icon as i64),
+                Value::Boolean(false),
+                Value::Boolean(false),
+                Value::Integer(1), // common quality
+            ]))
+        }
+    })?)
 }
 
 /// C_TransmogCollection namespace - transmog/appearance collection.
