@@ -237,7 +237,6 @@ pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     patch_get_setting_value(env);
     patch_apply_system_anchor_nil_guard(env);
     guard_action_bar_limits(env);
-    patch_init_anchors(env);
     patch_update_systems(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
@@ -343,41 +342,6 @@ fn guard_action_bar_limits(env: &WowLuaEnv) {
     "#,
     );
 }
-
-/// Custom InitSystemAnchors: apply preset layout anchors to non-managed frames.
-///
-/// Skips managed frames (OTF, etc.) whose position comes from the container
-/// layout system. UpdateSystems is called after this to apply settings.
-fn patch_init_anchors(env: &WowLuaEnv) {
-    let _ = env.exec(INIT_SYSTEM_ANCHORS_LUA);
-}
-
-const INIT_SYSTEM_ANCHORS_LUA: &str = r#"
-    if not EditModeManagerFrame then return end
-    local emm = EditModeManagerFrame
-    function emm:InitSystemAnchors()
-        local activeLayout = self:GetActiveLayoutInfo()
-        if not activeLayout or not activeLayout.systems then return end
-        local lookup = {}
-        for _, sysInfo in ipairs(activeLayout.systems) do
-            local idx = sysInfo.systemIndex or 0
-            lookup[tostring(sysInfo.system) .. ":" .. tostring(idx)] = sysInfo
-        end
-        for _, frame in ipairs(self.registeredSystemFrames) do
-            if not frame.isManagedFrame then
-                local idx = frame.systemIndex or 0
-                local sysInfo = lookup[tostring(frame.system) .. ":" .. tostring(idx)]
-                if sysInfo and sysInfo.anchorInfo then
-                    frame:ClearAllPoints()
-                    local a = sysInfo.anchorInfo
-                    local rel = a.relativeTo
-                    if type(rel) == "string" then rel = _G[rel] or rel end
-                    frame:SetPoint(a.point, rel, a.relativePoint, a.offsetX, a.offsetY)
-                end
-            end
-        end
-    end
-"#;
 
 /// Implement UpdateSystems to call UpdateSystem on each registered frame.
 ///
