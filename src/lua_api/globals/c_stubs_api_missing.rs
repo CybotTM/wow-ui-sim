@@ -450,6 +450,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetLFGQueuedList",
         lua.create_function(|_, _cat: Value| Ok(Value::Nil))?,
     )?;
+    g.set(
+        "StoreSecureReference",
+        lua.create_function(|_, (_name, _ref): (String, Value)| Ok(()))?,
+    )?;
     // inParty, joined, queued, noPartialClear, achievements, lfgComment, slotCount,
     // category, leader, tank, healer, dps
     g.set(

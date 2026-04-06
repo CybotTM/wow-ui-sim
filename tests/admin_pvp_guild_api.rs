@@ -254,6 +254,17 @@ fn test_request_guild_challenge_info_does_not_error() {
 }
 
 // ============================================================================
+// StoreSecureReference
+// ============================================================================
+
+#[test]
+fn test_store_secure_reference_does_not_error() {
+    let env = env();
+    env.eval::<()>(r#"StoreSecureReference("myref", CreateFrame("Frame"))"#)
+        .unwrap();
+}
+
+// ============================================================================
 // GetLFGInfoServer
 // ============================================================================
 
