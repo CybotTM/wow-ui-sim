@@ -32,6 +32,15 @@ fn test_unit_honor_returns_zero() {
 }
 
 #[test]
+fn test_unit_power_bar_timer_info_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval(r#"return UnitPowerBarTimerInfo("player", 1) == nil"#)
+        .unwrap();
+    assert!(is_nil);
+}
+
+#[test]
 fn test_set_honor_level_zero() {
     let env = env();
     let level: i32 = env
