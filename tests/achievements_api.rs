@@ -186,3 +186,52 @@ fn test_category_num_updates_with_earned() {
     assert_eq!(completed, 1);
     assert_eq!(incomplete, 5);
 }
+
+// ============================================================================
+// GetAchievementCriteriaInfo
+// ============================================================================
+
+#[test]
+fn test_achievement_num_criteria() {
+    let env = env();
+    let count: i32 = env
+        .eval("return GetAchievementNumCriteria(948)")
+        .unwrap();
+    assert_eq!(count, 5); // Ambassador: 5 factions
+}
+
+#[test]
+fn test_achievement_criteria_info_returns_name() {
+    let env = env();
+    let name: String = env
+        .eval("return GetAchievementCriteriaInfo(948, 1)")
+        .unwrap();
+    assert_eq!(name, "Exalted with Stormwind");
+}
+
+#[test]
+fn test_achievement_criteria_completed_tracks_earned() {
+    let env = env();
+    env.exec("A_Admin.SetAchievementEarned(513, true)").unwrap();
+    let (name, completed, qty, req): (String, bool, i32, i32) = env
+        .eval(
+            r#"
+            local n, _, c, q, r = GetAchievementCriteriaInfo(513, 1)
+            return n, c, q, r
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Honorable kills");
+    assert!(completed);
+    assert_eq!(qty, 100);
+    assert_eq!(req, 100);
+}
+
+#[test]
+fn test_achievement_criteria_nil_for_invalid_index() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return GetAchievementCriteriaInfo(6, 99) == nil")
+        .unwrap();
+    assert!(is_nil);
+}
