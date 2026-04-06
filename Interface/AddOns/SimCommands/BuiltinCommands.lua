@@ -114,6 +114,10 @@ SimCommands:Register("Toggle Debug Anchors", "Green dots at anchor points", func
     A_Admin.ToggleDebugAnchors()
 end, "Debug")
 
+SimCommands:Register("Reload UI", "Reload the interface (ReloadUI)", function()
+    ReloadUI()
+end, "Debug")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)

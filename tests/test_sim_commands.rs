@@ -621,3 +621,19 @@ fn builtin_toggle_debug_commands_registered() {
         .unwrap();
     assert_eq!(result, "ok", "Debug toggle commands should be registered: {result}");
 }
+
+#[test]
+fn builtin_reload_ui_registered() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Reload UI" then return true end
+            end
+            return false
+            "#,
+        )
+        .unwrap();
+    assert!(found, "Reload UI command should be registered");
+}
