@@ -66,6 +66,25 @@ pub fn apply(env: &WowLuaEnv) {
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
     init_raid_frame_divider_pools(env);
+    guard_lfg_backfill_cover(env);
+}
+
+/// Guard `LFGBackfillCover_Update` against nil self.
+///
+/// `RaidFinderQueueFrame.PartyBackfill` and `ScenarioQueueFrame.PartyBackfill`
+/// may be nil if the template child wasn't instantiated. The Blizzard code at
+/// LFGFrame.lua:274 passes these as self without nil-checking.
+fn guard_lfg_backfill_cover(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if LFGBackfillCover_Update then
+            local orig = LFGBackfillCover_Update
+            LFGBackfillCover_Update = function(self, ...)
+                if self then return orig(self, ...) end
+            end
+        end
+        "#,
+    );
 }
 
 /// Blizzard's class talent loadout dialogs are hidden XML popups that should
