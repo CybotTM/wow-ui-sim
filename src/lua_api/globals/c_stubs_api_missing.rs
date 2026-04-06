@@ -557,6 +557,7 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "UnitPrestige",
         lua.create_function(|_, _unit: Value| Ok(0i32))?,
     )?;
+    g.set("ResetCursor", lua.create_function(|_, ()| Ok(()))?)?;
     Ok(())
 }
 

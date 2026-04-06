@@ -55,6 +55,12 @@ fn test_get_web_ticket_returns_nil() {
 }
 
 #[test]
+fn test_reset_cursor_does_not_error() {
+    let env = env();
+    env.eval::<()>("ResetCursor()").unwrap();
+}
+
+#[test]
 fn test_set_honor_level_zero() {
     let env = env();
     let level: i32 = env
