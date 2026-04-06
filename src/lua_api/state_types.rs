@@ -481,6 +481,35 @@ fn default_toys() -> Vec<ToyData> {
     ]
 }
 
+fn default_premade_listings() -> Vec<PremadeListing> {
+    let mut id = 0u32;
+    let l = |id: &mut u32, name: &str, comment: &str, leader: &str, activity: u32, num: i32, max: i32| {
+        *id += 1;
+        PremadeListing {
+            search_result_id: *id,
+            name: name.to_string(),
+            comment: comment.to_string(),
+            leader_name: leader.to_string(),
+            activity_id: activity,
+            num_members: num,
+            max_members: max,
+            voice_chat: false,
+            auto_accept: false,
+            is_delisted: false,
+        }
+    };
+    vec![
+        l(&mut id, "+15 Mists chill run",     "Know mechanics, 2.5k io",  "Thrallx",    1195, 3, 5),
+        l(&mut id, "+12 Siege weekly",         "Weekly key, all welcome",  "Jainavx",    1188, 2, 5),
+        l(&mut id, "Nerub-ar Palace HC fresh", "AOTC prog, be geared",    "Anduin",     1296, 12,20),
+        l(&mut id, "Nerub-ar Palace N learn",  "Learning run, patient",   "Sylvanas",   1295, 8, 20),
+        l(&mut id, "World Boss — Aggregation", "Quick kill, summon up",   "Khadgar",    1350, 18,40),
+        l(&mut id, "2v2 Arena chill",          "Just capping",            "Garrosh",    491,  1, 2),
+        l(&mut id, "RBG yolo",                 "Casual RBG, no rage",     "Velen",      493,  7, 10),
+        l(&mut id, "WQ group Ringing Deeps",   "Doing WQs together",      "Malfurion",  0,    3, 5),
+    ]
+}
+
 /// World/instance state: zone, guild, collections, vault, loot.
 #[derive(Debug, Clone)]
 pub struct WorldState {
@@ -536,7 +565,7 @@ impl Default for WorldState {
             collected_toys: HashSet::new(),
             toys: default_toys(),
             earned_achievements: HashSet::new(),
-            premade_listings: Vec::new(),
+            premade_listings: default_premade_listings(),
         }
     }
 }
