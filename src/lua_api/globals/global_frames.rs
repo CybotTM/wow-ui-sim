@@ -118,36 +118,26 @@ fn register_chat_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()>
     Ok(())
 }
 
+/// Chat type group → member message types (drives ChatFrame filter tabs).
+#[rustfmt::skip]
+const CHAT_TYPE_GROUPS: &[(&str, &[&str])] = &[
+    ("SYSTEM",        &["SYSTEM", "ERROR", "IGNORED", "CHANNEL_NOTICE", "CHANNEL_NOTICE_USER"]),
+    ("SAY",           &["SAY"]),
+    ("YELL",          &["YELL"]),
+    ("WHISPER",       &["WHISPER", "WHISPER_INFORM"]),
+    ("PARTY",         &["PARTY", "PARTY_LEADER"]),
+    ("RAID",          &["RAID", "RAID_LEADER", "RAID_WARNING"]),
+    ("GUILD",         &["GUILD", "OFFICER"]),
+    ("EMOTE",         &["EMOTE", "TEXT_EMOTE"]),
+    ("CHANNEL",       &["CHANNEL"]),
+    ("INSTANCE_CHAT", &["INSTANCE_CHAT", "INSTANCE_CHAT_LEADER"]),
+    ("BN_WHISPER",    &["BN_WHISPER", "BN_WHISPER_INFORM", "BN_CONVERSATION"]),
+];
+
 /// Register ChatTypeGroup table mapping chat type groups to arrays of message types.
 fn register_chat_type_group(lua: &Lua) -> Result<()> {
-    let groups: &[(&str, &[&str])] = &[
-        (
-            "SYSTEM",
-            &[
-                "SYSTEM",
-                "ERROR",
-                "IGNORED",
-                "CHANNEL_NOTICE",
-                "CHANNEL_NOTICE_USER",
-            ],
-        ),
-        ("SAY", &["SAY"]),
-        ("YELL", &["YELL"]),
-        ("WHISPER", &["WHISPER", "WHISPER_INFORM"]),
-        ("PARTY", &["PARTY", "PARTY_LEADER"]),
-        ("RAID", &["RAID", "RAID_LEADER", "RAID_WARNING"]),
-        ("GUILD", &["GUILD", "OFFICER"]),
-        ("EMOTE", &["EMOTE", "TEXT_EMOTE"]),
-        ("CHANNEL", &["CHANNEL"]),
-        ("INSTANCE_CHAT", &["INSTANCE_CHAT", "INSTANCE_CHAT_LEADER"]),
-        (
-            "BN_WHISPER",
-            &["BN_WHISPER", "BN_WHISPER_INFORM", "BN_CONVERSATION"],
-        ),
-    ];
-
     let chat_type_group = lua.create_table()?;
-    for (group_name, members) in groups {
+    for (group_name, members) in CHAT_TYPE_GROUPS {
         let group_table = lua.create_table()?;
         for (i, member) in members.iter().enumerate() {
             group_table.set(i + 1, *member)?;
