@@ -103,15 +103,29 @@ pub fn put(hash: u64, bytecode: &[u8]) {
     let _ = append_pack_entry(&mut state, hash, bytecode);
 }
 
+/// Maximum pack file size before deletion and rebuild (100 MB).
+/// Normal addon loading produces ~50 MB; test runs add ~50 MB of
+/// generated chunks. Growth beyond 100 MB indicates stale accumulation.
+const MAX_PACK_SIZE: u64 = 100 * 1024 * 1024;
+
 fn ensure_loaded(state: &mut CacheState) {
     if state.initialized {
         return;
     }
 
-    if let Ok(mut file) = std::fs::File::open(pack_path()) {
-        let mut bytes = Vec::new();
-        if file.read_to_end(&mut bytes).is_ok() && load_pack_bytes(state, &bytes) {
-            state.pack_exists = true;
+    let pack = pack_path();
+    if let Ok(mut file) = std::fs::File::open(&pack) {
+        let file_size = file.metadata().map(|m| m.len()).unwrap_or(0);
+        if file_size > MAX_PACK_SIZE {
+            // Pack file has grown too large (append-only accumulation).
+            // Delete and rebuild from scratch on next run.
+            drop(file);
+            let _ = std::fs::remove_file(&pack);
+        } else {
+            let mut bytes = Vec::new();
+            if file.read_to_end(&mut bytes).is_ok() && load_pack_bytes(state, &bytes) {
+                state.pack_exists = true;
+            }
         }
     }
 
