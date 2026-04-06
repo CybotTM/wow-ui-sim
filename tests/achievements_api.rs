@@ -122,7 +122,38 @@ fn test_get_category_num_achievements_returns_three_values() {
     let (total, completed, incomplete): (i32, i32, i32) = env
         .eval("return GetCategoryNumAchievements(92)")
         .unwrap();
-    assert_eq!(total, 0);
+    assert_eq!(total, 6); // 6 General achievements (Level 10-80)
     assert_eq!(completed, 0);
-    assert_eq!(incomplete, 0);
+    assert_eq!(incomplete, 6);
+}
+
+#[test]
+fn test_achievement_info_returns_real_name() {
+    let env = env();
+    let name: String = env
+        .eval("local _, name = GetAchievementInfo(6); return name")
+        .unwrap();
+    assert_eq!(name, "Level 10");
+}
+
+#[test]
+fn test_achievement_info_explore_elwynn() {
+    let env = env();
+    let (name, points): (String, i32) = env
+        .eval("local _, name, pts = GetAchievementInfo(776); return name, pts")
+        .unwrap();
+    assert_eq!(name, "Explore Elwynn Forest");
+    assert_eq!(points, 10);
+}
+
+#[test]
+fn test_category_num_updates_with_earned() {
+    let env = env();
+    env.exec("A_Admin.SetAchievementEarned(6, true)").unwrap();
+    let (total, completed, incomplete): (i32, i32, i32) = env
+        .eval("return GetCategoryNumAchievements(92)")
+        .unwrap();
+    assert_eq!(total, 6);
+    assert_eq!(completed, 1);
+    assert_eq!(incomplete, 5);
 }

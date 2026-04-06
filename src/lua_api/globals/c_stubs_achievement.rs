@@ -11,6 +11,51 @@ struct AchievementCategory {
     parent_id: i32,
 }
 
+struct AchievementData {
+    id: i32,
+    name: &'static str,
+    description: &'static str,
+    points: i32,
+    icon: u32,
+    category_id: i32,
+}
+
+static ACHIEVEMENTS: &[AchievementData] = &[
+    // General
+    AchievementData { id: 6, name: "Level 10", description: "Reach level 10.", points: 10, icon: 136243, category_id: 92 },
+    AchievementData { id: 7, name: "Level 20", description: "Reach level 20.", points: 10, icon: 136243, category_id: 92 },
+    AchievementData { id: 8, name: "Level 40", description: "Reach level 40.", points: 10, icon: 136243, category_id: 92 },
+    AchievementData { id: 9, name: "Level 60", description: "Reach level 60.", points: 10, icon: 136243, category_id: 92 },
+    AchievementData { id: 10, name: "Level 70", description: "Reach level 70.", points: 10, icon: 136243, category_id: 92 },
+    AchievementData { id: 11, name: "Level 80", description: "Reach level 80.", points: 10, icon: 136243, category_id: 92 },
+    // Quests
+    AchievementData { id: 503, name: "50 Quests Completed", description: "Complete 50 quests.", points: 10, icon: 136243, category_id: 96 },
+    AchievementData { id: 504, name: "100 Quests Completed", description: "Complete 100 quests.", points: 10, icon: 136243, category_id: 96 },
+    AchievementData { id: 505, name: "250 Quests Completed", description: "Complete 250 quests.", points: 10, icon: 136243, category_id: 96 },
+    // Exploration
+    AchievementData { id: 776, name: "Explore Elwynn Forest", description: "Explore Elwynn Forest, revealing the covered areas of the world map.", points: 10, icon: 236809, category_id: 97 },
+    AchievementData { id: 627, name: "Explore Durotar", description: "Explore Durotar, revealing the covered areas of the world map.", points: 10, icon: 236809, category_id: 97 },
+    // PvP
+    AchievementData { id: 238, name: "An Honorable Kill", description: "Achieve an honorable kill.", points: 10, icon: 136243, category_id: 95 },
+    AchievementData { id: 513, name: "100 Honorable Kills", description: "Get 100 honorable kills.", points: 10, icon: 136243, category_id: 95 },
+    // Dungeons & Raids
+    AchievementData { id: 632, name: "Deadmines", description: "Defeat Edwin VanCleef.", points: 10, icon: 136243, category_id: 168 },
+    AchievementData { id: 633, name: "Shadowfang Keep", description: "Defeat Lord Godfrey.", points: 10, icon: 136243, category_id: 168 },
+    // Professions
+    AchievementData { id: 116, name: "Professional Journeyman", description: "Become a Journeyman in a profession.", points: 10, icon: 136243, category_id: 169 },
+    AchievementData { id: 731, name: "Professional Expert", description: "Become an Expert in a profession.", points: 10, icon: 136243, category_id: 169 },
+    // Reputation
+    AchievementData { id: 948, name: "Ambassador of the Alliance", description: "Earn exalted status with the five Alliance capital cities.", points: 10, icon: 136243, category_id: 201 },
+    // World Events
+    AchievementData { id: 913, name: "To Honor One's Elders", description: "Complete the Lunar Festival achievements.", points: 10, icon: 136243, category_id: 155 },
+    // Feats of Strength
+    AchievementData { id: 879, name: "Old School Ride", description: "Owner of a classic epic mount.", points: 0, icon: 136243, category_id: 81 },
+];
+
+fn find_achievement(id: i32) -> Option<&'static AchievementData> {
+    ACHIEVEMENTS.iter().find(|a| a.id == id)
+}
+
 static ACHIEVEMENT_CATEGORIES: &[AchievementCategory] = &[
     AchievementCategory { id: 92, name: "General", parent_id: -1 },
     AchievementCategory { id: 96, name: "Quests", parent_id: -1 },
@@ -44,7 +89,19 @@ pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
     )?;
     g.set(
         "GetCategoryNumAchievements",
-        lua.create_function(|_, _: Value| Ok((0i32, 0i32, 0i32)))?,
+        lua.create_function(|lua, cat_id: Value| {
+            let cid = match &cat_id {
+                Value::Integer(n) => *n as i32,
+                Value::Number(n) => *n as i32,
+                _ => return Ok((0i32, 0i32, 0i32)),
+            };
+            let total = ACHIEVEMENTS.iter().filter(|a| a.category_id == cid).count() as i32;
+            let completed = ACHIEVEMENTS
+                .iter()
+                .filter(|a| a.category_id == cid && is_achievement_earned(lua, a.id))
+                .count() as i32;
+            Ok((total, completed, total - completed))
+        })?,
     )?;
     g.set(
         "GetTotalAchievementPoints",
@@ -93,7 +150,7 @@ fn is_achievement_earned(lua: &Lua, aid: i32) -> bool {
 }
 
 /// GetAchievementInfo — returns 14 values matching WoW's signature.
-/// Checks earned_achievements HashSet for the completed flag.
+/// Looks up from ACHIEVEMENTS data, falls back to generic for unknown IDs.
 fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
     let aid = match &id {
         Value::Integer(n) => *n as i32,
@@ -101,17 +158,22 @@ fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
         _ => return Ok(mlua::MultiValue::from_vec(vec![Value::Nil])),
     };
     let completed = is_achievement_earned(lua, aid);
+    let data = find_achievement(aid);
+    let name = data.map(|a| a.name).unwrap_or("Achievement");
+    let desc = data.map(|a| a.description).unwrap_or("Achievement description");
+    let points = data.map(|a| a.points).unwrap_or(10) as i64;
+    let icon = data.map(|a| a.icon).unwrap_or(136243) as i64;
     Ok(mlua::MultiValue::from_vec(vec![
         Value::Integer(aid as i64),
-        Value::String(lua.create_string("Achievement")?),
-        Value::Integer(10),
+        Value::String(lua.create_string(name)?),
+        Value::Integer(points),
         Value::Boolean(completed),
         Value::Integer(if completed { 1 } else { 0 }),
         Value::Integer(if completed { 1 } else { 0 }),
         Value::Integer(2025),
-        Value::String(lua.create_string("Achievement description")?),
+        Value::String(lua.create_string(desc)?),
         Value::Integer(0),
-        Value::Integer(136243),
+        Value::Integer(icon),
         Value::String(lua.create_string("")?),
         Value::Boolean(false),
         Value::Boolean(false),
