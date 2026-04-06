@@ -412,24 +412,33 @@ fn add_clear_all_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_clear_point<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ClearPoint", |lua, this, point_name: String| {
         let id = this.0;
-        let point = crate::widget::AnchorPoint::from_str(&point_name);
-        if let Some(point) = point {
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            if let Some(frame) = state.widgets.get(id) {
-                if let Some(anchor) = frame.anchors.iter().find(|a| a.point == point) {
-                    if let Some(target) = anchor.relative_to_id {
-                        state.widgets.remove_anchor_dependent(target as u64, id);
-                    }
-                }
-            }
-            if let Some(frame) = state.widgets.get_mut_visual(id) {
-                frame.anchors.retain(|a| a.point != point);
-            }
-            state.widgets.mark_rect_dirty(id);
+        let Some(point) = crate::widget::AnchorPoint::from_str(&point_name) else {
+            return Ok(());
+        };
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        remove_anchor_dependency(&mut state, id, point);
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.anchors.retain(|a| a.point != point);
         }
+        state.widgets.mark_rect_dirty(id);
         Ok(())
     });
+}
+
+fn remove_anchor_dependency(
+    state: &mut crate::lua_api::SimState,
+    id: u64,
+    point: crate::widget::AnchorPoint,
+) {
+    let target_id = state
+        .widgets
+        .get(id)
+        .and_then(|f| f.anchors.iter().find(|a| a.point == point))
+        .and_then(|a| a.relative_to_id);
+    if let Some(target) = target_id {
+        state.widgets.remove_anchor_dependent(target as u64, id);
+    }
 }
 
 fn add_adjust_points<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
