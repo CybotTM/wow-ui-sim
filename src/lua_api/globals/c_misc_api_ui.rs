@@ -552,6 +552,27 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
             Ok(Value::Table(searcher))
         })?,
     )?;
+    // Return the "All" category (ID 18) so the catalog has at least one category
+    const ALL_CATEGORY_ID: i32 = 18;
+    catalog.set(
+        "SearchCatalogCategories",
+        lua.create_function(|lua, _: MultiValue| {
+            let t = lua.create_table()?;
+            t.push(ALL_CATEGORY_ID)?;
+            Ok(Value::Table(t))
+        })?,
+    )?;
+    catalog.set(
+        "GetCatalogCategoryInfo",
+        lua.create_function(|lua, category_id: Option<i32>| {
+            let id = category_id.unwrap_or(ALL_CATEGORY_ID);
+            let info = lua.create_table()?;
+            info.set("ID", id)?;
+            info.set("name", "All")?;
+            info.set("subcategoryIDs", lua.create_table()?)?;
+            Ok(Value::Table(info))
+        })?,
+    )?;
     g.set("C_HousingCatalog", catalog)?;
 
     Ok(())

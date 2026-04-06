@@ -214,7 +214,19 @@ fn register_c_club_finder(lua: &Lua) -> Result<()> {
         "GetPlayerApplicantLocaleFlags",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
+    table.set(
+        "ReturnClubApplicantList",
+        lua.create_function(|lua, _club_id: Value| lua.create_table())?,
+    )?;
     lua.globals().set("C_ClubFinder", table)?;
+
+    // Initialize SavedVariablesPerCharacter that Blizzard_Communities expects.
+    // Normally set by InitSeenApplicants() on ADDON_LOADED, but OnShow can fire
+    // before that event is processed.
+    let g = lua.globals();
+    if g.get::<Value>("g_clubIdToSeenApplicants")?.is_nil() {
+        g.set("g_clubIdToSeenApplicants", lua.create_table()?)?;
+    }
     Ok(())
 }
 
