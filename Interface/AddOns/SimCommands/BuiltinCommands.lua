@@ -16,6 +16,16 @@ SimCommands:Register("Open Guild Bank", "Fire GUILDBANKFRAME_OPENED event", func
     FireEvent("GUILDBANKFRAME_OPENED")
 end, "UI Panels")
 
+SimCommands:Register("Add Gold", "Add gold to player (enter amount in gold)", function()
+    SimCommands:Prompt("Enter gold amount:", function(text)
+        local gold = tonumber(text)
+        if gold and gold > 0 then
+            local current = GetMoney() or 0
+            A_Admin.SetMoney(current + gold * 10000)
+        end
+    end)
+end, "Player State")
+
 SimCommands:Register("Set Player Level", "Change player level (1-80)", function()
     SimCommands:Prompt("Enter level (1-80):", function(text)
         local level = tonumber(text)

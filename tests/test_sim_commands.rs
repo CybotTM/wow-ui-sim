@@ -371,3 +371,34 @@ fn builtin_set_player_level_applies() {
         .unwrap();
     assert_eq!(result, "ok", "Set Player Level should apply level 42: {result}");
 }
+
+#[test]
+fn builtin_add_gold_applies() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Set starting money to 0
+            A_Admin.SetMoney(0)
+            -- Trigger the command
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Add Gold" then
+                    cmd.action()
+                    break
+                end
+            end
+            -- Simulate entering 100 gold
+            local input = SimCommandsPromptInput
+            if not input then return "no_input" end
+            input:SetText("100")
+            local enter = input:GetScript("OnEnterPressed")
+            enter(input)
+            -- 100 gold = 1000000 copper
+            local money = GetMoney()
+            if money == 1000000 then return "ok" end
+            return "money=" .. tostring(money)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Add Gold should add 100g (1000000 copper): {result}");
+}
