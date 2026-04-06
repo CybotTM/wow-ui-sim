@@ -283,6 +283,16 @@ pub struct PlayerState {
     pub movement: MovementState,
     pub active_spec_index: i32,
     pub pending_spec_change: Option<i32>,
+    /// Mail inbox.
+    pub inbox: Vec<MailMessage>,
+    /// Items attached to outgoing mail (12 slots max).
+    pub send_mail_items: [Option<MailAttachment>; 12],
+    /// Money attached to outgoing mail (copper).
+    pub send_mail_money: u64,
+    /// COD amount on outgoing mail (copper).
+    pub send_mail_cod: u64,
+    /// Counter for generating unique mail IDs.
+    pub next_mail_id: u64,
 }
 
 impl Default for PlayerState {
@@ -310,6 +320,11 @@ impl Default for PlayerState {
             movement: MovementState::default(),
             active_spec_index: 2,
             pending_spec_change: None,
+            inbox: Vec::new(),
+            send_mail_items: Default::default(),
+            send_mail_money: 0,
+            send_mail_cod: 0,
+            next_mail_id: 1,
         }
     }
 }
