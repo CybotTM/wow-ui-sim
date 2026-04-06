@@ -81,3 +81,65 @@ fn admin_set_inbox_count() {
         .unwrap();
     assert!(ok, "SetInboxCount should not error");
 }
+
+#[test]
+fn get_inbox_num_items_empty() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local num, total = GetInboxNumItems()
+            return num .. "," .. total
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "0,0", "Empty inbox should return (0, 0)");
+}
+
+#[test]
+fn get_inbox_num_items_after_add() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S1", "B1")
+            A_Admin.AddMail("B", "S2", "B2")
+            A_Admin.AddMail("C", "S3", "B3")
+            local num, total = GetInboxNumItems()
+            return num .. "," .. total
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "3,3", "Should have 3 mails after 3 AddMail calls");
+}
+
+#[test]
+fn get_inbox_num_items_after_clear() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S1", "B1")
+            A_Admin.ClearInbox()
+            local num, total = GetInboxNumItems()
+            return num .. "," .. total
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "0,0", "Should have 0 after clear");
+}
+
+#[test]
+fn get_inbox_num_items_set_count() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.SetInboxCount(7)
+            local num, total = GetInboxNumItems()
+            return num .. "," .. total
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "7,7", "SetInboxCount(7) should produce 7 mails");
+}

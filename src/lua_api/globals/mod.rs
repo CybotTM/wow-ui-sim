@@ -42,6 +42,7 @@ pub mod c_editmode_api;
 pub mod c_event_utils_api;
 pub mod c_item_api;
 mod c_item_api_globals;
+pub mod c_mail_api;
 mod c_item_location_api;
 pub mod c_map_api;
 pub mod c_misc_api;

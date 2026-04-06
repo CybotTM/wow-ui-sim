@@ -710,7 +710,8 @@ fn register_stateless_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<(
     register_font_api(lua)?;
     register_abbreviate_config(lua)?;
     register_lua_duration_object(lua)?;
-    register_unit_heal_prediction(lua)
+    register_unit_heal_prediction(lua)?;
+    super::globals::c_mail_api::register(lua, Rc::clone(state))
 }
 
 /// Register cursor/drag-and-drop APIs (must run after C_Spell and C_ActionBar).
