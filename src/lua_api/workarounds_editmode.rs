@@ -237,7 +237,6 @@ pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     patch_get_setting_value(env);
     patch_apply_system_anchor_nil_guard(env);
     guard_action_bar_limits(env);
-    patch_update_systems(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
 }
@@ -338,32 +337,6 @@ fn guard_action_bar_limits(env: &WowLuaEnv) {
                 if top then return top + 24 end
             end
             return 0
-        end
-    "#,
-    );
-}
-
-/// Implement UpdateSystems to call UpdateSystem on each registered frame.
-///
-/// The real WoW UpdateSystems uses secureexecuterange which swallows
-/// per-frame errors. We replicate that: look up each frame's systemInfo
-/// from the active layout and call frame:UpdateSystem(sysInfo). Frames
-/// that crash (missing subsystems, etc.) are caught individually.
-fn patch_update_systems(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeManagerFrame then return end
-        function EditModeManagerFrame:UpdateSystems()
-            local function callUpdateSystem(index, systemFrame)
-                if systemFrame.isManagedFrame then return end
-                local sysInfo = self:GetActiveLayoutSystemInfo(
-                    systemFrame.system, systemFrame.systemIndex
-                )
-                if sysInfo then
-                    systemFrame:UpdateSystem(sysInfo)
-                end
-            end
-            secureexecuterange(self.registeredSystemFrames, callUpdateSystem)
         end
     "#,
     );
