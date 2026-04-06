@@ -514,7 +514,7 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     )?;
     g.set(
         "UnitGroupRolesAssigned",
-        lua.create_function(|_, _unit: String| Ok("NONE"))?,
+        lua.create_function(|_, _unit: Value| Ok("NONE"))?,
     )?;
     g.set(
         "GetDungeonDifficultyID",
