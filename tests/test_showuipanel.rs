@@ -153,6 +153,46 @@ fn uipanel_windows_has_area_attributes() {
 }
 
 #[test]
+fn key_blizzard_panels_registered() {
+    test_timeout! {
+        let env = setup_env();
+        // Core Blizzard panels loaded from UIPanelWindows.lua should all be registered.
+        // LoD panels (AchievementFrame, CollectionsJournal, etc.) register when their
+        // addon loads — they won't be here, and that's correct WoW behavior.
+        let missing: String = env.eval(r#"
+            local expected = {
+                -- From Blizzard_UIParentPanelManager/Mainline/UIPanelWindows.lua
+                {"CharacterFrame", "left"},
+                {"FriendsFrame", "left"},
+                {"GameMenuFrame", "center"},
+                {"HelpFrame", "center"},
+                {"ProfessionsBookFrame", "left"},
+                {"PVEFrame", "left"},
+                {"MailFrame", "left"},
+                {"MerchantFrame", "left"},
+                {"BankFrame", "left"},
+                {"GossipFrame", "left"},
+                {"DressUpFrame", "left"},
+                {"QuestFrame", "left"},
+                {"CommunitiesFrame", "left"},
+            }
+            local missing = {}
+            for _, pair in ipairs(expected) do
+                local name, area = pair[1], pair[2]
+                local entry = UIPanelWindows[name]
+                if not entry then
+                    table.insert(missing, name .. "(not registered)")
+                elseif entry.area ~= area then
+                    table.insert(missing, name .. "(area=" .. tostring(entry.area) .. " expected=" .. area .. ")")
+                end
+            end
+            return table.concat(missing, ", ")
+        "#).unwrap();
+        assert!(missing.is_empty(), "Missing or wrong UIPanelWindows entries: {missing}");
+    }
+}
+
+#[test]
 fn show_ui_panel_shows_frame() {
     test_timeout! {
         let env = setup_env();
