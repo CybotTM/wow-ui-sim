@@ -570,3 +570,19 @@ fn builtin_add_toy_registered() {
         .unwrap();
     assert!(found, "Add Toy command should be registered");
 }
+
+#[test]
+fn builtin_earn_achievement_registered() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Earn Achievement" then return true end
+            end
+            return false
+            "#,
+        )
+        .unwrap();
+    assert!(found, "Earn Achievement command should be registered");
+}

@@ -97,6 +97,15 @@ SimCommands:Register("Add Toy", "Collect a toy by item ID", function()
     end)
 end, "Collections")
 
+SimCommands:Register("Earn Achievement", "Earn an achievement by ID", function()
+    SimCommands:Prompt("Enter achievement ID:", function(text)
+        local id = tonumber(text)
+        if id and id > 0 then
+            A_Admin.EarnAchievement(id)
+        end
+    end)
+end, "Collections")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)
