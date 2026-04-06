@@ -41,6 +41,13 @@ fn test_unit_power_bar_timer_info_returns_nil() {
 }
 
 #[test]
+fn test_get_send_mail_price_returns_30() {
+    let env = env();
+    let price: i32 = env.eval("return GetSendMailPrice()").unwrap();
+    assert_eq!(price, 30);
+}
+
+#[test]
 fn test_set_honor_level_zero() {
     let env = env();
     let level: i32 = env

@@ -542,6 +542,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, (_unit, _index): (String, i32)| Ok(Value::Nil))?,
     )?;
     g.set(
+        "GetSendMailPrice",
+        lua.create_function(|_, ()| Ok(30i32))?,
+    )?;
+    g.set(
         "GetPVPLifetimeStats",
         lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
     )?;
