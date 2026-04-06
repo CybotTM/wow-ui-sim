@@ -305,45 +305,48 @@ fn add_font_type_methods(lua: &Lua, font: &mlua::Table) -> Result<()> {
     font.set(
         "SetFontObject",
         lua.create_function(|lua, (this, raw_target): (mlua::Table, Value)| {
-            let target: mlua::Table = match raw_target {
-                Value::Table(t) => t,
-                Value::String(s) => {
-                    let name_str = s.to_string_lossy().to_string();
-                    lua.globals().get::<mlua::Table>(name_str)?
-                }
-                _ => {
-                    return Err(mlua::Error::runtime(
-                        "Usage: SetFontObject(fontObj or \"name\")",
-                    ));
-                }
-            };
-            let name: String = this
-                .get::<String>("__name")
-                .unwrap_or_else(|_| "Font".to_string());
-            // Walk the target's __fontObject chain looking for this table.
-            let mut current: Value = Value::Table(target.clone());
-            loop {
-                match current {
-                    Value::Table(ref t) => {
-                        if *t == this {
-                            return Err(lua_error(
-                                lua,
-                                format!(
-                                    "{}:SetFontObject(): Can't create a font object loop",
-                                    name
-                                ),
-                            ));
-                        }
-                        current = t.get::<Value>("__fontObject").unwrap_or(Value::Nil);
-                    }
-                    _ => break,
-                }
-            }
+            let target = resolve_font_target(lua, raw_target)?;
+            detect_font_object_cycle(lua, &this, &target)?;
             this.set("__fontObject", target)?;
             Ok(())
         })?,
     )?;
 
+    Ok(())
+}
+
+fn resolve_font_target(lua: &Lua, raw: Value) -> mlua::Result<mlua::Table> {
+    match raw {
+        Value::Table(t) => Ok(t),
+        Value::String(s) => {
+            let name_str = s.to_string_lossy().to_string();
+            lua.globals().get::<mlua::Table>(name_str)
+        }
+        _ => Err(mlua::Error::runtime(
+            "Usage: SetFontObject(fontObj or \"name\")",
+        )),
+    }
+}
+
+/// Walk the target's __fontObject chain to detect cycles.
+fn detect_font_object_cycle(
+    lua: &Lua,
+    this: &mlua::Table,
+    target: &mlua::Table,
+) -> mlua::Result<()> {
+    let mut current: Value = Value::Table(target.clone());
+    while let Value::Table(ref t) = current {
+        if *t == *this {
+            let name: String = this
+                .get::<String>("__name")
+                .unwrap_or_else(|_| "Font".to_string());
+            return Err(lua_error(
+                lua,
+                format!("{name}:SetFontObject(): Can't create a font object loop"),
+            ));
+        }
+        current = t.get::<Value>("__fontObject").unwrap_or(Value::Nil);
+    }
     Ok(())
 }
 
