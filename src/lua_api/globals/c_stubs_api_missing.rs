@@ -528,7 +528,6 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GuildControlSetRank",
         lua.create_function(|_, _rank: i32| Ok(()))?,
     )?;
-    g.set("IsInGuild", lua.create_function(|_, ()| Ok(false))?)?;
     g.set(
         "GetGuildInfo",
         lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
