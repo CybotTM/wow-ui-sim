@@ -88,6 +88,15 @@ SimCommands:Register("Add Battle Pet", "Collect a battle pet by species ID", fun
     end)
 end, "Collections")
 
+SimCommands:Register("Add Toy", "Collect a toy by item ID", function()
+    SimCommands:Prompt("Enter toy item ID:", function(text)
+        local id = tonumber(text)
+        if id and id > 0 then
+            A_Admin.SetToyCollected(id, true)
+        end
+    end)
+end, "Collections")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)
