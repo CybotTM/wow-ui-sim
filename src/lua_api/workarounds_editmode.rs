@@ -233,29 +233,11 @@ fn position_bottom_managed_container(env: &WowLuaEnv) {
 /// Also wraps EnterEditMode/ExitEditMode with pcall protection so edit
 /// mode can activate even when subsystems crash.
 pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
-    patch_get_active_layout(env);
     patch_get_setting_value(env);
     patch_apply_system_anchor_nil_guard(env);
     guard_action_bar_limits(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
-}
-
-/// Guard GetActiveLayoutInfo against nil layoutInfo (pre-event calls).
-fn patch_get_active_layout(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeManagerFrame then return end
-        local emm = EditModeManagerFrame
-        local origGetActiveLayoutInfo = emm.GetActiveLayoutInfo
-        function emm:GetActiveLayoutInfo()
-            if not self.layoutInfo then
-                return { layoutType = 0, layoutIndex = 1, systems = {} }
-            end
-            return origGetActiveLayoutInfo(self)
-        end
-    "#,
-    );
 }
 
 /// Guard GetSettingValue against nil settingMap.
