@@ -522,3 +522,19 @@ fn builtin_set_honor_level() {
         .unwrap();
     assert_eq!(result, "ok", "Set Honor Level should apply: {result}");
 }
+
+#[test]
+fn builtin_add_mount_registered() {
+    let env = env();
+    let found: bool = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Add Mount" then return true end
+            end
+            return false
+            "#,
+        )
+        .unwrap();
+    assert!(found, "Add Mount command should be registered");
+}

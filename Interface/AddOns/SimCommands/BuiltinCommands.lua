@@ -70,6 +70,15 @@ SimCommands:Register("Leave Guild", "Leave current guild", function()
     A_Admin.LeaveGuild()
 end, "Player State")
 
+SimCommands:Register("Add Mount", "Collect a mount by ID", function()
+    SimCommands:Prompt("Enter mount ID:", function(text)
+        local id = tonumber(text)
+        if id and id > 0 then
+            A_Admin.SetMountCollected(id, true)
+        end
+    end)
+end, "Collections")
+
 SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
     SimCommands:Prompt("Enter honor level (1-500):", function(text)
         local level = tonumber(text)
