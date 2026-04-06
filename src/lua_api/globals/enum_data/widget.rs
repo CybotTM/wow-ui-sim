@@ -285,6 +285,7 @@ pub const GAME_RULE: SeqEnumDef = (
         "IngameMailNotificationDisabled",
         "IngameTrackingDisabled",
         "LandingPageFactionID",
+        "HousingDashboardDisabled",
     ],
 );
 
