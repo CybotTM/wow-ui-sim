@@ -19,6 +19,7 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     globals.set("C_Minimap", register_c_minimap(lua)?)?;
     globals.set("C_Navigation", register_c_navigation(lua)?)?;
     globals.set("C_TaxiMap", register_c_taxi_map(lua)?)?;
+    globals.set("C_DeathInfo", register_c_death_info(lua)?)?;
 
     Ok(())
 }
@@ -64,6 +65,11 @@ fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
     t.set(
         "MapHasArt",
         lua.create_function(|_, _map_id: i32| Ok(true))?,
+    )?;
+    // No user waypoint set — return nil so callers skip pin placement
+    t.set(
+        "GetUserWaypointPositionForMap",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
     )?;
 
     Ok(t)
@@ -328,5 +334,24 @@ fn register_c_taxi_map(lua: &Lua) -> Result<mlua::Table> {
         lua.create_function(|_, _map_id: i32| Ok(true))?,
     )?;
 
+    Ok(t)
+}
+
+/// C_DeathInfo — corpse/graveyard position data.
+/// Player is alive in the simulator, so all position queries return nil.
+fn register_c_death_info(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set(
+        "GetCorpseMapPosition",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetDeathReleasePosition",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetGraveyardsForMap",
+        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
     Ok(t)
 }
