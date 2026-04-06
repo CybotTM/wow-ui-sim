@@ -1,0 +1,6 @@
+## Interface: 120000
+## Title: SimCommands
+## Notes: Searchable command palette for simulator actions (Ctrl+P)
+## LoadOnDemand: 0
+
+SimCommands.lua

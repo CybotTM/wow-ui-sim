@@ -7,6 +7,7 @@
 /Interface/AddOns/*
 !/Interface/AddOns/TestFramework
 !/Interface/AddOns/Admin
+!/Interface/AddOns/SimCommands
 /Interface/BlizzardUI
 /vendor/
 /docs/local/
