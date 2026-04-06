@@ -337,6 +337,13 @@ fn register_unit_frame_stateless_stubs(lua: &Lua) -> Result<()> {
 
 /// Continuation of unit-frame global stubs (combat, arena, UIParent handlers).
 fn register_unit_frame_global_stubs_2(lua: &Lua) -> Result<()> {
+    register_combat_and_arena_stubs(lua)?;
+    register_uiparent_entering_world_stubs(lua)?;
+    Ok(())
+}
+
+/// Combat, threat, arena, pet, and misc OnUpdate handler stubs.
+fn register_combat_and_arena_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.set(
         "GetUnitTotalModifiedMaxHealthPercent",
@@ -384,7 +391,12 @@ fn register_unit_frame_global_stubs_2(lua: &Lua) -> Result<()> {
         "GetLootSpecialization",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    // UIParent PLAYER_ENTERING_WORLD handler stubs
+    Ok(())
+}
+
+/// UIParent PLAYER_ENTERING_WORLD handler stubs.
+fn register_uiparent_entering_world_stubs(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
     g.set(
         "GetSpellConfirmationPromptsInfo",
         lua.create_function(|lua, ()| lua.create_table())?,
