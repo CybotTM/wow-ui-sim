@@ -198,3 +198,37 @@ fn get_inbox_header_info_invalid_index() {
         .unwrap();
     assert_eq!(result, "nil", "Invalid index should return nil");
 }
+
+#[test]
+fn get_inbox_item_returns_attachment() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Won", "", 0, {{item_id=6948, count=1}})
+            local name, id, texture, count, quality, canUse, isCurrency = GetInboxItem(1, 1)
+            if name ~= "Hearthstone" then return "name=" .. tostring(name) end
+            if id ~= 6948 then return "id=" .. tostring(id) end
+            if count ~= 1 then return "count=" .. tostring(count) end
+            if quality ~= 1 then return "quality=" .. tostring(quality) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetInboxItem should return item details: {result}");
+}
+
+#[test]
+fn get_inbox_item_invalid_returns_nil() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S", "B")
+            local r = GetInboxItem(1, 1)  -- mail has no items
+            return r == nil and "nil" or "not_nil"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "nil", "No attachment should return nil");
+}
