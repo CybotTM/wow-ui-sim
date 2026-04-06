@@ -34,6 +34,7 @@ mod widget_model;
 mod widget_scroll;
 mod widget_slider;
 mod widget_tooltip;
+mod widget_tooltip_data;
 
 pub(crate) use methods_visibility::fire_on_show_recursive;
 
