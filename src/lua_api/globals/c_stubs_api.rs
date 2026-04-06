@@ -259,6 +259,16 @@ fn register_unit_frame_global_stubs(
     lua: &Lua,
     state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
 ) -> Result<()> {
+    register_combat_state_globals(lua, state)?;
+    register_unit_frame_stateless_stubs(lua)?;
+    register_unit_frame_global_stubs_2(lua)?;
+    Ok(())
+}
+
+fn register_combat_state_globals(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let g = lua.globals();
     let s2 = std::rc::Rc::clone(&state);
     g.set(
@@ -269,6 +279,11 @@ fn register_unit_frame_global_stubs(
         "IsResting",
         lua.create_function(move |_, ()| Ok(state.borrow().player.is_resting))?,
     )?;
+    Ok(())
+}
+
+fn register_unit_frame_stateless_stubs(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
     g.set("IsPVPTimerRunning", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("GetPVPTimer", lua.create_function(|_, ()| Ok(0.0f64))?)?;
     g.set(
@@ -317,7 +332,6 @@ fn register_unit_frame_global_stubs(
             Ok(())
         })?,
     )?;
-    register_unit_frame_global_stubs_2(lua)?;
     Ok(())
 }
 
