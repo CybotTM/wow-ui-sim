@@ -475,6 +475,17 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
     g.set(
+        "GetAvailableLocaleInfo",
+        lua.create_function(|lua, _ignore_restrictions: Option<bool>| {
+            let entry = lua.create_table()?;
+            entry.set("localeId", 1)?;
+            entry.set("localeName", "enUS")?;
+            let list = lua.create_table()?;
+            list.set(1, entry)?;
+            Ok(list)
+        })?,
+    )?;
+    g.set(
         "GuildControlSetRank",
         lua.create_function(|_, _rank: i32| Ok(()))?,
     )?;

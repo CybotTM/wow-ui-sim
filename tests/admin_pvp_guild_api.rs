@@ -187,3 +187,25 @@ fn test_guild_control_set_rank_does_not_error() {
     let env = env();
     env.eval::<()>("GuildControlSetRank(1)").unwrap();
 }
+
+// ============================================================================
+// GetAvailableLocaleInfo
+// ============================================================================
+
+#[test]
+fn test_get_available_locale_info_returns_enus() {
+    let env = env();
+    let name: String = env
+        .eval("return GetAvailableLocaleInfo()[1].localeName")
+        .unwrap();
+    assert_eq!(name, "enUS");
+}
+
+#[test]
+fn test_get_available_locale_info_returns_locale_id() {
+    let env = env();
+    let id: i32 = env
+        .eval("return GetAvailableLocaleInfo()[1].localeId")
+        .unwrap();
+    assert_eq!(id, 1);
+}
