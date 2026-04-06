@@ -270,3 +270,49 @@ fn test_mining_skill_line_in_spellbook() {
         .unwrap();
     assert_eq!(name, "Mining");
 }
+
+#[test]
+fn test_spellbook_item_info_blacksmithing_slot() {
+    let env = env();
+    let (name, spell_id): (String, i32) = env
+        .eval(
+            r#"
+            local n = C_SpellBook.GetNumSpellBookSkillLines()
+            for i = 1, n do
+                local line = C_SpellBook.GetSpellBookSkillLineInfo(i)
+                if line.name == "Blacksmithing" then
+                    local slot = line.itemIndexOffset + 1
+                    local info = C_SpellBook.GetSpellBookItemInfo(slot)
+                    return info.name, info.spellID
+                end
+            end
+            return "", 0
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Blacksmithing");
+    assert_eq!(spell_id, 2018);
+}
+
+#[test]
+fn test_spellbook_item_info_mining_passive() {
+    let env = env();
+    let (name, is_passive): (String, bool) = env
+        .eval(
+            r#"
+            local n = C_SpellBook.GetNumSpellBookSkillLines()
+            for i = 1, n do
+                local line = C_SpellBook.GetSpellBookSkillLineInfo(i)
+                if line.name == "Mining" then
+                    local slot = line.itemIndexOffset + 2
+                    local info = C_SpellBook.GetSpellBookItemInfo(slot)
+                    return info.name, info.isPassive
+                end
+            end
+            return "", false
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Mining");
+    assert!(is_passive);
+}
