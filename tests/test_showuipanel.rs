@@ -16,6 +16,13 @@ fn blizzard_ui_dir() -> PathBuf {
 }
 
 /// Blizzard addons needed for the panel system (dependency order).
+/// Extra addons needed for spellbook tests (loaded on demand in real WoW,
+/// but we load them explicitly here for deterministic testing).
+const SPELLBOOK_ADDONS: &[(&str, &str)] = &[
+    ("Blizzard_PlayerSpells", "Blizzard_PlayerSpells.toc"),
+];
+
+/// Blizzard addons needed for the panel system (dependency order).
 const PANEL_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
@@ -281,5 +288,43 @@ fn show_ui_panel_displaces_previous_occupant() {
             return "ok"
         "#).unwrap();
         assert_eq!(result, "ok", "Non-pushable panel should replace previous non-pushable occupant: {result}");
+    }
+}
+
+#[test]
+fn character_and_spellbook_coexist() {
+    test_timeout! {
+        let env = setup_env();
+
+        // Load PlayerSpells addon (normally LoD, loaded on demand)
+        let ui = blizzard_ui_dir();
+        for (name, toc) in SPELLBOOK_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if toc_path.exists() {
+                if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                    eprintln!("[load {name}] FAILED: {e}");
+                }
+            }
+        }
+
+        // CharacterFrame: area="left", pushable=3
+        // PlayerSpellsFrame: area="centerOrLeft", pushable=3, allowOtherPanels=1
+        // Both are pushable and allow other panels, so they coexist:
+        // Character stays in left slot, Spellbook goes to center.
+        let result: String = env.eval(r#"
+            if not CharacterFrame then return "no_char_frame" end
+            if not PlayerSpellsFrame then return "no_spellbook_frame" end
+
+            ShowUIPanel(CharacterFrame)
+            if not CharacterFrame:IsShown() then return "char_not_shown" end
+
+            ShowUIPanel(PlayerSpellsFrame)
+            if not PlayerSpellsFrame:IsShown() then return "spellbook_not_shown" end
+
+            -- Both should be visible: CharacterFrame in left, PlayerSpellsFrame in center
+            if not CharacterFrame:IsShown() then return "char_closed_unexpectedly" end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "Character and Spellbook panels should coexist (left + center): {result}");
     }
 }
