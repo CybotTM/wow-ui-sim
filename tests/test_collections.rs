@@ -125,6 +125,55 @@ fn pet_journal_num_collected_info() {
 }
 
 #[test]
+fn pet_journal_get_pet_info_by_index() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID, speciesID, owned, _, level, _, _, name, icon, petType
+                = C_PetJournal.GetPetInfoByIndex(1)
+            if name ~= "Mechanical Squirrel" then return "name=" .. tostring(name) end
+            if speciesID ~= 39 then return "species=" .. tostring(speciesID) end
+            if owned ~= true then return "owned=" .. tostring(owned) end
+            if level ~= 25 then return "level=" .. tostring(level) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetPetInfoByIndex: {result}");
+}
+
+#[test]
+fn pet_journal_get_pet_info_by_species_id() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local petID, speciesID, owned, _, _, _, _, name
+                = C_PetJournal.GetPetInfoBySpeciesID(254)
+            if name ~= "Lil' Ragnaros" then return "name=" .. tostring(name) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetPetInfoBySpeciesID: {result}");
+}
+
+#[test]
+fn pet_journal_get_pet_info_invalid() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local r = C_PetJournal.GetPetInfoByIndex(99)
+            return r == nil and "nil" or "not_nil"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "nil");
+}
+
+#[test]
 fn mount_journal_get_mount_info_extra_by_id() {
     let env = env();
     let result: String = env

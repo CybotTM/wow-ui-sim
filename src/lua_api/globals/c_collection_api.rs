@@ -23,7 +23,8 @@ pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
 /// C_PetJournal namespace - battle pet utilities.
 fn register_pet_journal(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    register_pet_count_methods(lua, &t, state)?;
+    register_pet_count_methods(lua, &t, Rc::clone(&state))?;
+    register_pet_info_methods(lua, &t, state)?;
     register_pet_info_stubs(lua, &t)?;
     lua.globals().set("C_PetJournal", t)?;
     Ok(())
@@ -51,10 +52,76 @@ fn register_pet_count_methods(
 }
 
 fn register_pet_info_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetPetInfoByIndex", lua.create_function(|_, _: i32| Ok(Value::Nil))?)?;
-    t.set("GetPetInfoByPetID", lua.create_function(|_, _: String| Ok(Value::Nil))?)?;
-    t.set("GetPetInfoBySpeciesID", lua.create_function(|_, _: i32| Ok(Value::Nil))?)?;
     t.set("PetIsSummonable", lua.create_function(|_, _: String| Ok(false))?)
+}
+
+fn register_pet_info_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetPetInfoByIndex", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, index: i32| {
+            let st = s.borrow();
+            let i = (index - 1) as usize;
+            let Some(p) = st.world.pets.get(i) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            build_pet_info_multi(lua, p)
+        }
+    })?)?;
+    t.set("GetPetInfoByPetID", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, pet_id: String| {
+            let st = s.borrow();
+            let Some(p) = st.world.pets.iter().find(|p| p.pet_id == pet_id) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            build_pet_info_multi(lua, p)
+        }
+    })?)?;
+    t.set("GetPetInfoBySpeciesID", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, species_id: u32| {
+            let st = s.borrow();
+            let Some(p) = st.world.pets.iter().find(|p| p.species_id == species_id) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            build_pet_info_multi(lua, p)
+        }
+    })?)?;
+    Ok(())
+}
+
+/// Build the multi-return for pet info queries.
+/// Returns: petID, speciesID, owned, customName, level, favorite, isRevoked,
+///          speciesName, icon, petType, companionID, tooltip, description,
+///          isWild, canBattle, isTradeable, isUnique, obtainable
+fn build_pet_info_multi(
+    lua: &Lua,
+    p: &crate::lua_api::state_types::PetData,
+) -> mlua::Result<mlua::MultiValue> {
+    Ok(mlua::MultiValue::from_vec(vec![
+        Value::String(lua.create_string(&p.pet_id)?),
+        Value::Integer(p.species_id as i64),
+        Value::Boolean(p.is_collected),
+        Value::Nil,                                    // customName
+        Value::Integer(p.level as i64),
+        Value::Boolean(false),                         // favorite
+        Value::Boolean(false),                         // isRevoked
+        Value::String(lua.create_string(&p.name)?),
+        Value::Integer(p.icon as i64),
+        Value::Integer(p.pet_type as i64),
+        Value::Integer(0),                             // companionID
+        Value::String(lua.create_string("")?),         // tooltip
+        Value::String(lua.create_string("")?),         // description
+        Value::Boolean(false),                         // isWild
+        Value::Boolean(true),                          // canBattle
+        Value::Boolean(false),                         // isTradeable
+        Value::Boolean(false),                         // isUnique
+        Value::Boolean(true),                          // obtainable
+    ]))
 }
 
 /// C_MountJournal namespace - mount collection.
