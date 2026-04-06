@@ -181,11 +181,20 @@ fn register_lfg_search_and_activity(
     t: &mlua::Table,
     state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
 ) -> Result<()> {
+    register_lfg_search_methods(lua, t, state)?;
+    register_lfg_activity_stubs(lua, t)
+}
+
+fn register_lfg_search_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     t.set("GetSearchResults", lua.create_function({
         let s = std::rc::Rc::clone(&state);
         move |lua, ()| {
             let st = s.borrow();
-            let active: Vec<&crate::lua_api::state_types::PremadeListing> =
+            let active: Vec<_> =
                 st.world.premade_listings.iter().filter(|l| !l.is_delisted).collect();
             let count = active.len() as i32;
             let results = lua.create_table()?;
@@ -196,16 +205,18 @@ fn register_lfg_search_and_activity(
         }
     })?)?;
     t.set("Search", lua.create_function({
-        let s = std::rc::Rc::clone(&state);
         move |lua, _args: mlua::MultiValue| {
-            let count = s.borrow().world.premade_listings.len();
+            let count = state.borrow().world.premade_listings.len();
             if count > 0 {
                 let fire: mlua::Function = lua.globals().get("FireEvent")?;
                 fire.call::<()>(("LFG_LIST_SEARCH_RESULTS_RECEIVED",))?;
             }
             Ok(())
         }
-    })?)?;
+    })?)
+}
+
+fn register_lfg_activity_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetActivityInfoTable", lua.create_function(|lua, activity_id: u32| {
         let tbl = lua.create_table()?;
         tbl.set("activityID", activity_id)?;
@@ -219,13 +230,12 @@ fn register_lfg_search_and_activity(
         tbl.set("isMythicPlusActivity", activity_id > 1000)?;
         Ok(tbl)
     })?)?;
-    t.set("GetActivityGroupInfo", lua.create_function(|lua, _group_id: u32| {
+    t.set("GetActivityGroupInfo", lua.create_function(|lua, _: u32| {
         Ok(lua.create_string("Dungeons")?)
     })?)?;
-    t.set("GetAvailableActivities", lua.create_function(|lua, _category_id: mlua::MultiValue| {
+    t.set("GetAvailableActivities", lua.create_function(|lua, _: mlua::MultiValue| {
         lua.create_table()
-    })?)?;
-    Ok(())
+    })?)
 }
 
 fn register_c_loss_of_control(lua: &Lua) -> Result<()> {
