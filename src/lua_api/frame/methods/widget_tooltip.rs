@@ -107,6 +107,7 @@ fn add_tooltip_doubleline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_tooltip_i32_stub(methods, "SetSpellByID");
     add_set_item_by_id(methods);
+    add_set_inventory_item(methods);
     add_set_hyperlink(methods);
     add_set_unit(methods);
     add_aura_tooltip_methods(methods);
@@ -171,6 +172,38 @@ fn add_set_item_by_id<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         };
         populate_item_tooltip(lua, this.0, item_id)?;
         fire_tooltip_script(lua, this.0, "OnTooltipSetItem")
+    });
+}
+
+fn add_set_inventory_item<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    // SetInventoryItem("player", slot) → hasItem, hasCooldown, repairCost
+    methods.add_method("SetInventoryItem", |lua, this, args: mlua::MultiValue| {
+        let mut iter = args.into_iter();
+        let _unit = iter.next(); // always "player" in practice
+        let slot = match iter.next() {
+            Some(Value::Integer(n)) => n as i32,
+            Some(Value::Number(n)) => n as i32,
+            _ => return Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false)])),
+        };
+        let state_rc = get_sim_state(lua);
+        let item_id = {
+            let st = state_rc.borrow();
+            st.player
+                .equipped_items
+                .get(&slot)
+                .map(|e| e.item_id)
+                .filter(|&id| id > 0)
+        };
+        let Some(id) = item_id else {
+            return Ok(mlua::MultiValue::from_vec(vec![Value::Boolean(false)]));
+        };
+        populate_item_tooltip(lua, this.0, id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetItem")?;
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::Boolean(true),  // hasItem
+            Value::Boolean(false), // hasCooldown
+            Value::Integer(0),     // repairCost
+        ]))
     });
 }
 

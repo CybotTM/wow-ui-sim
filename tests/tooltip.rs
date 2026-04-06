@@ -624,3 +624,37 @@ fn test_set_unit_invalid_returns_false() {
         .unwrap();
     assert!(!result, "SetUnit with invalid unit should return false");
 }
+
+#[test]
+fn test_set_inventory_item_shows_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            -- Slot 1 = Head, has default equipped item (Entombed Seraph's Casque)
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            local hasItem = GameTooltip:SetInventoryItem("player", 1)
+            if not hasItem then return "no_item" end
+            local lines = GameTooltip:NumLines()
+            if lines < 2 then return "lines=" .. tostring(lines) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "SetInventoryItem should populate tooltip: {result}");
+}
+
+#[test]
+fn test_set_inventory_item_empty_slot() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: bool = env
+        .eval(
+            r#"
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            -- Slot 4 = shirt, typically empty
+            return GameTooltip:SetInventoryItem("player", 4)
+            "#,
+        )
+        .unwrap();
+    assert!(!result, "Empty slot should return false");
+}
