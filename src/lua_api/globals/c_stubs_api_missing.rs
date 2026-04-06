@@ -490,6 +490,17 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     g.set(
+        "GetGroupMemberCounts",
+        lua.create_function(|lua, ()| {
+            let t = lua.create_table()?;
+            t.set("TANK", 0)?;
+            t.set("HEALER", 0)?;
+            t.set("DAMAGER", 0)?;
+            t.set("NOROLE", 0)?;
+            Ok(t)
+        })?,
+    )?;
+    g.set(
         "RequestGuildChallengeInfo",
         lua.create_function(|_, ()| Ok(()))?,
     )?;

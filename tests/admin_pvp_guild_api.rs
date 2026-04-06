@@ -202,6 +202,24 @@ fn test_get_guild_faction_group_nil_when_not_in_guild() {
 }
 
 // ============================================================================
+// GetGroupMemberCounts
+// ============================================================================
+
+#[test]
+fn test_get_group_member_counts_all_zero_when_solo() {
+    let env = env();
+    let total: i32 = env
+        .eval(
+            r#"
+            local c = GetGroupMemberCounts()
+            return c.TANK + c.HEALER + c.DAMAGER + c.NOROLE
+            "#,
+        )
+        .unwrap();
+    assert_eq!(total, 0);
+}
+
+// ============================================================================
 // RequestGuildChallengeInfo
 // ============================================================================
 
