@@ -43,13 +43,13 @@ fn register_timerunning_functions(lua: &Lua) -> Result<()> {
 /// Register BattleNet social functions.
 fn register_battlenet_functions(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    let bn_false = lua.create_function(|_, ()| Ok(false))?;
+    let bn_true = lua.create_function(|_, ()| Ok(true))?;
     for name in [
         "BNFeaturesEnabled",
         "BNFeaturesEnabledAndConnected",
         "BNConnected",
     ] {
-        g.set(name, bn_false.clone())?;
+        g.set(name, bn_true.clone())?;
     }
     g.set(
         "BNGetFriendInfo",
