@@ -294,3 +294,28 @@ fn builtin_open_merchant_fires_event() {
         .unwrap();
     assert_eq!(result, "ok", "Open Merchant should fire MERCHANT_SHOW: {result}");
 }
+
+#[test]
+fn builtin_open_guild_bank_fires_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("GUILDBANKFRAME_OPENED")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "GUILDBANKFRAME_OPENED" then fired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Open Guild Bank" then
+                    cmd.action()
+                    break
+                end
+            end
+            return fired and "ok" or "not_fired"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Open Guild Bank should fire GUILDBANKFRAME_OPENED: {result}");
+}

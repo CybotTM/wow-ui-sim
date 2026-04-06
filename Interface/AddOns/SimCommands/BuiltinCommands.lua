@@ -11,3 +11,7 @@ end, "UI Panels")
 SimCommands:Register("Open Merchant", "Fire MERCHANT_SHOW event", function()
     FireEvent("MERCHANT_SHOW")
 end, "UI Panels")
+
+SimCommands:Register("Open Guild Bank", "Fire GUILDBANKFRAME_OPENED event", function()
+    FireEvent("GUILDBANKFRAME_OPENED")
+end, "UI Panels")
