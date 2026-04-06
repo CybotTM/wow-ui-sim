@@ -21,9 +21,15 @@ fn is_region(wt: crate::widget::WidgetType) -> bool {
     )
 }
 
-/// DFS emit: parent frame, then its regions (sorted by draw_layer), then child
-/// frames (sorted by frame_level/raise_order/id, recursively).
-/// This ensures all descendants of a frame render as a contiguous group.
+/// DFS emit: parent frame, then its Texture regions (sorted by draw_layer),
+/// then child frames (recursively), then its FontString regions.
+///
+/// FontStrings are deferred past child frames so that parent text renders on top
+/// of child frame backgrounds.  In WoW's flat render model, all regions at the
+/// same frame_level are interleaved by draw_layer — ARTWORK FontStrings from a
+/// parent sort after BACKGROUND Textures from a child.  Our DFS groups by frame
+/// tree, so we approximate this by splitting regions into textures (before
+/// children) and fontstrings (after children).
 fn dfs_emit(
     id: u64,
     strata_idx: usize,
@@ -36,12 +42,22 @@ fn dfs_emit(
 
     let (mut regions, mut child_frames) = partition_children(f, strata_idx, widgets, visible);
     sort_regions(&mut regions, widgets);
-    out.extend(regions);
+
+    // Split: Texture/Line regions before children, FontStrings after.
+    let split = regions.partition_point(|&rid| {
+        widgets
+            .get(rid)
+            .map_or(true, |r| r.widget_type != crate::widget::WidgetType::FontString)
+    });
+    let (texture_regions, fontstring_regions) = regions.split_at(split);
+    out.extend_from_slice(texture_regions);
 
     sort_child_frames(&mut child_frames, widgets);
     for child_id in child_frames {
         dfs_emit(child_id, strata_idx, widgets, visible, out);
     }
+
+    out.extend_from_slice(fontstring_regions);
 }
 
 /// Split visible children into regions (textures/fontstrings) and child frames in same strata.
