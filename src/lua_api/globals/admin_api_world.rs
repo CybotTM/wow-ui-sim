@@ -133,8 +133,20 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         &mut state.world.earned_achievements
     })?;
     super::admin_api::set_fn(lua, t, "HasAchievement", {
-        let s = state;
+        let s = Rc::clone(&state);
         move |_, id: i32| Ok(s.borrow().world.earned_achievements.contains(&id))
+    })?;
+    super::admin_api::set_fn(lua, t, "EarnAchievement", {
+        let s = state;
+        move |lua, id: i32| {
+            s.borrow_mut().world.earned_achievements.insert(id);
+            let fire: mlua::Function = lua.globals().get("FireEvent")?;
+            fire.call::<()>(mlua::MultiValue::from_vec(vec![
+                Value::String(lua.create_string("ACHIEVEMENT_EARNED")?),
+                Value::Integer(id as i64),
+            ]))?;
+            Ok(())
+        }
     })?;
     Ok(())
 }

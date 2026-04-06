@@ -235,3 +235,29 @@ fn test_achievement_criteria_nil_for_invalid_index() {
         .unwrap();
     assert!(is_nil);
 }
+
+// ============================================================================
+// A_Admin.EarnAchievement
+// ============================================================================
+
+#[test]
+fn test_earn_achievement_sets_earned_and_fires_event() {
+    let env = env();
+    let (completed, event_fired): (bool, bool) = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("ACHIEVEMENT_EARNED")
+            f:SetScript("OnEvent", function(self, event, id)
+                if event == "ACHIEVEMENT_EARNED" and id == 6 then fired = true end
+            end)
+            A_Admin.EarnAchievement(6)
+            local _, _, _, c = GetAchievementInfo(6)
+            return c, fired
+            "#,
+        )
+        .unwrap();
+    assert!(completed);
+    assert!(event_fired);
+}
