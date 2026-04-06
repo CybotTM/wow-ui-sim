@@ -19,15 +19,7 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     apply_system_anchors(env);
     fix_action_bar_nan_size(env);
     fix_action_bar_scale(env);
-    register_override_helpers(env);
-    clear_edit_mode_overrides(env);
     reposition_managed_frames(env);
-}
-
-/// Register Lua helper functions used by clear_edit_mode_overrides.
-fn register_override_helpers(env: &WowLuaEnv) {
-    let _ = env.exec(CLEAR_FRAME_OVERRIDES_FN);
-    let _ = env.exec(REAPPLY_PRESET_ANCHOR_FN);
 }
 
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
@@ -102,72 +94,6 @@ fn fix_action_bar_scale(env: &WowLuaEnv) {
     "#,
     );
 }
-
-/// Clear EditMode method overrides and re-apply preset anchors for non-managed frames.
-///
-/// `OnSystemLoad` (line 10-17 of EditModeSystemTemplates.lua) replaces SetScale,
-/// SetPoint, and ClearAllPoints with Override versions that adjust offsets and
-/// track snapped frames. Since `__index` checks Lua fields before Rust methods
-/// (commit 73e6032), these overrides intercept all calls:
-///
-/// - `SetScaleOverride` adjusts anchor offsets via `offset * oldScale / newScale`,
-///   shifting FocusFrame x by +130px.
-/// - `SetPointOverride` expects 5 explicit args; when VerticalLayoutMixin calls
-///   the 3-arg `SetPoint("TOPRIGHT", x, y)`, the numbers are misinterpreted as
-///   relativeTo/relativePoint and offsets default to 0.
-///
-/// Fix: clear all overrides from fenv, then re-apply preset anchors via the
-/// Rust methods for non-managed frames. Managed frames get their position from
-/// the container layout (Layout → SetPoint), which requires the Rust method.
-fn clear_edit_mode_overrides(env: &WowLuaEnv) {
-    let _ = env.exec(CLEAR_OVERRIDES_LUA);
-}
-
-const CLEAR_OVERRIDES_LUA: &str = r#"
-    if not EditModeManagerFrame then return end
-    local emm = EditModeManagerFrame
-    local activeLayout = emm:GetActiveLayoutInfo()
-    if not activeLayout or not activeLayout.systems then return end
-    local lookup = {}
-    for _, sysInfo in ipairs(activeLayout.systems) do
-        local key = tostring(sysInfo.system) .. ":" .. tostring(sysInfo.systemIndex or 0)
-        lookup[key] = sysInfo
-    end
-    for _, frame in ipairs(emm.registeredSystemFrames) do
-        clear_frame_overrides(frame)
-        if not frame.isManagedFrame then
-            reapply_preset_anchor(frame, lookup)
-        end
-    end
-"#;
-
-/// Lua helper: clear SetPoint/SetScale/ClearAllPoints overrides from a frame's fenv.
-/// `rawset(userdata, ...)` fails, so we access the per-frame fields via
-/// `debug.getfenv(frame)[1]` which is the table checked by `__index`.
-const CLEAR_FRAME_OVERRIDES_FN: &str = r#"
-    function clear_frame_overrides(frame)
-        local env = debug.getfenv(frame)
-        if not env or not env[1] then return end
-        local t = env[1]
-        rawset(t, "SetPoint", nil)
-        rawset(t, "SetScale", nil)
-        rawset(t, "ClearAllPoints", nil)
-    end
-"#;
-
-/// Lua helper: re-apply a frame's preset anchor from the active layout.
-const REAPPLY_PRESET_ANCHOR_FN: &str = r#"
-    function reapply_preset_anchor(frame, lookup)
-        local key = tostring(frame.system) .. ":" .. tostring(frame.systemIndex or 0)
-        local sysInfo = lookup[key]
-        if not sysInfo or not sysInfo.anchorInfo then return end
-        local a = sysInfo.anchorInfo
-        local rel = a.relativeTo
-        if type(rel) == "string" then rel = _G[rel] or rel end
-        frame:ClearAllPoints()
-        frame:SetPoint(a.point, rel, a.relativePoint, a.offsetX, a.offsetY)
-    end
-"#;
 
 /// Re-run managed frame container layouts after edit mode initialization.
 ///
