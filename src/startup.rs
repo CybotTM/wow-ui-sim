@@ -7,6 +7,23 @@
 use crate::lua_api::WowLuaEnv;
 use crate::screen::ScreenKind;
 
+const GLUE_HIDE_CHAT: &str = r#"
+    if GeneralDockManager then GeneralDockManager:Hide() end
+    if ChatFrame1 then ChatFrame1:Hide() end
+    if ChatFrame1Tab then ChatFrame1Tab:Hide() end
+    if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
+"#;
+
+const GLUE_LOGIN_HIDE_CHAT: &str = r#"
+    if AllowChatFramesToShow and ChatFrame1 and not AllowChatFramesToShow(ChatFrame1) then
+        if GeneralDockManager then GeneralDockManager:Hide() end
+        if ChatFrame1 then ChatFrame1:Hide() end
+        if ChatFrame1Tab then ChatFrame1Tab:Hide() end
+        if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
+    end
+    if CharCustomizeFrame then CharCustomizeFrame:Hide() end
+"#;
+
 fn log_with_timestamp(env: &WowLuaEnv, message: &str) {
     let start_time = env.state().borrow().start_time;
     eprintln!("{} {}", crate::logging::elapsed_prefix(start_time), message);
@@ -141,47 +158,24 @@ fn fire_glue_startup_events(env: &WowLuaEnv, screen: ScreenKind) {
 }
 
 fn apply_glue_screen_visibility(env: &WowLuaEnv, screen: ScreenKind) {
-    let script = match screen {
+    let screen_name = match screen {
         ScreenKind::Game => return,
-        ScreenKind::CharacterSelect => {
-            r#"
-            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "charselect" then
-                if GeneralDockManager then GeneralDockManager:Hide() end
-                if ChatFrame1 then ChatFrame1:Hide() end
-                if ChatFrame1Tab then ChatFrame1Tab:Hide() end
-                if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
-            end
-            "#
-        }
-        ScreenKind::CharacterCreate => {
-            r#"
-            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "charcreate" then
-                if GeneralDockManager then GeneralDockManager:Hide() end
-                if ChatFrame1 then ChatFrame1:Hide() end
-                if ChatFrame1Tab then ChatFrame1Tab:Hide() end
-                if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
-            end
-            "#
-        }
-        ScreenKind::Login => {
-            r#"
-            if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == "login" then
-                if AllowChatFramesToShow and ChatFrame1 and not AllowChatFramesToShow(ChatFrame1) then
-                    if GeneralDockManager then GeneralDockManager:Hide() end
-                    if ChatFrame1 then ChatFrame1:Hide() end
-                    if ChatFrame1Tab then ChatFrame1Tab:Hide() end
-                    if ChatFrame1EditBox then ChatFrame1EditBox:Hide() end
-                end
-
-                if CharCustomizeFrame then
-                    CharCustomizeFrame:Hide()
-                end
-            end
-            "#
-        }
+        ScreenKind::CharacterSelect => "charselect",
+        ScreenKind::CharacterCreate => "charcreate",
+        ScreenKind::Login => "login",
     };
-
-    if let Err(e) = env.exec(script) {
+    let hide_chat = if screen == ScreenKind::Login {
+        // Login screen only hides chat when AllowChatFramesToShow returns false
+        GLUE_LOGIN_HIDE_CHAT
+    } else {
+        GLUE_HIDE_CHAT
+    };
+    let script = format!(
+        "if GlueParent_GetCurrentScreen and GlueParent_GetCurrentScreen() == \"{screen_name}\" then\n\
+         {hide_chat}\n\
+         end"
+    );
+    if let Err(e) = env.exec(&script) {
         log_with_timestamp(
             env,
             &format!("[Startup] glue visibility normalization failed: {e}"),
