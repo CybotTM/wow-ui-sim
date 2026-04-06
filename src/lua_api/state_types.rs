@@ -162,6 +162,21 @@ pub struct ToyData {
     pub is_usable: bool,
 }
 
+/// A premade group listing in the Group Finder.
+#[derive(Debug, Clone)]
+pub struct PremadeListing {
+    pub search_result_id: u32,
+    pub name: String,
+    pub comment: String,
+    pub leader_name: String,
+    pub activity_id: u32,
+    pub num_members: i32,
+    pub max_members: i32,
+    pub voice_chat: bool,
+    pub auto_accept: bool,
+    pub is_delisted: bool,
+}
+
 /// An item attachment in a mail message.
 #[derive(Debug, Clone)]
 pub struct MailAttachment {
