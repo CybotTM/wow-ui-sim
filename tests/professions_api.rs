@@ -234,3 +234,39 @@ fn test_mining_passive_spell_exists() {
         .unwrap();
     assert_eq!(name, "Mining");
 }
+
+#[test]
+fn test_blacksmithing_skill_line_in_spellbook() {
+    let env = env();
+    let name: String = env
+        .eval(
+            r#"
+            local n = C_SpellBook.GetNumSpellBookSkillLines()
+            for i = 1, n do
+                local info = C_SpellBook.GetSpellBookSkillLineInfo(i)
+                if info.name == "Blacksmithing" then return info.name end
+            end
+            return ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Blacksmithing");
+}
+
+#[test]
+fn test_mining_skill_line_in_spellbook() {
+    let env = env();
+    let name: String = env
+        .eval(
+            r#"
+            local n = C_SpellBook.GetNumSpellBookSkillLines()
+            for i = 1, n do
+                local info = C_SpellBook.GetSpellBookSkillLineInfo(i)
+                if info.name == "Mining" then return info.name end
+            end
+            return ""
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Mining");
+}

@@ -121,6 +121,18 @@ static RETRIBUTION_SPELLS: &[SpellBookEntry] = &[
     passive(269569), // Zeal
 ];
 
+/// Blacksmithing profession spells.
+static BLACKSMITHING_SPELLS: &[SpellBookEntry] = &[
+    spell(2018),  // Blacksmithing
+    spell(2657),  // Smelt Copper
+];
+
+/// Mining profession spells.
+static MINING_SPELLS: &[SpellBookEntry] = &[
+    spell(2575),    // Mining
+    passive(2576),  // Mining (passive)
+];
+
 /// All skill lines for a Protection Paladin, in WoW skill line index order.
 /// Index 1 = General, 2 = Class, 3 = MainSpec (Protection), 4+ = OffSpecs.
 static SKILL_LINES: &[SkillLineData] = &[
@@ -158,6 +170,20 @@ static SKILL_LINES: &[SkillLineData] = &[
         spec_id: Some(70),
         off_spec_id: Some(70),
         spells: RETRIBUTION_SPELLS,
+    },
+    SkillLineData {
+        name: "Blacksmithing",
+        icon_id: 136241,
+        spec_id: None,
+        off_spec_id: None,
+        spells: BLACKSMITHING_SPELLS,
+    },
+    SkillLineData {
+        name: "Mining",
+        icon_id: 136248,
+        spec_id: None,
+        off_spec_id: None,
+        spells: MINING_SPELLS,
     },
 ];
 
