@@ -48,7 +48,15 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
 fn setup_full_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    load_all_blizzard_addons(&env);
+    install_test_error_handler(&env);
+    fire_startup_events(&env);
+    // Drain startup errors — we only care about click errors
+    drain_test_errors(&env);
+    env
+}
 
+fn load_all_blizzard_addons(env: &WowLuaEnv) {
     let ui = blizzard_ui_dir();
     let addons = discover_blizzard_addons(&ui);
     for (name, toc_path) in &addons {
@@ -57,8 +65,9 @@ fn setup_full_ui() -> WowLuaEnv {
         }
     }
     env.apply_post_load_workarounds();
-    install_test_error_handler(&env);
+}
 
+fn fire_startup_events(env: &WowLuaEnv) {
     let lua = env.lua();
     let _ = env.fire_event_with_args(
         "ADDON_LOADED",
@@ -81,11 +90,6 @@ fn setup_full_ui() -> WowLuaEnv {
     }
     let _ = env.fire_on_update(0.016);
     let _ = env.process_timers();
-
-    // Drain startup errors — we only care about click errors
-    drain_test_errors(&env);
-
-    env
 }
 
 /// Click a frame by name, return errors. Skips if frame doesn't exist.
