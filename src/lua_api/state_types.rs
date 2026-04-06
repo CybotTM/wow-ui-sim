@@ -139,6 +139,19 @@ pub struct MountData {
     pub mount_type: u32,
 }
 
+/// A battle pet in the pet journal.
+#[derive(Debug, Clone)]
+pub struct PetData {
+    pub pet_id: String,
+    pub species_id: u32,
+    pub name: String,
+    pub icon: u32,
+    pub pet_type: i32,
+    pub level: i32,
+    pub quality: i32,
+    pub is_collected: bool,
+}
+
 /// An item attachment in a mail message.
 #[derive(Debug, Clone)]
 pub struct MailAttachment {
