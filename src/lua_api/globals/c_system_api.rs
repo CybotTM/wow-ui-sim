@@ -205,47 +205,58 @@ fn register_c_reputation(lua: &Lua) -> Result<mlua::Table> {
 
 /// Reputation stubs that don't need data.
 fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
-    t.set(
+    register_reputation_simple_stubs(t, lua)?;
+    register_reputation_header_collapse(t, lua)?;
+    register_reputation_state(t, lua)?;
+    Ok(())
+}
+
+/// Simple boolean/nil/noop reputation stubs.
+fn register_reputation_simple_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
+    for name in [
         "IsFactionParagon",
-        lua.create_function(|_, _id: i32| Ok(false))?,
-    )?;
-    t.set(
         "IsFactionParagonForCurrentPlayer",
-        lua.create_function(|_, _id: i32| Ok(false))?,
-    )?;
+        "IsAccountWideReputation",
+        "IsMajorFaction",
+    ] {
+        t.set(name, lua.create_function(|_, _id: i32| Ok(false))?)?;
+    }
     t.set(
         "GetFactionParagonInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
     t.set(
-        "SetWatchedFactionByID",
-        lua.create_function(|_, _id: i32| Ok(()))?,
+        "IsFactionActive",
+        lua.create_function(|_, _i: i32| Ok(true))?,
     )?;
+    for name in [
+        "SetWatchedFactionByID",
+        "SetSelectedFaction",
+        "SetFactionActive",
+        "RequestFactionParagonPreloadRewardData",
+    ] {
+        t.set(
+            name,
+            lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+        )?;
+    }
+    t.set("GetSelectedFaction", lua.create_function(|_, ()| Ok(0i32))?)?;
+    Ok(())
+}
+
+/// Expand/collapse faction header handlers.
+fn register_reputation_header_collapse(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "ExpandFactionHeader",
         lua.create_function(|_, visible_index: i32| {
-            let visible = visible_faction_indices();
-            if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
-                with_collapsed_headers(|c| {
-                    if let Some(v) = c.get_mut(actual_idx) {
-                        *v = false;
-                    }
-                });
-            }
+            set_header_collapsed(visible_index, false);
             Ok(())
         })?,
     )?;
     t.set(
         "CollapseFactionHeader",
         lua.create_function(|_, visible_index: i32| {
-            let visible = visible_faction_indices();
-            if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
-                with_collapsed_headers(|c| {
-                    if let Some(v) = c.get_mut(actual_idx) {
-                        *v = true;
-                    }
-                });
-            }
+            set_header_collapsed(visible_index, true);
             Ok(())
         })?,
     )?;
@@ -259,19 +270,39 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "CollapseAllFactionHeaders",
         lua.create_function(|_, ()| {
-            let list = super::reputation_data::faction_list();
-            with_collapsed_headers(|c| {
-                for (i, entry) in list.iter().enumerate() {
-                    if entry.is_header {
-                        if let Some(v) = c.get_mut(i) {
-                            *v = true;
-                        }
-                    }
-                }
-            });
+            collapse_all_headers();
             Ok(())
         })?,
     )?;
+    Ok(())
+}
+
+fn set_header_collapsed(visible_index: i32, collapsed: bool) {
+    let visible = visible_faction_indices();
+    if let Some(&actual_idx) = visible.get((visible_index - 1) as usize) {
+        with_collapsed_headers(|c| {
+            if let Some(v) = c.get_mut(actual_idx) {
+                *v = collapsed;
+            }
+        });
+    }
+}
+
+fn collapse_all_headers() {
+    let list = super::reputation_data::faction_list();
+    with_collapsed_headers(|c| {
+        for (i, entry) in list.iter().enumerate() {
+            if entry.is_header {
+                if let Some(v) = c.get_mut(i) {
+                    *v = true;
+                }
+            }
+        }
+    });
+}
+
+/// Thread-local reputation state getters/setters.
+fn register_reputation_state(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "GetReputationSortType",
         lua.create_function(|_, ()| REPUTATION_SORT_TYPE.with(|v| Ok(*v.borrow())))?,
@@ -293,31 +324,6 @@ fn register_c_reputation_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
             LEGACY_REPS_SHOWN.with(|v| *v.borrow_mut() = shown);
             Ok(())
         })?,
-    )?;
-    t.set("GetSelectedFaction", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "SetSelectedFaction",
-        lua.create_function(|_, _i: i32| Ok(()))?,
-    )?;
-    t.set(
-        "IsAccountWideReputation",
-        lua.create_function(|_, _id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "IsMajorFaction",
-        lua.create_function(|_, _id: i32| Ok(false))?,
-    )?;
-    t.set(
-        "IsFactionActive",
-        lua.create_function(|_, _i: i32| Ok(true))?,
-    )?;
-    t.set(
-        "SetFactionActive",
-        lua.create_function(|_, (_i, _a): (i32, bool)| Ok(()))?,
-    )?;
-    t.set(
-        "RequestFactionParagonPreloadRewardData",
-        lua.create_function(|_, _id: i32| Ok(()))?,
     )?;
     Ok(())
 }
