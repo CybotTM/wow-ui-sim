@@ -13,6 +13,7 @@ pub(crate) mod game_data;
 pub mod globals;
 mod globals_legacy;
 mod key_dispatch;
+mod string_format;
 pub(crate) mod keybindings;
 mod layout;
 pub(crate) mod loader_env;
