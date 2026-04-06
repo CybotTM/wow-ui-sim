@@ -70,6 +70,15 @@ SimCommands:Register("Leave Guild", "Leave current guild", function()
     A_Admin.LeaveGuild()
 end, "Player State")
 
+SimCommands:Register("Set Honor Level", "Change PvP honor level (1-500)", function()
+    SimCommands:Prompt("Enter honor level (1-500):", function(text)
+        local level = tonumber(text)
+        if level and level >= 1 and level <= 500 then
+            A_Admin.SetHonorLevel(level)
+        end
+    end)
+end, "Player State")
+
 SimCommands:Register("Set Player Level", "Change player level (1-80)", function()
     SimCommands:Prompt("Enter level (1-80):", function(text)
         local level = tonumber(text)

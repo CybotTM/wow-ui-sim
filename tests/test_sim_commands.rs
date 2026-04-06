@@ -496,3 +496,29 @@ fn builtin_leave_guild() {
         .unwrap();
     assert_eq!(result, "ok", "Leave Guild should clear guild: {result}");
 }
+
+#[test]
+fn builtin_set_honor_level() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Set Honor Level" then
+                    cmd.action()
+                    break
+                end
+            end
+            local input = SimCommandsPromptInput
+            if not input then return "no_input" end
+            input:SetText("25")
+            local enter = input:GetScript("OnEnterPressed")
+            enter(input)
+            local level = UnitHonorLevel("player")
+            if level == 25 then return "ok" end
+            return "level=" .. tostring(level)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Set Honor Level should apply: {result}");
+}
