@@ -297,3 +297,18 @@ fn get_inbox_text_nil_for_invalid() {
         .unwrap();
     assert_eq!(result, "nil");
 }
+
+#[test]
+fn get_inbox_invoice_info_returns_nil() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Sold", "Your item sold")
+            local r = GetInboxInvoiceInfo(1)
+            return r == nil and "nil" or "not_nil"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "nil", "Invoice info stub should return nil");
+}

@@ -8,7 +8,8 @@ pub fn register(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_get_inbox_header_info(lua, Rc::clone(&state))?;
     register_get_inbox_item_link(lua, Rc::clone(&state))?;
     register_get_inbox_item(lua, Rc::clone(&state))?;
-    register_get_inbox_text(lua, state)?;
+    register_get_inbox_text(lua, Rc::clone(&state))?;
+    register_get_inbox_invoice_info(lua, state)?;
     Ok(())
 }
 
@@ -134,5 +135,13 @@ fn register_get_inbox_text(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
                 Value::Boolean(false),
             ]))
         })?,
+    )
+}
+
+/// Stub — no auction house integration. Returns nil (no invoice).
+fn register_get_inbox_invoice_info(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "GetInboxInvoiceInfo",
+        lua.create_function(|_, _index: i32| Ok(mlua::MultiValue::new()))?,
     )
 }
