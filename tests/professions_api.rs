@@ -194,3 +194,25 @@ fn test_greatsword_recipe_has_three_reagents() {
         .unwrap();
     assert_eq!(count, 3);
 }
+
+// ============================================================================
+// Profession spells in SPELL_DB
+// ============================================================================
+
+#[test]
+fn test_blacksmithing_spell_exists() {
+    let env = env();
+    let name: String = env
+        .eval("return C_Spell.GetSpellInfo(2018).name")
+        .unwrap();
+    assert_eq!(name, "Blacksmithing");
+}
+
+#[test]
+fn test_smelt_copper_spell_exists() {
+    let env = env();
+    let name: String = env
+        .eval("return C_Spell.GetSpellInfo(2657).name")
+        .unwrap();
+    assert_eq!(name, "Smelt Copper");
+}
