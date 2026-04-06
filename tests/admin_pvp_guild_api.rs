@@ -189,6 +189,19 @@ fn test_guild_control_set_rank_does_not_error() {
 }
 
 // ============================================================================
+// GetGuildFactionGroup
+// ============================================================================
+
+#[test]
+fn test_get_guild_faction_group_nil_when_not_in_guild() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return GetGuildFactionGroup() == nil")
+        .unwrap();
+    assert!(is_nil);
+}
+
+// ============================================================================
 // RequestGuildChallengeInfo
 // ============================================================================
 
