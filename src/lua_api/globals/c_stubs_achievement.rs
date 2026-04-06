@@ -163,21 +163,22 @@ fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
     let desc = data.map(|a| a.description).unwrap_or("Achievement description");
     let points = data.map(|a| a.points).unwrap_or(10) as i64;
     let icon = data.map(|a| a.icon).unwrap_or(136243) as i64;
+    let (month, day, year) = if completed { (1, 15, 2025) } else { (0, 0, 0) };
     Ok(mlua::MultiValue::from_vec(vec![
-        Value::Integer(aid as i64),
-        Value::String(lua.create_string(name)?),
-        Value::Integer(points),
-        Value::Boolean(completed),
-        Value::Integer(if completed { 1 } else { 0 }),
-        Value::Integer(if completed { 1 } else { 0 }),
-        Value::Integer(2025),
-        Value::String(lua.create_string(desc)?),
-        Value::Integer(0),
-        Value::Integer(icon),
-        Value::String(lua.create_string("")?),
-        Value::Boolean(false),
-        Value::Boolean(false),
-        Value::Nil,
+        Value::Integer(aid as i64),          // id
+        Value::String(lua.create_string(name)?), // name
+        Value::Integer(points),              // points
+        Value::Boolean(completed),           // completed
+        Value::Integer(month),               // month
+        Value::Integer(day),                 // day
+        Value::Integer(year),                // year
+        Value::String(lua.create_string(desc)?), // description
+        Value::Integer(0),                   // flags
+        Value::Integer(icon),                // icon
+        Value::String(lua.create_string("")?), // rewardText
+        Value::Boolean(false),               // isGuild
+        Value::Boolean(completed),           // wasEarnedByMe
+        Value::Nil,                          // earnedBy
     ]))
 }
 

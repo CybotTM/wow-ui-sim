@@ -147,6 +147,35 @@ fn test_achievement_info_explore_elwynn() {
 }
 
 #[test]
+fn test_achievement_info_full_signature() {
+    let env = env();
+    env.exec("A_Admin.SetAchievementEarned(776, true)").unwrap();
+    let (id, name, points, completed, month, day, year, desc, flags, icon, reward, is_guild, was_earned): (
+        i32, String, i32, bool, i32, i32, i32, String, i32, i32, String, bool, bool,
+    ) = env
+        .eval(
+            r#"
+            local id, name, pts, comp, m, d, y, desc, fl, ic, rw, ig, we = GetAchievementInfo(776)
+            return id, name, pts, comp, m, d, y, desc, fl, ic, rw, ig, we
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 776);
+    assert_eq!(name, "Explore Elwynn Forest");
+    assert_eq!(points, 10);
+    assert!(completed);
+    assert_eq!(month, 1);
+    assert_eq!(day, 15);
+    assert_eq!(year, 2025);
+    assert_eq!(desc, "Explore Elwynn Forest, revealing the covered areas of the world map.");
+    assert_eq!(flags, 0);
+    assert_eq!(icon, 236809);
+    assert_eq!(reward, "");
+    assert!(!is_guild);
+    assert!(was_earned);
+}
+
+#[test]
 fn test_category_num_updates_with_earned() {
     let env = env();
     env.exec("A_Admin.SetAchievementEarned(6, true)").unwrap();
