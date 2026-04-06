@@ -570,39 +570,28 @@ fn hide_action_bar_overlays(lua: &Lua) {
 }
 
 fn hide_player_frame_overlays(lua: &Lua) {
-    let _ = lua
-        .load(
-            r#"
-        if not PlayerFrame then return end
-        local h = __hide_child
-        -- Container-level textures (vehicle/alternate overlays)
-        local pfc = PlayerFrame.PlayerFrameContainer
-        if pfc then
-            h(pfc, "VehicleFrameTexture")
-            h(pfc, "AlternatePowerFrameTexture")
-        end
-        -- Content-level: main overlays + contextual icons
-        local content = PlayerFrame.PlayerFrameContent
-        if content then
-            local main = content.PlayerFrameContentMain
-            if main then h(main, "StatusTexture") end
-            local ctx = content.PlayerFrameContentContextual
-            if ctx then
-                h(ctx, "LeaderIcon")
-                h(ctx, "GuideIcon")
-                h(ctx, "RoleIcon")
-                h(ctx, "AttackIcon")
-                h(ctx, "PlayerPortraitCornerIcon")
-                h(ctx, "PrestigePortrait")
-                h(ctx, "PrestigeBadge")
+    let _ = lua.load(HIDE_PLAYER_FRAME_OVERLAYS_LUA).exec();
+}
+
+const HIDE_PLAYER_FRAME_OVERLAYS_LUA: &str = r#"
+    if not PlayerFrame then return end
+    local h = __hide_child
+    local pfc = PlayerFrame.PlayerFrameContainer
+    if pfc then h(pfc, "VehicleFrameTexture"); h(pfc, "AlternatePowerFrameTexture") end
+    local content = PlayerFrame.PlayerFrameContent
+    if content then
+        local main = content.PlayerFrameContentMain
+        if main then h(main, "StatusTexture") end
+        local ctx = content.PlayerFrameContentContextual
+        if ctx then
+            for _, k in ipairs({"LeaderIcon","GuideIcon","RoleIcon","AttackIcon",
+                "PlayerPortraitCornerIcon","PrestigePortrait","PrestigeBadge"}) do
+                h(ctx, k)
             end
         end
-        -- Mana bar full-power glow
-        if PlayerFrame.manabar then h(PlayerFrame.manabar, "FullPowerFrame") end
-    "#,
-        )
-        .exec();
-}
+    end
+    if PlayerFrame.manabar then h(PlayerFrame.manabar, "FullPowerFrame") end
+"#;
 
 fn hide_micro_menu_flashes(lua: &Lua) {
     let _ = lua
