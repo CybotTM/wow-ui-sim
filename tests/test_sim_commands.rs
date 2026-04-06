@@ -402,3 +402,49 @@ fn builtin_add_gold_applies() {
         .unwrap();
     assert_eq!(result, "ok", "Add Gold should add 100g (1000000 copper): {result}");
 }
+
+#[test]
+fn builtin_equip_gear_presets_registered() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local found_seraph = false
+            local found_naked = false
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Equip: Entombed Seraph (ilvl 571)" then found_seraph = true end
+                if cmd.name == "Equip: Naked (no gear)" then found_naked = true end
+            end
+            if not found_seraph then return "missing_seraph" end
+            if not found_naked then return "missing_naked" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Gear presets should be registered: {result}");
+}
+
+#[test]
+fn builtin_equip_naked_clears_gear() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Default gear should have items
+            local before = GetInventoryItemID("player", 1)
+            if not before then return "no_default_gear" end
+            -- Run naked preset
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Equip: Naked (no gear)" then
+                    cmd.action()
+                    break
+                end
+            end
+            local after = GetInventoryItemID("player", 1)
+            if after then return "slot1_not_cleared=" .. tostring(after) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Naked preset should clear all gear: {result}");
+}
