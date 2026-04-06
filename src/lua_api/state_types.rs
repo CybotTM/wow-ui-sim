@@ -507,6 +507,7 @@ pub struct WorldState {
     pub collected_toys: HashSet<i32>,
     pub toys: Vec<ToyData>,
     pub earned_achievements: HashSet<i32>,
+    pub premade_listings: Vec<PremadeListing>,
 }
 
 impl Default for WorldState {
@@ -535,6 +536,7 @@ impl Default for WorldState {
             collected_toys: HashSet::new(),
             toys: default_toys(),
             earned_achievements: HashSet::new(),
+            premade_listings: Vec::new(),
         }
     }
 }
