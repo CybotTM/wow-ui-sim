@@ -211,6 +211,36 @@ fn test_default_guild_name() {
 }
 
 // ============================================================================
+// GuildQuit
+// ============================================================================
+
+#[test]
+fn test_guild_quit_clears_guild() {
+    let env = env();
+    assert!(env.eval::<bool>("return IsInGuild()").unwrap());
+    env.exec("GuildQuit()").unwrap();
+    assert!(!env.eval::<bool>("return IsInGuild()").unwrap());
+}
+
+#[test]
+fn test_guild_quit_fires_event() {
+    let env = env();
+    let fired: bool = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_GUILD_UPDATE")
+            f:SetScript("OnEvent", function() fired = true end)
+            GuildQuit()
+            return fired
+            "#,
+        )
+        .unwrap();
+    assert!(fired);
+}
+
+// ============================================================================
 // GuildControlGetNumRanks
 // ============================================================================
 

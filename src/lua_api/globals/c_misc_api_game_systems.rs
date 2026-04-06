@@ -409,7 +409,28 @@ fn register_global_account_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     )?;
     globals.set(
         "IsInGuild",
-        lua.create_function(move |_, ()| Ok(state.borrow().world.guild_name.is_some()))?,
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, ()| Ok(s.borrow().world.guild_name.is_some())
+        })?,
+    )?;
+    globals.set(
+        "GuildQuit",
+        lua.create_function({
+            let s = state;
+            move |lua, ()| {
+                let mut st = s.borrow_mut();
+                st.world.guild_name = None;
+                st.world.guild_rank = None;
+                st.world.guild_num_members = 0;
+                drop(st);
+                let fire: mlua::Function = lua.globals().get("FireEvent")?;
+                fire.call::<()>(mlua::MultiValue::from_vec(vec![Value::String(
+                    lua.create_string("PLAYER_GUILD_UPDATE")?,
+                )]))?;
+                Ok(())
+            }
+        })?,
     )?;
     globals.set(
         "GetGuildLogoInfo",
