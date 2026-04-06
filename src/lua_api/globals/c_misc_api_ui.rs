@@ -8,7 +8,7 @@
 //! - C_SpecializationInfo, C_SuperTrack
 //! - C_PlayerInteractionManager, C_PaperDollInfo, C_PerksProgram
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -527,6 +527,32 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     g.set("C_HousingBasicMode", basic)?;
+
+    let catalog: mlua::Table = match g.get::<Value>("C_HousingCatalog")? {
+        Value::Table(t) => t,
+        _ => lua.create_table()?,
+    };
+    catalog.set(
+        "CreateCatalogSearcher",
+        lua.create_function(|lua, _: MultiValue| {
+            let searcher = lua.create_table()?;
+            let ret_empty =
+                lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?;
+            searcher.set("GetAllSearchItems", ret_empty.clone())?;
+            searcher.set("GetCatalogSearchResults", ret_empty)?;
+            // Catch-all: any unknown method returns a noop function
+            let mt = lua.create_table()?;
+            mt.set(
+                "__index",
+                lua.create_function(|lua, (_t, _key): (Value, Value)| {
+                    lua.create_function(|_, _: MultiValue| Ok(Value::Nil))
+                })?,
+            )?;
+            searcher.set_metatable(Some(mt));
+            Ok(Value::Table(searcher))
+        })?,
+    )?;
+    g.set("C_HousingCatalog", catalog)?;
 
     Ok(())
 }
