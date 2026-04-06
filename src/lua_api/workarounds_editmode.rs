@@ -19,7 +19,6 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
     apply_system_anchors(env);
     fix_action_bar_nan_size(env);
     fix_action_bar_scale(env);
-    reposition_managed_frames(env);
 }
 
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
@@ -91,58 +90,6 @@ fn fix_action_bar_scale(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
         if MainActionBar then MainActionBar:SetScale(1) end
-    "#,
-    );
-}
-
-/// Re-run managed frame container layouts after edit mode initialization.
-///
-/// The VerticalLayoutMixin positions children via `SetPoint("TOPRIGHT", x, y)`,
-/// but the 3-arg SetPoint form silently drops offsets for some frames (likely
-/// related to frame re-creation). Using the explicit 5-arg `SetPoint` with the
-/// container as relativeTo works correctly. Re-run UpdateManagedFrames which
-/// triggers Layout() to reposition all managed children.
-fn reposition_managed_frames(env: &WowLuaEnv) {
-    position_right_managed_container(env);
-    position_bottom_managed_container(env);
-}
-
-/// Position UIParentRightManagedFrameContainer using EditMode default offsets.
-fn position_right_managed_container(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local f = UIParentRightManagedFrameContainer
-        if not f then return end
-        f:ClearAllPoints()
-        f:SetPoint("TOPRIGHT", UIParent, "TOPRIGHT", -5, -260)
-        local minimapHeight = 0
-        if MinimapCluster and MinimapCluster.GetHeight then
-            minimapHeight = MinimapCluster:GetHeight()
-        end
-        f.fixedHeight = UIParent:GetHeight() - minimapHeight - 100
-        f:Layout()
-        if f.BottomManagedLayoutContainer then
-            f.BottomManagedLayoutContainer:Layout()
-        end
-        f:UpdateManagedFrames()
-    "#,
-    );
-}
-
-/// Position UIParentBottomManagedFrameContainer at screen bottom center.
-fn position_bottom_managed_container(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local f = UIParentBottomManagedFrameContainer
-        if not f then return end
-        f.fixedWidth = 573
-        f:ClearAllPoints()
-        f:SetPoint("BOTTOM", UIParent, "BOTTOM", 0, 90)
-        f:Layout()
-        if f.BottomManagedLayoutContainer then
-            f.BottomManagedLayoutContainer:Layout()
-        end
-        f:UpdateManagedFrames()
     "#,
     );
 }
