@@ -115,3 +115,14 @@ fn test_get_category_info_unknown_returns_nil() {
         .unwrap();
     assert!(is_nil);
 }
+
+#[test]
+fn test_get_category_num_achievements_returns_three_values() {
+    let env = env();
+    let (total, completed, incomplete): (i32, i32, i32) = env
+        .eval("return GetCategoryNumAchievements(92)")
+        .unwrap();
+    assert_eq!(total, 0);
+    assert_eq!(completed, 0);
+    assert_eq!(incomplete, 0);
+}
