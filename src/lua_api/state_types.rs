@@ -152,6 +152,16 @@ pub struct PetData {
     pub is_collected: bool,
 }
 
+/// A toy in the toy box.
+#[derive(Debug, Clone)]
+pub struct ToyData {
+    pub item_id: u32,
+    pub name: String,
+    pub icon: u32,
+    pub is_collected: bool,
+    pub is_usable: bool,
+}
+
 /// An item attachment in a mail message.
 #[derive(Debug, Clone)]
 pub struct MailAttachment {
