@@ -244,3 +244,28 @@ fn builtin_open_mailbox_fires_event() {
         .unwrap();
     assert_eq!(result, "ok", "Open Mailbox should fire MAIL_SHOW: {result}");
 }
+
+#[test]
+fn builtin_open_bank_fires_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("BANKFRAME_OPENED")
+            f:SetScript("OnEvent", function(self, event)
+                if event == "BANKFRAME_OPENED" then fired = true end
+            end)
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Open Bank" then
+                    cmd.action()
+                    break
+                end
+            end
+            return fired and "ok" or "not_fired"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Open Bank should fire BANKFRAME_OPENED: {result}");
+}
