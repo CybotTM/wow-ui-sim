@@ -241,6 +241,30 @@ fn test_guild_quit_fires_event() {
 }
 
 // ============================================================================
+// A_Admin.JoinGuild
+// ============================================================================
+
+#[test]
+fn test_join_guild_sets_info_and_fires_event() {
+    let env = env();
+    env.exec("GuildQuit()").unwrap(); // start fresh
+    let (name, fired): (String, bool) = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_GUILD_UPDATE")
+            f:SetScript("OnEvent", function() fired = true end)
+            A_Admin.JoinGuild("Test Guild", "Officer", 42)
+            return (C_Guild.GetGuildInfo("player")), fired
+            "#,
+        )
+        .unwrap();
+    assert_eq!(name, "Test Guild");
+    assert!(fired);
+}
+
+// ============================================================================
 // GuildControlGetNumRanks
 // ============================================================================
 

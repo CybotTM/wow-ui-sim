@@ -189,6 +189,7 @@ fn register_pvp_guild_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
         }
     })?;
     add_guild_info_setter(lua, t, Rc::clone(&state))?;
+    add_join_guild(lua, t, Rc::clone(&state))?;
     add_clear_guild_setter(lua, t, state)?;
     Ok(())
 }
@@ -203,6 +204,26 @@ fn add_guild_info_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>
             state.world.guild_name = Some(name);
             state.world.guild_rank = Some(rank);
             state.world.guild_num_members = num_members;
+            Ok(())
+        },
+    )
+}
+
+fn add_join_guild(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    super::admin_api::set_fn(
+        lua,
+        t,
+        "JoinGuild",
+        move |lua, (name, rank, num_members): (String, String, i32)| {
+            let mut st = state.borrow_mut();
+            st.world.guild_name = Some(name);
+            st.world.guild_rank = Some(rank);
+            st.world.guild_num_members = num_members;
+            drop(st);
+            let fire: mlua::Function = lua.globals().get("FireEvent")?;
+            fire.call::<()>(mlua::MultiValue::from_vec(vec![Value::String(
+                lua.create_string("PLAYER_GUILD_UPDATE")?,
+            )]))?;
             Ok(())
         },
     )
