@@ -20,6 +20,7 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     globals.set("C_Navigation", register_c_navigation(lua)?)?;
     globals.set("C_TaxiMap", register_c_taxi_map(lua)?)?;
     globals.set("C_DeathInfo", register_c_death_info(lua)?)?;
+    globals.set("C_InvasionInfo", register_c_invasion_info(lua)?)?;
 
     Ok(())
 }
@@ -334,6 +335,24 @@ fn register_c_taxi_map(lua: &Lua) -> Result<mlua::Table> {
         lua.create_function(|_, _map_id: i32| Ok(true))?,
     )?;
 
+    Ok(t)
+}
+
+/// C_InvasionInfo — legion invasion data. No active invasions in the simulator.
+fn register_c_invasion_info(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    t.set(
+        "GetInvasionForUiMapID",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetInvasionInfo",
+        lua.create_function(|_, _invasion_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "AreInvasionsAvailable",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(t)
 }
 

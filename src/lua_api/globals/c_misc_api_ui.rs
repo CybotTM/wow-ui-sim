@@ -248,6 +248,15 @@ fn register_c_gossip_info(lua: &Lua) -> Result<()> {
         })?,
     )?;
     t.set("ForceGossip", lua.create_function(|_, ()| Ok(false))?)?;
+    // No active gossip POI in the simulator
+    t.set(
+        "GetPoiForUiMapID",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetPoiInfo",
+        lua.create_function(|_, (_map_id, _poi_id): (i32, i32)| Ok(Value::Nil))?,
+    )?;
     lua.globals().set("C_GossipInfo", t)?;
     Ok(())
 }
