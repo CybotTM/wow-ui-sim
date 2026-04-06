@@ -537,6 +537,13 @@ fn register_quest_global_functions(
             Ok((s.world.in_instance, s.world.instance_type.clone()))
         })?,
     )?;
+    register_quest_query_stubs(lua, &g)?;
+    register_quest_leaderboard_functions(lua, &g)?;
+    Ok(())
+}
+
+/// Stateless quest query/popup stubs.
+fn register_quest_query_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "IsQuestSequenced",
         lua.create_function(|_, _quest_id: i32| Ok(false))?,
@@ -590,7 +597,6 @@ fn register_quest_global_functions(
         "CollapseQuestHeader",
         lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?,
     )?;
-    register_quest_leaderboard_functions(lua, &g)?;
     Ok(())
 }
 
