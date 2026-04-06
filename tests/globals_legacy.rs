@@ -376,3 +376,59 @@ fn test_standard_font_objects_created() {
     let exists: bool = env.eval("return GameFontNormal ~= nil").unwrap();
     assert!(exists, "GameFontNormal should exist");
 }
+
+// ============================================================================
+// Quest log selection and description text
+// ============================================================================
+
+#[test]
+fn test_quest_log_set_get_selected() {
+    let env = env();
+    let (before, after): (i32, i32) = env
+        .eval(
+            r#"
+            local before = C_QuestLog.GetSelectedQuest()
+            C_QuestLog.SetSelectedQuest(80000)
+            return before, C_QuestLog.GetSelectedQuest()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(before, 0, "initially no quest selected");
+    assert_eq!(after, 80000, "SetSelectedQuest stores the ID");
+}
+
+#[test]
+fn test_get_quest_log_quest_text_returns_description() {
+    let env = env();
+    let (desc, obj): (String, String) = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(80000)
+            return GetQuestLogQuestText()
+        "#,
+        )
+        .unwrap();
+    assert!(
+        desc.contains("Ironforge expedition"),
+        "description should contain quest text, got: {desc}"
+    );
+    assert!(
+        obj.contains("Ironforge Relics"),
+        "objectives should contain objective text, got: {obj}"
+    );
+}
+
+#[test]
+fn test_get_quest_log_quest_text_no_selection() {
+    let env = env();
+    let (desc, obj): (String, String) = env
+        .eval(
+            r#"
+            C_QuestLog.SetSelectedQuest(0)
+            return GetQuestLogQuestText()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(desc, "", "no quest selected → empty description");
+    assert_eq!(obj, "", "no quest selected → empty objectives");
+}

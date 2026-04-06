@@ -4,6 +4,11 @@
 //! headers and quests with objectives. All quest APIs derive from this array.
 
 use mlua::{Lua, Result, Value};
+use std::cell::Cell;
+
+thread_local! {
+    static SELECTED_QUEST_ID: Cell<i32> = const { Cell::new(0) };
+}
 
 /// A quest objective (leaderboard entry).
 struct Objective {
@@ -20,6 +25,7 @@ enum QuestLogEntry {
     Quest {
         quest_id: i32,
         title: &'static str,
+        description: &'static str,
         objectives: &'static [Objective],
     },
 }
@@ -34,6 +40,7 @@ static QUEST_LOG: &[QuestLogEntry] = &[
     QuestLogEntry::Quest {
         quest_id: 80000,
         title: "The Lost Expedition",
+        description: "An old journal found near the quarry entrance describes an Ironforge expedition that went missing decades ago. Scattered relics hint at their path deeper underground. Collect what remains and piece together what happened.",
         objectives: &[
             Objective {
                 text: "Ironforge Relics collected: 3/5",
@@ -50,6 +57,7 @@ static QUEST_LOG: &[QuestLogEntry] = &[
     QuestLogEntry::Quest {
         quest_id: 80001,
         title: "Defending the Gates",
+        description: "The Stormwind gate guards are under constant pressure from the gnoll raiders that have been sighted along the forest road. Lend your strength to the defense until reinforcements arrive from Goldshire.",
         objectives: &[Objective {
             text: "Stormwind Guards defended: 7/10",
             obj_type: "monster",
@@ -59,6 +67,7 @@ static QUEST_LOG: &[QuestLogEntry] = &[
     QuestLogEntry::Quest {
         quest_id: 80002,
         title: "Supply Run",
+        description: "The quartermaster at the forward camp is running low on provisions. Gather supplies from the nearby farmsteads and deliver them before nightfall.",
         objectives: &[
             Objective {
                 text: "Supplies gathered: 5/5",
@@ -122,6 +131,7 @@ pub fn register_c_quest_api(lua: &Lua) -> Result<()> {
     globals.set("C_QuestLine", register_c_quest_line(lua)?)?;
     globals.set("C_QuestOffer", register_c_quest_offer(lua)?)?;
     globals.set("C_QuestSession", register_c_quest_session(lua)?)?;
+    register_quest_log_quest_text(lua)?;
     Ok(())
 }
 
@@ -133,6 +143,7 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
     register_quest_log_requests(lua, &t)?;
     register_quest_log_watch(lua, &t)?;
     register_quest_log_status(lua, &t)?;
+    register_quest_log_selection(lua, &t)?;
     t.set("HasActiveThreats", lua.create_function(|_, ()| Ok(false))?)?;
     t.set(
         "GetBountySetInfoForMapID",
@@ -393,6 +404,53 @@ fn register_quest_log_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetQuestDetailsTheme",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    Ok(())
+}
+
+/// Selected quest state and GetQuestLogQuestText.
+fn register_quest_log_selection(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "SetSelectedQuest",
+        lua.create_function(|_, id: i32| {
+            SELECTED_QUEST_ID.with(|c| c.set(id));
+            Ok(())
+        })?,
+    )?;
+    t.set(
+        "GetSelectedQuest",
+        lua.create_function(|_, ()| Ok(SELECTED_QUEST_ID.with(|c| c.get())))?,
+    )?;
+    Ok(())
+}
+
+/// Register GetQuestLogQuestText global.
+///
+/// Returns (description, objectives) for the currently selected quest.
+/// Called by QuestInfo_ShowDescriptionText and QuestInfo_ShowObjectivesText.
+pub fn register_quest_log_quest_text(lua: &Lua) -> Result<()> {
+    lua.globals().set(
+        "GetQuestLogQuestText",
+        lua.create_function(|_, ()| {
+            let quest_id = SELECTED_QUEST_ID.with(|c| c.get());
+            let Some((_, entry)) = find_quest_by_id(quest_id) else {
+                return Ok(("".to_string(), "".to_string()));
+            };
+            let QuestLogEntry::Quest {
+                description,
+                objectives,
+                ..
+            } = entry
+            else {
+                return Ok(("".to_string(), "".to_string()));
+            };
+            let obj_text = objectives
+                .iter()
+                .map(|o| o.text)
+                .collect::<Vec<_>>()
+                .join("\n");
+            Ok((description.to_string(), obj_text))
+        })?,
     )?;
     Ok(())
 }
