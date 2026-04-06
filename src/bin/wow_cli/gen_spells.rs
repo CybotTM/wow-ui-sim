@@ -416,7 +416,8 @@ fn collect_required_spell_ids() -> Result<BTreeSet<u32>, Box<dyn std::error::Err
 }
 
 const BASELINE_SPELL_IDS: &[u32] = &[
-    100, 116, 2018, 2657, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534, 1272143, 1279510,
+    100, 116, 2018, 2575, 2576, 2657, 1230084, 1232418, 1232421, 1234430, 1242031, 1247534,
+    1272143, 1279510,
 ];
 
 fn collect_ids_from_file(

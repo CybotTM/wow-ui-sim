@@ -216,3 +216,21 @@ fn test_smelt_copper_spell_exists() {
         .unwrap();
     assert_eq!(name, "Smelt Copper");
 }
+
+#[test]
+fn test_mining_spell_exists() {
+    let env = env();
+    let name: String = env
+        .eval("return C_Spell.GetSpellInfo(2575).name")
+        .unwrap();
+    assert_eq!(name, "Mining");
+}
+
+#[test]
+fn test_mining_passive_spell_exists() {
+    let env = env();
+    let name: String = env
+        .eval("return C_Spell.GetSpellInfo(2576).name")
+        .unwrap();
+    assert_eq!(name, "Mining");
+}
