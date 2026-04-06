@@ -182,23 +182,8 @@ fn emit_widget_text_quads(
     f: &crate::widget::Frame,
     layout: WidgetTextLayout<'_>,
 ) {
-    let color = [
-        f.text_color.r,
-        f.text_color.g,
-        f.text_color.b,
-        f.text_color.a * layout.alpha,
-    ];
-    let shadow = if f.shadow_color.a > 0.0 {
-        Some([
-            f.shadow_color.r,
-            f.shadow_color.g,
-            f.shadow_color.b,
-            f.shadow_color.a * layout.alpha,
-        ])
-    } else {
-        None
-    };
-    let scaled_font_size = f.font_size * f.effective_scale;
+    let color = color_with_alpha(&f.text_color, layout.alpha);
+    let shadow = (f.shadow_color.a > 0.0).then(|| color_with_alpha(&f.shadow_color, layout.alpha));
     emit_text_quads(
         text_renderer.batch,
         text_renderer.font_sys,
@@ -206,7 +191,7 @@ fn emit_widget_text_quads(
         layout.text,
         layout.bounds,
         f.font.as_deref(),
-        scaled_font_size,
+        f.font_size * f.effective_scale,
         color,
         layout.justify_h,
         layout.justify_v,
@@ -218,6 +203,10 @@ fn emit_widget_text_quads(
         layout.max_lines,
         f.text_stripped.as_deref(),
     );
+}
+
+fn color_with_alpha(c: &crate::widget::Color, alpha: f32) -> [f32; 4] {
+    [c.r, c.g, c.b, c.a * alpha]
 }
 
 struct WidgetTextRenderer<'a> {
