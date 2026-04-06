@@ -233,43 +233,10 @@ fn position_bottom_managed_container(env: &WowLuaEnv) {
 /// Also wraps EnterEditMode/ExitEditMode with pcall protection so edit
 /// mode can activate even when subsystems crash.
 pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
-    patch_get_setting_value(env);
     patch_apply_system_anchor_nil_guard(env);
     guard_action_bar_limits(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
-}
-
-/// Guard GetSettingValue against nil settingMap.
-///
-/// During startup events (VARIABLES_LOADED, PLAYER_ENTERING_WORLD), frames
-/// may have systemInfo set (IsInitialized() → true) but settingMap not yet
-/// populated (init_edit_mode_layout runs post-events). Return 0 when
-/// settingMap is nil or missing the requested setting, matching the
-/// IsInitialized() fallback behavior.
-fn patch_get_setting_value(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeSystemMixin then return end
-        function EditModeSystemMixin:GetSettingValue(setting, useRawValue)
-            if not self:IsInitialized() then
-                return 0
-            end
-            local compositeNumberValue = self:GetCompositeNumberSettingValue(setting, useRawValue)
-            if compositeNumberValue ~= nil then
-                return compositeNumberValue
-            end
-            if not self.settingMap or not self.settingMap[setting] then
-                return 0
-            end
-            if useRawValue then
-                return self.settingMap[setting].value
-            else
-                return self.settingMap[setting].displayValue or self.settingMap[setting].value
-            end
-        end
-    "#,
-    );
 }
 
 /// Guard ApplySystemAnchor against nil systemInfo.
