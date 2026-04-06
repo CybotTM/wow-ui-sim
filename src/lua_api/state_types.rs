@@ -127,6 +127,32 @@ pub struct GreatVaultActivity {
     pub level: i32,
 }
 
+/// An item attachment in a mail message.
+#[derive(Debug, Clone)]
+pub struct MailAttachment {
+    pub item_id: u32,
+    pub count: i32,
+    pub quality: i32,
+}
+
+/// A mail message in the player's inbox.
+#[derive(Debug, Clone)]
+pub struct MailMessage {
+    pub id: u64,
+    pub sender: String,
+    pub subject: String,
+    pub body: String,
+    pub money: u64,
+    pub cod_amount: u64,
+    pub items: Vec<MailAttachment>,
+    pub days_left: f32,
+    pub was_read: bool,
+    pub was_returned: bool,
+    pub can_reply: bool,
+    pub is_gm: bool,
+    pub stationery_icon: u32,
+}
+
 /// An item in a bag slot.
 #[derive(Debug, Clone)]
 pub struct BagItem {
