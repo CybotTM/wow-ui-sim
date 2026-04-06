@@ -368,6 +368,30 @@ fn default_equipped_items() -> HashMap<i32, EquippedItem> {
     .collect()
 }
 
+fn default_mounts() -> Vec<MountData> {
+    let m = |mount_id, name: &str, spell_id, icon, collected, mount_type| MountData {
+        mount_id,
+        name: name.to_string(),
+        spell_id,
+        icon,
+        is_collected: collected,
+        is_usable: collected,
+        mount_type,
+    };
+    vec![
+        m(6,    "Brown Horse",                  458,   132261, true,  230),  // Ground
+        m(18,   "Swift Palomino",               23338, 132261, true,  230),  // Ground
+        m(69,   "Swift Stormsaber",             23338, 132226, true,  230),  // Ground
+        m(107,  "Ashes of Al'ar",               40192, 132238, true,  248),  // Flying
+        m(219,  "Invincible",                   72286, 132226, true,  248),  // Flying
+        m(280,  "Traveler's Tundra Mammoth",    61425, 236241, true,  230),  // Ground (vendor)
+        m(376,  "Sandstone Drake",              93326, 656576, true,  248),  // Flying (2-person)
+        m(440,  "Grand Expedition Yak",         122708,646372, true,  230),  // Ground (vendor)
+        m(678,  "Llothien Prowler",             171851,1394955,true,  230),  // Ground
+        m(1039, "Mighty Caravan Brutosaur",     264058,2399241,false, 230),  // Ground (AH mount)
+    ]
+}
+
 /// World/instance state: zone, guild, collections, vault, loot.
 #[derive(Debug, Clone)]
 pub struct WorldState {
@@ -388,6 +412,7 @@ pub struct WorldState {
     pub loot_rolls: HashMap<i32, LootRollInfo>,
     pub collected_transmogs: HashSet<i32>,
     pub collected_mounts: HashSet<i32>,
+    pub mounts: Vec<MountData>,
     pub collected_pets: HashSet<i32>,
     pub collected_toys: HashSet<i32>,
     pub earned_achievements: HashSet<i32>,
@@ -413,6 +438,7 @@ impl Default for WorldState {
             loot_rolls: HashMap::new(),
             collected_transmogs: HashSet::new(),
             collected_mounts: HashSet::new(),
+            mounts: default_mounts(),
             collected_pets: HashSet::new(),
             collected_toys: HashSet::new(),
             earned_achievements: HashSet::new(),
