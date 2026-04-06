@@ -44,10 +44,10 @@ pub(super) fn bag_slot_count(bag: i32) -> i32 {
 
 /// Build the `containerInfo` table returned by `C_Container.GetContainerItemInfo`.
 fn build_container_item_info(lua: &Lua, item_id: u32, stack_count: i32) -> Result<Value> {
-    let (name, quality) = if let Some(item) = crate::items::get_item(item_id) {
-        (item.name, item.quality)
+    let (name, quality, icon) = if let Some(item) = crate::items::get_item(item_id) {
+        (item.name, item.quality, item.icon_file_data_id)
     } else {
-        ("Unknown", 1u8)
+        ("Unknown", 1u8, 134400)
     };
     let color = super::c_item_api::quality_color(quality);
     let link = format!(
@@ -56,7 +56,7 @@ fn build_container_item_info(lua: &Lua, item_id: u32, stack_count: i32) -> Resul
     );
     let t = lua.create_table()?;
     t.set("itemID", item_id)?;
-    t.set("iconFileID", 134400)?;
+    t.set("iconFileID", icon)?;
     t.set("stackCount", stack_count)?;
     t.set("quality", quality as i32)?;
     t.set("hyperlink", lua.create_string(&link)?)?;

@@ -350,6 +350,72 @@ fn test_c_container_default_stack_count_is_one() {
 }
 
 // ============================================================================
+// Default backpack items verification
+// ============================================================================
+
+#[test]
+fn test_default_backpack_hearthstone_slot1() {
+    let env = env();
+    let (id, stack, name): (i64, i32, String) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 1)
+            return info.itemID, info.stackCount, info.hyperlink
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 6948);
+    assert_eq!(stack, 1);
+    assert!(name.contains("Hearthstone"));
+}
+
+#[test]
+fn test_default_backpack_water_slot2() {
+    let env = env();
+    let (id, stack): (i64, i32) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 2)
+            return info.itemID, info.stackCount
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 159);
+    assert_eq!(stack, 5);
+}
+
+#[test]
+fn test_default_backpack_bread_slot3() {
+    let env = env();
+    let (id, stack): (i64, i32) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 3)
+            return info.itemID, info.stackCount
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 4540);
+    assert_eq!(stack, 5);
+}
+
+#[test]
+fn test_default_backpack_skinning_knife_slot4() {
+    let env = env();
+    let (id, stack, icon): (i64, i32, i64) = env
+        .eval(
+            r#"
+            local info = C_Container.GetContainerItemInfo(0, 4)
+            return info.itemID, info.stackCount, info.iconFileID
+            "#,
+        )
+        .unwrap();
+    assert_eq!(id, 7005);
+    assert_eq!(stack, 1);
+    assert_eq!(icon, 135637); // Skinning Knife icon
+}
+
+// ============================================================================
 // C_EncodingUtil
 // ============================================================================
 
