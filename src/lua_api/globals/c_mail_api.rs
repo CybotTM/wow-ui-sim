@@ -13,7 +13,8 @@ pub fn register(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_has_inbox_item(lua, Rc::clone(&state))?;
     register_inbox_item_can_delete(lua, Rc::clone(&state))?;
     register_check_inbox(lua, Rc::clone(&state))?;
-    register_c_mail(lua, state)?;
+    register_c_mail(lua, Rc::clone(&state))?;
+    register_inbox_actions(lua, state)?;
     Ok(())
 }
 
@@ -224,4 +225,81 @@ fn register_c_mail(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
         })?,
     )?;
     Ok(())
+}
+
+fn register_inbox_actions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_take_inbox_item(lua, Rc::clone(&state))?;
+    register_auto_loot_mail_item(lua, Rc::clone(&state))?;
+    register_delete_inbox_item(lua, Rc::clone(&state))?;
+    register_return_inbox_item(lua, state)?;
+    Ok(())
+}
+
+fn fire_mail_event(lua: &Lua, event: &str) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    fire.call::<()>((event,))
+}
+
+fn register_take_inbox_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "TakeInboxItem",
+        lua.create_function(move |lua, (index, slot): (i32, i32)| {
+            let mut st = state.borrow_mut();
+            let i = (index - 1) as usize;
+            let s = (slot - 1) as usize;
+            if let Some(mail) = st.player.inbox.get_mut(i) {
+                if s < mail.items.len() {
+                    mail.items.remove(s);
+                }
+            }
+            drop(st);
+            fire_mail_event(lua, "MAIL_SUCCESS")
+        })?,
+    )
+}
+
+fn register_auto_loot_mail_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "AutoLootMailItem",
+        lua.create_function(move |lua, index: i32| {
+            let mut st = state.borrow_mut();
+            let i = (index - 1) as usize;
+            if let Some(mail) = st.player.inbox.get_mut(i) {
+                mail.items.clear();
+                mail.money = 0;
+            }
+            drop(st);
+            fire_mail_event(lua, "MAIL_SUCCESS")
+        })?,
+    )
+}
+
+fn register_delete_inbox_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "DeleteInboxItem",
+        lua.create_function(move |lua, index: i32| {
+            let mut st = state.borrow_mut();
+            let i = (index - 1) as usize;
+            if i < st.player.inbox.len() {
+                st.player.inbox.remove(i);
+            }
+            drop(st);
+            fire_mail_event(lua, "MAIL_INBOX_UPDATE")
+        })?,
+    )
+}
+
+fn register_return_inbox_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "ReturnInboxItem",
+        lua.create_function(move |lua, index: i32| {
+            let mut st = state.borrow_mut();
+            let i = (index - 1) as usize;
+            if i < st.player.inbox.len() {
+                st.player.inbox.remove(i);
+            }
+            drop(st);
+            fire_mail_event(lua, "MAIL_INBOX_UPDATE")
+        })?,
+    )
 }

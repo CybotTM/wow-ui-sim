@@ -384,3 +384,77 @@ fn c_mail_has_inbox_money() {
         .unwrap();
     assert_eq!(result, "ok", "C_Mail.HasInboxMoney: {result}");
 }
+
+#[test]
+fn take_inbox_item_removes_attachment() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Won", "", 0, {{item_id=6948, count=1}, {item_id=159, count=5}})
+            TakeInboxItem(1, 1)
+            -- Should have 1 item left (the second one)
+            local has1 = HasInboxItem(1, 1)
+            local has2 = HasInboxItem(1, 2)
+            if not has1 then return "item1_gone" end
+            if has2 then return "item2_still" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "TakeInboxItem: {result}");
+}
+
+#[test]
+fn auto_loot_clears_all() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Won", "", 500, {{item_id=6948, count=1}})
+            AutoLootMailItem(1)
+            local _, _, _, _, money, _, _, itemCount = GetInboxHeaderInfo(1)
+            if money ~= 0 then return "money=" .. tostring(money) end
+            if itemCount ~= 0 then return "items=" .. tostring(itemCount) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "AutoLootMailItem: {result}");
+}
+
+#[test]
+fn delete_inbox_item_removes_mail() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S1", "B1")
+            A_Admin.AddMail("B", "S2", "B2")
+            DeleteInboxItem(1)
+            local num = GetInboxNumItems()
+            if num ~= 1 then return "count=" .. tostring(num) end
+            local _, _, sender = GetInboxHeaderInfo(1)
+            if sender ~= "B" then return "sender=" .. tostring(sender) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "DeleteInboxItem: {result}");
+}
+
+#[test]
+fn return_inbox_item_removes_mail() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S1", "B1")
+            ReturnInboxItem(1)
+            local num = GetInboxNumItems()
+            return tostring(num)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "0", "ReturnInboxItem should remove mail");
+}
