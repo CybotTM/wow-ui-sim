@@ -18,6 +18,22 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     super::workarounds_tracker::fire_quest_callbacks(env);
     hide_talent_loadout_dialogs(env);
     suppress_spellbook_tutorials(env);
+    attach_castbar_to_player_frame(env);
+}
+
+/// Attach PlayerCastingBarFrame to PlayerFrame (WoW's default position).
+///
+/// EditMode's `ApplySystemAnchor` normally handles this, but PlayerCastingBarFrame
+/// has nil systemInfo (no CastBar entry in the preset layout), so the anchor is
+/// never applied.  Call Blizzard's `PlayerFrame_AttachCastBar()` directly.
+fn attach_castbar_to_player_frame(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if PlayerFrame_AttachCastBar and PlayerCastingBarFrame then
+            pcall(PlayerFrame_AttachCastBar)
+        end
+        "#,
+    );
 }
 
 /// Apply targeted cleanup after a load-on-demand addon finishes loading.

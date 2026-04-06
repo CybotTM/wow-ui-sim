@@ -133,8 +133,8 @@ const POSITION_TESTS: &[TestCase] = &[
     ("minor_encounter_warnings",   "MinorEncounterWarnings",         550.0,  130.0,  500.0,  36.0, 1.0),
     // Managed containers
     ("right_managed_container",    "UIParentRightManagedFrameContainer", 1335.0, 260.0, 260.0, 847.0, 1.0),
-    // Casting bar (hidden — no active cast; position is wrong pending EditMode CastBar preset, see §12)
-    ("casting_bar",                "PlayerCastingBarFrame",              696.0,    0.0,  208.0,  11.0, 1.0),
+    // Casting bar (hidden — no active cast; attached to PlayerFrame via PlayerFrame_AttachCastBar)
+    ("casting_bar",                "PlayerCastingBarFrame",              326.0,  980.0,  150.0,  10.0, 1.0),
 ];
 
 /// ActionButton1 only checks x position (y/size depend on bar layout).
