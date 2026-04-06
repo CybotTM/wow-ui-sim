@@ -76,3 +76,42 @@ fn test_achievement_info_returns_id() {
         .unwrap();
     assert_eq!(id, 42);
 }
+
+// ============================================================================
+// Achievement Categories
+// ============================================================================
+
+#[test]
+fn test_get_category_list_returns_nine_categories() {
+    let env = env();
+    let count: i32 = env.eval("return #GetCategoryList()").unwrap();
+    assert_eq!(count, 9);
+}
+
+#[test]
+fn test_get_category_info_general() {
+    let env = env();
+    let (name, parent): (String, i32) = env
+        .eval("local n, p = GetCategoryInfo(92); return n, p")
+        .unwrap();
+    assert_eq!(name, "General");
+    assert_eq!(parent, -1);
+}
+
+#[test]
+fn test_get_category_info_feats_of_strength() {
+    let env = env();
+    let name: String = env
+        .eval("local n = GetCategoryInfo(81); return n")
+        .unwrap();
+    assert_eq!(name, "Feats of Strength");
+}
+
+#[test]
+fn test_get_category_info_unknown_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("local n = GetCategoryInfo(99999); return n == nil")
+        .unwrap();
+    assert!(is_nil);
+}

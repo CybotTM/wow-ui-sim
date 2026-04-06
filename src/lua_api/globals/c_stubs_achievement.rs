@@ -5,13 +5,42 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+struct AchievementCategory {
+    id: i32,
+    name: &'static str,
+    parent_id: i32,
+}
+
+static ACHIEVEMENT_CATEGORIES: &[AchievementCategory] = &[
+    AchievementCategory { id: 92, name: "General", parent_id: -1 },
+    AchievementCategory { id: 96, name: "Quests", parent_id: -1 },
+    AchievementCategory { id: 97, name: "Exploration", parent_id: -1 },
+    AchievementCategory { id: 95, name: "PvP", parent_id: -1 },
+    AchievementCategory { id: 168, name: "Dungeons & Raids", parent_id: -1 },
+    AchievementCategory { id: 169, name: "Professions", parent_id: -1 },
+    AchievementCategory { id: 201, name: "Reputation", parent_id: -1 },
+    AchievementCategory { id: 155, name: "World Events", parent_id: -1 },
+    AchievementCategory { id: 81, name: "Feats of Strength", parent_id: -1 },
+];
+
 /// Achievement category API stubs needed by Blizzard_AchievementUI at parse time.
 pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     register_achievement_empty_table_stubs(lua, &g)?;
     g.set(
         "GetCategoryInfo",
-        lua.create_function(|_, _: Value| Ok((Value::Nil, -1i32, -1i32)))?,
+        lua.create_function(|lua, id: Value| {
+            let cat_id = match &id {
+                Value::Integer(n) => *n as i32,
+                Value::Number(n) => *n as i32,
+                _ => return Ok((Value::Nil, -1i32, -1i32)),
+            };
+            let cat = ACHIEVEMENT_CATEGORIES.iter().find(|c| c.id == cat_id);
+            match cat {
+                Some(c) => Ok((Value::String(lua.create_string(c.name)?), c.parent_id, 0i32)),
+                None => Ok((Value::Nil, -1i32, -1i32)),
+            }
+        })?,
     )?;
     g.set(
         "GetCategoryNumAchievements",
@@ -33,9 +62,18 @@ pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
 }
 
 fn register_achievement_empty_table_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "GetCategoryList",
+        lua.create_function(|lua, ()| {
+            let t = lua.create_table()?;
+            for (i, cat) in ACHIEVEMENT_CATEGORIES.iter().enumerate() {
+                t.set(i + 1, cat.id)?;
+            }
+            Ok(t)
+        })?,
+    )?;
     let empty_table = lua.create_function(|lua, ()| lua.create_table())?;
     for name in [
-        "GetCategoryList",
         "GetGuildCategoryList",
         "GetStatisticsCategoryList",
     ] {
