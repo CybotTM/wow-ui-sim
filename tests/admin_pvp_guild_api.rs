@@ -265,6 +265,29 @@ fn test_join_guild_sets_info_and_fires_event() {
 }
 
 // ============================================================================
+// A_Admin.LeaveGuild
+// ============================================================================
+
+#[test]
+fn test_leave_guild_clears_and_fires_event() {
+    let env = env();
+    let (in_guild, fired): (bool, bool) = env
+        .eval(
+            r#"
+            local fired = false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("PLAYER_GUILD_UPDATE")
+            f:SetScript("OnEvent", function() fired = true end)
+            A_Admin.LeaveGuild()
+            return IsInGuild(), fired
+            "#,
+        )
+        .unwrap();
+    assert!(!in_guild);
+    assert!(fired);
+}
+
+// ============================================================================
 // GuildControlGetNumRanks
 // ============================================================================
 
