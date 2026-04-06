@@ -319,3 +319,55 @@ fn builtin_open_guild_bank_fires_event() {
         .unwrap();
     assert_eq!(result, "ok", "Open Guild Bank should fire GUILDBANKFRAME_OPENED: {result}");
 }
+
+#[test]
+fn builtin_set_player_level_shows_prompt() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Set Player Level" then
+                    cmd.action()
+                    break
+                end
+            end
+            local prompt = SimCommandsPrompt
+            if not prompt then return "no_prompt" end
+            if not prompt:IsShown() then return "not_shown" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Set Player Level should show prompt dialog: {result}");
+}
+
+#[test]
+fn builtin_set_player_level_applies() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Trigger the command to set up the prompt
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Set Player Level" then
+                    cmd.action()
+                    break
+                end
+            end
+            -- Simulate typing and pressing Enter
+            local input = SimCommandsPromptInput
+            if not input then return "no_input" end
+            input:SetText("42")
+            local enter = input:GetScript("OnEnterPressed")
+            if not enter then return "no_enter_handler" end
+            enter(input)
+            -- Verify
+            local level = UnitLevel("player")
+            if level == 42 then return "ok" end
+            return "level=" .. tostring(level)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Set Player Level should apply level 42: {result}");
+}

@@ -15,3 +15,12 @@ end, "UI Panels")
 SimCommands:Register("Open Guild Bank", "Fire GUILDBANKFRAME_OPENED event", function()
     FireEvent("GUILDBANKFRAME_OPENED")
 end, "UI Panels")
+
+SimCommands:Register("Set Player Level", "Change player level (1-80)", function()
+    SimCommands:Prompt("Enter level (1-80):", function(text)
+        local level = tonumber(text)
+        if level and level >= 1 and level <= 80 then
+            A_Admin.SetPlayerLevel(level)
+        end
+    end)
+end, "Player State")

@@ -248,3 +248,70 @@ end
 
 -- Create the minimap button at load time (does not depend on palette UI)
 CreateMinimapButton()
+
+---------------------------------------------------------------------------
+-- Input prompt dialog
+---------------------------------------------------------------------------
+
+local promptFrame, promptInput, promptLabel
+
+local function CreatePromptDialog()
+    if promptFrame then return end
+
+    promptFrame = CreateFrame("Frame", "SimCommandsPrompt", UIParent)
+    promptFrame:SetSize(300, 80)
+    promptFrame:SetPoint("CENTER", 0, 150)
+    promptFrame:SetFrameStrata("DIALOG")
+    promptFrame:SetFrameLevel(600)
+    promptFrame:EnableMouse(true)
+    promptFrame:Hide()
+
+    local bg = promptFrame:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.1, 0.1, 0.1, 0.95)
+
+    local border = promptFrame:CreateTexture(nil, "BORDER")
+    border:SetPoint("TOPLEFT", -1, 1)
+    border:SetPoint("BOTTOMRIGHT", 1, -1)
+    border:SetColorTexture(0.4, 0.4, 0.4, 1)
+
+    local inner = promptFrame:CreateTexture(nil, "ARTWORK")
+    inner:SetAllPoints()
+    inner:SetColorTexture(0.1, 0.1, 0.1, 0.95)
+
+    promptLabel = promptFrame:CreateFontString(nil, "OVERLAY")
+    promptLabel:SetFontObject(GameFontNormal or "GameFontNormal")
+    promptLabel:SetPoint("TOP", 0, -10)
+
+    promptInput = CreateFrame("EditBox", "SimCommandsPromptInput", promptFrame)
+    promptInput:SetSize(260, 24)
+    promptInput:SetPoint("BOTTOM", 0, 14)
+    promptInput:SetAutoFocus(false)
+    promptInput:SetFontObject(GameFontNormal or "GameFontNormal")
+    promptInput:SetTextInsets(8, 8, 0, 0)
+    promptInput:SetNumeric(true)
+
+    local inputBg = promptInput:CreateTexture(nil, "BACKGROUND")
+    inputBg:SetAllPoints()
+    inputBg:SetColorTexture(0.15, 0.15, 0.15, 1)
+
+    promptInput:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+        promptFrame:Hide()
+    end)
+end
+
+--- Show an input prompt. `callback(text)` is called when the user presses Enter.
+function SimCommands:Prompt(label, callback)
+    CreatePromptDialog()
+    promptLabel:SetText(label)
+    promptInput:SetText("")
+    promptInput:SetScript("OnEnterPressed", function(self)
+        local text = self:GetText()
+        self:ClearFocus()
+        promptFrame:Hide()
+        if callback then callback(text) end
+    end)
+    promptFrame:Show()
+    promptInput:SetFocus()
+end
