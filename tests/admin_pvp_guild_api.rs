@@ -48,6 +48,13 @@ fn test_get_send_mail_price_returns_30() {
 }
 
 #[test]
+fn test_get_web_ticket_returns_nil() {
+    let env = env();
+    let is_nil: bool = env.eval("return GetWebTicket() == nil").unwrap();
+    assert!(is_nil);
+}
+
+#[test]
 fn test_set_honor_level_zero() {
     let env = env();
     let level: i32 = env
