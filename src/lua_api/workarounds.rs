@@ -49,6 +49,7 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     stub_glow_emitter_factory(env);
+    init_raid_frame_divider_pools(env);
 }
 
 /// Blizzard's class talent loadout dialogs are hidden XML popups that should
@@ -82,6 +83,22 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         end
         if HelpTip then
             HelpTip:HideAllSystem("SpellBook Helptips")
+        end
+    "#,
+    );
+}
+
+/// CompactRaidFrameManager's OnLoad fails before creating divider pools
+/// (line 160), leaving `dividerVerticalPool`/`dividerHorizontalPool` nil.
+/// UpdateOptionsFlowContainer (line 473) then crashes accessing them.
+/// Initialize the pools if OnLoad didn't get far enough.
+fn init_raid_frame_divider_pools(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        local mgr = CompactRaidFrameManager
+        if mgr and not mgr.dividerVerticalPool then
+            mgr.dividerVerticalPool = CreateTexturePool(mgr, "ARTWORK", 0, "CRFManagerDividerVertical")
+            mgr.dividerHorizontalPool = CreateTexturePool(mgr, "ARTWORK", 0, "CRFManagerDividerHorizontal")
         end
     "#,
     );
