@@ -189,6 +189,16 @@ fn test_guild_control_set_rank_does_not_error() {
 }
 
 // ============================================================================
+// RequestGuildChallengeInfo
+// ============================================================================
+
+#[test]
+fn test_request_guild_challenge_info_does_not_error() {
+    let env = env();
+    env.eval::<()>("RequestGuildChallengeInfo()").unwrap();
+}
+
+// ============================================================================
 // GetAvailableLocaleInfo
 // ============================================================================
 

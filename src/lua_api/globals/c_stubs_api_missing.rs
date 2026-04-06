@@ -486,6 +486,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         })?,
     )?;
     g.set(
+        "RequestGuildChallengeInfo",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
         "GuildControlSetRank",
         lua.create_function(|_, _rank: i32| Ok(()))?,
     )?;
