@@ -62,3 +62,95 @@ fn sim_commands_default_category() {
         .unwrap();
     assert_eq!(cat, "General", "Default category should be 'General'");
 }
+
+#[test]
+fn sim_commands_filter_by_name() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            SimCommands:Register("Open Mailbox", "Show mail UI", function() end)
+            SimCommands:Register("Set Level", "Change player level", function() end)
+            SimCommands:Register("Open Bank", "Show bank UI", function() end)
+            return #SimCommands:Filter("open")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 2, "Filter 'open' should match 2 commands");
+}
+
+#[test]
+fn sim_commands_filter_by_description() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            SimCommands:Register("Do Thing", "mail related", function() end)
+            SimCommands:Register("Other", "unrelated", function() end)
+            return #SimCommands:Filter("mail")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1, "Filter 'mail' should match description");
+}
+
+#[test]
+fn sim_commands_filter_empty_returns_all() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            SimCommands:Register("A", "", function() end)
+            SimCommands:Register("B", "", function() end)
+            return #SimCommands:Filter("")
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 2, "Empty filter should return all commands");
+}
+
+#[test]
+fn sim_commands_toggle_shows_frame() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            SimCommands:Toggle()
+            local shown = SimCommands:IsShown()
+            SimCommands:Toggle()
+            local hidden = not SimCommands:IsShown()
+            if shown and hidden then return "ok" end
+            return "shown=" .. tostring(shown) .. " hidden=" .. tostring(hidden)
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Toggle should show then hide: {result}");
+}
+
+#[test]
+fn sim_commands_palette_frame_exists() {
+    let env = env();
+    let exists: bool = env
+        .eval(
+            r#"
+            SimCommands:Show()
+            return SimCommandsFrame ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(exists, "SimCommandsFrame should exist after Show()");
+}
+
+#[test]
+fn sim_commands_search_box_exists() {
+    let env = env();
+    let exists: bool = env
+        .eval(
+            r#"
+            SimCommands:Show()
+            return SimCommandsSearchBox ~= nil
+            "#,
+        )
+        .unwrap();
+    assert!(exists, "SimCommandsSearchBox should exist after Show()");
+}

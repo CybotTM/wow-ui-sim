@@ -13,3 +13,188 @@ end
 function SimCommands:GetCommands()
     return self.commands
 end
+
+-- Filter commands by substring match on name or description (case-insensitive).
+function SimCommands:Filter(query)
+    if not query or query == "" then
+        return self.commands
+    end
+    local q = query:lower()
+    local results = {}
+    for _, cmd in ipairs(self.commands) do
+        if cmd.name:lower():find(q, 1, true)
+            or cmd.description:lower():find(q, 1, true) then
+            table.insert(results, cmd)
+        end
+    end
+    return results
+end
+
+---------------------------------------------------------------------------
+-- UI: command palette frame
+---------------------------------------------------------------------------
+
+local MAX_VISIBLE_ROWS = 12
+local ROW_HEIGHT = 24
+local PANEL_WIDTH = 420
+local PANEL_HEIGHT = 42 + ROW_HEIGHT * MAX_VISIBLE_ROWS  -- editbox + rows
+
+local function CreatePaletteFrame()
+    local frame = CreateFrame("Frame", "SimCommandsFrame", UIParent)
+    frame:SetSize(PANEL_WIDTH, PANEL_HEIGHT)
+    frame:SetPoint("CENTER", 0, 100)
+    frame:SetFrameStrata("DIALOG")
+    frame:SetFrameLevel(500)
+    frame:Hide()
+    frame:EnableMouse(true)
+
+    -- Dark background
+    local bg = frame:CreateTexture(nil, "BACKGROUND")
+    bg:SetAllPoints()
+    bg:SetColorTexture(0.1, 0.1, 0.1, 0.92)
+
+    -- Border
+    local border = frame:CreateTexture(nil, "BORDER")
+    border:SetPoint("TOPLEFT", -1, 1)
+    border:SetPoint("BOTTOMRIGHT", 1, -1)
+    border:SetColorTexture(0.4, 0.4, 0.4, 1)
+
+    -- Inner background (covers border interior)
+    local inner = frame:CreateTexture(nil, "ARTWORK")
+    inner:SetAllPoints()
+    inner:SetColorTexture(0.1, 0.1, 0.1, 0.92)
+
+    return frame
+end
+
+local function CreateSearchBox(parent)
+    local box = CreateFrame("EditBox", "SimCommandsSearchBox", parent)
+    box:SetSize(PANEL_WIDTH - 16, 24)
+    box:SetPoint("TOP", 0, -8)
+    box:SetAutoFocus(false)
+    box:SetFontObject(GameFontNormal or "GameFontNormal")
+    box:SetTextInsets(8, 8, 0, 0)
+
+    local boxBg = box:CreateTexture(nil, "BACKGROUND")
+    boxBg:SetAllPoints()
+    boxBg:SetColorTexture(0.15, 0.15, 0.15, 1)
+
+    return box
+end
+
+local function CreateRow(parent, index)
+    local row = CreateFrame("Button", nil, parent)
+    row:SetSize(PANEL_WIDTH - 8, ROW_HEIGHT)
+    row:SetPoint("TOPLEFT", parent, "TOPLEFT", 4, -(36 + (index - 1) * ROW_HEIGHT))
+
+    local highlight = row:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetAllPoints()
+    highlight:SetColorTexture(0.3, 0.3, 0.5, 0.4)
+
+    row.nameText = row:CreateFontString(nil, "OVERLAY")
+    row.nameText:SetFontObject(GameFontNormal or "GameFontNormal")
+    row.nameText:SetPoint("LEFT", 8, 0)
+    row.nameText:SetJustifyH("LEFT")
+    row.nameText:SetWidth(PANEL_WIDTH - 24)
+    row.nameText:SetWordWrap(false)
+
+    row.command = nil
+    return row
+end
+
+---------------------------------------------------------------------------
+-- Palette controller
+---------------------------------------------------------------------------
+
+local palette  -- the Frame
+local searchBox
+local rows = {}
+local filteredCommands = {}
+
+local function RefreshRows()
+    filteredCommands = SimCommands:Filter(searchBox and searchBox:GetText() or "")
+    for i = 1, MAX_VISIBLE_ROWS do
+        local row = rows[i]
+        local cmd = filteredCommands[i]
+        if cmd then
+            local label = cmd.name
+            if cmd.description ~= "" then
+                label = label .. "  |cff888888" .. cmd.description .. "|r"
+            end
+            row.nameText:SetText(label)
+            row.command = cmd
+            row:Show()
+        else
+            row.nameText:SetText("")
+            row.command = nil
+            row:Hide()
+        end
+    end
+end
+
+local function InitUI()
+    if palette then return end
+
+    palette = CreatePaletteFrame()
+    searchBox = CreateSearchBox(palette)
+
+    for i = 1, MAX_VISIBLE_ROWS do
+        local row = CreateRow(palette, i)
+        row:SetScript("OnClick", function(self)
+            if self.command and self.command.action then
+                palette:Hide()
+                self.command.action()
+            end
+        end)
+        rows[i] = row
+    end
+
+    searchBox:SetScript("OnTextChanged", function()
+        RefreshRows()
+    end)
+
+    searchBox:SetScript("OnEscapePressed", function(self)
+        self:ClearFocus()
+        palette:Hide()
+    end)
+
+    searchBox:SetScript("OnEnterPressed", function(self)
+        -- Execute first matching command
+        if filteredCommands[1] and filteredCommands[1].action then
+            palette:Hide()
+            filteredCommands[1].action()
+        end
+    end)
+
+    palette:SetScript("OnShow", function()
+        searchBox:SetText("")
+        searchBox:SetFocus()
+        RefreshRows()
+    end)
+
+    palette:SetScript("OnHide", function()
+        searchBox:ClearFocus()
+    end)
+end
+
+function SimCommands:Toggle()
+    InitUI()
+    if palette:IsShown() then
+        palette:Hide()
+    else
+        palette:Show()
+    end
+end
+
+function SimCommands:Show()
+    InitUI()
+    palette:Show()
+end
+
+function SimCommands:Hide()
+    if palette then palette:Hide() end
+end
+
+function SimCommands:IsShown()
+    return palette and palette:IsShown() or false
+end
