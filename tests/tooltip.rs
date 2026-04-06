@@ -658,3 +658,45 @@ fn test_set_inventory_item_empty_slot() {
         .unwrap();
     assert!(!result, "Empty slot should return false");
 }
+
+#[test]
+fn test_set_inventory_item_tooltip_content() {
+    let env = WowLuaEnv::new().unwrap();
+    // Populate the tooltip for slot 1 (Head: Entombed Seraph's Casque, ilvl 571)
+    env.exec(
+        r#"
+        GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        GameTooltip:SetInventoryItem("player", 1)
+        "#,
+    )
+    .unwrap();
+
+    // Read tooltip lines from Rust state
+    let tooltip_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("GameTooltip")
+            .expect("GameTooltip not found")
+    };
+    let state = env.state().borrow();
+    let td = state.tooltips.get(&tooltip_id).expect("No tooltip data");
+
+    // Line 1: item name with quality color
+    assert_eq!(td.lines[0].left_text, "Entombed Seraph's Casque");
+    let (r, _g, _b) = td.lines[0].left_color;
+    assert!(r > 0.5, "Epic quality title should have purple/red color component");
+
+    // Line 2: item level
+    assert!(
+        td.lines[1].left_text.contains("571"),
+        "Second line should contain ilvl 571, got: {}",
+        td.lines[1].left_text
+    );
+
+    // Line 3: equip slot
+    assert!(
+        td.lines.len() >= 3,
+        "Should have at least 3 lines (name, ilvl, slot)"
+    );
+}
