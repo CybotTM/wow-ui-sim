@@ -181,3 +181,9 @@ fn test_guild_control_get_num_ranks_returns_zero_when_not_in_guild() {
     let ranks: i32 = env.eval("return GuildControlGetNumRanks()").unwrap();
     assert_eq!(ranks, 0);
 }
+
+#[test]
+fn test_guild_control_set_rank_does_not_error() {
+    let env = env();
+    env.eval::<()>("GuildControlSetRank(1)").unwrap();
+}
