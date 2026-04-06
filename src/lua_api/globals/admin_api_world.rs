@@ -135,41 +135,41 @@ fn register_economy_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>
 }
 
 fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_transmog_admin(lua, t, Rc::clone(&state))?;
+    register_toggle_setters(lua, t, Rc::clone(&state))?;
+    register_achievement_admin(lua, t, Rc::clone(&state))?;
+    register_collect_helpers(lua, t, state)
+}
+
+fn register_transmog_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     super::admin_api::set_fn(lua, t, "AddTransmog", {
         let s = Rc::clone(&state);
-        move |_, id: i32| {
-            s.borrow_mut().world.collected_transmogs.insert(id);
-            Ok(())
-        }
+        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.insert(id); Ok(()) }
     })?;
     super::admin_api::set_fn(lua, t, "RemoveTransmog", {
-        let s = Rc::clone(&state);
-        move |_, id: i32| {
-            s.borrow_mut().world.collected_transmogs.remove(&id);
-            Ok(())
-        }
-    })?;
-    add_world_toggle_setter(lua, t, "SetMountCollected", Rc::clone(&state), |state| {
-        &mut state.world.collected_mounts
-    })?;
-    add_world_toggle_setter(lua, t, "SetPetCollected", Rc::clone(&state), |state| {
-        &mut state.world.collected_pets
-    })?;
-    add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |state| {
-        &mut state.world.collected_toys
-    })?;
-    add_world_toggle_setter(lua, t, "SetAchievementEarned", Rc::clone(&state), |state| {
-        &mut state.world.earned_achievements
-    })?;
+        move |_, id: i32| { state.borrow_mut().world.collected_transmogs.remove(&id); Ok(()) }
+    })
+}
+
+fn register_toggle_setters(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    add_world_toggle_setter(lua, t, "SetMountCollected", Rc::clone(&state), |s| &mut s.world.collected_mounts)?;
+    add_world_toggle_setter(lua, t, "SetPetCollected", Rc::clone(&state), |s| &mut s.world.collected_pets)?;
+    add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |s| &mut s.world.collected_toys)?;
+    add_world_toggle_setter(lua, t, "SetAchievementEarned", state, |s| &mut s.world.earned_achievements)
+}
+
+fn register_achievement_admin(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     super::admin_api::set_fn(lua, t, "HasAchievement", {
         let s = Rc::clone(&state);
         move |_, id: i32| Ok(s.borrow().world.earned_achievements.contains(&id))
     })?;
-    register_collect_helpers(lua, t, Rc::clone(&state))?;
     super::admin_api::set_fn(lua, t, "EarnAchievement", {
-        let s = state;
         move |lua, id: i32| {
-            s.borrow_mut().world.earned_achievements.insert(id);
+            state.borrow_mut().world.earned_achievements.insert(id);
             let fire: mlua::Function = lua.globals().get("FireEvent")?;
             fire.call::<()>(mlua::MultiValue::from_vec(vec![
                 Value::String(lua.create_string("ACHIEVEMENT_EARNED")?),
@@ -177,8 +177,7 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
             ]))?;
             Ok(())
         }
-    })?;
-    Ok(())
+    })
 }
 
 fn register_collect_helpers(
