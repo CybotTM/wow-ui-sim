@@ -195,10 +195,19 @@ fn test_clear_guild_c_guild_is_in_guild_returns_false() {
 }
 
 #[test]
-fn test_not_in_guild_by_default() {
+fn test_in_guild_by_default() {
     let env = env();
     let in_guild: bool = env.eval("return IsInGuild()").unwrap();
-    assert!(!in_guild);
+    assert!(in_guild);
+}
+
+#[test]
+fn test_default_guild_name() {
+    let env = env();
+    let name: String = env
+        .eval("return (C_Guild.GetGuildInfo('player'))")
+        .unwrap();
+    assert_eq!(name, "Heroes of Azeroth");
 }
 
 // ============================================================================
