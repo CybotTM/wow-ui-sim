@@ -254,3 +254,39 @@ fn test_main_action_bar_size() {
         "MainActionBar should be 566x52 after layout"
     );
 }
+
+/// Verify the core EditMode enter/exit flow works without pcall.
+///
+/// AccountSettings:OnEditModeEnter/Exit are excluded — they call
+/// Setup/Refresh on ~30 optional frames (DurabilityFrame, TargetFrame, etc.)
+/// that may not be loaded in partial test environments.
+#[test]
+fn test_enter_exit_edit_mode_core_steps() {
+    let env = env_with_action_bar();
+    env.apply_post_event_workarounds();
+    let failures: String = env
+        .eval(
+            r#"
+            local emm = EditModeManagerFrame
+            local fails = {}
+            local function try(name, fn)
+                local ok, err = pcall(fn)
+                if not ok then fails[#fails+1] = name .. ": " .. tostring(err) end
+            end
+            emm.editModeActive = true
+            try("ClearActiveChangesFlags", function() emm:ClearActiveChangesFlags() end)
+            try("ShowSystemSelections", function() emm:ShowSystemSelections() end)
+            try("TriggerEvent_Enter", function() EventRegistry:TriggerEvent("EditMode.Enter") end)
+            emm.editModeActive = false
+            try("HideSystemSelections", function() emm:HideSystemSelections() end)
+            try("TriggerEvent_Exit", function() EventRegistry:TriggerEvent("EditMode.Exit") end)
+            return table.concat(fails, "\n")
+        "#,
+        )
+        .unwrap();
+    assert!(
+        failures.is_empty(),
+        "EditMode core steps should not crash:\n{}",
+        failures
+    );
+}
