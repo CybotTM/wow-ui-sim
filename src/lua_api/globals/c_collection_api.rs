@@ -10,7 +10,7 @@ use std::rc::Rc;
 /// Register collection-related C_* namespaces.
 pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_pet_journal(lua)?;
-    register_mount_journal(lua)?;
+    register_mount_journal(lua, Rc::clone(&state))?;
     register_toy_box(lua)?;
     register_transmog_collection(lua, state)?;
     register_transmog(lua)?;
@@ -53,18 +53,28 @@ fn register_pet_journal(lua: &Lua) -> Result<()> {
 }
 
 /// C_MountJournal namespace - mount collection.
-fn register_mount_journal(lua: &Lua) -> Result<()> {
+fn register_mount_journal(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    register_mount_info_methods(lua, &t)?;
+    register_mount_info_methods(lua, &t, state)?;
     register_mount_filter_methods(lua, &t)?;
     lua.globals().set("C_MountJournal", t)?;
     Ok(())
 }
 
 /// Mount info query methods: counts, GetMountInfoByID, GetMountIDs.
-fn register_mount_info_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    add_i32_stub(lua, t, "GetNumMounts", 0)?;
-    add_i32_stub(lua, t, "GetNumDisplayedMounts", 0)?;
+fn register_mount_info_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetNumMounts", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.mounts.len() as i32)
+    })?)?;
+    t.set("GetNumDisplayedMounts", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.mounts.len() as i32)
+    })?)?;
     t.set(
         "GetMountInfoByID",
         lua.create_function(|_, _mount_id: i32| empty_mount_info())?,
