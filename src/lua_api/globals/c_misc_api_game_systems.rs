@@ -219,10 +219,13 @@ fn register_c_club_finder(lua: &Lua) -> Result<()> {
         lua.create_function(|lua, _club_id: Value| lua.create_table())?,
     )?;
     lua.globals().set("C_ClubFinder", table)?;
+    init_communities_saved_vars(lua)
+}
 
-    // Initialize SavedVariablesPerCharacter that Blizzard_Communities expects.
-    // Normally set by InitSeenApplicants() on ADDON_LOADED, but OnShow can fire
-    // before that event is processed.
+/// Initialize SavedVariablesPerCharacter that Blizzard_Communities expects.
+/// Normally set by InitSeenApplicants() on ADDON_LOADED, but OnShow can fire
+/// before that event is processed.
+fn init_communities_saved_vars(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     if g.get::<Value>("g_clubIdToSeenApplicants")?.is_nil() {
         g.set("g_clubIdToSeenApplicants", lua.create_table()?)?;
