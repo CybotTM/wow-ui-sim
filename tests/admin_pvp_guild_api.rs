@@ -220,6 +220,19 @@ fn test_get_group_member_counts_all_zero_when_solo() {
 }
 
 // ============================================================================
+// UnitGroupRolesAssigned
+// ============================================================================
+
+#[test]
+fn test_unit_group_roles_assigned_returns_none() {
+    let env = env();
+    let role: String = env
+        .eval(r#"return UnitGroupRolesAssigned("player")"#)
+        .unwrap();
+    assert_eq!(role, "NONE");
+}
+
+// ============================================================================
 // RequestGuildChallengeInfo
 // ============================================================================
 

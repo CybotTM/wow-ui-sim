@@ -501,6 +501,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         })?,
     )?;
     g.set(
+        "UnitGroupRolesAssigned",
+        lua.create_function(|_, _unit: String| Ok("NONE"))?,
+    )?;
+    g.set(
         "RequestGuildChallengeInfo",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
