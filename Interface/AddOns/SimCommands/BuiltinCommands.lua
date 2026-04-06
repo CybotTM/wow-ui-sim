@@ -58,6 +58,18 @@ for _, preset in ipairs(GEAR_PRESETS) do
     end, "Player State")
 end
 
+SimCommands:Register("Join Guild", "Join a guild (prompts for name)", function()
+    SimCommands:Prompt("Enter guild name:", function(text)
+        if text and text ~= "" then
+            A_Admin.JoinGuild(text, "Member", 150)
+        end
+    end)
+end, "Player State")
+
+SimCommands:Register("Leave Guild", "Leave current guild", function()
+    A_Admin.LeaveGuild()
+end, "Player State")
+
 SimCommands:Register("Set Player Level", "Change player level (1-80)", function()
     SimCommands:Prompt("Enter level (1-80):", function(text)
         local level = tonumber(text)

@@ -289,8 +289,6 @@ local function CreatePromptDialog()
     promptInput:SetAutoFocus(false)
     promptInput:SetFontObject(GameFontNormal or "GameFontNormal")
     promptInput:SetTextInsets(8, 8, 0, 0)
-    promptInput:SetNumeric(true)
-
     local inputBg = promptInput:CreateTexture(nil, "BACKGROUND")
     inputBg:SetAllPoints()
     inputBg:SetColorTexture(0.15, 0.15, 0.15, 1)
@@ -302,10 +300,12 @@ local function CreatePromptDialog()
 end
 
 --- Show an input prompt. `callback(text)` is called when the user presses Enter.
-function SimCommands:Prompt(label, callback)
+--- Pass `numeric = true` in opts for number-only input.
+function SimCommands:Prompt(label, callback, opts)
     CreatePromptDialog()
     promptLabel:SetText(label)
     promptInput:SetText("")
+    promptInput:SetNumeric(opts and opts.numeric or false)
     promptInput:SetScript("OnEnterPressed", function(self)
         local text = self:GetText()
         self:ClearFocus()

@@ -448,3 +448,51 @@ fn builtin_equip_naked_clears_gear() {
         .unwrap();
     assert_eq!(result, "ok", "Naked preset should clear all gear: {result}");
 }
+
+#[test]
+fn builtin_join_guild() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Join Guild" then
+                    cmd.action()
+                    break
+                end
+            end
+            -- Simulate entering guild name
+            local input = SimCommandsPromptInput
+            if not input then return "no_input" end
+            input:SetText("Test Guild")
+            local enter = input:GetScript("OnEnterPressed")
+            enter(input)
+            if IsInGuild() then return "ok" end
+            return "not_in_guild"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Join Guild should set guild: {result}");
+}
+
+#[test]
+fn builtin_leave_guild() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- Start in a guild (default state)
+            if not IsInGuild() then return "not_in_guild_initially" end
+            for _, cmd in ipairs(SimCommands:GetCommands()) do
+                if cmd.name == "Leave Guild" then
+                    cmd.action()
+                    break
+                end
+            end
+            if IsInGuild() then return "still_in_guild" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "Leave Guild should clear guild: {result}");
+}
