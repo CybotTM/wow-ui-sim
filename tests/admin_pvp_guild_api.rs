@@ -233,6 +233,17 @@ fn test_unit_group_roles_assigned_returns_none() {
 }
 
 // ============================================================================
+// GetDungeonDifficultyID
+// ============================================================================
+
+#[test]
+fn test_get_dungeon_difficulty_id_returns_normal() {
+    let env = env();
+    let diff: i32 = env.eval("return GetDungeonDifficultyID()").unwrap();
+    assert_eq!(diff, 1);
+}
+
+// ============================================================================
 // RequestGuildChallengeInfo
 // ============================================================================
 
