@@ -119,39 +119,28 @@ fn register_c_console(lua: &Lua) -> Result<mlua::Table> {
 /// C_VoiceChat namespace - voice chat and TTS.
 fn register_c_voice_chat(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-
     t.set(
         "SpeakText",
-        lua.create_function(
-            |_, (_voice_id, _text, _dest, _rate, _volume): (i32, String, i32, i32, i32)| Ok(()),
-        )?,
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
     )?;
     t.set("StopSpeakingText", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("IsSpeakingText", lua.create_function(|_, ()| Ok(false))?)?;
     t.set(
         "GetTtsVoices",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set(
+    for name in [
+        "IsSpeakingText",
         "IsSpeakForMeActive",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    t.set(
         "IsTranscriptionAllowed",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    t.set("IsTranscribing", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set(
-        "GetActiveChannelType",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetActiveChannelID",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    t.set("IsMuted", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("IsLoggedIn", lua.create_function(|_, ()| Ok(false))?)?;
-
+        "IsTranscribing",
+        "IsMuted",
+        "IsLoggedIn",
+    ] {
+        t.set(name, lua.create_function(|_, ()| Ok(false))?)?;
+    }
+    for name in ["GetActiveChannelType", "GetActiveChannelID"] {
+        t.set(name, lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    }
     Ok(t)
 }
 
