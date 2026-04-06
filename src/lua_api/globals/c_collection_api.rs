@@ -79,9 +79,40 @@ fn register_mount_info_methods(
         "GetMountInfoByID",
         lua.create_function(|_, _mount_id: i32| empty_mount_info())?,
     )?;
+    register_get_displayed_mount_info(lua, t, Rc::clone(&state))?;
     add_empty_table_stub(lua, t, "GetMountIDs")?;
     add_i32_stub(lua, t, "GetNumMountsNeedingFanfare", 0)?;
     Ok(())
+}
+
+fn register_get_displayed_mount_info(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set("GetDisplayedMountInfo", lua.create_function(move |lua, index: i32| {
+        let st = state.borrow();
+        let i = (index - 1) as usize;
+        let Some(m) = st.world.mounts.get(i) else {
+            return Ok(mlua::MultiValue::new());
+        };
+        // name, spellID, icon, isActive, isUsable, sourceType,
+        // isFavorite, isFactionSpecific, faction, shouldHideOnChar, isCollected, mountID
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::String(lua.create_string(&m.name)?),
+            Value::Integer(m.spell_id as i64),
+            Value::Integer(m.icon as i64),
+            Value::Boolean(false),
+            Value::Boolean(m.is_usable),
+            Value::Integer(0),
+            Value::Boolean(false),
+            Value::Boolean(false),
+            Value::Nil,
+            Value::Boolean(false),
+            Value::Boolean(m.is_collected),
+            Value::Integer(m.mount_id as i64),
+        ]))
+    })?)
 }
 
 fn add_i32_stub(lua: &Lua, t: &mlua::Table, name: &str, value: i32) -> Result<()> {
