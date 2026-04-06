@@ -254,6 +254,21 @@ fn test_request_guild_challenge_info_does_not_error() {
 }
 
 // ============================================================================
+// GetLFGInfoServer
+// ============================================================================
+
+#[test]
+fn test_get_lfg_info_server_returns_not_queued() {
+    let env = env();
+    let (in_party, joined, queued): (bool, bool, bool) = env
+        .eval(r#"return GetLFGInfoServer(1, 0)"#)
+        .unwrap();
+    assert!(!in_party);
+    assert!(!joined);
+    assert!(!queued);
+}
+
+// ============================================================================
 // GetAvailableLocaleInfo
 // ============================================================================
 

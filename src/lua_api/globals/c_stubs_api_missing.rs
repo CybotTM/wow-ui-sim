@@ -450,6 +450,14 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetLFGQueuedList",
         lua.create_function(|_, _cat: Value| Ok(Value::Nil))?,
     )?;
+    // inParty, joined, queued, noPartialClear, achievements, lfgComment, slotCount,
+    // category, leader, tank, healer, dps
+    g.set(
+        "GetLFGInfoServer",
+        lua.create_function(|_, (_cat, _id): (Value, Value)| {
+            Ok((false, false, false, false, false, "", 0i32, 0i32, false, false, false, false))
+        })?,
+    )?;
     g.set(
         "GetLFGBootProposal",
         lua.create_function(|_, ()| {
