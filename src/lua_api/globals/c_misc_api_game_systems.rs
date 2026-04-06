@@ -29,45 +29,21 @@ fn challenge_mode_map_info(map_id: i32) -> Option<(&'static str, i32)> {
     }
 }
 
+const AFFIX_DATA: &[(i32, &str, &str, i64)] = &[
+    (9,   "Tyrannical",                      "Boss enemies have 20% more health and inflict up to 15% increased damage.", 236401),
+    (10,  "Fortified",                        "Non-boss enemies have 20% more health and inflict up to 30% increased damage.", 236402),
+    (160, "Challenger's Peril",               "Dying subtracts 15 seconds from time remaining.", 136120),
+    (148, "Xal'atath's Bargain: Ascendant",   "While in combat, Xal'atath rains down shadow upon players.", 4630473),
+    (147, "Xal'atath's Bargain: Frenzied",    "Non-boss enemies become frenzied at 30% health remaining.", 4630474),
+    (149, "Xal'atath's Bargain: Voidbound",   "Xal'atath opens void portals that empower nearby enemies.", 4630471),
+    (158, "Xal'atath's Bargain: Oblivion",    "Xal'atath tears open rifts to the void.", 4630472),
+];
+
 fn challenge_mode_affix_info(affix_id: i32) -> Option<(&'static str, &'static str, i64)> {
-    match affix_id {
-        9 => Some((
-            "Tyrannical",
-            "Boss enemies have 20% more health and inflict up to 15% increased damage.",
-            236401,
-        )),
-        10 => Some((
-            "Fortified",
-            "Non-boss enemies have 20% more health and inflict up to 30% increased damage.",
-            236402,
-        )),
-        160 => Some((
-            "Challenger's Peril",
-            "Dying subtracts 15 seconds from time remaining.",
-            136120,
-        )),
-        148 => Some((
-            "Xal'atath's Bargain: Ascendant",
-            "While in combat, Xal'atath rains down shadow upon players.",
-            4630473,
-        )),
-        147 => Some((
-            "Xal'atath's Bargain: Frenzied",
-            "Non-boss enemies become frenzied at 30% health remaining.",
-            4630474,
-        )),
-        149 => Some((
-            "Xal'atath's Bargain: Voidbound",
-            "Xal'atath opens void portals that empower nearby enemies.",
-            4630471,
-        )),
-        158 => Some((
-            "Xal'atath's Bargain: Oblivion",
-            "Xal'atath tears open rifts to the void.",
-            4630472,
-        )),
-        _ => None,
-    }
+    AFFIX_DATA
+        .iter()
+        .find(|(id, ..)| *id == affix_id)
+        .map(|(_, name, desc, icon)| (*name, *desc, *icon))
 }
 
 fn add_challenge_mode_map_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
