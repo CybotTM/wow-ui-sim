@@ -56,6 +56,7 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("GetPlayerPingScale", |_, _, ()| Ok(1.0_f64));
     methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method("StartPlayerPing", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
 }
 
