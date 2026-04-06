@@ -170,3 +170,14 @@ fn test_not_in_guild_by_default() {
     let in_guild: bool = env.eval("return IsInGuild()").unwrap();
     assert!(!in_guild);
 }
+
+// ============================================================================
+// GuildControlGetNumRanks
+// ============================================================================
+
+#[test]
+fn test_guild_control_get_num_ranks_returns_zero_when_not_in_guild() {
+    let env = env();
+    let ranks: i32 = env.eval("return GuildControlGetNumRanks()").unwrap();
+    assert_eq!(ranks, 0);
+}

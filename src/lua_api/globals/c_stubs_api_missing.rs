@@ -470,6 +470,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetNumRandomDungeons",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
+    g.set(
+        "GuildControlGetNumRanks",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     g.set("IsInGuild", lua.create_function(|_, ()| Ok(false))?)?;
     g.set(
         "GetGuildInfo",
