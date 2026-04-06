@@ -244,27 +244,7 @@ pub fn emit_frame_quads(
         WidgetType::Frame | WidgetType::StatusBar => {
             build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
         }
-        WidgetType::MessageFrame => {
-            build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha);
-            if let Some((fs, ga)) = text_ctx
-                && let Some(mf_map) = frame.message_frames
-            {
-                let mut render = MessageFrameTextRenderer {
-                    batch,
-                    font_sys: fs,
-                    glyph_atlas: ga,
-                };
-                emit_message_frame_text(
-                    &mut render,
-                    frame.widget,
-                    frame.id,
-                    frame.bounds,
-                    mf_map,
-                    frame.eff_alpha,
-                    frame.elapsed_secs,
-                );
-            }
-        }
+        WidgetType::MessageFrame => emit_message_frame_quads(batch, text_ctx, &frame),
         WidgetType::GameTooltip => {
             super::tooltip::build_tooltip_quads(
                 super::tooltip::TooltipRender {
@@ -280,120 +260,10 @@ pub fn emit_frame_quads(
         WidgetType::Minimap => {
             build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
         }
-        WidgetType::Button => {
-            build_button_quads(
-                batch,
-                frame.bounds,
-                frame.widget,
-                is_button_pressed(frame.widget, frame.id, frame.pressed_frame),
-                frame.hovered_frame == Some(frame.id),
-                frame.eff_alpha,
-            );
-            if !frame.widget.children_keys.contains_key("Text")
-                && let Some((fs, ga)) = text_ctx
-                && let Some(ref txt) = frame.widget.text
-            {
-                let mut text_renderer = WidgetTextRenderer {
-                    batch,
-                    font_sys: fs,
-                    glyph_atlas: ga,
-                };
-                emit_widget_text_quads(
-                    &mut text_renderer,
-                    frame.widget,
-                    WidgetTextLayout {
-                        text: txt,
-                        bounds: frame.bounds,
-                        justify_h: frame.widget.justify_h,
-                        justify_v: frame.widget.justify_v,
-                        word_wrap: false,
-                        max_lines: 0,
-                        alpha: frame.eff_alpha,
-                    },
-                );
-            }
-        }
-        WidgetType::Texture => {
-            if !frame.widget.is_mask {
-                let vert_before = batch.vertices.len();
-                build_texture_quads(
-                    batch,
-                    frame.bounds,
-                    frame.widget,
-                    frame.bar_fill,
-                    frame.eff_alpha,
-                );
-                if !frame.widget.mask_textures.is_empty() {
-                    apply_mask_texture(
-                        batch,
-                        vert_before,
-                        frame.bounds,
-                        &frame.widget.mask_textures,
-                        frame.registry,
-                    );
-                }
-            }
-        }
-        WidgetType::FontString => {
-            if let Some((fs, ga)) = text_ctx
-                && let Some(ref txt) = frame.widget.text
-            {
-                let mut text_renderer = WidgetTextRenderer {
-                    batch,
-                    font_sys: fs,
-                    glyph_atlas: ga,
-                };
-                emit_widget_text_quads(
-                    &mut text_renderer,
-                    frame.widget,
-                    WidgetTextLayout {
-                        text: txt,
-                        bounds: frame.bounds,
-                        justify_h: frame.widget.justify_h,
-                        justify_v: frame.widget.justify_v,
-                        word_wrap: frame.widget.word_wrap,
-                        max_lines: frame.widget.max_lines,
-                        alpha: frame.eff_alpha,
-                    },
-                );
-            }
-        }
-        WidgetType::CheckButton => {
-            build_button_quads(
-                batch,
-                frame.bounds,
-                frame.widget,
-                is_button_pressed(frame.widget, frame.id, frame.pressed_frame),
-                frame.hovered_frame == Some(frame.id),
-                frame.eff_alpha,
-            );
-            if let Some((fs, ga)) = text_ctx
-                && let Some(ref txt) = frame.widget.text
-            {
-                let label_bounds = Rectangle::new(
-                    Point::new(frame.bounds.x + 20.0, frame.bounds.y),
-                    Size::new(frame.bounds.width - 20.0, frame.bounds.height),
-                );
-                let mut text_renderer = WidgetTextRenderer {
-                    batch,
-                    font_sys: fs,
-                    glyph_atlas: ga,
-                };
-                emit_widget_text_quads(
-                    &mut text_renderer,
-                    frame.widget,
-                    WidgetTextLayout {
-                        text: txt,
-                        bounds: label_bounds,
-                        justify_h: TextJustify::Left,
-                        justify_v: TextJustify::Center,
-                        word_wrap: false,
-                        max_lines: 0,
-                        alpha: frame.eff_alpha,
-                    },
-                );
-            }
-        }
+        WidgetType::Button => emit_button_quads_with_text(batch, text_ctx, &frame),
+        WidgetType::Texture => emit_texture_quads_with_mask(batch, &frame),
+        WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, &frame),
+        WidgetType::CheckButton => emit_checkbutton_quads(batch, text_ctx, &frame),
         WidgetType::EditBox => {
             emit_editbox_with_text(batch, frame.bounds, frame.widget, text_ctx, frame.eff_alpha);
         }
@@ -410,6 +280,163 @@ pub fn emit_frame_quads(
         && frame.widget.rotation == 0.0
     {
         clip_recent_quads(batch, vert_before, clip_bounds);
+    }
+}
+
+fn emit_message_frame_quads(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
+    build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha);
+    if let Some((fs, ga)) = text_ctx
+        && let Some(mf_map) = frame.message_frames
+    {
+        let mut render = MessageFrameTextRenderer {
+            batch,
+            font_sys: fs,
+            glyph_atlas: ga,
+        };
+        emit_message_frame_text(
+            &mut render,
+            frame.widget,
+            frame.id,
+            frame.bounds,
+            mf_map,
+            frame.eff_alpha,
+            frame.elapsed_secs,
+        );
+    }
+}
+
+fn emit_button_quads_with_text(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
+    build_button_quads(
+        batch,
+        frame.bounds,
+        frame.widget,
+        is_button_pressed(frame.widget, frame.id, frame.pressed_frame),
+        frame.hovered_frame == Some(frame.id),
+        frame.eff_alpha,
+    );
+    if !frame.widget.children_keys.contains_key("Text")
+        && let Some((fs, ga)) = text_ctx
+        && let Some(ref txt) = frame.widget.text
+    {
+        let mut text_renderer = WidgetTextRenderer {
+            batch,
+            font_sys: fs,
+            glyph_atlas: ga,
+        };
+        emit_widget_text_quads(
+            &mut text_renderer,
+            frame.widget,
+            WidgetTextLayout {
+                text: txt,
+                bounds: frame.bounds,
+                justify_h: frame.widget.justify_h,
+                justify_v: frame.widget.justify_v,
+                word_wrap: false,
+                max_lines: 0,
+                alpha: frame.eff_alpha,
+            },
+        );
+    }
+}
+
+fn emit_texture_quads_with_mask(batch: &mut QuadBatch, frame: &FrameQuadEmit<'_>) {
+    if frame.widget.is_mask {
+        return;
+    }
+    let vert_before = batch.vertices.len();
+    build_texture_quads(
+        batch,
+        frame.bounds,
+        frame.widget,
+        frame.bar_fill,
+        frame.eff_alpha,
+    );
+    if !frame.widget.mask_textures.is_empty() {
+        apply_mask_texture(
+            batch,
+            vert_before,
+            frame.bounds,
+            &frame.widget.mask_textures,
+            frame.registry,
+        );
+    }
+}
+
+fn emit_fontstring_quads(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
+    if let Some((fs, ga)) = text_ctx
+        && let Some(ref txt) = frame.widget.text
+    {
+        let mut text_renderer = WidgetTextRenderer {
+            batch,
+            font_sys: fs,
+            glyph_atlas: ga,
+        };
+        emit_widget_text_quads(
+            &mut text_renderer,
+            frame.widget,
+            WidgetTextLayout {
+                text: txt,
+                bounds: frame.bounds,
+                justify_h: frame.widget.justify_h,
+                justify_v: frame.widget.justify_v,
+                word_wrap: frame.widget.word_wrap,
+                max_lines: frame.widget.max_lines,
+                alpha: frame.eff_alpha,
+            },
+        );
+    }
+}
+
+fn emit_checkbutton_quads(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
+    build_button_quads(
+        batch,
+        frame.bounds,
+        frame.widget,
+        is_button_pressed(frame.widget, frame.id, frame.pressed_frame),
+        frame.hovered_frame == Some(frame.id),
+        frame.eff_alpha,
+    );
+    if let Some((fs, ga)) = text_ctx
+        && let Some(ref txt) = frame.widget.text
+    {
+        let label_bounds = Rectangle::new(
+            Point::new(frame.bounds.x + 20.0, frame.bounds.y),
+            Size::new(frame.bounds.width - 20.0, frame.bounds.height),
+        );
+        let mut text_renderer = WidgetTextRenderer {
+            batch,
+            font_sys: fs,
+            glyph_atlas: ga,
+        };
+        emit_widget_text_quads(
+            &mut text_renderer,
+            frame.widget,
+            WidgetTextLayout {
+                text: txt,
+                bounds: label_bounds,
+                justify_h: TextJustify::Left,
+                justify_v: TextJustify::Center,
+                word_wrap: false,
+                max_lines: 0,
+                alpha: frame.eff_alpha,
+            },
+        );
     }
 }
 
