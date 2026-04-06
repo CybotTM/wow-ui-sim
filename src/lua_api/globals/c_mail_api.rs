@@ -7,7 +7,8 @@ pub fn register(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_get_inbox_num_items(lua, Rc::clone(&state))?;
     register_get_inbox_header_info(lua, Rc::clone(&state))?;
     register_get_inbox_item_link(lua, Rc::clone(&state))?;
-    register_get_inbox_item(lua, state)?;
+    register_get_inbox_item(lua, Rc::clone(&state))?;
+    register_get_inbox_text(lua, state)?;
     Ok(())
 }
 
@@ -107,6 +108,29 @@ fn register_get_inbox_item(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()
                 Value::Integer(attach.count as i64),
                 Value::Integer(quality as i64),
                 Value::Boolean(true),
+                Value::Boolean(false),
+            ]))
+        })?,
+    )
+}
+
+fn register_get_inbox_text(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "GetInboxText",
+        lua.create_function(move |lua, index: i32| {
+            let st = state.borrow();
+            let i = (index - 1) as usize;
+            let Some(mail) = st.player.inbox.get(i) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            let has_items = !mail.items.is_empty();
+            // (bodyText, stationeryID1, stationeryID2, isTakeable, isInvoice, isConsortium)
+            Ok(mlua::MultiValue::from_vec(vec![
+                Value::String(lua.create_string(&mail.body)?),
+                Value::Integer(0),
+                Value::Integer(0),
+                Value::Boolean(has_items || mail.money > 0),
+                Value::Boolean(false),
                 Value::Boolean(false),
             ]))
         })?,

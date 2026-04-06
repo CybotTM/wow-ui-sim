@@ -265,3 +265,35 @@ fn get_inbox_item_link_nil_for_missing() {
         .unwrap();
     assert_eq!(result, "nil", "Missing attachment link should be nil");
 }
+
+#[test]
+fn get_inbox_text_returns_body() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("Thrall", "Hello", "Welcome to the Horde!", 100)
+            local body, s1, s2, takeable, invoice, consortium = GetInboxText(1)
+            if body ~= "Welcome to the Horde!" then return "body=" .. tostring(body) end
+            if takeable ~= true then return "takeable=" .. tostring(takeable) end
+            if invoice ~= false then return "invoice=" .. tostring(invoice) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetInboxText: {result}");
+}
+
+#[test]
+fn get_inbox_text_nil_for_invalid() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local r = GetInboxText(99)
+            return r == nil and "nil" or "not_nil"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "nil");
+}
