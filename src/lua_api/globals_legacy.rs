@@ -318,31 +318,31 @@ fn register_custom_next(lua: &Lua) -> Result<()> {
     lua.set_named_registry_value("__original_next", original_next)?;
 
     let custom_next = lua.create_function(|lua, (tbl, key): (Value, Value)| {
-        // If called on a FrameRef userdata, simulate table with [0]=userdata
-        if let Value::UserData(ud) = &tbl {
-            if ud.borrow::<super::frame::FrameRef>().is_ok() {
-                return match key {
-                    Value::Nil => {
-                        // First iteration: return (0, lightuserdata)
-                        // In WoW, frames are tables with [0]=C_userdata (no metatable).
-                        // Use LightUserData so getmetatable returns nil.
-                        Ok(mlua::MultiValue::from_vec(vec![
-                            Value::Integer(0),
-                            Value::LightUserData(mlua::LightUserData(std::ptr::null_mut())),
-                        ]))
-                    }
-                    _ => {
-                        // After key 0: no more entries
-                        Ok(mlua::MultiValue::new())
-                    }
-                };
-            }
+        if let Some(result) = next_for_frame_ref(&tbl, &key) {
+            return Ok(result);
         }
         let original: mlua::Function = lua.named_registry_value("__original_next")?;
         original.call((tbl, key))
     })?;
 
     globals.set("next", custom_next)
+}
+
+/// Handle `next()` on FrameRef userdata: simulate a table with `[0] = lightuserdata`.
+/// Returns None if `tbl` is not a FrameRef.
+fn next_for_frame_ref(tbl: &Value, key: &Value) -> Option<mlua::MultiValue> {
+    let Value::UserData(ud) = tbl else { return None };
+    if ud.borrow::<super::frame::FrameRef>().is_err() {
+        return None;
+    }
+    let result = match key {
+        Value::Nil => mlua::MultiValue::from_vec(vec![
+            Value::Integer(0),
+            Value::LightUserData(mlua::LightUserData(std::ptr::null_mut())),
+        ]),
+        _ => mlua::MultiValue::new(),
+    };
+    Some(result)
 }
 
 /// Override `ipairs` to support iterating over frame UserData (FrameRef) children.
