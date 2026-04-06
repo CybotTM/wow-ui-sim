@@ -234,6 +234,7 @@ fn position_bottom_managed_container(env: &WowLuaEnv) {
 /// mode can activate even when subsystems crash.
 pub fn patch_edit_mode_manager(env: &WowLuaEnv) {
     patch_apply_system_anchor_nil_guard(env);
+    fix_set_point_override_3arg(env);
     guard_action_bar_limits(env);
     patch_default_anchor(env);
     patch_enter_exit_edit_mode(env);
@@ -255,6 +256,49 @@ fn patch_apply_system_anchor_nil_guard(env: &WowLuaEnv) {
         function EditModeSystemMixin:ApplySystemAnchor()
             if not self.systemInfo then return end
             return orig(self)
+        end
+    "#,
+    );
+}
+
+/// Fix SetPointOverride to handle the 3-arg SetPoint form.
+///
+/// Blizzard's `SetPointOverride(point, relativeTo, relativePoint, offsetX, offsetY)`
+/// always forwards all 5 args to `SetPointBase`. But `VerticalLayoutMixin` and other
+/// code calls the 3-arg form: `SetPoint("TOPRIGHT", x, y)`, where x,y are offsets
+/// relative to the parent. In that case `relativeTo` receives a number (the x offset)
+/// and `relativePoint` receives a number (the y offset), which is wrong.
+///
+/// OnSystemLoad already ran during addon loading, copying the original
+/// SetPointOverride into each frame's fenv. We replace it on each registered
+/// frame by writing a fixed version into `debug.getfenv(frame)[1]`.
+fn fix_set_point_override_3arg(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not EditModeManagerFrame then return end
+        local emm = EditModeManagerFrame
+        if not emm.registeredSystemFrames then return end
+        for _, frame in ipairs(emm.registeredSystemFrames) do
+            local env = debug.getfenv(frame)
+            if env and env[1] and rawget(env[1], "SetPoint") then
+                local base = rawget(env[1], "SetPointBase")
+                    or frame.SetPointBase
+                if base then
+                    rawset(env[1], "SetPoint", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                        if type(relativeTo) == "number" then
+                            offsetX = relativeTo
+                            offsetY = relativePoint
+                            relativeTo = nil
+                            relativePoint = nil
+                        end
+                        base(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                        if relativeTo then
+                            pcall(self.SetSnappedToFrame, self, relativeTo)
+                        end
+                        pcall(EditModeManagerFrame.OnEditModeSystemAnchorChanged, EditModeManagerFrame)
+                    end)
+                end
+            end
         end
     "#,
     );
