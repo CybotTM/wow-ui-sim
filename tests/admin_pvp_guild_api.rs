@@ -25,6 +25,13 @@ fn test_set_honor_level_unit_honor_level_returns_level() {
 }
 
 #[test]
+fn test_unit_honor_returns_zero() {
+    let env = env();
+    let honor: i32 = env.eval(r#"return UnitHonor("player")"#).unwrap();
+    assert_eq!(honor, 0);
+}
+
+#[test]
 fn test_set_honor_level_zero() {
     let env = env();
     let level: i32 = env

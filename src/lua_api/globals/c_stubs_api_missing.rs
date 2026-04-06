@@ -534,6 +534,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
     )?;
     g.set(
+        "UnitHonor",
+        lua.create_function(|_, _unit: String| Ok(0i32))?,
+    )?;
+    g.set(
         "GetPVPLifetimeStats",
         lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
     )?;
