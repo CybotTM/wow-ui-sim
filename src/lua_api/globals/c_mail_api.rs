@@ -6,6 +6,7 @@ use std::rc::Rc;
 pub fn register(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_get_inbox_num_items(lua, Rc::clone(&state))?;
     register_get_inbox_header_info(lua, Rc::clone(&state))?;
+    register_get_inbox_item_link(lua, Rc::clone(&state))?;
     register_get_inbox_item(lua, state)?;
     Ok(())
 }
@@ -51,6 +52,32 @@ fn register_get_inbox_header_info(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
                 Value::Boolean(mail.can_reply),
                 Value::Boolean(mail.is_gm),
             ]))
+        })?,
+    )
+}
+
+fn register_get_inbox_item_link(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    lua.globals().set(
+        "GetInboxItemLink",
+        lua.create_function(move |lua, (index, slot): (i32, i32)| {
+            let st = state.borrow();
+            let mail_idx = (index - 1) as usize;
+            let slot_idx = (slot - 1) as usize;
+            let attach = st
+                .player
+                .inbox
+                .get(mail_idx)
+                .and_then(|m| m.items.get(slot_idx));
+            let Some(attach) = attach else {
+                return Ok(Value::Nil);
+            };
+            let item = crate::items::get_item(attach.item_id);
+            let name = item.map_or("Unknown", |i| i.name);
+            let quality = item.map_or(1, |i| i.quality);
+            let color = super::c_item_api::quality_color(quality);
+            let id = attach.item_id;
+            let link = format!("|c{color}|Hitem:{id}::::::::80:::::::::|h[{name}]|h|r");
+            Ok(Value::String(lua.create_string(&link)?))
         })?,
     )
 }

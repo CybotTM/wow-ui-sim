@@ -232,3 +232,36 @@ fn get_inbox_item_invalid_returns_nil() {
         .unwrap();
     assert_eq!(result, "nil", "No attachment should return nil");
 }
+
+#[test]
+fn get_inbox_item_link() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("AH", "Won", "", 0, {{item_id=6948, count=1}})
+            local link = GetInboxItemLink(1, 1)
+            if not link then return "nil" end
+            if not link:find("Hearthstone") then return "no_name: " .. link end
+            if not link:find("|Hitem:6948") then return "no_id: " .. link end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "GetInboxItemLink: {result}");
+}
+
+#[test]
+fn get_inbox_item_link_nil_for_missing() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "S", "B")
+            local r = GetInboxItemLink(1, 1)
+            return r == nil and "nil" or "not_nil"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "nil", "Missing attachment link should be nil");
+}
