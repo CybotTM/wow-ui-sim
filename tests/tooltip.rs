@@ -846,3 +846,129 @@ fn test_set_spell_by_id_unknown_spell_is_noop() {
     let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
     assert_eq!(count, 0, "Unknown spell should not add lines");
 }
+
+// --- GetLeftLine / GetRightLine tests ---
+
+#[test]
+fn test_get_left_line_returns_fontstring() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:AddLine("Hello")"#).unwrap();
+
+    let obj_type: String = env
+        .eval("return GameTooltip:GetLeftLine(1):GetObjectType()")
+        .unwrap();
+    assert_eq!(obj_type, "FontString");
+}
+
+#[test]
+fn test_get_left_line_has_correct_text() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddLine("First line")
+        GameTooltip:AddLine("Second line")
+    "#,
+    )
+    .unwrap();
+
+    let text1: String = env
+        .eval("return GameTooltip:GetLeftLine(1):GetText()")
+        .unwrap();
+    assert_eq!(text1, "First line");
+
+    let text2: String = env
+        .eval("return GameTooltip:GetLeftLine(2):GetText()")
+        .unwrap();
+    assert_eq!(text2, "Second line");
+}
+
+#[test]
+fn test_get_right_line_has_correct_text() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:AddDoubleLine("Left", "Right")"#)
+        .unwrap();
+
+    let right_text: String = env
+        .eval("return GameTooltip:GetRightLine(1):GetText()")
+        .unwrap();
+    assert_eq!(right_text, "Right");
+}
+
+#[test]
+fn test_get_left_line_out_of_range_returns_nil() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:AddLine("Only one")"#).unwrap();
+
+    let is_nil: bool = env
+        .eval("return GameTooltip:GetLeftLine(5) == nil")
+        .unwrap();
+    assert!(is_nil, "Out-of-range index should return nil");
+
+    let zero_nil: bool = env
+        .eval("return GameTooltip:GetLeftLine(0) == nil")
+        .unwrap();
+    assert!(zero_nil, "Index 0 should return nil");
+}
+
+#[test]
+fn test_tooltip_fontstring_globals_exist() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddLine("Line 1")
+        GameTooltip:AddLine("Line 2")
+        -- Force FontString creation by accessing them
+        local _ = GameTooltip:GetLeftLine(1)
+        local _ = GameTooltip:GetLeftLine(2)
+    "#,
+    )
+    .unwrap();
+
+    let exists1: bool = env.eval("return GameTooltipTextLeft1 ~= nil").unwrap();
+    assert!(exists1, "GameTooltipTextLeft1 global should exist");
+
+    let exists2: bool = env.eval("return GameTooltipTextLeft2 ~= nil").unwrap();
+    assert!(exists2, "GameTooltipTextLeft2 global should exist");
+
+    let text: String = env.eval("return GameTooltipTextLeft1:GetText()").unwrap();
+    assert_eq!(text, "Line 1");
+}
+
+#[test]
+fn test_get_left_line_after_set_item_by_id() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetItemByID(229181)").unwrap();
+
+    let text: String = env
+        .eval("return GameTooltip:GetLeftLine(1):GetText()")
+        .unwrap();
+    assert_eq!(text, "Ordained Forge Maul");
+}
+
+#[test]
+fn test_get_right_line_no_right_text_returns_nil_text() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Single-text line has no right text
+    env.exec(r#"GameTooltip:AddLine("Left only")"#).unwrap();
+
+    // GetRightLine still returns a FontString, but with nil text
+    let right_text_nil: bool = env
+        .eval(
+            r#"
+        local fs = GameTooltip:GetRightLine(1)
+        return fs:GetText() == nil or fs:GetText() == ""
+    "#,
+        )
+        .unwrap();
+    assert!(
+        right_text_nil,
+        "Right line text should be nil/empty for single-text lines"
+    );
+}
