@@ -806,7 +806,17 @@ fn test_heirloom_get_heirloom_link_nil() {
     let is_nil: bool = env
         .eval("return C_Heirloom.GetHeirloomLink(1) == nil")
         .unwrap();
-    assert!(is_nil);
+    assert!(is_nil, "unknown item should return nil");
+}
+
+#[test]
+fn test_heirloom_get_heirloom_link_known() {
+    let env = env();
+    let link: String = env
+        .eval("return C_Heirloom.GetHeirloomLink(122245)")
+        .unwrap();
+    assert!(link.contains("Burnished Helm of Might"));
+    assert!(link.contains("|Hitem:122245"));
 }
 
 #[test]
