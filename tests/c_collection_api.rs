@@ -260,6 +260,12 @@ fn test_toy_box_filter_stubs() {
 }
 
 #[test]
+fn test_toy_box_force_toy_refilter() {
+    let env = env();
+    env.eval::<()>("C_ToyBox.ForceToyRefilter()").unwrap();
+}
+
+#[test]
 fn test_toy_box_has_favorites() {
     let env = env();
     let result: String = env

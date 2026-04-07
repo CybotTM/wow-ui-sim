@@ -404,6 +404,7 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set("SetCollectedShown", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("SetUncollectedShown", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("SetUnusableShown", lua.create_function(|_, _: bool| Ok(()))?)?;
+    t.set("ForceToyRefilter", lua.create_function(|_, ()| Ok(()))?)?;
     lua.globals().set("C_ToyBox", t)?;
     Ok(())
 }
