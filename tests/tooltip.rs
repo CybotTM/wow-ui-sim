@@ -706,3 +706,143 @@ fn test_set_inventory_item_tooltip_content() {
         "Should have at least 3 lines (name, ilvl, slot)"
     );
 }
+
+// --- Spell tooltip tests ---
+
+#[test]
+fn test_set_spell_by_id_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Flash of Light (19750): has cast time (1.5s), description, and power cost
+    env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        num_lines >= 2,
+        "SetSpellByID should populate tooltip lines, got {num_lines}"
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Flash of Light");
+}
+
+#[test]
+fn test_set_spell_by_id_shows_cast_time() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Flash of Light has 1500ms cast time
+    env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    let has_cast_line = td.lines.iter().any(|l| l.left_text.contains("sec cast"));
+    assert!(has_cast_line, "Should have a cast time line");
+}
+
+#[test]
+fn test_set_spell_by_id_instant_cast() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Crusader Strike (35395): instant cast
+    env.exec("GameTooltip:SetSpellByID(35395)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Crusader Strike");
+    let has_instant = td.lines.iter().any(|l| l.left_text == "Instant");
+    assert!(has_instant, "Instant cast spells should show 'Instant'");
+}
+
+#[test]
+fn test_set_spell_by_id_makes_tooltip_visible() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let initially_visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(!initially_visible);
+
+    env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    assert!(visible, "SetSpellByID should make tooltip visible");
+}
+
+#[test]
+fn test_set_spell_by_id_fires_on_tooltip_set_spell() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        _G.spell_set_count = 0
+        GameTooltip:SetScript("OnTooltipSetSpell", function()
+            _G.spell_set_count = _G.spell_set_count + 1
+        end)
+        GameTooltip:SetSpellByID(19750)
+    "#,
+    )
+    .unwrap();
+
+    let count: i32 = env.eval("return _G.spell_set_count").unwrap();
+    assert_eq!(count, 1, "OnTooltipSetSpell should fire once");
+}
+
+#[test]
+fn test_get_spell_returns_spell_data_after_set() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(19750)").unwrap();
+
+    let name: String = env
+        .eval("local name, id = GameTooltip:GetSpell(); return name")
+        .unwrap();
+    assert_eq!(name, "Flash of Light");
+
+    let id: i32 = env
+        .eval("local name, id = GameTooltip:GetSpell(); return id")
+        .unwrap();
+    assert_eq!(id, 19750);
+}
+
+#[test]
+fn test_get_spell_returns_nil_when_no_spell() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let is_nil: bool = env
+        .eval("local name, id = GameTooltip:GetSpell(); return name == nil and id == nil")
+        .unwrap();
+    assert!(
+        is_nil,
+        "GetSpell should return nil,nil when no spell is set"
+    );
+}
+
+#[test]
+fn test_clear_lines_clears_spell_id() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:SetSpellByID(19750)
+        GameTooltip:ClearLines()
+    "#,
+    )
+    .unwrap();
+
+    let is_nil: bool = env
+        .eval("local name, id = GameTooltip:GetSpell(); return name == nil")
+        .unwrap();
+    assert!(is_nil, "ClearLines should clear spell_id");
+}
+
+#[test]
+fn test_set_spell_by_id_unknown_spell_is_noop() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(999999999)").unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 0, "Unknown spell should not add lines");
+}

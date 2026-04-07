@@ -404,7 +404,8 @@ fn register_unit_frame_stateless_stubs(lua: &Lua) -> Result<()> {
         "GetBillingTimeRested",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    lua.load(r#"
+    lua.load(
+        r#"
         function SetPortraitToTexture(tex, path)
             if tex and tex.SetTexture then
                 tex:SetTexture(path)
@@ -420,7 +421,9 @@ fn register_unit_frame_stateless_stubs(lua: &Lua) -> Result<()> {
                 end
             end
         end
-    "#).exec()?;
+    "#,
+    )
+    .exec()?;
     Ok(())
 }
 

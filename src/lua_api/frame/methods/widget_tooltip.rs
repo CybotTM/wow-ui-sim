@@ -4,7 +4,7 @@ use super::super::handle::FrameRef;
 use super::methods_helpers::get_mixin_override;
 use super::widget_tooltip_data::{
     lookup_aura_from_args, parse_item_id_from_hyperlink, populate_aura_tooltip,
-    populate_item_tooltip,
+    populate_item_tooltip, populate_spell_tooltip,
 };
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use crate::lua_api::tooltip::TooltipLine;
@@ -62,6 +62,7 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             let mut state = state_rc.borrow_mut();
             if let Some(td) = state.tooltips.get_mut(&id) {
                 td.lines.clear();
+                td.spell_id = None;
             }
         }
         fire_tooltip_script(lua, id, "OnTooltipCleared")?;
@@ -105,7 +106,7 @@ fn add_tooltip_doubleline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 }
 
 fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_tooltip_i32_stub(methods, "SetSpellByID");
+    add_set_spell_by_id(methods);
     add_set_item_by_id(methods);
     add_set_inventory_item(methods);
     add_set_hyperlink(methods);
@@ -117,10 +118,6 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_tooltip_nil_getter(methods, "GetLeftLine");
     add_tooltip_nil_getter(methods, "GetRightLine");
     add_line_count_methods(methods);
-}
-
-fn add_tooltip_i32_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &'static str) {
-    methods.add_method(name, |_, _this, _value: i32| Ok(()));
 }
 
 fn add_tooltip_multivalue_stubs<M: mlua::UserDataMethods<FrameRef>>(
@@ -161,6 +158,18 @@ fn add_line_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                 .unwrap_or(0) as i32)
         });
     }
+}
+
+fn add_set_spell_by_id<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSpellByID", |lua, this, args: mlua::MultiValue| {
+        let spell_id = match args.into_iter().next() {
+            Some(Value::Integer(n)) => n as u32,
+            Some(Value::Number(n)) => n as u32,
+            _ => return Ok(()),
+        };
+        populate_spell_tooltip(lua, this.0, spell_id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetSpell")
+    });
 }
 
 fn add_set_item_by_id<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -255,8 +264,19 @@ fn add_tooltip_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("GetUnit", |_, _this, ()| {
         Ok::<(Option<String>, Option<String>), mlua::Error>((None, None))
     });
-    methods.add_method("GetSpell", |_, _this, ()| {
-        Ok::<(Option<String>, Option<i32>), mlua::Error>((None, None))
+    methods.add_method("GetSpell", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let spell_id = state.tooltips.get(&this.0).and_then(|td| td.spell_id);
+        match spell_id {
+            Some(id) => {
+                let name = crate::spells::get_spell(id)
+                    .map(|s| s.name.to_string())
+                    .unwrap_or_else(|| format!("Spell {}", id));
+                Ok::<(Option<String>, Option<i32>), mlua::Error>((Some(name), Some(id as i32)))
+            }
+            None => Ok((None, None)),
+        }
     });
     methods.add_method("GetItem", |_, _this, ()| {
         Ok::<(Option<String>, Option<String>), mlua::Error>((None, None))
@@ -462,6 +482,7 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
         let mut state = state_rc.borrow_mut();
         if let Some(td) = state.tooltips.get_mut(&id) {
             td.lines.clear();
+            td.spell_id = None;
             td.owner_id = owner_id;
             td.anchor_type = anchor.clone();
         }

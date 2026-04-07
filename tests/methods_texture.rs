@@ -667,7 +667,10 @@ fn test_set_portrait_to_texture_applies_circle_mask() {
             "#,
         )
         .unwrap();
-    assert_eq!(mask_count, 1, "SetPortraitToTexture should apply a circular mask");
+    assert_eq!(
+        mask_count, 1,
+        "SetPortraitToTexture should apply a circular mask"
+    );
 }
 
 #[test]
@@ -684,7 +687,10 @@ fn test_set_portrait_to_texture_no_double_mask() {
             "#,
         )
         .unwrap();
-    assert_eq!(count, 1, "calling SetPortraitToTexture twice should not add a second mask");
+    assert_eq!(
+        count, 1,
+        "calling SetPortraitToTexture twice should not add a second mask"
+    );
 }
 
 // ============================================================================

@@ -16,6 +16,8 @@ pub struct TooltipData {
     pub anchor_type: String,
     pub min_width: f32,
     pub padding: f32,
+    /// Spell ID set by `SetSpellByID`, returned by `GetSpell`.
+    pub spell_id: Option<u32>,
 }
 
 impl Default for TooltipData {
@@ -26,6 +28,7 @@ impl Default for TooltipData {
             anchor_type: "ANCHOR_NONE".to_string(),
             min_width: 0.0,
             padding: 0.0,
+            spell_id: None,
         }
     }
 }

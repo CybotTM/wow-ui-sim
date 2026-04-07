@@ -4,6 +4,100 @@ use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::tooltip::TooltipLine;
 use mlua::Value;
 
+// --- Spell tooltips ---
+
+pub(super) fn populate_spell_tooltip(
+    lua: &mlua::Lua,
+    tooltip_id: u64,
+    spell_id: u32,
+) -> mlua::Result<()> {
+    let spell = match crate::spells::get_spell(spell_id) {
+        Some(s) => s,
+        None => return Ok(()),
+    };
+    let description = crate::spell_descriptions::get_spell_description(spell_id).unwrap_or("");
+    let cast_time_ms = crate::lua_api::globals::spell_api::spell_cast_time(spell_id as i32);
+    let power_costs = crate::spell_power::get_spell_power(spell_id);
+
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
+        td.lines.clear();
+        td.spell_id = Some(spell_id);
+
+        // Line 1: spell name (white)
+        td.lines.push(TooltipLine {
+            left_text: spell.name.to_string(),
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+        });
+
+        // Resource cost line (if any)
+        if let Some(cost_text) = power_costs
+            .and_then(|costs| costs.first())
+            .and_then(|cost| format_power_cost(cost))
+        {
+            td.lines.push(TooltipLine {
+                left_text: cost_text,
+                left_color: (1.0, 1.0, 1.0),
+                right_text: None,
+                right_color: (1.0, 1.0, 1.0),
+                wrap: false,
+            });
+        }
+
+        // Cast time line
+        let cast_text = if cast_time_ms > 0 {
+            format_cast_time(cast_time_ms)
+        } else {
+            "Instant".to_string()
+        };
+        td.lines.push(TooltipLine {
+            left_text: cast_text,
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+        });
+
+        // Description (if any)
+        if !description.is_empty() {
+            let clean = super::widget_tooltip::strip_html_tags(description);
+            td.lines.push(TooltipLine {
+                left_text: clean,
+                left_color: (1.0, 0.82, 0.0),
+                right_text: None,
+                right_color: (1.0, 1.0, 1.0),
+                wrap: true,
+            });
+        }
+    }
+    state.set_frame_visible(tooltip_id, true);
+    Ok(())
+}
+
+fn format_power_cost(cost: &crate::spell_power::SpellPowerCost) -> Option<String> {
+    let type_name = crate::spell_power::power_type_name(cost.power_type);
+    if cost.cost_pct > 0.0 {
+        Some(format!("{}% of Base {}", cost.cost_pct, type_name))
+    } else if cost.mana_cost > 0 {
+        Some(format!("{} {}", cost.mana_cost, type_name))
+    } else {
+        None
+    }
+}
+
+fn format_cast_time(ms: i32) -> String {
+    let secs = ms as f64 / 1000.0;
+    if (secs - secs.round()).abs() < 0.001 {
+        format!("{} sec cast", secs as i32)
+    } else {
+        format!("{:.1} sec cast", secs)
+    }
+}
+
 // --- Item tooltips ---
 
 pub(super) fn populate_item_tooltip(
