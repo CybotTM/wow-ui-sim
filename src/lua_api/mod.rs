@@ -23,6 +23,7 @@ pub(crate) mod script_helpers;
 pub(crate) mod secure_env;
 pub mod simple_html;
 pub(crate) mod state;
+mod state_defaults;
 pub(crate) mod state_render;
 pub(crate) mod state_types;
 pub(crate) mod talent_state;
