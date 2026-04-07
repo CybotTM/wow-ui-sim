@@ -260,6 +260,25 @@ fn test_toy_box_filter_stubs() {
 }
 
 #[test]
+fn test_toy_box_get_toy_link() {
+    let env = env();
+    let link: String = env
+        .eval("return C_ToyBox.GetToyLink(166779)")
+        .unwrap();
+    assert!(link.contains("Hearthstone Game Table"));
+    assert!(link.contains("|Hitem:166779"));
+}
+
+#[test]
+fn test_toy_box_get_toy_link_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_ToyBox.GetToyLink(1) == nil")
+        .unwrap();
+    assert!(is_nil, "unknown toy should return nil");
+}
+
+#[test]
 fn test_toy_box_force_toy_refilter() {
     let env = env();
     env.eval::<()>("C_ToyBox.ForceToyRefilter()").unwrap();
