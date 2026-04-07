@@ -162,6 +162,25 @@ pub struct ToyData {
     pub is_usable: bool,
 }
 
+/// A transmog appearance source (one way to obtain a visual appearance).
+///
+/// WoW's transmog system has three levels:
+/// - **Visual**: the actual look (shared across items with identical models)
+/// - **Source**: a specific item that grants a visual (e.g. "Heroic Garrosh's Helmet")
+/// - **Category**: equipment slot grouping (Head=1, Shoulder=2, ..., MainHand=12, etc.)
+#[derive(Debug, Clone)]
+pub struct TransmogAppearance {
+    pub source_id: i32,
+    pub visual_id: i32,
+    pub category_id: i32,
+    pub item_id: i32,
+    pub is_collected: bool,
+    /// Source type from Enum.TransmogSource (Boss Drop=1, Quest=2, Vendor=3, etc.)
+    pub source_type: i32,
+    /// Item modification ID (difficulty variant: Normal=0, Heroic=1, Mythic=3, etc.)
+    pub item_mod_id: i32,
+}
+
 /// A premade group listing in the Group Finder.
 #[derive(Debug, Clone)]
 pub struct PremadeListing {
@@ -529,6 +548,7 @@ pub struct WorldState {
     pub great_vault_can_claim: bool,
     pub loot_rolls: HashMap<i32, LootRollInfo>,
     pub collected_transmogs: HashSet<i32>,
+    pub transmog_appearances: Vec<TransmogAppearance>,
     pub collected_mounts: HashSet<i32>,
     pub mounts: Vec<MountData>,
     pub collected_pets: HashSet<i32>,
@@ -558,6 +578,7 @@ impl Default for WorldState {
             great_vault_can_claim: false,
             loot_rolls: HashMap::new(),
             collected_transmogs: HashSet::new(),
+            transmog_appearances: Vec::new(),
             collected_mounts: HashSet::new(),
             mounts: default_mounts(),
             collected_pets: HashSet::new(),
@@ -609,4 +630,26 @@ pub struct LootRollInfo {
     pub item_level: i32,
     /// Item link string.
     pub item_link: String,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn transmog_appearance_stored_in_world_state() {
+        let mut world = WorldState::default();
+        world.transmog_appearances.push(TransmogAppearance {
+            source_id: 12345,
+            visual_id: 100,
+            category_id: 1, // Head
+            item_id: 54321,
+            is_collected: true,
+            source_type: 1, // Boss Drop
+            item_mod_id: 0,
+        });
+        assert_eq!(world.transmog_appearances.len(), 1);
+        assert_eq!(world.transmog_appearances[0].source_id, 12345);
+        assert!(world.transmog_appearances[0].is_collected);
+    }
 }
