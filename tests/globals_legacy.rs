@@ -630,3 +630,38 @@ fn test_get_tooltip_index_first() {
         .unwrap();
     assert_eq!(result, 1);
 }
+
+#[test]
+fn test_get_cursor_position_reads_mouse_state() {
+    let env = env();
+
+    env.state().borrow_mut().mouse_position = Some((200.0, 300.0));
+
+    let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+    assert!((x - 200.0).abs() < 0.1, "x should be 200, got {x}");
+    assert!((y - 300.0).abs() < 0.1, "y should be 300, got {y}");
+}
+
+#[test]
+fn test_get_cursor_position_default_when_no_mouse() {
+    let env = env();
+
+    // mouse_position is None by default
+    let (x, y): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+    assert!((x - 512.0).abs() < 0.1, "default x should be 512, got {x}");
+    assert!((y - 384.0).abs() < 0.1, "default y should be 384, got {y}");
+}
+
+#[test]
+fn test_get_cursor_position_updates_dynamically() {
+    let env = env();
+
+    env.state().borrow_mut().mouse_position = Some((100.0, 50.0));
+    let (x1, _): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+
+    env.state().borrow_mut().mouse_position = Some((700.0, 500.0));
+    let (x2, _): (f64, f64) = env.eval("return GetCursorPosition()").unwrap();
+
+    assert!((x1 - 100.0).abs() < 0.1);
+    assert!((x2 - 700.0).abs() < 0.1, "Should reflect updated position");
+}

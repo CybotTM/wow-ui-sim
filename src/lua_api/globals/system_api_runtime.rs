@@ -12,7 +12,7 @@ pub(super) fn register_runtime_system_api(lua: &Lua, state: Rc<RefCell<SimState>
     register_input_state_stubs(lua, &state)?;
     register_screen_size_functions(lua, &state)?;
     register_request_time_played(lua)?;
-    register_cursor_position(lua)?;
+    register_cursor_position(lua, &state)?;
     register_localization_stubs(lua)?;
     register_ui_object_stubs(lua, state)?;
     register_ui_parent_stubs(lua)?;
@@ -230,10 +230,14 @@ fn register_request_time_played(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_cursor_position(lua: &Lua) -> Result<()> {
+fn register_cursor_position(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    let st = Rc::clone(state);
     lua.globals().set(
         "GetCursorPosition",
-        lua.create_function(|_, ()| Ok((512.0_f64, 384.0_f64)))?,
+        lua.create_function(move |_, ()| {
+            let (x, y) = st.borrow().mouse_position.unwrap_or((512.0, 384.0));
+            Ok((x as f64, y as f64))
+        })?,
     )?;
     Ok(())
 }
