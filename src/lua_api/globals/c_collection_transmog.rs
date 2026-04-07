@@ -292,8 +292,16 @@ fn register_transmog_util(lua: &Lua) -> Result<()> {
 
 fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
+    register_heirloom_info_methods(lua, &t, &state)?;
+    register_heirloom_query_methods(lua, &t, &state)?;
+    register_heirloom_filter_stubs(lua, &t)?;
+    lua.globals().set("C_Heirloom", t)?;
+    Ok(())
+}
+
+fn register_heirloom_info_methods(lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
     t.set("GetHeirloomInfo", lua.create_function({
-        let s = Rc::clone(&state);
+        let s = Rc::clone(state);
         move |lua, item_id: i32| {
             let st = s.borrow();
             let Some(h) = st.world.heirlooms.iter().find(|h| h.item_id == item_id as u32) else {
@@ -308,33 +316,9 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
             ))
         }
     })?)?;
-    add_i32_stub_with_arg::<i32>(lua, &t, "GetHeirloomMaxUpgradeLevel", 0)?;
-    t.set("GetNumHeirlooms", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32)
-    })?)?;
-    t.set("GetNumKnownHeirlooms", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, ()| Ok(s.borrow().world.collected_heirlooms.len() as i32)
-    })?)?;
-    t.set("GetNumDisplayedHeirlooms", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32)
-    })?)?;
-    t.set("GetHeirloomItemIDFromDisplayedIndex", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, index: i32| {
-            let st = s.borrow();
-            let i = (index - 1) as usize;
-            Ok(st.world.heirlooms.get(i).map(|h| h.item_id as i32).unwrap_or(0))
-        }
-    })?)?;
-    t.set("PlayerHasHeirloom", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, item_id: i32| Ok(s.borrow().world.collected_heirlooms.contains(&(item_id as u32)))
-    })?)?;
+    add_i32_stub_with_arg::<i32>(lua, t, "GetHeirloomMaxUpgradeLevel", 0)?;
     t.set("GetHeirloomLink", lua.create_function({
-        let s = Rc::clone(&state);
+        let s = Rc::clone(state);
         move |_, item_id: i32| {
             let st = s.borrow();
             match st.world.heirlooms.iter().find(|h| h.item_id == item_id as u32) {
@@ -343,13 +327,34 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
             }
         }
     })?)?;
-    add_bool_stub_with_arg::<i32>(lua, &t, "CanHeirloomUpgradeFromPending", false)?;
+    Ok(())
+}
+
+fn register_heirloom_query_methods(lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    t.set("GetNumHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32) })?)?;
+    t.set("GetNumKnownHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.collected_heirlooms.len() as i32) })?)?;
+    t.set("GetNumDisplayedHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32) })?)?;
+    t.set("GetHeirloomItemIDFromDisplayedIndex", lua.create_function({
+        let s = Rc::clone(state);
+        move |_, index: i32| {
+            let i = (index - 1) as usize;
+            Ok(s.borrow().world.heirlooms.get(i).map(|h| h.item_id as i32).unwrap_or(0))
+        }
+    })?)?;
+    t.set("PlayerHasHeirloom", lua.create_function({
+        let s = Rc::clone(state);
+        move |_, item_id: i32| Ok(s.borrow().world.collected_heirlooms.contains(&(item_id as u32)))
+    })?)?;
+    Ok(())
+}
+
+fn register_heirloom_filter_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    add_bool_stub_with_arg::<i32>(lua, t, "CanHeirloomUpgradeFromPending", false)?;
     t.set("GetCollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetUncollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("SetCollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("SetUncollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("GetClassAndSpecFilters", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
-    lua.globals().set("C_Heirloom", t)?;
     Ok(())
 }
 
