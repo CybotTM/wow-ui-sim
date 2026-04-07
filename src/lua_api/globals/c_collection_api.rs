@@ -745,40 +745,34 @@ fn build_transmog_location(lua: &Lua) -> Result<mlua::Table> {
     Ok(lua.named_registry_value("__transmog_location_mt")?)
 }
 
+/// Create a TransmogLocation table with metatable and common fields.
+fn new_transmog_location(lua: &Lua, transmog_type: i32, modification: Value) -> Result<mlua::Table> {
+    let location = lua.create_table()?;
+    let mt: mlua::Table = lua.named_registry_value("__transmog_location_mt")?;
+    location.set_metatable(Some(mt));
+    location.set("transmogType", transmog_type)?;
+    location.set("modification", bool_or_int_to_i32(modification))?;
+    Ok(location)
+}
+
 /// TransmogUtil - utility functions for transmog system.
 fn register_transmog_util(lua: &Lua) -> Result<()> {
     build_transmog_location(lua)?;
     let t = lua.create_table()?;
-    t.set(
-        "GetTransmogLocation",
-        lua.create_function(
-            |lua, (slot, transmog_type, modification): (String, i32, Value)| {
-                let location = lua.create_table()?;
-                let mt: mlua::Table =
-                    lua.named_registry_value("__transmog_location_mt")?;
-                location.set_metatable(Some(mt));
-                location.set("slotName", slot)?;
-                location.set("transmogType", transmog_type)?;
-                location.set("modification", bool_or_int_to_i32(modification))?;
-                Ok(location)
-            },
-        )?,
-    )?;
-    t.set(
-        "CreateTransmogLocation",
-        lua.create_function(
-            |lua, (slot_id, transmog_type, modification): (i32, i32, Value)| {
-                let location = lua.create_table()?;
-                let mt: mlua::Table =
-                    lua.named_registry_value("__transmog_location_mt")?;
-                location.set_metatable(Some(mt));
-                location.set("slotID", slot_id)?;
-                location.set("transmogType", transmog_type)?;
-                location.set("modification", bool_or_int_to_i32(modification))?;
-                Ok(location)
-            },
-        )?,
-    )?;
+    t.set("GetTransmogLocation", lua.create_function(
+        |lua, (slot, transmog_type, modification): (String, i32, Value)| {
+            let loc = new_transmog_location(lua, transmog_type, modification)?;
+            loc.set("slotName", slot)?;
+            Ok(loc)
+        },
+    )?)?;
+    t.set("CreateTransmogLocation", lua.create_function(
+        |lua, (slot_id, transmog_type, modification): (i32, i32, Value)| {
+            let loc = new_transmog_location(lua, transmog_type, modification)?;
+            loc.set("slotID", slot_id)?;
+            Ok(loc)
+        },
+    )?)?;
     t.set(
         "GetBestItemModifiedAppearanceID",
         lua.create_function(|_, _item_loc: mlua::Value| Ok(Value::Nil))?,
