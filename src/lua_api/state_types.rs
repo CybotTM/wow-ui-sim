@@ -701,6 +701,7 @@ pub struct WorldState {
     pub collected_toys: HashSet<i32>,
     pub toys: Vec<ToyData>,
     pub heirlooms: Vec<HeirloomData>,
+    pub collected_heirlooms: HashSet<u32>,
     pub earned_achievements: HashSet<i32>,
     pub premade_listings: Vec<PremadeListing>,
 }
@@ -733,6 +734,7 @@ impl Default for WorldState {
             collected_toys: HashSet::new(),
             toys: default_toys(),
             heirlooms: default_heirlooms(),
+            collected_heirlooms: default_heirlooms().iter().map(|h| h.item_id).collect(),
             earned_achievements: HashSet::new(),
             premade_listings: default_premade_listings(),
         }
@@ -810,5 +812,7 @@ mod tests {
 
         let ids: HashSet<u32> = world.heirlooms.iter().map(|h| h.item_id).collect();
         assert_eq!(ids.len(), 11, "all item IDs should be unique");
+        assert_eq!(world.collected_heirlooms.len(), 11, "all default heirlooms collected");
+        assert!(world.collected_heirlooms.contains(&122245));
     }
 }
