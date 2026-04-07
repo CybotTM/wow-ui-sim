@@ -646,9 +646,12 @@ fn register_transmog(lua: &Lua) -> Result<()> {
         "GetAppliedSourceID",
         lua.create_function(|_, _slot: i32| Ok(Value::Nil))?,
     )?;
+    // GetSlotInfo returns: isTransmogrified, hasPending, isPendingCollected,
+    // canTransmogrify, cannotTransmogrifyReason, hasUndo
+    // No transmog NPC open, so nothing is transmogrified or pending.
     t.set(
         "GetSlotInfo",
-        lua.create_function(|_, _slot: i32| Ok((false, false, false, false, false, Value::Nil)))?,
+        lua.create_function(|_, _slot: i32| Ok((false, false, false, false, false, false)))?,
     )?;
     lua.globals().set("C_Transmog", t)?;
     Ok(())

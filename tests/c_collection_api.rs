@@ -559,8 +559,19 @@ fn test_transmog_get_applied_source_id_nil() {
 #[test]
 fn test_transmog_get_slot_info() {
     let env = env();
-    let first: bool = env.eval("return C_Transmog.GetSlotInfo(1)").unwrap();
-    assert!(!first);
+    let result: String = env
+        .eval(
+            r#"
+            local isTransmogrified, hasPending, isPendingCollected,
+                  canTransmogrify, cannotTransmogrifyReason, hasUndo = C_Transmog.GetSlotInfo(1)
+            if isTransmogrified then return "transmogrified" end
+            if hasPending then return "pending" end
+            if type(hasUndo) ~= "boolean" then return "hasUndo type=" .. type(hasUndo) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
 }
 
 // ============================================================================
