@@ -16,6 +16,7 @@ use super::globals::c_map_api::register_c_map_api;
 use super::globals::c_misc_api::register_c_misc_api;
 use super::globals::c_quest_api::register_c_quest_api;
 use super::globals::c_stubs_api::register_c_stubs_api;
+use super::globals::c_stubs_api_secure::register_store_hooks_deferred;
 use super::globals::c_system_api::register_c_system_api;
 use super::globals::constants_api::register_constants_api;
 use super::globals::create_frame::create_frame_function;
@@ -532,6 +533,7 @@ fn register_stateful_apis(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
     register_unit_api(lua, Rc::clone(state))?;
     register_addon_api(lua, Rc::clone(state))?;
     register_timer_api(lua, Rc::clone(state))?;
+    register_store_hooks_deferred(lua)?;
     register_dropdown_api(lua, Rc::clone(state))?;
     register_cvar_api(lua, Rc::clone(state))?;
     register_system_api(lua, Rc::clone(state))?;

@@ -651,6 +651,43 @@ fn test_get_mask_texture_nil() {
 }
 
 // ============================================================================
+// SetPortraitToTexture
+// ============================================================================
+
+#[test]
+fn test_set_portrait_to_texture_applies_circle_mask() {
+    let env = env();
+    let mask_count: i32 = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "PortraitMaskFrame", UIParent)
+            local tex = frame:CreateTexture("PortraitMaskTex", "BORDER")
+            SetPortraitToTexture(tex, "Interface\\Icons\\Ability_Mount_RidingHorse")
+            return tex:GetNumMaskTextures()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(mask_count, 1, "SetPortraitToTexture should apply a circular mask");
+}
+
+#[test]
+fn test_set_portrait_to_texture_no_double_mask() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "PortraitNoDoubleFrame", UIParent)
+            local tex = frame:CreateTexture("PortraitNoDoubleTex", "BORDER")
+            SetPortraitToTexture(tex, "Interface\\Icons\\Ability_Mount_RidingHorse")
+            SetPortraitToTexture(tex, "Interface\\Icons\\INV_Misc_QuestionMark")
+            return tex:GetNumMaskTextures()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 1, "calling SetPortraitToTexture twice should not add a second mask");
+}
+
+// ============================================================================
 // SetDrawLayer / GetDrawLayer
 // ============================================================================
 

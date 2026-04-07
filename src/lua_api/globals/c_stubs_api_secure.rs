@@ -15,6 +15,23 @@ pub fn register_auth_ping_store(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+/// Register deferred store hooks that require C_Timer (call after register_timer_api).
+pub fn register_store_hooks_deferred(lua: &Lua) -> Result<()> {
+    lua.load(r#"
+        C_Timer.After(0, function()
+            if StoreCardMixin and StoreCardMixin.ShowIcon then
+                hooksecurefunc(StoreCardMixin, "ShowIcon", function(self, displayData)
+                    if not displayData then return end
+                    local useSquare = bit.band(displayData.flags or 0, Enum.BattlepayDisplayFlags.UseSquareIconBorder) == Enum.BattlepayDisplayFlags.UseSquareIconBorder
+                    if not useSquare and self.Icon and self.Icon:IsShown() then
+                        SetPortraitToTexture(self.Icon, self.Icon:GetTexture())
+                    end
+                end)
+            end
+        end)
+    "#).exec()
+}
+
 fn register_c_auth_challenge(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let auth_challenge = lua.create_table()?;
     auth_challenge.set("SetFrame", lua.create_function(|_, _frame: Value| Ok(()))?)?;

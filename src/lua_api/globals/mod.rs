@@ -65,7 +65,7 @@ pub mod c_stubs_api_glue;
 mod c_stubs_api_missing;
 mod c_stubs_api_namespaces;
 pub mod c_stubs_api_professions;
-mod c_stubs_api_secure;
+pub mod c_stubs_api_secure;
 mod c_stubs_api_social;
 pub mod c_stubs_api_store;
 pub mod c_system_api;
