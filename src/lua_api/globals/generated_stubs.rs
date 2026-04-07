@@ -26892,7 +26892,7 @@ fn register_c_pet_journal_0(lua: &Lua, t: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetNumPetSources")?.is_nil() {
         t.set(
             "GetNumPetSources",
-            lua.create_function(|_, _: MultiValue| Ok(Value::Integer(0)))?,
+            lua.create_function(|_, _: MultiValue| Ok(Value::Integer(10)))?,
         )?;
     }
     if t.get::<Value>("GetNumPetTypes")?.is_nil() {
