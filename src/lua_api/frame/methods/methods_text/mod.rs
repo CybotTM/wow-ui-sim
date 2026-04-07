@@ -361,6 +361,7 @@ fn update_tooltip_line(
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap,
+            texture: None,
         });
     }
 }

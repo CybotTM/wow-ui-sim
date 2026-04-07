@@ -972,3 +972,102 @@ fn test_get_right_line_no_right_text_returns_nil_text() {
         "Right line text should be nil/empty for single-text lines"
     );
 }
+
+// --- AddTexture / AddAtlas tests ---
+
+#[test]
+fn test_add_texture_increments_numlines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddLine("Header")
+        GameTooltip:AddTexture(136243)
+    "#,
+    )
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 2, "AddTexture should add a line");
+}
+
+#[test]
+fn test_add_atlas_increments_numlines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddLine("Header")
+        GameTooltip:AddAtlas("groupfinder-icon-friend", {})
+    "#,
+    )
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 2, "AddAtlas should add a line");
+}
+
+#[test]
+fn test_add_texture_stores_file_data_id() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:AddTexture(136243)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines.len(), 1);
+    match &td.lines[0].texture {
+        Some(wow_ui_sim::lua_api::tooltip::TooltipTexture::FileDataId(id)) => {
+            assert_eq!(*id, 136243);
+        }
+        other => panic!("Expected FileDataId, got {:?}", other.is_some()),
+    }
+}
+
+#[test]
+fn test_add_atlas_stores_atlas_name() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:AddAtlas("groupfinder-icon-friend")"#)
+        .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines.len(), 1);
+    match &td.lines[0].texture {
+        Some(wow_ui_sim::lua_api::tooltip::TooltipTexture::Atlas(name)) => {
+            assert_eq!(name, "groupfinder-icon-friend");
+        }
+        other => panic!("Expected Atlas, got {:?}", other.is_some()),
+    }
+}
+
+#[test]
+fn test_add_texture_with_string_id() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Some addons pass texture path as string
+    env.exec(r#"GameTooltip:AddTexture("136243")"#).unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 1, "AddTexture with string ID should add a line");
+}
+
+#[test]
+fn test_clearlines_clears_texture_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddTexture(136243)
+        GameTooltip:AddAtlas("test-atlas")
+        GameTooltip:ClearLines()
+    "#,
+    )
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(count, 0, "ClearLines should remove texture lines too");
+}

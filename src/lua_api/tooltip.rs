@@ -1,5 +1,11 @@
 //! Tooltip state data structures.
 
+/// Inline texture/atlas icon embedded in a tooltip line.
+pub enum TooltipTexture {
+    FileDataId(u32),
+    Atlas(String),
+}
+
 /// A single line in a tooltip.
 pub struct TooltipLine {
     pub left_text: String,
@@ -7,6 +13,8 @@ pub struct TooltipLine {
     pub right_text: Option<String>,
     pub right_color: (f32, f32, f32),
     pub wrap: bool,
+    /// Inline texture icon (from `AddTexture` / `AddAtlas`).
+    pub texture: Option<TooltipTexture>,
 }
 
 /// State for a GameTooltip frame.

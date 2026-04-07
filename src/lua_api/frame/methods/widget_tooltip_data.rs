@@ -32,6 +32,7 @@ pub(super) fn populate_spell_tooltip(
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap: false,
+            texture: None,
         });
 
         // Resource cost line (if any)
@@ -45,6 +46,7 @@ pub(super) fn populate_spell_tooltip(
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap: false,
+                texture: None,
             });
         }
 
@@ -60,6 +62,7 @@ pub(super) fn populate_spell_tooltip(
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap: false,
+            texture: None,
         });
 
         // Description (if any)
@@ -71,6 +74,7 @@ pub(super) fn populate_spell_tooltip(
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap: true,
+                texture: None,
             });
         }
     }
@@ -122,6 +126,7 @@ pub(super) fn populate_item_tooltip(
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap: false,
+                texture: None,
             });
             td.lines.push(TooltipLine {
                 left_text: format!("Item Level {}", item.item_level),
@@ -129,6 +134,7 @@ pub(super) fn populate_item_tooltip(
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap: false,
+                texture: None,
             });
             if item.inventory_type > 0 && !slot_label.is_empty() {
                 td.lines.push(TooltipLine {
@@ -137,6 +143,7 @@ pub(super) fn populate_item_tooltip(
                     right_text: None,
                     right_color: (1.0, 1.0, 1.0),
                     wrap: false,
+                    texture: None,
                 });
             }
         }
@@ -227,6 +234,7 @@ fn populate_unit_tooltip(lua: &mlua::Lua, tooltip_id: u64, unit: &str) -> mlua::
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap: false,
+            texture: None,
         });
         td.lines.push(TooltipLine {
             left_text: format!("Level {} {}", info.level, info.race),
@@ -234,6 +242,7 @@ fn populate_unit_tooltip(lua: &mlua::Lua, tooltip_id: u64, unit: &str) -> mlua::
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap: false,
+            texture: None,
         });
     }
     state.set_frame_visible(tooltip_id, true);
@@ -344,6 +353,7 @@ pub(super) fn populate_aura_tooltip(
             right_text: None,
             right_color: (1.0, 1.0, 1.0),
             wrap: false,
+            texture: None,
         });
         if aura.duration > 0.0 {
             td.lines.push(TooltipLine {
@@ -352,6 +362,7 @@ pub(super) fn populate_aura_tooltip(
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap: false,
+                texture: None,
             });
         }
     }

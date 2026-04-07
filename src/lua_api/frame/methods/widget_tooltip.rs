@@ -13,7 +13,7 @@ use mlua::Value;
 
 pub use super::widget_tooltip_data::set_unit_for_tooltip;
 
-const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddAtlas", "AddFontStrings"];
+const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
 const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
     "CopyTooltip",
@@ -93,6 +93,7 @@ fn add_tooltip_addline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
                 right_text: None,
                 right_color: (1.0, 1.0, 1.0),
                 wrap,
+                texture: None,
             });
         }
         Ok(())
@@ -276,8 +277,50 @@ fn add_tooltip_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     methods.add_method("GetItem", |_, _this, ()| {
         Ok::<(Option<String>, Option<String>), mlua::Error>((None, None))
     });
-    methods.add_method("AddTexture", |_, _this, _texture: String| Ok(()));
+    add_tooltip_texture_methods(methods);
     add_tooltip_minwidth_methods(methods);
+}
+
+fn add_tooltip_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    use crate::lua_api::tooltip::TooltipTexture;
+
+    methods.add_method("AddTexture", |lua, this, args: mlua::MultiValue| {
+        let file_data_id = match args.into_iter().next() {
+            Some(Value::Integer(n)) => n as u32,
+            Some(Value::Number(n)) => n as u32,
+            Some(Value::String(s)) => s.to_string_lossy().parse::<u32>().unwrap_or(0),
+            _ => return Ok(()),
+        };
+        push_texture_line(lua, this.0, TooltipTexture::FileDataId(file_data_id))
+    });
+
+    methods.add_method("AddAtlas", |lua, this, args: mlua::MultiValue| {
+        let atlas_name = match args.into_iter().next() {
+            Some(Value::String(s)) => s.to_string_lossy().to_string(),
+            _ => return Ok(()),
+        };
+        push_texture_line(lua, this.0, TooltipTexture::Atlas(atlas_name))
+    });
+}
+
+fn push_texture_line(
+    lua: &mlua::Lua,
+    tooltip_id: u64,
+    texture: crate::lua_api::tooltip::TooltipTexture,
+) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
+        td.lines.push(TooltipLine {
+            left_text: String::new(),
+            left_color: (1.0, 1.0, 1.0),
+            right_text: None,
+            right_color: (1.0, 1.0, 1.0),
+            wrap: false,
+            texture: Some(texture),
+        });
+    }
+    Ok(())
 }
 
 fn add_tooltip_minwidth_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -718,6 +761,7 @@ fn add_double_line_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlu
             right_text: Some(right),
             right_color: (rr, rg, rb),
             wrap: false,
+            texture: None,
         });
     }
     Ok(())

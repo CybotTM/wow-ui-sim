@@ -366,6 +366,7 @@ mod tests {
                         right_text: Some("Right".to_string()),
                         right_color: (0.2, 0.3, 0.4),
                         wrap: false,
+                        texture: None,
                     },
                     TooltipLine {
                         left_text: "Body".to_string(),
@@ -373,6 +374,7 @@ mod tests {
                         right_text: None,
                         right_color: (0.0, 0.0, 0.0),
                         wrap: true,
+                        texture: None,
                     },
                 ],
                 ..TooltipData::default()
