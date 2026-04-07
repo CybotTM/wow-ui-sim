@@ -281,6 +281,12 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
         if is_fav { st.world.favorite_toys.insert(item_id as u32); } else { st.world.favorite_toys.remove(&(item_id as u32)); }
         Ok(())
     }})?)?;
+    register_toy_filter_stubs(lua, &t)?;
+    lua.globals().set("C_ToyBox", t)?;
+    Ok(())
+}
+
+fn register_toy_filter_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetCollectedShown", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetUncollectedShown", lua.create_function(|_, ()| Ok(true))?)?;
     t.set("GetUnusableShown", lua.create_function(|_, ()| Ok(true))?)?;
@@ -288,7 +294,6 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set("SetUncollectedShown", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("SetUnusableShown", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set("ForceToyRefilter", lua.create_function(|_, ()| Ok(()))?)?;
-    lua.globals().set("C_ToyBox", t)?;
     Ok(())
 }
 
