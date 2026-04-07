@@ -710,6 +710,13 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
             if is_valid_anchor_type(&s) {
                 s
             } else {
+                crate::lua_api::script_helpers::call_error_handler(
+                    lua,
+                    &format!(
+                        "SetOwner: invalid anchor type '{}', defaulting to ANCHOR_LEFT",
+                        s
+                    ),
+                );
                 "ANCHOR_LEFT".to_string()
             }
         }

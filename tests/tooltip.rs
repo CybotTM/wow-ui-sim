@@ -1436,3 +1436,61 @@ fn test_tooltip_min_width_respected() {
         frame.width
     );
 }
+
+// --- Invalid anchor type warning tests ---
+
+#[test]
+fn test_invalid_anchor_type_warns_and_defaults() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "BadAnchorOwner", UIParent)
+        GameTooltip:SetOwner(owner, "INVALID_ANCHOR")
+    "#,
+    )
+    .unwrap();
+
+    // Should still work with default ANCHOR_LEFT
+    let anchor: String = env.eval("return GameTooltip:GetAnchorType()").unwrap();
+    assert_eq!(
+        anchor, "ANCHOR_LEFT",
+        "Invalid anchor should default to ANCHOR_LEFT"
+    );
+
+    // Should have logged a warning
+    let state = env.state().borrow();
+    let has_warning = state
+        .lua_errors
+        .iter()
+        .any(|e| e.contains("invalid anchor type") && e.contains("INVALID_ANCHOR"));
+    assert!(has_warning, "Should warn about invalid anchor type");
+}
+
+#[test]
+fn test_valid_anchor_type_no_warning() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.state().borrow_mut().lua_errors.clear();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "GoodAnchorOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+    "#,
+    )
+    .unwrap();
+
+    let anchor: String = env.eval("return GameTooltip:GetAnchorType()").unwrap();
+    assert_eq!(anchor, "ANCHOR_RIGHT");
+
+    let state = env.state().borrow();
+    let has_anchor_warning = state
+        .lua_errors
+        .iter()
+        .any(|e| e.contains("invalid anchor type"));
+    assert!(
+        !has_anchor_warning,
+        "Valid anchor should not produce a warning"
+    );
+}
