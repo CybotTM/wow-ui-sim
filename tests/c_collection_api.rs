@@ -22,6 +22,13 @@ fn test_pet_journal_get_num_pets_returns_two_numbers() {
 }
 
 #[test]
+fn test_pet_journal_get_num_pet_types() {
+    let env = env();
+    let count: i32 = env.eval("return C_PetJournal.GetNumPetTypes()").unwrap();
+    assert_eq!(count, 10, "WoW has 10 pet families");
+}
+
+#[test]
 fn test_pet_journal_get_pet_info_by_index_nil() {
     let env = env();
     let is_nil: bool = env
