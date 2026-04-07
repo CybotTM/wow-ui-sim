@@ -715,12 +715,26 @@ fn test_heirloom_get_heirloom_info_first_nil() {
 }
 
 #[test]
-fn test_heirloom_get_heirloom_info_is_pvp() {
+fn test_heirloom_get_heirloom_info_known_item() {
     let env = env();
-    let is_pvp: bool = env
-        .eval("local _,_, isPvP = C_Heirloom.GetHeirloomInfo(1); return isPvP")
+    let result: String = env
+        .eval(
+            r#"
+            local name, equipLoc, isPvP, texture, upgradeLevel, source,
+                  searchFiltered, effectiveLevel, minLevel, maxLevel
+                  = C_Heirloom.GetHeirloomInfo(122245)
+            if name ~= "Burnished Helm of Might" then return "name=" .. tostring(name) end
+            if equipLoc ~= "INVTYPE_HEAD" then return "loc=" .. tostring(equipLoc) end
+            if isPvP then return "isPvP" end
+            if upgradeLevel ~= 6 then return "upgrade=" .. tostring(upgradeLevel) end
+            if source ~= "Vendor" then return "source=" .. tostring(source) end
+            if minLevel ~= 1 then return "min=" .. tostring(minLevel) end
+            if maxLevel ~= 50 then return "max=" .. tostring(maxLevel) end
+            return "ok"
+            "#,
+        )
         .unwrap();
-    assert!(!is_pvp);
+    assert_eq!(result, "ok");
 }
 
 #[test]

@@ -743,10 +743,29 @@ fn register_transmog_util(lua: &Lua) -> Result<()> {
 /// C_Heirloom namespace - heirloom collection.
 fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "GetHeirloomInfo",
-        lua.create_function(|_, _item_id: i32| empty_heirloom_info())?,
-    )?;
+    // GetHeirloomInfo returns: name, equipLoc, isPvP, texture, upgradeLevel,
+    // source, searchFiltered, effectiveLevel, minLevel, maxLevel
+    t.set("GetHeirloomInfo", lua.create_function({
+        let s = Rc::clone(&state);
+        move |lua, item_id: i32| {
+            let st = s.borrow();
+            let Some(h) = st.world.heirlooms.iter().find(|h| h.item_id == item_id as u32) else {
+                return empty_heirloom_info();
+            };
+            Ok((
+                Value::String(lua.create_string(&h.name)?),
+                Value::String(lua.create_string(&h.equip_loc)?),
+                false,                       // isPvP
+                h.icon as i32,               // texture (fileDataID)
+                h.upgrade_level,             // upgradeLevel
+                Value::String(lua.create_string(&h.source)?),
+                false,                       // searchFiltered
+                h.max_level,                 // effectiveLevel
+                h.min_level,                 // minLevel
+                h.max_level,                 // maxLevel
+            ))
+        }
+    })?)?;
     add_i32_stub_with_arg::<i32>(lua, &t, "GetHeirloomMaxUpgradeLevel", 0)?;
     t.set("GetNumHeirlooms", lua.create_function({
         let s = Rc::clone(&state);
@@ -767,18 +786,18 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     Ok(())
 }
 
-fn empty_heirloom_info() -> Result<(Value, Value, bool, i32, i32, i32, bool, i32, i32, i32)> {
+fn empty_heirloom_info() -> Result<(Value, Value, bool, i32, i32, Value, bool, i32, i32, i32)> {
     Ok((
-        Value::Nil,
-        Value::Nil,
-        false,
-        0i32,
-        0i32,
-        0i32,
-        false,
-        0i32,
-        0i32,
-        0i32,
+        Value::Nil,   // name
+        Value::Nil,   // equipLoc
+        false,        // isPvP
+        0i32,         // texture
+        0i32,         // upgradeLevel
+        Value::Nil,   // source
+        false,        // searchFiltered
+        0i32,         // effectiveLevel
+        0i32,         // minLevel
+        0i32,         // maxLevel
     ))
 }
 
