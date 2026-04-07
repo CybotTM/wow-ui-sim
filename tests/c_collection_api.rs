@@ -14,9 +14,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn test_pet_journal_get_num_pets_returns_two_numbers() {
     let env = env();
-    let (total, owned): (i32, i32) = env
-        .eval("return C_PetJournal.GetNumPets()")
-        .unwrap();
+    let (total, owned): (i32, i32) = env.eval("return C_PetJournal.GetNumPets()").unwrap();
     assert_eq!(total, 10, "total pets in default world");
     assert_eq!(owned, 9, "collected pets (Pocopoc is not collected)");
 }
@@ -204,18 +202,14 @@ fn test_toy_box_is_toy_usable_unknown() {
 #[test]
 fn test_toy_box_is_toy_usable_collected() {
     let env = env();
-    let usable: bool = env
-        .eval("return C_ToyBox.IsToyUsable(166779)")
-        .unwrap();
+    let usable: bool = env.eval("return C_ToyBox.IsToyUsable(166779)").unwrap();
     assert!(usable, "collected toy should be usable");
 }
 
 #[test]
 fn test_toy_box_is_toy_usable_uncollected() {
     let env = env();
-    let usable: bool = env
-        .eval("return C_ToyBox.IsToyUsable(187421)")
-        .unwrap();
+    let usable: bool = env.eval("return C_ToyBox.IsToyUsable(187421)").unwrap();
     assert!(!usable, "uncollected toy should not be usable");
 }
 
@@ -259,9 +253,7 @@ fn test_toy_box_filter_stubs() {
 #[test]
 fn test_toy_box_get_toy_link() {
     let env = env();
-    let link: String = env
-        .eval("return C_ToyBox.GetToyLink(166779)")
-        .unwrap();
+    let link: String = env.eval("return C_ToyBox.GetToyLink(166779)").unwrap();
     assert!(link.contains("Hearthstone Game Table"));
     assert!(link.contains("|Hitem:166779"));
 }
@@ -269,9 +261,7 @@ fn test_toy_box_get_toy_link() {
 #[test]
 fn test_toy_box_get_toy_link_nil() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return C_ToyBox.GetToyLink(1) == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return C_ToyBox.GetToyLink(1) == nil").unwrap();
     assert!(is_nil, "unknown toy should return nil");
 }
 

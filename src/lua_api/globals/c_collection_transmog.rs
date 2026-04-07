@@ -43,37 +43,54 @@ fn register_transmog_source_queries(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    t.set("GetAppearanceSources", lua.create_function({
-        let s = Rc::clone(state);
-        move |lua, visual_id: i32| {
-            let st = s.borrow();
-            let sources: Vec<_> = st.world.transmog_appearances.iter()
-                .filter(|a| a.visual_id == visual_id)
-                .collect();
-            let result = lua.create_table()?;
-            for (i, a) in sources.iter().enumerate() {
-                result.set(i + 1, build_source_info(lua, a)?)?;
+    t.set(
+        "GetAppearanceSources",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |lua, visual_id: i32| {
+                let st = s.borrow();
+                let sources: Vec<_> = st
+                    .world
+                    .transmog_appearances
+                    .iter()
+                    .filter(|a| a.visual_id == visual_id)
+                    .collect();
+                let result = lua.create_table()?;
+                for (i, a) in sources.iter().enumerate() {
+                    result.set(i + 1, build_source_info(lua, a)?)?;
+                }
+                Ok(result)
             }
-            Ok(result)
-        }
-    })?)?;
-    t.set("GetSourceInfo", lua.create_function({
-        let s = Rc::clone(state);
-        move |lua, source_id: i32| {
-            let st = s.borrow();
-            if let Some(a) = st.world.transmog_appearances.iter().find(|a| a.source_id == source_id) {
-                build_source_info(lua, a)
-            } else {
-                build_empty_source_info(lua)
+        })?,
+    )?;
+    t.set(
+        "GetSourceInfo",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |lua, source_id: i32| {
+                let st = s.borrow();
+                if let Some(a) = st
+                    .world
+                    .transmog_appearances
+                    .iter()
+                    .find(|a| a.source_id == source_id)
+                {
+                    build_source_info(lua, a)
+                } else {
+                    build_empty_source_info(lua)
+                }
             }
-        }
-    })?)?;
+        })?,
+    )?;
     add_table_stub_with_arg::<i32>(lua, t, "GetAllAppearanceSources")?;
     add_i32_stub_with_arg::<i32>(lua, t, "GetAppearanceCameraID", 0)?;
-    t.set("GetNumTransmogSources", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, ()| Ok(s.borrow().world.transmog_appearances.len() as i32)
-    })?)?;
+    t.set(
+        "GetNumTransmogSources",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, ()| Ok(s.borrow().world.transmog_appearances.len() as i32)
+        })?,
+    )?;
     Ok(())
 }
 
@@ -82,32 +99,38 @@ fn register_transmog_category_queries(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    t.set("GetCategoryAppearances", lua.create_function({
-        let s = Rc::clone(state);
-        move |lua, (category_id, _location): (i32, Value)| {
-            let st = s.borrow();
-            let mut seen_visuals = std::collections::HashSet::new();
-            let result = lua.create_table()?;
-            let mut idx = 0;
-            for a in &st.world.transmog_appearances {
-                if a.category_id == category_id && seen_visuals.insert(a.visual_id) {
-                    idx += 1;
-                    result.set(idx, build_appearance_entry(lua, a, idx)?)?;
+    t.set(
+        "GetCategoryAppearances",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |lua, (category_id, _location): (i32, Value)| {
+                let st = s.borrow();
+                let mut seen_visuals = std::collections::HashSet::new();
+                let result = lua.create_table()?;
+                let mut idx = 0;
+                for a in &st.world.transmog_appearances {
+                    if a.category_id == category_id && seen_visuals.insert(a.visual_id) {
+                        idx += 1;
+                        result.set(idx, build_appearance_entry(lua, a, idx)?)?;
+                    }
                 }
+                Ok(result)
             }
-            Ok(result)
-        }
-    })?)?;
+        })?,
+    )?;
     add_bool_stub_with_arg::<i32>(lua, t, "IsAppearanceHiddenVisual", false)?;
-    t.set("GetCategoryInfo", lua.create_function(|_, cat_id: i32| {
-        if let Some((name, is_weapon, can_enchant, can_main, can_off)) =
-            transmog_category_info(cat_id)
-        {
-            Ok((name.to_string(), is_weapon, can_enchant, can_main, can_off))
-        } else {
-            Ok((String::new(), false, false, false, false))
-        }
-    })?)?;
+    t.set(
+        "GetCategoryInfo",
+        lua.create_function(|_, cat_id: i32| {
+            if let Some((name, is_weapon, can_enchant, can_main, can_off)) =
+                transmog_category_info(cat_id)
+            {
+                Ok((name.to_string(), is_weapon, can_enchant, can_main, can_off))
+            } else {
+                Ok((String::new(), false, false, false, false))
+            }
+        })?,
+    )?;
     Ok(())
 }
 
@@ -131,12 +154,19 @@ fn build_appearance_entry(
 }
 
 fn register_transmog_outfit_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetIllusions", lua.create_function(|lua, ()| lua.create_table())?)?;
-    t.set("GetOutfits", lua.create_function(|lua, ()| lua.create_table())?)?;
+    t.set(
+        "GetIllusions",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    t.set(
+        "GetOutfits",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
     t.set("GetNumMaxOutfits", lua.create_function(|_, ()| Ok(20i32))?)?;
-    t.set("GetOutfitInfo", lua.create_function(|_, _id: i32| {
-        Ok((Value::Nil, Value::Nil))
-    })?)?;
+    t.set(
+        "GetOutfitInfo",
+        lua.create_function(|_, _id: i32| Ok((Value::Nil, Value::Nil)))?,
+    )?;
     Ok(())
 }
 
@@ -145,23 +175,32 @@ fn register_transmog_ownership_methods(
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    t.set("PlayerHasTransmog", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, (item_id, _mod): (i32, Option<i32>)| {
-            Ok(s.borrow().world.collected_transmogs.contains(&item_id))
-        }
-    })?)?;
-    t.set("PlayerHasTransmogByItemInfo", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, item_info: String| {
-            let item_id = item_id_from_item_info(&item_info);
-            Ok(s.borrow().world.collected_transmogs.contains(&item_id))
-        }
-    })?)?;
-    t.set("PlayerHasTransmogItemModifiedAppearance", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, id: i32| Ok(s.borrow().world.collected_transmogs.contains(&id))
-    })?)?;
+    t.set(
+        "PlayerHasTransmog",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, (item_id, _mod): (i32, Option<i32>)| {
+                Ok(s.borrow().world.collected_transmogs.contains(&item_id))
+            }
+        })?,
+    )?;
+    t.set(
+        "PlayerHasTransmogByItemInfo",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, item_info: String| {
+                let item_id = item_id_from_item_info(&item_info);
+                Ok(s.borrow().world.collected_transmogs.contains(&item_id))
+            }
+        })?,
+    )?;
+    t.set(
+        "PlayerHasTransmogItemModifiedAppearance",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, id: i32| Ok(s.borrow().world.collected_transmogs.contains(&id))
+        })?,
+    )?;
     add_nil_stub_with_arg::<i32>(lua, t, "GetItemInfo")?;
     add_bool_stub_with_arg::<i32>(lua, t, "PlayerKnowsSource", false)?;
     add_bool_stub_with_arg::<i32>(lua, t, "IsSourceTypeFilterChecked", true)?;
@@ -210,19 +249,28 @@ fn item_id_from_item_info(item_info: &str) -> i32 {
 
 fn register_transmog(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetAllSetAppearancesByID", lua.create_function(|lua, _: i32| lua.create_table())?)?;
-    t.set("GetAppliedSourceID", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, slot: i32| {
-            let st = s.borrow();
-            match st.world.applied_transmog_slots.get(&slot) {
-                Some(&source_id) => Ok(Value::Integer(source_id as i64)),
-                None => Ok(Value::Nil),
+    t.set(
+        "GetAllSetAppearancesByID",
+        lua.create_function(|lua, _: i32| lua.create_table())?,
+    )?;
+    t.set(
+        "GetAppliedSourceID",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, slot: i32| {
+                let st = s.borrow();
+                match st.world.applied_transmog_slots.get(&slot) {
+                    Some(&source_id) => Ok(Value::Integer(source_id as i64)),
+                    None => Ok(Value::Nil),
+                }
             }
-        }
-    })?)?;
+        })?,
+    )?;
     // isTransmogrified, hasPending, isPendingCollected, canTransmogrify, cannotTransmogrifyReason, hasUndo
-    t.set("GetSlotInfo", lua.create_function(|_, _: i32| Ok((false, false, false, false, false, false)))?)?;
+    t.set(
+        "GetSlotInfo",
+        lua.create_function(|_, _: i32| Ok((false, false, false, false, false, false)))?,
+    )?;
     lua.globals().set("C_Transmog", t)?;
     Ok(())
 }
@@ -262,7 +310,11 @@ fn build_transmog_location(lua: &Lua) -> Result<mlua::Table> {
     Ok(lua.named_registry_value("__transmog_location_mt")?)
 }
 
-fn new_transmog_location(lua: &Lua, transmog_type: i32, modification: Value) -> Result<mlua::Table> {
+fn new_transmog_location(
+    lua: &Lua,
+    transmog_type: i32,
+    modification: Value,
+) -> Result<mlua::Table> {
     let location = lua.create_table()?;
     let mt: mlua::Table = lua.named_registry_value("__transmog_location_mt")?;
     location.set_metatable(Some(mt));
@@ -274,22 +326,30 @@ fn new_transmog_location(lua: &Lua, transmog_type: i32, modification: Value) -> 
 fn register_transmog_util(lua: &Lua) -> Result<()> {
     build_transmog_location(lua)?;
     let t = lua.create_table()?;
-    t.set("GetTransmogLocation", lua.create_function(
-        |lua, (slot, transmog_type, modification): (String, i32, Value)| {
-            let loc = new_transmog_location(lua, transmog_type, modification)?;
-            loc.set("slotName", slot)?;
-            Ok(loc)
-        },
-    )?)?;
-    t.set("CreateTransmogLocation", lua.create_function(
-        |lua, (slot_id, transmog_type, modification): (i32, i32, Value)| {
-            let loc = new_transmog_location(lua, transmog_type, modification)?;
-            loc.set("slotID", slot_id)?;
-            Ok(loc)
-        },
-    )?)?;
-    t.set("GetBestItemModifiedAppearanceID",
-        lua.create_function(|_, _: mlua::Value| Ok(Value::Nil))?)?;
+    t.set(
+        "GetTransmogLocation",
+        lua.create_function(
+            |lua, (slot, transmog_type, modification): (String, i32, Value)| {
+                let loc = new_transmog_location(lua, transmog_type, modification)?;
+                loc.set("slotName", slot)?;
+                Ok(loc)
+            },
+        )?,
+    )?;
+    t.set(
+        "CreateTransmogLocation",
+        lua.create_function(
+            |lua, (slot_id, transmog_type, modification): (i32, i32, Value)| {
+                let loc = new_transmog_location(lua, transmog_type, modification)?;
+                loc.set("slotID", slot_id)?;
+                Ok(loc)
+            },
+        )?,
+    )?;
+    t.set(
+        "GetBestItemModifiedAppearanceID",
+        lua.create_function(|_, _: mlua::Value| Ok(Value::Nil))?,
+    )?;
     lua.globals().set("TransmogUtil", t)?;
     Ok(())
 }
@@ -307,67 +367,159 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     Ok(())
 }
 
-fn register_heirloom_info_methods(lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    t.set("GetHeirloomInfo", lua.create_function({
-        let s = Rc::clone(state);
-        move |lua, item_id: i32| {
-            let st = s.borrow();
-            let Some(h) = st.world.heirlooms.iter().find(|h| h.item_id == item_id as u32) else {
-                return empty_heirloom_info();
-            };
-            Ok((
-                Value::String(lua.create_string(&h.name)?),
-                Value::String(lua.create_string(&h.equip_loc)?),
-                false, h.icon as i32, h.upgrade_level,
-                Value::String(lua.create_string(&h.source)?),
-                false, h.max_level, h.min_level, h.max_level,
-            ))
-        }
-    })?)?;
-    add_i32_stub_with_arg::<i32>(lua, t, "GetHeirloomMaxUpgradeLevel", 0)?;
-    t.set("GetHeirloomLink", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, item_id: i32| {
-            let st = s.borrow();
-            match st.world.heirlooms.iter().find(|h| h.item_id == item_id as u32) {
-                Some(h) => Ok(Some(format!("|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r", h.item_id, h.name))),
-                None => Ok(None),
+fn register_heirloom_info_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetHeirloomInfo",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |lua, item_id: i32| {
+                let st = s.borrow();
+                let Some(h) = st
+                    .world
+                    .heirlooms
+                    .iter()
+                    .find(|h| h.item_id == item_id as u32)
+                else {
+                    return empty_heirloom_info();
+                };
+                Ok((
+                    Value::String(lua.create_string(&h.name)?),
+                    Value::String(lua.create_string(&h.equip_loc)?),
+                    false,
+                    h.icon as i32,
+                    h.upgrade_level,
+                    Value::String(lua.create_string(&h.source)?),
+                    false,
+                    h.max_level,
+                    h.min_level,
+                    h.max_level,
+                ))
             }
-        }
-    })?)?;
+        })?,
+    )?;
+    add_i32_stub_with_arg::<i32>(lua, t, "GetHeirloomMaxUpgradeLevel", 0)?;
+    t.set(
+        "GetHeirloomLink",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, item_id: i32| {
+                let st = s.borrow();
+                match st
+                    .world
+                    .heirlooms
+                    .iter()
+                    .find(|h| h.item_id == item_id as u32)
+                {
+                    Some(h) => Ok(Some(format!(
+                        "|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r",
+                        h.item_id, h.name
+                    ))),
+                    None => Ok(None),
+                }
+            }
+        })?,
+    )?;
     Ok(())
 }
 
-fn register_heirloom_query_methods(lua: &Lua, t: &mlua::Table, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    t.set("GetNumHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32) })?)?;
-    t.set("GetNumKnownHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.collected_heirlooms.len() as i32) })?)?;
-    t.set("GetNumDisplayedHeirlooms", lua.create_function({ let s = Rc::clone(state); move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32) })?)?;
-    t.set("GetHeirloomItemIDFromDisplayedIndex", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, index: i32| {
-            let i = (index - 1) as usize;
-            Ok(s.borrow().world.heirlooms.get(i).map(|h| h.item_id as i32).unwrap_or(0))
-        }
-    })?)?;
-    t.set("PlayerHasHeirloom", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, item_id: i32| Ok(s.borrow().world.collected_heirlooms.contains(&(item_id as u32)))
-    })?)?;
+fn register_heirloom_query_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetNumHeirlooms",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32)
+        })?,
+    )?;
+    t.set(
+        "GetNumKnownHeirlooms",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, ()| Ok(s.borrow().world.collected_heirlooms.len() as i32)
+        })?,
+    )?;
+    t.set(
+        "GetNumDisplayedHeirlooms",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32)
+        })?,
+    )?;
+    t.set(
+        "GetHeirloomItemIDFromDisplayedIndex",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, index: i32| {
+                let i = (index - 1) as usize;
+                Ok(s.borrow()
+                    .world
+                    .heirlooms
+                    .get(i)
+                    .map(|h| h.item_id as i32)
+                    .unwrap_or(0))
+            }
+        })?,
+    )?;
+    t.set(
+        "PlayerHasHeirloom",
+        lua.create_function({
+            let s = Rc::clone(state);
+            move |_, item_id: i32| {
+                Ok(s.borrow()
+                    .world
+                    .collected_heirlooms
+                    .contains(&(item_id as u32)))
+            }
+        })?,
+    )?;
     Ok(())
 }
 
 fn register_heirloom_filter_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     add_bool_stub_with_arg::<i32>(lua, t, "CanHeirloomUpgradeFromPending", false)?;
-    t.set("GetCollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("GetUncollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
-    t.set("SetCollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
-    t.set("SetUncollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
-    t.set("GetClassAndSpecFilters", lua.create_function(|_, ()| Ok((0i32, 0i32)))?)?;
+    t.set(
+        "GetCollectedHeirloomFilter",
+        lua.create_function(|_, ()| Ok(true))?,
+    )?;
+    t.set(
+        "GetUncollectedHeirloomFilter",
+        lua.create_function(|_, ()| Ok(true))?,
+    )?;
+    t.set(
+        "SetCollectedHeirloomFilter",
+        lua.create_function(|_, _: bool| Ok(()))?,
+    )?;
+    t.set(
+        "SetUncollectedHeirloomFilter",
+        lua.create_function(|_, _: bool| Ok(()))?,
+    )?;
+    t.set(
+        "GetClassAndSpecFilters",
+        lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
+    )?;
     Ok(())
 }
 
 fn empty_heirloom_info() -> Result<(Value, Value, bool, i32, i32, Value, bool, i32, i32, i32)> {
-    Ok((Value::Nil, Value::Nil, false, 0, 0, Value::Nil, false, 0, 0, 0))
+    Ok((
+        Value::Nil,
+        Value::Nil,
+        false,
+        0,
+        0,
+        Value::Nil,
+        false,
+        0,
+        0,
+        0,
+    ))
 }
 
 // ============================================================================
@@ -378,16 +530,19 @@ fn register_transmog_sets(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     add_i32_stub_with_arg::<i32>(lua, &t, "GetBaseSetID", 0)?;
     add_table_stub_with_arg::<i32>(lua, &t, "GetVariantSets")?;
-    t.set("GetSetInfo", lua.create_function(|lua, _: i32| {
-        let info = lua.create_table()?;
-        info.set("setID", 0)?;
-        info.set("name", "")?;
-        info.set("description", "")?;
-        info.set("label", "")?;
-        info.set("expansionID", 0)?;
-        info.set("collected", false)?;
-        Ok(info)
-    })?)?;
+    t.set(
+        "GetSetInfo",
+        lua.create_function(|lua, _: i32| {
+            let info = lua.create_table()?;
+            info.set("setID", 0)?;
+            info.set("name", "")?;
+            info.set("description", "")?;
+            info.set("label", "")?;
+            info.set("expansionID", 0)?;
+            info.set("collected", false)?;
+            Ok(info)
+        })?,
+    )?;
     add_table_stub_with_arg::<i32>(lua, &t, "GetSetPrimaryAppearances")?;
     add_empty_table_stub(lua, &t, "GetAllSets")?;
     add_empty_table_stub(lua, &t, "GetUsableSets")?;

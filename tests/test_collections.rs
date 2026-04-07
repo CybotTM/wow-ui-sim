@@ -194,14 +194,18 @@ fn mount_journal_get_mount_info_extra_by_id() {
 #[test]
 fn toy_box_num_total_displayed() {
     let env = env();
-    let count: i32 = env.eval("return C_ToyBox.GetNumTotalDisplayedToys()").unwrap();
+    let count: i32 = env
+        .eval("return C_ToyBox.GetNumTotalDisplayedToys()")
+        .unwrap();
     assert_eq!(count, 10);
 }
 
 #[test]
 fn toy_box_num_learned_displayed() {
     let env = env();
-    let count: i32 = env.eval("return C_ToyBox.GetNumLearnedDisplayedToys()").unwrap();
+    let count: i32 = env
+        .eval("return C_ToyBox.GetNumLearnedDisplayedToys()")
+        .unwrap();
     assert_eq!(count, 9, "9 collected out of 10");
 }
 
