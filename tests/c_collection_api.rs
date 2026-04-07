@@ -763,6 +763,28 @@ fn test_heirloom_get_num_known_heirlooms() {
 }
 
 #[test]
+fn test_heirloom_get_num_displayed_heirlooms() {
+    let env = env();
+    let count: i32 = env
+        .eval("return C_Heirloom.GetNumDisplayedHeirlooms()")
+        .unwrap();
+    assert_eq!(count, 11);
+}
+
+#[test]
+fn test_heirloom_get_item_id_from_displayed_index() {
+    let env = env();
+    let id: i32 = env
+        .eval("return C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(1)")
+        .unwrap();
+    assert_eq!(id, 122245, "first heirloom is Burnished Helm of Might");
+    let zero: i32 = env
+        .eval("return C_Heirloom.GetHeirloomItemIDFromDisplayedIndex(99)")
+        .unwrap();
+    assert_eq!(zero, 0, "out of range returns 0");
+}
+
+#[test]
 fn test_heirloom_player_has_heirloom() {
     let env = env();
     let has: bool = env.eval("return C_Heirloom.PlayerHasHeirloom(1)").unwrap();
