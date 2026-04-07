@@ -299,28 +299,47 @@ struct TooltipTextRenderer<'a> {
     glyph_atlas: &'a mut GlyphAtlas,
 }
 
+impl TooltipTextRenderer<'_> {
+    fn emit(
+        &mut self,
+        text: &str,
+        bounds: Rectangle,
+        justify: TextJustify,
+        font_size: f32,
+        color: [f32; 4],
+        wrap: bool,
+    ) {
+        emit_tooltip_text_run(
+            self.batch,
+            self.font_sys,
+            self.glyph_atlas,
+            text,
+            bounds,
+            justify,
+            font_size,
+            color,
+            wrap,
+        );
+    }
+}
+
 /// Emit quads for a single tooltip line (left text, optional right text).
 fn emit_tooltip_line(
-    text_renderer: &mut TooltipTextRenderer<'_>,
+    tr: &mut TooltipTextRenderer<'_>,
     line: &TooltipLineRender,
     placement: TooltipLinePlacement,
 ) {
-    let right_width = line.right_text.as_ref().map(|t| {
-        text_renderer
-            .font_sys
-            .measure_text_width(t, None, line.font_size)
-    });
+    let right_width = line
+        .right_text
+        .as_ref()
+        .map(|t| tr.font_sys.measure_text_width(t, None, line.font_size));
 
-    // Left text: clip width to leave room for right text + gap.
     let left_width = match right_width {
         Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
         _ => placement.width,
     };
     let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
-    emit_tooltip_text_run(
-        text_renderer.batch,
-        text_renderer.font_sys,
-        text_renderer.glyph_atlas,
+    tr.emit(
         &line.left_text,
         left_bounds,
         TextJustify::Left,
@@ -329,16 +348,11 @@ fn emit_tooltip_line(
         line.wrap,
     );
 
-    // Right text: own bounds starting after the left area.
     if let Some(ref right_text) = line.right_text {
         let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
-        let right_w = placement.width - left_width - DOUBLE_LINE_GAP;
-        let right_bounds =
-            tooltip_line_bounds(right_x, placement.y, right_w.max(0.0), placement.height);
-        emit_tooltip_text_run(
-            text_renderer.batch,
-            text_renderer.font_sys,
-            text_renderer.glyph_atlas,
+        let right_w = (placement.width - left_width - DOUBLE_LINE_GAP).max(0.0);
+        let right_bounds = tooltip_line_bounds(right_x, placement.y, right_w, placement.height);
+        tr.emit(
             right_text,
             right_bounds,
             TextJustify::Right,
