@@ -579,6 +579,26 @@ fn test_transmog_get_applied_source_id_nil() {
 }
 
 #[test]
+fn test_admin_set_transmog_for_slot() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- No transmog applied initially
+            if C_Transmog.GetAppliedSourceID(1) ~= nil then return "not nil initially" end
+            A_Admin.SetTransmogForSlot(1, 42)
+            local id = C_Transmog.GetAppliedSourceID(1)
+            if id ~= 42 then return "id=" .. tostring(id) end
+            -- Other slots unaffected
+            if C_Transmog.GetAppliedSourceID(2) ~= nil then return "slot 2 affected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_get_slot_info() {
     let env = env();
     let result: String = env

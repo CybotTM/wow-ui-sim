@@ -62,8 +62,8 @@ pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     register_pet_journal(lua, Rc::clone(&state))?;
     register_mount_journal(lua, Rc::clone(&state))?;
     register_toy_box(lua, Rc::clone(&state))?;
-    register_transmog_collection(lua, state)?;
-    register_transmog(lua)?;
+    register_transmog_collection(lua, Rc::clone(&state))?;
+    register_transmog(lua, state)?;
     register_transmog_util(lua)?;
     register_heirloom(lua)?;
     register_transmog_sets(lua)?;
@@ -636,16 +636,22 @@ fn item_id_from_item_info(item_info: &str) -> i32 {
 }
 
 /// C_Transmog namespace - transmogrification API.
-fn register_transmog(lua: &Lua) -> Result<()> {
+fn register_transmog(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
         "GetAllSetAppearancesByID",
         lua.create_function(|lua, _set_id: i32| lua.create_table())?,
     )?;
-    t.set(
-        "GetAppliedSourceID",
-        lua.create_function(|_, _slot: i32| Ok(Value::Nil))?,
-    )?;
+    t.set("GetAppliedSourceID", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, slot: i32| {
+            let st = s.borrow();
+            match st.world.applied_transmog_slots.get(&slot) {
+                Some(&source_id) => Ok(Value::Integer(source_id as i64)),
+                None => Ok(Value::Nil),
+            }
+        }
+    })?)?;
     // GetSlotInfo returns: isTransmogrified, hasPending, isPendingCollected,
     // canTransmogrify, cannotTransmogrifyReason, hasUndo
     // No transmog NPC open, so nothing is transmogrified or pending.

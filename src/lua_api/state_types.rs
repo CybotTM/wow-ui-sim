@@ -647,6 +647,8 @@ pub struct WorldState {
     pub loot_rolls: HashMap<i32, LootRollInfo>,
     pub collected_transmogs: HashSet<i32>,
     pub transmog_appearances: Vec<TransmogAppearance>,
+    /// Applied transmog per equipment slot: slotID → sourceID.
+    pub applied_transmog_slots: HashMap<i32, i32>,
     pub collected_mounts: HashSet<i32>,
     pub mounts: Vec<MountData>,
     pub collected_pets: HashSet<i32>,
@@ -677,6 +679,7 @@ impl Default for WorldState {
             loot_rolls: HashMap::new(),
             collected_transmogs: HashSet::new(),
             transmog_appearances: default_transmog_appearances(),
+            applied_transmog_slots: HashMap::new(),
             collected_mounts: HashSet::new(),
             mounts: default_mounts(),
             collected_pets: HashSet::new(),

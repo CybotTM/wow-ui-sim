@@ -172,6 +172,13 @@ fn register_transmog_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
             Ok(())
         }
     })?;
+    super::admin_api::set_fn(lua, t, "SetTransmogForSlot", {
+        let s = Rc::clone(&state);
+        move |_, (slot_id, source_id): (i32, i32)| {
+            s.borrow_mut().world.applied_transmog_slots.insert(slot_id, source_id);
+            Ok(())
+        }
+    })?;
     Ok(())
 }
 
