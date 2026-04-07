@@ -702,6 +702,28 @@ fn register_fontstring_globals(
 // --- Positioning ---
 
 fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let (owner_id, anchor, x_offset, y_offset) = parse_set_owner_args(lua, args)?;
+    {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&id) {
+            td.lines.clear();
+            td.spell_id = None;
+            td.owner_id = owner_id;
+            td.anchor_type = anchor.clone();
+        }
+        position_tooltip(&mut state, id, owner_id, &anchor, x_offset, y_offset);
+        state.set_frame_visible(id, true);
+    }
+    fire_tooltip_script(lua, id, "OnTooltipCleared")?;
+    Ok(())
+}
+
+/// Parse SetOwner arguments: owner, anchor type (with validation), x/y offsets.
+fn parse_set_owner_args(
+    lua: &mlua::Lua,
+    args: mlua::MultiValue,
+) -> mlua::Result<(Option<u64>, String, f32, f32)> {
     let mut args_iter = args.into_iter();
     let owner_val = match args_iter.next() {
         Some(v) if extract_frame_id(&v).is_some() => v,
@@ -711,7 +733,7 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
             ));
         }
     };
-    let anchor: String = match args_iter.next() {
+    let anchor = match args_iter.next() {
         Some(Value::String(s)) => {
             let s = s.to_string_lossy().to_string();
             if is_valid_anchor_type(&s) {
@@ -731,21 +753,7 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
     };
     let x_offset = val_to_f32(args_iter.next(), 0.0);
     let y_offset = val_to_f32(args_iter.next(), 0.0);
-    let owner_id = extract_frame_id(&owner_val);
-    {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&id) {
-            td.lines.clear();
-            td.spell_id = None;
-            td.owner_id = owner_id;
-            td.anchor_type = anchor.clone();
-        }
-        position_tooltip(&mut state, id, owner_id, &anchor, x_offset, y_offset);
-        state.set_frame_visible(id, true);
-    }
-    fire_tooltip_script(lua, id, "OnTooltipCleared")?;
-    Ok(())
+    Ok((extract_frame_id(&owner_val), anchor, x_offset, y_offset))
 }
 
 fn is_valid_anchor_type(s: &str) -> bool {
