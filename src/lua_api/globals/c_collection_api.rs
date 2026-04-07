@@ -803,6 +803,11 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
         }
     })?)?;
     add_bool_stub_with_arg::<i32>(lua, &t, "CanHeirloomUpgradeFromPending", false)?;
+    // Filter stubs: show all by default, setters are no-ops
+    t.set("GetCollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("GetUncollectedHeirloomFilter", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("SetCollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
+    t.set("SetUncollectedHeirloomFilter", lua.create_function(|_, _: bool| Ok(()))?)?;
     t.set(
         "GetClassAndSpecFilters",
         lua.create_function(|_, ()| Ok((0i32, 0i32)))?,

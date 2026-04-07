@@ -820,6 +820,23 @@ fn test_heirloom_get_heirloom_link_known() {
 }
 
 #[test]
+fn test_heirloom_filter_stubs() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if not C_Heirloom.GetCollectedHeirloomFilter() then return "collected not true" end
+            if not C_Heirloom.GetUncollectedHeirloomFilter() then return "uncollected not true" end
+            C_Heirloom.SetCollectedHeirloomFilter(false)
+            C_Heirloom.SetUncollectedHeirloomFilter(false)
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_heirloom_can_heirloom_upgrade_from_pending() {
     let env = env();
     let can: bool = env
