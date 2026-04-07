@@ -459,7 +459,9 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetLFGInfoServer",
         lua.create_function(|_, (_cat, _id): (Value, Value)| {
-            Ok((false, false, false, false, false, "", 0i32, 0i32, false, false, false, false))
+            Ok((
+                false, false, false, false, false, "", 0i32, 0i32, false, false, false, false,
+            ))
         })?,
     )?;
     g.set(
@@ -544,14 +546,8 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "UnitPowerBarTimerInfo",
         lua.create_function(|_, (_unit, _index): (String, i32)| Ok(Value::Nil))?,
     )?;
-    g.set(
-        "GetSendMailPrice",
-        lua.create_function(|_, ()| Ok(30i32))?,
-    )?;
-    g.set(
-        "GetWebTicket",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
+    g.set("GetSendMailPrice", lua.create_function(|_, ()| Ok(30i32))?)?;
+    g.set("GetWebTicket", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     g.set(
         "GetPVPLifetimeStats",
         lua.create_function(|_, ()| Ok((0i32, 0i32)))?,

@@ -248,7 +248,10 @@ fn register_secure_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     register_swap_to_global_environment(lua, &globals)?;
     globals.set("IsGMClient", lua.create_function(|_, ()| Ok(false))?)?;
-    globals.set("RegisterStaticConstants", lua.create_function(|_, _: Value| Ok(()))?)?;
+    globals.set(
+        "RegisterStaticConstants",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
     register_metatable_getters(lua, &globals)?;
     globals.set("C_GamePad", register_c_gamepad(lua)?)?;
     globals.set("C_AssistedCombat", register_c_assisted_combat(lua)?)?;

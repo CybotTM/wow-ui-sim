@@ -123,14 +123,14 @@ static RETRIBUTION_SPELLS: &[SpellBookEntry] = &[
 
 /// Blacksmithing profession spells.
 static BLACKSMITHING_SPELLS: &[SpellBookEntry] = &[
-    spell(2018),  // Blacksmithing
-    spell(2657),  // Smelt Copper
+    spell(2018), // Blacksmithing
+    spell(2657), // Smelt Copper
 ];
 
 /// Mining profession spells.
 static MINING_SPELLS: &[SpellBookEntry] = &[
-    spell(2575),    // Mining
-    passive(2576),  // Mining (passive)
+    spell(2575),   // Mining
+    passive(2576), // Mining (passive)
 ];
 
 /// All skill lines for a Protection Paladin, in WoW skill line index order.
