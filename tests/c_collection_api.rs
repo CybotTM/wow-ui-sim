@@ -228,10 +228,31 @@ fn test_toy_box_get_num_filtered_toys() {
 // ============================================================================
 
 #[test]
+fn test_transmog_collection_get_appearance_sources() {
+    let env = env();
+    // visual_id 1 is the first Head appearance in defaults
+    let result: String = env
+        .eval(
+            r#"
+            local sources = C_TransmogCollection.GetAppearanceSources(1)
+            if #sources ~= 1 then return "count=" .. #sources end
+            local s = sources[1]
+            if s.sourceID ~= 1 then return "sourceID=" .. tostring(s.sourceID) end
+            if s.visualID ~= 1 then return "visualID=" .. tostring(s.visualID) end
+            if s.categoryID ~= 1 then return "categoryID=" .. tostring(s.categoryID) end
+            if not s.isCollected then return "not collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_get_appearance_sources_empty() {
     let env = env();
     let count: i32 = env
-        .eval("return #C_TransmogCollection.GetAppearanceSources(1)")
+        .eval("return #C_TransmogCollection.GetAppearanceSources(99999)")
         .unwrap();
     assert_eq!(count, 0);
 }
