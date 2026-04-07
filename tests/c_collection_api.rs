@@ -223,6 +223,24 @@ fn test_toy_box_is_toy_usable_uncollected() {
 }
 
 #[test]
+fn test_toy_box_get_set_is_favorite() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_ToyBox.GetIsFavorite(166779) then return "already fav" end
+            C_ToyBox.SetIsFavorite(166779, true)
+            if not C_ToyBox.GetIsFavorite(166779) then return "not fav after set" end
+            C_ToyBox.SetIsFavorite(166779, false)
+            if C_ToyBox.GetIsFavorite(166779) then return "still fav after unset" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_toy_box_get_num_toys() {
     let env = env();
     let count: i32 = env.eval("return C_ToyBox.GetNumToys()").unwrap();

@@ -368,13 +368,29 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_toy_count_methods(lua, &t, Rc::clone(&state))?;
     register_toy_info_methods(lua, &t, Rc::clone(&state))?;
     t.set("IsToyUsable", lua.create_function({
-        let s = state;
+        let s = Rc::clone(&state);
         move |_, item_id: i32| {
             let st = s.borrow();
             Ok(st.world.toys.iter()
                 .find(|t| t.item_id == item_id as u32)
                 .map(|t| t.is_usable)
                 .unwrap_or(false))
+        }
+    })?)?;
+    t.set("GetIsFavorite", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, item_id: i32| Ok(s.borrow().world.favorite_toys.contains(&(item_id as u32)))
+    })?)?;
+    t.set("SetIsFavorite", lua.create_function({
+        let s = state;
+        move |_, (item_id, is_fav): (i32, bool)| {
+            let mut st = s.borrow_mut();
+            if is_fav {
+                st.world.favorite_toys.insert(item_id as u32);
+            } else {
+                st.world.favorite_toys.remove(&(item_id as u32));
+            }
+            Ok(())
         }
     })?)?;
     lua.globals().set("C_ToyBox", t)?;
