@@ -562,23 +562,39 @@ fn ensure_tooltip_fontstrings(lua: &mlua::Lua, tooltip_id: u64) -> mlua::Result<
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
 
+    let (new_left, new_right) = create_missing_fontstrings(&mut state, tooltip_id);
+
+    let td = state.tooltips.get_mut(&tooltip_id).unwrap();
+    td.left_line_ids.extend(&new_left);
+    td.right_line_ids.extend(&new_right);
+    let sync_data = collect_line_sync_data(td);
+    sync_fontstring_text(&mut state, &sync_data);
+
+    drop(state);
+    register_fontstring_globals(lua, &state_rc, &new_left, &new_right)
+}
+
+/// Create left and right FontString children for lines that don't have them yet.
+fn create_missing_fontstrings(
+    state: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+) -> (Vec<u64>, Vec<u64>) {
     let tooltip_name = state
         .widgets
         .get(tooltip_id)
         .and_then(|f| f.name.clone())
         .unwrap_or_default();
 
-    let (line_count, existing_left, existing_right) = match state.tooltips.get(&tooltip_id) {
-        Some(td) => (
-            td.lines.len(),
-            td.left_line_ids.len(),
-            td.right_line_ids.len(),
-        ),
-        None => return Ok(()),
+    let td = match state.tooltips.get(&tooltip_id) {
+        Some(td) => td,
+        None => return (Vec::new(), Vec::new()),
     };
+    let line_count = td.lines.len();
+    let existing_left = td.left_line_ids.len();
+    let existing_right = td.right_line_ids.len();
 
     let new_left = create_line_fontstrings(
-        &mut state,
+        state,
         tooltip_id,
         &tooltip_name,
         "TextLeft",
@@ -586,23 +602,14 @@ fn ensure_tooltip_fontstrings(lua: &mlua::Lua, tooltip_id: u64) -> mlua::Result<
         line_count,
     );
     let new_right = create_line_fontstrings(
-        &mut state,
+        state,
         tooltip_id,
         &tooltip_name,
         "TextRight",
         existing_right,
         line_count,
     );
-
-    let td = state.tooltips.get_mut(&tooltip_id).unwrap();
-    td.left_line_ids.extend(&new_left);
-    td.right_line_ids.extend(&new_right);
-    let sync_data = collect_line_sync_data(td);
-
-    sync_fontstring_text(&mut state, &sync_data);
-
-    drop(state);
-    register_fontstring_globals(lua, &state_rc, &new_left, &new_right)
+    (new_left, new_right)
 }
 
 /// Create FontString children for line indices `existing..target`.
