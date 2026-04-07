@@ -196,10 +196,30 @@ fn test_toy_box_get_toy_info() {
 }
 
 #[test]
-fn test_toy_box_is_toy_usable() {
+fn test_toy_box_is_toy_usable_unknown() {
     let env = env();
     let usable: bool = env.eval("return C_ToyBox.IsToyUsable(1)").unwrap();
-    assert!(!usable);
+    assert!(!usable, "unknown toy should not be usable");
+}
+
+#[test]
+fn test_toy_box_is_toy_usable_collected() {
+    let env = env();
+    // Hearthstone Game Table (166779) is collected and usable
+    let usable: bool = env
+        .eval("return C_ToyBox.IsToyUsable(166779)")
+        .unwrap();
+    assert!(usable, "collected toy should be usable");
+}
+
+#[test]
+fn test_toy_box_is_toy_usable_uncollected() {
+    let env = env();
+    // Earpieces of Tranquil Focus (187421) is not collected, not usable
+    let usable: bool = env
+        .eval("return C_ToyBox.IsToyUsable(187421)")
+        .unwrap();
+    assert!(!usable, "uncollected toy should not be usable");
 }
 
 #[test]

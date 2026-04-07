@@ -366,8 +366,17 @@ fn register_mount_filter_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     register_toy_count_methods(lua, &t, Rc::clone(&state))?;
-    register_toy_info_methods(lua, &t, state)?;
-    t.set("IsToyUsable", lua.create_function(|_, _: i32| Ok(true))?)?;
+    register_toy_info_methods(lua, &t, Rc::clone(&state))?;
+    t.set("IsToyUsable", lua.create_function({
+        let s = state;
+        move |_, item_id: i32| {
+            let st = s.borrow();
+            Ok(st.world.toys.iter()
+                .find(|t| t.item_id == item_id as u32)
+                .map(|t| t.is_usable)
+                .unwrap_or(false))
+        }
+    })?)?;
     lua.globals().set("C_ToyBox", t)?;
     Ok(())
 }
