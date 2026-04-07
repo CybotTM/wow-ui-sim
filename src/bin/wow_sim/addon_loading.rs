@@ -29,6 +29,9 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
 
     for (name, toc_path) in &addons {
         load_one_blizzard_addon(env, name, toc_path, verbose, &mut total_timing);
+        if name == "Blizzard_EnvironmentCleanup" {
+            env.restore_post_cleanup_globals();
+        }
     }
 
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing);

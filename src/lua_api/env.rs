@@ -100,12 +100,21 @@ impl WowLuaEnv {
         }
     }
 
+    /// Restore globals that EnvironmentCleanup nil'd but later addons need.
+    ///
+    /// Call immediately after loading Blizzard_EnvironmentCleanup so that
+    /// subsequent Blizzard addons (Menu, SharedXMLGame, etc.) can use
+    /// `CreateSecureDelegate` at file scope.
+    pub fn restore_post_cleanup_globals(&self) {
+        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&self.lua);
+    }
+
     /// Apply post-load workarounds for Blizzard code that depends on
     /// unimplemented engine features (AnimationGroups, EditMode, etc.).
     /// Must be called after all addons are loaded and before firing events.
     pub fn apply_post_load_workarounds(&self) {
         super::workarounds::apply(self);
-        let _ = super::globals::environment_restore::restore_environment_cleanup_stubs(&self.lua);
+        self.restore_post_cleanup_globals();
         // Wrap seterrorhandler with newsecurefunction so coroutine.create rejects it.
         // Done here because BugGrabber overwrites it during addon loading.
         let _ = self.lua.load(

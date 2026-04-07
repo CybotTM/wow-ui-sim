@@ -333,3 +333,57 @@ fn test_securecallmethod_missing_method() {
         .unwrap();
     assert!(result, "missing method should return nil");
 }
+
+// ============================================================================
+// CreateSecureDelegate
+// ============================================================================
+
+#[test]
+fn test_create_secure_delegate_is_identity() {
+    let env = env();
+    let result: bool = env
+        .eval(
+            r#"
+            local function myFunc() return 42 end
+            local delegate = CreateSecureDelegate(myFunc)
+            return delegate == myFunc
+            "#,
+        )
+        .unwrap();
+    assert!(result, "CreateSecureDelegate should return the function as-is");
+}
+
+#[test]
+fn test_create_secure_delegate_survives_nil() {
+    let env = env();
+    // Simulate what EnvironmentCleanup does, then restore
+    let result: bool = env
+        .eval(
+            r#"
+            local function myFunc() return 42 end
+            -- EnvironmentCleanup nils it
+            CreateSecureDelegate = nil
+            assert(CreateSecureDelegate == nil, "should be nil after cleanup")
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(result);
+
+    // Restore it (as the loader does after EnvironmentCleanup)
+    env.restore_post_cleanup_globals();
+
+    let result: bool = env
+        .eval(
+            r#"
+            local function myFunc() return 42 end
+            local delegate = CreateSecureDelegate(myFunc)
+            return delegate == myFunc
+            "#,
+        )
+        .unwrap();
+    assert!(
+        result,
+        "CreateSecureDelegate should work after restore_post_cleanup_globals"
+    );
+}
