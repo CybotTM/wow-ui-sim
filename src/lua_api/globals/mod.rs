@@ -37,6 +37,7 @@ pub mod admin_encounter;
 pub mod aura_api;
 pub mod bit_api;
 pub mod c_collection_api;
+mod c_collection_transmog;
 pub mod c_container_api;
 pub mod c_editmode_api;
 pub mod c_event_utils_api;
