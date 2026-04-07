@@ -487,6 +487,46 @@ fn test_transmog_util_get_transmog_location() {
 }
 
 #[test]
+fn test_transmog_util_get_transmog_location_boolean_modification() {
+    let env = env();
+    // Blizzard code passes boolean `false` for isSecondary (modification) param
+    let (slot_name, modification): (String, i32) = env
+        .eval(
+            r#"
+            local loc = TransmogUtil.GetTransmogLocation("HEADSLOT", 0, false)
+            return loc.slotName, loc.modification
+            "#,
+        )
+        .unwrap();
+    assert_eq!(slot_name, "HEADSLOT");
+    assert_eq!(modification, 0);
+}
+
+#[test]
+fn test_transmog_location_methods() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local loc = TransmogUtil.GetTransmogLocation("HEADSLOT", 0, false)
+            if not loc:IsAppearance() then return "not appearance" end
+            if loc:IsIllusion() then return "is illusion" end
+            if loc:IsEitherHand() then return "is hand" end
+            if loc:IsSecondary() then return "is secondary" end
+            if loc:GetSlotName() ~= "HEADSLOT" then return "bad slot" end
+            local loc2 = TransmogUtil.GetTransmogLocation("HEADSLOT", 0, false)
+            if not loc:IsEqual(loc2) then return "not equal" end
+            local loc3 = TransmogUtil.GetTransmogLocation("MAINHANDSLOT", 0, false)
+            if not loc3:IsMainHand() then return "not mainhand" end
+            if not loc3:IsEitherHand() then return "not either hand" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok", "TransmogLocation methods: {result}");
+}
+
+#[test]
 fn test_transmog_util_create_transmog_location() {
     let env = env();
     let (slot_id, transmog_type, modification): (i32, i32, i32) = env

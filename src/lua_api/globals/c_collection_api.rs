@@ -7,6 +7,16 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Coerce a Lua value to i32: booleans map to 0/1, numbers pass through.
+fn bool_or_int_to_i32(v: Value) -> i32 {
+    match v {
+        Value::Boolean(b) => b as i32,
+        Value::Integer(n) => n as i32,
+        Value::Number(n) => n as i32,
+        _ => 0,
+    }
+}
+
 /// Register collection-related C_* namespaces.
 pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_pet_journal(lua, Rc::clone(&state))?;
@@ -517,17 +527,56 @@ fn register_transmog(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+/// Build a TransmogLocation table with methods matching the C++ engine object.
+///
+/// Fields: slotName (optional), slotID (optional), transmogType, modification.
+/// Methods derive from these fields (e.g. IsAppearance checks transmogType == 0).
+fn build_transmog_location(lua: &Lua) -> Result<mlua::Table> {
+    let methods: mlua::Table = lua
+        .load(
+            r#"
+        local mt = {}
+        mt.__index = {
+            IsAppearance = function(self) return self.transmogType == 0 end,
+            IsIllusion = function(self) return self.transmogType == 1 end,
+            IsSecondary = function(self) return self.modification == 1 end,
+            IsMainHand = function(self) return self.slotName == "MAINHANDSLOT" end,
+            IsOffHand = function(self) return self.slotName == "SECONDARYHANDSLOT" end,
+            IsEitherHand = function(self)
+                return self.slotName == "MAINHANDSLOT" or self.slotName == "SECONDARYHANDSLOT"
+            end,
+            GetSlotName = function(self) return self.slotName end,
+            GetSlotID = function(self) return self.slotID or 0 end,
+            GetArmorCategoryID = function(self) return nil end,
+            IsEqual = function(self, other)
+                return other and self.slotName == other.slotName
+                   and self.transmogType == other.transmogType
+                   and self.modification == other.modification
+            end,
+        }
+        return mt
+    "#,
+        )
+        .eval()?;
+    lua.set_named_registry_value("__transmog_location_mt", methods)?;
+    Ok(lua.named_registry_value("__transmog_location_mt")?)
+}
+
 /// TransmogUtil - utility functions for transmog system.
 fn register_transmog_util(lua: &Lua) -> Result<()> {
+    build_transmog_location(lua)?;
     let t = lua.create_table()?;
     t.set(
         "GetTransmogLocation",
         lua.create_function(
-            |lua, (slot, transmog_type, modification): (String, i32, i32)| {
+            |lua, (slot, transmog_type, modification): (String, i32, Value)| {
                 let location = lua.create_table()?;
+                let mt: mlua::Table =
+                    lua.named_registry_value("__transmog_location_mt")?;
+                location.set_metatable(Some(mt));
                 location.set("slotName", slot)?;
                 location.set("transmogType", transmog_type)?;
-                location.set("modification", modification)?;
+                location.set("modification", bool_or_int_to_i32(modification))?;
                 Ok(location)
             },
         )?,
@@ -535,11 +584,14 @@ fn register_transmog_util(lua: &Lua) -> Result<()> {
     t.set(
         "CreateTransmogLocation",
         lua.create_function(
-            |lua, (slot_id, transmog_type, modification): (i32, i32, i32)| {
+            |lua, (slot_id, transmog_type, modification): (i32, i32, Value)| {
                 let location = lua.create_table()?;
+                let mt: mlua::Table =
+                    lua.named_registry_value("__transmog_location_mt")?;
+                location.set_metatable(Some(mt));
                 location.set("slotID", slot_id)?;
                 location.set("transmogType", transmog_type)?;
-                location.set("modification", modification)?;
+                location.set("modification", bool_or_int_to_i32(modification))?;
                 Ok(location)
             },
         )?,
