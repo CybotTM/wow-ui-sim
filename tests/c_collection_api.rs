@@ -154,6 +154,15 @@ fn test_mount_journal_dismiss() {
     env.eval::<()>("C_MountJournal.Dismiss()").unwrap();
 }
 
+#[test]
+fn test_mount_journal_get_applied_mount_equipment_id_returns_nil() {
+    let env = env();
+    let is_nil: bool = env
+        .eval("return C_MountJournal.GetAppliedMountEquipmentID() == nil")
+        .unwrap();
+    assert!(is_nil, "should return nil when no mount equipment applied");
+}
+
 // ============================================================================
 // C_ToyBox
 // ============================================================================
