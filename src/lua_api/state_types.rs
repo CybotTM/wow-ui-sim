@@ -542,26 +542,42 @@ mod tests {
         assert_eq!(world.transmog_appearances.len(), 60);
 
         // Each armor slot has 4 collected + 1 uncollected
-        let head: Vec<_> = world.transmog_appearances.iter().filter(|a| a.category_id == 1).collect();
+        let head: Vec<_> = world
+            .transmog_appearances
+            .iter()
+            .filter(|a| a.category_id == 1)
+            .collect();
         assert_eq!(head.len(), 5, "Head slot should have 5 appearances");
         assert_eq!(head.iter().filter(|a| a.is_collected).count(), 4);
         assert_eq!(head.iter().filter(|a| !a.is_collected).count(), 1);
 
         // Source IDs are unique and sequential
-        let source_ids: HashSet<i32> = world.transmog_appearances.iter().map(|a| a.source_id).collect();
+        let source_ids: HashSet<i32> = world
+            .transmog_appearances
+            .iter()
+            .map(|a| a.source_id)
+            .collect();
         assert_eq!(source_ids.len(), 60, "All source IDs should be unique");
     }
 
     #[test]
     fn heirloom_defaults_populated() {
         let world = WorldState::default();
-        assert_eq!(world.heirlooms.len(), 11, "should have 11 default heirlooms");
+        assert_eq!(
+            world.heirlooms.len(),
+            11,
+            "should have 11 default heirlooms"
+        );
         assert_eq!(world.heirlooms[0].name, "Burnished Helm of Might");
         assert_eq!(world.heirlooms[0].equip_loc, "INVTYPE_HEAD");
 
         let ids: HashSet<u32> = world.heirlooms.iter().map(|h| h.item_id).collect();
         assert_eq!(ids.len(), 11, "all item IDs should be unique");
-        assert_eq!(world.collected_heirlooms.len(), 11, "all default heirlooms collected");
+        assert_eq!(
+            world.collected_heirlooms.len(),
+            11,
+            "all default heirlooms collected"
+        );
         assert!(world.collected_heirlooms.contains(&122245));
     }
 }

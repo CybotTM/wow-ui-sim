@@ -134,7 +134,9 @@ fn register_custom_next(lua: &Lua) -> Result<()> {
 /// Handle `next()` on FrameRef userdata: simulate a table with `[0] = lightuserdata`.
 /// Returns None if `tbl` is not a FrameRef.
 fn next_for_frame_ref(tbl: &Value, key: &Value) -> Option<mlua::MultiValue> {
-    let Value::UserData(ud) = tbl else { return None };
+    let Value::UserData(ud) = tbl else {
+        return None;
+    };
     if ud.borrow::<super::frame::FrameRef>().is_err() {
         return None;
     }

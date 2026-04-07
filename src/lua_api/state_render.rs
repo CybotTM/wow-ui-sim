@@ -45,9 +45,9 @@ fn dfs_emit(
 
     // Split: Texture/Line regions before children, FontStrings after.
     let split = regions.partition_point(|&rid| {
-        widgets
-            .get(rid)
-            .map_or(true, |r| r.widget_type != crate::widget::WidgetType::FontString)
+        widgets.get(rid).map_or(true, |r| {
+            r.widget_type != crate::widget::WidgetType::FontString
+        })
     });
     let (texture_regions, fontstring_regions) = regions.split_at(split);
     out.extend_from_slice(texture_regions);
