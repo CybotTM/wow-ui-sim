@@ -368,12 +368,14 @@ fn test_xml_keyvalues_on_fontstring_and_texture() {
         "FontString KeyValue number"
     );
     assert_eq!(
-        env.eval::<String>("return KVChildFrame.Text.myTag").unwrap(),
+        env.eval::<String>("return KVChildFrame.Text.myTag")
+            .unwrap(),
         "hello",
         "FontString KeyValue string"
     );
     assert_eq!(
-        env.eval::<f64>("return KVChildFrame.Icon.iconScale").unwrap(),
+        env.eval::<f64>("return KVChildFrame.Icon.iconScale")
+            .unwrap(),
         1.5,
         "Texture KeyValue number"
     );

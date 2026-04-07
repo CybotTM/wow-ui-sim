@@ -18,9 +18,7 @@ fn blizzard_ui_dir() -> PathBuf {
 /// Blizzard addons needed for the panel system (dependency order).
 /// Extra addons needed for spellbook tests (loaded on demand in real WoW,
 /// but we load them explicitly here for deterministic testing).
-const SPELLBOOK_ADDONS: &[(&str, &str)] = &[
-    ("Blizzard_PlayerSpells", "Blizzard_PlayerSpells.toc"),
-];
+const SPELLBOOK_ADDONS: &[(&str, &str)] = &[("Blizzard_PlayerSpells", "Blizzard_PlayerSpells.toc")];
 
 /// Blizzard addons needed for the panel system (dependency order).
 const PANEL_ADDONS: &[(&str, &str)] = &[
@@ -125,7 +123,11 @@ fn fire_startup_events(env: &WowLuaEnv) {
         "PLAYER_ENTERING_WORLD",
         &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     );
-    for event in ["UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED"] {
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
         let _ = env.fire_event(event);
     }
 }

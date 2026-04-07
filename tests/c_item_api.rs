@@ -302,7 +302,10 @@ fn test_c_container_free_slots_tracks_items() {
     let (free, _): (i32, i32) = env
         .eval("return C_Container.GetContainerNumFreeSlots(0)")
         .unwrap();
-    assert_eq!(free, 12, "Backpack with 4 default items should have 12 free slots");
+    assert_eq!(
+        free, 12,
+        "Backpack with 4 default items should have 12 free slots"
+    );
     env.exec("A_Admin.AddBagItem(0, 10, 6948, 1)").unwrap();
     env.exec("A_Admin.AddBagItem(0, 11, 6948, 1)").unwrap();
     let (free2, _): (i32, i32) = env

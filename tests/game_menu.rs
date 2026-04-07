@@ -125,7 +125,11 @@ fn setup_env() -> WowLuaEnv {
         "PLAYER_ENTERING_WORLD",
         &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     );
-    for event in ["UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED"] {
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
         let _ = env.fire_event(event);
     }
 

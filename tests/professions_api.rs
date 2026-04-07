@@ -202,36 +202,28 @@ fn test_greatsword_recipe_has_three_reagents() {
 #[test]
 fn test_blacksmithing_spell_exists() {
     let env = env();
-    let name: String = env
-        .eval("return C_Spell.GetSpellInfo(2018).name")
-        .unwrap();
+    let name: String = env.eval("return C_Spell.GetSpellInfo(2018).name").unwrap();
     assert_eq!(name, "Blacksmithing");
 }
 
 #[test]
 fn test_smelt_copper_spell_exists() {
     let env = env();
-    let name: String = env
-        .eval("return C_Spell.GetSpellInfo(2657).name")
-        .unwrap();
+    let name: String = env.eval("return C_Spell.GetSpellInfo(2657).name").unwrap();
     assert_eq!(name, "Smelt Copper");
 }
 
 #[test]
 fn test_mining_spell_exists() {
     let env = env();
-    let name: String = env
-        .eval("return C_Spell.GetSpellInfo(2575).name")
-        .unwrap();
+    let name: String = env.eval("return C_Spell.GetSpellInfo(2575).name").unwrap();
     assert_eq!(name, "Mining");
 }
 
 #[test]
 fn test_mining_passive_spell_exists() {
     let env = env();
-    let name: String = env
-        .eval("return C_Spell.GetSpellInfo(2576).name")
-        .unwrap();
+    let name: String = env.eval("return C_Spell.GetSpellInfo(2576).name").unwrap();
     assert_eq!(name, "Mining");
 }
 

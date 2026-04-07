@@ -621,4 +621,3 @@ fn parse_swipe_color(f: &crate::widget::Frame) -> [f32; 4] {
     }
     [0.0, 0.0, 0.0, 0.62] // WoW default: semi-transparent black
 }
-

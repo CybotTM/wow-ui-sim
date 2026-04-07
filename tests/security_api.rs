@@ -350,7 +350,10 @@ fn test_create_secure_delegate_is_identity() {
             "#,
         )
         .unwrap();
-    assert!(result, "CreateSecureDelegate should return the function as-is");
+    assert!(
+        result,
+        "CreateSecureDelegate should return the function as-is"
+    );
 }
 
 #[test]

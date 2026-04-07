@@ -641,7 +641,10 @@ fn test_set_inventory_item_shows_tooltip() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "SetInventoryItem should populate tooltip: {result}");
+    assert_eq!(
+        result, "ok",
+        "SetInventoryItem should populate tooltip: {result}"
+    );
 }
 
 #[test]
@@ -685,7 +688,10 @@ fn test_set_inventory_item_tooltip_content() {
     // Line 1: item name with quality color
     assert_eq!(td.lines[0].left_text, "Entombed Seraph's Casque");
     let (r, _g, _b) = td.lines[0].left_color;
-    assert!(r > 0.5, "Epic quality title should have purple/red color component");
+    assert!(
+        r > 0.5,
+        "Epic quality title should have purple/red color component"
+    );
 
     // Line 2: item level
     assert!(

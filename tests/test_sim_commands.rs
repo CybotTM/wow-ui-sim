@@ -13,9 +13,7 @@ fn env() -> WowLuaEnv {
 #[test]
 fn sim_commands_addon_loads() {
     let env = env();
-    let exists: bool = env
-        .eval("return type(SimCommands) == 'table'")
-        .unwrap();
+    let exists: bool = env.eval("return type(SimCommands) == 'table'").unwrap();
     assert!(exists, "SimCommands global should exist after addon load");
 }
 
@@ -81,7 +79,10 @@ fn sim_commands_filter_by_name() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "2", "Filter 'zzz open' should match 2 test commands");
+    assert_eq!(
+        result, "2",
+        "Filter 'zzz open' should match 2 test commands"
+    );
 }
 
 #[test]
@@ -177,9 +178,7 @@ fn sim_commands_ctrl_p_toggles() {
 #[test]
 fn sim_commands_minimap_button_exists() {
     let env = env();
-    let exists: bool = env
-        .eval("return SimCommandsMinimapButton ~= nil")
-        .unwrap();
+    let exists: bool = env.eval("return SimCommandsMinimapButton ~= nil").unwrap();
     assert!(exists, "Minimap button should be created at load time");
 }
 
@@ -201,7 +200,10 @@ fn sim_commands_minimap_button_toggles_palette() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Minimap button click should toggle palette: {result}");
+    assert_eq!(
+        result, "ok",
+        "Minimap button click should toggle palette: {result}"
+    );
 }
 
 #[test]
@@ -267,7 +269,10 @@ fn builtin_open_bank_fires_event() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Open Bank should fire BANKFRAME_OPENED: {result}");
+    assert_eq!(
+        result, "ok",
+        "Open Bank should fire BANKFRAME_OPENED: {result}"
+    );
 }
 
 #[test]
@@ -292,7 +297,10 @@ fn builtin_open_merchant_fires_event() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Open Merchant should fire MERCHANT_SHOW: {result}");
+    assert_eq!(
+        result, "ok",
+        "Open Merchant should fire MERCHANT_SHOW: {result}"
+    );
 }
 
 #[test]
@@ -317,7 +325,10 @@ fn builtin_open_guild_bank_fires_event() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Open Guild Bank should fire GUILDBANKFRAME_OPENED: {result}");
+    assert_eq!(
+        result, "ok",
+        "Open Guild Bank should fire GUILDBANKFRAME_OPENED: {result}"
+    );
 }
 
 #[test]
@@ -339,7 +350,10 @@ fn builtin_set_player_level_shows_prompt() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Set Player Level should show prompt dialog: {result}");
+    assert_eq!(
+        result, "ok",
+        "Set Player Level should show prompt dialog: {result}"
+    );
 }
 
 #[test]
@@ -369,7 +383,10 @@ fn builtin_set_player_level_applies() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Set Player Level should apply level 42: {result}");
+    assert_eq!(
+        result, "ok",
+        "Set Player Level should apply level 42: {result}"
+    );
 }
 
 #[test]
@@ -400,7 +417,10 @@ fn builtin_add_gold_applies() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Add Gold should add 100g (1000000 copper): {result}");
+    assert_eq!(
+        result, "ok",
+        "Add Gold should add 100g (1000000 copper): {result}"
+    );
 }
 
 #[test]
@@ -619,7 +639,10 @@ fn builtin_toggle_debug_commands_registered() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Debug toggle commands should be registered: {result}");
+    assert_eq!(
+        result, "ok",
+        "Debug toggle commands should be registered: {result}"
+    );
 }
 
 #[test]

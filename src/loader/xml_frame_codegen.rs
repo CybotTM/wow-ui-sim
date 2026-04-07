@@ -184,7 +184,10 @@ pub(super) fn generate_key_values_code(
     let mut code = String::new();
     for kv in &key_values.values {
         let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
-        code.push_str(&format!("\n        {var_name}.{} = {value}\n        ", kv.key));
+        code.push_str(&format!(
+            "\n        {var_name}.{} = {value}\n        ",
+            kv.key
+        ));
     }
     code
 }
