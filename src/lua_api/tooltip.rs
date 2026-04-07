@@ -26,6 +26,8 @@ pub struct TooltipData {
     pub padding: f32,
     /// Spell ID set by `SetSpellByID`, returned by `GetSpell`.
     pub spell_id: Option<u32>,
+    /// Custom line spacing set by `SetCustomLineSpacing` (default: 2px).
+    pub line_spacing: Option<f32>,
     /// Widget IDs for left-side FontString children (`{Name}TextLeft{N}`).
     pub left_line_ids: Vec<u64>,
     /// Widget IDs for right-side FontString children (`{Name}TextRight{N}`).
@@ -41,6 +43,7 @@ impl Default for TooltipData {
             min_width: 0.0,
             padding: 0.0,
             spell_id: None,
+            line_spacing: None,
             left_line_ids: Vec::new(),
             right_line_ids: Vec::new(),
         }

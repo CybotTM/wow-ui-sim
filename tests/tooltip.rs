@@ -1071,3 +1071,60 @@ fn test_clearlines_clears_texture_lines() {
     let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
     assert_eq!(count, 0, "ClearLines should remove texture lines too");
 }
+
+// --- SetCustomLineSpacing / GetCustomLineSpacing tests ---
+
+#[test]
+fn test_set_custom_line_spacing_and_get() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetCustomLineSpacing(8)").unwrap();
+
+    let spacing: f64 = env
+        .eval("return GameTooltip:GetCustomLineSpacing()")
+        .unwrap();
+    assert!((spacing - 8.0).abs() < 0.01);
+}
+
+#[test]
+fn test_get_custom_line_spacing_default_is_zero() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let spacing: f64 = env
+        .eval("return GameTooltip:GetCustomLineSpacing()")
+        .unwrap();
+    assert_eq!(
+        spacing, 0.0,
+        "Default should be 0 (meaning use default 2px)"
+    );
+}
+
+#[test]
+fn test_set_custom_line_spacing_stores_in_tooltip_data() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetCustomLineSpacing(5)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.line_spacing, Some(5.0));
+}
+
+#[test]
+fn test_set_custom_line_spacing_on_custom_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local tt = CreateFrame("GameTooltip", "SpacingTestTooltip", UIParent)
+        tt:SetCustomLineSpacing(12)
+    "#,
+    )
+    .unwrap();
+
+    let spacing: f64 = env
+        .eval("return SpacingTestTooltip:GetCustomLineSpacing()")
+        .unwrap();
+    assert!((spacing - 12.0).abs() < 0.01);
+}

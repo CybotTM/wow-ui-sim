@@ -30,6 +30,7 @@ const TOOLTIP_BODY_FONT_SIZE: f32 = 12.0;
 /// Pre-collected tooltip render data for a single tooltip frame.
 pub struct TooltipRenderData {
     pub lines: Vec<TooltipLineRender>,
+    pub line_spacing: f32,
 }
 
 /// A single line ready for rendering.
@@ -74,6 +75,7 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
         None => return (0.0, 0.0),
     };
 
+    let line_spacing = td.line_spacing.unwrap_or(TOOLTIP_LINE_SPACING);
     let mut max_width: f32 = td.min_width;
     let mut total_height: f32 = 0.0;
 
@@ -99,7 +101,7 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
 
         let line_height = (font_size * 1.2).ceil();
         if i > 0 {
-            total_height += TOOLTIP_LINE_SPACING;
+            total_height += line_spacing;
         }
         total_height += line_height;
     }
@@ -117,7 +119,14 @@ pub fn collect_tooltip_data(state: &SimState) -> HashMap<u64, TooltipRenderData>
             continue;
         };
         let lines = collect_tooltip_lines(td, alpha);
-        result.insert(id, TooltipRenderData { lines });
+        let line_spacing = td.line_spacing.unwrap_or(TOOLTIP_LINE_SPACING);
+        result.insert(
+            id,
+            TooltipRenderData {
+                lines,
+                line_spacing,
+            },
+        );
     }
     result
 }
@@ -246,7 +255,7 @@ pub fn build_tooltip_quads(
             },
         );
 
-        y += line_height + TOOLTIP_LINE_SPACING;
+        y += line_height + data.line_spacing;
     }
 }
 

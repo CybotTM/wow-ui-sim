@@ -19,7 +19,6 @@ const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
     "CopyTooltip",
     "SetAllowShowWithNoLines",
     "SetAnchorType",
-    "SetCustomLineSpacing",
     "SetCustomWordWrapMinWidth",
     "SetFrameStack",
     "SetObjectTooltipPosition",
@@ -115,7 +114,7 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_aura_tooltip_methods(methods);
     add_tooltip_multivalue_stubs(methods, TOOLTIP_MULTIVALUE_STUBS);
     add_tooltip_variadic_stubs(methods, TOOLTIP_VARIADIC_STUBS);
-    add_custom_line_spacing_getter(methods);
+    add_line_spacing_methods(methods);
     add_get_line_methods(methods);
     add_line_count_methods(methods);
 }
@@ -138,8 +137,26 @@ fn add_tooltip_variadic_stubs<M: mlua::UserDataMethods<FrameRef>>(
     }
 }
 
-fn add_custom_line_spacing_getter<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetCustomLineSpacing", |_, _this, ()| Ok(0.0f64));
+fn add_line_spacing_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetCustomLineSpacing", |lua, this, spacing: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&this.0) {
+            td.line_spacing = Some(spacing as f32);
+        }
+        Ok(())
+    });
+
+    methods.add_method("GetCustomLineSpacing", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .tooltips
+            .get(&this.0)
+            .and_then(|td| td.line_spacing)
+            .map(|s| s as f64)
+            .unwrap_or(0.0))
+    });
 }
 
 fn add_line_count_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
