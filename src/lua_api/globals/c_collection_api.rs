@@ -476,7 +476,34 @@ fn register_transmog_appearance_methods(
     )?;
     add_table_stub_with_arg::<i32>(lua, t, "GetAllAppearanceSources")?;
     add_i32_stub_with_arg::<i32>(lua, t, "GetAppearanceCameraID", 0)?;
-    add_table_stub_with_arg::<(i32, Value)>(lua, t, "GetCategoryAppearances")?;
+    t.set("GetCategoryAppearances", lua.create_function({
+        let s = Rc::clone(state);
+        move |lua, (category_id, _location): (i32, Value)| {
+            let st = s.borrow();
+            // Group by visual_id, deduplicate (one entry per unique visual)
+            let mut seen_visuals = std::collections::HashSet::new();
+            let result = lua.create_table()?;
+            let mut idx = 0;
+            for a in &st.world.transmog_appearances {
+                if a.category_id == category_id && seen_visuals.insert(a.visual_id) {
+                    idx += 1;
+                    let entry = lua.create_table()?;
+                    entry.set("visualID", a.visual_id)?;
+                    entry.set("isCollected", a.is_collected)?;
+                    entry.set("isUsable", true)?;
+                    entry.set("isFavorite", false)?;
+                    entry.set("isHideVisual", false)?;
+                    entry.set("uiOrder", idx)?;
+                    entry.set("hasActiveRequiredHoliday", false)?;
+                    entry.set("hasRequiredHoliday", false)?;
+                    entry.set("canDisplayOnPlayer", true)?;
+                    entry.set("exclusions", 0)?;
+                    result.set(idx, entry)?;
+                }
+            }
+            Ok(result)
+        }
+    })?)?;
     add_bool_stub_with_arg::<i32>(lua, t, "IsAppearanceHiddenVisual", false)?;
     t.set(
         "GetCategoryInfo",

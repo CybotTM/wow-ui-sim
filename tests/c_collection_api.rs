@@ -414,10 +414,30 @@ fn test_transmog_collection_get_appearance_camera_id() {
 }
 
 #[test]
+fn test_transmog_collection_get_category_appearances() {
+    let env = env();
+    // Category 1 = Head, default world has 5 Head appearances (5 unique visuals)
+    let result: String = env
+        .eval(
+            r#"
+            local appearances = C_TransmogCollection.GetCategoryAppearances(1, nil)
+            if #appearances ~= 5 then return "count=" .. #appearances end
+            local a = appearances[1]
+            if not a.visualID then return "no visualID" end
+            if a.isCollected == nil then return "no isCollected" end
+            if a.uiOrder ~= 1 then return "uiOrder=" .. tostring(a.uiOrder) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_get_category_appearances_empty() {
     let env = env();
     let count: i32 = env
-        .eval("return #C_TransmogCollection.GetCategoryAppearances(1, nil)")
+        .eval("return #C_TransmogCollection.GetCategoryAppearances(99, nil)")
         .unwrap();
     assert_eq!(count, 0);
 }
