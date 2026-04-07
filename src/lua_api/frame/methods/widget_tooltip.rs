@@ -823,39 +823,44 @@ fn position_tooltip(
         None => return,
     };
     frame.anchors.clear();
-    match anchor_type {
+    let anchor = match anchor_type {
         "ANCHOR_CURSOR" => {
             let (mx, my) = state.mouse_position.unwrap_or((0.0, 0.0));
-            let cursor_y = if x_offset == 0.0 && y_offset == 0.0 {
-                my + DEFAULT_CURSOR_Y_OFFSET
-            } else {
-                my + y_offset
-            };
-            frame.anchors.push(Anchor {
-                point: AnchorPoint::TopLeft,
-                relative_to: None,
-                relative_to_id: None,
-                relative_point: AnchorPoint::TopLeft,
-                x_offset: mx + x_offset,
-                y_offset: cursor_y,
-            });
+            Some(build_cursor_anchor(mx, my, x_offset, y_offset))
         }
-        "ANCHOR_NONE" => {}
-        _ => {
-            let owner = match owner_id {
-                Some(id) => id,
-                None => return,
-            };
-            let (tp, rp) = anchor_points_for_type(anchor_type);
-            frame.anchors.push(Anchor {
-                point: tp,
-                relative_to: None,
-                relative_to_id: Some(owner as usize),
-                relative_point: rp,
-                x_offset,
-                y_offset,
-            });
-        }
+        "ANCHOR_NONE" => None,
+        _ => owner_id.map(|oid| build_owner_anchor(anchor_type, oid, x_offset, y_offset)),
+    };
+    if let Some(a) = anchor {
+        frame.anchors.push(a);
+    }
+}
+
+fn build_cursor_anchor(mx: f32, my: f32, x_offset: f32, y_offset: f32) -> Anchor {
+    let cursor_y = if x_offset == 0.0 && y_offset == 0.0 {
+        my + DEFAULT_CURSOR_Y_OFFSET
+    } else {
+        my + y_offset
+    };
+    Anchor {
+        point: AnchorPoint::TopLeft,
+        relative_to: None,
+        relative_to_id: None,
+        relative_point: AnchorPoint::TopLeft,
+        x_offset: mx + x_offset,
+        y_offset: cursor_y,
+    }
+}
+
+fn build_owner_anchor(anchor_type: &str, owner_id: u64, x_offset: f32, y_offset: f32) -> Anchor {
+    let (tp, rp) = anchor_points_for_type(anchor_type);
+    Anchor {
+        point: tp,
+        relative_to: None,
+        relative_to_id: Some(owner_id as usize),
+        relative_point: rp,
+        x_offset,
+        y_offset,
     }
 }
 
