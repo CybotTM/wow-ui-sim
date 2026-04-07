@@ -100,32 +100,31 @@ fn register_pet_info_methods(
 }
 
 /// Build the multi-return for pet info queries.
-/// Returns: petID, speciesID, owned, customName, level, favorite, isRevoked,
-///          speciesName, icon, petType, companionID, tooltip, description,
-///          isWild, canBattle, isTradeable, isUnique, obtainable
+/// Returns: speciesID, customName, level, xp, maxXp, displayID, isFavorite,
+///          name, icon, petType, creatureID, sourceText, description,
+///          isWild, canBattle, isTradeable, isUnique
 fn build_pet_info_multi(
     lua: &Lua,
     p: &crate::lua_api::state_types::PetData,
 ) -> mlua::Result<mlua::MultiValue> {
     Ok(mlua::MultiValue::from_vec(vec![
-        Value::String(lua.create_string(&p.pet_id)?),
-        Value::Integer(p.species_id as i64),
-        Value::Boolean(p.is_collected),
+        Value::Integer(p.species_id as i64),           // speciesID
         Value::Nil,                                    // customName
-        Value::Integer(p.level as i64),
-        Value::Boolean(false),                         // favorite
-        Value::Boolean(false),                         // isRevoked
-        Value::String(lua.create_string(&p.name)?),
-        Value::Integer(p.icon as i64),
-        Value::Integer(p.pet_type as i64),
-        Value::Integer(0),                             // companionID
-        Value::String(lua.create_string("")?),         // tooltip
+        Value::Integer(p.level as i64),                // level
+        Value::Integer(0),                             // xp
+        Value::Integer(0),                             // maxXp
+        Value::Integer(0),                             // displayID
+        Value::Boolean(false),                         // isFavorite
+        Value::String(lua.create_string(&p.name)?),    // name
+        Value::Integer(p.icon as i64),                 // icon
+        Value::Integer(p.pet_type as i64),             // petType
+        Value::Integer(0),                             // creatureID
+        Value::String(lua.create_string("")?),         // sourceText
         Value::String(lua.create_string("")?),         // description
         Value::Boolean(false),                         // isWild
         Value::Boolean(true),                          // canBattle
         Value::Boolean(false),                         // isTradeable
         Value::Boolean(false),                         // isUnique
-        Value::Boolean(true),                          // obtainable
     ]))
 }
 

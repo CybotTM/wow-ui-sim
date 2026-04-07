@@ -131,12 +131,12 @@ fn pet_journal_get_pet_info_by_index() {
     let result: String = env
         .eval(
             r#"
-            local petID, speciesID, owned, _, level, _, _, name, icon, petType
+            local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name, icon, petType
                 = C_PetJournal.GetPetInfoByIndex(1)
             if name ~= "Mechanical Squirrel" then return "name=" .. tostring(name) end
             if speciesID ~= 39 then return "species=" .. tostring(speciesID) end
-            if owned ~= true then return "owned=" .. tostring(owned) end
             if level ~= 25 then return "level=" .. tostring(level) end
+            if type(level) ~= "number" then return "level_type=" .. type(level) end
             return "ok"
             "#,
         )
@@ -150,9 +150,10 @@ fn pet_journal_get_pet_info_by_species_id() {
     let result: String = env
         .eval(
             r#"
-            local petID, speciesID, owned, _, _, _, _, name
+            local speciesID, customName, level, xp, maxXp, displayID, isFavorite, name
                 = C_PetJournal.GetPetInfoBySpeciesID(254)
             if name ~= "Lil' Ragnaros" then return "name=" .. tostring(name) end
+            if speciesID ~= 254 then return "species=" .. tostring(speciesID) end
             return "ok"
             "#,
         )
@@ -258,14 +259,14 @@ fn admin_collect_uncollect_pet() {
         .eval(
             r#"
             -- Pocopoc (species 2403) is not collected by default
-            local _, _, owned = C_PetJournal.GetPetInfoBySpeciesID(2403)
-            if owned then return "already_collected" end
+            local _, owned = C_PetJournal.GetNumPets()
+            if owned ~= 9 then return "initial_owned=" .. tostring(owned) end
             A_Admin.CollectPet(2403)
-            local _, _, owned2 = C_PetJournal.GetPetInfoBySpeciesID(2403)
-            if not owned2 then return "not_collected_after" end
+            local _, owned2 = C_PetJournal.GetNumPets()
+            if owned2 ~= 10 then return "after_collect=" .. tostring(owned2) end
             A_Admin.UncollectPet(2403)
-            local _, _, owned3 = C_PetJournal.GetPetInfoBySpeciesID(2403)
-            if owned3 then return "still_collected" end
+            local _, owned3 = C_PetJournal.GetNumPets()
+            if owned3 ~= 9 then return "after_uncollect=" .. tostring(owned3) end
             return "ok"
             "#,
         )
