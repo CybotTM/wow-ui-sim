@@ -162,6 +162,25 @@ pub struct ToyData {
     pub is_usable: bool,
 }
 
+/// An heirloom item in the collection.
+#[derive(Debug, Clone)]
+pub struct HeirloomData {
+    pub item_id: u32,
+    pub name: String,
+    /// Equipment location string (e.g. "INVTYPE_HEAD", "INVTYPE_SHOULDER").
+    pub equip_loc: String,
+    /// Icon fileDataID.
+    pub icon: u32,
+    /// Current upgrade level (0 = base, max varies by expansion).
+    pub upgrade_level: i32,
+    /// Source description (e.g. "Vendor", "Achievement").
+    pub source: String,
+    /// Minimum effective level.
+    pub min_level: i32,
+    /// Maximum effective level at current upgrade.
+    pub max_level: i32,
+}
+
 /// A transmog appearance source (one way to obtain a visual appearance).
 ///
 /// WoW's transmog system has three levels:
@@ -655,6 +674,7 @@ pub struct WorldState {
     pub pets: Vec<PetData>,
     pub collected_toys: HashSet<i32>,
     pub toys: Vec<ToyData>,
+    pub heirlooms: Vec<HeirloomData>,
     pub earned_achievements: HashSet<i32>,
     pub premade_listings: Vec<PremadeListing>,
 }
@@ -686,6 +706,7 @@ impl Default for WorldState {
             pets: default_pets(),
             collected_toys: HashSet::new(),
             toys: default_toys(),
+            heirlooms: Vec::new(),
             earned_achievements: HashSet::new(),
             premade_listings: default_premade_listings(),
         }
@@ -752,5 +773,22 @@ mod tests {
         // Source IDs are unique and sequential
         let source_ids: HashSet<i32> = world.transmog_appearances.iter().map(|a| a.source_id).collect();
         assert_eq!(source_ids.len(), 60, "All source IDs should be unique");
+    }
+
+    #[test]
+    fn heirloom_data_stored_in_world_state() {
+        let mut world = WorldState::default();
+        world.heirlooms.push(HeirloomData {
+            item_id: 122245,
+            name: "Burnished Helm of Might".into(),
+            equip_loc: "INVTYPE_HEAD".into(),
+            icon: 133071,
+            upgrade_level: 6,
+            source: "Vendor".into(),
+            min_level: 1,
+            max_level: 50,
+        });
+        assert_eq!(world.heirlooms.len(), 1);
+        assert_eq!(world.heirlooms[0].item_id, 122245);
     }
 }
