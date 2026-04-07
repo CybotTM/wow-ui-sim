@@ -27,6 +27,14 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Stubs for specialized frame types (QuestPOI, FogOfWar, UnitPosition, etc.).
 fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_menu_frame_stubs(methods);
+    add_quest_poi_frame_methods(methods);
+    methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil)); // FogOfWarFrame
+    add_quest_blob_methods(methods);
+    add_unit_position_frame_stubs(methods);
+}
+
+fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsMenuOpen", |_, _this, ()| Ok(false));
     methods.add_method("SetOwningDialog", |_, _this, _dialog: Value| Ok(()));
     methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
@@ -35,37 +43,46 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         "RegisterBackgroundTexture",
         |_, _this, _args: MultiValue| Ok(()),
     );
-    // QuestPOIFrame
+}
+
+fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetFillTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetFillAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderScalar", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("UpdateMouseOverTooltip", |lua, this, (x, y): (f64, f64)| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let blob_state = match state.quest_blobs.get(&this.0) {
-            Some(bs) if !bs.active_quests.is_empty() => bs,
-            _ => return Ok((Value::Nil, Value::Nil)),
-        };
-        match crate::quest_poi_blobs::hit_test_blobs(
-            &blob_state.active_quests,
-            blob_state.map_id,
-            x as f32,
-            y as f32,
-        ) {
-            Some((quest_id, count)) => Ok((
-                Value::Integer(quest_id as i64),
-                Value::Integer(count as i64),
-            )),
-            None => Ok((Value::Nil, Value::Nil)),
-        }
+        update_mouse_over_tooltip(lua, this.0, x, y)
     });
-    // FogOfWarFrame
-    methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil));
-    // Blob frame (QuestBlobDataProvider)
-    add_quest_blob_methods(methods);
-    // UnitPositionFrame — C++ methods for unit map rendering
+}
+
+fn update_mouse_over_tooltip(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    x: f64,
+    y: f64,
+) -> mlua::Result<(Value, Value)> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    let blob_state = match state.quest_blobs.get(&frame_id) {
+        Some(bs) if !bs.active_quests.is_empty() => bs,
+        _ => return Ok((Value::Nil, Value::Nil)),
+    };
+    match crate::quest_poi_blobs::hit_test_blobs(
+        &blob_state.active_quests,
+        blob_state.map_id,
+        x as f32,
+        y as f32,
+    ) {
+        Some((quest_id, count)) => Ok((
+            Value::Integer(quest_id as i64),
+            Value::Integer(count as i64),
+        )),
+        None => Ok((Value::Nil, Value::Nil)),
+    }
+}
+
+fn add_unit_position_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ClearUnits", |_, _, ()| Ok(()));
     methods.add_method("AddUnit", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("FinalizeUnits", |_, _, ()| Ok(()));
