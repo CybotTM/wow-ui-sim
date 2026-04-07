@@ -15,6 +15,11 @@ use mlua::Lua;
 /// Maximum handler invocations per Show/Hide call (6 cycles × 2 handlers).
 const SHOW_HIDE_HANDLER_LIMIT: usize = 12;
 
+/// Maximum cross-frame Show/Hide dispatch depth. Prevents Lua stack overflow
+/// when OnShow handlers trigger Show on other frames (e.g. managed frame
+/// layout chains: ObjectiveTracker → UIParent container → Layout → Show).
+const GLOBAL_SHOW_HIDE_DEPTH_LIMIT: u32 = 40;
+
 /// Fire OnShow on a frame and recursively on its visible children.
 pub(crate) fn fire_on_show_recursive(lua: &Lua, id: u64) -> mlua::Result<()> {
     fire_script_recursive(lua, id, "OnShow", ScriptHandler::OnShow)
@@ -52,13 +57,23 @@ fn show_or_hide(lua: &Lua, id: u64, show: bool, method_name: &str) -> mlua::Resu
     if in_handler || !parent_visible {
         return Ok(());
     }
-    drain_visibility_handlers(lua, id, show)?;
+    // Guard against cross-frame recursion (A.OnShow → Show(B) → B.OnShow → Show(C) → ...)
+    let depth = state_rc.borrow().global_show_hide_depth;
+    if depth >= GLOBAL_SHOW_HIDE_DEPTH_LIMIT {
+        return Ok(());
+    }
+    state_rc.borrow_mut().global_show_hide_depth = depth + 1;
+    let result = drain_visibility_handlers(lua, id, show);
     // Restore to outermost caller's intended state
     state_rc.borrow_mut().set_frame_visible(id, show);
-    if let Some(f) = state_rc.borrow_mut().widgets.get_mut(id) {
-        f.show_hide_depth = 0;
+    {
+        let mut st = state_rc.borrow_mut();
+        if let Some(f) = st.widgets.get_mut(id) {
+            f.show_hide_depth = 0;
+        }
+        st.global_show_hide_depth = depth;
     }
-    Ok(())
+    result
 }
 
 /// Check combat lockdown and fire the blocked event if needed. Returns true if blocked.

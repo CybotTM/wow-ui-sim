@@ -723,3 +723,27 @@ fn test_set_point_5arg_with_fixed_override() {
         "5-arg SetPoint through fixed override preserves offsets"
     );
 }
+
+// ============================================================================
+// Cross-frame Show recursion guard
+// ============================================================================
+
+#[test]
+fn test_cross_frame_show_recursion_does_not_overflow() {
+    let env = WowLuaEnv::new().unwrap();
+    // Frame A's OnShow calls Show on Frame B, B's OnShow calls Show on A.
+    // Without a global depth limit this would overflow the Lua stack.
+    env.eval::<()>(
+        r#"
+        local a = CreateFrame("Frame", "RecurseA", UIParent)
+        local b = CreateFrame("Frame", "RecurseB", UIParent)
+        a:Hide()
+        b:Hide()
+        a:SetScript("OnShow", function() b:Show() end)
+        b:SetScript("OnShow", function() a:Show() end)
+        a:Show()
+        "#,
+    )
+    .unwrap();
+    // If we get here without a stack overflow, the guard worked.
+}

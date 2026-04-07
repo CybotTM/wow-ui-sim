@@ -134,6 +134,9 @@ pub struct SimState {
     pub talents: super::talent_state::TalentState,
     /// Collected Lua errors (from call_error_handler and addframetext).
     pub lua_errors: Vec<String>,
+    /// Global cross-frame Show/Hide dispatch depth (prevents Lua stack overflow
+    /// when OnShow handlers trigger Show on other frames recursively).
+    pub global_show_hide_depth: u32,
     /// Synced animation group start times (key → elapsed Duration when first PlaySynced was called).
     pub anim_sync_times: HashMap<String, std::time::Duration>,
 
@@ -348,6 +351,7 @@ impl SimState {
             talents: super::talent_state::TalentState::new(),
             player: PlayerState::default(),
             world: WorldState::default(),
+            global_show_hide_depth: 0,
             debug_borders: false,
             debug_anchors: false,
         }
