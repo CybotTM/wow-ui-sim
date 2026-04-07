@@ -27,6 +27,14 @@ pub use super::state_types::{
     LootRollInfo, MovementState, PendingTimer, PlayerState, WorldState,
 };
 
+/// Active quest blob state for a QuestPOIFrame.
+pub struct QuestBlobState {
+    /// Map ID set via `SetMapID`.
+    pub map_id: u32,
+    /// Quest IDs currently drawn (via `DrawBlob`).
+    pub active_quests: Vec<u32>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -44,6 +52,8 @@ pub struct SimState {
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).
     pub tooltips: HashMap<u64, TooltipData>,
+    /// Quest blob state for QuestPOIFrame widgets (keyed by frame ID).
+    pub quest_blobs: HashMap<u64, QuestBlobState>,
     /// SimpleHTML state (keyed by frame ID).
     pub simple_htmls: HashMap<u64, SimpleHtmlData>,
     /// MessageFrame state (keyed by frame ID).
@@ -158,6 +168,7 @@ struct EmptyStateCollections {
     addons: Vec<AddonInfo>,
     lua_errors: Vec<String>,
     tooltips: HashMap<u64, TooltipData>,
+    quest_blobs: HashMap<u64, QuestBlobState>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,
@@ -182,6 +193,7 @@ impl EmptyStateCollections {
             addons: Vec::new(),
             lua_errors: Vec::new(),
             tooltips: HashMap::new(),
+            quest_blobs: HashMap::new(),
             simple_htmls: HashMap::new(),
             message_frames: HashMap::new(),
             animation_groups: HashMap::new(),
@@ -329,6 +341,7 @@ impl SimState {
             addons: c.addons,
             lua_errors: c.lua_errors,
             tooltips: c.tooltips,
+            quest_blobs: c.quest_blobs,
             simple_htmls: c.simple_htmls,
             message_frames: c.message_frames,
             animation_groups: c.animation_groups,

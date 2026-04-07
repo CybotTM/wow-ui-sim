@@ -47,8 +47,7 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     // FogOfWarFrame
     methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil));
     // Blob frame (QuestBlobDataProvider)
-    methods.add_method("DrawNone", |_, _, ()| Ok(()));
-    methods.add_method("DrawBlob", |_, _, _: mlua::MultiValue| Ok(()));
+    add_quest_blob_methods(methods);
     // UnitPositionFrame — C++ methods for unit map rendering
     methods.add_method("ClearUnits", |_, _, ()| Ok(()));
     methods.add_method("AddUnit", |_, _, _: mlua::MultiValue| Ok(()));
@@ -61,6 +60,42 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StartPlayerPing", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
+}
+
+/// Quest blob methods for QuestPOIFrame (DrawBlob, DrawNone, SetMapID).
+fn add_quest_blob_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    use crate::lua_api::state::QuestBlobState;
+
+    methods.add_method("DrawBlob", |lua, this, args: mlua::MultiValue| {
+        let mut iter = args.into_iter();
+        let quest_id = match iter.next() {
+            Some(Value::Integer(n)) => n as u32,
+            Some(Value::Number(n)) => n as u32,
+            _ => return Ok(()),
+        };
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let blob = state
+            .quest_blobs
+            .entry(this.0)
+            .or_insert_with(|| QuestBlobState {
+                map_id: 0,
+                active_quests: Vec::new(),
+            });
+        if !blob.active_quests.contains(&quest_id) {
+            blob.active_quests.push(quest_id);
+        }
+        Ok(())
+    });
+
+    methods.add_method("DrawNone", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(blob) = state.quest_blobs.get_mut(&this.0) {
+            blob.active_quests.clear();
+        }
+        Ok(())
+    });
 }
 
 /// Drag/Input stubs.

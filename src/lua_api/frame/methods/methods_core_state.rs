@@ -361,8 +361,27 @@ fn add_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .unwrap_or(0))
     });
 
-    methods.add_method("GetMapID", |_lua, _this, ()| Ok(0));
-    methods.add_method("SetMapID", |_lua, _this, _map_id: i32| Ok(()));
+    methods.add_method("GetMapID", |lua, this, ()| {
+        let state_rc = crate::lua_api::frame::handle::get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .quest_blobs
+            .get(&this.0)
+            .map(|b| b.map_id as i32)
+            .unwrap_or(0))
+    });
+    methods.add_method("SetMapID", |lua, this, map_id: i32| {
+        let state_rc = crate::lua_api::frame::handle::get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let blob = state.quest_blobs.entry(this.0).or_insert_with(|| {
+            crate::lua_api::state::QuestBlobState {
+                map_id: 0,
+                active_quests: Vec::new(),
+            }
+        });
+        blob.map_id = map_id as u32;
+        Ok(())
+    });
 }
 
 fn add_mouse_enable_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

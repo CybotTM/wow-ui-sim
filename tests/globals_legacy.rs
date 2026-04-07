@@ -446,3 +446,104 @@ fn test_get_quest_poi_blob_count_unknown_quest() {
     let count: i32 = env.eval("return GetQuestPOIBlobCount(99999)").unwrap();
     assert_eq!(count, 0, "Unknown quest should have 0 blobs");
 }
+
+#[test]
+fn test_draw_blob_stores_quest_id() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOI", UIParent)
+        poi:SetMapID(2248)
+        poi:DrawBlob(80000, true)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let poi_id = state.widgets.get_id_by_name("TestPOI").unwrap();
+    let blob = state.quest_blobs.get(&poi_id).unwrap();
+    assert_eq!(blob.map_id, 2248);
+    assert_eq!(blob.active_quests, vec![80000]);
+}
+
+#[test]
+fn test_draw_blob_multiple_quests() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOI2", UIParent)
+        poi:DrawBlob(80000, true)
+        poi:DrawBlob(80001, true)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let poi_id = state.widgets.get_id_by_name("TestPOI2").unwrap();
+    let blob = state.quest_blobs.get(&poi_id).unwrap();
+    assert_eq!(blob.active_quests, vec![80000, 80001]);
+}
+
+#[test]
+fn test_draw_blob_no_duplicates() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOI3", UIParent)
+        poi:DrawBlob(80000, true)
+        poi:DrawBlob(80000, true)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let poi_id = state.widgets.get_id_by_name("TestPOI3").unwrap();
+    let blob = state.quest_blobs.get(&poi_id).unwrap();
+    assert_eq!(
+        blob.active_quests,
+        vec![80000],
+        "Should not duplicate quest IDs"
+    );
+}
+
+#[test]
+fn test_draw_none_clears_blobs() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOI4", UIParent)
+        poi:DrawBlob(80000, true)
+        poi:DrawBlob(80001, true)
+        poi:DrawNone()
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let poi_id = state.widgets.get_id_by_name("TestPOI4").unwrap();
+    let blob = state.quest_blobs.get(&poi_id).unwrap();
+    assert!(
+        blob.active_quests.is_empty(),
+        "DrawNone should clear all blobs"
+    );
+}
+
+#[test]
+fn test_set_map_id_and_get_map_id() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOI5", UIParent)
+        poi:SetMapID(37)
+    "#,
+    )
+    .unwrap();
+
+    let map_id: i32 = env.eval("return TestPOI5:GetMapID()").unwrap();
+    assert_eq!(map_id, 37);
+}
