@@ -41,6 +41,8 @@ pub struct TooltipLineRender {
     pub right_color: [f32; 4],
     pub font_size: f32,
     pub wrap: bool,
+    /// Measured height for this line (accounts for word-wrap).
+    pub measured_height: f32,
 }
 
 /// Update tooltip frame sizes based on their text content.
@@ -69,6 +71,9 @@ pub fn update_tooltip_sizes(state: &mut SimState, font_system: &mut WowFontSyste
 }
 
 /// Measure a tooltip's required width and height from its lines.
+///
+/// Two-pass approach: first determine width from non-wrapping lines,
+/// then measure wrapped lines' heights against that width.
 fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -> (f32, f32) {
     let td = match state.tooltips.get(&id) {
         Some(td) => td,
@@ -76,39 +81,56 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
     };
 
     let line_spacing = td.line_spacing.unwrap_or(TOOLTIP_LINE_SPACING);
-    let mut max_width: f32 = td.min_width;
+
+    // Pass 1: determine content width from non-wrapping lines.
+    let content_width = measure_tooltip_content_width(td, font_system);
+
+    // Pass 2: sum line heights, using text measurement for wrapped lines.
     let mut total_height: f32 = 0.0;
-
     for (i, line) in td.lines.iter().enumerate() {
-        let font_size = if i == 0 {
-            TOOLTIP_HEADER_FONT_SIZE
+        let font_size = tooltip_line_font_size(i);
+        let line_height = if line.wrap && !line.left_text.is_empty() {
+            font_system.measure_text_height(&line.left_text, None, font_size, Some(content_width))
         } else {
-            TOOLTIP_BODY_FONT_SIZE
+            (font_size * 1.2).ceil()
         };
-        let left_w = font_system.measure_text_width(&line.left_text, None, font_size);
-        let right_w = line
-            .right_text
-            .as_ref()
-            .map(|t| font_system.measure_text_width(t, None, font_size))
-            .unwrap_or(0.0);
-
-        let line_width = if right_w > 0.0 {
-            left_w + right_w + 20.0 // gap between left and right
-        } else {
-            left_w
-        };
-        max_width = max_width.max(line_width);
-
-        let line_height = (font_size * 1.2).ceil();
         if i > 0 {
             total_height += line_spacing;
         }
         total_height += line_height;
     }
 
-    let width = max_width + TOOLTIP_PADDING_H * 2.0;
+    let width = content_width + TOOLTIP_PADDING_H * 2.0;
     let height = total_height + TOOLTIP_PADDING_V * 2.0;
     (width, height)
+}
+
+/// Measure the content width from non-wrapping tooltip lines.
+/// Wrapping lines don't contribute to width — they wrap within it.
+fn measure_tooltip_content_width(
+    td: &crate::lua_api::tooltip::TooltipData,
+    font_system: &mut WowFontSystem,
+) -> f32 {
+    let mut max_width: f32 = td.min_width;
+    for (i, line) in td.lines.iter().enumerate() {
+        if line.wrap {
+            continue;
+        }
+        let font_size = tooltip_line_font_size(i);
+        let left_w = font_system.measure_text_width(&line.left_text, None, font_size);
+        let right_w = line
+            .right_text
+            .as_ref()
+            .map(|t| font_system.measure_text_width(t, None, font_size))
+            .unwrap_or(0.0);
+        let line_width = if right_w > 0.0 {
+            left_w + right_w + 20.0
+        } else {
+            left_w
+        };
+        max_width = max_width.max(line_width);
+    }
+    max_width
 }
 
 /// Collect render data for all visible tooltips with lines.
@@ -181,6 +203,7 @@ fn tooltip_line_render(
         ],
         font_size: tooltip_line_font_size(index),
         wrap: line.wrap,
+        measured_height: (tooltip_line_font_size(index) * 1.2).ceil(),
     }
 }
 
@@ -242,7 +265,16 @@ pub fn build_tooltip_quads(
     let mut y = tooltip.bounds.y + TOOLTIP_PADDING_V;
 
     for line in &data.lines {
-        let line_height = (line.font_size * 1.2).ceil();
+        let line_height = if line.wrap && !line.left_text.is_empty() {
+            text_renderer.font_sys.measure_text_height(
+                &line.left_text,
+                None,
+                line.font_size,
+                Some(content_width),
+            )
+        } else {
+            line.measured_height
+        };
 
         emit_tooltip_line(
             &mut text_renderer,

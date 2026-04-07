@@ -1128,3 +1128,107 @@ fn test_set_custom_line_spacing_on_custom_tooltip() {
         .unwrap();
     assert!((spacing - 12.0).abs() < 0.01);
 }
+
+// --- Text wrapping tests ---
+
+#[test]
+fn test_addline_wrap_flag_stored() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        GameTooltip:AddLine("Short title")
+        GameTooltip:AddLine("This is a long description that should wrap", 1, 1, 1, true)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert!(!td.lines[0].wrap, "First line should not wrap");
+    assert!(td.lines[1].wrap, "Second line (with wrap=true) should wrap");
+}
+
+fn update_tooltip_sizes(env: &WowLuaEnv) {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut state = env.state().borrow_mut();
+    wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+}
+
+#[test]
+fn test_wrapped_line_does_not_expand_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "WrapWidthOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:AddLine("Short")
+        GameTooltip:AddLine("This is a very very very very very very very very very long line that should word-wrap within the tooltip width rather than expanding it to be extremely wide", 1, 1, 1, true)
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    // Width should be determined by the short line, not the long wrapped one.
+    // "Short" at 14px ~ 40-60px + 24px padding = ~64-84px total.
+    assert!(
+        frame.width < 200.0,
+        "Tooltip width should be small (non-wrapping lines only), got {}",
+        frame.width
+    );
+}
+
+#[test]
+fn test_wrapped_line_increases_height() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Single non-wrapping line
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "WrapHeightOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:AddLine("Short")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+    let height_one_line = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().height
+    };
+
+    // Clear and add a short line + a long wrapping line
+    env.exec(
+        r#"
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("Short")
+        GameTooltip:AddLine("This is a long description that should definitely wrap onto multiple lines when rendered within the narrow tooltip width constraint", 1, 1, 1, true)
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+
+    let height_with_wrap = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().height
+    };
+
+    assert!(
+        height_with_wrap > height_one_line,
+        "Wrapped text should increase tooltip height: one_line={}, with_wrap={}",
+        height_one_line,
+        height_with_wrap
+    );
+}
