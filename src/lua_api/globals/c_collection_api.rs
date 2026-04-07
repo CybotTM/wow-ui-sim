@@ -63,9 +63,9 @@ pub fn register_c_collection_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Res
     register_mount_journal(lua, Rc::clone(&state))?;
     register_toy_box(lua, Rc::clone(&state))?;
     register_transmog_collection(lua, Rc::clone(&state))?;
-    register_transmog(lua, state)?;
+    register_transmog(lua, Rc::clone(&state))?;
     register_transmog_util(lua)?;
-    register_heirloom(lua)?;
+    register_heirloom(lua, state)?;
     register_transmog_sets(lua)?;
     Ok(())
 }
@@ -741,15 +741,21 @@ fn register_transmog_util(lua: &Lua) -> Result<()> {
 }
 
 /// C_Heirloom namespace - heirloom collection.
-fn register_heirloom(lua: &Lua) -> Result<()> {
+fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
         "GetHeirloomInfo",
         lua.create_function(|_, _item_id: i32| empty_heirloom_info())?,
     )?;
     add_i32_stub_with_arg::<i32>(lua, &t, "GetHeirloomMaxUpgradeLevel", 0)?;
-    add_i32_stub(lua, &t, "GetNumHeirlooms", 0)?;
-    add_i32_stub(lua, &t, "GetNumKnownHeirlooms", 0)?;
+    t.set("GetNumHeirlooms", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.heirlooms.len() as i32)
+    })?)?;
+    t.set("GetNumKnownHeirlooms", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(s.borrow().world.collected_heirlooms.len() as i32)
+    })?)?;
     add_bool_stub_with_arg::<i32>(lua, &t, "PlayerHasHeirloom", false)?;
     add_nil_stub_with_arg::<i32>(lua, &t, "GetHeirloomLink")?;
     add_bool_stub_with_arg::<i32>(lua, &t, "CanHeirloomUpgradeFromPending", false)?;

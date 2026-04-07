@@ -736,7 +736,7 @@ fn test_heirloom_get_heirloom_max_upgrade_level() {
 fn test_heirloom_get_num_heirlooms() {
     let env = env();
     let count: i32 = env.eval("return C_Heirloom.GetNumHeirlooms()").unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 11, "default world has 11 heirlooms");
 }
 
 #[test]
@@ -745,7 +745,7 @@ fn test_heirloom_get_num_known_heirlooms() {
     let count: i32 = env
         .eval("return C_Heirloom.GetNumKnownHeirlooms()")
         .unwrap();
-    assert_eq!(count, 0);
+    assert_eq!(count, 11, "all default heirlooms are collected");
 }
 
 #[test]
