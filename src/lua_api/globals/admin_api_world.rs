@@ -172,6 +172,20 @@ fn register_transmog_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
             Ok(())
         }
     })?;
+    super::admin_api::set_fn(lua, t, "CollectHeirloom", {
+        let s = Rc::clone(&state);
+        move |_, item_id: i32| {
+            s.borrow_mut().world.collected_heirlooms.insert(item_id as u32);
+            Ok(())
+        }
+    })?;
+    super::admin_api::set_fn(lua, t, "UncollectHeirloom", {
+        let s = Rc::clone(&state);
+        move |_, item_id: i32| {
+            s.borrow_mut().world.collected_heirlooms.remove(&(item_id as u32));
+            Ok(())
+        }
+    })?;
     super::admin_api::set_fn(lua, t, "SetTransmogForSlot", {
         let s = Rc::clone(&state);
         move |_, (slot_id, source_id): (i32, i32)| {

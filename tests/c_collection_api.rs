@@ -837,6 +837,25 @@ fn test_heirloom_filter_stubs() {
 }
 
 #[test]
+fn test_admin_collect_uncollect_heirloom() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            -- 99999 is not collected
+            if C_Heirloom.PlayerHasHeirloom(99999) then return "already has" end
+            A_Admin.CollectHeirloom(99999)
+            if not C_Heirloom.PlayerHasHeirloom(99999) then return "not collected" end
+            A_Admin.UncollectHeirloom(99999)
+            if C_Heirloom.PlayerHasHeirloom(99999) then return "still collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_heirloom_can_heirloom_upgrade_from_pending() {
     let env = env();
     let can: bool = env
