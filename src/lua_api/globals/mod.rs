@@ -31,6 +31,7 @@ mod action_bar_api_namespace;
 pub mod addon_api;
 mod addon_api_runtime;
 pub mod admin_api;
+mod admin_api_mail_premade;
 mod admin_api_world;
 pub mod admin_combat;
 pub mod admin_encounter;
