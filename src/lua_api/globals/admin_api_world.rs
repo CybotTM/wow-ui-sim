@@ -144,38 +144,60 @@ fn register_collection_api(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
 fn register_transmog_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     super::admin_api::set_fn(lua, t, "AddTransmog", {
         let s = Rc::clone(&state);
-        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.insert(id); Ok(()) }
+        move |_, id: i32| {
+            s.borrow_mut().world.collected_transmogs.insert(id);
+            Ok(())
+        }
     })?;
     super::admin_api::set_fn(lua, t, "RemoveTransmog", {
         let s = Rc::clone(&state);
-        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.remove(&id); Ok(()) }
+        move |_, id: i32| {
+            s.borrow_mut().world.collected_transmogs.remove(&id);
+            Ok(())
+        }
     })?;
     register_add_transmog_appearance(lua, t, Rc::clone(&state))?;
     register_heirloom_admin(lua, t, Rc::clone(&state))?;
     super::admin_api::set_fn(lua, t, "SetTransmogForSlot", {
         let s = state;
         move |_, (slot_id, source_id): (i32, i32)| {
-            s.borrow_mut().world.applied_transmog_slots.insert(slot_id, source_id);
+            s.borrow_mut()
+                .world
+                .applied_transmog_slots
+                .insert(slot_id, source_id);
             Ok(())
         }
     })?;
     Ok(())
 }
 
-fn register_add_transmog_appearance(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+fn register_add_transmog_appearance(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     super::admin_api::set_fn(lua, t, "AddTransmogAppearance", {
         move |_, (source_id, category_id, item_id): (i32, i32, i32)| {
             let mut st = state.borrow_mut();
-            let visual_id = st.world.transmog_appearances.iter()
+            let visual_id = st
+                .world
+                .transmog_appearances
+                .iter()
                 .map(|a| a.visual_id)
                 .max()
-                .unwrap_or(0) + 1;
-            st.world.transmog_appearances.push(
-                crate::lua_api::state_types::TransmogAppearance {
-                    source_id, visual_id, category_id, item_id,
-                    is_collected: true, source_type: 0, item_mod_id: 0,
-                },
-            );
+                .unwrap_or(0)
+                + 1;
+            st.world
+                .transmog_appearances
+                .push(crate::lua_api::state_types::TransmogAppearance {
+                    source_id,
+                    visual_id,
+                    category_id,
+                    item_id,
+                    is_collected: true,
+                    source_type: 0,
+                    item_mod_id: 0,
+                });
             Ok(())
         }
     })
@@ -185,24 +207,38 @@ fn register_heirloom_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
     super::admin_api::set_fn(lua, t, "CollectHeirloom", {
         let s = Rc::clone(&state);
         move |_, item_id: i32| {
-            s.borrow_mut().world.collected_heirlooms.insert(item_id as u32);
+            s.borrow_mut()
+                .world
+                .collected_heirlooms
+                .insert(item_id as u32);
             Ok(())
         }
     })?;
     super::admin_api::set_fn(lua, t, "UncollectHeirloom", {
         let s = state;
         move |_, item_id: i32| {
-            s.borrow_mut().world.collected_heirlooms.remove(&(item_id as u32));
+            s.borrow_mut()
+                .world
+                .collected_heirlooms
+                .remove(&(item_id as u32));
             Ok(())
         }
     })
 }
 
 fn register_toggle_setters(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    add_world_toggle_setter(lua, t, "SetMountCollected", Rc::clone(&state), |s| &mut s.world.collected_mounts)?;
-    add_world_toggle_setter(lua, t, "SetPetCollected", Rc::clone(&state), |s| &mut s.world.collected_pets)?;
-    add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |s| &mut s.world.collected_toys)?;
-    add_world_toggle_setter(lua, t, "SetAchievementEarned", state, |s| &mut s.world.earned_achievements)
+    add_world_toggle_setter(lua, t, "SetMountCollected", Rc::clone(&state), |s| {
+        &mut s.world.collected_mounts
+    })?;
+    add_world_toggle_setter(lua, t, "SetPetCollected", Rc::clone(&state), |s| {
+        &mut s.world.collected_pets
+    })?;
+    add_world_toggle_setter(lua, t, "SetToyCollected", Rc::clone(&state), |s| {
+        &mut s.world.collected_toys
+    })?;
+    add_world_toggle_setter(lua, t, "SetAchievementEarned", state, |s| {
+        &mut s.world.earned_achievements
+    })
 }
 
 fn register_achievement_admin(
@@ -269,7 +305,12 @@ fn register_pet_collect(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>
         move |_, species_id: u32| {
             let mut st = s.borrow_mut();
             st.world.collected_pets.insert(species_id as i32);
-            if let Some(p) = st.world.pets.iter_mut().find(|p| p.species_id == species_id) {
+            if let Some(p) = st
+                .world
+                .pets
+                .iter_mut()
+                .find(|p| p.species_id == species_id)
+            {
                 p.is_collected = true;
             }
             Ok(())
@@ -279,7 +320,12 @@ fn register_pet_collect(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>
         move |_, species_id: u32| {
             let mut st = state.borrow_mut();
             st.world.collected_pets.remove(&(species_id as i32));
-            if let Some(p) = st.world.pets.iter_mut().find(|p| p.species_id == species_id) {
+            if let Some(p) = st
+                .world
+                .pets
+                .iter_mut()
+                .find(|p| p.species_id == species_id)
+            {
                 p.is_collected = false;
             }
             Ok(())

@@ -112,7 +112,11 @@ fn fire_startup_events(env: &WowLuaEnv) {
         "PLAYER_ENTERING_WORLD",
         &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
     );
-    for event in ["UPDATE_BINDINGS", "DISPLAY_SIZE_CHANGED", "UI_SCALE_CHANGED"] {
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
         let _ = env.fire_event(event);
     }
 }
@@ -150,7 +154,10 @@ fn guild_panel_opens_without_unavailable_error() {
 fn bn_connected_returns_true() {
     let env = WowLuaEnv::new().unwrap();
     let connected: bool = env.eval("return BNConnected()").unwrap();
-    assert!(connected, "BNConnected should return true for Communities to work");
+    assert!(
+        connected,
+        "BNConnected should return true for Communities to work"
+    );
 }
 
 #[test]
@@ -163,13 +170,17 @@ fn c_club_is_enabled() {
 #[test]
 fn c_club_returns_guild() {
     let env = WowLuaEnv::new().unwrap();
-    let result: String = env.eval(r#"
+    let result: String = env
+        .eval(
+            r#"
         local clubs = C_Club.GetSubscribedClubs()
         if #clubs == 0 then return "no_clubs" end
         local club = clubs[1]
         if club.clubType ~= 2 then return "type=" .. tostring(club.clubType) end
         if club.name ~= "Heroes of Azeroth" then return "name=" .. tostring(club.name) end
         return "ok"
-    "#).unwrap();
+    "#,
+        )
+        .unwrap();
     assert_eq!(result, "ok", "C_Club should return guild: {result}");
 }

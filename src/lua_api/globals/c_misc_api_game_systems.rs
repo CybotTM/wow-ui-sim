@@ -30,13 +30,48 @@ fn challenge_mode_map_info(map_id: i32) -> Option<(&'static str, i32)> {
 }
 
 const AFFIX_DATA: &[(i32, &str, &str, i64)] = &[
-    (9,   "Tyrannical",                      "Boss enemies have 20% more health and inflict up to 15% increased damage.", 236401),
-    (10,  "Fortified",                        "Non-boss enemies have 20% more health and inflict up to 30% increased damage.", 236402),
-    (160, "Challenger's Peril",               "Dying subtracts 15 seconds from time remaining.", 136120),
-    (148, "Xal'atath's Bargain: Ascendant",   "While in combat, Xal'atath rains down shadow upon players.", 4630473),
-    (147, "Xal'atath's Bargain: Frenzied",    "Non-boss enemies become frenzied at 30% health remaining.", 4630474),
-    (149, "Xal'atath's Bargain: Voidbound",   "Xal'atath opens void portals that empower nearby enemies.", 4630471),
-    (158, "Xal'atath's Bargain: Oblivion",    "Xal'atath tears open rifts to the void.", 4630472),
+    (
+        9,
+        "Tyrannical",
+        "Boss enemies have 20% more health and inflict up to 15% increased damage.",
+        236401,
+    ),
+    (
+        10,
+        "Fortified",
+        "Non-boss enemies have 20% more health and inflict up to 30% increased damage.",
+        236402,
+    ),
+    (
+        160,
+        "Challenger's Peril",
+        "Dying subtracts 15 seconds from time remaining.",
+        136120,
+    ),
+    (
+        148,
+        "Xal'atath's Bargain: Ascendant",
+        "While in combat, Xal'atath rains down shadow upon players.",
+        4630473,
+    ),
+    (
+        147,
+        "Xal'atath's Bargain: Frenzied",
+        "Non-boss enemies become frenzied at 30% health remaining.",
+        4630474,
+    ),
+    (
+        149,
+        "Xal'atath's Bargain: Voidbound",
+        "Xal'atath opens void portals that empower nearby enemies.",
+        4630471,
+    ),
+    (
+        158,
+        "Xal'atath's Bargain: Oblivion",
+        "Xal'atath tears open rifts to the void.",
+        4630472,
+    ),
 ];
 
 fn challenge_mode_affix_info(affix_id: i32) -> Option<(&'static str, &'static str, i64)> {
@@ -128,38 +163,44 @@ fn register_c_challenge_mode(lua: &Lua) -> Result<()> {
 fn register_c_club(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let table = lua.create_table()?;
     table.set("IsEnabled", lua.create_function(|_, ()| Ok(true))?)?;
-    table.set("GetSubscribedClubs", lua.create_function({
-        let s = Rc::clone(&state);
-        move |lua, ()| {
-            let st = s.borrow();
-            let clubs = lua.create_table()?;
-            if let Some(ref guild_name) = st.world.guild_name {
-                let club = lua.create_table()?;
-                club.set("clubId", 1)?;
-                club.set("name", lua.create_string(guild_name.as_str())?)?;
-                club.set("clubType", 2)?;
-                club.set("memberCount", st.world.guild_num_members)?;
-                clubs.set(1, club)?;
+    table.set(
+        "GetSubscribedClubs",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |lua, ()| {
+                let st = s.borrow();
+                let clubs = lua.create_table()?;
+                if let Some(ref guild_name) = st.world.guild_name {
+                    let club = lua.create_table()?;
+                    club.set("clubId", 1)?;
+                    club.set("name", lua.create_string(guild_name.as_str())?)?;
+                    club.set("clubType", 2)?;
+                    club.set("memberCount", st.world.guild_num_members)?;
+                    clubs.set(1, club)?;
+                }
+                Ok(clubs)
             }
-            Ok(clubs)
-        }
-    })?)?;
-    table.set("GetClubInfo", lua.create_function({
-        let s = Rc::clone(&state);
-        move |lua, _id: i64| {
-            let st = s.borrow();
-            if let Some(ref guild_name) = st.world.guild_name {
-                let info = lua.create_table()?;
-                info.set("clubId", 1)?;
-                info.set("name", lua.create_string(guild_name.as_str())?)?;
-                info.set("clubType", 2)?;
-                info.set("memberCount", st.world.guild_num_members)?;
-                Ok(Value::Table(info))
-            } else {
-                Ok(Value::Nil)
+        })?,
+    )?;
+    table.set(
+        "GetClubInfo",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |lua, _id: i64| {
+                let st = s.borrow();
+                if let Some(ref guild_name) = st.world.guild_name {
+                    let info = lua.create_table()?;
+                    info.set("clubId", 1)?;
+                    info.set("name", lua.create_string(guild_name.as_str())?)?;
+                    info.set("clubType", 2)?;
+                    info.set("memberCount", st.world.guild_num_members)?;
+                    Ok(Value::Table(info))
+                } else {
+                    Ok(Value::Nil)
+                }
             }
-        }
-    })?)?;
+        })?,
+    )?;
     table.set(
         "GetStreams",
         lua.create_function(|lua, _id: i64| lua.create_table())?,

@@ -210,9 +210,7 @@ fn test_in_guild_by_default() {
 #[test]
 fn test_default_guild_name() {
     let env = env();
-    let name: String = env
-        .eval("return (C_Guild.GetGuildInfo('player'))")
-        .unwrap();
+    let name: String = env.eval("return (C_Guild.GetGuildInfo('player'))").unwrap();
     assert_eq!(name, "Heroes of Azeroth");
 }
 
@@ -317,9 +315,7 @@ fn test_guild_control_set_rank_does_not_error() {
 #[test]
 fn test_get_guild_faction_group_nil_when_not_in_guild() {
     let env = env();
-    let is_nil: bool = env
-        .eval("return GetGuildFactionGroup() == nil")
-        .unwrap();
+    let is_nil: bool = env.eval("return GetGuildFactionGroup() == nil").unwrap();
     assert!(is_nil);
 }
 
@@ -393,9 +389,8 @@ fn test_store_secure_reference_does_not_error() {
 #[test]
 fn test_get_lfg_info_server_returns_not_queued() {
     let env = env();
-    let (in_party, joined, queued): (bool, bool, bool) = env
-        .eval(r#"return GetLFGInfoServer(1, 0)"#)
-        .unwrap();
+    let (in_party, joined, queued): (bool, bool, bool) =
+        env.eval(r#"return GetLFGInfoServer(1, 0)"#).unwrap();
     assert!(!in_party);
     assert!(!joined);
     assert!(!queued);
