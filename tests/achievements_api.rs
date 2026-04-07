@@ -101,9 +101,7 @@ fn test_get_category_info_general() {
 #[test]
 fn test_get_category_info_feats_of_strength() {
     let env = env();
-    let name: String = env
-        .eval("local n = GetCategoryInfo(81); return n")
-        .unwrap();
+    let name: String = env.eval("local n = GetCategoryInfo(81); return n").unwrap();
     assert_eq!(name, "Feats of Strength");
 }
 
@@ -119,9 +117,8 @@ fn test_get_category_info_unknown_returns_nil() {
 #[test]
 fn test_get_category_num_achievements_returns_three_values() {
     let env = env();
-    let (total, completed, incomplete): (i32, i32, i32) = env
-        .eval("return GetCategoryNumAchievements(92)")
-        .unwrap();
+    let (total, completed, incomplete): (i32, i32, i32) =
+        env.eval("return GetCategoryNumAchievements(92)").unwrap();
     assert_eq!(total, 6); // 6 General achievements (Level 10-80)
     assert_eq!(completed, 0);
     assert_eq!(incomplete, 6);
@@ -150,8 +147,34 @@ fn test_achievement_info_explore_elwynn() {
 fn test_achievement_info_full_signature() {
     let env = env();
     env.exec("A_Admin.SetAchievementEarned(776, true)").unwrap();
-    let (id, name, points, completed, month, day, year, desc, flags, icon, reward, is_guild, was_earned): (
-        i32, String, i32, bool, i32, i32, i32, String, i32, i32, String, bool, bool,
+    let (
+        id,
+        name,
+        points,
+        completed,
+        month,
+        day,
+        year,
+        desc,
+        flags,
+        icon,
+        reward,
+        is_guild,
+        was_earned,
+    ): (
+        i32,
+        String,
+        i32,
+        bool,
+        i32,
+        i32,
+        i32,
+        String,
+        i32,
+        i32,
+        String,
+        bool,
+        bool,
     ) = env
         .eval(
             r#"
@@ -167,7 +190,10 @@ fn test_achievement_info_full_signature() {
     assert_eq!(month, 1);
     assert_eq!(day, 15);
     assert_eq!(year, 2025);
-    assert_eq!(desc, "Explore Elwynn Forest, revealing the covered areas of the world map.");
+    assert_eq!(
+        desc,
+        "Explore Elwynn Forest, revealing the covered areas of the world map."
+    );
     assert_eq!(flags, 0);
     assert_eq!(icon, 236809);
     assert_eq!(reward, "");
@@ -179,9 +205,8 @@ fn test_achievement_info_full_signature() {
 fn test_category_num_updates_with_earned() {
     let env = env();
     env.exec("A_Admin.SetAchievementEarned(6, true)").unwrap();
-    let (total, completed, incomplete): (i32, i32, i32) = env
-        .eval("return GetCategoryNumAchievements(92)")
-        .unwrap();
+    let (total, completed, incomplete): (i32, i32, i32) =
+        env.eval("return GetCategoryNumAchievements(92)").unwrap();
     assert_eq!(total, 6);
     assert_eq!(completed, 1);
     assert_eq!(incomplete, 5);
@@ -194,9 +219,7 @@ fn test_category_num_updates_with_earned() {
 #[test]
 fn test_achievement_num_criteria() {
     let env = env();
-    let count: i32 = env
-        .eval("return GetAchievementNumCriteria(948)")
-        .unwrap();
+    let count: i32 = env.eval("return GetAchievementNumCriteria(948)").unwrap();
     assert_eq!(count, 5); // Ambassador: 5 factions
 }
 

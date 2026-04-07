@@ -29,40 +29,272 @@ struct AchievementData {
 
 static ACHIEVEMENTS: &[AchievementData] = &[
     // General (level achievements)
-    AchievementData { id: 6, name: "Level 10", description: "Reach level 10.", points: 10, icon: 236562, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 10", criteria_type: 5, required_quantity: 10 }] },
-    AchievementData { id: 7, name: "Level 20", description: "Reach level 20.", points: 10, icon: 236563, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 20", criteria_type: 5, required_quantity: 20 }] },
-    AchievementData { id: 8, name: "Level 40", description: "Reach level 40.", points: 10, icon: 236565, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 40", criteria_type: 5, required_quantity: 40 }] },
-    AchievementData { id: 9, name: "Level 60", description: "Reach level 60.", points: 10, icon: 236567, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 60", criteria_type: 5, required_quantity: 60 }] },
-    AchievementData { id: 10, name: "Level 70", description: "Reach level 70.", points: 10, icon: 236568, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 70", criteria_type: 5, required_quantity: 70 }] },
-    AchievementData { id: 11, name: "Level 80", description: "Reach level 80.", points: 10, icon: 236569, category_id: 92, criteria: &[AchievementCriteria { name: "Reach level 80", criteria_type: 5, required_quantity: 80 }] },
+    AchievementData {
+        id: 6,
+        name: "Level 10",
+        description: "Reach level 10.",
+        points: 10,
+        icon: 236562,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 10",
+            criteria_type: 5,
+            required_quantity: 10,
+        }],
+    },
+    AchievementData {
+        id: 7,
+        name: "Level 20",
+        description: "Reach level 20.",
+        points: 10,
+        icon: 236563,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 20",
+            criteria_type: 5,
+            required_quantity: 20,
+        }],
+    },
+    AchievementData {
+        id: 8,
+        name: "Level 40",
+        description: "Reach level 40.",
+        points: 10,
+        icon: 236565,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 40",
+            criteria_type: 5,
+            required_quantity: 40,
+        }],
+    },
+    AchievementData {
+        id: 9,
+        name: "Level 60",
+        description: "Reach level 60.",
+        points: 10,
+        icon: 236567,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 60",
+            criteria_type: 5,
+            required_quantity: 60,
+        }],
+    },
+    AchievementData {
+        id: 10,
+        name: "Level 70",
+        description: "Reach level 70.",
+        points: 10,
+        icon: 236568,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 70",
+            criteria_type: 5,
+            required_quantity: 70,
+        }],
+    },
+    AchievementData {
+        id: 11,
+        name: "Level 80",
+        description: "Reach level 80.",
+        points: 10,
+        icon: 236569,
+        category_id: 92,
+        criteria: &[AchievementCriteria {
+            name: "Reach level 80",
+            criteria_type: 5,
+            required_quantity: 80,
+        }],
+    },
     // Quests
-    AchievementData { id: 503, name: "50 Quests Completed", description: "Complete 50 quests.", points: 10, icon: 236664, category_id: 96, criteria: &[AchievementCriteria { name: "Complete 50 quests", criteria_type: 0, required_quantity: 50 }] },
-    AchievementData { id: 504, name: "100 Quests Completed", description: "Complete 100 quests.", points: 10, icon: 236665, category_id: 96, criteria: &[AchievementCriteria { name: "Complete 100 quests", criteria_type: 0, required_quantity: 100 }] },
-    AchievementData { id: 505, name: "250 Quests Completed", description: "Complete 250 quests.", points: 10, icon: 236666, category_id: 96, criteria: &[AchievementCriteria { name: "Complete 250 quests", criteria_type: 0, required_quantity: 250 }] },
+    AchievementData {
+        id: 503,
+        name: "50 Quests Completed",
+        description: "Complete 50 quests.",
+        points: 10,
+        icon: 236664,
+        category_id: 96,
+        criteria: &[AchievementCriteria {
+            name: "Complete 50 quests",
+            criteria_type: 0,
+            required_quantity: 50,
+        }],
+    },
+    AchievementData {
+        id: 504,
+        name: "100 Quests Completed",
+        description: "Complete 100 quests.",
+        points: 10,
+        icon: 236665,
+        category_id: 96,
+        criteria: &[AchievementCriteria {
+            name: "Complete 100 quests",
+            criteria_type: 0,
+            required_quantity: 100,
+        }],
+    },
+    AchievementData {
+        id: 505,
+        name: "250 Quests Completed",
+        description: "Complete 250 quests.",
+        points: 10,
+        icon: 236666,
+        category_id: 96,
+        criteria: &[AchievementCriteria {
+            name: "Complete 250 quests",
+            criteria_type: 0,
+            required_quantity: 250,
+        }],
+    },
     // Exploration
-    AchievementData { id: 776, name: "Explore Elwynn Forest", description: "Explore Elwynn Forest, revealing the covered areas of the world map.", points: 10, icon: 236809, category_id: 97, criteria: &[] },
-    AchievementData { id: 627, name: "Explore Durotar", description: "Explore Durotar, revealing the covered areas of the world map.", points: 10, icon: 236809, category_id: 97, criteria: &[] },
+    AchievementData {
+        id: 776,
+        name: "Explore Elwynn Forest",
+        description: "Explore Elwynn Forest, revealing the covered areas of the world map.",
+        points: 10,
+        icon: 236809,
+        category_id: 97,
+        criteria: &[],
+    },
+    AchievementData {
+        id: 627,
+        name: "Explore Durotar",
+        description: "Explore Durotar, revealing the covered areas of the world map.",
+        points: 10,
+        icon: 236809,
+        category_id: 97,
+        criteria: &[],
+    },
     // PvP
-    AchievementData { id: 238, name: "An Honorable Kill", description: "Achieve an honorable kill.", points: 10, icon: 236363, category_id: 95, criteria: &[AchievementCriteria { name: "Honorable kills", criteria_type: 0, required_quantity: 1 }] },
-    AchievementData { id: 513, name: "100 Honorable Kills", description: "Get 100 honorable kills.", points: 10, icon: 236363, category_id: 95, criteria: &[AchievementCriteria { name: "Honorable kills", criteria_type: 0, required_quantity: 100 }] },
+    AchievementData {
+        id: 238,
+        name: "An Honorable Kill",
+        description: "Achieve an honorable kill.",
+        points: 10,
+        icon: 236363,
+        category_id: 95,
+        criteria: &[AchievementCriteria {
+            name: "Honorable kills",
+            criteria_type: 0,
+            required_quantity: 1,
+        }],
+    },
+    AchievementData {
+        id: 513,
+        name: "100 Honorable Kills",
+        description: "Get 100 honorable kills.",
+        points: 10,
+        icon: 236363,
+        category_id: 95,
+        criteria: &[AchievementCriteria {
+            name: "Honorable kills",
+            criteria_type: 0,
+            required_quantity: 100,
+        }],
+    },
     // Dungeons & Raids
-    AchievementData { id: 632, name: "Deadmines", description: "Defeat Edwin VanCleef.", points: 10, icon: 135274, category_id: 168, criteria: &[AchievementCriteria { name: "Edwin VanCleef", criteria_type: 0, required_quantity: 1 }] },
-    AchievementData { id: 633, name: "Shadowfang Keep", description: "Defeat Lord Godfrey.", points: 10, icon: 136243, category_id: 168, criteria: &[AchievementCriteria { name: "Lord Godfrey", criteria_type: 0, required_quantity: 1 }] },
+    AchievementData {
+        id: 632,
+        name: "Deadmines",
+        description: "Defeat Edwin VanCleef.",
+        points: 10,
+        icon: 135274,
+        category_id: 168,
+        criteria: &[AchievementCriteria {
+            name: "Edwin VanCleef",
+            criteria_type: 0,
+            required_quantity: 1,
+        }],
+    },
+    AchievementData {
+        id: 633,
+        name: "Shadowfang Keep",
+        description: "Defeat Lord Godfrey.",
+        points: 10,
+        icon: 136243,
+        category_id: 168,
+        criteria: &[AchievementCriteria {
+            name: "Lord Godfrey",
+            criteria_type: 0,
+            required_quantity: 1,
+        }],
+    },
     // Professions
-    AchievementData { id: 116, name: "Professional Journeyman", description: "Become a Journeyman in a profession.", points: 10, icon: 136243, category_id: 169, criteria: &[] },
-    AchievementData { id: 731, name: "Professional Expert", description: "Become an Expert in a profession.", points: 10, icon: 136243, category_id: 169, criteria: &[] },
+    AchievementData {
+        id: 116,
+        name: "Professional Journeyman",
+        description: "Become a Journeyman in a profession.",
+        points: 10,
+        icon: 136243,
+        category_id: 169,
+        criteria: &[],
+    },
+    AchievementData {
+        id: 731,
+        name: "Professional Expert",
+        description: "Become an Expert in a profession.",
+        points: 10,
+        icon: 136243,
+        category_id: 169,
+        criteria: &[],
+    },
     // Reputation
-    AchievementData { id: 948, name: "Ambassador of the Alliance", description: "Earn exalted status with the five Alliance capital cities.", points: 10, icon: 236685, category_id: 201, criteria: &[
-        AchievementCriteria { name: "Exalted with Stormwind", criteria_type: 46, required_quantity: 1 },
-        AchievementCriteria { name: "Exalted with Ironforge", criteria_type: 46, required_quantity: 1 },
-        AchievementCriteria { name: "Exalted with Gnomeregan", criteria_type: 46, required_quantity: 1 },
-        AchievementCriteria { name: "Exalted with Darnassus", criteria_type: 46, required_quantity: 1 },
-        AchievementCriteria { name: "Exalted with Exodar", criteria_type: 46, required_quantity: 1 },
-    ] },
+    AchievementData {
+        id: 948,
+        name: "Ambassador of the Alliance",
+        description: "Earn exalted status with the five Alliance capital cities.",
+        points: 10,
+        icon: 236685,
+        category_id: 201,
+        criteria: &[
+            AchievementCriteria {
+                name: "Exalted with Stormwind",
+                criteria_type: 46,
+                required_quantity: 1,
+            },
+            AchievementCriteria {
+                name: "Exalted with Ironforge",
+                criteria_type: 46,
+                required_quantity: 1,
+            },
+            AchievementCriteria {
+                name: "Exalted with Gnomeregan",
+                criteria_type: 46,
+                required_quantity: 1,
+            },
+            AchievementCriteria {
+                name: "Exalted with Darnassus",
+                criteria_type: 46,
+                required_quantity: 1,
+            },
+            AchievementCriteria {
+                name: "Exalted with Exodar",
+                criteria_type: 46,
+                required_quantity: 1,
+            },
+        ],
+    },
     // World Events
-    AchievementData { id: 913, name: "To Honor One's Elders", description: "Complete the Lunar Festival achievements.", points: 10, icon: 236704, category_id: 155, criteria: &[] },
+    AchievementData {
+        id: 913,
+        name: "To Honor One's Elders",
+        description: "Complete the Lunar Festival achievements.",
+        points: 10,
+        icon: 236704,
+        category_id: 155,
+        criteria: &[],
+    },
     // Feats of Strength
-    AchievementData { id: 879, name: "Old School Ride", description: "Owner of a classic epic mount.", points: 0, icon: 136243, category_id: 81, criteria: &[] },
+    AchievementData {
+        id: 879,
+        name: "Old School Ride",
+        description: "Owner of a classic epic mount.",
+        points: 0,
+        icon: 136243,
+        category_id: 81,
+        criteria: &[],
+    },
 ];
 
 fn find_achievement(id: i32) -> Option<&'static AchievementData> {
@@ -70,15 +302,51 @@ fn find_achievement(id: i32) -> Option<&'static AchievementData> {
 }
 
 static ACHIEVEMENT_CATEGORIES: &[AchievementCategory] = &[
-    AchievementCategory { id: 92, name: "General", parent_id: -1 },
-    AchievementCategory { id: 96, name: "Quests", parent_id: -1 },
-    AchievementCategory { id: 97, name: "Exploration", parent_id: -1 },
-    AchievementCategory { id: 95, name: "PvP", parent_id: -1 },
-    AchievementCategory { id: 168, name: "Dungeons & Raids", parent_id: -1 },
-    AchievementCategory { id: 169, name: "Professions", parent_id: -1 },
-    AchievementCategory { id: 201, name: "Reputation", parent_id: -1 },
-    AchievementCategory { id: 155, name: "World Events", parent_id: -1 },
-    AchievementCategory { id: 81, name: "Feats of Strength", parent_id: -1 },
+    AchievementCategory {
+        id: 92,
+        name: "General",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 96,
+        name: "Quests",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 97,
+        name: "Exploration",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 95,
+        name: "PvP",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 168,
+        name: "Dungeons & Raids",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 169,
+        name: "Professions",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 201,
+        name: "Reputation",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 155,
+        name: "World Events",
+        parent_id: -1,
+    },
+    AchievementCategory {
+        id: 81,
+        name: "Feats of Strength",
+        parent_id: -1,
+    },
 ];
 
 /// Achievement category API stubs needed by Blizzard_AchievementUI at parse time.
@@ -131,7 +399,9 @@ pub fn register_achievement_stubs(lua: &Lua) -> Result<()> {
     g.set(
         "GetAchievementNumCriteria",
         lua.create_function(|_, aid: i32| {
-            Ok(find_achievement(aid).map(|a| a.criteria.len() as i32).unwrap_or(0))
+            Ok(find_achievement(aid)
+                .map(|a| a.criteria.len() as i32)
+                .unwrap_or(0))
         })?,
     )?;
     g.set(
@@ -153,10 +423,7 @@ fn register_achievement_empty_table_stubs(lua: &Lua, g: &mlua::Table) -> Result<
         })?,
     )?;
     let empty_table = lua.create_function(|lua, ()| lua.create_table())?;
-    for name in [
-        "GetGuildCategoryList",
-        "GetStatisticsCategoryList",
-    ] {
+    for name in ["GetGuildCategoryList", "GetStatisticsCategoryList"] {
         g.set(name, empty_table.clone())?;
     }
     let empty_multi = lua.create_function(|_, _: mlua::MultiValue| Ok(mlua::MultiValue::new()))?;
@@ -183,30 +450,35 @@ fn stub_get_achievement_info(lua: &Lua, id: Value) -> Result<mlua::MultiValue> {
     let completed = is_achievement_earned(lua, aid);
     let data = find_achievement(aid);
     let name = data.map(|a| a.name).unwrap_or("Achievement");
-    let desc = data.map(|a| a.description).unwrap_or("Achievement description");
+    let desc = data
+        .map(|a| a.description)
+        .unwrap_or("Achievement description");
     let points = data.map(|a| a.points).unwrap_or(10) as i64;
     let icon = data.map(|a| a.icon).unwrap_or(136243) as i64;
     let (month, day, year) = if completed { (1, 15, 2025) } else { (0, 0, 0) };
     Ok(mlua::MultiValue::from_vec(vec![
-        Value::Integer(aid as i64),          // id
+        Value::Integer(aid as i64),              // id
         Value::String(lua.create_string(name)?), // name
-        Value::Integer(points),              // points
-        Value::Boolean(completed),           // completed
-        Value::Integer(month),               // month
-        Value::Integer(day),                 // day
-        Value::Integer(year),                // year
+        Value::Integer(points),                  // points
+        Value::Boolean(completed),               // completed
+        Value::Integer(month),                   // month
+        Value::Integer(day),                     // day
+        Value::Integer(year),                    // year
         Value::String(lua.create_string(desc)?), // description
-        Value::Integer(0),                   // flags
-        Value::Integer(icon),                // icon
-        Value::String(lua.create_string("")?), // rewardText
-        Value::Boolean(false),               // isGuild
-        Value::Boolean(completed),           // wasEarnedByMe
-        Value::Nil,                          // earnedBy
+        Value::Integer(0),                       // flags
+        Value::Integer(icon),                    // icon
+        Value::String(lua.create_string("")?),   // rewardText
+        Value::Boolean(false),                   // isGuild
+        Value::Boolean(completed),               // wasEarnedByMe
+        Value::Nil,                              // earnedBy
     ]))
 }
 
 /// GetAchievementCriteriaInfo(achievementID, criteriaIndex) → 9 values.
-fn stub_get_achievement_criteria_info(lua: &Lua, (aid, idx): (i32, i32)) -> Result<mlua::MultiValue> {
+fn stub_get_achievement_criteria_info(
+    lua: &Lua,
+    (aid, idx): (i32, i32),
+) -> Result<mlua::MultiValue> {
     let criteria = find_achievement(aid).and_then(|a| a.criteria.get((idx - 1) as usize));
     let Some(c) = criteria else {
         return Ok(mlua::MultiValue::from_vec(vec![Value::Nil]));
@@ -215,13 +487,13 @@ fn stub_get_achievement_criteria_info(lua: &Lua, (aid, idx): (i32, i32)) -> Resu
     let quantity = if completed { c.required_quantity } else { 0 };
     Ok(mlua::MultiValue::from_vec(vec![
         Value::String(lua.create_string(c.name)?), // criteriaString
-        Value::Integer(c.criteria_type as i64),     // criteriaType
-        Value::Boolean(completed),                  // criteriaCompleted
-        Value::Integer(quantity as i64),             // quantity
-        Value::Integer(c.required_quantity as i64),  // reqQuantity
-        Value::String(lua.create_string("")?),      // charName
-        Value::Integer(0),                          // criteriaFlags
-        Value::Integer(0),                          // assetID
+        Value::Integer(c.criteria_type as i64),    // criteriaType
+        Value::Boolean(completed),                 // criteriaCompleted
+        Value::Integer(quantity as i64),           // quantity
+        Value::Integer(c.required_quantity as i64), // reqQuantity
+        Value::String(lua.create_string("")?),     // charName
+        Value::Integer(0),                         // criteriaFlags
+        Value::Integer(0),                         // assetID
         Value::String(lua.create_string(format!("{}/{}", quantity, c.required_quantity))?), // quantityString
     ]))
 }
