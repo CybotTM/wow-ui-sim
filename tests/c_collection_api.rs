@@ -360,6 +360,15 @@ fn test_transmog_collection_get_item_info_nil() {
 }
 
 #[test]
+fn test_transmog_collection_get_num_transmog_sources() {
+    let env = env();
+    let count: i32 = env
+        .eval("return C_TransmogCollection.GetNumTransmogSources()")
+        .unwrap();
+    assert_eq!(count, 60, "default world has 60 transmog appearances");
+}
+
+#[test]
 fn test_transmog_collection_get_all_appearance_sources_empty() {
     let env = env();
     let count: i32 = env

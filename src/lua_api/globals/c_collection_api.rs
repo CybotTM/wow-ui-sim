@@ -517,6 +517,10 @@ fn register_transmog_appearance_methods(
             }
         })?,
     )?;
+    t.set("GetNumTransmogSources", lua.create_function({
+        let s = Rc::clone(state);
+        move |_, ()| Ok(s.borrow().world.transmog_appearances.len() as i32)
+    })?)?;
     Ok(())
 }
 
