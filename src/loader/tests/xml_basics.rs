@@ -316,6 +316,71 @@ fn test_xml_keyvalue_global_type_resolves_global_string() {
 }
 
 #[test]
+fn test_xml_keyvalues_on_fontstring_and_texture() {
+    let env = WowLuaEnv::new().unwrap();
+    let temp_dir = std::env::temp_dir().join("wow-sim-test-kv-children");
+    std::fs::create_dir_all(&temp_dir).unwrap();
+    let xml_path = temp_dir.join("test_kv_children.xml");
+    std::fs::write(
+        &xml_path,
+        r#"<Ui>
+        <Frame name="KVChildFrame" parent="UIParent">
+            <Layers>
+                <Layer level="OVERLAY">
+                    <FontString parentKey="Text" inherits="GameFontNormal">
+                        <KeyValues>
+                            <KeyValue key="anchorSpacing" value="4" type="number"/>
+                            <KeyValue key="myTag" value="hello"/>
+                        </KeyValues>
+                    </FontString>
+                    <Texture parentKey="Icon">
+                        <KeyValues>
+                            <KeyValue key="iconScale" value="1.5" type="number"/>
+                        </KeyValues>
+                    </Texture>
+                </Layer>
+            </Layers>
+        </Frame>
+    </Ui>"#,
+    )
+    .unwrap();
+
+    let addon_table = env.create_addon_table().unwrap();
+    let ctx = AddonContext {
+        name: "TestAddon",
+        table: addon_table,
+        addon_root: &temp_dir,
+        use_secure_env: false,
+        taint: false,
+    };
+    load_xml_file(
+        &env.loader_env(),
+        &xml_path,
+        &ctx,
+        &mut LoadTiming::default(),
+    )
+    .unwrap();
+
+    assert_eq!(
+        env.eval::<i32>("return KVChildFrame.Text.anchorSpacing")
+            .unwrap(),
+        4,
+        "FontString KeyValue number"
+    );
+    assert_eq!(
+        env.eval::<String>("return KVChildFrame.Text.myTag").unwrap(),
+        "hello",
+        "FontString KeyValue string"
+    );
+    assert_eq!(
+        env.eval::<f64>("return KVChildFrame.Icon.iconScale").unwrap(),
+        1.5,
+        "Texture KeyValue number"
+    );
+    std::fs::remove_file(&xml_path).ok();
+}
+
+#[test]
 fn test_xml_anchors_with_offset() {
     let env = WowLuaEnv::new().unwrap();
     let temp_dir = std::env::temp_dir().join("wow-sim-test-offset");

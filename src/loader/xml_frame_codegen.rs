@@ -173,6 +173,22 @@ fn append_key_values_from_xml(
     }
 }
 
+/// Generate `var.key = value` assignments for a KeyValues block.
+pub(super) fn generate_key_values_code(
+    key_values: Option<&crate::xml::KeyValuesXml>,
+    var_name: &str,
+) -> String {
+    let Some(key_values) = key_values else {
+        return String::new();
+    };
+    let mut code = String::new();
+    for kv in &key_values.values {
+        let value = format_key_value_lua(&kv.value, kv.value_type.as_deref());
+        code.push_str(&format!("\n        {var_name}.{} = {value}\n        ", kv.key));
+    }
+    code
+}
+
 /// Format a KeyValue's value as a Lua expression based on its type.
 fn format_key_value_lua(value: &str, value_type: Option<&str>) -> String {
     match value_type {

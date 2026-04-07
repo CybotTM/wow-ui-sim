@@ -169,6 +169,10 @@ fn build_fontstring_extra_code(
             "parent",
         ));
     }
+    code.push_str(&super::xml_frame_codegen::generate_key_values_code(
+        fontstring.key_values.as_ref(),
+        "fs",
+    ));
     if let Some(a) = fontstring.alpha {
         code.push_str(&format!("\n        fs:SetAlpha({})\n        ", a));
     }

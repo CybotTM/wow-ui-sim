@@ -261,6 +261,10 @@ pub(super) fn build_texture_lua(
     append_texture_anchors(&mut code, texture, parent_name);
     code.push_str(&emit_texture_visibility(texture));
     code.push_str(&emit_masked_textures(texture, is_mask));
+    code.push_str(&super::xml_frame_codegen::generate_key_values_code(
+        texture.key_values.as_ref(),
+        "tex",
+    ));
     code
 }
 
