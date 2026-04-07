@@ -2,8 +2,14 @@
 
 use mlua::{Lua, Result, Value};
 
-/// Register FadingFrame_* globals and addframetext.
+/// Register FadingFrame_* globals, addframetext, and related stubs.
 pub fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
+    register_fading_frame_functions(lua)?;
+    register_error_display(lua)?;
+    Ok(())
+}
+
+fn register_fading_frame_functions(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.set(
         "FadingFrame_OnLoad",
@@ -33,9 +39,13 @@ pub fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
         "SetChatWindowShown",
         lua.create_function(|_, (_id, _shown): (Value, Value)| Ok(()))?,
     )?;
-    // Native WoW error display function — called by Blizzard_ScriptErrors error handler.
-    // Without this stub, the error handler itself crashes, causing recursive error spam.
-    g.set(
+    Ok(())
+}
+
+/// Native WoW error display function — called by Blizzard_ScriptErrors error handler.
+/// Without this stub, the error handler itself crashes, causing recursive error spam.
+fn register_error_display(lua: &Lua) -> Result<()> {
+    lua.globals().set(
         "addframetext",
         lua.create_function(|lua, msg: Value| {
             let msg_str = match &msg {
