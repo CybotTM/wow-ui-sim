@@ -28,7 +28,9 @@ fn register_add_mail(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -
             let mut st = state.borrow_mut();
             let id = st.player.next_mail_id;
             st.player.next_mail_id += 1;
-            st.player.inbox.push(build_mail(id, sender, subject, body, money, items));
+            st.player
+                .inbox
+                .push(build_mail(id, sender, subject, body, money, items));
             Ok(())
         }
     })
@@ -55,7 +57,9 @@ fn register_set_inbox_count(
             let sender = format!("Player{}", i + 1);
             let subject = format!("Test Mail #{}", i + 1);
             let body = format!("This is test mail message {}.", i + 1);
-            st.player.inbox.push(build_mail(id, sender, subject, body, 0, Vec::new()));
+            st.player
+                .inbox
+                .push(build_mail(id, sender, subject, body, 0, Vec::new()));
         }
         Ok(())
     })

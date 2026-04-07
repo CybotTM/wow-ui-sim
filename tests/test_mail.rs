@@ -182,7 +182,10 @@ fn get_inbox_header_info_with_items() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "Mail with items should show package icon and count: {result}");
+    assert_eq!(
+        result, "ok",
+        "Mail with items should show package icon and count: {result}"
+    );
 }
 
 #[test]
@@ -215,7 +218,10 @@ fn get_inbox_item_returns_attachment() {
             "#,
         )
         .unwrap();
-    assert_eq!(result, "ok", "GetInboxItem should return item details: {result}");
+    assert_eq!(
+        result, "ok",
+        "GetInboxItem should return item details: {result}"
+    );
 }
 
 #[test]

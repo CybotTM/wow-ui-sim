@@ -206,10 +206,7 @@ fn register_c_mail(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
             t
         }
     };
-    t.set(
-        "CanCheckInbox",
-        lua.create_function(|_, ()| Ok((true, 0)))?,
-    )?;
+    t.set("CanCheckInbox", lua.create_function(|_, ()| Ok((true, 0)))?)?;
     t.set(
         "HasInboxMoney",
         lua.create_function({
@@ -317,82 +314,127 @@ fn register_send_mail_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 }
 
 fn register_get_send_mail_item(
-    lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>,
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    g.set("GetSendMailItem", lua.create_function(move |lua, slot: i32| {
-        let st = state.borrow();
-        let i = (slot - 1) as usize;
-        let Some(Some(attach)) = st.player.send_mail_items.get(i) else {
-            return Ok(mlua::MultiValue::new());
-        };
-        let item = crate::items::get_item(attach.item_id);
-        let name = item.map_or("Unknown", |i| i.name);
-        let texture = item.map_or(0, |i| i.icon_file_data_id);
-        let quality = item.map_or(attach.quality, |i| i.quality as i32);
-        Ok(mlua::MultiValue::from_vec(vec![
-            Value::String(lua.create_string(name)?),
-            Value::Integer(attach.item_id as i64),
-            Value::Integer(texture as i64),
-            Value::Integer(attach.count as i64),
-            Value::Integer(quality as i64),
-        ]))
-    })?)
+    g.set(
+        "GetSendMailItem",
+        lua.create_function(move |lua, slot: i32| {
+            let st = state.borrow();
+            let i = (slot - 1) as usize;
+            let Some(Some(attach)) = st.player.send_mail_items.get(i) else {
+                return Ok(mlua::MultiValue::new());
+            };
+            let item = crate::items::get_item(attach.item_id);
+            let name = item.map_or("Unknown", |i| i.name);
+            let texture = item.map_or(0, |i| i.icon_file_data_id);
+            let quality = item.map_or(attach.quality, |i| i.quality as i32);
+            Ok(mlua::MultiValue::from_vec(vec![
+                Value::String(lua.create_string(name)?),
+                Value::Integer(attach.item_id as i64),
+                Value::Integer(texture as i64),
+                Value::Integer(attach.count as i64),
+                Value::Integer(quality as i64),
+            ]))
+        })?,
+    )
 }
 
 fn register_has_send_mail_item(
-    lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>,
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    g.set("HasSendMailItem", lua.create_function(move |_, slot: i32| {
-        let st = state.borrow();
-        let i = (slot - 1) as usize;
-        Ok(st.player.send_mail_items.get(i).is_some_and(|s| s.is_some()))
-    })?)
+    g.set(
+        "HasSendMailItem",
+        lua.create_function(move |_, slot: i32| {
+            let st = state.borrow();
+            let i = (slot - 1) as usize;
+            Ok(st
+                .player
+                .send_mail_items
+                .get(i)
+                .is_some_and(|s| s.is_some()))
+        })?,
+    )
 }
 
 fn register_send_mail_money(
-    lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>,
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    g.set("SetSendMailMoney", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, amount: i64| { s.borrow_mut().player.send_mail_money = amount as u64; Ok(()) }
-    })?)?;
-    g.set("GetSendMailMoney", lua.create_function(move |_, ()| {
-        Ok(state.borrow().player.send_mail_money as i64)
-    })?)
+    g.set(
+        "SetSendMailMoney",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, amount: i64| {
+                s.borrow_mut().player.send_mail_money = amount as u64;
+                Ok(())
+            }
+        })?,
+    )?;
+    g.set(
+        "GetSendMailMoney",
+        lua.create_function(move |_, ()| Ok(state.borrow().player.send_mail_money as i64))?,
+    )
 }
 
-fn register_send_mail_cod(
-    lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>,
-) -> Result<()> {
-    g.set("SetSendMailCOD", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, amount: i64| { s.borrow_mut().player.send_mail_cod = amount as u64; Ok(()) }
-    })?)?;
-    g.set("GetSendMailCOD", lua.create_function(move |_, ()| {
-        Ok(state.borrow().player.send_mail_cod as i64)
-    })?)
+fn register_send_mail_cod(lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
+    g.set(
+        "SetSendMailCOD",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, amount: i64| {
+                s.borrow_mut().player.send_mail_cod = amount as u64;
+                Ok(())
+            }
+        })?,
+    )?;
+    g.set(
+        "GetSendMailCOD",
+        lua.create_function(move |_, ()| Ok(state.borrow().player.send_mail_cod as i64))?,
+    )
 }
 
 fn register_send_mail_actions(
-    lua: &Lua, g: &mlua::Table, state: Rc<RefCell<SimState>>,
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
     g.set("GetSendMailPrice", lua.create_function(|_, ()| Ok(30))?)?;
-    g.set("SendMail", lua.create_function({
-        let s = Rc::clone(&state);
-        move |lua, (_recipient, _subject, _body): (String, String, String)| {
-            clear_send_state(&s);
-            fire_mail_event(lua, "MAIL_SEND_SUCCESS")
-        }
-    })?)?;
-    g.set("ClearSendMail", lua.create_function({
-        let s = Rc::clone(&state);
-        move |_, ()| { clear_send_state(&s); Ok(()) }
-    })?)?;
-    g.set("SetSendMailShowing", lua.create_function(|_, _: bool| Ok(()))?)?;
-    g.set("CloseMail", lua.create_function(move |lua, ()| {
-        clear_send_state(&state);
-        fire_mail_event(lua, "MAIL_CLOSED")
-    })?)?;
+    g.set(
+        "SendMail",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |lua, (_recipient, _subject, _body): (String, String, String)| {
+                clear_send_state(&s);
+                fire_mail_event(lua, "MAIL_SEND_SUCCESS")
+            }
+        })?,
+    )?;
+    g.set(
+        "ClearSendMail",
+        lua.create_function({
+            let s = Rc::clone(&state);
+            move |_, ()| {
+                clear_send_state(&s);
+                Ok(())
+            }
+        })?,
+    )?;
+    g.set(
+        "SetSendMailShowing",
+        lua.create_function(|_, _: bool| Ok(()))?,
+    )?;
+    g.set(
+        "CloseMail",
+        lua.create_function(move |lua, ()| {
+            clear_send_state(&state);
+            fire_mail_event(lua, "MAIL_CLOSED")
+        })?,
+    )?;
     Ok(())
 }
 
