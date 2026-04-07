@@ -1275,3 +1275,164 @@ fn test_double_line_width_includes_gap() {
         width_double
     );
 }
+
+// --- Tooltip NineSlice sizing tests ---
+
+#[test]
+fn test_tooltip_sizing_includes_padding() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "PadTestOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:AddLine("X")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    // Padding is 12px on each side (24 total per axis).
+    // Single line at 14px header: height = ceil(14*1.2) = 17 + 24 padding = 41.
+    // Width = text width + 24 padding.
+    assert!(
+        frame.width > 24.0,
+        "Width should be > padding alone, got {}",
+        frame.width
+    );
+    assert!(
+        frame.height > 24.0,
+        "Height should be > padding alone, got {}",
+        frame.height
+    );
+    // Single header line (14pt * 1.2 = ~17px) + 24px vertical padding = ~41px
+    let expected_height = (14.0_f32 * 1.2).ceil() + 24.0;
+    assert!(
+        (frame.height - expected_height).abs() < 1.0,
+        "Expected height ~{}, got {}",
+        expected_height,
+        frame.height
+    );
+}
+
+#[test]
+fn test_tooltip_height_grows_with_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "GrowOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:AddLine("Line 1")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+    let h1 = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().height
+    };
+
+    env.exec(r#"GameTooltip:AddLine("Line 2")"#).unwrap();
+    update_tooltip_sizes(&env);
+    let h2 = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().height
+    };
+
+    env.exec(r#"GameTooltip:AddLine("Line 3")"#).unwrap();
+    update_tooltip_sizes(&env);
+    let h3 = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().height
+    };
+
+    assert!(h2 > h1, "2 lines should be taller than 1: h1={h1}, h2={h2}");
+    assert!(h3 > h2, "3 lines should be taller than 2: h2={h2}, h3={h3}");
+}
+
+#[test]
+fn test_tooltip_nineslice_child_accessible() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // Verify NineSlice exists in Rust children_keys
+    let ns_exists_rust = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let frame = state.widgets.get(gt_id).unwrap();
+        frame.children_keys.contains_key("NineSlice")
+    };
+    assert!(ns_exists_rust, "NineSlice should be in Rust children_keys");
+
+    let has_ns: bool = env.eval("return GameTooltip.NineSlice ~= nil").unwrap();
+    assert!(
+        has_ns,
+        "GameTooltip.NineSlice should be accessible from Lua"
+    );
+
+    let obj_type: String = env
+        .eval("return GameTooltip.NineSlice:GetObjectType()")
+        .unwrap();
+    assert_eq!(obj_type, "Frame", "NineSlice child should be a Frame");
+}
+
+#[test]
+fn test_tooltip_sizing_skipped_when_hidden() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // GameTooltip starts hidden — sizing should not change its dimensions
+    let width_before = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().width
+    };
+
+    // Add a line but don't show the tooltip (no SetOwner)
+    env.exec(r#"GameTooltip:AddLine("Hidden line")"#).unwrap();
+    update_tooltip_sizes(&env);
+
+    let width_after = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().width
+    };
+
+    assert_eq!(
+        width_before, width_after,
+        "Sizing should skip hidden tooltips"
+    );
+}
+
+#[test]
+fn test_tooltip_min_width_respected() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "MinWOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:SetMinimumWidth(300)
+        GameTooltip:AddLine("Short")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    // min_width=300 + 24px padding = 324
+    assert!(
+        frame.width >= 324.0,
+        "Width should respect min_width (300+padding), got {}",
+        frame.width
+    );
+}

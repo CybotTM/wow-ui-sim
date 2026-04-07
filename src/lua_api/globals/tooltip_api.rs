@@ -51,17 +51,19 @@ pub fn register_tooltip_frames(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resul
 fn register_game_tooltips(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     // GameTooltip - needs a NineSlice child frame for SharedTooltipTemplates
     let gt_id = create_tooltip_frame(lua, state, "GameTooltip")?;
-    {
+    let nine_slice_id = {
         let nine_slice = Frame::new(WidgetType::Frame, None, Some(gt_id));
-        let nine_slice_id = nine_slice.id;
+        let id = nine_slice.id;
         let mut s = state.borrow_mut();
         s.widgets.register(nine_slice);
-        s.widgets.add_child(gt_id, nine_slice_id);
+        s.widgets.add_child(gt_id, id);
         if let Some(f) = s.widgets.get_mut_visual(gt_id) {
-            f.children_keys
-                .insert("NineSlice".to_string(), nine_slice_id);
+            f.children_keys.insert("NineSlice".to_string(), id);
         }
-    }
+        id
+    };
+    // Expose NineSlice in Lua so GameTooltip.NineSlice works via __index.
+    crate::lua_api::frame::sync_child_to_lua(lua, gt_id, "NineSlice", nine_slice_id)?;
     // Initialize updateTooltipTimer so GameTooltip_OnUpdate doesn't error
     // on arithmetic with nil before GameTooltip_SetTooltipWaitingForData runs.
     let gt_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, gt_id);
