@@ -547,3 +547,56 @@ fn test_set_map_id_and_get_map_id() {
     let map_id: i32 = env.eval("return TestPOI5:GetMapID()").unwrap();
     assert_eq!(map_id, 37);
 }
+
+#[test]
+fn test_update_mouse_over_tooltip_hit() {
+    let env = env();
+
+    // Quest 80000 blob is on map 2248, centered around (0.45, 0.58)
+    let quest_id: i32 = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "HitTestPOI", UIParent)
+        poi:SetMapID(2248)
+        poi:DrawBlob(80000, true)
+        local qid, count = poi:UpdateMouseOverTooltip(0.45, 0.58)
+        return qid or 0
+    "#,
+        )
+        .unwrap();
+    assert_eq!(quest_id, 80000, "Should hit quest 80000 blob");
+}
+
+#[test]
+fn test_update_mouse_over_tooltip_miss() {
+    let env = env();
+
+    let is_nil: bool = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "MissPOI", UIParent)
+        poi:SetMapID(2248)
+        poi:DrawBlob(80000, true)
+        local qid = poi:UpdateMouseOverTooltip(0.1, 0.1)
+        return qid == nil
+    "#,
+        )
+        .unwrap();
+    assert!(is_nil, "Point outside blob should return nil");
+}
+
+#[test]
+fn test_update_mouse_over_tooltip_no_blobs() {
+    let env = env();
+
+    let is_nil: bool = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "EmptyPOI", UIParent)
+        local qid = poi:UpdateMouseOverTooltip(0.5, 0.5)
+        return qid == nil
+    "#,
+        )
+        .unwrap();
+    assert!(is_nil, "No active blobs should return nil");
+}

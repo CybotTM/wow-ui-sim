@@ -41,8 +41,25 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetFillAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderScalar", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("UpdateMouseOverTooltip", |_, _, (_x, _y): (f64, f64)| {
-        Ok((Value::Nil, Value::Nil))
+    methods.add_method("UpdateMouseOverTooltip", |lua, this, (x, y): (f64, f64)| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let blob_state = match state.quest_blobs.get(&this.0) {
+            Some(bs) if !bs.active_quests.is_empty() => bs,
+            _ => return Ok((Value::Nil, Value::Nil)),
+        };
+        match crate::quest_poi_blobs::hit_test_blobs(
+            &blob_state.active_quests,
+            blob_state.map_id,
+            x as f32,
+            y as f32,
+        ) {
+            Some((quest_id, count)) => Ok((
+                Value::Integer(quest_id as i64),
+                Value::Integer(count as i64),
+            )),
+            None => Ok((Value::Nil, Value::Nil)),
+        }
     });
     // FogOfWarFrame
     methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil));

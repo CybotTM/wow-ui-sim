@@ -29,6 +29,42 @@ pub fn get_quest_blobs_for_map(quest_id: u32, map_id: u32) -> Vec<&'static Quest
         .collect()
 }
 
+/// Point-in-polygon test using the ray casting algorithm.
+/// Returns true if the point (px, py) is inside the polygon defined by `vertices`.
+pub fn point_in_polygon(px: f32, py: f32, vertices: &[(f32, f32)]) -> bool {
+    let n = vertices.len();
+    if n < 3 {
+        return false;
+    }
+    let mut inside = false;
+    let mut j = n - 1;
+    for i in 0..n {
+        let (xi, yi) = vertices[i];
+        let (xj, yj) = vertices[j];
+        if ((yi > py) != (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi) {
+            inside = !inside;
+        }
+        j = i;
+    }
+    inside
+}
+
+/// Find the first active quest whose blob polygon contains the given point.
+/// Returns `(quest_id, blob_count)` where blob_count is the number of matching blobs.
+pub fn hit_test_blobs(active_quests: &[u32], map_id: u32, x: f32, y: f32) -> Option<(u32, usize)> {
+    for &quest_id in active_quests {
+        let blobs = get_quest_blobs_for_map(quest_id, map_id);
+        let hit_count = blobs
+            .iter()
+            .filter(|b| point_in_polygon(x, y, b.vertices))
+            .count();
+        if hit_count > 0 {
+            return Some((quest_id, hit_count));
+        }
+    }
+    None
+}
+
 // --- Quest 80000: The Lost Expedition (Khaz Algar, map 2248) ---
 // Polygon around the Old Quarry area
 static QUEST_80000_BLOBS: [QuestPOIBlob; 1] = [QuestPOIBlob {
@@ -106,6 +142,50 @@ mod tests {
 
         let blobs_wrong_map = get_quest_blobs_for_map(80001, 9999);
         assert!(blobs_wrong_map.is_empty());
+    }
+
+    #[test]
+    fn test_point_in_polygon_square() {
+        let square = &[(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)];
+        assert!(point_in_polygon(0.5, 0.5, square));
+        assert!(!point_in_polygon(1.5, 0.5, square));
+        assert!(!point_in_polygon(0.5, -0.1, square));
+    }
+
+    #[test]
+    fn test_point_in_polygon_triangle() {
+        let tri = &[(0.0, 0.0), (1.0, 0.0), (0.5, 1.0)];
+        assert!(point_in_polygon(0.5, 0.3, tri));
+        assert!(!point_in_polygon(0.0, 1.0, tri));
+    }
+
+    #[test]
+    fn test_point_in_polygon_degenerate() {
+        assert!(!point_in_polygon(0.0, 0.0, &[]));
+        assert!(!point_in_polygon(0.0, 0.0, &[(0.0, 0.0), (1.0, 0.0)]));
+    }
+
+    #[test]
+    fn test_hit_test_blobs_inside() {
+        // Quest 80000 blob center is roughly (0.45, 0.58) on map 2248
+        let result = hit_test_blobs(&[80000], 2248, 0.45, 0.58);
+        assert!(result.is_some(), "Point inside blob should hit");
+        let (qid, count) = result.unwrap();
+        assert_eq!(qid, 80000);
+        assert_eq!(count, 1);
+    }
+
+    #[test]
+    fn test_hit_test_blobs_outside() {
+        let result = hit_test_blobs(&[80000], 2248, 0.1, 0.1);
+        assert!(result.is_none(), "Point outside all blobs should miss");
+    }
+
+    #[test]
+    fn test_hit_test_blobs_wrong_map() {
+        // Quest 80000 is on map 2248, not 37
+        let result = hit_test_blobs(&[80000], 37, 0.45, 0.58);
+        assert!(result.is_none(), "Wrong map should not match");
     }
 
     #[test]
