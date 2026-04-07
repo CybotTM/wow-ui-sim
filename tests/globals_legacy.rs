@@ -600,3 +600,33 @@ fn test_update_mouse_over_tooltip_no_blobs() {
         .unwrap();
     assert!(is_nil, "No active blobs should return nil");
 }
+
+#[test]
+fn test_get_tooltip_index_identity() {
+    let env = env();
+
+    let result: i32 = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "TooltipIdxPOI", UIParent)
+        return poi:GetTooltipIndex(3)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(result, 3, "GetTooltipIndex should return the input index");
+}
+
+#[test]
+fn test_get_tooltip_index_first() {
+    let env = env();
+
+    let result: i32 = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "TooltipIdxPOI2", UIParent)
+        return poi:GetTooltipIndex(1)
+    "#,
+        )
+        .unwrap();
+    assert_eq!(result, 1);
+}
