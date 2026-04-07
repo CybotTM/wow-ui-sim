@@ -341,6 +341,28 @@ fn test_transmog_remove_then_not_has() {
 }
 
 #[test]
+fn test_admin_add_transmog_appearance() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local before = #C_TransmogCollection.GetCategoryAppearances(1, nil)
+            A_Admin.AddTransmogAppearance(9999, 1, 77777)
+            local after = #C_TransmogCollection.GetCategoryAppearances(1, nil)
+            if after ~= before + 1 then return "count: " .. before .. " -> " .. after end
+            local info = C_TransmogCollection.GetSourceInfo(9999)
+            if info.sourceID ~= 9999 then return "sourceID=" .. tostring(info.sourceID) end
+            if info.categoryID ~= 1 then return "categoryID=" .. tostring(info.categoryID) end
+            if info.itemID ~= 77777 then return "itemID=" .. tostring(info.itemID) end
+            if not info.isCollected then return "not collected" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_uncollected_returns_false() {
     let env = env();
     env.exec("A_Admin.AddTransmog(42)").unwrap();

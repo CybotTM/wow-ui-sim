@@ -147,8 +147,32 @@ fn register_transmog_admin(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimStat
         move |_, id: i32| { s.borrow_mut().world.collected_transmogs.insert(id); Ok(()) }
     })?;
     super::admin_api::set_fn(lua, t, "RemoveTransmog", {
-        move |_, id: i32| { state.borrow_mut().world.collected_transmogs.remove(&id); Ok(()) }
-    })
+        let s = Rc::clone(&state);
+        move |_, id: i32| { s.borrow_mut().world.collected_transmogs.remove(&id); Ok(()) }
+    })?;
+    super::admin_api::set_fn(lua, t, "AddTransmogAppearance", {
+        let s = Rc::clone(&state);
+        move |_, (source_id, category_id, item_id): (i32, i32, i32)| {
+            let mut st = s.borrow_mut();
+            let visual_id = st.world.transmog_appearances.iter()
+                .map(|a| a.visual_id)
+                .max()
+                .unwrap_or(0) + 1;
+            st.world.transmog_appearances.push(
+                crate::lua_api::state_types::TransmogAppearance {
+                    source_id,
+                    visual_id,
+                    category_id,
+                    item_id,
+                    is_collected: true,
+                    source_type: 0,
+                    item_mod_id: 0,
+                },
+            );
+            Ok(())
+        }
+    })?;
+    Ok(())
 }
 
 fn register_toggle_setters(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
