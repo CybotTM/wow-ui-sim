@@ -397,6 +397,13 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
             Ok(())
         }
     })?)?;
+    // Filter stubs: show all by default, setters are no-ops
+    t.set("GetCollectedShown", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("GetUncollectedShown", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("GetUnusableShown", lua.create_function(|_, ()| Ok(true))?)?;
+    t.set("SetCollectedShown", lua.create_function(|_, _: bool| Ok(()))?)?;
+    t.set("SetUncollectedShown", lua.create_function(|_, _: bool| Ok(()))?)?;
+    t.set("SetUnusableShown", lua.create_function(|_, _: bool| Ok(()))?)?;
     lua.globals().set("C_ToyBox", t)?;
     Ok(())
 }

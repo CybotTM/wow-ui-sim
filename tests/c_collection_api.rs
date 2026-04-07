@@ -241,6 +241,25 @@ fn test_toy_box_get_set_is_favorite() {
 }
 
 #[test]
+fn test_toy_box_filter_stubs() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if not C_ToyBox.GetCollectedShown() then return "collected" end
+            if not C_ToyBox.GetUncollectedShown() then return "uncollected" end
+            if not C_ToyBox.GetUnusableShown() then return "unusable" end
+            C_ToyBox.SetCollectedShown(false)
+            C_ToyBox.SetUncollectedShown(false)
+            C_ToyBox.SetUnusableShown(false)
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_toy_box_has_favorites() {
     let env = env();
     let result: String = env
