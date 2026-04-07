@@ -12,1245 +12,4415 @@ pub struct SpellPowerCost {
     pub optional_cost: i32,
 }
 
-static SPELL_POWER_53: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_66: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_116: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_120: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_133: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_53: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_66: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_116: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_120: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_133: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_139: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 8.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.7_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 8.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_172: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_172: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_370: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 14.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 14.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 14.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 14.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_475: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_498: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_475: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_498: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.7_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_528: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 14.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 14.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_589: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417191, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.8_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.3_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.3_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417191,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_596: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.25_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_603: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_605: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_710: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_740: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.68_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_759: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 18.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_772: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_596: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.25_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_603: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_605: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_710: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_740: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.68_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_759: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 18.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_772: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_774: [SpellPowerCost; 5] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.1_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137012, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137013, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137011, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137010, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417382, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.1_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137012,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137013,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137011,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137010,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417382,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_845: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_853: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_845: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_853: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.7_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_974: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_980: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1022: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1044: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_980: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1022: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1044: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_1064: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417374, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 4.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417374,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_1079: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 4, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 4 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 20,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 4,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 4,
+    },
 ];
-static SPELL_POWER_1122: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1449: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1464: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1513: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1680: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_1122: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1449: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1464: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1513: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1680: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_1714: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 7, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 7,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_1776: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1822: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1953: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2050: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.375_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2120: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2484: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2637: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2643: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2782: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2908: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.12_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_2948: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_4987: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_5143: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_1776: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1822: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1953: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2050: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.375_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2120: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2484: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2637: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2643: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2782: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2908: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.12_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_2948: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_4987: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_5143: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 15.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_5394: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417374, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.8_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 5.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417374,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_5484: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_5740: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_5938: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_5484: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_5740: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_5938: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_6343: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137049, optional_cost: 0 },
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137050, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 1,
+        mana_cost: 200,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137049,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 1,
+        mana_cost: 200,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137050,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_6353: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_6572: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_6770: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_6789: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_6807: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 400, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_6940: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_7328: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_8042: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 11, mana_cost: 60, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_6353: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_6572: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_6770: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_6789: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_6807: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 400,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_6940: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_7328: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_8042: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 11,
+    mana_cost: 60,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_8092: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.25_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.25_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417191, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.25_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.25_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 4.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417191,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_8122: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_8143: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.46_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_8512: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_8122: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_8143: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.46_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_8512: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_8921: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137012, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417382, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.2_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137012,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 4.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417382,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_9484: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_10326: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.1_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_11366: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_11426: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_12294: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 300, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_13877: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_14914: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.24_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_17364: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_17877: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_17962: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_9484: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_10326: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.1_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_11366: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_11426: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_12294: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 300,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_13877: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 15,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_14914: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.24_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_17364: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_17877: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_17962: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_18562: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137012, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137013, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137011, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137010, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137012,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137013,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137011,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137010,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_19434: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_19434: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_19750: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137027, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137028, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417383, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137027,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137028,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137029,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417383,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_20473: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.24_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_20473: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.24_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_22570: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 4, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 4 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 30,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 4,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 4,
+    },
 ];
 static SPELL_POWER_22842: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 1, mana_cost: 100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 768, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 1,
+        mana_cost: 100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 768,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_24275: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
-];
-static SPELL_POWER_27243: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_30146: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_30283: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_30449: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 21.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_30455: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_31589: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_31661: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_31687: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_24275: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137029,
+    optional_cost: 0,
+}];
+static SPELL_POWER_27243: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_30146: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_30283: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_30449: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 21.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_30455: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_31589: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_31661: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_31687: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_32375: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 8.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 8.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 20.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 8.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 8.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 20.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_32379: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_33206: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_33763: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_33786: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_34026: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_34861: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.325_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_32379: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_33206: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_33763: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_33786: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_34026: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_34861: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.325_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_35395: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 417383, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137027, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137028, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 417383,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137029,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137027,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137028,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_42650: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_43265: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_44614: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_47528: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_47788: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.9_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_48181: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_44614: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_47528: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 0,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_47788: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.9_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_48181: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_48438: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137012, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137013, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137011, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137010, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 3.8_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137012,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137013,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137011,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137010,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_49020: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 5, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_49143: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 350, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_49020: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 5,
+    mana_cost: 2,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_49143: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 350,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_49184: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_49998: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 450, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_50464: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_51485: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_51505: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_49998: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 450,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_50464: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_51485: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_51505: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_51690: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 45, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 4, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 6 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 45,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 4,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 6,
+    },
 ];
-static SPELL_POWER_51886: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_53351: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_53385: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_53563: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_53595: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.32_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_51886: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_53351: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_53385: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 9,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_53563: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_53595: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.32_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_53600: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 1277162, optional_cost: 2 },
+    SpellPowerCost {
+        power_type: 9,
+        mana_cost: 3,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 9,
+        mana_cost: 3,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 1277162,
+        optional_cost: 2,
+    },
 ];
 static SPELL_POWER_55090: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_55342: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_60103: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.16_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_61295: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_61882: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 11, mana_cost: 60, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_62124: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_62618: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_63106: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_64843: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_73325: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_73685: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_73899: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.88_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_73920: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.32_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_77472: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_55342: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_60103: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.16_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_61295: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_61882: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 11,
+    mana_cost: 60,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_62124: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_62618: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_63106: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_64843: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_73325: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_73685: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_73899: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.88_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_73920: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.32_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_77472: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_77575: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_78674: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 8, mana_cost: 400, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_78675: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.36_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_79206: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.82_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_80240: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_82326: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 7.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_84714: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_78674: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 8,
+    mana_cost: 400,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_78675: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.36_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_79206: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.82_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_80240: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_82326: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 7.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_84714: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_85222: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 9,
+        mana_cost: 3,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_85256: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_85256: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 9,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_85673: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 20.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137028, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 15.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137027, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 9,
+        mana_cost: 3,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137029,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 20.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137028,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 15.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137027,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_88625: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_93402: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137012, optional_cost: 0 },
-];
-static SPELL_POWER_98008: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_100780: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 50, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_102351: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.84_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_104316: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_105174: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_88625: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_93402: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137012,
+    optional_cost: 0,
+}];
+static SPELL_POWER_98008: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_100780: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 50,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_102351: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.84_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_104316: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_105174: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_107428: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 12, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137025, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 12,
+        mana_cost: 2,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137024,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_108280: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.12_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_108853: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_108280: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.12_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_108853: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_111673: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_111771: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_111898: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_113656: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 12, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_113724: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 8.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_114165: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
-];
-static SPELL_POWER_114923: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_111771: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_111898: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_113656: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 12,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_113724: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 8.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_114165: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137029,
+    optional_cost: 0,
+}];
+static SPELL_POWER_114923: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_115078: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 115069, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137025, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 20,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 115069,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 20,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_115151: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_115151: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_115175: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 15.0_f32, required_aura_id: 137023, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 15.0_f32, required_aura_id: 137025, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137024,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 15.0_f32,
+        required_aura_id: 137023,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 15.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_115310: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.374_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_115750: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_115869: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_115310: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.374_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_115750: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_115869: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_116095: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 3, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 115069, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137025, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 15,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 115069,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.7_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137024,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 15,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_116670: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137023, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137025, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 3.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137024,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 30,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137023,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 30,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_116847: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 12, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_116849: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_116858: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_116847: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 12,
+    mana_cost: 1,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_116849: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_116858: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_117014: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.55_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
-    SpellPowerCost { power_type: 11, mana_cost: 90, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.55_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 11,
+        mana_cost: 90,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_120360: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_120517: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_120360: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_120517: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.7_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_120644: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.7_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 4.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_121253: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_124682: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_131894: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_121253: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_124682: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_131894: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_132157: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.2_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.2_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_132331: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_132413: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_136099: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 215, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_141425: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 90, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_145205: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_148039: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_152108: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_152279: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 160.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_132331: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_132413: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_136099: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 215,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_141425: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 90,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_145205: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_148039: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_152108: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_152279: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 0,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 160.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_152280: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_153561: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_153626: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_153561: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_153626: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_156322: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137027, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137029, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 9,
+        mana_cost: 3,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137027,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.6_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137029,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_156910: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_157154: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_179057: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_184367: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 800, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_185123: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 393029, optional_cost: 0 },
-];
-static SPELL_POWER_185358: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_186270: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_186387: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_187708: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_187874: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_188443: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_190319: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_190356: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_190456: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 350, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_191034: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 8, mana_cost: 500, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_192058: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_192077: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_192081: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 400, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_192222: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.7_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_192249: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_193455: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_194509: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_156910: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_157154: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_179057: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_184367: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 800,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_185123: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 393029,
+    optional_cost: 0,
+}];
+static SPELL_POWER_185358: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_186270: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_186387: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_187708: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_187874: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_188443: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_190319: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_190356: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_190456: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 350,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_191034: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 8,
+    mana_cost: 500,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_192058: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_192077: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_192081: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 400,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_192222: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.7_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_192249: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_193455: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_194509: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_195182: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 2,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -200,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_195645: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_196447: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_196725: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_195645: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_196447: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_196725: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_196770: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_196840: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_197214: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_197626: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_197628: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_197995: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_198013: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_198067: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_198590: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_198838: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_200025: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_200758: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_200829: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_202028: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 768, optional_cost: 0 },
-];
-static SPELL_POWER_202168: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_203651: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_204018: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_204019: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.32_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_205021: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_205179: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_205180: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_205364: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_196840: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_197214: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_197626: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_197628: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_197995: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_198013: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_198067: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_198590: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_198838: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_200025: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_200758: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_200829: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_202028: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 768,
+    optional_cost: 0,
+}];
+static SPELL_POWER_202168: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 100,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_203651: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_204018: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_204019: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.32_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_205021: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_205179: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_205180: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_205364: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_206930: [SpellPowerCost; 4] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -150, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: -2, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 10.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 202846, optional_cost: 0 },
-    SpellPowerCost { power_type: -2, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 3.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 356456, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -150,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: -2,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 10.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 202846,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: -2,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 3.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 356456,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_206931: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_207230: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 5, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_207230: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 5,
+    mana_cost: 2,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_207311: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_207399: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_210714: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_211881: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 212612, optional_cost: 0 },
-];
-static SPELL_POWER_212084: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 50, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_212431: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_212436: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_212653: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_213634: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_213644: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_215661: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_216331: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_218164: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_235313: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_235450: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_247454: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_257620: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_258925: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_259387: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_259495: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_264119: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_264178: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_265187: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_265202: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 6.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_268358: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_274837: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_275779: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_278350: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_207399: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_210714: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_211881: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 212612,
+    optional_cost: 0,
+}];
+static SPELL_POWER_212084: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 50,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_212431: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_212436: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_212653: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_213634: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_213644: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_215661: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 9,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_216331: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_218164: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_235313: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_235450: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_247454: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_257620: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_258925: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_259387: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_259495: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_264119: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_264178: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_265187: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_265202: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 6.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_268358: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_274837: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_275779: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_278350: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_285381: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 4, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 4 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 25,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 4,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 4,
+    },
 ];
-static SPELL_POWER_315508: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_316099: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_315508: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_316099: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_316239: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
 static SPELL_POWER_319175: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 3, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 4, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 4 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 35,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 4,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 4,
+    },
 ];
-static SPELL_POWER_319836: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_320976: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_321507: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_319836: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_320976: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_321507: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_322101: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 3, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137025, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-    SpellPowerCost { power_type: 3, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137023, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 15,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137025,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137024,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 3,
+        mana_cost: 15,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137023,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_322118: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_324536: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_325197: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_325727: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_327574: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_322118: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_324536: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_325197: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_325727: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_327574: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_334275: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 7, mana_cost: 0, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 7,
+        mana_cost: 0,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_335467: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 13, mana_cost: 5000, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_342049: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 40, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_342240: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.66_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_342245: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_342817: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_335467: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 13,
+    mana_cost: 5000,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_342049: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 40,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_342240: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.66_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_342245: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_342817: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_343294: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_355936: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.9_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_356995: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 19, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_357170: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_357211: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 19, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_358385: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_359816: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_360806: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_355936: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.9_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_356995: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 19,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_357170: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_357211: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 19,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_358385: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_359816: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_360806: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_360995: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 356810, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 356809, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 396186, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 3.3_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 356810,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 356809,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 396186,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_363534: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_363534: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_364343: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 19, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.9_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 19,
+        mana_cost: 2,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.9_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_365350: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 2900000 },
-];
-static SPELL_POWER_365585: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_366155: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.8_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_367226: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.2_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_370537: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_365350: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 1,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 2900000,
+}];
+static SPELL_POWER_365585: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 10.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_366155: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.8_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_367226: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.2_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_370537: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_373481: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137032, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137031, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137033, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137032,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137031,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137033,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_373861: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 7.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_373861: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 7.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_374251: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 356810, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 356809, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 10.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 396186, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 1.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 356810,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 356809,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 10.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 396186,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_375576: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_375982: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_376103: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_375576: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_375982: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_376103: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_378773: [SpellPowerCost; 3] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 21.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137040, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 21.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 2.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 21.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137040,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 21.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_383013: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_383017: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_383019: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_383121: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_383269: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 300, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_383328: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 9, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_384069: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_385408: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_385627: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_385899: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_386696: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_386951: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_386997: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_387184: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-];
-static SPELL_POWER_388007: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_388193: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-];
-static SPELL_POWER_388615: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.374_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_389713: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_390279: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 300, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_392060: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 15, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_392160: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_392983: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 12, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_394062: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 200, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_395152: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_395160: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 19, mana_cost: 3, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_399491: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_400254: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 1, mana_cost: 400, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_405397: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 3.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_414660: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 8.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_414664: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 6.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_417537: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_420254: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 5, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_426591: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_428332: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.6_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_431044: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_438317: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_439843: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 5, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_442726: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_443028: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 5.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-];
+static SPELL_POWER_383013: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_383017: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_383019: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_383121: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_383269: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 300,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_383328: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 9,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_384069: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_385408: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_385627: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_385899: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_386696: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_386951: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_386997: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_387184: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137024,
+    optional_cost: 0,
+}];
+static SPELL_POWER_388007: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_388193: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137024,
+    optional_cost: 0,
+}];
+static SPELL_POWER_388615: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.374_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_389713: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_390279: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 300,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_392060: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 15,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_392160: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.4_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_392983: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 12,
+    mana_cost: 2,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_394062: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 200,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_395152: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_395160: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 19,
+    mana_cost: 3,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_399491: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_400254: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 1,
+    mana_cost: 400,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_405397: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 3.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_414660: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 8.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_414664: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 6.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_417537: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_420254: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 5,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_426591: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_428332: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.6_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_431044: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_438317: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_439843: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 5,
+    mana_cost: 2,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_442726: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_443028: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 5.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137024,
+    optional_cost: 0,
+}];
 static SPELL_POWER_444995: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.4_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137041, optional_cost: 0 },
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 6.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137039, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 0.4_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137041,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 0,
+        mana_cost: 0,
+        cost_pct: 6.5_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 137039,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_445468: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_462620: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 11, mana_cost: 60, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_466930: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_467307: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.25_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 137024, optional_cost: 0 },
-];
-static SPELL_POWER_470057: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_470194: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.66_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_470411: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 0.3_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_472566: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 5, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_473728: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_474750: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1214467: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1217413: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 12, mana_cost: 2, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 1248837, optional_cost: 0 },
-];
-static SPELL_POWER_1219074: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 17, mana_cost: 30, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1241462: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 4.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1243807: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 25, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1247227: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 3, mana_cost: 60, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_445468: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_462620: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 11,
+    mana_cost: 60,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_466930: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_467307: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.25_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 137024,
+    optional_cost: 0,
+}];
+static SPELL_POWER_470057: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_470194: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.66_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_470411: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 0.3_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_472566: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 5,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_473728: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 100,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_474750: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1214467: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1217413: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 12,
+    mana_cost: 2,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 1248837,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1219074: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 17,
+    mana_cost: 30,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1241462: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 4.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1243807: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 25,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1247227: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 3,
+    mana_cost: 60,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 static SPELL_POWER_1247378: [SpellPowerCost; 2] = [
-    SpellPowerCost { power_type: 5, mana_cost: 1, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-    SpellPowerCost { power_type: 6, mana_cost: -100, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
+    SpellPowerCost {
+        power_type: 5,
+        mana_cost: 1,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
+    SpellPowerCost {
+        power_type: 6,
+        mana_cost: -100,
+        cost_pct: 0.0_f32,
+        cost_max_pct: 0.0_f32,
+        cost_per_sec: 0.0_f32,
+        required_aura_id: 0,
+        optional_cost: 0,
+    },
 ];
-static SPELL_POWER_1248829: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 2.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1249658: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 6, mana_cost: 600, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1251592: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 20, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1254851: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.5_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1257052: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 0, mana_cost: 0, cost_pct: 1.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1259790: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1261193: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 50, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1264359: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 2, mana_cost: 35, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1276452: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1276467: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
-static SPELL_POWER_1276672: [SpellPowerCost; 1] = [
-    SpellPowerCost { power_type: 7, mana_cost: 10, cost_pct: 0.0_f32, cost_max_pct: 0.0_f32, cost_per_sec: 0.0_f32, required_aura_id: 0, optional_cost: 0 },
-];
+static SPELL_POWER_1248829: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 2.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1249658: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 6,
+    mana_cost: 600,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1251592: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 20,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1254851: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.5_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1257052: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 0,
+    mana_cost: 0,
+    cost_pct: 1.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1259790: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1261193: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 50,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1264359: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 2,
+    mana_cost: 35,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1276452: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1276467: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
+static SPELL_POWER_1276672: [SpellPowerCost; 1] = [SpellPowerCost {
+    power_type: 7,
+    mana_cost: 10,
+    cost_pct: 0.0_f32,
+    cost_max_pct: 0.0_f32,
+    cost_per_sec: 0.0_f32,
+    required_aura_id: 0,
+    optional_cost: 0,
+}];
 
 pub static SPELL_POWER_DB: phf::Map<u32, &'static [SpellPowerCost]> = ::phf::Map {
     key: 15467950696543387533,
