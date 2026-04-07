@@ -722,6 +722,8 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
         }
         _ => "ANCHOR_LEFT".to_string(),
     };
+    let x_offset = val_to_f32(args_iter.next(), 0.0);
+    let y_offset = val_to_f32(args_iter.next(), 0.0);
     let owner_id = extract_frame_id(&owner_val);
     {
         let state_rc = get_sim_state(lua);
@@ -732,7 +734,7 @@ fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
             td.owner_id = owner_id;
             td.anchor_type = anchor.clone();
         }
-        position_tooltip(&mut state, id, owner_id, &anchor);
+        position_tooltip(&mut state, id, owner_id, &anchor, x_offset, y_offset);
         state.set_frame_visible(id, true);
     }
     fire_tooltip_script(lua, id, "OnTooltipCleared")?;
@@ -791,11 +793,15 @@ fn add_double_line_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlu
     Ok(())
 }
 
+const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;
+
 fn position_tooltip(
     state: &mut crate::lua_api::state::SimState,
     tooltip_id: u64,
     owner_id: Option<u64>,
     anchor_type: &str,
+    x_offset: f32,
+    y_offset: f32,
 ) {
     let frame = match state.widgets.get_mut_visual(tooltip_id) {
         Some(f) => f,
@@ -805,13 +811,18 @@ fn position_tooltip(
     match anchor_type {
         "ANCHOR_CURSOR" => {
             let (mx, my) = state.mouse_position.unwrap_or((0.0, 0.0));
+            let cursor_y = if x_offset == 0.0 && y_offset == 0.0 {
+                my + DEFAULT_CURSOR_Y_OFFSET
+            } else {
+                my + y_offset
+            };
             frame.anchors.push(Anchor {
                 point: AnchorPoint::TopLeft,
                 relative_to: None,
                 relative_to_id: None,
                 relative_point: AnchorPoint::TopLeft,
-                x_offset: mx,
-                y_offset: my + 20.0,
+                x_offset: mx + x_offset,
+                y_offset: cursor_y,
             });
         }
         "ANCHOR_NONE" => {}
@@ -826,8 +837,8 @@ fn position_tooltip(
                 relative_to: None,
                 relative_to_id: Some(owner as usize),
                 relative_point: rp,
-                x_offset: 0.0,
-                y_offset: 0.0,
+                x_offset,
+                y_offset,
             });
         }
     }

@@ -1494,3 +1494,98 @@ fn test_valid_anchor_type_no_warning() {
         "Valid anchor should not produce a warning"
     );
 }
+
+// --- ANCHOR_CURSOR offset tests ---
+
+#[test]
+fn test_anchor_cursor_custom_offsets() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.state().borrow_mut().mouse_position = Some((100.0, 200.0));
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "CursorOffOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_CURSOR", 10, 30)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(frame.anchors.len(), 1);
+    let anchor = &frame.anchors[0];
+    // mouse(100,200) + explicit offsets(10,30)
+    assert!(
+        (anchor.x_offset - 110.0).abs() < 0.1,
+        "x should be mouse + xOffset: got {}",
+        anchor.x_offset
+    );
+    assert!(
+        (anchor.y_offset - 230.0).abs() < 0.1,
+        "y should be mouse + yOffset: got {}",
+        anchor.y_offset
+    );
+}
+
+#[test]
+fn test_anchor_cursor_default_offset_when_none_specified() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.state().borrow_mut().mouse_position = Some((50.0, 100.0));
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "CursorDefOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    let anchor = &frame.anchors[0];
+    // Default: mouse(50,100) + (0, 20)
+    assert!(
+        (anchor.x_offset - 50.0).abs() < 0.1,
+        "x should be mouse x: got {}",
+        anchor.x_offset
+    );
+    assert!(
+        (anchor.y_offset - 120.0).abs() < 0.1,
+        "y should be mouse y + 20 default: got {}",
+        anchor.y_offset
+    );
+}
+
+#[test]
+fn test_non_cursor_anchor_uses_offsets() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "OffsetOwner", UIParent)
+        owner:SetSize(100, 30)
+        owner:SetPoint("CENTER")
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT", 5, 10)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::TopLeft);
+    assert_eq!(anchor.relative_point, AnchorPoint::TopRight);
+    assert!((anchor.x_offset - 5.0).abs() < 0.1, "x_offset should be 5");
+    assert!(
+        (anchor.y_offset - 10.0).abs() < 0.1,
+        "y_offset should be 10"
+    );
+}
