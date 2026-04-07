@@ -274,37 +274,39 @@ fn register_localization_stubs(lua: &Lua) -> Result<()> {
 }
 
 fn register_ui_object_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    register_mixin_stub_tables(lua)?;
+    patch_namespace_stubs(lua)?;
     let globals = lua.globals();
+    if let Ok(c_unit_auras) = globals.get::<mlua::Table>("C_UnitAuras") {
+        super::c_unit_auras_api::patch_c_unit_auras(lua, &c_unit_auras, state)?;
+    }
+    Ok(())
+}
+
+/// Stub mixin tables: AnimateCallout, WowStyle1DropdownMixin, AnimateMouse.
+fn register_mixin_stub_tables(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    let noop = |lua: &Lua| lua.create_function(|_, _args: mlua::MultiValue| Ok(()));
 
     let animate_callout = lua.create_table()?;
-    animate_callout.set(
-        "Start",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
-    animate_callout.set(
-        "Stop",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
+    animate_callout.set("Start", noop(lua)?)?;
+    animate_callout.set("Stop", noop(lua)?)?;
     globals.set("AnimateCallout", animate_callout)?;
 
     let wow_style1 = lua.create_table()?;
-    wow_style1.set(
-        "OnLoad",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
+    wow_style1.set("OnLoad", noop(lua)?)?;
     globals.set("WowStyle1DropdownMixin", wow_style1)?;
 
     let animate_mouse = lua.create_table()?;
-    animate_mouse.set(
-        "Start",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
-    animate_mouse.set(
-        "Stop",
-        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
-    )?;
+    animate_mouse.set("Start", noop(lua)?)?;
+    animate_mouse.set("Stop", noop(lua)?)?;
     globals.set("AnimateMouse", animate_mouse)?;
+    Ok(())
+}
 
+/// Patch existing C_PlayerInfo and C_UIWidgetManager namespaces with missing methods.
+fn patch_namespace_stubs(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
     if let Ok(c_player_info) = globals.get::<mlua::Table>("C_PlayerInfo") {
         c_player_info.set("IsPlayerInRPE", lua.create_function(|_, ()| Ok(false))?)?;
         c_player_info.set(
@@ -312,18 +314,12 @@ fn register_ui_object_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
             lua.create_function(|_, ()| Ok((false, false)))?,
         )?;
     }
-
     if let Ok(c_widget_mgr) = globals.get::<mlua::Table>("C_UIWidgetManager") {
         c_widget_mgr.set(
             "GetPowerBarWidgetSetID",
             lua.create_function(|_, ()| Ok(0i32))?,
         )?;
     }
-
-    if let Ok(c_unit_auras) = globals.get::<mlua::Table>("C_UnitAuras") {
-        super::c_unit_auras_api::patch_c_unit_auras(lua, &c_unit_auras, state)?;
-    }
-
     Ok(())
 }
 
