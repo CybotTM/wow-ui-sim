@@ -1232,3 +1232,46 @@ fn test_wrapped_line_increases_height() {
         height_with_wrap
     );
 }
+
+#[test]
+fn test_double_line_width_includes_gap() {
+    let env = WowLuaEnv::new().unwrap();
+
+    // A single-text line for baseline width
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "GapTestOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:AddLine("Left text only")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+    let width_single = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().width
+    };
+
+    // Now a double line — should be wider due to right text + gap
+    env.exec(
+        r#"
+        GameTooltip:ClearLines()
+        GameTooltip:AddDoubleLine("Left text only", "Right text")
+    "#,
+    )
+    .unwrap();
+    update_tooltip_sizes(&env);
+    let width_double = {
+        let state = env.state().borrow();
+        let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        state.widgets.get(gt_id).unwrap().width
+    };
+
+    assert!(
+        width_double > width_single,
+        "Double-line tooltip should be wider than single: single={}, double={}",
+        width_single,
+        width_double
+    );
+}

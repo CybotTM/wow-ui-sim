@@ -26,6 +26,7 @@ const TOOLTIP_PADDING_V: f32 = 12.0;
 const TOOLTIP_LINE_SPACING: f32 = 2.0;
 const TOOLTIP_HEADER_FONT_SIZE: f32 = 14.0;
 const TOOLTIP_BODY_FONT_SIZE: f32 = 12.0;
+const DOUBLE_LINE_GAP: f32 = 20.0;
 
 /// Pre-collected tooltip render data for a single tooltip frame.
 pub struct TooltipRenderData {
@@ -124,7 +125,7 @@ fn measure_tooltip_content_width(
             .map(|t| font_system.measure_text_width(t, None, font_size))
             .unwrap_or(0.0);
         let line_width = if right_w > 0.0 {
-            left_w + right_w + 20.0
+            left_w + right_w + DOUBLE_LINE_GAP
         } else {
             left_w
         };
@@ -311,26 +312,42 @@ fn emit_tooltip_line(
     line: &TooltipLineRender,
     placement: TooltipLinePlacement,
 ) {
-    let bounds = tooltip_line_bounds(placement.x, placement.y, placement.width, placement.height);
+    let right_width = line.right_text.as_ref().map(|t| {
+        text_renderer
+            .font_sys
+            .measure_text_width(t, None, line.font_size)
+    });
+
+    // Left text: clip width to leave room for right text + gap.
+    let left_width = match right_width {
+        Some(rw) if rw > 0.0 => (placement.width - rw - DOUBLE_LINE_GAP).max(0.0),
+        _ => placement.width,
+    };
+    let left_bounds = tooltip_line_bounds(placement.x, placement.y, left_width, placement.height);
     emit_tooltip_text_run(
         text_renderer.batch,
         text_renderer.font_sys,
         text_renderer.glyph_atlas,
         &line.left_text,
-        bounds,
+        left_bounds,
         TextJustify::Left,
         line.font_size,
         line.left_color,
         line.wrap,
     );
 
+    // Right text: own bounds starting after the left area.
     if let Some(ref right_text) = line.right_text {
+        let right_x = placement.x + left_width + DOUBLE_LINE_GAP;
+        let right_w = placement.width - left_width - DOUBLE_LINE_GAP;
+        let right_bounds =
+            tooltip_line_bounds(right_x, placement.y, right_w.max(0.0), placement.height);
         emit_tooltip_text_run(
             text_renderer.batch,
             text_renderer.font_sys,
             text_renderer.glyph_atlas,
             right_text,
-            bounds,
+            right_bounds,
             TextJustify::Right,
             line.font_size,
             line.right_color,
