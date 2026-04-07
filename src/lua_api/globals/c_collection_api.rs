@@ -37,7 +37,12 @@ fn register_pet_count_methods(
 ) -> Result<()> {
     t.set("GetNumPets", lua.create_function({
         let s = Rc::clone(&state);
-        move |_, ()| Ok(s.borrow().world.pets.len() as i32)
+        move |_, ()| {
+            let st = s.borrow();
+            let total = st.world.pets.len() as i32;
+            let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
+            Ok((total, owned))
+        }
     })?)?;
     t.set("GetNumCollectedInfo", lua.create_function({
         let s = Rc::clone(&state);

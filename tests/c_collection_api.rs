@@ -12,10 +12,13 @@ fn env() -> WowLuaEnv {
 // ============================================================================
 
 #[test]
-fn test_pet_journal_get_num_pets() {
+fn test_pet_journal_get_num_pets_returns_two_numbers() {
     let env = env();
-    let count: i32 = env.eval("return C_PetJournal.GetNumPets()").unwrap();
-    assert_eq!(count, 0);
+    let (total, owned): (i32, i32) = env
+        .eval("return C_PetJournal.GetNumPets()")
+        .unwrap();
+    assert_eq!(total, 10, "total pets in default world");
+    assert_eq!(owned, 9, "collected pets (Pocopoc is not collected)");
 }
 
 #[test]

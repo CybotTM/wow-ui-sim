@@ -106,8 +106,9 @@ fn mount_journal_get_mount_info_by_id_invalid() {
 #[test]
 fn pet_journal_num_pets() {
     let env = env();
-    let count: i32 = env.eval("return C_PetJournal.GetNumPets()").unwrap();
-    assert_eq!(count, 10, "Should have 10 default pets");
+    let (total, owned): (i32, i32) = env.eval("return C_PetJournal.GetNumPets()").unwrap();
+    assert_eq!(total, 10, "Should have 10 default pets");
+    assert_eq!(owned, 9, "9 collected (Pocopoc is not collected)");
 }
 
 #[test]
