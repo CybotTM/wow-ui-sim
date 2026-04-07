@@ -788,7 +788,10 @@ fn register_heirloom(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
             Ok(st.world.heirlooms.get(i).map(|h| h.item_id as i32).unwrap_or(0))
         }
     })?)?;
-    add_bool_stub_with_arg::<i32>(lua, &t, "PlayerHasHeirloom", false)?;
+    t.set("PlayerHasHeirloom", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, item_id: i32| Ok(s.borrow().world.collected_heirlooms.contains(&(item_id as u32)))
+    })?)?;
     add_nil_stub_with_arg::<i32>(lua, &t, "GetHeirloomLink")?;
     add_bool_stub_with_arg::<i32>(lua, &t, "CanHeirloomUpgradeFromPending", false)?;
     t.set(

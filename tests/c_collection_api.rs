@@ -785,10 +785,19 @@ fn test_heirloom_get_item_id_from_displayed_index() {
 }
 
 #[test]
-fn test_heirloom_player_has_heirloom() {
+fn test_heirloom_player_has_heirloom_unknown() {
     let env = env();
     let has: bool = env.eval("return C_Heirloom.PlayerHasHeirloom(1)").unwrap();
-    assert!(!has);
+    assert!(!has, "unknown item ID should not be owned");
+}
+
+#[test]
+fn test_heirloom_player_has_heirloom_collected() {
+    let env = env();
+    let has: bool = env
+        .eval("return C_Heirloom.PlayerHasHeirloom(122245)")
+        .unwrap();
+    assert!(has, "Burnished Helm should be collected by default");
 }
 
 #[test]
