@@ -617,6 +617,32 @@ fn default_transmog_appearances() -> Vec<TransmogAppearance> {
     ]
 }
 
+fn default_heirlooms() -> Vec<HeirloomData> {
+    let h = |id, name: &str, loc: &str, icon, lvl, src: &str, min, max| HeirloomData {
+        item_id: id,
+        name: name.into(),
+        equip_loc: loc.into(),
+        icon,
+        upgrade_level: lvl,
+        source: src.into(),
+        min_level: min,
+        max_level: max,
+    };
+    vec![
+        h(122245, "Burnished Helm of Might",               "INVTYPE_HEAD",     133071, 6, "Vendor", 1, 50),
+        h(122355, "Polished Breastplate of Valor",          "INVTYPE_CHEST",    132633, 6, "Vendor", 1, 50),
+        h(122356, "Polished Spaulders of Valor",            "INVTYPE_SHOULDER", 132633, 6, "Vendor", 1, 50),
+        h(122382, "Preened Ironfeather Shoulders",          "INVTYPE_SHOULDER", 135033, 6, "Vendor", 1, 50),
+        h(122384, "Tattered Dreadmist Robe",                "INVTYPE_CHEST",    132673, 6, "Vendor", 1, 50),
+        h(122247, "Burnished Legplates of Might",           "INVTYPE_LEGS",     133071, 6, "Vendor", 1, 50),
+        h(122250, "Mystical Kilt of Elements",              "INVTYPE_LEGS",     134188, 6, "Vendor", 1, 50),
+        h(122266, "Balanced Heartseeker",                   "INVTYPE_WEAPON",   135274, 6, "Vendor", 1, 50),
+        h(122389, "Bloodied Arcanite Reaper",               "INVTYPE_2HWEAPON", 135277, 6, "Vendor", 1, 50),
+        h(122390, "Dignified Headmaster's Charge",          "INVTYPE_2HWEAPON", 135146, 6, "Vendor", 1, 50),
+        h(187997, "Eternal Amulet of the Redeemed",         "INVTYPE_NECK",     133280, 0, "Vendor", 1, 50),
+    ]
+}
+
 fn default_premade_listings() -> Vec<PremadeListing> {
     let mut id = 0u32;
     let l = |id: &mut u32, name: &str, comment: &str, leader: &str, activity: u32, num: i32, max: i32| {
@@ -706,7 +732,7 @@ impl Default for WorldState {
             pets: default_pets(),
             collected_toys: HashSet::new(),
             toys: default_toys(),
-            heirlooms: Vec::new(),
+            heirlooms: default_heirlooms(),
             earned_achievements: HashSet::new(),
             premade_listings: default_premade_listings(),
         }
@@ -776,19 +802,13 @@ mod tests {
     }
 
     #[test]
-    fn heirloom_data_stored_in_world_state() {
-        let mut world = WorldState::default();
-        world.heirlooms.push(HeirloomData {
-            item_id: 122245,
-            name: "Burnished Helm of Might".into(),
-            equip_loc: "INVTYPE_HEAD".into(),
-            icon: 133071,
-            upgrade_level: 6,
-            source: "Vendor".into(),
-            min_level: 1,
-            max_level: 50,
-        });
-        assert_eq!(world.heirlooms.len(), 1);
-        assert_eq!(world.heirlooms[0].item_id, 122245);
+    fn heirloom_defaults_populated() {
+        let world = WorldState::default();
+        assert_eq!(world.heirlooms.len(), 11, "should have 11 default heirlooms");
+        assert_eq!(world.heirlooms[0].name, "Burnished Helm of Might");
+        assert_eq!(world.heirlooms[0].equip_loc, "INVTYPE_HEAD");
+
+        let ids: HashSet<u32> = world.heirlooms.iter().map(|h| h.item_id).collect();
+        assert_eq!(ids.len(), 11, "all item IDs should be unique");
     }
 }
