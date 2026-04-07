@@ -37,9 +37,18 @@ pub fn register_fading_frame_stubs(lua: &Lua) -> Result<()> {
     // Without this stub, the error handler itself crashes, causing recursive error spam.
     g.set(
         "addframetext",
-        lua.create_function(|lua, msg: String| {
-            eprintln!("[addframetext] {msg}");
-            super::super::script_helpers::collect_lua_error(lua, &msg);
+        lua.create_function(|lua, msg: Value| {
+            let msg_str = match &msg {
+                Value::String(s) => s.to_string_lossy().to_string(),
+                Value::Integer(i) => i.to_string(),
+                Value::Number(n) => n.to_string(),
+                _ => lua
+                    .load("return tostring(...)")
+                    .call::<String>(msg)
+                    .unwrap_or_else(|_| "<error>".to_string()),
+            };
+            eprintln!("[addframetext] {msg_str}");
+            super::super::script_helpers::collect_lua_error(lua, &msg_str);
             Ok(())
         })?,
     )?;

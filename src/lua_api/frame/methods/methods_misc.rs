@@ -41,6 +41,10 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetFillAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderAlpha", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetBorderScalar", |_, _, _: mlua::MultiValue| Ok(()));
+    methods.add_method(
+        "UpdateMouseOverTooltip",
+        |_, _, (_x, _y): (f64, f64)| Ok((Value::Nil, Value::Nil)),
+    );
     // FogOfWarFrame
     methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil));
     // Blob frame (QuestBlobDataProvider)
