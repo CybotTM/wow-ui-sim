@@ -487,8 +487,8 @@ fn register_transmog_collection(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
     Ok(())
 }
 
-/// Appearance query methods: sources, info, camera, categories.
-fn register_transmog_appearance_methods(
+/// Appearance source query methods: GetAppearanceSources, GetSourceInfo.
+fn register_transmog_source_queries(
     lua: &Lua,
     t: &mlua::Table,
     state: &Rc<RefCell<SimState>>,
@@ -507,27 +507,36 @@ fn register_transmog_appearance_methods(
             Ok(result)
         }
     })?)?;
-    t.set(
-        "GetSourceInfo",
-        lua.create_function({
-            let s = Rc::clone(state);
-            move |lua, source_id: i32| {
-                let st = s.borrow();
-                if let Some(a) = st.world.transmog_appearances.iter().find(|a| a.source_id == source_id) {
-                    build_source_info(lua, a)
-                } else {
-                    build_empty_source_info(lua)
-                }
+    t.set("GetSourceInfo", lua.create_function({
+        let s = Rc::clone(state);
+        move |lua, source_id: i32| {
+            let st = s.borrow();
+            if let Some(a) = st.world.transmog_appearances.iter().find(|a| a.source_id == source_id) {
+                build_source_info(lua, a)
+            } else {
+                build_empty_source_info(lua)
             }
-        })?,
-    )?;
+        }
+    })?)?;
     add_table_stub_with_arg::<i32>(lua, t, "GetAllAppearanceSources")?;
     add_i32_stub_with_arg::<i32>(lua, t, "GetAppearanceCameraID", 0)?;
+    t.set("GetNumTransmogSources", lua.create_function({
+        let s = Rc::clone(state);
+        move |_, ()| Ok(s.borrow().world.transmog_appearances.len() as i32)
+    })?)?;
+    Ok(())
+}
+
+/// Category query methods: GetCategoryAppearances, GetCategoryInfo.
+fn register_transmog_category_queries(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set("GetCategoryAppearances", lua.create_function({
         let s = Rc::clone(state);
         move |lua, (category_id, _location): (i32, Value)| {
             let st = s.borrow();
-            // Group by visual_id, deduplicate (one entry per unique visual)
             let mut seen_visuals = std::collections::HashSet::new();
             let result = lua.create_table()?;
             let mut idx = 0;
@@ -552,22 +561,26 @@ fn register_transmog_appearance_methods(
         }
     })?)?;
     add_bool_stub_with_arg::<i32>(lua, t, "IsAppearanceHiddenVisual", false)?;
-    t.set(
-        "GetCategoryInfo",
-        lua.create_function(|_, cat_id: i32| {
-            if let Some((name, is_weapon, can_enchant, can_main, can_off)) =
-                transmog_category_info(cat_id)
-            {
-                Ok((name.to_string(), is_weapon, can_enchant, can_main, can_off))
-            } else {
-                Ok((String::new(), false, false, false, false))
-            }
-        })?,
-    )?;
-    t.set("GetNumTransmogSources", lua.create_function({
-        let s = Rc::clone(state);
-        move |_, ()| Ok(s.borrow().world.transmog_appearances.len() as i32)
+    t.set("GetCategoryInfo", lua.create_function(|_, cat_id: i32| {
+        if let Some((name, is_weapon, can_enchant, can_main, can_off)) =
+            transmog_category_info(cat_id)
+        {
+            Ok((name.to_string(), is_weapon, can_enchant, can_main, can_off))
+        } else {
+            Ok((String::new(), false, false, false, false))
+        }
     })?)?;
+    Ok(())
+}
+
+/// Appearance query methods: sources, info, camera, categories.
+fn register_transmog_appearance_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    register_transmog_source_queries(lua, t, state)?;
+    register_transmog_category_queries(lua, t, state)?;
     Ok(())
 }
 
