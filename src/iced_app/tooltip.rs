@@ -221,36 +221,10 @@ pub fn build_tooltip_quads(
     tooltip: TooltipRender<'_>,
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
 ) {
-    // Only render when there are lines to display — otherwise the tooltip is
-    // "owned" but has no content yet (e.g. during addon init).
     let data = tooltip.tooltip_data.and_then(|map| map.get(&tooltip.id));
     let Some(data) = data else { return };
 
-    let alpha = tooltip.eff_alpha;
-
-    // Tooltip border and background via nine-slice atlas (rounded corners).
-    // WoW calls SetCenterColor(0, 0, 0, 1) — TOOLTIP_DEFAULT_BACKGROUND_COLOR is black.
-    if let Some(ns) = tooltip_nine_slice() {
-        let center = [0.0, 0.0, 0.0, alpha];
-        // WoW's TooltipDefaultLayout anchors center with (-4,4,4,-4) offsets,
-        // extending the fill 4px into each corner to cover transparent inner areas.
-        super::nine_slice::emit_nine_slice_with_center_color(
-            tooltip.batch,
-            tooltip.bounds,
-            ns,
-            alpha,
-            center,
-            4.0,
-        );
-    } else {
-        // Fallback if atlas entries are missing
-        tooltip
-            .batch
-            .push_solid(tooltip.bounds, [0.0, 0.0, 0.0, alpha]);
-        tooltip
-            .batch
-            .push_border(tooltip.bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
-    }
+    emit_tooltip_background(tooltip.batch, tooltip.bounds, tooltip.eff_alpha);
 
     let Some((font_sys, glyph_atlas)) = text_ctx else {
         return;
@@ -260,10 +234,29 @@ pub fn build_tooltip_quads(
         font_sys,
         glyph_atlas,
     };
+    emit_tooltip_lines(&mut text_renderer, data, tooltip.bounds);
+}
 
-    let content_x = tooltip.bounds.x + TOOLTIP_PADDING_H;
-    let content_width = tooltip.bounds.width - TOOLTIP_PADDING_H * 2.0;
-    let mut y = tooltip.bounds.y + TOOLTIP_PADDING_V;
+/// Render tooltip background: nine-slice border with black fill, or solid fallback.
+fn emit_tooltip_background(batch: &mut QuadBatch, bounds: Rectangle, alpha: f32) {
+    if let Some(ns) = tooltip_nine_slice() {
+        let center = [0.0, 0.0, 0.0, alpha];
+        super::nine_slice::emit_nine_slice_with_center_color(batch, bounds, ns, alpha, center, 4.0);
+    } else {
+        batch.push_solid(bounds, [0.0, 0.0, 0.0, alpha]);
+        batch.push_border(bounds, 1.0, [0.6, 0.5, 0.15, alpha]);
+    }
+}
+
+/// Render tooltip text lines with wrapping-aware height measurement.
+fn emit_tooltip_lines(
+    text_renderer: &mut TooltipTextRenderer<'_>,
+    data: &TooltipRenderData,
+    bounds: Rectangle,
+) {
+    let content_x = bounds.x + TOOLTIP_PADDING_H;
+    let content_width = bounds.width - TOOLTIP_PADDING_H * 2.0;
+    let mut y = bounds.y + TOOLTIP_PADDING_V;
 
     for line in &data.lines {
         let line_height = if line.wrap && !line.left_text.is_empty() {
@@ -278,7 +271,7 @@ pub fn build_tooltip_quads(
         };
 
         emit_tooltip_line(
-            &mut text_renderer,
+            text_renderer,
             line,
             TooltipLinePlacement {
                 x: content_x,
