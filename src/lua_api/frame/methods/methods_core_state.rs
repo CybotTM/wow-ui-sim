@@ -361,8 +361,12 @@ fn add_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .unwrap_or(0))
     });
 
+    add_map_id_methods(methods);
+}
+
+fn add_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetMapID", |lua, this, ()| {
-        let state_rc = crate::lua_api::frame::handle::get_sim_state(lua);
+        let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         Ok(state
             .quest_blobs
@@ -371,7 +375,7 @@ fn add_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .unwrap_or(0))
     });
     methods.add_method("SetMapID", |lua, this, map_id: i32| {
-        let state_rc = crate::lua_api::frame::handle::get_sim_state(lua);
+        let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let blob = state.quest_blobs.entry(this.0).or_insert_with(|| {
             crate::lua_api::state::QuestBlobState {
