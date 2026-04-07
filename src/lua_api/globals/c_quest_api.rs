@@ -132,6 +132,18 @@ pub fn register_c_quest_api(lua: &Lua) -> Result<()> {
     globals.set("C_QuestOffer", register_c_quest_offer(lua)?)?;
     globals.set("C_QuestSession", register_c_quest_session(lua)?)?;
     register_quest_log_quest_text(lua)?;
+    register_quest_poi_globals(lua)?;
+    Ok(())
+}
+
+fn register_quest_poi_globals(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    globals.set(
+        "GetQuestPOIBlobCount",
+        lua.create_function(|_, quest_id: i32| {
+            Ok(crate::quest_poi_blobs::get_quest_blobs(quest_id as u32).len() as i32)
+        })?,
+    )?;
     Ok(())
 }
 

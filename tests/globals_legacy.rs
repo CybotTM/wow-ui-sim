@@ -432,3 +432,17 @@ fn test_get_quest_log_quest_text_no_selection() {
     assert_eq!(desc, "", "no quest selected → empty description");
     assert_eq!(obj, "", "no quest selected → empty objectives");
 }
+
+#[test]
+fn test_get_quest_poi_blob_count_known_quest() {
+    let env = env();
+    let count: i32 = env.eval("return GetQuestPOIBlobCount(80000)").unwrap();
+    assert_eq!(count, 1, "Quest 80000 should have 1 blob");
+}
+
+#[test]
+fn test_get_quest_poi_blob_count_unknown_quest() {
+    let env = env();
+    let count: i32 = env.eval("return GetQuestPOIBlobCount(99999)").unwrap();
+    assert_eq!(count, 0, "Unknown quest should have 0 blobs");
+}
