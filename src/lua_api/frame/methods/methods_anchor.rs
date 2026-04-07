@@ -152,9 +152,11 @@ fn parse_validated_set_point(
             format!("Frame:SetPoint(): Invalid region point {point_str}"),
         )
     })?;
-    let (mut relative_to, relative_point, x_ofs, y_ofs, explicit_relative) =
+    let (mut relative_to, relative_point, x_ofs, y_ofs, _explicit_relative) =
         parse_set_point_args(lua, &args, point).map_err(|msg| lua_error(lua, msg))?;
-    if !explicit_relative && relative_to.is_none() {
+    // In WoW, nil relativeTo always means "parent", whether omitted or explicitly nil.
+    // EditMode's SetPointOverride passes explicit nil when forwarding 3-arg SetPoint calls.
+    if relative_to.is_none() {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         if let Some(frame) = state.widgets.get(id) {

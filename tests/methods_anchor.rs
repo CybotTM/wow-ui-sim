@@ -309,28 +309,28 @@ fn test_set_all_points_explicit_nil_returns_nil() {
 }
 
 // ============================================================================
-// SetAllPoints implicit screen — GetPoint returns nil for relativeTo
+// SetAllPoints implicit parent — GetPoint returns parent for relativeTo
 // ============================================================================
 
 #[test]
-fn test_set_all_points_implicit_screen_returns_nil() {
+fn test_set_all_points_implicit_parent_returns_parent() {
     let env = env();
     // Frame parented to UIParent, SetAllPoints() with no args
-    // GetPoint should return nil for relativeTo (not UIParent)
-    let (point, has_relative, rel_point, x, y): (String, bool, String, f64, f64) = env
+    // In WoW, nil relativeTo always means "parent", so GetPoint returns the parent frame.
+    let (point, rel_name, rel_point, x, y): (String, String, String, f64, f64) = env
         .eval(
             r#"
-        local f = CreateFrame("Frame")
+        local f = CreateFrame("Frame", "SAP_TestFrame", UIParent)
         f:SetAllPoints()
         local p, rel, rp, x, y = f:GetPoint(1)
-        return p, rel ~= nil, rp, x, y
+        return p, rel:GetName(), rp, x, y
     "#,
         )
         .unwrap();
     assert_eq!(point, "TOPLEFT");
     assert_eq!(
-        has_relative, false,
-        "relativeTo should be nil for implicit parent"
+        rel_name, "UIParent",
+        "relativeTo should be the parent frame"
     );
     assert_eq!(rel_point, "TOPLEFT");
     assert_eq!(x, 0.0);
@@ -588,4 +588,33 @@ fn test_cycle_error_all3_set_all_points_chain() {
     "#)).unwrap();
     assert!(msg.contains("Frame:SetAllPoints"), "msg: {msg}");
     assert!(msg.contains("Dependent ancestors:"), "msg: {msg}");
+}
+
+/// Explicit nil relativeTo in SetPoint should resolve to parent, not screen.
+/// This is the pattern used by EditMode's SetPointOverride when forwarding
+/// 3-arg SetPoint calls: `base(self, point, nil, nil, offsetX, offsetY)`.
+#[test]
+fn test_set_point_explicit_nil_relative_to_resolves_to_parent() {
+    let env = env();
+    let parent_name: String = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "NilRelParent", UIParent)
+        parent:SetSize(200, 100)
+        parent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, 30)
+
+        local child = CreateFrame("Frame", "NilRelChild", parent)
+        child:SetSize(80, 40)
+        -- Explicit nil relativeTo (5-arg form with nil, nil)
+        child:SetPoint("TOPRIGHT", nil, nil, 0, -11)
+
+        local _, relTo = child:GetPoint(1)
+        return relTo:GetName()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        parent_name, "NilRelParent",
+        "explicit nil relativeTo should resolve to parent frame"
+    );
 }
