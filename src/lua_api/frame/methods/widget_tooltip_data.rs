@@ -15,71 +15,58 @@ pub(super) fn populate_spell_tooltip(
         Some(s) => s,
         None => return Ok(()),
     };
-    let description = crate::spell_descriptions::get_spell_description(spell_id).unwrap_or("");
-    let cast_time_ms = crate::lua_api::globals::spell_api::spell_cast_time(spell_id as i32);
-    let power_costs = crate::spell_power::get_spell_power(spell_id);
 
     let state_rc = get_sim_state(lua);
     let mut state = state_rc.borrow_mut();
     if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
         td.lines.clear();
         td.spell_id = Some(spell_id);
-
-        // Line 1: spell name (white)
-        td.lines.push(TooltipLine {
-            left_text: spell.name.to_string(),
-            left_color: (1.0, 1.0, 1.0),
-            right_text: None,
-            right_color: (1.0, 1.0, 1.0),
-            wrap: false,
-            texture: None,
-        });
-
-        // Resource cost line (if any)
-        if let Some(cost_text) = power_costs
-            .and_then(|costs| costs.first())
-            .and_then(|cost| format_power_cost(cost))
-        {
-            td.lines.push(TooltipLine {
-                left_text: cost_text,
-                left_color: (1.0, 1.0, 1.0),
-                right_text: None,
-                right_color: (1.0, 1.0, 1.0),
-                wrap: false,
-                texture: None,
-            });
-        }
-
-        // Cast time line
-        let cast_text = if cast_time_ms > 0 {
-            format_cast_time(cast_time_ms)
-        } else {
-            "Instant".to_string()
-        };
-        td.lines.push(TooltipLine {
-            left_text: cast_text,
-            left_color: (1.0, 1.0, 1.0),
-            right_text: None,
-            right_color: (1.0, 1.0, 1.0),
-            wrap: false,
-            texture: None,
-        });
-
-        // Description (if any)
-        if !description.is_empty() {
-            let clean = super::widget_tooltip::strip_html_tags(description);
-            td.lines.push(TooltipLine {
-                left_text: clean,
-                left_color: (1.0, 0.82, 0.0),
-                right_text: None,
-                right_color: (1.0, 1.0, 1.0),
-                wrap: true,
-                texture: None,
-            });
-        }
+        build_spell_lines(spell_id, spell.name, &mut td.lines);
     }
     state.set_frame_visible(tooltip_id, true);
     Ok(())
+}
+
+fn build_spell_lines(spell_id: u32, name: &str, lines: &mut Vec<TooltipLine>) {
+    lines.push(simple_line(name.to_string()));
+
+    if let Some(cost_text) = crate::spell_power::get_spell_power(spell_id)
+        .and_then(|costs| costs.first())
+        .and_then(|cost| format_power_cost(cost))
+    {
+        lines.push(simple_line(cost_text));
+    }
+
+    let cast_time_ms = crate::lua_api::globals::spell_api::spell_cast_time(spell_id as i32);
+    let cast_text = if cast_time_ms > 0 {
+        format_cast_time(cast_time_ms)
+    } else {
+        "Instant".to_string()
+    };
+    lines.push(simple_line(cast_text));
+
+    let description = crate::spell_descriptions::get_spell_description(spell_id).unwrap_or("");
+    if !description.is_empty() {
+        let clean = super::widget_tooltip::strip_html_tags(description);
+        lines.push(TooltipLine {
+            left_text: clean,
+            left_color: (1.0, 0.82, 0.0),
+            wrap: true,
+            ..simple_line(String::new())
+        });
+    }
+}
+
+/// Create a white, non-wrapping, left-aligned tooltip line.
+fn simple_line(text: String) -> TooltipLine {
+    TooltipLine {
+        left_text: text,
+        left_color: (1.0, 1.0, 1.0),
+        right_text: None,
+        right_color: (1.0, 1.0, 1.0),
+        wrap: false,
+        texture: None,
+    }
 }
 
 fn format_power_cost(cost: &crate::spell_power::SpellPowerCost) -> Option<String> {
