@@ -157,6 +157,11 @@ fn register_mouse_foci(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
 }
 
 fn register_screen_size_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
+    register_screen_size_getters(lua, state)?;
+    register_set_screen_size(lua, state)
+}
+
+fn register_screen_size_getters(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     let st = Rc::clone(state);
     globals.set(
@@ -176,8 +181,12 @@ fn register_screen_size_functions(lua: &Lua, state: &Rc<RefCell<SimState>>) -> R
             Ok((s.screen_width as i32, s.screen_height as i32))
         })?,
     )?;
+    Ok(())
+}
+
+fn register_set_screen_size(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let st = Rc::clone(state);
-    globals.set(
+    lua.globals().set(
         "SetScreenSize",
         lua.create_function(move |_, (w, h): (f32, f32)| {
             let mut s = st.borrow_mut();
