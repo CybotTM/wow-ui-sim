@@ -92,18 +92,7 @@ fn register_transmog_category_queries(
             for a in &st.world.transmog_appearances {
                 if a.category_id == category_id && seen_visuals.insert(a.visual_id) {
                     idx += 1;
-                    let entry = lua.create_table()?;
-                    entry.set("visualID", a.visual_id)?;
-                    entry.set("isCollected", a.is_collected)?;
-                    entry.set("isUsable", true)?;
-                    entry.set("isFavorite", false)?;
-                    entry.set("isHideVisual", false)?;
-                    entry.set("uiOrder", idx)?;
-                    entry.set("hasActiveRequiredHoliday", false)?;
-                    entry.set("hasRequiredHoliday", false)?;
-                    entry.set("canDisplayOnPlayer", true)?;
-                    entry.set("exclusions", 0)?;
-                    result.set(idx, entry)?;
+                    result.set(idx, build_appearance_entry(lua, a, idx)?)?;
                 }
             }
             Ok(result)
@@ -120,6 +109,25 @@ fn register_transmog_category_queries(
         }
     })?)?;
     Ok(())
+}
+
+fn build_appearance_entry(
+    lua: &Lua,
+    a: &crate::lua_api::state_types::TransmogAppearance,
+    ui_order: i32,
+) -> Result<mlua::Table> {
+    let entry = lua.create_table()?;
+    entry.set("visualID", a.visual_id)?;
+    entry.set("isCollected", a.is_collected)?;
+    entry.set("isUsable", true)?;
+    entry.set("isFavorite", false)?;
+    entry.set("isHideVisual", false)?;
+    entry.set("uiOrder", ui_order)?;
+    entry.set("hasActiveRequiredHoliday", false)?;
+    entry.set("hasRequiredHoliday", false)?;
+    entry.set("canDisplayOnPlayer", true)?;
+    entry.set("exclusions", 0)?;
+    Ok(entry)
 }
 
 fn register_transmog_outfit_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
