@@ -100,43 +100,30 @@ pub(super) fn populate_item_tooltip(
         Some(i) => i,
         None => return Ok(()),
     };
-    let (nr, ng, nb) = quality_color_rgb(item.quality);
-    let slot_label = equip_slot_label(item.inventory_type);
-    {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
-            td.lines.clear();
-            td.lines.push(TooltipLine {
-                left_text: item.name.to_string(),
-                left_color: (nr, ng, nb),
-                right_text: None,
-                right_color: (1.0, 1.0, 1.0),
-                wrap: false,
-                texture: None,
-            });
-            td.lines.push(TooltipLine {
-                left_text: format!("Item Level {}", item.item_level),
-                left_color: (1.0, 0.82, 0.0),
-                right_text: None,
-                right_color: (1.0, 1.0, 1.0),
-                wrap: false,
-                texture: None,
-            });
-            if item.inventory_type > 0 && !slot_label.is_empty() {
-                td.lines.push(TooltipLine {
-                    left_text: slot_label.to_string(),
-                    left_color: (1.0, 1.0, 1.0),
-                    right_text: None,
-                    right_color: (1.0, 1.0, 1.0),
-                    wrap: false,
-                    texture: None,
-                });
-            }
-        }
-        state.set_frame_visible(tooltip_id, true);
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(td) = state.tooltips.get_mut(&tooltip_id) {
+        td.lines.clear();
+        build_item_lines(item, &mut td.lines);
     }
+    state.set_frame_visible(tooltip_id, true);
     Ok(())
+}
+
+fn build_item_lines(item: &crate::items::ItemInfo, lines: &mut Vec<TooltipLine>) {
+    let (nr, ng, nb) = quality_color_rgb(item.quality);
+    lines.push(TooltipLine {
+        left_color: (nr, ng, nb),
+        ..simple_line(item.name.to_string())
+    });
+    lines.push(TooltipLine {
+        left_color: (1.0, 0.82, 0.0),
+        ..simple_line(format!("Item Level {}", item.item_level))
+    });
+    let slot_label = equip_slot_label(item.inventory_type);
+    if item.inventory_type > 0 && !slot_label.is_empty() {
+        lines.push(simple_line(slot_label.to_string()));
+    }
 }
 
 pub(super) fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
