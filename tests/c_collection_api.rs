@@ -241,6 +241,24 @@ fn test_toy_box_get_set_is_favorite() {
 }
 
 #[test]
+fn test_toy_box_has_favorites() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_ToyBox.HasFavorites() then return "has favs initially" end
+            C_ToyBox.SetIsFavorite(166779, true)
+            if not C_ToyBox.HasFavorites() then return "no favs after set" end
+            C_ToyBox.SetIsFavorite(166779, false)
+            if C_ToyBox.HasFavorites() then return "has favs after unset" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_toy_box_get_num_toys() {
     let env = env();
     let count: i32 = env.eval("return C_ToyBox.GetNumToys()").unwrap();

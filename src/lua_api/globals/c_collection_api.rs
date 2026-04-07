@@ -381,6 +381,10 @@ fn register_toy_box(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
         let s = Rc::clone(&state);
         move |_, item_id: i32| Ok(s.borrow().world.favorite_toys.contains(&(item_id as u32)))
     })?)?;
+    t.set("HasFavorites", lua.create_function({
+        let s = Rc::clone(&state);
+        move |_, ()| Ok(!s.borrow().world.favorite_toys.is_empty())
+    })?)?;
     t.set("SetIsFavorite", lua.create_function({
         let s = state;
         move |_, (item_id, is_fav): (i32, bool)| {
