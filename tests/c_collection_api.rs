@@ -402,6 +402,53 @@ fn test_transmog_collection_get_category_appearances_empty() {
 }
 
 #[test]
+fn test_transmog_collection_get_category_info_armor() {
+    let env = env();
+    let (name, is_weapon): (String, bool) = env
+        .eval("return C_TransmogCollection.GetCategoryInfo(1)")
+        .unwrap();
+    assert_eq!(name, "Head");
+    assert!(!is_weapon);
+}
+
+#[test]
+fn test_transmog_collection_get_category_info_weapon() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local name, isWeapon, canEnchant, canMainHand, canOffHand = C_TransmogCollection.GetCategoryInfo(14)
+            if name ~= "One-Handed Swords" then return "name=" .. tostring(name) end
+            if not isWeapon then return "not weapon" end
+            if not canEnchant then return "not enchantable" end
+            if not canMainHand then return "not mainhand" end
+            if not canOffHand then return "not offhand" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn test_transmog_collection_get_category_info_shield() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local name, isWeapon, canEnchant, canMainHand, canOffHand = C_TransmogCollection.GetCategoryInfo(18)
+            if not isWeapon then return "not weapon" end
+            if canEnchant then return "enchantable" end
+            if canMainHand then return "mainhand" end
+            if not canOffHand then return "not offhand" end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn test_transmog_collection_player_knows_source() {
     let env = env();
     let knows: bool = env

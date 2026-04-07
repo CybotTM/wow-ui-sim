@@ -7,6 +7,46 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+/// Map Enum.TransmogCollectionType category ID → (name, is_weapon, can_enchant, can_main_hand, can_off_hand).
+///
+/// Armor categories map to specific equipment slots via armorCategoryID in TRANSMOG_SLOTS.
+/// Weapon categories use can_main_hand / can_off_hand to determine slot.
+fn transmog_category_info(category_id: i32) -> Option<(&'static str, bool, bool, bool, bool)> {
+    //                             name                weapon  enchant main   off
+    match category_id {
+        1  => Some(("Head",                false, false, false, false)),
+        2  => Some(("Shoulder",            false, false, false, false)),
+        3  => Some(("Back",                false, false, false, false)),
+        4  => Some(("Chest",               false, false, false, false)),
+        5  => Some(("Shirt",               false, false, false, false)),
+        6  => Some(("Tabard",              false, false, false, false)),
+        7  => Some(("Wrist",               false, false, false, false)),
+        8  => Some(("Hands",               false, false, false, false)),
+        9  => Some(("Waist",               false, false, false, false)),
+        10 => Some(("Legs",                false, false, false, false)),
+        11 => Some(("Feet",                false, false, false, false)),
+        12 => Some(("Wand",                true,  true,  true,  true)),
+        13 => Some(("One-Handed Axes",     true,  true,  true,  true)),
+        14 => Some(("One-Handed Swords",   true,  true,  true,  true)),
+        15 => Some(("One-Handed Maces",    true,  true,  true,  true)),
+        16 => Some(("Daggers",             true,  true,  true,  true)),
+        17 => Some(("Fist Weapons",        true,  true,  true,  true)),
+        18 => Some(("Shields",             true,  false, false, true)),
+        19 => Some(("Held In Off-hand",    true,  false, false, true)),
+        20 => Some(("Two-Handed Axes",     true,  true,  true,  false)),
+        21 => Some(("Two-Handed Swords",   true,  true,  true,  false)),
+        22 => Some(("Two-Handed Maces",    true,  true,  true,  false)),
+        23 => Some(("Staves",              true,  true,  true,  false)),
+        24 => Some(("Polearms",            true,  true,  true,  false)),
+        25 => Some(("Bows",                true,  true,  true,  false)),
+        26 => Some(("Guns",                true,  true,  true,  false)),
+        27 => Some(("Crossbows",           true,  true,  true,  false)),
+        28 => Some(("Warglaives",          true,  true,  true,  true)),
+        29 => Some(("Paired",              true,  true,  true,  false)),
+        _  => None,
+    }
+}
+
 /// Coerce a Lua value to i32: booleans map to 0/1, numbers pass through.
 fn bool_or_int_to_i32(v: Value) -> i32 {
     match v {
@@ -411,6 +451,18 @@ fn register_transmog_appearance_methods(lua: &Lua, t: &mlua::Table) -> Result<()
     add_i32_stub_with_arg::<i32>(lua, t, "GetAppearanceCameraID", 0)?;
     add_table_stub_with_arg::<(i32, Value)>(lua, t, "GetCategoryAppearances")?;
     add_bool_stub_with_arg::<i32>(lua, t, "IsAppearanceHiddenVisual", false)?;
+    t.set(
+        "GetCategoryInfo",
+        lua.create_function(|_, cat_id: i32| {
+            if let Some((name, is_weapon, can_enchant, can_main, can_off)) =
+                transmog_category_info(cat_id)
+            {
+                Ok((name.to_string(), is_weapon, can_enchant, can_main, can_off))
+            } else {
+                Ok((String::new(), false, false, false, false))
+            }
+        })?,
+    )?;
     Ok(())
 }
 
