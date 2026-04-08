@@ -330,7 +330,7 @@ fn fallback_icon_for_inv_type(inv_type: u8) -> u32 {
     }
 }
 
-fn get_equipped_item_id(lua: &Lua, slot: i32) -> Option<u32> {
+pub(crate) fn get_equipped_item_id(lua: &Lua, slot: i32) -> Option<u32> {
     let state_rc = lua.app_data_ref::<Rc<RefCell<SimState>>>()?;
     let state = state_rc.borrow();
     state.player.equipped_items.get(&slot).map(|e| e.item_id)

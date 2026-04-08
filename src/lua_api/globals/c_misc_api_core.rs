@@ -205,6 +205,10 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         lua.create_function(create_trait_entry_tooltip)?,
     )?;
     t.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
+    t.set(
+        "GetInventoryItem",
+        lua.create_function(create_inventory_item_tooltip)?,
+    )?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -251,6 +255,15 @@ fn create_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
     build_filled_item_tooltip(lua, item, TOOLTIP_DATA_TYPE_ITEM)
+}
+
+fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item_id) = super::c_item_api_globals::get_equipped_item_id(lua, slot) else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    create_item_tooltip(lua, item_id as i32)
 }
 
 fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {

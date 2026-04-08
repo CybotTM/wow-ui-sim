@@ -594,6 +594,39 @@ fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_inventory_item_returns_equipped_item_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetInventoryItem("player", 1)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local equipSlotLine = tooltip.lines[3]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Entombed Seraph's Casque"
+                and itemLevelLine
+                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
+                and itemLevelLine.leftText == "Item Level 571"
+                and equipSlotLine
+                and equipSlotLine.type == Enum.TooltipDataLineType.EquipSlot
+                and equipSlotLine.leftText == "Head"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetInventoryItem should expose equipped item tooltip lines",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env
