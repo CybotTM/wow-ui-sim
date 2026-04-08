@@ -157,6 +157,41 @@ fn test_secure_handler_stubs_exist() {
     }
 }
 
+#[test]
+fn test_secure_handler_stubs_are_inert() {
+    let env = env();
+    let (ran_original, kept_attribute, did_not_store_ref): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local ref = CreateFrame("Frame")
+            local originalRan = false
+
+            frame:SetAttribute("testAttr", "before")
+            frame:SetScript("OnShow", function() originalRan = true end)
+            frame:Hide()
+
+            SecureHandlerSetFrameRef(frame, "target", ref)
+            SecureHandlerExecute(frame, "self:SetAttribute('testAttr', 'after')")
+            SecureHandlerWrapScript(frame, "OnShow", "self:SetAttribute('wrapped', true)")
+
+            frame:Show()
+
+            return originalRan, frame:GetAttribute("testAttr") == "before", frame:GetAttribute("_frame-target") == nil
+            "#,
+        )
+        .unwrap();
+    assert!(ran_original, "original script should still run");
+    assert!(
+        kept_attribute,
+        "secure handler stubs should not mutate attributes"
+    );
+    assert!(
+        did_not_store_ref,
+        "SecureHandlerSetFrameRef should stay inert until restricted handlers exist"
+    );
+}
+
 // ============================================================================
 // forceinsecure + taint tracking
 // ============================================================================
@@ -288,6 +323,34 @@ fn test_canaccesstable_clean() {
     let env = env();
     let result: bool = env.eval("return canaccesstable({1, 2, 3})").unwrap();
     assert!(result, "engine-created table should be accessible");
+}
+
+#[test]
+fn test_state_driver_stubs_are_inert() {
+    let env = env();
+    let (still_shown, no_state_attr): (bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:Show()
+
+            RegisterStateDriver(frame, "visibility", "hide")
+            RegisterAttributeDriver(frame, "state-custom", "active")
+            UnregisterStateDriver(frame, "visibility")
+            UnregisterAttributeDriver(frame, "state-custom")
+
+            return frame:IsShown(), frame:GetAttribute("state-custom") == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        still_shown,
+        "state driver stubs should not change visibility until protected drivers exist"
+    );
+    assert!(
+        no_state_attr,
+        "attribute driver stubs should not write attributes until protected drivers exist"
+    );
 }
 
 #[test]

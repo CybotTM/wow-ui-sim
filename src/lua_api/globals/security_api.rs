@@ -1,11 +1,13 @@
 //! Security-related WoW API functions.
 //!
-//! Contains securecallmethod (not in Elune), SecureHandler stubs,
-//! state/attribute driver stubs, and SecureCmdOptionParse.
+//! Contains securecallmethod (not in Elune), fallback taint helpers,
+//! SecureHandler stubs, state/attribute driver stubs, and SecureCmdOptionParse.
 //!
 //! Functions provided by Elune's baselib_shared (issecure, issecurevariable,
 //! securecall, securecallfunction, forceinsecure, hooksecurefunc,
 //! secureexecuterange) are NOT registered here — they come from the C runtime.
+//! When Elune also provides secret/access helpers, we preserve those definitions
+//! instead of overriding them with simulator fallbacks.
 
 use mlua::{Function, Lua, MultiValue, Result, Value};
 
@@ -18,45 +20,134 @@ pub fn register_security_functions(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// Register taint-aware functions (no taint in simulator — all return constants).
+/// Register taint helpers.
+///
+/// Elune provides real taint-aware implementations for these helpers in normal
+/// simulator startup. We only install permissive fallbacks when they are absent
+/// so stripped-down environments still boot.
 fn register_taint_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
     globals.set("securecallmethod", make_securecallmethod(lua)?)?;
 
-    // issecretvalue: no taint in simulator, always false
-    globals.set(
+    set_if_missing(
+        &globals,
         "issecretvalue",
-        lua.create_function(|_, _: MultiValue| Ok(false))?,
+        lua.create_function(|lua, args: MultiValue| {
+            Ok(matches!(args.front(), Some(value) if is_secret_value(lua, value)?))
+        })?,
     )?;
 
-    // canaccessvalue / canaccessallvalues / canaccesstable: no taint restrictions
-    globals.set(
+    set_if_missing(
+        &globals,
         "canaccessvalue",
-        lua.create_function(|_, _: MultiValue| Ok(true))?,
+        lua.create_function(|lua, args: MultiValue| {
+            Ok(matches!(args.front(), Some(value) if !is_secret_value(lua, value)?))
+        })?,
     )?;
-    globals.set(
+    set_if_missing(
+        &globals,
         "canaccessallvalues",
-        lua.create_function(|_, _: MultiValue| Ok(true))?,
+        lua.create_function(|lua, args: MultiValue| {
+            for value in &args {
+                if is_secret_value(lua, value)? {
+                    return Ok(false);
+                }
+            }
+            Ok(true)
+        })?,
     )?;
-    globals.set(
+    set_if_missing(
+        &globals,
         "canaccesstable",
-        lua.create_function(|_, _: MultiValue| Ok(true))?,
+        lua.create_function(|lua, args: MultiValue| match args.front() {
+            Some(Value::Table(table)) => table_is_accessible(lua, table),
+            Some(value) => Ok(!is_secret_value(lua, value)?),
+            None => Ok(false),
+        })?,
     )?;
 
-    // scrub: strips tainted values from args. No taint in simulator — pass through.
-    globals.set(
+    set_if_missing(
+        &globals,
         "scrub",
         lua.create_function(|_, args: MultiValue| Ok(args))?,
     )?;
 
-    // scrubsecretvalues: strips secret values. No secrets in simulator — pass through.
-    globals.set(
+    set_if_missing(
+        &globals,
         "scrubsecretvalues",
         lua.create_function(|_, args: MultiValue| Ok(args))?,
     )?;
 
     Ok(())
+}
+
+fn set_if_missing(globals: &mlua::Table, name: &str, value: Function) -> Result<()> {
+    if matches!(globals.get::<Value>(name)?, Value::Nil) {
+        globals.set(name, value)?;
+    }
+    Ok(())
+}
+
+fn is_secret_value(lua: &Lua, value: &Value) -> Result<bool> {
+    if value_has_object_taint(lua, value)? {
+        return Ok(true);
+    }
+
+    match value {
+        Value::Function(function) => is_loadstring_function(lua, function),
+        Value::Table(table) => table_contains_secret_values(lua, table),
+        _ => Ok(false),
+    }
+}
+
+fn value_has_object_taint(lua: &Lua, value: &Value) -> Result<bool> {
+    let taintable_value = match value {
+        Value::String(_)
+        | Value::Table(_)
+        | Value::Function(_)
+        | Value::Thread(_)
+        | Value::UserData(_) => value.clone(),
+        _ => return Ok(false),
+    };
+
+    let debug: mlua::Table = lua.globals().get("debug")?;
+    let getobjecttaint: Option<Function> = debug.get("getobjecttaint")?;
+    let Some(getobjecttaint) = getobjecttaint else {
+        return Ok(false);
+    };
+
+    let taint = getobjecttaint.call::<Value>(taintable_value)?;
+    Ok(!matches!(taint, Value::Nil | Value::Boolean(false)))
+}
+
+fn is_loadstring_function(lua: &Lua, function: &Function) -> Result<bool> {
+    let debug: mlua::Table = lua.globals().get("debug")?;
+    let getinfo: Function = debug.get("getinfo")?;
+    let info: mlua::Table = getinfo.call((function.clone(), "S"))?;
+    let what: Option<String> = info.get("what")?;
+    if what.as_deref() == Some("C") {
+        return Ok(false);
+    }
+    let short_src: Option<String> = info.get("short_src")?;
+    Ok(short_src
+        .as_deref()
+        .is_some_and(|src| src.starts_with("[string \"")))
+}
+
+fn table_is_accessible(lua: &Lua, table: &mlua::Table) -> Result<bool> {
+    Ok(!is_secret_value(lua, &Value::Table(table.clone()))?
+        && !table_contains_secret_values(lua, table)?)
+}
+
+fn table_contains_secret_values(lua: &Lua, table: &mlua::Table) -> Result<bool> {
+    for pair in table.pairs::<Value, Value>() {
+        let (key, value) = pair?;
+        if is_secret_value(lua, &key)? || is_secret_value(lua, &value)? {
+            return Ok(true);
+        }
+    }
+    Ok(false)
 }
 
 /// Build the securecallmethod closure: calls obj[name](obj, ...) via securecall.
@@ -98,7 +189,11 @@ fn extract_table(val: &Value) -> Result<mlua::Table> {
     }
 }
 
-/// SecureHandler execution stubs (SecureHandlerSetFrameRef, Execute, WrapScript).
+/// SecureHandler execution stubs.
+///
+/// These APIs require Blizzard's restricted execution environment and protected
+/// frame semantics. The simulator does not model that yet, so these remain
+/// inert no-ops instead of pretending to enforce partial security rules.
 fn register_secure_handler_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
@@ -118,7 +213,11 @@ fn register_secure_handler_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-/// State/attribute driver stubs (Register/UnregisterStateDriver, Register/UnregisterAttributeDriver).
+/// State/attribute driver stubs.
+///
+/// Real drivers depend on SecureStateDriverManager and protected attribute
+/// propagation. We leave them inert for now rather than simulating a misleading
+/// subset of protected-frame behavior.
 fn register_state_driver_stubs(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
