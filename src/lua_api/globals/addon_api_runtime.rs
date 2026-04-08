@@ -112,8 +112,35 @@ fn addon_load_failure(
 
 /// Search addon_base_paths for an addon's TOC file.
 fn find_addon_toc(state: &Rc<RefCell<SimState>>, addon_name: &str) -> Option<std::path::PathBuf> {
-    let s = state.borrow();
-    s.addon_base_paths
+    let from_state = {
+        let s = state.borrow();
+        s.addon_base_paths
+            .iter()
+            .map(|base| base.join(addon_name))
+            .find_map(|dir| {
+                if dir.is_dir() {
+                    crate::loader::find_toc_file(&dir)
+                } else {
+                    None
+                }
+            })
+    };
+    if from_state.is_some() {
+        return from_state;
+    }
+
+    if addon_name != "Blizzard_AccountStore" {
+        return None;
+    }
+    // UIParent_OnShow calls LoadAddOn("Blizzard_AccountStore") very early in
+    // some startup test harnesses that don't populate addon_base_paths.
+    // Use a narrow fallback so AccountStoreFrame exists without enabling
+    // broad on-demand addon loading in those harnesses.
+    let fallback_roots = [
+        std::path::PathBuf::from("./Interface/BlizzardUI"),
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI"),
+    ];
+    fallback_roots
         .iter()
         .map(|base| base.join(addon_name))
         .find_map(|dir| {

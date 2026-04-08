@@ -224,3 +224,35 @@ fn test_widget_container_mixin_applied() {
             "GetNumWidgetsShowing should still be available after startup events and timer processing");
     }
 }
+
+#[test]
+fn test_uiparent_onshow_loads_account_store_without_nil_error() {
+    test_timeout! {
+        let env = load_all_addons();
+
+        let (ok, loaded_after, account_store_exists, err): (bool, bool, bool, Option<String>) = env
+            .eval(
+                r#"
+                local ok, err = pcall(function()
+                    UIParent.firstTimeLoaded = nil
+                    UIParent_OnShow(UIParent)
+                end)
+                return ok,
+                    C_AddOns.IsAddOnLoaded("Blizzard_AccountStore"),
+                    AccountStoreFrame ~= nil,
+                    ok and nil or tostring(err)
+                "#,
+            )
+            .expect("UIParent_OnShow should be callable");
+
+        assert!(ok, "UIParent_OnShow should not error: {:?}", err);
+        assert!(
+            loaded_after,
+            "UIParent_OnShow should load Blizzard_AccountStore via C_AddOns.LoadAddOn"
+        );
+        assert!(
+            account_store_exists,
+            "AccountStoreFrame should exist after UIParent_OnShow addon load"
+        );
+    }
+}
