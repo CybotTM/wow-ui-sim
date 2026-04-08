@@ -530,11 +530,7 @@ fn build_item_tooltip_lines(
         lines,
         3,
         TOOLTIP_LINE_TYPE_EQUIP_SLOT,
-        if equip_slot.is_empty() {
-            None
-        } else {
-            Some(equip_slot)
-        },
+        non_empty_tooltip_text(equip_slot),
     )?;
     append_optional_item_tooltip_line(
         lua,
@@ -555,6 +551,10 @@ fn append_item_level_line(
 ) -> Result<()> {
     let item_level_text = format!("Item Level {item_level}");
     append_item_tooltip_line(lua, lines, index, line_type, &item_level_text)
+}
+
+fn non_empty_tooltip_text(text: &str) -> Option<&str> {
+    if text.is_empty() { None } else { Some(text) }
 }
 
 fn append_optional_item_tooltip_line(
