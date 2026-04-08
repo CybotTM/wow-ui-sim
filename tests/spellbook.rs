@@ -13,6 +13,10 @@ use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::WidgetRegistry;
 
+const SPELLBOOK_TUTORIALS_LUA: &str = include_str!(
+    "../Interface/BlizzardUI/Blizzard_PlayerSpells/SpellBook/Blizzard_SpellBookFrameTutorials.lua"
+);
+
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
@@ -55,6 +59,11 @@ fn fire_startup_sequence(env: &WowLuaEnv) {
 fn open_spellbook(env: &WowLuaEnv) {
     env.exec("PlayerSpellsUtil.ToggleSpellBookFrame()")
         .expect("Failed to toggle spellbook");
+}
+
+fn restore_spellbook_tutorials(env: &WowLuaEnv) {
+    env.exec(SPELLBOOK_TUTORIALS_LUA)
+        .expect("Failed to restore spellbook tutorials mixin");
 }
 
 /// Find spell item frame IDs by traversing the Rust registry.
@@ -527,6 +536,38 @@ fn spellbook_spell_items_have_nonzero_rect() {
              Zero-rect items ({}):\n{}",
             zero_rect.len(),
             zero_rect.join("\n")
+        );
+    }
+}
+
+#[test]
+fn spellbook_first_open_is_stable_with_real_tutorial_logic_restored() {
+    test_timeout! {
+        let env = setup_full_ui();
+        restore_spellbook_tutorials(&env);
+        env.state().borrow_mut().lua_errors.clear();
+
+        open_spellbook(&env);
+
+        let errors = env.state().borrow().lua_errors.clone();
+        assert!(
+            errors.is_empty(),
+            "Restoring the real tutorial logic should not break first-open spellbook startup: {errors:?}"
+        );
+
+        let item_ids = {
+            let state = env.state().borrow();
+            find_spell_item_ids(&state.widgets)
+        };
+        assert!(
+            !item_ids.is_empty(),
+            "Spellbook items should still be visible without tutorial suppression"
+        );
+
+        let quads = build_quads(&env);
+        assert!(
+            quads > 0,
+            "Spellbook should still render quads when the real tutorial logic runs"
         );
     }
 }
