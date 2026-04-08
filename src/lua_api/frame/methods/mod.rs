@@ -37,6 +37,8 @@ mod widget_tooltip;
 mod widget_tooltip_data;
 
 pub(crate) use methods_visibility::fire_on_show_recursive;
+pub(crate) use widget_tooltip_data::UnitTooltipInfo;
+pub(crate) use widget_tooltip_data::resolve_unit_tooltip_info;
 
 /// Register all ~200 frame methods into the FrameRef UserData methods container.
 pub fn register_all_methods<M: mlua::UserDataMethods<super::handle::FrameRef>>(methods: &mut M) {

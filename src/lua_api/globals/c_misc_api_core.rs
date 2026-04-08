@@ -201,7 +201,7 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         .get::<mlua::Table>("C_TooltipInfo")
         .unwrap_or_else(|_| lua.create_table().unwrap());
     register_item_and_spell_tooltip_overrides(lua, &t)?;
-    register_unit_aura_tooltip_overrides(lua, &t)?;
+    register_unit_tooltip_overrides(lua, &t)?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -224,7 +224,8 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
     Ok(())
 }
 
-fn register_unit_aura_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+fn register_unit_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set("GetUnit", lua.create_function(create_unit_tooltip)?)?;
     table.set(
         "GetUnitBuff",
         lua.create_function(create_unit_buff_tooltip)?,
@@ -317,6 +318,20 @@ fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
     build_empty_tooltip(lua, 0)
 }
 
+fn create_unit_tooltip(lua: &Lua, (unit, _hide_status): (String, Option<bool>)) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_UNIT: i32 = 2;
+
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    let Some(info) = crate::lua_api::frame::resolve_unit_tooltip_info(&state, &unit) else {
+        return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT);
+    };
+
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_UNIT, |lines| {
+        append_unit_tooltip_lines(lua, lines, &info)
+    })
+}
+
 fn create_unit_buff_tooltip(
     lua: &Lua,
     (unit, index, filter): (String, i32, Option<String>),
@@ -397,6 +412,26 @@ fn append_tooltip_line(
     if line_type == TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION {
         line.set("wrapText", true)?;
     }
+    lines.set(index, line)?;
+    Ok(())
+}
+
+fn append_colored_tooltip_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    text: &str,
+    color: (f32, f32, f32),
+) -> Result<()> {
+    let line = lua.create_table()?;
+    line.set("type", line_type)?;
+    line.set("leftText", text)?;
+    let (r, g, b) = color;
+    line.set(
+        "leftColor",
+        tooltip_color(lua, (r as f64, g as f64, b as f64))?,
+    )?;
     lines.set(index, line)?;
     Ok(())
 }
@@ -485,6 +520,34 @@ fn append_named_description_tooltip_lines(
             &description_text,
         )?;
     }
+    Ok(())
+}
+
+fn append_unit_tooltip_lines(
+    lua: &Lua,
+    lines: &mlua::Table,
+    info: &crate::lua_api::frame::UnitTooltipInfo,
+) -> Result<()> {
+    const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
+    const TOOLTIP_LINE_TYPE_UNIT_NAME: i32 = 2;
+
+    append_colored_tooltip_line(
+        lua,
+        lines,
+        1,
+        TOOLTIP_LINE_TYPE_UNIT_NAME,
+        &info.name,
+        info.class_color,
+    )?;
+    append_tooltip_line(
+        lua,
+        lines,
+        2,
+        TOOLTIP_LINE_TYPE_NONE,
+        &format!("Level {}", info.level),
+    )?;
+    append_tooltip_line(lua, lines, 3, TOOLTIP_LINE_TYPE_NONE, &info.race)?;
+    append_tooltip_line(lua, lines, 4, TOOLTIP_LINE_TYPE_NONE, &info.class_name)?;
     Ok(())
 }
 
@@ -669,8 +732,7 @@ fn append_item_tooltip_line(
     Ok(())
 }
 
-fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
-    let (r, g, b) = item_quality_rgb(quality);
+fn tooltip_color(lua: &Lua, (r, g, b): (f64, f64, f64)) -> Result<Value> {
     let color = lua.create_table()?;
     color.set("r", r)?;
     color.set("g", g)?;
@@ -698,6 +760,10 @@ fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
         })?,
     )?;
     Ok(Value::Table(color))
+}
+
+fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
+    tooltip_color(lua, item_quality_rgb(quality))
 }
 
 fn item_quality_rgb(quality: u8) -> (f64, f64, f64) {

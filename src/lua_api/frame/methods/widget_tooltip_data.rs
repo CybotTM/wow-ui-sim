@@ -223,14 +223,15 @@ fn populate_unit_tooltip(lua: &mlua::Lua, tooltip_id: u64, unit: &str) -> mlua::
     Ok(true)
 }
 
-struct UnitTooltipInfo {
-    name: String,
-    level: i32,
-    race: String,
-    class_color: (f32, f32, f32),
+pub(crate) struct UnitTooltipInfo {
+    pub(crate) name: String,
+    pub(crate) level: i32,
+    pub(crate) race: String,
+    pub(crate) class_name: String,
+    pub(crate) class_color: (f32, f32, f32),
 }
 
-fn resolve_unit_tooltip_info(
+pub(crate) fn resolve_unit_tooltip_info(
     state: &crate::lua_api::state::SimState,
     unit: &str,
 ) -> Option<UnitTooltipInfo> {
@@ -246,6 +247,7 @@ fn resolve_unit_tooltip_info(
                 name: p.name.clone(),
                 level: p.level,
                 race,
+                class_name: class_label(p.class_index),
                 class_color,
             })
         }
@@ -256,6 +258,7 @@ fn resolve_unit_tooltip_info(
                 name: t.name.clone(),
                 level: t.level,
                 race: t.creature_type.clone(),
+                class_name: class_label(t.class_index),
                 class_color,
             })
         }
@@ -263,7 +266,15 @@ fn resolve_unit_tooltip_info(
     }
 }
 
-fn class_color_rgb(class_index: i32) -> (f32, f32, f32) {
+fn class_label(class_index: i32) -> String {
+    crate::lua_api::game_data::CLASS_LABELS
+        .get((class_index - 1).max(0) as usize)
+        .copied()
+        .unwrap_or("Unknown")
+        .to_string()
+}
+
+pub(crate) fn class_color_rgb(class_index: i32) -> (f32, f32, f32) {
     match class_index {
         1 => (0.78, 0.61, 0.43),  // Warrior
         2 => (0.96, 0.55, 0.73),  // Paladin
