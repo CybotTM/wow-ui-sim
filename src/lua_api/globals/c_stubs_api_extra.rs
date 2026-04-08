@@ -993,37 +993,332 @@ fn register_c_pet_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|pet_info| g.set("C_PetInfo", pet_info))
 }
 
+const UNIT_AURAS_PRIVATE_LUA: &str = r#"
+    C_UnitAurasPrivate = C_UnitAurasPrivate or {}
+    C_UnitAuras = C_UnitAuras or {}
+    local api = C_UnitAurasPrivate
+
+    api._state = api._state or {
+        anchorsByID = {},
+        anchorOrder = {},
+        nextAnchorID = 1,
+        anchorAddedCallback = nil,
+        anchorRemovedCallback = nil,
+        updateCallbacksByUnit = {},
+        warningTextFrame = nil,
+        raidBossMessageCallback = nil,
+        showDispelTypeCallback = nil,
+        lastShowDispelType = nil,
+        privateAurasByUnit = {},
+        auraDataByUnit = {},
+        auraAppliedSoundsByUnitSpell = {},
+        anchoredFramesByAnchorID = {},
+    }
+
+    local function normalizeNumber(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function copyTable(value)
+        if type(value) ~= "table" then
+            return nil
+        end
+        local copy = {}
+        for key, child in pairs(value) do
+            copy[key] = child
+        end
+        return copy
+    end
+
+    local function asUnitKey(unit)
+        if unit == nil then
+            return ""
+        end
+        return tostring(unit)
+    end
+
+    local function removeFromOrder(anchorID)
+        local order = api._state.anchorOrder
+        for index, id in ipairs(order) do
+            if id == anchorID then
+                table.remove(order, index)
+                return
+            end
+        end
+    end
+
+    local function addAnchorInternal(anchorArgs)
+        if type(anchorArgs) ~= "table" then
+            return 0
+        end
+
+        local state = api._state
+        local anchorID = normalizeNumber(anchorArgs.anchorID)
+        if anchorID == nil or anchorID <= 0 then
+            anchorID = state.nextAnchorID
+            state.nextAnchorID = anchorID + 1
+        elseif anchorID >= state.nextAnchorID then
+            state.nextAnchorID = anchorID + 1
+        end
+
+        local anchorInfo = copyTable(anchorArgs) or {}
+        anchorInfo.anchorID = anchorID
+        state.anchorsByID[anchorID] = anchorInfo
+
+        removeFromOrder(anchorID)
+        table.insert(state.anchorOrder, anchorID)
+
+        local callback = state.anchorAddedCallback
+        if type(callback) == "function" then
+            pcall(callback, copyTable(anchorInfo))
+        end
+        return anchorID
+    end
+
+    local function removeAnchorInternal(anchorID)
+        local normalizedAnchorID = normalizeNumber(anchorID)
+        if normalizedAnchorID == nil then
+            return false
+        end
+
+        local state = api._state
+        if state.anchorsByID[normalizedAnchorID] == nil then
+            return false
+        end
+
+        state.anchorsByID[normalizedAnchorID] = nil
+        state.anchoredFramesByAnchorID[normalizedAnchorID] = nil
+        removeFromOrder(normalizedAnchorID)
+
+        local callback = state.anchorRemovedCallback
+        if type(callback) == "function" then
+            pcall(callback, normalizedAnchorID)
+        end
+        return true
+    end
+
+    local function getAnchors(unitFilter)
+        local state = api._state
+        local result = {}
+        local unitKey = nil
+        if unitFilter ~= nil then
+            unitKey = tostring(unitFilter)
+        end
+        for _, anchorID in ipairs(state.anchorOrder) do
+            local anchorInfo = state.anchorsByID[anchorID]
+            if type(anchorInfo) == "table" then
+                if unitKey == nil or tostring(anchorInfo.unitToken) == unitKey then
+                    table.insert(result, copyTable(anchorInfo))
+                end
+            end
+        end
+        return result
+    end
+
+    local function clonePrivateAuras(unit)
+        local state = api._state
+        local key = asUnitKey(unit)
+        local list = state.privateAurasByUnit[key]
+        if type(list) ~= "table" then
+            return {}
+        end
+        local copy = {}
+        for index, auraInfo in ipairs(list) do
+            if type(auraInfo) == "table" then
+                copy[index] = copyTable(auraInfo)
+            else
+                copy[index] = auraInfo
+            end
+        end
+        return copy
+    end
+
+    api.GetAuraDataBySlot = api.GetAuraDataBySlot or function(unit, slot)
+        local slotIndex = normalizeNumber(slot)
+        if slotIndex == nil or slotIndex < 1 then
+            return nil
+        end
+        local list = clonePrivateAuras(unit)
+        return list[slotIndex]
+    end
+
+    api.SetPrivateAuraAnchorAddedCallback = api.SetPrivateAuraAnchorAddedCallback or function(callback)
+        if type(callback) == "function" then
+            api._state.anchorAddedCallback = callback
+        else
+            api._state.anchorAddedCallback = nil
+        end
+    end
+
+    api.SetPrivateAuraAnchorRemovedCallback = api.SetPrivateAuraAnchorRemovedCallback or function(callback)
+        if type(callback) == "function" then
+            api._state.anchorRemovedCallback = callback
+        else
+            api._state.anchorRemovedCallback = nil
+        end
+    end
+
+    api.GetPrivateAuraAnchors = api.GetPrivateAuraAnchors or function(unit)
+        return getAnchors(unit)
+    end
+
+    api.SetPrivateWarningTextFrame = api.SetPrivateWarningTextFrame or function(frame)
+        api._state.warningTextFrame = frame
+    end
+
+    api.SetPrivateRaidBossMessageCallback = api.SetPrivateRaidBossMessageCallback or function(callback)
+        if type(callback) == "function" then
+            api._state.raidBossMessageCallback = callback
+        else
+            api._state.raidBossMessageCallback = nil
+        end
+    end
+
+    api.SetShowDispelTypeCallback = api.SetShowDispelTypeCallback or function(callback)
+        if type(callback) == "function" then
+            api._state.showDispelTypeCallback = callback
+        else
+            api._state.showDispelTypeCallback = nil
+        end
+    end
+
+    api.AddPrivateAuraUpdateCallback = api.AddPrivateAuraUpdateCallback or function(unit, callback)
+        local key = asUnitKey(unit)
+        local callbacks = api._state.updateCallbacksByUnit[key]
+        if type(callbacks) ~= "table" then
+            callbacks = {}
+            api._state.updateCallbacksByUnit[key] = callbacks
+        end
+        if type(callback) ~= "function" then
+            return
+        end
+        for _, existing in ipairs(callbacks) do
+            if existing == callback then
+                return
+            end
+        end
+        table.insert(callbacks, callback)
+    end
+
+    api.GetAllPrivateAuras = api.GetAllPrivateAuras or function(unit)
+        return clonePrivateAuras(unit)
+    end
+
+    api.GetAuraDataByAuraInstanceIDPrivate = api.GetAuraDataByAuraInstanceIDPrivate or function(unit, auraInstanceID)
+        local key = asUnitKey(unit)
+        local id = normalizeNumber(auraInstanceID)
+        if id == nil then
+            return nil
+        end
+        local byInstance = api._state.auraDataByUnit[key]
+        if type(byInstance) ~= "table" then
+            return nil
+        end
+        return copyTable(byInstance[id])
+    end
+
+    api.GetAuraAppliedSoundsForSpell = api.GetAuraAppliedSoundsForSpell or function(unit, spellID)
+        local key = asUnitKey(unit)
+        local normalizedSpellID = normalizeNumber(spellID)
+        if normalizedSpellID == nil then
+            return {}
+        end
+        local byUnit = api._state.auraAppliedSoundsByUnitSpell[key]
+        if type(byUnit) ~= "table" then
+            return {}
+        end
+        local sounds = byUnit[normalizedSpellID]
+        if type(sounds) ~= "table" then
+            return {}
+        end
+        local copy = {}
+        for index, sound in ipairs(sounds) do
+            if type(sound) == "table" then
+                copy[index] = copyTable(sound)
+            else
+                copy[index] = sound
+            end
+        end
+        return copy
+    end
+
+    api.AnchorPrivateAura = api.AnchorPrivateAura or function(frame, icon, duration, anchorID)
+        local normalizedAnchorID = normalizeNumber(anchorID)
+        if normalizedAnchorID == nil then
+            return false
+        end
+        if api._state.anchorsByID[normalizedAnchorID] == nil then
+            return false
+        end
+        api._state.anchoredFramesByAnchorID[normalizedAnchorID] = {
+            frame = frame,
+            icon = icon,
+            duration = duration,
+        }
+        return true
+    end
+
+    api._TriggerPrivateAuraUpdate = api._TriggerPrivateAuraUpdate or function(unit, privateSource, updateInfo)
+        local key = asUnitKey(unit)
+        local callbacks = api._state.updateCallbacksByUnit[key]
+        if type(callbacks) ~= "table" then
+            return 0
+        end
+        local fired = 0
+        for _, callback in ipairs(callbacks) do
+            if type(callback) == "function" then
+                pcall(callback, privateSource, updateInfo)
+                fired = fired + 1
+            end
+        end
+        return fired
+    end
+
+    api._TriggerPrivateRaidBossMessage = api._TriggerPrivateRaidBossMessage or function(...)
+        local callback = api._state.raidBossMessageCallback
+        if type(callback) ~= "function" then
+            return false
+        end
+        pcall(callback, ...)
+        return true
+    end
+
+    api._AddPrivateAuraAnchorForTest = api._AddPrivateAuraAnchorForTest or function(anchorArgs)
+        return addAnchorInternal(anchorArgs)
+    end
+
+    api._RemovePrivateAuraAnchorForTest = api._RemovePrivateAuraAnchorForTest or function(anchorID)
+        return removeAnchorInternal(anchorID)
+    end
+
+    C_UnitAuras.TriggerPrivateAuraShowDispelType = function(showDispelType)
+        local showFlag = showDispelType == true
+        local state = api._state
+        state.lastShowDispelType = showFlag
+        if type(state.showDispelTypeCallback) == "function" then
+            pcall(state.showDispelTypeCallback, showFlag)
+        end
+    end
+
+    C_UnitAuras.SetPrivateWarningTextAnchor = function(...)
+        api._state.warningTextAnchorArgs = { ... }
+        return true
+    end
+"#;
+
 fn register_c_unit_auras_private(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let uap = lua.create_table()?;
-    uap.set(
-        "GetAuraDataBySlot",
-        lua.create_function(|_, (_unit, _slot): (Value, Value)| Ok(Value::Nil))?,
-    )?;
-    uap.set(
-        "SetPrivateAuraAnchorAddedCallback",
-        lua.create_function(|_, _cb: Value| Ok(()))?,
-    )?;
-    uap.set(
-        "SetPrivateAuraAnchorRemovedCallback",
-        lua.create_function(|_, _cb: Value| Ok(()))?,
-    )?;
-    uap.set(
-        "GetPrivateAuraAnchors",
-        lua.create_function(|lua, _unit: Value| lua.create_table())?,
-    )?;
-    uap.set(
-        "SetPrivateWarningTextFrame",
-        lua.create_function(|_, _frame: Value| Ok(()))?,
-    )?;
-    uap.set(
-        "SetPrivateRaidBossMessageCallback",
-        lua.create_function(|_, _cb: Value| Ok(()))?,
-    )?;
-    uap.set(
-        "SetShowDispelTypeCallback",
-        lua.create_function(|_, _cb: Value| Ok(()))?,
-    )?;
-    g.set("C_UnitAurasPrivate", uap)
+    lua.load(UNIT_AURAS_PRIVATE_LUA).exec()?;
+    g.get::<mlua::Table>("C_UnitAurasPrivate")
+        .and_then(|unit_auras_private| g.set("C_UnitAurasPrivate", unit_auras_private))
 }
 
 /// C_LevelLink, C_EventScheduler, C_RestrictedActions, C_TransmogOutfitInfo stubs.

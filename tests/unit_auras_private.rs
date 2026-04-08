@@ -1,0 +1,172 @@
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn private_aura_anchor_callbacks_and_state_are_tracked() {
+    let env = env();
+    let (
+        ids_increment,
+        added_callback_ok,
+        anchor_list_ok,
+        filtered_list_ok,
+        removed_callback_ok,
+        anchors_after_remove_ok,
+    ): (bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local added = {}
+            local removed = {}
+            C_UnitAurasPrivate.SetPrivateAuraAnchorAddedCallback(function(anchorInfo)
+                added[#added + 1] = anchorInfo
+            end)
+            C_UnitAurasPrivate.SetPrivateAuraAnchorRemovedCallback(function(anchorID)
+                removed[#removed + 1] = anchorID
+            end)
+
+            local anchorID1 = C_UnitAurasPrivate._AddPrivateAuraAnchorForTest({
+                unitToken = "player",
+                auraIndex = 1,
+                isBuff = true,
+                maxAuras = 5,
+            })
+            local anchorID2 = C_UnitAurasPrivate._AddPrivateAuraAnchorForTest({
+                unitToken = "target",
+                auraIndex = 2,
+                isBuff = false,
+                maxAuras = 3,
+            })
+
+            local allAnchors = C_UnitAurasPrivate.GetPrivateAuraAnchors()
+            local playerAnchors = C_UnitAurasPrivate.GetPrivateAuraAnchors("player")
+
+            local removedOk = C_UnitAurasPrivate._RemovePrivateAuraAnchorForTest(anchorID1)
+            local anchorsAfterRemove = C_UnitAurasPrivate.GetPrivateAuraAnchors()
+
+            return anchorID1 > 0 and anchorID2 > anchorID1,
+                   #added == 2 and added[1].anchorID == anchorID1 and added[1].unitToken == "player",
+                   #allAnchors == 2 and allAnchors[2].anchorID == anchorID2,
+                   #playerAnchors == 1 and playerAnchors[1].anchorID == anchorID1,
+                   removedOk and #removed == 1 and removed[1] == anchorID1,
+                   #anchorsAfterRemove == 1 and anchorsAfterRemove[1].anchorID == anchorID2
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        ids_increment,
+        "anchor IDs should be generated incrementally"
+    );
+    assert!(
+        added_callback_ok,
+        "added callback should receive copied anchor info"
+    );
+    assert!(
+        anchor_list_ok,
+        "GetPrivateAuraAnchors should return all tracked anchors"
+    );
+    assert!(
+        filtered_list_ok,
+        "GetPrivateAuraAnchors(unit) should filter by unit token"
+    );
+    assert!(
+        removed_callback_ok,
+        "remove callback should be fired with removed anchor ID"
+    );
+    assert!(
+        anchors_after_remove_ok,
+        "removed anchors should no longer appear in tracked state"
+    );
+}
+
+#[test]
+fn private_warning_and_show_dispel_callbacks_are_state_backed() {
+    let env = env();
+    let (warning_frame_stored, dispel_callback_ok, last_show_type_recorded): (bool, bool, bool) =
+        env.eval(
+            r#"
+            local warningFrame = CreateFrame("Frame", "UnitAurasPrivateWarningFrame")
+            C_UnitAurasPrivate.SetPrivateWarningTextFrame(warningFrame)
+
+            local dispelCalls = {}
+            C_UnitAurasPrivate.SetShowDispelTypeCallback(function(showDispelType)
+                dispelCalls[#dispelCalls + 1] = showDispelType
+            end)
+
+            C_UnitAuras.TriggerPrivateAuraShowDispelType(true)
+            C_UnitAuras.TriggerPrivateAuraShowDispelType(false)
+
+            return C_UnitAurasPrivate._state.warningTextFrame == warningFrame,
+                   #dispelCalls == 2 and dispelCalls[1] == true and dispelCalls[2] == false,
+                   C_UnitAurasPrivate._state.lastShowDispelType == false
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        warning_frame_stored,
+        "SetPrivateWarningTextFrame should persist the warning frame reference"
+    );
+    assert!(
+        dispel_callback_ok,
+        "TriggerPrivateAuraShowDispelType should invoke registered callback"
+    );
+    assert!(
+        last_show_type_recorded,
+        "last show-dispel type should be tracked in private aura state"
+    );
+}
+
+#[test]
+fn private_aura_update_callbacks_and_lookup_queries_are_stateful() {
+    let env = env();
+    let (update_callback_fired, lookup_data_ok, read_is_copy): (bool, bool, bool) = env
+        .eval(
+            r#"
+            C_UnitAurasPrivate._state.privateAurasByUnit["player"] = {
+                { auraInstanceID = 11, spellId = 1001, applications = 1 },
+                { auraInstanceID = 22, spellId = 1002, applications = 2 },
+            }
+            C_UnitAurasPrivate._state.auraDataByUnit["player"] = {
+                [11] = { auraInstanceID = 11, spellId = 1001, applications = 1 },
+                [22] = { auraInstanceID = 22, spellId = 1002, applications = 2 },
+            }
+
+            local callbackCalls = 0
+            local lastPrivateSource = nil
+            local sawFullUpdate = false
+            C_UnitAurasPrivate.AddPrivateAuraUpdateCallback("player", function(privateSource, updateInfo)
+                callbackCalls = callbackCalls + 1
+                lastPrivateSource = privateSource
+                sawFullUpdate = updateInfo and updateInfo.isFullUpdate == true
+            end)
+
+            local fired = C_UnitAurasPrivate._TriggerPrivateAuraUpdate("player", "Private", { isFullUpdate = true })
+            local allAuras = C_UnitAurasPrivate.GetAllPrivateAuras("player")
+            local auraByID = C_UnitAurasPrivate.GetAuraDataByAuraInstanceIDPrivate("player", 11)
+
+            allAuras[1].spellId = 9999
+            local secondRead = C_UnitAurasPrivate.GetAllPrivateAuras("player")
+
+            return fired == 1 and callbackCalls == 1 and lastPrivateSource == "Private" and sawFullUpdate,
+                   #allAuras == 2 and auraByID and auraByID.spellId == 1001,
+                   secondRead[1].spellId == 1001
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        update_callback_fired,
+        "registered update callbacks should fire for matching unit"
+    );
+    assert!(
+        lookup_data_ok,
+        "private aura query methods should read configured unit aura state"
+    );
+    assert!(
+        read_is_copy,
+        "GetAllPrivateAuras should return a copy, not mutable internal state"
+    );
+}
