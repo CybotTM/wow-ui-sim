@@ -126,7 +126,7 @@ fn build_item_lines(item: &crate::items::ItemInfo, lines: &mut Vec<TooltipLine>)
     }
 }
 
-pub(super) fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
+pub(crate) fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
     let start = link.find("item:")?;
     let after = &link[start + 5..];
     let end = after

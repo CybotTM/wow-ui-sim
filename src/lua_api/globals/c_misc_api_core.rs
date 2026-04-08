@@ -222,6 +222,10 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         "GetUnitDebuff",
         lua.create_function(create_unit_debuff_tooltip)?,
     )?;
+    t.set(
+        "GetUnitAura",
+        lua.create_function(create_unit_aura_tooltip)?,
+    )?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -326,6 +330,17 @@ fn create_unit_debuff_tooltip(
     const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
 
     build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA)
+}
+
+fn create_unit_aura_tooltip(
+    lua: &Lua,
+    (unit, index, filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    if filter.as_deref().is_some_and(|f| f.contains("HARMFUL")) {
+        return create_unit_debuff_tooltip(lua, (unit, index, filter));
+    }
+
+    create_unit_buff_tooltip(lua, (unit, index, filter))
 }
 
 fn build_empty_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {

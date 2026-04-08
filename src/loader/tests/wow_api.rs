@@ -727,13 +727,17 @@ fn test_c_tooltip_info_get_unit_buff_returns_aura_tooltip_lines() {
         .eval(
             r#"
             local tooltip = C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL")
-            if not tooltip or tooltip.type ~= Enum.TooltipDataType.UnitAura or not tooltip.lines then
+            local auraTooltip = C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL")
+            if not tooltip or not auraTooltip or tooltip.type ~= Enum.TooltipDataType.UnitAura or not tooltip.lines then
                 return false
             end
 
             local nameLine = tooltip.lines[1]
             local durationLine = tooltip.lines[2]
             local descriptionLine = tooltip.lines[3]
+            local auraNameLine = auraTooltip.lines[1]
+            local auraDurationLine = auraTooltip.lines[2]
+            local auraDescriptionLine = auraTooltip.lines[3]
 
             return nameLine
                 and nameLine.type == Enum.TooltipDataLineType.SpellName
@@ -745,12 +749,22 @@ fn test_c_tooltip_info_get_unit_buff_returns_aura_tooltip_lines() {
                 and type(descriptionLine.leftText) == "string"
                 and descriptionLine.leftText ~= ""
                 and descriptionLine.wrapText == true
+                and auraTooltip.type == Enum.TooltipDataType.UnitAura
+                and auraNameLine
+                and auraNameLine.leftText == "Flash of Light"
+                and auraDurationLine
+                and auraDurationLine.leftText == "1 hr"
+                and auraDescriptionLine
+                and auraDescriptionLine.type == Enum.TooltipDataLineType.SpellDescription
+                and type(auraDescriptionLine.leftText) == "string"
+                and auraDescriptionLine.leftText ~= ""
+                and auraDescriptionLine.wrapText == true
             "#,
         )
         .unwrap();
     assert!(
         has_real_tooltip,
-        "C_TooltipInfo.GetUnitBuff should expose aura name, duration, and description lines",
+        "C_TooltipInfo.GetUnitBuff and GetUnitAura should expose aura name, duration, and description lines",
     );
 }
 
@@ -771,6 +785,54 @@ fn test_c_tooltip_info_get_unit_debuff_returns_empty_without_simulated_debuffs()
     assert!(
         is_empty_tooltip,
         "C_TooltipInfo.GetUnitDebuff should return an empty UnitAura tooltip when no debuffs exist",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_unit_aura_returns_helpful_and_harmful_tooltips() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().player.buffs = vec![crate::lua_api::game_data::AuraInfo {
+        name: "Flash of Light".to_string(),
+        spell_id: 19750,
+        icon: 135987,
+        duration: 3600.0,
+        expiration_time: 3600.0,
+        applications: 0,
+        source_unit: "player".to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: true,
+        aura_instance_id: 1,
+    }];
+
+    let has_expected_tooltips: bool = env
+        .eval(
+            r#"
+            local helpfulTooltip = C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL")
+            local harmfulTooltip = C_TooltipInfo.GetUnitAura("player", 1, "HARMFUL")
+
+            local helpfulNameLine = helpfulTooltip and helpfulTooltip.lines and helpfulTooltip.lines[1]
+            local helpfulDurationLine = helpfulTooltip and helpfulTooltip.lines and helpfulTooltip.lines[2]
+            local harmfulIsEmpty = harmfulTooltip
+                and harmfulTooltip.type == Enum.TooltipDataType.UnitAura
+                and harmfulTooltip.lines
+                and next(harmfulTooltip.lines) == nil
+
+            return helpfulTooltip
+                and helpfulTooltip.type == Enum.TooltipDataType.UnitAura
+                and helpfulNameLine
+                and helpfulNameLine.type == Enum.TooltipDataLineType.SpellName
+                and helpfulNameLine.leftText == "Flash of Light"
+                and helpfulDurationLine
+                and helpfulDurationLine.leftText == "1 hr"
+                and harmfulIsEmpty
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_expected_tooltips,
+        "C_TooltipInfo.GetUnitAura should route HELPFUL to buffs and HARMFUL to debuffs",
     );
 }
 
