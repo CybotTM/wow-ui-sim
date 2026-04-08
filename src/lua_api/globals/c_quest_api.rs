@@ -174,7 +174,14 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
 
 /// Quest log query methods (counts, GetInfo, objectives).
 fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    // Total entries (headers + quests), and number of actual quests
+    register_quest_log_entry_queries(lua, t)?;
+    register_quest_log_limit_queries(lua, t)?;
+    register_quest_log_map_queries(lua, t)?;
+    register_quest_log_misc_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_quest_log_entry_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let num_entries = QUEST_LOG.len() as i32;
     let num_quests = quest_count();
     t.set(
@@ -187,12 +194,7 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestIDForLogIndex",
-        lua.create_function(|_, idx: i32| {
-            Ok(match entry_at(idx) {
-                Some(QuestLogEntry::Quest { quest_id, .. }) => *quest_id,
-                _ => 0,
-            })
-        })?,
+        lua.create_function(|_, idx: i32| Ok(quest_id_for_log_index(idx)))?,
     )?;
     t.set(
         "GetLogIndexForQuestID",
@@ -202,11 +204,19 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetQuestObjectives",
         lua.create_function(|lua, _id: i32| lua.create_table())?,
     )?;
+    Ok(())
+}
+
+fn register_quest_log_limit_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetMaxNumQuestsCanAccept",
         lua.create_function(|_, ()| Ok(35i32))?,
     )?;
     t.set("GetMaxNumQuests", lua.create_function(|_, ()| Ok(35i32))?)?;
+    Ok(())
+}
+
+fn register_quest_log_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "SetMapForQuestPOIs",
         lua.create_function(|_, _map_id: i32| Ok(()))?,
@@ -216,12 +226,16 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         lua.create_function(|_, _map_id: i32| Ok((Value::Nil, Value::Nil)))?,
     )?;
     t.set(
-        "GetQuestAdditionalHighlights",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
         "GetQuestsOnMap",
         lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+    )?;
+    Ok(())
+}
+
+fn register_quest_log_misc_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "GetQuestAdditionalHighlights",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
     t.set(
         "IsQuestReplayable",
@@ -232,6 +246,13 @@ fn register_quest_log_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
     Ok(())
+}
+
+fn quest_id_for_log_index(idx: i32) -> i32 {
+    match entry_at(idx) {
+        Some(QuestLogEntry::Quest { quest_id, .. }) => *quest_id,
+        _ => 0,
+    }
 }
 
 /// Create a quest info table for a given log index.
