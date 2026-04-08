@@ -337,11 +337,127 @@ fn register_player_location_stub(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+const SECURE_TRANSFER_LUA: &str = r#"
+    C_SecureTransfer = C_SecureTransfer or {}
+    local api = C_SecureTransfer
+
+    api._state = api._state or {
+        shouldShowTradeOfferWarning = false,
+        tradePartner = nil,
+        mailInfo = {
+            target = "",
+            sendMoney = 0,
+        },
+        housingPurchaseCost = 0,
+        housingPurchaseQuantity = 1,
+        housingVCPurchaseProductID = 0,
+        acceptTradeCount = 0,
+        sendMailCount = 0,
+        completeHousingPurchaseCount = 0,
+        completeHousingVCPurchaseCount = 0,
+        cancelCount = 0,
+        lastAction = nil,
+    }
+
+    local function normalizeMoney(value)
+        local n = tonumber(value)
+        if n == nil then
+            return 0
+        end
+        return math.max(0, math.floor(n))
+    end
+
+    local function normalizeQuantity(value)
+        local n = tonumber(value)
+        if n == nil then
+            return 1
+        end
+        return math.max(1, math.floor(n))
+    end
+
+    local function normalizeOptionalString(value)
+        if type(value) == "string" and value ~= "" then
+            return value
+        end
+        return nil
+    end
+
+    local function getMailInfo()
+        local state = api._state
+        local info = state.mailInfo
+        if type(info) ~= "table" then
+            info = {}
+            state.mailInfo = info
+        end
+        local target = info.target
+        if type(target) ~= "string" then
+            target = ""
+        end
+        return {
+            target = target,
+            sendMoney = normalizeMoney(info.sendMoney),
+        }
+    end
+
+    api.AcceptTrade = api.AcceptTrade or function()
+        local state = api._state
+        state.acceptTradeCount = (tonumber(state.acceptTradeCount) or 0) + 1
+        state.lastAction = "AcceptTrade"
+    end
+
+    api.Cancel = api.Cancel or function()
+        local state = api._state
+        state.cancelCount = (tonumber(state.cancelCount) or 0) + 1
+        state.lastAction = "Cancel"
+    end
+
+    api.CompleteHousingPurchase = api.CompleteHousingPurchase or function()
+        local state = api._state
+        state.completeHousingPurchaseCount = (tonumber(state.completeHousingPurchaseCount) or 0) + 1
+        state.lastAction = "CompleteHousingPurchase"
+    end
+
+    api.CompleteHousingVCPurchase = api.CompleteHousingVCPurchase or function()
+        local state = api._state
+        state.completeHousingVCPurchaseCount = (tonumber(state.completeHousingVCPurchaseCount) or 0) + 1
+        state.lastAction = "CompleteHousingVCPurchase"
+    end
+
+    api.GetHousingPurchaseCost = api.GetHousingPurchaseCost or function()
+        return normalizeMoney(api._state.housingPurchaseCost)
+    end
+
+    api.GetHousingPurchaseQuantity = api.GetHousingPurchaseQuantity or function()
+        return normalizeQuantity(api._state.housingPurchaseQuantity)
+    end
+
+    api.GetHousingVCPurchaseProductID = api.GetHousingVCPurchaseProductID or function()
+        return normalizeMoney(api._state.housingVCPurchaseProductID)
+    end
+
+    api.GetMailInfo = api.GetMailInfo or function()
+        return getMailInfo()
+    end
+
+    api.GetTradePartner = api.GetTradePartner or function()
+        return normalizeOptionalString(api._state.tradePartner)
+    end
+
+    api.SendMail = api.SendMail or function()
+        local state = api._state
+        state.sendMailCount = (tonumber(state.sendMailCount) or 0) + 1
+        state.lastAction = "SendMail"
+    end
+
+    api.ShouldShowTradeOfferWarning = api.ShouldShowTradeOfferWarning or function()
+        return api._state.shouldShowTradeOfferWarning == true
+    end
+"#;
+
 fn register_secure_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    g.set(
-        "C_SecureTransfer",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
+    lua.load(SECURE_TRANSFER_LUA).exec()?;
+    g.get::<mlua::Table>("C_SecureTransfer")
+        .and_then(|secure_transfer| g.set("C_SecureTransfer", secure_transfer))?;
     g.set(
         "CanAutoSetFKeyBinding",
         lua.create_function(|_, ()| Ok(false))?,
