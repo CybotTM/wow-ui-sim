@@ -1372,15 +1372,60 @@ const LEVEL_LINK_LUA: &str = r#"
     end
 "#;
 
+const EVENT_SCHEDULER_LUA: &str = r#"
+    C_EventScheduler = C_EventScheduler or {}
+    local api = C_EventScheduler
+
+    api._state = api._state or {
+        canShowEvents = nil,
+        suppressDisplay = false,
+        ongoingEvents = {},
+        scheduledEvents = {},
+    }
+
+    local function normalizeBool(value)
+        if value == true then
+            return true
+        end
+        if value == false then
+            return false
+        end
+        return nil
+    end
+
+    local function hasVisibleEvents(list)
+        if type(list) ~= "table" then
+            return false
+        end
+        for _, eventInfo in ipairs(list) do
+            if eventInfo ~= nil then
+                return true
+            end
+        end
+        return false
+    end
+
+    api.CanShowEvents = api.CanShowEvents or function()
+        local state = api._state
+        local override = normalizeBool(state.canShowEvents)
+        if override ~= nil then
+            return override
+        end
+        if state.suppressDisplay == true then
+            return false
+        end
+        return hasVisibleEvents(state.ongoingEvents) or hasVisibleEvents(state.scheduledEvents)
+    end
+"#;
+
 /// C_LevelLink, C_EventScheduler, C_RestrictedActions, C_TransmogOutfitInfo stubs.
 fn register_utility_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     lua.load(LEVEL_LINK_LUA).exec()?;
     g.get::<mlua::Table>("C_LevelLink")
         .and_then(|level_link| g.set("C_LevelLink", level_link))?;
-
-    let es = lua.create_table()?;
-    es.set("CanShowEvents", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("C_EventScheduler", es)?;
+    lua.load(EVENT_SCHEDULER_LUA).exec()?;
+    g.get::<mlua::Table>("C_EventScheduler")
+        .and_then(|event_scheduler| g.set("C_EventScheduler", event_scheduler))?;
     Ok(())
 }
 
