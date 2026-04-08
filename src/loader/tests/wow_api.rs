@@ -451,6 +451,132 @@ fn test_c_tooltip_info_exists() {
     assert_eq!(ty, "table");
 }
 
+fn flash_of_light_aura() -> crate::lua_api::game_data::AuraInfo {
+    crate::lua_api::game_data::AuraInfo {
+        name: "Flash of Light".to_string(),
+        spell_id: 19750,
+        icon: 135987,
+        duration: 3600.0,
+        expiration_time: 3600.0,
+        applications: 0,
+        source_unit: "player".to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: true,
+        aura_instance_id: 1,
+    }
+}
+
+fn lady_liadrin_target() -> crate::lua_api::game_data::TargetInfo {
+    crate::lua_api::game_data::TargetInfo {
+        unit_id: "target".to_string(),
+        name: "Lady Liadrin".to_string(),
+        class_index: 2,
+        level: 80,
+        health: 100_000,
+        health_max: 100_000,
+        power: 50_000,
+        power_max: 100_000,
+        power_type: 0,
+        power_type_name: "MANA".to_string(),
+        is_player: true,
+        is_enemy: false,
+        guid: "Player-0000-0000BEEF".to_string(),
+        classification: "normal".to_string(),
+        creature_type: "Blood Elf".to_string(),
+        reaction: 5,
+    }
+}
+
+fn seed_c_tooltip_info_test_state(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.player.buffs = vec![flash_of_light_aura()];
+    state.current_target = Some(lady_liadrin_target());
+}
+
+#[test]
+fn test_c_tooltip_info_shapes_match_tooltip_data_handler_expectations() {
+    let env = WowLuaEnv::new().unwrap();
+    seed_c_tooltip_info_test_state(&env);
+    let all_shapes_match: bool = env
+        .eval(
+            r#"
+            local function colorShapeOk(color)
+                return color == nil or (type(color) == "table" and type(color.GetRGB) == "function")
+            end
+
+            local function lineShapeOk(line)
+                return type(line) == "table"
+                    and type(line.type) == "number"
+                    and (line.leftText == nil or type(line.leftText) == "string")
+                    and colorShapeOk(line.leftColor)
+                    and (line.wrapText == nil or type(line.wrapText) == "boolean")
+                    and (line.rightText == nil or type(line.rightText) == "string")
+                    and colorShapeOk(line.rightColor)
+                    and (line.leftOffset == nil or type(line.leftOffset) == "number")
+            end
+
+            local function tooltipShapeOk(tooltip, expectedType, allowEmpty)
+                if type(tooltip) ~= "table" or tooltip.type ~= expectedType or type(tooltip.lines) ~= "table" then
+                    return false
+                end
+
+                local lineCount = 0
+                for index, line in ipairs(tooltip.lines) do
+                    lineCount = index
+                    if not lineShapeOk(line) then
+                        return false
+                    end
+                end
+
+                return allowEmpty and lineCount == 0 or lineCount > 0
+            end
+
+            local nodeIDs = C_Traits.GetTreeNodes(790)
+            local entryID
+            for _, nodeID in ipairs(nodeIDs) do
+                local nodeInfo = C_Traits.GetNodeInfo(1, nodeID)
+                if nodeInfo and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+                    entryID = nodeInfo.entryIDs[1]
+                    break
+                end
+            end
+
+            if not entryID then
+                return false
+            end
+
+            local checks = {
+                tooltipShapeOk(C_TooltipInfo.GetTraitEntry(entryID, 1), Enum.TooltipDataType.Spell, false),
+                tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
+                tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
+                tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
+                tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
+                tooltipShapeOk(C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+                tooltipShapeOk(C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
+                tooltipShapeOk(C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+                tooltipShapeOk(C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r"), Enum.TooltipDataType.Item, false),
+                tooltipShapeOk(C_TooltipInfo.GetHyperlink(GetSpellLink(19750)), Enum.TooltipDataType.Spell, false),
+                tooltipShapeOk(C_TooltipInfo.GetUnit("player"), Enum.TooltipDataType.Unit, false),
+            }
+
+            for _, check in ipairs(checks) do
+                if not check then
+                    return false
+                end
+            end
+
+            return true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        all_shapes_match,
+        "every implemented C_TooltipInfo getter should return tooltip data tables that TooltipDataHandlerMixin can consume",
+    );
+}
+
 #[test]
 fn test_c_traits_get_node_info_exposes_non_nil_rank_delta_fields() {
     let env = WowLuaEnv::new().unwrap();
@@ -708,20 +834,7 @@ fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
 #[test]
 fn test_c_tooltip_info_get_unit_buff_returns_aura_tooltip_lines() {
     let env = WowLuaEnv::new().unwrap();
-    env.state().borrow_mut().player.buffs = vec![crate::lua_api::game_data::AuraInfo {
-        name: "Flash of Light".to_string(),
-        spell_id: 19750,
-        icon: 135987,
-        duration: 3600.0,
-        expiration_time: 3600.0,
-        applications: 0,
-        source_unit: "player".to_string(),
-        is_helpful: true,
-        is_stealable: false,
-        can_apply_aura: true,
-        is_from_player_or_player_pet: true,
-        aura_instance_id: 1,
-    }];
+    seed_c_tooltip_info_test_state(&env);
 
     let has_real_tooltip: bool = env
         .eval(
@@ -791,20 +904,7 @@ fn test_c_tooltip_info_get_unit_debuff_returns_empty_without_simulated_debuffs()
 #[test]
 fn test_c_tooltip_info_get_unit_aura_returns_helpful_and_harmful_tooltips() {
     let env = WowLuaEnv::new().unwrap();
-    env.state().borrow_mut().player.buffs = vec![crate::lua_api::game_data::AuraInfo {
-        name: "Flash of Light".to_string(),
-        spell_id: 19750,
-        icon: 135987,
-        duration: 3600.0,
-        expiration_time: 3600.0,
-        applications: 0,
-        source_unit: "player".to_string(),
-        is_helpful: true,
-        is_stealable: false,
-        can_apply_aura: true,
-        is_from_player_or_player_pet: true,
-        aura_instance_id: 1,
-    }];
+    seed_c_tooltip_info_test_state(&env);
 
     let has_expected_tooltips: bool = env
         .eval(
@@ -839,6 +939,7 @@ fn test_c_tooltip_info_get_unit_aura_returns_helpful_and_harmful_tooltips() {
 #[test]
 fn test_c_tooltip_info_get_unit_returns_player_and_target_tooltips() {
     let env = WowLuaEnv::new().unwrap();
+    seed_c_tooltip_info_test_state(&env);
     let (player_name, player_level, player_race, player_class, player_color) = {
         let state = env.state().borrow();
         let player = &state.player;
@@ -875,25 +976,6 @@ fn test_c_tooltip_info_get_unit_returns_player_and_target_tooltips() {
             player_color,
         )
     };
-    env.state().borrow_mut().current_target = Some(crate::lua_api::game_data::TargetInfo {
-        unit_id: "target".to_string(),
-        name: "Lady Liadrin".to_string(),
-        class_index: 2,
-        level: 80,
-        health: 100_000,
-        health_max: 100_000,
-        power: 50_000,
-        power_max: 100_000,
-        power_type: 0,
-        power_type_name: "MANA".to_string(),
-        is_player: true,
-        is_enemy: false,
-        guid: "Player-0000-0000BEEF".to_string(),
-        classification: "normal".to_string(),
-        creature_type: "Blood Elf".to_string(),
-        reaction: 5,
-    });
-
     let has_expected_tooltips: bool = env
         .eval(&format!(
             r#"
