@@ -3,7 +3,7 @@
 //! Single source of truth for all quest data. The `QUEST_LOG` array defines
 //! headers and quests with objectives. All quest APIs derive from this array.
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::Cell;
 
 thread_local! {
@@ -284,13 +284,27 @@ fn create_quest_info(lua: &Lua, idx: i32) -> Result<Value> {
 fn register_quest_log_requests(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "RequestLoadQuestByID",
-        lua.create_function(|_, _id: i32| Ok(()))?,
+        lua.create_function(|lua, id: i32| {
+            let success = find_quest_by_id(id).is_some();
+            fire_event(
+                lua,
+                "QUEST_DATA_LOAD_RESULT",
+                &[Value::Integer(i64::from(id)), Value::Boolean(success)],
+            )
+        })?,
     )?;
     t.set(
         "UpdateCampaignHeaders",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
     Ok(())
+}
+
+fn fire_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    let mut call_args = vec![Value::String(lua.create_string(event_name)?)];
+    call_args.extend(args.iter().cloned());
+    fire.call(MultiValue::from_vec(call_args))
 }
 
 /// Quest log info methods (titles, tags).

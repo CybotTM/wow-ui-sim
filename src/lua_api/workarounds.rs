@@ -15,7 +15,6 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_bags::fix_bags_bar_anchor(env);
     workarounds_bags::fix_bag_item_context_overlay(env);
     workarounds_editmode::init_edit_mode_layout(env);
-    super::workarounds_tracker::fire_quest_callbacks(env);
     hide_talent_loadout_dialogs(env);
     suppress_spellbook_tutorials(env);
     attach_castbar_to_player_frame(env);

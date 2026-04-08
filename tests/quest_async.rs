@@ -1,0 +1,164 @@
+mod common;
+
+use std::path::PathBuf;
+use wow_ui_sim::loader::load_addon;
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn blizzard_ui_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn env_with_object_api() -> WowLuaEnv {
+    let env = common::env_with_shared_xml();
+    let ui = blizzard_ui_dir();
+
+    let colors_toc = ui.join("Blizzard_Colors/Blizzard_Colors_Mainline.toc");
+    load_addon(&env.loader_env(), &colors_toc).expect("Failed to load Blizzard_Colors");
+
+    let object_api_toc = ui.join("Blizzard_ObjectAPI/Blizzard_ObjectAPI_Mainline.toc");
+    load_addon(&env.loader_env(), &object_api_toc).expect("Failed to load Blizzard_ObjectAPI");
+
+    env
+}
+
+#[test]
+fn request_load_quest_by_id_fires_result_event() {
+    let env = env_with_object_api();
+
+    let (seen, quest_id, success): (bool, i32, bool) = env
+        .eval(
+            r#"
+            local seen, got_id, got_success = false, 0, false
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+            f:SetScript("OnEvent", function(_, event, id, ok)
+                if event == "QUEST_DATA_LOAD_RESULT" then
+                    seen = true
+                    got_id = id
+                    got_success = ok
+                end
+            end)
+
+            C_QuestLog.RequestLoadQuestByID(80000)
+            return seen, got_id, got_success
+            "#,
+        )
+        .unwrap();
+
+    assert!(seen, "QUEST_DATA_LOAD_RESULT should fire");
+    assert_eq!(quest_id, 80000);
+    assert!(success, "known quest IDs should report success");
+}
+
+#[test]
+fn quest_event_listener_callback_runs_from_request_load() {
+    let env = env_with_object_api();
+
+    let callback_fired: bool = env
+        .eval(
+            r#"
+            local fired = false
+            QuestEventListener:AddCallback(80001, function()
+                fired = true
+            end)
+
+            C_QuestLog.RequestLoadQuestByID(80001)
+            return fired
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        callback_fired,
+        "QuestEventListener callbacks should run via QUEST_DATA_LOAD_RESULT"
+    );
+}
+
+#[test]
+fn request_load_unknown_quest_reports_failure() {
+    let env = env_with_object_api();
+
+    let (seen, quest_id, success, callback_fired): (bool, i32, bool, bool) = env
+        .eval(
+            r#"
+            local seen, got_id, got_success = false, 0, true
+            local callbackFired = false
+
+            local f = CreateFrame("Frame")
+            f:RegisterEvent("QUEST_DATA_LOAD_RESULT")
+            f:SetScript("OnEvent", function(_, event, id, ok)
+                if event == "QUEST_DATA_LOAD_RESULT" then
+                    seen = true
+                    got_id = id
+                    got_success = ok
+                end
+            end)
+
+            QuestEventListener:AddCallback(99999, function()
+                callbackFired = true
+            end)
+
+            C_QuestLog.RequestLoadQuestByID(99999)
+            return seen, got_id, got_success, callbackFired
+            "#,
+        )
+        .unwrap();
+
+    assert!(seen, "unknown quest requests should still resolve");
+    assert_eq!(quest_id, 99999);
+    assert!(!success, "unknown quest IDs should report failure");
+    assert!(
+        !callback_fired,
+        "failed quest loads should clear callbacks without executing them"
+    );
+}
+
+#[test]
+fn spell_event_listener_callback_runs_from_request_load() {
+    let env = env_with_object_api();
+
+    let callback_fired: bool = env
+        .eval(
+            r#"
+            local fired = false
+            local spell = Spell:CreateFromSpellID(35395)
+            spell:ContinueOnSpellLoad(function()
+                fired = true
+            end)
+
+            C_Spell.RequestLoadSpellData(35395)
+            return fired
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        callback_fired,
+        "SpellEventListener callbacks should run via SPELL_DATA_LOAD_RESULT"
+    );
+}
+
+#[test]
+fn item_event_listener_callback_runs_from_request_load() {
+    let env = env_with_object_api();
+
+    let callback_fired: bool = env
+        .eval(
+            r#"
+            local fired = false
+            local item = Item:CreateFromItemID(6948)
+            item:ContinueOnItemLoad(function()
+                fired = true
+            end)
+
+            C_Item.RequestLoadItemDataByID(6948)
+            return fired
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        callback_fired,
+        "ItemEventListener callbacks should run via ITEM_DATA_LOAD_RESULT"
+    );
+}

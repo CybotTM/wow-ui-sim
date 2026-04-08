@@ -10,21 +10,6 @@ pub(crate) fn init_objective_tracker(env: &WowLuaEnv) {
     setup_tracker_frame(env);
 }
 
-/// Fire QuestEventListener callbacks for tracked quests so quest block
-/// headers get their titles. QUEST_LOG_UPDATE refreshes the tracker
-/// structure, but header text comes from QuestEventListener.FireCallbacks.
-pub(crate) fn fire_quest_callbacks(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if QuestEventListener and QuestEventListener.FireCallbacks then
-            for _, qid in ipairs({80000, 80001, 80002}) do
-                pcall(QuestEventListener.FireCallbacks, QuestEventListener, qid)
-            end
-        end
-    "#,
-    );
-}
-
 fn setup_tracker_frame(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"

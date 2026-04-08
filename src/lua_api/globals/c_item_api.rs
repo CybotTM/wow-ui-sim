@@ -3,7 +3,7 @@
 //! Contains item information, container, encoding utilities, and inventory slot functions.
 
 use crate::lua_api::state::SimState;
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -284,7 +284,17 @@ fn register_c_item_link_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 /// DoesItemExist, IsBound, etc. are in c_item_location_api.rs (state-aware).
 fn register_c_item_stub_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     add_nil_value_stub(lua, t, "GetItemLearnTransmogSet")?;
-    add_unit_stub(lua, t, "RequestLoadItemDataByID")?;
+    t.set(
+        "RequestLoadItemDataByID",
+        lua.create_function(|lua, item_id: i32| {
+            let success = crate::items::get_item(item_id as u32).is_some();
+            fire_event(
+                lua,
+                "ITEM_DATA_LOAD_RESULT",
+                &[Value::Integer(i64::from(item_id)), Value::Boolean(success)],
+            )
+        })?,
+    )?;
     add_bool_value_stub(lua, t, "CanViewItemPowers")?;
     add_i32_value_stub(lua, t, "GetItemNumSockets", 0)?;
     add_i32_multivalue_stub(lua, t, "GetItemGemID", 0)?;
@@ -302,9 +312,11 @@ fn add_nil_value_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
     Ok(())
 }
 
-fn add_unit_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
-    t.set(name, lua.create_function(|_, _id: i32| Ok(()))?)?;
-    Ok(())
+fn fire_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    let mut call_args = vec![Value::String(lua.create_string(event_name)?)];
+    call_args.extend(args.iter().cloned());
+    fire.call(MultiValue::from_vec(call_args))
 }
 
 fn add_bool_value_stub(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {

@@ -6,7 +6,7 @@
 
 use super::spellbook_data;
 use crate::lua_api::SimState;
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -483,7 +483,14 @@ fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
 fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "RequestLoadSpellData",
-        lua.create_function(|_, _spell_id: i32| Ok(()))?,
+        lua.create_function(|lua, spell_id: i32| {
+            let success = crate::spells::get_spell(spell_id as u32).is_some();
+            fire_event(
+                lua,
+                "SPELL_DATA_LOAD_RESULT",
+                &[Value::Integer(i64::from(spell_id)), Value::Boolean(success)],
+            )
+        })?,
     )?;
     t.set(
         "IsAutoAttackSpell",
@@ -507,6 +514,13 @@ fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| Ok((false, false, false)))?,
     )?;
     Ok(())
+}
+
+fn fire_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    let mut call_args = vec![Value::String(lua.create_string(event_name)?)];
+    call_args.extend(args.iter().cloned());
+    fire.call(MultiValue::from_vec(call_args))
 }
 
 /// Buff/aura classification and description stubs.
