@@ -95,6 +95,7 @@ pub mod locale_api;
 pub mod lua_duration_object;
 pub mod mixin_api;
 pub mod player_api;
+pub(crate) mod player_api_helpers;
 pub mod profession_data;
 pub mod protected_call;
 pub mod quest_frames;

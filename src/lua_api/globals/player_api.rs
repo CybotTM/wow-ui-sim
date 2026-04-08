@@ -10,6 +10,12 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use super::player_api_helpers::{
+    ambiguate_name, format_large_number, lookup_avoidance, lookup_combat_rating,
+    lookup_combat_rating_bonus, lookup_haste, lookup_lifesteal, lookup_mastery_effect,
+    lookup_speed, lookup_versatility, stub_difficulty_info,
+};
+
 /// Register all player-related API functions to the Lua globals table.
 pub fn register_player_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_battlenet_functions(lua)?;
@@ -481,47 +487,6 @@ fn register_combat_rating_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn lookup_combat_rating(lua: &Lua, id: i32) -> Result<i32> {
-    use crate::lua_api::state::SimState;
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    Ok(lua
-        .app_data_ref::<Rc<RefCell<SimState>>>()
-        .map(|s| {
-            let st = &s.borrow().player.stats;
-            match id {
-                9 => st.crit_rating,
-                6 => st.haste_rating,
-                26 => st.mastery_rating,
-                14 => st.versatility_rating,
-                15 => st.speed_rating,
-                17 => st.leech_rating,
-                18 => st.avoidance_rating,
-                _ => 0,
-            }
-        })
-        .unwrap_or(0))
-}
-
-fn lookup_combat_rating_bonus(lua: &Lua, id: i32) -> Result<f64> {
-    use crate::lua_api::state::SimState;
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    Ok(lua
-        .app_data_ref::<Rc<RefCell<SimState>>>()
-        .map(|s| {
-            let st = &s.borrow().player.stats;
-            match id {
-                9 => st.crit_pct(),
-                6 => st.haste_pct(),
-                26 => st.mastery_pct(),
-                14 => st.versatility_pct(),
-                _ => 0.0,
-            }
-        })
-        .unwrap_or(0.0))
-}
-
 /// Additional character stat query stubs: secondary stats, regen, spell power.
 fn register_character_stat_functions_2(lua: &Lua) -> Result<()> {
     register_secondary_stat_stubs(lua)?;
@@ -557,44 +522,6 @@ fn register_secondary_stat_stubs(lua: &Lua) -> Result<()> {
     g.set("GetBonusBarIndex", lua.create_function(|_, ()| Ok(0i32))?)?;
     g.set("GetShieldBlock", lua.create_function(|_, ()| Ok(0.0_f64))?)?;
     Ok(())
-}
-
-/// Helper: read a f64 stat from PlayerState via app_data_ref.
-fn read_player_stat(
-    lua: &Lua,
-    f: impl Fn(&crate::lua_api::state_types::CharacterStats) -> f64,
-) -> f64 {
-    use crate::lua_api::state::SimState;
-    use std::cell::RefCell;
-    use std::rc::Rc;
-    lua.app_data_ref::<Rc<RefCell<SimState>>>()
-        .map(|s| f(&s.borrow().player.stats))
-        .unwrap_or(0.0)
-}
-
-fn lookup_mastery_effect(lua: &Lua, _: ()) -> Result<(f64, f64)> {
-    let m = read_player_stat(lua, |s| s.mastery_pct());
-    Ok((m + 8.0, m))
-}
-
-fn lookup_haste(lua: &Lua, _: ()) -> Result<f64> {
-    Ok(read_player_stat(lua, |s| s.haste_pct()))
-}
-
-fn lookup_versatility(lua: &Lua, _: Value) -> Result<f64> {
-    Ok(read_player_stat(lua, |s| s.versatility_pct()))
-}
-
-fn lookup_lifesteal(lua: &Lua, _: ()) -> Result<f64> {
-    Ok(read_player_stat(lua, |s| s.leech_rating as f64 / 100.0))
-}
-
-fn lookup_avoidance(lua: &Lua, _: ()) -> Result<f64> {
-    Ok(read_player_stat(lua, |s| s.avoidance_rating as f64 / 72.0))
-}
-
-fn lookup_speed(lua: &Lua, _: ()) -> Result<f64> {
-    Ok(read_player_stat(lua, |s| s.speed_rating as f64 / 50.0))
 }
 
 /// Spell power, regen, defense, and PVP stat stubs.
@@ -685,37 +612,6 @@ fn register_difficulty_and_utility_stubs(lua: &Lua) -> Result<()> {
     g.set("Ambiguate", lua.create_function(ambiguate_name)?)?;
     g.set("AreTalentsLocked", lua.create_function(|_, ()| Ok(false))?)?;
     Ok(())
-}
-
-/// Returns (name, groupType, isHeroic, isChallengeMode, toggleDifficultyID).
-fn stub_difficulty_info(lua: &Lua, _id: Value) -> Result<mlua::MultiValue> {
-    Ok(mlua::MultiValue::from_vec(vec![
-        Value::String(lua.create_string("")?),
-        Value::String(lua.create_string("")?),
-        Value::Boolean(false),
-        Value::Boolean(false),
-        Value::Integer(0),
-    ]))
-}
-
-fn format_large_number(_: &Lua, amount: Value) -> Result<String> {
-    Ok(match amount {
-        Value::Integer(n) => n.to_string(),
-        Value::Number(n) => format!("{:.0}", n),
-        _ => "0".to_string(),
-    })
-}
-
-fn ambiguate_name(_: &Lua, (full_name, context): (String, String)) -> Result<String> {
-    let Some((name, _realm)) = full_name.split_once('-') else {
-        return Ok(full_name);
-    };
-    let shortened = match context.as_str() {
-        "none" => full_name,
-        "short" | "guild" | "all" => name.to_string(),
-        _ => name.to_string(),
-    };
-    Ok(shortened)
 }
 
 /// Player movement state functions (read from SimState.movement toggles).
