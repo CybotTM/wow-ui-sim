@@ -490,6 +490,77 @@ fn test_c_tooltip_info_get_trait_entry_returns_real_tooltip_lines() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_item_by_id_exposes_colored_name_and_binding_line() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_full_item_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetItemByID(229181)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            if not nameLine
+                or nameLine.type ~= Enum.TooltipDataLineType.ItemName
+                or nameLine.leftText ~= "Ordained Forge Maul"
+                or type(nameLine.leftColor) ~= "table"
+            then
+                return false
+            end
+
+            local r, g, b = nameLine.leftColor:GetRGB()
+            if math.abs(r - 0.64) > 0.01 or math.abs(g - 0.21) > 0.01 or math.abs(b - 0.93) > 0.01 then
+                return false
+            end
+
+            local bindingLine = tooltip.lines[4]
+            return bindingLine
+                and bindingLine.type == Enum.TooltipDataLineType.ItemBinding
+                and bindingLine.leftText == ITEM_BIND_ON_PICKUP
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_full_item_tooltip,
+        "C_TooltipInfo.GetItemByID should expose item name color and binding text",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetItemByID(211992)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local equipSlotLine = tooltip.lines[3]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Entombed Seraph's Greaves"
+                and itemLevelLine
+                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
+                and itemLevelLine.leftText == "Item Level 571"
+                and equipSlotLine
+                and equipSlotLine.type == Enum.TooltipDataLineType.EquipSlot
+                and equipSlotLine.leftText == "Legs"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetItemByID should expose item, item-level, and equip-slot lines",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env

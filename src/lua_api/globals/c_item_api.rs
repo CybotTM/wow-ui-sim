@@ -512,6 +512,35 @@ fn inv_type_to_subclass(inv_type: u8) -> &'static str {
     }
 }
 
+/// Map inventory type to a human-readable equip slot label.
+pub(super) fn item_equip_slot_label(inv_type: u8) -> &'static str {
+    match inv_type {
+        1 => "Head",
+        2 => "Neck",
+        3 => "Shoulder",
+        4 => "Shirt",
+        5 | 20 => "Chest",
+        6 => "Waist",
+        7 => "Legs",
+        8 => "Feet",
+        9 => "Wrist",
+        10 => "Hands",
+        11 => "Finger",
+        12 => "Trinket",
+        13 => "One-Hand",
+        14 => "Shield",
+        15 => "Ranged",
+        16 => "Back",
+        17 => "Two-Hand",
+        21 => "Main Hand",
+        22 => "Off Hand",
+        23 => "Held In Off-hand",
+        25 => "Thrown",
+        26 => "Ranged",
+        _ => "",
+    }
+}
+
 /// Map inventory type to WoW equip location string.
 pub(super) fn inv_type_to_equip_loc(inv_type: u8) -> &'static str {
     match inv_type {

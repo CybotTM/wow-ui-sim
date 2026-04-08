@@ -204,6 +204,7 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         "GetTraitEntry",
         lua.create_function(create_trait_entry_tooltip)?,
     )?;
+    t.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -241,6 +242,164 @@ fn create_trait_entry_tooltip(lua: &Lua, (entry_id, rank): (i32, Option<i32>)) -
 
     tooltip.set("lines", lines)?;
     Ok(Value::Table(tooltip))
+}
+
+fn create_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item) = crate::items::get_item(item_id as u32) else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    build_filled_item_tooltip(lua, item, TOOLTIP_DATA_TYPE_ITEM)
+}
+
+fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
+    let tooltip = lua.create_table()?;
+    tooltip.set("type", tooltip_type)?;
+    tooltip.set("lines", lua.create_table()?)?;
+    Ok(Value::Table(tooltip))
+}
+
+fn build_filled_item_tooltip(
+    lua: &Lua,
+    item: &crate::items::ItemInfo,
+    tooltip_type: i32,
+) -> Result<Value> {
+    let tooltip = lua.create_table()?;
+    tooltip.set("type", tooltip_type)?;
+
+    let lines = lua.create_table()?;
+    build_item_tooltip_lines(lua, item, &lines)?;
+
+    tooltip.set("lines", lines)?;
+    Ok(Value::Table(tooltip))
+}
+
+fn build_item_tooltip_lines(
+    lua: &Lua,
+    item: &crate::items::ItemInfo,
+    lines: &mlua::Table,
+) -> Result<()> {
+    const TOOLTIP_LINE_TYPE_ITEM_BINDING: i32 = 20;
+    const TOOLTIP_LINE_TYPE_EQUIP_SLOT: i32 = 21;
+    const TOOLTIP_LINE_TYPE_ITEM_NAME: i32 = 22;
+    const TOOLTIP_LINE_TYPE_ITEM_LEVEL: i32 = 31;
+
+    append_item_name_line(lua, lines, 1, TOOLTIP_LINE_TYPE_ITEM_NAME, item)?;
+    let item_level_text = format!("Item Level {}", item.item_level);
+    append_item_tooltip_line(
+        lua,
+        lines,
+        2,
+        TOOLTIP_LINE_TYPE_ITEM_LEVEL,
+        &item_level_text,
+    )?;
+
+    let equip_slot = super::c_item_api::item_equip_slot_label(item.inventory_type);
+    let mut next_index = 3;
+    if !equip_slot.is_empty() {
+        append_item_tooltip_line(
+            lua,
+            lines,
+            next_index,
+            TOOLTIP_LINE_TYPE_EQUIP_SLOT,
+            equip_slot,
+        )?;
+        next_index += 1;
+    }
+
+    if let Some(binding_text) = item_binding_text(item.bonding) {
+        append_item_tooltip_line(
+            lua,
+            lines,
+            next_index,
+            TOOLTIP_LINE_TYPE_ITEM_BINDING,
+            binding_text,
+        )?;
+    }
+    Ok(())
+}
+
+fn append_item_name_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    item: &crate::items::ItemInfo,
+) -> Result<()> {
+    let line = lua.create_table()?;
+    line.set("type", line_type)?;
+    line.set("leftText", item.name)?;
+    line.set("leftColor", item_quality_color(lua, item.quality)?)?;
+    lines.set(index, line)?;
+    Ok(())
+}
+
+fn append_item_tooltip_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    text: &str,
+) -> Result<()> {
+    let line = lua.create_table()?;
+    line.set("type", line_type)?;
+    line.set("leftText", text)?;
+    lines.set(index, line)?;
+    Ok(())
+}
+
+fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
+    let (r, g, b) = match quality {
+        0 => (0.62, 0.62, 0.62),
+        1 => (1.00, 1.00, 1.00),
+        2 => (0.12, 1.00, 0.00),
+        3 => (0.00, 0.44, 0.87),
+        4 => (0.64, 0.21, 0.93),
+        5 => (1.00, 0.50, 0.00),
+        6 => (0.90, 0.80, 0.50),
+        7 | 8 => (0.00, 0.80, 1.00),
+        _ => (1.00, 1.00, 1.00),
+    };
+    let color = lua.create_table()?;
+    color.set("r", r)?;
+    color.set("g", g)?;
+    color.set("b", b)?;
+    color.set("a", 1.0)?;
+    color.set(
+        "GetRGB",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok((
+                this.get::<f64>("r")?,
+                this.get::<f64>("g")?,
+                this.get::<f64>("b")?,
+            ))
+        })?,
+    )?;
+    color.set(
+        "GetRGBA",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok((
+                this.get::<f64>("r")?,
+                this.get::<f64>("g")?,
+                this.get::<f64>("b")?,
+                this.get::<f64>("a")?,
+            ))
+        })?,
+    )?;
+    Ok(Value::Table(color))
+}
+
+fn item_binding_text(bonding: u8) -> Option<&'static str> {
+    match bonding {
+        1 => Some("Binds when picked up"),
+        2 => Some("Binds when equipped"),
+        3 => Some("Binds when used"),
+        4 => Some("Quest Item"),
+        8 => Some("Warbound"),
+        9 => Some("Warbound until equipped"),
+        _ => None,
+    }
 }
 
 fn register_profession_globals(lua: &Lua) -> Result<()> {
