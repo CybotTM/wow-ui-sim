@@ -666,15 +666,62 @@ fn register_ui_frame_manager_stub(lua: &Lua, _g: &mlua::Table) -> Result<()> {
 }
 
 /// ActionButtonSpellAlertManager stub — referenced by PetBattleUI OnLoad before ActionBar loads.
-fn register_action_button_spell_alert_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    if g.get::<Value>("ActionButtonSpellAlertManager")?.is_nil() {
-        let mgr = lua.create_table()?;
-        let noop = lua.create_function(|_, _: mlua::MultiValue| Ok(()))?;
-        mgr.set("ShowAlert", noop.clone())?;
-        mgr.set("HideAlert", noop)?;
-        g.set("ActionButtonSpellAlertManager", mgr)?;
-    }
-    Ok(())
+fn register_action_button_spell_alert_manager(lua: &Lua, _g: &mlua::Table) -> Result<()> {
+    lua.load(
+        r#"
+        if ActionButtonSpellAlertManager == nil then
+            ActionButtonSpellAlertManager = {
+                activeAlerts = {},
+                SpellAlertType = { Default = 1, AssistedCombatRotation = 2 },
+            }
+
+            local function GetAlertFrame(actionButton, create)
+                local frame = actionButton.SpellActivationAlert
+                if frame == nil and create then
+                    frame = CreateFrame("Frame", nil, actionButton)
+                    frame:SetAllPoints(actionButton)
+                    frame:Hide()
+                    actionButton.SpellActivationAlert = frame
+                end
+                return frame
+            end
+
+            function ActionButtonSpellAlertManager:ShowAlert(actionButton, skipBirth)
+                local currentType = self.activeAlerts[actionButton]
+                local alertType = self.SpellAlertType.Default
+                if currentType == alertType then
+                    local alertFrame = GetAlertFrame(actionButton, false)
+                    if alertFrame then
+                        alertFrame:Show()
+                    end
+                    return
+                end
+
+                self.activeAlerts[actionButton] = alertType
+                local alertFrame = GetAlertFrame(actionButton, true)
+                alertFrame:Show()
+            end
+
+            function ActionButtonSpellAlertManager:HideAlert(actionButton)
+                if self.activeAlerts[actionButton] == nil then
+                    return
+                end
+
+                local alertFrame = GetAlertFrame(actionButton, false)
+                if alertFrame then
+                    alertFrame:Hide()
+                end
+                self.activeAlerts[actionButton] = nil
+            end
+
+            function ActionButtonSpellAlertManager:HasAlert(actionButton)
+                local alertType = self.activeAlerts[actionButton]
+                return alertType ~= nil, alertType
+            end
+        end
+        "#,
+    )
+    .exec()
 }
 
 /// TalentButtonUtil - utility table for talent button rendering.
