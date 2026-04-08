@@ -217,7 +217,7 @@ fn register_battlenet_stubs(lua: &Lua) -> Result<()> {
         "BNFeaturesEnabledAndConnected",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    globals.set("BNConnected", lua.create_function(|_, ()| Ok(true))?)?;
+    globals.set("BNConnected", lua.create_function(|_, ()| Ok(false))?)?;
     globals.set(
         "BNGetFriendInfo",
         lua.create_function(|_, _index: i32| Ok(Value::Nil))?,

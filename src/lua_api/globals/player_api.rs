@@ -43,13 +43,13 @@ fn register_timerunning_functions(lua: &Lua) -> Result<()> {
 /// Register BattleNet social functions.
 fn register_battlenet_functions(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    let bn_true = lua.create_function(|_, ()| Ok(true))?;
+    let bn_false = lua.create_function(|_, ()| Ok(false))?;
     for name in [
         "BNFeaturesEnabled",
         "BNFeaturesEnabledAndConnected",
         "BNConnected",
     ] {
-        g.set(name, bn_true.clone())?;
+        g.set(name, bn_false.clone())?;
     }
     g.set(
         "BNGetFriendInfo",
@@ -682,6 +682,8 @@ fn register_difficulty_and_utility_stubs(lua: &Lua) -> Result<()> {
         "BreakUpLargeNumbers",
         lua.create_function(format_large_number)?,
     )?;
+    g.set("Ambiguate", lua.create_function(ambiguate_name)?)?;
+    g.set("AreTalentsLocked", lua.create_function(|_, ()| Ok(false))?)?;
     Ok(())
 }
 
@@ -702,6 +704,18 @@ fn format_large_number(_: &Lua, amount: Value) -> Result<String> {
         Value::Number(n) => format!("{:.0}", n),
         _ => "0".to_string(),
     })
+}
+
+fn ambiguate_name(_: &Lua, (full_name, context): (String, String)) -> Result<String> {
+    let Some((name, _realm)) = full_name.split_once('-') else {
+        return Ok(full_name);
+    };
+    let shortened = match context.as_str() {
+        "none" => full_name,
+        "short" | "guild" | "all" => name.to_string(),
+        _ => name.to_string(),
+    };
+    Ok(shortened)
 }
 
 /// Player movement state functions (read from SimState.movement toggles).

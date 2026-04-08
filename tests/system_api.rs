@@ -243,3 +243,47 @@ fn test_reload_ui_exists() {
     let is_func: bool = env.eval("return type(ReloadUI) == 'function'").unwrap();
     assert!(is_func);
 }
+
+// ============================================================================
+// Generated stub overrides
+// ============================================================================
+
+#[test]
+fn test_ambiguate_preserves_plain_names() {
+    let env = env();
+    let value: String = env.eval(r#"return Ambiguate("Thrall", "all")"#).unwrap();
+    assert_eq!(value, "Thrall");
+}
+
+#[test]
+fn test_ambiguate_strips_realm_for_common_contexts() {
+    let env = env();
+    let (all_name, short_name, guild_name): (String, String, String) = env
+        .eval(
+            r#"
+        return Ambiguate("Thrall-Area52", "all"),
+               Ambiguate("Thrall-Area52", "short"),
+               Ambiguate("Thrall-Area52", "guild")
+    "#,
+        )
+        .unwrap();
+    assert_eq!(all_name, "Thrall");
+    assert_eq!(short_name, "Thrall");
+    assert_eq!(guild_name, "Thrall");
+}
+
+#[test]
+fn test_ambiguate_none_keeps_full_name() {
+    let env = env();
+    let value: String = env
+        .eval(r#"return Ambiguate("Thrall-Area52", "none")"#)
+        .unwrap();
+    assert_eq!(value, "Thrall-Area52");
+}
+
+#[test]
+fn test_are_talents_locked_returns_false() {
+    let env = env();
+    let value: bool = env.eval("return AreTalentsLocked()").unwrap();
+    assert!(!value);
+}
