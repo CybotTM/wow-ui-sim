@@ -866,13 +866,15 @@ fn build_owner_anchor(anchor_type: &str, owner_id: u64, x_offset: f32, y_offset:
 
 fn anchor_points_for_type(anchor_type: &str) -> (AnchorPoint, AnchorPoint) {
     match anchor_type {
-        "ANCHOR_RIGHT" => (AnchorPoint::TopLeft, AnchorPoint::TopRight),
-        "ANCHOR_LEFT" => (AnchorPoint::TopRight, AnchorPoint::TopLeft),
+        "ANCHOR_RIGHT" => (AnchorPoint::Left, AnchorPoint::Right),
+        "ANCHOR_LEFT" => (AnchorPoint::Right, AnchorPoint::Left),
+        "ANCHOR_TOP" => (AnchorPoint::Bottom, AnchorPoint::Top),
+        "ANCHOR_BOTTOM" => (AnchorPoint::Top, AnchorPoint::Bottom),
         "ANCHOR_TOPLEFT" => (AnchorPoint::BottomLeft, AnchorPoint::TopLeft),
-        "ANCHOR_TOPRIGHT" => (AnchorPoint::BottomLeft, AnchorPoint::TopRight),
+        "ANCHOR_TOPRIGHT" => (AnchorPoint::BottomRight, AnchorPoint::TopRight),
         "ANCHOR_BOTTOMLEFT" => (AnchorPoint::TopLeft, AnchorPoint::BottomLeft),
-        "ANCHOR_BOTTOMRIGHT" => (AnchorPoint::TopLeft, AnchorPoint::BottomRight),
-        _ => (AnchorPoint::TopLeft, AnchorPoint::TopRight),
+        "ANCHOR_BOTTOMRIGHT" => (AnchorPoint::TopRight, AnchorPoint::BottomRight),
+        _ => (AnchorPoint::Right, AnchorPoint::Left),
     }
 }
 

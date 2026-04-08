@@ -390,17 +390,69 @@ fn test_tooltip_anchor_right_sets_anchors() {
     let anchor = &frame.anchors[0];
     assert_eq!(
         anchor.point,
-        AnchorPoint::TopLeft,
-        "tooltip point should be TopLeft"
+        AnchorPoint::Left,
+        "tooltip point should be Left"
     );
     assert_eq!(
         anchor.relative_point,
-        AnchorPoint::TopRight,
-        "owner point should be TopRight"
+        AnchorPoint::Right,
+        "owner point should be Right"
     );
 
     let owner_id = state.widgets.get_id_by_name("AnchorRightOwner").unwrap();
     assert_eq!(anchor.relative_to_id, Some(owner_id as usize));
+}
+
+#[test]
+fn test_tooltip_topright_anchor_aligns_right_edges() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "AnchorTopRightOwner", UIParent)
+        owner:SetSize(100, 30)
+        owner:SetPoint("CENTER")
+        GameTooltip:SetOwner(owner, "ANCHOR_TOPRIGHT")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(
+        frame.anchors.len(),
+        1,
+        "ANCHOR_TOPRIGHT should set one anchor"
+    );
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::BottomRight);
+    assert_eq!(anchor.relative_point, AnchorPoint::TopRight);
+}
+
+#[test]
+fn test_tooltip_top_anchor_uses_vertical_edge_points() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "AnchorTopOwner", UIParent)
+        owner:SetSize(100, 30)
+        owner:SetPoint("CENTER")
+        GameTooltip:SetOwner(owner, "ANCHOR_TOP")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(frame.anchors.len(), 1, "ANCHOR_TOP should set one anchor");
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::Bottom);
+    assert_eq!(anchor.relative_point, AnchorPoint::Top);
 }
 
 #[test]
@@ -1581,8 +1633,8 @@ fn test_non_cursor_anchor_uses_offsets() {
     let frame = state.widgets.get(gt_id).unwrap();
 
     let anchor = &frame.anchors[0];
-    assert_eq!(anchor.point, AnchorPoint::TopLeft);
-    assert_eq!(anchor.relative_point, AnchorPoint::TopRight);
+    assert_eq!(anchor.point, AnchorPoint::Left);
+    assert_eq!(anchor.relative_point, AnchorPoint::Right);
     assert!((anchor.x_offset - 5.0).abs() < 0.1, "x_offset should be 5");
     assert!(
         (anchor.y_offset - 10.0).abs() < 0.1,
