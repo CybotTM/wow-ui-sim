@@ -370,17 +370,89 @@ fn register_c_encounter_events(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|encounter_events| g.set("C_EncounterEvents", encounter_events))
 }
 
+const PROTOTYPE_DIALOG_LUA: &str = r#"
+    C_PrototypeDialog = C_PrototypeDialog or {}
+    local api = C_PrototypeDialog
+    api._activeDialogs = api._activeDialogs or {}
+    api._removedDialogs = api._removedDialogs or {}
+    api._transitionHistory = api._transitionHistory or {}
+    api._nextTransitionIndex = api._nextTransitionIndex or 1
+
+    local function normalizeDialogID(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function normalizeOptionID(value)
+        if value == nil or type(value) == "table" then
+            return nil
+        end
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        return value
+    end
+
+    local function recordTransition(dialogID, transition, optionID)
+        local index = api._nextTransitionIndex
+        api._nextTransitionIndex = index + 1
+        api._transitionHistory[index] = {
+            dialogID = dialogID,
+            transition = transition,
+            optionID = optionID,
+        }
+    end
+
+    api.EnsureRemoved = api.EnsureRemoved or function(dialogID)
+        local normalizedDialogID = normalizeDialogID(dialogID)
+        if normalizedDialogID == nil then
+            return false
+        end
+
+        local hadActiveDialog = api._activeDialogs[normalizedDialogID] ~= nil
+        api._activeDialogs[normalizedDialogID] = nil
+        api._removedDialogs[normalizedDialogID] = true
+        recordTransition(normalizedDialogID, "removed", nil)
+        return hadActiveDialog
+    end
+
+    api.SelectOption = api.SelectOption or function(dialogID, optionID)
+        local normalizedDialogID = normalizeDialogID(dialogID)
+        local normalizedOptionID = normalizeOptionID(optionID)
+        if normalizedDialogID == nil or normalizedOptionID == nil then
+            return false
+        end
+
+        local dialogState = api._activeDialogs[normalizedDialogID]
+        if type(dialogState) ~= "table" then
+            dialogState = {
+                dialogID = normalizedDialogID,
+                selectionCount = 0,
+            }
+            api._activeDialogs[normalizedDialogID] = dialogState
+        end
+
+        dialogState.selectionCount = (dialogState.selectionCount or 0) + 1
+        dialogState.selectedOptionID = normalizedOptionID
+        dialogState.lastTransition = "selected"
+        api._removedDialogs[normalizedDialogID] = nil
+        recordTransition(normalizedDialogID, "selected", normalizedOptionID)
+        return true
+    end
+"#;
+
 fn register_c_prototype_dialog(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let pd = lua.create_table()?;
-    pd.set(
-        "EnsureRemoved",
-        lua.create_function(|_, _dialog_id: Value| Ok(()))?,
-    )?;
-    pd.set(
-        "SelectOption",
-        lua.create_function(|_, (_dialog_id, _option_id): (Value, Value)| Ok(()))?,
-    )?;
-    g.set("C_PrototypeDialog", pd)
+    lua.load(PROTOTYPE_DIALOG_LUA).exec()?;
+    g.get::<mlua::Table>("C_PrototypeDialog")
+        .and_then(|prototype_dialog| g.set("C_PrototypeDialog", prototype_dialog))
 }
 
 /// C_Reincarnation and C_TableUtil stubs.
