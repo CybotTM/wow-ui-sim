@@ -1885,62 +1885,72 @@ fn register_simple_stub_tables(lua: &Lua, g: &mlua::Table) -> Result<()> {
 /// UIFrameManager_ManagedFrameMixin stub — needed before Blizzard_UIFrameManager loads.
 /// (Blizzard_UIFrameManager loads after Blizzard_Tutorials alphabetically.)
 fn register_ui_frame_manager_stub(lua: &Lua, _g: &mlua::Table) -> Result<()> {
-    lua.load(
-        r#"
-        if UIFrameManager == nil then
-            UIFrameManager = {
-                registeredFrames = {},
-                registeredFrameTypeToFrames = {},
-            }
+    install_ui_frame_manager_namespace(lua)?;
+    install_ui_frame_manager_managed_mixin(lua)
+}
 
-            function UIFrameManager:RegisterFrameForFrameType(frame, frameType)
-                if self.registeredFrames[frame] then
-                    return
-                end
+const UI_FRAME_MANAGER_NAMESPACE_LUA: &str = r#"
+    if UIFrameManager == nil then
+        UIFrameManager = {
+            registeredFrames = {},
+            registeredFrameTypeToFrames = {},
+        }
 
-                if self.registeredFrameTypeToFrames[frameType] == nil then
-                    self.registeredFrameTypeToFrames[frameType] = {}
-                end
-
-                self.registeredFrameTypeToFrames[frameType][frame] = true
-                self.registeredFrames[frame] = true
-
-                frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
+        function UIFrameManager:RegisterFrameForFrameType(frame, frameType)
+            if self.registeredFrames[frame] then
+                return
             end
 
-            function UIFrameManager:OnEvent(event, ...)
-                if event == "FRAME_MANAGER_UPDATE_ALL" then
-                    for frameType, frames in pairs(self.registeredFrameTypeToFrames) do
-                        for frame in pairs(frames) do
-                            frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
-                        end
+            if self.registeredFrameTypeToFrames[frameType] == nil then
+                self.registeredFrameTypeToFrames[frameType] = {}
+            end
+
+            self.registeredFrameTypeToFrames[frameType][frame] = true
+            self.registeredFrames[frame] = true
+
+            frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
+        end
+
+        function UIFrameManager:OnEvent(event, ...)
+            if event == "FRAME_MANAGER_UPDATE_ALL" then
+                for frameType, frames in pairs(self.registeredFrameTypeToFrames) do
+                    for frame in pairs(frames) do
+                        frame:UpdateFrameState(C_FrameManager.GetFrameVisibilityState(frameType))
                     end
-                else
-                    local frameType, show = ...
-                    local frames = self.registeredFrameTypeToFrames[frameType]
-                    if frames then
-                        for frame in pairs(frames) do
-                            frame:UpdateFrameState(show)
-                        end
+                end
+            else
+                local frameType, show = ...
+                local frames = self.registeredFrameTypeToFrames[frameType]
+                if frames then
+                    for frame in pairs(frames) do
+                        frame:UpdateFrameState(show)
                     end
                 end
             end
         end
+    end
+"#;
 
-        if UIFrameManager_ManagedFrameMixin == nil then
-            UIFrameManager_ManagedFrameMixin = {}
+fn install_ui_frame_manager_namespace(lua: &Lua) -> Result<()> {
+    lua.load(UI_FRAME_MANAGER_NAMESPACE_LUA).exec()
+}
 
-            function UIFrameManager_ManagedFrameMixin:OnLoad()
-                UIFrameManager:RegisterFrameForFrameType(self, self.frameType)
-            end
+const UI_FRAME_MANAGER_MANAGED_MIXIN_LUA: &str = r#"
+    if UIFrameManager_ManagedFrameMixin == nil then
+        UIFrameManager_ManagedFrameMixin = {}
 
-            function UIFrameManager_ManagedFrameMixin:UpdateFrameState(show)
-                self:SetShown(show)
-            end
+        function UIFrameManager_ManagedFrameMixin:OnLoad()
+            UIFrameManager:RegisterFrameForFrameType(self, self.frameType)
         end
-        "#,
-    )
-    .exec()
+
+        function UIFrameManager_ManagedFrameMixin:UpdateFrameState(show)
+            self:SetShown(show)
+        end
+    end
+"#;
+
+fn install_ui_frame_manager_managed_mixin(lua: &Lua) -> Result<()> {
+    lua.load(UI_FRAME_MANAGER_MANAGED_MIXIN_LUA).exec()
 }
 
 /// ActionButtonSpellAlertManager stub — referenced by PetBattleUI OnLoad before ActionBar loads.
