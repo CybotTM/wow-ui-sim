@@ -428,26 +428,37 @@ fn watched_quest_id_at_index(idx: i32) -> Option<i32> {
 
 /// Quest status check methods.
 fn register_quest_log_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_quest_completion_status(lua, t)?;
+    register_quest_membership_status(lua, t)?;
+    register_quest_status_metadata(lua, t)?;
+    Ok(())
+}
+
+fn register_quest_completion_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsQuestFlaggedCompleted",
         lua.create_function(|_, _id: i32| Ok(false))?,
     )?;
     t.set("IsComplete", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set(
-        "IsOnQuest",
-        lua.create_function(|_, id: i32| Ok(find_quest_by_id(id).is_some()))?,
-    )?;
-    t.set(
         "ReadyForTurnIn",
         lua.create_function(|_, _id: i32| Ok(false))?,
     )?;
     t.set("IsFailed", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set(
-        "IsPushableQuest",
+        "IsQuestDisabledForSession",
         lua.create_function(|_, _id: i32| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_quest_membership_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
-        "IsQuestDisabledForSession",
+        "IsOnQuest",
+        lua.create_function(|_, id: i32| Ok(find_quest_by_id(id).is_some()))?,
+    )?;
+    t.set(
+        "IsPushableQuest",
         lua.create_function(|_, _id: i32| Ok(false))?,
     )?;
     t.set(
@@ -461,20 +472,24 @@ fn register_quest_log_status(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("IsMetaQuest", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set("IsOnMap", lua.create_function(|_, _id: i32| Ok(false))?)?;
     t.set(
-        "GetNextWaypointText",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetTimeAllowed",
-        lua.create_function(|_, _id: i32| Ok((Value::Nil, Value::Nil)))?,
-    )?;
-    t.set(
         "IsAccountQuest",
         lua.create_function(|_, _id: i32| Ok(false))?,
     )?;
     t.set(
         "IsQuestCalling",
         lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    Ok(())
+}
+
+fn register_quest_status_metadata(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "GetNextWaypointText",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetTimeAllowed",
+        lua.create_function(|_, _id: i32| Ok((Value::Nil, Value::Nil)))?,
     )?;
     t.set(
         "GetQuestDetailsTheme",
