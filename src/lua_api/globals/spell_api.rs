@@ -487,38 +487,62 @@ fn register_c_spell_cooldown(
     t: &mlua::Table,
     state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
+    register_spell_cooldown_query(lua, t, state)?;
+    register_spell_loss_of_control_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_spell_cooldown_query(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set(
         "GetSpellCooldown",
         lua.create_function(move |lua, spell_id: i32| {
-            let s = state.borrow();
-            let now = s.start_time.elapsed().as_secs_f64();
-            let (start, duration) =
-                super::action_bar_api::spell_cooldown_times(&s, spell_id as u32, now);
-            let info = lua.create_table()?;
-            info.set("startTime", start)?;
-            info.set("duration", duration)?;
-            info.set("isEnabled", true)?;
-            info.set("modRate", 1.0)?;
-            Ok(info)
+            create_spell_cooldown_info(lua, &state, spell_id)
         })?,
     )?;
+    Ok(())
+}
+
+fn register_spell_loss_of_control_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetSpellLossOfControlCooldown",
         lua.create_function(|_, _spell_id: i32| Ok((0.0f64, 0.0f64)))?,
     )?;
     t.set(
         "GetSpellLossOfControlCooldownInfo",
-        lua.create_function(|lua, _spell_id: i32| {
-            let info = lua.create_table()?;
-            info.set("isActive", false)?;
-            info.set("startTime", 0)?;
-            info.set("duration", 0)?;
-            info.set("modRate", 1.0_f64)?;
-            info.set("shouldReplaceNormalCooldown", false)?;
-            Ok(info)
-        })?,
+        lua.create_function(create_spell_loss_of_control_cooldown_info)?,
     )?;
     Ok(())
+}
+
+fn create_spell_cooldown_info(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    spell_id: i32,
+) -> Result<mlua::Table> {
+    let state = state.borrow();
+    let now = state.start_time.elapsed().as_secs_f64();
+    let (start_time, duration) =
+        super::action_bar_api::spell_cooldown_times(&state, spell_id as u32, now);
+    let info = lua.create_table()?;
+    info.set("startTime", start_time)?;
+    info.set("duration", duration)?;
+    info.set("isEnabled", true)?;
+    info.set("modRate", 1.0)?;
+    Ok(info)
+}
+
+fn create_spell_loss_of_control_cooldown_info(lua: &Lua, _spell_id: i32) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("isActive", false)?;
+    info.set("startTime", 0)?;
+    info.set("duration", 0)?;
+    info.set("modRate", 1.0_f64)?;
+    info.set("shouldReplaceNormalCooldown", false)?;
+    Ok(info)
 }
 
 fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
