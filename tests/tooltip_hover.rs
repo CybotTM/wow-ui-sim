@@ -135,6 +135,47 @@ fn test_character_slot_hover_shows_inventory_tooltip() {
     assert_eq!(td.lines[2].left_text, "Head");
 }
 
+#[test]
+fn test_buff_icon_hover_shows_aura_tooltip() {
+    let env = setup_full_env();
+    refresh_buff_frame(&env);
+
+    let expected_name: String = env
+        .eval(
+            r#"
+            for _, button in ipairs(BuffFrame.auraFrames) do
+                if button:IsShown() and button.buttonInfo and button.buttonInfo.index then
+                    button:OnEnter()
+                    return C_TooltipInfo.GetUnitAura("player", button.buttonInfo.index, button:GetFilter()).lines[1].leftText
+                end
+            end
+            error("No visible buff icon with tooltip data")
+            "#,
+        )
+        .unwrap();
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+
+    assert!(
+        visible,
+        "GameTooltip should be visible after hovering a buff icon"
+    );
+    assert!(
+        num_lines >= 1,
+        "Buff icon hover should populate aura tooltip lines, got {}",
+        num_lines
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state
+        .tooltips
+        .get(&gt_id)
+        .expect("tooltip data should exist after buff hover");
+    assert_eq!(td.lines[0].left_text, expected_name);
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]
@@ -337,6 +378,86 @@ fn test_character_slot_hover_tooltip_produces_quads() {
     );
 }
 
+#[cfg(feature = "gui")]
+#[test]
+fn test_buff_icon_hover_tooltip_produces_quads() {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+    use wow_ui_sim::render::glyph::GlyphAtlas;
+
+    let env = setup_full_env();
+    refresh_buff_frame(&env);
+    hover_first_visible_buff_icon(&env);
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    {
+        let mut state = env.state().borrow_mut();
+        let _ = state.widgets.take_render_dirty();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+    }
+
+    let gt_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("GameTooltip")
+        .unwrap();
+    let (w, h) = {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(gt_id).unwrap();
+        (frame.width, frame.height)
+    };
+    assert!(w > 0.0, "Tooltip width should be > 0 after buff hover");
+    assert!(h > 0.0, "Tooltip height should be > 0 after buff hover");
+
+    {
+        let state = env.state().borrow();
+        let rect = wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, gt_id, 1024.0, 768.0);
+        assert!(rect.width > 0.0, "Tooltip rect width should be > 0");
+        assert!(rect.height > 0.0, "Tooltip rect height should be > 0");
+        assert!(
+            rect.x >= 0.0 && rect.x < 1024.0,
+            "Tooltip x={} should be on screen",
+            rect.x
+        );
+        assert!(
+            rect.y >= 0.0 && rect.y < 768.0,
+            "Tooltip y={} should be on screen",
+            rect.y
+        );
+    }
+
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
+    assert!(
+        !tooltip_data.is_empty(),
+        "Tooltip render data should exist after buff hover"
+    );
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        Some((&mut font_sys, &mut glyph_atlas)),
+        Some(&state.message_frames),
+        Some(&tooltip_data),
+        &buckets,
+    );
+
+    assert!(
+        batch.vertices.len() > 100,
+        "Batch should contain tooltip vertices after buff hover"
+    );
+}
+
 const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
@@ -369,6 +490,8 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
     ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
     ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
+    ("Blizzard_Minimap", "Blizzard_Minimap_Mainline.toc"),
+    ("Blizzard_BuffFrame", "Blizzard_BuffFrame.toc"),
     ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
     ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
     (
@@ -437,6 +560,8 @@ fn load_blizzard_addons(env: &WowLuaEnv, ui: &std::path::Path) {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
+    ensure_player_frame_for_aura_tests(env);
+
     let lua = env.lua();
     let _ = env.fire_event_with_args(
         "ADDON_LOADED",
@@ -456,6 +581,8 @@ fn fire_startup_events(env: &WowLuaEnv) {
     ] {
         let _ = env.fire_event(event);
     }
+
+    refresh_aura_frames(env);
 }
 
 fn open_character_panel(env: &WowLuaEnv) {
@@ -471,4 +598,77 @@ fn open_character_panel(env: &WowLuaEnv) {
         "#,
     )
     .expect("Failed to open character panel");
+}
+
+const HOVER_FIRST_VISIBLE_BUFF_ICON_LUA: &str = r#"
+    local totalButtons = 0
+    local shownButtons = 0
+    local buttonsWithInfo = 0
+    local buttonsWithIndex = 0
+    for _, button in ipairs(BuffFrame.auraFrames) do
+        totalButtons = totalButtons + 1
+        if button.buttonInfo then
+            buttonsWithInfo = buttonsWithInfo + 1
+        end
+        if button.buttonInfo and button.buttonInfo.index then
+            buttonsWithIndex = buttonsWithIndex + 1
+        end
+        if button:IsShown() and button.buttonInfo and button.buttonInfo.index then
+            button:OnEnter()
+            return
+        end
+        if button:IsShown() then
+            shownButtons = shownButtons + 1
+        end
+    end
+    error(string.format(
+        "No visible buff icon with tooltip data (BuffFrameShown=%s auraInfo=%s totalButtons=%d shownButtons=%d buttonsWithInfo=%d buttonsWithIndex=%d isExpanded=%s collapseEnabled=%s consolidateEnabled=%s)",
+        tostring(BuffFrame:IsShown()),
+        tostring(BuffFrame.auraInfo and #BuffFrame.auraInfo or nil),
+        totalButtons,
+        shownButtons,
+        buttonsWithInfo,
+        buttonsWithIndex,
+        tostring(BuffFrame:IsExpanded()),
+        tostring(BuffFrame.CollapseAndExpandButton and BuffFrame.CollapseAndExpandButton:IsEnabled()),
+        tostring(BuffFrame.ConsolidatedBuffs and BuffFrame.ConsolidatedBuffs:IsEnabled())
+    ))
+"#;
+
+fn hover_first_visible_buff_icon(env: &WowLuaEnv) {
+    env.exec(HOVER_FIRST_VISIBLE_BUFF_ICON_LUA)
+        .expect("Failed to hover a visible buff icon");
+}
+
+fn refresh_buff_frame(env: &WowLuaEnv) {
+    refresh_aura_frames(env);
+    wow_ui_sim::startup::seed_buff_durations(env);
+}
+
+fn ensure_player_frame_for_aura_tests(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        if not PlayerFrame then
+            PlayerFrame = CreateFrame("Frame", "PlayerFrame", UIParent)
+        end
+        PlayerFrame.unit = "player"
+        "#,
+    )
+    .expect("Failed to create PlayerFrame stub for aura tests");
+}
+
+fn refresh_aura_frames(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        assert(BuffFrame, "BuffFrame should exist")
+        assert(BuffFrame.UpdateAuras, "BuffFrame should expose UpdateAuras")
+        local updateInfo = { isFullUpdate = true }
+        if BuffFrame:IsEventRegistered("UNIT_AURA") and BuffFrame:GetScript("OnEvent") then
+            BuffFrame:GetScript("OnEvent")(BuffFrame, "UNIT_AURA", "player", updateInfo)
+        end
+        BuffFrame:UpdateAuras()
+        BuffFrame:Update()
+        "#,
+    )
+    .expect("Failed to refresh BuffFrame after seeding buffs");
 }
