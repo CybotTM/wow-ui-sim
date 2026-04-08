@@ -602,32 +602,40 @@ fn append_item_tooltip_line(
 
 fn tooltip_color(lua: &Lua, (r, g, b): (f64, f64, f64)) -> Result<Value> {
     let color = lua.create_table()?;
+    set_tooltip_color_channels(&color, r, g, b)?;
+    register_tooltip_color_methods(lua, &color)?;
+    Ok(Value::Table(color))
+}
+
+fn set_tooltip_color_channels(color: &mlua::Table, r: f64, g: f64, b: f64) -> Result<()> {
     color.set("r", r)?;
     color.set("g", g)?;
     color.set("b", b)?;
     color.set("a", 1.0)?;
-    color.set(
-        "GetRGB",
-        lua.create_function(|_, this: mlua::Table| {
-            Ok((
-                this.get::<f64>("r")?,
-                this.get::<f64>("g")?,
-                this.get::<f64>("b")?,
-            ))
-        })?,
-    )?;
-    color.set(
-        "GetRGBA",
-        lua.create_function(|_, this: mlua::Table| {
-            Ok((
-                this.get::<f64>("r")?,
-                this.get::<f64>("g")?,
-                this.get::<f64>("b")?,
-                this.get::<f64>("a")?,
-            ))
-        })?,
-    )?;
-    Ok(Value::Table(color))
+    Ok(())
+}
+
+fn register_tooltip_color_methods(lua: &Lua, color: &mlua::Table) -> Result<()> {
+    color.set("GetRGB", lua.create_function(tooltip_color_get_rgb)?)?;
+    color.set("GetRGBA", lua.create_function(tooltip_color_get_rgba)?)?;
+    Ok(())
+}
+
+fn tooltip_color_get_rgb(_: &Lua, color: mlua::Table) -> Result<(f64, f64, f64)> {
+    Ok((
+        color.get::<f64>("r")?,
+        color.get::<f64>("g")?,
+        color.get::<f64>("b")?,
+    ))
+}
+
+fn tooltip_color_get_rgba(_: &Lua, color: mlua::Table) -> Result<(f64, f64, f64, f64)> {
+    Ok((
+        color.get::<f64>("r")?,
+        color.get::<f64>("g")?,
+        color.get::<f64>("b")?,
+        color.get::<f64>("a")?,
+    ))
 }
 
 fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
