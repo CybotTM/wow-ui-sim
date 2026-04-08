@@ -53,6 +53,40 @@ fn seed_c_tooltip_info_test_state(env: &WowLuaEnv) {
     state.current_target = Some(lady_liadrin_target());
 }
 
+fn assert_item_tooltip_has_name_level_and_slot(
+    env: &WowLuaEnv,
+    tooltip_expr: &str,
+    expected_name: &str,
+    expected_slot: &str,
+    message: &str,
+) {
+    let has_real_tooltip: bool = env
+        .eval(&format!(
+            r#"
+            local tooltip = {tooltip_expr}
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local equipSlotLine = tooltip.lines[3]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "{expected_name}"
+                and itemLevelLine
+                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
+                and itemLevelLine.leftText == "Item Level 571"
+                and equipSlotLine
+                and equipSlotLine.type == Enum.TooltipDataLineType.EquipSlot
+                and equipSlotLine.leftText == "{expected_slot}"
+            "#,
+        ))
+        .unwrap();
+    assert!(has_real_tooltip, "{message}");
+}
+
 #[test]
 fn test_c_tooltip_info_shapes_match_tooltip_data_handler_expectations() {
     let env = WowLuaEnv::new().unwrap();
@@ -216,32 +250,11 @@ fn test_c_tooltip_info_get_item_by_id_exposes_colored_name_and_binding_line() {
 #[test]
 fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
     let env = WowLuaEnv::new().unwrap();
-    let has_real_tooltip: bool = env
-        .eval(
-            r#"
-            local tooltip = C_TooltipInfo.GetItemByID(211992)
-            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
-                return false
-            end
-
-            local nameLine = tooltip.lines[1]
-            local itemLevelLine = tooltip.lines[2]
-            local equipSlotLine = tooltip.lines[3]
-
-            return nameLine
-                and nameLine.type == Enum.TooltipDataLineType.ItemName
-                and nameLine.leftText == "Entombed Seraph's Greaves"
-                and itemLevelLine
-                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
-                and itemLevelLine.leftText == "Item Level 571"
-                and equipSlotLine
-                and equipSlotLine.type == Enum.TooltipDataLineType.EquipSlot
-                and equipSlotLine.leftText == "Legs"
-            "#,
-        )
-        .unwrap();
-    assert!(
-        has_real_tooltip,
+    assert_item_tooltip_has_name_level_and_slot(
+        &env,
+        "C_TooltipInfo.GetItemByID(211992)",
+        "Entombed Seraph's Greaves",
+        "Legs",
         "C_TooltipInfo.GetItemByID should expose item, item-level, and equip-slot lines",
     );
 }
@@ -249,32 +262,11 @@ fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
 #[test]
 fn test_c_tooltip_info_get_inventory_item_returns_equipped_item_tooltip() {
     let env = WowLuaEnv::new().unwrap();
-    let has_real_tooltip: bool = env
-        .eval(
-            r#"
-            local tooltip = C_TooltipInfo.GetInventoryItem("player", 1)
-            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
-                return false
-            end
-
-            local nameLine = tooltip.lines[1]
-            local itemLevelLine = tooltip.lines[2]
-            local equipSlotLine = tooltip.lines[3]
-
-            return nameLine
-                and nameLine.type == Enum.TooltipDataLineType.ItemName
-                and nameLine.leftText == "Entombed Seraph's Casque"
-                and itemLevelLine
-                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
-                and itemLevelLine.leftText == "Item Level 571"
-                and equipSlotLine
-                and equipSlotLine.type == Enum.TooltipDataLineType.EquipSlot
-                and equipSlotLine.leftText == "Head"
-            "#,
-        )
-        .unwrap();
-    assert!(
-        has_real_tooltip,
+    assert_item_tooltip_has_name_level_and_slot(
+        &env,
+        r#"C_TooltipInfo.GetInventoryItem("player", 1)"#,
+        "Entombed Seraph's Casque",
+        "Head",
         "C_TooltipInfo.GetInventoryItem should expose equipped item tooltip lines",
     );
 }
