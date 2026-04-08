@@ -745,31 +745,353 @@ fn build_spell_search_util(lua: &Lua) -> Result<mlua::Table> {
 
 /// Dispatcher - event dispatch system (real impl: Blizzard_Dispatcher addon).
 fn build_dispatcher_stub(lua: &Lua) -> Result<mlua::Table> {
-    let d = lua.create_table()?;
-    d.set("Events", lua.create_table()?)?;
-    d.set("Functions", lua.create_table()?)?;
-    d.set("Scripts", lua.create_table()?)?;
-    d.set("NextEventID", 1i32)?;
-    d.set("NextFunctionID", 1i32)?;
-    d.set("NextScriptID", 1i32)?;
-    let noop = lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?;
-    for name in [
-        "Initialize",
-        "OnEvent",
-        "RegisterEvent",
-        "UnregisterEvent",
-        "UnregisterAllEvents",
-        "UnregisterAll",
-        "RegisterFunction",
-        "UnregisterFunction",
-        "UnregisterAllFunctions",
-        "RegisterScript",
-        "UnregisterScript",
-        "UnregisterAllScripts",
-    ] {
-        d.set(name, noop.clone())?;
-    }
-    Ok(d)
+    lua.load(
+        r#"
+        local dispatcherFrame = CreateFrame("Frame")
+        local nextID = 1
+        local eventEntries = {}
+        local functionHooks = {}
+        local scriptHooks = {}
+
+        local function nextToken()
+            local id = nextID
+            nextID = nextID + 1
+            return id
+        end
+
+        local function resolveCallback(kind, key, callback)
+            if type(callback) == "function" then
+                return callback, callback
+            end
+
+            if type(callback) ~= "table" then
+                return nil, callback
+            end
+
+            local method = callback[key]
+            if type(method) == "function" then
+                return function(...)
+                    return method(callback, ...)
+                end, callback
+            end
+
+            if kind == "event" then
+                local onEvent = callback.OnEvent
+                if type(onEvent) == "function" then
+                    return function(...)
+                        return onEvent(callback, key, ...)
+                    end, callback
+                end
+            end
+
+            return nil, callback
+        end
+
+        local function removeListEntry(list, match)
+            for i = #list, 1, -1 do
+                if match(list[i]) then
+                    table.remove(list, i)
+                end
+            end
+        end
+
+        local function trimEvent(eventName)
+            local entries = eventEntries[eventName]
+            if not entries or #entries == 0 then
+                eventEntries[eventName] = nil
+                if eventName ~= "OnUpdate" then
+                    dispatcherFrame:UnregisterEvent(eventName)
+                else
+                    dispatcherFrame:SetScript("OnUpdate", nil)
+                end
+            end
+        end
+
+        local function dispatchEntries(entries, ...)
+            if not entries then
+                return
+            end
+
+            local removals = {}
+            for _, entry in ipairs(entries) do
+                entry.callback(...)
+                if entry.once then
+                    table.insert(removals, entry.id)
+                end
+            end
+            for _, id in ipairs(removals) do
+                removeListEntry(entries, function(entry) return entry.id == id end)
+            end
+        end
+
+        dispatcherFrame:SetScript("OnEvent", function(_, event, ...)
+            local entries = eventEntries[event]
+            dispatchEntries(entries, ...)
+            trimEvent(event)
+        end)
+
+        local Dispatcher = {}
+
+        function Dispatcher:RegisterEvent(eventName, callback, once)
+            local cb, owner = resolveCallback("event", eventName, callback)
+            if not cb then
+                return nil
+            end
+
+            local entry = {
+                id = nextToken(),
+                owner = owner,
+                callback = cb,
+                once = once == true,
+            }
+
+            if not eventEntries[eventName] then
+                eventEntries[eventName] = {}
+                if eventName ~= "OnUpdate" then
+                    dispatcherFrame:RegisterEvent(eventName)
+                else
+                    dispatcherFrame:SetScript("OnUpdate", function(_, elapsed)
+                        local entries = eventEntries.OnUpdate
+                        dispatchEntries(entries, elapsed)
+                        trimEvent("OnUpdate")
+                    end)
+                end
+            end
+
+            table.insert(eventEntries[eventName], entry)
+            return entry.id
+        end
+
+        function Dispatcher:UnregisterEvent(eventName, ownerOrToken)
+            local entries = eventEntries[eventName]
+            if not entries then
+                return
+            end
+            removeListEntry(entries, function(entry)
+                return entry.id == ownerOrToken or entry.owner == ownerOrToken
+            end)
+            trimEvent(eventName)
+        end
+
+        function Dispatcher:UnregisterAllEvents(ownerOrToken)
+            for eventName, entries in pairs(eventEntries) do
+                removeListEntry(entries, function(entry)
+                    return entry.id == ownerOrToken or entry.owner == ownerOrToken
+                end)
+                trimEvent(eventName)
+            end
+        end
+
+        local function functionHookKey(target, method)
+            return tostring(target) .. "\31" .. method
+        end
+
+        local function trimFunctionHook(hookKey)
+            local hook = functionHooks[hookKey]
+            if not hook or #hook.entries > 0 then
+                return
+            end
+            hook.target[hook.method] = hook.original
+            functionHooks[hookKey] = nil
+        end
+
+        local function ensureFunctionHook(target, method)
+            local hookKey = functionHookKey(target, method)
+            local hook = functionHooks[hookKey]
+            if hook then
+                return hookKey, hook
+            end
+
+            local original = target[method]
+            hook = {
+                target = target,
+                method = method,
+                original = original,
+                entries = {},
+            }
+            functionHooks[hookKey] = hook
+            target[method] = function(...)
+                if type(hook.original) == "function" then
+                    hook.original(...)
+                end
+                local removals = {}
+                for _, entry in ipairs(hook.entries) do
+                    entry.callback(...)
+                    if entry.once then
+                        table.insert(removals, entry.id)
+                    end
+                end
+                for _, id in ipairs(removals) do
+                    removeListEntry(hook.entries, function(entry) return entry.id == id end)
+                end
+                trimFunctionHook(hookKey)
+            end
+            return hookKey, hook
+        end
+
+        function Dispatcher:RegisterFunction(targetOrName, methodOrCallback, callbackOrOnce, once)
+            local target, method, callback, fireOnce
+            if type(targetOrName) == "string" then
+                target = _G
+                method = targetOrName
+                callback = methodOrCallback
+                fireOnce = callbackOrOnce
+            else
+                target = targetOrName
+                method = methodOrCallback
+                callback = callbackOrOnce
+                fireOnce = once
+            end
+
+            local cb, owner = resolveCallback("function", method, callback)
+            if not cb then
+                return nil
+            end
+
+            local _, hook = ensureFunctionHook(target, method)
+            local entry = {
+                id = nextToken(),
+                owner = owner,
+                callback = cb,
+                once = fireOnce == true,
+            }
+            table.insert(hook.entries, entry)
+            return entry.id
+        end
+
+        function Dispatcher:UnregisterFunction(targetOrName, methodOrOwner, ownerOrToken)
+            local target, method, owner = nil, nil, nil
+            if type(targetOrName) == "string" then
+                target = _G
+                method = targetOrName
+                owner = methodOrOwner
+            else
+                target = targetOrName
+                method = methodOrOwner
+                owner = ownerOrToken
+            end
+
+            if type(method) ~= "string" then
+                return
+            end
+
+            local hookKey = functionHookKey(target, method)
+            local hook = functionHooks[hookKey]
+            if not hook then
+                return
+            end
+
+            removeListEntry(hook.entries, function(entry)
+                return entry.id == owner or entry.owner == owner
+            end)
+            trimFunctionHook(hookKey)
+        end
+
+        function Dispatcher:UnregisterAllFunctions(ownerOrToken)
+            for hookKey, hook in pairs(functionHooks) do
+                removeListEntry(hook.entries, function(entry)
+                    return entry.id == ownerOrToken or entry.owner == ownerOrToken
+                end)
+                trimFunctionHook(hookKey)
+            end
+        end
+
+        local function scriptHookKey(frame, script)
+            return tostring(frame) .. "\31" .. script
+        end
+
+        local function trimScriptHook(hookKey)
+            local hook = scriptHooks[hookKey]
+            if not hook or #hook.entries > 0 then
+                return
+            end
+            hook.frame:SetScript(hook.script, hook.original)
+            scriptHooks[hookKey] = nil
+        end
+
+        local function ensureScriptHook(frame, script)
+            local hookKey = scriptHookKey(frame, script)
+            local hook = scriptHooks[hookKey]
+            if hook then
+                return hookKey, hook
+            end
+
+            local original = frame:GetScript(script)
+            hook = {
+                frame = frame,
+                script = script,
+                original = original,
+                entries = {},
+            }
+            scriptHooks[hookKey] = hook
+            frame:SetScript(script, function(...)
+                if type(hook.original) == "function" then
+                    hook.original(...)
+                end
+                local removals = {}
+                for _, entry in ipairs(hook.entries) do
+                    entry.callback(...)
+                    if entry.once then
+                        table.insert(removals, entry.id)
+                    end
+                end
+                for _, id in ipairs(removals) do
+                    removeListEntry(hook.entries, function(entry) return entry.id == id end)
+                end
+                trimScriptHook(hookKey)
+            end)
+            return hookKey, hook
+        end
+
+        function Dispatcher:RegisterScript(frame, script, callback, once)
+            local cb, owner = resolveCallback("script", script, callback)
+            if not cb then
+                return nil
+            end
+
+            local _, hook = ensureScriptHook(frame, script)
+            local entry = {
+                id = nextToken(),
+                owner = owner,
+                callback = cb,
+                once = once == true,
+            }
+            table.insert(hook.entries, entry)
+            return entry.id
+        end
+
+        function Dispatcher:UnregisterScript(frame, script, ownerOrToken)
+            local hookKey = scriptHookKey(frame, script)
+            local hook = scriptHooks[hookKey]
+            if not hook then
+                return
+            end
+
+            removeListEntry(hook.entries, function(entry)
+                return entry.id == ownerOrToken or entry.owner == ownerOrToken
+            end)
+            trimScriptHook(hookKey)
+        end
+
+        function Dispatcher:UnregisterAllScripts(ownerOrToken)
+            for hookKey, hook in pairs(scriptHooks) do
+                removeListEntry(hook.entries, function(entry)
+                    return entry.id == ownerOrToken or entry.owner == ownerOrToken
+                end)
+                trimScriptHook(hookKey)
+            end
+        end
+
+        function Dispatcher:UnregisterAll(ownerOrToken)
+            self:UnregisterAllEvents(ownerOrToken)
+            self:UnregisterAllFunctions(ownerOrToken)
+            self:UnregisterAllScripts(ownerOrToken)
+        end
+
+        return Dispatcher
+        "#,
+    )
+    .eval::<mlua::Table>()
 }
 
 /// Secure/premium/niche C_* namespaces referenced during addon loading.
