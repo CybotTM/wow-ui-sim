@@ -104,7 +104,7 @@ const POSITION_TESTS: &[TestCase] = &[
     // Player / Target / Group frames
     ("player_frame",               "PlayerFrame",                    268.0,  850.0,  232.0, 100.0, 1.0),
     ("target_frame",               "TargetFrame",                   1100.0,  850.0,  232.0, 100.0, 1.0),
-    ("focus_frame",                "FocusFrame",                    1190.0,  926.25, 174.0,  75.0, 1.0),
+    ("focus_frame",                "FocusFrame",                    1320.0,  860.0, 174.0,  75.0, 1.0),
     ("paladin_power_bar",          "PaladinPowerBarFrame",           341.5,  922.0,  150.0,  43.0, 1.0),
     ("party_frame",                "PartyFrame",                      22.0,  147.0,  120.0, 244.0, 1.0),
     ("compact_party_frame",        "CompactPartyFrame",               22.0,  147.0,   98.0, 234.0, 1.0),
@@ -123,7 +123,7 @@ const POSITION_TESTS: &[TestCase] = &[
     ("chat_edit_box",              "ChatFrame1EditBox",                30.0, 1152.0,  447.0,  32.0, 0.35),
     ("general_dock_manager",       "GeneralDockManager",              35.0,  951.0,  430.0,  26.0, 1.0),
     // Action bars
-    ("main_action_bar",            "MainActionBar",                  517.0, 1103.0,  566.0,  52.0, 1.0),
+    ("main_action_bar",            "MainActionBar",                  519.0, 1110.0,  562.0,  45.0, 1.0),
     ("status_tracking_bar",        "StatusTrackingBarManager",       514.0, 1166.0,  571.0,  34.0, 1.0),
     // Overlay / warning frames
     ("ui_errors_frame",            "UIErrorsFrame",                  544.0,  122.0,  512.0,  60.0, 1.0),
@@ -142,8 +142,8 @@ fn check_action_button(env: &WowLuaEnv) {
     let (x, _y, _w, _h) = frame_rect(env, "ActionButton1");
     let alpha = frame_alpha(env, "ActionButton1");
     assert!(
-        (x - 517.0).abs() <= 1.0,
-        "ActionButton1 x: expected 517, got {x}"
+        (x - 519.0).abs() <= 1.0,
+        "ActionButton1 x: expected 519, got {x}"
     );
     assert!(
         (alpha - 1.0).abs() <= 0.02,
@@ -218,7 +218,7 @@ fn main() {
             if failed > 0 {
                 std::process::exit(1);
             }
-            assert_eq!(total, 27, "Expected 27 tests, ran {total}");
+            assert_eq!(total, 28, "Expected 28 tests, ran {total}");
         }
         Err(_) => {
             eprintln!("\ntest timed out after 120s");

@@ -7,6 +7,47 @@
 
 use super::WowLuaEnv;
 
+const SETUP_LAYOUT_INFO_LUA: &str = r#"
+    local function setSystemSetting(systemInfo, setting, value)
+        if not systemInfo or not systemInfo.settings then return end
+        for _, settingInfo in ipairs(systemInfo.settings) do
+            if settingInfo.setting == setting then
+                settingInfo.value = value
+                return
+            end
+        end
+        table.insert(systemInfo.settings, { setting = setting, value = value })
+    end
+
+    local function forceCastBarUnderPlayerFrame(layoutInfo)
+        if not layoutInfo or not layoutInfo.layouts then return end
+        local activeLayout = layoutInfo.layouts[layoutInfo.activeLayout]
+        if not activeLayout or not activeLayout.systems then return end
+        for _, systemInfo in ipairs(activeLayout.systems) do
+            if systemInfo.system == Enum.EditModeSystem.CastBar then
+                setSystemSetting(systemInfo, Enum.EditModeCastBarSetting.LockToPlayerFrame, 1)
+            elseif systemInfo.system == Enum.EditModeSystem.UnitFrame
+                and systemInfo.systemIndex == Enum.EditModeUnitFrameSystemIndices.Player then
+                setSystemSetting(systemInfo, Enum.EditModeUnitFrameSetting.CastBarUnderneath, 1)
+            end
+        end
+    end
+
+    if not EditModeManagerFrame then return end
+    local emm = EditModeManagerFrame
+    if not emm.layoutInfo then
+        local layoutInfo = C_EditMode.GetLayouts()
+        emm.layoutInfo = layoutInfo
+        local savedLayouts = emm.layoutInfo.layouts
+        emm.layoutInfo.layouts = EditModePresetLayoutManager:GetCopyOfPresetLayouts()
+        tAppendAll(emm.layoutInfo.layouts, savedLayouts)
+    end
+    forceCastBarUnderPlayerFrame(emm.layoutInfo)
+    if not emm.accountSettings then
+        emm.accountSettings = C_EditMode.GetAccountSettings()
+    end
+"#;
+
 /// Initialize EditMode layout info and apply system anchors.
 ///
 /// EDIT_MODE_LAYOUTS_UPDATED fires during startup but UpdateLayoutInfo
@@ -23,21 +64,7 @@ pub fn init_edit_mode_layout(env: &WowLuaEnv) {
 
 /// Populate layoutInfo from C_EditMode.GetLayouts() + preset layouts.
 fn setup_layout_info(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not EditModeManagerFrame then return end
-        local emm = EditModeManagerFrame
-        if emm.layoutInfo then return end
-        local layoutInfo = C_EditMode.GetLayouts()
-        emm.layoutInfo = layoutInfo
-        local savedLayouts = emm.layoutInfo.layouts
-        emm.layoutInfo.layouts = EditModePresetLayoutManager:GetCopyOfPresetLayouts()
-        tAppendAll(emm.layoutInfo.layouts, savedLayouts)
-        if not emm.accountSettings then
-            emm.accountSettings = C_EditMode.GetAccountSettings()
-        end
-    "#,
-    );
+    let _ = env.exec(SETUP_LAYOUT_INFO_LUA);
 }
 
 /// Apply preset layout anchors and settings to all EditMode system frames.

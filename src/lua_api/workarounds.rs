@@ -25,23 +25,6 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_editmode::init_edit_mode_layout(env);
     hide_talent_loadout_dialogs(env);
     suppress_spellbook_tutorials(env);
-    attach_castbar_to_player_frame(env);
-}
-
-/// Attach PlayerCastingBarFrame to PlayerFrame (WoW's default position).
-///
-/// EditMode's `ApplySystemAnchor` normally handles this, but PlayerCastingBarFrame
-/// has nil systemInfo (no CastBar entry in the preset layout), so the anchor is
-/// never applied. Retained until cast-bar placement comes from the normal
-/// EditMode/system-anchor path.
-fn attach_castbar_to_player_frame(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if PlayerFrame_AttachCastBar and PlayerCastingBarFrame then
-            pcall(PlayerFrame_AttachCastBar)
-        end
-        "#,
-    );
 }
 
 /// Apply targeted cleanup after a load-on-demand addon finishes loading.
@@ -297,29 +280,6 @@ mod tests {
         assert_eq!(vertical_marker, "existing");
         assert_eq!(horizontal_template, "CRFManagerDividerHorizontal");
         assert_eq!(created_count, 1);
-    }
-
-    #[test]
-    fn attach_castbar_calls_blizzard_helper_only_when_frames_exist() {
-        let env = env();
-        env.exec(
-            r#"
-            attach_calls = 0
-            PlayerFrame_AttachCastBar = function()
-                attach_calls = attach_calls + 1
-            end
-            "#,
-        )
-        .unwrap();
-
-        attach_castbar_to_player_frame(&env);
-        let calls_without_frame: i32 = env.eval("return attach_calls").unwrap();
-        assert_eq!(calls_without_frame, 0);
-
-        env.exec("PlayerCastingBarFrame = {}").unwrap();
-        attach_castbar_to_player_frame(&env);
-        let calls_with_frame: i32 = env.eval("return attach_calls").unwrap();
-        assert_eq!(calls_with_frame, 1);
     }
 
     #[test]
