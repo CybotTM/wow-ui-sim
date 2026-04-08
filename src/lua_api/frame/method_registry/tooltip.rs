@@ -128,6 +128,7 @@ pub static GAMETOOLTIP_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "SetResizable",
         "SetResizeBounds",
         "SetShrinkToFitWrapped",
+        "SetSpellBookItem",
         "SetSpellByID",
         "SetText",
         "SetToplevel",

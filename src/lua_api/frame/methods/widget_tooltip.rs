@@ -113,6 +113,7 @@ fn add_tooltip_doubleline_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 
 fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_spell_by_id(methods);
+    add_set_spell_book_item(methods);
     add_set_item_by_id(methods);
     add_set_inventory_item(methods);
     add_set_hyperlink(methods);
@@ -187,6 +188,22 @@ fn add_set_spell_by_id<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             _ => return Ok(()),
         };
         populate_spell_tooltip(lua, this.0, spell_id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetSpell")
+    });
+}
+
+fn add_set_spell_book_item<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSpellBookItem", |lua, this, args: mlua::MultiValue| {
+        let slot = match args.into_iter().next() {
+            Some(Value::Integer(n)) => n as i32,
+            Some(Value::Number(n)) => n as i32,
+            _ => return Ok(()),
+        };
+        let Some((_, entry, _)) = crate::lua_api::globals::spellbook_data::get_spell_at_slot(slot)
+        else {
+            return Ok(());
+        };
+        populate_spell_tooltip(lua, this.0, entry.spell_id)?;
         fire_tooltip_script(lua, this.0, "OnTooltipSetSpell")
     });
 }

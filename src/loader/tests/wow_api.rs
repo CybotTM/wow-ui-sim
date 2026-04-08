@@ -552,6 +552,7 @@ fn test_c_tooltip_info_shapes_match_tooltip_data_handler_expectations() {
                 tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
                 tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
                 tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
+                tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
                 tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
                 tooltipShapeOk(C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
                 tooltipShapeOk(C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
@@ -828,6 +829,36 @@ fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
     assert!(
         has_real_tooltip,
         "C_TooltipInfo.GetSpellByID should expose spell name, cost, cast time, and description lines",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_spell_book_item_returns_spell_tooltip_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local expectedName = C_SpellBook.GetSpellBookItemName(1, Enum.SpellBookSpellBank.Player)
+            local tooltip = C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player)
+            if not expectedName or not tooltip or tooltip.type ~= Enum.TooltipDataType.Spell or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local castLine = tooltip.lines[3]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.SpellName
+                and nameLine.leftText == expectedName
+                and castLine
+                and type(castLine.leftText) == "string"
+                and castLine.leftText ~= ""
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetSpellBookItem should expose spellbook spell tooltip lines",
     );
 }
 

@@ -217,6 +217,10 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
         "GetInventoryItem",
         lua.create_function(create_inventory_item_tooltip)?,
     )?;
+    table.set(
+        "GetSpellBookItem",
+        lua.create_function(create_spell_book_item_tooltip)?,
+    )?;
     table.set("GetSpellByID", lua.create_function(create_spell_tooltip)?)?;
     table.set(
         "GetHyperlink",
@@ -313,6 +317,16 @@ fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Res
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
     create_item_tooltip(lua, item_id as i32)
+}
+
+fn create_spell_book_item_tooltip(
+    lua: &Lua,
+    (slot, _spell_bank): (i32, Option<i32>),
+) -> Result<Value> {
+    let Some((_, entry, _)) = super::spellbook_data::get_spell_at_slot(slot) else {
+        return build_empty_tooltip(lua, 1);
+    };
+    create_spell_tooltip(lua, entry.spell_id as i32)
 }
 
 fn create_spell_tooltip(lua: &Lua, spell_id: i32) -> Result<Value> {
