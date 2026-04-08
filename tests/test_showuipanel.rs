@@ -243,6 +243,41 @@ fn show_ui_panel_is_function() {
 }
 
 #[test]
+fn register_ui_panel_populates_uipanel_windows_without_overwriting() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local panel = CreateFrame("Frame", "RegisterUIPanelTestFrame", UIParent)
+            panel:SetSize(300, 400)
+            panel:Hide()
+
+            RegisterUIPanel(panel, { area = "center", pushable = 0, whileDead = 1, allowOtherPanels = 1 })
+            local entry = UIPanelWindows["RegisterUIPanelTestFrame"]
+            if not entry then
+                return "missing_entry"
+            end
+            if entry.area ~= "center" or entry.pushable ~= 0 or entry.whileDead ~= 1 then
+                return "wrong_attributes"
+            end
+
+            RegisterUIPanel(panel, { area = "left", pushable = 3, whileDead = 0 })
+            local entry_after_second_register = UIPanelWindows["RegisterUIPanelTestFrame"]
+            if entry_after_second_register.area ~= "center" or entry_after_second_register.pushable ~= 0 or entry_after_second_register.whileDead ~= 1 then
+                return "overwrote_existing_entry"
+            end
+
+            ShowUIPanel(panel)
+            if not panel:IsShown() then
+                return "show_failed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "RegisterUIPanel should populate UIPanelWindows once and enable ShowUIPanel: {result}");
+    }
+}
+
+#[test]
 fn show_ui_panel_displaces_previous_occupant() {
     test_timeout! {
         let env = setup_env();

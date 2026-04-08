@@ -323,10 +323,7 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "IsSpellValidForPendingGlyph",
         lua.create_function(|_, _spell_id: Value| Ok(false))?,
     )?;
-    g.set(
-        "RegisterUIPanel",
-        lua.create_function(|_, (_frame, _attrs): (Value, Option<Value>)| Ok(()))?,
-    )?;
+    install_register_ui_panel(lua)?;
     g.set(
         "GetScenariosChoiceOrder",
         lua.create_function(|lua, ()| lua.create_table())?,
@@ -356,6 +353,30 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         })?,
     )?;
     Ok(())
+}
+
+fn install_register_ui_panel(lua: &Lua) -> Result<()> {
+    lua.load(
+        r#"
+        if RegisterUIPanel == nil then
+            function RegisterUIPanel(frame, attributes)
+                if frame == nil then
+                    return
+                end
+
+                local name = frame:GetName()
+                if name == nil then
+                    return
+                end
+
+                if UIPanelWindows[name] == nil then
+                    UIPanelWindows[name] = attributes
+                end
+            end
+        end
+        "#,
+    )
+    .exec()
 }
 
 /// RegisterEventCallback - validates event names with taint detection.
