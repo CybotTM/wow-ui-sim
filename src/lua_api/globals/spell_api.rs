@@ -553,17 +553,21 @@ fn register_c_spell_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Request/attack/hold-release/visibility stubs.
 fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_spell_request_load_stubs(lua, t)?;
+    register_spell_attack_state_stubs(lua, t)?;
+    register_spell_visibility_stubs(lua, t)?;
+    Ok(())
+}
+
+fn register_spell_request_load_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "RequestLoadSpellData",
-        lua.create_function(|lua, spell_id: i32| {
-            let success = crate::spells::get_spell(spell_id as u32).is_some();
-            fire_event(
-                lua,
-                "SPELL_DATA_LOAD_RESULT",
-                &[Value::Integer(i64::from(spell_id)), Value::Boolean(success)],
-            )
-        })?,
+        lua.create_function(request_load_spell_data)?,
     )?;
+    Ok(())
+}
+
+fn register_spell_attack_state_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsAutoAttackSpell",
         lua.create_function(|_, _spell_id: i32| Ok(false))?,
@@ -576,6 +580,10 @@ fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "IsPressHoldReleaseSpell",
         lua.create_function(|_, _spell_id: i32| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_spell_visibility_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetMawPowerBorderAtlasBySpellID",
         lua.create_function(|_, _spell_id: i32| Ok(Value::Nil))?,
@@ -586,6 +594,12 @@ fn register_c_spell_request_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
         lua.create_function(|_, (_spell_id, _ctx): (Value, Value)| Ok((false, false, false)))?,
     )?;
     Ok(())
+}
+
+fn request_load_spell_data(lua: &Lua, spell_id: i32) -> Result<()> {
+    let success = crate::spells::get_spell(spell_id as u32).is_some();
+    let args = [Value::Integer(i64::from(spell_id)), Value::Boolean(success)];
+    fire_event(lua, "SPELL_DATA_LOAD_RESULT", &args)
 }
 
 fn fire_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
