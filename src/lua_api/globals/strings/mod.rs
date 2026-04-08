@@ -52,54 +52,89 @@ fn register_binding_getters(lua: &Lua, globals: &mlua::Table) -> Result<()> {
 
 /// GetBindingKey, GetBindingKeyForAction, GetBindingAction — key↔action lookups.
 fn register_binding_key_lookups(lua: &Lua, globals: &mlua::Table) -> Result<()> {
-    use super::super::keybindings;
+    register_get_binding_key(lua, globals)?;
+    register_get_binding_key_for_action(lua, globals)?;
+    register_get_binding_action(lua, globals)?;
+    Ok(())
+}
 
+fn register_get_binding_key(lua: &Lua, globals: &mlua::Table) -> Result<()> {
     globals.set(
         "GetBindingKey",
-        lua.create_function(|lua, action: String| {
-            let (k1, k2) = keybindings::get_binding_key(lua, &action)?;
-            let first = match k1 {
-                Some(k) => Value::String(lua.create_string(&k)?),
-                None => Value::Nil,
-            };
-            let second = match k2 {
-                Some(k) => Some(Value::String(lua.create_string(&k)?)),
-                None => None,
-            };
-            let vals = std::iter::once(first).chain(second).collect();
-            Ok(mlua::MultiValue::from_vec(vals))
-        })?,
-    )?;
-    globals.set(
-        "GetBindingKeyForAction",
-        lua.create_function(|lua, args: mlua::MultiValue| {
-            let action: Option<String> = args.into_iter().next().and_then(|v| {
-                if let Value::String(s) = v {
-                    s.to_str().ok().map(|s| s.to_string())
-                } else {
-                    None
-                }
-            });
-            let Some(action) = action else {
-                return Ok(Value::Nil);
-            };
-            let (k1, _) = keybindings::get_binding_key(lua, &action)?;
-            match k1 {
-                Some(k) => Ok(Value::String(lua.create_string(&k)?)),
-                None => Ok(Value::Nil),
-            }
-        })?,
-    )?;
-    globals.set(
-        "GetBindingAction",
-        lua.create_function(|lua, (key, _check_override): (String, Option<bool>)| {
-            match keybindings::get_binding_action(lua, &key)? {
-                Some(a) => Ok(Value::String(lua.create_string(&a)?)),
-                None => Ok(Value::String(lua.create_string("")?)),
-            }
-        })?,
+        lua.create_function(get_binding_key_values)?,
     )?;
     Ok(())
+}
+
+fn register_get_binding_key_for_action(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
+        "GetBindingKeyForAction",
+        lua.create_function(get_binding_key_for_action_value)?,
+    )?;
+    Ok(())
+}
+
+fn register_get_binding_action(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
+        "GetBindingAction",
+        lua.create_function(get_binding_action_value)?,
+    )?;
+    Ok(())
+}
+
+fn get_binding_key_values(lua: &Lua, action: String) -> Result<mlua::MultiValue> {
+    use super::super::keybindings;
+
+    let (first_key, second_key) = keybindings::get_binding_key(lua, &action)?;
+    Ok(mlua::MultiValue::from_vec(vec![
+        optional_string_value(lua, first_key)?,
+        optional_string_value(lua, second_key)?,
+    ]))
+}
+
+fn get_binding_key_for_action_value(lua: &Lua, args: mlua::MultiValue) -> Result<Value> {
+    use super::super::keybindings;
+
+    let Some(action) = first_string_argument(args) else {
+        return Ok(Value::Nil);
+    };
+    let (first_key, _) = keybindings::get_binding_key(lua, &action)?;
+    optional_string_value(lua, first_key)
+}
+
+fn get_binding_action_value(
+    lua: &Lua,
+    (key, _check_override): (String, Option<bool>),
+) -> Result<Value> {
+    use super::super::keybindings;
+
+    let action = keybindings::get_binding_action(lua, &key)?;
+    string_or_empty_value(lua, action)
+}
+
+fn first_string_argument(args: mlua::MultiValue) -> Option<String> {
+    args.into_iter().next().and_then(lua_string_value)
+}
+
+fn lua_string_value(value: Value) -> Option<String> {
+    match value {
+        Value::String(s) => s.to_str().ok().map(|text| text.to_string()),
+        _ => None,
+    }
+}
+
+fn optional_string_value(lua: &Lua, value: Option<String>) -> Result<Value> {
+    match value {
+        Some(text) => Ok(Value::String(lua.create_string(&text)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn string_or_empty_value(lua: &Lua, value: Option<String>) -> Result<Value> {
+    match value {
+        Some(text) => Ok(Value::String(lua.create_string(&text)?)),
+        None => Ok(Value::String(lua.create_string("")?)),
+    }
 }
 
 /// GetBinding, GetNumBindings, GetCurrentBindingSet — enumerate all bindings.
