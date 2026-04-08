@@ -594,20 +594,276 @@ fn register_item_pet_aura_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+const ITEM_SOCKET_INFO_LUA: &str = r#"
+    C_ItemSocketInfo = C_ItemSocketInfo or {}
+    local api = C_ItemSocketInfo
+
+    api._state = api._state or {
+        uiType = 0,
+        isOpen = true,
+        numSockets = 0,
+        itemInfo = {
+            name = nil,
+            icon = nil,
+            quality = 0,
+            isRefundable = false,
+            isBoundTradeable = false,
+        },
+        socketTypes = {},
+        existingSockets = {},
+        newSockets = {},
+        clickProposals = {},
+        artifactRelicItemIDs = {},
+        selectedSocketIndex = nil,
+        hasBoundGemProposed = false,
+        acceptCount = 0,
+        closeCount = 0,
+        lastAction = nil,
+    }
+
+    local function copyTable(input)
+        if type(input) ~= "table" then
+            return nil
+        end
+        local copy = {}
+        for key, value in pairs(input) do
+            copy[key] = value
+        end
+        return copy
+    end
+
+    local function normalizeIndex(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function normalizedSocketInfo(info)
+        if type(info) ~= "table" then
+            return nil
+        end
+        local out = {}
+        out.name = info.name
+        out.icon = info.icon
+        out.link = info.link
+        out.gemMatchesSocket = info.gemMatchesSocket == true
+        out.isBound = info.isBound == true or info.bound == true
+        return out
+    end
+
+    local function getNumSockets()
+        local state = api._state
+        local highest = normalizeIndex(state.numSockets) or 0
+        for idx in pairs(state.socketTypes or {}) do
+            if type(idx) == "number" and idx > highest then
+                highest = idx
+            end
+        end
+        for idx in pairs(state.existingSockets or {}) do
+            if type(idx) == "number" and idx > highest then
+                highest = idx
+            end
+        end
+        for idx in pairs(state.newSockets or {}) do
+            if type(idx) == "number" and idx > highest then
+                highest = idx
+            end
+        end
+        return math.max(0, highest)
+    end
+
+    local function readSocketInfo(source, index)
+        local entry = source[index]
+        if type(entry) ~= "table" then
+            return nil, nil, false
+        end
+        return entry.name, entry.icon, entry.gemMatchesSocket == true
+    end
+
+    local function recalculateBoundGemProposed()
+        local state = api._state
+        state.hasBoundGemProposed = false
+        for _, info in pairs(state.newSockets or {}) do
+            if type(info) == "table" and (info.isBound == true or info.bound == true) then
+                state.hasBoundGemProposed = true
+                return
+            end
+        end
+    end
+
+    local function itemIDFromInfo(info)
+        if type(info) == "number" then
+            return math.floor(info)
+        end
+        if type(info) == "string" then
+            local direct = tonumber(info)
+            if direct ~= nil then
+                return math.floor(direct)
+            end
+            local fromLink = string.match(info, "item:(%d+)")
+            if fromLink ~= nil then
+                return tonumber(fromLink)
+            end
+        end
+        if type(info) == "table" then
+            local candidate = info.itemID or info.itemId or info.id
+            if type(candidate) == "number" then
+                return math.floor(candidate)
+            end
+        end
+        return nil
+    end
+
+    api.GetCurrUIType = api.GetCurrUIType or function()
+        return api._state.uiType or 0
+    end
+
+    api.GetNumSockets = api.GetNumSockets or function()
+        return getNumSockets()
+    end
+
+    api.GetSocketTypes = api.GetSocketTypes or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil then
+            return ""
+        end
+        local socketType = api._state.socketTypes[socketIndex]
+        if socketType == nil then
+            return ""
+        end
+        return socketType
+    end
+
+    api.GetExistingSocketInfo = api.GetExistingSocketInfo or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil then
+            return nil, nil, false
+        end
+        return readSocketInfo(api._state.existingSockets or {}, socketIndex)
+    end
+
+    api.GetNewSocketInfo = api.GetNewSocketInfo or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil then
+            return nil, nil, false
+        end
+        return readSocketInfo(api._state.newSockets or {}, socketIndex)
+    end
+
+    api.GetExistingSocketLink = api.GetExistingSocketLink or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil then
+            return nil
+        end
+        local info = (api._state.existingSockets or {})[socketIndex]
+        if type(info) ~= "table" then
+            return nil
+        end
+        return info.link
+    end
+
+    api.GetNewSocketLink = api.GetNewSocketLink or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil then
+            return nil
+        end
+        local info = (api._state.newSockets or {})[socketIndex]
+        if type(info) ~= "table" then
+            return nil
+        end
+        return info.link
+    end
+
+    api.GetSocketItemInfo = api.GetSocketItemInfo or function()
+        local itemInfo = api._state.itemInfo or {}
+        return itemInfo.name, itemInfo.icon, itemInfo.quality or 0
+    end
+
+    api.GetSocketItemRefundable = api.GetSocketItemRefundable or function()
+        local itemInfo = api._state.itemInfo or {}
+        return itemInfo.isRefundable == true
+    end
+
+    api.GetSocketItemBoundTradeable = api.GetSocketItemBoundTradeable or function()
+        local itemInfo = api._state.itemInfo or {}
+        return itemInfo.isBoundTradeable == true
+    end
+
+    api.HasBoundGemProposed = api.HasBoundGemProposed or function()
+        return api._state.hasBoundGemProposed == true
+    end
+
+    api.ClickSocketButton = api.ClickSocketButton or function(index)
+        local socketIndex = normalizeIndex(index)
+        if socketIndex == nil or socketIndex < 1 or socketIndex > getNumSockets() then
+            return false
+        end
+
+        local state = api._state
+        state.selectedSocketIndex = socketIndex
+        state.lastAction = "click"
+
+        local proposal = (state.clickProposals or {})[socketIndex]
+        if type(proposal) == "table" then
+            state.newSockets[socketIndex] = normalizedSocketInfo(proposal)
+            recalculateBoundGemProposed()
+        end
+        return true
+    end
+
+    api.AcceptSockets = api.AcceptSockets or function()
+        local state = api._state
+        state.lastAction = "accept"
+        state.acceptCount = (state.acceptCount or 0) + 1
+        state.isOpen = true
+
+        for index, info in pairs(state.newSockets or {}) do
+            if type(info) == "table" then
+                state.existingSockets[index] = normalizedSocketInfo(info)
+            end
+        end
+
+        state.newSockets = {}
+        recalculateBoundGemProposed()
+        return true
+    end
+
+    api.CompleteSocketing = api.CompleteSocketing or function()
+        return api.AcceptSockets()
+    end
+
+    api.CloseSocketInfo = api.CloseSocketInfo or function()
+        local state = api._state
+        local wasOpen = state.isOpen ~= false
+        state.isOpen = false
+        state.closeCount = (state.closeCount or 0) + 1
+        state.selectedSocketIndex = nil
+        state.lastAction = "close"
+        state.newSockets = {}
+        recalculateBoundGemProposed()
+        return wasOpen
+    end
+
+    api.IsArtifactRelicItem = api.IsArtifactRelicItem or function(info)
+        local itemID = itemIDFromInfo(info)
+        if itemID == nil then
+            return false
+        end
+        return api._state.artifactRelicItemIDs[itemID] == true
+    end
+"#;
+
 fn register_c_item_socket_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let isi = lua.create_table()?;
-    isi.set("GetCurrUIType", lua.create_function(|_, ()| Ok(0i32))?)?;
-    isi.set(
-        "GetExistingSocketInfo",
-        lua.create_function(|_, _idx: i32| Ok(Value::Nil))?,
-    )?;
-    isi.set("AcceptSockets", lua.create_function(|_, ()| Ok(()))?)?;
-    isi.set("CloseSocketInfo", lua.create_function(|_, ()| Ok(()))?)?;
-    isi.set(
-        "IsArtifactRelicItem",
-        lua.create_function(|_, _item: Value| Ok(false))?,
-    )?;
-    g.set("C_ItemSocketInfo", isi)
+    lua.load(ITEM_SOCKET_INFO_LUA).exec()?;
+    g.get::<mlua::Table>("C_ItemSocketInfo")
+        .and_then(|item_socket_info| g.set("C_ItemSocketInfo", item_socket_info))
 }
 
 fn register_c_pet_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
