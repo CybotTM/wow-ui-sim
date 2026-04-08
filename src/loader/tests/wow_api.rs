@@ -664,6 +664,75 @@ fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_unit_buff_returns_aura_tooltip_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    env.state().borrow_mut().player.buffs = vec![crate::lua_api::game_data::AuraInfo {
+        name: "Flash of Light".to_string(),
+        spell_id: 19750,
+        icon: 135987,
+        duration: 3600.0,
+        expiration_time: 3600.0,
+        applications: 0,
+        source_unit: "player".to_string(),
+        is_helpful: true,
+        is_stealable: false,
+        can_apply_aura: true,
+        is_from_player_or_player_pet: true,
+        aura_instance_id: 1,
+    }];
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL")
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.UnitAura or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local durationLine = tooltip.lines[2]
+            local descriptionLine = tooltip.lines[3]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.SpellName
+                and nameLine.leftText == "Flash of Light"
+                and durationLine
+                and durationLine.leftText == "1 hr"
+                and descriptionLine
+                and descriptionLine.type == Enum.TooltipDataLineType.SpellDescription
+                and type(descriptionLine.leftText) == "string"
+                and descriptionLine.leftText ~= ""
+                and descriptionLine.wrapText == true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetUnitBuff should expose aura name, duration, and description lines",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_unit_debuff_returns_empty_without_simulated_debuffs() {
+    let env = WowLuaEnv::new().unwrap();
+    let is_empty_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL")
+            return tooltip
+                and tooltip.type == Enum.TooltipDataType.UnitAura
+                and tooltip.lines
+                and next(tooltip.lines) == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        is_empty_tooltip,
+        "C_TooltipInfo.GetUnitDebuff should return an empty UnitAura tooltip when no debuffs exist",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env

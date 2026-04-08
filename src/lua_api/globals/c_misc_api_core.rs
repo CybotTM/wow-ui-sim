@@ -210,6 +210,14 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         lua.create_function(create_inventory_item_tooltip)?,
     )?;
     t.set("GetSpellByID", lua.create_function(create_spell_tooltip)?)?;
+    t.set(
+        "GetUnitBuff",
+        lua.create_function(create_unit_buff_tooltip)?,
+    )?;
+    t.set(
+        "GetUnitDebuff",
+        lua.create_function(create_unit_debuff_tooltip)?,
+    )?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -283,10 +291,72 @@ fn create_spell_tooltip(lua: &Lua, spell_id: i32) -> Result<Value> {
     Ok(Value::Table(tooltip))
 }
 
+fn create_unit_buff_tooltip(
+    lua: &Lua,
+    (unit, index, filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
+
+    let Some(aura) = lookup_player_aura_for_tooltip(lua, &unit, index, filter.as_deref()) else {
+        return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA);
+    };
+
+    build_aura_tooltip(lua, aura, TOOLTIP_DATA_TYPE_UNIT_AURA)
+}
+
+fn create_unit_debuff_tooltip(
+    lua: &Lua,
+    (_unit, _index, _filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    build_empty_tooltip(lua, 7)
+}
+
 fn build_empty_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
     let tooltip = lua.create_table()?;
     tooltip.set("type", tooltip_type)?;
     tooltip.set("lines", lua.create_table()?)?;
+    Ok(Value::Table(tooltip))
+}
+
+fn build_aura_tooltip(
+    lua: &Lua,
+    aura: crate::lua_api::game_data::AuraInfo,
+    tooltip_type: i32,
+) -> Result<Value> {
+    const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
+    const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
+    const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
+
+    let tooltip = lua.create_table()?;
+    tooltip.set("type", tooltip_type)?;
+
+    let lines = lua.create_table()?;
+    append_tooltip_line(lua, &lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, &aura.name)?;
+
+    let mut next_index = 2;
+    if aura.duration > 0.0 {
+        let duration_text = format_aura_duration_text(aura.duration);
+        append_tooltip_line(
+            lua,
+            &lines,
+            next_index,
+            TOOLTIP_LINE_TYPE_NONE,
+            &duration_text,
+        )?;
+        next_index += 1;
+    }
+
+    if let Some(description_text) = aura_spell_description_text(aura.spell_id) {
+        append_tooltip_line(
+            lua,
+            &lines,
+            next_index,
+            TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION,
+            &description_text,
+        )?;
+    }
+
+    tooltip.set("lines", lines)?;
     Ok(Value::Table(tooltip))
 }
 
@@ -300,16 +370,16 @@ fn build_spell_tooltip_lines(
     const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
     const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
 
-    append_spell_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, spell_name)?;
+    append_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, spell_name)?;
 
     let mut next_index = 2;
     if let Some(power_text) = spell_power_text(spell_id) {
-        append_spell_tooltip_line(lua, lines, next_index, TOOLTIP_LINE_TYPE_NONE, &power_text)?;
+        append_tooltip_line(lua, lines, next_index, TOOLTIP_LINE_TYPE_NONE, &power_text)?;
         next_index += 1;
     }
 
     let cast_time_text = spell_cast_time_text(spell_id);
-    append_spell_tooltip_line(
+    append_tooltip_line(
         lua,
         lines,
         next_index,
@@ -319,7 +389,7 @@ fn build_spell_tooltip_lines(
     next_index += 1;
 
     if let Some(description_text) = spell_description_text(spell_id) {
-        append_spell_tooltip_line(
+        append_tooltip_line(
             lua,
             lines,
             next_index,
@@ -330,7 +400,7 @@ fn build_spell_tooltip_lines(
     Ok(())
 }
 
-fn append_spell_tooltip_line(
+fn append_tooltip_line(
     lua: &Lua,
     lines: &mlua::Table,
     index: i32,
@@ -347,6 +417,56 @@ fn append_spell_tooltip_line(
     }
     lines.set(index, line)?;
     Ok(())
+}
+
+fn lookup_player_aura_for_tooltip(
+    lua: &Lua,
+    unit: &str,
+    index: i32,
+    filter: Option<&str>,
+) -> Option<crate::lua_api::game_data::AuraInfo> {
+    if unit != "player" || index < 1 {
+        return None;
+    }
+    if filter.is_some_and(|f| f.contains("HARMFUL") || f.contains("MAW")) {
+        return None;
+    }
+
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    state.player.buffs.get((index - 1) as usize).cloned()
+}
+
+fn aura_spell_description_text(spell_id: i32) -> Option<String> {
+    let description = crate::spell_descriptions::get_spell_description(spell_id as u32)?;
+    if description.is_empty() {
+        None
+    } else {
+        Some(strip_html_tags(description))
+    }
+}
+
+fn format_aura_duration_text(seconds: f64) -> String {
+    let secs = seconds as u64;
+    if secs >= 3600 {
+        let hours = secs / 3600;
+        let mins = (secs % 3600) / 60;
+        if mins > 0 {
+            format!("{hours} hr {mins} min")
+        } else {
+            format!("{hours} hr")
+        }
+    } else if secs >= 60 {
+        let mins = secs / 60;
+        let remaining = secs % 60;
+        if remaining > 0 {
+            format!("{mins} min {remaining} sec")
+        } else {
+            format!("{mins} min")
+        }
+    } else {
+        format!("{secs} sec")
+    }
 }
 
 fn spell_power_text(spell_id: i32) -> Option<String> {
