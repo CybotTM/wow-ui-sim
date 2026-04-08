@@ -542,18 +542,46 @@ const REINCARNATION_LUA: &str = r#"
     end
 "#;
 
+const TABLE_UTIL_LUA: &str = r#"
+    C_TableUtil = C_TableUtil or {}
+    local api = C_TableUtil
+
+    api.FindIndexedMismatch = api.FindIndexedMismatch or function(t1, t2, comparator)
+        if type(t1) ~= "table" or type(t2) ~= "table" then
+            return nil
+        end
+
+        local compare = nil
+        if type(comparator) == "function" then
+            compare = comparator
+        end
+
+        local maxLength = math.max(#t1, #t2)
+        for index = 1, maxLength do
+            local v1 = t1[index]
+            local v2 = t2[index]
+            local matches
+            if compare ~= nil then
+                matches = compare(v1, v2, index)
+            else
+                matches = (v1 == v2)
+            end
+            if not matches then
+                return index
+            end
+        end
+        return nil
+    end
+"#;
+
 /// C_Reincarnation and C_TableUtil stubs.
 fn register_reincarnation_table_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
     lua.load(REINCARNATION_LUA).exec()?;
     g.get::<mlua::Table>("C_Reincarnation")
         .and_then(|reincarnation| g.set("C_Reincarnation", reincarnation))?;
-
-    let tu = lua.create_table()?;
-    tu.set(
-        "FindIndexedMismatch",
-        lua.create_function(|_, (_t1, _t2, _fn): (Value, Value, Value)| Ok(Value::Nil))?,
-    )?;
-    g.set("C_TableUtil", tu)?;
+    lua.load(TABLE_UTIL_LUA).exec()?;
+    g.get::<mlua::Table>("C_TableUtil")
+        .and_then(|table_util| g.set("C_TableUtil", table_util))?;
 
     Ok(())
 }
