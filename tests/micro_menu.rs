@@ -188,6 +188,26 @@ fn texture_path(env: &WowLuaEnv, texture_expr: &str) -> String {
     env.eval::<String>(&code).unwrap_or_default()
 }
 
+fn professions_primary_frame_expr() -> &'static str {
+    "PrimaryProfession1 or (ProfessionsContentFrame and ProfessionsContentFrame.PrimaryProfession1)"
+}
+
+fn professions_primary_spell_button_is_shown(env: &WowLuaEnv, button_name: &str) -> bool {
+    let primary_expr = professions_primary_frame_expr();
+    let code = format!(
+        "local primary = {primary_expr}; return primary and primary.{button_name} and primary.{button_name}:IsShown() or false"
+    );
+    env.eval::<bool>(&code).unwrap_or(false)
+}
+
+fn professions_primary_spell_button_has_texture(env: &WowLuaEnv, button_name: &str) -> bool {
+    let primary_expr = professions_primary_frame_expr();
+    let code = format!(
+        "local primary = {primary_expr}; return primary and primary.{button_name} and primary.{button_name}.IconTexture and primary.{button_name}.IconTexture:GetTexture() ~= nil"
+    );
+    env.eval::<bool>(&code).unwrap_or(false)
+}
+
 #[test]
 fn micro_menu_character_button_opens_character_frame() {
     let env = setup_env();
@@ -219,6 +239,20 @@ fn micro_menu_professions_button_loads_and_opens_panel() {
     assert!(
         frame_is_shown(&env, "ProfessionsBookFrame"),
         "ProfessionsBookFrame should be shown after clicking ProfessionMicroButton"
+    );
+
+    let spell_button_1_shown = professions_primary_spell_button_is_shown(&env, "SpellButton1");
+    let spell_button_2_shown = professions_primary_spell_button_is_shown(&env, "SpellButton2");
+    assert!(
+        spell_button_1_shown && spell_button_2_shown,
+        "Primary profession spell buttons should both be shown"
+    );
+
+    let first_icon = professions_primary_spell_button_has_texture(&env, "SpellButton1");
+    let second_icon = professions_primary_spell_button_has_texture(&env, "SpellButton2");
+    assert!(
+        first_icon && second_icon,
+        "Primary profession spell buttons should have icon textures"
     );
 }
 

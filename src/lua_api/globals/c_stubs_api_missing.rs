@@ -524,7 +524,97 @@ fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     )?;
     g.set("PutItemInBackpack", lua.create_function(|_, ()| Ok(()))?)?;
     g.set("PutItemInBag", lua.create_function(|_, _bag: i32| Ok(()))?)?;
+    install_cooldown_frame_helpers(lua)?;
+    install_communities_util_stub(lua)?;
+    install_adventure_guide_util_stub(lua)?;
     Ok(())
+}
+
+/// Blizzard_FrameXMLUtil normally defines these global cooldown helpers in Lua.
+///
+/// Some startup paths reach cooldown widgets before that file has populated the
+/// globals, so install a narrow fallback that mirrors Blizzard's logic.
+fn install_cooldown_frame_helpers(lua: &Lua) -> Result<()> {
+    lua.load(
+        r#"
+        if not CooldownFrame_Set then
+            function CooldownFrame_Set(self, start, duration, enable, forceShowDrawEdge, modRate)
+                if enable and enable ~= 0 and start > 0 and duration > 0 then
+                    self:SetDrawEdge(forceShowDrawEdge)
+                    self:SetCooldown(start, duration, modRate)
+                else
+                    CooldownFrame_Clear(self)
+                end
+            end
+
+            function CooldownFrame_Clear(self)
+                self:Clear()
+            end
+
+            function CooldownFrame_SetDisplayAsPercentage(self, percentage)
+                local seconds = 100
+                local clamped = math.max(0, math.min(1, percentage))
+                self:Pause()
+                self:SetCooldown(GetTime() - (seconds * clamped), seconds)
+            end
+        end
+    "#,
+    )
+    .exec()
+}
+
+/// Blizzard_FrameXMLUtil normally defines the CommunitiesUtil helper table in Lua.
+///
+/// The micro menu only needs the unread-message predicate during startup, so we
+/// install a narrow fallback that returns false until the real addon loads.
+fn install_communities_util_stub(lua: &Lua) -> Result<()> {
+    lua.load(
+        r#"
+        if not CommunitiesUtil then
+            CommunitiesUtil = {}
+        end
+
+        if CommunitiesUtil.DoesAnyCommunityHaveUnreadMessages == nil then
+            function CommunitiesUtil.DoesAnyCommunityHaveUnreadMessages()
+                return false
+            end
+        end
+
+        if CommunitiesUtil.DoesCommunityHaveUnreadMessages == nil then
+            function CommunitiesUtil.DoesCommunityHaveUnreadMessages()
+                return false
+            end
+        end
+
+        if CommunitiesUtil.DoesOtherCommunityHaveUnreadMessages == nil then
+            function CommunitiesUtil.DoesOtherCommunityHaveUnreadMessages()
+                return false
+            end
+        end
+    "#,
+    )
+    .exec()
+}
+
+/// Blizzard_FrameXMLUtil normally defines the AdventureGuideUtil helper table in Lua.
+///
+/// The micro menu only needs the availability check during startup, so the
+/// fallback keeps that branch false until the real addon loads.
+fn install_adventure_guide_util_stub(lua: &Lua) -> Result<()> {
+    lua.load(
+        r#"
+        if not AdventureGuideUtil then
+            AdventureGuideUtil = {}
+        end
+
+        if AdventureGuideUtil.IsAvailable == nil then
+            function AdventureGuideUtil.IsAvailable()
+                return false
+            end
+        end
+    "#,
+    )
+    .exec()
 }
 
 /// PaperDoll, container frame, group roster, and miscellaneous stubs.
