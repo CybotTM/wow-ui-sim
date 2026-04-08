@@ -16,7 +16,7 @@ pub fn register_c_stubs_api(
     super::c_stubs_api_namespaces::register_c_perks_activities(lua)?;
     super::c_stubs_api_namespaces::register_game_state_stubs(lua)?;
     super::c_stubs_api_namespaces::register_c_incoming_summon(lua)?;
-    super::c_stubs_api_extra::register_extra_stubs(lua)?;
+    super::c_stubs_api_extra::register_extra_stubs(lua, state)?;
     super::c_stubs_api_combat::register_combat_stubs(lua)?;
     super::c_stubs_api_professions::register_profession_stubs(lua)?;
     Ok(())

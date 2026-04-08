@@ -6,8 +6,11 @@
 //! - C_ItemSocketInfo, C_PetInfo, C_UnitAurasPrivate, C_Sound
 //! - Missing global functions, constants, and utility tables
 
+use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
 use std::collections::HashMap;
+use std::rc::Rc;
 use std::sync::OnceLock;
 
 /// Convert a Lua value to f64 for abbreviation functions, returning None for non-numeric.
@@ -35,9 +38,9 @@ fn format_abbreviated(n: f64, threshold_k: f64) -> String {
 }
 
 /// Register all extra stubs (called from c_stubs_api::register_c_stubs_api).
-pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
+pub fn register_extra_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
-    register_missing_c_namespaces(lua, &g)?;
+    register_missing_c_namespaces(lua, &g, state)?;
     register_secure_namespaces(lua, &g)?;
     register_missing_global_functions(lua, &g)?;
     register_missing_constants(lua, &g)?;
@@ -49,38 +52,77 @@ pub fn register_extra_stubs(lua: &Lua) -> Result<()> {
 }
 
 /// C_* namespace stubs that are referenced during addon loading.
-fn register_missing_c_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
+fn register_missing_c_namespaces(
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     register_item_pet_aura_namespaces(lua, g)?;
     register_utility_namespaces(lua, g)?;
-    register_account_encounter_proto_namespaces(lua, g)?;
+    register_account_encounter_proto_namespaces(lua, g, state)?;
     register_reincarnation_table_util(lua, g)?;
     Ok(())
 }
 
 /// C_AccountServices, C_ArrowCalloutManager, C_EncounterEvents, C_PrototypeDialog stubs.
-fn register_account_encounter_proto_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    register_c_account_services(lua, g)?;
+fn register_account_encounter_proto_namespaces(
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    register_c_account_services(lua, g, state)?;
     register_c_arrow_callout_manager(lua, g)?;
     register_c_encounter_events(lua, g)?;
     register_c_prototype_dialog(lua, g)?;
     Ok(())
 }
 
-fn register_c_account_services(lua: &Lua, g: &mlua::Table) -> Result<()> {
+const ACCOUNT_EXPORT_RESULT_SUCCESS: i32 = 0;
+const ACCOUNT_EXPORT_RESULT_UNAVAILABLE: i32 = 10;
+const ACCOUNT_EXPORT_RESULT_ALREADY_IN_PROGRESS: i32 = 11;
+
+fn save_account_data(state: &mut SimState) -> (bool, i32) {
+    if !state.account_save_enabled {
+        return (false, ACCOUNT_EXPORT_RESULT_UNAVAILABLE);
+    }
+    if state.account_save_in_progress {
+        return (false, ACCOUNT_EXPORT_RESULT_ALREADY_IN_PROGRESS);
+    }
+
+    state.account_save_in_progress = true;
+    state.account_locked_post_save = true;
+    state.account_save_in_progress = false;
+    (true, ACCOUNT_EXPORT_RESULT_SUCCESS)
+}
+
+fn register_c_account_services(
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     let acct = lua.create_table()?;
+    let locked = state.clone();
     acct.set(
         "IsAccountLockedPostSave",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(move |_, ()| Ok(locked.borrow().account_locked_post_save))?,
     )?;
+    let enabled = state.clone();
     acct.set(
         "IsAccountSaveEnabled",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(move |_, ()| Ok(enabled.borrow().account_save_enabled))?,
     )?;
+    let in_progress = state.clone();
     acct.set(
         "IsAccountSaveInProgress",
-        lua.create_function(|_, ()| Ok(false))?,
+        lua.create_function(move |_, ()| Ok(in_progress.borrow().account_save_in_progress))?,
     )?;
-    acct.set("SaveAccountData", lua.create_function(|_, ()| Ok(()))?)?;
+    acct.set(
+        "SaveAccountData",
+        lua.create_function(move |_, ()| {
+            let mut state = state.borrow_mut();
+            Ok(save_account_data(&mut state))
+        })?,
+    )?;
     g.set("C_AccountServices", acct)
 }
 

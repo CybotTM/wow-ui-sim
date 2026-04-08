@@ -95,6 +95,12 @@ pub struct SimState {
     pub saved_account_list: String,
     /// Whether the saved account uses token login.
     pub uses_token: bool,
+    /// Whether account-save export is available on this build/runtime.
+    pub account_save_enabled: bool,
+    /// Whether an account-save export is currently active.
+    pub account_save_in_progress: bool,
+    /// Whether the account is locked after a successful save/export.
+    pub account_locked_post_save: bool,
     /// Action bar slots: slot (1-120) → spell ID.
     pub action_bars: HashMap<u32, u32>,
     /// Addon base paths for runtime on-demand loading (Blizzard UI + AddOns directories).
@@ -275,6 +281,9 @@ struct EmptyRuntimeState {
     saved_account_name: String,
     saved_account_list: String,
     uses_token: bool,
+    account_save_enabled: bool,
+    account_save_in_progress: bool,
+    account_locked_post_save: bool,
     fps: f32,
     rot_damage_level: usize,
     start_time: Instant,
@@ -308,6 +317,9 @@ impl EmptyRuntimeState {
             saved_account_name: String::new(),
             saved_account_list: String::new(),
             uses_token: false,
+            account_save_enabled: false,
+            account_save_in_progress: false,
+            account_locked_post_save: false,
             fps: 0.0,
             rot_damage_level: 0,
             start_time: Instant::now(),
@@ -381,6 +393,9 @@ impl SimState {
             saved_account_name: r.saved_account_name,
             saved_account_list: r.saved_account_list,
             uses_token: r.uses_token,
+            account_save_enabled: r.account_save_enabled,
+            account_save_in_progress: r.account_save_in_progress,
+            account_locked_post_save: r.account_locked_post_save,
             fps: r.fps,
             rot_damage_level: r.rot_damage_level,
             start_time: r.start_time,
