@@ -627,6 +627,48 @@ fn test_c_tooltip_info_get_inventory_item_returns_equipped_item_tooltip() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_hyperlink_returns_item_and_spell_tooltips() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local itemTooltip = C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r")
+            local spellTooltip = C_TooltipInfo.GetHyperlink(GetSpellLink(19750))
+            if not itemTooltip or not spellTooltip then
+                return false
+            end
+
+            local itemNameLine = itemTooltip.lines[1]
+            local itemLevelLine = itemTooltip.lines[2]
+            local spellNameLine = spellTooltip.lines[1]
+            local spellCostLine = spellTooltip.lines[2]
+            local spellCastLine = spellTooltip.lines[3]
+
+            return itemTooltip.type == Enum.TooltipDataType.Item
+                and spellTooltip.type == Enum.TooltipDataType.Spell
+                and itemNameLine
+                and itemNameLine.type == Enum.TooltipDataLineType.ItemName
+                and itemNameLine.leftText == "Entombed Seraph's Greaves"
+                and itemLevelLine
+                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
+                and itemLevelLine.leftText == "Item Level 571"
+                and spellNameLine
+                and spellNameLine.type == Enum.TooltipDataLineType.SpellName
+                and spellNameLine.leftText == "Flash of Light"
+                and spellCostLine
+                and spellCostLine.leftText == "10% of Base MANA"
+                and spellCastLine
+                and spellCastLine.leftText == "1.5 sec cast"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetHyperlink should dispatch item and spell hyperlinks to tooltip data",
+    );
+}
+
+#[test]
 fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
     let env = WowLuaEnv::new().unwrap();
     let has_real_tooltip: bool = env
