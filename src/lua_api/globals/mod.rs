@@ -51,6 +51,7 @@ pub mod c_misc_api;
 mod c_misc_api_core;
 mod c_misc_api_core_progression;
 mod c_misc_api_core_social;
+mod c_misc_api_core_tooltip;
 mod c_misc_api_game;
 mod c_misc_api_game_systems;
 mod c_misc_api_ui;
