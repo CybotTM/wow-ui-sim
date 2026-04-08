@@ -63,6 +63,7 @@ mod c_stubs_api_combat_curve;
 pub mod c_stubs_api_extra;
 pub mod c_stubs_api_glue;
 mod c_stubs_api_missing;
+mod c_stubs_api_missing_player_location;
 mod c_stubs_api_namespaces;
 pub mod c_stubs_api_professions;
 pub mod c_stubs_api_secure;
