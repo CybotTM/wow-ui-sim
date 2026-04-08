@@ -86,6 +86,15 @@ fn setup_full_ui() -> WowLuaEnv {
     install_test_error_handler(&env);
     install_test_ui_error_capture(&env);
     fire_startup_events(&env);
+    // Ensure action button clicks that require a hostile target don't emit
+    // "You have no target" noise, which is unrelated to this regression suite.
+    let _ = env.exec(
+        r#"
+        if A_Admin and A_Admin.SetTarget then
+            A_Admin.SetTarget("ClickAllFramesDummy", 63, 1, true)
+        end
+    "#,
+    );
     // Drain startup errors — we only care about click errors
     drain_test_errors(&env);
     drain_test_ui_errors(&env);

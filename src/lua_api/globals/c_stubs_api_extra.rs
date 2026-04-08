@@ -1718,6 +1718,13 @@ fn register_legacy_constants(g: &mlua::Table) -> Result<()> {
 
 /// CombatLog C++ API functions used by Blizzard_CombatLog.
 fn register_combat_log_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_combat_log_entry_stubs(lua, g)?;
+    register_combat_log_retention_stubs(lua, g)?;
+    register_combat_log_object_stubs(lua, g)?;
+    Ok(())
+}
+
+fn register_combat_log_entry_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("CombatLogResetFilter", lua.create_function(|_, ()| Ok(()))?)?;
     g.set(
         "CombatLogAddFilter",
@@ -1750,7 +1757,10 @@ fn register_combat_log_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CombatLogGetCurrentEventInfo",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
+    )
+}
+
+fn register_combat_log_retention_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CombatLogGetRetentionTime",
         lua.create_function(|_, ()| Ok(300.0f64))?,
@@ -1758,12 +1768,14 @@ fn register_combat_log_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CombatLogSetRetentionTime",
         lua.create_function(|_, _time: Value| Ok(()))?,
-    )?;
+    )
+}
+
+fn register_combat_log_object_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CombatLog_Object_IsA",
         lua.create_function(|_, (unit_flags, mask): (i64, i64)| Ok(unit_flags & mask != 0))?,
-    )?;
-    Ok(())
+    )
 }
 
 /// Taint system and restricted environment globals.

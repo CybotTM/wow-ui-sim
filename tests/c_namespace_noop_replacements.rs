@@ -319,3 +319,94 @@ fn encounter_journal_global_filters_and_tier_are_numeric() {
         "numeric difficulties should be treated as valid"
     );
 }
+
+#[test]
+fn combat_log_globals_have_stable_stub_behavior() {
+    let env = env();
+    let (
+        reset_ok,
+        add_filter_ok,
+        set_entry_ok,
+        clear_ok,
+        set_retention_ok,
+        current_entry,
+        num_entries,
+        show_current,
+        advance_result,
+        retention_time,
+        event_info_is_nil,
+        object_match,
+        object_miss,
+    ): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+        i64,
+        i64,
+        bool,
+        bool,
+        f64,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local resetOk = pcall(CombatLogResetFilter)
+            local addFilterOk = pcall(CombatLogAddFilter, "anything")
+            local setEntryOk = pcall(CombatLogSetCurrentEntry, 5)
+            local clearOk = pcall(CombatLogClearEntries)
+            local setRetentionOk = pcall(CombatLogSetRetentionTime, 120)
+
+            local currentEntry = CombatLogGetCurrentEntry()
+            local numEntries = CombatLogGetNumEntries()
+            local showCurrent = CombatLogShowCurrentEntry()
+            local advanceResult = CombatLogAdvanceEntry(1)
+            local retentionTime = CombatLogGetRetentionTime()
+            local eventInfoIsNil = CombatLogGetCurrentEventInfo() == nil
+
+            local objectMatch = CombatLog_Object_IsA(0x21, 0x01)
+            local objectMiss = CombatLog_Object_IsA(0x20, 0x01)
+
+            return resetOk,
+                addFilterOk,
+                setEntryOk,
+                clearOk,
+                setRetentionOk,
+                currentEntry,
+                numEntries,
+                showCurrent,
+                advanceResult,
+                retentionTime,
+                eventInfoIsNil,
+                objectMatch,
+                objectMiss
+            "#,
+        )
+        .unwrap();
+
+    assert!(reset_ok, "CombatLogResetFilter should be callable");
+    assert!(add_filter_ok, "CombatLogAddFilter should be callable");
+    assert!(set_entry_ok, "CombatLogSetCurrentEntry should be callable");
+    assert!(clear_ok, "CombatLogClearEntries should be callable");
+    assert!(
+        set_retention_ok,
+        "CombatLogSetRetentionTime should be callable"
+    );
+    assert_eq!(current_entry, 0, "current entry stub should default to 0");
+    assert_eq!(num_entries, 0, "entry count stub should default to 0");
+    assert!(!show_current, "show current entry stub should be false");
+    assert!(!advance_result, "advance entry stub should be false");
+    assert_eq!(
+        retention_time, 300.0,
+        "retention time stub should default to 300s"
+    );
+    assert!(event_info_is_nil, "current event info stub should be nil");
+    assert!(object_match, "bitmask check should match overlapping flags");
+    assert!(
+        !object_miss,
+        "bitmask check should fail for non-overlapping flags"
+    );
+}
