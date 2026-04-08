@@ -1321,18 +1321,62 @@ fn register_c_unit_auras_private(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|unit_auras_private| g.set("C_UnitAurasPrivate", unit_auras_private))
 }
 
+const LEVEL_LINK_LUA: &str = r#"
+    C_LevelLink = C_LevelLink or {}
+    local api = C_LevelLink
+
+    api._state = api._state or {
+        lockedActions = {},
+        lockedSpells = {},
+        lastActionQuery = nil,
+        lastSpellQuery = nil,
+    }
+
+    local function normalizeNumber(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function isLocked(lockMap, id)
+        if type(lockMap) ~= "table" or id == nil then
+            return false
+        end
+        if lockMap[id] == true then
+            return true
+        end
+        local entry = lockMap[id]
+        if type(entry) == "table" then
+            return entry.locked == true
+        end
+        return false
+    end
+
+    api.IsActionLocked = api.IsActionLocked or function(actionID)
+        local normalized = normalizeNumber(actionID)
+        api._state.lastActionQuery = normalized
+        return isLocked(api._state.lockedActions, normalized)
+    end
+
+    api.IsSpellLocked = api.IsSpellLocked or function(spellID)
+        local normalized = normalizeNumber(spellID)
+        api._state.lastSpellQuery = normalized
+        return isLocked(api._state.lockedSpells, normalized)
+    end
+"#;
+
 /// C_LevelLink, C_EventScheduler, C_RestrictedActions, C_TransmogOutfitInfo stubs.
 fn register_utility_namespaces(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let ll = lua.create_table()?;
-    ll.set(
-        "IsActionLocked",
-        lua.create_function(|_, _action_id: Value| Ok(false))?,
-    )?;
-    ll.set(
-        "IsSpellLocked",
-        lua.create_function(|_, _spell_id: Value| Ok(false))?,
-    )?;
-    g.set("C_LevelLink", ll)?;
+    lua.load(LEVEL_LINK_LUA).exec()?;
+    g.get::<mlua::Table>("C_LevelLink")
+        .and_then(|level_link| g.set("C_LevelLink", level_link))?;
 
     let es = lua.create_table()?;
     es.set("CanShowEvents", lua.create_function(|_, ()| Ok(false))?)?;
