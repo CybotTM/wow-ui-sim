@@ -126,14 +126,80 @@ fn register_c_account_services(
     g.set("C_AccountServices", acct)
 }
 
+const ARROW_CALLOUT_MANAGER_LUA: &str = r#"
+    C_ArrowCalloutManager = C_ArrowCalloutManager or {}
+    local manager = C_ArrowCalloutManager
+    manager.activeCallouts = manager.activeCallouts or {}
+    manager.acknowledgedCallouts = manager.acknowledgedCallouts or {}
+
+    local function resolveCalloutID(value)
+        if type(value) == "table" then
+            return value.calloutID
+        end
+        return value
+    end
+
+    local function dispatchCalloutEvent(eventName, payload)
+        local frameManager = ArrowCalloutFrameManager
+        if frameManager and type(frameManager.OnEvent) == "function" then
+            frameManager:OnEvent(eventName, payload)
+        end
+    end
+
+    manager.ShowCallout = manager.ShowCallout or function(calloutInfo)
+        if type(calloutInfo) ~= "table" then
+            return false
+        end
+
+        local calloutID = calloutInfo.calloutID
+        if calloutID == nil then
+            return false
+        end
+
+        manager.activeCallouts[calloutID] = calloutInfo
+        manager.acknowledgedCallouts[calloutID] = nil
+        dispatchCalloutEvent("SHOW_ARROW_CALLOUT", calloutInfo)
+        return true
+    end
+
+    manager.HideCallout = manager.HideCallout or function(value)
+        local calloutID = resolveCalloutID(value)
+        if calloutID == nil then
+            return false
+        end
+
+        local hadActiveCallout = manager.activeCallouts[calloutID] ~= nil
+        manager.activeCallouts[calloutID] = nil
+        if hadActiveCallout then
+            dispatchCalloutEvent("HIDE_ARROW_CALLOUT", calloutID)
+        end
+        return hadActiveCallout
+    end
+
+    manager.AcknowledgeCallout = manager.AcknowledgeCallout or function(value)
+        local calloutID = resolveCalloutID(value)
+        if calloutID == nil then
+            return false
+        end
+
+        manager.acknowledgedCallouts[calloutID] = true
+        manager.HideCallout(calloutID)
+        return true
+    end
+
+    manager.IsCalloutActive = manager.IsCalloutActive or function(calloutID)
+        return manager.activeCallouts[calloutID] ~= nil
+    end
+
+    manager.IsCalloutAcknowledged = manager.IsCalloutAcknowledged or function(calloutID)
+        return manager.acknowledgedCallouts[calloutID] == true
+    end
+"#;
+
 fn register_c_arrow_callout_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let arrow = lua.create_table()?;
-    arrow.set(
-        "AcknowledgeCallout",
-        lua.create_function(|_, _id: Value| Ok(()))?,
-    )?;
-    arrow.set("HideCallout", lua.create_function(|_, _id: Value| Ok(()))?)?;
-    g.set("C_ArrowCalloutManager", arrow)
+    lua.load(ARROW_CALLOUT_MANAGER_LUA).exec()?;
+    g.get::<mlua::Table>("C_ArrowCalloutManager")
+        .and_then(|arrow| g.set("C_ArrowCalloutManager", arrow))
 }
 
 fn register_c_encounter_events(lua: &Lua, g: &mlua::Table) -> Result<()> {
