@@ -174,6 +174,20 @@ fn frame_exists(env: &WowLuaEnv, frame_name: &str) -> bool {
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
+/// Return a texture path from a global frame expression, or empty string.
+fn texture_path(env: &WowLuaEnv, texture_expr: &str) -> String {
+    let code = format!(
+        r#"
+        local tex = {texture_expr}
+        if not tex or not tex.GetTexture then
+            return ""
+        end
+        return tex:GetTexture() or ""
+        "#
+    );
+    env.eval::<String>(&code).unwrap_or_default()
+}
+
 #[test]
 fn micro_menu_character_button_opens_character_frame() {
     let env = setup_env();
@@ -252,6 +266,24 @@ fn micro_menu_achievement_button_loads_and_opens_panel() {
     assert!(
         frame_is_shown(&env, "AchievementFrame"),
         "AchievementFrame should be shown after clicking AchievementMicroButton"
+    );
+
+    let background = texture_path(&env, "AchievementFrame.Background");
+    assert_eq!(
+        background, r"Interface\AchievementFrame\UI-Achievement-AchievementBackground",
+        "AchievementFrame background texture should be assigned"
+    );
+
+    let categories_bg = texture_path(&env, "AchievementFrameCategoriesBG");
+    assert_eq!(
+        categories_bg, r"Interface\AchievementFrame\UI-Achievement-Parchment",
+        "Achievement categories parchment texture should be assigned"
+    );
+
+    let header_left = texture_path(&env, "AchievementFrame.Header.Left");
+    assert_eq!(
+        header_left, r"Interface\AchievementFrame\UI-Achievement-Header",
+        "Achievement header texture should be assigned"
     );
 }
 
