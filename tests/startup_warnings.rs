@@ -133,6 +133,22 @@ fn test_no_warnings_on_startup() {
     test_timeout! {
         let warnings = load_and_startup();
         let count = warnings.len();
+        let account_store_regressions: Vec<String> = warnings
+            .iter()
+            .filter(|warning| {
+                (warning.contains("attempt to index global 'AccountStoreFrame'")
+                    && warning.contains("UIParent.lua:352"))
+                    || warning.contains("AccountStoreFrame:SetStoreFrontID")
+            })
+            .cloned()
+            .collect();
+
+        assert!(
+            account_store_regressions.is_empty(),
+            "Regression: AccountStore startup nil-path error reintroduced.\n\
+             Matching warnings:\n  {}",
+            account_store_regressions.join("\n  ")
+        );
 
         if count > KNOWN_WARNING_COUNT {
             let mut msg = format!(

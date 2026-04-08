@@ -44,15 +44,51 @@ fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
     errors
 }
 
+/// Hook UIErrorsFrame:AddMessage and collect messages into `__test_ui_errors`.
+fn install_test_ui_error_capture(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        __test_ui_errors = {}
+        if UIErrorsFrame and type(UIErrorsFrame.AddMessage) == "function" then
+            local original_add_message = UIErrorsFrame.AddMessage
+            UIErrorsFrame.AddMessage = function(self, message, ...)
+                table.insert(__test_ui_errors, tostring(message))
+                return original_add_message(self, message, ...)
+            end
+        end
+    "#,
+    )
+    .expect("Failed to install UI error capture");
+}
+
+/// Read collected UIErrorsFrame messages and clear `__test_ui_errors`.
+fn drain_test_ui_errors(env: &WowLuaEnv) -> Vec<String> {
+    let lua = env.lua();
+    let table: mlua::Table = match lua.globals().get("__test_ui_errors") {
+        Ok(t) => t,
+        Err(_) => return Vec::new(),
+    };
+    let mut messages = Vec::new();
+    for entry in table.sequence_values::<String>() {
+        if let Ok(msg) = entry {
+            messages.push(msg);
+        }
+    }
+    let _ = lua.load("__test_ui_errors = {}").exec();
+    messages
+}
+
 /// Load all Blizzard addons, fire startup events, return the environment.
 fn setup_full_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     load_all_blizzard_addons(&env);
     install_test_error_handler(&env);
+    install_test_ui_error_capture(&env);
     fire_startup_events(&env);
     // Drain startup errors — we only care about click errors
     drain_test_errors(&env);
+    drain_test_ui_errors(&env);
     env
 }
 
@@ -102,10 +138,16 @@ fn click_named(env: &WowLuaEnv, name: &str) -> Vec<String> {
         }
     };
     env.send_click(id).ok();
-    drain_test_errors(env)
+    let mut errors: Vec<String> = drain_test_errors(env)
         .into_iter()
         .map(|e| format!("[{name}] {e}"))
-        .collect()
+        .collect();
+    errors.extend(
+        drain_test_ui_errors(env)
+            .into_iter()
+            .map(|msg| format!("[{name}] UIError: {msg}")),
+    );
+    errors
 }
 
 /// Click multiple frames by name, return (clicked_count, errors).
@@ -165,6 +207,9 @@ fn click_prefix(env: &WowLuaEnv, prefix: &str) -> (usize, Vec<String>) {
         env.send_click(*id).ok();
         for err in drain_test_errors(env) {
             all_errors.push(format!("[{name}] {err}"));
+        }
+        for msg in drain_test_ui_errors(env) {
+            all_errors.push(format!("[{name}] UIError: {msg}"));
         }
     }
 
@@ -287,6 +332,19 @@ fn test_click_all_frames() {
         let env = setup_full_ui();
         let report = click_all_groups(&env);
         let count = report.len();
+        let communities_unavailable = "Guilds and Communities are currently unavailable";
+        let communities_errors: Vec<String> = report
+            .iter()
+            .filter(|line| line.contains(communities_unavailable))
+            .cloned()
+            .collect();
+
+        assert!(
+            communities_errors.is_empty(),
+            "Regression: Communities unavailable UI error reintroduced.\n\
+             Matching errors:\n  {}",
+            communities_errors.join("\n  ")
+        );
 
         for line in &report {
             eprintln!("  {line}");
