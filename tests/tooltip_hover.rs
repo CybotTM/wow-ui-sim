@@ -5,6 +5,25 @@
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 
+#[test]
+fn test_tooltip_mixins_load_in_full_env() {
+    let env = setup_full_env();
+
+    let tooltip_data_handler_mixin_type: String =
+        env.eval("return type(TooltipDataHandlerMixin)").unwrap();
+    let game_tooltip_data_mixin_type: String =
+        env.eval("return type(GameTooltipDataMixin)").unwrap();
+    let status_bar_onload_type: String = env
+        .eval("return type(GameTooltipStatusBar.OnLoad)")
+        .unwrap();
+    let tooltip_onload_type: String = env.eval("return type(GameTooltip.OnLoad)").unwrap();
+
+    assert_eq!(tooltip_data_handler_mixin_type, "table");
+    assert_eq!(game_tooltip_data_mixin_type, "table");
+    assert_eq!(status_bar_onload_type, "function");
+    assert_eq!(tooltip_onload_type, "function");
+}
+
 /// Test that hovering a micro menu button shows the tooltip with text.
 ///
 /// Uses the full Blizzard UI environment so OnEnter scripts run properly.
@@ -268,14 +287,20 @@ fn setup_full_env() -> WowLuaEnv {
 }
 
 fn load_blizzard_addons(env: &WowLuaEnv, ui: &std::path::Path) {
-    use wow_ui_sim::loader::load_addon;
+    use wow_ui_sim::loader::{find_toc_file, load_addon};
 
     for (name, toc) in TOOLTIP_TEST_ADDONS {
-        let toc_path = ui.join(name).join(toc);
-        if toc_path.exists() {
-            if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
-                eprintln!("[load {name}] FAILED: {e}");
-            }
+        let addon_dir = ui.join(name);
+        let requested_toc = addon_dir.join(toc);
+        let toc_path = if requested_toc.exists() {
+            requested_toc
+        } else if let Some(discovered_toc) = find_toc_file(&addon_dir) {
+            discovered_toc
+        } else {
+            continue;
+        };
+        if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+            eprintln!("[load {name}] FAILED: {e}");
         }
     }
 }
