@@ -120,26 +120,14 @@ fn build_template_texture_lua(
     is_mask: bool,
     is_line: bool,
 ) -> String {
-    let create_method = if is_line {
-        "CreateLine"
-    } else if is_mask {
-        "CreateMaskTexture"
-    } else {
-        "CreateTexture"
-    };
-    let mut code = format!(
-        "local parent = {}\nif parent then\nlocal tex = parent:{}(\"{}\", \"{}\")\n",
-        lua_global_ref(parent_name),
-        create_method,
-        escape_lua_string(child_name),
+    let mut code = start_template_texture_lua(
+        parent_name,
+        child_name,
         draw_layer,
+        template_texture_create_method(is_mask, is_line),
     );
     append_template_texture_mixins(&mut code, texture);
-    if is_line {
-        if let Some(t) = texture.thickness {
-            code.push_str(&format!("tex:SetThickness({})\n", t));
-        }
-    }
+    append_line_texture_options(&mut code, texture, is_line);
     append_texture_properties(&mut code, texture, "tex", is_mask);
     append_anchors_and_parent_refs(
         &mut code,
@@ -153,15 +141,53 @@ fn build_template_texture_lua(
             parent_name,
         },
     );
+    append_template_texture_defaults(&mut code, texture);
+    append_mask_wiring(&mut code, is_mask, texture);
+    code.push_str("end\n");
+    code
+}
+
+fn template_texture_create_method(is_mask: bool, is_line: bool) -> &'static str {
+    if is_line {
+        "CreateLine"
+    } else if is_mask {
+        "CreateMaskTexture"
+    } else {
+        "CreateTexture"
+    }
+}
+
+fn start_template_texture_lua(
+    parent_name: &str,
+    child_name: &str,
+    draw_layer: &str,
+    create_method: &str,
+) -> String {
+    format!(
+        "local parent = {}\nif parent then\nlocal tex = parent:{}(\"{}\", \"{}\")\n",
+        lua_global_ref(parent_name),
+        create_method,
+        escape_lua_string(child_name),
+        draw_layer,
+    )
+}
+
+fn append_line_texture_options(code: &mut String, texture: &crate::xml::TextureXml, is_line: bool) {
+    if !is_line {
+        return;
+    }
+    if let Some(thickness) = texture.thickness {
+        code.push_str(&format!("tex:SetThickness({thickness})\n"));
+    }
+}
+
+fn append_template_texture_defaults(code: &mut String, texture: &crate::xml::TextureXml) {
     if texture.anchors.is_none() && texture.set_all_points != Some(true) {
         code.push_str("tex:SetAllPoints(true)\n");
     }
     if texture.hidden == Some(true) {
         code.push_str("tex:Hide()\n");
     }
-    append_mask_wiring(&mut code, is_mask, texture);
-    code.push_str("end\n");
-    code
 }
 
 /// Append Mixin() calls from inherited templates and direct mixin attribute.
@@ -515,5 +541,76 @@ fn lowercase_first(s: &str) -> String {
     match chars.next() {
         Some(c) => c.to_lowercase().to_string() + chars.as_str(),
         None => String::new(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_template_texture_lua;
+
+    #[test]
+    fn build_template_texture_lua_uses_line_creation_and_thickness() {
+        let texture = crate::xml::TextureXml {
+            thickness: Some(3.5),
+            ..Default::default()
+        };
+
+        let code = build_template_texture_lua(
+            &texture,
+            "ParentFrame",
+            "ParentFrameLine",
+            "OVERLAY",
+            false,
+            true,
+        );
+
+        assert!(code.contains("CreateLine(\"ParentFrameLine\", \"OVERLAY\")"));
+        assert!(code.contains("tex:SetThickness(3.5)"));
+        assert!(code.contains("tex:SetAllPoints(true)"));
+    }
+
+    #[test]
+    fn build_template_texture_lua_hides_and_defers_dotted_mask_wiring() {
+        let ui = crate::xml::parse_xml(
+            r#"
+            <Ui>
+                <Frame name="ParentFrame">
+                    <Layers>
+                        <Layer level="ARTWORK">
+                            <MaskTexture name="ParentFrameMask" hidden="true">
+                                <MaskedTextures>
+                                    <MaskedTexture childKey="HealthBar.Fill"/>
+                                </MaskedTextures>
+                            </MaskTexture>
+                        </Layer>
+                    </Layers>
+                </Frame>
+            </Ui>
+            "#,
+        )
+        .unwrap();
+        let texture = match &ui.elements[0] {
+            crate::xml::XmlElement::Frame(frame) => {
+                match &frame.layers().next().unwrap().layers[0].elements[0] {
+                    crate::xml::LayerElement::MaskTexture(texture) => texture.clone(),
+                    other => panic!("expected mask texture, got {:?}", other),
+                }
+            }
+            other => panic!("expected frame, got {:?}", other),
+        };
+
+        let code = build_template_texture_lua(
+            &texture,
+            "ParentFrame",
+            "ParentFrameMask",
+            "ARTWORK",
+            true,
+            false,
+        );
+
+        assert!(code.contains("CreateMaskTexture(\"ParentFrameMask\", \"ARTWORK\")"));
+        assert!(code.contains("tex:Hide()"));
+        assert!(code.contains("C_Timer.After(0, function()"));
+        assert!(code.contains("parent.HealthBar.Fill:AddMaskTexture(tex)"));
     }
 }
