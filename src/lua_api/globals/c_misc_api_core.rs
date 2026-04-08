@@ -270,18 +270,34 @@ fn build_profession_info(lua: &Lua, index: i32) -> Result<mlua::MultiValue> {
     let Some(p) = profession_data::get_profession_by_index((index - 1) as usize) else {
         return Ok(mlua::MultiValue::new());
     };
+    let (num_spells, spell_offset) = profession_spellbook_spell_count_and_offset(p.name);
     Ok(mlua::MultiValue::from_vec(vec![
         Value::String(lua.create_string(p.name)?),
         Value::Integer(p.icon as i64),
         Value::Integer(p.skill_level as i64),
         Value::Integer(p.max_skill_level as i64),
-        Value::Integer(0), // numAbilities
-        Value::Integer(0), // spellOffset
+        Value::Integer(num_spells as i64),   // numAbilities
+        Value::Integer(spell_offset as i64), // spellOffset
         Value::Integer(p.skill_line_id as i64),
         Value::Integer(p.skill_modifier as i64),
         Value::Integer(0), // specializationIndex
         Value::Integer(0), // specializationOffset
     ]))
+}
+
+fn profession_spellbook_spell_count_and_offset(profession_name: &str) -> (i32, i32) {
+    for skill_line_index in 1..=super::spellbook_data::num_skill_lines() {
+        let Some(skill_line) = super::spellbook_data::get_skill_line(skill_line_index) else {
+            continue;
+        };
+        if skill_line.name == profession_name {
+            return (
+                skill_line.spells.len() as i32,
+                super::spellbook_data::skill_line_offset(skill_line_index),
+            );
+        }
+    }
+    (0, 0)
 }
 
 fn register_c_trade_skill(lua: &Lua) -> Result<()> {

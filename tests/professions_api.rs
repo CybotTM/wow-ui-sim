@@ -50,6 +50,28 @@ fn test_profession_info_mining() {
     assert_eq!(skill, 90);
 }
 
+#[test]
+fn test_profession_info_exposes_spell_slots_for_professions_book_buttons() {
+    let env = env();
+    let (num_spells_1, num_spells_2, bs_spell_id, mining_spell_id): (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local _, _, _, _, numSpells1, spellOffset1 = GetProfessionInfo(1)
+            local _, _, _, _, numSpells2, spellOffset2 = GetProfessionInfo(2)
+
+            local bsInfo = C_SpellBook.GetSpellBookItemInfo(spellOffset1 + 1, Enum.SpellBookSpellBank.Player)
+            local miningInfo = C_SpellBook.GetSpellBookItemInfo(spellOffset2 + 1, Enum.SpellBookSpellBank.Player)
+            return numSpells1, numSpells2, bsInfo and bsInfo.spellID or 0, miningInfo and miningInfo.spellID or 0
+            "#,
+        )
+        .unwrap();
+
+    assert!(num_spells_1 > 0);
+    assert!(num_spells_2 > 0);
+    assert_eq!(bs_spell_id, 2018);
+    assert_eq!(mining_spell_id, 2575);
+}
+
 // ============================================================================
 // C_TradeSkillUI
 // ============================================================================
