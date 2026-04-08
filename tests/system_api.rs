@@ -220,6 +220,126 @@ fn test_bn_get_friend_info_nil() {
     assert!(is_nil);
 }
 
+// ============================================================================
+// PlayerLocation
+// ============================================================================
+
+#[test]
+fn test_player_location_guid_uses_guid_validity_and_clear_invalidates() {
+    let env = env();
+    let (is_guid, is_unit, guid_matches, valid_before, valid_after): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+        C_PlayerInfo.GUIDIsPlayer = function(guid)
+            return guid == "Player-3676-00000001"
+        end
+        C_AccountInfo.IsGUIDBattleNetAccountType = function()
+            return false
+        end
+
+        local location = PlayerLocation:CreateFromGUID("Player-3676-00000001")
+        local valid_before = location:IsValid()
+        local guid_matches = location:GetGUID() == "Player-3676-00000001"
+        location:Clear()
+
+        return location:IsGUID(), location:IsUnit(), guid_matches, valid_before, location:IsValid()
+    "#,
+        )
+        .unwrap();
+    assert!(!is_guid, "Clear should remove the GUID source kind");
+    assert!(
+        !is_unit,
+        "GUID locations should not report as unit locations"
+    );
+    assert!(
+        guid_matches,
+        "GUID locations should preserve the original GUID"
+    );
+    assert!(
+        valid_before,
+        "GUID validity should come from the GUID resolver"
+    );
+    assert!(!valid_after, "Cleared locations should become invalid");
+}
+
+#[test]
+fn test_player_location_unit_uses_unit_validity() {
+    let env = env();
+    let (player_valid, pet_valid, player_is_unit, pet_is_unit): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+        UnitIsHumanPlayer = function(unit)
+            return unit == "player"
+        end
+
+        local player_location = PlayerLocation:CreateFromUnit("player")
+        local pet_location = PlayerLocation:CreateFromUnit("pet")
+        return player_location:IsValid(), pet_location:IsValid(), player_location:IsUnit(), pet_location:IsUnit()
+    "#,
+        )
+        .unwrap();
+    assert!(
+        player_valid,
+        "player unit should be valid when UnitIsHumanPlayer says so"
+    );
+    assert!(!pet_valid, "non-human unit locations should be invalid");
+    assert!(player_is_unit);
+    assert!(pet_is_unit);
+}
+
+#[test]
+fn test_player_location_preserves_non_guid_source_kinds() {
+    let env = env();
+    let (community_valid, bnet_valid, community_kind, bnet_kind, clear_invalid): (
+        bool,
+        bool,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+        C_Club.CanResolvePlayerLocationFromClubMessageData = function(clubID, streamID, epoch, position)
+            return clubID == 7 and streamID == 11 and epoch == 13 and position == 17
+        end
+
+        local community = PlayerLocation:CreateFromCommunityChatData(7, 11, 13, 17)
+        local bnet = PlayerLocation:CreateFromBattleNetID(42)
+        local cleared = PlayerLocation:CreateFromVoiceID(3, 9)
+        cleared:Clear()
+
+        return community:IsValid(), bnet:IsValid(), community:IsCommunityData(), bnet:IsBattleNetID(), cleared:IsValid()
+    "#,
+        )
+        .unwrap();
+    assert!(
+        community_valid,
+        "community chat locations should use the resolver result"
+    );
+    assert!(
+        bnet_valid,
+        "battle.net locations should remain valid while their source kind is set"
+    );
+    assert!(
+        community_kind,
+        "community locations should preserve their source kind"
+    );
+    assert!(
+        bnet_kind,
+        "battle.net locations should preserve their source kind"
+    );
+    assert!(
+        !clear_invalid,
+        "cleared voice locations should become invalid"
+    );
+}
+
 #[test]
 fn test_bn_get_info() {
     let env = env();

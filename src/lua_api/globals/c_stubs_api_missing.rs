@@ -295,7 +295,17 @@ fn register_player_location_stub(lua: &Lua, g: &mlua::Table) -> Result<()> {
         end
 
         function PlayerLocationMixin:IsValid()
-            return true;
+            if self:IsGUID() then
+                local guid = self:GetGUID();
+                return guid ~= nil and (C_PlayerInfo.GUIDIsPlayer(guid) or C_AccountInfo.IsGUIDBattleNetAccountType(guid));
+            elseif self:IsCommunityData() then
+                return C_Club.CanResolvePlayerLocationFromClubMessageData(self.communityClubID, self.communityStreamID, self.communityEpoch, self.communityPosition);
+            elseif self:IsUnit() then
+                local unit = self:GetUnit();
+                return unit ~= nil and UnitIsHumanPlayer(unit);
+            end
+
+            return self:IsChatLineID() or self:IsBattlefieldScoreIndex() or self:IsVoiceID() or self:IsBattleNetID() or self:IsCommunityInvitation();
         end
 
         function PlayerLocationMixin:Clear()
