@@ -211,6 +211,7 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
         "GetTraitEntry",
         lua.create_function(create_trait_entry_tooltip)?,
     )?;
+    table.set("GetAction", lua.create_function(create_action_tooltip)?)?;
     table.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
     table.set(
         "GetInventoryItem",
@@ -274,6 +275,24 @@ fn create_trait_entry_tooltip(lua: &Lua, (entry_id, rank): (i32, Option<i32>)) -
 
     tooltip.set("lines", lines)?;
     Ok(Value::Table(tooltip))
+}
+
+fn create_action_tooltip(lua: &Lua, action_id: i32) -> Result<Value> {
+    let get_action_info: mlua::Function = lua.globals().get("GetActionInfo")?;
+    let action_info: mlua::MultiValue = get_action_info.call(action_id)?;
+    let mut action_info = action_info.into_iter();
+
+    let action_type = action_info
+        .next()
+        .and_then(lua_value_to_string)
+        .unwrap_or_default();
+    let action_value = action_info.next().and_then(lua_value_to_i32);
+
+    match (action_type.as_str(), action_value) {
+        ("spell", Some(spell_id)) => create_spell_tooltip(lua, spell_id),
+        ("item", Some(item_id)) => create_item_tooltip(lua, item_id),
+        _ => Ok(Value::Nil),
+    }
 }
 
 fn create_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
@@ -556,6 +575,21 @@ fn should_skip_player_aura_tooltip(unit: &str, index: i32, filter: Option<&str>)
         return true;
     }
     filter.is_some_and(|f| f.contains("HARMFUL") || f.contains("MAW"))
+}
+
+fn lua_value_to_string(value: Value) -> Option<String> {
+    match value {
+        Value::String(s) => Some(s.to_string_lossy().to_string()),
+        _ => None,
+    }
+}
+
+fn lua_value_to_i32(value: Value) -> Option<i32> {
+    match value {
+        Value::Integer(n) => Some(n as i32),
+        Value::Number(n) => Some(n as i32),
+        _ => None,
+    }
 }
 
 fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {

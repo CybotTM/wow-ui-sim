@@ -962,6 +962,35 @@ fn test_c_tooltip_info_get_unit_returns_player_and_target_tooltips() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_action_returns_spell_tooltip_for_spell_slots() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_expected_tooltips: bool = env
+        .eval(
+            r#"
+            local slotTooltip = C_TooltipInfo.GetAction(1)
+            local emptyTooltip = C_TooltipInfo.GetAction(999)
+
+            local nameLine = slotTooltip and slotTooltip.lines and slotTooltip.lines[1]
+            local castTimeLine = slotTooltip and slotTooltip.lines and slotTooltip.lines[3]
+
+            return slotTooltip
+                and slotTooltip.type == Enum.TooltipDataType.Spell
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.SpellName
+                and nameLine.leftText == "Flash of Light"
+                and castTimeLine
+                and castTimeLine.leftText == "1.5 sec cast"
+                and emptyTooltip == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_expected_tooltips,
+        "C_TooltipInfo.GetAction should delegate spell slots to spell tooltip data and return nil for empty slots",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env
