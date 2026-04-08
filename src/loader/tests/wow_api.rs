@@ -627,6 +627,43 @@ fn test_c_tooltip_info_get_inventory_item_returns_equipped_item_tooltip() {
 }
 
 #[test]
+fn test_c_tooltip_info_get_spell_by_id_returns_spell_tooltip_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetSpellByID(19750)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Spell or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local costLine = tooltip.lines[2]
+            local castLine = tooltip.lines[3]
+            local descriptionLine = tooltip.lines[4]
+
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.SpellName
+                and nameLine.leftText == "Flash of Light"
+                and costLine
+                and costLine.leftText == "10% of Base MANA"
+                and castLine
+                and castLine.leftText == "1.5 sec cast"
+                and descriptionLine
+                and descriptionLine.type == Enum.TooltipDataLineType.SpellDescription
+                and type(descriptionLine.leftText) == "string"
+                and descriptionLine.leftText ~= ""
+                and descriptionLine.wrapText == true
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetSpellByID should expose spell name, cost, cast time, and description lines",
+    );
+}
+
+#[test]
 fn test_c_spell_get_spell_description_returns_compact_trait_text() {
     let env = WowLuaEnv::new().unwrap();
     let has_description: bool = env

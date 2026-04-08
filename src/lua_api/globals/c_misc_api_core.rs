@@ -209,6 +209,7 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
         "GetInventoryItem",
         lua.create_function(create_inventory_item_tooltip)?,
     )?;
+    t.set("GetSpellByID", lua.create_function(create_spell_tooltip)?)?;
     globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
@@ -266,11 +267,140 @@ fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Res
     create_item_tooltip(lua, item_id as i32)
 }
 
-fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
+fn create_spell_tooltip(lua: &Lua, spell_id: i32) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_SPELL: i32 = 1;
+
+    let Some(spell) = crate::spells::get_spell(spell_id as u32) else {
+        return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_SPELL);
+    };
+
+    let tooltip = lua.create_table()?;
+    tooltip.set("type", TOOLTIP_DATA_TYPE_SPELL)?;
+
+    let lines = lua.create_table()?;
+    build_spell_tooltip_lines(lua, spell_id, spell.name, &lines)?;
+    tooltip.set("lines", lines)?;
+    Ok(Value::Table(tooltip))
+}
+
+fn build_empty_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
     let tooltip = lua.create_table()?;
     tooltip.set("type", tooltip_type)?;
     tooltip.set("lines", lua.create_table()?)?;
     Ok(Value::Table(tooltip))
+}
+
+fn build_spell_tooltip_lines(
+    lua: &Lua,
+    spell_id: i32,
+    spell_name: &str,
+    lines: &mlua::Table,
+) -> Result<()> {
+    const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
+    const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
+    const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
+
+    append_spell_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, spell_name)?;
+
+    let mut next_index = 2;
+    if let Some(power_text) = spell_power_text(spell_id) {
+        append_spell_tooltip_line(lua, lines, next_index, TOOLTIP_LINE_TYPE_NONE, &power_text)?;
+        next_index += 1;
+    }
+
+    let cast_time_text = spell_cast_time_text(spell_id);
+    append_spell_tooltip_line(
+        lua,
+        lines,
+        next_index,
+        TOOLTIP_LINE_TYPE_NONE,
+        &cast_time_text,
+    )?;
+    next_index += 1;
+
+    if let Some(description_text) = spell_description_text(spell_id) {
+        append_spell_tooltip_line(
+            lua,
+            lines,
+            next_index,
+            TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION,
+            &description_text,
+        )?;
+    }
+    Ok(())
+}
+
+fn append_spell_tooltip_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    text: &str,
+) -> Result<()> {
+    const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
+
+    let line = lua.create_table()?;
+    line.set("type", line_type)?;
+    line.set("leftText", text)?;
+    if line_type == TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION {
+        line.set("wrapText", true)?;
+    }
+    lines.set(index, line)?;
+    Ok(())
+}
+
+fn spell_power_text(spell_id: i32) -> Option<String> {
+    let costs = crate::spell_power::get_spell_power(spell_id as u32)?;
+    let cost = costs.first()?;
+    let type_name = crate::spell_power::power_type_name(cost.power_type);
+    if cost.cost_pct > 0.0 {
+        Some(format!("{}% of Base {}", cost.cost_pct, type_name))
+    } else if cost.mana_cost > 0 {
+        Some(format!("{} {}", cost.mana_cost, type_name))
+    } else {
+        None
+    }
+}
+
+fn spell_cast_time_text(spell_id: i32) -> String {
+    let cast_time_ms = super::spell_api::spell_cast_time(spell_id);
+    if cast_time_ms > 0 {
+        let secs = cast_time_ms as f64 / 1000.0;
+        if (secs - secs.round()).abs() < 0.001 {
+            format!("{} sec cast", secs as i32)
+        } else {
+            format!("{:.1} sec cast", secs)
+        }
+    } else {
+        "Instant".to_string()
+    }
+}
+
+fn spell_description_text(spell_id: i32) -> Option<String> {
+    let description = crate::spell_descriptions::get_spell_description(spell_id as u32)?;
+    if description.is_empty() {
+        None
+    } else {
+        Some(strip_html_tags(description))
+    }
+}
+
+fn strip_html_tags(html: &str) -> String {
+    let mut result = String::with_capacity(html.len());
+    let mut in_tag = false;
+    for ch in html.chars() {
+        match ch {
+            '<' => in_tag = true,
+            '>' => in_tag = false,
+            _ if !in_tag => result.push(ch),
+            _ => {}
+        }
+    }
+    result
+}
+
+fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
+    build_empty_tooltip(lua, tooltip_type)
 }
 
 fn build_filled_item_tooltip(
