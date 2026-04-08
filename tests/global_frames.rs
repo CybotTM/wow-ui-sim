@@ -47,6 +47,44 @@ fn test_minimap_exists() {
 }
 
 #[test]
+fn test_minimap_zoom_persists_and_clamps() {
+    let env = env();
+    let (default_zoom, clamped_zoom): (i32, i32) = env
+        .eval(
+            r#"
+        local before = Minimap:GetZoom()
+        Minimap:SetZoom(99)
+        return before, Minimap:GetZoom()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(default_zoom, 0);
+    assert_eq!(clamped_zoom, 5);
+}
+
+#[test]
+fn test_world_map_data_providers_are_tracked() {
+    let env = env();
+    let (count_after_add, count_after_remove): (i32, i32) = env
+        .eval(
+            r#"
+        local map = CreateFrame("Frame", "TestWorldMapProviders", UIParent)
+        local provider = {}
+        map:AddDataProvider(provider)
+        map:AddDataProvider(provider)
+        local fields = debug.getfenv(map)
+        local providers = fields and fields[1] and fields[1].dataProviders or {}
+        local added = #providers
+        map:RemoveDataProvider(provider)
+        return added, #providers
+    "#,
+        )
+        .unwrap();
+    assert_eq!(count_after_add, 1);
+    assert_eq!(count_after_remove, 0);
+}
+
+#[test]
 fn test_garrison_type_enum() {
     let env = env();
     let exists: bool = env.eval("return Enum ~= nil").unwrap();

@@ -334,10 +334,14 @@ fn setup_editmode_stub_methods(lua: &Lua, frame_name: &str) -> Result<()> {
 
 /// Set iconScale on BuffFrame.AuraContainer.
 fn setup_buff_frame_aura_container(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
-    let aura_container_id = {
+    let (buff_frame_id, aura_container_id) = {
         let st = state.borrow();
-        st.widgets.get_id_by_name("BuffFrameAuraContainer").unwrap()
+        (
+            st.widgets.get_id_by_name("BuffFrame").unwrap(),
+            st.widgets.get_id_by_name("BuffFrameAuraContainer").unwrap(),
+        )
     };
+    sync_child_to_lua(lua, buff_frame_id, "AuraContainer", aura_container_id)?;
     let aura_fields = get_or_create_frame_fields(lua, aura_container_id)?;
     aura_fields.set("iconScale", 1.0)?;
     Ok(())

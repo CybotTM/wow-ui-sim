@@ -315,8 +315,10 @@ fn add_minimap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Minimap core: zoom, ping, blips.
 fn add_minimap_core_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetZoom", |_, _this, ()| Ok(0));
-    methods.add_method("SetZoom", |_, _this, _zoom: i32| Ok(()));
+    methods.add_method("GetZoom", |lua, this, ()| get_frame_zoom(lua, this.0));
+    methods.add_method("SetZoom", |lua, this, zoom: i32| {
+        set_frame_zoom(lua, this.0, zoom)
+    });
     methods.add_method("GetZoomLevels", |_, _this, ()| Ok(5));
     methods.add_method("GetPingPosition", |_, _this, ()| Ok((0.0f64, 0.0f64)));
     methods.add_method("PingLocation", |_, _this, (_x, _y): (f64, f64)| Ok(()));
@@ -407,8 +409,12 @@ fn add_alert_subsystem_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
 
 /// WorldMapFrame data provider stubs and UseRaidStylePartyFrames.
 fn add_data_provider_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("AddDataProvider", |_, _this, _provider: Value| Ok(()));
-    methods.add_method("RemoveDataProvider", |_, _this, _provider: Value| Ok(()));
+    methods.add_method("AddDataProvider", |lua, this, provider: Value| {
+        add_frame_data_provider(lua, this.0, provider)
+    });
+    methods.add_method("RemoveDataProvider", |lua, this, provider: Value| {
+        remove_frame_data_provider(lua, this.0, provider)
+    });
     methods.add_method("UseRaidStylePartyFrames", |_, _this, ()| Ok(false));
 }
 
@@ -432,4 +438,78 @@ fn add_edit_mode_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(false)
     });
+}
+
+fn get_frame_zoom(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<i32> {
+    let fields = frame_fields(lua, frame_id)?;
+    match fields.get::<Value>("zoom")? {
+        Value::Integer(zoom) => Ok(zoom as i32),
+        Value::Number(zoom) => Ok(zoom as i32),
+        _ => Ok(0),
+    }
+}
+
+fn set_frame_zoom(lua: &mlua::Lua, frame_id: u64, zoom: i32) -> mlua::Result<()> {
+    let fields = frame_fields(lua, frame_id)?;
+    fields.set("zoom", zoom.clamp(0, 5))
+}
+
+fn add_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> mlua::Result<()> {
+    let providers = frame_data_providers(lua, frame_id)?;
+    if table_contains_value(&providers, &provider)? {
+        return Ok(());
+    }
+    let next_index = providers.raw_len() + 1;
+    providers.raw_set(next_index, provider)
+}
+
+fn remove_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> mlua::Result<()> {
+    let providers = frame_data_providers(lua, frame_id)?;
+    remove_matching_value(&providers, &provider)
+}
+
+fn frame_data_providers(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
+    let fields = frame_fields(lua, frame_id)?;
+    match fields.get::<Value>("dataProviders")? {
+        Value::Table(table) => Ok(table),
+        _ => {
+            let table = lua.create_table()?;
+            fields.set("dataProviders", table.clone())?;
+            Ok(table)
+        }
+    }
+}
+
+fn frame_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
+    let frame = frame_ref(lua, frame_id)?;
+    match frame {
+        Value::UserData(ud) => ud.user_value(),
+        _ => lua.create_table(),
+    }
+}
+
+fn table_contains_value(table: &mlua::Table, expected: &Value) -> mlua::Result<bool> {
+    for value in table.sequence_values::<Value>() {
+        if value? == *expected {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn remove_matching_value(table: &mlua::Table, expected: &Value) -> mlua::Result<()> {
+    let mut next_index = 1;
+    let mut kept = Vec::new();
+    for value in table.sequence_values::<Value>() {
+        let value = value?;
+        if value != *expected {
+            kept.push(value);
+        }
+    }
+    table.clear()?;
+    for value in kept {
+        table.raw_set(next_index, value)?;
+        next_index += 1;
+    }
+    Ok(())
 }
