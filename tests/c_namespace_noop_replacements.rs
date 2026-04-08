@@ -1,0 +1,200 @@
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn perks_activities_remove_tracked_updates_state() {
+    let env = env();
+    let (removed, remaining_one, remaining_two, remaining_count, remove_count, last_removed): (
+        bool,
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            C_PerksActivities._state.trackedIDs = { 101, 202, 303 }
+            C_PerksActivities._state.removeCount = 0
+            C_PerksActivities._state.lastRemovedID = nil
+            C_PerksActivities._state.activityInfoByID = {
+                [303] = { id = 303, name = "Trading Post Task" },
+            }
+            C_PerksActivities._state.chatLinkByID = {
+                [303] = "|cffffff00|Hperk:303|h[Trading Post Task]|h|r",
+            }
+
+            local removed = C_PerksActivities.RemoveTrackedPerksActivity("202")
+            local tracked = C_PerksActivities.GetTrackedPerksActivities().trackedIDs
+            local info = C_PerksActivities.GetPerksActivityInfo(303)
+            local link = C_PerksActivities.GetPerksActivityChatLink(303)
+
+            assert(info and info.id == 303 and info.name == "Trading Post Task")
+            assert(link ~= nil and string.find(link, "perk:303", 1, true) ~= nil)
+
+            return removed == true,
+                tracked[1],
+                tracked[2],
+                #tracked,
+                C_PerksActivities._state.removeCount,
+                C_PerksActivities._state.lastRemovedID
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        removed,
+        "RemoveTrackedPerksActivity should report successful removal"
+    );
+    assert_eq!(remaining_one, 101, "first tracked id should remain");
+    assert_eq!(remaining_two, 303, "second tracked id should remain");
+    assert_eq!(remaining_count, 2, "one tracked id should be removed");
+    assert_eq!(remove_count, 1, "remove count should increment");
+    assert_eq!(last_removed, 202, "lastRemovedID should store removed id");
+}
+
+#[test]
+fn store_glue_methods_are_state_backed() {
+    let env = env();
+    let (
+        disconnect_on_logout,
+        vas_ready,
+        purchase_state,
+        product_id,
+        result_tag,
+        request_count,
+        update_count,
+        queued_count,
+        last_queued_guid,
+    ): (bool, bool, i64, i64, String, i64, i64, i64, String) = env
+        .eval(
+            r#"
+            C_StoreGlue._state.disconnectOnLogout = true
+            C_StoreGlue._state.vasProductReady = true
+            C_StoreGlue._state.purchaseStateByGuid = {
+                ["Player-111"] = {
+                    purchaseState = 3,
+                    productID = 77,
+                    result = "READY",
+                }
+            }
+            C_StoreGlue._state.requestedQueueGuids = {}
+            C_StoreGlue._state.requestCharacterQueueTimeCount = 0
+            C_StoreGlue._state.updateVASPurchaseStatesCount = 0
+            C_StoreGlue._state.lastRequestedQueueGuid = nil
+
+            local purchaseState, productID, resultTag = C_StoreGlue.GetVASPurchaseStateInfo("Player-111")
+            local firstQueueRequest = C_StoreGlue.RequestCharacterQueueTime("Player-111")
+            local secondQueueRequest = C_StoreGlue.RequestCharacterQueueTime("Player-111")
+            local firstUpdate = C_StoreGlue.UpdateVASPurchaseStates()
+            local secondUpdate = C_StoreGlue.UpdateVASPurchaseStates()
+
+            assert(firstQueueRequest and secondQueueRequest)
+            assert(firstUpdate and secondUpdate)
+
+            return C_StoreGlue.GetDisconnectOnLogout(),
+                C_StoreGlue.GetVASProductReady(),
+                purchaseState,
+                productID,
+                resultTag,
+                C_StoreGlue._state.requestCharacterQueueTimeCount,
+                C_StoreGlue._state.updateVASPurchaseStatesCount,
+                #C_StoreGlue._state.requestedQueueGuids,
+                C_StoreGlue._state.lastRequestedQueueGuid
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        disconnect_on_logout,
+        "disconnectOnLogout should read from _state"
+    );
+    assert!(vas_ready, "vasProductReady should read from _state");
+    assert_eq!(
+        purchase_state, 3,
+        "purchase state should read from map entry"
+    );
+    assert_eq!(product_id, 77, "product id should read from map entry");
+    assert_eq!(result_tag, "READY", "result should read from map entry");
+    assert_eq!(request_count, 2, "queue request count should increment");
+    assert_eq!(update_count, 2, "update count should increment");
+    assert_eq!(
+        queued_count, 2,
+        "requested guid list should record requests"
+    );
+    assert_eq!(
+        last_queued_guid, "Player-111",
+        "last requested guid should be tracked"
+    );
+}
+
+#[test]
+fn video_options_set_window_size_updates_current_size() {
+    let env = env();
+    let (
+        default_x,
+        default_y,
+        current_x,
+        current_y,
+        size_count,
+        set_count,
+        last_set_x,
+        last_set_y,
+    ): (i64, i64, i64, i64, i64, i64, i64, i64) = env
+        .eval(
+            r#"
+            C_VideoOptions._state.defaultGameWindowSize = { x = 2560, y = 1440 }
+            C_VideoOptions._state.currentGameWindowSize = { x = 1920, y = 1080 }
+            C_VideoOptions._state.availableGameWindowSizes = {
+                { x = 1280, y = 720 },
+                { x = 1920, y = 1080 },
+                { x = 2560, y = 1440 },
+            }
+            C_VideoOptions._state.setGameWindowSizeCount = 0
+            C_VideoOptions._state.lastSetWindowSize = nil
+
+            local defaultSize = C_VideoOptions.GetDefaultGameWindowSize(1)
+            local sizes = C_VideoOptions.GetGameWindowSizes()
+            local currentBefore = C_VideoOptions.GetCurrentGameWindowSize()
+            assert(currentBefore.x == 1920 and currentBefore.y == 1080)
+            assert(#sizes == 3)
+
+            local changed = C_VideoOptions.SetGameWindowSize(1600, 900)
+            assert(changed == true)
+
+            local currentAfter = C_VideoOptions.GetCurrentGameWindowSize()
+            local lastSet = C_VideoOptions._state.lastSetWindowSize
+
+            return defaultSize.x,
+                defaultSize.y,
+                currentAfter.x,
+                currentAfter.y,
+                #sizes,
+                C_VideoOptions._state.setGameWindowSizeCount,
+                lastSet.x,
+                lastSet.y
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(default_x, 2560, "default width should read from _state");
+    assert_eq!(default_y, 1440, "default height should read from _state");
+    assert_eq!(
+        current_x, 1600,
+        "current width should update after SetGameWindowSize"
+    );
+    assert_eq!(
+        current_y, 900,
+        "current height should update after SetGameWindowSize"
+    );
+    assert_eq!(
+        size_count, 3,
+        "GetGameWindowSizes should return configured sizes"
+    );
+    assert_eq!(set_count, 1, "setGameWindowSizeCount should increment");
+    assert_eq!(last_set_x, 1600, "last set width should be tracked");
+    assert_eq!(last_set_y, 900, "last set height should be tracked");
+}

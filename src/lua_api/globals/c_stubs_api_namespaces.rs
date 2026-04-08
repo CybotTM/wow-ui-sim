@@ -3,33 +3,253 @@
 //! Split from c_stubs_api.rs — contains social/system namespaces, video options,
 //! perks activities, game-state stubs, and incoming summon.
 
-use mlua::{Lua, MultiValue, Result, Value};
+use mlua::{Lua, Result, Value};
+
+const PERKS_ACTIVITIES_LUA: &str = r#"
+    C_PerksActivities = C_PerksActivities or {}
+    local api = C_PerksActivities
+
+    api._state = api._state or {
+        trackedIDs = {},
+        activityInfoByID = {},
+        chatLinkByID = {},
+        removeCount = 0,
+        lastRemovedID = nil,
+    }
+
+    local function normalizeID(id)
+        local n = tonumber(id)
+        if n == nil then
+            return nil
+        end
+        return math.floor(n)
+    end
+
+    local function ensureState()
+        local state = api._state
+        if type(state.trackedIDs) ~= "table" then
+            state.trackedIDs = {}
+        end
+        if type(state.activityInfoByID) ~= "table" then
+            state.activityInfoByID = {}
+        end
+        if type(state.chatLinkByID) ~= "table" then
+            state.chatLinkByID = {}
+        end
+        return state
+    end
+
+    api.GetTrackedPerksActivities = api.GetTrackedPerksActivities or function()
+        local state = ensureState()
+        local tracked = {}
+        for index, id in ipairs(state.trackedIDs) do
+            tracked[index] = id
+        end
+        return { trackedIDs = tracked }
+    end
+
+    api.GetPerksActivityInfo = api.GetPerksActivityInfo or function(id)
+        local state = ensureState()
+        local activityID = normalizeID(id)
+        if activityID == nil then
+            return nil
+        end
+        return state.activityInfoByID[activityID]
+    end
+
+    api.GetPerksActivityChatLink = api.GetPerksActivityChatLink or function(id)
+        local state = ensureState()
+        local activityID = normalizeID(id)
+        if activityID == nil then
+            return nil
+        end
+        return state.chatLinkByID[activityID]
+    end
+
+    api.RemoveTrackedPerksActivity = api.RemoveTrackedPerksActivity or function(id)
+        local state = ensureState()
+        local activityID = normalizeID(id)
+        local removed = false
+        if activityID ~= nil then
+            for index = #state.trackedIDs, 1, -1 do
+                if normalizeID(state.trackedIDs[index]) == activityID then
+                    table.remove(state.trackedIDs, index)
+                    removed = true
+                end
+            end
+        end
+        state.removeCount = (tonumber(state.removeCount) or 0) + 1
+        state.lastRemovedID = activityID
+        return removed
+    end
+"#;
+
+const STORE_GLUE_LUA: &str = r#"
+    C_StoreGlue = C_StoreGlue or {}
+    local api = C_StoreGlue
+
+    api._state = api._state or {
+        disconnectOnLogout = false,
+        vasProductReady = false,
+        purchaseStateByGuid = {},
+        requestedQueueGuids = {},
+        requestCharacterQueueTimeCount = 0,
+        updateVASPurchaseStatesCount = 0,
+        lastRequestedQueueGuid = nil,
+    }
+
+    local function ensureState()
+        local state = api._state
+        if type(state.purchaseStateByGuid) ~= "table" then
+            state.purchaseStateByGuid = {}
+        end
+        if type(state.requestedQueueGuids) ~= "table" then
+            state.requestedQueueGuids = {}
+        end
+        return state
+    end
+
+    api.GetDisconnectOnLogout = api.GetDisconnectOnLogout or function()
+        return api._state.disconnectOnLogout == true
+    end
+
+    api.GetVASProductReady = api.GetVASProductReady or function()
+        return api._state.vasProductReady == true
+    end
+
+    api.GetVASPurchaseStateInfo = api.GetVASPurchaseStateInfo or function(guid)
+        local state = ensureState()
+        local key = tostring(guid)
+        local entry = state.purchaseStateByGuid[key]
+        if type(entry) == "table" then
+            local purchaseState = tonumber(entry.purchaseState or entry.state) or 0
+            return math.floor(purchaseState), entry.productID, entry.result
+        end
+        return 0, nil, nil
+    end
+
+    api.RequestCharacterQueueTime = api.RequestCharacterQueueTime or function(guid)
+        local state = ensureState()
+        state.requestCharacterQueueTimeCount = (tonumber(state.requestCharacterQueueTimeCount) or 0) + 1
+        state.lastRequestedQueueGuid = guid
+        table.insert(state.requestedQueueGuids, guid)
+        return true
+    end
+
+    api.UpdateVASPurchaseStates = api.UpdateVASPurchaseStates or function()
+        local state = ensureState()
+        state.updateVASPurchaseStatesCount = (tonumber(state.updateVASPurchaseStatesCount) or 0) + 1
+        return true
+    end
+"#;
+
+const VIDEO_OPTIONS_LUA: &str = r#"
+    C_VideoOptions = C_VideoOptions or {}
+    local api = C_VideoOptions
+
+    api._state = api._state or {
+        defaultGameWindowSize = { x = 1920, y = 1080 },
+        currentGameWindowSize = { x = 1920, y = 1080 },
+        availableGameWindowSizes = {},
+        setGameWindowSizeCount = 0,
+        lastSetWindowSize = nil,
+        gxAdapterInfo = {},
+    }
+
+    local function normalizeAxis(value, fallback)
+        local number = tonumber(value)
+        if number == nil then
+            return fallback
+        end
+        return math.max(1, math.floor(number))
+    end
+
+    local function normalizeSize(size, fallbackX, fallbackY)
+        if type(size) ~= "table" then
+            return { x = fallbackX, y = fallbackY }
+        end
+        return {
+            x = normalizeAxis(size.x, fallbackX),
+            y = normalizeAxis(size.y, fallbackY),
+        }
+    end
+
+    local function normalizeSizesList(list)
+        local normalized = {}
+        if type(list) == "table" then
+            for _, size in ipairs(list) do
+                table.insert(normalized, normalizeSize(size, 1920, 1080))
+            end
+        end
+        return normalized
+    end
+
+    local function ensureState()
+        local state = api._state
+        state.defaultGameWindowSize = normalizeSize(state.defaultGameWindowSize, 1920, 1080)
+        state.currentGameWindowSize = normalizeSize(
+            state.currentGameWindowSize,
+            state.defaultGameWindowSize.x,
+            state.defaultGameWindowSize.y
+        )
+        state.availableGameWindowSizes = normalizeSizesList(state.availableGameWindowSizes)
+        if type(state.gxAdapterInfo) ~= "table" then
+            state.gxAdapterInfo = {}
+        end
+        return state
+    end
+
+    local function cloneSize(size)
+        return { x = size.x, y = size.y }
+    end
+
+    api.GetDefaultGameWindowSize = api.GetDefaultGameWindowSize or function(_monitor)
+        local state = ensureState()
+        return cloneSize(state.defaultGameWindowSize)
+    end
+
+    api.GetCurrentGameWindowSize = api.GetCurrentGameWindowSize or function(...)
+        local state = ensureState()
+        return cloneSize(state.currentGameWindowSize)
+    end
+
+    api.GetGameWindowSizes = api.GetGameWindowSizes or function(...)
+        local state = ensureState()
+        local sizes = {}
+        for index, size in ipairs(state.availableGameWindowSizes) do
+            sizes[index] = cloneSize(size)
+        end
+        return sizes
+    end
+
+    api.GetGxAdapterInfo = api.GetGxAdapterInfo or function()
+        local state = ensureState()
+        return state.gxAdapterInfo
+    end
+
+    api.IsSpellVisualDensitySystemSupported = api.IsSpellVisualDensitySystemSupported or function()
+        return false
+    end
+
+    api.SetGameWindowSize = api.SetGameWindowSize or function(x, y)
+        local state = ensureState()
+        local nextSize = {
+            x = normalizeAxis(x, state.currentGameWindowSize.x),
+            y = normalizeAxis(y, state.currentGameWindowSize.y),
+        }
+        state.currentGameWindowSize = nextSize
+        state.setGameWindowSizeCount = (tonumber(state.setGameWindowSizeCount) or 0) + 1
+        state.lastSetWindowSize = cloneSize(nextSize)
+        return true
+    end
+"#;
 
 /// C_PerksActivities - Monthly activities / Trading Post tracking.
 pub(crate) fn register_c_perks_activities(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set(
-        "GetTrackedPerksActivities",
-        lua.create_function(|lua, ()| {
-            let result = lua.create_table()?;
-            result.set("trackedIDs", lua.create_table()?)?;
-            Ok(result)
-        })?,
-    )?;
-    t.set(
-        "GetPerksActivityInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetPerksActivityChatLink",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "RemoveTrackedPerksActivity",
-        lua.create_function(|_, _id: i32| Ok(()))?,
-    )?;
-    lua.globals().set("C_PerksActivities", t)?;
-    Ok(())
+    lua.load(PERKS_ACTIVITIES_LUA).exec()?;
+    let g = lua.globals();
+    g.get::<mlua::Table>("C_PerksActivities")
+        .and_then(|namespace| g.set("C_PerksActivities", namespace))
 }
 
 /// Missing C_* namespaces and globals referenced during startup events.
@@ -135,71 +355,17 @@ fn register_configuration_warnings_namespace(lua: &Lua, g: &mlua::Table) -> Resu
 }
 
 fn register_store_glue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let store_glue = lua.create_table()?;
-    store_glue.set(
-        "GetDisconnectOnLogout",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    store_glue.set(
-        "GetVASProductReady",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    store_glue.set(
-        "GetVASPurchaseStateInfo",
-        lua.create_function(|_, _guid: Value| Ok((0i32, Value::Nil, Value::Nil)))?,
-    )?;
-    store_glue.set(
-        "RequestCharacterQueueTime",
-        lua.create_function(|_, _guid: Value| Ok(()))?,
-    )?;
-    store_glue.set(
-        "UpdateVASPurchaseStates",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
-    g.set("C_StoreGlue", store_glue)?;
-    Ok(())
+    lua.load(STORE_GLUE_LUA).exec()?;
+    g.get::<mlua::Table>("C_StoreGlue")
+        .and_then(|store_glue| g.set("C_StoreGlue", store_glue))
 }
 
 /// C_VideoOptions — screen resolution and graphics queries.
 fn register_c_video_options(lua: &Lua) -> Result<()> {
+    lua.load(VIDEO_OPTIONS_LUA).exec()?;
     let g = lua.globals();
-    let video = lua.create_table()?;
-    video.set(
-        "GetDefaultGameWindowSize",
-        lua.create_function(|lua, _monitor: i32| {
-            let t = lua.create_table()?;
-            t.set("x", 1920)?;
-            t.set("y", 1080)?;
-            Ok(t)
-        })?,
-    )?;
-    video.set(
-        "GetCurrentGameWindowSize",
-        lua.create_function(|lua, _args: MultiValue| {
-            let t = lua.create_table()?;
-            t.set("x", 1920)?;
-            t.set("y", 1080)?;
-            Ok(t)
-        })?,
-    )?;
-    video.set(
-        "GetGameWindowSizes",
-        lua.create_function(|lua, _args: MultiValue| lua.create_table())?,
-    )?;
-    video.set(
-        "GetGxAdapterInfo",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    video.set(
-        "IsSpellVisualDensitySystemSupported",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    video.set(
-        "SetGameWindowSize",
-        lua.create_function(|_, (_x, _y): (i32, i32)| Ok(()))?,
-    )?;
-    g.set("C_VideoOptions", video)?;
-    Ok(())
+    g.get::<mlua::Table>("C_VideoOptions")
+        .and_then(|video_options| g.set("C_VideoOptions", video_options))
 }
 
 /// Game-state global stubs for functions referenced during startup events.
