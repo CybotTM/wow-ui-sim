@@ -5,10 +5,13 @@
 //! timer/bar globals, paperdoll/container stubs, LFG/guild stubs, and
 //! ActionButtonUtil.
 
+use crate::lua_api::SimState;
 use mlua::{Lua, MultiValue, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 /// Missing global functions referenced during startup events.
-pub(crate) fn register_missing_globals(lua: &Lua) -> Result<()> {
+pub(crate) fn register_missing_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
     super::c_stubs_api_glue::initialize_globals(lua)?;
     register_timer_and_bar_globals(lua, &g)?;
@@ -19,7 +22,7 @@ pub(crate) fn register_missing_globals(lua: &Lua) -> Result<()> {
     super::c_stubs_api_glue::register_character_select_globals(lua, &g)?;
     register_server_and_timerunning_stubs(lua, &g)?;
     register_misc_startup_stubs(lua, &g)?;
-    register_paperdoll_container_and_misc_stubs(lua, &g)?;
+    register_paperdoll_container_and_misc_stubs(lua, &g, state)?;
     register_secure_env_globals(lua, &g)?;
     register_former_workaround_stubs(lua, &g)?;
     Ok(())
@@ -409,7 +412,11 @@ fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 }
 
 /// PaperDoll, container frame, group roster, and miscellaneous stubs.
-fn register_paperdoll_container_and_misc_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+fn register_paperdoll_container_and_misc_stubs(
+    lua: &Lua,
+    g: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     g.set(
         "PaperDollFrame_SetLevel",
         lua.create_function(|_, ()| Ok(()))?,
@@ -434,15 +441,7 @@ fn register_paperdoll_container_and_misc_stubs(lua: &Lua, g: &mlua::Table) -> Re
         "GetDisplayedInviteType",
         lua.create_function(|_, _guid: Value| Ok("INVITE"))?,
     )?;
-    g.set(
-        "GetNumGroupMembers",
-        lua.create_function(|_, _category: Value| Ok(0i32))?,
-    )?;
-    g.set(
-        "GetNumSubgroupMembers",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    g.set("IsInGroup", lua.create_function(|_, _le: Value| Ok(false))?)?;
+    super::unit_api_extra::register_group_roster_globals(lua, state)?;
     if g.get::<Value>("LE_PARTY_CATEGORY_HOME")?.is_nil() {
         g.set("LE_PARTY_CATEGORY_HOME", 1)?;
         g.set("LE_PARTY_CATEGORY_INSTANCE", 2)?;

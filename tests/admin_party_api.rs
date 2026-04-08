@@ -79,6 +79,66 @@ fn test_get_num_group_members_zero_when_no_party() {
     );
 }
 
+#[test]
+fn test_get_num_subgroup_members_matches_party_size() {
+    let env = env();
+    let count: i32 = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(3)
+            return GetNumSubgroupMembers()
+            "#,
+        )
+        .unwrap();
+    assert_eq!(count, 3, "GetNumSubgroupMembers() should match party size");
+}
+
+#[test]
+fn test_group_queries_switch_between_solo_and_grouped_states() {
+    let env = env();
+    let (solo_in_group, solo_group_count, solo_subgroup_count, grouped_in_group, grouped_group_count, grouped_subgroup_count): (
+        bool,
+        i32,
+        i32,
+        bool,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            A_Admin.SetPartySize(0)
+            local solo_in_group = IsInGroup()
+            local solo_group_count = GetNumGroupMembers()
+            local solo_subgroup_count = GetNumSubgroupMembers()
+
+            A_Admin.SetPartySize(4)
+            return solo_in_group, solo_group_count, solo_subgroup_count, IsInGroup(LE_PARTY_CATEGORY_HOME), GetNumGroupMembers(LE_PARTY_CATEGORY_INSTANCE), GetNumSubgroupMembers()
+            "#,
+        )
+        .unwrap();
+    assert!(!solo_in_group, "solo state should report not in group");
+    assert_eq!(
+        solo_group_count, 0,
+        "solo state should have zero group members"
+    );
+    assert_eq!(
+        solo_subgroup_count, 0,
+        "solo state should have zero subgroup members"
+    );
+    assert!(
+        grouped_in_group,
+        "grouped state should report in-group even when a party category is passed"
+    );
+    assert_eq!(
+        grouped_group_count, 5,
+        "group member count should include the player after grouping"
+    );
+    assert_eq!(
+        grouped_subgroup_count, 4,
+        "subgroup member count should match grouped party size"
+    );
+}
+
 // ============================================================================
 // SetPartyMember
 // ============================================================================

@@ -13,7 +13,37 @@ pub fn register_extra_unit_functions(lua: &Lua, state: Rc<RefCell<SimState>>) ->
     register_weapon_enchant_functions(lua)?;
     register_xp_functions(lua)?;
     register_pvp_vehicle_functions(lua, state.clone())?;
-    register_misc_unit_functions(lua, state)?;
+    register_group_roster_globals(lua, state.clone())?;
+    register_misc_unit_functions(lua)?;
+    Ok(())
+}
+
+pub(crate) fn register_group_roster_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+    let globals = lua.globals();
+
+    let state_for_group_check = state.clone();
+    globals.set(
+        "IsInGroup",
+        lua.create_function(move |_, _flags: Option<i32>| {
+            Ok(!state_for_group_check.borrow().party_members.is_empty())
+        })?,
+    )?;
+    globals.set("IsInRaid", lua.create_function(|_, ()| Ok(false))?)?;
+
+    let state_for_subgroup_count = state.clone();
+    globals.set(
+        "GetNumSubgroupMembers",
+        lua.create_function(move |_, ()| {
+            Ok(state_for_subgroup_count.borrow().party_members.len() as i32)
+        })?,
+    )?;
+    globals.set(
+        "GetNumGroupMembers",
+        lua.create_function(move |_, _category: Option<Value>| {
+            let party_count = state.borrow().party_members.len() as i32;
+            Ok(if party_count > 0 { party_count + 1 } else { 0 })
+        })?,
+    )?;
     Ok(())
 }
 
@@ -261,7 +291,7 @@ fn register_pvp_vehicle_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Re
 }
 
 /// Register miscellaneous unit query functions.
-fn register_misc_unit_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
+fn register_misc_unit_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
 
     globals.set(
@@ -301,29 +331,6 @@ fn register_misc_unit_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
         lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
     )?;
 
-    let state_for_group_check = state.clone();
-    globals.set(
-        "IsInGroup",
-        lua.create_function(move |_, _flags: Option<i32>| {
-            Ok(!state_for_group_check.borrow().party_members.is_empty())
-        })?,
-    )?;
-    globals.set("IsInRaid", lua.create_function(|_, ()| Ok(false))?)?;
-
-    let state_for_subgroup_count = state.clone();
-    globals.set(
-        "GetNumSubgroupMembers",
-        lua.create_function(move |_, ()| {
-            Ok(state_for_subgroup_count.borrow().party_members.len() as i32)
-        })?,
-    )?;
-    globals.set(
-        "GetNumGroupMembers",
-        lua.create_function(move |_, ()| {
-            let party_count = state.borrow().party_members.len() as i32;
-            Ok(if party_count > 0 { party_count + 1 } else { 0 })
-        })?,
-    )?;
     globals.set(
         "UnitStagger",
         lua.create_function(|_, _unit: Value| Ok(0i32))?,
