@@ -2116,10 +2116,7 @@ fn build_spell_search_util(lua: &Lua) -> Result<mlua::Table> {
     Ok(ssu)
 }
 
-/// Dispatcher - event dispatch system (real impl: Blizzard_Dispatcher addon).
-fn build_dispatcher_stub(lua: &Lua) -> Result<mlua::Table> {
-    lua.load(
-        r#"
+const DISPATCHER_STUB_LUA: &str = r#"
         local dispatcherFrame = CreateFrame("Frame")
         local nextID = 1
         local eventEntries = {}
@@ -2462,9 +2459,15 @@ fn build_dispatcher_stub(lua: &Lua) -> Result<mlua::Table> {
         end
 
         return Dispatcher
-        "#,
-    )
-    .eval::<mlua::Table>()
+        "#;
+
+fn evaluate_dispatcher_stub(lua: &Lua) -> Result<mlua::Table> {
+    lua.load(DISPATCHER_STUB_LUA).eval::<mlua::Table>()
+}
+
+/// Dispatcher - event dispatch system (real impl: Blizzard_Dispatcher addon).
+fn build_dispatcher_stub(lua: &Lua) -> Result<mlua::Table> {
+    evaluate_dispatcher_stub(lua)
 }
 
 /// Secure/premium/niche C_* namespaces referenced during addon loading.

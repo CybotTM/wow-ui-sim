@@ -106,3 +106,30 @@ fn dispatcher_script_hooks_frame_and_once_unhooks_after_first_run() {
     assert_eq!(first, 1, "script hook should fire on first show");
     assert_eq!(second, 1, "one-shot script hook should remove itself");
 }
+
+#[test]
+fn dispatcher_on_update_once_runs_only_once() {
+    let env = env();
+    env.exec(
+        r#"
+        DispatcherOnUpdateTest = {
+            count = 0,
+            OnUpdate = function(self, elapsed)
+                self.count = self.count + 1
+            end,
+        }
+
+        Dispatcher:RegisterEvent("OnUpdate", DispatcherOnUpdateTest, true)
+        "#,
+    )
+    .unwrap();
+
+    env.fire_on_update(0.016).unwrap();
+    env.fire_on_update(0.016).unwrap();
+
+    let count: i32 = env.eval("return DispatcherOnUpdateTest.count").unwrap();
+    assert_eq!(
+        count, 1,
+        "OnUpdate one-shot dispatcher callbacks should unhook after first tick"
+    );
+}
