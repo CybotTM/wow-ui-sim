@@ -522,6 +522,16 @@ fn register_secure_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 }
 
 fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_action_bar_state_stubs(lua, g)?;
+    register_timer_query_stubs(lua, g)?;
+    register_inventory_bar_stubs(lua, g)?;
+    install_cooldown_frame_helpers(lua)?;
+    install_communities_util_stub(lua)?;
+    install_adventure_guide_util_stub(lua)?;
+    Ok(())
+}
+
+fn register_action_bar_state_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("GetDefaultScale", lua.create_function(|_, ()| Ok(1.0f64))?)?;
     g.set(
         "HasVehicleActionBar",
@@ -535,6 +545,15 @@ fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetMaxBattlefieldID",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
+    g.set("HasBonusActionBar", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set(
+        "HasTempShapeshiftActionBar",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    Ok(())
+}
+
+fn register_timer_query_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("RequestRaidInfo", lua.create_function(|_, ()| Ok(()))?)?;
     g.set(
         "RequestLFDPlayerLockInfo",
@@ -564,16 +583,12 @@ fn register_timer_and_bar_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetWorldElapsedTime",
         lua.create_function(|_, _id: i32| Ok((0i32, 0i32, 0i32)))?,
     )?;
-    g.set("HasBonusActionBar", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set(
-        "HasTempShapeshiftActionBar",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    Ok(())
+}
+
+fn register_inventory_bar_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("PutItemInBackpack", lua.create_function(|_, ()| Ok(()))?)?;
     g.set("PutItemInBag", lua.create_function(|_, _bag: i32| Ok(()))?)?;
-    install_cooldown_frame_helpers(lua)?;
-    install_communities_util_stub(lua)?;
-    install_adventure_guide_util_stub(lua)?;
     Ok(())
 }
 
