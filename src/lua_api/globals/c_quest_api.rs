@@ -372,6 +372,13 @@ fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Quest watch list methods (tracked quests for ObjectiveTracker).
 fn register_quest_log_watch(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_quest_watch_count_queries(lua, t)?;
+    register_quest_watch_mutations(lua, t)?;
+    register_world_quest_watch_queries(lua, t)?;
+    Ok(())
+}
+
+fn register_quest_watch_count_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let num_watches = quest_count();
     t.set(
         "GetNumQuestWatches",
@@ -379,24 +386,22 @@ fn register_quest_log_watch(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestIDForQuestWatchIndex",
-        lua.create_function(|_, idx: i32| {
-            // Watch index is 1-based among quests only (skip headers)
-            let quest_ids: Vec<i32> = QUEST_LOG
-                .iter()
-                .filter_map(|e| match e {
-                    QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
-                    _ => None,
-                })
-                .collect();
-            Ok(quest_ids.get((idx - 1) as usize).copied())
-        })?,
+        lua.create_function(|_, idx: i32| Ok(watched_quest_id_at_index(idx)))?,
     )?;
+    Ok(())
+}
+
+fn register_quest_watch_mutations(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("AddQuestWatch", lua.create_function(|_, _id: i32| Ok(()))?)?;
     t.set(
         "RemoveQuestWatch",
         lua.create_function(|_, _id: i32| Ok(()))?,
     )?;
     t.set("SortQuestWatches", lua.create_function(|_, ()| Ok(()))?)?;
+    Ok(())
+}
+
+fn register_world_quest_watch_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetNumWorldQuestWatches",
         lua.create_function(|_, ()| Ok(0i32))?,
@@ -406,6 +411,19 @@ fn register_quest_log_watch(lua: &Lua, t: &mlua::Table) -> Result<()> {
         lua.create_function(|_, _idx: i32| Ok(Value::Nil))?,
     )?;
     Ok(())
+}
+
+fn watched_quest_id_at_index(idx: i32) -> Option<i32> {
+    if idx <= 0 {
+        return None;
+    }
+    QUEST_LOG
+        .iter()
+        .filter_map(|entry| match entry {
+            QuestLogEntry::Quest { quest_id, .. } => Some(*quest_id),
+            _ => None,
+        })
+        .nth((idx - 1) as usize)
 }
 
 /// Quest status check methods.
