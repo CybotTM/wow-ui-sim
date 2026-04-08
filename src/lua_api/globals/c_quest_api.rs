@@ -262,42 +262,52 @@ fn create_quest_info(lua: &Lua, idx: i32) -> Result<Value> {
     };
     let info = lua.create_table()?;
     info.set("questLogIndex", idx)?;
+    populate_quest_info_fields(&info, entry)?;
+    Ok(Value::Table(info))
+}
+
+fn populate_quest_info_fields(info: &mlua::Table, entry: &QuestLogEntry) -> Result<()> {
     match entry {
-        QuestLogEntry::Header { title } => {
-            info.set("title", *title)?;
-            info.set("questID", 0)?;
-            info.set("isHeader", true)?;
-            info.set("isCollapsed", false)?;
-            info.set("isTask", false)?;
-            info.set("isBounty", false)?;
-            info.set("isHidden", false)?;
-            info.set("isOnMap", false)?;
-        }
+        QuestLogEntry::Header { title } => populate_header_quest_info(info, title),
         QuestLogEntry::Quest {
             quest_id, title, ..
-        } => {
-            info.set("title", *title)?;
-            info.set("questID", *quest_id)?;
-            info.set("campaignID", 0)?;
-            info.set("level", 80)?;
-            info.set("difficultyLevel", 80)?;
-            info.set("suggestedGroup", 0)?;
-            info.set("isHeader", false)?;
-            info.set("isCollapsed", false)?;
-            info.set("isTask", false)?;
-            info.set("isBounty", false)?;
-            info.set("isStory", false)?;
-            info.set("isOnMap", true)?;
-            info.set("hasLocalPOI", false)?;
-            info.set("isHidden", false)?;
-            info.set("isAutoComplete", false)?;
-            info.set("overridesSortOrder", false)?;
-            info.set("startEvent", false)?;
-            info.set("isScaling", false)?;
-            info.set("readyForTranslation", false)?;
-        }
+        } => populate_log_quest_info(info, *quest_id, title),
     }
-    Ok(Value::Table(info))
+}
+
+fn populate_header_quest_info(info: &mlua::Table, title: &str) -> Result<()> {
+    info.set("title", title)?;
+    info.set("questID", 0)?;
+    info.set("isHeader", true)?;
+    info.set("isCollapsed", false)?;
+    info.set("isTask", false)?;
+    info.set("isBounty", false)?;
+    info.set("isHidden", false)?;
+    info.set("isOnMap", false)?;
+    Ok(())
+}
+
+fn populate_log_quest_info(info: &mlua::Table, quest_id: i32, title: &str) -> Result<()> {
+    info.set("title", title)?;
+    info.set("questID", quest_id)?;
+    info.set("campaignID", 0)?;
+    info.set("level", 80)?;
+    info.set("difficultyLevel", 80)?;
+    info.set("suggestedGroup", 0)?;
+    info.set("isHeader", false)?;
+    info.set("isCollapsed", false)?;
+    info.set("isTask", false)?;
+    info.set("isBounty", false)?;
+    info.set("isStory", false)?;
+    info.set("isOnMap", true)?;
+    info.set("hasLocalPOI", false)?;
+    info.set("isHidden", false)?;
+    info.set("isAutoComplete", false)?;
+    info.set("overridesSortOrder", false)?;
+    info.set("startEvent", false)?;
+    info.set("isScaling", false)?;
+    info.set("readyForTranslation", false)?;
+    Ok(())
 }
 
 /// Quest data request stubs (async data loading).
