@@ -326,6 +326,31 @@ fn test_canaccesstable_clean() {
 }
 
 #[test]
+fn test_scrub_helpers_are_passthrough() {
+    let env = env();
+    let (first, third, first_secret, third_secret): (i32, String, i32, String) = env
+        .eval(
+            r#"
+            local t = { marker = true }
+            local a, b, c = scrub(7, t, "ok")
+            local x, y, z = scrubsecretvalues(7, t, "ok")
+            return a, c, x, z
+            "#,
+        )
+        .unwrap();
+    assert_eq!(first, 7, "scrub should preserve the first argument");
+    assert_eq!(third, "ok", "scrub should preserve later arguments");
+    assert_eq!(
+        first_secret, 7,
+        "scrubsecretvalues should preserve the first argument"
+    );
+    assert_eq!(
+        third_secret, "ok",
+        "scrubsecretvalues should preserve later arguments"
+    );
+}
+
+#[test]
 fn test_state_driver_stubs_are_inert() {
     let env = env();
     let (still_shown, no_state_attr): (bool, bool) = env

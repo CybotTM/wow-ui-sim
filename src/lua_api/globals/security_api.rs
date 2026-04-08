@@ -27,59 +27,76 @@ pub fn register_security_functions(lua: &Lua) -> Result<()> {
 /// so stripped-down environments still boot.
 fn register_taint_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
-
-    globals.set("securecallmethod", make_securecallmethod(lua)?)?;
-
-    set_if_missing(
-        &globals,
-        "issecretvalue",
-        lua.create_function(|lua, args: MultiValue| {
-            Ok(matches!(args.front(), Some(value) if is_secret_value(lua, value)?))
-        })?,
-    )?;
-
-    set_if_missing(
-        &globals,
-        "canaccessvalue",
-        lua.create_function(|lua, args: MultiValue| {
-            Ok(matches!(args.front(), Some(value) if !is_secret_value(lua, value)?))
-        })?,
-    )?;
-    set_if_missing(
-        &globals,
-        "canaccessallvalues",
-        lua.create_function(|lua, args: MultiValue| {
-            for value in &args {
-                if is_secret_value(lua, value)? {
-                    return Ok(false);
-                }
-            }
-            Ok(true)
-        })?,
-    )?;
-    set_if_missing(
-        &globals,
-        "canaccesstable",
-        lua.create_function(|lua, args: MultiValue| match args.front() {
-            Some(Value::Table(table)) => table_is_accessible(lua, table),
-            Some(value) => Ok(!is_secret_value(lua, value)?),
-            None => Ok(false),
-        })?,
-    )?;
-
-    set_if_missing(
-        &globals,
-        "scrub",
-        lua.create_function(|_, args: MultiValue| Ok(args))?,
-    )?;
-
-    set_if_missing(
-        &globals,
-        "scrubsecretvalues",
-        lua.create_function(|_, args: MultiValue| Ok(args))?,
-    )?;
-
+    register_securecallmethod(lua, &globals)?;
+    register_value_access_fallbacks(lua, &globals)?;
+    register_scrub_fallbacks(lua, &globals)?;
     Ok(())
+}
+
+fn register_securecallmethod(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set("securecallmethod", make_securecallmethod(lua)?)?;
+    Ok(())
+}
+
+fn register_value_access_fallbacks(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    set_if_missing(globals, "issecretvalue", make_issecretvalue_fallback(lua)?)?;
+    set_if_missing(
+        globals,
+        "canaccessvalue",
+        make_canaccessvalue_fallback(lua)?,
+    )?;
+    set_if_missing(
+        globals,
+        "canaccessallvalues",
+        make_canaccessallvalues_fallback(lua)?,
+    )?;
+    set_if_missing(
+        globals,
+        "canaccesstable",
+        make_canaccesstable_fallback(lua)?,
+    )?;
+    Ok(())
+}
+
+fn register_scrub_fallbacks(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    set_if_missing(globals, "scrub", make_passthrough_scrub(lua)?)?;
+    set_if_missing(globals, "scrubsecretvalues", make_passthrough_scrub(lua)?)?;
+    Ok(())
+}
+
+fn make_issecretvalue_fallback(lua: &Lua) -> Result<Function> {
+    lua.create_function(|lua, args: MultiValue| {
+        Ok(matches!(args.front(), Some(value) if is_secret_value(lua, value)?))
+    })
+}
+
+fn make_canaccessvalue_fallback(lua: &Lua) -> Result<Function> {
+    lua.create_function(|lua, args: MultiValue| {
+        Ok(matches!(args.front(), Some(value) if !is_secret_value(lua, value)?))
+    })
+}
+
+fn make_canaccessallvalues_fallback(lua: &Lua) -> Result<Function> {
+    lua.create_function(|lua, args: MultiValue| {
+        for value in &args {
+            if is_secret_value(lua, value)? {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    })
+}
+
+fn make_canaccesstable_fallback(lua: &Lua) -> Result<Function> {
+    lua.create_function(|lua, args: MultiValue| match args.front() {
+        Some(Value::Table(table)) => table_is_accessible(lua, table),
+        Some(value) => Ok(!is_secret_value(lua, value)?),
+        None => Ok(false),
+    })
+}
+
+fn make_passthrough_scrub(lua: &Lua) -> Result<Function> {
+    lua.create_function(|_, args: MultiValue| Ok(args))
 }
 
 fn set_if_missing(globals: &mlua::Table, name: &str, value: Function) -> Result<()> {
