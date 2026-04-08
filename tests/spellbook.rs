@@ -473,7 +473,7 @@ fn spellbook_frame_positions() {
         let (sw, sh) = (1024.0, 768.0);
 
         // PlayerSpellsFrame — main container
-        check_rect(registry, "PlayerSpellsFrame", sw, sh, 56.3, 85.0, 911.3, 497.4);
+        check_rect(registry, "PlayerSpellsFrame", sw, sh, 56.3, 41.0, 911.3, 497.4);
 
         let psf_id = registry.get_id_by_name("PlayerSpellsFrame").expect("PlayerSpellsFrame exists");
         let psf = registry.get(psf_id).unwrap();

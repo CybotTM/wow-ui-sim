@@ -76,6 +76,13 @@ fn register_c_spell_book_info_methods(t: &mlua::Table, lua: &Lua) -> Result<()> 
 
 /// State methods: passive, cooldown, power cost, auto-cast, texture.
 fn register_c_spell_book_state_methods(t: &mlua::Table, lua: &Lua) -> Result<()> {
+    register_spell_book_passive_and_cooldown(t, lua)?;
+    register_spell_book_power_and_autocast(t, lua)?;
+    register_spell_book_texture_query(t, lua)?;
+    Ok(())
+}
+
+fn register_spell_book_passive_and_cooldown(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "IsSpellBookItemPassive",
         lua.create_function(|_, (slot, _bank): (i32, Option<i32>)| {
@@ -87,6 +94,10 @@ fn register_c_spell_book_state_methods(t: &mlua::Table, lua: &Lua) -> Result<()>
         "GetSpellBookItemCooldown",
         lua.create_function(create_spell_book_item_cooldown)?,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_power_and_autocast(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "GetSpellBookItemPowerCost",
         lua.create_function(|lua, (slot, _bank): (i32, Option<i32>)| {
@@ -102,19 +113,27 @@ fn register_c_spell_book_state_methods(t: &mlua::Table, lua: &Lua) -> Result<()>
             Ok((false, false)) // autoCastAllowed, autoCastEnabled
         })?,
     )?;
+    Ok(())
+}
+
+fn register_spell_book_texture_query(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "GetSpellBookItemTexture",
         lua.create_function(|_, (slot, _bank): (i32, Option<i32>)| {
-            let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
-                return Ok(Value::Nil);
-            };
-            let file_id = crate::spells::get_spell(entry.spell_id)
-                .map(|s| s.icon_file_data_id)
-                .unwrap_or(136243);
-            Ok(Value::Integer(file_id as i64))
+            Ok(spell_book_item_texture(slot))
         })?,
     )?;
     Ok(())
+}
+
+fn spell_book_item_texture(slot: i32) -> Value {
+    let Some((_, entry, _)) = spellbook_data::get_spell_at_slot(slot) else {
+        return Value::Nil;
+    };
+    let file_id = crate::spells::get_spell(entry.spell_id)
+        .map(|spell| spell.icon_file_data_id)
+        .unwrap_or(136243);
+    Value::Integer(file_id as i64)
 }
 
 /// Spell knowledge and lookup queries for C_SpellBook.
