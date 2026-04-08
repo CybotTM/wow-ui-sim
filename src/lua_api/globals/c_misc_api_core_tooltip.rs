@@ -522,38 +522,53 @@ fn build_item_tooltip_lines(
     const TOOLTIP_LINE_TYPE_ITEM_LEVEL: i32 = 31;
 
     append_item_name_line(lua, lines, 1, TOOLTIP_LINE_TYPE_ITEM_NAME, item)?;
-    let item_level_text = format!("Item Level {}", item.item_level);
-    append_item_tooltip_line(
-        lua,
-        lines,
-        2,
-        TOOLTIP_LINE_TYPE_ITEM_LEVEL,
-        &item_level_text,
-    )?;
+    append_item_level_line(lua, lines, 2, TOOLTIP_LINE_TYPE_ITEM_LEVEL, item.item_level)?;
 
     let equip_slot = super::c_item_api::item_equip_slot_label(item.inventory_type);
-    let mut next_index = 3;
-    if !equip_slot.is_empty() {
-        append_item_tooltip_line(
-            lua,
-            lines,
-            next_index,
-            TOOLTIP_LINE_TYPE_EQUIP_SLOT,
-            equip_slot,
-        )?;
-        next_index += 1;
-    }
-
-    if let Some(binding_text) = item_binding_text(item.bonding) {
-        append_item_tooltip_line(
-            lua,
-            lines,
-            next_index,
-            TOOLTIP_LINE_TYPE_ITEM_BINDING,
-            binding_text,
-        )?;
-    }
+    let next_index = append_optional_item_tooltip_line(
+        lua,
+        lines,
+        3,
+        TOOLTIP_LINE_TYPE_EQUIP_SLOT,
+        if equip_slot.is_empty() {
+            None
+        } else {
+            Some(equip_slot)
+        },
+    )?;
+    append_optional_item_tooltip_line(
+        lua,
+        lines,
+        next_index,
+        TOOLTIP_LINE_TYPE_ITEM_BINDING,
+        item_binding_text(item.bonding),
+    )?;
     Ok(())
+}
+
+fn append_item_level_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    item_level: u16,
+) -> Result<()> {
+    let item_level_text = format!("Item Level {item_level}");
+    append_item_tooltip_line(lua, lines, index, line_type, &item_level_text)
+}
+
+fn append_optional_item_tooltip_line(
+    lua: &Lua,
+    lines: &mlua::Table,
+    index: i32,
+    line_type: i32,
+    text: Option<&str>,
+) -> Result<i32> {
+    let Some(text) = text else {
+        return Ok(index);
+    };
+    append_item_tooltip_line(lua, lines, index, line_type, text)?;
+    Ok(index + 1)
 }
 
 fn append_item_name_line(
