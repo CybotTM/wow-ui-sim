@@ -1568,7 +1568,7 @@ fn register_global_stubs_6(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("EJ_GetCurrentTier")?.is_nil() {
         g.set(
             "EJ_GetCurrentTier",
-            lua.create_function(|_, _: MultiValue| Ok(()))?,
+            lua.create_function(|_, _: MultiValue| Ok(Value::Integer(1)))?,
         )?;
     }
     if g.get::<Value>("EJ_GetDifficulty")?.is_nil() {
@@ -1627,7 +1627,12 @@ fn register_global_stubs_6(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("EJ_GetLootFilter")?.is_nil() {
         g.set(
             "EJ_GetLootFilter",
-            lua.create_function(|_, _: MultiValue| Ok(()))?,
+            lua.create_function(|_, _: MultiValue| {
+                Ok(mlua::MultiValue::from_vec(vec![
+                    Value::Integer(0),
+                    Value::Integer(0),
+                ]))
+            })?,
         )?;
     }
     if g.get::<Value>("EJ_GetMapEncounter")?.is_nil() {
@@ -26266,13 +26271,25 @@ fn register_c_perks_activities(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if t.get::<Value>("GetAllPerksActivityTags")?.is_nil() {
         t.set(
             "GetAllPerksActivityTags",
-            lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?,
+            lua.create_function(|lua, _: MultiValue| {
+                let out = lua.create_table()?;
+                out.set("tagName", lua.create_table()?)?;
+                Ok(Value::Table(out))
+            })?,
         )?;
     }
     if t.get::<Value>("GetPerksActivitiesInfo")?.is_nil() {
         t.set(
             "GetPerksActivitiesInfo",
-            lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?,
+            lua.create_function(|lua, _: MultiValue| {
+                let out = lua.create_table()?;
+                out.set("activePerksMonth", 1i32)?;
+                out.set("displayMonthName", "")?;
+                out.set("secondsRemaining", 0i32)?;
+                out.set("activities", lua.create_table()?)?;
+                out.set("thresholds", lua.create_table()?)?;
+                Ok(Value::Table(out))
+            })?,
         )?;
     }
     if t.get::<Value>("GetPerksActivitiesPendingCompletion")?
@@ -26280,7 +26297,11 @@ fn register_c_perks_activities(lua: &Lua, g: &mlua::Table) -> Result<()> {
     {
         t.set(
             "GetPerksActivitiesPendingCompletion",
-            lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?,
+            lua.create_function(|lua, _: MultiValue| {
+                let out = lua.create_table()?;
+                out.set("pendingIDs", lua.create_table()?)?;
+                Ok(Value::Table(out))
+            })?,
         )?;
     }
     if t.get::<Value>("GetPerksUIThemePrefix")?.is_nil() {

@@ -1572,7 +1572,13 @@ const ENCOUNTER_JOURNAL_GLOBALS_LUA: &str = r#"
     state.lootClassID = normalize_int(state.lootClassID, 0) or 0
     state.lootSpecID = normalize_int(state.lootSpecID, 0) or 0
 
+    local function get_default_tier()
+        local serverTier = normalize_int((GetServerExpansionLevel and GetServerExpansionLevel() or 0), 0) + 1
+        return math.max(1, serverTier)
+    end
+
     EJ_GetCurrentTier = EJ_GetCurrentTier or function()
+        state.currentTier = math.max(1, normalize_int(state.currentTier, get_default_tier()) or 1)
         return state.currentTier
     end
 
@@ -1591,6 +1597,8 @@ const ENCOUNTER_JOURNAL_GLOBALS_LUA: &str = r#"
     end
 
     EJ_GetLootFilter = EJ_GetLootFilter or function()
+        state.lootClassID = normalize_int(state.lootClassID, 0) or 0
+        state.lootSpecID = normalize_int(state.lootSpecID, 0) or 0
         return state.lootClassID, state.lootSpecID
     end
 
@@ -1605,6 +1613,7 @@ const ENCOUNTER_JOURNAL_GLOBALS_LUA: &str = r#"
     end
 
     EJ_GetDifficulty = EJ_GetDifficulty or function()
+        state.currentDifficulty = normalize_int(state.currentDifficulty, 0) or 0
         return state.currentDifficulty
     end
 
@@ -1614,6 +1623,15 @@ const ENCOUNTER_JOURNAL_GLOBALS_LUA: &str = r#"
 
     EJ_IsValidInstanceDifficulty = EJ_IsValidInstanceDifficulty or function(difficultyID)
         return normalize_int(difficultyID, nil) ~= nil
+    end
+
+    C_EncounterJournal = C_EncounterJournal or {}
+    C_EncounterJournal.InitalizeSelectedTier = C_EncounterJournal.InitalizeSelectedTier or function()
+        local tier = EJ_GetCurrentTier()
+        if EJ_SelectTier then
+            EJ_SelectTier(tier)
+        end
+        return tier
     end
 "#;
 
@@ -1955,61 +1973,81 @@ fn install_ui_frame_manager_managed_mixin(lua: &Lua) -> Result<()> {
 
 /// ActionButtonSpellAlertManager stub — referenced by PetBattleUI OnLoad before ActionBar loads.
 fn register_action_button_spell_alert_manager(lua: &Lua, _g: &mlua::Table) -> Result<()> {
-    lua.load(
-        r#"
-        if ActionButtonSpellAlertManager == nil then
-            ActionButtonSpellAlertManager = {
-                activeAlerts = {},
-                SpellAlertType = { Default = 1, AssistedCombatRotation = 2 },
-            }
+    install_action_button_spell_alert_manager_namespace(lua)?;
+    install_action_button_spell_alert_manager_methods(lua)
+}
 
-            local function GetAlertFrame(actionButton, create)
-                local frame = actionButton.SpellActivationAlert
-                if frame == nil and create then
-                    frame = CreateFrame("Frame", nil, actionButton)
-                    frame:SetAllPoints(actionButton)
-                    frame:Hide()
-                    actionButton.SpellActivationAlert = frame
-                end
-                return frame
+const ACTION_BUTTON_SPELL_ALERT_MANAGER_NAMESPACE_LUA: &str = r#"
+    if ActionButtonSpellAlertManager == nil then
+        ActionButtonSpellAlertManager = {
+            activeAlerts = {},
+            SpellAlertType = { Default = 1, AssistedCombatRotation = 2 },
+        }
+    end
+
+    if ActionButtonSpellAlertManager.GetAlertFrame == nil then
+        function ActionButtonSpellAlertManager:GetAlertFrame(actionButton, create)
+            local frame = actionButton.SpellActivationAlert
+            if frame == nil and create then
+                frame = CreateFrame("Frame", nil, actionButton)
+                frame:SetAllPoints(actionButton)
+                frame:Hide()
+                actionButton.SpellActivationAlert = frame
             end
-
-            function ActionButtonSpellAlertManager:ShowAlert(actionButton, skipBirth)
-                local currentType = self.activeAlerts[actionButton]
-                local alertType = self.SpellAlertType.Default
-                if currentType == alertType then
-                    local alertFrame = GetAlertFrame(actionButton, false)
-                    if alertFrame then
-                        alertFrame:Show()
-                    end
-                    return
-                end
-
-                self.activeAlerts[actionButton] = alertType
-                local alertFrame = GetAlertFrame(actionButton, true)
-                alertFrame:Show()
-            end
-
-            function ActionButtonSpellAlertManager:HideAlert(actionButton)
-                if self.activeAlerts[actionButton] == nil then
-                    return
-                end
-
-                local alertFrame = GetAlertFrame(actionButton, false)
-                if alertFrame then
-                    alertFrame:Hide()
-                end
-                self.activeAlerts[actionButton] = nil
-            end
-
-            function ActionButtonSpellAlertManager:HasAlert(actionButton)
-                local alertType = self.activeAlerts[actionButton]
-                return alertType ~= nil, alertType
-            end
+            return frame
         end
-        "#,
-    )
-    .exec()
+    end
+"#;
+
+fn install_action_button_spell_alert_manager_namespace(lua: &Lua) -> Result<()> {
+    lua.load(ACTION_BUTTON_SPELL_ALERT_MANAGER_NAMESPACE_LUA)
+        .exec()
+}
+
+const ACTION_BUTTON_SPELL_ALERT_MANAGER_METHODS_LUA: &str = r#"
+    if ActionButtonSpellAlertManager and ActionButtonSpellAlertManager.ShowAlert == nil then
+        function ActionButtonSpellAlertManager:ShowAlert(actionButton, skipBirth)
+            local currentType = self.activeAlerts[actionButton]
+            local alertType = self.SpellAlertType.Default
+            if currentType == alertType then
+                local alertFrame = self:GetAlertFrame(actionButton, false)
+                if alertFrame then
+                    alertFrame:Show()
+                end
+                return
+            end
+
+            self.activeAlerts[actionButton] = alertType
+            local alertFrame = self:GetAlertFrame(actionButton, true)
+            alertFrame:Show()
+        end
+    end
+
+    if ActionButtonSpellAlertManager and ActionButtonSpellAlertManager.HideAlert == nil then
+        function ActionButtonSpellAlertManager:HideAlert(actionButton)
+            if self.activeAlerts[actionButton] == nil then
+                return
+            end
+
+            local alertFrame = self:GetAlertFrame(actionButton, false)
+            if alertFrame then
+                alertFrame:Hide()
+            end
+            self.activeAlerts[actionButton] = nil
+        end
+    end
+
+    if ActionButtonSpellAlertManager and ActionButtonSpellAlertManager.HasAlert == nil then
+        function ActionButtonSpellAlertManager:HasAlert(actionButton)
+            local alertType = self.activeAlerts[actionButton]
+            return alertType ~= nil, alertType
+        end
+    end
+"#;
+
+fn install_action_button_spell_alert_manager_methods(lua: &Lua) -> Result<()> {
+    lua.load(ACTION_BUTTON_SPELL_ALERT_MANAGER_METHODS_LUA)
+        .exec()
 }
 
 /// TalentButtonUtil - utility table for talent button rendering.

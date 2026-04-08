@@ -101,6 +101,40 @@ const PERKS_ACTIVITIES_LUA: &str = r#"
         return out
     end
 
+    local function copyActivityList(input)
+        local out = {}
+        if type(input) ~= "table" then
+            return out
+        end
+        for index, activityInfo in ipairs(input) do
+            local activityCopy = copyTableShallow(activityInfo)
+            if type(activityCopy.tagNames) ~= "table" then
+                activityCopy.tagNames = {}
+            else
+                activityCopy.tagNames = copyArray(activityCopy.tagNames)
+            end
+            if tonumber(activityCopy.thresholdContributionAmount) == nil then
+                activityCopy.thresholdContributionAmount = 0
+            end
+            out[index] = activityCopy
+        end
+        return out
+    end
+
+    local function copyThresholdList(input)
+        local out = {}
+        if type(input) ~= "table" then
+            return out
+        end
+        for index, thresholdInfo in ipairs(input) do
+            local thresholdCopy = copyTableShallow(thresholdInfo)
+            thresholdCopy.thresholdOrderIndex = normalizeID(thresholdCopy.thresholdOrderIndex) or index
+            thresholdCopy.requiredContributionAmount = normalizeID(thresholdCopy.requiredContributionAmount) or 0
+            out[index] = thresholdCopy
+        end
+        return out
+    end
+
     api.AddTrackedPerksActivity = api.AddTrackedPerksActivity or function(id)
         local state = ensureState()
         local activityID = normalizeID(id)
@@ -170,9 +204,13 @@ const PERKS_ACTIVITIES_LUA: &str = r#"
     api.GetPerksActivitiesInfo = api.GetPerksActivitiesInfo or function()
         local state = ensureState()
         local activitiesInfo = state.activitiesInfo
+        if type(activitiesInfo) ~= "table" then
+            activitiesInfo = {}
+            state.activitiesInfo = activitiesInfo
+        end
         local info = copyTableShallow(activitiesInfo)
-        info.activities = copyArray(activitiesInfo.activities)
-        info.thresholds = copyArray(activitiesInfo.thresholds)
+        info.activities = copyActivityList(activitiesInfo.activities)
+        info.thresholds = copyThresholdList(activitiesInfo.thresholds)
         info.activePerksMonth = normalizeID(activitiesInfo.activePerksMonth) or 1
         info.displayMonthName = tostring(activitiesInfo.displayMonthName or "")
         info.secondsRemaining = normalizeID(activitiesInfo.secondsRemaining) or 0
