@@ -95,6 +95,46 @@ fn test_micro_menu_hover_shows_tooltip() {
     );
 }
 
+#[test]
+fn test_character_slot_hover_shows_inventory_tooltip() {
+    let env = setup_full_env();
+    open_character_panel(&env);
+
+    let slot_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("CharacterHeadSlot")
+            .expect("CharacterHeadSlot should exist after opening character panel")
+    };
+
+    env.state().borrow_mut().hovered_frame = Some(slot_id);
+    env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+
+    assert!(
+        visible,
+        "GameTooltip should be visible after hovering CharacterHeadSlot"
+    );
+    assert!(
+        num_lines >= 3,
+        "Character slot hover should populate item tooltip lines, got {}",
+        num_lines
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state
+        .tooltips
+        .get(&gt_id)
+        .expect("tooltip data should exist after character slot hover");
+    assert_eq!(td.lines[0].left_text, "Entombed Seraph's Casque");
+    assert_eq!(td.lines[1].left_text, "Item Level 571");
+    assert_eq!(td.lines[2].left_text, "Head");
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]
@@ -207,6 +247,96 @@ fn test_tooltip_produces_quads_after_hover() {
     );
 }
 
+#[cfg(feature = "gui")]
+#[test]
+fn test_character_slot_hover_tooltip_produces_quads() {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+    use wow_ui_sim::render::glyph::GlyphAtlas;
+
+    let env = setup_full_env();
+    open_character_panel(&env);
+
+    let slot_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("CharacterHeadSlot")
+            .expect("CharacterHeadSlot should exist after opening character panel")
+    };
+
+    env.state().borrow_mut().hovered_frame = Some(slot_id);
+    env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    {
+        let mut state = env.state().borrow_mut();
+        let _ = state.widgets.take_render_dirty();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+    }
+
+    let gt_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("GameTooltip")
+        .unwrap();
+    let (w, h) = {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(gt_id).unwrap();
+        (frame.width, frame.height)
+    };
+    assert!(w > 0.0, "Tooltip width should be > 0 after slot hover");
+    assert!(h > 0.0, "Tooltip height should be > 0 after slot hover");
+
+    {
+        let state = env.state().borrow();
+        let rect = wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, gt_id, 1024.0, 768.0);
+        assert!(rect.width > 0.0, "Tooltip rect width should be > 0");
+        assert!(rect.height > 0.0, "Tooltip rect height should be > 0");
+        assert!(
+            rect.x >= 0.0 && rect.x < 1024.0,
+            "Tooltip x={} should be on screen",
+            rect.x
+        );
+        assert!(
+            rect.y >= 0.0 && rect.y < 768.0,
+            "Tooltip y={} should be on screen",
+            rect.y
+        );
+    }
+
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
+    assert!(
+        !tooltip_data.is_empty(),
+        "Tooltip render data should exist after character slot hover"
+    );
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let batch = wow_ui_sim::iced_app::build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        Some((&mut font_sys, &mut glyph_atlas)),
+        Some(&state.message_frames),
+        Some(&tooltip_data),
+        &buckets,
+    );
+
+    assert!(
+        batch.vertices.len() > 100,
+        "Batch should contain tooltip vertices after character slot hover"
+    );
+}
+
 const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
@@ -268,6 +398,7 @@ const TOOLTIP_TEST_ADDONS: &[(&str, &str)] = &[
         "Blizzard_UIPanels_Game",
         "Blizzard_UIPanels_Game_Mainline.toc",
     ),
+    ("Blizzard_TokenUI", "Blizzard_TokenUI.toc"),
     ("Blizzard_ActionBar", "Blizzard_ActionBar_Mainline.toc"),
 ];
 
@@ -325,4 +456,19 @@ fn fire_startup_events(env: &WowLuaEnv) {
     ] {
         let _ = env.fire_event(event);
     }
+}
+
+fn open_character_panel(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        local btn = CharacterMicroButton
+        assert(btn, "CharacterMicroButton should exist")
+        local onclick = btn:GetScript("OnClick")
+        assert(onclick, "CharacterMicroButton should have an OnClick handler")
+        onclick(btn, "LeftButton", false)
+        assert(CharacterFrame and CharacterFrame:IsShown(), "CharacterFrame should be shown")
+        assert(CharacterHeadSlot ~= nil, "CharacterHeadSlot should exist")
+        "#,
+    )
+    .expect("Failed to open character panel");
 }
