@@ -11,7 +11,7 @@ use std::path::PathBuf;
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
-use wow_ui_sim::widget::WidgetRegistry;
+use wow_ui_sim::widget::{Frame, WidgetRegistry};
 
 const SPELLBOOK_TUTORIALS_LUA: &str = include_str!(
     "../Interface/BlizzardUI/Blizzard_PlayerSpells/SpellBook/Blizzard_SpellBookFrameTutorials.lua"
@@ -173,39 +173,59 @@ fn check_frame_reachability(registry: &WidgetRegistry, frame_id: u64) -> (bool, 
 
     loop {
         let Some(frame) = registry.get(id) else {
-            return (false, format!("Frame {} not found", id));
+            return missing_frame_result(id);
         };
-        let name = frame.name.as_deref().unwrap_or("(anon)");
+        let name = frame_display_name(frame);
         path.push(format!("{}[{}]", name, id));
 
         let Some(parent_id) = frame.parent_id else {
             break;
         };
-        let parent_has_child = registry
-            .get(parent_id)
-            .map(|p| p.children.contains(&id))
-            .unwrap_or(false);
-        if !parent_has_child {
-            let pname = registry
-                .get(parent_id)
-                .and_then(|f| f.name.as_deref())
-                .unwrap_or("?");
-            return (
-                false,
-                format!(
-                    "BREAK: {}[{}] parent={}[{}] but NOT in children list. Path: {}",
-                    name,
-                    id,
-                    pname,
-                    parent_id,
-                    path.join(" -> ")
-                ),
-            );
+        if !parent_lists_child(registry, parent_id, id) {
+            return broken_parent_link_result(registry, name, id, parent_id, &path);
         }
         id = parent_id;
     }
     path.reverse();
     (true, path.join(" -> "))
+}
+
+fn missing_frame_result(frame_id: u64) -> (bool, String) {
+    (false, format!("Frame {} not found", frame_id))
+}
+
+fn frame_display_name(frame: &Frame) -> &str {
+    frame.name.as_deref().unwrap_or("(anon)")
+}
+
+fn parent_lists_child(registry: &WidgetRegistry, parent_id: u64, child_id: u64) -> bool {
+    registry
+        .get(parent_id)
+        .is_some_and(|parent| parent.children.contains(&child_id))
+}
+
+fn broken_parent_link_result(
+    registry: &WidgetRegistry,
+    frame_name: &str,
+    frame_id: u64,
+    parent_id: u64,
+    path: &[String],
+) -> (bool, String) {
+    let parent_name = registry
+        .get(parent_id)
+        .map(frame_display_name)
+        .unwrap_or("?");
+    (
+        false,
+        format!(
+            "BREAK: {}[{}] parent={}[{}] but NOT in children list. Path: {}",
+            frame_name,
+            frame_id,
+            parent_name,
+            parent_id,
+            path.join(" -> ")
+        ),
+    )
 }
 
 /// Log the ancestor chain of a frame for debugging.
