@@ -15,6 +15,15 @@ const PERKS_ACTIVITIES_LUA: &str = r#"
         chatLinkByID = {},
         removeCount = 0,
         lastRemovedID = nil,
+        allTags = { tagName = {} },
+        activitiesInfo = {
+            activePerksMonth = 1,
+            displayMonthName = "",
+            secondsRemaining = 0,
+            activities = {},
+            thresholds = {},
+        },
+        pendingCompletion = { pendingIDs = {} },
     }
 
     local function normalizeID(id)
@@ -36,7 +45,75 @@ const PERKS_ACTIVITIES_LUA: &str = r#"
         if type(state.chatLinkByID) ~= "table" then
             state.chatLinkByID = {}
         end
+        if type(state.allTags) ~= "table" then
+            state.allTags = { tagName = {} }
+        end
+        if type(state.allTags.tagName) ~= "table" then
+            state.allTags.tagName = {}
+        end
+        if type(state.activitiesInfo) ~= "table" then
+            state.activitiesInfo = {}
+        end
+        local activitiesInfo = state.activitiesInfo
+        if type(activitiesInfo.activities) ~= "table" then
+            activitiesInfo.activities = {}
+        end
+        if type(activitiesInfo.thresholds) ~= "table" then
+            activitiesInfo.thresholds = {}
+        end
+        if tonumber(activitiesInfo.activePerksMonth) == nil then
+            activitiesInfo.activePerksMonth = 1
+        end
+        if type(activitiesInfo.displayMonthName) ~= "string" then
+            activitiesInfo.displayMonthName = ""
+        end
+        if tonumber(activitiesInfo.secondsRemaining) == nil then
+            activitiesInfo.secondsRemaining = 0
+        end
+        if type(state.pendingCompletion) ~= "table" then
+            state.pendingCompletion = { pendingIDs = {} }
+        end
+        if type(state.pendingCompletion.pendingIDs) ~= "table" then
+            state.pendingCompletion.pendingIDs = {}
+        end
         return state
+    end
+
+    local function copyArray(input)
+        local out = {}
+        if type(input) ~= "table" then
+            return out
+        end
+        for index, value in ipairs(input) do
+            out[index] = value
+        end
+        return out
+    end
+
+    local function copyTableShallow(input)
+        if type(input) ~= "table" then
+            return {}
+        end
+        local out = {}
+        for key, value in pairs(input) do
+            out[key] = value
+        end
+        return out
+    end
+
+    api.AddTrackedPerksActivity = api.AddTrackedPerksActivity or function(id)
+        local state = ensureState()
+        local activityID = normalizeID(id)
+        if activityID == nil then
+            return false
+        end
+        for _, trackedID in ipairs(state.trackedIDs) do
+            if normalizeID(trackedID) == activityID then
+                return false
+            end
+        end
+        table.insert(state.trackedIDs, activityID)
+        return true
     end
 
     api.GetTrackedPerksActivities = api.GetTrackedPerksActivities or function()
@@ -81,6 +158,35 @@ const PERKS_ACTIVITIES_LUA: &str = r#"
         state.removeCount = (tonumber(state.removeCount) or 0) + 1
         state.lastRemovedID = activityID
         return removed
+    end
+
+    api.GetAllPerksActivityTags = api.GetAllPerksActivityTags or function()
+        local state = ensureState()
+        return {
+            tagName = copyArray(state.allTags.tagName),
+        }
+    end
+
+    api.GetPerksActivitiesInfo = api.GetPerksActivitiesInfo or function()
+        local state = ensureState()
+        local activitiesInfo = state.activitiesInfo
+        local info = copyTableShallow(activitiesInfo)
+        info.activities = copyArray(activitiesInfo.activities)
+        info.thresholds = copyArray(activitiesInfo.thresholds)
+        info.activePerksMonth = normalizeID(activitiesInfo.activePerksMonth) or 1
+        info.displayMonthName = tostring(activitiesInfo.displayMonthName or "")
+        info.secondsRemaining = normalizeID(activitiesInfo.secondsRemaining) or 0
+        return info
+    end
+
+    api.GetPerksActivitiesPendingCompletion = api.GetPerksActivitiesPendingCompletion or function()
+        local state = ensureState()
+        return { pendingIDs = copyArray(state.pendingCompletion.pendingIDs) }
+    end
+
+    api.ClearPerksActivitiesPendingCompletion = api.ClearPerksActivitiesPendingCompletion or function()
+        local state = ensureState()
+        state.pendingCompletion.pendingIDs = {}
     end
 "#;
 

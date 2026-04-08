@@ -198,3 +198,124 @@ fn video_options_set_window_size_updates_current_size() {
     assert_eq!(last_set_x, 1600, "last set width should be tracked");
     assert_eq!(last_set_y, 900, "last set height should be tracked");
 }
+
+#[test]
+fn perks_activities_monthly_accessors_return_stable_shapes() {
+    let env = env();
+    let (
+        tag_type,
+        tag_count,
+        activities_type,
+        activities_count,
+        thresholds_type,
+        thresholds_count,
+        active_month,
+        seconds_remaining,
+        pending_type,
+        pending_count,
+    ): (String, i64, String, i64, String, i64, i64, i64, String, i64) = env
+        .eval(
+            r#"
+            C_PerksActivities._state.activitiesInfo = nil
+            C_PerksActivities._state.allTags = nil
+            C_PerksActivities._state.pendingCompletion = nil
+
+            local tags = C_PerksActivities.GetAllPerksActivityTags()
+            local info = C_PerksActivities.GetPerksActivitiesInfo()
+            local pending = C_PerksActivities.GetPerksActivitiesPendingCompletion()
+
+            return type(tags.tagName),
+                #tags.tagName,
+                type(info.activities),
+                #info.activities,
+                type(info.thresholds),
+                #info.thresholds,
+                info.activePerksMonth,
+                info.secondsRemaining,
+                type(pending.pendingIDs),
+                #pending.pendingIDs
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(tag_type, "table", "tagName should be a table");
+    assert_eq!(tag_count, 0, "default tag list should be empty");
+    assert_eq!(
+        activities_type, "table",
+        "activities should be a table for pairs/ipairs safety"
+    );
+    assert_eq!(
+        activities_count, 0,
+        "default activities list should be empty"
+    );
+    assert_eq!(
+        thresholds_type, "table",
+        "thresholds should be a table for pairs/ipairs safety"
+    );
+    assert_eq!(
+        thresholds_count, 0,
+        "default threshold list should be empty"
+    );
+    assert!(
+        active_month >= 1,
+        "activePerksMonth should default to a positive integer"
+    );
+    assert!(
+        seconds_remaining >= 0,
+        "secondsRemaining should default to a non-negative integer"
+    );
+    assert_eq!(
+        pending_type, "table",
+        "pendingIDs should be a table for ipairs safety"
+    );
+    assert_eq!(pending_count, 0, "pendingIDs should default to empty");
+}
+
+#[test]
+fn encounter_journal_global_filters_and_tier_are_numeric() {
+    let env = env();
+    let (
+        tier_type,
+        class_before,
+        spec_before,
+        class_after,
+        spec_after,
+        tier_after,
+        has_valid_difficulty,
+    ): (String, i64, i64, i64, i64, i64, bool) = env
+        .eval(
+            r#"
+            local tierBefore = EJ_GetCurrentTier()
+            local classBefore, specBefore = EJ_GetLootFilter()
+
+            EJ_SetLootFilter("3", nil)
+            local classAfter, specAfter = EJ_GetLootFilter()
+
+            EJ_SelectTier("11")
+            local tierAfter = EJ_GetCurrentTier()
+
+            return type(tierBefore),
+                classBefore,
+                specBefore,
+                classAfter,
+                specAfter,
+                tierAfter,
+                EJ_IsValidInstanceDifficulty(14)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(tier_type, "number", "EJ_GetCurrentTier should be numeric");
+    assert!(class_before >= 0, "default class filter should be numeric");
+    assert!(spec_before >= 0, "default spec filter should be numeric");
+    assert_eq!(
+        class_after, 3,
+        "class filter should normalize numeric input"
+    );
+    assert_eq!(spec_after, 0, "spec filter should normalize nil input to 0");
+    assert_eq!(tier_after, 11, "EJ_SelectTier should update current tier");
+    assert!(
+        has_valid_difficulty,
+        "numeric difficulties should be treated as valid"
+    );
+}

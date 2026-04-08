@@ -1481,6 +1481,17 @@ fn normalize_file_path(raw: &str) -> String {
 
 /// Gameplay-related global function stubs.
 fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_core_gameplay_globals(lua, g)?;
+    register_spell_and_glyph_globals(lua, g)?;
+    install_register_ui_panel(lua)?;
+    install_encounter_journal_globals(lua)?;
+    register_ui_and_progression_globals(lua, g)?;
+    register_event_callback(lua)?;
+    register_file_path_lookup_global(lua, g)?;
+    Ok(())
+}
+
+fn register_core_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("IsPlayerInWorld", lua.create_function(|_, ()| Ok(true))?)?;
     g.set(
         "ActionBarController_GetCurrentActionBarState",
@@ -1490,6 +1501,10 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetMaxLevelForLatestExpansion",
         lua.create_function(|_, ()| Ok(80i32))?,
     )?;
+    Ok(())
+}
+
+fn register_spell_and_glyph_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "HasAttachedGlyph",
         lua.create_function(|_, _spell_id: Value| Ok(false))?,
@@ -1498,14 +1513,17 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "IsSpellValidForPendingGlyph",
         lua.create_function(|_, _spell_id: Value| Ok(false))?,
     )?;
-    install_register_ui_panel(lua)?;
-    g.set(
-        "GetScenariosChoiceOrder",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
     g.set(
         "SpellIsSelfBuff",
         lua.create_function(|_, _spell_id: i32| Ok(false))?,
+    )?;
+    Ok(())
+}
+
+fn register_ui_and_progression_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "GetScenariosChoiceOrder",
+        lua.create_function(|lua, ()| lua.create_table())?,
     )?;
     g.set(
         "GetExpansionDisplayInfo",
@@ -1515,11 +1533,14 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "AddSourceLocationExclude",
         lua.create_function(|_, _location: Value| Ok(()))?,
     )?;
-    register_event_callback(lua)?;
     g.set(
         "UnitIsHumanPlayer",
         lua.create_function(|_, _args: mlua::MultiValue| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_file_path_lookup_global(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetFileIDFromPath",
         lua.create_function(|_, path: String| {
@@ -1528,6 +1549,76 @@ fn register_gameplay_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         })?,
     )?;
     Ok(())
+}
+
+const ENCOUNTER_JOURNAL_GLOBALS_LUA: &str = r#"
+    __wow_sim_ej_state = __wow_sim_ej_state or {}
+    local state = __wow_sim_ej_state
+
+    local function normalize_int(value, fallback)
+        local number = tonumber(value)
+        if number == nil then
+            return fallback
+        end
+        return math.floor(number)
+    end
+
+    if normalize_int(state.currentTier, nil) == nil then
+        local serverTier = normalize_int((GetServerExpansionLevel and GetServerExpansionLevel() or 0), 0) + 1
+        state.currentTier = math.max(1, serverTier)
+    end
+    state.numTiers = normalize_int(state.numTiers, 12) or 12
+    state.currentDifficulty = normalize_int(state.currentDifficulty, 0) or 0
+    state.lootClassID = normalize_int(state.lootClassID, 0) or 0
+    state.lootSpecID = normalize_int(state.lootSpecID, 0) or 0
+
+    EJ_GetCurrentTier = EJ_GetCurrentTier or function()
+        return state.currentTier
+    end
+
+    EJ_SelectTier = EJ_SelectTier or function(tier)
+        state.currentTier = math.max(1, normalize_int(tier, state.currentTier) or 1)
+        return state.currentTier
+    end
+
+    EJ_GetNumTiers = EJ_GetNumTiers or function()
+        return state.numTiers
+    end
+
+    EJ_GetTierInfo = EJ_GetTierInfo or function(tier)
+        local tierID = normalize_int(tier, state.currentTier) or 1
+        return string.format("Tier %d", tierID)
+    end
+
+    EJ_GetLootFilter = EJ_GetLootFilter or function()
+        return state.lootClassID, state.lootSpecID
+    end
+
+    EJ_SetLootFilter = EJ_SetLootFilter or function(classID, specID)
+        state.lootClassID = normalize_int(classID, 0) or 0
+        state.lootSpecID = normalize_int(specID, 0) or 0
+    end
+
+    EJ_ResetLootFilter = EJ_ResetLootFilter or function()
+        state.lootClassID = 0
+        state.lootSpecID = 0
+    end
+
+    EJ_GetDifficulty = EJ_GetDifficulty or function()
+        return state.currentDifficulty
+    end
+
+    EJ_SetDifficulty = EJ_SetDifficulty or function(difficultyID)
+        state.currentDifficulty = normalize_int(difficultyID, state.currentDifficulty) or 0
+    end
+
+    EJ_IsValidInstanceDifficulty = EJ_IsValidInstanceDifficulty or function(difficultyID)
+        return normalize_int(difficultyID, nil) ~= nil
+    end
+"#;
+
+fn install_encounter_journal_globals(lua: &Lua) -> Result<()> {
+    lua.load(ENCOUNTER_JOURNAL_GLOBALS_LUA).exec()
 }
 
 fn install_register_ui_panel(lua: &Lua) -> Result<()> {
