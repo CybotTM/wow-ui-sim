@@ -30,6 +30,14 @@ pub(crate) fn register_missing_globals(lua: &Lua, state: Rc<RefCell<SimState>>) 
 
 /// Server info, character undelete, timerunning, and system requirements stubs.
 fn register_server_and_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_character_undelete_stubs(lua, g)?;
+    register_server_info_stubs(lua, g)?;
+    register_timerunning_stubs(lua, g)?;
+    register_system_requirements_stubs(lua, g)?;
+    Ok(())
+}
+
+fn register_character_undelete_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "CheckCharacterUndeleteCooldown",
         lua.create_function(|_, ()| Ok(()))?,
@@ -38,6 +46,10 @@ fn register_server_and_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<(
         "GetCharacterUndeleteStatus",
         lua.create_function(|_, ()| Ok((true, false, 0i32, 0i32)))?,
     )?;
+    Ok(())
+}
+
+fn register_server_info_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetServerName",
         lua.create_function(|_, ()| {
@@ -59,12 +71,16 @@ fn register_server_and_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<(
         lua.create_function(|_, ()| Ok(false))?,
     )?;
     g.set(
-        "GetActiveTimerunningSeasonID",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    g.set(
         "GetPlayersOnServer",
         lua.create_function(|_, ()| Ok((false, 0i32, 0i32)))?,
+    )?;
+    Ok(())
+}
+
+fn register_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "GetActiveTimerunningSeasonID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     g.set(
         "GetCharacterTimerunningSeasonID",
@@ -82,6 +98,10 @@ fn register_server_and_timerunning_stubs(lua: &Lua, g: &mlua::Table) -> Result<(
         "IsTimerunningEnabled",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
+    Ok(())
+}
+
+fn register_system_requirements_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "HasCheckedSystemRequirements",
         lua.create_function(|_, ()| Ok(true))?,
