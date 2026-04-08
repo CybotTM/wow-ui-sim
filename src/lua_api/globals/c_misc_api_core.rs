@@ -200,33 +200,43 @@ fn register_c_tooltip_info_overrides(lua: &Lua) -> Result<()> {
     let t: mlua::Table = globals
         .get::<mlua::Table>("C_TooltipInfo")
         .unwrap_or_else(|_| lua.create_table().unwrap());
-    t.set(
+    register_item_and_spell_tooltip_overrides(lua, &t)?;
+    register_unit_aura_tooltip_overrides(lua, &t)?;
+    globals.set("C_TooltipInfo", t)?;
+    Ok(())
+}
+
+fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetTraitEntry",
         lua.create_function(create_trait_entry_tooltip)?,
     )?;
-    t.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
-    t.set(
+    table.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
+    table.set(
         "GetInventoryItem",
         lua.create_function(create_inventory_item_tooltip)?,
     )?;
-    t.set("GetSpellByID", lua.create_function(create_spell_tooltip)?)?;
-    t.set(
+    table.set("GetSpellByID", lua.create_function(create_spell_tooltip)?)?;
+    table.set(
         "GetHyperlink",
         lua.create_function(create_hyperlink_tooltip)?,
     )?;
-    t.set(
+    Ok(())
+}
+
+fn register_unit_aura_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetUnitBuff",
         lua.create_function(create_unit_buff_tooltip)?,
     )?;
-    t.set(
+    table.set(
         "GetUnitDebuff",
         lua.create_function(create_unit_debuff_tooltip)?,
     )?;
-    t.set(
+    table.set(
         "GetUnitAura",
         lua.create_function(create_unit_aura_tooltip)?,
     )?;
-    globals.set("C_TooltipInfo", t)?;
     Ok(())
 }
 
@@ -271,7 +281,9 @@ fn create_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
     let Some(item) = crate::items::get_item(item_id as u32) else {
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
-    build_filled_item_tooltip(lua, item, TOOLTIP_DATA_TYPE_ITEM)
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_ITEM, |lines| {
+        build_item_tooltip_lines(lua, item, lines)
+    })
 }
 
 fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
@@ -289,14 +301,9 @@ fn create_spell_tooltip(lua: &Lua, spell_id: i32) -> Result<Value> {
     let Some(spell) = crate::spells::get_spell(spell_id as u32) else {
         return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_SPELL);
     };
-
-    let tooltip = lua.create_table()?;
-    tooltip.set("type", TOOLTIP_DATA_TYPE_SPELL)?;
-
-    let lines = lua.create_table()?;
-    build_spell_tooltip_lines(lua, spell_id, spell.name, &lines)?;
-    tooltip.set("lines", lines)?;
-    Ok(Value::Table(tooltip))
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_SPELL, |lines| {
+        build_spell_tooltip_lines(lua, spell_id, spell.name, lines)
+    })
 }
 
 fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
@@ -319,8 +326,9 @@ fn create_unit_buff_tooltip(
     let Some(aura) = lookup_player_aura_for_tooltip(lua, &unit, index, filter.as_deref()) else {
         return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA);
     };
-
-    build_aura_tooltip(lua, aura, TOOLTIP_DATA_TYPE_UNIT_AURA)
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_UNIT_AURA, |lines| {
+        append_aura_tooltip_lines(lua, aura, lines)
+    })
 }
 
 fn create_unit_debuff_tooltip(
@@ -350,16 +358,15 @@ fn build_empty_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
     Ok(Value::Table(tooltip))
 }
 
-fn build_aura_tooltip(
-    lua: &Lua,
-    aura: crate::lua_api::game_data::AuraInfo,
-    tooltip_type: i32,
-) -> Result<Value> {
+fn build_tooltip_with_lines<F>(lua: &Lua, tooltip_type: i32, build_lines: F) -> Result<Value>
+where
+    F: FnOnce(&mlua::Table) -> Result<()>,
+{
     let tooltip = lua.create_table()?;
     tooltip.set("type", tooltip_type)?;
 
     let lines = lua.create_table()?;
-    append_aura_tooltip_lines(lua, aura, &lines)?;
+    build_lines(&lines)?;
 
     tooltip.set("lines", lines)?;
     Ok(Value::Table(tooltip))
@@ -414,35 +421,18 @@ fn append_aura_tooltip_lines(
     aura: crate::lua_api::game_data::AuraInfo,
     lines: &mlua::Table,
 ) -> Result<()> {
-    const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
-    const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
-    const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
-
-    append_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, &aura.name)?;
-
-    let mut next_index = 2;
+    let mut body_lines = Vec::new();
     if aura.duration > 0.0 {
-        let duration_text = format_aura_duration_text(aura.duration);
-        append_tooltip_line(
-            lua,
-            lines,
-            next_index,
-            TOOLTIP_LINE_TYPE_NONE,
-            &duration_text,
-        )?;
-        next_index += 1;
+        body_lines.push(format_aura_duration_text(aura.duration));
     }
 
-    if let Some(description_text) = tooltip_description_text(aura.spell_id) {
-        append_tooltip_line(
-            lua,
-            lines,
-            next_index,
-            TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION,
-            &description_text,
-        )?;
-    }
-    Ok(())
+    append_named_description_tooltip_lines(
+        lua,
+        lines,
+        &aura.name,
+        &body_lines,
+        tooltip_description_text(aura.spell_id),
+    )
 }
 
 fn append_spell_tooltip_lines(
@@ -451,29 +441,42 @@ fn append_spell_tooltip_lines(
     spell_name: &str,
     lines: &mlua::Table,
 ) -> Result<()> {
+    let mut body_lines = Vec::new();
+    if let Some(power_text) = spell_power_text(spell_id) {
+        body_lines.push(power_text);
+    }
+
+    body_lines.push(spell_cast_time_text(spell_id));
+
+    append_named_description_tooltip_lines(
+        lua,
+        lines,
+        spell_name,
+        &body_lines,
+        tooltip_description_text(spell_id),
+    )
+}
+
+fn append_named_description_tooltip_lines(
+    lua: &Lua,
+    lines: &mlua::Table,
+    name_text: &str,
+    body_lines: &[String],
+    description: Option<String>,
+) -> Result<()> {
     const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
     const TOOLTIP_LINE_TYPE_SPELL_NAME: i32 = 13;
     const TOOLTIP_LINE_TYPE_SPELL_DESCRIPTION: i32 = 34;
 
-    append_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, spell_name)?;
+    append_tooltip_line(lua, lines, 1, TOOLTIP_LINE_TYPE_SPELL_NAME, name_text)?;
 
     let mut next_index = 2;
-    if let Some(power_text) = spell_power_text(spell_id) {
-        append_tooltip_line(lua, lines, next_index, TOOLTIP_LINE_TYPE_NONE, &power_text)?;
+    for body_line in body_lines {
+        append_tooltip_line(lua, lines, next_index, TOOLTIP_LINE_TYPE_NONE, body_line)?;
         next_index += 1;
     }
 
-    let cast_time_text = spell_cast_time_text(spell_id);
-    append_tooltip_line(
-        lua,
-        lines,
-        next_index,
-        TOOLTIP_LINE_TYPE_NONE,
-        &cast_time_text,
-    )?;
-    next_index += 1;
-
-    if let Some(description_text) = tooltip_description_text(spell_id) {
+    if let Some(description_text) = description {
         append_tooltip_line(
             lua,
             lines,
@@ -590,21 +593,6 @@ fn strip_html_tags(html: &str) -> String {
 
 fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
     build_empty_tooltip(lua, tooltip_type)
-}
-
-fn build_filled_item_tooltip(
-    lua: &Lua,
-    item: &crate::items::ItemInfo,
-    tooltip_type: i32,
-) -> Result<Value> {
-    let tooltip = lua.create_table()?;
-    tooltip.set("type", tooltip_type)?;
-
-    let lines = lua.create_table()?;
-    build_item_tooltip_lines(lua, item, &lines)?;
-
-    tooltip.set("lines", lines)?;
-    Ok(Value::Table(tooltip))
 }
 
 fn build_item_tooltip_lines(
