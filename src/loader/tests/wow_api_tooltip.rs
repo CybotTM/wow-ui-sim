@@ -87,83 +87,85 @@ fn assert_item_tooltip_has_name_level_and_slot(
     assert!(has_real_tooltip, "{message}");
 }
 
+const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
+    local function colorShapeOk(color)
+        return color == nil or (type(color) == "table" and type(color.GetRGB) == "function")
+    end
+
+    local function lineShapeOk(line)
+        return type(line) == "table"
+            and type(line.type) == "number"
+            and (line.leftText == nil or type(line.leftText) == "string")
+            and colorShapeOk(line.leftColor)
+            and (line.wrapText == nil or type(line.wrapText) == "boolean")
+            and (line.rightText == nil or type(line.rightText) == "string")
+            and colorShapeOk(line.rightColor)
+            and (line.leftOffset == nil or type(line.leftOffset) == "number")
+    end
+
+    local function tooltipShapeOk(tooltip, expectedType, allowEmpty)
+        if type(tooltip) ~= "table" or tooltip.type ~= expectedType or type(tooltip.lines) ~= "table" then
+            return false
+        end
+
+        local lineCount = 0
+        for index, line in ipairs(tooltip.lines) do
+            lineCount = index
+            if not lineShapeOk(line) then
+                return false
+            end
+        end
+
+        return allowEmpty and lineCount == 0 or lineCount > 0
+    end
+
+    local nodeIDs = C_Traits.GetTreeNodes(790)
+    local entryID
+    for _, nodeID in ipairs(nodeIDs) do
+        local nodeInfo = C_Traits.GetNodeInfo(1, nodeID)
+        if nodeInfo and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
+            entryID = nodeInfo.entryIDs[1]
+            break
+        end
+    end
+
+    if not entryID then
+        return false
+    end
+
+    local checks = {
+        tooltipShapeOk(C_TooltipInfo.GetTraitEntry(entryID, 1), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+        tooltipShapeOk(C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
+        tooltipShapeOk(C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+        tooltipShapeOk(C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r"), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetHyperlink(GetSpellLink(19750)), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetUnit("player"), Enum.TooltipDataType.Unit, false),
+    }
+
+    for _, check in ipairs(checks) do
+        if not check then
+            return false
+        end
+    end
+
+    return true
+"#;
+
+fn tooltip_shape_checks_match_handler(env: &WowLuaEnv) -> bool {
+    env.eval(TOOLTIP_DATA_SHAPE_LUA).unwrap()
+}
+
 #[test]
 fn test_c_tooltip_info_shapes_match_tooltip_data_handler_expectations() {
     let env = WowLuaEnv::new().unwrap();
     seed_c_tooltip_info_test_state(&env);
-    let all_shapes_match: bool = env
-        .eval(
-            r#"
-            local function colorShapeOk(color)
-                return color == nil or (type(color) == "table" and type(color.GetRGB) == "function")
-            end
-
-            local function lineShapeOk(line)
-                return type(line) == "table"
-                    and type(line.type) == "number"
-                    and (line.leftText == nil or type(line.leftText) == "string")
-                    and colorShapeOk(line.leftColor)
-                    and (line.wrapText == nil or type(line.wrapText) == "boolean")
-                    and (line.rightText == nil or type(line.rightText) == "string")
-                    and colorShapeOk(line.rightColor)
-                    and (line.leftOffset == nil or type(line.leftOffset) == "number")
-            end
-
-            local function tooltipShapeOk(tooltip, expectedType, allowEmpty)
-                if type(tooltip) ~= "table" or tooltip.type ~= expectedType or type(tooltip.lines) ~= "table" then
-                    return false
-                end
-
-                local lineCount = 0
-                for index, line in ipairs(tooltip.lines) do
-                    lineCount = index
-                    if not lineShapeOk(line) then
-                        return false
-                    end
-                end
-
-                return allowEmpty and lineCount == 0 or lineCount > 0
-            end
-
-            local nodeIDs = C_Traits.GetTreeNodes(790)
-            local entryID
-            for _, nodeID in ipairs(nodeIDs) do
-                local nodeInfo = C_Traits.GetNodeInfo(1, nodeID)
-                if nodeInfo and nodeInfo.entryIDs and nodeInfo.entryIDs[1] then
-                    entryID = nodeInfo.entryIDs[1]
-                    break
-                end
-            end
-
-            if not entryID then
-                return false
-            end
-
-            local checks = {
-                tooltipShapeOk(C_TooltipInfo.GetTraitEntry(entryID, 1), Enum.TooltipDataType.Spell, false),
-                tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
-                tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
-                tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
-                tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
-                tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
-                tooltipShapeOk(C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
-                tooltipShapeOk(C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
-                tooltipShapeOk(C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
-                tooltipShapeOk(C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r"), Enum.TooltipDataType.Item, false),
-                tooltipShapeOk(C_TooltipInfo.GetHyperlink(GetSpellLink(19750)), Enum.TooltipDataType.Spell, false),
-                tooltipShapeOk(C_TooltipInfo.GetUnit("player"), Enum.TooltipDataType.Unit, false),
-            }
-
-            for _, check in ipairs(checks) do
-                if not check then
-                    return false
-                end
-            end
-
-            return true
-            "#,
-        )
-        .unwrap();
+    let all_shapes_match = tooltip_shape_checks_match_handler(&env);
     assert!(
         all_shapes_match,
         "every implemented C_TooltipInfo getter should return tooltip data tables that TooltipDataHandlerMixin can consume",
