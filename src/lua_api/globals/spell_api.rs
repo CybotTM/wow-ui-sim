@@ -421,6 +421,12 @@ fn register_c_spell_lookup_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
         })?,
     )?;
     t.set(
+        "IsSpellDataCached",
+        lua.create_function(|_, spell_id: i32| {
+            Ok(spell_id > 0 && crate::spells::get_spell(spell_id as u32).is_some())
+        })?,
+    )?;
+    t.set(
         "GetSpellPowerCost",
         lua.create_function(create_spell_power_cost)?,
     )?;

@@ -162,3 +162,61 @@ fn item_event_listener_callback_runs_from_request_load() {
         "ItemEventListener callbacks should run via ITEM_DATA_LOAD_RESULT"
     );
 }
+
+#[test]
+fn spell_cancel_callback_is_spent_after_sync_load() {
+    let env = env_with_object_api();
+
+    let (callback_fired, cancel_result): (bool, bool) = env
+        .eval(
+            r#"
+            local fired = false
+            local spell = Spell:CreateFromSpellID(35395)
+            local cancel = spell:ContinueWithCancelOnSpellLoad(function()
+                fired = true
+            end)
+
+            return fired, cancel()
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        callback_fired,
+        "Spell callback should fire through the ObjectAPI listener"
+    );
+    assert!(
+        !cancel_result,
+        "cancel should report false once the synchronous load already consumed the callback"
+    );
+}
+
+#[test]
+fn continuable_container_satisfies_mixed_item_and_spell_loads() {
+    let env = env_with_object_api();
+
+    let (callback_count, outstanding_after): (i32, i32) = env
+        .eval(
+            r#"
+            local callbackCount = 0
+            local container = ContinuableContainer:Create()
+            container:AddContinuable(Item:CreateFromItemID(6948))
+            container:AddContinuable(Spell:CreateFromSpellID(35395))
+            container:ContinueOnLoad(function()
+                callbackCount = callbackCount + 1
+            end)
+
+            return callbackCount, container:GetNumOutstandingLoads()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        callback_count, 1,
+        "ContinuableContainer should resolve once mixed item/spell loads complete"
+    );
+    assert_eq!(
+        outstanding_after, 0,
+        "ContinuableContainer should not leave outstanding loads after completion"
+    );
+}
