@@ -196,10 +196,19 @@ const ARROW_CALLOUT_MANAGER_LUA: &str = r#"
     end
 "#;
 
+fn register_namespace_from_lua_chunk(
+    lua: &Lua,
+    g: &mlua::Table,
+    lua_chunk: &str,
+    namespace: &str,
+) -> Result<()> {
+    lua.load(lua_chunk).exec()?;
+    let table: mlua::Table = g.get(namespace)?;
+    g.set(namespace, table)
+}
+
 fn register_c_arrow_callout_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    lua.load(ARROW_CALLOUT_MANAGER_LUA).exec()?;
-    g.get::<mlua::Table>("C_ArrowCalloutManager")
-        .and_then(|arrow| g.set("C_ArrowCalloutManager", arrow))
+    register_namespace_from_lua_chunk(lua, g, ARROW_CALLOUT_MANAGER_LUA, "C_ArrowCalloutManager")
 }
 
 const ENCOUNTER_EVENTS_LUA: &str = r#"
@@ -365,9 +374,7 @@ const ENCOUNTER_EVENTS_LUA: &str = r#"
 "#;
 
 fn register_c_encounter_events(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    lua.load(ENCOUNTER_EVENTS_LUA).exec()?;
-    g.get::<mlua::Table>("C_EncounterEvents")
-        .and_then(|encounter_events| g.set("C_EncounterEvents", encounter_events))
+    register_namespace_from_lua_chunk(lua, g, ENCOUNTER_EVENTS_LUA, "C_EncounterEvents")
 }
 
 const PROTOTYPE_DIALOG_LUA: &str = r#"
@@ -450,9 +457,7 @@ const PROTOTYPE_DIALOG_LUA: &str = r#"
 "#;
 
 fn register_c_prototype_dialog(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    lua.load(PROTOTYPE_DIALOG_LUA).exec()?;
-    g.get::<mlua::Table>("C_PrototypeDialog")
-        .and_then(|prototype_dialog| g.set("C_PrototypeDialog", prototype_dialog))
+    register_namespace_from_lua_chunk(lua, g, PROTOTYPE_DIALOG_LUA, "C_PrototypeDialog")
 }
 
 const REINCARNATION_LUA: &str = r#"
