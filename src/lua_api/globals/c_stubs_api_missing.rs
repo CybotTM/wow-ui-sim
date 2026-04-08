@@ -719,6 +719,14 @@ fn register_paperdoll_container_and_misc_stubs(
 
 /// LFG, dungeon finder, guild, and honor global stubs.
 fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    register_lfg_queue_stubs(lua, g)?;
+    register_lfg_role_and_group_stubs(lua, g)?;
+    register_guild_info_stubs(lua, g)?;
+    register_pvp_and_mail_stubs(lua, g)?;
+    Ok(())
+}
+
+fn register_lfg_queue_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetLFGMode",
         lua.create_function(|_, _cat: Value| Ok(Value::Nil))?,
@@ -761,6 +769,33 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetNumRandomDungeons",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
+    Ok(())
+}
+
+fn register_lfg_role_and_group_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set(
+        "GetGroupMemberCounts",
+        lua.create_function(|lua, ()| {
+            let t = lua.create_table()?;
+            t.set("TANK", 0)?;
+            t.set("HEALER", 0)?;
+            t.set("DAMAGER", 0)?;
+            t.set("NOROLE", 0)?;
+            Ok(t)
+        })?,
+    )?;
+    g.set(
+        "UnitGroupRolesAssigned",
+        lua.create_function(|_, _unit: Value| Ok("NONE"))?,
+    )?;
+    g.set(
+        "GetDungeonDifficultyID",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
+    Ok(())
+}
+
+fn register_guild_info_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GuildControlGetNumRanks",
         lua.create_function(|_, ()| Ok(0i32))?,
@@ -781,25 +816,6 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     g.set(
-        "GetGroupMemberCounts",
-        lua.create_function(|lua, ()| {
-            let t = lua.create_table()?;
-            t.set("TANK", 0)?;
-            t.set("HEALER", 0)?;
-            t.set("DAMAGER", 0)?;
-            t.set("NOROLE", 0)?;
-            Ok(t)
-        })?,
-    )?;
-    g.set(
-        "UnitGroupRolesAssigned",
-        lua.create_function(|_, _unit: Value| Ok("NONE"))?,
-    )?;
-    g.set(
-        "GetDungeonDifficultyID",
-        lua.create_function(|_, ()| Ok(1i32))?,
-    )?;
-    g.set(
         "RequestGuildChallengeInfo",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
@@ -811,6 +827,10 @@ fn register_lfg_and_guild_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetGuildInfo",
         lua.create_function(|_, _unit: Value| Ok(Value::Nil))?,
     )?;
+    Ok(())
+}
+
+fn register_pvp_and_mail_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "UnitHonor",
         lua.create_function(|_, _unit: String| Ok(0i32))?,
