@@ -350,17 +350,7 @@ fn append_item_tooltip_line(
 }
 
 fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
-    let (r, g, b) = match quality {
-        0 => (0.62, 0.62, 0.62),
-        1 => (1.00, 1.00, 1.00),
-        2 => (0.12, 1.00, 0.00),
-        3 => (0.00, 0.44, 0.87),
-        4 => (0.64, 0.21, 0.93),
-        5 => (1.00, 0.50, 0.00),
-        6 => (0.90, 0.80, 0.50),
-        7 | 8 => (0.00, 0.80, 1.00),
-        _ => (1.00, 1.00, 1.00),
-    };
+    let (r, g, b) = item_quality_rgb(quality);
     let color = lua.create_table()?;
     color.set("r", r)?;
     color.set("g", g)?;
@@ -388,6 +378,24 @@ fn item_quality_color(lua: &Lua, quality: u8) -> Result<Value> {
         })?,
     )?;
     Ok(Value::Table(color))
+}
+
+fn item_quality_rgb(quality: u8) -> (f64, f64, f64) {
+    const QUALITY_COLORS: [(f64, f64, f64); 9] = [
+        (0.62, 0.62, 0.62),
+        (1.00, 1.00, 1.00),
+        (0.12, 1.00, 0.00),
+        (0.00, 0.44, 0.87),
+        (0.64, 0.21, 0.93),
+        (1.00, 0.50, 0.00),
+        (0.90, 0.80, 0.50),
+        (0.00, 0.80, 1.00),
+        (0.00, 0.80, 1.00),
+    ];
+    QUALITY_COLORS
+        .get(quality as usize)
+        .copied()
+        .unwrap_or(QUALITY_COLORS[1])
 }
 
 fn item_binding_text(bonding: u8) -> Option<&'static str> {
