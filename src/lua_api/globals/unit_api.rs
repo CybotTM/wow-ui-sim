@@ -212,8 +212,11 @@ fn register_unit_level_exists(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
 
     globals.set(
         "UnitExists",
-        lua.create_function(move |_, unit: Option<String>| {
-            let Some(unit) = unit else { return Ok(false) };
+        lua.create_function(move |_, unit: Value| {
+            let unit = match unit {
+                Value::String(s) => s.to_str()?.to_string(),
+                _ => return Ok(false),
+            };
             if matches!(unit.as_str(), "player" | "pet") {
                 return Ok(true);
             }
@@ -325,15 +328,28 @@ fn register_class_lookup_functions(lua: &Lua, state: Rc<RefCell<SimState>>) -> R
     register_class_info_functions(lua)
 }
 
-/// Register UnitName and UnitNameUnmodified (strict: error on missing arg, nil on unknown unit).
+/// Register UnitName and UnitNameUnmodified.
+///
+/// Returns nil for unknown or invalid unit tokens instead of raising.
 fn register_unit_name_strict(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     for &fn_name in &["UnitName", "UnitNameUnmodified"] {
         let st = state.clone();
         globals.set(
             fn_name,
-            lua.create_function(move |lua, unit: String| {
-                let Some(name) = resolve_unit_name_with_party(&unit, &st.borrow()) else {
+            lua.create_function(move |lua, unit: Value| {
+                let unit_token = match unit {
+                    Value::String(s) => s.to_str()?.to_string(),
+                    _ => return Ok(MultiValue::from_vec(vec![Value::Nil, Value::Nil])),
+                };
+
+                let Some(name) = resolve_unit_name_with_party(&unit_token, &st.borrow()) else {
+                    if let Some(fallback) = fallback_name_for_unknown_unit(&unit_token) {
+                        return Ok(MultiValue::from_vec(vec![
+                            Value::String(lua.create_string(fallback)?),
+                            Value::Nil,
+                        ]));
+                    }
                     return Ok(MultiValue::from_vec(vec![Value::Nil, Value::Nil]));
                 };
                 Ok(MultiValue::from_vec(vec![
@@ -382,6 +398,13 @@ fn register_unit_name_display(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
         })?,
     )?;
     Ok(())
+}
+
+fn fallback_name_for_unknown_unit(unit: &str) -> Option<&str> {
+    if unit.is_empty() || unit == "target" || unit == "focus" || unit.starts_with("party") {
+        return None;
+    }
+    Some(unit)
 }
 
 /// Register UnitFullName, GetUnitName, UnitPVPName (lenient: fallback to SimUnit).

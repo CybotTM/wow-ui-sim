@@ -90,49 +90,18 @@ fn set_if_missing(globals: &mlua::Table, name: &str, value: Function) -> Result<
 }
 
 fn is_secret_value(lua: &Lua, value: &Value) -> Result<bool> {
-    if value_has_object_taint(lua, value)? {
-        return Ok(true);
-    }
-
     match value {
-        Value::Function(function) => is_loadstring_function(lua, function),
-        Value::Table(table) => table_contains_secret_values(lua, table),
+        Value::Function(function) => is_loadstring_tainted_function(lua, function),
         _ => Ok(false),
     }
 }
 
-fn value_has_object_taint(lua: &Lua, value: &Value) -> Result<bool> {
-    let taintable_value = match value {
-        Value::String(_)
-        | Value::Table(_)
-        | Value::Function(_)
-        | Value::Thread(_)
-        | Value::UserData(_) => value.clone(),
-        _ => return Ok(false),
+fn is_loadstring_tainted_function(lua: &Lua, function: &Function) -> Result<bool> {
+    let table = match lua.named_registry_value::<mlua::Table>("__tainted_loadstring_functions") {
+        Ok(table) => table,
+        Err(_) => return Ok(false),
     };
-
-    let debug: mlua::Table = lua.globals().get("debug")?;
-    let getobjecttaint: Option<Function> = debug.get("getobjecttaint")?;
-    let Some(getobjecttaint) = getobjecttaint else {
-        return Ok(false);
-    };
-
-    let taint = getobjecttaint.call::<Value>(taintable_value)?;
-    Ok(!matches!(taint, Value::Nil | Value::Boolean(false)))
-}
-
-fn is_loadstring_function(lua: &Lua, function: &Function) -> Result<bool> {
-    let debug: mlua::Table = lua.globals().get("debug")?;
-    let getinfo: Function = debug.get("getinfo")?;
-    let info: mlua::Table = getinfo.call((function.clone(), "S"))?;
-    let what: Option<String> = info.get("what")?;
-    if what.as_deref() == Some("C") {
-        return Ok(false);
-    }
-    let short_src: Option<String> = info.get("short_src")?;
-    Ok(short_src
-        .as_deref()
-        .is_some_and(|src| src.starts_with("[string \"")))
+    Ok(table.get::<bool>(function.clone()).unwrap_or(false))
 }
 
 fn table_is_accessible(lua: &Lua, table: &mlua::Table) -> Result<bool> {

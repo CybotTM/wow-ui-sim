@@ -88,7 +88,9 @@ fn add_unit_position_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
     methods.add_method("FinalizeUnits", |_, _, ()| Ok(()));
     methods.add_method("SetUiMapID", |_, _, _map_id: i32| Ok(()));
     methods.add_method("SetUnitColor", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("GetMouseOverUnits", |lua, _, ()| lua.create_table());
+    // Blizzard's UnitPositionFrame expects varargs unit tokens from
+    // GetMouseOverUnits(); return no values when no units are hovered.
+    methods.add_method("GetMouseOverUnits", |_, _, ()| Ok(MultiValue::new()));
     methods.add_method("GetPlayerPingScale", |_, _, ()| Ok(1.0_f64));
     methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));

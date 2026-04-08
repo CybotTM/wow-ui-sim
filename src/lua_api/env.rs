@@ -693,6 +693,14 @@ fn init_registry_tables(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Resul
     lua.set_named_registry_value("__frame_owners", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_timing", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_names", lua.create_table()?)?;
+    let tainted_loadstring_functions = lua.create_table()?;
+    let weak_meta = lua.create_table()?;
+    weak_meta.set("__mode", "k")?;
+    tainted_loadstring_functions.set_metatable(Some(weak_meta));
+    lua.set_named_registry_value(
+        "__tainted_loadstring_functions",
+        tainted_loadstring_functions,
+    )?;
     let taint_fallback: mlua::Function =
         lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
@@ -712,8 +720,16 @@ fn enable_taint_and_wrap_loadstring(lua: &Lua) -> mlua::Result<()> {
         r#"
         local original_ls = loadstring
         local sst = debug.setstacktaint
+        local sot = debug.setobjecttaint
+        local tainted = debug.getregistry().__tainted_loadstring_functions
         loadstring = debug.newsecurefunction(function(code, name)
-            sst("*** ForceTaint_Strong ***"); return original_ls(code, name)
+            sst("*** ForceTaint_Strong ***")
+            local loaded, err = original_ls(code, name)
+            if type(loaded) == "function" then
+                sot(loaded, "*** ForceTaint_Strong ***")
+                tainted[loaded] = true
+            end
+            return loaded, err
         end)
     "#,
     )
