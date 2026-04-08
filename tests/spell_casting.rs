@@ -385,6 +385,54 @@ fn cast_bar_visible_during_cast() {
 }
 
 #[test]
+fn cast_bar_still_needs_post_event_attach_workaround() {
+    test_timeout! {
+        let env = env_with_full_blizzard_ui();
+
+        let (
+            _lock_to_player_frame,
+            attached_after_normal_startup,
+            apply_ok,
+            attached_after_manual_player_anchor,
+        ): (bool, bool, bool, bool) = env
+            .eval(
+                r#"
+                local lockToPlayerFrame = PlayerCastingBarFrame:GetSettingValueBool(Enum.EditModeCastBarSetting.LockToPlayerFrame)
+                local attachedAfterNormalStartup = PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false
+                local applyOk = pcall(function()
+                    PlayerFrame:ApplySystemAnchor()
+                end)
+
+                return lockToPlayerFrame,
+                    attachedAfterNormalStartup,
+                    applyOk,
+                    PlayerCastingBarFrame:IsAttachedToPlayerFrame()
+                "#,
+            )
+            .unwrap();
+
+        assert!(
+            !attached_after_normal_startup,
+            "normal startup/EditMode anchoring should still leave the cast bar detached without the direct workaround"
+        );
+        assert!(apply_ok, "PlayerFrame:ApplySystemAnchor should still run successfully");
+        assert!(
+            !attached_after_manual_player_anchor,
+            "reapplying the normal player-frame anchor path should still fail to attach the cast bar"
+        );
+
+        env.apply_post_event_workarounds();
+        let attached_after_workaround: bool = env
+            .eval("return PlayerCastingBarFrame:IsAttachedToPlayerFrame() or false")
+            .unwrap();
+        assert!(
+            attached_after_workaround,
+            "post-event workaround should still be what actually attaches the cast bar in startup"
+        );
+    }
+}
+
+#[test]
 fn harmful_spell_blocked_with_no_target() {
     test_timeout! {
         let env = WowLuaEnv::new().expect("create env");
