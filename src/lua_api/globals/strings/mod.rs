@@ -213,7 +213,7 @@ pub fn register_tooltip_colors(lua: &Lua, globals: &mlua::Table) -> Result<()> {
 }
 
 /// Create a color table with r/g/b/a fields and GetRGB/GetRGBA/WrapTextInColorCode methods.
-fn make_color_table(lua: &Lua, r: f64, g: f64, b: f64, a: f64) -> Result<mlua::Table> {
+pub(super) fn make_color_table(lua: &Lua, r: f64, g: f64, b: f64, a: f64) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     set_color_fields(&t, r, g, b, a)?;
     register_color_table_methods(lua, &t)?;

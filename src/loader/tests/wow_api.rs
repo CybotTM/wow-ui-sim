@@ -135,6 +135,39 @@ fn test_invslot_constants() {
 }
 
 // ---------------------------------------------------------------------------
+// Color globals
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_color_globals_expose_expected_rgb_values() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let faction_ok: bool = env
+        .eval(
+            r#"
+            local r, g, b = PLAYER_FACTION_COLOR_HORDE:GetRGB()
+            return math.abs(r - 0.90196) < 0.0001
+                and math.abs(g - 0.05098) < 0.0001
+                and math.abs(b - 0.07059) < 0.0001
+            "#,
+        )
+        .unwrap();
+    assert!(faction_ok);
+
+    let raid_ok: bool = env
+        .eval(
+            r#"
+            local r, g, b = RAID_CLASS_COLORS.WARRIOR:GetRGB()
+            return math.abs(r - 0.78) < 0.0001
+                and math.abs(g - 0.61) < 0.0001
+                and math.abs(b - 0.43) < 0.0001
+            "#,
+        )
+        .unwrap();
+    assert!(raid_ok);
+}
+
+// ---------------------------------------------------------------------------
 // Item quality description globals
 // ---------------------------------------------------------------------------
 
