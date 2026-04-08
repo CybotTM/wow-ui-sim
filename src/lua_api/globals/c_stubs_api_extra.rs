@@ -202,41 +202,172 @@ fn register_c_arrow_callout_manager(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|arrow| g.set("C_ArrowCalloutManager", arrow))
 }
 
+const ENCOUNTER_EVENTS_LUA: &str = r#"
+    C_EncounterEvents = C_EncounterEvents or {}
+    local api = C_EncounterEvents
+    api._eventInfoByID = api._eventInfoByID or {
+        [1001] = {
+            encounterEventID = 1001,
+            enabled = true,
+            spellID = 853,
+            iconFileID = 135963,
+            severity = 1,
+            icons = 0,
+        },
+        [1002] = {
+            encounterEventID = 1002,
+            enabled = true,
+            spellID = 31935,
+            iconFileID = 135920,
+            severity = 2,
+            icons = 0,
+        },
+    }
+    api._eventColorOverrides = api._eventColorOverrides or {}
+    api._eventSoundOverrides = api._eventSoundOverrides or {}
+    api._nextSoundHandle = api._nextSoundHandle or 1
+
+    local function normalizeNumber(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function soundKey(eventID, trigger)
+        return tostring(eventID) .. ":" .. tostring(trigger)
+    end
+
+    local function copyTable(input)
+        if type(input) ~= "table" then
+            return nil
+        end
+        local copy = {}
+        for key, value in pairs(input) do
+            copy[key] = value
+        end
+        return copy
+    end
+
+    local function copyColor(color)
+        if type(color) ~= "table" then
+            return nil
+        end
+        local out = {}
+        out.r = color.r or color.red
+        out.g = color.g or color.green
+        out.b = color.b or color.blue
+        if color.a ~= nil or color.alpha ~= nil then
+            out.a = color.a or color.alpha
+        end
+        if out.r == nil or out.g == nil or out.b == nil then
+            return nil
+        end
+        return out
+    end
+
+    local function copyEventInfo(eventID)
+        local info = api._eventInfoByID[eventID]
+        if info == nil then
+            return nil
+        end
+        local out = copyTable(info)
+        out.color = copyColor(api._eventColorOverrides[eventID])
+        return out
+    end
+
+    api.GetEventList = api.GetEventList or function()
+        local ids = {}
+        for eventID in pairs(api._eventInfoByID) do
+            ids[#ids + 1] = eventID
+        end
+        table.sort(ids)
+        return ids
+    end
+
+    api.HasEventInfo = api.HasEventInfo or function(encounterEventID)
+        local eventID = normalizeNumber(encounterEventID)
+        return eventID ~= nil and api._eventInfoByID[eventID] ~= nil
+    end
+
+    api.GetEventInfo = api.GetEventInfo or function(encounterEventID)
+        local eventID = normalizeNumber(encounterEventID)
+        if eventID == nil then
+            return nil
+        end
+        return copyEventInfo(eventID)
+    end
+
+    api.GetEventColor = api.GetEventColor or function(encounterEventID)
+        local eventID = normalizeNumber(encounterEventID)
+        if eventID == nil then
+            return nil
+        end
+        return copyColor(api._eventColorOverrides[eventID])
+    end
+
+    api.SetEventColor = api.SetEventColor or function(encounterEventID, color)
+        local eventID = normalizeNumber(encounterEventID)
+        if eventID == nil or api._eventInfoByID[eventID] == nil then
+            return
+        end
+        if color == nil then
+            api._eventColorOverrides[eventID] = nil
+            return
+        end
+        local normalizedColor = copyColor(color)
+        if normalizedColor ~= nil then
+            api._eventColorOverrides[eventID] = normalizedColor
+        end
+    end
+
+    api.GetEventSound = api.GetEventSound or function(encounterEventID, trigger)
+        local eventID = normalizeNumber(encounterEventID)
+        local triggerID = normalizeNumber(trigger)
+        if eventID == nil or triggerID == nil then
+            return nil
+        end
+        return copyTable(api._eventSoundOverrides[soundKey(eventID, triggerID)])
+    end
+
+    api.SetEventSound = api.SetEventSound or function(encounterEventID, trigger, sound)
+        local eventID = normalizeNumber(encounterEventID)
+        local triggerID = normalizeNumber(trigger)
+        if eventID == nil or triggerID == nil or api._eventInfoByID[eventID] == nil then
+            return
+        end
+        local key = soundKey(eventID, triggerID)
+        if sound == nil then
+            api._eventSoundOverrides[key] = nil
+            return
+        end
+        local copy = copyTable(sound)
+        if copy ~= nil then
+            api._eventSoundOverrides[key] = copy
+        end
+    end
+
+    api.PlayEventSound = api.PlayEventSound or function(encounterEventID, trigger)
+        local sound = api.GetEventSound(encounterEventID, trigger)
+        if sound == nil then
+            return nil
+        end
+        local handle = api._nextSoundHandle
+        api._nextSoundHandle = api._nextSoundHandle + 1
+        return handle
+    end
+"#;
+
 fn register_c_encounter_events(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let ee = lua.create_table()?;
-    ee.set(
-        "GetEventColor",
-        lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?,
-    )?;
-    ee.set(
-        "GetEventInfo",
-        lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?,
-    )?;
-    ee.set(
-        "GetEventList",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    ee.set(
-        "GetEventSound",
-        lua.create_function(|_, _event_id: Value| Ok(Value::Nil))?,
-    )?;
-    ee.set(
-        "HasEventInfo",
-        lua.create_function(|_, _event_id: Value| Ok(false))?,
-    )?;
-    ee.set(
-        "PlayEventSound",
-        lua.create_function(|_, _event_id: Value| Ok(()))?,
-    )?;
-    ee.set(
-        "SetEventColor",
-        lua.create_function(|_, (_event_id, _color): (Value, Value)| Ok(()))?,
-    )?;
-    ee.set(
-        "SetEventSound",
-        lua.create_function(|_, (_event_id, _sound): (Value, Value)| Ok(()))?,
-    )?;
-    g.set("C_EncounterEvents", ee)
+    lua.load(ENCOUNTER_EVENTS_LUA).exec()?;
+    g.get::<mlua::Table>("C_EncounterEvents")
+        .and_then(|encounter_events| g.set("C_EncounterEvents", encounter_events))
 }
 
 fn register_c_prototype_dialog(lua: &Lua, g: &mlua::Table) -> Result<()> {
