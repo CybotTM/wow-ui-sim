@@ -866,21 +866,131 @@ fn register_c_item_socket_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|item_socket_info| g.set("C_ItemSocketInfo", item_socket_info))
 }
 
+const PET_INFO_LUA: &str = r#"
+    C_PetInfo = C_PetInfo or {}
+    local api = C_PetInfo
+
+    api._state = api._state or {
+        petTamersByMapID = {},
+        spellByPetActionID = {},
+        passivePetActionIDs = {},
+        petActionsByID = {},
+        lastQueriedMapID = nil,
+        lastQueriedPetActionID = nil,
+    }
+
+    local function normalizeNumber(value)
+        if type(value) == "number" then
+            return math.floor(value)
+        end
+        if type(value) == "string" then
+            local parsed = tonumber(value)
+            if parsed ~= nil then
+                return math.floor(parsed)
+            end
+        end
+        return nil
+    end
+
+    local function copyPosition(position)
+        if type(position) ~= "table" then
+            return nil
+        end
+        local x = position.x
+        if x == nil then
+            x = position[1]
+        end
+        local y = position.y
+        if y == nil then
+            y = position[2]
+        end
+        if type(x) ~= "number" or type(y) ~= "number" then
+            return nil
+        end
+        return { x = x, y = y }
+    end
+
+    local function copyTamerInfo(info)
+        if type(info) ~= "table" then
+            return nil
+        end
+        local out = {}
+        out.areaPoiID = normalizeNumber(info.areaPoiID) or 0
+        out.position = copyPosition(info.position)
+        out.name = tostring(info.name or "")
+        out.atlasName = info.atlasName
+        out.textureIndex = normalizeNumber(info.textureIndex)
+        return out
+    end
+
+    local function copyTamerList(list)
+        if type(list) ~= "table" then
+            return {}
+        end
+        local copy = {}
+        for index, tamerInfo in ipairs(list) do
+            local normalized = copyTamerInfo(tamerInfo)
+            if normalized ~= nil then
+                copy[index] = normalized
+            end
+        end
+        return copy
+    end
+
+    local function readSpellFromActionInfo(actionInfo)
+        if type(actionInfo) ~= "table" then
+            return nil
+        end
+        return normalizeNumber(actionInfo.spellID)
+    end
+
+    api.GetPetTamersForMap = api.GetPetTamersForMap or function(uiMapID)
+        local mapID = normalizeNumber(uiMapID)
+        api._state.lastQueriedMapID = mapID
+        if mapID == nil then
+            return {}
+        end
+        local list = (api._state.petTamersByMapID or {})[mapID]
+        return copyTamerList(list)
+    end
+
+    api.GetSpellForPetAction = api.GetSpellForPetAction or function(actionID)
+        local normalizedActionID = normalizeNumber(actionID)
+        api._state.lastQueriedPetActionID = normalizedActionID
+        if normalizedActionID == nil then
+            return nil
+        end
+
+        local byAction = api._state.spellByPetActionID or {}
+        local spellID = normalizeNumber(byAction[normalizedActionID])
+        if spellID ~= nil then
+            return spellID
+        end
+
+        local actionInfo = (api._state.petActionsByID or {})[normalizedActionID]
+        return readSpellFromActionInfo(actionInfo)
+    end
+
+    api.IsPetActionPassive = api.IsPetActionPassive or function(actionID)
+        local normalizedActionID = normalizeNumber(actionID)
+        if normalizedActionID == nil then
+            return false
+        end
+
+        local passiveSet = api._state.passivePetActionIDs or {}
+        if passiveSet[normalizedActionID] == true then
+            return true
+        end
+
+        local actionInfo = (api._state.petActionsByID or {})[normalizedActionID]
+        return type(actionInfo) == "table" and actionInfo.isPassive == true
+    end
+"#;
+
 fn register_c_pet_info(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let pi = lua.create_table()?;
-    pi.set(
-        "GetPetTamersForMap",
-        lua.create_function(|lua, _map_id: Value| lua.create_table())?,
-    )?;
-    pi.set(
-        "GetSpellForPetAction",
-        lua.create_function(|_, _action: Value| Ok(Value::Nil))?,
-    )?;
-    pi.set(
-        "IsPetActionPassive",
-        lua.create_function(|_, _action: Value| Ok(false))?,
-    )?;
-    g.set("C_PetInfo", pi)
+    lua.load(PET_INFO_LUA).exec()?;
+    g.get::<mlua::Table>("C_PetInfo")
+        .and_then(|pet_info| g.set("C_PetInfo", pet_info))
 }
 
 fn register_c_unit_auras_private(lua: &Lua, g: &mlua::Table) -> Result<()> {
