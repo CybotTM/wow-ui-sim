@@ -178,46 +178,69 @@ fn register_c_spell_book_actions(
     lua: &Lua,
     state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    let st = Rc::clone(&state);
+    register_cast_spell_book_item(t, lua, Rc::clone(&state))?;
+    register_pickup_spell_book_item(t, lua, state)?;
+    register_toggle_spell_book_autocast(t, lua)?;
+    Ok(())
+}
+
+fn register_cast_spell_book_item(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set(
         "CastSpellBookItem",
         lua.create_function(
             move |lua, (slot, _bank, _self_cast): (i32, Option<i32>, Option<bool>)| {
-                let spell_id =
-                    spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id);
+                let spell_id = spell_id_at_spellbook_slot(slot);
                 let Some(spell_id) = spell_id else {
                     return Ok(());
                 };
-                if st.borrow().casting.is_some() {
+                if state.borrow().casting.is_some() {
                     return Ok(());
                 }
-                cast_spell_by_id(&st, lua, spell_id)
+                cast_spell_by_id(&state, lua, spell_id)
             },
         )?,
     )?;
-    let st2 = Rc::clone(&state);
+    Ok(())
+}
+
+fn register_pickup_spell_book_item(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set(
         "PickupSpellBookItem",
         lua.create_function(move |lua, (slot, _bank): (i32, Option<i32>)| {
-            let spell_id =
-                spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id);
+            let spell_id = spell_id_at_spellbook_slot(slot);
             if let Some(spell_id) = spell_id {
                 eprintln!(
                     "[cursor] PickupSpellBookItem({}) → spell {}",
                     slot, spell_id
                 );
-                st2.borrow_mut().cursor_item =
+                state.borrow_mut().cursor_item =
                     Some(crate::lua_api::state::CursorInfo::Spell { spell_id });
                 super::cursor_api::fire_cursor_changed(lua)?;
             }
             Ok(())
         })?,
     )?;
+    Ok(())
+}
+
+fn register_toggle_spell_book_autocast(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set(
         "ToggleSpellBookItemAutoCast",
         lua.create_function(|_, (_slot, _bank): (i32, Option<i32>)| Ok(()))?,
     )?;
     Ok(())
+}
+
+fn spell_id_at_spellbook_slot(slot: i32) -> Option<u32> {
+    spellbook_data::get_spell_at_slot(slot).map(|(_, entry, _)| entry.spell_id)
 }
 
 /// Shared cast logic: validate target, resolve cast time, start cast or apply instant.
