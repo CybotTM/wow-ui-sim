@@ -202,7 +202,7 @@ fn test_bn_features_enabled_and_connected() {
 fn test_bn_connected() {
     let env = env();
     let val: bool = env.eval("return BNConnected()").unwrap();
-    assert!(!val);
+    assert!(val);
 }
 
 #[test]
