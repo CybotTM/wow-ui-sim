@@ -455,17 +455,98 @@ fn register_c_prototype_dialog(lua: &Lua, g: &mlua::Table) -> Result<()> {
         .and_then(|prototype_dialog| g.set("C_PrototypeDialog", prototype_dialog))
 }
 
+const REINCARNATION_LUA: &str = r#"
+    C_Reincarnation = C_Reincarnation or {}
+    local api = C_Reincarnation
+    api._isActive = api._isActive == true
+    api._character = api._character
+    api._history = api._history or {}
+    api._nextTransitionIndex = api._nextTransitionIndex or 1
+
+    local function copyTable(input)
+        if type(input) ~= "table" then
+            return nil
+        end
+        local copy = {}
+        for key, value in pairs(input) do
+            copy[key] = value
+        end
+        return copy
+    end
+
+    local function normalizeCharacter(character)
+        if character == nil then
+            return {
+                guid = "Player-0000-00000001",
+                name = "SimReincarnatingCharacter",
+                classID = 1,
+            }
+        end
+        if type(character) == "table" then
+            local copy = copyTable(character)
+            return copy or {}
+        end
+        if type(character) == "string" then
+            return {
+                guid = character,
+                name = "SimReincarnatingCharacter",
+            }
+        end
+        if type(character) == "number" then
+            return {
+                guid = tostring(math.floor(character)),
+                name = "SimReincarnatingCharacter",
+            }
+        end
+        return nil
+    end
+
+    local function recordTransition(transition)
+        local index = api._nextTransitionIndex
+        api._nextTransitionIndex = index + 1
+        api._history[index] = {
+            transition = transition,
+            isActive = api._isActive == true,
+        }
+    end
+
+    api.IsReincarnating = api.IsReincarnating or function()
+        return api._isActive == true
+    end
+
+    api.GetReincarnatingCharacter = api.GetReincarnatingCharacter or function()
+        return copyTable(api._character)
+    end
+
+    api.StartReincarnation = api.StartReincarnation or function(character)
+        if api._isActive then
+            return false
+        end
+        local normalizedCharacter = normalizeCharacter(character)
+        if normalizedCharacter == nil then
+            return false
+        end
+
+        api._isActive = true
+        api._character = normalizedCharacter
+        recordTransition("start")
+        return true
+    end
+
+    api.StopReincarnation = api.StopReincarnation or function()
+        local wasActive = api._isActive == true
+        api._isActive = false
+        api._character = nil
+        recordTransition("stop")
+        return wasActive
+    end
+"#;
+
 /// C_Reincarnation and C_TableUtil stubs.
 fn register_reincarnation_table_util(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let ri = lua.create_table()?;
-    ri.set(
-        "GetReincarnatingCharacter",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    ri.set("IsReincarnating", lua.create_function(|_, ()| Ok(false))?)?;
-    ri.set("StartReincarnation", lua.create_function(|_, ()| Ok(()))?)?;
-    ri.set("StopReincarnation", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("C_Reincarnation", ri)?;
+    lua.load(REINCARNATION_LUA).exec()?;
+    g.get::<mlua::Table>("C_Reincarnation")
+        .and_then(|reincarnation| g.set("C_Reincarnation", reincarnation))?;
 
     let tu = lua.create_table()?;
     tu.set(
