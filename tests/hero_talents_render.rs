@@ -1,11 +1,19 @@
 #![cfg(feature = "gui")]
 
+mod common;
+
 use std::path::PathBuf;
 
+use iced::{Point, Rectangle, Size};
+use image::RgbaImage;
 use wow_ui_sim::atlas::get_atlas_info;
 use wow_ui_sim::iced_app::build_quad_batch_for_registry;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::headless::render_to_image;
+use wow_ui_sim::render::shader::load_texture_or_crop;
+use wow_ui_sim::render::{BlendMode, QuadBatch};
+use wow_ui_sim::texture::TextureManager;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -98,6 +106,46 @@ fn parse_crop_coords(path: &str) -> Option<(f32, f32, f32, f32)> {
         return None;
     }
     Some((left, right, top, bottom))
+}
+
+fn make_texture_manager() -> Option<TextureManager> {
+    let home = dirs::home_dir().unwrap_or_default();
+    let local_textures = PathBuf::from("./textures");
+    let textures_path = if local_textures.exists() {
+        local_textures
+    } else {
+        let fallback = home.join("Repos/wow-ui-textures");
+        if !fallback.exists() {
+            return None;
+        }
+        fallback
+    };
+
+    let interface_path = home.join("Projects/wow/Interface");
+    let mut mgr = TextureManager::new(textures_path);
+    if interface_path.exists() {
+        mgr = mgr.with_interface_path(interface_path);
+    }
+    Some(mgr)
+}
+
+fn sample_rect_pixel(image: &RgbaImage, rect: (f32, f32, f32, f32), u: f32, v: f32) -> [u8; 4] {
+    let max_x = image.width().saturating_sub(1) as f32;
+    let max_y = image.height().saturating_sub(1) as f32;
+    let x = (rect.0 + rect.2 * u).round().clamp(0.0, max_x) as u32;
+    let y = (rect.1 + rect.3 * v).round().clamp(0.0, max_y) as u32;
+    image.get_pixel(x, y).0
+}
+
+fn assert_rgb_close(actual: [u8; 4], expected: [u8; 4], tolerance: u8, label: &str) {
+    let tolerance = i16::from(tolerance);
+    for channel in 0..3 {
+        let delta = (i16::from(actual[channel]) - i16::from(expected[channel])).abs();
+        assert!(
+            delta <= tolerance,
+            "{label} channel {channel} differs too much: actual={actual:?} expected={expected:?} tolerance={tolerance}"
+        );
+    }
 }
 
 #[test]
@@ -279,4 +327,126 @@ fn hero_spec_icon_crop_request_matches_atlas_entry() {
             && (crop_coords.3 - expected.3).abs() <= tolerance,
         "HeroSpecButton.Icon1 crop coords should match atlas entry: crop={crop_coords:?} expected={expected:?}"
     );
+}
+
+#[test]
+fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
+    if common::try_create_gpu_device().is_none() {
+        eprintln!("Skipping GPU sampling test: no adapter available");
+        return;
+    }
+
+    let env = setup_full_ui();
+    open_class_talent_frame(&env);
+
+    let (icon_rect, icon_path) = {
+        let state = env.state().borrow();
+        let player_spells_id = state
+            .widgets
+            .get_id_by_name("PlayerSpellsFrame")
+            .expect("PlayerSpellsFrame should exist");
+        let talents_frame_id = *state
+            .widgets
+            .get(player_spells_id)
+            .and_then(|frame| frame.children_keys.get("TalentsFrame"))
+            .expect("TalentsFrame child should exist");
+        let hero_container_id = *state
+            .widgets
+            .get(talents_frame_id)
+            .and_then(|frame| frame.children_keys.get("HeroTalentsContainer"))
+            .expect("HeroTalentsContainer child should exist");
+        let button_id = *state
+            .widgets
+            .get(hero_container_id)
+            .and_then(|frame| frame.children_keys.get("HeroSpecButton"))
+            .expect("HeroSpecButton child should exist");
+        let button = state.widgets.get(button_id).unwrap();
+        let icon_id = *button.children_keys.get("Icon1").expect("Icon1 child");
+        let icon_rect =
+            wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, icon_id, 1024.0, 768.0);
+        let icon_path = state
+            .widgets
+            .get(icon_id)
+            .and_then(|frame| frame.texture.clone())
+            .expect("Icon1 should have a texture path");
+        (icon_rect, icon_path)
+    };
+
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let batch = build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    );
+
+    let icon_crop_prefix = format!("{icon_path}@crop:");
+    let request = batch
+        .texture_requests
+        .iter()
+        .find(|request| request.path.starts_with(&icon_crop_prefix))
+        .expect("HeroSpecButton.Icon1 should emit a cropped atlas request");
+
+    let mut crop_mgr = make_texture_manager().expect("texture directories should exist");
+    let crop = load_texture_or_crop(&mut crop_mgr, &request.path)
+        .expect("cropped hero spec icon texture should load");
+    let crop_image = RgbaImage::from_raw(crop.width, crop.height, crop.rgba)
+        .expect("cropped hero spec icon should decode into an image");
+
+    let mut isolated_batch = QuadBatch::default();
+    isolated_batch.push_textured_path(
+        Rectangle::new(
+            Point::new(icon_rect.x, icon_rect.y),
+            Size::new(icon_rect.width, icon_rect.height),
+        ),
+        &request.path,
+        [1.0, 1.0, 1.0, 1.0],
+        BlendMode::Alpha,
+    );
+
+    let mut isolated_mgr = make_texture_manager().expect("texture directories should exist");
+    let isolated_render = render_to_image(&isolated_batch, &mut isolated_mgr, 1024, 768, None);
+
+    let mut full_render_mgr = make_texture_manager().expect("texture directories should exist");
+    let full_render = render_to_image(&batch, &mut full_render_mgr, 1024, 768, None);
+    let rendered_rect = (icon_rect.x, icon_rect.y, icon_rect.width, icon_rect.height);
+    let crop_rect = (
+        0.0,
+        0.0,
+        crop_image.width() as f32,
+        crop_image.height() as f32,
+    );
+
+    for (u, v, label) in [
+        (0.50, 0.35, "top-center"),
+        (0.35, 0.50, "center-left"),
+        (0.50, 0.50, "center"),
+        (0.65, 0.50, "center-right"),
+        (0.50, 0.65, "bottom-center"),
+    ] {
+        let source = sample_rect_pixel(&crop_image, crop_rect, u, v);
+        assert!(
+            source[3] >= 200,
+            "{label} crop sample should be substantially opaque: sample={source:?}"
+        );
+
+        let isolated_pixel = sample_rect_pixel(&isolated_render, rendered_rect, u, v);
+        let full_render_pixel = sample_rect_pixel(&full_render, rendered_rect, u, v);
+        assert_rgb_close(
+            full_render_pixel,
+            isolated_pixel,
+            12,
+            &format!("HeroSpecButton.Icon1 full render sample {label}"),
+        );
+    }
 }

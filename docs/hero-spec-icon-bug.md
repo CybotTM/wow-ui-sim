@@ -120,6 +120,25 @@ That rules out divergence in:
 - `atlas_tex_coords` storage on the frame
 - `remap_atlas_crop()` crop-key generation
 
+### Loaded crop content and GPU sampling still match
+
+`tests/hero_talents_render.rs::hero_spec_icon_full_ui_render_matches_isolated_crop_render`
+pushes the investigation one step further down the pipeline:
+
+- it loads the exact emitted crop request for `HeroSpecButton.Icon1` via `load_texture_or_crop()`
+- it verifies several stable interior sample points in that crop stay substantially opaque
+- it renders the exact same crop request in isolation through `render_to_image()`
+- it renders the full class-talent UI through that same headless GPU path
+- it compares several stable interior sample points inside the circular icon (`top-center`,
+  `center-left`, `center`, `center-right`, `bottom-center`)
+
+The full UI render matches the isolated crop render at those interior points, while the loaded crop
+itself is also non-empty and opaque there. That rules out divergence in:
+
+- the extracted `talentsheroclassicons` sub-region content for the active Lightsmith icon
+- CPU-side crop extraction via `TextureManager::load_sub_region()`
+- downstream GPU texture upload / sampling for the actual `Icon1` quad at those interior points
+
 ## What's Ruled Out
 
 - **Stale layout_rect**: Confirmed correct after ensure_layout_rects
@@ -132,9 +151,8 @@ That rules out divergence in:
 ## Remaining Hypotheses
 
 1. **Texture content / stale source asset**: The crop request is correct, but the sampled pixels in the local `talentsheroclassicons` texture could still be stale or wrong for that atlas region.
-2. **GPU-side atlas upload / sampling**: The CPU batch and crop key are correct, but the resolved GPU UVs or uploaded crop texture could still diverge downstream.
-3. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, but shader-side mask sampling could still blank the correct icon and leave another visual artifact visible.
-4. **Misidentified artifact**: The bottom-right visual may not be `Icon1` at all. Another hero-talent texture in the same subtree could be the one rendering unexpectedly, while `Icon1` is already correct in the batch.
+1. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, and interior icon samples match the loaded crop, but the shader-side mask path could still distort edge pixels or leave another artifact visible elsewhere.
+2. **Misidentified artifact**: The bottom-right visual may not be `Icon1` at all. Another hero-talent texture in the same subtree could be the one rendering unexpectedly, while `Icon1` itself is already correct through crop extraction and interior GPU sampling.
 
 ## Debug Tools Added
 
@@ -146,6 +164,6 @@ wow-sim screenshot --dump-tree               # dump all (no filter)
 
 ## Next Steps
 
-- Compare the cropped source pixels for `talentsheroclassicons@crop:...` against the expected icon art to rule out stale local texture content
-- Inspect the final resolved GPU vertex data after `resolve_texture_requests` / `resolve_mask_requests`
-- Identify which on-screen artifact in the screenshot corresponds to which texture request in the HeroTalentsContainer subtree
+- Identify which on-screen artifact in the screenshot corresponds to which texture request in the `HeroTalentsContainer` subtree
+- Check whether the suspicious bottom-right visual is emitted by another hero-talent texture rather than `HeroSpecButton.Icon1`
+- If needed, isolate mask-edge sampling separately from interior icon sampling
