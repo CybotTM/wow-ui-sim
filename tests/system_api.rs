@@ -203,6 +203,69 @@ fn test_get_net_stats_returns_seeded_latency_values() {
     );
 }
 
+#[test]
+fn test_c_encounter_timeline_returns_seeded_visible_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if not C_EncounterTimeline.IsFeatureAvailable() then
+            return "feature_unavailable"
+        end
+        if not C_EncounterTimeline.IsFeatureEnabled() then
+            return "feature_disabled"
+        end
+
+        local eventIDs = C_EncounterTimeline.GetEventList()
+        if #eventIDs ~= 1 then
+            return "event_count=" .. tostring(#eventIDs)
+        end
+
+        local eventID = eventIDs[1]
+        local info = C_EncounterTimeline.GetEventInfo(eventID)
+        if not info then
+            return "missing_event_info"
+        end
+        if info.spellID ~= 19750 then
+            return "spell_id=" .. tostring(info.spellID)
+        end
+        if info.spellName ~= "Flash of Light" then
+            return "spell_name=" .. tostring(info.spellName)
+        end
+
+        local timer = C_EncounterTimeline.GetEventTimer(eventID)
+        if not timer then
+            return "missing_timer"
+        end
+        if timer:GetRemainingDuration() <= 0 then
+            return "remaining_duration=" .. tostring(timer:GetRemainingDuration())
+        end
+
+        local track, trackSortIndex = C_EncounterTimeline.GetEventTrack(eventID)
+        if track ~= Enum.EncounterTimelineTrack.Short then
+            return "track=" .. tostring(track)
+        end
+        if trackSortIndex ~= 1 then
+            return "track_sort_index=" .. tostring(trackSortIndex)
+        end
+
+        if not C_EncounterTimeline.HasActiveEvents() then
+            return "missing_active_events"
+        end
+        if not C_EncounterTimeline.HasVisibleEvents() then
+            return "missing_visible_events"
+        end
+
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_EncounterTimeline should expose a seeded visible event with timer data: {result}"
+    );
+}
+
 // ============================================================================
 // Battle.net stubs
 // ============================================================================

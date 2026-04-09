@@ -411,6 +411,62 @@ fn item_socketing_frame_loads_and_populates_socket_buttons() {
 }
 
 #[test]
+fn encounter_timeline_loads_and_populates_track_view_event_frames() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_EncounterTimeline")
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
+            end
+            if not EncounterTimeline or not EncounterTimeline.TrackView then
+                return "encounter_timeline_missing"
+            end
+
+            EncounterTimeline:UpdateSystemSettingViewType()
+            EncounterTimeline:SetExplicitlyShown(true)
+            EncounterTimeline.TrackView:ActivateView()
+            EncounterTimeline:UpdateVisibility()
+
+            if not EncounterTimeline:IsShown() then
+                return "timeline_not_shown"
+            end
+            if not EncounterTimeline.TrackView:IsShown() then
+                return "track_view_not_shown"
+            end
+            if EncounterTimeline.TrackView:GetTrackCount() < 3 then
+                return "track_count=" .. tostring(EncounterTimeline.TrackView:GetTrackCount())
+            end
+            if EncounterTimeline.TrackView:GetActiveEventFrameCount() ~= 1 then
+                return "active_frame_count=" .. tostring(EncounterTimeline.TrackView:GetActiveEventFrameCount())
+            end
+
+            local eventFrame = EncounterTimeline.TrackView:GetEventFrame(1)
+            if not eventFrame then
+                return "missing_event_frame"
+            end
+            if not eventFrame:IsShown() then
+                return "event_frame_not_shown"
+            end
+            if not eventFrame.IconContainer or not eventFrame.IconContainer.IconTexture then
+                return "missing_icon_container"
+            end
+            if not eventFrame.IconContainer.IconTexture:GetTexture() then
+                return "missing_icon_texture"
+            end
+
+            local eventInfo = eventFrame:GetEventInfo()
+            if not eventInfo or eventInfo.spellID ~= 19750 then
+                return "event_info_spell_id=" .. tostring(eventInfo and eventInfo.spellID)
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "EncounterTimeline should load and populate a visible track event frame: {result}");
+    }
+}
+
+#[test]
 fn professions_frame_loads_and_populates_specialization_tab() {
     test_timeout! {
         let env = setup_env();
