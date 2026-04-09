@@ -16,10 +16,16 @@ pub fn register_sound_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     )?;
     g.set("StopSound", create_stop_sound(lua, Rc::clone(&state))?)?;
 
+    register_sound_driver_globals(lua)?;
     register_c_sound(lua, state)?;
     register_game_message_info(lua)?;
     Ok(())
 }
+
+const GAME_OUTPUT_DRIVERS: &[&str] = &["Silent Output Device"];
+const GAME_INPUT_DRIVERS: &[&str] = &["Silent Input Device"];
+const CHAT_OUTPUT_DRIVERS: &[&str] = &["Silent Voice Output Device"];
+const CHAT_INPUT_DRIVERS: &[&str] = &["Silent Voice Input Device"];
 
 /// PlaySound(soundKitID, [channel]) -> willPlay, soundHandle
 fn create_play_sound(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
@@ -76,6 +82,60 @@ fn create_stop_sound(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
             mgr.stop_sound(h);
         }
         Ok(())
+    })
+}
+
+fn register_sound_driver_globals(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+
+    g.set(
+        "Sound_GameSystem_GetNumOutputDrivers",
+        create_driver_count_fn(lua, GAME_OUTPUT_DRIVERS.len())?,
+    )?;
+    g.set(
+        "Sound_GameSystem_GetOutputDriverNameByIndex",
+        create_driver_name_fn(lua, GAME_OUTPUT_DRIVERS)?,
+    )?;
+    g.set(
+        "Sound_GameSystem_GetNumInputDrivers",
+        create_driver_count_fn(lua, GAME_INPUT_DRIVERS.len())?,
+    )?;
+    g.set(
+        "Sound_GameSystem_GetInputDriverNameByIndex",
+        create_driver_name_fn(lua, GAME_INPUT_DRIVERS)?,
+    )?;
+    g.set(
+        "Sound_ChatSystem_GetNumOutputDrivers",
+        create_driver_count_fn(lua, CHAT_OUTPUT_DRIVERS.len())?,
+    )?;
+    g.set(
+        "Sound_ChatSystem_GetOutputDriverNameByIndex",
+        create_driver_name_fn(lua, CHAT_OUTPUT_DRIVERS)?,
+    )?;
+    g.set(
+        "Sound_ChatSystem_GetNumInputDrivers",
+        create_driver_count_fn(lua, CHAT_INPUT_DRIVERS.len())?,
+    )?;
+    g.set(
+        "Sound_ChatSystem_GetInputDriverNameByIndex",
+        create_driver_name_fn(lua, CHAT_INPUT_DRIVERS)?,
+    )?;
+    g.set(
+        "Sound_GameSystem_RestartSoundSystem",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+
+    Ok(())
+}
+
+fn create_driver_count_fn(lua: &Lua, count: usize) -> Result<mlua::Function> {
+    lua.create_function(move |_, ()| Ok(count as i32))
+}
+
+fn create_driver_name_fn(lua: &Lua, drivers: &'static [&'static str]) -> Result<mlua::Function> {
+    lua.create_function(move |lua, index: i32| match drivers.get(index as usize) {
+        Some(name) => Ok(Value::String(lua.create_string(name)?)),
+        None => Ok(Value::Nil),
     })
 }
 

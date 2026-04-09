@@ -545,6 +545,60 @@ fn damage_meter_loads_and_populates_primary_session_window() {
 }
 
 #[test]
+fn audio_settings_register_seeded_output_device_dropdown_options() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            if not Settings or not Settings.AUDIO_CATEGORY_ID then
+                return "audio_category_missing"
+            end
+
+            local category = Settings.GetCategory(Settings.AUDIO_CATEGORY_ID)
+            if not category then
+                return "audio_category_lookup_failed"
+            end
+
+            local layout = SettingsPanel:GetLayout(category)
+            if not layout then
+                return "audio_layout_missing"
+            end
+
+            local outputInitializer = nil
+            for _, initializer in ipairs(layout:GetInitializers()) do
+                local setting = initializer.GetSetting and initializer:GetSetting()
+                if setting and setting:GetVariable() == "Sound_OutputDriverIndex" then
+                    outputInitializer = initializer
+                    break
+                end
+            end
+
+            if not outputInitializer then
+                return "output_initializer_missing"
+            end
+
+            local optionsFunc = outputInitializer:GetOptions()
+            if type(optionsFunc) ~= "function" then
+                return "options_func_type=" .. tostring(type(optionsFunc))
+            end
+
+            local options = optionsFunc()
+            if #options ~= 1 then
+                return "option_count=" .. tostring(#options)
+            end
+            if options[1].value ~= 0 then
+                return "option_value=" .. tostring(options[1].value)
+            end
+            if options[1].label ~= "Silent Output Device" then
+                return "option_label=" .. tostring(options[1].label)
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "Audio settings should register a seeded output-device dropdown option: {result}");
+    }
+}
+
+#[test]
 fn professions_frame_loads_and_populates_specialization_tab() {
     test_timeout! {
         let env = setup_env();

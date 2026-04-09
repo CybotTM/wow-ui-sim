@@ -343,6 +343,55 @@ fn test_c_damage_meter_returns_seeded_session_and_source_data() {
     );
 }
 
+#[test]
+fn test_sound_system_driver_functions_return_seeded_devices() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local gameOutputs = Sound_GameSystem_GetNumOutputDrivers()
+        if gameOutputs ~= 1 then
+            return "game_outputs=" .. tostring(gameOutputs)
+        end
+        if Sound_GameSystem_GetOutputDriverNameByIndex(0) ~= "Silent Output Device" then
+            return "game_output_name=" .. tostring(Sound_GameSystem_GetOutputDriverNameByIndex(0))
+        end
+
+        local gameInputs = Sound_GameSystem_GetNumInputDrivers()
+        if gameInputs ~= 1 then
+            return "game_inputs=" .. tostring(gameInputs)
+        end
+        if Sound_GameSystem_GetInputDriverNameByIndex(0) ~= "Silent Input Device" then
+            return "game_input_name=" .. tostring(Sound_GameSystem_GetInputDriverNameByIndex(0))
+        end
+
+        local chatOutputs = Sound_ChatSystem_GetNumOutputDrivers()
+        if chatOutputs ~= 1 then
+            return "chat_outputs=" .. tostring(chatOutputs)
+        end
+        if Sound_ChatSystem_GetOutputDriverNameByIndex(0) ~= "Silent Voice Output Device" then
+            return "chat_output_name=" .. tostring(Sound_ChatSystem_GetOutputDriverNameByIndex(0))
+        end
+
+        local chatInputs = Sound_ChatSystem_GetNumInputDrivers()
+        if chatInputs ~= 1 then
+            return "chat_inputs=" .. tostring(chatInputs)
+        end
+        if Sound_ChatSystem_GetInputDriverNameByIndex(0) ~= "Silent Voice Input Device" then
+            return "chat_input_name=" .. tostring(Sound_ChatSystem_GetInputDriverNameByIndex(0))
+        end
+
+        Sound_GameSystem_RestartSoundSystem()
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Audio driver globals should expose seeded input/output devices for settings UI: {result}"
+    );
+}
+
 // ============================================================================
 // Battle.net stubs
 // ============================================================================
