@@ -279,6 +279,62 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
     );
 }
 
+#[test]
+fn test_macro_apis_return_seeded_macros() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local accountCount, characterCount = GetNumMacros()
+        if accountCount ~= 2 or characterCount ~= 1 then
+            return "counts=" .. tostring(accountCount) .. "," .. tostring(characterCount)
+        end
+
+        local accountName, accountIcon, accountBody = GetMacroInfo(1)
+        if accountName ~= "Raid Beacon" then
+            return "account_name=" .. tostring(accountName)
+        end
+        if accountIcon ~= "Interface\\Icons\\INV_Misc_QuestionMark" then
+            return "account_icon=" .. tostring(accountIcon)
+        end
+        if accountBody ~= "/rw Stack on star" then
+            return "account_body=" .. tostring(accountBody)
+        end
+
+        local characterName, characterIcon, characterBody = GetMacroInfo(121)
+        if characterName ~= "Crusader" then
+            return "character_name=" .. tostring(characterName)
+        end
+        if characterIcon ~= "Interface\\Icons\\Spell_Holy_CrusaderAura" then
+            return "character_icon=" .. tostring(characterIcon)
+        end
+        if characterBody ~= "/cast Crusader Aura" then
+            return "character_body=" .. tostring(characterBody)
+        end
+
+        if GetMacroInfo(999) ~= nil then
+            return "unexpected_macro_999"
+        end
+        if C_Macro.GetMacroName(1) ~= "Raid Beacon" then
+            return "c_macro_name=" .. tostring(C_Macro.GetMacroName(1))
+        end
+        if C_Macro.GetSelectedMacroIcon(121) ~= "Interface\\Icons\\Spell_Holy_CrusaderAura" then
+            return "c_macro_icon=" .. tostring(C_Macro.GetSelectedMacroIcon(121))
+        end
+        local cAccountCount, cCharacterCount = C_Macro.GetNumMacros()
+        if cAccountCount ~= 2 or cCharacterCount ~= 1 then
+            return "c_counts=" .. tostring(cAccountCount) .. "," .. tostring(cCharacterCount)
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Macro APIs should expose seeded macros: {result}"
+    );
+}
+
 // ============================================================================
 // PlayerLocation
 // ============================================================================

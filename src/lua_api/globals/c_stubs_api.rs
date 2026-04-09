@@ -2,7 +2,37 @@
 //! See also: c_stubs_api_missing.rs, c_stubs_api_namespaces.rs, c_stubs_api_extra.rs,
 //! c_stubs_api_combat.rs, c_stubs_api_glue.rs, c_stubs_api_professions.rs.
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, MultiValue, Result, Value};
+
+#[derive(Clone, Copy)]
+struct SeededMacro {
+    id: i32,
+    name: &'static str,
+    icon: &'static str,
+    body: &'static str,
+}
+
+const SEEDED_ACCOUNT_MACROS: &[SeededMacro] = &[
+    SeededMacro {
+        id: 1,
+        name: "Raid Beacon",
+        icon: "Interface\\Icons\\INV_Misc_QuestionMark",
+        body: "/rw Stack on star",
+    },
+    SeededMacro {
+        id: 2,
+        name: "Pull Timer",
+        icon: "Interface\\Icons\\INV_Misc_PocketWatch_01",
+        body: "/pull 10",
+    },
+];
+
+const SEEDED_CHARACTER_MACROS: &[SeededMacro] = &[SeededMacro {
+    id: 121,
+    name: "Crusader",
+    icon: "Interface\\Icons\\Spell_Holy_CrusaderAura",
+    body: "/cast Crusader Aura",
+}];
 
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(
@@ -819,16 +849,90 @@ fn register_c_macro(lua: &Lua) -> Result<()> {
         "SetMacroExecuteLineCallback",
         lua.create_function(|_, _cb: Value| Ok(()))?,
     )?;
+    t.set("GetMacroName", lua.create_function(get_macro_name)?)?;
     t.set(
-        "GetMacroInfo",
-        lua.create_function(|_, _id: Value| Ok(Value::Nil))?,
+        "GetSelectedMacroIcon",
+        lua.create_function(get_selected_macro_icon)?,
     )?;
-    t.set(
-        "GetNumMacros",
-        lua.create_function(|_, ()| Ok((0i32, 0i32)))?,
-    )?;
+    t.set("GetMacroInfo", lua.create_function(get_macro_info)?)?;
+    t.set("GetNumMacros", lua.create_function(get_num_macros)?)?;
     lua.globals().set("C_Macro", t)?;
+    register_macro_globals(lua)?;
     Ok(())
+}
+
+fn register_macro_globals(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    globals.set("GetMacroInfo", lua.create_function(get_macro_info)?)?;
+    globals.set("GetNumMacros", lua.create_function(get_num_macros)?)?;
+    globals.set(
+        "GetMacroIndexByName",
+        lua.create_function(get_macro_index_by_name)?,
+    )?;
+    Ok(())
+}
+
+fn get_num_macros(_: &Lua, (): ()) -> Result<(i32, i32)> {
+    Ok((
+        SEEDED_ACCOUNT_MACROS.len() as i32,
+        SEEDED_CHARACTER_MACROS.len() as i32,
+    ))
+}
+
+fn get_macro_info(lua: &Lua, macro_id: Value) -> Result<MultiValue> {
+    let Some(macro_info) = lookup_macro(macro_id) else {
+        return Ok(MultiValue::from_vec(vec![Value::Nil]));
+    };
+    Ok(MultiValue::from_vec(vec![
+        Value::String(lua.create_string(macro_info.name)?),
+        Value::String(lua.create_string(macro_info.icon)?),
+        Value::String(lua.create_string(macro_info.body)?),
+    ]))
+}
+
+fn get_macro_name(lua: &Lua, macro_id: Value) -> Result<Value> {
+    match lookup_macro(macro_id) {
+        Some(macro_info) => Ok(Value::String(lua.create_string(macro_info.name)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn get_selected_macro_icon(lua: &Lua, macro_id: Value) -> Result<Value> {
+    match lookup_macro(macro_id) {
+        Some(macro_info) => Ok(Value::String(lua.create_string(macro_info.icon)?)),
+        None => Ok(Value::Integer(0)),
+    }
+}
+
+fn get_macro_index_by_name(_: &Lua, name: String) -> Result<i32> {
+    Ok(all_seeded_macros()
+        .find(|macro_info| macro_info.name.eq_ignore_ascii_case(&name))
+        .map(|macro_info| macro_info.id)
+        .unwrap_or(0))
+}
+
+fn lookup_macro(macro_id: Value) -> Option<&'static SeededMacro> {
+    let macro_id = match macro_id {
+        Value::Integer(index) => i32::try_from(index).ok()?,
+        Value::Number(index) => index as i32,
+        Value::String(name) => return lookup_macro_by_name(name.to_string_lossy().as_ref()),
+        _ => return None,
+    };
+    lookup_macro_by_id(macro_id)
+}
+
+fn lookup_macro_by_id(macro_id: i32) -> Option<&'static SeededMacro> {
+    all_seeded_macros().find(|macro_info| macro_info.id == macro_id)
+}
+
+fn lookup_macro_by_name(name: &str) -> Option<&'static SeededMacro> {
+    all_seeded_macros().find(|macro_info| macro_info.name.eq_ignore_ascii_case(name))
+}
+
+fn all_seeded_macros() -> impl Iterator<Item = &'static SeededMacro> {
+    SEEDED_ACCOUNT_MACROS
+        .iter()
+        .chain(SEEDED_CHARACTER_MACROS.iter())
 }
 
 fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {

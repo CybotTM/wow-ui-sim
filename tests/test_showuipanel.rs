@@ -217,6 +217,46 @@ fn show_ui_panel_shows_frame() {
 }
 
 #[test]
+fn show_macro_frame_loads_and_populates_selector() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            if not ShowMacroFrame then
+                return "missing_show_macro_frame"
+            end
+
+            ShowMacroFrame()
+
+            if not MacroFrame or not MacroFrame:IsShown() then
+                return "macro_frame_not_shown"
+            end
+            if PanelTemplates_GetSelectedTab(MacroFrame) ~= 1 then
+                return "selected_tab=" .. tostring(PanelTemplates_GetSelectedTab(MacroFrame))
+            end
+            if MacroFrame.MacroSelector.numMacros ~= 2 then
+                return "selector_count=" .. tostring(MacroFrame.MacroSelector.numMacros)
+            end
+            if MacroFrameSelectedMacroName:GetText() ~= "Raid Beacon" then
+                return "selected_name=" .. tostring(MacroFrameSelectedMacroName:GetText())
+            end
+            if MacroFrameText:GetText() ~= "/rw Stack on star" then
+                return "selected_body=" .. tostring(MacroFrameText:GetText())
+            end
+            if MacroFrame.SelectedMacroButton.Icon:GetTexture() ~= "Interface\\Icons\\INV_Misc_QuestionMark" then
+                return "selected_icon=" .. tostring(MacroFrame.SelectedMacroButton.Icon:GetTexture())
+            end
+
+            local accountCount, characterCount = GetNumMacros()
+            if accountCount ~= 2 or characterCount ~= 1 then
+                return "counts=" .. tostring(accountCount) .. "," .. tostring(characterCount)
+            end
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "ShowMacroFrame should load and populate the macro selector: {result}");
+    }
+}
+
+#[test]
 fn hide_ui_panel_hides_frame() {
     test_timeout! {
         let env = setup_env();
