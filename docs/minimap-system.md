@@ -2,7 +2,10 @@
 
 ## Current State
 
-The minimap exists as a first-class widget type but renders as a **solid dark green rectangle** — no map content, no circular clipping.
+The minimap now has a **basic circular placeholder render path**, but it is still far from a WoW-like
+minimap. The simulator currently renders a placeholder map texture and applies shader-based circle
+clipping, so the old "solid dark green rectangle" state is no longer accurate. The remaining gaps
+are about real minimap state, real mask handling, and actual content overlays.
 
 ### What Works
 
@@ -10,28 +13,35 @@ The minimap exists as a first-class widget type but renders as a **solid dark gr
 - **XML parsing**: `<Minimap>` elements parse correctly via `FrameElement::Minimap`
 - **Frame creation**: `CreateFrame("Minimap", ...)` creates a proper frame
 - **Child hierarchy**: Zoom buttons, backdrop, border texture render as children
-- **Lua methods**: 25+ stub methods prevent addon errors (zoom, blips, blob textures)
+- **Basic map quad**: `build_minimap_quads()` emits `Interface\\Minimap\\placeholder-map`
+- **Circular clipping**: `FLAG_CIRCLE_CLIP` in `quad.wgsl` clips the minimap quad to a circle
+- **Zoom state**: `SetZoom()` / `GetZoom()` persist and clamp zoom instead of returning constants
+- **Lua surface coverage**: minimap methods exist, with many still as no-op compatibility stubs
 - **Global registration**: `Minimap` is registered as a Lua global in `global_frames.rs`
 
 ### What's Missing
 
-- **Map content**: No texture displayed inside the minimap area
-- **Circular clipping**: Renders as a rectangle, not clipped to a circle
-- **Mask texture**: `SetMaskTexture` is a no-op stub
-- **Zoom**: `SetZoom`/`GetZoom` are stubs returning constants
+- **Real map content**: the minimap still renders a fixed placeholder texture, not zone/map data
+- **Mask texture state**: `SetMaskTexture` is still a no-op stub, so Blizzard/UI code cannot drive
+  the clip shape
+- **Mask-accurate contour**: current clip is a mathematical circle, not the real minimap mask
+  contour used by WoW
+- **Texture inputs**: `SetBlipTexture`, `SetIconTexture`, `SetPOIArrowTexture`, and related
+  setters are still stubs
 - **Player arrow**: Not rendered
 - **Blips/POIs**: Not rendered
+- **Blob overlays**: quest/task/arch blob setters are still no-ops
 
 ## Key Files
 
 | File | Purpose |
 |------|---------|
 | `src/widget/mod.rs:23-42` | `WidgetType::Minimap` enum variant |
-| `src/iced_app/render.rs:296-300` | `build_minimap_quads()` — currently a solid fill |
-| `src/iced_app/render.rs:469` | Dispatch: `WidgetType::Minimap => build_minimap_quads(...)` |
-| `src/lua_api/frame/methods/methods_misc.rs:17-74` | All minimap Lua method stubs |
+| `src/iced_app/quad_builders_textures.rs` | `build_minimap_quads()` — placeholder map + circle clip |
+| `src/iced_app/quad_builders.rs` | Dispatch: `WidgetType::Minimap => build_minimap_quads(...)` |
+| `src/lua_api/frame/methods/methods_misc.rs` | Minimap methods: real zoom state plus texture/blob stubs |
 | `src/lua_api/globals/global_frames.rs` | `Minimap` global registration |
-| `src/render/shader/quad.wgsl` | WGSL shader (no circular clip support yet) |
+| `src/render/shader/quad.wgsl` | WGSL shader — current `FLAG_CIRCLE_CLIP` path |
 | `Interface/BlizzardUI/Blizzard_Minimap/Mainline/Minimap.xml` | Blizzard minimap XML definition |
 
 ## How WoW Clips the Minimap to a Circle
@@ -87,7 +97,8 @@ The border does **not** do the masking. The corners of the border texture are tr
 
 ```
 build_minimap_quads(batch, bounds, frame)
-  → batch.push_solid(bounds, [0.05, 0.08, 0.05, alpha])  // dark green rect
+  → batch.push_textured_path(bounds, "Interface\\Minimap\\placeholder-map", ...)
+  → batch.set_extra_flags(4, FLAG_CIRCLE_CLIP)
 ```
 
 ### Shader Pipeline
@@ -96,9 +107,37 @@ The WGSL shader (`src/render/shader/quad.wgsl`) processes quads with:
 - **Vertex attributes**: position, tex_coords, color, tex_index, flags
 - **tex_index**: `-1` = solid color, `0-3` = tiered texture atlas, `4` = glyph atlas
 - **flags**: blend mode (alpha or additive)
-- No mask/clip support — all quads are axis-aligned rectangles
+- **circle clip**: `FLAG_CIRCLE_CLIP` uses `local_uv` + `smoothstep()` to fade alpha outside the
+  circular radius
 
-## Implementation Plan: Map Texture with Mask
+The shader does **not** currently sample a minimap mask texture. The circular clip is enough for a
+basic display, but it cannot reproduce the real WoW minimap contour.
+
+## What Is Still Needed
+
+For a **basic circular minimap display**, most of the foundational work is already present:
+
+1. a `Minimap` widget type
+2. a rendered map quad
+3. circular shader clipping
+4. persistent zoom state
+
+What is still needed to move from "basic placeholder minimap" to "useful minimap" is:
+
+1. **Real minimap texture state**
+   - store `SetMaskTexture`, `SetBlipTexture`, `SetIconTexture`, `SetPOIArrowTexture`,
+     `SetCorpsePOIArrowTexture`, and `SetStaticPOIArrowTexture` on the frame instead of dropping
+     them
+2. **Real minimap content selection**
+   - replace the fixed `Interface\\Minimap\\placeholder-map` path with a frame-driven texture input
+     or a simulator-owned dynamic minimap source
+3. **Player/POI rendering**
+   - render the player arrow and basic POI/blip overlays on top of the map quad
+4. **Optional WoW-accurate mask**
+   - if visual fidelity matters beyond a circular placeholder, add mask-texture sampling so the
+     minimap follows the actual `UIMinimapMask` contour instead of a perfect circle
+
+## WoW-Accurate Follow-Up: Map Texture with Mask
 
 Render a static map texture clipped by the mask texture, matching WoW's approach.
 
@@ -155,10 +194,10 @@ Options for the static map texture:
 
 Option 1 requires loading an arbitrary image into the GPU atlas. A dedicated texture slot outside the tiered atlas would be simplest.
 
-### Minimal Implementation Steps
+### Minimal Follow-Up Steps
 
-1. Convert mask: `wow-cli convert-texture Interface/HUD/UIMinimapMask.BLP -o textures/hud/uiminimapmask.webp`
-2. Add mask texture support to the shader (new binding or flag + atlas lookup)
-3. In `build_minimap_quads()`, emit a textured quad with the mask flag
-4. Load a placeholder map image at startup
-5. The compass border (`MinimapCompassTexture`) already renders as a child on top
+1. Store minimap texture setters as real frame state instead of no-op stubs
+2. Replace the fixed placeholder map path with frame-driven minimap content
+3. Render the player arrow/basic overlays using the stored minimap texture inputs
+4. If contour fidelity matters, add mask-texture sampling for `UIMinimapMask`
+5. Keep the existing compass/border children rendering on top
