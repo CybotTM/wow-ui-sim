@@ -121,6 +121,32 @@ The file contains methods that exist in live WoW but not in the sim. Many are on
 that indicates the sim already has them but does NOT have them type-specifically registered
 (see Section 3 for the flip side).
 
+### Reconcile Top Type Deltas First
+
+Start the missing-method pass with the highest-count widget types below. These still match the
+current `diff_methods_missing.txt` tallies and should be treated as the first ownership queue
+before broad one-off method work.
+
+| Widget Type | Missing Methods | Primary Owner Surface |
+|---|---:|---|
+| `PlayerModel` | 139 | `src/lua_api/frame/methods/widget_model.rs`, `src/lua_api/frame/method_registry/model.rs` |
+| `Model` | 124 | `src/lua_api/frame/methods/widget_model.rs`, `src/lua_api/frame/method_registry/model.rs` |
+| `EditBox` | 109 | `src/lua_api/frame/methods/widget_editbox.rs`, `src/lua_api/frame/method_registry/edit.rs` |
+| `Cooldown` | 94 | `src/lua_api/frame/methods/widget_cooldown.rs`, `src/lua_api/frame/method_registry/controls.rs` |
+| `GameTooltip` | 89 | `src/lua_api/frame/methods/widget_tooltip.rs`, `src/lua_api/frame/method_registry/tooltip.rs` |
+| `ColorSelect` | 87 | `src/lua_api/frame/methods/widget_misc.rs`, `src/lua_api/frame/method_registry/tooltip.rs` |
+| `SimpleHTML` | 86 | `src/lua_api/frame/methods/widget_misc.rs`, `src/lua_api/frame/method_registry/misc.rs` |
+| `MessageFrame` | 85 | `src/lua_api/frame/methods/widget_message_frame.rs`, `src/lua_api/frame/method_registry/misc.rs` |
+| `CheckButton` | 84 | `src/lua_api/frame/methods/widget_slider.rs`, `src/lua_api/frame/method_registry/frame.rs` |
+| `Button` | 83 | `src/lua_api/frame/methods/methods_button.rs`, `src/lua_api/frame/methods/widget_slider.rs`, `src/lua_api/frame/method_registry/frame.rs` |
+| `StatusBar` | 81 | `src/lua_api/frame/methods/widget_slider.rs`, `src/lua_api/frame/method_registry/controls.rs` |
+
+Use this table as the handoff point for follow-up tasks:
+
+- first reconcile ownership in the matching `method_registry/*.rs` file
+- then implement or move the method in the paired `methods_*.rs` / `widget_*.rs` file
+- only after that trim the remaining long tail types
+
 **Methods that appear on all or most widget types — genuine engine methods to add:**
 
 All Frame-type widgets are missing this cluster of methods (present on Frame, Button, CheckButton,
