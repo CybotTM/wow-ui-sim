@@ -468,41 +468,67 @@ fn register_expansion_landing_page(lua: &Lua) -> Result<()> {
 
 fn register_minimap_globals(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("HasNewMail", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set(
+    register_minimap_mail_globals(lua, &g)?;
+    register_minimap_garrison_globals(lua, &g)?;
+    register_minimap_landing_page_globals(lua, &g)?;
+    register_minimap_renown_globals(lua, &g)?;
+    register_minimap_time_globals(lua, &g)?;
+    Ok(())
+}
+
+fn register_minimap_mail_globals(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set("HasNewMail", lua.create_function(|_, ()| Ok(false))?)?;
+    globals.set(
         "GetLatestThreeSenders",
         lua.create_function(|_, ()| Ok(mlua::MultiValue::new()))?,
     )?;
-    g.set(
+    Ok(())
+}
+
+fn register_minimap_garrison_globals(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
         "DoesFollowerMatchCurrentGarrisonType",
-        lua.create_function(|_, _ft: Value| Ok(false))?,
+        lua.create_function(|_, _follower_type: Value| Ok(false))?,
     )?;
-    g.set(
+    globals.set(
         "ShowGarrisonLandingPage",
-        lua.create_function(|_, _gt: Value| Ok(()))?,
+        lua.create_function(|_, _garrison_type: Value| Ok(()))?,
     )?;
-    g.set(
+    Ok(())
+}
+
+fn register_minimap_landing_page_globals(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
         "ToggleExpansionLandingPage",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
-    g.set(
+    globals.set(
         "CovenantCalling_CheckCallings",
         lua.create_function(|_, ()| Ok(()))?,
     )?;
-    g.set(
+    Ok(())
+}
+
+fn register_minimap_renown_globals(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
         "ToggleMajorFactionRenown",
-        lua.create_function(|_, _fid: Value| Ok(()))?,
-    )?;
-    g.set(
-        "GetGameTime",
-        lua.create_function(|lua, ()| {
-            // Return local (hour, minute) via Lua's os.date to match the system clock.
-            let hour: i32 = lua.load("tonumber(os.date('%H'))").eval()?;
-            let min: i32 = lua.load("tonumber(os.date('%M'))").eval()?;
-            Ok((hour, min))
-        })?,
+        lua.create_function(|_, _faction_id: Value| Ok(()))?,
     )?;
     Ok(())
+}
+
+fn register_minimap_time_globals(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set("GetGameTime", create_get_game_time_fn(lua)?)?;
+    Ok(())
+}
+
+fn create_get_game_time_fn(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, ()| {
+        // Return local (hour, minute) via Lua's os.date to match the system clock.
+        let hour: i32 = lua.load("tonumber(os.date('%H'))").eval()?;
+        let min: i32 = lua.load("tonumber(os.date('%M'))").eval()?;
+        Ok((hour, min))
+    })
 }
 
 fn register_c_equipment_set(lua: &Lua) -> Result<()> {
