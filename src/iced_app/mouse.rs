@@ -9,6 +9,12 @@ const DRAG_THRESHOLD: f32 = 5.0;
 
 impl App {
     pub(super) fn handle_mouse_move(&mut self, pos: Point) {
+        self.sync_mouse_position(pos);
+        self.maybe_start_drag(pos);
+        self.update_hovered_frame(pos);
+    }
+
+    fn sync_mouse_position(&mut self, pos: Point) {
         self.mouse_position = Some(pos);
         {
             let env = self.env.borrow();
@@ -16,7 +22,9 @@ impl App {
                 .borrow_mut()
                 .set_mouse_position(Some((pos.x, pos.y)));
         }
+    }
 
+    fn maybe_start_drag(&mut self, pos: Point) {
         // Check drag threshold while mouse is held down.
         if let (Some(down_pos), Some(down_frame), false) =
             (self.mouse_down_pos, self.mouse_down_frame, self.dragging)
@@ -29,13 +37,23 @@ impl App {
                 self.flush_post_script_updates();
             }
         }
+    }
 
+    fn update_hovered_frame(&mut self, pos: Point) {
         let new_hovered = self.hit_test(pos);
         if new_hovered == self.hovered_frame {
             self.flush_mouse_move_visual_updates();
             return;
         }
 
+        self.fire_hover_transition(new_hovered);
+        // OnEnter/OnLeave scripts may show/hide tooltips or change widget state.
+        // Apply incremental HitGrid updates before the next hit_test.
+        self.apply_hit_grid_changes();
+        self.flush_mouse_move_visual_updates();
+    }
+
+    fn fire_hover_transition(&mut self, new_hovered: Option<u64>) {
         // Update hovered_frame in both iced_app and SimState BEFORE firing events,
         // so IsMouseMotionFocus() / GetMouseFocus() return correct values in OnEnter.
         let old_hovered = self.hovered_frame;
@@ -50,10 +68,6 @@ impl App {
                 let _ = env.fire_script_handler(new_id, "OnEnter", vec![]);
             }
         }
-        // OnEnter/OnLeave scripts may show/hide tooltips or change widget state.
-        // Apply incremental HitGrid updates before the next hit_test.
-        self.apply_hit_grid_changes();
-        self.flush_mouse_move_visual_updates();
     }
 
     fn flush_mouse_move_visual_updates(&mut self) {
