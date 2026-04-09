@@ -170,6 +170,7 @@ fn apply_set_button_texture(
     if parent_key == "HighlightTexture" {
         if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
             tex.draw_layer = crate::widget::DrawLayer::Highlight;
+            tex.alpha_mode = Some("ADD".to_string());
             tex.blend_mode = crate::render::BlendMode::Additive;
         }
     }

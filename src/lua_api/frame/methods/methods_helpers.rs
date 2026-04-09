@@ -301,6 +301,7 @@ fn apply_button_texture_defaults(
 ) {
     if key == "HighlightTexture" {
         texture.draw_layer = crate::widget::DrawLayer::Highlight;
+        texture.alpha_mode = Some("ADD".to_string());
         texture.blend_mode = crate::render::BlendMode::Additive;
     }
     if let Some(parent) = state.widgets.get(button_id) {

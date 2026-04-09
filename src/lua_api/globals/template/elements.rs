@@ -383,7 +383,7 @@ pub(super) fn append_texture_properties(
     if let Some(a) = texture.alpha {
         code.push_str(&format!("            {}:SetAlpha({})\n", var, a));
     }
-    if let Some(ref mode) = texture.alpha_mode {
+    if let Some(mode) = texture.effective_blend_mode() {
         code.push_str(&format!("            {}:SetBlendMode(\"{}\")\n", var, mode));
     }
     append_key_values(code, texture.key_values.as_ref(), var);

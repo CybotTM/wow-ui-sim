@@ -90,6 +90,8 @@ pub struct TextureXml {
     pub alpha: Option<f32>,
     #[serde(rename = "@alphaMode")]
     pub alpha_mode: Option<String>,
+    #[serde(rename = "@blendMode")]
+    pub blend_mode: Option<String>,
     #[serde(rename = "@setAllPoints")]
     pub set_all_points: Option<bool>,
     #[serde(rename = "@parentArray")]
@@ -114,6 +116,13 @@ pub struct TextureXml {
     /// MaskedTextures — declares which sibling textures this mask applies to.
     #[serde(rename = "MaskedTextures")]
     pub masked_textures: Option<MaskedTexturesXml>,
+}
+
+impl TextureXml {
+    /// Effective blend mode from either WoW XML spelling.
+    pub fn effective_blend_mode(&self) -> Option<&str> {
+        self.blend_mode.as_deref().or(self.alpha_mode.as_deref())
+    }
 }
 
 /// TexCoords element with left/right/top/bottom UV coordinates.

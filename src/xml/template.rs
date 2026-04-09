@@ -311,9 +311,18 @@ fn merge_texture_fields(dst: &mut TextureXml, src: &TextureXml) {
     merge_opt!(thickness);
     merge_opt!(hidden);
     merge_opt!(alpha);
-    merge_opt!(alpha_mode);
     merge_opt!(set_all_points);
     merge_opt!(mixin);
+    merge_texture_blend_mode(dst, src);
+}
+
+fn merge_texture_blend_mode(dst: &mut TextureXml, src: &TextureXml) {
+    let Some(mode) = src.effective_blend_mode() else {
+        return;
+    };
+    let mode = mode.to_string();
+    dst.alpha_mode = Some(mode.clone());
+    dst.blend_mode = Some(mode);
 }
 
 /// Collect all mixins for a texture by resolving its `inherits` chain.

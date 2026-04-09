@@ -228,7 +228,7 @@ fn emit_texture_visibility(texture: &crate::xml::TextureXml) -> String {
     if let Some(a) = texture.alpha {
         code.push_str(&format!("\n        tex:SetAlpha({})\n        ", a));
     }
-    if let Some(ref mode) = texture.alpha_mode {
+    if let Some(mode) = texture.effective_blend_mode() {
         code.push_str(&format!(
             "\n        tex:SetBlendMode(\"{}\")\n        ",
             mode

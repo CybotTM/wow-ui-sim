@@ -292,6 +292,19 @@ fn test_set_blend_mode_no_error() {
     env.exec(&format!(r#"{tex}:SetBlendMode("ADD"); {tex}:SetBlendMode("ALPHAKEY"); {tex}:SetBlendMode("DISABLE"); {tex}:SetBlendMode("MOD")"#)).unwrap();
 }
 
+#[test]
+fn test_set_blend_mode_persists_raw_mode_on_frame() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "BMState");
+    env.exec(&format!(r#"{tex}:SetBlendMode("MOD")"#)).unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name(&tex).unwrap();
+    let widget = state.widgets.get(id).unwrap();
+    assert_eq!(widget.alpha_mode.as_deref(), Some("MOD"));
+    assert_eq!(widget.blend_mode, wow_ui_sim::BlendMode::Alpha);
+}
+
 // ============================================================================
 // SetDesaturated / IsDesaturated
 // ============================================================================

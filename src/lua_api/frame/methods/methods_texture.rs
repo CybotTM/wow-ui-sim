@@ -170,13 +170,12 @@ fn add_blend_and_desaturation_methods<M: mlua::UserDataMethods<FrameRef>>(method
 
 fn add_blend_mode_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetBlendMode", |lua, this, mode: Option<String>| {
-        let blend = match mode.as_deref() {
-            Some("ADD") => crate::render::BlendMode::Additive,
-            _ => crate::render::BlendMode::Alpha,
-        };
+        let raw_mode = normalize_blend_mode(mode);
+        let blend = parse_blend_mode(raw_mode.as_deref());
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(f) = state.widgets.get_mut_visual(this.0) {
+            f.alpha_mode = raw_mode;
             f.blend_mode = blend;
         }
         Ok(())
@@ -184,11 +183,30 @@ fn add_blend_mode_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetBlendMode", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        Ok(match state.widgets.get(this.0).map(|f| f.blend_mode) {
-            Some(crate::render::BlendMode::Additive) => "ADD",
-            _ => "BLEND",
-        })
+        let mode = state
+            .widgets
+            .get(this.0)
+            .and_then(|f| f.alpha_mode.clone())
+            .unwrap_or_else(|| {
+                match state.widgets.get(this.0).map(|f| f.blend_mode) {
+                    Some(crate::render::BlendMode::Additive) => "ADD",
+                    _ => "BLEND",
+                }
+                .to_string()
+            });
+        Ok(mode)
     });
+}
+
+fn normalize_blend_mode(mode: Option<String>) -> Option<String> {
+    mode.map(|mode| mode.trim().to_ascii_uppercase())
+}
+
+fn parse_blend_mode(mode: Option<&str>) -> crate::render::BlendMode {
+    match mode {
+        Some("ADD") => crate::render::BlendMode::Additive,
+        _ => crate::render::BlendMode::Alpha,
+    }
 }
 
 fn add_desaturation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

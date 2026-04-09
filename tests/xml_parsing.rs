@@ -1,5 +1,8 @@
 use std::path::PathBuf;
-use wow_ui_sim::xml::{AnimationElement, FrameChildElement, XmlElement, parse_xml, parse_xml_file};
+use wow_ui_sim::xml::{
+    AnimationElement, FrameChildElement, TextureXml, XmlElement, parse_xml, parse_xml_file,
+    register_texture_template, resolve_texture_inheritance,
+};
 
 fn blizzard_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI/Blizzard_SharedXMLBase")
@@ -721,6 +724,61 @@ fn test_parse_button_state_colors() {
             .iter()
             .any(|c| matches!(c, FrameChildElement::DisabledColor(_)))
     );
+}
+
+#[test]
+fn test_parse_texture_alpha_mode_and_blend_mode_attributes() {
+    let xml = r#"
+        <Ui>
+            <Frame name="ModeFrame">
+                <Layers>
+                    <Layer level="ARTWORK">
+                        <Texture parentKey="AlphaModeTex" alphaMode="ADD"/>
+                        <Texture parentKey="BlendModeTex" blendMode="MOD"/>
+                    </Layer>
+                </Layers>
+            </Frame>
+        </Ui>
+    "#;
+    let ui = parse_xml(xml).expect("Failed to parse");
+    let frame = match &ui.elements[0] {
+        XmlElement::Frame(frame) => frame,
+        other => panic!("expected frame, got {:?}", other),
+    };
+    let layer = &frame.layers().next().unwrap().layers[0];
+    let alpha_mode = match &layer.elements[0] {
+        wow_ui_sim::xml::LayerElement::Texture(texture) => texture,
+        other => panic!("expected texture, got {:?}", other),
+    };
+    let blend_mode = match &layer.elements[1] {
+        wow_ui_sim::xml::LayerElement::Texture(texture) => texture,
+        other => panic!("expected texture, got {:?}", other),
+    };
+
+    assert_eq!(alpha_mode.alpha_mode.as_deref(), Some("ADD"));
+    assert_eq!(alpha_mode.blend_mode.as_deref(), None);
+    assert_eq!(blend_mode.alpha_mode.as_deref(), None);
+    assert_eq!(blend_mode.blend_mode.as_deref(), Some("MOD"));
+}
+
+#[test]
+fn test_resolve_texture_inheritance_carries_blend_mode_aliases() {
+    let template_name = "CodexTextureBlendModeTemplate";
+    register_texture_template(
+        template_name,
+        TextureXml {
+            blend_mode: Some("ADD".to_string()),
+            ..Default::default()
+        },
+    );
+    let inherited = resolve_texture_inheritance(&TextureXml {
+        inherits: Some(template_name.to_string()),
+        alpha_mode: Some("MOD".to_string()),
+        ..Default::default()
+    });
+
+    assert_eq!(inherited.alpha_mode.as_deref(), Some("MOD"));
+    assert_eq!(inherited.blend_mode.as_deref(), Some("MOD"));
 }
 
 #[test]

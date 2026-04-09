@@ -311,6 +311,8 @@ pub struct Frame {
     /// Horizontal three-slice caps for stretched atlas textures.
     /// (left_cap_px, right_cap_px, atlas_entry_width_px)
     pub three_slice_h: Option<(f32, f32, f32)>,
+    /// Raw WoW blend mode string from SetBlendMode/XML (e.g. "ADD", "MOD").
+    pub alpha_mode: Option<String>,
     /// Blend mode for texture rendering (Alpha or Additive).
     pub blend_mode: BlendMode,
     /// Whether this frame receives ALL events (set by RegisterAllEvents).
@@ -537,6 +539,7 @@ macro_rules! frame_defaults {
             nine_slice_layout: None,
             nine_slice_atlas: None,
             three_slice_h: None,
+            alpha_mode: None,
             blend_mode: BlendMode::Alpha,
             register_all_events: false,
             clips_children: false,
