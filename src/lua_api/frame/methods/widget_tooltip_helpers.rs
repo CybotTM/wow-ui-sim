@@ -364,6 +364,9 @@ fn position_tooltip(
         Some(f) => f,
         None => return,
     };
+    if anchor_type == "ANCHOR_PRESERVE" {
+        return;
+    }
     frame.anchors.clear();
     let anchor = match anchor_type {
         "ANCHOR_CURSOR" => {

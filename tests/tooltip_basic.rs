@@ -478,6 +478,58 @@ fn test_tooltip_anchor_none_no_anchors() {
 }
 
 #[test]
+fn test_tooltip_anchor_preserve_keeps_existing_anchor_when_reowned() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner1 = CreateFrame("Frame", "AnchorPreserveOwner1", UIParent)
+        local owner2 = CreateFrame("Frame", "AnchorPreserveOwner2", UIParent)
+        owner1:SetSize(100, 30)
+        owner2:SetSize(100, 30)
+        owner1:SetPoint("CENTER")
+        owner2:SetPoint("TOPLEFT")
+        GameTooltip:SetOwner(owner1, "ANCHOR_RIGHT", 5, 10)
+        GameTooltip:SetOwner(owner2, "ANCHOR_PRESERVE")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let owner1_id = state
+        .widgets
+        .get_id_by_name("AnchorPreserveOwner1")
+        .unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(
+        frame.anchors.len(),
+        1,
+        "ANCHOR_PRESERVE should keep the existing anchor"
+    );
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::Left);
+    assert_eq!(anchor.relative_point, AnchorPoint::Right);
+    assert_eq!(
+        anchor.relative_to_id,
+        Some(owner1_id as usize),
+        "ANCHOR_PRESERVE should keep the existing relative target"
+    );
+    assert!(
+        (anchor.x_offset - 5.0).abs() < 0.1,
+        "x_offset should stay preserved"
+    );
+    assert!(
+        (anchor.y_offset - 10.0).abs() < 0.1,
+        "y_offset should stay preserved"
+    );
+
+    let tooltip_anchor: String = env.eval("return GameTooltip:GetAnchorType()").unwrap();
+    assert_eq!(tooltip_anchor, "ANCHOR_PRESERVE");
+}
+
+#[test]
 fn test_tooltip_anchor_cursor_uses_absolute_position() {
     let env = WowLuaEnv::new().unwrap();
 
