@@ -8,16 +8,16 @@ fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
 }
 
-fn diff_c_namespaces_missing_path() -> PathBuf {
+fn diff_c_namespaces_path(file_name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .join("docs")
         .join("wow-client-diff")
-        .join("diff_c_namespaces_missing.txt")
+        .join(file_name)
 }
 
-fn read_missing_namespaces() -> BTreeSet<String> {
-    fs::read_to_string(diff_c_namespaces_missing_path())
-        .expect("failed to read diff_c_namespaces_missing.txt")
+fn read_diff_namespaces(file_name: &str) -> BTreeSet<String> {
+    fs::read_to_string(diff_c_namespaces_path(file_name))
+        .unwrap_or_else(|_| panic!("failed to read {file_name}"))
         .lines()
         .map(str::trim)
         .filter(|line| !line.is_empty())
@@ -27,7 +27,7 @@ fn read_missing_namespaces() -> BTreeSet<String> {
 
 #[test]
 fn diff_c_namespaces_missing_file_excludes_seeded_namespace_stubs() {
-    let missing = read_missing_namespaces();
+    let missing = read_diff_namespaces("diff_c_namespaces_missing.txt");
     let expected_absent = [
         "C_AccountServices",
         "C_ArrowCalloutManager",
@@ -48,7 +48,32 @@ fn diff_c_namespaces_missing_file_excludes_seeded_namespace_stubs() {
 }
 
 #[test]
-fn seeded_c_namespace_tables_exist_with_representative_methods() {
+fn diff_c_namespaces_extra_file_excludes_documented_blizzard_namespaces() {
+    let extra = read_diff_namespaces("diff_c_namespaces_extra.txt");
+    let expected_absent = [
+        "C_CinematicList",
+        "C_CombatLogSecure",
+        "C_Console",
+        "C_GMTicketInfo",
+        "C_Guild",
+        "C_Login",
+        "C_MacOptions",
+        "C_PingSecure",
+        "C_PrivateAuras",
+        "C_UnitAurasPrivate",
+        "C_Who",
+    ];
+
+    for namespace in expected_absent {
+        assert!(
+            !extra.contains(namespace),
+            "{namespace} should not remain in diff_c_namespaces_extra.txt"
+        );
+    }
+}
+
+#[test]
+fn seeded_missing_c_namespace_tables_exist_with_representative_methods() {
     let env = env();
     let result: String = env
         .eval(
@@ -82,5 +107,46 @@ fn seeded_c_namespace_tables_exist_with_representative_methods() {
     assert_eq!(
         result, "ok",
         "seeded namespace tables should exist with representative methods"
+    );
+}
+
+#[test]
+fn documented_extra_c_namespace_tables_exist_with_representative_methods() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local expectations = {
+                { "C_CinematicList", "GetUICinematicList" },
+                { "C_CombatLogSecure", "GetEntryCount" },
+                { "C_Console", "GetAllCommands" },
+                { "C_GMTicketInfo", "HasGMTicket" },
+                { "C_Guild", "IsInGuild" },
+                { "C_Login", "GetState" },
+                { "C_MacOptions", "GetGameBundleName" },
+                { "C_PingSecure", "CreateFrame" },
+                { "C_PrivateAuras", "SetPrivateRaidBossMessageCallback" },
+                { "C_UnitAurasPrivate", "GetAllPrivateAuras" },
+                { "C_Who", "SendWho" },
+            }
+
+            for _, expectation in ipairs(expectations) do
+                local namespace = _G[expectation[1]]
+                if type(namespace) ~= "table" then
+                    return expectation[1] .. ":missing_namespace"
+                end
+                if type(namespace[expectation[2]]) ~= "function" then
+                    return expectation[1] .. ":missing_method:" .. expectation[2]
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "documented Blizzard namespaces should exist with representative methods"
     );
 }

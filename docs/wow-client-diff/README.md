@@ -349,15 +349,10 @@ Mac-specific options. Can be stubbed as returning false/nil.
 - `C_TransmogCollection.GetNumMaxOutfits`, `C_TransmogCollection.GetOutfits`, etc.
 - `C_Who.GetWhoInfo`, `C_Who.SendWho`, `C_Who.SetWhoToUi`
 
-**Missing C_* namespaces** (6 entire namespaces have no stub at all):
-`C_CinematicList`, `C_CombatLogSecure`, `C_Console`, `C_GMTicketInfo`, `C_Guild`, `C_Login`,
-`C_MacOptions`, `C_PingSecure`, `C_PrivateAuras`, `C_UnitAurasPrivate`, `C_Who`
+**Missing C_* namespaces**: `0`
 
-Wait — that's 11 entries in `diff_c_namespaces_missing.txt`. Actually the summary says 6 missing
-namespaces; the file may list both namespace-level and function-level mismatches. The actual
-`diff_c_namespaces_missing.txt` lists: `C_CombatLogSecure`, `C_Console`, `C_GMTicketInfo`,
-`C_Guild`, `C_Login`, `C_MacOptions`, `C_PingSecure`, `C_PrivateAuras`, `C_UnitAurasPrivate`, `C_Who`,
-`C_CinematicList`.
+`diff_c_namespaces_missing.txt` is now intentionally empty. The namespace-level gaps from the
+earlier snapshot were reconciled; remaining C_* work is function-level, not table-level.
 
 ---
 
@@ -418,27 +413,12 @@ Includes item quality color codes (`ITEM_EPIC_COLOR_CODE`, etc.), many `LE_GAME_
 
 ## Section 7: Extra Stubs to Remove or Investigate
 
-**Extra C_* namespaces** (11 namespaces the sim has that live WoW does NOT):
+**Extra C_* namespaces**: `0`
 
-Source: `diff_c_namespaces_extra.txt`:
-- `C_AccountServices`
-- `C_ArrowCalloutManager`
-- `C_CatalogShop`
-- `C_DelvesUI`
-- `C_EncounterEvents`
-- `C_EncounterTimeline`
-- `C_EncounterWarnings`
-- `C_Housing` / `C_HousingCatalog` / `C_HousingLayout` / `C_HousingPhotoSharing`
-
-Wait — that's more than 11. The `diff_c_namespaces_extra.txt` lists functions in extra namespaces,
-while `diff_c_functions_extra.txt` has 152 entries. The 11 extra namespaces from the summary count
-are: `C_AccountServices`, `C_ArrowCalloutManager`, `C_CatalogShop`, `C_DelvesUI`,
-`C_EncounterEvents`, `C_EncounterTimeline`, `C_EncounterWarnings`, `C_Housing`,
-`C_HousingCatalog`, `C_HousingLayout`, `C_HousingPhotoSharing`.
-
-These are namespaces where the sim registered functions that exist under different namespaces in live
-WoW, or which were renamed/removed. Check each against `diff_c_functions_extra.txt` to see if they
-should be removed, renamed, or merged.
+`diff_c_namespaces_extra.txt` is now intentionally empty. The previous 11-entry list was a stale
+discovery artifact: the simulator namespaces are used by Blizzard UI locally, and several also exist
+in Blizzard APIDocumentation. Any remaining drift is tracked in `diff_c_functions_extra.txt`, not as
+invented top-level namespace tables.
 
 **Extra enums** (2):
 - `ExpansionLandingPageType` — verify if this is a sim invention or was renamed in live WoW
