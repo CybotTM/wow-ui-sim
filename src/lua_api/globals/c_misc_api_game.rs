@@ -321,49 +321,83 @@ fn register_c_splash_screen(lua: &Lua) -> Result<()> {
 }
 
 fn register_c_artifact_and_azerite(lua: &Lua) -> Result<()> {
-    let art = lua.create_table()?;
-    art.set(
+    register_c_artifact_ui(lua)?;
+    register_c_azerite_item(lua)?;
+    register_c_azerite_empowered_item(lua)?;
+    Ok(())
+}
+
+fn register_c_artifact_ui(lua: &Lua) -> Result<()> {
+    let artifact_ui = lua.create_table()?;
+    register_artifact_status_stubs(lua, &artifact_ui)?;
+    register_artifact_item_stubs(lua, &artifact_ui)?;
+    lua.globals().set("C_ArtifactUI", artifact_ui)?;
+    Ok(())
+}
+
+fn register_c_azerite_item(lua: &Lua) -> Result<()> {
+    let azerite_item = lua.create_table()?;
+    register_azerite_item_lookup_stubs(lua, &azerite_item)?;
+    register_azerite_item_status_stubs(lua, &azerite_item)?;
+    lua.globals().set("C_AzeriteItem", azerite_item)?;
+    Ok(())
+}
+
+fn register_c_azerite_empowered_item(lua: &Lua) -> Result<()> {
+    let empowered_item = lua.create_table()?;
+    empowered_item.set(
+        "IsAzeriteEmpoweredItem",
+        lua.create_function(|_, _location: Value| Ok(false))?,
+    )?;
+    empowered_item.set(
+        "IsAzeriteEmpoweredItemByID",
+        lua.create_function(|_, _item_id: Value| Ok(false))?,
+    )?;
+    lua.globals()
+        .set("C_AzeriteEmpoweredItem", empowered_item)?;
+    Ok(())
+}
+
+fn register_artifact_status_stubs(lua: &Lua, artifact_ui: &mlua::Table) -> Result<()> {
+    artifact_ui.set(
         "IsEquippedArtifactMaxed",
         lua.create_function(|_, ()| Ok(true))?,
     )?;
-    art.set(
+    artifact_ui.set(
         "IsEquippedArtifactDisabled",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    art.set(
+    artifact_ui.set("IsAtForge", lua.create_function(|_, ()| Ok(false))?)?;
+    Ok(())
+}
+
+fn register_artifact_item_stubs(lua: &Lua, artifact_ui: &mlua::Table) -> Result<()> {
+    artifact_ui.set(
         "GetEquippedArtifactInfo",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
-    art.set("GetArtifactItemID", lua.create_function(|_, ()| Ok(0i32))?)?;
-    art.set("GetArtifactTier", lua.create_function(|_, ()| Ok(0i32))?)?;
-    art.set("IsAtForge", lua.create_function(|_, ()| Ok(false))?)?;
-    lua.globals().set("C_ArtifactUI", art)?;
+    artifact_ui.set("GetArtifactItemID", lua.create_function(|_, ()| Ok(0i32))?)?;
+    artifact_ui.set("GetArtifactTier", lua.create_function(|_, ()| Ok(0i32))?)?;
+    Ok(())
+}
 
-    let az = lua.create_table()?;
-    az.set(
+fn register_azerite_item_lookup_stubs(lua: &Lua, azerite_item: &mlua::Table) -> Result<()> {
+    azerite_item.set(
         "FindActiveAzeriteItem",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
-    az.set(
+    Ok(())
+}
+
+fn register_azerite_item_status_stubs(lua: &Lua, azerite_item: &mlua::Table) -> Result<()> {
+    azerite_item.set(
         "IsAzeriteItemAtMaxLevel",
         lua.create_function(|_, ()| Ok(true))?,
     )?;
-    az.set(
+    azerite_item.set(
         "IsAzeriteItemEnabled",
-        lua.create_function(|_, _i: Value| Ok(false))?,
+        lua.create_function(|_, _item: Value| Ok(false))?,
     )?;
-    lua.globals().set("C_AzeriteItem", az)?;
-
-    let aze = lua.create_table()?;
-    aze.set(
-        "IsAzeriteEmpoweredItem",
-        lua.create_function(|_, _loc: Value| Ok(false))?,
-    )?;
-    aze.set(
-        "IsAzeriteEmpoweredItemByID",
-        lua.create_function(|_, _id: Value| Ok(false))?,
-    )?;
-    lua.globals().set("C_AzeriteEmpoweredItem", aze)?;
     Ok(())
 }
 
