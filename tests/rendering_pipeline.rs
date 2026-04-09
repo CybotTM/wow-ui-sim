@@ -466,6 +466,55 @@ fn layer4_quad_batch_vertex_positions_match_layout() {
     );
 }
 
+#[test]
+fn layer5_additive_quads_preserve_destination_color_in_overlap() {
+    if common::try_create_gpu_device().is_none() {
+        eprintln!("Skipping GPU additive blend test: no adapter available");
+        return;
+    }
+
+    use iced::{Point, Rectangle, Size};
+    use wow_ui_sim::render::BlendMode;
+    use wow_ui_sim::render::headless::render_to_image;
+
+    let mut batch = QuadBatch::new();
+    batch.push_quad(
+        Rectangle::new(Point::new(0.0, 0.0), Size::new(64.0, 64.0)),
+        Rectangle::new(Point::new(0.0, 0.0), Size::new(1.0, 1.0)),
+        [0.0, 0.0, 0.0, 1.0],
+        -1,
+        BlendMode::Alpha,
+    );
+    batch.push_quad(
+        Rectangle::new(Point::new(8.0, 8.0), Size::new(40.0, 40.0)),
+        Rectangle::new(Point::new(0.0, 0.0), Size::new(1.0, 1.0)),
+        [1.0, 0.0, 0.0, 1.0],
+        -1,
+        BlendMode::Alpha,
+    );
+    batch.push_quad(
+        Rectangle::new(Point::new(24.0, 8.0), Size::new(24.0, 24.0)),
+        Rectangle::new(Point::new(0.0, 0.0), Size::new(1.0, 1.0)),
+        [0.0, 1.0, 0.0, 0.5],
+        -1,
+        BlendMode::Additive,
+    );
+
+    let mut tex_mgr = make_texture_manager().expect("texture directories should exist");
+    let image = render_to_image(&batch, &mut tex_mgr, 64, 64, None);
+    let red_only = image.get_pixel(16, 16).0;
+    let overlap = image.get_pixel(32, 16).0;
+
+    assert!(
+        overlap[0].abs_diff(red_only[0]) <= 2,
+        "additive overlap should preserve destination red channel: red_only={red_only:?} overlap={overlap:?}"
+    );
+    assert!(
+        overlap[1] > red_only[1],
+        "additive overlap should add green light on top of the destination: red_only={red_only:?} overlap={overlap:?}"
+    );
+}
+
 /// Check if any quad vertex (after the first background quad) is near the given rect.
 fn find_vertex_near_rect(batch: &QuadBatch, rect: &wow_ui_sim::LayoutRect) -> bool {
     for quad_idx in 1..batch.quad_count() {
