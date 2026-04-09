@@ -43,15 +43,27 @@ fn add_tooltip_setup_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_tooltip_anchor_methods(methods);
+    add_tooltip_copy_and_state_methods(methods);
+    add_tooltip_layout_methods(methods);
+}
+
+fn add_tooltip_anchor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_owner_method(methods);
     add_set_anchor_type_method(methods);
     add_set_object_tooltip_position_method(methods);
+}
+
+fn add_tooltip_copy_and_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_copy_tooltip_method(methods);
+    add_set_frame_stack_method(methods);
+    add_clear_lines_method(methods);
+}
+
+fn add_tooltip_layout_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_allow_show_with_no_lines_method(methods);
     add_set_custom_word_wrap_min_width_method(methods);
     add_set_shrink_to_fit_wrapped_method(methods);
-    add_set_frame_stack_method(methods);
-    add_clear_lines_method(methods);
 }
 
 fn add_set_owner_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
