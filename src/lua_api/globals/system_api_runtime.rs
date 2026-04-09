@@ -76,11 +76,11 @@ fn register_network_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
     let globals = lua.globals();
     globals.set(
         "GetNetStats",
-        lua.create_function(|_, ()| Ok((0.0f64, 0.0f64, 0.0f64, 0.0f64)))?,
+        lua.create_function(|_, ()| Ok(seeded_net_stats()))?,
     )?;
     globals.set(
         "GetAvailableBandwidth",
-        lua.create_function(|_, ()| Ok(0.0f64))?,
+        lua.create_function(|_, ()| Ok(seeded_available_bandwidth()))?,
     )?;
     globals.set(
         "GetDownloadedPercentage",
@@ -92,6 +92,14 @@ fn register_network_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()
         lua.create_function(move |_, ()| Ok(st.borrow().fps as f64))?,
     )?;
     Ok(())
+}
+
+fn seeded_net_stats() -> (f64, f64, f64, f64) {
+    (512.0, 128.0, 28.0, 34.0)
+}
+
+fn seeded_available_bandwidth() -> f64 {
+    128.0
 }
 
 fn register_input_state_stubs(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {

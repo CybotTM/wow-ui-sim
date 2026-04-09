@@ -468,3 +468,38 @@ fn micro_menu_guild_button_loads_and_opens_panel() {
         "CommunitiesFrame should exist after clicking GuildMicroButton"
     );
 }
+
+#[test]
+fn main_menu_performance_bar_uses_seeded_network_stats() {
+    let env = setup_env();
+    let result: String = env
+        .eval(
+            r#"
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_PerformanceBar")
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
+            end
+            if not MainMenuBarPerformanceBarFrame_OnEnter then
+                return "missing_performance_bar_tooltip"
+            end
+            if not MainMenuMicroButton or not MainMenuMicroButton.MainMenuBarPerformanceBar then
+                return "missing_main_menu_performance_bar"
+            end
+
+            MainMenuMicroButton.updateInterval = 0
+            MainMenuMicroButton:OnUpdate(0)
+
+            local r, g, b = MainMenuMicroButton.MainMenuBarPerformanceBar:GetVertexColor()
+            if math.abs(r - 0) > 0.001 or math.abs(g - 1) > 0.001 or math.abs(b - 0) > 0.001 then
+                return string.format("bar_color=%.3f,%.3f,%.3f", r or -1, g or -1, b or -1)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "Main menu performance bar should use seeded latency values and stay green for low latency: {result}"
+    );
+}

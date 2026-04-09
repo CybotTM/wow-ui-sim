@@ -180,6 +180,29 @@ fn test_is_public_build() {
     assert!(val);
 }
 
+#[test]
+fn test_get_net_stats_returns_seeded_latency_values() {
+    let env = env();
+    let (bandwidth_in, bandwidth_out, latency_home, latency_world): (f64, f64, f64, f64) =
+        env.eval("return GetNetStats()").unwrap();
+    assert!(
+        bandwidth_in > 0.0,
+        "GetNetStats should seed incoming bandwidth for network stats UI"
+    );
+    assert!(
+        bandwidth_out > 0.0,
+        "GetNetStats should seed outgoing bandwidth for network stats UI"
+    );
+    assert!(
+        latency_home > 0.0,
+        "GetNetStats should seed home latency for network stats UI"
+    );
+    assert!(
+        latency_world > 0.0,
+        "GetNetStats should seed world latency for network stats UI"
+    );
+}
+
 // ============================================================================
 // Battle.net stubs
 // ============================================================================
