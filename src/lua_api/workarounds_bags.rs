@@ -27,21 +27,6 @@ pub fn init_bag_token_tracker(env: &WowLuaEnv) {
     );
 }
 
-/// Re-anchor `BagsBar` to `MicroButtonAndBagsBar` once both frames exist.
-///
-/// This is intentional load-order recovery. The bar should end up in this
-/// position; the workaround only reapplies the anchor after the parent exists.
-pub fn fix_bags_bar_anchor(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if BagsBar and MicroButtonAndBagsBar then
-            BagsBar:ClearAllPoints()
-            BagsBar:SetPoint("TOPRIGHT", MicroButtonAndBagsBar, "TOPRIGHT", 0, 0)
-        end
-    "#,
-    );
-}
-
 /// Fix ItemContextOverlay showing on bag buttons after startup events.
 ///
 /// `ItemButton`'s `PostOnShow` calls `UpdateItemContextMatching()` which references
@@ -80,42 +65,61 @@ pub fn fix_bag_item_context_overlay(env: &WowLuaEnv) {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::loader::{discover_blizzard_addons, load_addon};
+    use crate::lua_api::compute_frame_rect;
+    use crate::startup::{fire_one_on_update_tick, fire_startup_events, process_pending_timers};
+    use std::path::PathBuf;
+    use std::time::Duration;
 
     fn env() -> WowLuaEnv {
         WowLuaEnv::new().expect("Failed to create Lua environment")
     }
 
     #[test]
-    fn bag_bar_anchor_is_only_reapplied_when_both_frames_exist() {
-        let env = env();
+    fn bags_bar_reanchor_replay_moves_the_bar_off_its_correct_rect() {
+        let env = full_game_env_after_edit_mode_init();
+
+        let before_anchor = bag_bar_anchor(&env);
+        assert_eq!(
+            (
+                before_anchor.0.clone(),
+                before_anchor.1.clone(),
+                before_anchor.2.clone(),
+            ),
+            (
+                "TOPRIGHT".to_string(),
+                "MicroButtonAndBagsBar".to_string(),
+                "TOPRIGHT".to_string(),
+            )
+        );
+
+        let before_rect = frame_rect(&env, "BagsBar");
+        assert_eq!(before_rect, (1386.0, 1104.0, 208.0, 47.0));
+
         env.exec(
             r#"
-            BagsBar = {
-                clear_calls = 0,
-                anchor_target = nil,
-                ClearAllPoints = function(self)
-                    self.clear_calls = self.clear_calls + 1
-                end,
-                SetPoint = function(self, _, target)
-                    self.anchor_target = target
-                end,
-            }
+            BagsBar:ClearAllPoints()
+            BagsBar:SetPoint("TOPRIGHT", MicroButtonAndBagsBar, "TOPRIGHT", 0, 0)
             "#,
         )
         .unwrap();
+        env.state().borrow_mut().widgets.rebuild_anchor_index();
+        env.state().borrow_mut().ensure_layout_rects();
 
-        fix_bags_bar_anchor(&env);
-        let clear_calls_without_parent: i32 = env.eval("return BagsBar.clear_calls").unwrap();
-        assert_eq!(clear_calls_without_parent, 0);
-
-        env.exec("MicroButtonAndBagsBar = { marker = 'parent' }")
-            .unwrap();
-        fix_bags_bar_anchor(&env);
-        let (clear_calls, anchored_to_parent): (i32, bool) = env
-            .eval("return BagsBar.clear_calls, BagsBar.anchor_target == MicroButtonAndBagsBar")
-            .unwrap();
-        assert_eq!(clear_calls, 1);
-        assert!(anchored_to_parent);
+        let after_anchor = bag_bar_anchor(&env);
+        assert_eq!(
+            after_anchor,
+            (
+                "TOPRIGHT".to_string(),
+                "MicroButtonAndBagsBar".to_string(),
+                "TOPRIGHT".to_string(),
+                0.0,
+                0.0,
+            )
+        );
+        let after_rect = frame_rect(&env, "BagsBar");
+        assert_eq!(after_rect, (1386.0, 1114.0, 208.0, 47.0));
+        assert_ne!(after_rect, before_rect);
     }
 
     #[test]
@@ -242,5 +246,70 @@ mod tests {
         assert!(bag_touched);
         assert_eq!(backpack_result, "dna");
         assert!(backpack_touched);
+    }
+
+    fn blizzard_ui_dir() -> PathBuf {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+    }
+
+    fn full_game_env_after_edit_mode_init() -> WowLuaEnv {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1600.0, 1200.0);
+
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
+        }
+
+        load_all_blizzard_addons(&env);
+        settle_env_after_edit_mode_init(&env);
+
+        env
+    }
+
+    fn load_all_blizzard_addons(env: &WowLuaEnv) {
+        let ui = blizzard_ui_dir();
+        for (name, toc_path) in &discover_blizzard_addons(&ui) {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+        }
+    }
+
+    fn settle_env_after_edit_mode_init(env: &WowLuaEnv) {
+        env.apply_post_load_workarounds();
+        fire_startup_events(env);
+        crate::lua_api::workarounds_editmode::init_edit_mode_layout(env);
+        env.state().borrow_mut().widgets.rebuild_anchor_index();
+        process_pending_timers(env);
+        fire_one_on_update_tick(env);
+        let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+
+        std::thread::sleep(Duration::from_secs(2));
+        for _ in 0..3 {
+            env.state().borrow_mut().ensure_layout_rects();
+            fire_one_on_update_tick(env);
+            process_pending_timers(env);
+        }
+    }
+
+    fn bag_bar_anchor(env: &WowLuaEnv) -> (String, String, String, f32, f32) {
+        env.eval(
+            r#"
+            local point, rel, relPoint, x, y = BagsBar:GetPoint(1)
+            return point, rel:GetName(), relPoint, x, y
+            "#,
+        )
+        .unwrap()
+    }
+
+    fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
+        let state = env.state().borrow();
+        let id = state
+            .widgets
+            .get_id_by_name(name)
+            .unwrap_or_else(|| panic!("Frame '{name}' not found"));
+        let rect = compute_frame_rect(&state.widgets, id, 1600.0, 1200.0);
+        (rect.x, rect.y, rect.width, rect.height)
     }
 }

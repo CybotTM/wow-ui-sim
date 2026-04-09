@@ -18,9 +18,8 @@ use std::rc::Rc;
 /// Apply workarounds that must run after startup events.
 ///
 /// These post-event shims only correct state that Blizzard event handlers can
-/// still undo during startup (for example EditMode re-anchoring managed bars).
+/// still leave inconsistent after startup.
 pub fn apply_post_event(env: &WowLuaEnv) {
-    workarounds_bags::fix_bags_bar_anchor(env);
     workarounds_bags::fix_bag_item_context_overlay(env);
     workarounds_editmode::init_edit_mode_layout(env);
     hide_talent_loadout_dialogs(env);
