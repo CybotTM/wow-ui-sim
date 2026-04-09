@@ -80,10 +80,15 @@ if in.tex_index < 0 {
     color = tex_color * in.color;        // Tinting via vertex color
 }
 
-if (in.flags & 0xFF) == BLEND_ADDITIVE {
-    color.a = min(color.a * 1.5, 1.0);  // Boost additive alpha
+color = vec4f(color.rgb * color.a, color.a);
+if blend_mode == BLEND_ADDITIVE {
+    color.a = 0.0;                       // Preserve dst, add premultiplied src
 }
 ```
+
+Additive quads no longer use the old 1.5x alpha-boost workaround. The shader now premultiplies
+all colors, and additive quads zero their output alpha so the fixed premultiplied-alpha pipeline
+produces `src + dst`.
 
 **Texture Sampling** (lines 80-103):
 - tex_index 0-3: tiered atlas (64/128/256/512 cells)

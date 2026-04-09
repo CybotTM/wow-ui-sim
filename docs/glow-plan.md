@@ -2,41 +2,36 @@
 
 ## Current State
 
-The glow system is structurally present in XML/Lua but visually broken — additive blending never reaches the GPU.
+The old additive-blend blockers are no longer current. XML/Lua/shader support now carries blend
+mode through to the GPU, and the old 1.5x alpha-boost workaround is gone.
 
 ### What works
 
 - **GlowEmitter lifecycle** — `GlowEmitterMixin` + `EffectFactory` create, pool, position and animate glow frames correctly
 - **Animation** — alpha pulses between 0.5–1.0 via animation groups
-- **Shader infrastructure** — `BlendMode::Additive` enum exists in `quad.rs`, vertex `flags` field carries the blend mode, fragment shader reads it
-- **Button highlights** — hardcoded to `BlendMode::Additive` in `render.rs:195,203,211` (only place additive is actually used)
+- **XML blend mode parsing** — texture XML now preserves `alphaMode` / `blendMode`
+- **Runtime blend mode** — `SetBlendMode()` / `GetBlendMode()` now persist raw WoW mode strings on the frame
+- **Shader blending** — additive quads now premultiply color and zero output alpha, which works with the existing premultiplied-alpha pipeline
+- **Button highlights** — still use `BlendMode::Additive`
 
-### What's broken
+### Remaining gaps
 
-1. **`alphaMode` XML attribute ignored** — `TextureXml` (`src/xml/types.rs:540`) has no `alpha_mode` field; `alphaMode="ADD"` in GlowEmitter.xml is silently dropped during deserialization
+1. **`SetBorderBlendMode()` doesn't exist** — `GlowEmitter.lua` calls `self.NineSlice:SetBorderBlendMode("ADD")` but no Rust handler exists
 
-2. **No blend mode on `Frame` struct** — `src/widget/frame.rs:104` has no `blend_mode` field; there's nowhere to store a texture's blend mode in the widget system
+2. **Glow-specific validation is incomplete** — additive blending itself works, but this plan still needs an end-to-end proof that actual glow/nine-slice consumers render correctly
 
-3. **`SetBlendMode()` is a no-op** — `src/lua_api/frame/methods/methods_texture.rs:96` ignores the argument; `GetBlendMode()` always returns `"BLEND"`
-
-4. **`SetBorderBlendMode()` doesn't exist** — `GlowEmitter.lua` calls `self.NineSlice:SetBorderBlendMode("ADD")` but no Rust handler exists
-
-5. **Single GPU pipeline** — `pipeline.rs:101` creates one pipeline with `wgpu::BlendState::ALPHA_BLENDING`; additive quads go through the same blend state as everything else
-
-6. **Shader workaround** — `quad.wgsl:123-128` detects additive flag but can only boost alpha by 1.5x as a hack, since actual GPU blending is always alpha
-
-### Data flow gap
+### Updated data flow
 
 ```
-XML alphaMode="ADD"  ──(dropped)──> TextureXml (no field)
-                                         │
-Lua SetBlendMode()   ──(no-op)───> Frame (no field)
-                                         │
-render.rs            ──(hardcoded)─> QuadBatch.push_*(BlendMode::Alpha)
-                                         │
-                                    QuadVertex.flags = 0 (alpha)
-                                         │
-pipeline.rs          ──(single)───> wgpu BlendState::ALPHA_BLENDING
+XML alphaMode="ADD" / blendMode="ADD" ──> TextureXml
+                                               │
+Lua SetBlendMode()                    ────────> Frame.alpha_mode + Frame.blend_mode
+                                               │
+render.rs / quad builders             ────────> QuadVertex.flags carry blend mode
+                                               │
+quad.wgsl additive path               ────────> premultiply rgb, zero alpha
+                                               │
+pipeline.rs premultiplied alpha       ────────> src + dst for additive quads
 ```
 
 ## Implementation Plan
@@ -175,17 +170,11 @@ if blend_mode == BLEND_ADDITIVE {
 
 With `ALPHA_BLENDING`: `output = src * src.a + dst * (1 - src.a)` becomes `output = (rgb * a) * 0 + dst * (1 - 0) = dst` — that's wrong. This doesn't work. **Option A is required.**
 
-### Step 7: Remove shader workaround
+### Step 7: Removed
 
-**File:** `src/render/shader/quad.wgsl:119-128`
-
-Remove the alpha boost hack once real additive blending works:
-```wgsl
-// Remove this block:
-if blend_mode == BLEND_ADDITIVE {
-    color.a = min(color.a * 1.5, 1.0);
-}
-```
+The old shader workaround is already gone. `quad.wgsl` now uses the correct additive path:
+premultiply color, then set `alpha = 0.0` for additive quads so the premultiplied-alpha pipeline
+preserves destination color while adding source light.
 
 ### Step 8: Stub `SetBorderBlendMode`
 
