@@ -45,12 +45,24 @@ fn register_unit_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()>
         lua.create_function(create_unit_buff_tooltip)?,
     )?;
     table.set(
+        "GetUnitBuffByAuraInstanceID",
+        lua.create_function(create_unit_buff_by_aura_instance_id_tooltip)?,
+    )?;
+    table.set(
         "GetUnitDebuff",
         lua.create_function(create_unit_debuff_tooltip)?,
     )?;
     table.set(
+        "GetUnitDebuffByAuraInstanceID",
+        lua.create_function(create_unit_debuff_by_aura_instance_id_tooltip)?,
+    )?;
+    table.set(
         "GetUnitAura",
         lua.create_function(create_unit_aura_tooltip)?,
+    )?;
+    table.set(
+        "GetUnitAuraByAuraInstanceID",
+        lua.create_function(create_unit_aura_by_aura_instance_id_tooltip)?,
     )?;
     Ok(())
 }
@@ -178,19 +190,35 @@ fn create_unit_buff_tooltip(
     lua: &Lua,
     (unit, index, filter): (String, i32, Option<String>),
 ) -> Result<Value> {
-    const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
-
-    let Some(aura) = lookup_player_aura_for_tooltip(lua, &unit, index, filter.as_deref()) else {
-        return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA);
-    };
-    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_UNIT_AURA, |lines| {
-        append_aura_tooltip_lines(lua, aura, lines)
-    })
+    let aura = lookup_player_aura_for_tooltip(lua, &unit, index, filter.as_deref());
+    build_unit_aura_tooltip(lua, aura)
 }
 
 fn create_unit_debuff_tooltip(
     lua: &Lua,
     (_unit, _index, _filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
+
+    build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA)
+}
+
+fn create_unit_buff_by_aura_instance_id_tooltip(
+    lua: &Lua,
+    (unit, aura_instance_id, filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    let aura = lookup_player_buff_by_aura_instance_id_for_tooltip(
+        lua,
+        &unit,
+        aura_instance_id,
+        filter.as_deref(),
+    );
+    build_unit_aura_tooltip(lua, aura)
+}
+
+fn create_unit_debuff_by_aura_instance_id_tooltip(
+    lua: &Lua,
+    (_unit, _aura_instance_id, _filter): (String, i32, Option<String>),
 ) -> Result<Value> {
     const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
 
@@ -206,6 +234,28 @@ fn create_unit_aura_tooltip(
     }
 
     create_unit_buff_tooltip(lua, (unit, index, filter))
+}
+
+fn create_unit_aura_by_aura_instance_id_tooltip(
+    lua: &Lua,
+    (unit, aura_instance_id, _filter): (String, i32, Option<String>),
+) -> Result<Value> {
+    let aura = lookup_player_aura_by_instance_id_for_tooltip(lua, &unit, aura_instance_id);
+    build_unit_aura_tooltip(lua, aura)
+}
+
+fn build_unit_aura_tooltip(
+    lua: &Lua,
+    aura: Option<crate::lua_api::game_data::AuraInfo>,
+) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_UNIT_AURA: i32 = 7;
+
+    let Some(aura) = aura else {
+        return build_empty_tooltip(lua, TOOLTIP_DATA_TYPE_UNIT_AURA);
+    };
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_UNIT_AURA, |lines| {
+        append_aura_tooltip_lines(lua, aura, lines)
+    })
 }
 
 fn build_empty_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {
@@ -291,6 +341,38 @@ fn lookup_player_aura_for_tooltip(
     let state_rc = crate::lua_api::frame::get_sim_state(lua);
     let state = state_rc.borrow();
     state.player.buffs.get((index - 1) as usize).cloned()
+}
+
+fn lookup_player_buff_by_aura_instance_id_for_tooltip(
+    lua: &Lua,
+    unit: &str,
+    aura_instance_id: i32,
+    filter: Option<&str>,
+) -> Option<crate::lua_api::game_data::AuraInfo> {
+    if should_skip_player_aura_tooltip(unit, aura_instance_id, filter) {
+        return None;
+    }
+
+    lookup_player_aura_by_instance_id_for_tooltip(lua, unit, aura_instance_id)
+}
+
+fn lookup_player_aura_by_instance_id_for_tooltip(
+    lua: &Lua,
+    unit: &str,
+    aura_instance_id: i32,
+) -> Option<crate::lua_api::game_data::AuraInfo> {
+    if unit != "player" || aura_instance_id < 1 {
+        return None;
+    }
+
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .player
+        .buffs
+        .iter()
+        .find(|aura| aura.aura_instance_id == aura_instance_id)
+        .cloned()
 }
 
 fn append_aura_tooltip_lines(

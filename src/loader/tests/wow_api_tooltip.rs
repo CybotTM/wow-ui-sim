@@ -141,8 +141,11 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetUnitBuff("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+        tooltipShapeOk(C_TooltipInfo.GetUnitBuffByAuraInstanceID("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
         tooltipShapeOk(C_TooltipInfo.GetUnitDebuff("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
+        tooltipShapeOk(C_TooltipInfo.GetUnitDebuffByAuraInstanceID("player", 1, "HARMFUL"), Enum.TooltipDataType.UnitAura, true),
         tooltipShapeOk(C_TooltipInfo.GetUnitAura("player", 1, "HELPFUL"), Enum.TooltipDataType.UnitAura, false),
+        tooltipShapeOk(C_TooltipInfo.GetUnitAuraByAuraInstanceID("player", 1), Enum.TooltipDataType.UnitAura, false),
         tooltipShapeOk(C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r"), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetHyperlink(GetSpellLink(19750)), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetUnit("player"), Enum.TooltipDataType.Unit, false),
@@ -449,6 +452,51 @@ fn test_c_tooltip_info_get_unit_debuff_returns_empty_without_simulated_debuffs()
     assert!(
         is_empty_tooltip,
         "C_TooltipInfo.GetUnitDebuff should return an empty UnitAura tooltip when no debuffs exist",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_unit_aura_instance_getters_return_expected_tooltips() {
+    let env = WowLuaEnv::new().unwrap();
+    seed_c_tooltip_info_test_state(&env);
+
+    let has_expected_tooltips: bool = env
+        .eval(
+            r#"
+            local buffTooltip = C_TooltipInfo.GetUnitBuffByAuraInstanceID("player", 1, "HELPFUL")
+            local auraTooltip = C_TooltipInfo.GetUnitAuraByAuraInstanceID("player", 1)
+            local debuffTooltip = C_TooltipInfo.GetUnitDebuffByAuraInstanceID("player", 1, "HARMFUL")
+
+            local buffNameLine = buffTooltip and buffTooltip.lines and buffTooltip.lines[1]
+            local buffDurationLine = buffTooltip and buffTooltip.lines and buffTooltip.lines[2]
+            local auraNameLine = auraTooltip and auraTooltip.lines and auraTooltip.lines[1]
+            local auraDurationLine = auraTooltip and auraTooltip.lines and auraTooltip.lines[2]
+            local debuffIsEmpty = debuffTooltip
+                and debuffTooltip.type == Enum.TooltipDataType.UnitAura
+                and debuffTooltip.lines
+                and next(debuffTooltip.lines) == nil
+
+            return buffTooltip
+                and buffTooltip.type == Enum.TooltipDataType.UnitAura
+                and buffNameLine
+                and buffNameLine.type == Enum.TooltipDataLineType.SpellName
+                and buffNameLine.leftText == "Flash of Light"
+                and buffDurationLine
+                and buffDurationLine.leftText == "1 hr"
+                and auraTooltip
+                and auraTooltip.type == Enum.TooltipDataType.UnitAura
+                and auraNameLine
+                and auraNameLine.type == Enum.TooltipDataLineType.SpellName
+                and auraNameLine.leftText == "Flash of Light"
+                and auraDurationLine
+                and auraDurationLine.leftText == "1 hr"
+                and debuffIsEmpty
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_expected_tooltips,
+        "C_TooltipInfo aura-instance-ID getters should resolve helpful auras and return an empty debuff tooltip when no debuffs exist",
     );
 }
 
