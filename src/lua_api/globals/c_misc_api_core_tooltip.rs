@@ -20,6 +20,13 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
 }
 
 fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    register_item_tooltip_overrides(lua, table)?;
+    register_spell_tooltip_overrides(lua, table)?;
+    register_world_tooltip_overrides(lua, table)?;
+    Ok(())
+}
+
+fn register_item_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.set(
         "GetTraitEntry",
         lua.create_function(create_trait_entry_tooltip)?,
@@ -27,9 +34,17 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
     table.set("GetAction", lua.create_function(create_action_tooltip)?)?;
     table.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
     table.set(
+        "GetItemByGUID",
+        lua.create_function(create_item_by_guid_tooltip)?,
+    )?;
+    table.set(
         "GetInventoryItem",
         lua.create_function(create_inventory_item_tooltip)?,
     )?;
+    Ok(())
+}
+
+fn register_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.set(
         "GetSpellBookItem",
         lua.create_function(create_spell_book_item_tooltip)?,
@@ -39,6 +54,10 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
         "GetHyperlink",
         lua.create_function(create_hyperlink_tooltip)?,
     )?;
+    Ok(())
+}
+
+fn register_world_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.set(
         "GetWorldCursor",
         lua.create_function(create_world_cursor_tooltip)?,
@@ -143,6 +162,19 @@ fn create_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
     })
 }
 
+fn create_item_by_guid_tooltip(lua: &Lua, guid: String) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item_id) = bag_item_id_from_guid(lua, &guid) else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    let Value::Table(tooltip) = create_item_tooltip(lua, item_id as i32)? else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    tooltip.set("guid", guid)?;
+    Ok(Value::Table(tooltip))
+}
+
 fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
     const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
 
@@ -209,6 +241,16 @@ fn create_world_loot_spell_tooltip(lua: &Lua, world_loot_guid: &str) -> Result<V
     tooltip.set("id", WORLD_LOOT_TOOLTIP_SPELL_ID)?;
     tooltip.set("worldLootObjectGUID", world_loot_guid)?;
     Ok(Value::Table(tooltip))
+}
+
+fn bag_item_id_from_guid(lua: &Lua, guid: &str) -> Option<u32> {
+    let (bag, slot, item_id) = super::c_item_location_api::parse_item_guid(guid)?;
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .get_bag_item(bag, slot)
+        .filter(|(state_item_id, _)| *state_item_id == item_id)
+        .map(|(state_item_id, _)| state_item_id)
 }
 
 fn create_unit_tooltip(lua: &Lua, (unit, _hide_status): (String, Option<bool>)) -> Result<Value> {

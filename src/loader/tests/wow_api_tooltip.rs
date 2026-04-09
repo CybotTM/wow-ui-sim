@@ -137,6 +137,7 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetTraitEntry(entryID, 1), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetItemByGUID(C_Item.GetItemGUID({ bagID = 0, slotIndex = 1 })), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
@@ -263,6 +264,41 @@ fn test_c_tooltip_info_get_item_by_id_returns_item_tooltip_lines() {
         "Entombed Seraph's Greaves",
         "Legs",
         "C_TooltipInfo.GetItemByID should expose item, item-level, and equip-slot lines",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_item_by_guid_returns_bag_item_tooltip_and_guid() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local guid = C_Item.GetItemGUID({ bagID = 0, slotIndex = 1 })
+            local tooltip = C_TooltipInfo.GetItemByGUID(guid)
+            if not guid or guid == "" or not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local bindingLine = tooltip.lines[3]
+
+            return tooltip.guid == guid
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Hearthstone"
+                and itemLevelLine
+                and itemLevelLine.type == Enum.TooltipDataLineType.ItemLevel
+                and itemLevelLine.leftText == "Item Level 1"
+                and bindingLine
+                and bindingLine.type == Enum.TooltipDataLineType.ItemBinding
+                and bindingLine.leftText == ITEM_BIND_ON_PICKUP
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetItemByGUID should return bag-item tooltip data and preserve the GUID",
     );
 }
 

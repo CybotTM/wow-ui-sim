@@ -264,6 +264,36 @@ fn test_world_loot_object_tooltip_shows_world_loot_data() {
     assert!(!td.lines[0].left_text.is_empty());
 }
 
+#[test]
+fn test_tooltip_comparison_manager_get_comparison_item_data_uses_guid_lookup() {
+    let env = setup_full_env();
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            assert(type(TooltipComparisonManager) == "table", "TooltipComparisonManager should be loaded")
+
+            local guid = C_Item.GetItemGUID({ bagID = 0, slotIndex = 1 })
+            local tooltipData = TooltipComparisonManager:GetComparisonItemData({ guid = guid })
+            if not guid or guid == "" or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            return tooltipData.guid == guid
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Hearthstone"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_real_tooltip,
+        "TooltipComparisonManager should resolve GUID-backed comparison items through C_TooltipInfo.GetItemByGUID",
+    );
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]

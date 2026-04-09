@@ -20,6 +20,22 @@ fn extract_bag_slot(loc: &Value) -> Option<(i32, i32)> {
     None
 }
 
+pub(crate) fn item_guid_for_bag_slot(bag: i32, slot: i32, item_id: u32) -> String {
+    format!("item-{bag}-{slot}-{item_id}")
+}
+
+pub(crate) fn parse_item_guid(guid: &str) -> Option<(i32, i32, u32)> {
+    let mut parts = guid.split('-');
+    let prefix = parts.next()?;
+    let bag = parts.next()?.parse().ok()?;
+    let slot = parts.next()?.parse().ok()?;
+    let item_id = parts.next()?.parse().ok()?;
+    if prefix != "item" || parts.next().is_some() {
+        return None;
+    }
+    Some((bag, slot, item_id))
+}
+
 /// Check if an item exists at the given location in state.
 fn item_exists_at(state: &SimState, loc: &Value) -> bool {
     extract_bag_slot(loc).is_some_and(|(b, s)| state.get_bag_item(b, s).is_some())
@@ -52,13 +68,7 @@ fn register_does_item_exist(
 }
 
 fn register_does_item_exist_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set(
-        "DoesItemExistByID",
-        lua.create_function(|_, item_id: Value| {
-            let id = super::c_item_api::parse_item_id(&item_id);
-            Ok(id > 0 && crate::items::get_item(id as u32).is_some())
-        })?,
-    )
+    register_item_id_existence_query(lua, t, "DoesItemExistByID")
 }
 
 fn register_is_item_data_cached(
@@ -73,8 +83,12 @@ fn register_is_item_data_cached(
 }
 
 fn register_is_item_data_cached_by_id(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_item_id_existence_query(lua, t, "IsItemDataCachedByID")
+}
+
+fn register_item_id_existence_query(lua: &Lua, t: &mlua::Table, name: &str) -> Result<()> {
     t.set(
-        "IsItemDataCachedByID",
+        name,
         lua.create_function(|_, item_id: Value| {
             let id = super::c_item_api::parse_item_id(&item_id);
             Ok(id > 0 && crate::items::get_item(id as u32).is_some())
@@ -91,7 +105,7 @@ fn register_get_item_guid(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState
                     state
                         .borrow()
                         .get_bag_item(b, s)
-                        .map(|(id, _)| format!("item-{}-{}-{}", b, s, id))
+                        .map(|(id, _)| item_guid_for_bag_slot(b, s, id))
                 })
                 .unwrap_or_default();
             Ok(Value::String(lua.create_string(&guid)?))
