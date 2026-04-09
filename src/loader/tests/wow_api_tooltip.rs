@@ -149,6 +149,7 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetHyperlink("|cff0070dd|Hitem:211992:0:0:0:0:0:0:0:0:0|h[Entombed Seraph's Greaves]|h|r"), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetHyperlink(GetSpellLink(19750)), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetWorldCursor(), Enum.TooltipDataType.Spell, false),
+        tooltipShapeOk(C_TooltipInfo.GetWorldLootObject("player"), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetUnit("player"), Enum.TooltipDataType.Unit, false),
     }
 
@@ -669,6 +670,35 @@ fn test_c_tooltip_info_get_world_cursor_returns_spell_tooltip_with_world_loot_fi
     assert!(
         has_real_tooltip,
         "C_TooltipInfo.GetWorldCursor should expose a spell tooltip plus world-loot cursor metadata",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_world_loot_object_returns_spell_tooltip_with_world_loot_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetWorldLootObject("player")
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Spell or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            return nameLine
+                and nameLine.type == Enum.TooltipDataLineType.SpellName
+                and type(nameLine.leftText) == "string"
+                and nameLine.leftText ~= ""
+                and type(tooltip.worldLootObjectInventoryType) == "number"
+                and type(tooltip.id) == "number"
+                and type(tooltip.worldLootObjectGUID) == "string"
+                and tooltip.worldLootObjectGUID ~= ""
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetWorldLootObject should expose a spell tooltip plus world-loot object metadata",
     );
 }
 

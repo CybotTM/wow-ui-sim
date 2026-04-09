@@ -4,6 +4,10 @@ use crate::lua_api::tooltip::{
     parse_item_id_from_hyperlink, parse_spell_id_from_hyperlink, strip_html_tags,
 };
 
+const WORLD_LOOT_TOOLTIP_SPELL_ID: i32 = 19750;
+const WORLD_LOOT_TOOLTIP_INVENTORY_TYPE: i32 = 13;
+const WORLD_CURSOR_GUID: &str = "WorldLootObject-0000-0000C0DE";
+
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     let tooltip_info: mlua::Table = globals
@@ -38,6 +42,10 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
     table.set(
         "GetWorldCursor",
         lua.create_function(create_world_cursor_tooltip)?,
+    )?;
+    table.set(
+        "GetWorldLootObject",
+        lua.create_function(create_world_loot_object_tooltip)?,
     )?;
     Ok(())
 }
@@ -177,17 +185,29 @@ fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
 }
 
 fn create_world_cursor_tooltip(lua: &Lua, _: ()) -> Result<Value> {
-    const WORLD_CURSOR_SPELL_ID: i32 = 19750;
-    const WORLD_CURSOR_INVENTORY_TYPE: i32 = 13;
-    const WORLD_CURSOR_GUID: &str = "WorldLootObject-0000-0000C0DE";
+    create_world_loot_spell_tooltip(lua, WORLD_CURSOR_GUID)
+}
 
-    let tooltip = create_spell_tooltip(lua, WORLD_CURSOR_SPELL_ID)?;
+fn create_world_loot_object_tooltip(lua: &Lua, unit: String) -> Result<Value> {
+    if unit != "player" {
+        return Ok(Value::Nil);
+    }
+
+    let world_loot_guid = format!("WorldLootObject-{unit}");
+    create_world_loot_spell_tooltip(lua, &world_loot_guid)
+}
+
+fn create_world_loot_spell_tooltip(lua: &Lua, world_loot_guid: &str) -> Result<Value> {
+    let tooltip = create_spell_tooltip(lua, WORLD_LOOT_TOOLTIP_SPELL_ID)?;
     let Value::Table(tooltip) = tooltip else {
         return build_empty_tooltip(lua, 1);
     };
-    tooltip.set("worldLootObjectInventoryType", WORLD_CURSOR_INVENTORY_TYPE)?;
-    tooltip.set("id", WORLD_CURSOR_SPELL_ID)?;
-    tooltip.set("worldLootObjectGUID", WORLD_CURSOR_GUID)?;
+    tooltip.set(
+        "worldLootObjectInventoryType",
+        WORLD_LOOT_TOOLTIP_INVENTORY_TYPE,
+    )?;
+    tooltip.set("id", WORLD_LOOT_TOOLTIP_SPELL_ID)?;
+    tooltip.set("worldLootObjectGUID", world_loot_guid)?;
     Ok(Value::Table(tooltip))
 }
 

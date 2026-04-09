@@ -219,6 +219,51 @@ fn test_world_cursor_tooltip_shows_world_cursor_data() {
     assert!(!td.lines[0].left_text.is_empty());
 }
 
+#[test]
+fn test_world_loot_object_tooltip_shows_world_loot_data() {
+    let env = setup_full_env();
+
+    env.exec(
+        r#"
+        GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+        assert(GameTooltip.SetWorldLootObject, "GameTooltip:SetWorldLootObject should exist")
+        local shown = GameTooltip:SetWorldLootObject("player")
+        assert(shown == true, "SetWorldLootObject should report success for the supported unit")
+        "#,
+    )
+    .expect("Failed to show the world loot object tooltip");
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    let getter_name: String = env
+        .eval(
+            r#"
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            return info and info.getterName or ""
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        visible,
+        "GameTooltip should be visible after SetWorldLootObject"
+    );
+    assert!(
+        num_lines >= 1,
+        "GameTooltip should have world-loot tooltip lines, got {}",
+        num_lines
+    );
+    assert_eq!(getter_name, "GetWorldLootObject");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state
+        .tooltips
+        .get(&gt_id)
+        .expect("tooltip data should exist after SetWorldLootObject");
+    assert!(!td.lines[0].left_text.is_empty());
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]
