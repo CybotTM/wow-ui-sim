@@ -231,6 +231,57 @@ fn test_colorselect_rgb_to_hsv_conversion() {
     );
 }
 
+#[test]
+fn test_statusbar_texture_and_color_methods_still_resolve() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local sb = CreateFrame("StatusBar", "TestStatusBarMethods", UIParent)
+        sb:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+        sb:SetStatusBarColor(0.1, 0.2, 0.3, 0.4)
+        sb:SetFillStyle("REVERSE")
+    "#,
+    )
+    .unwrap();
+
+    let has_texture: bool = env
+        .eval("return type(TestStatusBarMethods:GetStatusBarTexture()) == 'table'")
+        .unwrap();
+    assert!(
+        has_texture,
+        "StatusBar should expose StatusBarTexture child"
+    );
+
+    let (r, g, b, a): (f32, f32, f32, f32) = env
+        .eval("return TestStatusBarMethods:GetStatusBarColor()")
+        .unwrap();
+    assert!((r - 0.1).abs() < 0.001);
+    assert!((g - 0.2).abs() < 0.001);
+    assert!((b - 0.3).abs() < 0.001);
+    assert!((a - 0.4).abs() < 0.001);
+}
+
+#[test]
+fn test_player_model_methods_still_resolve() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local pm = CreateFrame("PlayerModel", "TestPlayerModelMethods", UIParent)
+            return type(pm.ApplySpellVisualKit) == "function",
+                   type(pm.SetKeepModelOnHide) == "function",
+                   type(pm.GetDisplayInfo) == "function"
+            "#,
+        )
+        .unwrap();
+
+    assert!(result.0, "PlayerModel should expose ApplySpellVisualKit");
+    assert!(result.1, "PlayerModel should expose SetKeepModelOnHide");
+    assert!(result.2, "PlayerModel should expose GetDisplayInfo");
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

@@ -1,5 +1,5 @@
 //! Widget-specific methods: GameTooltip, EditBox, Slider, StatusBar, CheckButton,
-//! Cooldown, ScrollFrame, Model, ColorSelect, dragging/moving, ScrollBox.
+//! Cooldown, ScrollFrame, Model, PlayerModel, ColorSelect, dragging/moving, ScrollBox.
 //!
 //! Each widget type is implemented in its own submodule under `widget_*.rs`.
 
@@ -11,13 +11,14 @@ pub fn add_widget_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     super::widget_message_frame::add_message_frame_methods(methods);
     super::widget_editbox::add_editbox_methods(methods);
     super::widget_slider::add_slider_methods(methods);
-    super::widget_slider::add_statusbar_methods(methods);
+    super::widget_statusbar::add_statusbar_methods(methods);
     super::widget_slider::add_checkbutton_methods(methods);
     super::widget_cooldown::add_cooldown_methods(methods);
     super::widget_scroll::add_scrollframe_methods(methods);
     super::widget_model::add_model_methods(methods);
+    super::widget_player_model::add_player_model_methods(methods);
     super::widget_model::add_model_scene_methods(methods);
-    super::widget_misc::add_colorselect_methods(methods);
+    super::widget_colorselect::add_colorselect_methods(methods);
     super::widget_misc::add_drag_methods(methods);
     super::widget_scroll::add_scrollbox_methods(methods);
     super::widget_misc::add_simplehtml_methods(methods);

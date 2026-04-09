@@ -26,13 +26,16 @@ mod methods_texture;
 mod methods_texture_visual;
 pub(crate) mod methods_visibility;
 mod methods_widget;
+mod widget_colorselect;
 mod widget_cooldown;
 mod widget_editbox;
 mod widget_message_frame;
 mod widget_misc;
 mod widget_model;
+mod widget_player_model;
 mod widget_scroll;
 mod widget_slider;
+mod widget_statusbar;
 mod widget_tooltip;
 mod widget_tooltip_data;
 

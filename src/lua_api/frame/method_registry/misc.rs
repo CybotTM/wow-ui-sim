@@ -51,6 +51,7 @@ pub static SIMPLEHTML_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|
         "GetShadowColor",
         "GetShadowOffset",
         "GetSpacing",
+        "GetText",
         "GetTextColor",
         "GetTextData",
         "GetWindow",

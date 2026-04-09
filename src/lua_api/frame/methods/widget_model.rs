@@ -11,7 +11,6 @@ pub fn add_model_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_model_camera_stubs(methods);
     add_model_transform_extra_stubs(methods);
     add_model_rendering_extra_stubs(methods);
-    add_player_model_stubs(methods);
 }
 
 fn add_model_transform_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -240,39 +239,6 @@ fn add_model_i64_getter<M: mlua::UserDataMethods<FrameRef>>(
     value: i64,
 ) {
     methods.add_method(name, move |_, _this, ()| Ok(value));
-}
-
-fn add_player_model_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "ApplySpellVisualKit",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("CanSetUnit", |_, _this, ()| Ok(false));
-    methods.add_method(
-        "FreezeAnimation",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("GetDisplayInfo", |_, _this, ()| Ok(0i64));
-    methods.add_method("GetDoBlend", |_, _this, ()| Ok(false));
-    methods.add_method("GetKeepModelOnHide", |_, _this, ()| Ok(false));
-    methods.add_method("HasAnimation", |_, _this, ()| Ok(false));
-    methods.add_method("PlayAnimKit", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method(
-        "SetBarberShopAlternateForm",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("SetDoBlend", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetItem", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetItemAppearance", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
-    methods.add_method("SetKeepModelOnHide", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
-    methods.add_method("StopAnimKit", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("ZeroCachedCenterXY", |_, _this, _args: mlua::MultiValue| {
-        Ok(())
-    });
 }
 
 /// Native ModelScene methods (C++ side in WoW, stubs here).
