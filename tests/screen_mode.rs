@@ -62,3 +62,34 @@ fn character_create_screen_updates_glue_login_state() {
     assert_eq!(wow_connection_state, 0);
     assert!(!has_realm_list);
 }
+
+#[test]
+fn screen_size_globals_follow_canvas_dimensions() {
+    let env = WowLuaEnv::new().unwrap();
+    env.set_screen_size(813.0, 822.0);
+
+    let (width, height, physical_width, physical_height): (f64, f64, i32, i32) = env
+        .eval(
+            r#"
+        return GetScreenWidth(), GetScreenHeight(), GetPhysicalScreenSize()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(width, 813.0);
+    assert_eq!(height, 822.0);
+    assert_eq!(physical_width, 813);
+    assert_eq!(physical_height, 822);
+
+    env.set_screen_size(1646.0, 822.0);
+    let (width, height, physical_width, physical_height): (f64, f64, i32, i32) = env
+        .eval(
+            r#"
+        return GetScreenWidth(), GetScreenHeight(), GetPhysicalScreenSize()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(width, 1646.0);
+    assert_eq!(height, 822.0);
+    assert_eq!(physical_width, 1646);
+    assert_eq!(physical_height, 822);
+}
