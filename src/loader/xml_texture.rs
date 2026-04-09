@@ -80,27 +80,35 @@ fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
     let Some(color) = &texture.color else {
         return String::new();
     };
+    let uses_texture_source = texture.file.is_some() || texture.atlas.is_some();
+    let color_method = if uses_texture_source {
+        "SetVertexColor"
+    } else {
+        "SetColorTexture"
+    };
     if let Some(name) = &color.color {
         format!(
             r#"
         do
             local c = {name}
             if c then
-                tex:SetColorTexture(c:GetRGBA())
+                tex:{color_method}(c:GetRGBA())
             end
         end
         "#,
-            name = name
+            name = name,
+            color_method = color_method
         )
     } else {
         format!(
             r#"
-        tex:SetVertexColor({}, {}, {}, {})
+        tex:{color_method}({}, {}, {}, {})
         "#,
             color.r.unwrap_or(1.0),
             color.g.unwrap_or(1.0),
             color.b.unwrap_or(1.0),
-            color.a.unwrap_or(1.0)
+            color.a.unwrap_or(1.0),
+            color_method = color_method
         )
     }
 }

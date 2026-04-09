@@ -296,11 +296,25 @@ fn append_texture_source(
     }
 }
 
-/// Append `SetColorTexture` or `SetVertexColor` from a `<Color>` XML element.
-fn append_color_code(code: &mut String, color: &crate::xml::ColorXml, var: &str) {
+/// Append texture tinting from a `<Color>` XML element.
+///
+/// Textured regions should keep their file/atlas and use `SetVertexColor`.
+/// Untextured regions use `SetColorTexture` to become a solid fill.
+fn append_color_code(
+    code: &mut String,
+    texture: &crate::xml::TextureXml,
+    color: &crate::xml::ColorXml,
+    var: &str,
+) {
+    let uses_texture_source = texture.file.is_some() || texture.atlas.is_some();
     if let Some(name) = &color.color {
+        let color_method = if uses_texture_source {
+            "SetVertexColor"
+        } else {
+            "SetColorTexture"
+        };
         code.push_str(&format!(
-            "            do local c = {name} if c then {var}:SetColorTexture(c:GetRGBA()) end end\n",
+            "            do local c = {name} if c then {var}:{color_method}(c:GetRGBA()) end end\n",
         ));
     } else {
         let (r, g, b, a) = (
@@ -309,8 +323,13 @@ fn append_color_code(code: &mut String, color: &crate::xml::ColorXml, var: &str)
             color.b.unwrap_or(1.0),
             color.a.unwrap_or(1.0),
         );
+        let color_method = if uses_texture_source {
+            "SetVertexColor"
+        } else {
+            "SetColorTexture"
+        };
         code.push_str(&format!(
-            "            {var}:SetColorTexture({r}, {g}, {b}, {a})\n"
+            "            {var}:{color_method}({r}, {g}, {b}, {a})\n"
         ));
     }
 }
@@ -350,7 +369,7 @@ pub(super) fn append_texture_properties(
     }
     append_texture_source(code, texture, var, is_mask);
     if let Some(color) = &texture.color {
-        append_color_code(code, color, var);
+        append_color_code(code, texture, color, var);
     }
     if let Some(ref grad) = texture.gradient {
         append_gradient_code(code, grad, var);

@@ -227,6 +227,31 @@ fn professions_primary_spell_button_spell_id(env: &WowLuaEnv, button_name: &str)
     env.eval::<i32>(&code).unwrap_or(0)
 }
 
+fn professions_primary_spell_button_nameframe_texture(
+    env: &WowLuaEnv,
+    button_name: &str,
+) -> String {
+    let primary_expr = professions_primary_frame_expr();
+    let code = format!(
+        r#"
+        local primary = {primary_expr}
+        if not primary or not primary.{button_name} then
+            return ""
+        end
+        local frame_name = primary.{button_name}:GetName()
+        if not frame_name then
+            return ""
+        end
+        local name_frame = _G[frame_name .. "NameFrame"]
+        if not name_frame or not name_frame.GetTexture then
+            return ""
+        end
+        return name_frame:GetTexture() or ""
+        "#
+    );
+    env.eval::<String>(&code).unwrap_or_default()
+}
+
 #[test]
 fn micro_menu_character_button_opens_character_frame() {
     let env = setup_env();
@@ -283,6 +308,17 @@ fn micro_menu_professions_button_loads_and_opens_panel() {
     assert_eq!(
         second_spell, 2657,
         "SpellButton2 should resolve to Smelt Copper"
+    );
+
+    let first_nameframe = professions_primary_spell_button_nameframe_texture(&env, "SpellButton1");
+    let second_nameframe = professions_primary_spell_button_nameframe_texture(&env, "SpellButton2");
+    assert_eq!(
+        first_nameframe, "Interface\\Spellbook\\ProfessionsBook",
+        "SpellButton1 name frame should keep its textured parchment background"
+    );
+    assert_eq!(
+        second_nameframe, "Interface\\Spellbook\\ProfessionsBook",
+        "SpellButton2 name frame should keep its textured parchment background"
     );
 }
 
