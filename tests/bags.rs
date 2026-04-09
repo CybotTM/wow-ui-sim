@@ -15,10 +15,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -62,10 +59,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    (
-        "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil_Mainline.toc",
-    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -112,6 +106,7 @@ fn setup_env() -> WowLuaEnv {
         }
     }
 
+    load_token_ui(&env);
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
     env
@@ -141,6 +136,24 @@ fn fire_startup_events(env: &WowLuaEnv) {
     ] {
         let _ = env.fire_event(event);
     }
+}
+
+fn load_token_ui(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        local loaded, reason = LoadAddOn("Blizzard_TokenUI")
+        assert(loaded, "LoadAddOn(Blizzard_TokenUI) failed: " .. tostring(reason))
+        if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
+            ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
+        end
+        assert(BackpackTokenFrame, "BackpackTokenFrame should exist after loading Blizzard_TokenUI")
+        assert(
+            ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker == BackpackTokenFrame,
+            "ContainerFrameSettingsManager should own BackpackTokenFrame after loading Blizzard_TokenUI"
+        )
+        "#,
+    )
+    .expect("Failed to runtime-load Blizzard_TokenUI for bag tests");
 }
 
 fn install_test_error_handler(env: &WowLuaEnv) {
@@ -253,6 +266,29 @@ fn assert_backpack_item_count(env: &WowLuaEnv, expected: i32) {
         populated_slots, expected,
         "Backpack populated slot count mismatch"
     );
+}
+
+#[test]
+fn test_bag_env_loads_real_backpack_token_tracker() {
+    let env = setup_env();
+
+    let (tracker_is_real_frame, tracker_matches_backpack_frame, addon_loaded): (bool, bool, bool) =
+        env.eval(
+            r#"
+            local tracker = ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker
+            return type(tracker) == "table"
+                and type(tracker.UpdateIfVisible) == "function"
+                and type(tracker.GetMaxTokensWatched) == "function",
+                tracker == BackpackTokenFrame,
+                C_AddOns and C_AddOns.IsAddOnLoaded
+                    and C_AddOns.IsAddOnLoaded("Blizzard_TokenUI") or false
+            "#,
+        )
+        .unwrap();
+
+    assert!(tracker_is_real_frame);
+    assert!(tracker_matches_backpack_frame);
+    assert!(addon_loaded);
 }
 
 #[test]

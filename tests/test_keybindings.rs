@@ -24,10 +24,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
     ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
     ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
     ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
-    (
-        "Blizzard_SharedXMLGame",
-        "Blizzard_SharedXMLGame_Mainline.toc",
-    ),
+    ("Blizzard_SharedXMLGame", "Blizzard_SharedXMLGame.toc"),
     (
         "Blizzard_UIPanelTemplates",
         "Blizzard_UIPanelTemplates_Mainline.toc",
@@ -71,10 +68,7 @@ const BLIZZARD_ADDONS: &[(&str, &str)] = &[
         "Blizzard_SettingsDefinitions_Frame",
         "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
     ),
-    (
-        "Blizzard_FrameXMLUtil",
-        "Blizzard_FrameXMLUtil_Mainline.toc",
-    ),
+    ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
     ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
     ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
     ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
@@ -124,6 +118,7 @@ fn setup_env() -> WowLuaEnv {
         }
     }
 
+    load_token_ui(&env);
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
     env
@@ -156,10 +151,70 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+fn load_token_ui(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        local loaded, reason = LoadAddOn("Blizzard_TokenUI")
+        assert(loaded, "LoadAddOn(Blizzard_TokenUI) failed: " .. tostring(reason))
+        if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
+            ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
+        end
+        assert(BackpackTokenFrame, "BackpackTokenFrame should exist after loading Blizzard_TokenUI")
+        assert(
+            ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker == BackpackTokenFrame,
+            "ContainerFrameSettingsManager should own BackpackTokenFrame after loading Blizzard_TokenUI"
+        )
+        "#,
+    )
+    .expect("Failed to runtime-load Blizzard_TokenUI for keybinding bag tests");
+}
+
 /// Check whether a global frame exists and is shown.
 fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
     let code = format!("return {frame_name} ~= nil and {frame_name}:IsShown() == true");
     env.eval::<bool>(&code).unwrap_or(false)
+}
+
+fn visible_bag_frames_debug(env: &WowLuaEnv) -> String {
+    env.eval::<String>(
+        r#"
+        local parts = {}
+        local function add(name)
+            local frame = _G[name]
+            if not frame then
+                return
+            end
+            local shown = frame.IsShown and frame:IsShown()
+            local bagID = frame.GetBagID and frame:GetBagID()
+            table.insert(parts, string.format("%s(shown=%s, bagID=%s)", name, tostring(shown), tostring(bagID)))
+        end
+
+        add("ContainerFrameCombinedBags")
+        for i = 1, 6 do
+            add("ContainerFrame" .. i)
+        end
+        return table.concat(parts, ", ")
+    "#,
+    )
+    .unwrap_or_else(|_| "<bag frame introspection failed>".to_string())
+}
+
+fn bag_id_is_shown(env: &WowLuaEnv, bag_id: i32) -> bool {
+    env.eval::<bool>(&format!(
+        r#"
+        if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
+            return true
+        end
+        for i = 1, 6 do
+            local frame = _G["ContainerFrame" .. i]
+            if frame and frame:IsShown() and frame.GetBagID and frame:GetBagID() == {bag_id} then
+                return true
+            end
+        end
+        return false
+    "#
+    ))
+    .unwrap_or(false)
 }
 
 fn frame_is_visible(env: &WowLuaEnv, frame_name: &str) -> bool {
@@ -251,9 +306,9 @@ fn keybind_backspace_opens_backpack() {
         let env = setup_env();
         env.send_key_press("BACKSPACE", None).expect("BACKSPACE keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame1"),
-            "Backpack should be visible after pressing BACKSPACE"
+            bag_id_is_shown(&env, 0),
+            "Backpack should be visible after pressing BACKSPACE; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -266,9 +321,9 @@ fn keybind_f8_opens_bag4() {
         let env = setup_env();
         env.send_key_press("F8", None).expect("F8 keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame5"),
-            "A bag frame should be visible after pressing F8"
+            bag_id_is_shown(&env, 4),
+            "A bag frame should be visible after pressing F8; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -281,9 +336,9 @@ fn keybind_f9_opens_bag3() {
         let env = setup_env();
         env.send_key_press("F9", None).expect("F9 keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame4"),
-            "A bag frame should be visible after pressing F9"
+            bag_id_is_shown(&env, 3),
+            "A bag frame should be visible after pressing F9; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -296,9 +351,9 @@ fn keybind_f10_opens_bag2() {
         let env = setup_env();
         env.send_key_press("F10", None).expect("F10 keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame3"),
-            "A bag frame should be visible after pressing F10"
+            bag_id_is_shown(&env, 2),
+            "A bag frame should be visible after pressing F10; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -311,9 +366,9 @@ fn keybind_f11_opens_bag1() {
         let env = setup_env();
         env.send_key_press("F11", None).expect("F11 keybind failed");
         assert!(
-            frame_is_shown(&env, "ContainerFrameCombinedBags")
-                || frame_is_shown(&env, "ContainerFrame2"),
-            "A bag frame should be visible after pressing F11"
+            bag_id_is_shown(&env, 1),
+            "A bag frame should be visible after pressing F11; {}",
+            visible_bag_frames_debug(&env)
         );
     }
 }
@@ -357,7 +412,7 @@ fn keybind_s_opens_spellbook() {
             frame_is_shown(&env, "PlayerSpellsFrame"),
             "PlayerSpellsFrame should be shown after pressing S"
         );
-        // ShowUIPanel should scale-to-fit and raise strata
+        // ShowUIPanel should scale-to-fit; PlayerSpellsFrame keeps its default strata.
         let scale: f64 = env
             .eval("return PlayerSpellsFrame:GetScale()")
             .expect("GetScale failed");
@@ -368,7 +423,10 @@ fn keybind_s_opens_spellbook() {
         let strata: String = env
             .eval("return PlayerSpellsFrame:GetFrameStrata()")
             .expect("GetFrameStrata failed");
-        assert_eq!(strata, "HIGH", "ShowUIPanel should raise strata to HIGH");
+        assert_eq!(
+            strata, "MEDIUM",
+            "PlayerSpellsFrame should keep its default MEDIUM strata"
+        );
     }
 }
 
