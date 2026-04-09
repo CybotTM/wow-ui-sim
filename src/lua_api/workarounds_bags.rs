@@ -1,23 +1,10 @@
-//! Bag-button workarounds split between load-order recovery and simulator gaps.
+//! Bag-button workarounds for simulator gaps.
 //!
-//! `Blizzard_MainMenuBarBagButtons` loads before `Blizzard_UIPanels_Game` and
-//! `Blizzard_FrameXMLUtil`, so some bag-button setup runs before its Lua-side
-//! dependencies exist. Those cases are legitimate late-initialization recovery.
-//!
-//! The remaining shims are narrower simulator-gap patches. They keep startup
-//! stable but should eventually be replaced by proper addon loading or a more
-//! faithful replay of the missing Blizzard logic.
+//! These are narrower shims that keep startup stable but should eventually be
+//! replaced by proper addon loading or a more faithful replay of the missing
+//! Blizzard logic.
 
 use super::WowLuaEnv;
-
-/// Re-run bag-button setup after the late UI panel dependencies exist.
-///
-/// This is intentional load-order recovery, not a permanent behavior override:
-/// once the missing helpers have loaded, bag-button setup can be replayed.
-pub fn init_bag_bar(env: &WowLuaEnv) {
-    fix_bags_bar_anchor(env);
-    update_bag_button_textures(env);
-}
 
 /// `Blizzard_TokenUI` is an on-demand addon that creates `BackpackTokenFrame`.
 /// `ContainerFrameSettingsManager:SetTokenTrackerOwner()` crashes if
@@ -90,38 +77,6 @@ pub fn fix_bag_item_context_overlay(env: &WowLuaEnv) {
     );
 }
 
-/// Re-run bag button initialization now that PaperDollItemSlotButton_OnLoad exists.
-///
-/// During initial OnLoad, `PaperDollItemSlotButton_OnLoad` was a no-op stub
-/// (Blizzard_UIPanels_Game hadn't loaded yet). Re-run it on each bag button
-/// to set the correct slot ID, backgroundTextureName, etc., then update
-/// textures via `PaperDollItemSlotButton_Update` and `UpdateTextures`.
-/// This is intentional load-order recovery because it replays the same Blizzard
-/// setup after the missing dependency becomes available.
-fn update_bag_button_textures(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not MainMenuBarBagManager or not MainMenuBarBagManager.allBagButtons then
-            return
-        end
-        for _, btn in ipairs(MainMenuBarBagManager.allBagButtons) do
-            -- Backpack has its own OnLoadInternal that doesn't call
-            -- PaperDollItemSlotButton_OnLoad (name pattern doesn't match,
-            -- producing wrong slot ID and head-slot icon texture).
-            local isBackpack = btn:IsBackpack()
-            if not isBackpack and PaperDollItemSlotButton_OnLoad then
-                pcall(PaperDollItemSlotButton_OnLoad, btn)
-            end
-            if not isBackpack and PaperDollItemSlotButton_Update then
-                pcall(PaperDollItemSlotButton_Update, btn)
-            end
-            if btn.UpdateTextures then
-                pcall(btn.UpdateTextures, btn)
-            end
-        end
-    "#,
-    );
-}
 
 #[cfg(test)]
 mod tests {
@@ -162,73 +117,6 @@ mod tests {
             .unwrap();
         assert_eq!(clear_calls, 1);
         assert!(anchored_to_parent);
-    }
-
-    #[test]
-    fn bag_button_texture_recovery_skips_backpack_specific_onload() {
-        let env = env();
-        env.exec(
-            r#"
-            onload_calls = {}
-            update_calls = {}
-            texture_calls = {}
-
-            local function button(name, is_backpack)
-                return {
-                    name = name,
-                    IsBackpack = function() return is_backpack end,
-                    UpdateTextures = function(self)
-                        table.insert(texture_calls, self.name)
-                    end,
-                }
-            end
-
-            MainMenuBarBagManager = {
-                allBagButtons = {
-                    button("BagOne", false),
-                    button("Backpack", true),
-                },
-            }
-
-            PaperDollItemSlotButton_OnLoad = function(btn)
-                table.insert(onload_calls, btn.name)
-            end
-
-            PaperDollItemSlotButton_Update = function(btn)
-                table.insert(update_calls, btn.name)
-            end
-            "#,
-        )
-        .unwrap();
-
-        update_bag_button_textures(&env);
-
-        let (onload_count, first_onload, update_count, first_update, texture_count, second_texture): (
-            i32,
-            String,
-            i32,
-            String,
-            i32,
-            String,
-        ) = env
-            .eval(
-                r#"
-                return #onload_calls,
-                    onload_calls[1],
-                    #update_calls,
-                    update_calls[1],
-                    #texture_calls,
-                    texture_calls[2]
-                "#,
-            )
-            .unwrap();
-
-        assert_eq!(onload_count, 1);
-        assert_eq!(first_onload, "BagOne");
-        assert_eq!(update_count, 1);
-        assert_eq!(first_update, "BagOne");
-        assert_eq!(texture_count, 2);
-        assert_eq!(second_texture, "Backpack");
     }
 
     #[test]
