@@ -615,6 +615,62 @@ fn test_character_slot_hover_tooltip_produces_quads() {
 
 #[cfg(feature = "gui")]
 #[test]
+fn test_character_slot_hover_tooltip_is_positioned_to_right_of_slot() {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+
+    let env = setup_full_env();
+    open_character_panel(&env);
+
+    let slot_id = {
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get_id_by_name("CharacterHeadSlot")
+            .expect("CharacterHeadSlot should exist after opening character panel")
+    };
+
+    env.state().borrow_mut().hovered_frame = Some(slot_id);
+    env.fire_script_handler(slot_id, "OnEnter", vec![]).unwrap();
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    {
+        let mut state = env.state().borrow_mut();
+        let _ = state.widgets.take_render_dirty();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+    }
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let tooltip_rect =
+        wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, gt_id, 1024.0, 768.0);
+    let slot_rect =
+        wow_ui_sim::iced_app::compute_frame_rect(&state.widgets, slot_id, 1024.0, 768.0);
+    let slot_right = slot_rect.x + slot_rect.width;
+    let tooltip_center_y = tooltip_rect.y + tooltip_rect.height / 2.0;
+    let slot_center_y = slot_rect.y + slot_rect.height / 2.0;
+
+    assert!(
+        tooltip_rect.x >= slot_right - 0.1,
+        "Character slot hover tooltip should anchor to the right of the slot: tooltip={:?} slot={:?}",
+        tooltip_rect,
+        slot_rect
+    );
+    assert!(
+        (tooltip_center_y - slot_center_y).abs() <= 1.0,
+        "Character slot hover tooltip should stay vertically centered on the slot: tooltip={:?} slot={:?}",
+        tooltip_rect,
+        slot_rect
+    );
+    assert!(
+        tooltip_rect.x + tooltip_rect.width <= 1024.0 + 0.1,
+        "Tooltip should remain on-screen after character slot hover: tooltip={:?}",
+        tooltip_rect
+    );
+}
+
+#[cfg(feature = "gui")]
+#[test]
 fn test_buff_icon_hover_tooltip_produces_quads() {
     use std::path::PathBuf;
     use wow_ui_sim::render::font::WowFontSystem;
