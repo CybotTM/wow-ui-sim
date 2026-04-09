@@ -138,6 +138,7 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetAction(1), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetItemByGUID(C_Item.GetItemGUID({ bagID = 0, slotIndex = 1 })), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetOwnedItemByID(6948), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
@@ -299,6 +300,41 @@ fn test_c_tooltip_info_get_item_by_guid_returns_bag_item_tooltip_and_guid() {
     assert!(
         has_real_tooltip,
         "C_TooltipInfo.GetItemByGUID should return bag-item tooltip data and preserve the GUID",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_owned_item_by_id_returns_owned_bag_item_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetOwnedItemByID(6948)
+            local missing = C_TooltipInfo.GetOwnedItemByID(229181)
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.Item or not tooltip.lines then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local bindingLine = tooltip.lines[3]
+
+            return missing
+                and missing.type == Enum.TooltipDataType.Item
+                and next(missing.lines) == nil
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Hearthstone"
+                and itemLevelLine
+                and itemLevelLine.leftText == "Item Level 1"
+                and bindingLine
+                and bindingLine.leftText == ITEM_BIND_ON_PICKUP
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetOwnedItemByID should return tooltip data only for items in the player's bags",
     );
 }
 

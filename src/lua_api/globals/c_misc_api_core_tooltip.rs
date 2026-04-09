@@ -34,6 +34,10 @@ fn register_item_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()>
     table.set("GetAction", lua.create_function(create_action_tooltip)?)?;
     table.set("GetItemByID", lua.create_function(create_item_tooltip)?)?;
     table.set(
+        "GetOwnedItemByID",
+        lua.create_function(create_owned_item_tooltip)?,
+    )?;
+    table.set(
         "GetItemByGUID",
         lua.create_function(create_item_by_guid_tooltip)?,
     )?;
@@ -168,11 +172,16 @@ fn create_item_by_guid_tooltip(lua: &Lua, guid: String) -> Result<Value> {
     let Some(item_id) = bag_item_id_from_guid(lua, &guid) else {
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
-    let Value::Table(tooltip) = create_item_tooltip(lua, item_id as i32)? else {
+    add_guid_to_item_tooltip(lua, item_id, guid)
+}
+
+fn create_owned_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some((owned_item_id, guid)) = first_owned_bag_item(lua, item_id as u32) else {
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
-    tooltip.set("guid", guid)?;
-    Ok(Value::Table(tooltip))
+    add_guid_to_item_tooltip(lua, owned_item_id, guid)
 }
 
 fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
@@ -251,6 +260,30 @@ fn bag_item_id_from_guid(lua: &Lua, guid: &str) -> Option<u32> {
         .get_bag_item(bag, slot)
         .filter(|(state_item_id, _)| *state_item_id == item_id)
         .map(|(state_item_id, _)| state_item_id)
+}
+
+fn first_owned_bag_item(lua: &Lua, item_id: u32) -> Option<(u32, String)> {
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .bag_items
+        .iter()
+        .find(|(_, bag_item)| bag_item.item_id == item_id)
+        .map(|((bag, slot), bag_item)| {
+            let guid =
+                super::c_item_location_api::item_guid_for_bag_slot(*bag, *slot, bag_item.item_id);
+            (bag_item.item_id, guid)
+        })
+}
+
+fn add_guid_to_item_tooltip(lua: &Lua, item_id: u32, guid: String) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Value::Table(tooltip) = create_item_tooltip(lua, item_id as i32)? else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    tooltip.set("guid", guid)?;
+    Ok(Value::Table(tooltip))
 }
 
 fn create_unit_tooltip(lua: &Lua, (unit, _hide_status): (String, Option<bool>)) -> Result<Value> {

@@ -294,6 +294,38 @@ fn test_tooltip_comparison_manager_get_comparison_item_data_uses_guid_lookup() {
     );
 }
 
+#[test]
+fn test_tooltip_data_handler_set_owned_item_by_id_uses_owned_item_getter() {
+    let env = setup_full_env();
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            assert(GameTooltip.SetOwnedItemByID, "GameTooltip:SetOwnedItemByID should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            GameTooltip:SetOwnedItemByID(6948)
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            return info.getterName == "GetOwnedItemByID"
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Hearthstone"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_real_tooltip,
+        "TooltipDataHandler should populate GameTooltip:SetOwnedItemByID through C_TooltipInfo.GetOwnedItemByID",
+    );
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]
