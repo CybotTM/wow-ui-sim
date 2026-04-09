@@ -53,7 +53,6 @@ pub fn apply_post_runtime_addon_load_from_lua(
 /// - bootstrap recovery for Blizzard frames that partially initialize
 /// - explicit stubs for WoW runtime objects we do not model yet
 pub fn apply(env: &WowLuaEnv) {
-    super::workarounds_tracker::init_objective_tracker(env);
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
