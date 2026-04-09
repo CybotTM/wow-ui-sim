@@ -725,6 +725,70 @@ fn test_set_anchor_type_reanchors_existing_owned_tooltip() {
 }
 
 #[test]
+fn test_set_anchor_type_repositions_existing_owned_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "SetAnchorTypeLayoutOwner", UIParent)
+        owner:SetSize(100, 30)
+        owner:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 260, -180)
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT", 5, 10)
+    "#,
+    )
+    .unwrap();
+
+    let (tooltip_id, screen_width, screen_height, before_rect) = {
+        let state = env.state().borrow();
+        let tooltip_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let before_rect = compute_frame_rect(
+            &state.widgets,
+            tooltip_id,
+            state.screen_width,
+            state.screen_height,
+        );
+        (
+            tooltip_id,
+            state.screen_width,
+            state.screen_height,
+            before_rect,
+        )
+    };
+
+    env.exec(r#"GameTooltip:SetAnchorType("ANCHOR_TOPLEFT", 7, 9)"#)
+        .unwrap();
+
+    let (after_rect, owner_rect) = {
+        let state = env.state().borrow();
+        let owner_id = state
+            .widgets
+            .get_id_by_name("SetAnchorTypeLayoutOwner")
+            .unwrap();
+        let after_rect =
+            compute_frame_rect(&state.widgets, tooltip_id, screen_width, screen_height);
+        let owner_rect = compute_frame_rect(&state.widgets, owner_id, screen_width, screen_height);
+        (after_rect, owner_rect)
+    };
+
+    let is_owned: bool = env
+        .eval("return GameTooltip:IsOwned(SetAnchorTypeLayoutOwner)")
+        .unwrap();
+    assert!(is_owned, "SetAnchorType should keep the existing owner");
+    assert!(
+        (after_rect.x - before_rect.x).abs() > 0.1 || (after_rect.y - before_rect.y).abs() > 0.1,
+        "SetAnchorType should move the tooltip to the new anchor position"
+    );
+    assert!(
+        (after_rect.x - (owner_rect.x + 7.0)).abs() < 0.1,
+        "ANCHOR_TOPLEFT should align tooltip left edge with the owner left edge"
+    );
+    assert!(
+        (after_rect.y + after_rect.height - (owner_rect.y - 9.0)).abs() < 0.1,
+        "ANCHOR_TOPLEFT should place the tooltip above the owner using the provided y offset"
+    );
+}
+
+#[test]
 fn test_tooltip_anchor_cursor_uses_absolute_position() {
     let env = WowLuaEnv::new().unwrap();
 
