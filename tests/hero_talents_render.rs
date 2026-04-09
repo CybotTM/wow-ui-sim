@@ -148,6 +148,36 @@ fn assert_rgb_close(actual: [u8; 4], expected: [u8; 4], tolerance: u8, label: &s
     }
 }
 
+fn diff_bounds(
+    before: &RgbaImage,
+    after: &RgbaImage,
+    per_channel_tolerance: u8,
+) -> Option<(u32, u32, u32, u32)> {
+    let mut min_x = u32::MAX;
+    let mut min_y = u32::MAX;
+    let mut max_x = 0;
+    let mut max_y = 0;
+    let mut found = false;
+
+    for y in 0..before.height() {
+        for x in 0..before.width() {
+            let lhs = before.get_pixel(x, y).0;
+            let rhs = after.get_pixel(x, y).0;
+            let differs =
+                (0..4).any(|channel| lhs[channel].abs_diff(rhs[channel]) > per_channel_tolerance);
+            if differs {
+                min_x = min_x.min(x);
+                min_y = min_y.min(y);
+                max_x = max_x.max(x);
+                max_y = max_y.max(y);
+                found = true;
+            }
+        }
+    }
+
+    found.then_some((min_x, min_y, max_x, max_y))
+}
+
 #[test]
 fn hero_spec_icon_and_mask_quads_match_layout_rect() {
     let env = setup_full_ui();
@@ -449,4 +479,111 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
             &format!("HeroSpecButton.Icon1 full render sample {label}"),
         );
     }
+}
+
+#[test]
+fn hiding_hero_talents_container_only_changes_top_center_region() {
+    if common::try_create_gpu_device().is_none() {
+        eprintln!("Skipping GPU diff test: no adapter available");
+        return;
+    }
+
+    let env = setup_full_ui();
+    open_class_talent_frame(&env);
+    env.set_screen_size(1600.0, 1200.0);
+
+    let (hero_container_id, hero_rect) = {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let player_spells_id = state
+            .widgets
+            .get_id_by_name("PlayerSpellsFrame")
+            .expect("PlayerSpellsFrame should exist");
+        let talents_frame_id = *state
+            .widgets
+            .get(player_spells_id)
+            .and_then(|frame| frame.children_keys.get("TalentsFrame"))
+            .expect("TalentsFrame child should exist");
+        let hero_container_id = *state
+            .widgets
+            .get(talents_frame_id)
+            .and_then(|frame| frame.children_keys.get("HeroTalentsContainer"))
+            .expect("HeroTalentsContainer child should exist");
+        let hero_rect = wow_ui_sim::iced_app::compute_frame_rect(
+            &state.widgets,
+            hero_container_id,
+            1600.0,
+            1200.0,
+        );
+        (hero_container_id, hero_rect)
+    };
+
+    let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
+    let visible_batch = {
+        let buckets = {
+            let mut state = env.state().borrow_mut();
+            let _ = state.get_strata_buckets();
+            state.strata_buckets.as_ref().unwrap().clone()
+        };
+        let state = env.state().borrow();
+        build_quad_batch_for_registry(
+            &state.widgets,
+            (1600.0, 1200.0),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            &buckets,
+        )
+    };
+    let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1600, 1200, None);
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.set_frame_visible(hero_container_id, false);
+        state.ensure_layout_rects();
+    }
+
+    let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
+    let hidden_batch = {
+        let buckets = {
+            let mut state = env.state().borrow_mut();
+            let _ = state.get_strata_buckets();
+            state.strata_buckets.as_ref().unwrap().clone()
+        };
+        let state = env.state().borrow();
+        build_quad_batch_for_registry(
+            &state.widgets,
+            (1600.0, 1200.0),
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            &buckets,
+        )
+    };
+    let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1600, 1200, None);
+
+    let diff = diff_bounds(&visible_render, &hidden_render, 12)
+        .expect("hiding HeroTalentsContainer should change rendered pixels");
+    let expanded_left = (hero_rect.x - 160.0).max(0.0);
+    let expanded_top = (hero_rect.y - 160.0).max(0.0);
+    let expanded_right = hero_rect.x + hero_rect.width + 160.0;
+    let expanded_bottom = hero_rect.y + hero_rect.height + 160.0;
+
+    assert!(
+        diff.0 as f32 >= expanded_left
+            && diff.1 as f32 >= expanded_top
+            && diff.2 as f32 <= expanded_right
+            && diff.3 as f32 <= expanded_bottom,
+        "Hiding HeroTalentsContainer should only affect the hero panel region: diff={diff:?} hero_rect={hero_rect:?}"
+    );
+    assert!(
+        !(1000 >= diff.0 && 1000 <= diff.2 && 610 >= diff.1 && 610 <= diff.3),
+        "Historical bottom-right artifact point should not be affected by hiding HeroTalentsContainer: diff={diff:?}"
+    );
 }
