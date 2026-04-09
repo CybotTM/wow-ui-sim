@@ -20,7 +20,6 @@ use std::rc::Rc;
 /// These post-event shims only correct state that Blizzard event handlers can
 /// still leave inconsistent after startup.
 pub fn apply_post_event(env: &WowLuaEnv) {
-    workarounds_bags::fix_bag_item_context_overlay(env);
     workarounds_editmode::init_edit_mode_layout(env);
     hide_talent_loadout_dialogs(env);
     suppress_spellbook_tutorials(env);

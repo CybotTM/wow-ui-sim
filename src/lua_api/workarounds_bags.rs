@@ -27,41 +27,6 @@ pub fn init_bag_token_tracker(env: &WowLuaEnv) {
     );
 }
 
-/// Fix ItemContextOverlay showing on bag buttons after startup events.
-///
-/// `ItemButton`'s `PostOnShow` calls `UpdateItemContextMatching()` which references
-/// `ItemButtonUtil` (from `Blizzard_FrameXMLUtil`). But bag buttons load before
-/// `Blizzard_FrameXMLUtil`, so `PostOnShow` errors out and `itemContextMatchResult`
-/// stays nil. When `PLAYER_ENTERING_WORLD` later triggers `SetMatchesSearch` →
-/// `GetItemContextOverlayMode`, `nil ~= DoesNotApply` evaluates to true, showing
-/// a black 80% opacity overlay on each bag icon. Re-run `UpdateItemContextMatching`
-/// after events so `itemContextMatchResult` is properly set to `DoesNotApply`.
-///
-/// This is still a simulator-gap shim because it patches the final state instead
-/// of replaying the original `PostOnShow` path once `ItemButtonUtil` exists.
-pub fn fix_bag_item_context_overlay(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local dna = ItemButtonUtil and ItemButtonUtil.ItemContextMatchResult
-            and ItemButtonUtil.ItemContextMatchResult.DoesNotApply
-        if not dna then return end
-        local function fixBtn(btn)
-            if not btn then return end
-            btn.itemContextMatchResult = dna
-            if btn.UpdateItemContextOverlay then
-                pcall(btn.UpdateItemContextOverlay, btn)
-            end
-        end
-        if MainMenuBarBagManager and MainMenuBarBagManager.allBagButtons then
-            for _, btn in ipairs(MainMenuBarBagManager.allBagButtons) do
-                fixBtn(btn)
-            end
-        end
-        fixBtn(MainMenuBarBackpackButton)
-    "#,
-    );
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -185,67 +150,35 @@ mod tests {
     }
 
     #[test]
-    fn item_context_overlay_fix_only_runs_when_match_result_is_available() {
-        let env = env();
-        env.exec(
-            r#"
-            MainMenuBarBagManager = {
-                allBagButtons = {
-                    { touched = false, UpdateItemContextOverlay = function(self) self.touched = true end },
-                },
-            }
-            MainMenuBarBackpackButton = {
-                touched = false,
-                UpdateItemContextOverlay = function(self) self.touched = true end,
-            }
-            "#,
-        )
-        .unwrap();
+    fn main_menu_bag_buttons_have_correct_item_context_without_overlay_replay() {
+        let env = full_game_env_after_edit_mode_init();
 
-        fix_bag_item_context_overlay(&env);
-        let (bag_touched, backpack_touched): (bool, bool) = env
+        let (
+            util_exists,
+            bag_match_is_dna,
+            backpack_match_is_dna,
+            bag_overlay_hidden,
+            backpack_overlay_hidden,
+        ): (bool, bool, bool, bool, bool) = env
             .eval(
                 r#"
-                return MainMenuBarBagManager.allBagButtons[1].touched,
-                    MainMenuBarBackpackButton.touched
+                local dna = ItemButtonUtil and ItemButtonUtil.ItemContextMatchResult
+                    and ItemButtonUtil.ItemContextMatchResult.DoesNotApply
+                local bag = MainMenuBarBagManager and MainMenuBarBagManager.allBagButtons
+                    and MainMenuBarBagManager.allBagButtons[1]
+                return type(ItemButtonUtil) == "table",
+                    bag and bag.itemContextMatchResult == dna or false,
+                    MainMenuBarBackpackButton.itemContextMatchResult == dna,
+                    bag and bag:GetItemContextOverlayMode() == nil or false,
+                    MainMenuBarBackpackButton:GetItemContextOverlayMode() == nil
                 "#,
             )
             .unwrap();
-        assert!(!bag_touched);
-        assert!(!backpack_touched);
-
-        env.exec(
-            r#"
-            ItemButtonUtil = {
-                ItemContextMatchResult = {
-                    DoesNotApply = "dna",
-                },
-            }
-            "#,
-        )
-        .unwrap();
-        fix_bag_item_context_overlay(&env);
-
-        let (bag_result, bag_touched, backpack_result, backpack_touched): (
-            String,
-            bool,
-            String,
-            bool,
-        ) = env
-            .eval(
-                r#"
-                local bag = MainMenuBarBagManager.allBagButtons[1]
-                return bag.itemContextMatchResult,
-                    bag.touched,
-                    MainMenuBarBackpackButton.itemContextMatchResult,
-                    MainMenuBarBackpackButton.touched
-                "#,
-            )
-            .unwrap();
-        assert_eq!(bag_result, "dna");
-        assert!(bag_touched);
-        assert_eq!(backpack_result, "dna");
-        assert!(backpack_touched);
+        assert!(util_exists);
+        assert!(bag_match_is_dna);
+        assert!(backpack_match_is_dna);
+        assert!(bag_overlay_hidden);
+        assert!(backpack_overlay_hidden);
     }
 
     fn blizzard_ui_dir() -> PathBuf {

@@ -99,6 +99,69 @@ fn test_uipanels_game_loads_before_bag_buttons() {
     }
 }
 
+/// Blizzard_ItemButton currently loads before Blizzard_FrameXMLUtil, so
+/// ItemButtonMixin:PostOnShow can run before ItemButtonUtil exists.
+#[test]
+fn test_item_button_loads_before_framexmlutil() {
+    test_timeout! {
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+
+        let names: Vec<&str> = addons.iter().map(|(n, _)| n.as_str()).collect();
+
+        let item_button_pos = names.iter().position(|&n| n == "Blizzard_ItemButton");
+        let framexmlutil_pos = names.iter().position(|&n| n == "Blizzard_FrameXMLUtil");
+
+        assert!(
+            item_button_pos.is_some(),
+            "Blizzard_ItemButton should be in the addon list"
+        );
+        assert!(
+            framexmlutil_pos.is_some(),
+            "Blizzard_FrameXMLUtil should be in the addon list"
+        );
+
+        assert!(
+            item_button_pos.unwrap() < framexmlutil_pos.unwrap(),
+            "Blizzard_ItemButton (pos {}) must currently load before Blizzard_FrameXMLUtil (pos {})",
+            item_button_pos.unwrap(),
+            framexmlutil_pos.unwrap(),
+        );
+    }
+}
+
+/// When Blizzard_ItemButton has loaded but Blizzard_FrameXMLUtil has not,
+/// ItemButtonMixin exists but ItemButtonUtil still does not.
+#[test]
+fn test_item_button_mixin_exists_before_item_button_util() {
+    test_timeout! {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let ui = blizzard_ui_dir();
+        let addons = discover_blizzard_addons(&ui);
+
+        for (name, toc_path) in &addons {
+            load_addon(&env.loader_env(), toc_path).ok();
+            if name == "Blizzard_ItemButton" {
+                break;
+            }
+        }
+
+        let (has_item_button_mixin, has_item_button_util): (bool, bool) = env
+            .eval(
+                r#"
+                return type(ItemButtonMixin) == "table",
+                    type(ItemButtonUtil) == "table"
+                "#,
+            )
+            .unwrap();
+        assert!(has_item_button_mixin);
+        assert!(
+            !has_item_button_util,
+            "ItemButtonUtil should still be unavailable when Blizzard_ItemButton finishes loading"
+        );
+    }
+}
+
 /// Snapshot of the full resolved Blizzard addon load order.
 ///
 /// If the topological sort algorithm changes and reorders addons, this test
