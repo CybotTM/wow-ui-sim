@@ -24,7 +24,7 @@ pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, val_to_f32};
 
 const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
-const TOOLTIP_VARIADIC_STUBS: &[&str] = &["SetFrameStack", "SetShrinkToFitWrapped"];
+const TOOLTIP_VARIADIC_STUBS: &[&str] = &["SetFrameStack"];
 
 pub fn add_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_tooltip_setup_methods(methods);
@@ -49,6 +49,7 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_copy_tooltip_method(methods);
     add_set_allow_show_with_no_lines_method(methods);
     add_set_custom_word_wrap_min_width_method(methods);
+    add_set_shrink_to_fit_wrapped_method(methods);
     add_clear_lines_method(methods);
 }
 
@@ -139,6 +140,23 @@ fn add_set_custom_word_wrap_min_width_method<M: mlua::UserDataMethods<FrameRef>>
         let mut state = state_rc.borrow_mut();
         if let Some(td) = state.tooltips.get_mut(&id) {
             td.custom_word_wrap_min_width = Some(width as f32);
+        }
+        state.widgets.mark_rect_dirty(id);
+        state.widgets.mark_visual_dirty(id);
+        Ok(())
+    });
+}
+
+fn add_set_shrink_to_fit_wrapped_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetShrinkToFitWrapped", |lua, this, value: bool| {
+        let id = this.0;
+        if let Some((func, self_val)) = get_mixin_override(lua, id, "SetShrinkToFitWrapped") {
+            return func.call::<Value>((self_val, value)).map(|_| ());
+        }
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&id) {
+            td.shrink_to_fit_wrapped = value;
         }
         state.widgets.mark_rect_dirty(id);
         state.widgets.mark_visual_dirty(id);

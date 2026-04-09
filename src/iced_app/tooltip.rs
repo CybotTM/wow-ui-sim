@@ -118,7 +118,7 @@ fn measure_tooltip_content_width(
         max_width = max_width.max(wrapped_min_width);
     }
     for (i, line) in td.lines.iter().enumerate() {
-        if line.wrap {
+        if line.wrap && td.shrink_to_fit_wrapped {
             continue;
         }
         let font_size = tooltip_line_font_size(i);

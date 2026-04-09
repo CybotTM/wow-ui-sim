@@ -1,0 +1,38 @@
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+#[test]
+fn test_set_shrink_to_fit_wrapped_false_keeps_wrapped_line_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "ShrinkWrappedOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_NONE")
+        GameTooltip:SetShrinkToFitWrapped(false)
+        GameTooltip:AddLine("This is a wrapped-only tooltip body that should keep its natural width when shrink-to-fit-wrapped is disabled.", 1, 1, 1, true)
+        GameTooltip:Show()
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert!(
+        frame.width > 200.0,
+        "SetShrinkToFitWrapped(false) should let wrapped lines contribute to tooltip width, got {}",
+        frame.width
+    );
+}
+
+fn update_tooltip_sizes(env: &WowLuaEnv) {
+    use std::path::PathBuf;
+    use wow_ui_sim::render::font::WowFontSystem;
+
+    let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+    let mut state = env.state().borrow_mut();
+    wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
+}
