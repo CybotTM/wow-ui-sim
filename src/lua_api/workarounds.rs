@@ -1,12 +1,6 @@
 //! Post-load Lua workarounds for Blizzard code that still depends on
 //! simulator gaps or partial OnLoad recovery.
 //!
-//! These helpers are intentionally narrow. They are kept only where the
-//! underlying Blizzard code still expects either:
-//! - a C++-backed object we do not implement yet (`GlowEmitterFactory`)
-//! - a frame/template child that can be nil after partial addon load
-//! - a startup ordering side effect that the simulator does not fully replay
-//!
 //! If a shim stops being necessary, remove it rather than broadening it.
 
 use super::workarounds_editmode;
@@ -54,7 +48,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
-    init_raid_frame_divider_pools(env);
     guard_lfg_backfill_cover(env);
 }
 
@@ -87,25 +80,6 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         r#"
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK, true)
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE, true)
-    "#,
-    );
-}
-
-/// CompactRaidFrameManager's OnLoad fails before creating divider pools
-/// (line 160), leaving `dividerVerticalPool`/`dividerHorizontalPool` nil.
-/// UpdateOptionsFlowContainer (line 473) then crashes accessing them.
-/// Initialize the pools if OnLoad didn't get far enough. Retained as partial
-/// OnLoad recovery, not as a general raid-frame behavior override.
-fn init_raid_frame_divider_pools(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        local mgr = CompactRaidFrameManager
-        if mgr and not mgr.dividerVerticalPool then
-            mgr.dividerVerticalPool = CreateTexturePool(mgr, "ARTWORK", 0, "CRFManagerDividerVertical")
-        end
-        if mgr and not mgr.dividerHorizontalPool then
-            mgr.dividerHorizontalPool = CreateTexturePool(mgr, "ARTWORK", 0, "CRFManagerDividerHorizontal")
-        end
     "#,
     );
 }
@@ -154,40 +128,6 @@ mod tests {
         );
         assert!(!last_force);
         assert!(same_self);
-    }
-
-    #[test]
-    fn raid_frame_pool_init_only_fills_missing_pools() {
-        let env = env();
-        env.exec(
-            r#"
-            created = {}
-            local existing = { marker = "existing" }
-            CompactRaidFrameManager = {
-                dividerVerticalPool = existing,
-                dividerHorizontalPool = nil,
-            }
-            CreateTexturePool = function(_, layer, sublevel, template)
-                table.insert(created, template)
-                return { layer = layer, sublevel = sublevel, template = template }
-            end
-            "#,
-        )
-        .unwrap();
-
-        init_raid_frame_divider_pools(&env);
-        let (vertical_marker, horizontal_template, created_count): (String, String, i32) = env
-            .eval(
-                r#"
-                return CompactRaidFrameManager.dividerVerticalPool.marker,
-                    CompactRaidFrameManager.dividerHorizontalPool.template,
-                    #created
-                "#,
-            )
-            .unwrap();
-        assert_eq!(vertical_marker, "existing");
-        assert_eq!(horizontal_template, "CRFManagerDividerHorizontal");
-        assert_eq!(created_count, 1);
     }
 
     #[test]
