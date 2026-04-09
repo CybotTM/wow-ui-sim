@@ -15,9 +15,26 @@ fn diff_c_functions_path() -> PathBuf {
         .join("diff_c_functions_missing.txt")
 }
 
+fn diff_c_functions_extra_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("docs")
+        .join("wow-client-diff")
+        .join("diff_c_functions_extra.txt")
+}
+
 fn read_missing_c_functions() -> BTreeSet<String> {
     fs::read_to_string(diff_c_functions_path())
         .expect("failed to read diff_c_functions_missing.txt")
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(ToOwned::to_owned)
+        .collect()
+}
+
+fn read_extra_c_functions() -> BTreeSet<String> {
+    fs::read_to_string(diff_c_functions_extra_path())
+        .expect("failed to read diff_c_functions_extra.txt")
         .lines()
         .map(str::trim)
         .filter(|line| !line.is_empty())
@@ -95,4 +112,49 @@ fn reconciled_high_impact_c_functions_exist_at_runtime() {
         result, "ok",
         "High-impact C_* functions should exist at runtime"
     );
+}
+
+#[test]
+fn diff_c_functions_extra_excludes_current_documented_or_ui_only_features() {
+    let extra = read_extra_c_functions();
+    let expected_absent = [
+        "C_CinematicList.GetUICinematicList",
+        "C_ContributionCollector.GetContributionCollector",
+        "C_EditMode.ConvertLayoutInfoToHyperlink",
+        "C_MountJournal.Summon",
+        "C_MythicPlus.GetOverallDungeonScore",
+        "C_Reputation.GetFactionInfo",
+        "C_Scenario.GetCriteriaInfo",
+        "C_TradeSkillUI.GetTradeSkillLine",
+        "C_VoiceChat.IsSpeakingText",
+    ];
+
+    for function_name in expected_absent {
+        assert!(
+            !extra.contains(function_name),
+            "{function_name} should not remain in diff_c_functions_extra.txt"
+        );
+    }
+}
+
+#[test]
+fn diff_c_functions_extra_retains_intentional_compat_and_legacy_surfaces() {
+    let extra = read_extra_c_functions();
+    let expected_present = [
+        "C_CombatLog.GetEntryCount",
+        "C_CombatLogSecure.SeekToNewestEntry",
+        "C_Login.GetLastError",
+        "C_MacOptions.IsInputMonitoringEnabled",
+        "C_NamePlate.SetNamePlateEnemySize",
+        "C_PingSecure.SendPing",
+        "C_UnitAurasPrivate.GetAuraDataBySlot",
+        "C_Who.SendWho",
+    ];
+
+    for function_name in expected_present {
+        assert!(
+            extra.contains(function_name),
+            "{function_name} should remain in diff_c_functions_extra.txt"
+        );
+    }
 }

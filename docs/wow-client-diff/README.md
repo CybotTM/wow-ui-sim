@@ -430,7 +430,19 @@ DejunkBindings, etc.) that leaked into the discovery scan. The real sim extras a
 look for non-addon-prefixed names. Examples of likely real extras: `GetNumTotemSlots`, `GetWorldDeltaSeconds`,
 `FindSpellByName`, `FormatTooltipNumber`, `GetPlayerInfo`, `ResolvePrefixedChannelName`.
 
-**Extra C_* functions** (152 in `diff_c_functions_extra.txt`):
-These are functions the sim registered under C_* namespaces that don't exist in live WoW. Many are
-under the extra namespaces above. Review to determine if they're renamed, moved to different namespaces,
-or genuinely absent from live WoW and should be removed.
+**Extra C_* functions** (119 in `diff_c_functions_extra.txt`):
+This file is now curated, not a raw discovery dump. It intentionally keeps only compatibility and
+legacy surfaces that the simulator still exposes on purpose:
+- renamed or moved API shims such as older `C_AchievementInfo`, `C_ActionBar`, `C_Calendar`, `C_Guild`,
+  `C_Macro`, `C_Mail`, `C_PlayerChoice`, `C_PlayerInfo`, `C_Tutorial`, and `C_Who` wrappers
+- intentionally kept legacy/private hooks such as `C_PingSecure`, `C_UnitAurasPrivate`, `C_NamePlate`,
+  `C_CombatLog`, `C_CombatLogSecure`, and `C_MacOptions`
+- simulator-side Blizzard UI compatibility shims such as `C_Login`, `C_Minimap`, `C_Sound`,
+  `C_Transmog*`, and `C_ScenarioInfo`
+
+Stale false positives that are already documented in Blizzard APIDocumentation or directly referenced
+by Blizzard UI were removed from the file during this audit. Examples removed from the raw dump:
+`C_CinematicList.GetUICinematicList`, `C_EditMode.ConvertLayoutInfoToHyperlink`,
+`C_ContributionCollector.GetContributionCollector`, `C_MountJournal.Summon`,
+`C_TradeSkillUI.GetTradeSkillLine`, `C_MythicPlus.GetOverallDungeonScore`,
+`C_Reputation.GetFactionInfo`, `C_Scenario.GetCriteriaInfo`, and `C_VoiceChat.IsSpeakingText`.
