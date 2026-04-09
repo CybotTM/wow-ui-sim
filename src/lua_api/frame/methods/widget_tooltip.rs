@@ -15,7 +15,7 @@ use crate::lua_api::tooltip::{
 use mlua::Value;
 use widget_tooltip_helpers::{
     add_double_line_impl, add_get_line_methods, add_tooltip_info_methods,
-    add_tooltip_state_methods, set_owner_impl,
+    add_tooltip_state_methods, set_anchor_type_impl, set_owner_impl,
 };
 
 pub use super::widget_tooltip_data::set_unit_for_tooltip;
@@ -26,7 +26,6 @@ const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
     "CopyTooltip",
     "SetAllowShowWithNoLines",
-    "SetAnchorType",
     "SetCustomWordWrapMinWidth",
     "SetFrameStack",
     "SetObjectTooltipPosition",
@@ -60,6 +59,18 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
                 .map(|_| ());
         }
         set_owner_impl(lua, id, args)
+    });
+
+    methods.add_method("SetAnchorType", |lua, this, args: mlua::Variadic<Value>| {
+        let id = this.0;
+        if let Some((func, self_val)) = get_mixin_override(lua, id, "SetAnchorType") {
+            let mut call_args = vec![self_val];
+            call_args.extend(args);
+            return func
+                .call::<Value>(mlua::MultiValue::from_iter(call_args))
+                .map(|_| ());
+        }
+        set_anchor_type_impl(lua, id, args)
     });
 
     methods.add_method("ClearLines", |lua, this, ()| {

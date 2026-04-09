@@ -530,6 +530,47 @@ fn test_tooltip_anchor_preserve_keeps_existing_anchor_when_reowned() {
 }
 
 #[test]
+fn test_set_anchor_type_reanchors_existing_owned_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "SetAnchorTypeOwner", UIParent)
+        owner:SetSize(100, 30)
+        owner:SetPoint("CENTER")
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT", 5, 10)
+        GameTooltip:SetAnchorType("ANCHOR_TOPLEFT", 7, 9)
+    "#,
+    )
+    .unwrap();
+
+    let tooltip_anchor: String = env.eval("return GameTooltip:GetAnchorType()").unwrap();
+    assert_eq!(tooltip_anchor, "ANCHOR_TOPLEFT");
+
+    let is_owned: bool = env
+        .eval("return GameTooltip:IsOwned(SetAnchorTypeOwner)")
+        .unwrap();
+    assert!(is_owned, "SetAnchorType should not change the owner");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let owner_id = state.widgets.get_id_by_name("SetAnchorTypeOwner").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(
+        frame.anchors.len(),
+        1,
+        "SetAnchorType should rebuild the tooltip anchor"
+    );
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::BottomLeft);
+    assert_eq!(anchor.relative_point, AnchorPoint::TopLeft);
+    assert_eq!(anchor.relative_to_id, Some(owner_id as usize));
+    assert!((anchor.x_offset - 7.0).abs() < 0.1);
+    assert!((anchor.y_offset - 9.0).abs() < 0.1);
+}
+
+#[test]
 fn test_tooltip_anchor_cursor_uses_absolute_position() {
     let env = WowLuaEnv::new().unwrap();
 

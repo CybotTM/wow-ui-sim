@@ -257,6 +257,25 @@ pub(crate) fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -
     Ok(())
 }
 
+pub(crate) fn set_anchor_type_impl(
+    lua: &mlua::Lua,
+    id: u64,
+    args: mlua::Variadic<Value>,
+) -> mlua::Result<()> {
+    let (anchor, x_offset, y_offset) = parse_set_anchor_type_args(lua, args)?;
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let owner_id = match state.tooltips.get_mut(&id) {
+        Some(td) => {
+            td.anchor_type = anchor.clone();
+            td.owner_id
+        }
+        None => return Ok(()),
+    };
+    position_tooltip(&mut state, id, owner_id, &anchor, x_offset, y_offset);
+    Ok(())
+}
+
 /// Parse SetOwner arguments: owner, anchor type (with validation), x/y offsets.
 fn parse_set_owner_args(
     lua: &mlua::Lua,
@@ -271,27 +290,54 @@ fn parse_set_owner_args(
             ));
         }
     };
-    let anchor = match args_iter.next() {
-        Some(Value::String(s)) => {
-            let s = s.to_string_lossy().to_string();
-            if is_valid_anchor_type(&s) {
-                s
-            } else {
-                crate::lua_api::script_helpers::call_error_handler(
-                    lua,
-                    &format!(
-                        "SetOwner: invalid anchor type '{}', defaulting to ANCHOR_LEFT",
-                        s
-                    ),
-                );
-                "ANCHOR_LEFT".to_string()
-            }
-        }
-        _ => "ANCHOR_LEFT".to_string(),
-    };
+    let anchor = parse_anchor_type_or_default(lua, args_iter.next(), "SetOwner");
     let x_offset = val_to_f32(args_iter.next(), 0.0);
     let y_offset = val_to_f32(args_iter.next(), 0.0);
     Ok((extract_frame_id(&owner_val), anchor, x_offset, y_offset))
+}
+
+fn parse_set_anchor_type_args(
+    lua: &mlua::Lua,
+    args: mlua::Variadic<Value>,
+) -> mlua::Result<(String, f32, f32)> {
+    let mut args_iter = args.into_iter();
+    let anchor = match args_iter.next() {
+        Some(value @ Value::String(_)) => {
+            parse_anchor_type_or_default(lua, Some(value), "SetAnchorType")
+        }
+        _ => {
+            return Err(mlua::Error::runtime(
+                "Usage: GameTooltip:SetAnchorType(anchor[, xOffset, yOffset])",
+            ));
+        }
+    };
+    let x_offset = val_to_f32(args_iter.next(), 0.0);
+    let y_offset = val_to_f32(args_iter.next(), 0.0);
+    Ok((anchor, x_offset, y_offset))
+}
+
+fn parse_anchor_type_or_default(
+    lua: &mlua::Lua,
+    value: Option<Value>,
+    caller_name: &str,
+) -> String {
+    match value {
+        Some(Value::String(s)) => {
+            let anchor = s.to_string_lossy().to_string();
+            if is_valid_anchor_type(&anchor) {
+                return anchor;
+            }
+            crate::lua_api::script_helpers::call_error_handler(
+                lua,
+                &format!(
+                    "{caller_name}: invalid anchor type '{}', defaulting to ANCHOR_LEFT",
+                    anchor
+                ),
+            );
+            "ANCHOR_LEFT".to_string()
+        }
+        _ => "ANCHOR_LEFT".to_string(),
+    }
 }
 
 fn is_valid_anchor_type(s: &str) -> bool {
