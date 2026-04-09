@@ -35,6 +35,10 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
         "GetHyperlink",
         lua.create_function(create_hyperlink_tooltip)?,
     )?;
+    table.set(
+        "GetWorldCursor",
+        lua.create_function(create_world_cursor_tooltip)?,
+    )?;
     Ok(())
 }
 
@@ -170,6 +174,21 @@ fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
     }
 
     build_empty_tooltip(lua, 0)
+}
+
+fn create_world_cursor_tooltip(lua: &Lua, _: ()) -> Result<Value> {
+    const WORLD_CURSOR_SPELL_ID: i32 = 19750;
+    const WORLD_CURSOR_INVENTORY_TYPE: i32 = 13;
+    const WORLD_CURSOR_GUID: &str = "WorldLootObject-0000-0000C0DE";
+
+    let tooltip = create_spell_tooltip(lua, WORLD_CURSOR_SPELL_ID)?;
+    let Value::Table(tooltip) = tooltip else {
+        return build_empty_tooltip(lua, 1);
+    };
+    tooltip.set("worldLootObjectInventoryType", WORLD_CURSOR_INVENTORY_TYPE)?;
+    tooltip.set("id", WORLD_CURSOR_SPELL_ID)?;
+    tooltip.set("worldLootObjectGUID", WORLD_CURSOR_GUID)?;
+    Ok(Value::Table(tooltip))
 }
 
 fn create_unit_tooltip(lua: &Lua, (unit, _hide_status): (String, Option<bool>)) -> Result<Value> {

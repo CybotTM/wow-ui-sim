@@ -176,6 +176,49 @@ fn test_buff_icon_hover_shows_aura_tooltip() {
     assert_eq!(td.lines[0].left_text, expected_name);
 }
 
+#[test]
+fn test_world_cursor_tooltip_shows_world_cursor_data() {
+    let env = setup_full_env();
+
+    env.exec(
+        r#"
+        assert(GameTooltip.SetWorldCursor, "GameTooltip:SetWorldCursor should exist")
+        GameTooltip:SetWorldCursor(Enum.WorldCursorAnchorType.Cursor)
+        "#,
+    )
+    .expect("Failed to show the world cursor tooltip");
+
+    let visible: bool = env.eval("return GameTooltip:IsVisible()").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    let getter_name: String = env
+        .eval(
+            r#"
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            return info and info.getterName or ""
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        visible,
+        "GameTooltip should be visible after SetWorldCursor"
+    );
+    assert!(
+        num_lines >= 1,
+        "GameTooltip should have world-cursor tooltip lines, got {}",
+        num_lines
+    );
+    assert_eq!(getter_name, "GetWorldCursor");
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state
+        .tooltips
+        .get(&gt_id)
+        .expect("tooltip data should exist after SetWorldCursor");
+    assert!(!td.lines[0].left_text.is_empty());
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]
