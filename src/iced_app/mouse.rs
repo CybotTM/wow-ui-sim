@@ -114,54 +114,69 @@ impl App {
     }
 
     pub(super) fn handle_mouse_up(&mut self, pos: Point) {
-        let was_dragging = self.dragging;
-        let drag_source = self.mouse_down_frame;
-
-        // Reset drag state first.
-        self.mouse_down_pos = None;
-        self.dragging = false;
-
+        let (was_dragging, drag_source) = self.take_left_drag_state();
         let released_on = self.hit_test(pos);
 
         if was_dragging {
             self.finish_drag(drag_source, released_on);
-        } else if let Some(frame_id) = released_on {
-            // WoW fires OnReceiveDrag on any click when cursor holds an item,
-            // even without an actual drag gesture.  When it does, OnClick is
-            // NOT fired — otherwise the just-placed action would be cast.
-            let cursor_has_item = self.env.borrow().state().borrow().cursor_item.is_some();
-            if cursor_has_item {
-                self.fire_receive_drag(frame_id);
-            } else {
-                let env = self.env.borrow();
-                let button_val =
-                    mlua::Value::String(env.lua().create_string("LeftButton").unwrap());
-
-                if self.mouse_down_frame == Some(frame_id) {
-                    self.toggle_checkbutton_if_needed(frame_id, &env);
-
-                    let down_val = mlua::Value::Boolean(false);
-                    let _ = env.fire_script_handler(
-                        frame_id,
-                        "OnClick",
-                        vec![button_val.clone(), down_val.clone()],
-                    );
-
-                    // PostClick fires after OnClick (WoW secure button sequence).
-                    // ActionBar buttons use PostClick to call UpdateState().
-                    let _ = env.fire_script_handler(
-                        frame_id,
-                        "PostClick",
-                        vec![button_val.clone(), down_val],
-                    );
-                }
-
-                let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
-            }
+        } else {
+            self.dispatch_left_mouse_release(released_on);
         }
         self.mouse_down_frame = None;
         self.pressed_frame = None;
         self.flush_post_script_updates();
+    }
+
+    fn take_left_drag_state(&mut self) -> (bool, Option<u64>) {
+        let was_dragging = self.dragging;
+        let drag_source = self.mouse_down_frame;
+        self.mouse_down_pos = None;
+        self.dragging = false;
+        (was_dragging, drag_source)
+    }
+
+    fn dispatch_left_mouse_release(&mut self, released_on: Option<u64>) {
+        let Some(frame_id) = released_on else {
+            return;
+        };
+
+        if self.cursor_holds_item() {
+            self.fire_receive_drag(frame_id);
+            return;
+        }
+
+        let env = self.env.borrow();
+        let button_val = mlua::Value::String(env.lua().create_string("LeftButton").unwrap());
+
+        if self.mouse_down_frame == Some(frame_id) {
+            self.fire_left_click_sequence(frame_id, &env, &button_val);
+        }
+
+        let _ = env.fire_script_handler(frame_id, "OnMouseUp", vec![button_val]);
+    }
+
+    fn cursor_holds_item(&self) -> bool {
+        self.env.borrow().state().borrow().cursor_item.is_some()
+    }
+
+    fn fire_left_click_sequence(
+        &self,
+        frame_id: u64,
+        env: &crate::lua_api::WowLuaEnv,
+        button_val: &mlua::Value,
+    ) {
+        self.toggle_checkbutton_if_needed(frame_id, env);
+
+        let down_val = mlua::Value::Boolean(false);
+        let _ = env.fire_script_handler(
+            frame_id,
+            "OnClick",
+            vec![button_val.clone(), down_val.clone()],
+        );
+
+        // PostClick fires after OnClick (WoW secure button sequence).
+        // ActionBar buttons use PostClick to call UpdateState().
+        let _ = env.fire_script_handler(frame_id, "PostClick", vec![button_val.clone(), down_val]);
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
