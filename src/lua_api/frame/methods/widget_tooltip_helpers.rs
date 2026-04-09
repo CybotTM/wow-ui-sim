@@ -280,6 +280,15 @@ pub(crate) fn set_anchor_type_impl(
     Ok(())
 }
 
+pub(crate) fn set_object_tooltip_position_impl(lua: &mlua::Lua, id: u64) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let owner_id = state.tooltips.get(&id).and_then(|td| td.owner_id);
+    let anchor = owner_id.map(build_object_tooltip_anchor);
+    apply_tooltip_anchor(&mut state, id, anchor);
+    Ok(())
+}
+
 /// Parse SetOwner arguments: owner, anchor type (with validation), x/y offsets.
 fn parse_set_owner_args(
     lua: &mlua::Lua,
@@ -419,6 +428,14 @@ fn position_tooltip(
         "ANCHOR_NONE" => None,
         _ => owner_id.map(|oid| build_owner_anchor(anchor_type, oid, x_offset, y_offset)),
     };
+    apply_tooltip_anchor(state, tooltip_id, anchor);
+}
+
+fn apply_tooltip_anchor(
+    state: &mut crate::lua_api::state::SimState,
+    tooltip_id: u64,
+    anchor: Option<Anchor>,
+) {
     let Some(frame) = state.widgets.get_mut_visual(tooltip_id) else {
         return;
     };
@@ -440,6 +457,17 @@ fn build_owner_anchor(anchor_type: &str, owner_id: u64, x_offset: f32, y_offset:
         relative_point: rp,
         x_offset,
         y_offset,
+    }
+}
+
+fn build_object_tooltip_anchor(owner_id: u64) -> Anchor {
+    Anchor {
+        point: AnchorPoint::Bottom,
+        relative_to: None,
+        relative_to_id: Some(owner_id as usize),
+        relative_point: AnchorPoint::Top,
+        x_offset: 0.0,
+        y_offset: 0.0,
     }
 }
 

@@ -15,7 +15,8 @@ use crate::lua_api::tooltip::{
 use mlua::Value;
 use widget_tooltip_helpers::{
     add_double_line_impl, add_get_line_methods, add_tooltip_info_methods,
-    add_tooltip_state_methods, set_anchor_type_impl, set_owner_impl,
+    add_tooltip_state_methods, set_anchor_type_impl, set_object_tooltip_position_impl,
+    set_owner_impl,
 };
 
 pub use super::widget_tooltip_data::set_unit_for_tooltip;
@@ -28,7 +29,6 @@ const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
     "SetAllowShowWithNoLines",
     "SetCustomWordWrapMinWidth",
     "SetFrameStack",
-    "SetObjectTooltipPosition",
     "SetShrinkToFitWrapped",
 ];
 
@@ -49,6 +49,13 @@ fn add_tooltip_setup_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_owner_method(methods);
+    add_set_anchor_type_method(methods);
+    add_set_object_tooltip_position_method(methods);
+    add_clear_lines_method(methods);
+}
+
+fn add_set_owner_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetOwner", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
         if let Some((func, self_val)) = get_mixin_override(lua, id, "SetOwner") {
@@ -60,7 +67,9 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         set_owner_impl(lua, id, args)
     });
+}
 
+fn add_set_anchor_type_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetAnchorType", |lua, this, args: mlua::Variadic<Value>| {
         let id = this.0;
         if let Some((func, self_val)) = get_mixin_override(lua, id, "SetAnchorType") {
@@ -72,7 +81,27 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         }
         set_anchor_type_impl(lua, id, args)
     });
+}
 
+fn add_set_object_tooltip_position_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method(
+        "SetObjectTooltipPosition",
+        |lua, this, args: mlua::Variadic<Value>| {
+            let id = this.0;
+            if let Some((func, self_val)) = get_mixin_override(lua, id, "SetObjectTooltipPosition")
+            {
+                let mut call_args = vec![self_val];
+                call_args.extend(args);
+                return func
+                    .call::<Value>(mlua::MultiValue::from_iter(call_args))
+                    .map(|_| ());
+            }
+            set_object_tooltip_position_impl(lua, id)
+        },
+    );
+}
+
+fn add_clear_lines_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("ClearLines", |lua, this, ()| {
         let id = this.0;
         {
