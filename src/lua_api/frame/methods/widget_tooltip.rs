@@ -15,8 +15,8 @@ use crate::lua_api::tooltip::{
 use mlua::Value;
 use widget_tooltip_helpers::{
     add_double_line_impl, add_get_line_methods, add_tooltip_info_methods,
-    add_tooltip_state_methods, set_anchor_type_impl, set_object_tooltip_position_impl,
-    set_owner_impl,
+    add_tooltip_state_methods, copy_tooltip_impl, set_anchor_type_impl,
+    set_object_tooltip_position_impl, set_owner_impl,
 };
 
 pub use super::widget_tooltip_data::set_unit_for_tooltip;
@@ -25,7 +25,6 @@ pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, val_to_f32};
 const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
 const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
-    "CopyTooltip",
     "SetAllowShowWithNoLines",
     "SetCustomWordWrapMinWidth",
     "SetFrameStack",
@@ -52,6 +51,7 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_set_owner_method(methods);
     add_set_anchor_type_method(methods);
     add_set_object_tooltip_position_method(methods);
+    add_copy_tooltip_method(methods);
     add_clear_lines_method(methods);
 }
 
@@ -99,6 +99,20 @@ fn add_set_object_tooltip_position_method<M: mlua::UserDataMethods<FrameRef>>(me
             set_object_tooltip_position_impl(lua, id)
         },
     );
+}
+
+fn add_copy_tooltip_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("CopyTooltip", |lua, this, args: mlua::Variadic<Value>| {
+        let id = this.0;
+        if let Some((func, self_val)) = get_mixin_override(lua, id, "CopyTooltip") {
+            let mut call_args = vec![self_val];
+            call_args.extend(args);
+            return func
+                .call::<Value>(mlua::MultiValue::from_iter(call_args))
+                .map(|_| ());
+        }
+        copy_tooltip_impl(lua, id, args)
+    });
 }
 
 fn add_clear_lines_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

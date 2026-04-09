@@ -369,6 +369,47 @@ fn test_other_tooltip_frames_exist() {
 }
 
 #[test]
+fn test_copy_tooltip_copies_lines_and_spell_data_without_reowning() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "CopyTooltipOwner", UIParent)
+        ShoppingTooltip1:SetOwner(owner, "ANCHOR_RIGHT")
+        GameTooltip:SetSpellByID(19750)
+        ShoppingTooltip1:CopyTooltip(GameTooltip)
+    "#,
+    )
+    .unwrap();
+
+    let copied_lines: i32 = env.eval("return ShoppingTooltip1:NumLines()").unwrap();
+    assert!(
+        copied_lines >= 3,
+        "CopyTooltip should copy the source tooltip lines into ShoppingTooltip1"
+    );
+
+    let copied_spell_name: String = env
+        .eval("local name = ShoppingTooltip1:GetSpell(); return name or ''")
+        .unwrap();
+    let copied_spell_id: i32 = env
+        .eval("local _, id = ShoppingTooltip1:GetSpell(); return id or 0")
+        .unwrap();
+    let owner_name: String = env
+        .eval("return ShoppingTooltip1:GetOwner():GetName()")
+        .unwrap();
+
+    assert_eq!(copied_spell_name, "Flash of Light");
+    assert_eq!(copied_spell_id, 19750);
+    assert_eq!(owner_name, "CopyTooltipOwner");
+
+    let state = env.state().borrow();
+    let shopping_id = state.widgets.get_id_by_name("ShoppingTooltip1").unwrap();
+    let td = state.tooltips.get(&shopping_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Flash of Light");
+    assert_eq!(td.spell_id, Some(19750));
+}
+
+#[test]
 fn test_tooltip_anchor_right_sets_anchors() {
     let env = WowLuaEnv::new().unwrap();
 

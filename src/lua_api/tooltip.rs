@@ -3,12 +3,14 @@
 use crate::widget::{Anchor, AnchorPoint};
 
 /// Inline texture/atlas icon embedded in a tooltip line.
+#[derive(Clone)]
 pub enum TooltipTexture {
     FileDataId(u32),
     Atlas(String),
 }
 
 /// A single line in a tooltip.
+#[derive(Clone)]
 pub struct TooltipLine {
     pub left_text: String,
     pub left_color: (f32, f32, f32),
