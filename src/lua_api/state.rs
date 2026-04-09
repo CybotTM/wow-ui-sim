@@ -330,15 +330,19 @@ impl EmptyRuntimeState {
 impl Default for SimState {
     fn default() -> Self {
         let mut state = Self::new_empty();
-        state.action_bars = default_action_bars();
-        state.party_members = default_party();
-        state.player.name = random_player_name();
-        state.player.buffs = default_player_buffs();
+        state.seed_default_game_state();
         state
     }
 }
 
 impl SimState {
+    fn seed_default_game_state(&mut self) {
+        self.action_bars = default_action_bars();
+        self.party_members = default_party();
+        self.player.name = random_player_name();
+        self.player.buffs = default_player_buffs();
+    }
+
     fn new_empty() -> Self {
         let c = EmptyStateCollections::new();
         let r = EmptyRuntimeState::new();
