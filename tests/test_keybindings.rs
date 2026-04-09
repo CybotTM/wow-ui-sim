@@ -498,6 +498,71 @@ fn keybind_o_opens_social() {
     }
 }
 
+#[test]
+fn keybind_o_populates_friends_list_from_c_friend_list() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.send_key_press("O", None).expect("O keybind failed");
+        let _ = build_batch_for_root(&env, "FriendsFrame");
+
+        let result: String = env.eval(r#"
+            if not FriendsFrame or not FriendsFrame:IsShown() then
+                return "friends_frame_not_shown"
+            end
+            if C_FriendList.GetNumFriends() ~= 2 then
+                return "friend_count=" .. tostring(C_FriendList.GetNumFriends())
+            end
+            if C_FriendList.GetNumOnlineFriends() ~= 1 then
+                return "online_count=" .. tostring(C_FriendList.GetNumOnlineFriends())
+            end
+
+            local data_provider = FriendsListFrame.ScrollBox:GetDataProvider()
+            if not data_provider then
+                return "missing_data_provider"
+            end
+            if data_provider:GetSize() ~= 3 then
+                return "data_provider_size=" .. tostring(data_provider:GetSize())
+            end
+
+            local online_friend = data_provider:FindElementDataByPredicate(function(elementData)
+                return elementData.buttonType == FRIENDS_BUTTON_TYPE_WOW and elementData.id == 1
+            end)
+            if not online_friend then
+                return "missing_online_friend"
+            end
+            local offline_friend = data_provider:FindElementDataByPredicate(function(elementData)
+                return elementData.buttonType == FRIENDS_BUTTON_TYPE_WOW and elementData.id == 2
+            end)
+            if not offline_friend then
+                return "missing_offline_friend"
+            end
+            local divider = data_provider:FindElementDataByPredicate(function(elementData)
+                return elementData.buttonType == FRIENDS_BUTTON_TYPE_DIVIDER
+            end)
+            if not divider then
+                return "missing_divider"
+            end
+
+            local online_info = C_FriendList.GetFriendInfoByIndex(online_friend.id)
+            local offline_info = C_FriendList.GetFriendInfoByIndex(offline_friend.id)
+            if not online_info or online_info.name ~= "Alyth" or online_info.area ~= "Stormwind City" then
+                return "online_info_mismatch"
+            end
+            if not offline_info or offline_info.name ~= "Brom" or offline_info.connected then
+                return "offline_info_mismatch"
+            end
+            return "ok"
+        "#).unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "FriendsFrame should render the seeded WoW friend row from C_FriendList: {result}"
+        );
+    }
+}
+
 // ── J → ToggleGuildFrame() ──────────────────────────────────────────────
 
 #[test]

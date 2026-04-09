@@ -220,6 +220,65 @@ fn test_bn_get_friend_info_nil() {
     assert!(is_nil);
 }
 
+#[test]
+fn test_c_friend_list_returns_seeded_wow_friends() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if C_FriendList.GetNumFriends() ~= 2 then
+            return "friend_count=" .. tostring(C_FriendList.GetNumFriends())
+        end
+        if C_FriendList.GetNumOnlineFriends() ~= 1 then
+            return "online_count=" .. tostring(C_FriendList.GetNumOnlineFriends())
+        end
+
+        local info = C_FriendList.GetFriendInfoByIndex(1)
+        if not info then
+            return "missing_index_1"
+        end
+        if info.name ~= "Alyth" then
+            return "name=" .. tostring(info.name)
+        end
+        if not info.connected then
+            return "friend_should_be_online"
+        end
+        if info.level ~= 80 then
+            return "level=" .. tostring(info.level)
+        end
+        if info.className ~= "Paladin" then
+            return "class=" .. tostring(info.className)
+        end
+        if info.area ~= "Stormwind City" then
+            return "area=" .. tostring(info.area)
+        end
+        if info.notes ~= "Testing the FriendsFrame list" then
+            return "notes=" .. tostring(info.notes)
+        end
+        if info.guid ~= "Player-11-00000001" then
+            return "guid=" .. tostring(info.guid)
+        end
+
+        local by_name = C_FriendList.GetFriendInfoByName("Alyth")
+        if not by_name or by_name.guid ~= info.guid then
+            return "name_lookup_failed"
+        end
+        if not C_FriendList.IsFriend("Alyth") then
+            return "is_friend_failed"
+        end
+        if C_FriendList.GetFriendInfoByIndex(99) ~= nil then
+            return "unexpected_friend_at_99"
+        end
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_FriendList should expose seeded WoW friends: {result}"
+    );
+}
+
 // ============================================================================
 // PlayerLocation
 // ============================================================================

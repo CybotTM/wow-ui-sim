@@ -91,19 +91,28 @@ fn register_c_wow_token_public(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_FriendList stubs.
 fn register_c_friend_list(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let t = lua.create_table()?;
+    let t: mlua::Table = match g.get::<Value>("C_FriendList")? {
+        Value::Table(existing) => existing,
+        _ => lua.create_table()?,
+    };
     t.set("SetWhoToUi", lua.create_function(|_, _flag: bool| Ok(()))?)?;
     t.set("SendWho", lua.create_function(|_, _msg: String| Ok(()))?)?;
     t.set("GetNumWhoResults", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("GetNumFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
-        "GetNumOnlineFriends",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetFriendInfoByIndex",
-        lua.create_function(|_, _idx: i32| Ok(Value::Nil))?,
-    )?;
+    if t.get::<Value>("GetNumFriends")?.is_nil() {
+        t.set("GetNumFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
+    }
+    if t.get::<Value>("GetNumOnlineFriends")?.is_nil() {
+        t.set(
+            "GetNumOnlineFriends",
+            lua.create_function(|_, ()| Ok(0i32))?,
+        )?;
+    }
+    if t.get::<Value>("GetFriendInfoByIndex")?.is_nil() {
+        t.set(
+            "GetFriendInfoByIndex",
+            lua.create_function(|_, _idx: i32| Ok(Value::Nil))?,
+        )?;
+    }
     t.set("ShowFriends", lua.create_function(|_, ()| Ok(()))?)?;
     g.set("C_FriendList", t)
 }

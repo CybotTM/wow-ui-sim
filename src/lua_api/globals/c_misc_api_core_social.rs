@@ -2,6 +2,47 @@
 
 use mlua::{Lua, Result, Value};
 
+#[derive(Clone, Copy)]
+struct WowFriendRecord {
+    name: &'static str,
+    connected: bool,
+    afk: bool,
+    dnd: bool,
+    level: i32,
+    class_name: &'static str,
+    area: &'static str,
+    raf_link_type: i32,
+    guid: &'static str,
+    notes: Option<&'static str>,
+}
+
+const WOW_FRIENDS: &[WowFriendRecord] = &[
+    WowFriendRecord {
+        name: "Alyth",
+        connected: true,
+        afk: false,
+        dnd: false,
+        level: 80,
+        class_name: "Paladin",
+        area: "Stormwind City",
+        raf_link_type: 0,
+        guid: "Player-11-00000001",
+        notes: Some("Testing the FriendsFrame list"),
+    },
+    WowFriendRecord {
+        name: "Brom",
+        connected: false,
+        afk: false,
+        dnd: false,
+        level: 70,
+        class_name: "Monk",
+        area: "Orgrimmar",
+        raf_link_type: 0,
+        guid: "Player-11-00000002",
+        notes: None,
+    },
+];
+
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_nameplate(lua)?;
     register_c_player_info(lua)?;
@@ -416,21 +457,78 @@ fn register_c_pvp(lua: &Lua) -> Result<()> {
 }
 
 fn register_c_friend_list(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set("GetNumFriends", lua.create_function(|_, ()| Ok(0i32))?)?;
+    let globals = lua.globals();
+    let t: mlua::Table = globals
+        .get::<mlua::Table>("C_FriendList")
+        .unwrap_or_else(|_| lua.create_table().unwrap());
+    t.set(
+        "GetNumFriends",
+        lua.create_function(|_, ()| Ok(WOW_FRIENDS.len() as i32))?,
+    )?;
     t.set(
         "GetNumOnlineFriends",
-        lua.create_function(|_, ()| Ok(0i32))?,
+        lua.create_function(|_, ()| {
+            Ok(WOW_FRIENDS.iter().filter(|friend| friend.connected).count() as i32)
+        })?,
     )?;
     t.set(
         "GetFriendInfoByIndex",
-        lua.create_function(|_, _i: i32| Ok(Value::Nil))?,
+        lua.create_function(get_friend_info_by_index)?,
     )?;
     t.set(
         "GetFriendInfoByName",
-        lua.create_function(|_, _n: String| Ok(Value::Nil))?,
+        lua.create_function(get_friend_info_by_name)?,
     )?;
-    t.set("IsFriend", lua.create_function(|_, _g: String| Ok(false))?)?;
-    lua.globals().set("C_FriendList", t)?;
+    t.set("IsFriend", lua.create_function(is_friend)?)?;
+    globals.set("C_FriendList", t)?;
     Ok(())
+}
+
+fn get_friend_info_by_index(lua: &Lua, index: i32) -> Result<Value> {
+    friend_info_value(lua, lookup_friend_by_index(index))
+}
+
+fn get_friend_info_by_name(lua: &Lua, name: String) -> Result<Value> {
+    friend_info_value(lua, lookup_friend_by_name(&name))
+}
+
+fn is_friend(_: &Lua, name: String) -> Result<bool> {
+    Ok(lookup_friend_by_name(&name).is_some())
+}
+
+fn lookup_friend_by_index(index: i32) -> Option<&'static WowFriendRecord> {
+    index
+        .checked_sub(1)
+        .and_then(|zero_based| WOW_FRIENDS.get(zero_based as usize))
+}
+
+fn lookup_friend_by_name(name: &str) -> Option<&'static WowFriendRecord> {
+    WOW_FRIENDS
+        .iter()
+        .find(|friend| friend.name.eq_ignore_ascii_case(name))
+}
+
+fn friend_info_value(lua: &Lua, friend: Option<&WowFriendRecord>) -> Result<Value> {
+    match friend {
+        Some(friend) => Ok(Value::Table(create_friend_info_table(lua, friend)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn create_friend_info_table(lua: &Lua, friend: &WowFriendRecord) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("name", friend.name)?;
+    info.set("connected", friend.connected)?;
+    info.set("afk", friend.afk)?;
+    info.set("dnd", friend.dnd)?;
+    info.set("level", friend.level)?;
+    info.set("className", friend.class_name)?;
+    info.set("area", friend.area)?;
+    info.set("rafLinkType", friend.raf_link_type)?;
+    info.set("guid", friend.guid)?;
+    match friend.notes {
+        Some(notes) => info.set("notes", notes)?,
+        None => info.set("notes", Value::Nil)?,
+    }
+    Ok(info)
 }
