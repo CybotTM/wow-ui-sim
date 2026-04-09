@@ -141,6 +141,7 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetOwnedItemByID(6948), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetRecipeResultItem(100005, {}, nil, nil, nil), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetRecipeResultItemForOrder(100005, {}, 1, nil, nil), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetMinimapMouseover(), Enum.TooltipDataType.MinimapMouseover, false),
         tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
@@ -372,6 +373,32 @@ fn test_c_tooltip_info_get_recipe_result_item_returns_output_item_tooltip() {
     assert!(
         has_real_tooltip,
         "recipe result tooltip getters should expose the crafted output item and stay empty for zero-output recipes",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_minimap_mouseover_returns_zone_and_subzone_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetMinimapMouseover()
+            if not tooltip or tooltip.type ~= Enum.TooltipDataType.MinimapMouseover or not tooltip.lines then
+                return false
+            end
+
+            local zoneLine = tooltip.lines[1]
+            local subZoneLine = tooltip.lines[2]
+            return zoneLine
+                and zoneLine.leftText == "Stormwind City"
+                and subZoneLine
+                and subZoneLine.leftText == "Trade District"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetMinimapMouseover should return minimap tooltip data with the current zone and sub-zone",
     );
 }
 

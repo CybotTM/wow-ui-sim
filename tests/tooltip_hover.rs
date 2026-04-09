@@ -379,6 +379,40 @@ fn test_tooltip_data_handler_set_recipe_result_item_uses_recipe_getters() {
     );
 }
 
+#[test]
+fn test_tooltip_data_handler_set_minimap_mouseover_uses_minimap_getter() {
+    let env = setup_full_env();
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            assert(GameTooltip.SetMinimapMouseover, "GameTooltip:SetMinimapMouseover should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            GameTooltip:SetMinimapMouseover()
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.MinimapMouseover or not tooltipData.lines then
+                return false
+            end
+
+            local zoneLine = tooltipData.lines[1]
+            local subZoneLine = tooltipData.lines[2]
+            return info.getterName == "GetMinimapMouseover"
+                and zoneLine
+                and zoneLine.leftText == "Stormwind City"
+                and subZoneLine
+                and subZoneLine.leftText == "Trade District"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_real_tooltip,
+        "TooltipDataHandler should populate GameTooltip:SetMinimapMouseover through C_TooltipInfo.GetMinimapMouseover",
+    );
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]

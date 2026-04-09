@@ -78,6 +78,10 @@ fn register_world_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()
         "GetWorldLootObject",
         lua.create_function(create_world_loot_object_tooltip)?,
     )?;
+    table.set(
+        "GetMinimapMouseover",
+        lua.create_function(create_minimap_mouseover_tooltip)?,
+    )?;
     Ok(())
 }
 
@@ -270,6 +274,20 @@ fn create_world_loot_object_tooltip(lua: &Lua, unit: String) -> Result<Value> {
 
     let world_loot_guid = format!("WorldLootObject-{unit}");
     create_world_loot_spell_tooltip(lua, &world_loot_guid)
+}
+
+fn create_minimap_mouseover_tooltip(lua: &Lua, _: ()) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_MINIMAP_MOUSEOVER: i32 = 21;
+
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    let zone_name = state.world.zone_name.clone();
+    let sub_zone_name = state.world.sub_zone_name.clone();
+    drop(state);
+
+    build_tooltip_with_lines(lua, TOOLTIP_DATA_TYPE_MINIMAP_MOUSEOVER, |lines| {
+        append_minimap_mouseover_tooltip_lines(lua, lines, &zone_name, &sub_zone_name)
+    })
 }
 
 fn create_world_loot_spell_tooltip(lua: &Lua, world_loot_guid: &str) -> Result<Value> {
@@ -632,6 +650,33 @@ fn append_unit_tooltip_lines(
     )?;
     append_tooltip_line(lua, lines, 3, TOOLTIP_LINE_TYPE_NONE, &info.race)?;
     append_tooltip_line(lua, lines, 4, TOOLTIP_LINE_TYPE_NONE, &info.class_name)?;
+    Ok(())
+}
+
+fn append_minimap_mouseover_tooltip_lines(
+    lua: &Lua,
+    lines: &mlua::Table,
+    zone_name: &str,
+    sub_zone_name: &str,
+) -> Result<()> {
+    const TOOLTIP_LINE_TYPE_NONE: i32 = 0;
+    const WHITE_TOOLTIP_TEXT: (f32, f32, f32) = (1.0, 1.0, 1.0);
+
+    if zone_name.is_empty() {
+        return Ok(());
+    }
+
+    append_colored_tooltip_line(
+        lua,
+        lines,
+        1,
+        TOOLTIP_LINE_TYPE_NONE,
+        zone_name,
+        WHITE_TOOLTIP_TEXT,
+    )?;
+    if !sub_zone_name.is_empty() && sub_zone_name != zone_name {
+        append_tooltip_line(lua, lines, 2, TOOLTIP_LINE_TYPE_NONE, sub_zone_name)?;
+    }
     Ok(())
 }
 
