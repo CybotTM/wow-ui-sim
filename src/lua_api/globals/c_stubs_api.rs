@@ -64,7 +64,7 @@ pub fn register_c_stubs_api(
     register_core_namespaces(lua, std::rc::Rc::clone(&state))?;
     register_ui_and_chat_stubs(lua, state.clone())?;
     super::c_stubs_api_missing::register_missing_globals(lua, state.clone())?;
-    super::c_stubs_api_namespaces::register_missing_namespaces(lua)?;
+    super::c_stubs_api_namespaces::register_missing_namespaces(lua, state.clone())?;
     super::c_stubs_api_namespaces::register_c_perks_activities(lua)?;
     super::c_stubs_api_namespaces::register_game_state_stubs(lua)?;
     super::c_stubs_api_namespaces::register_c_incoming_summon(lua)?;

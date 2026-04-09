@@ -51,6 +51,15 @@ pub fn register_extra_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     Ok(())
 }
 
+pub(crate) fn register_diff_missing_namespaces(
+    lua: &Lua,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let g = lua.globals();
+    register_account_encounter_proto_namespaces(lua, &g, state)?;
+    register_reincarnation_table_util(lua, &g)
+}
+
 /// C_* namespace stubs that are referenced during addon loading.
 fn register_missing_c_namespaces(
     lua: &Lua,
@@ -59,8 +68,7 @@ fn register_missing_c_namespaces(
 ) -> Result<()> {
     register_item_pet_aura_namespaces(lua, g)?;
     register_utility_namespaces(lua, g)?;
-    register_account_encounter_proto_namespaces(lua, g, state)?;
-    register_reincarnation_table_util(lua, g)?;
+    let _ = state;
     Ok(())
 }
 

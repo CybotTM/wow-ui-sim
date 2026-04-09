@@ -3,7 +3,10 @@
 //! Split from c_stubs_api.rs — contains social/system namespaces, video options,
 //! perks activities, game-state stubs, and incoming summon.
 
+use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const PERKS_ACTIVITIES_LUA: &str = r#"
     C_PerksActivities = C_PerksActivities or {}
@@ -397,9 +400,9 @@ pub(crate) fn register_c_perks_activities(lua: &Lua) -> Result<()> {
 }
 
 /// Missing C_* namespaces and globals referenced during startup events.
-pub(crate) fn register_missing_namespaces(lua: &Lua) -> Result<()> {
+pub(crate) fn register_missing_namespaces(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_social_namespaces(lua)?;
-    register_system_namespaces(lua)?;
+    register_system_namespaces(lua, state)?;
     Ok(())
 }
 
@@ -466,11 +469,12 @@ fn register_social_queue_namespace(lua: &Lua, g: &mlua::Table) -> Result<()> {
 }
 
 /// System, service, and utility namespace stubs.
-fn register_system_namespaces(lua: &Lua) -> Result<()> {
+fn register_system_namespaces(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let g = lua.globals();
     super::c_stubs_api_glue::register_system_namespaces(lua, &g)?;
     super::c_stubs_api_store::register_c_account_store(lua)?;
     register_c_video_options(lua)?;
+    super::c_stubs_api_extra::register_diff_missing_namespaces(lua, state)?;
     Ok(())
 }
 
