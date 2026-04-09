@@ -326,6 +326,59 @@ fn test_tooltip_data_handler_set_owned_item_by_id_uses_owned_item_getter() {
     );
 }
 
+#[test]
+fn test_tooltip_data_handler_set_recipe_result_item_uses_recipe_getters() {
+    let env = setup_full_env();
+
+    let recipe_result_ok: bool = env
+        .eval(
+            r#"
+            assert(GameTooltip.SetRecipeResultItem, "GameTooltip:SetRecipeResultItem should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            GameTooltip:SetRecipeResultItem(100005, {}, nil, nil, nil)
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            return info.getterName == "GetRecipeResultItem"
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Ordained Forge Maul"
+            "#,
+        )
+        .unwrap();
+
+    let order_result_ok: bool = env
+        .eval(
+            r#"
+            assert(GameTooltip.SetRecipeResultItemForOrder, "GameTooltip:SetRecipeResultItemForOrder should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            GameTooltip:SetRecipeResultItemForOrder(100005, {}, 1, nil, nil)
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            return info.getterName == "GetRecipeResultItemForOrder"
+                and nameLine
+                and nameLine.leftText == "Ordained Forge Maul"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        recipe_result_ok && order_result_ok,
+        "TooltipDataHandler should populate both recipe result item accessors through C_TooltipInfo",
+    );
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]

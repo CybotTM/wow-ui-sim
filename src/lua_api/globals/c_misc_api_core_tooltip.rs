@@ -58,6 +58,14 @@ fn register_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()
         "GetHyperlink",
         lua.create_function(create_hyperlink_tooltip)?,
     )?;
+    table.set(
+        "GetRecipeResultItem",
+        lua.create_function(create_recipe_result_item_tooltip)?,
+    )?;
+    table.set(
+        "GetRecipeResultItemForOrder",
+        lua.create_function(create_recipe_result_item_for_order_tooltip)?,
+    )?;
     Ok(())
 }
 
@@ -225,6 +233,32 @@ fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
     build_empty_tooltip(lua, 0)
 }
 
+fn create_recipe_result_item_tooltip(
+    lua: &Lua,
+    (recipe_id, _reagent_infos, _recraft_item_guid, _recipe_level, _override_quality_id): (
+        i32,
+        Option<Value>,
+        Option<String>,
+        Option<i32>,
+        Option<i32>,
+    ),
+) -> Result<Value> {
+    create_recipe_output_item_tooltip(lua, recipe_id)
+}
+
+fn create_recipe_result_item_for_order_tooltip(
+    lua: &Lua,
+    (recipe_id, _reagent_infos, _order_id, _recipe_level, _override_quality_id): (
+        i32,
+        Option<Value>,
+        Option<Value>,
+        Option<i32>,
+        Option<i32>,
+    ),
+) -> Result<Value> {
+    create_recipe_output_item_tooltip(lua, recipe_id)
+}
+
 fn create_world_cursor_tooltip(lua: &Lua, _: ()) -> Result<Value> {
     create_world_loot_spell_tooltip(lua, WORLD_CURSOR_GUID)
 }
@@ -284,6 +318,18 @@ fn add_guid_to_item_tooltip(lua: &Lua, item_id: u32, guid: String) -> Result<Val
     };
     tooltip.set("guid", guid)?;
     Ok(Value::Table(tooltip))
+}
+
+fn create_recipe_output_item_tooltip(lua: &Lua, recipe_id: i32) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(recipe) = super::profession_data::get_recipe(recipe_id) else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    if recipe.output_item_id == 0 {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    }
+    create_item_tooltip(lua, recipe.output_item_id as i32)
 }
 
 fn create_unit_tooltip(lua: &Lua, (unit, _hide_status): (String, Option<bool>)) -> Result<Value> {

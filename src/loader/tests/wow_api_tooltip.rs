@@ -139,6 +139,8 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetItemByID(211992), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetItemByGUID(C_Item.GetItemGUID({ bagID = 0, slotIndex = 1 })), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetOwnedItemByID(6948), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetRecipeResultItem(100005, {}, nil, nil, nil), Enum.TooltipDataType.Item, false),
+        tooltipShapeOk(C_TooltipInfo.GetRecipeResultItemForOrder(100005, {}, 1, nil, nil), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
@@ -335,6 +337,41 @@ fn test_c_tooltip_info_get_owned_item_by_id_returns_owned_bag_item_tooltip() {
     assert!(
         has_real_tooltip,
         "C_TooltipInfo.GetOwnedItemByID should return tooltip data only for items in the player's bags",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_recipe_result_item_returns_output_item_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            local tooltip = C_TooltipInfo.GetRecipeResultItem(100005, {}, nil, nil, nil)
+            local orderTooltip = C_TooltipInfo.GetRecipeResultItemForOrder(100005, {}, 1, nil, nil)
+            local emptyTooltip = C_TooltipInfo.GetRecipeResultItem(100006, {}, nil, nil, nil)
+            if not tooltip or not orderTooltip or not emptyTooltip then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local orderNameLine = orderTooltip.lines[1]
+            local emptyLine = emptyTooltip.lines[1]
+
+            return tooltip.type == Enum.TooltipDataType.Item
+                and orderTooltip.type == Enum.TooltipDataType.Item
+                and emptyTooltip.type == Enum.TooltipDataType.Item
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Ordained Forge Maul"
+                and orderNameLine
+                and orderNameLine.leftText == "Ordained Forge Maul"
+                and emptyLine == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "recipe result tooltip getters should expose the crafted output item and stay empty for zero-output recipes",
     );
 }
 
