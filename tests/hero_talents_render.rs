@@ -2,6 +2,7 @@
 
 use std::path::PathBuf;
 
+use wow_ui_sim::atlas::get_atlas_info;
 use wow_ui_sim::iced_app::build_quad_batch_for_registry;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -82,6 +83,21 @@ fn assert_bounds_match_rect(
         (bounds.3 - (rect.y + rect.height)).abs() <= tolerance,
         "{label} max_y should match rect bottom edge: bounds={bounds:?} rect={rect:?}"
     );
+}
+
+fn parse_crop_coords(path: &str) -> Option<(f32, f32, f32, f32)> {
+    let (_, crop_str) = path.split_once("@crop:")?;
+    let mut parts = crop_str
+        .split(',')
+        .filter_map(|part| part.parse::<f32>().ok());
+    let left = parts.next()?;
+    let right = parts.next()?;
+    let top = parts.next()?;
+    let bottom = parts.next()?;
+    if parts.next().is_some() {
+        return None;
+    }
+    Some((left, right, top, bottom))
 }
 
 #[test]
@@ -181,5 +197,86 @@ fn hero_spec_icon_and_mask_quads_match_layout_rect() {
         quad_bounds(&batch, mask_requests[0]),
         icon_rect,
         "hero spec mask",
+    );
+}
+
+#[test]
+fn hero_spec_icon_crop_request_matches_atlas_entry() {
+    let env = setup_full_ui();
+    open_class_talent_frame(&env);
+
+    let (icon_path, atlas_name) = {
+        let state = env.state().borrow();
+        let player_spells_id = state
+            .widgets
+            .get_id_by_name("PlayerSpellsFrame")
+            .expect("PlayerSpellsFrame should exist");
+        let talents_frame_id = *state
+            .widgets
+            .get(player_spells_id)
+            .and_then(|frame| frame.children_keys.get("TalentsFrame"))
+            .expect("TalentsFrame child should exist");
+        let hero_container_id = *state
+            .widgets
+            .get(talents_frame_id)
+            .and_then(|frame| frame.children_keys.get("HeroTalentsContainer"))
+            .expect("HeroTalentsContainer child should exist");
+        let button_id = *state
+            .widgets
+            .get(hero_container_id)
+            .and_then(|frame| frame.children_keys.get("HeroSpecButton"))
+            .expect("HeroSpecButton child should exist");
+        let button = state.widgets.get(button_id).unwrap();
+        let icon_id = *button.children_keys.get("Icon1").expect("Icon1 child");
+        let icon = state.widgets.get(icon_id).unwrap();
+        (
+            icon.texture
+                .clone()
+                .expect("Icon1 should have a texture path"),
+            icon.atlas.clone().expect("Icon1 should have an atlas"),
+        )
+    };
+
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let batch = build_quad_batch_for_registry(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    );
+
+    let icon_crop_prefix = format!("{icon_path}@crop:");
+    let request = batch
+        .texture_requests
+        .iter()
+        .find(|request| request.path.starts_with(&icon_crop_prefix))
+        .expect("HeroSpecButton.Icon1 should emit a cropped atlas request");
+    let crop_coords =
+        parse_crop_coords(&request.path).expect("HeroSpecButton.Icon1 crop request should parse");
+
+    let atlas = get_atlas_info(&atlas_name).expect("atlas entry should exist");
+    let expected = (
+        atlas.info.left_tex_coord,
+        atlas.info.right_tex_coord,
+        atlas.info.top_tex_coord,
+        atlas.info.bottom_tex_coord,
+    );
+    let tolerance = 0.000001;
+    assert!(
+        (crop_coords.0 - expected.0).abs() <= tolerance
+            && (crop_coords.1 - expected.1).abs() <= tolerance
+            && (crop_coords.2 - expected.2).abs() <= tolerance
+            && (crop_coords.3 - expected.3).abs() <= tolerance,
+        "HeroSpecButton.Icon1 crop coords should match atlas entry: crop={crop_coords:?} expected={expected:?}"
     );
 }

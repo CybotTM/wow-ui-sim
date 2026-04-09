@@ -94,6 +94,32 @@ That rules out divergence in:
 - texture quad emission
 - mask quad clipping setup
 
+### Atlas crop request matches atlas metadata
+
+`tests/hero_talents_render.rs::hero_spec_icon_crop_request_matches_atlas_entry` also verifies that
+the emitted cropped texture request for `HeroSpecButton.Icon1` matches the atlas database entry for
+`talents-heroclass-paladin-lightsmith` exactly.
+
+Current emitted request:
+
+```
+Interface\talentframe\talentsheroclassicons@crop:0.395020,0.492676,0.790039,0.985352
+```
+
+Atlas DB entry:
+
+```
+talents-heroclass-paladin-lightsmith
+  file: Interface\talentframe\talentsheroclassicons
+  left/right/top/bottom: 0.395020 / 0.492676 / 0.790039 / 0.985352
+```
+
+That rules out divergence in:
+
+- `SetAtlas()` atlas lookup for `Icon1`
+- `atlas_tex_coords` storage on the frame
+- `remap_atlas_crop()` crop-key generation
+
 ## What's Ruled Out
 
 - **Stale layout_rect**: Confirmed correct after ensure_layout_rects
@@ -105,9 +131,10 @@ That rules out divergence in:
 
 ## Remaining Hypotheses
 
-1. **Atlas crop / UV mismatch**: The hero icon quad is in the right place, but the sampled region from `talentsheroclassicons` may be wrong after atlas/crop resolution.
-2. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, but shader-side mask sampling could still blank the correct icon and leave another visual artifact visible.
-3. **Misidentified artifact**: The bottom-right visual may not be `Icon1` at all. Another hero-talent texture in the same subtree could be the one rendering unexpectedly, while `Icon1` is already correct in the batch.
+1. **Texture content / stale source asset**: The crop request is correct, but the sampled pixels in the local `talentsheroclassicons` texture could still be stale or wrong for that atlas region.
+2. **GPU-side atlas upload / sampling**: The CPU batch and crop key are correct, but the resolved GPU UVs or uploaded crop texture could still diverge downstream.
+3. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, but shader-side mask sampling could still blank the correct icon and leave another visual artifact visible.
+4. **Misidentified artifact**: The bottom-right visual may not be `Icon1` at all. Another hero-talent texture in the same subtree could be the one rendering unexpectedly, while `Icon1` is already correct in the batch.
 
 ## Debug Tools Added
 
@@ -119,6 +146,6 @@ wow-sim screenshot --dump-tree               # dump all (no filter)
 
 ## Next Steps
 
-- Compare the resolved atlas UVs for `talentsheroclassicons@crop:...` against the expected `talents-heroclass-paladin-lightsmith` atlas entry
+- Compare the cropped source pixels for `talentsheroclassicons@crop:...` against the expected icon art to rule out stale local texture content
 - Inspect the final resolved GPU vertex data after `resolve_texture_requests` / `resolve_mask_requests`
 - Identify which on-screen artifact in the screenshot corresponds to which texture request in the HeroTalentsContainer subtree
