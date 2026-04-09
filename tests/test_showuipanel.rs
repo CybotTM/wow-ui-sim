@@ -312,6 +312,105 @@ fn show_mail_frame_loads_and_populates_inbox_rows() {
 }
 
 #[test]
+fn item_socketing_frame_loads_and_populates_socket_buttons() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            C_ItemSocketInfo._state.uiType = Enum.ItemSocketInfoUIType.ItemSocketingUI or 0
+            C_ItemSocketInfo._state.isOpen = true
+            C_ItemSocketInfo._state.numSockets = 2
+            C_ItemSocketInfo._state.itemInfo = {
+                name = "Socketed Helm",
+                icon = 901,
+                itemID = 6948,
+                link = "item:6948",
+                quality = 4,
+                isRefundable = false,
+                isBoundTradeable = true,
+            }
+            C_ItemSocketInfo._state.socketTypes = {
+                [1] = "Red",
+                [2] = "Blue",
+            }
+            C_ItemSocketInfo._state.existingSockets = {
+                [1] = {
+                    name = "Ruby",
+                    icon = 111,
+                    itemID = 6948,
+                    gemMatchesSocket = true,
+                    link = "item:6948",
+                },
+            }
+            C_ItemSocketInfo._state.newSockets = {
+                [2] = {
+                    name = "Bound Sapphire",
+                    icon = 222,
+                    itemID = 6948,
+                    gemMatchesSocket = false,
+                    link = "item:6948",
+                    isBound = true,
+                },
+            }
+            C_ItemSocketInfo._state.hasBoundGemProposed = true
+
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_ItemSocketingUI")
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
+            end
+
+            if ItemSocketingFrame:GetScript("OnEvent") == nil then
+                return "missing_on_event"
+            end
+
+            ItemSocketingFrame:GetScript("OnEvent")(ItemSocketingFrame, "SOCKET_INFO_UPDATE")
+
+            if not ItemSocketingFrame:IsShown() then
+                return "frame_not_shown"
+            end
+            if not ItemSocketingFrame.SocketingContainer.Socket1:IsShown() then
+                return "socket1_hidden"
+            end
+            if not ItemSocketingFrame.SocketingContainer.Socket2:IsShown() then
+                return "socket2_hidden"
+            end
+            if ItemSocketingFrame.SocketingContainer.Socket1.Icon:GetTexture() ~= 111 then
+                return "socket1_icon=" .. tostring(ItemSocketingFrame.SocketingContainer.Socket1.Icon:GetTexture())
+            end
+            if ItemSocketingFrame.SocketingContainer.Socket2.Icon:GetTexture() ~= 222 then
+                return "socket2_icon=" .. tostring(ItemSocketingFrame.SocketingContainer.Socket2.Icon:GetTexture())
+            end
+            if not ItemSocketingFrame.SocketingContainer.Socket1.Shine:IsShown() then
+                return "socket1_shine_hidden"
+            end
+            if not ItemSocketingFrame.SocketingContainer.itemIsBoundTradeable then
+                return "bound_tradeable_flag_missing"
+            end
+            if ItemSocketingFrame.SocketingContainer.ApplySocketsButton:IsEnabled() ~= true then
+                return "apply_disabled"
+            end
+
+            local socket1 = ItemSocketingFrame.SocketingContainer.Socket1
+            socket1:GetScript("OnEnter")(socket1)
+            if not GameTooltip:IsShown() then
+                return "tooltip_not_shown"
+            end
+            if not GameTooltip:IsOwned(socket1) then
+                return "tooltip_not_owned"
+            end
+            if GameTooltip:NumLines() == 0 then
+                return "tooltip_empty"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result, "ok",
+            "ItemSocketingFrame should load and populate from seeded C_ItemSocketInfo state: {result}"
+        );
+    }
+}
+
+#[test]
 fn professions_frame_loads_and_populates_specialization_tab() {
     test_timeout! {
         let env = setup_env();

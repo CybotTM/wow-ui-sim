@@ -234,6 +234,7 @@ fn add_tooltip_data_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_set_spell_book_item(methods);
     add_set_item_by_id(methods);
     add_set_inventory_item(methods);
+    add_socket_item_tooltip_methods(methods);
     add_set_hyperlink(methods);
     add_set_unit(methods);
     add_aura_tooltip_methods(methods);
@@ -368,6 +369,122 @@ fn add_set_inventory_item<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             Value::Integer(0),     // repairCost
         ]))
     });
+}
+
+fn add_socket_item_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_socketed_item(methods);
+    add_set_socket_gem(methods);
+    add_set_existing_socket_gem(methods);
+}
+
+fn add_set_socketed_item<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSocketedItem", |lua, this, _: mlua::MultiValue| {
+        let Some(item_id) = socketed_item_id(lua)? else {
+            return Ok(());
+        };
+        populate_item_tooltip(lua, this.0, item_id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetItem")
+    });
+}
+
+fn add_set_socket_gem<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSocketGem", |lua, this, args: mlua::MultiValue| {
+        let socket_index = socket_index_from_args(args);
+        let Some(item_id) = socket_gem_item_id(lua, "newSockets", socket_index)? else {
+            return Ok(());
+        };
+        populate_item_tooltip(lua, this.0, item_id)?;
+        fire_tooltip_script(lua, this.0, "OnTooltipSetItem")
+    });
+}
+
+fn add_set_existing_socket_gem<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method(
+        "SetExistingSocketGem",
+        |lua, this, args: mlua::MultiValue| {
+            let socket_index = socket_index_from_args(args);
+            let Some(item_id) = socket_gem_item_id(lua, "existingSockets", socket_index)? else {
+                return Ok(());
+            };
+            populate_item_tooltip(lua, this.0, item_id)?;
+            fire_tooltip_script(lua, this.0, "OnTooltipSetItem")
+        },
+    );
+}
+
+fn socket_index_from_args(args: mlua::MultiValue) -> i32 {
+    match args.into_iter().next() {
+        Some(Value::Integer(n)) => n as i32,
+        Some(Value::Number(n)) => n as i32,
+        _ => 0,
+    }
+}
+
+fn socketed_item_id(lua: &mlua::Lua) -> mlua::Result<Option<u32>> {
+    let Some(state) = item_socket_state(lua)? else {
+        return Ok(None);
+    };
+    Ok(state
+        .get::<Value>("itemInfo")
+        .ok()
+        .and_then(item_id_from_socket_value))
+}
+
+fn socket_gem_item_id(
+    lua: &mlua::Lua,
+    field_name: &str,
+    socket_index: i32,
+) -> mlua::Result<Option<u32>> {
+    if socket_index < 1 {
+        return Ok(None);
+    }
+    let Some(state) = item_socket_state(lua)? else {
+        return Ok(None);
+    };
+    let Value::Table(entries) = state.get::<Value>(field_name)? else {
+        return Ok(None);
+    };
+    Ok(entries
+        .get::<Value>(socket_index)
+        .ok()
+        .and_then(item_id_from_socket_value))
+}
+
+fn item_socket_state(lua: &mlua::Lua) -> mlua::Result<Option<mlua::Table>> {
+    let Value::Table(api) = lua.globals().get::<Value>("C_ItemSocketInfo")? else {
+        return Ok(None);
+    };
+    let Value::Table(state) = api.get::<Value>("_state")? else {
+        return Ok(None);
+    };
+    Ok(Some(state))
+}
+
+fn item_id_from_socket_value(value: Value) -> Option<u32> {
+    match value {
+        Value::Integer(n) if n > 0 => Some(n as u32),
+        Value::Number(n) if n > 0.0 => Some(n as u32),
+        Value::String(s) => item_id_from_socket_string(&s.to_string_lossy()),
+        Value::Table(table) => item_id_from_socket_table(&table),
+        _ => None,
+    }
+}
+
+fn item_id_from_socket_table(table: &mlua::Table) -> Option<u32> {
+    for field_name in ["itemID", "itemId", "id", "link"] {
+        let Some(value) = table.get::<Value>(field_name).ok() else {
+            continue;
+        };
+        let Some(item_id) = item_id_from_socket_value(value) else {
+            continue;
+        };
+        return Some(item_id);
+    }
+    None
+}
+
+fn item_id_from_socket_string(value: &str) -> Option<u32> {
+    parse_item_id_from_hyperlink(value).or_else(|| value.parse::<u32>().ok())
 }
 
 fn add_set_hyperlink<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
