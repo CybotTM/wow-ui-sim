@@ -257,6 +257,61 @@ fn show_macro_frame_loads_and_populates_selector() {
 }
 
 #[test]
+fn show_mail_frame_loads_and_populates_inbox_rows() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            A_Admin.ClearInbox()
+            A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+            A_Admin.AddMail("Jaina", "Arcane Invoice", "The Kirin Tor still expects payment.")
+
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_MailFrame")
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
+            end
+            if not MailFrame or not MailFrame_Show then
+                return "mail_frame_missing"
+            end
+
+            MailFrame_Show()
+
+            if not MailFrame:IsShown() then
+                return "mail_frame_not_shown"
+            end
+            if not InboxFrame or not InboxFrame:IsShown() then
+                return "inbox_frame_not_shown"
+            end
+            if C_Mail.GetNumItems() ~= 2 then
+                return "c_mail_count=" .. tostring(C_Mail.GetNumItems())
+            end
+
+            local firstButton = MailItem1Button
+            if not firstButton or not firstButton:IsShown() then
+                return "mail_item_1_not_shown"
+            end
+            if firstButton.index ~= 1 then
+                return "mail_item_1_index=" .. tostring(firstButton.index)
+            end
+            if MailItem1Sender:GetText() ~= "Thrall" then
+                return "mail_item_1_sender=" .. tostring(MailItem1Sender:GetText())
+            end
+            if MailItem1Subject:GetText() ~= "Unread Orders" then
+                return "mail_item_1_subject=" .. tostring(MailItem1Subject:GetText())
+            end
+            if not MailItem2Button or not MailItem2Button:IsShown() then
+                return "mail_item_2_not_shown"
+            end
+            if MailItem2Sender:GetText() ~= "Jaina" then
+                return "mail_item_2_sender=" .. tostring(MailItem2Sender:GetText())
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "ShowMailFrame should load the inbox panel and populate seeded inbox rows: {result}");
+    }
+}
+
+#[test]
 fn hide_ui_panel_hides_frame() {
     test_timeout! {
         let env = setup_env();

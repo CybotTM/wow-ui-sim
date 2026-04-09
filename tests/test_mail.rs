@@ -392,6 +392,56 @@ fn c_mail_has_inbox_money() {
 }
 
 #[test]
+fn c_mail_get_num_items_tracks_seeded_inbox_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            A_Admin.AddMail("A", "Unread", "")
+            A_Admin.AddMail("B", "Also unread", "")
+            local count = C_Mail.GetNumItems()
+            if count ~= 2 then return "count=" .. tostring(count) end
+            A_Admin.ClearInbox()
+            local cleared = C_Mail.GetNumItems()
+            if cleared ~= 0 then return "cleared=" .. tostring(cleared) end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_Mail.GetNumItems should follow the seeded inbox state: {result}"
+    );
+}
+
+#[test]
+fn c_mail_has_new_mail_reflects_unread_state() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_Mail.HasNewMail() ~= false then
+                return "empty=" .. tostring(C_Mail.HasNewMail())
+            end
+            A_Admin.AddMail("Thrall", "Unread", "")
+            if C_Mail.HasNewMail() ~= true then
+                return "unread=" .. tostring(C_Mail.HasNewMail())
+            end
+            A_Admin.ClearInbox()
+            if C_Mail.HasNewMail() ~= false then
+                return "cleared=" .. tostring(C_Mail.HasNewMail())
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_Mail.HasNewMail should reflect unread inbox mail: {result}"
+    );
+}
+
+#[test]
 fn take_inbox_item_removes_attachment() {
     let env = env();
     let result: String = env

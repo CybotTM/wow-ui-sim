@@ -62,7 +62,7 @@ fn register_core_namespaces(
     register_c_guild_info(lua)?;
     register_c_lfg_list(lua, std::rc::Rc::clone(&state))?;
     register_c_loss_of_control(lua)?;
-    register_c_mail(lua)?;
+    register_c_mail(lua, std::rc::Rc::clone(&state))?;
     register_c_stable_info(lua)?;
     register_c_tutorial(lua)?;
     super::action_bar_api::register_c_action_bar_namespace(lua, state.clone())?;
@@ -332,12 +332,39 @@ fn register_c_loss_of_control(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
-fn register_c_mail(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set("GetNumItems", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set("HasNewMail", lua.create_function(|_, ()| Ok(false))?)?;
+fn register_c_mail(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    let globals = lua.globals();
+    let t: mlua::Table = match globals.get::<Value>("C_Mail")? {
+        Value::Table(existing) => existing,
+        _ => {
+            let created = lua.create_table()?;
+            globals.set("C_Mail", created.clone())?;
+            created
+        }
+    };
+    t.set(
+        "GetNumItems",
+        lua.create_function({
+            let state = std::rc::Rc::clone(&state);
+            move |_, ()| Ok(state.borrow().player.inbox.len() as i32)
+        })?,
+    )?;
+    t.set(
+        "HasNewMail",
+        lua.create_function(move |_, ()| {
+            let has_unread = state
+                .borrow()
+                .player
+                .inbox
+                .iter()
+                .any(|mail| !mail.was_read);
+            Ok(has_unread)
+        })?,
+    )?;
     t.set("IsCommandPending", lua.create_function(|_, ()| Ok(false))?)?;
-    lua.globals().set("C_Mail", t)?;
     Ok(())
 }
 
