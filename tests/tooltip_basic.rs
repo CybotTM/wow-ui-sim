@@ -1,6 +1,7 @@
 //! Tests for GameTooltip implementation.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::compute_frame_rect;
 use wow_ui_sim::widget::AnchorPoint;
 
 #[test]
@@ -614,6 +615,72 @@ fn test_tooltip_anchor_preserve_keeps_existing_anchor_when_reowned() {
 
     let tooltip_anchor: String = env.eval("return GameTooltip:GetAnchorType()").unwrap();
     assert_eq!(tooltip_anchor, "ANCHOR_PRESERVE");
+}
+
+#[test]
+fn test_tooltip_anchor_preserve_keeps_existing_position_when_reowned() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local owner1 = CreateFrame("Frame", "AnchorPreserveLayoutOwner1", UIParent)
+        local owner2 = CreateFrame("Frame", "AnchorPreserveLayoutOwner2", UIParent)
+        owner1:SetSize(100, 30)
+        owner2:SetSize(100, 30)
+        owner1:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 120, -140)
+        owner2:SetPoint("BOTTOMRIGHT", UIParent, "BOTTOMRIGHT", -220, 180)
+        GameTooltip:SetOwner(owner1, "ANCHOR_RIGHT", 12, -8)
+    "#,
+    )
+    .unwrap();
+
+    let (tooltip_id, screen_width, screen_height, before_rect) = {
+        let state = env.state().borrow();
+        let tooltip_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+        let before_rect = compute_frame_rect(
+            &state.widgets,
+            tooltip_id,
+            state.screen_width,
+            state.screen_height,
+        );
+        (
+            tooltip_id,
+            state.screen_width,
+            state.screen_height,
+            before_rect,
+        )
+    };
+
+    env.exec(
+        r#"
+        GameTooltip:SetOwner(AnchorPreserveLayoutOwner2, "ANCHOR_PRESERVE")
+    "#,
+    )
+    .unwrap();
+
+    let after_rect = {
+        let state = env.state().borrow();
+        compute_frame_rect(&state.widgets, tooltip_id, screen_width, screen_height)
+    };
+    let owner_name: String = env.eval("return GameTooltip:GetOwner():GetName()").unwrap();
+
+    assert_eq!(owner_name, "AnchorPreserveLayoutOwner2");
+    assert!(
+        (after_rect.x - before_rect.x).abs() < 0.1,
+        "ANCHOR_PRESERVE should keep the tooltip x position when re-owned"
+    );
+    assert!(
+        (after_rect.y - before_rect.y).abs() < 0.1,
+        "ANCHOR_PRESERVE should keep the tooltip y position when re-owned"
+    );
+    assert!(
+        (after_rect.width - before_rect.width).abs() < 0.1,
+        "tooltip width should stay preserved"
+    );
+    assert!(
+        (after_rect.height - before_rect.height).abs() < 0.1,
+        "tooltip height should stay preserved"
+    );
 }
 
 #[test]
