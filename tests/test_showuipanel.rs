@@ -365,3 +365,50 @@ fn character_and_spellbook_coexist() {
         assert_eq!(result, "ok", "Character and Spellbook panels should coexist (left + center): {result}");
     }
 }
+
+#[test]
+fn housing_dashboard_loads_and_opens_panel() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env
+            .eval(
+                r#"
+                    local loaded, reason = C_AddOns.LoadAddOn("Blizzard_HousingDashboard")
+                    if not loaded then
+                        return "load_failed:" .. tostring(reason)
+                    end
+                    if not HousingDashboardFrame then
+                        return "missing_frame"
+                    end
+
+                    local panelEntry = UIPanelWindows["HousingDashboardFrame"]
+                    if not panelEntry then
+                        return "missing_panel_registration"
+                    end
+
+                    local ok, err = pcall(function()
+                        ShowUIPanel(HousingDashboardFrame)
+                    end)
+                    if not ok then
+                        return "show_failed:" .. tostring(err)
+                    end
+                    if not HousingDashboardFrame:IsShown() then
+                        return "panel_not_shown"
+                    end
+                    if HousingDashboardFrame.HouseInfoContent.LoadingSpinner:IsShown() then
+                        return "spinner_still_shown"
+                    end
+                    if not HousingDashboardFrame.HouseInfoContent.DashboardNoHousesFrame:IsShown() then
+                        return "no_houses_dashboard_not_shown"
+                    end
+
+                    return "ok"
+                "#,
+            )
+            .unwrap();
+        assert_eq!(
+            result, "ok",
+            "Housing dashboard should load and open via ShowUIPanel: {result}"
+        );
+    }
+}

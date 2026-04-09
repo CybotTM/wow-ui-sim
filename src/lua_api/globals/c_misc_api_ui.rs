@@ -487,7 +487,30 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
     )?;
     g.set("C_DyeColor", make_c_dye_color(lua)?)?;
     g.set("C_HouseEditor", make_c_house_editor(lua)?)?;
+    g.set("C_HousingDecor", make_c_housing_decor(lua)?)?;
+    g.set("C_Housing", make_c_housing_namespace(lua)?)?;
 
+    let basic = lua.create_table()?;
+    basic.set("IsDecorSelected", lua.create_function(|_, ()| Ok(false))?)?;
+    basic.set(
+        "GetSelectedDecorInfo",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set("C_HousingBasicMode", basic)?;
+
+    g.set("C_HousingCatalog", make_c_housing_catalog(lua, &g)?)?;
+
+    Ok(())
+}
+
+fn fire_ui_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    let mut call_args = vec![Value::String(lua.create_string(event_name)?)];
+    call_args.extend(args.iter().cloned());
+    fire.call(MultiValue::from_vec(call_args))
+}
+
+fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
     let decor = lua.create_table()?;
     decor.set(
         "GetHoveredDecorInfo",
@@ -498,8 +521,10 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
         "GetDecorInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
-    g.set("C_HousingDecor", decor)?;
+    Ok(decor)
+}
 
+fn make_c_housing_namespace(lua: &Lua) -> Result<mlua::Table> {
     let housing = lua.create_table()?;
     housing.set(
         "GetTrackedHouseGuid",
@@ -516,22 +541,38 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
     )?;
     housing.set(
         "GetPlayerOwnedHouses",
-        lua.create_function(|lua, ()| lua.create_table())?,
+        create_get_player_owned_houses_fn(lua)?,
     )?;
-    g.set("C_Housing", housing)?;
+    Ok(housing)
+}
 
-    let basic = lua.create_table()?;
-    basic.set("IsDecorSelected", lua.create_function(|_, ()| Ok(false))?)?;
-    basic.set(
-        "GetSelectedDecorInfo",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    g.set("C_HousingBasicMode", basic)?;
+fn create_get_player_owned_houses_fn(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, ()| {
+        let house_list = lua.create_table()?;
+        fire_ui_event(
+            lua,
+            "PLAYER_HOUSE_LIST_UPDATED",
+            &[Value::Table(house_list.clone())],
+        )?;
+        Ok(house_list)
+    })
+}
 
-    let catalog: mlua::Table = match g.get::<Value>("C_HousingCatalog")? {
-        Value::Table(t) => t,
-        _ => lua.create_table()?,
-    };
+fn make_c_housing_catalog(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
+    let catalog = ensure_c_housing_catalog_table(lua, globals)?;
+    register_c_housing_catalog_searcher(lua, &catalog)?;
+    register_c_housing_catalog_categories(lua, &catalog)?;
+    Ok(catalog)
+}
+
+fn ensure_c_housing_catalog_table(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
+    match globals.get::<Value>("C_HousingCatalog")? {
+        Value::Table(t) => Ok(t),
+        _ => lua.create_table(),
+    }
+}
+
+fn register_c_housing_catalog_searcher(lua: &Lua, catalog: &mlua::Table) -> Result<()> {
     catalog.set(
         "CreateCatalogSearcher",
         lua.create_function(|lua, _: MultiValue| {
@@ -540,7 +581,6 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
                 lua.create_function(|lua, _: MultiValue| Ok(Value::Table(lua.create_table()?)))?;
             searcher.set("GetAllSearchItems", ret_empty.clone())?;
             searcher.set("GetCatalogSearchResults", ret_empty)?;
-            // Catch-all: any unknown method returns a noop function
             let mt = lua.create_table()?;
             mt.set(
                 "__index",
@@ -552,8 +592,12 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
             Ok(Value::Table(searcher))
         })?,
     )?;
-    // Return the "All" category (ID 18) so the catalog has at least one category
+    Ok(())
+}
+
+fn register_c_housing_catalog_categories(lua: &Lua, catalog: &mlua::Table) -> Result<()> {
     const ALL_CATEGORY_ID: i32 = 18;
+
     catalog.set(
         "SearchCatalogCategories",
         lua.create_function(|lua, _: MultiValue| {
@@ -573,8 +617,6 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
             Ok(Value::Table(info))
         })?,
     )?;
-    g.set("C_HousingCatalog", catalog)?;
-
     Ok(())
 }
 
