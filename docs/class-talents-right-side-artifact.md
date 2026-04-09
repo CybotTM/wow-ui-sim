@@ -1,6 +1,6 @@
 # Class Talents Right-Side Artifact
 
-Status: open, separate from the retired hero-spec icon report.
+Status: resolved as a screenshot artifact, not a live class-talent render-batch bug.
 
 ## Problem
 
@@ -31,21 +31,42 @@ Observed in `/tmp/hero-current.webp` on April 9, 2026:
 - a separate gold circular visual remains visible near the lower-right portion of the class-talent
   UI, beneath the Protection tree area
 
-This should be treated as a different bug from the retired hero-spec investigation in
-[`docs/hero-spec-icon-bug.md`](/syncthing/Sync/Projects/wow/wow-ui-sim/docs/hero-spec-icon-bug.md).
+This initially looked like a different bug from the retired hero-spec investigation in
+[`docs/hero-spec-icon-bug.md`](/syncthing/Sync/Projects/wow/wow-ui-sim/docs/hero-spec-icon-bug.md),
+but the raw render-batch investigation below ruled that out.
+
+## Resolution
+
+The apparent lower-right artifact does not correspond to any live frame content in the raw
+render batch for the filtered class-talent screenshot.
+
+The investigated bbox was `(1134, 664) -> (1173, 708)` in the current `1600x1200`
+`PlayerSpellsFrame` screenshot-path render. For that region:
+
+- there are no overlapping non-background texture requests
+- there are no overlapping mask texture requests
+- there are no overlapping solid-color quads
+- the raw `render_to_image(...)` output for that bbox matches a marble-only baseline exactly
+
+That means the visible gold blob in the saved screenshot is not backed by a live class-talent
+frame, texture request, or render quad. The remaining evidence points to the lossy WebP
+screenshot encoding path, not the UI render batch itself.
 
 ## Known Non-Causes
 
-The following were already ruled out by the hero-spec investigation:
+The following were ruled out by the combined hero-spec and raw-batch investigations:
 
 - `HeroTalentsContainer`
 - `HeroSpecButton.Icon1`
 - other children of the hero-spec subtree
 - the old historical point `(1000, 610)`, which now resolves to `framegeneral/ui-background-marble`
+- the current lower-right bbox in the raw filtered class-talent render batch
 
-## Next Steps
+## Follow-Up
 
-- capture the exact bounds of the remaining right-side artifact in the current screenshot
-- identify which frame / texture request covers that actual region in the current batch
-- determine whether it belongs to the Protection tree, another class-talent subpanel, or an
-  unrelated overlapping frame
+If the screenshot output still matters, the next investigation should move to the screenshot
+export pipeline itself:
+
+- confirm whether WebP quality `15` is introducing the visible blob in that region
+- decide whether screenshot debugging should use a lossless format or higher-quality encode option
+- treat this separately from live class-talent rendering bugs

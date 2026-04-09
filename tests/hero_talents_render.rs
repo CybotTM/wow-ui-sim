@@ -2,7 +2,9 @@
 
 mod common;
 
+use std::cell::RefCell;
 use std::path::PathBuf;
+use std::rc::Rc;
 
 use iced::{Point, Rectangle, Size};
 use image::RgbaImage;
@@ -12,7 +14,7 @@ use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::render::headless::render_to_image;
 use wow_ui_sim::render::shader::load_texture_or_crop;
-use wow_ui_sim::render::{BlendMode, QuadBatch};
+use wow_ui_sim::render::{BlendMode, GlyphAtlas, QuadBatch, WowFontSystem};
 use wow_ui_sim::texture::TextureManager;
 
 fn blizzard_ui_dir() -> PathBuf {
@@ -49,13 +51,7 @@ fn open_class_talent_frame(env: &WowLuaEnv) {
         .expect("Failed to open class talent frame");
 }
 
-fn quad_bounds(
-    batch: &wow_ui_sim::render::QuadBatch,
-    request: &wow_ui_sim::render::TextureRequest,
-) -> (f32, f32, f32, f32) {
-    let start = request.vertex_start as usize;
-    let end = start + request.vertex_count as usize;
-    let verts = &batch.vertices[start..end];
+fn quad_bounds_from_vertices(verts: &[wow_ui_sim::render::QuadVertex]) -> (f32, f32, f32, f32) {
     let mut min_x = f32::INFINITY;
     let mut min_y = f32::INFINITY;
     let mut max_x = f32::NEG_INFINITY;
@@ -67,6 +63,15 @@ fn quad_bounds(
         max_y = max_y.max(vert.position[1]);
     }
     (min_x, min_y, max_x, max_y)
+}
+
+fn quad_bounds(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+) -> (f32, f32, f32, f32) {
+    let start = request.vertex_start as usize;
+    let end = start + request.vertex_count as usize;
+    quad_bounds_from_vertices(&batch.vertices[start..end])
 }
 
 fn assert_bounds_match_rect(
@@ -129,6 +134,45 @@ fn make_texture_manager() -> Option<TextureManager> {
     Some(mgr)
 }
 
+fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
+    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+}
+
+fn build_screenshot_like_batch(
+    env: &WowLuaEnv,
+    width: u32,
+    height: u32,
+    filter: Option<&str>,
+) -> QuadBatch {
+    let font_system = make_font_system();
+    env.set_font_system(Rc::clone(&font_system));
+    env.set_screen_size(width as f32, height as f32);
+    wow_ui_sim::startup::run_extra_update_ticks(env, 3);
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let mut font_system = font_system.borrow_mut();
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_system);
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
+    build_quad_batch_for_registry(
+        &state.widgets,
+        (width as f32, height as f32),
+        filter,
+        None,
+        None,
+        Some((&mut font_system, &mut glyph_atlas)),
+        Some(&state.message_frames),
+        Some(&tooltip_data),
+        &buckets,
+    )
+}
+
 fn sample_rect_pixel(image: &RgbaImage, rect: (f32, f32, f32, f32), u: f32, v: f32) -> [u8; 4] {
     let max_x = image.width().saturating_sub(1) as f32;
     let max_y = image.height().saturating_sub(1) as f32;
@@ -186,6 +230,65 @@ fn request_contains_point(
 ) -> bool {
     let bounds = quad_bounds(batch, request);
     x >= bounds.0 && x <= bounds.2 && y >= bounds.1 && y <= bounds.3
+}
+
+fn request_overlaps_rect(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+    rect: (f32, f32, f32, f32),
+) -> bool {
+    let bounds = quad_bounds(batch, request);
+    let rect_right = rect.0 + rect.2;
+    let rect_bottom = rect.1 + rect.3;
+    let bounds_right = bounds.2;
+    let bounds_bottom = bounds.3;
+    bounds.0 < rect_right
+        && bounds_right > rect.0
+        && bounds.1 < rect_bottom
+        && bounds_bottom > rect.1
+}
+
+fn vertex_range_bounds(
+    batch: &wow_ui_sim::render::QuadBatch,
+    vertex_start: usize,
+    vertex_count: usize,
+) -> (f32, f32, f32, f32) {
+    quad_bounds_from_vertices(&batch.vertices[vertex_start..vertex_start + vertex_count])
+}
+
+fn bounds_overlap_rect(bounds: (f32, f32, f32, f32), rect: (f32, f32, f32, f32)) -> bool {
+    let rect_right = rect.0 + rect.2;
+    let rect_bottom = rect.1 + rect.3;
+    bounds.0 < rect_right && bounds.2 > rect.0 && bounds.1 < rect_bottom && bounds.3 > rect.1
+}
+
+fn marble_only_batch(width: u32, height: u32) -> QuadBatch {
+    let mut batch = QuadBatch::default();
+    batch.push_tiled_path(
+        Rectangle::new(Point::ORIGIN, Size::new(width as f32, height as f32)),
+        256.0,
+        256.0,
+        "framegeneral/ui-background-marble",
+        [0.55, 0.55, 0.55, 1.0],
+    );
+    batch
+}
+
+fn assert_images_match_rect(
+    actual: &RgbaImage,
+    expected: &RgbaImage,
+    rect: (u32, u32, u32, u32),
+    label: &str,
+) {
+    for y in rect.1..rect.1 + rect.3 {
+        for x in rect.0..rect.0 + rect.2 {
+            assert_eq!(
+                actual.get_pixel(x, y).0,
+                expected.get_pixel(x, y).0,
+                "{label} pixel mismatch at ({x}, {y})"
+            );
+        }
+    }
 }
 
 #[test]
@@ -634,5 +737,85 @@ fn historical_bottom_right_artifact_point_is_only_background_marble_in_current_r
         matches,
         vec!["framegeneral/ui-background-marble"],
         "Historical bottom-right artifact point should only intersect the class-talent marble background in the current render"
+    );
+}
+
+#[test]
+fn lower_right_artifact_bbox_matches_background_marble_in_raw_player_spells_render() {
+    if common::try_create_gpu_device().is_none() {
+        eprintln!("Skipping GPU render test: no adapter available");
+        return;
+    }
+
+    let env = setup_full_ui();
+    open_class_talent_frame(&env);
+    let batch = build_screenshot_like_batch(&env, 1600, 1200, Some("PlayerSpellsFrame"));
+
+    let artifact_rect = (1134.0, 664.0, 40.0, 45.0);
+    let texture_matches: Vec<_> = batch
+        .texture_requests
+        .iter()
+        .filter(|request| {
+            request.path != "framegeneral/ui-background-marble"
+                && request_overlaps_rect(&batch, request, artifact_rect)
+        })
+        .map(|request| request.path.as_str())
+        .collect();
+    assert!(
+        texture_matches.is_empty(),
+        "artifact bbox should not overlap non-background texture requests: {texture_matches:#?}"
+    );
+
+    let mask_matches: Vec<_> = batch
+        .mask_texture_requests
+        .iter()
+        .filter(|request| request_overlaps_rect(&batch, request, artifact_rect))
+        .map(|request| request.path.as_str())
+        .collect();
+    assert!(
+        mask_matches.is_empty(),
+        "artifact bbox should not overlap mask requests: {mask_matches:#?}"
+    );
+
+    let solid_matches: Vec<_> = batch
+        .vertices
+        .chunks_exact(4)
+        .enumerate()
+        .filter_map(|(quad_idx, verts)| {
+            if verts[0].tex_index != -1 {
+                return None;
+            }
+            let vertex_start = quad_idx * 4;
+            let bounds = vertex_range_bounds(&batch, vertex_start, 4);
+            bounds_overlap_rect(bounds, artifact_rect).then_some((
+                quad_idx,
+                bounds,
+                verts[0].color,
+                verts[1].color,
+                verts[2].color,
+                verts[3].color,
+            ))
+        })
+        .collect();
+    assert!(
+        solid_matches.is_empty(),
+        "artifact bbox should not overlap solid-color quads: {solid_matches:#?}"
+    );
+
+    let mut raw_mgr = make_texture_manager().expect("texture directories should exist");
+    let raw_render = render_to_image(&batch, &mut raw_mgr, 1600, 1200, None);
+    let mut marble_mgr = make_texture_manager().expect("texture directories should exist");
+    let marble_render = render_to_image(
+        &marble_only_batch(1600, 1200),
+        &mut marble_mgr,
+        1600,
+        1200,
+        None,
+    );
+    assert_images_match_rect(
+        &raw_render,
+        &marble_render,
+        (1134, 664, 40, 45),
+        "lower-right artifact bbox",
     );
 }
