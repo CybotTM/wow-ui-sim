@@ -1,10 +1,14 @@
 //! UserData meta methods for FrameRef.
 //!
 //! Registers __index, __newindex, __len, __tostring, __eq on FrameRef's UserData impl.
-//! Methods are registered directly on FrameRef via add_method (mlua resolves them before
-//! __index is called), so __index only handles children / per-frame fields.
+//! Methods are registered directly on FrameRef via add_method, then a Lua wrapper around
+//! the shared `__index` metatable slot layers in per-frame fields and per-type method
+//! filtering before falling through to mlua's method resolution.
 
-use super::handle::{FrameRef, extract_frame_id, frame_ref, get_sim_state};
+use super::{
+    handle::{FrameRef, extract_frame_id, frame_ref, get_sim_state},
+    method_registry,
+};
 use mlua::{Lua, Value};
 
 /// Register meta methods on the FrameRef UserData type.
@@ -243,7 +247,7 @@ fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
 ///
 /// Note: mlua wraps user values, so debug.getfenv(ud)[1] = fields.
 const PATCH_INDEX_LUA: &str = r#"
-    local ud = ...
+    local ud, is_disallowed = ...
     local mt = debug.getmetatable(ud)
     local old_index = mt.__index
     local dgetfenv = debug.getfenv
@@ -257,6 +261,9 @@ const PATCH_INDEX_LUA: &str = r#"
                 val = rawget(env, key)
                 if val ~= nil then return val end
             end
+            if is_disallowed(self, key) then
+                return nil
+            end
         end
         return old_index(self, key)
     end
@@ -268,7 +275,9 @@ const PATCH_INDEX_LUA: &str = r#"
 /// Called once during init — all FrameRef instances share the same metatable.
 fn patch_metatable_index(lua: &Lua) -> mlua::Result<()> {
     let dummy = lua.create_userdata(FrameRef(0))?;
-    lua.load(PATCH_INDEX_LUA).call::<()>(dummy)?;
+    let is_disallowed = create_method_filter_helper(lua)?;
+    lua.load(PATCH_INDEX_LUA)
+        .call::<()>((dummy, is_disallowed))?;
     Ok(())
 }
 
@@ -291,12 +300,28 @@ fn lookup_child_by_index(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Val
 
 /// Check per-type __index tables for addon-injected methods.
 ///
-/// Currently a no-op: Elune's taint tracking consumes too much C stack for any
-/// extra table operations in the hot __index path, and adding rawgets to
-/// PATCH_INDEX_LUA triggers Elune assertion crashes. Per-type methods remain
-/// accessible via `getmetatable(frame).__index.Method(frame)` (explicit access).
+/// Currently a no-op. The runtime method filter in `PATCH_INDEX_LUA` only blocks
+/// shared Rust methods that are invalid for the frame's widget type; it does not
+/// synthesize extra per-type methods here.
 fn lookup_type_injected(_lua: &Lua, _ud: &mlua::AnyUserData, _key: &str) -> mlua::Result<Value> {
     Ok(Value::Nil)
+}
+
+fn create_method_filter_helper(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, (ud, key): (mlua::AnyUserData, String)| {
+        let frame_id = ud.borrow::<FrameRef>()?.0;
+        let widget_type = {
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            state
+                .widgets
+                .get(frame_id)
+                .map(|frame| frame.widget_type)
+                .unwrap_or(crate::widget::WidgetType::Frame)
+        };
+        Ok(method_registry::is_registered_method(&key)
+            && !method_registry::is_method_allowed(widget_type, &key))
+    })
 }
 
 /// If the frame has a per-frame custom `__newindex`, call it and return true.

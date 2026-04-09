@@ -254,6 +254,39 @@ fn test_getmetatable_frame_index_iterable_with_pairs() {
 }
 
 #[test]
+fn test_frame_runtime_lookup_filters_wrong_type_methods() {
+    let env = env();
+    let result: (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local button = CreateFrame("Button", "MethodFilterButton")
+            local scroll = CreateFrame("ScrollFrame", "MethodFilterScroll")
+            return button.GetScrollChild == nil,
+                   button.GetVerticalScroll == nil,
+                   type(scroll.GetScrollChild) == "function",
+                   type(scroll.GetVerticalScroll) == "function"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        result.0,
+        "Button should not expose ScrollFrame GetScrollChild at runtime"
+    );
+    assert!(
+        result.1,
+        "Button should not expose ScrollFrame GetVerticalScroll at runtime"
+    );
+    assert!(
+        result.2,
+        "ScrollFrame should still expose GetScrollChild at runtime"
+    );
+    assert!(
+        result.3,
+        "ScrollFrame should still expose GetVerticalScroll at runtime"
+    );
+}
+
+#[test]
 fn test_getmetatable_nil_returns_nil() {
     let env = env();
     let is_nil: bool = env.eval("return getmetatable(nil) == nil").unwrap();
