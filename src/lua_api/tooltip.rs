@@ -29,6 +29,7 @@ pub struct TooltipData {
     pub allow_show_with_no_lines: bool,
     pub anchor_x_offset: f32,
     pub anchor_y_offset: f32,
+    pub custom_word_wrap_min_width: Option<f32>,
     pub min_width: f32,
     pub padding: f32,
     /// Spell ID set by `SetSpellByID`, returned by `GetSpell`.
@@ -50,6 +51,7 @@ impl Default for TooltipData {
             allow_show_with_no_lines: false,
             anchor_x_offset: 0.0,
             anchor_y_offset: 0.0,
+            custom_word_wrap_min_width: None,
             min_width: 0.0,
             padding: 0.0,
             spell_id: None,

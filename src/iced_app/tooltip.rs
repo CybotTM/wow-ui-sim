@@ -113,6 +113,10 @@ fn measure_tooltip_content_width(
     font_system: &mut WowFontSystem,
 ) -> f32 {
     let mut max_width: f32 = td.min_width;
+    if tooltip_has_wrapped_lines(td) {
+        let wrapped_min_width = td.custom_word_wrap_min_width.unwrap_or(0.0);
+        max_width = max_width.max(wrapped_min_width);
+    }
     for (i, line) in td.lines.iter().enumerate() {
         if line.wrap {
             continue;
@@ -132,6 +136,10 @@ fn measure_tooltip_content_width(
         max_width = max_width.max(line_width);
     }
     max_width
+}
+
+fn tooltip_has_wrapped_lines(td: &crate::lua_api::tooltip::TooltipData) -> bool {
+    td.lines.iter().any(|line| line.wrap)
 }
 
 /// Collect render data for all visible tooltips with lines.
