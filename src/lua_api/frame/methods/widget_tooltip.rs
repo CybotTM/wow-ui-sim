@@ -284,6 +284,11 @@ fn add_set_unit<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_aura_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_index_aura_tooltip_methods(methods);
+    add_aura_instance_id_tooltip_methods(methods);
+}
+
+fn add_index_aura_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_aura_tooltip_method(
         methods,
         "SetUnitBuff",
@@ -302,6 +307,9 @@ fn add_aura_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
         AuraLookupKind::Index,
         AuraTooltipKind::Aura,
     );
+}
+
+fn add_aura_instance_id_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_aura_tooltip_method(
         methods,
         "SetUnitBuffByAuraInstanceID",
