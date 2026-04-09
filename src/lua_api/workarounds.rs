@@ -20,7 +20,6 @@ use std::rc::Rc;
 /// still leave inconsistent after startup.
 pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_editmode::init_edit_mode_layout(env);
-    hide_talent_loadout_dialogs(env);
     suppress_spellbook_tutorials(env);
 }
 
@@ -30,7 +29,6 @@ pub fn apply_post_event(env: &WowLuaEnv) {
 /// cleanup targeted to that addon avoids broad UI mutation on unrelated loads.
 pub fn apply_post_runtime_addon_load(env: &WowLuaEnv, addon_name: &str) {
     if addon_name == "Blizzard_PlayerSpells" {
-        hide_talent_loadout_dialogs(env);
         suppress_spellbook_tutorials(env);
     }
 }
@@ -77,27 +75,6 @@ fn guard_lfg_backfill_cover(env: &WowLuaEnv) {
             end
         end
         "#,
-    );
-}
-
-/// Blizzard's class talent loadout dialogs are hidden XML popups that should
-/// remain closed until their dropdown actions explicitly open them. Normalize
-/// them after startup events in case intermediate handlers surfaced them.
-/// Retained because first-open PlayerSpells startup still leaks them visible.
-fn hide_talent_loadout_dialogs(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        for _, name in ipairs({
-            "ClassTalentLoadoutCreateDialog",
-            "ClassTalentLoadoutEditDialog",
-            "ClassTalentLoadoutImportDialog",
-        }) do
-            local frame = _G[name]
-            if frame then
-                frame:Hide()
-            end
-        end
-    "#,
     );
 }
 
@@ -270,48 +247,6 @@ mod tests {
         assert_eq!(vertical_marker, "existing");
         assert_eq!(horizontal_template, "CRFManagerDividerHorizontal");
         assert_eq!(created_count, 1);
-    }
-
-    #[test]
-    fn talent_dialog_cleanup_hides_only_target_dialogs() {
-        let env = env();
-        env.exec(
-            r#"
-            local function dialog()
-                return {
-                    hidden = false,
-                    Hide = function(self) self.hidden = true end,
-                }
-            end
-            ClassTalentLoadoutCreateDialog = dialog()
-            ClassTalentLoadoutEditDialog = dialog()
-            ClassTalentLoadoutImportDialog = dialog()
-            UnrelatedDialog = dialog()
-            "#,
-        )
-        .unwrap();
-
-        hide_talent_loadout_dialogs(&env);
-        let (create_hidden, edit_hidden, import_hidden, unrelated_hidden): (
-            bool,
-            bool,
-            bool,
-            bool,
-        ) = env
-            .eval(
-                r#"
-                return ClassTalentLoadoutCreateDialog.hidden,
-                    ClassTalentLoadoutEditDialog.hidden,
-                    ClassTalentLoadoutImportDialog.hidden,
-                    UnrelatedDialog.hidden
-                "#,
-            )
-            .unwrap();
-        assert!(create_hidden && edit_hidden && import_hidden);
-        assert!(
-            !unrelated_hidden,
-            "cleanup should stay scoped to talent loadout dialogs"
-        );
     }
 
     #[test]
