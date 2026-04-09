@@ -77,7 +77,6 @@ pub fn fix_bag_item_context_overlay(env: &WowLuaEnv) {
     );
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
