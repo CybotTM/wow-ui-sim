@@ -438,12 +438,12 @@ fn combat_log_globals_have_stable_stub_behavior() {
         set_entry_ok,
         clear_ok,
         set_retention_ok,
-        current_entry,
-        num_entries,
-        show_current,
-        advance_result,
+        current_entry_ok,
+        num_entries_is_number,
+        show_current_is_boolean,
+        advance_result_is_nil_or_boolean,
         retention_time,
-        event_info_is_nil,
+        event_info_ok,
         object_match,
         object_miss,
     ): (
@@ -452,8 +452,8 @@ fn combat_log_globals_have_stable_stub_behavior() {
         bool,
         bool,
         bool,
-        i64,
-        i64,
+        bool,
+        bool,
         bool,
         bool,
         f64,
@@ -469,12 +469,12 @@ fn combat_log_globals_have_stable_stub_behavior() {
             local clearOk = pcall(CombatLogClearEntries)
             local setRetentionOk = pcall(CombatLogSetRetentionTime, 120)
 
-            local currentEntry = CombatLogGetCurrentEntry()
+            local currentEntryOk, currentEntry = pcall(CombatLogGetCurrentEntry)
             local numEntries = CombatLogGetNumEntries()
             local showCurrent = CombatLogShowCurrentEntry()
             local advanceResult = CombatLogAdvanceEntry(1)
             local retentionTime = CombatLogGetRetentionTime()
-            local eventInfoIsNil = CombatLogGetCurrentEventInfo() == nil
+            local eventInfoOk = pcall(CombatLogGetCurrentEventInfo)
 
             local objectMatch = CombatLog_Object_IsA(0x21, 0x01)
             local objectMiss = CombatLog_Object_IsA(0x20, 0x01)
@@ -484,12 +484,12 @@ fn combat_log_globals_have_stable_stub_behavior() {
                 setEntryOk,
                 clearOk,
                 setRetentionOk,
-                currentEntry,
-                numEntries,
-                showCurrent,
-                advanceResult,
+                currentEntryOk,
+                type(numEntries) == "number",
+                type(showCurrent) == "boolean",
+                advanceResult == nil or type(advanceResult) == "boolean",
                 retentionTime,
-                eventInfoIsNil,
+                eventInfoOk,
                 objectMatch,
                 objectMiss
             "#,
@@ -504,18 +504,215 @@ fn combat_log_globals_have_stable_stub_behavior() {
         set_retention_ok,
         "CombatLogSetRetentionTime should be callable"
     );
-    assert_eq!(current_entry, 0, "current entry stub should default to 0");
-    assert_eq!(num_entries, 0, "entry count stub should default to 0");
-    assert!(!show_current, "show current entry stub should be false");
-    assert!(!advance_result, "advance entry stub should be false");
-    assert_eq!(
-        retention_time, 300.0,
-        "retention time stub should default to 300s"
+    assert!(
+        current_entry_ok,
+        "CombatLogGetCurrentEntry should stay callable through deprecated globals"
     );
-    assert!(event_info_is_nil, "current event info stub should be nil");
+    assert!(
+        num_entries_is_number,
+        "CombatLogGetNumEntries should return a numeric value"
+    );
+    assert!(
+        show_current_is_boolean,
+        "CombatLogShowCurrentEntry should return a boolean"
+    );
+    assert!(
+        advance_result_is_nil_or_boolean,
+        "CombatLogAdvanceEntry should return a boolean-like validity result"
+    );
+    assert!(
+        retention_time > 0.0,
+        "CombatLogGetRetentionTime should return a positive numeric retention time"
+    );
+    assert!(
+        event_info_ok,
+        "CombatLogGetCurrentEventInfo should stay callable"
+    );
     assert!(object_match, "bitmask check should match overlapping flags");
     assert!(
         !object_miss,
         "bitmask check should fail for non-overlapping flags"
     );
+}
+
+#[test]
+fn combat_log_namespaces_iterate_seeded_entries_and_messages() {
+    let env = env();
+    let (
+        public_count_before,
+        secure_count_before,
+        public_current_event,
+        public_show_current,
+        secure_newest_valid,
+        secure_entry_count,
+        secure_current_event_name,
+        secure_previous_valid,
+        created_message_count,
+        newest_message_text,
+        oldest_message_text,
+        public_count_after_clear,
+        public_retention_after_set,
+        filtered_enabled,
+        message_limit,
+    ): (
+        i64,
+        i64,
+        String,
+        bool,
+        bool,
+        i64,
+        String,
+        bool,
+        i64,
+        String,
+        String,
+        i64,
+        f64,
+        bool,
+        i64,
+    ) = env
+        .eval(
+            r#"
+            local olderEntry = {
+                1234567891,
+                "SPELL_HEAL",
+                false,
+                "Player-1",
+                "Player",
+                0x511,
+                0,
+                "Player-2",
+                "Target",
+                0x512,
+                0,
+                82326,
+                "Holy Light",
+                2,
+                275,
+                0,
+                0,
+                false,
+            }
+            local newestEntry = {
+                1234567890,
+                "SPELL_DAMAGE",
+                false,
+                "Player-1",
+                "Player",
+                0x511,
+                0,
+                "Creature-1",
+                "Training Dummy",
+                0x10a48,
+                0,
+                19750,
+                "Flash of Light",
+                2,
+                150,
+                0,
+                2,
+                0,
+                0,
+                0,
+                false,
+                false,
+                false,
+                false,
+            }
+
+            C_CombatLogSecure._state.entries = { olderEntry, newestEntry }
+            C_CombatLogSecure._state.currentIndex = nil
+            C_CombatLogSecure._state.createdMessages = {}
+            C_CombatLog._state.retentionTime = 300
+            C_CombatLog._state.filteredEventsEnabled = false
+            C_CombatLog._state.messageLimit = 300
+
+            local publicCountBefore = C_CombatLog.GetEntryCount()
+            local secureCountBefore = C_CombatLogSecure.GetEntryCount()
+            local publicCurrentEvent = { C_CombatLog.GetCurrentEventInfo() }
+            local publicShowCurrent = C_CombatLog.ShouldShowCurrentEntry()
+
+            local secureNewestValid = C_CombatLogSecure.SeekToNewestEntry()
+            local secureEntryCount = C_CombatLogSecure.GetEntryCount()
+            local secureCurrent = { C_CombatLogSecure.GetCurrentEntryInfo() }
+            local securePreviousValid = C_CombatLogSecure.SeekToPreviousEntry()
+
+            C_CombatLogSecure.CreateCombatLogMessage("newest message", 1, 0.5, 0.25, Enum.CombatLogMessageOrder.Newest)
+            C_CombatLogSecure.CreateCombatLogMessage("oldest message", 0.25, 0.5, 1, Enum.CombatLogMessageOrder.Oldest)
+
+            C_CombatLog.SetEntryRetentionTime(120)
+            C_CombatLog.SetFilteredEventsEnabled(true)
+            C_CombatLog.SetMessageLimit(400)
+            C_CombatLog.ClearEntries()
+
+            return publicCountBefore,
+                secureCountBefore,
+                publicCurrentEvent[2],
+                publicShowCurrent,
+                secureNewestValid,
+                secureEntryCount,
+                secureCurrent[2],
+                securePreviousValid,
+                #C_CombatLogSecure._state.createdMessages,
+                C_CombatLogSecure._state.createdMessages[1].message,
+                C_CombatLogSecure._state.createdMessages[2].message,
+                C_CombatLog.GetEntryCount(),
+                C_CombatLog.GetEntryRetentionTime(),
+                C_CombatLog.AreFilteredEventsEnabled(),
+                C_CombatLog.GetMessageLimit()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        public_count_before, 2,
+        "public count should read seeded entries"
+    );
+    assert_eq!(
+        secure_count_before, 2,
+        "secure count should read seeded entries"
+    );
+    assert_eq!(
+        public_current_event, "SPELL_DAMAGE",
+        "public current event should expose the newest seeded entry"
+    );
+    assert!(
+        public_show_current,
+        "public show-current should reflect a valid entry"
+    );
+    assert!(secure_newest_valid, "secure seek-to-newest should succeed");
+    assert_eq!(
+        secure_entry_count, 2,
+        "secure entry count should match seeded entries"
+    );
+    assert_eq!(
+        secure_current_event_name, "SPELL_DAMAGE",
+        "secure current entry should expose the newest seeded entry"
+    );
+    assert!(
+        secure_previous_valid,
+        "secure seek-to-previous should reach the older entry"
+    );
+    assert_eq!(
+        created_message_count, 2,
+        "created messages should be recorded"
+    );
+    assert_eq!(
+        newest_message_text, "newest message",
+        "newest message should be stored"
+    );
+    assert_eq!(
+        oldest_message_text, "oldest message",
+        "oldest message should be stored"
+    );
+    assert_eq!(
+        public_count_after_clear, 0,
+        "ClearEntries should empty the combat log"
+    );
+    assert_eq!(
+        public_retention_after_set, 120.0,
+        "retention time should persist through SetEntryRetentionTime"
+    );
+    assert!(filtered_enabled, "filtered-events flag should persist");
+    assert_eq!(message_limit, 400, "message limit should persist");
 }
