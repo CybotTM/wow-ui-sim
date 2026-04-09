@@ -1,8 +1,12 @@
 # Hero Spec Icon Position Bug
 
-## Problem
+Status: retired as stale evidence in the current build.
 
-The hero talent spec icon (large circular paladin fire icon with ring border) renders at the **bottom-right** of the talent panel instead of **top-center** where it belongs.
+## Original Report
+
+The original report claimed the hero talent spec icon (large circular paladin fire icon with ring
+border) rendered at the **bottom-right** of the talent panel instead of **top-center** where it
+belongs.
 
 ## Frame Hierarchy
 
@@ -48,7 +52,7 @@ __tpl_25774 [Frame] (176x704) x=711, y=61   anchor: TOP -> __tpl_25748:TOP -> (8
     .Border [Texture] (168x168) x=715, y=115
 ```
 
-### screenshot renders at bottom-right (~x=1000, y=610)
+### historical screenshot annotation marked a bottom-right point (~x=1000, y=610)
 
 ### No stale layout_rect
 
@@ -181,12 +185,19 @@ stale or misidentified rather than evidence that `HeroSpecButton.Icon1` is still
 - **Pan offset**: Pan system moves individual talent buttons, not ButtonsParent position
 - **clipChildren**: ButtonsParent clips, but HeroTalentsContainer is a sibling not a child
 
-## Remaining Hypotheses
+## Conclusion
 
-1. **Texture content / stale source asset**: The crop request is correct, but the sampled pixels in the local `talentsheroclassicons` texture could still be stale or wrong for that atlas region.
-1. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, and interior icon samples match the loaded crop, but the shader-side mask path could still distort edge pixels around the real top-center icon.
-2. **Stale / misidentified screenshot evidence**: The old `(1000, 610)` point now resolves to marble background only, so the original “bottom-right hero icon” marker is not a live hero-icon render in the current build.
-3. **Separate non-hero visual issue**: If a bottom-right oddity still exists by eye, it must be a different class-talent render artifact unrelated to `HeroTalentsContainer`.
+The current build does not reproduce a hero-spec icon positioning bug:
+
+- the hero icon renders at the expected top-center location in the current screenshot output
+- the old bottom-right point intersects only marble background in the current screenshot-path batch
+- hiding `HeroTalentsContainer` does not affect that old bottom-right area at all
+
+So this is no longer an active hero-icon bug. The evidence now points to the original report being
+stale or misidentified.
+
+There may still be a separate bottom-right visual oddity elsewhere in the class-talent UI, but that
+is not a `HeroTalentsContainer` / `HeroSpecButton.Icon1` issue and should be tracked separately.
 
 ## Debug Tools Added
 
@@ -198,6 +209,5 @@ wow-sim screenshot --dump-tree               # dump all (no filter)
 
 ## Next Steps
 
-- Identify which on-screen artifact in the screenshot corresponds to which texture request in the `HeroTalentsContainer` subtree
-- Decide whether to retire this hero-icon bug as stale evidence, or open a separate investigation for any remaining non-hero visual oddity in the class-talent screenshot
-- If needed, isolate mask-edge sampling separately from interior icon sampling around the real top-center hero icon
+- If the bottom-right class-talent oddity still matters, open a separate non-hero visual bug for it
+- Otherwise, leave this investigation closed
