@@ -204,6 +204,72 @@ fn test_le_expansion_constants() {
 }
 
 #[test]
+fn test_wrong_constant_snapshot_matches_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let expansion_level: i32 = env.eval("return LE_EXPANSION_LEVEL_CURRENT").unwrap();
+    assert_eq!(expansion_level, 11);
+
+    let autocomplete: (i32, i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_AUTOCOMPLETE_PRIORITY_OTHER,
+                LE_AUTOCOMPLETE_PRIORITY_INTERACTED,
+                LE_AUTOCOMPLETE_PRIORITY_IN_GROUP,
+                LE_AUTOCOMPLETE_PRIORITY_GUILD,
+                LE_AUTOCOMPLETE_PRIORITY_FRIEND,
+                LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER,
+                LE_AUTOCOMPLETE_PRIORITY_ACCOUNT_CHARACTER_SAME_REALM
+            "#,
+        )
+        .unwrap();
+    assert_eq!(autocomplete, (1, 2, 3, 4, 5, 6, 7));
+
+    let lfg_categories: (i32, i32, i32) = env
+        .eval("return LE_LFG_CATEGORY_LFR, LE_LFG_CATEGORY_RF, LE_LFG_CATEGORY_SCENARIO")
+        .unwrap();
+    assert_eq!(lfg_categories, (2, 3, 4));
+
+    let timer_types: (i32, i32) = env
+        .eval(
+            "return LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE, LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND",
+        )
+        .unwrap();
+    assert_eq!(timer_types, (1, 2));
+
+    let max_lengths: (i32, i32, i32) = env
+        .eval(
+            "return MAX_CHARACTER_NAME_BYTES, MAX_COMMUNITY_NAME_LENGTH, MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL",
+        )
+        .unwrap();
+    assert_eq!(max_lengths, (305, 12, 24));
+
+    let strings: (String, String, String, String, String, String) = env
+        .eval(
+            r#"
+            return ITEM_BNETACCOUNTBOUND,
+                ITEM_COOLDOWN_TIME,
+                ITEM_REQ_ALLIANCE,
+                ITEM_REQ_HORDE,
+                SPELL_FAILED_NOT_READY,
+                RAID_BOSSES
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        strings,
+        (
+            "Warbound".into(),
+            "Cooldown remaining: %s".into(),
+            "Alliance Only".into(),
+            "Horde Only".into(),
+            "Not yet recovered".into(),
+            "Bosses".into(),
+        )
+    );
+}
+
+#[test]
 fn test_expansion_name_globals() {
     let env = WowLuaEnv::new().unwrap();
     for i in 0..=10 {

@@ -377,37 +377,25 @@ with addon code.
 
 **Count**: 1364 missing constants, 72 with wrong values.
 
-**Wrong values** (72 constants — fix these first, they cause silent behavior bugs):
+**Wrong values**: `0`
 
-Source: `diff_constants_wrong.txt`. Key examples:
+`diff_constants_wrong.txt` is intentionally empty now. The earlier 72-entry list had gone stale after
+the constant data refreshes landed: `LE_AUTOCOMPLETE_PRIORITY_*`, `LE_LFG_CATEGORY_*`,
+`LE_GAME_ERR_*`, `ITEM_MOD_*`, `ITEM_BNETACCOUNTBOUND`, `ITEM_COOLDOWN_TIME`, `ITEM_REQ_*`,
+`RAID_BOSSES`, and `SPELL_FAILED_NOT_READY` were already corrected in the shared string/constant data.
 
-| Constant | WoW Value | Sim Value |
-|---|---|---|
-| `LE_EXPANSION_LEVEL_CURRENT` | 11 | 10 |
-| `LE_LFG_CATEGORY_LFR` | 2 | 4 |
-| `LE_LFG_CATEGORY_RF` | 3 | 2 |
-| `LE_LFG_CATEGORY_SCENARIO` | 4 | 3 |
-| `LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE` | 1 | 0 |
-| `LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND` | 2 | 1 |
-| `MAX_CHARACTER_NAME_BYTES` | 305 | 100 |
-| `MAX_COMMUNITY_NAME_LENGTH` | 12 | 20 |
-| `MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL` | 24 | 15 |
-| `LE_AUTOCOMPLETE_PRIORITY_*` | All off by +1 | sim values are -1 from WoW |
-| `ITEM_MOD_*` | Format strings with `%c%s` | sim has plain strings |
-| `LE_GAME_ERR_*` | Integer error codes | sim has English strings |
-| `RAID_BOSSES` | "Bosses" | "Raid Bosses" |
-| `SPELL_FAILED_NOT_READY` | "Not yet recovered" | "Spell is not ready" |
-
-**Note on `LE_AUTOCOMPLETE_PRIORITY_*`**: All 6 values are off by +1 — sim uses 0-based, WoW uses 1-based.
-
-**Note on `LE_GAME_ERR_*` constants**: WoW stores these as integer error codes, not English strings.
-The sim appears to have substituted English strings instead. These need to be numeric IDs.
+The one live runtime bug this audit did find was deprecated alias exposure: the simulator had the
+correct backing values for `ChatFrameConstants` and `Enum.WorldElapsedTimerTypes`, but it was not
+exporting the legacy globals `MAX_CHARACTER_NAME_BYTES`, `MAX_COMMUNITY_NAME_LENGTH`,
+`MAX_COMMUNITY_NAME_LENGTH_NO_CHANNEL`, `LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE`, and
+`LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND`. That alias gap is now fixed, and the diff file is kept
+empty by regression tests.
 
 **Missing constants**: 1364 total. The `diff_constants_missing.txt` file has them with their WoW values.
 Includes item quality color codes (`ITEM_EPIC_COLOR_CODE`, etc.), many `LE_GAME_ERR_*` numeric codes,
 `LE_CHARACTER_UNDELETE_RESULT_*`, `LE_CHARACTER_UPGRADE_RESULT_*`, and hundreds of others.
 
-**Task**: Fix the 72 wrong values first (higher bug impact), then bulk-add the 1364 missing ones.
+**Task**: Keep `diff_constants_wrong.txt` at zero and then bulk-add the 1364 missing constants.
 
 ---
 
