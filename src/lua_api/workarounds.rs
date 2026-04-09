@@ -54,7 +54,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
-    stub_glow_emitter_factory(env);
     init_raid_frame_divider_pools(env);
     guard_lfg_backfill_cover(env);
 }
@@ -111,23 +110,6 @@ fn init_raid_frame_divider_pools(env: &WowLuaEnv) {
     );
 }
 
-/// GlowEmitterFactory is a C++ object in WoW managing spell overlay glow effects.
-/// Stub with no-ops until properly implemented (see docs/glow-plan.md).
-/// The shim installs only when the real factory is absent so it does not
-/// override a future Lua-side or engine-backed implementation.
-fn stub_glow_emitter_factory(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not GlowEmitterFactory then
-            GlowEmitterFactory = {
-                Show = function() end,
-                Hide = function() end,
-                SetShown = function() end,
-            }
-        end
-    "#,
-    );
-}
 
 #[cfg(test)]
 mod tests {
@@ -135,47 +117,6 @@ mod tests {
 
     fn env() -> WowLuaEnv {
         WowLuaEnv::new().expect("Failed to create Lua environment")
-    }
-
-    #[test]
-    fn glow_emitter_stub_installs_only_when_missing() {
-        let env = env();
-
-        env.exec(
-            r#"
-            GlowEmitterFactory = {
-                marker = 42,
-                Show = function() end,
-                Hide = function() end,
-                SetShown = function() end,
-            }
-            "#,
-        )
-        .unwrap();
-        stub_glow_emitter_factory(&env);
-
-        let marker: i32 = env.eval("return GlowEmitterFactory.marker").unwrap();
-        assert_eq!(
-            marker, 42,
-            "existing GlowEmitterFactory should be preserved"
-        );
-
-        let fresh_env = crate::lua_api::WowLuaEnv::new().expect("Failed to create Lua environment");
-        stub_glow_emitter_factory(&fresh_env);
-        let installed: bool = fresh_env
-            .eval(
-                r#"
-                return type(GlowEmitterFactory) == "table"
-                    and type(GlowEmitterFactory.Show) == "function"
-                    and type(GlowEmitterFactory.Hide) == "function"
-                    and type(GlowEmitterFactory.SetShown) == "function"
-                "#,
-            )
-            .unwrap();
-        assert!(
-            installed,
-            "missing GlowEmitterFactory should get a narrow stub"
-        );
     }
 
     #[test]
