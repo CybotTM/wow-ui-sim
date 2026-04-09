@@ -25,7 +25,6 @@ pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, val_to_f32};
 const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
 const TOOLTIP_VARIADIC_STUBS: &[&str] = &[
-    "SetAllowShowWithNoLines",
     "SetCustomWordWrapMinWidth",
     "SetFrameStack",
     "SetShrinkToFitWrapped",
@@ -52,6 +51,7 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_set_anchor_type_method(methods);
     add_set_object_tooltip_position_method(methods);
     add_copy_tooltip_method(methods);
+    add_set_allow_show_with_no_lines_method(methods);
     add_clear_lines_method(methods);
 }
 
@@ -112,6 +112,23 @@ fn add_copy_tooltip_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
                 .map(|_| ());
         }
         copy_tooltip_impl(lua, id, args)
+    });
+}
+
+fn add_set_allow_show_with_no_lines_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetAllowShowWithNoLines", |lua, this, value: bool| {
+        let id = this.0;
+        if let Some((func, self_val)) = get_mixin_override(lua, id, "SetAllowShowWithNoLines") {
+            return func.call::<Value>((self_val, value)).map(|_| ());
+        }
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(td) = state.tooltips.get_mut(&id) {
+            td.allow_show_with_no_lines = value;
+        }
+        state.widgets.mark_rect_dirty(id);
+        state.widgets.mark_visual_dirty(id);
+        Ok(())
     });
 }
 

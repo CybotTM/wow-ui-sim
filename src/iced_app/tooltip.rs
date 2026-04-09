@@ -52,15 +52,15 @@ pub struct TooltipLineRender {
 pub fn update_tooltip_sizes(state: &mut SimState, font_system: &mut WowFontSystem) {
     let tooltip_ids: Vec<u64> = state.tooltips.keys().copied().collect();
     for id in tooltip_ids {
-        let (lines_empty, visible) = {
+        let (has_render_content, visible) = {
             let td = match state.tooltips.get(&id) {
                 Some(td) => td,
                 None => continue,
             };
             let visible = state.widgets.get(id).map(|f| f.visible).unwrap_or(false);
-            (td.lines.is_empty(), visible)
+            (tooltip_has_render_content(td), visible)
         };
-        if lines_empty || !visible {
+        if !has_render_content || !visible {
             continue;
         }
         let (width, height) = measure_tooltip(state, id, font_system);
@@ -159,7 +159,7 @@ fn tooltip_alpha(
     id: u64,
     td: &crate::lua_api::tooltip::TooltipData,
 ) -> Option<f32> {
-    if td.lines.is_empty() {
+    if !tooltip_has_render_content(td) {
         return None;
     }
 
@@ -169,6 +169,10 @@ fn tooltip_alpha(
     }
 
     Some(frame.alpha)
+}
+
+fn tooltip_has_render_content(td: &crate::lua_api::tooltip::TooltipData) -> bool {
+    !td.lines.is_empty() || td.allow_show_with_no_lines
 }
 
 fn collect_tooltip_lines(
