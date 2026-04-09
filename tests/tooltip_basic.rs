@@ -173,6 +173,52 @@ fn test_on_tooltip_cleared_fires_on_setowner() {
 }
 
 #[test]
+fn test_set_frame_stack_populates_lines_returns_frame_and_fires_script() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "FrameStackParent", UIParent)
+        local child = CreateFrame("Frame", "FrameStackChild", parent)
+        _G.frame_stack_highlight = nil
+        GameTooltip:SetScript("OnTooltipSetFramestack", function(self, highlightFrame)
+            _G.frame_stack_highlight = highlightFrame and highlightFrame:GetDebugName() or nil
+        end)
+    "#,
+    )
+    .unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        let child_id = state.widgets.get_id_by_name("FrameStackChild").unwrap();
+        state.hovered_frame = Some(child_id);
+    }
+
+    let returned_name: String = env
+        .eval(
+            r#"
+            local highlight = GameTooltip:SetFrameStack(false, false, 0)
+            return highlight and highlight:GetDebugName() or ""
+        "#,
+        )
+        .unwrap();
+    let script_name: String = env.eval("return _G.frame_stack_highlight or ''").unwrap();
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+
+    assert_eq!(returned_name, "FrameStackChild");
+    assert_eq!(script_name, "FrameStackChild");
+    assert!(
+        num_lines >= 2,
+        "SetFrameStack should populate tooltip lines for the highlighted frame stack"
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "FrameStackChild");
+}
+
+#[test]
 fn test_isobjecttype_frame_returns_true_for_gametooltip() {
     let env = WowLuaEnv::new().unwrap();
 

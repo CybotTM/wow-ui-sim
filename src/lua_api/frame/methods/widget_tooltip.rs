@@ -15,7 +15,7 @@ use crate::lua_api::tooltip::{
 use mlua::Value;
 use widget_tooltip_helpers::{
     add_double_line_impl, add_get_line_methods, add_tooltip_info_methods,
-    add_tooltip_state_methods, copy_tooltip_impl, set_anchor_type_impl,
+    add_tooltip_state_methods, copy_tooltip_impl, set_anchor_type_impl, set_frame_stack_impl,
     set_object_tooltip_position_impl, set_owner_impl,
 };
 
@@ -24,7 +24,7 @@ pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, val_to_f32};
 
 const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
-const TOOLTIP_VARIADIC_STUBS: &[&str] = &["SetFrameStack"];
+const TOOLTIP_VARIADIC_STUBS: &[&str] = &[];
 
 pub fn add_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_tooltip_setup_methods(methods);
@@ -50,6 +50,7 @@ fn add_tooltip_owner_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_set_allow_show_with_no_lines_method(methods);
     add_set_custom_word_wrap_min_width_method(methods);
     add_set_shrink_to_fit_wrapped_method(methods);
+    add_set_frame_stack_method(methods);
     add_clear_lines_method(methods);
 }
 
@@ -161,6 +162,18 @@ fn add_set_shrink_to_fit_wrapped_method<M: mlua::UserDataMethods<FrameRef>>(meth
         state.widgets.mark_rect_dirty(id);
         state.widgets.mark_visual_dirty(id);
         Ok(())
+    });
+}
+
+fn add_set_frame_stack_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetFrameStack", |lua, this, args: mlua::Variadic<Value>| {
+        let id = this.0;
+        if let Some((func, self_val)) = get_mixin_override(lua, id, "SetFrameStack") {
+            let mut call_args = vec![self_val];
+            call_args.extend(args);
+            return func.call::<Value>(mlua::MultiValue::from_iter(call_args));
+        }
+        set_frame_stack_impl(lua, id, args)
     });
 }
 
