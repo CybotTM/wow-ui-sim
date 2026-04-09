@@ -297,49 +297,65 @@ fn register_c_gossip_poi_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
 
 fn register_c_calendar(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
+    register_c_calendar_queries(lua, &t)?;
+    register_c_calendar_day_events(lua, &t)?;
+    register_c_calendar_actions(lua, &t)?;
+    lua.globals().set("C_Calendar", t)?;
+    Ok(())
+}
+
+fn register_c_calendar_queries(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetDate",
         lua.create_function(|_, ()| Ok((1i32, 1i32, 1i32, 2024i32)))?,
     )?;
-    t.set(
-        "GetMonthInfo",
-        lua.create_function(|lua, _o: Option<i32>| {
-            let info = lua.create_table()?;
-            info.set("month", 1)?;
-            info.set("year", 2024)?;
-            info.set("numDays", 31)?;
-            info.set("firstWeekday", 1)?;
-            Ok(info)
-        })?,
-    )?;
-    t.set(
-        "GetNumDayEvents",
-        lua.create_function(|_, (_o, _d): (i32, i32)| Ok(0i32))?,
-    )?;
-    t.set(
-        "GetDayEvent",
-        lua.create_function(|_, (_o, _d, _i): (i32, i32, i32)| Ok(Value::Nil))?,
-    )?;
-    t.set("OpenCalendar", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("CloseCalendar", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("SetMonth", lua.create_function(|_, _o: i32| Ok(()))?)?;
-    t.set(
-        "SetAbsMonth",
-        lua.create_function(|_, (_m, _y): (i32, i32)| Ok(()))?,
-    )?;
-    t.set(
+    table.set("GetMonthInfo", create_get_calendar_month_info_fn(lua)?)?;
+    table.set(
         "GetMinDate",
         lua.create_function(|_, ()| Ok((1i32, 1i32, 2004i32)))?,
     )?;
-    t.set(
+    table.set(
         "GetMaxDate",
         lua.create_function(|_, ()| Ok((12i32, 31i32, 2030i32)))?,
     )?;
-    t.set(
+    table.set(
         "GetNumPendingInvites",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    lua.globals().set("C_Calendar", t)?;
+    Ok(())
+}
+
+fn create_get_calendar_month_info_fn(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, _o: Option<i32>| {
+        let info = lua.create_table()?;
+        info.set("month", 1)?;
+        info.set("year", 2024)?;
+        info.set("numDays", 31)?;
+        info.set("firstWeekday", 1)?;
+        Ok(info)
+    })
+}
+
+fn register_c_calendar_day_events(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
+        "GetNumDayEvents",
+        lua.create_function(|_, (_o, _d): (i32, i32)| Ok(0i32))?,
+    )?;
+    table.set(
+        "GetDayEvent",
+        lua.create_function(|_, (_o, _d, _i): (i32, i32, i32)| Ok(Value::Nil))?,
+    )?;
+    Ok(())
+}
+
+fn register_c_calendar_actions(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set("OpenCalendar", lua.create_function(|_, ()| Ok(()))?)?;
+    table.set("CloseCalendar", lua.create_function(|_, ()| Ok(()))?)?;
+    table.set("SetMonth", lua.create_function(|_, _o: i32| Ok(()))?)?;
+    table.set(
+        "SetAbsMonth",
+        lua.create_function(|_, (_m, _y): (i32, i32)| Ok(()))?,
+    )?;
     Ok(())
 }
 
