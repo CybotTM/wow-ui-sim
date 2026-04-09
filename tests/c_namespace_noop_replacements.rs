@@ -200,6 +200,115 @@ fn video_options_set_window_size_updates_current_size() {
 }
 
 #[test]
+fn video_options_official_api_surface_returns_stable_shapes() {
+    let env = env();
+    let (
+        current_x,
+        current_y,
+        default_x,
+        default_y,
+        size_count,
+        first_size_x,
+        first_size_y,
+        adapter_count,
+        first_adapter_name,
+        first_adapter_low_power,
+        second_adapter_external,
+        spell_density_supported,
+    ): (
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+        i64,
+        String,
+        bool,
+        bool,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            C_VideoOptions._state.defaultGameWindowSize = { x = 2560, y = 1440 }
+            C_VideoOptions._state.currentGameWindowSize = { x = 1920, y = 1080 }
+            C_VideoOptions._state.availableGameWindowSizes = {
+                { x = 1280, y = 720 },
+                { x = 1920, y = 1080 },
+            }
+            C_VideoOptions._state.gxAdapterInfo = {
+                { name = "Integrated GPU", isLowPower = true, isExternal = false },
+                { name = "Dock GPU", isLowPower = false, isExternal = true },
+            }
+
+            local current = C_VideoOptions.GetCurrentGameWindowSize(0, true)
+            local defaultSize = C_VideoOptions.GetDefaultGameWindowSize(1)
+            local sizes = C_VideoOptions.GetGameWindowSizes(1, false)
+            local adapters = C_VideoOptions.GetGxAdapterInfo()
+            local spellDensitySupported = C_VideoOptions.IsSpellVisualDensitySystemSupported()
+
+            assert(type(current) == "table" and current.x == 1920 and current.y == 1080)
+            assert(type(defaultSize) == "table" and defaultSize.x == 2560 and defaultSize.y == 1440)
+            assert(type(sizes) == "table" and #sizes == 2)
+            assert(type(adapters) == "table" and #adapters == 2)
+            assert(type(spellDensitySupported) == "boolean")
+
+            return current.x,
+                current.y,
+                defaultSize.x,
+                defaultSize.y,
+                #sizes,
+                sizes[1].x,
+                sizes[1].y,
+                #adapters,
+                adapters[1].name,
+                adapters[1].isLowPower,
+                adapters[2].isExternal,
+                spellDensitySupported
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(current_x, 1920, "current width should come from _state");
+    assert_eq!(current_y, 1080, "current height should come from _state");
+    assert_eq!(default_x, 2560, "default width should come from _state");
+    assert_eq!(default_y, 1440, "default height should come from _state");
+    assert_eq!(
+        size_count, 2,
+        "window sizes should preserve configured entries"
+    );
+    assert_eq!(
+        first_size_x, 1280,
+        "first window size width should match _state"
+    );
+    assert_eq!(
+        first_size_y, 720,
+        "first window size height should match _state"
+    );
+    assert_eq!(
+        adapter_count, 2,
+        "adapter list should preserve configured entries"
+    );
+    assert_eq!(
+        first_adapter_name, "Integrated GPU",
+        "adapter info should preserve names"
+    );
+    assert!(
+        first_adapter_low_power,
+        "adapter info should preserve low-power flags"
+    );
+    assert!(
+        second_adapter_external,
+        "adapter info should preserve external flags"
+    );
+    assert!(
+        !spell_density_supported,
+        "spell density support should remain disabled in the simulator"
+    );
+}
+
+#[test]
 fn perks_activities_monthly_accessors_return_stable_shapes() {
     let env = env();
     let (
