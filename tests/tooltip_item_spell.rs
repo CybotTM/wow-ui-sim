@@ -141,6 +141,81 @@ fn test_set_unit_buff_populates_lines() {
 }
 
 #[test]
+fn test_set_unit_aura_by_aura_instance_id_populates_lines() {
+    let env = WowLuaEnv::new().unwrap();
+    let aura_instance_id = {
+        let state = env.state().borrow();
+        state
+            .player
+            .buffs
+            .first()
+            .map(|aura| aura.aura_instance_id)
+            .expect("Player should have at least one buff")
+    };
+
+    env.exec(&format!(
+        r#"GameTooltip:SetUnitAuraByAuraInstanceID("player", {aura_instance_id})"#
+    ))
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        count > 0,
+        "SetUnitAuraByAuraInstanceID should populate tooltip lines for a valid player aura"
+    );
+}
+
+#[test]
+fn test_set_unit_debuff_by_aura_instance_id_does_not_show_helpful_buffs() {
+    let env = WowLuaEnv::new().unwrap();
+    let aura_instance_id = {
+        let state = env.state().borrow();
+        state
+            .player
+            .buffs
+            .first()
+            .map(|aura| aura.aura_instance_id)
+            .expect("Player should have at least one buff")
+    };
+
+    env.exec(&format!(
+        r#"GameTooltip:SetUnitDebuffByAuraInstanceID("player", {aura_instance_id}, "HARMFUL")"#
+    ))
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(
+        count, 0,
+        "SetUnitDebuffByAuraInstanceID should leave the tooltip empty for helpful-only player buffs"
+    );
+}
+
+#[test]
+fn test_set_unit_buff_by_aura_instance_id_respects_unit() {
+    let env = WowLuaEnv::new().unwrap();
+    let aura_instance_id = {
+        let state = env.state().borrow();
+        state
+            .player
+            .buffs
+            .first()
+            .map(|aura| aura.aura_instance_id)
+            .expect("Player should have at least one buff")
+    };
+
+    env.exec(&format!(
+        r#"GameTooltip:SetUnitBuffByAuraInstanceID("target", {aura_instance_id})"#
+    ))
+    .unwrap();
+
+    let count: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert_eq!(
+        count, 0,
+        "SetUnitBuffByAuraInstanceID should not read player buffs when asked for another unit"
+    );
+}
+
+#[test]
 fn test_set_unit_aura_invalid_index_no_crash() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(r#"GameTooltip:SetUnitAura("player", 999, "HELPFUL")"#)

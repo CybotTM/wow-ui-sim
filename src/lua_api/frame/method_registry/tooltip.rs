@@ -133,6 +133,7 @@ pub static GAMETOOLTIP_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "SetText",
         "SetToplevel",
         "SetUnitAura",
+        "SetUnitAuraByAuraInstanceID",
         "SetUnitBuff",
         "SetUnitBuffByAuraInstanceID",
         "SetUnitDebuff",

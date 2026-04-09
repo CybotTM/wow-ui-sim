@@ -3,7 +3,8 @@
 use super::super::handle::FrameRef;
 use super::methods_helpers::get_mixin_override;
 use super::widget_tooltip_data::{
-    lookup_aura_from_args, populate_aura_tooltip, populate_item_tooltip, populate_spell_tooltip,
+    AuraLookupKind, AuraTooltipKind, lookup_aura_from_args, populate_aura_tooltip,
+    populate_item_tooltip, populate_spell_tooltip,
 };
 #[path = "widget_tooltip_helpers.rs"]
 mod widget_tooltip_helpers;
@@ -283,22 +284,58 @@ fn add_set_unit<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_aura_tooltip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    for name in [
+    add_aura_tooltip_method(
+        methods,
         "SetUnitBuff",
+        AuraLookupKind::Index,
+        AuraTooltipKind::Buff,
+    );
+    add_aura_tooltip_method(
+        methods,
         "SetUnitDebuff",
+        AuraLookupKind::Index,
+        AuraTooltipKind::Debuff,
+    );
+    add_aura_tooltip_method(
+        methods,
         "SetUnitAura",
+        AuraLookupKind::Index,
+        AuraTooltipKind::Aura,
+    );
+    add_aura_tooltip_method(
+        methods,
         "SetUnitBuffByAuraInstanceID",
+        AuraLookupKind::AuraInstanceId,
+        AuraTooltipKind::Buff,
+    );
+    add_aura_tooltip_method(
+        methods,
         "SetUnitDebuffByAuraInstanceID",
-    ] {
-        methods.add_method(name, |lua, this, args: mlua::MultiValue| {
-            let tooltip_id = this.0;
-            let aura = lookup_aura_from_args(lua, &args);
-            if let Some(aura) = aura {
-                populate_aura_tooltip(lua, tooltip_id, &aura)?;
-            }
-            Ok(())
-        });
-    }
+        AuraLookupKind::AuraInstanceId,
+        AuraTooltipKind::Debuff,
+    );
+    add_aura_tooltip_method(
+        methods,
+        "SetUnitAuraByAuraInstanceID",
+        AuraLookupKind::AuraInstanceId,
+        AuraTooltipKind::Aura,
+    );
+}
+
+fn add_aura_tooltip_method<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    lookup_kind: AuraLookupKind,
+    tooltip_kind: AuraTooltipKind,
+) {
+    methods.add_method(name, move |lua, this, args: mlua::MultiValue| {
+        let tooltip_id = this.0;
+        let aura = lookup_aura_from_args(lua, &args, lookup_kind, tooltip_kind);
+        if let Some(aura) = aura {
+            populate_aura_tooltip(lua, tooltip_id, &aura)?;
+        }
+        Ok(())
+    });
 }
 
 fn add_tooltip_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

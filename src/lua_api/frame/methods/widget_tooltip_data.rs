@@ -286,32 +286,74 @@ pub(crate) fn class_color_rgb(class_index: i32) -> (f32, f32, f32) {
 
 // --- Aura tooltips ---
 
+#[derive(Clone, Copy)]
+pub(super) enum AuraLookupKind {
+    Index,
+    AuraInstanceId,
+}
+
+#[derive(Clone, Copy)]
+pub(super) enum AuraTooltipKind {
+    Buff,
+    Debuff,
+    Aura,
+}
+
 pub(super) fn lookup_aura_from_args(
     lua: &mlua::Lua,
     args: &mlua::MultiValue,
+    lookup_kind: AuraLookupKind,
+    tooltip_kind: AuraTooltipKind,
 ) -> Option<crate::lua_api::game_data::AuraInfo> {
+    let (unit, index_or_id, filter) = parse_aura_lookup_args(args)?;
+    if should_skip_aura_tooltip(&unit, index_or_id, &filter, tooltip_kind) {
+        return None;
+    }
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    match lookup_kind {
+        AuraLookupKind::Index => state.player.buffs.get((index_or_id - 1) as usize).cloned(),
+        AuraLookupKind::AuraInstanceId => state
+            .player
+            .buffs
+            .iter()
+            .find(|a| a.aura_instance_id == index_or_id)
+            .cloned(),
+    }
+}
+
+fn parse_aura_lookup_args(args: &mlua::MultiValue) -> Option<(String, i32, Option<String>)> {
     let mut iter = args.iter();
-    let _unit = iter.next(); // unit string (e.g. "player")
+    let unit = match iter.next()? {
+        Value::String(s) => s.to_string_lossy().to_string(),
+        _ => return None,
+    };
     let index_or_id = match iter.next()? {
         Value::Integer(n) => *n as i32,
         Value::Number(n) => *n as i32,
         _ => return None,
     };
-    let state_rc = get_sim_state(lua);
-    let state = state_rc.borrow();
-    // Try as 1-based index first
-    if index_or_id >= 1 {
-        if let Some(aura) = state.player.buffs.get((index_or_id - 1) as usize) {
-            return Some(aura.clone());
-        }
+    let filter = match iter.next() {
+        Some(Value::String(s)) => Some(s.to_string_lossy().to_string()),
+        _ => None,
+    };
+    Some((unit, index_or_id, filter))
+}
+
+fn should_skip_aura_tooltip(
+    unit: &str,
+    index_or_id: i32,
+    filter: &Option<String>,
+    tooltip_kind: AuraTooltipKind,
+) -> bool {
+    if unit != "player" || index_or_id < 1 {
+        return true;
     }
-    // Try as aura instance ID
-    state
-        .player
-        .buffs
-        .iter()
-        .find(|a| a.aura_instance_id == index_or_id)
-        .cloned()
+
+    matches!(tooltip_kind, AuraTooltipKind::Debuff)
+        || filter
+            .as_ref()
+            .is_some_and(|f| f.contains("HARMFUL") || f.contains("MAW"))
 }
 
 pub(super) fn populate_aura_tooltip(
