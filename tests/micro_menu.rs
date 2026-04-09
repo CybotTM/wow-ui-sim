@@ -208,6 +208,25 @@ fn professions_primary_spell_button_has_texture(env: &WowLuaEnv, button_name: &s
     env.eval::<bool>(&code).unwrap_or(false)
 }
 
+fn professions_primary_spell_button_spell_id(env: &WowLuaEnv, button_name: &str) -> i32 {
+    let primary_expr = professions_primary_frame_expr();
+    let code = format!(
+        r#"
+        local primary = {primary_expr}
+        if not primary or not primary.{button_name} then
+            return 0
+        end
+        local slot = ProfessionsBook_GetSpellBookItemSlot(primary.{button_name})
+        if not slot then
+            return -1
+        end
+        local info = C_SpellBook.GetSpellBookItemInfo(slot, Enum.SpellBookSpellBank.Player)
+        return info and info.spellID or 0
+        "#
+    );
+    env.eval::<i32>(&code).unwrap_or(0)
+}
+
 #[test]
 fn micro_menu_character_button_opens_character_frame() {
     let env = setup_env();
@@ -253,6 +272,17 @@ fn micro_menu_professions_button_loads_and_opens_panel() {
     assert!(
         first_icon && second_icon,
         "Primary profession spell buttons should have icon textures"
+    );
+
+    let first_spell = professions_primary_spell_button_spell_id(&env, "SpellButton1");
+    let second_spell = professions_primary_spell_button_spell_id(&env, "SpellButton2");
+    assert_eq!(
+        first_spell, 2018,
+        "SpellButton1 should resolve to Blacksmithing"
+    );
+    assert_eq!(
+        second_spell, 2657,
+        "SpellButton2 should resolve to Smelt Copper"
     );
 }
 

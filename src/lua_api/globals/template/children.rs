@@ -105,9 +105,16 @@ fn build_create_child_code(
     );
 
     append_child_size_and_anchors(&mut code, frame, parent_name);
+    append_child_id(&mut code, frame);
     append_child_parent_refs(&mut code, frame);
     code.push_str("        end\n");
     code
+}
+
+fn append_child_id(code: &mut String, frame: &FrameXml) {
+    if let Some(id) = frame.xml_id {
+        code.push_str(&format!("            child:SetID({id})\n"));
+    }
 }
 
 fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_name: &str) {
