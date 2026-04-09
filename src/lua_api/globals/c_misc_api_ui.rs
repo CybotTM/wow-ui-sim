@@ -217,43 +217,61 @@ fn make_friendship_reputation_info(lua: &Lua) -> Result<mlua::Table> {
 
 fn register_c_gossip_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set("GetNumOptions", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
+    register_c_gossip_basic_methods(lua, &t)?;
+    register_c_gossip_quest_methods(lua, &t)?;
+    register_c_gossip_friendship_methods(lua, &t)?;
+    register_c_gossip_poi_methods(lua, &t)?;
+    lua.globals().set("C_GossipInfo", t)?;
+    Ok(())
+}
+
+fn register_c_gossip_basic_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set("GetNumOptions", lua.create_function(|_, ()| Ok(0i32))?)?;
+    table.set(
         "GetOptions",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set("GetText", lua.create_function(|_, ()| Ok(""))?)?;
-    t.set(
+    table.set("GetText", lua.create_function(|_, ()| Ok(""))?)?;
+    table.set(
         "SelectOption",
         lua.create_function(|_, (_id, _t, _c): (i32, Option<String>, Option<bool>)| Ok(()))?,
     )?;
-    t.set("CloseGossip", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("GetNumActiveQuests", lua.create_function(|_, ()| Ok(0i32))?)?;
-    t.set(
+    table.set("CloseGossip", lua.create_function(|_, ()| Ok(()))?)?;
+    table.set("ForceGossip", lua.create_function(|_, ()| Ok(false))?)?;
+    Ok(())
+}
+
+fn register_c_gossip_quest_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set("GetNumActiveQuests", lua.create_function(|_, ()| Ok(0i32))?)?;
+    table.set(
         "GetNumAvailableQuests",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    t.set(
+    table.set(
         "GetActiveQuests",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set(
+    table.set(
         "GetAvailableQuests",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
-    t.set(
+    table.set(
         "SelectActiveQuest",
         lua.create_function(|_, _i: i32| Ok(()))?,
     )?;
-    t.set(
+    table.set(
         "SelectAvailableQuest",
         lua.create_function(|_, _i: i32| Ok(()))?,
     )?;
-    t.set(
+    Ok(())
+}
+
+fn register_c_gossip_friendship_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetFriendshipReputation",
         lua.create_function(|lua, _fid: Option<i32>| make_friendship_reputation_info(lua))?,
     )?;
-    t.set(
+    table.set(
         "GetFriendshipReputationRanks",
         lua.create_function(|lua, _fid: Option<i32>| {
             let info = lua.create_table()?;
@@ -262,17 +280,18 @@ fn register_c_gossip_info(lua: &Lua) -> Result<()> {
             Ok(info)
         })?,
     )?;
-    t.set("ForceGossip", lua.create_function(|_, ()| Ok(false))?)?;
-    // No active gossip POI in the simulator
-    t.set(
+    Ok(())
+}
+
+fn register_c_gossip_poi_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetPoiForUiMapID",
         lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
     )?;
-    t.set(
+    table.set(
         "GetPoiInfo",
         lua.create_function(|_, (_map_id, _poi_id): (i32, i32)| Ok(Value::Nil))?,
     )?;
-    lua.globals().set("C_GossipInfo", t)?;
     Ok(())
 }
 
