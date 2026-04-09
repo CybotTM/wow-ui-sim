@@ -35,6 +35,12 @@ fn register_item_and_spell_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> 
 }
 
 fn register_item_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    register_item_lookup_tooltip_overrides(lua, table)?;
+    register_socket_tooltip_overrides(lua, table)?;
+    Ok(())
+}
+
+fn register_item_lookup_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.set(
         "GetTraitEntry",
         lua.create_function(create_trait_entry_tooltip)?,
@@ -56,6 +62,22 @@ fn register_item_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()>
     table.set(
         "GetInventoryItem",
         lua.create_function(create_inventory_item_tooltip)?,
+    )?;
+    Ok(())
+}
+
+fn register_socket_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
+        "GetSocketedItem",
+        lua.create_function(create_socketed_item_tooltip)?,
+    )?;
+    table.set(
+        "GetSocketGem",
+        lua.create_function(create_socket_gem_tooltip)?,
+    )?;
+    table.set(
+        "GetExistingSocketGem",
+        lua.create_function(create_existing_socket_gem_tooltip)?,
     )?;
     Ok(())
 }
@@ -226,6 +248,36 @@ fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Res
     create_item_tooltip(lua, item_id as i32)
 }
 
+fn create_socketed_item_tooltip(lua: &Lua, _: mlua::MultiValue) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item_id) = socketed_item_id_for_tooltip(lua)? else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    create_item_tooltip(lua, item_id as i32)
+}
+
+fn create_socket_gem_tooltip(lua: &Lua, args: mlua::MultiValue) -> Result<Value> {
+    create_socket_item_tooltip(lua, "newSockets", args)
+}
+
+fn create_existing_socket_gem_tooltip(lua: &Lua, args: mlua::MultiValue) -> Result<Value> {
+    create_socket_item_tooltip(lua, "existingSockets", args)
+}
+
+fn create_socket_item_tooltip(
+    lua: &Lua,
+    field_name: &str,
+    args: mlua::MultiValue,
+) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item_id) = socket_gem_item_id_for_tooltip(lua, field_name, args)? else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    create_item_tooltip(lua, item_id as i32)
+}
+
 fn create_spell_book_item_tooltip(
     lua: &Lua,
     (slot, _spell_bank): (i32, Option<i32>),
@@ -256,6 +308,78 @@ fn create_hyperlink_tooltip(lua: &Lua, link: String) -> Result<Value> {
     }
 
     build_empty_tooltip(lua, 0)
+}
+
+fn socketed_item_id_for_tooltip(lua: &Lua) -> Result<Option<u32>> {
+    let Some(state) = item_socket_state_for_tooltip(lua)? else {
+        return Ok(None);
+    };
+    Ok(state
+        .get::<Value>("itemInfo")
+        .ok()
+        .and_then(item_id_from_socket_value_for_tooltip))
+}
+
+fn socket_gem_item_id_for_tooltip(
+    lua: &Lua,
+    field_name: &str,
+    args: mlua::MultiValue,
+) -> Result<Option<u32>> {
+    let socket_index = args
+        .into_iter()
+        .next()
+        .and_then(lua_value_to_i32)
+        .unwrap_or_default();
+    if socket_index < 1 {
+        return Ok(None);
+    }
+
+    let Some(state) = item_socket_state_for_tooltip(lua)? else {
+        return Ok(None);
+    };
+    let Value::Table(entries) = state.get::<Value>(field_name)? else {
+        return Ok(None);
+    };
+    Ok(entries
+        .get::<Value>(socket_index)
+        .ok()
+        .and_then(item_id_from_socket_value_for_tooltip))
+}
+
+fn item_socket_state_for_tooltip(lua: &Lua) -> Result<Option<mlua::Table>> {
+    let Value::Table(api) = lua.globals().get::<Value>("C_ItemSocketInfo")? else {
+        return Ok(None);
+    };
+    let Value::Table(state) = api.get::<Value>("_state")? else {
+        return Ok(None);
+    };
+    Ok(Some(state))
+}
+
+fn item_id_from_socket_value_for_tooltip(value: Value) -> Option<u32> {
+    match value {
+        Value::Integer(n) if n > 0 => Some(n as u32),
+        Value::Number(n) if n > 0.0 => Some(n as u32),
+        Value::String(s) => {
+            let value = s.to_string_lossy();
+            parse_item_id_from_hyperlink(&value).or_else(|| value.parse::<u32>().ok())
+        }
+        Value::Table(table) => item_id_from_socket_table_for_tooltip(&table),
+        _ => None,
+    }
+}
+
+fn item_id_from_socket_table_for_tooltip(table: &mlua::Table) -> Option<u32> {
+    for field_name in ["itemID", "itemId", "id", "link"] {
+        let Some(value) = table.get::<Value>(field_name).ok() else {
+            continue;
+        };
+        let Some(item_id) = item_id_from_socket_value_for_tooltip(value) else {
+            continue;
+        };
+        return Some(item_id);
+    }
+    None
 }
 
 fn create_recipe_result_item_tooltip(

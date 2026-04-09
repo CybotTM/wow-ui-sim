@@ -1,6 +1,6 @@
 C_* namespaces missing: 0
 C_* namespaces extra: 0
-C_* functions missing: 208
+C_* functions missing: 97
 C_* functions extra: 152
 Global functions missing: 310
 Global functions extra: 182

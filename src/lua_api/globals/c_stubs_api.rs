@@ -1059,25 +1059,414 @@ fn all_seeded_macros() -> impl Iterator<Item = &'static SeededMacro> {
 }
 
 fn register_c_wowlabs_matchmaking(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set(
-        "GetCurrentParty",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetPartyPlaylistEntry",
-        lua.create_function(|_, ()| Ok(mlua::Value::Nil))?,
-    )?;
-    t.set("ClearFastLogin", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set(
-        "SetAutoQueueOnLogout",
-        lua.create_function(|_, _flag: bool| Ok(()))?,
-    )?;
-    lua.globals().set("C_WoWLabsMatchmaking", t)?;
-
-    // C_WowLabsDataManager (note: different casing from C_WoWLabsMatchmaking)
-    let dm = lua.create_table()?;
-    dm.set("IsInPrematch", lua.create_function(|_, ()| Ok(false))?)?;
-    lua.globals().set("C_WowLabsDataManager", dm)?;
+    lua.load(WOWLABS_MATCHMAKING_LUA).exec()?;
     Ok(())
 }
+
+const WOWLABS_MATCHMAKING_LUA: &str = r#"
+    C_WoWLabsMatchmaking = C_WoWLabsMatchmaking or {}
+    local matchmaking = C_WoWLabsMatchmaking
+
+    local PARTY_PLAYLIST = Enum and Enum.PartyPlaylistEntry or {
+        SoloGameMode = 0,
+        DuoGameMode = 1,
+        TrioGameMode = 2,
+        TrainingGameMode = 3,
+    }
+
+    local AREA_TYPE = Enum and Enum.WoWLabsAreaType or {
+        PlunderstormDropSparse = 0,
+        PlunderstormDropMedium = 1,
+        PlunderstormDropDense = 2,
+    }
+
+    matchmaking._state = matchmaking._state or {
+        playerGUID = "Player-0000-0000A11E5510",
+        playerName = "Alessio",
+        playerBNetID = 42,
+        partyPlaylistEntry = PARTY_PLAYLIST.DuoGameMode,
+        playerReady = false,
+        findingMatch = false,
+        fastLogin = false,
+        autoQueueOnLogout = false,
+        autoQueuePartyPlaylistEntry = PARTY_PLAYLIST.DuoGameMode,
+        inQueueTimeStart = 0,
+        partyInvites = {
+            {
+                inviteID = "WoWLabsInvite-1",
+                playerName = "PartyPal",
+                inviterGUID = "Player-0000-INVITE0001",
+                bnetIDAccount = 84,
+            },
+        },
+        currentParty = {
+            {
+                partyMemberGUID = "Player-0000-0000A11E5510",
+                playerName = "Alessio",
+                isPartyLeader = true,
+                isReady = false,
+                isLocalPlayer = true,
+                raceFilename = "Human",
+                gender = Enum and Enum.UnitSex and Enum.UnitSex.Male or 0,
+                classFilename = "PALADIN",
+                bnetIDAccount = 42,
+            },
+            {
+                partyMemberGUID = "Player-0000-0000BEEFBEEF",
+                playerName = "Riona",
+                isPartyLeader = false,
+                isReady = false,
+                isLocalPlayer = false,
+                raceFilename = "NightElf",
+                gender = Enum and Enum.UnitSex and Enum.UnitSex.Female or 1,
+                classFilename = "DRUID",
+                bnetIDAccount = 84,
+            },
+        },
+    }
+
+    C_WowLabsDataManager = C_WowLabsDataManager or {}
+    local dataManager = C_WowLabsDataManager
+    dataManager._state = dataManager._state or {
+        isInPrematch = true,
+        selectedAreaID = nil,
+        confirmedAreaID = nil,
+        areas = {
+            { wowLabsAreaID = 101, x = 0.48, y = 0.42, areaType = AREA_TYPE.PlunderstormDropDense },
+            { wowLabsAreaID = 102, x = 0.56, y = 0.57, areaType = AREA_TYPE.PlunderstormDropMedium },
+            { wowLabsAreaID = 103, x = 0.37, y = 0.66, areaType = AREA_TYPE.PlunderstormDropSparse },
+        },
+        circleInfo = {
+            startLerpTime = 0,
+            timeToLerp = 30000,
+            outerPosition = { x = 0.5, y = 0.5 },
+            innerPosition = { x = 0.5, y = 0.5 },
+            baseRadius = 0.38,
+            outerScale = 1.0,
+            innerScale = 0.8,
+            predictionPosition = { x = 0.58, y = 0.47 },
+            predictionScale = 0.6,
+            initialBaseSize = 0.32,
+        },
+    }
+
+    local function deepcopy(value)
+        if type(value) ~= "table" then
+            return value
+        end
+
+        local copy = {}
+        for key, innerValue in pairs(value) do
+            copy[key] = deepcopy(innerValue)
+        end
+        return copy
+    end
+
+    local function normalize_playlist_entry(value)
+        local numericValue = tonumber(value)
+        if numericValue == nil then
+            return nil
+        end
+
+        if numericValue < PARTY_PLAYLIST.SoloGameMode or numericValue > PARTY_PLAYLIST.TrainingGameMode then
+            return nil
+        end
+
+        return numericValue
+    end
+
+    local function max_party_size_for_playlist(playlistEntry)
+        if playlistEntry == PARTY_PLAYLIST.SoloGameMode then
+            return 1
+        elseif playlistEntry == PARTY_PLAYLIST.DuoGameMode then
+            return 2
+        elseif playlistEntry == PARTY_PLAYLIST.TrioGameMode then
+            return 3
+        elseif playlistEntry == PARTY_PLAYLIST.TrainingGameMode then
+            return 3
+        end
+
+        return 0
+    end
+
+    local function get_local_player_entry()
+        for _, member in ipairs(matchmaking._state.currentParty) do
+            if member.isLocalPlayer then
+                return member
+            end
+        end
+        return nil
+    end
+
+    local function is_party_leader()
+        local localPlayer = get_local_player_entry()
+        return localPlayer ~= nil and localPlayer.isPartyLeader == true
+    end
+
+    local function get_party_size()
+        return #matchmaking._state.currentParty
+    end
+
+    local function can_enter_matchmaking()
+        local maxSize = max_party_size_for_playlist(matchmaking._state.partyPlaylistEntry)
+        return maxSize > 0 and get_party_size() > 0 and get_party_size() <= maxSize
+    end
+
+    local function refresh_player_ready_flags()
+        local localPlayer = get_local_player_entry()
+        if localPlayer then
+            localPlayer.isReady = matchmaking._state.playerReady == true
+        end
+    end
+
+    local function refresh_queue_state()
+        local shouldFindMatch = matchmaking._state.playerReady == true and is_party_leader() and can_enter_matchmaking()
+        local wasFindingMatch = matchmaking._state.findingMatch == true
+        matchmaking._state.findingMatch = shouldFindMatch
+        if shouldFindMatch then
+            if not wasFindingMatch or tonumber(matchmaking._state.inQueueTimeStart) == 0 then
+                matchmaking._state.inQueueTimeStart = math.floor(GetTime() * 1000)
+            end
+        else
+            matchmaking._state.inQueueTimeStart = 0
+        end
+    end
+
+    function matchmaking.GetCurrentParty()
+        return deepcopy(matchmaking._state.currentParty)
+    end
+
+    function matchmaking.GetPartyPlaylistEntry()
+        return matchmaking._state.partyPlaylistEntry
+    end
+
+    function matchmaking.SetPartyPlaylistEntry(playlistEntry)
+        local normalized = normalize_playlist_entry(playlistEntry)
+        if normalized == nil then
+            return false
+        end
+
+        local maxPartySize = max_party_size_for_playlist(normalized)
+        if get_party_size() > maxPartySize then
+            return false
+        end
+
+        matchmaking._state.partyPlaylistEntry = normalized
+        refresh_queue_state()
+        return true
+    end
+
+    function matchmaking.GetPartySize()
+        return get_party_size()
+    end
+
+    function matchmaking.IsPartyFull()
+        return get_party_size() >= 3
+    end
+
+    function matchmaking.IsAloneInWoWLabsParty()
+        return get_party_size() <= 1
+    end
+
+    function matchmaking.IsPartyLeader()
+        return is_party_leader()
+    end
+
+    function matchmaking.IsPlayer(guid)
+        local localPlayer = get_local_player_entry()
+        return localPlayer ~= nil and localPlayer.partyMemberGUID == guid
+    end
+
+    function matchmaking.IsWowLabsMatchmakingMember(guid)
+        for _, member in ipairs(matchmaking._state.currentParty) do
+            if member.partyMemberGUID == guid then
+                return true
+            end
+        end
+        return false
+    end
+
+    function matchmaking.IsPlayerReady()
+        return matchmaking._state.playerReady == true
+    end
+
+    function matchmaking.SetPlayerReady(isReady)
+        matchmaking._state.playerReady = isReady == true
+        refresh_player_ready_flags()
+        refresh_queue_state()
+    end
+
+    function matchmaking.CanEnterMatchmaking()
+        return can_enter_matchmaking()
+    end
+
+    function matchmaking.IsFindingMatch()
+        return matchmaking._state.findingMatch == true
+    end
+
+    function matchmaking.GetInQueueTimeStart()
+        return tonumber(matchmaking._state.inQueueTimeStart) or 0
+    end
+
+    function matchmaking.IsFastLogin()
+        return matchmaking._state.fastLogin == true
+    end
+
+    function matchmaking.ClearFastLogin()
+        matchmaking._state.fastLogin = false
+    end
+
+    function matchmaking.GetAutoQueueOnLogout()
+        return matchmaking._state.autoQueueOnLogout == true, matchmaking._state.autoQueuePartyPlaylistEntry
+    end
+
+    function matchmaking.SetAutoQueueOnLogout(flag, queueType)
+        matchmaking._state.autoQueueOnLogout = flag == true
+        matchmaking._state.autoQueuePartyPlaylistEntry = normalize_playlist_entry(queueType) or matchmaking._state.partyPlaylistEntry
+    end
+
+    function matchmaking.GetNumPartyInvites()
+        return #matchmaking._state.partyInvites
+    end
+
+    function matchmaking.GetPartyInviteByIndex(index)
+        local invite = matchmaking._state.partyInvites[(tonumber(index) or -1) + 1]
+        if invite == nil then
+            return nil
+        end
+        return invite.playerName, invite.inviteID
+    end
+
+    local function clear_invite(inviteIndex)
+        table.remove(matchmaking._state.partyInvites, inviteIndex)
+    end
+
+    function matchmaking.AcceptPartyInvite(inviteID)
+        for index, invite in ipairs(matchmaking._state.partyInvites) do
+            if invite.inviteID == inviteID then
+                local localPlayer = get_local_player_entry()
+                matchmaking._state.currentParty = {
+                    {
+                        partyMemberGUID = invite.inviterGUID,
+                        playerName = invite.playerName,
+                        isPartyLeader = true,
+                        isReady = false,
+                        isLocalPlayer = false,
+                        raceFilename = "Orc",
+                        gender = Enum and Enum.UnitSex and Enum.UnitSex.Male or 0,
+                        classFilename = "WARRIOR",
+                        bnetIDAccount = invite.bnetIDAccount,
+                    },
+                    {
+                        partyMemberGUID = localPlayer and localPlayer.partyMemberGUID or matchmaking._state.playerGUID,
+                        playerName = localPlayer and localPlayer.playerName or matchmaking._state.playerName,
+                        isPartyLeader = false,
+                        isReady = false,
+                        isLocalPlayer = true,
+                        raceFilename = localPlayer and localPlayer.raceFilename or "Human",
+                        gender = localPlayer and localPlayer.gender or (Enum and Enum.UnitSex and Enum.UnitSex.Male or 0),
+                        classFilename = localPlayer and localPlayer.classFilename or "PALADIN",
+                        bnetIDAccount = localPlayer and localPlayer.bnetIDAccount or matchmaking._state.playerBNetID,
+                    },
+                }
+                clear_invite(index)
+                matchmaking._state.playerReady = false
+                refresh_player_ready_flags()
+                refresh_queue_state()
+                return true
+            end
+        end
+        return false
+    end
+
+    function matchmaking.DeclinePartyInvite(inviteID)
+        for index, invite in ipairs(matchmaking._state.partyInvites) do
+            if invite.inviteID == inviteID then
+                clear_invite(index)
+                return true
+            end
+        end
+        return false
+    end
+
+    function matchmaking.LeaveParty()
+        local localPlayer = get_local_player_entry()
+        matchmaking._state.currentParty = {
+            {
+                partyMemberGUID = localPlayer and localPlayer.partyMemberGUID or matchmaking._state.playerGUID,
+                playerName = localPlayer and localPlayer.playerName or matchmaking._state.playerName,
+                isPartyLeader = true,
+                isReady = false,
+                isLocalPlayer = true,
+                raceFilename = localPlayer and localPlayer.raceFilename or "Human",
+                gender = localPlayer and localPlayer.gender or (Enum and Enum.UnitSex and Enum.UnitSex.Male or 0),
+                classFilename = localPlayer and localPlayer.classFilename or "PALADIN",
+                bnetIDAccount = localPlayer and localPlayer.bnetIDAccount or matchmaking._state.playerBNetID,
+            },
+        }
+        matchmaking._state.playerReady = false
+        refresh_player_ready_flags()
+        refresh_queue_state()
+        return true
+    end
+
+    function matchmaking.RemovePlayerFromParty(guid)
+        for index, member in ipairs(matchmaking._state.currentParty) do
+            if member.partyMemberGUID == guid and not member.isLocalPlayer then
+                table.remove(matchmaking._state.currentParty, index)
+                refresh_queue_state()
+                return true
+            end
+        end
+        return false
+    end
+
+    function matchmaking.SendPartyInvite(bnetIDAccount)
+        if matchmaking.IsPartyFull() or tonumber(bnetIDAccount) == nil then
+            return false
+        end
+        return true
+    end
+
+    function dataManager.IsInPrematch()
+        return dataManager._state.isInPrematch == true
+    end
+
+    function dataManager.GetWoWLabsAreaInfo()
+        return deepcopy(dataManager._state.areas)
+    end
+
+    function dataManager.GetConfirmedWoWLabsArea()
+        return dataManager._state.confirmedAreaID
+    end
+
+    function dataManager.SelectWoWLabsArea(areaID)
+        local normalized = tonumber(areaID)
+        if normalized == nil then
+            return false
+        end
+
+        for _, area in ipairs(dataManager._state.areas) do
+            if area.wowLabsAreaID == normalized then
+                dataManager._state.selectedAreaID = normalized
+                dataManager._state.confirmedAreaID = normalized
+                return true
+            end
+        end
+
+        return false
+    end
+
+    function dataManager.QuerySelectedWoWLabsArea()
+        return dataManager._state.selectedAreaID
+    end
+
+    function dataManager.QueryWoWLabsAreaInfo()
+        return deepcopy(dataManager._state.areas)
+    end
+
+    function dataManager.PushCircleInfoToLua()
+        local info = dataManager._state.circleInfo
+        return info.startLerpTime, info.timeToLerp, deepcopy(info.outerPosition), deepcopy(info.innerPosition), info.baseRadius, info.outerScale, info.innerScale, deepcopy(info.predictionPosition), info.predictionScale, info.initialBaseSize
+    end
+"#;
