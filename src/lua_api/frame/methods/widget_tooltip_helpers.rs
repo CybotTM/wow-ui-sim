@@ -1,5 +1,5 @@
 use crate::lua_api::frame::handle::{FrameRef, extract_frame_id, frame_ref, get_sim_state};
-use crate::lua_api::tooltip::TooltipLine;
+use crate::lua_api::tooltip::{TooltipLine, build_cursor_anchor};
 use crate::widget::{Anchor, AnchorPoint};
 use mlua::Value;
 
@@ -249,6 +249,8 @@ pub(crate) fn set_owner_impl(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -
             td.spell_id = None;
             td.owner_id = owner_id;
             td.anchor_type = anchor.clone();
+            td.anchor_x_offset = x_offset;
+            td.anchor_y_offset = y_offset;
         }
         position_tooltip(&mut state, id, owner_id, &anchor, x_offset, y_offset);
         state.set_frame_visible(id, true);
@@ -268,6 +270,8 @@ pub(crate) fn set_anchor_type_impl(
     let owner_id = match state.tooltips.get_mut(&id) {
         Some(td) => {
             td.anchor_type = anchor.clone();
+            td.anchor_x_offset = x_offset;
+            td.anchor_y_offset = y_offset;
             td.owner_id
         }
         None => return Ok(()),
@@ -396,8 +400,6 @@ pub(crate) fn add_double_line_impl(
     Ok(())
 }
 
-const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;
-
 fn position_tooltip(
     state: &mut crate::lua_api::state::SimState,
     tooltip_id: u64,
@@ -406,14 +408,9 @@ fn position_tooltip(
     x_offset: f32,
     y_offset: f32,
 ) {
-    let frame = match state.widgets.get_mut_visual(tooltip_id) {
-        Some(f) => f,
-        None => return,
-    };
     if anchor_type == "ANCHOR_PRESERVE" {
         return;
     }
-    frame.anchors.clear();
     let anchor = match anchor_type {
         "ANCHOR_CURSOR" => {
             let (mx, my) = state.mouse_position.unwrap_or((0.0, 0.0));
@@ -422,25 +419,16 @@ fn position_tooltip(
         "ANCHOR_NONE" => None,
         _ => owner_id.map(|oid| build_owner_anchor(anchor_type, oid, x_offset, y_offset)),
     };
-    if let Some(a) = anchor {
-        frame.anchors.push(a);
-    }
-}
-
-fn build_cursor_anchor(mx: f32, my: f32, x_offset: f32, y_offset: f32) -> Anchor {
-    let cursor_y = if x_offset == 0.0 && y_offset == 0.0 {
-        my + DEFAULT_CURSOR_Y_OFFSET
-    } else {
-        my + y_offset
+    let Some(frame) = state.widgets.get_mut_visual(tooltip_id) else {
+        return;
     };
-    Anchor {
-        point: AnchorPoint::TopLeft,
-        relative_to: None,
-        relative_to_id: None,
-        relative_point: AnchorPoint::TopLeft,
-        x_offset: mx + x_offset,
-        y_offset: cursor_y,
+    frame.anchors.clear();
+    if let Some(anchor) = anchor {
+        frame.anchors.push(anchor);
     }
+    let _ = frame;
+    state.widgets.mark_rect_dirty(tooltip_id);
+    state.widgets.mark_visual_dirty(tooltip_id);
 }
 
 fn build_owner_anchor(anchor_type: &str, owner_id: u64, x_offset: f32, y_offset: f32) -> Anchor {

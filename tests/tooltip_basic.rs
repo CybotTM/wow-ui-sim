@@ -575,7 +575,9 @@ fn test_tooltip_anchor_cursor_uses_absolute_position() {
     let env = WowLuaEnv::new().unwrap();
 
     // Set mouse position before SetOwner
-    env.state().borrow_mut().mouse_position = Some((200.0, 300.0));
+    env.state()
+        .borrow_mut()
+        .set_mouse_position(Some((200.0, 300.0)));
 
     env.exec(
         r#"
@@ -607,5 +609,42 @@ fn test_tooltip_anchor_cursor_uses_absolute_position() {
     assert!(
         (anchor.y_offset - 320.0).abs() < 0.1,
         "y_offset should be mouse y + 20"
+    );
+}
+
+#[test]
+fn test_tooltip_anchor_cursor_tracks_mouse_movement() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.state()
+        .borrow_mut()
+        .set_mouse_position(Some((100.0, 200.0)));
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "AnchorCursorFollowOwner", UIParent)
+        GameTooltip:SetOwner(owner, "ANCHOR_CURSOR", 10, 30)
+    "#,
+    )
+    .unwrap();
+
+    env.state()
+        .borrow_mut()
+        .set_mouse_position(Some((300.0, 450.0)));
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let frame = state.widgets.get(gt_id).unwrap();
+
+    assert_eq!(frame.anchors.len(), 1);
+    let anchor = &frame.anchors[0];
+    assert_eq!(anchor.point, AnchorPoint::TopLeft);
+    assert!(anchor.relative_to_id.is_none());
+    assert!(
+        (anchor.x_offset - 310.0).abs() < 0.1,
+        "x_offset should follow the updated mouse position"
+    );
+    assert!(
+        (anchor.y_offset - 480.0).abs() < 0.1,
+        "y_offset should follow the updated mouse position"
     );
 }

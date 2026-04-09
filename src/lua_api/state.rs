@@ -5,10 +5,10 @@ use crate::event::{EventQueue, ScriptRegistry};
 use crate::lua_api::animation::AnimGroupState;
 use crate::lua_api::message_frame::MessageFrameData;
 use crate::lua_api::simple_html::SimpleHtmlData;
-use crate::lua_api::tooltip::TooltipData;
+use crate::lua_api::tooltip::{TooltipData, build_cursor_anchor};
 use crate::screen::ScreenKind;
 use crate::sound::SoundManager;
-use crate::widget::WidgetRegistry;
+use crate::widget::{Anchor, WidgetRegistry};
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::time::Instant;
@@ -427,5 +427,40 @@ impl SimState {
         if screen_kind.is_glue() {
             self.is_logged_in = false;
         }
+    }
+
+    pub fn set_mouse_position(&mut self, pos: Option<(f32, f32)>) {
+        self.mouse_position = pos;
+        let Some((mx, my)) = pos else {
+            return;
+        };
+        let cursor_tooltips = self.collect_cursor_tooltip_positions(mx, my);
+        for (tooltip_id, anchor) in cursor_tooltips {
+            self.reanchor_tooltip_to_cursor(tooltip_id, anchor);
+        }
+    }
+
+    fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {
+        self.tooltips
+            .iter()
+            .filter(|(_, td)| td.anchor_type == "ANCHOR_CURSOR")
+            .map(|(&tooltip_id, td)| {
+                (
+                    tooltip_id,
+                    build_cursor_anchor(mx, my, td.anchor_x_offset, td.anchor_y_offset),
+                )
+            })
+            .collect()
+    }
+
+    fn reanchor_tooltip_to_cursor(&mut self, tooltip_id: u64, anchor: Anchor) {
+        let Some(frame) = self.widgets.get_mut_visual(tooltip_id) else {
+            return;
+        };
+        frame.anchors.clear();
+        frame.anchors.push(anchor);
+        let _ = frame;
+        self.widgets.mark_rect_dirty(tooltip_id);
+        self.widgets.mark_visual_dirty(tooltip_id);
     }
 }

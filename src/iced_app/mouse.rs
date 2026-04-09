@@ -12,7 +12,9 @@ impl App {
         self.mouse_position = Some(pos);
         {
             let env = self.env.borrow();
-            env.state().borrow_mut().mouse_position = Some((pos.x, pos.y));
+            env.state()
+                .borrow_mut()
+                .set_mouse_position(Some((pos.x, pos.y)));
         }
 
         // Check drag threshold while mouse is held down.
@@ -30,6 +32,7 @@ impl App {
 
         let new_hovered = self.hit_test(pos);
         if new_hovered == self.hovered_frame {
+            self.flush_mouse_move_visual_updates();
             return;
         }
 
@@ -50,7 +53,10 @@ impl App {
         // OnEnter/OnLeave scripts may show/hide tooltips or change widget state.
         // Apply incremental HitGrid updates before the next hit_test.
         self.apply_hit_grid_changes();
-        // Check if Lua mutated any widget and mark affected strata dirty.
+        self.flush_mouse_move_visual_updates();
+    }
+
+    fn flush_mouse_move_visual_updates(&mut self) {
         let dirty_mask = self
             .env
             .borrow()

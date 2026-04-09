@@ -1,5 +1,7 @@
 //! Tooltip state data structures.
 
+use crate::widget::{Anchor, AnchorPoint};
+
 /// Inline texture/atlas icon embedded in a tooltip line.
 pub enum TooltipTexture {
     FileDataId(u32),
@@ -22,6 +24,8 @@ pub struct TooltipData {
     pub lines: Vec<TooltipLine>,
     pub owner_id: Option<u64>,
     pub anchor_type: String,
+    pub anchor_x_offset: f32,
+    pub anchor_y_offset: f32,
     pub min_width: f32,
     pub padding: f32,
     /// Spell ID set by `SetSpellByID`, returned by `GetSpell`.
@@ -40,6 +44,8 @@ impl Default for TooltipData {
             lines: Vec::new(),
             owner_id: None,
             anchor_type: "ANCHOR_NONE".to_string(),
+            anchor_x_offset: 0.0,
+            anchor_y_offset: 0.0,
             min_width: 0.0,
             padding: 0.0,
             spell_id: None,
@@ -47,6 +53,24 @@ impl Default for TooltipData {
             left_line_ids: Vec::new(),
             right_line_ids: Vec::new(),
         }
+    }
+}
+
+pub(crate) const DEFAULT_CURSOR_Y_OFFSET: f32 = 20.0;
+
+pub(crate) fn build_cursor_anchor(mx: f32, my: f32, x_offset: f32, y_offset: f32) -> Anchor {
+    let cursor_y = if x_offset == 0.0 && y_offset == 0.0 {
+        my + DEFAULT_CURSOR_Y_OFFSET
+    } else {
+        my + y_offset
+    };
+    Anchor {
+        point: AnchorPoint::TopLeft,
+        relative_to: None,
+        relative_to_id: None,
+        relative_point: AnchorPoint::TopLeft,
+        x_offset: mx + x_offset,
+        y_offset: cursor_y,
     }
 }
 
