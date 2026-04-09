@@ -197,64 +197,93 @@ fn register_game_rules_util(lua: &Lua) -> Result<()> {
 
 fn register_game_menu_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
+    register_game_menu_query_stubs(lua, &g)?;
+    register_game_menu_noop_stubs(lua, &g)?;
+    register_set_portrait_texture_stub(lua, &g)?;
+    register_static_popup_stubs(lua, &g)?;
+    register_c_splash_screen(lua)?;
+    Ok(())
+}
 
-    g.set(
+fn register_game_menu_query_stubs(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
         "CurrentVersionHasNewUnseenSettings",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    g.set(
+    globals.set(
         "StaticPopup_Visible",
-        lua.create_function(|_, _w: String| Ok(Value::Nil))?,
+        lua.create_function(|_, _which: String| Ok(Value::Nil))?,
     )?;
-    g.set(
+    globals.set(
         "IsRestrictedAccount",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    for name in [
-        "Logout",
-        "Quit",
-        "ForceLogout",
-        "ForceQuit",
-        "ShowMacroFrame",
-        "ToggleHelpFrame",
-        "ToggleStoreUI",
-        "UpdateMicroButtons",
-        "SetGamePadCursorControl",
-    ] {
-        g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    }
-    g.set(
+    globals.set(
         "CanAutoSetGamePadCursorControl",
-        lua.create_function(|_, _e: bool| Ok(false))?,
+        lua.create_function(|_, _enabled: bool| Ok(false))?,
     )?;
-    g.set(
+    globals.set(
+        "IsTutorialFlagged",
+        lua.create_function(|_, _flag: i32| Ok(false))?,
+    )?;
+    Ok(())
+}
+
+fn register_game_menu_noop_stubs(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    register_noop_globals(
+        lua,
+        globals,
+        &[
+            "Logout",
+            "Quit",
+            "ForceLogout",
+            "ForceQuit",
+            "ShowMacroFrame",
+            "ToggleHelpFrame",
+            "ToggleStoreUI",
+            "UpdateMicroButtons",
+            "SetGamePadCursorControl",
+        ],
+    )
+}
+
+fn register_set_portrait_texture_stub(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    globals.set(
         "SetPortraitTexture",
-        lua.create_function(|lua, (tex, unit): (Value, Value)| {
+        lua.create_function(|lua, (texture, unit): (Value, Value)| {
             let texture_path = class_icon_path_for_unit(lua, &unit);
-            if let Some(id) = crate::lua_api::frame::extract_frame_id(&tex) {
-                let state_rc = crate::lua_api::frame::get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                if let Some(frame) = state.widgets.get_mut_visual(id) {
-                    frame.texture = Some(texture_path);
-                }
+            let Some(id) = crate::lua_api::frame::extract_frame_id(&texture) else {
+                return Ok(());
+            };
+
+            let state_rc = crate::lua_api::frame::get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(id) {
+                frame.texture = Some(texture_path);
             }
             Ok(())
         })?,
     )?;
-    for name in [
-        "ChangeActionBarPage",
-        "StaticPopup_UpdateAll",
-        "StaticPopup_Show",
-        "StaticPopup_Hide",
-    ] {
-        g.set(name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    }
-    g.set(
-        "IsTutorialFlagged",
-        lua.create_function(|_, _f: i32| Ok(false))?,
-    )?;
+    Ok(())
+}
 
-    register_c_splash_screen(lua)?;
+fn register_static_popup_stubs(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    register_noop_globals(
+        lua,
+        globals,
+        &[
+            "ChangeActionBarPage",
+            "StaticPopup_UpdateAll",
+            "StaticPopup_Show",
+            "StaticPopup_Hide",
+        ],
+    )
+}
+
+fn register_noop_globals(lua: &Lua, globals: &mlua::Table, names: &[&str]) -> Result<()> {
+    for name in names {
+        globals.set(*name, lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+    }
     Ok(())
 }
 
