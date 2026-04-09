@@ -196,6 +196,9 @@ The current build does not reproduce a hero-spec icon positioning bug:
 So this is no longer an active hero-icon bug. The evidence now points to the original report being
 stale or misidentified.
 
+Decision: retire the hero-spec bottom-right report in this codebase unless someone produces a fresh
+current-build repro that actually places `HeroSpecButton.Icon1` away from the top-center hero slot.
+
 There may still be a separate bottom-right visual oddity elsewhere in the class-talent UI, but that
 is not a `HeroTalentsContainer` / `HeroSpecButton.Icon1` issue and should be tracked separately.
 
