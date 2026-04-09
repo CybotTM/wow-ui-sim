@@ -201,6 +201,8 @@ current-build repro that actually places `HeroSpecButton.Icon1` away from the to
 
 There may still be a separate bottom-right visual oddity elsewhere in the class-talent UI, but that
 is not a `HeroTalentsContainer` / `HeroSpecButton.Icon1` issue and should be tracked separately.
+That follow-up now lives in
+[`docs/class-talents-right-side-artifact.md`](/syncthing/Sync/Projects/wow/wow-ui-sim/docs/class-talents-right-side-artifact.md).
 
 ## Debug Tools Added
 
