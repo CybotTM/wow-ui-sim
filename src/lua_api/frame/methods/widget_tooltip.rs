@@ -3,13 +3,14 @@
 use super::super::handle::FrameRef;
 use super::methods_helpers::get_mixin_override;
 use super::widget_tooltip_data::{
-    lookup_aura_from_args, parse_item_id_from_hyperlink, populate_aura_tooltip,
-    populate_item_tooltip, populate_spell_tooltip,
+    lookup_aura_from_args, populate_aura_tooltip, populate_item_tooltip, populate_spell_tooltip,
 };
 #[path = "widget_tooltip_helpers.rs"]
 mod widget_tooltip_helpers;
 use crate::lua_api::frame::handle::get_sim_state;
-use crate::lua_api::tooltip::TooltipLine;
+use crate::lua_api::tooltip::{
+    TooltipLine, parse_item_id_from_hyperlink, parse_spell_id_from_hyperlink,
+};
 use mlua::Value;
 use widget_tooltip_helpers::{
     add_double_line_impl, add_get_line_methods, add_tooltip_info_methods,
@@ -17,7 +18,7 @@ use widget_tooltip_helpers::{
 };
 
 pub use super::widget_tooltip_data::set_unit_for_tooltip;
-pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, strip_html_tags, val_to_f32};
+pub(crate) use widget_tooltip_helpers::{fire_tooltip_script, val_to_f32};
 
 const TOOLTIP_MULTIVALUE_STUBS: &[&str] = &["AddFontStrings"];
 
@@ -258,10 +259,14 @@ fn add_set_hyperlink<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             Some(Value::String(s)) => s.to_string_lossy().to_string(),
             _ => return Ok(()),
         };
-        let item_id = parse_item_id_from_hyperlink(&link);
-        if let Some(id) = item_id {
+        if let Some(id) = parse_item_id_from_hyperlink(&link) {
             populate_item_tooltip(lua, this.0, id)?;
             fire_tooltip_script(lua, this.0, "OnTooltipSetItem")?;
+            return Ok(());
+        }
+        if let Some(id) = parse_spell_id_from_hyperlink(&link) {
+            populate_spell_tooltip(lua, this.0, id)?;
+            fire_tooltip_script(lua, this.0, "OnTooltipSetSpell")?;
         }
         Ok(())
     });

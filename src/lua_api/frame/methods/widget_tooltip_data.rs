@@ -1,7 +1,7 @@
 //! Tooltip data population: items, units, auras, and associated color/label tables.
 
 use crate::lua_api::frame::handle::get_sim_state;
-use crate::lua_api::tooltip::TooltipLine;
+use crate::lua_api::tooltip::{TooltipLine, strip_html_tags};
 use mlua::Value;
 
 // --- Spell tooltips ---
@@ -47,7 +47,7 @@ fn build_spell_lines(spell_id: u32, name: &str, lines: &mut Vec<TooltipLine>) {
 
     let description = crate::spell_descriptions::get_spell_description(spell_id).unwrap_or("");
     if !description.is_empty() {
-        let clean = super::widget_tooltip::strip_html_tags(description);
+        let clean = strip_html_tags(description);
         lines.push(TooltipLine {
             left_text: clean,
             left_color: (1.0, 0.82, 0.0),
@@ -124,15 +124,6 @@ fn build_item_lines(item: &crate::items::ItemInfo, lines: &mut Vec<TooltipLine>)
     if item.inventory_type > 0 && !slot_label.is_empty() {
         lines.push(simple_line(slot_label.to_string()));
     }
-}
-
-pub(crate) fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
-    let start = link.find("item:")?;
-    let after = &link[start + 5..];
-    let end = after
-        .find(|c: char| c == ':' || c == '|')
-        .unwrap_or(after.len());
-    after[..end].parse::<u32>().ok()
 }
 
 fn quality_color_rgb(quality: u8) -> (f32, f32, f32) {

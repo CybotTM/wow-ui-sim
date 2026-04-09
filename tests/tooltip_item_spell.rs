@@ -67,6 +67,29 @@ fn test_set_hyperlink_short_format() {
 }
 
 #[test]
+fn test_set_hyperlink_spell_link_populates_spell_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"GameTooltip:SetHyperlink(GetSpellLink(19750))"#)
+        .unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        num_lines >= 2,
+        "SetHyperlink with a spell link should populate spell tooltip lines"
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert_eq!(td.lines[0].left_text, "Flash of Light");
+    assert_eq!(
+        state.tooltips.get(&gt_id).and_then(|td| td.spell_id),
+        Some(19750)
+    );
+}
+
+#[test]
 fn test_get_num_lines_returns_actual_count() {
     let env = WowLuaEnv::new().unwrap();
 

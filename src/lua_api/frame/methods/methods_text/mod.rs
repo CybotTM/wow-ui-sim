@@ -211,7 +211,7 @@ fn resolve_text_child(
 fn apply_html_strip(text_str: Option<String>, is_html: bool) -> Option<String> {
     text_str.map(|t| {
         if is_html {
-            super::widget_tooltip::strip_html_tags(&t)
+            crate::lua_api::tooltip::strip_html_tags(&t)
         } else {
             t
         }

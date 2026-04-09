@@ -445,18 +445,3 @@ pub(crate) fn val_to_f32(val: Option<Value>, default: f32) -> f32 {
         _ => default,
     }
 }
-
-/// Strip HTML tags from a string, returning plain text.
-pub(crate) fn strip_html_tags(html: &str) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut in_tag = false;
-    for ch in html.chars() {
-        match ch {
-            '<' => in_tag = true,
-            '>' => in_tag = false,
-            _ if !in_tag => result.push(ch),
-            _ => {}
-        }
-    }
-    result
-}

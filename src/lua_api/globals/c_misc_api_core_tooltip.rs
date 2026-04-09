@@ -1,5 +1,9 @@
 use mlua::{Lua, Result, Value};
 
+use crate::lua_api::tooltip::{
+    parse_item_id_from_hyperlink, parse_spell_id_from_hyperlink, strip_html_tags,
+};
+
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     let tooltip_info: mlua::Table = globals
@@ -411,29 +415,6 @@ fn lua_value_to_i32(value: Value) -> Option<i32> {
     }
 }
 
-fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
-    let start = link.find("item:")?;
-    let after = &link[start + 5..];
-    let end = after
-        .find(|c: char| c == ':' || c == '|')
-        .unwrap_or(after.len());
-    after[..end].parse::<u32>().ok()
-}
-
-fn parse_spell_id_from_hyperlink(link: &str) -> Option<u32> {
-    let start = link.find("Hspell:").or_else(|| link.find("spell:"))?;
-    let prefix_len = if link[start..].starts_with("Hspell:") {
-        7
-    } else {
-        6
-    };
-    let after = &link[start + prefix_len..];
-    let end = after
-        .find(|c: char| c == ':' || c == '|')
-        .unwrap_or(after.len());
-    after[..end].parse::<u32>().ok()
-}
-
 fn tooltip_description_text(spell_id: i32) -> Option<String> {
     let description = crate::spell_descriptions::get_spell_description(spell_id as u32)?;
     if description.is_empty() {
@@ -491,20 +472,6 @@ fn spell_cast_time_text(spell_id: i32) -> String {
     } else {
         "Instant".to_string()
     }
-}
-
-fn strip_html_tags(html: &str) -> String {
-    let mut result = String::with_capacity(html.len());
-    let mut in_tag = false;
-    for ch in html.chars() {
-        match ch {
-            '<' => in_tag = true,
-            '>' => in_tag = false,
-            _ if !in_tag => result.push(ch),
-            _ => {}
-        }
-    }
-    result
 }
 
 fn build_empty_item_tooltip(lua: &Lua, tooltip_type: i32) -> Result<Value> {

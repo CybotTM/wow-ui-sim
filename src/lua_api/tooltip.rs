@@ -49,3 +49,36 @@ impl Default for TooltipData {
         }
     }
 }
+
+pub(crate) fn parse_item_id_from_hyperlink(link: &str) -> Option<u32> {
+    parse_hyperlink_id(link, &["item:"])
+}
+
+pub(crate) fn parse_spell_id_from_hyperlink(link: &str) -> Option<u32> {
+    parse_hyperlink_id(link, &["Hspell:", "spell:"])
+}
+
+pub(crate) fn strip_html_tags(html: &str) -> String {
+    let mut result = String::with_capacity(html.len());
+    let mut in_tag = false;
+    for ch in html.chars() {
+        match ch {
+            '<' => in_tag = true,
+            '>' => in_tag = false,
+            _ if !in_tag => result.push(ch),
+            _ => {}
+        }
+    }
+    result
+}
+
+fn parse_hyperlink_id(link: &str, prefixes: &[&str]) -> Option<u32> {
+    let (start, prefix) = prefixes
+        .iter()
+        .find_map(|prefix| link.find(prefix).map(|start| (start, *prefix)))?;
+    let after = &link[start + prefix.len()..];
+    let end = after
+        .find(|c: char| c == ':' || c == '|')
+        .unwrap_or(after.len());
+    after[..end].parse::<u32>().ok()
+}
