@@ -413,6 +413,41 @@ fn test_tooltip_data_handler_set_minimap_mouseover_uses_minimap_getter() {
     );
 }
 
+#[test]
+fn test_tooltip_data_handler_set_upgrade_item_uses_upgrade_getter() {
+    let env = setup_full_env();
+
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            C_ItemUpgrade.SetItemUpgradeFromLocation({ bagID = 0, slotIndex = 1 })
+            assert(GameTooltip.SetUpgradeItem, "GameTooltip:SetUpgradeItem should exist")
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            GameTooltip:SetUpgradeItem()
+
+            local info = GameTooltip:GetPrimaryTooltipInfo()
+            local tooltipData = GameTooltip:GetPrimaryTooltipData()
+            if not info or not tooltipData or tooltipData.type ~= Enum.TooltipDataType.Item or not tooltipData.lines then
+                return false
+            end
+
+            local nameLine = tooltipData.lines[1]
+            local itemLevelLine = tooltipData.lines[2]
+            return info.getterName == "GetUpgradeItem"
+                and nameLine
+                and nameLine.leftText == "Hearthstone"
+                and itemLevelLine
+                and itemLevelLine.leftText == "Item Level 1"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        has_real_tooltip,
+        "TooltipDataHandler should populate GameTooltip:SetUpgradeItem through C_TooltipInfo.GetUpgradeItem",
+    );
+}
+
 /// Verify the tooltip produces render quads after the full rendering pipeline runs.
 #[cfg(feature = "gui")]
 #[test]

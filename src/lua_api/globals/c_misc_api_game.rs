@@ -10,6 +10,8 @@
 
 use mlua::{Lua, Result, Value};
 
+const ITEM_UPGRADE_LOCATION_REGISTRY_KEY: &str = "__wow_item_upgrade_location";
+
 pub(super) fn register_all(
     lua: &Lua,
     state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
@@ -38,12 +40,91 @@ pub(super) fn register_all(
 
 fn register_c_item_upgrade(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
-        "CanUpgradeItem",
-        lua.create_function(|_, _loc: Value| Ok(false))?,
-    )?;
+    register_c_item_upgrade_queries(lua, &t)?;
+    register_c_item_upgrade_selection(lua, &t)?;
     lua.globals().set("C_ItemUpgrade", t)?;
     Ok(())
+}
+
+fn register_c_item_upgrade_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "CanUpgradeItem",
+        lua.create_function(|lua, loc: Value| {
+            Ok(item_upgrade_item_id_from_location(lua, &loc).is_some())
+        })?,
+    )?;
+    t.set(
+        "GetItemHyperlink",
+        lua.create_function(|lua, ()| Ok(item_upgrade_item_hyperlink(lua)?.unwrap_or(Value::Nil)))?,
+    )?;
+    Ok(())
+}
+
+fn register_c_item_upgrade_selection(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    t.set(
+        "SetItemUpgradeFromLocation",
+        lua.create_function(|lua, loc: Value| set_item_upgrade_location(lua, loc))?,
+    )?;
+    t.set(
+        "ClearItemUpgrade",
+        lua.create_function(|lua, ()| clear_item_upgrade_location(lua))?,
+    )?;
+    Ok(())
+}
+
+pub(crate) fn selected_item_upgrade_item_id(lua: &Lua) -> Option<u32> {
+    let location = lua
+        .named_registry_value::<Value>(ITEM_UPGRADE_LOCATION_REGISTRY_KEY)
+        .ok()?;
+    item_upgrade_item_id_from_location(lua, &location)
+}
+
+fn set_item_upgrade_location(lua: &Lua, loc: Value) -> Result<()> {
+    lua.set_named_registry_value(ITEM_UPGRADE_LOCATION_REGISTRY_KEY, loc)
+}
+
+fn clear_item_upgrade_location(lua: &Lua) -> Result<()> {
+    lua.set_named_registry_value(ITEM_UPGRADE_LOCATION_REGISTRY_KEY, Value::Nil)
+}
+
+fn item_upgrade_item_hyperlink(lua: &Lua) -> Result<Option<Value>> {
+    let Some(item_id) = selected_item_upgrade_item_id(lua) else {
+        return Ok(None);
+    };
+    let Some(item) = crate::items::get_item(item_id) else {
+        return Ok(None);
+    };
+    let color = super::c_item_api::quality_color(item.quality);
+    let link = format!(
+        "|cff{}|Hitem:{}::::::::80:::::|h[{}]|h|r",
+        color, item_id, item.name
+    );
+    Ok(Some(Value::String(lua.create_string(&link)?)))
+}
+
+fn item_upgrade_item_id_from_location(lua: &Lua, loc: &Value) -> Option<u32> {
+    bag_item_id_from_location(lua, loc).or_else(|| equipped_item_id_from_location(lua, loc))
+}
+
+fn bag_item_id_from_location(lua: &Lua, loc: &Value) -> Option<u32> {
+    let Value::Table(table) = loc else {
+        return None;
+    };
+    let bag_id = table.get("bagID").ok()?;
+    let slot_index = table.get("slotIndex").ok()?;
+    let state_rc = crate::lua_api::frame::get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .get_bag_item(bag_id, slot_index)
+        .map(|(item_id, _)| item_id)
+}
+
+fn equipped_item_id_from_location(lua: &Lua, loc: &Value) -> Option<u32> {
+    let Value::Table(table) = loc else {
+        return None;
+    };
+    let slot = table.get("equipmentSlotIndex").ok()?;
+    super::c_item_api_globals::get_equipped_item_id(lua, slot)
 }
 
 fn register_c_external_event_url(lua: &Lua) -> Result<()> {

@@ -142,6 +142,10 @@ const TOOLTIP_DATA_SHAPE_LUA: &str = r#"
         tooltipShapeOk(C_TooltipInfo.GetRecipeResultItem(100005, {}, nil, nil, nil), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetRecipeResultItemForOrder(100005, {}, 1, nil, nil), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetMinimapMouseover(), Enum.TooltipDataType.MinimapMouseover, false),
+        tooltipShapeOk((function()
+            C_ItemUpgrade.SetItemUpgradeFromLocation({ bagID = 0, slotIndex = 1 })
+            return C_TooltipInfo.GetUpgradeItem()
+        end)(), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetInventoryItem("player", 1), Enum.TooltipDataType.Item, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellBookItem(1, Enum.SpellBookSpellBank.Player), Enum.TooltipDataType.Spell, false),
         tooltipShapeOk(C_TooltipInfo.GetSpellByID(19750), Enum.TooltipDataType.Spell, false),
@@ -399,6 +403,41 @@ fn test_c_tooltip_info_get_minimap_mouseover_returns_zone_and_subzone_lines() {
     assert!(
         has_real_tooltip,
         "C_TooltipInfo.GetMinimapMouseover should return minimap tooltip data with the current zone and sub-zone",
+    );
+}
+
+#[test]
+fn test_c_tooltip_info_get_upgrade_item_returns_selected_upgrade_item_tooltip() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_real_tooltip: bool = env
+        .eval(
+            r#"
+            C_ItemUpgrade.SetItemUpgradeFromLocation({ bagID = 0, slotIndex = 1 })
+            local tooltip = C_TooltipInfo.GetUpgradeItem()
+            C_ItemUpgrade.ClearItemUpgrade()
+            local emptyTooltip = C_TooltipInfo.GetUpgradeItem()
+
+            if not tooltip or not emptyTooltip then
+                return false
+            end
+
+            local nameLine = tooltip.lines[1]
+            local itemLevelLine = tooltip.lines[2]
+            local emptyLine = emptyTooltip.lines[1]
+            return tooltip.type == Enum.TooltipDataType.Item
+                and emptyTooltip.type == Enum.TooltipDataType.Item
+                and nameLine
+                and nameLine.type == Enum.TooltipDataLineType.ItemName
+                and nameLine.leftText == "Hearthstone"
+                and itemLevelLine
+                and itemLevelLine.leftText == "Item Level 1"
+                and emptyLine == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        has_real_tooltip,
+        "C_TooltipInfo.GetUpgradeItem should return the currently selected item-upgrade tooltip and empty data when nothing is selected",
     );
 }
 

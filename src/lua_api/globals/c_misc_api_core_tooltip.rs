@@ -38,6 +38,10 @@ fn register_item_tooltip_overrides(lua: &Lua, table: &mlua::Table) -> Result<()>
         lua.create_function(create_owned_item_tooltip)?,
     )?;
     table.set(
+        "GetUpgradeItem",
+        lua.create_function(create_upgrade_item_tooltip)?,
+    )?;
+    table.set(
         "GetItemByGUID",
         lua.create_function(create_item_by_guid_tooltip)?,
     )?;
@@ -194,6 +198,15 @@ fn create_owned_item_tooltip(lua: &Lua, item_id: i32) -> Result<Value> {
         return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
     };
     add_guid_to_item_tooltip(lua, owned_item_id, guid)
+}
+
+fn create_upgrade_item_tooltip(lua: &Lua, _: ()) -> Result<Value> {
+    const TOOLTIP_DATA_TYPE_ITEM: i32 = 0;
+
+    let Some(item_id) = super::c_misc_api_game::selected_item_upgrade_item_id(lua) else {
+        return build_empty_item_tooltip(lua, TOOLTIP_DATA_TYPE_ITEM);
+    };
+    create_item_tooltip(lua, item_id as i32)
 }
 
 fn create_inventory_item_tooltip(lua: &Lua, (_unit, slot): (String, i32)) -> Result<Value> {
