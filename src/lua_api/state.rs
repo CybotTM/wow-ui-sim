@@ -13,6 +13,75 @@ use std::collections::{HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::time::Instant;
 
+macro_rules! build_empty_sim_state {
+    ($collections:ident, $runtime:ident) => {
+        Self {
+            widgets: WidgetRegistry::default(),
+            events: EventQueue::default(),
+            scripts: ScriptRegistry::default(),
+            cvars: CVarStorage::new(),
+            console_output: $collections.console_output,
+            timers: $collections.timers,
+            focused_frame_id: $runtime.focused_frame_id,
+            addons: $collections.addons,
+            tooltips: $collections.tooltips,
+            quest_blobs: $collections.quest_blobs,
+            simple_htmls: $collections.simple_htmls,
+            message_frames: $collections.message_frames,
+            on_update_frames: $collections.on_update_frames,
+            visible_on_update_cache: $runtime.visible_on_update_cache,
+            strata_buckets: $runtime.strata_buckets,
+            pending_hit_grid_changes: $collections.pending_hit_grid_changes,
+            animation_groups: $collections.animation_groups,
+            next_anim_group_id: $runtime.next_anim_group_id,
+            anim_frame_to_group: $collections.anim_frame_to_group,
+            anim_frame_to_anim: $collections.anim_frame_to_anim,
+            screen_width: $runtime.screen_width,
+            screen_height: $runtime.screen_height,
+            screen_kind: $runtime.screen_kind,
+            is_logged_in: $runtime.is_logged_in,
+            screen_first_displayed: $runtime.screen_first_displayed,
+            saved_account_name: $runtime.saved_account_name,
+            saved_account_list: $runtime.saved_account_list,
+            uses_token: $runtime.uses_token,
+            account_save_enabled: $runtime.account_save_enabled,
+            account_save_in_progress: $runtime.account_save_in_progress,
+            account_locked_post_save: $runtime.account_locked_post_save,
+            action_bars: $collections.action_bars,
+            addon_base_paths: $collections.addon_base_paths,
+            create_frame_initial_hidden: $runtime.create_frame_initial_hidden,
+            mouse_position: $runtime.mouse_position,
+            hovered_frame: $runtime.hovered_frame,
+            party_members: $collections.party_members,
+            current_target: $runtime.current_target,
+            current_focus: $runtime.current_focus,
+            sound_manager: $runtime.sound_manager,
+            rot_damage_level: $runtime.rot_damage_level,
+            fps: $runtime.fps,
+            start_time: $runtime.start_time,
+            casting: $runtime.casting,
+            next_cast_id: $runtime.next_cast_id,
+            gcd: $runtime.gcd,
+            spell_cooldowns: $collections.spell_cooldowns,
+            action_ui_buttons: $collections.action_ui_buttons,
+            cursor_item: $runtime.cursor_item,
+            loading_addon_index: $runtime.loading_addon_index,
+            executing_addon_index: $runtime.executing_addon_index,
+            loading_forbidden: $runtime.loading_forbidden,
+            app_frame_metrics: AppFrameMetrics::default(),
+            talents: super::talent_state::TalentState::new(),
+            lua_errors: $collections.lua_errors,
+            global_show_hide_depth: 0,
+            anim_sync_times: $collections.anim_sync_times,
+            player: PlayerState::default(),
+            world: WorldState::default(),
+            bag_items: $collections.bag_items,
+            debug_borders: false,
+            debug_anchors: false,
+        }
+    };
+}
+
 // Re-export game data types so existing `crate::lua_api::state::X` imports keep working.
 pub use super::game_data::SpellCooldownState;
 pub use super::game_data::{
@@ -344,73 +413,11 @@ impl SimState {
     }
 
     fn new_empty() -> Self {
-        let c = EmptyStateCollections::new();
-        let r = EmptyRuntimeState::new();
+        Self::build_empty_state(EmptyStateCollections::new(), EmptyRuntimeState::new())
+    }
 
-        Self {
-            widgets: WidgetRegistry::default(),
-            events: EventQueue::default(),
-            scripts: ScriptRegistry::default(),
-            cvars: CVarStorage::new(),
-            console_output: c.console_output,
-            timers: c.timers,
-            addons: c.addons,
-            lua_errors: c.lua_errors,
-            tooltips: c.tooltips,
-            quest_blobs: c.quest_blobs,
-            simple_htmls: c.simple_htmls,
-            message_frames: c.message_frames,
-            animation_groups: c.animation_groups,
-            anim_sync_times: c.anim_sync_times,
-            anim_frame_to_group: c.anim_frame_to_group,
-            anim_frame_to_anim: c.anim_frame_to_anim,
-            on_update_frames: c.on_update_frames,
-            pending_hit_grid_changes: c.pending_hit_grid_changes,
-            action_bars: c.action_bars,
-            addon_base_paths: c.addon_base_paths,
-            create_frame_initial_hidden: r.create_frame_initial_hidden,
-            spell_cooldowns: c.spell_cooldowns,
-            action_ui_buttons: c.action_ui_buttons,
-            party_members: c.party_members,
-            bag_items: c.bag_items,
-            focused_frame_id: r.focused_frame_id,
-            visible_on_update_cache: r.visible_on_update_cache,
-            strata_buckets: r.strata_buckets,
-            mouse_position: r.mouse_position,
-            hovered_frame: r.hovered_frame,
-            current_target: r.current_target,
-            current_focus: r.current_focus,
-            sound_manager: r.sound_manager,
-            casting: r.casting,
-            gcd: r.gcd,
-            cursor_item: r.cursor_item,
-            loading_addon_index: r.loading_addon_index,
-            executing_addon_index: r.executing_addon_index,
-            loading_forbidden: r.loading_forbidden,
-            next_anim_group_id: r.next_anim_group_id,
-            next_cast_id: r.next_cast_id,
-            screen_width: r.screen_width,
-            screen_height: r.screen_height,
-            screen_kind: r.screen_kind,
-            is_logged_in: r.is_logged_in,
-            screen_first_displayed: r.screen_first_displayed,
-            saved_account_name: r.saved_account_name,
-            saved_account_list: r.saved_account_list,
-            uses_token: r.uses_token,
-            account_save_enabled: r.account_save_enabled,
-            account_save_in_progress: r.account_save_in_progress,
-            account_locked_post_save: r.account_locked_post_save,
-            fps: r.fps,
-            rot_damage_level: r.rot_damage_level,
-            start_time: r.start_time,
-            app_frame_metrics: AppFrameMetrics::default(),
-            talents: super::talent_state::TalentState::new(),
-            player: PlayerState::default(),
-            world: WorldState::default(),
-            global_show_hide_depth: 0,
-            debug_borders: false,
-            debug_anchors: false,
-        }
+    fn build_empty_state(c: EmptyStateCollections, r: EmptyRuntimeState) -> Self {
+        build_empty_sim_state!(c, r)
     }
 
     /// Look up bag item at (bag, slot). Returns (item_id, stack_count).
