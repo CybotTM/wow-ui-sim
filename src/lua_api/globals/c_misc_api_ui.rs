@@ -138,51 +138,66 @@ fn register_c_major_factions(lua: &Lua) -> Result<()> {
 
 fn register_c_ui_widget(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
-    t.set(
+    register_c_ui_widget_queries(lua, &t)?;
+    register_c_ui_widget_visualizations(lua, &t)?;
+    register_c_ui_widget_set_ids(lua, &t)?;
+    lua.globals().set("C_UIWidgetManager", t)?;
+    Ok(())
+}
+
+fn register_c_ui_widget_queries(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetAllWidgetsBySetID",
         lua.create_function(|lua, _id: i32| lua.create_table())?,
     )?;
-    t.set(
-        "GetStatusBarWidgetVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetTextWithStateWidgetVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetIconAndTextWidgetVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetCaptureBarWidgetVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetDoubleStatusBarWidgetVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetSpellDisplayVisualizationInfo",
-        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
-    )?;
-    t.set(
+    table.set(
         "GetWidgetSetInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
-    t.set(
+    Ok(())
+}
+
+fn register_c_ui_widget_visualizations(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
+        "GetStatusBarWidgetVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    table.set(
+        "GetTextWithStateWidgetVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    table.set(
+        "GetIconAndTextWidgetVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    table.set(
+        "GetCaptureBarWidgetVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    table.set(
+        "GetDoubleStatusBarWidgetVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    table.set(
+        "GetSpellDisplayVisualizationInfo",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    Ok(())
+}
+
+fn register_c_ui_widget_set_ids(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.set(
         "GetTopCenterWidgetSetID",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    t.set(
+    table.set(
         "GetBelowMinimapWidgetSetID",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    t.set(
+    table.set(
         "GetObjectiveTrackerWidgetSetID",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
-    lua.globals().set("C_UIWidgetManager", t)?;
     Ok(())
 }
 
