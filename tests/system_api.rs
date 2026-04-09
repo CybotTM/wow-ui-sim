@@ -280,6 +280,71 @@ fn test_c_friend_list_returns_seeded_wow_friends() {
 }
 
 #[test]
+fn test_c_loss_of_control_returns_seeded_active_event() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        if C_LossOfControl.GetActiveLossOfControlDataCount() ~= 1 then
+            return "global_count=" .. tostring(C_LossOfControl.GetActiveLossOfControlDataCount())
+        end
+
+        local data = C_LossOfControl.GetActiveLossOfControlData(1)
+        if not data then
+            return "missing_global_data"
+        end
+        if data.spellID ~= 408 then
+            return "spell=" .. tostring(data.spellID)
+        end
+        if data.displayText ~= "Kidney Shot" then
+            return "text=" .. tostring(data.displayText)
+        end
+        if data.iconTexture ~= "Interface\\Icons\\Ability_Rogue_KidneyShot" then
+            return "icon=" .. tostring(data.iconTexture)
+        end
+        if data.displayType ~= 2 then
+            return "display_type=" .. tostring(data.displayType)
+        end
+        if data.timeRemaining ~= 4 then
+            return "time_remaining=" .. tostring(data.timeRemaining)
+        end
+
+        if C_LossOfControl.GetActiveLossOfControlData(2) ~= nil then
+            return "unexpected_global_index_2"
+        end
+
+        if C_LossOfControl.GetActiveLossOfControlDataCountByUnit("player") ~= 1 then
+            return "player_count=" .. tostring(C_LossOfControl.GetActiveLossOfControlDataCountByUnit("player"))
+        end
+        if C_LossOfControl.GetActiveLossOfControlDataByUnit("player", 1) == nil then
+            return "missing_player_data"
+        end
+        if C_LossOfControl.GetActiveLossOfControlDuration("player", 1) ~= 4 then
+            return "duration=" .. tostring(C_LossOfControl.GetActiveLossOfControlDuration("player", 1))
+        end
+
+        if C_LossOfControl.GetActiveLossOfControlDataCountByUnit("focus") ~= 0 then
+            return "unexpected_focus_count"
+        end
+        if C_LossOfControl.GetActiveLossOfControlDataByUnit("focus", 1) ~= nil then
+            return "unexpected_focus_data"
+        end
+        if C_LossOfControl.GetActiveLossOfControlDuration("focus", 1) ~= nil then
+            return "unexpected_focus_duration"
+        end
+
+        return "ok"
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "ok",
+        "C_LossOfControl should expose seeded active loss-of-control data: {result}"
+    );
+}
+
+#[test]
 fn test_macro_apis_return_seeded_macros() {
     let env = env();
     let result: String = env

@@ -34,6 +34,28 @@ const SEEDED_CHARACTER_MACROS: &[SeededMacro] = &[SeededMacro {
     body: "/cast Crusader Aura",
 }];
 
+struct SeededLossOfControl {
+    spell_id: i32,
+    loc_type: &'static str,
+    display_text: &'static str,
+    icon_texture: &'static str,
+    duration: f64,
+    lockout_school: i32,
+    priority: i32,
+    display_type: i32,
+}
+
+const SEEDED_LOSS_OF_CONTROL: SeededLossOfControl = SeededLossOfControl {
+    spell_id: 408,
+    loc_type: "STUN_MECHANIC",
+    display_text: "Kidney Shot",
+    icon_texture: "Interface\\Icons\\Ability_Rogue_KidneyShot",
+    duration: 4.0,
+    lockout_school: 0,
+    priority: 100,
+    display_type: 2,
+};
+
 /// Register all additional C_* namespace stubs.
 pub fn register_c_stubs_api(
     lua: &Lua,
@@ -61,7 +83,7 @@ fn register_core_namespaces(
     register_c_guild(lua, std::rc::Rc::clone(&state))?;
     register_c_guild_info(lua)?;
     register_c_lfg_list(lua, std::rc::Rc::clone(&state))?;
-    register_c_loss_of_control(lua)?;
+    register_c_loss_of_control(lua, std::rc::Rc::clone(&state))?;
     register_c_mail(lua, std::rc::Rc::clone(&state))?;
     register_c_stable_info(lua)?;
     register_c_tutorial(lua)?;
@@ -318,18 +340,92 @@ fn register_lfg_activity_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )
 }
 
-fn register_c_loss_of_control(lua: &Lua) -> Result<()> {
+fn register_c_loss_of_control(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
     let t = lua.create_table()?;
+    let global_state = std::rc::Rc::clone(&state);
     t.set(
         "GetActiveLossOfControlData",
-        lua.create_function(|_, _index: Option<i32>| Ok(Value::Nil))?,
+        lua.create_function(move |lua, index: i32| {
+            create_loss_of_control_data(lua, &global_state, None, index)
+        })?,
     )?;
     t.set(
         "GetActiveLossOfControlDataCount",
-        lua.create_function(|_, ()| Ok(0i32))?,
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
+    let by_unit_state = std::rc::Rc::clone(&state);
+    t.set(
+        "GetActiveLossOfControlDataByUnit",
+        lua.create_function(move |lua, (unit_token, index): (String, i32)| {
+            create_loss_of_control_data(lua, &by_unit_state, Some(unit_token.as_str()), index)
+        })?,
+    )?;
+    let count_state = std::rc::Rc::clone(&state);
+    t.set(
+        "GetActiveLossOfControlDataCountByUnit",
+        lua.create_function(move |_, unit_token: String| {
+            Ok(loss_of_control_count_for_unit(
+                &count_state.borrow(),
+                Some(unit_token.as_str()),
+            ))
+        })?,
+    )?;
+    let duration_state = std::rc::Rc::clone(&state);
+    t.set(
+        "GetActiveLossOfControlDuration",
+        lua.create_function(move |_, (unit_token, index): (String, i32)| {
+            if loss_of_control_count_for_unit(&duration_state.borrow(), Some(unit_token.as_str()))
+                == 1
+                && index == 1
+            {
+                Ok(Some(SEEDED_LOSS_OF_CONTROL.duration))
+            } else {
+                Ok(None::<f64>)
+            }
+        })?,
     )?;
     lua.globals().set("C_LossOfControl", t)?;
     Ok(())
+}
+
+fn create_loss_of_control_data(
+    lua: &Lua,
+    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    unit_token: Option<&str>,
+    index: i32,
+) -> Result<Value> {
+    if index != 1 || loss_of_control_count_for_unit(&state.borrow(), unit_token) == 0 {
+        return Ok(Value::Nil);
+    }
+
+    let data = lua.create_table()?;
+    data.set("locType", SEEDED_LOSS_OF_CONTROL.loc_type)?;
+    data.set("spellID", SEEDED_LOSS_OF_CONTROL.spell_id)?;
+    data.set("displayText", SEEDED_LOSS_OF_CONTROL.display_text)?;
+    data.set("iconTexture", SEEDED_LOSS_OF_CONTROL.icon_texture)?;
+    data.set("startTime", Value::Nil)?;
+    data.set("timeRemaining", SEEDED_LOSS_OF_CONTROL.duration)?;
+    data.set("duration", SEEDED_LOSS_OF_CONTROL.duration)?;
+    data.set("lockoutSchool", SEEDED_LOSS_OF_CONTROL.lockout_school)?;
+    data.set("priority", SEEDED_LOSS_OF_CONTROL.priority)?;
+    data.set("displayType", SEEDED_LOSS_OF_CONTROL.display_type)?;
+    data.set("auraInstanceID", Value::Nil)?;
+    Ok(Value::Table(data))
+}
+
+fn loss_of_control_count_for_unit(
+    state: &crate::lua_api::SimState,
+    unit_token: Option<&str>,
+) -> i32 {
+    match unit_token {
+        None => 1,
+        Some("player") => 1,
+        Some("target") if state.current_target.is_some() => 1,
+        _ => 0,
+    }
 }
 
 fn register_c_mail(

@@ -367,6 +367,45 @@ fn professions_frame_loads_and_populates_specialization_tab() {
 }
 
 #[test]
+fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
+    test_timeout! {
+        let env = setup_env();
+        let lua = env.lua();
+        let _ = env.fire_event_with_args(
+            "LOSS_OF_CONTROL_ADDED",
+            &[
+                mlua::Value::String(lua.create_string("player").unwrap()),
+                mlua::Value::Integer(1),
+            ],
+        );
+
+        let result: String = env.eval(r#"
+            if not LossOfControlFrame then
+                return "missing_frame"
+            end
+            if not LossOfControlFrame:IsShown() then
+                return "frame_hidden"
+            end
+            if LossOfControlFrame.AbilityName:GetText() ~= "Kidney Shot" then
+                return "text=" .. tostring(LossOfControlFrame.AbilityName:GetText())
+            end
+            if LossOfControlFrame.Icon:GetTexture() ~= "Interface\\Icons\\Ability_Rogue_KidneyShot" then
+                return "icon=" .. tostring(LossOfControlFrame.Icon:GetTexture())
+            end
+            if not LossOfControlFrame.TimeLeft:IsShown() then
+                return "time_hidden"
+            end
+            return "ok"
+        "#).unwrap();
+
+        assert_eq!(
+            result, "ok",
+            "LossOfControlFrame should show the seeded loss-of-control overlay: {result}"
+        );
+    }
+}
+
+#[test]
 fn hide_ui_panel_hides_frame() {
     test_timeout! {
         let env = setup_env();
