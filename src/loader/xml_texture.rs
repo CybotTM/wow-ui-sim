@@ -76,19 +76,17 @@ fn generate_texture_source_code(texture: &crate::xml::TextureXml, is_mask: bool)
     code
 }
 
-fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
-    let Some(color) = &texture.color else {
-        return String::new();
-    };
-    let uses_texture_source = texture.file.is_some() || texture.atlas.is_some();
-    let color_method = if uses_texture_source {
+fn texture_color_method(texture: &crate::xml::TextureXml) -> &'static str {
+    if texture.file.is_some() || texture.atlas.is_some() {
         "SetVertexColor"
     } else {
         "SetColorTexture"
-    };
-    if let Some(name) = &color.color {
-        format!(
-            r#"
+    }
+}
+
+fn emit_named_color_code(name: &str, color_method: &str) -> String {
+    format!(
+        r#"
         do
             local c = {name}
             if c then
@@ -96,20 +94,34 @@ fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
             end
         end
         "#,
-            name = name,
-            color_method = color_method
-        )
-    } else {
-        format!(
-            r#"
+        name = name,
+        color_method = color_method
+    )
+}
+
+fn emit_rgba_color_code(color: &crate::xml::ColorXml, color_method: &str) -> String {
+    format!(
+        r#"
         tex:{color_method}({}, {}, {}, {})
         "#,
-            color.r.unwrap_or(1.0),
-            color.g.unwrap_or(1.0),
-            color.b.unwrap_or(1.0),
-            color.a.unwrap_or(1.0),
-            color_method = color_method
-        )
+        color.r.unwrap_or(1.0),
+        color.g.unwrap_or(1.0),
+        color.b.unwrap_or(1.0),
+        color.a.unwrap_or(1.0),
+        color_method = color_method
+    )
+}
+
+fn emit_color_code(texture: &crate::xml::TextureXml) -> String {
+    let Some(color) = &texture.color else {
+        return String::new();
+    };
+    let color_method = texture_color_method(texture);
+
+    if let Some(name) = &color.color {
+        emit_named_color_code(name, color_method)
+    } else {
+        emit_rgba_color_code(color, color_method)
     }
 }
 
