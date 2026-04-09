@@ -237,18 +237,78 @@ fn register_c_delves_ui(lua: &Lua) -> Result<()> {
 
 /// C_ZoneAbility namespace - zone ability data.
 fn register_c_zone_ability(lua: &Lua) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set(
-        "GetActiveAbilities",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetZoneAbilityIcon",
-        lua.create_function(|_, _spell_id: Value| Ok(Value::Nil))?,
-    )?;
-    lua.globals().set("C_ZoneAbility", t)?;
+    lua.load(ZONE_ABILITY_LUA).exec()?;
+    let zone_ability = lua.globals().get::<mlua::Table>("C_ZoneAbility")?;
+    lua.globals().set("C_ZoneAbility", zone_ability)?;
     Ok(())
 }
+
+const ZONE_ABILITY_LUA: &str = r#"
+    C_ZoneAbility = C_ZoneAbility or {}
+    local api = C_ZoneAbility
+
+    api._state = api._state or {
+        activeAbilities = {
+            {
+                zoneAbilityID = 1,
+                uiPriority = 1,
+                spellID = 372610,
+                textureKit = nil,
+                tutorialText = "Skyward Ascent",
+            },
+        },
+        iconsBySpellID = {},
+        defaultIcon = "Interface\\Icons\\INV_Misc_QuestionMark",
+    }
+
+    local function copyAbility(ability)
+        if type(ability) ~= "table" then
+            return nil
+        end
+
+        local copy = {}
+        for key, value in pairs(ability) do
+            copy[key] = value
+        end
+        return copy
+    end
+
+    local function resolveSpellTexture(spellID)
+        if type(C_Spell) ~= "table" or type(C_Spell.GetSpellTexture) ~= "function" then
+            return nil
+        end
+
+        local ok, texture = pcall(C_Spell.GetSpellTexture, spellID)
+        if not ok or texture == nil or texture == "" then
+            return nil
+        end
+        return texture
+    end
+
+    api.GetActiveAbilities = api.GetActiveAbilities or function()
+        local abilities = api._state.activeAbilities or {}
+        local copy = {}
+        for index, ability in ipairs(abilities) do
+            copy[index] = copyAbility(ability)
+        end
+        return copy
+    end
+
+    api.GetZoneAbilityIcon = api.GetZoneAbilityIcon or function(spellID)
+        local iconsBySpellID = api._state.iconsBySpellID or {}
+        local seededIcon = iconsBySpellID[spellID]
+        if seededIcon ~= nil and seededIcon ~= "" then
+            return seededIcon
+        end
+
+        local spellTexture = resolveSpellTexture(spellID)
+        if spellTexture ~= nil then
+            return spellTexture
+        end
+
+        return api._state.defaultIcon
+    end
+"#;
 
 /// C_AutoComplete namespace - player name autocomplete results.
 fn register_c_auto_complete(lua: &Lua, g: &mlua::Table) -> Result<()> {
