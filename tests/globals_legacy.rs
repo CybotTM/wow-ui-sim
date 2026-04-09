@@ -287,6 +287,49 @@ fn test_frame_runtime_lookup_filters_wrong_type_methods() {
 }
 
 #[test]
+fn test_fontstring_runtime_lookup_hides_extra_title_methods() {
+    let env = env();
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "FontStringMethodParent")
+            local text = parent:CreateFontString("FontStringMethodText")
+            return text.GetTitle == nil,
+                   text.SetTitle == nil,
+                   type(text.SetText) == "function"
+            "#,
+        )
+        .unwrap();
+    assert!(result.0, "FontString should not expose GetTitle");
+    assert!(result.1, "FontString should not expose SetTitle");
+    assert!(result.2, "FontString should still expose SetText");
+}
+
+#[test]
+fn test_statusbar_runtime_lookup_hides_extra_methods() {
+    let env = env();
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "StatusBarMethodFilter")
+            return sb.GetStatusBarDesaturated == nil,
+                   sb.SetStatusBarAtlas == nil,
+                   type(sb.SetStatusBarTexture) == "function"
+            "#,
+        )
+        .unwrap();
+    assert!(
+        result.0,
+        "StatusBar should not expose GetStatusBarDesaturated"
+    );
+    assert!(result.1, "StatusBar should not expose SetStatusBarAtlas");
+    assert!(
+        result.2,
+        "StatusBar should still expose supported texture methods"
+    );
+}
+
+#[test]
 fn test_getmetatable_nil_returns_nil() {
     let env = env();
     let is_nil: bool = env.eval("return getmetatable(nil) == nil").unwrap();

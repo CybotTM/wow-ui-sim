@@ -52,6 +52,17 @@ pub static ALL_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
         .collect()
 });
 
+static HIDDEN_SHARED_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(|| {
+    [
+        "GetStatusBarDesaturated",
+        "GetTitle",
+        "SetStatusBarAtlas",
+        "SetTitle",
+    ]
+    .into_iter()
+    .collect()
+});
+
 pub fn methods_for_type(widget_type: WidgetType) -> &'static HashSet<&'static str> {
     match widget_type {
         WidgetType::Frame | WidgetType::WorldFrame => &FRAME_METHODS,
@@ -77,7 +88,7 @@ pub fn methods_for_type(widget_type: WidgetType) -> &'static HashSet<&'static st
 }
 
 pub fn is_registered_method(name: &str) -> bool {
-    ALL_METHODS.contains(name)
+    ALL_METHODS.contains(name) || HIDDEN_SHARED_METHODS.contains(name)
 }
 
 pub fn is_method_allowed(widget_type: WidgetType, name: &str) -> bool {
