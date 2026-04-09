@@ -178,6 +178,16 @@ fn diff_bounds(
     found.then_some((min_x, min_y, max_x, max_y))
 }
 
+fn request_contains_point(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+    x: f32,
+    y: f32,
+) -> bool {
+    let bounds = quad_bounds(batch, request);
+    x >= bounds.0 && x <= bounds.2 && y >= bounds.1 && y <= bounds.3
+}
+
 #[test]
 fn hero_spec_icon_and_mask_quads_match_layout_rect() {
     let env = setup_full_ui();
@@ -585,5 +595,44 @@ fn hiding_hero_talents_container_only_changes_top_center_region() {
     assert!(
         !(1000 >= diff.0 && 1000 <= diff.2 && 610 >= diff.1 && 610 <= diff.3),
         "Historical bottom-right artifact point should not be affected by hiding HeroTalentsContainer: diff={diff:?}"
+    );
+}
+
+#[test]
+fn historical_bottom_right_artifact_point_is_only_background_marble_in_current_render() {
+    let env = setup_full_ui();
+    open_class_talent_frame(&env);
+    env.set_screen_size(1600.0, 1200.0);
+
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let batch = build_quad_batch_for_registry(
+        &state.widgets,
+        (1600.0, 1200.0),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        &buckets,
+    );
+
+    let matches: Vec<_> = batch
+        .texture_requests
+        .iter()
+        .filter(|request| request_contains_point(&batch, request, 1000.0, 610.0))
+        .map(|request| request.path.as_str())
+        .collect();
+
+    assert_eq!(
+        matches,
+        vec!["framegeneral/ui-background-marble"],
+        "Historical bottom-right artifact point should only intersect the class-talent marble background in the current render"
     );
 }

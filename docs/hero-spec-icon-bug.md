@@ -157,6 +157,21 @@ That rules out a whole class of false leads:
 - the bottom-right visual is not emitted by `HeroSpecButton.Icon1`
 - the bottom-right visual is not emitted by another child of the hero-spec subtree
 
+### The historical bottom-right point is just marble background in the current render
+
+`tests/hero_talents_render.rs::historical_bottom_right_artifact_point_is_only_background_marble_in_current_render`
+checks the exact old screenshot coordinate from this investigation, `(1000, 610)`, against the
+current `1600x1200` screenshot-path batch. In the current build, that point intersects exactly one
+textured request:
+
+```
+framegeneral/ui-background-marble
+```
+
+So the old bottom-right point is not only outside the hero subtree, it is not intersecting any hero
+icon-like request at all in the current render. That means the original screenshot annotation is
+stale or misidentified rather than evidence that `HeroSpecButton.Icon1` is still rendering there.
+
 ## What's Ruled Out
 
 - **Stale layout_rect**: Confirmed correct after ensure_layout_rects
@@ -170,7 +185,8 @@ That rules out a whole class of false leads:
 
 1. **Texture content / stale source asset**: The crop request is correct, but the sampled pixels in the local `talentsheroclassicons` texture could still be stale or wrong for that atlas region.
 1. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, and interior icon samples match the loaded crop, but the shader-side mask path could still distort edge pixels around the real top-center icon.
-2. **Misidentified artifact outside the hero subtree**: The bottom-right visual is not coming from `HeroTalentsContainer`, so another frame elsewhere in the class-talent UI must be responsible.
+2. **Stale / misidentified screenshot evidence**: The old `(1000, 610)` point now resolves to marble background only, so the original “bottom-right hero icon” marker is not a live hero-icon render in the current build.
+3. **Separate non-hero visual issue**: If a bottom-right oddity still exists by eye, it must be a different class-talent render artifact unrelated to `HeroTalentsContainer`.
 
 ## Debug Tools Added
 
@@ -183,5 +199,5 @@ wow-sim screenshot --dump-tree               # dump all (no filter)
 ## Next Steps
 
 - Identify which on-screen artifact in the screenshot corresponds to which texture request in the `HeroTalentsContainer` subtree
-- Identify which non-hero-subtree frame or texture request is actually producing the bottom-right visual
+- Decide whether to retire this hero-icon bug as stale evidence, or open a separate investigation for any remaining non-hero visual oddity in the class-talent screenshot
 - If needed, isolate mask-edge sampling separately from interior icon sampling around the real top-center hero icon
