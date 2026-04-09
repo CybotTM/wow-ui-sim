@@ -7,15 +7,31 @@ use mlua::{Function, Lua, Result, Table, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-fn parse_bitfield_mask(value: Option<String>) -> u128 {
+/// Parse a bitfield CVar string into a set of active bit indices.
+///
+/// Stored as comma-separated indices (e.g. "3,26,157"). Supports arbitrary
+/// indices — no u128 ceiling.
+fn parse_bitfield_set(value: Option<String>) -> std::collections::HashSet<u32> {
     value
-        .and_then(|v| v.trim().parse::<u128>().ok())
-        .unwrap_or(0)
+        .map(|v| {
+            v.split(',')
+                .filter_map(|s| s.trim().parse::<u32>().ok())
+                .collect()
+        })
+        .unwrap_or_default()
 }
 
-fn bitfield_bit(index: Option<i32>) -> Option<u128> {
-    let index = u32::try_from(index?).ok()?;
-    (index < 128).then(|| 1u128 << index)
+fn serialize_bitfield_set(set: &std::collections::HashSet<u32>) -> String {
+    let mut bits: Vec<u32> = set.iter().copied().collect();
+    bits.sort_unstable();
+    bits.iter()
+        .map(|b| b.to_string())
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+fn bitfield_index(index: Option<i32>) -> Option<u32> {
+    u32::try_from(index?).ok()
 }
 
 fn get_cvar_value(lua: &Lua, state: &SimState, cvar: &str) -> Result<Value> {
@@ -33,19 +49,23 @@ fn get_cvar_default_value(lua: &Lua, state: &SimState, cvar: &str) -> Result<Val
 }
 
 fn get_cvar_bitfield(state: &SimState, name: &str, index: Option<i32>) -> bool {
-    let Some(bit) = bitfield_bit(index) else {
+    let Some(idx) = bitfield_index(index) else {
         return false;
     };
-    (parse_bitfield_mask(state.cvars.get(name)) & bit) != 0
+    parse_bitfield_set(state.cvars.get(name)).contains(&idx)
 }
 
 fn set_cvar_bitfield(state: &SimState, name: &str, index: i32, value: bool) -> bool {
-    let Some(bit) = bitfield_bit(Some(index)) else {
+    let Some(idx) = bitfield_index(Some(index)) else {
         return false;
     };
-    let current = parse_bitfield_mask(state.cvars.get(name));
-    let updated = if value { current | bit } else { current & !bit };
-    state.cvars.set(name, &updated.to_string())
+    let mut set = parse_bitfield_set(state.cvars.get(name));
+    if value {
+        set.insert(idx);
+    } else {
+        set.remove(&idx);
+    }
+    state.cvars.set(name, &serialize_bitfield_set(&set))
 }
 
 fn create_get_cvar(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<Function> {

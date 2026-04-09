@@ -104,20 +104,16 @@ fn hide_talent_loadout_dialogs(env: &WowLuaEnv) {
     );
 }
 
-/// Spellbook helptips are transient overlays that currently produce unstable
-/// cold-open rendering in the simulator. Suppress them so the spellbook's
-/// first visible state matches subsequent opens without faking world-exit.
-/// Retained until spellbook startup produces the same first-open state without
-/// tutorial suppression.
+/// Suppress spellbook helptips via CVars instead of monkey-patching.
+///
+/// CheckShowHelpTips checks these bitfields before showing any tip.
+/// Setting them to true tells Blizzard code the tutorials are already
+/// dismissed, matching a real player who clicked them away.
 fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
-        if SpellBookFrameTutorialsMixin then
-            SpellBookFrameTutorialsMixin.CheckShowHelpTips = function() end
-        end
-        if HelpTip then
-            HelpTip:HideAllSystem("SpellBook Helptips")
-        end
+        SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK, true)
+        SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE, true)
     "#,
     );
 }
@@ -322,40 +318,26 @@ mod tests {
     }
 
     #[test]
-    fn spellbook_tutorial_suppression_only_overrides_tip_entrypoints() {
+    fn spellbook_tutorial_suppression_sets_cvars() {
         let env = env();
-        env.exec(
-            r#"
-            hide_calls = 0
-            hidden_system = nil
-            SpellBookFrameTutorialsMixin = {
-                CheckShowHelpTips = function()
-                    error("original should be replaced")
-                end,
-                KeepMe = "still-here",
-            }
-            HelpTip = {
-                HideAllSystem = function(_, system)
-                    hide_calls = hide_calls + 1
-                    hidden_system = system
-                end,
-            }
-            "#,
-        )
-        .unwrap();
-
         suppress_spellbook_tutorials(&env);
-        let (keep_me, hide_calls, hidden_system): (String, i32, String) = env
+
+        let (boosted, minimize): (bool, bool) = env
             .eval(
                 r#"
-                SpellBookFrameTutorialsMixin.CheckShowHelpTips()
-                return SpellBookFrameTutorialsMixin.KeepMe, hide_calls, hidden_system
+                return GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK),
+                    GetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE)
                 "#,
             )
             .unwrap();
 
-        assert_eq!(keep_me, "still-here");
-        assert_eq!(hide_calls, 1);
-        assert_eq!(hidden_system, "SpellBook Helptips");
+        assert!(
+            boosted,
+            "BOOSTED_SPELL_BOOK tutorial should be marked closed"
+        );
+        assert!(
+            minimize,
+            "PLAYER_SPELLS_MINIMIZE tutorial should be marked closed"
+        );
     }
 }
