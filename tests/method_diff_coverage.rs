@@ -113,6 +113,48 @@ fn parse_discovery_type_name(line: &str) -> Option<&str> {
         .and_then(|value| value.strip_suffix("\"] = {"))
 }
 
+fn reset_discovery_type_on_section_end(current_type: &mut Option<String>, line: &str) -> bool {
+    if line != "}," {
+        return false;
+    }
+    *current_type = None;
+    true
+}
+
+fn insert_discovery_method_entry(
+    parsed: &mut BTreeMap<String, BTreeSet<String>>,
+    current_type: &Option<String>,
+    line: &str,
+) -> bool {
+    let Some(type_name) = current_type else {
+        return false;
+    };
+    let Some(method_name) = parse_discovery_method_name(line) else {
+        return false;
+    };
+
+    parsed
+        .entry(type_name.clone())
+        .or_default()
+        .insert(method_name.to_string());
+    true
+}
+
+fn start_discovery_type_section(
+    parsed: &mut BTreeMap<String, BTreeSet<String>>,
+    current_type: &mut Option<String>,
+    line: &str,
+) -> bool {
+    let Some(type_name) = parse_discovery_type_name(line) else {
+        return false;
+    };
+
+    let type_name = type_name.to_string();
+    *current_type = Some(type_name.clone());
+    parsed.entry(type_name).or_default();
+    true
+}
+
 fn parse_discovery_frame_methods(path: &str) -> BTreeMap<String, BTreeSet<String>> {
     let contents = fs::read_to_string(path)
         .unwrap_or_else(|_| panic!("failed to read discovery file: {path}"));
@@ -125,30 +167,17 @@ fn parse_discovery_frame_methods(path: &str) -> BTreeMap<String, BTreeSet<String
             in_frame_methods = is_frame_methods_section_start(line);
             continue;
         }
-
-        if let Some(type_name) = &current_type {
-            if line == "}," {
-                current_type = None;
-                continue;
-            }
-
-            if let Some(method_name) = parse_discovery_method_name(line) {
-                parsed
-                    .entry(type_name.clone())
-                    .or_default()
-                    .insert(method_name.to_string());
-                continue;
-            }
-        }
-
-        if let Some(type_name) = parse_discovery_type_name(line) {
-            current_type = Some(type_name.to_string());
-            parsed.entry(type_name.to_string()).or_default();
-            continue;
-        }
-
         if current_type.is_none() && line == "}," {
             break;
+        }
+        if reset_discovery_type_on_section_end(&mut current_type, line) {
+            continue;
+        }
+        if insert_discovery_method_entry(&mut parsed, &current_type, line) {
+            continue;
+        }
+        if start_discovery_type_section(&mut parsed, &mut current_type, line) {
+            continue;
         }
     }
 
