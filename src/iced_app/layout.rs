@@ -6,7 +6,7 @@ use std::collections::HashMap;
 mod layout_line;
 
 use crate::LayoutRect;
-use crate::widget::{AnchorPoint, WidgetRegistry};
+use crate::widget::{AnchorPoint, WidgetRegistry, WidgetType};
 
 use layout_line::resolve_line_frame_rect;
 
@@ -499,9 +499,13 @@ fn maybe_clamp_frame_rect(
     screen_width: f32,
     screen_height: f32,
 ) {
-    if frame.clamped_to_screen && rect.width > 0.0 && rect.height > 0.0 {
+    if should_clamp_frame_to_screen(frame) && rect.width > 0.0 && rect.height > 0.0 {
         clamp_rect_to_screen(rect, screen_width, screen_height);
     }
+}
+
+fn should_clamp_frame_to_screen(frame: &crate::widget::Frame) -> bool {
+    frame.clamped_to_screen || frame.widget_type == WidgetType::GameTooltip
 }
 
 /// Compute frame rect with anchor resolution (uncached).
@@ -519,17 +523,16 @@ pub fn compute_frame_rect(
 }
 
 /// Shift a rect so it stays within screen bounds (WoW `clampedToScreen` behavior).
-///
-/// WoW's clamping prevents frames from being positioned entirely off-screen.
-/// It keeps the top-left corner on-screen (x >= 0, y >= 0) and allows frames
-/// to extend past the bottom/right edges — tall frames anchored partway down
-/// the screen simply clip at the bottom rather than being pulled upward.
-fn clamp_rect_to_screen(rect: &mut LayoutRect, _screen_w: f32, _screen_h: f32) {
-    if rect.x < 0.0 {
-        rect.x = 0.0;
-    }
-    if rect.y < 0.0 {
-        rect.y = 0.0;
+fn clamp_rect_to_screen(rect: &mut LayoutRect, screen_w: f32, screen_h: f32) {
+    rect.x = clamp_axis_to_viewport(rect.x, rect.width, screen_w);
+    rect.y = clamp_axis_to_viewport(rect.y, rect.height, screen_h);
+}
+
+fn clamp_axis_to_viewport(position: f32, size: f32, viewport_size: f32) -> f32 {
+    if size >= viewport_size {
+        0.0
+    } else {
+        position.clamp(0.0, viewport_size - size)
     }
 }
 

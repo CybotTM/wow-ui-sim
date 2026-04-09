@@ -313,6 +313,11 @@ fn update_tooltip_sizes(env: &WowLuaEnv) {
     wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_sys);
 }
 
+fn update_tooltip_layout(env: &WowLuaEnv) {
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+}
+
 #[test]
 fn test_wrapped_line_does_not_expand_width() {
     let env = WowLuaEnv::new().unwrap();
@@ -741,5 +746,63 @@ fn test_non_cursor_anchor_uses_offsets() {
     assert!(
         (anchor.y_offset - 10.0).abs() < 0.1,
         "y_offset should be 10"
+    );
+}
+
+#[test]
+fn test_tooltip_layout_is_clamped_to_viewport_edges() {
+    let env = WowLuaEnv::new().unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.screen_width = 400.0;
+        state.screen_height = 300.0;
+        state.widgets.clear_all_layout_rects();
+    }
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "ClampOwner", UIParent)
+        owner:SetSize(10, 10)
+        owner:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 390, 290)
+        GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+        GameTooltip:AddLine("A tooltip line wide enough to overflow the viewport")
+        GameTooltip:AddLine("Second line to ensure some height")
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+    update_tooltip_layout(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let rect = state
+        .widgets
+        .get(gt_id)
+        .and_then(|frame| frame.layout_rect)
+        .unwrap();
+
+    assert!(
+        rect.x >= 0.0,
+        "Tooltip should stay on-screen horizontally, got x={}",
+        rect.x
+    );
+    assert!(
+        rect.y >= 0.0,
+        "Tooltip should stay on-screen vertically, got y={}",
+        rect.y
+    );
+    assert!(
+        rect.x + rect.width <= state.screen_width + 0.1,
+        "Tooltip right edge should stay within the viewport: rect={:?}, screen_width={}",
+        rect,
+        state.screen_width
+    );
+    assert!(
+        rect.y + rect.height <= state.screen_height + 0.1,
+        "Tooltip bottom edge should stay within the viewport: rect={:?}, screen_height={}",
+        rect,
+        state.screen_height
     );
 }
