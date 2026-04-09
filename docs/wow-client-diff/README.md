@@ -25,6 +25,42 @@ Summary of gaps:
 | Constants | 1364 (72 wrong value) | 12 |
 | C_* namespaces | 6 | 11 |
 
+## Weekly Reconciliation Cycle
+
+Run a full `diff_*.txt` reconciliation pass once per week, and also before any broad API-surface
+implementation sprint that touches more than one of these categories:
+
+- frame methods
+- C_* APIs / namespaces
+- global functions
+- constants
+- enums
+
+### Pass Gate
+
+Do not start or close a reconciliation pass unless every still-open gap category has an explicit
+owner recorded for that pass. "No owner yet" is itself a blocker, not a pass result.
+
+Each pass must leave behind:
+
+- the pass date
+- the exact `diff_*.txt` files reviewed
+- the owner list for every open gap class
+- any tasks opened or updated from the diff review
+- the unresolved gaps carried forward to the next pass, with owners
+
+### Owner List
+
+Use the code-area owner list below when assigning responsibility for a pass:
+
+| Gap Class | Owner Surface |
+|---|---|
+| Methods | `src/lua_api/frame/methods/`, `src/lua_api/frame/method_registry/`, `src/lua_api/frame/metatable.rs` |
+| C_* APIs / namespaces | `src/lua_api/globals/c_*.rs`, `src/lua_api/globals/c_stubs_api*.rs`, `src/lua_api/globals/generated_stubs.rs` |
+| Globals | `src/lua_api/globals/*.rs`, `src/lua_api/globals_legacy.rs`, `src/lua_api/globals/strings/` |
+| Constants | `src/lua_api/globals/constants_api.rs`, `src/lua_api/globals/c_stubs_api_extra.rs`, `src/lua_api/globals/enum_data/missing_constants.lua` |
+| Enums | `src/lua_api/globals/enum_api.rs`, `src/lua_api/globals/enum_data/`, `src/lua_api/globals/enum_data/missing_enums.lua` |
+
 ---
 
 ## Section 1: Behavior Divergences
