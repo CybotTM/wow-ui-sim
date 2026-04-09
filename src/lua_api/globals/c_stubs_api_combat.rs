@@ -403,6 +403,283 @@ const COMBAT_LOG_LUA: &str = r#"
     end
 "#;
 
+const DAMAGE_METER_LUA: &str = r#"
+    C_DamageMeter = C_DamageMeter or {}
+
+    local api = C_DamageMeter
+    local overallSessionType = Enum and Enum.DamageMeterSessionType and Enum.DamageMeterSessionType.Overall or 0
+    local currentSessionType = Enum and Enum.DamageMeterSessionType and Enum.DamageMeterSessionType.Current or 1
+    local expiredSessionType = Enum and Enum.DamageMeterSessionType and Enum.DamageMeterSessionType.Expired or 2
+    local damageDoneType = Enum and Enum.DamageMeterType and Enum.DamageMeterType.DamageDone or 0
+    local allyDisplayType = Enum and Enum.DamageMeterSourceDisplayType and Enum.DamageMeterSourceDisplayType.Ally or 1
+    local enemyDisplayType = Enum and Enum.DamageMeterSourceDisplayType and Enum.DamageMeterSourceDisplayType.Enemy or 2
+
+    local function deep_copy(value)
+        if type(value) ~= "table" then
+            return value
+        end
+
+        local copy = {}
+        for key, nested in pairs(value) do
+            copy[key] = deep_copy(nested)
+        end
+        return copy
+    end
+
+    local function create_spell(spellID, totalAmount, amountPerSecond, unitDetails)
+        return {
+            spellID = spellID,
+            totalAmount = totalAmount,
+            amountPerSecond = amountPerSecond,
+            creatureName = "",
+            overkillAmount = 0,
+            isAvoidable = false,
+            isDeadly = false,
+            combatSpellDetails = unitDetails,
+        }
+    end
+
+    local function create_source_source(combatSpells)
+        local maxAmount = 0
+        local totalAmount = 0
+        for _, combatSpell in ipairs(combatSpells) do
+            if combatSpell.totalAmount > maxAmount then
+                maxAmount = combatSpell.totalAmount
+            end
+            totalAmount = totalAmount + combatSpell.totalAmount
+        end
+
+        return {
+            combatSpells = combatSpells,
+            maxAmount = maxAmount,
+            totalAmount = totalAmount,
+        }
+    end
+
+    local function create_combat_session(combatSources, durationSeconds)
+        local maxAmount = 0
+        local totalAmount = 0
+        for _, combatSource in ipairs(combatSources) do
+            if combatSource.totalAmount > maxAmount then
+                maxAmount = combatSource.totalAmount
+            end
+            totalAmount = totalAmount + combatSource.totalAmount
+        end
+
+        return {
+            combatSources = combatSources,
+            maxAmount = maxAmount,
+            totalAmount = totalAmount,
+            durationSeconds = durationSeconds,
+        }
+    end
+
+    local function create_default_state()
+        local playerGuid = "Player-0001-00000001"
+        local dummyGuid = "Creature-0-0000-00000-00000-31146-0000000001"
+        local durationSeconds = 40
+
+        local playerSpellDetails = {
+            unitName = "Training Dummy",
+            unitClassFilename = "",
+            classification = "normal",
+            isPet = false,
+            isMob = true,
+            amount = 52000,
+            specIconID = 0,
+        }
+        local dummySpellDetails = {
+            unitName = "Player",
+            unitClassFilename = "PALADIN",
+            classification = "normal",
+            isPet = false,
+            isMob = false,
+            amount = 18000,
+            specIconID = 0,
+        }
+
+        local playerSpells = {
+            create_spell(19750, 52000, 1300, playerSpellDetails),
+        }
+        local dummySpells = {
+            create_spell(6603, 18000, 450, dummySpellDetails),
+        }
+
+        local playerSource = {
+            sourceGUID = playerGuid,
+            sourceCreatureID = nil,
+            name = "Player",
+            classFilename = "PALADIN",
+            specIconID = 0,
+            totalAmount = 52000,
+            amountPerSecond = 1300,
+            isLocalPlayer = true,
+            deathRecapID = 0,
+            deathTimeSeconds = 0,
+            classification = "normal",
+            sourceDisplayType = allyDisplayType,
+        }
+        local dummySource = {
+            sourceGUID = dummyGuid,
+            sourceCreatureID = 31146,
+            name = "Training Dummy",
+            classFilename = "",
+            specIconID = 0,
+            totalAmount = 18000,
+            amountPerSecond = 450,
+            isLocalPlayer = false,
+            deathRecapID = 0,
+            deathTimeSeconds = 0,
+            classification = "normal",
+            sourceDisplayType = enemyDisplayType,
+        }
+
+        local overallSession = create_combat_session(
+            {playerSource, dummySource},
+            durationSeconds
+        )
+        local currentSession = create_combat_session(
+            {deep_copy(playerSource), deep_copy(dummySource)},
+            durationSeconds
+        )
+
+        return {
+            availableSessions = {
+                {
+                    sessionID = 1,
+                    name = "Training Dummy",
+                    durationSeconds = durationSeconds,
+                },
+            },
+            sessionsByID = {
+                [1] = {
+                    [damageDoneType] = overallSession,
+                },
+            },
+            sessionsByType = {
+                [overallSessionType] = {
+                    [damageDoneType] = overallSession,
+                },
+                [currentSessionType] = {
+                    [damageDoneType] = currentSession,
+                },
+                [expiredSessionType] = {},
+            },
+            sourcesByID = {
+                [1] = {
+                    [damageDoneType] = {
+                        [playerGuid] = create_source_source(playerSpells),
+                        [dummyGuid] = create_source_source(dummySpells),
+                    },
+                },
+            },
+            sourcesByType = {
+                [overallSessionType] = {
+                    [damageDoneType] = {
+                        [playerGuid] = create_source_source(deep_copy(playerSpells)),
+                        [dummyGuid] = create_source_source(deep_copy(dummySpells)),
+                    },
+                },
+                [currentSessionType] = {
+                    [damageDoneType] = {
+                        [playerGuid] = create_source_source(deep_copy(playerSpells)),
+                        [dummyGuid] = create_source_source(deep_copy(dummySpells)),
+                    },
+                },
+                [expiredSessionType] = {},
+            },
+        }
+    end
+
+    local function current_state()
+        if api._state == nil then
+            api._state = create_default_state()
+        end
+        return api._state
+    end
+
+    local function lookup_session(bucket, sessionKey, damageMeterType)
+        local sessionByType = bucket[sessionKey]
+        if not sessionByType then
+            return nil
+        end
+        return sessionByType[damageMeterType]
+    end
+
+    local function lookup_source(bucket, sessionKey, damageMeterType, sourceGUID, sourceCreatureID)
+        local sourceByType = bucket[sessionKey]
+        if not sourceByType then
+            return nil
+        end
+
+        local sources = sourceByType[damageMeterType]
+        if not sources then
+            return nil
+        end
+
+        if sourceGUID and sources[sourceGUID] then
+            return sources[sourceGUID]
+        end
+
+        if sourceCreatureID then
+            for guid, source in pairs(sources) do
+                local _ = guid
+                if sourceCreatureID ~= nil and tostring(sourceCreatureID) ~= "" then
+                    local session = current_state()
+                    local overall = session.sessionsByType[overallSessionType]
+                    local overallSession = overall and overall[damageMeterType]
+                    if overallSession then
+                        for _, combatSource in ipairs(overallSession.combatSources) do
+                            if combatSource.sourceCreatureID == sourceCreatureID then
+                                return source
+                            end
+                        end
+                    end
+                end
+            end
+        end
+
+        return nil
+    end
+
+    function api.IsDamageMeterAvailable()
+        return true, ""
+    end
+
+    function api.GetAvailableCombatSessions()
+        return deep_copy(current_state().availableSessions)
+    end
+
+    function api.GetCombatSessionFromID(sessionID, damageMeterType)
+        local session = lookup_session(current_state().sessionsByID, sessionID, damageMeterType)
+        return session and deep_copy(session) or nil
+    end
+
+    function api.GetCombatSessionFromType(sessionType, damageMeterType)
+        local session = lookup_session(current_state().sessionsByType, sessionType, damageMeterType)
+        return session and deep_copy(session) or nil
+    end
+
+    function api.GetCombatSessionSourceFromID(sessionID, damageMeterType, sourceGUID, sourceCreatureID)
+        local source = lookup_source(current_state().sourcesByID, sessionID, damageMeterType, sourceGUID, sourceCreatureID)
+        return source and deep_copy(source) or nil
+    end
+
+    function api.GetCombatSessionSourceFromType(sessionType, damageMeterType, sourceGUID, sourceCreatureID)
+        local source = lookup_source(current_state().sourcesByType, sessionType, damageMeterType, sourceGUID, sourceCreatureID)
+        return source and deep_copy(source) or nil
+    end
+
+    function api.GetSessionDurationSeconds(sessionType)
+        local session = api.GetCombatSessionFromType(sessionType, damageDoneType)
+        return session and session.durationSeconds or nil
+    end
+
+    function api.ResetAllCombatSessions()
+        api._state = create_default_state()
+    end
+"#;
+
 /// C_RestrictedActions, C_TransmogOutfitInfo stubs.
 fn register_c_restricted_transmog(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let ra = lua.create_table()?;
@@ -431,40 +708,9 @@ fn register_c_restricted_transmog(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_DamageMeter - damage/healing meter API.
 fn register_c_damage_meter(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    let t = lua.create_table()?;
-    t.set(
-        "IsDamageMeterAvailable",
-        lua.create_function(|_, ()| Ok((false, Value::Nil)))?,
-    )?;
-    t.set(
-        "GetAvailableCombatSessions",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    t.set(
-        "GetCombatSessionFromID",
-        lua.create_function(|_, _a: mlua::MultiValue| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetCombatSessionFromType",
-        lua.create_function(|_, _a: mlua::MultiValue| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetCombatSessionSourceFromID",
-        lua.create_function(|_, _a: mlua::MultiValue| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetCombatSessionSourceFromType",
-        lua.create_function(|_, _a: mlua::MultiValue| Ok(Value::Nil))?,
-    )?;
-    t.set(
-        "GetSessionDurationSeconds",
-        lua.create_function(|_, _st: Value| Ok(0.0f64))?,
-    )?;
-    t.set(
-        "ResetAllCombatSessions",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
-    g.set("C_DamageMeter", t)?;
+    lua.load(DAMAGE_METER_LUA).exec()?;
+    let damage_meter = g.get::<mlua::Table>("C_DamageMeter")?;
+    g.set("C_DamageMeter", damage_meter)?;
     Ok(())
 }
 

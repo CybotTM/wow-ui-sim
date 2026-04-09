@@ -467,6 +467,84 @@ fn encounter_timeline_loads_and_populates_track_view_event_frames() {
 }
 
 #[test]
+fn damage_meter_loads_and_populates_primary_session_window() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            SetCVar("damageMeterEnabled", "1")
+
+            local loaded, reason = C_AddOns.LoadAddOn("Blizzard_DamageMeter")
+            if not loaded then
+                return "load_failed:" .. tostring(reason)
+            end
+            if not DamageMeter then
+                return "damage_meter_missing"
+            end
+
+            DamageMeter:OnVariablesLoaded()
+            DamageMeter:SetShown(true)
+
+            local sessionWindow = DamageMeter:GetPrimarySessionWindow()
+            if not sessionWindow then
+                return "primary_window_missing"
+            end
+
+            sessionWindow:Refresh(ScrollBoxConstants.DiscardScrollPosition)
+
+            if not DamageMeter:IsShown() then
+                return "damage_meter_hidden"
+            end
+            if not sessionWindow:IsShown() then
+                return "session_window_hidden"
+            end
+            if sessionWindow:GetEntryFrameCount() == 0 then
+                return "entry_frame_count=0"
+            end
+
+            local entryData = sessionWindow:GetScrollBox():GetDataProvider():Find(1)
+            if not entryData then
+                return "missing_entry_data"
+            end
+            if entryData.name ~= "Player" then
+                return "entry_name=" .. tostring(entryData.name)
+            end
+            if entryData.totalAmount ~= 52000 then
+                return "entry_total=" .. tostring(entryData.totalAmount)
+            end
+            if entryData.amountPerSecond ~= 1300 then
+                return "entry_per_second=" .. tostring(entryData.amountPerSecond)
+            end
+            if not entryData.isLocalPlayer then
+                return "entry_not_local_player"
+            end
+
+            sessionWindow:ShowSourceWindow(entryData)
+            local sourceWindow = sessionWindow:GetSourceWindow()
+            if not sourceWindow:IsShown() then
+                return "source_window_hidden"
+            end
+            if sourceWindow:GetEntryFrameCount() == 0 then
+                return "source_entry_frame_count=0"
+            end
+
+            local spellData = sourceWindow:GetScrollBox():GetDataProvider():Find(1)
+            if not spellData then
+                return "missing_spell_data"
+            end
+            if spellData.spellID ~= 19750 then
+                return "spell_id=" .. tostring(spellData.spellID)
+            end
+            if spellData.totalAmount ~= 52000 then
+                return "spell_total=" .. tostring(spellData.totalAmount)
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "DamageMeter should load and populate the primary session and source windows: {result}");
+    }
+}
+
+#[test]
 fn professions_frame_loads_and_populates_specialization_tab() {
     test_timeout! {
         let env = setup_env();

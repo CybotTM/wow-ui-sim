@@ -266,6 +266,83 @@ fn test_c_encounter_timeline_returns_seeded_visible_event() {
     );
 }
 
+#[test]
+fn test_c_damage_meter_returns_seeded_session_and_source_data() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local isAvailable, failureReason = C_DamageMeter.IsDamageMeterAvailable()
+        if not isAvailable then
+            return "unavailable:" .. tostring(failureReason)
+        end
+
+        local availableSessions = C_DamageMeter.GetAvailableCombatSessions()
+        if #availableSessions ~= 1 then
+            return "session_count=" .. tostring(#availableSessions)
+        end
+
+        local sessionInfo = availableSessions[1]
+        if sessionInfo.sessionID ~= 1 then
+            return "session_id=" .. tostring(sessionInfo.sessionID)
+        end
+
+        local overallSession = C_DamageMeter.GetCombatSessionFromType(
+            Enum.DamageMeterSessionType.Overall,
+            Enum.DamageMeterType.DamageDone
+        )
+        if not overallSession then
+            return "missing_overall_session"
+        end
+        if overallSession.totalAmount <= 0 then
+            return "overall_total=" .. tostring(overallSession.totalAmount)
+        end
+        if #overallSession.combatSources ~= 2 then
+            return "source_count=" .. tostring(#overallSession.combatSources)
+        end
+
+        local topSource = overallSession.combatSources[1]
+        if topSource.name ~= "Player" then
+            return "top_source=" .. tostring(topSource.name)
+        end
+        if not topSource.isLocalPlayer then
+            return "top_source_not_local"
+        end
+
+        local sourceSession = C_DamageMeter.GetCombatSessionSourceFromType(
+            Enum.DamageMeterSessionType.Overall,
+            Enum.DamageMeterType.DamageDone,
+            topSource.sourceGUID,
+            topSource.sourceCreatureID
+        )
+        if not sourceSession then
+            return "missing_source_session"
+        end
+        if sourceSession.totalAmount ~= topSource.totalAmount then
+            return "source_total=" .. tostring(sourceSession.totalAmount)
+        end
+        if #sourceSession.combatSpells == 0 then
+            return "spell_count=0"
+        end
+        if sourceSession.combatSpells[1].spellID ~= 19750 then
+            return "spell_id=" .. tostring(sourceSession.combatSpells[1].spellID)
+        end
+
+        local durationSeconds = C_DamageMeter.GetSessionDurationSeconds(Enum.DamageMeterSessionType.Overall)
+        if durationSeconds <= 0 then
+            return "duration=" .. tostring(durationSeconds)
+        end
+
+        return "ok"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_DamageMeter should expose seeded session, source, and spell data: {result}"
+    );
+}
+
 // ============================================================================
 // Battle.net stubs
 // ============================================================================
