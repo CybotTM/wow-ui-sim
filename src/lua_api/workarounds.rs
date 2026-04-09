@@ -84,7 +84,6 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
     );
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
