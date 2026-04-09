@@ -8,20 +8,30 @@ use super::WowLuaEnv;
 
 /// `Blizzard_TokenUI` is an on-demand addon that creates `BackpackTokenFrame`.
 /// `ContainerFrameSettingsManager:SetTokenTrackerOwner()` crashes if
-/// `self.TokenTracker` is nil. Create a stub frame to avoid the nil index.
+/// `self.TokenTracker` is nil. Try to demand-load the real addon first and
+/// only fall back to a stub frame if that still leaves no token tracker.
 ///
-/// This is a simulator-gap shim. The real fix is to ensure the actual token
-/// tracker owner exists through normal addon loading, not to keep a fake frame.
+/// Some focused harnesses intentionally do not preload `Blizzard_TokenUI`, but
+/// they still populate `addon_base_paths`, so runtime `LoadAddOn` can recover
+/// the real `BackpackTokenFrame`. The stub remains as a last resort for unit
+/// tests or minimal envs where on-demand addon loading is unavailable.
 pub fn init_bag_token_tracker(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
         if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
-            local f = CreateFrame("Frame", "BackpackTokenFrame", UIParent)
-            f.ShouldShow = function() return false end
-            f.MarkDirty = function() end
-            f.CleanDirty = function() end
-            f.SetIsCombinedInventory = function() end
-            ContainerFrameSettingsManager.TokenTracker = f
+            if not BackpackTokenFrame and LoadAddOn then
+                pcall(LoadAddOn, "Blizzard_TokenUI")
+            end
+            if BackpackTokenFrame then
+                ContainerFrameSettingsManager.TokenTracker = BackpackTokenFrame
+            else
+                local f = CreateFrame("Frame", "BackpackTokenFrame", UIParent)
+                f.ShouldShow = function() return false end
+                f.MarkDirty = function() end
+                f.CleanDirty = function() end
+                f.SetIsCombinedInventory = function() end
+                ContainerFrameSettingsManager.TokenTracker = f
+            end
         end
     "#,
     );
@@ -107,7 +117,54 @@ mod tests {
             .eval("return ContainerFrameSettingsManager.TokenTracker.marker")
             .unwrap();
         assert_eq!(marker, "real");
+    }
 
+    #[test]
+    fn token_tracker_demand_loads_real_blizzard_token_ui_when_available() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        {
+            let mut state = env.state().borrow_mut();
+            state.addon_base_paths = vec![blizzard_ui_dir()];
+        }
+        load_all_blizzard_addons_except(&env, &["Blizzard_TokenUI"]);
+
+        let (tracker_missing, backpack_missing): (bool, bool) = env
+            .eval(
+                r#"
+                return ContainerFrameSettingsManager.TokenTracker == nil,
+                    BackpackTokenFrame == nil
+                "#,
+            )
+            .unwrap();
+        assert!(tracker_missing);
+        assert!(backpack_missing);
+
+        init_bag_token_tracker(&env);
+
+        let (tracker_is_real_frame, tracker_matches_backpack_frame, addon_loaded): (
+            bool,
+            bool,
+            bool,
+        ) = env
+            .eval(
+                r#"
+                local tracker = ContainerFrameSettingsManager.TokenTracker
+                return type(tracker) == "table"
+                    and type(tracker.UpdateIfVisible) == "function"
+                    and type(tracker.GetMaxTokensWatched) == "function",
+                    tracker == BackpackTokenFrame,
+                    C_AddOns and C_AddOns.IsAddOnLoaded
+                        and C_AddOns.IsAddOnLoaded("Blizzard_TokenUI") or false
+                "#,
+            )
+            .unwrap();
+        assert!(tracker_is_real_frame);
+        assert!(tracker_matches_backpack_frame);
+        assert!(addon_loaded);
+    }
+
+    #[test]
+    fn token_tracker_stub_installs_when_runtime_token_ui_load_is_unavailable() {
         let fresh_env = crate::lua_api::WowLuaEnv::new().expect("Failed to create Lua environment");
         fresh_env
             .exec(
@@ -115,6 +172,7 @@ mod tests {
             created = 0
             ContainerFrameSettingsManager = {}
             UIParent = {}
+            LoadAddOn = nil
             CreateFrame = function(_, name, parent)
                 created = created + 1
                 return {
@@ -203,6 +261,18 @@ mod tests {
     fn load_all_blizzard_addons(env: &WowLuaEnv) {
         let ui = blizzard_ui_dir();
         for (name, toc_path) in &discover_blizzard_addons(&ui) {
+            if let Err(err) = load_addon(&env.loader_env(), toc_path) {
+                panic!("[load {name}] FAILED: {err}");
+            }
+        }
+    }
+
+    fn load_all_blizzard_addons_except(env: &WowLuaEnv, excluded: &[&str]) {
+        let ui = blizzard_ui_dir();
+        for (name, toc_path) in &discover_blizzard_addons(&ui) {
+            if excluded.iter().any(|excluded_name| name == excluded_name) {
+                continue;
+            }
             if let Err(err) = load_addon(&env.loader_env(), toc_path) {
                 panic!("[load {name}] FAILED: {err}");
             }
