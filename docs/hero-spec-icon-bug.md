@@ -69,6 +69,31 @@ Both dump-tree and screenshot follow the same startup:
 `collect_sorted_frames` (frame_collect.rs:102) reads `f.layout_rect` directly — confirmed correct.
 `emit_all_frames` (render.rs:190-192) converts to screen bounds with `UI_SCALE=1.0` — no transform.
 
+### Quad emission matches layout rect
+
+`tests/hero_talents_render.rs::hero_spec_icon_and_mask_quads_match_layout_rect` now verifies the
+actual `QuadBatch` output for the active hero spec button:
+
+- `HeroSpecButton.Icon1` emits exactly one textured quad request
+- that request's vertex bounds exactly match `Icon1`'s computed layout rect
+- `HeroSpecButton.IconMask` emits exactly one mask request
+- that mask request's vertex bounds also exactly match the same layout rect
+
+Observed values in the full UI harness:
+
+```
+Icon1 layout rect: x=481.58 y=111.41 w=60.83 h=60.83
+Icon1 textured quad bounds: (481.58, 111.41) -> (542.42, 172.24)
+IconMask quad bounds:       (481.58, 111.41) -> (542.42, 172.24)
+```
+
+That rules out divergence in:
+
+- anchor/layout resolution
+- visible-frame collection
+- texture quad emission
+- mask quad clipping setup
+
 ## What's Ruled Out
 
 - **Stale layout_rect**: Confirmed correct after ensure_layout_rects
@@ -80,9 +105,9 @@ Both dump-tree and screenshot follow the same startup:
 
 ## Remaining Hypotheses
 
-1. **Quad generation / GPU rendering**: The layout rect is correct but quads are generated or rendered at wrong screen coordinates. Need to inspect actual quad vertex positions.
-2. **Masking hiding top icon**: Icon renders correctly at top but is masked/invisible, while a separate visual artifact appears at bottom. The `IconMask` and `HeroClassIconSheenMask` use `common-mask-circle` — if mask application is wrong, the icon could appear transparent at the correct position.
-3. **Strata bucket ordering**: The frame might be in a wrong strata bucket, causing it to be rendered with a different effective position or behind other content.
+1. **Atlas crop / UV mismatch**: The hero icon quad is in the right place, but the sampled region from `talentsheroclassicons` may be wrong after atlas/crop resolution.
+2. **GPU-side mask sampling interaction**: The icon quad and mask quad line up in the CPU batch, but shader-side mask sampling could still blank the correct icon and leave another visual artifact visible.
+3. **Misidentified artifact**: The bottom-right visual may not be `Icon1` at all. Another hero-talent texture in the same subtree could be the one rendering unexpectedly, while `Icon1` is already correct in the batch.
 
 ## Debug Tools Added
 
@@ -94,6 +119,6 @@ wow-sim screenshot --dump-tree               # dump all (no filter)
 
 ## Next Steps
 
-- Add temporary logging in `emit_all_frames` to print quad vertices for the HeroSpecButton
-- Check if the icon texture renders at (752,151) but is invisible (masked), and what's actually visible at (~1000,610)
-- Inspect mask texture application for the circular mask
+- Compare the resolved atlas UVs for `talentsheroclassicons@crop:...` against the expected `talents-heroclass-paladin-lightsmith` atlas entry
+- Inspect the final resolved GPU vertex data after `resolve_texture_requests` / `resolve_mask_requests`
+- Identify which on-screen artifact in the screenshot corresponds to which texture request in the HeroTalentsContainer subtree
