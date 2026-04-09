@@ -806,3 +806,49 @@ fn test_tooltip_layout_is_clamped_to_viewport_edges() {
         state.screen_height
     );
 }
+
+#[test]
+fn test_tooltip_layout_is_clamped_to_top_left_viewport_edge() {
+    let env = WowLuaEnv::new().unwrap();
+
+    {
+        let mut state = env.state().borrow_mut();
+        state.screen_width = 400.0;
+        state.screen_height = 300.0;
+        state.widgets.clear_all_layout_rects();
+    }
+
+    env.exec(
+        r#"
+        local owner = CreateFrame("Frame", "ClampTopLeftOwner", UIParent)
+        owner:SetSize(10, 10)
+        owner:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 5, 5)
+        GameTooltip:SetOwner(owner, "ANCHOR_TOPLEFT", -20, -15)
+        GameTooltip:AddLine("A tooltip line wide enough to overflow the left edge")
+        GameTooltip:AddLine("Second line to ensure some height")
+    "#,
+    )
+    .unwrap();
+
+    update_tooltip_sizes(&env);
+    update_tooltip_layout(&env);
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let rect = state
+        .widgets
+        .get(gt_id)
+        .and_then(|frame| frame.layout_rect)
+        .unwrap();
+
+    assert!(
+        rect.x >= 0.0,
+        "Tooltip should clamp back inside the left edge, got x={}",
+        rect.x
+    );
+    assert!(
+        rect.y >= 0.0,
+        "Tooltip should clamp back inside the top edge, got y={}",
+        rect.y
+    );
+}
