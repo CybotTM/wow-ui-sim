@@ -312,6 +312,61 @@ fn show_mail_frame_loads_and_populates_inbox_rows() {
 }
 
 #[test]
+fn professions_frame_loads_and_populates_specialization_tab() {
+    test_timeout! {
+        let env = setup_env();
+        let ui = blizzard_ui_dir();
+        for (name, toc) in [
+            ("Blizzard_FrameXMLUtil", "Blizzard_FrameXMLUtil.toc"),
+            ("Blizzard_ProfessionsTemplates", "Blizzard_ProfessionsTemplates.toc"),
+            ("Blizzard_SharedTalentUI", "Blizzard_SharedTalentUI.toc"),
+            ("Blizzard_Professions", "Blizzard_Professions.toc"),
+        ] {
+            let toc_path = ui.join(name).join(toc);
+            if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+                panic!("failed to load {name}: {error}");
+            }
+        }
+        let result: String = env.eval(r#"
+            if not ProfessionsFrame or not ProfessionsFrame.SpecPage or not Professions then
+                return "professions_spec_page_missing"
+            end
+
+            local professionInfo = Professions.GetProfessionInfo()
+            if not professionInfo or professionInfo.professionID ~= 164 then
+                return "profession_info=" .. tostring(professionInfo and professionInfo.professionID)
+            end
+
+            ProfessionsFrame.SpecPage:Refresh(professionInfo)
+
+            local selectedTab = ProfessionsFrame.SpecPage.selectedTab
+            if not selectedTab then
+                return "selected_spec_tab_missing"
+            end
+            if not selectedTab.tabInfo or not selectedTab.tabInfo.rootNodeID then
+                return "selected_tab_root_missing"
+            end
+
+            local rootNodeID = selectedTab.tabInfo.rootNodeID
+            if ProfessionsFrame.SpecPage:GetTalentTreeID() ~= selectedTab.traitTreeID then
+                return "talent_tree_id=" .. tostring(ProfessionsFrame.SpecPage:GetTalentTreeID())
+            end
+            local children = C_ProfSpecs.GetChildrenForPath(rootNodeID)
+            if #children == 0 then
+                return "root_children=0"
+            end
+
+            if not ProfessionsFrame.SpecPage:IsTreeDirty() then
+                return "tree_not_marked_dirty"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(result, "ok", "ProfessionsFrame should show a populated specialization tab: {result}");
+    }
+}
+
+#[test]
 fn hide_ui_panel_hides_frame() {
     test_timeout! {
         let env = setup_env();

@@ -72,6 +72,49 @@ fn test_profession_info_exposes_spell_slots_for_professions_book_buttons() {
     assert_eq!(mining_spell_id, 2575);
 }
 
+#[test]
+fn test_prof_specs_exposes_default_skill_line_and_tabs() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            if C_ProfSpecs.ShouldShowSpecTab() ~= true then
+                return "show_spec=" .. tostring(C_ProfSpecs.ShouldShowSpecTab())
+            end
+
+            local skillLineID = C_ProfSpecs.GetDefaultSpecSkillLine()
+            if skillLineID ~= 164 then
+                return "skill_line=" .. tostring(skillLineID)
+            end
+
+            local configID = C_ProfSpecs.GetConfigIDForSkillLine(skillLineID)
+            if configID ~= 1 then
+                return "config_id=" .. tostring(configID)
+            end
+
+            local tabIDs = C_ProfSpecs.GetSpecTabIDsForSkillLine(skillLineID)
+            if #tabIDs == 0 then
+                return "tab_count=0"
+            end
+
+            local tabInfo = C_ProfSpecs.GetTabInfo(tabIDs[1])
+            if not tabInfo then
+                return "missing_tab_info"
+            end
+            if not tabInfo.rootNodeID then
+                return "missing_root_node"
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+    assert_eq!(
+        result, "ok",
+        "C_ProfSpecs should expose a default skill line, config, and at least one tab: {result}"
+    );
+}
+
 // ============================================================================
 // C_TradeSkillUI
 // ============================================================================
@@ -79,13 +122,14 @@ fn test_profession_info_exposes_spell_slots_for_professions_book_buttons() {
 #[test]
 fn test_base_profession_info() {
     let env = env();
-    let (id, name): (i32, String) = env
+    let (id, profession, name): (i32, i32, String) = env
         .eval(
             "local i = C_TradeSkillUI.GetBaseProfessionInfo(); \
-             return i.professionID, i.professionName",
+             return i.professionID, i.profession, i.professionName",
         )
         .unwrap();
     assert_eq!(id, 164);
+    assert_eq!(profession, 1);
     assert_eq!(name, "Blacksmithing");
 }
 

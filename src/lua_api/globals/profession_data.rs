@@ -5,6 +5,7 @@
 /// A profession known by the player.
 pub struct ProfessionInfo {
     pub profession_id: i32,
+    pub profession: i32,
     pub skill_line_id: i32,
     pub name: &'static str,
     pub parent_profession_name: &'static str,
@@ -45,6 +46,7 @@ pub struct RecipeEntry {
 pub static PROFESSIONS: &[ProfessionInfo] = &[
     ProfessionInfo {
         profession_id: 164,
+        profession: 1,
         skill_line_id: 164,
         name: "Blacksmithing",
         parent_profession_name: "Blacksmithing",
@@ -55,6 +57,7 @@ pub static PROFESSIONS: &[ProfessionInfo] = &[
     },
     ProfessionInfo {
         profession_id: 186,
+        profession: 6,
         skill_line_id: 186,
         name: "Mining",
         parent_profession_name: "Mining",

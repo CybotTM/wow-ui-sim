@@ -450,6 +450,7 @@ fn build_profession_table_inner(
 ) -> mlua::Result<mlua::Table> {
     let tbl = lua.create_table()?;
     tbl.set("professionID", p.profession_id)?;
+    tbl.set("profession", p.profession)?;
     tbl.set("professionName", p.name)?;
     tbl.set("parentProfessionName", p.parent_profession_name)?;
     tbl.set("skillLevel", p.skill_level)?;
