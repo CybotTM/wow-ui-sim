@@ -4,29 +4,13 @@ use super::super::handle::FrameRef;
 use super::widget_tooltip::{fire_tooltip_script, val_to_f32};
 use crate::lua_api::frame::handle::get_sim_state;
 
-const EDITBOX_VARIADIC_STUBS: &[&str] = &[
-    "ClearHighlightText",
-    "ClearHistory",
-    "ResetInputMode",
-    "SetAlphabeticOnly",
-    "SetAltArrowKeyMode",
-    "SetHighlightColor",
-    "SetNumericFullRange",
-    "SetSecureText",
-    "SetSecurityDisablePaste",
-    "SetVisibleTextByteLimit",
-    "ToggleInputLanguage",
-];
+const EDITBOX_VARIADIC_STUBS: &[&str] = &["ClearHighlightText", "SetHighlightColor"];
 
 const EDITBOX_FALSE_GETTERS: &[&str] = &[
-    "GetAltArrowKeyMode",
     "GetIndentedWordWrap",
     "HasText",
-    "IsAlphabeticOnly",
     "IsCountInvisibleLetters",
     "IsInIMECompositionMode",
-    "IsNumericFullRange",
-    "IsSecureText",
 ];
 
 pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -39,7 +23,7 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     add_editbox_history_methods(methods);
     add_editbox_inset_methods(methods);
     methods.add_method("SetSecurityDisableSetText", |_, _this, ()| Ok(()));
-    methods.add_method("GetInputLanguage", |_, _this, ()| Ok("ROMAN"));
+    add_editbox_language_methods(methods);
     add_editbox_stub_methods(methods);
 }
 
@@ -47,7 +31,6 @@ fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     add_editbox_variadic_stubs(methods, EDITBOX_VARIADIC_STUBS);
     add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
     add_editbox_i32_getter(methods, "GetUTF8CursorPosition", 0);
-    add_editbox_i32_getter(methods, "GetVisibleTextByteLimit", 0);
     methods.add_method("GetDisplayText", |_, _this, ()| Ok("".to_string()));
     methods.add_method("GetHighlightColor", |_, _this, ()| {
         Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
@@ -288,6 +271,24 @@ fn add_editbox_mode_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         frame.editbox_numeric = value
     });
     add_editbox_bool_getter(methods, "IsNumeric", |frame| frame.editbox_numeric);
+    add_editbox_bool_setter(methods, "SetAlphabeticOnly", |frame, value| {
+        frame.editbox_alphabetic_only = value
+    });
+    add_editbox_bool_getter(methods, "IsAlphabeticOnly", |frame| {
+        frame.editbox_alphabetic_only
+    });
+    add_editbox_bool_setter(methods, "SetAltArrowKeyMode", |frame, value| {
+        frame.editbox_alt_arrow_key_mode = value
+    });
+    add_editbox_bool_getter(methods, "GetAltArrowKeyMode", |frame| {
+        frame.editbox_alt_arrow_key_mode
+    });
+    add_editbox_bool_setter(methods, "SetNumericFullRange", |frame, value| {
+        frame.editbox_numeric_full_range = value
+    });
+    add_editbox_bool_getter(methods, "IsNumericFullRange", |frame| {
+        frame.editbox_numeric_full_range
+    });
 }
 
 fn add_editbox_bool_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
@@ -330,6 +331,24 @@ fn add_editbox_input_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     });
     add_editbox_bool_setter(methods, "SetCountInvisibleLetters", |frame, value| {
         frame.editbox_count_invisible_letters = value
+    });
+    add_editbox_bool_setter(methods, "SetSecureText", |frame, value| {
+        frame.editbox_secure_text = value
+    });
+    add_editbox_bool_getter(methods, "IsSecureText", |frame| frame.editbox_secure_text);
+    methods.add_method("SetSecurityDisablePaste", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_security_disable_paste = true;
+        }
+        Ok(())
+    });
+    add_editbox_i32_setter(methods, "SetVisibleTextByteLimit", |frame, max| {
+        frame.editbox_visible_text_byte_limit = max
+    });
+    add_editbox_i32_getter_from_frame(methods, "GetVisibleTextByteLimit", |frame| {
+        frame.editbox_visible_text_byte_limit
     });
 }
 
@@ -390,6 +409,49 @@ fn add_editbox_history_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
             frame.editbox_history_max = max;
+        }
+        Ok(())
+    });
+
+    methods.add_method("ClearHistory", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_history.clear();
+        }
+        Ok(())
+    });
+}
+
+fn add_editbox_language_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetInputLanguage", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.editbox_input_language.clone())
+            .unwrap_or_else(|| "ROMAN".to_string()))
+    });
+
+    methods.add_method("ToggleInputLanguage", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_input_language = if frame.editbox_input_language == "ROMAN" {
+                "NATIVE".to_string()
+            } else {
+                "ROMAN".to_string()
+            };
+        }
+        Ok(())
+    });
+
+    methods.add_method("ResetInputMode", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_input_language = "ROMAN".to_string();
         }
         Ok(())
     });

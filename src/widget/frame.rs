@@ -665,6 +665,20 @@ pub struct Frame {
     pub editbox_text_insets: (f32, f32, f32, f32),
     /// Whether to count invisible letters.
     pub editbox_count_invisible_letters: bool,
+    /// Whether only alphabetic input should be accepted.
+    pub editbox_alphabetic_only: bool,
+    /// Whether alt+arrow mode is enabled.
+    pub editbox_alt_arrow_key_mode: bool,
+    /// Whether numeric input should use the full range behavior.
+    pub editbox_numeric_full_range: bool,
+    /// Whether the text is marked as secure.
+    pub editbox_secure_text: bool,
+    /// Whether paste is disabled for the editbox.
+    pub editbox_security_disable_paste: bool,
+    /// Maximum number of visible text bytes (0 = unlimited).
+    pub editbox_visible_text_byte_limit: i32,
+    /// Current input language identifier.
+    pub editbox_input_language: String,
 
     // --- ScrollFrame fields ---
     /// Scroll child frame ID.
@@ -910,6 +924,13 @@ macro_rules! frame_defaults {
             editbox_history_max: 0,
             editbox_text_insets: (0.0, 0.0, 0.0, 0.0),
             editbox_count_invisible_letters: false,
+            editbox_alphabetic_only: false,
+            editbox_alt_arrow_key_mode: false,
+            editbox_numeric_full_range: false,
+            editbox_secure_text: false,
+            editbox_security_disable_paste: false,
+            editbox_visible_text_byte_limit: 0,
+            editbox_input_language: "ROMAN".to_string(),
 
             // ScrollFrame
             scroll_child_id: None,
