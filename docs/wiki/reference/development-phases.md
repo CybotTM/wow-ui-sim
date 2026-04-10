@@ -35,9 +35,14 @@ Static analysis of `vendor/wow-ui-source/` to track coverage gaps. The `wow-cli 
 
 ## Active: Phase 33 — Performance Regression Tests
 
-No benchmark infrastructure exists yet. The plan:
+The repo already has ad hoc timing tools such as `src/bin/bench_talents.rs`,
+but the regression path should live under normal `cargo test` so it can fail in
+the same workflow as behavioral tests. The decision for this phase is:
 
-1. **Infrastructure**: decide between `criterion` benchmarks or simple `#[test]` timing assertions; create `tests/perf/` directory; shared Blizzard UI loader to amortize 5s+ startup cost
+1. **Infrastructure**: use simple `#[test]` timing assertions with
+   `Instant::now()` for regression gates instead of adding `criterion`;
+   create `tests/perf/` directory; shared Blizzard UI loader to amortize 5s+
+   startup cost
 2. **Startup**: measure `WowLuaEnv::new` through startup events; per-phase breakdown (XML, Lua, SavedVars)
 3. **Layout**: full layout pass, incremental anchor change, `build_strata_buckets`
 4. **Rendering**: quad batch build, dirty-tree rebuild, tooltip emission, glyph shaping

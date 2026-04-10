@@ -6,6 +6,11 @@ Measures the cost of opening the talent panel (Blizzard_PlayerSpells demand-load
 
 `src/bin/bench_talents.rs` — loads all Blizzard addons, fires startup events, then opens/closes the talent panel 10 times. The first open demand-loads `Blizzard_PlayerSpells` (the expensive path); subsequent opens exercise ShowUIPanel/HideUIPanel toggling.
 
+This binary is for exploratory profiling and one-off measurement. It is not the
+planned regression gate for Phase 33; the gated path should use ordinary
+`#[test]` timing assertions so performance budgets fail under normal
+`cargo test`.
+
 ## Running
 
 ```bash
@@ -18,14 +23,6 @@ cargo run --release --bin bench_talents
 # Flamegraph (frame pointers, not DWARF — DWARF chokes addr2line on this binary)
 perf record -F 997 --call-graph fp -g -o /tmp/perf.data -- target/release/bench_talents
 perf script -i /tmp/perf.data | inferno-collapse-perf --all | inferno-flamegraph > flamegraph.svg
-```
-
-## GC benchmark
-
-Use the `talent_panel_gc_benchmark` test in `tests/spellbook.rs` to compare talent panel creation with and without Lua garbage collection:
-
-```bash
-cargo test --test spellbook talent_panel_gc_benchmark -- --nocapture
 ```
 
 ## Results (2026-02-14, debug build)
