@@ -349,6 +349,23 @@ fn test_legacy_wow_token_constants_match_expected_values() {
 }
 
 #[test]
+fn test_legacy_garrison_constants_match_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let garrison_constants: (i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_FOLLOWER_MISSION_COMPLETE_STATE_ALIVE,
+                LE_FOLLOWER_MISSION_COMPLETE_STATE_SAVED,
+                LE_FOLLOWER_TYPE_GARRISON_7_0
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(garrison_constants, (1, 3, 4));
+}
+
+#[test]
 fn test_expansion_name_globals() {
     let env = WowLuaEnv::new().unwrap();
     for i in 0..=10 {

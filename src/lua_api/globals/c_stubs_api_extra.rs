@@ -1842,6 +1842,7 @@ fn register_taint_and_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn register_missing_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_bag_constants(lua, g)?;
     register_chat_constants(lua, g)?;
+    register_deprecated_garrison_constants(g)?;
     register_deprecated_item_quality_constants(g)?;
     register_deprecated_wow_token_constants(g)?;
     register_deprecated_world_elapsed_timer_constants(g)?;
@@ -1880,6 +1881,13 @@ fn register_chat_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     mfsb.set("InitialScrollDelay", 0.4f64)?;
     mfsb.set("HeldScrollDelay", 0.04f64)?;
     g.set("MessageFrameScrollButtonConstants", mfsb)?;
+    Ok(())
+}
+
+fn register_deprecated_garrison_constants(g: &mlua::Table) -> Result<()> {
+    g.set("LE_FOLLOWER_MISSION_COMPLETE_STATE_ALIVE", 1i32)?;
+    g.set("LE_FOLLOWER_MISSION_COMPLETE_STATE_SAVED", 3i32)?;
+    g.set("LE_FOLLOWER_TYPE_GARRISON_7_0", 4i32)?;
     Ok(())
 }
 
