@@ -1365,7 +1365,7 @@ fn add_edit_mode_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         {
             return func.call::<bool>(ud);
         }
-        Ok(true)
+        frame_edit_mode_is_in_default_position(lua, id)
     });
     methods.add_method("IsInitialized", |lua, this, ()| {
         let id = this.0;
@@ -1374,7 +1374,7 @@ fn add_edit_mode_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         {
             return func.call::<bool>(ud);
         }
-        Ok(false)
+        frame_edit_mode_is_initialized(lua, id)
     });
 }
 
@@ -1385,6 +1385,28 @@ fn get_frame_zoom(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<i32> {
         Value::Number(zoom) => Ok(zoom as i32),
         _ => Ok(0),
     }
+}
+
+fn frame_edit_mode_is_initialized(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<bool> {
+    let fields = frame_fields(lua, frame_id)?;
+    Ok(edit_mode_field_exists(&fields, "systemInfo")
+        || edit_mode_field_exists(&fields, "layoutInfo"))
+}
+
+fn frame_edit_mode_is_in_default_position(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<bool> {
+    let fields = frame_fields(lua, frame_id)?;
+    let Value::Table(system_info) = fields.get::<Value>("systemInfo")? else {
+        return Ok(false);
+    };
+
+    Ok(matches!(
+        system_info.get::<Value>("isInDefaultPosition")?,
+        Value::Boolean(true)
+    ))
+}
+
+fn edit_mode_field_exists(fields: &mlua::Table, field_name: &str) -> bool {
+    !matches!(fields.get::<Value>(field_name), Ok(Value::Nil) | Err(_))
 }
 
 fn set_frame_zoom(lua: &mlua::Lua, frame_id: u64, zoom: i32) -> mlua::Result<()> {
