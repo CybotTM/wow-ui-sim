@@ -503,6 +503,70 @@ fn test_widget_misc_setup_and_alert_methods_persist_runtime_fields() {
 }
 
 #[test]
+fn test_widget_misc_item_button_methods_delegate_or_store_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestWidgetMiscItemFrame", UIParent)
+            local fields = debug.getfenv(frame)[1]
+            local translator = function(selection) return selection end
+            frame:SetSelectionTranslator(translator)
+            local translatorStored = fields.selectionTranslator == translator
+
+            frame:SetItemButtonScale(0.65)
+            local scaleStored = fields.itemButtonScale == 0.65
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscItemOverrideFrame", UIParent)
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            local overrideTranslator = function(selection) return selection.data end
+            overrideFields.SetSelectionTranslator = function(self, value)
+                rawset(overrideFields, "storedTranslator", value)
+            end
+            overrideFields.SetItemButtonScale = function(self, value)
+                rawset(overrideFields, "storedScale", value)
+            end
+            overrideFields.UpdateItemContextMatching = function(self)
+                rawset(overrideFields, "updateCalled", true)
+            end
+
+            overrideFrame:SetSelectionTranslator(overrideTranslator)
+            overrideFrame:SetItemButtonScale(1.4)
+            overrideFrame:UpdateItemContextMatching()
+
+            return translatorStored,
+                scaleStored,
+                overrideFields.storedTranslator == overrideTranslator,
+                overrideFields.storedScale == 1.4,
+                overrideFields.updateCalled == true
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "SetSelectionTranslator should store the fallback translator on the frame"
+    );
+    assert!(
+        result.1,
+        "SetItemButtonScale should store the fallback scale on the frame"
+    );
+    assert!(
+        result.2,
+        "SetSelectionTranslator should delegate to an existing mixin override"
+    );
+    assert!(
+        result.3,
+        "SetItemButtonScale should delegate to an existing mixin override"
+    );
+    assert!(
+        result.4,
+        "UpdateItemContextMatching should delegate to an existing mixin override"
+    );
+}
+
+#[test]
 fn test_statusbar_set_color_fill_aliases_statusbar_color_state() {
     let env = WowLuaEnv::new().unwrap();
 

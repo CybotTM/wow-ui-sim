@@ -443,12 +443,31 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
-    methods.add_method("SetSelectionTranslator", |_, _this, _func: Value| Ok(()));
-    methods.add_method("SetItemButtonScale", |_, _this, _scale: Value| Ok(()));
-    methods.add_method(
-        "UpdateItemContextMatching",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
+    methods.add_method("SetSelectionTranslator", |lua, this, translator: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetSelectionTranslator")
+        {
+            return func.call::<()>((self_value, translator));
+        }
+
+        widget_fields(lua, this.0)?.set("selectionTranslator", translator)?;
+        Ok(())
+    });
+    methods.add_method("SetItemButtonScale", |lua, this, scale: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetItemButtonScale") {
+            return func.call::<()>((self_value, scale));
+        }
+
+        widget_fields(lua, this.0)?.set("itemButtonScale", scale)?;
+        Ok(())
+    });
+    methods.add_method("UpdateItemContextMatching", |lua, this, ()| {
+        if let Some((func, self_value)) =
+            get_mixin_override(lua, this.0, "UpdateItemContextMatching")
+        {
+            return func.call::<()>(self_value);
+        }
+        Ok(())
+    });
     methods.add_method("UpdateHeight", |_, _this, ()| Ok(()));
     methods.add_method("SetDefaultText", |_, _this, _text: Value| Ok(()));
     methods.add_method("SetVisuals", |_, _this, _args: mlua::MultiValue| Ok(()));
