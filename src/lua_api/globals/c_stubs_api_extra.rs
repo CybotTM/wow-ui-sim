@@ -1843,6 +1843,7 @@ fn register_missing_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_bag_constants(lua, g)?;
     register_chat_constants(lua, g)?;
     register_deprecated_item_quality_constants(g)?;
+    register_deprecated_wow_token_constants(g)?;
     register_deprecated_world_elapsed_timer_constants(g)?;
     // Defined in Blizzard_UIParent/Mainline/UIParent.lua but needed earlier
     // by Blizzard_GameTooltip which loads before Blizzard_UIParent.
@@ -1891,6 +1892,13 @@ fn register_deprecated_item_quality_constants(g: &mlua::Table) -> Result<()> {
     g.set("LE_ITEM_QUALITY_ARTIFACT", 6i32)?;
     g.set("LE_ITEM_QUALITY_HEIRLOOM", 7i32)?;
     g.set("LE_ITEM_QUALITY_WOW_TOKEN", 8i32)?;
+    Ok(())
+}
+
+fn register_deprecated_wow_token_constants(g: &mlua::Table) -> Result<()> {
+    g.set("LE_TOKEN_REDEEM_TYPE_GAME_TIME", 1i32)?;
+    g.set("LE_TOKEN_REDEEM_TYPE_BALANCE", 2i32)?;
+    g.set("LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP", 10i32)?;
     Ok(())
 }
 

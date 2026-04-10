@@ -332,6 +332,23 @@ fn test_legacy_item_quality_constants_match_enum_item_quality() {
 }
 
 #[test]
+fn test_legacy_wow_token_constants_match_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let token_constants: (i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_TOKEN_REDEEM_TYPE_GAME_TIME,
+                LE_TOKEN_REDEEM_TYPE_BALANCE,
+                LE_TOKEN_RESULT_ERROR_BALANCE_NEAR_CAP
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(token_constants, (1, 2, 10));
+}
+
+#[test]
 fn test_expansion_name_globals() {
     let env = WowLuaEnv::new().unwrap();
     for i in 0..=10 {
