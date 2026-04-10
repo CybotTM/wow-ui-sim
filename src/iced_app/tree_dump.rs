@@ -15,7 +15,12 @@ impl App {
     }
 
     /// Build a frame tree dump with computed layout rects (for connected dump-tree).
-    pub(crate) fn build_frame_tree_dump(&self, filter: Option<&str>, visible_only: bool) -> String {
+    pub(crate) fn build_frame_tree_dump(
+        &self,
+        filter: Option<&str>,
+        visible_only: bool,
+        verbose: bool,
+    ) -> String {
         let env = self.env.borrow();
         let state = env.state().borrow();
         let screen_width = self.screen_size.get().width;
@@ -27,6 +32,7 @@ impl App {
             filter,
             None,
             visible_only,
+            verbose,
             screen_width,
             screen_height,
         );

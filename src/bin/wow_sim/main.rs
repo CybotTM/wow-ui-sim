@@ -65,6 +65,8 @@ enum Commands {
         filter_key: Option<String>,
         #[arg(long)]
         visible_only: bool,
+        #[arg(short, long)]
+        verbose: bool,
         #[arg(long, default_value_t = 1600)]
         width: u32,
         #[arg(long, default_value_t = 1200)]
@@ -325,6 +327,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
             filter,
             filter_key,
             visible_only,
+            verbose,
             width,
             height,
         }) => {
@@ -333,6 +336,7 @@ fn dispatch_command(dispatch: CommandDispatch) -> Result<(), Box<dyn std::error:
                 filter,
                 filter_key,
                 visible_only,
+                verbose,
                 width,
                 height,
                 dispatch.delay,
@@ -428,6 +432,7 @@ fn run_dump_tree(
     filter: Option<String>,
     filter_key: Option<String>,
     visible_only: bool,
+    verbose: bool,
     width: u32,
     height: u32,
     delay: Option<u64>,
@@ -449,6 +454,7 @@ fn run_dump_tree(
         filter.as_deref(),
         filter_key.as_deref(),
         visible_only,
+        verbose,
         width as f32,
         height as f32,
     );
@@ -586,6 +592,7 @@ fn dump_screenshot_tree(env: &WowLuaEnv, filter_key: Option<&str>, w: u32, h: u3
         &addon_names,
         None,
         filter_key,
+        false,
         false,
         w as f32,
         h as f32,

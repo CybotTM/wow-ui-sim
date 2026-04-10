@@ -63,6 +63,10 @@ enum Commands {
         /// Show only visible frames
         #[arg(long)]
         visible_only: bool,
+
+        /// Show verbose texture detail lines, including rect and UV coords
+        #[arg(short, long)]
+        verbose: bool,
     },
 
     /// Render UI to an image file (requires running server)
@@ -198,7 +202,8 @@ fn handle_command(command: Commands) {
         Commands::DumpTree {
             filter,
             visible_only,
-        } => dump_tree(filter, visible_only),
+            verbose,
+        } => dump_tree(filter, visible_only, verbose),
         Commands::Screenshot {
             output,
             width,
@@ -383,9 +388,9 @@ fn execute_file_and_exit(path: &PathBuf) {
     execute_and_exit(&code);
 }
 
-fn dump_tree(filter: Option<String>, visible_only: bool) {
+fn dump_tree(filter: Option<String>, visible_only: bool, verbose: bool) {
     let socket = resolve_socket();
-    match client::dump_tree(&socket, filter, visible_only) {
+    match client::dump_tree(&socket, filter, visible_only, verbose) {
         Ok(tree) => println!("{}", tree),
         Err(e) => {
             eprintln!("Error: {}", e);

@@ -25,6 +25,8 @@ pub enum Request {
         filter: Option<String>,
         /// Only show visible frames
         visible_only: bool,
+        /// Show verbose texture detail lines
+        verbose: bool,
     },
     /// Render a screenshot to a file
     Screenshot {
@@ -63,6 +65,7 @@ pub enum LuaCommand {
     DumpTree {
         filter: Option<String>,
         visible_only: bool,
+        verbose: bool,
         respond: mpsc::Sender<Response>,
     },
     Screenshot {
@@ -242,9 +245,11 @@ fn handle_request(request: Request, cmd_tx: &mpsc::Sender<LuaCommand>) -> Respon
         Request::DumpTree {
             filter,
             visible_only,
+            verbose,
         } => send_command(cmd_tx, |respond| LuaCommand::DumpTree {
             filter,
             visible_only,
+            verbose,
             respond,
         }),
         Request::Screenshot {
@@ -378,6 +383,7 @@ pub mod client {
         socket: P,
         filter: Option<String>,
         visible_only: bool,
+        verbose: bool,
     ) -> Result<String, String> {
         let mut stream =
             UnixStream::connect(socket).map_err(|e| format!("Connect failed: {}", e))?;
@@ -385,6 +391,7 @@ pub mod client {
         let request = Request::DumpTree {
             filter,
             visible_only,
+            verbose,
         };
         writeln!(stream, "{}", serde_json::to_string(&request).unwrap())
             .map_err(|e| format!("Write failed: {}", e))?;

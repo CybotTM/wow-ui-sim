@@ -41,6 +41,8 @@ fn build_basic_registry() -> WidgetRegistry {
     tex.name = Some("__tex_123".to_string());
     tex.visible = true;
     tex.texture = Some("Interface/Icons/foo".to_string());
+    tex.tex_coords = Some((0.1, 0.9, 0.2, 0.8));
+    tex.atlas_tex_coords = Some((0.0, 1.0, 0.0, 1.0));
     tex.anchors = vec![anchor(AnchorPoint::Center, None, AnchorPoint::Center)];
     reg.register(tex);
 
@@ -91,7 +93,7 @@ fn test_strip_nested_escapes() {
 fn test_build_tree_includes_children() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
-    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
+    let lines = build_tree(&reg, &names, None, None, false, false, 1024.0, 768.0);
     let has_button = lines.iter().any(|l| l.contains("MyButton"));
     let has_icon = lines.iter().any(|l| l.contains(".Icon"));
     assert!(has_button, "Should contain MyButton");
@@ -102,7 +104,16 @@ fn test_build_tree_includes_children() {
 fn test_build_tree_filter() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
-    let lines = build_tree(&reg, &names, Some("MyButton"), None, false, 1024.0, 768.0);
+    let lines = build_tree(
+        &reg,
+        &names,
+        Some("MyButton"),
+        None,
+        false,
+        false,
+        1024.0,
+        768.0,
+    );
     assert!(lines.iter().any(|l| l.contains("MyButton")));
     assert!(!lines.iter().any(|l| l.contains("HiddenFrame")));
 }
@@ -111,7 +122,7 @@ fn test_build_tree_filter() {
 fn test_build_tree_visible_only() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
-    let lines = build_tree(&reg, &names, None, None, true, 1024.0, 768.0);
+    let lines = build_tree(&reg, &names, None, None, true, false, 1024.0, 768.0);
     assert!(!lines.iter().any(|l| l.contains("HiddenFrame")));
 }
 
@@ -119,7 +130,7 @@ fn test_build_tree_visible_only() {
 fn test_build_tree_shows_texture_path() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
-    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
+    let lines = build_tree(&reg, &names, None, None, false, false, 1024.0, 768.0);
     assert!(
         lines
             .iter()
@@ -131,8 +142,38 @@ fn test_build_tree_shows_texture_path() {
 fn test_build_tree_shows_anchor_lines() {
     let reg = build_basic_registry();
     let names: Vec<String> = vec![];
-    let lines = build_tree(&reg, &names, None, None, false, 1024.0, 768.0);
+    let lines = build_tree(&reg, &names, None, None, false, false, 1024.0, 768.0);
     assert!(lines.iter().any(|l| l.contains("[anchor]")));
+}
+
+#[test]
+fn test_build_tree_verbose_shows_texture_rect_and_uv_coords() {
+    let reg = build_basic_registry();
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, true, 1024.0, 768.0);
+    let texture_line = lines
+        .iter()
+        .find(|line| line.contains("[texture] Interface/Icons/foo"))
+        .expect("texture line should exist");
+
+    assert!(texture_line.contains("rect=("));
+    assert!(texture_line.contains("tex_coords=(0.100,0.900,0.200,0.800)"));
+    assert!(texture_line.contains("atlas_tex_coords=(0.000,1.000,0.000,1.000)"));
+}
+
+#[test]
+fn test_build_tree_default_hides_verbose_texture_coords() {
+    let reg = build_basic_registry();
+    let names: Vec<String> = vec![];
+    let lines = build_tree(&reg, &names, None, None, false, false, 1024.0, 768.0);
+    let texture_line = lines
+        .iter()
+        .find(|line| line.contains("[texture] Interface/Icons/foo"))
+        .expect("texture line should exist");
+
+    assert!(!texture_line.contains("rect=("));
+    assert!(!texture_line.contains("tex_coords=("));
+    assert!(!texture_line.contains("atlas_tex_coords=("));
 }
 
 #[test]

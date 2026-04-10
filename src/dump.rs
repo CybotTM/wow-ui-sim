@@ -15,6 +15,7 @@ pub fn print_frame_tree(
     filter: Option<&str>,
     filter_key: Option<&str>,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
 ) {
@@ -26,6 +27,7 @@ pub fn print_frame_tree(
         filter,
         filter_key,
         visible_only,
+        verbose,
         screen_width,
         screen_height,
     );
@@ -41,6 +43,7 @@ pub fn build_tree(
     filter: Option<&str>,
     filter_key: Option<&str>,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
 ) -> Vec<String> {
@@ -53,6 +56,7 @@ pub fn build_tree(
         filter,
         filter_key,
         visible_only,
+        verbose,
         screen_width,
         screen_height,
         &mut lines,
@@ -77,6 +81,7 @@ fn emit_tree_lines(
     filter: Option<&str>,
     filter_key: Option<&str>,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -88,6 +93,7 @@ fn emit_tree_lines(
             roots,
             key_filter,
             visible_only,
+            verbose,
             screen_width,
             screen_height,
             lines,
@@ -101,6 +107,7 @@ fn emit_tree_lines(
         roots,
         filter,
         visible_only,
+        verbose,
         screen_width,
         screen_height,
         lines,
@@ -125,6 +132,7 @@ fn emit_key_filtered_subtrees(
     roots: &[(u64, Option<String>)],
     key_filter: &str,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -138,6 +146,7 @@ fn emit_key_filtered_subtrees(
             id,
             0,
             visible_only,
+            verbose,
             screen_width,
             screen_height,
             lines,
@@ -151,6 +160,7 @@ fn emit_roots_with_filter(
     roots: &[(u64, Option<String>)],
     filter: Option<&str>,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -164,6 +174,7 @@ fn emit_roots_with_filter(
             0,
             re.as_ref(),
             visible_only,
+            verbose,
             screen_width,
             screen_height,
             lines,
@@ -214,6 +225,7 @@ pub fn build_warning_dump(
 struct DumpRenderCtx<'a> {
     widgets: &'a WidgetRegistry,
     addon_names: &'a [String],
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &'a mut Vec<String>,
@@ -258,7 +270,9 @@ fn emit_frame_line(
         .or_else(|| resolve_button_state_texture(ctx.widgets, frame, id));
     if let Some(path) = tex_path {
         let fmt = resolve_texture_format(path);
-        ctx.lines.push(format!("{indent}  [texture] {path}{fmt}"));
+        let detail = format_texture_detail_str(frame, &rect, ctx.verbose);
+        ctx.lines
+            .push(format!("{indent}  [texture] {path}{fmt}{detail}"));
     }
     if let Some(ref atlas) = frame.atlas {
         ctx.lines.push(format!("{indent}  [atlas] {atlas}"));
@@ -408,6 +422,34 @@ fn format_info_str(frame: &Frame, rect: &LayoutRect) -> String {
     )
 }
 
+fn format_texture_detail_str(frame: &Frame, rect: &LayoutRect, verbose: bool) -> String {
+    if !verbose {
+        return String::new();
+    }
+
+    let mut detail = format!(
+        " rect=({:.0},{:.0} {:.0}x{:.0})",
+        rect.x, rect.y, rect.width, rect.height
+    );
+    if let Some((left, right, top, bottom)) = frame.tex_coords {
+        detail.push_str(&format!(
+            " tex_coords=({left:.3},{right:.3},{top:.3},{bottom:.3})"
+        ));
+    }
+    if let Some((left, right, top, bottom)) = frame.atlas_tex_coords {
+        detail.push_str(&format!(
+            " atlas_tex_coords=({left:.3},{right:.3},{top:.3},{bottom:.3})"
+        ));
+    }
+    if let Some(raw) = frame.tex_coords_quad {
+        detail.push_str(&format!(
+            " tex_coords_quad=({:.3},{:.3},{:.3},{:.3},{:.3},{:.3},{:.3},{:.3})",
+            raw[0], raw[1], raw[2], raw[3], raw[4], raw[5], raw[6], raw[7]
+        ));
+    }
+    detail
+}
+
 fn format_text_str(widgets: &WidgetRegistry, frame: &Frame) -> String {
     resolve_display_text(widgets, frame)
         .map(|t| format!(" text={:?}", t))
@@ -432,6 +474,7 @@ fn emit_subtree(
     id: u64,
     depth: usize,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -444,6 +487,7 @@ fn emit_subtree(
     let mut render = DumpRenderCtx {
         widgets,
         addon_names,
+        verbose,
         screen_width,
         screen_height,
         lines,
@@ -456,6 +500,7 @@ fn emit_subtree(
             child_id,
             depth + 1,
             visible_only,
+            verbose,
             screen_width,
             screen_height,
             lines,
@@ -472,6 +517,7 @@ fn emit_filtered(
     depth: usize,
     filter: Option<&regex::Regex>,
     visible_only: bool,
+    verbose: bool,
     screen_width: f32,
     screen_height: f32,
     lines: &mut Vec<String>,
@@ -486,6 +532,7 @@ fn emit_filtered(
         let mut render = DumpRenderCtx {
             widgets,
             addon_names,
+            verbose,
             screen_width,
             screen_height,
             lines,
@@ -500,6 +547,7 @@ fn emit_filtered(
             depth + 1,
             filter,
             visible_only,
+            verbose,
             screen_width,
             screen_height,
             lines,
