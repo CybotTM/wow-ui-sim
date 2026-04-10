@@ -489,35 +489,47 @@ impl WidgetRegistry {
     /// A cycle exists if relative_to (or any of its anchor dependencies) already
     /// depends on frame_id.
     pub fn would_create_anchor_cycle(&self, frame_id: u64, relative_to_id: u64) -> bool {
-        // Can't anchor to yourself
-        if frame_id == relative_to_id {
-            return true;
-        }
+        frame_id == relative_to_id || self.anchor_dependency_reaches_frame(relative_to_id, frame_id)
+    }
 
-        // BFS from relative_to, checking if any dependency points back to frame_id
-        let mut queue = VecDeque::new();
-        let mut seen = HashSet::new();
-
-        queue.push_back(relative_to_id);
-        seen.insert(relative_to_id);
+    fn anchor_dependency_reaches_frame(&self, start_id: u64, target_id: u64) -> bool {
+        let mut queue = VecDeque::from([start_id]);
+        let mut seen = HashSet::from([start_id]);
 
         while let Some(check_id) = queue.pop_front() {
-            if let Some(frame) = self.widgets.get(&check_id) {
-                for anchor in &frame.anchors {
-                    if let Some(anchor_target) = anchor.relative_to_id {
-                        let target_id = anchor_target as u64;
-                        if target_id == frame_id {
-                            return true;
-                        }
-                        if seen.insert(target_id) {
-                            queue.push_back(target_id);
-                        }
-                    }
-                }
+            if self.enqueue_anchor_dependencies(check_id, target_id, &mut queue, &mut seen) {
+                return true;
             }
         }
 
         false
+    }
+
+    fn enqueue_anchor_dependencies(
+        &self,
+        frame_id: u64,
+        target_id: u64,
+        queue: &mut VecDeque<u64>,
+        seen: &mut HashSet<u64>,
+    ) -> bool {
+        for anchor_target_id in self.anchor_target_ids(frame_id) {
+            if anchor_target_id == target_id {
+                return true;
+            }
+            if seen.insert(anchor_target_id) {
+                queue.push_back(anchor_target_id);
+            }
+        }
+
+        false
+    }
+
+    fn anchor_target_ids(&self, frame_id: u64) -> impl Iterator<Item = u64> + '_ {
+        self.widgets
+            .get(&frame_id)
+            .into_iter()
+            .flat_map(|frame| frame.anchors.iter())
+            .filter_map(|anchor| anchor.relative_to_id.map(|target_id| target_id as u64))
     }
 
     /// Record that `frame_id` is anchored to `target_id`.
