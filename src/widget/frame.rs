@@ -111,6 +111,25 @@ pub struct ModelAppearanceState {
     pub refresh_camera_count: u32,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelRenderingState {
+    pub alpha: f32,
+    pub shadow_effect: f32,
+    pub particles_enabled: bool,
+    pub use_gbuffer: bool,
+}
+
+impl Default for ModelRenderingState {
+    fn default() -> Self {
+        Self {
+            alpha: 1.0,
+            shadow_effect: 0.0,
+            particles_enabled: false,
+            use_gbuffer: false,
+        }
+    }
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -474,6 +493,8 @@ pub struct Frame {
     pub model_transform: ModelTransformState,
     /// Persisted model appearance and playback state.
     pub model_appearance: ModelAppearanceState,
+    /// Persisted model rendering flags.
+    pub model_rendering: ModelRenderingState,
     /// Whether mouse motion events are enabled.
     pub mouse_motion_enabled: bool,
     /// User-set frame ID (from XML `id` attribute or SetID()).
@@ -749,6 +770,7 @@ macro_rules! frame_defaults {
             model_file_id: None,
             model_transform: ModelTransformState::default(),
             model_appearance: ModelAppearanceState::default(),
+            model_rendering: ModelRenderingState::default(),
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,

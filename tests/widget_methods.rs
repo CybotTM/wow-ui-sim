@@ -800,6 +800,46 @@ fn test_player_model_appearance_and_state_methods_persist_and_clear_state() {
     }
 }
 
+#[test]
+fn test_player_model_rendering_flag_methods_persist_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local pm = CreateFrame("PlayerModel", "TestPlayerModelRenderingFlags", UIParent)
+        pm:SetModelAlpha(0.35)
+        pm:SetShadowEffect(0.8)
+        pm:SetParticlesEnabled(true)
+        pm:SetUseGBuffer(true)
+    "#,
+    )
+    .unwrap();
+
+    let render_state: (f64, f64) = env
+        .eval(
+            r#"
+            return TestPlayerModelRenderingFlags:GetModelAlpha(),
+                   TestPlayerModelRenderingFlags:GetShadowEffect()
+        "#,
+        )
+        .unwrap();
+    assert!((render_state.0 - 0.35).abs() < 0.001);
+    assert!((render_state.1 - 0.8).abs() < 0.001);
+
+    let model_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestPlayerModelRenderingFlags")
+        .unwrap();
+    let state = env.state().borrow();
+    let frame = state.widgets.get(model_id).unwrap();
+    assert!((frame.model_rendering.alpha - 0.35).abs() < 0.001);
+    assert!((frame.model_rendering.shadow_effect - 0.8).abs() < 0.001);
+    assert!(frame.model_rendering.particles_enabled);
+    assert!(frame.model_rendering.use_gbuffer);
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

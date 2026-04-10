@@ -304,16 +304,23 @@ fn add_model_rendering_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: 
         methods,
         &[
             "SetModelDrawLayer",
-            "SetModelAlpha",
-            "SetShadowEffect",
             "ReplaceIconTexture",
             "SetGlow",
             "SetGradientMask",
-            "SetParticlesEnabled",
-            "SetUseGBuffer",
         ],
     );
-    add_model_f64_getter(methods, "GetModelAlpha", 1.0);
+    methods.add_method("SetModelAlpha", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_rendering.alpha = parse_first_model_number(&args) as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetModelAlpha", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_rendering.alpha as f64)
+                .unwrap_or(1.0),
+        )
+    });
     methods.add_method("GetModelFileID", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -323,7 +330,33 @@ fn add_model_rendering_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: 
             .and_then(|frame| frame.model_file_id)
             .unwrap_or(0))
     });
-    add_model_f64_getter(methods, "GetShadowEffect", 0.0);
+    methods.add_method("SetShadowEffect", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_rendering.shadow_effect = parse_first_model_number(&args) as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetShadowEffect", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_rendering.shadow_effect as f64
+        })
+        .unwrap_or(0.0))
+    });
+    methods.add_method(
+        "SetParticlesEnabled",
+        |lua, this, args: mlua::MultiValue| {
+            update_model_frame(lua, this.0, |frame| {
+                frame.model_rendering.particles_enabled = parse_first_model_bool(&args);
+            });
+            Ok(())
+        },
+    );
+    methods.add_method("SetUseGBuffer", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_rendering.use_gbuffer = parse_first_model_bool(&args);
+        });
+        Ok(())
+    });
     add_model_bool_getter(methods, "GetPaused", false);
     add_model_bool_getter(methods, "HasAttachmentPoints", false);
     methods.add_method("GetLight", |_, _this, ()| Ok(mlua::Value::Nil));
@@ -393,6 +426,10 @@ fn parse_first_model_i32(args: &mlua::MultiValue) -> Option<i32> {
     args.front().map(lua_value_to_i32)
 }
 
+fn parse_first_model_bool(args: &mlua::MultiValue) -> bool {
+    args.front().map(lua_value_to_bool).unwrap_or(false)
+}
+
 fn parse_model_vec3(args: &mlua::MultiValue) -> (f32, f32, f32) {
     (
         args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
@@ -414,6 +451,15 @@ fn lua_value_to_i32(value: &Value) -> i32 {
         Value::Number(n) => *n as i32,
         Value::Integer(n) => *n as i32,
         _ => 0,
+    }
+}
+
+fn lua_value_to_bool(value: &Value) -> bool {
+    match value {
+        Value::Boolean(flag) => *flag,
+        Value::Number(n) => *n != 0.0,
+        Value::Integer(n) => *n != 0,
+        _ => false,
     }
 }
 
