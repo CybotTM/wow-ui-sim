@@ -40,19 +40,157 @@ fn register_c_auth_challenge(lua: &Lua, g: &mlua::Table) -> Result<()> {
 
 /// C_WowTokenSecure + C_StoreSecure — fake catalog for Blizzard store UI.
 fn register_c_store_secure(lua: &Lua) -> Result<()> {
-    lua.load(
-        r#"
-        C_WowTokenSecure = setmetatable({}, {
-            __index = function() return function() end end,
-        })
-    "#,
-    )
-    .exec()?;
     lua.load(c_store_secure_lua_src()).exec()
 }
 
 fn c_store_secure_lua_src() -> &'static str {
     r#"
+        local TOKEN_RESULT_FAILURE_CAP = (Enum.CanRedeemTokenForBalanceResult and Enum.CanRedeemTokenForBalanceResult.FailureCap) or 1
+        local TOKEN_REDEEM_TYPE_GAME_TIME = LE_TOKEN_REDEEM_TYPE_GAME_TIME or 1
+        local TOKEN_REDEEM_TYPE_BALANCE = LE_TOKEN_REDEEM_TYPE_BALANCE or 2
+        local WOW_TOKEN_GAME_TIME_MINUTES = 30 * 24 * 60
+
+        local WOW_TOKEN_STATE = {
+            tokenCount = 2,
+            currentBalance = 2500,
+            balanceRedeemAmount = 1500,
+            balanceAmountString = "$15.00",
+            cannotRedeemReason = 0,
+            isSubscribed = false,
+            remainingGameTime = 1440,
+            pendingRedeemType = nil,
+            priceLockDuration = 900,
+            willKickFromWorld = false,
+            lastBuyConfirmed = false,
+            lastSellConfirmed = false,
+        }
+
+        local function fire_wowtoken_event(eventName, ...)
+            if FireEvent then
+                FireEvent(eventName, ...)
+            end
+        end
+
+        local function parse_balance_amount(value)
+            local text = tostring(value or "")
+            local dollars, cents = text:match("(%d+)[^%d]+(%d%d)")
+            if dollars then
+                return (tonumber(dollars) or 0) * 100 + (tonumber(cents) or 0)
+            end
+
+            local wholeUnits = text:match("(%d+)")
+            if wholeUnits then
+                return (tonumber(wholeUnits) or 0) * 100
+            end
+
+            return nil
+        end
+
+        C_WowTokenSecure = setmetatable({
+            CanRedeemForBalance = function()
+                local canRedeem = WOW_TOKEN_STATE.tokenCount > 0
+                fire_wowtoken_event("TOKEN_REDEEM_BALANCE_UPDATED")
+                if canRedeem then
+                    return Enum.CanRedeemTokenForBalanceResult.Ok
+                end
+                return TOKEN_RESULT_FAILURE_CAP
+            end,
+            CancelRedeem = function()
+                WOW_TOKEN_STATE.pendingRedeemType = nil
+                return true
+            end,
+            ConfirmBuyToken = function(accepted)
+                WOW_TOKEN_STATE.lastBuyConfirmed = accepted and true or false
+                if not accepted then
+                    return false
+                end
+
+                WOW_TOKEN_STATE.tokenCount = WOW_TOKEN_STATE.tokenCount + 1
+                fire_wowtoken_event("TOKEN_STATUS_CHANGED")
+                return true
+            end,
+            ConfirmSellToken = function(accepted)
+                WOW_TOKEN_STATE.lastSellConfirmed = accepted and true or false
+                if not accepted then
+                    return false
+                end
+
+                if WOW_TOKEN_STATE.tokenCount > 0 then
+                    WOW_TOKEN_STATE.tokenCount = WOW_TOKEN_STATE.tokenCount - 1
+                end
+                fire_wowtoken_event("TOKEN_STATUS_CHANGED")
+                return true
+            end,
+            GetBalanceRedeemAmount = function()
+                return WOW_TOKEN_STATE.balanceRedeemAmount
+            end,
+            GetBalanceRedemptionInfo = function()
+                return WOW_TOKEN_STATE.currentBalance,
+                    WOW_TOKEN_STATE.balanceRedeemAmount,
+                    WOW_TOKEN_STATE.tokenCount > 0,
+                    WOW_TOKEN_STATE.cannotRedeemReason
+            end,
+            GetGameTimeRedemptionInfo = function()
+                return WOW_TOKEN_STATE.isSubscribed, WOW_TOKEN_STATE.remainingGameTime
+            end,
+            GetPriceLockDuration = function()
+                return WOW_TOKEN_STATE.priceLockDuration
+            end,
+            GetRemainingGameTime = function()
+                fire_wowtoken_event("TOKEN_REDEEM_GAME_TIME_UPDATED")
+                return WOW_TOKEN_STATE.remainingGameTime
+            end,
+            GetTokenCount = function()
+                return WOW_TOKEN_STATE.tokenCount
+            end,
+            IsRedemptionStillValid = function()
+                return WOW_TOKEN_STATE.pendingRedeemType ~= nil and WOW_TOKEN_STATE.tokenCount > 0
+            end,
+            RedeemToken = function(redeemType)
+                if WOW_TOKEN_STATE.tokenCount <= 0 then
+                    return false
+                end
+
+                WOW_TOKEN_STATE.pendingRedeemType = redeemType
+                return true
+            end,
+            RedeemTokenConfirm = function(redeemType)
+                if WOW_TOKEN_STATE.pendingRedeemType ~= redeemType or WOW_TOKEN_STATE.tokenCount <= 0 then
+                    return false
+                end
+
+                WOW_TOKEN_STATE.pendingRedeemType = nil
+                WOW_TOKEN_STATE.tokenCount = WOW_TOKEN_STATE.tokenCount - 1
+
+                if redeemType == TOKEN_REDEEM_TYPE_BALANCE then
+                    WOW_TOKEN_STATE.currentBalance = WOW_TOKEN_STATE.currentBalance + WOW_TOKEN_STATE.balanceRedeemAmount
+                    fire_wowtoken_event("TOKEN_STATUS_CHANGED")
+                    fire_wowtoken_event("TOKEN_REDEEM_BALANCE_UPDATED")
+                    return true
+                end
+
+                if redeemType == TOKEN_REDEEM_TYPE_GAME_TIME then
+                    WOW_TOKEN_STATE.isSubscribed = true
+                    WOW_TOKEN_STATE.remainingGameTime = WOW_TOKEN_STATE.remainingGameTime + WOW_TOKEN_GAME_TIME_MINUTES
+                    fire_wowtoken_event("TOKEN_STATUS_CHANGED")
+                    fire_wowtoken_event("TOKEN_REDEEM_GAME_TIME_UPDATED")
+                    return true
+                end
+
+                return false
+            end,
+            SetBalanceAmountString = function(value)
+                WOW_TOKEN_STATE.balanceAmountString = tostring(value or "")
+                local parsedAmount = parse_balance_amount(value)
+                if parsedAmount then
+                    WOW_TOKEN_STATE.balanceRedeemAmount = parsedAmount
+                end
+            end,
+            WillKickFromWorld = function()
+                return WOW_TOKEN_STATE.willKickFromWorld
+            end,
+        }, { __index = function() return function() end end })
+
         local STORE_GROUPS = {
             {
                 groupID = WOW_GAMES_CATEGORY_ID or 33,
