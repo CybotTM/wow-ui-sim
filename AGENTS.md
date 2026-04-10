@@ -10,6 +10,16 @@
 
 LLM-maintained knowledge base at `docs/wiki/`. See `docs/wiki/SCHEMA.md` for conventions and workflows. Read `docs/wiki/index.md` first when answering questions about the project.
 
+### Wiki Maintenance
+
+After completing work that produces knowledge worth preserving, update the wiki:
+
+- **Investigations/debugging**: Create or update a page in `investigations/` with root cause, symptoms, and fix.
+- **New systems or major changes**: Create or update a page in `systems/` describing how the system works.
+- **Architecture decisions**: Record rationale in `design/`.
+
+Follow the workflow in `SCHEMA.md`: check existing pages first (update > create), maintain cross-references, update `index.md` and `log.md`. Skip wiki updates for routine bug fixes, config tweaks, and cosmetic changes.
+
 ## Architecture Docs
 
 - `docs/layout-system.md` - Anchor/layout system: AnchorPoint, single vs multi-anchor resolution, cycle detection, coordinate systems
