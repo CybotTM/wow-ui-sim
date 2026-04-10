@@ -50,7 +50,16 @@ fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         menu_frame_is_menu_open(lua, id)
     });
-    methods.add_method("SetOwningDialog", |_, _this, _dialog: Value| Ok(()));
+    methods.add_method("SetOwningDialog", |lua, this, dialog: Value| {
+        let id = this.0;
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "SetOwningDialog")
+        {
+            return func.call::<()>((ud, dialog));
+        }
+        frame_fields(lua, id)?.set("owningDialog", dialog)?;
+        Ok(())
+    });
     methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method("RegisterFrames", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method(

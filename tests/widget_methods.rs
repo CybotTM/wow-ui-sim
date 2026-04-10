@@ -529,6 +529,43 @@ fn test_widget_misc_is_menu_open_uses_dropdown_menu_state() {
 }
 
 #[test]
+fn test_widget_misc_set_owning_dialog_delegates_or_stores_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestWidgetMiscOwningDialogFrame", UIParent)
+            local dialog = CreateFrame("Frame", "TestWidgetMiscOwningDialogDialog", UIParent)
+            local fields = debug.getfenv(frame)[1]
+            frame:SetOwningDialog(dialog)
+            local stored = fields.owningDialog == dialog
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscOwningDialogOverrideFrame", UIParent)
+            local overrideDialog = CreateFrame("Frame", "TestWidgetMiscOwningDialogOverrideDialog", UIParent)
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            overrideFields.SetOwningDialog = function(self, value)
+                rawset(overrideFields, "storedDialog", value)
+            end
+            overrideFrame:SetOwningDialog(overrideDialog)
+            local delegated = overrideFields.storedDialog == overrideDialog
+
+            return stored, delegated
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "SetOwningDialog should store the owning dialog on the frame"
+    );
+    assert!(
+        result.1,
+        "SetOwningDialog should delegate to an existing mixin override instead of shadowing it"
+    );
+}
+
+#[test]
 fn test_widget_misc_item_button_methods_delegate_or_store_state() {
     let env = WowLuaEnv::new().unwrap();
 
