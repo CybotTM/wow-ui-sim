@@ -387,6 +387,42 @@ fn keybind_c_opens_character() {
     }
 }
 
+#[test]
+fn keybind_c_toggles_character_without_errors() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("C", None).expect("first C keybind failed");
+
+        let open_errors = drain_test_errors(&env);
+        assert!(
+            open_errors.is_empty(),
+            "Opening character panel produced {} Lua error(s):\n{}",
+            open_errors.len(),
+            open_errors.join("\n"),
+        );
+        assert!(
+            frame_is_shown(&env, "CharacterFrame"),
+            "CharacterFrame should be shown after first C press"
+        );
+
+        env.send_key_press("C", None).expect("second C keybind failed");
+
+        let close_errors = drain_test_errors(&env);
+        assert!(
+            close_errors.is_empty(),
+            "Closing character panel produced {} Lua error(s):\n{}",
+            close_errors.len(),
+            close_errors.join("\n"),
+        );
+        assert!(
+            !frame_is_shown(&env, "CharacterFrame"),
+            "CharacterFrame should be hidden after second C press"
+        );
+    }
+}
+
 // ── U → ToggleCharacter("ReputationFrame") ──────────────────────────────
 
 #[test]
