@@ -368,6 +368,10 @@ pub struct Frame {
     pub snap_to_pixel_grid: bool,
     /// Bias applied to texel snapping for textures.
     pub texel_snapping_bias: f32,
+    /// Manually configured nine-slice margins (left, right, top, bottom).
+    pub texture_slice_margins: (f32, f32, f32, f32),
+    /// Manually configured nine-slice mode.
+    pub texture_slice_mode: i32,
     /// Whether this frame receives ALL events (set by RegisterAllEvents).
     pub register_all_events: bool,
     /// Whether this frame clips its children to its bounds.
@@ -647,6 +651,8 @@ macro_rules! frame_defaults {
             blend_mode: BlendMode::Alpha,
             snap_to_pixel_grid: false,
             texel_snapping_bias: 0.0,
+            texture_slice_margins: (0.0, 0.0, 0.0, 0.0),
+            texture_slice_mode: 0,
             register_all_events: false,
             clips_children: false,
             is_frame_buffer: false,

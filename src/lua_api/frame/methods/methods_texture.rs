@@ -593,12 +593,80 @@ fn read_texel_snapping_bias(
 fn add_nine_slice_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetTextureSliceMargins",
-        |_, _this, (_l, _r, _t, _b): (f32, f32, f32, f32)| Ok(()),
+        |lua, this, (left, right, top, bottom): (f32, f32, f32, f32)| {
+            set_texture_slice_margins(get_sim_state(lua), this.0, (left, right, top, bottom));
+            Ok(())
+        },
     );
-    methods.add_method("GetTextureSliceMargins", |_, _this, ()| {
-        Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32))
+    methods.add_method("GetTextureSliceMargins", |lua, this, ()| {
+        Ok(read_texture_slice_margins(get_sim_state(lua), this.0))
     });
-    methods.add_method("SetTextureSliceMode", |_, _this, _mode: i32| Ok(()));
-    methods.add_method("GetTextureSliceMode", |_, _this, ()| Ok(0i32));
-    methods.add_method("ClearTextureSlice", |_, _this, ()| Ok(()));
+    methods.add_method("SetTextureSliceMode", |lua, this, mode: i32| {
+        set_texture_slice_mode(get_sim_state(lua), this.0, mode);
+        Ok(())
+    });
+    methods.add_method("GetTextureSliceMode", |lua, this, ()| {
+        Ok(read_texture_slice_mode(get_sim_state(lua), this.0))
+    });
+    methods.add_method("ClearTextureSlice", |lua, this, ()| {
+        clear_texture_slice(get_sim_state(lua), this.0);
+        Ok(())
+    });
+}
+
+fn set_texture_slice_margins(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    margins: (f32, f32, f32, f32),
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.texture_slice_margins = margins;
+    }
+}
+
+fn read_texture_slice_margins(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+) -> (f32, f32, f32, f32) {
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|frame| frame.texture_slice_margins)
+        .unwrap_or((0.0, 0.0, 0.0, 0.0))
+}
+
+fn set_texture_slice_mode(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    mode: i32,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.texture_slice_mode = mode;
+    }
+}
+
+fn read_texture_slice_mode(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+) -> i32 {
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|frame| frame.texture_slice_mode)
+        .unwrap_or(0)
+}
+
+fn clear_texture_slice(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.texture_slice_margins = (0.0, 0.0, 0.0, 0.0);
+        frame.texture_slice_mode = 0;
+    }
 }
