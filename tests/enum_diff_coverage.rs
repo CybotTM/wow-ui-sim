@@ -1,0 +1,88 @@
+use std::collections::BTreeSet;
+use std::fs;
+use std::path::PathBuf;
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+fn manifest_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+}
+
+fn parse_missing_enum_names() -> BTreeSet<String> {
+    let path = manifest_dir().join("docs/wow-client-diff/diff_enums_missing.txt");
+    fs::read_to_string(path)
+        .unwrap()
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(ToOwned::to_owned)
+        .collect()
+}
+
+#[test]
+fn diff_enums_missing_matches_live_runtime_gaps() {
+    let env = WowLuaEnv::new().unwrap();
+    let missing = parse_missing_enum_names();
+
+    let lua_list = missing
+        .iter()
+        .map(|name| format!("\"{}\"", name.replace('\\', "\\\\").replace('"', "\\\"")))
+        .collect::<Vec<_>>()
+        .join(", ");
+
+    let script = format!(
+        r#"
+        local names = {{ {lua_list} }}
+        local missing = {{}}
+        for _, name in ipairs(names) do
+            if type(Enum[name]) ~= "table" then
+                table.insert(missing, name)
+            end
+        end
+        return table.concat(missing, "\n")
+        "#
+    );
+
+    let runtime_missing = env.eval::<String>(&script).unwrap();
+    let runtime_missing: BTreeSet<String> = runtime_missing
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(ToOwned::to_owned)
+        .collect();
+
+    assert_eq!(missing, runtime_missing);
+}
+
+#[test]
+fn representative_missing_enums_are_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local checks = {
+                { "AbbreviationDataError", "InvalidBreakpoint", 0 },
+                { "AccountData", "Config", 0 },
+                { "AccountStoreItemStatus", "Owned", 3 },
+                { "ClientDebugAISpellReadyStatus", "Ready", 0 },
+                { "ClientDebugAISpellReadyStatusMeta", "NumValues", 32 },
+            }
+
+            for _, check in ipairs(checks) do
+                local enumTable = Enum[check[1]]
+                if type(enumTable) ~= "table" then
+                    return "missing_enum:" .. check[1]
+                end
+
+                if enumTable[check[2]] ~= check[3] then
+                    return "wrong_value:" .. check[1] .. "." .. check[2] .. "=" .. tostring(enumTable[check[2]])
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}

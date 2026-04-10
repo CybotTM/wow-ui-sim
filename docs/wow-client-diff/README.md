@@ -358,18 +358,20 @@ earlier snapshot were reconciled; remaining C_* work is function-level, not tabl
 
 ## Section 5: Missing Enums
 
-**Count**: 1430 enum names missing (the file also lists `Meta` variants, which are companion tables).
-
-**Full list with values**: `diff_enums_missing_values.txt` — use this for bulk import.
+**Count**: 0
 
 **Extra enums** (2 that shouldn't be there):
 - `ExpansionLandingPageType`
 - `TransmogOutfitFlags`
 
-**Task**: Bulk-import the 1430 missing enums from `diff_enums_missing_values.txt`. The file format
-is `EnumName.VALUE=number` — parse it to generate the Lua globals. This is mechanical work and can
-be done in one batch. Remove `ExpansionLandingPageType` and `TransmogOutfitFlags` if they cause issues
-with addon code.
+`diff_enums_missing.txt` and `diff_enums_missing_values.txt` are intentionally empty now. The
+bulk enum import already landed through `src/lua_api/globals/enum_data/missing_enums.lua`, and the
+only live runtime gap this reconciliation found was `ClientDebugAISpellReadyStatus` plus its `Meta`
+table. Those are now present at runtime too.
+
+The remaining enum follow-up is the separate extras item: decide whether
+`ExpansionLandingPageType` and `TransmogOutfitFlags` should stay as intentional compatibility enums
+or be removed from the runtime surface.
 
 ---
 

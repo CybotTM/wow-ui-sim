@@ -2720,6 +2720,51 @@ if not Enum.ClientPlatformTypeMeta then
   }
 end
 
+if not Enum.ClientDebugAISpellReadyStatus then
+  Enum.ClientDebugAISpellReadyStatus = {
+    CasterAuraEffectRestrictions = 29,
+    CasterAuraSpellRestrictions = 21,
+    CasterAuraStateRestrictions = 19,
+    Charmed = 5,
+    CheckArea = 26,
+    CombatCondition = 27,
+    Confused = 11,
+    Cooldown = 1,
+    DungeonEncounter = 23,
+    DungeonEncounterID = 25,
+    Enabled = 3,
+    EquippedItems = 13,
+    ExcludeCasterAuraEffect = 30,
+    ExcludeCasterAuraStateRestrictions = 20,
+    ExcludeCasterSpell = 22,
+    FactionReaction = 24,
+    Fleeing = 10,
+    GeneralAuraRestrictions = 31,
+    HasTargets = 28,
+    InitialDelay = 2,
+    NoActions = 9,
+    Pacified = 8,
+    Paused = 4,
+    Peaceful = 18,
+    PowerCost = 15,
+    Ready = 0,
+    ReadyToCast = 14,
+    ShapeShiftRules = 16,
+    Silenced = 7,
+    StealthRules = 17,
+    Stunned = 6,
+    Tokenless = 12,
+  }
+end
+
+if not Enum.ClientDebugAISpellReadyStatusMeta then
+  Enum.ClientDebugAISpellReadyStatusMeta = {
+    MaxValue = 31,
+    MinValue = 0,
+    NumValues = 32,
+  }
+end
+
 if not Enum.ClientSceneType then
   Enum.ClientSceneType = {
     DefaultSceneType = 0,

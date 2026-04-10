@@ -4,9 +4,9 @@ C_* functions missing: 97
 C_* functions extra: 119
 Global functions missing: 310
 Global functions extra: 182
-Enums missing: 1430
+Enums missing: 0
 Enums extra: 2
-Enum values to add: 6862
+Enum values to add: 0
 Frame methods missing: 1382
 Frame methods extra: 3810
 Constants missing: 164
