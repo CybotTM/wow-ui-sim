@@ -165,7 +165,7 @@ patch_string_format
 
 - **print** -- Appends to `SimState.console_output`, tab-separated
 - **ipairs** -- Custom iterator for frames (returns children), falls back to original for tables
-- **getmetatable** -- Returns fake metatable with `__index` for all frame methods
+- **getmetatable** -- Returns fake metatable with widget-filtered `__index` methods; direct userdata calls still resolve through the shared `FrameRef` registration path
 - **string.format** -- Converts `%F` -> `%f` (WoW LuaJIT vs standard Lua 5.1)
 
 ### CreateFrame
