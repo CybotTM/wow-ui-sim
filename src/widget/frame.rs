@@ -675,6 +675,8 @@ pub struct Frame {
     pub editbox_numeric_full_range: bool,
     /// Whether the text is marked as secure.
     pub editbox_secure_text: bool,
+    /// Whether SetText should be disabled for the editbox.
+    pub editbox_security_disable_set_text: bool,
     /// Whether paste is disabled for the editbox.
     pub editbox_security_disable_paste: bool,
     /// Maximum number of visible text bytes (0 = unlimited).
@@ -963,6 +965,7 @@ macro_rules! frame_defaults {
             editbox_alt_arrow_key_mode: false,
             editbox_numeric_full_range: false,
             editbox_secure_text: false,
+            editbox_security_disable_set_text: false,
             editbox_security_disable_paste: false,
             editbox_visible_text_byte_limit: 0,
             editbox_input_language: "ROMAN".to_string(),

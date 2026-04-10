@@ -16,7 +16,14 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     add_editbox_input_flags(methods);
     add_editbox_history_methods(methods);
     add_editbox_inset_methods(methods);
-    methods.add_method("SetSecurityDisableSetText", |_, _this, ()| Ok(()));
+    methods.add_method("SetSecurityDisableSetText", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_security_disable_set_text = true;
+        }
+        Ok(())
+    });
     add_editbox_language_methods(methods);
     add_editbox_stub_methods(methods);
 }

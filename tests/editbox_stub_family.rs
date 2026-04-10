@@ -45,6 +45,7 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             eb:SetAlphabeticOnly(true)
             eb:SetNumericFullRange(true)
             eb:SetSecureText(true)
+            eb:SetSecurityDisableSetText()
             eb:SetVisibleTextByteLimit(32)
             eb:SetSecurityDisablePaste()
             eb:SetCountInvisibleLetters(true)
@@ -137,6 +138,10 @@ fn editbox_stub_family_methods_persist_runtime_state() {
         .widgets
         .get(frame_id)
         .expect("StubFamilyEB frame should exist");
+    assert!(
+        frame.editbox_security_disable_set_text,
+        "SetSecurityDisableSetText should persist the editbox set-text-disable flag"
+    );
     assert!(
         frame.editbox_security_disable_paste,
         "SetSecurityDisablePaste should persist the editbox paste-disable flag"
