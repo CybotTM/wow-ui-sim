@@ -518,3 +518,27 @@ fn test_scrollboxlist_callbacks_and_foreach_frame_are_stateful() {
 
     assert_eq!(result, "1|true|true|First,Second|true");
 }
+
+#[test]
+fn test_scrollboxlist_interpolate_scroll_round_trip() {
+    let env = env_with_shared_xml();
+
+    let result: String = env
+        .eval(
+            r#"
+            local sb = CreateFrame("Frame", "TestScrollBoxInterpolate", UIParent, "WowScrollBoxList")
+            sb:SetSize(300, 400)
+
+            local initial = tostring(sb:CanInterpolateScroll())
+            sb:SetInterpolateScroll(true)
+            local enabled = tostring(sb:CanInterpolateScroll())
+            sb:SetInterpolateScroll(false)
+            local disabled = tostring(sb:CanInterpolateScroll())
+
+            return table.concat({ initial, enabled, disabled, tostring(sb.canInterpolateScroll) }, "|")
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "false|true|false|false");
+}
