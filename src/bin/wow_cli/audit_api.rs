@@ -5,7 +5,7 @@
 
 use regex::Regex;
 use serde::Serialize;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
@@ -295,19 +295,252 @@ pub fn print_text(results: &AuditResults) {
 }
 
 /// Print results as JSON.
-pub fn print_json(results: &AuditResults) {
+pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
     #[derive(Serialize)]
     struct Output<'a> {
         c_api: &'a BTreeMap<String, BTreeMap<String, SymbolUsage>>,
         constants: &'a BTreeMap<String, SymbolUsage>,
         enums: &'a BTreeMap<String, SymbolUsage>,
         other_constants: &'a BTreeMap<String, SymbolUsage>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        gap: Option<&'a GapReport>,
     }
     let out = Output {
         c_api: &results.c_api,
         constants: &results.constants,
         enums: &results.enums,
         other_constants: &results.other_constants,
+        gap,
     };
     println!("{}", serde_json::to_string_pretty(&out).unwrap());
+}
+
+// ── Simulator source scanning ────────────────────────────────────────
+
+/// What the simulator has registered, collected from Rust source files.
+#[derive(Debug, Default, Serialize)]
+pub struct SimRegistered {
+    /// C_* namespace names registered via `.set("C_Name", ...)`.
+    pub c_namespaces: BTreeSet<String>,
+    /// LE_* constant names found in Rust source + Lua data files.
+    pub le_constants: BTreeSet<String>,
+    /// Enum namespace names registered (e.g. "Enum.SpellBookItemType").
+    pub enum_namespaces: BTreeSet<String>,
+}
+
+/// A single missing symbol with its usage count.
+#[derive(Debug, Serialize)]
+pub struct GapEntry {
+    pub name: String,
+    pub calls: usize,
+}
+
+/// Summary counts for one symbol family.
+#[derive(Debug, Serialize)]
+pub struct GapSummary {
+    pub registered: usize,
+    pub used: usize,
+    pub missing: usize,
+}
+
+/// Full gap report comparing Blizzard UI usage against simulator registrations.
+#[derive(Debug, Serialize)]
+pub struct GapReport {
+    pub c_namespaces: GapSummary,
+    pub le_constants: GapSummary,
+    pub enum_namespaces: GapSummary,
+    pub missing_c_namespaces: Vec<GapEntry>,
+    pub missing_le_constants: Vec<GapEntry>,
+    pub missing_enum_namespaces: Vec<GapEntry>,
+}
+
+/// Scan the simulator Rust source tree and Lua data files to collect registered symbols.
+pub fn scan_simulator(src_path: &Path) -> SimRegistered {
+    let mut reg = SimRegistered::default();
+
+    let set_c_re = Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)""#).unwrap();
+    let le_rs_re = Regex::new(r#""(LE_[A-Z][A-Z0-9_]+)""#).unwrap();
+    let le_lua_re = Regex::new(r"LE_[A-Z][A-Z0-9_]+").unwrap();
+    let enum_rs_re = Regex::new(r#"\("([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
+    let enum_rs_explicit_re = Regex::new(r#"\("([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
+    let enum_lua_block_re = Regex::new(r"Enum\.([A-Za-z][A-Za-z0-9]+)\s*=\s*\{").unwrap();
+
+    for entry in WalkDir::new(src_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+    {
+        let path = entry.path();
+        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
+
+        match ext {
+            "rs" => {
+                let content = match std::fs::read_to_string(path) {
+                    Ok(c) => c,
+                    Err(_) => continue,
+                };
+                for cap in set_c_re.captures_iter(&content) {
+                    reg.c_namespaces.insert(cap[1].to_string());
+                }
+                for cap in le_rs_re.captures_iter(&content) {
+                    reg.le_constants.insert(cap[1].to_string());
+                }
+                // Enum names from SeqEnumDef/EnumDef tuple patterns
+                for cap in enum_rs_re.captures_iter(&content) {
+                    reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
+                }
+                let _ = enum_rs_explicit_re; // same regex used above
+            }
+            "lua" => {
+                let content = match std::fs::read_to_string(path) {
+                    Ok(c) => c,
+                    Err(_) => continue,
+                };
+                // LE_* from missing_constants.lua and similar
+                for cap in le_lua_re.find_iter(&content) {
+                    reg.le_constants.insert(cap.as_str().to_string());
+                }
+                // Enum.* namespaces from missing_enums.lua
+                for cap in enum_lua_block_re.captures_iter(&content) {
+                    reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
+                }
+            }
+            _ => {}
+        }
+    }
+
+    reg
+}
+
+/// Build a gap report comparing what Blizzard UI uses vs what the simulator registers.
+pub fn build_gap_report(used: &AuditResults, registered: &SimRegistered) -> GapReport {
+    // C_* namespaces: compare namespace keys from usage
+    let used_c: BTreeSet<String> = used.c_api.keys().cloned().collect();
+    let missing_c = collect_missing_entries(&used_c, &registered.c_namespaces, |ns| {
+        used.c_api
+            .get(ns)
+            .map(|m| m.values().map(|u| u.count).sum())
+            .unwrap_or(0)
+    });
+
+    // LE_* constants
+    let used_le: BTreeSet<String> = used.constants.keys().cloned().collect();
+    let missing_le = collect_missing_entries(&used_le, &registered.le_constants, |sym| {
+        used.constants.get(sym).map(|u| u.count).unwrap_or(0)
+    });
+
+    // Enum namespaces: extract "Enum.X" from "Enum.X.Y" usage keys
+    let used_enum_ns: BTreeSet<String> = used
+        .enums
+        .keys()
+        .map(|k| {
+            // "Enum.Foo.Bar" -> "Enum.Foo"
+            let parts: Vec<&str> = k.splitn(3, '.').collect();
+            if parts.len() >= 2 {
+                format!("Enum.{}", parts[1])
+            } else {
+                k.clone()
+            }
+        })
+        .collect();
+    let missing_enum = collect_missing_entries(&used_enum_ns, &registered.enum_namespaces, |ns| {
+        // sum all calls to any Enum.Namespace.* key
+        let prefix = format!("{}.", ns);
+        used.enums
+            .iter()
+            .filter(|(k, _)| k.starts_with(&prefix) || *k == ns)
+            .map(|(_, u)| u.count)
+            .sum()
+    });
+
+    GapReport {
+        c_namespaces: GapSummary {
+            registered: registered.c_namespaces.len(),
+            used: used_c.len(),
+            missing: missing_c.len(),
+        },
+        le_constants: GapSummary {
+            registered: registered.le_constants.len(),
+            used: used_le.len(),
+            missing: missing_le.len(),
+        },
+        enum_namespaces: GapSummary {
+            registered: registered.enum_namespaces.len(),
+            used: used_enum_ns.len(),
+            missing: missing_enum.len(),
+        },
+        missing_c_namespaces: missing_c,
+        missing_le_constants: missing_le,
+        missing_enum_namespaces: missing_enum,
+    }
+}
+
+fn collect_missing_entries(
+    used: &BTreeSet<String>,
+    registered: &BTreeSet<String>,
+    call_count: impl Fn(&str) -> usize,
+) -> Vec<GapEntry> {
+    let mut entries: Vec<GapEntry> = used
+        .iter()
+        .filter(|name| !registered.contains(*name))
+        .map(|name| GapEntry {
+            name: name.clone(),
+            calls: call_count(name),
+        })
+        .collect();
+    entries.sort_by(|a, b| b.calls.cmp(&a.calls).then(a.name.cmp(&b.name)));
+    entries
+}
+
+/// Print the gap report in human-readable text format.
+pub fn print_gap_text(report: &GapReport) {
+    println!("=== API Gap Report ===");
+    println!();
+    println!(
+        "C_* Namespaces: {}/{} registered ({} missing)",
+        report.c_namespaces.registered, report.c_namespaces.used, report.c_namespaces.missing
+    );
+    println!(
+        "LE_* Constants: {}/{} registered ({} missing)",
+        report.le_constants.registered, report.le_constants.used, report.le_constants.missing
+    );
+    println!(
+        "Enum.* Namespaces: {}/{} registered ({} missing)",
+        report.enum_namespaces.registered,
+        report.enum_namespaces.used,
+        report.enum_namespaces.missing
+    );
+
+    if !report.missing_c_namespaces.is_empty() {
+        println!();
+        println!(
+            "--- Missing C_* Namespaces ({}) ---",
+            report.missing_c_namespaces.len()
+        );
+        for entry in &report.missing_c_namespaces {
+            println!("  {} ({} calls)", entry.name, entry.calls);
+        }
+    }
+
+    if !report.missing_le_constants.is_empty() {
+        println!();
+        println!(
+            "--- Missing LE_* Constants ({}) ---",
+            report.missing_le_constants.len()
+        );
+        for entry in &report.missing_le_constants {
+            println!("  {} ({} refs)", entry.name, entry.calls);
+        }
+    }
+
+    if !report.missing_enum_namespaces.is_empty() {
+        println!();
+        println!(
+            "--- Missing Enum.* Namespaces ({}) ---",
+            report.missing_enum_namespaces.len()
+        );
+        for entry in &report.missing_enum_namespaces {
+            println!("  {} ({} refs)", entry.name, entry.calls);
+        }
+    }
 }

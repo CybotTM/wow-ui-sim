@@ -136,6 +136,14 @@ enum Commands {
         /// Override Blizzard UI path
         #[arg(long, default_value_os_t = default_blizzard_ui_path())]
         ui_path: PathBuf,
+
+        /// Also scan simulator source and print a gap report
+        #[arg(long)]
+        gaps: bool,
+
+        /// Path to simulator src directory (for gap analysis)
+        #[arg(long, default_value = "./src")]
+        sim_path: PathBuf,
     },
 }
 
@@ -202,7 +210,9 @@ fn handle_command(command: Commands) {
             filter_startup,
             namespace,
             ui_path,
-        } => run_audit_api(format, filter_startup, namespace, ui_path),
+            gaps,
+            sim_path,
+        } => run_audit_api(format, filter_startup, namespace, ui_path, gaps, sim_path),
     }
 }
 
@@ -245,6 +255,8 @@ fn run_audit_api(
     filter_startup: bool,
     namespace: Option<String>,
     ui_path: PathBuf,
+    gaps: bool,
+    sim_path: PathBuf,
 ) {
     use audit_api::{AuditConfig, OutputFormat};
     let fmt = match format.as_str() {
@@ -257,9 +269,21 @@ fn run_audit_api(
         filter_startup,
     };
     let results = audit_api::run_audit(&config);
+    let gap_report = if gaps {
+        let registered = audit_api::scan_simulator(&sim_path);
+        Some(audit_api::build_gap_report(&results, &registered))
+    } else {
+        None
+    };
     match fmt {
-        OutputFormat::Json => audit_api::print_json(&results),
-        OutputFormat::Text => audit_api::print_text(&results),
+        OutputFormat::Json => audit_api::print_json(&results, gap_report.as_ref()),
+        OutputFormat::Text => {
+            audit_api::print_text(&results);
+            if let Some(ref report) = gap_report {
+                println!();
+                audit_api::print_gap_text(report);
+            }
+        }
     }
 }
 
