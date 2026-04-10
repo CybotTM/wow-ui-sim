@@ -586,6 +586,38 @@ fn test_player_model_methods_still_resolve() {
     assert!(result.2, "PlayerModel should expose GetDisplayInfo");
 }
 
+#[test]
+fn test_player_model_set_model_persists_path_and_clears_file_id() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local pm = CreateFrame("PlayerModel", "TestPlayerModelSetModel", UIParent)
+        pm:SetModel("Creature/Dragon/Dragon.m2")
+    "#,
+    )
+    .unwrap();
+
+    let model_path: String = env
+        .eval("return TestPlayerModelSetModel:GetModel()")
+        .unwrap();
+    assert_eq!(model_path, "Creature/Dragon/Dragon.m2");
+
+    let model_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestPlayerModelSetModel")
+        .unwrap();
+    let state = env.state().borrow();
+    let frame = state.widgets.get(model_id).unwrap();
+    assert_eq!(
+        frame.model_path.as_deref(),
+        Some("Creature/Dragon/Dragon.m2")
+    );
+    assert_eq!(frame.model_file_id, None);
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

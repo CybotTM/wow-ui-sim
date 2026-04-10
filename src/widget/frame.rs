@@ -417,6 +417,10 @@ pub struct Frame {
     pub mask_textures: Vec<u64>,
     /// Texture rotation in radians (for SetRotation on Texture widgets).
     pub rotation: f32,
+    /// Model asset path set via Model:SetModel().
+    pub model_path: Option<String>,
+    /// Model file data ID when a model is sourced by file ID instead of path.
+    pub model_file_id: Option<i64>,
     /// Whether mouse motion events are enabled.
     pub mouse_motion_enabled: bool,
     /// User-set frame ID (from XML `id` attribute or SetID()).
@@ -688,6 +692,8 @@ macro_rules! frame_defaults {
             is_mask: false,
             mask_textures: Vec::new(),
             rotation: 0.0,
+            model_path: None,
+            model_file_id: None,
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,

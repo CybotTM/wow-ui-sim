@@ -271,6 +271,7 @@ pub static PLAYERMODEL_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "GetID",
         "GetKeepModelOnHide",
         "GetLight",
+        "GetModel",
         "GetModelAlpha",
         "GetModelDrawLayer",
         "GetModelFileID",

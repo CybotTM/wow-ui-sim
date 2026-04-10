@@ -14,8 +14,26 @@ pub fn add_model_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_model_transform_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetModel", |_, _this, _path: String| Ok(()));
-    methods.add_method("GetModel", |_, _this, ()| Ok::<Option<String>, _>(None));
+    methods.add_method("SetModel", |lua, this, path: String| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.model_path = Some(path);
+            frame.model_file_id = None;
+        }
+        Ok(())
+    });
+    methods.add_method("GetModel", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok::<String, _>(
+            state
+                .widgets
+                .get(this.0)
+                .and_then(|frame| frame.model_path.clone())
+                .unwrap_or_default(),
+        )
+    });
     methods.add_method("SetModelScale", |_, _this, _scale: f64| Ok(()));
     methods.add_method("GetModelScale", |_, _this, ()| Ok(1.0_f64));
     methods.add_method("SetPosition", |_, _this, _args: mlua::MultiValue| Ok(()));
@@ -188,7 +206,15 @@ fn add_model_rendering_extra_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: 
         ],
     );
     add_model_f64_getter(methods, "GetModelAlpha", 1.0);
-    add_model_i64_getter(methods, "GetModelFileID", 0);
+    methods.add_method("GetModelFileID", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .and_then(|frame| frame.model_file_id)
+            .unwrap_or(0))
+    });
     add_model_f64_getter(methods, "GetShadowEffect", 0.0);
     add_model_bool_getter(methods, "GetPaused", false);
     add_model_bool_getter(methods, "HasAttachmentPoints", false);
@@ -229,14 +255,6 @@ fn add_model_f64_getter<M: mlua::UserDataMethods<FrameRef>>(
     methods: &mut M,
     name: &'static str,
     value: f64,
-) {
-    methods.add_method(name, move |_, _this, ()| Ok(value));
-}
-
-fn add_model_i64_getter<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &'static str,
-    value: i64,
 ) {
     methods.add_method(name, move |_, _this, ()| Ok(value));
 }
