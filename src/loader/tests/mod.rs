@@ -1586,6 +1586,28 @@ fn test_fog_of_war_frame_atlas_and_mask_scalar_round_trip() {
     assert!((mask_scalar - 0.75).abs() < f64::EPSILON);
 }
 
+#[test]
+fn test_fog_of_war_frame_allows_clearing_optional_atlases() {
+    let env = WowLuaEnv::new().unwrap();
+    let (background_atlas, mask_atlas, mask_scalar): (Option<String>, Option<String>, f64) = env
+        .eval(
+            r#"
+            local fog = CreateFrame("FogOfWarFrame", "FogOfWarClearedAtlasFrame", UIParent)
+            fog:SetFogOfWarBackgroundAtlas("worldmap-wardisplay-background")
+            fog:SetFogOfWarMaskAtlas("worldmap-wardisplay-mask")
+            fog:SetMaskScalar(0.75)
+            fog:SetFogOfWarBackgroundAtlas(nil)
+            fog:SetFogOfWarMaskAtlas(nil)
+            fog:SetMaskScalar(nil)
+            return fog:GetFogOfWarBackgroundAtlas(), fog:GetFogOfWarMaskAtlas(), fog:GetMaskScalar()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(background_atlas, None);
+    assert_eq!(mask_atlas, None);
+    assert!((mask_scalar - 1.0).abs() < f64::EPSILON);
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

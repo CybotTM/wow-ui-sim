@@ -649,6 +649,42 @@ fn keybind_m_opens_world_map() {
     }
 }
 
+#[test]
+fn keybind_m_toggles_world_map_without_errors() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("first M keybind failed");
+
+        let open_errors = drain_test_errors(&env);
+        assert!(
+            open_errors.is_empty(),
+            "Opening world map produced {} Lua error(s):\n{}",
+            open_errors.len(),
+            open_errors.join("\n"),
+        );
+        assert!(
+            frame_is_shown(&env, "WorldMapFrame"),
+            "WorldMapFrame should be shown after first M press"
+        );
+
+        env.send_key_press("M", None).expect("second M keybind failed");
+
+        let close_errors = drain_test_errors(&env);
+        assert!(
+            close_errors.is_empty(),
+            "Closing world map produced {} Lua error(s):\n{}",
+            close_errors.len(),
+            close_errors.join("\n"),
+        );
+        assert!(
+            !frame_is_shown(&env, "WorldMapFrame"),
+            "WorldMapFrame should be hidden after second M press"
+        );
+    }
+}
+
 // ── ESCAPE → toggle GameMenuFrame ───────────────────────────────────────
 
 #[test]

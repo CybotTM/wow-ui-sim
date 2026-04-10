@@ -173,21 +173,23 @@ fn add_fog_of_war_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
                 .unwrap_or(1.0),
         )
     });
-    methods.add_method("SetFogOfWarBackgroundAtlas", |lua, this, atlas: String| {
+    methods.add_method("SetFogOfWarBackgroundAtlas", |lua, this, atlas: Value| {
+        let atlas = texture_asset_to_string(&atlas)?;
         write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.background_atlas = Some(atlas);
+            fog.background_atlas = atlas;
         });
         Ok(())
     });
-    methods.add_method("SetFogOfWarMaskAtlas", |lua, this, atlas: String| {
+    methods.add_method("SetFogOfWarMaskAtlas", |lua, this, atlas: Value| {
+        let atlas = texture_asset_to_string(&atlas)?;
         write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.mask_atlas = Some(atlas);
+            fog.mask_atlas = atlas;
         });
         Ok(())
     });
-    methods.add_method("SetMaskScalar", |lua, this, scalar: f64| {
+    methods.add_method("SetMaskScalar", |lua, this, scalar: Option<f64>| {
         write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.mask_scalar = Some(scalar);
+            fog.mask_scalar = scalar;
         });
         Ok(())
     });
