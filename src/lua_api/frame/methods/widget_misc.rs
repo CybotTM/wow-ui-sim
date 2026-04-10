@@ -468,9 +468,37 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
-    methods.add_method("UpdateHeight", |_, _this, ()| Ok(()));
-    methods.add_method("SetDefaultText", |_, _this, _text: Value| Ok(()));
-    methods.add_method("SetVisuals", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("UpdateHeight", |lua, this, ()| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "UpdateHeight") {
+            return func.call::<()>(self_value);
+        }
+        Ok(())
+    });
+    methods.add_method("SetDefaultText", |lua, this, text: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetDefaultText") {
+            return func.call::<()>((self_value, text));
+        }
+
+        widget_fields(lua, this.0)?.set("defaultText", text)?;
+        Ok(())
+    });
+    methods.add_method("SetVisuals", |lua, this, args: mlua::MultiValue| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetVisuals") {
+            let mut call_args = mlua::MultiValue::new();
+            call_args.push_back(self_value);
+            for value in args {
+                call_args.push_back(value);
+            }
+            return func.call::<()>(call_args);
+        }
+
+        let stored_args = lua.create_table()?;
+        for (index, value) in args.into_iter().enumerate() {
+            stored_args.set(index + 1, value)?;
+        }
+        widget_fields(lua, this.0)?.set("visualArgs", stored_args)?;
+        Ok(())
+    });
     methods.add_method(
         "RegisterForWidgetSet",
         |_, _this, _args: mlua::MultiValue| Ok(()),

@@ -567,6 +567,74 @@ fn test_widget_misc_item_button_methods_delegate_or_store_state() {
 }
 
 #[test]
+fn test_widget_misc_visual_methods_delegate_or_store_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool, bool) = env
+        .eval(
+            r##"
+            local frame = CreateFrame("Frame", "TestWidgetMiscVisualFrame", UIParent)
+            local frameFields = debug.getfenv(frame)[1]
+            frame:SetDefaultText("fallback")
+            local defaultStored = frameFields.defaultText == "fallback"
+
+            local texture = frame:CreateTexture(nil, "ARTWORK")
+            local textureFields = debug.getfenv(texture)[1]
+            texture:SetVisuals("left", 42, true)
+            local visualStored = textureFields.visualArgs
+                and textureFields.visualArgs[1] == "left"
+                and textureFields.visualArgs[2] == 42
+                and textureFields.visualArgs[3] == true
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscVisualOverrideFrame", UIParent)
+            local overrideFrameFields = debug.getfenv(overrideFrame)[1]
+            overrideFrameFields.SetDefaultText = function(self, text)
+                rawset(overrideFrameFields, "storedDefaultText", text)
+            end
+            overrideFrameFields.UpdateHeight = function(self)
+                rawset(overrideFrameFields, "heightUpdated", true)
+            end
+
+            local overrideTexture = overrideFrame:CreateTexture(nil, "ARTWORK")
+            local overrideTextureFields = debug.getfenv(overrideTexture)[1]
+            overrideTextureFields.SetVisuals = function(self, ...)
+                rawset(overrideTextureFields, "visualCount", select("#", ...))
+                rawset(overrideTextureFields, "visualFirst", (...))
+            end
+
+            overrideFrame:SetDefaultText("override")
+            overrideFrame:UpdateHeight()
+            overrideTexture:SetVisuals("tierSlot", 7, false)
+
+            return defaultStored,
+                visualStored,
+                overrideFrameFields.storedDefaultText == "override"
+                    and overrideTextureFields.visualCount == 3
+                    and overrideTextureFields.visualFirst == "tierSlot",
+                overrideFrameFields.heightUpdated == true
+        "##,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "SetDefaultText should store fallback default text on the frame"
+    );
+    assert!(
+        result.1,
+        "SetVisuals should store fallback visual arguments on the frame"
+    );
+    assert!(
+        result.2,
+        "SetDefaultText and SetVisuals should delegate to existing mixin overrides"
+    );
+    assert!(
+        result.3,
+        "UpdateHeight should delegate to an existing mixin override"
+    );
+}
+
+#[test]
 fn test_statusbar_set_color_fill_aliases_statusbar_color_state() {
     let env = WowLuaEnv::new().unwrap();
 
