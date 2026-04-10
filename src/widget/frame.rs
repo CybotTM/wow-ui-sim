@@ -49,6 +49,19 @@ pub struct AlphaGradient {
     pub length: f32,
 }
 
+#[derive(Debug, Clone, Default)]
+pub struct MinimapBlobLayerStyle {
+    pub texture: Option<String>,
+    pub alpha: f64,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct MinimapBlobRingStyle {
+    pub texture: Option<String>,
+    pub alpha: f64,
+    pub scalar: f64,
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -369,6 +382,24 @@ pub struct Frame {
     pub minimap_corpse_poi_arrow_texture: Option<String>,
     /// Stored Minimap static POI arrow texture asset.
     pub minimap_static_poi_arrow_texture: Option<String>,
+    /// Stored Minimap quest blob inside style.
+    pub quest_blob_inside: MinimapBlobLayerStyle,
+    /// Stored Minimap quest blob outside style.
+    pub quest_blob_outside: MinimapBlobLayerStyle,
+    /// Stored Minimap quest blob ring style.
+    pub quest_blob_ring: MinimapBlobRingStyle,
+    /// Stored Minimap task blob inside style.
+    pub task_blob_inside: MinimapBlobLayerStyle,
+    /// Stored Minimap task blob outside style.
+    pub task_blob_outside: MinimapBlobLayerStyle,
+    /// Stored Minimap task blob ring style.
+    pub task_blob_ring: MinimapBlobRingStyle,
+    /// Stored Minimap archaeology blob inside style.
+    pub arch_blob_inside: MinimapBlobLayerStyle,
+    /// Stored Minimap archaeology blob outside style.
+    pub arch_blob_outside: MinimapBlobLayerStyle,
+    /// Stored Minimap archaeology blob ring style.
+    pub arch_blob_ring: MinimapBlobRingStyle,
     /// Whether this texture is a MaskTexture (should not render).
     pub is_mask: bool,
     /// Mask texture IDs applied to this texture (for circular clipping etc.).
@@ -619,6 +650,15 @@ macro_rules! frame_defaults {
             minimap_poi_arrow_texture: None,
             minimap_corpse_poi_arrow_texture: None,
             minimap_static_poi_arrow_texture: None,
+            quest_blob_inside: MinimapBlobLayerStyle::default(),
+            quest_blob_outside: MinimapBlobLayerStyle::default(),
+            quest_blob_ring: MinimapBlobRingStyle::default(),
+            task_blob_inside: MinimapBlobLayerStyle::default(),
+            task_blob_outside: MinimapBlobLayerStyle::default(),
+            task_blob_ring: MinimapBlobRingStyle::default(),
+            arch_blob_inside: MinimapBlobLayerStyle::default(),
+            arch_blob_outside: MinimapBlobLayerStyle::default(),
+            arch_blob_ring: MinimapBlobRingStyle::default(),
             is_mask: false,
             mask_textures: Vec::new(),
             rotation: 0.0,

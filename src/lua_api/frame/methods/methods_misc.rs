@@ -963,33 +963,190 @@ fn texture_asset_to_string(asset: &Value) -> mlua::Result<Option<String>> {
     }
 }
 
-/// Minimap quest/task/arch blob setters (no-op stubs).
+/// Minimap quest/task/arch blob setters.
 fn add_minimap_blob_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_minimap_blob_family(methods, "Quest");
-    add_minimap_blob_family(methods, "Task");
-    add_minimap_blob_family(methods, "Arch");
+    add_minimap_blob_family(methods, BlobFamily::Quest);
+    add_minimap_blob_family(methods, BlobFamily::Task);
+    add_minimap_blob_family(methods, BlobFamily::Arch);
 }
 
-fn add_minimap_blob_family<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, prefix: &str) {
-    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobInsideTexture"));
-    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobInsideAlpha"));
-    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobOutsideTexture"));
-    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobOutsideAlpha"));
-    add_minimap_blob_texture_stub(methods, &format!("Set{prefix}BlobRingTexture"));
-    add_minimap_blob_scalar_stub(methods, &format!("Set{prefix}BlobRingScalar"));
-    add_minimap_blob_alpha_stub(methods, &format!("Set{prefix}BlobRingAlpha"));
+#[derive(Clone, Copy)]
+enum BlobFamily {
+    Quest,
+    Task,
+    Arch,
 }
 
-fn add_minimap_blob_texture_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
-    methods.add_method(name, |_, _this, _asset: Value| Ok(()));
+#[derive(Clone, Copy)]
+enum BlobLayer {
+    Inside,
+    Outside,
 }
 
-fn add_minimap_blob_alpha_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
-    methods.add_method(name, |_, _this, _alpha: f32| Ok(()));
+struct BlobMethodNames {
+    inside_texture: &'static str,
+    inside_alpha: &'static str,
+    outside_texture: &'static str,
+    outside_alpha: &'static str,
+    ring_texture: &'static str,
+    ring_alpha: &'static str,
+    ring_scalar: &'static str,
 }
 
-fn add_minimap_blob_scalar_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
-    methods.add_method(name, |_, _this, _scalar: f32| Ok(()));
+fn add_minimap_blob_family<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    family: BlobFamily,
+) {
+    let names = minimap_blob_method_names(family);
+    add_minimap_blob_texture_setter(methods, names.inside_texture, family, BlobLayer::Inside);
+    add_minimap_blob_alpha_setter(methods, names.inside_alpha, family, BlobLayer::Inside);
+    add_minimap_blob_texture_setter(methods, names.outside_texture, family, BlobLayer::Outside);
+    add_minimap_blob_alpha_setter(methods, names.outside_alpha, family, BlobLayer::Outside);
+    add_minimap_blob_ring_texture_setter(methods, names.ring_texture, family);
+    add_minimap_blob_ring_scalar_setter(methods, names.ring_scalar, family);
+    add_minimap_blob_ring_alpha_setter(methods, names.ring_alpha, family);
+}
+
+fn minimap_blob_method_names(family: BlobFamily) -> BlobMethodNames {
+    match family {
+        BlobFamily::Quest => BlobMethodNames {
+            inside_texture: "SetQuestBlobInsideTexture",
+            inside_alpha: "SetQuestBlobInsideAlpha",
+            outside_texture: "SetQuestBlobOutsideTexture",
+            outside_alpha: "SetQuestBlobOutsideAlpha",
+            ring_texture: "SetQuestBlobRingTexture",
+            ring_alpha: "SetQuestBlobRingAlpha",
+            ring_scalar: "SetQuestBlobRingScalar",
+        },
+        BlobFamily::Task => BlobMethodNames {
+            inside_texture: "SetTaskBlobInsideTexture",
+            inside_alpha: "SetTaskBlobInsideAlpha",
+            outside_texture: "SetTaskBlobOutsideTexture",
+            outside_alpha: "SetTaskBlobOutsideAlpha",
+            ring_texture: "SetTaskBlobRingTexture",
+            ring_alpha: "SetTaskBlobRingAlpha",
+            ring_scalar: "SetTaskBlobRingScalar",
+        },
+        BlobFamily::Arch => BlobMethodNames {
+            inside_texture: "SetArchBlobInsideTexture",
+            inside_alpha: "SetArchBlobInsideAlpha",
+            outside_texture: "SetArchBlobOutsideTexture",
+            outside_alpha: "SetArchBlobOutsideAlpha",
+            ring_texture: "SetArchBlobRingTexture",
+            ring_alpha: "SetArchBlobRingAlpha",
+            ring_scalar: "SetArchBlobRingScalar",
+        },
+    }
+}
+
+fn add_minimap_blob_texture_setter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    family: BlobFamily,
+    layer: BlobLayer,
+) {
+    methods.add_method(name, move |lua, this, asset: Value| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            let texture = texture_asset_to_string(&asset)?;
+            let layer_style = minimap_blob_layer_mut(frame, family, layer);
+            layer_style.texture = texture;
+        }
+        Ok(())
+    });
+}
+
+fn add_minimap_blob_alpha_setter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    family: BlobFamily,
+    layer: BlobLayer,
+) {
+    methods.add_method(name, move |lua, this, alpha: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            let layer_style = minimap_blob_layer_mut(frame, family, layer);
+            layer_style.alpha = alpha;
+        }
+        Ok(())
+    });
+}
+
+fn add_minimap_blob_ring_texture_setter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    family: BlobFamily,
+) {
+    methods.add_method(name, move |lua, this, asset: Value| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            let texture = texture_asset_to_string(&asset)?;
+            let ring_style = minimap_blob_ring_mut(frame, family);
+            ring_style.texture = texture;
+        }
+        Ok(())
+    });
+}
+
+fn add_minimap_blob_ring_alpha_setter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    family: BlobFamily,
+) {
+    methods.add_method(name, move |lua, this, alpha: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            let ring_style = minimap_blob_ring_mut(frame, family);
+            ring_style.alpha = alpha;
+        }
+        Ok(())
+    });
+}
+
+fn add_minimap_blob_ring_scalar_setter<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+    name: &'static str,
+    family: BlobFamily,
+) {
+    methods.add_method(name, move |lua, this, scalar: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            let ring_style = minimap_blob_ring_mut(frame, family);
+            ring_style.scalar = scalar;
+        }
+        Ok(())
+    });
+}
+
+fn minimap_blob_layer_mut(
+    frame: &mut crate::widget::Frame,
+    family: BlobFamily,
+    layer: BlobLayer,
+) -> &mut crate::widget::MinimapBlobLayerStyle {
+    match (family, layer) {
+        (BlobFamily::Quest, BlobLayer::Inside) => &mut frame.quest_blob_inside,
+        (BlobFamily::Quest, BlobLayer::Outside) => &mut frame.quest_blob_outside,
+        (BlobFamily::Task, BlobLayer::Inside) => &mut frame.task_blob_inside,
+        (BlobFamily::Task, BlobLayer::Outside) => &mut frame.task_blob_outside,
+        (BlobFamily::Arch, BlobLayer::Inside) => &mut frame.arch_blob_inside,
+        (BlobFamily::Arch, BlobLayer::Outside) => &mut frame.arch_blob_outside,
+    }
+}
+
+fn minimap_blob_ring_mut(
+    frame: &mut crate::widget::Frame,
+    family: BlobFamily,
+) -> &mut crate::widget::MinimapBlobRingStyle {
+    match family {
+        BlobFamily::Quest => &mut frame.quest_blob_ring,
+        BlobFamily::Task => &mut frame.task_blob_ring,
+        BlobFamily::Arch => &mut frame.arch_blob_ring,
+    }
 }
 
 /// ScrollingMessageFrame and EditBox stubs.

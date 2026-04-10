@@ -1197,6 +1197,102 @@ fn test_minimap_texture_setters_persist_asset_state() {
     );
 }
 
+#[test]
+fn test_minimap_blob_setters_persist_blob_style_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        MinimapBlobStateFrame = CreateFrame("Minimap", "MinimapBlobStateFrame", UIParent)
+
+        MinimapBlobStateFrame:SetQuestBlobInsideTexture("Interface\\Minimap\\Quest-Inside")
+        MinimapBlobStateFrame:SetQuestBlobInsideAlpha(0.25)
+        MinimapBlobStateFrame:SetQuestBlobOutsideTexture("Interface\\Minimap\\Quest-Outside")
+        MinimapBlobStateFrame:SetQuestBlobOutsideAlpha(0.5)
+        MinimapBlobStateFrame:SetQuestBlobRingTexture("Interface\\Minimap\\Quest-Ring")
+        MinimapBlobStateFrame:SetQuestBlobRingAlpha(0.75)
+        MinimapBlobStateFrame:SetQuestBlobRingScalar(1.25)
+
+        MinimapBlobStateFrame:SetTaskBlobInsideTexture("Interface\\Minimap\\Task-Inside")
+        MinimapBlobStateFrame:SetTaskBlobInsideAlpha(0.3)
+        MinimapBlobStateFrame:SetTaskBlobOutsideTexture("Interface\\Minimap\\Task-Outside")
+        MinimapBlobStateFrame:SetTaskBlobOutsideAlpha(0.6)
+        MinimapBlobStateFrame:SetTaskBlobRingTexture("Interface\\Minimap\\Task-Ring")
+        MinimapBlobStateFrame:SetTaskBlobRingAlpha(0.9)
+        MinimapBlobStateFrame:SetTaskBlobRingScalar(1.5)
+
+        MinimapBlobStateFrame:SetArchBlobInsideTexture("Interface\\Minimap\\Arch-Inside")
+        MinimapBlobStateFrame:SetArchBlobInsideAlpha(0.4)
+        MinimapBlobStateFrame:SetArchBlobOutsideTexture("Interface\\Minimap\\Arch-Outside")
+        MinimapBlobStateFrame:SetArchBlobOutsideAlpha(0.7)
+        MinimapBlobStateFrame:SetArchBlobRingTexture("Interface\\Minimap\\Arch-Ring")
+        MinimapBlobStateFrame:SetArchBlobRingAlpha(1.0)
+        MinimapBlobStateFrame:SetArchBlobRingScalar(1.75)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let minimap_id = state
+        .widgets
+        .get_id_by_name("MinimapBlobStateFrame")
+        .expect("minimap should exist");
+    let minimap = state
+        .widgets
+        .get(minimap_id)
+        .expect("minimap frame should be readable");
+
+    assert_eq!(
+        minimap.quest_blob_inside.texture.as_deref(),
+        Some("Interface\\Minimap\\Quest-Inside")
+    );
+    assert_eq!(minimap.quest_blob_inside.alpha, 0.25);
+    assert_eq!(
+        minimap.quest_blob_outside.texture.as_deref(),
+        Some("Interface\\Minimap\\Quest-Outside")
+    );
+    assert_eq!(minimap.quest_blob_outside.alpha, 0.5);
+    assert_eq!(
+        minimap.quest_blob_ring.texture.as_deref(),
+        Some("Interface\\Minimap\\Quest-Ring")
+    );
+    assert_eq!(minimap.quest_blob_ring.alpha, 0.75);
+    assert_eq!(minimap.quest_blob_ring.scalar, 1.25);
+
+    assert_eq!(
+        minimap.task_blob_inside.texture.as_deref(),
+        Some("Interface\\Minimap\\Task-Inside")
+    );
+    assert_eq!(minimap.task_blob_inside.alpha, 0.3);
+    assert_eq!(
+        minimap.task_blob_outside.texture.as_deref(),
+        Some("Interface\\Minimap\\Task-Outside")
+    );
+    assert_eq!(minimap.task_blob_outside.alpha, 0.6);
+    assert_eq!(
+        minimap.task_blob_ring.texture.as_deref(),
+        Some("Interface\\Minimap\\Task-Ring")
+    );
+    assert_eq!(minimap.task_blob_ring.alpha, 0.9);
+    assert_eq!(minimap.task_blob_ring.scalar, 1.5);
+
+    assert_eq!(
+        minimap.arch_blob_inside.texture.as_deref(),
+        Some("Interface\\Minimap\\Arch-Inside")
+    );
+    assert_eq!(minimap.arch_blob_inside.alpha, 0.4);
+    assert_eq!(
+        minimap.arch_blob_outside.texture.as_deref(),
+        Some("Interface\\Minimap\\Arch-Outside")
+    );
+    assert_eq!(minimap.arch_blob_outside.alpha, 0.7);
+    assert_eq!(
+        minimap.arch_blob_ring.texture.as_deref(),
+        Some("Interface\\Minimap\\Arch-Ring")
+    );
+    assert_eq!(minimap.arch_blob_ring.alpha, 1.0);
+    assert_eq!(minimap.arch_blob_ring.scalar, 1.75);
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
