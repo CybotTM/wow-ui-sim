@@ -1,4 +1,4 @@
-use super::super::handle::FrameRef;
+use super::super::handle::{FrameRef, extract_frame_id};
 use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
@@ -651,7 +651,31 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         };
         Ok(Value::String(lua.create_string(&location)?))
     });
-    methods.add_method("Intersects", |_lua, _this, _region: Value| Ok(false));
+    methods.add_method("Intersects", |lua, this, region: Value| {
+        let Some(other_id) = extract_frame_id(&region) else {
+            return Ok(false);
+        };
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let this_id = this.0;
+        state.resolve_rect_if_dirty(this_id);
+        state.resolve_rect_if_dirty(other_id);
+
+        let Some(this_frame) = state.widgets.get(this_id) else {
+            return Ok(false);
+        };
+        let Some(other_frame) = state.widgets.get(other_id) else {
+            return Ok(false);
+        };
+        let Some(this_rect) = this_frame.layout_rect else {
+            return Ok(false);
+        };
+        let Some(other_rect) = other_frame.layout_rect else {
+            return Ok(false);
+        };
+
+        Ok(layout_rects_intersect(this_rect, other_rect))
+    });
     methods.add_method("IsDrawLayerEnabled", |_lua, _this, _layer: String| Ok(true));
     methods.add_method(
         "SetDrawLayerEnabled",
@@ -686,6 +710,14 @@ fn source_location_for_owner(
         return Some("Interface/FrameXML".to_string());
     }
     Some(format!("Interface/AddOns/{folder}"))
+}
+
+fn layout_rects_intersect(a: crate::LayoutRect, b: crate::LayoutRect) -> bool {
+    let left = a.x.max(b.x);
+    let top = a.y.max(b.y);
+    let right = (a.x + a.width).min(b.x + b.width);
+    let bottom = (a.y + a.height).min(b.y + b.height);
+    right > left && bottom > top
 }
 
 #[cfg(test)]

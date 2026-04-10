@@ -531,6 +531,50 @@ fn test_is_mouse_over_requires_mouse_enabled() {
     );
 }
 
+#[test]
+fn test_intersects_uses_resolved_layout_rects_for_overlapping_frames() {
+    let (t, _) = load_test_lua(
+        "test-intersects-overlap",
+        r#"
+        local a = CreateFrame("Frame", "IntersectFrameA", UIParent)
+        a:SetSize(100, 100)
+        a:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+
+        local b = CreateFrame("Frame", "IntersectFrameB", UIParent)
+        b:SetSize(100, 100)
+        b:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 150, -150)
+
+        INTERSECTS = a:Intersects(b)
+    "#,
+    );
+
+    t.assert_lua_true(
+        "return INTERSECTS",
+        "overlapping frames should intersect even when layout was not pre-resolved",
+    );
+}
+
+#[test]
+fn test_intersects_returns_false_for_disjoint_frames() {
+    let (t, _) = load_test_lua(
+        "test-intersects-disjoint",
+        r#"
+        local a = CreateFrame("Frame", "DisjointFrameA", UIParent)
+        a:SetSize(100, 100)
+        a:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+
+        local b = CreateFrame("Frame", "DisjointFrameB", UIParent)
+        b:SetSize(100, 100)
+        b:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 400, -400)
+
+        INTERSECTS = a:Intersects(b)
+    "#,
+    );
+
+    let result: bool = t.env.eval("return INTERSECTS").unwrap();
+    assert!(!result, "disjoint frames should not intersect");
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
