@@ -550,6 +550,7 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
     g.set("C_HousingBasicMode", basic)?;
 
     g.set("C_HousingCatalog", make_c_housing_catalog(lua, &g)?)?;
+    g.set("C_HouseExterior", make_c_house_exterior(lua, &g)?)?;
 
     Ok(())
 }
@@ -607,6 +608,41 @@ fn create_get_player_owned_houses_fn(lua: &Lua) -> Result<mlua::Function> {
         )?;
         Ok(house_list)
     })
+}
+
+struct HouseExteriorState {
+    decor_hidden: bool,
+    house_exterior_has_attached_decor: bool,
+    door_has_attached_decor: bool,
+    selected_fixture_point_has_attached_decor: bool,
+    core_fixture_attached_decor: HashMap<i32, bool>,
+}
+
+impl HouseExteriorState {
+    fn seeded() -> Self {
+        let core_fixture_attached_decor = [
+            (house_exterior_base_fixture_type(), true),
+            (house_exterior_roof_fixture_type(), false),
+        ]
+        .into_iter()
+        .collect();
+
+        Self {
+            decor_hidden: false,
+            house_exterior_has_attached_decor: true,
+            door_has_attached_decor: true,
+            selected_fixture_point_has_attached_decor: true,
+            core_fixture_attached_decor,
+        }
+    }
+}
+
+const fn house_exterior_base_fixture_type() -> i32 {
+    9
+}
+
+const fn house_exterior_roof_fixture_type() -> i32 {
+    10
 }
 
 #[derive(Clone)]
@@ -713,8 +749,21 @@ fn make_c_housing_catalog(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Tabl
     Ok(catalog)
 }
 
+fn make_c_house_exterior(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
+    let exterior = ensure_c_house_exterior_table(lua, globals)?;
+    register_c_house_exterior_methods(lua, &exterior)?;
+    Ok(exterior)
+}
+
 fn ensure_c_housing_catalog_table(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
     match globals.get::<Value>("C_HousingCatalog")? {
+        Value::Table(t) => Ok(t),
+        _ => lua.create_table(),
+    }
+}
+
+fn ensure_c_house_exterior_table(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
+    match globals.get::<Value>("C_HouseExterior")? {
         Value::Table(t) => Ok(t),
         _ => lua.create_table(),
     }
@@ -871,6 +920,58 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             };
             bundle.was_viewed = true;
             Ok(true)
+        })?,
+    )?;
+
+    Ok(())
+}
+
+fn register_c_house_exterior_methods(lua: &Lua, exterior: &mlua::Table) -> Result<()> {
+    let state = Rc::new(RefCell::new(HouseExteriorState::seeded()));
+
+    let state_ref = Rc::clone(&state);
+    exterior.set(
+        "IsAnyDecorAttachedToHouseExterior",
+        lua.create_function(move |_, ()| Ok(state_ref.borrow().house_exterior_has_attached_decor))?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    exterior.set(
+        "IsAnyDecorAttachedToDoor",
+        lua.create_function(move |_, ()| Ok(state_ref.borrow().door_has_attached_decor))?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    exterior.set(
+        "IsAnyDecorAttachedToSelectedFixturePoint",
+        lua.create_function(move |_, ()| {
+            Ok(state_ref.borrow().selected_fixture_point_has_attached_decor)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    exterior.set(
+        "IsAnyDecorAttachedToCoreFixture",
+        lua.create_function(move |_, core_fixture_type: i32| {
+            Ok(*state_ref
+                .borrow()
+                .core_fixture_attached_decor
+                .get(&core_fixture_type)
+                .unwrap_or(&false))
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    exterior.set(
+        "IsExteriorDecorHidden",
+        lua.create_function(move |_, ()| Ok(state_ref.borrow().decor_hidden))?,
+    )?;
+
+    exterior.set(
+        "SetExteriorDecorHidden",
+        lua.create_function(move |_, hidden: bool| {
+            state.borrow_mut().decor_hidden = hidden;
+            Ok(())
         })?,
     )?;
 
