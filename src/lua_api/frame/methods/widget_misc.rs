@@ -22,7 +22,9 @@ pub fn add_drag_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 pub fn add_simplehtml_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_simplehtml_hyperlink_methods(methods);
     add_simplehtml_content_methods(methods);
-    methods.add_method("GetIndentedWordWrap", |_, _, ()| Ok(false));
+    methods.add_method("GetIndentedWordWrap", |lua, this, text_type: String| {
+        Ok(read_simplehtml_indented_word_wrap(lua, this.0, &text_type))
+    });
 }
 
 pub fn add_misc_widget_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -117,6 +119,15 @@ where
     methods.add_method(name, move |lua, this, ()| {
         Ok(read_simplehtml_data(lua, this.0, default, getter))
     });
+}
+
+fn read_simplehtml_indented_word_wrap(lua: &mlua::Lua, id: u64, text_type: &str) -> bool {
+    read_simplehtml_data(lua, id, false, |data| {
+        data.text_styles
+            .get(text_type)
+            .map(|style| style.indented_word_wrap)
+            .unwrap_or(false)
+    })
 }
 
 fn add_simplehtml_content_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

@@ -1524,6 +1524,35 @@ fn test_simplehtml_settext_strips_tags() {
     assert_eq!(text, "Hello World", "HTML tags should be stripped");
 }
 
+#[test]
+fn test_simplehtml_indented_word_wrap_round_trips_by_text_type() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local sh = CreateFrame("SimpleHTML", "TestSHIndentWrap", UIParent)
+        sh:SetIndentedWordWrap("p", true)
+    "#,
+    )
+    .unwrap();
+
+    let enabled: bool = env
+        .eval(r#"return TestSHIndentWrap:GetIndentedWordWrap("p")"#)
+        .unwrap();
+    assert!(
+        enabled,
+        "SimpleHTML should report the stored indented word wrap state for the text type"
+    );
+
+    let default_other: bool = env
+        .eval(r#"return TestSHIndentWrap:GetIndentedWordWrap("h1")"#)
+        .unwrap();
+    assert!(
+        !default_other,
+        "SimpleHTML should default to false for text types without stored wrap state"
+    );
+}
+
 // ============================================================================
 // Drag/Moving: SetMovable / IsMovable / StartMoving / StopMovingOrSizing
 // ============================================================================
