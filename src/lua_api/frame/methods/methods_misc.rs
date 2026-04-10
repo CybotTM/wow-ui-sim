@@ -369,8 +369,33 @@ fn set_alpha_gradient_result(widget_type: crate::widget::WidgetType, applied: bo
 
 /// Draw Layer stubs.
 fn add_draw_layer_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("DisableDrawLayer", |_, _this, _layer: String| Ok(()));
-    methods.add_method("EnableDrawLayer", |_, _this, _layer: String| Ok(()));
+    methods.add_method("DisableDrawLayer", |lua, this, layer: String| {
+        set_draw_layer_enabled(lua, this.0, &layer, false)
+    });
+    methods.add_method("EnableDrawLayer", |lua, this, layer: String| {
+        set_draw_layer_enabled(lua, this.0, &layer, true)
+    });
+}
+
+fn set_draw_layer_enabled(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    layer: &str,
+    enabled: bool,
+) -> mlua::Result<()> {
+    let Some(layer) = draw_layer_from_name(layer) else {
+        return Ok(());
+    };
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.set_draw_layer_enabled(layer, enabled);
+    }
+    Ok(())
+}
+
+fn draw_layer_from_name(layer: &str) -> Option<crate::widget::DrawLayer> {
+    crate::widget::DrawLayer::from_str(layer)
 }
 
 /// Frame Buffer/Rendering stubs.

@@ -607,6 +607,35 @@ fn test_draw_layer_enabled_round_trip_tracks_per_layer_frame_state() {
 }
 
 #[test]
+fn test_draw_layer_legacy_toggle_methods_update_layer_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.eval::<()>(
+        r#"
+        local f = CreateFrame("Frame", "LegacyLayerToggleFrame", UIParent)
+
+        assert(f:IsDrawLayerEnabled("ARTWORK") == true, "artwork should default enabled")
+
+        f:DisableDrawLayer("ARTWORK")
+        assert(f:IsDrawLayerEnabled("ARTWORK") == false, "DisableDrawLayer should disable artwork")
+
+        f:EnableDrawLayer("ARTWORK")
+        assert(f:IsDrawLayerEnabled("ARTWORK") == true, "EnableDrawLayer should re-enable artwork")
+
+        DRAW_LAYER_LEGACY_TOGGLE_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return DRAW_LAYER_LEGACY_TOGGLE_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "EnableDrawLayer / DisableDrawLayer Lua round-trip failed"
+    );
+}
+
+#[test]
 fn test_drag_methods_transfer_and_clear_active_drag_frame() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
