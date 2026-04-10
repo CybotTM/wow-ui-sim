@@ -21,7 +21,7 @@ Summary of gaps:
 |---|---|---|
 | Frame methods | 1382 | 3810 |
 | C_* functions | 208 | 152 |
-| Global functions | 310 | 182 |
+| Global functions | 107 | 182 |
 | Enums | 1430 | 2 |
 | Constants | 1364 (72 wrong value) | 12 |
 | C_* namespaces | 6 | 11 |
@@ -416,7 +416,36 @@ the still-unreconciled constants such as item quality color codes, `LE_CHARACTER
 
 ---
 
-## Section 7: Extra Stubs to Remove or Investigate
+## Section 7: Missing Global Functions
+
+**Count**: 107
+
+`diff_global_functions_missing.txt` is now intentionally filtered. It tracks only Blizzard-owned
+startup/API globals that still belong in `src/lua_api/globals` or `src/lua_api/globals_legacy.rs`,
+and it explicitly drops addon pollution from third-party prefixes like `Angleur_`, `Details`,
+`Auctionator`, `AllTheThings`, `DejunkBindings_`, `Plumber_`, `KrowiEVU_`, and similar leak paths.
+
+The remaining missing surface is dominated by the chat stack:
+
+- `ChatEdit_*`
+- `ChatFrame_*`
+- `Chat_*`
+
+plus the small standalone helper set Blizzard still calls globally:
+
+- `GetCVarTableValue`
+- `SetCVarTableValue`
+- `GetChatTimestampFormat`
+- `GetMobileEmbeddedTexture`
+- `ResolvePrefixedChannelName`
+- `SubstituteChatMessageBeforeSend`
+
+**Task**: implement the remaining filtered globals without re-expanding this file back into a raw
+addon-polluted discovery dump.
+
+---
+
+## Section 8: Extra Stubs to Remove or Investigate
 
 **Extra C_* namespaces**: `0`
 
