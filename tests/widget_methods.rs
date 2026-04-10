@@ -493,6 +493,52 @@ fn test_statusbar_interpolation_methods_track_target_and_displayed_value() {
 }
 
 #[test]
+fn test_statusbar_desaturation_methods_share_persisted_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (f64, bool, bool, f64, bool, bool) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "TestStatusBarDesaturation", UIParent)
+            sb:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+            local texture = sb:GetStatusBarTexture()
+
+            sb:SetStatusBarDesaturation(0.4)
+            local normalized = sb:GetStatusBarDesaturation()
+            local isDesaturated = sb:IsStatusBarDesaturated()
+            local textureIsDesaturated = texture:IsDesaturated()
+
+            sb:SetStatusBarDesaturated(false)
+            local clearedNormalized = sb:GetStatusBarDesaturation()
+            local clearedBool = sb:IsStatusBarDesaturated()
+            local clearedTexture = texture:IsDesaturated()
+
+            return normalized, isDesaturated, textureIsDesaturated, clearedNormalized, clearedBool, clearedTexture
+        "#,
+        )
+        .unwrap();
+
+    assert!((result.0 - 0.4).abs() < 0.001);
+    assert!(
+        result.1,
+        "normalized desaturation should mark the status bar desaturated"
+    );
+    assert!(
+        result.2,
+        "status bar texture child should inherit desaturation"
+    );
+    assert_eq!(result.3, 0.0);
+    assert!(
+        !result.4,
+        "bool state should clear through SetStatusBarDesaturated(false)"
+    );
+    assert!(
+        !result.5,
+        "texture state should clear through SetStatusBarDesaturated(false)"
+    );
+}
+
+#[test]
 fn test_player_model_methods_still_resolve() {
     let env = WowLuaEnv::new().unwrap();
 

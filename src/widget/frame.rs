@@ -460,6 +460,8 @@ pub struct Frame {
     pub statusbar_texture_path: Option<String>,
     /// StatusBar bar texture child ID (set by SetStatusBarTexture).
     pub statusbar_bar_id: Option<u64>,
+    /// StatusBar desaturation amount in the normalized 0..1 range.
+    pub statusbar_desaturation: f64,
     /// StatusBar fill style ("STANDARD", "CENTER", etc.).
     pub statusbar_fill_style: String,
     /// Whether statusbar fills in reverse.
@@ -710,6 +712,7 @@ macro_rules! frame_defaults {
             statusbar_color: None,
             statusbar_texture_path: None,
             statusbar_bar_id: None,
+            statusbar_desaturation: 0.0,
             statusbar_fill_style: "STANDARD".to_string(),
             statusbar_reverse_fill: false,
             statusbar_orientation: "HORIZONTAL".to_string(),

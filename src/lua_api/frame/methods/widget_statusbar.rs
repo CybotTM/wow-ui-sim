@@ -16,13 +16,7 @@ pub fn add_statusbar_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_statusbar_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetStatusBarDesaturation", |_, _, ()| Ok(0.0_f64));
     methods.add_method("GetTimerDuration", |_, _, ()| Ok(0.0_f64));
-    methods.add_method("IsStatusBarDesaturated", |_, _, ()| Ok(false));
-    methods.add_method(
-        "SetStatusBarDesaturation",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
     methods.add_method("SetTimerDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
@@ -85,6 +79,7 @@ fn add_set_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             apply_statusbar_texture_path(lua, &mut state, id, tex_str);
         }
         if let Some(bid) = bar_id {
+            sync_statusbar_child_desaturation(&mut state.widgets, id, bid);
             anchor_bar_to_parent(&mut state.widgets, bid, id);
         }
         Ok(true)
@@ -182,8 +177,23 @@ fn add_statusbar_fill_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 }
 
 fn add_statusbar_desaturate_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetStatusBarDesaturated", |_, _this, _desat: bool| Ok(()));
-    methods.add_method("GetStatusBarDesaturated", |_, _this, ()| Ok(false));
+    methods.add_method("SetStatusBarDesaturated", |lua, this, desat: bool| {
+        set_statusbar_desaturation(lua, this.0, if desat { 1.0 } else { 0.0 });
+        Ok(())
+    });
+    methods.add_method("GetStatusBarDesaturated", |lua, this, ()| {
+        Ok(read_statusbar_desaturation(lua, this.0) > 0.0)
+    });
+    methods.add_method("SetStatusBarDesaturation", |lua, this, desat: f64| {
+        set_statusbar_desaturation(lua, this.0, desat);
+        Ok(())
+    });
+    methods.add_method("GetStatusBarDesaturation", |lua, this, ()| {
+        Ok(read_statusbar_desaturation(lua, this.0))
+    });
+    methods.add_method("IsStatusBarDesaturated", |lua, this, ()| {
+        Ok(read_statusbar_desaturation(lua, this.0) > 0.0)
+    });
     methods.add_method("SetStatusBarAtlas", |lua, this, atlas: String| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
@@ -212,6 +222,7 @@ fn apply_statusbar_texture_path(
         frame.statusbar_bar_id = Some(bar_child_id);
     }
     apply_bar_texture(&mut state.widgets, bar_child_id, tex_str);
+    sync_statusbar_child_desaturation(&mut state.widgets, id, bar_child_id);
     anchor_bar_to_parent(&mut state.widgets, bar_child_id, id);
 }
 
@@ -252,6 +263,46 @@ fn apply_bar_texture(widgets: &mut crate::widget::WidgetRegistry, child_id: u64,
         frame.tex_coords = None;
         frame.tex_coords_quad = None;
         frame.atlas_tex_coords = None;
+    }
+}
+
+fn set_statusbar_desaturation(lua: &mlua::Lua, id: u64, desaturation: f64) {
+    let clamped = desaturation.clamp(0.0, 1.0);
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let child_id = state
+        .widgets
+        .get(id)
+        .and_then(|frame| frame.statusbar_bar_id);
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.statusbar_desaturation = clamped;
+    }
+    if let Some(child_id) = child_id {
+        sync_statusbar_child_desaturation(&mut state.widgets, id, child_id);
+    }
+}
+
+fn read_statusbar_desaturation(lua: &mlua::Lua, id: u64) -> f64 {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|frame| frame.statusbar_desaturation)
+        .unwrap_or(0.0)
+}
+
+fn sync_statusbar_child_desaturation(
+    widgets: &mut crate::widget::WidgetRegistry,
+    parent_id: u64,
+    child_id: u64,
+) {
+    let is_desaturated = widgets
+        .get(parent_id)
+        .map(|frame| frame.statusbar_desaturation > 0.0)
+        .unwrap_or(false);
+    if let Some(child) = widgets.get_mut_visual(child_id) {
+        child.desaturated = is_desaturated;
     }
 }
 
