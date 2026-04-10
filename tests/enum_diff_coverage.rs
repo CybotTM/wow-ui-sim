@@ -151,6 +151,33 @@ fn edit_mode_chat_frame_display_only_setting_is_available_with_expected_values()
 }
 
 #[test]
+fn housing_fixture_decor_action_is_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local enumTable = Enum.HousingFixtureDecorAction
+            if type(enumTable) ~= "table" then
+                return "missing_enum"
+            end
+
+            if enumTable.Store ~= 0 then
+                return "wrong_store:" .. tostring(enumTable.Store)
+            end
+
+            if enumTable.Detach ~= 1 then
+                return "wrong_detach:" .. tostring(enumTable.Detach)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(

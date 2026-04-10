@@ -407,6 +407,9 @@ pub const HOUSE_OWNER_ERROR: EnumDef = (
     &[("Faction", 0), ("Guild", 1), ("GenericPermission", 2)],
 );
 
+pub const HOUSING_FIXTURE_DECOR_ACTION: EnumDef =
+    ("HousingFixtureDecorAction", &[("Store", 0), ("Detach", 1)]);
+
 pub const HOUSING_LAYOUT_RESTRICTION: SeqEnumDef = (
     "HousingLayoutRestriction",
     &[
