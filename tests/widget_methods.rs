@@ -840,6 +840,72 @@ fn test_player_model_rendering_flag_methods_persist_state() {
     assert!(frame.model_rendering.use_gbuffer);
 }
 
+#[test]
+fn test_player_model_specific_methods_persist_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local pm = CreateFrame("PlayerModel", "TestPlayerModelSpecificState", UIParent)
+        pm:SetDoBlend(true)
+        pm:SetKeepModelOnHide(true)
+        pm:SetItem(19019)
+        pm:SetItemAppearance(4242)
+        pm:PlayAnimKit(777)
+    "#,
+    )
+    .unwrap();
+
+    let lua_state: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return TestPlayerModelSpecificState:CanSetUnit(),
+                   TestPlayerModelSpecificState:GetDoBlend(),
+                   TestPlayerModelSpecificState:GetKeepModelOnHide()
+        "#,
+        )
+        .unwrap();
+    assert!(
+        lua_state.0,
+        "PlayerModel should report unit assignment support"
+    );
+    assert!(
+        lua_state.1,
+        "SetDoBlend should round-trip through GetDoBlend"
+    );
+    assert!(
+        lua_state.2,
+        "SetKeepModelOnHide should round-trip through GetKeepModelOnHide"
+    );
+
+    let model_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestPlayerModelSpecificState")
+        .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(model_id).unwrap();
+        assert!(frame.player_model_state.do_blend);
+        assert!(frame.player_model_state.keep_model_on_hide);
+        assert_eq!(frame.player_model_state.last_item.as_deref(), Some("19019"));
+        assert_eq!(
+            frame.player_model_state.last_item_appearance.as_deref(),
+            Some("4242")
+        );
+        assert_eq!(frame.player_model_state.active_anim_kit, Some(777));
+    }
+
+    env.exec("TestPlayerModelSpecificState:StopAnimKit()")
+        .unwrap();
+
+    let state = env.state().borrow();
+    let frame = state.widgets.get(model_id).unwrap();
+    assert_eq!(frame.player_model_state.active_anim_kit, None);
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

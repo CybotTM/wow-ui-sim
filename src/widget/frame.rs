@@ -130,6 +130,15 @@ impl Default for ModelRenderingState {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct PlayerModelState {
+    pub do_blend: bool,
+    pub keep_model_on_hide: bool,
+    pub last_item: Option<String>,
+    pub last_item_appearance: Option<String>,
+    pub active_anim_kit: Option<i32>,
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -495,6 +504,8 @@ pub struct Frame {
     pub model_appearance: ModelAppearanceState,
     /// Persisted model rendering flags.
     pub model_rendering: ModelRenderingState,
+    /// Persisted PlayerModel-only state.
+    pub player_model_state: PlayerModelState,
     /// Whether mouse motion events are enabled.
     pub mouse_motion_enabled: bool,
     /// User-set frame ID (from XML `id` attribute or SetID()).
@@ -771,6 +782,7 @@ macro_rules! frame_defaults {
             model_transform: ModelTransformState::default(),
             model_appearance: ModelAppearanceState::default(),
             model_rendering: ModelRenderingState::default(),
+            player_model_state: PlayerModelState::default(),
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,
