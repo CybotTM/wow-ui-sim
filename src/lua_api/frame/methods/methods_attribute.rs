@@ -303,7 +303,11 @@ fn execute_attribute_body(
 fn frame_is_protected(lua: &mlua::Lua, id: u64) -> bool {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
-    state.widgets.get(id).map(|frame| frame.is_protected).unwrap_or(false)
+    state
+        .widgets
+        .get(id)
+        .map(|frame| frame.is_protected)
+        .unwrap_or(false)
 }
 
 fn execute_attribute_success(results: MultiValue) -> MultiValue {
