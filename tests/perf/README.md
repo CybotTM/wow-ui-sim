@@ -12,5 +12,10 @@ Planned use:
 - common timing helpers and budget assertions
 - scenario builders reused by startup, layout, and rendering perf tests
 
+The first shared helper lives in `tests/perf/mod.rs`:
+
+- `run_game_ui_cases(...)` loads and settles the full Blizzard game UI once,
+  then runs multiple named perf cases against that single `WowLuaEnv`
+
 Keep regression-gated perf tests in ordinary `cargo test` workflows rather than
 standalone benchmark-only harnesses.
