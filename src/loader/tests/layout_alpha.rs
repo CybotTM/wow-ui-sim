@@ -173,10 +173,13 @@ fn test_ignore_parent_alpha_flag_round_trip() {
         r#"
         local f = CreateFrame("Frame")
         BEFORE = f:GetIgnoreParentAlpha()
+        BEFORE_ALIAS = f:IsIgnoringParentAlpha()
         f:SetIgnoreParentAlpha(true)
         AFTER_ENABLE = f:GetIgnoreParentAlpha()
+        AFTER_ENABLE_ALIAS = f:IsIgnoringParentAlpha()
         f:SetIgnoreParentAlpha(false)
         AFTER_DISABLE = f:GetIgnoreParentAlpha()
+        AFTER_DISABLE_ALIAS = f:IsIgnoringParentAlpha()
     "#,
     );
     assert!(
@@ -184,12 +187,24 @@ fn test_ignore_parent_alpha_flag_round_trip() {
         "frames should default to GetIgnoreParentAlpha() == false",
     );
     assert!(
+        !t.env.eval::<bool>("return BEFORE_ALIAS").unwrap(),
+        "frames should default to IsIgnoringParentAlpha() == false",
+    );
+    assert!(
         t.env.eval::<bool>("return AFTER_ENABLE").unwrap(),
         "SetIgnoreParentAlpha(true) should persist on the frame",
     );
     assert!(
+        t.env.eval::<bool>("return AFTER_ENABLE_ALIAS").unwrap(),
+        "IsIgnoringParentAlpha() should reflect SetIgnoreParentAlpha(true)",
+    );
+    assert!(
         !t.env.eval::<bool>("return AFTER_DISABLE").unwrap(),
         "SetIgnoreParentAlpha(false) should clear the frame state",
+    );
+    assert!(
+        !t.env.eval::<bool>("return AFTER_DISABLE_ALIAS").unwrap(),
+        "IsIgnoringParentAlpha() should reflect SetIgnoreParentAlpha(false)",
     );
 }
 

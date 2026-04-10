@@ -198,23 +198,38 @@ fn test_ignore_parent_scale_flag_round_trip() {
         r#"
         local f = CreateFrame("Frame", nil, UIParent)
         BEFORE = f:GetIgnoreParentScale()
+        BEFORE_ALIAS = f:IsIgnoringParentScale()
         f:SetIgnoreParentScale(true)
         AFTER_ENABLE = f:GetIgnoreParentScale()
+        AFTER_ENABLE_ALIAS = f:IsIgnoringParentScale()
         f:SetIgnoreParentScale(false)
         AFTER_DISABLE = f:GetIgnoreParentScale()
+        AFTER_DISABLE_ALIAS = f:IsIgnoringParentScale()
     "#,
     );
     assert!(
         !t.env.eval::<bool>("return BEFORE").unwrap(),
         "frames should default to GetIgnoreParentScale() == false",
     );
+    assert!(
+        !t.env.eval::<bool>("return BEFORE_ALIAS").unwrap(),
+        "frames should default to IsIgnoringParentScale() == false",
+    );
     t.assert_lua_true(
         "return AFTER_ENABLE",
         "SetIgnoreParentScale(true) should persist on the frame",
     );
+    t.assert_lua_true(
+        "return AFTER_ENABLE_ALIAS",
+        "IsIgnoringParentScale() should reflect SetIgnoreParentScale(true)",
+    );
     assert!(
         !t.env.eval::<bool>("return AFTER_DISABLE").unwrap(),
         "SetIgnoreParentScale(false) should clear the frame state",
+    );
+    assert!(
+        !t.env.eval::<bool>("return AFTER_DISABLE_ALIAS").unwrap(),
+        "IsIgnoringParentScale() should reflect SetIgnoreParentScale(false)",
     );
 }
 

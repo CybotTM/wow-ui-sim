@@ -582,8 +582,6 @@ fn add_alpha_gradient_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
             .map(|frame| !frame.alpha_gradients.is_empty())
             .unwrap_or(false))
     });
-    methods.add_method("IsIgnoringParentAlpha", |_, _this, ()| Ok(false));
-    methods.add_method("IsIgnoringParentScale", |_, _this, ()| Ok(false));
     methods.add_method("SetAlphaGradient", |lua, this, args: MultiValue| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();

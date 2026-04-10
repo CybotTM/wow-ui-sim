@@ -223,6 +223,15 @@ fn add_ignore_parent_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
             .map(|f| f.ignore_parent_alpha)
             .unwrap_or(false))
     });
+    methods.add_method("IsIgnoringParentAlpha", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.ignore_parent_alpha)
+            .unwrap_or(false))
+    });
 }
 
 fn add_strata_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -571,6 +580,15 @@ fn add_ignore_parent_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     });
 
     methods.add_method("GetIgnoreParentScale", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.ignore_parent_scale)
+            .unwrap_or(false))
+    });
+    methods.add_method("IsIgnoringParentScale", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
         Ok(state
