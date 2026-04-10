@@ -30,6 +30,68 @@ fn test_create_scrollframe_basic() {
     assert_eq!(obj_type, "ScrollFrame");
 }
 
+#[test]
+fn test_scrollframe_update_scroll_child_rect_uses_resolved_subtree_bounds() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local sf = CreateFrame("ScrollFrame", "TestScrollFrameRectRefresh", UIParent)
+        sf:SetSize(100, 100)
+        sf:SetPoint("CENTER")
+
+        local child = CreateFrame("Frame", nil, sf)
+        child:SetSize(100, 100)
+        child:SetPoint("TOPLEFT", sf, "TOPLEFT", 0, 0)
+        sf:SetScrollChild(child)
+
+        local content = CreateFrame("Frame", nil, child)
+        content:SetSize(180, 220)
+        content:SetPoint("TOPLEFT", child, "TOPLEFT", 0, 0)
+    "#,
+    )
+    .unwrap();
+
+    let before: (f64, f64) = env
+        .eval(
+            "return TestScrollFrameRectRefresh:GetHorizontalScrollRange(), \
+             TestScrollFrameRectRefresh:GetVerticalScrollRange()",
+        )
+        .unwrap();
+    assert_eq!(before, (0.0, 0.0));
+
+    env.exec("TestScrollFrameRectRefresh:UpdateScrollChildRect()")
+        .unwrap();
+
+    let after: (f64, f64) = env
+        .eval(
+            "return TestScrollFrameRectRefresh:GetHorizontalScrollRange(), \
+             TestScrollFrameRectRefresh:GetVerticalScrollRange()",
+        )
+        .unwrap();
+    assert_eq!(after, (80.0, 120.0));
+}
+
+#[test]
+fn test_scrollframe_metatable_does_not_advertise_set_max_lines() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let has_set_max_lines: bool = env
+        .eval(
+            r#"
+            local sf = CreateFrame("ScrollFrame", "TestScrollFrameSetMaxLinesLeak", UIParent)
+            local mt = getmetatable(sf)
+            return mt ~= nil and mt.__index ~= nil and mt.__index.SetMaxLines ~= nil
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        !has_set_max_lines,
+        "ScrollFrame metatable should not advertise SetMaxLines"
+    );
+}
+
 // ============================================================================
 // FauxScrollFrameTemplate Tests (requires SharedXML)
 // ============================================================================

@@ -96,7 +96,6 @@ pub static SCROLLFRAME_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new(
         "SetID",
         "SetIgnoringChildrenForBounds",
         "SetIsFrameBuffer",
-        "SetMaxLines",
         "SetMovable",
         "SetPropagateKeyboardInput",
         "SetResizable",

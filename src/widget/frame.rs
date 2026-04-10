@@ -683,6 +683,8 @@ pub struct Frame {
     // --- ScrollFrame fields ---
     /// Scroll child frame ID.
     pub scroll_child_id: Option<u64>,
+    /// Cached scroll child subtree bounds after UpdateScrollChildRect().
+    pub scroll_child_rect_size: Option<(f32, f32)>,
     /// Horizontal scroll offset.
     pub scroll_horizontal: f64,
     /// Vertical scroll offset.
@@ -960,6 +962,7 @@ macro_rules! frame_defaults {
 
             // ScrollFrame
             scroll_child_id: None,
+            scroll_child_rect_size: None,
             scroll_horizontal: 0.0,
             scroll_vertical: 0.0,
 

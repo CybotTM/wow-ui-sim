@@ -5,13 +5,13 @@ use super::combat_lockdown;
 use super::methods_helpers::get_mixin_override;
 use super::methods_hierarchy::reparent_widget;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
+use crate::widget::WidgetRegistry;
 use mlua::{Function, MultiValue, Table, Value};
 
 pub fn add_scrollframe_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_scrollframe_child_methods(methods);
     add_scrollframe_offset_methods(methods);
     add_scrollframe_range_methods(methods);
-    methods.add_method("SetMaxLines", |_, _, _: mlua::Variadic<Value>| Ok(()));
 }
 
 pub fn add_scrollbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -330,6 +330,7 @@ fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.scroll_child_id = Some(child_id);
+            frame.scroll_child_rect_size = None;
         }
         reparent_widget(&mut state.widgets, child_id, Some(id));
         state.visible_on_update_cache = None;
@@ -349,7 +350,63 @@ fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         }
     });
 
-    methods.add_method("UpdateScrollChildRect", |_, _this, ()| Ok(()));
+    methods.add_method("UpdateScrollChildRect", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let scroll_child_id = state
+            .widgets
+            .get(this.0)
+            .and_then(|frame| frame.scroll_child_id);
+        let bounds = match scroll_child_id {
+            Some(child_id) => {
+                state.invalidate_layout(child_id);
+                state.ensure_layout_rects();
+                scroll_child_rect_size(&state.widgets, child_id)
+            }
+            None => None,
+        };
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.scroll_child_rect_size = bounds;
+        }
+        Ok(())
+    });
+}
+
+fn scroll_child_rect_size(widgets: &WidgetRegistry, root_id: u64) -> Option<(f32, f32)> {
+    let mut stack = vec![root_id];
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    let mut saw_rect = false;
+
+    while let Some(frame_id) = stack.pop() {
+        let Some(frame) = widgets.get(frame_id) else {
+            continue;
+        };
+        if let Some(rect) = frame.layout_rect {
+            min_x = min_x.min(rect.x);
+            min_y = min_y.min(rect.y);
+            max_x = max_x.max(rect.x + rect.width);
+            max_y = max_y.max(rect.y + rect.height);
+            saw_rect = true;
+        }
+        stack.extend(frame.children.iter().rev().copied());
+    }
+
+    saw_rect.then_some((max_x - min_x, max_y - min_y))
+}
+
+fn scroll_child_range_size(
+    frame: &crate::widget::Frame,
+    child_frame: Option<&crate::widget::Frame>,
+) -> (f64, f64) {
+    if let Some((width, height)) = frame.scroll_child_rect_size {
+        return (width as f64, height as f64);
+    }
+    child_frame
+        .map(|child| (child.width as f64, child.height as f64))
+        .unwrap_or((0.0, 0.0))
 }
 
 fn add_scrollframe_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -400,11 +457,8 @@ fn add_scrollframe_range_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Some(f) => f,
             None => return Ok(0.0_f64),
         };
-        let child_width = frame
-            .scroll_child_id
-            .and_then(|cid| state.widgets.get(cid))
-            .map(|c| c.width as f64)
-            .unwrap_or(0.0);
+        let child_frame = frame.scroll_child_id.and_then(|cid| state.widgets.get(cid));
+        let (child_width, _) = scroll_child_range_size(frame, child_frame);
         Ok((child_width - frame.width as f64).max(0.0))
     });
 
@@ -415,11 +469,8 @@ fn add_scrollframe_range_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Some(f) => f,
             None => return Ok(0.0_f64),
         };
-        let child_height = frame
-            .scroll_child_id
-            .and_then(|cid| state.widgets.get(cid))
-            .map(|c| c.height as f64)
-            .unwrap_or(0.0);
+        let child_frame = frame.scroll_child_id.and_then(|cid| state.widgets.get(cid));
+        let (_, child_height) = scroll_child_range_size(frame, child_frame);
         Ok((child_height - frame.height as f64).max(0.0))
     });
 }
