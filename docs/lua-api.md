@@ -157,6 +157,13 @@ Quest world-map blob polygons are already sourced in `data/quest_poi_blobs.rs`.
 The current simulator uses a small hand-maintained dataset rather than a
 generated import pipeline.
 
+I also checked `~/Projects/world-of-osso/game-engine` for reusable world-map
+code. That project does have a real `WorldMapPlugin` and a `WorldMapFrame`
+screen, but they live in a separate Bevy/UI-toolkit stack with their own
+screen model and FDID-driven texture pipeline. There is no drop-in WoW widget
+or render helper there that cleanly ports into `wow-ui-sim`, so the simulator
+continues to own its QuestPOI blob data and rendering path locally.
+
 That data feeds the full QuestPOI blob path:
 - `GetQuestPOIBlobCount(...)` reads the per-quest polygon table
 - `UpdateMouseOverTooltip(x, y)` uses `hit_test_blobs(...)` for point-in-polygon matching
