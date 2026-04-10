@@ -80,6 +80,7 @@ fn register_core_namespaces(
 ) -> Result<()> {
     register_c_achievement_info(lua)?;
     register_c_battle_net(lua, std::rc::Rc::clone(&state))?;
+    register_c_debug(lua, std::rc::Rc::clone(&state))?;
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
     register_c_guild(lua, std::rc::Rc::clone(&state))?;
     register_c_guild_info(lua)?;
@@ -156,6 +157,60 @@ fn register_c_battle_net(
     )?;
 
     globals.set("C_BattleNet", t)?;
+    Ok(())
+}
+
+fn format_debug_window_args(args: &[Value]) -> String {
+    let mut output = String::new();
+    for (index, arg) in args.iter().enumerate() {
+        if index > 0 {
+            output.push('\t');
+        }
+        match arg {
+            Value::Nil => output.push_str("nil"),
+            Value::Boolean(value) => output.push_str(if *value { "true" } else { "false" }),
+            Value::Integer(value) => output.push_str(&value.to_string()),
+            Value::Number(value) => output.push_str(&value.to_string()),
+            Value::String(value) => output.push_str(&value.to_string_lossy()),
+            Value::Table(_) => output.push_str("table"),
+            Value::Function(_) => output.push_str("function"),
+            Value::UserData(_) => output.push_str("userdata"),
+            _ => output.push_str(&format!("{arg:?}")),
+        }
+    }
+    output
+}
+
+fn register_c_debug(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    let globals = lua.globals();
+    let t: mlua::Table = match globals.get::<Value>("C_Debug")? {
+        Value::Table(table) => table,
+        _ => lua.create_table()?,
+    };
+
+    let print_state = std::rc::Rc::clone(&state);
+    t.set(
+        "PrintToDebugWindow",
+        lua.create_function(move |_, message: String| {
+            print_state.borrow_mut().console_output.push(message);
+            Ok(())
+        })?,
+    )?;
+
+    let view_state = std::rc::Rc::clone(&state);
+    t.set(
+        "ViewInDebugWindow",
+        lua.create_function(move |_, args: mlua::Variadic<Value>| {
+            let line = format_debug_window_args(args.as_slice());
+            view_state.borrow_mut().console_output.push(line);
+            Ok(())
+        })?,
+    )?;
+
+    globals.set("C_Debug", t)?;
     Ok(())
 }
 
