@@ -222,6 +222,10 @@ fn invoke_for_each_aura_callback(
 fn register_aura_util(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table> {
     let aura_util = lua.create_table()?;
     register_for_each_aura(lua, &aura_util, state)?;
+    register_aura_util_provider_methods(lua, &aura_util)?;
+    if let Ok(provider) = lua.globals().get::<mlua::Table>("C_UnitAuras") {
+        aura_util.raw_set("__provider", provider)?;
+    }
     aura_util.set(
         "FindAura",
         lua.create_function(
@@ -235,13 +239,110 @@ fn register_aura_util(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::T
             )| Ok(Value::Nil),
         )?,
     )?;
-    aura_util.set(
-        "UnpackAuraData",
-        lua.create_function(|_, _aura_data: Value| Ok(Value::Nil))?,
-    )?;
+    aura_util.set("UnpackAuraData", lua.create_function(unpack_aura_data)?)?;
+    let aura_util_ref = aura_util.clone();
     aura_util.set(
         "FindAuraByName",
-        lua.create_function(|_, (_name, _unit, _filter): (String, String, String)| Ok(Value::Nil))?,
+        lua.create_function(move |lua, (name, unit, filter): (String, String, String)| {
+            find_aura_by_name(lua, &aura_util_ref, &name, &unit, &filter)
+        })?,
+    )?;
+    let aura_util_ref = aura_util.clone();
+    aura_util.set(
+        "GetAuraDataByAuraInstanceID",
+        lua.create_function(move |_, (unit, aura_instance_id): (String, i32)| {
+            call_aura_provider_method(
+                &aura_util_ref,
+                "GetAuraDataByAuraInstanceID",
+                (unit, aura_instance_id),
+            )
+        })?,
     )?;
     Ok(aura_util)
+}
+
+fn register_aura_util_provider_methods(lua: &Lua, aura_util: &mlua::Table) -> Result<()> {
+    let aura_util_ref = aura_util.clone();
+    aura_util.set(
+        "SetDataProvider",
+        lua.create_function(move |_, provider: mlua::Table| {
+            aura_util_ref.raw_set("__provider", provider)?;
+            Ok(())
+        })?,
+    )?;
+    let aura_util_ref = aura_util.clone();
+    aura_util.set(
+        "ClearDataProvider",
+        lua.create_function(move |lua, ()| {
+            let provider: Value = lua.globals().get("C_UnitAuras")?;
+            aura_util_ref.raw_set("__provider", provider)?;
+            Ok(())
+        })?,
+    )?;
+    Ok(())
+}
+
+fn current_aura_provider(aura_util: &mlua::Table) -> Result<mlua::Table> {
+    match aura_util.raw_get::<Value>("__provider")? {
+        Value::Table(provider) => Ok(provider),
+        _ => Err(mlua::Error::RuntimeError(
+            "AuraUtil provider is not initialized".to_string(),
+        )),
+    }
+}
+
+fn call_aura_provider_method<A>(
+    aura_util: &mlua::Table,
+    method_name: &str,
+    args: A,
+) -> Result<Value>
+where
+    A: mlua::IntoLuaMulti,
+{
+    let provider = current_aura_provider(aura_util)?;
+    match provider.get::<Value>(method_name)? {
+        Value::Function(method) => method.call(args),
+        _ => Ok(Value::Nil),
+    }
+}
+
+fn unpack_aura_data(lua: &Lua, aura_data: Value) -> Result<MultiValue> {
+    let Value::Table(aura_data) = aura_data else {
+        return Ok(MultiValue::new());
+    };
+    Ok(MultiValue::from_vec(vec![
+        aura_data.get("name")?,
+        aura_data.get("icon")?,
+        aura_data.get("applications")?,
+        aura_data.get("dispelName")?,
+        aura_data.get("duration")?,
+        aura_data.get("expirationTime")?,
+        aura_data.get("sourceUnit")?,
+        aura_data.get("isStealable")?,
+        aura_data.get("nameplateShowPersonal")?,
+        aura_data.get("spellId")?,
+        aura_data.get("canApplyAura")?,
+        aura_data.get("isBossAura")?,
+        aura_data.get("isFromPlayerOrPlayerPet")?,
+        aura_data.get("nameplateShowAll")?,
+        aura_data.get("timeMod")?,
+        aura_data
+            .get("points")
+            .unwrap_or(Value::Table(lua.create_table()?)),
+    ]))
+}
+
+fn find_aura_by_name(
+    lua: &Lua,
+    aura_util: &mlua::Table,
+    name: &str,
+    unit: &str,
+    filter: &str,
+) -> Result<MultiValue> {
+    let aura_data = call_aura_provider_method(
+        aura_util,
+        "GetAuraDataBySpellName",
+        (unit.to_string(), name.to_string(), Some(filter.to_string())),
+    )?;
+    unpack_aura_data(lua, aura_data)
 }

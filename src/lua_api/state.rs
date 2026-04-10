@@ -25,6 +25,7 @@ macro_rules! build_empty_sim_state {
             focused_frame_id: $runtime.focused_frame_id,
             addons: $collections.addons,
             tooltips: $collections.tooltips,
+            blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
             unit_position_frames: $collections.unit_position_frames,
             simple_htmls: $collections.simple_htmls,
@@ -144,6 +145,8 @@ pub struct SimState {
     pub cvars: CVarStorage,
     /// Tooltip state for GameTooltip frames (keyed by frame ID).
     pub tooltips: HashMap<u64, TooltipData>,
+    /// Aura instance IDs hidden from default unit aura iteration (keyed by unit token).
+    pub blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     /// Quest blob state for QuestPOIFrame widgets (keyed by frame ID).
     pub quest_blobs: HashMap<u64, QuestBlobState>,
     /// UnitPositionFrame state (keyed by frame ID).
@@ -272,6 +275,7 @@ struct EmptyStateCollections {
     addons: Vec<AddonInfo>,
     lua_errors: Vec<String>,
     tooltips: HashMap<u64, TooltipData>,
+    blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     quest_blobs: HashMap<u64, QuestBlobState>,
     unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
@@ -298,6 +302,7 @@ impl EmptyStateCollections {
             addons: Vec::new(),
             lua_errors: Vec::new(),
             tooltips: HashMap::new(),
+            blocked_auras_by_unit: HashMap::new(),
             quest_blobs: HashMap::new(),
             unit_position_frames: HashMap::new(),
             simple_htmls: HashMap::new(),

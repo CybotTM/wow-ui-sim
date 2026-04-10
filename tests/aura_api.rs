@@ -326,3 +326,48 @@ fn test_c_unit_auras_slots_harmful_empty() {
         .unwrap();
     assert!(is_nil, "HARMFUL GetAuraSlots should return no slots");
 }
+
+#[test]
+fn test_c_unit_auras_blocking_and_provider_switch_affect_visible_aura_queries() {
+    let env = env();
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local helpfulToken, helpfulSlot = C_UnitAuras.GetAuraSlots("player", "HELPFUL")
+            assert(helpfulSlot ~= nil, "expected a default helpful aura slot")
+            local helpfulAura = C_UnitAuras.GetAuraDataBySlot("player", helpfulSlot)
+            assert(helpfulAura ~= nil, "expected to resolve the default helpful aura")
+
+            C_UnitAuras.AddBlockedAura("player", helpfulAura.auraInstanceID)
+            local _, blockedFirstSlot = C_UnitAuras.GetAuraSlots("player", "HELPFUL")
+            local blockedAura = C_UnitAuras.GetAuraDataByIndex("player", 1, "HELPFUL")
+            local blockedHidden = blockedFirstSlot ~= helpfulAura.auraInstanceID
+                and blockedAura ~= nil
+                and blockedAura.auraInstanceID ~= helpfulAura.auraInstanceID
+
+            local beforeSwitch = AuraUtil.GetAuraDataByAuraInstanceID("player", blockedAura.auraInstanceID)
+            C_UnitAuras.SwitchAuraDataProvider()
+            local switched = AuraUtil.GetAuraDataByAuraInstanceID("player", blockedAura.auraInstanceID)
+            C_UnitAuras.ResetAuraDataProvider()
+            local reset = AuraUtil.GetAuraDataByAuraInstanceID("player", blockedAura.auraInstanceID)
+
+            return blockedHidden,
+                beforeSwitch ~= nil and switched == nil,
+                reset ~= nil and reset.auraInstanceID == blockedAura.auraInstanceID
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "AddBlockedAura should hide the blocked aura from slot/index iteration"
+    );
+    assert!(
+        result.1,
+        "SwitchAuraDataProvider should move AuraUtil off the default C_UnitAuras provider"
+    );
+    assert!(
+        result.2,
+        "ResetAuraDataProvider should restore AuraUtil to the default C_UnitAuras provider"
+    );
+}
