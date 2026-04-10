@@ -490,8 +490,12 @@ pub fn add_model_scene_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 fn add_model_scene_rendering_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_model_scene_overlap_methods(methods);
     add_model_scene_pause_methods(methods);
-    methods.add_method("Project3DPointTo2D", |_, _this, _args: mlua::MultiValue| {
-        Ok::<(f64, f64, f64), _>((0.0, 0.0, 1.0))
+    methods.add_method("Project3DPointTo2D", |lua, this, args: mlua::MultiValue| {
+        let point = parse_model_vec3(&args);
+        let Some(projected) = project_model_scene_point(lua, this.0, point) else {
+            return Ok(mlua::MultiValue::new());
+        };
+        projected.into_lua_multi(lua)
     });
     add_model_scene_view_methods(methods);
 }
@@ -900,6 +904,97 @@ fn take_last_model_scene_actor(lua: &mlua::Lua, scene_id: u64) -> Option<u64> {
     }
 
     Some(actor_id)
+}
+
+fn project_model_scene_point(
+    lua: &mlua::Lua,
+    scene_id: u64,
+    point: (f32, f32, f32),
+) -> Option<(f64, f64, f64)> {
+    read_model_frame(lua, scene_id, |frame| {
+        let viewport = model_scene_viewport(frame)?;
+        let camera_point = model_scene_camera_point(frame, point)?;
+        project_camera_space_point(frame, viewport, camera_point)
+    })
+    .flatten()
+}
+
+fn model_scene_viewport(frame: &crate::widget::Frame) -> Option<(f32, f32)> {
+    let scene_width =
+        frame.width - frame.model_scene_state.view_insets.0 - frame.model_scene_state.view_insets.1;
+    let scene_height = frame.height
+        - frame.model_scene_state.view_insets.3
+        - frame.model_scene_state.view_insets.2;
+    if scene_width <= 0.0 || scene_height <= 0.0 {
+        return None;
+    }
+    Some((scene_width, scene_height))
+}
+
+fn model_scene_camera_point(
+    frame: &crate::widget::Frame,
+    point: (f32, f32, f32),
+) -> Option<(f32, f32, f32)> {
+    let camera = frame.model_scene_state.camera;
+    if camera.field_of_view <= 0.0 || camera.near_clip >= camera.far_clip {
+        return None;
+    }
+
+    let relative = subtract_vec3(point, camera.position);
+    let camera_x = dot_vec3(relative, normalize_vec3(camera.right)?);
+    let camera_y = dot_vec3(relative, normalize_vec3(camera.up)?);
+    let camera_z = dot_vec3(relative, normalize_vec3(camera.forward)?);
+    if camera_z <= camera.near_clip || camera_z > camera.far_clip {
+        return None;
+    }
+
+    Some((camera_x, camera_y, camera_z))
+}
+
+fn project_camera_space_point(
+    frame: &crate::widget::Frame,
+    viewport: (f32, f32),
+    camera_point: (f32, f32, f32),
+) -> Option<(f64, f64, f64)> {
+    let (scene_width, scene_height) = viewport;
+    let (camera_x, camera_y, camera_z) = camera_point;
+    let camera = frame.model_scene_state.camera;
+
+    let tan_half_fov = (camera.field_of_view * 0.5).tan();
+    if tan_half_fov <= 0.0 {
+        return None;
+    }
+
+    let aspect_ratio = scene_width / scene_height;
+    let normalized_x = camera_x / (camera_z * tan_half_fov * aspect_ratio);
+    let normalized_y = camera_y / (camera_z * tan_half_fov);
+    let projected_x =
+        ((normalized_x + 1.0) * 0.5 * scene_width) + frame.model_scene_state.view_translation.0;
+    let projected_y =
+        ((normalized_y + 1.0) * 0.5 * scene_height) + frame.model_scene_state.view_translation.1;
+    let depth_scale = (camera.far_clip - camera_z) / (camera.far_clip - camera.near_clip);
+
+    Some((projected_x as f64, projected_y as f64, depth_scale as f64))
+}
+
+fn subtract_vec3(lhs: (f32, f32, f32), rhs: (f32, f32, f32)) -> (f32, f32, f32) {
+    (lhs.0 - rhs.0, lhs.1 - rhs.1, lhs.2 - rhs.2)
+}
+
+fn dot_vec3(lhs: (f32, f32, f32), rhs: (f32, f32, f32)) -> f32 {
+    (lhs.0 * rhs.0) + (lhs.1 * rhs.1) + (lhs.2 * rhs.2)
+}
+
+fn normalize_vec3(vector: (f32, f32, f32)) -> Option<(f32, f32, f32)> {
+    let magnitude = ((vector.0 * vector.0) + (vector.1 * vector.1) + (vector.2 * vector.2)).sqrt();
+    if magnitude <= f32::EPSILON {
+        return None;
+    }
+    Some((
+        vector.0 / magnitude,
+        vector.1 / magnitude,
+        vector.2 / magnitude,
+    ))
 }
 
 fn parse_model_vec2(args: &mlua::MultiValue) -> (f32, f32) {
