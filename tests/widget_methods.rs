@@ -691,6 +691,115 @@ fn test_player_model_transform_and_camera_methods_persist_state() {
     assert!((frame.model_transform.camera.roll - 0.375).abs() < 0.001);
 }
 
+#[test]
+fn test_player_model_appearance_and_state_methods_persist_and_clear_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local pm = CreateFrame("PlayerModel", "TestPlayerModelAppearanceState", UIParent)
+        pm:SetModel("Creature/Dragon/Dragon.m2")
+        pm:SetDisplayInfo(1234)
+    "#,
+    )
+    .unwrap();
+
+    let display_info: i64 = env
+        .eval("return TestPlayerModelAppearanceState:GetDisplayInfo()")
+        .unwrap();
+    assert_eq!(display_info, 1234);
+
+    let model_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestPlayerModelAppearanceState")
+        .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(model_id).unwrap();
+        assert_eq!(frame.model_path, None);
+        assert_eq!(frame.model_file_id, None);
+        assert_eq!(frame.model_appearance.display_info, Some(1234));
+        assert_eq!(frame.model_appearance.creature_id, None);
+    }
+
+    env.exec(
+        r#"
+        TestPlayerModelAppearanceState:SetCreature(5678)
+        TestPlayerModelAppearanceState:SetAnimation(42)
+        TestPlayerModelAppearanceState:SetSequence(7)
+        TestPlayerModelAppearanceState:RefreshUnit()
+        TestPlayerModelAppearanceState:RefreshCamera()
+    "#,
+    )
+    .unwrap();
+
+    let has_animation: bool = env
+        .eval("return TestPlayerModelAppearanceState:HasAnimation()")
+        .unwrap();
+    assert!(
+        has_animation,
+        "SetAnimation should make HasAnimation return true"
+    );
+
+    {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(model_id).unwrap();
+        assert_eq!(frame.model_appearance.display_info, None);
+        assert_eq!(frame.model_appearance.creature_id, Some(5678));
+        assert_eq!(frame.model_appearance.animation_id, Some(42));
+        assert_eq!(frame.model_appearance.sequence_id, Some(7));
+        assert_eq!(frame.model_appearance.sequence_time_ms, None);
+        assert_eq!(frame.model_appearance.refresh_unit_count, 1);
+        assert_eq!(frame.model_appearance.refresh_camera_count, 1);
+    }
+
+    env.exec("TestPlayerModelAppearanceState:SetSequenceTime(7, 250)")
+        .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(model_id).unwrap();
+        assert_eq!(frame.model_appearance.sequence_id, Some(7));
+        assert_eq!(frame.model_appearance.sequence_time_ms, Some(250));
+    }
+
+    env.exec("TestPlayerModelAppearanceState:ClearModel()")
+        .unwrap();
+
+    let cleared: (i64, String, bool) = env
+        .eval(
+            r#"
+            return TestPlayerModelAppearanceState:GetDisplayInfo(),
+                   TestPlayerModelAppearanceState:GetModel(),
+                   TestPlayerModelAppearanceState:HasAnimation()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(cleared.0, 0);
+    assert_eq!(cleared.1, "");
+    assert!(
+        !cleared.2,
+        "ClearModel should clear the active animation state"
+    );
+
+    {
+        let state = env.state().borrow();
+        let frame = state.widgets.get(model_id).unwrap();
+        assert_eq!(frame.model_path, None);
+        assert_eq!(frame.model_file_id, None);
+        assert_eq!(frame.model_appearance.display_info, None);
+        assert_eq!(frame.model_appearance.creature_id, None);
+        assert_eq!(frame.model_appearance.animation_id, None);
+        assert_eq!(frame.model_appearance.sequence_id, None);
+        assert_eq!(frame.model_appearance.sequence_time_ms, None);
+        assert_eq!(frame.model_appearance.refresh_unit_count, 1);
+        assert_eq!(frame.model_appearance.refresh_camera_count, 1);
+    }
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

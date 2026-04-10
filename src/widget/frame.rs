@@ -100,6 +100,17 @@ impl Default for ModelTransformState {
     }
 }
 
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ModelAppearanceState {
+    pub display_info: Option<i32>,
+    pub creature_id: Option<i32>,
+    pub animation_id: Option<i32>,
+    pub sequence_id: Option<i32>,
+    pub sequence_time_ms: Option<i32>,
+    pub refresh_unit_count: u32,
+    pub refresh_camera_count: u32,
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -461,6 +472,8 @@ pub struct Frame {
     pub model_file_id: Option<i64>,
     /// Persisted model transform and camera state.
     pub model_transform: ModelTransformState,
+    /// Persisted model appearance and playback state.
+    pub model_appearance: ModelAppearanceState,
     /// Whether mouse motion events are enabled.
     pub mouse_motion_enabled: bool,
     /// User-set frame ID (from XML `id` attribute or SetID()).
@@ -735,6 +748,7 @@ macro_rules! frame_defaults {
             model_path: None,
             model_file_id: None,
             model_transform: ModelTransformState::default(),
+            model_appearance: ModelAppearanceState::default(),
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,

@@ -128,9 +128,30 @@ fn add_model_appearance_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
 
 fn add_model_appearance_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetAutoDress", |_, _this, _auto: bool| Ok(()));
-    methods.add_method("SetDisplayInfo", |_, _this, _id: i32| Ok(()));
-    methods.add_method("SetCreature", |_, _this, _id: i32| Ok(()));
-    methods.add_method("SetAnimation", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetDisplayInfo", |lua, this, id: i32| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_path = None;
+            frame.model_file_id = None;
+            frame.model_appearance.display_info = Some(id);
+            frame.model_appearance.creature_id = None;
+        });
+        Ok(())
+    });
+    methods.add_method("SetCreature", |lua, this, id: i32| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_path = None;
+            frame.model_file_id = None;
+            frame.model_appearance.display_info = None;
+            frame.model_appearance.creature_id = Some(id);
+        });
+        Ok(())
+    });
+    methods.add_method("SetAnimation", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_appearance.animation_id = parse_first_model_i32(&args);
+        });
+        Ok(())
+    });
     methods.add_method("SetCamDistanceScale", |_, _this, _scale: f64| Ok(()));
     methods.add_method("GetCamDistanceScale", |_, _this, ()| Ok(1.0_f64));
     methods.add_method("SetCamera", |_, _this, _cam: i32| Ok(()));
@@ -138,13 +159,44 @@ fn add_model_appearance_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     methods.add_method("SetDesaturation", |_, _this, _desat: f64| Ok(()));
     methods.add_method("SetLight", |_, _this, _args: mlua::MultiValue| Ok(()));
     methods.add_method("ResetLights", |_, _this, ()| Ok(()));
-    methods.add_method("SetSequence", |_, _this, _seq: i32| Ok(()));
-    methods.add_method("SetSequenceTime", |_, _this, (_seq, _time): (i32, i32)| {
+    methods.add_method("SetSequence", |lua, this, seq: i32| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_appearance.sequence_id = Some(seq);
+            frame.model_appearance.sequence_time_ms = None;
+        });
         Ok(())
     });
-    methods.add_method("ClearModel", |_, _this, ()| Ok(()));
-    methods.add_method("RefreshUnit", |_, _this, ()| Ok(()));
-    methods.add_method("RefreshCamera", |_, _this, ()| Ok(()));
+    methods.add_method("SetSequenceTime", |lua, this, (seq, time): (i32, i32)| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_appearance.sequence_id = Some(seq);
+            frame.model_appearance.sequence_time_ms = Some(time);
+        });
+        Ok(())
+    });
+    methods.add_method("ClearModel", |lua, this, ()| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_path = None;
+            frame.model_file_id = None;
+            frame.model_appearance.display_info = None;
+            frame.model_appearance.creature_id = None;
+            frame.model_appearance.animation_id = None;
+            frame.model_appearance.sequence_id = None;
+            frame.model_appearance.sequence_time_ms = None;
+        });
+        Ok(())
+    });
+    methods.add_method("RefreshUnit", |lua, this, ()| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_appearance.refresh_unit_count += 1;
+        });
+        Ok(())
+    });
+    methods.add_method("RefreshCamera", |lua, this, ()| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_appearance.refresh_camera_count += 1;
+        });
+        Ok(())
+    });
 }
 
 fn add_model_scene_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -337,6 +389,10 @@ fn parse_first_model_number(args: &mlua::MultiValue) -> f64 {
     args.front().map(lua_value_to_f64).unwrap_or(0.0)
 }
 
+fn parse_first_model_i32(args: &mlua::MultiValue) -> Option<i32> {
+    args.front().map(lua_value_to_i32)
+}
+
 fn parse_model_vec3(args: &mlua::MultiValue) -> (f32, f32, f32) {
     (
         args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
@@ -350,6 +406,14 @@ fn lua_value_to_f64(value: &Value) -> f64 {
         Value::Number(n) => *n,
         Value::Integer(n) => *n as f64,
         _ => 0.0,
+    }
+}
+
+fn lua_value_to_i32(value: &Value) -> i32 {
+    match value {
+        Value::Number(n) => *n as i32,
+        Value::Integer(n) => *n as i32,
+        _ => 0,
     }
 }
 
