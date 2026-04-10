@@ -86,7 +86,8 @@ The `Frame` struct is the fundamental data structure representing any widget in 
 
 **EditBox:** `editbox_cursor_pos`, `editbox_max_letters/bytes`, `editbox_multi_line`, `editbox_auto_focus`, `editbox_numeric`, `editbox_password`, `editbox_blink_speed`, `editbox_history`, `editbox_text_insets`
 
-**ScrollFrame:** `scroll_child_id`, `scroll_horizontal`, `scroll_vertical`
+**ScrollFrame:** `scroll_child_id`, `scroll_child_rect_size`, `scroll_horizontal`, `scroll_vertical`
+`UpdateScrollChildRect()` resolves the scroll child subtree layout and caches its unioned bounds in `scroll_child_rect_size`, which `GetHorizontalScrollRange()` and `GetVerticalScrollRange()` then use for real scroll extents.
 
 **Cooldown:** `cooldown_start`, `cooldown_duration`, `cooldown_reverse`, `cooldown_draw_swipe/edge/bling`, `cooldown_hide_countdown`, `cooldown_paused`
 
