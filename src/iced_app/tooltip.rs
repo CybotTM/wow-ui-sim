@@ -27,6 +27,7 @@ const TOOLTIP_LINE_SPACING: f32 = 2.0;
 const TOOLTIP_HEADER_FONT_SIZE: f32 = 14.0;
 const TOOLTIP_BODY_FONT_SIZE: f32 = 12.0;
 const DOUBLE_LINE_GAP: f32 = 20.0;
+const TOOLTIP_CENTER_OVERLAP: f32 = 4.0;
 
 /// Pre-collected tooltip render data for a single tooltip frame.
 pub struct TooltipRenderData {
@@ -44,6 +45,14 @@ pub struct TooltipLineRender {
     pub wrap: bool,
     /// Measured height for this line (accounts for word-wrap).
     pub measured_height: f32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+struct TooltipTextInsets {
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
 }
 
 /// Update tooltip frame sizes based on their text content.
@@ -101,8 +110,9 @@ fn measure_tooltip(state: &SimState, id: u64, font_system: &mut WowFontSystem) -
         total_height += line_height;
     }
 
-    let width = content_width + TOOLTIP_PADDING_H * 2.0;
-    let height = total_height + TOOLTIP_PADDING_V * 2.0;
+    let insets = tooltip_text_insets();
+    let width = content_width + insets.left + insets.right;
+    let height = total_height + insets.top + insets.bottom;
     (width, height)
 }
 
@@ -278,9 +288,10 @@ fn emit_tooltip_lines(
     data: &TooltipRenderData,
     bounds: Rectangle,
 ) {
-    let content_x = bounds.x + TOOLTIP_PADDING_H;
-    let content_width = bounds.width - TOOLTIP_PADDING_H * 2.0;
-    let mut y = bounds.y + TOOLTIP_PADDING_V;
+    let insets = tooltip_text_insets();
+    let content_x = bounds.x + insets.left;
+    let content_width = bounds.width - insets.left - insets.right;
+    let mut y = bounds.y + insets.top;
 
     for line in &data.lines {
         let line_height = if line.wrap && !line.left_text.is_empty() {
@@ -307,6 +318,27 @@ fn emit_tooltip_lines(
 
         y += line_height + data.line_spacing;
     }
+}
+
+fn tooltip_text_insets() -> TooltipTextInsets {
+    match tooltip_nine_slice() {
+        Some(ns) => TooltipTextInsets {
+            left: TOOLTIP_PADDING_H + tooltip_center_inset(ns.corner_tl.width),
+            right: TOOLTIP_PADDING_H + tooltip_center_inset(ns.corner_tr.width),
+            top: TOOLTIP_PADDING_V + tooltip_center_inset(ns.corner_tl.height),
+            bottom: TOOLTIP_PADDING_V + tooltip_center_inset(ns.corner_bl.height),
+        },
+        None => TooltipTextInsets {
+            left: TOOLTIP_PADDING_H,
+            right: TOOLTIP_PADDING_H,
+            top: TOOLTIP_PADDING_V,
+            bottom: TOOLTIP_PADDING_V,
+        },
+    }
+}
+
+fn tooltip_center_inset(piece_extent: u32) -> f32 {
+    (piece_extent as f32 - TOOLTIP_CENTER_OVERLAP).max(0.0)
 }
 
 pub struct TooltipRender<'a> {
@@ -480,5 +512,19 @@ mod tests {
         assert_eq!(lines[0].right_color, [0.2, 0.3, 0.4, 0.35]);
         assert_eq!(lines[1].left_color, [0.1, 0.2, 0.3, 0.35]);
         assert!(lines[1].wrap);
+    }
+
+    #[test]
+    fn tooltip_text_insets_account_for_tooltip_nine_slice_overlap() {
+        let insets = tooltip_text_insets();
+        assert_eq!(
+            insets,
+            TooltipTextInsets {
+                left: 15.0,
+                right: 15.0,
+                top: 15.0,
+                bottom: 15.0,
+            }
+        );
     }
 }

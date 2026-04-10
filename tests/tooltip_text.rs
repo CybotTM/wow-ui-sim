@@ -449,8 +449,9 @@ fn test_tooltip_sizing_includes_padding() {
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let frame = state.widgets.get(gt_id).unwrap();
 
-    // Padding is 12px on each side (24 total per axis).
-    // Single line at 14px header: height = ceil(14*1.2) = 17 + 24 padding = 41.
+    // The tooltip text inset is the 12px content padding plus the 3px
+    // NineSlice inner border inset on each side (30 total per axis).
+    // Single line at 14px header: height = ceil(14*1.2) = 17 + 30 inset = 47.
     // Width = text width + 24 padding.
     assert!(
         frame.width > 24.0,
@@ -462,8 +463,8 @@ fn test_tooltip_sizing_includes_padding() {
         "Height should be > padding alone, got {}",
         frame.height
     );
-    // Single header line (14pt * 1.2 = ~17px) + 24px vertical padding = ~41px
-    let expected_height = (14.0_f32 * 1.2).ceil() + 24.0;
+    // Single header line (14pt * 1.2 = ~17px) + 30px vertical inset = ~47px
+    let expected_height = (14.0_f32 * 1.2).ceil() + 30.0;
     assert!(
         (frame.height - expected_height).abs() < 1.0,
         "Expected height ~{}, got {}",
