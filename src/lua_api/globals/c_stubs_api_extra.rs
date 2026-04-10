@@ -1389,11 +1389,81 @@ const EVENT_SCHEDULER_LUA: &str = r#"
     C_EventScheduler = C_EventScheduler or {}
     local api = C_EventScheduler
 
+    local function displayInfo(overrides)
+        local info = {
+            hideTimeLeft = false,
+            hideDescription = false,
+            overrideAtlas = nil,
+            overrideTooltipWidgetSetID = nil,
+        }
+        if type(overrides) == "table" then
+            for key, value in pairs(overrides) do
+                info[key] = value
+            end
+        end
+        return info
+    end
+
+    local function seededOngoingEvents()
+        return {
+            {
+                areaPoiID = 1001,
+                rewardsClaimed = false,
+                displayInfo = displayInfo({
+                    overrideAtlas = "worldquest-icon-pvpbattle",
+                }),
+            },
+            {
+                areaPoiID = 1002,
+                rewardsClaimed = true,
+                displayInfo = displayInfo({
+                    hideDescription = true,
+                    overrideAtlas = "Dungeon",
+                }),
+            },
+        }
+    end
+
+    local function seededScheduledEvents()
+        local now = time()
+        local hour = 60 * 60
+        local day = 24 * hour
+        return {
+            {
+                eventKey = "pvp-brawl-blitz",
+                eventID = 2001,
+                areaPoiID = 1003,
+                startTime = now + (6 * hour),
+                endTime = now + (3 * day),
+                duration = (3 * day) - (6 * hour),
+                hasReminder = false,
+                rewardsClaimed = false,
+                displayInfo = displayInfo({
+                    overrideAtlas = "worldquest-icon-pvpbattle",
+                }),
+            },
+            {
+                eventKey = "darkmoon-faire-arrival",
+                eventID = 2002,
+                areaPoiID = 1004,
+                startTime = now + (5 * day),
+                endTime = now + (12 * day),
+                duration = 7 * day,
+                hasReminder = true,
+                rewardsClaimed = false,
+                displayInfo = displayInfo({
+                    hideTimeLeft = true,
+                    overrideTooltipWidgetSetID = 90210,
+                }),
+            },
+        }
+    end
+
     api._state = api._state or {
         canShowEvents = nil,
         suppressDisplay = false,
-        ongoingEvents = {},
-        scheduledEvents = {},
+        ongoingEvents = seededOngoingEvents(),
+        scheduledEvents = seededScheduledEvents(),
     }
 
     local function normalizeBool(value)

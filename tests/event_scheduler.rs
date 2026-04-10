@@ -26,6 +26,52 @@ fn event_scheduler_defaults_to_hidden_without_events() {
 }
 
 #[test]
+fn event_scheduler_starts_with_seeded_events_and_default_visibility() {
+    let env = env();
+    let (
+        can_show,
+        ongoing_count,
+        scheduled_count,
+        first_ongoing_poi,
+        first_scheduled_key,
+        first_start_time_is_future,
+        second_has_reminder,
+    ): (bool, i32, i32, i32, String, bool, bool) = env
+        .eval(
+            r#"
+            local canShow = C_EventScheduler.CanShowEvents()
+            local ongoing = C_EventScheduler._state.ongoingEvents
+            local scheduled = C_EventScheduler._state.scheduledEvents
+            return canShow,
+                #ongoing,
+                #scheduled,
+                ongoing[1].areaPoiID,
+                scheduled[1].eventKey,
+                scheduled[1].startTime > time(),
+                scheduled[2].hasReminder
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        can_show,
+        "seeded scheduler events should be visible by default"
+    );
+    assert_eq!(ongoing_count, 2, "expected two seeded ongoing events");
+    assert_eq!(scheduled_count, 2, "expected two seeded scheduled events");
+    assert_eq!(first_ongoing_poi, 1001);
+    assert_eq!(first_scheduled_key, "pvp-brawl-blitz");
+    assert!(
+        first_start_time_is_future,
+        "seeded scheduled events should be upcoming"
+    );
+    assert!(
+        second_has_reminder,
+        "seeded scheduled events should include at least one reminder example"
+    );
+}
+
+#[test]
 fn event_scheduler_override_flag_controls_visibility() {
     let env = env();
     let (override_true, override_false): (bool, bool) = env
