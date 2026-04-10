@@ -49,6 +49,7 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     patch_communities_toggle(env);
+    patch_group_finder_toggle(env);
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.
@@ -93,6 +94,38 @@ fn patch_communities_toggle(env: &WowLuaEnv) {
             end
 
             __wow_ui_sim_toggle_communities_patched = true
+        end
+    "#,
+    );
+}
+
+/// Load Blizzard_GroupFinder on demand before toggling the group finder panel.
+///
+/// Mainline UIParent calls PVEFrame_ToggleFrame() directly from
+/// ToggleLFDParentFrame(), but the lighter panel harness does not preload
+/// Blizzard_GroupFinder. Wrapping the public toggle preserves Blizzard's
+/// faction and eligibility guards while ensuring the toggle target exists.
+fn patch_group_finder_toggle(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_toggle_lfd_parent_patched and type(ToggleLFDParentFrame) == "function" then
+            local originalToggleLFDParentFrame = ToggleLFDParentFrame
+            ToggleLFDParentFrame = function(...)
+                if not PVEFrame_ToggleFrame then
+                    local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                    if loader then
+                        pcall(loader, "Blizzard_GroupFinder")
+                    end
+                end
+
+                if not PVEFrame_ToggleFrame then
+                    return
+                end
+
+                return originalToggleLFDParentFrame(...)
+            end
+
+            __wow_ui_sim_toggle_lfd_parent_patched = true
         end
     "#,
     );

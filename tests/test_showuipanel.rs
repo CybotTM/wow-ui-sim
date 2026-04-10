@@ -1093,6 +1093,36 @@ fn toggle_guild_frame_opens_and_closes_communities_panel() {
 }
 
 #[test]
+fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleLFDParentFrame then
+                return "missing_toggle_lfd_parent_frame"
+            end
+
+            ToggleLFDParentFrame()
+            if not PVEFrame or not PVEFrame:IsShown() then
+                return "pve_frame_not_shown"
+            end
+
+            ToggleLFDParentFrame()
+            if PVEFrame and PVEFrame:IsShown() then
+                return "pve_frame_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleLFDParentFrame() should open and close the group finder panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
