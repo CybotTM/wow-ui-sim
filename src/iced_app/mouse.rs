@@ -88,7 +88,7 @@ impl App {
     }
 
     pub(super) fn handle_mouse_down(&mut self, pos: Point) {
-        let hit_frame = self.hit_test(pos);
+        let hit_frame = self.hit_test_mouse_button(pos, "LeftButton");
 
         // Focus/unfocus EditBox on click
         self.update_editbox_focus(hit_frame);
@@ -121,7 +121,7 @@ impl App {
 
     pub(super) fn handle_mouse_up(&mut self, pos: Point) {
         let (was_dragging, drag_source) = self.take_left_drag_state();
-        let released_on = self.hit_test(pos);
+        let released_on = self.hit_test_mouse_button(pos, "LeftButton");
 
         if was_dragging {
             self.finish_drag(drag_source, released_on);
@@ -191,7 +191,7 @@ impl App {
     }
 
     pub(super) fn handle_right_mouse_down(&mut self, pos: Point) {
-        let Some(frame_id) = self.hit_test(pos) else {
+        let Some(frame_id) = self.hit_test_mouse_button(pos, "RightButton") else {
             return;
         };
         if !self.is_frame_enabled(frame_id) {
@@ -224,7 +224,7 @@ impl App {
             return;
         }
 
-        let released_on = self.hit_test(pos);
+        let released_on = self.hit_test_mouse_button(pos, "RightButton");
         if let Some(frame_id) = released_on {
             {
                 let env = self.env.borrow();
@@ -450,6 +450,63 @@ mod tests {
         *app.cached_hittable.borrow_mut() = Some(grid);
     }
 
+    fn setup_pass_through_test_frames(app: &App) {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            PassThroughParent = CreateFrame("Button", "PassThroughParent", UIParent)
+            PassThroughParent:SetSize(100, 100)
+            PassThroughParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+            PassThroughParent:EnableMouse(true)
+            PassThroughParent:SetScript("OnClick", function(_, button)
+                if button == "LeftButton" then
+                    __pass_parent_left = (__pass_parent_left or 0) + 1
+                elseif button == "RightButton" then
+                    __pass_parent_right = (__pass_parent_right or 0) + 1
+                end
+            end)
+
+            PassThroughChild = CreateFrame("Button", "PassThroughChild", PassThroughParent)
+            PassThroughChild:SetAllPoints(PassThroughParent)
+            PassThroughChild:EnableMouse(true)
+            PassThroughChild:SetScript("OnClick", function(_, button)
+                if button == "LeftButton" then
+                    __pass_child_left = (__pass_child_left or 0) + 1
+                elseif button == "RightButton" then
+                    __pass_child_right = (__pass_child_right or 0) + 1
+                end
+            end)
+
+            PassThroughChild:SetPassThroughButtons("RightButton")
+
+            __pass_parent_left = 0
+            __pass_parent_right = 0
+            __pass_child_left = 0
+            __pass_child_right = 0
+            "#,
+        )
+        .expect("pass-through frame setup should succeed");
+    }
+
+    fn read_pass_through_counters(app: &App) -> (f64, f64, f64, f64) {
+        app.env
+            .borrow()
+            .eval("return __pass_parent_left, __pass_parent_right, __pass_child_left, __pass_child_right")
+            .expect("pass-through counters should be readable")
+    }
+
+    fn clear_pass_through_buttons(app: &App) {
+        let env = app.env.borrow();
+        env.exec(
+            r#"
+            PassThroughChild:SetPassThroughButtons()
+            __pass_parent_right = 0
+            __pass_child_right = 0
+            "#,
+        )
+        .expect("clearing pass-through buttons should succeed");
+    }
+
     #[test]
     fn mouse_wheel_dispatch_requires_frame_mouse_wheel_enabled() {
         let mut app = build_test_app(ScreenKind::Game);
@@ -565,6 +622,50 @@ mod tests {
         assert_eq!(
             drag_stop_calls, 0.0,
             "mouse up should not fire OnDragStop after AbortDrag already cleared the drag"
+        );
+    }
+
+    #[test]
+    fn pass_through_buttons_reroute_clicks_and_can_be_cleared() {
+        let mut app = build_test_app(ScreenKind::Game);
+        setup_pass_through_test_frames(&app);
+
+        rebuild_hittable_cache(&app);
+        let click_pos = Point::new(150.0, 150.0);
+
+        app.handle_mouse_down(click_pos);
+        app.handle_mouse_up(click_pos);
+        app.handle_right_mouse_down(click_pos);
+        app.handle_right_mouse_up(click_pos);
+
+        let (parent_left, parent_right, child_left, child_right) = read_pass_through_counters(&app);
+        assert_eq!(parent_left, 0.0, "left click should not pass through");
+        assert_eq!(
+            parent_right, 1.0,
+            "right click should pass through to parent"
+        );
+        assert_eq!(
+            child_left, 1.0,
+            "child should still receive non-passthrough left clicks"
+        );
+        assert_eq!(
+            child_right, 0.0,
+            "child should not receive passthrough right clicks"
+        );
+
+        clear_pass_through_buttons(&app);
+        rebuild_hittable_cache(&app);
+        app.handle_right_mouse_down(click_pos);
+        app.handle_right_mouse_up(click_pos);
+
+        let (_, cleared_parent_right, _, cleared_child_right) = read_pass_through_counters(&app);
+        assert_eq!(
+            cleared_parent_right, 0.0,
+            "clearing pass-through buttons should stop rerouting right clicks"
+        );
+        assert_eq!(
+            cleared_child_right, 1.0,
+            "child should receive right clicks again after passthrough is cleared"
         );
     }
 }

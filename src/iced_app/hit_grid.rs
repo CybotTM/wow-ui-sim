@@ -68,6 +68,20 @@ impl HitGrid {
             .copied()
     }
 
+    /// Find the topmost frame containing `pos` that also matches `predicate`.
+    pub fn topmost_matching_at<F>(&self, pos: Point, mut predicate: F) -> Option<u64>
+    where
+        F: FnMut(u64) -> bool,
+    {
+        let col = ((pos.x / CELL_SIZE) as usize).min(self.cols.saturating_sub(1));
+        let row = ((pos.y / CELL_SIZE) as usize).min(self.rows.saturating_sub(1));
+        let cell = &self.cells[row * self.cols + col];
+        cell.iter()
+            .rev()
+            .find(|&&id| self.rects.get(&id).is_some_and(|r| r.contains(pos)) && predicate(id))
+            .copied()
+    }
+
     /// Check if a frame is in the hittable set and contains `pos` (Phase 2).
     pub fn contains(&self, id: u64, pos: Point) -> bool {
         self.rects.get(&id).is_some_and(|r| r.contains(pos))

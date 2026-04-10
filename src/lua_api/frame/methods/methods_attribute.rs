@@ -289,7 +289,21 @@ fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
     methods.add_method("CanChangeProtectedState", |_lua, _this, ()| Ok(true));
     methods.add_method(
         "SetPassThroughButtons",
-        |_lua, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            let mut buttons = std::collections::HashSet::new();
+            for value in args {
+                if let mlua::Value::String(button) = value {
+                    buttons.insert(button.to_str()?.to_ascii_lowercase());
+                }
+            }
+
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(this.0) {
+                frame.pass_through_buttons = buttons;
+            }
+            Ok(())
+        },
     );
     methods.add_method(
         "SetFlattensRenderLayers",

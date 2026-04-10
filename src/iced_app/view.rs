@@ -709,6 +709,48 @@ impl App {
 
         Some(current)
     }
+
+    pub(crate) fn hit_test_mouse_button(&self, pos: iced::Point, button_name: &str) -> Option<u64> {
+        let cache = self.cached_hittable.borrow();
+        let grid = cache.as_ref()?;
+
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let initial_id = grid.topmost_matching_at(pos, |id| {
+            deepest_click_target(&state.widgets, grid, id, pos, button_name).is_some()
+        })?;
+        deepest_click_target(&state.widgets, grid, initial_id, pos, button_name)
+    }
+}
+
+fn deepest_click_target(
+    widgets: &crate::widget::WidgetRegistry,
+    grid: &crate::iced_app::hit_grid::HitGrid,
+    frame_id: u64,
+    pos: iced::Point,
+    button_name: &str,
+) -> Option<u64> {
+    let frame = widgets.get(frame_id)?;
+    for &child_id in frame.children.iter().rev() {
+        if !grid.contains(child_id, pos) {
+            continue;
+        }
+        if let Some(target) = deepest_click_target(widgets, grid, child_id, pos, button_name) {
+            return Some(target);
+        }
+    }
+
+    if frame_accepts_mouse_button(frame, button_name) {
+        Some(frame_id)
+    } else {
+        None
+    }
+}
+
+fn frame_accepts_mouse_button(frame: &crate::widget::Frame, button_name: &str) -> bool {
+    !frame
+        .pass_through_buttons
+        .contains(&button_name.to_ascii_lowercase())
 }
 
 fn frame_should_be_hidden_in_sidebar(frame: &crate::widget::Frame) -> bool {
