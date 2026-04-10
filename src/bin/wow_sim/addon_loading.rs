@@ -49,7 +49,7 @@ fn load_one_blizzard_addon(
             if verbose {
                 let t = &r.timing;
                 println!(
-                    "{} loaded: {} Lua, {} XML, {} warnings ({:.1?}: xmlproc={:.1?} exec_lua={:.1?} lifecycle={:.1?} layers={:.1?} lua={:.1?} frames={})",
+                    "{} loaded: {} Lua, {} XML, {} warnings ({:.1?}: xmlproc={:.1?} exec_lua={:.1?} lifecycle={:.1?} layers={:.1?} lua={:.1?} [compile={:.1?} call={:.1?}] frames={})",
                     name,
                     r.lua_files,
                     r.xml_files,
@@ -60,6 +60,8 @@ fn load_one_blizzard_addon(
                     t.frame_lifecycle_time,
                     t.frame_layer_children_time,
                     t.lua_exec_time,
+                    t.lua_compile_time,
+                    t.lua_call_time,
                     t.frame_count
                 );
             }
@@ -80,8 +82,14 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
         String::new()
     };
     logging::println_elapsed(&format!(
-        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?}{cache_info})",
-        t.io_time, t.xml_parse_time, t.xml_process_time, t.xml_frame_create_time, t.lua_exec_time
+        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}]{cache_info})",
+        t.io_time,
+        t.xml_parse_time,
+        t.xml_process_time,
+        t.xml_frame_create_time,
+        t.lua_exec_time,
+        t.lua_compile_time,
+        t.lua_call_time
     ));
     println!(
         "  frame breakdown: setup={:.2?} finalize={:.2?} ({} frames)",
@@ -264,7 +272,7 @@ fn print_verbose_addon_status(name: &str, r: &LoadResult) {
     let status = if r.warnings.is_empty() { "✓" } else { "⚠" };
     let t = &r.timing;
     println!(
-        "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} xmlproc={:.1?} frames⊂xmlproc={:.1?} setup⊂frames={:.1?} finalize⊂frames={:.1?} lua={:.1?} sv={:.1?})",
+        "{} {} loaded: {} Lua, {} XML, {} warnings ({:.1?} total: io={:.1?} xml={:.1?} xmlproc={:.1?} frames⊂xmlproc={:.1?} setup⊂frames={:.1?} finalize⊂frames={:.1?} lua={:.1?} [compile={:.1?} call={:.1?}] sv={:.1?})",
         status,
         name,
         r.lua_files,
@@ -278,6 +286,8 @@ fn print_verbose_addon_status(name: &str, r: &LoadResult) {
         t.xml_frame_setup_time,
         t.xml_frame_finalize_time,
         t.lua_exec_time,
+        t.lua_compile_time,
+        t.lua_call_time,
         t.saved_vars_time
     );
 }
@@ -391,6 +401,16 @@ fn print_timing_breakdown(t: &LoadTiming) {
         "  Lua exec:   {:.2?} ({:.1}%)",
         t.lua_exec_time,
         pct(t.lua_exec_time)
+    );
+    println!(
+        "    compile:  {:.2?} ({:.1}%, subset of Lua exec)",
+        t.lua_compile_time,
+        pct(t.lua_compile_time)
+    );
+    println!(
+        "    call:     {:.2?} ({:.1}%, subset of Lua exec)",
+        t.lua_call_time,
+        pct(t.lua_call_time)
     );
     println!(
         "  SavedVars:  {:.2?} ({:.1}%)",

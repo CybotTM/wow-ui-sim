@@ -116,7 +116,11 @@ pub struct LoadTiming {
     pub frame_anim_time: Duration,
     /// Time in button textures+text (subset of finalize)
     pub frame_button_time: Duration,
-    /// Time executing Lua (compile + call; on cache hit, compile is near-zero)
+    /// Time compiling Lua chunks into functions (source compile or bytecode load)
+    pub lua_compile_time: Duration,
+    /// Time preparing and calling compiled Lua functions
+    pub lua_call_time: Duration,
+    /// Time executing Lua (compile + call)
     pub lua_exec_time: Duration,
     /// Time loading SavedVariables
     pub saved_vars_time: Duration,
@@ -154,6 +158,8 @@ impl LoadTiming {
         self.frame_code_build_time += other.frame_code_build_time;
         self.frame_anim_time += other.frame_anim_time;
         self.frame_button_time += other.frame_button_time;
+        self.lua_compile_time += other.lua_compile_time;
+        self.lua_call_time += other.lua_call_time;
         self.lua_exec_time += other.lua_exec_time;
         self.saved_vars_time += other.saved_vars_time;
     }

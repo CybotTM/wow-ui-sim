@@ -1,4 +1,6 @@
 mod common;
+#[path = "perf/base_game.rs"]
+mod perf_base_game;
 #[path = "perf/game_ui.rs"]
 mod perf_game_ui;
 

@@ -23,13 +23,18 @@ pub fn load_lua_file(
     let chunk_name = wow_chunk_name(path);
     let lua = env.lua();
 
-    let lua_start = Instant::now();
-    let func = if bytecode_cache::is_disabled() {
-        compile_from_source(lua, &bytes, &chunk_name)?
+    let compile_start = Instant::now();
+    let func_result = if bytecode_cache::is_disabled() {
+        compile_from_source(lua, &bytes, &chunk_name)
     } else {
-        load_cached_or_compile(lua, &bytes, &chunk_name, timing)?
+        load_cached_or_compile(lua, &bytes, &chunk_name, timing)
     };
+    let compile_elapsed = compile_start.elapsed();
+    timing.lua_compile_time += compile_elapsed;
+    timing.lua_exec_time += compile_elapsed;
+    let func = func_result?;
 
+    let call_start = Instant::now();
     // Stamp addon taint on the compiled function's GC header.
     // When the VM executes it, fixedtaint = cl->taint blocks read-propagation
     // and inner closures inherit via writetaint.
@@ -42,13 +47,16 @@ pub fn load_lua_file(
             .map_err(|e| report_lua_load_error(lua, e))?;
     }
 
-    exec_addon_func(lua, func, ctx).map_err(|e| {
+    let exec_result = exec_addon_func(lua, func, ctx).map_err(|e| {
         if let LoadError::Lua(msg) = &e {
             crate::lua_api::script_helpers::call_error_handler(lua, msg);
         }
         e
-    })?;
-    timing.lua_exec_time += lua_start.elapsed();
+    });
+    let call_elapsed = call_start.elapsed();
+    timing.lua_call_time += call_elapsed;
+    timing.lua_exec_time += call_elapsed;
+    exec_result?;
 
     Ok(())
 }

@@ -124,15 +124,19 @@ fn process_script(
     } else if let Some(inline) = &s.inline {
         let table_clone = ctx.table.clone();
         let lua = env.lua();
-        let lua_start = Instant::now();
-        let func: mlua::Function = lua
+        let compile_start = Instant::now();
+        let func_result: mlua::Result<mlua::Function> = lua
             .load(inline.as_str())
             .set_name("@inline")
-            .into_function()
-            .map_err(|e| {
-                crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                LoadError::Lua(e.to_string())
-            })?;
+            .into_function();
+        let compile_elapsed = compile_start.elapsed();
+        timing.lua_compile_time += compile_elapsed;
+        timing.lua_exec_time += compile_elapsed;
+        let func: mlua::Function = func_result.map_err(|e| {
+            crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+            LoadError::Lua(e.to_string())
+        })?;
+        let call_start = Instant::now();
         if ctx.use_secure_env {
             crate::lua_api::secure_env::apply_secure_env(lua, &func).map_err(|e| {
                 crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
@@ -145,7 +149,9 @@ fn process_script(
             crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
             tracing::warn!("Inline script error: {}", e);
         }
-        timing.lua_exec_time += lua_start.elapsed();
+        let call_elapsed = call_start.elapsed();
+        timing.lua_call_time += call_elapsed;
+        timing.lua_exec_time += call_elapsed;
         Ok(1)
     } else {
         Ok(0)
