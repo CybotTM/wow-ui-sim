@@ -618,6 +618,79 @@ fn test_player_model_set_model_persists_path_and_clears_file_id() {
     assert_eq!(frame.model_file_id, None);
 }
 
+#[test]
+fn test_player_model_transform_and_camera_methods_persist_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local pm = CreateFrame("PlayerModel", "TestPlayerModelTransformCamera", UIParent)
+        pm:SetModelScale(1.75)
+        pm:SetPosition(10.5, -2.25, 8.0)
+        pm:SetFacing(1.125)
+        pm:SetCameraDistance(23.5)
+        pm:SetCameraFacing(0.875)
+        pm:SetCameraTarget(4.0, 5.5, -6.25)
+        pm:SetCameraRoll(0.375)
+    "#,
+    )
+    .unwrap();
+
+    let model_scale: f64 = env
+        .eval("return TestPlayerModelTransformCamera:GetModelScale()")
+        .unwrap();
+    let position: (f64, f64, f64) = env
+        .eval("return TestPlayerModelTransformCamera:GetPosition()")
+        .unwrap();
+    let facing: f64 = env
+        .eval("return TestPlayerModelTransformCamera:GetFacing()")
+        .unwrap();
+    let camera_distance: f64 = env
+        .eval("return TestPlayerModelTransformCamera:GetCameraDistance()")
+        .unwrap();
+    let camera_facing: f64 = env
+        .eval("return TestPlayerModelTransformCamera:GetCameraFacing()")
+        .unwrap();
+    let camera_target: (f64, f64, f64) = env
+        .eval("return TestPlayerModelTransformCamera:GetCameraTarget()")
+        .unwrap();
+    let camera_roll: f64 = env
+        .eval("return TestPlayerModelTransformCamera:GetCameraRoll()")
+        .unwrap();
+
+    assert!((model_scale - 1.75).abs() < 0.001);
+    assert!((position.0 - 10.5).abs() < 0.001);
+    assert!((position.1 + 2.25).abs() < 0.001);
+    assert!((position.2 - 8.0).abs() < 0.001);
+    assert!((facing - 1.125).abs() < 0.001);
+    assert!((camera_distance - 23.5).abs() < 0.001);
+    assert!((camera_facing - 0.875).abs() < 0.001);
+    assert!((camera_target.0 - 4.0).abs() < 0.001);
+    assert!((camera_target.1 - 5.5).abs() < 0.001);
+    assert!((camera_target.2 + 6.25).abs() < 0.001);
+    assert!((camera_roll - 0.375).abs() < 0.001);
+
+    let model_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestPlayerModelTransformCamera")
+        .unwrap();
+    let state = env.state().borrow();
+    let frame = state.widgets.get(model_id).unwrap();
+    assert!((frame.model_transform.scale - 1.75).abs() < 0.001);
+    assert!((frame.model_transform.position.0 - 10.5).abs() < 0.001);
+    assert!((frame.model_transform.position.1 + 2.25).abs() < 0.001);
+    assert!((frame.model_transform.position.2 - 8.0).abs() < 0.001);
+    assert!((frame.model_transform.facing - 1.125).abs() < 0.001);
+    assert!((frame.model_transform.camera.distance - 23.5).abs() < 0.001);
+    assert!((frame.model_transform.camera.facing - 0.875).abs() < 0.001);
+    assert!((frame.model_transform.camera.target.0 - 4.0).abs() < 0.001);
+    assert!((frame.model_transform.camera.target.1 - 5.5).abs() < 0.001);
+    assert!((frame.model_transform.camera.target.2 + 6.25).abs() < 0.001);
+    assert!((frame.model_transform.camera.roll - 0.375).abs() < 0.001);
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

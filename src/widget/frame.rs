@@ -62,6 +62,44 @@ pub struct MinimapBlobRingStyle {
     pub scalar: f64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelCameraState {
+    pub distance: f32,
+    pub facing: f32,
+    pub target: (f32, f32, f32),
+    pub roll: f32,
+}
+
+impl Default for ModelCameraState {
+    fn default() -> Self {
+        Self {
+            distance: 0.0,
+            facing: 0.0,
+            target: (0.0, 0.0, 0.0),
+            roll: 0.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelTransformState {
+    pub scale: f32,
+    pub position: (f32, f32, f32),
+    pub facing: f32,
+    pub camera: ModelCameraState,
+}
+
+impl Default for ModelTransformState {
+    fn default() -> Self {
+        Self {
+            scale: 1.0,
+            position: (0.0, 0.0, 0.0),
+            facing: 0.0,
+            camera: ModelCameraState::default(),
+        }
+    }
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -421,6 +459,8 @@ pub struct Frame {
     pub model_path: Option<String>,
     /// Model file data ID when a model is sourced by file ID instead of path.
     pub model_file_id: Option<i64>,
+    /// Persisted model transform and camera state.
+    pub model_transform: ModelTransformState,
     /// Whether mouse motion events are enabled.
     pub mouse_motion_enabled: bool,
     /// User-set frame ID (from XML `id` attribute or SetID()).
@@ -694,6 +734,7 @@ macro_rules! frame_defaults {
             rotation: 0.0,
             model_path: None,
             model_file_id: None,
+            model_transform: ModelTransformState::default(),
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,

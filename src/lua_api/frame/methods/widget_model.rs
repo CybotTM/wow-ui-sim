@@ -34,9 +34,24 @@ fn add_model_transform_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
                 .unwrap_or_default(),
         )
     });
-    methods.add_method("SetModelScale", |_, _this, _scale: f64| Ok(()));
-    methods.add_method("GetModelScale", |_, _this, ()| Ok(1.0_f64));
-    methods.add_method("SetPosition", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetModelScale", |lua, this, scale: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.scale = scale as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetModelScale", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_transform.scale as f64)
+                .unwrap_or(1.0),
+        )
+    });
+    methods.add_method("SetPosition", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.position = parse_model_vec3(&args);
+        });
+        Ok(())
+    });
 
     methods.add_method("GetPosition", |lua, this, ()| {
         let id = this.0;
@@ -45,11 +60,23 @@ fn add_model_transform_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         {
             return func.call::<mlua::MultiValue>(frame_ud);
         }
-        (0.0_f64, 0.0_f64, 0.0_f64).into_lua_multi(lua)
+        let position = read_model_frame(lua, id, |frame| frame.model_transform.position)
+            .unwrap_or((0.0, 0.0, 0.0));
+        (position.0 as f64, position.1 as f64, position.2 as f64).into_lua_multi(lua)
     });
 
-    methods.add_method("SetFacing", |_, _this, _radians: f64| Ok(()));
-    methods.add_method("GetFacing", |_, _this, ()| Ok(0.0_f64));
+    methods.add_method("SetFacing", |lua, this, radians: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.facing = radians as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetFacing", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_transform.facing as f64)
+                .unwrap_or(0.0),
+        )
+    });
     add_model_set_rotation(methods);
 }
 
@@ -137,24 +164,53 @@ fn add_model_scene_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 }
 
 fn add_model_camera_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetCameraDistance", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method("SetCameraDistance", |_, _this, _args: mlua::MultiValue| {
+    methods.add_method("GetCameraDistance", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.distance as f64
+        })
+        .unwrap_or(0.0))
+    });
+    methods.add_method("SetCameraDistance", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.distance = parse_first_model_number(&args) as f32;
+        });
         Ok(())
     });
-    methods.add_method("GetCameraFacing", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method(
-        "SetCameraFacing",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("GetCameraRoll", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method("SetCameraRoll", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("GetCameraTarget", |_, _this, ()| {
-        Ok((0.0_f64, 0.0_f64, 0.0_f64))
+    methods.add_method("GetCameraFacing", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.facing as f64
+        })
+        .unwrap_or(0.0))
     });
-    methods.add_method(
-        "SetCameraTarget",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
+    methods.add_method("SetCameraFacing", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.facing = parse_first_model_number(&args) as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetCameraRoll", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.roll as f64
+        })
+        .unwrap_or(0.0))
+    });
+    methods.add_method("SetCameraRoll", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.roll = parse_first_model_number(&args) as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetCameraTarget", |lua, this, ()| {
+        let target = read_model_frame(lua, this.0, |frame| frame.model_transform.camera.target)
+            .unwrap_or((0.0, 0.0, 0.0));
+        Ok((target.0 as f64, target.1 as f64, target.2 as f64))
+    });
+    methods.add_method("SetCameraTarget", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_transform.camera.target = parse_model_vec3(&args);
+        });
+        Ok(())
+    });
     methods.add_method(
         "SetCustomCamera",
         |_, _this, _args: mlua::MultiValue| Ok(()),
@@ -257,6 +313,44 @@ fn add_model_f64_getter<M: mlua::UserDataMethods<FrameRef>>(
     value: f64,
 ) {
     methods.add_method(name, move |_, _this, ()| Ok(value));
+}
+
+fn update_model_frame(lua: &mlua::Lua, id: u64, update: impl FnOnce(&mut crate::widget::Frame)) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        update(frame);
+    }
+}
+
+fn read_model_frame<T>(
+    lua: &mlua::Lua,
+    id: u64,
+    read: impl FnOnce(&crate::widget::Frame) -> T,
+) -> Option<T> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state.widgets.get(id).map(read)
+}
+
+fn parse_first_model_number(args: &mlua::MultiValue) -> f64 {
+    args.front().map(lua_value_to_f64).unwrap_or(0.0)
+}
+
+fn parse_model_vec3(args: &mlua::MultiValue) -> (f32, f32, f32) {
+    (
+        args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(1).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(2).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+    )
+}
+
+fn lua_value_to_f64(value: &Value) -> f64 {
+    match value {
+        Value::Number(n) => *n,
+        Value::Integer(n) => *n as f64,
+        _ => 0.0,
+    }
 }
 
 /// Native ModelScene methods (C++ side in WoW, stubs here).
