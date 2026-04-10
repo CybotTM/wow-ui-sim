@@ -358,6 +358,10 @@ fn register_c_neighborhood_initiative(lua: &Lua) -> Result<()> {
         })?,
     )?;
     t.set(
+        "GetAvailableHouseXP",
+        lua.create_function(|_, ()| Ok(0i64))?,
+    )?;
+    t.set(
         "GetInitiativeTaskInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
     )?;
