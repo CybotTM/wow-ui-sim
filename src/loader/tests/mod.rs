@@ -1083,6 +1083,58 @@ fn test_window_display_methods_persist_window_and_dont_save_position() {
 }
 
 #[test]
+fn test_resize_and_user_placement_methods_persist_frame_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ResizeStateFrame = CreateFrame("Frame", "ResizeStateFrame", UIParent)
+
+        local minWidth, minHeight, maxWidth, maxHeight = ResizeStateFrame:GetResizeBounds()
+        assert(minWidth == 0 and minHeight == 0, "frames should default to zero minimum resize bounds")
+        assert(maxWidth == nil and maxHeight == nil, "frames should default to no maximum resize bounds")
+        assert(not ResizeStateFrame:IsUserPlaced(), "frames should default to userPlaced=false")
+
+        ResizeStateFrame:SetMinResize(120, 80)
+        minWidth, minHeight, maxWidth, maxHeight = ResizeStateFrame:GetResizeBounds()
+        assert(minWidth == 120 and minHeight == 80, "SetMinResize should persist minimum resize bounds")
+        assert(maxWidth == nil and maxHeight == nil, "SetMinResize should not invent maximum bounds")
+
+        ResizeStateFrame:SetMaxResize(480, 360)
+        minWidth, minHeight, maxWidth, maxHeight = ResizeStateFrame:GetResizeBounds()
+        assert(maxWidth == 480 and maxHeight == 360, "SetMaxResize should persist maximum resize bounds")
+        assert(minWidth == 120 and minHeight == 80, "SetMaxResize should preserve existing minimum resize bounds")
+
+        ResizeStateFrame:SetResizeBounds(160, 90, 640, 480)
+        minWidth, minHeight, maxWidth, maxHeight = ResizeStateFrame:GetResizeBounds()
+        assert(minWidth == 160 and minHeight == 90, "SetResizeBounds should overwrite minimum resize bounds")
+        assert(maxWidth == 640 and maxHeight == 480, "SetResizeBounds should overwrite maximum resize bounds")
+
+        ResizeStateFrame:SetResizeBounds(200, 110)
+        minWidth, minHeight, maxWidth, maxHeight = ResizeStateFrame:GetResizeBounds()
+        assert(minWidth == 200 and minHeight == 110, "two-argument SetResizeBounds should keep the new minimum resize bounds")
+        assert(maxWidth == nil and maxHeight == nil, "two-argument SetResizeBounds should clear maximum resize bounds")
+
+        ResizeStateFrame:SetUserPlaced(true)
+        assert(ResizeStateFrame:IsUserPlaced(), "SetUserPlaced(true) should persist")
+
+        ResizeStateFrame:SetUserPlaced(false)
+        assert(not ResizeStateFrame:IsUserPlaced(), "SetUserPlaced(false) should clear the persisted flag")
+
+        RESIZE_AND_USER_PLACEMENT_METHODS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return RESIZE_AND_USER_PLACEMENT_METHODS_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "resize and user placement methods should persist frame state"
+    );
+}
+
+#[test]
 fn test_misc_visual_state_methods_persist_and_desaturate_hierarchy() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(

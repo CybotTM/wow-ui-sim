@@ -315,22 +315,76 @@ fn next_inset_value(values: &mut impl Iterator<Item = mlua::Value>) -> f32 {
 }
 
 fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "SetResizeBounds",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
-    methods.add_method("GetResizeBounds", |_, _this, ()| {
-        Ok((0.0_f32, 0.0_f32, 0.0_f32, 0.0_f32))
+    methods.add_method("SetResizeBounds", |lua, this, args: mlua::MultiValue| {
+        let mut values = args.into_iter();
+        let min_width = next_required_resize_bound(&mut values);
+        let min_height = next_required_resize_bound(&mut values);
+        let max_width = next_optional_resize_bound(&mut values);
+        let max_height = next_optional_resize_bound(&mut values);
+        let resize_bounds_max = match (max_width, max_height) {
+            (Some(width), Some(height)) => Some((width, height)),
+            _ => None,
+        };
+
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.resize_bounds_min = (min_width, min_height);
+            frame.resize_bounds_max = resize_bounds_max;
+        }
+        Ok(())
     });
-    methods.add_method("SetMinResize", |_, _this, (_w, _h): (f32, f32)| Ok(()));
-    methods.add_method("SetMaxResize", |_, _this, (_w, _h): (f32, f32)| Ok(()));
+    methods.add_method("GetResizeBounds", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        if let Some(frame) = state.widgets.get(this.0) {
+            let (min_width, min_height) = frame.resize_bounds_min;
+            let (max_width, max_height) = frame
+                .resize_bounds_max
+                .map(|(width, height)| (Some(width), Some(height)))
+                .unwrap_or((None, None));
+            return Ok((min_width, min_height, max_width, max_height));
+        }
+        Ok((0.0_f32, 0.0_f32, None::<f32>, None::<f32>))
+    });
+    methods.add_method("SetMinResize", |lua, this, (width, height): (f32, f32)| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.resize_bounds_min = (width, height);
+        }
+        Ok(())
+    });
+    methods.add_method("SetMaxResize", |lua, this, (width, height): (f32, f32)| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.resize_bounds_max = Some((width, height));
+        }
+        Ok(())
+    });
     methods.add_method("StartSizing", |_, _this, _point: Option<String>| Ok(()));
     methods.add_method(
         "RegisterForDrag",
         |_, _this, _args: mlua::MultiValue| Ok(()),
     );
-    methods.add_method("SetUserPlaced", |_, _this, _user_placed: bool| Ok(()));
-    methods.add_method("IsUserPlaced", |_, _this, ()| Ok(false));
+    methods.add_method("SetUserPlaced", |lua, this, user_placed: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.user_placed = user_placed;
+        }
+        Ok(())
+    });
+    methods.add_method("IsUserPlaced", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.user_placed)
+            .unwrap_or(false))
+    });
     methods.add_method("SetDontSavePosition", |lua, this, dont_save: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -339,6 +393,18 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok(())
     });
+}
+
+fn next_required_resize_bound(values: &mut impl Iterator<Item = mlua::Value>) -> f32 {
+    next_optional_resize_bound(values).unwrap_or(0.0)
+}
+
+fn next_optional_resize_bound(values: &mut impl Iterator<Item = mlua::Value>) -> Option<f32> {
+    match values.next() {
+        Some(mlua::Value::Number(n)) => Some(n as f32),
+        Some(mlua::Value::Integer(n)) => Some(n as f32),
+        _ => None,
+    }
 }
 
 // --- Misc stubs ---
