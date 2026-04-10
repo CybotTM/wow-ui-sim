@@ -81,3 +81,26 @@ fn test_slider_set_thumb_texture_file_id_get_texture() {
         .unwrap();
     assert_eq!(tex_id, 12345);
 }
+
+#[test]
+fn test_obey_step_on_drag_round_trip() {
+    let env = env();
+    let obeys: (bool, bool, bool) = env
+        .eval(
+            r#"
+        local s = CreateFrame("Slider")
+        local initial = s:GetObeyStepOnDrag()
+        s:SetObeyStepOnDrag(true)
+        local enabled = s:GetObeyStepOnDrag()
+        s:SetObeyStepOnDrag(false)
+        local disabled = s:GetObeyStepOnDrag()
+        return initial, enabled, disabled
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        obeys,
+        (false, true, false),
+        "GetObeyStepOnDrag should round-trip the persisted slider flag"
+    );
+}

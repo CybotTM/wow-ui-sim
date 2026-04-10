@@ -10,7 +10,15 @@ pub fn add_slider_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_slider_orientation_methods(methods);
     add_slider_thumb_methods(methods);
     add_slider_drag_methods(methods);
-    methods.add_method("GetObeyStepOnDrag", |_, _, ()| Ok(false));
+    methods.add_method("GetObeyStepOnDrag", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.slider_obey_step_on_drag)
+            .unwrap_or(false))
+    });
     methods.add_method("IsDraggingThumb", |_, _, ()| Ok(false));
 }
 
