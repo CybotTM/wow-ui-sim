@@ -662,6 +662,7 @@ fn register_c_friend_list(lua: &Lua) -> Result<()> {
         "GetFriendInfoByName",
         lua.create_function(get_friend_info_by_name)?,
     )?;
+    t.set("GetWhoInfo", lua.create_function(get_who_info_by_index)?)?;
     t.set("IsFriend", lua.create_function(is_friend)?)?;
     globals.set("C_FriendList", t)?;
     Ok(())
@@ -673,6 +674,10 @@ fn get_friend_info_by_index(lua: &Lua, index: i32) -> Result<Value> {
 
 fn get_friend_info_by_name(lua: &Lua, name: String) -> Result<Value> {
     friend_info_value(lua, lookup_friend_by_name(&name))
+}
+
+fn get_who_info_by_index(lua: &Lua, index: i32) -> Result<Value> {
+    who_info_value(lua, lookup_friend_by_index(index))
 }
 
 fn is_friend(_: &Lua, name: String) -> Result<bool> {
@@ -698,6 +703,13 @@ fn friend_info_value(lua: &Lua, friend: Option<&WowFriendRecord>) -> Result<Valu
     }
 }
 
+fn who_info_value(lua: &Lua, friend: Option<&WowFriendRecord>) -> Result<Value> {
+    match friend {
+        Some(friend) => Ok(Value::Table(create_who_info_table(lua, friend)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
 fn create_friend_info_table(lua: &Lua, friend: &WowFriendRecord) -> Result<mlua::Table> {
     let info = lua.create_table()?;
     info.set("name", friend.name)?;
@@ -713,5 +725,36 @@ fn create_friend_info_table(lua: &Lua, friend: &WowFriendRecord) -> Result<mlua:
         Some(notes) => info.set("notes", notes)?,
         None => info.set("notes", Value::Nil)?,
     }
+    Ok(info)
+}
+
+fn class_filename_for_friend(friend: &WowFriendRecord) -> Option<&'static str> {
+    match friend.class_name {
+        "Paladin" => Some("PALADIN"),
+        "Monk" => Some("MONK"),
+        _ => None,
+    }
+}
+
+fn who_race_and_gender(friend: &WowFriendRecord) -> (&'static str, i32) {
+    match friend.name {
+        "Alyth" => ("Human", 2),
+        "Brom" => ("Orc", 2),
+        _ => ("Unknown", 2),
+    }
+}
+
+fn create_who_info_table(lua: &Lua, friend: &WowFriendRecord) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    let (race, gender) = who_race_and_gender(friend);
+    info.set("fullName", friend.name)?;
+    info.set("fullGuildName", "Heroes of Azeroth")?;
+    info.set("level", friend.level)?;
+    info.set("raceStr", race)?;
+    info.set("classStr", friend.class_name)?;
+    info.set("area", friend.area)?;
+    info.set("filename", class_filename_for_friend(friend))?;
+    info.set("gender", gender)?;
+    info.set("timerunningSeasonID", Value::Nil)?;
     Ok(info)
 }
