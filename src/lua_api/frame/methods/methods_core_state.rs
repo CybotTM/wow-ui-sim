@@ -610,8 +610,34 @@ fn add_rect_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsObjectLoaded", |_lua, _this, ()| Ok(true));
-    methods.add_method("IsMouseOver", |_lua, _this, _args: mlua::MultiValue| {
-        Ok(true)
+    methods.add_method("IsMouseOver", |lua, this, args: mlua::MultiValue| {
+        let id = this.0;
+        let (left, right, top, bottom) = parse_mouse_over_offsets(args);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        state.resolve_rect_if_dirty(id);
+        let Some((mouse_x, mouse_y)) = state.mouse_position else {
+            return Ok(false);
+        };
+        let Some(frame) = state.widgets.get(id) else {
+            return Ok(false);
+        };
+        if !frame.visible || frame.effective_alpha <= 0.0 || !frame.mouse_enabled {
+            return Ok(false);
+        }
+        let Some(rect) = frame.layout_rect else {
+            return Ok(false);
+        };
+
+        let left_edge = rect.x - left;
+        let right_edge = rect.x + rect.width + right;
+        let top_edge = rect.y - top;
+        let bottom_edge = rect.y + rect.height + bottom;
+
+        Ok(mouse_x >= left_edge
+            && mouse_x <= right_edge
+            && mouse_y >= top_edge
+            && mouse_y <= bottom_edge)
     });
     methods.add_method("StopAnimating", |_lua, _this, ()| Ok(()));
     methods.add_method("GetSourceLocation", |_lua, _this, ()| Ok(Value::Nil));
@@ -621,6 +647,23 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         "SetDrawLayerEnabled",
         |_lua, _this, (_layer, _enabled): (String, bool)| Ok(()),
     );
+}
+
+fn parse_mouse_over_offsets(args: mlua::MultiValue) -> (f32, f32, f32, f32) {
+    let mut values = args.into_iter();
+    let left = next_mouse_over_offset(&mut values);
+    let right = next_mouse_over_offset(&mut values);
+    let top = next_mouse_over_offset(&mut values);
+    let bottom = next_mouse_over_offset(&mut values);
+    (left, right, top, bottom)
+}
+
+fn next_mouse_over_offset(values: &mut impl Iterator<Item = Value>) -> f32 {
+    match values.next() {
+        Some(Value::Number(n)) => n as f32,
+        Some(Value::Integer(i)) => i as f32,
+        _ => 0.0,
+    }
 }
 
 #[cfg(test)]

@@ -447,6 +447,90 @@ fn test_xml_hit_rect_insets() {
     );
 }
 
+#[test]
+fn test_is_mouse_over_uses_mouse_position_and_optional_offsets() {
+    let (t, _) = load_test_lua(
+        "test-is-mouse-over",
+        r#"
+        local f = CreateFrame("Frame", "MouseOverFrame", UIParent)
+        f:SetSize(100, 100)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        f:EnableMouse(true)
+        local left, bottom, width, height = f:GetRect()
+        assert(left and bottom and width and height, "GetRect should resolve layout before IsMouseOver")
+    "#,
+    );
+
+    t.env.state().borrow_mut().mouse_position = Some((150.0, 150.0));
+    t.assert_lua_true(
+        "return MouseOverFrame:IsMouseOver()",
+        "mouse inside frame rect should return true",
+    );
+
+    t.env.state().borrow_mut().mouse_position = Some((95.0, 150.0));
+    let without_offsets: bool = t.env.eval("return MouseOverFrame:IsMouseOver()").unwrap();
+    assert!(!without_offsets, "mouse left of frame should return false");
+
+    t.assert_lua_true(
+        "return MouseOverFrame:IsMouseOver(10, 0, 0, 0)",
+        "left offset should expand the mouse-over area",
+    );
+}
+
+#[test]
+fn test_is_mouse_over_false_when_mouse_position_unknown() {
+    let (t, _) = load_test_lua(
+        "test-is-mouse-over-no-mouse",
+        r#"
+        local f = CreateFrame("Frame", "MouseOverUnknownMouseFrame", UIParent)
+        f:SetSize(100, 100)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        f:GetRect()
+    "#,
+    );
+
+    let result: bool = t
+        .env
+        .eval("return MouseOverUnknownMouseFrame:IsMouseOver()")
+        .unwrap();
+    assert!(
+        !result,
+        "IsMouseOver should be false when no mouse position is available",
+    );
+}
+
+#[test]
+fn test_is_mouse_over_requires_mouse_enabled() {
+    let (t, _) = load_test_lua(
+        "test-is-mouse-over-disabled",
+        r#"
+        local f = CreateFrame("Frame", "MouseOverDisabledFrame", UIParent)
+        f:SetSize(100, 100)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        f:GetRect()
+    "#,
+    );
+
+    t.env.state().borrow_mut().mouse_position = Some((150.0, 150.0));
+
+    let initially_disabled: bool = t
+        .env
+        .eval("return MouseOverDisabledFrame:IsMouseOver()")
+        .unwrap();
+    assert!(
+        !initially_disabled,
+        "IsMouseOver should be false when mouse is not enabled on the frame",
+    );
+
+    t.env
+        .eval::<()>("MouseOverDisabledFrame:EnableMouse(true)")
+        .unwrap();
+    t.assert_lua_true(
+        "return MouseOverDisabledFrame:IsMouseOver()",
+        "enabling mouse should allow IsMouseOver to return true inside the frame",
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
