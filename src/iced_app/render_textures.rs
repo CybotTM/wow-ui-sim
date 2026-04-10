@@ -1,11 +1,12 @@
 use iced::{Point, Rectangle, Size};
 
+use crate::iced_app::layout::anchor_position;
 use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuTextureData, QuadBatch, load_texture_or_crop};
-use crate::widget::{FrameStrata, WidgetType};
+use crate::widget::{Frame, FrameStrata, WidgetType};
 
 use super::super::app::App;
 use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
@@ -13,6 +14,7 @@ use super::super::quad_builders::{build_texture_quads, emit_button_highlight};
 impl App {
     pub(super) fn build_overlay(&self) -> QuadBatch {
         let mut overlay = QuadBatch::new();
+        self.append_debug_overlay(&mut overlay);
         self.append_hover_highlight(&mut overlay);
         if let Some(pos) = self.mouse_position {
             self.append_cursor_item_icon(&mut overlay, pos);
@@ -28,6 +30,45 @@ impl App {
             );
         }
         overlay
+    }
+
+    fn append_debug_overlay(&self, overlay: &mut QuadBatch) {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        let (show_borders, show_anchors) = self.debug_overlay_flags(&state);
+        if !show_borders && !show_anchors {
+            return;
+        }
+
+        for id in collect_debug_overlay_ids(&state) {
+            self.append_frame_debug_overlay(overlay, &state, id, show_borders, show_anchors);
+        }
+    }
+
+    fn debug_overlay_flags(&self, state: &crate::lua_api::SimState) -> (bool, bool) {
+        (
+            self.debug_borders || state.debug_borders,
+            self.debug_anchors || state.debug_anchors,
+        )
+    }
+
+    fn append_frame_debug_overlay(
+        &self,
+        overlay: &mut QuadBatch,
+        state: &crate::lua_api::SimState,
+        id: u64,
+        show_borders: bool,
+        show_anchors: bool,
+    ) {
+        let Some((frame, rect, bounds)) = debug_overlay_frame(state, id) else {
+            return;
+        };
+        if show_borders {
+            overlay.push_border(bounds, 1.0, [1.0, 0.1, 0.1, 0.9]);
+        }
+        if show_anchors {
+            append_anchor_markers(overlay, frame, rect);
+        }
     }
 
     /// Load textures with a time budget (~50ms). Sets `textures_pending` if more remain.
@@ -186,6 +227,63 @@ impl App {
     }
 }
 
+fn collect_debug_overlay_ids(state: &crate::lua_api::SimState) -> Vec<u64> {
+    if let Some(buckets) = state.strata_buckets.as_ref() {
+        return buckets
+            .iter()
+            .flat_map(|bucket| bucket.iter().copied())
+            .collect();
+    }
+
+    state
+        .widgets
+        .iter_ids()
+        .filter(|&id| state.widgets.is_ancestor_visible(id))
+        .collect()
+}
+
+fn debug_overlay_frame(
+    state: &crate::lua_api::SimState,
+    id: u64,
+) -> Option<(&Frame, crate::LayoutRect, Rectangle)> {
+    if !state.widgets.is_ancestor_visible(id) {
+        return None;
+    }
+    let frame = state.widgets.get(id)?;
+    let rect = frame.layout_rect?;
+    if rect.width <= 0.0 || rect.height <= 0.0 {
+        return None;
+    }
+    let bounds = Rectangle::new(
+        Point::new(rect.x * UI_SCALE, rect.y * UI_SCALE),
+        Size::new(rect.width * UI_SCALE, rect.height * UI_SCALE),
+    );
+    Some((frame, rect, bounds))
+}
+
+fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::LayoutRect) {
+    const ANCHOR_MARKER_SIZE: f32 = 5.0;
+    const ANCHOR_MARKER_OFFSET: f32 = ANCHOR_MARKER_SIZE * 0.5;
+    const ANCHOR_MARKER_COLOR: [f32; 4] = [0.1, 1.0, 0.1, 1.0];
+
+    for anchor in &frame.anchors {
+        let (x, y) = anchor_position(
+            anchor.point,
+            rect.x * UI_SCALE,
+            rect.y * UI_SCALE,
+            rect.width * UI_SCALE,
+            rect.height * UI_SCALE,
+        );
+        overlay.push_solid(
+            Rectangle::new(
+                Point::new(x - ANCHOR_MARKER_OFFSET, y - ANCHOR_MARKER_OFFSET),
+                Size::new(ANCHOR_MARKER_SIZE, ANCHOR_MARKER_SIZE),
+            ),
+            ANCHOR_MARKER_COLOR,
+        );
+    }
+}
+
 fn log_slow_texture_load(textures: &[GpuTextureData], elapsed: std::time::Duration) {
     let preview: Vec<&str> = textures
         .iter()
@@ -232,9 +330,17 @@ pub(super) fn collect_texture_request_paths(
 #[cfg(test)]
 mod tests {
     use super::collect_texture_request_paths;
-    use crate::render::{QuadBatch, TextureRequest};
-    use crate::widget::FrameStrata;
+    use crate::iced_app::App;
+    use crate::render::{GlyphAtlas, QuadBatch, TextureRequest, WowFontSystem};
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use crate::widget::{AnchorPoint, Frame, FrameStrata, WidgetType};
+    use crate::{LayoutRect, lua_api::WowLuaEnv};
+    use std::cell::RefCell;
+    use std::path::PathBuf;
+    use std::rc::Rc;
     use std::sync::Arc;
+    use tokio::sync::mpsc;
 
     fn request(path: &str) -> TextureRequest {
         TextureRequest {
@@ -263,5 +369,79 @@ mod tests {
             paths,
             vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]
         );
+    }
+
+    fn build_test_app(debug_borders: bool, debug_anchors: bool) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(ScreenKind::Game);
+
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
+            "./textures",
+        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+            crate::iced_app::app::DEFAULT_FONTS_PATH,
+        ))));
+        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        App::build_app(
+            env,
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            debug_borders,
+            debug_anchors,
+            None,
+            crate::config::SimConfig::default(),
+        )
+    }
+
+    fn register_debug_frame(app: &App) {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        let widgets = &mut state.widgets;
+        let mut frame = Frame::new(WidgetType::Frame, Some("DebugFrame".to_string()), None);
+        frame.layout_rect = Some(LayoutRect {
+            x: 10.0,
+            y: 20.0,
+            width: 40.0,
+            height: 30.0,
+        });
+        frame.set_point(AnchorPoint::TopLeft, None, AnchorPoint::TopLeft, 0.0, 0.0);
+        widgets.register(frame);
+    }
+
+    #[test]
+    fn build_overlay_emits_debug_quads_from_startup_flags() {
+        let app = build_test_app(true, true);
+        register_debug_frame(&app);
+
+        let overlay = app.build_overlay();
+        assert_eq!(overlay.quad_count(), 5);
+        assert!(overlay.texture_requests.is_empty());
+        assert!(overlay.mask_texture_requests.is_empty());
+    }
+
+    #[test]
+    fn build_overlay_emits_debug_quads_from_runtime_toggles() {
+        let app = build_test_app(false, false);
+        register_debug_frame(&app);
+        {
+            let env = app.env.borrow();
+            let mut state = env.state().borrow_mut();
+            state.debug_borders = true;
+            state.debug_anchors = true;
+        }
+
+        let overlay = app.build_overlay();
+        assert_eq!(overlay.quad_count(), 5);
+        assert!(overlay.texture_requests.is_empty());
+        assert!(overlay.mask_texture_requests.is_empty());
     }
 }

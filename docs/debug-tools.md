@@ -136,9 +136,12 @@ SettingsPanel [Frame] (920x550) visible keys=[TitleContainer, ...]
 
 ## Debug Visualization
 
-**File:** `src/iced_app/app.rs:37-41, 318-331`
+**File:** `src/iced_app/app.rs`, `src/iced_app/render_textures.rs`
 
-Overlay rendering for debugging layout. Currently stored as flags but marked `TODO: Re-implement as shader quads`.
+Overlay rendering for debugging layout. The live renderer emits shader quads into the overlay batch for:
+- red frame borders
+- green anchor-point markers
+- the existing hover/cursor overlays
 
 ### Activation
 
@@ -166,7 +169,7 @@ All three tools read from the same Rust `WidgetRegistry` (`state.widgets`). No d
 Lua API calls ──> WidgetRegistry <──┬── Inspector Panel (live, editable)
                                     ├── dump-tree connected (live, computed layout)
                                     ├── dump-tree standalone (one-shot, stored sizes)
-                                    └── Debug overlay (live, shader quads)
+                                    └── Debug overlay (live, shader quads + runtime toggles)
 ```
 
 ### Layout Resolution
