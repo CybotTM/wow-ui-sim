@@ -717,6 +717,15 @@ fn test_transmog_sets_get_usable_sets_empty() {
 }
 
 #[test]
+fn test_transmog_sets_has_available_sets_false_when_set_inventory_is_empty() {
+    let env = env();
+    let has_available_sets: bool = env
+        .eval("return C_TransmogSets.HasAvailableSets()")
+        .unwrap();
+    assert!(!has_available_sets);
+}
+
+#[test]
 fn test_transmog_sets_is_base_set_collected() {
     let env = env();
     let collected: bool = env

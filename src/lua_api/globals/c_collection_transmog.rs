@@ -546,6 +546,7 @@ fn register_transmog_sets(lua: &Lua) -> Result<()> {
     add_table_stub_with_arg::<i32>(lua, &t, "GetSetPrimaryAppearances")?;
     add_empty_table_stub(lua, &t, "GetAllSets")?;
     add_empty_table_stub(lua, &t, "GetUsableSets")?;
+    t.set("HasAvailableSets", lua.create_function(|_, ()| Ok(false))?)?;
     add_bool_stub_with_arg::<i32>(lua, &t, "IsBaseSetCollected", false)?;
     add_table_stub_with_arg::<(i32, i32)>(lua, &t, "GetSourcesForSlot")?;
     lua.globals().set("C_TransmogSets", t)?;
