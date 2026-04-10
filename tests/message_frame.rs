@@ -442,3 +442,48 @@ fn test_scroll_operations_update_offset_and_clamp_to_message_history() {
     assert_eq!(result.4, 0, "PageDown should clamp back toward the bottom");
     assert_eq!(result.5, 0, "ScrollDown should clamp at the bottom");
 }
+
+#[test]
+fn test_scroll_position_queries_follow_history_and_truncation() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (i32, bool, bool, i32, bool, bool) = env
+        .eval(
+            r#"
+            local f = CreateFrame("ScrollingMessageFrame", "TestMFScrollInfo", UIParent)
+            f:AddMessage("One")
+            f:AddMessage("Two")
+            f:AddMessage("Three")
+
+            local initialRange = f:GetMaxScrollRange()
+            local initialAtBottom = f:AtBottom()
+            local initialAtTop = f:AtTop()
+
+            f:SetMaxLines(2)
+            f:ScrollToTop()
+
+            local truncatedRange = f:GetMaxScrollRange()
+            local truncatedAtTop = f:AtTop()
+            local truncatedAtBottom = f:AtBottom()
+
+            return initialRange, initialAtBottom, initialAtTop, truncatedRange, truncatedAtTop, truncatedAtBottom
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result.0, 2,
+        "three messages should yield a max scroll range of two"
+    );
+    assert!(result.1, "new frames should start at the bottom");
+    assert!(
+        !result.2,
+        "new frames with history should not start at the top"
+    );
+    assert_eq!(
+        result.3, 1,
+        "truncating to two lines should reduce max scroll range"
+    );
+    assert!(result.4, "ScrollToTop should move the frame to the top");
+    assert!(!result.5, "top position should no longer report bottom");
+}

@@ -256,9 +256,21 @@ fn add_message_frame_scroll_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
         scroll_message_frame_to_edge(get_sim_state(lua), this.0, false);
         Ok(())
     });
-    methods.add_method("AtTop", |_, _this, ()| Ok(true));
-    methods.add_method("AtBottom", |_, _this, ()| Ok(true));
-    methods.add_method("GetMaxScrollRange", |_, _this, ()| Ok(0_i32));
+    methods.add_method("AtTop", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(message_frame_is_at_top(&state, this.0))
+    });
+    methods.add_method("AtBottom", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(message_frame_is_at_bottom(&state, this.0))
+    });
+    methods.add_method("GetMaxScrollRange", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(message_frame_max_scroll_range(&state, this.0))
+    });
     add_scroll_offset_methods(methods);
     add_scroll_allowed_methods(methods);
 }
@@ -363,11 +375,34 @@ fn scroll_message_frame_to_edge(
 }
 
 fn message_frame_scroll_limit(data: &crate::lua_api::message_frame::MessageFrameData) -> i32 {
-    data.messages.len().saturating_sub(1) as i32
+    data.messages.len().min(data.max_lines).saturating_sub(1) as i32
 }
 
 fn message_frame_page_amount(data: &crate::lua_api::message_frame::MessageFrameData) -> i32 {
     data.max_lines.max(1) as i32
+}
+
+fn message_frame_max_scroll_range(state: &SimState, id: u64) -> i32 {
+    state
+        .message_frames
+        .get(&id)
+        .map(message_frame_scroll_limit)
+        .unwrap_or(0)
+}
+
+fn message_frame_is_at_top(state: &SimState, id: u64) -> bool {
+    let Some(data) = state.message_frames.get(&id) else {
+        return true;
+    };
+    data.scroll_offset == message_frame_scroll_limit(data)
+}
+
+fn message_frame_is_at_bottom(state: &SimState, id: u64) -> bool {
+    state
+        .message_frames
+        .get(&id)
+        .map(|data| data.scroll_offset == 0)
+        .unwrap_or(true)
 }
 
 fn add_message_frame_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
