@@ -94,6 +94,10 @@ fn register_spell_book_passive_and_cooldown(t: &mlua::Table, lua: &Lua) -> Resul
         "GetSpellBookItemCooldown",
         lua.create_function(create_spell_book_item_cooldown)?,
     )?;
+    t.set(
+        "GetSpellBookItemLossOfControlCooldownInfo",
+        lua.create_function(create_spell_book_item_loss_of_control_cooldown_info)?,
+    )?;
     Ok(())
 }
 
@@ -357,6 +361,19 @@ fn create_spell_book_item_cooldown(lua: &Lua, (_slot, _bank): (i32, Option<i32>)
     info.set("isEnabled", true)?;
     info.set("modRate", 1.0)?;
     Ok(Value::Table(info))
+}
+
+fn create_spell_book_item_loss_of_control_cooldown_info(
+    lua: &Lua,
+    (slot, _bank): (i32, Option<i32>),
+) -> Result<Value> {
+    let Some(spell_id) = spell_id_at_spellbook_slot(slot) else {
+        return Ok(Value::Nil);
+    };
+    Ok(Value::Table(create_spell_loss_of_control_cooldown_info(
+        lua,
+        spell_id as i32,
+    )?))
 }
 
 /// Build a SpellBookSkillLineInfo table for a skill line index.

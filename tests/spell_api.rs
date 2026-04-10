@@ -121,6 +121,39 @@ fn test_spellbook_pickup_item_fires_cursor_changed() {
     );
 }
 
+#[test]
+fn test_spellbook_get_loss_of_control_cooldown_info() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+            local info = C_SpellBook.GetSpellBookItemLossOfControlCooldownInfo(1, Enum.SpellBookSpellBank.Player)
+            if type(info) ~= "table" then
+                return "expected_loc_info_table"
+            end
+            if info.isActive ~= false then
+                return "expected_inactive_loc_info"
+            end
+            if info.startTime ~= 0 or info.duration ~= 0 then
+                return "expected_zero_loc_cooldown"
+            end
+            if info.modRate ~= 1 then
+                return "expected_default_loc_mod_rate"
+            end
+            if info.shouldReplaceNormalCooldown ~= false then
+                return "expected_loc_not_to_replace_normal_cooldown"
+            end
+            if C_SpellBook.GetSpellBookItemLossOfControlCooldownInfo(9999, Enum.SpellBookSpellBank.Player) ~= nil then
+                return "invalid_spellbook_slot_should_not_have_loc_info"
+            end
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
 // ============================================================================
 // C_Spell
 // ============================================================================
