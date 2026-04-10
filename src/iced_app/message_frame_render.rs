@@ -87,7 +87,8 @@ fn message_fade_alpha(
     if !data.fading {
         return 1.0;
     }
-    let age = now - msg.timestamp;
+    let fade_timestamp = msg.timestamp.max(data.override_fade_timestamp);
+    let age = now - fade_timestamp;
     if age <= data.time_visible {
         return 1.0;
     }

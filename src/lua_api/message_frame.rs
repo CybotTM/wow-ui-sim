@@ -1,5 +1,7 @@
 //! MessageFrame / ScrollingMessageFrame state data structures.
 
+use std::collections::HashMap;
+
 /// A single message in a MessageFrame.
 #[derive(Clone)]
 pub struct Message {
@@ -25,6 +27,9 @@ pub struct MessageFrameData {
     pub scroll_offset: i32,
     pub scroll_allowed: bool,
     pub text_copyable: bool,
+    pub display_dirty: bool,
+    pub override_fade_timestamp: f64,
+    pub message_font_strings: HashMap<i64, u64>,
 }
 
 impl Default for MessageFrameData {
@@ -40,6 +45,9 @@ impl Default for MessageFrameData {
             scroll_offset: 0,
             scroll_allowed: true,
             text_copyable: false,
+            display_dirty: false,
+            override_fade_timestamp: 0.0,
+            message_font_strings: HashMap::new(),
         }
     }
 }

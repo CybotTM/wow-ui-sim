@@ -581,7 +581,10 @@ fn test_message_frame_transform_and_filter_apis_update_history() {
         )
         .unwrap();
 
-    assert_eq!(result.0, 3, "each mutating API should mark the display dirty once");
+    assert_eq!(
+        result.0, 3,
+        "each mutating API should mark the display dirty once"
+    );
     assert_eq!(result.1, "Keep");
     assert!((result.2 - 0.25).abs() < 0.01);
     assert!((result.3 - 0.5).abs() < 0.01);
@@ -590,4 +593,83 @@ fn test_message_frame_transform_and_filter_apis_update_history() {
     assert!((result.6 - 0.9).abs() < 0.01);
     assert!((result.7 - 0.8).abs() < 0.01);
     assert!((result.8 - 0.7).abs() < 0.01);
+}
+
+#[test]
+fn test_message_frame_fontstring_lookup_and_fade_reset_update_runtime_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("ScrollingMessageFrame", "TestMFFadeReset", UIParent)
+        f:AddMessage("Repeated", 0.8, 0.4, 0.2, 1.0, 77)
+    "#,
+    )
+    .unwrap();
+
+    let frame_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestMFFadeReset")
+        .unwrap();
+
+    let (text, r, g, b): (String, f64, f64, f64) = env
+        .eval(
+            r#"
+            local fontString = TestMFFadeReset:GetFontStringByID(77)
+            local text = fontString and fontString:GetText() or ""
+            local r, g, b = fontString:GetTextColor()
+            return text, r, g, b
+        "#,
+        )
+        .unwrap();
+    assert_eq!(text, "Repeated");
+    assert!((r - 0.8).abs() < 0.01);
+    assert!((g - 0.4).abs() < 0.01);
+    assert!((b - 0.2).abs() < 0.01);
+
+    let original_timestamp = {
+        let state = env.state().borrow();
+        state.message_frames.get(&frame_id).unwrap().messages[0].timestamp
+    };
+
+    std::thread::sleep(std::time::Duration::from_millis(10));
+    env.exec(r#"TestMFFadeReset:ResetMessageFadeByID(77)"#)
+        .unwrap();
+
+    let reset_timestamp = {
+        let state = env.state().borrow();
+        state.message_frames.get(&frame_id).unwrap().messages[0].timestamp
+    };
+    assert!(
+        reset_timestamp > original_timestamp,
+        "ResetMessageFadeByID should refresh the stored timestamp"
+    );
+
+    {
+        let mut state = env.state().borrow_mut();
+        let data = state.message_frames.get_mut(&frame_id).unwrap();
+        data.display_dirty = false;
+        data.override_fade_timestamp = 0.0;
+    }
+
+    env.exec(
+        r#"
+        TestMFFadeReset:MarkDisplayDirty()
+        TestMFFadeReset:ResetAllFadeTimes()
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let data = state.message_frames.get(&frame_id).unwrap();
+    assert!(
+        data.display_dirty,
+        "dirty methods should set real display-dirty state"
+    );
+    assert!(
+        data.override_fade_timestamp > 0.0,
+        "ResetAllFadeTimes should update the override fade timestamp"
+    );
 }

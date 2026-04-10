@@ -2,7 +2,8 @@
 
 use super::super::handle::FrameRef;
 use crate::lua_api::SimState;
-use crate::lua_api::frame::handle::get_sim_state;
+use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
+use crate::widget::{Frame, WidgetType};
 use mlua::Value;
 
 pub fn add_message_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -108,6 +109,7 @@ fn set_message_frame_max_lines(state: &mut SimState, id: u64, max_lines: i32) {
     data.scroll_offset = data
         .scroll_offset
         .clamp(0, message_frame_scroll_limit(data));
+    data.display_dirty = true;
 }
 
 fn message_frame_max_lines(state: &SimState, id: u64) -> usize {
@@ -479,21 +481,24 @@ fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("AddOnDisplayRefreshedCallback", |lua, this, func: Value| {
         add_message_frame_display_refreshed_callback(lua, this.0, func)
     });
-    methods.add_method("RemoveMessagesByPredicate", |lua, this, predicate: Value| {
-        let Some(predicate) = as_lua_function(predicate) else {
-            return Ok(());
-        };
-        if remove_messages_by_predicate(lua, this.0, predicate)? {
-            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
-        }
-        Ok(())
-    });
+    methods.add_method(
+        "RemoveMessagesByPredicate",
+        |lua, this, predicate: Value| {
+            let Some(predicate) = as_lua_function(predicate) else {
+                return Ok(());
+            };
+            if remove_messages_by_predicate(lua, this.0, predicate)? {
+                mark_message_frame_display_dirty(lua, this.0)?;
+            }
+            Ok(())
+        },
+    );
     methods.add_method("TransformMessages", |lua, this, args: mlua::MultiValue| {
         let Some((predicate, transform)) = parse_transform_message_callbacks(args) else {
             return Ok(());
         };
         if transform_messages(lua, this.0, predicate, transform)? {
-            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
+            mark_message_frame_display_dirty(lua, this.0)?;
         }
         Ok(())
     });
@@ -502,17 +507,25 @@ fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods:
             return Ok(());
         };
         if adjust_message_colors(lua, this.0, transform)? {
-            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
+            mark_message_frame_display_dirty(lua, this.0)?;
         }
         Ok(())
     });
-    methods.add_method("GetFontStringByID", |_, _this, _id: i64| Ok(Value::Nil));
-    methods.add_method("ResetMessageFadeByID", |_, _this, _id: i64| Ok(()));
+    methods.add_method("GetFontStringByID", |lua, this, message_id: i64| {
+        get_font_string_by_message_id(lua, this.0, message_id)
+    });
+    methods.add_method("ResetMessageFadeByID", |lua, this, message_id: i64| {
+        if reset_message_fade_by_id(lua, this.0, message_id) {
+            mark_message_frame_display_dirty(lua, this.0)?;
+        }
+        Ok(())
+    });
     methods.add_method("ResetAllFadeTimes", |lua, this, ()| {
-        call_message_frame_display_refreshed_callbacks(lua, this.0)
+        reset_all_message_fade_times(lua, this.0);
+        mark_message_frame_display_dirty(lua, this.0)
     });
     methods.add_method("MarkDisplayDirty", |lua, this, ()| {
-        call_message_frame_display_refreshed_callbacks(lua, this.0)
+        mark_message_frame_display_dirty(lua, this.0)
     });
     add_set_on_text_copied_callback(methods);
 }
@@ -635,6 +648,126 @@ fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: 
 
 // --- Helper functions ---
 
+fn mark_message_frame_display_dirty(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
+    {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let data = state
+            .message_frames
+            .entry(frame_id)
+            .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+        data.display_dirty = true;
+    }
+    call_message_frame_display_refreshed_callbacks(lua, frame_id)
+}
+
+fn reset_all_message_fade_times(lua: &mlua::Lua, frame_id: u64) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let now = state.start_time.elapsed().as_secs_f64();
+    let data = state
+        .message_frames
+        .entry(frame_id)
+        .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+    data.override_fade_timestamp = now;
+}
+
+fn reset_message_fade_by_id(lua: &mlua::Lua, frame_id: u64, message_id: i64) -> bool {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let now = state.start_time.elapsed().as_secs_f64();
+    let Some(data) = state.message_frames.get_mut(&frame_id) else {
+        return false;
+    };
+    let Some(message) = data
+        .messages
+        .iter_mut()
+        .rev()
+        .find(|message| message.message_id == Some(message_id))
+    else {
+        return false;
+    };
+    message.timestamp = now;
+    true
+}
+
+fn get_font_string_by_message_id(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    message_id: i64,
+) -> mlua::Result<Value> {
+    let Some((font_string_id, message)) = resolve_message_font_string(lua, frame_id, message_id)
+    else {
+        return Ok(Value::Nil);
+    };
+    update_message_font_string(lua, font_string_id, &message);
+    frame_ref(lua, font_string_id)
+}
+
+fn resolve_message_font_string(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    message_id: i64,
+) -> Option<(u64, crate::lua_api::message_frame::Message)> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let (message, existing_font_string_id) = {
+        let data = state.message_frames.get_mut(&frame_id)?;
+        let message = data
+            .messages
+            .iter()
+            .rev()
+            .find(|message| message.message_id == Some(message_id))
+            .cloned()?;
+        let existing_font_string_id = data.message_font_strings.get(&message_id).copied();
+        (message, existing_font_string_id)
+    };
+    let font_string_id = existing_font_string_id
+        .unwrap_or_else(|| create_message_font_string(&mut state, frame_id, message_id));
+    state
+        .message_frames
+        .get_mut(&frame_id)?
+        .message_font_strings
+        .insert(message_id, font_string_id);
+    Some((font_string_id, message))
+}
+
+fn create_message_font_string(state: &mut SimState, parent_id: u64, message_id: i64) -> u64 {
+    let mut font_string = Frame::new(WidgetType::FontString, None, Some(parent_id));
+    font_string.visible = false;
+    font_string.object_type_name = Some("FontString".to_string());
+    font_string.parent_key = Some(format!("MessageID{message_id}"));
+    let font_string_id = font_string.id;
+    state.widgets.register(font_string);
+    state.widgets.add_child(parent_id, font_string_id);
+    let parent_props = state
+        .widgets
+        .get(parent_id)
+        .map(|parent| (parent.frame_strata, parent.frame_level));
+    if let Some((parent_strata, parent_level)) = parent_props
+        && let Some(frame) = state.widgets.get_mut_visual(font_string_id)
+    {
+        frame.frame_strata = parent_strata;
+        frame.frame_level = parent_level + 1;
+    }
+    font_string_id
+}
+
+fn update_message_font_string(
+    lua: &mlua::Lua,
+    font_string_id: u64,
+    message: &crate::lua_api::message_frame::Message,
+) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let Some(font_string) = state.widgets.get_mut_visual(font_string_id) else {
+        return;
+    };
+    font_string.text = Some(message.text.clone());
+    font_string.text_stripped = Some(crate::dump::strip_wow_escapes(&message.text));
+    font_string.text_color = crate::widget::Color::new(message.r, message.g, message.b, message.a);
+}
+
 fn as_lua_function(value: Value) -> Option<mlua::Function> {
     match value {
         Value::Function(function) => Some(function),
@@ -755,7 +888,9 @@ fn replace_message_frame_messages(
         .entry(frame_id)
         .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
     data.messages = messages;
-    data.scroll_offset = data.scroll_offset.clamp(0, message_frame_scroll_limit(data));
+    data.scroll_offset = data
+        .scroll_offset
+        .clamp(0, message_frame_scroll_limit(data));
 }
 
 fn call_message_predicate(
@@ -893,6 +1028,7 @@ fn add_message_core(state: &mut SimState, id: u64, args: mlua::MultiValue, log: 
     let data = state.message_frames.entry(id).or_default();
     insert_message(data, text, r, g, b, a, message_id, timestamp);
     truncate_messages(data);
+    data.display_dirty = true;
 }
 
 fn backfill_message(state: &mut SimState, id: u64, args: mlua::MultiValue) {
@@ -923,6 +1059,7 @@ fn backfill_message(state: &mut SimState, id: u64, args: mlua::MultiValue) {
     if data.messages.len() > data.max_lines {
         data.messages.pop();
     }
+    data.display_dirty = true;
 }
 
 fn insert_message(
