@@ -1306,10 +1306,7 @@ fn register_c_game_rules(lua: &Lua) -> Result<()> {
         "IsGameRuleActive",
         lua.create_function(|_, _r: Value| Ok(false))?,
     )?;
-    t.set(
-        "IsHardcoreActive",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
+    t.set("IsHardcoreActive", lua.create_function(|_, ()| Ok(false))?)?;
     t.set("GetActiveGameMode", lua.create_function(|_, ()| Ok(0))?)?;
     t.set(
         "GetGameRuleAsFloat",
