@@ -278,10 +278,25 @@ fn register_global_game_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result
     register_global_combat_stubs(lua)?;
     register_global_action_stubs(lua)?;
     register_global_account_stubs(lua, state)?;
+    register_c_trade_info(lua)?;
     register_actionbar_hotkey_color(lua)?;
     register_unit_stat_constants(lua)?;
     register_store_frame_functions(lua)?;
     register_communities_dialog_stubs(lua)?;
+    Ok(())
+}
+
+fn register_c_trade_info(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    let table: mlua::Table = match globals.get::<Value>("C_TradeInfo")? {
+        Value::Table(existing) => existing,
+        _ => lua.create_table()?,
+    };
+    table.set(
+        "ShouldShowTradeOfferWarning",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    globals.set("C_TradeInfo", table)?;
     Ok(())
 }
 
