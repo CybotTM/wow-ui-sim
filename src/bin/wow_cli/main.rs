@@ -12,6 +12,7 @@
 //!   wow-cli convert-texture foo.BLP  # Convert single BLP to WebP (standalone)
 //!   wow-cli generate spells          # Regenerate data/spells.rs from CSVs
 
+mod audit_api;
 mod csv_util;
 mod gen_atlas;
 mod gen_global_strings;
@@ -117,6 +118,25 @@ enum Commands {
         #[command(subcommand)]
         what: GenerateTarget,
     },
+
+    /// Statically audit Blizzard UI API usage (standalone)
+    AuditApi {
+        /// Output format
+        #[arg(long, default_value = "text")]
+        format: String,
+
+        /// Only scan non-LoadOnDemand addons
+        #[arg(long)]
+        filter_startup: bool,
+
+        /// Drill into a specific C_* namespace
+        #[arg(long)]
+        namespace: Option<String>,
+
+        /// Override Blizzard UI path
+        #[arg(long, default_value_os_t = default_blizzard_ui_path())]
+        ui_path: PathBuf,
+    },
 }
 
 #[derive(Subcommand)]
@@ -139,6 +159,10 @@ enum GenerateTarget {
 
 fn default_addons_path() -> PathBuf {
     PathBuf::from("./Interface/AddOns")
+}
+
+fn default_blizzard_ui_path() -> PathBuf {
+    PathBuf::from("./vendor/wow-ui-source/Interface/AddOns")
 }
 
 fn default_interface_path() -> PathBuf {
@@ -173,6 +197,12 @@ fn handle_command(command: Commands) {
         } => handle_extract_textures_command(addons, interface, output),
         Commands::ConvertTexture { input, output } => convert_texture(&input, output.as_ref()),
         Commands::Generate { what } => run_generator(what),
+        Commands::AuditApi {
+            format,
+            filter_startup,
+            namespace,
+            ui_path,
+        } => run_audit_api(format, filter_startup, namespace, ui_path),
     }
 }
 
@@ -207,6 +237,29 @@ fn run_generator(target: GenerateTarget) {
     if let Err(e) = result {
         eprintln!("Error: {}", e);
         std::process::exit(1);
+    }
+}
+
+fn run_audit_api(
+    format: String,
+    filter_startup: bool,
+    namespace: Option<String>,
+    ui_path: PathBuf,
+) {
+    use audit_api::{AuditConfig, OutputFormat};
+    let fmt = match format.as_str() {
+        "json" => OutputFormat::Json,
+        _ => OutputFormat::Text,
+    };
+    let config = AuditConfig {
+        ui_path,
+        namespace_filter: namespace,
+        filter_startup,
+    };
+    let results = audit_api::run_audit(&config);
+    match fmt {
+        OutputFormat::Json => audit_api::print_json(&results),
+        OutputFormat::Text => audit_api::print_text(&results),
     }
 }
 
