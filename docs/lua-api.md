@@ -151,6 +151,22 @@ pub struct FrameHandle {
 
 ---
 
+## QuestPOI Blob Data
+
+Quest world-map blob polygons are already sourced in `data/quest_poi_blobs.rs`.
+The current simulator uses a small hand-maintained dataset rather than a
+generated import pipeline.
+
+That data feeds the full QuestPOI blob path:
+- `GetQuestPOIBlobCount(...)` reads the per-quest polygon table
+- `UpdateMouseOverTooltip(x, y)` uses `hit_test_blobs(...)` for point-in-polygon matching
+- `DrawBlob()` rendering triangulates the stored polygon vertices into the render batch
+
+Each blob entry stores `quest_id`, `map_id`, and normalized `(x, y)` vertices
+in the same 0.0-1.0 map space used by the QuestPOI APIs.
+
+---
+
 ## Global Functions
 
 ### Registration Flow (`globals_legacy.rs:44-52`)
