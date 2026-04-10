@@ -152,10 +152,10 @@ fn apply_crop(img: image::RgbaImage, crop_str: &str) -> Result<image::RgbaImage,
     Ok(img.view(cx, cy, cw, ch).to_image())
 }
 
-/// Save screenshot image as lossy WebP (quality 50). Extension is forced to .webp.
+/// Save screenshot image as lossy WebP (quality 65). Extension is forced to .webp.
 fn save_screenshot(img: &image::RgbaImage, output: &Path) -> Result<(), String> {
     let output = output.with_extension("webp");
     let encoder = webp::Encoder::from_rgba(img.as_raw(), img.width(), img.height());
-    let mem = encoder.encode(50.0);
+    let mem = encoder.encode(65.0);
     std::fs::write(&output, &*mem).map_err(|e| e.to_string())
 }

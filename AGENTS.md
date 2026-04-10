@@ -355,13 +355,13 @@ end)
 Render the UI to an image file without starting the GUI (headless GPU, same shader pipeline as the live renderer). Text is not rendered — this is for debugging frame layout and textures.
 
 ```bash
-wow-sim --no-addons --no-saved-vars screenshot                       # Render to screenshot.webp (1024x768, lossy q15)
+wow-sim --no-addons --no-saved-vars screenshot                       # Render to screenshot.webp (1024x768, lossy q65)
 wow-sim screenshot -o frame.webp --filter AddonList                  # Render only AddonList subtree
 wow-sim screenshot --width 1920 --height 1080                        # Custom resolution
 wow-sim --no-addons --no-saved-vars screenshot -o fast.webp           # Fast: skip extras
 ```
 
-Always saves as lossy WebP at quality 15. Extension is forced to `.webp` regardless of what's passed to `-o`.
+Always saves as lossy WebP at quality 65. Extension is forced to `.webp` regardless of what's passed to `-o`.
 
 Also available via `wow-cli screenshot` (standalone loading, same options).
 
