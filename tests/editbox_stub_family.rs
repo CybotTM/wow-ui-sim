@@ -85,6 +85,16 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             if eb:HasText() ~= true then
                 return "has_text_should_be_true_after_set_text"
             end
+            eb:SetText("aé🙂b")
+            eb:SetCursorPosition(2)
+            if eb:GetUTF8CursorPosition() ~= 3 then
+                return "utf8_cursor_position_should_track_byte_offset_after_accent"
+            end
+            eb:SetCursorPosition(3)
+            if eb:GetUTF8CursorPosition() ~= 7 then
+                return "utf8_cursor_position_should_track_byte_offset_after_emoji"
+            end
+            eb:SetText("Visible text")
             if eb:GetDisplayText() ~= "Visible text" then
                 return "display_text_should_reflect_current_text"
             end
