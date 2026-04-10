@@ -279,6 +279,68 @@ fn test_execute_attribute_rejects_unprotected_string_body() {
     assert_eq!(reason, "unsupported-unprotected-snippet");
 }
 
+#[test]
+fn test_can_change_protected_state_matches_lockdown_rules() {
+    let env = env();
+    let (plain, protected, parent, anchored): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local parent = CreateFrame("Frame", "CanChangeParent", UIParent)
+            local protected = CreateFrame("Frame", "CanChangeProtected", parent)
+            local anchored = CreateFrame("Frame", "CanChangeAnchored", UIParent)
+            local plain = CreateFrame("Frame", "CanChangePlain", UIParent)
+
+            anchored:SetPoint("TOPLEFT", protected, "BOTTOMLEFT", 0, -4)
+
+            A_Admin.SetFrameProtected("CanChangeProtected", true)
+            A_Admin.SetInCombat(true)
+            forceinsecure()
+
+            return plain:CanChangeProtectedState(),
+                   protected:CanChangeProtectedState(),
+                   parent:CanChangeProtectedState(),
+                   anchored:CanChangeProtectedState()
+            "#,
+        )
+        .unwrap();
+
+    assert!(plain, "plain frames should stay mutable");
+    assert!(!protected, "protected frame should be blocked");
+    assert!(!parent, "ancestor of protected frame should be blocked");
+    assert!(
+        !anchored,
+        "frame anchored to protected relation should be blocked"
+    );
+}
+
+#[test]
+fn test_can_change_protected_state_allows_secure_and_out_of_combat_calls() {
+    let env = env();
+    let (secure_in_combat, insecure_out_of_combat): (bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "CanChangeSecureProtected", UIParent)
+            A_Admin.SetFrameProtected("CanChangeSecureProtected", true)
+
+            A_Admin.SetInCombat(true)
+            local secureInCombat = frame:CanChangeProtectedState()
+
+            A_Admin.SetInCombat(false)
+            forceinsecure()
+            local insecureOutOfCombat = frame:CanChangeProtectedState()
+
+            return secureInCombat, insecureOutOfCombat
+            "#,
+        )
+        .unwrap();
+
+    assert!(secure_in_combat, "secure callers should bypass lockdown");
+    assert!(
+        insecure_out_of_combat,
+        "insecure callers should be allowed outside combat"
+    );
+}
+
 // ============================================================================
 // forceinsecure + taint tracking
 // ============================================================================

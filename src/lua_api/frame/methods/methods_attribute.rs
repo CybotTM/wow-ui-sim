@@ -377,7 +377,12 @@ fn add_forbidden_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("CanChangeProtectedState", |_lua, _this, ()| Ok(true));
+    methods.add_method("CanChangeProtectedState", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        Ok(!combat_lockdown::is_blocked_for_current_caller(
+            lua, &state_rc, this.0,
+        ))
+    });
     methods.add_method(
         "SetPassThroughButtons",
         |lua, this, args: mlua::MultiValue| {

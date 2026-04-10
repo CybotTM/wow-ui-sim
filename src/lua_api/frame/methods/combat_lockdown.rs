@@ -24,6 +24,9 @@ pub fn check_and_fire(
     frame_id: u64,
     method_name: &str,
 ) -> bool {
+    if !is_blocked_for_current_caller(lua, state_rc, frame_id) {
+        return false;
+    }
     if let Some((frame_name, addon_name)) = blocked_call_context(lua, state_rc, frame_id) {
         let func_str = format!("{}:{}()", frame_name, method_name);
         fire_event(lua, &addon_name, &func_str);
@@ -32,19 +35,28 @@ pub fn check_and_fire(
     false
 }
 
+pub fn is_blocked_for_current_caller(
+    lua: &Lua,
+    state_rc: &Rc<RefCell<SimState>>,
+    frame_id: u64,
+) -> bool {
+    if !is_caller_insecure(lua) {
+        return false;
+    }
+    let state = state_rc.borrow();
+    state.player.in_combat && is_protected_action_blocked(&state.widgets, frame_id)
+}
+
 fn blocked_call_context(
     lua: &Lua,
     state_rc: &Rc<RefCell<SimState>>,
     frame_id: u64,
 ) -> Option<(String, String)> {
-    if !is_caller_insecure(lua) {
+    if !is_blocked_for_current_caller(lua, state_rc, frame_id) {
         return None;
     }
     let state = state_rc.borrow();
     let frame = state.widgets.get(frame_id)?;
-    if !state.player.in_combat || !is_protected_action_blocked(&state.widgets, frame_id) {
-        return None;
-    }
     let frame_name = frame.name.clone().unwrap_or_default();
     let addon_name = state
         .executing_addon_index
