@@ -409,6 +409,204 @@ pub struct GapReport {
     pub missing_c_namespaces: Vec<GapEntry>,
     pub missing_le_constants: Vec<GapEntry>,
     pub missing_enum_namespaces: Vec<GapEntry>,
+    /// C_* namespace → list of (method_name, usage_count) used by Blizzard UI but not registered
+    pub missing_c_methods: BTreeMap<String, Vec<(String, usize)>>,
+}
+
+/// Scan the simulator Rust source for C_* method registrations.
+///
+/// For each Rust function, we look for `globals().set("C_Foo", var)` to identify which
+/// variable holds a given namespace, then collect all `var.set("Method", ...)` in that
+/// same function scope. For generated_stubs.rs, we also handle `t.get::<Value>("Method")`
+/// patterns used in the nil-check-before-set pattern.
+pub fn scan_simulator_c_methods(src_path: &Path) -> BTreeMap<String, BTreeSet<String>> {
+    let mut result: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+
+    // Regex patterns for method scanning
+    let globals_set_c_re =
+        Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)",\s*(\w+)(?:\.clone\(\))?"#).unwrap();
+    let table_set_re = Regex::new(r#"(\w+)\.set\("([A-Za-z][A-Za-z0-9_]*)""#).unwrap();
+    // For generated_stubs: t.get::<Value>("MethodName")
+    let table_get_re = Regex::new(r#"(\w+)\.get::<[^>]+>\("([A-Za-z][A-Za-z0-9_]*)"\)"#).unwrap();
+    // For generated_stubs: fn register_c_foo_N — detect which namespace owns the sub-function
+    let sub_fn_re = Regex::new(r"^fn register_c_([a-z][a-z0-9_]*)_\d+\b").unwrap();
+    let factory_fn_re = Regex::new(
+        r"^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+((?:register_c_|make_c_)[a-z][a-z0-9_]*)\b",
+    )
+    .unwrap();
+
+    for entry in WalkDir::new(src_path)
+        .into_iter()
+        .filter_map(|e| e.ok())
+        .filter(|e| e.file_type().is_file())
+        .filter(|e| e.path().extension().and_then(|e| e.to_str()).unwrap_or("") == "rs")
+    {
+        let path = entry.path();
+        let content = match std::fs::read_to_string(path) {
+            Ok(c) => c,
+            Err(_) => continue,
+        };
+        scan_rust_file_for_c_methods(
+            &content,
+            &globals_set_c_re,
+            &table_set_re,
+            &table_get_re,
+            &sub_fn_re,
+            &factory_fn_re,
+            &mut result,
+        );
+    }
+
+    result
+}
+
+/// Scan a single Rust file for C_* method registrations.
+///
+/// Strategy: split into function-level blocks, then for each block:
+/// 1. Find `something.set("C_Foo", varname)` → remember varname → namespace mapping
+/// 2. Collect all `varname.set("Method", ...)` for non-C_ method names
+/// 3. For generated_stubs sub-functions, infer namespace from function name pattern
+///
+/// Phase 2 scans the full file to catch methods registered in helper sub-functions
+/// that receive the namespace table as a parameter named `t`.
+fn scan_rust_file_for_c_methods(
+    content: &str,
+    globals_set_c_re: &Regex,
+    table_set_re: &Regex,
+    table_get_re: &Regex,
+    sub_fn_re: &Regex,
+    factory_fn_re: &Regex,
+    result: &mut BTreeMap<String, BTreeSet<String>>,
+) {
+    // Split into function blocks by finding `fn ` at start of a line (with optional pub/async)
+    let fn_block_re = Regex::new(r"(?m)^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+\w+").unwrap();
+    let fn_positions: Vec<usize> = fn_block_re.find_iter(content).map(|m| m.start()).collect();
+
+    // Generated stubs: process each `fn register_c_foo_N` sub-function independently.
+    for (i, &start) in fn_positions.iter().enumerate() {
+        let end = fn_positions.get(i + 1).copied().unwrap_or(content.len());
+        let block = &content[start..end];
+        let first_line = block.lines().next().unwrap_or("");
+        let Some(cap) = sub_fn_re.captures(first_line) else {
+            continue;
+        };
+        let ns = snake_to_c_namespace(&cap[1]);
+        for cap in table_set_re.captures_iter(block) {
+            if &cap[1] != "t" || cap[2].starts_with("C_") {
+                continue;
+            }
+            result
+                .entry(ns.clone())
+                .or_default()
+                .insert(cap[2].to_string());
+        }
+        for cap in table_get_re.captures_iter(block) {
+            if &cap[1] != "t" || cap[2].starts_with("C_") {
+                continue;
+            }
+            result
+                .entry(ns.clone())
+                .or_default()
+                .insert(cap[2].to_string());
+        }
+    }
+
+    // Dedicated factory functions: `fn register_c_map(...)` or `fn make_c_dye_color(...)`
+    // own exactly one namespace table inside their block, even in files that register many
+    // namespaces through helper functions.
+    for (i, &start) in fn_positions.iter().enumerate() {
+        let end = fn_positions.get(i + 1).copied().unwrap_or(content.len());
+        let block = &content[start..end];
+        let first_line = block.lines().next().unwrap_or("");
+        let Some(cap) = factory_fn_re.captures(first_line) else {
+            continue;
+        };
+        let full_name = &cap[1];
+        let stem = full_name
+            .strip_prefix("register_c_")
+            .or_else(|| full_name.strip_prefix("make_c_"))
+            .unwrap_or(full_name);
+        let ns = snake_to_c_namespace(stem);
+        for cap in table_set_re.captures_iter(block) {
+            if &cap[1] != "t" || cap[2].starts_with("C_") {
+                continue;
+            }
+            result
+                .entry(ns.clone())
+                .or_default()
+                .insert(cap[2].to_string());
+        }
+        for cap in table_get_re.captures_iter(block) {
+            if &cap[1] != "t" || cap[2].starts_with("C_") {
+                continue;
+            }
+            result
+                .entry(ns.clone())
+                .or_default()
+                .insert(cap[2].to_string());
+        }
+    }
+
+    // Phase 1: collect variable → namespace mappings from all functions in the file.
+    let mut var_to_ns: std::collections::HashMap<String, String> = std::collections::HashMap::new();
+    for cap in globals_set_c_re.captures_iter(content) {
+        let ns = cap[1].to_string();
+        let var = cap[2].to_string();
+        var_to_ns.insert(var, ns);
+    }
+
+    if var_to_ns.is_empty() {
+        return;
+    }
+
+    // Phase 2: if this file owns exactly one C_* namespace, also treat `t` as an alias
+    // (helper functions receive the namespace table as parameter `t`).
+    let unique_ns: std::collections::HashSet<&String> = var_to_ns.values().collect();
+    if unique_ns.len() == 1 {
+        let ns = unique_ns.into_iter().next().unwrap().clone();
+        var_to_ns.entry("t".to_string()).or_insert(ns);
+    }
+
+    // Scan full file for `var.set("Method", ...)` and `var.get::<T>("Method")`
+    for cap in table_set_re.captures_iter(content) {
+        let var = cap[1].to_string();
+        let method = cap[2].to_string();
+        if method.starts_with("C_") {
+            continue;
+        }
+        if let Some(ns) = var_to_ns.get(&var) {
+            result.entry(ns.clone()).or_default().insert(method);
+        }
+    }
+    for cap in table_get_re.captures_iter(content) {
+        let var = cap[1].to_string();
+        let method = cap[2].to_string();
+        if method.starts_with("C_") {
+            continue;
+        }
+        if let Some(ns) = var_to_ns.get(&var) {
+            result.entry(ns.clone()).or_default().insert(method);
+        }
+    }
+}
+
+/// Convert a snake_case C_* namespace identifier to its PascalCase form.
+///
+/// e.g. "container" → "C_Container", "new_items" → "C_NewItems",
+///      "c_var" → "C_CVar", "add_on_profiler" → "C_AddOnProfiler"
+fn snake_to_c_namespace(snake: &str) -> String {
+    let parts: Vec<&str> = snake.split('_').collect();
+    let pascal: String = parts
+        .iter()
+        .map(|p| {
+            let mut c = p.chars();
+            match c.next() {
+                None => String::new(),
+                Some(f) => f.to_uppercase().collect::<String>() + c.as_str(),
+            }
+        })
+        .collect();
+    format!("C_{}", pascal)
 }
 
 /// Scan the simulator Rust source tree and Lua data files to collect registered symbols.
@@ -418,7 +616,7 @@ pub fn scan_simulator(src_path: &Path) -> SimRegistered {
     let set_c_re = Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)""#).unwrap();
     let le_rs_re = Regex::new(r#""(LE_[A-Z][A-Z0-9_]+)""#).unwrap();
     let le_lua_re = Regex::new(r"LE_[A-Z][A-Z0-9_]+").unwrap();
-    let enum_rs_re = Regex::new(r#"\("([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
+    let enum_rs_re = Regex::new(r#""([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
     let enum_rs_explicit_re = Regex::new(r#"\("([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
     let enum_lua_block_re = Regex::new(r"Enum\.([A-Za-z][A-Za-z0-9]+)\s*=\s*\{").unwrap();
 
@@ -470,7 +668,13 @@ pub fn scan_simulator(src_path: &Path) -> SimRegistered {
 }
 
 /// Build a gap report comparing what Blizzard UI uses vs what the simulator registers.
-pub fn build_gap_report(used: &AuditResults, registered: &SimRegistered) -> GapReport {
+///
+/// `sim_methods` maps C_* namespace → registered method names (from `scan_simulator_c_methods`).
+pub fn build_gap_report(
+    used: &AuditResults,
+    registered: &SimRegistered,
+    sim_methods: &BTreeMap<String, BTreeSet<String>>,
+) -> GapReport {
     // C_* namespaces: compare namespace keys from usage
     let used_c: BTreeSet<String> = used.c_api.keys().cloned().collect();
     let missing_c = collect_missing_entries(&used_c, &registered.c_namespaces, |ns| {
@@ -510,6 +714,9 @@ pub fn build_gap_report(used: &AuditResults, registered: &SimRegistered) -> GapR
             .sum()
     });
 
+    // Per-method gap: for each C_* namespace used by Blizzard UI, find methods not in sim_methods
+    let missing_c_methods = build_missing_c_methods(used, registered, sim_methods);
+
     GapReport {
         c_namespaces: GapSummary {
             registered: registered.c_namespaces.len(),
@@ -529,7 +736,41 @@ pub fn build_gap_report(used: &AuditResults, registered: &SimRegistered) -> GapR
         missing_c_namespaces: missing_c,
         missing_le_constants: missing_le,
         missing_enum_namespaces: missing_enum,
+        missing_c_methods,
     }
+}
+
+/// For each C_* namespace known to the simulator, find methods used by Blizzard UI
+/// that are not in the simulator's registered method set.
+fn build_missing_c_methods(
+    used: &AuditResults,
+    registered: &SimRegistered,
+    sim_methods: &BTreeMap<String, BTreeSet<String>>,
+) -> BTreeMap<String, Vec<(String, usize)>> {
+    let mut result: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
+
+    for (ns, methods_used) in &used.c_api {
+        // Only report on namespaces the simulator has registered
+        if !registered.c_namespaces.contains(ns) {
+            continue;
+        }
+        let registered_methods = sim_methods.get(ns);
+        let mut missing: Vec<(String, usize)> = methods_used
+            .iter()
+            .filter(|(method, _)| {
+                registered_methods
+                    .map(|m| !m.contains(*method))
+                    .unwrap_or(true)
+            })
+            .map(|(method, usage)| (method.clone(), usage.count))
+            .collect();
+        if !missing.is_empty() {
+            missing.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+            result.insert(ns.clone(), missing);
+        }
+    }
+
+    result
 }
 
 fn collect_missing_entries(
@@ -599,5 +840,139 @@ pub fn print_gap_text(report: &GapReport) {
         for entry in &report.missing_enum_namespaces {
             println!("  {} ({} refs)", entry.name, entry.calls);
         }
+    }
+
+    if !report.missing_c_methods.is_empty() {
+        let total_missing: usize = report.missing_c_methods.values().map(|v| v.len()).sum();
+        println!();
+        println!(
+            "--- Missing C_* Methods (by namespace, {} total) ---",
+            total_missing
+        );
+        for (ns, methods) in &report.missing_c_methods {
+            println!("{} ({} missing):", ns, methods.len());
+            for (method, count) in methods {
+                println!("    .{} ({} refs)", method, count);
+            }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn usage(count: usize) -> SymbolUsage {
+        SymbolUsage {
+            count,
+            files: vec!["Blizzard_Test.lua".to_string()],
+        }
+    }
+
+    #[test]
+    fn snake_to_c_namespace_preserves_wow_style_pascal_case() {
+        assert_eq!(snake_to_c_namespace("container"), "C_Container");
+        assert_eq!(snake_to_c_namespace("new_items"), "C_NewItems");
+        assert_eq!(snake_to_c_namespace("c_var"), "C_CVar");
+        assert_eq!(snake_to_c_namespace("add_on_profiler"), "C_AddOnProfiler");
+    }
+
+    #[test]
+    fn scan_rust_file_for_c_methods_collects_direct_factory_and_generated_patterns() {
+        let content = r#"
+fn register_namespaces(lua: &Lua) {
+    let globals = lua.globals();
+    let c_container = lua.create_table().unwrap();
+    globals.set("C_Container", c_container.clone()).unwrap();
+    c_container.set("GetContainerNumSlots", 1).unwrap();
+    c_container.set("GetContainerItemInfo", 1).unwrap();
+}
+
+fn register_c_map(lua: &Lua) {
+    let t = lua.create_table().unwrap();
+    t.set("GetMapInfo", 1).unwrap();
+}
+
+fn register_c_tooltip_info_0(lua: &Lua) {
+    let t = lua.create_table().unwrap();
+    t.set("GetHyperlink", 1).unwrap();
+    let _ = t.get::<Value>("GetItem");
+}
+"#;
+
+        let globals_set_c_re =
+            Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)",\s*(\w+)\)"#).unwrap();
+        let table_set_re = Regex::new(r#"(\w+)\.set\("([A-Za-z][A-Za-z0-9_]*)""#).unwrap();
+        let table_get_re =
+            Regex::new(r#"(\w+)\.get::<[^>]+>\("([A-Za-z][A-Za-z0-9_]*)"\)"#).unwrap();
+        let sub_fn_re = Regex::new(r"^fn register_c_([a-z][a-z0-9_]*)_\d+\b").unwrap();
+        let factory_fn_re =
+            Regex::new(r"^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+((?:register_c_|make_c_)[a-z][a-z0-9_]*)\b").unwrap();
+        let mut result = BTreeMap::new();
+
+        scan_rust_file_for_c_methods(
+            content,
+            &globals_set_c_re,
+            &table_set_re,
+            &table_get_re,
+            &sub_fn_re,
+            &factory_fn_re,
+            &mut result,
+        );
+
+        assert_eq!(
+            result.get("C_Container"),
+            Some(&BTreeSet::from([
+                "GetContainerItemInfo".to_string(),
+                "GetContainerNumSlots".to_string(),
+            ]))
+        );
+        assert_eq!(
+            result.get("C_Map"),
+            Some(&BTreeSet::from(["GetMapInfo".to_string(),]))
+        );
+        assert_eq!(
+            result.get("C_TooltipInfo"),
+            Some(&BTreeSet::from([
+                "GetHyperlink".to_string(),
+                "GetItem".to_string(),
+            ]))
+        );
+    }
+
+    #[test]
+    fn build_gap_report_includes_only_missing_methods_for_registered_namespaces() {
+        let mut used = AuditResults::default();
+        used.c_api.insert(
+            "C_Container".to_string(),
+            BTreeMap::from([
+                ("GetContainerNumSlots".to_string(), usage(3)),
+                ("GetContainerItemInfo".to_string(), usage(2)),
+            ]),
+        );
+        used.c_api.insert(
+            "C_Unregistered".to_string(),
+            BTreeMap::from([("NeverImplemented".to_string(), usage(5))]),
+        );
+
+        let registered = SimRegistered {
+            c_namespaces: BTreeSet::from(["C_Container".to_string()]),
+            ..Default::default()
+        };
+        let sim_methods = BTreeMap::from([(
+            "C_Container".to_string(),
+            BTreeSet::from(["GetContainerNumSlots".to_string()]),
+        )]);
+
+        let report = build_gap_report(&used, &registered, &sim_methods);
+
+        assert_eq!(
+            report.missing_c_methods.get("C_Container"),
+            Some(&vec![("GetContainerItemInfo".to_string(), 2)])
+        );
+        assert!(
+            !report.missing_c_methods.contains_key("C_Unregistered"),
+            "missing method details should only be reported for namespaces the simulator exposes"
+        );
     }
 }
