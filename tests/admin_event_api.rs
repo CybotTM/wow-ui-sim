@@ -235,3 +235,42 @@ fn test_fire_event_string_arg() {
     assert!(received);
     assert_eq!(unit, "player");
 }
+
+#[test]
+fn test_fire_event_runs_matching_unit_event_callback() {
+    let env = env();
+    let (registered, fired_player, fired_target, owner_matches): (bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            local firedPlayer = false
+            local firedTarget = false
+            local ownerMatches = false
+            local f = CreateFrame("Frame")
+            local registered = f:RegisterUnitEventCallback("UNIT_HEALTH", function(owner, unit)
+                ownerMatches = (owner == f)
+                if unit == "player" then
+                    firedPlayer = true
+                elseif unit == "target" then
+                    firedTarget = true
+                end
+            end, "player")
+            FireEvent("UNIT_HEALTH", "target")
+            FireEvent("UNIT_HEALTH", "player")
+            return registered == true, firedPlayer, firedTarget, ownerMatches
+            "#,
+        )
+        .unwrap();
+    assert!(
+        registered,
+        "unit event callback should report successful registration"
+    );
+    assert!(fired_player, "matching unit should invoke the callback");
+    assert!(
+        !fired_target,
+        "non-matching unit should not invoke the callback"
+    );
+    assert!(
+        owner_matches,
+        "callback owner should be the registering frame"
+    );
+}

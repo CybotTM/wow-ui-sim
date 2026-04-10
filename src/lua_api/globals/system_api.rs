@@ -108,18 +108,27 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
             crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, &event_name)?;
 
         for widget_id in listeners {
+            let frame = frame_ref(lua, widget_id)?;
             if let Some(handler) =
                 crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
             {
-                let frame = frame_ref(lua, widget_id)?;
-
-                let mut call_args = vec![frame, Value::String(lua.create_string(&event_name)?)];
+                let mut call_args = vec![
+                    frame.clone(),
+                    Value::String(lua.create_string(&event_name)?),
+                ];
                 call_args.extend(event_args.iter().cloned());
 
                 if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
                     crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
                 }
             }
+            crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
+                lua,
+                widget_id,
+                frame,
+                &event_args,
+                &event_name,
+            )?;
         }
 
         Ok(())
@@ -184,15 +193,25 @@ where
 {
     let listeners = crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, event_name)?;
     for widget_id in listeners {
+        let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id) else {
+            continue;
+        };
+        let extra_args = build_extra_args(lua)?;
         if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
-            && let Some(frame) = crate::lua_api::script_helpers::get_frame_ref(lua, widget_id)
         {
-            let mut call_args = vec![frame];
-            call_args.extend(build_extra_args(lua)?);
+            let mut call_args = vec![frame.clone()];
+            call_args.extend(extra_args.iter().cloned());
             if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
                 crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
             }
         }
+        crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
+            lua,
+            widget_id,
+            frame,
+            &extra_args[1..],
+            event_name,
+        )?;
     }
     Ok(())
 }

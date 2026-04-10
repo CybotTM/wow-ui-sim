@@ -231,6 +231,7 @@ fn add_register_all_events<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 fn add_event_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_is_event_registered(methods);
     add_register_event_callback(methods);
+    add_register_unit_event_callback(methods);
 }
 
 fn add_is_event_registered<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -268,6 +269,63 @@ fn add_register_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
             Ok(Value::Boolean(!is_restricted_event(&event)))
         },
     );
+}
+
+fn add_register_unit_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method(
+        "RegisterUnitEventCallback",
+        |lua, this, args: mlua::MultiValue| {
+            let Some(event) = multi_value_string_arg(&args, 0) else {
+                return Ok(false);
+            };
+            let Some(callback) = multi_value_function_arg(&args, 1) else {
+                return Ok(false);
+            };
+            let units = multi_value_string_args(&args, 2);
+
+            let id = this.0;
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            let Some(frame) = state.widgets.get_mut(id) else {
+                return Ok(false);
+            };
+
+            frame.registered_events.insert(event.clone());
+            drop(state);
+
+            crate::lua_api::script_helpers::add_frame_unit_event_callback(
+                lua, id, &event, callback, &units,
+            )?;
+            lua_register_individual(lua, id, &event)?;
+            Ok(!is_restricted_event(&event))
+        },
+    );
+}
+
+fn multi_value_string_arg(args: &mlua::MultiValue, index: usize) -> Option<String> {
+    match args.get(index) {
+        Some(Value::String(value)) => value.to_str().ok().map(|value| value.to_string()),
+        _ => None,
+    }
+}
+
+fn multi_value_function_arg(args: &mlua::MultiValue, index: usize) -> Option<mlua::Function> {
+    match args.get(index) {
+        Some(Value::Function(callback)) => Some(callback.clone()),
+        _ => None,
+    }
+}
+
+fn multi_value_string_args(args: &mlua::MultiValue, start: usize) -> Vec<String> {
+    let mut values = Vec::new();
+    for arg in args.iter().skip(start) {
+        if let Value::String(value) = arg
+            && let Ok(value) = value.to_str()
+        {
+            values.push(value.to_string());
+        }
+    }
+    values
 }
 
 fn add_keyboard_propagation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

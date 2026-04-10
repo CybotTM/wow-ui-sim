@@ -12,6 +12,7 @@ use std::rc::Rc;
 
 const SCRIPTS_KEY: &str = "__scripts";
 const FRAME_FIELDS_KEY: &str = "__frame_fields";
+const FRAME_UNIT_EVENT_CALLBACKS_KEY: &str = "__frame_unit_event_callbacks";
 
 /// Get the __scripts table from the Lua registry. Returns None if not yet created.
 pub fn get_scripts_table(lua: &Lua) -> Option<mlua::Table> {
@@ -78,6 +79,130 @@ pub fn get_or_create_frame_fields(lua: &Lua, frame_id: u64) -> mlua::Table {
             fields_table.set(frame_id, t.clone()).unwrap();
             t
         })
+}
+
+fn get_or_create_unit_event_callback_table(lua: &Lua) -> mlua::Table {
+    lua.named_registry_value(FRAME_UNIT_EVENT_CALLBACKS_KEY)
+        .unwrap_or_else(|_| {
+            let t = lua.create_table().unwrap();
+            lua.set_named_registry_value(FRAME_UNIT_EVENT_CALLBACKS_KEY, t.clone())
+                .unwrap();
+            t
+        })
+}
+
+pub fn add_frame_unit_event_callback(
+    lua: &Lua,
+    frame_id: u64,
+    event: &str,
+    callback: mlua::Function,
+    units: &[String],
+) -> mlua::Result<()> {
+    let callback_table = get_or_create_unit_event_callback_table(lua);
+    let frame_callbacks = callback_table
+        .get::<mlua::Table>(frame_id)
+        .unwrap_or_else(|_| {
+            let t = lua.create_table().unwrap();
+            callback_table.set(frame_id, t.clone()).unwrap();
+            t
+        });
+    let event_callbacks = frame_callbacks
+        .get::<mlua::Table>(event)
+        .unwrap_or_else(|_| {
+            let t = lua.create_table().unwrap();
+            frame_callbacks.set(event, t.clone()).unwrap();
+            t
+        });
+
+    let entry = lua.create_table()?;
+    entry.set("callback", callback)?;
+    entry.set("units", unit_event_callback_units(lua, units)?)?;
+
+    let next_index = event_callbacks.raw_len() + 1;
+    event_callbacks.raw_set(next_index, entry)
+}
+
+pub fn dispatch_frame_unit_event_callbacks(
+    lua: &Lua,
+    frame_id: u64,
+    owner: Value,
+    event_args: &[Value],
+    event_name: &str,
+) -> mlua::Result<()> {
+    let callback_table =
+        match lua.named_registry_value::<mlua::Table>(FRAME_UNIT_EVENT_CALLBACKS_KEY) {
+            Ok(table) => table,
+            Err(_) => return Ok(()),
+        };
+    let frame_callbacks = match callback_table.get::<mlua::Table>(frame_id) {
+        Ok(table) => table,
+        Err(_) => return Ok(()),
+    };
+    let event_callbacks = match frame_callbacks.get::<mlua::Table>(event_name) {
+        Ok(table) => table,
+        Err(_) => return Ok(()),
+    };
+
+    let n = event_callbacks.raw_len();
+    for i in 1..=n {
+        let entry = match event_callbacks.raw_get::<mlua::Table>(i as i64) {
+            Ok(table) => table,
+            Err(_) => continue,
+        };
+        if !unit_event_callback_matches(&entry, event_args) {
+            continue;
+        }
+
+        let callback: mlua::Function = match entry.get("callback") {
+            Ok(callback) => callback,
+            Err(_) => continue,
+        };
+        let mut call_args = vec![owner.clone()];
+        call_args.extend(event_args.iter().cloned());
+        if let Err(e) = callback.call::<()>(mlua::MultiValue::from_vec(call_args)) {
+            call_error_handler(lua, &e.to_string());
+        }
+    }
+
+    Ok(())
+}
+
+fn unit_event_callback_units(lua: &Lua, units: &[String]) -> mlua::Result<Value> {
+    if units.is_empty() {
+        return Ok(Value::Nil);
+    }
+
+    let unit_table = lua.create_table()?;
+    for (index, unit) in units.iter().enumerate() {
+        unit_table.raw_set((index + 1) as i64, unit.as_str())?;
+    }
+    Ok(Value::Table(unit_table))
+}
+
+fn unit_event_callback_matches(entry: &mlua::Table, event_args: &[Value]) -> bool {
+    let units = match entry.get::<Value>("units") {
+        Ok(Value::Table(units)) => units,
+        Ok(Value::Nil) | Err(_) => return true,
+        _ => return false,
+    };
+
+    let Some(Value::String(unit_value)) = event_args.first() else {
+        return false;
+    };
+    let Ok(event_unit) = unit_value.to_str() else {
+        return false;
+    };
+
+    let n = units.raw_len();
+    for index in 1..=n {
+        let Ok(registered_unit) = units.raw_get::<String>(index as i64) else {
+            continue;
+        };
+        if event_unit == registered_unit {
+            return true;
+        }
+    }
+    false
 }
 
 // ── Frame reference ──────────────────────────────────────────────────

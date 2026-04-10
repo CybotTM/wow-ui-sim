@@ -1157,10 +1157,6 @@ fn add_misc_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         let state = state_rc.borrow();
         Ok(frame_ignoring_children_for_bounds(&state.widgets, this.0))
     });
-    methods.add_method(
-        "RegisterUnitEventCallback",
-        |_, _this, _args: MultiValue| Ok(()),
-    );
     methods.add_method("SetHighlightLocked", |lua, this, locked: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
