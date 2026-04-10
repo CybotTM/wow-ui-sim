@@ -926,6 +926,54 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
 }
 
 #[test]
+fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleCollectionsJournal then
+                return "missing_toggle_collections_journal"
+            end
+
+            local cases = {
+                { COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS, "MountJournal" },
+                { COLLECTIONS_JOURNAL_TAB_INDEX_PETS, "PetJournal" },
+                { COLLECTIONS_JOURNAL_TAB_INDEX_TOYS, "ToyBox" },
+            }
+
+            for _, case in ipairs(cases) do
+                local tabIndex, childName = case[1], case[2]
+                ToggleCollectionsJournal(tabIndex)
+
+                if not CollectionsJournal or not CollectionsJournal:IsShown() then
+                    return "journal_not_shown_" .. tostring(tabIndex)
+                end
+                if CollectionsJournal_GetTab(CollectionsJournal) ~= tabIndex then
+                    return "wrong_tab_" .. tostring(tabIndex) .. "_" .. tostring(CollectionsJournal_GetTab(CollectionsJournal))
+                end
+
+                local child = _G[childName]
+                if not child or not child:IsShown() then
+                    return "child_not_shown_" .. childName
+                end
+
+                ToggleCollectionsJournal(tabIndex)
+                if CollectionsJournal:IsShown() then
+                    return "journal_not_hidden_" .. tostring(tabIndex)
+                end
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleCollectionsJournal(tab) should open and close the mounts, pets, and toys tabs: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
