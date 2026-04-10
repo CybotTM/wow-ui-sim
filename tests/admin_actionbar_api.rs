@@ -142,3 +142,23 @@ fn test_get_action_info_returns_nil_for_empty_slot() {
     let is_nil: bool = env.eval("return GetActionInfo(99) == nil").unwrap();
     assert!(is_nil);
 }
+
+#[test]
+fn test_bonus_bar_offset_tracks_bonus_bar_index_above_main_pages() {
+    let env = env();
+    let (namespace_offset, global_offset): (i32, i32) = env
+        .eval(
+            r#"
+            local original = C_ActionBar.GetBonusBarIndex
+            C_ActionBar.GetBonusBarIndex = function() return 11 end
+            local namespaceOffset = C_ActionBar.GetBonusBarOffset()
+            local globalOffset = GetBonusBarOffset()
+            C_ActionBar.GetBonusBarIndex = original
+            return namespaceOffset, globalOffset
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(namespace_offset, 5);
+    assert_eq!(global_offset, 5);
+}

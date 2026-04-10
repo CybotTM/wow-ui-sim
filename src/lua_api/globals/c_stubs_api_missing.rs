@@ -285,7 +285,16 @@ fn register_secure_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetShapeshiftFormInfo",
         lua.create_function(|_, _index: i32| Ok((Value::Nil, false, false, 0i32)))?,
     )?;
-    g.set("GetBonusBarOffset", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set(
+        "GetBonusBarOffset",
+        lua.create_function(|lua, ()| {
+            let action_bar: mlua::Table = lua.globals().get("C_ActionBar")?;
+            match action_bar.get::<Value>("GetBonusBarOffset")? {
+                Value::Function(get_bonus_bar_offset) => get_bonus_bar_offset.call::<i32>(()),
+                _ => Ok(0),
+            }
+        })?,
+    )?;
     Ok(())
 }
 

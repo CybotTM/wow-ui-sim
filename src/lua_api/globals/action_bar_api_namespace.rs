@@ -5,6 +5,8 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+const NUM_ACTIONBAR_PAGES: i32 = 6;
+
 /// C_ActionBar namespace — called from c_stubs_api after globals are set.
 pub fn register_c_action_bar_namespace(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
@@ -82,11 +84,24 @@ fn register_c_action_bar_page_methods(lua: &Lua, t: &mlua::Table) -> Result<()> 
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     t.set("GetBonusBarIndex", lua.create_function(|_, ()| Ok(0i32))?)?;
+    let table_ref = t.clone();
+    t.set(
+        "GetBonusBarOffset",
+        lua.create_function(move |_, ()| current_bonus_bar_offset(&table_ref))?,
+    )?;
     t.set(
         "GetOverrideBarSkin",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     Ok(())
+}
+
+fn current_bonus_bar_offset(action_bar_table: &mlua::Table) -> Result<i32> {
+    let bonus_bar_index = match action_bar_table.get::<Value>("GetBonusBarIndex")? {
+        Value::Function(get_bonus_bar_index) => get_bonus_bar_index.call::<i32>(())?,
+        _ => 0,
+    };
+    Ok((bonus_bar_index - NUM_ACTIONBAR_PAGES).max(0))
 }
 
 fn register_c_action_bar_state_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {

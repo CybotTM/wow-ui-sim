@@ -511,7 +511,16 @@ fn action_ui_button_args(args: &mlua::MultiValue) -> Option<(u64, u32)> {
 fn register_action_bar_indices(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     globals.set("GetActionBarPage", lua.create_function(|_, ()| Ok(1))?)?;
-    globals.set("GetBonusBarOffset", lua.create_function(|_, ()| Ok(0))?)?;
+    globals.set(
+        "GetBonusBarOffset",
+        lua.create_function(|lua, ()| {
+            let action_bar: mlua::Table = lua.globals().get("C_ActionBar")?;
+            match action_bar.get::<Value>("GetBonusBarOffset")? {
+                Value::Function(get_bonus_bar_offset) => get_bonus_bar_offset.call::<i32>(()),
+                _ => Ok(0),
+            }
+        })?,
+    )?;
     globals.set(
         "GetOverrideBarIndex",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
