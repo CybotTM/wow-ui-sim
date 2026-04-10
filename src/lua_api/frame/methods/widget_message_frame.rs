@@ -102,7 +102,12 @@ fn set_message_frame_max_lines(state: &mut SimState, id: u64, max_lines: i32) {
         .entry(id)
         .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
     data.max_lines = max_lines.max(1) as usize;
-    data.messages.truncate(data.max_lines);
+    while data.messages.len() > data.max_lines {
+        truncate_messages(data);
+    }
+    data.scroll_offset = data
+        .scroll_offset
+        .clamp(0, message_frame_scroll_limit(data));
 }
 
 fn message_frame_max_lines(state: &SimState, id: u64) -> usize {
@@ -227,12 +232,30 @@ fn add_message_frame_insert_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
 }
 
 fn add_message_frame_scroll_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ScrollUp", |_, _this, ()| Ok(()));
-    methods.add_method("ScrollDown", |_, _this, ()| Ok(()));
-    methods.add_method("PageUp", |_, _this, ()| Ok(()));
-    methods.add_method("PageDown", |_, _this, ()| Ok(()));
-    methods.add_method("ScrollToTop", |_, _this, ()| Ok(()));
-    methods.add_method("ScrollToBottom", |_, _this, ()| Ok(()));
+    methods.add_method("ScrollUp", |lua, this, ()| {
+        adjust_message_frame_scroll(get_sim_state(lua), this.0, 1);
+        Ok(())
+    });
+    methods.add_method("ScrollDown", |lua, this, ()| {
+        adjust_message_frame_scroll(get_sim_state(lua), this.0, -1);
+        Ok(())
+    });
+    methods.add_method("PageUp", |lua, this, ()| {
+        page_message_frame_scroll(get_sim_state(lua), this.0, true);
+        Ok(())
+    });
+    methods.add_method("PageDown", |lua, this, ()| {
+        page_message_frame_scroll(get_sim_state(lua), this.0, false);
+        Ok(())
+    });
+    methods.add_method("ScrollToTop", |lua, this, ()| {
+        scroll_message_frame_to_edge(get_sim_state(lua), this.0, true);
+        Ok(())
+    });
+    methods.add_method("ScrollToBottom", |lua, this, ()| {
+        scroll_message_frame_to_edge(get_sim_state(lua), this.0, false);
+        Ok(())
+    });
     methods.add_method("AtTop", |_, _this, ()| Ok(true));
     methods.add_method("AtBottom", |_, _this, ()| Ok(true));
     methods.add_method("GetMaxScrollRange", |_, _this, ()| Ok(0_i32));
@@ -280,6 +303,71 @@ fn add_scroll_allowed_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
             .map(|d| d.scroll_allowed)
             .unwrap_or(true))
     });
+}
+
+fn adjust_message_frame_scroll(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    delta: i32,
+) {
+    let mut state = state_rc.borrow_mut();
+    let Some(data) = state.message_frames.get_mut(&id) else {
+        return;
+    };
+    if !data.scroll_allowed {
+        return;
+    }
+    let max_offset = message_frame_scroll_limit(data);
+    data.scroll_offset = (data.scroll_offset + delta).clamp(0, max_offset);
+}
+
+fn page_message_frame_scroll(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    towards_top: bool,
+) {
+    let mut state = state_rc.borrow_mut();
+    let Some(data) = state.message_frames.get_mut(&id) else {
+        return;
+    };
+    if !data.scroll_allowed {
+        return;
+    }
+    let page_amount = message_frame_page_amount(data);
+    let delta = if towards_top {
+        page_amount
+    } else {
+        -page_amount
+    };
+    let max_offset = message_frame_scroll_limit(data);
+    data.scroll_offset = (data.scroll_offset + delta).clamp(0, max_offset);
+}
+
+fn scroll_message_frame_to_edge(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    top: bool,
+) {
+    let mut state = state_rc.borrow_mut();
+    let Some(data) = state.message_frames.get_mut(&id) else {
+        return;
+    };
+    if !data.scroll_allowed {
+        return;
+    }
+    data.scroll_offset = if top {
+        message_frame_scroll_limit(data)
+    } else {
+        0
+    };
+}
+
+fn message_frame_scroll_limit(data: &crate::lua_api::message_frame::MessageFrameData) -> i32 {
+    data.messages.len().saturating_sub(1) as i32
+}
+
+fn message_frame_page_amount(data: &crate::lua_api::message_frame::MessageFrameData) -> i32 {
+    data.max_lines.max(1) as i32
 }
 
 fn add_message_frame_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -477,13 +565,16 @@ fn insert_message(
 }
 
 fn truncate_messages(data: &mut crate::lua_api::message_frame::MessageFrameData) {
-    if data.messages.len() > data.max_lines {
+    while data.messages.len() > data.max_lines {
         if data.insert_mode == "TOP" {
             data.messages.pop();
         } else {
             data.messages.remove(0);
         }
     }
+    data.scroll_offset = data
+        .scroll_offset
+        .clamp(0, message_frame_scroll_limit(data));
 }
 
 fn extract_rgba(args: &[Value], offset: usize) -> (f32, f32, f32, f32) {

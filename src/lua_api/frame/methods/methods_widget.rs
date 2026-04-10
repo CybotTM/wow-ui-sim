@@ -8,13 +8,13 @@ use super::super::handle::FrameRef;
 /// Add widget-specific methods to the shared frame methods table.
 pub fn add_widget_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     super::widget_tooltip::add_tooltip_methods(methods);
-    super::widget_message_frame::add_message_frame_methods(methods);
     super::widget_editbox::add_editbox_methods(methods);
     super::widget_slider::add_slider_methods(methods);
     super::widget_statusbar::add_statusbar_methods(methods);
     super::widget_slider::add_checkbutton_methods(methods);
     super::widget_cooldown::add_cooldown_methods(methods);
     super::widget_scroll::add_scrollframe_methods(methods);
+    super::widget_message_frame::add_message_frame_methods(methods);
     super::widget_model::add_model_methods(methods);
     super::widget_player_model::add_player_model_methods(methods);
     super::widget_model::add_model_scene_methods(methods);

@@ -187,6 +187,7 @@ pub static MESSAGEFRAME_METHODS: LazyLock<HashSet<&'static str>> = LazyLock::new
         "GetJustifyV",
         "GetMaxScrollRange",
         "GetMessageInfo",
+        "GetMaxLines",
         "GetNumChildren",
         "GetNumMessages",
         "GetNumRegions",

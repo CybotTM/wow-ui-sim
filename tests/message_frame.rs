@@ -10,7 +10,7 @@ fn test_create_message_frame_type() {
         .unwrap();
 
     let obj_type: String = env.eval("return TestMF:GetObjectType()").unwrap();
-    assert_eq!(obj_type, "MessageFrame");
+    assert_eq!(obj_type, "ScrollingMessageFrame");
 }
 
 #[test]
@@ -391,4 +391,54 @@ fn test_max_lines_truncates_existing() {
 
     let count: i32 = env.eval("return TestMFTrunc:GetNumMessages()").unwrap();
     assert_eq!(count, 2, "SetMaxLines should truncate existing messages");
+}
+
+#[test]
+fn test_scroll_operations_update_offset_and_clamp_to_message_history() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            local f = CreateFrame("ScrollingMessageFrame", "TestMFScrollOps", UIParent)
+            f:AddMessage("One")
+            f:AddMessage("Two")
+            f:AddMessage("Three")
+            f:AddMessage("Four")
+
+            f:ScrollUp()
+            local afterScrollUp = f:GetScrollOffset()
+
+            f:PageUp()
+            local afterPageUp = f:GetScrollOffset()
+
+            f:ScrollToBottom()
+            local afterScrollToBottom = f:GetScrollOffset()
+
+            f:ScrollToTop()
+            local afterScrollToTop = f:GetScrollOffset()
+
+            f:PageDown()
+            local afterPageDown = f:GetScrollOffset()
+
+            f:ScrollDown()
+            local afterScrollDown = f:GetScrollOffset()
+
+            return afterScrollUp, afterPageUp, afterScrollToBottom, afterScrollToTop, afterPageDown, afterScrollDown
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, 1, "ScrollUp should increment the scroll offset");
+    assert_eq!(
+        result.1, 3,
+        "PageUp should clamp at the top of message history"
+    );
+    assert_eq!(result.2, 0, "ScrollToBottom should reset the offset");
+    assert_eq!(
+        result.3, 3,
+        "ScrollToTop should jump to the highest valid offset"
+    );
+    assert_eq!(result.4, 0, "PageDown should clamp back toward the bottom");
+    assert_eq!(result.5, 0, "ScrollDown should clamp at the bottom");
 }
