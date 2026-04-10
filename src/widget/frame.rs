@@ -679,6 +679,10 @@ pub struct Frame {
     pub editbox_visible_text_byte_limit: i32,
     /// Current input language identifier.
     pub editbox_input_language: String,
+    /// Currently highlighted text range as character offsets.
+    pub editbox_highlight_range: Option<(i32, i32)>,
+    /// Highlight color for selected text.
+    pub editbox_highlight_color: Color,
 
     // --- ScrollFrame fields ---
     /// Scroll child frame ID.
@@ -959,6 +963,8 @@ macro_rules! frame_defaults {
             editbox_security_disable_paste: false,
             editbox_visible_text_byte_limit: 0,
             editbox_input_language: "ROMAN".to_string(),
+            editbox_highlight_range: None,
+            editbox_highlight_color: Color::new(1.0, 1.0, 1.0, 1.0),
 
             // ScrollFrame
             scroll_child_id: None,

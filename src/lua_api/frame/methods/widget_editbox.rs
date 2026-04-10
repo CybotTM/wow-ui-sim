@@ -3,8 +3,7 @@
 use super::super::handle::FrameRef;
 use super::widget_tooltip::{fire_tooltip_script, val_to_f32};
 use crate::lua_api::frame::handle::get_sim_state;
-
-const EDITBOX_VARIADIC_STUBS: &[&str] = &["ClearHighlightText", "SetHighlightColor"];
+use mlua::Value;
 
 const EDITBOX_FALSE_GETTERS: &[&str] = &[
     "GetIndentedWordWrap",
@@ -28,7 +27,6 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 }
 
 fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_editbox_variadic_stubs(methods, EDITBOX_VARIADIC_STUBS);
     add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
     add_editbox_i32_getter(methods, "GetUTF8CursorPosition", 0);
     methods.add_method("GetDisplayText", |lua, this, ()| {
@@ -40,18 +38,21 @@ fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
             .and_then(|frame| frame.text.clone())
             .unwrap_or_default())
     });
-    methods.add_method("GetHighlightColor", |_, _this, ()| {
-        Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
+    methods.add_method("GetHighlightColor", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let color = state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.editbox_highlight_color)
+            .unwrap_or(crate::widget::Color::new(1.0, 1.0, 1.0, 1.0));
+        Ok((
+            color.r as f64,
+            color.g as f64,
+            color.b as f64,
+            color.a as f64,
+        ))
     });
-}
-
-fn add_editbox_variadic_stubs<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    names: &[&'static str],
-) {
-    for name in names {
-        methods.add_method(*name, |_, _this, _: mlua::Variadic<mlua::Value>| Ok(()));
-    }
 }
 
 fn add_editbox_false_getters<M: mlua::UserDataMethods<FrameRef>>(
@@ -132,9 +133,62 @@ fn editbox_has_focus(lua: &mlua::Lua, id: u64) -> bool {
 fn add_editbox_cursor_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_cursor_position(methods);
     add_get_cursor_position(methods);
-    methods.add_method("HighlightText", |_, _this, _args: mlua::MultiValue| Ok(()));
+    add_highlight_text(methods);
+    add_clear_highlight_text(methods);
     add_insert_text(methods);
     add_get_num_letters(methods);
+}
+
+fn add_highlight_text<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("HighlightText", |lua, this, args: mlua::MultiValue| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let Some(frame) = state.widgets.get_mut_visual(this.0) else {
+            return Ok(());
+        };
+        frame.editbox_highlight_range = Some(parse_highlight_range(frame, args));
+        Ok(())
+    });
+}
+
+fn add_clear_highlight_text<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method(
+        "ClearHighlightText",
+        |lua, this, _: mlua::Variadic<mlua::Value>| {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+                frame.editbox_highlight_range = None;
+            }
+            Ok(())
+        },
+    );
+}
+
+fn parse_highlight_range(frame: &crate::widget::Frame, args: mlua::MultiValue) -> (i32, i32) {
+    let text_len = editbox_char_count(frame);
+    let mut it = args.into_iter();
+    let start = val_to_i32(it.next()).unwrap_or(0);
+    let end = val_to_i32(it.next()).unwrap_or(text_len);
+    normalize_highlight_range(start, end, text_len)
+}
+
+fn normalize_highlight_range(start: i32, end: i32, text_len: i32) -> (i32, i32) {
+    let clamped_start = start.clamp(0, text_len);
+    let clamped_end = end.clamp(0, text_len);
+    if clamped_start <= clamped_end {
+        (clamped_start, clamped_end)
+    } else {
+        (clamped_end, clamped_start)
+    }
+}
+
+fn val_to_i32(value: Option<Value>) -> Option<i32> {
+    match value {
+        Some(Value::Integer(value)) => Some(value as i32),
+        Some(Value::Number(value)) => Some(value as i32),
+        _ => None,
+    }
 }
 
 fn add_set_cursor_position<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -357,6 +411,21 @@ fn add_editbox_input_flags<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     });
     add_editbox_i32_getter_from_frame(methods, "GetVisibleTextByteLimit", |frame| {
         frame.editbox_visible_text_byte_limit
+    });
+    methods.add_method("SetHighlightColor", |lua, this, args: mlua::MultiValue| {
+        let mut it = args.into_iter();
+        let color = crate::widget::Color::new(
+            val_to_f32(it.next(), 1.0),
+            val_to_f32(it.next(), 1.0),
+            val_to_f32(it.next(), 1.0),
+            val_to_f32(it.next(), 1.0),
+        );
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.editbox_highlight_color = color;
+        }
+        Ok(())
     });
 }
 
