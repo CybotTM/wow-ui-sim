@@ -518,6 +518,9 @@ fn scan_rust_file_for_c_methods(
         let end = fn_positions.get(i + 1).copied().unwrap_or(content.len());
         let block = &content[start..end];
         let first_line = block.lines().next().unwrap_or("");
+        if sub_fn_re.is_match(first_line) {
+            continue;
+        }
         let Some(cap) = factory_fn_re.captures(first_line) else {
             continue;
         };
@@ -559,10 +562,14 @@ fn scan_rust_file_for_c_methods(
         return;
     }
 
-    // Phase 2: if this file owns exactly one C_* namespace, also treat `t` as an alias
+    // Phase 2: for simple single-namespace files, also treat `t` as an alias
     // (helper functions receive the namespace table as parameter `t`).
+    let has_named_namespace_functions = fn_positions.iter().any(|&start| {
+        let first_line = content[start..].lines().next().unwrap_or("");
+        sub_fn_re.is_match(first_line) || factory_fn_re.is_match(first_line)
+    });
     let unique_ns: std::collections::HashSet<&String> = var_to_ns.values().collect();
-    if unique_ns.len() == 1 {
+    if unique_ns.len() == 1 && !has_named_namespace_functions {
         let ns = unique_ns.into_iter().next().unwrap().clone();
         var_to_ns.entry("t".to_string()).or_insert(ns);
     }
@@ -901,7 +908,7 @@ fn register_c_tooltip_info_0(lua: &Lua) {
 "#;
 
         let globals_set_c_re =
-            Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)",\s*(\w+)\)"#).unwrap();
+            Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)",\s*(\w+)(?:\.clone\(\))?"#).unwrap();
         let table_set_re = Regex::new(r#"(\w+)\.set\("([A-Za-z][A-Za-z0-9_]*)""#).unwrap();
         let table_get_re =
             Regex::new(r#"(\w+)\.get::<[^>]+>\("([A-Za-z][A-Za-z0-9_]*)"\)"#).unwrap();
