@@ -224,7 +224,13 @@ impl QuadBatch {
     ///
     /// `progress` is 0.0 (fully covered) to 1.0 (fully revealed/done).
     /// `color` is the swipe overlay color (typically semi-transparent black).
-    pub fn push_cooldown_swipe(&mut self, bounds: Rectangle, progress: f32, color: [f32; 4]) {
+    pub fn push_cooldown_swipe(
+        &mut self,
+        bounds: Rectangle,
+        progress: f32,
+        color: [f32; 4],
+        uv_range: Option<(f32, f32, f32, f32)>,
+    ) {
         let base_index = self.vertices.len() as u32;
         let positions = [
             [bounds.x, bounds.y],
@@ -232,7 +238,13 @@ impl QuadBatch {
             [bounds.x + bounds.width, bounds.y + bounds.height],
             [bounds.x, bounds.y + bounds.height],
         ];
-        let local_uvs = [[0.0_f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
+        let (low_x, low_y, high_x, high_y) = uv_range.unwrap_or((0.0, 0.0, 1.0, 1.0));
+        let local_uvs = [
+            [low_x, low_y],
+            [high_x, low_y],
+            [high_x, high_y],
+            [low_x, high_y],
+        ];
         let flags = BlendMode::Alpha as u32 | FLAG_COOLDOWN_SWIPE;
         for i in 0..4 {
             self.vertices.push(QuadVertex {

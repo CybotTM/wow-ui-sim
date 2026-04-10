@@ -645,7 +645,7 @@ fn build_cooldown_quads(
         progress
     } as f32;
     let color = parse_swipe_color(f);
-    batch.push_cooldown_swipe(bounds, swipe_progress, color);
+    batch.push_cooldown_swipe(bounds, swipe_progress, color, f.cooldown_tex_coord_range);
 }
 
 /// Parse the swipe color from the frame's `__swipe_color` attribute, or return default.
@@ -658,4 +658,38 @@ fn parse_swipe_color(f: &crate::widget::Frame) -> [f32; 4] {
         }
     }
     [0.0, 0.0, 0.0, 0.62] // WoW default: semi-transparent black
+}
+
+#[cfg(test)]
+mod tests {
+    use super::build_cooldown_quads;
+    use crate::render::QuadBatch;
+    use crate::widget::{Frame, WidgetType};
+    use iced::{Point, Rectangle, Size};
+
+    #[test]
+    fn cooldown_swipe_uses_configured_texcoord_range_for_local_uvs() {
+        let mut batch = QuadBatch::new();
+        let mut cooldown = Frame::new(WidgetType::Cooldown, None, None);
+        cooldown.cooldown_duration = 10.0;
+        cooldown.cooldown_start = 0.0;
+        cooldown.cooldown_tex_coord_range = Some((0.2, 0.3, 0.8, 0.9));
+
+        build_cooldown_quads(
+            &mut batch,
+            Rectangle::new(Point::new(10.0, 20.0), Size::new(40.0, 50.0)),
+            &cooldown,
+            2.5,
+        );
+
+        assert_eq!(
+            batch.vertices.len(),
+            4,
+            "cooldown should emit one swipe quad"
+        );
+        assert_eq!(batch.vertices[0].local_uv, [0.2, 0.3]);
+        assert_eq!(batch.vertices[1].local_uv, [0.8, 0.3]);
+        assert_eq!(batch.vertices[2].local_uv, [0.8, 0.9]);
+        assert_eq!(batch.vertices[3].local_uv, [0.2, 0.9]);
+    }
 }

@@ -703,6 +703,20 @@ pub struct Frame {
     pub cooldown_draw_bling: bool,
     /// Whether to hide countdown numbers.
     pub cooldown_hide_countdown: bool,
+    /// Countdown display duration in milliseconds, unaffected by modRate.
+    pub cooldown_display_duration_ms: f64,
+    /// Cooldown modRate value from SetCooldown* APIs.
+    pub cooldown_mod_rate: f64,
+    /// Edge highlight scale factor.
+    pub cooldown_edge_scale: f64,
+    /// Minimum countdown duration before text should show, in milliseconds.
+    pub cooldown_min_countdown_duration_ms: f64,
+    /// Edge highlight color.
+    pub cooldown_edge_color: Color,
+    /// UV range for cooldown swipe atlases: (low_x, low_y, high_x, high_y).
+    pub cooldown_tex_coord_range: Option<(f32, f32, f32, f32)>,
+    /// Countdown font string child used by GetCountdownFontString.
+    pub cooldown_countdown_font_string_id: Option<u64>,
     /// Whether cooldown is paused.
     pub cooldown_paused: bool,
 
@@ -945,6 +959,13 @@ macro_rules! frame_defaults {
             cooldown_draw_edge: false,
             cooldown_draw_bling: true,
             cooldown_hide_countdown: false,
+            cooldown_display_duration_ms: 0.0,
+            cooldown_mod_rate: 1.0,
+            cooldown_edge_scale: 1.0,
+            cooldown_min_countdown_duration_ms: 0.0,
+            cooldown_edge_color: Color::rgb(1.0, 1.0, 1.0),
+            cooldown_tex_coord_range: None,
+            cooldown_countdown_font_string_id: None,
             cooldown_paused: false,
 
             // Line
