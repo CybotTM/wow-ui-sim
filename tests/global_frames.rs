@@ -40,8 +40,8 @@ fn test_minimap_exists() {
     let env = env();
     let exists: bool = env.eval("return Minimap ~= nil").unwrap();
     assert!(exists);
-    // Without Blizzard_Minimap loaded, Minimap is a stub Frame.
-    // The proper Minimap widget type comes from addon XML loading.
+    // In the lean env, Minimap is seeded directly as a Minimap widget type
+    // so the minimap-specific API surface is available before Blizzard_Minimap loads.
     let is_frame: bool = env.eval("return Minimap:IsObjectType('Frame')").unwrap();
     assert!(is_frame, "Minimap should be a Frame subtype");
 }
@@ -49,17 +49,21 @@ fn test_minimap_exists() {
 #[test]
 fn test_minimap_zoom_persists_and_clamps() {
     let env = env();
-    let (default_zoom, clamped_zoom): (i32, i32) = env
+    let (default_zoom, clamped_zoom, zoom_levels): (i32, i32, i32) = env
         .eval(
             r#"
         local before = Minimap:GetZoom()
         Minimap:SetZoom(99)
-        return before, Minimap:GetZoom()
+        return before, Minimap:GetZoom(), Minimap:GetZoomLevels()
     "#,
         )
         .unwrap();
     assert_eq!(default_zoom, 0);
     assert_eq!(clamped_zoom, 5);
+    assert_eq!(
+        zoom_levels, 6,
+        "GetZoomLevels should report the full zoom level count, not the max zoom index"
+    );
 }
 
 #[test]

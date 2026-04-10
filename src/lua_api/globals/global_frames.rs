@@ -99,7 +99,7 @@ fn register_core_frame_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Resu
     register_frame_global(lua, state, "UIParent")?;
     lua.globals().set("UIPanelWindows", lua.create_table()?)?;
     register_typed_frame_global(lua, state, "WorldFrame", WidgetType::WorldFrame)?;
-    register_frame_global(lua, state, "Minimap")?;
+    register_typed_frame_global(lua, state, "Minimap", WidgetType::Minimap)?;
     register_frame_global(lua, state, "EventToastManagerFrame")?;
     register_frame_global(lua, state, "EditModeManagerFrame")?;
     setup_edit_mode_manager(lua, state)?;

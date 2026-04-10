@@ -1088,7 +1088,9 @@ fn add_minimap_core_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("SetZoom", |lua, this, zoom: i32| {
         set_frame_zoom(lua, this.0, zoom)
     });
-    methods.add_method("GetZoomLevels", |_, _this, ()| Ok(5));
+    methods.add_method("GetZoomLevels", |_, _this, ()| {
+        Ok(minimap_zoom_level_count())
+    });
     methods.add_method("GetPingPosition", |_, _this, ()| Ok((0.0f64, 0.0f64)));
     methods.add_method("PingLocation", |_, _this, (_x, _y): (f64, f64)| Ok(()));
     methods.add_method("UpdateBlips", |_, _this, ()| Ok(()));
@@ -1411,7 +1413,15 @@ fn edit_mode_field_exists(fields: &mlua::Table, field_name: &str) -> bool {
 
 fn set_frame_zoom(lua: &mlua::Lua, frame_id: u64, zoom: i32) -> mlua::Result<()> {
     let fields = frame_fields(lua, frame_id)?;
-    fields.set("zoom", zoom.clamp(0, 5))
+    fields.set("zoom", zoom.clamp(0, minimap_max_zoom_index()))
+}
+
+fn minimap_zoom_level_count() -> i32 {
+    minimap_max_zoom_index() + 1
+}
+
+fn minimap_max_zoom_index() -> i32 {
+    5
 }
 
 fn add_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> mlua::Result<()> {
