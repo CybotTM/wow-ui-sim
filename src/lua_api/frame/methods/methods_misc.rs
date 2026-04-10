@@ -915,12 +915,52 @@ fn add_minimap_core_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
 
 /// Minimap texture setters (no-op stubs).
 fn add_minimap_texture_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetBlipTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetMaskTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetIconTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetPOIArrowTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetCorpsePOIArrowTexture", |_, _this, _asset: Value| Ok(()));
-    methods.add_method("SetStaticPOIArrowTexture", |_, _this, _asset: Value| Ok(()));
+    add_minimap_texture_setter(methods, "SetBlipTexture", |frame, asset| {
+        frame.minimap_blip_texture = asset;
+    });
+    add_minimap_texture_setter(methods, "SetMaskTexture", |frame, asset| {
+        frame.minimap_mask_texture = asset;
+    });
+    add_minimap_texture_setter(methods, "SetIconTexture", |frame, asset| {
+        frame.minimap_icon_texture = asset;
+    });
+    add_minimap_texture_setter(methods, "SetPOIArrowTexture", |frame, asset| {
+        frame.minimap_poi_arrow_texture = asset;
+    });
+    add_minimap_texture_setter(methods, "SetCorpsePOIArrowTexture", |frame, asset| {
+        frame.minimap_corpse_poi_arrow_texture = asset;
+    });
+    add_minimap_texture_setter(methods, "SetStaticPOIArrowTexture", |frame, asset| {
+        frame.minimap_static_poi_arrow_texture = asset;
+    });
+}
+
+fn add_minimap_texture_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::widget::Frame, Option<String>) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, asset: Value| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            setter(frame, texture_asset_to_string(&asset)?);
+        }
+        Ok(())
+    });
+}
+
+fn texture_asset_to_string(asset: &Value) -> mlua::Result<Option<String>> {
+    match asset {
+        Value::Nil => Ok(None),
+        Value::String(value) => Ok(Some(value.to_string_lossy().to_string())),
+        Value::Integer(value) => Ok(Some(value.to_string())),
+        Value::Number(value) => Ok(Some(value.to_string())),
+        other => Err(mlua::Error::runtime(format!(
+            "expected texture asset string/number/nil, got {}",
+            other.type_name()
+        ))),
+    }
 }
 
 /// Minimap quest/task/arch blob setters (no-op stubs).

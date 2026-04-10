@@ -1145,6 +1145,58 @@ fn test_misc_visual_state_methods_persist_and_desaturate_hierarchy() {
     );
 }
 
+#[test]
+fn test_minimap_texture_setters_persist_asset_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        MinimapTextureStateFrame = CreateFrame("Minimap", "MinimapTextureStateFrame", UIParent)
+        MinimapTextureStateFrame:SetBlipTexture("Interface\\Minimap\\ObjectIcons")
+        MinimapTextureStateFrame:SetMaskTexture("Interface\\Minimap\\UI-Minimap-Background")
+        MinimapTextureStateFrame:SetIconTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+        MinimapTextureStateFrame:SetPOIArrowTexture("Interface\\Minimap\\POIIcons")
+        MinimapTextureStateFrame:SetCorpsePOIArrowTexture("Interface\\Minimap\\POIIcons-Corpse")
+        MinimapTextureStateFrame:SetStaticPOIArrowTexture("Interface\\Minimap\\POIIcons-Static")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let minimap_id = state
+        .widgets
+        .get_id_by_name("MinimapTextureStateFrame")
+        .expect("minimap should exist");
+    let minimap = state
+        .widgets
+        .get(minimap_id)
+        .expect("minimap frame should be readable");
+
+    assert_eq!(
+        minimap.minimap_blip_texture.as_deref(),
+        Some("Interface\\Minimap\\ObjectIcons")
+    );
+    assert_eq!(
+        minimap.minimap_mask_texture.as_deref(),
+        Some("Interface\\Minimap\\UI-Minimap-Background")
+    );
+    assert_eq!(
+        minimap.minimap_icon_texture.as_deref(),
+        Some("Interface\\Minimap\\MiniMap-TrackingBorder")
+    );
+    assert_eq!(
+        minimap.minimap_poi_arrow_texture.as_deref(),
+        Some("Interface\\Minimap\\POIIcons")
+    );
+    assert_eq!(
+        minimap.minimap_corpse_poi_arrow_texture.as_deref(),
+        Some("Interface\\Minimap\\POIIcons-Corpse")
+    );
+    assert_eq!(
+        minimap.minimap_static_poi_arrow_texture.as_deref(),
+        Some("Interface\\Minimap\\POIIcons-Static")
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

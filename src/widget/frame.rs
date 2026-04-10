@@ -357,6 +357,18 @@ pub struct Frame {
     pub clips_children: bool,
     /// Whether this frame should behave like a frame buffer for texture rotation APIs.
     pub is_frame_buffer: bool,
+    /// Stored Minimap blip atlas/texture asset.
+    pub minimap_blip_texture: Option<String>,
+    /// Stored Minimap mask asset.
+    pub minimap_mask_texture: Option<String>,
+    /// Stored Minimap icon texture asset.
+    pub minimap_icon_texture: Option<String>,
+    /// Stored Minimap POI arrow texture asset.
+    pub minimap_poi_arrow_texture: Option<String>,
+    /// Stored Minimap corpse POI arrow texture asset.
+    pub minimap_corpse_poi_arrow_texture: Option<String>,
+    /// Stored Minimap static POI arrow texture asset.
+    pub minimap_static_poi_arrow_texture: Option<String>,
     /// Whether this texture is a MaskTexture (should not render).
     pub is_mask: bool,
     /// Mask texture IDs applied to this texture (for circular clipping etc.).
@@ -601,6 +613,12 @@ macro_rules! frame_defaults {
             register_all_events: false,
             clips_children: false,
             is_frame_buffer: false,
+            minimap_blip_texture: None,
+            minimap_mask_texture: None,
+            minimap_icon_texture: None,
+            minimap_poi_arrow_texture: None,
+            minimap_corpse_poi_arrow_texture: None,
+            minimap_static_poi_arrow_texture: None,
             is_mask: false,
             mask_textures: Vec::new(),
             rotation: 0.0,
