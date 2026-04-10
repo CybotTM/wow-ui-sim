@@ -512,6 +512,95 @@ mod tests {
         }))
     }
 
+    fn request_bounds_by_base_path(
+        batch: &QuadBatch,
+        base_path: &str,
+    ) -> Option<(f32, f32, f32, f32)> {
+        batch
+            .texture_requests
+            .iter()
+            .find(|request| request.path.starts_with(base_path))
+            .map(|request| request_bounds(batch, request))
+    }
+
+    fn render_single_line_tooltip_batch(
+        bounds: Rectangle,
+    ) -> (QuadBatch, (f32, f32, f32, f32), (f32, f32, f32, f32)) {
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "Header".to_string(),
+                left_color: [1.0, 1.0, 1.0, 1.0],
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                font_size: TOOLTIP_HEADER_FONT_SIZE,
+                wrap: false,
+                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds,
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+            },
+            &mut text_ctx,
+        );
+
+        let border_bounds = union_bounds(
+            batch
+                .texture_requests
+                .iter()
+                .map(|request| request_bounds(&batch, request)),
+        )
+        .expect("tooltip border should emit texture requests");
+        let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
+
+        (batch, border_bounds, glyph_bounds)
+    }
+
+    fn assert_text_origin_matches_nine_slice_corner(bounds: Rectangle, batch: &QuadBatch) {
+        let ns = tooltip_nine_slice().expect("tooltip nine-slice info should exist");
+        let tl_corner_bounds = request_bounds_by_base_path(batch, ns.corner_tl.file)
+            .expect("tooltip top-left corner texture should emit one request");
+        let text_origin = (
+            bounds.x + tooltip_text_insets().left,
+            bounds.y + tooltip_text_insets().top,
+        );
+
+        assert_eq!(
+            tl_corner_bounds,
+            (
+                bounds.x,
+                bounds.y,
+                bounds.x + ns.corner_tl.width as f32,
+                bounds.y + ns.corner_tl.height as f32,
+            ),
+            "top-left corner texture should match the tooltip's top-left corner coords"
+        );
+        assert!(
+            (text_origin.0 - tl_corner_bounds.2 - (TOOLTIP_PADDING_H - TOOLTIP_CENTER_OVERLAP))
+                .abs()
+                <= f32::EPSILON,
+            "text x origin should be offset from the top-left corner's right edge by padding minus overlap: text_origin={text_origin:?} tl_corner_bounds={tl_corner_bounds:?}"
+        );
+        assert!(
+            (text_origin.1 - tl_corner_bounds.3 - (TOOLTIP_PADDING_V - TOOLTIP_CENTER_OVERLAP))
+                .abs()
+                <= f32::EPSILON,
+            "text y origin should be offset from the top-left corner's bottom edge by padding minus overlap: text_origin={text_origin:?} tl_corner_bounds={tl_corner_bounds:?}"
+        );
+    }
+
     #[test]
     fn collect_tooltip_data_applies_alpha_and_font_sizes() {
         let mut state = SimState::default();
@@ -574,44 +663,7 @@ mod tests {
     #[test]
     fn tooltip_text_quads_start_inside_rendered_border_bounds() {
         let bounds = Rectangle::new(Point::new(100.0, 200.0), Size::new(80.0, 47.0));
-        let data = TooltipRenderData {
-            lines: vec![TooltipLineRender {
-                left_text: "Header".to_string(),
-                left_color: [1.0, 1.0, 1.0, 1.0],
-                right_text: None,
-                right_color: [1.0, 1.0, 1.0, 1.0],
-                font_size: TOOLTIP_HEADER_FONT_SIZE,
-                wrap: false,
-                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
-            }],
-            line_spacing: TOOLTIP_LINE_SPACING,
-        };
-
-        let mut batch = QuadBatch::new();
-        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
-        let mut glyph_atlas = GlyphAtlas::new();
-        let tooltip_data = HashMap::from([(42_u64, data)]);
-        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
-
-        build_tooltip_quads(
-            TooltipRender {
-                batch: &mut batch,
-                bounds,
-                tooltip_data: Some(&tooltip_data),
-                id: 42,
-                eff_alpha: 1.0,
-            },
-            &mut text_ctx,
-        );
-
-        let border_bounds = union_bounds(
-            batch
-                .texture_requests
-                .iter()
-                .map(|request| request_bounds(&batch, request)),
-        )
-        .expect("tooltip border should emit texture requests");
-        let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
+        let (batch, border_bounds, glyph_bounds) = render_single_line_tooltip_batch(bounds);
 
         assert_eq!(
             border_bounds,
@@ -623,6 +675,7 @@ mod tests {
             ),
             "rendered tooltip border should match tooltip bounds"
         );
+        assert_text_origin_matches_nine_slice_corner(bounds, &batch);
 
         let left_inset = glyph_bounds.0 - border_bounds.0;
         let top_inset = glyph_bounds.1 - border_bounds.1;
