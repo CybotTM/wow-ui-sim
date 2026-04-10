@@ -1233,6 +1233,39 @@ fn toggle_mail_frame_opens_and_closes_mail_panel() {
 }
 
 #[test]
+fn open_all_bags_opens_a_bag_frame() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not OpenAllBags then
+                return "missing_open_all_bags"
+            end
+
+            OpenAllBags()
+
+            if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
+                return "ok"
+            end
+
+            for i = 1, 6 do
+                local frame = _G["ContainerFrame" .. i]
+                if frame and frame:IsShown() then
+                    return "ok"
+                end
+            end
+
+            return "no_bag_frame_shown"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "OpenAllBags() should show a combined or individual bag frame: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();

@@ -48,6 +48,7 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
+    patch_bag_openers(env);
     patch_character_toggle(env);
     patch_communities_toggle(env);
     patch_group_finder_toggle(env);
@@ -64,6 +65,55 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         r#"
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK, true)
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE, true)
+    "#,
+    );
+}
+
+/// Load Blizzard_TokenUI on demand before Blizzard bag-opening entrypoints run.
+///
+/// The lighter panel harness loads ContainerFrame code without the separate
+/// Blizzard_TokenUI addon, but bag setup still assumes
+/// ContainerFrameSettingsManager.TokenTracker exists. Wrapping the public bag
+/// openers keeps Blizzard container logic intact while ensuring the token
+/// tracker is created before bag setup mutates ownership.
+fn patch_bag_openers(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_bag_openers_patched then
+            local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+
+            local function ensureBagTokenTracker()
+                if not ContainerFrameSettingsManager or ContainerFrameSettingsManager.TokenTracker then
+                    return
+                end
+
+                if loader then
+                    pcall(loader, "Blizzard_TokenUI")
+                end
+
+                if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker and type(ContainerFrameSettingsManager.OnAddonLoaded) == "function" then
+                    ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
+                end
+            end
+
+            local function patchBagOpener(name)
+                local original = _G[name]
+                if type(original) ~= "function" then
+                    return
+                end
+
+                _G[name] = function(...)
+                    ensureBagTokenTracker()
+                    return original(...)
+                end
+            end
+
+            patchBagOpener("OpenAllBags")
+            patchBagOpener("OpenBackpack")
+            patchBagOpener("OpenBag")
+
+            __wow_ui_sim_bag_openers_patched = true
+        end
     "#,
     );
 }
