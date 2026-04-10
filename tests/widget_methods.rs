@@ -635,6 +635,66 @@ fn test_widget_misc_visual_methods_delegate_or_store_state() {
 }
 
 #[test]
+fn test_widget_misc_widget_set_methods_delegate_or_store_registration() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r##"
+            local frame = CreateFrame("Frame", "TestWidgetSetFrame", UIParent)
+            local fields = debug.getfenv(frame)[1]
+            local layout = function() end
+            local init = function() end
+
+            frame:RegisterForWidgetSet(5501, layout, init, "player")
+            local fallbackStored = fields.widgetSetRegistration
+                and fields.widgetSetRegistration.widgetSetID == 5501
+                and fields.widgetSetRegistration.widgetLayoutFunction == layout
+                and fields.widgetSetRegistration.widgetInitFunction == init
+                and fields.widgetSetRegistration.attachedUnitInfo == "player"
+
+            frame:UnregisterForWidgetSet()
+            local fallbackCleared = fields.widgetSetRegistration == nil
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetSetOverrideFrame", UIParent)
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            overrideFields.RegisterForWidgetSet = function(self, ...)
+                rawset(overrideFields, "registerCount", select("#", ...))
+                rawset(overrideFields, "registeredWidgetSetID", ...)
+            end
+            overrideFields.UnregisterForWidgetSet = function(self, ...)
+                rawset(overrideFields, "unregisterCount", select("#", ...))
+                rawset(overrideFields, "unregisteredWidgetSetID", ...)
+            end
+
+            overrideFrame:RegisterForWidgetSet(4402, layout, init, "target")
+            overrideFrame:UnregisterForWidgetSet(4402)
+
+            return fallbackStored == true,
+                fallbackCleared == true,
+                overrideFields.registerCount == 4
+                    and overrideFields.registeredWidgetSetID == 4402
+                    and overrideFields.unregisterCount == 1
+                    and overrideFields.unregisteredWidgetSetID == 4402
+        "##,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "RegisterForWidgetSet should store fallback registration data on the frame"
+    );
+    assert!(
+        result.1,
+        "UnregisterForWidgetSet should clear the fallback widget set registration"
+    );
+    assert!(
+        result.2,
+        "Widget set methods should delegate to existing mixin overrides"
+    );
+}
+
+#[test]
 fn test_statusbar_set_color_fill_aliases_statusbar_color_state() {
     let env = WowLuaEnv::new().unwrap();
 

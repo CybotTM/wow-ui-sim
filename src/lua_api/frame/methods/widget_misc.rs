@@ -501,11 +501,37 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
     methods.add_method(
         "RegisterForWidgetSet",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            if let Some((func, self_value)) =
+                get_mixin_override(lua, this.0, "RegisterForWidgetSet")
+            {
+                let mut call_args = mlua::MultiValue::new();
+                call_args.push_back(self_value);
+                for value in args {
+                    call_args.push_back(value);
+                }
+                return func.call::<()>(call_args);
+            }
+
+            set_widget_set_registration(lua, this.0, args)
+        },
     );
     methods.add_method(
         "UnregisterForWidgetSet",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            if let Some((func, self_value)) =
+                get_mixin_override(lua, this.0, "UnregisterForWidgetSet")
+            {
+                let mut call_args = mlua::MultiValue::new();
+                call_args.push_back(self_value);
+                for value in args {
+                    call_args.push_back(value);
+                }
+                return func.call::<()>(call_args);
+            }
+
+            clear_widget_set_registration(lua, this.0)
+        },
     );
 }
 
@@ -526,6 +552,31 @@ fn widget_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
         Value::UserData(ud) => ud.user_value(),
         _ => lua.create_table(),
     }
+}
+
+fn set_widget_set_registration(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    args: mlua::MultiValue,
+) -> mlua::Result<()> {
+    let mut values = args.into_iter();
+    let widget_set_id = values.next().unwrap_or(Value::Nil);
+    if widget_set_id.is_nil() {
+        return clear_widget_set_registration(lua, frame_id);
+    }
+
+    let registration = lua.create_table()?;
+    registration.set("widgetSetID", widget_set_id)?;
+    registration.set("widgetLayoutFunction", values.next().unwrap_or(Value::Nil))?;
+    registration.set("widgetInitFunction", values.next().unwrap_or(Value::Nil))?;
+    registration.set("attachedUnitInfo", values.next().unwrap_or(Value::Nil))?;
+    widget_fields(lua, frame_id)?.set("widgetSetRegistration", registration)?;
+    Ok(())
+}
+
+fn clear_widget_set_registration(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
+    widget_fields(lua, frame_id)?.set("widgetSetRegistration", Value::Nil)?;
+    Ok(())
 }
 
 fn parse_statusbar_color(args: mlua::MultiValue) -> Color {
