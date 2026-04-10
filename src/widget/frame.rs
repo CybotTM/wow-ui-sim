@@ -542,6 +542,8 @@ pub struct Frame {
     pub minimap_mask_texture: Option<String>,
     /// Stored Minimap icon texture asset.
     pub minimap_icon_texture: Option<String>,
+    /// Stored Minimap player arrow texture asset.
+    pub minimap_player_texture: Option<String>,
     /// Stored Minimap POI arrow texture asset.
     pub minimap_poi_arrow_texture: Option<String>,
     /// Stored Minimap corpse POI arrow texture asset.
@@ -899,6 +901,7 @@ macro_rules! frame_defaults {
             minimap_blip_texture: None,
             minimap_mask_texture: None,
             minimap_icon_texture: None,
+            minimap_player_texture: None,
             minimap_poi_arrow_texture: None,
             minimap_corpse_poi_arrow_texture: None,
             minimap_static_poi_arrow_texture: None,

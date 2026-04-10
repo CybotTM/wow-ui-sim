@@ -3,7 +3,7 @@
 use super::super::handle::FrameRef;
 use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
-use crate::widget::WidgetRegistry;
+use crate::widget::{MinimapBlobLayerStyle, MinimapBlobRingStyle, WidgetRegistry, WidgetType};
 use mlua::{MultiValue, Value};
 
 /// Add all miscellaneous frame-type-specific methods.
@@ -1177,8 +1177,9 @@ fn add_misc_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
-    methods.add_method("SetToDefaults", |_, _this, ()| Ok(()));
-    methods.add_method("SetPlayerTexture", |_, _this, _args: MultiValue| Ok(()));
+    methods.add_method("SetToDefaults", |lua, this, ()| {
+        reset_frame_to_defaults(lua, this.0)
+    });
 }
 
 /// Minimap and WorldMap stubs.
@@ -1223,6 +1224,9 @@ fn add_minimap_texture_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     add_minimap_texture_setter(methods, "SetIconTexture", |frame, asset| {
         frame.minimap_icon_texture = asset;
     });
+    add_minimap_texture_setter(methods, "SetPlayerTexture", |frame, asset| {
+        frame.minimap_player_texture = asset;
+    });
     add_minimap_texture_setter(methods, "SetPOIArrowTexture", |frame, asset| {
         frame.minimap_poi_arrow_texture = asset;
     });
@@ -1232,6 +1236,48 @@ fn add_minimap_texture_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     add_minimap_texture_setter(methods, "SetStaticPOIArrowTexture", |frame, asset| {
         frame.minimap_static_poi_arrow_texture = asset;
     });
+}
+
+fn reset_frame_to_defaults(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
+    reset_minimap_frame_to_defaults(get_sim_state(lua), frame_id);
+    reset_frame_default_fields(lua, frame_id)
+}
+
+fn reset_minimap_frame_to_defaults(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) {
+    let mut state = state_rc.borrow_mut();
+    let Some(frame) = state.widgets.get_mut(frame_id) else {
+        return;
+    };
+    if frame.widget_type != WidgetType::Minimap {
+        return;
+    }
+
+    frame.minimap_blip_texture = None;
+    frame.minimap_mask_texture = None;
+    frame.minimap_icon_texture = None;
+    frame.minimap_player_texture = None;
+    frame.minimap_poi_arrow_texture = None;
+    frame.minimap_corpse_poi_arrow_texture = None;
+    frame.minimap_static_poi_arrow_texture = None;
+    frame.minimap_ping_position = None;
+    frame.minimap_blip_update_revision = 0;
+    frame.quest_blob_inside = MinimapBlobLayerStyle::default();
+    frame.quest_blob_outside = MinimapBlobLayerStyle::default();
+    frame.quest_blob_ring = MinimapBlobRingStyle::default();
+    frame.task_blob_inside = MinimapBlobLayerStyle::default();
+    frame.task_blob_outside = MinimapBlobLayerStyle::default();
+    frame.task_blob_ring = MinimapBlobRingStyle::default();
+    frame.arch_blob_inside = MinimapBlobLayerStyle::default();
+    frame.arch_blob_outside = MinimapBlobLayerStyle::default();
+    frame.arch_blob_ring = MinimapBlobRingStyle::default();
+}
+
+fn reset_frame_default_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
+    let fields = frame_fields(lua, frame_id)?;
+    fields.set("zoom", Value::Nil)
 }
 
 fn add_minimap_texture_setter<M, F>(methods: &mut M, name: &'static str, setter: F)

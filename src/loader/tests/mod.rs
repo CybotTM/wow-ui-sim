@@ -1250,6 +1250,66 @@ fn test_minimap_texture_setters_persist_asset_state() {
 }
 
 #[test]
+fn test_minimap_player_texture_and_defaults_follow_runtime_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        MinimapDefaultStateFrame = CreateFrame("Minimap", "MinimapDefaultStateFrame", UIParent)
+        MinimapDefaultStateFrame:SetPlayerTexture("Interface\\Minimap\\MinimapArrow")
+        MinimapDefaultStateFrame:SetZoom(4)
+        MinimapDefaultStateFrame:PingLocation(0.25, 0.75)
+    "#,
+    )
+    .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let minimap_id = state
+            .widgets
+            .get_id_by_name("MinimapDefaultStateFrame")
+            .expect("minimap should exist");
+        let minimap = state
+            .widgets
+            .get(minimap_id)
+            .expect("minimap frame should be readable");
+
+        assert_eq!(
+            minimap.minimap_player_texture.as_deref(),
+            Some("Interface\\Minimap\\MinimapArrow")
+        );
+        assert_eq!(minimap.minimap_ping_position, Some((0.25, 0.75)));
+    }
+
+    let zoom_before_reset: i32 = env
+        .eval("return MinimapDefaultStateFrame:GetZoom()")
+        .unwrap();
+    assert_eq!(zoom_before_reset, 4);
+
+    env.exec("MinimapDefaultStateFrame:SetToDefaults()")
+        .unwrap();
+
+    let zoom_after_reset: i32 = env
+        .eval("return MinimapDefaultStateFrame:GetZoom()")
+        .unwrap();
+    assert_eq!(zoom_after_reset, 0);
+
+    {
+        let state = env.state().borrow();
+        let minimap_id = state
+            .widgets
+            .get_id_by_name("MinimapDefaultStateFrame")
+            .expect("minimap should exist");
+        let minimap = state
+            .widgets
+            .get(minimap_id)
+            .expect("minimap frame should be readable");
+
+        assert_eq!(minimap.minimap_player_texture, None);
+        assert_eq!(minimap.minimap_ping_position, None);
+    }
+}
+
+#[test]
 fn test_minimap_blob_setters_persist_blob_style_state() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(
