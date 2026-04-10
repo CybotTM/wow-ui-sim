@@ -765,6 +765,30 @@ fn test_update_mouse_over_tooltip_hit() {
 }
 
 #[test]
+fn test_update_mouse_over_tooltip_returns_first_matching_quest_and_blob_count() {
+    let env = env();
+
+    let (quest_id, blob_count): (i32, i32) = env
+        .eval(
+            r#"
+        local poi = CreateFrame("Frame", "OrderedHitPOI", UIParent)
+        poi:SetMapID(37)
+        poi:DrawBlob(80001, true)
+        poi:DrawBlob(80002, true)
+        local qid, count = poi:UpdateMouseOverTooltip(0.74, 0.77)
+        return qid or 0, count or 0
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        quest_id, 80001,
+        "Should return the first matching active quest"
+    );
+    assert_eq!(blob_count, 1, "Should report the number of matching blobs");
+}
+
+#[test]
 fn test_update_mouse_over_tooltip_miss() {
     let env = env();
 
