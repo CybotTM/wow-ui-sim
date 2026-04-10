@@ -232,6 +232,84 @@ fn test_colorselect_rgb_to_hsv_conversion() {
 }
 
 #[test]
+fn test_colorselect_alpha_defaults_to_one_and_round_trips() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cs = CreateFrame("ColorSelect", "TestCSAlpha", UIParent)
+    "#,
+    )
+    .unwrap();
+
+    let default_alpha: f64 = env.eval("return TestCSAlpha:GetColorAlpha()").unwrap();
+    assert!(
+        (default_alpha - 1.0).abs() < 0.001,
+        "ColorSelect alpha should default to fully opaque"
+    );
+
+    env.exec("TestCSAlpha:SetColorAlpha(0.35)").unwrap();
+
+    let alpha: f64 = env.eval("return TestCSAlpha:GetColorAlpha()").unwrap();
+    assert!((alpha - 0.35).abs() < 0.001);
+}
+
+#[test]
+fn test_colorselect_alpha_is_preserved_across_rgb_and_hsv_updates() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cs = CreateFrame("ColorSelect", "TestCSAlphaPreserve", UIParent)
+        cs:SetColorRGB(0.2, 0.3, 0.4)
+        cs:SetColorAlpha(0.6)
+        cs:SetColorHSV(120, 0.5, 0.8)
+    "#,
+    )
+    .unwrap();
+
+    let (alpha, r, g, b, h, s, v): (f64, f64, f64, f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local r, g, b = TestCSAlphaPreserve:GetColorRGB()
+            local h, s, v = TestCSAlphaPreserve:GetColorHSV()
+            return TestCSAlphaPreserve:GetColorAlpha(), r, g, b, h, s, v
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        (alpha - 0.6).abs() < 0.001,
+        "SetColorHSV should not wipe stored alpha"
+    );
+    assert!((r - 0.4).abs() < 0.01);
+    assert!((g - 0.8).abs() < 0.01);
+    assert!((b - 0.4).abs() < 0.01);
+    assert!((h - 120.0).abs() < 0.01);
+    assert!((s - 0.5).abs() < 0.01);
+    assert!((v - 0.8).abs() < 0.01);
+
+    env.exec("TestCSAlphaPreserve:SetColorRGB(0.9, 0.1, 0.2)")
+        .unwrap();
+    let (alpha_after_rgb, r_after_rgb, g_after_rgb, b_after_rgb): (f64, f64, f64, f64) = env
+        .eval(
+            r#"
+            local r, g, b = TestCSAlphaPreserve:GetColorRGB()
+            return TestCSAlphaPreserve:GetColorAlpha(), r, g, b
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        (alpha_after_rgb - 0.6).abs() < 0.001,
+        "SetColorRGB should not wipe stored alpha"
+    );
+    assert!((r_after_rgb - 0.9).abs() < 0.01);
+    assert!((g_after_rgb - 0.1).abs() < 0.01);
+    assert!((b_after_rgb - 0.2).abs() < 0.01);
+}
+
+#[test]
 fn test_colorselect_texture_getters_default_nil() {
     let env = WowLuaEnv::new().unwrap();
 

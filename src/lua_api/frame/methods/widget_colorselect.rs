@@ -10,7 +10,7 @@ pub fn add_colorselect_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     add_colorselect_rgb_methods(methods);
     add_colorselect_hsv_methods(methods);
     add_colorselect_texture_methods(methods);
-    add_colorselect_alpha_stubs(methods);
+    add_colorselect_alpha_methods(methods);
 }
 
 fn add_colorselect_rgb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -27,6 +27,8 @@ fn add_colorselect_rgb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
             frame
                 .attributes
                 .insert("colorB".to_string(), AttributeValue::Number(b));
+            let (h, s, v) = rgb_to_hsv(r, g, b);
+            set_color_hsv_attrs(frame, h, s, v);
         }
         Ok(())
     });
@@ -113,6 +115,13 @@ fn get_color_hsv_from_attrs(
     rgb_to_hsv(r, g, b)
 }
 
+fn get_color_alpha_from_attrs(attrs: &std::collections::HashMap<String, AttributeValue>) -> f64 {
+    match attrs.get("colorA") {
+        Some(AttributeValue::Number(alpha)) => *alpha,
+        _ => 1.0,
+    }
+}
+
 const COLOR_ALPHA_TEXTURE_KEY: &str = "ColorAlphaTexture";
 const COLOR_ALPHA_THUMB_TEXTURE_KEY: &str = "ColorAlphaThumbTexture";
 const COLOR_VALUE_TEXTURE_KEY: &str = "ColorValueTexture";
@@ -159,9 +168,27 @@ fn add_colorselect_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     }
 }
 
-fn add_colorselect_alpha_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetColorAlpha", |_, _, ()| Ok(0.0_f64));
-    methods.add_method("SetColorAlpha", |_, _, _: mlua::Variadic<Value>| Ok(()));
+fn add_colorselect_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetColorAlpha", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        if let Some(frame) = state.widgets.get(this.0) {
+            return Ok(get_color_alpha_from_attrs(&frame.attributes));
+        }
+        Ok(1.0_f64)
+    });
+
+    methods.add_method("SetColorAlpha", |lua, this, alpha: f64| {
+        let clamped_alpha = alpha.clamp(0.0, 1.0);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame
+                .attributes
+                .insert("colorA".to_string(), AttributeValue::Number(clamped_alpha));
+        }
+        Ok(())
+    });
 }
 
 fn set_colorselect_texture_slot(
