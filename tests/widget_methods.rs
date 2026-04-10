@@ -539,6 +539,34 @@ fn test_statusbar_desaturation_methods_share_persisted_state() {
 }
 
 #[test]
+fn test_statusbar_timer_duration_round_trips_duration_object() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, String, bool) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "TestStatusBarTimerDuration", UIParent)
+            local duration = C_DurationUtil.CreateDuration()
+            duration.debugTag = "statusbar-timer"
+            sb:SetTimerDuration(duration, Enum.StatusBarInterpolation.Immediate, Enum.StatusBarTimerDirection.RemainingTime)
+            local stored = sb:GetTimerDuration()
+            return rawequal(duration, stored), stored.debugTag, type(stored) == "userdata"
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "GetTimerDuration should return the same duration object"
+    );
+    assert_eq!(result.1, "statusbar-timer");
+    assert!(
+        result.2,
+        "status bar timer should stay a LuaDurationObject userdata"
+    );
+}
+
+#[test]
 fn test_player_model_methods_still_resolve() {
     let env = WowLuaEnv::new().unwrap();
 

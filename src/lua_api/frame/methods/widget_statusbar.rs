@@ -3,6 +3,7 @@
 use super::super::handle::FrameRef;
 use super::widget_tooltip::val_to_f32;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
+use crate::lua_api::globals::lua_duration_object::LuaDurationObject;
 use crate::widget::Color;
 use mlua::Value;
 
@@ -12,12 +13,7 @@ pub fn add_statusbar_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_statusbar_fill_methods(methods);
     add_statusbar_desaturate_methods(methods);
     add_statusbar_interpolation_methods(methods);
-    add_statusbar_stubs(methods);
-}
-
-fn add_statusbar_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetTimerDuration", |_, _, ()| Ok(0.0_f64));
-    methods.add_method("SetTimerDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
+    add_statusbar_timer_methods(methods);
 }
 
 fn add_statusbar_interpolation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -48,6 +44,15 @@ fn add_statusbar_interpolation_methods<M: mlua::UserDataMethods<FrameRef>>(metho
             frame.statusbar_interpolated_value = target;
         }
         Ok(())
+    });
+}
+
+fn add_statusbar_timer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetTimerDuration", |lua, this, ()| {
+        get_statusbar_timer_duration(lua, this.0)
+    });
+    methods.add_method("SetTimerDuration", |lua, this, args: mlua::MultiValue| {
+        set_statusbar_timer_duration(lua, this.0, args)
     });
 }
 
@@ -304,6 +309,33 @@ fn sync_statusbar_child_desaturation(
     if let Some(child) = widgets.get_mut_visual(child_id) {
         child.desaturated = is_desaturated;
     }
+}
+
+fn get_statusbar_timer_duration(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<Value> {
+    let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    let stored: Value = fields.get("timerDuration")?;
+    if stored.is_nil() {
+        return Ok(Value::UserData(
+            lua.create_userdata(LuaDurationObject::new())?,
+        ));
+    }
+    Ok(stored)
+}
+
+fn set_statusbar_timer_duration(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    args: mlua::MultiValue,
+) -> mlua::Result<()> {
+    let mut it = args.into_iter();
+    let duration = it.next().unwrap_or(Value::Nil);
+    let interpolation = it.next().unwrap_or(Value::Nil);
+    let direction = it.next().unwrap_or(Value::Nil);
+    let fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    fields.set("timerDuration", duration)?;
+    fields.set("timerInterpolation", interpolation)?;
+    fields.set("timerDirection", direction)?;
+    Ok(())
 }
 
 fn anchor_bar_to_parent(widgets: &mut crate::widget::WidgetRegistry, bar_id: u64, parent_id: u64) {
