@@ -22,15 +22,18 @@ fn register_c_traits_config(
     lua: &Lua,
     state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
-    register_config_stubs(t, lua)?;
+    register_config_stubs(t, lua, Rc::clone(&state))?;
     register_config_mutations(t, lua, state)?;
     Ok(())
 }
 
 /// Stateless config stubs.
-fn register_config_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
+fn register_config_stubs(t: &mlua::Table, lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_config_bulk_stubs(t, lua)?;
-    t.set("GetConfigInfo", lua.create_function(create_config_info)?)?;
+    t.set(
+        "GetConfigInfo",
+        lua.create_function(move |lua, config_id: i32| create_config_info(lua, &state, config_id))?,
+    )?;
     t.set(
         "GetLoadoutSerializationVersion",
         lua.create_function(|_, ()| Ok(2i32))?,
@@ -489,14 +492,18 @@ fn register_traits_node_stateful(
     Ok(())
 }
 
-fn create_config_info(lua: &Lua, _config_id: i32) -> Result<Value> {
+fn create_config_info(lua: &Lua, state: &Rc<RefCell<SimState>>, config_id: i32) -> Result<Value> {
     let info = lua.create_table()?;
     let tree_ids = lua.create_table()?;
     tree_ids.set(1, 790)?;
     info.set("treeIDs", tree_ids)?;
-    info.set("ID", 1)?;
+    info.set("ID", config_id)?;
     info.set("type", 1)?;
-    info.set("name", "")?;
+    let active = state.borrow().talents.active_config_id == config_id;
+    let name =
+        crate::lua_api::talent_state::seeded_class_talent_config_name(config_id).unwrap_or("");
+    info.set("name", name)?;
+    info.set("isActive", active)?;
     Ok(Value::Table(info))
 }
 

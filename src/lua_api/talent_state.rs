@@ -2,6 +2,84 @@
 
 use std::collections::HashMap;
 
+#[derive(Clone, Copy)]
+pub struct SeededTalentConfig {
+    pub id: i32,
+    pub name: &'static str,
+}
+
+const HOLY_CONFIGS: [SeededTalentConfig; 2] = [
+    SeededTalentConfig {
+        id: 101,
+        name: "Holy Default",
+    },
+    SeededTalentConfig {
+        id: 102,
+        name: "Holy Raid",
+    },
+];
+
+const PROTECTION_CONFIGS: [SeededTalentConfig; 2] = [
+    SeededTalentConfig {
+        id: 201,
+        name: "Protection Default",
+    },
+    SeededTalentConfig {
+        id: 202,
+        name: "Protection Mythic+",
+    },
+];
+
+const RETRIBUTION_CONFIGS: [SeededTalentConfig; 2] = [
+    SeededTalentConfig {
+        id: 301,
+        name: "Retribution Default",
+    },
+    SeededTalentConfig {
+        id: 302,
+        name: "Retribution Raid",
+    },
+];
+
+pub fn seeded_class_talent_configs(spec_id: u32) -> &'static [SeededTalentConfig] {
+    match spec_id {
+        65 => &HOLY_CONFIGS,
+        66 => &PROTECTION_CONFIGS,
+        70 => &RETRIBUTION_CONFIGS,
+        _ => &[],
+    }
+}
+
+pub fn seeded_class_talent_config_name(config_id: i32) -> Option<&'static str> {
+    [65u32, 66, 70]
+        .into_iter()
+        .flat_map(seeded_class_talent_configs)
+        .find(|config| config.id == config_id)
+        .map(|config| config.name)
+}
+
+pub fn seeded_class_talent_config_id_by_name(spec_id: u32, loadout_name: &str) -> Option<i32> {
+    seeded_class_talent_configs(spec_id)
+        .iter()
+        .find(|config| config.name.eq_ignore_ascii_case(loadout_name))
+        .map(|config| config.id)
+}
+
+pub fn default_class_talent_config_id(spec_id: u32) -> Option<i32> {
+    seeded_class_talent_configs(spec_id)
+        .first()
+        .map(|config| config.id)
+}
+
+fn default_last_selected_config_ids() -> HashMap<u32, i32> {
+    [65u32, 66, 70]
+        .into_iter()
+        .filter_map(|spec_id| {
+            default_class_talent_config_id(spec_id).map(|config_id| (spec_id, config_id))
+        })
+        .collect()
+}
+
 /// Talent tree interactive state.
 pub struct TalentState {
     /// Per-node purchased ranks: node_id → ranks_purchased (default 0).
@@ -16,11 +94,20 @@ pub struct TalentState {
     pub currency_spent: HashMap<u32, u32>,
     /// Cached currently selected hero subtree, if any.
     pub active_hero_subtree_id: Option<u32>,
+    /// Currently active seeded config for the active specialization.
+    pub active_config_id: i32,
+    /// Last selected seeded config per specialization.
+    pub last_selected_config_id_by_spec_id: HashMap<u32, i32>,
 }
 
 impl TalentState {
     /// Build talent state with currency mappings derived from the trait databases.
     pub fn new() -> Self {
+        Self::for_spec_id(66)
+    }
+
+    /// Build talent state seeded for a specific specialization.
+    pub fn for_spec_id(active_spec_id: u32) -> Self {
         use crate::traits::{TRAIT_COND_DB, TRAIT_NODE_DB};
 
         // Build group → currency map from gate conditions (cond_type == 0).
@@ -46,7 +133,11 @@ impl TalentState {
         let mut node_selections = HashMap::new();
 
         // Auto-select the first hero spec so hero talent UI displays by default.
-        super::globals::hero_talents::auto_select_hero_spec(&mut node_ranks, &mut node_selections);
+        super::globals::hero_talents::auto_select_hero_spec_for_spec(
+            active_spec_id,
+            &mut node_ranks,
+            &mut node_selections,
+        );
 
         let mut currency_spent = HashMap::new();
         for (&node_id, &ranks) in &node_ranks {
@@ -60,6 +151,12 @@ impl TalentState {
                 .and_then(|entry| (entry.sub_tree_id != 0).then_some(entry.sub_tree_id))
         });
 
+        let last_selected_config_id_by_spec_id = default_last_selected_config_ids();
+        let active_config_id = last_selected_config_id_by_spec_id
+            .get(&active_spec_id)
+            .copied()
+            .unwrap_or(1);
+
         Self {
             node_ranks,
             node_selections,
@@ -67,6 +164,8 @@ impl TalentState {
             node_currency_map,
             currency_spent,
             active_hero_subtree_id,
+            active_config_id,
+            last_selected_config_id_by_spec_id,
         }
     }
 
@@ -140,5 +239,24 @@ impl TalentState {
     /// Return the currently selected hero subtree, if any.
     pub fn active_hero_subtree(&self) -> Option<u32> {
         self.active_hero_subtree_id
+    }
+
+    pub fn switch_to_spec(&mut self, spec_id: u32) {
+        let last_selected = self.last_selected_config_id_by_spec_id.clone();
+        *self = Self::for_spec_id(spec_id);
+        self.last_selected_config_id_by_spec_id
+            .extend(last_selected);
+        self.active_config_id = self
+            .last_selected_config_id_by_spec_id
+            .get(&spec_id)
+            .copied()
+            .or_else(|| default_class_talent_config_id(spec_id))
+            .unwrap_or(self.active_config_id);
+    }
+
+    pub fn switch_to_loadout(&mut self, spec_id: u32, config_id: i32) {
+        self.active_config_id = config_id;
+        self.last_selected_config_id_by_spec_id
+            .insert(spec_id, config_id);
     }
 }

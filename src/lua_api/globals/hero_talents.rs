@@ -181,6 +181,13 @@ pub fn spec_id_to_spec_set(spec_id: u32) -> u32 {
     }
 }
 
+fn active_spec_id(state: &SimState) -> u32 {
+    crate::specializations::specs_for_class(state.player.class_index as u32)
+        .nth((state.player.active_spec_index - 1).max(0) as usize)
+        .map(|spec| spec.id)
+        .unwrap_or(66)
+}
+
 /// Collect unique subtree IDs from a node's entries.
 fn collect_entry_subtree_ids(entry_ids: &[u32]) -> Vec<u32> {
     let mut ids = Vec::new();
@@ -202,7 +209,18 @@ pub fn auto_select_hero_spec(
     node_ranks: &mut std::collections::HashMap<u32, u32>,
     node_selections: &mut std::collections::HashMap<u32, u32>,
 ) {
-    let spec_set = 28u32; // Protection
+    auto_select_hero_spec_for_spec(66, node_ranks, node_selections);
+}
+
+pub fn auto_select_hero_spec_for_spec(
+    spec_id: u32,
+    node_ranks: &mut std::collections::HashMap<u32, u32>,
+    node_selections: &mut std::collections::HashMap<u32, u32>,
+) {
+    let spec_set = spec_id_to_spec_set(spec_id);
+    if spec_set == 0 {
+        return;
+    }
     let tree_id = 790u32;
     let Some(subtree_ids) = subtree_ids_for_spec(tree_id, spec_set) else {
         return;
@@ -244,6 +262,7 @@ pub fn get_active_hero_subtree(state: &SimState) -> Option<u32> {
 pub fn register_c_class_talents(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let t = lua.create_table()?;
     register_config_stubs(&t, lua)?;
+    register_config_stateful_methods(&t, lua, &state)?;
     register_hero_spec_apis(&t, lua, &state)?;
     let st = Rc::clone(&state);
     t.set(
@@ -271,14 +290,6 @@ pub fn register_c_class_talents(lua: &Lua, state: Rc<RefCell<SimState>>) -> Resu
 fn register_config_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
     t.set("GetActiveConfigID", lua.create_function(|_, ()| Ok(1i32))?)?;
     t.set(
-        "GetConfigIDsBySpecID",
-        lua.create_function(|lua, _spec_id: Option<i32>| {
-            let t = lua.create_table()?;
-            t.set(1, 1i32)?;
-            Ok(t)
-        })?,
-    )?;
-    t.set(
         "CanEditTalents",
         lua.create_function(|_, ()| Ok((true, Value::Nil)))?,
     )?;
@@ -298,6 +309,141 @@ fn register_config_stubs(t: &mlua::Table, lua: &Lua) -> Result<()> {
         "CanChangeTalents",
         lua.create_function(|_, ()| Ok((true, false)))?,
     )?;
+    Ok(())
+}
+
+fn register_config_stateful_methods(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let st = Rc::clone(state);
+    t.set(
+        "GetActiveConfigID",
+        lua.create_function(move |_, ()| Ok(st.borrow().talents.active_config_id))?,
+    )?;
+    let st = Rc::clone(state);
+    t.set(
+        "GetConfigIDsBySpecID",
+        lua.create_function(move |lua, spec_id: Option<i32>| {
+            let spec_id = spec_id
+                .map(|id| id as u32)
+                .unwrap_or_else(|| active_spec_id(&st.borrow()));
+            let ids = crate::lua_api::talent_state::seeded_class_talent_configs(spec_id);
+            let configs = lua.create_table()?;
+            for (index, config) in ids.iter().enumerate() {
+                configs.set(index + 1, config.id)?;
+            }
+            Ok(configs)
+        })?,
+    )?;
+    let st = Rc::clone(state);
+    t.set(
+        "GetLastSelectedSavedConfigID",
+        lua.create_function(move |_, spec_id: Option<i32>| {
+            let spec_id = spec_id
+                .map(|id| id as u32)
+                .unwrap_or_else(|| active_spec_id(&st.borrow()));
+            Ok(st
+                .borrow()
+                .talents
+                .last_selected_config_id_by_spec_id
+                .get(&spec_id)
+                .copied())
+        })?,
+    )?;
+    register_switch_methods(t, lua, state)?;
+    Ok(())
+}
+
+fn register_switch_methods(
+    t: &mlua::Table,
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> Result<()> {
+    let st = Rc::clone(state);
+    t.set(
+        "SwitchToLoadoutByIndex",
+        lua.create_function(move |_, loadout_index: i32| {
+            let mut state = st.borrow_mut();
+            let spec_id = active_spec_id(&state);
+            let Some(config) = crate::lua_api::talent_state::seeded_class_talent_configs(spec_id)
+                .get((loadout_index - 1).max(0) as usize)
+                .copied()
+            else {
+                return Ok(());
+            };
+            state.talents.switch_to_loadout(spec_id, config.id);
+            Ok(())
+        })?,
+    )?;
+    let st = Rc::clone(state);
+    t.set(
+        "SwitchToLoadoutByName",
+        lua.create_function(move |_, loadout_name: String| {
+            let mut state = st.borrow_mut();
+            let spec_id = active_spec_id(&state);
+            let Some(config_id) =
+                crate::lua_api::talent_state::seeded_class_talent_config_id_by_name(
+                    spec_id,
+                    &loadout_name,
+                )
+            else {
+                return Ok(());
+            };
+            state.talents.switch_to_loadout(spec_id, config_id);
+            Ok(())
+        })?,
+    )?;
+    let st = Rc::clone(state);
+    t.set(
+        "SwitchToSpecializationByIndex",
+        lua.create_function(move |lua, spec_index: i32| {
+            switch_to_specialization(lua, &st, spec_index)
+        })?,
+    )?;
+    let st = Rc::clone(state);
+    t.set(
+        "SwitchToSpecializationByName",
+        lua.create_function(move |lua, spec_name: String| {
+            let spec_index =
+                crate::specializations::specs_for_class(st.borrow().player.class_index as u32)
+                    .position(|spec| spec.name.eq_ignore_ascii_case(&spec_name))
+                    .map(|index| index as i32 + 1);
+            let Some(spec_index) = spec_index else {
+                return Ok(());
+            };
+            switch_to_specialization(lua, &st, spec_index)
+        })?,
+    )?;
+    Ok(())
+}
+
+fn switch_to_specialization(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    spec_index: i32,
+) -> Result<()> {
+    let spec_id = {
+        let borrowed = state.borrow();
+        crate::specializations::specs_for_class(borrowed.player.class_index as u32)
+            .nth((spec_index - 1).max(0) as usize)
+            .map(|spec| spec.id)
+    };
+    let Some(spec_id) = spec_id else {
+        return Ok(());
+    };
+    {
+        let mut borrowed = state.borrow_mut();
+        borrowed.player.active_spec_index = spec_index;
+        borrowed.player.pending_spec_change = None;
+        borrowed.talents.switch_to_spec(spec_id);
+    }
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    fire.call::<()>((
+        lua.create_string("PLAYER_SPECIALIZATION_CHANGED")?,
+        lua.create_string("player")?,
+    ))?;
     Ok(())
 }
 
