@@ -364,6 +364,8 @@ pub struct Frame {
     pub alpha_mode: Option<String>,
     /// Blend mode for texture rendering (Alpha or Additive).
     pub blend_mode: BlendMode,
+    /// Whether texture sampling should snap to the pixel grid.
+    pub snap_to_pixel_grid: bool,
     /// Whether this frame receives ALL events (set by RegisterAllEvents).
     pub register_all_events: bool,
     /// Whether this frame clips its children to its bounds.
@@ -641,6 +643,7 @@ macro_rules! frame_defaults {
             three_slice_h: None,
             alpha_mode: None,
             blend_mode: BlendMode::Alpha,
+            snap_to_pixel_grid: false,
             register_all_events: false,
             clips_children: false,
             is_frame_buffer: false,

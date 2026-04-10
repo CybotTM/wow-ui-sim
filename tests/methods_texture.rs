@@ -442,7 +442,7 @@ fn test_snap_to_pixel_grid() {
     let snap: bool = env
         .eval(&format!("return {tex}:IsSnappingToPixelGrid()"))
         .unwrap();
-    assert!(!snap); // stub returns false
+    assert!(snap);
 }
 
 #[test]
