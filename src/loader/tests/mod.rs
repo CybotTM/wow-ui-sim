@@ -636,6 +636,36 @@ fn test_draw_layer_legacy_toggle_methods_update_layer_state() {
 }
 
 #[test]
+fn test_frame_buffer_methods_persist_flag_and_rotate_child_textures() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", "FrameBufferFrame", UIParent)
+        local first = frame:CreateTexture(nil, "ARTWORK")
+        local second = frame:CreateTexture(nil, "OVERLAY")
+
+        assert(not frame:IsFrameBuffer(), "frame buffer flag should default false")
+
+        frame:SetIsFrameBuffer(true)
+        assert(frame:IsFrameBuffer(), "frame buffer flag should enable")
+
+        frame:RotateTextures(math.pi / 2)
+        assert(math.abs(first:GetRotation() - (math.pi / 2)) < 0.001, "first child texture should rotate")
+        assert(math.abs(second:GetRotation() - (math.pi / 2)) < 0.001, "second child texture should rotate")
+
+        frame:SetIsFrameBuffer(false)
+        assert(not frame:IsFrameBuffer(), "frame buffer flag should disable")
+
+        FRAME_BUFFER_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return FRAME_BUFFER_OK == true").unwrap();
+    assert!(ok, "frame buffer flag/rotation round-trip should succeed");
+}
+
+#[test]
 fn test_drag_methods_transfer_and_clear_active_drag_frame() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(

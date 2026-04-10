@@ -400,9 +400,60 @@ fn draw_layer_from_name(layer: &str) -> Option<crate::widget::DrawLayer> {
 
 /// Frame Buffer/Rendering stubs.
 fn add_frame_buffer_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("IsFrameBuffer", |_, _this, ()| Ok(false));
-    methods.add_method("RotateTextures", |_, _this, _args: MultiValue| Ok(()));
-    methods.add_method("SetIsFrameBuffer", |_, _this, _: bool| Ok(()));
+    methods.add_method("IsFrameBuffer", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.is_frame_buffer)
+            .unwrap_or(false))
+    });
+    methods.add_method("RotateTextures", |lua, this, args: MultiValue| {
+        let radians = frame_buffer_rotation_radians(&args);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        rotate_descendant_textures(&mut state, this.0, radians);
+        Ok(())
+    });
+    methods.add_method("SetIsFrameBuffer", |lua, this, enabled: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.is_frame_buffer = enabled;
+        }
+        Ok(())
+    });
+}
+
+fn frame_buffer_rotation_radians(args: &MultiValue) -> f32 {
+    args.front().and_then(rotation_arg_to_f32).unwrap_or(0.0)
+}
+
+fn rotation_arg_to_f32(value: &Value) -> Option<f32> {
+    match value {
+        Value::Number(n) => Some(*n as f32),
+        Value::Integer(n) => Some(*n as f32),
+        _ => None,
+    }
+}
+
+fn rotate_descendant_textures(state: &mut crate::lua_api::SimState, frame_id: u64, radians: f32) {
+    let mut pending = vec![frame_id];
+    while let Some(current_id) = pending.pop() {
+        let Some(frame) = state.widgets.get(current_id) else {
+            continue;
+        };
+        let child_ids = frame.children.clone();
+        pending.extend(child_ids.iter().copied());
+        for child_id in child_ids {
+            if let Some(child) = state.widgets.get_mut_visual(child_id)
+                && child.widget_type == crate::widget::WidgetType::Texture
+            {
+                child.rotation = radians;
+            }
+        }
+    }
 }
 
 /// Bounds/Position stubs.

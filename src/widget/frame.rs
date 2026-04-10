@@ -348,6 +348,8 @@ pub struct Frame {
     pub register_all_events: bool,
     /// Whether this frame clips its children to its bounds.
     pub clips_children: bool,
+    /// Whether this frame should behave like a frame buffer for texture rotation APIs.
+    pub is_frame_buffer: bool,
     /// Whether this texture is a MaskTexture (should not render).
     pub is_mask: bool,
     /// Mask texture IDs applied to this texture (for circular clipping etc.).
@@ -583,6 +585,7 @@ macro_rules! frame_defaults {
             blend_mode: BlendMode::Alpha,
             register_all_events: false,
             clips_children: false,
+            is_frame_buffer: false,
             is_mask: false,
             mask_textures: Vec::new(),
             rotation: 0.0,
