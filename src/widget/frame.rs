@@ -130,6 +130,82 @@ impl Default for ModelRenderingState {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneCameraState {
+    pub position: (f32, f32, f32),
+    pub forward: (f32, f32, f32),
+    pub right: (f32, f32, f32),
+    pub up: (f32, f32, f32),
+    pub field_of_view: f32,
+    pub near_clip: f32,
+    pub far_clip: f32,
+}
+
+impl Default for ModelSceneCameraState {
+    fn default() -> Self {
+        Self {
+            position: (0.0, 0.0, 0.0),
+            forward: (0.0, 0.0, 1.0),
+            right: (1.0, 0.0, 0.0),
+            up: (0.0, 1.0, 0.0),
+            field_of_view: 0.785,
+            near_clip: 0.1,
+            far_clip: 100.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneLightState {
+    pub light_type: i32,
+    pub position: (f32, f32, f32),
+    pub direction: (f32, f32, f32),
+    pub ambient_color: Color,
+    pub diffuse_color: Color,
+    pub visible: bool,
+}
+
+impl Default for ModelSceneLightState {
+    fn default() -> Self {
+        Self {
+            light_type: 0,
+            position: (0.0, 0.0, 0.0),
+            direction: (0.0, -1.0, 0.0),
+            ambient_color: Color::rgb(1.0, 1.0, 1.0),
+            diffuse_color: Color::rgb(1.0, 1.0, 1.0),
+            visible: true,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneFogState {
+    pub near: f32,
+    pub far: f32,
+    pub color: Color,
+}
+
+impl Default for ModelSceneFogState {
+    fn default() -> Self {
+        Self {
+            near: 0.0,
+            far: 0.0,
+            color: Color::rgb(0.0, 0.0, 0.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub struct ModelSceneState {
+    pub paused: bool,
+    pub allow_overlapped_models: bool,
+    pub view_insets: (f32, f32, f32, f32),
+    pub view_translation: (f32, f32),
+    pub camera: ModelSceneCameraState,
+    pub light: ModelSceneLightState,
+    pub fog: ModelSceneFogState,
+}
+
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct PlayerModelState {
     pub do_blend: bool,
@@ -504,6 +580,8 @@ pub struct Frame {
     pub model_appearance: ModelAppearanceState,
     /// Persisted model rendering flags.
     pub model_rendering: ModelRenderingState,
+    /// Persisted ModelScene state.
+    pub model_scene_state: ModelSceneState,
     /// Persisted PlayerModel-only state.
     pub player_model_state: PlayerModelState,
     /// Whether mouse motion events are enabled.
@@ -782,6 +860,7 @@ macro_rules! frame_defaults {
             model_transform: ModelTransformState::default(),
             model_appearance: ModelAppearanceState::default(),
             model_rendering: ModelRenderingState::default(),
+            model_scene_state: ModelSceneState::default(),
             player_model_state: PlayerModelState::default(),
             mouse_motion_enabled: false,
             user_id: 0,

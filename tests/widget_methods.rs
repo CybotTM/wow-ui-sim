@@ -906,6 +906,156 @@ fn test_player_model_specific_methods_persist_state() {
     assert_eq!(frame.player_model_state.active_anim_kit, None);
 }
 
+#[test]
+fn test_model_scene_camera_light_and_fog_methods_persist_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestModelSceneState", UIParent)
+        scene:SetCameraPosition(1.5, -2.25, 3.75)
+        scene:SetCameraOrientationByAxisVectors(0, 0, 1, 1, 0, 0, 0, 1, 0)
+        scene:SetCameraFieldOfView(1.125)
+        scene:SetCameraNearClip(0.25)
+        scene:SetCameraFarClip(250.0)
+        scene:SetLightType(2)
+        scene:SetLightPosition(4.5, 5.5, -6.5)
+        scene:SetLightDirection(0.1, -0.2, 0.3)
+        scene:SetLightAmbientColor(0.11, 0.22, 0.33)
+        scene:SetLightDiffuseColor(0.44, 0.55, 0.66)
+        scene:SetLightVisible(false)
+        scene:SetFogNear(7.5)
+        scene:SetFogFar(8.5)
+        scene:SetFogColor(0.7, 0.8, 0.9)
+        scene:SetPaused(true, false)
+        scene:SetViewInsets(10, 20, 30, 40)
+    "#,
+    )
+    .unwrap();
+
+    let camera_position: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetCameraPosition()")
+        .unwrap();
+    let camera_forward: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetCameraForward()")
+        .unwrap();
+    let camera_right: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetCameraRight()")
+        .unwrap();
+    let camera_up: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetCameraUp()")
+        .unwrap();
+    let field_of_view: f64 = env
+        .eval("return TestModelSceneState:GetCameraFieldOfView()")
+        .unwrap();
+    let near_clip: f64 = env
+        .eval("return TestModelSceneState:GetCameraNearClip()")
+        .unwrap();
+    let far_clip: f64 = env
+        .eval("return TestModelSceneState:GetCameraFarClip()")
+        .unwrap();
+    let light_type: i64 = env
+        .eval("return TestModelSceneState:GetLightType()")
+        .unwrap();
+    let light_position: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetLightPosition()")
+        .unwrap();
+    let light_direction: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetLightDirection()")
+        .unwrap();
+    let ambient_color: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetLightAmbientColor()")
+        .unwrap();
+    let diffuse_color: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetLightDiffuseColor()")
+        .unwrap();
+    let light_visible: bool = env
+        .eval("return TestModelSceneState:IsLightVisible()")
+        .unwrap();
+    let fog_near: f64 = env.eval("return TestModelSceneState:GetFogNear()").unwrap();
+    let fog_far: f64 = env.eval("return TestModelSceneState:GetFogFar()").unwrap();
+    let fog_color: (f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetFogColor()")
+        .unwrap();
+    let paused: bool = env.eval("return TestModelSceneState:GetPaused()").unwrap();
+    let view_insets: (f64, f64, f64, f64) = env
+        .eval("return TestModelSceneState:GetViewInsets()")
+        .unwrap();
+
+    assert!((camera_position.0 - 1.5).abs() < 0.001);
+    assert!((camera_position.1 + 2.25).abs() < 0.001);
+    assert!((camera_position.2 - 3.75).abs() < 0.001);
+    assert_eq!(camera_forward, (0.0, 0.0, 1.0));
+    assert_eq!(camera_right, (1.0, 0.0, 0.0));
+    assert_eq!(camera_up, (0.0, 1.0, 0.0));
+    assert!((field_of_view - 1.125).abs() < 0.001);
+    assert!((near_clip - 0.25).abs() < 0.001);
+    assert!((far_clip - 250.0).abs() < 0.001);
+    assert_eq!(light_type, 2);
+    assert!((light_position.0 - 4.5).abs() < 0.001);
+    assert!((light_position.1 - 5.5).abs() < 0.001);
+    assert!((light_position.2 + 6.5).abs() < 0.001);
+    assert!((light_direction.0 - 0.1).abs() < 0.001);
+    assert!((light_direction.1 + 0.2).abs() < 0.001);
+    assert!((light_direction.2 - 0.3).abs() < 0.001);
+    assert!((ambient_color.0 - 0.11).abs() < 0.001);
+    assert!((ambient_color.1 - 0.22).abs() < 0.001);
+    assert!((ambient_color.2 - 0.33).abs() < 0.001);
+    assert!((diffuse_color.0 - 0.44).abs() < 0.001);
+    assert!((diffuse_color.1 - 0.55).abs() < 0.001);
+    assert!((diffuse_color.2 - 0.66).abs() < 0.001);
+    assert!(!light_visible);
+    assert!((fog_near - 7.5).abs() < 0.001);
+    assert!((fog_far - 8.5).abs() < 0.001);
+    assert!((fog_color.0 - 0.7).abs() < 0.001);
+    assert!((fog_color.1 - 0.8).abs() < 0.001);
+    assert!((fog_color.2 - 0.9).abs() < 0.001);
+    assert!(paused);
+    assert_eq!(view_insets, (10.0, 20.0, 30.0, 40.0));
+
+    let scene_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestModelSceneState")
+        .unwrap();
+    let state = env.state().borrow();
+    let frame = state.widgets.get(scene_id).unwrap();
+    assert!((frame.model_scene_state.camera.position.0 - 1.5).abs() < 0.001);
+    assert!((frame.model_scene_state.camera.position.1 + 2.25).abs() < 0.001);
+    assert!((frame.model_scene_state.camera.position.2 - 3.75).abs() < 0.001);
+    assert_eq!(frame.model_scene_state.camera.forward, (0.0, 0.0, 1.0));
+    assert_eq!(frame.model_scene_state.camera.right, (1.0, 0.0, 0.0));
+    assert_eq!(frame.model_scene_state.camera.up, (0.0, 1.0, 0.0));
+    assert!((frame.model_scene_state.camera.field_of_view - 1.125).abs() < 0.001);
+    assert!((frame.model_scene_state.camera.near_clip - 0.25).abs() < 0.001);
+    assert!((frame.model_scene_state.camera.far_clip - 250.0).abs() < 0.001);
+    assert_eq!(frame.model_scene_state.light.light_type, 2);
+    assert!((frame.model_scene_state.light.position.0 - 4.5).abs() < 0.001);
+    assert!((frame.model_scene_state.light.position.1 - 5.5).abs() < 0.001);
+    assert!((frame.model_scene_state.light.position.2 + 6.5).abs() < 0.001);
+    assert!((frame.model_scene_state.light.direction.0 - 0.1).abs() < 0.001);
+    assert!((frame.model_scene_state.light.direction.1 + 0.2).abs() < 0.001);
+    assert!((frame.model_scene_state.light.direction.2 - 0.3).abs() < 0.001);
+    assert!((frame.model_scene_state.light.ambient_color.r - 0.11).abs() < 0.001);
+    assert!((frame.model_scene_state.light.ambient_color.g - 0.22).abs() < 0.001);
+    assert!((frame.model_scene_state.light.ambient_color.b - 0.33).abs() < 0.001);
+    assert!((frame.model_scene_state.light.diffuse_color.r - 0.44).abs() < 0.001);
+    assert!((frame.model_scene_state.light.diffuse_color.g - 0.55).abs() < 0.001);
+    assert!((frame.model_scene_state.light.diffuse_color.b - 0.66).abs() < 0.001);
+    assert!(!frame.model_scene_state.light.visible);
+    assert!((frame.model_scene_state.fog.near - 7.5).abs() < 0.001);
+    assert!((frame.model_scene_state.fog.far - 8.5).abs() < 0.001);
+    assert!((frame.model_scene_state.fog.color.r - 0.7).abs() < 0.001);
+    assert!((frame.model_scene_state.fog.color.g - 0.8).abs() < 0.001);
+    assert!((frame.model_scene_state.fog.color.b - 0.9).abs() < 0.001);
+    assert!(frame.model_scene_state.paused);
+    assert_eq!(
+        frame.model_scene_state.view_insets,
+        (10.0, 20.0, 30.0, 40.0)
+    );
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

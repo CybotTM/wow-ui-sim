@@ -474,82 +474,281 @@ pub fn add_model_scene_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 fn add_model_scene_rendering_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetAllowOverlappedModels", |_, _this, _allow: bool| Ok(()));
-    methods.add_method("IsAllowOverlappedModels", |_, _this, ()| Ok(false));
-    methods.add_method("SetPaused", |_, _this, _args: mlua::MultiValue| Ok(()));
+    add_model_scene_overlap_methods(methods);
+    add_model_scene_pause_methods(methods);
     methods.add_method("Project3DPointTo2D", |_, _this, _args: mlua::MultiValue| {
         Ok::<(f64, f64, f64), _>((0.0, 0.0, 1.0))
     });
-    methods.add_method("SetViewInsets", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("GetViewInsets", |_, _this, ()| {
-        Ok((0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))
+    add_model_scene_view_methods(methods);
+}
+
+fn add_model_scene_overlap_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetAllowOverlappedModels", |lua, this, allow: bool| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.allow_overlapped_models = allow;
+        });
+        Ok(())
     });
-    methods.add_method("GetViewTranslation", |_, _this, ()| Ok((0.0_f64, 0.0_f64)));
+    methods.add_method("IsAllowOverlappedModels", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.allow_overlapped_models
+        })
+        .unwrap_or(false))
+    });
+}
+
+fn add_model_scene_pause_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetPaused", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.paused = parse_first_model_bool(&args);
+        });
+        Ok(())
+    });
+}
+
+fn add_model_scene_view_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetViewInsets", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.view_insets = parse_model_vec4(&args);
+        });
+        Ok(())
+    });
+    methods.add_method("GetViewInsets", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple4_to_f64(frame.model_scene_state.view_insets)
+        })
+        .unwrap_or((0.0, 0.0, 0.0, 0.0)))
+    });
+    methods.add_method("SetViewTranslation", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.view_translation = parse_model_vec2(&args);
+        });
+        Ok(())
+    });
+    methods.add_method("GetViewTranslation", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple2_to_f64(frame.model_scene_state.view_translation)
+        })
+        .unwrap_or((0.0, 0.0)))
+    });
 }
 
 fn add_model_scene_camera_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetCameraPosition", |_, _this, _args: mlua::MultiValue| {
+    add_model_scene_camera_position_methods(methods);
+    add_model_scene_camera_orientation_methods(methods);
+    add_model_scene_camera_clip_methods(methods);
+}
+
+fn add_model_scene_camera_position_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetCameraPosition", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.position = parse_model_vec3(&args);
+        });
         Ok(())
     });
-    methods.add_method("GetCameraPosition", |_, _this, ()| {
-        Ok((0.0_f64, 0.0_f64, 0.0_f64))
+    methods.add_method("GetCameraPosition", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.camera.position)
+        })
+        .unwrap_or((0.0, 0.0, 0.0)))
     });
+}
+
+fn add_model_scene_camera_orientation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetCameraOrientationByYawPitchRoll",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            let yaw = args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32;
+            let pitch = args.get(1).map(lua_value_to_f64).unwrap_or(0.0) as f32;
+            let roll = args.get(2).map(lua_value_to_f64).unwrap_or(0.0) as f32;
+            let (forward, right, up) = model_scene_axes_from_yaw_pitch_roll(yaw, pitch, roll);
+            update_model_frame(lua, this.0, |frame| {
+                frame.model_scene_state.camera.forward = forward;
+                frame.model_scene_state.camera.right = right;
+                frame.model_scene_state.camera.up = up;
+            });
+            Ok(())
+        },
     );
     methods.add_method(
         "SetCameraOrientationByAxisVectors",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            let forward = parse_model_vec3(&args);
+            let right = (
+                args.get(3).map(lua_value_to_f64).unwrap_or(1.0) as f32,
+                args.get(4).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+                args.get(5).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+            );
+            let up = (
+                args.get(6).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+                args.get(7).map(lua_value_to_f64).unwrap_or(1.0) as f32,
+                args.get(8).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+            );
+            update_model_frame(lua, this.0, |frame| {
+                frame.model_scene_state.camera.forward = forward;
+                frame.model_scene_state.camera.right = right;
+                frame.model_scene_state.camera.up = up;
+            });
+            Ok(())
+        },
     );
-    methods.add_method("GetCameraForward", |_, _this, ()| {
-        Ok((0.0_f64, 0.0_f64, 1.0_f64))
+    methods.add_method("GetCameraForward", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.camera.forward)
+        })
+        .unwrap_or((0.0, 0.0, 1.0)))
     });
-    methods.add_method("GetCameraRight", |_, _this, ()| {
-        Ok((1.0_f64, 0.0_f64, 0.0_f64))
+    methods.add_method("GetCameraRight", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.camera.right)
+        })
+        .unwrap_or((1.0, 0.0, 0.0)))
     });
-    methods.add_method("GetCameraUp", |_, _this, ()| {
-        Ok((0.0_f64, 1.0_f64, 0.0_f64))
+    methods.add_method("GetCameraUp", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.camera.up)
+        })
+        .unwrap_or((0.0, 1.0, 0.0)))
     });
-    methods.add_method("SetCameraFieldOfView", |_, _this, _fov: f64| Ok(()));
-    methods.add_method("GetCameraFieldOfView", |_, _this, ()| Ok(0.785_f64));
-    methods.add_method("SetCameraNearClip", |_, _this, _clip: f64| Ok(()));
-    methods.add_method("SetCameraFarClip", |_, _this, _clip: f64| Ok(()));
-    methods.add_method("GetCameraNearClip", |_, _this, ()| Ok(0.1_f64));
-    methods.add_method("GetCameraFarClip", |_, _this, ()| Ok(100.0_f64));
+}
+
+fn add_model_scene_camera_clip_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetCameraFieldOfView", |lua, this, fov: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.field_of_view = fov as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetCameraFieldOfView", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.field_of_view as f64
+        })
+        .unwrap_or(0.785))
+    });
+    methods.add_method("SetCameraNearClip", |lua, this, clip: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.near_clip = clip as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("SetCameraFarClip", |lua, this, clip: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.far_clip = clip as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("GetCameraNearClip", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.near_clip as f64
+        })
+        .unwrap_or(0.1))
+    });
+    methods.add_method("GetCameraFarClip", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.camera.far_clip as f64
+        })
+        .unwrap_or(100.0))
+    });
 }
 
 fn add_model_scene_light_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetLightType", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetLightPosition", |_, _this, _args: mlua::MultiValue| {
+    add_model_scene_light_geometry_methods(methods);
+    add_model_scene_light_color_methods(methods);
+}
+
+fn add_model_scene_light_geometry_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetLightType", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.light.light_type = parse_first_model_i32(&args).unwrap_or(0);
+        });
         Ok(())
     });
-    methods.add_method("GetLightPosition", |_, _this, ()| {
-        Ok((0.0_f64, 0.0_f64, 0.0_f64))
-    });
-    methods.add_method("SetLightDirection", |_, _this, _args: mlua::MultiValue| {
+    methods.add_method("SetLightPosition", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.light.position = parse_model_vec3(&args);
+        });
         Ok(())
     });
-    methods.add_method("GetLightDirection", |_, _this, ()| {
-        Ok((0.0_f64, -1.0_f64, 0.0_f64))
+    methods.add_method("GetLightPosition", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.light.position)
+        })
+        .unwrap_or((0.0, 0.0, 0.0)))
     });
+    methods.add_method("SetLightDirection", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.light.direction = parse_model_vec3(&args);
+        });
+        Ok(())
+    });
+    methods.add_method("GetLightDirection", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            tuple3_to_f64(frame.model_scene_state.light.direction)
+        })
+        .unwrap_or((0.0, -1.0, 0.0)))
+    });
+}
+
+fn add_model_scene_light_color_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetLightAmbientColor",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            update_model_frame(lua, this.0, |frame| {
+                frame.model_scene_state.light.ambient_color = parse_model_rgb(&args);
+            });
+            Ok(())
+        },
     );
     methods.add_method(
         "SetLightDiffuseColor",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
+        |lua, this, args: mlua::MultiValue| {
+            update_model_frame(lua, this.0, |frame| {
+                frame.model_scene_state.light.diffuse_color = parse_model_rgb(&args);
+            });
+            Ok(())
+        },
     );
-    methods.add_method("SetLightVisible", |_, _this, _vis: bool| Ok(()));
-    methods.add_method("IsLightVisible", |_, _this, ()| Ok(true));
+    methods.add_method("SetLightVisible", |lua, this, vis: bool| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.light.visible = vis;
+        });
+        Ok(())
+    });
+    methods.add_method("IsLightVisible", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_scene_state.light.visible)
+                .unwrap_or(true),
+        )
+    });
 }
 
 fn add_model_scene_fog_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFogNear", |_, _this, _near: f64| Ok(()));
-    methods.add_method("SetFogFar", |_, _this, _far: f64| Ok(()));
-    methods.add_method("SetFogColor", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("ClearFog", |_, _this, ()| Ok(()));
+    methods.add_method("SetFogNear", |lua, this, near: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.fog.near = near as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("SetFogFar", |lua, this, far: f64| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.fog.far = far as f32;
+        });
+        Ok(())
+    });
+    methods.add_method("SetFogColor", |lua, this, args: mlua::MultiValue| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.fog.color = parse_model_rgb(&args);
+        });
+        Ok(())
+    });
+    methods.add_method("ClearFog", |lua, this, ()| {
+        update_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.fog.near = 0.0;
+            frame.model_scene_state.fog.far = 0.0;
+            frame.model_scene_state.fog.color = crate::widget::Color::rgb(0.0, 0.0, 0.0);
+        });
+        Ok(())
+    });
 }
 
 fn add_model_scene_actor_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -578,13 +777,125 @@ fn add_model_scene_actor_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 fn add_model_scene_query_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetAllowOverlappedModels", |_, _this, ()| Ok(false));
+    add_model_scene_state_query_methods(methods);
+    add_model_scene_light_query_methods(methods);
+    add_model_scene_fog_query_methods(methods);
+}
+
+fn add_model_scene_state_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetAllowOverlappedModels", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.allow_overlapped_models
+        })
+        .unwrap_or(false))
+    });
     methods.add_method("GetDesaturation", |_, _this, ()| Ok(0.0_f64));
-    methods.add_method("GetLightAmbientColor", |_, _this, ()| {
-        Ok((1.0_f64, 1.0_f64, 1.0_f64))
+    methods.add_method("GetPaused", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| frame.model_scene_state.paused).unwrap_or(false))
     });
-    methods.add_method("GetLightDiffuseColor", |_, _this, ()| {
-        Ok((1.0_f64, 1.0_f64, 1.0_f64))
+}
+
+fn add_model_scene_light_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetLightAmbientColor", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            color_to_rgb_f64(frame.model_scene_state.light.ambient_color)
+        })
+        .unwrap_or((1.0, 1.0, 1.0)))
     });
-    methods.add_method("GetLightType", |_, _this, ()| Ok(0i32));
+    methods.add_method("GetLightDiffuseColor", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            color_to_rgb_f64(frame.model_scene_state.light.diffuse_color)
+        })
+        .unwrap_or((1.0, 1.0, 1.0)))
+    });
+    methods.add_method("GetLightType", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_state.light.light_type
+        })
+        .unwrap_or(0))
+    });
+}
+
+fn add_model_scene_fog_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetFogColor", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            color_to_rgb_f64(frame.model_scene_state.fog.color)
+        })
+        .unwrap_or((0.0, 0.0, 0.0)))
+    });
+    methods.add_method("GetFogNear", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_scene_state.fog.near as f64)
+                .unwrap_or(0.0),
+        )
+    });
+    methods.add_method("GetFogFar", |lua, this, ()| {
+        Ok(
+            read_model_frame(lua, this.0, |frame| frame.model_scene_state.fog.far as f64)
+                .unwrap_or(0.0),
+        )
+    });
+}
+
+fn parse_model_vec2(args: &mlua::MultiValue) -> (f32, f32) {
+    (
+        args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(1).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+    )
+}
+
+fn parse_model_vec4(args: &mlua::MultiValue) -> (f32, f32, f32, f32) {
+    (
+        args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(1).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(2).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(3).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+    )
+}
+
+fn parse_model_rgb(args: &mlua::MultiValue) -> crate::widget::Color {
+    crate::widget::Color::rgb(
+        args.front().map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(1).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+        args.get(2).map(lua_value_to_f64).unwrap_or(0.0) as f32,
+    )
+}
+
+fn tuple2_to_f64(values: (f32, f32)) -> (f64, f64) {
+    (values.0 as f64, values.1 as f64)
+}
+
+fn tuple3_to_f64(values: (f32, f32, f32)) -> (f64, f64, f64) {
+    (values.0 as f64, values.1 as f64, values.2 as f64)
+}
+
+fn tuple4_to_f64(values: (f32, f32, f32, f32)) -> (f64, f64, f64, f64) {
+    (
+        values.0 as f64,
+        values.1 as f64,
+        values.2 as f64,
+        values.3 as f64,
+    )
+}
+
+fn color_to_rgb_f64(color: crate::widget::Color) -> (f64, f64, f64) {
+    (color.r as f64, color.g as f64, color.b as f64)
+}
+
+fn model_scene_axes_from_yaw_pitch_roll(
+    yaw: f32,
+    pitch: f32,
+    roll: f32,
+) -> ((f32, f32, f32), (f32, f32, f32), (f32, f32, f32)) {
+    let cy = yaw.cos();
+    let sy = yaw.sin();
+    let cp = pitch.cos();
+    let sp = pitch.sin();
+    let cr = roll.cos();
+    let sr = roll.sin();
+
+    let right = (cy * cp, sy * cp, -sp);
+    let up = (cy * sp * sr - sy * cr, sy * sp * sr + cy * cr, cp * sr);
+    let forward = (cy * sp * cr + sy * sr, sy * sp * cr - cy * sr, cp * cr);
+    (forward, right, up)
 }
