@@ -162,6 +162,18 @@ fn register_c_scenario_info(lua: &Lua) -> Result<()> {
         "GetCriteriaInfoByStep",
         lua.create_function(stub_criteria_info)?,
     )?;
+    t.set(
+        "GetDisplayInfo",
+        lua.create_function(stub_scenario_display_info)?,
+    )?;
+    t.set(
+        "GetTieredEntranceActiveSpells",
+        lua.create_function(stub_tiered_entrance_active_spells)?,
+    )?;
+    t.set(
+        "IsTieredEntranceScenario",
+        lua.create_function(stub_is_tiered_entrance_scenario)?,
+    )?;
     t.set("IsInScenario", lua.create_function(|_, ()| Ok(false))?)?;
     lua.globals().set("C_ScenarioInfo", t)?;
     Ok(())
@@ -193,6 +205,21 @@ fn stub_criteria_info(_: &Lua, _: mlua::MultiValue) -> Result<(Value, Value, Val
         Value::Integer(0),
         Value::Integer(0),
     ))
+}
+
+/// Stub: no active scenario theme display info.
+fn stub_scenario_display_info(_: &Lua, _: ()) -> Result<Value> {
+    Ok(Value::Nil)
+}
+
+/// Stub: no active tiered entrance spells while outside the scenario.
+fn stub_tiered_entrance_active_spells(_: &Lua, _: ()) -> Result<Value> {
+    Ok(Value::Nil)
+}
+
+/// Stub: the simulator is not in a tiered entrance scenario by default.
+fn stub_is_tiered_entrance_scenario(_: &Lua, _: ()) -> Result<bool> {
+    Ok(false)
 }
 
 fn register_profession_globals(lua: &Lua) -> Result<()> {
