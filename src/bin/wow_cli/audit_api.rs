@@ -21,6 +21,8 @@ pub struct SymbolUsage {
 pub struct AuditResults {
     /// C_Namespace -> method -> usage
     pub c_api: BTreeMap<String, BTreeMap<String, SymbolUsage>>,
+    /// Bare global function calls like `UnitName(...)`
+    pub global_functions: BTreeMap<String, SymbolUsage>,
     /// LE_* constants
     pub constants: BTreeMap<String, SymbolUsage>,
     /// Enum.Namespace.Value references
@@ -52,12 +54,16 @@ const SCRIPT_TAGS: &[&str] = &[
 /// All compiled regex patterns (built once, reused across all files).
 struct Patterns {
     c_api: Regex,
+    global_call: Regex,
     le_const: Regex,
     enum_ref: Regex,
     other_const: Regex,
     line_comment: Regex,
     block_comment: Regex,
     kv_global: Regex,
+    local_fn_def: Regex,
+    global_fn_def: Regex,
+    local_assign: Regex,
     /// One regex per script tag (no backreference support in the `regex` crate).
     xml_script_tags: Vec<Regex>,
 }
@@ -70,6 +76,7 @@ impl Patterns {
             .collect();
         Self {
             c_api: Regex::new(r"(C_\w+)[.:](\w+)").unwrap(),
+            global_call: Regex::new(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(").unwrap(),
             le_const: Regex::new(r"\bLE_\w+").unwrap(),
             enum_ref: Regex::new(r"\bEnum\.(\w+\.\w+)").unwrap(),
             other_const: Regex::new(r"\b(ITEM_MOD|MAX|NUM|SPELL_SCHOOL|RAID_CLASS|CLASS_SORT)_\w+")
@@ -77,6 +84,13 @@ impl Patterns {
             line_comment: Regex::new(r"--[^\n]*").unwrap(),
             block_comment: Regex::new(r"(?s)--\[\[.*?\]\]").unwrap(),
             kv_global: Regex::new(r#"type="global"[^>]*value="([^"]+)""#).unwrap(),
+            local_fn_def: Regex::new(r"\blocal\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(")
+                .unwrap(),
+            global_fn_def: Regex::new(r"\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(").unwrap(),
+            local_assign: Regex::new(
+                r"\blocal\s+([A-Za-z_][A-Za-z0-9_]*(?:\s*,\s*[A-Za-z_][A-Za-z0-9_]*)*)\s*=",
+            )
+            .unwrap(),
             xml_script_tags,
         }
     }
@@ -115,6 +129,107 @@ fn scan_c_api_usage(clean: &str, file_label: &str, results: &mut AuditResults, p
     }
 }
 
+fn scan_global_function_usage(
+    clean: &str,
+    file_label: &str,
+    results: &mut AuditResults,
+    p: &Patterns,
+) {
+    let definition_starts = collect_definition_starts(clean, p);
+    for cap in p.global_call.captures_iter(clean) {
+        let Some(matched_name) = cap.get(1) else {
+            continue;
+        };
+        let name = matched_name.as_str();
+        if !should_record_bare_global_call(clean, matched_name.start(), name, &definition_starts) {
+            continue;
+        }
+        let usage = results
+            .global_functions
+            .entry(name.to_string())
+            .or_default();
+        record_symbol_usage(usage, file_label);
+    }
+}
+
+fn collect_definition_starts(clean: &str, p: &Patterns) -> BTreeMap<String, usize> {
+    let mut starts = BTreeMap::new();
+
+    for cap in p.local_fn_def.captures_iter(clean) {
+        record_definition_start(&mut starts, &cap[1], cap.get(1).map(|m| m.start()));
+    }
+    for cap in p.global_fn_def.captures_iter(clean) {
+        record_definition_start(&mut starts, &cap[1], cap.get(1).map(|m| m.start()));
+    }
+    for cap in p.local_assign.captures_iter(clean) {
+        for name in cap[1].split(',') {
+            record_definition_start(&mut starts, name.trim(), cap.get(1).map(|m| m.start()));
+        }
+    }
+
+    starts
+}
+
+fn record_definition_start(starts: &mut BTreeMap<String, usize>, name: &str, start: Option<usize>) {
+    let Some(start) = start else {
+        return;
+    };
+    starts
+        .entry(name.to_string())
+        .and_modify(|earliest| *earliest = (*earliest).min(start))
+        .or_insert(start);
+}
+
+fn should_record_bare_global_call(
+    clean: &str,
+    name_start: usize,
+    name: &str,
+    definition_starts: &BTreeMap<String, usize>,
+) -> bool {
+    if definition_starts
+        .get(name)
+        .is_some_and(|definition_start| *definition_start <= name_start)
+        || is_lua_keyword(name)
+    {
+        return false;
+    }
+    match previous_non_whitespace_char(clean, name_start) {
+        Some('.') | Some(':') => false,
+        _ => true,
+    }
+}
+
+fn previous_non_whitespace_char(clean: &str, start: usize) -> Option<char> {
+    clean[..start].chars().rev().find(|c| !c.is_whitespace())
+}
+
+fn is_lua_keyword(name: &str) -> bool {
+    matches!(
+        name,
+        "and"
+            | "break"
+            | "do"
+            | "else"
+            | "elseif"
+            | "end"
+            | "false"
+            | "for"
+            | "function"
+            | "if"
+            | "in"
+            | "local"
+            | "nil"
+            | "not"
+            | "or"
+            | "repeat"
+            | "return"
+            | "then"
+            | "true"
+            | "until"
+            | "while"
+    )
+}
+
 fn scan_constant_usage(clean: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
     for cap in p.le_const.captures_iter(clean) {
         let usage = results.constants.entry(cap[0].to_string()).or_default();
@@ -149,6 +264,7 @@ fn scan_other_constant_usage(
 fn scan_lua_text(text: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
     let clean = strip_comments(text, p);
     scan_c_api_usage(&clean, file_label, results, p);
+    scan_global_function_usage(&clean, file_label, results, p);
     scan_constant_usage(&clean, file_label, results, p);
     scan_enum_usage(&clean, file_label, results, p);
     scan_other_constant_usage(&clean, file_label, results, p);
@@ -328,6 +444,15 @@ pub fn print_text(results: &AuditResults) {
 
     println!();
     println!(
+        "=== Global Function Calls ({} unique) ===",
+        results.global_functions.len()
+    );
+    for (sym, usage) in &results.global_functions {
+        println!("{} ({} files)", sym, usage.files.len());
+    }
+
+    println!();
+    println!(
         "=== LE_* Constants ({} unique) ===",
         results.constants.len()
     );
@@ -356,6 +481,7 @@ pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
     #[derive(Serialize)]
     struct Output<'a> {
         c_api: &'a BTreeMap<String, BTreeMap<String, SymbolUsage>>,
+        global_functions: &'a BTreeMap<String, SymbolUsage>,
         constants: &'a BTreeMap<String, SymbolUsage>,
         enums: &'a BTreeMap<String, SymbolUsage>,
         other_constants: &'a BTreeMap<String, SymbolUsage>,
@@ -364,6 +490,7 @@ pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
     }
     let out = Output {
         c_api: &results.c_api,
+        global_functions: &results.global_functions,
         constants: &results.constants,
         enums: &results.enums,
         other_constants: &results.other_constants,
@@ -1025,6 +1152,52 @@ fn register_c_tooltip_info_0(lua: &Lua) {
         assert!(
             !report.missing_c_methods.contains_key("C_Unregistered"),
             "missing method details should only be reported for namespaces the simulator exposes"
+        );
+    }
+
+    #[test]
+    fn scan_lua_text_extracts_only_bare_global_function_calls() {
+        let patterns = Patterns::new();
+        let mut used = AuditResults::default();
+        let lua = r#"
+            UnitName("player")
+            GetSpellInfo(1)
+            frame:GetSpellInfo()
+            frame.GetSpellInfo()
+            C_Spell.GetSpellInfo(1)
+
+            local function LocalHelper()
+                return UnitName("target")
+            end
+            LocalHelper()
+
+            local UnitName = function() end
+            UnitName("focus")
+
+            function GlobalHelper()
+                return GetSpellInfo(2)
+            end
+            GlobalHelper()
+        "#;
+
+        scan_lua_text(lua, "Blizzard_Test.lua", &mut used, &patterns);
+
+        assert_eq!(
+            used.global_functions
+                .keys()
+                .cloned()
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from(["GetSpellInfo".to_string(), "UnitName".to_string()])
+        );
+        assert_eq!(
+            used.global_functions.get("UnitName").map(|u| u.count),
+            Some(2),
+            "should count bare global calls but exclude locally shadowed calls"
+        );
+        assert_eq!(
+            used.global_functions.get("GetSpellInfo").map(|u| u.count),
+            Some(2),
+            "should count bare global calls but exclude method calls and locally defined helpers"
         );
     }
 }
