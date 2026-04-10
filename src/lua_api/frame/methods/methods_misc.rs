@@ -42,7 +42,14 @@ fn add_ui_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("IsMenuOpen", |_, _this, ()| Ok(false));
+    methods.add_method("IsMenuOpen", |lua, this, ()| {
+        let id = this.0;
+        if let Some((func, ud)) = super::methods_helpers::get_mixin_override(lua, id, "IsMenuOpen")
+        {
+            return func.call::<bool>(ud);
+        }
+        menu_frame_is_menu_open(lua, id)
+    });
     methods.add_method("SetOwningDialog", |_, _this, _dialog: Value| Ok(()));
     methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
     methods.add_method("RegisterFrames", |_, _this, _args: MultiValue| Ok(()));
@@ -50,6 +57,11 @@ fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         "RegisterBackgroundTexture",
         |_, _this, _args: MultiValue| Ok(()),
     );
+}
+
+fn menu_frame_is_menu_open(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<bool> {
+    let fields = frame_fields(lua, frame_id)?;
+    Ok(!matches!(fields.get::<Value>("menu")?, Value::Nil))
 }
 
 fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

@@ -503,6 +503,32 @@ fn test_widget_misc_setup_and_alert_methods_persist_runtime_fields() {
 }
 
 #[test]
+fn test_widget_misc_is_menu_open_uses_dropdown_menu_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestWidgetMiscMenuFrame", UIParent)
+            local fields = debug.getfenv(frame)[1]
+            local closed = frame:IsMenuOpen() == false
+
+            fields.menu = {}
+            local opened = frame:IsMenuOpen() == true
+
+            return closed, opened
+        "#,
+        )
+        .unwrap();
+
+    assert!(result.0, "Frames should report no menu by default");
+    assert!(
+        result.1,
+        "Frames should report an open menu when their active menu field is set"
+    );
+}
+
+#[test]
 fn test_widget_misc_item_button_methods_delegate_or_store_state() {
     let env = WowLuaEnv::new().unwrap();
 
