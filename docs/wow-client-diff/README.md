@@ -443,6 +443,20 @@ plus the small standalone helper set Blizzard still calls globally:
 **Task**: implement the remaining filtered globals without re-expanding this file back into a raw
 addon-polluted discovery dump.
 
+This section does **not** own broader Blizzard panel/data blockers that happen to surface during
+startup. Those belong in the behavioral backlog, not the global diff pass. Examples already moved
+out of this bucket are the old section-29 items for:
+
+- `C_FriendList`
+- `C_Macro`
+- `C_VideoOptions`
+- `C_CombatLog`
+- `C_ZoneAbility`
+- `C_LossOfControl`
+
+Keep `diff_global_functions_missing.txt` focused on actual missing global symbols. Do not re-expand
+it to track panel breakage that is really caused by C_* namespace/data gaps.
+
 ---
 
 ## Section 8: Extra Stubs to Remove or Investigate
