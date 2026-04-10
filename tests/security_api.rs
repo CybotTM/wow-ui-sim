@@ -192,6 +192,93 @@ fn test_secure_handler_stubs_are_inert() {
     );
 }
 
+#[test]
+fn test_execute_attribute_calls_function_attribute_and_returns_success_tuple() {
+    let env = env();
+    let (success, first, second, called): (bool, String, i64, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            local seen = false
+            frame:SetAttribute("menu-function", function(selfArg, unit, button, isKeyPress)
+                seen = selfArg == frame and unit == "player" and button == "LeftButton" and isKeyPress == true
+                return "ok", 42
+            end)
+
+            local success, first, second = frame:ExecuteAttribute("menu-function", frame, "player", "LeftButton", true)
+            return success, first, second, seen
+            "#,
+        )
+        .unwrap();
+
+    assert!(success);
+    assert_eq!(first, "ok");
+    assert_eq!(second, 42);
+    assert!(called);
+}
+
+#[test]
+fn test_execute_attribute_runs_protected_string_body_with_frame_refs() {
+    let env = env();
+    env.exec(
+        r#"
+        local header = CreateFrame("Frame", "ExecuteAttributeProtectedHeader", UIParent)
+        local target = CreateFrame("Frame", "ExecuteAttributeProtectedTarget", UIParent)
+        header:SetFrameRef("target", target)
+        header:SetAttribute("snippet", [[
+            local ref = self:GetFrameRef("target")
+            ref:SetAttribute("fromSnippet", ...)
+            return "snippet-ok"
+        ]])
+        "#,
+    )
+    .unwrap();
+
+    let header_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("ExecuteAttributeProtectedHeader")
+        .unwrap();
+    {
+        let mut state = env.state().borrow_mut();
+        state.widgets.get_mut(header_id).unwrap().is_protected = true;
+    }
+
+    let (success, returned, target_value): (bool, String, String) = env
+        .eval(
+            r#"
+            local header = ExecuteAttributeProtectedHeader
+            local target = ExecuteAttributeProtectedTarget
+            local success, returned = header:ExecuteAttribute("snippet", "payload")
+            return success, returned, target:GetAttribute("fromSnippet")
+            "#,
+        )
+        .unwrap();
+
+    assert!(success);
+    assert_eq!(returned, "snippet-ok");
+    assert_eq!(target_value, "payload");
+}
+
+#[test]
+fn test_execute_attribute_rejects_unprotected_string_body() {
+    let env = env();
+    let (success, reason): (bool, String) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:SetAttribute("snippet", "return 'nope'")
+            local success, reason = frame:ExecuteAttribute("snippet")
+            return success, reason
+            "#,
+        )
+        .unwrap();
+
+    assert!(!success);
+    assert_eq!(reason, "unsupported-unprotected-snippet");
+}
+
 // ============================================================================
 // forceinsecure + taint tracking
 // ============================================================================

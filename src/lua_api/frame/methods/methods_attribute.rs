@@ -5,7 +5,7 @@ use super::combat_lockdown;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::script_helpers::lua_error;
 use crate::widget::AttributeValue;
-use mlua::Value;
+use mlua::{Function, MultiValue, Value};
 
 /// Add attribute methods to the shared methods table.
 pub fn add_attribute_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -226,10 +226,97 @@ fn fire_on_attribute_changed(
 }
 
 fn add_execute_attribute<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "ExecuteAttribute",
-        |_lua, _this, _args: mlua::MultiValue| Ok(Value::Nil),
+    methods.add_method("ExecuteAttribute", |lua, this, args: MultiValue| {
+        let Some(attribute_name) = parse_execute_attribute_name(&args) else {
+            return execute_attribute_error(lua, "invalid-attribute-name");
+        };
+
+        let attribute = get_attribute_value(lua, this.0, &[attribute_name])?;
+        execute_attribute_value(lua, this.0, attribute, trim_execute_attribute_args(args))
+    });
+}
+
+fn parse_execute_attribute_name(args: &MultiValue) -> Option<String> {
+    match args.front() {
+        Some(Value::String(name)) => name.to_str().ok().map(|s| s.to_string()),
+        _ => None,
+    }
+}
+
+fn trim_execute_attribute_args(args: MultiValue) -> MultiValue {
+    MultiValue::from_vec(args.into_iter().skip(1).collect())
+}
+
+fn execute_attribute_value(
+    lua: &mlua::Lua,
+    id: u64,
+    attribute: Value,
+    args: MultiValue,
+) -> mlua::Result<MultiValue> {
+    match attribute {
+        Value::Function(callback) => execute_attribute_function(lua, callback, args),
+        Value::String(body) => execute_attribute_body(lua, id, body, args),
+        Value::Nil => execute_attribute_error(lua, "attribute-missing"),
+        _ => execute_attribute_error(lua, "unsupported-attribute-type"),
+    }
+}
+
+fn execute_attribute_function(
+    lua: &mlua::Lua,
+    callback: Function,
+    args: MultiValue,
+) -> mlua::Result<MultiValue> {
+    match callback.call::<MultiValue>(args) {
+        Ok(results) => Ok(execute_attribute_success(results)),
+        Err(error) => execute_attribute_error(lua, &error.to_string()),
+    }
+}
+
+fn execute_attribute_body(
+    lua: &mlua::Lua,
+    id: u64,
+    body: mlua::String,
+    args: MultiValue,
+) -> mlua::Result<MultiValue> {
+    if !frame_is_protected(lua, id) {
+        return execute_attribute_error(lua, "unsupported-unprotected-snippet");
+    }
+
+    let chunk = format!(
+        "return function(self, ...)\n{}\nend",
+        body.to_string_lossy()
     );
+    let snippet = match lua.load(&chunk).eval::<Function>() {
+        Ok(snippet) => snippet,
+        Err(error) => return execute_attribute_error(lua, &error.to_string()),
+    };
+
+    let self_ref = frame_ref(lua, id)?;
+    let mut call_args = vec![self_ref];
+    call_args.extend(args);
+    match snippet.call::<MultiValue>(MultiValue::from_vec(call_args)) {
+        Ok(results) => Ok(execute_attribute_success(results)),
+        Err(error) => execute_attribute_error(lua, &error.to_string()),
+    }
+}
+
+fn frame_is_protected(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state.widgets.get(id).map(|frame| frame.is_protected).unwrap_or(false)
+}
+
+fn execute_attribute_success(results: MultiValue) -> MultiValue {
+    let mut values = vec![Value::Boolean(true)];
+    values.extend(results);
+    MultiValue::from_vec(values)
+}
+
+fn execute_attribute_error(lua: &mlua::Lua, reason: &str) -> mlua::Result<MultiValue> {
+    Ok(MultiValue::from_vec(vec![
+        Value::Boolean(false),
+        Value::String(lua.create_string(reason)?),
+    ]))
 }
 
 fn add_frame_ref_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
