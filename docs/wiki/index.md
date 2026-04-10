@@ -21,8 +21,40 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 
 ## systems/
 
-*(to be populated)*
+| Page | Summary |
+|------|---------|
+| [[layout-system]] | AnchorPoint enum (9 positions), single vs multi-anchor resolution, coordinate system (top-left screen / bottom-left Lua), SetPoint API, cycle detection |
+| [[rendering-pipeline]] | QuadBatch (36-byte QuadVertex), four-tier GPU texture atlas, WGSL shaders, strata/level sorting, alpha propagation, hit testing |
+| [[widget-system]] | Frame struct (~140 fields), WidgetType enum (18 types), WidgetRegistry, default children, button text rendering, three-slice pattern |
+| [[lua-api]] | WowLuaEnv, FrameHandle userdata, 300+ frame methods, 200+ globals, C_* namespaces, timer system, animation system |
+| [[event-system]] | EventQueue, 36+ script handler types, dispatch flow, OnUpdate tick, startup event sequence, XML script setup |
+| [[xml-template-system]] | XML parsing (30+ element types), template registry, inheritance chain resolution, XML-to-widget Lua code generation, inline scripts |
+| [[addon-loading]] | TOC parsing, Blizzard load order (27 addons), per-file Lua/XML loading, SavedVariables, startup sequence |
+| [[texture-atlas]] | TextureManager (BLP/PNG/WebP), ~50K-entry compiled atlas database, nine-slice kit detection, UV remapping |
+| [[frame-data-flow]] | Parallel Lua/Rust systems, global tables (__frame_fields/__scripts), method lookup order, Mixin() application, event dispatch flow |
+| [[taint-system]] | Combat lockdown on protected frames, dual Lua environment (genv/secureenv), issecure/securecall from Elune, SecureHandler stubs |
 
 ## investigations/
 
-*(to be populated)*
+| Page | Summary |
+|------|---------|
+| [[action-bar-spell-icons]] | 4 bugs: SetDrawLayer no-op, draw order, sublevel ignored, textureSubLevel not parsed |
+| [[addon-load-order]] | Bag buttons partially initialized at load; workaround mirrors real WoW event recovery |
+| [[bag-button]] | nil texture from GetInventorySlotInfo, stub returning 0 slots, ItemContextOverlay, frame_level_offset |
+| [[talent-performance]] | Lazy `_G` lookup (431ms→263ms), rect-dirty stale cache causing infinite OnUpdate loop |
+| [[character-select-performance]] | Lazy atlas crop stalls (fixed), first-resize relayout deduplication (partial) |
+| [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
+| [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
+| [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
+| [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
+| [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
+| [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
+| [[mask-texture]] | UV computation, useAtlasSize default, SmallActionButtonMixin override |
+| [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
+| [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
+| [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; 3 fix strategies with tradeoffs |
+| [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
+| [[talent-sheen]] | 22s synchronized sweep; white rectangle bug when masking broken |
+| [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
+| [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
+| [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
