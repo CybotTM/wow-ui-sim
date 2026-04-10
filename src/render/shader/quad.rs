@@ -220,6 +220,33 @@ impl QuadBatch {
         ]);
     }
 
+    /// Push a single triangle with explicit vertex positions and UVs.
+    pub fn push_triangle(
+        &mut self,
+        positions: [[f32; 2]; 3],
+        uvs: [[f32; 2]; 3],
+        color: [f32; 4],
+        tex_index: i32,
+        blend_mode: BlendMode,
+    ) {
+        let base_index = self.vertices.len() as u32;
+        let flags = blend_mode as u32;
+        for i in 0..3 {
+            self.vertices.push(QuadVertex {
+                position: positions[i],
+                tex_coords: uvs[i],
+                color,
+                tex_index,
+                flags,
+                local_uv: uvs[i],
+                mask_tex_index: -1,
+                mask_tex_coords: [0.0, 0.0],
+            });
+        }
+        self.indices
+            .extend_from_slice(&[base_index, base_index + 1, base_index + 2]);
+    }
+
     /// Push a cooldown swipe quad (radial clock wipe overlay).
     ///
     /// `progress` is 0.0 (fully covered) to 1.0 (fully revealed/done).
@@ -301,6 +328,17 @@ impl QuadBatch {
             Rectangle::new(iced::Point::ORIGIN, iced::Size::new(1.0, 1.0)),
             color,
             -1, // No texture
+            BlendMode::Alpha,
+        );
+    }
+
+    /// Push a solid color triangle (no texture).
+    pub fn push_solid_triangle(&mut self, positions: [[f32; 2]; 3], color: [f32; 4]) {
+        self.push_triangle(
+            positions,
+            [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0]],
+            color,
+            -1,
             BlendMode::Alpha,
         );
     }
@@ -409,6 +447,24 @@ impl QuadBatch {
             path: path.to_string(),
             vertex_start,
             vertex_count: 4,
+        });
+    }
+
+    /// Push a textured triangle by path (for deferred texture loading).
+    pub fn push_textured_triangle_path(
+        &mut self,
+        positions: [[f32; 2]; 3],
+        uvs: [[f32; 2]; 3],
+        path: &str,
+        color: [f32; 4],
+        blend_mode: BlendMode,
+    ) {
+        let vertex_start = self.vertices.len() as u32;
+        self.push_triangle(positions, uvs, color, -2, blend_mode);
+        self.texture_requests.push(TextureRequest {
+            path: path.to_string(),
+            vertex_start,
+            vertex_count: 3,
         });
     }
 }

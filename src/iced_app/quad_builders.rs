@@ -320,6 +320,8 @@ pub fn emit_frame_quads(
     {
         clip_recent_quads(batch, vert_before, clip_bounds);
     }
+
+    emit_quest_blob_quads(batch, &frame);
 }
 
 fn emit_message_frame_quads(
@@ -509,9 +511,65 @@ pub struct FrameQuadEmit<'a> {
     pub message_frames:
         Option<&'a std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
     pub tooltip_data: Option<&'a std::collections::HashMap<u64, TooltipRenderData>>,
+    pub quest_blobs:
+        Option<&'a std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
     pub registry: &'a crate::widget::WidgetRegistry,
     pub elapsed_secs: f64,
     pub eff_alpha: f32,
+}
+
+fn emit_quest_blob_quads(batch: &mut QuadBatch, frame: &FrameQuadEmit<'_>) {
+    let Some(quest_blobs) = frame.quest_blobs else {
+        return;
+    };
+    let Some(blob_state) = quest_blobs.get(&frame.id) else {
+        return;
+    };
+    if blob_state.active_quests.is_empty() || blob_state.map_id == 0 {
+        return;
+    }
+
+    let alpha = blob_state.fill_alpha.unwrap_or(1.0) as f32 * frame.eff_alpha;
+    if alpha <= 0.0 {
+        return;
+    }
+
+    for &quest_id in &blob_state.active_quests {
+        for blob in crate::quest_poi_blobs::get_quest_blobs_for_map(quest_id, blob_state.map_id) {
+            emit_blob_polygon(
+                batch,
+                frame.bounds,
+                blob.vertices,
+                blob_state.fill_texture.as_deref(),
+                alpha,
+            );
+        }
+    }
+}
+
+fn emit_blob_polygon(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    vertices: &[(f32, f32)],
+    fill_texture: Option<&str>,
+    alpha: f32,
+) {
+    if vertices.len() < 3 {
+        return;
+    }
+
+    let color = [1.0, 1.0, 1.0, alpha];
+    for i in 1..vertices.len() - 1 {
+        let triangle = [vertices[0], vertices[i], vertices[i + 1]];
+        let positions =
+            triangle.map(|(u, v)| [bounds.x + u * bounds.width, bounds.y + v * bounds.height]);
+        let uvs = triangle.map(|(u, v)| [u, v]);
+        if let Some(path) = fill_texture {
+            batch.push_textured_triangle_path(positions, uvs, path, color, BlendMode::Alpha);
+        } else {
+            batch.push_solid_triangle(positions, color);
+        }
+    }
 }
 
 fn clip_recent_quads(batch: &mut QuadBatch, vert_before: usize, clip: Rectangle) {
@@ -872,6 +930,7 @@ mod tests {
             hovered_frame: None,
             message_frames: None,
             tooltip_data: None,
+            quest_blobs: None,
             registry: &registry,
             elapsed_secs: 10.0,
             eff_alpha: 1.0,

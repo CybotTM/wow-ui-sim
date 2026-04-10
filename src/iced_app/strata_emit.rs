@@ -93,6 +93,7 @@ pub(super) fn emit_single_strata(
                 hovered_frame: params.hovered_frame,
                 message_frames: params.message_frames,
                 tooltip_data: params.tooltip_data,
+                quest_blobs: params.quest_blobs,
                 registry: params.registry,
                 elapsed_secs: params.elapsed_secs,
                 eff_alpha,
@@ -110,6 +111,7 @@ pub(super) struct SingleStrataEmit<'a> {
     message_frames:
         Option<&'a std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>>,
     tooltip_data: Option<&'a std::collections::HashMap<u64, TooltipRenderData>>,
+    quest_blobs: Option<&'a std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
     elapsed_secs: f64,
 }
 
@@ -194,11 +196,40 @@ pub fn build_quad_batch_for_registry(
     root_name: Option<&str>,
     pressed_frame: Option<u64>,
     hovered_frame: Option<u64>,
+    text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    message_frames: Option<
+        &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
+    >,
+    tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
+    strata_buckets: &Vec<Vec<u64>>,
+) -> QuadBatch {
+    build_quad_batch_for_registry_with_quest_blobs(
+        registry,
+        screen_size,
+        root_name,
+        pressed_frame,
+        hovered_frame,
+        text_ctx,
+        message_frames,
+        tooltip_data,
+        None,
+        strata_buckets,
+    )
+}
+
+#[allow(clippy::too_many_arguments)]
+pub fn build_quad_batch_for_registry_with_quest_blobs(
+    registry: &crate::widget::WidgetRegistry,
+    screen_size: (f32, f32),
+    root_name: Option<&str>,
+    pressed_frame: Option<u64>,
+    hovered_frame: Option<u64>,
     mut text_ctx: Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     message_frames: Option<
         &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
     >,
     tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
+    quest_blobs: Option<&std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
     strata_buckets: &Vec<Vec<u64>>,
 ) -> QuadBatch {
     let (batch, _) = build_quad_batch_with_cache(
@@ -210,6 +241,7 @@ pub fn build_quad_batch_for_registry(
         &mut text_ctx,
         message_frames,
         tooltip_data,
+        quest_blobs,
         strata_buckets,
         0.0,
     );
@@ -258,6 +290,7 @@ pub fn build_quad_batch_with_cache(
         &std::collections::HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
     >,
     tooltip_data: Option<&std::collections::HashMap<u64, TooltipRenderData>>,
+    quest_blobs: Option<&std::collections::HashMap<u64, crate::lua_api::state::QuestBlobState>>,
     strata_buckets: &[Vec<u64>],
     elapsed_secs: f64,
 ) -> (QuadBatch, CollectedFrames) {
@@ -287,6 +320,7 @@ pub fn build_quad_batch_with_cache(
                 hovered_frame,
                 message_frames,
                 tooltip_data,
+                quest_blobs,
                 elapsed_secs,
             },
         );

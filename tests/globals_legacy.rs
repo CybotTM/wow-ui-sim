@@ -1,9 +1,34 @@
 //! Tests for globals_legacy.rs: print, ipairs, getmetatable overrides.
 
+use wow_ui_sim::iced_app::build_quad_batch_for_registry_with_quest_blobs;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 fn env() -> WowLuaEnv {
     WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+fn build_strata_buckets(env: &WowLuaEnv) -> Vec<Vec<u64>> {
+    let mut state = env.state().borrow_mut();
+    state.ensure_layout_rects();
+    let _ = state.get_strata_buckets();
+    state.strata_buckets.as_ref().unwrap().clone()
+}
+
+fn build_quads(env: &WowLuaEnv) -> wow_ui_sim::render::QuadBatch {
+    let buckets = build_strata_buckets(env);
+    let state = env.state().borrow();
+    build_quad_batch_for_registry_with_quest_blobs(
+        &state.widgets,
+        (1024.0, 768.0),
+        None,
+        None,
+        None,
+        None,
+        None,
+        None,
+        Some(&state.quest_blobs),
+        &buckets,
+    )
 }
 
 // ============================================================================
@@ -541,6 +566,41 @@ fn test_draw_blob_stores_quest_id() {
     let blob = state.quest_blobs.get(&poi_id).unwrap();
     assert_eq!(blob.map_id, 2248);
     assert_eq!(blob.active_quests, vec![80000]);
+}
+
+#[test]
+fn test_draw_blob_emits_fill_geometry_into_render_batch() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("QuestPOIFrame", "RenderPOI", UIParent)
+        poi:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -120)
+        poi:SetSize(200, 180)
+        poi:SetMapID(2248)
+        poi:SetFillTexture("Interface/QuestBlobFill")
+        poi:SetFillAlpha(0.75)
+        poi:DrawBlob(80000, true)
+    "#,
+    )
+    .unwrap();
+
+    let batch = build_quads(&env);
+    assert!(
+        batch
+            .texture_requests
+            .iter()
+            .any(|request| request.path == "Interface/QuestBlobFill"),
+        "DrawBlob should enqueue the configured fill texture for rendering"
+    );
+    assert!(
+        batch
+            .texture_requests
+            .iter()
+            .filter(|request| request.path == "Interface/QuestBlobFill")
+            .all(|request| request.vertex_count > 0),
+        "DrawBlob should emit blob-specific geometry for the configured fill texture"
+    );
 }
 
 #[test]

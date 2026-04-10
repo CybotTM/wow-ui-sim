@@ -7,8 +7,6 @@ use crate::render::GlyphAtlas;
 use crate::render::headless::render_to_image;
 
 use super::app::App;
-use super::strata_emit::build_quad_batch_for_registry;
-
 const CROP_FORMAT_EXAMPLE: &str = "700x150+400+650";
 
 impl App {
@@ -62,7 +60,7 @@ impl App {
             };
             let state = env.state().borrow();
             let tooltip_data = super::tooltip::collect_tooltip_data(&state);
-            build_quad_batch_for_registry(
+            super::build_quad_batch_for_registry_with_quest_blobs(
                 &state.widgets,
                 (width as f32, height as f32),
                 filter,
@@ -71,6 +69,7 @@ impl App {
                 Some((&mut fs, &mut glyph_atlas)),
                 Some(&state.message_frames),
                 Some(&tooltip_data),
+                Some(&state.quest_blobs),
                 &buckets,
             )
         };

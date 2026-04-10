@@ -165,6 +165,7 @@ fn rebuild_strata_batches(
             text_ctx,
             params.message_frames,
             params.tooltip_data,
+            params.quest_blobs,
             params.elapsed_secs,
         );
         log_strata_timing(i, bucket.len(), &stats, strata_start.elapsed());
@@ -181,6 +182,7 @@ struct RebuildStrataBatches<'a> {
     pressed_frame: Option<u64>,
     message_frames: &'a HashMap<u64, crate::lua_api::MessageFrameData>,
     tooltip_data: &'a HashMap<u64, super::tooltip::TooltipRenderData>,
+    quest_blobs: &'a HashMap<u64, crate::lua_api::state::QuestBlobState>,
     elapsed_secs: f64,
 }
 
@@ -224,6 +226,7 @@ fn emit_one_frame(
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
     tooltip_data: &HashMap<u64, TooltipRenderData>,
+    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
     statusbar_fills: &HashMap<u64, super::statusbar::StatusBarFill>,
     elapsed_secs: f64,
 ) -> bool {
@@ -268,6 +271,7 @@ fn emit_one_frame(
             hovered_frame: None,
             message_frames: Some(message_frames),
             tooltip_data: Some(tooltip_data),
+            quest_blobs: Some(quest_blobs),
             registry,
             elapsed_secs,
             eff_alpha,
@@ -298,6 +302,7 @@ fn emit_strata_cached(
     text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
     message_frames: &HashMap<u64, crate::lua_api::message_frame::MessageFrameData>,
     tooltip_data: &HashMap<u64, TooltipRenderData>,
+    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
     elapsed_secs: f64,
 ) -> EmitStats {
     let render_list = build_render_list(bucket, registry);
@@ -324,6 +329,7 @@ fn emit_strata_cached(
             text_ctx,
             message_frames,
             tooltip_data,
+            quest_blobs,
             &statusbar_fills,
             elapsed_secs,
         );
@@ -553,6 +559,7 @@ impl App {
                 pressed_frame: self.pressed_frame,
                 message_frames: &state.message_frames,
                 tooltip_data: &tooltip_data,
+                quest_blobs: &state.quest_blobs,
                 elapsed_secs,
             },
         );
