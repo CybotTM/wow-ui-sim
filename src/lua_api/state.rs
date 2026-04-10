@@ -54,6 +54,7 @@ macro_rules! build_empty_sim_state {
             mouse_position: $runtime.mouse_position,
             hovered_frame: $runtime.hovered_frame,
             active_drag_frame: $runtime.active_drag_frame,
+            active_slider_thumb_drag_frame: $runtime.active_slider_thumb_drag_frame,
             party_members: $collections.party_members,
             current_target: $runtime.current_target,
             current_focus: $runtime.current_focus,
@@ -207,6 +208,8 @@ pub struct SimState {
     pub hovered_frame: Option<u64>,
     /// Frame currently owning the active mouse drag, if any.
     pub active_drag_frame: Option<u64>,
+    /// Slider currently holding the left mouse for thumb dragging, if any.
+    pub active_slider_thumb_drag_frame: Option<u64>,
     /// Simulated party members (empty = not in group).
     pub party_members: Vec<PartyMember>,
     /// Current target (None = no target).
@@ -360,6 +363,7 @@ struct EmptyRuntimeState {
     mouse_position: Option<(f32, f32)>,
     hovered_frame: Option<u64>,
     active_drag_frame: Option<u64>,
+    active_slider_thumb_drag_frame: Option<u64>,
     current_target: Option<TargetInfo>,
     current_focus: Option<TargetInfo>,
     sound_manager: Option<SoundManager>,
@@ -397,6 +401,7 @@ impl EmptyRuntimeState {
             mouse_position: None,
             hovered_frame: None,
             active_drag_frame: None,
+            active_slider_thumb_drag_frame: None,
             current_target: None,
             current_focus: None,
             sound_manager: None,
@@ -483,6 +488,10 @@ impl SimState {
 
     pub fn set_active_drag_frame(&mut self, frame_id: Option<u64>) {
         self.active_drag_frame = frame_id;
+    }
+
+    pub fn set_active_slider_thumb_drag_frame(&mut self, frame_id: Option<u64>) {
+        self.active_slider_thumb_drag_frame = frame_id;
     }
 
     fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {

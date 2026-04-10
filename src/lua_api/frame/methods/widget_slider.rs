@@ -19,7 +19,11 @@ pub fn add_slider_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .map(|frame| frame.slider_obey_step_on_drag)
             .unwrap_or(false))
     });
-    methods.add_method("IsDraggingThumb", |_, _, ()| Ok(false));
+    methods.add_method("IsDraggingThumb", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state.active_slider_thumb_drag_frame == Some(this.0))
+    });
 }
 
 pub fn add_checkbutton_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

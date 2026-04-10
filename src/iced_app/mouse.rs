@@ -3,6 +3,7 @@
 use iced::Point;
 
 use super::app::App;
+use crate::widget::WidgetType;
 
 /// Minimum distance (in pixels) the mouse must move while held to start a drag.
 const DRAG_THRESHOLD: f32 = 5.0;
@@ -105,11 +106,13 @@ impl App {
         self.mouse_down_pos = Some(pos);
         self.dragging = false;
         self.pressed_frame = Some(frame_id);
-        self.env
-            .borrow()
-            .state()
-            .borrow_mut()
-            .set_active_drag_frame(None);
+        {
+            let env = self.env.borrow();
+            let mut state = env.state().borrow_mut();
+            let slider_drag_target = find_slider_drag_target(&state, frame_id);
+            state.set_active_drag_frame(None);
+            state.set_active_slider_thumb_drag_frame(slider_drag_target);
+        }
 
         {
             let env = self.env.borrow();
@@ -138,11 +141,12 @@ impl App {
         let drag_source = self.env.borrow().state().borrow().active_drag_frame;
         self.mouse_down_pos = None;
         self.dragging = false;
-        self.env
-            .borrow()
-            .state()
-            .borrow_mut()
-            .set_active_drag_frame(None);
+        {
+            let env = self.env.borrow();
+            let mut state = env.state().borrow_mut();
+            state.set_active_drag_frame(None);
+            state.set_active_slider_thumb_drag_frame(None);
+        }
         (was_dragging, drag_source)
     }
 
@@ -388,6 +392,18 @@ fn find_drag_script_target(
     None
 }
 
+fn find_slider_drag_target(state: &crate::lua_api::state::SimState, frame_id: u64) -> Option<u64> {
+    let mut current = Some(frame_id);
+    while let Some(id) = current {
+        let frame = state.widgets.get(id)?;
+        if frame.widget_type == WidgetType::Slider {
+            return Some(id);
+        }
+        current = frame.parent_id;
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -622,6 +638,62 @@ mod tests {
         assert_eq!(
             drag_stop_calls, 0.0,
             "mouse up should not fire OnDragStop after AbortDrag already cleared the drag"
+        );
+    }
+
+    #[test]
+    fn slider_reports_thumb_drag_state_while_mouse_is_held() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                SliderThumbDragFrame = CreateFrame("Slider", "SliderThumbDragFrame", UIParent)
+                SliderThumbDragFrame:SetSize(120, 20)
+                SliderThumbDragFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                SliderThumbDragFrame:EnableMouse(true)
+                "#,
+            )
+            .expect("slider setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        let drag_pos = Point::new(150.0, 110.0);
+
+        let before_mouse_down: bool = app
+            .env
+            .borrow()
+            .eval("return SliderThumbDragFrame:IsDraggingThumb()")
+            .expect("initial thumb drag query should succeed");
+        assert!(
+            !before_mouse_down,
+            "fresh sliders should not report thumb dragging"
+        );
+
+        app.handle_mouse_move(drag_pos);
+        app.handle_mouse_down(drag_pos);
+
+        let during_mouse_down: bool = app
+            .env
+            .borrow()
+            .eval("return SliderThumbDragFrame:IsDraggingThumb()")
+            .expect("active thumb drag query should succeed");
+        assert!(
+            during_mouse_down,
+            "slider should report thumb dragging while left mouse is held on it"
+        );
+
+        app.handle_mouse_up(drag_pos);
+
+        let after_mouse_up: bool = app
+            .env
+            .borrow()
+            .eval("return SliderThumbDragFrame:IsDraggingThumb()")
+            .expect("post mouse up thumb drag query should succeed");
+        assert!(
+            !after_mouse_up,
+            "slider thumb drag state should clear on mouse up"
         );
     }
 
