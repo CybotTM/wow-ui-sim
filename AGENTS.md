@@ -6,6 +6,10 @@
 - **NEVER modify files in `Interface/AddOns/WowlessData/`** — regenerate with `python3 tools/gen_wowless_data.py` (reads from `~/Repos/wowless/data/`). Update the source repo first: `cd ~/Repos/wowless && git pull`.
 - **NEVER modify files in `Interface/BlizzardUI/`** — this is a symlink to `vendor/wow-ui-source/Interface/AddOns` (sparse checkout of [Gethe/wow-ui-source](https://github.com/Gethe/wow-ui-source)). To update, run `./scripts/setup-blizzard-ui.sh <TAG>`.
 
+## Wiki
+
+LLM-maintained knowledge base at `docs/wiki/`. See `docs/wiki/SCHEMA.md` for conventions and workflows. Read `docs/wiki/index.md` first when answering questions about the project.
+
 ## Architecture Docs
 
 - `docs/layout-system.md` - Anchor/layout system: AnchorPoint, single vs multi-anchor resolution, cycle detection, coordinate systems
