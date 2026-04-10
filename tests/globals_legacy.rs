@@ -669,6 +669,34 @@ fn test_draw_none_clears_blobs() {
 }
 
 #[test]
+fn test_draw_none_clears_rendered_blob_geometry() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("QuestPOIFrame", "RenderPOIClear", UIParent)
+        poi:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -120)
+        poi:SetSize(200, 180)
+        poi:SetMapID(2248)
+        poi:SetFillTexture("Interface/QuestBlobFill")
+        poi:SetFillAlpha(0.75)
+        poi:DrawBlob(80000, true)
+        poi:DrawNone()
+    "#,
+    )
+    .unwrap();
+
+    let batch = build_quads(&env);
+    assert!(
+        !batch
+            .texture_requests
+            .iter()
+            .any(|request| request.path == "Interface/QuestBlobFill"),
+        "DrawNone should remove blob-specific fill geometry from the render batch"
+    );
+}
+
+#[test]
 fn test_quest_blob_render_inputs_persist_on_first_setter_use() {
     let env = env();
 
