@@ -163,6 +163,14 @@ fn register_c_guild(
 fn register_c_guild_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
+        "__motd",
+        "Raid invites tonight at 20:00 server. Repairs are on for progression.",
+    )?;
+    t.set(
+        "__infoText",
+        "Mythic-focused guild recruiting healers and a warlock for weekend raids.",
+    )?;
+    t.set(
         "GetGuildTabardInfo",
         lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
     )?;
@@ -173,6 +181,21 @@ fn register_c_guild_info(lua: &Lua) -> Result<()> {
     t.set(
         "AreGuildEventsEnabled",
         lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    let guild_info = t.clone();
+    t.set(
+        "GetMOTD",
+        lua.create_function(move |_, ()| guild_info.get::<String>("__motd"))?,
+    )?;
+    let guild_info = t.clone();
+    t.set(
+        "GetInfoText",
+        lua.create_function(move |_, ()| guild_info.get::<String>("__infoText"))?,
+    )?;
+    let guild_info = t.clone();
+    t.set(
+        "SetInfoText",
+        lua.create_function(move |_, info_text: String| guild_info.set("__infoText", info_text))?,
     )?;
     t.set("GuildRoster", lua.create_function(|_, ()| Ok(()))?)?;
     lua.globals().set("C_GuildInfo", t)?;
