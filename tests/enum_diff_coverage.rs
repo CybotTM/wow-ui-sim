@@ -124,6 +124,33 @@ fn cooldown_layout_enums_are_available_with_expected_values() {
 }
 
 #[test]
+fn edit_mode_chat_frame_display_only_setting_is_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local enumTable = Enum.EditModeChatFrameDisplayOnlySetting
+            if type(enumTable) ~= "table" then
+                return "missing_enum"
+            end
+
+            if enumTable.Width ~= 4 then
+                return "wrong_width:" .. tostring(enumTable.Width)
+            end
+
+            if enumTable.Height ~= 5 then
+                return "wrong_height:" .. tostring(enumTable.Height)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(

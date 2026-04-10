@@ -52,6 +52,11 @@ pub const EDIT_MODE_CHAT_FRAME_SETTING: SeqEnumDef = (
     ],
 );
 
+pub const EDIT_MODE_CHAT_FRAME_DISPLAY_ONLY_SETTING: EnumDef = (
+    "EditModeChatFrameDisplayOnlySetting",
+    &[("Width", 4), ("Height", 5)],
+);
+
 pub const EDIT_MODE_ACCOUNT_SETTING: SeqEnumDef = (
     "EditModeAccountSetting",
     &[
