@@ -390,12 +390,17 @@ impl WidgetRegistry {
 
     /// Recompute `effective_scale` for a frame and propagate to all descendants.
     ///
-    /// effective_scale = parent_effective_scale × own_scale.
+    /// Frames that ignore parent scale use only their own scale. All other
+    /// frames inherit the parent's effective scale.
     pub fn propagate_effective_scale(&mut self, id: u64, parent_effective_scale: f32) {
         let Some(f) = self.widgets.get_mut(&id) else {
             return;
         };
-        let eff = parent_effective_scale * f.scale;
+        let eff = if f.ignore_parent_scale {
+            f.scale
+        } else {
+            parent_effective_scale * f.scale
+        };
         let became_dirty = (eff - f.effective_scale).abs() > f32::EPSILON;
         f.effective_scale = eff;
         let children: Vec<u64> = f.children.clone();

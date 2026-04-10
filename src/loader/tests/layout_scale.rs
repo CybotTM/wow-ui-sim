@@ -190,3 +190,68 @@ fn test_scale_affects_get_rect() {
     assert!((t.env.eval::<f64>("return W").unwrap() - 100.0).abs() < 0.01);
     assert!((t.env.eval::<f64>("return H").unwrap() - 50.0).abs() < 0.01);
 }
+
+#[test]
+fn test_ignore_parent_scale_flag_round_trip() {
+    let (t, _) = load_test_lua(
+        "layout-ignore-parent-scale-flag",
+        r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        BEFORE = f:GetIgnoreParentScale()
+        f:SetIgnoreParentScale(true)
+        AFTER_ENABLE = f:GetIgnoreParentScale()
+        f:SetIgnoreParentScale(false)
+        AFTER_DISABLE = f:GetIgnoreParentScale()
+    "#,
+    );
+    assert!(
+        !t.env.eval::<bool>("return BEFORE").unwrap(),
+        "frames should default to GetIgnoreParentScale() == false",
+    );
+    t.assert_lua_true(
+        "return AFTER_ENABLE",
+        "SetIgnoreParentScale(true) should persist on the frame",
+    );
+    assert!(
+        !t.env.eval::<bool>("return AFTER_DISABLE").unwrap(),
+        "SetIgnoreParentScale(false) should clear the frame state",
+    );
+}
+
+#[test]
+fn test_ignore_parent_scale_changes_effective_scale_propagation() {
+    let (t, _) = load_test_lua(
+        "layout-ignore-parent-scale-propagation",
+        r#"
+        local parent = CreateFrame("Frame", nil, UIParent)
+        parent:SetAllPoints(UIParent)
+        parent:SetScale(2.0)
+
+        local child = CreateFrame("Frame", nil, parent)
+        child:SetAllPoints(parent)
+        child:SetScale(3.0)
+
+        INHERITED = child:GetEffectiveScale()
+        child:SetIgnoreParentScale(true)
+        IGNORED = child:GetEffectiveScale()
+
+        parent:SetScale(4.0)
+        IGNORED_AFTER_PARENT_CHANGE = child:GetEffectiveScale()
+
+        child:SetIgnoreParentScale(false)
+        REINHERITED = child:GetEffectiveScale()
+    "#,
+    );
+
+    assert!((t.env.eval::<f64>("return INHERITED").unwrap() - 6.0).abs() < 0.001);
+    assert!((t.env.eval::<f64>("return IGNORED").unwrap() - 3.0).abs() < 0.001);
+    assert!(
+        (t.env
+            .eval::<f64>("return IGNORED_AFTER_PARENT_CHANGE")
+            .unwrap()
+            - 3.0)
+            .abs()
+            < 0.001
+    );
+    assert!((t.env.eval::<f64>("return REINHERITED").unwrap() - 12.0).abs() < 0.001);
+}

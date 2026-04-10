@@ -195,6 +195,8 @@ pub struct Frame {
     pub anim_offset_y: f32,
     /// Scale factor (affects visible size; default 1.0).
     pub scale: f32,
+    /// Whether this frame ignores its parent's effective scale.
+    pub ignore_parent_scale: bool,
     /// Effective scale (product of all ancestor scales × own scale).
     /// Updated eagerly when scale changes or frame is reparented.
     pub effective_scale: f32,
@@ -483,6 +485,7 @@ macro_rules! frame_defaults {
             anim_offset_x: 0.0,
             anim_offset_y: 0.0,
             scale: 1.0,
+            ignore_parent_scale: false,
             effective_scale: 1.0,
             mouse_enabled: false,
             mouse_wheel_enabled: false,
