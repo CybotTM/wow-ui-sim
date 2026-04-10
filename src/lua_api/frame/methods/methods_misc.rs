@@ -1,7 +1,9 @@
 //! Miscellaneous frame-type-specific method stubs (Minimap, ScrollingMessage, Alerts, etc.).
 
 use super::super::handle::FrameRef;
+use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
+use crate::widget::WidgetRegistry;
 use mlua::{MultiValue, Value};
 
 /// Add all miscellaneous frame-type-specific methods.
@@ -511,10 +513,88 @@ fn add_frame_level_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         get_sim_state(lua).borrow_mut().raise_frame(this.0);
         Ok(())
     });
-    methods.add_method("GetHighestFrameLevel", |_, _this, ()| Ok(0i32));
-    methods.add_method("GetRaisedFrameLevel", |_, _this, ()| Ok(0i32));
-    methods.add_method("IsUsingParentLevel", |_, _this, ()| Ok(false));
-    methods.add_method("SetUsingParentLevel", |_, _this, _: bool| Ok(()));
+    methods.add_method(
+        "GetHighestFrameLevel",
+        |lua, this, iterate_all_children: Option<bool>| {
+            let state_rc = get_sim_state(lua);
+            let state = state_rc.borrow();
+            Ok(get_highest_frame_level(
+                &state.widgets,
+                this.0,
+                iterate_all_children.unwrap_or(false),
+            ))
+        },
+    );
+    methods.add_method("GetRaisedFrameLevel", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(get_raised_frame_level(&state.widgets, this.0))
+    });
+    methods.add_method("IsUsingParentLevel", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| !frame.has_fixed_frame_level)
+            .unwrap_or(false))
+    });
+    methods.add_method(
+        "SetUsingParentLevel",
+        |lua, this, using_parent_level: bool| {
+            let id = this.0;
+            if lockdown_blocked(lua, id, "SetUsingParentLevel") {
+                return Ok(());
+            }
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            let inherited_level = inherited_parent_level(&state.widgets, id);
+            if let Some(frame) = state.widgets.get_mut_visual(id) {
+                frame.has_fixed_frame_level = !using_parent_level;
+                if let Some(level) = inherited_level.filter(|_| using_parent_level) {
+                    frame.frame_level = level;
+                }
+            }
+            super::methods_hierarchy::propagate_strata_level_pub(&mut state.widgets, id);
+            Ok(())
+        },
+    );
+}
+
+fn get_highest_frame_level(
+    widgets: &WidgetRegistry,
+    root_id: u64,
+    iterate_all_children: bool,
+) -> i32 {
+    let Some(root) = widgets.get(root_id) else {
+        return 0;
+    };
+    if !iterate_all_children {
+        return root.frame_level;
+    }
+    let mut highest = root.frame_level;
+    let mut queue = root.children.clone();
+    while let Some(child_id) = queue.pop() {
+        let Some(child) = widgets.get(child_id) else {
+            continue;
+        };
+        highest = highest.max(child.frame_level);
+        queue.extend(child.children.iter().copied());
+    }
+    highest
+}
+
+fn get_raised_frame_level(widgets: &WidgetRegistry, id: u64) -> i32 {
+    widgets
+        .get(id)
+        .map(|frame| frame.frame_level + frame.raise_order)
+        .unwrap_or(0)
+}
+
+fn inherited_parent_level(widgets: &WidgetRegistry, id: u64) -> Option<i32> {
+    let frame = widgets.get(id)?;
+    let parent_level = widgets.get(frame.parent_id?)?.frame_level;
+    Some(parent_level + frame.frame_level_offset.unwrap_or(1))
 }
 
 /// Secret/Protected stubs.

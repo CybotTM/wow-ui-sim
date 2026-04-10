@@ -887,6 +887,57 @@ fn test_font_string_set_alpha_gradient_accepts_legacy_arguments() {
     assert!(ok, "FontString alpha gradient compatibility should succeed");
 }
 
+#[test]
+fn test_frame_level_methods_follow_parent_level_and_raise_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        ParentLevelFrame = CreateFrame("Frame", "ParentLevelFrame", UIParent)
+        ChildLevelFrame = CreateFrame("Frame", "ChildLevelFrame", ParentLevelFrame)
+        GrandchildLevelFrame = CreateFrame("Frame", "GrandchildLevelFrame", ChildLevelFrame)
+        SiblingLevelFrame = CreateFrame("Frame", "SiblingLevelFrame", ParentLevelFrame)
+
+        ParentLevelFrame:SetFrameLevel(10)
+
+        assert(ChildLevelFrame:IsUsingParentLevel(), "child should inherit parent level by default")
+        assert(ChildLevelFrame:GetFrameLevel() == 11, "child should inherit parent level plus default offset")
+        assert(GrandchildLevelFrame:GetFrameLevel() == 12, "grandchild should inherit recursively")
+        assert(ParentLevelFrame:GetHighestFrameLevel() == 10, "default highest level should use self")
+        assert(ParentLevelFrame:GetHighestFrameLevel(true) == 12, "highest level should include descendants when requested")
+
+        ChildLevelFrame:SetUsingParentLevel(false)
+        ChildLevelFrame:SetFrameLevel(30)
+
+        assert(not ChildLevelFrame:IsUsingParentLevel(), "child should stop inheriting after SetUsingParentLevel(false)")
+        assert(ChildLevelFrame:GetFrameLevel() == 30, "child should keep explicit fixed frame level")
+        assert(ChildLevelFrame:GetHighestFrameLevel(true) == 31, "fixed child highest level should include descendant")
+        assert(GrandchildLevelFrame:GetFrameLevel() == 31, "grandchild should inherit from fixed child level")
+
+        ParentLevelFrame:SetFrameLevel(20)
+
+        assert(ChildLevelFrame:GetFrameLevel() == 30, "fixed child level should survive parent level changes")
+        assert(SiblingLevelFrame:GetFrameLevel() == 21, "sibling should continue inheriting updated parent level")
+        assert(ParentLevelFrame:GetHighestFrameLevel(true) == 31, "highest level should reflect deepest descendant")
+
+        ChildLevelFrame:Raise()
+        assert(ChildLevelFrame:GetRaisedFrameLevel() > ChildLevelFrame:GetFrameLevel(), "raised frame level should include raise order")
+
+        ChildLevelFrame:SetUsingParentLevel(true)
+
+        assert(ChildLevelFrame:IsUsingParentLevel(), "child should resume inheriting after SetUsingParentLevel(true)")
+        assert(ChildLevelFrame:GetFrameLevel() == 21, "child should snap back to parent-derived level")
+        assert(ChildLevelFrame:GetHighestFrameLevel(true) == 22, "highest level should update after re-enabling inheritance")
+        assert(GrandchildLevelFrame:GetFrameLevel() == 22, "grandchild should re-inherit from updated child level")
+
+        FRAME_LEVEL_METHODS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return FRAME_LEVEL_METHODS_OK == true").unwrap();
+    assert!(ok, "frame level method round-trip should succeed");
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
