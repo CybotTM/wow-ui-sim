@@ -278,9 +278,18 @@ fn add_message_frame_scroll_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
 fn add_scroll_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScrollOffset", |lua, this, offset: i32| {
         let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(data) = state.message_frames.get_mut(&this.0) {
+        let changed = {
+            let mut state = state_rc.borrow_mut();
+            let data = state
+                .message_frames
+                .entry(this.0)
+                .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+            let changed = data.scroll_offset != offset;
             data.scroll_offset = offset;
+            changed
+        };
+        if changed {
+            call_message_frame_scroll_changed_callback(lua, this.0, offset)?;
         }
         Ok(())
     });
@@ -461,15 +470,14 @@ fn add_get_message_info_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 
 fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
-    methods.add_method(
-        "SetOnScrollChangedCallback",
-        |_, _this, _func: Value| Ok(()),
-    );
-    methods.add_method("SetOnLineRightClickedCallback", |_, _this, _func: Value| {
-        Ok(())
+    methods.add_method("SetOnScrollChangedCallback", |lua, this, func: Value| {
+        set_message_frame_callback(lua, this.0, "onScrollChangedCallback", func)
     });
-    methods.add_method("AddOnDisplayRefreshedCallback", |_, _this, _func: Value| {
-        Ok(())
+    methods.add_method("SetOnLineRightClickedCallback", |lua, this, func: Value| {
+        set_message_frame_callback(lua, this.0, "onLineRightClickedCallback", func)
+    });
+    methods.add_method("AddOnDisplayRefreshedCallback", |lua, this, func: Value| {
+        add_message_frame_display_refreshed_callback(lua, this.0, func)
     });
     methods.add_method("RemoveMessagesByPredicate", |_, _this, _func: Value| Ok(()));
     methods.add_method("TransformMessages", |_, _this, _args: mlua::MultiValue| {
@@ -478,9 +486,102 @@ fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("AdjustMessageColors", |_, _this, _func: Value| Ok(()));
     methods.add_method("GetFontStringByID", |_, _this, _id: i64| Ok(Value::Nil));
     methods.add_method("ResetMessageFadeByID", |_, _this, _id: i64| Ok(()));
-    methods.add_method("ResetAllFadeTimes", |_, _this, ()| Ok(()));
-    methods.add_method("MarkDisplayDirty", |_, _this, ()| Ok(()));
+    methods.add_method("ResetAllFadeTimes", |lua, this, ()| {
+        call_message_frame_display_refreshed_callbacks(lua, this.0)
+    });
+    methods.add_method("MarkDisplayDirty", |lua, this, ()| {
+        call_message_frame_display_refreshed_callbacks(lua, this.0)
+    });
     add_set_on_text_copied_callback(methods);
+}
+
+fn set_message_frame_callback(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    field_name: &str,
+    func: Value,
+) -> mlua::Result<()> {
+    let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    match func {
+        Value::Function(callback) => frame_fields.set(field_name, callback)?,
+        _ => frame_fields.set(field_name, Value::Nil)?,
+    }
+    Ok(())
+}
+
+fn add_message_frame_display_refreshed_callback(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    func: Value,
+) -> mlua::Result<()> {
+    let Value::Function(callback) = func else {
+        return Ok(());
+    };
+    let callbacks = get_or_create_message_frame_callback_list(lua, frame_id)?;
+    callbacks.raw_set(callbacks.raw_len() + 1, callback)?;
+    Ok(())
+}
+
+fn get_or_create_message_frame_callback_list(
+    lua: &mlua::Lua,
+    frame_id: u64,
+) -> mlua::Result<mlua::Table> {
+    let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    if let Ok(callbacks) = frame_fields.get::<mlua::Table>("onDisplayRefreshedCallbacks") {
+        return Ok(callbacks);
+    }
+    let callbacks = lua.create_table()?;
+    frame_fields.set("onDisplayRefreshedCallbacks", callbacks.clone())?;
+    Ok(callbacks)
+}
+
+fn call_message_frame_scroll_changed_callback(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    offset: i32,
+) -> mlua::Result<()> {
+    call_message_frame_callback(
+        lua,
+        frame_id,
+        "onScrollChangedCallback",
+        vec![Value::Integer(offset as i64)],
+    )
+}
+
+fn call_message_frame_display_refreshed_callbacks(
+    lua: &mlua::Lua,
+    frame_id: u64,
+) -> mlua::Result<()> {
+    let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    let Ok(callbacks) = frame_fields.get::<mlua::Table>("onDisplayRefreshedCallbacks") else {
+        return Ok(());
+    };
+    let frame = crate::lua_api::frame::frame_ref(lua, frame_id)?;
+    for index in 1..=callbacks.raw_len() {
+        if let Ok(callback) = callbacks.raw_get::<mlua::Function>(index) {
+            callback.call::<()>((frame.clone(),))?;
+        }
+    }
+    Ok(())
+}
+
+fn call_message_frame_callback(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    field_name: &str,
+    mut args: Vec<Value>,
+) -> mlua::Result<()> {
+    let frame_fields = crate::lua_api::script_helpers::get_or_create_frame_fields(lua, frame_id);
+    let Ok(callback) = frame_fields.get::<mlua::Function>(field_name) else {
+        return Ok(());
+    };
+    let frame = crate::lua_api::frame::frame_ref(lua, frame_id)?;
+    let mut call_args = mlua::MultiValue::new();
+    call_args.push_back(frame);
+    for arg in args.drain(..) {
+        call_args.push_back(arg);
+    }
+    callback.call::<()>(call_args)
 }
 
 fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

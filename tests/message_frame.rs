@@ -487,3 +487,52 @@ fn test_scroll_position_queries_follow_history_and_truncation() {
     assert!(result.4, "ScrollToTop should move the frame to the top");
     assert!(!result.5, "top position should no longer report bottom");
 }
+
+#[test]
+fn test_message_frame_callbacks_fire_for_scroll_and_display_refresh() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (i32, i32, i32, String) = env
+        .eval(
+            r#"
+            local f = CreateFrame("ScrollingMessageFrame", "TestMFCallbacks", UIParent)
+            f:AddMessage("One")
+            f:AddMessage("Two")
+            f:AddMessage("Three")
+
+            local scrollCalls = 0
+            local lastOffset = -1
+            local refreshCalls = 0
+            local lastRefreshName = ""
+
+            f:SetOnScrollChangedCallback(function(self, offset)
+                scrollCalls = scrollCalls + 1
+                lastOffset = offset
+            end)
+
+            f:AddOnDisplayRefreshedCallback(function(self)
+                refreshCalls = refreshCalls + 1
+                lastRefreshName = self:GetName()
+            end)
+
+            f:SetScrollOffset(1)
+            f:SetScrollOffset(1)
+            f:MarkDisplayDirty()
+            f:ResetAllFadeTimes()
+
+            return scrollCalls, lastOffset, refreshCalls, lastRefreshName
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result.0, 1,
+        "scroll callback should only fire when the offset changes"
+    );
+    assert_eq!(result.1, 1, "scroll callback should receive the new offset");
+    assert_eq!(
+        result.2, 2,
+        "display refresh callbacks should run for explicit dirty/reset calls"
+    );
+    assert_eq!(result.3, "TestMFCallbacks");
+}
