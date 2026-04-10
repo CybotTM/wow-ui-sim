@@ -178,6 +178,10 @@ The simulator uses **Elune** — Blizzard's custom Lua 5.1 fork with taint track
 - **Protected frame restrictions**: `SetAttribute` does NOT check `issecure()`. In real WoW, protected frames block attribute changes from insecure code. We don't enforce this — known gap.
 - **`SetForbidden`/`IsForbidden`**: Implemented as flags but not enforced on any method.
 
+## Intentional Gaps
+
+- **No 3D rendering**: Model, ModelScene, PlayerModel, DressUpModel frames have stub-only implementations for camera, lighting, transform, animation, and mesh methods (`widget_model.rs`). The simulator renders 2D UI only — 3D model display is out of scope. These ~38 stubs are permanent and should not be converted to real implementations.
+
 ## Performance
 
 Uses **Lua 5.1** via mlua (WoW's Lua version).
