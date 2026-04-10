@@ -290,6 +290,51 @@ fn test_alert_frame_sub_systems() {
 }
 
 #[test]
+fn test_alert_frame_queued_subsystem_tracks_queue_and_priority() {
+    let env = env();
+    let (count, first_priority, second_priority, add1, add2, add3, after_remove, after_clear): (
+        i32,
+        i32,
+        i32,
+        bool,
+        bool,
+        bool,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+        local first = AlertFrame:AddQueuedAlertFrameSubSystem("TestAlertTemplate", function() end, 2, 2)
+        local second = AlertFrame:AddQueuedAlertFrameSubSystem("TestAlertTemplate2", function() end, 2, 3)
+
+        first:SetCanShowMoreConditionFunc(function()
+            return false
+        end)
+
+        local add1 = first:AddAlert("alpha")
+        local add2 = first:AddAlert("beta")
+        local add3 = first:AddAlert("gamma")
+        first:RemoveAlert("alpha")
+        local afterRemove = first.queuedAlerts and #first.queuedAlerts or 0
+        first:ClearAllAlerts()
+        local afterClear = first.queuedAlerts and #first.queuedAlerts or 0
+
+        return #AlertFrame.alertFrameSubSystems, first.anchorPriority, second.anchorPriority, add1, add2, add3, afterRemove, afterClear
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(count, 2);
+    assert_eq!(first_priority, 1010);
+    assert_eq!(second_priority, 1020);
+    assert!(add1);
+    assert!(add2);
+    assert!(!add3);
+    assert_eq!(after_remove, 1);
+    assert_eq!(after_clear, 0);
+}
+
+#[test]
 fn test_container_frame_container_has_container_frames() {
     let env = env();
     let is_table: bool = env
