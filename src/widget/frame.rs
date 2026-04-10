@@ -206,6 +206,12 @@ pub struct Frame {
     pub mouse_enabled: bool,
     /// Whether mouse wheel events are enabled for this frame.
     pub mouse_wheel_enabled: bool,
+    /// Whether mouse clicks propagate to parent frames.
+    pub propagate_mouse_clicks: bool,
+    /// Whether mouse motion propagates to parent frames.
+    pub propagate_mouse_motion: bool,
+    /// Whether hyperlinks propagate to parent frames.
+    pub propagate_hyperlinks_to_parent: bool,
     /// Hit rect insets (left, right, top, bottom) — shrinks the clickable area.
     pub hit_rect_insets: (f32, f32, f32, f32),
     /// Whether keyboard input is enabled for this frame.
@@ -494,6 +500,9 @@ macro_rules! frame_defaults {
             effective_scale: 1.0,
             mouse_enabled: false,
             mouse_wheel_enabled: false,
+            propagate_mouse_clicks: false,
+            propagate_mouse_motion: false,
+            propagate_hyperlinks_to_parent: false,
             hit_rect_insets: (0.0, 0.0, 0.0, 0.0),
             keyboard_enabled: false,
             propagate_keyboard_input: false,

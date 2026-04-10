@@ -671,6 +671,42 @@ fn test_drag_methods_transfer_and_clear_active_drag_frame() {
     );
 }
 
+#[test]
+fn test_propagation_methods_round_trip_frame_flags() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        PropagationFrame = CreateFrame("Frame", "PropagationFrame", UIParent)
+
+        assert(not PropagationFrame:CanPropagateMouseClicks(), "mouse clicks should default false")
+        assert(not PropagationFrame:CanPropagateMouseMotion(), "mouse motion should default false")
+        assert(not PropagationFrame:DoesHyperlinkPropagateToParent(), "hyperlink propagation should default false")
+
+        PropagationFrame:SetPropagateMouseClicks(true)
+        PropagationFrame:SetPropagateMouseMotion(true)
+        PropagationFrame:SetHyperlinkPropagateToParent(true)
+
+        assert(PropagationFrame:CanPropagateMouseClicks(), "mouse clicks should enable")
+        assert(PropagationFrame:CanPropagateMouseMotion(), "mouse motion should enable")
+        assert(PropagationFrame:DoesHyperlinkPropagateToParent(), "hyperlink propagation should enable")
+
+        PropagationFrame:SetPropagateMouseClicks(false)
+        PropagationFrame:SetPropagateMouseMotion(false)
+        PropagationFrame:SetHyperlinkPropagateToParent(false)
+
+        assert(not PropagationFrame:CanPropagateMouseClicks(), "mouse clicks should disable")
+        assert(not PropagationFrame:CanPropagateMouseMotion(), "mouse motion should disable")
+        assert(not PropagationFrame:DoesHyperlinkPropagateToParent(), "hyperlink propagation should disable")
+
+        PROPAGATION_FLAGS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return PROPAGATION_FLAGS_OK == true").unwrap();
+    assert!(ok, "propagation flag round-trip should succeed");
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

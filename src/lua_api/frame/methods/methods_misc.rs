@@ -172,12 +172,57 @@ fn add_drag_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Mouse/Input Propagation stubs.
 fn add_propagation_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("CanPropagateMouseClicks", |_, _this, ()| Ok(false));
-    methods.add_method("CanPropagateMouseMotion", |_, _this, ()| Ok(false));
-    methods.add_method("DoesHyperlinkPropagateToParent", |_, _this, ()| Ok(false));
-    methods.add_method("SetHyperlinkPropagateToParent", |_, _this, _: bool| Ok(()));
-    methods.add_method("SetPropagateMouseClicks", |_, _this, _: bool| Ok(()));
-    methods.add_method("SetPropagateMouseMotion", |_, _this, _: bool| Ok(()));
+    methods.add_method("CanPropagateMouseClicks", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.propagate_mouse_clicks)
+            .unwrap_or(false))
+    });
+    methods.add_method("CanPropagateMouseMotion", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.propagate_mouse_motion)
+            .unwrap_or(false))
+    });
+    methods.add_method("DoesHyperlinkPropagateToParent", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.propagate_hyperlinks_to_parent)
+            .unwrap_or(false))
+    });
+    methods.add_method("SetHyperlinkPropagateToParent", |lua, this, value: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.propagate_hyperlinks_to_parent = value;
+        }
+        Ok(())
+    });
+    methods.add_method("SetPropagateMouseClicks", |lua, this, value: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.propagate_mouse_clicks = value;
+        }
+        Ok(())
+    });
+    methods.add_method("SetPropagateMouseMotion", |lua, this, value: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.propagate_mouse_motion = value;
+        }
+        Ok(())
+    });
 }
 
 /// GamePad stubs.
