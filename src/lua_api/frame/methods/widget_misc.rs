@@ -32,11 +32,23 @@ fn add_simplehtml_hyperlink_methods<M: mlua::UserDataMethods<FrameRef>>(methods:
     add_simplehtml_string_getter(methods, "GetHyperlinkFormat", "|H%s|h%s|h", |data| {
         data.hyperlink_format.clone()
     });
-    add_simplehtml_bool_setter(methods, "SetHyperlinksEnabled", |data, value| {
-        data.hyperlinks_enabled = value
-    });
+    add_set_hyperlinks_enabled(methods);
     add_simplehtml_bool_getter(methods, "GetHyperlinksEnabled", true, |data| {
         data.hyperlinks_enabled
+    });
+}
+
+fn add_set_hyperlinks_enabled<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetHyperlinksEnabled", |lua, this, value: bool| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetHyperlinksEnabled") {
+                return Ok(());
+            }
+        }
+        update_simplehtml_data(lua, id, |data| data.hyperlinks_enabled = value);
+        Ok(())
     });
 }
 
@@ -87,17 +99,6 @@ fn add_simplehtml_string_getter<M, F>(
             default.to_string(),
             getter,
         ))
-    });
-}
-
-fn add_simplehtml_bool_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
-where
-    M: mlua::UserDataMethods<FrameRef>,
-    F: Fn(&mut crate::lua_api::simple_html::SimpleHtmlData, bool) + Copy + 'static,
-{
-    methods.add_method(name, move |lua, this, value: bool| {
-        update_simplehtml_data(lua, this.0, |data| setter(data, value));
-        Ok(())
     });
 }
 

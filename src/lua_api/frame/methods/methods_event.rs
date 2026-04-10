@@ -1,6 +1,7 @@
 //! Event registration methods: RegisterEvent, UnregisterEvent, etc.
 
 use super::super::handle::FrameRef;
+use super::combat_lockdown;
 use crate::event::{is_registerable_event, is_restricted_event};
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
@@ -271,9 +272,16 @@ fn add_register_event_callback<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 
 fn add_keyboard_propagation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetPropagateKeyboardInput", |lua, this, propagate: bool| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetPropagateKeyboardInput") {
+                return Ok(());
+            }
+        }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(f) = state.widgets.get_mut(this.0) {
+        if let Some(f) = state.widgets.get_mut(id) {
             f.propagate_keyboard_input = propagate;
         }
         Ok(())

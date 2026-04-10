@@ -1,6 +1,7 @@
 //! Hierarchy methods: GetParent, SetParent, GetNumChildren, GetChildren, GetRegions.
 
 use super::super::handle::{FrameRef, extract_frame_id, frame_ref};
+use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::{FrameStrata, WidgetRegistry};
 use mlua::Value;
@@ -29,6 +30,9 @@ fn add_parent_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
     methods.add_method("SetParent", |lua, this, parent: Value| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetParent") {
+            return Ok(());
+        }
         let new_parent_id = extract_frame_id(&parent);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();

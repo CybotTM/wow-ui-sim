@@ -128,6 +128,9 @@ fn add_size_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_size<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetSize", |lua, this, (width, height): (f32, f32)| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetSize") {
+            return Ok(());
+        }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let changed = state
@@ -149,6 +152,9 @@ fn add_set_size<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_width<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetWidth", |lua, this, width: f32| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetWidth") {
+            return Ok(());
+        }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let changed = state
@@ -170,6 +176,9 @@ fn add_set_width<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_set_height<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetHeight", |lua, this, height: f32| {
         let id = this.0;
+        if lockdown_blocked(lua, id, "SetHeight") {
+            return Ok(());
+        }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let changed = state

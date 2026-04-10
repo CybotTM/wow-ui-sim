@@ -254,15 +254,26 @@ fn add_security_and_input_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
 }
 
 fn add_security_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_forbidden_methods(methods);
+    add_security_capability_stubs(methods);
+}
+
+fn add_forbidden_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetForbidden", |lua, this, forbidden: Option<bool>| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "SetForbidden") {
+                return Ok(());
+            }
+        }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(this.0) {
+        if let Some(frame) = state.widgets.get_mut(id) {
             frame.forbidden = forbidden.unwrap_or(true);
         }
         Ok(())
     });
-
     methods.add_method("IsForbidden", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -272,7 +283,9 @@ fn add_security_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             .map(|f| f.forbidden)
             .unwrap_or(false))
     });
+}
 
+fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("CanChangeProtectedState", |_lua, _this, ()| Ok(true));
     methods.add_method(
         "SetPassThroughButtons",
