@@ -143,3 +143,26 @@ fn test_collect_lua_error_tracks_seen_message_counts() {
     assert!(!second_seen, "repeat occurrence should be suppressible");
     assert!(third_seen, "new message should be reported");
 }
+
+#[test]
+fn test_suppressed_lua_error_summary_lines_report_repeat_counts() {
+    let env = WowLuaEnv::new().unwrap();
+
+    crate::lua_api::script_helpers::collect_lua_error(
+        env.lua(),
+        "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
+    );
+    crate::lua_api::script_helpers::collect_lua_error(
+        env.lua(),
+        "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
+    );
+    crate::lua_api::script_helpers::collect_lua_error(env.lua(), "different boom");
+
+    let state = env.state().borrow();
+    let summary = crate::lua_errors::suppressed_error_summary_lines(&state);
+    assert_eq!(summary.len(), 1);
+    assert_eq!(
+        summary[0],
+        "Lua error suppressed 1 additional times: repeated boom"
+    );
+}

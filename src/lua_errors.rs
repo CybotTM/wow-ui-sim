@@ -1,6 +1,6 @@
 //! `lua-errors` subcommand: load UI, collect Lua errors, output unique errors as JSON.
 
-use crate::lua_api::WowLuaEnv;
+use crate::lua_api::{SimState, WowLuaEnv};
 use crate::startup::settle_headless_startup;
 
 /// A unique Lua error with its occurrence count.
@@ -39,7 +39,39 @@ pub fn run_lua_errors(env: &WowLuaEnv, saved_stdout: Option<i32>, exec_lua: Opti
 /// Deduplicate collected Lua errors by their first line. Preserves first-seen order.
 fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
     let state = env.state().borrow();
-    let mut order: Vec<String> = Vec::new();
+    unique_error_order(&state)
+        .into_iter()
+        .map(|message| LuaError {
+            count: state.lua_error_counts.get(&message).copied().unwrap_or(0),
+            message,
+        })
+        .collect()
+}
+
+pub(crate) fn suppressed_error_summary_lines(state: &SimState) -> Vec<String> {
+    unique_error_order(state)
+        .into_iter()
+        .filter_map(|message| {
+            let count = state.lua_error_counts.get(&message).copied().unwrap_or(0);
+            (count > 1).then(|| {
+                format!(
+                    "Lua error suppressed {} additional times: {}",
+                    count - 1,
+                    message
+                )
+            })
+        })
+        .collect()
+}
+
+pub(crate) fn print_suppressed_error_summary(state: &SimState) {
+    for line in suppressed_error_summary_lines(state) {
+        eprintln!("{line}");
+    }
+}
+
+fn unique_error_order(state: &SimState) -> Vec<String> {
+    let mut order = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for raw in &state.lua_errors {
         let msg = extract_error_message(raw);
@@ -48,12 +80,6 @@ fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
         }
     }
     order
-        .into_iter()
-        .map(|message| LuaError {
-            count: state.lua_error_counts.get(&message).copied().unwrap_or(0),
-            message,
-        })
-        .collect()
 }
 
 /// Extract the core error message, stripping "runtime error: " prefix.

@@ -24,6 +24,14 @@ pub struct WowLuaEnv {
     pub(crate) state: Rc<RefCell<SimState>>,
 }
 
+impl Drop for WowLuaEnv {
+    fn drop(&mut self) {
+        if let Ok(state) = self.state.try_borrow() {
+            crate::lua_errors::print_suppressed_error_summary(&state);
+        }
+    }
+}
+
 impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
