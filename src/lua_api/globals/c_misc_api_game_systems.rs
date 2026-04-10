@@ -377,6 +377,59 @@ fn register_store_frame_functions(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(()))?,
     )?;
     globals.set(
+        "ToggleSpellBook",
+        lua.create_function(|lua, book_type: Option<String>| {
+            lua.load(
+                r#"
+                local bookType = ...
+                if bookType ~= nil and bookType ~= BOOKTYPE_SPELL and bookType ~= BOOKTYPE_PET then
+                    return
+                end
+
+                if not PlayerSpellsFrame then
+                    local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                    if loader then
+                        pcall(loader, "Blizzard_PlayerSpells")
+                    end
+                end
+
+                if not PlayerSpellsFrame then
+                    return
+                end
+
+                local spellBookTab = PlayerSpellsUtil and PlayerSpellsUtil.FrameTabs and PlayerSpellsUtil.FrameTabs.SpellBook
+                local petCategory = PlayerSpellsUtil and PlayerSpellsUtil.SpellBookCategories and PlayerSpellsUtil.SpellBookCategories.Pet
+                local category = nil
+                if bookType == BOOKTYPE_PET then
+                    category = petCategory
+                end
+
+                if PlayerSpellsUtil and PlayerSpellsUtil.ToggleSpellBookFrame then
+                    PlayerSpellsUtil.ToggleSpellBookFrame(category)
+                    return
+                end
+
+                if bookType == BOOKTYPE_PET then
+                    return
+                end
+
+                local alreadyShowing = PlayerSpellsFrame:IsShown()
+
+                if alreadyShowing then
+                    HideUIPanel(PlayerSpellsFrame)
+                    return
+                end
+
+                ShowUIPanel(PlayerSpellsFrame)
+                if PlayerSpellsFrame.SpellBookFrame then
+                    PlayerSpellsFrame.SpellBookFrame:Show()
+                end
+            "#,
+            )
+            .call::<()>(book_type)
+        })?,
+    )?;
+    globals.set(
         "SwitchAchievementSearchTab",
         lua.create_function(|_, _tab: Value| Ok(()))?,
     )?;

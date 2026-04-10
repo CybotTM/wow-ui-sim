@@ -843,6 +843,49 @@ fn character_and_spellbook_coexist() {
 }
 
 #[test]
+fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let ui = blizzard_ui_dir();
+        for (name, toc) in SPELLBOOK_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if toc_path.exists() {
+                if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                    eprintln!("[load {name}] FAILED: {e}");
+                }
+            }
+        }
+
+        let result: String = env.eval(r#"
+            if not ToggleSpellBook then
+                return "missing_toggle_spellbook"
+            end
+
+            ToggleSpellBook(BOOKTYPE_SPELL)
+            if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                return "spellbook_not_shown"
+            end
+            if not PlayerSpellsFrame.SpellBookFrame or not PlayerSpellsFrame.SpellBookFrame:IsShown() then
+                return "spellbook_tab_not_shown"
+            end
+
+            ToggleSpellBook(BOOKTYPE_SPELL)
+            if PlayerSpellsFrame:IsShown() then
+                return "spellbook_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleSpellBook(BOOKTYPE_SPELL) should toggle the spellbook panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
