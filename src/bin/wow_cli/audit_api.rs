@@ -921,7 +921,7 @@ pub fn build_gap_report(
         |sym| {
             used.constants
                 .get(sym)
-                .map(|usage| usage.files.clone())
+                .map(|usage| normalize_file_list(usage.files.clone()))
                 .unwrap_or_default()
         },
     );
@@ -1006,7 +1006,7 @@ fn build_missing_c_methods(
             .map(|(method, usage)| GapEntry {
                 name: method.clone(),
                 calls: usage.count,
-                files: usage.files.clone(),
+                files: normalize_file_list(usage.files.clone()),
             })
             .collect();
         if !missing.is_empty() {
@@ -1057,6 +1057,13 @@ fn collect_prefixed_usage_files(
         }
     }
     files.into_iter().collect()
+}
+
+fn normalize_file_list(files: Vec<String>) -> Vec<String> {
+    let mut files = files;
+    files.sort();
+    files.dedup();
+    files
 }
 
 /// Print the gap report in human-readable text format.
@@ -1154,7 +1161,10 @@ pub fn print_gap_text(report: &GapReport) {
 /// Print gap report as PLAN.md-ready markdown checkboxes.
 pub fn print_gap_plan(report: &GapReport) {
     if !report.missing_c_namespaces.is_empty() {
-        println!("### Missing C_* Namespaces ({})\n", report.missing_c_namespaces.len());
+        println!(
+            "### Missing C_* Namespaces ({})\n",
+            report.missing_c_namespaces.len()
+        );
         for entry in &report.missing_c_namespaces {
             println!("- [ ] `{}` ({} calls)", entry.name, entry.calls);
         }
@@ -1169,13 +1179,21 @@ pub fn print_gap_plan(report: &GapReport) {
                 .iter()
                 .map(|e| format!("{} ({})", e.name, e.calls))
                 .collect();
-            println!("- [ ] `{}` ({}): {}", ns, methods.len(), method_list.join(", "));
+            println!(
+                "- [ ] `{}` ({}): {}",
+                ns,
+                methods.len(),
+                method_list.join(", ")
+            );
         }
         println!();
     }
 
     if !report.missing_le_constants.is_empty() {
-        println!("### Missing LE_* Constants ({})\n", report.missing_le_constants.len());
+        println!(
+            "### Missing LE_* Constants ({})\n",
+            report.missing_le_constants.len()
+        );
         for entry in &report.missing_le_constants {
             println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
         }
@@ -1183,7 +1201,10 @@ pub fn print_gap_plan(report: &GapReport) {
     }
 
     if !report.missing_enum_namespaces.is_empty() {
-        println!("### Missing Enum Namespaces ({})\n", report.missing_enum_namespaces.len());
+        println!(
+            "### Missing Enum Namespaces ({})\n",
+            report.missing_enum_namespaces.len()
+        );
         for entry in &report.missing_enum_namespaces {
             println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
         }
@@ -1289,10 +1310,7 @@ fn register_c_tooltip_info_0(lua: &Lua) {
                 ("GetContainerNumSlots".to_string(), usage(3)),
                 (
                     "GetContainerItemInfo".to_string(),
-                    usage_in_files(
-                        2,
-                        &["Blizzard_Container.lua", "Blizzard_Bags.lua"],
-                    ),
+                    usage_in_files(2, &["Blizzard_Container.lua", "Blizzard_Bags.lua"]),
                 ),
             ]),
         );
