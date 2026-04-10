@@ -6,7 +6,7 @@ use super::widget_tooltip_data::{
     AuraLookupKind, AuraTooltipKind, lookup_aura_from_args, populate_aura_tooltip,
     populate_item_tooltip, populate_spell_tooltip,
 };
-#[path = "widget_tooltip_helpers.rs"]
+#[path = "widget_tooltip_helpers/mod.rs"]
 mod widget_tooltip_helpers;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::lua_api::tooltip::{
