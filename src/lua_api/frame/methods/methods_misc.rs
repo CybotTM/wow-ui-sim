@@ -458,13 +458,40 @@ fn rotate_descendant_textures(state: &mut crate::lua_api::SimState, frame_id: u6
 
 /// Bounds/Position stubs.
 fn add_bounds_position_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetBoundsRect", |_, _this, ()| {
-        Ok((0.0f64, 0.0f64, 0.0f64, 0.0f64))
+    methods.add_method("GetBoundsRect", |lua, this, ()| {
+        let Some(resolved) = super::methods_rect::resolve_and_extract(lua, this.0) else {
+            return Ok(mlua::MultiValue::new());
+        };
+        let (left, bottom, width, height) = super::methods_rect::to_wow_rect(&resolved);
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::Number(left as f64),
+            Value::Number(bottom as f64),
+            Value::Number(width as f64),
+            Value::Number(height as f64),
+        ]))
     });
-    methods.add_method("GetClampRectInsets", |_, _this, ()| {
-        Ok((0.0f64, 0.0f64, 0.0f64, 0.0f64))
+    methods.add_method("GetClampRectInsets", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let (left, right, top, bottom) = state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.clamp_rect_insets)
+            .unwrap_or((0.0, 0.0, 0.0, 0.0));
+        Ok((left as f64, right as f64, top as f64, bottom as f64))
     });
-    methods.add_method("SetPointsOffset", |_, _this, (_x, _y): (f64, f64)| Ok(()));
+    methods.add_method("SetPointsOffset", |lua, this, (x, y): (f64, f64)| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            for anchor in &mut frame.anchors {
+                anchor.x_offset = x as f32;
+                anchor.y_offset = y as f32;
+            }
+        }
+        state.widgets.mark_rect_dirty(this.0);
+        Ok(())
+    });
 }
 
 /// Attribute stubs.

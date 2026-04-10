@@ -666,6 +666,38 @@ fn test_frame_buffer_methods_persist_flag_and_rotate_child_textures() {
 }
 
 #[test]
+fn test_bounds_position_methods_use_geometry_and_persisted_insets() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", "BoundsFrame", UIParent)
+        frame:SetSize(120, 45)
+        frame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -20)
+
+        local left0, bottom0, width0, height0 = frame:GetBoundsRect()
+        assert(left0 == 10 and width0 == 120 and height0 == 45, "GetBoundsRect should reflect initial geometry")
+
+        frame:SetPointsOffset(30, -40)
+        local _, _, _, x, y = frame:GetPoint(1)
+        assert(x == 30 and y == -40, "SetPointsOffset should overwrite anchor offsets")
+
+        local left1, bottom1, width1, height1 = frame:GetBoundsRect()
+        assert(left1 == 30 and width1 == 120 and height1 == 45, "GetBoundsRect should reflect updated anchor geometry")
+
+        frame:SetClampRectInsets(1, 2, 3, 4)
+        local l, r, t, b = frame:GetClampRectInsets()
+        assert(l == 1 and r == 2 and t == 3 and b == 4, "GetClampRectInsets should return persisted inset values")
+
+        BOUNDS_POSITION_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return BOUNDS_POSITION_OK == true").unwrap();
+    assert!(ok, "bounds/position geometry round-trip should succeed");
+}
+
+#[test]
 fn test_drag_methods_transfer_and_clear_active_drag_frame() {
     let env = WowLuaEnv::new().unwrap();
     env.exec(

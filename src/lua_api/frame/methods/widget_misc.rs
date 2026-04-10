@@ -248,9 +248,28 @@ fn add_drag_clamp_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(false)
     });
-    methods.add_method("SetClampRectInsets", |_, _this, _args: mlua::MultiValue| {
+    methods.add_method("SetClampRectInsets", |lua, this, args: mlua::MultiValue| {
+        let mut values = args.into_iter();
+        let left = next_inset_value(&mut values);
+        let right = next_inset_value(&mut values);
+        let top = next_inset_value(&mut values);
+        let bottom = next_inset_value(&mut values);
+        let state_rc = get_sim_state(lua);
+        if let Ok(mut s) = state_rc.try_borrow_mut()
+            && let Some(frame) = s.widgets.get_mut_visual(this.0)
+        {
+            frame.clamp_rect_insets = (left, right, top, bottom);
+        }
         Ok(())
     });
+}
+
+fn next_inset_value(values: &mut impl Iterator<Item = mlua::Value>) -> f32 {
+    match values.next() {
+        Some(mlua::Value::Number(n)) => n as f32,
+        Some(mlua::Value::Integer(n)) => n as f32,
+        _ => 0.0,
+    }
 }
 
 fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

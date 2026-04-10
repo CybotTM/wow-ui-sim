@@ -16,7 +16,7 @@ use mlua::Value;
 use super::methods_core::screen_dims;
 
 /// Resolved layout data extracted from SimState while borrowed.
-struct ResolvedRect {
+pub(super) struct ResolvedRect {
     rect: LayoutRect,
     eff_scale: f32,
     screen_height: f32,
@@ -28,7 +28,7 @@ fn has_queryable_rect(frame: &crate::widget::Frame, id: u64) -> bool {
 
 /// Resolve dirty flag, then extract layout_rect + effective_scale + screen_height.
 /// Returns None if the frame has no anchors or no layout_rect.
-fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
+pub(super) fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
     let state_rc = get_sim_state(lua);
 
     let needs_layout_rect = {
@@ -60,7 +60,7 @@ fn resolve_and_extract(lua: &mlua::Lua, id: u64) -> Option<ResolvedRect> {
 }
 
 /// Convert layout_rect to WoW UI coordinates (bottom-left origin, divided by effective_scale).
-fn to_wow_rect(r: &ResolvedRect) -> (f32, f32, f32, f32) {
+pub(super) fn to_wow_rect(r: &ResolvedRect) -> (f32, f32, f32, f32) {
     let e = r.eff_scale;
     let left = r.rect.x / e;
     let bottom = (r.screen_height - r.rect.y - r.rect.height) / e;
