@@ -134,6 +134,52 @@ fn test_pushed_text_offset() {
     assert_eq!(y, -1.0);
 }
 
+#[test]
+fn test_clear_button_texture_methods_clear_parent_fields_and_child_textures() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestClearBtnTex", UIParent)
+        btn:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+        btn:SetHighlightTexture("Interface/Buttons/UI-Panel-Button-Highlight")
+        btn:SetPushedTexture("Interface/Buttons/UI-Panel-Button-Down")
+        btn:SetDisabledTexture("Interface/Buttons/UI-Panel-Button-Disabled")
+        btn:ClearNormalTexture()
+        btn:ClearHighlightTexture()
+        btn:ClearPushedTexture()
+        btn:ClearDisabledTexture()
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let button_id = state.widgets.get_id_by_name("TestClearBtnTex").unwrap();
+    let button = state.widgets.get(button_id).unwrap();
+    assert_eq!(button.normal_texture, None);
+    assert_eq!(button.highlight_texture, None);
+    assert_eq!(button.pushed_texture, None);
+    assert_eq!(button.disabled_texture, None);
+
+    for key in [
+        "NormalTexture",
+        "HighlightTexture",
+        "PushedTexture",
+        "DisabledTexture",
+    ] {
+        let child_id = button
+            .children_keys
+            .get(key)
+            .copied()
+            .unwrap_or_else(|| panic!("Expected {key} child to exist"));
+        let child = state.widgets.get(child_id).unwrap();
+        assert_eq!(
+            child.texture, None,
+            "{key} child texture should be cleared on the child widget too"
+        );
+    }
+}
+
 // ============================================================================
 // GetFontString Method
 // ============================================================================

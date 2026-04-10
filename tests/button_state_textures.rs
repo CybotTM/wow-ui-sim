@@ -328,3 +328,39 @@ fn pressed_button_text_child_uses_pushed_text_offset() {
         pushed_bounds
     );
 }
+
+#[test]
+fn clearing_button_texture_hides_rendered_child_texture() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestClearNormalTextureRender", UIParent)
+        btn:SetPoint("CENTER")
+        btn:SetSize(100, 30)
+        btn:SetNormalTexture("Interface/Buttons/UI-Panel-Button-Up")
+        btn:Show()
+    "#,
+    )
+    .unwrap();
+
+    let before = build_batch_for_button(&env, "TestClearNormalTextureRender", None, None);
+    assert!(
+        before
+            .texture_requests
+            .iter()
+            .any(|r| r.path.to_lowercase().contains("button-up")),
+        "Normal texture should render before ClearNormalTexture"
+    );
+
+    env.exec(r#"TestClearNormalTextureRender:ClearNormalTexture()"#)
+        .unwrap();
+    let after = build_batch_for_button(&env, "TestClearNormalTextureRender", None, None);
+    assert!(
+        !after
+            .texture_requests
+            .iter()
+            .any(|r| r.path.to_lowercase().contains("button-up")),
+        "Normal texture should not render after ClearNormalTexture"
+    );
+}

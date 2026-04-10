@@ -503,23 +503,80 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     });
 }
 
-/// Clear{Normal,Highlight,Pushed,Disabled}Texture and GetDisabledCheckedTexture stubs.
+/// Clear{Normal,Highlight,Pushed,Disabled}Texture and GetDisabledCheckedTexture.
 fn add_clear_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method(
-        "ClearNormalTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("ClearHighlightTexture", |_, _, _: mlua::Variadic<Value>| {
-        Ok(())
-    });
-    methods.add_method(
-        "ClearPushedTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("ClearDisabledTexture", |_, _, _: mlua::Variadic<Value>| {
-        Ok(())
-    });
+    for (method_name, parent_key) in [
+        ("ClearNormalTexture", "NormalTexture"),
+        ("ClearHighlightTexture", "HighlightTexture"),
+        ("ClearPushedTexture", "PushedTexture"),
+        ("ClearDisabledTexture", "DisabledTexture"),
+    ] {
+        methods.add_method(method_name, move |lua, this, _: mlua::Variadic<Value>| {
+            clear_button_texture(lua, this.0, parent_key);
+            Ok(())
+        });
+    }
     methods.add_method("GetDisabledCheckedTexture", |_, _, ()| Ok(Value::Nil));
+}
+
+fn clear_button_texture(lua: &mlua::Lua, button_id: u64, parent_key: &str) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    clear_button_texture_field(&mut state.widgets, button_id, parent_key);
+    clear_button_texture_child(&mut state.widgets, button_id, parent_key);
+    state.widgets.mark_rect_dirty(button_id);
+}
+
+fn clear_button_texture_field(
+    widgets: &mut crate::widget::WidgetRegistry,
+    button_id: u64,
+    parent_key: &str,
+) {
+    let Some(button) = widgets.get_mut_visual(button_id) else {
+        return;
+    };
+    match parent_key {
+        "NormalTexture" => {
+            button.normal_texture = None;
+            button.normal_tex_coords = None;
+        }
+        "HighlightTexture" => {
+            button.highlight_texture = None;
+            button.highlight_tex_coords = None;
+        }
+        "PushedTexture" => {
+            button.pushed_texture = None;
+            button.pushed_tex_coords = None;
+        }
+        "DisabledTexture" => {
+            button.disabled_texture = None;
+            button.disabled_tex_coords = None;
+        }
+        _ => {}
+    }
+}
+
+fn clear_button_texture_child(
+    widgets: &mut crate::widget::WidgetRegistry,
+    button_id: u64,
+    parent_key: &str,
+) {
+    let child_id = widgets
+        .get(button_id)
+        .and_then(|button| button.children_keys.get(parent_key).copied());
+    let Some(child_id) = child_id else {
+        return;
+    };
+    let Some(child) = widgets.get_mut_visual(child_id) else {
+        return;
+    };
+    child.texture = None;
+    child.texture_file_data_id = None;
+    child.tex_coords = None;
+    child.tex_coords_quad = None;
+    child.atlas_tex_coords = None;
+    child.atlas = None;
+    child.three_slice_h = None;
 }
 
 /// Set{Left,Middle,Right}Texture - three-slice button cap textures.
