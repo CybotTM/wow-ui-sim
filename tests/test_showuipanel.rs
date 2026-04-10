@@ -1197,6 +1197,42 @@ fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
 }
 
 #[test]
+fn toggle_mail_frame_opens_and_closes_mail_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            A_Admin.ClearInbox()
+            A_Admin.AddMail("Thrall", "Unread Orders", "Meet me in Orgrimmar.")
+
+            if not ToggleMailFrame then
+                return "missing_toggle_mail_frame"
+            end
+
+            ToggleMailFrame()
+            if not MailFrame or not MailFrame:IsShown() then
+                return "mail_frame_not_shown"
+            end
+            if not InboxFrame or not InboxFrame:IsShown() then
+                return "inbox_frame_not_shown"
+            end
+
+            ToggleMailFrame()
+            if MailFrame and MailFrame:IsShown() then
+                return "mail_frame_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleMailFrame() should open and close the mail panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();

@@ -51,6 +51,7 @@ pub fn apply(env: &WowLuaEnv) {
     patch_character_toggle(env);
     patch_communities_toggle(env);
     patch_group_finder_toggle(env);
+    patch_mail_toggle(env);
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.
@@ -155,6 +156,48 @@ fn patch_group_finder_toggle(env: &WowLuaEnv) {
             end
 
             __wow_ui_sim_toggle_lfd_parent_patched = true
+        end
+    "#,
+    );
+}
+
+/// Install a legacy ToggleMailFrame() helper for the lighter panel harness.
+///
+/// Blizzard_MailFrame exposes MailFrame_Show()/MailFrame_Hide() after the
+/// addon loads, but the older ToggleMailFrame global is absent in the current
+/// runtime surface. The compat shim keeps the behavior narrow: define it only
+/// when missing, lazy-load Blizzard_MailFrame, then delegate to the real mail
+/// panel functions when available.
+fn patch_mail_toggle(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_toggle_mail_patched and type(ToggleMailFrame) ~= "function" then
+            ToggleMailFrame = function()
+                if not MailFrame then
+                    local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                    if loader then
+                        pcall(loader, "Blizzard_MailFrame")
+                    end
+                end
+
+                if not MailFrame then
+                    return
+                end
+
+                if MailFrame:IsShown() then
+                    if type(MailFrame_Hide) == "function" then
+                        return MailFrame_Hide()
+                    end
+                    return HideUIPanel(MailFrame)
+                end
+
+                if type(MailFrame_Show) == "function" then
+                    return MailFrame_Show()
+                end
+                return ShowUIPanel(MailFrame)
+            end
+
+            __wow_ui_sim_toggle_mail_patched = true
         end
     "#,
     );
