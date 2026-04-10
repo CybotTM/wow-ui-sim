@@ -449,7 +449,17 @@ fn register_c_settings_util(lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "OpenSettingsPanel",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
+        lua.create_function(|lua, args: mlua::Variadic<Value>| {
+            let open_to_category = args.first().cloned().unwrap_or(Value::Nil);
+            let scroll_to_element = args.get(1).cloned().unwrap_or(Value::Nil);
+            let fire: mlua::Function = lua.globals().get("FireEvent")?;
+            fire.call::<()>((
+                lua.create_string("SETTINGS_PANEL_OPEN")?,
+                open_to_category,
+                scroll_to_element,
+            ))?;
+            Ok(())
+        })?,
     )?;
     lua.globals().set("C_SettingsUtil", t)?;
     Ok(())
