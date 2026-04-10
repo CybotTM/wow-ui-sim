@@ -534,8 +534,13 @@ fn add_pixel_grid_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsSnappingToPixelGrid", |lua, this, ()| {
         Ok(read_snap_to_pixel_grid(get_sim_state(lua), this.0))
     });
-    methods.add_method("SetTexelSnappingBias", |_, _this, _bias: f32| Ok(()));
-    methods.add_method("GetTexelSnappingBias", |_, _this, ()| Ok(0.0_f32));
+    methods.add_method("SetTexelSnappingBias", |lua, this, bias: f32| {
+        set_texel_snapping_bias(get_sim_state(lua), this.0, bias);
+        Ok(())
+    });
+    methods.add_method("GetTexelSnappingBias", |lua, this, ()| {
+        Ok(read_texel_snapping_bias(get_sim_state(lua), this.0))
+    });
 }
 
 fn set_snap_to_pixel_grid(
@@ -559,6 +564,29 @@ fn read_snap_to_pixel_grid(
         .get(id)
         .map(|frame| frame.snap_to_pixel_grid)
         .unwrap_or(false)
+}
+
+fn set_texel_snapping_bias(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    bias: f32,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.texel_snapping_bias = bias;
+    }
+}
+
+fn read_texel_snapping_bias(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+) -> f32 {
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(id)
+        .map(|frame| frame.texel_snapping_bias)
+        .unwrap_or(0.0)
 }
 
 /// SetTextureSliceMargins etc.

@@ -454,7 +454,7 @@ fn test_texel_snapping_bias() {
     let bias: f64 = env
         .eval(&format!("return {tex}:GetTexelSnappingBias()"))
         .unwrap();
-    assert_eq!(bias, 0.0); // stub returns 0.0
+    assert_eq!(bias, 0.5);
 }
 
 // ============================================================================

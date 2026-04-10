@@ -366,6 +366,8 @@ pub struct Frame {
     pub blend_mode: BlendMode,
     /// Whether texture sampling should snap to the pixel grid.
     pub snap_to_pixel_grid: bool,
+    /// Bias applied to texel snapping for textures.
+    pub texel_snapping_bias: f32,
     /// Whether this frame receives ALL events (set by RegisterAllEvents).
     pub register_all_events: bool,
     /// Whether this frame clips its children to its bounds.
@@ -644,6 +646,7 @@ macro_rules! frame_defaults {
             alpha_mode: None,
             blend_mode: BlendMode::Alpha,
             snap_to_pixel_grid: false,
+            texel_snapping_bias: 0.0,
             register_all_events: false,
             clips_children: false,
             is_frame_buffer: false,
