@@ -1056,6 +1056,104 @@ fn test_model_scene_camera_light_and_fog_methods_persist_state() {
     );
 }
 
+#[test]
+fn test_model_scene_actor_management_tracks_created_indexed_and_taken_actors() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local scene = CreateFrame("ModelScene", "TestModelSceneActors", UIParent)
+        local actor1 = scene:CreateActor("FirstActor", "ModelSceneActorTemplate")
+        local actor2 = scene:CreateActor("SecondActor", "ModelSceneActorTemplate")
+        local count_after_create = scene:GetNumActors()
+        local actor1_is_index1 = scene:GetActorAtIndex(1) == actor1
+        local actor2_is_index2 = scene:GetActorAtIndex(2) == actor2
+        local missing = scene:GetActorAtIndex(3)
+        local taken = scene:TakeActor()
+
+        _G.actor_scene_state = {
+            actor1_ok = actor1 ~= nil,
+            actor2_ok = actor2 ~= nil,
+            count_after_create = count_after_create,
+            actor1_is_index1 = actor1_is_index1,
+            actor2_is_index2 = actor2_is_index2,
+            missing_is_nil = missing == nil,
+            taken_is_actor2 = taken == actor2,
+            count_after_take = scene:GetNumActors(),
+            actor1_still_index1 = scene:GetActorAtIndex(1) == actor1,
+            actor2_removed = scene:GetActorAtIndex(2) == nil,
+        }
+    "#,
+    )
+    .unwrap();
+
+    let actor_state: (bool, bool, i64, bool, bool, bool, bool, i64, bool, bool) = env
+        .eval(
+            r#"
+            local s = _G.actor_scene_state
+            return s.actor1_ok,
+                   s.actor2_ok,
+                   s.count_after_create,
+                   s.actor1_is_index1,
+                   s.actor2_is_index2,
+                   s.missing_is_nil,
+                   s.taken_is_actor2,
+                   s.count_after_take,
+                   s.actor1_still_index1,
+                   s.actor2_removed
+        "#,
+        )
+        .unwrap();
+
+    assert!(actor_state.0);
+    assert!(actor_state.1);
+    assert_eq!(actor_state.2, 2);
+    assert!(actor_state.3);
+    assert!(actor_state.4);
+    assert!(actor_state.5);
+    assert!(actor_state.6);
+    assert_eq!(actor_state.7, 1);
+    assert!(actor_state.8);
+    assert!(actor_state.9);
+
+    let scene_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("TestModelSceneActors")
+        .unwrap();
+    let first_actor_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("FirstActor")
+        .unwrap();
+    let second_actor_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("SecondActor")
+        .unwrap();
+
+    let state = env.state().borrow();
+    let scene = state.widgets.get(scene_id).unwrap();
+    assert_eq!(scene.model_scene_actor_ids, vec![first_actor_id]);
+
+    let first_actor = state.widgets.get(first_actor_id).unwrap();
+    assert_eq!(first_actor.parent_id, Some(scene_id));
+    assert_eq!(
+        first_actor.object_type_name.as_deref(),
+        Some("ModelSceneActor")
+    );
+
+    let second_actor = state.widgets.get(second_actor_id).unwrap();
+    assert_eq!(second_actor.parent_id, None);
+    assert_eq!(
+        second_actor.object_type_name.as_deref(),
+        Some("ModelSceneActor")
+    );
+}
+
 // ============================================================================
 // SimpleHTML: SetHyperlinkFormat / GetHyperlinkFormat
 // ============================================================================

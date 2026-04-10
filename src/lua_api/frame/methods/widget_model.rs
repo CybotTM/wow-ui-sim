@@ -426,6 +426,10 @@ fn parse_first_model_i32(args: &mlua::MultiValue) -> Option<i32> {
     args.front().map(lua_value_to_i32)
 }
 
+fn parse_first_model_string(args: &mlua::MultiValue) -> Option<String> {
+    args.front().map(lua_value_to_string)
+}
+
 fn parse_first_model_bool(args: &mlua::MultiValue) -> bool {
     args.front().map(lua_value_to_bool).unwrap_or(false)
 }
@@ -460,6 +464,16 @@ fn lua_value_to_bool(value: &Value) -> bool {
         Value::Number(n) => *n != 0.0,
         Value::Integer(n) => *n != 0,
         _ => false,
+    }
+}
+
+fn lua_value_to_string(value: &Value) -> String {
+    match value {
+        Value::String(text) => text.to_string_lossy(),
+        Value::Number(n) => n.to_string(),
+        Value::Integer(n) => n.to_string(),
+        Value::Boolean(flag) => flag.to_string(),
+        _ => String::new(),
     }
 }
 
@@ -752,27 +766,35 @@ fn add_model_scene_fog_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
 }
 
 fn add_model_scene_actor_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("CreateActor", |lua, this, _args: mlua::MultiValue| {
-        use crate::lua_api::frame::handle::{frame_ref as mk_frame_ref, get_sim_state};
-        use crate::widget::{Frame, WidgetType};
-        let id = this.0;
-        let mut child = Frame::new(WidgetType::Frame, None, Some(id));
-        child.object_type_name = Some("ModelSceneActor".to_string());
-        let child_id = child.id;
-        {
-            let state_rc = get_sim_state(lua);
-            let mut state = state_rc.borrow_mut();
-            state.widgets.register(child);
-            state.widgets.add_child(id, child_id);
-        }
-        mk_frame_ref(lua, child_id)
+    methods.add_method("CreateActor", |lua, this, args: mlua::MultiValue| {
+        let actor_name = parse_first_model_string(&args);
+        let actor_id = create_model_scene_actor(lua, this.0, actor_name);
+        crate::lua_api::frame::handle::frame_ref(lua, actor_id)
     });
-    methods.add_method("GetActorAtIndex", |_, _this, _args: mlua::MultiValue| {
-        Ok(mlua::Value::Nil)
+    methods.add_method("GetActorAtIndex", |lua, this, index: i32| {
+        let actor_id = read_model_frame(lua, this.0, |frame| {
+            let actor_index = (index - 1).max(0) as usize;
+            frame.model_scene_actor_ids.get(actor_index).copied()
+        })
+        .flatten();
+
+        actor_id
+            .map(|id| crate::lua_api::frame::handle::frame_ref(lua, id))
+            .transpose()
+            .map(|value| value.unwrap_or(mlua::Value::Nil))
     });
-    methods.add_method("GetNumActors", |_, _this, ()| Ok(0i32));
-    methods.add_method("TakeActor", |_, _this, _args: mlua::MultiValue| {
-        Ok(mlua::Value::Nil)
+    methods.add_method("GetNumActors", |lua, this, ()| {
+        Ok(read_model_frame(lua, this.0, |frame| {
+            frame.model_scene_actor_ids.len() as i32
+        })
+        .unwrap_or(0))
+    });
+    methods.add_method("TakeActor", |lua, this, ()| {
+        let actor_id = take_last_model_scene_actor(lua, this.0);
+        actor_id
+            .map(|id| crate::lua_api::frame::handle::frame_ref(lua, id))
+            .transpose()
+            .map(|value| value.unwrap_or(mlua::Value::Nil))
     });
 }
 
@@ -835,6 +857,49 @@ fn add_model_scene_fog_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods
                 .unwrap_or(0.0),
         )
     });
+}
+
+fn create_model_scene_actor(lua: &mlua::Lua, scene_id: u64, actor_name: Option<String>) -> u64 {
+    use crate::widget::{Frame, WidgetType};
+
+    let mut actor = Frame::new(WidgetType::Frame, actor_name, Some(scene_id));
+    actor.object_type_name = Some("ModelSceneActor".to_string());
+    let actor_id = actor.id;
+
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    state.widgets.register(actor);
+    state.widgets.add_child(scene_id, actor_id);
+    if let Some(scene) = state.widgets.get_mut_visual(scene_id) {
+        scene.model_scene_actor_ids.push(actor_id);
+    }
+
+    actor_id
+}
+
+fn take_last_model_scene_actor(lua: &mlua::Lua, scene_id: u64) -> Option<u64> {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+
+    let actor_id = state
+        .widgets
+        .get_mut_visual(scene_id)?
+        .model_scene_actor_ids
+        .pop()?;
+
+    if let Some(scene) = state.widgets.get_mut_visual(scene_id) {
+        scene.children.retain(|&id| id != actor_id);
+        scene
+            .children_keys
+            .retain(|_, child_id| *child_id != actor_id);
+    }
+
+    if let Some(actor) = state.widgets.get_mut_visual(actor_id) {
+        actor.parent_id = None;
+        actor.parent_key = None;
+    }
+
+    Some(actor_id)
 }
 
 fn parse_model_vec2(args: &mlua::MultiValue) -> (f32, f32) {

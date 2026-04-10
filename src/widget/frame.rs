@@ -582,6 +582,8 @@ pub struct Frame {
     pub model_rendering: ModelRenderingState,
     /// Persisted ModelScene state.
     pub model_scene_state: ModelSceneState,
+    /// ModelScene actor IDs in scene order.
+    pub model_scene_actor_ids: Vec<u64>,
     /// Persisted PlayerModel-only state.
     pub player_model_state: PlayerModelState,
     /// Whether mouse motion events are enabled.
@@ -861,6 +863,7 @@ macro_rules! frame_defaults {
             model_appearance: ModelAppearanceState::default(),
             model_rendering: ModelRenderingState::default(),
             model_scene_state: ModelSceneState::default(),
+            model_scene_actor_ids: Vec::new(),
             player_model_state: PlayerModelState::default(),
             mouse_motion_enabled: false,
             user_id: 0,
