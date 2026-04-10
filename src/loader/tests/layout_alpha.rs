@@ -165,3 +165,77 @@ fn test_alpha_independent_of_scale() {
     assert!((a - 0.7).abs() < 0.001, "alpha: {}", a);
     assert!((ea - 0.7).abs() < 0.001, "eff alpha: {}", ea);
 }
+
+#[test]
+fn test_ignore_parent_alpha_flag_round_trip() {
+    let (t, _) = load_test_lua(
+        "layout-ignore-parent-alpha-flag",
+        r#"
+        local f = CreateFrame("Frame")
+        BEFORE = f:GetIgnoreParentAlpha()
+        f:SetIgnoreParentAlpha(true)
+        AFTER_ENABLE = f:GetIgnoreParentAlpha()
+        f:SetIgnoreParentAlpha(false)
+        AFTER_DISABLE = f:GetIgnoreParentAlpha()
+    "#,
+    );
+    assert!(
+        !t.env.eval::<bool>("return BEFORE").unwrap(),
+        "frames should default to GetIgnoreParentAlpha() == false",
+    );
+    assert!(
+        t.env.eval::<bool>("return AFTER_ENABLE").unwrap(),
+        "SetIgnoreParentAlpha(true) should persist on the frame",
+    );
+    assert!(
+        !t.env.eval::<bool>("return AFTER_DISABLE").unwrap(),
+        "SetIgnoreParentAlpha(false) should clear the frame state",
+    );
+}
+
+#[test]
+fn test_ignore_parent_alpha_changes_effective_alpha_propagation() {
+    let (t, _) = load_test_lua(
+        "layout-ignore-parent-alpha-prop",
+        r#"
+        local parent = CreateFrame("Frame", nil, UIParent)
+        parent:SetAllPoints(UIParent)
+        parent:SetAlpha(0.5)
+
+        local child = CreateFrame("Frame", nil, parent)
+        child:SetAllPoints(parent)
+        child:SetAlpha(0.8)
+
+        EFF_BEFORE = child:GetEffectiveAlpha()
+        child:SetIgnoreParentAlpha(true)
+        EFF_IGNORING = child:GetEffectiveAlpha()
+
+        parent:SetAlpha(0.25)
+        EFF_AFTER_PARENT_CHANGE = child:GetEffectiveAlpha()
+
+        child:SetIgnoreParentAlpha(false)
+        EFF_AFTER_REINHERIT = child:GetEffectiveAlpha()
+    "#,
+    );
+    let before = t.env.eval::<f64>("return EFF_BEFORE").unwrap();
+    let ignoring = t.env.eval::<f64>("return EFF_IGNORING").unwrap();
+    let after_parent_change = t.env.eval::<f64>("return EFF_AFTER_PARENT_CHANGE").unwrap();
+    let after_reinherit = t.env.eval::<f64>("return EFF_AFTER_REINHERIT").unwrap();
+
+    assert!((before - 0.4).abs() < 0.001, "before: {}", before);
+    assert!(
+        (ignoring - 0.8).abs() < 0.001,
+        "ignoring parent alpha should use only child alpha: {}",
+        ignoring
+    );
+    assert!(
+        (after_parent_change - 0.8).abs() < 0.001,
+        "ignored child alpha should not change when parent alpha changes: {}",
+        after_parent_change
+    );
+    assert!(
+        (after_reinherit - 0.2).abs() < 0.001,
+        "disabling ignore-parent-alpha should reinherit parent alpha: {}",
+        after_reinherit
+    );
+}

@@ -332,8 +332,8 @@ impl WidgetRegistry {
 
     /// Recompute `effective_alpha` for a frame and propagate to all descendants.
     ///
-    /// effective_alpha = parent_effective_alpha × own_alpha when visible,
-    /// 0.0 when the frame itself is hidden.
+    /// Visible frames inherit their parent's effective alpha unless they
+    /// explicitly ignore it. Hidden frames always resolve to 0.0.
     /// Also marks frames as visually dirty when their effective_alpha changes,
     /// so cached quad snapshots with baked-in alpha are invalidated.
     pub fn propagate_effective_alpha(&mut self, id: u64, parent_effective_alpha: f32) {
@@ -341,7 +341,11 @@ impl WidgetRegistry {
             return;
         };
         let eff = if f.visible {
-            parent_effective_alpha * f.alpha
+            if f.ignore_parent_alpha {
+                f.alpha
+            } else {
+                parent_effective_alpha * f.alpha
+            }
         } else {
             0.0
         };

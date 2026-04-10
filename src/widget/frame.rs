@@ -186,6 +186,8 @@ pub struct Frame {
     pub toplevel: bool,
     /// Alpha transparency (0.0 - 1.0).
     pub alpha: f32,
+    /// Whether this frame ignores its parent's effective alpha.
+    pub ignore_parent_alpha: bool,
     /// Effective alpha (product of all ancestor alphas × own alpha).
     /// Updated eagerly when visibility or alpha changes. 0.0 when any ancestor is hidden.
     pub effective_alpha: f32,
@@ -481,6 +483,7 @@ macro_rules! frame_defaults {
             has_fixed_frame_strata: false,
             toplevel: false,
             alpha: 1.0,
+            ignore_parent_alpha: false,
             effective_alpha: 1.0,
             anim_offset_x: 0.0,
             anim_offset_y: 0.0,

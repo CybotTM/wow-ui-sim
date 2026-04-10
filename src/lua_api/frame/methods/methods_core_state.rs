@@ -124,6 +124,7 @@ fn add_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_alpha(methods);
     add_get_alpha_methods(methods);
     add_set_alpha_from_boolean(methods);
+    add_ignore_parent_alpha_methods(methods);
 }
 
 fn add_set_alpha<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -190,6 +191,36 @@ fn add_set_alpha_from_boolean<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         }
         state.widgets.propagate_effective_alpha(id, parent_eff);
         Ok(())
+    });
+}
+
+fn add_ignore_parent_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetIgnoreParentAlpha", |lua, this, ignore: bool| {
+        let id = this.0;
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let parent_eff = state
+            .widgets
+            .get(id)
+            .and_then(|f| f.parent_id)
+            .and_then(|pid| state.widgets.get(pid))
+            .map(|p| p.effective_alpha)
+            .unwrap_or(1.0);
+        if let Some(frame) = state.widgets.get_mut_visual(id) {
+            frame.ignore_parent_alpha = ignore;
+        }
+        state.widgets.propagate_effective_alpha(id, parent_eff);
+        Ok(())
+    });
+
+    methods.add_method("GetIgnoreParentAlpha", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.ignore_parent_alpha)
+            .unwrap_or(false))
     });
 }
 
@@ -468,7 +499,6 @@ where
 fn add_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_get_set_scale(methods);
     add_ignore_parent_scale_methods(methods);
-    add_scale_stubs(methods);
 }
 
 fn add_get_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -548,11 +578,6 @@ fn add_ignore_parent_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
             .map(|f| f.ignore_parent_scale)
             .unwrap_or(false))
     });
-}
-
-fn add_scale_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetIgnoreParentAlpha", |_lua, _this, _ignore: bool| Ok(()));
-    methods.add_method("GetIgnoreParentAlpha", |_lua, _this, ()| Ok(false));
 }
 
 fn add_region_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
