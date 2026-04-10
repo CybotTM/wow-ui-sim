@@ -770,6 +770,57 @@ fn frame_dont_save_position(widgets: &WidgetRegistry, id: u64) -> bool {
         .unwrap_or(false)
 }
 
+fn frame_highlight_locked(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.highlight_locked)
+        .unwrap_or(false)
+}
+
+fn frame_ignoring_children_for_bounds(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.ignoring_children_for_bounds)
+        .unwrap_or(false)
+}
+
+fn collect_frame_and_descendant_ids(
+    widgets: &WidgetRegistry,
+    root_id: u64,
+    exclude_root: bool,
+) -> Vec<u64> {
+    let mut ids = Vec::new();
+    let mut stack = vec![root_id];
+
+    while let Some(frame_id) = stack.pop() {
+        if !(exclude_root && frame_id == root_id) {
+            ids.push(frame_id);
+        }
+        if let Some(frame) = widgets.get(frame_id) {
+            stack.extend(frame.children.iter().rev().copied());
+        }
+    }
+
+    ids
+}
+
+fn desaturate_frame_hierarchy(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    root_id: u64,
+    desaturation: f64,
+    exclude_root: bool,
+) {
+    let mut state = state_rc.borrow_mut();
+    let ids = collect_frame_and_descendant_ids(&state.widgets, root_id, exclude_root);
+    let desaturated = desaturation > 0.0;
+
+    for frame_id in ids {
+        if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+            frame.desaturated = desaturated;
+        }
+    }
+}
+
 fn get_frame_window(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<Value> {
     let fields = frame_fields(lua, frame_id)?;
     fields.get("window")
@@ -795,15 +846,48 @@ fn add_window_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 
 /// Miscellaneous stubs.
 fn add_misc_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("DesaturateHierarchy", |_, _this, _: bool| Ok(()));
-    methods.add_method("IsHighlightLocked", |_, _this, ()| Ok(false));
-    methods.add_method("IsIgnoringChildrenForBounds", |_, _this, ()| Ok(false));
+    methods.add_method(
+        "DesaturateHierarchy",
+        |lua, this, (desaturation, exclude_root): (f64, Option<bool>)| {
+            desaturate_frame_hierarchy(
+                get_sim_state(lua),
+                this.0,
+                desaturation,
+                exclude_root.unwrap_or(false),
+            );
+            Ok(())
+        },
+    );
+    methods.add_method("IsHighlightLocked", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_highlight_locked(&state.widgets, this.0))
+    });
+    methods.add_method("IsIgnoringChildrenForBounds", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_ignoring_children_for_bounds(&state.widgets, this.0))
+    });
     methods.add_method(
         "RegisterUnitEventCallback",
         |_, _this, _args: MultiValue| Ok(()),
     );
-    methods.add_method("SetHighlightLocked", |_, _this, _: bool| Ok(()));
-    methods.add_method("SetIgnoringChildrenForBounds", |_, _this, _: bool| Ok(()));
+    methods.add_method("SetHighlightLocked", |lua, this, locked: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.highlight_locked = locked;
+        }
+        Ok(())
+    });
+    methods.add_method("SetIgnoringChildrenForBounds", |lua, this, ignore: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.ignoring_children_for_bounds = ignore;
+        }
+        Ok(())
+    });
     methods.add_method("SetToDefaults", |_, _this, ()| Ok(()));
     methods.add_method("SetPlayerTexture", |_, _this, _args: MultiValue| Ok(()));
 }

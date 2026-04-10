@@ -1082,6 +1082,69 @@ fn test_window_display_methods_persist_window_and_dont_save_position() {
     );
 }
 
+#[test]
+fn test_misc_visual_state_methods_persist_and_desaturate_hierarchy() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        MiscStateRootFrame = CreateFrame("Frame", "MiscStateRootFrame", UIParent)
+        MiscStateChildTexture = MiscStateRootFrame:CreateTexture("MiscStateChildTexture", "ARTWORK")
+        MiscStateGrandchildFrame = CreateFrame("Frame", "MiscStateGrandchildFrame", MiscStateRootFrame)
+        MiscStateGrandchildTexture = MiscStateGrandchildFrame:CreateTexture("MiscStateGrandchildTexture", "ARTWORK")
+
+        assert(not MiscStateRootFrame:IsHighlightLocked(), "highlight lock should default false")
+        assert(not MiscStateRootFrame:IsIgnoringChildrenForBounds(), "ignore children for bounds should default false")
+        assert(not MiscStateChildTexture:IsDesaturated(), "child texture should default not desaturated")
+        assert(not MiscStateGrandchildTexture:IsDesaturated(), "grandchild texture should default not desaturated")
+
+        MiscStateRootFrame:SetHighlightLocked(true)
+        MiscStateRootFrame:SetIgnoringChildrenForBounds(true)
+        MiscStateRootFrame:DesaturateHierarchy(1, true)
+
+        assert(MiscStateRootFrame:IsHighlightLocked(), "highlight lock should persist")
+        assert(MiscStateRootFrame:IsIgnoringChildrenForBounds(), "ignore children for bounds should persist")
+        assert(MiscStateChildTexture:IsDesaturated(), "desaturate hierarchy should affect direct child textures")
+        assert(MiscStateGrandchildTexture:IsDesaturated(), "desaturate hierarchy should affect descendant textures")
+
+        MiscStateRootFrame:SetHighlightLocked(false)
+        MiscStateRootFrame:SetIgnoringChildrenForBounds(false)
+        MiscStateRootFrame:DesaturateHierarchy(0)
+
+        assert(not MiscStateRootFrame:IsHighlightLocked(), "highlight lock should clear")
+        assert(not MiscStateRootFrame:IsIgnoringChildrenForBounds(), "ignore children for bounds should clear")
+        assert(not MiscStateChildTexture:IsDesaturated(), "desaturate hierarchy should clear child textures")
+        assert(not MiscStateGrandchildTexture:IsDesaturated(), "desaturate hierarchy should clear descendant textures")
+
+        MISC_VISUAL_STATE_METHODS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let root_id = state
+            .widgets
+            .get_id_by_name("MiscStateRootFrame")
+            .expect("root frame should exist");
+        let root = state
+            .widgets
+            .get(root_id)
+            .expect("root frame should be readable");
+        assert!(
+            !root.desaturated,
+            "excludeRoot=true should leave the root frame undessaturated"
+        );
+    }
+
+    let ok: bool = env
+        .eval("return MISC_VISUAL_STATE_METHODS_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "misc visual state methods should persist booleans and desaturate descendants"
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
