@@ -270,6 +270,8 @@ pub fn collect_lua_error(lua: &Lua, msg: &str) {
     if let Some(state_rc) = lua.app_data_ref::<Rc<RefCell<SimState>>>() {
         if let Ok(mut state) = state_rc.try_borrow_mut() {
             state.lua_errors.push(msg.to_string());
+            let normalized = crate::lua_errors::extract_error_message(msg);
+            *state.lua_error_counts.entry(normalized).or_insert(0) += 1;
         }
     }
 }

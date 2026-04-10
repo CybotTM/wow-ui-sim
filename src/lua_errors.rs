@@ -40,26 +40,24 @@ pub fn run_lua_errors(env: &WowLuaEnv, saved_stdout: Option<i32>, exec_lua: Opti
 fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
     let state = env.state().borrow();
     let mut order: Vec<String> = Vec::new();
-    let mut counts = std::collections::HashMap::<String, usize>::new();
+    let mut seen = std::collections::HashSet::new();
     for raw in &state.lua_errors {
         let msg = extract_error_message(raw);
-        let entry = counts.entry(msg.clone()).or_insert(0);
-        if *entry == 0 {
+        if state.lua_error_counts.contains_key(&msg) && seen.insert(msg.clone()) {
             order.push(msg);
         }
-        *entry += 1;
     }
     order
         .into_iter()
         .map(|message| LuaError {
-            count: counts[&message],
+            count: state.lua_error_counts.get(&message).copied().unwrap_or(0),
             message,
         })
         .collect()
 }
 
 /// Extract the core error message, stripping "runtime error: " prefix.
-fn extract_error_message(raw: &str) -> String {
+pub(crate) fn extract_error_message(raw: &str) -> String {
     let first_line = raw.lines().next().unwrap_or(raw);
     first_line
         .strip_prefix("runtime error: ")

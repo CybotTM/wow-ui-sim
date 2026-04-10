@@ -120,3 +120,23 @@ fn test_load_lua_file_runtime_error_collects_lua_error() {
 
     let _ = std::fs::remove_dir_all(&temp_dir);
 }
+
+#[test]
+fn test_collect_lua_error_tracks_seen_message_counts() {
+    let env = WowLuaEnv::new().unwrap();
+
+    crate::lua_api::script_helpers::collect_lua_error(
+        env.lua(),
+        "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
+    );
+    crate::lua_api::script_helpers::collect_lua_error(
+        env.lua(),
+        "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
+    );
+    crate::lua_api::script_helpers::collect_lua_error(env.lua(), "different boom");
+
+    let state = env.state().borrow();
+    assert_eq!(state.lua_errors.len(), 3);
+    assert_eq!(state.lua_error_counts.get("repeated boom"), Some(&2));
+    assert_eq!(state.lua_error_counts.get("different boom"), Some(&1));
+}
