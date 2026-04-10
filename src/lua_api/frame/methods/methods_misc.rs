@@ -599,26 +599,54 @@ fn inherited_parent_level(widgets: &WidgetRegistry, id: u64) -> Option<i32> {
 
 /// Secret/Protected stubs.
 fn add_secret_protected_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_secret_boolean_stub(methods, "HasAnySecretAspect");
-    add_secret_boolean_stub_with_arg(methods, "HasSecretAspect");
-    add_secret_boolean_stub(methods, "HasSecretValues");
-    add_secret_boolean_stub(methods, "IsAnchoringRestricted");
-    add_secret_boolean_stub(methods, "IsAnchoringSecret");
-    add_secret_boolean_stub(methods, "IsPreventingSecretValues");
+    add_secret_query_methods(methods);
+    add_secret_mutation_methods(methods);
+}
+
+fn add_secret_query_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("HasAnySecretAspect", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_has_any_secret_aspect(&state.widgets, this.0))
+    });
+    methods.add_method("HasSecretAspect", |lua, this, aspect: Value| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_has_secret_aspect(&state.widgets, this.0, &aspect))
+    });
+    methods.add_method("HasSecretValues", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_has_secret_values(&state.widgets, this.0))
+    });
+    methods.add_method("IsAnchoringRestricted", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_is_anchoring_restricted(&state.widgets, this.0))
+    });
+    methods.add_method("IsAnchoringSecret", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_is_anchoring_secret(&state.widgets, this.0))
+    });
+    methods.add_method("IsPreventingSecretValues", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_is_preventing_secret_values(&state.widgets, this.0))
+    });
+}
+
+fn add_secret_mutation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_is_protected_stub(methods);
     add_protect_method(methods);
-    methods.add_method("SetPreventSecretValues", |_, _this, _: bool| Ok(()));
-}
-
-fn add_secret_boolean_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M, name: &str) {
-    methods.add_method(name, |_, _this, ()| Ok(false));
-}
-
-fn add_secret_boolean_stub_with_arg<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &str,
-) {
-    methods.add_method(name, |_, _this, _arg: Value| Ok(false));
+    methods.add_method("SetPreventSecretValues", |lua, this, prevent: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.prevent_secret_values = prevent;
+        }
+        Ok(())
+    });
 }
 
 fn add_is_protected_stub<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -651,6 +679,48 @@ fn add_protect_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
+}
+
+fn frame_has_any_secret_aspect(widgets: &WidgetRegistry, id: u64) -> bool {
+    frame_has_secret_values(widgets, id) || frame_is_anchoring_restricted(widgets, id)
+}
+
+fn frame_has_secret_aspect(widgets: &WidgetRegistry, id: u64, aspect: &Value) -> bool {
+    secret_aspect_value(aspect)
+        .is_some_and(|aspect_value| aspect_value == 1 && frame_has_any_secret_aspect(widgets, id))
+}
+
+fn secret_aspect_value(aspect: &Value) -> Option<i64> {
+    match aspect {
+        Value::Integer(value) => Some(*value),
+        Value::Number(value) => Some(*value as i64),
+        _ => None,
+    }
+}
+
+fn frame_has_secret_values(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.prevent_secret_values)
+        .unwrap_or(false)
+}
+
+fn frame_is_anchoring_restricted(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.forbidden || frame.is_protected)
+        .unwrap_or(false)
+}
+
+fn frame_is_anchoring_secret(widgets: &WidgetRegistry, id: u64) -> bool {
+    frame_has_secret_values(widgets, id)
+}
+
+fn frame_is_preventing_secret_values(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.prevent_secret_values)
+        .unwrap_or(false)
 }
 
 /// Flatten/Render stubs.

@@ -938,6 +938,65 @@ fn test_frame_level_methods_follow_parent_level_and_raise_state() {
     assert!(ok, "frame level method round-trip should succeed");
 }
 
+#[test]
+fn test_secret_and_protected_methods_reflect_frame_security_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        SecretValuesFrame = CreateFrame("Frame", "SecretValuesFrame", UIParent)
+        ProtectedSecretFrame = CreateFrame("Frame", "ProtectedSecretFrame", UIParent)
+        ForbiddenSecretFrame = CreateFrame("Frame", "ForbiddenSecretFrame", UIParent)
+
+        assert(not SecretValuesFrame:HasAnySecretAspect(), "new frame should not have secret aspects by default")
+        assert(not SecretValuesFrame:HasSecretValues(), "new frame should not have secret values by default")
+        assert(not SecretValuesFrame:IsPreventingSecretValues(), "new frame should not prevent secret values by default")
+        assert(not SecretValuesFrame:IsAnchoringSecret(), "new frame should not be anchoring secret by default")
+        assert(not SecretValuesFrame:IsAnchoringRestricted(), "new frame should not be anchoring restricted by default")
+        assert(not SecretValuesFrame:HasSecretAspect(Enum.SecretAspect.FrameLevel), "unrelated secret aspect should stay false")
+
+        SecretValuesFrame:SetPreventSecretValues(true)
+
+        assert(SecretValuesFrame:IsPreventingSecretValues(), "SetPreventSecretValues(true) should persist")
+        assert(SecretValuesFrame:HasSecretValues(), "preventing secret values should mark the frame as having secret values")
+        assert(SecretValuesFrame:HasAnySecretAspect(), "secret-valued frame should report a secret aspect")
+        assert(SecretValuesFrame:HasSecretAspect(Enum.SecretAspect.ObjectSecrets), "object secret aspect should be present")
+        assert(SecretValuesFrame:IsAnchoringSecret(), "secret-valued frame should be anchoring secret")
+        assert(not SecretValuesFrame:IsAnchoringRestricted(), "secret-valued frame should not become anchoring restricted")
+
+        SecretValuesFrame:SetPreventSecretValues(false)
+
+        assert(not SecretValuesFrame:IsPreventingSecretValues(), "SetPreventSecretValues(false) should clear")
+        assert(not SecretValuesFrame:HasSecretValues(), "clearing prevention should clear secret values")
+        assert(not SecretValuesFrame:HasAnySecretAspect(), "clearing prevention should clear secret aspects")
+        assert(not SecretValuesFrame:IsAnchoringSecret(), "clearing prevention should clear anchoring secret")
+
+        A_Admin.SetFrameProtected("ProtectedSecretFrame", true)
+        ForbiddenSecretFrame:SetForbidden(true)
+
+        assert(ProtectedSecretFrame:IsAnchoringRestricted(), "protected frames should be anchoring restricted")
+        assert(ProtectedSecretFrame:HasAnySecretAspect(), "protected frames should report a secret/security aspect")
+        assert(ProtectedSecretFrame:HasSecretAspect(Enum.SecretAspect.ObjectSecurity), "protected frames should report object security aspect")
+        assert(not ProtectedSecretFrame:HasSecretValues(), "protected frames should not imply secret values")
+        assert(not ProtectedSecretFrame:IsAnchoringSecret(), "protected frames should not imply anchoring secret")
+
+        assert(ForbiddenSecretFrame:IsAnchoringRestricted(), "forbidden frames should be anchoring restricted")
+        assert(ForbiddenSecretFrame:HasAnySecretAspect(), "forbidden frames should report a secret/security aspect")
+        assert(ForbiddenSecretFrame:HasSecretAspect(Enum.SecretAspect.ObjectSecurity), "forbidden frames should report object security aspect")
+
+        SECRET_PROTECTED_STATE_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return SECRET_PROTECTED_STATE_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "secret/protected state should round-trip through frame methods"
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
