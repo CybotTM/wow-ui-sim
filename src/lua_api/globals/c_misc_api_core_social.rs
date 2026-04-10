@@ -1,6 +1,6 @@
 //! Social, player, and chat related C_* namespace stubs.
 
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, Result, Table, Value};
 
 #[derive(Clone, Copy)]
 struct WowFriendRecord {
@@ -89,6 +89,8 @@ const HOLIDAY_BG_INFO: PvpHolidayBgSeed = PvpHolidayBgSeed {
 
 const PVP_LOCKLIST_MAP_NAMES: &[(i32, &str)] =
     &[(566, "Eye of the Storm"), (727, "Silvershard Mines")];
+const AVAILABLE_PARTY_LOOT_METHODS: [i32; 5] = [0, 1, 2, 3, 4];
+const DEFAULT_PARTY_LOOT_METHOD: i32 = 3;
 
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_nameplate(lua)?;
@@ -98,6 +100,18 @@ pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_pvp(lua)?;
     register_c_friend_list(lua)?;
     Ok(())
+}
+
+fn create_available_party_loot_methods(lua: &Lua) -> Result<Table> {
+    let methods = lua.create_table()?;
+    for (index, method) in AVAILABLE_PARTY_LOOT_METHODS.into_iter().enumerate() {
+        methods.set(index + 1, method)?;
+    }
+    Ok(methods)
+}
+
+fn is_available_party_loot_method(method: i32) -> bool {
+    AVAILABLE_PARTY_LOOT_METHODS.contains(&method)
 }
 
 fn register_c_nameplate(lua: &Lua) -> Result<()> {
@@ -257,6 +271,10 @@ fn register_c_party_info(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(true))?,
     )?;
     t.set(
+        "GetAvailableLootMethods",
+        lua.create_function(|lua, ()| create_available_party_loot_methods(lua))?,
+    )?;
+    t.set(
         "GetInviteConfirmationInfo",
         lua.create_function(|_, _g: String| Ok(Value::Nil))?,
     )?;
@@ -289,6 +307,16 @@ fn register_c_party_info(lua: &Lua) -> Result<()> {
     t.set("ConvertToParty", lua.create_function(|_, ()| Ok(()))?)?;
     t.set("ConvertToRaid", lua.create_function(|_, ()| Ok(()))?)?;
     t.set(
+        "GetLootMethod",
+        lua.create_function(|_lua, ()| {
+            Ok(mlua::MultiValue::from_vec(vec![
+                Value::Integer(i64::from(DEFAULT_PARTY_LOOT_METHOD)),
+                Value::Nil,
+                Value::Nil,
+            ]))
+        })?,
+    )?;
+    t.set(
         "GetMinLevel",
         lua.create_function(|_, _cat: Option<i32>| Ok(1i32))?,
     )?;
@@ -304,6 +332,10 @@ fn register_c_party_info(lua: &Lua) -> Result<()> {
     t.set(
         "IsCrossFactionParty",
         lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set(
+        "IsLootMethodAvailable",
+        lua.create_function(|_, method: i32| Ok(is_available_party_loot_method(method)))?,
     )?;
     lua.globals().set("C_PartyInfo", t)?;
     Ok(())
