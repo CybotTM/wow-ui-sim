@@ -474,12 +474,61 @@ fn register_c_scenario(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+struct HousingCustomizeModeState {
+    selected_decor_info: Option<HousingSelectedDecorInfo>,
+}
+
+impl HousingCustomizeModeState {
+    fn seeded() -> Self {
+        Self {
+            selected_decor_info: Some(HousingSelectedDecorInfo {
+                decor_guid: "Decor-Selection-1001",
+                name: "Sunspire Chair",
+                can_be_customized: true,
+                can_be_removed: true,
+                is_locked: false,
+            }),
+        }
+    }
+}
+
+struct HousingSelectedDecorInfo {
+    decor_guid: &'static str,
+    name: &'static str,
+    can_be_customized: bool,
+    can_be_removed: bool,
+    is_locked: bool,
+}
+
 fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingCustomizeModeState::seeded()));
     t.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
     t.set(
         "GetHoveredDecorInfo",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    let state_ref = Rc::clone(&state);
+    t.set(
+        "IsDecorSelected",
+        lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?,
+    )?;
+    let state_ref = Rc::clone(&state);
+    t.set(
+        "GetSelectedDecorInfo",
+        lua.create_function(move |lua, ()| {
+            let state = state_ref.borrow();
+            let Some(info) = &state.selected_decor_info else {
+                return Ok(Value::Nil);
+            };
+            let decor = lua.create_table()?;
+            decor.set("decorGUID", info.decor_guid)?;
+            decor.set("name", info.name)?;
+            decor.set("canBeCustomized", info.can_be_customized)?;
+            decor.set("canBeRemoved", info.can_be_removed)?;
+            decor.set("isLocked", info.is_locked)?;
+            Ok(Value::Table(decor))
+        })?,
     )?;
     t.set(
         "GetDecorDyeSlots",
