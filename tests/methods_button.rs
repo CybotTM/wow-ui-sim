@@ -127,12 +127,11 @@ fn test_pushed_text_offset() {
     )
     .unwrap();
 
-    // GetPushedTextOffset currently returns (0, 0) as a stub
     let (x, y): (f64, f64) = env
         .eval("return TestPushOffBtn:GetPushedTextOffset()")
         .unwrap();
-    assert_eq!(x, 0.0);
-    assert_eq!(y, 0.0);
+    assert_eq!(x, 2.5);
+    assert_eq!(y, -1.0);
 }
 
 // ============================================================================
@@ -181,7 +180,7 @@ fn test_get_font_string_nil_when_no_text() {
 
     env.exec(
         r#"
-        local frame = CreateFrame("Frame", "TestNoTextFrame", UIParent)
+        local frame = CreateFrame("Button", "TestNoTextFrame", UIParent)
     "#,
     )
     .unwrap();

@@ -420,6 +420,8 @@ pub struct Frame {
     pub user_id: i32,
     /// Button state: 0=NORMAL, 1=PUSHED (set by SetButtonState from Lua).
     pub button_state: u8,
+    /// Text offset applied while a button is visually pressed.
+    pub pushed_text_offset: (f32, f32),
     /// Eagerly computed layout rect (updated on SetPoint, SetSize, etc.).
     pub layout_rect: Option<crate::LayoutRect>,
     // --- Slider fields ---
@@ -677,6 +679,7 @@ macro_rules! frame_defaults {
             mouse_motion_enabled: false,
             user_id: 0,
             button_state: 0,
+            pushed_text_offset: (0.0, 0.0),
             layout_rect: None,
 
             // Slider

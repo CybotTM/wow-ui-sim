@@ -54,12 +54,26 @@ fn add_font_object_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     }
 }
 
-/// SetPushedTextOffset / GetPushedTextOffset stubs.
+/// SetPushedTextOffset / GetPushedTextOffset.
 fn add_pushed_text_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetPushedTextOffset", |_, _this, (_x, _y): (f64, f64)| {
+    methods.add_method("SetPushedTextOffset", |lua, this, (x, y): (f64, f64)| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.pushed_text_offset = (x as f32, y as f32);
+        }
         Ok(())
     });
-    methods.add_method("GetPushedTextOffset", |_, _this, ()| Ok((0.0_f64, 0.0_f64)));
+    methods.add_method("GetPushedTextOffset", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let (x, y) = state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.pushed_text_offset)
+            .unwrap_or((0.0, 0.0));
+        Ok((f64::from(x), f64::from(y)))
+    });
 }
 
 /// Get{Normal,Highlight,Pushed,Disabled}Texture — return existing texture child or nil.

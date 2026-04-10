@@ -230,6 +230,42 @@ fn is_button_pressed(f: &crate::widget::Frame, id: u64, pressed_frame: Option<u6
     pressed_frame == Some(id) || f.button_state == 1
 }
 
+fn offset_bounds(bounds: Rectangle, offset: (f32, f32)) -> Rectangle {
+    Rectangle::new(
+        Point::new(bounds.x + offset.0, bounds.y + offset.1),
+        Size::new(bounds.width, bounds.height),
+    )
+}
+
+fn pressed_button_text_offset(frame: &FrameQuadEmit<'_>) -> Option<(f32, f32)> {
+    match frame.widget.widget_type {
+        WidgetType::Button | WidgetType::CheckButton => {
+            is_button_pressed(frame.widget, frame.id, frame.pressed_frame)
+                .then_some(frame.widget.pushed_text_offset)
+        }
+        WidgetType::FontString => {
+            let parent_id = frame.widget.parent_id?;
+            let parent = frame.registry.get(parent_id)?;
+            let is_button_text_child = parent.children_keys.get("Text").copied() == Some(frame.id);
+            (is_button_text_child
+                && matches!(
+                    parent.widget_type,
+                    WidgetType::Button | WidgetType::CheckButton
+                ))
+            .then_some(parent)
+            .filter(|parent| is_button_pressed(parent, parent_id, frame.pressed_frame))
+            .map(|parent| parent.pushed_text_offset)
+        }
+        _ => None,
+    }
+}
+
+fn button_text_bounds(frame: &FrameQuadEmit<'_>) -> Rectangle {
+    pressed_button_text_offset(frame)
+        .map(|offset| offset_bounds(frame.bounds, offset))
+        .unwrap_or(frame.bounds)
+}
+
 /// Emit quads for a single visible frame based on its widget type.
 ///
 /// `eff_alpha` is the effective alpha from the ancestor chain (`parent_alpha * f.alpha`),
@@ -331,6 +367,7 @@ fn emit_button_quads_with_text(
         && let Some((fs, ga)) = text_ctx
         && let Some(ref txt) = frame.widget.text
     {
+        let text_bounds = button_text_bounds(frame);
         let mut text_renderer = WidgetTextRenderer {
             batch,
             font_sys: fs,
@@ -341,7 +378,7 @@ fn emit_button_quads_with_text(
             frame.widget,
             WidgetTextLayout {
                 text: txt,
-                bounds: frame.bounds,
+                bounds: text_bounds,
                 justify_h: frame.widget.justify_h,
                 justify_v: frame.widget.justify_v,
                 word_wrap: false,
@@ -383,6 +420,7 @@ fn emit_fontstring_quads(
     if let Some((fs, ga)) = text_ctx
         && let Some(ref txt) = frame.widget.text
     {
+        let text_bounds = button_text_bounds(frame);
         let mut text_renderer = WidgetTextRenderer {
             batch,
             font_sys: fs,
@@ -393,7 +431,7 @@ fn emit_fontstring_quads(
             frame.widget,
             WidgetTextLayout {
                 text: txt,
-                bounds: frame.bounds,
+                bounds: text_bounds,
                 justify_h: frame.widget.justify_h,
                 justify_v: frame.widget.justify_v,
                 word_wrap: frame.widget.word_wrap,
