@@ -1,6 +1,7 @@
 //! MessageFrame / ScrollingMessageFrame state data structures.
 
 /// A single message in a MessageFrame.
+#[derive(Clone)]
 pub struct Message {
     pub text: String,
     pub r: f32,

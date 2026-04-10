@@ -536,3 +536,58 @@ fn test_message_frame_callbacks_fire_for_scroll_and_display_refresh() {
     );
     assert_eq!(result.3, "TestMFCallbacks");
 }
+
+#[test]
+fn test_message_frame_transform_and_filter_apis_update_history() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (i32, String, f64, f64, f64, String, f64, f64, f64) = env
+        .eval(
+            r#"
+            local f = CreateFrame("ScrollingMessageFrame", "TestMFTransform", UIParent)
+            f:AddMessage("Keep", 1, 0, 0)
+            f:AddMessage("Drop", 0, 1, 0)
+            f:AddMessage("Swap", 0, 0, 1)
+
+            local refreshCalls = 0
+            f:AddOnDisplayRefreshedCallback(function()
+                refreshCalls = refreshCalls + 1
+            end)
+
+            f:RemoveMessagesByPredicate(function(message)
+                return message == "Drop"
+            end)
+
+            f:AdjustMessageColors(function(message, r, g, b)
+                if message == "Keep" then
+                    return true, 0.25, 0.5, 0.75
+                end
+                return false
+            end)
+
+            f:TransformMessages(
+                function(message)
+                    return message == "Swap"
+                end,
+                function(message, r, g, b)
+                    return "Swapped", 0.9, 0.8, 0.7
+                end
+            )
+
+            local keepText, keepR, keepG, keepB = f:GetMessageInfo(1)
+            local swapText, swapR, swapG, swapB = f:GetMessageInfo(2)
+            return refreshCalls, keepText, keepR, keepG, keepB, swapText, swapR, swapG, swapB
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, 3, "each mutating API should mark the display dirty once");
+    assert_eq!(result.1, "Keep");
+    assert!((result.2 - 0.25).abs() < 0.01);
+    assert!((result.3 - 0.5).abs() < 0.01);
+    assert!((result.4 - 0.75).abs() < 0.01);
+    assert_eq!(result.5, "Swapped");
+    assert!((result.6 - 0.9).abs() < 0.01);
+    assert!((result.7 - 0.8).abs() < 0.01);
+    assert!((result.8 - 0.7).abs() < 0.01);
+}

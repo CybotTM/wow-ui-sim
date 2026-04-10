@@ -479,11 +479,33 @@ fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods:
     methods.add_method("AddOnDisplayRefreshedCallback", |lua, this, func: Value| {
         add_message_frame_display_refreshed_callback(lua, this.0, func)
     });
-    methods.add_method("RemoveMessagesByPredicate", |_, _this, _func: Value| Ok(()));
-    methods.add_method("TransformMessages", |_, _this, _args: mlua::MultiValue| {
+    methods.add_method("RemoveMessagesByPredicate", |lua, this, predicate: Value| {
+        let Some(predicate) = as_lua_function(predicate) else {
+            return Ok(());
+        };
+        if remove_messages_by_predicate(lua, this.0, predicate)? {
+            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
+        }
         Ok(())
     });
-    methods.add_method("AdjustMessageColors", |_, _this, _func: Value| Ok(()));
+    methods.add_method("TransformMessages", |lua, this, args: mlua::MultiValue| {
+        let Some((predicate, transform)) = parse_transform_message_callbacks(args) else {
+            return Ok(());
+        };
+        if transform_messages(lua, this.0, predicate, transform)? {
+            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
+        }
+        Ok(())
+    });
+    methods.add_method("AdjustMessageColors", |lua, this, transform: Value| {
+        let Some(transform) = as_lua_function(transform) else {
+            return Ok(());
+        };
+        if adjust_message_colors(lua, this.0, transform)? {
+            call_message_frame_display_refreshed_callbacks(lua, this.0)?;
+        }
+        Ok(())
+    });
     methods.add_method("GetFontStringByID", |_, _this, _id: i64| Ok(Value::Nil));
     methods.add_method("ResetMessageFadeByID", |_, _this, _id: i64| Ok(()));
     methods.add_method("ResetAllFadeTimes", |lua, this, ()| {
@@ -612,6 +634,235 @@ fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: 
 }
 
 // --- Helper functions ---
+
+fn as_lua_function(value: Value) -> Option<mlua::Function> {
+    match value {
+        Value::Function(function) => Some(function),
+        _ => None,
+    }
+}
+
+fn parse_transform_message_callbacks(
+    args: mlua::MultiValue,
+) -> Option<(mlua::Function, mlua::Function)> {
+    let mut values = args.into_iter();
+    let predicate = as_lua_function(values.next()?)?;
+    let transform = as_lua_function(values.next()?)?;
+    Some((predicate, transform))
+}
+
+fn remove_messages_by_predicate(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    predicate: mlua::Function,
+) -> mlua::Result<bool> {
+    let snapshot = get_message_frame_snapshot(lua, frame_id);
+    if snapshot.is_empty() {
+        return Ok(false);
+    }
+    let mut kept_messages = Vec::with_capacity(snapshot.len());
+    let mut removed_any = false;
+    for message in snapshot {
+        if call_message_predicate(lua, &predicate, &message)? {
+            removed_any = true;
+        } else {
+            kept_messages.push(message);
+        }
+    }
+    if removed_any {
+        replace_message_frame_messages(lua, frame_id, kept_messages);
+    }
+    Ok(removed_any)
+}
+
+fn transform_messages(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    predicate: mlua::Function,
+    transform: mlua::Function,
+) -> mlua::Result<bool> {
+    let snapshot = get_message_frame_snapshot(lua, frame_id);
+    if snapshot.is_empty() {
+        return Ok(false);
+    }
+    let mut transformed_messages = Vec::with_capacity(snapshot.len());
+    let mut changed_any = false;
+    for message in snapshot {
+        if call_message_predicate(lua, &predicate, &message)? {
+            transformed_messages.push(call_message_transform(lua, &transform, &message)?);
+            changed_any = true;
+        } else {
+            transformed_messages.push(message);
+        }
+    }
+    if changed_any {
+        replace_message_frame_messages(lua, frame_id, transformed_messages);
+    }
+    Ok(changed_any)
+}
+
+fn adjust_message_colors(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    transform: mlua::Function,
+) -> mlua::Result<bool> {
+    let snapshot = get_message_frame_snapshot(lua, frame_id);
+    if snapshot.is_empty() {
+        return Ok(false);
+    }
+    let mut recolored_messages = Vec::with_capacity(snapshot.len());
+    let mut changed_any = false;
+    for message in snapshot {
+        let Some((r, g, b)) = call_color_transform(lua, &transform, &message)? else {
+            recolored_messages.push(message);
+            continue;
+        };
+        let mut updated = message;
+        updated.r = r;
+        updated.g = g;
+        updated.b = b;
+        recolored_messages.push(updated);
+        changed_any = true;
+    }
+    if changed_any {
+        replace_message_frame_messages(lua, frame_id, recolored_messages);
+    }
+    Ok(changed_any)
+}
+
+fn get_message_frame_snapshot(
+    lua: &mlua::Lua,
+    frame_id: u64,
+) -> Vec<crate::lua_api::message_frame::Message> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .message_frames
+        .get(&frame_id)
+        .map(|data| data.messages.clone())
+        .unwrap_or_default()
+}
+
+fn replace_message_frame_messages(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    messages: Vec<crate::lua_api::message_frame::Message>,
+) {
+    let state_rc = get_sim_state(lua);
+    let mut state = state_rc.borrow_mut();
+    let data = state
+        .message_frames
+        .entry(frame_id)
+        .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
+    data.messages = messages;
+    data.scroll_offset = data.scroll_offset.clamp(0, message_frame_scroll_limit(data));
+}
+
+fn call_message_predicate(
+    lua: &mlua::Lua,
+    predicate: &mlua::Function,
+    message: &crate::lua_api::message_frame::Message,
+) -> mlua::Result<bool> {
+    predicate.call(build_message_callback_args(lua, message)?)
+}
+
+fn call_message_transform(
+    lua: &mlua::Lua,
+    transform: &mlua::Function,
+    message: &crate::lua_api::message_frame::Message,
+) -> mlua::Result<crate::lua_api::message_frame::Message> {
+    let results: mlua::MultiValue = transform.call(build_message_callback_args(lua, message)?)?;
+    Ok(message_from_transform_results(message, results))
+}
+
+fn call_color_transform(
+    lua: &mlua::Lua,
+    transform: &mlua::Function,
+    message: &crate::lua_api::message_frame::Message,
+) -> mlua::Result<Option<(f32, f32, f32)>> {
+    let results: mlua::MultiValue = transform.call(build_message_callback_args(lua, message)?)?;
+    let mut values = results.into_iter();
+    let Some(change_color) = values.next() else {
+        return Ok(None);
+    };
+    if !is_lua_truthy(&change_color) {
+        return Ok(None);
+    }
+    Ok(Some((
+        value_to_optional_f32(values.next()).unwrap_or(message.r),
+        value_to_optional_f32(values.next()).unwrap_or(message.g),
+        value_to_optional_f32(values.next()).unwrap_or(message.b),
+    )))
+}
+
+fn build_message_callback_args(
+    lua: &mlua::Lua,
+    message: &crate::lua_api::message_frame::Message,
+) -> mlua::Result<mlua::MultiValue> {
+    let mut args = mlua::MultiValue::new();
+    args.push_back(Value::String(lua.create_string(&message.text)?));
+    args.push_back(Value::Number(message.r as f64));
+    args.push_back(Value::Number(message.g as f64));
+    args.push_back(Value::Number(message.b as f64));
+    args.push_back(Value::Number(message.a as f64));
+    match message.message_id {
+        Some(message_id) => args.push_back(Value::Integer(message_id)),
+        None => args.push_back(Value::Nil),
+    }
+    args.push_back(Value::Number(message.timestamp));
+    Ok(args)
+}
+
+fn message_from_transform_results(
+    original: &crate::lua_api::message_frame::Message,
+    results: mlua::MultiValue,
+) -> crate::lua_api::message_frame::Message {
+    let mut values = results.into_iter();
+    crate::lua_api::message_frame::Message {
+        text: value_to_optional_string(values.next()).unwrap_or_else(|| original.text.clone()),
+        r: value_to_optional_f32(values.next()).unwrap_or(original.r),
+        g: value_to_optional_f32(values.next()).unwrap_or(original.g),
+        b: value_to_optional_f32(values.next()).unwrap_or(original.b),
+        a: value_to_optional_f32(values.next()).unwrap_or(original.a),
+        message_id: value_to_optional_i64(values.next()).or(original.message_id),
+        timestamp: value_to_optional_f64(values.next()).unwrap_or(original.timestamp),
+    }
+}
+
+fn value_to_optional_string(value: Option<Value>) -> Option<String> {
+    match value {
+        Some(Value::String(text)) => Some(text.to_string_lossy().to_string()),
+        _ => None,
+    }
+}
+
+fn value_to_optional_f32(value: Option<Value>) -> Option<f32> {
+    match value {
+        Some(Value::Integer(number)) => Some(number as f32),
+        Some(Value::Number(number)) => Some(number as f32),
+        _ => None,
+    }
+}
+
+fn value_to_optional_f64(value: Option<Value>) -> Option<f64> {
+    match value {
+        Some(Value::Integer(number)) => Some(number as f64),
+        Some(Value::Number(number)) => Some(number),
+        _ => None,
+    }
+}
+
+fn value_to_optional_i64(value: Option<Value>) -> Option<i64> {
+    match value {
+        Some(Value::Integer(number)) => Some(number),
+        Some(Value::Number(number)) => Some(number as i64),
+        _ => None,
+    }
+}
+
+fn is_lua_truthy(value: &Value) -> bool {
+    !matches!(value, Value::Nil | Value::Boolean(false))
+}
 
 fn log_message(state: &SimState, id: u64, text: &str) {
     let name = state
