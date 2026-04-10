@@ -144,6 +144,10 @@ enum Commands {
         /// Path to simulator src directory (for gap analysis)
         #[arg(long, default_value = "./src")]
         sim_path: PathBuf,
+
+        /// Path to wowless repo (for C_* namespace allowlist filtering)
+        #[arg(long, default_value_os_t = default_wowless_path())]
+        wowless_path: PathBuf,
     },
 }
 
@@ -171,6 +175,10 @@ fn default_addons_path() -> PathBuf {
 
 fn default_blizzard_ui_path() -> PathBuf {
     PathBuf::from("./vendor/wow-ui-source/Interface/AddOns")
+}
+
+fn default_wowless_path() -> PathBuf {
+    dirs::home_dir().unwrap_or_default().join("Repos/wowless")
 }
 
 fn default_interface_path() -> PathBuf {
@@ -212,7 +220,16 @@ fn handle_command(command: Commands) {
             ui_path,
             gaps,
             sim_path,
-        } => run_audit_api(format, filter_startup, namespace, ui_path, gaps, sim_path),
+            wowless_path,
+        } => run_audit_api(
+            format,
+            filter_startup,
+            namespace,
+            ui_path,
+            gaps,
+            sim_path,
+            wowless_path,
+        ),
     }
 }
 
@@ -257,16 +274,24 @@ fn run_audit_api(
     ui_path: PathBuf,
     gaps: bool,
     sim_path: PathBuf,
+    wowless_path: PathBuf,
 ) {
     use audit_api::{AuditConfig, OutputFormat};
     let fmt = match format.as_str() {
         "json" => OutputFormat::Json,
         _ => OutputFormat::Text,
     };
+    // Only use wowless path if the apis.yaml file actually exists there
+    let wowless_opt = if wowless_path.join("data/products/wow/apis.yaml").exists() {
+        Some(wowless_path)
+    } else {
+        None
+    };
     let config = AuditConfig {
         ui_path,
         namespace_filter: namespace,
         filter_startup,
+        wowless_path: wowless_opt,
     };
     let results = audit_api::run_audit(&config);
     let gap_report = if gaps {

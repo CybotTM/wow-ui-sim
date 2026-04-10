@@ -5,7 +5,7 @@
 
 use regex::Regex;
 use serde::Serialize;
-use std::collections::{BTreeMap, BTreeSet};
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
@@ -34,6 +34,8 @@ pub struct AuditConfig {
     pub ui_path: PathBuf,
     pub namespace_filter: Option<String>,
     pub filter_startup: bool,
+    /// Path to wowless repo (for C_* namespace allowlist from apis.yaml).
+    pub wowless_path: Option<PathBuf>,
 }
 
 #[derive(Clone, Copy, PartialEq)]
@@ -202,6 +204,45 @@ fn is_load_on_demand(addon_path: &Path, addon_dir: &Path) -> bool {
     false
 }
 
+/// Load valid C_* namespaces and their methods from wowless apis.yaml.
+///
+/// The apis.yaml file contains flat entries like `C_Timer.After:` at the top level.
+/// Returns `(namespace_set, namespace_to_methods)`, or `None` if the file doesn't exist.
+pub fn load_valid_c_namespaces(
+    wowless_path: &Path,
+) -> Option<(HashSet<String>, BTreeMap<String, BTreeSet<String>>)> {
+    let apis_path = wowless_path.join("data/products/wow/apis.yaml");
+    let content = match std::fs::read_to_string(&apis_path) {
+        Ok(c) => c,
+        Err(_) => {
+            eprintln!(
+                "Warning: wowless apis.yaml not found at {}; skipping C_* namespace filtering",
+                apis_path.display()
+            );
+            return None;
+        }
+    };
+
+    let mut namespaces: HashSet<String> = HashSet::new();
+    let mut methods: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+
+    for line in content.lines() {
+        // Top-level entries look like `C_Foo.Bar:` (no leading whitespace, ends with `:`)
+        if !line.starts_with("C_") || !line.ends_with(':') {
+            continue;
+        }
+        let entry = &line[..line.len() - 1]; // strip trailing `:`
+        if let Some(dot) = entry.find('.') {
+            let ns = entry[..dot].to_string();
+            let method = entry[dot + 1..].to_string();
+            namespaces.insert(ns.clone());
+            methods.entry(ns).or_default().insert(method);
+        }
+    }
+
+    Some((namespaces, methods))
+}
+
 /// Run the audit and return results.
 pub fn run_audit(config: &AuditConfig) -> AuditResults {
     let p = Patterns::new();
@@ -246,6 +287,22 @@ pub fn run_audit(config: &AuditConfig) -> AuditResults {
     // Apply namespace filter if requested
     if let Some(ns) = &config.namespace_filter {
         results.c_api.retain(|k, _| k == ns);
+    }
+
+    // Filter C_* results against wowless allowlist to remove false positives
+    if let Some(wowless_path) = &config.wowless_path {
+        if let Some((valid_ns, _)) = load_valid_c_namespaces(wowless_path) {
+            let before = results.c_api.len();
+            results.c_api.retain(|k, _| valid_ns.contains(k));
+            let filtered = before - results.c_api.len();
+            if filtered > 0 {
+                eprintln!(
+                    "Filtered {} false-positive C_* namespace(s) using wowless allowlist ({} kept)",
+                    filtered,
+                    results.c_api.len()
+                );
+            }
+        }
     }
 
     results
