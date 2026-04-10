@@ -48,6 +48,7 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
+    patch_character_toggle(env);
     patch_communities_toggle(env);
     patch_group_finder_toggle(env);
 }
@@ -62,6 +63,34 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         r#"
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK, true)
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE, true)
+    "#,
+    );
+}
+
+/// Load Blizzard_TokenUI on demand before character tabs that depend on TokenFrame.
+///
+/// CharacterFrame's Blizzard ShowSubFrame() path always hides all three
+/// subframes, including TokenFrame. In the lighter panel harness TokenFrame
+/// does not exist until Blizzard_TokenUI loads, so reputation toggles can fail
+/// even though ReputationFrame itself is present.
+fn patch_character_toggle(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_toggle_character_patched and type(ToggleCharacter) == "function" then
+            local originalToggleCharacter = ToggleCharacter
+            ToggleCharacter = function(tab, onlyShow, ...)
+                if (tab == "ReputationFrame" or tab == "TokenFrame") and not TokenFrame then
+                    local loader = TokenFrame_LoadUI or ((C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn)
+                    if loader then
+                        pcall(loader, "Blizzard_TokenUI")
+                    end
+                end
+
+                return originalToggleCharacter(tab, onlyShow, ...)
+            end
+
+            __wow_ui_sim_toggle_character_patched = true
+        end
     "#,
     );
 }

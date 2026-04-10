@@ -1123,6 +1123,45 @@ fn toggle_lfd_parent_frame_opens_and_closes_group_finder_panel() {
 }
 
 #[test]
+fn toggle_character_reputation_frame_selects_and_toggles_reputation_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleCharacter then
+                return "missing_toggle_character"
+            end
+            if not ReputationFrame then
+                return "missing_reputation_frame"
+            end
+
+            ToggleCharacter("ReputationFrame")
+            if not CharacterFrame or not CharacterFrame:IsShown() then
+                return "character_frame_not_shown"
+            end
+            if not ReputationFrame:IsShown() then
+                return "reputation_frame_not_shown"
+            end
+            if PaperDollFrame and PaperDollFrame:IsShown() then
+                return "paperdoll_should_be_hidden"
+            end
+
+            ToggleCharacter("ReputationFrame")
+            if CharacterFrame and CharacterFrame:IsShown() then
+                return "character_frame_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleCharacter(\"ReputationFrame\") should select and toggle the reputation panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
