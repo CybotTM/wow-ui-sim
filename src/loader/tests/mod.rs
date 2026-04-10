@@ -745,6 +745,57 @@ fn test_gamepad_methods_round_trip_frame_state() {
     assert!(ok, "gamepad flag round-trip should succeed");
 }
 
+#[test]
+fn test_alpha_gradient_surface_round_trip_frame_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        AlphaGradientFrame = CreateFrame("Frame", "AlphaGradientFrame", UIParent)
+
+        assert(not AlphaGradientFrame:HasAlphaGradient(), "alpha gradient should default disabled")
+
+        AlphaGradientFrame:SetAlphaGradient(2, { x = 0.25, y = 0.75 })
+        assert(AlphaGradientFrame:HasAlphaGradient(), "alpha gradient should enable after SetAlphaGradient")
+
+        AlphaGradientFrame:ClearAlphaGradient()
+        assert(not AlphaGradientFrame:HasAlphaGradient(), "alpha gradient should clear after ClearAlphaGradient")
+
+        ALPHA_GRADIENT_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return ALPHA_GRADIENT_OK == true").unwrap();
+    assert!(ok, "alpha gradient round-trip should succeed");
+}
+
+#[test]
+fn test_font_string_set_alpha_gradient_accepts_legacy_arguments() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        local frame = CreateFrame("Frame", nil, UIParent)
+        local fs = frame:CreateFontString(nil, "OVERLAY")
+        fs:SetText("Hello World")
+
+        local ok, applied = pcall(function()
+            return fs:SetAlphaGradient(0, 50)
+        end)
+
+        assert(ok, "FontString:SetAlphaGradient should not error for legacy arguments")
+        assert(applied == true, "FontString:SetAlphaGradient should report success")
+
+        FONTSTRING_ALPHA_GRADIENT_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return FONTSTRING_ALPHA_GRADIENT_OK == true")
+        .unwrap();
+    assert!(ok, "FontString alpha gradient compatibility should succeed");
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

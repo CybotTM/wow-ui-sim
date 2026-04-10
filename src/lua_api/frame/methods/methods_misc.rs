@@ -12,7 +12,7 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_drag_stubs(methods);
     add_propagation_stubs(methods);
     add_gamepad_methods(methods);
-    add_alpha_gradient_stubs(methods);
+    add_alpha_gradient_methods(methods);
     add_draw_layer_stubs(methods);
     add_frame_buffer_stubs(methods);
     add_bounds_position_stubs(methods);
@@ -272,13 +272,99 @@ fn add_gamepad_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-/// Alpha/Gradient stubs.
-fn add_alpha_gradient_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ClearAlphaGradient", |_, _this, ()| Ok(()));
-    methods.add_method("HasAlphaGradient", |_, _this, ()| Ok(false));
+/// Alpha/Gradient state.
+fn add_alpha_gradient_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("ClearAlphaGradient", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.alpha_gradients.clear();
+        }
+        Ok(())
+    });
+    methods.add_method("HasAlphaGradient", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| !frame.alpha_gradients.is_empty())
+            .unwrap_or(false))
+    });
     methods.add_method("IsIgnoringParentAlpha", |_, _this, ()| Ok(false));
     methods.add_method("IsIgnoringParentScale", |_, _this, ()| Ok(false));
-    methods.add_method("SetAlphaGradient", |_, _this, _args: MultiValue| Ok(()));
+    methods.add_method("SetAlphaGradient", |lua, this, args: MultiValue| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let Some(frame) = state.widgets.get_mut(this.0) else {
+            return Ok(Value::Nil);
+        };
+        let Some((index, gradient)) = parse_alpha_gradient_args(&args) else {
+            return Ok(set_alpha_gradient_result(frame.widget_type, false));
+        };
+        frame.alpha_gradients.insert(index, gradient);
+        Ok(set_alpha_gradient_result(frame.widget_type, true))
+    });
+}
+
+fn parse_alpha_gradient_args(args: &MultiValue) -> Option<(i32, crate::widget::AlphaGradient)> {
+    let args_vec: Vec<&Value> = args.iter().collect();
+    match args_vec.as_slice() {
+        [index, Value::Table(_)] | [index, Value::Table(_), ..] => Some((
+            alpha_gradient_index(index)?,
+            alpha_gradient_from_value(args_vec[1])?,
+        )),
+        [start, length] => Some((
+            0,
+            crate::widget::AlphaGradient {
+                start: alpha_gradient_number(start)?,
+                length: alpha_gradient_number(length)?,
+            },
+        )),
+        _ => None,
+    }
+}
+
+fn alpha_gradient_index(value: &Value) -> Option<i32> {
+    match value {
+        Value::Integer(n) => Some(*n as i32),
+        Value::Number(n) => Some(*n as i32),
+        _ => None,
+    }
+}
+
+fn alpha_gradient_number(value: &Value) -> Option<f32> {
+    match value {
+        Value::Integer(n) => Some(*n as f32),
+        Value::Number(n) => Some(*n as f32),
+        _ => None,
+    }
+}
+
+fn alpha_gradient_from_value(value: &Value) -> Option<crate::widget::AlphaGradient> {
+    match value {
+        Value::Table(table) => Some(crate::widget::AlphaGradient {
+            start: table
+                .get::<Option<f32>>("x")
+                .ok()
+                .flatten()
+                .or_else(|| table.get::<Option<f32>>(1).ok().flatten())?,
+            length: table
+                .get::<Option<f32>>("y")
+                .ok()
+                .flatten()
+                .or_else(|| table.get::<Option<f32>>(2).ok().flatten())?,
+        }),
+        _ => None,
+    }
+}
+
+fn set_alpha_gradient_result(widget_type: crate::widget::WidgetType, applied: bool) -> Value {
+    if widget_type == crate::widget::WidgetType::FontString {
+        Value::Boolean(applied)
+    } else {
+        Value::Nil
+    }
 }
 
 /// Draw Layer stubs.

@@ -42,6 +42,13 @@ pub struct Gradient {
     pub max_color: Color,
 }
 
+/// Stored alpha-gradient span.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AlphaGradient {
+    pub start: f32,
+    pub length: f32,
+}
+
 /// Text justification for FontStrings.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub enum TextJustify {
@@ -233,6 +240,8 @@ pub struct Frame {
     pub vertex_color: Option<Color>,
     /// Vertex color gradient for textures.
     pub gradient: Option<Gradient>,
+    /// Alpha gradients keyed by surface index.
+    pub alpha_gradients: HashMap<i32, AlphaGradient>,
     /// Text content (for FontString widgets).
     pub text: Option<String>,
     /// Pre-stripped text (WoW markup removed). Updated when `text` is set.
@@ -520,6 +529,7 @@ macro_rules! frame_defaults {
             color_texture: None,
             vertex_color: None,
             gradient: None,
+            alpha_gradients: HashMap::new(),
             text: None,
             text_stripped: None,
             title: None,

@@ -8,7 +8,8 @@ mod registry;
 pub use crate::atlas::NineSliceAtlasInfo;
 pub use anchor::{Anchor, AnchorPoint};
 pub use frame::{
-    AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify, TextOutline,
+    AlphaGradient, AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify,
+    TextOutline,
 };
 pub use frame_enums::{DrawLayer, FrameStrata};
 pub use registry::{RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
