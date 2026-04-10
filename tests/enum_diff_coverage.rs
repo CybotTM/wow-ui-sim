@@ -88,6 +88,42 @@ fn representative_missing_enums_are_available_with_expected_values() {
 }
 
 #[test]
+fn cooldown_layout_enums_are_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local checks = {
+                { "CooldownLayoutStatus", "Success", 0 },
+                { "CooldownLayoutStatus", "NoValidAlerts", 6 },
+                { "CDMLayoutMode", "AccessOnly", false },
+                { "CDMLayoutMode", "AllowCreate", true },
+                { "CooldownLayoutAction", "ChangeOrder", 0 },
+                { "CooldownLayoutAction", "AddAlert", 3 },
+                { "CooldownLayoutType", "Character", 1 },
+                { "CooldownLayoutType", "Account", 2 },
+            }
+
+            for _, check in ipairs(checks) do
+                local enumTable = Enum[check[1]]
+                if type(enumTable) ~= "table" then
+                    return "missing_enum:" .. check[1]
+                end
+
+                if enumTable[check[2]] ~= check[3] then
+                    return "wrong_value:" .. check[1] .. "." .. check[2] .. "=" .. tostring(enumTable[check[2]])
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(

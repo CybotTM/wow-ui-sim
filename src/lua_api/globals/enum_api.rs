@@ -9,6 +9,9 @@ use mlua::{Lua, Result};
 
 /// Auto-generated Lua code that registers missing WoW client enums.
 const MISSING_ENUMS_LUA: &str = include_str!("enum_data/missing_enums.lua");
+/// Small hand-maintained enum patch set for runtime gaps that are not present in
+/// the generated wowless globals snapshot.
+const COMPAT_ENUMS_LUA: &str = include_str!("enum_data/compat_enums.lua");
 
 /// Register the Enum table with all WoW game enumerations.
 pub fn register_enum_api(lua: &Lua) -> Result<()> {
@@ -26,6 +29,7 @@ pub fn register_enum_api(lua: &Lua) -> Result<()> {
     lua.load(MISSING_ENUMS_LUA)
         .set_name("missing_enums")
         .exec()?;
+    lua.load(COMPAT_ENUMS_LUA).set_name("compat_enums").exec()?;
 
     Ok(())
 }

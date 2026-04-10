@@ -1,0 +1,37 @@
+-- Hand-maintained compatibility enums for Blizzard UI surfaces that are
+-- missing from the generated wowless globals snapshot.
+
+if not Enum.CooldownLayoutStatus then
+  Enum.CooldownLayoutStatus = {
+    Success = 0,
+    InvalidLayoutName = 1,
+    TooManyLayouts = 2,
+    AttemptToModifyDefaultLayoutWouldCreateTooManyLayouts = 3,
+    TooManyAlerts = 4,
+    InvalidOrderChange = 5,
+    NoValidAlerts = 6,
+  }
+end
+
+if not Enum.CDMLayoutMode then
+  Enum.CDMLayoutMode = {
+    AccessOnly = false,
+    AllowCreate = true,
+  }
+end
+
+if not Enum.CooldownLayoutAction then
+  Enum.CooldownLayoutAction = {
+    ChangeOrder = 0,
+    ChangeCategory = 1,
+    AddLayout = 2,
+    AddAlert = 3,
+  }
+end
+
+if not Enum.CooldownLayoutType then
+  Enum.CooldownLayoutType = {
+    Character = 1,
+    Account = 2,
+  }
+end
