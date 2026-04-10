@@ -169,6 +169,29 @@ fn test_template_inherited_parent_key_assigns_lua_field_on_parent() {
 }
 
 #[test]
+fn test_template_inherited_parent_key_climbs_one_level_for_nested_child() {
+    let t = load_test_xml(
+        "test-g-template-parentkey-parent",
+        r#"<Ui>
+            <Frame name="NestedParentKeyTemplate" parentKey="$parent.CloseButton" virtual="true"/>
+            <Frame name="NestedParentKeyOuter" parent="UIParent">
+                <Frames>
+                    <Frame name="$parentInner" parentKey="Inner">
+                        <Frames>
+                            <Frame name="$parentGrandchild" inherits="NestedParentKeyTemplate"/>
+                        </Frames>
+                    </Frame>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+    t.assert_lua_true(
+        "return NestedParentKeyOuter.CloseButton == NestedParentKeyOuterInnerGrandchild",
+        "template-inherited $parent parentKey should assign on the nested child's grandparent",
+    );
+}
+
+#[test]
 fn test_button_child_globals_not_on_fresh_button() {
     let (t, _) = load_test_lua(
         "test-g-btn-no-children",

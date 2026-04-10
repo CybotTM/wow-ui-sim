@@ -109,6 +109,10 @@ fn compile_assign_parent_key(lua: &Lua) -> mlua::Result<Function> {
         local parent = _G[parent_name]
         local child = _G[child_name]
         if parent and child then
+            if key:sub(1, 8) == "$parent." then
+                parent = parent:GetParent()
+                key = key:sub(9)
+            end
             parent[key] = child
         end
     "#,

@@ -119,14 +119,17 @@ pub(super) fn apply_parent_key_from_template(lua: &Lua, template_names: &str, re
             let frame_ref = lua_global_ref(ref_name);
             let code = format!(
                 "do local child = {frame_ref}\n\
-                 if child then\n\
-                     local parent = child:GetParent()\n\
-                     if parent then\n\
-                         parent[\"{parent_key}\"] = child\n\
-                     end\n\
-                 end\nend",
+                 local parent = child and child:GetParent()\n\
+                 return parent and parent:GetName() or nil\n\
+                 end",
             );
-            let _ = lua.load(&code).exec();
+            let parent_name = lua.load(&code).eval::<Option<String>>().ok().flatten();
+            if let Some(parent_name) = parent_name {
+                let fns = crate::loader::precompiled::get(lua);
+                fns.assign_parent_key
+                    .call::<()>((parent_name, parent_key.as_str(), ref_name))
+                    .ok();
+            }
             break;
         }
     }
