@@ -16,6 +16,23 @@ struct WowFriendRecord {
     notes: Option<&'static str>,
 }
 
+struct PvpWorldAreaSeed {
+    name: &'static str,
+    can_enter: bool,
+    can_queue: bool,
+    is_active: bool,
+    min_level: i32,
+    start_time: i32,
+}
+
+struct PvpHolidayBgSeed {
+    bg_id: i32,
+    bg_index: i32,
+    name: &'static str,
+    can_queue: bool,
+    min_level: i32,
+}
+
 const WOW_FRIENDS: &[WowFriendRecord] = &[
     WowFriendRecord {
         name: "Alyth",
@@ -42,6 +59,36 @@ const WOW_FRIENDS: &[WowFriendRecord] = &[
         notes: None,
     },
 ];
+
+const WORLD_PVP_AREAS: &[PvpWorldAreaSeed] = &[
+    PvpWorldAreaSeed {
+        name: "Wintergrasp",
+        can_enter: true,
+        can_queue: true,
+        is_active: true,
+        min_level: 80,
+        start_time: 900,
+    },
+    PvpWorldAreaSeed {
+        name: "Tol Barad",
+        can_enter: true,
+        can_queue: false,
+        is_active: false,
+        min_level: 80,
+        start_time: 1800,
+    },
+];
+
+const HOLIDAY_BG_INFO: PvpHolidayBgSeed = PvpHolidayBgSeed {
+    bg_id: 108,
+    bg_index: 2,
+    name: "Warsong Scramble",
+    can_queue: true,
+    min_level: 10,
+};
+
+const PVP_LOCKLIST_MAP_NAMES: &[(i32, &str)] =
+    &[(566, "Eye of the Storm"), (727, "Silvershard Mines")];
 
 pub(super) fn register_all(lua: &Lua) -> Result<()> {
     register_c_nameplate(lua)?;
@@ -388,6 +435,12 @@ fn send_chat_message(
 
 fn register_c_pvp(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
+    let locklist_maps = lua.create_table()?;
+    let world_pvp_areas = seeded_world_pvp_areas(lua)?;
+    let holiday_bg_info = seeded_holiday_bg_info(lua)?;
+    t.set("__locklistMaps", locklist_maps)?;
+    t.set("__worldPVPAreas", world_pvp_areas)?;
+    t.set("__holidayBGInfo", holiday_bg_info)?;
     t.set(
         "GetZonePVPInfo",
         lua.create_function(|_, ()| Ok((Value::Nil, false, Value::Nil)))?,
@@ -452,7 +505,137 @@ fn register_c_pvp(lua: &Lua) -> Result<()> {
         "ArePvpTalentsUnlocked",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
+    let pvp_state = t.clone();
+    t.set(
+        "GetWorldPVPAreaInfo",
+        lua.create_function(move |lua, index: i32| lookup_pvp_world_area(lua, &pvp_state, index))?,
+    )?;
+    let pvp_state = t.clone();
+    t.set(
+        "GetHolidayBGInfo",
+        lua.create_function(move |_, ()| pvp_state.get::<mlua::Table>("__holidayBGInfo"))?,
+    )?;
+    let pvp_state = t.clone();
+    t.set(
+        "GetLocklistMap",
+        lua.create_function(move |_, slot: i32| lookup_locklist_map_id(&pvp_state, slot))?,
+    )?;
+    let pvp_state = t.clone();
+    t.set(
+        "GetLocklistMapName",
+        lua.create_function(move |lua, slot: i32| lookup_locklist_map_name(lua, &pvp_state, slot))?,
+    )?;
+    let pvp_state = t.clone();
+    t.set(
+        "SetLocklistMap",
+        lua.create_function(move |_, map_id: i32| set_locklist_map(&pvp_state, map_id))?,
+    )?;
+    let pvp_state = t.clone();
+    t.set(
+        "ClearLocklistMap",
+        lua.create_function(move |_, map_id: i32| clear_locklist_map(&pvp_state, map_id))?,
+    )?;
     lua.globals().set("C_PvP", t)?;
+    Ok(())
+}
+
+fn seeded_world_pvp_areas(lua: &Lua) -> Result<mlua::Table> {
+    let areas = lua.create_table()?;
+    for (index, area) in WORLD_PVP_AREAS.iter().enumerate() {
+        let info = lua.create_table()?;
+        info.set("name", area.name)?;
+        info.set("canEnter", area.can_enter)?;
+        info.set("canQueue", area.can_queue)?;
+        info.set("isActive", area.is_active)?;
+        info.set("minLevel", area.min_level)?;
+        info.set("startTime", area.start_time)?;
+        areas.set(index + 1, info)?;
+    }
+    Ok(areas)
+}
+
+fn seeded_holiday_bg_info(lua: &Lua) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("bgID", HOLIDAY_BG_INFO.bg_id)?;
+    info.set("bgIndex", HOLIDAY_BG_INFO.bg_index)?;
+    info.set("name", HOLIDAY_BG_INFO.name)?;
+    info.set("canQueue", HOLIDAY_BG_INFO.can_queue)?;
+    info.set("minLevel", HOLIDAY_BG_INFO.min_level)?;
+    Ok(info)
+}
+
+fn lookup_pvp_world_area(_: &Lua, pvp_state: &mlua::Table, index: i32) -> Result<Value> {
+    let areas = pvp_state.get::<mlua::Table>("__worldPVPAreas")?;
+    match areas.get::<Value>(index)? {
+        Value::Nil => Ok(Value::Nil),
+        value => Ok(value),
+    }
+}
+
+fn lookup_locklist_map_id(pvp_state: &mlua::Table, slot: i32) -> Result<i32> {
+    let locklist_maps = pvp_state.get::<mlua::Table>("__locklistMaps")?;
+    Ok(locklist_maps.get::<Option<i32>>(slot)?.unwrap_or(0))
+}
+
+fn lookup_locklist_map_name(lua: &Lua, pvp_state: &mlua::Table, slot: i32) -> Result<Value> {
+    let map_id = lookup_locklist_map_id(pvp_state, slot)?;
+    if map_id == 0 {
+        return Ok(Value::Nil);
+    }
+
+    let map_name = PVP_LOCKLIST_MAP_NAMES
+        .iter()
+        .find_map(|(candidate_id, candidate_name)| {
+            (*candidate_id == map_id).then_some(*candidate_name)
+        });
+    match map_name {
+        Some(name) => Ok(Value::String(lua.create_string(name)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn set_locklist_map(pvp_state: &mlua::Table, map_id: i32) -> Result<()> {
+    let locklist_maps = pvp_state.get::<mlua::Table>("__locklistMaps")?;
+    let already_present = locklist_contains_map(&locklist_maps, map_id)?;
+    if already_present {
+        return Ok(());
+    }
+
+    for slot in 1..=2 {
+        if locklist_maps.get::<Option<i32>>(slot)?.is_none() {
+            locklist_maps.set(slot, map_id)?;
+            break;
+        }
+    }
+    Ok(())
+}
+
+fn clear_locklist_map(pvp_state: &mlua::Table, map_id: i32) -> Result<()> {
+    let locklist_maps = pvp_state.get::<mlua::Table>("__locklistMaps")?;
+    for slot in 1..=2 {
+        if locklist_maps.get::<Option<i32>>(slot)? == Some(map_id) {
+            shift_locklist_maps_left(&locklist_maps, slot)?;
+            break;
+        }
+    }
+    Ok(())
+}
+
+fn locklist_contains_map(locklist_maps: &mlua::Table, map_id: i32) -> Result<bool> {
+    for slot in 1..=2 {
+        if locklist_maps.get::<Option<i32>>(slot)? == Some(map_id) {
+            return Ok(true);
+        }
+    }
+    Ok(false)
+}
+
+fn shift_locklist_maps_left(locklist_maps: &mlua::Table, start_slot: i32) -> Result<()> {
+    if start_slot == 1 {
+        let next_value = locklist_maps.get::<Value>(2)?;
+        locklist_maps.set(1, next_value)?;
+    }
+    locklist_maps.set(2, Value::Nil)?;
     Ok(())
 }
 
