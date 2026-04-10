@@ -375,7 +375,7 @@ with addon code.
 
 ## Section 6: Missing Constants
 
-**Count**: 1364 missing constants, 72 with wrong values.
+**Count**: 164 missing constants, 0 with wrong values.
 
 **Wrong values**: `0`
 
@@ -391,11 +391,15 @@ exporting the legacy globals `MAX_CHARACTER_NAME_BYTES`, `MAX_COMMUNITY_NAME_LEN
 `LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND`. That alias gap is now fixed, and the diff file is kept
 empty by regression tests.
 
-**Missing constants**: 1364 total. The `diff_constants_missing.txt` file has them with their WoW values.
-Includes item quality color codes (`ITEM_EPIC_COLOR_CODE`, etc.), many `LE_GAME_ERR_*` numeric codes,
-`LE_CHARACTER_UNDELETE_RESULT_*`, `LE_CHARACTER_UPGRADE_RESULT_*`, and hundreds of others.
+**Missing constants**: 164 total. The `diff_constants_missing.txt` file has them with their WoW values.
+The large `LE_GAME_*`, `LE_AUTOCOMPLETE_*`, and `LE_LFG_*` families are no longer tracked there because
+[`constants_api.rs`](../../src/lua_api/globals/constants_api.rs) already loads
+[`missing_constants.lua`](../../src/lua_api/globals/enum_data/missing_constants.lua) at startup, and
+runtime coverage now proves those values resolve with the expected numbers. The remaining entries are
+the still-unreconciled constants such as item quality color codes, `LE_CHARACTER_UNDELETE_RESULT_*`,
+`LE_CHARACTER_UPGRADE_RESULT_*`, and other smaller families.
 
-**Task**: Keep `diff_constants_wrong.txt` at zero and then bulk-add the 1364 missing constants.
+**Task**: Keep `diff_constants_wrong.txt` at zero and then reconcile the remaining 164 missing constants.
 
 ---
 

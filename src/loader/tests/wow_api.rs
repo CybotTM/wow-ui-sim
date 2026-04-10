@@ -230,6 +230,31 @@ fn test_wrong_constant_snapshot_matches_expected_values() {
         .unwrap();
     assert_eq!(lfg_categories, (2, 3, 4));
 
+    let lfg_display_types: (i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_LFG_LIST_DISPLAY_TYPE_ROLE_COUNT,
+                LE_LFG_LIST_DISPLAY_TYPE_ROLE_ENUMERATE,
+                LE_LFG_LIST_DISPLAY_TYPE_CLASS_ENUMERATE,
+                LE_LFG_LIST_DISPLAY_TYPE_HIDE_ALL,
+                LE_LFG_LIST_DISPLAY_TYPE_PLAYER_COUNT
+            "#,
+        )
+        .unwrap();
+    assert_eq!(lfg_display_types, (1, 2, 3, 4, 5));
+
+    let game_errors: (i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_GAME_ERR_SYSTEM,
+                LE_GAME_ERR_BAG_FULL,
+                LE_GAME_ERR_NOT_IN_GROUP,
+                LE_GAME_ERR_WRONG_SLOT
+            "#,
+        )
+        .unwrap();
+    assert_eq!(game_errors, (1, 14, 106, 12));
+
     let timer_types: (i32, i32) = env
         .eval(
             "return LE_WORLD_ELAPSED_TIMER_TYPE_CHALLENGE_MODE, LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND",

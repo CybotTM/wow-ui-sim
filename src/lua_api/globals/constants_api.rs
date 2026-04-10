@@ -21,7 +21,7 @@ pub fn register_constants_api(lua: &Lua) -> Result<()> {
     register_constants_table(lua)?;
     register_color_globals(lua)?;
     register_raid_class_colors(lua)?;
-    // Load auto-generated missing constants from WoW client diff (1364 constants).
+    // Load auto-generated missing constants from the WoW client diff snapshot.
     lua.load(MISSING_CONSTANTS_LUA)
         .set_name("missing_constants")
         .exec()?;
