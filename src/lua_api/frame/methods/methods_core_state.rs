@@ -418,12 +418,7 @@ fn add_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMapID", |lua, this, map_id: i32| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let blob = state.quest_blobs.entry(this.0).or_insert_with(|| {
-            crate::lua_api::state::QuestBlobState {
-                map_id: 0,
-                active_quests: Vec::new(),
-            }
-        });
+        let blob = state.quest_blobs.entry(this.0).or_default();
         blob.map_id = map_id as u32;
         Ok(())
     });

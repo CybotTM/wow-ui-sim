@@ -609,6 +609,39 @@ fn test_draw_none_clears_blobs() {
 }
 
 #[test]
+fn test_quest_blob_render_inputs_persist_on_first_setter_use() {
+    let env = env();
+
+    env.exec(
+        r#"
+        local poi = CreateFrame("Frame", "TestPOIStyled", UIParent)
+        poi:SetFillTexture("Interface\\WorldMap\\UI-QuestBlob-Inside")
+        poi:SetBorderTexture("Interface\\WorldMap\\UI-QuestBlob-Outside")
+        poi:SetFillAlpha(128)
+        poi:SetBorderAlpha(192)
+        poi:SetBorderScalar(1.0)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let poi_id = state.widgets.get_id_by_name("TestPOIStyled").unwrap();
+    let blob = state.quest_blobs.get(&poi_id).unwrap();
+    assert!(blob.active_quests.is_empty());
+    assert_eq!(
+        blob.fill_texture.as_deref(),
+        Some("Interface\\WorldMap\\UI-QuestBlob-Inside")
+    );
+    assert_eq!(
+        blob.border_texture.as_deref(),
+        Some("Interface\\WorldMap\\UI-QuestBlob-Outside")
+    );
+    assert_eq!(blob.fill_alpha, Some(128.0));
+    assert_eq!(blob.border_alpha, Some(192.0));
+    assert_eq!(blob.border_scalar, Some(1.0));
+}
+
+#[test]
 fn test_set_map_id_and_get_map_id() {
     let env = env();
 

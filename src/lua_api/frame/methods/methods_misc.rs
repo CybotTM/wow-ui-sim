@@ -47,14 +47,60 @@ fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetFillTexture", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("SetBorderTexture", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("SetFillAlpha", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("SetBorderAlpha", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("SetBorderScalar", |_, _, _: mlua::MultiValue| Ok(()));
+    add_quest_blob_texture_setter(methods, "SetFillTexture", |blob, texture| {
+        blob.fill_texture = texture;
+    });
+    add_quest_blob_texture_setter(methods, "SetBorderTexture", |blob, texture| {
+        blob.border_texture = texture;
+    });
+    add_quest_blob_numeric_setter(methods, "SetFillAlpha", |blob, alpha| {
+        blob.fill_alpha = Some(alpha);
+    });
+    add_quest_blob_numeric_setter(methods, "SetBorderAlpha", |blob, alpha| {
+        blob.border_alpha = Some(alpha);
+    });
+    add_quest_blob_numeric_setter(methods, "SetBorderScalar", |blob, scalar| {
+        blob.border_scalar = Some(scalar);
+    });
     methods.add_method("UpdateMouseOverTooltip", |lua, this, (x, y): (f64, f64)| {
         update_mouse_over_tooltip(lua, this.0, x, y)
     });
+}
+
+fn add_quest_blob_texture_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::state::QuestBlobState, Option<String>) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, texture: Value| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        setter(
+            quest_blob_state_mut(&mut state, this.0),
+            texture_asset_to_string(&texture)?,
+        );
+        Ok(())
+    });
+}
+
+fn add_quest_blob_numeric_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+where
+    M: mlua::UserDataMethods<FrameRef>,
+    F: Fn(&mut crate::lua_api::state::QuestBlobState, f64) + Copy + 'static,
+{
+    methods.add_method(name, move |lua, this, value: f64| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        setter(quest_blob_state_mut(&mut state, this.0), value);
+        Ok(())
+    });
+}
+
+fn quest_blob_state_mut(
+    state: &mut crate::lua_api::state::SimState,
+    frame_id: u64,
+) -> &mut crate::lua_api::state::QuestBlobState {
+    state.quest_blobs.entry(frame_id).or_default()
 }
 
 fn update_mouse_over_tooltip(
@@ -391,8 +437,6 @@ fn update_unit_pin_color(
 
 /// Quest blob methods for QuestPOIFrame (DrawBlob, DrawNone, SetMapID).
 fn add_quest_blob_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    use crate::lua_api::state::QuestBlobState;
-
     methods.add_method("DrawBlob", |lua, this, args: mlua::MultiValue| {
         let mut iter = args.into_iter();
         let quest_id = match iter.next() {
@@ -402,13 +446,7 @@ fn add_quest_blob_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let blob = state
-            .quest_blobs
-            .entry(this.0)
-            .or_insert_with(|| QuestBlobState {
-                map_id: 0,
-                active_quests: Vec::new(),
-            });
+        let blob = state.quest_blobs.entry(this.0).or_default();
         if !blob.active_quests.contains(&quest_id) {
             blob.active_quests.push(quest_id);
         }

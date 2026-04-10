@@ -108,6 +108,30 @@ pub struct QuestBlobState {
     pub map_id: u32,
     /// Quest IDs currently drawn (via `DrawBlob`).
     pub active_quests: Vec<u32>,
+    /// Fill texture configured via `SetFillTexture`.
+    pub fill_texture: Option<String>,
+    /// Border texture configured via `SetBorderTexture`.
+    pub border_texture: Option<String>,
+    /// Fill alpha configured via `SetFillAlpha`.
+    pub fill_alpha: Option<f64>,
+    /// Border alpha configured via `SetBorderAlpha`.
+    pub border_alpha: Option<f64>,
+    /// Border scalar configured via `SetBorderScalar`.
+    pub border_scalar: Option<f64>,
+}
+
+impl Default for QuestBlobState {
+    fn default() -> Self {
+        Self {
+            map_id: 0,
+            active_quests: Vec::new(),
+            fill_texture: None,
+            border_texture: None,
+            fill_alpha: None,
+            border_alpha: None,
+            border_scalar: None,
+        }
+    }
 }
 
 /// A unit pin stored by a UnitPositionFrame.
