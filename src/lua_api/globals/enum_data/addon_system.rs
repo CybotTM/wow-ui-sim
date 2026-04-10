@@ -168,15 +168,6 @@ pub const PVP_UNIT_CLASSIFICATION: SeqEnumDef = (
 
 pub const END_OF_MATCH_TYPE: SeqEnumDef = ("EndOfMatchType", &["None", "Plunderstorm"]);
 
-// ============================================================================
-// Expansion / Feature Enums
-// ============================================================================
-
-pub const EXPANSION_LANDING_PAGE_TYPE: SeqEnumDef = (
-    "ExpansionLandingPageType",
-    &["None", "Dragonflight", "WarWithin"],
-);
-
 pub const ARROW_CALLOUT_DIRECTION: SeqEnumDef =
     ("ArrowCalloutDirection", &["Up", "Down", "Left", "Right"]);
 

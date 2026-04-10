@@ -8,8 +8,8 @@ fn manifest_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
 }
 
-fn parse_missing_enum_names() -> BTreeSet<String> {
-    let path = manifest_dir().join("docs/wow-client-diff/diff_enums_missing.txt");
+fn parse_enum_names(file_name: &str) -> BTreeSet<String> {
+    let path = manifest_dir().join("docs/wow-client-diff").join(file_name);
     fs::read_to_string(path)
         .unwrap()
         .lines()
@@ -22,7 +22,7 @@ fn parse_missing_enum_names() -> BTreeSet<String> {
 #[test]
 fn diff_enums_missing_matches_live_runtime_gaps() {
     let env = WowLuaEnv::new().unwrap();
-    let missing = parse_missing_enum_names();
+    let missing = parse_enum_names("diff_enums_missing.txt");
 
     let lua_list = missing
         .iter()
@@ -76,6 +76,37 @@ fn representative_missing_enums_are_available_with_expected_values() {
 
                 if enumTable[check[2]] ~= check[3] then
                     return "wrong_value:" .. check[1] .. "." .. check[2] .. "=" .. tostring(enumTable[check[2]])
+                end
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
+fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
+    let extra = parse_enum_names("diff_enums_extra.txt");
+    assert!(
+        extra.is_empty(),
+        "expected no extra enums, found: {extra:?}"
+    );
+
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local removed = {
+                "ExpansionLandingPageType",
+                "TransmogOutfitFlags",
+            }
+
+            for _, name in ipairs(removed) do
+                if type(Enum[name]) == "table" then
+                    return "unexpected_enum:" .. name
                 end
             end
 

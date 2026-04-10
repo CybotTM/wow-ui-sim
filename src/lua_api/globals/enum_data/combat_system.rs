@@ -220,13 +220,6 @@ pub const SPELL_AURA_VISIBILITY_TYPE: SeqEnumDef = (
 pub const LUA_CURVE_TYPE: SeqEnumDef = ("LuaCurveType", &["Bezier", "Linear"]);
 
 // ============================================================================
-// Transmog Outfit Enums (stubs to prevent C_TransmogOutfitInfo errors)
-// ============================================================================
-
-pub const TRANSMOG_OUTFIT_FLAGS: SeqEnumDef =
-    ("TransmogOutfitFlags", &["None", "NoMainhand", "NoOffhand"]);
-
-// ============================================================================
 // Prey / Hunt / UI Widget State Enums
 // ============================================================================
 

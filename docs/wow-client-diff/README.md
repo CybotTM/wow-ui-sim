@@ -360,18 +360,17 @@ earlier snapshot were reconciled; remaining C_* work is function-level, not tabl
 
 **Count**: 0
 
-**Extra enums** (2 that shouldn't be there):
-- `ExpansionLandingPageType`
-- `TransmogOutfitFlags`
+**Extra enums**: `0`
 
 `diff_enums_missing.txt` and `diff_enums_missing_values.txt` are intentionally empty now. The
 bulk enum import already landed through `src/lua_api/globals/enum_data/missing_enums.lua`, and the
 only live runtime gap this reconciliation found was `ClientDebugAISpellReadyStatus` plus its `Meta`
 table. Those are now present at runtime too.
 
-The remaining enum follow-up is the separate extras item: decide whether
-`ExpansionLandingPageType` and `TransmogOutfitFlags` should stay as intentional compatibility enums
-or be removed from the runtime surface.
+`diff_enums_extra.txt` is intentionally empty now too. The only two lingering extras from the older
+snapshot, `ExpansionLandingPageType` and `TransmogOutfitFlags`, were simulator-only inventions with
+no Blizzard UI references in this tree, so they were removed from the runtime surface rather than
+kept as compatibility aliases.
 
 ---
 
@@ -414,9 +413,7 @@ discovery artifact: the simulator namespaces are used by Blizzard UI locally, an
 in Blizzard APIDocumentation. Any remaining drift is tracked in `diff_c_functions_extra.txt`, not as
 invented top-level namespace tables.
 
-**Extra enums** (2):
-- `ExpansionLandingPageType` — verify if this is a sim invention or was renamed in live WoW
-- `TransmogOutfitFlags` — same check
+**Extra enums**: `0`
 
 **Extra global functions** (182 in `diff_global_functions_extra.txt`):
 Most are addon-injected globals from loaded third-party addons (Angleur, Details, ATT, Auctionator,
