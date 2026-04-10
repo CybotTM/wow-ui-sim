@@ -886,6 +886,46 @@ fn toggle_spellbook_legacy_global_opens_and_closes_spellbook_panel() {
 }
 
 #[test]
+fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let ui = blizzard_ui_dir();
+        for (name, toc) in SPELLBOOK_ADDONS {
+            let toc_path = ui.join(name).join(toc);
+            if toc_path.exists() {
+                if let Err(e) = load_addon(&env.loader_env(), &toc_path) {
+                    eprintln!("[load {name}] FAILED: {e}");
+                }
+            }
+        }
+
+        let result: String = env.eval(r#"
+            if not PlayerSpellsUtil or not PlayerSpellsUtil.TogglePlayerSpellsFrame then
+                return "missing_toggle_player_spells_frame"
+            end
+
+            PlayerSpellsUtil.TogglePlayerSpellsFrame()
+            if not PlayerSpellsFrame or not PlayerSpellsFrame:IsShown() then
+                return "player_spells_not_shown"
+            end
+
+            PlayerSpellsUtil.TogglePlayerSpellsFrame()
+            if PlayerSpellsFrame:IsShown() then
+                return "player_spells_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "PlayerSpellsUtil.TogglePlayerSpellsFrame() should toggle the talent panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();

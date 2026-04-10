@@ -354,6 +354,7 @@ fn register_unit_stat_constants(lua: &Lua) -> Result<()> {
 /// StoreFrame_IsShown function stub (used by MicroButtons).
 fn register_store_frame_functions(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
+    register_player_spells_compat(lua, &globals)?;
     globals.set(
         "StoreFrame_IsShown",
         lua.create_function(|_, ()| Ok(false))?,
@@ -434,6 +435,62 @@ fn register_store_frame_functions(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _tab: Value| Ok(()))?,
     )?;
     Ok(())
+}
+
+fn register_player_spells_compat(lua: &Lua, globals: &mlua::Table) -> Result<()> {
+    let player_spells_util = match globals.get::<Value>("PlayerSpellsUtil")? {
+        Value::Table(table) => table,
+        _ => lua.create_table()?,
+    };
+
+    if player_spells_util
+        .get::<Value>("TogglePlayerSpellsFrame")?
+        .is_nil()
+    {
+        player_spells_util.set(
+            "TogglePlayerSpellsFrame",
+            lua.create_function(|lua, (suggested_tab, inspect_unit): (Value, Value)| {
+                lua.load(
+                    r#"
+                    local suggestedTab, inspectUnit = ...
+                    if DISALLOW_FRAME_TOGGLING then
+                        return false
+                    end
+
+                    if not PlayerSpellsFrame then
+                        local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                        if loader then
+                            pcall(loader, "Blizzard_PlayerSpells")
+                        end
+                    end
+
+                    if not PlayerSpellsFrame then
+                        return false
+                    end
+
+                    local alreadyShowing = PlayerSpellsFrame:IsShown()
+                    if alreadyShowing then
+                        HideUIPanel(PlayerSpellsFrame)
+                        return true
+                    end
+
+                    if suggestedTab ~= nil and PlayerSpellsFrame.TrySetTab then
+                        local ok, changed = pcall(PlayerSpellsFrame.TrySetTab, PlayerSpellsFrame, suggestedTab)
+                        if ok and changed == false then
+                            return false
+                        end
+                    end
+
+                    ShowUIPanel(PlayerSpellsFrame)
+                    return true
+                "#,
+                )
+                .call::<bool>((suggested_tab, inspect_unit))
+            })?,
+        )?;
+    }
+
+    globals.set("PlayerSpellsUtil", player_spells_util)
 }
 
 fn register_global_combat_stubs(lua: &Lua) -> Result<()> {
