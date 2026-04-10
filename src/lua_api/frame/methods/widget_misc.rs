@@ -289,7 +289,14 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     );
     methods.add_method("SetUserPlaced", |_, _this, _user_placed: bool| Ok(()));
     methods.add_method("IsUserPlaced", |_, _this, ()| Ok(false));
-    methods.add_method("SetDontSavePosition", |_, _this, _dont_save: bool| Ok(()));
+    methods.add_method("SetDontSavePosition", |lua, this, dont_save: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.dont_save_position = dont_save;
+        }
+        Ok(())
+    });
 }
 
 // --- Misc stubs ---

@@ -22,7 +22,7 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_frame_level_stubs(methods);
     add_secret_protected_stubs(methods);
     add_flatten_render_methods(methods);
-    add_window_display_stubs(methods);
+    add_window_display_methods(methods);
     add_misc_stubs(methods);
     add_specialized_frame_stubs(methods);
 }
@@ -763,11 +763,34 @@ fn add_flatten_render_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
     });
 }
 
-/// Window/Display stubs.
-fn add_window_display_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetDontSavePosition", |_, _this, ()| Ok(false));
-    methods.add_method("GetWindow", |_, _this, ()| Ok(Value::Nil));
-    methods.add_method("SetWindow", |_, _this, _args: MultiValue| Ok(()));
+fn frame_dont_save_position(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.dont_save_position)
+        .unwrap_or(false)
+}
+
+fn get_frame_window(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<Value> {
+    let fields = frame_fields(lua, frame_id)?;
+    fields.get("window")
+}
+
+fn set_frame_window(lua: &mlua::Lua, frame_id: u64, window: Value) -> mlua::Result<()> {
+    let fields = frame_fields(lua, frame_id)?;
+    fields.set("window", window)
+}
+
+/// Window/display methods.
+fn add_window_display_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetDontSavePosition", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_dont_save_position(&state.widgets, this.0))
+    });
+    methods.add_method("GetWindow", |lua, this, ()| get_frame_window(lua, this.0));
+    methods.add_method("SetWindow", |lua, this, window: Value| {
+        set_frame_window(lua, this.0, window)
+    });
 }
 
 /// Miscellaneous stubs.

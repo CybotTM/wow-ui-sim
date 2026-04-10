@@ -1041,6 +1041,47 @@ fn test_flatten_render_methods_track_local_and_inherited_state() {
     );
 }
 
+#[test]
+fn test_window_display_methods_persist_window_and_dont_save_position() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        WindowOwnerFrame = CreateFrame("Frame", "WindowOwnerFrame", UIParent)
+        local firstWindow = { name = "first" }
+        local secondWindow = { name = "second" }
+
+        assert(not WindowOwnerFrame:GetDontSavePosition(), "frames should default to saving their position")
+        assert(WindowOwnerFrame:GetWindow() == nil, "frames should default to no associated window")
+
+        WindowOwnerFrame:SetDontSavePosition(true)
+        assert(WindowOwnerFrame:GetDontSavePosition(), "SetDontSavePosition(true) should persist")
+
+        WindowOwnerFrame:SetWindow(firstWindow)
+        assert(WindowOwnerFrame:GetWindow() == firstWindow, "SetWindow should persist the associated window object")
+
+        WindowOwnerFrame:SetWindow(secondWindow)
+        assert(WindowOwnerFrame:GetWindow() == secondWindow, "SetWindow should overwrite the previous window object")
+
+        WindowOwnerFrame:SetWindow(nil)
+        assert(WindowOwnerFrame:GetWindow() == nil, "SetWindow(nil) should clear the associated window")
+
+        WindowOwnerFrame:SetDontSavePosition(false)
+        assert(not WindowOwnerFrame:GetDontSavePosition(), "SetDontSavePosition(false) should clear the persisted flag")
+
+        WINDOW_DISPLAY_METHODS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return WINDOW_DISPLAY_METHODS_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "window display methods should persist associated window and dont-save-position state"
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

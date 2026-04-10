@@ -278,6 +278,7 @@ pub struct Frame {
     pub parent_key: Option<String>,
     pub movable: bool,
     pub resizable: bool,
+    pub dont_save_position: bool,
     pub clamped_to_screen: bool,
     pub is_moving: bool,
     /// Whether text should word-wrap (for FontString widgets).
@@ -558,6 +559,7 @@ macro_rules! frame_defaults {
             parent_key: None,
             movable: false,
             resizable: false,
+            dont_save_position: false,
             clamped_to_screen: false,
             is_moving: false,
             word_wrap: true,
