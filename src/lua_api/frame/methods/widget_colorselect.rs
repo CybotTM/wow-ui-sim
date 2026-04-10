@@ -1,14 +1,16 @@
 //! ColorSelect widget methods.
 
 use super::super::handle::FrameRef;
+use super::widget_slider::get_or_create_child_texture;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::AttributeValue;
-use mlua::Value;
+use mlua::{Lua, Table, Value};
 
 pub fn add_colorselect_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_colorselect_rgb_methods(methods);
     add_colorselect_hsv_methods(methods);
-    add_colorselect_alpha_texture_stubs(methods);
+    add_colorselect_texture_methods(methods);
+    add_colorselect_alpha_stubs(methods);
 }
 
 fn add_colorselect_rgb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -111,40 +113,135 @@ fn get_color_hsv_from_attrs(
     rgb_to_hsv(r, g, b)
 }
 
-fn add_colorselect_alpha_texture_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+const COLOR_ALPHA_TEXTURE_KEY: &str = "ColorAlphaTexture";
+const COLOR_ALPHA_THUMB_TEXTURE_KEY: &str = "ColorAlphaThumbTexture";
+const COLOR_VALUE_TEXTURE_KEY: &str = "ColorValueTexture";
+const COLOR_VALUE_THUMB_TEXTURE_KEY: &str = "ColorValueThumbTexture";
+const COLOR_WHEEL_TEXTURE_KEY: &str = "ColorWheelTexture";
+const COLOR_WHEEL_THUMB_TEXTURE_KEY: &str = "ColorWheelThumbTexture";
+
+fn add_colorselect_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "ClearColorWheelTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
+        |lua, this, _: mlua::Variadic<Value>| {
+            clear_colorselect_texture_slot(lua, this.0, COLOR_WHEEL_TEXTURE_KEY)
+        },
     );
+
+    for (method_name, slot_key) in [
+        ("GetColorAlphaTexture", COLOR_ALPHA_TEXTURE_KEY),
+        ("GetColorAlphaThumbTexture", COLOR_ALPHA_THUMB_TEXTURE_KEY),
+        ("GetColorValueTexture", COLOR_VALUE_TEXTURE_KEY),
+        ("GetColorValueThumbTexture", COLOR_VALUE_THUMB_TEXTURE_KEY),
+        ("GetColorWheelTexture", COLOR_WHEEL_TEXTURE_KEY),
+        ("GetColorWheelThumbTexture", COLOR_WHEEL_THUMB_TEXTURE_KEY),
+    ] {
+        methods.add_method(method_name, move |lua, this, ()| {
+            get_colorselect_texture_slot(lua, this.0, slot_key)
+        });
+    }
+
+    for (method_name, slot_key) in [
+        ("SetColorAlphaTexture", COLOR_ALPHA_TEXTURE_KEY),
+        ("SetColorAlphaThumbTexture", COLOR_ALPHA_THUMB_TEXTURE_KEY),
+        ("SetColorValueTexture", COLOR_VALUE_TEXTURE_KEY),
+        ("SetColorValueThumbTexture", COLOR_VALUE_THUMB_TEXTURE_KEY),
+        ("SetColorWheelTexture", COLOR_WHEEL_TEXTURE_KEY),
+        ("SetColorWheelThumbTexture", COLOR_WHEEL_THUMB_TEXTURE_KEY),
+    ] {
+        methods.add_method(
+            method_name,
+            move |lua, this, args: mlua::Variadic<Value>| {
+                let texture = args.first().cloned().unwrap_or(Value::Nil);
+                set_colorselect_texture_slot(lua, this.0, slot_key, texture)
+            },
+        );
+    }
+}
+
+fn add_colorselect_alpha_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetColorAlpha", |_, _, ()| Ok(0.0_f64));
-    methods.add_method("GetColorAlphaTexture", |_, _, ()| Ok(Value::Nil));
-    methods.add_method("GetColorAlphaThumbTexture", |_, _, ()| Ok(Value::Nil));
-    methods.add_method("GetColorValueTexture", |_, _, ()| Ok(Value::Nil));
-    methods.add_method("GetColorValueThumbTexture", |_, _, ()| Ok(Value::Nil));
-    methods.add_method("GetColorWheelTexture", |_, _, ()| Ok(Value::Nil));
-    methods.add_method("GetColorWheelThumbTexture", |_, _, ()| Ok(Value::Nil));
     methods.add_method("SetColorAlpha", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetColorAlphaTexture", |_, _, _: mlua::Variadic<Value>| {
-        Ok(())
-    });
-    methods.add_method(
-        "SetColorAlphaThumbTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("SetColorValueTexture", |_, _, _: mlua::Variadic<Value>| {
-        Ok(())
-    });
-    methods.add_method(
-        "SetColorValueThumbTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
-    methods.add_method("SetColorWheelTexture", |_, _, _: mlua::Variadic<Value>| {
-        Ok(())
-    });
-    methods.add_method(
-        "SetColorWheelThumbTexture",
-        |_, _, _: mlua::Variadic<Value>| Ok(()),
-    );
+}
+
+fn set_colorselect_texture_slot(
+    lua: &Lua,
+    frame_id: u64,
+    slot_key: &str,
+    texture: Value,
+) -> mlua::Result<()> {
+    match texture {
+        Value::UserData(_) => store_colorselect_texture_slot(lua, frame_id, slot_key, texture),
+        Value::Integer(_) | Value::Number(_) | Value::String(_) => {
+            let existing_texture = get_colorselect_texture_slot(lua, frame_id, slot_key)?;
+            let texture_ud = match existing_texture {
+                Value::UserData(_) => existing_texture,
+                _ => {
+                    let child_texture = get_or_create_child_texture(lua, frame_id, slot_key)?;
+                    store_colorselect_texture_slot(lua, frame_id, slot_key, child_texture.clone())?;
+                    child_texture
+                }
+            };
+            set_texture_value(lua, &texture_ud, &texture)
+        }
+        Value::Nil => clear_colorselect_texture_slot(lua, frame_id, slot_key),
+        _ => Ok(()),
+    }
+}
+
+fn get_colorselect_texture_slot(lua: &Lua, frame_id: u64, slot_key: &str) -> mlua::Result<Value> {
+    let store = get_colorselect_texture_store(lua)?;
+    match store.get::<Value>(frame_id)? {
+        Value::Table(frame_store) => frame_store.get(slot_key),
+        _ => Ok(Value::Nil),
+    }
+}
+
+fn store_colorselect_texture_slot(
+    lua: &Lua,
+    frame_id: u64,
+    slot_key: &str,
+    texture: Value,
+) -> mlua::Result<()> {
+    let frame_store = get_or_create_colorselect_frame_store(lua, frame_id)?;
+    frame_store.set(slot_key, texture)
+}
+
+fn clear_colorselect_texture_slot(lua: &Lua, frame_id: u64, slot_key: &str) -> mlua::Result<()> {
+    let existing_texture = get_colorselect_texture_slot(lua, frame_id, slot_key)?;
+    if matches!(existing_texture, Value::UserData(_)) {
+        set_texture_value(lua, &existing_texture, &Value::Nil)?;
+    }
+
+    let store = get_colorselect_texture_store(lua)?;
+    if let Value::Table(frame_store) = store.get::<Value>(frame_id)? {
+        frame_store.set(slot_key, Value::Nil)?;
+    }
+    Ok(())
+}
+
+fn get_colorselect_texture_store(lua: &Lua) -> mlua::Result<Table> {
+    lua.load(
+        "_G.__colorselect_textures = _G.__colorselect_textures or {}; return _G.__colorselect_textures",
+    )
+    .eval()
+}
+
+fn get_or_create_colorselect_frame_store(lua: &Lua, frame_id: u64) -> mlua::Result<Table> {
+    let store = get_colorselect_texture_store(lua)?;
+    match store.get::<Value>(frame_id)? {
+        Value::Table(frame_store) => Ok(frame_store),
+        _ => {
+            let frame_store = lua.create_table()?;
+            store.set(frame_id, frame_store.clone())?;
+            Ok(frame_store)
+        }
+    }
+}
+
+fn set_texture_value(lua: &Lua, texture_ud: &Value, texture: &Value) -> mlua::Result<()> {
+    lua.load("local region, value = ...; region:SetTexture(value)")
+        .call::<()>((texture_ud.clone(), texture.clone()))
 }
 
 fn hsv_to_rgb(h: f64, s: f64, v: f64) -> (f64, f64, f64) {

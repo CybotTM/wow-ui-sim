@@ -232,6 +232,123 @@ fn test_colorselect_rgb_to_hsv_conversion() {
 }
 
 #[test]
+fn test_colorselect_texture_getters_default_nil() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(r#"local cs = CreateFrame("ColorSelect", "TestCSTexNil", UIParent)"#)
+        .unwrap();
+
+    let getters_are_nil: (bool, bool, bool, bool, bool, bool) = env
+        .eval(
+            r#"
+            return TestCSTexNil:GetColorAlphaTexture() == nil,
+                   TestCSTexNil:GetColorAlphaThumbTexture() == nil,
+                   TestCSTexNil:GetColorValueTexture() == nil,
+                   TestCSTexNil:GetColorValueThumbTexture() == nil,
+                   TestCSTexNil:GetColorWheelTexture() == nil,
+                   TestCSTexNil:GetColorWheelThumbTexture() == nil
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(getters_are_nil, (true, true, true, true, true, true));
+}
+
+#[test]
+fn test_colorselect_primary_texture_setters_create_child_textures() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cs = CreateFrame("ColorSelect", "TestCSTex", UIParent)
+        cs:SetColorAlphaTexture("Interface\\Buttons\\WHITE8X8")
+        cs:SetColorValueTexture("Interface\\Buttons\\WHITE8X8")
+        cs:SetColorWheelTexture("Interface\\Buttons\\WHITE8X8")
+    "#,
+    )
+    .unwrap();
+
+    let result: (String, String, String, String, String, String) = env
+        .eval(
+            r#"
+            return TestCSTex:GetColorAlphaTexture():GetObjectType(),
+                   TestCSTex:GetColorAlphaTexture():GetParent():GetName(),
+                   TestCSTex:GetColorValueTexture():GetObjectType(),
+                   TestCSTex:GetColorValueTexture():GetParent():GetName(),
+                   TestCSTex:GetColorWheelTexture():GetObjectType(),
+                   TestCSTex:GetColorWheelTexture():GetParent():GetName()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result.0, "Texture");
+    assert_eq!(result.1, "TestCSTex");
+    assert_eq!(result.2, "Texture");
+    assert_eq!(result.3, "TestCSTex");
+    assert_eq!(result.4, "Texture");
+    assert_eq!(result.5, "TestCSTex");
+}
+
+#[test]
+fn test_colorselect_thumb_texture_setters_round_trip_userdata() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cs = CreateFrame("ColorSelect", "TestCSThumbs", UIParent)
+        TestCSAlphaThumb = cs:CreateTexture(nil, "ARTWORK")
+        TestCSValueThumb = cs:CreateTexture(nil, "ARTWORK")
+        TestCSWheelThumb = cs:CreateTexture(nil, "ARTWORK")
+        cs:SetColorAlphaThumbTexture(TestCSAlphaThumb)
+        cs:SetColorValueThumbTexture(TestCSValueThumb)
+        cs:SetColorWheelThumbTexture(TestCSWheelThumb)
+    "#,
+    )
+    .unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            return TestCSThumbs:GetColorAlphaThumbTexture() == TestCSAlphaThumb,
+                   TestCSThumbs:GetColorValueThumbTexture() == TestCSValueThumb,
+                   TestCSThumbs:GetColorWheelThumbTexture() == TestCSWheelThumb
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, (true, true, true));
+}
+
+#[test]
+fn test_colorselect_clear_color_wheel_texture_clears_getter() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cs = CreateFrame("ColorSelect", "TestCSClearWheel", UIParent)
+        cs:SetColorWheelTexture("Interface\\Buttons\\WHITE8X8")
+        TestCSWheelBeforeClear = cs:GetColorWheelTexture()
+        cs:ClearColorWheelTexture()
+    "#,
+    )
+    .unwrap();
+
+    let result: (bool, bool) = env
+        .eval(
+            r#"
+            return TestCSWheelBeforeClear ~= nil,
+                   TestCSClearWheel:GetColorWheelTexture() == nil
+            "#,
+        )
+        .unwrap();
+    assert!(
+        result.0,
+        "SetColorWheelTexture should create a retrievable wheel texture before clear"
+    );
+    assert!(result.1, "Cleared color wheel getter should return nil");
+}
+
+#[test]
 fn test_statusbar_texture_and_color_methods_still_resolve() {
     let env = WowLuaEnv::new().unwrap();
 
