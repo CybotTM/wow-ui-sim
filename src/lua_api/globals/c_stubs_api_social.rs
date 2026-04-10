@@ -1366,6 +1366,26 @@ const PET_BATTLES_LUA: &str = r#"
 /// C_DelvesUI namespace - Delves companion data.
 fn register_c_delves_ui(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
+    let delve_entrance_tiers = seeded_delve_entrance_tiers(lua)?;
+    let active_delve_tier = lua.create_table()?;
+    active_delve_tier.set("tier", 4)?;
+    active_delve_tier.set("tierDescription", "Tier 4")?;
+    active_delve_tier.set("unlocked", true)?;
+    active_delve_tier.set("modifierUIWidgetSetID", 4404)?;
+    active_delve_tier.set("suggestedILvl", 603)?;
+    active_delve_tier.set("lockedReason", Value::Nil)?;
+    t.set("__activeDelveTier", active_delve_tier)?;
+    t.set("__delveEntranceBackgroundWidgetSetID", 5501)?;
+    t.set(
+        "__delveEntranceDescriptionString",
+        "The Fungal Folly winds deeper with every tier.",
+    )?;
+    t.set("__delveEntranceHeaderString", "Fungal Folly")?;
+    t.set("__delveEntranceMapID", 2339)?;
+    t.set("__delveEntranceTiers", delve_entrance_tiers)?;
+    t.set("__selectedDelveEntranceTier", 4)?;
+    t.set("__tieredEntranceOptionalAffixTraitTreeID", 77001)?;
+    let delve_state = t.clone();
     t.set(
         "GetTraitTreeForCompanion",
         lua.create_function(|_, ()| Ok(0i32))?,
@@ -1395,6 +1415,39 @@ fn register_c_delves_ui(lua: &Lua) -> Result<()> {
         lua.create_function(|_, ()| Ok(80i32))?,
     )?;
     t.set(
+        "GetActiveDelveTier",
+        lua.create_function(move |_, ()| delve_state.get::<mlua::Table>("__activeDelveTier"))?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetDelveEntranceBackgroundWidgetSetID",
+        lua.create_function(move |_, ()| {
+            delve_state.get::<i32>("__delveEntranceBackgroundWidgetSetID")
+        })?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetDelveEntranceDescriptionString",
+        lua.create_function(move |_, ()| {
+            delve_state.get::<String>("__delveEntranceDescriptionString")
+        })?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetDelveEntranceHeaderString",
+        lua.create_function(move |_, ()| delve_state.get::<String>("__delveEntranceHeaderString"))?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetDelveEntranceMapID",
+        lua.create_function(move |_, ()| delve_state.get::<i32>("__delveEntranceMapID"))?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetDelveEntranceTiers",
+        lua.create_function(move |_, ()| delve_state.get::<mlua::Table>("__delveEntranceTiers"))?,
+    )?;
+    t.set(
         "GetFactionForCompanion",
         lua.create_function(|_, ()| Ok(0i32))?,
     )?;
@@ -1407,9 +1460,55 @@ fn register_c_delves_ui(lua: &Lua) -> Result<()> {
         "GetDelvesFactionForSeason",
         lua.create_function(|_, _season: Value| Ok(Value::Nil))?,
     )?;
+    let delve_state = t.clone();
+    t.set(
+        "GetTieredEntranceOptionalAffixTraitTreeID",
+        lua.create_function(move |_, ()| {
+            delve_state.get::<i32>("__tieredEntranceOptionalAffixTraitTreeID")
+        })?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "IsDelveEntranceTierEnabled",
+        lua.create_function(move |lua, tier: i32| {
+            let tiers = delve_state.get::<mlua::Table>("__delveEntranceTiers")?;
+            for pair in tiers.sequence_values::<mlua::Table>() {
+                let info = pair?;
+                if info.get::<i32>("tier")? == tier {
+                    let unlocked = info.get::<bool>("unlocked")?;
+                    let locked_reason = info.get::<Value>("lockedReason")?;
+                    return Ok(mlua::MultiValue::from_vec(vec![
+                        Value::Boolean(unlocked),
+                        if unlocked { Value::Nil } else { locked_reason },
+                    ]));
+                }
+            }
+
+            Ok(mlua::MultiValue::from_vec(vec![
+                Value::Boolean(false),
+                Value::String(lua.create_string("Unknown tier")?),
+            ]))
+        })?,
+    )?;
     t.set(
         "RequestPartyEligibilityForDelveTiers",
         lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    let delve_state = t.clone();
+    t.set(
+        "SelectDelveEntranceTier",
+        lua.create_function(move |_, tier: i32| {
+            delve_state.set("__selectedDelveEntranceTier", tier)?;
+            let tiers = delve_state.get::<mlua::Table>("__delveEntranceTiers")?;
+            for pair in tiers.sequence_values::<mlua::Table>() {
+                let info = pair?;
+                if info.get::<i32>("tier")? == tier {
+                    delve_state.set("__activeDelveTier", info)?;
+                    break;
+                }
+            }
+            Ok(())
+        })?,
     )?;
     t.set(
         "SaveSeenCuriosBySlotType",
@@ -1417,6 +1516,39 @@ fn register_c_delves_ui(lua: &Lua) -> Result<()> {
     )?;
     lua.globals().set("C_DelvesUI", t)?;
     Ok(())
+}
+
+fn seeded_delve_entrance_tiers(lua: &Lua) -> Result<mlua::Table> {
+    let tiers = lua.create_table()?;
+    for (index, (tier, unlocked, widget_set_id, suggested_ilvl, locked_reason)) in [
+        (1, true, 4401, 571, None),
+        (2, true, 4402, 584, None),
+        (3, true, 4403, 597, None),
+        (4, true, 4404, 603, None),
+        (
+            5,
+            false,
+            4405,
+            610,
+            Some("Complete Tier 4 to unlock this delve tier."),
+        ),
+    ]
+    .into_iter()
+    .enumerate()
+    {
+        let info = lua.create_table()?;
+        info.set("tier", tier)?;
+        info.set("tierDescription", format!("Tier {tier}"))?;
+        info.set("unlocked", unlocked)?;
+        info.set("modifierUIWidgetSetID", widget_set_id)?;
+        info.set("suggestedILvl", suggested_ilvl)?;
+        match locked_reason {
+            Some(reason) => info.set("lockedReason", reason)?,
+            None => info.set("lockedReason", Value::Nil)?,
+        }
+        tiers.set(index + 1, info)?;
+    }
+    Ok(tiers)
 }
 
 /// C_ZoneAbility namespace - zone ability data.
