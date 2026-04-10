@@ -27,13 +27,13 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_specialized_frame_stubs(methods);
 }
 
-/// Stubs for specialized frame types (QuestPOI, FogOfWar, UnitPosition, etc.).
+/// Methods for specialized frame types (QuestPOI, FogOfWar, UnitPosition, etc.).
 fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_menu_frame_stubs(methods);
     add_quest_poi_frame_methods(methods);
     methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil)); // FogOfWarFrame
     add_quest_blob_methods(methods);
-    add_unit_position_frame_stubs(methods);
+    add_unit_position_frame_methods(methods);
 }
 
 fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -84,20 +84,202 @@ fn update_mouse_over_tooltip(
     }
 }
 
-fn add_unit_position_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("ClearUnits", |_, _, ()| Ok(()));
-    methods.add_method("AddUnit", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("FinalizeUnits", |_, _, ()| Ok(()));
-    methods.add_method("SetUiMapID", |_, _, _map_id: i32| Ok(()));
-    methods.add_method("SetUnitColor", |_, _, _: mlua::MultiValue| Ok(()));
-    // Blizzard's UnitPositionFrame expects varargs unit tokens from
-    // GetMouseOverUnits(); return no values when no units are hovered.
-    methods.add_method("GetMouseOverUnits", |_, _, ()| Ok(MultiValue::new()));
+fn add_unit_position_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_unit_position_clear_units_method(methods);
+    add_unit_position_add_unit_method(methods);
+    add_unit_position_finalize_units_method(methods);
+    add_unit_position_set_ui_map_id_method(methods);
+    add_unit_position_set_unit_color_method(methods);
+    add_unit_position_get_mouse_over_units_method(methods);
     methods.add_method("GetPlayerPingScale", |_, _, ()| Ok(1.0_f64));
     methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StartPlayerPing", |_, _, _: mlua::MultiValue| Ok(()));
     methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
+}
+
+fn add_unit_position_clear_units_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("ClearUnits", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .entry(this.0)
+            .or_insert_with(new_unit_position_frame_state);
+        unit_state.units.clear();
+        unit_state.unit_colors.clear();
+        unit_state.mouse_over_units.clear();
+        unit_state.is_finalized = false;
+        Ok(())
+    });
+}
+
+fn add_unit_position_add_unit_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    use crate::lua_api::state::UnitPositionUnit;
+
+    methods.add_method("AddUnit", |lua, this, args: mlua::MultiValue| {
+        let Some(unit) = multi_value_string_arg(&args, 0) else {
+            return Ok(());
+        };
+        let asset = multi_value_texture_arg(&args, 1)?;
+        let width = multi_value_number_arg(&args, 2);
+        let height = multi_value_number_arg(&args, 3);
+        let color = multi_value_color_arg(&args, 4);
+        let sublevel = multi_value_i32_arg(&args, 8);
+        let show_facing = multi_value_bool_arg(&args, 9);
+
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .entry(this.0)
+            .or_insert_with(new_unit_position_frame_state);
+        unit_state.units.push(UnitPositionUnit {
+            unit,
+            asset,
+            width,
+            height,
+            color,
+            sublevel,
+            show_facing,
+        });
+        unit_state.is_finalized = false;
+        Ok(())
+    });
+}
+
+fn add_unit_position_finalize_units_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("FinalizeUnits", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .entry(this.0)
+            .or_insert_with(new_unit_position_frame_state);
+        unit_state.is_finalized = true;
+        Ok(())
+    });
+}
+
+fn add_unit_position_set_ui_map_id_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetUiMapID", |lua, this, map_id: i32| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .entry(this.0)
+            .or_insert_with(new_unit_position_frame_state);
+        unit_state.ui_map_id = Some(map_id);
+        Ok(())
+    });
+}
+
+fn add_unit_position_set_unit_color_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetUnitColor", |lua, this, args: mlua::MultiValue| {
+        let Some(unit) = multi_value_string_arg(&args, 0) else {
+            return Ok(());
+        };
+        let Some(color) = multi_value_color_arg(&args, 1) else {
+            return Ok(());
+        };
+
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .entry(this.0)
+            .or_insert_with(new_unit_position_frame_state);
+        unit_state.unit_colors.insert(unit.clone(), color);
+        update_unit_pin_color(unit_state, &unit, color);
+        Ok(())
+    });
+}
+
+fn add_unit_position_get_mouse_over_units_method<M: mlua::UserDataMethods<FrameRef>>(
+    methods: &mut M,
+) {
+    // Blizzard's UnitPositionFrame expects varargs unit tokens from
+    // GetMouseOverUnits(); return no values when no units are hovered.
+    methods.add_method("GetMouseOverUnits", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let Some(unit_state) = state.unit_position_frames.get(&this.0) else {
+            return Ok(MultiValue::new());
+        };
+        let mut result = MultiValue::new();
+        for unit in &unit_state.mouse_over_units {
+            result.push_back(Value::String(lua.create_string(unit)?));
+        }
+        Ok(result)
+    });
+}
+
+fn new_unit_position_frame_state() -> crate::lua_api::state::UnitPositionFrameState {
+    crate::lua_api::state::UnitPositionFrameState {
+        ui_map_id: None,
+        units: Vec::new(),
+        unit_colors: std::collections::HashMap::new(),
+        mouse_over_units: Vec::new(),
+        is_finalized: false,
+    }
+}
+
+fn multi_value_string_arg(args: &MultiValue, index: usize) -> Option<String> {
+    match args.get(index) {
+        Some(Value::String(value)) => Some(value.to_string_lossy().to_string()),
+        _ => None,
+    }
+}
+
+fn multi_value_texture_arg(args: &MultiValue, index: usize) -> mlua::Result<Option<String>> {
+    match args.get(index) {
+        Some(value) => texture_asset_to_string(value),
+        None => Ok(None),
+    }
+}
+
+fn multi_value_number_arg(args: &MultiValue, index: usize) -> Option<f64> {
+    match args.get(index) {
+        Some(Value::Integer(value)) => Some(*value as f64),
+        Some(Value::Number(value)) => Some(*value),
+        _ => None,
+    }
+}
+
+fn multi_value_i32_arg(args: &MultiValue, index: usize) -> Option<i32> {
+    match args.get(index) {
+        Some(Value::Integer(value)) => Some(*value as i32),
+        Some(Value::Number(value)) => Some(*value as i32),
+        _ => None,
+    }
+}
+
+fn multi_value_bool_arg(args: &MultiValue, index: usize) -> Option<bool> {
+    match args.get(index) {
+        Some(Value::Boolean(value)) => Some(*value),
+        _ => None,
+    }
+}
+
+fn multi_value_color_arg(args: &MultiValue, start_index: usize) -> Option<(f64, f64, f64, f64)> {
+    Some((
+        multi_value_number_arg(args, start_index)?,
+        multi_value_number_arg(args, start_index + 1)?,
+        multi_value_number_arg(args, start_index + 2)?,
+        multi_value_number_arg(args, start_index + 3)?,
+    ))
+}
+
+fn update_unit_pin_color(
+    unit_state: &mut crate::lua_api::state::UnitPositionFrameState,
+    unit: &str,
+    color: (f64, f64, f64, f64),
+) {
+    for pin in &mut unit_state.units {
+        if pin.unit == unit {
+            pin.color = Some(color);
+        }
+    }
 }
 
 /// Quest blob methods for QuestPOIFrame (DrawBlob, DrawNone, SetMapID).

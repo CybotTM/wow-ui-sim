@@ -1293,6 +1293,114 @@ fn test_minimap_blob_setters_persist_blob_style_state() {
     assert_eq!(minimap.arch_blob_ring.scalar, 1.75);
 }
 
+#[test]
+fn test_unit_position_frame_methods_persist_runtime_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        UnitPositionStateFrame = CreateFrame("UnitPositionFrame", "UnitPositionStateFrame", UIParent)
+        UnitPositionStateFrame:SetUiMapID(2274)
+        UnitPositionStateFrame:AddUnit("player", "Interface\\Buttons\\WHITE8X8", 24, 26, 0.1, 0.2, 0.3, 0.4, 7, true)
+        UnitPositionStateFrame:AddUnit("party1", "Interface\\Buttons\\WHITE8X8", 18, 19, 0.5, 0.6, 0.7, 0.8, 3, false)
+        UnitPositionStateFrame:SetUnitColor("player", 0.9, 0.8, 0.7, 0.6)
+        UnitPositionStateFrame:FinalizeUnits()
+    "#,
+    )
+    .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let frame_id = state
+            .widgets
+            .get_id_by_name("UnitPositionStateFrame")
+            .expect("unit position frame should exist");
+        let unit_state = state
+            .unit_position_frames
+            .get(&frame_id)
+            .expect("unit position state should exist");
+        assert_eq!(unit_state.ui_map_id, Some(2274));
+        assert_eq!(unit_state.units.len(), 2);
+
+        let player = &unit_state.units[0];
+        assert_eq!(player.unit, "player");
+        assert_eq!(
+            player.asset.as_deref(),
+            Some("Interface\\Buttons\\WHITE8X8")
+        );
+        assert_eq!(player.width, Some(24.0));
+        assert_eq!(player.height, Some(26.0));
+        assert_eq!(player.color, Some((0.9, 0.8, 0.7, 0.6)));
+        assert_eq!(player.sublevel, Some(7));
+        assert_eq!(player.show_facing, Some(true));
+
+        let party = &unit_state.units[1];
+        assert_eq!(party.unit, "party1");
+        assert_eq!(party.asset.as_deref(), Some("Interface\\Buttons\\WHITE8X8"));
+        assert_eq!(party.width, Some(18.0));
+        assert_eq!(party.height, Some(19.0));
+        assert_eq!(party.color, Some((0.5, 0.6, 0.7, 0.8)));
+        assert_eq!(party.sublevel, Some(3));
+        assert_eq!(party.show_facing, Some(false));
+
+        assert_eq!(
+            unit_state.unit_colors.get("player"),
+            Some(&(0.9, 0.8, 0.7, 0.6))
+        );
+        assert!(unit_state.is_finalized);
+    }
+
+    {
+        let frame_id = {
+            let state = env.state().borrow();
+            state
+                .widgets
+                .get_id_by_name("UnitPositionStateFrame")
+                .expect("unit position frame should exist")
+        };
+        let mut state = env.state().borrow_mut();
+        let unit_state = state
+            .unit_position_frames
+            .get_mut(&frame_id)
+            .expect("unit position state should exist");
+        unit_state.mouse_over_units = vec!["party1".to_string(), "player".to_string()];
+    }
+
+    let hovered_units = env
+        .eval::<mlua::MultiValue>(
+            r#"
+            return UnitPositionStateFrame:GetMouseOverUnits()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(hovered_units.len(), 2);
+    assert!(
+        matches!(hovered_units.front(), Some(mlua::Value::String(s)) if s.to_str().unwrap() == "party1")
+    );
+    assert!(
+        matches!(hovered_units.get(1), Some(mlua::Value::String(s)) if s.to_str().unwrap() == "player")
+    );
+
+    env.exec(
+        r#"
+        UnitPositionStateFrame:ClearUnits()
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let frame_id = state
+        .widgets
+        .get_id_by_name("UnitPositionStateFrame")
+        .expect("unit position frame should exist");
+    let unit_state = state
+        .unit_position_frames
+        .get(&frame_id)
+        .expect("unit position state should still exist");
+    assert!(unit_state.units.is_empty());
+    assert!(unit_state.unit_colors.is_empty());
+    assert!(!unit_state.is_finalized);
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

@@ -26,6 +26,7 @@ macro_rules! build_empty_sim_state {
             addons: $collections.addons,
             tooltips: $collections.tooltips,
             quest_blobs: $collections.quest_blobs,
+            unit_position_frames: $collections.unit_position_frames,
             simple_htmls: $collections.simple_htmls,
             message_frames: $collections.message_frames,
             on_update_frames: $collections.on_update_frames,
@@ -105,6 +106,26 @@ pub struct QuestBlobState {
     pub active_quests: Vec<u32>,
 }
 
+/// A unit pin stored by a UnitPositionFrame.
+pub struct UnitPositionUnit {
+    pub unit: String,
+    pub asset: Option<String>,
+    pub width: Option<f64>,
+    pub height: Option<f64>,
+    pub color: Option<(f64, f64, f64, f64)>,
+    pub sublevel: Option<i32>,
+    pub show_facing: Option<bool>,
+}
+
+/// Runtime state for a UnitPositionFrame.
+pub struct UnitPositionFrameState {
+    pub ui_map_id: Option<i32>,
+    pub units: Vec<UnitPositionUnit>,
+    pub unit_colors: HashMap<String, (f64, f64, f64, f64)>,
+    pub mouse_over_units: Vec<String>,
+    pub is_finalized: bool,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -124,6 +145,8 @@ pub struct SimState {
     pub tooltips: HashMap<u64, TooltipData>,
     /// Quest blob state for QuestPOIFrame widgets (keyed by frame ID).
     pub quest_blobs: HashMap<u64, QuestBlobState>,
+    /// UnitPositionFrame state (keyed by frame ID).
+    pub unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     /// SimpleHTML state (keyed by frame ID).
     pub simple_htmls: HashMap<u64, SimpleHtmlData>,
     /// MessageFrame state (keyed by frame ID).
@@ -247,6 +270,7 @@ struct EmptyStateCollections {
     lua_errors: Vec<String>,
     tooltips: HashMap<u64, TooltipData>,
     quest_blobs: HashMap<u64, QuestBlobState>,
+    unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,
@@ -272,6 +296,7 @@ impl EmptyStateCollections {
             lua_errors: Vec::new(),
             tooltips: HashMap::new(),
             quest_blobs: HashMap::new(),
+            unit_position_frames: HashMap::new(),
             simple_htmls: HashMap::new(),
             message_frames: HashMap::new(),
             animation_groups: HashMap::new(),
