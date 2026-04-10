@@ -334,6 +334,41 @@ fn register_trade_skill_profession_info(lua: &Lua, t: &mlua::Table) -> Result<()
         "SetProfessionChildSkillLineID",
         lua.create_function(|_, _id: Value| Ok(()))?,
     )?;
+    t.set(
+        "OpenTradeSkill",
+        lua.create_function(|lua, skill_line_id: i32| {
+            if super::profession_data::get_profession(skill_line_id).is_none() {
+                return Ok(false);
+            }
+
+            lua.load(
+                r#"
+                if not ProfessionsFrame then
+                    if ProfessionsFrame_LoadUI then
+                        ProfessionsFrame_LoadUI()
+                    else
+                        local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                        if loader then
+                            pcall(loader, "Blizzard_Professions")
+                        end
+                    end
+                end
+
+                if not ProfessionsFrame then
+                    return false
+                end
+
+                if ProfessionsFrame.SetTab and ProfessionsFrame.recipesTabID then
+                    pcall(ProfessionsFrame.SetTab, ProfessionsFrame, ProfessionsFrame.recipesTabID)
+                end
+
+                ShowUIPanel(ProfessionsFrame)
+                return ProfessionsFrame:IsShown()
+                "#,
+            )
+            .eval()
+        })?,
+    )?;
     Ok(())
 }
 

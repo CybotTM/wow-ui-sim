@@ -1034,6 +1034,35 @@ fn toggle_encounter_journal_opens_and_closes_panel() {
 }
 
 #[test]
+fn open_trade_skill_opens_blacksmithing_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not C_TradeSkillUI or not C_TradeSkillUI.OpenTradeSkill then
+                return "missing_open_trade_skill"
+            end
+
+            local opened = C_TradeSkillUI.OpenTradeSkill(164)
+            if opened ~= true then
+                return "opened=" .. tostring(opened)
+            end
+
+            if not ProfessionsFrame or not ProfessionsFrame:IsShown() then
+                return "professions_frame_not_shown"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "C_TradeSkillUI.OpenTradeSkill(164) should open the professions frame: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
