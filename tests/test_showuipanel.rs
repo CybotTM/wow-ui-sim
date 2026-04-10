@@ -974,6 +974,36 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
 }
 
 #[test]
+fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleAchievementFrame then
+                return "missing_toggle_achievement_frame"
+            end
+
+            ToggleAchievementFrame()
+            if not AchievementFrame or not AchievementFrame:IsShown() then
+                return "achievement_not_shown"
+            end
+
+            ToggleAchievementFrame()
+            if AchievementFrame:IsShown() then
+                return "achievement_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleAchievementFrame() should open and close the achievement panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
