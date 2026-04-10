@@ -430,6 +430,14 @@ wow-cli extract-textures --output ./tex     # Custom output directory
 
 This scans addon XML/Lua files for texture references and converts them from BLP to WebP.
 
+### Audit API Gaps → PLAN.md
+
+Generate PLAN.md-ready checkboxes for missing C_* methods, LE_* constants, and Enum namespaces:
+
+```bash
+wow-cli audit-api --gaps --format plan         # Paste-ready markdown checkboxes
+```
+
 ## Textures
 
 ### Texture Sources (in order of priority)
