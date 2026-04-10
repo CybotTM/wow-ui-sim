@@ -402,9 +402,23 @@ fn register_azerite_item_status_stubs(lua: &Lua, azerite_item: &mlua::Table) -> 
 }
 
 fn register_c_commentator(lua: &Lua) -> Result<()> {
+    const SEND_ADDON_MESSAGE_SUCCESS: i32 = 0;
+
     let t = lua.create_table()?;
     t.set("GetMode", lua.create_function(|_, ()| Ok(0i32))?)?;
     t.set("IsSpectating", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "SendAddonMessage",
+        lua.create_function(
+            |_,
+             (_prefix, _message, _chat_type, _target): (
+                String,
+                String,
+                Option<String>,
+                Option<String>,
+            )| { Ok(SEND_ADDON_MESSAGE_SUCCESS) },
+        )?,
+    )?;
     lua.globals().set("C_Commentator", t)?;
     Ok(())
 }
