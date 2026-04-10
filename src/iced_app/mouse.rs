@@ -36,7 +36,7 @@ impl App {
             let dy = pos.y - down_pos.y;
             if (dx * dx + dy * dy).sqrt() >= DRAG_THRESHOLD {
                 self.dragging = true;
-                self.fire_drag_start(down_frame);
+                self.fire_drag_start(down_frame, "LeftButton");
                 self.flush_post_script_updates();
             }
         }
@@ -320,7 +320,7 @@ impl App {
     }
 
     /// Fire OnDragStart on the source frame (walks up parent chain).
-    fn fire_drag_start(&mut self, frame_id: u64) {
+    fn fire_drag_start(&mut self, frame_id: u64, button_name: &str) {
         let drag_target = {
             let env = self.env.borrow();
             find_drag_script_target(&env, frame_id, "OnDragStart")
@@ -328,6 +328,19 @@ impl App {
         let Some(drag_target) = drag_target else {
             return;
         };
+
+        let drag_button_registered = {
+            let env = self.env.borrow();
+            env.state()
+                .borrow()
+                .widgets
+                .get(drag_target)
+                .map(|frame| frame.registered_drag_buttons.contains(button_name))
+                .unwrap_or(false)
+        };
+        if !drag_button_registered {
+            return;
+        }
 
         {
             let env = self.env.borrow();
@@ -338,7 +351,7 @@ impl App {
 
         let env = self.env.borrow();
         let lua = env.lua();
-        let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
+        let button_val = mlua::Value::String(lua.create_string(button_name).unwrap());
         eprintln!("[drag] OnDragStart fired on frame {}", drag_target);
         let _ = env.fire_script_handler(drag_target, "OnDragStart", vec![button_val]);
     }
@@ -948,6 +961,50 @@ mod tests {
         assert!(
             user_placed,
             "StopMovingOrSizing should mark a dragged frame as user placed"
+        );
+    }
+
+    #[test]
+    fn drag_start_requires_registered_button_match() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                __mismatched_drag_start_calls = 0
+                MismatchedDragButtonFrame = CreateFrame("Frame", "MismatchedDragButtonFrame", UIParent)
+                MismatchedDragButtonFrame:SetSize(100, 100)
+                MismatchedDragButtonFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -50)
+                MismatchedDragButtonFrame:EnableMouse(true)
+                MismatchedDragButtonFrame:RegisterForDrag("RightButton")
+                MismatchedDragButtonFrame:SetScript("OnDragStart", function()
+                    __mismatched_drag_start_calls = __mismatched_drag_start_calls + 1
+                end)
+                "#,
+            )
+            .expect("mismatched drag button frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(60.0, 60.0));
+        app.handle_mouse_down(Point::new(60.0, 60.0));
+        app.handle_mouse_move(Point::new(90.0, 90.0));
+
+        let drag_start_calls: f64 = app
+            .env
+            .borrow()
+            .eval("return __mismatched_drag_start_calls")
+            .expect("drag start call count query should succeed");
+        let active_drag_frame = app.env.borrow().state().borrow().active_drag_frame;
+
+        assert_eq!(
+            drag_start_calls, 0.0,
+            "left-button drag should not fire OnDragStart when only RightButton is registered"
+        );
+        assert_eq!(
+            active_drag_frame, None,
+            "mismatched drag button should not activate a drag frame"
         );
     }
 

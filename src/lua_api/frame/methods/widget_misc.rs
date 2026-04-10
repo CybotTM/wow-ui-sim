@@ -397,10 +397,22 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         Ok(())
     });
     methods.add_method("StartSizing", |_, _this, _point: Option<String>| Ok(()));
-    methods.add_method(
-        "RegisterForDrag",
-        |_, _this, _args: mlua::MultiValue| Ok(()),
-    );
+    methods.add_method("RegisterForDrag", |lua, this, args: mlua::MultiValue| {
+        let buttons = args
+            .into_iter()
+            .filter_map(|value| match value {
+                mlua::Value::String(button) => button.to_str().ok().map(|s| s.to_string()),
+                _ => None,
+            })
+            .collect();
+
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.registered_drag_buttons = buttons;
+        }
+        Ok(())
+    });
     methods.add_method("SetUserPlaced", |lua, this, user_placed: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
