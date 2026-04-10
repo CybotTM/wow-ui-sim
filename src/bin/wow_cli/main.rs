@@ -301,7 +301,7 @@ fn run_audit_api(
     let results = audit_api::run_audit(&config);
     let gap_report = if gaps {
         let registered = audit_api::scan_simulator(&sim_path);
-        let sim_methods = audit_api::scan_simulator_c_methods(&sim_path);
+        let sim_methods = audit_api::introspect_simulator_c_methods();
         Some(audit_api::build_gap_report(
             &results,
             &registered,

@@ -413,12 +413,57 @@ pub struct GapReport {
     pub missing_c_methods: BTreeMap<String, Vec<(String, usize)>>,
 }
 
-/// Scan the simulator Rust source for C_* method registrations.
+/// Introspect the simulator's Lua environment to find registered C_* methods.
+///
+/// Creates a `WowLuaEnv` (no addon loading — just the Rust-registered globals)
+/// and iterates all `C_*` globals to collect their string keys. This is 100%
+/// accurate since it reads the actual Lua state, not Rust source heuristics.
+pub fn introspect_simulator_c_methods() -> BTreeMap<String, BTreeSet<String>> {
+    use wow_ui_sim::lua_api::WowLuaEnv;
+
+    let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    let table: mlua::Table = env
+        .lua()
+        .load(
+            r#"
+            local result = {}
+            for k, v in pairs(_G) do
+                if type(k) == "string" and k:match("^C_") and type(v) == "table" then
+                    local methods = {}
+                    for mk, _ in pairs(v) do
+                        if type(mk) == "string" then
+                            methods[#methods + 1] = mk
+                        end
+                    end
+                    result[k] = methods
+                end
+            end
+            return result
+        "#,
+        )
+        .eval()
+        .expect("C_* introspection failed");
+
+    let mut map = BTreeMap::new();
+    for pair in table.pairs::<String, mlua::Table>() {
+        let (ns, methods_table) = pair.expect("pair iteration failed");
+        let mut methods = BTreeSet::new();
+        for method_pair in methods_table.pairs::<i64, String>() {
+            let (_, method) = method_pair.expect("method iteration failed");
+            methods.insert(method);
+        }
+        map.insert(ns, methods);
+    }
+    map
+}
+
+/// Scan the simulator Rust source for C_* method registrations (static fallback).
 ///
 /// For each Rust function, we look for `globals().set("C_Foo", var)` to identify which
 /// variable holds a given namespace, then collect all `var.set("Method", ...)` in that
-/// same function scope. For generated_stubs.rs, we also handle `t.get::<Value>("Method")`
-/// patterns used in the nil-check-before-set pattern.
+/// same function scope. Less accurate than `introspect_simulator_c_methods` but doesn't
+/// require loading the Lua environment.
+#[allow(dead_code)]
 pub fn scan_simulator_c_methods(src_path: &Path) -> BTreeMap<String, BTreeSet<String>> {
     let mut result: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
 
