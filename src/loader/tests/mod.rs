@@ -1355,10 +1355,19 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
         UnitPositionStateFrame:AddUnit("player", "Interface\\Buttons\\WHITE8X8", 24, 26, 0.1, 0.2, 0.3, 0.4, 7, true)
         UnitPositionStateFrame:AddUnit("party1", "Interface\\Buttons\\WHITE8X8", 18, 19, 0.5, 0.6, 0.7, 0.8, 3, false)
         UnitPositionStateFrame:SetUnitColor("player", 0.9, 0.8, 0.7, 0.6)
+        UnitPositionStateFrame:SetPlayerPingTexture(Enum.PingTextureType.Center, "Interface\\Minimap\\UI-Minimap-Ping-Center", 32, 32)
+        UnitPositionStateFrame:SetPlayerPingTexture(Enum.PingTextureType.Rotation, "Interface\\Minimap\\UI-Minimap-Ping-Rotate", 70, 70)
+        UnitPositionStateFrame:SetPlayerPingScale(0.65)
+        UnitPositionStateFrame:StartPlayerPing(2, 0.25)
         UnitPositionStateFrame:FinalizeUnits()
     "#,
     )
     .unwrap();
+
+    let ping_scale: f64 = env
+        .eval("return UnitPositionStateFrame:GetPlayerPingScale()")
+        .unwrap();
+    assert_eq!(ping_scale, 0.65);
 
     {
         let state = env.state().borrow();
@@ -1398,6 +1407,30 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
             unit_state.unit_colors.get("player"),
             Some(&(0.9, 0.8, 0.7, 0.6))
         );
+        let center_ping = unit_state
+            .player_ping_textures
+            .get(&0)
+            .expect("center ping texture should exist");
+        assert_eq!(
+            center_ping.asset.as_deref(),
+            Some("Interface\\Minimap\\UI-Minimap-Ping-Center")
+        );
+        assert_eq!(center_ping.width, 32.0);
+        assert_eq!(center_ping.height, 32.0);
+        let rotation_ping = unit_state
+            .player_ping_textures
+            .get(&2)
+            .expect("rotation ping texture should exist");
+        assert_eq!(
+            rotation_ping.asset.as_deref(),
+            Some("Interface\\Minimap\\UI-Minimap-Ping-Rotate")
+        );
+        assert_eq!(rotation_ping.width, 70.0);
+        assert_eq!(rotation_ping.height, 70.0);
+        assert_eq!(unit_state.player_ping_scale, 0.65);
+        assert!(unit_state.player_ping_active);
+        assert_eq!(unit_state.player_ping_duration, Some(2.0));
+        assert_eq!(unit_state.player_ping_fade_duration, Some(0.25));
         assert!(unit_state.is_finalized);
     }
 
@@ -1434,6 +1467,7 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
 
     env.exec(
         r#"
+        UnitPositionStateFrame:StopPlayerPing()
         UnitPositionStateFrame:ClearUnits()
     "#,
     )
@@ -1450,6 +1484,7 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
         .expect("unit position state should still exist");
     assert!(unit_state.units.is_empty());
     assert!(unit_state.unit_colors.is_empty());
+    assert!(!unit_state.player_ping_active);
     assert!(!unit_state.is_finalized);
 }
 

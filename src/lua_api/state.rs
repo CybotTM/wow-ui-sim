@@ -121,12 +121,24 @@ pub struct UnitPositionUnit {
     pub show_facing: Option<bool>,
 }
 
+/// A player-ping texture configured on a UnitPositionFrame.
+pub struct UnitPositionPlayerPingTexture {
+    pub asset: Option<String>,
+    pub width: f64,
+    pub height: f64,
+}
+
 /// Runtime state for a UnitPositionFrame.
 pub struct UnitPositionFrameState {
     pub ui_map_id: Option<i32>,
     pub units: Vec<UnitPositionUnit>,
     pub unit_colors: HashMap<String, (f64, f64, f64, f64)>,
     pub mouse_over_units: Vec<String>,
+    pub player_ping_scale: f64,
+    pub player_ping_textures: HashMap<i32, UnitPositionPlayerPingTexture>,
+    pub player_ping_active: bool,
+    pub player_ping_duration: Option<f64>,
+    pub player_ping_fade_duration: Option<f64>,
     pub is_finalized: bool,
 }
 

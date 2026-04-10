@@ -90,11 +90,7 @@ fn add_unit_position_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     add_unit_position_set_ui_map_id_method(methods);
     add_unit_position_set_unit_color_method(methods);
     add_unit_position_get_mouse_over_units_method(methods);
-    methods.add_method("GetPlayerPingScale", |_, _, ()| Ok(1.0_f64));
-    methods.add_method("SetPlayerPingTexture", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("SetPlayerPingScale", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("StartPlayerPing", |_, _, _: mlua::MultiValue| Ok(()));
-    methods.add_method("StopPlayerPing", |_, _, ()| Ok(()));
+    add_unit_position_ping_methods(methods);
 }
 
 fn add_unit_position_clear_units_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -219,8 +215,120 @@ fn new_unit_position_frame_state() -> crate::lua_api::state::UnitPositionFrameSt
         units: Vec::new(),
         unit_colors: std::collections::HashMap::new(),
         mouse_over_units: Vec::new(),
+        player_ping_scale: 1.0,
+        player_ping_textures: std::collections::HashMap::new(),
+        player_ping_active: false,
+        player_ping_duration: None,
+        player_ping_fade_duration: None,
         is_finalized: false,
     }
+}
+
+fn add_unit_position_ping_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetPlayerPingScale", |lua, this, ()| {
+        Ok(read_unit_position_ping_scale(get_sim_state(lua), this.0))
+    });
+    methods.add_method(
+        "SetPlayerPingTexture",
+        |lua, this, args: mlua::MultiValue| {
+            write_unit_position_ping_texture(get_sim_state(lua), this.0, args)
+        },
+    );
+    methods.add_method("SetPlayerPingScale", |lua, this, scale: f64| {
+        write_unit_position_ping_scale(get_sim_state(lua), this.0, scale);
+        Ok(())
+    });
+    methods.add_method("StartPlayerPing", |lua, this, args: mlua::MultiValue| {
+        start_unit_position_ping(get_sim_state(lua), this.0, args);
+        Ok(())
+    });
+    methods.add_method("StopPlayerPing", |lua, this, ()| {
+        stop_unit_position_ping(get_sim_state(lua), this.0);
+        Ok(())
+    });
+}
+
+fn read_unit_position_ping_scale(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) -> f64 {
+    let state = state_rc.borrow();
+    state
+        .unit_position_frames
+        .get(&frame_id)
+        .map(|unit_state| unit_state.player_ping_scale)
+        .unwrap_or(1.0)
+}
+
+fn write_unit_position_ping_scale(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    scale: f64,
+) {
+    let mut state = state_rc.borrow_mut();
+    let unit_state = state
+        .unit_position_frames
+        .entry(frame_id)
+        .or_insert_with(new_unit_position_frame_state);
+    unit_state.player_ping_scale = scale;
+}
+
+fn write_unit_position_ping_texture(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    args: mlua::MultiValue,
+) -> mlua::Result<()> {
+    let Some(texture_type) = multi_value_i32_arg(&args, 0) else {
+        return Ok(());
+    };
+    let asset = multi_value_texture_arg(&args, 1)?;
+    let width = multi_value_number_arg(&args, 2).unwrap_or(0.0);
+    let height = multi_value_number_arg(&args, 3).unwrap_or(0.0);
+
+    let mut state = state_rc.borrow_mut();
+    let unit_state = state
+        .unit_position_frames
+        .entry(frame_id)
+        .or_insert_with(new_unit_position_frame_state);
+    unit_state.player_ping_textures.insert(
+        texture_type,
+        crate::lua_api::state::UnitPositionPlayerPingTexture {
+            asset,
+            width,
+            height,
+        },
+    );
+    Ok(())
+}
+
+fn start_unit_position_ping(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    args: mlua::MultiValue,
+) {
+    let duration = multi_value_number_arg(&args, 0).unwrap_or(0.0);
+    let fade_duration = multi_value_number_arg(&args, 1).unwrap_or(0.0);
+
+    let mut state = state_rc.borrow_mut();
+    let unit_state = state
+        .unit_position_frames
+        .entry(frame_id)
+        .or_insert_with(new_unit_position_frame_state);
+    unit_state.player_ping_active = true;
+    unit_state.player_ping_duration = Some(duration);
+    unit_state.player_ping_fade_duration = Some(fade_duration);
+}
+
+fn stop_unit_position_ping(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) {
+    let mut state = state_rc.borrow_mut();
+    let unit_state = state
+        .unit_position_frames
+        .entry(frame_id)
+        .or_insert_with(new_unit_position_frame_state);
+    unit_state.player_ping_active = false;
 }
 
 fn multi_value_string_arg(args: &MultiValue, index: usize) -> Option<String> {
