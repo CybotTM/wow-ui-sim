@@ -1063,6 +1063,36 @@ fn open_trade_skill_opens_blacksmithing_panel() {
 }
 
 #[test]
+fn toggle_guild_frame_opens_and_closes_communities_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleGuildFrame then
+                return "missing_toggle_guild_frame"
+            end
+
+            local opened = ToggleGuildFrame()
+            if CommunitiesFrame and not CommunitiesFrame:IsShown() then
+                return "communities_frame_not_shown"
+            end
+
+            ToggleGuildFrame()
+            if CommunitiesFrame and CommunitiesFrame:IsShown() then
+                return "communities_frame_not_hidden"
+            end
+
+            return tostring(opened == nil or opened == true) == "true" and "ok" or ("opened=" .. tostring(opened))
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleGuildFrame() should open and close the guild/communities panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();

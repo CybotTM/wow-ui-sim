@@ -48,6 +48,7 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
+    patch_communities_toggle(env);
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.
@@ -60,6 +61,39 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
         r#"
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_BOOSTED_SPELL_BOOK, true)
         SetCVarBitfield("closedInfoFrames", LE_FRAME_TUTORIAL_PLAYER_SPELLS_MINIMIZE, true)
+    "#,
+    );
+}
+
+/// Load Blizzard_Communities on demand before toggling the communities panel.
+///
+/// Mainline UIParent assumes CommunitiesFrame already exists when
+/// ToggleCommunitiesFrame() runs, but the lighter panel harness intentionally
+/// does not preload Blizzard_Communities. Wrapping the public toggle keeps
+/// Blizzard's real ToggleGuildFrame() logic intact while making the panel
+/// opener honest in that environment.
+fn patch_communities_toggle(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_toggle_communities_patched and type(ToggleCommunitiesFrame) == "function" then
+            local originalToggleCommunitiesFrame = ToggleCommunitiesFrame
+            ToggleCommunitiesFrame = function(...)
+                if not CommunitiesFrame then
+                    local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+                    if loader then
+                        pcall(loader, "Blizzard_Communities")
+                    end
+                end
+
+                if not CommunitiesFrame then
+                    return
+                end
+
+                return originalToggleCommunitiesFrame(...)
+            end
+
+            __wow_ui_sim_toggle_communities_patched = true
+        end
     "#,
     );
 }
