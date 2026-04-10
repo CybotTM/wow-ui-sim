@@ -389,27 +389,16 @@ fn add_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_mouse_enable_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("EnableMouse", |lua, this, enable: bool| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.mouse_enabled = enable;
-        }
-        Ok(())
+    add_bool_frame_setter(methods, "EnableMouse", |frame, enable| {
+        frame.mouse_enabled = enable;
     });
-
-    methods.add_method("IsMouseEnabled", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.mouse_enabled)
-            .unwrap_or(false))
+    add_bool_frame_getter(methods, "IsMouseEnabled", |frame| frame.mouse_enabled);
+    add_bool_frame_setter(methods, "EnableMouseWheel", |frame, enable| {
+        frame.mouse_wheel_enabled = enable;
     });
-
-    methods.add_method("EnableMouseWheel", |_lua, _this, _enable: bool| Ok(()));
-    methods.add_method("IsMouseWheelEnabled", |_lua, _this, ()| Ok(false));
+    add_bool_frame_getter(methods, "IsMouseWheelEnabled", |frame| {
+        frame.mouse_wheel_enabled
+    });
 }
 
 fn add_keyboard_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -575,4 +564,55 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         "SetDrawLayerEnabled",
         |_lua, _this, (_layer, _enabled): (String, bool)| Ok(()),
     );
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn enable_mouse_wheel_updates_frame_state() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+
+        let initially_disabled: bool = env
+            .eval(
+                r#"
+                local frame = CreateFrame("Frame", "MouseWheelStateFrame", UIParent)
+                return frame:IsMouseWheelEnabled()
+                "#,
+            )
+            .expect("initial mouse wheel query should succeed");
+        assert!(
+            !initially_disabled,
+            "frames should start with mouse wheel disabled"
+        );
+
+        let enabled: bool = env
+            .eval(
+                r#"
+                local frame = MouseWheelStateFrame
+                frame:EnableMouseWheel(true)
+                return frame:IsMouseWheelEnabled()
+                "#,
+            )
+            .expect("mouse wheel enable should succeed");
+        assert!(
+            enabled,
+            "EnableMouseWheel(true) should persist on the frame"
+        );
+
+        let disabled_again: bool = env
+            .eval(
+                r#"
+                local frame = MouseWheelStateFrame
+                frame:EnableMouseWheel(false)
+                return frame:IsMouseWheelEnabled()
+                "#,
+            )
+            .expect("mouse wheel disable should succeed");
+        assert!(
+            !disabled_again,
+            "EnableMouseWheel(false) should clear the frame state"
+        );
+    }
 }

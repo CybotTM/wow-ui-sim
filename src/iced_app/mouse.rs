@@ -350,7 +350,14 @@ impl App {
         let env = self.env.borrow();
         let mut current = Some(start_frame);
         while let Some(frame_id) = current {
-            if env.has_script_handler(frame_id, "OnMouseWheel") {
+            let wheel_enabled = env
+                .state()
+                .borrow()
+                .widgets
+                .get(frame_id)
+                .map(|f| f.mouse_wheel_enabled)
+                .unwrap_or(false);
+            if wheel_enabled && env.has_script_handler(frame_id, "OnMouseWheel") {
                 let delta_val = mlua::Value::Number(dy as f64);
                 let _ = env.fire_script_handler(frame_id, "OnMouseWheel", vec![delta_val]);
                 return true;
@@ -363,5 +370,124 @@ impl App {
                 .and_then(|f| f.parent_id);
         }
         false
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::iced_app::{build_hittable_rects, frame_collect::collect_hittable_frames};
+    use crate::lua_api::WowLuaEnv;
+    use crate::render::{GlyphAtlas, WowFontSystem};
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use iced::Size;
+    use std::cell::RefCell;
+    use std::path::PathBuf;
+    use std::rc::Rc;
+    use tokio::sync::mpsc;
+
+    fn build_test_app(screen_kind: ScreenKind) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(screen_kind);
+        env.borrow().set_screen_size(800.0, 600.0);
+
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
+            "./textures",
+        ))));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+            super::super::app::DEFAULT_FONTS_PATH,
+        ))));
+        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        let app = App::build_app(
+            Rc::clone(&env),
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            false,
+            false,
+            None,
+            crate::config::SimConfig::default(),
+        );
+        app.screen_size.set(Size::new(800.0, 600.0));
+        app
+    }
+
+    fn rebuild_hittable_cache(app: &App) {
+        let env = app.env.borrow();
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        let strata_buckets = state
+            .get_strata_buckets()
+            .expect("visible strata buckets should exist")
+            .clone();
+        let collected = collect_hittable_frames(&state.widgets, &strata_buckets);
+        let hittable = build_hittable_rects(&collected, &state.widgets);
+        let grid = super::super::hit_grid::HitGrid::new(hittable, 800.0, 600.0);
+        *app.cached_hittable.borrow_mut() = Some(grid);
+    }
+
+    #[test]
+    fn mouse_wheel_dispatch_requires_frame_mouse_wheel_enabled() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                MouseWheelDispatchFrame = CreateFrame("Frame", "MouseWheelDispatchFrame", UIParent)
+                MouseWheelDispatchFrame:SetSize(100, 100)
+                MouseWheelDispatchFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                MouseWheelDispatchFrame:EnableMouse(true)
+                MouseWheelDispatchFrame:SetScript("OnMouseWheel", function(_, delta)
+                    __wheel_delta = (__wheel_delta or 0) + delta
+                end)
+                __wheel_delta = 0
+                "#,
+            )
+            .expect("test frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(150.0, 150.0));
+        app.handle_scroll(0.0, -1.0);
+
+        let not_delivered: f64 = app
+            .env
+            .borrow()
+            .eval("return __wheel_delta")
+            .expect("wheel delta query should succeed");
+        assert_eq!(
+            not_delivered, 0.0,
+            "mouse wheel scripts should not fire while mouse wheel is disabled"
+        );
+
+        {
+            let env = app.env.borrow();
+            env.exec("MouseWheelDispatchFrame:EnableMouseWheel(true)")
+                .expect("enabling mouse wheel should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(150.0, 150.0));
+        app.handle_scroll(0.0, -1.0);
+
+        let delivered: f64 = app
+            .env
+            .borrow()
+            .eval("return __wheel_delta")
+            .expect("wheel delta query should succeed");
+        assert_eq!(
+            delivered, -1.0,
+            "mouse wheel scripts should fire once the frame enables mouse wheel"
+        );
     }
 }
