@@ -892,6 +892,66 @@ mod tests {
     }
 
     #[test]
+    fn stop_moving_or_sizing_marks_dragged_frame_user_placed() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                UserPlacedDragFrame = CreateFrame("Frame", "UserPlacedDragFrame", UIParent)
+                UserPlacedDragFrame:SetSize(100, 100)
+                UserPlacedDragFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 50, -50)
+                UserPlacedDragFrame:SetMovable(true)
+                UserPlacedDragFrame:EnableMouse(true)
+                UserPlacedDragFrame:RegisterForDrag("LeftButton")
+                UserPlacedDragFrame:SetScript("OnDragStart", function(self)
+                    self:StartMoving()
+                end)
+                UserPlacedDragFrame:SetScript("OnDragStop", function(self)
+                    self:StopMovingOrSizing()
+                end)
+                "#,
+            )
+            .expect("user placed drag frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(60.0, 60.0));
+        app.handle_mouse_down(Point::new(60.0, 60.0));
+        app.handle_mouse_move(Point::new(90.0, 90.0));
+        app.handle_mouse_up(Point::new(90.0, 90.0));
+
+        let user_placed: bool = app
+            .env
+            .borrow()
+            .eval(
+                r#"
+                return UserPlacedDragFrame:IsUserPlaced()
+            "#,
+            )
+            .expect("user placed drag state query should succeed");
+        let is_moving = app
+            .env
+            .borrow()
+            .state()
+            .borrow()
+            .widgets
+            .get_by_name("UserPlacedDragFrame")
+            .map(|frame| frame.is_moving)
+            .expect("user placed drag frame should exist");
+
+        assert!(
+            !is_moving,
+            "StopMovingOrSizing should clear the moving state after drag stop"
+        );
+        assert!(
+            user_placed,
+            "StopMovingOrSizing should mark a dragged frame as user placed"
+        );
+    }
+
+    #[test]
     fn slider_reports_thumb_drag_state_while_mouse_is_held() {
         let mut app = build_test_app(ScreenKind::Game);
 

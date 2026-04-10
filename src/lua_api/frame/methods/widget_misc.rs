@@ -267,6 +267,9 @@ fn add_stop_moving_or_sizing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         if let Ok(mut s) = state_rc.try_borrow_mut()
             && let Some(frame) = s.widgets.get_mut_visual(id)
         {
+            if frame.is_moving {
+                frame.user_placed = true;
+            }
             frame.is_moving = false;
         }
         Ok(())
