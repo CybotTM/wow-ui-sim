@@ -59,11 +59,17 @@ impl App {
             let Some(drag_id) = state.active_drag_frame else {
                 return;
             };
+            let screen_size = self.screen_size.get();
 
             state.ensure_layout_rects();
-            let Some((parent_id, x_offset, y_offset)) =
-                moving_drag_anchor_update(&state, drag_id, dx, dy)
-            else {
+            let Some((parent_id, x_offset, y_offset)) = moving_drag_anchor_update(
+                &state,
+                drag_id,
+                dx,
+                dy,
+                screen_size.width,
+                screen_size.height,
+            ) else {
                 return;
             };
 
@@ -440,6 +446,8 @@ fn moving_drag_anchor_update(
     drag_id: u64,
     dx: f32,
     dy: f32,
+    screen_width: f32,
+    screen_height: f32,
 ) -> Option<(Option<u64>, f32, f32)> {
     let frame = state.widgets.get(drag_id)?;
     if !frame.is_moving {
@@ -453,9 +461,21 @@ fn moving_drag_anchor_update(
         .map(|rect| (rect.x, rect.y))
         .unwrap_or((0.0, 0.0));
 
-    let new_left = rect.x + dx;
-    let new_top = rect.y + dy;
+    let mut new_left = rect.x + dx;
+    let mut new_top = rect.y + dy;
+    if frame.clamped_to_screen {
+        new_left = clamp_axis_to_viewport(new_left, rect.width, screen_width);
+        new_top = clamp_axis_to_viewport(new_top, rect.height, screen_height);
+    }
     Some((parent_id, new_left - parent_x, -(new_top - parent_y)))
+}
+
+fn clamp_axis_to_viewport(position: f32, size: f32, viewport_size: f32) -> f32 {
+    if size >= viewport_size {
+        0.0
+    } else {
+        position.clamp(0.0, viewport_size - size)
+    }
 }
 
 fn reanchor_moving_drag_frame(
@@ -816,6 +836,59 @@ mod tests {
         );
         assert_eq!(x, 120.0, "mouse delta should advance the frame x offset");
         assert_eq!(y, -120.0, "mouse delta should advance the frame y offset");
+    }
+
+    #[test]
+    fn moving_drag_clamps_frame_to_screen_when_enabled() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                ClampedMovingDragFrame = CreateFrame("Frame", "ClampedMovingDragFrame", UIParent)
+                ClampedMovingDragFrame:SetSize(100, 100)
+                ClampedMovingDragFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 10, -10)
+                ClampedMovingDragFrame:SetMovable(true)
+                ClampedMovingDragFrame:SetClampedToScreen(true)
+                ClampedMovingDragFrame:EnableMouse(true)
+                ClampedMovingDragFrame:RegisterForDrag("LeftButton")
+                ClampedMovingDragFrame:SetScript("OnDragStart", function(self)
+                    self:StartMoving()
+                end)
+                "#,
+            )
+            .expect("clamped moving drag frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(20.0, 20.0));
+        app.handle_mouse_down(Point::new(20.0, 20.0));
+        app.handle_mouse_move(Point::new(-80.0, -80.0));
+
+        let (point, relative_to, relative_point, x, y): (String, String, String, f64, f64) = app
+            .env
+            .borrow()
+            .eval(
+                r#"
+                local point, relativeTo, relativePoint, x, y = ClampedMovingDragFrame:GetPoint(1)
+                local relativeName = relativeTo and relativeTo:GetName() or "nil"
+                return point, relativeName, relativePoint, x, y
+            "#,
+            )
+            .expect("clamped moving drag anchor query should succeed");
+
+        assert_eq!(point, "TOPLEFT");
+        assert_eq!(relative_to, "UIParent");
+        assert_eq!(relative_point, "TOPLEFT");
+        assert_eq!(
+            x, 0.0,
+            "clamped moving drag should not move past the left edge"
+        );
+        assert_eq!(
+            y, 0.0,
+            "clamped moving drag should not move past the top edge"
+        );
     }
 
     #[test]
