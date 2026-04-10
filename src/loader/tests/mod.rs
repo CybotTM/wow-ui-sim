@@ -1428,6 +1428,10 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
         .eval("return UnitPositionStateFrame:GetPlayerPingScale()")
         .unwrap();
     assert_eq!(ping_scale, 0.65);
+    let ui_map_id: i32 = env
+        .eval("return UnitPositionStateFrame:GetUiMapID()")
+        .unwrap();
+    assert_eq!(ui_map_id, 2274);
 
     {
         let state = env.state().borrow();
@@ -1546,6 +1550,21 @@ fn test_unit_position_frame_methods_persist_runtime_state() {
     assert!(unit_state.unit_colors.is_empty());
     assert!(!unit_state.player_ping_active);
     assert!(!unit_state.is_finalized);
+}
+
+#[test]
+fn test_fog_of_war_frame_get_ui_map_id_round_trips_setter_state() {
+    let env = WowLuaEnv::new().unwrap();
+    let ui_map_id: i32 = env
+        .eval(
+            r#"
+            local fog = CreateFrame("FogOfWarFrame", "FogOfWarStateFrame", UIParent)
+            fog:SetUiMapID(2274)
+            return fog:GetUiMapID()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(ui_map_id, 2274);
 }
 
 mod global_frame_access;

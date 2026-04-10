@@ -30,9 +30,15 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_menu_frame_stubs(methods);
     add_quest_poi_frame_methods(methods);
-    methods.add_method("GetUiMapID", |_, _, ()| Ok(mlua::Value::Nil)); // FogOfWarFrame
+    add_ui_map_id_methods(methods);
     add_quest_blob_methods(methods);
     add_unit_position_frame_methods(methods);
+}
+
+fn add_ui_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetUiMapID", |lua, this, ()| {
+        Ok(read_unit_position_ui_map_id(get_sim_state(lua), this.0))
+    });
 }
 
 fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -304,6 +310,18 @@ fn read_unit_position_ping_scale(
         .get(&frame_id)
         .map(|unit_state| unit_state.player_ping_scale)
         .unwrap_or(1.0)
+}
+
+fn read_unit_position_ui_map_id(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) -> i32 {
+    let state = state_rc.borrow();
+    state
+        .unit_position_frames
+        .get(&frame_id)
+        .and_then(|unit_state| unit_state.ui_map_id)
+        .unwrap_or(0)
 }
 
 fn write_unit_position_ping_scale(
