@@ -1842,6 +1842,7 @@ fn register_taint_and_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn register_missing_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_bag_constants(lua, g)?;
     register_chat_constants(lua, g)?;
+    register_deprecated_item_quality_constants(g)?;
     register_deprecated_world_elapsed_timer_constants(g)?;
     // Defined in Blizzard_UIParent/Mainline/UIParent.lua but needed earlier
     // by Blizzard_GameTooltip which loads before Blizzard_UIParent.
@@ -1878,6 +1879,18 @@ fn register_chat_constants(lua: &Lua, g: &mlua::Table) -> Result<()> {
     mfsb.set("InitialScrollDelay", 0.4f64)?;
     mfsb.set("HeldScrollDelay", 0.04f64)?;
     g.set("MessageFrameScrollButtonConstants", mfsb)?;
+    Ok(())
+}
+
+fn register_deprecated_item_quality_constants(g: &mlua::Table) -> Result<()> {
+    g.set("LE_ITEM_QUALITY_COMMON", 1i32)?;
+    g.set("LE_ITEM_QUALITY_UNCOMMON", 2i32)?;
+    g.set("LE_ITEM_QUALITY_RARE", 3i32)?;
+    g.set("LE_ITEM_QUALITY_EPIC", 4i32)?;
+    g.set("LE_ITEM_QUALITY_LEGENDARY", 5i32)?;
+    g.set("LE_ITEM_QUALITY_ARTIFACT", 6i32)?;
+    g.set("LE_ITEM_QUALITY_HEIRLOOM", 7i32)?;
+    g.set("LE_ITEM_QUALITY_WOW_TOKEN", 8i32)?;
     Ok(())
 }
 

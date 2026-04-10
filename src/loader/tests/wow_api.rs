@@ -295,6 +295,43 @@ fn test_wrong_constant_snapshot_matches_expected_values() {
 }
 
 #[test]
+fn test_legacy_item_quality_constants_match_enum_item_quality() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let legacy_aliases: (i32, i32, i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return LE_ITEM_QUALITY_COMMON,
+                LE_ITEM_QUALITY_UNCOMMON,
+                LE_ITEM_QUALITY_RARE,
+                LE_ITEM_QUALITY_EPIC,
+                LE_ITEM_QUALITY_LEGENDARY,
+                LE_ITEM_QUALITY_ARTIFACT,
+                LE_ITEM_QUALITY_HEIRLOOM,
+                LE_ITEM_QUALITY_WOW_TOKEN
+            "#,
+        )
+        .unwrap();
+
+    let enum_values: (i32, i32, i32, i32, i32, i32, i32, i32) = env
+        .eval(
+            r#"
+            return Enum.ItemQuality.Common,
+                Enum.ItemQuality.Uncommon,
+                Enum.ItemQuality.Rare,
+                Enum.ItemQuality.Epic,
+                Enum.ItemQuality.Legendary,
+                Enum.ItemQuality.Artifact,
+                Enum.ItemQuality.Heirloom,
+                Enum.ItemQuality.WoWToken
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(legacy_aliases, enum_values);
+}
+
+#[test]
 fn test_expansion_name_globals() {
     let env = WowLuaEnv::new().unwrap();
     for i in 0..=10 {
