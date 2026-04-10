@@ -338,6 +338,42 @@ fn make_renown_level_entry(lua: &Lua, level: i32) -> Result<mlua::Table> {
     Ok(entry)
 }
 
+fn seeded_covenant_renown_reward(
+    covenant_id: i32,
+    renown_level: i32,
+) -> Option<(i32, &'static str, &'static str, &'static str)> {
+    match (covenant_id, renown_level) {
+        (1, 5) => Some((
+            4_089_529,
+            "Path of Ascension",
+            "Unlocks a new covenant activity.",
+            "Path of Ascension unlocked",
+        )),
+        _ => None,
+    }
+}
+
+fn make_covenant_renown_rewards_for_level(
+    lua: &Lua,
+    covenant_id: i32,
+    renown_level: i32,
+) -> Result<mlua::Table> {
+    let rewards = lua.create_table()?;
+    let Some((icon, name, description, toast_description)) =
+        seeded_covenant_renown_reward(covenant_id, renown_level)
+    else {
+        return Ok(rewards);
+    };
+
+    let reward = lua.create_table()?;
+    reward.set("icon", icon)?;
+    reward.set("name", name)?;
+    reward.set("description", description)?;
+    reward.set("toastDescription", toast_description)?;
+    rewards.set(1, reward)?;
+    Ok(rewards)
+}
+
 fn register_c_covenant_sanctum_ui(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
@@ -359,6 +395,12 @@ fn register_c_covenant_sanctum_ui(lua: &Lua) -> Result<()> {
     t.set(
         "HasMaximumRenown",
         lua.create_function(|_, _id: i32| Ok(false))?,
+    )?;
+    t.set(
+        "GetRenownRewardsForLevel",
+        lua.create_function(|lua, (covenant_id, renown_level): (i32, i32)| {
+            make_covenant_renown_rewards_for_level(lua, covenant_id, renown_level)
+        })?,
     )?;
     lua.globals().set("C_CovenantSanctumUI", t)?;
     Ok(())
