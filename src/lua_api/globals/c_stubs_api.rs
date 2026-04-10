@@ -814,6 +814,8 @@ fn register_c_log(lua: &Lua) -> Result<()> {
 
 /// C_CampaignInfo namespace - campaign/war campaign data.
 fn register_c_campaign_info(lua: &Lua) -> Result<()> {
+    const CAMPAIGN_STATE_INVALID: i32 = 0;
+
     let t = lua.create_table()?;
     t.set(
         "GetCampaignID",
@@ -822,6 +824,10 @@ fn register_c_campaign_info(lua: &Lua) -> Result<()> {
     t.set(
         "GetCampaignInfo",
         lua.create_function(|_, _campaign_id: i32| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "GetState",
+        lua.create_function(|_, _campaign_id: i32| Ok(CAMPAIGN_STATE_INVALID))?,
     )?;
     lua.globals().set("C_CampaignInfo", t)?;
     Ok(())
