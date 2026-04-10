@@ -123,6 +123,8 @@ pub struct FrameHandle {
 
 `SetAttribute()`, `GetAttribute()`, `SetBackdrop()`, `GetBackdrop()`, `SetBackdropColor()`, `SetBackdropBorderColor()`
 
+**Flatten Render Layers:** `SetFlattensRenderLayers()` persists per-frame local flatten state, `GetFlattensRenderLayers()` returns only that local flag, and `GetEffectivelyFlattensRenderLayers()` walks ancestors so descendants inherit effective flattening without inheriting the local flag itself.
+
 ### Widget-Type-Specific Methods
 
 **EditBox:** `SetText()`, `GetText()`, `SetMaxLetters()`, `SetMultiLine()`, `SetAutoFocus()`, `SetFocus()`, `ClearFocus()`
