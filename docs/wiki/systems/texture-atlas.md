@@ -1,0 +1,85 @@
+# Texture Atlas System
+
+Texture handling spans three interconnected layers: file I/O and caching (TextureManager), atlas name resolution and nine-slice detection (Atlas system), and GPU quad batching (rendering). The system supports BLP, PNG, WebP, and TGA formats, with WebP as the preferred local cache format.
+
+## TextureManager (`src/texture.rs`)
+
+```rust
+pub struct TextureManager {
+    textures_path: PathBuf,           // ./textures (local WebP cache)
+    interface_path: Option<PathBuf>,  // ~/Projects/wow/Interface (extracted BLP)
+    addons_path: Option<PathBuf>,     // Addon directories
+    cache: HashMap<String, TextureData>,
+    sub_cache: HashMap<String, TextureData>,
+}
+```
+
+All textures decoded to `TextureData { width, height, pixels: Vec<u8> }` in RGBA8.
+
+**Path resolution priority**: addon textures (`Interface/AddOns/...`) → local WebP cache (`./textures/...`) → extracted game files (`~/Projects/wow/Interface/...`) → case-insensitive crawl fallback.
+
+**Extension priority**: `webp > WEBP > PNG > png > tga > TGA > blp > BLP > jpg > JPG`.
+
+**Path normalization**: backslashes to forward slashes, extension stripped. `Interface\Buttons\UI-Panel-Button-Up.blp` → `Interface/Buttons/UI-Panel-Button-Up`.
+
+**Formats**: BLP via `image_blp` crate (0.24 compat layer); PNG/WebP/TGA/JPG via standard `image` crate.
+
+## Atlas Lookup (`src/atlas.rs`)
+
+The atlas database is a compiled perfect hash map (`phf_map!`) with ~50K entries built from WoW CSV exports at compile time.
+
+```rust
+pub struct AtlasInfo {
+    pub file: &'static str,     // backing texture path
+    pub width: u32, pub height: u32,
+    pub left_tex_coord: f32, pub right_tex_coord: f32,
+    pub top_tex_coord: f32, pub bottom_tex_coord: f32,
+    pub tiles_horizontally: bool, pub tiles_vertically: bool,
+}
+```
+
+`get_atlas_info(name)` resolution order:
+1. Exact match (case-insensitive, strip/add `-2x` suffix)
+2. Size-suffixed fallback: `coin-copper` → try `-16x16`, `-20x20`, `-32x32`, `-48x48`, `-64x64`
+3. Underscore suffix: try `_2x` then `_1x`
+4. Spelling corrections (e.g., Blizzard typo `divider` → `devider`)
+
+`is_2x_fallback` halves reported dimensions: `width() = info.width / 2`.
+
+## Nine-Slice Atlas Kits
+
+Auto-detected by probing `{kit}-nineslice-cornertopleft`. If found, `get_nine_slice_atlas_info()` assembles 8 required pieces + optional center:
+
+- Corners: `{kit}-nineslice-corner{topleft,topright,bottomleft,bottomright}`
+- Edges: `_{kit}-nineslice-edge{top,bottom}`, `!{kit}-nineslice-edge{left,right}` (note prefix variations)
+- Center: `{kit}-nineslice-center` (optional)
+
+`SetAtlas()` prefers nine-slice kits over 2x fallbacks. Kit names stored in `frame.nine_slice_atlas` trigger `emit_nine_slice_atlas()` rendering (4 corners + tiled top/bottom edges + tiled left/right edges + optional center fill).
+
+## Texture Coordinate System
+
+WoW uses 8 UV values: `(tlx, tly, blx, bly, trx, try, brx, bry)`. Internally stored as `Option<(left, right, top, bottom)>` (packed form).
+
+**SetTexCoord remapping**: when an atlas is active, user-supplied coords are remapped relative to the atlas sub-region:
+```
+result_left = atlas_left + user_left * (atlas_right - atlas_left)
+```
+
+## SetAtlas Lua API
+
+`SetAtlas(atlasName, useAtlasSize, filterMode, resetTexCoords)` — looks up atlas info, detects nine-slice kit, sets `frame.nine_slice_atlas` or calls `apply_atlas_to_frame()` (sets texture path, UV coords, tiling hints). If `useAtlasSize`, sets frame width/height from atlas dimensions.
+
+**Button texture propagation**: child textures with standard parentKeys (NormalTexture, PushedTexture, etc.) sync atlas info to the parent button's state fields. Custom parentKeys render independently.
+
+## Deferred Texture Loading
+
+Quad batch uses `push_textured_path()` with deferred loading: quads store a path reference; during `WowUiPrimitive::prepare()`, paths are resolved to GPU atlas indices. New textures are uploaded to the appropriate tier based on dimensions.
+
+## Sources
+
+- [texture-atlas-system.md](../../texture-atlas-system.md) — TextureManager, AtlasInfo, nine-slice kits, tex coord remapping, StatusBar fill
+
+## See Also
+
+- [[rendering-pipeline]] — GPU atlas tiers, QuadBatch, nine-slice and tiling rendering
+- [[widget-system]] — Frame fields: texture, atlas, tex_coords, nine_slice_atlas
