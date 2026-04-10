@@ -21,7 +21,7 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_attribute_stubs(methods);
     add_frame_level_stubs(methods);
     add_secret_protected_stubs(methods);
-    add_flatten_render_stubs(methods);
+    add_flatten_render_methods(methods);
     add_window_display_stubs(methods);
     add_misc_stubs(methods);
     add_specialized_frame_stubs(methods);
@@ -723,12 +723,44 @@ fn frame_is_preventing_secret_values(widgets: &WidgetRegistry, id: u64) -> bool 
         .unwrap_or(false)
 }
 
-/// Flatten/Render stubs.
-fn add_flatten_render_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetEffectivelyFlattensRenderLayers", |_, _this, ()| {
-        Ok(false)
+fn frame_flattens_render_layers(widgets: &WidgetRegistry, id: u64) -> bool {
+    widgets
+        .get(id)
+        .map(|frame| frame.flattens_render_layers)
+        .unwrap_or(false)
+}
+
+fn frame_effectively_flattens_render_layers(widgets: &WidgetRegistry, id: u64) -> bool {
+    let mut current_id = Some(id);
+
+    while let Some(frame_id) = current_id {
+        let Some(frame) = widgets.get(frame_id) else {
+            return false;
+        };
+        if frame.flattens_render_layers {
+            return true;
+        }
+        current_id = frame.parent_id;
+    }
+
+    false
+}
+
+/// Flatten/render layer methods.
+fn add_flatten_render_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetEffectivelyFlattensRenderLayers", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_effectively_flattens_render_layers(
+            &state.widgets,
+            this.0,
+        ))
     });
-    methods.add_method("GetFlattensRenderLayers", |_, _this, ()| Ok(false));
+    methods.add_method("GetFlattensRenderLayers", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(frame_flattens_render_layers(&state.widgets, this.0))
+    });
 }
 
 /// Window/Display stubs.

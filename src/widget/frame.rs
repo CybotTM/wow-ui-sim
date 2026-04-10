@@ -189,6 +189,8 @@ pub struct Frame {
     pub frame_strata: FrameStrata,
     /// Whether frame strata was explicitly set (not inherited from parent).
     pub has_fixed_frame_strata: bool,
+    /// Whether this frame locally flattens descendant render layers.
+    pub flattens_render_layers: bool,
     /// Top-level frame: auto-raised above siblings when shown.
     pub toplevel: bool,
     /// Alpha transparency (0.0 - 1.0).
@@ -511,6 +513,7 @@ macro_rules! frame_defaults {
             frame_level_offset: None,
             frame_strata: FrameStrata::Medium,
             has_fixed_frame_strata: false,
+            flattens_render_layers: false,
             toplevel: false,
             alpha: 1.0,
             ignore_parent_alpha: false,

@@ -307,7 +307,14 @@ fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
     );
     methods.add_method(
         "SetFlattensRenderLayers",
-        |_lua, _this, _flatten: Option<bool>| Ok(()),
+        |lua, this, flatten: Option<bool>| {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(this.0) {
+                frame.flattens_render_layers = flatten.unwrap_or(false);
+            }
+            Ok(())
+        },
     );
     methods.add_method(
         "SetMotionScriptsWhileDisabled",

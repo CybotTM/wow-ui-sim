@@ -997,6 +997,50 @@ fn test_secret_and_protected_methods_reflect_frame_security_state() {
     );
 }
 
+#[test]
+fn test_flatten_render_methods_track_local_and_inherited_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        FlattenRootFrame = CreateFrame("Frame", "FlattenRootFrame", UIParent)
+        FlattenParentFrame = CreateFrame("Frame", "FlattenParentFrame", FlattenRootFrame)
+        FlattenChildFrame = CreateFrame("Frame", "FlattenChildFrame", FlattenParentFrame)
+
+        assert(not FlattenRootFrame:GetFlattensRenderLayers(), "new frames should default flatten=false")
+        assert(not FlattenRootFrame:GetEffectivelyFlattensRenderLayers(), "root should default effective flatten=false")
+        assert(not FlattenChildFrame:GetFlattensRenderLayers(), "child local flatten should default false")
+        assert(not FlattenChildFrame:GetEffectivelyFlattensRenderLayers(), "child effective flatten should default false")
+
+        FlattenParentFrame:SetFlattensRenderLayers(true)
+
+        assert(FlattenParentFrame:GetFlattensRenderLayers(), "local flatten flag should persist on the frame")
+        assert(FlattenParentFrame:GetEffectivelyFlattensRenderLayers(), "frame should effectively flatten when local flag is enabled")
+        assert(not FlattenChildFrame:GetFlattensRenderLayers(), "descendants should not inherit the local flatten flag itself")
+        assert(FlattenChildFrame:GetEffectivelyFlattensRenderLayers(), "descendants should inherit effective flattening from ancestors")
+        assert(not FlattenRootFrame:GetEffectivelyFlattensRenderLayers(), "ancestors should not inherit flattening upward")
+
+        FlattenChildFrame:SetFlattensRenderLayers(true)
+        FlattenParentFrame:SetFlattensRenderLayers(false)
+
+        assert(FlattenChildFrame:GetFlattensRenderLayers(), "child local flatten flag should persist independently")
+        assert(FlattenChildFrame:GetEffectivelyFlattensRenderLayers(), "child local flatten should keep effective flattening enabled")
+        assert(not FlattenParentFrame:GetFlattensRenderLayers(), "parent local flatten flag should clear")
+        assert(not FlattenParentFrame:GetEffectivelyFlattensRenderLayers(), "cleared parent should stop flattening effectively")
+
+        FLATTEN_RENDER_METHODS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return FLATTEN_RENDER_METHODS_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "flatten render layer methods should track local and inherited state"
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
