@@ -219,8 +219,9 @@ pub fn get_frame_ref(lua: &Lua, widget_id: u64) -> Option<Value> {
 /// Uses Elune's `geterrorhandler()` which reads `LUA_ERRORHANDLERINDEX` (-9999),
 /// the same slot that `securecall`'s `lua_pcall` references.
 pub fn call_error_handler(lua: &Lua, error_msg: &str) {
-    eprintln!("Lua error: {error_msg}");
-    collect_lua_error(lua, error_msg);
+    if collect_lua_error(lua, error_msg) {
+        eprintln!("Lua error: {error_msg}");
+    }
     let result: mlua::Result<()> = lua
         .load(
             r#"
@@ -266,14 +267,18 @@ pub fn get_stack_taint(lua: &Lua) -> Option<String> {
 }
 
 /// Push an error message into SimState.lua_errors for later retrieval.
-pub fn collect_lua_error(lua: &Lua, msg: &str) {
+pub fn collect_lua_error(lua: &Lua, msg: &str) -> bool {
     if let Some(state_rc) = lua.app_data_ref::<Rc<RefCell<SimState>>>() {
         if let Ok(mut state) = state_rc.try_borrow_mut() {
             state.lua_errors.push(msg.to_string());
             let normalized = crate::lua_errors::extract_error_message(msg);
-            *state.lua_error_counts.entry(normalized).or_insert(0) += 1;
+            let entry = state.lua_error_counts.entry(normalized).or_insert(0);
+            let is_first = *entry == 0;
+            *entry += 1;
+            return is_first;
         }
     }
+    false
 }
 
 // ── Event dispatch ordering ───────────────────────────────────────────
