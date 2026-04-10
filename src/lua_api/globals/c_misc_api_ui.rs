@@ -533,6 +533,38 @@ struct HousingDecorInstanceInfo {
     is_locked: bool,
 }
 
+struct HousingNeighborhoodState {
+    cornerstone_house_info: Option<CornerstoneHouseInfo>,
+    cornerstone_neighborhood_info: Option<CornerstoneNeighborhoodInfo>,
+}
+
+impl HousingNeighborhoodState {
+    fn seeded() -> Self {
+        Self {
+            cornerstone_house_info: Some(CornerstoneHouseInfo {
+                plot_id: 27,
+                owner_name: "Simhero",
+                house_name: "Sunspire Retreat",
+            }),
+            cornerstone_neighborhood_info: Some(CornerstoneNeighborhoodInfo {
+                neighborhood_name: "Dawnmeadow",
+                neighborhood_type: "Public",
+            }),
+        }
+    }
+}
+
+struct CornerstoneHouseInfo {
+    plot_id: i32,
+    owner_name: &'static str,
+    house_name: &'static str,
+}
+
+struct CornerstoneNeighborhoodInfo {
+    neighborhood_name: &'static str,
+    neighborhood_type: &'static str,
+}
+
 fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     let state = Rc::new(RefCell::new(HousingCustomizeModeState::seeded()));
@@ -622,6 +654,7 @@ fn register_c_housing(lua: &Lua) -> Result<()> {
     g.set("C_HouseEditor", make_c_house_editor(lua)?)?;
     g.set("C_HousingDecor", make_c_housing_decor(lua)?)?;
     g.set("C_Housing", make_c_housing_namespace(lua)?)?;
+    g.set("C_HousingNeighborhood", make_c_housing_neighborhood(lua)?)?;
 
     let basic = lua.create_table()?;
     basic.set("IsDecorSelected", lua.create_function(|_, ()| Ok(false))?)?;
@@ -711,6 +744,54 @@ fn make_c_housing_namespace(lua: &Lua) -> Result<mlua::Table> {
         create_get_player_owned_houses_fn(lua)?,
     )?;
     Ok(housing)
+}
+
+fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
+    let neighborhood = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingNeighborhoodState::seeded()));
+
+    let state_ref = Rc::clone(&state);
+    neighborhood.set(
+        "GetCornerstoneHouseInfo",
+        lua.create_function(move |lua, ()| {
+            let state = state_ref.borrow();
+            let Some(info) = &state.cornerstone_house_info else {
+                return Ok(Value::Nil);
+            };
+            let house = lua.create_table()?;
+            house.set("plotID", info.plot_id)?;
+            house.set("ownerName", info.owner_name)?;
+            house.set("houseName", info.house_name)?;
+            Ok(Value::Table(house))
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    neighborhood.set(
+        "GetCornerstoneNeighborhoodInfo",
+        lua.create_function(move |lua, ()| {
+            let state = state_ref.borrow();
+            let Some(info) = &state.cornerstone_neighborhood_info else {
+                return Ok(Value::Nil);
+            };
+            let neighborhood = lua.create_table()?;
+            neighborhood.set("neighborhoodName", info.neighborhood_name)?;
+            neighborhood.set("neighborhoodType", info.neighborhood_type)?;
+            Ok(Value::Table(neighborhood))
+        })?,
+    )?;
+
+    neighborhood.set(
+        "OnCornerstoneClosed",
+        lua.create_function(move |_, ()| {
+            let mut state = state.borrow_mut();
+            state.cornerstone_house_info = None;
+            state.cornerstone_neighborhood_info = None;
+            Ok(())
+        })?,
+    )?;
+
+    Ok(neighborhood)
 }
 
 fn create_get_player_owned_houses_fn(lua: &Lua) -> Result<mlua::Function> {
