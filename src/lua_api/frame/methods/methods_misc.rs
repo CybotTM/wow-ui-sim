@@ -1091,9 +1091,17 @@ fn add_minimap_core_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     methods.add_method("GetZoomLevels", |_, _this, ()| {
         Ok(minimap_zoom_level_count())
     });
-    methods.add_method("GetPingPosition", |_, _this, ()| Ok((0.0f64, 0.0f64)));
-    methods.add_method("PingLocation", |_, _this, (_x, _y): (f64, f64)| Ok(()));
-    methods.add_method("UpdateBlips", |_, _this, ()| Ok(()));
+    methods.add_method("GetPingPosition", |lua, this, ()| {
+        Ok(read_minimap_ping_position(get_sim_state(lua), this.0))
+    });
+    methods.add_method("PingLocation", |lua, this, (x, y): (f64, f64)| {
+        write_minimap_ping_position(get_sim_state(lua), this.0, x, y);
+        Ok(())
+    });
+    methods.add_method("UpdateBlips", |lua, this, ()| {
+        bump_minimap_blip_revision(get_sim_state(lua), this.0);
+        Ok(())
+    });
 }
 
 /// Minimap texture setters (no-op stubs).
@@ -1422,6 +1430,41 @@ fn minimap_zoom_level_count() -> i32 {
 
 fn minimap_max_zoom_index() -> i32 {
     5
+}
+
+fn read_minimap_ping_position(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) -> (f64, f64) {
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.minimap_ping_position)
+        .map(|(x, y)| (x as f64, y as f64))
+        .unwrap_or((0.0, 0.0))
+}
+
+fn write_minimap_ping_position(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    x: f64,
+    y: f64,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.minimap_ping_position = Some((x as f32, y as f32));
+    }
+}
+
+fn bump_minimap_blip_revision(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.minimap_blip_update_revision = frame.minimap_blip_update_revision.saturating_add(1);
+    }
 }
 
 fn add_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> mlua::Result<()> {

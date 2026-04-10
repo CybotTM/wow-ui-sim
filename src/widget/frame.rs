@@ -548,6 +548,10 @@ pub struct Frame {
     pub minimap_corpse_poi_arrow_texture: Option<String>,
     /// Stored Minimap static POI arrow texture asset.
     pub minimap_static_poi_arrow_texture: Option<String>,
+    /// Latest Minimap ping position in normalized map coordinates.
+    pub minimap_ping_position: Option<(f32, f32)>,
+    /// Monotonic revision bumped by UpdateBlips().
+    pub minimap_blip_update_revision: u64,
     /// Stored Minimap quest blob inside style.
     pub quest_blob_inside: MinimapBlobLayerStyle,
     /// Stored Minimap quest blob outside style.
@@ -898,6 +902,8 @@ macro_rules! frame_defaults {
             minimap_poi_arrow_texture: None,
             minimap_corpse_poi_arrow_texture: None,
             minimap_static_poi_arrow_texture: None,
+            minimap_ping_position: None,
+            minimap_blip_update_revision: 0,
             quest_blob_inside: MinimapBlobLayerStyle::default(),
             quest_blob_outside: MinimapBlobLayerStyle::default(),
             quest_blob_ring: MinimapBlobRingStyle::default(),

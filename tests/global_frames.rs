@@ -67,6 +67,47 @@ fn test_minimap_zoom_persists_and_clamps() {
 }
 
 #[test]
+fn test_minimap_ping_methods_persist_runtime_state() {
+    let env = env();
+    let (default_x, default_y, ping_x, ping_y): (f64, f64, f64, f64) = env
+        .eval(
+            r#"
+        local beforeX, beforeY = Minimap:GetPingPosition()
+        Minimap:PingLocation(0.25, 0.75)
+        Minimap:UpdateBlips()
+        local afterX, afterY = Minimap:GetPingPosition()
+        return beforeX, beforeY, afterX, afterY
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!((default_x, default_y), (0.0, 0.0));
+    assert_eq!((ping_x, ping_y), (0.25, 0.75));
+
+    let minimap_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("Minimap")
+        .expect("Minimap should exist");
+    let state = env.state().borrow();
+    let minimap = state
+        .widgets
+        .get(minimap_id)
+        .expect("Minimap frame should exist");
+
+    assert_eq!(
+        minimap.minimap_ping_position,
+        Some((0.25, 0.75)),
+        "PingLocation should persist the latest minimap ping coordinates"
+    );
+    assert_eq!(
+        minimap.minimap_blip_update_revision, 1,
+        "UpdateBlips should update minimap runtime state instead of no-oping"
+    );
+}
+
+#[test]
 fn test_world_map_data_providers_are_tracked() {
     let env = env();
     let (count_after_add, count_after_remove): (i32, i32) = env
