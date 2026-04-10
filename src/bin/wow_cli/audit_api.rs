@@ -80,7 +80,7 @@ impl Patterns {
             .map(|tag| Regex::new(&format!(r"(?s)<{tag}[^>]*>(.*?)</{tag}>")).unwrap())
             .collect();
         Self {
-            c_api: Regex::new(r"(C_\w+)[.:](\w+)").unwrap(),
+            c_api: Regex::new(r"(C_\w+)[.:](\w+)\s*\(").unwrap(),
             global_call: Regex::new(r"\b([A-Za-z_][A-Za-z0-9_]*)\s*\(").unwrap(),
             le_const: Regex::new(r"\bLE_\w+").unwrap(),
             enum_ref: Regex::new(r"\bEnum\.(\w+\.\w+)").unwrap(),
@@ -1490,6 +1490,46 @@ fn register_c_tooltip_info_0(lua: &Lua) {
                 .cloned()
                 .collect::<BTreeSet<_>>(),
             BTreeSet::from(["GetSpellInfo".to_string(), "UnitName".to_string()])
+        );
+    }
+
+    #[test]
+    fn scan_lua_text_only_counts_c_api_usages_in_call_context() {
+        let patterns = Patterns::new();
+        let mut used = AuditResults::default();
+        let lua = r#"
+            local getter = C_Spell.GetSpellInfo
+            if C_Spell.GetSpellInfo then
+                local maybe = C_Spell.GetSpellInfo
+            end
+
+            C_Spell.GetSpellInfo(1)
+            C_Container.GetContainerNumSlots(0)
+            C_Timer:After(0, function() end)
+        "#;
+
+        scan_lua_text(lua, "Blizzard_Test.lua", &mut used, &patterns);
+
+        assert_eq!(
+            used.c_api
+                .get("C_Spell")
+                .and_then(|methods| methods.get("GetSpellInfo"))
+                .map(|usage| usage.count),
+            Some(1)
+        );
+        assert_eq!(
+            used.c_api
+                .get("C_Container")
+                .and_then(|methods| methods.get("GetContainerNumSlots"))
+                .map(|usage| usage.count),
+            Some(1)
+        );
+        assert_eq!(
+            used.c_api
+                .get("C_Timer")
+                .and_then(|methods| methods.get("After"))
+                .map(|usage| usage.count),
+            Some(1)
         );
     }
 
