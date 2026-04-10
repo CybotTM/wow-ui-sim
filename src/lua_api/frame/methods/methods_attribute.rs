@@ -377,12 +377,22 @@ fn add_forbidden_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_can_change_protected_state(methods);
+    add_pass_through_button_methods(methods);
+    add_flatten_render_layer_methods(methods);
+    add_motion_scripts_while_disabled_methods(methods);
+}
+
+fn add_can_change_protected_state<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("CanChangeProtectedState", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         Ok(!combat_lockdown::is_blocked_for_current_caller(
             lua, &state_rc, this.0,
         ))
     });
+}
+
+fn add_pass_through_button_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetPassThroughButtons",
         |lua, this, args: mlua::MultiValue| {
@@ -401,6 +411,9 @@ fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Ok(())
         },
     );
+}
+
+fn add_flatten_render_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetFlattensRenderLayers",
         |lua, this, flatten: Option<bool>| {
@@ -412,6 +425,9 @@ fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
             Ok(())
         },
     );
+}
+
+fn add_motion_scripts_while_disabled_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetMotionScriptsWhileDisabled",
         |lua, this, enabled: Option<bool>| {
