@@ -33,6 +33,9 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             if eb:HasText() ~= false then
                 return "has_text_should_default_false"
             end
+            if eb:IsCountInvisibleLetters() ~= false then
+                return "count_invisible_letters_should_default_false"
+            end
             local r, g, b, a = eb:GetHighlightColor()
             if r ~= 1 or g ~= 1 or b ~= 1 or a ~= 1 then
                 return "highlight_color_should_default_white"
@@ -44,6 +47,7 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             eb:SetSecureText(true)
             eb:SetVisibleTextByteLimit(32)
             eb:SetSecurityDisablePaste()
+            eb:SetCountInvisibleLetters(true)
             eb:SetHighlightColor(0.25, 0.5, 0.75, 0.9)
 
             eb:AddHistoryLine("one")
@@ -76,6 +80,9 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             end
             if eb:GetVisibleTextByteLimit() ~= 32 then
                 return "visible_text_byte_limit_not_persisted"
+            end
+            if eb:IsCountInvisibleLetters() ~= true then
+                return "count_invisible_letters_not_persisted"
             end
             if eb:GetInputLanguage() ~= "ROMAN" then
                 return "reset_input_mode_should_restore_roman"
@@ -143,5 +150,37 @@ fn editbox_stub_family_methods_persist_runtime_state() {
         frame.editbox_highlight_range,
         Some((0, "Visible text".chars().count() as i32)),
         "HighlightText() without args should select the full current text"
+    );
+}
+
+#[test]
+fn editbox_ime_composition_getter_reflects_runtime_state() {
+    let env = env();
+    env.eval::<()>(r#"CreateFrame("EditBox", "StubFamilyIME", UIParent)"#)
+        .unwrap();
+
+    let frame_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("StubFamilyIME")
+        .expect("StubFamilyIME should exist");
+
+    {
+        let state_rc = env.state();
+        let mut state = state_rc.borrow_mut();
+        let frame = state
+            .widgets
+            .get_mut_visual(frame_id)
+            .expect("StubFamilyIME frame should exist");
+        frame.editbox_in_ime_composition_mode = true;
+    }
+
+    let in_ime: bool = env
+        .eval(r#"return StubFamilyIME:IsInIMECompositionMode()"#)
+        .unwrap();
+    assert!(
+        in_ime,
+        "IsInIMECompositionMode should reflect the backing editbox runtime state"
     );
 }

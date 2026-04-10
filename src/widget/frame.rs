@@ -665,6 +665,8 @@ pub struct Frame {
     pub editbox_text_insets: (f32, f32, f32, f32),
     /// Whether to count invisible letters.
     pub editbox_count_invisible_letters: bool,
+    /// Whether the editbox is currently in IME composition mode.
+    pub editbox_in_ime_composition_mode: bool,
     /// Whether only alphabetic input should be accepted.
     pub editbox_alphabetic_only: bool,
     /// Whether alt+arrow mode is enabled.
@@ -956,6 +958,7 @@ macro_rules! frame_defaults {
             editbox_history_max: 0,
             editbox_text_insets: (0.0, 0.0, 0.0, 0.0),
             editbox_count_invisible_letters: false,
+            editbox_in_ime_composition_mode: false,
             editbox_alphabetic_only: false,
             editbox_alt_arrow_key_mode: false,
             editbox_numeric_full_range: false,

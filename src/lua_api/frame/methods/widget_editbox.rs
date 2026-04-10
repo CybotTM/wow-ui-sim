@@ -5,11 +5,7 @@ use super::widget_tooltip::{fire_tooltip_script, val_to_f32};
 use crate::lua_api::frame::handle::get_sim_state;
 use mlua::Value;
 
-const EDITBOX_FALSE_GETTERS: &[&str] = &[
-    "GetIndentedWordWrap",
-    "IsCountInvisibleLetters",
-    "IsInIMECompositionMode",
-];
+const EDITBOX_FALSE_GETTERS: &[&str] = &["GetIndentedWordWrap"];
 
 pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_editbox_focus_methods(methods);
@@ -28,6 +24,12 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
     methods.add_method("HasText", |lua, this, ()| Ok(editbox_has_text(lua, this.0)));
+    methods.add_method("IsCountInvisibleLetters", |lua, this, ()| {
+        Ok(editbox_counts_invisible_letters(lua, this.0))
+    });
+    methods.add_method("IsInIMECompositionMode", |lua, this, ()| {
+        Ok(editbox_in_ime_composition_mode(lua, this.0))
+    });
     methods.add_method("GetDisplayText", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -129,6 +131,28 @@ fn editbox_has_text(lua: &mlua::Lua, id: u64) -> bool {
             .get(id)
             .and_then(|frame| frame.text.as_ref())
             .is_some_and(|text| !text.is_empty());
+    }
+    false
+}
+
+fn editbox_counts_invisible_letters(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    if let Ok(state) = state_rc.try_borrow() {
+        return state
+            .widgets
+            .get(id)
+            .is_some_and(|frame| frame.editbox_count_invisible_letters);
+    }
+    false
+}
+
+fn editbox_in_ime_composition_mode(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    if let Ok(state) = state_rc.try_borrow() {
+        return state
+            .widgets
+            .get(id)
+            .is_some_and(|frame| frame.editbox_in_ime_composition_mode);
     }
     false
 }
