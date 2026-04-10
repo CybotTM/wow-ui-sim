@@ -31,6 +31,7 @@ fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     add_menu_frame_stubs(methods);
     add_quest_poi_frame_methods(methods);
     add_ui_map_id_methods(methods);
+    add_fog_of_war_frame_methods(methods);
     add_quest_blob_methods(methods);
     add_unit_position_frame_methods(methods);
 }
@@ -152,6 +153,80 @@ fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("UpdateMouseOverTooltip", |lua, this, (x, y): (f64, f64)| {
         update_mouse_over_tooltip(lua, this.0, x, y)
     });
+}
+
+fn add_fog_of_war_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetFogOfWarBackgroundAtlas", |lua, this, ()| {
+        let atlas = read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
+            fog.background_atlas.clone()
+        });
+        fog_of_war_string_value(lua, atlas)
+    });
+    methods.add_method("GetFogOfWarMaskAtlas", |lua, this, ()| {
+        let atlas =
+            read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| fog.mask_atlas.clone());
+        fog_of_war_string_value(lua, atlas)
+    });
+    methods.add_method("GetMaskScalar", |lua, this, ()| {
+        Ok(
+            read_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| fog.mask_scalar)
+                .unwrap_or(1.0),
+        )
+    });
+    methods.add_method("SetFogOfWarBackgroundAtlas", |lua, this, atlas: String| {
+        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
+            fog.background_atlas = Some(atlas);
+        });
+        Ok(())
+    });
+    methods.add_method("SetFogOfWarMaskAtlas", |lua, this, atlas: String| {
+        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
+            fog.mask_atlas = Some(atlas);
+        });
+        Ok(())
+    });
+    methods.add_method("SetMaskScalar", |lua, this, scalar: f64| {
+        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
+            fog.mask_scalar = Some(scalar);
+        });
+        Ok(())
+    });
+}
+
+fn fog_of_war_string_value(lua: &mlua::Lua, value: Option<String>) -> mlua::Result<Value> {
+    match value {
+        Some(value) => Ok(Value::String(lua.create_string(&value)?)),
+        None => Ok(Value::Nil),
+    }
+}
+
+fn read_fog_of_war_frame_state<T, F>(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    read: F,
+) -> T
+where
+    F: FnOnce(&crate::lua_api::state::FogOfWarFrameState) -> T,
+    T: Default,
+{
+    let state = state_rc.borrow();
+    state
+        .fog_of_war_frames
+        .get(&frame_id)
+        .map(read)
+        .unwrap_or_default()
+}
+
+fn write_fog_of_war_frame_state<F>(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    write: F,
+) where
+    F: FnOnce(&mut crate::lua_api::state::FogOfWarFrameState),
+{
+    let mut state = state_rc.borrow_mut();
+    let fog = state.fog_of_war_frames.entry(frame_id).or_default();
+    write(fog);
 }
 
 fn add_quest_blob_texture_setter<M, F>(methods: &mut M, name: &'static str, setter: F)

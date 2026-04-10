@@ -27,6 +27,7 @@ macro_rules! build_empty_sim_state {
             tooltips: $collections.tooltips,
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
+            fog_of_war_frames: $collections.fog_of_war_frames,
             unit_position_frames: $collections.unit_position_frames,
             pending_player_reports: $collections.pending_player_reports,
             simple_htmls: $collections.simple_htmls,
@@ -153,6 +154,14 @@ pub struct UnitPositionPlayerPingTexture {
     pub height: f64,
 }
 
+/// Runtime state for a FogOfWarFrame.
+#[derive(Default)]
+pub struct FogOfWarFrameState {
+    pub background_atlas: Option<String>,
+    pub mask_atlas: Option<String>,
+    pub mask_scalar: Option<f64>,
+}
+
 /// Runtime state for a UnitPositionFrame.
 pub struct UnitPositionFrameState {
     pub ui_map_id: Option<i32>,
@@ -194,6 +203,8 @@ pub struct SimState {
     pub blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     /// Quest blob state for QuestPOIFrame widgets (keyed by frame ID).
     pub quest_blobs: HashMap<u64, QuestBlobState>,
+    /// FogOfWarFrame state (keyed by frame ID).
+    pub fog_of_war_frames: HashMap<u64, FogOfWarFrameState>,
     /// UnitPositionFrame state (keyed by frame ID).
     pub unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     /// Pending report tokens created by `C_ReportSystem.InitiateReportPlayer`.
@@ -329,6 +340,7 @@ struct EmptyStateCollections {
     tooltips: HashMap<u64, TooltipData>,
     blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     quest_blobs: HashMap<u64, QuestBlobState>,
+    fog_of_war_frames: HashMap<u64, FogOfWarFrameState>,
     unit_position_frames: HashMap<u64, UnitPositionFrameState>,
     pending_player_reports: HashMap<i64, PendingPlayerReport>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
@@ -358,6 +370,7 @@ impl EmptyStateCollections {
             tooltips: HashMap::new(),
             blocked_auras_by_unit: HashMap::new(),
             quest_blobs: HashMap::new(),
+            fog_of_war_frames: HashMap::new(),
             unit_position_frames: HashMap::new(),
             pending_player_reports: HashMap::new(),
             simple_htmls: HashMap::new(),

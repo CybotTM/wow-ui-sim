@@ -1567,6 +1567,25 @@ fn test_fog_of_war_frame_get_ui_map_id_round_trips_setter_state() {
     assert_eq!(ui_map_id, 2274);
 }
 
+#[test]
+fn test_fog_of_war_frame_atlas_and_mask_scalar_round_trip() {
+    let env = WowLuaEnv::new().unwrap();
+    let (background_atlas, mask_atlas, mask_scalar): (String, String, f64) = env
+        .eval(
+            r#"
+            local fog = CreateFrame("FogOfWarFrame", "FogOfWarAtlasFrame", UIParent)
+            fog:SetFogOfWarBackgroundAtlas("worldmap-wardisplay-background")
+            fog:SetFogOfWarMaskAtlas("worldmap-wardisplay-mask")
+            fog:SetMaskScalar(0.75)
+            return fog:GetFogOfWarBackgroundAtlas(), fog:GetFogOfWarMaskAtlas(), fog:GetMaskScalar()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(background_atlas, "worldmap-wardisplay-background");
+    assert_eq!(mask_atlas, "worldmap-wardisplay-mask");
+    assert!((mask_scalar - 0.75).abs() < f64::EPSILON);
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
