@@ -452,3 +452,69 @@ fn test_scrollboxlist_rust_children_keys() {
         "Rust children_keys should have DragDelegate"
     );
 }
+
+#[test]
+fn test_scrollboxlist_callbacks_and_foreach_frame_are_stateful() {
+    let env = env_with_shared_xml();
+
+    let result: String = env
+        .eval(
+            r#"
+            local sb = CreateFrame("Frame", "TestScrollBoxCallbacks", UIParent, "WowScrollBoxList")
+            sb:SetSize(300, 400)
+
+            local callbackCalls = 0
+            local owner = {}
+            local ownerOk = false
+            local argsOk = false
+
+            sb:RegisterCallback(ScrollBoxListMixin.Event.OnScroll, function(self, scrollPercentage, visibleExtentPercentage, panExtentPercentage)
+                callbackCalls = callbackCalls + 1
+                ownerOk = self == owner
+                argsOk = scrollPercentage == 0.25 and visibleExtentPercentage == 0.5 and panExtentPercentage == 0.75
+            end, owner)
+
+            sb:TriggerEvent(ScrollBoxListMixin.Event.OnScroll, 0.25, 0.5, 0.75)
+            sb:UnregisterCallback(ScrollBoxListMixin.Event.OnScroll, owner)
+            sb:TriggerEvent(ScrollBoxListMixin.Event.OnScroll, 1, 1, 1)
+
+            local first = CreateFrame("Button", nil, sb.ScrollTarget)
+            local second = CreateFrame("Button", nil, sb.ScrollTarget)
+            first.GetElementData = function() return { label = "First" } end
+            second.GetElementData = function() return { label = "Second" } end
+
+            sb.view = {
+                GetFrames = function(self)
+                    return { first, second }
+                end,
+                ForEachFrame = function(self, func)
+                    for _, frame in ipairs(self:GetFrames()) do
+                        local result = func(frame, frame:GetElementData())
+                        if result then
+                            return result
+                        end
+                    end
+                end,
+            }
+
+            local seen = {}
+            local found = sb:ForEachFrame(function(frame, elementData)
+                table.insert(seen, elementData.label)
+                if elementData.label == "Second" then
+                    return frame
+                end
+            end)
+
+            return table.concat({
+                tostring(callbackCalls),
+                tostring(ownerOk),
+                tostring(argsOk),
+                table.concat(seen, ","),
+                tostring(found == second),
+            }, "|")
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "1|true|true|First,Second|true");
+}
