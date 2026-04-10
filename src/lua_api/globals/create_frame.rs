@@ -5,8 +5,8 @@ mod widget_defaults;
 use super::super::SimState;
 use super::super::frame::{extract_frame_id, frame_ref};
 use super::create_frame_util::{
-    apply_parent_array_from_template, migrate_children_to_new_frame, orphan_old_frame,
-    register_button_child_globals,
+    apply_parent_array_from_template, apply_parent_key_from_template,
+    migrate_children_to_new_frame, orphan_old_frame, register_button_child_globals,
 };
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
@@ -253,6 +253,7 @@ fn apply_intrinsic_and_templates(
     if let Some(tmpl) = template {
         apply_templates_from_registry(lua, state, ref_name, tmpl);
         if parent_id.is_some() {
+            apply_parent_key_from_template(lua, tmpl, ref_name);
             apply_parent_array_from_template(lua, tmpl, frame_id, ref_name);
         }
     }

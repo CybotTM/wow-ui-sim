@@ -110,6 +110,28 @@ pub(super) fn migrate_children_to_new_frame(
     }
 }
 
+/// Check the template chain for a `parentKey` attribute and assign the frame
+/// onto its parent if found.
+pub(super) fn apply_parent_key_from_template(lua: &Lua, template_names: &str, ref_name: &str) {
+    let chain = crate::xml::get_template_chain(template_names);
+    for entry in &chain {
+        if let Some(parent_key) = &entry.frame.parent_key {
+            let frame_ref = lua_global_ref(ref_name);
+            let code = format!(
+                "do local child = {frame_ref}\n\
+                 if child then\n\
+                     local parent = child:GetParent()\n\
+                     if parent then\n\
+                         parent[\"{parent_key}\"] = child\n\
+                     end\n\
+                 end\nend",
+            );
+            let _ = lua.load(&code).exec();
+            break;
+        }
+    }
+}
+
 /// Check the template chain for a `parentArray` attribute and insert the frame
 /// into its parent's Lua array if found.
 pub(super) fn apply_parent_array_from_template(

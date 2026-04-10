@@ -77,6 +77,31 @@ fn test_global_overwritten_by_recreate() {
 }
 
 #[test]
+fn test_recreated_named_parent_keeps_lua_child_field() {
+    let (t, _) = load_test_lua(
+        "test-g-recreate-parentkey",
+        r#"
+        local parent1 = CreateFrame("Frame", "RecreatedParent", UIParent)
+        local child = CreateFrame("Frame", "RecreatedParentChild", parent1)
+        parent1.Child = child
+
+        local parent2 = CreateFrame("Frame", "RecreatedParent", UIParent)
+
+        CHILD_FIELD_PRESERVED = (parent2.Child == child)
+        CHILD_GLOBAL_MATCHES = (_G["RecreatedParent"].Child == _G["RecreatedParentChild"])
+        "#,
+    );
+    t.assert_lua_true(
+        "return CHILD_FIELD_PRESERVED",
+        "recreated named parent should keep Lua child field assignments",
+    );
+    t.assert_lua_true(
+        "return CHILD_GLOBAL_MATCHES",
+        "global recreated parent should still expose the child by Lua field",
+    );
+}
+
+#[test]
 fn test_xml_named_frame_in_global() {
     let t = load_test_xml(
         "test-g-xml",
@@ -121,6 +146,25 @@ fn test_xml_child_texture_in_global() {
     t.assert_lua_true(
         "return TexGlobalParent.icon == TexGlobalParent_Icon",
         "parentKey lookup should match global lookup",
+    );
+}
+
+#[test]
+fn test_template_inherited_parent_key_assigns_lua_field_on_parent() {
+    let t = load_test_xml(
+        "test-g-template-parentkey",
+        r#"<Ui>
+            <Frame name="InheritedParentKeyTemplate" parentKey="PartyBackfill" virtual="true"/>
+            <Frame name="InheritedParentKeyParent" parent="UIParent">
+                <Frames>
+                    <Frame name="$parentPartyBackfill" inherits="InheritedParentKeyTemplate"/>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+    t.assert_lua_true(
+        "return InheritedParentKeyParent.PartyBackfill == InheritedParentKeyParentPartyBackfill",
+        "template-inherited parentKey should assign a Lua field on the instantiated parent",
     );
 }
 

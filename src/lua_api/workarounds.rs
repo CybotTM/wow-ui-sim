@@ -48,26 +48,6 @@ pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
     workarounds_editmode::patch_edit_mode_manager(env);
-    guard_lfg_backfill_cover(env);
-}
-
-/// Guard `LFGBackfillCover_Update` against nil self.
-///
-/// `RaidFinderQueueFrame.PartyBackfill` and `ScenarioQueueFrame.PartyBackfill`
-/// may be nil if the template child wasn't instantiated. The Blizzard code at
-/// LFGFrame.lua:274 passes these as self without nil-checking. Retained as a
-/// narrow nil-guard until those template children are guaranteed to exist.
-fn guard_lfg_backfill_cover(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if LFGBackfillCover_Update then
-            local orig = LFGBackfillCover_Update
-            LFGBackfillCover_Update = function(self, ...)
-                if self then return orig(self, ...) end
-            end
-        end
-        "#,
-    );
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.
@@ -90,43 +70,6 @@ mod tests {
 
     fn env() -> WowLuaEnv {
         WowLuaEnv::new().expect("Failed to create Lua environment")
-    }
-
-    #[test]
-    fn lfg_backfill_guard_ignores_nil_self_and_preserves_real_calls() {
-        let env = env();
-        env.exec(
-            r#"
-            backfill_calls = 0
-            LFGBackfillCover_Update = function(self, forceUpdate)
-                backfill_calls = backfill_calls + 1
-                if not self then error("nil self") end
-                _G.last_force = forceUpdate
-                _G.last_self_seen = self == _G.expected_self
-            end
-            expected_self = {}
-            "#,
-        )
-        .unwrap();
-
-        guard_lfg_backfill_cover(&env);
-        env.exec(
-            r#"
-            LFGBackfillCover_Update(nil, true)
-            LFGBackfillCover_Update(expected_self, false)
-            "#,
-        )
-        .unwrap();
-
-        let (calls, last_force, same_self): (i32, bool, bool) = env
-            .eval("return backfill_calls, last_force, last_self_seen")
-            .unwrap();
-        assert_eq!(
-            calls, 1,
-            "nil self should be ignored, real self should still call through"
-        );
-        assert!(!last_force);
-        assert!(same_self);
     }
 
     #[test]
