@@ -637,6 +637,11 @@ pub const FRAME_TUTORIAL_ACCOUNT: EnumDef = (
     ],
 );
 
+pub const GUIDE_FRAME_STATE: EnumDef = (
+    "GuideFrameState",
+    &[("StartGuiding", 1), ("StopGuiding", 2), ("CannotGuide", 3)],
+);
+
 // ============================================================================
 // LFG / Group Finder Enums
 // ============================================================================
