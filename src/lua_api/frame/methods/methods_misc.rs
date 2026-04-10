@@ -11,7 +11,7 @@ pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_alert_and_data_provider_methods(methods);
     add_drag_stubs(methods);
     add_propagation_stubs(methods);
-    add_gamepad_stubs(methods);
+    add_gamepad_methods(methods);
     add_alpha_gradient_stubs(methods);
     add_draw_layer_stubs(methods);
     add_frame_buffer_stubs(methods);
@@ -225,13 +225,51 @@ fn add_propagation_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
-/// GamePad stubs.
-fn add_gamepad_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("EnableGamePadButton", |_, _this, _: bool| Ok(()));
-    methods.add_method("EnableGamePadStick", |_, _this, _: bool| Ok(()));
-    methods.add_method("IsGamePadButtonEnabled", |_, _this, ()| Ok(false));
-    methods.add_method("IsGamePadStickEnabled", |_, _this, ()| Ok(false));
-    methods.add_method("ShouldButtonPassThrough", |_, _this, ()| Ok(false));
+fn add_gamepad_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("EnableGamePadButton", |lua, this, enabled: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.gamepad_button_enabled = enabled;
+        }
+        Ok(())
+    });
+    methods.add_method("EnableGamePadStick", |lua, this, enabled: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut(this.0) {
+            frame.gamepad_stick_enabled = enabled;
+        }
+        Ok(())
+    });
+    methods.add_method("IsGamePadButtonEnabled", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.gamepad_button_enabled)
+            .unwrap_or(false))
+    });
+    methods.add_method("IsGamePadStickEnabled", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.gamepad_stick_enabled)
+            .unwrap_or(false))
+    });
+    methods.add_method("ShouldButtonPassThrough", |lua, this, button: String| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let normalized_button = button.to_ascii_lowercase();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.pass_through_buttons.contains(&normalized_button))
+            .unwrap_or(false))
+    });
 }
 
 /// Alpha/Gradient stubs.

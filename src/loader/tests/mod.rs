@@ -707,6 +707,44 @@ fn test_propagation_methods_round_trip_frame_flags() {
     assert!(ok, "propagation flag round-trip should succeed");
 }
 
+#[test]
+fn test_gamepad_methods_round_trip_frame_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        GamePadFrame = CreateFrame("Frame", "GamePadFrame", UIParent)
+
+        assert(not GamePadFrame:IsGamePadButtonEnabled(), "gamepad button should default false")
+        assert(not GamePadFrame:IsGamePadStickEnabled(), "gamepad stick should default false")
+        assert(not GamePadFrame:ShouldButtonPassThrough("LeftButton"), "button passthrough should default false")
+
+        GamePadFrame:EnableGamePadButton(true)
+        GamePadFrame:EnableGamePadStick(true)
+        GamePadFrame:SetPassThroughButtons("LeftButton", "RightButton")
+
+        assert(GamePadFrame:IsGamePadButtonEnabled(), "gamepad button should enable")
+        assert(GamePadFrame:IsGamePadStickEnabled(), "gamepad stick should enable")
+        assert(GamePadFrame:ShouldButtonPassThrough("LeftButton"), "left button should pass through after configuration")
+        assert(GamePadFrame:ShouldButtonPassThrough("RIGHTBUTTON"), "button passthrough should be case-insensitive")
+        assert(not GamePadFrame:ShouldButtonPassThrough("MiddleButton"), "unconfigured buttons should not pass through")
+
+        GamePadFrame:EnableGamePadButton(false)
+        GamePadFrame:EnableGamePadStick(false)
+        GamePadFrame:SetPassThroughButtons()
+
+        assert(not GamePadFrame:IsGamePadButtonEnabled(), "gamepad button should disable")
+        assert(not GamePadFrame:IsGamePadStickEnabled(), "gamepad stick should disable")
+        assert(not GamePadFrame:ShouldButtonPassThrough("LeftButton"), "button passthrough should clear")
+
+        GAMEPAD_FLAGS_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env.eval("return GAMEPAD_FLAGS_OK == true").unwrap();
+    assert!(ok, "gamepad flag round-trip should succeed");
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

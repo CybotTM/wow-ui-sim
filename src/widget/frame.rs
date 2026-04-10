@@ -206,6 +206,10 @@ pub struct Frame {
     pub mouse_enabled: bool,
     /// Whether mouse wheel events are enabled for this frame.
     pub mouse_wheel_enabled: bool,
+    /// Whether gamepad button input is enabled for this frame.
+    pub gamepad_button_enabled: bool,
+    /// Whether gamepad stick input is enabled for this frame.
+    pub gamepad_stick_enabled: bool,
     /// Whether mouse clicks propagate to parent frames.
     pub propagate_mouse_clicks: bool,
     /// Whether mouse motion propagates to parent frames.
@@ -502,6 +506,8 @@ macro_rules! frame_defaults {
             effective_scale: 1.0,
             mouse_enabled: false,
             mouse_wheel_enabled: false,
+            gamepad_button_enabled: false,
+            gamepad_stick_enabled: false,
             propagate_mouse_clicks: false,
             propagate_mouse_motion: false,
             propagate_hyperlinks_to_parent: false,
