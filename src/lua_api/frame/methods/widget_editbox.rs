@@ -31,7 +31,15 @@ fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
     add_editbox_variadic_stubs(methods, EDITBOX_VARIADIC_STUBS);
     add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
     add_editbox_i32_getter(methods, "GetUTF8CursorPosition", 0);
-    methods.add_method("GetDisplayText", |_, _this, ()| Ok("".to_string()));
+    methods.add_method("GetDisplayText", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .and_then(|frame| frame.text.clone())
+            .unwrap_or_default())
+    });
     methods.add_method("GetHighlightColor", |_, _this, ()| {
         Ok((1.0f64, 1.0f64, 1.0f64, 1.0f64))
     });

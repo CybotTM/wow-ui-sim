@@ -73,6 +73,11 @@ fn editbox_stub_family_methods_persist_runtime_state() {
                 return "reset_input_mode_should_restore_roman"
             end
 
+            eb:SetText("Visible text")
+            if eb:GetDisplayText() ~= "Visible text" then
+                return "display_text_should_reflect_current_text"
+            end
+
             return "ok"
             "#,
         )
