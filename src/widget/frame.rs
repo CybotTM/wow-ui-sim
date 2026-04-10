@@ -3,7 +3,7 @@
 use super::{Anchor, AnchorPoint, WidgetType, next_widget_id};
 use crate::BlendMode;
 use crate::atlas::NineSliceAtlasInfo;
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeSet, HashMap, HashSet};
 
 /// Attribute value stored on frames.
 #[derive(Debug, Clone)]
@@ -295,6 +295,8 @@ pub struct Frame {
     pub draw_layer: DrawLayer,
     /// Sub-layer within draw layer (for fine-grained ordering).
     pub draw_sub_layer: i32,
+    /// Parent-controlled disabled region layers.
+    pub disabled_draw_layers: BTreeSet<DrawLayer>,
     /// Tile texture horizontally.
     pub horiz_tile: bool,
     /// Tile texture vertically.
@@ -539,6 +541,7 @@ macro_rules! frame_defaults {
             right_texture: None,
             draw_layer: DrawLayer::Artwork,
             draw_sub_layer: 0,
+            disabled_draw_layers: BTreeSet::new(),
             horiz_tile: false,
             vert_tile: false,
             tex_coords: None,
@@ -710,6 +713,18 @@ impl Frame {
 
     pub fn is_registered_for_event(&self, event: &str) -> bool {
         self.register_all_events || self.registered_events.contains(event)
+    }
+
+    pub fn is_draw_layer_enabled(&self, layer: DrawLayer) -> bool {
+        !self.disabled_draw_layers.contains(&layer)
+    }
+
+    pub fn set_draw_layer_enabled(&mut self, layer: DrawLayer, enabled: bool) {
+        if enabled {
+            self.disabled_draw_layers.remove(&layer);
+        } else {
+            self.disabled_draw_layers.insert(layer);
+        }
     }
 }
 

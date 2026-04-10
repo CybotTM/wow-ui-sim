@@ -1,6 +1,7 @@
 use super::super::handle::{FrameRef, extract_frame_id};
 use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::get_sim_state;
+use crate::widget::DrawLayer;
 use mlua::Value;
 
 pub(super) fn add_core_state_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -676,10 +677,31 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 
         Ok(layout_rects_intersect(this_rect, other_rect))
     });
-    methods.add_method("IsDrawLayerEnabled", |_lua, _this, _layer: String| Ok(true));
+    methods.add_method("IsDrawLayerEnabled", |lua, this, layer: String| {
+        let Some(layer) = draw_layer_from_name(&layer) else {
+            return Ok(false);
+        };
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.is_draw_layer_enabled(layer))
+            .unwrap_or(false))
+    });
     methods.add_method(
         "SetDrawLayerEnabled",
-        |_lua, _this, (_layer, _enabled): (String, bool)| Ok(()),
+        |lua, this, (layer, enabled): (String, bool)| {
+            let Some(layer) = draw_layer_from_name(&layer) else {
+                return Ok(());
+            };
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+                frame.set_draw_layer_enabled(layer, enabled);
+            }
+            Ok(())
+        },
     );
 }
 
@@ -698,6 +720,10 @@ fn next_mouse_over_offset(values: &mut impl Iterator<Item = Value>) -> f32 {
         Some(Value::Integer(i)) => i as f32,
         _ => 0.0,
     }
+}
+
+fn draw_layer_from_name(layer: &str) -> Option<DrawLayer> {
+    DrawLayer::from_str(layer)
 }
 
 fn source_location_for_owner(

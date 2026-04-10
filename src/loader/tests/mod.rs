@@ -575,6 +575,37 @@ fn test_intersects_returns_false_for_disjoint_frames() {
     assert!(!result, "disjoint frames should not intersect");
 }
 
+#[test]
+fn test_draw_layer_enabled_round_trip_tracks_per_layer_frame_state() {
+    let env = WowLuaEnv::new().unwrap();
+    env.eval::<()>(
+        r#"
+        local f = CreateFrame("Frame", "LayerToggleFrame", UIParent)
+
+        assert(f:IsDrawLayerEnabled("BACKGROUND") == true, "background should default enabled")
+        assert(f:IsDrawLayerEnabled("BORDER") == true, "border should default enabled")
+
+        f:SetDrawLayerEnabled("BORDER", false)
+        assert(f:IsDrawLayerEnabled("BORDER") == false, "border should disable")
+        assert(f:IsDrawLayerEnabled("BACKGROUND") == true, "background should stay enabled")
+
+        f:SetDrawLayerEnabled("BORDER", true)
+        assert(f:IsDrawLayerEnabled("BORDER") == true, "border should re-enable")
+
+        DRAW_LAYER_ENABLED_TEST_OK = true
+    "#,
+    )
+    .unwrap();
+
+    let ok: bool = env
+        .eval("return DRAW_LAYER_ENABLED_TEST_OK == true")
+        .unwrap();
+    assert!(
+        ok,
+        "SetDrawLayerEnabled / IsDrawLayerEnabled Lua round-trip failed",
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

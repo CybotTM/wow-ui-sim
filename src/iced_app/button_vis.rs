@@ -27,6 +27,9 @@ pub fn should_skip_frame(
     if eff_alpha <= 0.0 {
         return true;
     }
+    if parent_draw_layer_is_disabled(f, registry) {
+        return true;
+    }
     // WoW HIGHLIGHT draw layer: regions only visible when parent is hovered.
     // This is separate from the HighlightTexture button child (handled below).
     if f.draw_layer == DrawLayer::Highlight {
@@ -42,6 +45,22 @@ pub fn should_skip_frame(
         Some(true) => false,
         None => !f.visible,
     }
+}
+
+fn parent_draw_layer_is_disabled(f: &crate::widget::Frame, registry: &WidgetRegistry) -> bool {
+    if !matches!(
+        f.widget_type,
+        WidgetType::Texture | WidgetType::FontString | WidgetType::Line
+    ) {
+        return false;
+    }
+    let Some(parent_id) = f.parent_id else {
+        return false;
+    };
+    let Some(parent) = registry.get(parent_id) else {
+        return false;
+    };
+    !parent.is_draw_layer_enabled(f.draw_layer)
 }
 
 fn resolve_button_visibility(
@@ -112,4 +131,37 @@ fn is_enabled(frame: &crate::widget::Frame) -> bool {
             _ => None,
         })
         .unwrap_or(true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_skip_frame;
+    use crate::widget::{DrawLayer, Frame, WidgetRegistry, WidgetType};
+
+    #[test]
+    fn disabled_parent_draw_layer_hides_child_region() {
+        let mut registry = WidgetRegistry::new();
+
+        let mut parent = Frame::new(WidgetType::Frame, Some("Parent".to_string()), None);
+        parent.set_draw_layer_enabled(DrawLayer::Border, false);
+        let parent_id = parent.id;
+        registry.register(parent);
+
+        let mut child = Frame::new(
+            WidgetType::Texture,
+            Some("Child".to_string()),
+            Some(parent_id),
+        );
+        child.draw_layer = DrawLayer::Border;
+        let child_id = child.id;
+        registry.register(child);
+        registry.add_child(parent_id, child_id);
+
+        let child = registry.get(child_id).unwrap();
+        let skipped = should_skip_frame(child, child_id, 1.0, &None, &registry, None, None);
+        assert!(
+            skipped,
+            "child region should be skipped when its parent draw layer is disabled",
+        );
+    }
 }
