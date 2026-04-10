@@ -60,17 +60,77 @@ fn add_menu_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         frame_fields(lua, id)?.set("owningDialog", dialog)?;
         Ok(())
     });
-    methods.add_method("RegisterFontStrings", |_, _this, _args: MultiValue| Ok(()));
-    methods.add_method("RegisterFrames", |_, _this, _args: MultiValue| Ok(()));
+    methods.add_method("RegisterFontStrings", |lua, this, args: MultiValue| {
+        let id = this.0;
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "RegisterFontStrings")
+        {
+            let mut call_args = MultiValue::new();
+            call_args.push_back(ud);
+            for value in args {
+                call_args.push_back(value);
+            }
+            return func.call::<()>(call_args);
+        }
+        register_menu_frame_values(lua, id, "fontStrings", args)
+    });
+    methods.add_method("RegisterFrames", |lua, this, args: MultiValue| {
+        let id = this.0;
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, id, "RegisterFrames")
+        {
+            let mut call_args = MultiValue::new();
+            call_args.push_back(ud);
+            for value in args {
+                call_args.push_back(value);
+            }
+            return func.call::<()>(call_args);
+        }
+        register_menu_frame_values(lua, id, "frames", args)
+    });
     methods.add_method(
         "RegisterBackgroundTexture",
-        |_, _this, _args: MultiValue| Ok(()),
+        |lua, this, args: MultiValue| {
+            let id = this.0;
+            if let Some((func, ud)) =
+                super::methods_helpers::get_mixin_override(lua, id, "RegisterBackgroundTexture")
+            {
+                let mut call_args = MultiValue::new();
+                call_args.push_back(ud);
+                for value in args {
+                    call_args.push_back(value);
+                }
+                return func.call::<()>(call_args);
+            }
+            let mut args = args.into_iter();
+            let texture = args.next().unwrap_or(Value::Nil);
+            let texture_kit = args.next().unwrap_or(Value::Nil);
+            let fields = frame_fields(lua, id)?;
+            fields.set("backgroundTexture", texture)?;
+            fields.set("textureKit", texture_kit)?;
+            Ok(())
+        },
     );
 }
 
 fn menu_frame_is_menu_open(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<bool> {
     let fields = frame_fields(lua, frame_id)?;
     Ok(!matches!(fields.get::<Value>("menu")?, Value::Nil))
+}
+
+fn register_menu_frame_values(
+    lua: &mlua::Lua,
+    frame_id: u64,
+    field_name: &str,
+    args: MultiValue,
+) -> mlua::Result<()> {
+    let fields = frame_fields(lua, frame_id)?;
+    let registered = lua.create_table()?;
+    for (index, value) in args.into_iter().enumerate() {
+        registered.raw_set(index + 1, value)?;
+    }
+    fields.set(field_name, registered)?;
+    Ok(())
 }
 
 fn add_quest_poi_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

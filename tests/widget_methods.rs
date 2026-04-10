@@ -566,6 +566,62 @@ fn test_widget_misc_set_owning_dialog_delegates_or_stores_state() {
 }
 
 #[test]
+fn test_widget_misc_registration_methods_delegate_or_store_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool, bool) = env
+        .eval(
+            r##"
+            local frame = CreateFrame("Frame", "TestWidgetMiscRegistrationFrame", UIParent)
+            local fontA = frame:CreateFontString(nil, "OVERLAY")
+            local fontB = frame:CreateFontString(nil, "OVERLAY")
+            local childA = CreateFrame("Frame", nil, frame)
+            local childB = CreateFrame("Frame", nil, frame)
+            local background = frame:CreateTexture(nil, "BACKGROUND")
+            local fields = debug.getfenv(frame)[1]
+
+            frame:RegisterFontStrings(fontA, fontB)
+            frame:RegisterFrames(childA, childB)
+            frame:RegisterBackgroundTexture(background, "guildrename")
+
+            local fontStringsStored = fields.fontStrings and fields.fontStrings[1] == fontA and fields.fontStrings[2] == fontB
+            local framesStored = fields.frames and fields.frames[1] == childA and fields.frames[2] == childB
+            local backgroundStored = fields.backgroundTexture == background and fields.textureKit == "guildrename"
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscRegistrationOverrideFrame", UIParent)
+            local overrideFont = overrideFrame:CreateFontString(nil, "OVERLAY")
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            overrideFields.RegisterFontStrings = function(self, ...)
+                rawset(overrideFields, "storedCount", select("#", ...))
+                rawset(overrideFields, "storedFirst", ...)
+            end
+            overrideFrame:RegisterFontStrings(overrideFont)
+            local delegated = overrideFields.storedCount == 1 and overrideFields.storedFirst == overrideFont
+
+            return fontStringsStored, framesStored, backgroundStored, delegated
+        "##,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "RegisterFontStrings should store the registered font strings on the frame"
+    );
+    assert!(
+        result.1,
+        "RegisterFrames should store the registered frames on the frame"
+    );
+    assert!(
+        result.2,
+        "RegisterBackgroundTexture should store the background texture and texture kit"
+    );
+    assert!(
+        result.3,
+        "RegisterFontStrings should delegate to an existing mixin override instead of shadowing it"
+    );
+}
+
+#[test]
 fn test_widget_misc_item_button_methods_delegate_or_store_state() {
     let env = WowLuaEnv::new().unwrap();
 
