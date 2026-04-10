@@ -453,9 +453,64 @@ fn emit_tooltip_text_run(
 
 #[cfg(test)]
 mod tests {
+    use std::path::PathBuf;
+
+    use iced::{Point, Rectangle, Size};
+
     use super::*;
     use crate::lua_api::tooltip::{TooltipData, TooltipLine};
+    use crate::render::{GlyphAtlas, QuadBatch, TextureRequest, WowFontSystem};
     use crate::widget::{Frame, WidgetType};
+
+    fn request_bounds(batch: &QuadBatch, request: &TextureRequest) -> (f32, f32, f32, f32) {
+        let start = request.vertex_start as usize;
+        let end = start + request.vertex_count as usize;
+        let mut min_x = f32::INFINITY;
+        let mut min_y = f32::INFINITY;
+        let mut max_x = f32::NEG_INFINITY;
+        let mut max_y = f32::NEG_INFINITY;
+
+        for vertex in &batch.vertices[start..end] {
+            min_x = min_x.min(vertex.position[0]);
+            min_y = min_y.min(vertex.position[1]);
+            max_x = max_x.max(vertex.position[0]);
+            max_y = max_y.max(vertex.position[1]);
+        }
+
+        (min_x, min_y, max_x, max_y)
+    }
+
+    fn union_bounds(
+        bounds: impl Iterator<Item = (f32, f32, f32, f32)>,
+    ) -> Option<(f32, f32, f32, f32)> {
+        let mut min_x = f32::INFINITY;
+        let mut min_y = f32::INFINITY;
+        let mut max_x = f32::NEG_INFINITY;
+        let mut max_y = f32::NEG_INFINITY;
+        let mut found = false;
+
+        for (x0, y0, x1, y1) in bounds {
+            min_x = min_x.min(x0);
+            min_y = min_y.min(y0);
+            max_x = max_x.max(x1);
+            max_y = max_y.max(y1);
+            found = true;
+        }
+
+        found.then_some((min_x, min_y, max_x, max_y))
+    }
+
+    fn glyph_bounds(batch: &QuadBatch) -> Option<(f32, f32, f32, f32)> {
+        let glyph_tex_index = GLYPH_ATLAS_TEX_INDEX;
+        union_bounds(batch.vertices.iter().filter_map(|vertex| {
+            (vertex.tex_index == glyph_tex_index).then_some((
+                vertex.position[0],
+                vertex.position[1],
+                vertex.position[0],
+                vertex.position[1],
+            ))
+        }))
+    }
 
     #[test]
     fn collect_tooltip_data_applies_alpha_and_font_sizes() {
@@ -513,6 +568,72 @@ mod tests {
                 top: 15.0,
                 bottom: 15.0,
             }
+        );
+    }
+
+    #[test]
+    fn tooltip_text_quads_start_inside_rendered_border_bounds() {
+        let bounds = Rectangle::new(Point::new(100.0, 200.0), Size::new(80.0, 47.0));
+        let data = TooltipRenderData {
+            lines: vec![TooltipLineRender {
+                left_text: "Header".to_string(),
+                left_color: [1.0, 1.0, 1.0, 1.0],
+                right_text: None,
+                right_color: [1.0, 1.0, 1.0, 1.0],
+                font_size: TOOLTIP_HEADER_FONT_SIZE,
+                wrap: false,
+                measured_height: (TOOLTIP_HEADER_FONT_SIZE * 1.2).ceil(),
+            }],
+            line_spacing: TOOLTIP_LINE_SPACING,
+        };
+
+        let mut batch = QuadBatch::new();
+        let mut font_sys = WowFontSystem::new(&PathBuf::from("./fonts"));
+        let mut glyph_atlas = GlyphAtlas::new();
+        let tooltip_data = HashMap::from([(42_u64, data)]);
+        let mut text_ctx = Some((&mut font_sys, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds,
+                tooltip_data: Some(&tooltip_data),
+                id: 42,
+                eff_alpha: 1.0,
+            },
+            &mut text_ctx,
+        );
+
+        let border_bounds = union_bounds(
+            batch
+                .texture_requests
+                .iter()
+                .map(|request| request_bounds(&batch, request)),
+        )
+        .expect("tooltip border should emit texture requests");
+        let glyph_bounds = glyph_bounds(&batch).expect("tooltip text should emit glyph vertices");
+
+        assert_eq!(
+            border_bounds,
+            (
+                bounds.x,
+                bounds.y,
+                bounds.x + bounds.width,
+                bounds.y + bounds.height
+            ),
+            "rendered tooltip border should match tooltip bounds"
+        );
+
+        let left_inset = glyph_bounds.0 - border_bounds.0;
+        let top_inset = glyph_bounds.1 - border_bounds.1;
+
+        assert!(
+            left_inset >= 15.0,
+            "glyphs should start at or inside the 15px left inset: glyphs={glyph_bounds:?} border={border_bounds:?}"
+        );
+        assert!(
+            top_inset >= 15.0,
+            "glyphs should start at or inside the 15px top inset: glyphs={glyph_bounds:?} border={border_bounds:?}"
         );
     }
 }
