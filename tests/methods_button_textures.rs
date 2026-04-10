@@ -239,6 +239,52 @@ fn test_set_disabled_checked_texture() {
 }
 
 #[test]
+fn test_get_disabled_checked_texture_nil_when_unset() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cb = CreateFrame("CheckButton", "TestGetDisChkTexNil", UIParent)
+    "#,
+    )
+    .unwrap();
+
+    let is_nil: bool = env
+        .eval("return TestGetDisChkTexNil:GetDisabledCheckedTexture() == nil")
+        .unwrap();
+    assert!(is_nil, "Fresh checkbutton getter should return nil");
+}
+
+#[test]
+fn test_get_disabled_checked_texture_returns_child_texture() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local cb = CreateFrame("CheckButton", "TestGetDisChkTex", UIParent)
+        cb:SetDisabledCheckedTexture("Interface\\Buttons\\CheckButtonCheckDisabled")
+    "#,
+    )
+    .unwrap();
+
+    let obj_type: String = env
+        .eval("return TestGetDisChkTex:GetDisabledCheckedTexture():GetObjectType()")
+        .unwrap();
+    assert_eq!(
+        obj_type, "Texture",
+        "Getter should return the disabled checked texture child"
+    );
+
+    let parent_name: String = env
+        .eval("return TestGetDisChkTex:GetDisabledCheckedTexture():GetParent():GetName()")
+        .unwrap();
+    assert_eq!(
+        parent_name, "TestGetDisChkTex",
+        "Disabled checked texture child should stay parented to the checkbutton"
+    );
+}
+
+#[test]
 fn test_set_left_texture() {
     let env = WowLuaEnv::new().unwrap();
 

@@ -85,18 +85,25 @@ fn add_texture_getter_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         ("GetDisabledTexture", "DisabledTexture"),
     ] {
         methods.add_method(method_name, move |lua, this, ()| {
-            let id = this.0;
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            let tex_id = state
-                .widgets
-                .get(id)
-                .and_then(|f| f.children_keys.get(parent_key).copied());
-            match tex_id {
-                Some(tid) => frame_ref(lua, tid),
-                None => Ok(Value::Nil),
-            }
+            get_existing_button_texture(lua, this.0, parent_key)
         });
+    }
+}
+
+fn get_existing_button_texture(
+    lua: &mlua::Lua,
+    button_id: u64,
+    parent_key: &str,
+) -> mlua::Result<Value> {
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    let tex_id = state
+        .widgets
+        .get(button_id)
+        .and_then(|frame| frame.children_keys.get(parent_key).copied());
+    match tex_id {
+        Some(texture_id) => frame_ref(lua, texture_id),
+        None => Ok(Value::Nil),
     }
 }
 
@@ -501,9 +508,12 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
         }
         Ok(())
     });
+    methods.add_method("GetDisabledCheckedTexture", |lua, this, ()| {
+        get_existing_button_texture(lua, this.0, "DisabledCheckedTexture")
+    });
 }
 
-/// Clear{Normal,Highlight,Pushed,Disabled}Texture and GetDisabledCheckedTexture.
+/// Clear{Normal,Highlight,Pushed,Disabled}Texture.
 fn add_clear_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     for (method_name, parent_key) in [
         ("ClearNormalTexture", "NormalTexture"),
@@ -516,7 +526,6 @@ fn add_clear_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             Ok(())
         });
     }
-    methods.add_method("GetDisabledCheckedTexture", |_, _, ()| Ok(Value::Nil));
 }
 
 fn clear_button_texture(lua: &mlua::Lua, button_id: u64, parent_key: &str) {
