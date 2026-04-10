@@ -28,6 +28,7 @@ macro_rules! build_empty_sim_state {
             blocked_auras_by_unit: $collections.blocked_auras_by_unit,
             quest_blobs: $collections.quest_blobs,
             unit_position_frames: $collections.unit_position_frames,
+            pending_player_reports: $collections.pending_player_reports,
             simple_htmls: $collections.simple_htmls,
             message_frames: $collections.message_frames,
             on_update_frames: $collections.on_update_frames,
@@ -56,6 +57,7 @@ macro_rules! build_empty_sim_state {
             hovered_frame: $runtime.hovered_frame,
             active_drag_frame: $runtime.active_drag_frame,
             active_slider_thumb_drag_frame: $runtime.active_slider_thumb_drag_frame,
+            next_report_token: $runtime.next_report_token,
             party_members: $collections.party_members,
             current_target: $runtime.current_target,
             current_focus: $runtime.current_focus,
@@ -128,6 +130,12 @@ pub struct UnitPositionFrameState {
     pub is_finalized: bool,
 }
 
+/// Pending player report initiated through `C_ReportSystem`.
+pub struct PendingPlayerReport {
+    pub report_type: String,
+    pub comment: Option<String>,
+}
+
 /// Shared simulator state accessible from Lua.
 pub struct SimState {
     pub widgets: WidgetRegistry,
@@ -151,6 +159,8 @@ pub struct SimState {
     pub quest_blobs: HashMap<u64, QuestBlobState>,
     /// UnitPositionFrame state (keyed by frame ID).
     pub unit_position_frames: HashMap<u64, UnitPositionFrameState>,
+    /// Pending report tokens created by `C_ReportSystem.InitiateReportPlayer`.
+    pub pending_player_reports: HashMap<i64, PendingPlayerReport>,
     /// SimpleHTML state (keyed by frame ID).
     pub simple_htmls: HashMap<u64, SimpleHtmlData>,
     /// MessageFrame state (keyed by frame ID).
@@ -213,6 +223,8 @@ pub struct SimState {
     pub active_drag_frame: Option<u64>,
     /// Slider currently holding the left mouse for thumb dragging, if any.
     pub active_slider_thumb_drag_frame: Option<u64>,
+    /// Counter for generating unique report tokens.
+    pub next_report_token: i64,
     /// Simulated party members (empty = not in group).
     pub party_members: Vec<PartyMember>,
     /// Current target (None = no target).
@@ -278,6 +290,7 @@ struct EmptyStateCollections {
     blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     quest_blobs: HashMap<u64, QuestBlobState>,
     unit_position_frames: HashMap<u64, UnitPositionFrameState>,
+    pending_player_reports: HashMap<i64, PendingPlayerReport>,
     simple_htmls: HashMap<u64, SimpleHtmlData>,
     message_frames: HashMap<u64, MessageFrameData>,
     animation_groups: HashMap<u64, AnimGroupState>,
@@ -305,6 +318,7 @@ impl EmptyStateCollections {
             blocked_auras_by_unit: HashMap::new(),
             quest_blobs: HashMap::new(),
             unit_position_frames: HashMap::new(),
+            pending_player_reports: HashMap::new(),
             simple_htmls: HashMap::new(),
             message_frames: HashMap::new(),
             animation_groups: HashMap::new(),
@@ -369,6 +383,7 @@ struct EmptyRuntimeState {
     hovered_frame: Option<u64>,
     active_drag_frame: Option<u64>,
     active_slider_thumb_drag_frame: Option<u64>,
+    next_report_token: i64,
     current_target: Option<TargetInfo>,
     current_focus: Option<TargetInfo>,
     sound_manager: Option<SoundManager>,
@@ -407,6 +422,7 @@ impl EmptyRuntimeState {
             hovered_frame: None,
             active_drag_frame: None,
             active_slider_thumb_drag_frame: None,
+            next_report_token: 1,
             current_target: None,
             current_focus: None,
             sound_manager: None,

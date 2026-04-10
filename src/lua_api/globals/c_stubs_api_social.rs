@@ -6,7 +6,11 @@
 //! - C_DelvesUI, C_ZoneAbility, C_AutoComplete, C_PhotoSharing
 //! - Misc global stubs (totems, parental controls, etc.)
 
+use crate::event::{Event, EventArg};
+use crate::lua_api::state::{PendingPlayerReport, SimState};
 use mlua::{Lua, MultiValue, Result, Value};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 const CATALOG_SHOP_CATEGORY_ID: i64 = 1;
 const CATALOG_SHOP_SECTION_ID: i64 = 101;
@@ -68,6 +72,7 @@ const CATALOG_SHOP_PRODUCT: CatalogShopProductSeed = CatalogShopProductSeed {
 /// Register trial/social/feature namespaces and misc globals.
 pub fn register_social_feature_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_trial_raf_token(lua, g)?;
+    register_c_report_system(lua, g)?;
     register_shop_who_auras(lua, g)?;
     register_guild_bank_pet_battles(lua, g)?;
     register_c_delves_ui(lua)?;
@@ -77,6 +82,65 @@ pub fn register_social_feature_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     register_auto_complete_globals(lua, g)?;
     register_misc_global_stubs(lua)?;
     Ok(())
+}
+
+fn register_c_report_system(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    let t: mlua::Table = match g.get::<Value>("C_ReportSystem")? {
+        Value::Table(existing) => existing,
+        _ => lua.create_table()?,
+    };
+
+    t.set(
+        "CanReportPlayer",
+        lua.create_function(|_, _player_location: Value| Ok(true))?,
+    )?;
+    t.set(
+        "CanReportPlayerForLanguage",
+        lua.create_function(|_, _player_location: Value| Ok(true))?,
+    )?;
+    t.set(
+        "InitiateReportPlayer",
+        lua.create_function(
+            |lua, (report_type, _player_location): (String, Option<Value>)| {
+                let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
+                    return Ok(0i64);
+                };
+
+                let mut state = state.borrow_mut();
+                let report_token = state.next_report_token;
+                state.next_report_token += 1;
+                state.pending_player_reports.insert(
+                    report_token,
+                    PendingPlayerReport {
+                        report_type,
+                        comment: None,
+                    },
+                );
+                Ok(report_token)
+            },
+        )?,
+    )?;
+    t.set(
+        "SendReportPlayer",
+        lua.create_function(|lua, (report_token, comment): (i64, Option<String>)| {
+            let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
+                return Ok(());
+            };
+
+            let mut state = state.borrow_mut();
+            let Some(mut report) = state.pending_player_reports.remove(&report_token) else {
+                return Ok(());
+            };
+            report.comment = comment.filter(|text| !text.is_empty());
+            state.events.push(Event {
+                name: "REPORT_PLAYER_RESULT".to_string(),
+                args: vec![EventArg::Number(0.0), EventArg::String(report.report_type)],
+            });
+            Ok(())
+        })?,
+    )?;
+
+    g.set("C_ReportSystem", t)
 }
 
 /// C_ClassTrial, C_RecruitAFriend, C_WowTokenPublic, C_FriendList stubs.
