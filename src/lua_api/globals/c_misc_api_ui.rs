@@ -10,6 +10,7 @@
 
 use mlua::{Lua, MultiValue, Result, Value};
 use std::cell::RefCell;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 pub(super) fn register_all(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
@@ -608,10 +609,107 @@ fn create_get_player_owned_houses_fn(lua: &Lua) -> Result<mlua::Function> {
     })
 }
 
+#[derive(Clone)]
+struct HousingCatalogVariantInfo {
+    variant_id: i32,
+    product_id: i32,
+    name: &'static str,
+}
+
+#[derive(Clone)]
+struct HousingCatalogEntryInfo {
+    entry_id: i32,
+    name: &'static str,
+    featured_small: bool,
+    variants: Vec<HousingCatalogVariantInfo>,
+    was_viewed_in_store: bool,
+}
+
+#[derive(Clone)]
+struct HousingCatalogBundleInfo {
+    bundle_id: i32,
+    name: &'static str,
+    entry_ids: Vec<i32>,
+    was_viewed: bool,
+}
+
+struct HousingCatalogState {
+    entries: HashMap<i32, HousingCatalogEntryInfo>,
+    bundles: HashMap<i32, HousingCatalogBundleInfo>,
+    cart_counts: HashMap<i32, i32>,
+}
+
+impl HousingCatalogState {
+    fn seeded() -> Self {
+        let entries = [
+            HousingCatalogEntryInfo {
+                entry_id: 1001,
+                name: "Sunspire Chair",
+                featured_small: true,
+                variants: vec![
+                    HousingCatalogVariantInfo {
+                        variant_id: 1,
+                        product_id: 91001,
+                        name: "Crimson Upholstery",
+                    },
+                    HousingCatalogVariantInfo {
+                        variant_id: 2,
+                        product_id: 91002,
+                        name: "Azure Upholstery",
+                    },
+                ],
+                was_viewed_in_store: false,
+            },
+            HousingCatalogEntryInfo {
+                entry_id: 1002,
+                name: "Moonwell Lamp",
+                featured_small: true,
+                variants: vec![HousingCatalogVariantInfo {
+                    variant_id: 1,
+                    product_id: 92001,
+                    name: "Starlit Glass",
+                }],
+                was_viewed_in_store: false,
+            },
+            HousingCatalogEntryInfo {
+                entry_id: 1003,
+                name: "Grand Canopy Bed",
+                featured_small: false,
+                variants: vec![HousingCatalogVariantInfo {
+                    variant_id: 1,
+                    product_id: 93001,
+                    name: "Royal Plumage",
+                }],
+                was_viewed_in_store: false,
+            },
+        ]
+        .into_iter()
+        .map(|entry| (entry.entry_id, entry))
+        .collect();
+
+        let bundles = [HousingCatalogBundleInfo {
+            bundle_id: 5001,
+            name: "Moonlit Lounge Set",
+            entry_ids: vec![1001, 1002],
+            was_viewed: false,
+        }]
+        .into_iter()
+        .map(|bundle| (bundle.bundle_id, bundle))
+        .collect();
+
+        Self {
+            entries,
+            bundles,
+            cart_counts: HashMap::new(),
+        }
+    }
+}
+
 fn make_c_housing_catalog(lua: &Lua, globals: &mlua::Table) -> Result<mlua::Table> {
     let catalog = ensure_c_housing_catalog_table(lua, globals)?;
     register_c_housing_catalog_searcher(lua, &catalog)?;
     register_c_housing_catalog_categories(lua, &catalog)?;
+    register_c_housing_catalog_market_methods(lua, &catalog)?;
     Ok(catalog)
 }
 
@@ -668,6 +766,241 @@ fn register_c_housing_catalog_categories(lua: &Lua, catalog: &mlua::Table) -> Re
         })?,
     )?;
     Ok(())
+}
+
+fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -> Result<()> {
+    let state = Rc::new(RefCell::new(HousingCatalogState::seeded()));
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "GetCatalogEntryVariantInfo",
+        lua.create_function(move |lua, (entry_id, variant_id): (i32, i32)| {
+            get_housing_catalog_entry_variant_info(lua, &state_ref.borrow(), entry_id, variant_id)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "GetAllVariantInfosForEntry",
+        lua.create_function(move |lua, entry_id: i32| {
+            get_all_housing_catalog_variant_infos(lua, &state_ref.borrow(), entry_id)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "GetFeaturedSmallProducts",
+        lua.create_function(move |lua, ()| {
+            get_housing_catalog_featured_small_products(lua, &state_ref.borrow())
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "GetMarketInfoForDecor",
+        lua.create_function(move |lua, entry_id: i32| {
+            get_housing_catalog_market_info(lua, &state_ref.borrow(), entry_id)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "GetBundleInfo",
+        lua.create_function(move |lua, bundle_id: i32| {
+            get_housing_catalog_bundle_info(lua, &state_ref.borrow(), bundle_id)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "HousingMarketActionAddToCart",
+        lua.create_function(move |_, entry_id: i32| {
+            let mut state = state_ref.borrow_mut();
+            if !state.entries.contains_key(&entry_id) {
+                return Ok(false);
+            }
+            *state.cart_counts.entry(entry_id).or_insert(0) += 1;
+            Ok(true)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "HousingMarketActionRemoveFromCart",
+        lua.create_function(move |_, entry_id: i32| {
+            let mut state = state_ref.borrow_mut();
+            let Some(count) = state.cart_counts.get_mut(&entry_id) else {
+                return Ok(false);
+            };
+            *count -= 1;
+            if *count <= 0 {
+                state.cart_counts.remove(&entry_id);
+            }
+            Ok(true)
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "HousingMarketActionClearCart",
+        lua.create_function(move |_, ()| {
+            state_ref.borrow_mut().cart_counts.clear();
+            Ok(())
+        })?,
+    )?;
+
+    let state_ref = Rc::clone(&state);
+    catalog.set(
+        "HousingMarketActionViewInStore",
+        lua.create_function(move |_, entry_id: i32| {
+            let mut state = state_ref.borrow_mut();
+            let Some(entry) = state.entries.get_mut(&entry_id) else {
+                return Ok(false);
+            };
+            entry.was_viewed_in_store = true;
+            Ok(true)
+        })?,
+    )?;
+
+    catalog.set(
+        "HousingMarketActionViewBundle",
+        lua.create_function(move |_, bundle_id: i32| {
+            let mut state = state.borrow_mut();
+            let Some(bundle) = state.bundles.get_mut(&bundle_id) else {
+                return Ok(false);
+            };
+            bundle.was_viewed = true;
+            Ok(true)
+        })?,
+    )?;
+
+    Ok(())
+}
+
+fn get_housing_catalog_entry_variant_info(
+    lua: &Lua,
+    state: &HousingCatalogState,
+    entry_id: i32,
+    variant_id: i32,
+) -> Result<Value> {
+    let Some(entry) = state.entries.get(&entry_id) else {
+        return Ok(Value::Nil);
+    };
+    let Some(variant) = entry
+        .variants
+        .iter()
+        .find(|variant| variant.variant_id == variant_id)
+    else {
+        return Ok(Value::Nil);
+    };
+    Ok(Value::Table(build_housing_catalog_variant_info_table(
+        lua, entry, variant,
+    )?))
+}
+
+fn get_all_housing_catalog_variant_infos(
+    lua: &Lua,
+    state: &HousingCatalogState,
+    entry_id: i32,
+) -> Result<mlua::Table> {
+    let variants = lua.create_table()?;
+    let Some(entry) = state.entries.get(&entry_id) else {
+        return Ok(variants);
+    };
+    for (index, variant) in entry.variants.iter().enumerate() {
+        variants.set(
+            index + 1,
+            build_housing_catalog_variant_info_table(lua, entry, variant)?,
+        )?;
+    }
+    Ok(variants)
+}
+
+fn get_housing_catalog_featured_small_products(
+    lua: &Lua,
+    state: &HousingCatalogState,
+) -> Result<mlua::Table> {
+    let featured = lua.create_table()?;
+    let mut entries = state
+        .entries
+        .values()
+        .filter(|entry| entry.featured_small)
+        .collect::<Vec<_>>();
+    entries.sort_by_key(|entry| entry.entry_id);
+    for (index, entry) in entries.into_iter().enumerate() {
+        let info = lua.create_table()?;
+        let first_variant = entry.variants.first();
+        info.set("entryID", entry.entry_id)?;
+        info.set("name", entry.name)?;
+        info.set(
+            "productID",
+            first_variant
+                .map(|variant| variant.product_id)
+                .unwrap_or_default(),
+        )?;
+        info.set(
+            "variantID",
+            first_variant
+                .map(|variant| variant.variant_id)
+                .unwrap_or_default(),
+        )?;
+        featured.set(index + 1, info)?;
+    }
+    Ok(featured)
+}
+
+fn get_housing_catalog_market_info(
+    lua: &Lua,
+    state: &HousingCatalogState,
+    entry_id: i32,
+) -> Result<Value> {
+    let Some(entry) = state.entries.get(&entry_id) else {
+        return Ok(Value::Nil);
+    };
+    let info = lua.create_table()?;
+    let cart_count = state
+        .cart_counts
+        .get(&entry_id)
+        .copied()
+        .unwrap_or_default();
+    info.set("entryID", entry.entry_id)?;
+    info.set("cartCount", cart_count)?;
+    info.set("isInCart", cart_count > 0)?;
+    info.set("wasViewedInStore", entry.was_viewed_in_store)?;
+    Ok(Value::Table(info))
+}
+
+fn get_housing_catalog_bundle_info(
+    lua: &Lua,
+    state: &HousingCatalogState,
+    bundle_id: i32,
+) -> Result<Value> {
+    let Some(bundle) = state.bundles.get(&bundle_id) else {
+        return Ok(Value::Nil);
+    };
+    let info = lua.create_table()?;
+    let entry_ids = lua.create_table()?;
+    for (index, entry_id) in bundle.entry_ids.iter().enumerate() {
+        entry_ids.set(index + 1, *entry_id)?;
+    }
+    info.set("bundleID", bundle.bundle_id)?;
+    info.set("name", bundle.name)?;
+    info.set("entryIDs", entry_ids)?;
+    info.set("wasViewed", bundle.was_viewed)?;
+    Ok(Value::Table(info))
+}
+
+fn build_housing_catalog_variant_info_table(
+    lua: &Lua,
+    entry: &HousingCatalogEntryInfo,
+    variant: &HousingCatalogVariantInfo,
+) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    info.set("entryID", entry.entry_id)?;
+    info.set("variantID", variant.variant_id)?;
+    info.set("name", variant.name)?;
+    info.set("productID", variant.product_id)?;
+    Ok(info)
 }
 
 fn register_c_game_rules(lua: &Lua) -> Result<()> {

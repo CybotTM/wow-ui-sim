@@ -1,0 +1,93 @@
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+const HOUSING_CATALOG_SCRIPT: &str = r#"
+    local featured = C_HousingCatalog.GetFeaturedSmallProducts()
+    if #featured ~= 2 then
+        return "wrong_featured_count:" .. tostring(#featured)
+    end
+
+    if featured[1].entryID ~= 1001 or featured[1].productID ~= 91001 then
+        return "wrong_first_featured_product"
+    end
+
+    local variant = C_HousingCatalog.GetCatalogEntryVariantInfo(1001, 2)
+    if not variant or variant.variantID ~= 2 or variant.productID ~= 91002 or variant.name ~= "Azure Upholstery" then
+        return "wrong_variant_info"
+    end
+
+    local allVariants = C_HousingCatalog.GetAllVariantInfosForEntry(1001)
+    if #allVariants ~= 2 or allVariants[1].variantID ~= 1 or allVariants[2].variantID ~= 2 then
+        return "wrong_variant_list"
+    end
+
+    local marketInfo = C_HousingCatalog.GetMarketInfoForDecor(1001)
+    if marketInfo.isInCart ~= false or marketInfo.cartCount ~= 0 or marketInfo.wasViewedInStore ~= false then
+        return "wrong_initial_market_info"
+    end
+
+    if C_HousingCatalog.HousingMarketActionAddToCart(1001) ~= true then
+        return "add_to_cart_failed"
+    end
+
+    marketInfo = C_HousingCatalog.GetMarketInfoForDecor(1001)
+    if marketInfo.isInCart ~= true or marketInfo.cartCount ~= 1 then
+        return "add_to_cart_not_reflected"
+    end
+
+    if C_HousingCatalog.HousingMarketActionViewInStore(1001) ~= true then
+        return "view_in_store_failed"
+    end
+
+    marketInfo = C_HousingCatalog.GetMarketInfoForDecor(1001)
+    if marketInfo.wasViewedInStore ~= true then
+        return "view_in_store_not_reflected"
+    end
+
+    if C_HousingCatalog.HousingMarketActionRemoveFromCart(1001) ~= true then
+        return "remove_from_cart_failed"
+    end
+
+    marketInfo = C_HousingCatalog.GetMarketInfoForDecor(1001)
+    if marketInfo.isInCart ~= false or marketInfo.cartCount ~= 0 then
+        return "remove_from_cart_not_reflected"
+    end
+
+    C_HousingCatalog.HousingMarketActionAddToCart(1001)
+    C_HousingCatalog.HousingMarketActionAddToCart(1002)
+    C_HousingCatalog.HousingMarketActionClearCart()
+
+    local firstAfterClear = C_HousingCatalog.GetMarketInfoForDecor(1001)
+    local secondAfterClear = C_HousingCatalog.GetMarketInfoForDecor(1002)
+    if firstAfterClear.isInCart ~= false or secondAfterClear.isInCart ~= false then
+        return "clear_cart_not_reflected"
+    end
+
+    local bundle = C_HousingCatalog.GetBundleInfo(5001)
+    if not bundle or bundle.wasViewed ~= false or #bundle.entryIDs ~= 2 then
+        return "wrong_initial_bundle_info"
+    end
+
+    if C_HousingCatalog.HousingMarketActionViewBundle(5001) ~= true then
+        return "view_bundle_failed"
+    end
+
+    bundle = C_HousingCatalog.GetBundleInfo(5001)
+    if bundle.wasViewed ~= true then
+        return "view_bundle_not_reflected"
+    end
+
+    return "ok"
+"#;
+
+fn env() -> WowLuaEnv {
+    WowLuaEnv::new().expect("Failed to create Lua environment")
+}
+
+#[test]
+fn housing_catalog_market_and_variant_methods_use_seeded_state() {
+    let env = env();
+    let result: String = env
+        .eval(HOUSING_CATALOG_SCRIPT)
+        .expect("seeded C_HousingCatalog methods should be queryable");
+    assert_eq!(result, "ok");
+}
