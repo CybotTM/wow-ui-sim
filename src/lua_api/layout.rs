@@ -1,15 +1,7 @@
 //! Layout computation helpers for frame positioning.
 
+pub use crate::LayoutRect;
 use crate::widget::{AnchorPoint, WidgetRegistry};
-
-/// Simple layout rect for frame positioning.
-#[derive(Debug, Default, Clone, Copy)]
-pub struct LayoutRect {
-    pub x: f32,
-    pub y: f32,
-    pub width: f32,
-    pub height: f32,
-}
 
 /// Get depth in parent hierarchy (for indentation).
 pub fn get_parent_depth(registry: &WidgetRegistry, id: u64) -> usize {
@@ -26,94 +18,14 @@ pub fn get_parent_depth(registry: &WidgetRegistry, id: u64) -> usize {
     depth
 }
 
-/// Get the parent rect, falling back to the screen rect if no parent.
-fn parent_rect(
-    registry: &WidgetRegistry,
-    parent_id: Option<u64>,
-    screen_width: f32,
-    screen_height: f32,
-) -> LayoutRect {
-    match parent_id {
-        Some(pid) => compute_frame_rect(registry, pid, screen_width, screen_height),
-        None => LayoutRect {
-            x: 0.0,
-            y: 0.0,
-            width: screen_width,
-            height: screen_height,
-        },
-    }
-}
-
-/// Compute frame rect for debugging (same algorithm as renderer).
+/// Compute frame rect using the same layout path as the renderer.
 pub fn compute_frame_rect(
     registry: &WidgetRegistry,
     id: u64,
     screen_width: f32,
     screen_height: f32,
 ) -> LayoutRect {
-    let frame = match registry.get(id) {
-        Some(f) => f,
-        None => return LayoutRect::default(),
-    };
-
-    let width = frame.width;
-    let height = frame.height;
-    let pr = parent_rect(registry, frame.parent_id, screen_width, screen_height);
-
-    if frame.anchors.is_empty() {
-        return LayoutRect {
-            x: pr.x,
-            y: pr.y,
-            width,
-            height,
-        };
-    }
-
-    let anchor = &frame.anchors[0];
-    let rel_rect = resolve_anchor_target(registry, anchor, &pr, screen_width, screen_height);
-    let (ax, ay) = anchor_position(
-        anchor.relative_point,
-        rel_rect.x,
-        rel_rect.y,
-        rel_rect.width,
-        rel_rect.height,
-    );
-    // WoW uses Y-up coordinate system, screen uses Y-down
-    let target_x = ax + anchor.x_offset;
-    let target_y = ay - anchor.y_offset;
-    let (frame_x, frame_y) =
-        frame_position_from_anchor(anchor.point, target_x, target_y, width, height);
-
-    LayoutRect {
-        x: frame_x,
-        y: frame_y,
-        width,
-        height,
-    }
-}
-
-/// Resolve the rect to anchor against: relative_to_id frame or screen.
-///
-/// When relative_to_id is None, the anchor targets the screen (UIParent).
-/// XML anchors with no relativeTo are resolved to an explicit parent_id before
-/// storage, so they never reach this branch with None.
-fn resolve_anchor_target(
-    registry: &WidgetRegistry,
-    anchor: &crate::widget::Anchor,
-    _parent_rect: &LayoutRect,
-    screen_width: f32,
-    screen_height: f32,
-) -> LayoutRect {
-    if let Some(rel_id) = anchor.relative_to_id {
-        compute_frame_rect(registry, rel_id as u64, screen_width, screen_height)
-    } else {
-        LayoutRect {
-            x: 0.0,
-            y: 0.0,
-            width: screen_width,
-            height: screen_height,
-        }
-    }
+    crate::iced_app::compute_frame_rect(registry, id, screen_width, screen_height)
 }
 
 /// Get the position of an anchor point on a rect.

@@ -97,6 +97,12 @@ The render pipeline for each frame in `emit_single_strata` (render.rs):
 4. **Size check** (line 212): skips if `width <= 0.0` or `height <= 0.0`
 5. **emit_frame_quads**: dispatches to type-specific quad builder
 
-### GetRect coordinate divergence (separate known issue)
+### GetRect coordinate divergence (fixed)
 
-`GetRect()` returns `L=-47, B=1720` for item 1 (WoW coordinate system), while dump-tree shows `x=1545, y=1053` (screen coordinates). The Lua-side anchor resolution computes different positions than the Rust layout engine. The render uses `layout_rect` (Rust side), which shows correct positions in dump-tree. This coordinate divergence is a separate bug and is unrelated to the rendering failure.
+This investigation note was stale. `GetRect()` itself now resolves through the renderer-backed `layout_rect` cache in [`methods_rect.rs`](../src/lua_api/frame/methods/methods_rect.rs). The remaining mismatch was the older exported helper [`wow_ui_sim::lua_api::compute_frame_rect`](../src/lua_api/layout.rs), which still used a standalone Lua-side anchor solver.
+
+That helper now delegates to [`iced_app::compute_frame_rect`](../src/iced_app/layout.rs), so:
+- `GetScaledRect()` matches the renderer rect directly
+- `GetRect()` matches the renderer rect after WoW bottom-left conversion and effective-scale division
+
+Regression proof is in [`tests/workarounds_bags.rs`](../tests/workarounds_bags.rs): `bag_frame_rect_queries_match_render_layout_rects` checks `CharacterBag0Slot`, `MainMenuBarBackpackButton`, and the opened bag frame against the renderer rects in the full Blizzard env.

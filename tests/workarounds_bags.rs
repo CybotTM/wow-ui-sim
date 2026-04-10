@@ -49,6 +49,24 @@ fn settle_env_after_edit_mode_init(env: &WowLuaEnv) {
     }
 }
 
+fn load_token_ui(env: &WowLuaEnv) {
+    env.exec(
+        r#"
+        local loaded, reason = LoadAddOn("Blizzard_TokenUI")
+        assert(loaded, "LoadAddOn(Blizzard_TokenUI) failed: " .. tostring(reason))
+        if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker then
+            ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
+        end
+        assert(BackpackTokenFrame, "BackpackTokenFrame should exist after loading Blizzard_TokenUI")
+        assert(
+            ContainerFrameSettingsManager and ContainerFrameSettingsManager.TokenTracker == BackpackTokenFrame,
+            "ContainerFrameSettingsManager should own BackpackTokenFrame after loading Blizzard_TokenUI"
+        )
+        "#,
+    )
+    .expect("Failed to runtime-load Blizzard_TokenUI");
+}
+
 fn bag_bar_anchor(env: &WowLuaEnv) -> (String, String, String, f32, f32) {
     env.eval(
         r#"
@@ -67,6 +85,90 @@ fn frame_rect(env: &WowLuaEnv, name: &str) -> (f32, f32, f32, f32) {
         .unwrap_or_else(|| panic!("Frame '{name}' not found"));
     let rect = compute_frame_rect(&state.widgets, id, 1600.0, 1200.0);
     (rect.x, rect.y, rect.width, rect.height)
+}
+
+fn visible_bag_frame_name(env: &WowLuaEnv) -> String {
+    env.eval(
+        r#"
+        if ContainerFrameCombinedBags and ContainerFrameCombinedBags:IsShown() then
+            return "ContainerFrameCombinedBags"
+        end
+        for i = 1, 6 do
+            local frame = _G["ContainerFrame" .. i]
+            if frame and frame:IsShown() then
+                return frame:GetName()
+            end
+        end
+        error("no visible bag frame")
+        "#,
+    )
+    .unwrap()
+}
+
+fn assert_rect_queries_match_layout_rect(env: &WowLuaEnv, name: &str) {
+    env.state().borrow_mut().ensure_layout_rects();
+
+    let (
+        scaled_left,
+        scaled_bottom,
+        scaled_width,
+        scaled_height,
+        left,
+        bottom,
+        width,
+        height,
+        effective_scale,
+    ): (f32, f32, f32, f32, f32, f32, f32, f32, f32) = env
+        .eval(&format!(
+            r#"
+            local frame = assert(_G[{name:?}], "missing frame: {name}")
+            local sl, sb, sw, sh = frame:GetScaledRect()
+            local l, b, w, h = frame:GetRect()
+            return sl, sb, sw, sh, l, b, w, h, frame:GetEffectiveScale()
+            "#
+        ))
+        .unwrap();
+
+    let (render_x, render_y, render_width, render_height) = frame_rect(env, name);
+    let render_bottom = 1200.0 - render_y - render_height;
+    let tol = 0.1;
+
+    assert!(
+        (scaled_left - render_x).abs() <= tol,
+        "{name} GetScaledRect left mismatch: expected {render_x}, got {scaled_left}"
+    );
+    assert!(
+        (scaled_bottom - render_bottom).abs() <= tol,
+        "{name} GetScaledRect bottom mismatch: expected {render_bottom}, got {scaled_bottom}"
+    );
+    assert!(
+        (scaled_width - render_width).abs() <= tol,
+        "{name} GetScaledRect width mismatch: expected {render_width}, got {scaled_width}"
+    );
+    assert!(
+        (scaled_height - render_height).abs() <= tol,
+        "{name} GetScaledRect height mismatch: expected {render_height}, got {scaled_height}"
+    );
+    assert!(
+        (left - render_x / effective_scale).abs() <= tol,
+        "{name} GetRect left mismatch: expected {}, got {left}",
+        render_x / effective_scale
+    );
+    assert!(
+        (bottom - render_bottom / effective_scale).abs() <= tol,
+        "{name} GetRect bottom mismatch: expected {}, got {bottom}",
+        render_bottom / effective_scale
+    );
+    assert!(
+        (width - render_width / effective_scale).abs() <= tol,
+        "{name} GetRect width mismatch: expected {}, got {width}",
+        render_width / effective_scale
+    );
+    assert!(
+        (height - render_height / effective_scale).abs() <= tol,
+        "{name} GetRect height mismatch: expected {}, got {height}",
+        render_height / effective_scale
+    );
 }
 
 #[test]
@@ -146,4 +248,25 @@ fn main_menu_bag_buttons_have_correct_item_context_without_overlay_replay() {
     assert!(backpack_match_is_dna);
     assert!(bag_overlay_hidden);
     assert!(backpack_overlay_hidden);
+}
+
+#[test]
+fn bag_frame_rect_queries_match_render_layout_rects() {
+    let env = full_game_env_after_edit_mode_init();
+    load_token_ui(&env);
+
+    env.exec(
+        r#"
+        local ok, err = pcall(ToggleAllBags)
+        assert(ok, tostring(err))
+        "#,
+    )
+    .unwrap();
+    env.state().borrow_mut().ensure_layout_rects();
+
+    let visible_bag_frame = visible_bag_frame_name(&env);
+
+    assert_rect_queries_match_layout_rect(&env, "CharacterBag0Slot");
+    assert_rect_queries_match_layout_rect(&env, "MainMenuBarBackpackButton");
+    assert_rect_queries_match_layout_rect(&env, &visible_bag_frame);
 }
