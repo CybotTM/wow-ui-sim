@@ -23,6 +23,8 @@ pub struct AuditResults {
     pub c_api: BTreeMap<String, BTreeMap<String, SymbolUsage>>,
     /// Bare global function calls like `UnitName(...)`
     pub global_functions: BTreeMap<String, SymbolUsage>,
+    /// XML template inheritance references like `inherits="ButtonFrameTemplate"`
+    pub inherited_templates: BTreeMap<String, SymbolUsage>,
     /// LE_* constants
     pub constants: BTreeMap<String, SymbolUsage>,
     /// Enum.Namespace.Value references
@@ -61,6 +63,7 @@ struct Patterns {
     line_comment: Regex,
     block_comment: Regex,
     kv_global: Regex,
+    xml_inherits: Regex,
     local_fn_def: Regex,
     global_fn_def: Regex,
     local_assign: Regex,
@@ -84,6 +87,7 @@ impl Patterns {
             line_comment: Regex::new(r"--[^\n]*").unwrap(),
             block_comment: Regex::new(r"(?s)--\[\[.*?\]\]").unwrap(),
             kv_global: Regex::new(r#"type="global"[^>]*value="([^"]+)""#).unwrap(),
+            xml_inherits: Regex::new(r#"inherits="([^"]+)""#).unwrap(),
             local_fn_def: Regex::new(r"\blocal\s+function\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(")
                 .unwrap(),
             global_fn_def: Regex::new(r"\bfunction\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(").unwrap(),
@@ -276,9 +280,14 @@ fn scan_xml_file(path: &Path, file_label: &str, results: &mut AuditResults, p: &
         Ok(c) => c,
         Err(_) => return,
     };
+    scan_xml_text(&content, file_label, results, p);
+}
+
+fn scan_xml_text(content: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
+    scan_xml_inherits(content, file_label, results, p);
 
     // Extract KeyValue globals: type="global" value="SOME_CONSTANT"
-    for cap in p.kv_global.captures_iter(&content) {
+    for cap in p.kv_global.captures_iter(content) {
         let usage = results
             .other_constants
             .entry(cap[1].to_string())
@@ -288,8 +297,24 @@ fn scan_xml_file(path: &Path, file_label: &str, results: &mut AuditResults, p: &
 
     // Extract inline script bodies
     for re in &p.xml_script_tags {
-        for cap in re.captures_iter(&content) {
+        for cap in re.captures_iter(content) {
             scan_lua_text(&cap[1], file_label, results, p);
+        }
+    }
+}
+
+fn scan_xml_inherits(content: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
+    for cap in p.xml_inherits.captures_iter(content) {
+        for template in cap[1].split(',') {
+            let template = template.trim();
+            if template.is_empty() {
+                continue;
+            }
+            let usage = results
+                .inherited_templates
+                .entry(template.to_string())
+                .or_default();
+            record_symbol_usage(usage, file_label);
         }
     }
 }
@@ -453,6 +478,15 @@ pub fn print_text(results: &AuditResults) {
 
     println!();
     println!(
+        "=== Inherited Templates ({} unique) ===",
+        results.inherited_templates.len()
+    );
+    for (sym, usage) in &results.inherited_templates {
+        println!("{} ({} files)", sym, usage.files.len());
+    }
+
+    println!();
+    println!(
         "=== LE_* Constants ({} unique) ===",
         results.constants.len()
     );
@@ -482,6 +516,7 @@ pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
     struct Output<'a> {
         c_api: &'a BTreeMap<String, BTreeMap<String, SymbolUsage>>,
         global_functions: &'a BTreeMap<String, SymbolUsage>,
+        inherited_templates: &'a BTreeMap<String, SymbolUsage>,
         constants: &'a BTreeMap<String, SymbolUsage>,
         enums: &'a BTreeMap<String, SymbolUsage>,
         other_constants: &'a BTreeMap<String, SymbolUsage>,
@@ -491,6 +526,7 @@ pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
     let out = Output {
         c_api: &results.c_api,
         global_functions: &results.global_functions,
+        inherited_templates: &results.inherited_templates,
         constants: &results.constants,
         enums: &results.enums,
         other_constants: &results.other_constants,
@@ -1152,6 +1188,54 @@ fn register_c_tooltip_info_0(lua: &Lua) {
         assert!(
             !report.missing_c_methods.contains_key("C_Unregistered"),
             "missing method details should only be reported for namespaces the simulator exposes"
+        );
+    }
+
+    #[test]
+    fn scan_xml_file_extracts_inherited_templates() {
+        let patterns = Patterns::new();
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("Blizzard_Test.xml");
+        std::fs::write(
+            &path,
+            r#"
+                <Ui xmlns="http://www.blizzard.com/wow/ui/">
+                    <Frame name="ExampleFrame" inherits="DefaultPanelTemplate, PortraitFrameTemplate">
+                        <Frames>
+                            <Frame parentKey="Inset" inherits="InsetFrameTemplate"/>
+                            <Frame parentKey="NoTemplate"/>
+                        </Frames>
+                    </Frame>
+                </Ui>
+            "#,
+        )
+        .unwrap();
+        let mut used = AuditResults::default();
+
+        scan_xml_file(&path, "Blizzard_Test.xml", &mut used, &patterns);
+
+        assert_eq!(
+            used.inherited_templates
+                .keys()
+                .cloned()
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from([
+                "DefaultPanelTemplate".to_string(),
+                "InsetFrameTemplate".to_string(),
+                "PortraitFrameTemplate".to_string(),
+            ])
+        );
+        assert_eq!(
+            used.inherited_templates
+                .get("DefaultPanelTemplate")
+                .map(|usage| usage.count),
+            Some(1)
+        );
+        assert_eq!(
+            used.inherited_templates
+                .get("InsetFrameTemplate")
+                .map(|usage| usage.count),
+            Some(1)
         );
     }
 
