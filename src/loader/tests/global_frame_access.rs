@@ -315,6 +315,27 @@ fn test_builtin_frames_have_owner() {
 }
 
 #[test]
+fn test_get_source_location_uses_owner_addon_folder() {
+    let (t, _) = load_test_lua(
+        "test-source-location-addon",
+        r#"
+        local f = CreateFrame("Frame", "SourceLocationFrame", UIParent)
+        SOURCE = f:GetSourceLocation()
+    "#,
+    );
+
+    let source: String = t.env.eval("return SOURCE").unwrap();
+    assert_eq!(source, "Interface/AddOns/TestAddon");
+}
+
+#[test]
+fn test_get_source_location_builtin_frames_use_builtin_bucket() {
+    let env = WowLuaEnv::new().unwrap();
+    let source: String = env.eval("return UIParent:GetSourceLocation()").unwrap();
+    assert_eq!(source, "Interface/FrameXML");
+}
+
+#[test]
 fn test_global_nil_for_nonexistent_frame() {
     let env = WowLuaEnv::new().unwrap();
     assert!(

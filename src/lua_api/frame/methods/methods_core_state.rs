@@ -640,7 +640,17 @@ fn add_region_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
             && mouse_y <= bottom_edge)
     });
     methods.add_method("StopAnimating", |_lua, _this, ()| Ok(()));
-    methods.add_method("GetSourceLocation", |_lua, _this, ()| Ok(Value::Nil));
+    methods.add_method("GetSourceLocation", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let Some(frame) = state.widgets.get(this.0) else {
+            return Ok(Value::Nil);
+        };
+        let Some(location) = source_location_for_owner(&state, frame.owner_addon) else {
+            return Ok(Value::Nil);
+        };
+        Ok(Value::String(lua.create_string(&location)?))
+    });
     methods.add_method("Intersects", |_lua, _this, _region: Value| Ok(false));
     methods.add_method("IsDrawLayerEnabled", |_lua, _this, _layer: String| Ok(true));
     methods.add_method(
@@ -664,6 +674,18 @@ fn next_mouse_over_offset(values: &mut impl Iterator<Item = Value>) -> f32 {
         Some(Value::Integer(i)) => i as f32,
         _ => 0.0,
     }
+}
+
+fn source_location_for_owner(
+    state: &crate::lua_api::state::SimState,
+    owner_addon: Option<u16>,
+) -> Option<String> {
+    let addon = owner_addon.and_then(|idx| state.addons.get(idx as usize))?;
+    let folder = addon.folder_name.as_str();
+    if folder == "__BuiltIn" {
+        return Some("Interface/FrameXML".to_string());
+    }
+    Some(format!("Interface/AddOns/{folder}"))
 }
 
 #[cfg(test)]
