@@ -1240,6 +1240,67 @@ fn register_c_tooltip_info_0(lua: &Lua) {
     }
 
     #[test]
+    fn run_audit_filter_startup_skips_load_on_demand_addons() {
+        let dir = tempfile::tempdir().unwrap();
+        let startup_addon = dir.path().join("Blizzard_StartupTest");
+        let lod_addon = dir.path().join("Blizzard_LoadOnDemandTest");
+        std::fs::create_dir_all(&startup_addon).unwrap();
+        std::fs::create_dir_all(&lod_addon).unwrap();
+
+        std::fs::write(
+            startup_addon.join("Blizzard_StartupTest.toc"),
+            "## Interface: 110000\nBlizzard_StartupTest.lua\n",
+        )
+        .unwrap();
+        std::fs::write(
+            startup_addon.join("Blizzard_StartupTest.lua"),
+            "UnitName('player')\n",
+        )
+        .unwrap();
+
+        std::fs::write(
+            lod_addon.join("Blizzard_LoadOnDemandTest.toc"),
+            "## Interface: 110000\n## LoadOnDemand: 1\nBlizzard_LoadOnDemandTest.lua\n",
+        )
+        .unwrap();
+        std::fs::write(
+            lod_addon.join("Blizzard_LoadOnDemandTest.lua"),
+            "GetSpellInfo(1)\n",
+        )
+        .unwrap();
+
+        let startup_only = run_audit(&AuditConfig {
+            ui_path: dir.path().to_path_buf(),
+            namespace_filter: None,
+            filter_startup: true,
+            wowless_path: None,
+        });
+        let all_addons = run_audit(&AuditConfig {
+            ui_path: dir.path().to_path_buf(),
+            namespace_filter: None,
+            filter_startup: false,
+            wowless_path: None,
+        });
+
+        assert_eq!(
+            startup_only
+                .global_functions
+                .keys()
+                .cloned()
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from(["UnitName".to_string()])
+        );
+        assert_eq!(
+            all_addons
+                .global_functions
+                .keys()
+                .cloned()
+                .collect::<BTreeSet<_>>(),
+            BTreeSet::from(["GetSpellInfo".to_string(), "UnitName".to_string()])
+        );
+    }
+
+    #[test]
     fn scan_lua_text_extracts_only_bare_global_function_calls() {
         let patterns = Patterns::new();
         let mut used = AuditResults::default();
