@@ -2,8 +2,13 @@
 
 use super::super::handle::FrameRef;
 use super::combat_lockdown;
+use super::methods_rect::{resolve_and_extract, to_wow_rect};
 use crate::lua_api::frame::handle::get_sim_state;
+use crate::render::font::WowFontSystem;
 use mlua::Value;
+use std::cell::RefCell;
+use std::path::PathBuf;
+use std::rc::Rc;
 
 pub fn add_drag_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_drag_move_methods(methods);
@@ -114,27 +119,64 @@ where
 
 fn add_simplehtml_content_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetContentHeight", |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let frame = match state.widgets.get(this.0) {
-            Some(f) => f,
-            None => return Ok(0.0_f64),
-        };
-        let text = match &frame.text {
-            Some(t) if !t.is_empty() => t,
-            _ => return Ok(0.0_f64),
-        };
-        let font_size = frame.font_size.max(12.0) as f64;
-        let line_height = font_size * 1.2;
-        let width = frame.width.max(200.0) as f64;
-        let chars_per_line = (width / (font_size * 0.6)).max(1.0);
-        let estimated_lines = (text.len() as f64 / chars_per_line).ceil().max(1.0);
-        Ok(estimated_lines * line_height)
+        measure_simplehtml_content_height(lua, this.0)
     });
 
     methods.add_method("GetTextData", |lua, _this, ()| {
         Ok(Value::Table(lua.create_table()?))
     });
+}
+
+fn measure_simplehtml_content_height(lua: &mlua::Lua, id: u64) -> mlua::Result<f64> {
+    let resolved = resolve_and_extract(lua, id);
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    let frame = match state.widgets.get(id) {
+        Some(frame) => frame,
+        None => return Ok(0.0),
+    };
+    let text = match frame.text_stripped.as_deref().or(frame.text.as_deref()) {
+        Some(text) if !text.is_empty() => text.to_string(),
+        _ => return Ok(0.0),
+    };
+    let font_path = frame.font.clone();
+    let font_size = frame.font_size;
+    let wrap_width = frame.word_wrap.then(|| {
+        resolved
+            .as_ref()
+            .map(|rect| {
+                let (_, _, width, _) = to_wow_rect(rect);
+                width
+            })
+            .filter(|width| *width > 0.0)
+            .unwrap_or(frame.width)
+    });
+    drop(state);
+
+    Ok(
+        measure_simplehtml_text_height(lua, &text, font_path.as_deref(), font_size, wrap_width)
+            as f64,
+    )
+}
+
+fn measure_simplehtml_text_height(
+    lua: &mlua::Lua,
+    text: &str,
+    font_path: Option<&str>,
+    font_size: f32,
+    wrap_width: Option<f32>,
+) -> f32 {
+    if let Some(font_system_rc) = lua.app_data_ref::<Rc<RefCell<WowFontSystem>>>() {
+        let mut font_system = font_system_rc.borrow_mut();
+        return font_system.measure_text_height(text, font_path, font_size, wrap_width);
+    }
+
+    let mut font_system = WowFontSystem::new(&default_fonts_dir());
+    font_system.measure_text_height(text, font_path, font_size, wrap_width)
+}
+
+fn default_fonts_dir() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fonts")
 }
 
 // --- Drag/Move/Resize ---

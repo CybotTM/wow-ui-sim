@@ -202,6 +202,43 @@ fn test_get_content_height_zero_without_text() {
 }
 
 #[test]
+fn test_get_content_height_tracks_resolved_layout_width() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "TestHTMLLayoutParent", UIParent)
+        parent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 0, 0)
+        parent:SetSize(400, 200)
+
+        local f = CreateFrame("SimpleHTML", "TestHTMLLayoutWidth", parent)
+        f:SetPoint("TOPLEFT", parent, "TOPLEFT", 0, 0)
+        f:SetPoint("TOPRIGHT", parent, "TOPRIGHT", 0, 0)
+        f:SetHeight(200)
+        f:SetText("This is long SimpleHTML content that should wrap differently when the resolved layout width changes from wide to narrow. This is long SimpleHTML content that should wrap differently when the resolved layout width changes from wide to narrow. This is long SimpleHTML content that should wrap differently when the resolved layout width changes from wide to narrow.")
+    "#,
+    )
+    .unwrap();
+
+    let wide_height: f64 = env
+        .eval("return TestHTMLLayoutWidth:GetContentHeight()")
+        .unwrap();
+
+    env.exec("TestHTMLLayoutParent:SetWidth(160)").unwrap();
+
+    let narrow_height: f64 = env
+        .eval("return TestHTMLLayoutWidth:GetContentHeight()")
+        .unwrap();
+
+    assert!(
+        narrow_height > wide_height,
+        "Narrower resolved layout width should increase wrapped content height (wide={}, narrow={})",
+        wide_height,
+        narrow_height
+    );
+}
+
+#[test]
 fn test_get_text_data_returns_table() {
     let env = WowLuaEnv::new().unwrap();
 
