@@ -44,6 +44,10 @@ pub(super) fn val_to_f64(val: Option<&Value>, default: f64) -> f64 {
     }
 }
 
+pub(crate) fn get_frame_font_object(lua: &Lua, id: u64) -> mlua::Result<Option<mlua::Table>> {
+    font_object::get_frame_font_object(lua, id)
+}
+
 /// Add text/FontString methods to the frame methods table.
 pub fn add_text_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_text_get_set_methods(methods);

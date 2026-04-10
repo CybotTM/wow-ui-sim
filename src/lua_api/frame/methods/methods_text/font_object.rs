@@ -74,6 +74,11 @@ fn get_font_object_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
     Ok(font)
 }
 
+pub(super) fn get_frame_font_object(lua: &Lua, id: u64) -> mlua::Result<Option<mlua::Table>> {
+    let font_object = get_font_object_impl(lua, id, mlua::MultiValue::new())?;
+    Ok(resolve_font_table(lua, &font_object))
+}
+
 /// Get the stored font object for a SimpleHTML text type.
 fn get_font_object_for_type(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<Value> {
     let store: mlua::Table = lua

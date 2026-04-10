@@ -1,6 +1,8 @@
 //! MessageFrame widget methods: AddMessage, scrolling, fading, message history.
 
 use super::super::handle::FrameRef;
+use super::methods_helpers::get_mixin_override;
+use super::methods_text::get_frame_font_object;
 use crate::lua_api::SimState;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
 use crate::widget::{Frame, WidgetType};
@@ -471,7 +473,17 @@ fn add_get_message_info_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
 }
 
 fn add_message_frame_callback_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetIndentedWordWrap", |_, _this, ()| Ok(false));
+    methods.add_method("GetIndentedWordWrap", |lua, this, ()| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "GetIndentedWordWrap") {
+            return func.call(self_value);
+        }
+        if let Some(font_object) = get_frame_font_object(lua, this.0)?
+            && let Ok(getter) = font_object.get::<mlua::Function>("GetIndentedWordWrap")
+        {
+            return getter.call(font_object);
+        }
+        Ok(false)
+    });
     methods.add_method("SetOnScrollChangedCallback", |lua, this, func: Value| {
         set_message_frame_callback(lua, this.0, "onScrollChangedCallback", func)
     });

@@ -1,6 +1,8 @@
 //! Text measurement, word wrap, text scale, and spacing methods.
 
 use super::super::super::handle::{FrameRef, get_sim_state};
+use super::super::methods_helpers::get_mixin_override;
+use super::get_frame_font_object;
 use super::{is_simple_html, is_text_type, val_to_f64};
 use crate::lua_api::simple_html::TextStyle;
 use crate::render::font::WowFontSystem;
@@ -215,6 +217,22 @@ fn set_indented_word_wrap_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> ml
         if is_text_type(&type_str) {
             return set_indented_wrap_html(lua, id, &type_str, &args_vec);
         }
+    }
+    if let Some((func, self_value)) = get_mixin_override(lua, id, "SetIndentedWordWrap") {
+        let mut call_args = mlua::MultiValue::new();
+        call_args.push_back(self_value);
+        for value in args_vec {
+            call_args.push_back(value);
+        }
+        return func.call(call_args);
+    }
+    if let Some(font_object) = get_frame_font_object(lua, id)?
+        && let Ok(setter) = font_object.get::<mlua::Function>("SetIndentedWordWrap")
+    {
+        let mut call_args = mlua::MultiValue::new();
+        call_args.push_back(Value::Table(font_object));
+        call_args.push_back(args_vec.first().cloned().unwrap_or(Value::Boolean(false)));
+        return setter.call(call_args);
     }
     Ok(())
 }

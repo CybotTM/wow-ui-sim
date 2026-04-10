@@ -4,6 +4,7 @@ use super::super::handle::FrameRef;
 use super::combat_lockdown;
 use super::methods_helpers::get_mixin_override;
 use super::methods_rect::{resolve_and_extract, to_wow_rect};
+use super::methods_text::get_frame_font_object;
 use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
 use crate::render::font::WowFontSystem;
 use crate::widget::Color;
@@ -22,9 +23,25 @@ pub fn add_drag_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 pub fn add_simplehtml_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_simplehtml_hyperlink_methods(methods);
     add_simplehtml_content_methods(methods);
-    methods.add_method("GetIndentedWordWrap", |lua, this, text_type: String| {
-        Ok(read_simplehtml_indented_word_wrap(lua, this.0, &text_type))
-    });
+    methods.add_method(
+        "GetIndentedWordWrap",
+        |lua, this, args: mlua::MultiValue| {
+            if let Some(Value::String(text_type)) = args.front() {
+                let text_type = text_type.to_string_lossy().to_string();
+                return Ok(read_simplehtml_indented_word_wrap(lua, this.0, &text_type));
+            }
+            if let Some((func, self_value)) = get_mixin_override(lua, this.0, "GetIndentedWordWrap")
+            {
+                return func.call(self_value);
+            }
+            if let Some(font_object) = get_frame_font_object(lua, this.0)?
+                && let Ok(getter) = font_object.get::<mlua::Function>("GetIndentedWordWrap")
+            {
+                return getter.call(font_object);
+            }
+            Ok(false)
+        },
+    );
 }
 
 pub fn add_misc_widget_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

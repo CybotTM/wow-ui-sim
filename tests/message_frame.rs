@@ -236,6 +236,24 @@ fn test_insert_mode_top_prepends() {
 }
 
 #[test]
+fn test_message_frame_indented_word_wrap_round_trips() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("ScrollingMessageFrame", "TestMFIndentedWrap", UIParent)
+        f:SetIndentedWordWrap(true)
+    "#,
+    )
+    .unwrap();
+
+    let wrapped: bool = env
+        .eval("return TestMFIndentedWrap:GetIndentedWordWrap()")
+        .unwrap();
+    assert!(wrapped);
+}
+
+#[test]
 fn test_backfill_message_prepends() {
     let env = WowLuaEnv::new().unwrap();
 
