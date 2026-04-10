@@ -690,6 +690,9 @@ fn register_c_restricted_transmog(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("C_RestrictedActions", ra)?;
 
     let toi = lua.create_table()?;
+    toi.set("__activeOutfitID", 0i32)?;
+    toi.set("__currentlyViewedOutfitID", 0i32)?;
+    toi.set("__pendingSheatheCategories", lua.create_table()?)?;
     toi.set(
         "GetOutfitInfoList",
         lua.create_function(|lua, ()| lua.create_table())?,
@@ -702,8 +705,114 @@ fn register_c_restricted_transmog(lua: &Lua, g: &mlua::Table) -> Result<()> {
         "GetAllSlotLocationInfo",
         lua.create_function(|lua, ()| lua.create_table())?,
     )?;
+    let transmog_state = toi.clone();
+    toi.set(
+        "GetActiveOutfitID",
+        lua.create_function(move |_, ()| transmog_state.get::<i32>("__activeOutfitID"))?,
+    )?;
+    let transmog_state = toi.clone();
+    toi.set(
+        "GetCurrentlyViewedOutfitID",
+        lua.create_function(move |_, ()| transmog_state.get::<i32>("__currentlyViewedOutfitID"))?,
+    )?;
+    toi.set(
+        "GetAllTransmogOutfitOptionSheatheCategoryInfo",
+        lua.create_function(build_sheathe_category_info)?,
+    )?;
+    let transmog_state = toi.clone();
+    toi.set(
+        "SetPendingTransmogSheatheCategory",
+        lua.create_function(
+            move |_, (slot, weapon_option, sheathe_category): (i32, i32, i32)| {
+                set_pending_transmog_sheathe_category(
+                    &transmog_state,
+                    slot,
+                    weapon_option,
+                    sheathe_category,
+                )
+            },
+        )?,
+    )?;
+    let transmog_state = toi.clone();
+    toi.set(
+        "ClearOutfit",
+        lua.create_function(move |lua, ()| clear_transmog_outfit(lua, &transmog_state))?,
+    )?;
+    let transmog_state = toi.clone();
+    toi.set(
+        "ChangeToOutfit",
+        lua.create_function(
+            move |lua, (player_facing_outfit_index, allow_remove_outfit): (i32, bool)| {
+                change_to_outfit(
+                    lua,
+                    &transmog_state,
+                    player_facing_outfit_index,
+                    allow_remove_outfit,
+                )
+            },
+        )?,
+    )?;
     g.set("C_TransmogOutfitInfo", toi)?;
     Ok(())
+}
+
+fn build_sheathe_category_info(lua: &Lua, ima_id: i32) -> Result<Value> {
+    if ima_id <= 0 {
+        return Ok(Value::Nil);
+    }
+
+    let categories = lua.create_table()?;
+    for (index, (sheathe_category, category_name)) in
+        [(0, "Default"), (1, "Back"), (2, "Side"), (3, "Hide")]
+            .into_iter()
+            .enumerate()
+    {
+        let category_info = lua.create_table()?;
+        category_info.set("sheatheCategory", sheathe_category)?;
+        category_info.set("categoryName", category_name)?;
+        categories.set(index + 1, category_info)?;
+    }
+    Ok(Value::Table(categories))
+}
+
+fn set_pending_transmog_sheathe_category(
+    transmog_state: &mlua::Table,
+    slot: i32,
+    weapon_option: i32,
+    sheathe_category: i32,
+) -> Result<()> {
+    let pending_categories = transmog_state.get::<mlua::Table>("__pendingSheatheCategories")?;
+    let key = pending_sheathe_category_key(slot, weapon_option);
+    pending_categories.set(key, sheathe_category)?;
+    Ok(())
+}
+
+fn clear_transmog_outfit(lua: &Lua, transmog_state: &mlua::Table) -> Result<()> {
+    transmog_state.set("__activeOutfitID", 0i32)?;
+    transmog_state.set("__currentlyViewedOutfitID", 0i32)?;
+    transmog_state.set("__pendingSheatheCategories", lua.create_table()?)?;
+    Ok(())
+}
+
+fn change_to_outfit(
+    lua: &Lua,
+    transmog_state: &mlua::Table,
+    player_facing_outfit_index: i32,
+    allow_remove_outfit: bool,
+) -> Result<()> {
+    let active_outfit_id = transmog_state.get::<i32>("__activeOutfitID")?;
+    let should_clear = allow_remove_outfit && active_outfit_id == player_facing_outfit_index;
+    if should_clear {
+        return clear_transmog_outfit(lua, transmog_state);
+    }
+
+    transmog_state.set("__activeOutfitID", player_facing_outfit_index)?;
+    transmog_state.set("__currentlyViewedOutfitID", player_facing_outfit_index)?;
+    Ok(())
+}
+
+fn pending_sheathe_category_key(slot: i32, weapon_option: i32) -> String {
+    format!("{slot}:{weapon_option}")
 }
 
 /// C_DamageMeter - damage/healing meter API.
