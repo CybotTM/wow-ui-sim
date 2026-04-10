@@ -53,12 +53,13 @@ impl WidgetType {
     pub fn from_str(s: &str) -> Option<Self> {
         // WoW Lua uses both PascalCase ("Button") and ALLCAPS ("BUTTON")
         // for frame type names, so match case-insensitively.
-        let lower = s.to_ascii_lowercase();
-        match lower.as_str() {
+        let normalized = s.to_ascii_lowercase();
+        Self::direct_widget_type(&normalized).or_else(|| Self::alias_group_widget_type(&normalized))
+    }
+
+    fn direct_widget_type(alias: &str) -> Option<Self> {
+        match alias {
             "frame" => Some(Self::Frame),
-            "button" | "dropdownbutton" | "itembutton" | "containedalertframe" => {
-                Some(Self::Button)
-            }
             "fontstring" => Some(Self::FontString),
             "texture" => Some(Self::Texture),
             "line" => Some(Self::Line),
@@ -70,30 +71,67 @@ impl WidgetType {
             "cooldown" => Some(Self::Cooldown),
             "model" => Some(Self::Model),
             "modelscene" => Some(Self::ModelScene),
-            "playermodel" | "cinematicmodel" | "tabardmodel" | "dressupmodel" => {
-                Some(Self::PlayerModel)
-            }
             "colorselect" => Some(Self::ColorSelect),
-            "messageframe" | "scrollingmessageframe" => Some(Self::MessageFrame),
             "simplehtml" => Some(Self::SimpleHTML),
             "gametooltip" => Some(Self::GameTooltip),
             "minimap" => Some(Self::Minimap),
-            // EventFrame is a Frame subtype for event-only handling
-            "eventframe" => Some(Self::Frame),
-            // Checkout is a special frame type for the in-game shop
-            "checkout" => Some(Self::Frame),
-            // Specialty frame types — no custom behavior needed, treat as plain Frame
-            "archaeologydigsiteframe"
-            | "browser"
-            | "fogofwarframe"
-            | "movieframe"
-            | "offscreenframe"
-            | "questpoiframe"
-            | "scenariopoiframe"
-            | "unitpositionframe" => Some(Self::Frame),
-            // WorldFrame is internal only — CreateFrame("WorldFrame") should error
             _ => None,
         }
+    }
+
+    fn alias_group_widget_type(alias: &str) -> Option<Self> {
+        if Self::is_button_alias(alias) {
+            return Some(Self::Button);
+        }
+        if Self::is_player_model_alias(alias) {
+            return Some(Self::PlayerModel);
+        }
+        if Self::is_message_frame_alias(alias) {
+            return Some(Self::MessageFrame);
+        }
+        if Self::is_frame_alias(alias) {
+            return Some(Self::Frame);
+        }
+
+        // WorldFrame is internal only — CreateFrame("WorldFrame") should error
+        None
+    }
+
+    fn is_button_alias(alias: &str) -> bool {
+        matches!(
+            alias,
+            "button" | "dropdownbutton" | "itembutton" | "containedalertframe"
+        )
+    }
+
+    fn is_player_model_alias(alias: &str) -> bool {
+        matches!(
+            alias,
+            "playermodel" | "cinematicmodel" | "tabardmodel" | "dressupmodel"
+        )
+    }
+
+    fn is_message_frame_alias(alias: &str) -> bool {
+        matches!(alias, "messageframe" | "scrollingmessageframe")
+    }
+
+    fn is_frame_alias(alias: &str) -> bool {
+        matches!(
+            alias,
+            // EventFrame is a Frame subtype for event-only handling
+            "eventframe"
+                // Checkout is a special frame type for the in-game shop
+                | "checkout"
+                // Specialty frame types — no custom behavior needed, treat as plain Frame
+                | "archaeologydigsiteframe"
+                | "browser"
+                | "fogofwarframe"
+                | "movieframe"
+                | "offscreenframe"
+                | "questpoiframe"
+                | "scenariopoiframe"
+                | "unitpositionframe"
+        )
     }
 
     pub fn as_str(&self) -> &'static str {

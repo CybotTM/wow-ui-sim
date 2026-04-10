@@ -4,6 +4,7 @@
 //! and widget-type defaults (button textures, slider fontstrings).
 
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::widget::WidgetType;
 
 // ============================================================================
 // Frame Level Defaults
@@ -102,6 +103,25 @@ fn test_create_frame_types() {
     assert_eq!(editbox_type, "EditBox");
     assert_eq!(scrollframe_type, "ScrollFrame");
     assert_eq!(statusbar_type, "StatusBar");
+}
+
+#[test]
+fn test_widget_type_from_str_preserves_alias_groups() {
+    assert_eq!(WidgetType::from_str("BUTTON"), Some(WidgetType::Button));
+    assert_eq!(
+        WidgetType::from_str("DropdownButton"),
+        Some(WidgetType::Button)
+    );
+    assert_eq!(
+        WidgetType::from_str("ScrollingMessageFrame"),
+        Some(WidgetType::MessageFrame)
+    );
+    assert_eq!(
+        WidgetType::from_str("DressUpModel"),
+        Some(WidgetType::PlayerModel)
+    );
+    assert_eq!(WidgetType::from_str("EventFrame"), Some(WidgetType::Frame));
+    assert_eq!(WidgetType::from_str("WorldFrame"), None);
 }
 
 #[test]
