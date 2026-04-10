@@ -79,6 +79,7 @@ fn register_core_namespaces(
     state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
 ) -> Result<()> {
     register_c_achievement_info(lua)?;
+    register_c_battle_net(lua, std::rc::Rc::clone(&state))?;
     super::hero_talents::register_c_class_talents(lua, std::rc::Rc::clone(&state))?;
     register_c_guild(lua, std::rc::Rc::clone(&state))?;
     register_c_guild_info(lua)?;
@@ -121,6 +122,40 @@ fn register_c_achievement_info(lua: &Lua) -> Result<()> {
         lua.create_function(|_, _achievement_id: i32| Ok(Value::Nil))?,
     )?;
     lua.globals().set("C_AchievementInfo", t)?;
+    Ok(())
+}
+
+fn register_c_battle_net(
+    lua: &Lua,
+    state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    let globals = lua.globals();
+    let t: mlua::Table = match globals.get::<Value>("C_BattleNet")? {
+        Value::Table(table) => table,
+        _ => lua.create_table()?,
+    };
+
+    let installed_state = std::rc::Rc::clone(&state);
+    t.set(
+        "AreHighResTexturesInstalled",
+        lua.create_function(move |_, ()| {
+            Ok(installed_state
+                .borrow()
+                .cvars
+                .get_bool("useHighResTextures"))
+        })?,
+    )?;
+
+    let install_state = std::rc::Rc::clone(&state);
+    t.set(
+        "InstallHighResTextures",
+        lua.create_function(move |_, ()| {
+            install_state.borrow().cvars.set("useHighResTextures", "1");
+            Ok(())
+        })?,
+    )?;
+
+    globals.set("C_BattleNet", t)?;
     Ok(())
 }
 
