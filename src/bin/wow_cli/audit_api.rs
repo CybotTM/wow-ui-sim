@@ -46,6 +46,8 @@ pub struct AuditConfig {
 pub enum OutputFormat {
     Text,
     Json,
+    /// PLAN.md-ready markdown checkboxes (gaps only, no usage dump).
+    Plan,
 }
 
 /// Script element tag names whose text content is inline Lua.
@@ -549,10 +551,11 @@ pub struct SimRegistered {
 }
 
 /// A single missing symbol with its usage count.
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Eq)]
 pub struct GapEntry {
     pub name: String,
     pub calls: usize,
+    pub files: Vec<String>,
 }
 
 /// Summary counts for one symbol family.
@@ -572,8 +575,8 @@ pub struct GapReport {
     pub missing_c_namespaces: Vec<GapEntry>,
     pub missing_le_constants: Vec<GapEntry>,
     pub missing_enum_namespaces: Vec<GapEntry>,
-    /// C_* namespace → list of (method_name, usage_count) used by Blizzard UI but not registered
-    pub missing_c_methods: BTreeMap<String, Vec<(String, usize)>>,
+    /// C_* namespace → missing methods used by Blizzard UI but not registered
+    pub missing_c_methods: BTreeMap<String, Vec<GapEntry>>,
 }
 
 /// Introspect the simulator's Lua environment to find registered C_* methods.
@@ -892,18 +895,36 @@ pub fn build_gap_report(
 ) -> GapReport {
     // C_* namespaces: compare namespace keys from usage
     let used_c: BTreeSet<String> = used.c_api.keys().cloned().collect();
-    let missing_c = collect_missing_entries(&used_c, &registered.c_namespaces, |ns| {
-        used.c_api
-            .get(ns)
-            .map(|m| m.values().map(|u| u.count).sum())
-            .unwrap_or(0)
-    });
+    let missing_c = collect_missing_entries(
+        &used_c,
+        &registered.c_namespaces,
+        |ns| {
+            used.c_api
+                .get(ns)
+                .map(|m| m.values().map(|u| u.count).sum())
+                .unwrap_or(0)
+        },
+        |ns| {
+            used.c_api
+                .get(ns)
+                .map(collect_method_usage_files)
+                .unwrap_or_default()
+        },
+    );
 
     // LE_* constants
     let used_le: BTreeSet<String> = used.constants.keys().cloned().collect();
-    let missing_le = collect_missing_entries(&used_le, &registered.le_constants, |sym| {
-        used.constants.get(sym).map(|u| u.count).unwrap_or(0)
-    });
+    let missing_le = collect_missing_entries(
+        &used_le,
+        &registered.le_constants,
+        |sym| used.constants.get(sym).map(|u| u.count).unwrap_or(0),
+        |sym| {
+            used.constants
+                .get(sym)
+                .map(|usage| usage.files.clone())
+                .unwrap_or_default()
+        },
+    );
 
     // Enum namespaces: extract "Enum.X" from "Enum.X.Y" usage keys
     let used_enum_ns: BTreeSet<String> = used
@@ -919,15 +940,20 @@ pub fn build_gap_report(
             }
         })
         .collect();
-    let missing_enum = collect_missing_entries(&used_enum_ns, &registered.enum_namespaces, |ns| {
-        // sum all calls to any Enum.Namespace.* key
-        let prefix = format!("{}.", ns);
-        used.enums
-            .iter()
-            .filter(|(k, _)| k.starts_with(&prefix) || *k == ns)
-            .map(|(_, u)| u.count)
-            .sum()
-    });
+    let missing_enum = collect_missing_entries(
+        &used_enum_ns,
+        &registered.enum_namespaces,
+        |ns| {
+            // sum all calls to any Enum.Namespace.* key
+            let prefix = format!("{}.", ns);
+            used.enums
+                .iter()
+                .filter(|(k, _)| k.starts_with(&prefix) || *k == ns)
+                .map(|(_, u)| u.count)
+                .sum()
+        },
+        |ns| collect_prefixed_usage_files(&used.enums, &format!("{ns}."), ns),
+    );
 
     // Per-method gap: for each C_* namespace used by Blizzard UI, find methods not in sim_methods
     let missing_c_methods = build_missing_c_methods(used, registered, sim_methods);
@@ -961,8 +987,8 @@ fn build_missing_c_methods(
     used: &AuditResults,
     registered: &SimRegistered,
     sim_methods: &BTreeMap<String, BTreeSet<String>>,
-) -> BTreeMap<String, Vec<(String, usize)>> {
-    let mut result: BTreeMap<String, Vec<(String, usize)>> = BTreeMap::new();
+) -> BTreeMap<String, Vec<GapEntry>> {
+    let mut result: BTreeMap<String, Vec<GapEntry>> = BTreeMap::new();
 
     for (ns, methods_used) in &used.c_api {
         // Only report on namespaces the simulator has registered
@@ -970,17 +996,21 @@ fn build_missing_c_methods(
             continue;
         }
         let registered_methods = sim_methods.get(ns);
-        let mut missing: Vec<(String, usize)> = methods_used
+        let mut missing: Vec<GapEntry> = methods_used
             .iter()
             .filter(|(method, _)| {
                 registered_methods
                     .map(|m| !m.contains(*method))
                     .unwrap_or(true)
             })
-            .map(|(method, usage)| (method.clone(), usage.count))
+            .map(|(method, usage)| GapEntry {
+                name: method.clone(),
+                calls: usage.count,
+                files: usage.files.clone(),
+            })
             .collect();
         if !missing.is_empty() {
-            missing.sort_by(|a, b| b.1.cmp(&a.1).then(a.0.cmp(&b.0)));
+            missing.sort_by(|a, b| b.calls.cmp(&a.calls).then(a.name.cmp(&b.name)));
             result.insert(ns.clone(), missing);
         }
     }
@@ -992,6 +1022,7 @@ fn collect_missing_entries(
     used: &BTreeSet<String>,
     registered: &BTreeSet<String>,
     call_count: impl Fn(&str) -> usize,
+    files_for: impl Fn(&str) -> Vec<String>,
 ) -> Vec<GapEntry> {
     let mut entries: Vec<GapEntry> = used
         .iter()
@@ -999,10 +1030,33 @@ fn collect_missing_entries(
         .map(|name| GapEntry {
             name: name.clone(),
             calls: call_count(name),
+            files: files_for(name),
         })
         .collect();
     entries.sort_by(|a, b| b.calls.cmp(&a.calls).then(a.name.cmp(&b.name)));
     entries
+}
+
+fn collect_method_usage_files(methods: &BTreeMap<String, SymbolUsage>) -> Vec<String> {
+    let mut files = BTreeSet::new();
+    for usage in methods.values() {
+        files.extend(usage.files.iter().cloned());
+    }
+    files.into_iter().collect()
+}
+
+fn collect_prefixed_usage_files(
+    usages: &BTreeMap<String, SymbolUsage>,
+    prefix: &str,
+    exact_name: &str,
+) -> Vec<String> {
+    let mut files = BTreeSet::new();
+    for (name, usage) in usages {
+        if name.starts_with(prefix) || name == exact_name {
+            files.extend(usage.files.iter().cloned());
+        }
+    }
+    files.into_iter().collect()
 }
 
 /// Print the gap report in human-readable text format.
@@ -1031,7 +1085,13 @@ pub fn print_gap_text(report: &GapReport) {
             report.missing_c_namespaces.len()
         );
         for entry in &report.missing_c_namespaces {
-            println!("  {} ({} calls)", entry.name, entry.calls);
+            println!(
+                "  {} ({} calls, {} file{})",
+                entry.name,
+                entry.calls,
+                entry.files.len(),
+                if entry.files.len() == 1 { "" } else { "s" }
+            );
         }
     }
 
@@ -1042,7 +1102,13 @@ pub fn print_gap_text(report: &GapReport) {
             report.missing_le_constants.len()
         );
         for entry in &report.missing_le_constants {
-            println!("  {} ({} refs)", entry.name, entry.calls);
+            println!(
+                "  {} ({} refs, {} file{})",
+                entry.name,
+                entry.calls,
+                entry.files.len(),
+                if entry.files.len() == 1 { "" } else { "s" }
+            );
         }
     }
 
@@ -1053,7 +1119,13 @@ pub fn print_gap_text(report: &GapReport) {
             report.missing_enum_namespaces.len()
         );
         for entry in &report.missing_enum_namespaces {
-            println!("  {} ({} refs)", entry.name, entry.calls);
+            println!(
+                "  {} ({} refs, {} file{})",
+                entry.name,
+                entry.calls,
+                entry.files.len(),
+                if entry.files.len() == 1 { "" } else { "s" }
+            );
         }
     }
 
@@ -1066,10 +1138,56 @@ pub fn print_gap_text(report: &GapReport) {
         );
         for (ns, methods) in &report.missing_c_methods {
             println!("{} ({} missing):", ns, methods.len());
-            for (method, count) in methods {
-                println!("    .{} ({} refs)", method, count);
+            for entry in methods {
+                println!(
+                    "    .{} ({} refs, {} file{})",
+                    entry.name,
+                    entry.calls,
+                    entry.files.len(),
+                    if entry.files.len() == 1 { "" } else { "s" }
+                );
             }
         }
+    }
+}
+
+/// Print gap report as PLAN.md-ready markdown checkboxes.
+pub fn print_gap_plan(report: &GapReport) {
+    if !report.missing_c_namespaces.is_empty() {
+        println!("### Missing C_* Namespaces ({})\n", report.missing_c_namespaces.len());
+        for entry in &report.missing_c_namespaces {
+            println!("- [ ] `{}` ({} calls)", entry.name, entry.calls);
+        }
+        println!();
+    }
+
+    if !report.missing_c_methods.is_empty() {
+        let total: usize = report.missing_c_methods.values().map(|v| v.len()).sum();
+        println!("### Missing C_* Methods ({} total)\n", total);
+        for (ns, methods) in &report.missing_c_methods {
+            let method_list: Vec<String> = methods
+                .iter()
+                .map(|e| format!("{} ({})", e.name, e.calls))
+                .collect();
+            println!("- [ ] `{}` ({}): {}", ns, methods.len(), method_list.join(", "));
+        }
+        println!();
+    }
+
+    if !report.missing_le_constants.is_empty() {
+        println!("### Missing LE_* Constants ({})\n", report.missing_le_constants.len());
+        for entry in &report.missing_le_constants {
+            println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
+        }
+        println!();
+    }
+
+    if !report.missing_enum_namespaces.is_empty() {
+        println!("### Missing Enum Namespaces ({})\n", report.missing_enum_namespaces.len());
+        for entry in &report.missing_enum_namespaces {
+            println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
+        }
+        println!();
     }
 }
 
@@ -1081,6 +1199,13 @@ mod tests {
         SymbolUsage {
             count,
             files: vec!["Blizzard_Test.lua".to_string()],
+        }
+    }
+
+    fn usage_in_files(count: usize, files: &[&str]) -> SymbolUsage {
+        SymbolUsage {
+            count,
+            files: files.iter().map(|file| file.to_string()).collect(),
         }
     }
 
@@ -1162,16 +1287,35 @@ fn register_c_tooltip_info_0(lua: &Lua) {
             "C_Container".to_string(),
             BTreeMap::from([
                 ("GetContainerNumSlots".to_string(), usage(3)),
-                ("GetContainerItemInfo".to_string(), usage(2)),
+                (
+                    "GetContainerItemInfo".to_string(),
+                    usage_in_files(
+                        2,
+                        &["Blizzard_Container.lua", "Blizzard_Bags.lua"],
+                    ),
+                ),
             ]),
         );
         used.c_api.insert(
             "C_Unregistered".to_string(),
-            BTreeMap::from([("NeverImplemented".to_string(), usage(5))]),
+            BTreeMap::from([(
+                "NeverImplemented".to_string(),
+                usage_in_files(5, &["Blizzard_Unregistered.lua"]),
+            )]),
+        );
+        used.constants.insert(
+            "LE_TEST_CONSTANT".to_string(),
+            usage_in_files(4, &["Blizzard_Constants.lua"]),
+        );
+        used.enums.insert(
+            "Enum.TestNamespace.Value".to_string(),
+            usage_in_files(7, &["Blizzard_Enum.lua"]),
         );
 
         let registered = SimRegistered {
             c_namespaces: BTreeSet::from(["C_Container".to_string()]),
+            le_constants: BTreeSet::new(),
+            enum_namespaces: BTreeSet::new(),
             ..Default::default()
         };
         let sim_methods = BTreeMap::from([(
@@ -1183,11 +1327,42 @@ fn register_c_tooltip_info_0(lua: &Lua) {
 
         assert_eq!(
             report.missing_c_methods.get("C_Container"),
-            Some(&vec![("GetContainerItemInfo".to_string(), 2)])
+            Some(&vec![GapEntry {
+                name: "GetContainerItemInfo".to_string(),
+                calls: 2,
+                files: vec![
+                    "Blizzard_Bags.lua".to_string(),
+                    "Blizzard_Container.lua".to_string(),
+                ],
+            }])
         );
         assert!(
             !report.missing_c_methods.contains_key("C_Unregistered"),
             "missing method details should only be reported for namespaces the simulator exposes"
+        );
+        assert_eq!(
+            report.missing_c_namespaces,
+            vec![GapEntry {
+                name: "C_Unregistered".to_string(),
+                calls: 5,
+                files: vec!["Blizzard_Unregistered.lua".to_string()],
+            }]
+        );
+        assert_eq!(
+            report.missing_le_constants,
+            vec![GapEntry {
+                name: "LE_TEST_CONSTANT".to_string(),
+                calls: 4,
+                files: vec!["Blizzard_Constants.lua".to_string()],
+            }]
+        );
+        assert_eq!(
+            report.missing_enum_namespaces,
+            vec![GapEntry {
+                name: "Enum.TestNamespace".to_string(),
+                calls: 7,
+                files: vec!["Blizzard_Enum.lua".to_string()],
+            }]
         );
     }
 

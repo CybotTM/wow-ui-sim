@@ -284,6 +284,7 @@ fn run_audit_api(
     use audit_api::{AuditConfig, OutputFormat};
     let fmt = match format.as_str() {
         "json" => OutputFormat::Json,
+        "plan" => OutputFormat::Plan,
         _ => OutputFormat::Text,
     };
     // Only use wowless path if the apis.yaml file actually exists there
@@ -312,6 +313,13 @@ fn run_audit_api(
     };
     match fmt {
         OutputFormat::Json => audit_api::print_json(&results, gap_report.as_ref()),
+        OutputFormat::Plan => {
+            if let Some(ref report) = gap_report {
+                audit_api::print_gap_plan(report);
+            } else {
+                eprintln!("--format plan requires --gaps");
+            }
+        }
         OutputFormat::Text => {
             audit_api::print_text(&results);
             if let Some(ref report) = gap_report {
