@@ -458,6 +458,73 @@ fn test_statusbar_texture_and_color_methods_still_resolve() {
 }
 
 #[test]
+fn test_widget_misc_setup_and_alert_methods_persist_runtime_fields() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (bool, bool, bool) = env
+        .eval(
+            r#"
+            local frame = CreateFrame("Frame", "TestWidgetMiscFrame", UIParent)
+            local fallbackGenerator = function() end
+            frame:SetupMenu(fallbackGenerator)
+            local fields = debug.getfenv(frame)[1]
+            local fallbackStored = fields.menuGenerator == fallbackGenerator
+
+            local overrideFrame = CreateFrame("Frame", "TestWidgetMiscOverrideFrame", UIParent)
+            local overrideFields = debug.getfenv(overrideFrame)[1]
+            local overrideGenerator = function() end
+            overrideFields.SetupMenu = function(self, generator)
+                rawset(overrideFields, "calledGenerator", generator)
+            end
+            overrideFrame:SetupMenu(overrideGenerator)
+            local overrideCalled = overrideFields.calledGenerator == overrideGenerator
+
+            local container = CreateFrame("Frame", "TestWidgetMiscContainer", UIParent)
+            frame:SetAlertContainer(container)
+            local alertStored = fields.alertContainer == container
+
+            return fallbackStored, overrideCalled, alertStored
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.0,
+        "SetupMenu should store menuGenerator without an override"
+    );
+    assert!(
+        result.1,
+        "SetupMenu should delegate to an existing mixin override instead of shadowing it"
+    );
+    assert!(
+        result.2,
+        "SetAlertContainer should store the container reference on the frame"
+    );
+}
+
+#[test]
+fn test_statusbar_set_color_fill_aliases_statusbar_color_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local sb = CreateFrame("StatusBar", "TestStatusBarColorFill", UIParent)
+        sb:SetStatusBarTexture("Interface\\Buttons\\WHITE8X8")
+        sb:SetColorFill(0.6, 0.5, 0.4, 0.3)
+    "#,
+    )
+    .unwrap();
+
+    let (r, g, b, a): (f32, f32, f32, f32) = env
+        .eval("return TestStatusBarColorFill:GetStatusBarColor()")
+        .unwrap();
+    assert!((r - 0.6).abs() < 0.001);
+    assert!((g - 0.5).abs() < 0.001);
+    assert!((b - 0.4).abs() < 0.001);
+    assert!((a - 0.3).abs() < 0.001);
+}
+
+#[test]
 fn test_statusbar_interpolation_methods_track_target_and_displayed_value() {
     let env = WowLuaEnv::new().unwrap();
 

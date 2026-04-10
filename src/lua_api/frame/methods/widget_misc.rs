@@ -2,9 +2,11 @@
 
 use super::super::handle::FrameRef;
 use super::combat_lockdown;
+use super::methods_helpers::get_mixin_override;
 use super::methods_rect::{resolve_and_extract, to_wow_rect};
-use crate::lua_api::frame::handle::get_sim_state;
+use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
 use crate::render::font::WowFontSystem;
+use crate::widget::Color;
 use mlua::Value;
 use std::cell::RefCell;
 use std::path::PathBuf;
@@ -410,9 +412,29 @@ fn next_optional_resize_bound(values: &mut impl Iterator<Item = mlua::Value>) ->
 // --- Misc stubs ---
 
 fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetupMenu", |_, _this, _args: mlua::MultiValue| Ok(()));
-    methods.add_method("SetAlertContainer", |_, _this, _container: Value| Ok(()));
-    methods.add_method("SetColorFill", |_, _this, _args: mlua::MultiValue| Ok(()));
+    methods.add_method("SetupMenu", |lua, this, generator: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetupMenu") {
+            return func.call::<()>((self_value, generator));
+        }
+
+        widget_fields(lua, this.0)?.set("menuGenerator", generator)?;
+        Ok(())
+    });
+    methods.add_method("SetAlertContainer", |lua, this, container: Value| {
+        widget_fields(lua, this.0)?.set("alertContainer", container)?;
+        Ok(())
+    });
+    methods.add_method("SetColorFill", |lua, this, args: mlua::MultiValue| {
+        let color = parse_statusbar_color(args);
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(bar_id) = statusbar_child_id(&state.widgets, this.0)
+            && let Some(bar) = state.widgets.get_mut_visual(bar_id)
+        {
+            bar.vertex_color = Some(color);
+        }
+        Ok(())
+    });
     methods.add_method("SetTextToFit", |lua, this, text: Option<String>| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -450,4 +472,36 @@ fn add_misc_stubs_mixin<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
+}
+
+fn widget_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
+    match frame_ref(lua, frame_id)? {
+        Value::UserData(ud) => ud.user_value(),
+        _ => lua.create_table(),
+    }
+}
+
+fn parse_statusbar_color(args: mlua::MultiValue) -> Color {
+    let mut it = args.into_iter();
+    let r = statusbar_color_arg(it.next(), 1.0);
+    let g = statusbar_color_arg(it.next(), 1.0);
+    let b = statusbar_color_arg(it.next(), 1.0);
+    let a = statusbar_color_arg(it.next(), 1.0);
+    Color::new(r, g, b, a)
+}
+
+fn statusbar_color_arg(value: Option<Value>, default: f32) -> f32 {
+    match value {
+        Some(Value::Number(value)) => value as f32,
+        Some(Value::Integer(value)) => value as f32,
+        _ => default,
+    }
+}
+
+fn statusbar_child_id(widgets: &crate::widget::WidgetRegistry, id: u64) -> Option<u64> {
+    let bar_id = widgets.get(id).and_then(|frame| frame.statusbar_bar_id)?;
+    widgets
+        .get(bar_id)
+        .filter(|frame| frame.parent_id == Some(id))
+        .map(|_| bar_id)
 }
