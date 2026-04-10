@@ -42,7 +42,12 @@ pub enum OutputFormat {
     Json,
 }
 
-/// Patterns used to extract API usage from Lua source.
+/// Script element tag names whose text content is inline Lua.
+const SCRIPT_TAGS: &[&str] = &[
+    "OnLoad", "OnClick", "OnShow", "OnHide", "OnEvent", "OnUpdate", "OnEnter", "OnLeave",
+];
+
+/// All compiled regex patterns (built once, reused across all files).
 struct Patterns {
     c_api: Regex,
     le_const: Regex,
@@ -50,10 +55,17 @@ struct Patterns {
     other_const: Regex,
     line_comment: Regex,
     block_comment: Regex,
+    kv_global: Regex,
+    /// One regex per script tag (no backreference support in the `regex` crate).
+    xml_script_tags: Vec<Regex>,
 }
 
 impl Patterns {
     fn new() -> Self {
+        let xml_script_tags = SCRIPT_TAGS
+            .iter()
+            .map(|tag| Regex::new(&format!(r"(?s)<{tag}[^>]*>(.*?)</{tag}>")).unwrap())
+            .collect();
         Self {
             c_api: Regex::new(r"(C_\w+)[.:](\w+)").unwrap(),
             le_const: Regex::new(r"\bLE_\w+").unwrap(),
@@ -62,32 +74,38 @@ impl Patterns {
                 .unwrap(),
             line_comment: Regex::new(r"--[^\n]*").unwrap(),
             block_comment: Regex::new(r"(?s)--\[\[.*?\]\]").unwrap(),
+            kv_global: Regex::new(r#"type="global"[^>]*value="([^"]+)""#).unwrap(),
+            xml_script_tags,
         }
     }
 }
 
-/// Strip Lua comments from source text.
-fn strip_comments(src: &str) -> String {
-    let p = Patterns::new();
-    // Strip block comments first (they can contain --)
+/// Strip Lua comments from source text using pre-compiled patterns.
+fn strip_comments<'a>(src: &'a str, p: &Patterns) -> std::borrow::Cow<'a, str> {
     let without_blocks = p.block_comment.replace_all(src, "");
-    p.line_comment.replace_all(&without_blocks, "").into_owned()
+    // replace_all returns Cow; if no block comments, it borrows — turn into owned for
+    // the second pass to avoid lifetime issues.
+    let without_blocks = without_blocks.into_owned();
+    p.line_comment
+        .replace_all(&without_blocks, "")
+        .into_owned()
+        .into()
 }
 
 fn record_symbol_usage(usage: &mut SymbolUsage, file_label: &str) {
     usage.count += 1;
-    if !usage.files.iter().any(|file| file == file_label) {
+    if !usage.files.iter().any(|f| f == file_label) {
         usage.files.push(file_label.to_string());
     }
 }
 
 fn scan_c_api_usage(clean: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
     for cap in p.c_api.captures_iter(clean) {
-        let namespace = cap[1].to_string();
+        let ns = cap[1].to_string();
         let method = cap[2].to_string();
         let usage = results
             .c_api
-            .entry(namespace)
+            .entry(ns)
             .or_default()
             .entry(method)
             .or_default();
@@ -97,16 +115,15 @@ fn scan_c_api_usage(clean: &str, file_label: &str, results: &mut AuditResults, p
 
 fn scan_constant_usage(clean: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
     for cap in p.le_const.captures_iter(clean) {
-        let symbol = cap[0].to_string();
-        let usage = results.constants.entry(symbol).or_default();
+        let usage = results.constants.entry(cap[0].to_string()).or_default();
         record_symbol_usage(usage, file_label);
     }
 }
 
 fn scan_enum_usage(clean: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
     for cap in p.enum_ref.captures_iter(clean) {
-        let symbol = format!("Enum.{}", &cap[1]);
-        let usage = results.enums.entry(symbol).or_default();
+        let sym = format!("Enum.{}", &cap[1]);
+        let usage = results.enums.entry(sym).or_default();
         record_symbol_usage(usage, file_label);
     }
 }
@@ -118,25 +135,22 @@ fn scan_other_constant_usage(
     p: &Patterns,
 ) {
     for cap in p.other_const.captures_iter(clean) {
-        let symbol = cap[0].to_string();
-        let usage = results.other_constants.entry(symbol).or_default();
+        let usage = results
+            .other_constants
+            .entry(cap[0].to_string())
+            .or_default();
         record_symbol_usage(usage, file_label);
     }
 }
 
 /// Scan a chunk of Lua source text and accumulate results.
 fn scan_lua_text(text: &str, file_label: &str, results: &mut AuditResults, p: &Patterns) {
-    let clean = strip_comments(text);
+    let clean = strip_comments(text, p);
     scan_c_api_usage(&clean, file_label, results, p);
     scan_constant_usage(&clean, file_label, results, p);
     scan_enum_usage(&clean, file_label, results, p);
     scan_other_constant_usage(&clean, file_label, results, p);
 }
-
-/// Script element tag names whose text content is inline Lua.
-const SCRIPT_TAGS: &[&str] = &[
-    "OnLoad", "OnClick", "OnShow", "OnHide", "OnEvent", "OnUpdate", "OnEnter", "OnLeave",
-];
 
 /// Extract inline Lua from XML script elements and scan them.
 fn scan_xml_file(path: &Path, file_label: &str, results: &mut AuditResults, p: &Patterns) {
@@ -146,17 +160,17 @@ fn scan_xml_file(path: &Path, file_label: &str, results: &mut AuditResults, p: &
     };
 
     // Extract KeyValue globals: type="global" value="SOME_CONSTANT"
-    let kv_re = Regex::new(r#"type="global"[^>]*value="([^"]+)""#).unwrap();
-    for cap in kv_re.captures_iter(&content) {
-        let symbol = cap[1].to_string();
-        let usage = results.other_constants.entry(symbol).or_default();
+    for cap in p.kv_global.captures_iter(&content) {
+        let usage = results
+            .other_constants
+            .entry(cap[1].to_string())
+            .or_default();
         record_symbol_usage(usage, file_label);
     }
 
     // Extract inline script bodies
-    for tag in SCRIPT_TAGS {
-        let script_re = Regex::new(&format!(r"(?s)<{tag}[^>]*>(.*?)</{tag}>", tag = tag)).unwrap();
-        for cap in script_re.captures_iter(&content) {
+    for re in &p.xml_script_tags {
+        for cap in re.captures_iter(&content) {
             scan_lua_text(&cap[1], file_label, results, p);
         }
     }
@@ -170,7 +184,6 @@ fn should_skip(path: &Path) -> bool {
 
 /// Whether to skip a file because it's LoadOnDemand (when filter_startup is on).
 fn is_load_on_demand(addon_path: &Path, addon_dir: &Path) -> bool {
-    // Check if the parent addon's .toc file has LoadOnDemand = 1
     let toc = addon_path
         .ancestors()
         .find(|p| p.parent() == Some(addon_dir))
@@ -249,7 +262,6 @@ pub fn print_text(results: &AuditResults) {
     for (ns, methods) in &results.c_api {
         let total: usize = methods.values().map(|u| u.count).sum();
         println!("{} ({} calls)", ns, total);
-        // Sort methods by count descending
         let mut sorted: Vec<(&String, &SymbolUsage)> = methods.iter().collect();
         sorted.sort_by(|a, b| b.1.count.cmp(&a.1.count));
         for (method, usage) in sorted {
@@ -284,7 +296,6 @@ pub fn print_text(results: &AuditResults) {
 
 /// Print results as JSON.
 pub fn print_json(results: &AuditResults) {
-    // Build the output structure matching the spec
     #[derive(Serialize)]
     struct Output<'a> {
         c_api: &'a BTreeMap<String, BTreeMap<String, SymbolUsage>>,
