@@ -35,3 +35,19 @@ if not Enum.CooldownLayoutType then
     Account = 2,
   }
 end
+
+if not Enum.CharacterCreateRaceMode then
+  Enum.CharacterCreateRaceMode = {
+    Normal = 0,
+    Allied = 1,
+  }
+end
+
+if not Enum.TransmogOutfitSlotOptionSheatheCategory then
+  Enum.TransmogOutfitSlotOptionSheatheCategory = {
+    Default = 0,
+    Back = 1,
+    Side = 2,
+    Hide = 3,
+  }
+end

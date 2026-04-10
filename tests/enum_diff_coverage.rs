@@ -269,6 +269,54 @@ fn tiered_entrance_reward_type_is_available_with_expected_values() {
 }
 
 #[test]
+fn low_usage_character_create_and_transmog_enums_are_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local raceMode = Enum.CharacterCreateRaceMode
+            if type(raceMode) ~= "table" then
+                return "missing_character_create_race_mode"
+            end
+
+            if raceMode.Normal ~= 0 then
+                return "wrong_character_create_race_mode_normal:" .. tostring(raceMode.Normal)
+            end
+
+            if raceMode.Allied ~= 1 then
+                return "wrong_character_create_race_mode_allied:" .. tostring(raceMode.Allied)
+            end
+
+            local sheatheCategory = Enum.TransmogOutfitSlotOptionSheatheCategory
+            if type(sheatheCategory) ~= "table" then
+                return "missing_transmog_outfit_slot_option_sheathe_category"
+            end
+
+            if sheatheCategory.Default ~= 0 then
+                return "wrong_sheathe_category_default:" .. tostring(sheatheCategory.Default)
+            end
+
+            if sheatheCategory.Back ~= 1 then
+                return "wrong_sheathe_category_back:" .. tostring(sheatheCategory.Back)
+            end
+
+            if sheatheCategory.Side ~= 2 then
+                return "wrong_sheathe_category_side:" .. tostring(sheatheCategory.Side)
+            end
+
+            if sheatheCategory.Hide ~= 3 then
+                return "wrong_sheathe_category_hide:" .. tostring(sheatheCategory.Hide)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(
