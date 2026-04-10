@@ -286,6 +286,22 @@ pub const INVALID_PLOT_SCREENSHOT_REASON: SeqEnumDef = (
     ],
 );
 
+pub const WARBAND_SCENE_ANIMATION_EVENT: EnumDef = (
+    "WarbandSceneAnimationEvent",
+    &[
+        ("StartingPose", 0),
+        ("Idle", 1),
+        ("Mouseover", 2),
+        ("Select", 3),
+        ("Deselect", 4),
+        ("Insert", 5),
+        ("EnterWorld", 6),
+        ("Spin", 7),
+        ("Poke", 8),
+        ("Ffx", 9),
+    ],
+);
+
 // ============================================================================
 // Housing Enums
 // ============================================================================
