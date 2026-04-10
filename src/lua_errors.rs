@@ -85,10 +85,24 @@ fn unique_error_order(state: &SimState) -> Vec<String> {
 /// Extract the core error message, stripping "runtime error: " prefix.
 pub(crate) fn extract_error_message(raw: &str) -> String {
     let first_line = raw.lines().next().unwrap_or(raw);
-    first_line
+    let stripped = first_line
         .strip_prefix("runtime error: ")
-        .unwrap_or(first_line)
-        .to_string()
+        .unwrap_or(first_line);
+    strip_lua_location_prefix(stripped).to_string()
+}
+
+fn strip_lua_location_prefix(msg: &str) -> &str {
+    let Some((prefix, body)) = msg.rsplit_once(": ") else {
+        return msg;
+    };
+    let Some((_source, line)) = prefix.rsplit_once(':') else {
+        return msg;
+    };
+    if line.parse::<usize>().is_ok() {
+        body
+    } else {
+        msg
+    }
 }
 
 /// Redirect stdout (fd 1) to stderr (fd 2). Returns saved original stdout fd.

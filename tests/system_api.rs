@@ -144,6 +144,39 @@ fn test_xpcall_passes_args() {
     assert_eq!(result, 30);
 }
 
+#[test]
+fn test_protected_calls_record_errors_in_shared_tracker() {
+    let env = env();
+    let result: String = env
+        .eval(
+            r#"
+        local p_ok, p_err = pcall(function() error("repeat me") end)
+        local x_ok, x_err = xpcall(
+            function() error("repeat me") end,
+            function(err) return "handled: " .. err end
+        )
+        if p_ok or x_ok then
+            return "unexpected_success"
+        end
+        return p_err .. " | " .. x_err
+    "#,
+        )
+        .unwrap();
+
+    assert!(
+        result.contains("repeat me"),
+        "protected calls should still surface the original error to Lua"
+    );
+
+    let state = env.state().borrow();
+    assert_eq!(
+        state.lua_error_counts.get("repeat me"),
+        Some(&2),
+        "protected call errors should be tracked in lua_error_counts: {:?}",
+        state.lua_error_counts
+    );
+}
+
 // ============================================================================
 // SlashCmdList
 // ============================================================================

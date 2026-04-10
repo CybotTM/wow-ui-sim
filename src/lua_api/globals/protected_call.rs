@@ -27,6 +27,7 @@ fn register_pcall(lua: &Lua) -> Result<()> {
             if result_vec.len() > 1 && !matches!(result_vec[1], Value::Nil) {
                 let msg = error_to_string(lua, &tostring, &result_vec[1])?;
                 let clean = strip_error_wrapper(&msg);
+                crate::lua_api::script_helpers::collect_lua_error(lua, clean);
                 result_vec[1] = Value::String(lua.create_string(clean)?);
             }
         }
@@ -111,6 +112,7 @@ fn call_with_handler(
         Err(e) => {
             let raw = e.to_string();
             let clean = strip_error_wrapper(&raw);
+            crate::lua_api::script_helpers::collect_lua_error(lua, clean);
             let error_msg = lua.create_string(clean)?;
             let handler_result = error_handler.call::<Value>(Value::String(error_msg));
             let mut ret = MultiValue::new();
