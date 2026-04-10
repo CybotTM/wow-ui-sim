@@ -145,7 +145,8 @@ fn c_store_secure_lua_src() -> &'static str {
                     flags = 0,
                     buyableHere = true,
                     eligibility = Enum.PurchaseEligibility.Ok,
-                    productDecorator = nil,
+                    productDecorator = Enum.BattlepayProductDecorator.VasService,
+                    vasServiceType = Enum.VasServiceType.NameChange,
                     texture = "Interface\\Icons\\INV_Misc_Note_02",
                     overrideTexture = nil,
                     overrideBackground = nil,
@@ -180,6 +181,159 @@ fn c_store_secure_lua_src() -> &'static str {
             },
         }
 
+        local STORE_REALMS = {
+            { realmName = "Azeroth", virtualRealmAddress = 101 },
+            { realmName = "Kalimdor", virtualRealmAddress = 202 },
+        }
+
+        local STORE_CHARACTERS_BY_REALM = {
+            [101] = {
+                {
+                    guid = 501001,
+                    name = "Simhero",
+                    level = 70,
+                    classID = 2,
+                    classFileName = "PALADIN",
+                    className = "Paladin",
+                    raceID = 1,
+                    raceName = "Human",
+                    faction = 1,
+                    realmName = "Azeroth",
+                    wowAccount = 1001,
+                    isGuildMaster = true,
+                },
+                {
+                    guid = 501002,
+                    name = "Simalt",
+                    level = 60,
+                    classID = 3,
+                    classFileName = "HUNTER",
+                    className = "Hunter",
+                    raceID = 4,
+                    raceName = "Night Elf",
+                    faction = 1,
+                    realmName = "Azeroth",
+                    wowAccount = 1001,
+                    isGuildMaster = false,
+                },
+            },
+            [202] = {
+                {
+                    guid = 602001,
+                    name = "Hordesim",
+                    level = 70,
+                    classID = 7,
+                    classFileName = "SHAMAN",
+                    className = "Shaman",
+                    raceID = 2,
+                    raceName = "Orc",
+                    faction = 0,
+                    realmName = "Kalimdor",
+                    wowAccount = 2002,
+                    isGuildMaster = true,
+                },
+            },
+        }
+
+        local STORE_CHARACTERS_BY_GUID = {}
+        for _, characters in pairs(STORE_CHARACTERS_BY_REALM) do
+            for _, character in ipairs(characters) do
+                STORE_CHARACTERS_BY_GUID[character.guid] = character
+            end
+        end
+
+        local STORE_GUILD_MASTER_INFO = {
+            [501001] = { guildName = "Simulator Guild", guildMasterName = "Simleader" },
+            [602001] = { guildName = "Horde Sim Guild", guildMasterName = "Hordeleader" },
+        }
+
+        local STORE_GUILD_FOLLOW_INFO = {
+            [501001] = { transferredRealm = "Kalimdor", factionChanged = false },
+            [602001] = { transferredRealm = nil, factionChanged = true },
+        }
+
+        local STORE_ELIGIBLE_RACES = {
+            [501001] = {
+                { raceID = 1, raceName = "Human", isAlliedRace = false, isHeritageArmorUnlocked = true },
+                { raceID = 29, raceName = "Void Elf", isAlliedRace = true, isHeritageArmorUnlocked = false },
+            },
+            [501002] = {
+                { raceID = 4, raceName = "Night Elf", isAlliedRace = false, isHeritageArmorUnlocked = true },
+            },
+            [602001] = {
+                { raceID = 2, raceName = "Orc", isAlliedRace = false, isHeritageArmorUnlocked = true },
+                { raceID = 36, raceName = "Mag'har Orc", isAlliedRace = true, isHeritageArmorUnlocked = false },
+            },
+        }
+
+        local LOCAL_WOW_ACCOUNT_GUIDS = {
+            WoW1 = 1001,
+            WoW2 = 1002,
+        }
+
+        local REMOTE_WOW_ACCOUNT_GUIDS = {
+            WoW2 = 2002,
+            WoW3 = 2003,
+        }
+
+        local DEFAULT_BNET_TRANSFER_INFO = {
+            guid = 3001,
+            gameAccounts = { "WoW2", "WoW3" },
+        }
+
+        local STORE_BNET_TRANSFER_INFO = {
+            guid = DEFAULT_BNET_TRANSFER_INFO.guid,
+            gameAccounts = { unpack(DEFAULT_BNET_TRANSFER_INFO.gameAccounts) },
+        }
+
+        local STORE_VAS_ERRORS = {}
+        local STORE_FAILURE_INFO = nil
+        local STORE_PREGENERATED_EXTERNAL_TRANSACTION_ID = nil
+        local STORE_DISCONNECT_ON_LOGOUT = false
+        local STORE_VAS_PRODUCT_READY = false
+        local STORE_VAS_COMPLETION_INFO = nil
+        local STORE_LAST_PRODUCT_LIST_RESPONSE_ERROR = 0
+        local STORE_CONFIRMATION_INFO = {
+            productID = 2003,
+            walletName = "Blizzard Balance",
+            currentDollars = 10,
+            currentCents = 0,
+        }
+        local STORE_UNREVOKED_BOOST_INFO = {
+            productName = "Level 70 Character Boost",
+            characterName = "Simhero",
+            realmName = "Azeroth",
+        }
+
+        local function fire_store_event(eventName, ...)
+            if FireEvent then
+                FireEvent(eventName, ...)
+            end
+        end
+
+        local function find_realm_name_by_address(realmAddress)
+            for _, realm in ipairs(STORE_REALMS) do
+                if realm.virtualRealmAddress == realmAddress then
+                    return realm.realmName
+                end
+            end
+            return nil
+        end
+
+        local function build_confirmation_info(productID)
+            local productInfo = STORE_PRODUCT_INFO[productID]
+            if not productInfo then
+                return nil
+            end
+
+            return {
+                productID = productID,
+                walletName = "Blizzard Balance",
+                currentDollars = productInfo.sharedData.currentDollars,
+                currentCents = productInfo.sharedData.currentCents,
+            }
+        end
+
         C_StoreSecure = setmetatable({
             IsStoreAvailable = function() return true end,
             IsAvailable = function() return true end,
@@ -203,11 +357,162 @@ fn c_store_secure_lua_src() -> &'static str {
             GetProductInfo = function(productID) return STORE_PRODUCT_INFO[productID] end,
             GetPurchaseList = function() return {} end,
             GetProductList = function()
+                STORE_LAST_PRODUCT_LIST_RESPONSE_ERROR = 0
                 FireEvent("STORE_PRODUCTS_UPDATED")
                 FireEvent("PRODUCT_DISTRIBUTIONS_UPDATED")
                 return STORE_PRODUCTS_BY_GROUP
             end,
-            GetFailureInfo = function() return nil, nil end,
+            GetFailureInfo = function()
+                if not STORE_FAILURE_INFO then
+                    return nil, nil
+                end
+                return unpack(STORE_FAILURE_INFO)
+            end,
+            GetWoWAccountGUIDFromName = function(accountName, isLocalAccount)
+                local accountMap = isLocalAccount and LOCAL_WOW_ACCOUNT_GUIDS or REMOTE_WOW_ACCOUNT_GUIDS
+                return accountMap[accountName] or 0
+            end,
+            GetCharacterInfoByGUID = function(characterGUID)
+                return STORE_CHARACTERS_BY_GUID[characterGUID]
+            end,
+            GetVASErrors = function()
+                return STORE_VAS_ERRORS
+            end,
+            GetBnetTransferInfo = function()
+                return STORE_BNET_TRANSFER_INFO.guid, STORE_BNET_TRANSFER_INFO.gameAccounts
+            end,
+            GetUnrevokedBoostInfo = function()
+                return STORE_UNREVOKED_BOOST_INFO.productName, STORE_UNREVOKED_BOOST_INFO.characterName, STORE_UNREVOKED_BOOST_INFO.realmName
+            end,
+            GetVASCompletionInfo = function()
+                if not STORE_VAS_COMPLETION_INFO then
+                    return nil
+                end
+                return STORE_VAS_COMPLETION_INFO.productID,
+                    STORE_VAS_COMPLETION_INFO.guid,
+                    STORE_VAS_COMPLETION_INFO.realmName,
+                    STORE_VAS_COMPLETION_INFO.shouldHandle
+            end,
+            GetVASRealmList = function()
+                return STORE_REALMS
+            end,
+            AckFailure = function()
+                STORE_FAILURE_INFO = nil
+                STORE_VAS_ERRORS = {}
+            end,
+            ClearPreGeneratedExternalTransactionID = function()
+                STORE_PREGENERATED_EXTERNAL_TRANSACTION_ID = nil
+            end,
+            GetCharactersForRealm = function(realmAddress, isGuildVAS)
+                local characters = STORE_CHARACTERS_BY_REALM[realmAddress] or {}
+                if not isGuildVAS then
+                    return characters
+                end
+
+                local guildCharacters = {}
+                for _, character in ipairs(characters) do
+                    if character.isGuildMaster then
+                        table.insert(guildCharacters, character)
+                    end
+                end
+                return guildCharacters
+            end,
+            GetEligibleRacesForVASService = function(characterGUID, _serviceType)
+                return STORE_ELIGIBLE_RACES[characterGUID] or {}
+            end,
+            GetRealmList = function()
+                return STORE_REALMS
+            end,
+            SetDisconnectOnLogout = function(flag)
+                STORE_DISCONNECT_ON_LOGOUT = flag and true or false
+                if STORE_VAS_COMPLETION_INFO then
+                    STORE_VAS_COMPLETION_INFO.shouldHandle = STORE_DISCONNECT_ON_LOGOUT
+                end
+            end,
+            ValidateBnetTransfer = function(email)
+                local hasError = email == nil or email == "" or email == "invalid@example.com"
+                if hasError then
+                    STORE_BNET_TRANSFER_INFO = { guid = 0, gameAccounts = {} }
+                else
+                    STORE_BNET_TRANSFER_INFO = {
+                        guid = DEFAULT_BNET_TRANSFER_INFO.guid,
+                        gameAccounts = { unpack(DEFAULT_BNET_TRANSFER_INFO.gameAccounts) },
+                    }
+                end
+                fire_store_event("VAS_TRANSFER_VALIDATION_UPDATE", hasError)
+                return not hasError
+            end,
+            GetConfirmationInfo = function()
+                if not STORE_CONFIRMATION_INFO then
+                    return nil
+                end
+                return STORE_CONFIRMATION_INFO.productID,
+                    STORE_CONFIRMATION_INFO.walletName,
+                    nil,
+                    nil,
+                    STORE_CONFIRMATION_INFO.currentDollars,
+                    STORE_CONFIRMATION_INFO.currentCents
+            end,
+            GetLastProductListResponseError = function()
+                return STORE_LAST_PRODUCT_LIST_RESPONSE_ERROR
+            end,
+            GetVASGuildMasterInfoForCharacterByGUID = function(characterGUID)
+                return STORE_GUILD_MASTER_INFO[characterGUID]
+            end,
+            GetVasServiceType = function(productID)
+                local productInfo = STORE_PRODUCT_INFO[productID]
+                return productInfo and productInfo.sharedData and productInfo.sharedData.vasServiceType or nil
+            end,
+            IsRegionLocked = function()
+                return false
+            end,
+            OpenNydusLink = function(entryID)
+                local entryInfo = STORE_ENTRIES[entryID]
+                if entryInfo then
+                    STORE_CONFIRMATION_INFO = build_confirmation_info(entryInfo.productID)
+                end
+                return true
+            end,
+            PurchaseVASProduct = function(productID, characterGUID, _newCharacterName, _oldGuildNewName, _newGuildMaster, destinationRealmAddress, _wowAccountGUID, _bnetAccountGUID, _transferFactionChangeBundle, _isGuildFollow)
+                if not STORE_PRODUCT_INFO[productID] or not STORE_CHARACTERS_BY_GUID[characterGUID] then
+                    STORE_FAILURE_INFO = { Enum.StoreError.Other, "InvalidVASPurchase" }
+                    STORE_VAS_ERRORS = { Enum.StoreError.Other }
+                    return false
+                end
+
+                if STORE_PREGENERATED_EXTERNAL_TRANSACTION_ID then
+                    STORE_FAILURE_INFO = { Enum.StoreError.Other, "DuplicateVASPurchase" }
+                    STORE_VAS_ERRORS = { Enum.StoreError.Other }
+                    return false
+                end
+
+                STORE_PREGENERATED_EXTERNAL_TRANSACTION_ID = string.format("vas-%d-%d", productID, characterGUID)
+                STORE_CONFIRMATION_INFO = build_confirmation_info(productID)
+                STORE_FAILURE_INFO = nil
+                STORE_VAS_ERRORS = {}
+                STORE_VAS_COMPLETION_INFO = {
+                    productID = productID,
+                    guid = characterGUID,
+                    realmName = find_realm_name_by_address(destinationRealmAddress) or STORE_CHARACTERS_BY_GUID[characterGUID].realmName,
+                    shouldHandle = STORE_DISCONNECT_ON_LOGOUT,
+                }
+                return true
+            end,
+            RequestCharacterGuildFollowInfo = function(characterGUID, _realmAddress)
+                local guildFollowInfo = STORE_GUILD_FOLLOW_INFO[characterGUID] or { transferredRealm = nil, factionChanged = false }
+                fire_store_event("STORE_GUILD_FOLLOW_INFO_RECEIVED", characterGUID, guildFollowInfo)
+                return guildFollowInfo
+            end,
+            RequestRealmGuildMasterInfo = function(realmAddress)
+                fire_store_event("STORE_GUILD_MASTER_INFO_RECEIVED", realmAddress)
+                return true
+            end,
+            SetVASProductReady = function(flag)
+                STORE_VAS_PRODUCT_READY = flag and true or false
+                if STORE_VAS_PRODUCT_READY and STORE_VAS_COMPLETION_INFO then
+                    fire_store_event("STORE_VAS_PURCHASE_COMPLETE")
+                end
+            end,
             IsDynamicBundle = function() return false end,
             HasDynamicPriceData = function() return true end,
             RequestAllDynamicPriceInfo = function() end,
