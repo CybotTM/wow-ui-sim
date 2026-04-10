@@ -1004,6 +1004,36 @@ fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
 }
 
 #[test]
+fn toggle_encounter_journal_opens_and_closes_panel() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleEncounterJournal then
+                return "missing_toggle_encounter_journal"
+            end
+
+            ToggleEncounterJournal()
+            if not EncounterJournal or not EncounterJournal:IsShown() then
+                return "encounter_journal_not_shown"
+            end
+
+            ToggleEncounterJournal()
+            if EncounterJournal:IsShown() then
+                return "encounter_journal_not_hidden"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ToggleEncounterJournal() should open and close the encounter journal panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn housing_dashboard_loads_and_opens_panel() {
     test_timeout! {
         let env = setup_env();
