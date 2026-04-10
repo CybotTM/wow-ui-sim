@@ -414,9 +414,24 @@ fn add_security_capability_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &m
     );
     methods.add_method(
         "SetMotionScriptsWhileDisabled",
-        |_lua, _this, _enabled: Option<bool>| Ok(()),
+        |lua, this, enabled: Option<bool>| {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut(this.0) {
+                frame.motion_scripts_while_disabled = enabled.unwrap_or(false);
+            }
+            Ok(())
+        },
     );
-    methods.add_method("GetMotionScriptsWhileDisabled", |_lua, _this, ()| Ok(false));
+    methods.add_method("GetMotionScriptsWhileDisabled", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.motion_scripts_while_disabled)
+            .unwrap_or(false))
+    });
 }
 
 fn add_clip_children_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

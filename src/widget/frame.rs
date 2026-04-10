@@ -381,6 +381,8 @@ pub struct Frame {
     pub mouse_enabled: bool,
     /// Whether mouse wheel events are enabled for this frame.
     pub mouse_wheel_enabled: bool,
+    /// Whether hover/wheel motion scripts should still run while the frame is disabled.
+    pub motion_scripts_while_disabled: bool,
     /// Whether gamepad button input is enabled for this frame.
     pub gamepad_button_enabled: bool,
     /// Whether gamepad stick input is enabled for this frame.
@@ -759,6 +761,7 @@ macro_rules! frame_defaults {
             effective_scale: 1.0,
             mouse_enabled: false,
             mouse_wheel_enabled: false,
+            motion_scripts_while_disabled: false,
             gamepad_button_enabled: false,
             gamepad_stick_enabled: false,
             propagate_mouse_clicks: false,

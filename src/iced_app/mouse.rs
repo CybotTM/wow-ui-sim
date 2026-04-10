@@ -62,10 +62,10 @@ impl App {
         {
             let env = self.env.borrow();
             env.state().borrow_mut().hovered_frame = new_hovered;
-            if let Some(old_id) = old_hovered {
+            if let Some(old_id) = old_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(old_id, "OnLeave", vec![]);
             }
-            if let Some(new_id) = new_hovered {
+            if let Some(new_id) = new_hovered.filter(|id| self.motion_scripts_allowed(*id)) {
                 let _ = env.fire_script_handler(new_id, "OnEnter", vec![]);
             }
         }
@@ -349,27 +349,54 @@ impl App {
         let env = self.env.borrow();
         let mut current = Some(start_frame);
         while let Some(frame_id) = current {
-            let wheel_enabled = env
-                .state()
-                .borrow()
-                .widgets
-                .get(frame_id)
-                .map(|f| f.mouse_wheel_enabled)
-                .unwrap_or(false);
-            if wheel_enabled && env.has_script_handler(frame_id, "OnMouseWheel") {
+            let (wheel_enabled, motion_allowed, parent_id) = {
+                let state = env.state().borrow();
+                state
+                    .widgets
+                    .get(frame_id)
+                    .map(|frame| {
+                        (
+                            frame.mouse_wheel_enabled,
+                            frame_motion_scripts_allowed(frame),
+                            frame.parent_id,
+                        )
+                    })
+                    .unwrap_or((false, false, None))
+            };
+            if motion_allowed && wheel_enabled && env.has_script_handler(frame_id, "OnMouseWheel") {
                 let delta_val = mlua::Value::Number(dy as f64);
                 let _ = env.fire_script_handler(frame_id, "OnMouseWheel", vec![delta_val]);
                 return true;
             }
-            current = env
-                .state()
-                .borrow()
-                .widgets
-                .get(frame_id)
-                .and_then(|f| f.parent_id);
+            current = parent_id;
         }
         false
     }
+
+    fn motion_scripts_allowed(&self, frame_id: u64) -> bool {
+        let env = self.env.borrow();
+        let state = env.state().borrow();
+        state
+            .widgets
+            .get(frame_id)
+            .map(frame_motion_scripts_allowed)
+            .unwrap_or(false)
+    }
+}
+
+fn frame_motion_scripts_allowed(frame: &crate::widget::Frame) -> bool {
+    frame_enabled(frame) || frame.motion_scripts_while_disabled
+}
+
+fn frame_enabled(frame: &crate::widget::Frame) -> bool {
+    frame
+        .attributes
+        .get("__enabled")
+        .and_then(|value| match value {
+            crate::widget::AttributeValue::Boolean(enabled) => Some(*enabled),
+            _ => None,
+        })
+        .unwrap_or(true)
 }
 
 fn find_drag_script_target(
@@ -738,6 +765,97 @@ mod tests {
         assert_eq!(
             cleared_child_right, 1.0,
             "child should receive right clicks again after passthrough is cleared"
+        );
+    }
+
+    #[test]
+    fn disabled_buttons_only_run_hover_motion_scripts_when_opted_in() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                DisabledMotionButton = CreateFrame("Button", "DisabledMotionButton", UIParent)
+                DisabledMotionButton:SetSize(100, 100)
+                DisabledMotionButton:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                DisabledMotionButton:EnableMouse(true)
+                DisabledMotionButton:Disable()
+                DisabledMotionButton:SetScript("OnEnter", function()
+                    __disabled_motion_enter = (__disabled_motion_enter or 0) + 1
+                end)
+                DisabledMotionButton:SetScript("OnLeave", function()
+                    __disabled_motion_leave = (__disabled_motion_leave or 0) + 1
+                end)
+                __disabled_motion_enter = 0
+                __disabled_motion_leave = 0
+                "#,
+            )
+            .expect("disabled motion test button setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        let outside_pos = Point::new(20.0, 20.0);
+        let inside_pos = Point::new(150.0, 150.0);
+
+        app.handle_mouse_move(outside_pos);
+        app.handle_mouse_move(inside_pos);
+        app.handle_mouse_move(outside_pos);
+
+        let (blocked_enter, blocked_leave, default_flag): (f64, f64, bool) = app
+            .env
+            .borrow()
+            .eval(
+                "return __disabled_motion_enter, __disabled_motion_leave, DisabledMotionButton:GetMotionScriptsWhileDisabled()",
+            )
+            .expect("default disabled motion state should be readable");
+        assert_eq!(
+            blocked_enter, 0.0,
+            "disabled buttons should not receive OnEnter by default"
+        );
+        assert_eq!(
+            blocked_leave, 0.0,
+            "disabled buttons should not receive OnLeave by default"
+        );
+        assert!(
+            !default_flag,
+            "disabled buttons should default motion scripts while disabled to false"
+        );
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                DisabledMotionButton:SetMotionScriptsWhileDisabled(true)
+                __disabled_motion_enter = 0
+                __disabled_motion_leave = 0
+                "#,
+            )
+            .expect("enabling motion scripts while disabled should succeed");
+        }
+
+        app.handle_mouse_move(outside_pos);
+        app.handle_mouse_move(inside_pos);
+        app.handle_mouse_move(outside_pos);
+
+        let (allowed_enter, allowed_leave, enabled_flag): (f64, f64, bool) = app
+            .env
+            .borrow()
+            .eval(
+                "return __disabled_motion_enter, __disabled_motion_leave, DisabledMotionButton:GetMotionScriptsWhileDisabled()",
+            )
+            .expect("enabled disabled-motion state should be readable");
+        assert_eq!(
+            allowed_enter, 1.0,
+            "disabled buttons should receive OnEnter after opting into motion scripts"
+        );
+        assert_eq!(
+            allowed_leave, 1.0,
+            "disabled buttons should receive OnLeave after opting into motion scripts"
+        );
+        assert!(
+            enabled_flag,
+            "GetMotionScriptsWhileDisabled should reflect the opt-in flag"
         );
     }
 }

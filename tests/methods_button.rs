@@ -324,6 +324,40 @@ fn test_disable_method() {
     assert!(!enabled, "Button should be disabled after Disable()");
 }
 
+#[test]
+fn test_motion_scripts_while_disabled_round_trip() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local btn = CreateFrame("Button", "TestMotionScriptsWhileDisabled", UIParent)
+        __motion_default = btn:GetMotionScriptsWhileDisabled()
+        btn:SetMotionScriptsWhileDisabled(true)
+        __motion_enabled = btn:GetMotionScriptsWhileDisabled()
+        btn:SetMotionScriptsWhileDisabled(false)
+        __motion_disabled = btn:GetMotionScriptsWhileDisabled()
+    "#,
+    )
+    .unwrap();
+
+    let (default_state, enabled_state, disabled_state): (bool, bool, bool) = env
+        .eval("return __motion_default, __motion_enabled, __motion_disabled")
+        .unwrap();
+
+    assert!(
+        !default_state,
+        "motion scripts should default to disabled on new buttons"
+    );
+    assert!(
+        enabled_state,
+        "SetMotionScriptsWhileDisabled(true) should persist true"
+    );
+    assert!(
+        !disabled_state,
+        "SetMotionScriptsWhileDisabled(false) should clear the flag"
+    );
+}
+
 // ============================================================================
 // Click Method
 // ============================================================================
