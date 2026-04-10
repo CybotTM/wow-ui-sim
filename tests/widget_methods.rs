@@ -458,6 +458,41 @@ fn test_statusbar_texture_and_color_methods_still_resolve() {
 }
 
 #[test]
+fn test_statusbar_interpolation_methods_track_target_and_displayed_value() {
+    let env = WowLuaEnv::new().unwrap();
+
+    let result: (f64, f64, bool, f64, bool) = env
+        .eval(
+            r#"
+            local sb = CreateFrame("StatusBar", "TestStatusBarInterpolation", UIParent)
+            sb:SetMinMaxValues(0, 1)
+            sb:SetValue(0.25)
+            sb:SetValue(0.75, "Smooth")
+            local targetValue = sb:GetValue()
+            local displayedValue = sb:GetInterpolatedValue()
+            local isInterpolating = sb:IsInterpolating()
+            sb:SetToTargetValue()
+            local snappedValue = sb:GetInterpolatedValue()
+            local isStillInterpolating = sb:IsInterpolating()
+            return targetValue, displayedValue, isInterpolating, snappedValue, isStillInterpolating
+        "#,
+        )
+        .unwrap();
+
+    assert!((result.0 - 0.75).abs() < 0.001);
+    assert!(
+        (result.1 - 0.25).abs() < 0.001,
+        "displayed value should remain at the previous bar value until snapped"
+    );
+    assert!(result.2, "status bar should report active interpolation");
+    assert!((result.3 - 0.75).abs() < 0.001);
+    assert!(
+        !result.4,
+        "SetToTargetValue should finish interpolation and clear the flag"
+    );
+}
+
+#[test]
 fn test_player_model_methods_still_resolve() {
     let env = WowLuaEnv::new().unwrap();
 

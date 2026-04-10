@@ -211,16 +211,19 @@ fn add_slider_drag_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 // --- Shared value methods ---
 
 fn add_shared_set_value<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetValue", |lua, this, value: f64| {
+    methods.add_method("SetValue", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
         let state_rc = get_sim_state(lua);
         let wtype = {
             let s = state_rc.borrow();
             s.widgets.get(id).map(|f| f.widget_type)
         };
+        let (value, interpolation) = parse_value_args(args);
         match wtype {
             Some(WidgetType::Slider) => set_slider_value(lua, id, value)?,
-            Some(WidgetType::StatusBar) => set_statusbar_value(lua, id, value)?,
+            Some(WidgetType::StatusBar) => {
+                set_statusbar_value(lua, id, value, interpolation.as_deref())?
+            }
             _ => {}
         }
         Ok(())
@@ -292,7 +295,12 @@ fn set_slider_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()> {
     fire_value_changed(lua, id, clamped)
 }
 
-fn set_statusbar_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()> {
+fn set_statusbar_value(
+    lua: &mlua::Lua,
+    id: u64,
+    value: f64,
+    interpolation: Option<&str>,
+) -> mlua::Result<()> {
     let clamped = {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -300,10 +308,23 @@ fn set_statusbar_value(lua: &mlua::Lua, id: u64, value: f64) -> mlua::Result<()>
             return Ok(());
         };
         let clamped = value.clamp(frame.statusbar_min, frame.statusbar_max);
-        if clamped == frame.statusbar_value {
+        let use_interpolation =
+            interpolation.is_some_and(|mode| !mode.eq_ignore_ascii_case("Immediate"));
+        let displayed_value = frame.statusbar_interpolated_value;
+        let already_targeting = frame.statusbar_interpolation_target == Some(clamped);
+        if clamped == frame.statusbar_value
+            && (!use_interpolation || already_targeting || displayed_value == clamped)
+        {
             return Ok(());
         }
-        state.widgets.get_mut_visual(id).unwrap().statusbar_value = clamped;
+        let frame = state.widgets.get_mut_visual(id).unwrap();
+        frame.statusbar_value = clamped;
+        if use_interpolation && displayed_value != clamped {
+            frame.statusbar_interpolation_target = Some(clamped);
+        } else {
+            frame.statusbar_interpolated_value = clamped;
+            frame.statusbar_interpolation_target = None;
+        }
         clamped
     };
     fire_value_changed(lua, id, clamped)
@@ -334,6 +355,20 @@ fn parse_min_max_args(args: mlua::MultiValue) -> (f64, f64) {
     (min, max)
 }
 
+fn parse_value_args(args: mlua::MultiValue) -> (f64, Option<String>) {
+    let mut it = args.into_iter();
+    let value = match it.next() {
+        Some(Value::Number(n)) => n,
+        Some(Value::Integer(n)) => n as f64,
+        _ => 0.0,
+    };
+    let interpolation = match it.next() {
+        Some(Value::String(s)) => Some(s.to_string_lossy().to_string()),
+        _ => None,
+    };
+    (value, interpolation)
+}
+
 fn min_max_changed(state: &crate::lua_api::SimState, id: u64, min: f64, max: f64) -> bool {
     state
         .widgets
@@ -357,6 +392,11 @@ fn apply_min_max(frame: &mut crate::widget::Frame, min: f64, max: f64) {
             frame.statusbar_min = min;
             frame.statusbar_max = max;
             frame.statusbar_value = frame.statusbar_value.clamp(min, max);
+            frame.statusbar_interpolated_value = frame.statusbar_interpolated_value.clamp(min, max);
+            frame.statusbar_interpolation_target = frame
+                .statusbar_interpolation_target
+                .map(|target| target.clamp(min, max))
+                .filter(|target| *target != frame.statusbar_interpolated_value);
         }
         _ => {}
     }

@@ -450,6 +450,10 @@ pub struct Frame {
     pub statusbar_min: f64,
     /// StatusBar maximum value.
     pub statusbar_max: f64,
+    /// Currently displayed interpolated status bar value.
+    pub statusbar_interpolated_value: f64,
+    /// Target value when the status bar is interpolating.
+    pub statusbar_interpolation_target: Option<f64>,
     /// StatusBar color.
     pub statusbar_color: Option<Color>,
     /// StatusBar texture path.
@@ -701,6 +705,8 @@ macro_rules! frame_defaults {
             statusbar_value: 0.0,
             statusbar_min: 0.0,
             statusbar_max: 1.0,
+            statusbar_interpolated_value: 0.0,
+            statusbar_interpolation_target: None,
             statusbar_color: None,
             statusbar_texture_path: None,
             statusbar_bar_id: None,

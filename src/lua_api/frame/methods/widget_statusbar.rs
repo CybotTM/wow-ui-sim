@@ -11,21 +11,50 @@ pub fn add_statusbar_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
     add_statusbar_color_methods(methods);
     add_statusbar_fill_methods(methods);
     add_statusbar_desaturate_methods(methods);
+    add_statusbar_interpolation_methods(methods);
     add_statusbar_stubs(methods);
 }
 
 fn add_statusbar_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetInterpolatedValue", |_, _, ()| Ok(0.0_f64));
     methods.add_method("GetStatusBarDesaturation", |_, _, ()| Ok(0.0_f64));
     methods.add_method("GetTimerDuration", |_, _, ()| Ok(0.0_f64));
-    methods.add_method("IsInterpolating", |_, _, ()| Ok(false));
     methods.add_method("IsStatusBarDesaturated", |_, _, ()| Ok(false));
     methods.add_method(
         "SetStatusBarDesaturation",
         |_, _, _: mlua::Variadic<Value>| Ok(()),
     );
     methods.add_method("SetTimerDuration", |_, _, _: mlua::Variadic<Value>| Ok(()));
-    methods.add_method("SetToTargetValue", |_, _, _: mlua::Variadic<Value>| Ok(()));
+}
+
+fn add_statusbar_interpolation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("GetInterpolatedValue", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|frame| frame.statusbar_interpolated_value)
+            .unwrap_or(0.0))
+    });
+    methods.add_method("IsInterpolating", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .and_then(|frame| frame.statusbar_interpolation_target)
+            .is_some())
+    });
+    methods.add_method("SetToTargetValue", |lua, this, _: mlua::Variadic<Value>| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0)
+            && let Some(target) = frame.statusbar_interpolation_target.take()
+        {
+            frame.statusbar_interpolated_value = target;
+        }
+        Ok(())
+    });
 }
 
 fn add_statusbar_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
