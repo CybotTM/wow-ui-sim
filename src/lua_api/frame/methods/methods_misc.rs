@@ -9,7 +9,6 @@ use mlua::{MultiValue, Value};
 /// Add all miscellaneous frame-type-specific methods.
 pub fn add_misc_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_minimap_methods(methods);
-    add_scrolling_message_methods(methods);
     add_alert_and_data_provider_methods(methods);
     add_drag_stubs(methods);
     add_propagation_stubs(methods);
@@ -1329,15 +1328,6 @@ fn minimap_blob_ring_mut(
         BlobFamily::Task => &mut frame.task_blob_ring,
         BlobFamily::Arch => &mut frame.arch_blob_ring,
     }
-}
-
-/// ScrollingMessageFrame and EditBox stubs.
-fn add_scrolling_message_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetTextCopyable", |_, _this, _copyable: bool| Ok(()));
-    methods.add_method("SetInsertMode", |_, _this, _mode: String| Ok(()));
-    methods.add_method("SetFading", |_, _this, _fading: bool| Ok(()));
-    methods.add_method("SetFadeDuration", |_, _this, _duration: f32| Ok(()));
-    methods.add_method("SetTimeVisible", |_, _this, _time: f32| Ok(()));
 }
 
 /// Alert subsystem, data provider, and EditMode stubs.
