@@ -18,13 +18,15 @@ pub fn add_cooldown_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
 }
 
 fn add_cooldown_remaining_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("GetUseAuraDisplayTime", |_, _, ()| Ok(false));
-    add_cooldown_texture_variadic_stub(methods, "SetEdgeTexture");
-    add_cooldown_texture_variadic_stub(methods, "SetSwipeTexture");
-    add_cooldown_texture_variadic_stub(methods, "SetBlingTexture");
-    add_cooldown_texture_bool_stub(methods, "SetUseCircularEdge");
-    add_cooldown_texture_value_stub(methods, "SetCountdownAbbrevThreshold");
-    add_cooldown_texture_value_stub(methods, "SetUseAuraDisplayTime");
+    methods.add_method("GetUseAuraDisplayTime", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(this.0)
+            .map(|f| f.cooldown_use_aura_display_time)
+            .unwrap_or(false))
+    });
 }
 
 fn parse_f64_arg(val: Option<Value>) -> f64 {
@@ -51,6 +53,13 @@ fn clear_cooldown_timing(frame: &mut Frame) {
     frame.cooldown_duration = 0.0;
     frame.cooldown_display_duration_ms = 0.0;
     frame.cooldown_mod_rate = 1.0;
+}
+
+fn parse_optional_texture_path(value: Option<Value>) -> Option<String> {
+    match value {
+        Some(Value::String(path)) => Some(path.to_string_lossy().to_string()),
+        _ => None,
+    }
 }
 
 fn parse_vector2(value: &Value) -> Option<(f32, f32)> {
@@ -135,6 +144,31 @@ fn ensure_countdown_font_string(
 
     let _ = sync_child_to_lua(lua, cooldown_id, "Countdown", child_id);
     Ok(child_id)
+}
+
+fn apply_countdown_font_name(
+    lua: &mlua::Lua,
+    countdown: &mut Frame,
+    font_name: &str,
+) -> mlua::Result<()> {
+    let globals = lua.globals();
+    match globals.get::<Value>(font_name)? {
+        Value::Table(tbl) => {
+            if let Ok(path) = tbl.get::<String>("__font") {
+                countdown.font = Some(path);
+            } else {
+                countdown.font = Some(font_name.to_string());
+            }
+            if let Ok(height) = tbl.get::<f64>("__height") {
+                countdown.font_size = height as f32;
+            }
+            if let Ok(outline) = tbl.get::<String>("__outline") {
+                countdown.font_outline = crate::widget::TextOutline::from_wow_str(&outline);
+            }
+        }
+        _ => countdown.font = Some(font_name.to_string()),
+    }
+    Ok(())
 }
 
 fn add_cooldown_set_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -423,28 +457,13 @@ fn add_cooldown_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     add_get_reverse(methods);
     add_set_cooldown_duration(methods);
     add_set_edge_scale(methods);
+    add_set_swipe_texture(methods);
+    add_set_edge_texture(methods);
+    add_set_bling_texture(methods);
+    add_set_use_circular_edge(methods);
+    add_set_countdown_abbrev_threshold(methods);
     add_set_countdown_font(methods);
-}
-
-fn add_cooldown_texture_variadic_stub<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &'static str,
-) {
-    methods.add_method(name, |_, _this, _args: mlua::MultiValue| Ok(()));
-}
-
-fn add_cooldown_texture_value_stub<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &'static str,
-) {
-    methods.add_method(name, |_, _this, _value: Value| Ok(()));
-}
-
-fn add_cooldown_texture_bool_stub<M: mlua::UserDataMethods<FrameRef>>(
-    methods: &mut M,
-    name: &'static str,
-) {
-    methods.add_method(name, |_, _this, _value: bool| Ok(()));
+    add_set_use_aura_display_time(methods);
 }
 
 fn add_get_reverse<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -487,13 +506,106 @@ fn add_set_edge_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     });
 }
 
+fn add_set_swipe_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetSwipeTexture", |lua, this, args: mlua::MultiValue| {
+        let path = parse_optional_texture_path(args.into_iter().next());
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_swipe_texture = path;
+        }
+        Ok(())
+    });
+}
+
+fn add_set_edge_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetEdgeTexture", |lua, this, args: mlua::MultiValue| {
+        let mut it = args.into_iter();
+        let path = parse_optional_texture_path(it.next());
+        let color = match (&path, it.next(), it.next(), it.next(), it.next()) {
+            (_, Some(r), Some(g), Some(b), Some(a)) => Some(Color::new(
+                val_to_f32(Some(r), 1.0),
+                val_to_f32(Some(g), 1.0),
+                val_to_f32(Some(b), 1.0),
+                val_to_f32(Some(a), 1.0),
+            )),
+            _ => None,
+        };
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_edge_texture = path;
+            if let Some(color) = color {
+                frame.cooldown_edge_color = color;
+            }
+        }
+        Ok(())
+    });
+}
+
+fn add_set_bling_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetBlingTexture", |lua, this, args: mlua::MultiValue| {
+        let path = parse_optional_texture_path(args.into_iter().next());
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_bling_texture = path;
+        }
+        Ok(())
+    });
+}
+
+fn add_set_use_circular_edge<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetUseCircularEdge", |lua, this, enabled: bool| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_use_circular_edge = enabled;
+        }
+        Ok(())
+    });
+}
+
+fn add_set_countdown_abbrev_threshold<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method(
+        "SetCountdownAbbrevThreshold",
+        |lua, this, threshold: Value| {
+            let state_rc = get_sim_state(lua);
+            let mut state = state_rc.borrow_mut();
+            if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+                frame.cooldown_countdown_abbrev_threshold_seconds = parse_f64_arg(Some(threshold));
+            }
+            Ok(())
+        },
+    );
+}
+
 fn add_set_countdown_font<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetCountdownFont", |lua, this, font: Value| {
         let Value::String(font) = font else {
             return Ok(());
         };
         let font_name = font.to_string_lossy().to_string();
-        let _ = ensure_countdown_font_string(lua, this.0, Some(&font_name))?;
+        let countdown_id = ensure_countdown_font_string(lua, this.0, None)?;
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(countdown) = state.widgets.get_mut_visual(countdown_id) {
+            apply_countdown_font_name(lua, countdown, &font_name)?;
+        }
+        Ok(())
+    });
+}
+
+fn add_set_use_aura_display_time<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("SetUseAuraDisplayTime", |lua, this, enabled: Value| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.cooldown_use_aura_display_time = match enabled {
+                Value::Boolean(flag) => flag,
+                other => parse_f64_arg(Some(other)) != 0.0,
+            };
+        }
         Ok(())
     });
 }

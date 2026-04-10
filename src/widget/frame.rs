@@ -703,14 +703,26 @@ pub struct Frame {
     pub cooldown_draw_bling: bool,
     /// Whether to hide countdown numbers.
     pub cooldown_hide_countdown: bool,
+    /// Optional swipe fill texture path.
+    pub cooldown_swipe_texture: Option<String>,
+    /// Optional edge overlay texture path.
+    pub cooldown_edge_texture: Option<String>,
+    /// Optional bling overlay texture path.
+    pub cooldown_bling_texture: Option<String>,
     /// Countdown display duration in milliseconds, unaffected by modRate.
     pub cooldown_display_duration_ms: f64,
     /// Cooldown modRate value from SetCooldown* APIs.
     pub cooldown_mod_rate: f64,
     /// Edge highlight scale factor.
     pub cooldown_edge_scale: f64,
+    /// Whether edge rendering should use a circular clip.
+    pub cooldown_use_circular_edge: bool,
+    /// Threshold in seconds at which countdown text switches to abbreviated output.
+    pub cooldown_countdown_abbrev_threshold_seconds: f64,
     /// Minimum countdown duration before text should show, in milliseconds.
     pub cooldown_min_countdown_duration_ms: f64,
+    /// Whether countdown text should use aura-style display rules.
+    pub cooldown_use_aura_display_time: bool,
     /// Edge highlight color.
     pub cooldown_edge_color: Color,
     /// UV range for cooldown swipe atlases: (low_x, low_y, high_x, high_y).
@@ -959,10 +971,16 @@ macro_rules! frame_defaults {
             cooldown_draw_edge: false,
             cooldown_draw_bling: true,
             cooldown_hide_countdown: false,
+            cooldown_swipe_texture: None,
+            cooldown_edge_texture: None,
+            cooldown_bling_texture: None,
             cooldown_display_duration_ms: 0.0,
             cooldown_mod_rate: 1.0,
             cooldown_edge_scale: 1.0,
+            cooldown_use_circular_edge: false,
+            cooldown_countdown_abbrev_threshold_seconds: 0.0,
             cooldown_min_countdown_duration_ms: 0.0,
+            cooldown_use_aura_display_time: false,
             cooldown_edge_color: Color::rgb(1.0, 1.0, 1.0),
             cooldown_tex_coord_range: None,
             cooldown_countdown_font_string_id: None,

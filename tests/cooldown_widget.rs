@@ -9,6 +9,11 @@ fn cooldown_widget_methods_persist_runtime_state() {
         .eval(
             r#"
             local cd = CreateFrame("Cooldown", "TestCooldown", UIParent)
+            TestCooldownFont = {
+                __font = "Fonts\\FRIZQT__.TTF",
+                __height = 14,
+                __outline = "OUTLINE",
+            }
 
             if cd:GetCooldownDisplayDuration() ~= 0 then
                 return "display_duration_should_default_zero"
@@ -28,14 +33,23 @@ fn cooldown_widget_methods_persist_runtime_state() {
             if cd:GetMinimumCountdownDuration() ~= 0 then
                 return "minimum_countdown_should_default_zero"
             end
+            if cd:GetUseAuraDisplayTime() ~= false then
+                return "use_aura_display_time_should_default_false"
+            end
 
             cd:SetDrawBling(false)
             cd:SetDrawEdge(true)
             cd:SetDrawSwipe(false)
             cd:SetEdgeScale(1.5)
             cd:SetEdgeColor(0.1, 0.2, 0.3, 0.4)
+            cd:SetEdgeTexture("Interface\\Cooldown\\edge", 0.7, 0.6, 0.5, 0.4)
+            cd:SetSwipeTexture("Interface\\Cooldown\\swipe")
+            cd:SetBlingTexture("Interface\\Cooldown\\bling")
+            cd:SetUseCircularEdge(true)
+            cd:SetCountdownAbbrevThreshold(5)
+            cd:SetUseAuraDisplayTime(true)
             cd:SetMinimumCountdownDuration(2500)
-            cd:SetCountdownFont("GameFontHighlightSmall")
+            cd:SetCountdownFont("TestCooldownFont")
             cd:SetCooldownFromExpirationTime(20, 8, 1.25)
 
             local startTime, duration = cd:GetCooldownTimes()
@@ -59,6 +73,9 @@ fn cooldown_widget_methods_persist_runtime_state() {
             end
             if cd:GetMinimumCountdownDuration() ~= 2500 then
                 return "minimum_countdown_should_round_trip"
+            end
+            if cd:GetUseAuraDisplayTime() ~= true then
+                return "use_aura_display_time_should_round_trip"
             end
 
             local countdown = cd:GetCountdownFontString()
@@ -110,12 +127,29 @@ fn cooldown_widget_methods_persist_runtime_state() {
     assert_eq!(cooldown.cooldown_edge_scale, 1.5);
     assert_eq!(cooldown.cooldown_min_countdown_duration_ms, 2500.0);
     assert_eq!(
+        cooldown.cooldown_edge_texture.as_deref(),
+        Some("Interface\\Cooldown\\edge")
+    );
+    assert_eq!(
+        cooldown.cooldown_swipe_texture.as_deref(),
+        Some("Interface\\Cooldown\\swipe")
+    );
+    assert_eq!(
+        cooldown.cooldown_bling_texture.as_deref(),
+        Some("Interface\\Cooldown\\bling")
+    );
+    assert!(cooldown.cooldown_use_circular_edge);
+    assert_eq!(cooldown.cooldown_countdown_abbrev_threshold_seconds, 5.0);
+    assert!(cooldown.cooldown_use_aura_display_time);
+    assert_eq!(
         cooldown.cooldown_edge_color,
-        Color::new(0.1, 0.2, 0.3, 0.4),
-        "SetEdgeColor should persist the cooldown edge tint"
+        Color::new(0.7, 0.6, 0.5, 0.4),
+        "SetEdgeTexture color arguments should persist the cooldown edge tint"
     );
-    assert!(
-        cooldown.cooldown_countdown_font_string_id.is_some(),
-        "SetCountdownFont/GetCountdownFontString should create and retain a countdown fontstring"
+    let countdown_id = cooldown.cooldown_countdown_font_string_id.expect(
+        "SetCountdownFont/GetCountdownFontString should create and retain a countdown fontstring",
     );
+    let countdown = state.widgets.get(countdown_id).unwrap();
+    assert_eq!(countdown.font.as_deref(), Some("Fonts\\FRIZQT__.TTF"));
+    assert_eq!(countdown.font_size, 14.0);
 }

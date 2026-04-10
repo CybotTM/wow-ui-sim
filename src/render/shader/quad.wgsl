@@ -120,9 +120,18 @@ fn sample_tiered_texture(tex_index: i32, tex_coords: vec2<f32>) -> vec4<f32> {
 @fragment
 fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     var color: vec4<f32>;
+    const FLAG_COOLDOWN_SWIPE: u32 = 0x200u;
 
-    // Check if this is a textured or solid color quad
-    if in.tex_index < 0 {
+    if (in.flags & FLAG_COOLDOWN_SWIPE) != 0u {
+        if in.tex_index < 0 {
+            color = in.color;
+        } else {
+            // Cooldown swipes use mask_tex_coords as sample UVs because tex_coords.x
+            // is reserved for the radial progress value.
+            let tex_color = sample_tiered_texture(in.tex_index, in.mask_tex_coords);
+            color = tex_color * in.color;
+        }
+    } else if in.tex_index < 0 {
         // Solid color or pending texture (-1 = solid, -2 = pending)
         color = in.color;
     } else {
@@ -144,7 +153,6 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
     // Cooldown swipe — radial clock wipe from 12 o'clock clockwise.
     // tex_coords.x holds progress (0.0 = fully covered, 1.0 = fully revealed).
     // Pixels where the clock sweep has NOT yet passed are kept; passed pixels discarded.
-    const FLAG_COOLDOWN_SWIPE: u32 = 0x200u;
     if (in.flags & FLAG_COOLDOWN_SWIPE) != 0u {
         let progress = in.tex_coords.x;
         // Convert progress to angle threshold (0 → 0, 1 → 2π)

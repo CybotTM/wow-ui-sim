@@ -223,13 +223,15 @@ impl QuadBatch {
     /// Push a cooldown swipe quad (radial clock wipe overlay).
     ///
     /// `progress` is 0.0 (fully covered) to 1.0 (fully revealed/done).
-    /// `color` is the swipe overlay color (typically semi-transparent black).
-    pub fn push_cooldown_swipe(
+    /// `sample_uv_range` remaps the optional texture sample coordinates while
+    /// `local_uv` remains normalized for radial wipe math.
+    fn push_cooldown_swipe_impl(
         &mut self,
         bounds: Rectangle,
         progress: f32,
         color: [f32; 4],
-        uv_range: Option<(f32, f32, f32, f32)>,
+        tex_index: i32,
+        sample_uv_range: Option<(f32, f32, f32, f32)>,
     ) {
         let base_index = self.vertices.len() as u32;
         let positions = [
@@ -238,8 +240,9 @@ impl QuadBatch {
             [bounds.x + bounds.width, bounds.y + bounds.height],
             [bounds.x, bounds.y + bounds.height],
         ];
-        let (low_x, low_y, high_x, high_y) = uv_range.unwrap_or((0.0, 0.0, 1.0, 1.0));
-        let local_uvs = [
+        let local_uvs = [[0.0_f32, 0.0], [1.0, 0.0], [1.0, 1.0], [0.0, 1.0]];
+        let (low_x, low_y, high_x, high_y) = sample_uv_range.unwrap_or((0.0, 0.0, 1.0, 1.0));
+        let sample_uvs = [
             [low_x, low_y],
             [high_x, low_y],
             [high_x, high_y],
@@ -251,11 +254,11 @@ impl QuadBatch {
                 position: positions[i],
                 tex_coords: [progress, 0.0], // progress encoded in tex_coords.x
                 color,
-                tex_index: -1,
+                tex_index,
                 flags,
                 local_uv: local_uvs[i],
                 mask_tex_index: -1,
-                mask_tex_coords: [0.0, 0.0],
+                mask_tex_coords: sample_uvs[i],
             });
         }
         self.indices.extend_from_slice(&[
@@ -266,6 +269,29 @@ impl QuadBatch {
             base_index + 2,
             base_index + 3,
         ]);
+    }
+
+    /// Push a solid-color cooldown swipe quad.
+    pub fn push_cooldown_swipe(&mut self, bounds: Rectangle, progress: f32, color: [f32; 4]) {
+        self.push_cooldown_swipe_impl(bounds, progress, color, -1, None);
+    }
+
+    /// Push a textured cooldown swipe quad by path with optional sample UV range.
+    pub fn push_cooldown_swipe_path(
+        &mut self,
+        bounds: Rectangle,
+        progress: f32,
+        path: &str,
+        color: [f32; 4],
+        sample_uv_range: Option<(f32, f32, f32, f32)>,
+    ) {
+        let vertex_start = self.vertices.len() as u32;
+        self.push_cooldown_swipe_impl(bounds, progress, color, -2, sample_uv_range);
+        self.texture_requests.push(TextureRequest {
+            path: path.to_string(),
+            vertex_start,
+            vertex_count: 4,
+        });
     }
 
     /// Push a solid color quad (no texture).
