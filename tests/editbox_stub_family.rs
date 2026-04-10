@@ -30,6 +30,9 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             if eb:GetInputLanguage() ~= "ROMAN" then
                 return "input_language_should_default_roman"
             end
+            if eb:HasText() ~= false then
+                return "has_text_should_default_false"
+            end
             local r, g, b, a = eb:GetHighlightColor()
             if r ~= 1 or g ~= 1 or b ~= 1 or a ~= 1 then
                 return "highlight_color_should_default_white"
@@ -79,6 +82,9 @@ fn editbox_stub_family_methods_persist_runtime_state() {
             end
 
             eb:SetText("Visible text")
+            if eb:HasText() ~= true then
+                return "has_text_should_be_true_after_set_text"
+            end
             if eb:GetDisplayText() ~= "Visible text" then
                 return "display_text_should_reflect_current_text"
             end

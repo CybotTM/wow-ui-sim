@@ -7,7 +7,6 @@ use mlua::Value;
 
 const EDITBOX_FALSE_GETTERS: &[&str] = &[
     "GetIndentedWordWrap",
-    "HasText",
     "IsCountInvisibleLetters",
     "IsInIMECompositionMode",
 ];
@@ -29,6 +28,7 @@ pub fn add_editbox_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 fn add_editbox_stub_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_editbox_false_getters(methods, EDITBOX_FALSE_GETTERS);
     add_editbox_i32_getter(methods, "GetUTF8CursorPosition", 0);
+    methods.add_method("HasText", |lua, this, ()| Ok(editbox_has_text(lua, this.0)));
     methods.add_method("GetDisplayText", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
@@ -126,6 +126,18 @@ fn editbox_has_focus(lua: &mlua::Lua, id: u64) -> bool {
     let state_rc = get_sim_state(lua);
     if let Ok(state) = state_rc.try_borrow() {
         return state.focused_frame_id == Some(id);
+    }
+    false
+}
+
+fn editbox_has_text(lua: &mlua::Lua, id: u64) -> bool {
+    let state_rc = get_sim_state(lua);
+    if let Ok(state) = state_rc.try_borrow() {
+        return state
+            .widgets
+            .get(id)
+            .and_then(|frame| frame.text.as_ref())
+            .is_some_and(|text| !text.is_empty());
     }
     false
 }
