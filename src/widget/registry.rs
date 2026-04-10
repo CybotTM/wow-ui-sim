@@ -4,6 +4,19 @@ use super::Frame;
 use std::cell::RefCell;
 use std::collections::{HashMap, HashSet, VecDeque};
 
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub struct RenderDirtySource {
+    pub frame_id: u64,
+    pub method: String,
+}
+
+#[derive(Debug, Default)]
+pub struct RenderDirtyBatch {
+    pub strata_mask: u16,
+    pub frame_ids: Option<HashSet<u64>>,
+    pub sources: HashMap<u64, HashSet<RenderDirtySource>>,
+}
+
 /// Registry of all widgets in the UI.
 #[derive(Debug, Default)]
 pub struct WidgetRegistry {
@@ -16,6 +29,10 @@ pub struct WidgetRegistry {
     /// Frame IDs whose visual properties changed since last render.
     /// Checked and drained by the render loop.
     render_dirty_ids: RefCell<HashSet<u64>>,
+    /// Dirty provenance captured while a specific script/method is running.
+    render_dirty_sources: RefCell<HashMap<u64, HashSet<RenderDirtySource>>>,
+    /// Current source context for dirty attribution.
+    current_dirty_source: RefCell<Option<RenderDirtySource>>,
     /// Reverse index: target_id → set of frame IDs anchored to it.
     anchor_dependents: HashMap<u64, HashSet<u64>>,
     /// Frames with `rect_dirty = true`, for fast lookup in `ensure_layout_rects`.
@@ -76,7 +93,7 @@ impl WidgetRegistry {
     /// Use when changing visual properties: texture, text, alpha, color,
     /// visibility, size, anchors, draw_layer, frame_strata, backdrop, etc.
     pub fn get_mut_visual(&mut self, id: u64) -> Option<&mut Frame> {
-        self.render_dirty_ids.borrow_mut().insert(id);
+        self.record_visual_dirty(id);
         self.widgets.get_mut(&id)
     }
 
@@ -86,7 +103,7 @@ impl WidgetRegistry {
     /// visibility, size, anchors, tex_coords, atlas, blend_mode, vertex_color,
     /// nine_slice, backdrop, rotation, desaturated.
     pub fn mark_visual_dirty(&self, id: u64) {
-        self.render_dirty_ids.borrow_mut().insert(id);
+        self.record_visual_dirty(id);
     }
 
     /// Mark all frames as visually dirty (e.g. after screen resize).
@@ -94,6 +111,10 @@ impl WidgetRegistry {
         // Insert a sentinel value that consumers check via has_dirty_frames().
         // Avoids iterating all 50K frames just to insert their IDs.
         self.render_dirty_ids.borrow_mut().insert(u64::MAX);
+    }
+
+    pub fn set_render_dirty_source(&self, source: Option<RenderDirtySource>) {
+        *self.current_dirty_source.borrow_mut() = source;
     }
 
     /// Set (or update) the name of a widget, updating the names index.
@@ -203,38 +224,67 @@ impl WidgetRegistry {
     /// The sentinel `u64::MAX` (from `mark_all_visual_dirty`) produces the
     /// all-strata mask `(1 << COUNT) - 1`.
     pub fn take_render_dirty(&self) -> u16 {
-        self.take_render_dirty_with_ids().0
+        self.take_render_dirty_batch().strata_mask
     }
 
     /// Drain the dirty set, returning both the strata bitmask and the set of
     /// dirty frame IDs. Returns `None` for the ID set when the sentinel
     /// (`u64::MAX`) was present, signalling that a full rebuild is needed.
     pub fn take_render_dirty_with_ids(&self) -> (u16, Option<HashSet<u64>>) {
+        let batch = self.take_render_dirty_batch();
+        (batch.strata_mask, batch.frame_ids)
+    }
+
+    pub fn take_render_dirty_batch(&self) -> RenderDirtyBatch {
         let mut ids = self.render_dirty_ids.borrow_mut();
         if ids.is_empty() {
-            return (0, Some(HashSet::new()));
+            return self.empty_render_dirty_batch();
         }
+        let (strata_mask, has_sentinel) = self.render_dirty_mask(&ids);
+        let frame_ids = Self::drain_render_dirty_ids(&mut ids, has_sentinel);
+        RenderDirtyBatch {
+            strata_mask,
+            frame_ids,
+            sources: self.take_render_dirty_sources(),
+        }
+    }
+
+    fn empty_render_dirty_batch(&self) -> RenderDirtyBatch {
+        RenderDirtyBatch {
+            strata_mask: 0,
+            frame_ids: Some(HashSet::new()),
+            sources: HashMap::new(),
+        }
+    }
+
+    fn render_dirty_mask(&self, ids: &HashSet<u64>) -> (u16, bool) {
         let all_mask = (1u16 << super::FrameStrata::COUNT) - 1;
         let has_sentinel = ids.contains(&u64::MAX);
-        let mask = if has_sentinel {
-            all_mask
-        } else {
-            let mut m: u16 = 0;
-            for &id in ids.iter() {
-                m |= self.strata_bit_for(id);
-                if m == all_mask {
-                    break;
-                }
+        if has_sentinel {
+            return (all_mask, true);
+        }
+
+        let mut mask: u16 = 0;
+        for &id in ids {
+            mask |= self.strata_bit_for(id);
+            if mask == all_mask {
+                break;
             }
-            m
-        };
-        let frame_ids = if has_sentinel {
+        }
+        (mask, false)
+    }
+
+    fn drain_render_dirty_ids(ids: &mut HashSet<u64>, has_sentinel: bool) -> Option<HashSet<u64>> {
+        if has_sentinel {
             ids.clear();
             None
         } else {
-            Some(std::mem::take(&mut *ids))
-        };
-        (mask, frame_ids)
+            Some(std::mem::take(ids))
+        }
+    }
+
+    fn take_render_dirty_sources(&self) -> HashMap<u64, HashSet<RenderDirtySource>> {
+        std::mem::take(&mut *self.render_dirty_sources.borrow_mut())
     }
 
     /// Return the strata bitmask for a single frame ID.
@@ -295,13 +345,17 @@ impl WidgetRegistry {
         } else {
             0.0
         };
-        if (eff - f.effective_alpha).abs() > f32::EPSILON {
+        let became_dirty = (eff - f.effective_alpha).abs() > f32::EPSILON;
+        if became_dirty {
             f.effective_alpha = eff;
-            self.render_dirty_ids.borrow_mut().insert(id);
         } else {
             f.effective_alpha = eff;
         }
         let children: Vec<u64> = f.children.clone();
+        let _ = f;
+        if became_dirty {
+            self.record_visual_dirty(id);
+        }
         for child_id in children {
             self.propagate_effective_alpha(child_id, eff);
         }
@@ -342,8 +396,13 @@ impl WidgetRegistry {
             return;
         };
         let eff = parent_effective_scale * f.scale;
+        let became_dirty = (eff - f.effective_scale).abs() > f32::EPSILON;
         f.effective_scale = eff;
         let children: Vec<u64> = f.children.clone();
+        let _ = f;
+        if became_dirty {
+            self.record_visual_dirty(id);
+        }
         for child_id in children {
             self.propagate_effective_scale(child_id, eff);
         }
@@ -513,5 +572,17 @@ impl WidgetRegistry {
                 .or_default()
                 .insert(frame_id);
         }
+    }
+
+    fn record_visual_dirty(&self, id: u64) {
+        self.render_dirty_ids.borrow_mut().insert(id);
+        let Some(source) = self.current_dirty_source.borrow().clone() else {
+            return;
+        };
+        self.render_dirty_sources
+            .borrow_mut()
+            .entry(id)
+            .or_default()
+            .insert(source);
     }
 }

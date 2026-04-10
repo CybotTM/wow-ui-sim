@@ -71,16 +71,17 @@ impl App {
     }
 
     fn flush_mouse_move_visual_updates(&mut self) {
-        let dirty_mask = self
+        let (dirty_mask, dirty_ids) = self
             .env
             .borrow()
             .state()
             .borrow()
             .widgets
-            .take_render_dirty();
+            .take_render_dirty_with_ids();
         if dirty_mask != 0 {
             self.drain_console();
             self.mark_strata_dirty(dirty_mask);
+            self.merge_pending_dirty_ids(dirty_ids);
         } else {
             self.drain_console();
         }

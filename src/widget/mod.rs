@@ -11,7 +11,7 @@ pub use frame::{
     AttributeValue, Backdrop, Color, Frame, Gradient, LineAnchor, TextJustify, TextOutline,
 };
 pub use frame_enums::{DrawLayer, FrameStrata};
-pub use registry::WidgetRegistry;
+pub use registry::{RenderDirtyBatch, RenderDirtySource, WidgetRegistry};
 
 use std::sync::atomic::{AtomicU64, Ordering};
 

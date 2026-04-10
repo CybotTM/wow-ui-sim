@@ -313,7 +313,7 @@ impl App {
 
     /// Run timers, layout, OnUpdate, health/casting and collect dirty mask + IDs.
     fn collect_tick_dirty(&mut self) -> (u16, std::time::Duration) {
-        self.take_render_dirty(); // discard pre-timer dirty
+        let (m0, ids0) = self.take_render_dirty_with_ids();
         self.run_wow_timers();
         let (m1, ids1) = self.take_render_dirty_with_ids();
 
@@ -328,17 +328,8 @@ impl App {
         self.tick_casting();
         let (m3, ids3) = self.take_render_dirty_with_ids();
 
-        *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids(ids1, ids2, ids3);
-        (m1 | m2 | m3, layout_dur)
-    }
-
-    fn take_render_dirty(&self) {
-        self.env
-            .borrow()
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty();
+        *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids([ids0, ids1, ids2, ids3]);
+        (m0 | m1 | m2 | m3, layout_dur)
     }
 
     fn take_render_dirty_with_ids(&self) -> (u16, Option<std::collections::HashSet<u64>>) {
@@ -348,6 +339,11 @@ impl App {
             .borrow()
             .widgets
             .take_render_dirty_with_ids()
+    }
+
+    pub(super) fn merge_pending_dirty_ids(&self, ids: Option<std::collections::HashSet<u64>>) {
+        let current = self.pending_dirty_ids.borrow_mut().take();
+        *self.pending_dirty_ids.borrow_mut() = merge_dirty_ids([current, ids]);
     }
 
     fn update_fps_counter(&mut self) {
@@ -624,6 +620,88 @@ fn log_slow_tick(
         eprintln!(
             "[tick] {total:.1?} (layout={layout_dur:.1?} dirty=0x{combined:x} ids={n:?} pending={})",
             app.textures_pending.get()
+        );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use iced::Size;
+    use std::cell::RefCell;
+    use std::path::PathBuf;
+    use std::rc::Rc;
+    use tokio::sync::mpsc;
+
+    fn build_test_app(screen_kind: ScreenKind) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(screen_kind);
+
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new(PathBuf::from(
+            "./textures",
+        ))));
+        let font_system = Rc::new(RefCell::new(crate::render::WowFontSystem::new(
+            &PathBuf::from(super::super::app::DEFAULT_FONTS_PATH),
+        )));
+        let glyph_atlas = Rc::new(RefCell::new(crate::render::GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        App::build_app(
+            env,
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            false,
+            false,
+            None,
+            crate::config::SimConfig::default(),
+        )
+    }
+
+    #[test]
+    fn collect_tick_dirty_preserves_preexisting_dirty_ids() {
+        let mut app = build_test_app(ScreenKind::Game);
+        app.strata_dirty.set(0);
+        app.selected_rot_level = "Off".to_string();
+        app.screen_size.set(Size::new(1024.0, 768.0));
+
+        {
+            let env = app.env.borrow();
+            env.exec("TickDirtyFrame = CreateFrame('Frame', 'TickDirtyFrame', UIParent)")
+                .unwrap();
+        }
+
+        let frame_id = {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            state.widgets.get_id_by_name("TickDirtyFrame").unwrap()
+        };
+
+        {
+            let env = app.env.borrow();
+            let state = env.state().borrow();
+            let _ = state.widgets.take_render_dirty_with_ids();
+            state.widgets.mark_visual_dirty(frame_id);
+        }
+
+        let (dirty_mask, _layout_dur) = app.collect_tick_dirty();
+        let pending = app.pending_dirty_ids.borrow().clone().unwrap();
+
+        assert_ne!(
+            dirty_mask, 0,
+            "pre-tick dirty should contribute to the mask"
+        );
+        assert!(
+            pending.contains(&frame_id),
+            "pre-tick dirty frame should survive collect_tick_dirty"
         );
     }
 }

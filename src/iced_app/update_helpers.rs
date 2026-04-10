@@ -1,19 +1,19 @@
 //! Helper functions extracted from update.rs for hit-grid, checkbutton, and dirty-ID merging.
 
-/// Merge three optional dirty-ID sets into one.
-pub(super) fn merge_dirty_ids(
-    ids1: Option<std::collections::HashSet<u64>>,
-    ids2: Option<std::collections::HashSet<u64>>,
-    ids3: Option<std::collections::HashSet<u64>>,
-) -> Option<std::collections::HashSet<u64>> {
-    match (ids1, ids2, ids3) {
-        (Some(mut a), Some(b), Some(c)) => {
-            a.extend(b);
-            a.extend(c);
-            Some(a)
-        }
-        _ => None,
+/// Merge optional dirty-ID sets into one.
+///
+/// If any input is `None`, the result must stay `None` because a full rebuild
+/// is required and the exact frame set is incomplete.
+pub(super) fn merge_dirty_ids<I>(ids: I) -> Option<std::collections::HashSet<u64>>
+where
+    I: IntoIterator<Item = Option<std::collections::HashSet<u64>>>,
+{
+    let mut merged = std::collections::HashSet::new();
+    for dirty_ids in ids {
+        let ids = dirty_ids?;
+        merged.extend(ids);
     }
+    Some(merged)
 }
 
 /// Walk a subtree and insert/remove hittable frames from the grid.

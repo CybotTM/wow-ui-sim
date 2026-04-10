@@ -199,7 +199,7 @@ impl App {
 
     /// Construct the App struct from initialized components.
     #[allow(clippy::too_many_arguments)]
-    fn build_app(
+    pub(crate) fn build_app(
         env: Rc<RefCell<WowLuaEnv>>,
         log_messages: Vec<String>,
         texture_manager: Rc<RefCell<TextureManager>>,
