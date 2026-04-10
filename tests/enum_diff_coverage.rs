@@ -242,6 +242,33 @@ fn warband_scene_animation_event_is_available_with_expected_values() {
 }
 
 #[test]
+fn tiered_entrance_reward_type_is_available_with_expected_values() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: String = env
+        .eval(
+            r#"
+            local enumTable = Enum.TieredEntranceRewardType
+            if type(enumTable) ~= "table" then
+                return "missing_enum"
+            end
+
+            if enumTable.Item ~= 0 then
+                return "wrong_item:" .. tostring(enumTable.Item)
+            end
+
+            if enumTable.Currency ~= 1 then
+                return "wrong_currency:" .. tostring(enumTable.Currency)
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(result, "ok");
+}
+
+#[test]
 fn diff_enums_extra_is_empty_and_removed_runtime_enums_stay_absent() {
     let extra = parse_enum_names("diff_enums_extra.txt");
     assert!(

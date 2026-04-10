@@ -456,6 +456,13 @@ pub const NEIGHBORHOOD_OWNER_TYPE: SeqEnumDef =
     ("NeighborhoodOwnerType", &["None", "Guild", "Charter"]);
 
 // ============================================================================
+// Delves Enums
+// ============================================================================
+
+pub const TIERED_ENTRANCE_REWARD_TYPE: EnumDef =
+    ("TieredEntranceRewardType", &[("Item", 0), ("Currency", 1)]);
+
+// ============================================================================
 // Ping / Voice Enums
 // ============================================================================
 
