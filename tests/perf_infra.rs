@@ -1,7 +1,10 @@
 mod common;
-mod perf;
+#[path = "perf/cases.rs"]
+mod perf_cases;
+#[path = "perf/game_ui.rs"]
+mod perf_game_ui;
 
-use perf::{PerfCase, run_game_ui_cases};
+use perf_cases::{PerfCase, run_game_ui_cases};
 
 #[test]
 fn shared_perf_cases_reuse_one_loaded_game_env() {

@@ -6,42 +6,19 @@ use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::startup::settle_headless_startup;
 
-pub struct PerfCase<'a, T> {
-    name: &'a str,
-    run: Box<dyn FnMut(&WowLuaEnv) -> T + 'a>,
+pub struct LoadedGameUi {
+    pub env: WowLuaEnv,
+    pub startup_elapsed: Duration,
 }
 
-impl<'a, T> PerfCase<'a, T> {
-    pub fn new(name: &'a str, run: impl FnMut(&WowLuaEnv) -> T + 'a) -> Self {
-        Self {
-            name,
-            run: Box::new(run),
-        }
-    }
-}
-
-pub struct PerfCaseResult<T> {
-    pub name: String,
-    pub elapsed: Duration,
-    pub output: T,
-}
-
-pub fn run_game_ui_cases<T>(mut cases: Vec<PerfCase<'_, T>>) -> Vec<PerfCaseResult<T>> {
+pub fn load_timed_game_ui() -> LoadedGameUi {
+    let started = Instant::now();
     let env = load_settled_game_ui();
-    let mut results = Vec::with_capacity(cases.len());
 
-    for case in &mut cases {
-        let started = Instant::now();
-        let output = (case.run)(&env);
-
-        results.push(PerfCaseResult {
-            name: case.name.to_string(),
-            elapsed: started.elapsed(),
-            output,
-        });
+    LoadedGameUi {
+        env,
+        startup_elapsed: started.elapsed(),
     }
-
-    results
 }
 
 fn load_settled_game_ui() -> WowLuaEnv {
