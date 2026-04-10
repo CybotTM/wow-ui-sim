@@ -161,18 +161,6 @@ pub fn collect_tooltip_data(state: &SimState) -> HashMap<u64, TooltipRenderData>
         };
         let lines = collect_tooltip_lines(td, alpha);
         let line_spacing = td.line_spacing.unwrap_or(TOOLTIP_LINE_SPACING);
-        if !lines.is_empty() {
-            let name = state
-                .widgets
-                .get(id)
-                .and_then(|f| f.name.as_deref())
-                .unwrap_or("unnamed");
-            eprintln!(
-                "[TOOLTIP DEBUG] id={id} name={name:?} lines={} first={:?}",
-                lines.len(),
-                lines.first().map(|l| &l.left_text),
-            );
-        }
         result.insert(
             id,
             TooltipRenderData {
