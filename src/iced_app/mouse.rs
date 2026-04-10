@@ -3,15 +3,17 @@
 use iced::Point;
 
 use super::app::App;
-use crate::widget::WidgetType;
+use crate::widget::{AnchorPoint, WidgetType};
 
 /// Minimum distance (in pixels) the mouse must move while held to start a drag.
 const DRAG_THRESHOLD: f32 = 5.0;
 
 impl App {
     pub(super) fn handle_mouse_move(&mut self, pos: Point) {
+        let previous_pos = self.mouse_position;
         self.sync_mouse_position(pos);
         self.maybe_start_drag(pos);
+        self.maybe_move_active_drag_frame(previous_pos, pos);
         self.update_hovered_frame(pos);
     }
 
@@ -37,6 +39,40 @@ impl App {
                 self.fire_drag_start(down_frame);
                 self.flush_post_script_updates();
             }
+        }
+    }
+
+    fn maybe_move_active_drag_frame(&mut self, previous_pos: Option<Point>, pos: Point) {
+        let Some(previous_pos) = previous_pos else {
+            return;
+        };
+
+        let dx = pos.x - previous_pos.x;
+        let dy = pos.y - previous_pos.y;
+        if dx.abs() < f32::EPSILON && dy.abs() < f32::EPSILON {
+            return;
+        }
+
+        let moved = {
+            let env = self.env.borrow();
+            let mut state = env.state().borrow_mut();
+            let Some(drag_id) = state.active_drag_frame else {
+                return;
+            };
+
+            state.ensure_layout_rects();
+            let Some((parent_id, x_offset, y_offset)) =
+                moving_drag_anchor_update(&state, drag_id, dx, dy)
+            else {
+                return;
+            };
+
+            reanchor_moving_drag_frame(&mut state, drag_id, parent_id, x_offset, y_offset);
+            true
+        };
+
+        if moved {
+            self.mark_all_strata_dirty();
         }
     }
 
@@ -399,6 +435,54 @@ fn frame_enabled(frame: &crate::widget::Frame) -> bool {
         .unwrap_or(true)
 }
 
+fn moving_drag_anchor_update(
+    state: &crate::lua_api::SimState,
+    drag_id: u64,
+    dx: f32,
+    dy: f32,
+) -> Option<(Option<u64>, f32, f32)> {
+    let frame = state.widgets.get(drag_id)?;
+    if !frame.is_moving {
+        return None;
+    }
+
+    let rect = frame.layout_rect?;
+    let parent_id = frame.parent_id;
+    let (parent_x, parent_y) = parent_id
+        .and_then(|id| state.widgets.get(id).and_then(|parent| parent.layout_rect))
+        .map(|rect| (rect.x, rect.y))
+        .unwrap_or((0.0, 0.0));
+
+    let new_left = rect.x + dx;
+    let new_top = rect.y + dy;
+    Some((parent_id, new_left - parent_x, -(new_top - parent_y)))
+}
+
+fn reanchor_moving_drag_frame(
+    state: &mut crate::lua_api::SimState,
+    drag_id: u64,
+    parent_id: Option<u64>,
+    x_offset: f32,
+    y_offset: f32,
+) {
+    state.widgets.remove_all_anchor_dependents_for(drag_id);
+    if let Some(parent_id) = parent_id {
+        state.widgets.add_anchor_dependent(parent_id, drag_id);
+    }
+
+    if let Some(frame) = state.widgets.get_mut_visual(drag_id) {
+        frame.clear_all_points();
+        frame.set_point(
+            AnchorPoint::TopLeft,
+            parent_id.map(|id| id as usize),
+            AnchorPoint::TopLeft,
+            x_offset,
+            y_offset,
+        );
+    }
+    state.widgets.mark_rect_dirty(drag_id);
+}
+
 fn find_drag_script_target(
     env: &crate::lua_api::WowLuaEnv,
     frame_id: u64,
@@ -666,6 +750,72 @@ mod tests {
             drag_stop_calls, 0.0,
             "mouse up should not fire OnDragStop after AbortDrag already cleared the drag"
         );
+    }
+
+    #[test]
+    fn moving_drag_updates_frame_anchor_to_follow_mouse() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                MovingDragFrame = CreateFrame("Frame", "MovingDragFrame", UIParent)
+                MovingDragFrame:SetSize(100, 100)
+                MovingDragFrame:SetPoint("CENTER", UIParent, "TOPLEFT", 150, -150)
+                MovingDragFrame:SetMovable(true)
+                MovingDragFrame:EnableMouse(true)
+                MovingDragFrame:RegisterForDrag("LeftButton")
+                MovingDragFrame:SetScript("OnDragStart", function(self)
+                    self:StartMoving()
+                end)
+                "#,
+            )
+            .expect("moving drag frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(150.0, 150.0));
+        app.handle_mouse_down(Point::new(150.0, 150.0));
+        app.handle_mouse_move(Point::new(170.0, 170.0));
+
+        let (num_points, point, relative_to, relative_point, x, y): (
+            i64,
+            String,
+            String,
+            String,
+            f64,
+            f64,
+        ) = app
+            .env
+            .borrow()
+            .eval(
+                r#"
+                local point, relativeTo, relativePoint, x, y = MovingDragFrame:GetPoint(1)
+                local relativeName = relativeTo and relativeTo:GetName() or "nil"
+                return MovingDragFrame:GetNumPoints(), point, relativeName, relativePoint, x, y
+            "#,
+            )
+            .expect("moving drag anchor query should succeed");
+
+        assert_eq!(
+            num_points, 1,
+            "moving drag should collapse anchors to one TOPLEFT point"
+        );
+        assert_eq!(
+            point, "TOPLEFT",
+            "moving drag should re-anchor the frame by TOPLEFT"
+        );
+        assert_eq!(
+            relative_to, "UIParent",
+            "moving drag should anchor relative to the parent"
+        );
+        assert_eq!(
+            relative_point, "TOPLEFT",
+            "moving drag should use the parent's TOPLEFT as its target"
+        );
+        assert_eq!(x, 120.0, "mouse delta should advance the frame x offset");
+        assert_eq!(y, -120.0, "mouse delta should advance the frame y offset");
     }
 
     #[test]
