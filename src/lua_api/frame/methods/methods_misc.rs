@@ -1,7 +1,7 @@
 //! Miscellaneous frame-type-specific method stubs (Minimap, ScrollingMessage, Alerts, etc.).
 
 use super::super::handle::FrameRef;
-use crate::lua_api::frame::handle::{frame_ref, get_sim_state};
+use crate::lua_api::frame::handle::{extract_frame_id, frame_ref, get_sim_state};
 use mlua::{MultiValue, Value};
 
 /// Add all miscellaneous frame-type-specific methods.
@@ -140,9 +140,34 @@ fn add_quest_blob_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Drag/Input stubs.
 fn add_drag_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("AbortDrag", |_, _this, ()| Ok(()));
-    methods.add_method("InterceptStartDrag", |_, _this, _flag: bool| Ok(()));
-    methods.add_method("IsDragging", |_, _this, ()| Ok(false));
+    methods.add_method("AbortDrag", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if state.active_drag_frame == Some(this.0) {
+            state.set_active_drag_frame(None);
+        }
+        Ok(())
+    });
+    methods.add_method("InterceptStartDrag", |lua, this, delegate: Value| {
+        let Some(delegate_id) = extract_frame_id(&delegate) else {
+            return Ok(false);
+        };
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        if state.active_drag_frame != Some(this.0) {
+            return Ok(false);
+        }
+        if state.widgets.get(delegate_id).is_none() {
+            return Ok(false);
+        }
+        state.set_active_drag_frame(Some(delegate_id));
+        Ok(true)
+    });
+    methods.add_method("IsDragging", |lua, this, ()| {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state.active_drag_frame == Some(this.0))
+    });
 }
 
 /// Mouse/Input Propagation stubs.

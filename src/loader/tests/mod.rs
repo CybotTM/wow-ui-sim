@@ -606,6 +606,71 @@ fn test_draw_layer_enabled_round_trip_tracks_per_layer_frame_state() {
     );
 }
 
+#[test]
+fn test_drag_methods_transfer_and_clear_active_drag_frame() {
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(
+        r#"
+        DragSourceFrame = CreateFrame("Frame", "DragSourceFrame", UIParent)
+        DragDelegateFrame = CreateFrame("Frame", "DragDelegateFrame", UIParent)
+    "#,
+    )
+    .unwrap();
+
+    let source_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("DragSourceFrame")
+        .unwrap();
+    let delegate_id = env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("DragDelegateFrame")
+        .unwrap();
+
+    env.state().borrow_mut().active_drag_frame = Some(source_id);
+
+    let intercepted: bool = env
+        .eval("return DragSourceFrame:InterceptStartDrag(DragDelegateFrame)")
+        .unwrap();
+    assert!(
+        intercepted,
+        "drag interception should succeed for an active source frame"
+    );
+
+    let source_dragging: bool = env.eval("return DragSourceFrame:IsDragging()").unwrap();
+    let delegate_dragging: bool = env.eval("return DragDelegateFrame:IsDragging()").unwrap();
+    assert!(
+        !source_dragging,
+        "source frame should stop reporting dragging after interception"
+    );
+    assert!(
+        delegate_dragging,
+        "delegate frame should report dragging after interception"
+    );
+    assert_eq!(
+        env.state().borrow().active_drag_frame,
+        Some(delegate_id),
+        "delegate should become the active drag frame"
+    );
+
+    env.exec("DragDelegateFrame:AbortDrag()").unwrap();
+
+    let delegate_dragging_after_abort: bool =
+        env.eval("return DragDelegateFrame:IsDragging()").unwrap();
+    assert!(
+        !delegate_dragging_after_abort,
+        "AbortDrag should clear dragging state for the active drag frame"
+    );
+    assert_eq!(
+        env.state().borrow().active_drag_frame,
+        None,
+        "AbortDrag should clear the active drag frame"
+    );
+}
+
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;

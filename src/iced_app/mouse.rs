@@ -105,6 +105,11 @@ impl App {
         self.mouse_down_pos = Some(pos);
         self.dragging = false;
         self.pressed_frame = Some(frame_id);
+        self.env
+            .borrow()
+            .state()
+            .borrow_mut()
+            .set_active_drag_frame(None);
 
         {
             let env = self.env.borrow();
@@ -130,9 +135,14 @@ impl App {
 
     fn take_left_drag_state(&mut self) -> (bool, Option<u64>) {
         let was_dragging = self.dragging;
-        let drag_source = self.mouse_down_frame;
+        let drag_source = self.env.borrow().state().borrow().active_drag_frame;
         self.mouse_down_pos = None;
         self.dragging = false;
+        self.env
+            .borrow()
+            .state()
+            .borrow_mut()
+            .set_active_drag_frame(None);
         (was_dragging, drag_source)
     }
 
@@ -265,25 +275,26 @@ impl App {
 
     /// Fire OnDragStart on the source frame (walks up parent chain).
     fn fire_drag_start(&mut self, frame_id: u64) {
+        let drag_target = {
+            let env = self.env.borrow();
+            find_drag_script_target(&env, frame_id, "OnDragStart")
+        };
+        let Some(drag_target) = drag_target else {
+            return;
+        };
+
+        {
+            let env = self.env.borrow();
+            env.state()
+                .borrow_mut()
+                .set_active_drag_frame(Some(drag_target));
+        }
+
         let env = self.env.borrow();
         let lua = env.lua();
         let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
-
-        // Walk up parent chain looking for a frame with OnDragStart registered.
-        let mut current = Some(frame_id);
-        while let Some(id) = current {
-            if env.has_script_handler(id, "OnDragStart") {
-                eprintln!("[drag] OnDragStart fired on frame {}", id);
-                let _ = env.fire_script_handler(id, "OnDragStart", vec![button_val]);
-                return;
-            }
-            current = env
-                .state()
-                .borrow()
-                .widgets
-                .get(id)
-                .and_then(|f| f.parent_id);
-        }
+        eprintln!("[drag] OnDragStart fired on frame {}", drag_target);
+        let _ = env.fire_script_handler(drag_target, "OnDragStart", vec![button_val]);
     }
 
     /// Fire OnDragStop on source and OnReceiveDrag on target.
@@ -293,19 +304,9 @@ impl App {
             let env = self.env.borrow();
             let lua = env.lua();
             let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
-            let mut current = Some(src_id);
-            while let Some(id) = current {
-                if env.has_script_handler(id, "OnDragStop") {
-                    eprintln!("[drag] OnDragStop fired on frame {}", id);
-                    let _ = env.fire_script_handler(id, "OnDragStop", vec![button_val]);
-                    break;
-                }
-                current = env
-                    .state()
-                    .borrow()
-                    .widgets
-                    .get(id)
-                    .and_then(|f| f.parent_id);
+            if let Some(drag_stop_target) = find_drag_script_target(&env, src_id, "OnDragStop") {
+                eprintln!("[drag] OnDragStop fired on frame {}", drag_stop_target);
+                let _ = env.fire_script_handler(drag_stop_target, "OnDragStop", vec![button_val]);
             }
         }
 
@@ -320,19 +321,13 @@ impl App {
         let env = self.env.borrow();
         let lua = env.lua();
         let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
-        let mut current = Some(frame_id);
-        while let Some(id) = current {
-            if env.has_script_handler(id, "OnReceiveDrag") {
-                eprintln!("[drag] OnReceiveDrag fired on frame {}", id);
-                let _ = env.fire_script_handler(id, "OnReceiveDrag", vec![button_val]);
-                return;
-            }
-            current = env
-                .state()
-                .borrow()
-                .widgets
-                .get(id)
-                .and_then(|f| f.parent_id);
+        if let Some(receive_drag_target) = find_drag_script_target(&env, frame_id, "OnReceiveDrag")
+        {
+            eprintln!(
+                "[drag] OnReceiveDrag fired on frame {}",
+                receive_drag_target
+            );
+            let _ = env.fire_script_handler(receive_drag_target, "OnReceiveDrag", vec![button_val]);
         }
     }
 
@@ -371,6 +366,26 @@ impl App {
         }
         false
     }
+}
+
+fn find_drag_script_target(
+    env: &crate::lua_api::WowLuaEnv,
+    frame_id: u64,
+    script_name: &str,
+) -> Option<u64> {
+    let mut current = Some(frame_id);
+    while let Some(id) = current {
+        if env.has_script_handler(id, script_name) {
+            return Some(id);
+        }
+        current = env
+            .state()
+            .borrow()
+            .widgets
+            .get(id)
+            .and_then(|f| f.parent_id);
+    }
+    None
 }
 
 #[cfg(test)]
@@ -488,6 +503,68 @@ mod tests {
         assert_eq!(
             delivered, -1.0,
             "mouse wheel scripts should fire once the frame enables mouse wheel"
+        );
+    }
+
+    #[test]
+    fn drag_start_can_transfer_to_delegate_and_abort_before_mouse_up() {
+        let mut app = build_test_app(ScreenKind::Game);
+
+        {
+            let env = app.env.borrow();
+            env.exec(
+                r#"
+                DragSourceFrame = CreateFrame("Frame", "DragSourceFrame", UIParent)
+                DragSourceFrame:SetSize(100, 100)
+                DragSourceFrame:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+                DragSourceFrame:EnableMouse(true)
+                DragSourceFrame:SetScript("OnDragStart", function(self)
+                    self:InterceptStartDrag(DragDelegateFrame)
+                    DragDelegateFrame:AbortDrag()
+                end)
+
+                DragDelegateFrame = CreateFrame("Frame", "DragDelegateFrame", UIParent)
+                DragDelegateFrame:SetScript("OnDragStop", function()
+                    __drag_stop_calls = (__drag_stop_calls or 0) + 1
+                end)
+
+                __drag_stop_calls = 0
+                "#,
+            )
+            .expect("drag test frame setup should succeed");
+        }
+
+        rebuild_hittable_cache(&app);
+        app.handle_mouse_move(Point::new(150.0, 150.0));
+        app.handle_mouse_down(Point::new(150.0, 150.0));
+        app.handle_mouse_move(Point::new(170.0, 170.0));
+
+        let active_drag_frame = app.env.borrow().state().borrow().active_drag_frame;
+        assert_eq!(
+            active_drag_frame, None,
+            "AbortDrag during OnDragStart should clear the active drag frame immediately"
+        );
+
+        let delegate_dragging: bool = app
+            .env
+            .borrow()
+            .eval("return DragDelegateFrame:IsDragging()")
+            .expect("delegate dragging query should succeed");
+        assert!(
+            !delegate_dragging,
+            "delegate should not report dragging after AbortDrag clears the transfer"
+        );
+
+        app.handle_mouse_up(Point::new(170.0, 170.0));
+
+        let drag_stop_calls: f64 = app
+            .env
+            .borrow()
+            .eval("return __drag_stop_calls")
+            .expect("drag stop count query should succeed");
+        assert_eq!(
+            drag_stop_calls, 0.0,
+            "mouse up should not fire OnDragStop after AbortDrag already cleared the drag"
         );
     }
 }
