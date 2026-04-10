@@ -1,0 +1,18 @@
+{
+  "generated_files": [
+    {
+      "path": "src/lua_api/globals/enum_data/missing_enums.lua",
+      "source": "~/Repos/wowless/data/products/wow/globals.yaml",
+      "sha256": "87acd4a23da91f4026bb362e57a2e1305f08efaf1903257294b6cdd9535e0436",
+      "bytes": 319511,
+      "lines": 16296
+    },
+    {
+      "path": "src/lua_api/globals/enum_data/missing_constants.lua",
+      "source": "docs/wow-client-diff/diff_constants_missing.txt",
+      "sha256": "4a8e43d7d3fdc4f945a5df5d6eec780bbf8099fbe3606482fb937bad57932b0a",
+      "bytes": 133993,
+      "lines": 1402
+    }
+  ]
+}

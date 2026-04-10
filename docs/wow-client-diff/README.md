@@ -13,6 +13,7 @@ Source files in this directory:
 - `diff_enums_missing.txt` / `diff_enums_missing_values.txt` / `diff_enums_extra.txt` — enum gaps
 - `diff_constants_missing.txt` / `diff_constants_wrong.txt` / `diff_constants_extra.txt` — constant gaps
 - `diff_global_functions_missing.txt` / `diff_global_functions_extra.txt` — global function gaps
+- `generated_data_refresh_manifest.json` — tracked hash/size manifest for the two large generated Lua data files; bulk refreshes must update this in the same commit
 
 Summary of gaps:
 
@@ -60,6 +61,17 @@ Use the code-area owner list below when assigning responsibility for a pass:
 | Globals | `src/lua_api/globals/*.rs`, `src/lua_api/globals_legacy.rs`, `src/lua_api/globals/strings/` |
 | Constants | `src/lua_api/globals/constants_api.rs`, `src/lua_api/globals/c_stubs_api_extra.rs`, `src/lua_api/globals/enum_data/missing_constants.lua` |
 | Enums | `src/lua_api/globals/enum_api.rs`, `src/lua_api/globals/enum_data/`, `src/lua_api/globals/enum_data/missing_enums.lua` |
+
+### Generated Data Refresh Gate
+
+The two large generated Lua data files:
+
+- `src/lua_api/globals/enum_data/missing_enums.lua`
+- `src/lua_api/globals/enum_data/missing_constants.lua`
+
+must stay pinned in [`generated_data_refresh_manifest.json`](./generated_data_refresh_manifest.json).
+Any bulk refresh must update that manifest in the same commit, which makes the source, hash, byte
+count, and line count visible in review instead of burying a huge generated diff by itself.
 
 ---
 
