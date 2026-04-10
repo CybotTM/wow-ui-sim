@@ -21,7 +21,7 @@ Summary of gaps:
 |---|---|---|
 | Frame methods | 1382 | 3810 |
 | C_* functions | 208 | 152 |
-| Global functions | 107 | 182 |
+| Global functions | 107 | 16 |
 | Enums | 1430 | 2 |
 | Constants | 1364 (72 wrong value) | 12 |
 | C_* namespaces | 6 | 11 |
@@ -456,11 +456,24 @@ invented top-level namespace tables.
 
 **Extra enums**: `0`
 
-**Extra global functions** (182 in `diff_global_functions_extra.txt`):
-Most are addon-injected globals from loaded third-party addons (Angleur, Details, ATT, Auctionator,
-DejunkBindings, etc.) that leaked into the discovery scan. The real sim extras are a smaller set —
-look for non-addon-prefixed names. Examples of likely real extras: `GetNumTotemSlots`, `GetWorldDeltaSeconds`,
-`FindSpellByName`, `FormatTooltipNumber`, `GetPlayerInfo`, `ResolvePrefixedChannelName`.
+**Extra global functions** (16 in `diff_global_functions_extra.txt`):
+This file is now curated to intentional compatibility aliases only. It no longer tracks addon leak
+noise, Blizzard XML/script handler globals, simulator-only helpers like `FireEvent` / `SetScreenSize`
+or the internal `__*` globals, and it no longer treats stale raw-diff names as worth owning.
+
+The remaining compatibility aliases are grouped by owner surface:
+
+- Combat log legacy wrappers in [`src/lua_api/globals/c_stubs_api_combat.rs`](../../src/lua_api/globals/c_stubs_api_combat.rs):
+  `CombatLogAddFilter`, `CombatLogAdvanceEntry`, `CombatLogGetCurrentEntry`,
+  `CombatLogGetCurrentEventInfo`, `CombatLogGetNumEntries`, `CombatLogSetCurrentEntry`
+- Legacy container globals in [`src/lua_api/globals/c_container_api.rs`](../../src/lua_api/globals/c_container_api.rs):
+  `GetContainerItemID`, `GetContainerItemLink`, `GetContainerNumSlots`
+- Legacy item globals in [`src/lua_api/globals/c_item_api_globals.rs`](../../src/lua_api/globals/c_item_api_globals.rs):
+  `GetItemID`, `GetTradeSkillTexture`, `IsArtifactRelicItem`
+- Old-style aura globals in [`src/lua_api/globals/aura_api.rs`](../../src/lua_api/globals/aura_api.rs):
+  `GetPlayerAuraBySpellID`, `UnitAura`, `UnitBuff`, `UnitDebuff`
+
+Anything outside those four groups should not be in `diff_global_functions_extra.txt`.
 
 **Extra C_* functions** (119 in `diff_c_functions_extra.txt`):
 This file is now curated, not a raw discovery dump. It intentionally keeps only compatibility and

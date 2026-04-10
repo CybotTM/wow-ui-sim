@@ -3,7 +3,7 @@ C_* namespaces extra: 0
 C_* functions missing: 97
 C_* functions extra: 119
 Global functions missing: 107
-Global functions extra: 182
+Global functions extra: 16
 Enums missing: 0
 Enums extra: 0
 Enum values to add: 0
