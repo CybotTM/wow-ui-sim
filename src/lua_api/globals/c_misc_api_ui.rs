@@ -500,6 +500,39 @@ struct HousingSelectedDecorInfo {
     is_locked: bool,
 }
 
+struct HousingDecorState {
+    selected_decor_info: Option<HousingDecorInstanceInfo>,
+    decor_hyperlinks: HashMap<i32, &'static str>,
+}
+
+impl HousingDecorState {
+    fn seeded() -> Self {
+        let decor_hyperlinks = [(
+            91002,
+            "|cff66bbff|Hhousingdecor:91002|h[Azure Upholstery]|h|r",
+        )]
+        .into_iter()
+        .collect();
+
+        Self {
+            selected_decor_info: Some(HousingDecorInstanceInfo {
+                decor_guid: "Decor-Selection-2001",
+                name: "Azure Reading Lamp",
+                can_be_removed: true,
+                is_locked: false,
+            }),
+            decor_hyperlinks,
+        }
+    }
+}
+
+struct HousingDecorInstanceInfo {
+    decor_guid: &'static str,
+    name: &'static str,
+    can_be_removed: bool,
+    is_locked: bool,
+}
+
 fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     let state = Rc::new(RefCell::new(HousingCustomizeModeState::seeded()));
@@ -613,11 +646,44 @@ fn fire_ui_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
 
 fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
     let decor = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingDecorState::seeded()));
     decor.set(
         "GetHoveredDecorInfo",
         lua.create_function(|_, ()| Ok(Value::Nil))?,
     )?;
     decor.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
+    let state_ref = Rc::clone(&state);
+    decor.set(
+        "IsDecorSelected",
+        lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?,
+    )?;
+    let state_ref = Rc::clone(&state);
+    decor.set(
+        "GetDecorHyperlink",
+        lua.create_function(move |lua, decor_id: i32| {
+            let state = state_ref.borrow();
+            let Some(link) = state.decor_hyperlinks.get(&decor_id) else {
+                return Ok(Value::Nil);
+            };
+            Ok(Value::String(lua.create_string(*link)?))
+        })?,
+    )?;
+    let state_ref = Rc::clone(&state);
+    decor.set(
+        "GetSelectedDecorInfo",
+        lua.create_function(move |lua, ()| {
+            let state = state_ref.borrow();
+            let Some(info) = &state.selected_decor_info else {
+                return Ok(Value::Nil);
+            };
+            let decor = lua.create_table()?;
+            decor.set("decorGUID", info.decor_guid)?;
+            decor.set("name", info.name)?;
+            decor.set("canBeRemoved", info.can_be_removed)?;
+            decor.set("isLocked", info.is_locked)?;
+            Ok(Value::Table(decor))
+        })?,
+    )?;
     decor.set(
         "GetDecorInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
