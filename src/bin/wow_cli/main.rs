@@ -27,7 +27,7 @@ mod gen_zones;
 
 use clap::{Parser, Subcommand};
 use std::io::{self, BufRead, Write};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use wow_ui_sim::lua_server::client;
 
 #[derive(Parser)]
@@ -285,48 +285,59 @@ fn run_audit_api(
     sim_path: PathBuf,
     wowless_path: PathBuf,
 ) {
-    use audit_api::{AuditConfig, OutputFormat};
-    let fmt = match format.as_str() {
-        "json" => OutputFormat::Json,
-        "plan" => OutputFormat::Plan,
-        _ => OutputFormat::Text,
-    };
-    // Only use wowless path if the apis.yaml file actually exists there
-    let wowless_opt = if wowless_path.join("data/products/wow/apis.yaml").exists() {
-        Some(wowless_path)
-    } else {
-        None
-    };
-    let config = AuditConfig {
+    let fmt = parse_output_format(&format);
+    let config = build_audit_config(ui_path, namespace, filter_startup, wowless_path);
+    let results = audit_api::run_audit(&config);
+    let gap_report = gaps.then(|| build_gap_report(&sim_path, &results));
+    print_audit_output(fmt, &results, gap_report.as_ref());
+}
+
+fn parse_output_format(format: &str) -> audit_api::OutputFormat {
+    match format {
+        "json" => audit_api::OutputFormat::Json,
+        "plan" => audit_api::OutputFormat::Plan,
+        _ => audit_api::OutputFormat::Text,
+    }
+}
+
+fn build_audit_config(
+    ui_path: PathBuf,
+    namespace: Option<String>,
+    filter_startup: bool,
+    wowless_path: PathBuf,
+) -> audit_api::AuditConfig {
+    let wowless_opt = wowless_path
+        .join("data/products/wow/apis.yaml")
+        .exists()
+        .then_some(wowless_path);
+    audit_api::AuditConfig {
         ui_path,
         namespace_filter: namespace,
         filter_startup,
         wowless_path: wowless_opt,
-    };
-    let results = audit_api::run_audit(&config);
-    let gap_report = if gaps {
-        let registered = audit_api::scan_simulator(&sim_path);
-        let sim_methods = audit_api::introspect_simulator_c_methods();
-        Some(audit_api::build_gap_report(
-            &results,
-            &registered,
-            &sim_methods,
-        ))
-    } else {
-        None
-    };
+    }
+}
+
+fn build_gap_report(sim_path: &Path, results: &audit_api::AuditResults) -> audit_api::GapReport {
+    let registered = audit_api::scan_simulator(sim_path);
+    let sim_methods = audit_api::introspect_simulator_c_methods();
+    audit_api::build_gap_report(results, &registered, &sim_methods)
+}
+
+fn print_audit_output(
+    fmt: audit_api::OutputFormat,
+    results: &audit_api::AuditResults,
+    gap_report: Option<&audit_api::GapReport>,
+) {
     match fmt {
-        OutputFormat::Json => audit_api::print_json(&results, gap_report.as_ref()),
-        OutputFormat::Plan => {
-            if let Some(ref report) = gap_report {
-                audit_api::print_gap_plan(report);
-            } else {
-                eprintln!("--format plan requires --gaps");
-            }
-        }
-        OutputFormat::Text => {
-            audit_api::print_text(&results);
-            if let Some(ref report) = gap_report {
+        audit_api::OutputFormat::Json => audit_api::print_json(results, gap_report),
+        audit_api::OutputFormat::Plan => match gap_report {
+            Some(report) => audit_api::print_gap_plan(report),
+            None => eprintln!("--format plan requires --gaps"),
+        },
+        audit_api::OutputFormat::Text => {
+            audit_api::print_text(results);
+            if let Some(report) = gap_report {
                 println!();
                 audit_api::print_gap_text(report);
             }

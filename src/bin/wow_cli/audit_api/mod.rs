@@ -11,7 +11,7 @@ use serde::Serialize;
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
-pub use gap::{build_gap_report, introspect_simulator_c_methods, scan_simulator};
+pub use gap::{GapReport, build_gap_report, introspect_simulator_c_methods, scan_simulator};
 pub use output::{print_gap_plan, print_gap_text, print_json, print_text};
 pub use scanner::run_audit;
 
