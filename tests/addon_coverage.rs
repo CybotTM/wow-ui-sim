@@ -192,6 +192,67 @@ fn format_error_count_map(error_counts: &BTreeMap<String, usize>) -> String {
         .join(", ")
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct ErrorCountChanges {
+    increased: Vec<(String, usize, usize)>,
+    decreased: Vec<(String, usize, usize)>,
+}
+
+fn classify_error_count_changes(
+    known: &BTreeMap<String, usize>,
+    actual: &BTreeMap<String, usize>,
+) -> ErrorCountChanges {
+    let mut increased = Vec::new();
+    let mut decreased = Vec::new();
+
+    for (addon_name, known_count) in known {
+        let actual_count = actual.get(addon_name).copied().unwrap_or(0);
+        match actual_count.cmp(known_count) {
+            std::cmp::Ordering::Greater => {
+                increased.push((addon_name.clone(), *known_count, actual_count));
+            }
+            std::cmp::Ordering::Less => {
+                decreased.push((addon_name.clone(), *known_count, actual_count));
+            }
+            std::cmp::Ordering::Equal => {}
+        }
+    }
+
+    ErrorCountChanges {
+        increased,
+        decreased,
+    }
+}
+
+fn format_error_count_changes(changes: &[(String, usize, usize)]) -> String {
+    changes
+        .iter()
+        .map(|(addon_name, old_count, new_count)| {
+            format!("{addon_name}: {old_count} -> {new_count}")
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+#[test]
+fn error_count_ratchet_detects_increases_and_decreases() {
+    let known = BTreeMap::from([
+        ("Blizzard_A".to_string(), 2),
+        ("Blizzard_B".to_string(), 4),
+        ("Blizzard_C".to_string(), 1),
+    ]);
+    let actual = BTreeMap::from([
+        ("Blizzard_A".to_string(), 3),
+        ("Blizzard_B".to_string(), 4),
+        ("Blizzard_C".to_string(), 0),
+    ]);
+
+    let changes = classify_error_count_changes(&known, &actual);
+
+    assert_eq!(changes.increased, vec![("Blizzard_A".to_string(), 2, 3)],);
+    assert_eq!(changes.decreased, vec![("Blizzard_C".to_string(), 1, 0)],);
+}
+
 fn count_blizzard_directories() -> usize {
     std::fs::read_dir(blizzard_ui_dir())
         .expect("BlizzardUI directory should be readable")
@@ -243,7 +304,9 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
 
         let state = env.state().borrow();
         let grouped_errors = grouped_errors_by_addon(&state);
+        let known_counts = known_error_counts();
         let actual_counts = actual_error_counts(&grouped_errors);
+        let changes = classify_error_count_changes(&known_counts, &actual_counts);
         let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
         let invalid_addons: Vec<_> = grouped_errors
             .keys()
@@ -262,10 +325,17 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
             invalid_addons,
             format_per_addon_report(&grouped_errors),
         );
-        assert_eq!(
-            actual_counts,
-            known_error_counts(),
-            "full Blizzard load KNOWN_ERRORS baseline changed.\nactual counts: [{}]\n{}",
+        assert!(
+            changes.increased.is_empty(),
+            "full Blizzard load increased per-addon Lua errors.\nincreased: [{}]\nactual counts: [{}]\n{}",
+            format_error_count_changes(&changes.increased),
+            format_error_count_map(&actual_counts),
+            format_per_addon_report(&grouped_errors),
+        );
+        assert!(
+            changes.decreased.is_empty(),
+            "full Blizzard load decreased per-addon Lua errors; ratchet KNOWN_ERRORS down.\ndecreased: [{}]\nactual counts: [{}]\n{}",
+            format_error_count_changes(&changes.decreased),
             format_error_count_map(&actual_counts),
             format_per_addon_report(&grouped_errors),
         );
