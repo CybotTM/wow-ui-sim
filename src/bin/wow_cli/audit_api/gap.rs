@@ -57,26 +57,29 @@ pub fn introspect_simulator_c_methods() -> BTreeMap<String, BTreeSet<String>> {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
     let table: mlua::Table = env
         .lua()
-        .load(
-            r#"
-            local result = {}
-            for k, v in pairs(_G) do
-                if type(k) == "string" and k:match("^C_") and type(v) == "table" then
-                    local methods = {}
-                    for mk, _ in pairs(v) do
-                        if type(mk) == "string" then
-                            methods[#methods + 1] = mk
-                        end
-                    end
-                    result[k] = methods
-                end
-            end
-            return result
-        "#,
-        )
+        .load(INTROSPECT_C_NAMESPACES_LUA)
         .eval()
         .expect("C_* introspection failed");
+    parse_namespace_method_table(table)
+}
 
+const INTROSPECT_C_NAMESPACES_LUA: &str = r#"
+    local result = {}
+    for k, v in pairs(_G) do
+        if type(k) == "string" and k:match("^C_") and type(v) == "table" then
+            local methods = {}
+            for mk, _ in pairs(v) do
+                if type(mk) == "string" then
+                    methods[#methods + 1] = mk
+                end
+            end
+            result[k] = methods
+        end
+    end
+    return result
+"#;
+
+fn parse_namespace_method_table(table: mlua::Table) -> BTreeMap<String, BTreeSet<String>> {
     let mut map = BTreeMap::new();
     for pair in table.pairs::<String, mlua::Table>() {
         let (ns, methods_table) = pair.expect("pair iteration failed");
