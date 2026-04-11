@@ -65,8 +65,10 @@ fn load_one_blizzard_addon(
                     t.frame_count
                 );
             }
-            for w in &r.warnings {
-                println!("  [!] {}", w);
+            if std::env::var("WOW_SIM_DEBUG_NIL_GLOBALS").is_ok() {
+                for w in &r.warnings {
+                    println!("  [!] {}", w);
+                }
             }
             timing.accumulate(&r.timing);
         }
