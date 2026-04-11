@@ -245,3 +245,30 @@ fn event_scheduler_event_zone_names_follow_seeded_area_poi_ids() {
         "GetEventZoneName() should keep the empty-string fallback for unknown POIs"
     );
 }
+
+#[test]
+fn event_scheduler_event_ui_map_ids_follow_seeded_area_poi_ids() {
+    let env = env();
+    let (ongoing_map, scheduled_map, missing_map): (i32, i32, i32) = env
+        .eval(
+            r#"
+            return C_EventScheduler.GetEventUiMapID(1001),
+                C_EventScheduler.GetEventUiMapID(1004),
+                C_EventScheduler.GetEventUiMapID(999999)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        ongoing_map, 8685,
+        "GetEventUiMapID() should resolve seeded ongoing event POIs"
+    );
+    assert_eq!(
+        scheduled_map, 5861,
+        "GetEventUiMapID() should resolve seeded scheduled event POIs"
+    );
+    assert_eq!(
+        missing_map, 0,
+        "GetEventUiMapID() should keep the zero fallback for unknown POIs"
+    );
+}

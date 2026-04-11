@@ -1465,10 +1465,10 @@ const EVENT_SCHEDULER_LUA: &str = r#"
     end
 
     local SEEDED_EVENT_LOCATIONS = {
-        [1001] = { zoneName = "Warsong Gulch" },
-        [1002] = { zoneName = "The Cinderbrew Meadery" },
-        [1003] = { zoneName = "Arathi Basin" },
-        [1004] = { zoneName = "Darkmoon Island" },
+        [1001] = { zoneName = "Warsong Gulch", uiMapID = 8685 },
+        [1002] = { zoneName = "The Cinderbrew Meadery", uiMapID = 0 },
+        [1003] = { zoneName = "Arathi Basin", uiMapID = 10440 },
+        [1004] = { zoneName = "Darkmoon Island", uiMapID = 5861 },
     }
 
     api._state = api._state or {
@@ -1531,6 +1531,14 @@ const EVENT_SCHEDULER_LUA: &str = r#"
             return ""
         end
         return tostring(location.zoneName or "")
+    end
+
+    api.GetEventUiMapID = api.GetEventUiMapID or function(areaPoiID)
+        local location = SEEDED_EVENT_LOCATIONS[tonumber(areaPoiID)]
+        if type(location) ~= "table" then
+            return 0
+        end
+        return tonumber(location.uiMapID) or 0
     end
 
     api.RequestEvents = api.RequestEvents or function()
