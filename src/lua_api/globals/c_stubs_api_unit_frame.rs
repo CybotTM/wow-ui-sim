@@ -59,22 +59,46 @@ fn register_pvp_and_lfg_stubs(lua: &Lua) -> Result<()> {
         "GetReadyCheckStatus",
         lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
     )?;
-    g.set("HasLFGRestrictions", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetPartyLFGID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("RequestGuildPartyState", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("GetLFGCategoryForID", lua.create_function(|_, _id: i32| Ok(Value::Nil))?)?;
-    g.set("IsEveryoneAssistant", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("WorldLootObjectExists", lua.create_function(|_, _unit: Value| Ok(false))?)?;
+    g.set(
+        "HasLFGRestrictions",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetPartyLFGID",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "RequestGuildPartyState",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "GetLFGCategoryForID",
+        lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "IsEveryoneAssistant",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "WorldLootObjectExists",
+        lua.create_function(|_, _unit: Value| Ok(false))?,
+    )?;
     Ok(())
 }
 
 fn register_raid_and_billing_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.set("IsInRaid", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetRaidRosterInfo", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
+    g.set(
+        "GetRaidRosterInfo",
+        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
+    )?;
     g.set("PartialPlayTime", lua.create_function(|_, ()| Ok(false))?)?;
     g.set("NoPlayTime", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetBillingTimeRested", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set(
+        "GetBillingTimeRested",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     Ok(())
 }
 
@@ -114,24 +138,57 @@ fn register_combat_and_arena_stubs(lua: &Lua) -> Result<()> {
 
 fn register_threat_and_arena_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetUnitTotalModifiedMaxHealthPercent", lua.create_function(|_, _unit: Option<String>| Ok(0.0f64))?)?;
-    g.set("IsThreatWarningEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetThreatStatusColor", lua.create_function(|_, _status: i32| Ok((1.0f64, 1.0f64, 1.0f64)))?)?;
+    g.set(
+        "GetUnitTotalModifiedMaxHealthPercent",
+        lua.create_function(|_, _unit: Option<String>| Ok(0.0f64))?,
+    )?;
+    g.set(
+        "IsThreatWarningEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetThreatStatusColor",
+        lua.create_function(|_, _status: i32| Ok((1.0f64, 1.0f64, 1.0f64)))?,
+    )?;
     g.set("LE_REALM_RELATION_VIRTUAL", 3i32)?;
-    g.set("IsActiveBattlefieldArena", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set("GetNumArenaOpponents", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("GetBattlefieldEstimatedWaitTime", lua.create_function(|_, _index: Value| Ok(0i32))?)?;
+    g.set(
+        "IsActiveBattlefieldArena",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    g.set(
+        "GetNumArenaOpponents",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "GetBattlefieldEstimatedWaitTime",
+        lua.create_function(|_, _index: Value| Ok(0i32))?,
+    )?;
     Ok(())
 }
 
 fn register_pet_and_misc_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
     g.set("PetUsesPetFrame", lua.create_function(|_, ()| Ok(true))?)?;
-    g.set("UnitIsPossessed", lua.create_function(|_, _unit: Option<String>| Ok(false))?)?;
-    g.set("GetReleaseTimeRemaining", lua.create_function(|_, ()| Ok(0i32))?)?;
-    g.set("FCF_OnUpdate", lua.create_function(|_, _elapsed: Option<f64>| Ok(()))?)?;
-    g.set("HelpOpenWebTicketButton_OnUpdate", lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?)?;
-    g.set("GetLootSpecialization", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set(
+        "UnitIsPossessed",
+        lua.create_function(|_, _unit: Option<String>| Ok(false))?,
+    )?;
+    g.set(
+        "GetReleaseTimeRemaining",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
+    g.set(
+        "FCF_OnUpdate",
+        lua.create_function(|_, _elapsed: Option<f64>| Ok(()))?,
+    )?;
+    g.set(
+        "HelpOpenWebTicketButton_OnUpdate",
+        lua.create_function(|_, _args: mlua::MultiValue| Ok(()))?,
+    )?;
+    g.set(
+        "GetLootSpecialization",
+        lua.create_function(|_, ()| Ok(0i32))?,
+    )?;
     Ok(())
 }
 
@@ -143,21 +200,51 @@ fn register_uiparent_entering_world_stubs(lua: &Lua) -> Result<()> {
 
 fn register_entering_world_queries(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("GetSpellConfirmationPromptsInfo", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("ResurrectGetOfferer", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    g.set("GetActiveLootRollIDs", lua.create_function(|lua, ()| lua.create_table())?)?;
-    g.set("GetTutorialsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set(
+        "GetSpellConfirmationPromptsInfo",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set(
+        "ResurrectGetOfferer",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    g.set(
+        "GetActiveLootRollIDs",
+        lua.create_function(|lua, ()| lua.create_table())?,
+    )?;
+    g.set(
+        "GetTutorialsEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     Ok(())
 }
 
 fn register_entering_world_actions(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set("BoostTutorial_AttemptLoad", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("ExpansionTrial_CheckLoadUI", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("SubscriptionInterstitial_LoadUI", lua.create_function(|_, ()| Ok(()))?)?;
-    g.set("ShowResurrectRequest", lua.create_function(|_, _offerer: String| Ok(()))?)?;
-    g.set("GroupLootContainer_AddRoll", lua.create_function(|_, (_id, _dur): (Value, Value)| Ok(()))?)?;
-    g.set("RemixArtifactTutorialUI_LoadUI", lua.create_function(|_, ()| Ok(()))?)?;
+    g.set(
+        "BoostTutorial_AttemptLoad",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "ExpansionTrial_CheckLoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "SubscriptionInterstitial_LoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    g.set(
+        "ShowResurrectRequest",
+        lua.create_function(|_, _offerer: String| Ok(()))?,
+    )?;
+    g.set(
+        "GroupLootContainer_AddRoll",
+        lua.create_function(|_, (_id, _dur): (Value, Value)| Ok(()))?,
+    )?;
+    g.set(
+        "RemixArtifactTutorialUI_LoadUI",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
     Ok(())
 }
 

@@ -73,9 +73,21 @@ pub fn print_gap_text(report: &GapReport) {
     print_gap_summary("LE_* Constants", &report.le_constants);
     print_gap_summary("Enum.* Namespaces", &report.enum_namespaces);
 
-    print_missing_entries("Missing C_* Namespaces", &report.missing_c_namespaces, "calls");
-    print_missing_entries("Missing LE_* Constants", &report.missing_le_constants, "refs");
-    print_missing_entries("Missing Enum.* Namespaces", &report.missing_enum_namespaces, "refs");
+    print_missing_entries(
+        "Missing C_* Namespaces",
+        &report.missing_c_namespaces,
+        "calls",
+    );
+    print_missing_entries(
+        "Missing LE_* Constants",
+        &report.missing_le_constants,
+        "refs",
+    );
+    print_missing_entries(
+        "Missing Enum.* Namespaces",
+        &report.missing_enum_namespaces,
+        "refs",
+    );
     print_missing_methods_text(&report.missing_c_methods);
 }
 
@@ -130,10 +142,22 @@ fn print_missing_methods_text(methods: &BTreeMap<String, Vec<GapEntry>>) {
 
 /// Print gap report as PLAN.md-ready markdown checkboxes.
 pub fn print_gap_plan(report: &GapReport) {
-    print_plan_entries("Missing C_* Namespaces", &report.missing_c_namespaces, "calls");
+    print_plan_entries(
+        "Missing C_* Namespaces",
+        &report.missing_c_namespaces,
+        "calls",
+    );
     print_plan_methods(&report.missing_c_methods);
-    print_plan_entries("Missing LE_* Constants", &report.missing_le_constants, "refs");
-    print_plan_entries("Missing Enum Namespaces", &report.missing_enum_namespaces, "refs");
+    print_plan_entries(
+        "Missing LE_* Constants",
+        &report.missing_le_constants,
+        "refs",
+    );
+    print_plan_entries(
+        "Missing Enum Namespaces",
+        &report.missing_enum_namespaces,
+        "refs",
+    );
 }
 
 fn print_plan_entries(title: &str, entries: &[GapEntry], unit: &str) {

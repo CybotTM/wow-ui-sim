@@ -33,9 +33,18 @@ fn register_c_report_system(lua: &Lua, g: &mlua::Table) -> Result<()> {
         Value::Table(existing) => existing,
         _ => lua.create_table()?,
     };
-    t.set("CanReportPlayer", lua.create_function(|_, _loc: Value| Ok(true))?)?;
-    t.set("CanReportPlayerForLanguage", lua.create_function(|_, _loc: Value| Ok(true))?)?;
-    t.set("InitiateReportPlayer", lua.create_function(initiate_report_player)?)?;
+    t.set(
+        "CanReportPlayer",
+        lua.create_function(|_, _loc: Value| Ok(true))?,
+    )?;
+    t.set(
+        "CanReportPlayerForLanguage",
+        lua.create_function(|_, _loc: Value| Ok(true))?,
+    )?;
+    t.set(
+        "InitiateReportPlayer",
+        lua.create_function(initiate_report_player)?,
+    )?;
     t.set("SendReportPlayer", lua.create_function(send_report_player)?)?;
     g.set("C_ReportSystem", t)
 }

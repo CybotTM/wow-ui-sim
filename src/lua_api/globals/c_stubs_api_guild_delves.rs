@@ -11,7 +11,6 @@ pub(super) use super::c_stubs_api_pet_battles::register_guild_bank_pet_battles;
 
 use mlua::{Lua, Result, Value};
 
-
 /// C_ZoneAbility namespace - zone ability data.
 pub(super) fn register_c_zone_ability(lua: &Lua) -> Result<()> {
     lua.load(ZONE_ABILITY_LUA).exec()?;

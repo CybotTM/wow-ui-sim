@@ -148,4 +148,3 @@ fn register_deprecated_world_elapsed_timer_constants(g: &mlua::Table) -> Result<
     g.set("LE_WORLD_ELAPSED_TIMER_TYPE_PROVING_GROUND", 2i32)?;
     Ok(())
 }
-

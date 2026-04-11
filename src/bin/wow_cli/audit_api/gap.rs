@@ -160,8 +160,25 @@ fn scan_rust_file_for_c_methods(
     result: &mut BTreeMap<String, BTreeSet<String>>,
 ) {
     let fn_positions = find_fn_positions(content);
-    scan_named_function_blocks(content, &fn_positions, table_set_re, table_get_re, sub_fn_re, factory_fn_re, result);
-    scan_variable_mapped_methods(content, &fn_positions, globals_set_c_re, table_set_re, table_get_re, sub_fn_re, factory_fn_re, result);
+    scan_named_function_blocks(
+        content,
+        &fn_positions,
+        table_set_re,
+        table_get_re,
+        sub_fn_re,
+        factory_fn_re,
+        result,
+    );
+    scan_variable_mapped_methods(
+        content,
+        &fn_positions,
+        globals_set_c_re,
+        table_set_re,
+        table_get_re,
+        sub_fn_re,
+        factory_fn_re,
+        result,
+    );
 }
 
 /// Find byte offsets of all `fn` declarations in a Rust file.
@@ -179,7 +196,10 @@ fn collect_methods_from_block(
     table_get_re: &Regex,
     methods: &mut BTreeSet<String>,
 ) {
-    for cap in table_set_re.captures_iter(block).chain(table_get_re.captures_iter(block)) {
+    for cap in table_set_re
+        .captures_iter(block)
+        .chain(table_get_re.captures_iter(block))
+    {
         if &cap[1] == var_name && !cap[2].starts_with("C_") {
             methods.insert(cap[2].to_string());
         }
@@ -219,8 +239,13 @@ fn scan_named_function_blocks(
             continue;
         };
 
-        collect_methods_from_block(block, "t", table_set_re, table_get_re,
-            result.entry(ns).or_default());
+        collect_methods_from_block(
+            block,
+            "t",
+            table_set_re,
+            table_get_re,
+            result.entry(ns).or_default(),
+        );
     }
 }
 
@@ -254,7 +279,10 @@ fn scan_variable_mapped_methods(
         var_to_ns.entry("t".to_string()).or_insert(ns);
     }
 
-    for cap in table_set_re.captures_iter(content).chain(table_get_re.captures_iter(content)) {
+    for cap in table_set_re
+        .captures_iter(content)
+        .chain(table_get_re.captures_iter(content))
+    {
         let method = cap[2].to_string();
         if method.starts_with("C_") {
             continue;

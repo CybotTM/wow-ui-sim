@@ -198,7 +198,9 @@ fn add_ignore_parent_alpha_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
         let id = this.0;
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let parent_eff = state.widgets.get(id)
+        let parent_eff = state
+            .widgets
+            .get(id)
             .and_then(|f| f.parent_id)
             .and_then(|pid| state.widgets.get(pid))
             .map(|p| p.effective_alpha)
@@ -536,7 +538,9 @@ fn add_ignore_parent_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
         let id = this.0;
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let parent_eff_scale = state.widgets.get(id)
+        let parent_eff_scale = state
+            .widgets
+            .get(id)
             .and_then(|f| f.parent_id)
             .and_then(|pid| state.widgets.get(pid))
             .map(|p| p.effective_scale)
@@ -544,14 +548,15 @@ fn add_ignore_parent_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
         if let Some(frame) = state.widgets.get_mut_visual(id) {
             frame.ignore_parent_scale = ignore;
         }
-        state.widgets.propagate_effective_scale(id, parent_eff_scale);
+        state
+            .widgets
+            .propagate_effective_scale(id, parent_eff_scale);
         state.widgets.mark_rect_dirty(id);
         Ok(())
     });
     add_bool_frame_getter(methods, "GetIgnoreParentScale", |f| f.ignore_parent_scale);
     add_bool_frame_getter(methods, "IsIgnoringParentScale", |f| f.ignore_parent_scale);
 }
-
 
 #[cfg(test)]
 mod tests {

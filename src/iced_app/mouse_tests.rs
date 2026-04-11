@@ -100,7 +100,9 @@ fn setup_pass_through_test_frames(app: &App) {
 fn read_pass_through_counters(app: &App) -> (f64, f64, f64, f64) {
     app.env
         .borrow()
-        .eval("return __pass_parent_left, __pass_parent_right, __pass_child_left, __pass_child_right")
+        .eval(
+            "return __pass_parent_left, __pass_parent_right, __pass_child_left, __pass_child_right",
+        )
         .expect("pass-through counters should be readable")
 }
 

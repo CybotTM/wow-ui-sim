@@ -21,8 +21,8 @@ mod cooldown;
 #[path = "quad_builders_button.rs"]
 mod button;
 
-pub(super) use textures::{build_minimap_quads, build_texture_quads};
 pub(super) use button::emit_button_highlight;
+pub(super) use textures::{build_minimap_quads, build_texture_quads};
 
 /// Build quads for a Frame widget (backdrop).
 pub fn build_frame_quads(
@@ -144,17 +144,32 @@ fn dispatch_widget_quads(
     frame: &FrameQuadEmit<'_>,
 ) {
     match frame.widget.widget_type {
-        WidgetType::Frame | WidgetType::StatusBar => build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha),
+        WidgetType::Frame | WidgetType::StatusBar => {
+            build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
+        }
         WidgetType::MessageFrame => emit_message_frame_quads(batch, text_ctx, frame),
         WidgetType::GameTooltip => emit_tooltip_quads(batch, text_ctx, frame),
-        WidgetType::Minimap => build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha),
+        WidgetType::Minimap => {
+            build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
+        }
         WidgetType::Button => button::emit_button_quads_with_text(batch, text_ctx, frame),
         WidgetType::Texture => emit_texture_quads_with_mask(batch, frame),
         WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, frame),
         WidgetType::CheckButton => button::emit_checkbutton_quads(batch, text_ctx, frame),
-        WidgetType::EditBox => button::emit_editbox_with_text(batch, frame.bounds, frame.widget, text_ctx, frame.eff_alpha),
+        WidgetType::EditBox => button::emit_editbox_with_text(
+            batch,
+            frame.bounds,
+            frame.widget,
+            text_ctx,
+            frame.eff_alpha,
+        ),
         WidgetType::Cooldown => cooldown::emit_cooldown_quads(batch, text_ctx, frame),
-        WidgetType::Line => super::quad_builders_line::build_line_quads(batch, frame.widget, frame.registry, frame.eff_alpha),
+        WidgetType::Line => super::quad_builders_line::build_line_quads(
+            batch,
+            frame.widget,
+            frame.registry,
+            frame.eff_alpha,
+        ),
         _ => {}
     }
 }
@@ -390,4 +405,3 @@ fn inv_lerp(a: f32, b: f32, v: f32) -> f32 {
 fn lerp(a: f32, b: f32, t: f32) -> f32 {
     a + (b - a) * t
 }
-

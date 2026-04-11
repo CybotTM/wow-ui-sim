@@ -95,11 +95,7 @@ fn add_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> m
     providers.raw_set(next_index, provider)
 }
 
-fn remove_frame_data_provider(
-    lua: &mlua::Lua,
-    frame_id: u64,
-    provider: Value,
-) -> mlua::Result<()> {
+fn remove_frame_data_provider(lua: &mlua::Lua, frame_id: u64, provider: Value) -> mlua::Result<()> {
     let providers = frame_data_providers(lua, frame_id)?;
     remove_matching_value(&providers, &provider)
 }
@@ -348,4 +344,3 @@ fn remove_matching_value(table: &mlua::Table, expected: &Value) -> mlua::Result<
     }
     Ok(())
 }
-

@@ -308,7 +308,10 @@ fn is_load_on_demand(addon_path: &Path, addon_dir: &Path) -> bool {
 /// Returns `(namespace_set, namespace_to_methods)`, or `None` if the file doesn't exist.
 pub fn load_valid_c_namespaces(
     wowless_path: &Path,
-) -> Option<(std::collections::HashSet<String>, BTreeMap<String, BTreeSet<String>>)> {
+) -> Option<(
+    std::collections::HashSet<String>,
+    BTreeMap<String, BTreeSet<String>>,
+)> {
     let apis_path = wowless_path.join("data/products/wow/apis.yaml");
     let content = match std::fs::read_to_string(&apis_path) {
         Ok(c) => c,

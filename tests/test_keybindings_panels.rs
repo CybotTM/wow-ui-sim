@@ -479,4 +479,3 @@ fn keybind_j_opens_guild() {
         );
     }
 }
-

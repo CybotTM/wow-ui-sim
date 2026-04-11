@@ -102,33 +102,75 @@ fn register_catalog_shop_queries(lua: &Lua, catalog_shop: &mlua::Table) -> Resul
 }
 
 fn register_catalog_shop_category_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetAvailableCategoryIDs", lua.create_function(|lua, ()| lua.create_sequence_from([CATALOG_SHOP_CATEGORY_ID]))?)?;
-    t.set("GetCategoryInfo", lua.create_function(|lua, id: i64| catalog_shop_category_info(lua, id))?)?;
-    t.set("GetSectionIDsForCategory", lua.create_function(section_ids_for_category)?)?;
-    t.set("GetCategorySectionInfo", lua.create_function(|lua, (cid, sid): (i64, i64)| catalog_shop_section_info(lua, cid, sid))?)?;
-    t.set("GetProductIDsForCategory", lua.create_function(|lua, id: i64| catalog_shop_product_ids_for_category(lua, id))?)?;
-    t.set("GetProductIDsForCategorySection", lua.create_function(|lua, (cid, sid): (i64, i64)| catalog_shop_product_ids_for_section(lua, cid, sid))?)?;
+    t.set(
+        "GetAvailableCategoryIDs",
+        lua.create_function(|lua, ()| lua.create_sequence_from([CATALOG_SHOP_CATEGORY_ID]))?,
+    )?;
+    t.set(
+        "GetCategoryInfo",
+        lua.create_function(|lua, id: i64| catalog_shop_category_info(lua, id))?,
+    )?;
+    t.set(
+        "GetSectionIDsForCategory",
+        lua.create_function(section_ids_for_category)?,
+    )?;
+    t.set(
+        "GetCategorySectionInfo",
+        lua.create_function(|lua, (cid, sid): (i64, i64)| {
+            catalog_shop_section_info(lua, cid, sid)
+        })?,
+    )?;
+    t.set(
+        "GetProductIDsForCategory",
+        lua.create_function(|lua, id: i64| catalog_shop_product_ids_for_category(lua, id))?,
+    )?;
+    t.set(
+        "GetProductIDsForCategorySection",
+        lua.create_function(|lua, (cid, sid): (i64, i64)| {
+            catalog_shop_product_ids_for_section(lua, cid, sid)
+        })?,
+    )?;
     Ok(())
 }
 
 fn section_ids_for_category(lua: &Lua, category_id: i64) -> Result<Value> {
     if category_id == CATALOG_SHOP_CATEGORY_ID {
-        return Ok(Value::Table(lua.create_sequence_from([CATALOG_SHOP_SECTION_ID])?));
+        return Ok(Value::Table(
+            lua.create_sequence_from([CATALOG_SHOP_SECTION_ID])?,
+        ));
     }
     Ok(Value::Table(lua.create_table()?))
 }
 
 fn register_catalog_shop_product_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("GetProductInfo", lua.create_function(|lua, id: i64| catalog_shop_product_info(lua, id))?)?;
-    t.set("GetCatalogShopProductDisplayInfo", lua.create_function(|lua, id: i64| catalog_shop_product_display_info(lua, id))?)?;
-    t.set("GetProductSortOrder", lua.create_function(product_sort_order)?)?;
-    t.set("GetFirstCategoryByProductID", lua.create_function(first_category_by_product)?)?;
-    t.set("GetProductAvailabilityTimeRemainingSecs", lua.create_function(|_, _id: i64| Ok(Value::Nil))?)?;
+    t.set(
+        "GetProductInfo",
+        lua.create_function(|lua, id: i64| catalog_shop_product_info(lua, id))?,
+    )?;
+    t.set(
+        "GetCatalogShopProductDisplayInfo",
+        lua.create_function(|lua, id: i64| catalog_shop_product_display_info(lua, id))?,
+    )?;
+    t.set(
+        "GetProductSortOrder",
+        lua.create_function(product_sort_order)?,
+    )?;
+    t.set(
+        "GetFirstCategoryByProductID",
+        lua.create_function(first_category_by_product)?,
+    )?;
+    t.set(
+        "GetProductAvailabilityTimeRemainingSecs",
+        lua.create_function(|_, _id: i64| Ok(Value::Nil))?,
+    )?;
     Ok(())
 }
 
 fn product_sort_order(_: &Lua, (cid, sid, pid): (i64, i64, i64)) -> Result<Value> {
-    if cid == CATALOG_SHOP_CATEGORY_ID && sid == CATALOG_SHOP_SECTION_ID && pid == CATALOG_SHOP_PRODUCT_ID {
+    if cid == CATALOG_SHOP_CATEGORY_ID
+        && sid == CATALOG_SHOP_SECTION_ID
+        && pid == CATALOG_SHOP_PRODUCT_ID
+    {
         return Ok(Value::Integer(1));
     }
     Ok(Value::Nil)
@@ -143,20 +185,49 @@ fn first_category_by_product(lua: &Lua, product_id: i64) -> Result<Value> {
 
 fn register_catalog_shop_misc_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     register_catalog_shop_empty_table_queries(lua, t)?;
-    t.set("GetVirtualCurrencyBalance", lua.create_function(|lua, _code: String| Ok(Value::String(lua.create_string("0")?)))?)?;
-    t.set("GetRefundableDecors", lua.create_function(|lua, _: Value| Ok(MultiValue::from_vec(vec![Value::Table(lua.create_table()?), Value::Integer(0)])))?)?;
-    t.set("GetFailureInfo", lua.create_function(|_, ()| Ok(MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?)?;
-    t.set("IsProductIncludedInAnyBundle", lua.create_function(|_, _id: i64| Ok(false))?)?;
+    t.set(
+        "GetVirtualCurrencyBalance",
+        lua.create_function(|lua, _code: String| Ok(Value::String(lua.create_string("0")?)))?,
+    )?;
+    t.set(
+        "GetRefundableDecors",
+        lua.create_function(|lua, _: Value| {
+            Ok(MultiValue::from_vec(vec![
+                Value::Table(lua.create_table()?),
+                Value::Integer(0),
+            ]))
+        })?,
+    )?;
+    t.set(
+        "GetFailureInfo",
+        lua.create_function(|_, ()| Ok(MultiValue::from_vec(vec![Value::Nil, Value::Nil])))?,
+    )?;
+    t.set(
+        "IsProductIncludedInAnyBundle",
+        lua.create_function(|_, _id: i64| Ok(false))?,
+    )?;
     Ok(())
 }
 
 fn register_catalog_shop_empty_table_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let empty_table = |lua: &Lua, _: Value| Ok(Value::Table(lua.create_table()?));
     t.set("GetProductIDsForBundle", lua.create_function(empty_table)?)?;
-    t.set("GetAvailableTransmogRaceInfos", lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?)?;
-    t.set("GetNewProducts", lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?)?;
-    t.set("GetVCProductInfos", lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?)?;
-    t.set("GetSpellVisualInfoForMount", lua.create_function(|lua, _id: i64| Ok(Value::Table(lua.create_table()?)))?)?;
+    t.set(
+        "GetAvailableTransmogRaceInfos",
+        lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?,
+    )?;
+    t.set(
+        "GetNewProducts",
+        lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?,
+    )?;
+    t.set(
+        "GetVCProductInfos",
+        lua.create_function(|lua, ()| Ok(Value::Table(lua.create_table()?)))?,
+    )?;
+    t.set(
+        "GetSpellVisualInfoForMount",
+        lua.create_function(|lua, _id: i64| Ok(Value::Table(lua.create_table()?)))?,
+    )?;
     Ok(())
 }
 
@@ -184,12 +255,30 @@ fn register_catalog_shop_session_actions(lua: &Lua, catalog_shop: &mlua::Table) 
 }
 
 fn register_catalog_shop_purchase_actions(lua: &Lua, t: &mlua::Table) -> Result<()> {
-    t.set("PurchaseProduct", lua.create_function(|_, _id: i64| Ok(false))?)?;
-    t.set("BulkPurchaseProducts", lua.create_function(|_, _ids: Value| Ok(false))?)?;
-    t.set("ConfirmHousingPurchase", lua.create_function(|_, _ids: Value| Ok(()))?)?;
-    t.set("FindBestCurrencyProductForNeededAmount", lua.create_function(|_, (_code, _amt): (String, i64)| Ok(Value::Nil))?)?;
-    t.set("RefreshRefundableDecors", lua.create_function(|_, ()| Ok(()))?)?;
-    t.set("RefreshVirtualCurrencyBalance", lua.create_function(refresh_virtual_currency_balance)?)?;
+    t.set(
+        "PurchaseProduct",
+        lua.create_function(|_, _id: i64| Ok(false))?,
+    )?;
+    t.set(
+        "BulkPurchaseProducts",
+        lua.create_function(|_, _ids: Value| Ok(false))?,
+    )?;
+    t.set(
+        "ConfirmHousingPurchase",
+        lua.create_function(|_, _ids: Value| Ok(()))?,
+    )?;
+    t.set(
+        "FindBestCurrencyProductForNeededAmount",
+        lua.create_function(|_, (_code, _amt): (String, i64)| Ok(Value::Nil))?,
+    )?;
+    t.set(
+        "RefreshRefundableDecors",
+        lua.create_function(|_, ()| Ok(()))?,
+    )?;
+    t.set(
+        "RefreshVirtualCurrencyBalance",
+        lua.create_function(refresh_virtual_currency_balance)?,
+    )?;
     Ok(())
 }
 

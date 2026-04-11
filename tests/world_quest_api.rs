@@ -71,14 +71,10 @@ fn test_task_quest_is_active() {
 #[test]
 fn test_quest_log_is_world_quest() {
     let env = env();
-    let is_wq: bool = env
-        .eval("return C_QuestLog.IsWorldQuest(90001)")
-        .unwrap();
+    let is_wq: bool = env.eval("return C_QuestLog.IsWorldQuest(90001)").unwrap();
     assert!(is_wq, "Seeded world quest should return true");
 
-    let is_wq: bool = env
-        .eval("return C_QuestLog.IsWorldQuest(80000)")
-        .unwrap();
+    let is_wq: bool = env.eval("return C_QuestLog.IsWorldQuest(80000)").unwrap();
     assert!(!is_wq, "Regular quest should return false");
 }
 
@@ -112,10 +108,16 @@ fn test_have_quest_data_returns_true_for_seeded() {
     assert!(have, "HaveQuestData should return true for world quests");
 
     let have: bool = env.eval("return HaveQuestData(80000)").unwrap();
-    assert!(have, "HaveQuestData should return true for quest log quests");
+    assert!(
+        have,
+        "HaveQuestData should return true for quest log quests"
+    );
 
     let have: bool = env.eval("return HaveQuestRewardData(90001)").unwrap();
-    assert!(have, "HaveQuestRewardData should return true for world quests");
+    assert!(
+        have,
+        "HaveQuestRewardData should return true for world quests"
+    );
 }
 
 #[test]

@@ -123,9 +123,10 @@ fn set_message_frame_max_lines(state: &mut SimState, id: u64, max_lines: i32) {
     while data.messages.len() > data.max_lines {
         super::widget_message_frame_scroll::truncate_messages(data);
     }
-    data.scroll_offset = data
-        .scroll_offset
-        .clamp(0, super::widget_message_frame_scroll::message_frame_scroll_limit(data));
+    data.scroll_offset = data.scroll_offset.clamp(
+        0,
+        super::widget_message_frame_scroll::message_frame_scroll_limit(data),
+    );
     data.display_dirty = true;
 }
 

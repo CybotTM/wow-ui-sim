@@ -453,4 +453,3 @@ fn test_copy_tooltip_copies_lines_and_spell_data_without_reowning() {
     assert_eq!(td.lines[0].left_text, "Flash of Light");
     assert_eq!(td.spell_id, Some(19750));
 }
-

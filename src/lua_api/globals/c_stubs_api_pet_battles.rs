@@ -4,13 +4,19 @@ use mlua::{Lua, Result};
 
 pub(super) fn register_guild_bank_pet_battles(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let guild_bank = lua.create_table()?;
-    guild_bank.set("IsGuildBankEnabled", lua.create_function(|_, ()| Ok(false))?)?;
+    guild_bank.set(
+        "IsGuildBankEnabled",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
     guild_bank.set("GetCurrentBankTab", lua.create_function(|_, ()| Ok(1i32))?)?;
     guild_bank.set("FetchNumTabs", lua.create_function(|_, ()| Ok(0i32))?)?;
     g.set("C_GuildBank", guild_bank)?;
 
     lua.load(PET_BATTLES_LUA).exec()?;
-    g.set("C_PetBattles", lua.globals().get::<mlua::Table>("C_PetBattles")?)?;
+    g.set(
+        "C_PetBattles",
+        lua.globals().get::<mlua::Table>("C_PetBattles")?,
+    )?;
     Ok(())
 }
 

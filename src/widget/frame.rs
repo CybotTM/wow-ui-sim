@@ -823,7 +823,6 @@ impl Frame {
             self.disabled_draw_layers.insert(layer);
         }
     }
-
 }
 
 pub use super::frame_enums::{DrawLayer, FrameStrata};

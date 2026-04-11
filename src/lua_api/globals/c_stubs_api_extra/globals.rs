@@ -396,4 +396,3 @@ fn register_taint_and_env_globals(lua: &Lua, g: &mlua::Table) -> Result<()> {
     )?;
     Ok(())
 }
-

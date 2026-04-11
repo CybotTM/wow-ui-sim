@@ -57,10 +57,7 @@ pub(super) fn call_with_taint(
 }
 
 /// Look up the addon folder name for a given owner_addon index.
-pub(super) fn addon_taint_name(
-    state: &Rc<RefCell<SimState>>,
-    idx: Option<u16>,
-) -> Option<String> {
+pub(super) fn addon_taint_name(state: &Rc<RefCell<SimState>>, idx: Option<u16>) -> Option<String> {
     idx.and_then(|i| {
         state
             .borrow()
@@ -83,11 +80,7 @@ pub(super) fn is_blizzard_addon(state: &Rc<RefCell<SimState>>, idx: Option<u16>)
 }
 
 /// Record per-addon timing from an Instant.
-pub(super) fn record_addon_time(
-    state: &Rc<RefCell<SimState>>,
-    idx: Option<u16>,
-    start: &Instant,
-) {
+pub(super) fn record_addon_time(state: &Rc<RefCell<SimState>>, idx: Option<u16>, start: &Instant) {
     if let Some(i) = idx {
         let ms = start.elapsed().as_secs_f64() * 1000.0;
         if let Some(addon) = state.borrow_mut().addons.get_mut(i as usize) {

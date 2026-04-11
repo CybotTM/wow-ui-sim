@@ -16,8 +16,8 @@ mod common;
 
 use std::path::PathBuf;
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
-use wow_ui_sim::lua_api::globals::global_frames;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::lua_api::globals::global_frames;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")

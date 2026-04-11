@@ -6,12 +6,17 @@ use crate::render::shader::FLAG_CIRCLE_CLIP;
 use crate::render::{BlendMode, QuadBatch};
 use crate::widget::AttributeValue;
 
-use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, color_with_alpha, emit_widget_text_quads};
+use super::{
+    FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, color_with_alpha, emit_widget_text_quads,
+};
 
 /// Emit all cooldown quads (swipe, edge, bling, countdown text).
 pub(super) fn emit_cooldown_quads(
     batch: &mut QuadBatch,
-    text_ctx: &mut Option<(&mut crate::render::font::WowFontSystem, &mut crate::render::glyph::GlyphAtlas)>,
+    text_ctx: &mut Option<(
+        &mut crate::render::font::WowFontSystem,
+        &mut crate::render::glyph::GlyphAtlas,
+    )>,
     frame: &FrameQuadEmit<'_>,
 ) {
     build_cooldown_quads(
@@ -116,7 +121,10 @@ pub(super) fn emit_cooldown_bling_overlay(batch: &mut QuadBatch, frame: &FrameQu
 
 pub(super) fn emit_cooldown_countdown_text(
     batch: &mut QuadBatch,
-    text_ctx: &mut Option<(&mut crate::render::font::WowFontSystem, &mut crate::render::glyph::GlyphAtlas)>,
+    text_ctx: &mut Option<(
+        &mut crate::render::font::WowFontSystem,
+        &mut crate::render::glyph::GlyphAtlas,
+    )>,
     frame: &FrameQuadEmit<'_>,
 ) {
     let f = frame.widget;

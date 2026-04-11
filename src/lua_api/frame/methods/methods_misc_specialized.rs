@@ -626,4 +626,3 @@ fn add_quest_blob_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     // Identity mapping: tooltip index equals the input index.
     methods.add_method("GetTooltipIndex", |_, _, index: i32| Ok(index));
 }
-

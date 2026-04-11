@@ -191,9 +191,7 @@ fn message_frame_is_at_bottom(state: &SimState, id: u64) -> bool {
         .unwrap_or(true)
 }
 
-pub(super) fn truncate_messages(
-    data: &mut crate::lua_api::message_frame::MessageFrameData,
-) {
+pub(super) fn truncate_messages(data: &mut crate::lua_api::message_frame::MessageFrameData) {
     while data.messages.len() > data.max_lines {
         if data.insert_mode == "TOP" {
             data.messages.pop();

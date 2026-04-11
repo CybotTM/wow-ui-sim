@@ -505,18 +505,51 @@ fn register_c_combat_text(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn register_c_combat_audio_alert(lua: &Lua, g: &mlua::Table) -> Result<()> {
     let t = lua.create_table()?;
     t.set("IsEnabled", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set("GetCategoryVoice", lua.create_function(|_, _: Value| Ok(0i32))?)?;
-    t.set("GetCategoryVolume", lua.create_function(|_, _: Value| Ok(1.0f64))?)?;
-    t.set("GetFormatSetting", lua.create_function(|_, _: mlua::MultiValue| Ok(0i32))?)?;
+    t.set(
+        "GetCategoryVoice",
+        lua.create_function(|_, _: Value| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetCategoryVolume",
+        lua.create_function(|_, _: Value| Ok(1.0f64))?,
+    )?;
+    t.set(
+        "GetFormatSetting",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(0i32))?,
+    )?;
     t.set("GetSpeakerSpeed", lua.create_function(|_, ()| Ok(1.0f64))?)?;
-    t.set("GetSpecSetting", lua.create_function(|_, _: Value| Ok(0i32))?)?;
-    t.set("GetThrottle", lua.create_function(|_, _: Value| Ok(0.0f64))?)?;
-    t.set("SetCategoryVoice", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("SetCategoryVolume", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("SetFormatSetting", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("SetSpeakerSpeed", lua.create_function(|_, _: Value| Ok(()))?)?;
-    t.set("SetSpecSetting", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
-    t.set("SetThrottle", lua.create_function(|_, _: mlua::MultiValue| Ok(()))?)?;
+    t.set(
+        "GetSpecSetting",
+        lua.create_function(|_, _: Value| Ok(0i32))?,
+    )?;
+    t.set(
+        "GetThrottle",
+        lua.create_function(|_, _: Value| Ok(0.0f64))?,
+    )?;
+    t.set(
+        "SetCategoryVoice",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "SetCategoryVolume",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "SetFormatSetting",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "SetSpeakerSpeed",
+        lua.create_function(|_, _: Value| Ok(()))?,
+    )?;
+    t.set(
+        "SetSpecSetting",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
+    t.set(
+        "SetThrottle",
+        lua.create_function(|_, _: mlua::MultiValue| Ok(()))?,
+    )?;
     t.set("SpeakText", lua.create_function(|_, _: Value| Ok(()))?)?;
     g.set("C_CombatAudioAlert", t)?;
     Ok(())
@@ -557,26 +590,44 @@ fn register_c_housing_photo_sharing(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn nameplate_cvar_fields(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     for (k, v) in [
-        ("INFO_DISPLAY_CVAR",                              "nameplateInfoDisplay"),
-        ("CAST_BAR_DISPLAY_CVAR",                          "nameplateCastBarDisplay"),
-        ("THREAT_DISPLAY_CVAR",                            "nameplateThreatDisplay"),
-        ("ENEMY_NPC_AURA_DISPLAY_CVAR",                    "nameplateEnemyNpcAuraDisplay"),
-        ("ENEMY_PLAYER_AURA_DISPLAY_CVAR",                 "nameplateEnemyPlayerAuraDisplay"),
-        ("FRIENDLY_PLAYER_AURA_DISPLAY_CVAR",              "nameplateFriendlyPlayerAuraDisplay"),
-        ("SHOW_DEBUFFS_ON_FRIENDLY_CVAR",                  "nameplateShowDebuffsOnFriendly"),
-        ("DEBUFF_PADDING_CVAR",                            "nameplateDebuffPadding"),
-        ("AURA_SCALE_CVAR",                                "nameplateAuraScale"),
-        ("SIZE_CVAR",                                      "nameplateSize"),
-        ("STYLE_CVAR",                                     "nameplateStyle"),
-        ("SIMPLIFIED_TYPES_CVAR",                          "nameplateSimplifiedTypes"),
-        ("SOFT_TARGET_NAMEPLATE_SIZE_CVAR",                "SoftTargetNameplateSize"),
-        ("SOFT_TARGET_ICON_ENEMY_CVAR",                    "SoftTargetIconEnemy"),
-        ("SOFT_TARGET_ICON_FRIEND_CVAR",                   "SoftTargetIconFriend"),
-        ("SOFT_TARGET_ICON_INTERACT_CVAR",                 "SoftTargetIconInteract"),
-        ("SHOW_FRIENDLY_NPCS_CVAR",                        "nameplateShowFriendlyNpcs"),
-        ("SHOW_ONLY_NAME_FOR_FRIENDLY_PLAYER_UNITS_CVAR",  "nameplateShowOnlyNameForFriendlyPlayerUnits"),
-        ("USE_CLASS_COLOR_FOR_FRIENDLY_PLAYER_UNIT_NAMES_CVAR", "nameplateUseClassColorForFriendlyPlayerUnitNames"),
-        ("PREVIEW_UNIT_TOKEN",                             "preview"),
+        ("INFO_DISPLAY_CVAR", "nameplateInfoDisplay"),
+        ("CAST_BAR_DISPLAY_CVAR", "nameplateCastBarDisplay"),
+        ("THREAT_DISPLAY_CVAR", "nameplateThreatDisplay"),
+        (
+            "ENEMY_NPC_AURA_DISPLAY_CVAR",
+            "nameplateEnemyNpcAuraDisplay",
+        ),
+        (
+            "ENEMY_PLAYER_AURA_DISPLAY_CVAR",
+            "nameplateEnemyPlayerAuraDisplay",
+        ),
+        (
+            "FRIENDLY_PLAYER_AURA_DISPLAY_CVAR",
+            "nameplateFriendlyPlayerAuraDisplay",
+        ),
+        (
+            "SHOW_DEBUFFS_ON_FRIENDLY_CVAR",
+            "nameplateShowDebuffsOnFriendly",
+        ),
+        ("DEBUFF_PADDING_CVAR", "nameplateDebuffPadding"),
+        ("AURA_SCALE_CVAR", "nameplateAuraScale"),
+        ("SIZE_CVAR", "nameplateSize"),
+        ("STYLE_CVAR", "nameplateStyle"),
+        ("SIMPLIFIED_TYPES_CVAR", "nameplateSimplifiedTypes"),
+        ("SOFT_TARGET_NAMEPLATE_SIZE_CVAR", "SoftTargetNameplateSize"),
+        ("SOFT_TARGET_ICON_ENEMY_CVAR", "SoftTargetIconEnemy"),
+        ("SOFT_TARGET_ICON_FRIEND_CVAR", "SoftTargetIconFriend"),
+        ("SOFT_TARGET_ICON_INTERACT_CVAR", "SoftTargetIconInteract"),
+        ("SHOW_FRIENDLY_NPCS_CVAR", "nameplateShowFriendlyNpcs"),
+        (
+            "SHOW_ONLY_NAME_FOR_FRIENDLY_PLAYER_UNITS_CVAR",
+            "nameplateShowOnlyNameForFriendlyPlayerUnits",
+        ),
+        (
+            "USE_CLASS_COLOR_FOR_FRIENDLY_PLAYER_UNIT_NAMES_CVAR",
+            "nameplateUseClassColorForFriendlyPlayerUnitNames",
+        ),
+        ("PREVIEW_UNIT_TOKEN", "preview"),
     ] {
         t.raw_set(k, v)?;
     }
@@ -632,4 +683,3 @@ fn register_c_death_recap(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("C_DeathRecap", t)?;
     Ok(())
 }
-

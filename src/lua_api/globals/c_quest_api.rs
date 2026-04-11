@@ -180,11 +180,15 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
     )?;
     t.set(
         "IsWorldQuest",
-        lua.create_function(|_, quest_id: i32| Ok(super::c_quest_api_tasks::is_world_quest(quest_id)))?,
+        lua.create_function(|_, quest_id: i32| {
+            Ok(super::c_quest_api_tasks::is_world_quest(quest_id))
+        })?,
     )?;
     t.set(
         "IsQuestTask",
-        lua.create_function(|_, quest_id: i32| Ok(super::c_quest_api_tasks::is_world_quest(quest_id)))?,
+        lua.create_function(|_, quest_id: i32| {
+            Ok(super::c_quest_api_tasks::is_world_quest(quest_id))
+        })?,
     )?;
     Ok(t)
 }

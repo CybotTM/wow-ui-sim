@@ -141,9 +141,7 @@ fn register_task_quest_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestTimeLeftMinutes",
-        lua.create_function(|_, quest_id: i32| {
-            Ok(if is_world_quest(quest_id) { 120 } else { 0 })
-        })?,
+        lua.create_function(|_, quest_id: i32| Ok(if is_world_quest(quest_id) { 120 } else { 0 }))?,
     )?;
     Ok(())
 }

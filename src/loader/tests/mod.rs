@@ -577,7 +577,6 @@ fn test_intersects_returns_false_for_disjoint_frames() {
 
 mod frame_interaction;
 mod frame_state;
-mod minimap_specialized;
 mod global_frame_access;
 mod inline_script;
 mod layout_alpha;
@@ -585,6 +584,7 @@ mod layout_anchoring;
 mod layout_positioning;
 mod layout_scale;
 mod layout_size;
+mod minimap_specialized;
 mod wow_api;
 mod wow_api_globals;
 mod wow_api_tooltip;

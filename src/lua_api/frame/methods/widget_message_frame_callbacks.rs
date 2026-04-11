@@ -183,10 +183,7 @@ fn add_set_on_text_copied_callback<M: mlua::UserDataMethods<FrameRef>>(methods: 
     });
 }
 
-pub(super) fn mark_message_frame_display_dirty(
-    lua: &mlua::Lua,
-    frame_id: u64,
-) -> mlua::Result<()> {
+pub(super) fn mark_message_frame_display_dirty(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<()> {
     {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -426,9 +423,10 @@ fn replace_message_frame_messages(
         .entry(frame_id)
         .or_insert_with(crate::lua_api::message_frame::MessageFrameData::default);
     data.messages = messages;
-    data.scroll_offset = data
-        .scroll_offset
-        .clamp(0, super::widget_message_frame_scroll::message_frame_scroll_limit(data));
+    data.scroll_offset = data.scroll_offset.clamp(
+        0,
+        super::widget_message_frame_scroll::message_frame_scroll_limit(data),
+    );
 }
 
 fn call_message_predicate(
@@ -547,12 +545,7 @@ fn log_message(state: &SimState, id: u64, text: &str) {
     eprintln!("[{name}] {clean}");
 }
 
-pub(super) fn add_message_core(
-    state: &mut SimState,
-    id: u64,
-    args: mlua::MultiValue,
-    log: bool,
-) {
+pub(super) fn add_message_core(state: &mut SimState, id: u64, args: mlua::MultiValue, log: bool) {
     let args_vec: Vec<Value> = args.into_iter().collect();
     let text = match args_vec.first() {
         Some(Value::String(s)) => s.to_string_lossy().to_string(),

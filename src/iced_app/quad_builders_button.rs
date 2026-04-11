@@ -5,10 +5,8 @@ use iced::{Point, Rectangle, Size};
 use crate::render::{BlendMode, QuadBatch};
 use crate::widget::{TextJustify, WidgetType};
 
-use super::{
-    FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_text_quads,
-};
 use super::textures::remap_atlas_crop;
+use super::{FrameQuadEmit, WidgetTextLayout, WidgetTextRenderer, emit_widget_text_quads};
 
 /// Build quads for a Button widget.
 pub(super) fn build_button_quads(
