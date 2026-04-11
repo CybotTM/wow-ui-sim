@@ -65,6 +65,7 @@ pub fn register_globals(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     register_submodule_apis(lua, &state)?;
     register_ui_strings_and_fonts(lua)?;
     super::string_format::patch_string_format(lua)?;
+    super::globals::nil_symbol_audit::install(lua, Rc::clone(&state))?;
     Ok(())
 }
 

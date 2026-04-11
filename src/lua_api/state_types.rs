@@ -121,6 +121,17 @@ pub struct LuaErrorRecord {
     pub addon_name: Option<String>,
 }
 
+/// A missing symbol access captured through `_G` or `C_*` namespace `__index` hooks.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct NilSymbolAccess {
+    /// Addon name inferred from the loading/executing context.
+    pub addon_name: Option<String>,
+    /// Container table where the miss happened (`_G` or `C_*` namespace name).
+    pub container: String,
+    /// Missing key that resolved to nil.
+    pub key: String,
+}
+
 /// A Great Vault activity slot (one row/tier in the weekly rewards UI).
 #[derive(Debug, Clone)]
 pub struct GreatVaultActivity {

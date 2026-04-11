@@ -80,6 +80,7 @@ macro_rules! build_empty_sim_state {
             lua_errors: $collections.lua_errors,
             lua_error_records: $collections.lua_error_records,
             lua_error_counts: $collections.lua_error_counts,
+            nil_symbol_accesses: $collections.nil_symbol_accesses,
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
             player: PlayerState::default(),
@@ -102,7 +103,8 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, GreatVaultActivity,
-    LootRollInfo, LuaErrorRecord, MovementState, PendingTimer, PlayerState, WorldState,
+    LootRollInfo, LuaErrorRecord, MovementState, NilSymbolAccess, PendingTimer, PlayerState,
+    WorldState,
 };
 
 /// Active quest blob state for a QuestPOIFrame.
@@ -316,6 +318,8 @@ pub struct SimState {
     pub lua_error_records: Vec<LuaErrorRecord>,
     /// Count of normalized Lua error messages seen so far.
     pub lua_error_counts: HashMap<String, usize>,
+    /// Missing global / namespace symbol accesses captured by logging `__index` hooks.
+    pub nil_symbol_accesses: Vec<NilSymbolAccess>,
     /// Global cross-frame Show/Hide dispatch depth (prevents Lua stack overflow
     /// when OnShow handlers trigger Show on other frames recursively).
     pub global_show_hide_depth: u32,
@@ -341,6 +345,7 @@ struct EmptyStateCollections {
     lua_errors: Vec<String>,
     lua_error_records: Vec<LuaErrorRecord>,
     lua_error_counts: HashMap<String, usize>,
+    nil_symbol_accesses: Vec<NilSymbolAccess>,
     tooltips: HashMap<u64, TooltipData>,
     blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
     quest_blobs: HashMap<u64, QuestBlobState>,
@@ -372,6 +377,7 @@ impl EmptyStateCollections {
             lua_errors: Vec::new(),
             lua_error_records: Vec::new(),
             lua_error_counts: HashMap::new(),
+            nil_symbol_accesses: Vec::new(),
             tooltips: HashMap::new(),
             blocked_auras_by_unit: HashMap::new(),
             quest_blobs: HashMap::new(),

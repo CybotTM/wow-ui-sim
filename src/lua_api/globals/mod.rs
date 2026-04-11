@@ -96,6 +96,7 @@ pub mod item_api;
 pub mod locale_api;
 pub mod lua_duration_object;
 pub mod mixin_api;
+pub mod nil_symbol_audit;
 pub mod player_api;
 pub(crate) mod player_api_helpers;
 pub mod profession_data;
