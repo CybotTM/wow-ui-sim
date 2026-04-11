@@ -71,6 +71,8 @@ mod c_stubs_api_missing_player_location;
 mod c_stubs_api_namespaces;
 pub mod c_stubs_api_professions;
 pub mod c_stubs_api_secure;
+mod c_stubs_api_guild_delves;
+mod c_stubs_api_shop;
 mod c_stubs_api_social;
 pub mod c_stubs_api_store;
 pub mod c_stubs_api_unit_frame;
