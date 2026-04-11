@@ -972,6 +972,75 @@ fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_e
     }
 }
 
+#[test]
+fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleClassTalentFrame) == "function") then
+                    return "missing_toggle_class_talent_frame"
+                end
+
+                if not (PlayerSpellsUtil.FrameTabs and PlayerSpellsUtil.FrameTabs.ClassSpecializations and PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "missing_frame_tabs"
+                end
+
+                PlayerSpellsUtil.ToggleClassTalentFrame()
+
+                if not (PlayerSpellsFrame and PlayerSpellsFrame:IsShown()) then
+                    return "talent_panel_not_open"
+                end
+
+                if not PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "talent_tab_not_initial"
+                end
+
+                if not PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.ClassSpecializations) then
+                    return "spec_tab_unavailable"
+                end
+
+                if not PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.ClassSpecializations) then
+                    return "spec_tab_not_selected"
+                end
+
+                if not PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "talent_tab_unavailable"
+                end
+
+                if not PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "talent_tab_not_reselected"
+                end
+
+                PlayerSpellsUtil.ToggleClassTalentFrame()
+
+                if PlayerSpellsFrame:IsShown() then
+                    return "talent_panel_not_closed"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Talent panel tab-switch flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Talent panel flow should open, switch to spec tab, switch back, and close: {result}"
+        );
+    }
+}
+
 // ── Target frame visibility tests (full addon load including Blizzard_UnitFrame) ──
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
