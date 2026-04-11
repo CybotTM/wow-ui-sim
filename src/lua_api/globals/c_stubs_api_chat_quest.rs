@@ -52,59 +52,29 @@ pub(super) fn register_quest_global_functions(
 
 /// Stateless quest query/popup stubs.
 fn register_quest_query_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
-    g.set(
-        "IsQuestSequenced",
-        lua.create_function(|_, _quest_id: i32| Ok(false))?,
-    )?;
-    g.set(
-        "GetQuestLogCompletionText",
-        lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?,
-    )?;
-    g.set(
-        "GetQuestProgressBarPercent",
-        lua.create_function(|_, _quest_id: i32| Ok(0.0f64))?,
-    )?;
-    g.set(
-        "QuestMapFrame_GetFocusedQuestID",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    g.set(
-        "IsModifiedClick",
-        lua.create_function(|_, _action: String| Ok(false))?,
-    )?;
-    g.set(
-        "GetQuestLink",
-        lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?,
-    )?;
+    register_quest_info_queries(lua, g)?;
+    register_quest_popup_stubs(lua, g)
+}
+
+fn register_quest_info_queries(lua: &Lua, g: &mlua::Table) -> Result<()> {
+    g.set("IsQuestSequenced", lua.create_function(|_, _quest_id: i32| Ok(false))?)?;
+    g.set("GetQuestLogCompletionText", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
+    g.set("GetQuestProgressBarPercent", lua.create_function(|_, _quest_id: i32| Ok(0.0f64))?)?;
+    g.set("QuestMapFrame_GetFocusedQuestID", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set("IsModifiedClick", lua.create_function(|_, _action: String| Ok(false))?)?;
+    g.set("GetQuestLink", lua.create_function(|_, _quest_id: i32| Ok(Value::Nil))?)?;
+    g.set("GetQuestLogSpecialItemInfo", lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?)?;
+    Ok(())
+}
+
+fn register_quest_popup_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set("IsInJailersTower", lua.create_function(|_, ()| Ok(false))?)?;
-    g.set(
-        "IsOnGroundFloorInJailersTower",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    g.set(
-        "GetNumAutoQuestPopUps",
-        lua.create_function(|_, ()| Ok(0i32))?,
-    )?;
-    g.set(
-        "GetAutoQuestPopUp",
-        lua.create_function(|_, _index: i32| Ok(Value::Nil))?,
-    )?;
-    g.set(
-        "GetQuestLogSpecialItemInfo",
-        lua.create_function(|_, _log_idx: i32| Ok(Value::Nil))?,
-    )?;
-    g.set(
-        "GetTasksTable",
-        lua.create_function(|lua, ()| lua.create_table())?,
-    )?;
-    g.set(
-        "ExpandQuestHeader",
-        lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?,
-    )?;
-    g.set(
-        "CollapseQuestHeader",
-        lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?,
-    )?;
+    g.set("IsOnGroundFloorInJailersTower", lua.create_function(|_, ()| Ok(false))?)?;
+    g.set("GetNumAutoQuestPopUps", lua.create_function(|_, ()| Ok(0i32))?)?;
+    g.set("GetAutoQuestPopUp", lua.create_function(|_, _index: i32| Ok(Value::Nil))?)?;
+    g.set("GetTasksTable", lua.create_function(|lua, ()| lua.create_table())?)?;
+    g.set("ExpandQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
+    g.set("CollapseQuestHeader", lua.create_function(|_, (_idx, _no_update): (i32, Option<bool>)| Ok(()))?)?;
     Ok(())
 }
 
@@ -132,42 +102,20 @@ fn register_quest_leaderboard_functions(lua: &Lua, g: &mlua::Table) -> Result<()
 
 /// Chat window management stubs needed by FloatingChatFrame.
 pub(super) fn register_chat_window_stubs(lua: &Lua) -> Result<()> {
+    register_chat_window_setters(lua)?;
+    register_chat_window_getters(lua)
+}
+
+fn register_chat_window_setters(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    g.set(
-        "SetChatWindowLocked",
-        lua.create_function(|_, (_id, _locked): (i32, bool)| Ok(()))?,
-    )?;
-    g.set(
-        "SetChatWindowUninteractable",
-        lua.create_function(|_, (_id, _flag): (i32, bool)| Ok(()))?,
-    )?;
-    g.set(
-        "GetChatWindowSavedDimensions",
-        lua.create_function(|_, _id: i32| Ok((430.0f64, 120.0f64)))?,
-    )?;
-    g.set(
-        "SetChatWindowColor",
-        lua.create_function(|_, (_id, _r, _g, _b): (i32, f64, f64, f64)| Ok(()))?,
-    )?;
-    g.set(
-        "SetChatWindowAlpha",
-        lua.create_function(|_, (_id, _a): (i32, f64)| Ok(()))?,
-    )?;
-    g.set(
-        "GetChatWindowSavedPosition",
-        lua.create_function(|_, _id: i32| {
-            // Returns: point, yOffset, xOffset, relativePoint
-            Ok(("BOTTOMLEFT", 0.0f64, 0.0f64, "BOTTOMLEFT"))
-        })?,
-    )?;
-    // ChangeChatColor: sets r,g,b on ChatTypeInfo[type]
+    g.set("SetChatWindowLocked", lua.create_function(|_, (_id, _locked): (i32, bool)| Ok(()))?)?;
+    g.set("SetChatWindowUninteractable", lua.create_function(|_, (_id, _flag): (i32, bool)| Ok(()))?)?;
+    g.set("SetChatWindowColor", lua.create_function(|_, (_id, _r, _g, _b): (i32, f64, f64, f64)| Ok(()))?)?;
+    g.set("SetChatWindowAlpha", lua.create_function(|_, (_id, _a): (i32, f64)| Ok(()))?)?;
     g.set(
         "ChangeChatColor",
         lua.create_function(|lua, (ct, r, g, b): (String, f64, f64, f64)| {
-            let cti: mlua::Table = lua
-                .globals()
-                .get::<mlua::Table>("ChatTypeInfo")?
-                .get(&*ct)?;
+            let cti: mlua::Table = lua.globals().get::<mlua::Table>("ChatTypeInfo")?.get(&*ct)?;
             cti.set("r", r)?;
             cti.set("g", g)?;
             cti.set("b", b)?;
@@ -177,54 +125,49 @@ pub(super) fn register_chat_window_stubs(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+fn register_chat_window_getters(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("GetChatWindowSavedDimensions", lua.create_function(|_, _id: i32| Ok((430.0f64, 120.0f64)))?)?;
+    g.set(
+        "GetChatWindowSavedPosition",
+        lua.create_function(|_, _id: i32| Ok(("BOTTOMLEFT", 0.0f64, 0.0f64, "BOTTOMLEFT")))?,
+    )?;
+    Ok(())
+}
+
 /// Chat-related global function stubs needed by Blizzard_ChatFrame.
 pub(super) fn register_chat_stubs(lua: &Lua) -> Result<()> {
+    register_chat_type_stubs(lua)?;
+    register_chat_info_stubs(lua)
+}
+
+fn register_chat_type_stubs(lua: &Lua) -> Result<()> {
     let g = lua.globals();
-    // GetChatTypeIndex: deterministic integer from chat type name
     g.set(
         "GetChatTypeIndex",
         lua.create_function(|_, name: String| {
-            let hash = name
-                .bytes()
-                .fold(0u32, |acc, b| acc.wrapping_mul(31).wrapping_add(b as u32));
+            let hash = name.bytes().fold(0u32, |acc, b| acc.wrapping_mul(31).wrapping_add(b as u32));
             Ok((hash % 50 + 1) as i32)
         })?,
     )?;
-    // CreateSecureDelegate: no taint system, return the function as-is
-    g.set(
-        "CreateSecureDelegate",
-        lua.create_function(|_, func: mlua::Function| Ok(func))?,
-    )?;
-    // GetChatWindowInfo: return defaults (only window 1 is shown)
-    // Returns: name, fontSize, r, g, b, alpha, shown, locked, docked, uninteractable
-    // Default color is black (0,0,0) at 25% alpha, matching DEFAULT_CHATFRAME_COLOR/ALPHA
+    g.set("CreateSecureDelegate", lua.create_function(|_, func: mlua::Function| Ok(func))?)?;
     g.set(
         "GetChatWindowInfo",
         lua.create_function(|_, id: i32| {
             let name = format!("ChatFrame{id}");
             let shown = id == 1;
-            Ok((
-                name, 14.0f64, 0.0f64, 0.0f64, 0.0f64, 0.25f64, shown, false, false, false,
-            ))
+            Ok((name, 14.0f64, 0.0f64, 0.0f64, 0.0f64, 0.25f64, shown, false, false, false))
         })?,
     )?;
-    // GetChatWindowMessages/GetChatWindowChannels: return no message types or channels
-    g.set(
-        "GetChatWindowMessages",
-        lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?,
-    )?;
-    g.set(
-        "GetChatWindowChannels",
-        lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?,
-    )?;
-    g.set(
-        "GetDefaultLanguage",
-        lua.create_function(|_, ()| Ok("Common"))?,
-    )?;
-    g.set(
-        "GetAlternativeDefaultLanguage",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
+    Ok(())
+}
+
+fn register_chat_info_stubs(lua: &Lua) -> Result<()> {
+    let g = lua.globals();
+    g.set("GetChatWindowMessages", lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?)?;
+    g.set("GetChatWindowChannels", lua.create_function(|_, _id: i32| Ok(mlua::MultiValue::new()))?)?;
+    g.set("GetDefaultLanguage", lua.create_function(|_, ()| Ok("Common"))?)?;
+    g.set("GetAlternativeDefaultLanguage", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
     Ok(())
 }
 
