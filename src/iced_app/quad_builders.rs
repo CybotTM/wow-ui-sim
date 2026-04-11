@@ -127,11 +127,27 @@ pub fn emit_frame_quads(
     frame: FrameQuadEmit<'_>,
 ) {
     let vert_before = batch.vertices.len();
+    dispatch_widget_quads(batch, text_ctx, &frame);
+
+    if let Some(clip_bounds) = frame.clip_bounds
+        && frame.widget.rotation == 0.0
+    {
+        clip_recent_quads(batch, vert_before, clip_bounds);
+    }
+
+    emit_quest_blob_quads(batch, &frame);
+}
+
+fn dispatch_widget_quads(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
     match frame.widget.widget_type {
         WidgetType::Frame | WidgetType::StatusBar => {
             build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
         }
-        WidgetType::MessageFrame => emit_message_frame_quads(batch, text_ctx, &frame),
+        WidgetType::MessageFrame => emit_message_frame_quads(batch, text_ctx, frame),
         WidgetType::GameTooltip => {
             super::tooltip::build_tooltip_quads(
                 super::tooltip::TooltipRender {
@@ -147,10 +163,10 @@ pub fn emit_frame_quads(
         WidgetType::Minimap => {
             build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
         }
-        WidgetType::Button => button::emit_button_quads_with_text(batch, text_ctx, &frame),
-        WidgetType::Texture => emit_texture_quads_with_mask(batch, &frame),
-        WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, &frame),
-        WidgetType::CheckButton => button::emit_checkbutton_quads(batch, text_ctx, &frame),
+        WidgetType::Button => button::emit_button_quads_with_text(batch, text_ctx, frame),
+        WidgetType::Texture => emit_texture_quads_with_mask(batch, frame),
+        WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, frame),
+        WidgetType::CheckButton => button::emit_checkbutton_quads(batch, text_ctx, frame),
         WidgetType::EditBox => {
             button::emit_editbox_with_text(
                 batch,
@@ -160,7 +176,7 @@ pub fn emit_frame_quads(
                 frame.eff_alpha,
             );
         }
-        WidgetType::Cooldown => cooldown::emit_cooldown_quads(batch, text_ctx, &frame),
+        WidgetType::Cooldown => cooldown::emit_cooldown_quads(batch, text_ctx, frame),
         WidgetType::Line => {
             super::quad_builders_line::build_line_quads(
                 batch,
@@ -171,14 +187,6 @@ pub fn emit_frame_quads(
         }
         _ => {}
     }
-
-    if let Some(clip_bounds) = frame.clip_bounds
-        && frame.widget.rotation == 0.0
-    {
-        clip_recent_quads(batch, vert_before, clip_bounds);
-    }
-
-    emit_quest_blob_quads(batch, &frame);
 }
 
 fn emit_message_frame_quads(
