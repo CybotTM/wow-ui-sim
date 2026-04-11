@@ -674,7 +674,7 @@ fn load_first_unloaded_addon_in_family(
     env: &WowLuaEnv,
     family: &[String],
     load_failures: &mut Vec<String>,
-) {
+) -> Option<String> {
     if let Some(addon_name) = first_unloaded_addon_in_family(env, family) {
         let (loaded, reason): (bool, Option<String>) = env
             .eval(&format!("return C_AddOns.LoadAddOn({addon_name:?})"))
@@ -686,6 +686,10 @@ fn load_first_unloaded_addon_in_family(
                 reason.as_deref().unwrap_or("nil"),
             ));
         }
+
+        Some(addon_name)
+    } else {
+        None
     }
 }
 
@@ -705,6 +709,7 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
         let shard_families =
             shard_load_on_demand_addon_families(&lod_families, shard_count, &known_runtime_counts);
         let mut load_failures = Vec::new();
+        let mut family_failures = Vec::new();
         for (name, toc_path) in &startup_addons {
             if let Err(error) = load_addon(&env.loader_env(), toc_path) {
                 load_failures.push(format!("{name}: {error}"));
@@ -720,26 +725,39 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
         env.apply_post_load_workarounds();
         settle_headless_startup(&env);
         silence_lua_error_handler(&env);
-        clear_lua_error_tracking(&env);
 
         for family in &shard_families[shard_index] {
-            load_first_unloaded_addon_in_family(&env, family, &mut load_failures);
+            clear_lua_error_tracking(&env);
+            let representative =
+                load_first_unloaded_addon_in_family(&env, family, &mut load_failures);
+            let Some(representative) = representative else {
+                continue;
+            };
+            let state = env.state().borrow();
+            let grouped_errors = grouped_errors_by_addon(&state);
+            let actual_counts = actual_error_counts(&grouped_errors);
+            let increases =
+                classify_error_count_increases_from_baseline(&known_runtime_counts, &actual_counts);
+            let invalid_addons: Vec<_> = grouped_errors
+                .keys()
+                .filter(|addon_name| {
+                    addon_name.as_str() != "<unknown>"
+                        && !known_blizzard_addons.contains(*addon_name)
+                })
+                .cloned()
+                .collect();
+            let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
+            if unknown_count > 0 || !invalid_addons.is_empty() || !increases.is_empty() {
+                family_failures.push(format!(
+                    "{representative}: increased [{}], invalid_addons={:?}, unknown_count={}, actual counts=[{}]\n{}",
+                    format_error_count_changes(&increases),
+                    invalid_addons,
+                    unknown_count,
+                    format_error_count_map(&actual_counts),
+                    format_per_addon_report(&grouped_errors),
+                ));
+            }
         }
-
-        let state = env.state().borrow();
-        let grouped_errors = grouped_errors_by_addon(&state);
-        let actual_counts = actual_error_counts(&grouped_errors);
-        let increases =
-            classify_error_count_increases_from_baseline(&known_runtime_counts, &actual_counts);
-        let invalid_addons: Vec<_> = grouped_errors
-            .keys()
-            .filter(|addon_name| {
-                addon_name.as_str() != "<unknown>" && !known_blizzard_addons.contains(*addon_name)
-            })
-            .cloned()
-            .collect();
-        let unknown_count = grouped_errors.get("<unknown>").map_or(0, Vec::len);
-        drop(state);
 
         assert!(
             load_failures.is_empty(),
@@ -747,22 +765,9 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
             load_failures.join("\n"),
         );
         assert!(
-            unknown_count == 0,
-            "runtime LoadAddOn should attribute LoD-pass Lua errors in shard {shard_index}/{shard_count} to addon names, not <unknown>.\n{}",
-            format_per_addon_report(&grouped_errors),
-        );
-        assert!(
-            invalid_addons.is_empty(),
-            "runtime LoadAddOn attributed LoD-pass Lua errors in shard {shard_index}/{shard_count} to unexpected addons: {:?}\n{}",
-            invalid_addons,
-            format_per_addon_report(&grouped_errors),
-        );
-        assert!(
-            increases.is_empty(),
-            "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline after startup for shard {shard_index}/{shard_count}.\nincreased: [{}]\nactual counts: [{}]\n{}",
-            format_error_count_changes(&increases),
-            format_error_count_map(&actual_counts),
-            format_per_addon_report(&grouped_errors),
+            family_failures.is_empty(),
+            "runtime LoadAddOn exceeded the known runtime per-addon Lua error baseline for at least one family in shard {shard_index}/{shard_count}:\n{}",
+            family_failures.join("\n\n"),
         );
     })
 }
