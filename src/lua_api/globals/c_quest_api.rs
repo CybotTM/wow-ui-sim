@@ -450,14 +450,25 @@ fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestTagInfo",
-        lua.create_function(|lua, _id: i32| {
+        lua.create_function(|lua, id: i32| {
             let info = lua.create_table()?;
-            info.set("tagID", 0)?;
-            info.set("tagName", "Quest")?;
-            info.set("worldQuestType", Value::Nil)?;
-            info.set("quality", 1)?;
-            info.set("isElite", false)?;
-            info.set("displayExpiration", false)?;
+            if is_world_quest(id) {
+                // Enum.QuestTagType.Normal = 2
+                info.set("tagID", 2)?;
+                info.set("tagName", "World Quest")?;
+                info.set("worldQuestType", 2)?;
+                // Enum.WorldQuestQuality.Common = 0
+                info.set("quality", 0)?;
+                info.set("isElite", false)?;
+                info.set("displayExpiration", true)?;
+            } else {
+                info.set("tagID", 0)?;
+                info.set("tagName", "Quest")?;
+                info.set("worldQuestType", Value::Nil)?;
+                info.set("quality", 1)?;
+                info.set("isElite", false)?;
+                info.set("displayExpiration", false)?;
+            }
             Ok(info)
         })?,
     )?;
