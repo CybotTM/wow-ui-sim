@@ -336,17 +336,36 @@ fn register_c_date_and_time(lua: &Lua) -> Result<mlua::Table> {
 /// C_Minimap namespace - minimap utilities.
 fn register_c_minimap(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
+    register_minimap_core(lua, &t)?;
+    register_minimap_tracking(lua, &t)?;
+    Ok(t)
+}
 
+/// Core minimap queries and settings.
+fn register_minimap_core(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsInsideQuestBlob",
-        lua.create_function(|_, (_quest_id, _x, _y): (i32, f64, f64)| Ok(false))?,
+        lua.create_function(|_, (_qid, _x, _y): (i32, f64, f64)| Ok(false))?,
     )?;
     t.set("GetViewRadius", lua.create_function(|_, ()| Ok(200.0f64))?)?;
     t.set(
         "SetPlayerTexture",
-        lua.create_function(|_, (_file_id, _icon_id): (i32, i32)| Ok(()))?,
+        lua.create_function(|_, (_fid, _iid): (i32, i32)| Ok(()))?,
     )?;
-    // Tracking system stubs
+    t.set(
+        "ShouldUseHybridMinimap",
+        lua.create_function(|_, ()| Ok(false))?,
+    )?;
+    t.set("GetUiMapID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
+    t.set(
+        "IsFilteredOut",
+        lua.create_function(|_, _filter: Value| Ok(false))?,
+    )?;
+    Ok(())
+}
+
+/// Minimap tracking system stubs — no tracking types in the simulator.
+fn register_minimap_tracking(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetNumTrackingTypes",
         lua.create_function(|_, ()| Ok(0i32))?,
@@ -362,19 +381,9 @@ fn register_c_minimap(lua: &Lua) -> Result<mlua::Table> {
     t.set("ClearAllTracking", lua.create_function(|_, ()| Ok(()))?)?;
     t.set(
         "SetTrackingFilterByFilterIndex",
-        lua.create_function(|_, (_index, _value): (i32, bool)| Ok(()))?,
+        lua.create_function(|_, (_i, _v): (i32, bool)| Ok(()))?,
     )?;
-    t.set(
-        "ShouldUseHybridMinimap",
-        lua.create_function(|_, ()| Ok(false))?,
-    )?;
-    t.set("GetUiMapID", lua.create_function(|_, ()| Ok(Value::Nil))?)?;
-    t.set(
-        "IsFilteredOut",
-        lua.create_function(|_, _filter: Value| Ok(false))?,
-    )?;
-
-    Ok(t)
+    Ok(())
 }
 
 /// C_Navigation namespace - quest navigation waypoints.
