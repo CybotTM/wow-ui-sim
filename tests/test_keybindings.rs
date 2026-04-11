@@ -1161,6 +1161,56 @@ fn talent_panel_switches_spec_tabs_and_closes_without_errors() {
     }
 }
 
+#[test]
+fn talent_panel_has_at_least_one_visible_talent_node_frame() {
+    test_timeout! {
+        let env = setup_full_env();
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleClassTalentFrame) == "function") then
+                    return "missing_toggle_class_talent_frame"
+                end
+
+                PlayerSpellsUtil.ToggleClassTalentFrame()
+
+                if not (PlayerSpellsFrame and PlayerSpellsFrame:IsShown()) then
+                    return "talent_panel_not_open"
+                end
+                if not (PlayerSpellsFrame.TalentsFrame and PlayerSpellsFrame.TalentsFrame:IsShown()) then
+                    return "talents_frame_not_shown"
+                end
+
+                local totalButtons = 0
+                local visibleButtons = 0
+                for talentButton in PlayerSpellsFrame.TalentsFrame:EnumerateAllTalentButtons() do
+                    totalButtons = totalButtons + 1
+                    if talentButton and talentButton:IsShown() then
+                        visibleButtons = visibleButtons + 1
+                    end
+                end
+
+                if totalButtons == 0 then
+                    return "no_talent_buttons"
+                end
+                if visibleButtons == 0 then
+                    return "no_visible_talent_buttons"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "Talent panel should expose at least one visible active talent button frame: {result}"
+        );
+    }
+}
+
 // ── Target frame visibility tests (full addon load including Blizzard_UnitFrame) ──
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
