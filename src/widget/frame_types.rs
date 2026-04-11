@@ -1,0 +1,308 @@
+//! Type definitions used by Frame: colors, gradients, model state, minimap blobs, text, backdrop.
+
+use super::AnchorPoint;
+
+/// Attribute value stored on frames.
+#[derive(Debug, Clone)]
+pub enum AttributeValue {
+    String(String),
+    Number(f64),
+    Boolean(bool),
+    Nil,
+}
+
+/// RGBA color value.
+#[derive(Debug, Clone, Copy, Default, PartialEq)]
+pub struct Color {
+    pub r: f32,
+    pub g: f32,
+    pub b: f32,
+    pub a: f32,
+}
+
+impl Color {
+    pub fn new(r: f32, g: f32, b: f32, a: f32) -> Self {
+        Self { r, g, b, a }
+    }
+
+    pub fn rgb(r: f32, g: f32, b: f32) -> Self {
+        Self { r, g, b, a: 1.0 }
+    }
+}
+
+/// Vertex color gradient (VERTICAL or HORIZONTAL).
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct Gradient {
+    /// true = vertical (min at bottom, max at top), false = horizontal (min at left, max at right).
+    pub vertical: bool,
+    pub min_color: Color,
+    pub max_color: Color,
+}
+
+/// Stored alpha-gradient span.
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct AlphaGradient {
+    pub start: f32,
+    pub length: f32,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct MinimapBlobLayerStyle {
+    pub texture: Option<String>,
+    pub alpha: f64,
+}
+
+#[derive(Debug, Clone, Default)]
+pub struct MinimapBlobRingStyle {
+    pub texture: Option<String>,
+    pub alpha: f64,
+    pub scalar: f64,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelCameraState {
+    pub distance: f32,
+    pub facing: f32,
+    pub target: (f32, f32, f32),
+    pub roll: f32,
+}
+
+impl Default for ModelCameraState {
+    fn default() -> Self {
+        Self {
+            distance: 0.0,
+            facing: 0.0,
+            target: (0.0, 0.0, 0.0),
+            roll: 0.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelTransformState {
+    pub scale: f32,
+    pub position: (f32, f32, f32),
+    pub facing: f32,
+    pub camera: ModelCameraState,
+}
+
+impl Default for ModelTransformState {
+    fn default() -> Self {
+        Self {
+            scale: 1.0,
+            position: (0.0, 0.0, 0.0),
+            facing: 0.0,
+            camera: ModelCameraState::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct ModelAppearanceState {
+    pub display_info: Option<i32>,
+    pub creature_id: Option<i32>,
+    pub animation_id: Option<i32>,
+    pub sequence_id: Option<i32>,
+    pub sequence_time_ms: Option<i32>,
+    pub refresh_unit_count: u32,
+    pub refresh_camera_count: u32,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelRenderingState {
+    pub alpha: f32,
+    pub shadow_effect: f32,
+    pub particles_enabled: bool,
+    pub use_gbuffer: bool,
+}
+
+impl Default for ModelRenderingState {
+    fn default() -> Self {
+        Self {
+            alpha: 1.0,
+            shadow_effect: 0.0,
+            particles_enabled: false,
+            use_gbuffer: false,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneCameraState {
+    pub position: (f32, f32, f32),
+    pub forward: (f32, f32, f32),
+    pub right: (f32, f32, f32),
+    pub up: (f32, f32, f32),
+    pub field_of_view: f32,
+    pub near_clip: f32,
+    pub far_clip: f32,
+}
+
+impl Default for ModelSceneCameraState {
+    fn default() -> Self {
+        Self {
+            position: (0.0, 0.0, 0.0),
+            forward: (0.0, 0.0, 1.0),
+            right: (1.0, 0.0, 0.0),
+            up: (0.0, 1.0, 0.0),
+            field_of_view: 0.785,
+            near_clip: 0.1,
+            far_clip: 100.0,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneLightState {
+    pub light_type: i32,
+    pub position: (f32, f32, f32),
+    pub direction: (f32, f32, f32),
+    pub ambient_color: Color,
+    pub diffuse_color: Color,
+    pub visible: bool,
+}
+
+impl Default for ModelSceneLightState {
+    fn default() -> Self {
+        Self {
+            light_type: 0,
+            position: (0.0, 0.0, 0.0),
+            direction: (0.0, -1.0, 0.0),
+            ambient_color: Color::rgb(1.0, 1.0, 1.0),
+            diffuse_color: Color::rgb(1.0, 1.0, 1.0),
+            visible: true,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq)]
+pub struct ModelSceneFogState {
+    pub near: f32,
+    pub far: f32,
+    pub color: Color,
+}
+
+impl Default for ModelSceneFogState {
+    fn default() -> Self {
+        Self {
+            near: 0.0,
+            far: 0.0,
+            color: Color::rgb(0.0, 0.0, 0.0),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
+pub struct ModelSceneState {
+    pub paused: bool,
+    pub allow_overlapped_models: bool,
+    pub view_insets: (f32, f32, f32, f32),
+    pub view_translation: (f32, f32),
+    pub camera: ModelSceneCameraState,
+    pub light: ModelSceneLightState,
+    pub fog: ModelSceneFogState,
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct PlayerModelState {
+    pub do_blend: bool,
+    pub keep_model_on_hide: bool,
+    pub last_item: Option<String>,
+    pub last_item_appearance: Option<String>,
+    pub active_anim_kit: Option<i32>,
+}
+
+/// Text justification for FontStrings.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TextJustify {
+    /// Left/Top alignment.
+    Left,
+    /// Center/Middle alignment (default).
+    #[default]
+    Center,
+    /// Right/Bottom alignment.
+    Right,
+}
+
+impl TextJustify {
+    /// Parse from WoW string (case-insensitive).
+    pub fn from_wow_str(s: &str) -> Self {
+        match s.to_uppercase().as_str() {
+            "LEFT" | "TOP" => TextJustify::Left,
+            "CENTER" | "MIDDLE" => TextJustify::Center,
+            "RIGHT" | "BOTTOM" => TextJustify::Right,
+            _ => TextJustify::Left, // WoW defaults to LEFT
+        }
+    }
+
+    /// Convert to the canonical horizontal WoW string ("LEFT", "CENTER", "RIGHT").
+    pub fn as_h_str(self) -> &'static str {
+        match self {
+            TextJustify::Left => "LEFT",
+            TextJustify::Center => "CENTER",
+            TextJustify::Right => "RIGHT",
+        }
+    }
+
+    /// Convert to the canonical vertical WoW string ("TOP", "MIDDLE", "BOTTOM").
+    pub fn as_v_str(self) -> &'static str {
+        match self {
+            TextJustify::Left => "TOP",
+            TextJustify::Center => "MIDDLE",
+            TextJustify::Right => "BOTTOM",
+        }
+    }
+}
+
+/// Text outline style for FontStrings.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub enum TextOutline {
+    #[default]
+    None,
+    /// Normal outline (1px).
+    Outline,
+    /// Thick outline (2px).
+    ThickOutline,
+}
+
+impl TextOutline {
+    /// Parse from WoW flag string (e.g., "OUTLINE", "THICKOUTLINE", "OUTLINE, MONOCHROME").
+    pub fn from_wow_str(s: &str) -> Self {
+        let upper = s.to_uppercase();
+        if upper.contains("THICKOUTLINE") {
+            TextOutline::ThickOutline
+        } else if upper.contains("OUTLINE") || upper.contains("NORMAL") {
+            TextOutline::Outline
+        } else {
+            TextOutline::None
+        }
+    }
+}
+
+/// Backdrop configuration for frames.
+#[derive(Debug, Clone, Default)]
+pub struct Backdrop {
+    /// Whether backdrop is enabled.
+    pub enabled: bool,
+    /// Background texture file path (WoW path format).
+    pub bg_file: Option<String>,
+    /// Edge/border texture file path (WoW path format).
+    pub edge_file: Option<String>,
+    /// Background color.
+    pub bg_color: Color,
+    /// Border color.
+    pub border_color: Color,
+    /// Edge size (border thickness).
+    pub edge_size: f32,
+    /// Insets from frame edges.
+    pub insets: f32,
+}
+
+/// Anchor for Line widget start/end points.
+#[derive(Debug, Clone, Default)]
+pub struct LineAnchor {
+    pub point: AnchorPoint,
+    pub target_id: Option<u64>,
+    pub x_offset: f32,
+    pub y_offset: f32,
+}

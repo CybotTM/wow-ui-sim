@@ -3,6 +3,7 @@
 mod anchor;
 mod frame;
 mod frame_enums;
+mod frame_types;
 mod registry;
 
 pub use crate::atlas::NineSliceAtlasInfo;
