@@ -966,6 +966,57 @@ fn world_map_events_tab_click_and_zone_switch_without_errors() {
     }
 }
 
+#[test]
+fn quest_log_validate_tabs_shows_events_tab_when_scheduler_can_show_events() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                if not (QuestMapFrame and QuestMapFrame.EventsTab) then
+                    return "events_tab_missing"
+                end
+
+                C_EventScheduler._state.canShowEvents = true
+                QuestMapFrame.EventsTab:Hide()
+                QuestMapFrame:ValidateTabs()
+
+                if not C_EventScheduler.CanShowEvents() then
+                    return "scheduler_cannot_show_events"
+                end
+
+                if not QuestMapFrame.EventsTab:IsShown() then
+                    return "events_tab_not_shown"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Quest log ValidateTabs flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Quest log ValidateTabs should show the Events tab when C_EventScheduler.CanShowEvents() is true: {result}"
+        );
+    }
+}
+
 // ── ESCAPE → toggle GameMenuFrame ───────────────────────────────────────
 
 #[test]
