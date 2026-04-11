@@ -265,7 +265,8 @@ impl WowLuaEnv {
         self.fire_script_handler(frame_id, "OnMouseDown", vec![button_val.clone()])?;
         let down_val = Value::Boolean(false);
         self.fire_script_handler(frame_id, "OnClick", vec![button_val.clone(), down_val])?;
-        self.fire_script_handler(frame_id, "OnMouseUp", vec![button_val])?;
+        let up_inside_val = Value::Boolean(true);
+        self.fire_script_handler(frame_id, "OnMouseUp", vec![button_val, up_inside_val])?;
 
         Ok(())
     }

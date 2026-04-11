@@ -11,7 +11,7 @@ use std::rc::Rc;
 pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
 
-    globals.set("C_Map", register_c_map(lua)?)?;
+    globals.set("C_Map", register_c_map(lua, Rc::clone(&state))?)?;
     register_zone_text_functions(lua, state)?;
     globals.set("UiMapPoint", register_ui_map_point(lua)?)?;
     globals.set("C_MapExplorationInfo", register_c_map_exploration(lua)?)?;
@@ -26,7 +26,7 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 }
 
 /// C_Map namespace - map and area information.
-fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
+fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table> {
     let t = lua.create_table()?;
 
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
@@ -62,6 +62,32 @@ fn register_c_map(lua: &Lua) -> Result<mlua::Table> {
     t.set(
         "RequestPreloadMap",
         lua.create_function(|_, _map_id: i32| Ok(()))?,
+    )?;
+    t.set(
+        "SetMapForQuestLog",
+        lua.create_function(move |lua, map_id: i32| {
+            let globals = lua.globals();
+            globals.set("__wow_ui_sim_quest_log_map_id", map_id)?;
+            let exec_result = lua
+                .load(
+                    r#"
+                    local mapID = __wow_ui_sim_quest_log_map_id
+                    if WorldMapFrame and type(WorldMapFrame.SetMapID) == "function" then
+                        WorldMapFrame:SetMapID(mapID)
+                    end
+                "#,
+                )
+                .exec();
+            let _ = globals.set("__wow_ui_sim_quest_log_map_id", Value::Nil);
+            exec_result?;
+
+            let mut sim_state = state.borrow_mut();
+            if let Some(world_map_id) = sim_state.widgets.get_id_by_name("WorldMapFrame") {
+                let blob = sim_state.quest_blobs.entry(world_map_id).or_default();
+                blob.map_id = map_id as u32;
+            }
+            Ok(())
+        })?,
     )?;
     t.set(
         "MapHasArt",

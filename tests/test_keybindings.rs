@@ -721,6 +721,77 @@ fn keybind_m_toggles_world_map_without_errors() {
     }
 }
 
+#[test]
+fn world_map_events_tab_click_and_zone_switch_without_errors() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let events_tab_id = {
+            let state = env.state().borrow();
+            let quest_map_id = state
+                .widgets
+                .get_id_by_name("QuestMapFrame")
+                .expect("QuestMapFrame should exist after opening the world map");
+            state
+                .widgets
+                .get(quest_map_id)
+                .and_then(|frame| frame.children_keys.get("EventsTab").copied())
+                .expect("QuestMapFrame.EventsTab should exist after opening the world map")
+        };
+
+        env.send_click(events_tab_id)
+            .expect("clicking QuestMapFrame.EventsTab failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                if not (QuestMapFrame and QuestMapFrame.EventsTab and QuestMapFrame.EventsTab:IsShown()) then
+                    return "events_tab_not_shown"
+                end
+
+                if QuestMapFrame.displayMode ~= QuestLogDisplayMode.Events then
+                    return "events_tab_not_selected"
+                end
+
+                C_Map.SetMapForQuestLog(1)
+
+                if WorldMapFrame:GetMapID() ~= 1 then
+                    return "quest_log_map_not_switched"
+                end
+
+                ToggleWorldMap()
+
+                if WorldMapFrame:IsShown() then
+                    return "world_map_not_closed"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "World map events tab flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "World map events tab flow should open, switch to events, change zone, and close: {result}"
+        );
+    }
+}
+
 // ── ESCAPE → toggle GameMenuFrame ───────────────────────────────────────
 
 #[test]
