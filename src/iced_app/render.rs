@@ -173,6 +173,45 @@ fn rebuild_strata_batches(
     }
 }
 
+/// Rebuild cached strata batches for the given dirty mask and frame IDs.
+///
+/// This drives the same incremental snapshot path the live renderer uses:
+/// clean frames append cached snapshots, while dirty frames re-emit fresh quads.
+#[allow(clippy::too_many_arguments)]
+pub fn rebuild_dirty_strata_batches_for_registry(
+    strata_cache: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+    snapshot_cache: &mut [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT],
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    dirty: u16,
+    dirty_ids: Option<&HashSet<u64>>,
+    size: Size,
+    strata_buckets: &[Vec<u64>],
+    widgets: &crate::widget::WidgetRegistry,
+    pressed_frame: Option<u64>,
+    message_frames: &HashMap<u64, crate::lua_api::MessageFrameData>,
+    tooltip_data: &HashMap<u64, super::tooltip::TooltipRenderData>,
+    quest_blobs: &HashMap<u64, crate::lua_api::state::QuestBlobState>,
+    elapsed_secs: f64,
+) {
+    rebuild_strata_batches(
+        strata_cache,
+        snapshot_cache,
+        text_ctx,
+        RebuildStrataBatches {
+            dirty,
+            dirty_ids,
+            size,
+            strata_buckets,
+            widgets,
+            pressed_frame,
+            message_frames,
+            tooltip_data,
+            quest_blobs,
+            elapsed_secs,
+        },
+    );
+}
+
 struct RebuildStrataBatches<'a> {
     dirty: u16,
     dirty_ids: Option<&'a HashSet<u64>>,
@@ -546,22 +585,20 @@ impl App {
 
         let mut strata_cache = self.cached_strata_quads.borrow_mut();
         let mut snap_cache = self.cached_frame_snapshots.borrow_mut();
-        rebuild_strata_batches(
+        rebuild_dirty_strata_batches_for_registry(
             &mut strata_cache,
             &mut snap_cache,
             &mut text_ctx,
-            RebuildStrataBatches {
-                dirty,
-                dirty_ids,
-                size,
-                strata_buckets,
-                widgets: &state.widgets,
-                pressed_frame: self.pressed_frame,
-                message_frames: &state.message_frames,
-                tooltip_data: &tooltip_data,
-                quest_blobs: &state.quest_blobs,
-                elapsed_secs,
-            },
+            dirty,
+            dirty_ids,
+            size,
+            strata_buckets,
+            &state.widgets,
+            self.pressed_frame,
+            &state.message_frames,
+            &tooltip_data,
+            &state.quest_blobs,
+            elapsed_secs,
         );
     }
 
