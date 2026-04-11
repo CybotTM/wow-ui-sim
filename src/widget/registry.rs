@@ -171,6 +171,25 @@ impl WidgetRegistry {
         self.widgets.keys().copied()
     }
 
+    pub fn storage_estimate_bytes(&self) -> usize {
+        std::mem::size_of::<Self>()
+            + self.widgets.capacity() * std::mem::size_of::<(u64, Frame)>()
+            + self
+                .widgets
+                .values()
+                .map(Frame::storage_estimate_bytes)
+                .sum::<usize>()
+            + self.names.capacity() * std::mem::size_of::<(String, u64)>()
+            + self.names.keys().map(String::capacity).sum::<usize>()
+            + self.ordered_ids.capacity() * std::mem::size_of::<u64>()
+            + hash_set_u64_bytes(&self.render_dirty_ids.borrow())
+            + render_dirty_sources_bytes(&self.render_dirty_sources.borrow())
+            + dirty_source_bytes(&self.current_dirty_source.borrow())
+            + hash_map_u64_hash_set_u64_bytes(&self.anchor_dependents)
+            + hash_set_u64_bytes(&self.rect_dirty_ids)
+            + hash_set_u64_bytes(&self.pending_layout_ids)
+    }
+
     /// Collect unique texture paths from all visible frames.
     pub fn visible_texture_paths(&self) -> Vec<String> {
         let mut paths = std::collections::HashSet::new();
@@ -606,4 +625,33 @@ impl WidgetRegistry {
             .or_default()
             .insert(source);
     }
+}
+
+fn hash_set_u64_bytes(values: &HashSet<u64>) -> usize {
+    values.capacity() * std::mem::size_of::<u64>()
+}
+
+fn dirty_source_bytes(value: &Option<RenderDirtySource>) -> usize {
+    value.as_ref().map_or(0, |source| source.method.capacity())
+}
+
+fn render_dirty_sources_bytes(values: &HashMap<u64, HashSet<RenderDirtySource>>) -> usize {
+    values.capacity() * std::mem::size_of::<(u64, HashSet<RenderDirtySource>)>()
+        + values
+            .values()
+            .map(render_dirty_source_set_bytes)
+            .sum::<usize>()
+}
+
+fn render_dirty_source_set_bytes(values: &HashSet<RenderDirtySource>) -> usize {
+    values.capacity() * std::mem::size_of::<RenderDirtySource>()
+        + values
+            .iter()
+            .map(|source| source.method.capacity())
+            .sum::<usize>()
+}
+
+fn hash_map_u64_hash_set_u64_bytes(values: &HashMap<u64, HashSet<u64>>) -> usize {
+    values.capacity() * std::mem::size_of::<(u64, HashSet<u64>)>()
+        + values.values().map(hash_set_u64_bytes).sum::<usize>()
 }
