@@ -87,9 +87,10 @@ pub fn load_addon_internal(
     maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
     let ctx = build_addon_context(env, toc, folder_name)?;
     let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
+    let addon_name = result.name.clone();
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
-    append_nil_symbol_access_warnings(env, nil_symbol_access_start, &mut result);
+    append_nil_symbol_access_warnings(env, &addon_name, nil_symbol_access_start, &mut result);
     env.state().borrow_mut().loading_addon_index = None;
     Ok(result)
 }
@@ -213,6 +214,7 @@ fn load_addon_file(
 
 fn append_nil_symbol_access_warnings(
     env: &LoaderEnv<'_>,
+    addon_name: &str,
     start_index: usize,
     result: &mut LoadResult,
 ) {
@@ -223,31 +225,73 @@ fn append_nil_symbol_access_warnings(
     result.warnings.extend(
         grouped_accesses
             .into_iter()
-            .map(|(symbol_path, count)| format!("nil symbol access: {symbol_path} ({count}x)")),
+            .map(|(need, count)| format_missing_symbol_need(addon_name, &need, count)),
     );
 }
 
 fn summarize_nil_symbol_accesses(
     accesses: &[crate::lua_api::state::NilSymbolAccess],
-) -> Vec<(String, usize)> {
+) -> Vec<(MissingSymbolNeed, usize)> {
     let mut counts = BTreeMap::new();
     for access in accesses {
         *counts
-            .entry(format_nil_symbol_path(access))
+            .entry(classify_nil_symbol_access(access))
             .or_insert(0usize) += 1;
     }
 
     let mut rows: Vec<_> = counts.into_iter().collect();
-    rows.sort_by(|(left_path, left_count), (right_path, right_count)| {
+    rows.sort_by(|(left_need, left_count), (right_need, right_count)| {
         right_count
             .cmp(left_count)
-            .then_with(|| left_path.cmp(right_path))
+            .then_with(|| left_need.cmp(right_need))
     });
     rows
 }
 
-fn format_nil_symbol_path(access: &crate::lua_api::state::NilSymbolAccess) -> String {
-    format!("{}.{}", access.container, access.key)
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+enum MissingSymbolNeed {
+    Global(String),
+    CNamespace(String),
+    CMethod { namespace: String, method: String },
+}
+
+fn classify_nil_symbol_access(
+    access: &crate::lua_api::state::NilSymbolAccess,
+) -> MissingSymbolNeed {
+    if access.container == "_G" {
+        return classify_global_nil_access(&access.key);
+    }
+
+    if access.container.starts_with("C_") {
+        return MissingSymbolNeed::CMethod {
+            namespace: access.container.clone(),
+            method: access.key.clone(),
+        };
+    }
+
+    MissingSymbolNeed::Global(format!("{}.{}", access.container, access.key))
+}
+
+fn classify_global_nil_access(key: &str) -> MissingSymbolNeed {
+    if key.starts_with("C_") {
+        return MissingSymbolNeed::CNamespace(key.to_string());
+    }
+
+    MissingSymbolNeed::Global(key.to_string())
+}
+
+fn format_missing_symbol_need(addon_name: &str, need: &MissingSymbolNeed, count: usize) -> String {
+    match need {
+        MissingSymbolNeed::Global(name) => {
+            format!("{addon_name} needs global {name} ({count}x)")
+        }
+        MissingSymbolNeed::CNamespace(namespace) => {
+            format!("{addon_name} needs {namespace} ({count}x)")
+        }
+        MissingSymbolNeed::CMethod { namespace, method } => {
+            format!("{addon_name} needs {namespace}.{method} ({count}x)")
+        }
+    }
 }
 
 fn load_addon_lua_file(
@@ -292,12 +336,15 @@ fn load_addon_xml_file(
 fn apply_cpp_mixin_stubs(env: &LoaderEnv<'_>) {
     let _ = env.exec(
         r#"
+        local ModelSceneControlButtonMixin = rawget(_G, "ModelSceneControlButtonMixin")
         if ModelSceneControlButtonMixin and not ModelSceneControlButtonMixin.OnLoad then
             ModelSceneControlButtonMixin.OnLoad = function() end
         end
+        local PerksModelSceneControlButtonMixin = rawget(_G, "PerksModelSceneControlButtonMixin")
         if PerksModelSceneControlButtonMixin and not PerksModelSceneControlButtonMixin.OnLoad then
             PerksModelSceneControlButtonMixin.OnLoad = function() end
         end
+        local PetActionBarMixin = rawget(_G, "PetActionBarMixin")
         if PetActionBarMixin and PetActionBarMixin.Update and not PetActionBarMixin._update_guarded then
             PetActionBarMixin._update_guarded = true
             local origUpdate = PetActionBarMixin.Update

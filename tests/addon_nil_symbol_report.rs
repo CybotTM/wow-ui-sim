@@ -18,6 +18,7 @@ fn create_test_addon_with_missing_symbol_accesses() -> tempfile::TempDir {
         lua,
         r#"
 local _ = MissingGlobalSymbol
+local _ = C_MissingNamespace
 local _ = C_Container.MissingMethod
 local _ = C_Container.MissingMethod
 "#
@@ -38,15 +39,22 @@ fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
     assert!(
         result
             .warnings
-            .contains(&"nil symbol access: _G.MissingGlobalSymbol (1x)".to_string()),
-        "expected missing _G symbol warning, got {:?}",
+            .contains(&"TestNilSymbols needs global MissingGlobalSymbol (1x)".to_string()),
+        "expected missing global gap warning, got {:?}",
         result.warnings
     );
     assert!(
         result
             .warnings
-            .contains(&"nil symbol access: C_Container.MissingMethod (2x)".to_string()),
-        "expected missing C_* symbol warning, got {:?}",
+            .contains(&"TestNilSymbols needs C_MissingNamespace (1x)".to_string()),
+        "expected missing C_* namespace gap warning, got {:?}",
+        result.warnings
+    );
+    assert!(
+        result
+            .warnings
+            .contains(&"TestNilSymbols needs C_Container.MissingMethod (2x)".to_string()),
+        "expected missing C_* method gap warning, got {:?}",
         result.warnings
     );
 }
