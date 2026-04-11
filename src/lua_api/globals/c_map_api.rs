@@ -28,15 +28,20 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 /// C_Map namespace - map and area information.
 fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table> {
     let t = lua.create_table()?;
+    register_map_queries(lua, &t)?;
+    register_map_art_methods(lua, &t)?;
+    register_map_quest_log(lua, &t, state)?;
+    Ok(t)
+}
 
+/// Map info, position, and child queries.
+fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
-    // GetBestMapForUnit(unit) -> uiMapID; 2274 = Dornogal
     t.set(
         "GetBestMapForUnit",
         lua.create_function(|_, _unit: String| Ok(2274i32))?,
     )?;
-    // GetCurrentMapID() -> uiMapID
     t.set("GetCurrentMapID", lua.create_function(|_, ()| Ok(2274i32))?)?;
     t.set(
         "GetPlayerMapPosition",
@@ -45,9 +50,7 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
     t.set(
         "GetMapChildrenInfo",
         lua.create_function(
-            |lua, (_map_id, _map_type, _all_descendants): (i32, Option<i32>, Option<bool>)| {
-                lua.create_table()
-            },
+            |lua, (_map_id, _map_type, _all): (i32, Option<i32>, Option<bool>)| lua.create_table(),
         )?,
     )?;
     t.set(
@@ -58,6 +61,15 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
         "GetMapWorldSize",
         lua.create_function(|_, _map_id: i32| Ok((1000.0f64, 1000.0f64)))?,
     )?;
+    t.set(
+        "GetUserWaypointPositionForMap",
+        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
+    )?;
+    Ok(())
+}
+
+/// Map art layers, tiles, and art ID lookups.
+fn register_map_art_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetMapArtLayers", lua.create_function(get_map_art_layers)?)?;
     t.set(
         "GetMapArtLayerTextures",
@@ -65,9 +77,20 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
     )?;
     t.set("GetMapArtID", lua.create_function(get_map_art_id)?)?;
     t.set(
+        "MapHasArt",
+        lua.create_function(|_, map_id: i32| {
+            Ok(crate::map_art::get_map_art(map_id as u32).is_some())
+        })?,
+    )?;
+    t.set(
         "RequestPreloadMap",
         lua.create_function(|_, _map_id: i32| Ok(()))?,
     )?;
+    Ok(())
+}
+
+/// SetMapForQuestLog — updates WorldMapFrame and quest blob state.
+fn register_map_quest_log(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
     t.set(
         "SetMapForQuestLog",
         lua.create_function(move |lua, map_id: i32| {
@@ -94,19 +117,7 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
             Ok(())
         })?,
     )?;
-    t.set(
-        "MapHasArt",
-        lua.create_function(|_, map_id: i32| {
-            Ok(crate::map_art::get_map_art(map_id as u32).is_some())
-        })?,
-    )?;
-    // No user waypoint set — return nil so callers skip pin placement
-    t.set(
-        "GetUserWaypointPositionForMap",
-        lua.create_function(|_, _map_id: i32| Ok(Value::Nil))?,
-    )?;
-
-    Ok(t)
+    Ok(())
 }
 
 fn get_area_info(lua: &Lua, area_id: i32) -> Result<Value> {
