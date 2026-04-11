@@ -1017,6 +1017,53 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search
 }
 
 #[test]
+fn collections_mount_list_count_matches_displayed_mount_count() {
+    test_timeout! {
+        let env = setup_env();
+
+        let result: String = env.eval(r#"
+            if not ToggleCollectionsJournal then
+                return "missing_toggle_collections_journal"
+            end
+
+            ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS)
+
+            if not (CollectionsJournal and CollectionsJournal:IsShown()) then
+                return "journal_not_shown"
+            end
+            if not (MountJournal and MountJournal:IsShown()) then
+                return "mount_journal_not_shown"
+            end
+            if not MountJournal.ScrollBox then
+                return "missing_mount_scroll_box"
+            end
+
+            local dataProvider = MountJournal.ScrollBox:GetDataProvider()
+            if not dataProvider then
+                return "missing_mount_data_provider"
+            end
+
+            local expected = C_MountJournal.GetNumDisplayedMounts()
+            local actual = dataProvider:GetSize()
+            if actual ~= expected then
+                return string.format(
+                    "mount_list_count_mismatch_expected_%s_actual_%s",
+                    tostring(expected),
+                    tostring(actual)
+                )
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "MountJournal scrollbox data-provider size should match C_MountJournal.GetNumDisplayedMounts(): {result}"
+        );
+    }
+}
+
+#[test]
 fn toggle_achievement_frame_opens_and_closes_achievement_panel() {
     test_timeout! {
         let env = setup_env();
