@@ -12,6 +12,7 @@ mod methods_button;
 mod methods_button_state;
 pub(crate) mod methods_core;
 mod methods_core_identity;
+mod methods_core_region;
 mod methods_core_state;
 mod methods_create;
 mod methods_event;
