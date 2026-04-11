@@ -2,6 +2,7 @@
 
 use crate::lua_api::{SimState, WowLuaEnv};
 use crate::startup::settle_headless_startup;
+use std::collections::BTreeMap;
 
 /// A unique Lua error with its occurrence count.
 #[derive(serde::Serialize)]
@@ -46,6 +47,24 @@ fn collect_unique_errors(env: &WowLuaEnv) -> Vec<LuaError> {
             message,
         })
         .collect()
+}
+
+pub fn grouped_errors_by_addon(state: &SimState) -> BTreeMap<String, Vec<String>> {
+    let mut grouped = BTreeMap::new();
+
+    for record in &state.lua_error_records {
+        let addon_name = record
+            .addon_name
+            .clone()
+            .unwrap_or_else(|| "<unknown>".to_string());
+        let message = extract_error_message(&record.message);
+        grouped
+            .entry(addon_name)
+            .or_insert_with(Vec::new)
+            .push(message);
+    }
+
+    grouped
 }
 
 pub(crate) fn suppressed_error_summary_lines(state: &SimState) -> Vec<String> {

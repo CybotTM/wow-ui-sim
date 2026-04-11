@@ -241,6 +241,38 @@ pub fn discover_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)
     discover_blizzard_addons_for_screen(blizzard_ui_dir, ScreenKind::Game)
 }
 
+/// Discover every Blizzard addon directory in a BlizzardUI tree, including LoadOnDemand addons.
+///
+/// This is stricter than `discover_blizzard_addons_for_screen`: it includes all 315
+/// `Blizzard_*` directories present in the checkout, regardless of screen restrictions
+/// or `LoadOnDemand`, then sorts them by dependencies.
+pub fn discover_all_blizzard_addons(blizzard_ui_dir: &Path) -> Vec<(String, PathBuf)> {
+    let entries = match std::fs::read_dir(blizzard_ui_dir) {
+        Ok(entries) => entries,
+        Err(_) => return Vec::new(),
+    };
+
+    let mut addons = Vec::new();
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if !path.is_dir() {
+            continue;
+        }
+        let Some(name) = path.file_name().and_then(|name| name.to_str()) else {
+            continue;
+        };
+        if !name.starts_with("Blizzard_") {
+            continue;
+        }
+        if let Some(toc_path) = find_toc_file(&path) {
+            addons.push((name.to_string(), toc_path));
+        }
+    }
+
+    sort_addons_by_dependencies(&mut addons);
+    addons
+}
+
 /// Discover Blizzard addons for a specific screen mode, topologically sorted by dependencies.
 pub fn discover_blizzard_addons_for_screen(
     blizzard_ui_dir: &Path,

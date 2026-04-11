@@ -112,6 +112,15 @@ pub struct AddonInfo {
     pub runtime: AddonRuntimeMetrics,
 }
 
+/// A collected Lua error with optional addon attribution.
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct LuaErrorRecord {
+    /// Raw collected error message.
+    pub message: String,
+    /// Addon name inferred from the loading/executing context or Lua stack.
+    pub addon_name: Option<String>,
+}
+
 /// A Great Vault activity slot (one row/tier in the weekly rewards UI).
 #[derive(Debug, Clone)]
 pub struct GreatVaultActivity {

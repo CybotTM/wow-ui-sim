@@ -42,7 +42,12 @@ fn test_invalid_anchor_type_warns_and_defaults() {
 fn test_valid_anchor_type_no_warning() {
     let env = WowLuaEnv::new().unwrap();
 
-    env.state().borrow_mut().lua_errors.clear();
+    {
+        let mut state = env.state().borrow_mut();
+        state.lua_errors.clear();
+        state.lua_error_records.clear();
+        state.lua_error_counts.clear();
+    }
     env.exec(
         r#"
         local owner = CreateFrame("Frame", "GoodAnchorOwner", UIParent)

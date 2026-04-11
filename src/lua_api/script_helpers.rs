@@ -266,11 +266,34 @@ pub fn get_stack_taint(lua: &Lua) -> Option<String> {
     fallback.call(()).ok()
 }
 
+fn current_error_addon_name(lua: &Lua) -> Option<String> {
+    let from_state = lua
+        .app_data_ref::<Rc<RefCell<SimState>>>()
+        .and_then(|state_rc| {
+            state_rc.try_borrow().ok().and_then(|state| {
+                state
+                    .executing_addon_index
+                    .or(state.loading_addon_index)
+                    .and_then(|idx| state.addons.get(idx as usize))
+                    .map(|addon| addon.folder_name.clone())
+            })
+        });
+
+    from_state.or_else(|| get_stack_taint(lua))
+}
+
 /// Push an error message into SimState.lua_errors for later retrieval.
 pub fn collect_lua_error(lua: &Lua, msg: &str) -> bool {
+    let addon_name = current_error_addon_name(lua);
     if let Some(state_rc) = lua.app_data_ref::<Rc<RefCell<SimState>>>() {
         if let Ok(mut state) = state_rc.try_borrow_mut() {
             state.lua_errors.push(msg.to_string());
+            state
+                .lua_error_records
+                .push(crate::lua_api::state::LuaErrorRecord {
+                    message: msg.to_string(),
+                    addon_name,
+                });
             let normalized = crate::lua_errors::extract_error_message(msg);
             let entry = state.lua_error_counts.entry(normalized).or_insert(0);
             let is_first = *entry == 0;

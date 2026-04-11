@@ -594,7 +594,12 @@ fn spellbook_first_open_is_stable_with_real_tutorial_logic_restored() {
     test_timeout! {
         let env = setup_full_ui();
         restore_spellbook_tutorials(&env);
-        env.state().borrow_mut().lua_errors.clear();
+        {
+            let mut state = env.state().borrow_mut();
+            state.lua_errors.clear();
+            state.lua_error_records.clear();
+            state.lua_error_counts.clear();
+        }
 
         open_spellbook(&env);
 

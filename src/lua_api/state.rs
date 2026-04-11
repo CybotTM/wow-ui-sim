@@ -78,6 +78,7 @@ macro_rules! build_empty_sim_state {
             app_frame_metrics: AppFrameMetrics::default(),
             talents: super::talent_state::TalentState::new(),
             lua_errors: $collections.lua_errors,
+            lua_error_records: $collections.lua_error_records,
             lua_error_counts: $collections.lua_error_counts,
             global_show_hide_depth: 0,
             anim_sync_times: $collections.anim_sync_times,
@@ -101,7 +102,7 @@ use super::game_data::{
 };
 pub use super::state_types::{
     AddonInfo, AddonRuntimeMetrics, AppFrameMetrics, BagItem, CursorInfo, GreatVaultActivity,
-    LootRollInfo, MovementState, PendingTimer, PlayerState, WorldState,
+    LootRollInfo, LuaErrorRecord, MovementState, PendingTimer, PlayerState, WorldState,
 };
 
 /// Active quest blob state for a QuestPOIFrame.
@@ -311,6 +312,8 @@ pub struct SimState {
     pub talents: super::talent_state::TalentState,
     /// Collected Lua errors (from call_error_handler and addframetext).
     pub lua_errors: Vec<String>,
+    /// Collected Lua errors with optional addon attribution.
+    pub lua_error_records: Vec<LuaErrorRecord>,
     /// Count of normalized Lua error messages seen so far.
     pub lua_error_counts: HashMap<String, usize>,
     /// Global cross-frame Show/Hide dispatch depth (prevents Lua stack overflow
@@ -336,6 +339,7 @@ struct EmptyStateCollections {
     timers: VecDeque<PendingTimer>,
     addons: Vec<AddonInfo>,
     lua_errors: Vec<String>,
+    lua_error_records: Vec<LuaErrorRecord>,
     lua_error_counts: HashMap<String, usize>,
     tooltips: HashMap<u64, TooltipData>,
     blocked_auras_by_unit: HashMap<String, HashSet<i32>>,
@@ -366,6 +370,7 @@ impl EmptyStateCollections {
             timers: VecDeque::new(),
             addons: Vec::new(),
             lua_errors: Vec::new(),
+            lua_error_records: Vec::new(),
             lua_error_counts: HashMap::new(),
             tooltips: HashMap::new(),
             blocked_auras_by_unit: HashMap::new(),
