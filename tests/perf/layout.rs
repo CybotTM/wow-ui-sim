@@ -2,8 +2,11 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
-use iced::Size;
-use wow_ui_sim::iced_app::tooltip::collect_tooltip_data;
+use iced::{Point, Rectangle, Size};
+use wow_ui_sim::iced_app::compute_frame_rect;
+use wow_ui_sim::iced_app::tooltip::{
+    TooltipRender, build_tooltip_quads, collect_tooltip_data, update_tooltip_sizes,
+};
 use wow_ui_sim::iced_app::{
     build_quad_batch_for_registry, rebuild_dirty_strata_batches_for_registry,
 };
@@ -14,6 +17,8 @@ use wow_ui_sim::widget::{Anchor, FrameStrata};
 const PERF_SCREEN_SIZE: (f32, f32) = (1024.0, 768.0);
 const PERF_FONTS_PATH: &str = "./fonts";
 const PERF_DIRTY_TEXTURE_NAME: &str = "PerfDirtyTexture";
+const PERF_TOOLTIP_OWNER_NAME: &str = "PerfTooltipOwner";
+const PERF_TOOLTIP_HEADER: &str = "Performance Tooltip";
 
 pub fn measure_full_root_layout_pass(env: &WowLuaEnv) -> Duration {
     let ui_parent_id = {
@@ -181,6 +186,60 @@ pub fn measure_dirty_tree_quad_rebuild(env: &WowLuaEnv) -> Duration {
     elapsed
 }
 
+pub fn measure_tooltip_collect_and_quad_emission(env: &WowLuaEnv) -> Duration {
+    seed_perf_tooltip(env);
+
+    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    {
+        let mut state = env.state().borrow_mut();
+        update_tooltip_sizes(&mut state, &mut font_system);
+    }
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let started = Instant::now();
+    {
+        let state = env.state().borrow();
+        let tooltip_data = collect_tooltip_data(&state);
+        let tooltip_id = state
+            .widgets
+            .get_id_by_name("GameTooltip")
+            .expect("GameTooltip should exist in the settled game UI");
+        let tooltip_frame = state
+            .widgets
+            .get(tooltip_id)
+            .expect("GameTooltip frame should resolve");
+        let bounds = compute_frame_rect(
+            &state.widgets,
+            tooltip_id,
+            PERF_SCREEN_SIZE.0,
+            PERF_SCREEN_SIZE.1,
+        );
+        let bounds = Rectangle::new(
+            Point::new(bounds.x, bounds.y),
+            Size::new(bounds.width, bounds.height),
+        );
+        let mut batch = QuadBatch::new();
+        let mut text_ctx = Some((&mut font_system, &mut glyph_atlas));
+
+        build_tooltip_quads(
+            TooltipRender {
+                batch: &mut batch,
+                bounds,
+                tooltip_data: Some(&tooltip_data),
+                id: tooltip_id,
+                eff_alpha: tooltip_frame.alpha,
+            },
+            &mut text_ctx,
+        );
+
+        assert!(
+            !batch.vertices.is_empty(),
+            "perf tooltip measurement should emit tooltip quads"
+        );
+    }
+    started.elapsed()
+}
+
 fn find_player_frame_id(env: &WowLuaEnv) -> u64 {
     let state = env.state().borrow();
     state
@@ -232,6 +291,31 @@ fn ensure_perf_dirty_texture_exists(env: &WowLuaEnv) {
     "#,
     )
     .expect("perf dirty texture setup should succeed");
+}
+
+fn seed_perf_tooltip(env: &WowLuaEnv) {
+    env.exec(&format!(
+        r#"
+        if not _G.{owner_name} then
+            local owner = CreateFrame("Frame", "{owner_name}", UIParent)
+            owner:SetSize(16, 16)
+            owner:SetPoint("CENTER")
+            owner:Show()
+        end
+
+        GameTooltip:SetOwner(_G.{owner_name}, "ANCHOR_NONE")
+        GameTooltip:ClearLines()
+        GameTooltip:AddLine("{header}")
+        GameTooltip:AddLine("This is a deliberately long tooltip body line used to exercise wrapped tooltip text measurement and quad emission in the render path.", 1, 1, 1, true)
+        GameTooltip:AddDoubleLine("Spell", "Avenger's Shield")
+        GameTooltip:AddLine("Second wrapped line to keep the body realistic and ensure multiple glyph rows are emitted into the tooltip batch.", 0.9, 0.82, 0.5, true)
+        GameTooltip:AddDoubleLine("Cooldown", "15 sec")
+        GameTooltip:Show()
+    "#,
+        owner_name = PERF_TOOLTIP_OWNER_NAME,
+        header = PERF_TOOLTIP_HEADER,
+    ))
+    .expect("perf tooltip setup should succeed");
 }
 
 fn full_dirty_mask() -> u16 {
