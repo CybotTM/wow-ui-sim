@@ -776,6 +776,53 @@ fn keybind_m_toggles_world_map_without_errors() {
 }
 
 #[test]
+fn world_map_title_text_is_non_empty_after_opening() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                local legacyTitle = WorldMapFrame.mapTitle
+                if legacyTitle then
+                    local legacyText = legacyTitle:GetText()
+                    if type(legacyText) ~= "string" or legacyText == "" then
+                        return "empty_legacy_world_map_title"
+                    end
+                    return "ok"
+                end
+
+                local titleText = WorldMapFrame.BorderFrame
+                    and WorldMapFrame.BorderFrame.TitleContainer
+                    and WorldMapFrame.BorderFrame.TitleContainer.TitleText
+                if not titleText then
+                    return "missing_border_frame_title_text"
+                end
+
+                local actual = titleText:GetText()
+                if type(actual) ~= "string" or actual == "" then
+                    return "empty_border_frame_title_text"
+                end
+
+                return "stale_name_border_frame_title_text"
+            "#,
+            )
+            .unwrap();
+
+        assert!(
+            result == "ok" || result == "stale_name_border_frame_title_text",
+            "World map opening should produce a non-empty title on the live title widget even if the plan name is stale: {result}"
+        );
+    }
+}
+
+#[test]
 fn world_map_events_tab_click_and_zone_switch_without_errors() {
     test_timeout! {
         let env = setup_env();
