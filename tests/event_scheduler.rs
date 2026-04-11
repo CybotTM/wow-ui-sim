@@ -218,3 +218,30 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
         "RequestEvents() should restore visible scheduler data"
     );
 }
+
+#[test]
+fn event_scheduler_event_zone_names_follow_seeded_area_poi_ids() {
+    let env = env();
+    let (ongoing_zone, scheduled_zone, missing_zone): (String, String, String) = env
+        .eval(
+            r#"
+            return C_EventScheduler.GetEventZoneName(1001),
+                C_EventScheduler.GetEventZoneName(1004),
+                C_EventScheduler.GetEventZoneName(999999)
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        ongoing_zone, "Warsong Gulch",
+        "GetEventZoneName() should resolve seeded ongoing event POIs"
+    );
+    assert_eq!(
+        scheduled_zone, "Darkmoon Island",
+        "GetEventZoneName() should resolve seeded scheduled event POIs"
+    );
+    assert_eq!(
+        missing_zone, "",
+        "GetEventZoneName() should keep the empty-string fallback for unknown POIs"
+    );
+}

@@ -1464,6 +1464,13 @@ const EVENT_SCHEDULER_LUA: &str = r#"
         state.scheduledEvents = seededScheduledEvents()
     end
 
+    local SEEDED_EVENT_LOCATIONS = {
+        [1001] = { zoneName = "Warsong Gulch" },
+        [1002] = { zoneName = "The Cinderbrew Meadery" },
+        [1003] = { zoneName = "Arathi Basin" },
+        [1004] = { zoneName = "Darkmoon Island" },
+    }
+
     api._state = api._state or {
         canShowEvents = nil,
         suppressDisplay = false,
@@ -1516,6 +1523,14 @@ const EVENT_SCHEDULER_LUA: &str = r#"
     api.HasData = api.HasData or function()
         local state = api._state
         return hasVisibleEvents(state.ongoingEvents) or hasVisibleEvents(state.scheduledEvents)
+    end
+
+    api.GetEventZoneName = api.GetEventZoneName or function(areaPoiID)
+        local location = SEEDED_EVENT_LOCATIONS[tonumber(areaPoiID)]
+        if type(location) ~= "table" then
+            return ""
+        end
+        return tostring(location.zoneName or "")
     end
 
     api.RequestEvents = api.RequestEvents or function()
