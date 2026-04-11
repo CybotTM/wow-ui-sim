@@ -4,6 +4,7 @@ use crate::lua_api::LoaderEnv;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
 use mlua::Table;
+use std::collections::BTreeMap;
 use std::path::Path;
 use std::time::Instant;
 
@@ -85,8 +86,10 @@ pub fn load_addon_internal(
 
     maybe_init_saved_variables(env, toc, folder_name, saved_vars_mgr, &mut result);
     let ctx = build_addon_context(env, toc, folder_name)?;
+    let nil_symbol_access_start = env.state().borrow().nil_symbol_accesses.len();
 
     load_addon_files(env, toc, folder_name, &ctx, &mut result);
+    append_nil_symbol_access_warnings(env, nil_symbol_access_start, &mut result);
     env.state().borrow_mut().loading_addon_index = None;
     Ok(result)
 }
@@ -206,6 +209,45 @@ fn load_addon_file(
             .warnings
             .push(format!("{}: unknown file type", file.display())),
     }
+}
+
+fn append_nil_symbol_access_warnings(
+    env: &LoaderEnv<'_>,
+    start_index: usize,
+    result: &mut LoadResult,
+) {
+    let grouped_accesses = {
+        let state = env.state().borrow();
+        summarize_nil_symbol_accesses(&state.nil_symbol_accesses[start_index..])
+    };
+    result.warnings.extend(
+        grouped_accesses
+            .into_iter()
+            .map(|(symbol_path, count)| format!("nil symbol access: {symbol_path} ({count}x)")),
+    );
+}
+
+fn summarize_nil_symbol_accesses(
+    accesses: &[crate::lua_api::state::NilSymbolAccess],
+) -> Vec<(String, usize)> {
+    let mut counts = BTreeMap::new();
+    for access in accesses {
+        *counts
+            .entry(format_nil_symbol_path(access))
+            .or_insert(0usize) += 1;
+    }
+
+    let mut rows: Vec<_> = counts.into_iter().collect();
+    rows.sort_by(|(left_path, left_count), (right_path, right_count)| {
+        right_count
+            .cmp(left_count)
+            .then_with(|| left_path.cmp(right_path))
+    });
+    rows
+}
+
+fn format_nil_symbol_path(access: &crate::lua_api::state::NilSymbolAccess) -> String {
+    format!("{}.{}", access.container, access.key)
 }
 
 fn load_addon_lua_file(
