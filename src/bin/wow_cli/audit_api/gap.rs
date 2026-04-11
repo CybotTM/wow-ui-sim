@@ -287,13 +287,8 @@ fn snake_to_c_namespace(snake: &str) -> String {
 /// Scan the simulator Rust source tree and Lua data files to collect registered symbols.
 pub fn scan_simulator(src_path: &Path) -> SimRegistered {
     let mut reg = SimRegistered::default();
-
-    let set_c_re = Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)""#).unwrap();
-    let le_rs_re = Regex::new(r#""(LE_[A-Z][A-Z0-9_]+)""#).unwrap();
-    let le_lua_re = Regex::new(r"LE_[A-Z][A-Z0-9_]+").unwrap();
-    let enum_rs_re = Regex::new(r#""([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
-    let enum_rs_explicit_re = Regex::new(r#"\("([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap();
-    let enum_lua_block_re = Regex::new(r"Enum\.([A-Za-z][A-Za-z0-9]+)\s*=\s*\{").unwrap();
+    let rs_patterns = RustScanPatterns::new();
+    let lua_patterns = LuaScanPatterns::new();
 
     for entry in WalkDir::new(src_path)
         .into_iter()
@@ -301,45 +296,67 @@ pub fn scan_simulator(src_path: &Path) -> SimRegistered {
         .filter(|e| e.file_type().is_file())
     {
         let path = entry.path();
-        let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("");
-
-        match ext {
-            "rs" => {
-                let content = match std::fs::read_to_string(path) {
-                    Ok(c) => c,
-                    Err(_) => continue,
-                };
-                for cap in set_c_re.captures_iter(&content) {
-                    reg.c_namespaces.insert(cap[1].to_string());
-                }
-                for cap in le_rs_re.captures_iter(&content) {
-                    reg.le_constants.insert(cap[1].to_string());
-                }
-                // Enum names from SeqEnumDef/EnumDef tuple patterns
-                for cap in enum_rs_re.captures_iter(&content) {
-                    reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
-                }
-                let _ = enum_rs_explicit_re; // same regex used above
-            }
-            "lua" => {
-                let content = match std::fs::read_to_string(path) {
-                    Ok(c) => c,
-                    Err(_) => continue,
-                };
-                // LE_* from missing_constants.lua and similar
-                for cap in le_lua_re.find_iter(&content) {
-                    reg.le_constants.insert(cap.as_str().to_string());
-                }
-                // Enum.* namespaces from missing_enums.lua
-                for cap in enum_lua_block_re.captures_iter(&content) {
-                    reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
-                }
-            }
+        let Ok(content) = std::fs::read_to_string(path) else {
+            continue;
+        };
+        match path.extension().and_then(|e| e.to_str()) {
+            Some("rs") => scan_rust_symbols(&content, &rs_patterns, &mut reg),
+            Some("lua") => scan_lua_symbols(&content, &lua_patterns, &mut reg),
             _ => {}
         }
     }
-
     reg
+}
+
+struct RustScanPatterns {
+    set_c: Regex,
+    le: Regex,
+    enum_def: Regex,
+}
+
+impl RustScanPatterns {
+    fn new() -> Self {
+        Self {
+            set_c: Regex::new(r#"\.set\("(C_[A-Za-z][A-Za-z0-9_]*)""#).unwrap(),
+            le: Regex::new(r#""(LE_[A-Z][A-Z0-9_]+)""#).unwrap(),
+            enum_def: Regex::new(r#""([A-Z][A-Za-z0-9]+)",\s*&\["#).unwrap(),
+        }
+    }
+}
+
+struct LuaScanPatterns {
+    le: Regex,
+    enum_block: Regex,
+}
+
+impl LuaScanPatterns {
+    fn new() -> Self {
+        Self {
+            le: Regex::new(r"LE_[A-Z][A-Z0-9_]+").unwrap(),
+            enum_block: Regex::new(r"Enum\.([A-Za-z][A-Za-z0-9]+)\s*=\s*\{").unwrap(),
+        }
+    }
+}
+
+fn scan_rust_symbols(content: &str, p: &RustScanPatterns, reg: &mut SimRegistered) {
+    for cap in p.set_c.captures_iter(content) {
+        reg.c_namespaces.insert(cap[1].to_string());
+    }
+    for cap in p.le.captures_iter(content) {
+        reg.le_constants.insert(cap[1].to_string());
+    }
+    for cap in p.enum_def.captures_iter(content) {
+        reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
+    }
+}
+
+fn scan_lua_symbols(content: &str, p: &LuaScanPatterns, reg: &mut SimRegistered) {
+    for cap in p.le.find_iter(content) {
+        reg.le_constants.insert(cap.as_str().to_string());
+    }
+    for cap in p.enum_block.captures_iter(content) {
+        reg.enum_namespaces.insert(format!("Enum.{}", &cap[1]));
+    }
 }
 
 /// Build a gap report comparing what Blizzard UI uses vs what the simulator registers.
