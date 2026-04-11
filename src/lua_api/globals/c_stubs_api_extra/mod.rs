@@ -44,7 +44,7 @@ pub fn register_extra_stubs(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<(
     constants::register_missing_constants(lua, &g)?;
     tables::register_missing_global_tables(lua, &g)?;
     super::c_stubs_achievement::register_simulate_ping(lua)?;
-    super::c_stubs_api_combat::fixup_combat_log_aliases(lua, &g)?;
+    super::c_stubs_api_encounter::fixup_combat_log_aliases(lua, &g)?;
     register_secure_namespaces(lua, &g)?;
     let _ = state;
     Ok(())

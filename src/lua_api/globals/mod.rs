@@ -63,6 +63,8 @@ pub mod c_stubs_api;
 pub mod c_stubs_api_chat_quest;
 pub mod c_stubs_api_combat;
 mod c_stubs_api_combat_curve;
+mod c_stubs_api_combat_log;
+mod c_stubs_api_encounter;
 pub mod c_stubs_api_extra;
 pub mod c_stubs_api_glue;
 pub mod c_stubs_api_lfg;
