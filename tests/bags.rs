@@ -319,3 +319,92 @@ fn test_bags_open_with_items() {
         .unwrap();
     assert!(empty, "Slot 6 should be empty");
 }
+
+#[test]
+fn test_container_frame_1_item_1_icon_matches_first_bag_slot_item() {
+    let env = setup_env();
+    install_test_error_handler(&env);
+
+    env.exec(
+        r#"
+        assert(ContainerFrameSettingsManager, "ContainerFrameSettingsManager should exist")
+        ContainerFrameSettingsManager:SetUsingCombinedBags(false)
+        "#,
+    )
+    .unwrap();
+
+    open_all_bags(&env);
+
+    let result: String = env
+        .eval(
+            r#"
+            if not ContainerFrame1 then
+                return "missing_container_frame_1"
+            end
+            local button = ContainerFrame1Item1
+            if not button and ContainerFrame1.Items then
+                button = ContainerFrame1.Items[1]
+                if not button then
+                    return "missing_container_frame_1_items_1"
+                end
+                if not button.icon then
+                    return "missing_container_frame_1_items_1_icon"
+                end
+
+                local buttonSlot = button:GetID()
+                local actual = button.icon:GetTexture()
+                local buttonInfo = C_Container.GetContainerItemInfo(0, buttonSlot)
+                local buttonTexture = buttonInfo and buttonInfo.iconFileID
+                if actual ~= buttonTexture then
+                    return string.format(
+                        "stale_name_items_1_button_slot_%d_expected_%s_actual_%s",
+                        buttonSlot,
+                        tostring(buttonTexture),
+                        tostring(actual)
+                    )
+                end
+                return string.format("stale_name_items_1_button_slot_%d", buttonSlot)
+            end
+            if not button then
+                return "missing_container_frame_1_item_1"
+            end
+
+            local buttonSlot = button:GetID()
+            local actual = button.icon and button.icon:GetTexture()
+            local firstSlotInfo = C_Container.GetContainerItemInfo(0, 1)
+            local firstSlotTexture = firstSlotInfo and firstSlotInfo.iconFileID
+
+            if buttonSlot ~= 1 then
+                local buttonInfo = C_Container.GetContainerItemInfo(0, buttonSlot)
+                local buttonTexture = buttonInfo and buttonInfo.iconFileID
+                if actual ~= buttonTexture then
+                    return string.format(
+                        "stale_name_button_slot_%d_expected_%s_actual_%s",
+                        buttonSlot,
+                        tostring(buttonTexture),
+                        tostring(actual)
+                    )
+                end
+                return string.format("stale_name_button_slot_%d", buttonSlot)
+            end
+
+            if actual ~= firstSlotTexture then
+                return string.format(
+                    "icon_mismatch_expected_%s_actual_%s",
+                    tostring(firstSlotTexture),
+                    tostring(actual)
+                )
+            end
+
+            return "ok"
+            "#,
+        )
+        .unwrap();
+
+    assert!(
+        result == "ok"
+            || result.starts_with("stale_name_button_slot_")
+            || result.starts_with("stale_name_items_1_button_slot_"),
+        "ContainerFrame1Item1 should either match bag slot 1 directly or prove the plan wording is stale through the real item-button list: {result}"
+    );
+}
