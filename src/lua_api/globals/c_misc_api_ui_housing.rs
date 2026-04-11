@@ -228,10 +228,7 @@ fn register_housing_decor_queries(
     state: &Rc<RefCell<HousingDecorState>>,
 ) -> Result<()> {
     let state_ref = Rc::clone(state);
-    decor.set(
-        "IsDecorSelected",
-        lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?,
-    )?;
+    decor.set("IsDecorSelected", lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?)?;
     let state_ref = Rc::clone(state);
     decor.set(
         "GetDecorHyperlink",
@@ -581,41 +578,16 @@ fn register_catalog_market_queries(
     catalog: &mlua::Table,
     state: &Rc<RefCell<HousingCatalogState>>,
 ) -> Result<()> {
-    let state_ref = Rc::clone(state);
-    catalog.set(
-        "GetCatalogEntryVariantInfo",
-        lua.create_function(move |lua, (entry_id, variant_id): (i32, i32)| {
-            get_housing_catalog_entry_variant_info(lua, &state_ref.borrow(), entry_id, variant_id)
-        })?,
-    )?;
-    let state_ref = Rc::clone(state);
-    catalog.set(
-        "GetAllVariantInfosForEntry",
-        lua.create_function(move |lua, entry_id: i32| {
-            get_all_housing_catalog_variant_infos(lua, &state_ref.borrow(), entry_id)
-        })?,
-    )?;
-    let state_ref = Rc::clone(state);
-    catalog.set(
-        "GetFeaturedSmallProducts",
-        lua.create_function(move |lua, ()| {
-            get_housing_catalog_featured_small_products(lua, &state_ref.borrow())
-        })?,
-    )?;
-    let state_ref = Rc::clone(state);
-    catalog.set(
-        "GetMarketInfoForDecor",
-        lua.create_function(move |lua, entry_id: i32| {
-            get_housing_catalog_market_info(lua, &state_ref.borrow(), entry_id)
-        })?,
-    )?;
-    let state_ref = Rc::clone(state);
-    catalog.set(
-        "GetBundleInfo",
-        lua.create_function(move |lua, bundle_id: i32| {
-            get_housing_catalog_bundle_info(lua, &state_ref.borrow(), bundle_id)
-        })?,
-    )?;
+    let s = Rc::clone(state);
+    catalog.set("GetCatalogEntryVariantInfo", lua.create_function(move |lua, (entry_id, variant_id): (i32, i32)| get_housing_catalog_entry_variant_info(lua, &s.borrow(), entry_id, variant_id))?)?;
+    let s = Rc::clone(state);
+    catalog.set("GetAllVariantInfosForEntry", lua.create_function(move |lua, entry_id: i32| get_all_housing_catalog_variant_infos(lua, &s.borrow(), entry_id))?)?;
+    let s = Rc::clone(state);
+    catalog.set("GetFeaturedSmallProducts", lua.create_function(move |lua, ()| get_housing_catalog_featured_small_products(lua, &s.borrow()))?)?;
+    let s = Rc::clone(state);
+    catalog.set("GetMarketInfoForDecor", lua.create_function(move |lua, entry_id: i32| get_housing_catalog_market_info(lua, &s.borrow(), entry_id))?)?;
+    let s = Rc::clone(state);
+    catalog.set("GetBundleInfo", lua.create_function(move |lua, bundle_id: i32| get_housing_catalog_bundle_info(lua, &s.borrow(), bundle_id))?)?;
     Ok(())
 }
 
@@ -624,64 +596,39 @@ fn register_catalog_market_actions(
     catalog: &mlua::Table,
     state: Rc<RefCell<HousingCatalogState>>,
 ) -> Result<()> {
-    let state_ref = Rc::clone(&state);
-    catalog.set(
-        "HousingMarketActionAddToCart",
-        lua.create_function(move |_, entry_id: i32| {
-            let mut state = state_ref.borrow_mut();
-            if !state.entries.contains_key(&entry_id) {
-                return Ok(false);
-            }
-            *state.cart_counts.entry(entry_id).or_insert(0) += 1;
-            Ok(true)
-        })?,
-    )?;
-    let state_ref = Rc::clone(&state);
-    catalog.set(
-        "HousingMarketActionRemoveFromCart",
-        lua.create_function(move |_, entry_id: i32| {
-            let mut state = state_ref.borrow_mut();
-            let Some(count) = state.cart_counts.get_mut(&entry_id) else {
-                return Ok(false);
-            };
-            *count -= 1;
-            if *count <= 0 {
-                state.cart_counts.remove(&entry_id);
-            }
-            Ok(true)
-        })?,
-    )?;
-    let state_ref = Rc::clone(&state);
-    catalog.set(
-        "HousingMarketActionClearCart",
-        lua.create_function(move |_, ()| {
-            state_ref.borrow_mut().cart_counts.clear();
-            Ok(())
-        })?,
-    )?;
-    let state_ref = Rc::clone(&state);
-    catalog.set(
-        "HousingMarketActionViewInStore",
-        lua.create_function(move |_, entry_id: i32| {
-            let mut state = state_ref.borrow_mut();
-            let Some(entry) = state.entries.get_mut(&entry_id) else {
-                return Ok(false);
-            };
-            entry.was_viewed_in_store = true;
-            Ok(true)
-        })?,
-    )?;
-    catalog.set(
-        "HousingMarketActionViewBundle",
-        lua.create_function(move |_, bundle_id: i32| {
-            let mut state = state.borrow_mut();
-            let Some(bundle) = state.bundles.get_mut(&bundle_id) else {
-                return Ok(false);
-            };
-            bundle.was_viewed = true;
-            Ok(true)
-        })?,
-    )?;
+    let s = Rc::clone(&state);
+    catalog.set("HousingMarketActionAddToCart", lua.create_function(move |_, entry_id: i32| {
+        let mut state = s.borrow_mut();
+        if !state.entries.contains_key(&entry_id) { return Ok(false); }
+        *state.cart_counts.entry(entry_id).or_insert(0) += 1;
+        Ok(true)
+    })?)?;
+    let s = Rc::clone(&state);
+    catalog.set("HousingMarketActionRemoveFromCart", lua.create_function(move |_, entry_id: i32| {
+        let mut state = s.borrow_mut();
+        let Some(count) = state.cart_counts.get_mut(&entry_id) else { return Ok(false); };
+        *count -= 1;
+        if *count <= 0 { state.cart_counts.remove(&entry_id); }
+        Ok(true)
+    })?)?;
+    let s = Rc::clone(&state);
+    catalog.set("HousingMarketActionClearCart", lua.create_function(move |_, ()| {
+        s.borrow_mut().cart_counts.clear();
+        Ok(())
+    })?)?;
+    let s = Rc::clone(&state);
+    catalog.set("HousingMarketActionViewInStore", lua.create_function(move |_, entry_id: i32| {
+        let mut state = s.borrow_mut();
+        let Some(entry) = state.entries.get_mut(&entry_id) else { return Ok(false); };
+        entry.was_viewed_in_store = true;
+        Ok(true)
+    })?)?;
+    catalog.set("HousingMarketActionViewBundle", lua.create_function(move |_, bundle_id: i32| {
+        let mut state = state.borrow_mut();
+        let Some(bundle) = state.bundles.get_mut(&bundle_id) else { return Ok(false); };
+        bundle.was_viewed = true;
+        Ok(true)
+    })?)?;
     Ok(())
 }
 
