@@ -62,6 +62,14 @@ pub(super) fn register_c_guild(
 
 pub(super) fn register_c_guild_info(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
+    seed_guild_info_data(&t)?;
+    register_guild_info_queries(lua, &t)?;
+    register_guild_info_accessors(lua, &t)?;
+    lua.globals().set("C_GuildInfo", t)?;
+    Ok(())
+}
+
+fn seed_guild_info_data(t: &mlua::Table) -> Result<()> {
     t.set(
         "__motd",
         "Raid invites tonight at 20:00 server. Repairs are on for progression.",
@@ -69,7 +77,10 @@ pub(super) fn register_c_guild_info(lua: &Lua) -> Result<()> {
     t.set(
         "__infoText",
         "Mythic-focused guild recruiting healers and a warlock for weekend raids.",
-    )?;
+    )
+}
+
+fn register_guild_info_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetGuildTabardInfo",
         lua.create_function(|_, _unit: Option<String>| Ok(Value::Nil))?,
@@ -82,6 +93,11 @@ pub(super) fn register_c_guild_info(lua: &Lua) -> Result<()> {
         "AreGuildEventsEnabled",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
+    t.set("GuildRoster", lua.create_function(|_, ()| Ok(()))?)?;
+    Ok(())
+}
+
+fn register_guild_info_accessors(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let guild_info = t.clone();
     t.set(
         "GetMOTD",
@@ -97,8 +113,6 @@ pub(super) fn register_c_guild_info(lua: &Lua) -> Result<()> {
         "SetInfoText",
         lua.create_function(move |_, info_text: String| guild_info.set("__infoText", info_text))?,
     )?;
-    t.set("GuildRoster", lua.create_function(|_, ()| Ok(()))?)?;
-    lua.globals().set("C_GuildInfo", t)?;
     Ok(())
 }
 
@@ -268,25 +282,44 @@ pub(super) fn register_c_loss_of_control(
     state: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
 ) -> Result<()> {
     let t = lua.create_table()?;
-    let global_state = std::rc::Rc::clone(&state);
+    register_loss_of_control_data_methods(lua, &t, &state)?;
+    register_loss_of_control_count_methods(lua, &t, &state)?;
+    lua.globals().set("C_LossOfControl", t)?;
+    Ok(())
+}
+
+fn register_loss_of_control_data_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    let global_state = std::rc::Rc::clone(state);
     t.set(
         "GetActiveLossOfControlData",
         lua.create_function(move |lua, index: i32| {
             create_loss_of_control_data(lua, &global_state, None, index)
         })?,
     )?;
-    t.set(
-        "GetActiveLossOfControlDataCount",
-        lua.create_function(|_, ()| Ok(1i32))?,
-    )?;
-    let by_unit_state = std::rc::Rc::clone(&state);
+    let by_unit_state = std::rc::Rc::clone(state);
     t.set(
         "GetActiveLossOfControlDataByUnit",
         lua.create_function(move |lua, (unit_token, index): (String, i32)| {
             create_loss_of_control_data(lua, &by_unit_state, Some(unit_token.as_str()), index)
         })?,
     )?;
-    let count_state = std::rc::Rc::clone(&state);
+    Ok(())
+}
+
+fn register_loss_of_control_count_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+) -> Result<()> {
+    t.set(
+        "GetActiveLossOfControlDataCount",
+        lua.create_function(|_, ()| Ok(1i32))?,
+    )?;
+    let count_state = std::rc::Rc::clone(state);
     t.set(
         "GetActiveLossOfControlDataCountByUnit",
         lua.create_function(move |_, unit_token: String| {
@@ -296,7 +329,7 @@ pub(super) fn register_c_loss_of_control(
             ))
         })?,
     )?;
-    let duration_state = std::rc::Rc::clone(&state);
+    let duration_state = std::rc::Rc::clone(state);
     t.set(
         "GetActiveLossOfControlDuration",
         lua.create_function(move |_, (unit_token, index): (String, i32)| {
@@ -310,7 +343,6 @@ pub(super) fn register_c_loss_of_control(
             }
         })?,
     )?;
-    lua.globals().set("C_LossOfControl", t)?;
     Ok(())
 }
 
