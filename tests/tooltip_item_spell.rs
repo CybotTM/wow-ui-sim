@@ -21,6 +21,33 @@ fn test_set_item_by_id_populates_lines() {
 }
 
 #[test]
+fn test_set_item_by_id_6948_contains_hearthstone_line() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetItemByID(6948)").unwrap();
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        num_lines > 0,
+        "SetItemByID(6948) should populate tooltip lines"
+    );
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+    assert!(
+        td.lines
+            .iter()
+            .any(|line| line.left_text.contains("Hearthstone")),
+        "Tooltip lines for item 6948 should contain Hearthstone, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn test_set_item_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 
