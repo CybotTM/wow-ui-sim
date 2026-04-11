@@ -58,42 +58,43 @@ fn rebuild_hittable_cache(app: &App) {
     *app.cached_hittable.borrow_mut() = Some(grid);
 }
 
+const PASS_THROUGH_SETUP_LUA: &str = r#"
+    PassThroughParent = CreateFrame("Button", "PassThroughParent", UIParent)
+    PassThroughParent:SetSize(100, 100)
+    PassThroughParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+    PassThroughParent:EnableMouse(true)
+    PassThroughParent:SetScript("OnClick", function(_, button)
+        if button == "LeftButton" then
+            __pass_parent_left = (__pass_parent_left or 0) + 1
+        elseif button == "RightButton" then
+            __pass_parent_right = (__pass_parent_right or 0) + 1
+        end
+    end)
+
+    PassThroughChild = CreateFrame("Button", "PassThroughChild", PassThroughParent)
+    PassThroughChild:SetAllPoints(PassThroughParent)
+    PassThroughChild:EnableMouse(true)
+    PassThroughChild:SetScript("OnClick", function(_, button)
+        if button == "LeftButton" then
+            __pass_child_left = (__pass_child_left or 0) + 1
+        elseif button == "RightButton" then
+            __pass_child_right = (__pass_child_right or 0) + 1
+        end
+    end)
+
+    PassThroughChild:SetPassThroughButtons("RightButton")
+
+    __pass_parent_left = 0
+    __pass_parent_right = 0
+    __pass_child_left = 0
+    __pass_child_right = 0
+"#;
+
 fn setup_pass_through_test_frames(app: &App) {
-    let env = app.env.borrow();
-    env.exec(
-        r#"
-        PassThroughParent = CreateFrame("Button", "PassThroughParent", UIParent)
-        PassThroughParent:SetSize(100, 100)
-        PassThroughParent:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
-        PassThroughParent:EnableMouse(true)
-        PassThroughParent:SetScript("OnClick", function(_, button)
-            if button == "LeftButton" then
-                __pass_parent_left = (__pass_parent_left or 0) + 1
-            elseif button == "RightButton" then
-                __pass_parent_right = (__pass_parent_right or 0) + 1
-            end
-        end)
-
-        PassThroughChild = CreateFrame("Button", "PassThroughChild", PassThroughParent)
-        PassThroughChild:SetAllPoints(PassThroughParent)
-        PassThroughChild:EnableMouse(true)
-        PassThroughChild:SetScript("OnClick", function(_, button)
-            if button == "LeftButton" then
-                __pass_child_left = (__pass_child_left or 0) + 1
-            elseif button == "RightButton" then
-                __pass_child_right = (__pass_child_right or 0) + 1
-            end
-        end)
-
-        PassThroughChild:SetPassThroughButtons("RightButton")
-
-        __pass_parent_left = 0
-        __pass_parent_right = 0
-        __pass_child_left = 0
-        __pass_child_right = 0
-        "#,
-    )
-    .expect("pass-through frame setup should succeed");
+    app.env
+        .borrow()
+        .exec(PASS_THROUGH_SETUP_LUA)
+        .expect("pass-through frame setup should succeed");
 }
 
 fn read_pass_through_counters(app: &App) -> (f64, f64, f64, f64) {
