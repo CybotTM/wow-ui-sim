@@ -961,7 +961,7 @@ fn toggle_player_spells_frame_opens_and_closes_talent_panel() {
 }
 
 #[test]
-fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
+fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs_and_accepts_search_text() {
     test_timeout! {
         let env = setup_env();
 
@@ -971,13 +971,13 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
             end
 
             local cases = {
-                { COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS, "MountJournal" },
-                { COLLECTIONS_JOURNAL_TAB_INDEX_PETS, "PetJournal" },
-                { COLLECTIONS_JOURNAL_TAB_INDEX_TOYS, "ToyBox" },
+                { COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS, "MountJournal", "searchBox", "gryphon" },
+                { COLLECTIONS_JOURNAL_TAB_INDEX_PETS, "PetJournal", "searchBox", "cat" },
+                { COLLECTIONS_JOURNAL_TAB_INDEX_TOYS, "ToyBox", "searchBox", "ball" },
             }
 
             for _, case in ipairs(cases) do
-                local tabIndex, childName = case[1], case[2]
+                local tabIndex, childName, searchKey, searchText = case[1], case[2], case[3], case[4]
                 ToggleCollectionsJournal(tabIndex)
 
                 if not CollectionsJournal or not CollectionsJournal:IsShown() then
@@ -991,6 +991,14 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
                 if not child or not child:IsShown() then
                     return "child_not_shown_" .. childName
                 end
+                local searchBox = child[searchKey]
+                if not searchBox then
+                    return "search_box_missing_" .. childName
+                end
+                searchBox:SetText(searchText)
+                if searchBox:GetText() ~= searchText then
+                    return "search_text_not_set_" .. childName
+                end
 
                 ToggleCollectionsJournal(tabIndex)
                 if CollectionsJournal:IsShown() then
@@ -1003,7 +1011,7 @@ fn toggle_collections_journal_opens_mounts_pets_and_toys_tabs() {
         assert_eq!(
             result,
             "ok",
-            "ToggleCollectionsJournal(tab) should open and close the mounts, pets, and toys tabs: {result}"
+            "ToggleCollectionsJournal(tab) should open, switch tabs, accept search text, and close for mounts, pets, and toys: {result}"
         );
     }
 }
