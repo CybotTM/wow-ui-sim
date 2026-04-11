@@ -54,6 +54,30 @@ fn nine_slice_corner_textures_have_atlas() {
     );
 }
 
+/// Direct NineSliceUtil.ApplyLayout("TooltipDefaultLayout") calls should create
+/// the tooltip pieces and assign the expected atlas names to them.
+#[test]
+fn nine_slice_apply_layout_tooltip_default_sets_child_piece_atlases() {
+    let env = env_with_shared_xml();
+
+    let (top_left, top_edge, center): (String, String, String) = env
+        .eval(
+            r#"
+            local container = CreateFrame("Frame", "TestTooltipLayoutNineSlice", UIParent)
+            NineSliceUtil.ApplyLayout(container, NineSliceUtil.GetLayout("TooltipDefaultLayout"))
+
+            return (container.TopLeftCorner and container.TopLeftCorner:GetAtlas() or ""),
+                (container.TopEdge and container.TopEdge:GetAtlas() or ""),
+                (container.Center and container.Center:GetAtlas() or "")
+        "#,
+        )
+        .unwrap();
+
+    assert_eq!(top_left, "Tooltip-NineSlice-CornerTopLeft");
+    assert_eq!(top_edge, "_Tooltip-NineSlice-EdgeTop");
+    assert_eq!(center, "Tooltip-NineSlice-Center");
+}
+
 /// NineSlice corner/edge textures should produce quads with atlas texture paths
 /// in the rendering pipeline -- they render as normal Texture widgets.
 #[test]
