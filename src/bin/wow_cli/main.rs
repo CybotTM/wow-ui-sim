@@ -18,6 +18,7 @@ mod gen_atlas;
 mod gen_global_strings;
 mod gen_items;
 mod gen_manifest;
+mod gen_map_art;
 mod gen_spells;
 mod gen_traits;
 mod gen_traits_emit;
@@ -171,6 +172,8 @@ enum GenerateTarget {
     Traits,
     /// Generate data/zones.rs from AreaTable CSV
     Zones,
+    /// Generate data/map_art.rs from UiMap* DB2 CSVs
+    MapArt,
 }
 
 fn default_addons_path() -> PathBuf {
@@ -265,6 +268,7 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::Manifest => gen_manifest::run(),
         GenerateTarget::Traits => gen_traits::run(),
         GenerateTarget::Zones => gen_zones::run(),
+        GenerateTarget::MapArt => gen_map_art::run(),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);

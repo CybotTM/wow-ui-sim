@@ -60,6 +60,11 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
     )?;
     t.set("GetMapArtLayers", lua.create_function(get_map_art_layers)?)?;
     t.set(
+        "GetMapArtLayerTextures",
+        lua.create_function(get_map_art_layer_textures)?,
+    )?;
+    t.set("GetMapArtID", lua.create_function(get_map_art_id)?)?;
+    t.set(
         "RequestPreloadMap",
         lua.create_function(|_, _map_id: i32| Ok(()))?,
     )?;
@@ -91,7 +96,9 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
     )?;
     t.set(
         "MapHasArt",
-        lua.create_function(|_, _map_id: i32| Ok(true))?,
+        lua.create_function(|_, map_id: i32| {
+            Ok(crate::map_art::get_map_art(map_id as u32).is_some())
+        })?,
     )?;
     // No user waypoint set — return nil so callers skip pin placement
     t.set(
@@ -121,18 +128,55 @@ fn get_map_info(lua: &Lua, map_id: i32) -> Result<Value> {
     Ok(Value::Table(info))
 }
 
-fn get_map_art_layers(lua: &Lua, _map_id: i32) -> Result<mlua::Table> {
+fn get_map_art_layers(lua: &Lua, map_id: i32) -> Result<mlua::Table> {
     let layers = lua.create_table()?;
-    let layer = lua.create_table()?;
-    layer.set("layerWidth", 1000)?;
-    layer.set("layerHeight", 668)?;
-    layer.set("tileWidth", 256)?;
-    layer.set("tileHeight", 256)?;
-    layer.set("minScale", 0.25)?;
-    layer.set("maxScale", 1.0)?;
-    layer.set("additionalZoomSteps", 0)?;
-    layers.set(1, layer)?;
+    if let Some(info) = crate::map_art::get_map_art(map_id as u32) {
+        for (i, art_layer) in info.layers.iter().enumerate() {
+            let layer = lua.create_table()?;
+            layer.set("layerWidth", art_layer.layer_width)?;
+            layer.set("layerHeight", art_layer.layer_height)?;
+            layer.set("tileWidth", art_layer.tile_width)?;
+            layer.set("tileHeight", art_layer.tile_height)?;
+            layer.set("minScale", art_layer.min_scale as f64)?;
+            layer.set("maxScale", art_layer.max_scale as f64)?;
+            layer.set("additionalZoomSteps", art_layer.additional_zoom_steps)?;
+            layers.set(i + 1, layer)?;
+        }
+    } else {
+        // Fallback for unknown maps
+        let layer = lua.create_table()?;
+        layer.set("layerWidth", 1002)?;
+        layer.set("layerHeight", 668)?;
+        layer.set("tileWidth", 256)?;
+        layer.set("tileHeight", 256)?;
+        layer.set("minScale", 1.0)?;
+        layer.set("maxScale", 2.14)?;
+        layer.set("additionalZoomSteps", 2)?;
+        layers.set(1, layer)?;
+    }
     Ok(layers)
+}
+
+/// C_Map.GetMapArtLayerTextures(mapID, layerIndex) -> table of fileDataIDs
+fn get_map_art_layer_textures(lua: &Lua, (map_id, layer_index): (i32, i32)) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    if let Some(info) = crate::map_art::get_map_art(map_id as u32) {
+        let idx = (layer_index - 1) as usize; // Lua 1-indexed
+        if let Some(tiles) = info.tiles.get(idx) {
+            for (i, &file_data_id) in tiles.iter().enumerate() {
+                t.set(i + 1, file_data_id)?; // 1-indexed Lua table
+            }
+        }
+    }
+    Ok(t)
+}
+
+/// C_Map.GetMapArtID(mapID) -> uiMapArtID
+fn get_map_art_id(_lua: &Lua, map_id: i32) -> Result<i32> {
+    match crate::map_art::get_map_art(map_id as u32) {
+        Some(info) => Ok(info.art_id as i32),
+        None => Ok(0),
+    }
 }
 
 fn create_player_map_position(lua: &Lua, (_map_id, _unit): (i32, String)) -> Result<Value> {

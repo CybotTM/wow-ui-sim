@@ -30,6 +30,8 @@ pub mod lua_errors;
 pub mod lua_server;
 #[path = "../data/manifest_interface_data.rs"]
 pub mod manifest_interface_data;
+#[path = "../data/map_art.rs"]
+pub mod map_art;
 #[path = "../data/quest_poi_blobs.rs"]
 pub mod quest_poi_blobs;
 pub mod render;
