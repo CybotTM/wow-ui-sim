@@ -93,3 +93,44 @@ fn character_panel_equipment_slots_match_inventory_or_background_textures() {
         );
     }
 }
+
+#[test]
+fn character_panel_title_text_matches_player_name() {
+    test_timeout! {
+        let env = setup_full_env();
+        open_character_panel(&env);
+
+        let result: String = env.eval(
+            r#"
+            if not CharacterFrame then
+                return "missing_character_frame"
+            end
+            if not CharacterFrame.TitleContainer then
+                return "missing_title_container"
+            end
+            if not CharacterFrame.TitleContainer.TitleText then
+                return "missing_title_text"
+            end
+
+            local expected = UnitPVPName("player")
+            local actual = CharacterFrame.TitleContainer.TitleText:GetText()
+
+            if actual ~= expected then
+                return string.format(
+                    "title_mismatch_expected_%s_actual_%s",
+                    tostring(expected),
+                    tostring(actual)
+                )
+            end
+
+            return "ok"
+        "#,
+        ).unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "Character panel title text should match the player name shown by Blizzard's title path: {result}"
+        );
+    }
+}
