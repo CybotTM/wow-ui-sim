@@ -367,69 +367,9 @@ pub fn build_gap_report(
     registered: &SimRegistered,
     sim_methods: &BTreeMap<String, BTreeSet<String>>,
 ) -> GapReport {
-    // C_* namespaces: compare namespace keys from usage
-    let used_c: BTreeSet<String> = used.c_api.keys().cloned().collect();
-    let missing_c = collect_missing_entries(
-        &used_c,
-        &registered.c_namespaces,
-        |ns| {
-            used.c_api
-                .get(ns)
-                .map(|m| m.values().map(|u| u.count).sum())
-                .unwrap_or(0)
-        },
-        |ns| {
-            used.c_api
-                .get(ns)
-                .map(collect_method_usage_files)
-                .unwrap_or_default()
-        },
-    );
-
-    // LE_* constants
-    let used_le: BTreeSet<String> = used.constants.keys().cloned().collect();
-    let missing_le = collect_missing_entries(
-        &used_le,
-        &registered.le_constants,
-        |sym| used.constants.get(sym).map(|u| u.count).unwrap_or(0),
-        |sym| {
-            used.constants
-                .get(sym)
-                .map(|usage| normalize_file_list(usage.files.clone()))
-                .unwrap_or_default()
-        },
-    );
-
-    // Enum namespaces: extract "Enum.X" from "Enum.X.Y" usage keys
-    let used_enum_ns: BTreeSet<String> = used
-        .enums
-        .keys()
-        .map(|k| {
-            // "Enum.Foo.Bar" -> "Enum.Foo"
-            let parts: Vec<&str> = k.splitn(3, '.').collect();
-            if parts.len() >= 2 {
-                format!("Enum.{}", parts[1])
-            } else {
-                k.clone()
-            }
-        })
-        .collect();
-    let missing_enum = collect_missing_entries(
-        &used_enum_ns,
-        &registered.enum_namespaces,
-        |ns| {
-            // sum all calls to any Enum.Namespace.* key
-            let prefix = format!("{}.", ns);
-            used.enums
-                .iter()
-                .filter(|(k, _)| k.starts_with(&prefix) || *k == ns)
-                .map(|(_, u)| u.count)
-                .sum()
-        },
-        |ns| collect_prefixed_usage_files(&used.enums, &format!("{ns}."), ns),
-    );
-
-    // Per-method gap: for each C_* namespace used by Blizzard UI, find methods not in sim_methods
+    let (used_c, missing_c) = find_missing_c_namespaces(used, registered);
+    let (used_le, missing_le) = find_missing_le_constants(used, registered);
+    let (used_enum_ns, missing_enum) = find_missing_enum_namespaces(used, registered);
     let missing_c_methods = build_missing_c_methods(used, registered, sim_methods);
 
     GapReport {
@@ -453,6 +393,81 @@ pub fn build_gap_report(
         missing_enum_namespaces: missing_enum,
         missing_c_methods,
     }
+}
+
+fn find_missing_c_namespaces(
+    used: &AuditResults,
+    registered: &SimRegistered,
+) -> (BTreeSet<String>, Vec<GapEntry>) {
+    let used_c: BTreeSet<String> = used.c_api.keys().cloned().collect();
+    let missing = collect_missing_entries(
+        &used_c,
+        &registered.c_namespaces,
+        |ns| {
+            used.c_api
+                .get(ns)
+                .map(|m| m.values().map(|u| u.count).sum())
+                .unwrap_or(0)
+        },
+        |ns| {
+            used.c_api
+                .get(ns)
+                .map(collect_method_usage_files)
+                .unwrap_or_default()
+        },
+    );
+    (used_c, missing)
+}
+
+fn find_missing_le_constants(
+    used: &AuditResults,
+    registered: &SimRegistered,
+) -> (BTreeSet<String>, Vec<GapEntry>) {
+    let used_le: BTreeSet<String> = used.constants.keys().cloned().collect();
+    let missing = collect_missing_entries(
+        &used_le,
+        &registered.le_constants,
+        |sym| used.constants.get(sym).map(|u| u.count).unwrap_or(0),
+        |sym| {
+            used.constants
+                .get(sym)
+                .map(|usage| normalize_file_list(usage.files.clone()))
+                .unwrap_or_default()
+        },
+    );
+    (used_le, missing)
+}
+
+fn find_missing_enum_namespaces(
+    used: &AuditResults,
+    registered: &SimRegistered,
+) -> (BTreeSet<String>, Vec<GapEntry>) {
+    let used_enum_ns: BTreeSet<String> = used
+        .enums
+        .keys()
+        .map(|k| {
+            let parts: Vec<&str> = k.splitn(3, '.').collect();
+            if parts.len() >= 2 {
+                format!("Enum.{}", parts[1])
+            } else {
+                k.clone()
+            }
+        })
+        .collect();
+    let missing = collect_missing_entries(
+        &used_enum_ns,
+        &registered.enum_namespaces,
+        |ns| {
+            let prefix = format!("{}.", ns);
+            used.enums
+                .iter()
+                .filter(|(k, _)| k.starts_with(&prefix) || *k == ns)
+                .map(|(_, u)| u.count)
+                .sum()
+        },
+        |ns| collect_prefixed_usage_files(&used.enums, &format!("{ns}."), ns),
+    );
+    (used_enum_ns, missing)
 }
 
 /// For each C_* namespace known to the simulator, find methods used by Blizzard UI
