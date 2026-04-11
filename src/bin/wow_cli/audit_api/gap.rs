@@ -159,120 +159,107 @@ fn scan_rust_file_for_c_methods(
     factory_fn_re: &Regex,
     result: &mut BTreeMap<String, BTreeSet<String>>,
 ) {
-    // Split into function blocks by finding `fn ` at start of a line (with optional pub/async)
+    let fn_positions = find_fn_positions(content);
+    scan_named_function_blocks(content, &fn_positions, table_set_re, table_get_re, sub_fn_re, factory_fn_re, result);
+    scan_variable_mapped_methods(content, &fn_positions, globals_set_c_re, table_set_re, table_get_re, sub_fn_re, factory_fn_re, result);
+}
+
+/// Find byte offsets of all `fn` declarations in a Rust file.
+fn find_fn_positions(content: &str) -> Vec<usize> {
     let fn_block_re = Regex::new(r"(?m)^(?:pub(?:\([^)]*\))?\s+)?(?:async\s+)?fn\s+\w+").unwrap();
-    let fn_positions: Vec<usize> = fn_block_re.find_iter(content).map(|m| m.start()).collect();
+    fn_block_re.find_iter(content).map(|m| m.start()).collect()
+}
 
-    // Generated stubs: process each `fn register_c_foo_N` sub-function independently.
+/// Collect methods from `t.set("Method", ...)` and `t.get::<T>("Method")` in a block,
+/// filtering to a specific variable name and skipping C_* entries.
+fn collect_methods_from_block(
+    block: &str,
+    var_name: &str,
+    table_set_re: &Regex,
+    table_get_re: &Regex,
+    methods: &mut BTreeSet<String>,
+) {
+    for cap in table_set_re.captures_iter(block).chain(table_get_re.captures_iter(block)) {
+        if &cap[1] == var_name && !cap[2].starts_with("C_") {
+            methods.insert(cap[2].to_string());
+        }
+    }
+}
+
+/// Scan generated stub sub-functions (`register_c_foo_N`) and factory functions
+/// (`register_c_map`, `make_c_dye_color`) for method registrations.
+fn scan_named_function_blocks(
+    content: &str,
+    fn_positions: &[usize],
+    table_set_re: &Regex,
+    table_get_re: &Regex,
+    sub_fn_re: &Regex,
+    factory_fn_re: &Regex,
+    result: &mut BTreeMap<String, BTreeSet<String>>,
+) {
     for (i, &start) in fn_positions.iter().enumerate() {
         let end = fn_positions.get(i + 1).copied().unwrap_or(content.len());
         let block = &content[start..end];
         let first_line = block.lines().next().unwrap_or("");
-        let Some(cap) = sub_fn_re.captures(first_line) else {
+
+        let ns = if let Some(cap) = sub_fn_re.captures(first_line) {
+            snake_to_c_namespace(&cap[1])
+        } else if !sub_fn_re.is_match(first_line) {
+            if let Some(cap) = factory_fn_re.captures(first_line) {
+                let full_name = &cap[1];
+                let stem = full_name
+                    .strip_prefix("register_c_")
+                    .or_else(|| full_name.strip_prefix("make_c_"))
+                    .unwrap_or(full_name);
+                snake_to_c_namespace(stem)
+            } else {
+                continue;
+            }
+        } else {
             continue;
         };
-        let ns = snake_to_c_namespace(&cap[1]);
-        for cap in table_set_re.captures_iter(block) {
-            if &cap[1] != "t" || cap[2].starts_with("C_") {
-                continue;
-            }
-            result
-                .entry(ns.clone())
-                .or_default()
-                .insert(cap[2].to_string());
-        }
-        for cap in table_get_re.captures_iter(block) {
-            if &cap[1] != "t" || cap[2].starts_with("C_") {
-                continue;
-            }
-            result
-                .entry(ns.clone())
-                .or_default()
-                .insert(cap[2].to_string());
-        }
-    }
 
-    // Dedicated factory functions: `fn register_c_map(...)` or `fn make_c_dye_color(...)`
-    // own exactly one namespace table inside their block, even in files that register many
-    // namespaces through helper functions.
-    for (i, &start) in fn_positions.iter().enumerate() {
-        let end = fn_positions.get(i + 1).copied().unwrap_or(content.len());
-        let block = &content[start..end];
-        let first_line = block.lines().next().unwrap_or("");
-        if sub_fn_re.is_match(first_line) {
-            continue;
-        }
-        let Some(cap) = factory_fn_re.captures(first_line) else {
-            continue;
-        };
-        let full_name = &cap[1];
-        let stem = full_name
-            .strip_prefix("register_c_")
-            .or_else(|| full_name.strip_prefix("make_c_"))
-            .unwrap_or(full_name);
-        let ns = snake_to_c_namespace(stem);
-        for cap in table_set_re.captures_iter(block) {
-            if &cap[1] != "t" || cap[2].starts_with("C_") {
-                continue;
-            }
-            result
-                .entry(ns.clone())
-                .or_default()
-                .insert(cap[2].to_string());
-        }
-        for cap in table_get_re.captures_iter(block) {
-            if &cap[1] != "t" || cap[2].starts_with("C_") {
-                continue;
-            }
-            result
-                .entry(ns.clone())
-                .or_default()
-                .insert(cap[2].to_string());
-        }
+        collect_methods_from_block(block, "t", table_set_re, table_get_re,
+            result.entry(ns).or_default());
     }
+}
 
-    // Phase 1: collect variable → namespace mappings from all functions in the file.
+/// Scan full file for `var.set("Method", ...)` using variable→namespace mappings.
+fn scan_variable_mapped_methods(
+    content: &str,
+    fn_positions: &[usize],
+    globals_set_c_re: &Regex,
+    table_set_re: &Regex,
+    table_get_re: &Regex,
+    sub_fn_re: &Regex,
+    factory_fn_re: &Regex,
+    result: &mut BTreeMap<String, BTreeSet<String>>,
+) {
     let mut var_to_ns: std::collections::HashMap<String, String> = std::collections::HashMap::new();
     for cap in globals_set_c_re.captures_iter(content) {
-        let ns = cap[1].to_string();
-        let var = cap[2].to_string();
-        var_to_ns.insert(var, ns);
+        var_to_ns.insert(cap[2].to_string(), cap[1].to_string());
     }
-
     if var_to_ns.is_empty() {
         return;
     }
 
-    // Phase 2: for simple single-namespace files, also treat `t` as an alias
-    // (helper functions receive the namespace table as parameter `t`).
-    let has_named_namespace_functions = fn_positions.iter().any(|&start| {
+    // For single-namespace files without named sub-functions, treat `t` as an alias.
+    let has_named_fns = fn_positions.iter().any(|&start| {
         let first_line = content[start..].lines().next().unwrap_or("");
         sub_fn_re.is_match(first_line) || factory_fn_re.is_match(first_line)
     });
     let unique_ns: std::collections::HashSet<&String> = var_to_ns.values().collect();
-    if unique_ns.len() == 1 && !has_named_namespace_functions {
+    if unique_ns.len() == 1 && !has_named_fns {
         let ns = unique_ns.into_iter().next().unwrap().clone();
         var_to_ns.entry("t".to_string()).or_insert(ns);
     }
 
-    // Scan full file for `var.set("Method", ...)` and `var.get::<T>("Method")`
-    for cap in table_set_re.captures_iter(content) {
-        let var = cap[1].to_string();
+    for cap in table_set_re.captures_iter(content).chain(table_get_re.captures_iter(content)) {
         let method = cap[2].to_string();
         if method.starts_with("C_") {
             continue;
         }
-        if let Some(ns) = var_to_ns.get(&var) {
-            result.entry(ns.clone()).or_default().insert(method);
-        }
-    }
-    for cap in table_get_re.captures_iter(content) {
-        let var = cap[1].to_string();
-        let method = cap[2].to_string();
-        if method.starts_with("C_") {
-            continue;
-        }
-        if let Some(ns) = var_to_ns.get(&var) {
+        if let Some(ns) = var_to_ns.get(&cap[1]) {
             result.entry(ns.clone()).or_default().insert(method);
         }
     }
