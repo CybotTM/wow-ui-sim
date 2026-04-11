@@ -86,6 +86,7 @@ fn add_create_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let args: Vec<Value> = args.into_iter().collect();
         let name_raw = extract_string_arg(&args, 0);
         let layer = extract_string_arg(&args, 1);
+        let inherits = extract_string_arg(&args, 2);
         let name = resolve_child_name(lua, name_raw, id);
 
         let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
@@ -94,6 +95,13 @@ fn add_create_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
         {
             texture.draw_layer = draw_layer;
+        }
+
+        // Apply template size from the texture template registry
+        if let Some(ref tmpl_name) = inherits
+            && let Some((w, h)) = crate::xml::get_texture_template_size(tmpl_name)
+        {
+            texture.set_size(w, h);
         }
 
         register_child_widget(lua, id, texture, &name)

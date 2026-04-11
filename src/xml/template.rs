@@ -247,6 +247,20 @@ pub fn register_texture_template(name: &str, texture: TextureXml) {
     registry.insert(name.to_string(), texture);
 }
 
+/// Get size from a texture template by name. Returns (width, height) if found.
+pub fn get_texture_template_size(name: &str) -> Option<(f32, f32)> {
+    let registry = texture_template_registry().read().unwrap();
+    let tex = registry.get(name)?;
+    let size = tex.size.as_ref()?;
+    let w = size.x.unwrap_or(0.0);
+    let h = size.y.unwrap_or(0.0);
+    if w > 0.0 && h > 0.0 {
+        Some((w, h))
+    } else {
+        None
+    }
+}
+
 /// Resolve texture inheritance: merge properties from the template chain.
 ///
 /// Returns a new `TextureXml` with inherited properties filled in.

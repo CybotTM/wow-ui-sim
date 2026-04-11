@@ -384,3 +384,41 @@ fn test_should_map_show_taxi_nodes() {
         .unwrap();
     assert!(val);
 }
+
+#[test]
+fn test_create_texture_inherits_template_size() {
+    use wow_ui_sim::xml::{SizeXml, TextureXml, register_texture_template};
+
+    // Register a texture template with known size (simulates XML loading)
+    register_texture_template(
+        "TestTileTemplate",
+        TextureXml {
+            size: Some(SizeXml {
+                x: Some(256.0),
+                y: Some(256.0),
+                abs_dimension: None,
+            }),
+            ..Default::default()
+        },
+    );
+
+    let env = env();
+    // CreateTexture(name, layer, inherits, subLevel) should apply template size
+    let (w, h): (f64, f64) = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        local tex = f:CreateTexture(nil, "BACKGROUND", "TestTileTemplate")
+        return tex:GetSize()
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        w, 256.0,
+        "CreateTexture with inherits should apply template width"
+    );
+    assert_eq!(
+        h, 256.0,
+        "CreateTexture with inherits should apply template height"
+    );
+}
