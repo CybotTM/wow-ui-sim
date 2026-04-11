@@ -34,6 +34,18 @@ pub fn measure_incremental_anchor_change_layout_pass(env: &WowLuaEnv) -> Duratio
     started.elapsed()
 }
 
+pub fn measure_strata_bucket_rebuild(env: &WowLuaEnv) -> Duration {
+    let started = Instant::now();
+    {
+        let mut state = env.state().borrow_mut();
+        state.strata_buckets = None;
+        let _ = state
+            .get_strata_buckets()
+            .expect("strata buckets should rebuild for the settled game UI");
+    }
+    started.elapsed()
+}
+
 fn find_player_frame_id(env: &WowLuaEnv) -> u64 {
     let state = env.state().borrow();
     state

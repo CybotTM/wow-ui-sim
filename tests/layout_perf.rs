@@ -9,10 +9,14 @@ mod perf_layout;
 use std::time::Duration;
 
 use perf_game_ui::load_timed_game_ui;
-use perf_layout::{measure_full_root_layout_pass, measure_incremental_anchor_change_layout_pass};
+use perf_layout::{
+    measure_full_root_layout_pass, measure_incremental_anchor_change_layout_pass,
+    measure_strata_bucket_rebuild,
+};
 
 const FULL_ROOT_LAYOUT_BUDGET: Duration = Duration::from_millis(500);
 const INCREMENTAL_LAYOUT_BUDGET: Duration = Duration::from_millis(15);
+const STRATA_BUCKET_REBUILD_BUDGET: Duration = Duration::from_millis(50);
 
 #[test]
 fn full_root_layout_pass_stays_under_budget() {
@@ -62,6 +66,32 @@ fn incremental_anchor_change_layout_pass_stays_under_budget() {
             "incremental anchor-change layout took {:.2?}, exceeding budget {:.2?}",
             layout_elapsed,
             INCREMENTAL_LAYOUT_BUDGET
+        );
+    }
+}
+
+#[test]
+fn strata_bucket_rebuild_stays_under_budget() {
+    test_timeout! {
+        let loaded_ui = load_timed_game_ui();
+        let env = &loaded_ui.env;
+        assert!(
+            loaded_ui.startup_elapsed.as_nanos() > 0,
+            "shared perf UI startup timing should be captured"
+        );
+
+        let rebuild_elapsed = measure_strata_bucket_rebuild(env);
+        eprintln!(
+            "strata bucket rebuild baseline: {:.2?} (budget {:.2?})",
+            rebuild_elapsed,
+            STRATA_BUCKET_REBUILD_BUDGET
+        );
+
+        assert!(
+            rebuild_elapsed < STRATA_BUCKET_REBUILD_BUDGET,
+            "strata bucket rebuild took {:.2?}, exceeding budget {:.2?}",
+            rebuild_elapsed,
+            STRATA_BUCKET_REBUILD_BUDGET
         );
     }
 }
