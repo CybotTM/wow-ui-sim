@@ -101,20 +101,17 @@ struct CornerstoneNeighborhoodInfo {
     neighborhood_type: &'static str,
 }
 
-fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
-    let t = lua.create_table()?;
-    let state = Rc::new(RefCell::new(HousingCustomizeModeState::seeded()));
-    t.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
-    t.set(
-        "GetHoveredDecorInfo",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    let state_ref = Rc::clone(&state);
+fn register_customize_mode_selected_decor(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: &Rc<RefCell<HousingCustomizeModeState>>,
+) -> Result<()> {
+    let state_ref = Rc::clone(state);
     t.set(
         "IsDecorSelected",
         lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?,
     )?;
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     t.set(
         "GetSelectedDecorInfo",
         lua.create_function(move |lua, ()| {
@@ -131,6 +128,18 @@ fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
             Ok(Value::Table(decor))
         })?,
     )?;
+    Ok(())
+}
+
+fn make_c_housing_customize_mode(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingCustomizeModeState::seeded()));
+    t.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
+    t.set(
+        "GetHoveredDecorInfo",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    register_customize_mode_selected_decor(lua, &t, &state)?;
     t.set(
         "GetDecorDyeSlots",
         lua.create_function(|lua, _id: i32| lua.create_table())?,
@@ -213,20 +222,17 @@ fn fire_ui_event(lua: &Lua, event_name: &str, args: &[Value]) -> Result<()> {
     fire.call(MultiValue::from_vec(call_args))
 }
 
-fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
-    let decor = lua.create_table()?;
-    let state = Rc::new(RefCell::new(HousingDecorState::seeded()));
-    decor.set(
-        "GetHoveredDecorInfo",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
-    )?;
-    decor.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
-    let state_ref = Rc::clone(&state);
+fn register_housing_decor_queries(
+    lua: &Lua,
+    decor: &mlua::Table,
+    state: &Rc<RefCell<HousingDecorState>>,
+) -> Result<()> {
+    let state_ref = Rc::clone(state);
     decor.set(
         "IsDecorSelected",
         lua.create_function(move |_, ()| Ok(state_ref.borrow().selected_decor_info.is_some()))?,
     )?;
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     decor.set(
         "GetDecorHyperlink",
         lua.create_function(move |lua, decor_id: i32| {
@@ -237,7 +243,7 @@ fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
             Ok(Value::String(lua.create_string(*link)?))
         })?,
     )?;
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     decor.set(
         "GetSelectedDecorInfo",
         lua.create_function(move |lua, ()| {
@@ -245,14 +251,26 @@ fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
             let Some(info) = &state.selected_decor_info else {
                 return Ok(Value::Nil);
             };
-            let decor = lua.create_table()?;
-            decor.set("decorGUID", info.decor_guid)?;
-            decor.set("name", info.name)?;
-            decor.set("canBeRemoved", info.can_be_removed)?;
-            decor.set("isLocked", info.is_locked)?;
-            Ok(Value::Table(decor))
+            let t = lua.create_table()?;
+            t.set("decorGUID", info.decor_guid)?;
+            t.set("name", info.name)?;
+            t.set("canBeRemoved", info.can_be_removed)?;
+            t.set("isLocked", info.is_locked)?;
+            Ok(Value::Table(t))
         })?,
     )?;
+    Ok(())
+}
+
+fn make_c_housing_decor(lua: &Lua) -> Result<mlua::Table> {
+    let decor = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingDecorState::seeded()));
+    decor.set(
+        "GetHoveredDecorInfo",
+        lua.create_function(|_, ()| Ok(Value::Nil))?,
+    )?;
+    decor.set("IsHoveringDecor", lua.create_function(|_, ()| Ok(false))?)?;
+    register_housing_decor_queries(lua, &decor, &state)?;
     decor.set(
         "GetDecorInfo",
         lua.create_function(|_, _id: i32| Ok(Value::Nil))?,
@@ -282,11 +300,12 @@ fn make_c_housing_namespace(lua: &Lua) -> Result<mlua::Table> {
     Ok(housing)
 }
 
-fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
-    let neighborhood = lua.create_table()?;
-    let state = Rc::new(RefCell::new(HousingNeighborhoodState::seeded()));
-
-    let state_ref = Rc::clone(&state);
+fn register_neighborhood_cornerstone_queries(
+    lua: &Lua,
+    neighborhood: &mlua::Table,
+    state: &Rc<RefCell<HousingNeighborhoodState>>,
+) -> Result<()> {
+    let state_ref = Rc::clone(state);
     neighborhood.set(
         "GetCornerstoneHouseInfo",
         lua.create_function(move |lua, ()| {
@@ -301,8 +320,7 @@ fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
             Ok(Value::Table(house))
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     neighborhood.set(
         "GetCornerstoneNeighborhoodInfo",
         lua.create_function(move |lua, ()| {
@@ -310,13 +328,19 @@ fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
             let Some(info) = &state.cornerstone_neighborhood_info else {
                 return Ok(Value::Nil);
             };
-            let neighborhood = lua.create_table()?;
-            neighborhood.set("neighborhoodName", info.neighborhood_name)?;
-            neighborhood.set("neighborhoodType", info.neighborhood_type)?;
-            Ok(Value::Table(neighborhood))
+            let t = lua.create_table()?;
+            t.set("neighborhoodName", info.neighborhood_name)?;
+            t.set("neighborhoodType", info.neighborhood_type)?;
+            Ok(Value::Table(t))
         })?,
     )?;
+    Ok(())
+}
 
+fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
+    let neighborhood = lua.create_table()?;
+    let state = Rc::new(RefCell::new(HousingNeighborhoodState::seeded()));
+    register_neighborhood_cornerstone_queries(lua, &neighborhood, &state)?;
     neighborhood.set(
         "OnCornerstoneClosed",
         lua.create_function(move |_, ()| {
@@ -326,7 +350,6 @@ fn make_c_housing_neighborhood(lua: &Lua) -> Result<mlua::Table> {
             Ok(())
         })?,
     )?;
-
     Ok(neighborhood)
 }
 
@@ -407,67 +430,71 @@ struct HousingCatalogState {
     cart_counts: HashMap<i32, i32>,
 }
 
+fn seed_catalog_entries() -> HashMap<i32, HousingCatalogEntryInfo> {
+    [
+        HousingCatalogEntryInfo {
+            entry_id: 1001,
+            name: "Sunspire Chair",
+            featured_small: true,
+            variants: vec![
+                HousingCatalogVariantInfo {
+                    variant_id: 1,
+                    product_id: 91001,
+                    name: "Crimson Upholstery",
+                },
+                HousingCatalogVariantInfo {
+                    variant_id: 2,
+                    product_id: 91002,
+                    name: "Azure Upholstery",
+                },
+            ],
+            was_viewed_in_store: false,
+        },
+        HousingCatalogEntryInfo {
+            entry_id: 1002,
+            name: "Moonwell Lamp",
+            featured_small: true,
+            variants: vec![HousingCatalogVariantInfo {
+                variant_id: 1,
+                product_id: 92001,
+                name: "Starlit Glass",
+            }],
+            was_viewed_in_store: false,
+        },
+        HousingCatalogEntryInfo {
+            entry_id: 1003,
+            name: "Grand Canopy Bed",
+            featured_small: false,
+            variants: vec![HousingCatalogVariantInfo {
+                variant_id: 1,
+                product_id: 93001,
+                name: "Royal Plumage",
+            }],
+            was_viewed_in_store: false,
+        },
+    ]
+    .into_iter()
+    .map(|entry| (entry.entry_id, entry))
+    .collect()
+}
+
+fn seed_catalog_bundles() -> HashMap<i32, HousingCatalogBundleInfo> {
+    [HousingCatalogBundleInfo {
+        bundle_id: 5001,
+        name: "Moonlit Lounge Set",
+        entry_ids: vec![1001, 1002],
+        was_viewed: false,
+    }]
+    .into_iter()
+    .map(|bundle| (bundle.bundle_id, bundle))
+    .collect()
+}
+
 impl HousingCatalogState {
     fn seeded() -> Self {
-        let entries = [
-            HousingCatalogEntryInfo {
-                entry_id: 1001,
-                name: "Sunspire Chair",
-                featured_small: true,
-                variants: vec![
-                    HousingCatalogVariantInfo {
-                        variant_id: 1,
-                        product_id: 91001,
-                        name: "Crimson Upholstery",
-                    },
-                    HousingCatalogVariantInfo {
-                        variant_id: 2,
-                        product_id: 91002,
-                        name: "Azure Upholstery",
-                    },
-                ],
-                was_viewed_in_store: false,
-            },
-            HousingCatalogEntryInfo {
-                entry_id: 1002,
-                name: "Moonwell Lamp",
-                featured_small: true,
-                variants: vec![HousingCatalogVariantInfo {
-                    variant_id: 1,
-                    product_id: 92001,
-                    name: "Starlit Glass",
-                }],
-                was_viewed_in_store: false,
-            },
-            HousingCatalogEntryInfo {
-                entry_id: 1003,
-                name: "Grand Canopy Bed",
-                featured_small: false,
-                variants: vec![HousingCatalogVariantInfo {
-                    variant_id: 1,
-                    product_id: 93001,
-                    name: "Royal Plumage",
-                }],
-                was_viewed_in_store: false,
-            },
-        ]
-        .into_iter()
-        .map(|entry| (entry.entry_id, entry))
-        .collect();
-
-        let bundles = [HousingCatalogBundleInfo {
-            bundle_id: 5001,
-            name: "Moonlit Lounge Set",
-            entry_ids: vec![1001, 1002],
-            was_viewed: false,
-        }]
-        .into_iter()
-        .map(|bundle| (bundle.bundle_id, bundle))
-        .collect();
-
         Self {
-            entries,
-            bundles,
+            entries: seed_catalog_entries(),
+            bundles: seed_catalog_bundles(),
             cart_counts: HashMap::new(),
         }
     }
@@ -549,49 +576,54 @@ fn register_c_housing_catalog_categories(lua: &Lua, catalog: &mlua::Table) -> Re
     Ok(())
 }
 
-fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -> Result<()> {
-    let state = Rc::new(RefCell::new(HousingCatalogState::seeded()));
-
-    let state_ref = Rc::clone(&state);
+fn register_catalog_market_queries(
+    lua: &Lua,
+    catalog: &mlua::Table,
+    state: &Rc<RefCell<HousingCatalogState>>,
+) -> Result<()> {
+    let state_ref = Rc::clone(state);
     catalog.set(
         "GetCatalogEntryVariantInfo",
         lua.create_function(move |lua, (entry_id, variant_id): (i32, i32)| {
             get_housing_catalog_entry_variant_info(lua, &state_ref.borrow(), entry_id, variant_id)
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     catalog.set(
         "GetAllVariantInfosForEntry",
         lua.create_function(move |lua, entry_id: i32| {
             get_all_housing_catalog_variant_infos(lua, &state_ref.borrow(), entry_id)
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     catalog.set(
         "GetFeaturedSmallProducts",
         lua.create_function(move |lua, ()| {
             get_housing_catalog_featured_small_products(lua, &state_ref.borrow())
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     catalog.set(
         "GetMarketInfoForDecor",
         lua.create_function(move |lua, entry_id: i32| {
             get_housing_catalog_market_info(lua, &state_ref.borrow(), entry_id)
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     catalog.set(
         "GetBundleInfo",
         lua.create_function(move |lua, bundle_id: i32| {
             get_housing_catalog_bundle_info(lua, &state_ref.borrow(), bundle_id)
         })?,
     )?;
+    Ok(())
+}
 
+fn register_catalog_market_actions(
+    lua: &Lua,
+    catalog: &mlua::Table,
+    state: Rc<RefCell<HousingCatalogState>>,
+) -> Result<()> {
     let state_ref = Rc::clone(&state);
     catalog.set(
         "HousingMarketActionAddToCart",
@@ -604,7 +636,6 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             Ok(true)
         })?,
     )?;
-
     let state_ref = Rc::clone(&state);
     catalog.set(
         "HousingMarketActionRemoveFromCart",
@@ -620,7 +651,6 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             Ok(true)
         })?,
     )?;
-
     let state_ref = Rc::clone(&state);
     catalog.set(
         "HousingMarketActionClearCart",
@@ -629,7 +659,6 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             Ok(())
         })?,
     )?;
-
     let state_ref = Rc::clone(&state);
     catalog.set(
         "HousingMarketActionViewInStore",
@@ -642,7 +671,6 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             Ok(true)
         })?,
     )?;
-
     catalog.set(
         "HousingMarketActionViewBundle",
         lua.create_function(move |_, bundle_id: i32| {
@@ -654,34 +682,39 @@ fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -
             Ok(true)
         })?,
     )?;
-
     Ok(())
 }
 
-fn register_c_house_exterior_methods(lua: &Lua, exterior: &mlua::Table) -> Result<()> {
-    let state = Rc::new(RefCell::new(HouseExteriorState::seeded()));
+fn register_c_housing_catalog_market_methods(lua: &Lua, catalog: &mlua::Table) -> Result<()> {
+    let state = Rc::new(RefCell::new(HousingCatalogState::seeded()));
+    register_catalog_market_queries(lua, catalog, &state)?;
+    register_catalog_market_actions(lua, catalog, state)?;
+    Ok(())
+}
 
-    let state_ref = Rc::clone(&state);
+fn register_house_exterior_decor_queries(
+    lua: &Lua,
+    exterior: &mlua::Table,
+    state: &Rc<RefCell<HouseExteriorState>>,
+) -> Result<()> {
+    let state_ref = Rc::clone(state);
     exterior.set(
         "IsAnyDecorAttachedToHouseExterior",
         lua.create_function(move |_, ()| Ok(state_ref.borrow().house_exterior_has_attached_decor))?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     exterior.set(
         "IsAnyDecorAttachedToDoor",
         lua.create_function(move |_, ()| Ok(state_ref.borrow().door_has_attached_decor))?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     exterior.set(
         "IsAnyDecorAttachedToSelectedFixturePoint",
         lua.create_function(move |_, ()| {
             Ok(state_ref.borrow().selected_fixture_point_has_attached_decor)
         })?,
     )?;
-
-    let state_ref = Rc::clone(&state);
+    let state_ref = Rc::clone(state);
     exterior.set(
         "IsAnyDecorAttachedToCoreFixture",
         lua.create_function(move |_, core_fixture_type: i32| {
@@ -692,13 +725,17 @@ fn register_c_house_exterior_methods(lua: &Lua, exterior: &mlua::Table) -> Resul
                 .unwrap_or(&false))
         })?,
     )?;
+    Ok(())
+}
 
+fn register_c_house_exterior_methods(lua: &Lua, exterior: &mlua::Table) -> Result<()> {
+    let state = Rc::new(RefCell::new(HouseExteriorState::seeded()));
+    register_house_exterior_decor_queries(lua, exterior, &state)?;
     let state_ref = Rc::clone(&state);
     exterior.set(
         "IsExteriorDecorHidden",
         lua.create_function(move |_, ()| Ok(state_ref.borrow().decor_hidden))?,
     )?;
-
     exterior.set(
         "SetExteriorDecorHidden",
         lua.create_function(move |_, hidden: bool| {
@@ -706,7 +743,6 @@ fn register_c_house_exterior_methods(lua: &Lua, exterior: &mlua::Table) -> Resul
             Ok(())
         })?,
     )?;
-
     Ok(())
 }
 
