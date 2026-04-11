@@ -743,6 +743,40 @@ fn hide_ui_panel_hides_frame() {
 }
 
 #[test]
+fn show_and_hide_ui_panel_toggle_registered_frame_visibility() {
+    test_timeout! {
+        let env = setup_env();
+        let result: String = env.eval(r#"
+            local panel = CreateFrame("Frame", "ShowHideUIPanelTestFrame", UIParent)
+            panel:SetSize(300, 400)
+            panel:Hide()
+            RegisterUIPanel(panel, { area = "center", pushable = 0, whileDead = 1, allowOtherPanels = 1 })
+
+            if panel:IsShown() then
+                return "panel_started_shown"
+            end
+
+            ShowUIPanel(panel)
+            if not panel:IsShown() then
+                return "show_failed"
+            end
+
+            HideUIPanel(panel)
+            if panel:IsShown() then
+                return "hide_failed"
+            end
+
+            return "ok"
+        "#).unwrap();
+        assert_eq!(
+            result,
+            "ok",
+            "ShowUIPanel/HideUIPanel should toggle visibility for a registered panel: {result}"
+        );
+    }
+}
+
+#[test]
 fn show_ui_panel_is_function() {
     test_timeout! {
         let env = setup_env();
