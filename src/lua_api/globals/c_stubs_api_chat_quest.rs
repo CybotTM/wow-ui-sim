@@ -113,8 +113,8 @@ fn register_quest_query_stubs(lua: &Lua, g: &mlua::Table) -> Result<()> {
 fn register_quest_leaderboard_functions(lua: &Lua, g: &mlua::Table) -> Result<()> {
     g.set(
         "GetNumQuestLeaderBoards",
-        lua.create_function(|_, log_idx: i32| {
-            Ok(super::c_quest_api::num_quest_leaderboards(log_idx))
+        lua.create_function(|_, log_idx: Option<i32>| {
+            Ok(super::c_quest_api::num_quest_leaderboards(log_idx.unwrap_or(0)))
         })?,
     )?;
     g.set(
