@@ -1513,6 +1513,11 @@ const EVENT_SCHEDULER_LUA: &str = r#"
         return api._state.scheduledEvents
     end
 
+    api.HasData = api.HasData or function()
+        local state = api._state
+        return hasVisibleEvents(state.ongoingEvents) or hasVisibleEvents(state.scheduledEvents)
+    end
+
     api.RequestEvents = api.RequestEvents or function()
         populateSeededEventState(api._state)
     end

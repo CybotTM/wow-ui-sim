@@ -161,8 +161,9 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
         first_public_poi,
         public_scheduled_count,
         first_public_event_key,
+        has_data,
         can_show,
-    ): (i32, i32, i32, i32, i32, String, bool) = env
+    ): (i32, i32, i32, i32, i32, String, bool, bool) = env
         .eval(
             r#"
             C_EventScheduler._state.canShowEvents = nil
@@ -178,6 +179,7 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
                 C_EventScheduler.GetOngoingEvents()[1].areaPoiID,
                 #C_EventScheduler.GetScheduledEvents(),
                 C_EventScheduler.GetScheduledEvents()[1].eventKey,
+                C_EventScheduler.HasData(),
                 C_EventScheduler.CanShowEvents()
             "#,
         )
@@ -206,6 +208,10 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
     assert_eq!(
         first_public_event_key, "pvp-brawl-blitz",
         "GetScheduledEvents() should return the seeded scheduled event records"
+    );
+    assert!(
+        has_data,
+        "HasData() should report true after RequestEvents() restores scheduler state"
     );
     assert!(
         can_show,
