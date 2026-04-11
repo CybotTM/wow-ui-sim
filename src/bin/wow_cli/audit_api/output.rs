@@ -1,11 +1,20 @@
 use serde::Serialize;
 use std::collections::BTreeMap;
 
+use super::gap::{GapEntry, GapReport, GapSummary};
 use super::{AuditResults, SymbolUsage};
-use super::gap::GapReport;
 
 /// Print results in human-readable text format.
 pub fn print_text(results: &AuditResults) {
+    print_c_api_usage(results);
+    print_symbol_section("Global Function Calls", &results.global_functions);
+    print_symbol_section("Inherited Templates", &results.inherited_templates);
+    print_symbol_section("LE_* Constants", &results.constants);
+    print_symbol_section("Enum.* References", &results.enums);
+    print_symbol_section("Other Constants", &results.other_constants);
+}
+
+fn print_c_api_usage(results: &AuditResults) {
     let total_ns = results.c_api.len();
     let total_methods: usize = results.c_api.values().map(|v| v.len()).sum();
     println!(
@@ -21,46 +30,12 @@ pub fn print_text(results: &AuditResults) {
             println!("  .{} ({})", method, usage.count);
         }
     }
+}
 
+fn print_symbol_section(title: &str, symbols: &BTreeMap<String, SymbolUsage>) {
     println!();
-    println!(
-        "=== Global Function Calls ({} unique) ===",
-        results.global_functions.len()
-    );
-    for (sym, usage) in &results.global_functions {
-        println!("{} ({} files)", sym, usage.files.len());
-    }
-
-    println!();
-    println!(
-        "=== Inherited Templates ({} unique) ===",
-        results.inherited_templates.len()
-    );
-    for (sym, usage) in &results.inherited_templates {
-        println!("{} ({} files)", sym, usage.files.len());
-    }
-
-    println!();
-    println!(
-        "=== LE_* Constants ({} unique) ===",
-        results.constants.len()
-    );
-    for (sym, usage) in &results.constants {
-        println!("{} ({} files)", sym, usage.files.len());
-    }
-
-    println!();
-    println!("=== Enum.* References ({} unique) ===", results.enums.len());
-    for (sym, usage) in &results.enums {
-        println!("{} ({} files)", sym, usage.files.len());
-    }
-
-    println!();
-    println!(
-        "=== Other Constants ({} unique) ===",
-        results.other_constants.len()
-    );
-    for (sym, usage) in &results.other_constants {
+    println!("=== {} ({} unique) ===", title, symbols.len());
+    for (sym, usage) in symbols {
         println!("{} ({} files)", sym, usage.files.len());
     }
 }
@@ -94,144 +69,101 @@ pub fn print_json(results: &AuditResults, gap: Option<&GapReport>) {
 pub fn print_gap_text(report: &GapReport) {
     println!("=== API Gap Report ===");
     println!();
-    println!(
-        "C_* Namespaces: {}/{} registered ({} missing)",
-        report.c_namespaces.registered, report.c_namespaces.used, report.c_namespaces.missing
-    );
-    println!(
-        "LE_* Constants: {}/{} registered ({} missing)",
-        report.le_constants.registered, report.le_constants.used, report.le_constants.missing
-    );
-    println!(
-        "Enum.* Namespaces: {}/{} registered ({} missing)",
-        report.enum_namespaces.registered,
-        report.enum_namespaces.used,
-        report.enum_namespaces.missing
-    );
+    print_gap_summary("C_* Namespaces", &report.c_namespaces);
+    print_gap_summary("LE_* Constants", &report.le_constants);
+    print_gap_summary("Enum.* Namespaces", &report.enum_namespaces);
 
-    if !report.missing_c_namespaces.is_empty() {
-        println!();
+    print_missing_entries("Missing C_* Namespaces", &report.missing_c_namespaces, "calls");
+    print_missing_entries("Missing LE_* Constants", &report.missing_le_constants, "refs");
+    print_missing_entries("Missing Enum.* Namespaces", &report.missing_enum_namespaces, "refs");
+    print_missing_methods_text(&report.missing_c_methods);
+}
+
+fn print_gap_summary(label: &str, summary: &GapSummary) {
+    println!(
+        "{}: {}/{} registered ({} missing)",
+        label, summary.registered, summary.used, summary.missing
+    );
+}
+
+fn print_missing_entries(title: &str, entries: &[GapEntry], unit: &str) {
+    if entries.is_empty() {
+        return;
+    }
+    println!();
+    println!("--- {} ({}) ---", title, entries.len());
+    for entry in entries {
         println!(
-            "--- Missing C_* Namespaces ({}) ---",
-            report.missing_c_namespaces.len()
+            "  {} ({} {}, {} file{})",
+            entry.name,
+            entry.calls,
+            unit,
+            entry.files.len(),
+            if entry.files.len() == 1 { "" } else { "s" }
         );
-        for entry in &report.missing_c_namespaces {
+    }
+}
+
+fn print_missing_methods_text(methods: &BTreeMap<String, Vec<GapEntry>>) {
+    if methods.is_empty() {
+        return;
+    }
+    let total_missing: usize = methods.values().map(|v| v.len()).sum();
+    println!();
+    println!(
+        "--- Missing C_* Methods (by namespace, {} total) ---",
+        total_missing
+    );
+    for (ns, entries) in methods {
+        println!("{} ({} missing):", ns, entries.len());
+        for entry in entries {
             println!(
-                "  {} ({} calls, {} file{})",
+                "    .{} ({} refs, {} file{})",
                 entry.name,
                 entry.calls,
                 entry.files.len(),
                 if entry.files.len() == 1 { "" } else { "s" }
             );
-        }
-    }
-
-    if !report.missing_le_constants.is_empty() {
-        println!();
-        println!(
-            "--- Missing LE_* Constants ({}) ---",
-            report.missing_le_constants.len()
-        );
-        for entry in &report.missing_le_constants {
-            println!(
-                "  {} ({} refs, {} file{})",
-                entry.name,
-                entry.calls,
-                entry.files.len(),
-                if entry.files.len() == 1 { "" } else { "s" }
-            );
-        }
-    }
-
-    if !report.missing_enum_namespaces.is_empty() {
-        println!();
-        println!(
-            "--- Missing Enum.* Namespaces ({}) ---",
-            report.missing_enum_namespaces.len()
-        );
-        for entry in &report.missing_enum_namespaces {
-            println!(
-                "  {} ({} refs, {} file{})",
-                entry.name,
-                entry.calls,
-                entry.files.len(),
-                if entry.files.len() == 1 { "" } else { "s" }
-            );
-        }
-    }
-
-    if !report.missing_c_methods.is_empty() {
-        let total_missing: usize = report.missing_c_methods.values().map(|v| v.len()).sum();
-        println!();
-        println!(
-            "--- Missing C_* Methods (by namespace, {} total) ---",
-            total_missing
-        );
-        for (ns, methods) in &report.missing_c_methods {
-            println!("{} ({} missing):", ns, methods.len());
-            for entry in methods {
-                println!(
-                    "    .{} ({} refs, {} file{})",
-                    entry.name,
-                    entry.calls,
-                    entry.files.len(),
-                    if entry.files.len() == 1 { "" } else { "s" }
-                );
-            }
         }
     }
 }
 
 /// Print gap report as PLAN.md-ready markdown checkboxes.
 pub fn print_gap_plan(report: &GapReport) {
-    if !report.missing_c_namespaces.is_empty() {
-        println!(
-            "### Missing C_* Namespaces ({})\n",
-            report.missing_c_namespaces.len()
-        );
-        for entry in &report.missing_c_namespaces {
-            println!("- [ ] `{}` ({} calls)", entry.name, entry.calls);
-        }
-        println!();
-    }
+    print_plan_entries("Missing C_* Namespaces", &report.missing_c_namespaces, "calls");
+    print_plan_methods(&report.missing_c_methods);
+    print_plan_entries("Missing LE_* Constants", &report.missing_le_constants, "refs");
+    print_plan_entries("Missing Enum Namespaces", &report.missing_enum_namespaces, "refs");
+}
 
-    if !report.missing_c_methods.is_empty() {
-        let total: usize = report.missing_c_methods.values().map(|v| v.len()).sum();
-        println!("### Missing C_* Methods ({} total)\n", total);
-        for (ns, methods) in &report.missing_c_methods {
-            let method_list: Vec<String> = methods
-                .iter()
-                .map(|e| format!("{} ({})", e.name, e.calls))
-                .collect();
-            println!(
-                "- [ ] `{}` ({}): {}",
-                ns,
-                methods.len(),
-                method_list.join(", ")
-            );
-        }
-        println!();
+fn print_plan_entries(title: &str, entries: &[GapEntry], unit: &str) {
+    if entries.is_empty() {
+        return;
     }
+    println!("### {} ({})\n", title, entries.len());
+    for entry in entries {
+        println!("- [ ] `{}` ({} {})", entry.name, entry.calls, unit);
+    }
+    println!();
+}
 
-    if !report.missing_le_constants.is_empty() {
-        println!(
-            "### Missing LE_* Constants ({})\n",
-            report.missing_le_constants.len()
-        );
-        for entry in &report.missing_le_constants {
-            println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
-        }
-        println!();
+fn print_plan_methods(methods: &BTreeMap<String, Vec<GapEntry>>) {
+    if methods.is_empty() {
+        return;
     }
-
-    if !report.missing_enum_namespaces.is_empty() {
+    let total: usize = methods.values().map(|v| v.len()).sum();
+    println!("### Missing C_* Methods ({} total)\n", total);
+    for (ns, entries) in methods {
+        let method_list: Vec<String> = entries
+            .iter()
+            .map(|e| format!("{} ({})", e.name, e.calls))
+            .collect();
         println!(
-            "### Missing Enum Namespaces ({})\n",
-            report.missing_enum_namespaces.len()
+            "- [ ] `{}` ({}): {}",
+            ns,
+            entries.len(),
+            method_list.join(", ")
         );
-        for entry in &report.missing_enum_namespaces {
-            println!("- [ ] `{}` ({} refs)", entry.name, entry.calls);
-        }
-        println!();
     }
+    println!();
 }
