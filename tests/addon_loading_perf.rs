@@ -4,11 +4,24 @@ mod perf_addon_loading;
 #[path = "perf/base_game.rs"]
 mod perf_base_game;
 
+use std::collections::{BTreeMap, BTreeSet};
 use std::time::Duration;
 
-use perf_addon_loading::load_timed_game_addons_with_saved_vars;
+use perf_addon_loading::{PerAddonLoadTiming, load_timed_game_addons_with_saved_vars};
 
 const ADDON_LOADING_BUDGET: Duration = Duration::from_secs(25);
+const HEAVIEST_ADDON_COUNT: usize = 8;
+const MIN_HEAVY_ADDON_ALLOWED_REGRESSION: Duration = Duration::from_millis(400);
+const NEW_HEAVY_ADDON_OUTLIER_THRESHOLD: Duration = Duration::from_millis(650);
+const KNOWN_HEAVY_ADDON_BUDGETS: &[(&str, Duration)] = &[
+    ("Blizzard_ActionBar", Duration::from_millis(7700)),
+    ("Blizzard_UIPanels_Game", Duration::from_millis(1520)),
+    ("Blizzard_Communities", Duration::from_millis(980)),
+    ("Blizzard_UnitFrame", Duration::from_millis(835)),
+    ("Blizzard_FrameXML", Duration::from_millis(720)),
+    ("Blizzard_GroupFinder", Duration::from_millis(625)),
+    ("Blizzard_CompactRaidFrames", Duration::from_millis(611)),
+];
 
 #[test]
 fn blizzard_addon_loading_reports_phase_breakdown_under_budget() {
@@ -65,4 +78,115 @@ fn blizzard_addon_loading_reports_phase_breakdown_under_budget() {
             ADDON_LOADING_BUDGET
         );
     }
+}
+
+#[test]
+fn heaviest_blizzard_addons_stay_within_per_addon_load_budgets() {
+    test_timeout! {
+        let loaded = load_timed_game_addons_with_saved_vars();
+        let heaviest = heaviest_addons(&loaded.per_addon_timings, HEAVIEST_ADDON_COUNT);
+        assert_eq!(
+            heaviest.len(),
+            HEAVIEST_ADDON_COUNT,
+            "expected at least {HEAVIEST_ADDON_COUNT} per-addon timing samples, got {}",
+            heaviest.len()
+        );
+
+        let heaviest_report = format_heaviest_addon_report(&heaviest);
+        eprintln!("heaviest Blizzard addon loads: {heaviest_report}");
+
+        let timing_by_name = per_addon_timing_map(&loaded.per_addon_timings);
+        let regressions = collect_heavy_addon_regressions(&heaviest, &timing_by_name);
+
+        assert!(
+            regressions.is_empty(),
+            "heaviest Blizzard addon loading regressed:\n{}\nheaviest: [{}]",
+            regressions.join("\n"),
+            heaviest_report
+        );
+    }
+}
+
+fn format_heaviest_addon_report(heaviest: &[PerAddonLoadTiming]) -> String {
+    heaviest
+        .iter()
+        .map(|timing| format!("{}={:.2?}", timing.name, timing.total_time))
+        .collect::<Vec<_>>()
+        .join(", ")
+}
+
+fn per_addon_timing_map(per_addon_timings: &[PerAddonLoadTiming]) -> BTreeMap<&str, Duration> {
+    per_addon_timings
+        .iter()
+        .map(|timing| (timing.name.as_str(), timing.total_time))
+        .collect()
+}
+
+fn collect_heavy_addon_regressions(
+    heaviest: &[PerAddonLoadTiming],
+    timing_by_name: &BTreeMap<&str, Duration>,
+) -> Vec<String> {
+    let mut regressions = collect_known_heavy_addon_budget_regressions(timing_by_name);
+    regressions.extend(collect_new_heavy_addon_outliers(heaviest));
+    regressions
+}
+
+fn collect_known_heavy_addon_budget_regressions(
+    timing_by_name: &BTreeMap<&str, Duration>,
+) -> Vec<String> {
+    let mut regressions = Vec::new();
+    for (name, budget) in KNOWN_HEAVY_ADDON_BUDGETS {
+        let Some(total_time) = timing_by_name.get(name).copied() else {
+            regressions.push(format!("missing per-addon timing sample for {name}"));
+            continue;
+        };
+
+        let allowance = heavy_addon_allowed_regression(*budget);
+        let limit = *budget + allowance;
+        if total_time > limit {
+            regressions.push(format!(
+                "{} took {:.2?}, exceeding budget {:.2?} + regression allowance {:.2?}",
+                name, total_time, budget, allowance
+            ));
+        }
+    }
+    regressions
+}
+
+fn collect_new_heavy_addon_outliers(heaviest: &[PerAddonLoadTiming]) -> Vec<String> {
+    let known_heavy_addons: BTreeSet<&str> = KNOWN_HEAVY_ADDON_BUDGETS
+        .iter()
+        .map(|(name, _)| *name)
+        .collect();
+    heaviest
+        .iter()
+        .filter(|timing| !known_heavy_addons.contains(timing.name.as_str()))
+        .filter(|timing| timing.total_time > NEW_HEAVY_ADDON_OUTLIER_THRESHOLD)
+        .map(|timing| {
+            format!(
+                "{} became a new heavy-addon outlier at {:.2?}; add an explicit budget entry",
+                timing.name, timing.total_time
+            )
+        })
+        .collect()
+}
+
+fn heaviest_addons(
+    per_addon_timings: &[PerAddonLoadTiming],
+    count: usize,
+) -> Vec<PerAddonLoadTiming> {
+    let mut sorted = per_addon_timings.to_vec();
+    sorted.sort_by(|left, right| {
+        right
+            .total_time
+            .cmp(&left.total_time)
+            .then_with(|| left.name.cmp(&right.name))
+    });
+    sorted.truncate(count);
+    sorted
+}
+
+fn heavy_addon_allowed_regression(budget: Duration) -> Duration {
+    let scaled = Duration::from_secs_f64(budget.as_secs_f64() * 0.2);
+    scaled.max(MIN_HEAVY_ADDON_ALLOWED_REGRESSION)
 }
