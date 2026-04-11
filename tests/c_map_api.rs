@@ -83,6 +83,95 @@ fn test_get_map_world_size() {
 }
 
 // ============================================================================
+// Map art layer textures (world map tile rendering)
+// ============================================================================
+
+#[test]
+fn test_get_map_art_layer_textures_returns_filedata_ids() {
+    let env = env();
+    // GetMapArtLayerTextures must return a table of fileDataIDs for map tiles.
+    // The detail layer code indexes into this table (1..numTiles) and passes
+    // each value to SetTexture(). Without valid fileDataIDs, map tiles are blank.
+    let count: i32 = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local textures = C_Map.GetMapArtLayerTextures(mapID, 1)
+        if type(textures) ~= "table" then return 0 end
+        local n = 0
+        for _ in pairs(textures) do n = n + 1 end
+        return n
+    "#,
+        )
+        .unwrap();
+    assert!(
+        count > 0,
+        "GetMapArtLayerTextures should return at least one fileDataID for default map"
+    );
+}
+
+#[test]
+fn test_get_map_art_layer_textures_count_matches_grid() {
+    let env = env();
+    // The number of textures must equal ceil(layerHeight/tileHeight) * ceil(layerWidth/tileWidth)
+    let matches: bool = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local layers = C_Map.GetMapArtLayers(mapID)
+        local layerInfo = layers[1]
+        local numRows = math.ceil(layerInfo.layerHeight / layerInfo.tileHeight)
+        local numCols = math.ceil(layerInfo.layerWidth / layerInfo.tileWidth)
+        local expected = numRows * numCols
+
+        local textures = C_Map.GetMapArtLayerTextures(mapID, 1)
+        local actual = 0
+        for _ in pairs(textures) do actual = actual + 1 end
+        return actual == expected
+    "#,
+        )
+        .unwrap();
+    assert!(
+        matches,
+        "Texture count must match tile grid dimensions from GetMapArtLayers"
+    );
+}
+
+#[test]
+fn test_get_map_art_layer_textures_values_are_numbers() {
+    let env = env();
+    // Each value should be a numeric fileDataID
+    let all_numbers: bool = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local textures = C_Map.GetMapArtLayerTextures(mapID, 1)
+        for k, v in pairs(textures) do
+            if type(v) ~= "number" or v <= 0 then return false end
+        end
+        return true
+    "#,
+        )
+        .unwrap();
+    assert!(
+        all_numbers,
+        "All texture entries should be positive numeric fileDataIDs"
+    );
+}
+
+#[test]
+fn test_get_map_art_id_returns_nonzero() {
+    let env = env();
+    let art_id: i32 = env
+        .eval("return C_Map.GetMapArtID(C_Map.GetCurrentMapID())")
+        .unwrap();
+    assert!(
+        art_id > 0,
+        "GetMapArtID should return a non-zero art ID for the current map"
+    );
+}
+
+// ============================================================================
 // Zone text functions
 // ============================================================================
 
