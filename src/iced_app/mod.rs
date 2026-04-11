@@ -31,6 +31,8 @@ mod message_frame_render;
 #[cfg(feature = "gui")]
 mod mouse;
 #[cfg(feature = "gui")]
+mod mouse_drag;
+#[cfg(feature = "gui")]
 mod nine_slice;
 #[cfg(feature = "gui")]
 mod quad_builders;
