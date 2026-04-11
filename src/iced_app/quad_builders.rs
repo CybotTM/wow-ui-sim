@@ -144,49 +144,36 @@ fn dispatch_widget_quads(
     frame: &FrameQuadEmit<'_>,
 ) {
     match frame.widget.widget_type {
-        WidgetType::Frame | WidgetType::StatusBar => {
-            build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
-        }
+        WidgetType::Frame | WidgetType::StatusBar => build_frame_quads(batch, frame.bounds, frame.widget, frame.eff_alpha),
         WidgetType::MessageFrame => emit_message_frame_quads(batch, text_ctx, frame),
-        WidgetType::GameTooltip => {
-            super::tooltip::build_tooltip_quads(
-                super::tooltip::TooltipRender {
-                    batch,
-                    bounds: frame.bounds,
-                    tooltip_data: frame.tooltip_data,
-                    id: frame.id,
-                    eff_alpha: frame.eff_alpha,
-                },
-                text_ctx,
-            );
-        }
-        WidgetType::Minimap => {
-            build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha)
-        }
+        WidgetType::GameTooltip => emit_tooltip_quads(batch, text_ctx, frame),
+        WidgetType::Minimap => build_minimap_quads(batch, frame.bounds, frame.widget, frame.eff_alpha),
         WidgetType::Button => button::emit_button_quads_with_text(batch, text_ctx, frame),
         WidgetType::Texture => emit_texture_quads_with_mask(batch, frame),
         WidgetType::FontString => emit_fontstring_quads(batch, text_ctx, frame),
         WidgetType::CheckButton => button::emit_checkbutton_quads(batch, text_ctx, frame),
-        WidgetType::EditBox => {
-            button::emit_editbox_with_text(
-                batch,
-                frame.bounds,
-                frame.widget,
-                text_ctx,
-                frame.eff_alpha,
-            );
-        }
+        WidgetType::EditBox => button::emit_editbox_with_text(batch, frame.bounds, frame.widget, text_ctx, frame.eff_alpha),
         WidgetType::Cooldown => cooldown::emit_cooldown_quads(batch, text_ctx, frame),
-        WidgetType::Line => {
-            super::quad_builders_line::build_line_quads(
-                batch,
-                frame.widget,
-                frame.registry,
-                frame.eff_alpha,
-            );
-        }
+        WidgetType::Line => super::quad_builders_line::build_line_quads(batch, frame.widget, frame.registry, frame.eff_alpha),
         _ => {}
     }
+}
+
+fn emit_tooltip_quads(
+    batch: &mut QuadBatch,
+    text_ctx: &mut Option<(&mut WowFontSystem, &mut GlyphAtlas)>,
+    frame: &FrameQuadEmit<'_>,
+) {
+    super::tooltip::build_tooltip_quads(
+        super::tooltip::TooltipRender {
+            batch,
+            bounds: frame.bounds,
+            tooltip_data: frame.tooltip_data,
+            id: frame.id,
+            eff_alpha: frame.eff_alpha,
+        },
+        text_ctx,
+    );
 }
 
 fn emit_message_frame_quads(
