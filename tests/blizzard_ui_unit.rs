@@ -3,7 +3,7 @@
 mod common;
 mod tooltip_full_env_helpers;
 
-use tooltip_full_env_helpers::setup_full_env;
+use tooltip_full_env_helpers::{refresh_aura_frames, setup_full_env};
 
 fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     env.exec(
@@ -30,6 +30,11 @@ fn open_spellbook(env: &wow_ui_sim::lua_api::WowLuaEnv) {
         "#,
     )
     .expect("Failed to open spellbook");
+}
+
+fn refresh_buff_frame(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    refresh_aura_frames(env);
+    wow_ui_sim::startup::seed_buff_durations(env);
 }
 
 #[test]
@@ -192,6 +197,83 @@ fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
             result,
             "ok",
             "The first visible spellbook item icon should match C_SpellBook.GetSpellBookItemTexture for its slot: {result}"
+        );
+    }
+}
+
+#[test]
+fn buff_frame_visible_count_matches_active_helpful_aura_count() {
+    test_timeout! {
+        let env = setup_full_env();
+
+        env.exec(
+            r#"
+            A_Admin.ClearBuffs()
+            A_Admin.AddBuff(99011, "Test Buff One", "134973", 30, 1)
+            A_Admin.AddBuff(99012, "Test Buff Two", "134973", 45, 2)
+            A_Admin.AddBuff(99013, "Test Buff Three", "134973", 50, 1)
+            if BuffFrame and BuffFrame.SetBuffsExpandedState then
+                BuffFrame:SetBuffsExpandedState(true)
+            end
+            "#,
+        )
+        .unwrap();
+        refresh_buff_frame(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if not BuffFrame then
+                    return "missing_buff_frame"
+                end
+                if not BuffFrame.auraFrames then
+                    return "missing_buff_aura_frames"
+                end
+
+                local _, firstSlot = C_UnitAuras.GetAuraSlots("player", "HELPFUL")
+                if not firstSlot then
+                    return "missing_helpful_auras"
+                end
+
+                local auraCount = 0
+                local index = 1
+                while true do
+                    local aura = C_UnitAuras.GetAuraDataByIndex("player", index, "HELPFUL")
+                    if not aura then
+                        break
+                    end
+                    auraCount = auraCount + 1
+                    index = index + 1
+                end
+
+                local visibleBuffButtons = 0
+                for _, button in ipairs(BuffFrame.auraFrames) do
+                    if button:IsShown()
+                        and button.buttonInfo
+                        and button.buttonInfo.auraType == "Buff"
+                        and button.buttonInfo.index
+                    then
+                        visibleBuffButtons = visibleBuffButtons + 1
+                    end
+                end
+
+                if visibleBuffButtons ~= auraCount then
+                    return string.format(
+                        "buff_count_mismatch_expected_%d_actual_%d",
+                        auraCount,
+                        visibleBuffButtons
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "Visible BuffFrame buff buttons should match the active HELPFUL aura count from C_UnitAuras: {result}"
         );
     }
 }
