@@ -320,3 +320,49 @@ fn area_poi_info_returns_seeded_event_location_data() {
         "GetAreaPOIInfo() should keep returning nil for unknown POIs"
     );
 }
+
+#[test]
+fn area_poi_for_map_returns_seeded_event_poi_ids() {
+    let env = env();
+    let (battleground_count, battleground_first, island_count, island_first, missing_count): (
+        i32,
+        i32,
+        i32,
+        i32,
+        i32,
+    ) = env
+        .eval(
+            r#"
+            local battleground = C_AreaPoiInfo.GetAreaPOIForMap(8685)
+            local island = C_AreaPoiInfo.GetAreaPOIForMap(5861)
+            local missing = C_AreaPoiInfo.GetAreaPOIForMap(999999)
+            return #battleground,
+                battleground[1],
+                #island,
+                island[1],
+                #missing
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        battleground_count, 1,
+        "GetAreaPOIForMap() should list the seeded POIs for Warsong Gulch"
+    );
+    assert_eq!(
+        battleground_first, 1001,
+        "GetAreaPOIForMap() should include the seeded Warsong Gulch event POI"
+    );
+    assert_eq!(
+        island_count, 1,
+        "GetAreaPOIForMap() should list the seeded POIs for Darkmoon Island"
+    );
+    assert_eq!(
+        island_first, 1004,
+        "GetAreaPOIForMap() should include the seeded Darkmoon Island event POI"
+    );
+    assert_eq!(
+        missing_count, 0,
+        "GetAreaPOIForMap() should keep returning an empty table for unknown maps"
+    );
+}

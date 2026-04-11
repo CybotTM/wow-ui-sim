@@ -105,6 +105,13 @@ fn seeded_area_poi(map_id: i32, poi_id: i32) -> Option<&'static AreaPoiSeed> {
         .find(|seed| seed.map_id == map_id && seed.poi_id == poi_id)
 }
 
+fn seeded_area_poi_ids_for_map(map_id: i32) -> impl Iterator<Item = i32> {
+    SEEDED_AREA_POIS
+        .iter()
+        .filter(move |seed| seed.map_id == map_id)
+        .map(|seed| seed.poi_id)
+}
+
 fn create_vector2d(lua: &Lua, x: f32, y: f32) -> Result<Value> {
     let globals = lua.globals();
     if let Ok(create_vector2d) = globals.get::<mlua::Function>("CreateVector2D") {
@@ -157,7 +164,13 @@ fn register_c_area_poi(lua: &Lua) -> Result<()> {
     )?;
     t.set(
         "GetAreaPOIForMap",
-        lua.create_function(|lua, _m: i32| lua.create_table())?,
+        lua.create_function(|lua, map_id: i32| {
+            let ids = lua.create_table()?;
+            for (index, poi_id) in seeded_area_poi_ids_for_map(map_id).enumerate() {
+                ids.set(index + 1, poi_id)?;
+            }
+            Ok(ids)
+        })?,
     )?;
     lua.globals().set("C_AreaPoiInfo", t)?;
     Ok(())
