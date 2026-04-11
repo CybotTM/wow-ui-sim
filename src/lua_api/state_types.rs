@@ -130,6 +130,10 @@ pub struct NilSymbolAccess {
     pub container: String,
     /// Missing key that resolved to nil.
     pub key: String,
+    /// Raw Lua chunk source reported by `debug.getinfo`, if available.
+    pub source: Option<String>,
+    /// 1-based source line where the nil access happened, if available.
+    pub line: Option<i32>,
 }
 
 /// A Great Vault activity slot (one row/tier in the weekly rewards UI).

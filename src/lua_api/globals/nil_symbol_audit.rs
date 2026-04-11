@@ -7,6 +7,23 @@ use std::rc::Rc;
 
 const INSTALL_NIL_LOGGER_LUA: &str = r#"
 return function(target, logger)
+    local getinfo = debug.getinfo
+
+    local function get_access_location()
+        for level = 3, 30 do
+            local info = getinfo(level, "Sl")
+            if not info then
+                break
+            end
+
+            if info.source and info.source ~= "[C]" and info.source ~= "=[C]" then
+                return info.source, info.currentline
+            end
+        end
+
+        return nil, nil
+    end
+
     local mt = getmetatable(target)
     if type(mt) ~= "table" then
         mt = {}
@@ -25,7 +42,8 @@ return function(target, logger)
             return value
         end
 
-        logger(key)
+        local source, line = get_access_location()
+        logger(key, source, line)
         return nil
     end
 
@@ -74,7 +92,7 @@ fn install_table_nil_logger(
     state: Rc<RefCell<SimState>>,
 ) -> Result<()> {
     let container_name = container.to_string();
-    let logger = lua.create_function(move |_, key: Value| {
+    let logger = lua.create_function(move |_, (key, source, line): (Value, Value, Value)| {
         let mut state = state.borrow_mut();
         let addon_name = current_addon_name(&state);
         state
@@ -83,6 +101,8 @@ fn install_table_nil_logger(
                 addon_name,
                 container: container_name.clone(),
                 key: format_missing_key(&key),
+                source: format_source(source),
+                line: format_line(line),
             });
         Ok(())
     })?;
@@ -110,5 +130,22 @@ fn format_missing_key(key: &Value) -> String {
         Value::Boolean(key) => key.to_string(),
         Value::Nil => "nil".to_string(),
         _ => format!("{key:?}"),
+    }
+}
+
+fn format_source(source: Value) -> Option<String> {
+    match source {
+        Value::String(source) => Some(source.to_string_lossy().to_string()),
+        Value::Nil => None,
+        _ => None,
+    }
+}
+
+fn format_line(line: Value) -> Option<i32> {
+    match line {
+        Value::Integer(line) => i32::try_from(line).ok(),
+        Value::Number(line) => i32::try_from(line as i64).ok(),
+        Value::Nil => None,
+        _ => None,
     }
 }

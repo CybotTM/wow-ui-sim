@@ -16,8 +16,7 @@ fn create_test_addon_with_missing_symbol_accesses() -> tempfile::TempDir {
     let mut lua = std::fs::File::create(&lua_path).unwrap();
     writeln!(
         lua,
-        r#"
-local _ = MissingGlobalSymbol
+        r#"local _ = MissingGlobalSymbol
 local _ = C_MissingNamespace
 local _ = C_Container.MissingMethod
 local _ = C_Container.MissingMethod
@@ -37,23 +36,26 @@ fn load_addon_reports_missing_global_and_namespace_symbol_accesses() {
     let result = load_addon(&env.loader_env(), &toc_path).expect("addon load should succeed");
 
     assert!(
-        result
-            .warnings
-            .contains(&"TestNilSymbols needs global MissingGlobalSymbol (1x)".to_string()),
+        result.warnings.contains(
+            &"TestNilSymbols needs global MissingGlobalSymbol (accessed at TestNilSymbols.lua:1)"
+                .to_string()
+        ),
         "expected missing global gap warning, got {:?}",
         result.warnings
     );
     assert!(
-        result
-            .warnings
-            .contains(&"TestNilSymbols needs C_MissingNamespace (1x)".to_string()),
+        result.warnings.contains(
+            &"TestNilSymbols needs C_MissingNamespace (accessed at TestNilSymbols.lua:2)"
+                .to_string()
+        ),
         "expected missing C_* namespace gap warning, got {:?}",
         result.warnings
     );
     assert!(
-        result
-            .warnings
-            .contains(&"TestNilSymbols needs C_Container.MissingMethod (2x)".to_string()),
+        result.warnings.contains(
+            &"TestNilSymbols needs C_Container.MissingMethod (accessed at TestNilSymbols.lua:3)"
+                .to_string()
+        ),
         "expected missing C_* method gap warning, got {:?}",
         result.warnings
     );

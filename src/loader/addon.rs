@@ -4,8 +4,7 @@ use crate::lua_api::LoaderEnv;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
 use mlua::Table;
-use std::collections::BTreeMap;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::Instant;
 
 use super::error::LoadError;
@@ -225,27 +224,24 @@ fn append_nil_symbol_access_warnings(
     result.warnings.extend(
         grouped_accesses
             .into_iter()
-            .map(|(need, count)| format_missing_symbol_need(addon_name, &need, count)),
+            .map(|report| format_missing_symbol_report(addon_name, &report)),
     );
 }
 
 fn summarize_nil_symbol_accesses(
     accesses: &[crate::lua_api::state::NilSymbolAccess],
-) -> Vec<(MissingSymbolNeed, usize)> {
-    let mut counts = BTreeMap::new();
+) -> Vec<MissingSymbolReport> {
+    let mut reports = std::collections::BTreeMap::new();
     for access in accesses {
-        *counts
-            .entry(classify_nil_symbol_access(access))
-            .or_insert(0usize) += 1;
+        let need = classify_nil_symbol_access(access);
+        let location = format_nil_symbol_location(access);
+        reports.entry(need).or_insert(location);
     }
 
-    let mut rows: Vec<_> = counts.into_iter().collect();
-    rows.sort_by(|(left_need, left_count), (right_need, right_count)| {
-        right_count
-            .cmp(left_count)
-            .then_with(|| left_need.cmp(right_need))
-    });
-    rows
+    reports
+        .into_iter()
+        .map(|(need, location)| MissingSymbolReport { need, location })
+        .collect()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
@@ -280,18 +276,39 @@ fn classify_global_nil_access(key: &str) -> MissingSymbolNeed {
     MissingSymbolNeed::Global(key.to_string())
 }
 
-fn format_missing_symbol_need(addon_name: &str, need: &MissingSymbolNeed, count: usize) -> String {
-    match need {
-        MissingSymbolNeed::Global(name) => {
-            format!("{addon_name} needs global {name} ({count}x)")
-        }
-        MissingSymbolNeed::CNamespace(namespace) => {
-            format!("{addon_name} needs {namespace} ({count}x)")
-        }
-        MissingSymbolNeed::CMethod { namespace, method } => {
-            format!("{addon_name} needs {namespace}.{method} ({count}x)")
-        }
+#[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord)]
+struct MissingSymbolReport {
+    need: MissingSymbolNeed,
+    location: Option<String>,
+}
+
+fn format_missing_symbol_report(addon_name: &str, report: &MissingSymbolReport) -> String {
+    let need = match &report.need {
+        MissingSymbolNeed::Global(name) => format!("global {name}"),
+        MissingSymbolNeed::CNamespace(namespace) => namespace.clone(),
+        MissingSymbolNeed::CMethod { namespace, method } => format!("{namespace}.{method}"),
+    };
+
+    match &report.location {
+        Some(location) => format!("{addon_name} needs {need} (accessed at {location})"),
+        None => format!("{addon_name} needs {need}"),
     }
+}
+
+fn format_nil_symbol_location(access: &crate::lua_api::state::NilSymbolAccess) -> Option<String> {
+    let source = access.source.as_deref()?;
+    let line = access.line?;
+    Some(format!("{}:{line}", summarize_chunk_source(source)))
+}
+
+fn summarize_chunk_source(source: &str) -> String {
+    let stripped = source.trim_start_matches(['@', '=']);
+    let path = PathBuf::from(stripped);
+    path.file_name()
+        .and_then(|name| name.to_str())
+        .map(ToOwned::to_owned)
+        .filter(|name| !name.is_empty())
+        .unwrap_or_else(|| stripped.to_string())
 }
 
 fn load_addon_lua_file(
