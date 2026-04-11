@@ -154,7 +154,13 @@ fn event_scheduler_derives_visibility_from_event_lists() {
 #[test]
 fn event_scheduler_request_events_repopulates_seeded_state() {
     let env = env();
-    let (ongoing_count, scheduled_count, can_show): (i32, i32, bool) = env
+    let (ongoing_count, scheduled_count, public_ongoing_count, first_public_poi, can_show): (
+        i32,
+        i32,
+        i32,
+        i32,
+        bool,
+    ) = env
         .eval(
             r#"
             C_EventScheduler._state.canShowEvents = nil
@@ -166,6 +172,8 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
 
             return #C_EventScheduler._state.ongoingEvents,
                 #C_EventScheduler._state.scheduledEvents,
+                #C_EventScheduler.GetOngoingEvents(),
+                C_EventScheduler.GetOngoingEvents()[1].areaPoiID,
                 C_EventScheduler.CanShowEvents()
             "#,
         )
@@ -178,6 +186,14 @@ fn event_scheduler_request_events_repopulates_seeded_state() {
     assert_eq!(
         scheduled_count, 2,
         "RequestEvents() should repopulate the seeded scheduled event list"
+    );
+    assert_eq!(
+        public_ongoing_count, 2,
+        "GetOngoingEvents() should expose the repopulated seeded ongoing event list"
+    );
+    assert_eq!(
+        first_public_poi, 1001,
+        "GetOngoingEvents() should return the seeded ongoing event records"
     );
     assert!(
         can_show,
