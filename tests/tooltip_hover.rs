@@ -30,6 +30,43 @@ fn test_tooltip_mixins_load_in_full_env() {
     assert_eq!(tooltip_onload_type, "function");
 }
 
+#[test]
+fn test_game_tooltip_process_info_with_constructed_tooltip_info_populates_lines() {
+    let env = setup_full_env();
+
+    let processed: bool = env
+        .eval(
+            r#"
+            GameTooltip:SetOwner(UIParent, "ANCHOR_NONE")
+            local tooltipInfo = {
+                getterName = "GetItemByID",
+                getterArgs = { [1] = 6948, n = 1 },
+            }
+            return GameTooltip:ProcessInfo(tooltipInfo)
+        "#,
+        )
+        .unwrap();
+
+    assert!(
+        processed,
+        "GameTooltip:ProcessInfo should succeed for a valid item tooltipInfo"
+    );
+
+    let num_lines: i32 = env.eval("return GameTooltip:NumLines()").unwrap();
+    assert!(
+        num_lines > 0,
+        "GameTooltip:ProcessInfo should populate tooltip lines for a valid tooltipInfo"
+    );
+
+    let first_line: String = env
+        .eval("return GameTooltip:GetLeftLine(1):GetText()")
+        .unwrap();
+    assert_eq!(
+        first_line, "Hearthstone",
+        "GameTooltip:ProcessInfo should set the first tooltip line from the constructed tooltipInfo"
+    );
+}
+
 /// Test that hovering a micro menu button shows the tooltip with text.
 ///
 /// Uses the full Blizzard UI environment so OnEnter scripts run properly.
