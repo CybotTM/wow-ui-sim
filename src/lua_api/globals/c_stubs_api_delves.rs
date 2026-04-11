@@ -57,64 +57,59 @@ fn register_seasonal_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 
 /// Entrance data methods (active tier, tiers list, map ID, header/description, background widget).
 fn register_entrance_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    register_entrance_getters(lua, t)?;
+    register_entrance_tier_actions(lua, t)
+}
+
+fn register_entrance_getters(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let s = t.clone();
     t.set("GetActiveDelveTier", lua.create_function(move |_, ()| s.get::<mlua::Table>("__activeDelveTier"))?)?;
-
     let s = t.clone();
     t.set("GetDelveEntranceBackgroundWidgetSetID", lua.create_function(move |_, ()| s.get::<i32>("__delveEntranceBackgroundWidgetSetID"))?)?;
-
     let s = t.clone();
     t.set("GetDelveEntranceDescriptionString", lua.create_function(move |_, ()| s.get::<String>("__delveEntranceDescriptionString"))?)?;
-
     let s = t.clone();
     t.set("GetDelveEntranceHeaderString", lua.create_function(move |_, ()| s.get::<String>("__delveEntranceHeaderString"))?)?;
-
     let s = t.clone();
     t.set("GetDelveEntranceMapID", lua.create_function(move |_, ()| s.get::<i32>("__delveEntranceMapID"))?)?;
-
     let s = t.clone();
     t.set("GetDelveEntranceTiers", lua.create_function(move |_, ()| s.get::<mlua::Table>("__delveEntranceTiers"))?)?;
+    Ok(())
+}
 
+fn register_entrance_tier_actions(lua: &Lua, t: &mlua::Table) -> Result<()> {
     let s = t.clone();
-    t.set(
-        "IsDelveEntranceTierEnabled",
-        lua.create_function(move |lua, tier: i32| {
-            let tiers = s.get::<mlua::Table>("__delveEntranceTiers")?;
-            for pair in tiers.sequence_values::<mlua::Table>() {
-                let info = pair?;
-                if info.get::<i32>("tier")? == tier {
-                    let unlocked = info.get::<bool>("unlocked")?;
-                    let locked_reason = info.get::<Value>("lockedReason")?;
-                    return Ok(mlua::MultiValue::from_vec(vec![
-                        Value::Boolean(unlocked),
-                        if unlocked { Value::Nil } else { locked_reason },
-                    ]));
-                }
+    t.set("IsDelveEntranceTierEnabled", lua.create_function(move |lua, tier: i32| {
+        let tiers = s.get::<mlua::Table>("__delveEntranceTiers")?;
+        for pair in tiers.sequence_values::<mlua::Table>() {
+            let info = pair?;
+            if info.get::<i32>("tier")? == tier {
+                let unlocked = info.get::<bool>("unlocked")?;
+                let locked_reason = info.get::<Value>("lockedReason")?;
+                return Ok(mlua::MultiValue::from_vec(vec![
+                    Value::Boolean(unlocked),
+                    if unlocked { Value::Nil } else { locked_reason },
+                ]));
             }
-            Ok(mlua::MultiValue::from_vec(vec![
-                Value::Boolean(false),
-                Value::String(lua.create_string("Unknown tier")?),
-            ]))
-        })?,
-    )?;
-
+        }
+        Ok(mlua::MultiValue::from_vec(vec![
+            Value::Boolean(false),
+            Value::String(lua.create_string("Unknown tier")?),
+        ]))
+    })?)?;
     let s = t.clone();
-    t.set(
-        "SelectDelveEntranceTier",
-        lua.create_function(move |_, tier: i32| {
-            s.set("__selectedDelveEntranceTier", tier)?;
-            let tiers = s.get::<mlua::Table>("__delveEntranceTiers")?;
-            for pair in tiers.sequence_values::<mlua::Table>() {
-                let info = pair?;
-                if info.get::<i32>("tier")? == tier {
-                    s.set("__activeDelveTier", info)?;
-                    break;
-                }
+    t.set("SelectDelveEntranceTier", lua.create_function(move |_, tier: i32| {
+        s.set("__selectedDelveEntranceTier", tier)?;
+        let tiers = s.get::<mlua::Table>("__delveEntranceTiers")?;
+        for pair in tiers.sequence_values::<mlua::Table>() {
+            let info = pair?;
+            if info.get::<i32>("tier")? == tier {
+                s.set("__activeDelveTier", info)?;
+                break;
             }
-            Ok(())
-        })?,
-    )?;
-
+        }
+        Ok(())
+    })?)?;
     t.set("RequestPartyEligibilityForDelveTiers", lua.create_function(|_, ()| Ok(()))?)?;
     Ok(())
 }
