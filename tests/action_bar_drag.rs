@@ -228,3 +228,44 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
         );
     });
 }
+
+#[test]
+fn action_button_1_icon_matches_get_action_texture() {
+    common::with_timeout(120, move || {
+        let env = env_with_action_bar();
+        seed_action_slot(&env, 1, 853);
+        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[mlua::Value::Integer(0)])
+            .unwrap();
+        env.fire_event("ACTIONBAR_UPDATE_STATE").unwrap();
+
+        let result: String = env
+            .eval(
+                r#"
+                if not ActionButton1 then
+                    return "missing_action_button_1"
+                end
+                if not ActionButton1.icon then
+                    return "missing_action_button_1_icon"
+                end
+
+                local expected = GetActionTexture(1)
+                local actual = ActionButton1.icon:GetTexture()
+                if actual ~= expected then
+                    return string.format(
+                        "icon_mismatch_expected_%s_actual_%s",
+                        tostring(expected),
+                        tostring(actual)
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result, "ok",
+            "ActionButton1 icon should match GetActionTexture(1): {result}"
+        );
+    });
+}
