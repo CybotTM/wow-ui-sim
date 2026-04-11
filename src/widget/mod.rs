@@ -3,6 +3,7 @@
 mod anchor;
 mod frame;
 mod frame_enums;
+mod frame_size;
 mod frame_types;
 mod registry;
 
