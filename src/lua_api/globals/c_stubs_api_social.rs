@@ -33,58 +33,47 @@ fn register_c_report_system(lua: &Lua, g: &mlua::Table) -> Result<()> {
         Value::Table(existing) => existing,
         _ => lua.create_table()?,
     };
-
-    t.set(
-        "CanReportPlayer",
-        lua.create_function(|_, _player_location: Value| Ok(true))?,
-    )?;
-    t.set(
-        "CanReportPlayerForLanguage",
-        lua.create_function(|_, _player_location: Value| Ok(true))?,
-    )?;
-    t.set(
-        "InitiateReportPlayer",
-        lua.create_function(
-            |lua, (report_type, _player_location): (String, Option<Value>)| {
-                let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
-                    return Ok(0i64);
-                };
-
-                let mut state = state.borrow_mut();
-                let report_token = state.next_report_token;
-                state.next_report_token += 1;
-                state.pending_player_reports.insert(
-                    report_token,
-                    PendingPlayerReport {
-                        report_type,
-                        comment: None,
-                    },
-                );
-                Ok(report_token)
-            },
-        )?,
-    )?;
-    t.set(
-        "SendReportPlayer",
-        lua.create_function(|lua, (report_token, comment): (i64, Option<String>)| {
-            let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
-                return Ok(());
-            };
-
-            let mut state = state.borrow_mut();
-            let Some(mut report) = state.pending_player_reports.remove(&report_token) else {
-                return Ok(());
-            };
-            report.comment = comment.filter(|text| !text.is_empty());
-            state.events.push(Event {
-                name: "REPORT_PLAYER_RESULT".to_string(),
-                args: vec![EventArg::Number(0.0), EventArg::String(report.report_type)],
-            });
-            Ok(())
-        })?,
-    )?;
-
+    t.set("CanReportPlayer", lua.create_function(|_, _loc: Value| Ok(true))?)?;
+    t.set("CanReportPlayerForLanguage", lua.create_function(|_, _loc: Value| Ok(true))?)?;
+    t.set("InitiateReportPlayer", lua.create_function(initiate_report_player)?)?;
+    t.set("SendReportPlayer", lua.create_function(send_report_player)?)?;
     g.set("C_ReportSystem", t)
+}
+
+fn initiate_report_player(
+    lua: &Lua,
+    (report_type, _player_location): (String, Option<Value>),
+) -> Result<i64> {
+    let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
+        return Ok(0);
+    };
+    let mut state = state.borrow_mut();
+    let report_token = state.next_report_token;
+    state.next_report_token += 1;
+    state.pending_player_reports.insert(
+        report_token,
+        PendingPlayerReport {
+            report_type,
+            comment: None,
+        },
+    );
+    Ok(report_token)
+}
+
+fn send_report_player(lua: &Lua, (report_token, comment): (i64, Option<String>)) -> Result<()> {
+    let Some(state) = lua.app_data_ref::<Rc<RefCell<SimState>>>() else {
+        return Ok(());
+    };
+    let mut state = state.borrow_mut();
+    let Some(mut report) = state.pending_player_reports.remove(&report_token) else {
+        return Ok(());
+    };
+    report.comment = comment.filter(|text| !text.is_empty());
+    state.events.push(Event {
+        name: "REPORT_PLAYER_RESULT".to_string(),
+        args: vec![EventArg::Number(0.0), EventArg::String(report.report_type)],
+    });
+    Ok(())
 }
 
 /// C_ClassTrial, C_RecruitAFriend, C_WowTokenPublic, C_FriendList stubs.
