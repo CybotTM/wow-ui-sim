@@ -840,13 +840,31 @@ impl Frame {
     }
 
     fn dynamic_string_bytes(&self) -> usize {
+        self.core_string_bytes()
+            + self.texture_string_bytes()
+            + self.minimap_string_bytes()
+            + option_string_bytes(&self.model_path)
+            + option_string_bytes(&self.statusbar_texture_path)
+            + self.slider_orientation.capacity()
+            + self.statusbar_fill_style.capacity()
+            + self.statusbar_orientation.capacity()
+            + self.editbox_input_language.capacity()
+    }
+
+    fn core_string_bytes(&self) -> usize {
         option_string_bytes(&self.object_type_name)
             + option_string_bytes(&self.name)
             + option_string_bytes(&self.texture)
             + option_string_bytes(&self.text)
             + option_string_bytes(&self.font)
             + option_string_bytes(&self.parent_key)
-            + option_string_bytes(&self.normal_texture)
+            + option_string_bytes(&self.atlas)
+            + option_string_bytes(&self.nine_slice_layout)
+            + option_string_bytes(&self.alpha_mode)
+    }
+
+    fn texture_string_bytes(&self) -> usize {
+        option_string_bytes(&self.normal_texture)
             + option_string_bytes(&self.pushed_texture)
             + option_string_bytes(&self.highlight_texture)
             + option_string_bytes(&self.disabled_texture)
@@ -855,22 +873,16 @@ impl Frame {
             + option_string_bytes(&self.left_texture)
             + option_string_bytes(&self.middle_texture)
             + option_string_bytes(&self.right_texture)
-            + option_string_bytes(&self.atlas)
-            + option_string_bytes(&self.nine_slice_layout)
-            + option_string_bytes(&self.alpha_mode)
-            + option_string_bytes(&self.minimap_blip_texture)
+    }
+
+    fn minimap_string_bytes(&self) -> usize {
+        option_string_bytes(&self.minimap_blip_texture)
             + option_string_bytes(&self.minimap_mask_texture)
             + option_string_bytes(&self.minimap_icon_texture)
             + option_string_bytes(&self.minimap_player_texture)
             + option_string_bytes(&self.minimap_poi_arrow_texture)
             + option_string_bytes(&self.minimap_corpse_poi_arrow_texture)
             + option_string_bytes(&self.minimap_static_poi_arrow_texture)
-            + option_string_bytes(&self.model_path)
-            + option_string_bytes(&self.statusbar_texture_path)
-            + self.slider_orientation.capacity()
-            + self.statusbar_fill_style.capacity()
-            + self.statusbar_orientation.capacity()
-            + self.editbox_input_language.capacity()
     }
 }
 
