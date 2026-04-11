@@ -423,6 +423,60 @@ fn keybind_c_toggles_character_without_errors() {
     }
 }
 
+#[test]
+fn character_panel_inventory_tooltip_has_lines_and_closes_without_errors() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if type(ToggleCharacter) ~= "function" then
+                    return "missing_toggle_character"
+                end
+
+                ToggleCharacter("PaperDollFrame")
+
+                if not (CharacterFrame and CharacterFrame:IsShown()) then
+                    return "character_not_open"
+                end
+
+                local hasItem = GameTooltip:SetInventoryItem("player", 1)
+                if not hasItem then
+                    return "no_inventory_item"
+                end
+
+                if GameTooltip:NumLines() == 0 then
+                    return "tooltip_has_no_lines"
+                end
+
+                ToggleCharacter("PaperDollFrame")
+
+                if CharacterFrame and CharacterFrame:IsShown() then
+                    return "character_not_closed"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Character panel inventory tooltip flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Character panel inventory tooltip flow should open, populate tooltip lines, and close: {result}"
+        );
+    }
+}
+
 // ── U → ToggleCharacter("ReputationFrame") ──────────────────────────────
 
 #[test]
