@@ -491,6 +491,79 @@ fn keybind_u_opens_reputation() {
     }
 }
 
+#[test]
+fn reputation_first_visible_line_matches_first_faction_name() {
+    test_timeout! {
+        let env = setup_env();
+
+        env.send_key_press("U", None).expect("U keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (CharacterFrame and CharacterFrame:IsShown()) then
+                    return "character_frame_not_shown"
+                end
+                if not (ReputationFrame and ReputationFrame:IsShown()) then
+                    return "reputation_frame_not_shown"
+                end
+                if not ReputationFrame.ScrollBox then
+                    return "missing_reputation_scroll_box"
+                end
+
+                local expectedData = C_Reputation.GetFactionDataByIndex(1)
+                if not expectedData then
+                    return "missing_first_faction_data"
+                end
+
+                local firstVisible
+                for _, frame in ReputationFrame.ScrollBox:EnumerateFrames() do
+                    if frame and frame:IsShown() then
+                        firstVisible = frame
+                        break
+                    end
+                end
+
+                if not firstVisible then
+                    return "missing_first_visible_reputation_line"
+                end
+
+                local actualIndex = firstVisible.factionIndex
+                    or (firstVisible.elementData and firstVisible.elementData.factionIndex)
+                if actualIndex ~= 1 then
+                    return string.format(
+                        "first_visible_line_index_mismatch_expected_1_actual_%s",
+                        tostring(actualIndex)
+                    )
+                end
+
+                local nameRegion = firstVisible.Content and firstVisible.Content.Name or firstVisible.Name
+                if not nameRegion then
+                    return "missing_first_visible_line_name"
+                end
+
+                local actualName = nameRegion:GetText()
+                if actualName ~= expectedData.name then
+                    return string.format(
+                        "first_visible_line_name_mismatch_expected_%s_actual_%s",
+                        tostring(expectedData.name),
+                        tostring(actualName)
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "The first visible reputation line should match C_Reputation.GetFactionDataByIndex(1).name: {result}"
+        );
+    }
+}
+
 // ── S → PlayerSpellsUtil.ToggleSpellBookFrame() ─────────────────────────
 
 #[test]
