@@ -9,9 +9,10 @@ mod perf_layout;
 use std::time::Duration;
 
 use perf_game_ui::load_timed_game_ui;
-use perf_layout::measure_full_root_layout_pass;
+use perf_layout::{measure_full_root_layout_pass, measure_incremental_anchor_change_layout_pass};
 
 const FULL_ROOT_LAYOUT_BUDGET: Duration = Duration::from_millis(500);
+const INCREMENTAL_LAYOUT_BUDGET: Duration = Duration::from_millis(15);
 
 #[test]
 fn full_root_layout_pass_stays_under_budget() {
@@ -35,6 +36,32 @@ fn full_root_layout_pass_stays_under_budget() {
             "full root layout took {:.2?}, exceeding budget {:.2?}",
             layout_elapsed,
             FULL_ROOT_LAYOUT_BUDGET
+        );
+    }
+}
+
+#[test]
+fn incremental_anchor_change_layout_pass_stays_under_budget() {
+    test_timeout! {
+        let loaded_ui = load_timed_game_ui();
+        let env = &loaded_ui.env;
+        assert!(
+            loaded_ui.startup_elapsed.as_nanos() > 0,
+            "shared perf UI startup timing should be captured"
+        );
+
+        let layout_elapsed = measure_incremental_anchor_change_layout_pass(env);
+        eprintln!(
+            "incremental anchor-change layout baseline: {:.2?} (budget {:.2?})",
+            layout_elapsed,
+            INCREMENTAL_LAYOUT_BUDGET
+        );
+
+        assert!(
+            layout_elapsed < INCREMENTAL_LAYOUT_BUDGET,
+            "incremental anchor-change layout took {:.2?}, exceeding budget {:.2?}",
+            layout_elapsed,
+            INCREMENTAL_LAYOUT_BUDGET
         );
     }
 }
