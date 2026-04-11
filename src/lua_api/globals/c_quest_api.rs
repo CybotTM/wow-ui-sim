@@ -259,6 +259,14 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
         "IsUnitOnQuest",
         lua.create_function(|_, (_unit, _quest_id): (String, i32)| Ok(false))?,
     )?;
+    t.set(
+        "IsWorldQuest",
+        lua.create_function(|_, quest_id: i32| Ok(is_world_quest(quest_id)))?,
+    )?;
+    t.set(
+        "IsQuestTask",
+        lua.create_function(|_, quest_id: i32| Ok(is_world_quest(quest_id)))?,
+    )?;
     Ok(t)
 }
 
