@@ -170,6 +170,13 @@ fn format_per_addon_report(grouped_errors: &BTreeMap<String, Vec<String>>) -> St
         .join("\n")
 }
 
+fn format_full_per_addon_report(grouped_errors: &BTreeMap<String, Vec<String>>) -> String {
+    format!(
+        "Per-addon Lua error report (sorted by error count):\n{}",
+        format_per_addon_report(grouped_errors)
+    )
+}
+
 fn known_error_counts() -> BTreeMap<String, usize> {
     KNOWN_ERRORS
         .iter()
@@ -253,6 +260,29 @@ fn error_count_ratchet_detects_increases_and_decreases() {
     assert_eq!(changes.decreased, vec![("Blizzard_C".to_string(), 1, 0)],);
 }
 
+#[test]
+fn full_per_addon_report_lists_highest_error_counts_first() {
+    let grouped_errors = BTreeMap::from([
+        ("Blizzard_B".to_string(), vec!["second".to_string()]),
+        (
+            "Blizzard_A".to_string(),
+            vec!["first".to_string(), "another".to_string()],
+        ),
+        ("Blizzard_C".to_string(), vec!["third".to_string()]),
+    ]);
+
+    let report = format_full_per_addon_report(&grouped_errors);
+    let lines: Vec<_> = report.lines().collect();
+
+    assert_eq!(
+        lines[0],
+        "Per-addon Lua error report (sorted by error count):"
+    );
+    assert_eq!(lines[1], "Blizzard_A: 2 error(s); sample: first");
+    assert_eq!(lines[2], "Blizzard_B: 1 error(s); sample: second");
+    assert_eq!(lines[3], "Blizzard_C: 1 error(s); sample: third");
+}
+
 fn count_blizzard_directories() -> usize {
     std::fs::read_dir(blizzard_ui_dir())
         .expect("BlizzardUI directory should be readable")
@@ -304,6 +334,7 @@ fn all_blizzard_addon_load_errors_are_tracked_per_addon_name() {
 
         let state = env.state().borrow();
         let grouped_errors = grouped_errors_by_addon(&state);
+        println!("{}", format_full_per_addon_report(&grouped_errors));
         let known_counts = known_error_counts();
         let actual_counts = actual_error_counts(&grouped_errors);
         let changes = classify_error_count_changes(&known_counts, &actual_counts);
