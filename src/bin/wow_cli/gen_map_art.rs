@@ -191,113 +191,122 @@ fn write_map_art(
     write_file_header(out)?;
     write_structs(out)?;
 
-    // Collect all unique artIDs needed
     let mut art_ids: Vec<u32> = map_art.values().copied().collect();
     art_ids.sort_unstable();
     art_ids.dedup();
 
-    // For each artID, emit tile slices and layer slices
     for &art_id in &art_ids {
-        let style_id = match art_style.get(&art_id) {
-            Some(&s) => s,
-            None => continue,
+        let Some(&style_id) = art_style.get(&art_id) else {
+            continue;
         };
-        let layers = match style_layers.get(&style_id) {
-            Some(l) => l,
-            None => continue,
+        let Some(layers) = style_layers.get(&style_id) else {
+            continue;
         };
+        emit_art_statics(out, art_id, layers, tiles)?;
+    }
 
-        for layer in layers {
-            let layer_idx = layer.layer_index;
-            let tile_map = tiles.get(&(art_id, layer_idx));
+    writeln!(out)?;
+    let count = emit_phf_map(out, map_art, art_style, style_layers)?;
+    write_lookup_fn(out)?;
+    Ok(count)
+}
 
-            let ids: Vec<u32> = if let Some(tm) = tile_map {
-                // Determine grid dimensions from the max row/col seen
-                let max_row = tm.keys().map(|&(r, _)| r).max().unwrap_or(0);
-                let max_col = tm.keys().map(|&(_, c)| c).max().unwrap_or(0);
-                let num_cols = max_col + 1;
-                let num_rows = max_row + 1;
-                let len = (num_rows * num_cols) as usize;
-                let mut v = vec![0u32; len];
-                for (&(row, col), &fdid) in tm {
-                    let idx = (row * num_cols + col) as usize;
-                    v[idx] = fdid;
-                }
-                v
-            } else {
-                vec![]
-            };
+/// Flatten a tile BTreeMap<(row,col), fileDataID> into a row-major Vec.
+fn flatten_tile_map(tm: &BTreeMap<(u32, u32), u32>) -> Vec<u32> {
+    let max_row = tm.keys().map(|&(r, _)| r).max().unwrap_or(0);
+    let max_col = tm.keys().map(|&(_, c)| c).max().unwrap_or(0);
+    let num_cols = max_col + 1;
+    let len = ((max_row + 1) * num_cols) as usize;
+    let mut v = vec![0u32; len];
+    for (&(row, col), &fdid) in tm {
+        v[(row * num_cols + col) as usize] = fdid;
+    }
+    v
+}
 
-            write!(
-                out,
-                "static ART_{}_LAYER_{}_TILES: [u32; {}] = [",
-                art_id,
-                layer_idx,
-                ids.len()
-            )?;
-            for (i, &id) in ids.iter().enumerate() {
-                if i > 0 {
-                    write!(out, ",")?;
-                }
-                write!(out, "{}", id)?;
+/// Emit tile arrays, layer info, and tile-slice arrays for one art ID.
+fn emit_art_statics(
+    out: &mut File,
+    art_id: u32,
+    layers: &[StyleLayer],
+    tiles: &HashMap<(u32, u32), BTreeMap<(u32, u32), u32>>,
+) -> std::io::Result<()> {
+    for layer in layers {
+        let ids = tiles
+            .get(&(art_id, layer.layer_index))
+            .map(flatten_tile_map)
+            .unwrap_or_default();
+        write!(
+            out,
+            "static ART_{}_LAYER_{}_TILES: [u32; {}] = [",
+            art_id,
+            layer.layer_index,
+            ids.len()
+        )?;
+        for (i, &id) in ids.iter().enumerate() {
+            if i > 0 {
+                write!(out, ",")?;
             }
-            writeln!(out, "];")?;
-        }
-
-        // Emit the layers slice
-        writeln!(
-            out,
-            "static ART_{}_LAYERS: [MapArtLayer; {}] = [",
-            art_id,
-            layers.len()
-        )?;
-        for layer in layers {
-            writeln!(
-                out,
-                "    MapArtLayer {{ layer_width: {}, layer_height: {}, tile_width: {}, tile_height: {}, min_scale: {}f32, max_scale: {}f32, additional_zoom_steps: {} }},",
-                layer.layer_width,
-                layer.layer_height,
-                layer.tile_width,
-                layer.tile_height,
-                layer.min_scale,
-                layer.max_scale,
-                layer.additional_zoom_steps,
-            )?;
-        }
-        writeln!(out, "];")?;
-
-        // Emit the tile slices-of-slices
-        writeln!(
-            out,
-            "static ART_{}_TILE_SLICES: [&[u32]; {}] = [",
-            art_id,
-            layers.len()
-        )?;
-        for layer in layers {
-            writeln!(
-                out,
-                "    &ART_{}_LAYER_{}_TILES,",
-                art_id, layer.layer_index
-            )?;
+            write!(out, "{}", id)?;
         }
         writeln!(out, "];")?;
     }
 
-    writeln!(out)?;
+    writeln!(
+        out,
+        "static ART_{}_LAYERS: [MapArtLayer; {}] = [",
+        art_id,
+        layers.len()
+    )?;
+    for layer in layers {
+        writeln!(
+            out,
+            "    MapArtLayer {{ layer_width: {}, layer_height: {}, tile_width: {}, tile_height: {}, min_scale: {}f32, max_scale: {}f32, additional_zoom_steps: {} }},",
+            layer.layer_width,
+            layer.layer_height,
+            layer.tile_width,
+            layer.tile_height,
+            layer.min_scale,
+            layer.max_scale,
+            layer.additional_zoom_steps,
+        )?;
+    }
+    writeln!(out, "];")?;
 
-    // Build phf map
+    writeln!(
+        out,
+        "static ART_{}_TILE_SLICES: [&[u32]; {}] = [",
+        art_id,
+        layers.len()
+    )?;
+    for layer in layers {
+        writeln!(
+            out,
+            "    &ART_{}_LAYER_{}_TILES,",
+            art_id, layer.layer_index
+        )?;
+    }
+    writeln!(out, "];")?;
+    Ok(())
+}
+
+/// Build and emit the phf::Map from mapID → MapArtInfo.
+fn emit_phf_map(
+    out: &mut File,
+    map_art: &BTreeMap<u32, u32>,
+    art_style: &HashMap<u32, u32>,
+    style_layers: &HashMap<u32, Vec<StyleLayer>>,
+) -> Result<u32, Box<dyn std::error::Error>> {
     let mut builder = phf_codegen::Map::new();
     let mut count = 0u32;
 
     for (&map_id, &art_id) in map_art {
-        let style_id = match art_style.get(&art_id) {
-            Some(&s) => s,
-            None => continue,
+        let Some(&style_id) = art_style.get(&art_id) else {
+            continue;
         };
         if style_layers.get(&style_id).is_none() {
             continue;
         }
-
         let value = format!(
             "MapArtInfo {{ art_id: {}, layers: &ART_{}_LAYERS, tiles: &ART_{}_TILE_SLICES }}",
             art_id, art_id, art_id
@@ -312,8 +321,6 @@ fn write_map_art(
         builder.build()
     )?;
     writeln!(out)?;
-    write_lookup_fn(out)?;
-
     Ok(count)
 }
 
