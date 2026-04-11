@@ -10,13 +10,14 @@ use std::time::Duration;
 
 use perf_game_ui::load_timed_game_ui;
 use perf_layout::{
-    measure_full_root_layout_pass, measure_incremental_anchor_change_layout_pass,
-    measure_strata_bucket_rebuild,
+    measure_full_quad_batch_build, measure_full_root_layout_pass,
+    measure_incremental_anchor_change_layout_pass, measure_strata_bucket_rebuild,
 };
 
 const FULL_ROOT_LAYOUT_BUDGET: Duration = Duration::from_millis(500);
 const INCREMENTAL_LAYOUT_BUDGET: Duration = Duration::from_millis(15);
 const STRATA_BUCKET_REBUILD_BUDGET: Duration = Duration::from_millis(50);
+const QUAD_BATCH_BUILD_BUDGET: Duration = Duration::from_millis(100);
 
 #[test]
 fn full_root_layout_pass_stays_under_budget() {
@@ -92,6 +93,32 @@ fn strata_bucket_rebuild_stays_under_budget() {
             "strata bucket rebuild took {:.2?}, exceeding budget {:.2?}",
             rebuild_elapsed,
             STRATA_BUCKET_REBUILD_BUDGET
+        );
+    }
+}
+
+#[test]
+fn full_quad_batch_build_stays_under_budget() {
+    test_timeout! {
+        let loaded_ui = load_timed_game_ui();
+        let env = &loaded_ui.env;
+        assert!(
+            loaded_ui.startup_elapsed.as_nanos() > 0,
+            "shared perf UI startup timing should be captured"
+        );
+
+        let quad_batch_elapsed = measure_full_quad_batch_build(env);
+        eprintln!(
+            "full quad batch baseline: {:.2?} (budget {:.2?})",
+            quad_batch_elapsed,
+            QUAD_BATCH_BUILD_BUDGET
+        );
+
+        assert!(
+            quad_batch_elapsed < QUAD_BATCH_BUILD_BUDGET,
+            "full quad batch build took {:.2?}, exceeding budget {:.2?}",
+            quad_batch_elapsed,
+            QUAD_BATCH_BUILD_BUDGET
         );
     }
 }

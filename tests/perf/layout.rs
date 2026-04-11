@@ -1,7 +1,14 @@
+use std::path::Path;
 use std::time::{Duration, Instant};
 
+use wow_ui_sim::iced_app::build_quad_batch_for_registry;
+use wow_ui_sim::iced_app::tooltip::collect_tooltip_data;
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::{GlyphAtlas, WowFontSystem};
 use wow_ui_sim::widget::Anchor;
+
+const PERF_SCREEN_SIZE: (f32, f32) = (1024.0, 768.0);
+const PERF_FONTS_PATH: &str = "./fonts";
 
 pub fn measure_full_root_layout_pass(env: &WowLuaEnv) -> Duration {
     let ui_parent_id = {
@@ -42,6 +49,35 @@ pub fn measure_strata_bucket_rebuild(env: &WowLuaEnv) -> Duration {
         let _ = state
             .get_strata_buckets()
             .expect("strata buckets should rebuild for the settled game UI");
+    }
+    started.elapsed()
+}
+
+pub fn measure_full_quad_batch_build(env: &WowLuaEnv) -> Duration {
+    let mut font_system = WowFontSystem::new(Path::new(PERF_FONTS_PATH));
+    let mut glyph_atlas = GlyphAtlas::new();
+
+    let started = Instant::now();
+    {
+        let mut state = env.state().borrow_mut();
+        let strata_buckets = state
+            .get_strata_buckets()
+            .expect("strata buckets should exist for quad batch measurement")
+            .clone();
+        let tooltip_data = collect_tooltip_data(&state);
+        let text_ctx = Some((&mut font_system, &mut glyph_atlas));
+
+        let _batch = build_quad_batch_for_registry(
+            &state.widgets,
+            PERF_SCREEN_SIZE,
+            None,
+            None,
+            None,
+            text_ctx,
+            Some(&state.message_frames),
+            Some(&tooltip_data),
+            &strata_buckets,
+        );
     }
     started.elapsed()
 }
