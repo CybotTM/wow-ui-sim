@@ -120,14 +120,9 @@ pub(super) fn emit_cooldown_countdown_text(
     frame: &FrameQuadEmit<'_>,
 ) {
     let f = frame.widget;
-    if f.cooldown_hide_countdown || f.cooldown_duration <= 0.0 {
+    let Some(remaining) = cooldown_remaining_seconds(f, frame.elapsed_secs) else {
         return;
-    }
-    let elapsed_since_start = frame.elapsed_secs - f.cooldown_start;
-    let remaining = (f.cooldown_duration - elapsed_since_start).max(0.0);
-    if remaining <= 0.0 || f.cooldown_display_duration_ms < f.cooldown_min_countdown_duration_ms {
-        return;
-    }
+    };
     let Some((font_sys, glyph_atlas)) = text_ctx.as_mut() else {
         return;
     };
@@ -158,6 +153,17 @@ pub(super) fn emit_cooldown_countdown_text(
             alpha: frame.eff_alpha,
         },
     );
+}
+
+fn cooldown_remaining_seconds(f: &crate::widget::Frame, elapsed_secs: f64) -> Option<f64> {
+    if f.cooldown_hide_countdown || f.cooldown_duration <= 0.0 {
+        return None;
+    }
+    let remaining = (f.cooldown_duration - (elapsed_secs - f.cooldown_start)).max(0.0);
+    if remaining <= 0.0 || f.cooldown_display_duration_ms < f.cooldown_min_countdown_duration_ms {
+        return None;
+    }
+    Some(remaining)
 }
 
 pub(super) fn cooldown_countdown_text(f: &crate::widget::Frame, remaining: f64) -> Option<String> {
