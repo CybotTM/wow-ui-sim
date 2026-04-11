@@ -338,15 +338,14 @@ impl WidgetRegistry {
         }
     }
 
-    /// Check if a frame and all its ancestors are visible.
+    /// Check if a frame and all its ancestors are visible (shown).
     ///
-    /// Matches WoW's `IsVisible()` semantics: uses eagerly-propagated
-    /// `effective_alpha` — a frame is visible when effective_alpha > 0 and
-    /// its own `visible` flag is true.
+    /// Matches WoW's `IsVisible()` semantics: a frame is visible when its
+    /// own `visible` flag is true AND all ancestors are visible. Alpha does
+    /// NOT affect visibility — a frame with alpha=0 is still "visible" and
+    /// receives OnUpdate, events, etc.
     pub fn is_ancestor_visible(&self, id: u64) -> bool {
-        self.widgets
-            .get(&id)
-            .is_some_and(|f| f.visible && f.effective_alpha > 0.0)
+        self.widgets.get(&id).is_some_and(|f| f.visible)
     }
 
     /// Recompute `effective_alpha` for a frame and propagate to all descendants.

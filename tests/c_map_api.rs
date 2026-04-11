@@ -386,6 +386,35 @@ fn test_should_map_show_taxi_nodes() {
 }
 
 #[test]
+fn test_is_visible_ignores_alpha() {
+    // Reproduces the world map blank canvas bug:
+    // The detail layer sets alpha=0 while waiting for textures to load,
+    // then relies on OnUpdate to detect loading is complete and set alpha=1.
+    // But is_ancestor_visible (used by fire_on_update to filter frames)
+    // checks effective_alpha > 0, creating a deadlock: OnUpdate can't fire
+    // because alpha=0, and alpha can't become 1 because OnUpdate can't fire.
+    //
+    // WoW's IsVisible() only checks the shown/hidden state, not alpha.
+    // A frame with alpha=0 is still "visible" and should receive OnUpdate.
+    let env = env();
+    let visible: bool = env
+        .eval(
+            r#"
+        UIParent:Show()
+        local f = CreateFrame("Frame", nil, UIParent)
+        f:Show()
+        f:SetAlpha(0)
+        return f:IsVisible()
+    "#,
+        )
+        .unwrap();
+    assert!(
+        visible,
+        "IsVisible should return true for a shown frame with alpha=0 (alpha != visibility)"
+    );
+}
+
+#[test]
 fn test_create_texture_inherits_template_size() {
     use wow_ui_sim::xml::{SizeXml, TextureXml, register_texture_template};
 

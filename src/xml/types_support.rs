@@ -155,7 +155,7 @@ pub struct OffsetXml {
 }
 
 /// Scripts container.
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct ScriptsXml {
     #[serde(rename = "OnLoad", default)]
     pub on_load: Vec<ScriptBodyXml>,
@@ -241,7 +241,7 @@ pub struct ScriptsXml {
     pub post_click: Vec<ScriptBodyXml>,
 }
 
-#[derive(Debug, Deserialize, Clone)]
+#[derive(Debug, Deserialize, Clone, Default)]
 pub struct ScriptBodyXml {
     #[serde(rename = "$text")]
     pub body: Option<String>,
