@@ -469,7 +469,14 @@ fn tooltip_description_text(spell_id: i32) -> Option<String> {
     if description.is_empty() {
         None
     } else {
-        Some(crate::lua_api::tooltip::strip_html_tags(description))
+        let stripped = crate::lua_api::tooltip::strip_html_tags(description);
+        let formatted =
+            crate::lua_api::tooltip::format_spell_tooltip_description(spell_id as u32, &stripped);
+        if formatted.is_empty() {
+            None
+        } else {
+            Some(formatted)
+        }
     }
 }
 

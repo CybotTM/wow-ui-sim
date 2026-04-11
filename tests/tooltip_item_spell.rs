@@ -419,6 +419,36 @@ fn test_set_spell_by_id_instant_cast() {
 }
 
 #[test]
+fn test_set_spell_by_id_replaces_damage_placeholders_in_description() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec("GameTooltip:SetSpellByID(31935)").unwrap();
+
+    let state = env.state().borrow();
+    let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
+    let td = state.tooltips.get(&gt_id).unwrap();
+
+    assert!(
+        td.lines
+            .iter()
+            .any(|line| line.left_text.contains("25000 Holy damage")),
+        "SetSpellByID should replace spell damage placeholders in tooltip descriptions, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+    assert!(
+        td.lines.iter().all(|line| !line.left_text.contains('$')),
+        "SetSpellByID should not leave raw parameter placeholders in tooltip text, got: {:?}",
+        td.lines
+            .iter()
+            .map(|line| line.left_text.clone())
+            .collect::<Vec<_>>()
+    );
+}
+
+#[test]
 fn test_set_spell_by_id_makes_tooltip_visible() {
     let env = WowLuaEnv::new().unwrap();
 

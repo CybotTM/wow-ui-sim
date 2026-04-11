@@ -1,7 +1,7 @@
 //! Tooltip data population: items, units, auras, and associated color/label tables.
 
 use crate::lua_api::frame::handle::get_sim_state;
-use crate::lua_api::tooltip::{TooltipLine, strip_html_tags};
+use crate::lua_api::tooltip::{TooltipLine, format_spell_tooltip_description, strip_html_tags};
 use mlua::Value;
 
 // --- Spell tooltips ---
@@ -48,8 +48,9 @@ fn build_spell_lines(spell_id: u32, name: &str, lines: &mut Vec<TooltipLine>) {
     let description = crate::spell_descriptions::get_spell_description(spell_id).unwrap_or("");
     if !description.is_empty() {
         let clean = strip_html_tags(description);
+        let formatted = format_spell_tooltip_description(spell_id, &clean);
         lines.push(TooltipLine {
-            left_text: clean,
+            left_text: formatted,
             left_color: (1.0, 0.82, 0.0),
             wrap: true,
             ..simple_line(String::new())

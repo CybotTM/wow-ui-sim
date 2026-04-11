@@ -1,5 +1,9 @@
 //! Tooltip state data structures.
 
+use std::sync::OnceLock;
+
+use regex::Regex;
+
 use crate::widget::{Anchor, AnchorPoint};
 
 /// Inline texture/atlas icon embedded in a tooltip line.
@@ -104,6 +108,64 @@ pub(crate) fn strip_html_tags(html: &str) -> String {
         }
     }
     result
+}
+
+pub(crate) fn format_spell_tooltip_description(spell_id: u32, description: &str) -> String {
+    let replaced = replace_spell_amount_placeholders(spell_id, description);
+    let without_conditionals = strip_trailing_conditional_branch(&replaced);
+    let without_inline_formulas = strip_inline_formula_placeholders(&without_conditionals);
+    let without_simple_tokens = strip_simple_placeholders(&without_inline_formulas);
+    normalize_tooltip_spacing(&without_simple_tokens)
+}
+
+fn replace_spell_amount_placeholders(spell_id: u32, description: &str) -> String {
+    static EFFECT_PLACEHOLDER_RE: OnceLock<Regex> = OnceLock::new();
+
+    let amount = crate::lua_api::game_data::spell_effect_amount(spell_id).to_string();
+    EFFECT_PLACEHOLDER_RE
+        .get_or_init(|| Regex::new(r"\$s\d+").unwrap())
+        .replace_all(description, amount.as_str())
+        .into_owned()
+}
+
+fn strip_trailing_conditional_branch(description: &str) -> String {
+    match description.find("$?") {
+        Some(index) => description[..index].to_string(),
+        None => description.to_string(),
+    }
+}
+
+fn strip_inline_formula_placeholders(description: &str) -> String {
+    static INLINE_FORMULA_RE: OnceLock<Regex> = OnceLock::new();
+
+    INLINE_FORMULA_RE
+        .get_or_init(|| Regex::new(r"\$\{[^}]+\}").unwrap())
+        .replace_all(description, "")
+        .into_owned()
+}
+
+fn strip_simple_placeholders(description: &str) -> String {
+    static SIMPLE_PLACEHOLDER_RE: OnceLock<Regex> = OnceLock::new();
+
+    SIMPLE_PLACEHOLDER_RE
+        .get_or_init(|| Regex::new(r"\$[A-Za-z<][A-Za-z0-9<>]*").unwrap())
+        .replace_all(description, "")
+        .into_owned()
+}
+
+fn normalize_tooltip_spacing(description: &str) -> String {
+    static SPACE_BEFORE_PUNCTUATION_RE: OnceLock<Regex> = OnceLock::new();
+    static MULTI_SPACE_RE: OnceLock<Regex> = OnceLock::new();
+
+    let without_space_before_punctuation = SPACE_BEFORE_PUNCTUATION_RE
+        .get_or_init(|| Regex::new(r"\s+([,.;:])").unwrap())
+        .replace_all(description, "$1")
+        .into_owned();
+
+    MULTI_SPACE_RE
+        .get_or_init(|| Regex::new(r"\s{2,}").unwrap())
+        .replace_all(without_space_before_punctuation.trim(), " ")
+        .into_owned()
 }
 
 fn parse_hyperlink_id(link: &str, prefixes: &[&str]) -> Option<u32> {
