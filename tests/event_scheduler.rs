@@ -272,3 +272,51 @@ fn event_scheduler_event_ui_map_ids_follow_seeded_area_poi_ids() {
         "GetEventUiMapID() should keep the zero fallback for unknown POIs"
     );
 }
+
+#[test]
+fn area_poi_info_returns_seeded_event_location_data() {
+    let env = env();
+    let (name, description, atlas_name, x, y, missing_info): (
+        String,
+        String,
+        String,
+        f32,
+        f32,
+        bool,
+    ) = env
+        .eval(
+            r#"
+            local info = C_AreaPoiInfo.GetAreaPOIInfo(8685, 1001)
+            local x, y = info.position:GetXY()
+            return info.name,
+                info.description,
+                info.atlasName,
+                x,
+                y,
+                C_AreaPoiInfo.GetAreaPOIInfo(8685, 999999) == nil
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(name, "Warsong Gulch");
+    assert_eq!(
+        description, "Compete in the current PvP brawl.",
+        "GetAreaPOIInfo() should return the seeded event description"
+    );
+    assert_eq!(
+        atlas_name, "worldquest-icon-pvpbattle",
+        "GetAreaPOIInfo() should return the seeded event atlas"
+    );
+    assert_eq!(
+        x, 0.452,
+        "GetAreaPOIInfo() should return the seeded X position"
+    );
+    assert_eq!(
+        y, 0.641,
+        "GetAreaPOIInfo() should return the seeded Y position"
+    );
+    assert!(
+        missing_info,
+        "GetAreaPOIInfo() should keep returning nil for unknown POIs"
+    );
+}

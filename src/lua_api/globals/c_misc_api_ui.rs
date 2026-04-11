@@ -13,6 +13,50 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+struct AreaPoiSeed {
+    map_id: i32,
+    poi_id: i32,
+    name: &'static str,
+    description: &'static str,
+    atlas_name: &'static str,
+    position: (f32, f32),
+}
+
+const SEEDED_AREA_POIS: &[AreaPoiSeed] = &[
+    AreaPoiSeed {
+        map_id: 8685,
+        poi_id: 1001,
+        name: "Warsong Gulch",
+        description: "Compete in the current PvP brawl.",
+        atlas_name: "worldquest-icon-pvpbattle",
+        position: (0.452, 0.641),
+    },
+    AreaPoiSeed {
+        map_id: 0,
+        poi_id: 1002,
+        name: "The Cinderbrew Meadery",
+        description: "A celebratory dungeon event is active here.",
+        atlas_name: "Dungeon",
+        position: (0.507, 0.318),
+    },
+    AreaPoiSeed {
+        map_id: 10440,
+        poi_id: 1003,
+        name: "Arathi Basin",
+        description: "The next PvP brawl starts here soon.",
+        atlas_name: "worldquest-icon-pvpbattle",
+        position: (0.618, 0.472),
+    },
+    AreaPoiSeed {
+        map_id: 5861,
+        poi_id: 1004,
+        name: "Darkmoon Island",
+        description: "The Darkmoon Faire returns soon.",
+        atlas_name: "worldevent-darkmoonfaire",
+        position: (0.533, 0.624),
+    },
+];
+
 pub(super) fn register_all(lua: &Lua, state: Rc<RefCell<crate::lua_api::SimState>>) -> Result<()> {
     register_c_vignette_info(lua)?;
     register_c_area_poi(lua)?;
@@ -55,11 +99,53 @@ fn register_c_vignette_info(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+fn seeded_area_poi(map_id: i32, poi_id: i32) -> Option<&'static AreaPoiSeed> {
+    SEEDED_AREA_POIS
+        .iter()
+        .find(|seed| seed.map_id == map_id && seed.poi_id == poi_id)
+}
+
+fn create_vector2d(lua: &Lua, x: f32, y: f32) -> Result<Value> {
+    let globals = lua.globals();
+    if let Ok(create_vector2d) = globals.get::<mlua::Function>("CreateVector2D") {
+        return create_vector2d.call((x, y));
+    }
+
+    let vector = lua.create_table()?;
+    vector.set("x", x)?;
+    vector.set("y", y)?;
+    vector.set(
+        "GetXY",
+        lua.create_function(|_, this: mlua::Table| {
+            Ok((this.get::<f32>("x")?, this.get::<f32>("y")?))
+        })?,
+    )?;
+    Ok(Value::Table(vector))
+}
+
+fn create_area_poi_info(lua: &Lua, seed: &AreaPoiSeed) -> Result<Value> {
+    let info = lua.create_table()?;
+    info.set("areaPoiID", seed.poi_id)?;
+    info.set("name", seed.name)?;
+    info.set("description", seed.description)?;
+    info.set("atlasName", seed.atlas_name)?;
+    info.set(
+        "position",
+        create_vector2d(lua, seed.position.0, seed.position.1)?,
+    )?;
+    Ok(Value::Table(info))
+}
+
 fn register_c_area_poi(lua: &Lua) -> Result<()> {
     let t = lua.create_table()?;
     t.set(
         "GetAreaPOIInfo",
-        lua.create_function(|_, (_m, _id): (i32, i32)| Ok(Value::Nil))?,
+        lua.create_function(|lua, (map_id, poi_id): (i32, i32)| {
+            let Some(seed) = seeded_area_poi(map_id, poi_id) else {
+                return Ok(Value::Nil);
+            };
+            create_area_poi_info(lua, seed)
+        })?,
     )?;
     t.set(
         "GetAreaPOISecondsLeft",
