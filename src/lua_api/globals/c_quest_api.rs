@@ -223,6 +223,25 @@ pub fn register_c_quest_api(lua: &Lua) -> Result<()> {
     globals.set("C_QuestSession", register_c_quest_session(lua)?)?;
     register_quest_log_quest_text(lua)?;
     register_quest_poi_globals(lua)?;
+    register_quest_data_globals(lua)?;
+    Ok(())
+}
+
+/// Global quest data availability functions.
+fn register_quest_data_globals(lua: &Lua) -> Result<()> {
+    let globals = lua.globals();
+    globals.set(
+        "HaveQuestData",
+        lua.create_function(|_, quest_id: i32| {
+            Ok(find_quest_by_id(quest_id).is_some() || is_world_quest(quest_id))
+        })?,
+    )?;
+    globals.set(
+        "HaveQuestRewardData",
+        lua.create_function(|_, quest_id: i32| {
+            Ok(find_quest_by_id(quest_id).is_some() || is_world_quest(quest_id))
+        })?,
+    )?;
     Ok(())
 }
 

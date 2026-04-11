@@ -24,9 +24,19 @@ fn add_alert_subsystem_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
 /// WorldMapFrame data provider stubs and UseRaidStylePartyFrames.
 fn add_data_provider_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("AddDataProvider", |lua, this, provider: Value| {
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, this.0, "AddDataProvider")
+        {
+            return func.call::<()>((ud, provider));
+        }
         add_frame_data_provider(lua, this.0, provider)
     });
     methods.add_method("RemoveDataProvider", |lua, this, provider: Value| {
+        if let Some((func, ud)) =
+            super::methods_helpers::get_mixin_override(lua, this.0, "RemoveDataProvider")
+        {
+            return func.call::<()>((ud, provider));
+        }
         remove_frame_data_provider(lua, this.0, provider)
     });
     methods.add_method("UseRaidStylePartyFrames", |_, _this, ()| Ok(false));
