@@ -385,7 +385,8 @@ fn test_set_spell_by_id_populates_lines() {
     let state = env.state().borrow();
     let gt_id = state.widgets.get_id_by_name("GameTooltip").unwrap();
     let td = state.tooltips.get(&gt_id).unwrap();
-    assert_eq!(td.lines[0].left_text, "Flash of Light");
+    let expected_name: String = env.eval("return C_Spell.GetSpellName(19750)").unwrap();
+    assert_eq!(td.lines[0].left_text, expected_name);
 }
 
 #[test]
