@@ -150,3 +150,37 @@ fn event_scheduler_derives_visibility_from_event_lists() {
         "suppress flag should hide scheduler when no explicit override is set"
     );
 }
+
+#[test]
+fn event_scheduler_request_events_repopulates_seeded_state() {
+    let env = env();
+    let (ongoing_count, scheduled_count, can_show): (i32, i32, bool) = env
+        .eval(
+            r#"
+            C_EventScheduler._state.canShowEvents = nil
+            C_EventScheduler._state.suppressDisplay = false
+            C_EventScheduler._state.ongoingEvents = {}
+            C_EventScheduler._state.scheduledEvents = {}
+
+            C_EventScheduler.RequestEvents()
+
+            return #C_EventScheduler._state.ongoingEvents,
+                #C_EventScheduler._state.scheduledEvents,
+                C_EventScheduler.CanShowEvents()
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        ongoing_count, 2,
+        "RequestEvents() should repopulate the seeded ongoing event list"
+    );
+    assert_eq!(
+        scheduled_count, 2,
+        "RequestEvents() should repopulate the seeded scheduled event list"
+    );
+    assert!(
+        can_show,
+        "RequestEvents() should restore visible scheduler data"
+    );
+}

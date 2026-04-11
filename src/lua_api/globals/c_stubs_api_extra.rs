@@ -1459,6 +1459,11 @@ const EVENT_SCHEDULER_LUA: &str = r#"
         }
     end
 
+    local function populateSeededEventState(state)
+        state.ongoingEvents = seededOngoingEvents()
+        state.scheduledEvents = seededScheduledEvents()
+    end
+
     api._state = api._state or {
         canShowEvents = nil,
         suppressDisplay = false,
@@ -1498,6 +1503,10 @@ const EVENT_SCHEDULER_LUA: &str = r#"
             return false
         end
         return hasVisibleEvents(state.ongoingEvents) or hasVisibleEvents(state.scheduledEvents)
+    end
+
+    api.RequestEvents = api.RequestEvents or function()
+        populateSeededEventState(api._state)
     end
 "#;
 
