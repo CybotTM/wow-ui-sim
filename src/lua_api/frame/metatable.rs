@@ -310,15 +310,28 @@ fn lookup_type_injected(_lua: &Lua, _ud: &mlua::AnyUserData, _key: &str) -> mlua
 fn create_method_filter_helper(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (ud, key): (mlua::AnyUserData, String)| {
         let frame_id = ud.borrow::<FrameRef>()?.0;
-        let widget_type = {
+        let (widget_type, is_anim_type) = {
             let state_rc = get_sim_state(lua);
             let state = state_rc.borrow();
             state
                 .widgets
                 .get(frame_id)
-                .map(|frame| frame.widget_type)
-                .unwrap_or(crate::widget::WidgetType::Frame)
+                .map(|frame| {
+                    (
+                        frame.widget_type,
+                        frame
+                            .object_type_name
+                            .as_deref()
+                            .is_some_and(super::methods::methods_core::is_anim_type),
+                    )
+                })
+                .unwrap_or((crate::widget::WidgetType::Frame, false))
         };
+
+        if is_anim_type {
+            return Ok(false);
+        }
+
         Ok(method_registry::is_registered_method(&key)
             && !method_registry::is_method_allowed(widget_type, &key))
     })

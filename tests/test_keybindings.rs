@@ -898,6 +898,80 @@ fn keybind_s_opens_spellbook_no_errors() {
     }
 }
 
+#[test]
+fn spellbook_panel_spell_tooltip_has_lines_after_tab_switch_and_closes_without_errors() {
+    test_timeout! {
+        let env = setup_full_env();
+        install_test_error_handler(&env);
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleSpellBookFrame) == "function") then
+                    return "missing_toggle_spellbook"
+                end
+
+                if not (PlayerSpellsUtil.FrameTabs and PlayerSpellsUtil.FrameTabs.ClassTalents and PlayerSpellsUtil.FrameTabs.SpellBook) then
+                    return "missing_frame_tabs"
+                end
+
+                PlayerSpellsUtil.ToggleSpellBookFrame()
+
+                if not (PlayerSpellsFrame and PlayerSpellsFrame:IsShown()) then
+                    return "spellbook_not_open"
+                end
+
+                if not PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "talent_tab_unavailable"
+                end
+
+                if not PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.ClassTalents) then
+                    return "talent_tab_not_selected"
+                end
+
+                if not PlayerSpellsFrame:TrySetTab(PlayerSpellsUtil.FrameTabs.SpellBook) then
+                    return "spellbook_tab_unavailable"
+                end
+
+                if not PlayerSpellsFrame:IsFrameTabActive(PlayerSpellsUtil.FrameTabs.SpellBook) then
+                    return "spellbook_tab_not_selected"
+                end
+
+                local hasSpell = GameTooltip:SetSpellBookItem(1)
+                if not hasSpell then
+                    return "no_spellbook_item"
+                end
+
+                if GameTooltip:NumLines() == 0 then
+                    return "tooltip_has_no_lines"
+                end
+
+                PlayerSpellsUtil.ToggleSpellBookFrame()
+
+                if PlayerSpellsFrame:IsShown() then
+                    return "spellbook_not_closed"
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Spellbook tooltip flow produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Spellbook panel tooltip flow should open, switch tabs, populate tooltip lines, and close: {result}"
+        );
+    }
+}
+
 // ── Target frame visibility tests (full addon load including Blizzard_UnitFrame) ──
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).

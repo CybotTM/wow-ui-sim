@@ -305,6 +305,81 @@ const ANIM_SCRIPT_META: &[&str] = &[
     "ClearScripts",
 ];
 
+/// Runtime methods shared by AnimationGroup and Animation userdata.
+const ANIM_RUNTIME_META: &[&str] = &[
+    "Play",
+    "Restart",
+    "Stop",
+    "Pause",
+    "Finish",
+    "IsPlaying",
+    "IsPaused",
+    "IsDone",
+    "IsPendingFinish",
+    "IsReverse",
+    "IsStopped",
+    "IsDelaying",
+    "GetDuration",
+    "GetElapsed",
+    "GetProgress",
+    "GetSmoothProgress",
+    "SetAnimationSpeedMultiplier",
+    "GetAnimationSpeedMultiplier",
+    "SetDuration",
+    "SetOrder",
+    "GetOrder",
+    "SetStartDelay",
+    "GetStartDelay",
+    "SetEndDelay",
+    "GetEndDelay",
+    "SetSmoothing",
+    "GetSmoothing",
+    "SetFromAlpha",
+    "GetFromAlpha",
+    "SetToAlpha",
+    "GetToAlpha",
+    "SetChange",
+    "SetOffset",
+    "SetScaleFrom",
+    "SetScaleTo",
+    "SetDegrees",
+    "SetOrigin",
+    "GetOrigin",
+    "SetFlipBookRows",
+    "GetFlipBookRows",
+    "SetFlipBookColumns",
+    "GetFlipBookColumns",
+    "SetFlipBookFrames",
+    "GetFlipBookFrames",
+    "GetTarget",
+    "SetTarget",
+    "SetChildKey",
+    "SetTargetKey",
+    "SetTargetName",
+    "SetTargetParent",
+    "GetRegionParent",
+];
+
+/// Runtime methods specific to AnimationGroup userdata.
+const ANIM_GROUP_RUNTIME_META: &[&str] = &[
+    "SetLooping",
+    "GetLooping",
+    "GetLoopState",
+    "PlaySynced",
+    "SetPlaying",
+    "RemoveAnimations",
+    "SetToFinalAlpha",
+    "IsSetToFinalAlpha",
+    "GetToFinalAlpha",
+    "SetAlpha",
+    "GetAlpha",
+    "GetAnimations",
+    "CreateAnimation",
+];
+
+/// Runtime methods specific to path animations.
+const PATH_ANIM_RUNTIME_META: &[&str] = &["CreateControlPoint"];
+
 /// Build a restricted metatable for animation/actor/controlpoint types.
 ///
 /// Copies only animation-appropriate methods from Frame's metatable, wrapping
@@ -323,6 +398,28 @@ fn build_anim_metatable(lua: &Lua, per_type: &mlua::Table, otn: &str) -> Result<
     // Script methods for AnimationGroup and Animation subtypes (not ControlPoint/Actor)
     if otn != "ControlPoint" && otn != "Actor" && otn != "ModelSceneActor" {
         for &name in ANIM_SCRIPT_META {
+            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
+                index_table.set(name, wrap_method(lua, f)?)?;
+            }
+        }
+
+        for &name in ANIM_RUNTIME_META {
+            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
+                index_table.set(name, wrap_method(lua, f)?)?;
+            }
+        }
+    }
+
+    if matches!(otn, "AnimationGroup" | "ParallelAnimation") {
+        for &name in ANIM_GROUP_RUNTIME_META {
+            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
+                index_table.set(name, wrap_method(lua, f)?)?;
+            }
+        }
+    }
+
+    if otn == "Path" {
+        for &name in PATH_ANIM_RUNTIME_META {
             if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
                 index_table.set(name, wrap_method(lua, f)?)?;
             }
