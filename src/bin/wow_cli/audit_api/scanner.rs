@@ -345,8 +345,13 @@ pub fn load_valid_c_namespaces(
 pub fn run_audit(config: &AuditConfig) -> AuditResults {
     let p = Patterns::new();
     let mut results = AuditResults::default();
-    let addon_dir = &config.ui_path;
+    scan_addon_files(config, &p, &mut results);
+    apply_result_filters(config, &mut results);
+    results
+}
 
+fn scan_addon_files(config: &AuditConfig, p: &Patterns, results: &mut AuditResults) {
+    let addon_dir = &config.ui_path;
     for entry in WalkDir::new(addon_dir)
         .into_iter()
         .filter_entry(|e| !should_skip(e.path()))
@@ -358,36 +363,30 @@ pub fn run_audit(config: &AuditConfig) -> AuditResults {
         if ext != "lua" && ext != "xml" {
             continue;
         }
-
         if config.filter_startup && is_load_on_demand(path, addon_dir) {
             continue;
         }
-
         let file_label = path
             .strip_prefix(addon_dir)
             .unwrap_or(path)
             .to_string_lossy()
             .to_string();
-
         match ext {
             "lua" => {
                 if let Ok(content) = std::fs::read_to_string(path) {
-                    scan_lua_text(&content, &file_label, &mut results, &p);
+                    scan_lua_text(&content, &file_label, results, p);
                 }
             }
-            "xml" => {
-                scan_xml_file(path, &file_label, &mut results, &p);
-            }
+            "xml" => scan_xml_file(path, &file_label, results, p),
             _ => {}
         }
     }
+}
 
-    // Apply namespace filter if requested
+fn apply_result_filters(config: &AuditConfig, results: &mut AuditResults) {
     if let Some(ns) = &config.namespace_filter {
         results.c_api.retain(|k, _| k == ns);
     }
-
-    // Filter C_* results against wowless allowlist to remove false positives
     if let Some(wowless_path) = &config.wowless_path {
         if let Some((valid_ns, _)) = load_valid_c_namespaces(wowless_path) {
             let before = results.c_api.len();
@@ -402,8 +401,6 @@ pub fn run_audit(config: &AuditConfig) -> AuditResults {
             }
         }
     }
-
-    results
 }
 
 #[cfg(test)]
