@@ -154,6 +154,102 @@ const KNOWN_ERRORS: &[(&str, usize)] = &[
 const KNOWN_LOAD_ON_DEMAND_RUNTIME_ERRORS: &[(&str, usize)] =
     &[("Blizzard_EventTrace", 2), ("Blizzard_Professions", 16)];
 
+struct PanelOpenCoverageCase {
+    name: &'static str,
+    open_lua: &'static str,
+    expected_addon: &'static str,
+    expected_frame: &'static str,
+    expected_error_overrides: &'static [(&'static str, usize)],
+}
+
+const PANEL_OPEN_COVERAGE_CASES: &[PanelOpenCoverageCase] = &[
+    PanelOpenCoverageCase {
+        name: "achievement",
+        open_lua: "ToggleAchievementFrame()",
+        expected_addon: "Blizzard_AchievementUI",
+        expected_frame: "AchievementFrame",
+        expected_error_overrides: &[],
+    },
+    PanelOpenCoverageCase {
+        name: "collections",
+        open_lua: "ToggleCollectionsJournal(COLLECTIONS_JOURNAL_TAB_INDEX_MOUNTS)",
+        expected_addon: "Blizzard_Collections",
+        expected_frame: "CollectionsJournal",
+        expected_error_overrides: &[("<unknown>", 1), ("Blizzard_SpellSearch", 1)],
+    },
+    PanelOpenCoverageCase {
+        name: "encounter_journal",
+        open_lua: "ToggleEncounterJournal()",
+        expected_addon: "Blizzard_EncounterJournal",
+        expected_frame: "EncounterJournal",
+        expected_error_overrides: &[],
+    },
+];
+
+const PANEL_COVERAGE_ADDONS: &[(&str, &str)] = &[
+    ("Blizzard_SharedXMLBase", "Blizzard_SharedXMLBase.toc"),
+    ("Blizzard_Colors", "Blizzard_Colors_Mainline.toc"),
+    ("Blizzard_SharedXML", "Blizzard_SharedXML_Mainline.toc"),
+    (
+        "Blizzard_SharedXMLGame",
+        "Blizzard_SharedXMLGame_Mainline.toc",
+    ),
+    (
+        "Blizzard_UIPanelTemplates",
+        "Blizzard_UIPanelTemplates_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLBase",
+        "Blizzard_FrameXMLBase_Mainline.toc",
+    ),
+    ("Blizzard_FrameEffects", "Blizzard_FrameEffects.toc"),
+    ("Blizzard_LoadLocale", "Blizzard_LoadLocale.toc"),
+    ("Blizzard_Fonts_Shared", "Blizzard_Fonts_Shared.toc"),
+    ("Blizzard_HelpPlate", "Blizzard_HelpPlate.toc"),
+    (
+        "Blizzard_AccessibilityTemplates",
+        "Blizzard_AccessibilityTemplates.toc",
+    ),
+    ("Blizzard_ObjectAPI", "Blizzard_ObjectAPI_Mainline.toc"),
+    ("Blizzard_UIParent", "Blizzard_UIParent_Mainline.toc"),
+    ("Blizzard_TextStatusBar", "Blizzard_TextStatusBar.toc"),
+    ("Blizzard_MoneyFrame", "Blizzard_MoneyFrame_Mainline.toc"),
+    ("Blizzard_POIButton", "Blizzard_POIButton.toc"),
+    ("Blizzard_Flyout", "Blizzard_Flyout.toc"),
+    ("Blizzard_StoreUI", "Blizzard_StoreUI_Mainline.toc"),
+    ("Blizzard_MicroMenu", "Blizzard_MicroMenu_Mainline.toc"),
+    ("Blizzard_EditMode", "Blizzard_EditMode.toc"),
+    ("Blizzard_GarrisonBase", "Blizzard_GarrisonBase.toc"),
+    ("Blizzard_GameTooltip", "Blizzard_GameTooltip_Mainline.toc"),
+    (
+        "Blizzard_UIParentPanelManager",
+        "Blizzard_UIParentPanelManager_Mainline.toc",
+    ),
+    (
+        "Blizzard_Settings_Shared",
+        "Blizzard_Settings_Shared_Mainline.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Shared",
+        "Blizzard_SettingsDefinitions_Shared.toc",
+    ),
+    (
+        "Blizzard_SettingsDefinitions_Frame",
+        "Blizzard_SettingsDefinitions_Frame_Mainline.toc",
+    ),
+    (
+        "Blizzard_FrameXMLUtil",
+        "Blizzard_FrameXMLUtil_Mainline.toc",
+    ),
+    ("Blizzard_ItemButton", "Blizzard_ItemButton_Mainline.toc"),
+    ("Blizzard_QuickKeybind", "Blizzard_QuickKeybind.toc"),
+    ("Blizzard_FrameXML", "Blizzard_FrameXML_Mainline.toc"),
+    (
+        "Blizzard_UIPanels_Game",
+        "Blizzard_UIPanels_Game_Mainline.toc",
+    ),
+];
+
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
@@ -203,6 +299,14 @@ fn actual_error_counts(grouped_errors: &BTreeMap<String, Vec<String>>) -> BTreeM
         .iter()
         .map(|(addon_name, errors)| (addon_name.clone(), errors.len()))
         .collect()
+}
+
+fn known_panel_open_runtime_error_counts(case: &PanelOpenCoverageCase) -> BTreeMap<String, usize> {
+    let mut counts = known_error_counts();
+    for (addon_name, count) in case.expected_error_overrides {
+        counts.insert((*addon_name).to_string(), *count);
+    }
+    counts
 }
 
 fn format_error_count_map(error_counts: &BTreeMap<String, usize>) -> String {
@@ -446,6 +550,85 @@ fn silence_lua_error_handler(env: &WowLuaEnv) {
         .expect("seterrorhandler should accept a no-op test handler");
 }
 
+fn load_startup_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
+    let known_blizzard_addons: HashSet<_> = discover_all_blizzard_addons(&blizzard_ui_dir())
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect();
+    let startup_addons = discover_blizzard_addons(&blizzard_ui_dir());
+    let mut load_failures = Vec::new();
+    for (name, toc_path) in &startup_addons {
+        if let Err(error) = load_addon(&env.loader_env(), toc_path) {
+            load_failures.push(format!("{name}: {error}"));
+        }
+    }
+
+    assert!(
+        load_failures.is_empty(),
+        "startup Blizzard addon load should not have hard TOC load failures:\n{}",
+        load_failures.join("\n"),
+    );
+
+    env.apply_post_load_workarounds();
+    settle_headless_startup(env);
+    silence_lua_error_handler(env);
+    known_blizzard_addons
+}
+
+fn fire_panel_harness_startup_events(env: &WowLuaEnv) {
+    let lua = env.lua();
+    let _ = env.fire_event_with_args(
+        "ADDON_LOADED",
+        &[mlua::Value::String(
+            lua.create_string("WoWUISim")
+                .expect("WoWUISim startup marker should be creatable"),
+        )],
+    );
+    for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
+        let _ = env.fire_event(event);
+    }
+    let _ = env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
+    );
+    for event in [
+        "UPDATE_BINDINGS",
+        "DISPLAY_SIZE_CHANGED",
+        "UI_SCALE_CHANGED",
+    ] {
+        let _ = env.fire_event(event);
+    }
+}
+
+fn load_panel_harness_blizzard_ui(env: &WowLuaEnv) -> HashSet<String> {
+    let ui = blizzard_ui_dir();
+    for (addon_name, toc_name) in PANEL_COVERAGE_ADDONS {
+        let toc_path = ui.join(addon_name).join(toc_name);
+        if !toc_path.exists() {
+            continue;
+        }
+        if let Err(error) = load_addon(&env.loader_env(), &toc_path) {
+            panic!("{addon_name} should load for the panel harness: {error}");
+        }
+    }
+
+    env.apply_post_load_workarounds();
+    fire_panel_harness_startup_events(env);
+    silence_lua_error_handler(env);
+
+    discover_all_blizzard_addons(&ui)
+        .into_iter()
+        .map(|(name, _)| name)
+        .collect()
+}
+
+fn frame_is_shown(env: &WowLuaEnv, frame_name: &str) -> bool {
+    env.eval(&format!(
+        "return _G[{frame_name:?}] ~= nil and _G[{frame_name:?}]:IsShown()"
+    ))
+    .expect("frame visibility query should return")
+}
+
 fn is_addon_loaded(env: &WowLuaEnv, addon_name: &str) -> bool {
     env.eval(&format!("return C_AddOns.IsAddOnLoaded({addon_name:?})"))
         .expect("C_AddOns.IsAddOnLoaded should return")
@@ -607,6 +790,19 @@ fn load_on_demand_runtime_baseline_overrides_force_load_counts() {
 }
 
 #[test]
+fn panel_open_runtime_baseline_overrides_known_side_loads() {
+    let collections_case = PANEL_OPEN_COVERAGE_CASES
+        .iter()
+        .find(|case| case.name == "collections")
+        .expect("collections coverage case should exist");
+    let known_counts = known_panel_open_runtime_error_counts(collections_case);
+
+    assert_eq!(known_counts.get("<unknown>"), Some(&1));
+    assert_eq!(known_counts.get("Blizzard_SpellSearch"), Some(&1));
+    assert_eq!(known_counts.get("Blizzard_Collections"), Some(&76));
+}
+
+#[test]
 fn shard_load_on_demand_addons_spreads_heavy_addons_across_shards() {
     let lod_families = vec![
         vec!["Blizzard_Light".to_string()],
@@ -670,6 +866,62 @@ fn first_unloaded_addon_in_family_respects_family_order() {
     assert_eq!(first.as_deref(), Some("Blizzard_First"));
 }
 
+#[test]
+fn panel_open_runtime_paths_stay_within_known_error_baseline() {
+    common::with_timeout(600, move || {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.set_screen_size(1024.0, 768.0);
+        env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
+
+        let known_blizzard_addons = load_panel_harness_blizzard_ui(&env);
+        let mut case_failures = Vec::new();
+
+        for case in PANEL_OPEN_COVERAGE_CASES {
+            clear_lua_error_tracking(&env);
+            env.exec(case.open_lua)
+                .unwrap_or_else(|error| panic!("{} opener should run: {error}", case.name));
+
+            let addon_loaded = is_addon_loaded(&env, case.expected_addon);
+            let frame_shown = frame_is_shown(&env, case.expected_frame);
+            let known_counts = known_panel_open_runtime_error_counts(case);
+            let state = env.state().borrow();
+            let grouped_errors = grouped_errors_by_addon(&state);
+            let actual_counts = actual_error_counts(&grouped_errors);
+            let increases =
+                classify_error_count_increases_from_baseline(&known_counts, &actual_counts);
+            let invalid_addons: Vec<_> = grouped_errors
+                .keys()
+                .filter(|addon_name| {
+                    addon_name.as_str() != "<unknown>"
+                        && !known_blizzard_addons.contains(*addon_name)
+                })
+                .cloned()
+                .collect();
+            drop(state);
+
+            if !addon_loaded || !frame_shown || !invalid_addons.is_empty() || !increases.is_empty()
+            {
+                case_failures.push(format!(
+                    "{}: loaded={}, frame_shown={}, increased=[{}], invalid_addons={:?}, actual counts=[{}]\n{}",
+                    case.name,
+                    addon_loaded,
+                    frame_shown,
+                    format_error_count_changes(&increases),
+                    invalid_addons,
+                    format_error_count_map(&actual_counts),
+                    format_per_addon_report(&grouped_errors),
+                ));
+            }
+        }
+
+        assert!(
+            case_failures.is_empty(),
+            "panel-open runtime paths exceeded the known per-addon Lua error baseline:\n{}",
+            case_failures.join("\n\n"),
+        );
+    })
+}
+
 fn load_first_unloaded_addon_in_family(
     env: &WowLuaEnv,
     family: &[String],
@@ -699,32 +951,13 @@ fn run_load_on_demand_blizzard_addon_shard(shard_index: usize, shard_count: usiz
         env.set_screen_size(1024.0, 768.0);
         env.state().borrow_mut().addon_base_paths = vec![blizzard_ui_dir()];
 
-        let known_blizzard_addons: HashSet<_> = discover_all_blizzard_addons(&blizzard_ui_dir())
-            .into_iter()
-            .map(|(name, _)| name)
-            .collect();
-        let startup_addons = discover_blizzard_addons(&blizzard_ui_dir());
+        let known_blizzard_addons = load_startup_blizzard_ui(&env);
         let lod_families = discover_blizzard_lod_addon_families();
         let known_runtime_counts = known_load_on_demand_runtime_error_counts();
         let shard_families =
             shard_load_on_demand_addon_families(&lod_families, shard_count, &known_runtime_counts);
-        let mut load_failures = Vec::new();
         let mut family_failures = Vec::new();
-        for (name, toc_path) in &startup_addons {
-            if let Err(error) = load_addon(&env.loader_env(), toc_path) {
-                load_failures.push(format!("{name}: {error}"));
-            }
-        }
-
-        assert!(
-            load_failures.is_empty(),
-            "startup Blizzard addon load should not have hard TOC load failures:\n{}",
-            load_failures.join("\n"),
-        );
-
-        env.apply_post_load_workarounds();
-        settle_headless_startup(&env);
-        silence_lua_error_handler(&env);
+        let mut load_failures = Vec::new();
 
         for family in &shard_families[shard_index] {
             clear_lua_error_tracking(&env);
