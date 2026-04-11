@@ -591,6 +591,33 @@ fn test_three_slice_button_texture_scaling() {
     );
 }
 
+/// The three-slice template should end up with Left/Right/Center atlases set
+/// after the real InitButton + UpdateButton lifecycle runs.
+#[test]
+fn test_three_slice_button_children_get_expected_atlases() {
+    let env = setup_three_slice_env();
+    let result: String = env
+        .eval(
+            r#"
+        local btn = CreateFrame("Button", "TestThreeSliceAtlases", UIParent, "SharedButtonSmallTemplate")
+        btn:SetSize(120, 22)
+        btn:Show()
+        btn:UpdateButton("NORMAL")
+
+        local leftAtlas = btn.Left and btn.Left:GetAtlas() or ""
+        local centerAtlas = btn.Center and btn.Center:GetAtlas() or ""
+        local rightAtlas = btn.Right and btn.Right:GetAtlas() or ""
+        return table.concat({ leftAtlas, centerAtlas, rightAtlas }, "|")
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result, "128-RedButton-Left|_128-RedButton-Center|128-RedButton-Right",
+        "Three-slice button should assign the expected Left/Center/Right atlases"
+    );
+}
+
 /// Center texture gets non-zero width via cross-frame anchors to Left/Right siblings.
 #[test]
 fn test_three_slice_center_texture_layout() {
