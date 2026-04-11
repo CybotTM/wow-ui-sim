@@ -58,6 +58,7 @@ mod c_misc_api_ui;
 mod c_misc_api_ui_housing;
 mod c_misc_api_ui_player;
 pub mod c_quest_api;
+mod c_quest_api_tasks;
 pub mod c_stubs_achievement;
 pub mod c_stubs_api;
 pub mod c_stubs_api_chat_quest;
