@@ -676,6 +676,12 @@ pub fn register_quest_log_quest_text(lua: &Lua) -> Result<()> {
 /// C_TaskQuest namespace - world quest/task utilities.
 fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
+    register_task_quest_queries(lua, &t)?;
+    register_task_quest_stubs(lua, &t)?;
+    Ok(t)
+}
+
+fn register_task_quest_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "IsActive",
         lua.create_function(|_, quest_id: i32| Ok(is_world_quest(quest_id)))?,
@@ -687,12 +693,7 @@ fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
     )?;
     t.set(
         "GetQuestLocation",
-        lua.create_function(|_, (quest_id, _map_id): (i32, i32)| {
-            match find_world_quest(quest_id) {
-                Some(wq) => Ok((wq.x, wq.y)),
-                None => Ok((0.0f64, 0.0f64)),
-            }
-        })?,
+        lua.create_function(build_quest_location)?,
     )?;
     t.set(
         "GetQuestsForPlayerByMapID",
@@ -704,6 +705,10 @@ fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
             Ok(if is_world_quest(quest_id) { 120 } else { 0 })
         })?,
     )?;
+    Ok(())
+}
+
+fn register_task_quest_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "GetQuestUIWidgetSetByType",
         lua.create_function(|_, (_quest_id, _set_type): (i32, i32)| Ok(Value::Nil))?,
@@ -712,7 +717,14 @@ fn register_c_task_quest(lua: &Lua) -> Result<mlua::Table> {
         "RequestPreloadRewardData",
         lua.create_function(|_, _quest_id: i32| Ok(()))?,
     )?;
-    Ok(t)
+    Ok(())
+}
+
+fn build_quest_location(_lua: &Lua, (quest_id, _map_id): (i32, i32)) -> Result<(f64, f64)> {
+    match find_world_quest(quest_id) {
+        Some(wq) => Ok((wq.x, wq.y)),
+        None => Ok((0.0, 0.0)),
+    }
 }
 
 /// Build the task info array for a given map ID from seeded world quests.
