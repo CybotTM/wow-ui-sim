@@ -369,33 +369,33 @@ fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestTagInfo",
-        lua.create_function(|lua, id: i32| {
-            let info = lua.create_table()?;
-            if super::c_quest_api_tasks::is_world_quest(id) {
-                // Enum.QuestTagType.Normal = 2
-                info.set("tagID", 2)?;
-                info.set("tagName", "World Quest")?;
-                info.set("worldQuestType", 2)?;
-                // Enum.WorldQuestQuality.Common = 0
-                info.set("quality", 0)?;
-                info.set("isElite", false)?;
-                info.set("displayExpiration", true)?;
-            } else {
-                info.set("tagID", 0)?;
-                info.set("tagName", "Quest")?;
-                info.set("worldQuestType", Value::Nil)?;
-                info.set("quality", 1)?;
-                info.set("isElite", false)?;
-                info.set("displayExpiration", false)?;
-            }
-            Ok(info)
-        })?,
+        lua.create_function(build_quest_tag_info)?,
     )?;
     t.set(
         "GetRequiredMoney",
         lua.create_function(|_, _id: i32| Ok(0i32))?,
     )?;
     Ok(())
+}
+
+fn build_quest_tag_info(lua: &Lua, id: i32) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    if super::c_quest_api_tasks::is_world_quest(id) {
+        info.set("tagID", 2)?; // Enum.QuestTagType.Normal
+        info.set("tagName", "World Quest")?;
+        info.set("worldQuestType", 2)?;
+        info.set("quality", 0)?; // Enum.WorldQuestQuality.Common
+        info.set("isElite", false)?;
+        info.set("displayExpiration", true)?;
+    } else {
+        info.set("tagID", 0)?;
+        info.set("tagName", "Quest")?;
+        info.set("worldQuestType", Value::Nil)?;
+        info.set("quality", 1)?;
+        info.set("isElite", false)?;
+        info.set("displayExpiration", false)?;
+    }
+    Ok(info)
 }
 
 /// Quest watch list methods (tracked quests for ObjectiveTracker).
