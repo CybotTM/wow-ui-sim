@@ -1466,7 +1466,7 @@ const EVENT_SCHEDULER_LUA: &str = r#"
 
     local SEEDED_EVENT_LOCATIONS = {
         [1001] = { zoneName = "Warsong Gulch", uiMapID = 8685 },
-        [1002] = { zoneName = "The Cinderbrew Meadery", uiMapID = 0 },
+        [1002] = { zoneName = "The Cinderbrew Meadery", uiMapID = 1980 },
         [1003] = { zoneName = "Arathi Basin", uiMapID = 10440 },
         [1004] = { zoneName = "Darkmoon Island", uiMapID = 5861 },
     }

@@ -366,3 +366,31 @@ fn area_poi_for_map_returns_seeded_event_poi_ids() {
         "GetAreaPOIForMap() should keep returning an empty table for unknown maps"
     );
 }
+
+#[test]
+fn seeded_event_area_poi_data_includes_cinderbrew_meadery_map() {
+    let env = env();
+    let (map_id, name, listed_poi_id): (i32, String, i32) = env
+        .eval(
+            r#"
+            local mapID = C_EventScheduler.GetEventUiMapID(1002)
+            local info = C_AreaPoiInfo.GetAreaPOIInfo(mapID, 1002)
+            local poiList = C_AreaPoiInfo.GetAreaPOIForMap(mapID)
+            return mapID, info.name, poiList[1]
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        map_id, 1980,
+        "The seeded Cinderbrew event location should use the real dungeon map ID"
+    );
+    assert_eq!(
+        name, "The Cinderbrew Meadery",
+        "The Cinderbrew event location should have seeded area POI info"
+    );
+    assert_eq!(
+        listed_poi_id, 1002,
+        "The Cinderbrew event location should appear in the seeded POI list for its map"
+    );
+}

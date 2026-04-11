@@ -32,7 +32,7 @@ const SEEDED_AREA_POIS: &[AreaPoiSeed] = &[
         position: (0.452, 0.641),
     },
     AreaPoiSeed {
-        map_id: 0,
+        map_id: 1980,
         poi_id: 1002,
         name: "The Cinderbrew Meadery",
         description: "A celebratory dungeon event is active here.",
