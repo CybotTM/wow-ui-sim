@@ -20,6 +20,18 @@ fn open_character_panel(env: &wow_ui_sim::lua_api::WowLuaEnv) {
     .expect("Failed to open character panel");
 }
 
+fn open_spellbook(env: &wow_ui_sim::lua_api::WowLuaEnv) {
+    env.exec(
+        r#"
+        assert(PlayerSpellsUtil and PlayerSpellsUtil.ToggleSpellBookFrame, "ToggleSpellBookFrame should exist")
+        PlayerSpellsUtil.ToggleSpellBookFrame()
+        assert(PlayerSpellsFrame and PlayerSpellsFrame:IsShown(), "PlayerSpellsFrame should be shown")
+        assert(PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame:IsShown(), "SpellBookFrame should be shown")
+        "#,
+    )
+    .expect("Failed to open spellbook");
+}
+
 #[test]
 fn character_panel_equipment_slots_match_inventory_or_background_textures() {
     test_timeout! {
@@ -131,6 +143,55 @@ fn character_panel_title_text_matches_player_name() {
             result,
             "ok",
             "Character panel title text should match the player name shown by Blizzard's title path: {result}"
+        );
+    }
+}
+
+#[test]
+fn spellbook_first_visible_item_icon_matches_spellbook_texture() {
+    test_timeout! {
+        let env = setup_full_env();
+        open_spellbook(&env);
+
+        let result: String = env.eval(
+            r#"
+            local paged = PlayerSpellsFrame and PlayerSpellsFrame.SpellBookFrame and PlayerSpellsFrame.SpellBookFrame.PagedSpellsFrame
+            if not paged then
+                return "missing_paged_spells_frame"
+            end
+
+            for _, frame in paged:EnumerateFrames() do
+                if frame
+                    and frame:IsShown()
+                    and frame.HasValidData
+                    and frame:HasValidData()
+                    and frame.slotIndex
+                    and frame.spellBank
+                    and frame.Button
+                    and frame.Button.Icon
+                then
+                    local expected = C_SpellBook.GetSpellBookItemTexture(frame.slotIndex, frame.spellBank)
+                    local actual = frame.Button.Icon:GetTexture()
+                    if actual ~= expected then
+                        return string.format(
+                            "icon_mismatch_slot_%s_expected_%s_actual_%s",
+                            tostring(frame.slotIndex),
+                            tostring(expected),
+                            tostring(actual)
+                        )
+                    end
+                    return "ok"
+                end
+            end
+
+            return "no_visible_spellbook_item"
+        "#,
+        ).unwrap();
+
+        assert_eq!(
+            result,
+            "ok",
+            "The first visible spellbook item icon should match C_SpellBook.GetSpellBookItemTexture for its slot: {result}"
         );
     }
 }
