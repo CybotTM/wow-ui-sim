@@ -67,7 +67,7 @@ pub fn set_anchors(
 }
 
 /// Set a single anchor point on a frame.
-fn set_single_anchor(state: &mut SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str) {
+pub(super) fn set_single_anchor(state: &mut SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str) {
     let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
     let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
     let Some(point) = AnchorPoint::from_str(point_str) else {
