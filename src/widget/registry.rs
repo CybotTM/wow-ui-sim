@@ -161,9 +161,15 @@ impl WidgetRegistry {
 
     /// Add a child to a parent widget.
     pub fn add_child(&mut self, parent_id: u64, child_id: u64) {
+        let parent_eff = self
+            .widgets
+            .get(&parent_id)
+            .map(|p| p.effective_alpha)
+            .unwrap_or(1.0);
         if let Some(parent) = self.widgets.get_mut(&parent_id) {
             parent.children.push(child_id);
         }
+        self.propagate_effective_alpha(child_id, parent_eff);
     }
 
     /// Iterate over all widget IDs.

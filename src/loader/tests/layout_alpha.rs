@@ -254,3 +254,66 @@ fn test_ignore_parent_alpha_changes_effective_alpha_propagation() {
         after_reinherit
     );
 }
+
+#[test]
+fn test_xml_alpha_zero_on_button() {
+    let t = load_test_xml(
+        "test-xml-alpha-zero",
+        r#"<Ui>
+            <Frame name="TestAlphaParent" parent="UIParent">
+                <Size x="200" y="200"/>
+                <Anchors><Anchor point="CENTER"/></Anchors>
+                <Frames>
+                    <Button name="TestAlphaZeroBtn" alpha="0">
+                        <Size x="60" y="60"/>
+                        <Anchors><Anchor point="BOTTOMRIGHT"/></Anchors>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+
+    let alpha: f64 = t.env.eval("return TestAlphaZeroBtn:GetAlpha()").unwrap();
+    assert!(
+        alpha.abs() < 0.001,
+        "XML alpha=\"0\" on Button should result in GetAlpha()=0, got {alpha}"
+    );
+
+    let eff: f64 = t
+        .env
+        .eval("return TestAlphaZeroBtn:GetEffectiveAlpha()")
+        .unwrap();
+    assert!(
+        eff.abs() < 0.001,
+        "XML alpha=\"0\" should propagate to effective alpha=0, got {eff}"
+    );
+}
+
+#[test]
+fn test_xml_alpha_zero_child_textures_invisible() {
+    let t = load_test_xml(
+        "test-xml-alpha-zero-children",
+        r#"<Ui>
+            <Frame name="TestAlphaParent2" parent="UIParent">
+                <Size x="200" y="200"/>
+                <Anchors><Anchor point="CENTER"/></Anchors>
+                <Frames>
+                    <Button name="TestAlphaZeroBtn2" alpha="0">
+                        <Size x="60" y="60"/>
+                        <Anchors><Anchor point="BOTTOMRIGHT"/></Anchors>
+                        <NormalTexture name="TestAlphaZeroNormal" file="Interface/Buttons/test"/>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+
+    let child_eff: f64 = t
+        .env
+        .eval("return TestAlphaZeroNormal:GetEffectiveAlpha()")
+        .unwrap();
+    assert!(
+        child_eff.abs() < 0.001,
+        "Child texture of alpha=0 button should have effective alpha=0, got {child_eff}"
+    );
+}
