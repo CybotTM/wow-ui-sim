@@ -4,8 +4,8 @@ use iced::Point;
 
 use super::app::App;
 use super::mouse_drag::{
-    find_drag_script_target, find_slider_drag_target, frame_motion_scripts_allowed,
-    moving_drag_anchor_update, reanchor_moving_drag_frame,
+    apply_sizing, find_drag_script_target, find_slider_drag_target, frame_motion_scripts_allowed,
+    moving_drag_anchor_update, reanchor_moving_drag_frame, sizing_drag_update,
 };
 
 /// Minimum distance (in pixels) the mouse must move while held to start a drag.
@@ -56,7 +56,7 @@ impl App {
             return;
         }
 
-        let moved = {
+        let changed = {
             let env = self.env.borrow();
             let mut state = env.state().borrow_mut();
             let Some(drag_id) = state.active_drag_frame else {
@@ -65,22 +65,26 @@ impl App {
             let screen_size = self.screen_size.get();
 
             state.ensure_layout_rects();
-            let Some((parent_id, x_offset, y_offset)) = moving_drag_anchor_update(
+
+            if let Some((new_width, new_height)) = sizing_drag_update(&state, drag_id, dx, dy) {
+                apply_sizing(&mut state, drag_id, new_width, new_height);
+                true
+            } else if let Some((parent_id, x_offset, y_offset)) = moving_drag_anchor_update(
                 &state,
                 drag_id,
                 dx,
                 dy,
                 screen_size.width,
                 screen_size.height,
-            ) else {
-                return;
-            };
-
-            reanchor_moving_drag_frame(&mut state, drag_id, parent_id, x_offset, y_offset);
-            true
+            ) {
+                reanchor_moving_drag_frame(&mut state, drag_id, parent_id, x_offset, y_offset);
+                true
+            } else {
+                false
+            }
         };
 
-        if moved {
+        if changed {
             self.mark_all_strata_dirty();
         }
     }

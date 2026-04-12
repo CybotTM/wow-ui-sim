@@ -611,6 +611,164 @@ fn test_clamped_to_screen_set_get() {
 }
 
 // ============================================================================
+// StartSizing / StopMovingOrSizing / Resize bounds
+// ============================================================================
+
+#[test]
+fn test_start_sizing_requires_resizable() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestSizingNotResizable", UIParent)
+        f:SetSize(200, 100)
+        f:StartSizing("BOTTOMRIGHT")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let id = state
+        .widgets
+        .get_id_by_name("TestSizingNotResizable")
+        .unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(
+        !frame.is_sizing,
+        "StartSizing should be ignored when frame is not resizable"
+    );
+}
+
+#[test]
+fn test_start_sizing_sets_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestSizingState", UIParent)
+        f:SetSize(200, 100)
+        f:SetResizable(true)
+        f:StartSizing("BOTTOMRIGHT")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestSizingState").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(frame.is_sizing, "StartSizing should set is_sizing flag");
+    assert_eq!(
+        frame.sizing_point,
+        wow_ui_sim::widget::AnchorPoint::BottomRight
+    );
+}
+
+#[test]
+fn test_start_sizing_bottomleft() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestSizingBL", UIParent)
+        f:SetSize(200, 100)
+        f:SetResizable(true)
+        f:StartSizing("BOTTOMLEFT")
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestSizingBL").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(frame.is_sizing);
+    assert_eq!(
+        frame.sizing_point,
+        wow_ui_sim::widget::AnchorPoint::BottomLeft
+    );
+}
+
+#[test]
+fn test_start_sizing_defaults_to_bottomright() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestSizingDefault", UIParent)
+        f:SetSize(200, 100)
+        f:SetResizable(true)
+        f:StartSizing()
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestSizingDefault").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(frame.is_sizing);
+    assert_eq!(
+        frame.sizing_point,
+        wow_ui_sim::widget::AnchorPoint::BottomRight,
+        "StartSizing with no argument should default to BOTTOMRIGHT"
+    );
+}
+
+#[test]
+fn test_stop_moving_or_sizing_clears_sizing() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestStopSizing", UIParent)
+        f:SetSize(200, 100)
+        f:SetResizable(true)
+        f:StartSizing("BOTTOMRIGHT")
+    "#,
+    )
+    .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let id = state.widgets.get_id_by_name("TestStopSizing").unwrap();
+        assert!(state.widgets.get(id).unwrap().is_sizing);
+    }
+
+    env.exec("TestStopSizing:StopMovingOrSizing()").unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestStopSizing").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(
+        !frame.is_sizing,
+        "StopMovingOrSizing should clear is_sizing"
+    );
+    assert!(
+        frame.user_placed,
+        "StopMovingOrSizing should set user_placed after sizing"
+    );
+}
+
+#[test]
+fn test_resize_bounds_clamp() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Frame", "TestResizeBounds", UIParent)
+        f:SetSize(200, 100)
+        f:SetResizable(true)
+        f:SetResizeBounds(100, 50, 300, 200)
+    "#,
+    )
+    .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestResizeBounds").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert_eq!(frame.resize_bounds_min, (100.0, 50.0));
+    assert_eq!(frame.resize_bounds_max, Some((300.0, 200.0)));
+}
+
+// ============================================================================
 // Button / CheckButton / EditBox: mouse enabled by default
 // ============================================================================
 

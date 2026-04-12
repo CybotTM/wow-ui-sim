@@ -79,6 +79,130 @@ pub(super) fn reanchor_moving_drag_frame(
     state.widgets.mark_rect_dirty(drag_id);
 }
 
+/// Calculate new size for a frame being resized via StartSizing.
+/// Returns (new_width, new_height) clamped to resize bounds, or None if not sizing.
+pub(super) fn sizing_drag_update(
+    state: &crate::lua_api::SimState,
+    drag_id: u64,
+    dx: f32,
+    dy: f32,
+) -> Option<(f32, f32)> {
+    let frame = state.widgets.get(drag_id)?;
+    if !frame.is_sizing {
+        return None;
+    }
+
+    let rect = frame.layout_rect?;
+    let sizing_point = frame.sizing_point;
+
+    let (dw, dh) = match sizing_point {
+        AnchorPoint::BottomRight => (dx, dy),
+        AnchorPoint::BottomLeft => (-dx, dy),
+        AnchorPoint::TopRight => (dx, -dy),
+        AnchorPoint::TopLeft => (-dx, -dy),
+        AnchorPoint::Right => (dx, 0.0),
+        AnchorPoint::Left => (-dx, 0.0),
+        AnchorPoint::Bottom => (0.0, dy),
+        AnchorPoint::Top => (0.0, -dy),
+        AnchorPoint::Center => return None,
+    };
+
+    let mut new_width = rect.width + dw;
+    let mut new_height = rect.height + dh;
+
+    let (min_w, min_h) = frame.resize_bounds_min;
+    new_width = new_width.max(min_w.max(1.0));
+    new_height = new_height.max(min_h.max(1.0));
+
+    if let Some((max_w, max_h)) = frame.resize_bounds_max {
+        new_width = new_width.min(max_w);
+        new_height = new_height.min(max_h);
+    }
+
+    Some((new_width, new_height))
+}
+
+/// Apply new size to a frame being resized, re-anchoring to keep the non-dragged corner fixed.
+pub(super) fn apply_sizing(
+    state: &mut crate::lua_api::SimState,
+    drag_id: u64,
+    new_width: f32,
+    new_height: f32,
+) {
+    let sizing_point = state.widgets.get(drag_id).map(|f| f.sizing_point);
+    let old_rect = state.widgets.get(drag_id).and_then(|f| f.layout_rect);
+
+    if let Some(frame) = state.widgets.get_mut_visual(drag_id) {
+        frame.set_size(new_width, new_height);
+    }
+
+    let Some(sizing_point) = sizing_point else {
+        state.widgets.mark_rect_dirty(drag_id);
+        return;
+    };
+    let Some(old_rect) = old_rect else {
+        state.widgets.mark_rect_dirty(drag_id);
+        return;
+    };
+
+    let fixed_anchor = match sizing_point {
+        AnchorPoint::BottomRight => AnchorPoint::TopLeft,
+        AnchorPoint::BottomLeft => AnchorPoint::TopRight,
+        AnchorPoint::TopRight => AnchorPoint::BottomLeft,
+        AnchorPoint::TopLeft => AnchorPoint::BottomRight,
+        AnchorPoint::Right => AnchorPoint::Left,
+        AnchorPoint::Left => AnchorPoint::Right,
+        AnchorPoint::Bottom => AnchorPoint::Top,
+        AnchorPoint::Top => AnchorPoint::Bottom,
+        AnchorPoint::Center => AnchorPoint::Center,
+    };
+
+    let fixed_screen_x = match fixed_anchor {
+        AnchorPoint::TopLeft | AnchorPoint::Left | AnchorPoint::BottomLeft => old_rect.x,
+        AnchorPoint::Top | AnchorPoint::Center | AnchorPoint::Bottom => {
+            old_rect.x + old_rect.width / 2.0
+        }
+        AnchorPoint::TopRight | AnchorPoint::Right | AnchorPoint::BottomRight => {
+            old_rect.x + old_rect.width
+        }
+    };
+    let fixed_screen_y = match fixed_anchor {
+        AnchorPoint::TopLeft | AnchorPoint::Top | AnchorPoint::TopRight => old_rect.y,
+        AnchorPoint::Left | AnchorPoint::Center | AnchorPoint::Right => {
+            old_rect.y + old_rect.height / 2.0
+        }
+        AnchorPoint::BottomLeft | AnchorPoint::Bottom | AnchorPoint::BottomRight => {
+            old_rect.y + old_rect.height
+        }
+    };
+
+    let parent_id = state.widgets.get(drag_id).and_then(|f| f.parent_id);
+    let (parent_x, parent_y) = parent_id
+        .and_then(|id| state.widgets.get(id).and_then(|p| p.layout_rect))
+        .map(|r| (r.x, r.y))
+        .unwrap_or((0.0, 0.0));
+
+    let x_offset = fixed_screen_x - parent_x;
+    let y_offset = -(fixed_screen_y - parent_y);
+
+    state.widgets.remove_all_anchor_dependents_for(drag_id);
+    if let Some(pid) = parent_id {
+        state.widgets.add_anchor_dependent(pid, drag_id);
+    }
+
+    if let Some(frame) = state.widgets.get_mut_visual(drag_id) {
+        frame.clear_all_points();
+        frame.set_point(
+            fixed_anchor,
+            parent_id.map(|id| id as usize),
+            AnchorPoint::TopLeft,
+            x_offset,
+            y_offset,
+        );
+    }
+    state.widgets.mark_rect_dirty(drag_id);
+}
+
 pub(super) fn find_drag_script_target(
     env: &crate::lua_api::WowLuaEnv,
     frame_id: u64,

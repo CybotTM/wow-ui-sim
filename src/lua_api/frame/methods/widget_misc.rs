@@ -267,10 +267,11 @@ fn add_stop_moving_or_sizing<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         if let Ok(mut s) = state_rc.try_borrow_mut()
             && let Some(frame) = s.widgets.get_mut_visual(id)
         {
-            if frame.is_moving {
+            if frame.is_moving || frame.is_sizing {
                 frame.user_placed = true;
             }
             frame.is_moving = false;
+            frame.is_sizing = false;
         }
         Ok(())
     });
@@ -396,7 +397,28 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok(())
     });
-    methods.add_method("StartSizing", |_, _this, _point: Option<String>| Ok(()));
+    methods.add_method("StartSizing", |lua, this, point: Option<String>| {
+        let id = this.0;
+        {
+            let state_rc = get_sim_state(lua);
+            if combat_lockdown::check_and_fire(lua, &state_rc, id, "StartSizing") {
+                return Ok(());
+            }
+        }
+        let sizing_point = point
+            .as_deref()
+            .and_then(crate::widget::AnchorPoint::from_str)
+            .unwrap_or(crate::widget::AnchorPoint::BottomRight);
+        let state_rc = get_sim_state(lua);
+        if let Ok(mut s) = state_rc.try_borrow_mut()
+            && let Some(frame) = s.widgets.get_mut_visual(id)
+            && frame.resizable
+        {
+            frame.is_sizing = true;
+            frame.sizing_point = sizing_point;
+        }
+        Ok(())
+    });
     methods.add_method("RegisterForDrag", |lua, this, args: mlua::MultiValue| {
         let buttons = args
             .into_iter()

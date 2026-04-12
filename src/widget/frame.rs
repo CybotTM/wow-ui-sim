@@ -151,6 +151,10 @@ pub struct Frame {
     pub ignoring_children_for_bounds: bool,
     pub clamped_to_screen: bool,
     pub is_moving: bool,
+    /// Whether the frame is currently being resized via StartSizing.
+    pub is_sizing: bool,
+    /// Which corner/edge is being dragged for sizing (e.g., BottomRight).
+    pub sizing_point: crate::widget::AnchorPoint,
     /// Whether text should word-wrap (for FontString widgets).
     pub word_wrap: bool,
     /// Maximum number of lines to display (0 = unlimited, for FontString widgets).
@@ -557,6 +561,8 @@ macro_rules! frame_defaults {
             ignoring_children_for_bounds: false,
             clamped_to_screen: false,
             is_moving: false,
+            is_sizing: false,
+            sizing_point: crate::widget::AnchorPoint::BottomRight,
             word_wrap: true,
             max_lines: 0,
             text_scale: 1.0,
