@@ -73,11 +73,21 @@ pub fn get_template_info(name: &str) -> Option<TemplateInfo> {
         return None;
     }
 
-    // Get the widget type from the first entry that defines it
+    // The most derived entry's widget_type wins. The chain is base-to-derived;
+    // e.g. `<Button inherits="FrameTemplate">` is a Button, not a Frame.
+    // However, many templates inherit from Frame-based parents without explicitly
+    // redefining their type. The last entry in the chain is the template itself
+    // (most derived) — use its type if non-empty, otherwise fall back to parents.
     let frame_type = chain
-        .iter()
-        .find(|e| !e.widget_type.is_empty())
+        .last()
+        .filter(|e| !e.widget_type.is_empty())
         .map(|e| e.widget_type.clone())
+        .or_else(|| {
+            chain
+                .iter()
+                .find(|e| !e.widget_type.is_empty())
+                .map(|e| e.widget_type.clone())
+        })
         .unwrap_or_else(|| "Frame".to_string());
 
     let (width, height) = resolve_chain_size(&chain);

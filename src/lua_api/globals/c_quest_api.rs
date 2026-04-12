@@ -585,10 +585,16 @@ pub fn register_quest_log_quest_text(lua: &Lua) -> Result<()> {
 /// C_QuestInfoSystem namespace - quest classification info.
 fn register_c_quest_info_system(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-    // Returns Enum.QuestClassification.Normal (0)
+    // Enum.QuestClassification: Normal=7, WorldQuest=10
     t.set(
         "GetQuestClassification",
-        lua.create_function(|_, _quest_id: i32| Ok(0i32))?,
+        lua.create_function(|_, quest_id: i32| {
+            if super::c_quest_api_tasks::is_world_quest(quest_id) {
+                Ok(10i32) // WorldQuest
+            } else {
+                Ok(7i32) // Normal
+            }
+        })?,
     )?;
     t.set(
         "HasQuestRewardCurrencies",

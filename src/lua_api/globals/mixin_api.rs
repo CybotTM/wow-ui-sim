@@ -203,14 +203,8 @@ fn add_pin_frame_level_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
             Ok(Value::String(lua.create_string("PIN_FRAME_LEVEL_DEFAULT")?))
         })?,
     )?;
-    t.set(
-        "UseFrameLevelType",
-        lua.create_function(|_, (_self, _type): (Value, String)| Ok(()))?,
-    )?;
-    t.set(
-        "ApplyFrameLevel",
-        lua.create_function(|_, _self: Value| Ok(()))?,
-    )?;
+    // UseFrameLevelType and ApplyFrameLevel are implemented in Lua by
+    // MapCanvasPinMixin (MapCanvas_DataProviderBase.lua). Do not stub them.
     Ok(())
 }
 
