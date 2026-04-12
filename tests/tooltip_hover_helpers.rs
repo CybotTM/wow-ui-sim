@@ -1,4 +1,6 @@
-use crate::tooltip_full_env_helpers::refresh_aura_frames;
+#[path = "tooltip_full_env_helpers.rs"]
+mod tooltip_full_env_helpers;
+use tooltip_full_env_helpers::refresh_aura_frames;
 use wow_ui_sim::lua_api::WowLuaEnv;
 
 const HOVER_FIRST_VISIBLE_BUFF_ICON_LUA: &str = r#"
