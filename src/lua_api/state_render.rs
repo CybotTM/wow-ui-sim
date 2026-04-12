@@ -275,22 +275,27 @@ impl SimState {
     }
 
     /// Recompute frames anchored to `target_id` using the reverse index.
-    ///
-    /// O(k) where k = number of frames anchored to target_id.
+    /// Recurses into dependents-of-dependents so that transitive anchor chains
+    /// (e.g. TitleCanvasSpacerFrame → ScrollContainer → overlay buttons) all
+    /// get updated in a single pass.
     pub(crate) fn recompute_anchor_dependents(
         widgets: &mut crate::widget::WidgetRegistry,
         target_id: u64,
         sw: f32,
         sh: f32,
         cache: &mut crate::iced_app::layout::LayoutCache,
-        _depth: u32,
+        depth: u32,
     ) {
+        if depth > 16 {
+            return; // guard against cycles
+        }
         let deps: Vec<u64> = widgets
             .get_anchor_dependents(target_id)
             .map(|s| s.iter().copied().collect())
             .unwrap_or_default();
         for dep_id in deps {
             Self::recompute_layout_subtree(widgets, dep_id, sw, sh, cache);
+            Self::recompute_anchor_dependents(widgets, dep_id, sw, sh, cache, depth + 1);
         }
     }
 
