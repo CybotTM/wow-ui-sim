@@ -145,7 +145,14 @@ pub(super) fn apply_sizing(
         return;
     };
 
-    let fixed_anchor = match sizing_point {
+    let fixed_anchor = opposite_anchor(sizing_point);
+    let (fixed_x, fixed_y) = anchor_screen_position(fixed_anchor, &old_rect);
+    reanchor_to_fixed_corner(state, drag_id, fixed_anchor, fixed_x, fixed_y);
+}
+
+/// Return the anchor point opposite to the one being dragged.
+fn opposite_anchor(point: AnchorPoint) -> AnchorPoint {
+    match point {
         AnchorPoint::BottomRight => AnchorPoint::TopLeft,
         AnchorPoint::BottomLeft => AnchorPoint::TopRight,
         AnchorPoint::TopRight => AnchorPoint::BottomLeft,
@@ -155,27 +162,36 @@ pub(super) fn apply_sizing(
         AnchorPoint::Bottom => AnchorPoint::Top,
         AnchorPoint::Top => AnchorPoint::Bottom,
         AnchorPoint::Center => AnchorPoint::Center,
-    };
+    }
+}
 
-    let fixed_screen_x = match fixed_anchor {
-        AnchorPoint::TopLeft | AnchorPoint::Left | AnchorPoint::BottomLeft => old_rect.x,
-        AnchorPoint::Top | AnchorPoint::Center | AnchorPoint::Bottom => {
-            old_rect.x + old_rect.width / 2.0
-        }
+/// Compute the absolute screen position of an anchor point on a rect.
+fn anchor_screen_position(anchor: AnchorPoint, rect: &crate::LayoutRect) -> (f32, f32) {
+    let x = match anchor {
+        AnchorPoint::TopLeft | AnchorPoint::Left | AnchorPoint::BottomLeft => rect.x,
+        AnchorPoint::Top | AnchorPoint::Center | AnchorPoint::Bottom => rect.x + rect.width / 2.0,
         AnchorPoint::TopRight | AnchorPoint::Right | AnchorPoint::BottomRight => {
-            old_rect.x + old_rect.width
+            rect.x + rect.width
         }
     };
-    let fixed_screen_y = match fixed_anchor {
-        AnchorPoint::TopLeft | AnchorPoint::Top | AnchorPoint::TopRight => old_rect.y,
-        AnchorPoint::Left | AnchorPoint::Center | AnchorPoint::Right => {
-            old_rect.y + old_rect.height / 2.0
-        }
+    let y = match anchor {
+        AnchorPoint::TopLeft | AnchorPoint::Top | AnchorPoint::TopRight => rect.y,
+        AnchorPoint::Left | AnchorPoint::Center | AnchorPoint::Right => rect.y + rect.height / 2.0,
         AnchorPoint::BottomLeft | AnchorPoint::Bottom | AnchorPoint::BottomRight => {
-            old_rect.y + old_rect.height
+            rect.y + rect.height
         }
     };
+    (x, y)
+}
 
+/// Clear existing anchors and set a single anchor to keep the fixed corner in place.
+fn reanchor_to_fixed_corner(
+    state: &mut crate::lua_api::SimState,
+    drag_id: u64,
+    fixed_anchor: AnchorPoint,
+    fixed_screen_x: f32,
+    fixed_screen_y: f32,
+) {
     let parent_id = state.widgets.get(drag_id).and_then(|f| f.parent_id);
     let (parent_x, parent_y) = parent_id
         .and_then(|id| state.widgets.get(id).and_then(|p| p.layout_rect))
