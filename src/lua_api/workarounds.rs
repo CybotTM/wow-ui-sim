@@ -54,6 +54,7 @@ pub fn apply(env: &WowLuaEnv) {
     patch_group_finder_toggle(env);
     patch_mail_toggle(env);
     patch_map_canvas_zoom(env);
+    patch_poi_button_update_point(env);
     patch_combat_log_filters(env);
     patch_missing_frame_stubs(env);
 }
@@ -283,6 +284,50 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
     }
 }
 
+/// Guard POIButtonDisplayLayerMixin:UpdatePoint against nil parent.
+///
+/// When map pins are created via template pools, the Display child's
+/// GetParent() may return a frame whose IsEnabled method isn't accessible
+/// (parent not yet fully initialized as a Button). Guard the call to
+/// prevent "attempt to call method 'IsEnabled' (a nil value)" errors
+/// that block world quest pin rendering.
+fn patch_poi_button_update_point(env: &WowLuaEnv) {
+    if let Err(e) = env.exec(
+        r#"
+        -- Guard UpdateButtonAlpha against nil NormalTexture/PushedTexture.
+        -- These children should be created by POIButtonTemplate XML but
+        -- template child creation during CreateFrame doesn't cover them yet.
+        if POIButtonMixin then
+            local orig = POIButtonMixin.UpdateButtonAlpha
+            function POIButtonMixin:UpdateButtonAlpha()
+                if self.NormalTexture and self.PushedTexture then
+                    orig(self)
+                end
+            end
+        end
+        if POIButtonDisplayLayerMixin then
+            function POIButtonDisplayLayerMixin:UpdatePoint(isPushed)
+                local parent = self:GetParent()
+                if not parent or not parent.IsEnabled or not parent:IsEnabled() then
+                    return
+                end
+                local pushedX = isPushed and 1 or 0
+                local pushedY = isPushed and -1 or 0
+                local x = (self.offsetX or 0) + pushedX
+                local y = (self.offsetY or 0) + pushedY
+                if PixelUtil then
+                    PixelUtil.SetPoint(self, "CENTER", parent, "CENTER", x, y, x, y)
+                else
+                    self:SetPoint("CENTER", parent, "CENTER", x, y)
+                end
+            end
+        end
+    "#,
+    ) {
+        eprintln!("[workaround] patch_poi_button_update_point failed: {e}");
+    }
+}
+
 /// Add minimal stubs for global frames expected by Blizzard code but not
 /// created by any loaded addon (e.g. the frame exists in XML but the parent
 /// frame was nil, preventing creation).
@@ -292,25 +337,33 @@ fn patch_missing_frame_stubs(env: &WowLuaEnv) {
     let snippets: &[(&str, &str)] = &[
         // FriendsFrameIcon: a Texture child of FriendsFrame, but FriendsFrame is
         // hidden at startup. Provides SetTexture stub to silence OnEvent errors.
-        ("FriendsFrameIcon", r#"
+        (
+            "FriendsFrameIcon",
+            r#"
             if not FriendsFrameIcon then
                 rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
             end
-        "#),
+        "#,
+        ),
         // QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
         // QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
-        ("QueueStatusButton", r#"
+        (
+            "QueueStatusButton",
+            r#"
             if QueueStatusButton and not QueueStatusButton.SetGlowLock then
                 QueueStatusButton.SetGlowLock = function() end
             end
             if not QueueStatusButton then
                 rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
             end
-        "#),
+        "#,
+        ),
         // TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
         // If the parent frame failed to create (nil parent), the button is nil.
         // Provide a stub with Text field for UpdateDefaultButtons().
-        ("TextToSpeechDefaultButton", r#"
+        (
+            "TextToSpeechDefaultButton",
+            r#"
             if not TextToSpeechDefaultButton then
                 local t = { GetWidth = function() return 100 end }
                 rawset(_G, "TextToSpeechDefaultButton", {
@@ -322,15 +375,19 @@ fn patch_missing_frame_stubs(env: &WowLuaEnv) {
             elseif not TextToSpeechDefaultButton.Text then
                 TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
             end
-        "#),
-        ("TextToSpeechCharacterSpecificButton", r#"
+        "#,
+        ),
+        (
+            "TextToSpeechCharacterSpecificButton",
+            r#"
             if not TextToSpeechCharacterSpecificButton then
                 rawset(_G, "TextToSpeechCharacterSpecificButton", {
                     SetShown = function() end,
                     SetPoint = function() end,
                 })
             end
-        "#),
+        "#,
+        ),
     ];
 
     for (name, code) in snippets {

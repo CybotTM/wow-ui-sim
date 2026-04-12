@@ -16,9 +16,44 @@ struct WorldQuest {
 }
 
 /// Seeded world quests for map display.
-/// Map IDs: 2025 = Thaldraszus, 2024 = The Azure Span, 2023 = Ohn'ahran Plains,
-///           2022 = The Waking Shores, 2112 = Valdrakken.
+/// Map IDs: 2248 = Isle of Dorn, 2215 = Hallowfall, 2214 = The Ringing Deeps,
+///           2025 = Thaldraszus, 2024 = The Azure Span, 2023 = Ohn'ahran Plains,
+///           2022 = The Waking Shores.
 static WORLD_QUESTS: &[WorldQuest] = &[
+    // TWW zones (visible on default Khaz Algar map)
+    WorldQuest {
+        quest_id: 90101,
+        map_id: 2248,
+        x: 0.45,
+        y: 0.35,
+        title: "Earthen Relic Recovery",
+        num_objectives: 1,
+    },
+    WorldQuest {
+        quest_id: 90102,
+        map_id: 2248,
+        x: 0.62,
+        y: 0.58,
+        title: "Arathi Signal Fires",
+        num_objectives: 2,
+    },
+    WorldQuest {
+        quest_id: 90103,
+        map_id: 2215,
+        x: 0.40,
+        y: 0.50,
+        title: "Crystal Shard Collection",
+        num_objectives: 3,
+    },
+    WorldQuest {
+        quest_id: 90104,
+        map_id: 2214,
+        x: 0.55,
+        y: 0.45,
+        title: "Kobold Tunnel Collapse",
+        num_objectives: 1,
+    },
+    // Dragon Isles zones
     WorldQuest {
         quest_id: 90001,
         map_id: 2025,
