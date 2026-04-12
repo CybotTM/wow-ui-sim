@@ -106,7 +106,7 @@ impl App {
 
     /// Load new textures from the batch's requests within a time budget.
     /// Returns the loaded textures and whether the deadline was reached.
-    fn load_new_textures_budgeted(
+    pub(super) fn load_new_textures_budgeted(
         &self,
         quads: &QuadBatch,
         deadline: std::time::Instant,

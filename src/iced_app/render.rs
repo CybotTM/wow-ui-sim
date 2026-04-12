@@ -94,12 +94,34 @@ impl shader::Program<Message> for &App {
         let size = bounds.size();
         self.screen_size.set(size);
         self.sync_screen_size_to_state(size);
+        let had_textures_pending = self.textures_pending.get();
         let t0 = std::time::Instant::now();
-        let (dirty_strata, _) = self.get_or_rebuild_quads(size);
+        let (mut dirty_strata, _) = self.get_or_rebuild_quads(size);
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
-        let (textures, tex_dur) = self.load_all_textures(&dirty_strata, &overlay);
+        let (mut textures, tex_dur) = self.load_all_textures(&dirty_strata, &overlay);
+
+        // When textures were pending from the previous frame, scan cached
+        // (non-dirty) strata for unresolved texture requests and include
+        // those strata in the primitive so prepare() re-resolves them with
+        // the newly uploaded GPU atlas entries.
+        if had_textures_pending {
+            let cached = self.cached_strata_quads.borrow();
+            let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
+            for i in 0..dirty_strata.len() {
+                if dirty_strata[i].is_none() {
+                    if let Some(batch) = &cached[i] {
+                        let (extra, _) = self.load_new_textures_budgeted(batch, deadline);
+                        textures.extend(extra);
+                        // Always include cached strata so its texture refs
+                        // get re-resolved against the updated GPU atlas.
+                        dirty_strata[i] = Some(batch.clone());
+                    }
+                }
+            }
+        }
+
         log_slow_draw(quad_dur, tex_dur, textures.len());
 
         self.update_frame_time_avg(start.elapsed());
