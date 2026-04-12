@@ -345,7 +345,19 @@ impl WidgetRegistry {
     /// NOT affect visibility — a frame with alpha=0 is still "visible" and
     /// receives OnUpdate, events, etc.
     pub fn is_ancestor_visible(&self, id: u64) -> bool {
-        self.widgets.get(&id).is_some_and(|f| f.visible)
+        let mut current_id = id;
+        loop {
+            let Some(f) = self.widgets.get(&current_id) else {
+                return false;
+            };
+            if !f.visible {
+                return false;
+            }
+            match f.parent_id {
+                Some(parent_id) => current_id = parent_id,
+                None => return true,
+            }
+        }
     }
 
     /// Recompute `effective_alpha` for a frame and propagate to all descendants.
