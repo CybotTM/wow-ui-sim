@@ -769,6 +769,38 @@ fn test_resize_bounds_clamp() {
 }
 
 // ============================================================================
+// Alpha: SetAlpha / GetAlpha on frames
+// ============================================================================
+
+#[test]
+fn test_set_alpha_zero_persists() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local f = CreateFrame("Button", "TestAlphaZeroBtn", UIParent)
+        f:SetAlpha(0)
+    "#,
+    )
+    .unwrap();
+
+    let alpha: f64 = env.eval("return TestAlphaZeroBtn:GetAlpha()").unwrap();
+    assert!(
+        alpha.abs() < 0.001,
+        "Button with SetAlpha(0) should have alpha=0, got {alpha}"
+    );
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name("TestAlphaZeroBtn").unwrap();
+    let frame = state.widgets.get(id).unwrap();
+    assert!(
+        frame.alpha.abs() < 0.001,
+        "Rust frame.alpha should be 0, got {}",
+        frame.alpha
+    );
+}
+
+// ============================================================================
 // Button / CheckButton / EditBox: mouse enabled by default
 // ============================================================================
 
