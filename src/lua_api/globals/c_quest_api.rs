@@ -165,6 +165,11 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
     register_quest_log_watch(lua, &t)?;
     register_quest_log_status(lua, &t)?;
     register_quest_log_selection(lua, &t)?;
+    register_quest_log_misc_stubs(lua, &t)?;
+    Ok(t)
+}
+
+fn register_quest_log_misc_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("HasActiveThreats", lua.create_function(|_, ()| Ok(false))?)?;
     t.set(
         "GetBountySetInfoForMapID",
@@ -190,7 +195,7 @@ fn register_c_quest_log(lua: &Lua) -> Result<mlua::Table> {
             Ok(super::c_quest_api_tasks::is_world_quest(quest_id))
         })?,
     )?;
-    Ok(t)
+    Ok(())
 }
 
 /// Quest log query methods (counts, GetInfo, objectives).
