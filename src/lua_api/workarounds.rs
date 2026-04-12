@@ -53,6 +53,9 @@ pub fn apply(env: &WowLuaEnv) {
     patch_communities_toggle(env);
     patch_group_finder_toggle(env);
     patch_mail_toggle(env);
+    patch_map_canvas_zoom(env);
+    patch_combat_log_filters(env);
+    patch_missing_frame_stubs(env);
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.
@@ -251,6 +254,107 @@ fn patch_mail_toggle(env: &WowLuaEnv) {
         end
     "#,
     );
+}
+
+/// Patch MapCanvasScrollControllerMixin to guard nil targetScale before compare.
+///
+/// `IsZoomingIn` and `IsZoomingOut` compare `self.targetScale` to a number but
+/// `targetScale` is only set after the first zoom action. Before any zoom
+/// the mixin leaves it nil, causing a "attempt to compare nil with number" error.
+///
+/// Patching the methods directly to default nil values avoids timing issues with
+/// OnLoad having already fired for existing scroll container instances.
+fn patch_map_canvas_zoom(env: &WowLuaEnv) {
+    if let Err(e) = env.exec(
+        r#"
+        if MapCanvasScrollControllerMixin then
+            function MapCanvasScrollControllerMixin:IsZoomingIn()
+                if self.targetScale == nil then return false end
+                return self:GetCanvasScale() < self.targetScale
+            end
+            function MapCanvasScrollControllerMixin:IsZoomingOut()
+                if self.targetScale == nil then return false end
+                return self.targetScale < self:GetCanvasScale()
+            end
+        end
+    "#,
+    ) {
+        eprintln!("[workaround] patch_map_canvas_zoom failed: {e}");
+    }
+}
+
+/// Add minimal stubs for global frames expected by Blizzard code but not
+/// created by any loaded addon (e.g. the frame exists in XML but the parent
+/// frame was nil, preventing creation).
+///
+/// These stubs only provide the specific methods/fields called at startup.
+fn patch_missing_frame_stubs(env: &WowLuaEnv) {
+    let snippets: &[(&str, &str)] = &[
+        // FriendsFrameIcon: a Texture child of FriendsFrame, but FriendsFrame is
+        // hidden at startup. Provides SetTexture stub to silence OnEvent errors.
+        ("FriendsFrameIcon", r#"
+            if not FriendsFrameIcon then
+                rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
+            end
+        "#),
+        // QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
+        // QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
+        ("QueueStatusButton", r#"
+            if QueueStatusButton and not QueueStatusButton.SetGlowLock then
+                QueueStatusButton.SetGlowLock = function() end
+            end
+            if not QueueStatusButton then
+                rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
+            end
+        "#),
+        // TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
+        // If the parent frame failed to create (nil parent), the button is nil.
+        // Provide a stub with Text field for UpdateDefaultButtons().
+        ("TextToSpeechDefaultButton", r#"
+            if not TextToSpeechDefaultButton then
+                local t = { GetWidth = function() return 100 end }
+                rawset(_G, "TextToSpeechDefaultButton", {
+                    Text = t,
+                    SetShown = function() end,
+                    SetWidth = function() end,
+                    SetPoint = function() end,
+                })
+            elseif not TextToSpeechDefaultButton.Text then
+                TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
+            end
+        "#),
+        ("TextToSpeechCharacterSpecificButton", r#"
+            if not TextToSpeechCharacterSpecificButton then
+                rawset(_G, "TextToSpeechCharacterSpecificButton", {
+                    SetShown = function() end,
+                    SetPoint = function() end,
+                })
+            end
+        "#),
+    ];
+
+    for (name, code) in snippets {
+        if let Err(e) = env.exec(code) {
+            eprintln!("[workaround] patch_missing_frame_stubs({name}) failed: {e}");
+        }
+    }
+}
+
+/// Ensure Blizzard_CombatLog_Filters is initialized as empty table before
+/// ChatConfigFrame.lua accesses it in OnShow handlers.
+///
+/// Blizzard_CombatLog.lua sets this at line 411 but it may run after
+/// ChatConfigFrame tries to use it during startup events.
+fn patch_combat_log_filters(env: &WowLuaEnv) {
+    if let Err(e) = env.exec(
+        r#"
+        if Blizzard_CombatLog_Filters == nil then
+            rawset(_G, "Blizzard_CombatLog_Filters", {})
+        end
+    "#,
+    ) {
+        eprintln!("[workaround] patch_combat_log_filters failed: {e}");
+    }
 }
 
 #[cfg(test)]
