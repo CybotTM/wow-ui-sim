@@ -498,14 +498,65 @@ fn next_optional_resize_bound(values: &mut impl Iterator<Item = mlua::Value>) ->
 // --- Misc stubs ---
 
 fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_misc_mixin_field_stubs(methods);
+    add_misc_mixin_only_stubs(methods);
+    add_misc_state_setters(methods);
+    add_misc_vararg_stubs(methods);
+}
+
+/// Methods that delegate to a mixin override or fall back to setting a Lua field.
+fn add_misc_mixin_field_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetupMenu", |lua, this, generator: Value| {
         if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetupMenu") {
             return func.call::<()>((self_value, generator));
         }
-
         widget_fields(lua, this.0)?.set("menuGenerator", generator)?;
         Ok(())
     });
+    methods.add_method("SetSelectionTranslator", |lua, this, translator: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetSelectionTranslator")
+        {
+            return func.call::<()>((self_value, translator));
+        }
+        widget_fields(lua, this.0)?.set("selectionTranslator", translator)?;
+        Ok(())
+    });
+    methods.add_method("SetItemButtonScale", |lua, this, scale: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetItemButtonScale") {
+            return func.call::<()>((self_value, scale));
+        }
+        widget_fields(lua, this.0)?.set("itemButtonScale", scale)?;
+        Ok(())
+    });
+    methods.add_method("SetDefaultText", |lua, this, text: Value| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetDefaultText") {
+            return func.call::<()>((self_value, text));
+        }
+        widget_fields(lua, this.0)?.set("defaultText", text)?;
+        Ok(())
+    });
+}
+
+/// Mixin-only delegates with no field fallback.
+fn add_misc_mixin_only_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    methods.add_method("UpdateItemContextMatching", |lua, this, ()| {
+        if let Some((func, self_value)) =
+            get_mixin_override(lua, this.0, "UpdateItemContextMatching")
+        {
+            return func.call::<()>(self_value);
+        }
+        Ok(())
+    });
+    methods.add_method("UpdateHeight", |lua, this, ()| {
+        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "UpdateHeight") {
+            return func.call::<()>(self_value);
+        }
+        Ok(())
+    });
+}
+
+/// Simple field and state setters without mixin delegation.
+fn add_misc_state_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetAlertContainer", |lua, this, container: Value| {
         widget_fields(lua, this.0)?.set("alertContainer", container)?;
         Ok(())
@@ -529,55 +580,14 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         Ok(())
     });
-    methods.add_method("SetSelectionTranslator", |lua, this, translator: Value| {
-        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetSelectionTranslator")
-        {
-            return func.call::<()>((self_value, translator));
-        }
+}
 
-        widget_fields(lua, this.0)?.set("selectionTranslator", translator)?;
-        Ok(())
-    });
-    methods.add_method("SetItemButtonScale", |lua, this, scale: Value| {
-        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetItemButtonScale") {
-            return func.call::<()>((self_value, scale));
-        }
-
-        widget_fields(lua, this.0)?.set("itemButtonScale", scale)?;
-        Ok(())
-    });
-    methods.add_method("UpdateItemContextMatching", |lua, this, ()| {
-        if let Some((func, self_value)) =
-            get_mixin_override(lua, this.0, "UpdateItemContextMatching")
-        {
-            return func.call::<()>(self_value);
-        }
-        Ok(())
-    });
-    methods.add_method("UpdateHeight", |lua, this, ()| {
-        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "UpdateHeight") {
-            return func.call::<()>(self_value);
-        }
-        Ok(())
-    });
-    methods.add_method("SetDefaultText", |lua, this, text: Value| {
-        if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetDefaultText") {
-            return func.call::<()>((self_value, text));
-        }
-
-        widget_fields(lua, this.0)?.set("defaultText", text)?;
-        Ok(())
-    });
+/// Vararg methods that delegate to mixin overrides or store args.
+fn add_misc_vararg_stubs<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetVisuals", |lua, this, args: mlua::MultiValue| {
         if let Some((func, self_value)) = get_mixin_override(lua, this.0, "SetVisuals") {
-            let mut call_args = mlua::MultiValue::new();
-            call_args.push_back(self_value);
-            for value in args {
-                call_args.push_back(value);
-            }
-            return func.call::<()>(call_args);
+            return call_mixin_with_varargs(func, self_value, args);
         }
-
         let stored_args = lua.create_table()?;
         for (index, value) in args.into_iter().enumerate() {
             stored_args.set(index + 1, value)?;
@@ -591,14 +601,8 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             if let Some((func, self_value)) =
                 get_mixin_override(lua, this.0, "RegisterForWidgetSet")
             {
-                let mut call_args = mlua::MultiValue::new();
-                call_args.push_back(self_value);
-                for value in args {
-                    call_args.push_back(value);
-                }
-                return func.call::<()>(call_args);
+                return call_mixin_with_varargs(func, self_value, args);
             }
-
             set_widget_set_registration(lua, this.0, args)
         },
     );
@@ -608,17 +612,25 @@ fn add_misc_stubs_simple<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             if let Some((func, self_value)) =
                 get_mixin_override(lua, this.0, "UnregisterForWidgetSet")
             {
-                let mut call_args = mlua::MultiValue::new();
-                call_args.push_back(self_value);
-                for value in args {
-                    call_args.push_back(value);
-                }
-                return func.call::<()>(call_args);
+                return call_mixin_with_varargs(func, self_value, args);
             }
-
             clear_widget_set_registration(lua, this.0)
         },
     );
+}
+
+/// Forward a vararg call to a mixin override, prepending `self`.
+fn call_mixin_with_varargs(
+    func: mlua::Function,
+    self_value: Value,
+    args: mlua::MultiValue,
+) -> mlua::Result<()> {
+    let mut call_args = mlua::MultiValue::new();
+    call_args.push_back(self_value);
+    for value in args {
+        call_args.push_back(value);
+    }
+    func.call::<()>(call_args)
 }
 
 fn add_misc_stubs_mixin<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
