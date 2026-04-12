@@ -584,7 +584,7 @@ pub(crate) fn register_game_state_stubs(lua: &Lua) -> Result<()> {
     )?;
     g.set(
         "GetChannelList",
-        lua.create_function(|_, ()| Ok(Value::Nil))?,
+        lua.create_function(|_, ()| Ok(()))?,
     )?;
     g.set(
         "CanBeRaidTarget",

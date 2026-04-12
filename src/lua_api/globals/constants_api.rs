@@ -123,6 +123,8 @@ const MISC_COLOR_GLOBALS: &[(&str, (f64, f64, f64, f64))] = &[
         (1.0, 0.82, 0.0, 1.0),
     ),
     ("PANEL_BACKGROUND_COLOR", (0.15, 0.15, 0.15, 1.0)),
+    ("EDIT_MODE_GRID_LINE_COLOR", (1.0, 1.0, 1.0, 0.3)),
+    ("EDIT_MODE_GRID_CENTER_LINE_COLOR", (0.0, 0.8, 1.0, 0.6)),
 ];
 
 /// Register `RAID_CLASS_COLORS` - maps class file names to color objects.
