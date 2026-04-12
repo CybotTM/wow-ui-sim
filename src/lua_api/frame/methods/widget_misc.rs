@@ -349,6 +349,13 @@ fn next_inset_value(values: &mut impl Iterator<Item = mlua::Value>) -> f32 {
 }
 
 fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_resize_bounds_methods(methods);
+    add_start_sizing_method(methods);
+    add_drag_registration_methods(methods);
+    add_placement_methods(methods);
+}
+
+fn add_resize_bounds_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetResizeBounds", |lua, this, args: mlua::MultiValue| {
         let mut values = args.into_iter();
         let min_width = next_required_resize_bound(&mut values);
@@ -381,6 +388,11 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok((0.0_f32, 0.0_f32, None::<f32>, None::<f32>))
     });
+    add_resize_bounds_legacy_methods(methods);
+}
+
+/// Deprecated SetMinResize/SetMaxResize (superseded by SetResizeBounds).
+fn add_resize_bounds_legacy_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetMinResize", |lua, this, (width, height): (f32, f32)| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
@@ -397,6 +409,9 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok(())
     });
+}
+
+fn add_start_sizing_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("StartSizing", |lua, this, point: Option<String>| {
         let id = this.0;
         {
@@ -419,6 +434,9 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok(())
     });
+}
+
+fn add_drag_registration_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("RegisterForDrag", |lua, this, args: mlua::MultiValue| {
         let buttons = args
             .into_iter()
@@ -435,6 +453,9 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
         }
         Ok(())
     });
+}
+
+fn add_placement_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetUserPlaced", |lua, this, user_placed: bool| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
