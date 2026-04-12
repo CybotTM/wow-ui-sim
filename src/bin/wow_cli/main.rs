@@ -126,35 +126,32 @@ enum Commands {
     },
 
     /// Statically audit Blizzard UI API usage (standalone)
-    AuditApi {
-        /// Output format
-        #[arg(long, default_value = "text")]
-        format: String,
+    AuditApi(AuditApiArgs),
+}
 
-        /// Only scan non-LoadOnDemand addons
-        #[arg(long)]
-        filter_startup: bool,
-
-        /// Drill into a specific C_* namespace
-        #[arg(long)]
-        namespace: Option<String>,
-
-        /// Override Blizzard UI path
-        #[arg(long, default_value_os_t = default_blizzard_ui_path())]
-        ui_path: PathBuf,
-
-        /// Also scan simulator source and print a gap report
-        #[arg(long)]
-        gaps: bool,
-
-        /// Path to simulator src directory (for gap analysis)
-        #[arg(long, default_value = "./src")]
-        sim_path: PathBuf,
-
-        /// Path to wowless repo (for C_* namespace allowlist filtering)
-        #[arg(long, default_value_os_t = default_wowless_path())]
-        wowless_path: PathBuf,
-    },
+#[derive(clap::Args)]
+struct AuditApiArgs {
+    /// Output format
+    #[arg(long, default_value = "text")]
+    format: String,
+    /// Only scan non-LoadOnDemand addons
+    #[arg(long)]
+    filter_startup: bool,
+    /// Drill into a specific C_* namespace
+    #[arg(long)]
+    namespace: Option<String>,
+    /// Override Blizzard UI path
+    #[arg(long, default_value_os_t = default_blizzard_ui_path())]
+    ui_path: PathBuf,
+    /// Also scan simulator source and print a gap report
+    #[arg(long)]
+    gaps: bool,
+    /// Path to simulator src directory (for gap analysis)
+    #[arg(long, default_value = "./src")]
+    sim_path: PathBuf,
+    /// Path to wowless repo (for C_* namespace allowlist filtering)
+    #[arg(long, default_value_os_t = default_wowless_path())]
+    wowless_path: PathBuf,
 }
 
 #[derive(Subcommand)]
@@ -224,23 +221,7 @@ fn handle_command(command: Commands) {
         } => handle_extract_textures_command(addons, interface, output),
         Commands::ConvertTexture { input, output } => convert_texture(&input, output.as_ref()),
         Commands::Generate { what } => run_generator(what),
-        Commands::AuditApi {
-            format,
-            filter_startup,
-            namespace,
-            ui_path,
-            gaps,
-            sim_path,
-            wowless_path,
-        } => run_audit_api(
-            format,
-            filter_startup,
-            namespace,
-            ui_path,
-            gaps,
-            sim_path,
-            wowless_path,
-        ),
+        Commands::AuditApi(args) => handle_audit_api(args),
     }
 }
 
@@ -280,19 +261,18 @@ fn run_generator(target: GenerateTarget) {
     }
 }
 
-fn run_audit_api(
-    format: String,
-    filter_startup: bool,
-    namespace: Option<String>,
-    ui_path: PathBuf,
-    gaps: bool,
-    sim_path: PathBuf,
-    wowless_path: PathBuf,
-) {
-    let fmt = parse_output_format(&format);
-    let config = build_audit_config(ui_path, namespace, filter_startup, wowless_path);
+fn handle_audit_api(args: AuditApiArgs) {
+    let fmt = parse_output_format(&args.format);
+    let config = build_audit_config(
+        args.ui_path,
+        args.namespace,
+        args.filter_startup,
+        args.wowless_path,
+    );
     let results = audit_api::run_audit(&config);
-    let gap_report = gaps.then(|| build_gap_report(&sim_path, &results));
+    let gap_report = args
+        .gaps
+        .then(|| build_gap_report(&args.sim_path, &results));
     print_audit_output(fmt, &results, gap_report.as_ref());
 }
 
