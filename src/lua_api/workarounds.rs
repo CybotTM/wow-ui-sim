@@ -397,16 +397,20 @@ fn patch_missing_frame_stubs(env: &WowLuaEnv) {
     }
 }
 
-/// Ensure Blizzard_CombatLog_Filters is initialized as empty table before
-/// ChatConfigFrame.lua accesses it in OnShow handlers.
+/// Initialize Blizzard_CombatLog_Filters with the structure ChatConfigFrame expects.
 ///
-/// Blizzard_CombatLog.lua sets this at line 411 but it may run after
-/// ChatConfigFrame tries to use it during startup events.
+/// Blizzard_CombatLog is LoadOnDemand — it sets this global at line 411 but
+/// ChatConfigFrame accesses `.filters` during startup OnShow events before
+/// the combat log addon loads. Provide the minimal structure so those
+/// accesses don't error.
 fn patch_combat_log_filters(env: &WowLuaEnv) {
     if let Err(e) = env.exec(
         r#"
         if Blizzard_CombatLog_Filters == nil then
-            rawset(_G, "Blizzard_CombatLog_Filters", {})
+            rawset(_G, "Blizzard_CombatLog_Filters", { filters = {} })
+        end
+        if CHATCONFIG_SELECTED_FILTER == nil then
+            rawset(_G, "CHATCONFIG_SELECTED_FILTER", nil)
         end
     "#,
     ) {
