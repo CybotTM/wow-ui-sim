@@ -357,38 +357,44 @@ fn add_drag_resize_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 
 fn add_resize_bounds_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetResizeBounds", |lua, this, args: mlua::MultiValue| {
-        let mut values = args.into_iter();
-        let min_width = next_required_resize_bound(&mut values);
-        let min_height = next_required_resize_bound(&mut values);
-        let max_width = next_optional_resize_bound(&mut values);
-        let max_height = next_optional_resize_bound(&mut values);
-        let resize_bounds_max = match (max_width, max_height) {
-            (Some(width), Some(height)) => Some((width, height)),
-            _ => None,
-        };
-
+        let (min, max) = parse_resize_bounds(args);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if let Some(frame) = state.widgets.get_mut(this.0) {
-            frame.resize_bounds_min = (min_width, min_height);
-            frame.resize_bounds_max = resize_bounds_max;
+            frame.resize_bounds_min = min;
+            frame.resize_bounds_max = max;
         }
         Ok(())
     });
     methods.add_method("GetResizeBounds", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(frame) = state.widgets.get(this.0) {
-            let (min_width, min_height) = frame.resize_bounds_min;
-            let (max_width, max_height) = frame
-                .resize_bounds_max
-                .map(|(width, height)| (Some(width), Some(height)))
-                .unwrap_or((None, None));
-            return Ok((min_width, min_height, max_width, max_height));
-        }
-        Ok((0.0_f32, 0.0_f32, None::<f32>, None::<f32>))
+        let Some(frame) = state.widgets.get(this.0) else {
+            return Ok((0.0_f32, 0.0_f32, None::<f32>, None::<f32>));
+        };
+        let (min_w, min_h) = frame.resize_bounds_min;
+        let (max_w, max_h) = frame
+            .resize_bounds_max
+            .map(|(w, h)| (Some(w), Some(h)))
+            .unwrap_or((None, None));
+        Ok((min_w, min_h, max_w, max_h))
     });
     add_resize_bounds_legacy_methods(methods);
+}
+
+/// Parse SetResizeBounds varargs: (minW, minH [, maxW, maxH]).
+fn parse_resize_bounds(args: mlua::MultiValue) -> ((f32, f32), Option<(f32, f32)>) {
+    let mut values = args.into_iter();
+    let min_width = next_required_resize_bound(&mut values);
+    let min_height = next_required_resize_bound(&mut values);
+    let max = match (
+        next_optional_resize_bound(&mut values),
+        next_optional_resize_bound(&mut values),
+    ) {
+        (Some(w), Some(h)) => Some((w, h)),
+        _ => None,
+    };
+    ((min_width, min_height), max)
 }
 
 /// Deprecated SetMinResize/SetMaxResize (superseded by SetResizeBounds).
