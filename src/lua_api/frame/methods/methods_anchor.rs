@@ -113,17 +113,28 @@ fn parse_set_point_2_or_3(
     }
 }
 
-/// Parse SetPoint with 4+ arguments (full form with relativeTo, relativePoint, x, y).
+/// Parse SetPoint with 4+ arguments.
+///
+/// Handles both:
+/// - `SetPoint("point", relativeTo, "relativePoint", x, y)` — full form
+/// - `SetPoint("point", relativeTo, x, y)` — omitted relativePoint (defaults to point)
 fn parse_set_point_full(
     lua: &mlua::Lua,
     args: &[Value],
     point: crate::widget::AnchorPoint,
 ) -> Result<(Option<usize>, crate::widget::AnchorPoint, f32, f32, bool), String> {
     let rel_to = args.get(1).and_then(|v| get_frame_id(lua, v));
-    let rel_point = resolve_relative_point(args.get(2), point)?;
-    let x = args.get(3).and_then(get_number).unwrap_or(0.0);
-    let y = args.get(4).and_then(get_number).unwrap_or(0.0);
-    Ok((rel_to, rel_point, x, y, true))
+    let arg2_is_number = args.get(2).and_then(get_number).is_some();
+    if arg2_is_number {
+        let x = args.get(2).and_then(get_number).unwrap_or(0.0);
+        let y = args.get(3).and_then(get_number).unwrap_or(0.0);
+        Ok((rel_to, point, x, y, true))
+    } else {
+        let rel_point = resolve_relative_point(args.get(2), point)?;
+        let x = args.get(3).and_then(get_number).unwrap_or(0.0);
+        let y = args.get(4).and_then(get_number).unwrap_or(0.0);
+        Ok((rel_to, rel_point, x, y, true))
+    }
 }
 
 /// SetPoint(point, relativeTo, relativePoint, xOfs, yOfs)

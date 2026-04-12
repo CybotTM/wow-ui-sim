@@ -618,3 +618,75 @@ fn test_set_point_explicit_nil_relative_to_resolves_to_parent() {
         "explicit nil relativeTo should resolve to parent frame"
     );
 }
+
+// ============================================================================
+// SetPoint with relativeTo frame and numeric offsets (3-arg after point)
+// ============================================================================
+
+/// SetPoint("TOPLEFT", otherFrame, xOfs, yOfs) must anchor to otherFrame,
+/// not ignore it and treat (xOfs, yOfs) as a parent-relative offset.
+///
+/// Reproduces the quest log POI button positioning bug where
+/// `poiButton:SetPoint("TOPLEFT", button, 6, -4)` ignored `button` and
+/// anchored to the parent instead, placing all icons at the top.
+#[test]
+fn test_set_point_relative_frame_with_offsets() {
+    let env = env();
+    let rel_name: String = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "SPRelParent", UIParent)
+        local anchor = CreateFrame("Frame", "SPRelAnchor", parent)
+        local child = CreateFrame("Frame", "SPRelChild", parent)
+        child:SetPoint("TOPLEFT", anchor, 6, -4)
+        local _, relTo = child:GetPoint(1)
+        return relTo and relTo:GetName() or "nil"
+    "#,
+        )
+        .unwrap();
+    assert_eq!(
+        rel_name, "SPRelAnchor",
+        "SetPoint('TOPLEFT', frame, x, y) should anchor to frame, not parent"
+    );
+}
+
+/// Same as above but verify the offsets are correct.
+#[test]
+fn test_set_point_relative_frame_with_offsets_values() {
+    let env = env();
+    let (x, y): (f64, f64) = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "SPOfsParent", UIParent)
+        local anchor = CreateFrame("Frame", "SPOfsAnchor", parent)
+        local child = CreateFrame("Frame", "SPOfsChild", parent)
+        child:SetPoint("TOPLEFT", anchor, 6, -4)
+        local _, _, _, x, y = child:GetPoint(1)
+        return x, y
+    "#,
+        )
+        .unwrap();
+    assert!((x - 6.0).abs() < 0.01, "x offset should be 6, got {x}");
+    assert!((y - (-4.0)).abs() < 0.01, "y offset should be -4, got {y}");
+}
+
+/// SetPoint("TOPLEFT", otherFrame, "BOTTOMLEFT", x, y) — full 5-arg form
+/// should still work (regression guard).
+#[test]
+fn test_set_point_full_form_still_works() {
+    let env = env();
+    let (rel_name, rel_point): (String, String) = env
+        .eval(
+            r#"
+        local parent = CreateFrame("Frame", "SPFullParent", UIParent)
+        local anchor = CreateFrame("Frame", "SPFullAnchor", parent)
+        local child = CreateFrame("Frame", "SPFullChild", parent)
+        child:SetPoint("TOPLEFT", anchor, "BOTTOMLEFT", 10, -5)
+        local point, relTo, relPoint, x, y = child:GetPoint(1)
+        return relTo:GetName(), relPoint
+    "#,
+        )
+        .unwrap();
+    assert_eq!(rel_name, "SPFullAnchor");
+    assert_eq!(rel_point, "BOTTOMLEFT");
+}
