@@ -23,6 +23,7 @@ mod gen_spells;
 mod gen_traits;
 mod gen_traits_emit;
 mod gen_traits_load;
+mod gen_quest_poi;
 mod gen_zones;
 
 use clap::{Parser, Subcommand};
@@ -174,6 +175,8 @@ enum GenerateTarget {
     Zones,
     /// Generate data/map_art.rs from UiMap* DB2 CSVs
     MapArt,
+    /// Generate data/quest_ui_map.rs from QuestPOIBlob CSV
+    QuestPoi,
 }
 
 fn default_addons_path() -> PathBuf {
@@ -269,6 +272,7 @@ fn run_generator(target: GenerateTarget) {
         GenerateTarget::Traits => gen_traits::run(),
         GenerateTarget::Zones => gen_zones::run(),
         GenerateTarget::MapArt => gen_map_art::run(),
+        GenerateTarget::QuestPoi => gen_quest_poi::run(),
     };
     if let Err(e) = result {
         eprintln!("Error: {}", e);

@@ -4829,7 +4829,9 @@ fn register_global_stubs_17(lua: &Lua, g: &mlua::Table) -> Result<()> {
     if g.get::<Value>("GetQuestUiMapID")?.is_nil() {
         g.set(
             "GetQuestUiMapID",
-            lua.create_function(|_, _: MultiValue| Ok(0))?,
+            lua.create_function(|_, (quest_id, _): (u32, mlua::Value)| {
+                Ok(crate::quest_ui_map::get_quest_ui_map_id(quest_id))
+            })?,
         )?;
     }
     if g.get::<Value>("GetRFDungeonInfo")?.is_nil() {

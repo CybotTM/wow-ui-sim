@@ -34,6 +34,8 @@ pub mod manifest_interface_data;
 pub mod map_art;
 #[path = "../data/quest_poi_blobs.rs"]
 pub mod quest_poi_blobs;
+#[path = "../data/quest_ui_map.rs"]
+pub mod quest_ui_map;
 pub mod render;
 pub mod saved_variables;
 pub mod screen;
