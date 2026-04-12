@@ -57,7 +57,8 @@ fn register_error_display(lua: &Lua) -> Result<()> {
                     .call::<String>(msg)
                     .unwrap_or_else(|_| "<error>".to_string()),
             };
-            eprintln!("[addframetext] {msg_str}");
+            // Collect for lua-errors command but don't print — call_error_handler
+            // already printed the first occurrence of each unique error.
             super::super::script_helpers::collect_lua_error(lua, &msg_str);
             Ok(())
         })?,
