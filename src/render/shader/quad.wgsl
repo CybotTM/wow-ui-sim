@@ -185,6 +185,11 @@ fn fs_main(in: VertexOutput) -> @location(0) vec4<f32> {
         color.a *= mask_color.a;
     }
 
+    // Brightness boost — the simulator has no 3D game world behind the UI,
+    // so dark/semi-transparent textures (borders, backgrounds) are harder to
+    // see against the black clear color.  A mild gamma lift makes details visible.
+    color = vec4f(pow(color.rgb, vec3f(1.0 / 1.5)), color.a);
+
     // Premultiplied alpha output: pipeline uses src + dst * (1 - src.a).
     // Standard alpha: premultiply color by alpha for correct blending.
     // Additive: premultiply then zero alpha so dst is fully preserved (src + dst).
