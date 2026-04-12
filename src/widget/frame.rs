@@ -498,6 +498,8 @@ impl Frame {
             widget_type,
             name,
             parent_id,
+            // WoW ScrollFrames always clip their scroll child content to bounds.
+            clips_children: widget_type == WidgetType::ScrollFrame,
             ..Default::default()
         }
     }
@@ -582,3 +584,26 @@ impl Frame {
 }
 
 pub use super::frame_enums::{DrawLayer, FrameStrata};
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn scroll_frame_defaults_clips_children_true() {
+        let frame = Frame::new(WidgetType::ScrollFrame, None, None);
+        assert!(
+            frame.clips_children,
+            "ScrollFrame should clip children by default (WoW native behavior)"
+        );
+    }
+
+    #[test]
+    fn regular_frame_defaults_clips_children_false() {
+        let frame = Frame::new(WidgetType::Frame, None, None);
+        assert!(
+            !frame.clips_children,
+            "Regular Frame should not clip children by default"
+        );
+    }
+}
