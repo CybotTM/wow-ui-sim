@@ -27,7 +27,9 @@ fn register_pcall(lua: &Lua) -> Result<()> {
             if result_vec.len() > 1 && !matches!(result_vec[1], Value::Nil) {
                 let msg = error_to_string(lua, &tostring, &result_vec[1])?;
                 let clean = strip_error_wrapper(&msg);
-                crate::lua_api::script_helpers::collect_lua_error(lua, clean);
+                // Do NOT call collect_lua_error here — pcall is intended to catch errors
+                // silently. Reporting them would flood the error log with intentionally
+                // caught errors (e.g. nil index checks in anchors, optional method calls).
                 result_vec[1] = Value::String(lua.create_string(clean)?);
             }
         }
