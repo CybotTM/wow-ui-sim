@@ -582,10 +582,7 @@ pub(crate) fn register_game_state_stubs(lua: &Lua) -> Result<()> {
         "CanHearthAndResurrectFromArea",
         lua.create_function(|_, ()| Ok(false))?,
     )?;
-    g.set(
-        "GetChannelList",
-        lua.create_function(|_, ()| Ok(()))?,
-    )?;
+    g.set("GetChannelList", lua.create_function(|_, ()| Ok(()))?)?;
     g.set(
         "CanBeRaidTarget",
         lua.create_function(|_, _unit: Value| Ok(false))?,
