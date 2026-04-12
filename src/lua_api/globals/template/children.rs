@@ -225,6 +225,8 @@ fn apply_inline_frame_content(
         });
     if let Some(frame_id) = frame_id {
         direct::set_size_partial(state, frame_id, frame);
+        let inherits = frame.inherits.as_deref().unwrap_or("");
+        direct::apply_xml_alpha(state, frame_id, frame, inherits);
     }
 
     // Create child frames before layers so that relativeKey anchors

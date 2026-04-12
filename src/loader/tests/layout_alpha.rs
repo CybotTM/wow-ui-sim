@@ -317,3 +317,43 @@ fn test_xml_alpha_zero_child_textures_invisible() {
         "Child texture of alpha=0 button should have effective alpha=0, got {child_eff}"
     );
 }
+
+/// Regression: template child frames with alpha="0" must have alpha applied
+/// when instantiated via CreateFrame. Before the fix, `apply_inline_frame_content`
+/// in the template path skipped alpha, so the child kept the default alpha=1.
+#[test]
+fn test_template_child_alpha_zero() {
+    let t = load_test_xml(
+        "test-tpl-alpha-zero",
+        r#"<Ui>
+            <Frame name="TplAlphaTestTemplate" virtual="true">
+                <Size x="400" y="200"/>
+                <Frames>
+                    <Button parentKey="ResizeBtn" alpha="0">
+                        <Size x="60" y="60"/>
+                        <Anchors><Anchor point="BOTTOMRIGHT"/></Anchors>
+                    </Button>
+                </Frames>
+            </Frame>
+        </Ui>"#,
+    );
+
+    // Instantiate the template via Lua (template child creation path)
+    t.env
+        .exec(
+            r#"
+        local f = CreateFrame("Frame", "TplAlphaInstance", UIParent, "TplAlphaTestTemplate")
+        f:SetPoint("CENTER")
+    "#,
+        )
+        .unwrap();
+
+    let alpha: f64 = t
+        .env
+        .eval("return TplAlphaInstance.ResizeBtn:GetAlpha()")
+        .unwrap();
+    assert!(
+        alpha.abs() < 0.001,
+        "Template child with alpha=\"0\" should have GetAlpha()=0 after instantiation, got {alpha}"
+    );
+}
