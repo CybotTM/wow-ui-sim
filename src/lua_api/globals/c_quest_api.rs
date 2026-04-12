@@ -377,7 +377,7 @@ fn register_quest_log_info(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetRequiredMoney",
-        lua.create_function(|_, _id: i32| Ok(0i32))?,
+        lua.create_function(|_, _id: Option<i32>| Ok(0i32))?,
     )?;
     Ok(())
 }
