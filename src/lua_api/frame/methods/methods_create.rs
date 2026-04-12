@@ -125,12 +125,14 @@ fn add_create_mask_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &
 /// CreateLine(name, layer, inherits, subLevel) - create a Line.
 fn add_create_line_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("CreateLine", |lua, this, args: mlua::MultiValue| {
+        use crate::lua_api::globals::template::apply_templates_from_registry;
         use crate::widget::DrawLayer;
 
         let id = this.0;
         let args: Vec<Value> = args.into_iter().collect();
         let name_raw = extract_string_arg(&args, 0);
         let layer = extract_string_arg(&args, 1);
+        let inherits = extract_string_arg(&args, 2);
         let name = resolve_child_name(lua, name_raw, id);
 
         let mut line = Frame::new(WidgetType::Line, name.clone(), Some(id));
@@ -141,8 +143,28 @@ fn add_create_line_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             line.draw_layer = draw_layer;
         }
 
-        register_child_widget(lua, id, line, &name)
+        let ud = register_child_widget(lua, id, line, &name)?;
+
+        if let Some(tmpl) = inherits {
+            let state_rc = get_sim_state(lua);
+            let frame_name = name
+                .clone()
+                .unwrap_or_else(|| format!("__frame_{}", extract_id_from_ud(&ud)));
+            apply_templates_from_registry(lua, &state_rc, &frame_name, &tmpl);
+        }
+
+        Ok(ud)
     });
+}
+
+/// Extract the frame id from a FrameRef UserData value for anonymous frame naming.
+fn extract_id_from_ud(val: &Value) -> u64 {
+    if let Value::UserData(ud) = val {
+        if let Ok(frame_ref) = ud.borrow::<super::super::handle::FrameRef>() {
+            return frame_ref.0;
+        }
+    }
+    0
 }
 
 /// CreateFontString(name, layer, inherits)
