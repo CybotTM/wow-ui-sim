@@ -19,11 +19,11 @@ mod gen_global_strings;
 mod gen_items;
 mod gen_manifest;
 mod gen_map_art;
+mod gen_quest_poi;
 mod gen_spells;
 mod gen_traits;
 mod gen_traits_emit;
 mod gen_traits_load;
-mod gen_quest_poi;
 mod gen_zones;
 
 use clap::{Parser, Subcommand};

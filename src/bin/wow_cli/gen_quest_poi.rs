@@ -123,14 +123,8 @@ fn build_phf_map(out: &mut File, quest_map: HashMap<u32, u32>) -> std::io::Resul
 }
 
 fn write_lookup_fn(out: &mut File) -> std::io::Result<()> {
-    writeln!(
-        out,
-        "pub fn get_quest_ui_map_id(quest_id: u32) -> u32 {{"
-    )?;
-    writeln!(
-        out,
-        "    QUEST_UI_MAP.get(&quest_id).copied().unwrap_or(0)"
-    )?;
+    writeln!(out, "pub fn get_quest_ui_map_id(quest_id: u32) -> u32 {{")?;
+    writeln!(out, "    QUEST_UI_MAP.get(&quest_id).copied().unwrap_or(0)")?;
     writeln!(out, "}}")?;
     Ok(())
 }
@@ -157,7 +151,10 @@ fn write_tests(out: &mut File) -> std::io::Result<()> {
     writeln!(out)?;
     writeln!(out, "    #[test]")?;
     writeln!(out, "    fn test_unknown_quest() {{")?;
-    writeln!(out, "        assert_eq!(get_quest_ui_map_id(999_999_999), 0);")?;
+    writeln!(
+        out,
+        "        assert_eq!(get_quest_ui_map_id(999_999_999), 0);"
+    )?;
     writeln!(out, "    }}")?;
     writeln!(out, "}}")?;
     Ok(())
