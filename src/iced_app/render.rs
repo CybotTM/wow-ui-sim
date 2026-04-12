@@ -10,7 +10,7 @@ use crate::render::FrameQuadSnapshot;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
 use crate::render::texture::UI_SCALE;
-use crate::render::{QuadBatch, WowUiPrimitive, load_texture_or_crop};
+use crate::render::{GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
 use crate::widget::WidgetType;
 
 use super::Message;
@@ -102,24 +102,8 @@ impl shader::Program<Message> for &App {
         let overlay = self.build_overlay();
         let (mut textures, tex_dur) = self.load_all_textures(&dirty_strata, &overlay);
 
-        // When textures were pending from the previous frame, scan cached
-        // (non-dirty) strata for unresolved texture requests and include
-        // those strata in the primitive so prepare() re-resolves them with
-        // the newly uploaded GPU atlas entries.
         if had_textures_pending {
-            let cached = self.cached_strata_quads.borrow();
-            let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
-            for i in 0..dirty_strata.len() {
-                if dirty_strata[i].is_none() {
-                    if let Some(batch) = &cached[i] {
-                        let (extra, _) = self.load_new_textures_budgeted(batch, deadline);
-                        textures.extend(extra);
-                        // Always include cached strata so its texture refs
-                        // get re-resolved against the updated GPU atlas.
-                        dirty_strata[i] = Some(batch.clone());
-                    }
-                }
-            }
+            self.recover_pending_textures(&mut dirty_strata, &mut textures);
         }
 
         log_slow_draw(quad_dur, tex_dur, textures.len());
@@ -445,6 +429,27 @@ fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, te
 }
 
 impl App {
+    /// Scan cached (non-dirty) strata for unresolved texture requests and
+    /// include them in the primitive so `prepare()` re-resolves their refs
+    /// against the updated GPU atlas.
+    fn recover_pending_textures(
+        &self,
+        dirty_strata: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
+        textures: &mut Vec<GpuTextureData>,
+    ) {
+        let cached = self.cached_strata_quads.borrow();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
+        for i in 0..dirty_strata.len() {
+            if dirty_strata[i].is_none() {
+                if let Some(batch) = &cached[i] {
+                    let (extra, _) = self.load_new_textures_budgeted(batch, deadline);
+                    textures.extend(extra);
+                    dirty_strata[i] = Some(batch.clone());
+                }
+            }
+        }
+    }
+
     pub(crate) fn preload_initial_texture_requests(&self) {
         self.preload_current_render_requests(None);
     }
