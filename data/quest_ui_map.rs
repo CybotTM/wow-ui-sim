@@ -3,12 +3,8 @@
 
 static QUEST_UI_MAP: phf::Map<u32, u32> = ::phf::Map {
     key: 12913932095322966823,
-    disps: &[
-        (0, 0),
-    ],
-    entries: &[
-        (80000, 2248),
-    ],
+    disps: &[(0, 0)],
+    entries: &[(80000, 2248)],
 };
 
 pub fn get_quest_ui_map_id(quest_id: u32) -> u32 {

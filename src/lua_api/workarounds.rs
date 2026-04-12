@@ -15,6 +15,7 @@ use std::rc::Rc;
 pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_editmode::init_edit_mode_layout(env);
     suppress_spellbook_tutorials(env);
+    init_world_map_frame(env);
 }
 
 /// Apply targeted cleanup after a load-on-demand addon finishes loading.
@@ -394,6 +395,26 @@ fn patch_missing_frame_stubs(env: &WowLuaEnv) {
         if let Err(e) = env.exec(code) {
             eprintln!("[workaround] patch_missing_frame_stubs({name}) failed: {e}");
         }
+    }
+}
+
+/// Initialize WorldMapFrame with the player's current zone map and refresh data
+/// providers so that map pins (world quests, POIs, etc.) are populated.
+///
+/// In real WoW this happens when the player opens the map (OnShow). The
+/// simulator never triggers OnShow for the map, so we call SetMapID and
+/// RefreshAllDataProviders explicitly after startup events complete.
+fn init_world_map_frame(env: &WowLuaEnv) {
+    if let Err(e) = env.exec(
+        r#"
+        if WorldMapFrame and WorldMapFrame.SetMapID and WorldMapFrame.RefreshAllDataProviders then
+            local mapID = C_Map.GetBestMapForUnit("player") or 2248
+            pcall(WorldMapFrame.SetMapID, WorldMapFrame, mapID)
+            pcall(WorldMapFrame.RefreshAllDataProviders, WorldMapFrame)
+        end
+    "#,
+    ) {
+        eprintln!("[workaround] init_world_map_frame failed: {e}");
     }
 }
 

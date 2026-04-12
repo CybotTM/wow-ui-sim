@@ -40,9 +40,9 @@ fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
     t.set(
         "GetBestMapForUnit",
-        lua.create_function(|_, _unit: String| Ok(2274i32))?,
+        lua.create_function(|_, _unit: String| Ok(2248i32))?,
     )?;
-    t.set("GetCurrentMapID", lua.create_function(|_, ()| Ok(2274i32))?)?;
+    t.set("GetCurrentMapID", lua.create_function(|_, ()| Ok(2248i32))?)?;
     t.set(
         "GetPlayerMapPosition",
         lua.create_function(create_player_map_position)?,

@@ -48,7 +48,7 @@ fn test_get_best_map_for_unit() {
     let map_id: i32 = env
         .eval(r#"return C_Map.GetBestMapForUnit("player")"#)
         .unwrap();
-    assert_eq!(map_id, 2274, "Default map should be Dornogal");
+    assert_eq!(map_id, 2248, "Default map should be Isle of Dorn");
 }
 
 #[test]
