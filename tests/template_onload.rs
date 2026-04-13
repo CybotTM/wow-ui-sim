@@ -37,6 +37,33 @@ const SPELL_BTN_TEMPLATE_XML: &str = r#"
     </Ui>
 "#;
 
+const INHERITED_LIFECYCLE_MIXIN_LUA: &str = r#"
+    __test_base_onshow_calls = 0
+    function TestBaseOnShow(self)
+        __test_base_onshow_calls = __test_base_onshow_calls + 1
+    end
+
+    DerivedLifecycleMixin = {}
+    function DerivedLifecycleMixin:OnLoad()
+        self.showingFrames = {}
+    end
+"#;
+
+const INHERITED_LIFECYCLE_TEMPLATE_XML: &str = r#"
+    <Ui>
+        <Frame name="BaseLifecycleTemplate" virtual="true">
+            <Scripts>
+                <OnShow function="TestBaseOnShow"/>
+            </Scripts>
+        </Frame>
+        <Frame name="DerivedLifecycleTemplate" inherits="BaseLifecycleTemplate" mixin="DerivedLifecycleMixin" virtual="true">
+            <Scripts>
+                <OnLoad method="OnLoad"/>
+            </Scripts>
+        </Frame>
+    </Ui>
+"#;
+
 fn setup_spell_btn_env() -> WowLuaEnv {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -44,6 +71,21 @@ fn setup_spell_btn_env() -> WowLuaEnv {
     let ui = parse_xml(SPELL_BTN_TEMPLATE_XML).unwrap();
     if let XmlElement::Frame(frame) = &ui.elements[0] {
         register_template("TestSpellBtnTpl", "Frame", frame.clone());
+    }
+    env
+}
+
+fn setup_inherited_lifecycle_env() -> WowLuaEnv {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    env.exec(INHERITED_LIFECYCLE_MIXIN_LUA).unwrap();
+    let ui = parse_xml(INHERITED_LIFECYCLE_TEMPLATE_XML).unwrap();
+    for element in &ui.elements {
+        if let XmlElement::Frame(frame) = element
+            && let Some(ref name) = frame.name
+        {
+            register_template(name, "Frame", frame.clone());
+        }
     }
     env
 }
@@ -106,4 +148,35 @@ fn template_child_shared_mixin_no_onload_xml() {
 
     let result = check_onload_only_on_parent(&env, "SpellBtnXml");
     assert_eq!(result, "ok", "XML loading path: {}", result);
+}
+
+#[test]
+fn inherited_template_onload_survives_base_onshow_during_xml_load() {
+    let env = setup_inherited_lifecycle_env();
+
+    let xml = r#"
+        <Ui>
+            <Frame name="InheritedLifecycleFrame" inherits="DerivedLifecycleTemplate" parent="UIParent"/>
+        </Ui>
+    "#;
+    let ui = parse_xml(xml).unwrap();
+    if let XmlElement::Frame(frame) = &ui.elements[0] {
+        create_frame_from_xml(
+            &env.loader_env(),
+            frame,
+            "Frame",
+            None,
+            None,
+            &mut LoadTiming::default(),
+        )
+        .unwrap();
+    }
+
+    let initialized: bool = env
+        .eval(r#"return _G["InheritedLifecycleFrame"].showingFrames ~= nil"#)
+        .unwrap();
+    assert!(
+        initialized,
+        "Inherited OnLoad should initialize instance state"
+    );
 }

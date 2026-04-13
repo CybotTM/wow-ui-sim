@@ -236,7 +236,7 @@ fn create_children_and_finalize(
 
 fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleScripts {
     let mut lifecycle = lifecycle_scripts_for_frame(frame);
-    if lifecycle.any() || inherits.is_empty() {
+    if inherits.is_empty() || (lifecycle.on_load && lifecycle.on_show) {
         return lifecycle;
     }
 
@@ -244,8 +244,8 @@ fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleS
         let inherited = lifecycle_scripts_for_frame(&entry.frame);
         lifecycle.on_load |= inherited.on_load;
         lifecycle.on_show |= inherited.on_show;
-        if lifecycle.any() {
-            return lifecycle;
+        if lifecycle.on_load && lifecycle.on_show {
+            break;
         }
     }
 
