@@ -149,13 +149,16 @@ fn resolve_clip_rect(
     id: u64,
     registry: &crate::widget::WidgetRegistry,
 ) -> Option<crate::LayoutRect> {
-    let mut current_id = registry.get(id).and_then(|f| f.parent_id);
+    let mut current_id = id;
     let mut clip_rect: Option<crate::LayoutRect> = None;
-    while let Some(parent_id) = current_id {
+    while let Some(parent_id) = registry.get(current_id).and_then(|f| f.parent_id) {
         let Some(parent) = registry.get(parent_id) else {
             break;
         };
-        if parent.clips_children
+        let clips_scroll_child =
+            matches!(parent.widget_type, crate::widget::WidgetType::ScrollFrame)
+                && parent.scroll_child_id == Some(current_id);
+        if (parent.clips_children || clips_scroll_child)
             && let Some(parent_rect) = parent.layout_rect
         {
             clip_rect = Some(match clip_rect {
@@ -163,7 +166,7 @@ fn resolve_clip_rect(
                 None => parent_rect,
             });
         }
-        current_id = parent.parent_id;
+        current_id = parent_id;
     }
     clip_rect
 }

@@ -171,6 +171,18 @@ fn test_get_map_art_id_returns_nonzero() {
     );
 }
 
+#[test]
+fn test_get_map_art_background_atlas_returns_world_map_tile_background() {
+    let env = env();
+    let atlas: String = env
+        .eval("return C_Map.GetMapArtBackgroundAtlas(C_Map.GetCurrentMapID())")
+        .unwrap();
+    assert_eq!(
+        atlas, "AdventureMap_TileBg",
+        "map art background should use the shared tiled world map atlas"
+    );
+}
+
 // ============================================================================
 // Zone text functions
 // ============================================================================

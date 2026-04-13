@@ -397,9 +397,50 @@ fn create_child_frames(
     for child in &elements {
         create_single_child_frame(env, child, name, timing)?;
     }
-    // ScrollChild children are parented to the ScrollFrame just like regular children
+    // ScrollChild children are parented to the ScrollFrame just like regular children,
+    // but the first ScrollChild element also becomes the ScrollFrame's scroll child.
     if let Some(scroll_child) = frame.scroll_child() {
-        create_frame_elements(env, &scroll_child.children, name, timing)?;
+        create_scroll_child_elements(env, &scroll_child.children, name, timing)?;
+    }
+    Ok(())
+}
+
+fn create_scroll_child_elements(
+    env: &LoaderEnv<'_>,
+    elements: &[crate::xml::FrameElement],
+    parent_name: &str,
+    timing: &mut LoadTiming,
+) -> Result<(), LoadError> {
+    let mut registered_scroll_child = false;
+    for child in elements {
+        let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
+            Some(triple) => triple,
+            None => continue,
+        };
+        let child_name = create_frame_from_xml(
+            env,
+            child_frame,
+            child_type,
+            Some(parent_name),
+            intrinsic,
+            timing,
+        )?;
+
+        if let (Some(actual_child_name), Some(parent_key)) =
+            (child_name.as_deref(), &child_frame.parent_key)
+        {
+            let fns = precompiled::get(env.lua());
+            fns.assign_parent_key
+                .call::<()>((parent_name, parent_key.as_str(), actual_child_name))
+                .ok();
+        }
+
+        if !registered_scroll_child {
+            if let Some(actual_child_name) = child_name.as_deref() {
+                register_scroll_child(env, parent_name, actual_child_name);
+                registered_scroll_child = true;
+            }
+        }
     }
     Ok(())
 }
@@ -432,37 +473,17 @@ fn create_single_child_frame(
     Ok(())
 }
 
-/// Create frames from a list of FrameElement, assigning parentKey references.
-fn create_frame_elements(
-    env: &LoaderEnv<'_>,
-    elements: &[crate::xml::FrameElement],
-    parent_name: &str,
-    timing: &mut LoadTiming,
-) -> Result<(), LoadError> {
-    for child in elements {
-        let (child_frame, child_type, intrinsic) = match frame_element_to_type(child) {
-            Some(triple) => triple,
-            None => continue,
-        };
-        let child_name = create_frame_from_xml(
-            env,
-            child_frame,
-            child_type,
-            Some(parent_name),
-            intrinsic,
-            timing,
-        )?;
-
-        // Assign parentKey so the parent can reference the child.
-        // The Lua assignment triggers __newindex which syncs to Rust children_keys.
-        if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
-            let fns = precompiled::get(env.lua());
-            fns.assign_parent_key
-                .call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str()))
-                .ok();
-        }
-    }
-    Ok(())
+fn register_scroll_child(env: &LoaderEnv<'_>, parent_name: &str, child_name: &str) {
+    let mut state = env.state().borrow_mut();
+    let Some(parent_id) = state.widgets.get_id_by_name(parent_name) else {
+        return;
+    };
+    let Some(child_id) = state.widgets.get_id_by_name(child_name) else {
+        return;
+    };
+    crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(
+        &mut state, parent_id, child_id, false,
+    );
 }
 
 /// Apply the secure mixin transformation to the named mixin tables.

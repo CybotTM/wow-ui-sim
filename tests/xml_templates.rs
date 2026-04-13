@@ -150,6 +150,47 @@ fn test_create_frame_from_xml_basic() {
 }
 
 #[test]
+fn test_create_scrollframe_from_xml_registers_scroll_child() {
+    clear_templates();
+    let env = WowLuaEnv::new().unwrap();
+    let ui = parse_xml(
+        r#"<Ui><ScrollFrame name="XmlScrollFrame" parent="UIParent">
+        <Size x="200" y="100"/>
+        <Anchors><Anchor point="CENTER"/></Anchors>
+        <ScrollChild>
+            <Frame parentKey="Child">
+                <Size x="320" y="180"/>
+                <Anchors><Anchor point="TOPLEFT"/></Anchors>
+            </Frame>
+        </ScrollChild>
+    </ScrollFrame></Ui>"#,
+    )
+    .unwrap();
+    match &ui.elements[0] {
+        XmlElement::ScrollFrame(f) => {
+            create_frame_from_xml(
+                &env.loader_env(),
+                f,
+                "ScrollFrame",
+                None,
+                None,
+                &mut LoadTiming::default(),
+            )
+            .unwrap();
+        }
+        _ => panic!("Expected ScrollFrame element"),
+    }
+
+    let matches_child: bool = env
+        .eval("return XmlScrollFrame:GetScrollChild() == XmlScrollFrame.Child")
+        .unwrap();
+    assert!(
+        matches_child,
+        "XML ScrollChild should be registered as the ScrollFrame's scroll child"
+    );
+}
+
+#[test]
 fn test_create_frame_from_xml_hidden_starts_hidden() {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();

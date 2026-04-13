@@ -129,6 +129,77 @@ fn diff_bounds(
     found.then_some((min_x, min_y, max_x, max_y))
 }
 
+fn diff_pixels_in_rect(
+    before: &RgbaImage,
+    after: &RgbaImage,
+    rect: (u32, u32, u32, u32),
+    per_channel_tolerance: u8,
+) -> Vec<(u32, u32, [u8; 4], [u8; 4])> {
+    let mut diffs = Vec::new();
+    let max_x = (rect.0 + rect.2).min(before.width());
+    let max_y = (rect.1 + rect.3).min(before.height());
+    for y in rect.1..max_y {
+        for x in rect.0..max_x {
+            let lhs = before.get_pixel(x, y).0;
+            let rhs = after.get_pixel(x, y).0;
+            let differs =
+                (0..4).any(|channel| lhs[channel].abs_diff(rhs[channel]) > per_channel_tolerance);
+            if differs {
+                diffs.push((x, y, lhs, rhs));
+            }
+        }
+    }
+    diffs
+}
+
+fn quad_bounds_from_vertices(verts: &[wow_ui_sim::render::QuadVertex]) -> (f32, f32, f32, f32) {
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    for vert in verts {
+        min_x = min_x.min(vert.position[0]);
+        min_y = min_y.min(vert.position[1]);
+        max_x = max_x.max(vert.position[0]);
+        max_y = max_y.max(vert.position[1]);
+    }
+    (min_x, min_y, max_x, max_y)
+}
+
+fn quad_bounds(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+) -> (f32, f32, f32, f32) {
+    let start = request.vertex_start as usize;
+    let end = start + request.vertex_count as usize;
+    quad_bounds_from_vertices(&batch.vertices[start..end])
+}
+
+fn request_overlaps_rect(
+    batch: &wow_ui_sim::render::QuadBatch,
+    request: &wow_ui_sim::render::TextureRequest,
+    rect: (f32, f32, f32, f32),
+) -> bool {
+    let bounds = quad_bounds(batch, request);
+    let rect_right = rect.0 + rect.2;
+    let rect_bottom = rect.1 + rect.3;
+    bounds.0 < rect_right && bounds.2 > rect.0 && bounds.1 < rect_bottom && bounds.3 > rect.1
+}
+
+fn vertex_range_bounds(
+    batch: &wow_ui_sim::render::QuadBatch,
+    vertex_start: usize,
+    vertex_count: usize,
+) -> (f32, f32, f32, f32) {
+    quad_bounds_from_vertices(&batch.vertices[vertex_start..vertex_start + vertex_count])
+}
+
+fn bounds_overlap_rect(bounds: (f32, f32, f32, f32), rect: (f32, f32, f32, f32)) -> bool {
+    let rect_right = rect.0 + rect.2;
+    let rect_bottom = rect.1 + rect.3;
+    bounds.0 < rect_right && bounds.2 > rect.0 && bounds.1 < rect_bottom && bounds.3 > rect.1
+}
+
 fn request_path_for_frame_texture(
     texture: &str,
     atlas_tex_coords: Option<(f32, f32, f32, f32)>,
@@ -330,6 +401,77 @@ fn open_world_map(env: &WowLuaEnv) {
         .expect("failed to toggle world map after startup");
     wow_ui_sim::startup::process_pending_timers(env);
     wow_ui_sim::startup::fire_one_on_update_tick(env);
+}
+
+#[test]
+fn opening_world_map_does_not_darken_the_strip_above_the_panel() {
+    let env = env_with_isolated_world_map_ui();
+
+    let baseline_batch = build_screenshot_like_batch(&env, 1024, 768, None);
+    let mut baseline_mgr = make_texture_manager().expect("texture directories should exist");
+    let baseline_render = render_to_image(&baseline_batch, &mut baseline_mgr, 1024, 768, None);
+
+    open_world_map(&env);
+
+    let world_map_batch = build_screenshot_like_batch(&env, 1024, 768, None);
+    let mut world_map_mgr = make_texture_manager().expect("texture directories should exist");
+    let world_map_render = render_to_image(&world_map_batch, &mut world_map_mgr, 1024, 768, None);
+
+    let strip_rect = (80, 0, 820, 80);
+    let diffs = diff_pixels_in_rect(&baseline_render, &world_map_render, strip_rect, 8);
+
+    let texture_matches: Vec<_> = world_map_batch
+        .texture_requests
+        .iter()
+        .filter(|request| {
+            request_overlaps_rect(
+                &world_map_batch,
+                request,
+                (
+                    strip_rect.0 as f32,
+                    strip_rect.1 as f32,
+                    strip_rect.2 as f32,
+                    strip_rect.3 as f32,
+                ),
+            )
+        })
+        .map(|request| {
+            (
+                request.path.as_str(),
+                quad_bounds(&world_map_batch, request),
+            )
+        })
+        .collect();
+
+    let solid_matches: Vec<_> = world_map_batch
+        .vertices
+        .chunks_exact(4)
+        .enumerate()
+        .filter_map(|(quad_idx, verts)| {
+            if verts[0].tex_index != -1 {
+                return None;
+            }
+            let vertex_start = quad_idx * 4;
+            let bounds = vertex_range_bounds(&world_map_batch, vertex_start, 4);
+            bounds_overlap_rect(
+                bounds,
+                (
+                    strip_rect.0 as f32,
+                    strip_rect.1 as f32,
+                    strip_rect.2 as f32,
+                    strip_rect.3 as f32,
+                ),
+            )
+            .then_some((quad_idx, bounds, verts[0].color, verts[0].flags))
+        })
+        .collect();
+
+    assert!(
+        diffs.is_empty(),
+        "world map should not change the strip above its panel; diff_count={} first_diff={:?} textures={texture_matches:#?} solids={solid_matches:#?}",
+        diffs.len(),
+        diffs.first()
+    );
 }
 
 #[test]

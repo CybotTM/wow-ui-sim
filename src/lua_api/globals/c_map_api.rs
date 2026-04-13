@@ -93,6 +93,10 @@ fn register_map_art_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
         "GetMapArtLayerTextures",
         lua.create_function(get_map_art_layer_textures)?,
     )?;
+    t.set(
+        "GetMapArtBackgroundAtlas",
+        lua.create_function(get_map_art_background_atlas)?,
+    )?;
     t.set("GetMapArtID", lua.create_function(get_map_art_id)?)?;
     t.set(
         "MapHasArt",
@@ -217,6 +221,13 @@ fn get_map_art_id(_lua: &Lua, map_id: i32) -> Result<i32> {
         Some(info) => Ok(info.art_id as i32),
         None => Ok(0),
     }
+}
+
+fn get_map_art_background_atlas(lua: &Lua, map_id: i32) -> Result<Value> {
+    if crate::map_art::get_map_art(map_id as u32).is_some() {
+        return Ok(Value::String(lua.create_string("AdventureMap_TileBg")?));
+    }
+    Ok(Value::String(lua.create_string("")?))
 }
 
 fn create_player_map_position(lua: &Lua, (_map_id, _unit): (i32, String)) -> Result<Value> {

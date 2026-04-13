@@ -39,7 +39,7 @@ mod widget_message_frame_scroll;
 mod widget_misc;
 mod widget_model;
 mod widget_player_model;
-mod widget_scroll;
+pub(crate) mod widget_scroll;
 mod widget_slider;
 mod widget_statusbar;
 mod widget_tooltip;

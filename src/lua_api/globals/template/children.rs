@@ -24,7 +24,7 @@ pub(super) fn create_child_frames(
         let Some((child_frame, child_type, intrinsic)) = frame_element_type(child) else {
             continue;
         };
-        create_child_frame_from_template(
+        let _ = create_child_frame_from_template(
             lua,
             state,
             child_frame,
@@ -44,7 +44,7 @@ fn create_child_frame_from_template(
     intrinsic: Option<&str>,
     parent_name: &str,
     subst_parent: &str,
-) {
+) -> Option<String> {
     let is_named = frame.name.is_some();
     let child_name = frame
         .name
@@ -63,7 +63,7 @@ fn create_child_frame_from_template(
             child_name, widget_type, parent_name, error
         );
         pop_suppress(lua);
-        return;
+        return None;
     }
 
     if let Some(intrinsic_name) = intrinsic {
@@ -92,6 +92,7 @@ fn create_child_frame_from_template(
 
     pop_suppress(lua);
     defer_child_onload(lua, &child_name);
+    Some(child_name)
 }
 
 fn build_create_child_code(
@@ -155,23 +156,17 @@ fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_nam
 }
 
 /// Clear all template-set anchors and re-apply inline anchors from the child XML.
-fn reapply_inline_anchors(
-    state: &Rc<RefCell<SimState>>,
-    frame: &FrameXml,
-    child_name: &str,
-) {
+fn reapply_inline_anchors(state: &Rc<RefCell<SimState>>, frame: &FrameXml, child_name: &str) {
     let Some(anchors) = frame.anchors() else {
         return;
     };
     let frame_id = {
         let s = state.borrow();
-        s.widgets
-            .get_id_by_name(child_name)
-            .or_else(|| {
-                child_name
-                    .strip_prefix("__frame_")
-                    .and_then(|suffix| suffix.parse::<u64>().ok())
-            })
+        s.widgets.get_id_by_name(child_name).or_else(|| {
+            child_name
+                .strip_prefix("__frame_")
+                .and_then(|suffix| suffix.parse::<u64>().ok())
+        })
     };
     let Some(fid) = frame_id else { return };
     {
@@ -227,11 +222,12 @@ pub(super) fn create_scroll_child_frames(
     parent_name: &str,
     subst_parent: &str,
 ) {
+    let mut registered_scroll_child = false;
     for child in children {
         let Some((child_frame, child_type, intrinsic)) = frame_element_type(child) else {
             continue;
         };
-        create_child_frame_from_template(
+        let Some(child_name) = create_child_frame_from_template(
             lua,
             state,
             child_frame,
@@ -239,8 +235,27 @@ pub(super) fn create_scroll_child_frames(
             intrinsic,
             parent_name,
             subst_parent,
-        );
+        ) else {
+            continue;
+        };
+        if !registered_scroll_child {
+            register_scroll_child(state, parent_name, &child_name);
+            registered_scroll_child = true;
+        }
     }
+}
+
+fn register_scroll_child(state: &Rc<RefCell<SimState>>, parent_name: &str, child_name: &str) {
+    let mut sim = state.borrow_mut();
+    let Some(parent_id) = sim.widgets.get_id_by_name(parent_name) else {
+        return;
+    };
+    let Some(child_id) = sim.widgets.get_id_by_name(child_name) else {
+        return;
+    };
+    crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(
+        &mut sim, parent_id, child_id, false,
+    );
 }
 
 fn apply_inline_frame_content(

@@ -309,6 +309,23 @@ fn set_interpolate_scroll_fallback(
     fields.set("canInterpolateScroll", enabled)
 }
 
+pub(crate) fn assign_scroll_child(
+    state: &mut crate::lua_api::SimState,
+    parent_id: u64,
+    child_id: u64,
+    should_reparent: bool,
+) {
+    if let Some(frame) = state.widgets.get_mut_visual(parent_id) {
+        frame.scroll_child_id = Some(child_id);
+        frame.scroll_child_rect_size = None;
+    }
+    if should_reparent {
+        reparent_widget(&mut state.widgets, child_id, Some(parent_id));
+    }
+    state.visible_on_update_cache = None;
+    state.invalidate_layout(child_id);
+}
+
 fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScrollChild", |lua, this, child: Value| {
         let id = this.0;
@@ -328,13 +345,7 @@ fn add_scrollframe_child_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &m
         };
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.scroll_child_id = Some(child_id);
-            frame.scroll_child_rect_size = None;
-        }
-        reparent_widget(&mut state.widgets, child_id, Some(id));
-        state.visible_on_update_cache = None;
-        state.invalidate_layout(child_id);
+        assign_scroll_child(&mut state, id, child_id, true);
         Ok(())
     });
 
