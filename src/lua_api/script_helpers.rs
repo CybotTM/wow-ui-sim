@@ -13,6 +13,8 @@ use std::rc::Rc;
 const SCRIPTS_KEY: &str = "__scripts";
 const FRAME_FIELDS_KEY: &str = "__frame_fields";
 const FRAME_UNIT_EVENT_CALLBACKS_KEY: &str = "__frame_unit_event_callbacks";
+const ON_UPDATE_SCRIPTS_KEY: &str = "__on_update_scripts";
+const ON_POST_UPDATE_SCRIPTS_KEY: &str = "__on_post_update_scripts";
 
 /// Get the __scripts table from the Lua registry. Returns None if not yet created.
 pub fn get_scripts_table(lua: &Lua) -> Option<mlua::Table> {
@@ -40,7 +42,8 @@ pub fn get_script(lua: &Lua, widget_id: u64, handler_name: &str) -> Option<mlua:
 pub fn set_script(lua: &Lua, widget_id: u64, handler_name: &str, func: mlua::Function) {
     let table = get_or_create_scripts_table(lua);
     let key = format!("{}_{}", widget_id, handler_name);
-    table.set(key.as_str(), func).ok();
+    table.set(key.as_str(), func.clone()).ok();
+    sync_on_update_script_cache(lua, widget_id, handler_name, Value::Function(func));
 }
 
 /// Remove a script handler for a given frame + handler name.
@@ -49,6 +52,42 @@ pub fn remove_script(lua: &Lua, widget_id: u64, handler_name: &str) {
         let key = format!("{}_{}", widget_id, handler_name);
         table.set(key.as_str(), Value::Nil).ok();
     }
+    sync_on_update_script_cache(lua, widget_id, handler_name, Value::Nil);
+}
+
+pub fn clear_on_update_script_caches(lua: &Lua, widget_id: u64) {
+    clear_registry_hot_script(lua, ON_UPDATE_SCRIPTS_KEY, widget_id);
+    clear_registry_hot_script(lua, ON_POST_UPDATE_SCRIPTS_KEY, widget_id);
+}
+
+fn sync_on_update_script_cache(lua: &Lua, widget_id: u64, handler_name: &str, value: Value) {
+    let Some(cache_key) = on_update_script_cache_key(handler_name) else {
+        return;
+    };
+    let table = get_or_create_registry_table(lua, cache_key);
+    table.raw_set(widget_id as i64, value).ok();
+}
+
+fn clear_registry_hot_script(lua: &Lua, key: &str, widget_id: u64) {
+    if let Ok(table) = lua.named_registry_value::<mlua::Table>(key) {
+        table.raw_set(widget_id as i64, Value::Nil).ok();
+    }
+}
+
+fn on_update_script_cache_key(handler_name: &str) -> Option<&'static str> {
+    match handler_name {
+        "OnUpdate" => Some(ON_UPDATE_SCRIPTS_KEY),
+        "OnPostUpdate" => Some(ON_POST_UPDATE_SCRIPTS_KEY),
+        _ => None,
+    }
+}
+
+fn get_or_create_registry_table(lua: &Lua, key: &str) -> mlua::Table {
+    lua.named_registry_value(key).unwrap_or_else(|_| {
+        let table = lua.create_table().unwrap();
+        lua.set_named_registry_value(key, table.clone()).unwrap();
+        table
+    })
 }
 
 // ── __frame_fields table ─────────────────────────────────────────────

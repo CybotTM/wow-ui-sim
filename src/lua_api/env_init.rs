@@ -171,8 +171,11 @@ fn init_registry_tables(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Resul
     lua.set_named_registry_value("__event_all", lua.create_table()?)?;
     // Persistent tables for OnUpdate profiler attribution.
     lua.set_named_registry_value("__frame_owners", lua.create_table()?)?;
+    lua.set_named_registry_value("__frame_refs", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_timing", lua.create_table()?)?;
     lua.set_named_registry_value("__addon_names", lua.create_table()?)?;
+    lua.set_named_registry_value("__on_update_scripts", lua.create_table()?)?;
+    lua.set_named_registry_value("__on_post_update_scripts", lua.create_table()?)?;
     let tainted_loadstring_functions = lua.create_table()?;
     let weak_meta = lua.create_table()?;
     weak_meta.set("__mode", "k")?;

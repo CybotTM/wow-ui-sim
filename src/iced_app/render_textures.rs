@@ -125,34 +125,12 @@ impl App {
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let mut ordered_paths = Vec::new();
-        let mut seen = HashSet::new();
-        for request in quads
-            .texture_requests
-            .iter()
-            .chain(&quads.mask_texture_requests)
-        {
-            let path = request.path.as_str();
-            if seen.insert(path) {
-                ordered_paths.push(path);
-            }
-        }
-        sort_texture_request_paths(&mut ordered_paths);
+        let pending_paths = unresolved_texture_request_paths(quads, &uploaded, &failed);
 
-        for path in ordered_paths {
-            if uploaded.contains(path) || failed.contains(path) {
-                continue;
-            }
-            let already_queued = textures.iter().any(|t: &GpuTextureData| t.path == path)
-                || bc_textures
-                    .iter()
-                    .any(|t: &GpuBcTextureData| t.path == path);
-            if already_queued {
-                continue;
-            }
-            if (!textures.is_empty() || !bc_textures.is_empty())
-                && std::time::Instant::now() >= deadline
-            {
+        for path in pending_paths {
+            let loaded_any_textures = !textures.is_empty() || !bc_textures.is_empty();
+            let deadline_reached = std::time::Instant::now() >= deadline;
+            if loaded_any_textures && deadline_reached {
                 let base = path.find("@crop:").map_or(path, |i| &path[..i]);
                 if !tex_mgr.is_cached(base) {
                     return (textures, bc_textures, true);
@@ -326,6 +304,32 @@ fn log_slow_texture_load(
     );
 }
 
+fn unresolved_texture_request_paths<'a>(
+    quads: &'a QuadBatch,
+    uploaded: &std::collections::HashSet<String>,
+    failed: &std::collections::HashSet<String>,
+) -> Vec<&'a str> {
+    let mut paths = Vec::new();
+    let mut seen = HashSet::new();
+
+    for request in quads
+        .texture_requests
+        .iter()
+        .chain(&quads.mask_texture_requests)
+    {
+        let path = request.path.as_str();
+        let is_duplicate = !seen.insert(path);
+        let already_resolved = uploaded.contains(path) || failed.contains(path);
+        if is_duplicate || already_resolved {
+            continue;
+        }
+        paths.push(path);
+    }
+
+    sort_texture_request_paths(&mut paths);
+    paths
+}
+
 pub(super) fn collect_texture_request_paths(
     dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
     overlay: &QuadBatch,
@@ -377,7 +381,7 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
 
 #[cfg(test)]
 mod tests {
-    use super::collect_texture_request_paths;
+    use super::{collect_texture_request_paths, unresolved_texture_request_paths};
     use crate::iced_app::App;
     use crate::render::{GlyphAtlas, QuadBatch, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
@@ -385,6 +389,7 @@ mod tests {
     use crate::widget::{AnchorPoint, Frame, FrameStrata, WidgetType};
     use crate::{LayoutRect, lua_api::WowLuaEnv};
     use std::cell::RefCell;
+    use std::collections::HashSet;
     use std::path::PathBuf;
     use std::rc::Rc;
     use std::sync::Arc;
@@ -446,6 +451,54 @@ mod tests {
                 r"Interface\Minimap\UI-Minimap-Background".to_string(),
                 r"Interface\WorldMap\IsleofDorn\IsleOfDorn1".to_string(),
                 r"Interface\WorldMap\IsleofDorn\IsleOfDorn2".to_string(),
+            ]
+        );
+    }
+
+    #[test]
+    fn unresolved_texture_request_paths_filters_uploaded_and_failed_requests() {
+        let mut batch = QuadBatch::new();
+        batch
+            .texture_requests
+            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
+        batch
+            .texture_requests
+            .push(request(r"Interface\Minimap\UI-Minimap-Background"));
+        batch.mask_texture_requests.push(request("uploaded-mask"));
+        batch.texture_requests.push(request("failed-path"));
+
+        let uploaded = HashSet::from(["uploaded-mask".to_string()]);
+        let failed = HashSet::from(["failed-path".to_string()]);
+
+        let paths = unresolved_texture_request_paths(&batch, &uploaded, &failed);
+        assert_eq!(
+            paths,
+            vec![
+                r"Interface\Minimap\UI-Minimap-Background",
+                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
+            ]
+        );
+    }
+
+    #[test]
+    fn unresolved_texture_request_paths_deduplicates_before_sorting() {
+        let mut batch = QuadBatch::new();
+        batch
+            .texture_requests
+            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
+        batch
+            .texture_requests
+            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
+        batch.texture_requests.push(request(
+            r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
+        ));
+
+        let paths = unresolved_texture_request_paths(&batch, &HashSet::new(), &HashSet::new());
+        assert_eq!(
+            paths,
+            vec![
+                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
+                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
             ]
         );
     }

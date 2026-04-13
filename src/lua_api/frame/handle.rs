@@ -8,6 +8,8 @@ use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+const FRAME_REF_CACHE_KEY: &str = "__frame_refs";
+
 /// Frame reference userdata. Wraps a widget ID for the Lua side.
 /// All frame methods are registered via `add_method` on this type,
 /// so mlua resolves them directly without going through `__index`.
@@ -27,21 +29,39 @@ impl mlua::UserData for FrameRef {
 
 /// Get the cached UserData Value for a frame ID.
 ///
-/// Looks up `_G["__frame_{id}"]`. If not cached, creates a new FrameRef
-/// UserData with an empty per-frame Lua table as user_value, and caches it.
+/// Looks up the numeric `__frame_refs[id]` cache first, then `_G["__frame_{id}"]`.
+/// If not cached, creates a new FrameRef UserData with an empty per-frame Lua
+/// table as user_value and caches it in both places.
 pub fn frame_ref(lua: &mlua::Lua, id: u64) -> mlua::Result<mlua::Value> {
-    let key = format!("__frame_{}", id);
-    let cached: mlua::Value = lua.globals().raw_get(key.as_str())?;
+    let frame_refs = get_or_create_frame_ref_cache(lua)?;
+    let cached: mlua::Value = frame_refs.raw_get(id as i64)?;
     if !cached.is_nil() {
         return Ok(cached);
     }
+
+    let key = format!("__frame_{}", id);
+    let global_cached: mlua::Value = lua.globals().raw_get(key.as_str())?;
+    if !global_cached.is_nil() {
+        frame_refs.raw_set(id as i64, global_cached.clone())?;
+        return Ok(global_cached);
+    }
+
     // Create and cache on demand
     let ud = lua.create_userdata(FrameRef(id))?;
     let fields = lua.create_table()?;
     ud.set_user_value(fields)?;
     let val = mlua::Value::UserData(ud);
+    frame_refs.raw_set(id as i64, val.clone())?;
     lua.globals().raw_set(key.as_str(), val.clone())?;
     Ok(val)
+}
+
+fn get_or_create_frame_ref_cache(lua: &Lua) -> mlua::Result<mlua::Table> {
+    lua.named_registry_value(FRAME_REF_CACHE_KEY).or_else(|_| {
+        let cache = lua.create_table()?;
+        lua.set_named_registry_value(FRAME_REF_CACHE_KEY, cache.clone())?;
+        Ok(cache)
+    })
 }
 
 /// Retrieve the shared SimState from Lua app_data.

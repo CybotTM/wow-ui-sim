@@ -171,6 +171,7 @@ fn add_clear_scripts_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M)
         if let Ok(table) = lua.named_registry_value::<mlua::Table>("__script_hooks") {
             remove_keys_with_prefix(&table, &prefix);
         }
+        crate::lua_api::script_helpers::clear_on_update_script_caches(lua, id);
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         state.scripts.remove_all(id);

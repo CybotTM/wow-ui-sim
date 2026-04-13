@@ -5,6 +5,20 @@ use std::collections::HashSet;
 
 use super::state::SimState;
 
+fn should_trace_strata_invalidations(start_time: &std::time::Instant) -> bool {
+    if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_none() {
+        return false;
+    }
+
+    let after_ms = std::env::var("WOW_SIM_TRACE_STRATA_INVALIDATIONS_AFTER_MS")
+        .ok()
+        .and_then(|value| value.parse::<u64>().ok());
+    match after_ms {
+        Some(ms) => start_time.elapsed() >= std::time::Duration::from_millis(ms),
+        None => true,
+    }
+}
+
 fn uses_parent_alpha_fallback(frame: &crate::widget::Frame) -> bool {
     matches!(
         frame.parent_key.as_deref(),
@@ -549,7 +563,7 @@ impl SimState {
     /// Used after show/reparent operations that change DFS traversal order.
     #[track_caller]
     pub(crate) fn invalidate_strata_buckets(&mut self) {
-        if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_some() {
+        if should_trace_strata_invalidations(&self.start_time) {
             let caller = std::panic::Location::caller();
             eprintln!(
                 "{} [strata-invalid] {}:{}",

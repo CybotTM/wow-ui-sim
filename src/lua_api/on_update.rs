@@ -2,8 +2,8 @@
 //!
 //! Passes all visible frame IDs to a single Lua call per suffix, avoiding
 //! per-handler FFI round-trips and Lua table allocations. A Rust callback
-//! (`__set_executing_addon`) keeps `executing_addon_index` in sync so that
-//! CreateFrame / C_Timer calls during handlers get correct addon ownership.
+//! pair keeps `executing_addon_index` and dirty-source attribution in sync so
+//! that CreateFrame / C_Timer calls during handlers get correct addon ownership.
 
 use super::state::SimState;
 use mlua::Lua;
@@ -14,34 +14,36 @@ use std::time::Instant;
 /// OnUpdate dispatch loop — pure Lua, called once per suffix with all IDs.
 const ON_UPDATE_DISPATCH_LUA: &str = r#"
     local reg = debug.getregistry()
-    local scripts = reg.__scripts
+    local on_update_scripts = reg.__on_update_scripts
+    local on_post_update_scripts = reg.__on_post_update_scripts
+    local frames = reg.__frame_refs
     local owners = reg.__frame_owners
     local timing = reg.__addon_timing
     local addon_names = reg.__addon_names
     local setobjecttaint = debug.setobjecttaint
-    local set_addon = reg.__set_executing_addon
-    local set_dirty_source = reg.__set_render_dirty_source
+    local enter_context = reg.__enter_on_update_context
+    local leave_context = reg.__leave_on_update_context
     local G = _G
     local stderr = io.stderr
     return function(ids, elapsed, suffix)
+        local is_post_update = suffix == "_OnPostUpdate"
+        local scripts = is_post_update and on_post_update_scripts or on_update_scripts
         local profile = debugprofilestop
         local handler = geterrorhandler()
         for i = 1, #ids do
             local id = ids[i]
-            local func = scripts[id .. suffix]
+            local func = scripts[id]
             if func then
-                local frame = rawget(G, "__frame_" .. id)
+                local frame = frames[id]
                 if frame then
                     local owner = owners[id]
                     local taint = owner and addon_names[owner]
                     if taint then setobjecttaint(func, taint) end
-                    set_addon(owner)
-                    set_dirty_source(id, string.sub(suffix, 2))
+                    enter_context(id, owner, is_post_update)
                     local t0 = profile()
                     local ok, err = pcall(func, frame, elapsed)
                     local dt = profile() - t0
-                    set_dirty_source(nil, nil)
-                    set_addon(nil)
+                    leave_context()
                     if dt > 5 then
                         local n = frame.GetDebugName and frame:GetDebugName() or tostring(id)
                         local ts = (G.GetTimePreciseSec and G.GetTimePreciseSec())
@@ -63,28 +65,35 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
 pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
     super::script_helpers::get_or_create_scripts_table(lua);
 
-    // Rust callback: Lua calls this to set executing_addon_index per handler.
-    let st = Rc::clone(state);
-    let set_addon = lua.create_function(move |_, idx: Option<u16>| {
-        st.borrow_mut().executing_addon_index = idx;
-        Ok(())
-    })?;
-    lua.set_named_registry_value("__set_executing_addon", set_addon)?;
-
-    let dirty_state = Rc::clone(state);
-    let set_dirty_source = lua.create_function(
-        move |_, (frame_id, method): (Option<u64>, Option<String>)| {
-            let source = match (frame_id, method) {
-                (Some(frame_id), Some(method)) => {
-                    Some(crate::widget::RenderDirtySource { frame_id, method })
-                }
-                _ => None,
+    let enter_state = Rc::clone(state);
+    let enter_context = lua.create_function(
+        move |_, (frame_id, addon_idx, is_post_update): (u64, Option<u16>, bool)| {
+            let method = if is_post_update {
+                "OnPostUpdate"
+            } else {
+                "OnUpdate"
             };
-            dirty_state.borrow().widgets.set_render_dirty_source(source);
+            let mut state = enter_state.borrow_mut();
+            state.executing_addon_index = addon_idx;
+            state
+                .widgets
+                .set_render_dirty_source(Some(crate::widget::RenderDirtySource {
+                    frame_id,
+                    method,
+                }));
             Ok(())
         },
     )?;
-    lua.set_named_registry_value("__set_render_dirty_source", set_dirty_source)?;
+    lua.set_named_registry_value("__enter_on_update_context", enter_context)?;
+
+    let leave_state = Rc::clone(state);
+    let leave_context = lua.create_function(move |_, ()| {
+        let mut state = leave_state.borrow_mut();
+        state.executing_addon_index = None;
+        state.widgets.set_render_dirty_source(None);
+        Ok(())
+    })?;
+    lua.set_named_registry_value("__leave_on_update_context", leave_context)?;
 
     let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;
     let dispatch = factory.call::<mlua::Function>(())?;
@@ -92,6 +101,7 @@ pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result
 
     // Pre-allocate a reusable table for passing frame IDs.
     lua.set_named_registry_value("__dispatch_ids", lua.create_table()?)?;
+    lua.set_named_registry_value("__dispatch_ids_len", 0usize)?;
 
     Ok(())
 }
@@ -112,11 +122,14 @@ pub(crate) fn dispatch(lua: &Lua, frame_ids: &[u64], elapsed: f64, suffix: &str)
     }
     // Trim leftover entries from a previous longer batch.
     let new_len = frame_ids.len();
-    let mut i = new_len + 1;
-    while ids_table.get::<Option<i64>>(i).unwrap_or(None).is_some() {
+    let previous_len = lua
+        .named_registry_value::<usize>("__dispatch_ids_len")
+        .unwrap_or(0);
+    for i in (new_len + 1)..=previous_len {
         ids_table.set(i, mlua::Nil).unwrap();
-        i += 1;
     }
+    lua.set_named_registry_value("__dispatch_ids_len", new_len)
+        .unwrap();
 
     if let Err(e) = dispatch.call::<()>((&ids_table, elapsed, suffix)) {
         eprintln!("[OnUpdate] dispatch error: {e}");
@@ -165,23 +178,62 @@ fn get_visible_on_update_frames(state: &Rc<RefCell<SimState>>) -> Vec<u64> {
 #[cfg(test)]
 mod tests {
     use crate::lua_api::WowLuaEnv;
-    use crate::widget::RenderDirtySource;
+    use crate::widget::{RenderDirtyBatch, RenderDirtySource};
     use std::collections::HashSet;
 
     #[test]
     fn on_update_dirty_batch_records_handler_source_frame() {
+        let (driver_id, target_id, batch) = run_dirty_source_handler("OnUpdate");
+        let sources = batch.sources.get(&target_id).cloned().unwrap_or_default();
+        assert!(
+            batch
+                .frame_ids
+                .as_ref()
+                .is_some_and(|ids| ids.contains(&target_id)),
+            "dirty target should be included in the dirty batch"
+        );
+        assert_eq!(
+            sources,
+            HashSet::from([RenderDirtySource {
+                frame_id: driver_id,
+                method: "OnUpdate",
+            }])
+        );
+    }
+
+    #[test]
+    fn on_post_update_dirty_batch_records_handler_source_frame() {
+        let (driver_id, target_id, batch) = run_dirty_source_handler("OnPostUpdate");
+        let sources = batch.sources.get(&target_id).cloned().unwrap_or_default();
+        assert!(
+            batch
+                .frame_ids
+                .as_ref()
+                .is_some_and(|ids| ids.contains(&target_id)),
+            "dirty target should be included in the dirty batch"
+        );
+        assert_eq!(
+            sources,
+            HashSet::from([RenderDirtySource {
+                frame_id: driver_id,
+                method: "OnPostUpdate",
+            }])
+        );
+    }
+
+    fn run_dirty_source_handler(handler_name: &str) -> (u64, u64, RenderDirtyBatch) {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        env.exec(
+        env.exec(&format!(
             r#"
             DirtyDriver = CreateFrame("Frame", "DirtyDriver", UIParent)
             DirtyTarget = CreateFrame("Frame", "DirtyTarget", UIParent)
             DirtyTarget:SetSize(10, 10)
-            DirtyDriver:SetScript("OnUpdate", function(self, elapsed)
+            DirtyDriver:SetScript("{handler_name}", function(self, elapsed)
                 DirtyTarget:SetWidth(25)
-                self:SetScript("OnUpdate", nil)
+                self:SetScript("{handler_name}", nil)
             end)
-            "#,
-        )
+            "#
+        ))
         .unwrap();
 
         let (driver_id, target_id) = {
@@ -200,21 +252,6 @@ mod tests {
         env.fire_on_update(0.05).unwrap();
 
         let batch = env.state().borrow().widgets.take_render_dirty_batch();
-        let sources = batch.sources.get(&target_id).cloned().unwrap_or_default();
-
-        assert!(
-            batch
-                .frame_ids
-                .as_ref()
-                .is_some_and(|ids| ids.contains(&target_id)),
-            "dirty target should be included in the dirty batch"
-        );
-        assert_eq!(
-            sources,
-            HashSet::from([RenderDirtySource {
-                frame_id: driver_id,
-                method: "OnUpdate".to_string(),
-            }])
-        );
+        (driver_id, target_id, batch)
     }
 }

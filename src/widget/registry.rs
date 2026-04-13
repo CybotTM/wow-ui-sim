@@ -7,7 +7,7 @@ use std::collections::{HashMap, HashSet, VecDeque};
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RenderDirtySource {
     pub frame_id: u64,
-    pub method: String,
+    pub method: &'static str,
 }
 
 #[derive(Debug, Default)]
@@ -649,7 +649,7 @@ fn hash_set_u64_bytes(values: &HashSet<u64>) -> usize {
 }
 
 fn dirty_source_bytes(value: &Option<RenderDirtySource>) -> usize {
-    value.as_ref().map_or(0, |source| source.method.capacity())
+    usize::from(value.is_some()) * std::mem::size_of::<RenderDirtySource>()
 }
 
 fn render_dirty_sources_bytes(values: &HashMap<u64, HashSet<RenderDirtySource>>) -> usize {
@@ -662,10 +662,6 @@ fn render_dirty_sources_bytes(values: &HashMap<u64, HashSet<RenderDirtySource>>)
 
 fn render_dirty_source_set_bytes(values: &HashSet<RenderDirtySource>) -> usize {
     values.capacity() * std::mem::size_of::<RenderDirtySource>()
-        + values
-            .iter()
-            .map(|source| source.method.capacity())
-            .sum::<usize>()
 }
 
 fn hash_map_u64_hash_set_u64_bytes(values: &HashMap<u64, HashSet<u64>>) -> usize {
