@@ -538,11 +538,7 @@ impl App {
 
     fn current_texture_request_batches(
         &self,
-        size: Size,
     ) -> [Option<Arc<QuadBatch>>; FrameStrata::COUNT] {
-        if self.strata_dirty.get() != 0 {
-            return self.get_or_rebuild_quads(size).0;
-        }
         let strata = self.cached_strata_quads.borrow();
         std::array::from_fn(|i| strata[i].clone())
     }
@@ -561,8 +557,7 @@ impl App {
     }
 
     pub(crate) fn preload_current_render_requests(&self, budget: Option<std::time::Duration>) {
-        let size = self.screen_size.get();
-        let dirty_strata = self.current_texture_request_batches(size);
+        let dirty_strata = self.current_texture_request_batches();
         let overlay = self.build_overlay();
         let paths = textures::collect_texture_request_paths(&dirty_strata, &overlay);
 
