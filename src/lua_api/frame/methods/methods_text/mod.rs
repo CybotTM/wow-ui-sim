@@ -107,8 +107,17 @@ fn get_text_for_widget(
 
 /// SetFormattedText implementation.
 fn set_formatted_text_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
-    let string_table: mlua::Table = lua.globals().get("string")?;
-    let format_func: mlua::Function = string_table.get("format")?;
+    // Cache `string.format` in the registry to skip two table lookups per call.
+    // Hot because AuraButton:UpdateDuration calls SetFormattedText every tick.
+    let format_func: mlua::Function =
+        if let Ok(f) = lua.named_registry_value::<mlua::Function>("__string_format_cache") {
+            f
+        } else {
+            let string_table: mlua::Table = lua.globals().get("string")?;
+            let f: mlua::Function = string_table.get("format")?;
+            lua.set_named_registry_value("__string_format_cache", f.clone())?;
+            f
+        };
     if let Ok(Value::String(result)) = format_func.call::<Value>(args) {
         handle_set_text(
             lua,
