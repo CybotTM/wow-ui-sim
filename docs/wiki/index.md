@@ -59,3 +59,4 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
+| [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw share BC cache, use smaller budgets, and keep the fast tick alive until GPU uploads finish |

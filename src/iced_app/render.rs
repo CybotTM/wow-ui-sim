@@ -421,6 +421,17 @@ fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
 use crate::widget::FrameStrata;
 use std::sync::Arc;
 
+fn preload_texture_request_source(tex_mgr: &mut crate::texture::TextureManager, path: &str) {
+    if path.contains("@crop:") {
+        let _ = load_texture_or_crop(tex_mgr, path);
+        return;
+    }
+    if crate::render::shader::atlas::is_bc_supported() && tex_mgr.load_bc(path).is_some() {
+        return;
+    }
+    let _ = tex_mgr.load(path);
+}
+
 fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
     if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
         eprintln!(
@@ -512,17 +523,19 @@ impl App {
                 remaining = true;
                 break;
             }
-            if budget.is_some() {
-                let base = path.find("@crop:").map_or(path.as_str(), |i| &path[..i]);
-                if !tex_mgr.is_cached(base) {
-                    remaining = true;
-                    continue;
-                }
-            }
-            let _ = load_texture_or_crop(&mut tex_mgr, path);
+            preload_texture_request_source(&mut tex_mgr, path);
         }
 
-        self.textures_pending.set(remaining);
+        let gpu_backlog = self.has_pending_gpu_texture_requests(&paths);
+        self.textures_pending.set(remaining || gpu_backlog);
+    }
+
+    fn has_pending_gpu_texture_requests(&self, paths: &[String]) -> bool {
+        let uploaded = self.gpu_uploaded_textures.borrow();
+        let failed = self.gpu_failed_textures.borrow();
+        paths
+            .iter()
+            .any(|path| !uploaded.contains(path) && !failed.contains(path))
     }
 
     fn update_frame_time_avg(&self, elapsed: std::time::Duration) {
@@ -691,3 +704,6 @@ impl App {
         }
     }
 }
+
+#[cfg(test)]
+mod pending_texture_tests;
