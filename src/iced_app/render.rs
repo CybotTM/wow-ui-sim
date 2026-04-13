@@ -10,7 +10,9 @@ use crate::render::FrameQuadSnapshot;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
 use crate::render::texture::UI_SCALE;
-use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
+use crate::render::{
+    GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop,
+};
 use crate::widget::WidgetType;
 
 use super::Message;
@@ -100,14 +102,14 @@ impl shader::Program<Message> for &App {
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
-        let (mut textures, bc_textures, tex_dur) =
+        let (mut textures, mut bc_textures, tex_dur) =
             self.load_all_textures(&dirty_strata, &overlay);
 
         if had_textures_pending {
-            self.recover_pending_textures(&mut dirty_strata, &mut textures, &bc_textures);
+            self.recover_pending_textures(&mut dirty_strata, &mut textures, &mut bc_textures);
         }
 
-        log_slow_draw(quad_dur, tex_dur, textures.len());
+        log_slow_draw(quad_dur, tex_dur, textures.len(), bc_textures.len());
 
         self.update_frame_time_avg(start.elapsed());
 
@@ -421,22 +423,82 @@ fn snapshot_offsets(batch: &QuadBatch) -> (usize, usize, usize, usize) {
 use crate::widget::FrameStrata;
 use std::sync::Arc;
 
-fn preload_texture_request_source(tex_mgr: &mut crate::texture::TextureManager, path: &str) {
-    if path.contains("@crop:") {
-        let _ = load_texture_or_crop(tex_mgr, path);
-        return;
+type StrataBatchCache = [Option<Arc<QuadBatch>>; FrameStrata::COUNT];
+type StrataSnapshotCache = [Option<HashMap<u64, FrameQuadSnapshot>>; FrameStrata::COUNT];
+
+fn prune_irrelevant_dirty_strata(
+    dirty: u16,
+    dirty_ids: Option<&HashSet<u64>>,
+    strata_buckets: Option<&[Vec<u64>]>,
+    cached_strata: &StrataBatchCache,
+    snapshot_cache: &StrataSnapshotCache,
+) -> u16 {
+    let Some(dirty_ids) = dirty_ids else {
+        return dirty;
+    };
+    let Some(strata_buckets) = strata_buckets else {
+        return dirty;
+    };
+
+    let mut pruned = dirty;
+    for strata_idx in 0..FrameStrata::COUNT {
+        let strata_bit = 1u16 << strata_idx;
+        if dirty & strata_bit == 0 {
+            continue;
+        }
+        if strata_needs_rebuild(
+            strata_idx,
+            dirty_ids,
+            strata_buckets,
+            cached_strata,
+            snapshot_cache,
+        ) {
+            continue;
+        }
+        pruned &= !strata_bit;
     }
-    if crate::render::shader::atlas::is_bc_supported() && tex_mgr.load_bc(path).is_some() {
-        return;
-    }
-    let _ = tex_mgr.load(path);
+    pruned
 }
 
-fn log_slow_draw(quad_dur: std::time::Duration, tex_dur: std::time::Duration, tex_count: usize) {
+fn strata_needs_rebuild(
+    strata_idx: usize,
+    dirty_ids: &HashSet<u64>,
+    strata_buckets: &[Vec<u64>],
+    cached_strata: &StrataBatchCache,
+    snapshot_cache: &StrataSnapshotCache,
+) -> bool {
+    let Some(_) = cached_strata[strata_idx].as_ref() else {
+        return true;
+    };
+    let Some(snapshots) = snapshot_cache[strata_idx].as_ref() else {
+        return true;
+    };
+
+    let bucket = strata_buckets
+        .get(strata_idx)
+        .map(Vec::as_slice)
+        .unwrap_or(&[]);
+    let dirty_hits_bucket = bucket.iter().any(|id| dirty_ids.contains(id));
+    if dirty_hits_bucket {
+        return true;
+    }
+
+    dirty_ids.iter().any(|id| snapshots.contains_key(id))
+}
+
+fn log_slow_draw(
+    quad_dur: std::time::Duration,
+    tex_dur: std::time::Duration,
+    rgba_count: usize,
+    bc_count: usize,
+) {
     if quad_dur.as_millis() > 10 || tex_dur.as_millis() > 10 {
         eprintln!(
-            "{} [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} ({tex_count} new)",
-            crate::logging::global_elapsed_prefix()
+            "{} [draw] quads={quad_dur:.1?} textures={tex_dur:.1?} (new={} rgba={} bc={})",
+            crate::logging::global_elapsed_prefix(),
+            rgba_count + bc_count,
+            rgba_count,
+            bc_count,
         );
     }
 }
@@ -449,21 +511,25 @@ impl App {
         &self,
         dirty_strata: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
         textures: &mut Vec<GpuTextureData>,
-        _bc_textures: &[GpuBcTextureData],
+        bc_textures: &mut Vec<GpuBcTextureData>,
     ) {
         let cached = self.cached_strata_quads.borrow();
-        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
+        let deadline = std::time::Instant::now() + std::time::Duration::from_millis(10);
+        let mut exhausted = false;
         for i in 0..dirty_strata.len() {
             if dirty_strata[i].is_none() {
                 if let Some(batch) = &cached[i] {
-                    let (extra, _extra_bc, _) =
+                    let (extra, extra_bc, hit) =
                         self.load_new_textures_budgeted(batch, deadline);
                     textures.extend(extra);
-                    // BC textures from recovery are already tracked by the atlas
-                    // from prior frames — they only need uploading once.
+                    bc_textures.extend(extra_bc);
+                    exhausted |= hit;
                     dirty_strata[i] = Some(batch.clone());
                 }
             }
+        }
+        if exhausted {
+            self.textures_pending.set(true);
         }
     }
 
@@ -571,35 +637,53 @@ impl App {
             return (std::array::from_fn(|_| None), false);
         }
 
-        self.rebuild_dirty_strata(size, dirty);
+        let rebuilt = self.rebuild_dirty_strata(size, dirty);
         self.strata_dirty.set(0);
         // Record current size so next frame detects resize.
         *size_cache = Some((size, Arc::new(QuadBatch::new())));
 
         let strata = self.cached_strata_quads.borrow();
         let result = std::array::from_fn(|i| {
-            if dirty & (1 << i) != 0 {
+            if rebuilt & (1 << i) != 0 {
                 strata[i].clone()
             } else {
                 None
             }
         });
-        (result, true)
+        (result, rebuilt != 0)
     }
 
     /// Rebuild only the strata whose bits are set in `dirty`.
     ///
     /// Stores results in `cached_strata_quads`. Also updates the hittable
     /// grid on first build and syncs layout caches.
-    fn rebuild_dirty_strata(&self, size: Size, dirty: u16) {
+    fn rebuild_dirty_strata(&self, size: Size, dirty: u16) -> u16 {
         let dirty_ids = self.pending_dirty_ids.borrow_mut().take();
+        let effective_dirty = {
+            let env = self.env.borrow();
+            let state = env.state().borrow();
+            let strata_cache = self.cached_strata_quads.borrow();
+            let snapshot_cache = self.cached_frame_snapshots.borrow();
+            prune_irrelevant_dirty_strata(
+                dirty,
+                dirty_ids.as_ref(),
+                state.strata_buckets.as_deref(),
+                &strata_cache,
+                &snapshot_cache,
+            )
+        };
+        if effective_dirty == 0 {
+            self.apply_hit_grid_changes();
+            return 0;
+        }
+
         let env = self.env.borrow();
         let mut font_sys = self.font_system.borrow_mut();
         let strata_buckets = self.resolve_layout_and_buckets(&env, &mut font_sys);
         let state = env.state().borrow();
 
         self.emit_and_finalize_strata(
-            dirty,
+            effective_dirty,
             dirty_ids.as_ref(),
             size,
             &strata_buckets,
@@ -610,6 +694,7 @@ impl App {
         drop(state);
         self.apply_hit_grid_changes();
         env.state().borrow_mut().strata_buckets = Some(strata_buckets);
+        effective_dirty
     }
 
     /// Emit quads for dirty strata into the cache.
@@ -702,6 +787,198 @@ impl App {
             primitive.glyph_atlas_size = size;
             ga.mark_clean();
         }
+    }
+}
+
+fn preload_texture_request_source(tex_mgr: &mut crate::texture::TextureManager, path: &str) {
+    if path.contains("@crop:") {
+        let _ = load_texture_or_crop(tex_mgr, path);
+        return;
+    }
+    if crate::render::shader::atlas::is_bc_supported() && tex_mgr.load_bc(path).is_some() {
+        return;
+    }
+    let _ = tex_mgr.load(path);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::WowLuaEnv;
+    use crate::render::{GlyphAtlas, TextureRequest, WowFontSystem};
+    use crate::screen::ScreenKind;
+    use crate::texture::TextureManager;
+    use std::cell::RefCell;
+    use std::path::Path;
+    use std::rc::Rc;
+    use tempfile::tempdir;
+    use tokio::sync::mpsc;
+
+    fn dirty_mask(strata: usize) -> u16 {
+        1u16 << strata
+    }
+
+    fn build_test_app_with_textures(textures_path: &Path) -> App {
+        let env = Rc::new(RefCell::new(
+            WowLuaEnv::new().expect("Failed to create Lua environment"),
+        ));
+        env.borrow().set_screen_mode(ScreenKind::Game);
+
+        let texture_manager = Rc::new(RefCell::new(TextureManager::new(textures_path)));
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&std::path::PathBuf::from(
+            crate::iced_app::app::DEFAULT_FONTS_PATH,
+        ))));
+        let glyph_atlas = Rc::new(RefCell::new(GlyphAtlas::new()));
+        let (_cmd_tx, cmd_rx) = mpsc::channel(1);
+        let (_lua_tx, lua_rx) = std::sync::mpsc::channel();
+
+        App::build_app(
+            env,
+            Vec::new(),
+            texture_manager,
+            font_system,
+            glyph_atlas,
+            cmd_rx,
+            lua_rx,
+            false,
+            false,
+            None,
+            crate::config::SimConfig::default(),
+        )
+    }
+
+    #[test]
+    fn prune_irrelevant_dirty_strata_skips_cached_strata_without_bucket_or_snapshot_hits() {
+        let dirty_ids = HashSet::from([99_u64]);
+        let buckets = vec![vec![1_u64, 2_u64]];
+        let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
+        let snapshots = std::array::from_fn(|i| {
+            (i == 0).then(|| HashMap::from([(1_u64, FrameQuadSnapshot::default())]))
+        });
+
+        let pruned = prune_irrelevant_dirty_strata(
+            dirty_mask(0),
+            Some(&dirty_ids),
+            Some(&buckets),
+            &cached,
+            &snapshots,
+        );
+
+        assert_eq!(
+            pruned, 0,
+            "irrelevant dirty ids should not rebuild cached strata"
+        );
+    }
+
+    #[test]
+    fn prune_irrelevant_dirty_strata_keeps_strata_when_snapshot_must_be_removed() {
+        let dirty_ids = HashSet::from([3_u64]);
+        let buckets = vec![vec![1_u64, 2_u64]];
+        let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
+        let snapshots = std::array::from_fn(|i| {
+            (i == 0).then(|| HashMap::from([(3_u64, FrameQuadSnapshot::default())]))
+        });
+
+        let pruned = prune_irrelevant_dirty_strata(
+            dirty_mask(0),
+            Some(&dirty_ids),
+            Some(&buckets),
+            &cached,
+            &snapshots,
+        );
+
+        assert_eq!(
+            pruned,
+            dirty_mask(0),
+            "dirty frames with cached snapshots still need a rebuild to clear old quads"
+        );
+    }
+
+    #[test]
+    fn prune_irrelevant_dirty_strata_keeps_strata_when_bucket_contains_dirty_frame() {
+        let dirty_ids = HashSet::from([2_u64]);
+        let buckets = vec![vec![1_u64, 2_u64]];
+        let cached = std::array::from_fn(|i| (i == 0).then(|| Arc::new(QuadBatch::new())));
+        let snapshots = std::array::from_fn(|i| {
+            (i == 0).then(|| HashMap::from([(1_u64, FrameQuadSnapshot::default())]))
+        });
+
+        let pruned = prune_irrelevant_dirty_strata(
+            dirty_mask(0),
+            Some(&dirty_ids),
+            Some(&buckets),
+            &cached,
+            &snapshots,
+        );
+
+        assert_eq!(
+            pruned,
+            dirty_mask(0),
+            "dirty frames still present in the bucket must rebuild that strata"
+        );
+    }
+
+    #[test]
+    fn budgeted_preload_keeps_textures_pending_until_gpu_uploads_cached_batch_requests() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("world-map-tile.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let app = build_test_app_with_textures(temp_dir.path());
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(TextureRequest {
+            path: "world-map-tile".to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        });
+        app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(batch));
+        app.strata_dirty.set(0);
+
+        app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
+
+        assert!(
+            app.texture_manager.borrow().get("world-map-tile").is_some(),
+            "budgeted preload should decode uncached sources instead of deferring them to draw"
+        );
+        assert!(
+            app.gpu_uploaded_textures.borrow().is_empty(),
+            "preload should not mark textures as GPU-uploaded before draw runs"
+        );
+        assert!(
+            app.textures_pending.get(),
+            "preload should keep the fast tick alive until draw uploads cached-batch textures"
+        );
+    }
+
+    #[test]
+    fn budgeted_preload_clears_pending_after_cached_batch_texture_reaches_gpu() {
+        let temp_dir = tempdir().unwrap();
+        let texture_path = temp_dir.path().join("world-map-tile.png");
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba([0x44, 0x88, 0xcc, 0xff]));
+        image.save(&texture_path).unwrap();
+
+        let app = build_test_app_with_textures(temp_dir.path());
+        let mut batch = QuadBatch::new();
+        batch.texture_requests.push(TextureRequest {
+            path: "world-map-tile".to_string(),
+            vertex_start: 0,
+            vertex_count: 4,
+        });
+        app.cached_strata_quads.borrow_mut()[0] = Some(Arc::new(batch));
+        app.strata_dirty.set(0);
+
+        app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
+        app.gpu_uploaded_textures
+            .borrow_mut()
+            .insert("world-map-tile".to_string());
+
+        app.preload_current_render_requests(Some(std::time::Duration::from_millis(50)));
+
+        assert!(
+            !app.textures_pending.get(),
+            "pending should clear once the requested texture is already in the GPU atlas"
+        );
     }
 }
 

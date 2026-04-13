@@ -532,6 +532,31 @@ fn test_is_mouse_over_requires_mouse_enabled() {
 }
 
 #[test]
+fn test_is_mouse_over_clean_layout_does_not_require_mutable_state_borrow() {
+    let (t, _) = load_test_lua(
+        "test-is-mouse-over-clean-layout",
+        r#"
+        local f = CreateFrame("Frame", "MouseOverCleanLayoutFrame", UIParent)
+        f:SetSize(100, 100)
+        f:SetPoint("TOPLEFT", UIParent, "TOPLEFT", 100, -100)
+        f:EnableMouse(true)
+        f:GetRect()
+    "#,
+    );
+
+    t.env.state().borrow_mut().mouse_position = Some((150.0, 150.0));
+
+    let state_borrow = t.env.state().borrow();
+    assert_eq!(state_borrow.mouse_position, Some((150.0, 150.0)));
+
+    let is_mouse_over: bool = t
+        .env
+        .eval("return MouseOverCleanLayoutFrame:IsMouseOver()")
+        .unwrap();
+    assert!(is_mouse_over, "mouse inside clean frame should return true");
+}
+
+#[test]
 fn test_intersects_uses_resolved_layout_rects_for_overlapping_frames() {
     let (t, _) = load_test_lua(
         "test-intersects-overlap",

@@ -67,7 +67,12 @@ pub fn set_anchors(
 }
 
 /// Set a single anchor point on a frame.
-pub(super) fn set_single_anchor(state: &mut SimState, frame_id: u64, anchor: &AnchorXml, frame_name: &str) {
+pub(super) fn set_single_anchor(
+    state: &mut SimState,
+    frame_id: u64,
+    anchor: &AnchorXml,
+    frame_name: &str,
+) {
     let point_str = anchor.point.as_deref().unwrap_or("TOPLEFT");
     let relative_point_str = anchor.relative_point.as_deref().unwrap_or(point_str);
     let Some(point) = AnchorPoint::from_str(point_str) else {
@@ -279,7 +284,7 @@ pub fn set_frame_strata(state: &Rc<RefCell<SimState>>, frame_id: u64, strata_str
         queue.extend(child.children.iter().copied());
     }
     // Invalidate strata buckets since strata changed.
-    s.strata_buckets = None;
+    s.invalidate_strata_buckets();
 }
 
 /// Set frame level directly.

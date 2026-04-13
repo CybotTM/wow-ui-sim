@@ -304,7 +304,7 @@ impl App {
         }
         if self.strata_dirty.get() != 0 || self.textures_pending.get() {
             self.preload_current_render_requests_preserving_dirty(Some(
-                std::time::Duration::from_millis(75),
+                std::time::Duration::from_millis(25),
             ));
         }
         log_slow_tick(t0.elapsed(), layout_dur, combined, self);

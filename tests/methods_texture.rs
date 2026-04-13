@@ -369,11 +369,17 @@ fn test_set_atlas_tile_slice_uses_direct_atlas_entry() {
 
     assert_eq!(widget.atlas.as_deref(), Some("questlog-frame"));
     assert!(
-        widget.texture.as_ref().is_some_and(|path| path.contains("questlogframe")),
+        widget
+            .texture
+            .as_ref()
+            .is_some_and(|path| path.contains("questlogframe")),
         "questlog-frame should resolve to questlogframe texture, got: {:?}",
         widget.texture
     );
-    assert!(widget.tex_coords.is_some(), "questlog-frame should set tex_coords");
+    assert!(
+        widget.tex_coords.is_some(),
+        "questlog-frame should set tex_coords"
+    );
     assert!(
         widget.atlas_tex_coords.is_some(),
         "questlog-frame should set atlas_tex_coords"

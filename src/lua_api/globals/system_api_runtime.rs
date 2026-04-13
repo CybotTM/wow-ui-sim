@@ -200,7 +200,7 @@ fn register_set_screen_size(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<
             let mut s = st.borrow_mut();
             s.screen_width = w;
             s.screen_height = h;
-            s.strata_buckets = None;
+            s.invalidate_strata_buckets();
             s.widgets.clear_all_layout_rects();
             for name in ["UIParent", "WorldFrame"] {
                 if let Some(id) = s.widgets.get_id_by_name(name)

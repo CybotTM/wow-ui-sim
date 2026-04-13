@@ -49,7 +49,9 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
                         local ts = (G.GetTimePreciseSec and G.GetTimePreciseSec())
                             or (G.GetTime and G.GetTime())
                             or os.clock()
-                        stderr:write(string.format("[%7.3fs] [OnUpdate] %7.1fms  %s%s\n", ts, dt, n, suffix))
+                        local parent = frame.GetParent and frame:GetParent()
+                        local pname = parent and parent.GetDebugName and parent:GetDebugName() or "?"
+                        stderr:write(string.format("[%7.3fs] [OnUpdate] %7.1fms  %s%s id=%d parent=%s\n", ts, dt, n, suffix, id, pname))
                     end
                     if not ok then handler(err) end
                     if owner then

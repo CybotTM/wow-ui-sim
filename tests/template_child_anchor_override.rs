@@ -78,10 +78,8 @@ fn setup_env() -> WowLuaEnv {
 fn child_inline_anchors_replace_inherited_template_anchors() {
     let env = setup_env();
 
-    env.exec(
-        r#"CreateFrame("Frame", "TestParentFrame", UIParent, "ParentTemplate")"#,
-    )
-    .unwrap();
+    env.exec(r#"CreateFrame("Frame", "TestParentFrame", UIParent, "ParentTemplate")"#)
+        .unwrap();
 
     let result: String = env
         .eval(

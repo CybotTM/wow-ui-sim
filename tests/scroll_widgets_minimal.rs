@@ -3,6 +3,30 @@
 mod common;
 
 use common::env_with_shared_xml;
+use wow_ui_sim::xml::{XmlElement, parse_xml, register_template};
+
+const CHATFRAME_SCROLLBAR_HOST_XML: &str = r#"
+    <Ui>
+        <Frame name="ChatFrameScrollBarHostTemplate" virtual="true">
+            <Frames>
+                <EventFrame parentKey="ScrollBar" inherits="MinimalScrollBar">
+                    <Anchors>
+                        <Anchor point="TOPRIGHT"/>
+                        <Anchor point="BOTTOMRIGHT"/>
+                    </Anchors>
+                </EventFrame>
+            </Frames>
+        </Frame>
+    </Ui>
+"#;
+
+fn register_chatframe_scrollbar_host_template() {
+    let ui = parse_xml(CHATFRAME_SCROLLBAR_HOST_XML).unwrap();
+    let XmlElement::Frame(frame) = &ui.elements[0] else {
+        panic!("expected frame template");
+    };
+    register_template("ChatFrameScrollBarHostTemplate", "Frame", frame.clone());
+}
 
 #[test]
 fn test_minimal_scrollbar_child_structure() {
@@ -294,5 +318,55 @@ fn test_scrollframe_template_creates_scrollbar_with_thumb() {
     assert_eq!(
         result, "true",
         "ScrollFrameTemplate's ScrollBar.Track.Thumb should exist"
+    );
+}
+
+#[test]
+fn test_inherited_minimal_scrollbar_child_keeps_inline_outer_anchors() {
+    let env = env_with_shared_xml();
+    register_chatframe_scrollbar_host_template();
+
+    let result: String = env
+        .eval(
+            r#"
+        local host = CreateFrame("Frame", "TestChatFrameScrollBarHost", UIParent, "ChatFrameScrollBarHostTemplate")
+        local bar = host.ScrollBar
+        if not bar then
+            return "missing scrollbar"
+        end
+        local track = bar.Track
+        if not track then
+            return "missing track"
+        end
+
+        local function collect(frame)
+            local out = {}
+            for i = 1, frame:GetNumPoints() do
+                local point, rel, relPoint, x, y = frame:GetPoint(i)
+                local relName = "$parent"
+                if rel then
+                    if frame == bar and rel == host then
+                        relName = "$parent"
+                    elseif frame == track and rel == bar then
+                        relName = "$parent"
+                    else
+                        relName = rel:GetName() or "<unnamed>"
+                    end
+                end
+                table.insert(out, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, x, y))
+            end
+            table.sort(out)
+            return table.concat(out, " | ")
+        end
+
+        return collect(bar) .. " || " .. collect(track)
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        result,
+        "BOTTOMRIGHT->$parent:BOTTOMRIGHT(0,0) | TOPRIGHT->$parent:TOPRIGHT(0,0) || BOTTOM->$parent:BOTTOM(0,19) | TOP->$parent:TOP(0,-19)",
+        "outer scrollbar anchors should stay TOPRIGHT/BOTTOMRIGHT while Track keeps TOP/BOTTOM: {result}"
     );
 }

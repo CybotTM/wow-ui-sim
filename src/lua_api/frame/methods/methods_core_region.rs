@@ -106,30 +106,47 @@ fn layout_rects_intersect(a: crate::LayoutRect, b: crate::LayoutRect) -> bool {
     right > left && bottom > top
 }
 
+fn is_mouse_over_bounds(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    left: f32,
+    right: f32,
+    top: f32,
+    bottom: f32,
+) -> bool {
+    let Some((mouse_x, mouse_y)) = state.mouse_position else {
+        return false;
+    };
+    let Some(frame) = state.widgets.get(id) else {
+        return false;
+    };
+    if !frame.visible || frame.effective_alpha <= 0.0 || !frame.mouse_enabled {
+        return false;
+    }
+    let Some(rect) = frame.layout_rect else {
+        return false;
+    };
+    mouse_x >= rect.x - left
+        && mouse_x <= rect.x + rect.width + right
+        && mouse_y >= rect.y - top
+        && mouse_y <= rect.y + rect.height + bottom
+}
+
 fn add_is_mouse_over_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("IsMouseOver", |lua, this, args: mlua::MultiValue| {
         let id = this.0;
         let (left, right, top, bottom) = parse_mouse_over_offsets(args);
         let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        state.resolve_rect_if_dirty(id);
-        let Some((mouse_x, mouse_y)) = state.mouse_position else {
-            return Ok(false);
+        let needs_layout_resolution = {
+            let state = state_rc.borrow();
+            state.widgets.is_rect_dirty(id)
         };
-        let Some(frame) = state.widgets.get(id) else {
-            return Ok(false);
-        };
-        if !frame.visible || frame.effective_alpha <= 0.0 || !frame.mouse_enabled {
-            return Ok(false);
+        if needs_layout_resolution {
+            state_rc.borrow_mut().resolve_rect_if_dirty(id);
         }
-        let Some(rect) = frame.layout_rect else {
-            return Ok(false);
-        };
-        let in_bounds = mouse_x >= rect.x - left
-            && mouse_x <= rect.x + rect.width + right
-            && mouse_y >= rect.y - top
-            && mouse_y <= rect.y + rect.height + bottom;
-        Ok(in_bounds)
+
+        let state = state_rc.borrow();
+        Ok(is_mouse_over_bounds(&state, id, left, right, top, bottom))
     });
 }
 

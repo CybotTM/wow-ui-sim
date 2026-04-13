@@ -6,8 +6,8 @@
 use iced::widget::shader::Primitive;
 use image::RgbaImage;
 
-use super::shader::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive};
 use super::shader::primitive::{LoadedTexture, load_texture_prefer_bc};
+use super::shader::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive};
 use crate::texture::TextureManager;
 
 /// Load unique textures for all batch texture requests.

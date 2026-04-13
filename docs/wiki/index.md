@@ -53,10 +53,14 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[method-dispatch-refactor]] | Runtime pollution fixed; target: direct Rust dispatch |
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; 3 fix strategies with tradeoffs |
+| [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only |
+| [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
 | [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |
 | [[talent-sheen]] | 22s synchronized sweep; white rectangle bug when masking broken |
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
+| [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
+| [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |
 | [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw share BC cache, use smaller budgets, and keep the fast tick alive until GPU uploads finish |
