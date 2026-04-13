@@ -1,7 +1,8 @@
 //! Widget-specific quad emitters for rendering WoW frames.
 
-use iced::Rectangle;
+use iced::{Point, Rectangle, Size};
 
+use crate::atlas::get_atlas_info;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::{GlyphAtlas, emit_text_quads};
 use crate::render::shader::GLYPH_ATLAS_TEX_INDEX;
@@ -31,6 +32,8 @@ pub fn build_frame_quads(
     f: &crate::widget::Frame,
     alpha: f32,
 ) {
+    emit_fog_of_war_quads(batch, bounds, f, alpha);
+
     if f.backdrop.enabled {
         let bg = &f.backdrop.bg_color;
         batch.push_solid(bounds, [bg.r, bg.g, bg.b, bg.a * alpha]);
@@ -48,6 +51,65 @@ pub fn build_frame_quads(
     if f.nine_slice_layout.is_some() {
         batch.push_border(bounds, 2.0, [0.6, 0.45, 0.15, alpha]);
     }
+}
+
+fn emit_fog_of_war_quads(
+    batch: &mut QuadBatch,
+    bounds: Rectangle,
+    frame: &crate::widget::Frame,
+    alpha: f32,
+) {
+    if !frame
+        .object_type_name
+        .as_deref()
+        .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
+    {
+        return;
+    }
+
+    let Some(background_asset) = frame.fog_of_war_background_atlas.as_deref() else {
+        return;
+    };
+
+    let explored_left_fraction =
+        crate::lua_api::globals::c_map_api::EXPLORED_LEFT_FRACTION.clamp(0.0, 1.0);
+    let fog_fraction = 1.0 - explored_left_fraction;
+    if fog_fraction <= f32::EPSILON {
+        return;
+    }
+
+    let fog_bounds = Rectangle::new(
+        Point::new(bounds.x + bounds.width * explored_left_fraction, bounds.y),
+        Size::new(bounds.width * fog_fraction, bounds.height),
+    );
+    let (texture_path, uvs) = fog_texture_path_and_uvs(background_asset, explored_left_fraction);
+    batch.push_textured_path_uv(
+        fog_bounds,
+        Rectangle::new(
+            Point::new(uvs.0, uvs.2),
+            Size::new(uvs.1 - uvs.0, uvs.3 - uvs.2),
+        ),
+        &texture_path,
+        [1.0, 1.0, 1.0, alpha],
+        BlendMode::Alpha,
+    );
+}
+
+fn fog_texture_path_and_uvs(
+    asset: &str,
+    explored_left_fraction: f32,
+) -> (String, (f32, f32, f32, f32)) {
+    if let Some(lookup) = get_atlas_info(asset) {
+        let info = lookup.info;
+        let left = info.left_tex_coord;
+        let right = info.right_tex_coord;
+        let top = info.top_tex_coord;
+        let bottom = info.bottom_tex_coord;
+        let fog_left = left + (right - left) * explored_left_fraction;
+        return (info.file.to_string(), (fog_left, right, top, bottom));
+    }
+
+    (asset.to_string(), (explored_left_fraction, 1.0, 0.0, 1.0))
 }
 
 pub(super) fn color_with_alpha(c: &crate::widget::Color, alpha: f32) -> [f32; 4] {

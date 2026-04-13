@@ -239,6 +239,12 @@ pub struct Frame {
     pub is_frame_buffer: bool,
     /// Stored Minimap blip atlas/texture asset.
     pub minimap_blip_texture: Option<String>,
+    /// FogOfWar background asset rendered by FogOfWarFrame.
+    pub fog_of_war_background_atlas: Option<String>,
+    /// FogOfWar mask asset configured on FogOfWarFrame.
+    pub fog_of_war_mask_atlas: Option<String>,
+    /// FogOfWar mask scalar configured on FogOfWarFrame.
+    pub fog_of_war_mask_scalar: Option<f32>,
     /// Stored Minimap mask asset.
     pub minimap_mask_texture: Option<String>,
     /// Stored Minimap icon texture asset.

@@ -430,15 +430,34 @@ fn test_get_explored_map_textures_cover_left_half_of_current_map() {
 }
 
 #[test]
-fn test_c_fog_of_war_returns_nil_without_backing_data() {
+fn test_c_fog_of_war_returns_half_map_data_for_current_map() {
+    let env = env();
+    let (fog_id, background, mask, scalar): (i32, Option<String>, Option<String>, f64) = env
+        .eval(
+            r#"
+            local mapID = C_Map.GetCurrentMapID()
+            local fogID = C_FogOfWar.GetFogOfWarForMap(mapID)
+            local info = C_FogOfWar.GetFogOfWarInfo(fogID)
+            return fogID or 0, info.backgroundAtlas, info.maskAtlas, info.maskScalar
+        "#,
+        )
+        .unwrap();
+    assert!(fog_id > 0, "current map should expose simulator fog data");
+    assert_eq!(background.as_deref(), Some("Interface/Map/MapFogOfWar"));
+    assert_eq!(
+        mask.as_deref(),
+        Some("Interface/Map/MapFogOfWarMaskSoftEdge")
+    );
+    assert!((scalar - 1.0).abs() < f64::EPSILON);
+}
+
+#[test]
+fn test_c_fog_of_war_returns_nil_for_unknown_map() {
     let env = env();
     let has_no_fog: bool = env
-        .eval("return C_FogOfWar.GetFogOfWarForMap(C_Map.GetCurrentMapID()) == nil")
+        .eval("return C_FogOfWar.GetFogOfWarForMap(-1) == nil")
         .unwrap();
-    assert!(
-        has_no_fog,
-        "maps without simulator fog data should return nil, not truthy 0"
-    );
+    assert!(has_no_fog, "unknown maps should not invent fog IDs");
 }
 
 // ============================================================================
@@ -536,5 +555,28 @@ fn test_create_texture_inherits_template_size() {
     assert_eq!(
         h, 256.0,
         "CreateTexture with inherits should apply template height"
+    );
+}
+
+#[test]
+fn test_create_texture_applies_sublevel_argument() {
+    let env = env();
+    let (layer, sublevel): (String, i32) = env
+        .eval(
+            r#"
+        local f = CreateFrame("Frame", nil, UIParent)
+        local tex = f:CreateTexture(nil, "OVERLAY", nil, 7)
+        return tex:GetDrawLayer()
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        layer, "OVERLAY",
+        "CreateTexture should keep the requested draw layer"
+    );
+    assert_eq!(
+        sublevel, 7,
+        "CreateTexture should apply the requested draw sublevel"
     );
 }

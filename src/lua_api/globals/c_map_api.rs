@@ -7,8 +7,10 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const EXPLORED_HALF_BOUNDARY: f64 = 0.5;
+pub(crate) const EXPLORED_LEFT_FRACTION: f32 = 0.5;
 const DEFAULT_FOG_MASK_SCALAR: f64 = 1.0;
+pub(crate) const DEFAULT_FOG_BACKGROUND_ASSET: &str = "Interface/Map/MapFogOfWar";
+pub(crate) const DEFAULT_FOG_MASK_ASSET: &str = "Interface/Map/MapFogOfWarMaskSoftEdge";
 
 pub(crate) struct FogOfWarInfo {
     pub background_atlas: Option<&'static str>,
@@ -347,12 +349,17 @@ fn register_c_fog_of_war(lua: &Lua) -> Result<mlua::Table> {
     Ok(t)
 }
 
-pub(crate) fn fog_of_war_id_for_map(_map_id: i32) -> Option<i32> {
-    None
+pub(crate) fn fog_of_war_id_for_map(map_id: i32) -> Option<i32> {
+    crate::map_art::get_map_art(map_id as u32).map(|_| map_id)
 }
 
-pub(crate) fn fog_of_war_info_for_id(_fog_of_war_id: i32) -> Option<FogOfWarInfo> {
-    None
+pub(crate) fn fog_of_war_info_for_id(fog_of_war_id: i32) -> Option<FogOfWarInfo> {
+    crate::map_art::get_map_art(fog_of_war_id as u32)?;
+    Some(FogOfWarInfo {
+        background_atlas: Some(DEFAULT_FOG_BACKGROUND_ASSET),
+        mask_atlas: Some(DEFAULT_FOG_MASK_ASSET),
+        mask_scalar: DEFAULT_FOG_MASK_SCALAR,
+    })
 }
 
 fn get_fog_of_war_info_table(lua: &Lua, fog_of_war_id: Value) -> Result<mlua::Table> {
@@ -486,7 +493,7 @@ fn position_is_in_left_half(pos: &Value) -> bool {
         return false;
     };
     let x = table.get::<f64>("x").unwrap_or(0.0);
-    x <= EXPLORED_HALF_BOUNDARY
+    x <= f64::from(EXPLORED_LEFT_FRACTION)
 }
 
 fn explored_area_id_for_map(map_id: i32) -> i32 {

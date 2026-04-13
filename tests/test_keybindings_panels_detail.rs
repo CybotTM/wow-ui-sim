@@ -404,14 +404,22 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                 end
 
                 local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
-                if fogPin and fogPin:IsShown() then
+                if not fogPin then
+                    return "missing_fog_pin"
+                end
+
+                if not fogPin:IsShown() then
                     return string.format(
-                        "fog_pin_visible:type=%s:map=%s:bg=%s:mask=%s",
+                        "fog_pin_hidden:type=%s:map=%s:bg=%s:mask=%s",
                         tostring(fogPin:GetObjectType()),
                         tostring(fogPin.GetUiMapID and fogPin:GetUiMapID()),
                         tostring(fogPin:GetFogOfWarBackgroundAtlas()),
                         tostring(fogPin:GetFogOfWarMaskAtlas())
                     )
+                end
+
+                if not fogPin:GetFogOfWarBackgroundAtlas() then
+                    return "fog_pin_missing_background"
                 end
 
                 local width, height = pin:GetSize()

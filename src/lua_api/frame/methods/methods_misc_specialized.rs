@@ -157,22 +157,37 @@ fn add_fog_of_war_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
     });
     methods.add_method("SetFogOfWarBackgroundAtlas", |lua, this, atlas: Value| {
         let atlas = super::methods_misc::texture_asset_to_string(&atlas)?;
-        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.background_atlas = atlas;
+        let state_rc = get_sim_state(lua);
+        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
+            fog.background_atlas = atlas.clone();
         });
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.fog_of_war_background_atlas = atlas;
+        }
         Ok(())
     });
     methods.add_method("SetFogOfWarMaskAtlas", |lua, this, atlas: Value| {
         let atlas = super::methods_misc::texture_asset_to_string(&atlas)?;
-        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
-            fog.mask_atlas = atlas;
+        let state_rc = get_sim_state(lua);
+        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
+            fog.mask_atlas = atlas.clone();
         });
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.fog_of_war_mask_atlas = atlas;
+        }
         Ok(())
     });
     methods.add_method("SetMaskScalar", |lua, this, scalar: Option<f64>| {
-        write_fog_of_war_frame_state(get_sim_state(lua), this.0, |fog| {
+        let state_rc = get_sim_state(lua);
+        write_fog_of_war_frame_state(std::rc::Rc::clone(&state_rc), this.0, |fog| {
             fog.mask_scalar = scalar;
         });
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.fog_of_war_mask_scalar = scalar.map(|value| value as f32);
+        }
         Ok(())
     });
 }
@@ -503,6 +518,11 @@ fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u
     fog_state.background_atlas = fog_info.background_atlas.map(str::to_string);
     fog_state.mask_atlas = fog_info.mask_atlas.map(str::to_string);
     fog_state.mask_scalar = Some(fog_info.mask_scalar);
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.fog_of_war_background_atlas = fog_state.background_atlas.clone();
+        frame.fog_of_war_mask_atlas = fog_state.mask_atlas.clone();
+        frame.fog_of_war_mask_scalar = Some(fog_info.mask_scalar as f32);
+    }
     state.set_frame_visible(frame_id, true);
 }
 
@@ -511,6 +531,11 @@ fn clear_fog_of_war_frame(state: &mut crate::lua_api::SimState, frame_id: u64) {
     fog_state.background_atlas = None;
     fog_state.mask_atlas = None;
     fog_state.mask_scalar = None;
+    if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.fog_of_war_background_atlas = None;
+        frame.fog_of_war_mask_atlas = None;
+        frame.fog_of_war_mask_scalar = None;
+    }
     state.set_frame_visible(frame_id, false);
 }
 

@@ -5,9 +5,11 @@ mod common;
 use common::env_with_shared_xml;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
-use wow_ui_sim::iced_app::compute_frame_rect;
+use std::{cell::RefCell, rc::Rc};
+use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::{GlyphAtlas, WowFontSystem};
 use wow_ui_sim::screen::ScreenKind;
 use wow_ui_sim::toc::TocFile;
 
@@ -16,6 +18,90 @@ fn build_strata_buckets(env: &wow_ui_sim::lua_api::WowLuaEnv) -> Vec<Vec<u64>> {
     let mut state = env.state().borrow_mut();
     let _ = state.get_strata_buckets();
     state.strata_buckets.as_ref().unwrap().clone()
+}
+
+fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
+    Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+}
+
+fn build_screenshot_like_batch(
+    env: &WowLuaEnv,
+    width: u32,
+    height: u32,
+    filter: Option<&str>,
+) -> wow_ui_sim::render::QuadBatch {
+    let font_system = make_font_system();
+    env.set_font_system(Rc::clone(&font_system));
+    env.set_screen_size(width as f32, height as f32);
+    wow_ui_sim::startup::run_extra_update_ticks(env, 3);
+
+    let mut glyph_atlas = GlyphAtlas::new();
+    let mut font_system = font_system.borrow_mut();
+    let buckets = {
+        let mut state = env.state().borrow_mut();
+        state.ensure_layout_rects();
+        wow_ui_sim::iced_app::tooltip::update_tooltip_sizes(&mut state, &mut font_system);
+        let _ = state.get_strata_buckets();
+        state.strata_buckets.as_ref().unwrap().clone()
+    };
+    let state = env.state().borrow();
+    let tooltip_data = wow_ui_sim::iced_app::tooltip::collect_tooltip_data(&state);
+    build_quad_batch_for_registry(
+        &state.widgets,
+        (width as f32, height as f32),
+        filter,
+        None,
+        None,
+        Some((&mut font_system, &mut glyph_atlas)),
+        Some(&state.message_frames),
+        Some(&tooltip_data),
+        &buckets,
+    )
+}
+
+fn is_descendant_of(
+    widgets: &wow_ui_sim::widget::WidgetRegistry,
+    mut frame_id: u64,
+    ancestor_id: u64,
+) -> bool {
+    loop {
+        if frame_id == ancestor_id {
+            return true;
+        }
+        let Some(parent_id) = widgets.get(frame_id).and_then(|frame| frame.parent_id) else {
+            return false;
+        };
+        frame_id = parent_id;
+    }
+}
+
+fn texture_request_bounds(
+    batch: &wow_ui_sim::render::QuadBatch,
+    texture_path: &str,
+) -> Option<(f32, f32, f32, f32)> {
+    let mut min_x = f32::INFINITY;
+    let mut min_y = f32::INFINITY;
+    let mut max_x = f32::NEG_INFINITY;
+    let mut max_y = f32::NEG_INFINITY;
+    let mut found = false;
+
+    for request in batch
+        .texture_requests
+        .iter()
+        .filter(|request| request.path == texture_path)
+    {
+        let start = request.vertex_start as usize;
+        let end = start + request.vertex_count as usize;
+        for vertex in &batch.vertices[start..end] {
+            min_x = min_x.min(vertex.position[0]);
+            min_y = min_y.min(vertex.position[1]);
+            max_x = max_x.max(vertex.position[0]);
+            max_y = max_y.max(vertex.position[1]);
+            found = true;
+        }
+    }
+
+    found.then_some((min_x, min_y, max_x, max_y))
 }
 
 fn request_path_for_frame_texture(
@@ -214,6 +300,13 @@ fn env_with_isolated_world_map() -> WowLuaEnv {
     env
 }
 
+fn open_world_map(env: &WowLuaEnv) {
+    env.exec("ToggleWorldMap()")
+        .expect("failed to toggle world map after startup");
+    wow_ui_sim::startup::process_pending_timers(env);
+    wow_ui_sim::startup::fire_one_on_update_tick(env);
+}
+
 #[test]
 fn isolated_world_map_dependency_closure_loads_declared_dependencies() {
     let ui = blizzard_ui_dir();
@@ -232,9 +325,9 @@ fn voice_chat_prompt_renders_below_world_map_panel_in_combined_stack() {
     let mut roots = ISOLATED_WORLD_MAP_ROOT_ADDONS.to_vec();
     roots.extend(["Blizzard_ChatFrame", "Blizzard_Channels"]);
     let env = env_with_root_addons_ui(&roots);
+    open_world_map(&env);
     env.exec(
         r#"
-        ToggleWorldMap();
         VoiceChatPromptActivateChannel:ClearAllPoints();
         VoiceChatPromptActivateChannel:SetPoint("CENTER", WorldMapFrame, "CENTER", 0, 0);
         VoiceChatPromptActivateChannel:SetAlpha(1);
@@ -282,6 +375,73 @@ fn voice_chat_prompt_renders_below_world_map_panel_in_combined_stack() {
     assert!(
         prompt_pos < border_pos,
         "voice prompt should render before world map border when both overlap; prompt_pos={prompt_pos}, border_pos={border_pos}"
+    );
+}
+
+#[test]
+fn chat_frame_voice_button_overlaps_world_map_but_renders_below_panel_border() {
+    let mut roots = ISOLATED_WORLD_MAP_ROOT_ADDONS.to_vec();
+    roots.extend(["Blizzard_ChatFrame", "Blizzard_Channels"]);
+    let env = env_with_root_addons_ui(&roots);
+    open_world_map(&env);
+
+    let buckets = build_strata_buckets(&env);
+    let flattened: Vec<u64> = buckets.iter().flatten().copied().collect();
+    let state = env.state().borrow();
+
+    let world_map_id = state
+        .widgets
+        .get_id_by_name("WorldMapFrame")
+        .expect("world map should exist");
+    let border_id = state
+        .widgets
+        .get(world_map_id)
+        .and_then(|frame| frame.children_keys.get("BorderFrame"))
+        .copied()
+        .expect("world map border frame should exist");
+    let voice_button_id = state
+        .widgets
+        .get_id_by_name("ChatFrameChannelButton")
+        .expect("chat voice button should exist");
+    let voice_icon_id = state
+        .widgets
+        .get(voice_button_id)
+        .and_then(|frame| frame.children_keys.get("Icon"))
+        .copied()
+        .expect("chat voice button icon should exist");
+
+    let world_map_rect = compute_frame_rect(&state.widgets, world_map_id, 1024.0, 768.0);
+    let voice_button_rect = compute_frame_rect(&state.widgets, voice_button_id, 1024.0, 768.0);
+    let voice_icon = state.widgets.get(voice_icon_id).unwrap();
+    let border = state.widgets.get(border_id).unwrap();
+
+    assert_eq!(
+        voice_icon.atlas.as_deref(),
+        Some("chatframe-button-icon-voicechat")
+    );
+    assert_eq!(border.frame_strata.as_str(), "HIGH");
+
+    let overlaps_horizontally = voice_button_rect.x < world_map_rect.x + world_map_rect.width
+        && voice_button_rect.x + voice_button_rect.width > world_map_rect.x;
+    let overlaps_vertically = voice_button_rect.y < world_map_rect.y + world_map_rect.height
+        && voice_button_rect.y + voice_button_rect.height > world_map_rect.y;
+    assert!(
+        overlaps_horizontally && overlaps_vertically,
+        "chat voice button should overlap world map bounds at 1024x768; button={voice_button_rect:?} map={world_map_rect:?}"
+    );
+
+    let voice_button_pos = flattened
+        .iter()
+        .position(|&id| id == voice_button_id)
+        .expect("chat voice button should be in render list");
+    let border_pos = flattened
+        .iter()
+        .position(|&id| id == border_id)
+        .expect("world map border should be in render list");
+
+    assert!(
+        voice_button_pos < border_pos,
+        "chat voice button should render before world map border even though the layouts overlap; button_pos={voice_button_pos}, border_pos={border_pos}"
     );
 }
 
@@ -526,6 +686,40 @@ fn late_set_draw_layer_invalidates_cached_strata_buckets() {
 }
 
 #[test]
+fn same_draw_layer_preserves_cached_strata_buckets() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "SameLayerParent", UIParent)
+        parent:SetSize(80, 80)
+        parent:SetPoint("CENTER")
+        parent:Show()
+
+        local tex = parent:CreateTexture("SameLayerTexture", "ARTWORK")
+        tex:SetAllPoints()
+        tex:SetColorTexture(1, 0, 0, 1)
+        tex:SetDrawLayer("OVERLAY", 2)
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "building buckets should populate the cache"
+    );
+
+    env.exec(r#"SameLayerTexture:SetDrawLayer("OVERLAY", 2)"#)
+        .unwrap();
+
+    assert!(
+        env.state().borrow().strata_buckets.is_some(),
+        "no-op SetDrawLayer should not invalidate cached strata buckets"
+    );
+}
+
+#[test]
 fn late_set_frame_level_invalidates_cached_strata_buckets() {
     let env = env_with_shared_xml();
 
@@ -645,6 +839,75 @@ fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
         assert!(
             !world_quest_pairs.is_empty(),
             "isolated world map stack should still populate visible world quest pins"
+        );
+    });
+}
+
+#[test]
+fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
+    common::with_timeout(120, move || {
+        let env = env_with_isolated_world_map();
+
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let fog_rect = {
+            let state = env.state().borrow();
+            let world_map_id = state
+                .widgets
+                .get_id_by_name("WorldMapFrame")
+                .expect("isolated world map should create WorldMapFrame");
+            let fog_pin_id = state
+                .widgets
+                .iter_ids()
+                .find(|&id| {
+                    state.widgets.get(id).is_some_and(|frame| {
+                        frame
+                            .object_type_name
+                            .as_deref()
+                            .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
+                            && is_descendant_of(&state.widgets, id, world_map_id)
+                    })
+                })
+                .expect("isolated world map should create a FogOfWarFrame pin");
+            compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
+        };
+
+        let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
+        let visible_fog_bounds =
+            texture_request_bounds(&visible_batch, "Interface/Map/MapFogOfWar")
+                .expect("visible world map batch should contain the fog texture request");
+
+        env.exec(
+            r#"
+            local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+            assert(fogPin, "missing fog pin")
+            fogPin:Hide()
+        "#,
+        )
+        .expect("failed to hide fog pin");
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
+        let hidden_fog_bounds = texture_request_bounds(&hidden_batch, "Interface/Map/MapFogOfWar");
+
+        assert!(
+            hidden_fog_bounds.is_none(),
+            "hidden world map batch should not contain a fog texture request: {hidden_fog_bounds:?}"
+        );
+        assert!(
+            visible_fog_bounds.0 >= fog_rect.x + fog_rect.width * 0.49,
+            "fog should start on the unexplored half: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
+        );
+        assert!(
+            visible_fog_bounds.2 <= fog_rect.x + fog_rect.width + 1.0,
+            "fog should not extend beyond the fog frame: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
+        );
+        assert!(
+            visible_fog_bounds.3 - visible_fog_bounds.1 >= fog_rect.height - 1.0,
+            "fog should cover the full fog-frame height: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
         );
     });
 }

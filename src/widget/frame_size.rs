@@ -59,6 +59,8 @@ impl Frame {
 
     fn minimap_string_bytes(&self) -> usize {
         option_string_bytes(&self.minimap_blip_texture)
+            + option_string_bytes(&self.fog_of_war_background_atlas)
+            + option_string_bytes(&self.fog_of_war_mask_atlas)
             + option_string_bytes(&self.minimap_mask_texture)
             + option_string_bytes(&self.minimap_icon_texture)
             + option_string_bytes(&self.minimap_player_texture)
