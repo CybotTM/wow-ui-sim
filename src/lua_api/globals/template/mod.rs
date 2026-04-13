@@ -425,8 +425,20 @@ fn apply_mixin_direct(lua: &Lua, mixin: &str, frame_name: &str) -> mlua::Result<
     let Some(fields) = frame_fields_by_name(lua, frame_name)? else {
         return Ok(());
     };
+    let secure_methods: Value = lua.globals().get("__secureMixinMethods")?;
     for mixin_table in resolve_mixin_tables(lua, mixin)? {
-        for pair in mixin_table.pairs::<Value, Value>() {
+        // For secure mixins, methods are moved to __index and the table is empty.
+        // Check __secureMixinMethods for the actual methods table, same as Mixin().
+        let source = if let Value::Table(ref sm) = secure_methods {
+            if let Value::Table(t) = sm.get::<Value>(mixin_table.clone())? {
+                t
+            } else {
+                mixin_table
+            }
+        } else {
+            mixin_table
+        };
+        for pair in source.pairs::<Value, Value>() {
             let (key, value) = pair?;
             fields.raw_set(key, value)?;
         }

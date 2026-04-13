@@ -310,6 +310,46 @@ fn test_runtime_template_mixin_and_key_values_apply() {
         .unwrap();
 }
 
+#[test]
+fn test_runtime_template_method_scripts_apply() {
+    let t = load_test_xml(
+        "runtime-template-method-scripts",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeMethodScriptTemplate" virtual="true" mixin="RuntimeMethodScriptMixin">
+                <Scripts>
+                    <OnLoad method="RuntimeMethodScriptTemplate_OnLoad"/>
+                    <OnEvent method="RuntimeMethodScriptTemplate_OnEvent"/>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            RuntimeMethodScriptMixin = {
+                RuntimeMethodScriptTemplate_OnLoad = function(self)
+                    self.loadedByMethodScript = true
+                end,
+                RuntimeMethodScriptTemplate_OnEvent = function(self, event, payload)
+                    self.lastMethodEvent = event .. ":" .. tostring(payload)
+                end,
+            }
+
+            local frame = CreateFrame("Frame", "RuntimeMethodScriptFrame", UIParent, "RuntimeMethodScriptTemplate")
+            assert(frame.loadedByMethodScript == true, "OnLoad method script should run")
+
+            local onEvent = frame:GetScript("OnEvent")
+            assert(type(onEvent) == "function", "OnEvent method script should be installed")
+            onEvent(frame, "TEST_EVENT", "payload")
+            assert(frame.lastMethodEvent == "TEST_EVENT:payload", "method script should dispatch through frame method")
+        "#,
+        )
+        .unwrap();
+}
+
 const MULTI_FILE_WIDGETS_LUA: &str = r#"
     local _, addon = ...
     local function updateKeyDirection(self) return "updated: " .. tostring(self) end

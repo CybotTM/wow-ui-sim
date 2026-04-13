@@ -36,6 +36,10 @@ Created `investigations/world-map-texture-loading-budget.md` to document the pos
 
 ## [2026-04-13] ingest | world map frame-level rebuild investigation
 
+## [2026-04-13] investigations | startup CreateFrame profiling follow-up
+
+Updated `investigations/startup-createframe-profile.md` with section-level template profiling, the method-only XML script fast path, widened direct-child creation for `ActionButtonSpellFXTemplate` / `MinimalScrollBar`, and current shared-worktree startup numbers showing `36.79s -> 28.89s` on `--no-addons --no-saved-vars`.
+
 Created `investigations/world-map-frame-level-rebuilds.md` to document the world-map performance bug where map pins repeatedly called `SetFrameLevel()` with the same value, forcing unnecessary `strata_buckets` invalidation and bucket rebuilds. Updated `index.md` with the new investigation page.
 
 ## [2026-04-12] ingest | transparent wrapper render-order investigation

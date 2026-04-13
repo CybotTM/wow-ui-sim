@@ -44,13 +44,15 @@ pub(super) fn create_child_frames(
 pub(super) fn use_direct_runtime_child_creation(template_name: &str) -> bool {
     matches!(
         template_name,
-        "ActionButtonTemplate"
+        "ActionButtonSpellFXTemplate"
+            | "ActionButtonTemplate"
             | "ActionBarButtonTemplate"
             | "SmallActionButtonTemplate"
             | "MainBarActionBarButtonTemplate"
             | "PetActionButtonTemplate"
             | "StanceButtonTemplate"
             | "PossessButtonTemplate"
+            | "MinimalScrollBar"
     )
 }
 
@@ -487,11 +489,15 @@ mod tests {
 
     #[test]
     fn action_button_template_uses_direct_runtime_child_creation() {
+        assert!(use_direct_runtime_child_creation(
+            "ActionButtonSpellFXTemplate"
+        ));
         assert!(use_direct_runtime_child_creation("ActionButtonTemplate"));
+        assert!(use_direct_runtime_child_creation("MinimalScrollBar"));
     }
 
     #[test]
     fn unrelated_template_skips_direct_runtime_child_creation() {
-        assert!(!use_direct_runtime_child_creation("MinimalScrollBar"));
+        assert!(!use_direct_runtime_child_creation("UIPanelButtonTemplate"));
     }
 }

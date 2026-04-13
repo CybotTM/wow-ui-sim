@@ -23,6 +23,13 @@ The logger records:
 
 Nested/suppressed `CreateFrame` calls are excluded so the log stays focused on top-level runtime callers such as action-bar construction in `ActionBarMixin:ActionBar_OnLoad()`.
 
+`src/lua_api/globals/template/mod.rs` also supports section-level template timing via:
+
+- `WOW_SIM_PROFILE_TEMPLATE_APPLY=1` — log slow template-application steps
+- `WOW_SIM_PROFILE_TEMPLATE_APPLY_MIN_MS=<n>` — minimum total duration to log, default `10`
+
+This breaks a template apply into mixins, key values, direct Rust props, layers, button textures, child creation, animation groups, and script wiring.
+
 ### Action-bar buttons dominate runtime frame creation
 
 `ActionBarMixin:ActionBar_OnLoad()` creates one button container and one button per slot. The button creation call is:
@@ -68,6 +75,46 @@ The action-bar button templates are deep inheritance stacks:
 
 `ActionButtonTemplate.xml` also creates many child regions/frames per button: icon layers, masks, cooldowns, overlays, text containers, autocast overlay, animation groups, and button state textures. Each runtime button therefore pays for substantial XML-driven child creation and template merging before its Lua `OnLoad` code even matters.
 
+### Follow-up profiling changed the hot path
+
+Section-level template timing showed the next real bottleneck was not key values or mixin copying. On the hot action-bar families, the dominant buckets were:
+
+- `ActionBarButtonCodeTemplate` — almost entirely `scripts`
+- `PetActionButtonTemplate` — almost entirely `scripts`
+- `ActionButtonSpellFXTemplate` — almost entirely `children`
+- `ActionButtonTemplate` — mostly `children`, `layers`, and `button_textures`
+- `MinimalScrollBar` — mostly `children`
+
+That led to two targeted fast paths:
+
+1. In `template/elements.rs`, method-only XML script handlers now bypass generated per-frame Lua chunks and install handlers directly.
+2. In `template/children.rs`, direct Rust child creation was widened from the initial action-button family to `ActionButtonSpellFXTemplate` and `MinimalScrollBar`.
+
+### Current results on the shared worktree (2026-04-13)
+
+On an idle-core `wow-sim --no-addons --no-saved-vars` run in the current shared worktree, startup improved:
+
+- Blizzard addons loaded: `36.79s -> 28.89s`
+- `xmlproc`: `33.22s -> 24.87s`
+- setup `exec_lua`: `12.23s -> 11.46s`
+- lifecycle: `18.38s -> 10.34s`
+- `PLAYER_ENTERING_WORLD`: `44.02s -> 37.44s`
+
+Representative template-total drops on the same shared-tree comparison:
+
+- `MainBarActionBarButtonTemplate`: `2219.04ms -> 307.30ms`
+- `PetActionButtonTemplate`: `1590.63ms -> 204.03ms`
+- `MultiBar7ButtonTemplate`: `1438.66ms -> 343.10ms`
+- `MultiBar1ButtonTemplate`: `1101.71ms -> 304.82ms`
+- `MinimalScrollBar`: `560.88ms -> 310.38ms`
+
+Residual hotspots after those changes:
+
+- `MinimalScrollBar` still spends most of its time in child creation
+- `ActionButtonSpellFXTemplate` still spends most of its time in child creation
+- `ActionButtonTemplate` still spends meaningful time in child creation, layers, and button textures
+- non-action-bar one-offs like `CompactArenaFrameTemplate` and `CompactPartyFrameTemplate` are now relatively more visible
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.
@@ -81,6 +128,9 @@ Most promising direction:
 ## Sources
 
 - [create_frame.rs](../../src/lua_api/globals/create_frame.rs) — runtime `CreateFrame` profiling hooks and timing buckets
+- [template/mod.rs](../../src/lua_api/globals/template/mod.rs) — template-apply section profiler
+- [template/elements.rs](../../src/lua_api/globals/template/elements.rs) — method-only XML script fast path
+- [template/children.rs](../../src/lua_api/globals/template/children.rs) — direct Rust child creation hot-path selector
 - [ActionBar.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionBar.lua) — `ActionBar_OnLoad()` runtime button creation loop
 - [ActionButton.lua](../../Interface/BlizzardUI/Blizzard_ActionBar/Shared/ActionButton.lua) — action-button `OnLoad` handlers for comparison against template cost
 - [ActionButtonTemplate.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/ActionButtonTemplate.xml) — action-button template inheritance and child regions
