@@ -122,7 +122,7 @@ struct ResolvedTexture {
 
 /// Resolve a texture string as either an atlas name or a file path.
 fn resolve_texture_string(name: &str) -> ResolvedTexture {
-    if let Some(lookup) = crate::atlas::get_render_atlas_info(name) {
+    if let Some(lookup) = crate::atlas::get_atlas_info(name) {
         let info = lookup.info;
         ResolvedTexture {
             path: info.file.to_string(),
@@ -457,7 +457,7 @@ fn apply_atlas_to_button<F>(
     if already_set {
         return;
     }
-    if let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name) {
+    if let Some(lookup) = crate::atlas::get_atlas_info(atlas_name) {
         let tex_coords = (
             lookup.info.left_tex_coord,
             lookup.info.right_tex_coord,

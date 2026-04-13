@@ -73,6 +73,7 @@ pub fn get_nine_slice_atlas_info(name: &str) -> Option<NineSliceAtlasInfo> {
 
 /// Common square sizes used in WoW's size-suffixed atlas entries.
 const SIZE_SUFFIXES: &[u32] = &[16, 20, 32, 48, 64];
+const RENDER_PREFERRED_2X_ATLASES: &[&str] = &["questlog-icon-ticksquare"];
 
 fn exact_atlas_info(name: &str) -> Option<AtlasLookup> {
     crate::atlas_data::get_atlas_info(name)
@@ -95,6 +96,13 @@ fn paired_2x_variant(lower: &str) -> Option<&'static AtlasInfo> {
     }
 
     None
+}
+
+fn render_preferred_2x_variant(lower: &str) -> Option<&'static AtlasInfo> {
+    if !RENDER_PREFERRED_2X_ATLASES.contains(&lower) {
+        return None;
+    }
+    paired_2x_variant(lower)
 }
 
 /// Get atlas info by name (case-insensitive).
@@ -151,7 +159,7 @@ pub fn get_render_atlas_info(name: &str) -> Option<AtlasLookup> {
     let lower = name.to_lowercase();
 
     if exact_atlas_info(name).is_some() {
-        if let Some(info) = paired_2x_variant(&lower) {
+        if let Some(info) = render_preferred_2x_variant(&lower) {
             return Some(AtlasLookup {
                 info,
                 is_2x_fallback: true,
@@ -197,5 +205,15 @@ mod tests {
         assert_eq!(lookup.info.file, r"Interface\questframe\questlogframe2x");
         assert_eq!(lookup.width(), 14);
         assert_eq!(lookup.height(), 14);
+    }
+
+    #[test]
+    fn render_lookup_keeps_other_exact_atlases_on_their_base_texture() {
+        let lookup =
+            get_render_atlas_info("questlog-tab-side").expect("quest log tab atlas should exist");
+        assert!(!lookup.is_2x_fallback);
+        assert_eq!(lookup.info.file, r"Interface\questframe\questlogframe");
+        assert_eq!(lookup.width(), 51);
+        assert_eq!(lookup.height(), 60);
     }
 }

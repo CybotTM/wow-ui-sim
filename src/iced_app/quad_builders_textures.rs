@@ -250,7 +250,7 @@ fn stretch_slice_render<'a>(
         return None;
     }
 
-    let atlas_info = crate::atlas::get_render_atlas_info(atlas_name)?;
+    let atlas_info = crate::atlas::get_atlas_info(atlas_name)?;
     Some(StretchSliceRender {
         bounds,
         texture,
@@ -258,8 +258,8 @@ fn stretch_slice_render<'a>(
         top_px: slice.top as f32,
         right_px: slice.right as f32,
         bottom_px: slice.bottom as f32,
-        atlas_width_px: atlas_info.info.width as f32,
-        atlas_height_px: atlas_info.info.height as f32,
+        atlas_width_px: atlas_info.width() as f32,
+        atlas_height_px: atlas_info.height() as f32,
     })
 }
 
@@ -280,7 +280,7 @@ fn tile_slice_render<'a>(
         return None;
     }
 
-    let atlas_info = crate::atlas::get_render_atlas_info(atlas_name)?;
+    let atlas_info = crate::atlas::get_atlas_info(atlas_name)?;
     Some(TileSliceRender {
         bounds,
         texture,
@@ -288,8 +288,8 @@ fn tile_slice_render<'a>(
         top_px: slice.top as f32,
         right_px: slice.right as f32,
         bottom_px: slice.bottom as f32,
-        atlas_width_px: atlas_info.info.width as f32,
-        atlas_height_px: atlas_info.info.height as f32,
+        atlas_width_px: atlas_info.width() as f32,
+        atlas_height_px: atlas_info.height() as f32,
     })
 }
 
@@ -1071,7 +1071,11 @@ pub(crate) fn build_minimap_quads(
 
 #[cfg(test)]
 mod tests {
-    use super::{emit_texture_fill, remap_atlas_crop};
+    use super::{
+        BlendMode, TexturedSlice, emit_texture_fill, remap_atlas_crop, stretch_slice_render,
+        tile_slice_center_height, tile_slice_center_width, tile_slice_render,
+    };
+    use crate::atlas::get_render_atlas_info;
     use crate::render::QuadBatch;
     use crate::widget::{Frame, WidgetType};
     use iced::{Point, Rectangle, Size};
@@ -1080,6 +1084,22 @@ mod tests {
         let mut frame = Frame::new(WidgetType::Texture, None, None);
         frame.atlas = Some(name.to_string());
         frame
+    }
+
+    fn render_texture_slice(name: &str) -> TexturedSlice<'static> {
+        let lookup = get_render_atlas_info(name)
+            .unwrap_or_else(|| panic!("missing render atlas info for {name}"));
+        TexturedSlice {
+            path: lookup.info.file,
+            uvs: (
+                lookup.info.left_tex_coord,
+                lookup.info.right_tex_coord,
+                lookup.info.top_tex_coord,
+                lookup.info.bottom_tex_coord,
+            ),
+            tint: [1.0, 1.0, 1.0, 1.0],
+            blend: BlendMode::Alpha,
+        }
     }
 
     #[test]
@@ -1141,5 +1161,37 @@ mod tests {
             "tile atlas slices should flatten crop paths, got: {:?}",
             batch.texture_requests
         );
+    }
+
+    #[test]
+    fn tile_slice_render_uses_logical_dimensions_for_2x_fallback_atlas() {
+        let frame = texture_frame_with_atlas("questlog-frame");
+        let texture = render_texture_slice("questlog-frame");
+        let render = tile_slice_render(
+            &frame,
+            Rectangle::new(Point::ORIGIN, Size::new(314.0, 436.0)),
+            texture,
+        )
+        .expect("questlog-frame should use tile slice rendering");
+
+        assert_eq!(render.atlas_width_px, 107.0);
+        assert_eq!(render.atlas_height_px, 107.0);
+        assert_eq!(tile_slice_center_width(render), Some((208.0, 1.0)));
+        assert_eq!(tile_slice_center_height(render), Some((330.0, 1.0)));
+    }
+
+    #[test]
+    fn stretch_slice_render_uses_logical_dimensions_for_2x_fallback_atlas() {
+        let frame = texture_frame_with_atlas("common-button-tertiary-normal");
+        let texture = render_texture_slice("common-button-tertiary-normal");
+        let render = stretch_slice_render(
+            &frame,
+            Rectangle::new(Point::ORIGIN, Size::new(160.0, 32.0)),
+            texture,
+        )
+        .expect("common-button-tertiary-normal should use stretch slice rendering");
+
+        assert_eq!(render.atlas_width_px, 46.0);
+        assert_eq!(render.atlas_height_px, 34.0);
     }
 }

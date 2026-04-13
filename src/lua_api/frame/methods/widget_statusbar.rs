@@ -246,7 +246,7 @@ fn find_bar_texture_child(widgets: &crate::widget::WidgetRegistry, parent_id: u6
 }
 
 fn apply_bar_texture(widgets: &mut crate::widget::WidgetRegistry, child_id: u64, tex_str: &str) {
-    if let Some(lookup) = crate::atlas::get_render_atlas_info(tex_str) {
+    if let Some(lookup) = crate::atlas::get_atlas_info(tex_str) {
         let info = lookup.info;
         if let Some(frame) = widgets.get_mut_visual(child_id) {
             frame.texture = Some(info.file.to_string());

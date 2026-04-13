@@ -525,6 +525,71 @@ fn world_map_quest_track_checkboxes_use_high_res_checkbox_atlas() {
 }
 
 #[test]
+fn world_map_quest_track_checkbox_quads_match_texture_layout_bounds() {
+    let env = env_with_isolated_world_map();
+    let batch = build_screenshot_like_batch(&env, 1024, 768, None);
+    let state = env.state().borrow();
+    let quest_map_id = state
+        .widgets
+        .get_id_by_name("QuestMapFrame")
+        .expect("QuestMapFrame should exist after opening the world map");
+
+    let checkbox_ids: Vec<u64> = state
+        .widgets
+        .iter_ids()
+        .filter(|&id| {
+            let Some(frame) = state.widgets.get(id) else {
+                return false;
+            };
+            frame.atlas.as_deref() == Some("questlog-icon-ticksquare")
+                && is_descendant_of(&state.widgets, id, quest_map_id)
+        })
+        .collect();
+
+    assert!(
+        !checkbox_ids.is_empty(),
+        "world map quest log should contain questlog-icon-ticksquare textures"
+    );
+
+    for id in checkbox_ids {
+        let frame = state
+            .widgets
+            .get(id)
+            .expect("checkbox texture should still exist");
+        let expected_path = request_path_for_frame_texture(
+            frame
+                .texture
+                .as_deref()
+                .expect("checkbox texture should resolve to a texture path"),
+            frame.atlas_tex_coords,
+        );
+        let rect = compute_frame_rect(&state.widgets, id, 1024.0, 768.0);
+        let expected_bounds = (rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
+
+        let matching_bounds: Vec<_> = batch
+            .texture_requests
+            .iter()
+            .filter(|request| request.path == expected_path)
+            .map(|request| quad_bounds(&batch, request))
+            .filter(|bounds| {
+                let width_matches = (bounds.2 - bounds.0 - rect.width).abs() < 0.1;
+                let height_matches = (bounds.3 - bounds.1 - rect.height).abs() < 0.1;
+                let overlaps = bounds_overlap_rect(
+                    *bounds,
+                    (rect.x, rect.y, rect.width.max(0.1), rect.height.max(0.1)),
+                );
+                width_matches && height_matches && overlaps
+            })
+            .collect();
+
+        assert!(
+            !matching_bounds.is_empty(),
+            "checkbox quad should match texture layout bounds; id={id} expected_path={expected_path} expected_bounds={expected_bounds:?}"
+        );
+    }
+}
+
+#[test]
 fn isolated_world_map_dependency_closure_loads_declared_dependencies() {
     let ui = blizzard_ui_dir();
     let addons =
