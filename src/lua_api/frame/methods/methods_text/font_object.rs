@@ -38,18 +38,57 @@ fn set_font_object_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
             "Usage: SetFontObject(fontObject or \"fontName\")",
         ));
     }
+    // Hot path: same Font table/name already stored. AuraButton:OnUpdate calls
+    // `self.Duration:SetFontObject(SMALLER_AURA_DURATION_FONT)` every tick
+    // with a constant global Font — skip the 12-field table copy + store.
+    let store = get_or_create_font_object_store(lua)?;
+    if let Ok(existing) = store.get::<Value>(id)
+        && font_object_values_equal(&existing, &font_object)
+    {
+        return Ok(());
+    }
     let font_table = resolve_font_table(lua, &font_object);
     apply_font_table_to_frame(lua, id, font_table.as_ref());
-    store_font_object(lua, id, font_object)
-}
-
-/// Store font object in the global registry.
-fn store_font_object(lua: &Lua, id: u64, font_object: Value) -> mlua::Result<()> {
-    let store: mlua::Table = lua
-        .load("_G.__fontstring_font_objects = _G.__fontstring_font_objects or {}; return _G.__fontstring_font_objects")
-        .eval()?;
     store.set(id, font_object)?;
     Ok(())
+}
+
+/// Whether two Font values reference the same Lua object (same table or same
+/// string). Used by the SetFontObject fast-path to detect redundant calls.
+fn font_object_values_equal(a: &Value, b: &Value) -> bool {
+    match (a, b) {
+        (Value::Table(at), Value::Table(bt)) => at == bt,
+        (Value::String(a), Value::String(b)) => a
+            .to_str()
+            .ok()
+            .zip(b.to_str().ok())
+            .is_some_and(|(a, b)| *a == *b),
+        _ => false,
+    }
+}
+
+/// Return the `_G.__fontstring_font_objects` table, creating it on first access.
+///
+/// Replaces the per-call `lua.load("...").eval()` which compiled a Lua chunk
+/// every time — around 30µs per SetFontObject/GetFontObject call. Hot because
+/// `AuraButtonMixin:OnUpdate` calls `self.Duration:SetFontObject(...)` each
+/// frame. The table is cached in the Lua registry so repeated lookups are
+/// O(1) after the first.
+fn get_or_create_font_object_store(lua: &Lua) -> mlua::Result<mlua::Table> {
+    if let Ok(t) = lua.named_registry_value::<mlua::Table>("__fontstring_font_objects_cache") {
+        return Ok(t);
+    }
+    let globals = lua.globals();
+    let table = match globals.get::<Value>("__fontstring_font_objects")? {
+        Value::Table(t) => t,
+        _ => {
+            let t = lua.create_table()?;
+            globals.set("__fontstring_font_objects", t.clone())?;
+            t
+        }
+    };
+    lua.set_named_registry_value("__fontstring_font_objects_cache", table.clone())?;
+    Ok(table)
 }
 
 /// GetFontObject implementation.
@@ -67,9 +106,7 @@ fn get_font_object_impl(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Res
         return get_or_create_auto_font(lua, id);
     }
 
-    let store: mlua::Table = lua
-        .load("return _G.__fontstring_font_objects or {}")
-        .eval()?;
+    let store = get_or_create_font_object_store(lua)?;
     let font: Value = store.get(id)?;
     Ok(font)
 }
@@ -81,9 +118,7 @@ pub(super) fn get_frame_font_object(lua: &Lua, id: u64) -> mlua::Result<Option<m
 
 /// Get the stored font object for a SimpleHTML text type.
 fn get_font_object_for_type(lua: &Lua, id: u64, type_str: &str) -> mlua::Result<Value> {
-    let store: mlua::Table = lua
-        .load("return _G.__fontstring_font_objects or {}")
-        .eval()?;
+    let store = get_or_create_font_object_store(lua)?;
     let key = format!("{}_{}", id, type_str);
     let font: Value = store.get(key)?;
     Ok(font)
@@ -130,9 +165,7 @@ fn set_font_object_for_text_type(
         style.font_object = font_name;
     }
     drop(state);
-    let store: mlua::Table = lua
-        .load("_G.__fontstring_font_objects = _G.__fontstring_font_objects or {}; return _G.__fontstring_font_objects")
-        .eval()?;
+    let store = get_or_create_font_object_store(lua)?;
     let key = format!("{}_{}", id, type_str);
     if let Some(fo) = args_vec.get(1).cloned() {
         store.set(key, fo)?;
@@ -154,9 +187,7 @@ fn needs_auto_font_object(lua: &Lua, id: u64) -> bool {
 
 /// Get or create the auto-created Font object for a MessageFrame or EditBox.
 fn get_or_create_auto_font(lua: &Lua, id: u64) -> mlua::Result<Value> {
-    let store: mlua::Table = lua
-        .load("_G.__auto_fonts = _G.__auto_fonts or {}; return _G.__auto_fonts")
-        .eval()?;
+    let store = get_or_create_auto_font_store(lua)?;
     let existing: Value = store.get(id)?;
     if !existing.is_nil() {
         return Ok(existing);
@@ -164,6 +195,25 @@ fn get_or_create_auto_font(lua: &Lua, id: u64) -> mlua::Result<Value> {
     let font = crate::lua_api::globals::font_api::create_bare_font(lua)?;
     store.set(id, font.clone())?;
     Ok(Value::Table(font))
+}
+
+/// Return the `_G.__auto_fonts` table, creating it on first access.
+/// Cached in the Lua registry so subsequent lookups skip the chunk compile.
+fn get_or_create_auto_font_store(lua: &Lua) -> mlua::Result<mlua::Table> {
+    if let Ok(t) = lua.named_registry_value::<mlua::Table>("__auto_fonts_cache") {
+        return Ok(t);
+    }
+    let globals = lua.globals();
+    let table = match globals.get::<Value>("__auto_fonts")? {
+        Value::Table(t) => t,
+        _ => {
+            let t = lua.create_table()?;
+            globals.set("__auto_fonts", t.clone())?;
+            t
+        }
+    };
+    lua.set_named_registry_value("__auto_fonts_cache", table.clone())?;
+    Ok(table)
 }
 
 /// Resolve a font object Value (table or name string) into an optional Table.
