@@ -1,6 +1,6 @@
 use iced::{Point, Rectangle, Size};
 
-use crate::atlas::{AtlasSliceMode, get_atlas_info, get_atlas_slice_info};
+use crate::atlas::{AtlasSliceMode, get_atlas_slice_info};
 use crate::render::{BlendMode, QuadBatch};
 
 use super::super::statusbar::StatusBarFill;
@@ -250,7 +250,7 @@ fn stretch_slice_render<'a>(
         return None;
     }
 
-    let atlas_info = get_atlas_info(atlas_name)?;
+    let atlas_info = crate::atlas::get_render_atlas_info(atlas_name)?;
     Some(StretchSliceRender {
         bounds,
         texture,
@@ -280,7 +280,7 @@ fn tile_slice_render<'a>(
         return None;
     }
 
-    let atlas_info = get_atlas_info(atlas_name)?;
+    let atlas_info = crate::atlas::get_render_atlas_info(atlas_name)?;
     Some(TileSliceRender {
         bounds,
         texture,

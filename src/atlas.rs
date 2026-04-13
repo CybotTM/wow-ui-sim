@@ -74,6 +74,29 @@ pub fn get_nine_slice_atlas_info(name: &str) -> Option<NineSliceAtlasInfo> {
 /// Common square sizes used in WoW's size-suffixed atlas entries.
 const SIZE_SUFFIXES: &[u32] = &[16, 20, 32, 48, 64];
 
+fn exact_atlas_info(name: &str) -> Option<AtlasLookup> {
+    crate::atlas_data::get_atlas_info(name)
+}
+
+fn paired_2x_variant(lower: &str) -> Option<&'static AtlasInfo> {
+    if lower.ends_with("_1x")
+        || lower.ends_with("-1x")
+        || lower.ends_with("_2x")
+        || lower.ends_with("-2x")
+    {
+        return None;
+    }
+
+    for sep in ["_", "-"] {
+        let with_2x = format!("{lower}{sep}2x");
+        if let Some(info) = ATLAS_DB.get(&with_2x as &str) {
+            return Some(info);
+        }
+    }
+
+    None
+}
+
 /// Get atlas info by name (case-insensitive).
 ///
 /// Resolution order:
@@ -83,7 +106,7 @@ const SIZE_SUFFIXES: &[u32] = &[16, 20, 32, 48, 64];
 pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     let lower = name.to_lowercase();
 
-    if let Some(lookup) = crate::atlas_data::get_atlas_info(name) {
+    if let Some(lookup) = exact_atlas_info(name) {
         return Some(lookup);
     }
 
@@ -120,6 +143,26 @@ pub fn get_atlas_info(name: &str) -> Option<AtlasLookup> {
     try_spelling_corrections(&lower)
 }
 
+/// Get atlas info for rendering, preferring a paired 2x entry when one exists.
+///
+/// This keeps logical atlas dimensions unchanged while sourcing texels from
+/// the higher-resolution atlas file.
+pub fn get_render_atlas_info(name: &str) -> Option<AtlasLookup> {
+    let lower = name.to_lowercase();
+
+    if exact_atlas_info(name).is_some() {
+        if let Some(info) = paired_2x_variant(&lower) {
+            return Some(AtlasLookup {
+                info,
+                is_2x_fallback: true,
+            });
+        }
+        return exact_atlas_info(name);
+    }
+
+    get_atlas_info(name)
+}
+
 /// Atlas DB has some Blizzard typos. Try known corrections.
 fn try_spelling_corrections(lower: &str) -> Option<AtlasLookup> {
     let corrected = lower.replace("divider", "devider");
@@ -131,7 +174,7 @@ fn try_spelling_corrections(lower: &str) -> Option<AtlasLookup> {
 
 #[cfg(test)]
 mod tests {
-    use super::get_atlas_info;
+    use super::{get_atlas_info, get_render_atlas_info};
 
     #[test]
     fn exact_unsuffixed_atlas_beats_2x_fallback() {
@@ -144,5 +187,15 @@ mod tests {
         );
         assert_eq!(lookup.width(), 310);
         assert_eq!(lookup.height(), 89);
+    }
+
+    #[test]
+    fn render_lookup_prefers_paired_2x_atlas_without_changing_logical_size() {
+        let lookup = get_render_atlas_info("questlog-icon-ticksquare")
+            .expect("quest log checkbox atlas should exist");
+        assert!(lookup.is_2x_fallback);
+        assert_eq!(lookup.info.file, r"Interface\questframe\questlogframe2x");
+        assert_eq!(lookup.width(), 14);
+        assert_eq!(lookup.height(), 14);
     }
 }

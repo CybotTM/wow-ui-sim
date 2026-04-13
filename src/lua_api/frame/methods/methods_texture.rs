@@ -371,7 +371,7 @@ fn apply_set_atlas(lua: &mlua::Lua, id: u64, name: &str, use_atlas_size: bool) -
     if atlas_unchanged(lua, id, name, use_atlas_size) {
         return Ok(());
     }
-    let lookup = crate::atlas::get_atlas_info(name);
+    let lookup = crate::atlas::get_render_atlas_info(name);
     let prefer_nine_slice = lookup.as_ref().is_some_and(|l| l.is_2x_fallback);
     let ns_info = if lookup.is_none() || prefer_nine_slice {
         crate::atlas::get_nine_slice_atlas_info(name)

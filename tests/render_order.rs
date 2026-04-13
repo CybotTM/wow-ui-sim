@@ -475,6 +475,56 @@ fn opening_world_map_does_not_darken_the_strip_above_the_panel() {
 }
 
 #[test]
+fn world_map_quest_track_checkboxes_use_high_res_checkbox_atlas() {
+    let env = env_with_isolated_world_map();
+    let state = env.state().borrow();
+    let quest_map_id = state
+        .widgets
+        .get_id_by_name("QuestMapFrame")
+        .expect("QuestMapFrame should exist after opening the world map");
+
+    let checkbox_ids: Vec<u64> = state
+        .widgets
+        .iter_ids()
+        .filter(|&id| {
+            let Some(frame) = state.widgets.get(id) else {
+                return false;
+            };
+            frame.atlas.as_deref() == Some("questlog-icon-ticksquare")
+                && is_descendant_of(&state.widgets, id, quest_map_id)
+        })
+        .collect();
+
+    assert!(
+        !checkbox_ids.is_empty(),
+        "world map quest log should contain questlog-icon-ticksquare textures"
+    );
+
+    for id in checkbox_ids {
+        let frame = state
+            .widgets
+            .get(id)
+            .expect("checkbox texture should still exist");
+        let texture = frame
+            .texture
+            .as_deref()
+            .expect("checkbox texture should resolve to a texture path");
+        assert!(
+            texture.to_ascii_lowercase().contains("questlogframe2x"),
+            "quest log checkbox atlas should prefer the 2x texture path, got {texture}"
+        );
+        assert_eq!(
+            frame.width, 14.0,
+            "checkbox texture width should stay logical 14px"
+        );
+        assert_eq!(
+            frame.height, 14.0,
+            "checkbox texture height should stay logical 14px"
+        );
+    }
+}
+
+#[test]
 fn isolated_world_map_dependency_closure_loads_declared_dependencies() {
     let ui = blizzard_ui_dir();
     let addons =
