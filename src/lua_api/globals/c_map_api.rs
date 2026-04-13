@@ -38,6 +38,11 @@ fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table
 fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set("GetAreaInfo", lua.create_function(get_area_info)?)?;
     t.set("GetMapInfo", lua.create_function(get_map_info)?)?;
+    t.set("GetMapGroupID", lua.create_function(get_map_group_id)?)?;
+    t.set(
+        "GetMapGroupMembersInfo",
+        lua.create_function(get_map_group_members_info)?,
+    )?;
     t.set(
         "GetBestMapForUnit",
         lua.create_function(|_, _unit: String| Ok(2248i32))?,
@@ -137,6 +142,17 @@ fn get_map_info(lua: &Lua, map_id: i32) -> Result<Value> {
     info.set("mapType", 3)?;
     info.set("parentMapID", 0)?;
     Ok(Value::Table(info))
+}
+
+fn get_map_group_id(_lua: &Lua, _map_id: i32) -> Result<Value> {
+    // Blizzard checks this with `if not mapGroupID then`.
+    // Returning numeric 0 from the generated stub is truthy in Lua and
+    // incorrectly enables the world map floor dropdown.
+    Ok(Value::Nil)
+}
+
+fn get_map_group_members_info(_lua: &Lua, _map_group_id: Value) -> Result<Value> {
+    Ok(Value::Nil)
 }
 
 fn get_map_art_layers(lua: &Lua, map_id: i32) -> Result<mlua::Table> {

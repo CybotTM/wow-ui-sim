@@ -231,6 +231,75 @@ fn keybind_m_opens_world_map() {
 }
 
 #[test]
+fn world_map_floor_dropdown_hidden_without_subzone_or_map_group() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+        env.state().borrow_mut().world.sub_zone_name.clear();
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                local floorDropdown
+                for _, frame in ipairs(WorldMapFrame.overlayFrames or {}) do
+                    if type(frame.RefreshMenu) == "function" then
+                        floorDropdown = frame
+                        break
+                    end
+                end
+
+                if not floorDropdown then
+                    return "missing_floor_dropdown"
+                end
+
+                local mapID = WorldMapFrame:GetMapID()
+                local groupID = C_Map.GetMapGroupID(mapID)
+                local members = C_Map.GetMapGroupMembersInfo(groupID)
+                local memberCount = 0
+                if type(members) == "table" then
+                    for _ in ipairs(members) do
+                        memberCount = memberCount + 1
+                    end
+                end
+
+                if floorDropdown:IsShown() then
+                    return string.format(
+                        "shown:subzone=%s:groupID=%s:groupType=%s:membersType=%s:members=%d",
+                        tostring(GetSubZoneText()),
+                        tostring(groupID),
+                        type(groupID),
+                        type(members),
+                        memberCount
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Opening world map with no subzone produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "World map floor dropdown should stay hidden when there is no subzone or map group: {result}"
+        );
+    }
+}
+
+#[test]
 fn keybind_m_toggles_world_map_without_errors() {
     test_timeout! {
         let env = setup_env();
