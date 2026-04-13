@@ -167,7 +167,7 @@ const UTILITY_STUBS_LUA: &str = r##"
         function pool:Acquire()
             local parent_frame = type(parent) == "string" and _G[parent] or parent
             if not parent_frame then parent_frame = UIParent end
-            local tex = parent_frame:CreateTexture(nil, layer or "ARTWORK")
+            local tex = parent_frame:CreateTexture(nil, layer or "ARTWORK", template, subLayer)
             table.insert(self.active, tex)
             return tex
         end

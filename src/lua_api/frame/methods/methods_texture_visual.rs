@@ -311,24 +311,20 @@ fn add_rotation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetDrawLayer", |lua, this, args: mlua::MultiValue| {
-        use crate::widget::DrawLayer;
         let args_vec: Vec<Value> = args.into_iter().collect();
-        if let Some(Value::String(s)) = args_vec.first() {
-            let layer_str = s.to_string_lossy();
-            if let Some(layer) = DrawLayer::from_str(&layer_str) {
-                let state_rc = get_sim_state(lua);
-                let mut state = state_rc.borrow_mut();
-                if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-                    frame.draw_layer = layer;
-                    frame.draw_sub_layer = match args_vec.get(1) {
-                        Some(Value::Integer(n)) => *n as i32,
-                        Some(Value::Number(n)) => *n as i32,
-                        _ => 0,
-                    };
-                }
-                state.invalidate_strata_buckets();
-            }
+        let Some((layer, sub_layer)) = draw_layer_request_from_args(&args_vec) else {
+            return Ok(());
+        };
+        let state_rc = get_sim_state(lua);
+        if draw_layer_matches(&state_rc.borrow(), this.0, layer, sub_layer) {
+            return Ok(());
         }
+        let mut state = state_rc.borrow_mut();
+        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
+            frame.draw_layer = layer;
+            frame.draw_sub_layer = sub_layer;
+        }
+        state.invalidate_strata_buckets();
         Ok(())
     });
     methods.add_method("GetDrawLayer", |lua, this, ()| {
@@ -340,6 +336,31 @@ fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             Ok(("ARTWORK".to_string(), 0i32))
         }
     });
+}
+
+fn draw_layer_request_from_args(args: &[Value]) -> Option<(crate::widget::DrawLayer, i32)> {
+    let Value::String(layer_value) = args.first()? else {
+        return None;
+    };
+    let layer = crate::widget::DrawLayer::from_str(&layer_value.to_string_lossy())?;
+    let sub_layer = match args.get(1) {
+        Some(Value::Integer(n)) => *n as i32,
+        Some(Value::Number(n)) => *n as i32,
+        _ => 0,
+    };
+    Some((layer, sub_layer))
+}
+
+fn draw_layer_matches(
+    state: &crate::lua_api::SimState,
+    id: u64,
+    layer: crate::widget::DrawLayer,
+    sub_layer: i32,
+) -> bool {
+    state
+        .widgets
+        .get(id)
+        .is_some_and(|frame| frame.draw_layer == layer && frame.draw_sub_layer == sub_layer)
 }
 
 fn add_visual_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {

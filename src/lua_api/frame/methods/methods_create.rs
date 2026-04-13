@@ -27,6 +27,14 @@ fn extract_string_arg(args: &[Value], index: usize) -> Option<String> {
     })
 }
 
+fn extract_i32_arg(args: &[Value], index: usize) -> Option<i32> {
+    match args.get(index) {
+        Some(Value::Integer(n)) => Some(*n as i32),
+        Some(Value::Number(n)) => Some(*n as i32),
+        _ => None,
+    }
+}
+
 /// Register a child widget in the state and cache its FrameRef UserData in `_G`.
 fn register_child_widget(
     lua: &mlua::Lua,
@@ -88,6 +96,7 @@ fn add_create_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let name_raw = extract_string_arg(&args, 0);
         let layer = extract_string_arg(&args, 1);
         let inherits = extract_string_arg(&args, 2);
+        let sub_level = extract_i32_arg(&args, 3);
         let name = resolve_child_name(lua, name_raw, id);
 
         let mut texture = Frame::new(WidgetType::Texture, name.clone(), Some(id));
@@ -96,6 +105,9 @@ fn add_create_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
             && let Some(draw_layer) = DrawLayer::from_str(&layer_str)
         {
             texture.draw_layer = draw_layer;
+        }
+        if let Some(sub_level) = sub_level {
+            texture.draw_sub_layer = sub_level;
         }
 
         // Apply template size from the texture template registry
