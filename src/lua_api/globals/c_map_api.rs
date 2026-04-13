@@ -5,6 +5,7 @@
 use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
+use std::collections::BTreeSet;
 use std::rc::Rc;
 
 pub(crate) const EXPLORED_LEFT_FRACTION: f32 = 0.5;
@@ -396,83 +397,59 @@ fn get_explored_area_ids_at_position(
     (map_id, pos): (i32, Value),
 ) -> Result<mlua::Table> {
     let areas = lua.create_table()?;
-    if !position_is_in_left_half(&pos) {
+    let Some((pixel_x, pixel_y)) = map_pixel_position(map_id, &pos) else {
         return Ok(areas);
+    };
+
+    let mut area_ids = BTreeSet::new();
+    for overlay in crate::map_exploration::get_half_explored_overlays_for_map(
+        map_id as u32,
+        EXPLORED_LEFT_FRACTION,
+    ) {
+        if !overlay.contains_pixel(pixel_x, pixel_y) {
+            continue;
+        }
+        area_ids.extend(overlay.area_ids());
     }
 
-    if crate::map_art::get_map_art(map_id as u32).is_some() {
-        areas.set(1, explored_area_id_for_map(map_id))?;
+    for (index, area_id) in area_ids.into_iter().enumerate() {
+        areas.set(index + 1, area_id)?;
     }
     Ok(areas)
 }
 
 fn get_explored_map_textures(lua: &Lua, map_id: i32) -> Result<mlua::Table> {
     let overlays = lua.create_table()?;
-    let Some((explored_width, layer_height, file_data_ids)) =
-        explored_left_half_overlay_data(map_id)
-    else {
-        return Ok(overlays);
-    };
-    let overlay = create_explored_overlay_table(lua, explored_width, layer_height, &file_data_ids)?;
-    overlays.set(1, overlay)?;
+    for (index, overlay_info) in crate::map_exploration::get_half_explored_overlays_for_map(
+        map_id as u32,
+        EXPLORED_LEFT_FRACTION,
+    )
+    .into_iter()
+    .enumerate()
+    {
+        let overlay = create_explored_overlay_table(lua, overlay_info)?;
+        overlays.set(index + 1, overlay)?;
+    }
 
     Ok(overlays)
 }
 
-fn explored_left_half_overlay_data(map_id: i32) -> Option<(u32, u32, Vec<u32>)> {
-    let info = crate::map_art::get_map_art(map_id as u32)?;
-    let layer = info.layers.first()?;
-    let tiles = info.tiles.first()?;
-
-    let tiles_wide = div_ceil(layer.layer_width, layer.tile_width);
-    let tiles_tall = div_ceil(layer.layer_height, layer.tile_height);
-    let explored_tiles_wide = tiles_wide.div_ceil(2);
-    let explored_width = (explored_tiles_wide * layer.tile_width).min(layer.layer_width);
-    let file_data_ids =
-        collect_left_half_tile_ids(tiles, tiles_wide, tiles_tall, explored_tiles_wide);
-    if file_data_ids.is_empty() {
-        return None;
-    }
-
-    Some((explored_width, layer.layer_height, file_data_ids))
-}
-
-fn collect_left_half_tile_ids(
-    tiles: &[u32],
-    tiles_wide: u32,
-    tiles_tall: u32,
-    explored_tiles_wide: u32,
-) -> Vec<u32> {
-    let mut file_data_ids = Vec::new();
-    for row in 0..tiles_tall {
-        for col in 0..explored_tiles_wide {
-            let tile_index = (row * tiles_wide + col) as usize;
-            if let Some(&file_data_id) = tiles.get(tile_index) {
-                file_data_ids.push(file_data_id);
-            }
-        }
-    }
-    file_data_ids
-}
-
 fn create_explored_overlay_table(
     lua: &Lua,
-    explored_width: u32,
-    layer_height: u32,
-    file_data_ids: &[u32],
+    overlay_info: &crate::map_exploration::MapExplorationOverlay,
 ) -> Result<mlua::Table> {
-    let file_data_ids = create_file_data_id_table(lua, file_data_ids)?;
+    let file_data_ids = create_file_data_id_table(lua, &overlay_info.file_data_ids)?;
     let hit_rect = lua.create_table()?;
-    hit_rect.set("top", 0)?;
-    hit_rect.set("bottom", layer_height)?;
-    hit_rect.set("left", 0)?;
-    hit_rect.set("right", explored_width)?;
+    hit_rect.set("top", overlay_info.hit_rect_top)?;
+    hit_rect.set("bottom", overlay_info.hit_rect_bottom)?;
+    hit_rect.set("left", overlay_info.hit_rect_left)?;
+    hit_rect.set("right", overlay_info.hit_rect_right)?;
 
     let overlay = lua.create_table()?;
-    overlay.set("textureWidth", explored_width)?;
-    overlay.set("textureHeight", layer_height)?;
-    overlay.set("offsetX", 0)?;
-    overlay.set("offsetY", 0)?;
+    overlay.set("textureWidth", overlay_info.texture_width)?;
+    overlay.set("textureHeight", overlay_info.texture_height)?;
+    overlay.set("offsetX", overlay_info.offset_x)?;
+    overlay.set("offsetY", overlay_info.offset_y)?;
     overlay.set("isShownByMouseOver", false)?;
     overlay.set("isDrawOnTopLayer", false)?;
     overlay.set("fileDataIDs", file_data_ids)?;
@@ -488,20 +465,14 @@ fn create_file_data_id_table(lua: &Lua, file_data_ids: &[u32]) -> Result<mlua::T
     Ok(table)
 }
 
-fn position_is_in_left_half(pos: &Value) -> bool {
+fn map_pixel_position(map_id: i32, pos: &Value) -> Option<(f32, f32)> {
     let Value::Table(table) = pos else {
-        return false;
+        return None;
     };
-    let x = table.get::<f64>("x").unwrap_or(0.0);
-    x <= f64::from(EXPLORED_LEFT_FRACTION)
-}
-
-fn explored_area_id_for_map(map_id: i32) -> i32 {
-    map_id.saturating_mul(1_000).saturating_add(1)
-}
-
-fn div_ceil(value: u32, divisor: u32) -> u32 {
-    value.div_ceil(divisor.max(1))
+    let layer = crate::map_art::get_map_art(map_id as u32)?.layers.first()?;
+    let x = table.get::<f64>("x").ok()? as f32;
+    let y = table.get::<f64>("y").ok()? as f32;
+    Some((x * layer.layer_width as f32, y * layer.layer_height as f32))
 }
 
 /// C_DateAndTime namespace - date/time utilities.

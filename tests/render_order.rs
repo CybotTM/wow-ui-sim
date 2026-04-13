@@ -941,6 +941,109 @@ fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
 }
 
 #[test]
+fn isolated_world_map_exploration_overlay_renders_on_explored_half() {
+    common::with_timeout(120, move || {
+        let env = env_with_isolated_world_map();
+
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let map_rect = {
+            let state = env.state().borrow();
+            let world_map_id = state
+                .widgets
+                .get_id_by_name("WorldMapFrame")
+                .expect("isolated world map should create WorldMapFrame");
+            let fog_pin_id = state
+                .widgets
+                .iter_ids()
+                .find(|&id| {
+                    state.widgets.get(id).is_some_and(|frame| {
+                        frame
+                            .object_type_name
+                            .as_deref()
+                            .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
+                            && is_descendant_of(&state.widgets, id, world_map_id)
+                    })
+                })
+                .expect("isolated world map should create a FogOfWarFrame pin");
+            compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
+        };
+        let expected_overlay_bounds: (f32, f32, f32, f32) = env
+            .eval(
+                r#"
+                local mapID = C_Map.GetCurrentMapID()
+                local layer = C_Map.GetMapArtLayers(mapID)[1]
+                local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+                assert(type(explored) == "table" and #explored > 0, "missing explored overlays")
+
+                local minLeft = math.huge
+                local minTop = math.huge
+                local maxRight = 0
+                local maxBottom = 0
+
+                for _, overlay in ipairs(explored) do
+                    minLeft = math.min(minLeft, overlay.offsetX)
+                    minTop = math.min(minTop, overlay.offsetY)
+                    maxRight = math.max(maxRight, overlay.offsetX + overlay.textureWidth)
+                    maxBottom = math.max(maxBottom, overlay.offsetY + overlay.textureHeight)
+                end
+
+                return minLeft / layer.layerWidth,
+                    minTop / layer.layerHeight,
+                    maxRight / layer.layerWidth,
+                    maxBottom / layer.layerHeight
+            "#,
+            )
+            .expect("failed to compute expected exploration bounds");
+
+        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
+        let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
+        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
+
+        env.exec(
+            r#"
+            local pin = WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate")()
+            assert(pin, "missing exploration pin")
+            pin:Hide()
+        "#,
+        )
+        .expect("failed to hide exploration pin");
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
+        let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
+        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
+        let overlay_diff = diff_bounds(&visible_render, &hidden_render, 12)
+            .expect("exploration overlay should change pixels");
+        let expected_left = map_rect.x + map_rect.width * expected_overlay_bounds.0;
+        let expected_top = map_rect.y + map_rect.height * expected_overlay_bounds.1;
+        let expected_right = map_rect.x + map_rect.width * expected_overlay_bounds.2;
+        let expected_bottom = map_rect.y + map_rect.height * expected_overlay_bounds.3;
+        let tolerance = 32.0;
+
+        assert!(
+            (overlay_diff.0 as f32 - expected_left).abs() <= tolerance,
+            "exploration overlay should start where the API overlay data starts: diff={overlay_diff:?} expected_left={expected_left} rect={map_rect:?}"
+        );
+        assert!(
+            (overlay_diff.1 as f32 - expected_top).abs() <= tolerance,
+            "exploration overlay should start at the expected top bound: diff={overlay_diff:?} expected_top={expected_top} rect={map_rect:?}"
+        );
+        assert!(
+            (overlay_diff.2 as f32 - expected_right).abs() <= tolerance,
+            "exploration overlay should end where the API overlay data ends: diff={overlay_diff:?} expected_right={expected_right} rect={map_rect:?}"
+        );
+        assert!(
+            (overlay_diff.3 as f32 - expected_bottom).abs() <= tolerance,
+            "exploration overlay should end at the expected bottom bound: diff={overlay_diff:?} expected_bottom={expected_bottom} rect={map_rect:?}"
+        );
+    });
+}
+
+#[test]
 fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
     common::with_timeout(120, move || {
         let env = env_with_isolated_world_map();

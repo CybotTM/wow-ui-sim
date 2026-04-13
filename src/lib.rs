@@ -32,6 +32,7 @@ pub mod lua_server;
 pub mod manifest_interface_data;
 #[path = "../data/map_art.rs"]
 pub mod map_art;
+pub mod map_exploration;
 #[path = "../data/quest_poi_blobs.rs"]
 pub mod quest_poi_blobs;
 #[path = "../data/quest_ui_map.rs"]

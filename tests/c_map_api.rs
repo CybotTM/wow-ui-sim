@@ -352,6 +352,13 @@ fn test_get_explored_area_ids_only_cover_left_half() {
         .eval(
             r#"
         local mapID = C_Map.GetCurrentMapID()
+        local layer = C_Map.GetMapArtLayers(mapID)[1]
+        local overlays = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+        local overlay = overlays and overlays[1]
+        assert(overlay, "expected at least one explored overlay on the default map")
+
+        local sampleX = (overlay.offsetX + (overlay.textureWidth / 2)) / layer.layerWidth
+        local sampleY = (overlay.offsetY + (overlay.textureHeight / 2)) / layer.layerHeight
 
         local function count(list)
             if type(list) ~= "table" then
@@ -365,7 +372,7 @@ fn test_get_explored_area_ids_only_cover_left_half() {
             return n
         end
 
-        local left = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.25, y = 0.50 })
+        local left = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = sampleX, y = sampleY })
         local right = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.75, y = 0.50 })
         return count(left), count(right)
     "#,
@@ -392,7 +399,7 @@ fn test_get_explored_map_textures() {
 }
 
 #[test]
-fn test_get_explored_map_textures_cover_left_half_of_current_map() {
+fn test_get_explored_map_textures_return_real_left_half_overlays_for_current_map() {
     let env = env();
     let matches_expected_overlay: bool = env
         .eval(
@@ -400,32 +407,46 @@ fn test_get_explored_map_textures_cover_left_half_of_current_map() {
         local mapID = C_Map.GetCurrentMapID()
         local layer = C_Map.GetMapArtLayers(mapID)[1]
         local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
-        local overlay = explored and explored[1]
-        if type(overlay) ~= "table" then
+        if type(explored) ~= "table" or #explored == 0 then
             return false
         end
 
-        local tilesWide = math.ceil(layer.layerWidth / layer.tileWidth)
-        local tilesTall = math.ceil(layer.layerHeight / layer.tileHeight)
-        local exploredTilesWide = math.ceil(tilesWide / 2)
-        local expectedWidth = math.min(layer.layerWidth, exploredTilesWide * layer.tileWidth)
+        local minCenter = 1
+        local maxCenter = 0
+        local overlayCount = 0
+        local hasMultiTileOverlay = false
+        local hasAreaTexture = false
 
-        local fileCount = 0
-        for _ in ipairs(overlay.fileDataIDs or {}) do
-            fileCount = fileCount + 1
+        for _, overlay in ipairs(explored) do
+            overlayCount = overlayCount + 1
+            local fileCount = 0
+            for _, fileDataID in ipairs(overlay.fileDataIDs or {}) do
+                fileCount = fileCount + 1
+                if fileDataID > 0 then
+                    hasAreaTexture = true
+                end
+            end
+
+            if fileCount > 1 then
+                hasMultiTileOverlay = true
+            end
+
+            local center = (overlay.offsetX + (overlay.textureWidth / 2)) / layer.layerWidth
+            minCenter = math.min(minCenter, center)
+            maxCenter = math.max(maxCenter, center)
         end
 
-        return overlay.offsetX == 0
-            and overlay.offsetY == 0
-            and overlay.textureWidth == expectedWidth
-            and overlay.textureHeight == layer.layerHeight
-            and fileCount == exploredTilesWide * tilesTall
+        return overlayCount > 1
+            and hasMultiTileOverlay
+            and hasAreaTexture
+            and minCenter < 0.5
+            and maxCenter <= 0.5
     "#,
         )
         .unwrap();
     assert!(
         matches_expected_overlay,
-        "GetExploredMapTextures should expose a single overlay covering the left half of the current map"
+        "GetExploredMapTextures should expose real explored-area overlays filtered to the explored half of the current map"
     );
 }
 
