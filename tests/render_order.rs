@@ -3,14 +3,17 @@
 mod common;
 
 use common::env_with_shared_xml;
+use image::RgbaImage;
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::{cell::RefCell, rc::Rc};
 use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::headless::render_to_image;
 use wow_ui_sim::render::{GlyphAtlas, WowFontSystem};
 use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::texture::TextureManager;
 use wow_ui_sim::toc::TocFile;
 
 /// Build strata buckets from a WowLuaEnv (mutable borrow), then return a clone.
@@ -22,6 +25,27 @@ fn build_strata_buckets(env: &wow_ui_sim::lua_api::WowLuaEnv) -> Vec<Vec<u64>> {
 
 fn make_font_system() -> Rc<RefCell<WowFontSystem>> {
     Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("./fonts"))))
+}
+
+fn make_texture_manager() -> Option<TextureManager> {
+    let home = dirs::home_dir().unwrap_or_default();
+    let local_textures = PathBuf::from("./textures");
+    let textures_path = if local_textures.exists() {
+        local_textures
+    } else {
+        let fallback = home.join("Repos/wow-ui-textures");
+        if !fallback.exists() {
+            return None;
+        }
+        fallback
+    };
+
+    let interface_path = home.join("Projects/wow/Interface");
+    let mut mgr = TextureManager::new(textures_path);
+    if interface_path.exists() {
+        mgr = mgr.with_interface_path(interface_path);
+    }
+    Some(mgr)
 }
 
 fn build_screenshot_like_batch(
@@ -75,29 +99,30 @@ fn is_descendant_of(
     }
 }
 
-fn texture_request_bounds(
-    batch: &wow_ui_sim::render::QuadBatch,
-    texture_path: &str,
-) -> Option<(f32, f32, f32, f32)> {
-    let mut min_x = f32::INFINITY;
-    let mut min_y = f32::INFINITY;
-    let mut max_x = f32::NEG_INFINITY;
-    let mut max_y = f32::NEG_INFINITY;
+fn diff_bounds(
+    before: &RgbaImage,
+    after: &RgbaImage,
+    per_channel_tolerance: u8,
+) -> Option<(u32, u32, u32, u32)> {
+    let mut min_x = u32::MAX;
+    let mut min_y = u32::MAX;
+    let mut max_x = 0;
+    let mut max_y = 0;
     let mut found = false;
 
-    for request in batch
-        .texture_requests
-        .iter()
-        .filter(|request| request.path == texture_path)
-    {
-        let start = request.vertex_start as usize;
-        let end = start + request.vertex_count as usize;
-        for vertex in &batch.vertices[start..end] {
-            min_x = min_x.min(vertex.position[0]);
-            min_y = min_y.min(vertex.position[1]);
-            max_x = max_x.max(vertex.position[0]);
-            max_y = max_y.max(vertex.position[1]);
-            found = true;
+    for y in 0..before.height() {
+        for x in 0..before.width() {
+            let lhs = before.get_pixel(x, y).0;
+            let rhs = after.get_pixel(x, y).0;
+            let differs =
+                (0..4).any(|channel| lhs[channel].abs_diff(rhs[channel]) > per_channel_tolerance);
+            if differs {
+                min_x = min_x.min(x);
+                min_y = min_y.min(y);
+                max_x = max_x.max(x);
+                max_y = max_y.max(y);
+                found = true;
+            }
         }
     }
 
@@ -874,10 +899,9 @@ fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
             compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
         };
 
+        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
         let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
-        let visible_fog_bounds =
-            texture_request_bounds(&visible_batch, "Interface/Map/MapFogOfWar")
-                .expect("visible world map batch should contain the fog texture request");
+        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
 
         env.exec(
             r#"
@@ -890,24 +914,28 @@ fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
         wow_ui_sim::startup::process_pending_timers(&env);
         wow_ui_sim::startup::fire_one_on_update_tick(&env);
 
+        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
         let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
-        let hidden_fog_bounds = texture_request_bounds(&hidden_batch, "Interface/Map/MapFogOfWar");
+        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
+        let fog_diff =
+            diff_bounds(&visible_render, &hidden_render, 12).expect("fog should change pixels");
 
         assert!(
-            hidden_fog_bounds.is_none(),
-            "hidden world map batch should not contain a fog texture request: {hidden_fog_bounds:?}"
+            fog_diff.0 as f32 >= fog_rect.x + fog_rect.width * 0.49,
+            "fog should start on the unexplored half: diff={fog_diff:?} fog_rect={fog_rect:?}"
         );
         assert!(
-            visible_fog_bounds.0 >= fog_rect.x + fog_rect.width * 0.49,
-            "fog should start on the unexplored half: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
+            fog_diff.2 as f32 >= fog_rect.x + fog_rect.width * 0.92,
+            "fog should reach the right side of the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
         );
         assert!(
-            visible_fog_bounds.2 <= fog_rect.x + fog_rect.width + 1.0,
-            "fog should not extend beyond the fog frame: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
+            fog_diff.2 as f32 <= fog_rect.x + fog_rect.width + 2.0,
+            "fog should not extend beyond the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
         );
         assert!(
-            visible_fog_bounds.3 - visible_fog_bounds.1 >= fog_rect.height - 1.0,
-            "fog should cover the full fog-frame height: fog_bounds={visible_fog_bounds:?} fog_rect={fog_rect:?}"
+            fog_diff.1 as f32 <= fog_rect.y + 2.0
+                && fog_diff.3 as f32 >= fog_rect.y + fog_rect.height - 2.0,
+            "fog should cover the full fog-frame height: diff={fog_diff:?} fog_rect={fog_rect:?}"
         );
     });
 }
