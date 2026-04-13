@@ -73,6 +73,48 @@ fn test_scrollframe_update_scroll_child_rect_uses_resolved_subtree_bounds() {
 }
 
 #[test]
+fn test_scrollframe_same_offsets_do_not_dirty_render_state() {
+    let env = WowLuaEnv::new().unwrap();
+
+    env.exec(
+        r#"
+        local sf = CreateFrame("ScrollFrame", "TestScrollFrameNoRenderDirty", UIParent)
+        sf:SetSize(100, 100)
+        sf:SetHorizontalScroll(25)
+        sf:SetVerticalScroll(30)
+    "#,
+    )
+    .unwrap();
+
+    {
+        let state = env.state().borrow();
+        let _ = state.widgets.take_render_dirty_with_ids();
+    }
+
+    env.exec(
+        r#"
+        TestScrollFrameNoRenderDirty:SetHorizontalScroll(25)
+        TestScrollFrameNoRenderDirty:SetVerticalScroll(30)
+    "#,
+    )
+    .unwrap();
+
+    let (dirty_mask, dirty_ids) = {
+        let state = env.state().borrow();
+        state.widgets.take_render_dirty_with_ids()
+    };
+
+    assert_eq!(
+        dirty_mask, 0,
+        "same scroll offsets should not dirty render state"
+    );
+    assert!(
+        dirty_ids.is_some_and(|ids| ids.is_empty()),
+        "same scroll offsets should not enqueue dirty frame IDs"
+    );
+}
+
+#[test]
 fn test_scrollframe_metatable_does_not_advertise_set_max_lines() {
     let env = WowLuaEnv::new().unwrap();
 

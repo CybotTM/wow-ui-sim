@@ -410,28 +410,43 @@ fn scroll_child_range_size(
 }
 
 fn add_scrollframe_offset_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_scroll_offset_setter(methods, "SetHorizontalScroll", |frame, offset| {
-        frame.scroll_horizontal = offset
-    });
+    add_scroll_offset_setter(
+        methods,
+        "SetHorizontalScroll",
+        |frame| frame.scroll_horizontal,
+        |frame, offset| frame.scroll_horizontal = offset,
+    );
     add_scroll_offset_getter(methods, "GetHorizontalScroll", |frame| {
         frame.scroll_horizontal
     });
-    add_scroll_offset_setter(methods, "SetVerticalScroll", |frame, offset| {
-        frame.scroll_vertical = offset
-    });
+    add_scroll_offset_setter(
+        methods,
+        "SetVerticalScroll",
+        |frame| frame.scroll_vertical,
+        |frame, offset| frame.scroll_vertical = offset,
+    );
     add_scroll_offset_getter(methods, "GetVerticalScroll", |frame| frame.scroll_vertical);
 }
 
-fn add_scroll_offset_setter<M, F>(methods: &mut M, name: &'static str, setter: F)
+fn add_scroll_offset_setter<M, R, W>(methods: &mut M, name: &'static str, read: R, write: W)
 where
     M: mlua::UserDataMethods<FrameRef>,
-    F: Fn(&mut crate::widget::Frame, f64) + Copy + 'static,
+    R: Fn(&crate::widget::Frame) -> f64 + Copy + 'static,
+    W: Fn(&mut crate::widget::Frame, f64) + Copy + 'static,
 {
     methods.add_method(name, move |lua, this, offset: f64| {
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        if state
+            .widgets
+            .get(this.0)
+            .is_some_and(|frame| read(frame) == offset)
+        {
+            return Ok(());
+        }
+
         if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            setter(frame, offset);
+            write(frame, offset);
         }
         Ok(())
     });

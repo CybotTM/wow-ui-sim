@@ -125,6 +125,99 @@ fn test_set_size_same_values_no_dirty() {
 }
 
 #[test]
+fn test_set_size_same_values_no_render_dirty() {
+    let (t, _) = load_test_lua(
+        "layout-size-no-render-dirty",
+        r#"
+        local f = CreateFrame("Frame", "SameSizeNoRenderDirtyFrame", UIParent)
+        f:SetSize(50, 30)
+    "#,
+    );
+
+    {
+        let state = t.env.state().borrow();
+        let _ = state.widgets.take_render_dirty_with_ids();
+    }
+
+    t.env
+        .exec("SameSizeNoRenderDirtyFrame:SetSize(50, 30)")
+        .unwrap();
+
+    let (dirty_mask, dirty_ids) = {
+        let state = t.env.state().borrow();
+        state.widgets.take_render_dirty_with_ids()
+    };
+    assert_eq!(dirty_mask, 0, "same SetSize should not dirty render state");
+    assert!(
+        dirty_ids.is_some_and(|ids| ids.is_empty()),
+        "same SetSize should not enqueue dirty frame IDs"
+    );
+}
+
+#[test]
+fn test_set_width_same_value_no_render_dirty() {
+    let (t, _) = load_test_lua(
+        "layout-width-no-render-dirty",
+        r#"
+        local f = CreateFrame("Frame", "SameWidthNoRenderDirtyFrame", UIParent)
+        f:SetSize(50, 30)
+    "#,
+    );
+
+    {
+        let state = t.env.state().borrow();
+        let _ = state.widgets.take_render_dirty_with_ids();
+    }
+
+    t.env
+        .exec("SameWidthNoRenderDirtyFrame:SetWidth(50)")
+        .unwrap();
+
+    let (dirty_mask, dirty_ids) = {
+        let state = t.env.state().borrow();
+        state.widgets.take_render_dirty_with_ids()
+    };
+    assert_eq!(dirty_mask, 0, "same SetWidth should not dirty render state");
+    assert!(
+        dirty_ids.is_some_and(|ids| ids.is_empty()),
+        "same SetWidth should not enqueue dirty frame IDs"
+    );
+}
+
+#[test]
+fn test_set_height_same_value_no_render_dirty() {
+    let (t, _) = load_test_lua(
+        "layout-height-no-render-dirty",
+        r#"
+        local f = CreateFrame("Frame", "SameHeightNoRenderDirtyFrame", UIParent)
+        f:SetSize(50, 30)
+    "#,
+    );
+
+    {
+        let state = t.env.state().borrow();
+        let _ = state.widgets.take_render_dirty_with_ids();
+    }
+
+    t.env
+        .exec("SameHeightNoRenderDirtyFrame:SetHeight(30)")
+        .unwrap();
+
+    let (dirty_mask, dirty_ids) = {
+        let state = t.env.state().borrow();
+        state.widgets.take_render_dirty_with_ids()
+    };
+    assert_eq!(
+        dirty_mask, 0,
+        "same SetHeight should not dirty render state"
+    );
+    assert!(
+        dirty_ids.is_some_and(|ids| ids.is_empty()),
+        "same SetHeight should not enqueue dirty frame IDs"
+    );
+}
+
+#[test]
 fn test_zero_size() {
     let (t, _) = load_test_lua(
         "layout-zero-size",

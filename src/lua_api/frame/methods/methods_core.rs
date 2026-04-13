@@ -119,6 +119,52 @@ fn raw_frame_size(lua: &mlua::Lua, id: u64) -> (f32, f32) {
         .unwrap_or((0.0, 0.0))
 }
 
+struct ExplicitSizeState {
+    width: f32,
+    height: f32,
+    width_is_text_auto: bool,
+}
+
+fn current_explicit_size_state(
+    state: &crate::lua_api::SimState,
+    id: u64,
+) -> Option<ExplicitSizeState> {
+    state.widgets.get(id).map(|frame| ExplicitSizeState {
+        width: frame.width,
+        height: frame.height,
+        width_is_text_auto: frame.width_is_text_auto,
+    })
+}
+
+fn clear_auto_width_flag(state: &mut crate::lua_api::SimState, id: u64) {
+    if let Some(frame) = state.widgets.get_mut(id) {
+        frame.width_is_text_auto = false;
+    }
+}
+
+fn apply_explicit_size(state: &mut crate::lua_api::SimState, id: u64, width: f32, height: f32) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.set_size(width, height);
+        frame.width_is_text_auto = false;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
+fn apply_explicit_width(state: &mut crate::lua_api::SimState, id: u64, width: f32) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.width = width;
+        frame.width_is_text_auto = false;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
+fn apply_explicit_height(state: &mut crate::lua_api::SimState, id: u64, height: f32) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.height = height;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
 fn add_size_setters<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_size(methods);
     add_set_width(methods);
@@ -133,18 +179,19 @@ fn add_set_size<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let changed = state
-            .widgets
-            .get(id)
-            .map(|f| f.width != width || f.height != height)
-            .unwrap_or(false);
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.set_size(width, height);
-            frame.width_is_text_auto = false;
+        let Some(current) = current_explicit_size_state(&state, id) else {
+            return Ok(());
+        };
+
+        let size_changed = current.width != width || current.height != height;
+        if !size_changed {
+            if current.width_is_text_auto {
+                clear_auto_width_flag(&mut state, id);
+            }
+            return Ok(());
         }
-        if changed {
-            state.widgets.mark_rect_dirty(id);
-        }
+
+        apply_explicit_size(&mut state, id, width, height);
         Ok(())
     });
 }
@@ -157,18 +204,18 @@ fn add_set_width<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let changed = state
-            .widgets
-            .get(id)
-            .map(|f| f.width != width)
-            .unwrap_or(false);
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.width = width;
-            frame.width_is_text_auto = false;
+        let Some(current) = current_explicit_size_state(&state, id) else {
+            return Ok(());
+        };
+
+        if current.width == width {
+            if current.width_is_text_auto {
+                clear_auto_width_flag(&mut state, id);
+            }
+            return Ok(());
         }
-        if changed {
-            state.widgets.mark_rect_dirty(id);
-        }
+
+        apply_explicit_width(&mut state, id, width);
         Ok(())
     });
 }
@@ -181,17 +228,15 @@ fn add_set_height<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
         }
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
-        let changed = state
-            .widgets
-            .get(id)
-            .map(|f| f.height != height)
-            .unwrap_or(false);
-        if let Some(frame) = state.widgets.get_mut_visual(id) {
-            frame.height = height;
+        let Some(current_height) = state.widgets.get(id).map(|f| f.height) else {
+            return Ok(());
+        };
+
+        if current_height == height {
+            return Ok(());
         }
-        if changed {
-            state.widgets.mark_rect_dirty(id);
-        }
+
+        apply_explicit_height(&mut state, id, height);
         Ok(())
     });
 }
