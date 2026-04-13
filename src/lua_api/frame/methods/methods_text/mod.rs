@@ -161,12 +161,16 @@ fn handle_set_text(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(
     let (text_child_id, is_html) = resolve_text_child(lua, &mut state, id, &text_str);
     let store_text = apply_html_strip(text_str, is_html);
 
-    set_text_on_frame(&mut state, id, store_text.clone());
-    if let Some(cid) = text_child_id {
-        set_text_on_frame(&mut state, cid, store_text);
-    }
+    let frame_text_changed = set_text_on_frame(&mut state, id, store_text.clone());
+    let child_text_changed = text_child_id
+        .map(|cid| set_text_on_frame(&mut state, cid, store_text.clone()))
+        .unwrap_or(false);
 
-    let ids_to_measure = collect_fontstring_measure_ids(&state, id, text_child_id);
+    let mut measure_candidates = vec![(id, frame_text_changed)];
+    if let Some(cid) = text_child_id {
+        measure_candidates.push((cid, child_text_changed));
+    }
+    let ids_to_measure = collect_fontstring_measure_ids(&state, &measure_candidates);
     drop(state);
 
     measure_and_apply_sizes(lua, &state_rc, &ids_to_measure);
@@ -235,21 +239,20 @@ struct FontStringMeasureInfo {
 
 /// Collect FontString IDs that need size measurement after text changes.
 fn collect_fontstring_measure_ids(
-    state: &std::cell::RefMut<'_, crate::lua_api::SimState>,
-    id: u64,
-    text_child_id: Option<u64>,
+    state: &crate::lua_api::SimState,
+    candidates: &[(u64, bool)],
 ) -> Vec<FontStringMeasureInfo> {
-    [Some(id), text_child_id]
+    candidates
         .into_iter()
-        .flatten()
-        .filter_map(|fid| {
-            let f = state.widgets.get(fid)?;
+        .filter(|(_, changed)| *changed)
+        .filter_map(|(fid, _)| {
+            let f = state.widgets.get(*fid)?;
             if f.widget_type != WidgetType::FontString {
                 return None;
             }
             let text = f.text.as_ref()?.clone();
             Some(FontStringMeasureInfo {
-                id: fid,
+                id: *fid,
                 text,
                 font: f.font.clone(),
                 font_size: f.font_size,
@@ -376,15 +379,53 @@ fn set_text_on_frame(
     state: &mut std::cell::RefMut<'_, crate::lua_api::SimState>,
     id: u64,
     text: Option<String>,
-) {
+) -> bool {
     if let Some(frame) = state.widgets.get(id) {
         if frame.text == text {
-            return;
+            return false;
         }
     }
     if let Some(frame) = state.widgets.get_mut_visual(id) {
         frame.text_stripped = text.as_ref().map(|t| crate::render::strip_wow_markup(t));
         frame.text = text;
+    }
+    true
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::SimState;
+    use crate::widget::{Frame, WidgetType};
+
+    #[test]
+    fn collect_fontstring_measure_ids_skips_unchanged_text_targets() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::FontString, Some("Duration".to_string()), None);
+        frame.text = Some("1m".to_string());
+        frame.font = Some("Fonts\\FRIZQT__.TTF".to_string());
+        frame.font_size = 12.0;
+        let id = frame.id;
+        state.widgets.register(frame);
+
+        let ids = collect_fontstring_measure_ids(&state, &[(id, false)]);
+        assert!(ids.is_empty(), "unchanged text should not be remeasured");
+    }
+
+    #[test]
+    fn collect_fontstring_measure_ids_keeps_changed_fontstrings() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::FontString, Some("Duration".to_string()), None);
+        frame.text = Some("59s".to_string());
+        frame.font = Some("Fonts\\FRIZQT__.TTF".to_string());
+        frame.font_size = 12.0;
+        let id = frame.id;
+        state.widgets.register(frame);
+
+        let ids = collect_fontstring_measure_ids(&state, &[(id, true)]);
+        assert_eq!(ids.len(), 1, "changed text should still be measured");
+        assert_eq!(ids[0].id, id);
+        assert_eq!(ids[0].text, "59s");
     }
 }
 
