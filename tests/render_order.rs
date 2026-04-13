@@ -325,6 +325,155 @@ fn late_created_frame_invalidates_cached_strata_buckets() {
 }
 
 #[test]
+fn late_set_draw_layer_invalidates_cached_strata_buckets() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "LateLayerParent", UIParent)
+        parent:SetSize(80, 80)
+        parent:SetPoint("CENTER")
+        parent:Show()
+
+        local circle = parent:CreateTexture("LateLayerCircle", "BACKGROUND")
+        circle:SetAllPoints()
+        circle:SetColorTexture(1, 0, 0, 1)
+
+        local map = parent:CreateTexture("LateLayerMap", "ARTWORK")
+        map:SetAllPoints()
+        map:SetColorTexture(0, 1, 0, 1)
+
+        local star = parent:CreateTexture("LateLayerStar", "OVERLAY")
+        star:SetAllPoints()
+        star:SetColorTexture(0, 0, 1, 1)
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+
+    env.exec(r#"LateLayerCircle:SetDrawLayer("ARTWORK", 1)"#)
+        .unwrap();
+
+    let buckets = build_strata_buckets(&env);
+    let state = env.state().borrow();
+    let medium_bucket = &buckets[wow_ui_sim::widget::FrameStrata::Medium.as_index()];
+    let circle_id = state
+        .widgets
+        .get_id_by_name("LateLayerCircle")
+        .expect("circle texture should exist");
+    let map_id = state
+        .widgets
+        .get_id_by_name("LateLayerMap")
+        .expect("map texture should exist");
+    let star_id = state
+        .widgets
+        .get_id_by_name("LateLayerStar")
+        .expect("star texture should exist");
+
+    let circle_pos = medium_bucket
+        .iter()
+        .position(|&id| id == circle_id)
+        .expect("circle should be in MEDIUM bucket");
+    let map_pos = medium_bucket
+        .iter()
+        .position(|&id| id == map_id)
+        .expect("map should be in MEDIUM bucket");
+    let star_pos = medium_bucket
+        .iter()
+        .position(|&id| id == star_id)
+        .expect("star should be in MEDIUM bucket");
+
+    assert!(
+        map_pos < circle_pos && circle_pos < star_pos,
+        "late SetDrawLayer should rebuild region ordering: expected map -> circle -> star, \
+         got positions map={map_pos} circle={circle_pos} star={star_pos}"
+    );
+}
+
+#[test]
+fn late_set_frame_level_invalidates_cached_strata_buckets() {
+    let env = env_with_shared_xml();
+
+    env.exec(
+        r#"
+        local parent = CreateFrame("Frame", "LateLevelParent", UIParent)
+        parent:SetSize(80, 80)
+        parent:SetPoint("CENTER")
+        parent:Show()
+
+        local circleFrame = CreateFrame("Frame", "LateLevelCircleFrame", parent)
+        circleFrame:SetAllPoints()
+        circleFrame:SetFrameLevel(1)
+        circleFrame:Show()
+
+        local circle = circleFrame:CreateTexture("LateLevelCircle", "ARTWORK")
+        circle:SetAllPoints()
+        circle:SetColorTexture(1, 0, 0, 1)
+
+        local mapFrame = CreateFrame("Frame", "LateLevelMapFrame", parent)
+        mapFrame:SetAllPoints()
+        mapFrame:SetFrameLevel(2)
+        mapFrame:Show()
+
+        local map = mapFrame:CreateTexture("LateLevelMap", "ARTWORK")
+        map:SetAllPoints()
+        map:SetColorTexture(0, 1, 0, 1)
+
+        local starFrame = CreateFrame("Frame", "LateLevelStarFrame", parent)
+        starFrame:SetAllPoints()
+        starFrame:SetFrameLevel(4)
+        starFrame:Show()
+
+        local star = starFrame:CreateTexture("LateLevelStar", "ARTWORK")
+        star:SetAllPoints()
+        star:SetColorTexture(0, 0, 1, 1)
+    "#,
+    )
+    .unwrap();
+
+    let _ = build_strata_buckets(&env);
+
+    env.exec(r#"LateLevelCircleFrame:SetFrameLevel(3)"#)
+        .unwrap();
+
+    let buckets = build_strata_buckets(&env);
+    let state = env.state().borrow();
+    let medium_bucket = &buckets[wow_ui_sim::widget::FrameStrata::Medium.as_index()];
+    let circle_frame_id = state
+        .widgets
+        .get_id_by_name("LateLevelCircleFrame")
+        .expect("circle frame should exist");
+    let map_frame_id = state
+        .widgets
+        .get_id_by_name("LateLevelMapFrame")
+        .expect("map frame should exist");
+    let star_frame_id = state
+        .widgets
+        .get_id_by_name("LateLevelStarFrame")
+        .expect("star frame should exist");
+
+    let circle_pos = medium_bucket
+        .iter()
+        .position(|&id| id == circle_frame_id)
+        .expect("circle frame should be in MEDIUM bucket");
+    let map_pos = medium_bucket
+        .iter()
+        .position(|&id| id == map_frame_id)
+        .expect("map frame should be in MEDIUM bucket");
+    let star_pos = medium_bucket
+        .iter()
+        .position(|&id| id == star_frame_id)
+        .expect("star frame should be in MEDIUM bucket");
+
+    assert!(
+        map_pos < circle_pos && circle_pos < star_pos,
+        "late SetFrameLevel should rebuild frame ordering: expected map -> circle -> star, \
+         got positions map={map_pos} circle={circle_pos} star={star_pos}"
+    );
+}
+
+#[test]
 fn world_map_tiles_render_after_tiled_background() {
     common::with_timeout(120, move || {
         let env = env_with_world_map();
@@ -350,7 +499,8 @@ fn world_map_tiles_render_after_tiled_background() {
                 let Some(frame) = state.widgets.get(id) else {
                     return false;
                 };
-                frame.texture
+                frame
+                    .texture
                     .as_deref()
                     .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
             })
@@ -388,7 +538,8 @@ fn world_quest_pin_icon_renders_after_world_map_tiles() {
                 let Some(frame) = state.widgets.get(id) else {
                     return false;
                 };
-                frame.texture
+                frame
+                    .texture
                     .as_deref()
                     .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
             })
@@ -492,7 +643,8 @@ fn world_quest_star_and_circle_emit_live_quads_after_map_tiles() {
                     let Some(frame) = state.widgets.get(id) else {
                         return false;
                     };
-                    frame.texture
+                    frame
+                        .texture
                         .as_deref()
                         .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
                 })

@@ -312,6 +312,7 @@ fn add_set_frame_level<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             frame.frame_level = level;
         }
         super::methods_hierarchy::propagate_strata_level_pub(&mut state.widgets, id);
+        state.invalidate_strata_buckets();
         Ok(())
     });
 }

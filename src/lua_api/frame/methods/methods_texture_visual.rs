@@ -326,6 +326,7 @@ fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                         _ => 0,
                     };
                 }
+                state.invalidate_strata_buckets();
             }
         }
         Ok(())
