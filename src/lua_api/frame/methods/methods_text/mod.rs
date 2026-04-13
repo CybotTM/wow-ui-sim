@@ -152,6 +152,13 @@ fn handle_set_text(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(
     let text_str = parse_text_arg(&mut args_iter);
 
     let state_rc = get_sim_state(lua);
+    // Hot path: OnUpdate handlers reapply constant text every frame
+    // (e.g., LeaveInstanceGroupButton:SetText(INSTANCE_PARTY_LEAVE)).
+    // Skip child resolution, HTML stripping, measurement, etc. when text
+    // already matches both self and the optional Text child.
+    if is_set_text_noop(&state_rc.borrow(), id, &text_str) {
+        return Ok(());
+    }
     let mut state = state_rc.borrow_mut();
 
     if let Some(ref text) = text_str {
@@ -160,21 +167,90 @@ fn handle_set_text(lua: &Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<(
 
     let (text_child_id, is_html) = resolve_text_child(lua, &mut state, id, &text_str);
     let store_text = apply_html_strip(text_str, is_html);
+    let frame_needs_measurement = state
+        .widgets
+        .get(id)
+        .is_some_and(fontstring_needs_measurement);
+    let child_needs_measurement = text_child_id
+        .and_then(|child_id| state.widgets.get(child_id))
+        .is_some_and(fontstring_needs_measurement);
 
     let frame_text_changed = set_text_on_frame(&mut state, id, store_text.clone());
     let child_text_changed = text_child_id
         .map(|cid| set_text_on_frame(&mut state, cid, store_text.clone()))
         .unwrap_or(false);
 
-    let mut measure_candidates = vec![(id, frame_text_changed)];
+    let mut measure_candidates = vec![(id, frame_text_changed || frame_needs_measurement)];
     if let Some(cid) = text_child_id {
-        measure_candidates.push((cid, child_text_changed));
+        measure_candidates.push((cid, child_text_changed || child_needs_measurement));
     }
     let ids_to_measure = collect_fontstring_measure_ids(&state, &measure_candidates);
     drop(state);
 
     measure_and_apply_sizes(lua, &state_rc, &ids_to_measure);
     Ok(())
+}
+
+/// Return true when SetText would not change any stored value or trigger
+/// side effects (tooltip line rewrite, lazy Text child creation, HTML strip).
+///
+/// Designed for the hot OnUpdate case where a handler reapplies a constant
+/// text string every frame. Keeping this read-only avoids the mutable borrow
+/// and HashMap lookups in the full `handle_set_text` path.
+fn is_set_text_noop(state: &crate::lua_api::SimState, id: u64, text_str: &Option<String>) -> bool {
+    // Tooltip frames always rewrite the tooltip line (color/wrap args may differ
+    // even when text is unchanged).
+    if state.tooltips.contains_key(&id) {
+        return false;
+    }
+    // SimpleHTML frames store the stripped form. Comparing raw text_str to the
+    // stripped stored text would be wrong; let the slow path handle it.
+    if state.simple_htmls.contains_key(&id) {
+        return false;
+    }
+    let Some(frame) = state.widgets.get(id) else {
+        return false;
+    };
+    let is_button = matches!(
+        frame.widget_type,
+        WidgetType::Button | WidgetType::CheckButton
+    );
+    let child_id = frame.children_keys.get("Text").copied();
+    // Lazy Text child creation is a one-time side effect: take the slow path
+    // for the first SetText on a Button so the child is created.
+    if is_button && text_str.is_some() && child_id.is_none() {
+        return false;
+    }
+    if frame.text != *text_str {
+        return false;
+    }
+    if fontstring_needs_measurement(frame) {
+        return false;
+    }
+    if let Some(cid) = child_id
+        && state
+            .widgets
+            .get(cid)
+            .map(|c| c.text != *text_str || fontstring_needs_measurement(c))
+            .unwrap_or(true)
+    {
+        return false;
+    }
+    true
+}
+
+fn fontstring_needs_measurement(frame: &crate::widget::Frame) -> bool {
+    if frame.widget_type != WidgetType::FontString {
+        return false;
+    }
+    if !frame.text.as_ref().is_some_and(|text| !text.is_empty()) {
+        return false;
+    }
+    if frame.height <= 0.0 {
+        return true;
+    }
+    let width_is_explicit = frame.word_wrap && frame.width > 0.0 && !frame.width_is_text_auto;
+    !width_is_explicit && frame.width <= 0.0
 }
 
 /// Parse the text argument from a SetText arg iterator.
@@ -405,6 +481,9 @@ mod tests {
         frame.text = Some("1m".to_string());
         frame.font = Some("Fonts\\FRIZQT__.TTF".to_string());
         frame.font_size = 12.0;
+        frame.width = 12.0;
+        frame.width_is_text_auto = true;
+        frame.height = 15.0;
         let id = frame.id;
         state.widgets.register(frame);
 
@@ -419,6 +498,9 @@ mod tests {
         frame.text = Some("59s".to_string());
         frame.font = Some("Fonts\\FRIZQT__.TTF".to_string());
         frame.font_size = 12.0;
+        frame.width = 18.0;
+        frame.width_is_text_auto = true;
+        frame.height = 15.0;
         let id = frame.id;
         state.widgets.register(frame);
 
@@ -426,6 +508,138 @@ mod tests {
         assert_eq!(ids.len(), 1, "changed text should still be measured");
         assert_eq!(ids[0].id, id);
         assert_eq!(ids[0].text, "59s");
+    }
+
+    fn make_button_with_text_child(state: &mut SimState, text: &str) -> (u64, u64) {
+        let mut button = Frame::new(WidgetType::Button, Some("Btn".to_string()), None);
+        button.text = Some(text.to_string());
+        let button_id = button.id;
+        state.widgets.register(button);
+
+        let mut child = Frame::new(WidgetType::FontString, None, Some(button_id));
+        child.text = Some(text.to_string());
+        child.width = 100.0;
+        child.height = 15.0;
+        let child_id = child.id;
+        state.widgets.register(child);
+        state.widgets.add_child(button_id, child_id);
+        if let Some(btn) = state.widgets.get_mut_visual(button_id) {
+            btn.children_keys.insert("Text".to_string(), child_id);
+        }
+        (button_id, child_id)
+    }
+
+    #[test]
+    fn set_text_noop_detects_matching_text_on_button_with_text_child() {
+        let mut state = SimState::default();
+        let (id, _child) = make_button_with_text_child(&mut state, "Leave Party");
+        assert!(is_set_text_noop(
+            &state,
+            id,
+            &Some("Leave Party".to_string())
+        ));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_changed_text_on_button() {
+        let mut state = SimState::default();
+        let (id, _child) = make_button_with_text_child(&mut state, "Leave Party");
+        assert!(!is_set_text_noop(
+            &state,
+            id,
+            &Some("Leave Instance Group".to_string())
+        ));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_button_without_text_child_when_setting_non_nil() {
+        let mut state = SimState::default();
+        let button = Frame::new(WidgetType::Button, Some("Btn".to_string()), None);
+        let id = button.id;
+        state.widgets.register(button);
+        // First SetText must take the slow path to create the lazy Text child.
+        assert!(!is_set_text_noop(
+            &state,
+            id,
+            &Some("Leave Party".to_string())
+        ));
+    }
+
+    #[test]
+    fn set_text_noop_detects_matching_text_on_fontstring() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::FontString, Some("Label".to_string()), None);
+        frame.text = Some("Hello".to_string());
+        frame.width = 35.0;
+        frame.width_is_text_auto = true;
+        frame.height = 15.0;
+        let id = frame.id;
+        state.widgets.register(frame);
+        assert!(is_set_text_noop(&state, id, &Some("Hello".to_string())));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_fontstring_that_needs_remeasurement() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::FontString, Some("Label".to_string()), None);
+        frame.text = Some("Hello".to_string());
+        frame.width = 35.0;
+        frame.width_is_text_auto = true;
+        frame.height = 0.0;
+        let id = frame.id;
+        state.widgets.register(frame);
+        assert!(!is_set_text_noop(&state, id, &Some("Hello".to_string())));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_stale_child_text() {
+        let mut state = SimState::default();
+        let (id, child_id) = make_button_with_text_child(&mut state, "Leave Party");
+        // Corrupt the child so it no longer matches self — slow path must run.
+        if let Some(child) = state.widgets.get_mut_visual(child_id) {
+            child.text = Some("stale".to_string());
+        }
+        assert!(!is_set_text_noop(
+            &state,
+            id,
+            &Some("Leave Party".to_string())
+        ));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_tooltip_frames() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::FontString, Some("Tip".to_string()), None);
+        frame.text = Some("Hello".to_string());
+        let id = frame.id;
+        state.widgets.register(frame);
+        state
+            .tooltips
+            .insert(id, crate::lua_api::tooltip::TooltipData::default());
+        // Tooltip frames must always re-run to pick up color/wrap args.
+        assert!(!is_set_text_noop(&state, id, &Some("Hello".to_string())));
+    }
+
+    #[test]
+    fn set_text_noop_rejects_simple_html_frames() {
+        let mut state = SimState::default();
+        let mut frame = Frame::new(WidgetType::SimpleHTML, Some("Html".to_string()), None);
+        frame.text = Some("Hello".to_string());
+        let id = frame.id;
+        state.widgets.register(frame);
+        state
+            .simple_htmls
+            .insert(id, crate::lua_api::simple_html::SimpleHtmlData::default());
+        assert!(!is_set_text_noop(&state, id, &Some("Hello".to_string())));
+    }
+
+    #[test]
+    fn set_text_noop_detects_both_nil() {
+        let mut state = SimState::default();
+        let frame = Frame::new(WidgetType::FontString, Some("Label".to_string()), None);
+        let id = frame.id;
+        state.widgets.register(frame);
+        assert!(is_set_text_noop(&state, id, &None));
     }
 }
 

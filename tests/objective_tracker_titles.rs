@@ -1,8 +1,9 @@
 mod common;
 
-use std::path::PathBuf;
+use std::{cell::RefCell, path::PathBuf, rc::Rc};
 use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::render::WowFontSystem;
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
@@ -10,6 +11,9 @@ fn blizzard_ui_dir() -> PathBuf {
 
 fn setup_full_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+    env.set_font_system(Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
+        "./fonts",
+    )))));
     env.set_screen_size(1024.0, 768.0);
 
     let ui = blizzard_ui_dir();
@@ -52,4 +56,35 @@ fn quest_objective_tracker_populates_titles_via_normal_async_load_path() {
         .unwrap();
 
     assert_eq!(titles, "Defending the Gates|Supply Run|The Lost Expedition");
+}
+
+#[test]
+fn quest_objective_tracker_measures_objective_line_text_height() {
+    let env = setup_full_ui();
+
+    let collapsed_lines: String = env
+        .eval(
+            r#"
+            local collapsed = {}
+            for _, blocks in pairs(QuestObjectiveTracker.usedBlocks or {}) do
+                for _, block in pairs(blocks) do
+                    for _, lineFrame in pairs(block.usedLines or {}) do
+                        local textFs = lineFrame.Text
+                        local text = textFs and textFs:GetText()
+                        if text and text ~= "" and textFs:GetHeight() <= 0 then
+                            table.insert(collapsed, text)
+                        end
+                    end
+                end
+            end
+            table.sort(collapsed)
+            return table.concat(collapsed, "|")
+            "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        collapsed_lines, "",
+        "objective line text should be measured, not collapsed to zero height"
+    );
 }
