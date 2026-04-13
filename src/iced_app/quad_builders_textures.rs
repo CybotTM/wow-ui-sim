@@ -747,6 +747,10 @@ fn emit_horiz_tiled_slice(
         return;
     }
 
+    if emit_unit_repeat_quad(batch, texture, bounds, source_uvs, tile_w) {
+        return;
+    }
+
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     emit_horiz_tiles(
         batch,
@@ -772,6 +776,10 @@ fn emit_vert_tiled_slice(
         || source_uvs.width <= 0.0
         || source_uvs.height <= 0.0
     {
+        return;
+    }
+
+    if emit_unit_repeat_quad(batch, texture, bounds, source_uvs, tile_h) {
         return;
     }
 
@@ -805,6 +813,10 @@ fn emit_grid_tiled_slice(
         return;
     }
 
+    if try_emit_collapsed_grid_repeat(batch, texture, bounds, source_uvs, tile_w, tile_h) {
+        return;
+    }
+
     let (path, full_uvs) = crop_flattened_subregion(texture.path, source_uvs);
     emit_grid_tiles(
         batch,
@@ -816,6 +828,43 @@ fn emit_grid_tiled_slice(
         texture.tint,
         texture.blend,
     );
+}
+
+fn emit_unit_repeat_quad(
+    batch: &mut QuadBatch,
+    texture: TexturedSlice<'_>,
+    bounds: Rectangle,
+    source_uvs: Rectangle,
+    tile_extent: f32,
+) -> bool {
+    if tile_extent > 1.0 {
+        return false;
+    }
+    push_cropped_slice_quad(batch, texture, bounds, source_uvs);
+    true
+}
+
+fn try_emit_collapsed_grid_repeat(
+    batch: &mut QuadBatch,
+    texture: TexturedSlice<'_>,
+    bounds: Rectangle,
+    source_uvs: Rectangle,
+    tile_w: f32,
+    tile_h: f32,
+) -> bool {
+    if tile_w <= 1.0 && tile_h <= 1.0 {
+        push_cropped_slice_quad(batch, texture, bounds, source_uvs);
+        return true;
+    }
+    if tile_w <= 1.0 {
+        emit_vert_tiled_slice(batch, texture, bounds, source_uvs, tile_h);
+        return true;
+    }
+    if tile_h <= 1.0 {
+        emit_horiz_tiled_slice(batch, texture, bounds, source_uvs, tile_w);
+        return true;
+    }
+    false
 }
 
 fn atlas_subregion_uvs(
@@ -1068,7 +1117,7 @@ mod tests {
     }
 
     #[test]
-    fn tile_atlas_slices_emit_cropped_tiled_quads() {
+    fn tile_atlas_slices_collapse_unit_repeat_regions() {
         let mut batch = QuadBatch::new();
         let frame = texture_frame_with_atlas("questlog-frame");
 
@@ -1082,8 +1131,8 @@ mod tests {
             1.0,
         );
 
-        assert_eq!(batch.vertices.len(), 1024);
-        assert_eq!(batch.texture_requests.len(), 256);
+        assert_eq!(batch.vertices.len(), 36);
+        assert_eq!(batch.texture_requests.len(), 9);
         assert!(
             batch
                 .texture_requests
