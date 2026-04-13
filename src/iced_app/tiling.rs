@@ -382,7 +382,7 @@ pub(super) fn emit_vert_tiles(
 
 /// Emit grid-tiled texture quads (both horizontal and vertical).
 #[allow(clippy::too_many_arguments)]
-fn emit_grid_tiles(
+pub(super) fn emit_grid_tiles(
     batch: &mut QuadBatch,
     bounds: Rectangle,
     uvs: &Rectangle,
