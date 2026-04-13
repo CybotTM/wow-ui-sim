@@ -357,6 +357,34 @@ fn test_set_atlas_known() {
 }
 
 #[test]
+fn test_set_atlas_tile_slice_uses_direct_atlas_entry() {
+    let env = env();
+    let (_, tex) = setup_texture(&env, "QuestlogAtlas");
+    env.exec(&format!(r#"{tex}:SetAtlas("questlog-frame")"#))
+        .unwrap();
+
+    let state = env.state().borrow();
+    let id = state.widgets.get_id_by_name(&tex).unwrap();
+    let widget = state.widgets.get(id).unwrap();
+
+    assert_eq!(widget.atlas.as_deref(), Some("questlog-frame"));
+    assert!(
+        widget.texture.as_ref().is_some_and(|path| path.contains("questlogframe")),
+        "questlog-frame should resolve to questlogframe texture, got: {:?}",
+        widget.texture
+    );
+    assert!(widget.tex_coords.is_some(), "questlog-frame should set tex_coords");
+    assert!(
+        widget.atlas_tex_coords.is_some(),
+        "questlog-frame should set atlas_tex_coords"
+    );
+    assert!(
+        widget.nine_slice_atlas.is_none(),
+        "questlog-frame should stay a direct atlas slice, not a nine-slice kit"
+    );
+}
+
+#[test]
 fn test_set_atlas_unknown() {
     let env = env();
     let (_, tex) = setup_texture(&env, "AtlasUnk");
