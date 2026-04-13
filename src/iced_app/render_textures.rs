@@ -4,9 +4,9 @@ use crate::iced_app::layout::anchor_position;
 use std::collections::HashSet;
 use std::sync::Arc;
 
+use crate::render::shader::primitive::load_texture_prefer_bc;
 use crate::render::texture::UI_SCALE;
 use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
-use crate::render::shader::primitive::load_texture_prefer_bc;
 use crate::widget::{Frame, FrameStrata, WidgetType};
 
 use super::super::app::App;
@@ -72,14 +72,19 @@ impl App {
         }
     }
 
-    /// Load textures with a time budget (~50ms). Sets `textures_pending` if more remain.
+    /// Load textures with a small draw-thread budget (~10ms).
+    /// Remaining work stays pending for the tick preloader.
     pub(super) fn load_all_textures(
         &self,
         dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
         overlay: &QuadBatch,
-    ) -> (Vec<GpuTextureData>, Vec<GpuBcTextureData>, std::time::Duration) {
+    ) -> (
+        Vec<GpuTextureData>,
+        Vec<GpuBcTextureData>,
+        std::time::Duration,
+    ) {
         let t = std::time::Instant::now();
-        let deadline = t + std::time::Duration::from_millis(50);
+        let deadline = t + std::time::Duration::from_millis(10);
         let mut textures = Vec::new();
         let mut bc_textures = Vec::new();
         let mut exhausted = false;
@@ -88,24 +93,22 @@ impl App {
                 break;
             }
             if let Some(batch) = batch_opt {
-                let (loaded, loaded_bc, hit) =
-                    self.load_new_textures_budgeted(batch, deadline);
+                let (loaded, loaded_bc, hit) = self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(loaded);
                 bc_textures.extend(loaded_bc);
                 exhausted |= hit;
             }
         }
         if !exhausted {
-            let (loaded, loaded_bc, hit) =
-                self.load_new_textures_budgeted(overlay, deadline);
+            let (loaded, loaded_bc, hit) = self.load_new_textures_budgeted(overlay, deadline);
             textures.extend(loaded);
             bc_textures.extend(loaded_bc);
             exhausted |= hit;
         }
         self.textures_pending.set(exhausted);
         let elapsed = t.elapsed();
-        if elapsed.as_millis() > 50 && !textures.is_empty() {
-            log_slow_texture_load(&textures, elapsed);
+        if elapsed.as_millis() > 10 && (!textures.is_empty() || !bc_textures.is_empty()) {
+            log_slow_texture_load(&textures, &bc_textures, elapsed);
         }
         (textures, bc_textures, elapsed)
     }
@@ -122,43 +125,48 @@ impl App {
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
-        let all_requests = quads
+        let mut ordered_paths = Vec::new();
+        let mut seen = HashSet::new();
+        for request in quads
             .texture_requests
             .iter()
-            .chain(&quads.mask_texture_requests);
-        for request in all_requests {
-            if uploaded.contains(&request.path) || failed.contains(&request.path) {
+            .chain(&quads.mask_texture_requests)
+        {
+            let path = request.path.as_str();
+            if seen.insert(path) {
+                ordered_paths.push(path);
+            }
+        }
+        sort_texture_request_paths(&mut ordered_paths);
+
+        for path in ordered_paths {
+            if uploaded.contains(path) || failed.contains(path) {
                 continue;
             }
-            let already_queued = textures
-                .iter()
-                .any(|t: &GpuTextureData| t.path == request.path)
+            let already_queued = textures.iter().any(|t: &GpuTextureData| t.path == path)
                 || bc_textures
                     .iter()
-                    .any(|t: &GpuBcTextureData| t.path == request.path);
+                    .any(|t: &GpuBcTextureData| t.path == path);
             if already_queued {
                 continue;
             }
             if (!textures.is_empty() || !bc_textures.is_empty())
                 && std::time::Instant::now() >= deadline
             {
-                let base = request
-                    .path
-                    .find("@crop:")
-                    .map_or(request.path.as_str(), |i| &request.path[..i]);
+                let base = path.find("@crop:").map_or(path, |i| &path[..i]);
                 if !tex_mgr.is_cached(base) {
                     return (textures, bc_textures, true);
                 }
             }
             use crate::render::shader::primitive::LoadedTexture;
-            if let Some(loaded) = load_texture_prefer_bc(&mut tex_mgr, &request.path) {
-                uploaded.insert(request.path.clone());
+            if let Some(loaded) = load_texture_prefer_bc(&mut tex_mgr, path) {
+                uploaded.insert(path.to_string());
                 match loaded {
                     LoadedTexture::Rgba(data) => textures.push(data),
                     LoadedTexture::Bc(data) => bc_textures.push(data),
                 }
             } else {
-                failed.insert(request.path.clone());
+                failed.insert(path.to_string());
             }
         }
         (textures, bc_textures, false)
@@ -300,17 +308,21 @@ fn append_anchor_markers(overlay: &mut QuadBatch, frame: &Frame, rect: crate::La
     }
 }
 
-fn log_slow_texture_load(textures: &[GpuTextureData], elapsed: std::time::Duration) {
-    let preview: Vec<&str> = textures
-        .iter()
-        .take(12)
-        .map(|tex| tex.path.as_str())
-        .collect();
+fn log_slow_texture_load(
+    textures: &[GpuTextureData],
+    bc_textures: &[GpuBcTextureData],
+    elapsed: std::time::Duration,
+) {
+    let mut preview: Vec<&str> = textures.iter().map(|tex| tex.path.as_str()).collect();
+    preview.extend(bc_textures.iter().map(|tex| tex.path.as_str()));
+    preview.truncate(12);
     eprintln!(
-        "{} [textures] loaded {} in {elapsed:.1?}: {}",
+        "{} [textures] loaded {} in {elapsed:.1?}: {} (rgba={} bc={})",
         crate::logging::global_elapsed_prefix(),
+        textures.len() + bc_textures.len(),
+        preview.join(", "),
         textures.len(),
-        preview.join(", ")
+        bc_textures.len(),
     );
 }
 
@@ -340,7 +352,27 @@ pub(super) fn collect_texture_request_paths(
             paths.push(request.path.clone());
         }
     }
+    sort_texture_request_paths(&mut paths);
     paths
+}
+
+fn sort_texture_request_paths<T: AsRef<str>>(paths: &mut [T]) {
+    paths.sort_by(|a, b| {
+        texture_request_priority(a.as_ref())
+            .cmp(&texture_request_priority(b.as_ref()))
+            .then_with(|| a.as_ref().cmp(b.as_ref()))
+    });
+}
+
+fn texture_request_priority(path: &str) -> (u8, u8) {
+    let is_world_map = path
+        .get(..19)
+        .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface\\WorldMap\\"))
+        || path
+            .get(..19)
+            .is_some_and(|prefix| prefix.eq_ignore_ascii_case("Interface/WorldMap/"));
+    let is_crop = path.contains("@crop:");
+    (u8::from(is_world_map), u8::from(!is_crop))
 }
 
 #[cfg(test)]
@@ -383,7 +415,38 @@ mod tests {
         let paths = collect_texture_request_paths(&strata, &overlay);
         assert_eq!(
             paths,
-            vec!["foo".to_string(), "bar".to_string(), "baz".to_string()]
+            vec!["bar".to_string(), "baz".to_string(), "foo".to_string()]
+        );
+    }
+
+    #[test]
+    fn collect_texture_request_paths_prioritizes_non_worldmap_crops_before_tiles() {
+        let mut strata: [Option<Arc<QuadBatch>>; FrameStrata::COUNT] =
+            std::array::from_fn(|_| None);
+        let mut batch = QuadBatch::new();
+        batch
+            .texture_requests
+            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"));
+        batch.texture_requests.push(request(
+            r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4",
+        ));
+        batch
+            .texture_requests
+            .push(request(r"Interface\Minimap\UI-Minimap-Background"));
+        batch
+            .texture_requests
+            .push(request(r"Interface\WorldMap\IsleofDorn\IsleOfDorn2"));
+        strata[0] = Some(Arc::new(batch));
+
+        let paths = collect_texture_request_paths(&strata, &QuadBatch::new());
+        assert_eq!(
+            paths,
+            vec![
+                r"Interface\questframe\questmaplogatlas@crop:0.1,0.2,0.3,0.4".to_string(),
+                r"Interface\Minimap\UI-Minimap-Background".to_string(),
+                r"Interface\WorldMap\IsleofDorn\IsleOfDorn1".to_string(),
+                r"Interface\WorldMap\IsleofDorn\IsleOfDorn2".to_string(),
+            ]
         );
     }
 

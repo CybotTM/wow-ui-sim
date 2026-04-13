@@ -15,7 +15,7 @@ pub struct GpuTextureData {
     /// Image height.
     pub height: u32,
     /// RGBA pixel data.
-    pub rgba: Vec<u8>,
+    pub rgba: Arc<[u8]>,
 }
 
 use crate::render::shader::atlas::BcFormat;
@@ -30,7 +30,7 @@ pub struct GpuBcTextureData {
     /// Image height.
     pub height: u32,
     /// Raw BC block data (mip level 0).
-    pub bc_data: Vec<u8>,
+    pub bc_data: Arc<[u8]>,
     /// BC compression format (BC1 = DXT1, BC3 = DXT3/DXT5).
     pub bc_format: BcFormat,
 }
@@ -60,7 +60,7 @@ pub fn load_texture_or_crop(
                 path: path.to_string(),
                 width: tex_data.width,
                 height: tex_data.height,
-                rgba: tex_data.pixels.clone(),
+                rgba: Arc::clone(&tex_data.pixels),
             })
         }
     }
@@ -82,7 +82,7 @@ pub fn load_texture_prefer_bc(
                 path: path.to_string(),
                 width: tex_data.width,
                 height: tex_data.height,
-                rgba: tex_data.pixels.clone(),
+                rgba: Arc::clone(&tex_data.pixels),
             }));
         }
         return None;
@@ -101,7 +101,7 @@ pub fn load_texture_prefer_bc(
                     path: path.to_string(),
                     width: bc_result.width,
                     height: bc_result.height,
-                    bc_data: bc_result.bc_data,
+                    bc_data: Arc::clone(&bc_result.bc_data),
                     bc_format: bc_result.format,
                 }));
             }
@@ -114,7 +114,7 @@ pub fn load_texture_prefer_bc(
         path: path.to_string(),
         width: tex_data.width,
         height: tex_data.height,
-        rgba: tex_data.pixels.clone(),
+        rgba: Arc::clone(&tex_data.pixels),
     }))
 }
 
@@ -148,11 +148,15 @@ fn decode_crop_request<'a>(
 
 #[cfg(test)]
 mod tests {
-    use super::{WowUiPipeline, decode_crop_request, remap_entry_uv, resolve_and_scale_quads};
+    use super::{
+        LoadedTexture, WowUiPipeline, decode_crop_request, load_texture_prefer_bc, remap_entry_uv,
+        resolve_and_scale_quads,
+    };
     use crate::render::BlendMode;
     use crate::render::shader::QuadBatch;
     use iced::widget::shader::Pipeline;
     use iced::{Point, Rectangle, Size};
+    use std::sync::Arc;
 
     #[test]
     fn decode_crop_request_rejects_malformed_coords() {
@@ -168,7 +172,7 @@ mod tests {
             crate::texture::TextureData {
                 width: 200,
                 height: 100,
-                pixels: vec![0; 200 * 100 * 4],
+                pixels: Arc::<[u8]>::from(vec![0; 200 * 100 * 4]),
             },
         );
         let decoded = decode_crop_request(
@@ -181,6 +185,66 @@ mod tests {
         assert_eq!(decoded.2, 20);
         assert_eq!(decoded.3, 100);
         assert_eq!(decoded.4, 50);
+    }
+
+    #[test]
+    fn load_texture_prefer_bc_reuses_cached_rgba_buffer() {
+        let mut mgr = crate::texture::TextureManager::new(".");
+        let cached_pixels = Arc::<[u8]>::from(vec![0xaa; 4 * 4 * 4]);
+        mgr.insert_test_texture(
+            r"Interface\Foo\Cached",
+            crate::texture::TextureData {
+                width: 4,
+                height: 4,
+                pixels: Arc::clone(&cached_pixels),
+            },
+        );
+
+        let loaded = load_texture_prefer_bc(&mut mgr, r"Interface\Foo\Cached")
+            .expect("cached RGBA texture should load");
+        let LoadedTexture::Rgba(upload) = loaded else {
+            panic!("plain cached texture should stay on the RGBA upload path");
+        };
+
+        assert_eq!(
+            upload.rgba.as_ptr(),
+            cached_pixels.as_ptr(),
+            "RGBA upload path should reuse cached pixels instead of cloning them"
+        );
+    }
+
+    #[test]
+    fn load_texture_prefer_bc_reuses_cached_crop_buffer() {
+        let mut mgr = crate::texture::TextureManager::new(".");
+        mgr.insert_test_texture(
+            r"Interface\Foo\CropSource",
+            crate::texture::TextureData {
+                width: 8,
+                height: 8,
+                pixels: Arc::<[u8]>::from(vec![0xbb; 8 * 8 * 4]),
+            },
+        );
+
+        let crop_path = r"Interface\Foo\CropSource@crop:0.250000,0.750000,0.250000,0.750000";
+        let _ = mgr
+            .load_sub_region(r"Interface\Foo\CropSource", 2, 2, 4, 4)
+            .expect("crop should populate the sub-region cache");
+        let cached_crop_ptr = mgr
+            .load_sub_region(r"Interface\Foo\CropSource", 2, 2, 4, 4)
+            .expect("crop should stay cached");
+        let cached_crop_ptr = cached_crop_ptr.pixels.as_ptr();
+
+        let loaded =
+            load_texture_prefer_bc(&mut mgr, crop_path).expect("cached crop texture should load");
+        let LoadedTexture::Rgba(upload) = loaded else {
+            panic!("crop requests should stay on the RGBA upload path");
+        };
+
+        assert_eq!(
+            upload.rgba.as_ptr(),
+            cached_crop_ptr,
+            "crop upload path should reuse cached crop pixels instead of cloning them"
+        );
     }
 
     #[test]
@@ -310,7 +374,7 @@ fn upload_pending_textures(
                 &tex_data.path,
                 tex_data.width,
                 tex_data.height,
-                &tex_data.rgba,
+                tex_data.rgba.as_ref(),
             );
         }
     }
@@ -322,7 +386,7 @@ fn upload_pending_textures(
                 &bc_data.path,
                 bc_data.width,
                 bc_data.height,
-                &bc_data.bc_data,
+                bc_data.bc_data.as_ref(),
                 bc_data.bc_format,
             );
         }

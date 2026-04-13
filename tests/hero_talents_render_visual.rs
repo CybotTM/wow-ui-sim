@@ -322,7 +322,7 @@ fn hero_spec_icon_full_ui_render_matches_isolated_crop_render() {
     let mut crop_mgr = make_texture_manager().expect("texture directories should exist");
     let crop = load_texture_or_crop(&mut crop_mgr, &request.path)
         .expect("cropped hero spec icon texture should load");
-    let crop_image = RgbaImage::from_raw(crop.width, crop.height, crop.rgba)
+    let crop_image = RgbaImage::from_raw(crop.width, crop.height, crop.rgba.to_vec())
         .expect("cropped hero spec icon should decode into an image");
 
     let mut isolated_batch = QuadBatch::default();

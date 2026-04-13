@@ -58,7 +58,7 @@ fn dump_texture_request(tex_mgr: &mut TextureManager, output_dir: &Path, path: &
 
     let filename = sanitize_texture_filename(path);
     let out_path = output_dir.join(&filename);
-    match image::RgbaImage::from_raw(gpu_data.width, gpu_data.height, gpu_data.rgba) {
+    match image::RgbaImage::from_raw(gpu_data.width, gpu_data.height, gpu_data.rgba.to_vec()) {
         Some(img) => save_texture_image(img, &out_path, &filename, gpu_data.width, gpu_data.height),
         None => {
             eprintln!(

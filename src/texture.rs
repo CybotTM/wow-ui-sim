@@ -5,6 +5,7 @@ mod resolve;
 
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use image_blp::convert::blp_to_image;
 use image_blp::parser::load_blp;
@@ -23,6 +24,8 @@ pub struct TextureManager {
     disk_cache_dir: Option<PathBuf>,
     /// Cache of loaded texture data (path -> RGBA pixels).
     cache: HashMap<String, TextureData>,
+    /// Cache of raw BC-compressed texture data keyed by normalized WoW path.
+    bc_cache: HashMap<String, BcTextureResult>,
     /// Cache of sub-region textures (path#region -> RGBA pixels).
     sub_cache: HashMap<String, TextureData>,
     /// Paths that failed to load (logged once, then silenced).
@@ -34,7 +37,7 @@ pub struct TextureManager {
 pub struct TextureData {
     pub width: u32,
     pub height: u32,
-    pub pixels: Vec<u8>, // RGBA
+    pub pixels: Arc<[u8]>, // RGBA
 }
 
 impl TextureManager {
@@ -46,6 +49,7 @@ impl TextureManager {
             addons_path: None,
             disk_cache_dir: None,
             cache: HashMap::new(),
+            bc_cache: HashMap::new(),
             sub_cache: HashMap::new(),
             not_found: HashSet::new(),
         }
@@ -142,11 +146,12 @@ impl TextureManager {
 }
 
 /// Result of a BC-compressed texture load.
+#[derive(Debug, Clone)]
 pub struct BcTextureResult {
     pub width: u32,
     pub height: u32,
     /// Raw BC block data (mip level 0 only).
-    pub bc_data: Vec<u8>,
+    pub bc_data: Arc<[u8]>,
     /// BC compression format.
     pub format: crate::render::shader::atlas::BcFormat,
 }
@@ -156,10 +161,13 @@ impl TextureManager {
     ///
     /// Returns `Some` only when the resolved file is a BLP with DXT1/DXT3/DXT5 content.
     /// Callers should fall back to `load()` (RGBA path) when this returns `None`.
-    pub fn load_bc(&self, wow_path: &str) -> Option<BcTextureResult> {
+    pub fn load_bc(&mut self, wow_path: &str) -> Option<&BcTextureResult> {
         use crate::render::shader::atlas::BcFormat;
 
         let normalized = normalize_wow_path(wow_path);
+        if self.bc_cache.contains_key(&normalized) {
+            return self.bc_cache.get(&normalized);
+        }
         let file_path = self.resolve_path(&normalized)?;
 
         let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
@@ -171,15 +179,24 @@ impl TextureManager {
         let width = blp.header.width;
         let height = blp.header.height;
 
-        let (bc_data, format): (Vec<u8>, BcFormat) = match &blp.content {
-            BlpContent::Dxt1(dxtn) if !dxtn.images.is_empty() => {
-                (dxtn.images[0].content.clone(), BcFormat::Bc1)
+        let (bc_data, format): (Arc<[u8]>, BcFormat) = match blp.content {
+            BlpContent::Dxt1(dxtn) => {
+                let Some(image) = dxtn.images.into_iter().next() else {
+                    return None;
+                };
+                (Arc::<[u8]>::from(image.content), BcFormat::Bc1)
             }
-            BlpContent::Dxt3(dxtn) if !dxtn.images.is_empty() => {
-                (dxtn.images[0].content.clone(), BcFormat::Bc3)
+            BlpContent::Dxt3(dxtn) => {
+                let Some(image) = dxtn.images.into_iter().next() else {
+                    return None;
+                };
+                (Arc::<[u8]>::from(image.content), BcFormat::Bc3)
             }
-            BlpContent::Dxt5(dxtn) if !dxtn.images.is_empty() => {
-                (dxtn.images[0].content.clone(), BcFormat::Bc3)
+            BlpContent::Dxt5(dxtn) => {
+                let Some(image) = dxtn.images.into_iter().next() else {
+                    return None;
+                };
+                (Arc::<[u8]>::from(image.content), BcFormat::Bc3)
             }
             _ => return None,
         };
@@ -188,12 +205,16 @@ impl TextureManager {
             return None;
         }
 
-        Some(BcTextureResult {
-            width,
-            height,
-            bc_data,
-            format,
-        })
+        self.bc_cache.insert(
+            normalized.clone(),
+            BcTextureResult {
+                width,
+                height,
+                bc_data,
+                format,
+            },
+        );
+        self.bc_cache.get(&normalized)
     }
 }
 
@@ -250,7 +271,7 @@ fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Err
         Ok(TextureData {
             width,
             height,
-            pixels,
+            pixels: Arc::<[u8]>::from(pixels),
         })
     } else {
         // Use standard image crate for other formats
@@ -260,7 +281,7 @@ fn load_texture_file(path: &Path) -> Result<TextureData, Box<dyn std::error::Err
         Ok(TextureData {
             width,
             height,
-            pixels: rgba.into_raw(),
+            pixels: Arc::<[u8]>::from(rgba.into_raw()),
         })
     }
 }
@@ -454,6 +475,68 @@ mod tests {
         assert_eq!((sub.width, sub.height), (2, 2));
         assert_eq!(sub.pixels[0], 10);
         assert_eq!(sub.pixels[1], 20);
+    }
+
+    #[test]
+    fn test_load_bc_caches_dxt_blp_data() {
+        let temp_dir = TempDir::new().unwrap();
+        let mut mgr = TextureManager::new(temp_dir.path());
+        mgr.bc_cache.insert(
+            "cached-dxt".to_string(),
+            BcTextureResult {
+                width: 4,
+                height: 4,
+                bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
+                format: crate::render::shader::atlas::BcFormat::Bc1,
+            },
+        );
+
+        let cached = mgr
+            .load_bc("cached-dxt")
+            .expect("cached BC data should be returned without reading disk");
+
+        assert_eq!(cached.width, 4);
+        assert_eq!(cached.height, 4);
+        assert_eq!(cached.format, crate::render::shader::atlas::BcFormat::Bc1);
+        assert_eq!(cached.bc_data.as_ref(), [0xaa; 8]);
+    }
+
+    #[test]
+    fn test_load_texture_prefer_bc_reuses_cached_bc_buffer() {
+        let temp_dir = TempDir::new().unwrap();
+        let mut mgr = TextureManager::new(temp_dir.path());
+        mgr.bc_cache.insert(
+            "cached-dxt".to_string(),
+            BcTextureResult {
+                width: 4,
+                height: 4,
+                bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
+                format: crate::render::shader::atlas::BcFormat::Bc1,
+            },
+        );
+        let prev_bc_supported = crate::render::shader::atlas::set_bc_supported_for_tests(true);
+
+        let cached_ptr = mgr
+            .bc_cache
+            .get("cached-dxt")
+            .expect("cached BC data should exist")
+            .bc_data
+            .as_ptr();
+
+        let loaded =
+            crate::render::shader::primitive::load_texture_prefer_bc(&mut mgr, "cached-dxt")
+                .expect("cached BC texture should load");
+        crate::render::shader::atlas::set_bc_supported_for_tests(prev_bc_supported);
+
+        let crate::render::shader::primitive::LoadedTexture::Bc(upload) = loaded else {
+            panic!("cached DXT texture should stay on the BC upload path");
+        };
+
+        assert_eq!(
+            upload.bc_data.as_ptr(),
+            cached_ptr,
+            "BC upload path should reuse cached compressed bytes instead of cloning them"
+        );
     }
 
     #[test]

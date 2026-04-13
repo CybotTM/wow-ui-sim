@@ -8,6 +8,7 @@
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use crate::texture::TextureData;
 
@@ -67,7 +68,7 @@ fn read_cache_file(path: &Path) -> Option<TextureData> {
     Some(TextureData {
         width,
         height,
-        pixels,
+        pixels: Arc::<[u8]>::from(pixels),
     })
 }
 

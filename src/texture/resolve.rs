@@ -1,4 +1,5 @@
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
 
 use super::{TextureData, TextureManager, normalize_wow_path};
 
@@ -188,6 +189,6 @@ fn extract_sub_region(
     Some(TextureData {
         width,
         height,
-        pixels,
+        pixels: Arc::<[u8]>::from(pixels),
     })
 }

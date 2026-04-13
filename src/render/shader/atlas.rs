@@ -22,6 +22,11 @@ pub fn is_bc_supported() -> bool {
     BC_SUPPORTED.load(std::sync::atomic::Ordering::Relaxed)
 }
 
+#[cfg(test)]
+pub(crate) fn set_bc_supported_for_tests(supported: bool) -> bool {
+    BC_SUPPORTED.swap(supported, std::sync::atomic::Ordering::Relaxed)
+}
+
 /// Cell sizes for each tier.
 pub const TIER_SIZES: [u32; 5] = [64, 128, 256, 512, 2048];
 
@@ -361,7 +366,11 @@ impl GpuTextureAtlas {
         eprintln!(
             "{} [GPU] BC texture compression: {}",
             crate::logging::global_elapsed_prefix(),
-            if has_bc_support { "supported" } else { "NOT supported (using placeholders)" }
+            if has_bc_support {
+                "supported"
+            } else {
+                "NOT supported (using placeholders)"
+            }
         );
         let (bc1_atlas, bc3_atlas) = if has_bc_support {
             (
