@@ -42,7 +42,7 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 fn register_c_map(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     register_map_queries(lua, &t)?;
-    register_map_art_methods(lua, &t)?;
+    register_map_art_methods(lua, &t, Rc::clone(&state))?;
     register_map_quest_log(lua, &t, state)?;
     Ok(t)
 }
@@ -87,7 +87,11 @@ fn register_map_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
 }
 
 /// Map art layers, tiles, and art ID lookups.
-fn register_map_art_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
+fn register_map_art_methods(
+    lua: &Lua,
+    t: &mlua::Table,
+    state: Rc<RefCell<SimState>>,
+) -> Result<()> {
     t.set("GetMapArtLayers", lua.create_function(get_map_art_layers)?)?;
     t.set(
         "GetMapArtLayerTextures",
@@ -104,9 +108,16 @@ fn register_map_art_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
             Ok(crate::map_art::get_map_art(map_id as u32).is_some())
         })?,
     )?;
+    let preload_state = Rc::clone(&state);
     t.set(
         "RequestPreloadMap",
-        lua.create_function(|_, _map_id: i32| Ok(()))?,
+        lua.create_function(move |_, map_id: i32| {
+            if map_id > 0 {
+                let paths = crate::texture::collect_map_preload_texture_paths(map_id as u32);
+                preload_state.borrow_mut().enqueue_texture_preloads(paths);
+            }
+            Ok(())
+        })?,
     )?;
     Ok(())
 }

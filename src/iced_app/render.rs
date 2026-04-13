@@ -519,8 +519,7 @@ impl App {
         for i in 0..dirty_strata.len() {
             if dirty_strata[i].is_none() {
                 if let Some(batch) = &cached[i] {
-                    let (extra, extra_bc, hit) =
-                        self.load_new_textures_budgeted(batch, deadline);
+                    let (extra, extra_bc, hit) = self.load_new_textures_budgeted(batch, deadline);
                     textures.extend(extra);
                     bc_textures.extend(extra_bc);
                     exhausted |= hit;
@@ -566,9 +565,6 @@ impl App {
         let dirty_strata = self.current_texture_request_batches(size);
         let overlay = self.build_overlay();
         let paths = textures::collect_texture_request_paths(&dirty_strata, &overlay);
-        if paths.is_empty() {
-            return;
-        }
 
         let env = self.env.borrow();
         let is_glue_screen = env.state().borrow().screen_kind.is_glue();
@@ -582,18 +578,51 @@ impl App {
                 .then(|| std::time::Instant::now() + std::time::Duration::from_millis(250)),
         };
 
-        for path in &paths {
-            if let Some(deadline) = deadline
-                && std::time::Instant::now() >= deadline
-            {
-                remaining = true;
-                break;
+        remaining |= self.preload_queued_texture_requests(&mut tex_mgr, deadline);
+
+        if !remaining {
+            for path in &paths {
+                if let Some(deadline) = deadline
+                    && std::time::Instant::now() >= deadline
+                {
+                    remaining = true;
+                    break;
+                }
+                preload_texture_request_source(&mut tex_mgr, path);
             }
-            preload_texture_request_source(&mut tex_mgr, path);
         }
 
         let gpu_backlog = self.has_pending_gpu_texture_requests(&paths);
         self.textures_pending.set(remaining || gpu_backlog);
+    }
+
+    fn preload_queued_texture_requests(
+        &self,
+        tex_mgr: &mut crate::texture::TextureManager,
+        deadline: Option<std::time::Instant>,
+    ) -> bool {
+        let queued_paths = {
+            let env = self.env.borrow();
+            env.state().borrow_mut().drain_texture_preloads()
+        };
+        if queued_paths.is_empty() {
+            return false;
+        }
+
+        for (index, path) in queued_paths.iter().enumerate() {
+            if let Some(deadline) = deadline
+                && std::time::Instant::now() >= deadline
+            {
+                let env = self.env.borrow();
+                env.state()
+                    .borrow_mut()
+                    .enqueue_texture_preloads(queued_paths[index..].iter().cloned());
+                return true;
+            }
+            preload_texture_request_source(tex_mgr, path);
+        }
+
+        false
     }
 
     fn has_pending_gpu_texture_requests(&self, paths: &[String]) -> bool {
@@ -807,8 +836,9 @@ mod tests {
     use crate::lua_api::WowLuaEnv;
     use crate::render::{GlyphAtlas, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
-    use crate::texture::TextureManager;
+    use crate::texture::{TextureManager, normalize_wow_path};
     use std::cell::RefCell;
+    use std::fs;
     use std::path::Path;
     use std::rc::Rc;
     use tempfile::tempdir;
@@ -845,6 +875,46 @@ mod tests {
             None,
             crate::config::SimConfig::default(),
         )
+    }
+
+    fn file_data_id_to_wow_path(file_data_id: u32) -> Option<String> {
+        let path = crate::manifest_interface_data::get_texture_path(file_data_id)?;
+        Some(format!("Interface\\{}", path.replace('/', "\\")))
+    }
+
+    fn first_map_with_art_and_overlay_paths() -> Option<(u32, String, String)> {
+        for map_id in 1..=10_000 {
+            let art_path = crate::map_art::get_map_art(map_id).and_then(|info| {
+                info.tiles
+                    .iter()
+                    .flat_map(|tiles| tiles.iter().copied())
+                    .find_map(file_data_id_to_wow_path)
+            });
+            let overlay_path =
+                crate::map_exploration::get_overlays_for_map(map_id).and_then(|overlays| {
+                    overlays
+                        .iter()
+                        .flat_map(|overlay| overlay.file_data_ids.iter().copied())
+                        .find_map(file_data_id_to_wow_path)
+                });
+            if let (Some(art_path), Some(overlay_path)) = (art_path, overlay_path) {
+                return Some((map_id, art_path, overlay_path));
+            }
+        }
+        None
+    }
+
+    fn write_test_texture(base: &Path, wow_path: &str, color: [u8; 4]) {
+        let normalized = normalize_wow_path(wow_path);
+        let relative = normalized
+            .strip_prefix("Interface/")
+            .unwrap_or(normalized.as_str());
+        let file_path = base.join(format!("{relative}.webp"));
+        if let Some(parent) = file_path.parent() {
+            fs::create_dir_all(parent).unwrap();
+        }
+        let image = image::RgbaImage::from_pixel(4, 4, image::Rgba(color));
+        image.save(&file_path).unwrap();
     }
 
     #[test]
@@ -978,6 +1048,45 @@ mod tests {
         assert!(
             !app.textures_pending.get(),
             "pending should clear once the requested texture is already in the GPU atlas"
+        );
+    }
+
+    #[test]
+    fn request_preload_map_warms_map_art_and_overlay_textures() {
+        let Some((map_id, art_path, overlay_path)) = first_map_with_art_and_overlay_paths() else {
+            eprintln!("Skipping test: no map with both art and exploration overlay textures found");
+            return;
+        };
+
+        let temp_dir = tempdir().unwrap();
+        write_test_texture(temp_dir.path(), &art_path, [0x22, 0x66, 0xaa, 0xff]);
+        write_test_texture(temp_dir.path(), &overlay_path, [0xdd, 0xaa, 0x33, 0xff]);
+
+        let app = build_test_app_with_textures(temp_dir.path());
+        app.env
+            .borrow()
+            .exec(&format!("C_Map.RequestPreloadMap({map_id})"))
+            .expect("RequestPreloadMap should succeed");
+
+        assert!(
+            app.texture_manager.borrow().get(&art_path).is_none(),
+            "map art texture should not already be cached before preload runs"
+        );
+        assert!(
+            app.texture_manager.borrow().get(&overlay_path).is_none(),
+            "map overlay texture should not already be cached before preload runs"
+        );
+
+        app.preload_initial_texture_requests();
+
+        let tex_mgr = app.texture_manager.borrow();
+        assert!(
+            tex_mgr.get(&art_path).is_some(),
+            "RequestPreloadMap should warm map art tile texture {art_path}"
+        );
+        assert!(
+            tex_mgr.get(&overlay_path).is_some(),
+            "RequestPreloadMap should warm exploration overlay texture {overlay_path}"
         );
     }
 }

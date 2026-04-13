@@ -9,7 +9,7 @@ use crate::lua_api::tooltip::{TooltipData, build_cursor_anchor};
 use crate::screen::ScreenKind;
 use crate::sound::SoundManager;
 use crate::widget::{Anchor, WidgetRegistry};
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{BTreeSet, HashMap, HashSet, VecDeque};
 use std::path::PathBuf;
 use std::time::Instant;
 
@@ -36,6 +36,7 @@ macro_rules! build_empty_sim_state {
             visible_on_update_cache: $runtime.visible_on_update_cache,
             strata_buckets: $runtime.strata_buckets,
             pending_hit_grid_changes: $collections.pending_hit_grid_changes,
+            pending_texture_preloads: $collections.pending_texture_preloads,
             animation_groups: $collections.animation_groups,
             next_anim_group_id: $runtime.next_anim_group_id,
             anim_frame_to_group: $collections.anim_frame_to_group,
@@ -231,6 +232,8 @@ pub struct SimState {
     /// frame ID that changed visibility and whether it became visible.
     /// Drained and applied by the App after Lua handlers run.
     pub pending_hit_grid_changes: Vec<(u64, bool)>,
+    /// Texture paths queued by API-side preload requests such as `C_Map.RequestPreloadMap`.
+    pub pending_texture_preloads: BTreeSet<String>,
     /// Animation groups keyed by unique group ID.
     pub animation_groups: HashMap<u64, AnimGroupState>,
     /// Counter for generating unique animation group IDs.
@@ -361,6 +364,7 @@ struct EmptyStateCollections {
     anim_frame_to_anim: HashMap<u64, (u64, usize)>,
     on_update_frames: HashSet<u64>,
     pending_hit_grid_changes: Vec<(u64, bool)>,
+    pending_texture_preloads: BTreeSet<String>,
     action_bars: HashMap<u32, u32>,
     addon_base_paths: Vec<PathBuf>,
     spell_cooldowns: HashMap<u32, SpellCooldownState>,
@@ -393,6 +397,7 @@ impl EmptyStateCollections {
             anim_frame_to_anim: HashMap::new(),
             on_update_frames: HashSet::new(),
             pending_hit_grid_changes: Vec::new(),
+            pending_texture_preloads: BTreeSet::new(),
             action_bars: HashMap::new(),
             addon_base_paths: Vec::new(),
             spell_cooldowns: HashMap::new(),
@@ -579,6 +584,19 @@ impl SimState {
 
     pub fn set_active_slider_thumb_drag_frame(&mut self, frame_id: Option<u64>) {
         self.active_slider_thumb_drag_frame = frame_id;
+    }
+
+    pub fn enqueue_texture_preloads<I>(&mut self, paths: I)
+    where
+        I: IntoIterator<Item = String>,
+    {
+        self.pending_texture_preloads.extend(paths);
+    }
+
+    pub fn drain_texture_preloads(&mut self) -> Vec<String> {
+        std::mem::take(&mut self.pending_texture_preloads)
+            .into_iter()
+            .collect()
     }
 
     fn collect_cursor_tooltip_positions(&self, mx: f32, my: f32) -> Vec<(u64, Anchor)> {

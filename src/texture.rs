@@ -3,6 +3,8 @@
 mod preload;
 mod resolve;
 
+pub(crate) use self::preload::collect_map_preload_texture_paths;
+
 use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
