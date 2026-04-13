@@ -178,6 +178,14 @@ fn add_set_alpha_from_boolean<M: mlua::UserDataMethods<FrameRef>>(methods: &mut 
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         let new_alpha = if flag { 1.0 } else { 0.0 };
+        let changed = state
+            .widgets
+            .get(id)
+            .map(|f| f.alpha != new_alpha)
+            .unwrap_or(false);
+        if !changed {
+            return Ok(());
+        }
         let parent_eff = state
             .widgets
             .get(id)
@@ -515,12 +523,22 @@ where
 fn add_set_scale<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetScale", |lua, this, scale: f32| {
         let id = this.0;
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
+        // Argument validation runs first so that invalid values still error
+        // even when the stored scale would make the call a no-op otherwise.
         if scale <= 0.0 {
             return Err(mlua::Error::RuntimeError(
                 "Frame:SetScale(): Scale must be > 0".into(),
             ));
+        }
+        let state_rc = get_sim_state(lua);
+        let mut state = state_rc.borrow_mut();
+        let changed = state
+            .widgets
+            .get(id)
+            .map(|f| f.scale != scale)
+            .unwrap_or(false);
+        if !changed {
+            return Ok(());
         }
         let parent_eff_scale = state
             .widgets
@@ -545,6 +563,14 @@ fn add_ignore_parent_scale_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
         let id = this.0;
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
+        let changed = state
+            .widgets
+            .get(id)
+            .map(|f| f.ignore_parent_scale != ignore)
+            .unwrap_or(false);
+        if !changed {
+            return Ok(());
+        }
         let parent_eff_scale = state
             .widgets
             .get(id)
@@ -666,19 +692,16 @@ mod tests {
             .get_id_by_name("ScaleNoopFrame")
             .expect("frame should exist");
         // Clear dirty tracking from initial setup.
-        env.state().borrow_mut().widgets.take_rect_dirty_ids();
+        env.state().borrow_mut().widgets.drain_rect_dirty();
 
         env.exec(r#"ScaleNoopFrame:SetScale(0.75)"#)
             .expect("repeat SetScale should succeed");
 
-        let dirty: bool = env
-            .state()
-            .borrow()
-            .widgets
-            .rect_dirty_contains(id);
+        let dirty_ids = env.state().borrow_mut().widgets.drain_rect_dirty();
         assert!(
-            !dirty,
-            "no-op SetScale should not mark the frame rect dirty"
+            !dirty_ids.contains(&id),
+            "no-op SetScale should not mark the frame rect dirty (got {:?})",
+            dirty_ids,
         );
     }
 
@@ -699,13 +722,14 @@ mod tests {
             .widgets
             .get_id_by_name("ScaleChangeFrame")
             .expect("frame should exist");
-        env.state().borrow_mut().widgets.take_rect_dirty_ids();
+        env.state().borrow_mut().widgets.drain_rect_dirty();
 
         env.exec(r#"ScaleChangeFrame:SetScale(2.0)"#)
             .expect("SetScale with new value should succeed");
 
+        let dirty_ids = env.state().borrow_mut().widgets.drain_rect_dirty();
         assert!(
-            env.state().borrow().widgets.rect_dirty_contains(id),
+            dirty_ids.contains(&id),
             "SetScale with a different value should mark the frame rect dirty",
         );
     }
@@ -784,14 +808,16 @@ mod tests {
             .widgets
             .get_id_by_name("IgnoreScaleNoopFrame")
             .unwrap();
-        env.state().borrow_mut().widgets.take_rect_dirty_ids();
+        env.state().borrow_mut().widgets.drain_rect_dirty();
 
         env.exec(r#"IgnoreScaleNoopFrame:SetIgnoreParentScale(true)"#)
             .unwrap();
 
+        let dirty_ids = env.state().borrow_mut().widgets.drain_rect_dirty();
         assert!(
-            !env.state().borrow().widgets.rect_dirty_contains(id),
-            "no-op SetIgnoreParentScale should not mark the frame rect dirty",
+            !dirty_ids.contains(&id),
+            "no-op SetIgnoreParentScale should not mark the frame rect dirty (got {:?})",
+            dirty_ids,
         );
     }
 }
