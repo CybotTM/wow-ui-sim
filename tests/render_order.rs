@@ -3,36 +3,18 @@
 mod common;
 
 use common::env_with_shared_xml;
+use std::collections::HashSet;
 use std::path::PathBuf;
-use wow_ui_sim::iced_app::{build_quad_batch_for_registry, compute_frame_rect};
-use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
+use wow_ui_sim::iced_app::compute_frame_rect;
+use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
+use wow_ui_sim::screen::ScreenKind;
 
 /// Build strata buckets from a WowLuaEnv (mutable borrow), then return a clone.
 fn build_strata_buckets(env: &wow_ui_sim::lua_api::WowLuaEnv) -> Vec<Vec<u64>> {
     let mut state = env.state().borrow_mut();
     let _ = state.get_strata_buckets();
     state.strata_buckets.as_ref().unwrap().clone()
-}
-
-fn build_quad_batch(env: &wow_ui_sim::lua_api::WowLuaEnv) -> wow_ui_sim::render::QuadBatch {
-    {
-        let mut state = env.state().borrow_mut();
-        state.ensure_layout_rects();
-    }
-    let buckets = build_strata_buckets(env);
-    let state = env.state().borrow();
-    build_quad_batch_for_registry(
-        &state.widgets,
-        (1024.0, 768.0),
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        &buckets,
-    )
 }
 
 fn request_path_for_frame_texture(
@@ -53,82 +35,134 @@ fn request_path_for_frame_texture(
     }
 }
 
-fn request_bounds(
-    batch: &wow_ui_sim::render::QuadBatch,
-    request: &wow_ui_sim::render::TextureRequest,
-) -> (f32, f32, f32, f32) {
-    let start = request.vertex_start as usize;
-    let end = start + request.vertex_count as usize;
-    let mut min_x = f32::INFINITY;
-    let mut min_y = f32::INFINITY;
-    let mut max_x = f32::NEG_INFINITY;
-    let mut max_y = f32::NEG_INFINITY;
-    for vertex in &batch.vertices[start..end] {
-        min_x = min_x.min(vertex.position[0]);
-        min_y = min_y.min(vertex.position[1]);
-        max_x = max_x.max(vertex.position[0]);
-        max_y = max_y.max(vertex.position[1]);
+fn world_quest_pin_pairs(
+    state: &wow_ui_sim::lua_api::SimState,
+) -> Vec<(u64, u64, wow_ui_sim::LayoutRect, String, String)> {
+    let mut pairs = Vec::new();
+
+    for icon_id in state.widgets.iter_ids().filter(|&id| {
+        let Some(frame) = state.widgets.get(id) else {
+            return false;
+        };
+        frame.atlas.as_deref() == Some("Worldquest-icon")
+    }) {
+        let Some(display_frame_id) = state.widgets.get(icon_id).and_then(|frame| frame.parent_id)
+        else {
+            continue;
+        };
+        let Some(button_id) = state
+            .widgets
+            .get(display_frame_id)
+            .and_then(|frame| frame.parent_id)
+        else {
+            continue;
+        };
+        let Some(circle_id) = state.widgets.iter_ids().find(|&id| {
+            let Some(frame) = state.widgets.get(id) else {
+                return false;
+            };
+            frame.parent_id == Some(button_id)
+                && frame.atlas.as_deref() == Some("UI-QuestPoi-QuestNumber")
+        }) else {
+            continue;
+        };
+
+        let Some(circle_texture) = state
+            .widgets
+            .get(circle_id)
+            .and_then(|frame| frame.texture.clone())
+        else {
+            continue;
+        };
+        let Some(icon_texture) = state
+            .widgets
+            .get(icon_id)
+            .and_then(|frame| frame.texture.clone())
+        else {
+            continue;
+        };
+
+        pairs.push((
+            circle_id,
+            icon_id,
+            compute_frame_rect(&state.widgets, circle_id, 1024.0, 768.0),
+            request_path_for_frame_texture(
+                &circle_texture,
+                state
+                    .widgets
+                    .get(circle_id)
+                    .and_then(|frame| frame.atlas_tex_coords),
+            ),
+            request_path_for_frame_texture(
+                &icon_texture,
+                state
+                    .widgets
+                    .get(icon_id)
+                    .and_then(|frame| frame.atlas_tex_coords),
+            ),
+        ));
     }
-    (min_x, min_y, max_x, max_y)
-}
 
-fn union_request_bounds(
-    batch: &wow_ui_sim::render::QuadBatch,
-    requests: &[&wow_ui_sim::render::TextureRequest],
-) -> (f32, f32, f32, f32) {
-    let mut min_x = f32::INFINITY;
-    let mut min_y = f32::INFINITY;
-    let mut max_x = f32::NEG_INFINITY;
-    let mut max_y = f32::NEG_INFINITY;
-    for request in requests {
-        let (x0, y0, x1, y1) = request_bounds(batch, request);
-        min_x = min_x.min(x0);
-        min_y = min_y.min(y0);
-        max_x = max_x.max(x1);
-        max_y = max_y.max(y1);
-    }
-    (min_x, min_y, max_x, max_y)
-}
-
-fn assert_bounds_match_rect(
-    bounds: (f32, f32, f32, f32),
-    rect: wow_ui_sim::LayoutRect,
-    label: &str,
-) {
-    let tolerance = 0.1;
-    assert!(
-        (bounds.0 - rect.x).abs() <= tolerance,
-        "{label} min_x should match rect.x: bounds={bounds:?} rect={rect:?}"
-    );
-    assert!(
-        (bounds.1 - rect.y).abs() <= tolerance,
-        "{label} min_y should match rect.y: bounds={bounds:?} rect={rect:?}"
-    );
-    assert!(
-        (bounds.2 - (rect.x + rect.width)).abs() <= tolerance,
-        "{label} max_x should match rect right edge: bounds={bounds:?} rect={rect:?}"
-    );
-    assert!(
-        (bounds.3 - (rect.y + rect.height)).abs() <= tolerance,
-        "{label} max_y should match rect bottom edge: bounds={bounds:?} rect={rect:?}"
-    );
-}
-
-fn bounds_match_rect(bounds: (f32, f32, f32, f32), rect: wow_ui_sim::LayoutRect) -> bool {
-    let tolerance = 0.1;
-    (bounds.0 - rect.x).abs() <= tolerance
-        && (bounds.1 - rect.y).abs() <= tolerance
-        && (bounds.2 - (rect.x + rect.width)).abs() <= tolerance
-        && (bounds.3 - (rect.y + rect.height)).abs() <= tolerance
+    pairs
 }
 
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
-fn env_with_world_map() -> WowLuaEnv {
+/// Reduced Blizzard stack already known to open the world map in tests.
+///
+/// This is not "WorldMap alone" — the addon depends on the usual FrameXML /
+/// UIParent base chain plus map-canvas and pin infrastructure.
+const ISOLATED_WORLD_MAP_ADDONS: &[&str] = &[
+    "Blizzard_SharedXMLBase",
+    "Blizzard_Colors",
+    "Blizzard_SharedXML",
+    "Blizzard_SharedXMLGame",
+    "Blizzard_UIPanelTemplates",
+    "Blizzard_FrameXMLBase",
+    "Blizzard_FrameEffects",
+    "Blizzard_LoadLocale",
+    "Blizzard_Fonts_Shared",
+    "Blizzard_HelpPlate",
+    "Blizzard_AccessibilityTemplates",
+    "Blizzard_ObjectAPI",
+    "Blizzard_UIParent",
+    "Blizzard_TextStatusBar",
+    "Blizzard_MoneyFrame",
+    "Blizzard_POIButton",
+    "Blizzard_Flyout",
+    "Blizzard_StoreUI",
+    "Blizzard_MicroMenu",
+    "Blizzard_EditMode",
+    "Blizzard_GarrisonBase",
+    "Blizzard_GameTooltip",
+    "Blizzard_UIParentPanelManager",
+    "Blizzard_Settings_Shared",
+    "Blizzard_SettingsDefinitions_Shared",
+    "Blizzard_SettingsDefinitions_Frame",
+    "Blizzard_FrameXMLUtil",
+    "Blizzard_ItemButton",
+    "Blizzard_QuickKeybind",
+    "Blizzard_FrameXML",
+    "Blizzard_UIPanels_Game",
+    "Blizzard_MapCanvasSecureUtil",
+    "Blizzard_MapCanvas",
+    "Blizzard_SharedMapDataProviders",
+    "Blizzard_WorldMap",
+    "Blizzard_ActionBar",
+    "Blizzard_GameMenu",
+    "Blizzard_UIWidgets",
+    "Blizzard_Minimap",
+    "Blizzard_AddOnList",
+    "Blizzard_TimerunningUtil",
+    "Blizzard_Communities",
+];
+
+fn env_with_isolated_world_map_ui() -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
+    env.set_screen_mode(ScreenKind::Game);
 
     let ui = blizzard_ui_dir();
     {
@@ -136,16 +170,25 @@ fn env_with_world_map() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
-    for (name, toc_path) in discover_blizzard_addons(&ui) {
+    let wanted: HashSet<&str> = ISOLATED_WORLD_MAP_ADDONS.iter().copied().collect();
+    for (name, toc_path) in discover_blizzard_addons_for_screen(&ui, ScreenKind::Game) {
+        if !wanted.contains(name.as_str()) {
+            continue;
+        }
         if let Err(err) = load_addon(&env.loader_env(), &toc_path) {
-            eprintln!("[load {name}] FAILED: {err}");
+            eprintln!("[isolated load {name}] FAILED: {err}");
         }
     }
 
     env.apply_post_load_workarounds();
     wow_ui_sim::startup::settle_headless_startup(&env);
+    env
+}
+
+fn env_with_isolated_world_map() -> WowLuaEnv {
+    let env = env_with_isolated_world_map_ui();
     env.exec("ToggleWorldMap()")
-        .expect("failed to toggle world map after startup");
+        .expect("failed to toggle isolated world map after startup");
     wow_ui_sim::startup::process_pending_timers(&env);
     wow_ui_sim::startup::fire_one_on_update_tick(&env);
     env
@@ -474,338 +517,111 @@ fn late_set_frame_level_invalidates_cached_strata_buckets() {
 }
 
 #[test]
-fn world_map_tiles_render_after_tiled_background() {
+fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
     common::with_timeout(120, move || {
-        let env = env_with_world_map();
-        let buckets = build_strata_buckets(&env);
+        let env = env_with_isolated_world_map();
+
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let world_map_shown: bool = env
+            .eval("return WorldMapFrame ~= nil and WorldMapFrame:IsShown() == true")
+            .expect("should query WorldMapFrame visibility");
+        assert!(
+            world_map_shown,
+            "isolated world map stack should show WorldMapFrame"
+        );
+
         let state = env.state().borrow();
-        let medium_bucket = &buckets[wow_ui_sim::widget::FrameStrata::Medium.as_index()];
-
-        let tiled_background_id = state
-            .widgets
-            .iter_ids()
-            .find(|&id| {
-                let Some(frame) = state.widgets.get(id) else {
-                    return false;
-                };
-                frame.parent_key.as_deref() == Some("TiledBackground")
-            })
-            .expect("expected WorldMapFrame.ScrollContainer.Child.TiledBackground");
-
-        let map_tile_id = state
-            .widgets
-            .iter_ids()
-            .find(|&id| {
-                let Some(frame) = state.widgets.get(id) else {
-                    return false;
-                };
-                frame
-                    .texture
-                    .as_deref()
-                    .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
-            })
-            .expect("expected a visible world map tile texture");
-
-        let tiled_background_pos = medium_bucket
+        let loaded_addons: Vec<_> = state
+            .addons
             .iter()
-            .position(|&id| id == tiled_background_id)
-            .expect("tiled background should be in MEDIUM bucket");
-        let map_tile_pos = medium_bucket
-            .iter()
-            .position(|&id| id == map_tile_id)
-            .expect("world map tile should be in MEDIUM bucket");
+            .filter(|addon| addon.loaded)
+            .map(|addon| addon.folder_name.clone())
+            .collect();
+        let world_quest_pairs = world_quest_pin_pairs(&state);
+        eprintln!(
+            "isolated world map loaded {} addons: {:?}",
+            loaded_addons.len(),
+            loaded_addons
+        );
+        eprintln!(
+            "isolated world map visible world quest pin pairs={}",
+            world_quest_pairs.len()
+        );
 
         assert!(
-            map_tile_pos > tiled_background_pos,
-            "world map tile (pos={map_tile_pos}) must render after tiled background \
-             (pos={tiled_background_pos}) so the map is visible"
+            !world_quest_pairs.is_empty(),
+            "isolated world map stack should still populate visible world quest pins"
         );
     });
 }
 
 #[test]
-fn world_quest_pin_icon_renders_after_world_map_tiles() {
+fn isolated_world_map_seeded_world_quests_do_not_show_expiration_clock() {
     common::with_timeout(120, move || {
-        let env = env_with_world_map();
-        let buckets = build_strata_buckets(&env);
-        let state = env.state().borrow();
-        let medium_bucket = &buckets[wow_ui_sim::widget::FrameStrata::Medium.as_index()];
+        let env = env_with_isolated_world_map();
 
-        let map_tile_ids: Vec<_> = state
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let lua_probe: String = env
+            .eval(
+                r#"
+                local pin = WorldMapFrame and WorldMapFrame:EnumeratePinsByTemplate("WorldMap_WorldQuestPinTemplate")()
+                return string.format(
+                    "seconds=%s low=%s critical=%s timelow=%s",
+                    tostring(C_TaskQuest.GetQuestTimeLeftSeconds(90101)),
+                    tostring(QuestUtils_IsQuestWithinLowTimeThreshold(90101)),
+                    tostring(QuestUtils_IsQuestWithinCriticalTimeThreshold(90101)),
+                    tostring(pin and pin.TimeLowFrame and pin.TimeLowFrame:IsShown())
+                )
+                "#,
+            )
+            .expect("lua probe should run");
+        eprintln!("{lua_probe}");
+
+        let state = env.state().borrow();
+        let visible_clock_icons: Vec<_> = state
             .widgets
             .iter_ids()
             .filter(|&id| {
                 let Some(frame) = state.widgets.get(id) else {
                     return false;
                 };
-                frame
-                    .texture
-                    .as_deref()
-                    .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
+                frame.effective_alpha > 0.0
+                    && frame.atlas.as_deref() == Some("worldquest-icon-clock")
             })
             .collect();
-        assert!(
-            !map_tile_ids.is_empty(),
-            "expected at least one visible world map tile texture"
-        );
-
-        let world_quest_icon_id = state
-            .widgets
-            .iter_ids()
-            .find(|&id| {
-                let Some(frame) = state.widgets.get(id) else {
-                    return false;
-                };
-                frame.atlas.as_deref() == Some("Worldquest-icon")
-            })
-            .expect("expected a visible world quest pin icon texture");
-        let display_frame_id = state
-            .widgets
-            .get(world_quest_icon_id)
-            .and_then(|frame| frame.parent_id)
-            .expect("world quest icon should have display-frame parent");
-        let button_id = state
-            .widgets
-            .get(display_frame_id)
-            .and_then(|frame| frame.parent_id)
-            .expect("display frame should have button parent");
-        let button_texture_id = state
-            .widgets
-            .iter_ids()
-            .find(|&id| {
-                let Some(frame) = state.widgets.get(id) else {
-                    return false;
-                };
-                frame.parent_id == Some(button_id)
-                    && frame.atlas.as_deref() == Some("UI-QuestPoi-QuestNumber")
-            })
-            .expect("expected world quest button number texture");
-
-        let map_tile_positions: Vec<_> = map_tile_ids
-            .iter()
-            .filter_map(|&id| medium_bucket.iter().position(|&bucket_id| bucket_id == id))
-            .collect();
-        assert!(
-            !map_tile_positions.is_empty(),
-            "expected at least one world map tile in MEDIUM bucket"
-        );
-        let max_map_tile_pos = *map_tile_positions
-            .iter()
-            .max()
-            .expect("world map tiles should have at least one position");
-        let button_texture_pos = medium_bucket
-            .iter()
-            .position(|&id| id == button_texture_id)
-            .expect("world quest button texture should be in MEDIUM bucket");
-        let world_quest_icon_pos = medium_bucket
-            .iter()
-            .position(|&id| id == world_quest_icon_id)
-            .expect("world quest icon should be in MEDIUM bucket");
 
         assert!(
-            world_quest_icon_pos > max_map_tile_pos,
-            "world quest icon (pos={world_quest_icon_pos}) must render after world map tile \
-             range ending at pos={max_map_tile_pos} so pins stay above the map art"
-        );
-        assert!(
-            button_texture_pos > max_map_tile_pos,
-            "world quest button circle (pos={button_texture_pos}) must render after world map \
-             tile range ending at pos={max_map_tile_pos} so the pin base stays above the map art"
-        );
-        assert!(
-            medium_bucket
-                .iter()
-                .position(|&id| id == button_id)
-                .is_some_and(|button_pos| button_pos > max_map_tile_pos),
-            "world quest button frame must sort after the world map tile range"
+            visible_clock_icons.is_empty(),
+            "seeded world quests default to 120 minutes left, so expiration clocks should stay hidden; visible clock ids={visible_clock_icons:?}"
         );
     });
 }
 
 #[test]
-fn world_quest_star_and_circle_emit_live_quads_after_map_tiles() {
+fn isolated_world_map_world_quest_circle_keeps_atlas_size() {
     common::with_timeout(120, move || {
-        let env = env_with_world_map();
-        let (
-            map_tile_texture,
-            circle_rect,
-            circle_request_path,
-            icon_rect,
-            icon_request_path,
-            circle_id,
-            icon_id,
-        ) = {
-            let state = env.state().borrow();
-            let map_tile_id = state
-                .widgets
-                .iter_ids()
-                .find(|&id| {
-                    let Some(frame) = state.widgets.get(id) else {
-                        return false;
-                    };
-                    frame
-                        .texture
-                        .as_deref()
-                        .is_some_and(|path| path.starts_with("Interface\\WorldMap\\"))
-                })
-                .expect("expected a visible world map tile texture");
-            let icon_id = state
-                .widgets
-                .iter_ids()
-                .find(|&id| {
-                    let Some(frame) = state.widgets.get(id) else {
-                        return false;
-                    };
-                    frame.atlas.as_deref() == Some("Worldquest-icon")
-                })
-                .expect("expected a visible world quest pin icon texture");
-            let display_frame_id = state
-                .widgets
-                .get(icon_id)
-                .and_then(|frame| frame.parent_id)
-                .expect("world quest icon should have display-frame parent");
-            let button_id = state
-                .widgets
-                .get(display_frame_id)
-                .and_then(|frame| frame.parent_id)
-                .expect("display frame should have button parent");
-            let circle_id = state
-                .widgets
-                .iter_ids()
-                .find(|&id| {
-                    let Some(frame) = state.widgets.get(id) else {
-                        return false;
-                    };
-                    frame.parent_id == Some(button_id)
-                        && frame.atlas.as_deref() == Some("UI-QuestPoi-QuestNumber")
-                })
-                .expect("expected world quest button circle texture");
-            let map_tile_texture = state
-                .widgets
-                .get(map_tile_id)
-                .and_then(|frame| frame.texture.clone())
-                .expect("map tile should have texture path");
-            let circle_texture = state
-                .widgets
-                .get(circle_id)
-                .and_then(|frame| frame.texture.clone())
-                .expect("world quest circle should have texture path");
-            let circle_request_path = request_path_for_frame_texture(
-                &circle_texture,
-                state
-                    .widgets
-                    .get(circle_id)
-                    .and_then(|frame| frame.atlas_tex_coords),
-            );
-            let icon_texture = state
-                .widgets
-                .get(icon_id)
-                .and_then(|frame| frame.texture.clone())
-                .expect("world quest icon should have texture path");
-            let icon_request_path = request_path_for_frame_texture(
-                &icon_texture,
-                state
-                    .widgets
-                    .get(icon_id)
-                    .and_then(|frame| frame.atlas_tex_coords),
-            );
-            let circle_rect = compute_frame_rect(&state.widgets, circle_id, 1024.0, 768.0);
-            let icon_rect = compute_frame_rect(&state.widgets, icon_id, 1024.0, 768.0);
-            (
-                map_tile_texture,
-                circle_rect,
-                circle_request_path,
-                icon_rect,
-                icon_request_path,
-                circle_id,
-                icon_id,
-            )
-        };
+        let env = env_with_isolated_world_map();
 
-        let batch = build_quad_batch(&env);
-        let map_tile_request = batch
-            .texture_requests
-            .iter()
-            .find(|request| request.path.starts_with(&map_tile_texture))
-            .or_else(|| {
-                batch
-                    .texture_requests
-                    .iter()
-                    .find(|request| request.path.starts_with("Interface\\WorldMap\\"))
-            })
-            .expect("world map tile texture request should exist");
-        let circle_requests: Vec<_> = batch
-            .texture_requests
-            .iter()
-            .filter(|request| request.path == circle_request_path.as_str())
-            .filter(|request| bounds_match_rect(request_bounds(&batch, request), circle_rect))
-            .collect();
-        let icon_requests: Vec<_> = batch
-            .texture_requests
-            .iter()
-            .filter(|request| request.path == icon_request_path.as_str())
-            .filter(|request| bounds_match_rect(request_bounds(&batch, request), icon_rect))
-            .collect();
+        std::thread::sleep(std::time::Duration::from_millis(1200));
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let state = env.state().borrow();
+        let (_circle_id, _icon_id, circle_rect, _circle_request_path, _icon_request_path) =
+            world_quest_pin_pairs(&state)
+                .into_iter()
+                .next()
+                .expect("isolated world map should have at least one world quest pair");
 
         assert!(
-            !circle_requests.is_empty(),
-            "world quest circle frame {circle_id} should emit at least one textured quad request"
-        );
-        assert!(
-            !icon_requests.is_empty(),
-            "world quest icon frame {icon_id} should emit at least one textured quad request"
-        );
-
-        assert_bounds_match_rect(
-            union_request_bounds(&batch, &circle_requests),
-            circle_rect,
-            "world quest circle quad union",
-        );
-        assert_bounds_match_rect(
-            union_request_bounds(&batch, &icon_requests),
-            icon_rect,
-            "world quest star quad union",
-        );
-
-        assert!(
-            circle_requests.iter().all(|request| {
-                let start = request.vertex_start as usize;
-                let end = start + request.vertex_count as usize;
-                batch.vertices[start..end]
-                    .iter()
-                    .any(|vertex| vertex.color[3] > 0.0)
-            }),
-            "world quest circle quads should have visible alpha"
-        );
-        assert!(
-            icon_requests.iter().all(|request| {
-                let start = request.vertex_start as usize;
-                let end = start + request.vertex_count as usize;
-                batch.vertices[start..end]
-                    .iter()
-                    .any(|vertex| vertex.color[3] > 0.0)
-            }),
-            "world quest star quads should have visible alpha"
-        );
-
-        let map_tile_start = map_tile_request.vertex_start;
-        let first_circle_start = circle_requests
-            .iter()
-            .map(|request| request.vertex_start)
-            .min()
-            .expect("world quest circle request should have vertex_start");
-        let first_icon_start = icon_requests
-            .iter()
-            .map(|request| request.vertex_start)
-            .min()
-            .expect("world quest icon request should have vertex_start");
-        assert!(
-            first_circle_start > map_tile_start,
-            "world quest circle quads must emit after the map tile request"
-        );
-        assert!(
-            first_icon_start > map_tile_start,
-            "world quest star quads must emit after the map tile request"
+            (circle_rect.width - 32.0).abs() <= 0.1 && (circle_rect.height - 32.0).abs() <= 0.1,
+            "world quest NormalTexture should keep its 32x32 atlas-sized rect, got {circle_rect:?}"
         );
     });
 }

@@ -120,6 +120,8 @@ static WORLD_QUESTS: &[WorldQuest] = &[
     },
 ];
 
+const SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES: i32 = 120;
+
 /// Find a world quest by ID.
 fn find_world_quest(quest_id: i32) -> Option<&'static WorldQuest> {
     WORLD_QUESTS.iter().find(|wq| wq.quest_id == quest_id)
@@ -128,6 +130,14 @@ fn find_world_quest(quest_id: i32) -> Option<&'static WorldQuest> {
 /// Check if a quest ID is a seeded world quest.
 pub fn is_world_quest(quest_id: i32) -> bool {
     find_world_quest(quest_id).is_some()
+}
+
+fn quest_time_left_minutes(quest_id: i32) -> Option<i32> {
+    is_world_quest(quest_id).then_some(SEEDED_WORLD_QUEST_TIME_LEFT_MINUTES)
+}
+
+fn quest_time_left_seconds(quest_id: i32) -> Option<i32> {
+    quest_time_left_minutes(quest_id).map(|minutes| minutes * 60)
 }
 
 /// Global quest data availability functions.
@@ -176,7 +186,21 @@ fn register_task_quest_queries(lua: &Lua, t: &mlua::Table) -> Result<()> {
     )?;
     t.set(
         "GetQuestTimeLeftMinutes",
-        lua.create_function(|_, quest_id: i32| Ok(if is_world_quest(quest_id) { 120 } else { 0 }))?,
+        lua.create_function(|_, quest_id: i32| {
+            Ok(match quest_time_left_minutes(quest_id) {
+                Some(minutes) => Value::Integer(i64::from(minutes)),
+                None => Value::Nil,
+            })
+        })?,
+    )?;
+    t.set(
+        "GetQuestTimeLeftSeconds",
+        lua.create_function(|_, quest_id: i32| {
+            Ok(match quest_time_left_seconds(quest_id) {
+                Some(seconds) => Value::Integer(i64::from(seconds)),
+                None => Value::Nil,
+            })
+        })?,
     )?;
     Ok(())
 }

@@ -177,12 +177,18 @@ fn apply_set_button_texture(
     tex_id: u64,
 ) {
     let current_parent = state.widgets.get(tex_id).and_then(|f| f.parent_id);
+    let needs_default_anchors = state
+        .widgets
+        .get(tex_id)
+        .map(|texture| texture.anchors.is_empty())
+        .unwrap_or(false);
     if current_parent != Some(button_id) {
         super::methods_hierarchy::reparent_widget(&mut state.widgets, tex_id, Some(button_id));
     }
     if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
-        tex.anchors.clear();
-        super::methods_helpers::set_all_points_anchors_pub(tex, button_id);
+        if needs_default_anchors {
+            super::methods_helpers::set_all_points_anchors_pub(tex, button_id);
+        }
         tex.parent_key = Some(parent_key.to_string());
     }
     if let Some(btn) = state.widgets.get_mut_visual(button_id) {

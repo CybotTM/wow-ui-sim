@@ -303,40 +303,27 @@ fn build_button_texture_code(
         key_escaped,
         escape_lua_string(texture_name),
     );
-
-    if let Some(size) = &texture.size {
-        let (width, height) = get_size_values(size);
-        match (width, height) {
-            (Some(width), Some(height)) => {
-                code.push_str(&format!("            tex:SetSize({}, {})\n", width, height));
-            }
-            (Some(width), None) => {
-                code.push_str(&format!("            tex:SetWidth({})\n", width));
-            }
-            (None, Some(height)) => {
-                code.push_str(&format!("            tex:SetHeight({})\n", height));
-            }
-            _ => {}
-        }
+    append_texture_properties(&mut code, texture, "tex", false);
+    let no_parent_key = None;
+    let no_parent_array = None;
+    append_anchors_and_parent_refs(
+        &mut code,
+        &texture.anchors,
+        texture.set_all_points,
+        AnchorParentContext {
+            parent_key: &no_parent_key,
+            parent_array: &no_parent_array,
+            var: "tex",
+            parent_var: "parent",
+            parent_name,
+        },
+    );
+    if texture.hidden == Some(true) {
+        code.push_str("            tex:Hide()\n");
     }
 
     code.push_str(&format!("            parent[\"{key_escaped}\"] = tex\n"));
     code.push_str(&format!("            parent:{}(tex)\n", setter_method));
-
-    if let Some(file) = &texture.file {
-        code.push_str(&format!(
-            "            tex:SetTexture(\"{}\")\n",
-            escape_lua_string(file)
-        ));
-    }
-    if let Some(atlas) = &texture.atlas {
-        let use_atlas_size = texture.use_atlas_size.unwrap_or(false);
-        code.push_str(&format!(
-            "            tex:SetAtlas(\"{}\", {})\n",
-            escape_lua_string(atlas),
-            use_atlas_size
-        ));
-    }
 
     code.push_str("        end\n");
     code
