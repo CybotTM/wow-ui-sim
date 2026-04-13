@@ -141,18 +141,34 @@ fn add_slider_orientation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &
 fn add_slider_thumb_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_set_thumb_texture_method(methods);
     methods.add_method("GetThumbTexture", |lua, this, ()| {
-        let store: mlua::Table = lua.load("return _G.__slider_thumbs or {}").eval()?;
+        let store = get_or_create_slider_thumb_store(lua)?;
         let thumb: Value = store.get(this.0)?;
         Ok(thumb)
     });
 }
 
+/// Return the `_G.__slider_thumbs` table, creating + caching on first access.
+fn get_or_create_slider_thumb_store(lua: &mlua::Lua) -> mlua::Result<mlua::Table> {
+    if let Ok(t) = lua.named_registry_value::<mlua::Table>("__slider_thumbs_cache") {
+        return Ok(t);
+    }
+    let globals = lua.globals();
+    let table = match globals.get::<mlua::Value>("__slider_thumbs")? {
+        mlua::Value::Table(t) => t,
+        _ => {
+            let t = lua.create_table()?;
+            globals.set("__slider_thumbs", t.clone())?;
+            t
+        }
+    };
+    lua.set_named_registry_value("__slider_thumbs_cache", table.clone())?;
+    Ok(table)
+}
+
 fn add_set_thumb_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetThumbTexture", |lua, this, arg: Value| {
         let id = this.0;
-        let store: mlua::Table = lua
-            .load("_G.__slider_thumbs = _G.__slider_thumbs or {}; return _G.__slider_thumbs")
-            .eval()?;
+        let store = get_or_create_slider_thumb_store(lua)?;
         match arg {
             Value::UserData(_) => {
                 store.set(id, arg)?;

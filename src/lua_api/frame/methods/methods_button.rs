@@ -36,9 +36,7 @@ fn add_font_object_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
     ] {
         methods.add_method(set_name, move |lua, this, font_object: Value| {
             let id = this.0;
-            let store: mlua::Table = lua
-                .load("_G.__button_font_objects = _G.__button_font_objects or {}; return _G.__button_font_objects")
-                .eval()?;
+            let store = get_or_create_button_font_store(lua)?;
             let key = format!("{}:{}", id, state_key);
             store.set(key, font_object)?;
             Ok(())
@@ -46,12 +44,30 @@ fn add_font_object_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) 
 
         methods.add_method(get_name, move |lua, this, ()| {
             let id = this.0;
-            let store: mlua::Table = lua.load("return _G.__button_font_objects or {}").eval()?;
+            let store = get_or_create_button_font_store(lua)?;
             let key = format!("{}:{}", id, state_key);
             let font: Value = store.get(key)?;
             Ok(font)
         });
     }
+}
+
+/// Return the `_G.__button_font_objects` table, creating + caching on first access.
+fn get_or_create_button_font_store(lua: &mlua::Lua) -> mlua::Result<mlua::Table> {
+    if let Ok(t) = lua.named_registry_value::<mlua::Table>("__button_font_objects_cache") {
+        return Ok(t);
+    }
+    let globals = lua.globals();
+    let table = match globals.get::<Value>("__button_font_objects")? {
+        Value::Table(t) => t,
+        _ => {
+            let t = lua.create_table()?;
+            globals.set("__button_font_objects", t.clone())?;
+            t
+        }
+    };
+    lua.set_named_registry_value("__button_font_objects_cache", table.clone())?;
+    Ok(table)
 }
 
 /// SetPushedTextOffset / GetPushedTextOffset.

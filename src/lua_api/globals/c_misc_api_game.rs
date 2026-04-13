@@ -537,12 +537,27 @@ fn register_minimap_time_globals(lua: &Lua, globals: &mlua::Table) -> Result<()>
 }
 
 fn create_get_game_time_fn(lua: &Lua) -> Result<mlua::Function> {
-    lua.create_function(|lua, ()| {
-        // Return local (hour, minute) via Lua's os.date to match the system clock.
-        let hour: i32 = lua.load("tonumber(os.date('%H'))").eval()?;
-        let min: i32 = lua.load("tonumber(os.date('%M'))").eval()?;
-        Ok((hour, min))
+    lua.create_function(|_, ()| {
+        // Return local (hour, minute) directly from libc. The previous
+        // implementation compiled two Lua chunks per call via
+        // lua.load("tonumber(os.date('%H'))").eval() — ~60µs total.
+        // This is called every frame by GameTimeFrame_OnUpdate.
+        let (h, m) = local_hour_minute();
+        Ok((h, m))
     })
+}
+
+fn local_hour_minute() -> (i32, i32) {
+    let secs = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    unsafe {
+        let time = secs as libc::time_t;
+        let mut tm: libc::tm = std::mem::zeroed();
+        libc::localtime_r(&time, &mut tm);
+        (tm.tm_hour as i32, tm.tm_min as i32)
+    }
 }
 
 fn register_c_equipment_set(lua: &Lua) -> Result<()> {
