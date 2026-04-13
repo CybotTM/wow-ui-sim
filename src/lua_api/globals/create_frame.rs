@@ -445,6 +445,7 @@ fn register_new_frame(
     let mut state = state.borrow_mut();
     register_frame_instance(&mut state, name.as_deref(), frame);
     apply_new_frame_parent_state(&mut state, frame_id, parent_id, parent_explicit);
+    state.invalidate_strata_buckets();
     frame_id
 }
 

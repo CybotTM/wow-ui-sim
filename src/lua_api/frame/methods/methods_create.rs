@@ -41,6 +41,7 @@ fn register_child_widget(
         let mut state = state_rc.borrow_mut();
         state.widgets.register(child);
         state.widgets.add_child(parent_id, child_id);
+        state.invalidate_strata_buckets();
 
         let parent_props = state
             .widgets
