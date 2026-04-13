@@ -271,6 +271,45 @@ fn test_runtime_action_button_template_creates_named_children() {
         .unwrap();
 }
 
+#[test]
+fn test_runtime_template_mixin_and_key_values_apply() {
+    let t = load_test_xml(
+        "runtime-template-mixin-keyvalues",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="RuntimeTemplateTest" virtual="true" mixin="RuntimeTemplateMixin">
+                <KeyValues>
+                    <KeyValue key="myString" value="hello"/>
+                    <KeyValue key="myNumber" value="42" type="number"/>
+                    <KeyValue key="myBool" value="true" type="boolean"/>
+                    <KeyValue key="myGlobal" value="RuntimeTemplateGlobals.Token" type="global"/>
+                </KeyValues>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            RuntimeTemplateGlobals = { Token = "ready" }
+            RuntimeTemplateMixin = {
+                Describe = function(self)
+                    return self.myString .. ":" .. tostring(self.myNumber) .. ":" .. tostring(self.myBool) .. ":" .. self.myGlobal
+                end,
+            }
+
+            local frame = CreateFrame("Frame", "RuntimeTemplateInstance", UIParent, "RuntimeTemplateTest")
+            assert(frame.myString == "hello", "string key value should apply")
+            assert(frame.myNumber == 42, "numeric key value should apply")
+            assert(frame.myBool == true, "boolean key value should apply")
+            assert(frame.myGlobal == "ready", "dotted global key value should resolve")
+            assert(frame:Describe() == "hello:42:true:ready", "mixin method should apply")
+        "#,
+        )
+        .unwrap();
+}
+
 const MULTI_FILE_WIDGETS_LUA: &str = r#"
     local _, addon = ...
     local function updateKeyDirection(self) return "updated: " .. tostring(self) end

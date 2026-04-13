@@ -12,8 +12,9 @@ use crate::loader::chunk_cache;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::loader::precompiled;
 use crate::lua_api::SimState;
+use crate::lua_api::frame::FrameRef;
 use crate::xml::{FrameElement, FrameXml, LayerElement, TemplateEntry, get_template_chain};
-use mlua::Lua;
+use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -251,6 +252,27 @@ fn apply_key_values(lua: &Lua, key_values: &crate::xml::KeyValuesXml, frame_name
     if key_values.values.is_empty() {
         return;
     }
+    if apply_key_values_direct(lua, key_values, frame_name).is_err() {
+        apply_key_values_via_chunk(lua, key_values, frame_name);
+    }
+}
+
+fn apply_key_values_direct(
+    lua: &Lua,
+    key_values: &crate::xml::KeyValuesXml,
+    frame_name: &str,
+) -> mlua::Result<()> {
+    let Some(fields) = frame_fields_by_name(lua, frame_name)? else {
+        return Ok(());
+    };
+    for kv in &key_values.values {
+        let value = key_value_to_lua_value(lua, &kv.value, kv.value_type.as_deref())?;
+        fields.raw_set(kv.key.as_str(), value)?;
+    }
+    Ok(())
+}
+
+fn apply_key_values_via_chunk(lua: &Lua, key_values: &crate::xml::KeyValuesXml, frame_name: &str) {
     let frame_ref = lua_global_ref(frame_name);
     let mut code = format!("do local f = {} if f then ", frame_ref);
     for kv in &key_values.values {
@@ -261,7 +283,29 @@ fn apply_key_values(lua: &Lua, key_values: &crate::xml::KeyValuesXml, frame_name
     let _ = chunk_cache::exec(lua, &code, "template-key-values");
 }
 
-/// Format a key value for Lua assignment.
+fn key_value_to_lua_value(lua: &Lua, value: &str, value_type: Option<&str>) -> mlua::Result<Value> {
+    match value_type {
+        Some("number") => parse_number_value(value),
+        Some("boolean") => Ok(Value::Boolean(value.eq_ignore_ascii_case("true"))),
+        Some("global") => resolve_global_path_value(lua, value),
+        _ => Ok(Value::String(lua.create_string(value)?)),
+    }
+}
+
+fn parse_number_value(value: &str) -> mlua::Result<Value> {
+    if let Ok(integer) = value.parse::<i64>() {
+        return Ok(Value::Integer(integer));
+    }
+    if let Ok(number) = value.parse::<f64>() {
+        return Ok(Value::Number(number));
+    }
+    Err(mlua::Error::RuntimeError(format!(
+        "invalid numeric key value '{}'",
+        value
+    )))
+}
+
+/// Format a key value for Lua assignment fallback.
 fn format_key_value(value: &str, value_type: Option<&str>) -> String {
     match value_type {
         Some("number") => value.to_string(),
@@ -371,6 +415,45 @@ fn apply_button_textures(lua: &Lua, template: &FrameXml, frame_name: &str, subst
 /// Apply mixin to a frame.
 fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
     let Some(mixin) = mixin else { return };
+    if apply_mixin_direct(lua, mixin, frame_name).is_ok() {
+        return;
+    }
+    apply_mixin_via_chunk(lua, mixin, frame_name);
+}
+
+fn apply_mixin_direct(lua: &Lua, mixin: &str, frame_name: &str) -> mlua::Result<()> {
+    let Some(fields) = frame_fields_by_name(lua, frame_name)? else {
+        return Ok(());
+    };
+    for mixin_table in resolve_mixin_tables(lua, mixin)? {
+        for pair in mixin_table.pairs::<Value, Value>() {
+            let (key, value) = pair?;
+            fields.raw_set(key, value)?;
+        }
+    }
+    let post_init = build_mixin_post_init(mixin);
+    if !post_init.is_empty() {
+        let code = format!(
+            "do local f = {} if f then {} end end",
+            lua_global_ref(frame_name),
+            post_init,
+        );
+        let _ = chunk_cache::exec(lua, &code, "template-mod");
+    }
+    Ok(())
+}
+
+fn resolve_mixin_tables(lua: &Lua, mixin: &str) -> mlua::Result<Vec<mlua::Table>> {
+    let mut mixins = Vec::new();
+    for name in mixin.split(',').map(str::trim).filter(|s| !s.is_empty()) {
+        if let Value::Table(table) = resolve_top_level_value(lua, name)? {
+            mixins.push(table);
+        }
+    }
+    Ok(mixins)
+}
+
+fn apply_mixin_via_chunk(lua: &Lua, mixin: &str, frame_name: &str) {
     let mut parts = Vec::new();
     for name in mixin.split(',').map(str::trim).filter(|s| !s.is_empty()) {
         parts.push(format!(
@@ -389,6 +472,59 @@ fn apply_mixin(lua: &Lua, mixin: &Option<String>, frame_name: &str) {
         post_init,
     );
     let _ = chunk_cache::exec(lua, &code, "template-mod");
+}
+
+fn frame_fields_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Option<mlua::Table>> {
+    let value: Value = lua.globals().raw_get(frame_name)?;
+    frame_fields_from_value(value)
+}
+
+fn frame_fields_from_value(value: Value) -> mlua::Result<Option<mlua::Table>> {
+    let userdata = match value {
+        Value::UserData(ud) => Some(ud),
+        Value::Table(t) => match t.raw_get::<Value>("__lud")? {
+            Value::UserData(ud) => Some(ud),
+            _ => None,
+        },
+        _ => None,
+    };
+    let Some(userdata) = userdata else {
+        return Ok(None);
+    };
+    if userdata.is::<FrameRef>() {
+        return userdata.user_value::<mlua::Table>().map(Some);
+    }
+    Ok(None)
+}
+
+fn resolve_global_path_value(lua: &Lua, path: &str) -> mlua::Result<Value> {
+    let mut segments = path.split('.').filter(|segment| !segment.is_empty());
+    let Some(first) = segments.next() else {
+        return Ok(Value::Nil);
+    };
+    let mut current = resolve_top_level_value(lua, first)?;
+    for segment in segments {
+        current = match current {
+            Value::Table(table) => table.get::<Value>(segment)?,
+            _ => return Ok(Value::Nil),
+        };
+    }
+    Ok(current)
+}
+
+fn resolve_top_level_value(lua: &Lua, name: &str) -> mlua::Result<Value> {
+    let globals = lua.globals();
+    let global_value = globals.get::<Value>(name)?;
+    if !global_value.is_nil() {
+        return Ok(global_value);
+    }
+    if let Ok(secureenv) = lua.named_registry_value::<mlua::Table>("__secureenv") {
+        let secure_value = secureenv.get::<Value>(name)?;
+        if !secure_value.is_nil() {
+            return Ok(secure_value);
+        }
+    }
+    Ok(Value::Nil)
 }
 
 /// Build post-initialization code for known mixins that need pre-seeded fields.
@@ -415,6 +551,14 @@ fn build_mixin_post_init(mixin: &str) -> String {
             }
             "EventFrameMixin" | "CallbackRegistryMixin" => {
                 post_init.push_str("if f.OnLoad_Intrinsic then pcall(f.OnLoad_Intrinsic, f) end ");
+                post_init.push_str("f.callbackTables = f.callbackTables or {} ");
+                post_init.push_str("f.executingEvents = f.executingEvents or {} ");
+            }
+            "UIParentManagedFrameContainerMixin" => {
+                post_init.push_str("f.showingFrames = f.showingFrames or {} ");
+            }
+            "TabSystemMixin" => {
+                post_init.push_str("f.tabs = f.tabs or {} ");
             }
             _ => {}
         }
