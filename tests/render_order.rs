@@ -3,12 +3,13 @@
 mod common;
 
 use common::env_with_shared_xml;
-use std::collections::HashSet;
-use std::path::PathBuf;
+use std::collections::{HashMap, HashSet};
+use std::path::{Path, PathBuf};
 use wow_ui_sim::iced_app::compute_frame_rect;
 use wow_ui_sim::loader::{discover_blizzard_addons_for_screen, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::screen::ScreenKind;
+use wow_ui_sim::toc::TocFile;
 
 /// Build strata buckets from a WowLuaEnv (mutable borrow), then return a clone.
 fn build_strata_buckets(env: &wow_ui_sim::lua_api::WowLuaEnv) -> Vec<Vec<u64>> {
@@ -110,56 +111,74 @@ fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
 }
 
-/// Reduced Blizzard stack already known to open the world map in tests.
+/// Intentional root systems for reduced world-map harness.
 ///
-/// This is not "WorldMap alone" — the addon depends on the usual FrameXML /
-/// UIParent base chain plus map-canvas and pin infrastructure.
-const ISOLATED_WORLD_MAP_ADDONS: &[&str] = &[
-    "Blizzard_SharedXMLBase",
-    "Blizzard_Colors",
-    "Blizzard_SharedXML",
-    "Blizzard_SharedXMLGame",
-    "Blizzard_UIPanelTemplates",
-    "Blizzard_FrameXMLBase",
+/// Declared TOC dependencies load automatically. These roots stay explicit
+/// because some Blizzard panels still rely on ambient systems that are not
+/// modeled as TOC dependencies.
+const ISOLATED_WORLD_MAP_ROOT_ADDONS: &[&str] = &[
     "Blizzard_FrameEffects",
-    "Blizzard_LoadLocale",
-    "Blizzard_Fonts_Shared",
-    "Blizzard_HelpPlate",
-    "Blizzard_AccessibilityTemplates",
-    "Blizzard_ObjectAPI",
-    "Blizzard_UIParent",
-    "Blizzard_TextStatusBar",
-    "Blizzard_MoneyFrame",
-    "Blizzard_POIButton",
-    "Blizzard_Flyout",
     "Blizzard_StoreUI",
-    "Blizzard_MicroMenu",
-    "Blizzard_EditMode",
-    "Blizzard_GarrisonBase",
-    "Blizzard_GameTooltip",
-    "Blizzard_UIParentPanelManager",
-    "Blizzard_Settings_Shared",
-    "Blizzard_SettingsDefinitions_Shared",
-    "Blizzard_SettingsDefinitions_Frame",
-    "Blizzard_FrameXMLUtil",
-    "Blizzard_ItemButton",
-    "Blizzard_QuickKeybind",
-    "Blizzard_FrameXML",
     "Blizzard_UIPanels_Game",
     "Blizzard_MapCanvasSecureUtil",
     "Blizzard_MapCanvas",
     "Blizzard_SharedMapDataProviders",
     "Blizzard_WorldMap",
-    "Blizzard_ActionBar",
     "Blizzard_GameMenu",
     "Blizzard_UIWidgets",
-    "Blizzard_Minimap",
     "Blizzard_AddOnList",
     "Blizzard_TimerunningUtil",
-    "Blizzard_Communities",
 ];
 
-fn env_with_isolated_world_map_ui() -> WowLuaEnv {
+fn discover_blizzard_addon_closure_for_screen(
+    blizzard_ui_dir: &Path,
+    screen: ScreenKind,
+    roots: &[&str],
+) -> Vec<(String, PathBuf)> {
+    let addons = discover_blizzard_addons_for_screen(blizzard_ui_dir, screen);
+    let toc_map: HashMap<String, (PathBuf, TocFile)> = addons
+        .iter()
+        .map(|(name, toc_path)| {
+            let toc = TocFile::from_file(toc_path)
+                .unwrap_or_else(|err| panic!("failed to parse TOC for {name}: {err}"));
+            (name.clone(), (toc_path.clone(), toc))
+        })
+        .collect();
+
+    let wanted = collect_declared_dependency_closure(&toc_map, roots);
+    addons
+        .into_iter()
+        .filter(|(name, _)| wanted.contains(name))
+        .collect()
+}
+
+fn collect_declared_dependency_closure(
+    toc_map: &HashMap<String, (PathBuf, TocFile)>,
+    roots: &[&str],
+) -> HashSet<String> {
+    let mut wanted = HashSet::new();
+    let mut pending: Vec<String> = roots.iter().map(|name| (*name).to_string()).collect();
+
+    while let Some(name) = pending.pop() {
+        if !wanted.insert(name.clone()) {
+            continue;
+        }
+
+        let Some((_, toc)) = toc_map.get(&name) else {
+            panic!("missing Blizzard addon root/dependency in discovered set: {name}");
+        };
+
+        for dep in toc.dependencies() {
+            if toc_map.contains_key(&dep) && !wanted.contains(&dep) {
+                pending.push(dep);
+            }
+        }
+    }
+
+    wanted
+}
+
+fn env_with_root_addons_ui(roots: &[&str]) -> WowLuaEnv {
     let env = WowLuaEnv::new().expect("failed to create Lua environment");
     env.set_screen_size(1024.0, 768.0);
     env.set_screen_mode(ScreenKind::Game);
@@ -170,11 +189,8 @@ fn env_with_isolated_world_map_ui() -> WowLuaEnv {
         state.addon_base_paths = vec![ui.clone()];
     }
 
-    let wanted: HashSet<&str> = ISOLATED_WORLD_MAP_ADDONS.iter().copied().collect();
-    for (name, toc_path) in discover_blizzard_addons_for_screen(&ui, ScreenKind::Game) {
-        if !wanted.contains(name.as_str()) {
-            continue;
-        }
+    for (name, toc_path) in discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, roots)
+    {
         if let Err(err) = load_addon(&env.loader_env(), &toc_path) {
             eprintln!("[isolated load {name}] FAILED: {err}");
         }
@@ -185,6 +201,10 @@ fn env_with_isolated_world_map_ui() -> WowLuaEnv {
     env
 }
 
+fn env_with_isolated_world_map_ui() -> WowLuaEnv {
+    env_with_root_addons_ui(ISOLATED_WORLD_MAP_ROOT_ADDONS)
+}
+
 fn env_with_isolated_world_map() -> WowLuaEnv {
     let env = env_with_isolated_world_map_ui();
     env.exec("ToggleWorldMap()")
@@ -192,6 +212,77 @@ fn env_with_isolated_world_map() -> WowLuaEnv {
     wow_ui_sim::startup::process_pending_timers(&env);
     wow_ui_sim::startup::fire_one_on_update_tick(&env);
     env
+}
+
+#[test]
+fn isolated_world_map_dependency_closure_loads_declared_dependencies() {
+    let ui = blizzard_ui_dir();
+    let addons =
+        discover_blizzard_addon_closure_for_screen(&ui, ScreenKind::Game, &["Blizzard_Channels"]);
+    let loaded: HashSet<_> = addons.iter().map(|(name, _)| name.as_str()).collect();
+
+    assert!(
+        loaded.contains("Blizzard_SocialToast"),
+        "dependency closure should include Blizzard_SocialToast when Blizzard_Channels is requested; loaded={loaded:?}"
+    );
+}
+
+#[test]
+fn voice_chat_prompt_renders_below_world_map_panel_in_combined_stack() {
+    let mut roots = ISOLATED_WORLD_MAP_ROOT_ADDONS.to_vec();
+    roots.extend(["Blizzard_ChatFrame", "Blizzard_Channels"]);
+    let env = env_with_root_addons_ui(&roots);
+    env.exec(
+        r#"
+        ToggleWorldMap();
+        VoiceChatPromptActivateChannel:ClearAllPoints();
+        VoiceChatPromptActivateChannel:SetPoint("CENTER", WorldMapFrame, "CENTER", 0, 0);
+        VoiceChatPromptActivateChannel:SetAlpha(1);
+        VoiceChatPromptActivateChannel:Show();
+    "#,
+    )
+    .expect("failed to show voice chat prompt over world map");
+    wow_ui_sim::startup::process_pending_timers(&env);
+    wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+    let buckets = build_strata_buckets(&env);
+    let flattened: Vec<u64> = buckets.iter().flatten().copied().collect();
+    let state = env.state().borrow();
+
+    let prompt_id = state
+        .widgets
+        .get_id_by_name("VoiceChatPromptActivateChannel")
+        .expect("voice prompt should exist");
+    let world_map_id = state
+        .widgets
+        .get_id_by_name("WorldMapFrame")
+        .expect("world map should exist");
+    let border_id = state
+        .widgets
+        .get(world_map_id)
+        .and_then(|frame| frame.children_keys.get("BorderFrame"))
+        .copied()
+        .expect("world map border frame should exist");
+
+    let prompt = state.widgets.get(prompt_id).unwrap();
+    let border = state.widgets.get(border_id).unwrap();
+
+    assert_eq!(prompt.frame_strata.as_str(), "LOW");
+    assert_eq!(border.frame_strata.as_str(), "HIGH");
+
+    let prompt_pos = flattened
+        .iter()
+        .position(|&id| id == prompt_id)
+        .expect("voice prompt should be in render list");
+    let border_pos = flattened
+        .iter()
+        .position(|&id| id == border_id)
+        .expect("world map border should be in render list");
+
+    assert!(
+        prompt_pos < border_pos,
+        "voice prompt should render before world map border when both overlap; prompt_pos={prompt_pos}, border_pos={border_pos}"
+    );
 }
 
 // ============================================================================
