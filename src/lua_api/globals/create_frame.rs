@@ -10,10 +10,13 @@ use super::create_frame_util::{
 };
 use super::template::{apply_templates_from_registry, fire_deferred_child_onloads, fire_on_load};
 use crate::loader::helpers::lua_global_ref;
+use crate::logging;
 use crate::widget::{Frame, WidgetRegistry, WidgetType};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::OnceLock;
+use std::time::{Duration, Instant};
 use widget_defaults::{create_item_button_intrinsics, create_widget_type_defaults};
 
 /// Write a frame's owner_addon into the persistent `__frame_owners` registry table.
@@ -46,48 +49,159 @@ fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
     }
 }
 
+#[derive(Clone, Copy)]
+struct CreateFrameProfileConfig {
+    log_all: bool,
+    min_duration: Duration,
+}
+
+#[derive(Default)]
+struct CreateFrameTemplateTiming {
+    intrinsic_templates: Duration,
+    explicit_templates: Duration,
+    deferred_child_onloads: Duration,
+    self_onload: Duration,
+    deferred_child_count: usize,
+}
+
+fn create_frame_profile_config() -> Option<CreateFrameProfileConfig> {
+    static CONFIG: OnceLock<Option<CreateFrameProfileConfig>> = OnceLock::new();
+    *CONFIG.get_or_init(|| {
+        let raw = std::env::var("WOW_SIM_PROFILE_CREATE_FRAME").ok()?;
+        let value = raw.trim();
+        if value.is_empty()
+            || value == "0"
+            || value.eq_ignore_ascii_case("false")
+            || value.eq_ignore_ascii_case("off")
+        {
+            return None;
+        }
+        Some(CreateFrameProfileConfig {
+            log_all: value.eq_ignore_ascii_case("all"),
+            min_duration: parse_create_frame_profile_min_duration(
+                std::env::var("WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS")
+                    .ok()
+                    .as_deref(),
+            ),
+        })
+    })
+}
+
+fn parse_create_frame_profile_min_duration(raw: Option<&str>) -> Duration {
+    raw.and_then(|s| s.trim().parse::<u64>().ok())
+        .map(Duration::from_millis)
+        .unwrap_or_else(|| Duration::from_millis(5))
+}
+
+fn current_create_frame_suppress_depth(lua: &Lua) -> i32 {
+    lua.globals()
+        .get("__suppress_create_frame_onload")
+        .unwrap_or(0)
+}
+
+fn log_create_frame_profile(
+    frame_type: &str,
+    frame_name: &str,
+    template: Option<&str>,
+    total: Duration,
+    finalize: Duration,
+    template_timing: &CreateFrameTemplateTiming,
+) {
+    logging::println_elapsed(&format!(
+        "[CreateFrame] name={} type={} template={} total={:.2?} finalize={:.2?} intrinsic={:.2?} explicit={:.2?} deferred_onloads={:.2?} child_onloads={} self_onload={:.2?}",
+        frame_name,
+        frame_type,
+        template.unwrap_or("-"),
+        total,
+        finalize,
+        template_timing.intrinsic_templates,
+        template_timing.explicit_templates,
+        template_timing.deferred_child_onloads,
+        template_timing.deferred_child_count,
+        template_timing.self_onload,
+    ));
+}
+
+pub(crate) fn create_frame_instance(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    widget_type: WidgetType,
+    frame_type: &str,
+    name: Option<String>,
+    parent_id: Option<u64>,
+    parent_explicit: bool,
+    id: Option<i32>,
+) -> Result<u64> {
+    let old_same_name = name
+        .as_ref()
+        .and_then(|frame_name| state.borrow().widgets.get_id_by_name(frame_name));
+    let frame_id = register_new_frame(state, widget_type, name.clone(), parent_id, parent_explicit);
+    configure_frame_metadata(lua, state, frame_id, widget_type, frame_type, id);
+    let is_forbidden = frame_is_forbidden(state, frame_id);
+    let ud = create_frame_userdata(lua, frame_id, name.as_deref(), is_forbidden)?;
+    if let Some(old_id) = old_same_name {
+        migrate_lua_fields_to_new_frame(lua, old_id, frame_id)?;
+    }
+    store_widget_type_key(lua, &ud, widget_type, frame_type)?;
+    register_named_button_children(lua, state, frame_id, widget_type, name.as_deref())?;
+    if frame_type == "ItemButton" {
+        apply_item_button_mixin(lua, frame_id);
+    }
+    Ok(frame_id)
+}
+
 /// Create the CreateFrame Lua function.
 pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     let state_clone = Rc::clone(&state);
     let create_frame = lua.create_function(move |lua, args: mlua::MultiValue| {
+        let profile = create_frame_profile_config();
+        let entry_suppress_depth = current_create_frame_suppress_depth(lua);
+        let profile_runtime_call = profile.is_some() && entry_suppress_depth <= 0;
+        let total_start = profile_runtime_call.then(Instant::now);
         let cfa = parse_create_frame_args(lua, &args, &state_clone)?;
         let widget_type = parse_widget_type(&cfa.frame_type)?;
-        let old_same_name = cfa
+        let frame_id = create_frame_instance(
+            lua,
+            &state_clone,
+            widget_type,
+            &cfa.frame_type,
+            cfa.name.clone(),
+            cfa.parent_id,
+            cfa.parent_explicit,
+            cfa.id,
+        )?;
+        let ref_name = cfa
             .name
-            .as_ref()
-            .and_then(|name| state_clone.borrow().widgets.get_id_by_name(name));
-        let frame_id = register_frame_from_args(&state_clone, widget_type, &cfa);
-        configure_frame_metadata(
+            .clone()
+            .unwrap_or_else(|| format!("__frame_{}", frame_id));
+        let finalize_start = profile_runtime_call.then(Instant::now);
+        let template_timing = finalize_registered_frame(
             lua,
             &state_clone,
             frame_id,
-            widget_type,
-            &cfa.frame_type,
-            cfa.id,
-        );
-        let is_forbidden = frame_is_forbidden(&state_clone, frame_id);
-        let ud = create_frame_userdata(lua, frame_id, cfa.name.as_deref(), is_forbidden)?;
-        if let Some(old_id) = old_same_name {
-            migrate_lua_fields_to_new_frame(lua, old_id, frame_id)?;
+            &cfa,
+            &ref_name,
+            profile_runtime_call,
+        )?;
+        if let (Some(cfg), Some(total_start)) = (profile, total_start) {
+            let total = total_start.elapsed();
+            if cfg.log_all || total >= cfg.min_duration {
+                let finalize = finalize_start
+                    .map(|start| start.elapsed())
+                    .unwrap_or_default();
+                log_create_frame_profile(
+                    &cfa.frame_type,
+                    &ref_name,
+                    cfa.template.as_deref(),
+                    total,
+                    finalize,
+                    &template_timing,
+                );
+            }
         }
-        finalize_registered_frame(lua, &state_clone, frame_id, widget_type, &cfa, &ud)?;
-        Ok(ud)
+        frame_ref(lua, frame_id)
     })?;
     Ok(create_frame)
-}
-
-fn register_frame_from_args(
-    state: &Rc<RefCell<SimState>>,
-    widget_type: WidgetType,
-    cfa: &CreateFrameArgs,
-) -> u64 {
-    register_new_frame(
-        state,
-        widget_type,
-        cfa.name.clone(),
-        cfa.parent_id,
-        cfa.parent_explicit,
-    )
 }
 
 fn configure_frame_metadata(
@@ -146,28 +260,19 @@ fn finalize_registered_frame(
     lua: &Lua,
     state: &Rc<RefCell<SimState>>,
     frame_id: u64,
-    widget_type: WidgetType,
     cfa: &CreateFrameArgs,
-    ud: &Value,
-) -> mlua::Result<()> {
-    store_widget_type_key(lua, ud, widget_type, &cfa.frame_type)?;
-    register_named_button_children(lua, state, frame_id, widget_type, cfa.name.as_deref())?;
-    if cfa.frame_type == "ItemButton" {
-        apply_item_button_mixin(lua, frame_id);
-    }
-
-    let ref_name = cfa
-        .name
-        .clone()
-        .unwrap_or_else(|| format!("__frame_{}", frame_id));
+    ref_name: &str,
+    profile_runtime_call: bool,
+) -> mlua::Result<CreateFrameTemplateTiming> {
     apply_intrinsic_and_templates(
         lua,
         state,
         &cfa.frame_type,
-        &ref_name,
+        ref_name,
         cfa.template.as_deref(),
         cfa.parent_id,
         frame_id,
+        profile_runtime_call,
     )
 }
 
@@ -243,15 +348,21 @@ fn apply_intrinsic_and_templates(
     template: Option<&str>,
     parent_id: Option<u64>,
     frame_id: u64,
-) -> mlua::Result<()> {
+    profile_runtime_call: bool,
+) -> mlua::Result<CreateFrameTemplateTiming> {
+    let mut timing = CreateFrameTemplateTiming::default();
     if let Some(entry) = &crate::xml::get_template(frame_type) {
         let canonical = &entry.name;
+        let start = profile_runtime_call.then(Instant::now);
         apply_templates_from_registry(lua, state, ref_name, canonical);
+        timing.intrinsic_templates = start.map(|t| t.elapsed()).unwrap_or_default();
         let code = format!("{}.intrinsic = \"{}\"", lua_global_ref(ref_name), canonical);
         let _ = lua.load(&code).exec();
     }
     if let Some(tmpl) = template {
+        let start = profile_runtime_call.then(Instant::now);
         apply_templates_from_registry(lua, state, ref_name, tmpl);
+        timing.explicit_templates = start.map(|t| t.elapsed()).unwrap_or_default();
         if parent_id.is_some() {
             apply_parent_key_from_template(lua, tmpl, ref_name);
             apply_parent_array_from_template(lua, tmpl, frame_id, ref_name);
@@ -262,10 +373,14 @@ fn apply_intrinsic_and_templates(
         .get("__suppress_create_frame_onload")
         .unwrap_or(0);
     if suppress_depth <= 0 {
-        fire_deferred_child_onloads(lua);
+        let deferred_start = profile_runtime_call.then(Instant::now);
+        timing.deferred_child_count = fire_deferred_child_onloads(lua);
+        timing.deferred_child_onloads = deferred_start.map(|t| t.elapsed()).unwrap_or_default();
+        let onload_start = profile_runtime_call.then(Instant::now);
         fire_on_load(lua, ref_name);
+        timing.self_onload = onload_start.map(|t| t.elapsed()).unwrap_or_default();
     }
-    Ok(())
+    Ok(timing)
 }
 
 struct CreateFrameArgs {
@@ -631,4 +746,34 @@ fn create_forbidden_proxy(lua: &Lua, ud: Value) -> Result<Value> {
     let mt: mlua::Table = lua.named_registry_value("__forbidden_proxy_mt")?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_create_frame_profile_min_duration;
+    use std::time::Duration;
+
+    #[test]
+    fn create_frame_profile_min_duration_defaults_to_five_ms() {
+        assert_eq!(
+            parse_create_frame_profile_min_duration(None),
+            Duration::from_millis(5)
+        );
+        assert_eq!(
+            parse_create_frame_profile_min_duration(Some("")),
+            Duration::from_millis(5)
+        );
+        assert_eq!(
+            parse_create_frame_profile_min_duration(Some("garbage")),
+            Duration::from_millis(5)
+        );
+    }
+
+    #[test]
+    fn create_frame_profile_min_duration_parses_ms() {
+        assert_eq!(
+            parse_create_frame_profile_min_duration(Some("17")),
+            Duration::from_millis(17)
+        );
+    }
 }

@@ -122,9 +122,9 @@ pub fn apply_templates_from_registry(
 
 /// Fire all deferred child OnLoad scripts that were queued during template
 /// application while `__suppress_create_frame_onload` was active.
-pub fn fire_deferred_child_onloads(lua: &Lua) {
+pub fn fire_deferred_child_onloads(lua: &Lua) -> usize {
     let Ok(deferred) = lua.globals().get::<mlua::Table>("__deferred_child_onloads") else {
-        return;
+        return 0;
     };
     let names: Vec<String> = deferred
         .sequence_values::<String>()
@@ -136,6 +136,7 @@ pub fn fire_deferred_child_onloads(lua: &Lua) {
     for name in &names {
         fire_on_load(lua, name);
     }
+    names.len()
 }
 
 /// Apply a single template entry to a frame.
@@ -181,7 +182,14 @@ fn apply_single_template(
     apply_animation_groups(lua, template, frame_name);
 
     // Create child frames defined in the template
-    children::create_child_frames(lua, state, template, frame_name, frame_name);
+    children::create_child_frames(
+        lua,
+        state,
+        template,
+        frame_name,
+        frame_name,
+        children::use_direct_runtime_child_creation(&entry.name),
+    );
 
     // Create ScrollChild children
     if let Some(scroll_child) = template.scroll_child() {
