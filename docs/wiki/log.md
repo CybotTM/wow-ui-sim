@@ -2,6 +2,10 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-12] ingest | transparent wrapper render-order investigation
+
+Created `investigations/transparent-wrapper-render-order.md` for the world map / quest log render-order fix. Updated it after a follow-up regression to document the depth-aware transparent-wrapper hoist in `state_render.rs`, including both world-map visibility coverage (`world_map_tiles_render_after_tiled_background`) and world-quest pin ordering coverage.
+
 ## [2026-04-09] ingest | systems/ pages created (10 pages)
 
 Created all 10 systems/ pages from source docs in docs/:

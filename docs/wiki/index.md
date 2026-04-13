@@ -54,6 +54,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; 3 fix strategies with tradeoffs |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
+| [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |
 | [[talent-sheen]] | 22s synchronized sweep; white rectangle bug when masking broken |
 | [[tooltip-alignment]] | NineSlice inner box vs outer bounds; 15px effective inset |
 | [[glow-effects]] | Additive blending end-to-end; one gap: SetBorderBlendMode missing |
