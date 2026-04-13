@@ -85,7 +85,7 @@ fn create_child_frame_from_template(
     // any anchors set by the inherited template (WoW behavior: most-derived
     // anchors win completely, not merged).
     if frame.anchors().is_some() {
-        reapply_inline_anchors(state, frame, &child_name);
+        reapply_inline_anchors(state, frame, &child_name, parent_name);
     }
 
     apply_inline_frame_content(lua, state, frame, &child_name, child_subst);
@@ -156,7 +156,15 @@ fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_nam
 }
 
 /// Clear all template-set anchors and re-apply inline anchors from the child XML.
-fn reapply_inline_anchors(state: &Rc<RefCell<SimState>>, frame: &FrameXml, child_name: &str) {
+///
+/// `$parent` in the child frame's own anchors refers to the actual parent frame,
+/// not the child's resolved global name.
+fn reapply_inline_anchors(
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    child_name: &str,
+    parent_name: &str,
+) {
     let Some(anchors) = frame.anchors() else {
         return;
     };
@@ -177,7 +185,7 @@ fn reapply_inline_anchors(state: &Rc<RefCell<SimState>>, frame: &FrameXml, child
     }
     let mut s = state.borrow_mut();
     for anchor in &anchors.anchors {
-        direct::set_single_anchor(&mut s, fid, anchor, child_name);
+        direct::set_single_anchor(&mut s, fid, anchor, parent_name);
     }
 }
 

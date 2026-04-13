@@ -20,12 +20,47 @@ const CHATFRAME_SCROLLBAR_HOST_XML: &str = r#"
     </Ui>
 "#;
 
+const INLINE_REAPPLY_HOST_XML: &str = r#"
+    <Ui>
+        <Button name="InlineReapplyBaseButtonTemplate" virtual="true">
+            <Size x="16" y="16"/>
+        </Button>
+        <Frame name="InlineReapplyHostTemplate" virtual="true">
+            <Layers>
+                <Layer level="BACKGROUND">
+                    <Texture name="$parentBackground" parentKey="Background"/>
+                </Layer>
+            </Layers>
+            <Frames>
+                <Button name="$parentResizeButton" parentKey="ResizeButton" inherits="InlineReapplyBaseButtonTemplate">
+                    <Anchors>
+                        <Anchor point="BOTTOMRIGHT" relativeTo="$parentBackground"/>
+                    </Anchors>
+                </Button>
+            </Frames>
+        </Frame>
+    </Ui>
+"#;
+
 fn register_chatframe_scrollbar_host_template() {
     let ui = parse_xml(CHATFRAME_SCROLLBAR_HOST_XML).unwrap();
     let XmlElement::Frame(frame) = &ui.elements[0] else {
         panic!("expected frame template");
     };
     register_template("ChatFrameScrollBarHostTemplate", "Frame", frame.clone());
+}
+
+fn register_inline_reapply_host_template() {
+    let ui = parse_xml(INLINE_REAPPLY_HOST_XML).unwrap();
+    let XmlElement::Button(base) = &ui.elements[0] else {
+        panic!("expected button template");
+    };
+    register_template("InlineReapplyBaseButtonTemplate", "Button", base.clone());
+
+    let XmlElement::Frame(host) = &ui.elements[1] else {
+        panic!("expected host template");
+    };
+    register_template("InlineReapplyHostTemplate", "Frame", host.clone());
 }
 
 #[test]
@@ -368,5 +403,26 @@ fn test_inherited_minimal_scrollbar_child_keeps_inline_outer_anchors() {
         result,
         "BOTTOMRIGHT->$parent:BOTTOMRIGHT(0,0) | TOPRIGHT->$parent:TOPRIGHT(0,0) || BOTTOM->$parent:BOTTOM(0,19) | TOP->$parent:TOP(0,-19)",
         "outer scrollbar anchors should stay TOPRIGHT/BOTTOMRIGHT while Track keeps TOP/BOTTOM: {result}"
+    );
+}
+
+#[test]
+fn test_reapplied_inline_child_anchor_uses_actual_parent_for_dollar_parent_lookup() {
+    let env = env_with_shared_xml();
+    register_inline_reapply_host_template();
+
+    let relative_name: String = env
+        .eval(
+            r#"
+        local host = CreateFrame("Frame", "TestInlineReapply", UIParent, "InlineReapplyHostTemplate")
+        local _, rel = host.ResizeButton:GetPoint(1)
+        return rel and rel:GetName() or "nil"
+    "#,
+        )
+        .unwrap();
+
+    assert_eq!(
+        relative_name, "TestInlineReapplyBackground",
+        "reapplied child anchors should resolve $parent against the actual parent frame"
     );
 }

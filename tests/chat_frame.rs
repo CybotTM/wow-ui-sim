@@ -63,6 +63,53 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 }
 
+fn chat_layout_debug(env: &WowLuaEnv) -> String {
+    env.eval(
+        r#"
+        local frames = {
+            {"ChatFrame1", ChatFrame1},
+            {"ChatFrame1Background", ChatFrame1Background},
+            {"ChatFrame1.ResizeButton", ChatFrame1.ResizeButton},
+            {"ChatFrame1.ScrollToBottomButton", ChatFrame1.ScrollToBottomButton},
+            {"ChatFrame1.ScrollBar", ChatFrame1.ScrollBar},
+            {"ChatFrame1EditBox", ChatFrame1EditBox},
+        }
+
+        local out = {}
+        for _, item in ipairs(frames) do
+            local label, frame = item[1], item[2]
+            if frame then
+                local x, y, w, h = frame:GetRect()
+                local points = {}
+                for i = 1, frame:GetNumPoints() do
+                    local point, rel, relPoint, ox, oy = frame:GetPoint(i)
+                    local relName = rel and rel:GetName() or "$parent"
+                    table.insert(points, string.format("%s->%s:%s(%.0f,%.0f)", point, relName, relPoint, ox, oy))
+                end
+                table.sort(points)
+                table.insert(
+                    out,
+                    string.format(
+                        "%s rect=(%.0f,%.0f %.0fx%.0f) shown=%s points=%s",
+                        label,
+                        x or -1,
+                        y or -1,
+                        w or -1,
+                        h or -1,
+                        tostring(frame:IsShown()),
+                        table.concat(points, " | ")
+                    )
+                )
+            else
+                table.insert(out, label .. " <nil>")
+            end
+        end
+        return table.concat(out, "\n")
+    "#,
+    )
+    .expect("chat layout debug eval failed")
+}
+
 /// Hook C_ChatInfo.SendChatMessage to capture submitted messages.
 fn hook_send_chat_message(env: &WowLuaEnv) {
     env.exec(
@@ -255,6 +302,7 @@ fn test_chat_editbox_text_color_after_activation() {
 fn test_chat_scrollbar_stays_attached_to_chat_frame_right_edge() {
     test_timeout! {
         let env = setup_env();
+        let layout = chat_layout_debug(&env);
 
         let (chat_x, _chat_y, chat_w, _chat_h): (f64, f64, f64, f64) = env
             .eval("local x, y, w, h = ChatFrame1:GetRect(); return x, y, w, h")
@@ -283,19 +331,25 @@ fn test_chat_scrollbar_stays_attached_to_chat_frame_right_edge() {
         let chat_right = chat_x + chat_w;
         assert!(
             (scroll_x - chat_right).abs() <= 30.0,
-            "ChatFrame1.ScrollBar should stay near ChatFrame1 right edge. chat=({chat_x:.0f}, w={chat_w:.0f}) scroll=({scroll_x:.0f}, w={scroll_w:.0f}) anchors={points}"
+            "ChatFrame1.ScrollBar should stay near ChatFrame1 right edge. chat=({:.0}, w={:.0}) scroll=({:.0}, w={:.0}) anchors={}\n{}",
+            chat_x,
+            chat_w,
+            scroll_x,
+            scroll_w,
+            points,
+            layout
         );
         assert!(
             (4.0..=32.0).contains(&scroll_w),
-            "ChatFrame1.ScrollBar width should stay sane, got {scroll_w}. anchors={points}"
+            "ChatFrame1.ScrollBar width should stay sane, got {scroll_w}. anchors={points}\n{layout}"
         );
         assert!(
             (350.0..=600.0).contains(&edit_w),
-            "ChatFrame1EditBox width should stay sane, got {edit_w}. scrollbar anchors={points}"
+            "ChatFrame1EditBox width should stay sane, got {edit_w}. scrollbar anchors={points}\n{layout}"
         );
         assert!(
             !points.contains("TOP->$parent:TOP") && !points.contains("BOTTOM->$parent:BOTTOM"),
-            "ChatFrame1.ScrollBar should not keep inner Track anchors after startup: {points}"
+            "ChatFrame1.ScrollBar should not keep inner Track anchors after startup: {points}\n{layout}"
         );
     }
 }

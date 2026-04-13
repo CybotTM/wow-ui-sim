@@ -46,6 +46,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[class-talents-artifact]] | Gold blob ruled out as lossy WebP encoding artifact, not a live render bug |
 | [[editmode-layout]] | 3 frame regressions from EditMode overrides after `__index` ordering fix; fenv workaround |
 | [[generated-stubs-audit]] | 6 priority findings in generated_stubs.rs affecting startup/panel-load paths |
+| [[chatframe-scrollbar-anchor-reapply]] | Inherited child anchor reapply used the child name for `$parent...` substitution, pushing `ChatFrame1` scrollbar descendants off-screen |
 | [[hero-spec-icon-bug]] | Retired — 5 layers of evidence confirm icon renders correctly |
 | [[hit-testing]] | Two-phase algorithm: HitGrid spatial index + depth-first child drill-down |
 | [[keybinding-system]] | Two Lua tables, key press pipeline, default bindings, Lua API |
