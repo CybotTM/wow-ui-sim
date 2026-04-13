@@ -36,7 +36,6 @@ pub(super) fn create_widget_type_defaults(
         WidgetType::EditBox => {
             if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
                 frame.mouse_enabled = true;
-                frame.visible = false;
             }
         }
         _ => {}
