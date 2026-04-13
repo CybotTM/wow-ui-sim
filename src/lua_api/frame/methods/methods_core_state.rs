@@ -779,11 +779,7 @@ mod tests {
         env.exec(r#"AlphaBoolNoopFrame:SetAlphaFromBoolean(true)"#)
             .unwrap();
 
-        let (_, dirty_ids) = env
-            .state()
-            .borrow()
-            .widgets
-            .take_render_dirty_with_ids();
+        let (_, dirty_ids) = env.state().borrow().widgets.take_render_dirty_with_ids();
         let dirty_ids = dirty_ids.unwrap_or_default();
         assert!(
             !dirty_ids.contains(&id) && !dirty_ids.contains(&child_id),
