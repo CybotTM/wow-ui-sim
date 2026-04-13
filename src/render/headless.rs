@@ -6,12 +6,17 @@
 use iced::widget::shader::Primitive;
 use image::RgbaImage;
 
-use super::shader::{GpuTextureData, QuadBatch, WowUiPrimitive};
+use super::shader::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive};
+use super::shader::primitive::{LoadedTexture, load_texture_prefer_bc};
 use crate::texture::TextureManager;
 
 /// Load unique textures for all batch texture requests.
-fn load_batch_textures(batch: &QuadBatch, tex_mgr: &mut TextureManager) -> Vec<GpuTextureData> {
+fn load_batch_textures(
+    batch: &QuadBatch,
+    tex_mgr: &mut TextureManager,
+) -> (Vec<GpuTextureData>, Vec<GpuBcTextureData>) {
     let mut textures = Vec::new();
+    let mut bc_textures = Vec::new();
     let mut seen = std::collections::HashSet::new();
     for request in batch
         .texture_requests
@@ -21,12 +26,15 @@ fn load_batch_textures(batch: &QuadBatch, tex_mgr: &mut TextureManager) -> Vec<G
         if seen.contains(&request.path) {
             continue;
         }
-        if let Some(gpu_data) = super::shader::load_texture_or_crop(tex_mgr, &request.path) {
+        if let Some(loaded) = load_texture_prefer_bc(tex_mgr, &request.path) {
             seen.insert(request.path.clone());
-            textures.push(gpu_data);
+            match loaded {
+                LoadedTexture::Rgba(data) => textures.push(data),
+                LoadedTexture::Bc(data) => bc_textures.push(data),
+            }
         }
     }
-    textures
+    (textures, bc_textures)
 }
 
 /// Create a headless wgpu device and queue.
@@ -47,8 +55,20 @@ fn create_headless_device() -> (wgpu::Device, wgpu::Queue) {
             .await
             .expect("Failed to find GPU adapter");
 
+        // Request BC texture compression if available (for direct BLP upload)
+        let features = if adapter
+            .features()
+            .contains(wgpu::Features::TEXTURE_COMPRESSION_BC)
+        {
+            wgpu::Features::TEXTURE_COMPRESSION_BC
+        } else {
+            wgpu::Features::empty()
+        };
         adapter
-            .request_device(&wgpu::DeviceDescriptor::default())
+            .request_device(&wgpu::DeviceDescriptor {
+                required_features: features,
+                ..Default::default()
+            })
             .await
             .expect("Failed to create GPU device")
     })
@@ -165,9 +185,12 @@ pub fn render_to_image(
     height: u32,
     glyph_atlas_data: Option<(&[u8], u32)>,
 ) -> RgbaImage {
-    let textures = load_batch_textures(batch, tex_mgr);
-    let mut primitive =
-        WowUiPrimitive::new_merged_with_textures(std::sync::Arc::new(batch.clone()), textures);
+    let (textures, bc_textures) = load_batch_textures(batch, tex_mgr);
+    let mut primitive = WowUiPrimitive::new_merged_with_textures(
+        std::sync::Arc::new(batch.clone()),
+        textures,
+        bc_textures,
+    );
 
     if let Some((data, size)) = glyph_atlas_data {
         primitive.glyph_atlas_data = Some(data.to_vec());

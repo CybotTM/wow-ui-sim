@@ -10,7 +10,7 @@ use crate::render::FrameQuadSnapshot;
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::GlyphAtlas;
 use crate::render::texture::UI_SCALE;
-use crate::render::{GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
+use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive, load_texture_or_crop};
 use crate::widget::WidgetType;
 
 use super::Message;
@@ -100,10 +100,11 @@ impl shader::Program<Message> for &App {
         let quad_dur = t0.elapsed();
 
         let overlay = self.build_overlay();
-        let (mut textures, tex_dur) = self.load_all_textures(&dirty_strata, &overlay);
+        let (mut textures, bc_textures, tex_dur) =
+            self.load_all_textures(&dirty_strata, &overlay);
 
         if had_textures_pending {
-            self.recover_pending_textures(&mut dirty_strata, &mut textures);
+            self.recover_pending_textures(&mut dirty_strata, &mut textures, &bc_textures);
         }
 
         log_slow_draw(quad_dur, tex_dur, textures.len());
@@ -115,6 +116,7 @@ impl shader::Program<Message> for &App {
             overlay,
             clear_color: [0.10, 0.11, 0.14, 1.0],
             textures,
+            bc_textures,
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
         };
@@ -436,14 +438,18 @@ impl App {
         &self,
         dirty_strata: &mut [Option<Arc<QuadBatch>>; FrameStrata::COUNT],
         textures: &mut Vec<GpuTextureData>,
+        _bc_textures: &[GpuBcTextureData],
     ) {
         let cached = self.cached_strata_quads.borrow();
         let deadline = std::time::Instant::now() + std::time::Duration::from_millis(50);
         for i in 0..dirty_strata.len() {
             if dirty_strata[i].is_none() {
                 if let Some(batch) = &cached[i] {
-                    let (extra, _) = self.load_new_textures_budgeted(batch, deadline);
+                    let (extra, _extra_bc, _) =
+                        self.load_new_textures_budgeted(batch, deadline);
                     textures.extend(extra);
+                    // BC textures from recovery are already tracked by the atlas
+                    // from prior frames — they only need uploading once.
                     dirty_strata[i] = Some(batch.clone());
                 }
             }

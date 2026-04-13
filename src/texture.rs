@@ -8,6 +8,7 @@ use std::path::{Path, PathBuf};
 
 use image_blp::convert::blp_to_image;
 use image_blp::parser::load_blp;
+use image_blp::types::BlpContent;
 
 /// Texture manager that loads and caches textures.
 #[derive(Debug)]
@@ -137,6 +138,62 @@ impl TextureManager {
                 None
             }
         }
+    }
+}
+
+/// Result of a BC-compressed texture load.
+pub struct BcTextureResult {
+    pub width: u32,
+    pub height: u32,
+    /// Raw BC block data (mip level 0 only).
+    pub bc_data: Vec<u8>,
+    /// BC compression format.
+    pub format: crate::render::shader::atlas::BcFormat,
+}
+
+impl TextureManager {
+    /// Attempt to load a BLP texture's raw BC block data without CPU decoding.
+    ///
+    /// Returns `Some` only when the resolved file is a BLP with DXT1/DXT3/DXT5 content.
+    /// Callers should fall back to `load()` (RGBA path) when this returns `None`.
+    pub fn load_bc(&self, wow_path: &str) -> Option<BcTextureResult> {
+        use crate::render::shader::atlas::BcFormat;
+
+        let normalized = normalize_wow_path(wow_path);
+        let file_path = self.resolve_path(&normalized)?;
+
+        let ext = file_path.extension().and_then(|e| e.to_str()).unwrap_or("");
+        if !ext.eq_ignore_ascii_case("blp") {
+            return None;
+        }
+
+        let blp = load_blp(&file_path).ok()?;
+        let width = blp.header.width;
+        let height = blp.header.height;
+
+        let (bc_data, format): (Vec<u8>, BcFormat) = match &blp.content {
+            BlpContent::Dxt1(dxtn) if !dxtn.images.is_empty() => {
+                (dxtn.images[0].content.clone(), BcFormat::Bc1)
+            }
+            BlpContent::Dxt3(dxtn) if !dxtn.images.is_empty() => {
+                (dxtn.images[0].content.clone(), BcFormat::Bc3)
+            }
+            BlpContent::Dxt5(dxtn) if !dxtn.images.is_empty() => {
+                (dxtn.images[0].content.clone(), BcFormat::Bc3)
+            }
+            _ => return None,
+        };
+
+        if bc_data.is_empty() {
+            return None;
+        }
+
+        Some(BcTextureResult {
+            width,
+            height,
+            bc_data,
+            format,
+        })
     }
 }
 

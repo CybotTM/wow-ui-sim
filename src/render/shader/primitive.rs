@@ -18,33 +18,104 @@ pub struct GpuTextureData {
     pub rgba: Vec<u8>,
 }
 
+use crate::render::shader::atlas::BcFormat;
+
+/// BC-compressed texture data ready for direct GPU upload (no CPU decode).
+#[derive(Debug, Clone)]
+pub struct GpuBcTextureData {
+    /// Texture path (normalized).
+    pub path: String,
+    /// Image width.
+    pub width: u32,
+    /// Image height.
+    pub height: u32,
+    /// Raw BC block data (mip level 0).
+    pub bc_data: Vec<u8>,
+    /// BC compression format (BC1 = DXT1, BC3 = DXT3/DXT5).
+    pub bc_format: BcFormat,
+}
+
 /// Load a texture by path, handling `@crop:` paths by extracting a sub-region.
 ///
 /// Atlas sub-region paths have format `"base_path@crop:left,right,top,bottom"` where
 /// left/right/top/bottom are UV coordinates in the source texture. The sub-region is
 /// extracted at native resolution so small atlas entries aren't degraded by downscaling
 /// the full oversized texture into a 512px GPU atlas cell.
+/// Result of loading a texture — either RGBA (CPU-decoded) or BC (raw GPU-native).
+pub enum LoadedTexture {
+    Rgba(GpuTextureData),
+    Bc(GpuBcTextureData),
+}
+
 pub fn load_texture_or_crop(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
 ) -> Option<GpuTextureData> {
-    if let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) {
-        let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
-        Some(GpuTextureData {
-            path: path.to_string(),
-            width: tex_data.width,
-            height: tex_data.height,
-            rgba: tex_data.pixels.clone(),
-        })
-    } else {
-        let tex_data = tex_mgr.load(path)?;
-        Some(GpuTextureData {
-            path: path.to_string(),
-            width: tex_data.width,
-            height: tex_data.height,
-            rgba: tex_data.pixels.clone(),
-        })
+    match load_texture_prefer_bc(tex_mgr, path)? {
+        LoadedTexture::Rgba(data) => Some(data),
+        LoadedTexture::Bc(_) => {
+            // Caller expects RGBA — fall back to standard decode
+            let tex_data = tex_mgr.load(path)?;
+            Some(GpuTextureData {
+                path: path.to_string(),
+                width: tex_data.width,
+                height: tex_data.height,
+                rgba: tex_data.pixels.clone(),
+            })
+        }
     }
+}
+
+/// Load a texture, preferring raw BC when the source is a BLP with DXT compression.
+///
+/// Returns `Bc` for BLP files with DXT content (dimensions must be multiples of 4),
+/// falls back to `Rgba` for everything else (webp, png, non-DXT BLP, crop requests).
+pub fn load_texture_prefer_bc(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) -> Option<LoadedTexture> {
+    // Crop requests always go through RGBA (sub-region extraction needs decoded pixels)
+    if path.contains("@crop:") {
+        if let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) {
+            let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
+            return Some(LoadedTexture::Rgba(GpuTextureData {
+                path: path.to_string(),
+                width: tex_data.width,
+                height: tex_data.height,
+                rgba: tex_data.pixels.clone(),
+            }));
+        }
+        return None;
+    }
+
+    // Try BC path first (only succeeds for BLP files with DXT content AND GPU BC support)
+    if crate::render::shader::atlas::is_bc_supported() {
+        if let Some(bc_result) = tex_mgr.load_bc(path) {
+            // BC textures require dimensions that are multiples of 4
+            if bc_result.width % 4 == 0
+                && bc_result.height % 4 == 0
+                && bc_result.width <= crate::render::shader::atlas::BC_CELL_SIZE
+                && bc_result.height <= crate::render::shader::atlas::BC_CELL_SIZE
+            {
+                return Some(LoadedTexture::Bc(GpuBcTextureData {
+                    path: path.to_string(),
+                    width: bc_result.width,
+                    height: bc_result.height,
+                    bc_data: bc_result.bc_data,
+                    bc_format: bc_result.format,
+                }));
+            }
+        }
+    }
+
+    // Fall back to RGBA
+    let tex_data = tex_mgr.load(path)?;
+    Some(LoadedTexture::Rgba(GpuTextureData {
+        path: path.to_string(),
+        width: tex_data.width,
+        height: tex_data.height,
+        rgba: tex_data.pixels.clone(),
+    }))
 }
 
 fn decode_crop_request<'a>(
@@ -168,6 +239,8 @@ pub struct WowUiPrimitive {
     pub clear_color: [f32; 4],
     /// Texture data to upload (path -> image data).
     pub textures: Vec<GpuTextureData>,
+    /// BC-compressed texture data to upload directly to the GPU BC atlas.
+    pub bc_textures: Vec<GpuBcTextureData>,
     /// Glyph atlas RGBA data for text rendering (2048x2048).
     pub glyph_atlas_data: Option<Vec<u8>>,
     /// Size of the glyph atlas (width = height).
@@ -188,15 +261,21 @@ impl WowUiPrimitive {
             overlay: QuadBatch::new(),
             clear_color: [0.10, 0.11, 0.14, 1.0],
             textures: Vec::new(),
+            bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
         }
     }
 
     /// Create a merged primitive with texture data (headless path).
-    pub fn new_merged_with_textures(quads: Arc<QuadBatch>, textures: Vec<GpuTextureData>) -> Self {
+    pub fn new_merged_with_textures(
+        quads: Arc<QuadBatch>,
+        textures: Vec<GpuTextureData>,
+        bc_textures: Vec<GpuBcTextureData>,
+    ) -> Self {
         let mut p = Self::new_merged(quads);
         p.textures = textures;
+        p.bc_textures = bc_textures;
         p
     }
 
@@ -207,6 +286,7 @@ impl WowUiPrimitive {
             overlay: QuadBatch::new(),
             clear_color: [0.10, 0.11, 0.14, 1.0],
             textures: Vec::new(),
+            bc_textures: Vec::new(),
             glyph_atlas_data: None,
             glyph_atlas_size: 0,
         }
@@ -218,6 +298,7 @@ fn upload_pending_textures(
     pipeline: &mut WowUiPipeline,
     queue: &wgpu::Queue,
     textures: &[GpuTextureData],
+    bc_textures: &[GpuBcTextureData],
     glyph_atlas_data: &Option<Vec<u8>>,
     glyph_atlas_size: u32,
 ) {
@@ -230,6 +311,19 @@ fn upload_pending_textures(
                 tex_data.width,
                 tex_data.height,
                 &tex_data.rgba,
+            );
+        }
+    }
+
+    for bc_data in bc_textures {
+        if atlas.get_bc(&bc_data.path).is_none() && atlas.get(&bc_data.path).is_none() {
+            atlas.upload_bc(
+                queue,
+                &bc_data.path,
+                bc_data.width,
+                bc_data.height,
+                &bc_data.bc_data,
+                bc_data.bc_format,
             );
         }
     }
@@ -276,13 +370,14 @@ fn resolve_and_scale_quads(
     resolved
 }
 
-/// Remap primary texture UVs for resolved atlas entries.
+/// Remap primary texture UVs for resolved atlas entries (RGBA or BC).
 fn resolve_texture_requests(
     atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
     requests: &[crate::render::TextureRequest],
     vertices: &mut [crate::render::QuadVertex],
 ) {
     for request in requests {
+        // Try RGBA atlas first, then BC atlas
         if let Some(entry) = atlas.get(&request.path) {
             let start = request.vertex_start as usize;
             let end = start + request.vertex_count as usize;
@@ -303,6 +398,27 @@ fn resolve_texture_requests(
                         entry.uv_height,
                         entry.original_height,
                         entry.tier,
+                    );
+                }
+            }
+        } else if let Some(bc_entry) = atlas.get_bc(&request.path).copied() {
+            let start = request.vertex_start as usize;
+            let end = start + request.vertex_count as usize;
+            let tex_idx = bc_entry.tex_index();
+            for vertex in vertices[start..end].iter_mut() {
+                if vertex.tex_index == -2 {
+                    vertex.tex_index = tex_idx;
+                    vertex.tex_coords[0] = remap_bc_entry_uv(
+                        vertex.tex_coords[0],
+                        bc_entry.uv_x,
+                        bc_entry.uv_width,
+                        bc_entry.original_width,
+                    );
+                    vertex.tex_coords[1] = remap_bc_entry_uv(
+                        vertex.tex_coords[1],
+                        bc_entry.uv_y,
+                        bc_entry.uv_height,
+                        bc_entry.original_height,
                     );
                 }
             }
@@ -355,6 +471,18 @@ fn remap_entry_uv(local_uv: f32, base_uv: f32, span_uv: f32, original_size: u32,
     base_uv + inset + local_uv * (span_uv - inset * 2.0).max(0.0)
 }
 
+/// Remap UV for BC atlas entries (fixed 256x256 cell size).
+fn remap_bc_entry_uv(local_uv: f32, base_uv: f32, span_uv: f32, original_size: u32) -> f32 {
+    let cell_size = crate::render::shader::atlas::BC_CELL_SIZE;
+    let uploaded_size = original_size.min(cell_size).max(1) as f32;
+    let inset = if uploaded_size > 1.0 {
+        (span_uv * 0.5 / uploaded_size).min(span_uv * 0.5)
+    } else {
+        0.0
+    };
+    base_uv + inset + local_uv * (span_uv - inset * 2.0).max(0.0)
+}
+
 /// Hide unresolved textures and scale positions to physical pixels.
 fn clear_pending_and_scale(vertices: &mut [crate::render::QuadVertex], scale: f32) {
     for vertex in vertices.iter_mut() {
@@ -391,6 +519,7 @@ impl shader::Primitive for WowUiPrimitive {
             pipeline,
             queue,
             &self.textures,
+            &self.bc_textures,
             &self.glyph_atlas_data,
             self.glyph_atlas_size,
         );

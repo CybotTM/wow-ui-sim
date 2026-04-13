@@ -5,7 +5,8 @@ use std::collections::HashSet;
 use std::sync::Arc;
 
 use crate::render::texture::UI_SCALE;
-use crate::render::{GpuTextureData, QuadBatch, load_texture_or_crop};
+use crate::render::{GpuBcTextureData, GpuTextureData, QuadBatch};
+use crate::render::shader::primitive::load_texture_prefer_bc;
 use crate::widget::{Frame, FrameStrata, WidgetType};
 
 use super::super::app::App;
@@ -76,24 +77,29 @@ impl App {
         &self,
         dirty_strata: &[Option<Arc<QuadBatch>>; FrameStrata::COUNT],
         overlay: &QuadBatch,
-    ) -> (Vec<GpuTextureData>, std::time::Duration) {
+    ) -> (Vec<GpuTextureData>, Vec<GpuBcTextureData>, std::time::Duration) {
         let t = std::time::Instant::now();
         let deadline = t + std::time::Duration::from_millis(50);
         let mut textures = Vec::new();
+        let mut bc_textures = Vec::new();
         let mut exhausted = false;
         for batch_opt in dirty_strata {
             if exhausted {
                 break;
             }
             if let Some(batch) = batch_opt {
-                let (loaded, hit) = self.load_new_textures_budgeted(batch, deadline);
+                let (loaded, loaded_bc, hit) =
+                    self.load_new_textures_budgeted(batch, deadline);
                 textures.extend(loaded);
+                bc_textures.extend(loaded_bc);
                 exhausted |= hit;
             }
         }
         if !exhausted {
-            let (loaded, hit) = self.load_new_textures_budgeted(overlay, deadline);
+            let (loaded, loaded_bc, hit) =
+                self.load_new_textures_budgeted(overlay, deadline);
             textures.extend(loaded);
+            bc_textures.extend(loaded_bc);
             exhausted |= hit;
         }
         self.textures_pending.set(exhausted);
@@ -101,17 +107,18 @@ impl App {
         if elapsed.as_millis() > 50 && !textures.is_empty() {
             log_slow_texture_load(&textures, elapsed);
         }
-        (textures, elapsed)
+        (textures, bc_textures, elapsed)
     }
 
     /// Load new textures from the batch's requests within a time budget.
-    /// Returns the loaded textures and whether the deadline was reached.
+    /// Returns (RGBA textures, BC textures, deadline_reached).
     pub(super) fn load_new_textures_budgeted(
         &self,
         quads: &QuadBatch,
         deadline: std::time::Instant,
-    ) -> (Vec<GpuTextureData>, bool) {
+    ) -> (Vec<GpuTextureData>, Vec<GpuBcTextureData>, bool) {
         let mut textures = Vec::new();
+        let mut bc_textures = Vec::new();
         let mut uploaded = self.gpu_uploaded_textures.borrow_mut();
         let mut failed = self.gpu_failed_textures.borrow_mut();
         let mut tex_mgr = self.texture_manager.borrow_mut();
@@ -123,29 +130,38 @@ impl App {
             if uploaded.contains(&request.path) || failed.contains(&request.path) {
                 continue;
             }
-            if textures
+            let already_queued = textures
                 .iter()
                 .any(|t: &GpuTextureData| t.path == request.path)
-            {
+                || bc_textures
+                    .iter()
+                    .any(|t: &GpuBcTextureData| t.path == request.path);
+            if already_queued {
                 continue;
             }
-            if !textures.is_empty() && std::time::Instant::now() >= deadline {
+            if (!textures.is_empty() || !bc_textures.is_empty())
+                && std::time::Instant::now() >= deadline
+            {
                 let base = request
                     .path
                     .find("@crop:")
                     .map_or(request.path.as_str(), |i| &request.path[..i]);
                 if !tex_mgr.is_cached(base) {
-                    return (textures, true);
+                    return (textures, bc_textures, true);
                 }
             }
-            if let Some(gpu_data) = load_texture_or_crop(&mut tex_mgr, &request.path) {
+            use crate::render::shader::primitive::LoadedTexture;
+            if let Some(loaded) = load_texture_prefer_bc(&mut tex_mgr, &request.path) {
                 uploaded.insert(request.path.clone());
-                textures.push(gpu_data);
+                match loaded {
+                    LoadedTexture::Rgba(data) => textures.push(data),
+                    LoadedTexture::Bc(data) => bc_textures.push(data),
+                }
             } else {
                 failed.insert(request.path.clone());
             }
         }
-        (textures, false)
+        (textures, bc_textures, false)
     }
 
     /// Append hover highlight quads for the currently hovered button.
