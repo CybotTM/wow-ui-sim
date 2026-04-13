@@ -21,6 +21,14 @@ fn is_region(wt: crate::widget::WidgetType) -> bool {
     )
 }
 
+fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
+    frame.frame_level.saturating_add(frame.raise_order)
+}
+
+fn is_strata_root_boundary(frame: &crate::widget::Frame) -> bool {
+    matches!(frame.name.as_deref(), Some("UIParent" | "WorldFrame"))
+}
+
 /// DFS emit: parent frame, then its Texture regions (sorted by draw_layer),
 /// then child frames (recursively), then its FontString regions.
 ///
@@ -85,6 +93,44 @@ fn partition_children(
     (regions, child_frames)
 }
 
+fn collect_same_strata_subtree_ids(
+    id: u64,
+    strata_idx: usize,
+    widgets: &WidgetRegistry,
+    out: &mut HashSet<u64>,
+) {
+    if !out.insert(id) {
+        return;
+    }
+    let Some(frame) = widgets.get(id) else {
+        return;
+    };
+    for &child_id in &frame.children {
+        let Some(child) = widgets.get(child_id) else {
+            continue;
+        };
+        if is_region(child.widget_type) {
+            out.insert(child_id);
+            continue;
+        }
+        if child.frame_strata.as_index() == strata_idx {
+            collect_same_strata_subtree_ids(child_id, strata_idx, widgets, out);
+        }
+    }
+}
+
+fn same_strata_subtree_segment_end(
+    bucket: &[u64],
+    start: usize,
+    subtree_ids: &HashSet<u64>,
+) -> usize {
+    let mut end = start + 1;
+    while end < bucket.len() && subtree_ids.contains(&bucket[end]) {
+        end += 1;
+    }
+    end
+}
+
 /// Sort regions by (draw_layer, draw_sub_layer, type_flag, id).
 /// FontStrings sort after Textures within the same layer (type_flag=1 vs 0).
 fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
@@ -97,9 +143,6 @@ fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
         let type_flag = |f: &crate::widget::Frame| -> u8 {
             u8::from(f.widget_type == crate::widget::WidgetType::FontString)
         };
-        // Reverse(id): earlier-created regions (lower ID) render on top within
-        // the same draw layer, matching WoW's behavior where the icon texture
-        // (created first in XML) renders above SlotArt (created later).
         (
             fa.draw_layer as i32,
             fa.draw_sub_layer,
@@ -118,9 +161,8 @@ fn sort_regions(regions: &mut [u64], widgets: &WidgetRegistry) {
 /// Sort child frames by (frame_level, raise_order, id).
 fn sort_child_frames(frames: &mut [u64], widgets: &WidgetRegistry) {
     frames.sort_by(|&a, &b| match (widgets.get(a), widgets.get(b)) {
-        (Some(fa), Some(fb)) => {
-            (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
-        }
+        (Some(fa), Some(fb)) => (effective_frame_level(fa), fa.frame_level, fa.raise_order, a)
+            .cmp(&(effective_frame_level(fb), fb.frame_level, fb.raise_order, b)),
         _ => a.cmp(&b),
     });
 }
@@ -188,30 +230,36 @@ impl SimState {
                 let Some(f) = self.widgets.get(id) else {
                     return false;
                 };
-                if is_region(f.widget_type) {
+                if is_region(f.widget_type) || is_strata_root_boundary(f) {
                     return false;
                 }
                 match f.parent_id {
                     None => true,
                     Some(pid) => {
-                        let same_strata = self.widgets.get(pid).map_or(false, |p| {
-                            self.frame_bucket_strata(p).as_index() == strata_idx
-                        });
-                        !same_strata || !visible.contains(&pid)
+                        let Some(parent) = self.widgets.get(pid) else {
+                            return true;
+                        };
+                        let same_strata = self.frame_bucket_strata(parent).as_index() == strata_idx;
+                        !same_strata || !visible.contains(&pid) || is_strata_root_boundary(parent)
                     }
                 }
             })
             .collect()
     }
 
-    /// Sort frame IDs by (frame_level, raise_order, id).
+    /// Sort root frame IDs so explicit Raise() wins for top-level panel trees.
     fn sort_by_frame_level(&self, ids: &mut [u64]) {
         ids.sort_by(|&a, &b| {
             let fa = self.widgets.get(a);
             let fb = self.widgets.get(b);
             match (fa, fb) {
                 (Some(fa), Some(fb)) => {
-                    (fa.frame_level, fa.raise_order, a).cmp(&(fb.frame_level, fb.raise_order, b))
+                    (fa.raise_order, effective_frame_level(fa), fa.frame_level, a).cmp(&(
+                        fb.raise_order,
+                        effective_frame_level(fb),
+                        fb.frame_level,
+                        b,
+                    ))
                 }
                 _ => a.cmp(&b),
             }
@@ -405,10 +453,77 @@ impl SimState {
         self.widgets.propagate_effective_alpha(id, parent_eff);
         if visible {
             // Show: insert newly-visible frames AFTER propagating alpha.
-            self.invalidate_strata_buckets();
+            if !self.try_repair_strata_buckets_after_show(id) {
+                self.invalidate_strata_buckets();
+            }
         }
         // Record for incremental HitGrid update (applied by App after Lua runs).
         self.pending_hit_grid_changes.push((id, visible));
+    }
+
+    fn try_repair_strata_buckets_after_show(&mut self, shown_id: u64) -> bool {
+        let Some(repair_root) = self.visible_same_strata_ancestor(shown_id) else {
+            return false;
+        };
+        let Some(root_frame) = self.widgets.get(repair_root) else {
+            return false;
+        };
+        let strata_idx = self.frame_bucket_strata(root_frame).as_index();
+
+        let mut subtree_ids = HashSet::new();
+        collect_same_strata_subtree_ids(repair_root, strata_idx, &self.widgets, &mut subtree_ids);
+
+        let visible_ids: HashSet<u64> = subtree_ids
+            .iter()
+            .copied()
+            .filter(|&id| {
+                self.widgets
+                    .get(id)
+                    .is_some_and(|frame| self.frame_render_alpha(frame) > 0.0)
+            })
+            .collect();
+        if !visible_ids.contains(&repair_root) {
+            return false;
+        }
+
+        let mut new_segment = Vec::new();
+        dfs_emit(
+            repair_root,
+            strata_idx,
+            &self.widgets,
+            &visible_ids,
+            &mut new_segment,
+        );
+
+        let Some(buckets) = self.strata_buckets.as_mut() else {
+            return false;
+        };
+        let bucket = &mut buckets[strata_idx];
+        let Some(start) = bucket.iter().position(|&id| id == repair_root) else {
+            return false;
+        };
+        let end = same_strata_subtree_segment_end(bucket, start, &subtree_ids);
+        bucket.splice(start..end, new_segment);
+        true
+    }
+
+    fn visible_same_strata_ancestor(&self, id: u64) -> Option<u64> {
+        let frame = self.widgets.get(id)?;
+        let target_strata = self.frame_bucket_strata(frame).as_index();
+        let mut current_id = frame.parent_id;
+        while let Some(parent_id) = current_id {
+            let parent = self.widgets.get(parent_id)?;
+            if is_strata_root_boundary(parent) {
+                return None;
+            }
+            if self.frame_bucket_strata(parent).as_index() == target_strata
+                && self.frame_render_alpha(parent) > 0.0
+            {
+                return Some(parent_id);
+            }
+            current_id = parent.parent_id;
+        }
+        None
     }
 
     /// Remove a frame and all its descendants from strata_buckets.
@@ -432,7 +547,17 @@ impl SimState {
 
     /// Invalidate strata buckets so they rebuild on next access.
     /// Used after show/reparent operations that change DFS traversal order.
+    #[track_caller]
     pub(crate) fn invalidate_strata_buckets(&mut self) {
+        if std::env::var_os("WOW_SIM_TRACE_STRATA_INVALIDATIONS").is_some() {
+            let caller = std::panic::Location::caller();
+            eprintln!(
+                "{} [strata-invalid] {}:{}",
+                crate::logging::global_elapsed_prefix(),
+                caller.file(),
+                caller.line()
+            );
+        }
         self.strata_buckets = None;
     }
 
@@ -469,24 +594,27 @@ impl SimState {
         frame.frame_strata
     }
 
-    /// Raise a frame above all siblings in the same strata+level.
+    /// Raise a frame above all siblings in the same strata.
     ///
-    /// Sets `raise_order` to max sibling raise_order + 1 without modifying
-    /// `frame_level`. Resorts the affected subtree in strata buckets.
+    /// `Raise()` does not mutate `frame_level`, so we store enough
+    /// `raise_order` to move the frame's effective raised level above the
+    /// highest sibling in the same strata.
     pub fn raise_frame(&mut self, id: u64) {
-        let (parent_id, strata, level) = match self.widgets.get(id) {
-            Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
+        let (parent_id, strata, level, current_effective_level) = match self.widgets.get(id) {
+            Some(f) => (
+                f.parent_id,
+                f.frame_strata,
+                f.frame_level,
+                effective_frame_level(f),
+            ),
             None => return,
         };
-        let max_raise_order = self
-            .sibling_raise_order_range(id, parent_id, strata, level)
-            .1;
-        let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
-        if current_raise_order > max_raise_order {
+        let max_effective_level = self.sibling_effective_level_range(id, parent_id, strata).1;
+        if current_effective_level > max_effective_level {
             return; // Already on top
         }
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.raise_order = max_raise_order + 1;
+            f.raise_order = max_effective_level.saturating_add(1).saturating_sub(level);
         }
         // Re-sort the affected subtree in strata buckets.
         // Avoid setting strata_buckets = None: Show/Hide calls later in the
@@ -497,24 +625,26 @@ impl SimState {
         }
     }
 
-    /// Lower a frame below all siblings in the same strata+level.
+    /// Lower a frame below all siblings in the same strata.
     ///
-    /// Sets `raise_order` to min sibling raise_order - 1 without modifying
-    /// `frame_level`. Resorts the affected subtree in strata buckets.
+    /// Mirrors `Raise()` by adjusting only `raise_order` and leaving the raw
+    /// `frame_level` unchanged.
     pub fn lower_frame(&mut self, id: u64) {
-        let (parent_id, strata, level) = match self.widgets.get(id) {
-            Some(f) => (f.parent_id, f.frame_strata, f.frame_level),
+        let (parent_id, strata, level, current_effective_level) = match self.widgets.get(id) {
+            Some(f) => (
+                f.parent_id,
+                f.frame_strata,
+                f.frame_level,
+                effective_frame_level(f),
+            ),
             None => return,
         };
-        let min_raise_order = self
-            .sibling_raise_order_range(id, parent_id, strata, level)
-            .0;
-        let current_raise_order = self.widgets.get(id).map(|f| f.raise_order).unwrap_or(0);
-        if current_raise_order < min_raise_order {
+        let min_effective_level = self.sibling_effective_level_range(id, parent_id, strata).0;
+        if current_effective_level < min_effective_level {
             return; // Already at bottom
         }
         if let Some(f) = self.widgets.get_mut_visual(id) {
-            f.raise_order = min_raise_order - 1;
+            f.raise_order = min_effective_level.saturating_sub(1).saturating_sub(level);
         }
         if self.strata_buckets.is_some() {
             self.remove_subtree_from_buckets(id);
@@ -522,13 +652,12 @@ impl SimState {
         }
     }
 
-    /// Return (min, max) raise_order among siblings of `id` in the given strata+level.
-    fn sibling_raise_order_range(
+    /// Return (min, max) effective frame level among siblings of `id` in the given strata.
+    fn sibling_effective_level_range(
         &self,
         id: u64,
         parent_id: Option<u64>,
         strata: crate::widget::FrameStrata,
-        level: i32,
     ) -> (i32, i32) {
         let sibling_ids: Vec<u64> = if let Some(pid) = parent_id {
             self.widgets
@@ -547,15 +676,15 @@ impl SimState {
                 })
                 .collect()
         };
-        let orders: Vec<i32> = sibling_ids
+        let levels: Vec<i32> = sibling_ids
             .iter()
             .filter(|&&sid| sid != id)
             .filter_map(|&sid| self.widgets.get(sid))
-            .filter(|f| f.frame_strata == strata && f.frame_level == level)
-            .map(|f| f.raise_order)
+            .filter(|f| f.frame_strata == strata)
+            .map(effective_frame_level)
             .collect();
-        let min = orders.iter().copied().min().unwrap_or(0);
-        let max = orders.iter().copied().max().unwrap_or(0);
+        let min = levels.iter().copied().min().unwrap_or(0);
+        let max = levels.iter().copied().max().unwrap_or(0);
         (min, max)
     }
 
@@ -613,5 +742,112 @@ impl SimState {
         self.visible_on_update_cache = None;
         let after = self.on_update_frames.len();
         eprintln!("[self-test] stripped OnUpdate: {before} → {after} (keeping {addon_name})");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::{Frame, FrameStrata, WidgetType};
+
+    fn test_frame(
+        id: u64,
+        widget_type: WidgetType,
+        parent_id: Option<u64>,
+        visible: bool,
+    ) -> Frame {
+        let mut frame = Frame {
+            id,
+            widget_type,
+            parent_id,
+            visible,
+            width: 10.0,
+            height: 10.0,
+            layout_rect: Some(crate::LayoutRect {
+                x: 0.0,
+                y: 0.0,
+                width: 10.0,
+                height: 10.0,
+            }),
+            ..Default::default()
+        };
+        frame.effective_alpha = if visible { 1.0 } else { 0.0 };
+        frame
+    }
+
+    fn register_child(
+        state: &mut SimState,
+        id: u64,
+        widget_type: WidgetType,
+        parent_id: u64,
+        visible: bool,
+    ) {
+        state
+            .widgets
+            .register(test_frame(id, widget_type, Some(parent_id), visible));
+        state.widgets.add_child(parent_id, id);
+    }
+
+    fn medium_bucket(state: &mut SimState) -> Vec<u64> {
+        state
+            .get_strata_buckets()
+            .unwrap()
+            .get(FrameStrata::Medium.as_index())
+            .cloned()
+            .unwrap_or_default()
+    }
+
+    #[test]
+    fn show_visible_region_repairs_parent_subtree_without_invalidating_buckets() {
+        let mut state = SimState::default();
+        state
+            .widgets
+            .register(test_frame(1, WidgetType::Frame, None, true));
+        register_child(&mut state, 2, WidgetType::Texture, 1, true);
+        register_child(&mut state, 3, WidgetType::Texture, 1, false);
+        register_child(&mut state, 4, WidgetType::Frame, 1, true);
+        register_child(&mut state, 5, WidgetType::Texture, 4, true);
+        register_child(&mut state, 6, WidgetType::FontString, 1, true);
+
+        assert_eq!(medium_bucket(&mut state), vec![1, 2, 4, 5, 6]);
+        assert!(state.strata_buckets.is_some());
+
+        state.set_frame_visible(3, true);
+
+        assert!(state.strata_buckets.is_some());
+        assert_eq!(medium_bucket(&mut state), vec![1, 3, 2, 4, 5, 6]);
+    }
+
+    #[test]
+    fn show_visible_child_frame_repairs_parent_subtree_without_invalidating_buckets() {
+        let mut state = SimState::default();
+        state
+            .widgets
+            .register(test_frame(10, WidgetType::Frame, None, true));
+        register_child(&mut state, 11, WidgetType::Texture, 10, true);
+        register_child(&mut state, 12, WidgetType::Frame, 10, false);
+        register_child(&mut state, 13, WidgetType::Texture, 12, true);
+        register_child(&mut state, 14, WidgetType::FontString, 10, true);
+
+        assert_eq!(medium_bucket(&mut state), vec![10, 11, 14]);
+        assert!(state.strata_buckets.is_some());
+
+        state.set_frame_visible(12, true);
+
+        assert!(state.strata_buckets.is_some());
+        assert_eq!(medium_bucket(&mut state), vec![10, 11, 12, 13, 14]);
+    }
+
+    #[test]
+    fn show_root_frame_still_falls_back_to_full_invalidation() {
+        let mut state = SimState::default();
+        state
+            .widgets
+            .register(test_frame(20, WidgetType::Frame, None, false));
+        let _ = medium_bucket(&mut state);
+
+        state.set_frame_visible(20, true);
+
+        assert!(state.strata_buckets.is_none());
     }
 }

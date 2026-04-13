@@ -1,9 +1,11 @@
 # World Map Voice Chat Alerts
 
-Initial investigation found a reduced-harness artifact, not a proven `WorldMapFrame` render-order bug in the live/full addon stack. Follow-up probes now show two separate behaviors:
+Initial investigation found a reduced-harness artifact, not a proven `WorldMapFrame` render-order bug in the live/full addon stack. Follow-up probes showed two separate behaviors:
 
 - voice prompt alerts sort below the world map panel in a combined world-map/chat/channels stack
-- the live-like `1024x768` overlap comes from the standalone chat voice button (`ChatFrameChannelButton`), which physically intrudes into the map bounds while still rendering below the map border
+- the live-like `1024x768` overlap comes from the standalone chat voice button (`ChatFrameChannelButton`)
+
+The second issue is now fixed in the simulator.
 
 ## Content
 
@@ -64,17 +66,28 @@ Follow-up check:
 - A combined-stack regression in [`tests/render_order.rs`](../../../tests/render_order.rs) now loads world-map plus chat/voice addons together, forces `VoiceChatPromptActivateChannel` to overlap `WorldMapFrame`, and verifies the prompt renders before `WorldMapFrame.BorderFrame`.
 - That means the simulator currently preserves the expected major ordering in this live-like configuration: voice prompt `LOW` strata, world map border `HIGH` strata.
 
-Additional follow-up:
+Additional follow-up before the fix:
 
 - In a live-like `1024x768` layout, [`ChatFrameChannelButton`](../../../Interface/BlizzardUI/Blizzard_ChatFrame/Mainline/FloatingChatFrameVoiceChat.xml) is visible by default and its icon atlas is `chatframe-button-icon-voicechat`.
 - Its bounds overlap `WorldMapFrame` horizontally (`x=2..29` versus world map starting at `x=16`) and vertically in the lower-left of the map.
-- A focused regression in [`tests/render_order.rs`](../../../tests/render_order.rs) confirms that this button still renders **before** `WorldMapFrame.BorderFrame`.
+- A focused regression in [`tests/render_order.rs`](../../../tests/render_order.rs) confirmed that this button still rendered **before** `WorldMapFrame.BorderFrame`.
 
-Inference:
+Why it still rendered over the map body:
 
-- This live-like overlap is not currently explained by wrong major z-order.
-- It is better described as a layout/placement overlap: the chat voice button remains anchored to the chat button frame while the minimized world map occupies the left panel area.
-- The likely reason is that `WorldMapFrame` is registered as a regular left-side panel (`RegisterUIPanel(... { area = "left", ... })`) rather than a fullscreen frame, so it does not go through the `FCF_SetFullScreenFrame()` path in [`FloatingChatFrame.lua`](../../../Interface/BlizzardUI/Blizzard_ChatFrameBase/Mainline/FloatingChatFrame.lua) that reparents/controls chat-adjacent buttons for fullscreen UIs.
+- `ChatFrameChannelButton` is `MEDIUM` strata, but its parent `ChatFrame1ButtonFrame` is `LOW`, so the button becomes its own `MEDIUM`-strata root.
+- The simulator's strata-root walk treated `UIParent` like an ordinary visible `MEDIUM` frame, so the entire world-map subtree was emitted as part of the `UIParent` DFS segment before independent `MEDIUM` roots such as `ChatFrameChannelButton`.
+- When cached strata buckets already existed, the incremental show repair path also climbed to `UIParent` as a same-strata ancestor and preserved that bad segment order.
+
+Fix:
+
+- Treat `UIParent` and `WorldFrame` as **strata root boundaries**, not normal render roots.
+- Stop the cached-bucket repair path at those boundaries so showing `WorldMapFrame` invalidates/rebuilds the relevant strata ordering instead of splicing under `UIParent`.
+- Use effective raised level (`frame_level + raise_order`) for intra-strata sort keys and for `Raise()`/`Lower()` bookkeeping so UIPanel raises participate in render order the same way `GetRaisedFrameLevel()` reports them.
+
+Verification after the fix:
+
+- [`tests/world_map_voice_button_order.rs`](../../../tests/world_map_voice_button_order.rs) now verifies that `ChatFrameChannelButton` renders before every overlapping `WorldMapFrame` widget in the live-like `1024x768` stack.
+- The existing combined-stack prompt regression still passes: voice prompts remain below `WorldMapFrame.BorderFrame`.
 
 Inference:
 
@@ -85,7 +98,8 @@ Current conclusion:
 
 - The reduced harness issue was real and is now understood.
 - A live/full-stack **voice prompt** render-order bug has **not** been reproduced by this investigation.
-- The live-like `1024x768` overlap that is reproducible today is the chat voice button, and current evidence points to layout overlap rather than incorrect z-order.
+- The live-like `1024x768` overlap was a real render-order bug affecting `ChatFrameChannelButton`, not just a layout quirk.
+- The bug came from treating `UIParent` as a normal same-strata DFS root instead of a top-level root boundary.
 - If a user still sees the icon above the map in a real/full simulator run, that needs a separate reproduction against the exact frame/icon involved rather than more reduced-stack reasoning.
 
 ## Practical Fix Direction
@@ -103,6 +117,8 @@ Current conclusion:
 - [SocialToast.xml](../../../Interface/BlizzardUI/Blizzard_SocialToast/SocialToast.xml) — `SocialToastTemplate hidden="true"`
 - [FloatingChatFrameAlertFrame.xml](../../../Interface/BlizzardUI/Blizzard_ChatFrame/Mainline/FloatingChatFrameAlertFrame.xml) — real `ChatAlertFrame`
 - [ChatAlertFrameMixin.lua](../../../Interface/BlizzardUI/Blizzard_ChatFrameBase/Mainline/ChatAlertFrameMixin.lua) — real alert positioning behavior
+- [state_render.rs](../../../src/lua_api/state_render.rs) — strata root discovery, cached bucket repair, and `Raise()` ordering
+- [frame_collect.rs](../../../src/iced_app/frame_collect.rs) — effective raised level for intra-strata keys
 
 ## See Also
 

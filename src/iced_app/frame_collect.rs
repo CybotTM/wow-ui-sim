@@ -48,6 +48,10 @@ pub fn collect_subtree_ids(
 /// Sort key type for frame rendering order within a strata bucket.
 pub type IntraStrataKey = (i32, i32, u64, u8, i32, i32, u8, u64);
 
+fn effective_frame_level(frame: &crate::widget::Frame) -> i32 {
+    frame.frame_level.saturating_add(frame.raise_order)
+}
+
 /// Intra-strata sort key for rendering order within the same frame strata.
 ///
 /// In WoW, regions (Texture/FontString) render as part of their parent frame,
@@ -55,13 +59,13 @@ pub type IntraStrataKey = (i32, i32, u64, u8, i32, i32, u8, u64);
 /// their parent via `parent_id`, ensuring all regions of a frame render
 /// immediately after that frame (before any higher-level content).
 ///
-/// Non-regions sort by `(frame_level, raise_order, id)` — higher frame_level
-/// renders on top; within the same level, raise_order (adjusted by
-/// Raise()/Lower()) breaks ties; within the same raise_order, later-created
-/// frames render on top. Regions follow the same rule within the same parent
-/// draw layer so later-created overlays do not get buried under earlier
-/// background textures. FontStrings (type_flag=1) render above Textures
-/// (type_flag=0) in the same draw layer per WoW rules.
+/// Non-regions sort by effective raised level `(frame_level + raise_order)`.
+/// `Raise()` changes `raise_order` without mutating `frame_level`, so render
+/// ordering needs the combined value to match WoW's `GetRaisedFrameLevel()`.
+/// Regions follow the same parent effective level within the same parent draw
+/// layer so later-created overlays do not get buried under earlier background
+/// textures. FontStrings (type_flag=1) render above Textures (type_flag=0) in
+/// the same draw layer per WoW rules.
 pub fn intra_strata_sort_key(
     f: &crate::widget::Frame,
     id: u64,
@@ -71,14 +75,14 @@ pub fn intra_strata_sort_key(
         f.widget_type,
         WidgetType::Texture | WidgetType::FontString | WidgetType::Line
     ) {
-        let (parent_level, parent_raise_order, parent_id) = f
+        let (parent_level, parent_frame_level, parent_id) = f
             .parent_id
             .and_then(|pid| {
                 registry
                     .get(pid)
-                    .map(|p| (p.frame_level, p.raise_order, pid))
+                    .map(|p| (effective_frame_level(p), p.frame_level, pid))
             })
-            .unwrap_or((f.frame_level, f.raise_order, id));
+            .unwrap_or((effective_frame_level(f), f.frame_level, id));
         let type_flag = if f.widget_type == WidgetType::FontString {
             1u8
         } else {
@@ -86,7 +90,7 @@ pub fn intra_strata_sort_key(
         };
         (
             parent_level,
-            parent_raise_order,
+            parent_frame_level,
             parent_id,
             1,
             f.draw_layer as i32,
@@ -95,7 +99,7 @@ pub fn intra_strata_sort_key(
             id,
         )
     } else {
-        (f.frame_level, f.raise_order, id, 0, 0, 0, 0, 0)
+        (effective_frame_level(f), f.frame_level, id, 0, 0, 0, 0, 0)
     }
 }
 
@@ -107,7 +111,7 @@ pub fn collect_hittable_frames(
     registry: &crate::widget::WidgetRegistry,
     strata_buckets: &[Vec<u64>],
 ) -> CollectedFrames {
-    let mut hittable: Vec<(u64, FrameStrata, i32, crate::LayoutRect)> = Vec::new();
+    let mut hittable: Vec<(u64, FrameStrata, i32, i32, crate::LayoutRect)> = Vec::new();
 
     for bucket in strata_buckets {
         for &id in bucket {
@@ -121,7 +125,13 @@ pub fn collect_hittable_frames(
                     .as_deref()
                     .is_some_and(|n| HIT_TEST_EXCLUDED.contains(&n))
             {
-                hittable.push((id, f.frame_strata, f.frame_level, rect));
+                hittable.push((
+                    id,
+                    f.frame_strata,
+                    effective_frame_level(f),
+                    f.frame_level,
+                    rect,
+                ));
             }
         }
     }
@@ -129,11 +139,15 @@ pub fn collect_hittable_frames(
     hittable.sort_by(|a, b| {
         a.1.cmp(&b.1)
             .then_with(|| a.2.cmp(&b.2))
+            .then_with(|| a.3.cmp(&b.3))
             .then_with(|| a.0.cmp(&b.0))
     });
 
     CollectedFrames {
-        hittable: hittable.into_iter().map(|(id, _, _, r)| (id, r)).collect(),
+        hittable: hittable
+            .into_iter()
+            .map(|(id, _, _, _, r)| (id, r))
+            .collect(),
     }
 }
 

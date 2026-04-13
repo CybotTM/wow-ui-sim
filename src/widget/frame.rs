@@ -38,8 +38,10 @@ pub struct Frame {
     pub registered_events: HashSet<String>,
     /// Frame level (draw order within strata).
     pub frame_level: i32,
-    /// Raise/Lower order offset within same strata+level siblings.
-    /// Raise() increments, Lower() decrements. Does not affect frame_level.
+    /// Raise/Lower order offset applied on top of `frame_level`.
+    /// Render order uses the effective raised level (`frame_level + raise_order`)
+    /// so Raise() can outrank higher raw sibling levels without mutating the
+    /// frame's actual level.
     pub raise_order: i32,
     /// Whether frame level was explicitly set (not inherited from parent).
     pub has_fixed_frame_level: bool,
