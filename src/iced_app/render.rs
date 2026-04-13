@@ -536,9 +536,7 @@ impl App {
         self.preload_current_render_requests(None);
     }
 
-    fn current_texture_request_batches(
-        &self,
-    ) -> [Option<Arc<QuadBatch>>; FrameStrata::COUNT] {
+    fn current_texture_request_batches(&self) -> [Option<Arc<QuadBatch>>; FrameStrata::COUNT] {
         let strata = self.cached_strata_quads.borrow();
         std::array::from_fn(|i| strata[i].clone())
     }

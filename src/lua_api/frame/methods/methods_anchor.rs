@@ -185,6 +185,7 @@ fn do_set_point(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Resul
     let (point, relative_to, relative_point, x_ofs, y_ofs) =
         parse_validated_set_point(lua, id, args)?;
     let state_rc = get_sim_state(lua);
+
     check_anchor_cycle(lua, &state_rc.borrow(), id, relative_to, "Frame:SetPoint")?;
     if has_duplicate_set_point(
         &state_rc.borrow(),
