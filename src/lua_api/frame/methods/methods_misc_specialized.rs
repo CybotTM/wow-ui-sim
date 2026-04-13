@@ -16,7 +16,11 @@ pub(super) fn add_specialized_frame_stubs<M: mlua::UserDataMethods<FrameRef>>(me
 
 fn add_ui_map_id_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetUiMapID", |lua, this, ()| {
-        Ok(read_unit_position_ui_map_id(get_sim_state(lua), this.0))
+        Ok(read_ui_map_id(get_sim_state(lua), this.0))
+    });
+    methods.add_method("SetUiMapID", |lua, this, map_id: i32| {
+        store_ui_map_id(get_sim_state(lua), this.0, map_id);
+        Ok(())
     });
 }
 
@@ -275,7 +279,6 @@ fn add_unit_position_frame_methods<M: mlua::UserDataMethods<FrameRef>>(methods: 
     add_unit_position_clear_units_method(methods);
     add_unit_position_add_unit_method(methods);
     add_unit_position_finalize_units_method(methods);
-    add_unit_position_set_ui_map_id_method(methods);
     add_unit_position_set_unit_color_method(methods);
     add_unit_position_get_mouse_over_units_method(methods);
     add_unit_position_ping_methods(methods);
@@ -344,17 +347,24 @@ fn add_unit_position_finalize_units_method<M: mlua::UserDataMethods<FrameRef>>(m
     });
 }
 
-fn add_unit_position_set_ui_map_id_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_method("SetUiMapID", |lua, this, map_id: i32| {
-        let state_rc = get_sim_state(lua);
-        let mut state = state_rc.borrow_mut();
-        let unit_state = state
-            .unit_position_frames
-            .entry(this.0)
-            .or_insert_with(new_unit_position_frame_state);
-        unit_state.ui_map_id = Some(map_id);
-        Ok(())
-    });
+fn store_ui_map_id(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    map_id: i32,
+) {
+    let mut state = state_rc.borrow_mut();
+    if is_fog_of_war_frame(&state, frame_id) {
+        let fog_state = state.fog_of_war_frames.entry(frame_id).or_default();
+        fog_state.ui_map_id = Some(map_id);
+        apply_fog_of_war_map_change(&mut state, frame_id, map_id);
+        return;
+    }
+
+    let unit_state = state
+        .unit_position_frames
+        .entry(frame_id)
+        .or_insert_with(new_unit_position_frame_state);
+    unit_state.ui_map_id = Some(map_id);
 }
 
 fn add_unit_position_set_unit_color_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
@@ -448,16 +458,60 @@ fn read_unit_position_ping_scale(
         .unwrap_or(1.0)
 }
 
-fn read_unit_position_ui_map_id(
+fn read_ui_map_id(
     state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
     frame_id: u64,
 ) -> i32 {
     let state = state_rc.borrow();
+    if is_fog_of_war_frame(&state, frame_id) {
+        return state
+            .fog_of_war_frames
+            .get(&frame_id)
+            .and_then(|fog_state| fog_state.ui_map_id)
+            .unwrap_or(0);
+    }
+
     state
         .unit_position_frames
         .get(&frame_id)
         .and_then(|unit_state| unit_state.ui_map_id)
         .unwrap_or(0)
+}
+
+fn is_fog_of_war_frame(state: &crate::lua_api::SimState, frame_id: u64) -> bool {
+    state
+        .widgets
+        .get(frame_id)
+        .and_then(|frame| frame.object_type_name.as_deref())
+        .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
+}
+
+fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u64, map_id: i32) {
+    let fog_id = crate::lua_api::globals::c_map_api::fog_of_war_id_for_map(map_id);
+
+    let Some(fog_id) = fog_id else {
+        clear_fog_of_war_frame(state, frame_id);
+        return;
+    };
+
+    let Some(fog_info) = crate::lua_api::globals::c_map_api::fog_of_war_info_for_id(fog_id) else {
+        clear_fog_of_war_frame(state, frame_id);
+        return;
+    };
+
+    let fog_state = state.fog_of_war_frames.entry(frame_id).or_default();
+    fog_state.background_atlas = fog_info.background_atlas.map(str::to_string);
+    fog_state.mask_atlas = fog_info.mask_atlas.map(str::to_string);
+    fog_state.mask_scalar = Some(fog_info.mask_scalar);
+    state.set_frame_visible(frame_id, true);
+}
+
+fn clear_fog_of_war_frame(state: &mut crate::lua_api::SimState, frame_id: u64) {
+    let fog_state = state.fog_of_war_frames.entry(frame_id).or_default();
+    fog_state.background_atlas = None;
+    fog_state.mask_atlas = None;
+    fog_state.mask_scalar = None;
+    state.set_frame_visible(frame_id, false);
 }
 
 fn write_unit_position_ping_scale(

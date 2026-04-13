@@ -61,31 +61,37 @@ fn specialized_frame_element(
     }
 }
 
-/// Frame-like elements that all map to widget type "Frame".
+/// Frame-like elements that share the XML mapping used during regular loading.
 fn frame_like_frame_element(
     element: &FrameElement,
 ) -> Option<(&FrameXml, &'static str, Option<&'static str>)> {
-    match element {
-        FrameElement::EventFrame(f)
-        | FrameElement::TaxiRouteFrame(f)
-        | FrameElement::ModelFFX(f)
-        | FrameElement::UiCamera(f)
-        | FrameElement::UnitPositionFrame(f)
-        | FrameElement::OffScreenFrame(f)
-        | FrameElement::Checkout(f)
-        | FrameElement::FogOfWarFrame(f)
-        | FrameElement::QuestPOIFrame(f)
-        | FrameElement::ArchaeologyDigSiteFrame(f)
-        | FrameElement::ScenarioPOIFrame(f)
-        | FrameElement::UIThemeContainerFrame(f)
-        | FrameElement::MapScene(f)
-        | FrameElement::Line(f)
-        | FrameElement::Browser(f)
-        | FrameElement::Minimap(f)
-        | FrameElement::MovieFrame(f)
-        | FrameElement::WorldFrame(f) => Some((f, "Frame", None)),
-        _ => None,
+    if !matches!(
+        element,
+        FrameElement::EventFrame(_)
+            | FrameElement::TaxiRouteFrame(_)
+            | FrameElement::ModelFFX(_)
+            | FrameElement::UiCamera(_)
+            | FrameElement::UnitPositionFrame(_)
+            | FrameElement::OffScreenFrame(_)
+            | FrameElement::Checkout(_)
+            | FrameElement::FogOfWarFrame(_)
+            | FrameElement::QuestPOIFrame(_)
+            | FrameElement::ArchaeologyDigSiteFrame(_)
+            | FrameElement::ScenarioPOIFrame(_)
+            | FrameElement::UIThemeContainerFrame(_)
+            | FrameElement::MapScene(_)
+            | FrameElement::Line(_)
+            | FrameElement::Browser(_)
+            | FrameElement::Minimap(_)
+            | FrameElement::MovieFrame(_)
+            | FrameElement::WorldFrame(_)
+    ) {
+        return None;
     }
+
+    let (frame, tag) = element.as_frame_data()?;
+    let (widget_type, intrinsic) = crate::xml::widget_type_for_tag(tag)?;
+    Some((frame, widget_type, intrinsic))
 }
 
 /// Apply templates from the registry to a frame.

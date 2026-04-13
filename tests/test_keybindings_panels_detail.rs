@@ -339,6 +339,7 @@ fn keybind_m_toggles_world_map_without_errors() {
 fn world_map_title_text_is_non_empty_after_opening() {
     test_timeout! {
         let env = setup_env();
+        install_test_error_handler(&env);
 
         env.send_key_press("M", None).expect("M keybind failed");
 
@@ -378,6 +379,120 @@ fn world_map_title_text_is_non_empty_after_opening() {
         assert!(
             result == "ok" || result == "stale_name_border_frame_title_text",
             "World map opening should produce a non-empty title on the live title widget even if the plan name is stale: {result}"
+        );
+    }
+}
+
+#[test]
+fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                local pin = WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate")()
+                if not pin then
+                    return "missing_exploration_pin"
+                end
+
+                local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+                if fogPin and fogPin:IsShown() then
+                    return string.format(
+                        "fog_pin_visible:type=%s:map=%s:bg=%s:mask=%s",
+                        tostring(fogPin:GetObjectType()),
+                        tostring(fogPin.GetUiMapID and fogPin:GetUiMapID()),
+                        tostring(fogPin:GetFogOfWarBackgroundAtlas()),
+                        tostring(fogPin:GetFogOfWarMaskAtlas())
+                    )
+                end
+
+                local width, height = pin:GetSize()
+                if width == 0 or height == 0 then
+                    return string.format("zero_size:%s:%s", tostring(width), tostring(height))
+                end
+
+                local textureCount = pin.overlayTexturePool and pin.overlayTexturePool:GetNumActive() or 0
+                if textureCount == 0 then
+                    local mapID = WorldMapFrame:GetMapID()
+                    local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+                    local exploredCount = explored and #explored or 0
+                    local layerIndex = pin.layerIndex
+                    local currentLayer = WorldMapFrame:GetCanvasContainer() and WorldMapFrame:GetCanvasContainer():GetCurrentLayerIndex()
+                    return string.format(
+                        "no_overlay_textures:map=%s:explored=%s:pinLayer=%s:currentLayer=%s",
+                        tostring(mapID),
+                        tostring(exploredCount),
+                        tostring(layerIndex),
+                        tostring(currentLayer)
+                    )
+                end
+
+                local visible = 0
+                for texture in pin.overlayTexturePool:EnumerateActive() do
+                    if texture:IsShown() then
+                        visible = visible + 1
+                    end
+                end
+
+                if visible == 0 then
+                    return string.format("all_overlays_hidden:alpha=%s", tostring(pin:GetAlpha()))
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+
+        assert_eq!(
+            result,
+            "ok",
+            "World map exploration should create a visible exploration overlay pin after opening: {result}"
+        );
+        assert!(
+            errors.is_empty(),
+            "World map exploration test produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+    }
+}
+
+#[test]
+fn world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let template_type: String = env
+            .eval(
+                r#"
+                local info = C_XMLUtil.GetTemplateInfo("FogOfWarPinTemplate")
+                assert(info, "missing FogOfWarPinTemplate")
+                return info.type
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+
+        assert_eq!(template_type, "FogOfWarFrame");
+        assert!(
+            errors.is_empty(),
+            "World map template test produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
         );
     }
 }

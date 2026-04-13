@@ -346,12 +346,99 @@ fn test_get_explored_area_ids() {
 }
 
 #[test]
+fn test_get_explored_area_ids_only_cover_left_half() {
+    let env = env();
+    let (left_count, right_count): (i32, i32) = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+
+        local function count(list)
+            if type(list) ~= "table" then
+                return -1
+            end
+
+            local n = 0
+            for _ in ipairs(list) do
+                n = n + 1
+            end
+            return n
+        end
+
+        local left = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.25, y = 0.50 })
+        local right = C_MapExplorationInfo.GetExploredAreaIDsAtPosition(mapID, { x = 0.75, y = 0.50 })
+        return count(left), count(right)
+    "#,
+        )
+        .unwrap();
+
+    assert!(
+        left_count > 0,
+        "left half should report explored area IDs for the default map"
+    );
+    assert_eq!(
+        right_count, 0,
+        "right half should remain unexplored for the default map"
+    );
+}
+
+#[test]
 fn test_get_explored_map_textures() {
     let env = env();
     let is_table: bool = env
         .eval("return type(C_MapExplorationInfo.GetExploredMapTextures(1)) == 'table'")
         .unwrap();
     assert!(is_table);
+}
+
+#[test]
+fn test_get_explored_map_textures_cover_left_half_of_current_map() {
+    let env = env();
+    let matches_expected_overlay: bool = env
+        .eval(
+            r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local layer = C_Map.GetMapArtLayers(mapID)[1]
+        local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
+        local overlay = explored and explored[1]
+        if type(overlay) ~= "table" then
+            return false
+        end
+
+        local tilesWide = math.ceil(layer.layerWidth / layer.tileWidth)
+        local tilesTall = math.ceil(layer.layerHeight / layer.tileHeight)
+        local exploredTilesWide = math.ceil(tilesWide / 2)
+        local expectedWidth = math.min(layer.layerWidth, exploredTilesWide * layer.tileWidth)
+
+        local fileCount = 0
+        for _ in ipairs(overlay.fileDataIDs or {}) do
+            fileCount = fileCount + 1
+        end
+
+        return overlay.offsetX == 0
+            and overlay.offsetY == 0
+            and overlay.textureWidth == expectedWidth
+            and overlay.textureHeight == layer.layerHeight
+            and fileCount == exploredTilesWide * tilesTall
+    "#,
+        )
+        .unwrap();
+    assert!(
+        matches_expected_overlay,
+        "GetExploredMapTextures should expose a single overlay covering the left half of the current map"
+    );
+}
+
+#[test]
+fn test_c_fog_of_war_returns_nil_without_backing_data() {
+    let env = env();
+    let has_no_fog: bool = env
+        .eval("return C_FogOfWar.GetFogOfWarForMap(C_Map.GetCurrentMapID()) == nil")
+        .unwrap();
+    assert!(
+        has_no_fog,
+        "maps without simulator fog data should return nil, not truthy 0"
+    );
 }
 
 // ============================================================================

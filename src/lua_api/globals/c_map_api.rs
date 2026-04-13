@@ -7,6 +7,15 @@ use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
+const EXPLORED_HALF_BOUNDARY: f64 = 0.5;
+const DEFAULT_FOG_MASK_SCALAR: f64 = 1.0;
+
+pub(crate) struct FogOfWarInfo {
+    pub background_atlas: Option<&'static str>,
+    pub mask_atlas: Option<&'static str>,
+    pub mask_scalar: f64,
+}
+
 /// Register C_Map namespace and map-related functions.
 pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
@@ -15,6 +24,7 @@ pub fn register_c_map_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
     register_zone_text_functions(lua, state)?;
     globals.set("UiMapPoint", register_ui_map_point(lua)?)?;
     globals.set("C_MapExplorationInfo", register_c_map_exploration(lua)?)?;
+    globals.set("C_FogOfWar", register_c_fog_of_war(lua)?)?;
     globals.set("C_DateAndTime", register_c_date_and_time(lua)?)?;
     globals.set("C_Minimap", register_c_minimap(lua)?)?;
     globals.set("C_Navigation", register_c_navigation(lua)?)?;
@@ -309,14 +319,182 @@ fn register_c_map_exploration(lua: &Lua) -> Result<mlua::Table> {
 
     t.set(
         "GetExploredAreaIDsAtPosition",
-        lua.create_function(|lua, (_map_id, _pos): (i32, Value)| lua.create_table())?,
+        lua.create_function(get_explored_area_ids_at_position)?,
     )?;
     t.set(
         "GetExploredMapTextures",
-        lua.create_function(|lua, _map_id: i32| lua.create_table())?,
+        lua.create_function(get_explored_map_textures)?,
     )?;
 
     Ok(t)
+}
+
+fn register_c_fog_of_war(lua: &Lua) -> Result<mlua::Table> {
+    let t = lua.create_table()?;
+
+    t.set(
+        "GetFogOfWarForMap",
+        lua.create_function(|_, map_id: i32| match fog_of_war_id_for_map(map_id) {
+            Some(fog_id) => Ok(Value::Integer(fog_id as i64)),
+            None => Ok(Value::Nil),
+        })?,
+    )?;
+    t.set(
+        "GetFogOfWarInfo",
+        lua.create_function(get_fog_of_war_info_table)?,
+    )?;
+
+    Ok(t)
+}
+
+pub(crate) fn fog_of_war_id_for_map(_map_id: i32) -> Option<i32> {
+    None
+}
+
+pub(crate) fn fog_of_war_info_for_id(_fog_of_war_id: i32) -> Option<FogOfWarInfo> {
+    None
+}
+
+fn get_fog_of_war_info_table(lua: &Lua, fog_of_war_id: Value) -> Result<mlua::Table> {
+    let info = lua.create_table()?;
+    let fog_info = fog_of_war_id
+        .as_integer()
+        .and_then(|fog_id| fog_of_war_info_for_id(fog_id as i32));
+    let Some(fog_info) = fog_info else {
+        set_optional_string_field(&info, "backgroundAtlas", None)?;
+        set_optional_string_field(&info, "maskAtlas", None)?;
+        info.set("maskScalar", DEFAULT_FOG_MASK_SCALAR)?;
+        return Ok(info);
+    };
+
+    set_optional_string_field(&info, "backgroundAtlas", fog_info.background_atlas)?;
+    set_optional_string_field(&info, "maskAtlas", fog_info.mask_atlas)?;
+    info.set("maskScalar", fog_info.mask_scalar)?;
+    Ok(info)
+}
+
+fn set_optional_string_field(
+    table: &mlua::Table,
+    field_name: &str,
+    value: Option<&str>,
+) -> Result<()> {
+    match value {
+        Some(value) => table.set(field_name, value),
+        None => table.set(field_name, Value::Nil),
+    }
+}
+
+fn get_explored_area_ids_at_position(
+    lua: &Lua,
+    (map_id, pos): (i32, Value),
+) -> Result<mlua::Table> {
+    let areas = lua.create_table()?;
+    if !position_is_in_left_half(&pos) {
+        return Ok(areas);
+    }
+
+    if crate::map_art::get_map_art(map_id as u32).is_some() {
+        areas.set(1, explored_area_id_for_map(map_id))?;
+    }
+    Ok(areas)
+}
+
+fn get_explored_map_textures(lua: &Lua, map_id: i32) -> Result<mlua::Table> {
+    let overlays = lua.create_table()?;
+    let Some((explored_width, layer_height, file_data_ids)) =
+        explored_left_half_overlay_data(map_id)
+    else {
+        return Ok(overlays);
+    };
+    let overlay = create_explored_overlay_table(lua, explored_width, layer_height, &file_data_ids)?;
+    overlays.set(1, overlay)?;
+
+    Ok(overlays)
+}
+
+fn explored_left_half_overlay_data(map_id: i32) -> Option<(u32, u32, Vec<u32>)> {
+    let info = crate::map_art::get_map_art(map_id as u32)?;
+    let layer = info.layers.first()?;
+    let tiles = info.tiles.first()?;
+
+    let tiles_wide = div_ceil(layer.layer_width, layer.tile_width);
+    let tiles_tall = div_ceil(layer.layer_height, layer.tile_height);
+    let explored_tiles_wide = tiles_wide.div_ceil(2);
+    let explored_width = (explored_tiles_wide * layer.tile_width).min(layer.layer_width);
+    let file_data_ids =
+        collect_left_half_tile_ids(tiles, tiles_wide, tiles_tall, explored_tiles_wide);
+    if file_data_ids.is_empty() {
+        return None;
+    }
+
+    Some((explored_width, layer.layer_height, file_data_ids))
+}
+
+fn collect_left_half_tile_ids(
+    tiles: &[u32],
+    tiles_wide: u32,
+    tiles_tall: u32,
+    explored_tiles_wide: u32,
+) -> Vec<u32> {
+    let mut file_data_ids = Vec::new();
+    for row in 0..tiles_tall {
+        for col in 0..explored_tiles_wide {
+            let tile_index = (row * tiles_wide + col) as usize;
+            if let Some(&file_data_id) = tiles.get(tile_index) {
+                file_data_ids.push(file_data_id);
+            }
+        }
+    }
+    file_data_ids
+}
+
+fn create_explored_overlay_table(
+    lua: &Lua,
+    explored_width: u32,
+    layer_height: u32,
+    file_data_ids: &[u32],
+) -> Result<mlua::Table> {
+    let file_data_ids = create_file_data_id_table(lua, file_data_ids)?;
+    let hit_rect = lua.create_table()?;
+    hit_rect.set("top", 0)?;
+    hit_rect.set("bottom", layer_height)?;
+    hit_rect.set("left", 0)?;
+    hit_rect.set("right", explored_width)?;
+
+    let overlay = lua.create_table()?;
+    overlay.set("textureWidth", explored_width)?;
+    overlay.set("textureHeight", layer_height)?;
+    overlay.set("offsetX", 0)?;
+    overlay.set("offsetY", 0)?;
+    overlay.set("isShownByMouseOver", false)?;
+    overlay.set("isDrawOnTopLayer", false)?;
+    overlay.set("fileDataIDs", file_data_ids)?;
+    overlay.set("hitRect", hit_rect)?;
+    Ok(overlay)
+}
+
+fn create_file_data_id_table(lua: &Lua, file_data_ids: &[u32]) -> Result<mlua::Table> {
+    let table = lua.create_table()?;
+    for (index, file_data_id) in file_data_ids.iter().copied().enumerate() {
+        table.set(index + 1, file_data_id)?;
+    }
+    Ok(table)
+}
+
+fn position_is_in_left_half(pos: &Value) -> bool {
+    let Value::Table(table) = pos else {
+        return false;
+    };
+    let x = table.get::<f64>("x").unwrap_or(0.0);
+    x <= EXPLORED_HALF_BOUNDARY
+}
+
+fn explored_area_id_for_map(map_id: i32) -> i32 {
+    map_id.saturating_mul(1_000).saturating_add(1)
+}
+
+fn div_ceil(value: u32, divisor: u32) -> u32 {
+    value.div_ceil(divisor.max(1))
 }
 
 /// C_DateAndTime namespace - date/time utilities.

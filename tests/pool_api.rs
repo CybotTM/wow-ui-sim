@@ -173,15 +173,18 @@ fn test_create_texture_pool() {
 #[test]
 fn test_texture_pool_acquire() {
     let env = env();
-    env.exec(
-        r#"
+    let active_count: i32 = env
+        .eval(
+            r#"
         local parent = CreateFrame("Frame", "TexPoolAcq", UIParent)
         local pool = CreateTexturePool(parent, "BACKGROUND")
         local tex = pool:Acquire()
         assert(tex ~= nil, "Acquired texture should not be nil")
+        return pool:GetNumActive()
     "#,
-    )
-    .unwrap();
+        )
+        .unwrap();
+    assert_eq!(active_count, 1, "Acquire should track one active texture");
 }
 
 #[test]

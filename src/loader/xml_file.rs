@@ -598,13 +598,10 @@ mod tests {
     }
 
     #[test]
-    fn frame_like_elements_map_to_frame() {
+    fn frame_like_elements_preserve_supported_alias_types() {
         let f = default_frame();
-        let frame_likes = [
+        let preserved_aliases = [
             XmlElement::EventFrame(f.clone()),
-            XmlElement::TaxiRouteFrame(f.clone()),
-            XmlElement::ModelFFX(f.clone()),
-            XmlElement::UiCamera(f.clone()),
             XmlElement::UnitPositionFrame(f.clone()),
             XmlElement::OffScreenFrame(f.clone()),
             XmlElement::Checkout(f.clone()),
@@ -612,11 +609,30 @@ mod tests {
             XmlElement::QuestPOIFrame(f.clone()),
             XmlElement::ArchaeologyDigSiteFrame(f.clone()),
             XmlElement::ScenarioPOIFrame(f.clone()),
+            XmlElement::Browser(f.clone()),
+            XmlElement::MovieFrame(f.clone()),
+        ];
+        for elem in &preserved_aliases {
+            let (_, tag) = elem.as_frame_data().unwrap();
+            assert_eq!(
+                resolve(elem),
+                Some((tag, None)),
+                "Expected preserved type for {:?}",
+                std::mem::discriminant(elem)
+            );
+        }
+    }
+
+    #[test]
+    fn unsupported_frame_like_elements_still_fall_back_to_frame() {
+        let f = default_frame();
+        let frame_likes = [
+            XmlElement::TaxiRouteFrame(f.clone()),
+            XmlElement::ModelFFX(f.clone()),
+            XmlElement::UiCamera(f.clone()),
             XmlElement::UIThemeContainerFrame(f.clone()),
             XmlElement::MapScene(f.clone()),
             XmlElement::Line(f.clone()),
-            XmlElement::Browser(f.clone()),
-            XmlElement::MovieFrame(f.clone()),
             XmlElement::WorldFrame(f.clone()),
         ];
         for elem in &frame_likes {

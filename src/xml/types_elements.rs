@@ -335,11 +335,31 @@ pub enum FrameElement {
     Line(FrameXml),
 }
 
-/// Shared mapping from XML element tag name to (widget_type, intrinsic_name).
+fn preserved_frame_alias_type(tag: &str) -> Option<&'static str> {
+    match tag {
+        "EventFrame" => Some("EventFrame"),
+        "UnitPositionFrame" => Some("UnitPositionFrame"),
+        "OffScreenFrame" => Some("OffScreenFrame"),
+        "Checkout" => Some("Checkout"),
+        "FogOfWarFrame" => Some("FogOfWarFrame"),
+        "QuestPOIFrame" => Some("QuestPOIFrame"),
+        "ArchaeologyDigSiteFrame" => Some("ArchaeologyDigSiteFrame"),
+        "ScenarioPOIFrame" => Some("ScenarioPOIFrame"),
+        "Browser" => Some("Browser"),
+        "MovieFrame" => Some("MovieFrame"),
+        _ => None,
+    }
+}
+
+/// Shared mapping from XML element tag name to `(widget_type, intrinsic_name)`.
 ///
 /// Covers the common mappings used by both `FrameElement` (inside `<Frames>`)
 /// and `XmlElement` (top-level). Callers handle divergences before calling this.
 pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static str>)> {
+    if let Some(widget_type) = preserved_frame_alias_type(tag) {
+        return Some((widget_type, None));
+    }
+
     match tag {
         "Frame" => Some(("Frame", None)),
         "Button" => Some(("Button", None)),
@@ -363,23 +383,13 @@ pub fn widget_type_for_tag(tag: &str) -> Option<(&'static str, Option<&'static s
         "Minimap" => Some(("Minimap", None)),
         "DropdownButton" => Some(("Button", Some("DropdownButton"))),
         "ContainedAlertFrame" => Some(("Button", Some("ContainedAlertFrame"))),
-        // Frame-like elements (specialized XML tags that map to widget type "Frame")
-        "EventFrame"
-        | "TaxiRouteFrame"
+        // Frame-like elements without a creatable alias still fall back to Frame.
+        "TaxiRouteFrame"
         | "ModelFFX"
         | "UiCamera"
-        | "UnitPositionFrame"
-        | "OffScreenFrame"
-        | "Checkout"
-        | "FogOfWarFrame"
-        | "QuestPOIFrame"
-        | "ArchaeologyDigSiteFrame"
-        | "ScenarioPOIFrame"
         | "UIThemeContainerFrame"
         | "MapScene"
         | "Line"
-        | "Browser"
-        | "MovieFrame"
         | "WorldFrame" => Some(("Frame", None)),
         _ => None,
     }

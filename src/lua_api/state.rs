@@ -160,6 +160,7 @@ pub struct UnitPositionPlayerPingTexture {
 /// Runtime state for a FogOfWarFrame.
 #[derive(Default)]
 pub struct FogOfWarFrameState {
+    pub ui_map_id: Option<i32>,
     pub background_atlas: Option<String>,
     pub mask_atlas: Option<String>,
     pub mask_scalar: Option<f64>,

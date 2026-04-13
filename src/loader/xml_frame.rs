@@ -656,13 +656,10 @@ mod tests {
     }
 
     #[test]
-    fn frame_like_elements_map_to_frame() {
+    fn frame_like_elements_preserve_supported_alias_types() {
         let f = default_frame();
-        let frame_likes = [
+        let preserved_aliases = [
             FrameElement::EventFrame(f.clone()),
-            FrameElement::TaxiRouteFrame(f.clone()),
-            FrameElement::ModelFFX(f.clone()),
-            FrameElement::UiCamera(f.clone()),
             FrameElement::UnitPositionFrame(f.clone()),
             FrameElement::OffScreenFrame(f.clone()),
             FrameElement::Checkout(f.clone()),
@@ -670,11 +667,30 @@ mod tests {
             FrameElement::QuestPOIFrame(f.clone()),
             FrameElement::ArchaeologyDigSiteFrame(f.clone()),
             FrameElement::ScenarioPOIFrame(f.clone()),
+            FrameElement::Browser(f.clone()),
+            FrameElement::MovieFrame(f.clone()),
+        ];
+        for elem in &preserved_aliases {
+            let (_, tag) = elem.as_frame_data().unwrap();
+            assert_eq!(
+                resolve(elem),
+                Some((tag, None)),
+                "Expected preserved type for {:?}",
+                std::mem::discriminant(elem)
+            );
+        }
+    }
+
+    #[test]
+    fn unsupported_frame_like_elements_still_map_to_frame() {
+        let f = default_frame();
+        let frame_likes = [
+            FrameElement::TaxiRouteFrame(f.clone()),
+            FrameElement::ModelFFX(f.clone()),
+            FrameElement::UiCamera(f.clone()),
             FrameElement::UIThemeContainerFrame(f.clone()),
             FrameElement::MapScene(f.clone()),
             FrameElement::Line(f.clone()),
-            FrameElement::Browser(f.clone()),
-            FrameElement::MovieFrame(f.clone()),
             FrameElement::WorldFrame(f.clone()),
         ];
         for elem in &frame_likes {
