@@ -74,6 +74,52 @@ fn test_xml_frame_with_layers_and_scripts() {
     assert_layers_and_scripts_children(&t);
 }
 
+#[test]
+fn test_xml_onload_fires_during_load() {
+    let t = load_test_xml(
+        "test-xml-onload-fired",
+        r#"<Ui>
+            <Frame name="OnLoadFrame" parent="UIParent">
+                <Scripts><OnLoad>XML_ONLOAD_FIRED = true</OnLoad></Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+
+    t.assert_lua_true(
+        "return XML_ONLOAD_FIRED == true",
+        "OnLoad should fire while the XML frame is finalized",
+    );
+}
+
+#[test]
+fn test_xml_onshow_only_fires_for_visible_frames() {
+    let visible = load_test_xml(
+        "test-xml-onshow-visible",
+        r#"<Ui>
+            <Frame name="VisibleOnShowFrame" parent="UIParent">
+                <Scripts><OnShow>VISIBLE_ONSHOW_FIRED = true</OnShow></Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+    visible.assert_lua_true(
+        "return VISIBLE_ONSHOW_FIRED == true",
+        "visible XML frame should fire OnShow during load",
+    );
+
+    let hidden = load_test_xml(
+        "test-xml-onshow-hidden",
+        r#"<Ui>
+            <Frame name="HiddenOnShowFrame" parent="UIParent" hidden="true">
+                <Scripts><OnShow>HIDDEN_ONSHOW_FIRED = true</OnShow></Scripts>
+            </Frame>
+        </Ui>"#,
+    );
+    hidden.assert_lua_true(
+        "return HIDDEN_ONSHOW_FIRED == nil",
+        "hidden XML frame should not fire OnShow during load",
+    );
+}
+
 fn assert_layers_and_scripts_frame(t: &TestCtx) {
     t.assert_lua_true("return TestXMLFrame ~= nil", "TestXMLFrame should exist");
     t.assert_lua_true(

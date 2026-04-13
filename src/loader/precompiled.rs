@@ -12,9 +12,9 @@ use mlua::{Function, Lua};
 /// Each function is compiled once at startup and called with arguments instead of
 /// generating and compiling unique Lua source strings for each frame.
 pub struct PrecompiledFns {
-    /// Fire OnLoad lifecycle script on a frame (by global name).
+    /// Fire OnLoad lifecycle script on a frame (by frame ref or global name).
     pub fire_onload: Function,
-    /// Fire OnShow lifecycle script on a frame (by global name).
+    /// Fire OnShow lifecycle script on a frame (by frame ref or global name).
     pub fire_onshow: Function,
     /// Increment the `__suppress_create_frame_onload` counter.
     pub suppress_push: Function,
@@ -44,7 +44,8 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
         local __report = debug.getregistry()["__report_script_error"]
-        local frame = _G[...]
+        local arg = ...
+        local frame = type(arg) == "string" and _G[arg] or arg
         if not frame then return end
         if type(frame.OnLoad_Intrinsic) == "function" then
             local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
@@ -69,7 +70,8 @@ fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
         local __report = debug.getregistry()["__report_script_error"]
-        local frame = _G[...]
+        local arg = ...
+        local frame = type(arg) == "string" and _G[arg] or arg
         if not frame then return end
         if frame:IsVisible() then
             local handler = frame:GetScript("OnShow")

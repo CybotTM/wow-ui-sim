@@ -10,6 +10,7 @@ use super::helpers::rand_id;
 use super::precompiled;
 use super::xml_frame_codegen::build_frame_lua_code;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
+use super::xml_lifecycle::LifecycleScripts;
 use super::xml_lifecycle::fire_lifecycle_scripts;
 
 /// Create a frame from XML definition.
@@ -223,35 +224,42 @@ fn create_children_and_finalize(
     apply_bar_texture(env, frame, name)?;
     init_action_bar_tables(env, frame, name);
     timing.frame_button_time += btn_start.elapsed();
-    if has_lifecycle_scripts(frame, inherits) {
+    let lifecycle = lifecycle_scripts(frame, inherits);
+    if lifecycle.any() {
         let lc_start = Instant::now();
-        fire_lifecycle_scripts(env, name);
+        fire_lifecycle_scripts(env, name, lifecycle);
         timing.frame_lifecycle_time += lc_start.elapsed();
         timing.lifecycle_fire_count += 1;
     }
     Ok(())
 }
 
-fn has_lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
-    if frame
-        .scripts()
-        .is_some_and(|scripts| !scripts.on_load.is_empty() || !scripts.on_show.is_empty())
-    {
-        return true;
+fn lifecycle_scripts(frame: &crate::xml::FrameXml, inherits: &str) -> LifecycleScripts {
+    let mut lifecycle = lifecycle_scripts_for_frame(frame);
+    if lifecycle.any() || inherits.is_empty() {
+        return lifecycle;
     }
 
-    if inherits.is_empty() {
-        return false;
+    for entry in &crate::xml::get_template_chain(inherits) {
+        let inherited = lifecycle_scripts_for_frame(&entry.frame);
+        lifecycle.on_load |= inherited.on_load;
+        lifecycle.on_show |= inherited.on_show;
+        if lifecycle.any() {
+            return lifecycle;
+        }
     }
 
-    crate::xml::get_template_chain(inherits)
-        .iter()
-        .any(|entry| {
-            entry
-                .frame
-                .scripts()
-                .is_some_and(|scripts| !scripts.on_load.is_empty() || !scripts.on_show.is_empty())
-        })
+    lifecycle
+}
+
+fn lifecycle_scripts_for_frame(frame: &crate::xml::FrameXml) -> LifecycleScripts {
+    let Some(scripts) = frame.scripts() else {
+        return LifecycleScripts::default();
+    };
+    LifecycleScripts {
+        on_load: !scripts.on_load.is_empty(),
+        on_show: !scripts.on_show.is_empty(),
+    }
 }
 
 /// Execute CreateFrame Lua with OnLoad suppression (depth-counted for recursion).

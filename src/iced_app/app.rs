@@ -346,23 +346,25 @@ impl App {
             .with_interface_path(DEFAULT_INTERFACE_PATH)
             .with_addons_path(DEFAULT_ADDONS_PATH)
             .with_disk_cache("./cache/textures");
-        let class_name = {
-            let env = env_rc.borrow();
-            let state = env.state().borrow();
-            crate::lua_api::state::CLASS_LABELS
-                .get((state.player.class_index - 1).max(0) as usize)
-                .copied()
-                .unwrap_or("Warrior")
-                .to_string()
-        };
-        let is_glue_screen = {
-            let env = env_rc.borrow();
-            env.state().borrow().screen_kind.is_glue()
-        };
-        tex_mgr.preload_talent_textures(790);
-        tex_mgr.preload_talent_panel_textures(&class_name);
-        if !is_glue_screen {
-            Self::preload_non_glue_textures(&mut tex_mgr, &class_name);
+        if Self::eager_startup_texture_preloads_enabled() {
+            let class_name = {
+                let env = env_rc.borrow();
+                let state = env.state().borrow();
+                crate::lua_api::state::CLASS_LABELS
+                    .get((state.player.class_index - 1).max(0) as usize)
+                    .copied()
+                    .unwrap_or("Warrior")
+                    .to_string()
+            };
+            let is_glue_screen = {
+                let env = env_rc.borrow();
+                env.state().borrow().screen_kind.is_glue()
+            };
+            tex_mgr.preload_talent_textures(790);
+            tex_mgr.preload_talent_panel_textures(&class_name);
+            if !is_glue_screen {
+                Self::preload_non_glue_textures(&mut tex_mgr, &class_name);
+            }
         }
         let texture_manager = Rc::new(RefCell::new(tex_mgr));
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from(
@@ -382,6 +384,10 @@ impl App {
         tex_mgr.preload_game_hud_textures();
         tex_mgr.preload_playerspells_runtime_textures();
         tex_mgr.preload_spellbook_icons();
+    }
+
+    fn eager_startup_texture_preloads_enabled() -> bool {
+        std::env::var_os("WOW_SIM_EAGER_STARTUP_TEXTURES").is_some()
     }
 
     /// Start debug server and Lua REPL server.
