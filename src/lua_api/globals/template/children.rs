@@ -7,8 +7,11 @@ use super::{
 use crate::loader::chunk_cache;
 use crate::loader::helpers::generate_set_point_code;
 use crate::lua_api::SimState;
+use crate::lua_api::frame::{frame_ref, sync_child_to_lua};
+use crate::lua_api::globals::create_frame::create_frame_instance;
+use crate::widget::WidgetType;
 use crate::xml::{FrameElement, FrameXml, get_template_chain};
-use mlua::Lua;
+use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -18,6 +21,7 @@ pub(super) fn create_child_frames(
     frame: &FrameXml,
     parent_name: &str,
     subst_parent: &str,
+    use_direct_creation: bool,
 ) {
     let elements = frame.all_frame_elements();
     for child in &elements {
@@ -32,8 +36,22 @@ pub(super) fn create_child_frames(
             intrinsic,
             parent_name,
             subst_parent,
+            use_direct_creation,
         );
     }
+}
+
+pub(super) fn use_direct_runtime_child_creation(template_name: &str) -> bool {
+    matches!(
+        template_name,
+        "ActionButtonTemplate"
+            | "ActionBarButtonTemplate"
+            | "SmallActionButtonTemplate"
+            | "MainBarActionBarButtonTemplate"
+            | "PetActionButtonTemplate"
+            | "StanceButtonTemplate"
+            | "PossessButtonTemplate"
+    )
 }
 
 fn create_child_frame_from_template(
@@ -44,6 +62,7 @@ fn create_child_frame_from_template(
     intrinsic: Option<&str>,
     parent_name: &str,
     subst_parent: &str,
+    use_direct_creation: bool,
 ) -> Option<String> {
     let is_named = frame.name.is_some();
     let child_name = frame
@@ -56,8 +75,19 @@ fn create_child_frame_from_template(
 
     push_suppress(lua);
 
-    let code = build_create_child_code(frame, widget_type, parent_name, &child_name);
-    if let Err(error) = chunk_cache::exec(lua, &code, "template-mod") {
+    let create_result = if use_direct_creation {
+        create_child_frame_direct(lua, state, frame, widget_type, parent_name, &child_name)
+            .or_else(|error| {
+                eprintln!(
+                    "[template] Direct child create failed for '{}' (type={}) under '{}': {}. Falling back to Lua path.",
+                    child_name, widget_type, parent_name, error
+                );
+                create_child_frame_via_lua(lua, frame, widget_type, parent_name, &child_name)
+            })
+    } else {
+        create_child_frame_via_lua(lua, frame, widget_type, parent_name, &child_name)
+    };
+    if let Err(error) = create_result {
         eprintln!(
             "[template] Failed to create child '{}' (type={}) under '{}': {}",
             child_name, widget_type, parent_name, error
@@ -95,6 +125,110 @@ fn create_child_frame_from_template(
     Some(child_name)
 }
 
+fn create_child_frame_via_lua(
+    lua: &Lua,
+    frame: &FrameXml,
+    widget_type: &str,
+    parent_name: &str,
+    child_name: &str,
+) -> mlua::Result<()> {
+    let code = build_create_child_code(frame, widget_type, parent_name, child_name);
+    chunk_cache::exec(lua, &code, "template-mod")
+}
+
+fn create_child_frame_direct(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    widget_type_name: &str,
+    parent_name: &str,
+    child_name: &str,
+) -> mlua::Result<()> {
+    let Some(parent_id) = resolve_frame_id(state, parent_name) else {
+        return Err(mlua::Error::RuntimeError(format!(
+            "parent '{}' missing during direct child create",
+            parent_name
+        )));
+    };
+    let Some(widget_type) = WidgetType::from_str(widget_type_name) else {
+        return Err(mlua::Error::RuntimeError(format!(
+            "unknown widget type '{}'",
+            widget_type_name
+        )));
+    };
+
+    let child_id = create_frame_instance(
+        lua,
+        state,
+        widget_type,
+        widget_type_name,
+        Some(child_name.to_string()),
+        Some(parent_id),
+        true,
+        frame.xml_id,
+    )?;
+    apply_direct_child_layout(state, child_id, frame, parent_name);
+    apply_direct_child_parent_refs(lua, state, parent_id, child_id, frame)?;
+    Ok(())
+}
+
+fn apply_direct_child_layout(
+    state: &Rc<RefCell<SimState>>,
+    child_id: u64,
+    frame: &FrameXml,
+    parent_name: &str,
+) {
+    if frame.anchors().is_some() {
+        direct::set_anchors(state, child_id, frame, parent_name);
+    }
+    if frame.set_all_points == Some(true) {
+        direct::set_all_points(state, child_id, frame);
+    }
+    if resolve_inherited_hidden(frame) == Some(true) {
+        state.borrow_mut().set_frame_visible(child_id, false);
+    }
+}
+
+fn apply_direct_child_parent_refs(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    parent_id: u64,
+    child_id: u64,
+    frame: &FrameXml,
+) -> mlua::Result<()> {
+    if let Some(parent_key) = resolve_inherited_field(frame, |frame| frame.parent_key.as_ref()) {
+        {
+            let mut sim = state.borrow_mut();
+            if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+                parent.children_keys.insert(parent_key.clone(), child_id);
+            }
+        }
+        sync_child_to_lua(lua, parent_id, &parent_key, child_id)?;
+    }
+
+    let Some(parent_array) = resolve_inherited_field(frame, |frame| frame.parent_array.as_ref())
+    else {
+        return Ok(());
+    };
+    let parent_val = frame_ref(lua, parent_id)?;
+    let child_val = frame_ref(lua, child_id)?;
+    let Value::UserData(parent_ud) = parent_val else {
+        return Ok(());
+    };
+    let fields: mlua::Table = parent_ud.user_value()?;
+    let array = match fields.raw_get::<Value>(parent_array.as_str())? {
+        Value::Table(existing) => existing,
+        _ => {
+            let created = lua.create_table()?;
+            fields.raw_set(parent_array.as_str(), created.clone())?;
+            created
+        }
+    };
+    let next_index = array.raw_len() + 1;
+    array.raw_set(next_index, child_val)?;
+    Ok(())
+}
+
 fn build_create_child_code(
     frame: &FrameXml,
     widget_type: &str,
@@ -123,6 +257,33 @@ fn append_child_id(code: &mut String, frame: &FrameXml) {
     if let Some(id) = frame.xml_id {
         code.push_str(&format!("            child:SetID({id})\n"));
     }
+}
+
+fn resolve_inherited_hidden(frame: &FrameXml) -> Option<bool> {
+    frame.hidden.or_else(|| {
+        let inherits = frame.inherits.as_deref().unwrap_or("");
+        if inherits.is_empty() {
+            return None;
+        }
+        for entry in &get_template_chain(inherits) {
+            if entry.frame.hidden.is_some() {
+                return entry.frame.hidden;
+            }
+        }
+        None
+    })
+}
+
+fn resolve_frame_id(state: &Rc<RefCell<SimState>>, frame_name: &str) -> Option<u64> {
+    state
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name)
+        .or_else(|| {
+            frame_name
+                .strip_prefix("__frame_")
+                .and_then(|suffix| suffix.parse::<u64>().ok())
+        })
 }
 
 fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_name: &str) {
@@ -243,6 +404,7 @@ pub(super) fn create_scroll_child_frames(
             intrinsic,
             parent_name,
             subst_parent,
+            false,
         ) else {
             continue;
         };
@@ -294,7 +456,7 @@ fn apply_inline_frame_content(
     // Create child frames before layers so that relativeKey anchors
     // from FontStrings/Textures to sibling child frames resolve correctly
     // (e.g. $parent.AccountWideIcon in ReputationEntryTemplate).
-    create_child_frames(lua, state, frame, frame_name, subst_parent);
+    create_child_frames(lua, state, frame, frame_name, subst_parent, false);
     if let Some(scroll_child) = frame.scroll_child() {
         create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent);
     }
@@ -316,5 +478,20 @@ fn apply_inline_frame_content(
 
     if let Some(scripts) = frame.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::use_direct_runtime_child_creation;
+
+    #[test]
+    fn action_button_template_uses_direct_runtime_child_creation() {
+        assert!(use_direct_runtime_child_creation("ActionButtonTemplate"));
+    }
+
+    #[test]
+    fn unrelated_template_skips_direct_runtime_child_creation() {
+        assert!(!use_direct_runtime_child_creation("MinimalScrollBar"));
     }
 }

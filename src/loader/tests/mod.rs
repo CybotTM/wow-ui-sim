@@ -225,6 +225,52 @@ fn test_multi_file_closures() {
     );
 }
 
+#[test]
+fn test_runtime_action_button_template_creates_named_children() {
+    let t = load_test_xml(
+        "runtime-action-button-template",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Cooldown name="CooldownFrameTemplate" hidden="true" setAllPoints="true" virtual="true"/>
+            <CheckButton name="ActionButtonTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="TextOverlayContainer">
+                        <Size x="10" y="11"/>
+                        <Anchors>
+                            <Anchor point="CENTER"/>
+                        </Anchors>
+                        <Scripts>
+                            <OnLoad>self.loaded = true;</OnLoad>
+                        </Scripts>
+                    </Frame>
+                    <Cooldown name="$parentCooldown" parentKey="cooldown" inherits="CooldownFrameTemplate" id="17">
+                        <Anchors>
+                            <Anchor point="TOPLEFT"/>
+                            <Anchor point="BOTTOMRIGHT"/>
+                        </Anchors>
+                    </Cooldown>
+                </Frames>
+            </CheckButton>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local button = CreateFrame("CheckButton", "ActionButtonFastPath", UIParent, "ActionButtonTemplate")
+            assert(button.TextOverlayContainer ~= nil, "TextOverlayContainer should exist")
+            assert(button.TextOverlayContainer.loaded == true, "child OnLoad should fire")
+            assert(button.cooldown ~= nil, "cooldown child should exist")
+            assert(ActionButtonFastPathCooldown == button.cooldown, "named cooldown global should resolve")
+            assert(button.cooldown:GetParent() == button, "cooldown parent should be button")
+            assert(button.cooldown:GetID() == 17, "cooldown xml id should be preserved")
+            assert(not button.cooldown:IsShown(), "inherited hidden cooldown should stay hidden")
+        "#,
+        )
+        .unwrap();
+}
+
 const MULTI_FILE_WIDGETS_LUA: &str = r#"
     local _, addon = ...
     local function updateKeyDirection(self) return "updated: " .. tostring(self) end
