@@ -48,11 +48,13 @@ fn show_or_hide(lua: &Lua, id: u64, show: bool, method_name: &str) -> mlua::Resu
         return Ok(());
     }
     let state_rc = get_sim_state(lua);
-    let (needs_change, in_handler, parent_visible) =
-        read_show_hide_state(&state_rc.borrow(), id, show);
+    let (needs_change, in_handler, parent_id) = read_show_hide_state(&state_rc.borrow(), id, show);
     if !needs_change {
         return Ok(());
     }
+    let parent_visible = parent_id
+        .map(|parent_id| state_rc.borrow().widgets.is_ancestor_visible(parent_id))
+        .unwrap_or(true);
     state_rc.borrow_mut().set_frame_visible(id, show);
     if in_handler || !parent_visible {
         return Ok(());
@@ -82,23 +84,64 @@ fn blocked_by_combat_lockdown(lua: &Lua, id: u64, method_name: &str) -> bool {
     combat_lockdown::check_and_fire(lua, &state_rc, id, method_name)
 }
 
-/// Extract (needs_change, in_handler, parent_visible) from state for show_or_hide.
+/// Extract (needs_change, in_handler, parent_id) from state for show_or_hide.
 fn read_show_hide_state(
     state: &crate::lua_api::SimState,
     id: u64,
     show: bool,
-) -> (bool, bool, bool) {
+) -> (bool, bool, Option<u64>) {
     let f = state.widgets.get(id);
-    (
-        f.map(|f| f.visible != show).unwrap_or(false),
-        f.map(|f| f.show_hide_depth > 0).unwrap_or(false),
-        // WoW only fires OnShow/OnHide when the frame is effectively visible,
-        // which requires all ancestors to be visible too. If parent is hidden,
-        // just change the flag silently.
+    let needs_change = f.map(|f| f.visible != show).unwrap_or(false);
+    let in_handler = f.map(|f| f.show_hide_depth > 0).unwrap_or(false);
+    let parent_id = if needs_change {
         f.and_then(|f| f.parent_id)
-            .map(|pid| state.widgets.is_ancestor_visible(pid))
-            .unwrap_or(true), // root frames have no parent, always "parent visible"
-    )
+    } else {
+        None
+    };
+    (needs_change, in_handler, parent_id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::read_show_hide_state;
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn read_show_hide_state_skips_parent_lookup_for_noop_visibility_calls() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec(
+            r#"
+            Parent = CreateFrame("Frame", "Parent", UIParent)
+            Child = CreateFrame("Frame", "Child", Parent)
+            Parent:Show()
+            Child:Show()
+            "#,
+        )
+        .expect("failed to create test frames");
+
+        let child_id = env
+            .state()
+            .borrow()
+            .widgets
+            .get_id_by_name("Child")
+            .expect("child should exist");
+
+        let state = env.state().borrow();
+        let (needs_change, in_handler, parent_id) = read_show_hide_state(&state, child_id, true);
+
+        assert!(
+            !needs_change,
+            "shown child should not need another Show/SetShown(true)"
+        );
+        assert!(
+            !in_handler,
+            "fresh child should not be in a show/hide handler"
+        );
+        assert!(
+            parent_id.is_none(),
+            "no-op visibility checks should not request parent visibility traversal"
+        );
+    }
 }
 
 /// Iteratively fire OnShow/OnHide handlers until no more state changes
