@@ -20,24 +20,28 @@ impl LifecycleScripts {
 }
 
 /// Fire OnLoad and OnShow lifecycle scripts after the frame is fully configured.
-pub fn fire_lifecycle_scripts(env: &LoaderEnv<'_>, name: &str, lifecycle: LifecycleScripts) {
-    let Some(frame) = resolve_lifecycle_frame(env, name) else {
+pub fn fire_lifecycle_scripts(
+    env: &LoaderEnv<'_>,
+    frame_id: u64,
+    display_name: &str,
+    lifecycle: LifecycleScripts,
+) {
+    let Some(frame) = resolve_lifecycle_frame(env, frame_id) else {
         return;
     };
     let fns = precompiled::get(env.lua());
     if lifecycle.on_load
         && let Err(e) = fns.fire_onload.call::<()>(frame.clone())
     {
-        eprintln!("[OnLoad] {} error: {}", name, e);
+        eprintln!("[OnLoad] {} error: {}", display_name, e);
     }
     if lifecycle.on_show
         && let Err(e) = fns.fire_onshow.call::<()>(frame)
     {
-        eprintln!("[OnShow] {} error: {}", name, e);
+        eprintln!("[OnShow] {} error: {}", display_name, e);
     }
 }
 
-fn resolve_lifecycle_frame(env: &LoaderEnv<'_>, name: &str) -> Option<Value> {
-    let id = env.state().borrow().widgets.get_id_by_name(name)?;
-    frame_ref(env.lua(), id).ok()
+fn resolve_lifecycle_frame(env: &LoaderEnv<'_>, frame_id: u64) -> Option<Value> {
+    frame_ref(env.lua(), frame_id).ok()
 }

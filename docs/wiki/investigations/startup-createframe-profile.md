@@ -199,6 +199,31 @@ meaningful drop:
 - total `CreateFrame` time: `2855.80ms -> 2119.22ms` (`-25.79%`)
 - frame count: unchanged at `118`
 
+### XML lifecycle frame-id threading follow-up (2026-04-14)
+
+Fresh release-build startup `perf` still showed loader finalization spending
+meaningful time in XML lifecycle firing after the action-button hot paths had
+already moved down. One small but repeated cost in that path was:
+
+- XML finalize handed `fire_lifecycle_scripts()` only the frame name
+- `fire_lifecycle_scripts()` re-did `name -> id -> frame_ref`
+- every XML `OnLoad` / `OnShow` fire paid the extra global-name lookup again
+
+`xml_frame.rs` now resolves the created frame id once immediately after the
+Lua `CreateFrame(...)` chunk succeeds and threads that id through finalize.
+`xml_lifecycle.rs` now takes `(frame_id, display_name, lifecycle)` and calls
+`frame_ref()` directly.
+
+The focused regression
+`lifecycle_scripts_use_passed_frame_id_instead_of_name_lookup` proves the
+behavior change directly by firing lifecycle handlers with:
+
+- the real frame id
+- an intentionally wrong display name
+
+The handlers still run, which means lifecycle dispatch no longer depends on a
+second global name lookup during XML finalize.
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.

@@ -11,6 +11,15 @@ spikes, `31` steady-state handlers, `64.73ms` post-90s average), added the
 new `world_map_onupdate_inventory` handler-ceiling regression test, and
 refreshed the `index.md` summary for the page.
 
+## [2026-04-14] investigations | startup XML lifecycle frame-id threading
+
+Updated `investigations/startup-createframe-profile.md` with the loader
+follow-up that removes repeated `name -> id -> frame_ref` lifecycle resolution
+during XML finalize. Recorded the new `xml_frame.rs` / `xml_lifecycle.rs`
+threaded-frame-id path, the focused regression test that fires lifecycle
+handlers with a wrong display name but the correct frame id, and refreshed the
+`index.md` summary for the page.
+
 ## [2026-04-14] investigations | world map UIParent empty worklist follow-up
 
 Updated `investigations/world-map-onupdate-hover-polling.md` with the

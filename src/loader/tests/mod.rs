@@ -7,6 +7,7 @@ mod xml_basics;
 use super::addon::AddonContext;
 use super::lua_file::load_lua_file;
 use super::xml_file::load_xml_file;
+use super::xml_lifecycle::{LifecycleScripts, fire_lifecycle_scripts};
 use super::*;
 use crate::lua_api::WowLuaEnv;
 
@@ -222,6 +223,55 @@ fn test_multi_file_closures() {
         result.starts_with("updated:"),
         "updateKeyDirection should have been called, got: {}",
         result
+    );
+}
+
+#[test]
+fn lifecycle_scripts_use_passed_frame_id_instead_of_name_lookup() {
+    let t = load_test_xml(
+        "lifecycle-frame-id",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="LifecycleRefFrame" parent="UIParent">
+                <Scripts>
+                    <OnLoad>LIFECYCLE_REF_ONLOAD = (LIFECYCLE_REF_ONLOAD or 0) + 1</OnLoad>
+                    <OnShow>LIFECYCLE_REF_ONSHOW = (LIFECYCLE_REF_ONSHOW or 0) + 1</OnShow>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    let frame_id = t
+        .env
+        .state()
+        .borrow()
+        .widgets
+        .get_id_by_name("LifecycleRefFrame")
+        .expect("LifecycleRefFrame should exist");
+
+    fire_lifecycle_scripts(
+        &t.env.loader_env(),
+        frame_id,
+        "DefinitelyNotTheFrameName",
+        LifecycleScripts {
+            on_load: true,
+            on_show: true,
+        },
+    );
+
+    let (on_load_count, on_show_count): (i32, i32) = t
+        .env
+        .eval("return LIFECYCLE_REF_ONLOAD or 0, LIFECYCLE_REF_ONSHOW or 0")
+        .unwrap();
+
+    assert_eq!(
+        on_load_count, 2,
+        "OnLoad should fire again via direct frame id"
+    );
+    assert_eq!(
+        on_show_count, 2,
+        "OnShow should fire again via direct frame id"
     );
 }
 
