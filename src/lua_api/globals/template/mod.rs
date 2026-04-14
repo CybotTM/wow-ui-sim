@@ -1,20 +1,59 @@
-//! Minimal template bridge during the rilua cutover.
+//! Template helpers shared by the rilua loader/runtime path.
 
 pub(crate) mod direct;
 
-use crate::lua_api::SimState;
-use std::cell::RefCell;
-use std::rc::Rc;
+use crate::lua_api::rilua_methods::{frame_ref, sync_child_to_rilua, table_set};
+use rilua::LuaResult;
+use rilua::vm::state::LuaState;
 
-pub fn apply_templates_from_registry<T>(
-    _lua: &T,
-    _state: &Rc<RefCell<SimState>>,
-    _frame_name: &str,
-    _template_names: &str,
-) {
+pub fn set_intrinsic(state: &mut LuaState, frame_id: u64, base: &str) {
+    let Ok(frame) = frame_ref(state, frame_id) else {
+        return;
+    };
+    let value = crate::lua_api::rilua_methods::create_string(state, base);
+    table_set(state, frame, "intrinsic", value);
 }
 
-pub fn fire_deferred_child_onloads<T>(_lua: &T) -> usize {
+pub fn assign_parent_key(
+    state: &mut LuaState,
+    parent_id: u64,
+    parent_key: &str,
+    child_id: u64,
+) -> LuaResult<()> {
+    let (target_parent_id, resolved_key) = resolve_parent_key_target(state, parent_id, parent_key);
+    let Some(target_parent_id) = target_parent_id else {
+        return Ok(());
+    };
+
+    {
+        let mut sim = crate::lua_api::rilua_methods::borrow_state_mut(state)?;
+        if let Some(parent) = sim.widgets.get_mut_visual(target_parent_id) {
+            parent.children_keys.insert(resolved_key.clone(), child_id);
+        }
+    }
+
+    sync_child_to_rilua(state, target_parent_id, &resolved_key, child_id)
+}
+
+fn resolve_parent_key_target(
+    state: &LuaState,
+    parent_id: u64,
+    parent_key: &str,
+) -> (Option<u64>, String) {
+    if let Some(key) = parent_key.strip_prefix("$parent.") {
+        let target_parent = crate::lua_api::rilua_methods::borrow_state(state)
+            .ok()
+            .and_then(|sim| {
+                sim.widgets
+                    .get(parent_id)
+                    .and_then(|parent| parent.parent_id)
+            });
+        return (target_parent, key.to_string());
+    }
+    (Some(parent_id), parent_key.to_string())
+}
+
+pub fn fire_deferred_child_onloads(_state: &mut LuaState) -> usize {
     0
 }
 

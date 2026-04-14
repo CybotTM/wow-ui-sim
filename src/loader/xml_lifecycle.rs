@@ -1,6 +1,10 @@
 //! Lifecycle script firing for XML-created frames (OnLoad, OnShow).
 
 use crate::lua_api::LoaderEnv;
+use crate::lua_api::rilua_methods::{frame_ref, table_get};
+use crate::lua_api::rilua_script_helpers::{collect_lua_error, get_script};
+use rilua::LuaApiMut;
+use rilua::Val;
 
 #[derive(Clone, Copy, Debug, Default, Eq, PartialEq)]
 pub(super) struct LifecycleScripts {
@@ -14,4 +18,82 @@ impl LifecycleScripts {
     }
 }
 
-pub fn fire_lifecycle_scripts(_env: &LoaderEnv<'_>, _name: &str, _lifecycle: LifecycleScripts) {}
+/// Fire OnLoad and OnShow after XML creation has finished wiring children and properties.
+pub fn fire_lifecycle_scripts(env: &LoaderEnv<'_>, name: &str, lifecycle: LifecycleScripts) {
+    let Some(frame_id) = env.state().borrow().widgets.get_id_by_name(name) else {
+        return;
+    };
+
+    let mut lua = env.rilua_mut();
+    let state = lua.state_mut();
+    if lifecycle.on_load {
+        fire_intrinsic_handler(state, frame_id, "OnLoad_Intrinsic");
+        fire_script_handler(state, frame_id, "OnLoad");
+    }
+    if lifecycle.on_show && is_frame_visible(state, frame_id) {
+        fire_script_handler(state, frame_id, "OnShow");
+        fire_intrinsic_handler(state, frame_id, "OnShow_Intrinsic");
+    }
+}
+
+fn is_frame_visible(state: &rilua::vm::state::LuaState, frame_id: u64) -> bool {
+    let Ok(sim) = crate::lua_api::rilua_methods::borrow_state(state) else {
+        return false;
+    };
+    sim.widgets.is_ancestor_visible(frame_id)
+}
+
+fn fire_intrinsic_handler(state: &mut rilua::vm::state::LuaState, frame_id: u64, key: &str) {
+    let Ok(frame) = frame_ref(state, frame_id) else {
+        return;
+    };
+    let handler = table_get(state, frame, key);
+    call_handler(state, frame_id, handler, key);
+}
+
+fn fire_script_handler(state: &mut rilua::vm::state::LuaState, frame_id: u64, handler_name: &str) {
+    let Some(handler) = get_script(state, frame_id, handler_name) else {
+        return;
+    };
+    call_handler(state, frame_id, handler, handler_name);
+}
+
+fn call_handler(
+    state: &mut rilua::vm::state::LuaState,
+    frame_id: u64,
+    handler: Val,
+    handler_name: &str,
+) {
+    if !matches!(handler, Val::Function(_)) {
+        return;
+    }
+
+    let Ok(frame) = frame_ref(state, frame_id) else {
+        return;
+    };
+    let frame_name = frame_display_name(state, frame_id);
+    let call_base = state.top;
+    state.ensure_stack(call_base + 3);
+    state.stack_set(call_base, handler);
+    state.stack_set(call_base + 1, frame);
+    state.top = call_base + 2;
+    let result = state.call_function(call_base, 0);
+    state.top = call_base;
+
+    if let Err(error) = result {
+        let message = format!("[{handler_name}] {frame_name}: {error}");
+        if collect_lua_error(state, &message) {
+            eprintln!("Lua error: {message}");
+        }
+    }
+}
+
+fn frame_display_name(state: &rilua::vm::state::LuaState, frame_id: u64) -> String {
+    let Ok(sim) = crate::lua_api::rilua_methods::borrow_state(state) else {
+        return format!("frame#{frame_id}");
+    };
+    sim.widgets
+        .get(frame_id)
+        .and_then(|frame| frame.name.clone())
+        .unwrap_or_else(|| format!("frame#{frame_id}"))
+}

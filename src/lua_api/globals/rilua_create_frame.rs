@@ -9,13 +9,14 @@
 
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id, frame_ref,
-    registry_get, registry_table_or_create, table_set,
+    registry_get, registry_table_or_create, table_get, table_set,
 };
-use crate::lua_api::rilua_script_helpers::set_script as set_rilua_script;
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
 use rilua::{LuaApiMut, LuaResult, Val};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 // ---------------------------------------------------------------------------
 // CreateFrame
@@ -669,28 +670,310 @@ fn apply_runtime_templates(
     frame_id: u64,
     inherits: Option<&str>,
 ) -> LuaResult<()> {
+    apply_runtime_template_chain(state, frame_id, inherits, true)
+}
+
+fn apply_runtime_template_chain(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+    fire_on_load: bool,
+) -> LuaResult<()> {
     let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
         return Ok(());
     };
 
     let chain = crate::xml::get_template_chain(inherits);
-    let frame_val = frame_ref(state, frame_id)?;
+    if chain.is_empty() {
+        return Ok(());
+    }
+
+    let state_rc = sim_state_rc(state)?;
+    let frame_name = frame_lookup_name(state, frame_id);
 
     for entry in &chain {
         apply_template_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
         apply_template_key_values(state, frame_id, entry.frame.all_key_values());
         if let Some(scripts) = entry.frame.scripts() {
-            apply_template_scripts(state, frame_id, scripts);
+            apply_template_scripts(state, frame_id, scripts)?;
+        }
+        create_template_child_frames(
+            state,
+            &state_rc,
+            frame_id,
+            &frame_name,
+            &frame_name,
+            &entry.frame,
+        )?;
+    }
+
+    apply_runtime_template_direct_properties(&state_rc, frame_id, inherits, &frame_name);
+    if fire_on_load {
+        fire_frame_on_load(state, frame_id)?;
+    }
+    Ok(())
+}
+
+fn create_template_child_frames(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    parent_id: u64,
+    parent_name: &str,
+    subst_parent: &str,
+    frame: &crate::xml::FrameXml,
+) -> LuaResult<()> {
+    for child in frame.all_frame_elements() {
+        create_template_child_frame(
+            state,
+            state_rc,
+            parent_id,
+            parent_name,
+            subst_parent,
+            &child,
+        )?;
+    }
+
+    let Some(scroll_child) = frame.scroll_child() else {
+        return Ok(());
+    };
+
+    let mut registered_scroll_child = false;
+    for child in &scroll_child.children {
+        let child_id = create_template_child_frame(
+            state,
+            state_rc,
+            parent_id,
+            parent_name,
+            subst_parent,
+            child,
+        )?;
+        if !registered_scroll_child && let Some(child_id) = child_id {
+            let mut sim = borrow_state_mut(state)?;
+            crate::lua_api::frame::methods::widget_scroll::assign_scroll_child(
+                &mut sim, parent_id, child_id, false,
+            );
+            registered_scroll_child = true;
         }
     }
 
+    Ok(())
+}
+
+fn create_template_child_frame(
+    state: &mut LuaState,
+    state_rc: &Rc<RefCell<crate::lua_api::SimState>>,
+    parent_id: u64,
+    _parent_name: &str,
+    subst_parent: &str,
+    child: &crate::xml::FrameElement,
+) -> LuaResult<Option<u64>> {
+    let Some((frame, widget_type_name, intrinsic)) = template_child_type(child) else {
+        return Ok(None);
+    };
+
+    let child_name = template_child_name(frame.name.as_deref(), subst_parent);
+    let child_id = crate::lua_api::globals::create_frame::create_frame_instance(
+        state,
+        WidgetType::from_str(widget_type_name).ok_or_else(|| {
+            rilua::runtime_error(format!("unknown widget type '{widget_type_name}'"))
+        })?,
+        widget_type_name,
+        Some(child_name.clone()),
+        Some(parent_id),
+        true,
+        frame.xml_id,
+    )?;
+
+    let inherited_parent_key =
+        resolve_inherited_string(frame, |template| template.parent_key.as_ref());
+    if let Some(parent_key) = inherited_parent_key {
+        crate::lua_api::globals::template::assign_parent_key(
+            state,
+            parent_id,
+            &parent_key,
+            child_id,
+        )?;
+    }
+    if let Some(parent_array) =
+        resolve_inherited_string(frame, |template| template.parent_array.as_ref())
+    {
+        append_parent_array_entry(state, parent_id, &parent_array, child_id);
+    }
+
+    let inherited_chain = build_child_inherits(intrinsic, frame.inherits.as_deref());
+    if let Some(chain) = inherited_chain.as_deref() {
+        apply_runtime_template_chain(state, child_id, Some(chain), false)?;
+    }
+    if let Some(intrinsic) = intrinsic {
+        crate::lua_api::globals::template::set_intrinsic(state, child_id, intrinsic);
+    }
+
+    let child_subst = if frame.name.is_some() {
+        child_name.as_str()
+    } else {
+        subst_parent
+    };
+    create_template_child_frames(state, state_rc, child_id, &child_name, child_subst, frame)?;
+
+    apply_runtime_child_direct_properties(state_rc, child_id, frame, &child_name);
+    apply_template_mixins(state, child_id, frame.combined_mixin().as_deref());
+    apply_template_key_values(state, child_id, frame.all_key_values());
+    if let Some(scripts) = frame.scripts() {
+        apply_template_scripts(state, child_id, scripts)?;
+    }
+    fire_frame_on_load(state, child_id)?;
+    Ok(Some(child_id))
+}
+
+fn apply_runtime_template_direct_properties(
+    state: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    inherits: &str,
+    frame_name: &str,
+) {
+    let frame = crate::xml::FrameXml::default();
+    apply_runtime_child_direct_properties_with_inherits(
+        state, frame_id, &frame, inherits, frame_name,
+    );
+}
+
+fn apply_runtime_child_direct_properties(
+    state: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    frame: &crate::xml::FrameXml,
+    frame_name: &str,
+) {
+    let inherits = frame.inherits.as_deref().unwrap_or("");
+    apply_runtime_child_direct_properties_with_inherits(
+        state, frame_id, frame, inherits, frame_name,
+    );
+}
+
+fn apply_runtime_child_direct_properties_with_inherits(
+    state: &Rc<RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    frame: &crate::xml::FrameXml,
+    inherits: &str,
+    frame_name: &str,
+) {
+    crate::lua_api::globals::template::direct::apply_xml_size(state, frame_id, frame, inherits);
+    crate::lua_api::globals::template::direct::apply_xml_anchors(
+        state, frame_id, frame, inherits, frame_name,
+    );
+    crate::lua_api::globals::template::direct::apply_xml_hidden(state, frame_id, frame, inherits);
+    crate::lua_api::globals::template::direct::apply_xml_clips_children(
+        state, frame_id, frame, inherits,
+    );
+    crate::lua_api::globals::template::direct::apply_xml_set_all_points(
+        state, frame_id, frame, inherits,
+    );
+    crate::lua_api::globals::template::direct::apply_xml_frame_level(
+        state, frame_id, frame, inherits,
+    );
+    crate::lua_api::globals::template::direct::apply_xml_frame_strata(
+        state, frame_id, frame, inherits,
+    );
+    crate::lua_api::globals::template::direct::apply_xml_protected(
+        state, frame_id, frame, inherits,
+    );
+}
+
+fn fire_frame_on_load(state: &mut LuaState, frame_id: u64) -> LuaResult<()> {
+    let frame = frame_ref(state, frame_id)?;
+    let intrinsic = table_get(state, frame, "OnLoad_Intrinsic");
+    call_handler_with_frame(state, intrinsic, frame)?;
     if let Some(on_load) =
         crate::lua_api::rilua_script_helpers::get_script(state, frame_id, "OnLoad")
     {
-        call_handler_with_frame(state, on_load, frame_val)?;
+        call_handler_with_frame(state, on_load, frame)?;
     }
-
     Ok(())
+}
+
+fn template_child_name(name: Option<&str>, subst_parent: &str) -> String {
+    name.map(|name| name.replace("$parent", subst_parent))
+        .unwrap_or_else(|| format!("__tpl_{}", crate::loader::helpers::rand_id()))
+}
+
+fn build_child_inherits(intrinsic: Option<&str>, inherits: Option<&str>) -> Option<String> {
+    match (intrinsic, inherits.filter(|value| !value.trim().is_empty())) {
+        (Some(base), Some(inherits)) => Some(format!("{base}, {inherits}")),
+        (Some(base), None) => Some(base.to_string()),
+        (None, Some(inherits)) => Some(inherits.to_string()),
+        (None, None) => None,
+    }
+}
+
+fn frame_lookup_name(state: &LuaState, frame_id: u64) -> String {
+    borrow_state(state)
+        .ok()
+        .and_then(|sim| {
+            sim.widgets
+                .get(frame_id)
+                .and_then(|frame| frame.name.clone())
+        })
+        .unwrap_or_else(|| format!("__frame_{frame_id}"))
+}
+
+fn sim_state_rc(state: &LuaState) -> LuaResult<Rc<RefCell<crate::lua_api::SimState>>> {
+    state
+        .app_data::<crate::lua_api::env::WowLuaAppData>()
+        .map(|app| app.sim_state.clone())
+        .ok_or_else(|| rilua::runtime_error("missing WowLuaAppData"))
+}
+
+fn template_child_type(
+    child: &crate::xml::FrameElement,
+) -> Option<(&crate::xml::FrameXml, &'static str, Option<&'static str>)> {
+    let (frame, tag) = child.as_frame_data()?;
+    match tag {
+        "DropDownToggleButton" => Some((frame, "Button", Some("DropDownToggleButton"))),
+        "EventButton" => Some((frame, "Button", Some("EventButton"))),
+        _ => crate::xml::widget_type_for_tag(tag)
+            .map(|(widget_type, intrinsic)| (frame, widget_type, intrinsic)),
+    }
+}
+
+fn resolve_inherited_string(
+    frame: &crate::xml::FrameXml,
+    project: impl Fn(&crate::xml::FrameXml) -> Option<&String>,
+) -> Option<String> {
+    if let Some(value) = project(frame) {
+        return Some(value.clone());
+    }
+    let inherits = frame.inherits.as_deref()?;
+    crate::xml::get_template_chain(inherits)
+        .into_iter()
+        .find_map(|entry| project(&entry.frame).cloned())
+}
+
+fn append_parent_array_entry(state: &mut LuaState, parent_id: u64, key: &str, child_id: u64) {
+    let Ok(parent) = frame_ref(state, parent_id) else {
+        return;
+    };
+    let Ok(child) = frame_ref(state, child_id) else {
+        return;
+    };
+    let array = match table_get(state, parent, key) {
+        Val::Table(existing) => Val::Table(existing),
+        _ => {
+            let created = create_table(state);
+            table_set(state, parent, key, created);
+            created
+        }
+    };
+    let Val::Table(array_ref) = array else {
+        return;
+    };
+    let next_index = state
+        .gc
+        .tables
+        .get(array_ref)
+        .map(|table| table.array_slice().len() + 1)
+        .unwrap_or(1);
+    if let Some(table) = state.gc.tables.get_mut(array_ref) {
+        let _ = table.raw_set(Val::Num(next_index as f64), child, &state.gc.string_arena);
+    }
 }
 
 fn apply_template_mixins(state: &mut LuaState, frame_id: u64, mixins: Option<&str>) {
@@ -729,90 +1012,28 @@ fn apply_template_key_values<'a>(
     }
 }
 
-fn apply_template_scripts(state: &mut LuaState, frame_id: u64, scripts: &crate::xml::ScriptsXml) {
-    for (handler_name, script) in template_script_entries(scripts) {
-        apply_template_script(state, frame_id, handler_name, script);
-    }
-}
-
-fn template_script_entries(
+fn apply_template_scripts(
+    state: &mut LuaState,
+    frame_id: u64,
     scripts: &crate::xml::ScriptsXml,
-) -> [(&'static str, Option<&crate::xml::ScriptBodyXml>); 36] {
-    [
-        ("OnLoad", scripts.on_load.last()),
-        ("OnEvent", scripts.on_event.last()),
-        ("OnUpdate", scripts.on_update.last()),
-        ("OnClick", scripts.on_click.last()),
-        ("OnShow", scripts.on_show.last()),
-        ("OnHide", scripts.on_hide.last()),
-        ("OnEnter", scripts.on_enter.last()),
-        ("OnLeave", scripts.on_leave.last()),
-        ("OnMouseDown", scripts.on_mouse_down.last()),
-        ("OnMouseUp", scripts.on_mouse_up.last()),
-        ("OnMouseWheel", scripts.on_mouse_wheel.last()),
-        ("OnDragStart", scripts.on_drag_start.last()),
-        ("OnDragStop", scripts.on_drag_stop.last()),
-        ("OnReceiveDrag", scripts.on_receive_drag.last()),
-        ("OnEnterPressed", scripts.on_enter_pressed.last()),
-        ("OnEscapePressed", scripts.on_escape_pressed.last()),
-        ("OnTabPressed", scripts.on_tab_pressed.last()),
-        ("OnSpacePressed", scripts.on_space_pressed.last()),
-        ("OnTextChanged", scripts.on_text_changed.last()),
-        ("OnTextSet", scripts.on_text_set.last()),
-        ("OnChar", scripts.on_char.last()),
-        ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
-        ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
-        (
-            "OnInputLanguageChanged",
-            scripts.on_input_language_changed.last(),
-        ),
-        ("OnKeyDown", scripts.on_key_down.last()),
-        ("OnKeyUp", scripts.on_key_up.last()),
-        ("OnValueChanged", scripts.on_value_changed.last()),
-        ("OnEnable", scripts.on_enable.last()),
-        ("OnDisable", scripts.on_disable.last()),
-        ("OnSizeChanged", scripts.on_size_changed.last()),
-        ("OnAttributeChanged", scripts.on_attribute_changed.last()),
-        ("OnHyperlinkClick", scripts.on_hyperlink_click.last()),
-        ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
-        ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
-        ("PreClick", scripts.pre_click.last()),
-        ("PostClick", scripts.post_click.last()),
-    ]
-}
-
-fn apply_template_script(
-    state: &mut LuaState,
-    frame_id: u64,
-    handler_name: &str,
-    script: Option<&crate::xml::ScriptBodyXml>,
-) {
-    let Some(script) = script else {
-        return;
-    };
-    let Some(handler) = script_handler_val(state, frame_id, script) else {
-        return;
-    };
-    set_rilua_script(state, frame_id, handler_name, handler);
-}
-
-fn script_handler_val(
-    state: &mut LuaState,
-    frame_id: u64,
-    script: &crate::xml::ScriptBodyXml,
-) -> Option<Val> {
-    if let Some(function_name) = script.function.as_deref() {
-        let function = resolve_global_path(state, function_name);
-        return matches!(function, Val::Function(_)).then_some(function);
+) -> LuaResult<()> {
+    let script_code = crate::loader::helpers::generate_scripts_code(scripts);
+    if script_code.trim().is_empty() {
+        return Ok(());
     }
 
-    if let Some(method_name) = script.method.as_deref() {
-        let frame = frame_ref(state, frame_id).ok()?;
-        let method = table_get_str(state, frame, method_name);
-        return matches!(method, Val::Function(_)).then_some(method);
-    }
-
-    None
+    let chunk = format!("local frame = ...\n{script_code}");
+    let func = LuaApiMut::load(state, &chunk)?;
+    let frame = frame_ref(state, frame_id)?;
+    let call_base = state.top;
+    state.ensure_stack(call_base + 3);
+    state.stack_set(call_base, Val::Function(func.gc_ref()));
+    state.stack_set(call_base + 1, frame);
+    state.top = call_base + 2;
+    let result = state.call_function(call_base, 0);
+    state.top = call_base;
+    result?;
+    Ok(())
 }
 
 fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {

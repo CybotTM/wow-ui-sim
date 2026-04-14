@@ -1,13 +1,13 @@
 //! Frame creation from XML definitions.
 
 use crate::lua_api::LoaderEnv;
+use rilua::LuaApiMut;
 use std::time::Instant;
 
 use super::LoadTiming;
 use super::button::{apply_button_text, apply_button_textures};
 use super::error::LoadError;
 use super::helpers::rand_id;
-use super::precompiled;
 use super::xml_frame_codegen::build_frame_lua_code;
 use super::xml_frame_extras::{apply_animation_groups, apply_bar_texture, init_action_bar_tables};
 use super::xml_lifecycle::LifecycleScripts;
@@ -198,8 +198,11 @@ fn build_inherits_chain(
 /// Set the `intrinsic` property on intrinsic frames (e.g. frame.intrinsic = "DropdownButton").
 fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, name: &str) {
     if let Some(base) = intrinsic_base {
-        let fns = precompiled::get(env.lua());
-        fns.set_intrinsic.call((name, base)).ok();
+        let Some(frame_id) = env.state().borrow().widgets.get_id_by_name(name) else {
+            return;
+        };
+        let mut lua = env.rilua_mut();
+        crate::lua_api::globals::template::set_intrinsic(lua.state_mut(), frame_id, base);
     }
 }
 
@@ -269,17 +272,12 @@ fn exec_create_frame_code(
     name: &str,
     initial_hidden: bool,
 ) -> Result<(), LoadError> {
-    let fns = precompiled::get(env.lua());
-    fns.suppress_push.call::<()>(()).ok();
     env.state().borrow_mut().create_frame_initial_hidden = Some(initial_hidden);
     let exec_result = env
         .exec(lua_code)
         .map_err(|e| LoadError::Lua(format!("Failed to create frame {}: {}", name, e)));
     env.state().borrow_mut().create_frame_initial_hidden = None;
-    fns.suppress_pop.call::<()>(()).ok();
-    exec_result?;
-    crate::lua_api::globals::template::fire_deferred_child_onloads(env.lua());
-    Ok(())
+    exec_result
 }
 
 fn resolve_xml_hidden(frame: &crate::xml::FrameXml, inherits: &str) -> bool {
@@ -437,10 +435,7 @@ fn create_scroll_child_elements(
         if let (Some(actual_child_name), Some(parent_key)) =
             (child_name.as_deref(), &child_frame.parent_key)
         {
-            let fns = precompiled::get(env.lua());
-            fns.assign_parent_key
-                .call((parent_name, parent_key.as_str(), actual_child_name))
-                .ok();
+            assign_parent_key(env, parent_name, parent_key, actual_child_name);
         }
 
         if !registered_scroll_child {
@@ -473,12 +468,30 @@ fn create_single_child_frame(
         timing,
     )?;
     if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
-        let fns = precompiled::get(env.lua());
-        fns.assign_parent_key
-            .call((parent_name, parent_key.as_str(), actual_child_name.as_str()))
-            .ok();
+        assign_parent_key(env, parent_name, parent_key, actual_child_name.as_str());
     }
     Ok(())
+}
+
+fn assign_parent_key(env: &LoaderEnv<'_>, parent_name: &str, parent_key: &str, child_name: &str) {
+    let ids = {
+        let state = env.state().borrow();
+        (
+            state.widgets.get_id_by_name(parent_name),
+            state.widgets.get_id_by_name(child_name),
+        )
+    };
+    let (Some(parent_id), Some(child_id)) = ids else {
+        return;
+    };
+
+    let mut lua = env.rilua_mut();
+    let _ = crate::lua_api::globals::template::assign_parent_key(
+        lua.state_mut(),
+        parent_id,
+        parent_key,
+        child_id,
+    );
 }
 
 fn register_scroll_child(env: &LoaderEnv<'_>, parent_name: &str, child_name: &str) {
