@@ -39,6 +39,16 @@ pub fn table_set_rust_fn(
     table.raw_set(key, Val::Function(closure_ref), &state.gc.string_arena)
 }
 
+/// Allocate a Lua table with wow-ui-sim's frame backing metadata attached.
+///
+/// The returned table is still a normal Lua table: Lua code can `rawset`,
+/// iterate, and attach a metatable as usual.
+pub fn create_frame_table(state: &mut LuaState, index: u32, generation: u32) -> GcRef<RiluaTable> {
+    let mut table = RiluaTable::new();
+    table.set_backing(Some((index, generation)));
+    state.gc.alloc_table(table)
+}
+
 // ---------------------------------------------------------------------------
 // TableBuilder
 // ---------------------------------------------------------------------------

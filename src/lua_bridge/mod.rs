@@ -16,8 +16,9 @@ mod into_stack;
 mod macros;
 mod table_builder;
 
-pub use from_stack::FromStack;
 pub(crate) use from_stack::stack_val;
+pub use from_stack::FromStack;
 pub use into_stack::IntoStack;
-pub use table_builder::TableBuilder;
+pub use table_builder::create_frame_table;
 pub(crate) use table_builder::table_set_rust_fn;
+pub use table_builder::TableBuilder;

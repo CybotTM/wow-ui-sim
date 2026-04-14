@@ -13,7 +13,7 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
-use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
+use crate::lua_bridge::{create_frame_table, FromStack, IntoStack, TableBuilder};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -272,6 +272,23 @@ fn test_define_methods_registers_backed_table_methods() {
     }
 
     lua.exec("local label, count = myframe:Describe('frame', 4); assert(label == 'frame' and count == 5)")
+        .unwrap();
+}
+
+#[test]
+fn test_create_frame_table_sets_backing_and_keeps_table_behavior() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+        let frame_ref = create_frame_table(state, 17, 9);
+        let frame = state.gc.tables.get(frame_ref).unwrap();
+        assert_eq!(frame.backing(), Some((17, 9)));
+        set_global_table(state, "helper_frame", frame_ref);
+    }
+
+    lua.exec("assert(type(helper_frame) == 'table')").unwrap();
+    lua.exec("rawset(helper_frame, 'field', 55)").unwrap();
+    lua.exec("assert(rawget(helper_frame, 'field') == 55)")
         .unwrap();
 }
 
