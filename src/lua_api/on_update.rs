@@ -147,23 +147,14 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
     let frame_ids = get_visible_on_update_frames(&env.state);
 
     if !frame_ids.is_empty() {
-        env.lua.gc_stop();
-
         let t = Instant::now();
         dispatch(&env.lua, &frame_ids, elapsed, "_OnUpdate");
         let on_update_dur = t.elapsed();
         dispatch(&env.lua, &frame_ids, elapsed, "_OnPostUpdate");
-        let handlers_dur = t.elapsed();
-
-        let gc_start = Instant::now();
-        env.lua.gc_restart();
-        let _ = env.lua.gc_step();
-        let gc_dur = gc_start.elapsed();
-
         let total = t.elapsed();
         if total.as_millis() > 20 {
             eprintln!(
-                "{} [fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} handlers={handlers_dur:.1?} gc={gc_dur:.1?} total={total:.1?}",
+                "{} [fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
                 crate::logging::global_elapsed_prefix(),
                 frame_ids.len()
             );
