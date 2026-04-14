@@ -11,6 +11,7 @@ use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, create_table, extract_frame_id, frame_ref,
     registry_get, registry_table_or_create, table_set,
 };
+use crate::lua_api::rilua_script_helpers::set_script as set_rilua_script;
 use crate::lua_bridge::FromStack;
 use crate::widget::WidgetType;
 use rilua::vm::state::LuaState;
@@ -24,7 +25,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
     let frame_type: String = FromStack::from_stack(state, 1)?;
     let name: Option<String> = FromStack::from_stack(state, 2)?;
     let parent_val: Val = FromStack::from_stack(state, 3)?;
-    let _inherits: Option<String> = FromStack::from_stack(state, 4)?;
+    let inherits: Option<String> = FromStack::from_stack(state, 4)?;
     let id: Option<f64> = FromStack::from_stack(state, 5)?;
 
     let widget_type = WidgetType::from_str(&frame_type)
@@ -51,6 +52,7 @@ pub fn create_frame(state: &mut LuaState) -> LuaResult<u32> {
         parent_explicit,
         id.map(|n| n as i32),
     )?;
+    apply_runtime_templates(state, frame_id, inherits.as_deref())?;
     let frame_val = frame_ref(state, frame_id)?;
     state.push(frame_val);
     Ok(1)
@@ -660,6 +662,235 @@ fn get_or_create_frame_fields(state: &mut LuaState, frame_id: u64) -> Val {
         let _ = reg.raw_set(id_key, new_table, &state.gc.string_arena);
     }
     new_table
+}
+
+fn apply_runtime_templates(
+    state: &mut LuaState,
+    frame_id: u64,
+    inherits: Option<&str>,
+) -> LuaResult<()> {
+    let Some(inherits) = inherits.filter(|value| !value.trim().is_empty()) else {
+        return Ok(());
+    };
+
+    let chain = crate::xml::get_template_chain(inherits);
+    let frame_val = frame_ref(state, frame_id)?;
+
+    for entry in &chain {
+        apply_template_mixins(state, frame_id, entry.frame.combined_mixin().as_deref());
+        apply_template_key_values(state, frame_id, entry.frame.all_key_values());
+        if let Some(scripts) = entry.frame.scripts() {
+            apply_template_scripts(state, frame_id, scripts);
+        }
+    }
+
+    if let Some(on_load) =
+        crate::lua_api::rilua_script_helpers::get_script(state, frame_id, "OnLoad")
+    {
+        call_handler_with_frame(state, on_load, frame_val)?;
+    }
+
+    Ok(())
+}
+
+fn apply_template_mixins(state: &mut LuaState, frame_id: u64, mixins: Option<&str>) {
+    let Some(mixins) = mixins else {
+        return;
+    };
+
+    for mixin_name in mixins
+        .split(',')
+        .map(str::trim)
+        .filter(|name| !name.is_empty())
+    {
+        let mixin_val = resolve_global_path(state, mixin_name);
+        copy_table_into_frame(state, frame_id, mixin_val);
+    }
+}
+
+fn apply_template_key_values<'a>(
+    state: &mut LuaState,
+    frame_id: u64,
+    key_values: impl Iterator<Item = &'a crate::xml::KeyValuesXml>,
+) {
+    let frame = frame_ref(state, frame_id).ok();
+    let Some(Val::Table(frame_ref)) = frame else {
+        return;
+    };
+
+    for key_block in key_values {
+        for entry in &key_block.values {
+            let value = template_key_value(state, &entry.value, entry.value_type.as_deref());
+            let key = create_string(state, &entry.key);
+            if let Some(table) = state.gc.tables.get_mut(frame_ref) {
+                let _ = table.raw_set(key, value, &state.gc.string_arena);
+            }
+        }
+    }
+}
+
+fn apply_template_scripts(state: &mut LuaState, frame_id: u64, scripts: &crate::xml::ScriptsXml) {
+    for (handler_name, script) in template_script_entries(scripts) {
+        apply_template_script(state, frame_id, handler_name, script);
+    }
+}
+
+fn template_script_entries(
+    scripts: &crate::xml::ScriptsXml,
+) -> [(&'static str, Option<&crate::xml::ScriptBodyXml>); 36] {
+    [
+        ("OnLoad", scripts.on_load.last()),
+        ("OnEvent", scripts.on_event.last()),
+        ("OnUpdate", scripts.on_update.last()),
+        ("OnClick", scripts.on_click.last()),
+        ("OnShow", scripts.on_show.last()),
+        ("OnHide", scripts.on_hide.last()),
+        ("OnEnter", scripts.on_enter.last()),
+        ("OnLeave", scripts.on_leave.last()),
+        ("OnMouseDown", scripts.on_mouse_down.last()),
+        ("OnMouseUp", scripts.on_mouse_up.last()),
+        ("OnMouseWheel", scripts.on_mouse_wheel.last()),
+        ("OnDragStart", scripts.on_drag_start.last()),
+        ("OnDragStop", scripts.on_drag_stop.last()),
+        ("OnReceiveDrag", scripts.on_receive_drag.last()),
+        ("OnEnterPressed", scripts.on_enter_pressed.last()),
+        ("OnEscapePressed", scripts.on_escape_pressed.last()),
+        ("OnTabPressed", scripts.on_tab_pressed.last()),
+        ("OnSpacePressed", scripts.on_space_pressed.last()),
+        ("OnTextChanged", scripts.on_text_changed.last()),
+        ("OnTextSet", scripts.on_text_set.last()),
+        ("OnChar", scripts.on_char.last()),
+        ("OnEditFocusGained", scripts.on_edit_focus_gained.last()),
+        ("OnEditFocusLost", scripts.on_edit_focus_lost.last()),
+        (
+            "OnInputLanguageChanged",
+            scripts.on_input_language_changed.last(),
+        ),
+        ("OnKeyDown", scripts.on_key_down.last()),
+        ("OnKeyUp", scripts.on_key_up.last()),
+        ("OnValueChanged", scripts.on_value_changed.last()),
+        ("OnEnable", scripts.on_enable.last()),
+        ("OnDisable", scripts.on_disable.last()),
+        ("OnSizeChanged", scripts.on_size_changed.last()),
+        ("OnAttributeChanged", scripts.on_attribute_changed.last()),
+        ("OnHyperlinkClick", scripts.on_hyperlink_click.last()),
+        ("OnHyperlinkEnter", scripts.on_hyperlink_enter.last()),
+        ("OnHyperlinkLeave", scripts.on_hyperlink_leave.last()),
+        ("PreClick", scripts.pre_click.last()),
+        ("PostClick", scripts.post_click.last()),
+    ]
+}
+
+fn apply_template_script(
+    state: &mut LuaState,
+    frame_id: u64,
+    handler_name: &str,
+    script: Option<&crate::xml::ScriptBodyXml>,
+) {
+    let Some(script) = script else {
+        return;
+    };
+    let Some(handler) = script_handler_val(state, frame_id, script) else {
+        return;
+    };
+    set_rilua_script(state, frame_id, handler_name, handler);
+}
+
+fn script_handler_val(
+    state: &mut LuaState,
+    frame_id: u64,
+    script: &crate::xml::ScriptBodyXml,
+) -> Option<Val> {
+    if let Some(function_name) = script.function.as_deref() {
+        let function = resolve_global_path(state, function_name);
+        return matches!(function, Val::Function(_)).then_some(function);
+    }
+
+    if let Some(method_name) = script.method.as_deref() {
+        let frame = frame_ref(state, frame_id).ok()?;
+        let method = table_get_str(state, frame, method_name);
+        return matches!(method, Val::Function(_)).then_some(method);
+    }
+
+    None
+}
+
+fn template_key_value(state: &mut LuaState, value: &str, value_type: Option<&str>) -> Val {
+    match value_type {
+        Some("number") => value.parse::<f64>().map(Val::Num).unwrap_or(Val::Nil),
+        Some("boolean") => Val::Bool(value.eq_ignore_ascii_case("true")),
+        Some("global") => resolve_global_path(state, value),
+        _ => create_string(state, value),
+    }
+}
+
+fn resolve_global_path(state: &mut LuaState, path: &str) -> Val {
+    let mut current = Val::Table(state.global);
+    for segment in path
+        .split('.')
+        .map(str::trim)
+        .filter(|segment| !segment.is_empty())
+    {
+        let Val::Table(table_ref) = current else {
+            return Val::Nil;
+        };
+        let key = state.gc.intern_string(segment.as_bytes());
+        current = state
+            .gc
+            .tables
+            .get(table_ref)
+            .map(|table| table.get_str(key, &state.gc.string_arena))
+            .unwrap_or(Val::Nil);
+    }
+    current
+}
+
+fn copy_table_into_frame(state: &mut LuaState, frame_id: u64, source: Val) {
+    let Val::Table(source_ref) = source else {
+        return;
+    };
+    let frame = frame_ref(state, frame_id).ok();
+    let Some(Val::Table(frame_ref)) = frame else {
+        return;
+    };
+
+    let array_values = state
+        .gc
+        .tables
+        .get(source_ref)
+        .map(|table| table.array_slice().to_vec())
+        .unwrap_or_default();
+    let hash_entries = state
+        .gc
+        .tables
+        .get(source_ref)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default();
+
+    if let Some(fields_table) = state.gc.tables.get_mut(frame_ref) {
+        for (index, value) in array_values.into_iter().enumerate() {
+            let _ =
+                fields_table.raw_set(Val::Num((index + 1) as f64), value, &state.gc.string_arena);
+        }
+        for (key, value) in hash_entries {
+            let _ = fields_table.raw_set(key, value, &state.gc.string_arena);
+        }
+    }
+}
+
+fn call_handler_with_frame(state: &mut LuaState, handler: Val, frame: Val) -> LuaResult<()> {
+    let Val::Function(_) = handler else {
+        return Ok(());
+    };
+
+    let call_base = state.top;
+    state.ensure_stack(call_base + 3);
+    state.stack_set(call_base, handler);
+    state.stack_set(call_base + 1, frame);
+    state.top = call_base + 2;
+    let result = state.call_function(call_base, 0);
+    state.top = call_base;
+    result
 }
 
 /// Set a named field (arg 2) on the frame (arg 1)'s fields table.

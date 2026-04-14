@@ -6,6 +6,10 @@
 use crate::lua_api::rilua_methods::{
     borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
 };
+use crate::lua_api::rilua_script_helpers::{
+    get_script as get_rilua_script, remove_script as remove_rilua_script,
+    set_script as set_rilua_script,
+};
 use crate::lua_bridge::{stack_val, table_set_rust_fn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
@@ -361,6 +365,39 @@ fn get_motion_scripts_while_disabled(state: &mut LuaState) -> LuaResult<u32> {
         .unwrap_or(false);
     drop(sim);
     state.stack.push(Val::Bool(val));
+    Ok(1)
+}
+
+fn set_script(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let handler_name = val_to_string(state, stack_val(state, 2))
+        .ok_or_else(|| runtime_error("SetScript: handler name required"))?;
+    let handler = stack_val(state, 3);
+
+    if matches!(handler, Val::Nil) {
+        remove_rilua_script(state, frame_id, &handler_name);
+    } else {
+        set_rilua_script(state, frame_id, &handler_name, handler);
+    }
+
+    Ok(0)
+}
+
+fn get_script(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let handler_name = val_to_string(state, stack_val(state, 2))
+        .ok_or_else(|| runtime_error("GetScript: handler name required"))?;
+    let handler = get_rilua_script(state, frame_id, &handler_name).unwrap_or(Val::Nil);
+    state.push(handler);
+    Ok(1)
+}
+
+fn has_script(state: &mut LuaState) -> LuaResult<u32> {
+    let frame_id = frame_id_from_stack(state, 1)?;
+    let handler_name = val_to_string(state, stack_val(state, 2))
+        .ok_or_else(|| runtime_error("HasScript: handler name required"))?;
+    let has_handler = get_rilua_script(state, frame_id, &handler_name).is_some();
+    state.push(Val::Bool(has_handler));
     Ok(1)
 }
 
@@ -953,5 +990,8 @@ pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> 
         "GetPropagateKeyboardInput",
         get_propagate_keyboard_input,
     )?;
+    table_set_rust_fn(state, table, "SetScript", set_script)?;
+    table_set_rust_fn(state, table, "GetScript", get_script)?;
+    table_set_rust_fn(state, table, "HasScript", has_script)?;
     Ok(())
 }
