@@ -12,6 +12,7 @@
 - `ActionBarButtonUpdateFrame` — calls `SetChecked()` on all buttons each tick; idle after first few ticks once buttons unregister
 - `MainMenuMicroButton` — calls `SetNormalAtlas` etc. with the same values every second
 - `QueueStatusButton` — calls `Show()` on an already-shown texture every tick
+- `LeaveInstanceGroupButton` — only while the compact raid manager subtree is actually shown; as of 2026-04-14, `A_Admin.SetPartySize(0)` fires `GROUP_ROSTER_UPDATE`, so solo transitions now hide `CompactRaidFrameManager` and drop this button out of the visible `OnUpdate` set outside party content
 
 **Legitimate (should trigger redraws):**
 - `PlayerCastingBarFrame` — `SetValue()` and `SetText()` genuinely change every frame during a cast

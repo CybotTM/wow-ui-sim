@@ -2,6 +2,13 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | on-update dirty solo compact raid manager follow-up
+
+Updated `investigations/on-update-dirty.md` with the compact-raid follow-up:
+`A_Admin.SetPartySize(0)` now fires `GROUP_ROSTER_UPDATE`, so solo transitions
+hide `CompactRaidFrameManager` and remove `LeaveInstanceGroupButton` from the
+visible `OnUpdate` handler set. Refreshed the `index.md` summary for the page.
+
 ## [2026-04-14] investigations | startup CreateFrame profiling ActionButtonTemplate regions
 
 Updated `investigations/startup-createframe-profile.md` with the direct

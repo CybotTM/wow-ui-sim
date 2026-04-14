@@ -6,7 +6,7 @@
 
 use crate::lua_api::game_data::{AuraInfo, PartyMember, TargetInfo};
 use crate::lua_api::state::SimState;
-use mlua::{Lua, Result};
+use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
@@ -682,8 +682,17 @@ where
 }
 
 fn add_party_size_setter(lua: &Lua, t: &mlua::Table, state: Rc<RefCell<SimState>>) -> Result<()> {
-    set_fn(lua, t, "SetPartySize", move |_, n: i32| {
-        resize_party_members(&mut state.borrow_mut(), n.max(0) as usize);
+    set_fn(lua, t, "SetPartySize", move |lua, n: i32| {
+        let size = n.max(0) as usize;
+        let changed = {
+            let mut state = state.borrow_mut();
+            let changed = state.party_members.len() != size;
+            resize_party_members(&mut state, size);
+            changed
+        };
+        if changed {
+            fire_wow_event(lua, "GROUP_ROSTER_UPDATE")?;
+        }
         Ok(())
     })
 }
@@ -700,6 +709,13 @@ fn resize_party_members(state: &mut SimState, size: usize) {
         state.party_members.push(default_party_member());
     }
     state.party_members.truncate(size);
+}
+
+fn fire_wow_event(lua: &Lua, event_name: &str) -> Result<()> {
+    let fire: mlua::Function = lua.globals().get("FireEvent")?;
+    fire.call(mlua::MultiValue::from_vec(vec![Value::String(
+        lua.create_string(event_name)?,
+    )]))
 }
 
 fn party_member_mut(state: &mut SimState, idx: i32) -> Option<&mut PartyMember> {
