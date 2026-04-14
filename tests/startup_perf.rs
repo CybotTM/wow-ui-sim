@@ -34,114 +34,122 @@ const ACTION_BAR_BUTTON_EXPECTED_FRAMES: usize = 805;
 #[test]
 fn full_game_startup_stays_under_budget() {
     test_timeout! {
-        let loaded_ui = load_timed_game_ui();
-        let env = &loaded_ui.env;
-        let startup_elapsed = loaded_ui.startup_elapsed;
+        common::with_perf_lock(|| {
+            let loaded_ui = load_timed_game_ui();
+            let env = &loaded_ui.env;
+            let startup_elapsed = loaded_ui.startup_elapsed;
 
-        let startup_ready: bool = env
-            .eval("return UIParent ~= nil and PlayerFrame ~= nil and IsLoggedIn()")
-            .unwrap();
-        assert!(
-            startup_ready,
-            "timed startup should produce a settled logged-in game UI"
-        );
+            let startup_ready: bool = env
+                .eval("return UIParent ~= nil and PlayerFrame ~= nil and IsLoggedIn()")
+                .unwrap();
+            assert!(
+                startup_ready,
+                "timed startup should produce a settled logged-in game UI"
+            );
 
-        eprintln!(
-            "full game startup baseline: {:.2?} (budget {:.2?})",
-            startup_elapsed,
-            FULL_GAME_STARTUP_BUDGET
-        );
+            eprintln!(
+                "full game startup baseline: {:.2?} (budget {:.2?})",
+                startup_elapsed,
+                FULL_GAME_STARTUP_BUDGET
+            );
 
-        assert!(
-            startup_elapsed < FULL_GAME_STARTUP_BUDGET,
-            "full game startup took {:.2?}, exceeding budget {:.2?}",
-            startup_elapsed,
-            FULL_GAME_STARTUP_BUDGET
-        );
+            assert!(
+                startup_elapsed < FULL_GAME_STARTUP_BUDGET,
+                "full game startup took {:.2?}, exceeding budget {:.2?}",
+                startup_elapsed,
+                FULL_GAME_STARTUP_BUDGET
+            );
+        });
     }
 }
 
 #[test]
 fn action_button_spellfx_template_stays_under_budget() {
     test_timeout! {
-        let loaded = load_timed_game_ui();
-        let result = measure_template_create(&loaded.env, &TemplateBench {
-            template: "ActionButtonSpellFXTemplate",
-            widget_type: "CheckButton",
-            count: ACTION_BUTTON_SPELLFX_COUNT,
+        common::with_perf_lock(|| {
+            let loaded = load_timed_game_ui();
+            let result = measure_template_create(&loaded.env, &TemplateBench {
+                template: "ActionButtonSpellFXTemplate",
+                widget_type: "CheckButton",
+                count: ACTION_BUTTON_SPELLFX_COUNT,
+            });
+
+            eprintln!(
+                "{} x{}: {:.2?}, {} frames (budget {:.2?})",
+                result.template, result.count, result.elapsed,
+                result.frames_created, ACTION_BUTTON_SPELLFX_BUDGET,
+            );
+
+            assert_eq!(
+                result.frames_created, ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
+                "{} x{} created {} frames, expected {}",
+                result.template, result.count, result.frames_created,
+                ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
+            );
+            assert!(
+                result.elapsed < ACTION_BUTTON_SPELLFX_BUDGET,
+                "{} x{} took {:.2?}, exceeding budget {:.2?}",
+                result.template, result.count, result.elapsed, ACTION_BUTTON_SPELLFX_BUDGET,
+            );
         });
-
-        eprintln!(
-            "{} x{}: {:.2?}, {} frames (budget {:.2?})",
-            result.template, result.count, result.elapsed,
-            result.frames_created, ACTION_BUTTON_SPELLFX_BUDGET,
-        );
-
-        assert_eq!(
-            result.frames_created, ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
-            "{} x{} created {} frames, expected {}",
-            result.template, result.count, result.frames_created,
-            ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
-        );
-        assert!(
-            result.elapsed < ACTION_BUTTON_SPELLFX_BUDGET,
-            "{} x{} took {:.2?}, exceeding budget {:.2?}",
-            result.template, result.count, result.elapsed, ACTION_BUTTON_SPELLFX_BUDGET,
-        );
     }
 }
 
 #[test]
 fn minimal_scrollbar_template_stays_under_budget() {
     test_timeout! {
-        let loaded = load_timed_game_ui();
-        let result = measure_template_create(&loaded.env, &TemplateBench {
-            template: "MinimalScrollBar",
-            widget_type: "EventFrame",
-            count: MINIMAL_SCROLLBAR_COUNT,
+        common::with_perf_lock(|| {
+            let loaded = load_timed_game_ui();
+            let result = measure_template_create(&loaded.env, &TemplateBench {
+                template: "MinimalScrollBar",
+                widget_type: "EventFrame",
+                count: MINIMAL_SCROLLBAR_COUNT,
+            });
+
+            eprintln!(
+                "{} x{}: {:.2?}, {} frames (budget {:.2?})",
+                result.template, result.count, result.elapsed,
+                result.frames_created, MINIMAL_SCROLLBAR_BUDGET,
+            );
+
+            assert_eq!(
+                result.frames_created, MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
+                "{} x{} created {} frames, expected {}",
+                result.template, result.count, result.frames_created,
+                MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
+            );
+            assert!(
+                result.elapsed < MINIMAL_SCROLLBAR_BUDGET,
+                "{} x{} took {:.2?}, exceeding budget {:.2?}",
+                result.template, result.count, result.elapsed, MINIMAL_SCROLLBAR_BUDGET,
+            );
         });
-
-        eprintln!(
-            "{} x{}: {:.2?}, {} frames (budget {:.2?})",
-            result.template, result.count, result.elapsed,
-            result.frames_created, MINIMAL_SCROLLBAR_BUDGET,
-        );
-
-        assert_eq!(
-            result.frames_created, MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
-            "{} x{} created {} frames, expected {}",
-            result.template, result.count, result.frames_created,
-            MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
-        );
-        assert!(
-            result.elapsed < MINIMAL_SCROLLBAR_BUDGET,
-            "{} x{} took {:.2?}, exceeding budget {:.2?}",
-            result.template, result.count, result.elapsed, MINIMAL_SCROLLBAR_BUDGET,
-        );
     }
 }
 
 #[test]
 fn action_bar_button_family_stays_under_budget() {
     test_timeout! {
-        let loaded = load_timed_game_ui();
-        let result = measure_action_bar_button_family(&loaded.env, ACTION_BAR_BUTTON_COUNT);
+        common::with_perf_lock(|| {
+            let loaded = load_timed_game_ui();
+            let result = measure_action_bar_button_family(&loaded.env, ACTION_BAR_BUTTON_COUNT);
 
-        eprintln!(
-            "action-bar button family x{}: {:.2?}, {} frames (budget {:.2?})",
-            result.count, result.elapsed,
-            result.frames_created, ACTION_BAR_BUTTON_BUDGET,
-        );
+            eprintln!(
+                "action-bar button family x{}: {:.2?}, {} frames (budget {:.2?})",
+                result.count, result.elapsed,
+                result.frames_created, ACTION_BAR_BUTTON_BUDGET,
+            );
 
-        assert_eq!(
-            result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
-            "action-bar button family x{} created {} frames, expected {}",
-            result.count, result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
-        );
-        assert!(
-            result.elapsed < ACTION_BAR_BUTTON_BUDGET,
-            "action-bar button family x{} took {:.2?}, exceeding budget {:.2?}",
-            result.count, result.elapsed, ACTION_BAR_BUTTON_BUDGET,
-        );
+            assert_eq!(
+                result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
+                "action-bar button family x{} created {} frames, expected {}",
+                result.count, result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
+            );
+            assert!(
+                result.elapsed < ACTION_BAR_BUTTON_BUDGET,
+                "action-bar button family x{} took {:.2?}, exceeding budget {:.2?}",
+                result.count, result.elapsed, ACTION_BAR_BUTTON_BUDGET,
+            );
+        });
     }
 }
