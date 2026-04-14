@@ -87,6 +87,26 @@ if not time then time = os.time end
 if not date then date = os.date end
 if not difftime then difftime = os.difftime end
 
+-- Value access helpers (permissive stubs)
+if not issecretvalue then
+    issecretvalue = function() return false end
+end
+if not canaccessvalue then
+    canaccessvalue = function() return true end
+end
+if not canaccessallvalues then
+    canaccessallvalues = function() return true end
+end
+if not canaccesstable then
+    canaccesstable = function() return true end
+end
+if not scrub then
+    scrub = function(...) return ... end
+end
+if not scrubsecretvalues then
+    scrubsecretvalues = function(...) return ... end
+end
+
 -- Error handler (WoW expects these to exist)
 if not geterrorhandler then
     local _errorHandler

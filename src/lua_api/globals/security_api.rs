@@ -1,139 +1,24 @@
 //! Security-related WoW API functions.
 //!
-//! Contains securecallmethod (not in Elune), fallback taint helpers,
-//! SecureHandler stubs, state/attribute driver stubs, and SecureCmdOptionParse.
-//!
-//! Functions provided by Elune's baselib_shared (issecure, issecurevariable,
-//! securecall, securecallfunction, forceinsecure, hooksecurefunc,
-//! secureexecuterange) are NOT registered here — they come from the C runtime.
-//! When Elune also provides secret/access helpers, we preserve those definitions
-//! instead of overriding them with simulator fallbacks.
+//! Contains securecallmethod, SecureHandler stubs, state/attribute driver stubs,
+//! and SecureCmdOptionParse. Taint functions (issecure, issecurevariable, etc.)
+//! are provided by data/lua/taint_stubs.lua loaded at startup.
 
 use mlua::{Function, Lua, MultiValue, Result, Value};
 
 /// Register all security-related API functions.
 pub fn register_security_functions(lua: &Lua) -> Result<()> {
-    register_taint_functions(lua)?;
+    register_securecallmethod(lua)?;
     register_secure_handler_stubs(lua)?;
     register_state_driver_stubs(lua)?;
     register_secure_cmd_option_parse(lua)?;
     Ok(())
 }
 
-/// Register taint helpers.
-///
-/// Elune provides real taint-aware implementations for these helpers in normal
-/// simulator startup. We only install permissive fallbacks when they are absent
-/// so stripped-down environments still boot.
-fn register_taint_functions(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-    register_securecallmethod(lua, &globals)?;
-    register_value_access_fallbacks(lua, &globals)?;
-    register_scrub_fallbacks(lua, &globals)?;
+fn register_securecallmethod(lua: &Lua) -> Result<()> {
+    lua.globals()
+        .set("securecallmethod", make_securecallmethod(lua)?)?;
     Ok(())
-}
-
-fn register_securecallmethod(lua: &Lua, globals: &mlua::Table) -> Result<()> {
-    globals.set("securecallmethod", make_securecallmethod(lua)?)?;
-    Ok(())
-}
-
-fn register_value_access_fallbacks(lua: &Lua, globals: &mlua::Table) -> Result<()> {
-    set_if_missing(globals, "issecretvalue", make_issecretvalue_fallback(lua)?)?;
-    set_if_missing(
-        globals,
-        "canaccessvalue",
-        make_canaccessvalue_fallback(lua)?,
-    )?;
-    set_if_missing(
-        globals,
-        "canaccessallvalues",
-        make_canaccessallvalues_fallback(lua)?,
-    )?;
-    set_if_missing(
-        globals,
-        "canaccesstable",
-        make_canaccesstable_fallback(lua)?,
-    )?;
-    Ok(())
-}
-
-fn register_scrub_fallbacks(lua: &Lua, globals: &mlua::Table) -> Result<()> {
-    set_if_missing(globals, "scrub", make_passthrough_scrub(lua)?)?;
-    set_if_missing(globals, "scrubsecretvalues", make_passthrough_scrub(lua)?)?;
-    Ok(())
-}
-
-fn make_issecretvalue_fallback(lua: &Lua) -> Result<Function> {
-    lua.create_function(|lua, args: MultiValue| {
-        Ok(matches!(args.front(), Some(value) if is_secret_value(lua, value)?))
-    })
-}
-
-fn make_canaccessvalue_fallback(lua: &Lua) -> Result<Function> {
-    lua.create_function(|lua, args: MultiValue| {
-        Ok(matches!(args.front(), Some(value) if !is_secret_value(lua, value)?))
-    })
-}
-
-fn make_canaccessallvalues_fallback(lua: &Lua) -> Result<Function> {
-    lua.create_function(|lua, args: MultiValue| {
-        for value in &args {
-            if is_secret_value(lua, value)? {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    })
-}
-
-fn make_canaccesstable_fallback(lua: &Lua) -> Result<Function> {
-    lua.create_function(|lua, args: MultiValue| match args.front() {
-        Some(Value::Table(table)) => table_is_accessible(lua, table),
-        Some(value) => Ok(!is_secret_value(lua, value)?),
-        None => Ok(false),
-    })
-}
-
-fn make_passthrough_scrub(lua: &Lua) -> Result<Function> {
-    lua.create_function(|_, args: MultiValue| Ok(args))
-}
-
-fn set_if_missing(globals: &mlua::Table, name: &str, value: Function) -> Result<()> {
-    if matches!(globals.get::<Value>(name)?, Value::Nil) {
-        globals.set(name, value)?;
-    }
-    Ok(())
-}
-
-fn is_secret_value(lua: &Lua, value: &Value) -> Result<bool> {
-    match value {
-        Value::Function(function) => is_loadstring_tainted_function(lua, function),
-        _ => Ok(false),
-    }
-}
-
-fn is_loadstring_tainted_function(lua: &Lua, function: &Function) -> Result<bool> {
-    let table = match lua.named_registry_value::<mlua::Table>("__tainted_loadstring_functions") {
-        Ok(table) => table,
-        Err(_) => return Ok(false),
-    };
-    Ok(table.get::<bool>(function.clone()).unwrap_or(false))
-}
-
-fn table_is_accessible(lua: &Lua, table: &mlua::Table) -> Result<bool> {
-    Ok(!is_secret_value(lua, &Value::Table(table.clone()))?
-        && !table_contains_secret_values(lua, table)?)
-}
-
-fn table_contains_secret_values(lua: &Lua, table: &mlua::Table) -> Result<bool> {
-    for pair in table.pairs::<Value, Value>() {
-        let (key, value) = pair?;
-        if is_secret_value(lua, &key)? || is_secret_value(lua, &value)? {
-            return Ok(true);
-        }
-    }
-    Ok(false)
 }
 
 /// Build the securecallmethod closure: calls obj[name](obj, ...) via securecall.
@@ -144,8 +29,22 @@ fn make_securecallmethod(lua: &Lua) -> Result<Function> {
         if matches!(obj, Value::Nil) {
             return Ok(MultiValue::new());
         }
-        let method_name = extract_method_name(iter.next())?;
-        let obj_table = extract_table(&obj)?;
+        let method_name = match iter.next() {
+            Some(Value::String(s)) => s.to_str()?.to_string(),
+            _ => {
+                return Err(mlua::Error::RuntimeError(
+                    "Usage: securecallmethod(table, name, ...)".into(),
+                ))
+            }
+        };
+        let obj_table = match &obj {
+            Value::Table(t) => t.clone(),
+            _ => {
+                return Err(mlua::Error::RuntimeError(
+                    "Usage: securecallmethod(table, name, ...)".into(),
+                ))
+            }
+        };
         let method: Option<Function> = obj_table.get(method_name)?;
         let Some(method) = method else {
             return Ok(MultiValue::new());
@@ -157,73 +56,43 @@ fn make_securecallmethod(lua: &Lua) -> Result<Function> {
     })
 }
 
-fn extract_method_name(arg: Option<Value>) -> Result<String> {
-    match arg {
-        Some(Value::String(s)) => Ok(s.to_str()?.to_string()),
-        _ => Err(mlua::Error::RuntimeError(
-            "Usage: securecallmethod(table, name, ...)".into(),
-        )),
-    }
-}
-
-fn extract_table(val: &Value) -> Result<mlua::Table> {
-    match val {
-        Value::Table(t) => Ok(t.clone()),
-        _ => Err(mlua::Error::RuntimeError(
-            "Usage: securecallmethod(table, name, ...)".into(),
-        )),
-    }
-}
-
-/// SecureHandler execution stubs.
-///
-/// These APIs require Blizzard's restricted execution environment and protected
-/// frame semantics. The simulator does not model that yet, so these remain
-/// inert no-ops instead of pretending to enforce partial security rules.
+/// SecureHandler execution stubs (no-ops).
 fn register_secure_handler_stubs(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "SecureHandlerSetFrameRef",
         lua.create_function(|_, (_frame, _name, _target): (Value, String, Value)| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "SecureHandlerExecute",
-        lua.create_function(|_, (_frame, _body, _args): (Value, String, mlua::MultiValue)| Ok(()))?,
+        lua.create_function(|_, (_frame, _body, _args): (Value, String, MultiValue)| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "SecureHandlerWrapScript",
         lua.create_function(|_, (_frame, _script, _body): (Value, String, String)| Ok(()))?,
     )?;
-
     Ok(())
 }
 
-/// State/attribute driver stubs.
-///
-/// Real drivers depend on SecureStateDriverManager and protected attribute
-/// propagation. We leave them inert for now rather than simulating a misleading
-/// subset of protected-frame behavior.
+/// State/attribute driver stubs (no-ops).
 fn register_state_driver_stubs(lua: &Lua) -> Result<()> {
-    let globals = lua.globals();
-
-    globals.set(
+    let g = lua.globals();
+    g.set(
         "RegisterStateDriver",
         lua.create_function(|_, (_frame, _attr, _driver): (Value, String, String)| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "UnregisterStateDriver",
         lua.create_function(|_, (_frame, _attr): (Value, String)| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "RegisterAttributeDriver",
         lua.create_function(|_, (_frame, _attr, _driver): (Value, String, String)| Ok(()))?,
     )?;
-    globals.set(
+    g.set(
         "UnregisterAttributeDriver",
         lua.create_function(|_, (_frame, _attr): (Value, String)| Ok(()))?,
     )?;
-
     Ok(())
 }
 
