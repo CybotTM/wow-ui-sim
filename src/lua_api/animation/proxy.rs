@@ -6,6 +6,7 @@
 //! `__lud`, plus a per-handle user-value table for dynamic fields.
 
 use super::{AnimGroupHandle, AnimHandle};
+use crate::lua_api::proxy_helpers::{lookup_registered_method, proxy_userdata, wrap_fn_with_userdata};
 use crate::lua_api::SimState;
 use mlua::{Lua, Value};
 use std::cell::RefCell;
@@ -150,7 +151,7 @@ fn create_proxy_index(lua: &Lua) -> mlua::Result<mlua::Function> {
         let registered = lookup_registered_method(&userdata, &key)?;
         if let Value::Function(function) = registered {
             return Ok(Value::Function(wrap_fn_with_userdata(
-                lua, function, userdata,
+                lua, function, userdata, ANIM_BIND_METHOD_KEY,
             )?));
         }
         Ok(registered)
@@ -182,39 +183,6 @@ fn create_proxy_eq(lua: &Lua) -> mlua::Result<mlua::Function> {
 
 fn create_proxy_tostring(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|_, this: mlua::Table| Ok(proxy_display_name(&Value::Table(this))))
-}
-
-fn wrap_fn_with_userdata(
-    lua: &Lua,
-    function: mlua::Function,
-    userdata: mlua::AnyUserData,
-) -> mlua::Result<mlua::Function> {
-    let bind_fn: mlua::Function = lua.named_registry_value(ANIM_BIND_METHOD_KEY)?;
-    bind_fn.call((function, Value::UserData(userdata)))
-}
-
-fn lookup_registered_method(userdata: &mlua::AnyUserData, key: &Value) -> mlua::Result<Value> {
-    let Value::String(name) = key else {
-        return Ok(Value::Nil);
-    };
-    let key_name = name.to_string_lossy().to_string();
-    let index_value: Value = userdata.metatable()?.get("__index")?;
-    match index_value {
-        Value::Function(function) => function.call((userdata.clone(), key_name)),
-        Value::Table(table) => table.raw_get(name.clone()),
-        _ => Ok(Value::Nil),
-    }
-}
-
-fn proxy_userdata(value: &Value) -> Option<mlua::AnyUserData> {
-    match value {
-        Value::UserData(userdata) => Some(userdata.clone()),
-        Value::Table(table) => match table.raw_get::<Value>("__lud") {
-            Ok(Value::UserData(userdata)) => Some(userdata),
-            _ => None,
-        },
-        _ => None,
-    }
 }
 
 fn proxy_fields(value: &Value) -> mlua::Result<Option<mlua::Table>> {

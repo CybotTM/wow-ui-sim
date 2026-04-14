@@ -55,7 +55,8 @@ impl WowLuaEnv {
             .and_then(|k| self.compat_lua.registry_value(k).ok());
         match handle {
             Some(h) => {
-                let proxy = create_fc_proxy(&self.compat_lua, &h).unwrap_or(h);
+                let proxy = create_fc_proxy(&self.compat_lua, &h)
+                    .unwrap_or_else(|_| mlua::Value::UserData(h));
                 callback.call::<()>(proxy)
             }
             None => callback.call::<()>(()),

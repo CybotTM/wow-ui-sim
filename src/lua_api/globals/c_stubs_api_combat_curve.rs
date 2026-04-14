@@ -1,12 +1,13 @@
-//! Curve and color-curve userdata support for combat stubs.
+//! Curve and color-curve table-backed proxy support for combat stubs.
 
-use mlua::{AnyUserData, Lua, MetaMethod, MultiValue, Result, UserData, UserDataMethods, Value};
+use crate::lua_api::proxy_helpers::{proxy_userdata, wrap_fn_with_userdata};
+use mlua::{AnyUserData, Lua, MultiValue, Result, UserData, Value};
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_CURVE_ID: AtomicU64 = AtomicU64::new(1);
 
-/// Metamethod names that should return nil when accessed via __index on curve objects.
+/// Metamethod names that are read-only (cannot be assigned by user code).
 const METAMETHOD_NAMES: &[&str] = &["__eq", "__index", "__metatable", "__newindex", "__tostring"];
 
 /// Registry key for the shared LuaCurveObject methods table.
@@ -14,6 +15,15 @@ const CURVE_METHODS_KEY: &str = "__lua_curve_object_methods";
 
 /// Registry key for the shared LuaColorCurveObject methods table.
 const COLOR_CURVE_METHODS_KEY: &str = "__lua_color_curve_object_methods";
+
+/// Registry key for the curve proxy metatable.
+const CURVE_PROXY_MT_KEY: &str = "__curve_proxy_mt";
+
+/// Registry key for the color curve proxy metatable.
+const COLOR_CURVE_PROXY_MT_KEY: &str = "__color_curve_proxy_mt";
+
+/// Registry key for the shared bind-method helper (shared by both proxy types).
+const BIND_METHOD_KEY: &str = "__curve_bind_method_helper";
 
 /// A curve point for piecewise linear interpolation.
 struct CurvePoint {
@@ -38,6 +48,8 @@ impl LuaCurveObject {
     }
 }
 
+impl UserData for LuaCurveObject {}
+
 /// LuaColorCurveObject: WoW color curve object (4-component RGBA values per point).
 struct LuaColorCurveObject {
     id: u64,
@@ -54,6 +66,8 @@ impl LuaColorCurveObject {
         }
     }
 }
+
+impl UserData for LuaColorCurveObject {}
 
 /// Piecewise linear interpolation over sorted points.
 fn interpolate(points: &[CurvePoint], x: f64) -> f64 {
@@ -78,88 +92,171 @@ fn interpolate(points: &[CurvePoint], x: f64) -> f64 {
     }
 }
 
-fn curve_index(
-    lua: &Lua,
-    ud: AnyUserData,
-    key: String,
-    methods_key: &'static str,
-) -> Result<Value> {
-    if METAMETHOD_NAMES.contains(&key.as_str()) {
-        return Ok(Value::Nil);
+// ---------------------------------------------------------------------------
+// Proxy infrastructure
+// ---------------------------------------------------------------------------
+
+fn register_bind_method_helper(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Function>(BIND_METHOD_KEY)
+        .is_ok()
+    {
+        return Ok(());
     }
-    if let Ok(fields) = ud.user_value::<mlua::Table>() {
-        let value: Value = fields.raw_get(key.as_str())?;
-        if value != Value::Nil {
-            return Ok(value);
+    lua.set_named_registry_value(
+        BIND_METHOD_KEY,
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )
+}
+
+fn ensure_proxy_support(lua: &Lua) -> Result<()> {
+    register_bind_method_helper(lua)?;
+    install_curve_proxy_metatable(lua)?;
+    install_color_curve_proxy_metatable(lua)
+}
+
+fn install_curve_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(CURVE_PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua, CURVE_METHODS_KEY, "LuaCurveObject")?;
+    lua.set_named_registry_value(CURVE_PROXY_MT_KEY, mt)
+}
+
+fn install_color_curve_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(COLOR_CURVE_PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua, COLOR_CURVE_METHODS_KEY, "LuaColorCurveObject")?;
+    lua.set_named_registry_value(COLOR_CURVE_PROXY_MT_KEY, mt)
+}
+
+fn create_proxy_metatable(
+    lua: &Lua,
+    methods_key: &'static str,
+    type_name: &'static str,
+) -> Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua, methods_key)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua, methods_key)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua, type_name)?)?;
+    Ok(mt)
+}
+
+fn create_proxy_index(lua: &Lua, methods_key: &'static str) -> Result<mlua::Function> {
+    lua.create_function(move |lua, (this, key): (mlua::Table, Value)| {
+        // Metamethod names always return nil.
+        if let Value::String(ref s) = key {
+            if s.to_string_lossy().starts_with("__") {
+                return Ok(Value::Nil);
+            }
         }
-    }
-    let methods: mlua::Table = lua.named_registry_value(methods_key)?;
-    methods.raw_get(key.as_str())
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(Value::Nil);
+        };
+
+        // Check per-instance fields first.
+        if let Ok(fields) = userdata.user_value::<mlua::Table>() {
+            let field_value: Value = fields.raw_get(key.clone())?;
+            if !field_value.is_nil() {
+                return Ok(field_value);
+            }
+        }
+
+        // Fall back to the shared methods table.
+        if let Value::String(ref name) = key {
+            let methods: mlua::Table = lua.named_registry_value(methods_key)?;
+            let method: Value = methods.raw_get(name.clone())?;
+            if let Value::Function(function) = method {
+                return Ok(Value::Function(wrap_fn_with_userdata(
+                    lua, function, userdata, BIND_METHOD_KEY,
+                )?));
+            }
+        }
+
+        Ok(Value::Nil)
+    })
 }
 
-fn curve_newindex(
-    lua: &Lua,
-    ud: AnyUserData,
-    key: String,
-    value: Value,
-    methods_key: &'static str,
-) -> Result<()> {
-    if METAMETHOD_NAMES.contains(&key.as_str()) {
-        return Err(mlua::Error::runtime(format!(
-            "Attempted to assign to read-only key {}",
-            key
-        )));
-    }
-    let methods: mlua::Table = lua.named_registry_value(methods_key)?;
-    let existing: Value = methods.raw_get(key.as_str())?;
-    if existing != Value::Nil {
-        return Err(mlua::Error::runtime(format!(
-            "Attempted to assign to read-only key {}",
-            key
-        )));
-    }
-    let fields = ud.user_value::<mlua::Table>()?;
-    fields.raw_set(key, value)?;
-    Ok(())
+fn create_proxy_newindex(lua: &Lua, methods_key: &'static str) -> Result<mlua::Function> {
+    lua.create_function(move |lua, (this, key, value): (mlua::Table, Value, Value)| {
+        if let Value::String(ref s) = key {
+            let key_str = s.to_string_lossy();
+            // Reject metamethod names.
+            if METAMETHOD_NAMES.contains(&key_str.as_ref()) {
+                return Err(mlua::Error::runtime(format!(
+                    "Attempted to assign to read-only key {}",
+                    key_str
+                )));
+            }
+            // Reject method names.
+            let methods: mlua::Table = lua.named_registry_value(methods_key)?;
+            let existing: Value = methods.raw_get(key.clone())?;
+            if existing != Value::Nil {
+                return Err(mlua::Error::runtime(format!(
+                    "Attempted to assign to read-only key {}",
+                    key_str
+                )));
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(());
+        };
+        let fields: mlua::Table = userdata.user_value()?;
+        fields.raw_set(key, value)?;
+        Ok(())
+    })
 }
 
-impl UserData for LuaCurveObject {
-    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::Index,
-            |lua, (ud, key): (AnyUserData, String)| curve_index(lua, ud, key, CURVE_METHODS_KEY),
-        );
-        methods.add_meta_function(
-            MetaMethod::NewIndex,
-            |lua, (ud, key, value): (AnyUserData, String, Value)| {
-                curve_newindex(lua, ud, key, value, CURVE_METHODS_KEY)
-            },
-        );
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!("LuaCurveObject: 0x{:016x}", this.id))
-        });
-    }
+fn create_proxy_tostring(lua: &Lua, type_name: &'static str) -> Result<mlua::Function> {
+    lua.create_function(move |_, this: mlua::Table| {
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(format!("{}: 0x0000000000000000", type_name));
+        };
+        // Try curve first, then color curve.
+        let id = userdata
+            .borrow::<LuaCurveObject>()
+            .map(|c| c.id)
+            .or_else(|_| userdata.borrow::<LuaColorCurveObject>().map(|c| c.id))
+            .unwrap_or(0);
+        Ok(format!("{}: 0x{:016x}", type_name, id))
+    })
 }
 
-impl UserData for LuaColorCurveObject {
-    fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::Index,
-            |lua, (ud, key): (AnyUserData, String)| {
-                curve_index(lua, ud, key, COLOR_CURVE_METHODS_KEY)
-            },
-        );
-        methods.add_meta_function(
-            MetaMethod::NewIndex,
-            |lua, (ud, key, value): (AnyUserData, String, Value)| {
-                curve_newindex(lua, ud, key, value, COLOR_CURVE_METHODS_KEY)
-            },
-        );
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!("LuaColorCurveObject: 0x{:016x}", this.id))
-        });
-    }
+fn create_curve_proxy(lua: &Lua, curve: LuaCurveObject) -> Result<Value> {
+    let userdata = lua.create_userdata(curve)?;
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(CURVE_PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
 }
+
+fn create_color_curve_proxy(lua: &Lua, curve: LuaColorCurveObject) -> Result<Value> {
+    let userdata = lua.create_userdata(curve)?;
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(COLOR_CURVE_PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
+}
+
+// ---------------------------------------------------------------------------
+// Curve method table builders
+// ---------------------------------------------------------------------------
 
 fn add_curve_add_clear(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
@@ -249,9 +346,7 @@ fn add_curve_copy_eval(lua: &Lua, table: &mlua::Table) -> Result<()> {
                 ),
             };
             drop(curve);
-            let new_ud = lua.create_userdata(new_curve)?;
-            new_ud.set_user_value(lua.create_table()?)?;
-            Ok(new_ud)
+            create_curve_proxy(lua, new_curve)
         })?,
     )?;
     table.raw_set(
@@ -324,6 +419,10 @@ fn build_curve_methods(lua: &Lua) -> Result<mlua::Table> {
     Ok(table)
 }
 
+// ---------------------------------------------------------------------------
+// Color curve method table builders
+// ---------------------------------------------------------------------------
+
 fn add_color_curve_basic(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "AddPoint",
@@ -365,9 +464,7 @@ fn add_color_curve_basic(lua: &Lua, table: &mlua::Table) -> Result<()> {
                 ),
             };
             drop(curve);
-            let new_ud = lua.create_userdata(new_curve)?;
-            new_ud.set_user_value(lua.create_table()?)?;
-            Ok(new_ud)
+            create_color_curve_proxy(lua, new_curve)
         })?,
     )?;
     Ok(())
@@ -505,6 +602,10 @@ fn build_color_curve_methods(lua: &Lua) -> Result<mlua::Table> {
     Ok(table)
 }
 
+// ---------------------------------------------------------------------------
+// Registration
+// ---------------------------------------------------------------------------
+
 /// C_CurveUtil - creates LuaCurveObject and LuaColorCurveObject for interpolation.
 pub fn register_curve_support(lua: &Lua) -> Result<()> {
     let curve_methods = build_curve_methods(lua)?;
@@ -513,21 +614,21 @@ pub fn register_curve_support(lua: &Lua) -> Result<()> {
     let color_curve_methods = build_color_curve_methods(lua)?;
     lua.set_named_registry_value(COLOR_CURVE_METHODS_KEY, color_curve_methods)?;
 
+    ensure_proxy_support(lua)?;
+
     let table = lua.create_table()?;
     table.set(
         "CreateCurve",
         lua.create_function(|lua, ()| {
-            let ud = lua.create_userdata(LuaCurveObject::new())?;
-            ud.set_user_value(lua.create_table()?)?;
-            Ok(ud)
+            ensure_proxy_support(lua)?;
+            create_curve_proxy(lua, LuaCurveObject::new())
         })?,
     )?;
     table.set(
         "CreateColorCurve",
         lua.create_function(|lua, ()| {
-            let ud = lua.create_userdata(LuaColorCurveObject::new())?;
-            ud.set_user_value(lua.create_table()?)?;
-            Ok(ud)
+            ensure_proxy_support(lua)?;
+            create_color_curve_proxy(lua, LuaColorCurveObject::new())
         })?,
     )?;
     lua.globals().set("C_CurveUtil", table)?;

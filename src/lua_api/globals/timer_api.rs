@@ -3,7 +3,7 @@
 //! Provides timer creation and management functions used by addons.
 
 use super::super::{PendingTimer, SimState, next_timer_id};
-use super::function_container::FunctionContainer;
+use super::function_container::{FunctionContainer, create_fc_table_proxy};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -26,8 +26,8 @@ pub fn register_timer_api(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<()>
 
 /// Extract the Lua function from a callback value.
 ///
-/// Accepts either a plain Lua function or a FunctionContainer UserData.
-/// Returns an error if the value is a C function or invalid type.
+/// Accepts either a plain Lua function, a FunctionContainer UserData, or a proxy table
+/// wrapping a FunctionContainer. Returns an error if the value is a C function or invalid type.
 fn extract_callback_function(lua: &Lua, callback: &Value) -> Result<mlua::Function> {
     match callback {
         Value::Function(f) => {
@@ -43,6 +43,18 @@ fn extract_callback_function(lua: &Lua, callback: &Value) -> Result<mlua::Functi
             // Accept FunctionContainer - extract its inner callback
             let fc = ud.borrow::<FunctionContainer>()?;
             lua.registry_value::<mlua::Function>(&fc.callback)
+        }
+        Value::Table(t) => {
+            // Accept proxy table wrapping a FunctionContainer
+            let lud: Value = t.raw_get("__lud")?;
+            if let Value::UserData(ud) = lud {
+                let fc = ud.borrow::<FunctionContainer>()?;
+                lua.registry_value::<mlua::Function>(&fc.callback)
+            } else {
+                Err(mlua::Error::RuntimeError(
+                    "bad argument #2 (function expected)".to_string(),
+                ))
+            }
         }
         _ => Err(mlua::Error::RuntimeError(
             "bad argument #2 (function expected)".to_string(),
@@ -119,7 +131,10 @@ fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
                 id,
             )?;
             let handle_ud = lua.create_userdata(handle)?;
+            // Store raw userdata in registry for timer bookkeeping (used by create_fc_proxy).
             let handle_key = lua.create_registry_value(handle_ud.clone())?;
+            // Return proxy table to Lua.
+            let handle_proxy = create_fc_table_proxy(lua, handle_ud)?;
 
             let timer = PendingTimer {
                 id,
@@ -133,7 +148,7 @@ fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
             };
 
             state.borrow_mut().timers.push_back(timer);
-            Ok(handle_ud)
+            Ok(handle_proxy)
         },
     )
 }
@@ -159,7 +174,10 @@ fn create_new_timer(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fun
             id,
         )?;
         let handle_ud = lua.create_userdata(handle)?;
+        // Store raw userdata in registry for timer bookkeeping (used by create_fc_proxy).
         let handle_key = lua.create_registry_value(handle_ud.clone())?;
+        // Return proxy table to Lua.
+        let handle_proxy = create_fc_table_proxy(lua, handle_ud)?;
 
         let timer = PendingTimer {
             id,
@@ -173,18 +191,21 @@ fn create_new_timer(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fun
         };
 
         state.borrow_mut().timers.push_back(timer);
-        Ok(handle_ud)
+        Ok(handle_proxy)
     })
 }
 
 /// Create a proxy FunctionContainer for passing to a timer callback.
 ///
-/// The proxy shares the same inner state as the original (cancelled, fields)
+/// The proxy shares the same inner state as the original (cancelled flag)
 /// but is a distinct Lua UserData object. `proxy == original` via `__eq`
 /// because they share the same `Rc<FcInner>`.
-pub fn create_fc_proxy(lua: &Lua, handle_ud: &mlua::AnyUserData) -> Result<mlua::AnyUserData> {
+///
+/// Returns a proxy table (Value) wrapping the new proxy userdata.
+pub fn create_fc_proxy(lua: &Lua, handle_ud: &mlua::AnyUserData) -> Result<Value> {
     let fc = handle_ud.borrow::<FunctionContainer>()?;
-    let proxy = FunctionContainer::new_proxy(lua, &fc)?;
+    let proxy_fc = FunctionContainer::new_proxy(lua, &fc)?;
     drop(fc);
-    lua.create_userdata(proxy)
+    let proxy_ud = lua.create_userdata(proxy_fc)?;
+    create_fc_table_proxy(lua, proxy_ud)
 }

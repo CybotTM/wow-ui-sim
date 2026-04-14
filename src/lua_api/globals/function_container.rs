@@ -1,23 +1,28 @@
-//! LuaFunctionContainer UserData type for WoW C_FunctionContainers API.
+//! LuaFunctionContainer table-backed proxy for WoW C_FunctionContainers API.
 //!
-//! Implements `C_FunctionContainers.CreateCallback(func)` which returns a UserData
-//! object with `Cancel`, `IsCancelled`, and `Invoke` methods.
+//! Implements `C_FunctionContainers.CreateCallback(func)` which returns a table proxy
+//! wrapping a hidden userdata. The proxy supports `Cancel`, `IsCancelled`, and `Invoke`
+//! methods and arbitrary per-instance field storage via the userdata's user-value table.
 //!
 //! Also used as the handle returned by `C_Timer.NewTimer` and `C_Timer.NewTicker`.
-//!
-//! The metatable is automatically hidden by mlua (`getmetatable` returns `false`).
 
+use crate::lua_api::proxy_helpers::{lookup_registered_method, proxy_userdata, wrap_fn_with_userdata};
 use crate::lua_api::script_helpers::lua_error;
-use mlua::{AnyUserData, Lua, MetaMethod, Result, UserData, UserDataMethods, Value};
+use mlua::{AnyUserData, Lua, Result, UserData, UserDataMethods, Value};
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_FC_ID: AtomicU64 = AtomicU64::new(1);
 
+const PROXY_MT_KEY: &str = "__fc_proxy_mt";
+const BIND_METHOD_KEY: &str = "__fc_bind_method_helper";
+
 /// Method names that are read-only (cannot be overwritten via __newindex).
 const METHOD_NAMES: &[&str] = &["Cancel", "IsCancelled", "Invoke"];
+
+/// Metamethod names that are read-only.
+const META_NAMES: &[&str] = &["__eq", "__index", "__metatable", "__newindex", "__tostring"];
 
 /// Shared interior state for a FunctionContainer instance pair (original + proxy).
 pub struct FcInner {
@@ -25,8 +30,6 @@ pub struct FcInner {
     pub cancelled: Cell<bool>,
     /// Optional timer ID for cancelling associated timers.
     pub timer_id: Option<u64>,
-    /// Per-instance user field storage, shared between original and proxy.
-    pub fields: RefCell<HashMap<String, Value>>,
 }
 
 impl FcInner {
@@ -34,7 +37,6 @@ impl FcInner {
         Rc::new(FcInner {
             cancelled: Cell::new(false),
             timer_id,
-            fields: RefCell::new(HashMap::new()),
         })
     }
 }
@@ -42,14 +44,14 @@ impl FcInner {
 /// WoW LuaFunctionContainer userdata object.
 ///
 /// Wraps a Lua function with `Cancel`/`IsCancelled`/`Invoke` semantics.
-/// Arbitrary field storage is supported via `__index`/`__newindex`.
+/// Arbitrary field storage is supported via the userdata's user-value table.
 /// Methods are read-only (assignment fails with WoW's error message).
 pub struct FunctionContainer {
-    /// Unique ID for this container pair (used for `__eq` comparison via Rc identity).
+    /// Unique ID for this container pair (used for `__tostring` and `__eq` comparison via Rc identity).
     pub fc_id: u64,
     /// The wrapped Lua function (stored in Lua registry).
     pub callback: mlua::RegistryKey,
-    /// Shared state between original and proxy (cancelled flag, timer linkage, fields).
+    /// Shared state between original and proxy (cancelled flag, timer linkage).
     pub inner: Rc<FcInner>,
     /// SimState reference for timer cancellation (None for plain CreateCallback).
     pub state: Option<Rc<RefCell<crate::lua_api::SimState>>>,
@@ -93,7 +95,6 @@ impl FunctionContainer {
     ///
     /// The proxy has the same `Rc<FcInner>` as the original, so:
     /// - `proxy == original` via `__eq` (same Rc pointer identity)
-    /// - Fields set on the original are visible on the proxy
     /// - Cancelling either cancels both
     ///
     /// The proxy is a distinct Lua UserData object (different pointer), so
@@ -112,113 +113,183 @@ impl FunctionContainer {
 
 impl UserData for FunctionContainer {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        add_fc_methods(methods);
-        add_fc_index(methods);
-        add_fc_newindex(methods);
-        add_fc_eq(methods);
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!("LuaFunctionContainer: 0x{:016x}", this.fc_id))
+        methods.add_function("Cancel", |_, ud: AnyUserData| {
+            let this = ud.borrow::<FunctionContainer>()?;
+            this.inner.cancelled.set(true);
+            if let (Some(timer_id), Some(state)) = (this.inner.timer_id, this.state.as_ref()) {
+                let mut st = state.borrow_mut();
+                for timer in st.timers.iter_mut() {
+                    if timer.id == timer_id {
+                        timer.cancelled = true;
+                        break;
+                    }
+                }
+            }
+            Ok(())
+        });
+
+        methods.add_function("IsCancelled", |_, ud: AnyUserData| {
+            let this = ud.borrow::<FunctionContainer>()?;
+            Ok(this.inner.cancelled.get())
+        });
+
+        methods.add_function("Invoke", |lua, (ud, args): (AnyUserData, mlua::MultiValue)| {
+            let this = ud.borrow::<FunctionContainer>()?;
+            if this.inner.cancelled.get() {
+                return Ok(());
+            }
+            let callback = lua.registry_value::<mlua::Function>(&this.callback)?;
+            drop(this);
+            // Invoke calls the function but discards all return values.
+            // We ignore errors to match WoW's pcall-like behavior.
+            let _ = callback.call::<mlua::MultiValue>(args);
+            Ok(())
         });
     }
 }
 
-fn add_fc_methods<M: UserDataMethods<FunctionContainer>>(methods: &mut M) {
-    methods.add_method("Cancel", |_, this, ()| {
-        this.inner.cancelled.set(true);
-        if let (Some(timer_id), Some(state)) = (this.inner.timer_id, this.state.as_ref()) {
-            let mut st = state.borrow_mut();
-            for timer in st.timers.iter_mut() {
-                if timer.id == timer_id {
-                    timer.cancelled = true;
-                    break;
-                }
-            }
-        }
-        Ok(())
-    });
-
-    methods.add_method("IsCancelled", |_, this, ()| Ok(this.inner.cancelled.get()));
-
-    methods.add_method("Invoke", |lua, this, args: mlua::MultiValue| {
-        if this.inner.cancelled.get() {
-            return Ok(());
-        }
-        let callback = lua.registry_value::<mlua::Function>(&this.callback)?;
-        // Invoke calls the function but discards all return values.
-        // We ignore errors to match WoW's pcall-like behavior.
-        let _ = callback.call::<mlua::MultiValue>(args);
-        Ok(())
-    });
+fn ensure_proxy_support(lua: &Lua) -> Result<()> {
+    register_bind_method_helper(lua)?;
+    install_proxy_metatable(lua)
 }
 
-fn add_fc_index<M: UserDataMethods<FunctionContainer>>(methods: &mut M) {
-    methods.add_meta_function(
-        MetaMethod::Index,
-        |_lua: &Lua, (ud, key): (AnyUserData, Value)| {
-            let fc = ud.borrow::<FunctionContainer>()?;
-            let inner = Rc::clone(&fc.inner);
-            drop(fc);
+fn register_bind_method_helper(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Function>(BIND_METHOD_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    lua.set_named_registry_value(
+        BIND_METHOD_KEY,
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )
+}
 
-            let key_str = match &key {
-                Value::String(s) => s.to_string_lossy().to_string(),
-                _ => return Ok(Value::Nil),
-            };
+fn install_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua)?;
+    lua.set_named_registry_value(PROXY_MT_KEY, mt)
+}
 
-            // Metamethods are not exposed through __index
-            if key_str.starts_with("__") {
+/// Create a table proxy wrapping the given FunctionContainer userdata.
+///
+/// The proxy is `{__lud = userdata}` with a metatable providing `__index`,
+/// `__newindex`, `__tostring`, and `__eq`. Dynamic fields are stored in the
+/// userdata's user-value table.
+pub fn create_fc_table_proxy(lua: &Lua, userdata: mlua::AnyUserData) -> Result<Value> {
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
+}
+
+fn create_proxy_metatable(lua: &Lua) -> Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua)?)?;
+    mt.raw_set("__eq", create_proxy_eq(lua)?)?;
+    Ok(mt)
+}
+
+fn create_proxy_index(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
+        // Metamethod names always return nil.
+        if let Value::String(ref s) = key {
+            if s.to_string_lossy().starts_with("__") {
                 return Ok(Value::Nil);
             }
+        }
 
-            // Method names: mlua's generated __index checks methods table first,
-            // then calls our __index. So we only reach here for non-method keys.
-            let fields = inner.fields.borrow();
-            Ok(fields.get(&key_str).cloned().unwrap_or(Value::Nil))
-        },
-    );
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(Value::Nil);
+        };
+
+        // Check per-instance fields first.
+        if let Ok(fields) = userdata.user_value::<mlua::Table>() {
+            let field_value: Value = fields.raw_get(key.clone())?;
+            if !field_value.is_nil() {
+                return Ok(field_value);
+            }
+        }
+
+        // Fall back to registered methods on the userdata metatable.
+        let registered = lookup_registered_method(&userdata, &key)?;
+        if let Value::Function(function) = registered {
+            return Ok(Value::Function(wrap_fn_with_userdata(
+                lua, function, userdata, BIND_METHOD_KEY,
+            )?));
+        }
+        Ok(registered)
+    })
 }
 
-fn add_fc_newindex<M: UserDataMethods<FunctionContainer>>(methods: &mut M) {
-    methods.add_meta_function(
-        MetaMethod::NewIndex,
-        |_lua: &Lua, (ud, key, value): (AnyUserData, String, Value)| {
-            let fc = ud.borrow::<FunctionContainer>()?;
-            let inner = Rc::clone(&fc.inner);
-            drop(fc);
-
-            // Block method name assignment
-            if METHOD_NAMES.contains(&key.as_str()) {
+fn create_proxy_newindex(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (this, key, value): (mlua::Table, Value, Value)| {
+        // Reject writes to method and metamethod names.
+        if let Value::String(ref s) = key {
+            let key_str = s.to_string_lossy();
+            if is_readonly_key(&key_str) {
                 return Err(mlua::Error::RuntimeError(format!(
                     "Attempted to assign to read-only key {}",
-                    key
+                    key_str
                 )));
             }
+        }
 
-            // Block metamethod assignment
-            if key.starts_with("__") {
-                return Err(mlua::Error::RuntimeError(format!(
-                    "Attempted to assign to read-only key {}",
-                    key
-                )));
-            }
-
-            // Store or remove from per-instance field table
-            let mut fields = inner.fields.borrow_mut();
-            if let Value::Nil = value {
-                fields.remove(&key);
-            } else {
-                fields.insert(key, value);
-            }
-            Ok(())
-        },
-    );
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(());
+        };
+        let fields: mlua::Table = userdata.user_value()?;
+        fields.raw_set(key, value)?;
+        Ok(())
+    })
 }
 
-fn add_fc_eq<M: UserDataMethods<FunctionContainer>>(methods: &mut M) {
-    methods.add_meta_method(MetaMethod::Eq, |_, this, other: AnyUserData| {
-        let other_fc = other.borrow::<FunctionContainer>()?;
-        // Equal if they share the same inner state (original and proxy pairs).
-        Ok(Rc::ptr_eq(&this.inner, &other_fc.inner))
-    });
+fn create_proxy_tostring(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, this: mlua::Table| {
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok("LuaFunctionContainer: 0x0000000000000000".to_string());
+        };
+        let id = userdata
+            .borrow::<FunctionContainer>()
+            .map(|c| c.fc_id)
+            .unwrap_or(0);
+        Ok(format!("LuaFunctionContainer: 0x{:016x}", id))
+    })
+}
+
+fn create_proxy_eq(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (a, b): (Value, Value)| {
+        let Some(ud_a) = proxy_userdata(&a) else {
+            return Ok(false);
+        };
+        let Some(ud_b) = proxy_userdata(&b) else {
+            return Ok(false);
+        };
+        let Ok(fc_a) = ud_a.borrow::<FunctionContainer>() else {
+            return Ok(false);
+        };
+        let Ok(fc_b) = ud_b.borrow::<FunctionContainer>() else {
+            return Ok(false);
+        };
+        Ok(Rc::ptr_eq(&fc_a.inner, &fc_b.inner))
+    })
+}
+
+fn is_readonly_key(key: &str) -> bool {
+    METHOD_NAMES.contains(&key) || META_NAMES.contains(&key)
 }
 
 /// Check if a Lua function is a pure Lua function (not a C function).
@@ -234,6 +305,7 @@ fn is_lua_function(lua: &Lua, func: &mlua::Function) -> Result<bool> {
 
 /// Register `C_FunctionContainers` namespace in the Lua globals.
 pub fn register_c_function_containers(lua: &Lua) -> Result<()> {
+    ensure_proxy_support(lua)?;
     let t = lua.create_table()?;
 
     t.set(
@@ -256,7 +328,10 @@ pub fn register_c_function_containers(lua: &Lua) -> Result<()> {
                     ));
                 }
             };
-            FunctionContainer::new(lua, func, None)
+            ensure_proxy_support(lua)?;
+            let fc = FunctionContainer::new(lua, func, None)?;
+            let userdata = lua.create_userdata(fc)?;
+            create_fc_table_proxy(lua, userdata)
         })?,
     )?;
 

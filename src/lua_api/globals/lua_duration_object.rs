@@ -1,20 +1,17 @@
-//! LuaDurationObject UserData type for WoW duration tracking.
+//! LuaDurationObject table-backed proxy for WoW duration tracking.
 //!
-//! Implements `C_DurationUtil.CreateDuration()` which returns a UserData object
-//! with methods for tracking time spans (start/end/duration). The metatable is
-//! hidden (`getmetatable` returns `false`), which is the default mlua behaviour
-//! for all UserData types.
-//!
-//! Supports per-instance field storage so addon code can attach arbitrary Lua
-//! values to duration objects.
+//! Implements `C_DurationUtil.CreateDuration()` which returns a table proxy
+//! wrapping a hidden userdata. The proxy supports all duration methods and
+//! arbitrary per-instance field storage via the userdata's user-value table.
 
-use mlua::{AnyUserData, Lua, MetaMethod, MultiValue, Result, UserData, UserDataMethods, Value};
+use crate::lua_api::proxy_helpers::{lookup_registered_method, proxy_userdata, wrap_fn_with_userdata};
+use mlua::{AnyUserData, Lua, MultiValue, Result, UserData, UserDataMethods, Value};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
-/// Global Lua table name used to store per-instance custom fields.
-const FIELDS_TABLE: &str = "__lua_duration_object_fields";
+const PROXY_MT_KEY: &str = "__lua_duration_proxy_mt";
+const BIND_METHOD_KEY: &str = "__lua_duration_bind_method_helper";
 
 /// Method names that are read-only (cannot be assigned by user code).
 const METHOD_NAMES: &[&str] = &[
@@ -56,66 +53,14 @@ impl LuaDurationObject {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
         }
     }
-
-    fn add_duration_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        add_copy_and_assign_methods(methods);
-        add_evaluate_methods(methods);
-        add_getter_methods(methods);
-        add_setter_methods(methods);
-    }
-
-    fn add_index_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::Index,
-            |lua: &Lua, (ud, key): (AnyUserData, Value)| {
-                let handle = ud.borrow::<LuaDurationObject>()?;
-                let id = handle.id;
-                drop(handle);
-
-                let key_str = match &key {
-                    Value::String(s) => s.to_string_lossy().to_string(),
-                    _ => return Ok(Value::Nil),
-                };
-
-                let value = get_instance_fields(lua, id)
-                    .and_then(|t| t.get::<Value>(key_str.as_str()).ok())
-                    .unwrap_or(Value::Nil);
-
-                Ok(value)
-            },
-        );
-    }
-
-    fn add_newindex_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::NewIndex,
-            |lua: &Lua, (ud, key, value): (AnyUserData, String, Value)| {
-                let handle = ud.borrow::<LuaDurationObject>()?;
-                let id = handle.id;
-                drop(handle);
-
-                if is_readonly_key(&key) {
-                    return Err(mlua::Error::RuntimeError(format!(
-                        "Attempted to assign to read-only key {}",
-                        key
-                    )));
-                }
-
-                get_or_create_instance_fields(lua, id).set(key, value)?;
-                Ok(())
-            },
-        );
-    }
 }
 
 impl UserData for LuaDurationObject {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        Self::add_duration_methods(methods);
-        Self::add_index_metamethod(methods);
-        Self::add_newindex_metamethod(methods);
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!("LuaDurationObject: 0x{:016x}", this.id))
-        });
+        add_copy_and_assign_methods(methods);
+        add_evaluate_methods(methods);
+        add_getter_methods(methods);
+        add_setter_methods(methods);
     }
 }
 
@@ -126,67 +71,159 @@ fn is_readonly_key(key: &str) -> bool {
 
 /// Register Copy and Assign methods.
 fn add_copy_and_assign_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
-    methods.add_method("Assign", |_, _, _other: Value| Ok(()));
-    methods.add_method("Copy", |_, _, ()| Ok(LuaDurationObject::new()));
+    methods.add_function("Assign", |_, (_ud, _other): (AnyUserData, Value)| Ok(()));
+    methods.add_function("Copy", |lua, _ud: AnyUserData| {
+        ensure_proxy_support(lua)?;
+        let new_userdata = lua.create_userdata(LuaDurationObject::new())?;
+        create_proxy(lua, new_userdata)
+    });
 }
 
 /// Register Evaluate* methods (return 0.0 stubs).
 fn add_evaluate_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
-    methods.add_method("EvaluateElapsedDuration", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("EvaluateElapsedPercent", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("EvaluateRemainingDuration", |_, _, _: MultiValue| {
-        Ok(0.0f64)
-    });
-    methods.add_method("EvaluateRemainingPercent", |_, _, _: MultiValue| Ok(0.0f64));
+    methods.add_function("EvaluateElapsedDuration", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("EvaluateElapsedPercent", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("EvaluateRemainingDuration", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("EvaluateRemainingPercent", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
 }
 
 /// Register Get* query methods (return 0.0 / false stubs).
 fn add_getter_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
-    methods.add_method("GetClockTime", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetElapsedDuration", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetElapsedPercent", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetEndTime", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetModRate", |_, _, ()| Ok(1.0f64));
-    methods.add_method("GetRemainingDuration", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetRemainingPercent", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetStartTime", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("GetTotalDuration", |_, _, _: MultiValue| Ok(0.0f64));
-    methods.add_method("HasSecretValues", |_, _, ()| Ok(false));
-    methods.add_method("IsZero", |_, _, ()| Ok(true));
+    methods.add_function("GetClockTime", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetElapsedDuration", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetElapsedPercent", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetEndTime", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetModRate", |_, (_ud,): (AnyUserData,)| Ok(1.0f64));
+    methods.add_function("GetRemainingDuration", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetRemainingPercent", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetStartTime", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("GetTotalDuration", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(0.0f64));
+    methods.add_function("HasSecretValues", |_, (_ud,): (AnyUserData,)| Ok(false));
+    methods.add_function("IsZero", |_, (_ud,): (AnyUserData,)| Ok(true));
 }
 
 /// Register Set* and Reset mutating methods (no-op stubs).
 fn add_setter_methods<M: UserDataMethods<LuaDurationObject>>(methods: &mut M) {
-    methods.add_method("Reset", |_, _, ()| Ok(()));
-    methods.add_method("SetTimeFromEnd", |_, _, _: MultiValue| Ok(()));
-    methods.add_method("SetTimeFromStart", |_, _, _: MultiValue| Ok(()));
-    methods.add_method("SetTimeSpan", |_, _, _: MultiValue| Ok(()));
-    methods.add_method("SetToDefaults", |_, _, ()| Ok(()));
+    methods.add_function("Reset", |_, (_ud,): (AnyUserData,)| Ok(()));
+    methods.add_function("SetTimeFromEnd", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(()));
+    methods.add_function("SetTimeFromStart", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(()));
+    methods.add_function("SetTimeSpan", |_, (_ud, _args): (AnyUserData, MultiValue)| Ok(()));
+    methods.add_function("SetToDefaults", |_, (_ud,): (AnyUserData,)| Ok(()));
 }
 
-/// Get the per-instance field table for `id`, or `None` if not yet created.
-fn get_instance_fields(lua: &Lua, id: u64) -> Option<mlua::Table> {
-    lua.globals()
-        .get::<mlua::Table>(FIELDS_TABLE)
-        .ok()
-        .and_then(|outer| outer.get::<mlua::Table>(id).ok())
+fn ensure_proxy_support(lua: &Lua) -> Result<()> {
+    register_bind_method_helper(lua)?;
+    install_proxy_metatable(lua)
 }
 
-/// Get or create the per-instance field table for `id`.
-fn get_or_create_instance_fields(lua: &Lua, id: u64) -> mlua::Table {
-    let outer = lua
-        .globals()
-        .get::<mlua::Table>(FIELDS_TABLE)
-        .unwrap_or_else(|_| {
-            let t = lua.create_table().unwrap();
-            lua.globals().set(FIELDS_TABLE, t.clone()).unwrap();
-            t
-        });
+fn register_bind_method_helper(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Function>(BIND_METHOD_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    lua.set_named_registry_value(
+        BIND_METHOD_KEY,
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )
+}
 
-    outer.get::<mlua::Table>(id).unwrap_or_else(|_| {
-        let t = lua.create_table().unwrap();
-        outer.set(id, t.clone()).unwrap();
-        t
+fn install_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua)?;
+    lua.set_named_registry_value(PROXY_MT_KEY, mt)
+}
+
+fn create_proxy(lua: &Lua, userdata: mlua::AnyUserData) -> Result<Value> {
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
+}
+
+fn create_proxy_metatable(lua: &Lua) -> Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua)?)?;
+    Ok(mt)
+}
+
+fn create_proxy_index(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
+        // Metamethod names always return nil.
+        if let Value::String(ref s) = key {
+            if s.to_string_lossy().starts_with("__") {
+                return Ok(Value::Nil);
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(Value::Nil);
+        };
+
+        // Check per-instance fields first.
+        if let Ok(fields) = userdata.user_value::<mlua::Table>() {
+            let field_value: Value = fields.raw_get(key.clone())?;
+            if !field_value.is_nil() {
+                return Ok(field_value);
+            }
+        }
+
+        // Fall back to registered methods on the userdata metatable.
+        let registered = lookup_registered_method(&userdata, &key)?;
+        if let Value::Function(function) = registered {
+            return Ok(Value::Function(wrap_fn_with_userdata(
+                lua, function, userdata, BIND_METHOD_KEY,
+            )?));
+        }
+        Ok(registered)
+    })
+}
+
+fn create_proxy_newindex(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (this, key, value): (mlua::Table, Value, Value)| {
+        // Reject writes to method and metamethod names.
+        if let Value::String(ref s) = key {
+            let key_str = s.to_string_lossy();
+            if is_readonly_key(&key_str) {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "Attempted to assign to read-only key {}",
+                    key_str
+                )));
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(());
+        };
+        let fields: mlua::Table = userdata.user_value()?;
+        fields.raw_set(key, value)?;
+        Ok(())
+    })
+}
+
+fn create_proxy_tostring(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, this: mlua::Table| {
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok("LuaDurationObject: 0x0000000000000000".to_string());
+        };
+        let id = userdata
+            .borrow::<LuaDurationObject>()
+            .map(|c| c.id)
+            .unwrap_or(0);
+        Ok(format!("LuaDurationObject: 0x{id:016x}"))
     })
 }
 
@@ -194,6 +231,7 @@ fn get_or_create_instance_fields(lua: &Lua, id: u64) -> mlua::Table {
 ///
 /// Also registers `C_DurationUtil.GetCurrentTime` if not already present.
 pub fn register_lua_duration_object(lua: &Lua) -> Result<()> {
+    ensure_proxy_support(lua)?;
     let g = lua.globals();
     let t: mlua::Table = match g.get::<Value>("C_DurationUtil")? {
         Value::Table(t) => t,
@@ -202,7 +240,11 @@ pub fn register_lua_duration_object(lua: &Lua) -> Result<()> {
 
     t.set(
         "CreateDuration",
-        lua.create_function(|_, ()| Ok(LuaDurationObject::new()))?,
+        lua.create_function(|lua, ()| {
+            ensure_proxy_support(lua)?;
+            let userdata = lua.create_userdata(LuaDurationObject::new())?;
+            create_proxy(lua, userdata)
+        })?,
     )?;
 
     if t.get::<Value>("GetCurrentTime")?.is_nil() {

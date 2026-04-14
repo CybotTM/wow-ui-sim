@@ -1,17 +1,18 @@
-//! AbbreviateConfig UserData type for WoW number abbreviation configuration.
+//! AbbreviateConfig table-backed proxy for WoW number abbreviation configuration.
 //!
-//! Implements `CreateAbbreviateConfig(configTable)` which returns a UserData object
-//! with `GetAbbreviateNumberData`/`SetAbbreviateNumberData` methods and per-instance
-//! field storage. The metatable is hidden (`getmetatable` returns `false`), which is
-//! the default mlua behaviour for all UserData types.
+//! Implements `CreateAbbreviateConfig(configTable)` which returns a table proxy
+//! wrapping a hidden userdata. The proxy supports `GetAbbreviateNumberData` /
+//! `SetAbbreviateNumberData` methods and arbitrary per-instance field storage via
+//! the userdata's user-value table.
 
-use mlua::{AnyUserData, Lua, MetaMethod, Result, UserData, UserDataMethods, Value};
+use crate::lua_api::proxy_helpers::{lookup_registered_method, proxy_userdata, wrap_fn_with_userdata};
+use mlua::{AnyUserData, Lua, Result, UserData, UserDataMethods, Value};
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_ID: AtomicU64 = AtomicU64::new(1);
 
-/// Global Lua table name used to store per-instance custom fields.
-const FIELDS_TABLE: &str = "__abbreviate_config_fields";
+const PROXY_MT_KEY: &str = "__abbreviate_config_proxy_mt";
+const BIND_METHOD_KEY: &str = "__abbreviate_config_bind_method_helper";
 
 /// Method names that are read-only (cannot be assigned by user code).
 const METHOD_NAMES: &[&str] = &["GetAbbreviateNumberData", "SetAbbreviateNumberData"];
@@ -19,14 +20,7 @@ const METHOD_NAMES: &[&str] = &["GetAbbreviateNumberData", "SetAbbreviateNumberD
 /// Metamethod names that are read-only.
 const META_NAMES: &[&str] = &["__eq", "__index", "__metatable", "__newindex", "__tostring"];
 
-/// WoW AbbreviateConfig userdata object.
-///
-/// Exposes two methods required by the WoW API:
-/// - `GetAbbreviateNumberData()` - returns the stored config data (table or nil)
-/// - `SetAbbreviateNumberData(data)` - stores a new config data value
-///
-/// Additionally supports arbitrary field storage via `__index`/`__newindex` so
-/// that addon code can attach arbitrary Lua values to the object instance.
+/// Hidden userdata backing each AbbreviateConfig proxy.
 pub struct AbbreviateConfig {
     id: u64,
 }
@@ -37,112 +31,153 @@ impl AbbreviateConfig {
             id: NEXT_ID.fetch_add(1, Ordering::Relaxed),
         }
     }
-
-    fn add_data_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_method("GetAbbreviateNumberData", |lua, this, ()| {
-            let fields = get_instance_fields(lua, this.id);
-            let data: Value = fields
-                .and_then(|t| t.get("__data").ok())
-                .unwrap_or(Value::Nil);
-            Ok(data)
-        });
-
-        methods.add_method("SetAbbreviateNumberData", |lua, this, data: Value| {
-            get_or_create_instance_fields(lua, this.id).set("__data", data)?;
-            Ok(())
-        });
-    }
-
-    fn add_index_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::Index,
-            |lua: &Lua, (ud, key): (AnyUserData, Value)| {
-                let handle = ud.borrow::<AbbreviateConfig>()?;
-                let id = handle.id;
-                drop(handle);
-
-                let key_str = match &key {
-                    Value::String(s) => s.to_string_lossy().to_string(),
-                    _ => return Ok(Value::Nil),
-                };
-
-                let value = get_instance_fields(lua, id)
-                    .and_then(|t| t.get::<Value>(key_str.as_str()).ok())
-                    .unwrap_or(Value::Nil);
-
-                Ok(value)
-            },
-        );
-    }
-
-    fn add_newindex_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            MetaMethod::NewIndex,
-            |lua: &Lua, (ud, key, value): (AnyUserData, String, Value)| {
-                let handle = ud.borrow::<AbbreviateConfig>()?;
-                let id = handle.id;
-                drop(handle);
-
-                if is_readonly_key(&key) {
-                    return Err(mlua::Error::RuntimeError(format!(
-                        "Attempted to assign to read-only key {}",
-                        key
-                    )));
-                }
-
-                get_or_create_instance_fields(lua, id).set(key, value)?;
-                Ok(())
-            },
-        );
-    }
 }
 
 impl UserData for AbbreviateConfig {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-        Self::add_data_methods(methods);
-        Self::add_index_metamethod(methods);
-        Self::add_newindex_metamethod(methods);
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!("AbbreviateConfig: 0x{:016x}", this.id))
+        methods.add_function("GetAbbreviateNumberData", |_, ud: AnyUserData| {
+            let fields: mlua::Table = ud.user_value()?;
+            let data: Value = fields.raw_get("__data")?;
+            Ok(data)
+        });
+
+        methods.add_function("SetAbbreviateNumberData", |_, (ud, data): (AnyUserData, Value)| {
+            let fields: mlua::Table = ud.user_value()?;
+            fields.raw_set("__data", data)?;
+            Ok(())
         });
     }
 }
 
-/// Returns true if the key is a method or metamethod name (read-only).
+fn ensure_proxy_support(lua: &Lua) -> Result<()> {
+    register_bind_method_helper(lua)?;
+    install_proxy_metatable(lua)
+}
+
+fn register_bind_method_helper(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Function>(BIND_METHOD_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    lua.set_named_registry_value(
+        BIND_METHOD_KEY,
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )
+}
+
+fn install_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua)?;
+    lua.set_named_registry_value(PROXY_MT_KEY, mt)
+}
+
+fn create_proxy(lua: &Lua, userdata: mlua::AnyUserData) -> Result<Value> {
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
+}
+
+fn create_proxy_metatable(lua: &Lua) -> Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua)?)?;
+    Ok(mt)
+}
+
+fn create_proxy_index(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
+        // Metamethod names always return nil.
+        if let Value::String(ref s) = key {
+            if s.to_string_lossy().starts_with("__") {
+                return Ok(Value::Nil);
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(Value::Nil);
+        };
+
+        // Check per-instance fields first.
+        if let Ok(fields) = userdata.user_value::<mlua::Table>() {
+            let field_value: Value = fields.raw_get(key.clone())?;
+            if !field_value.is_nil() {
+                return Ok(field_value);
+            }
+        }
+
+        // Fall back to registered methods on the userdata metatable.
+        let registered = lookup_registered_method(&userdata, &key)?;
+        if let Value::Function(function) = registered {
+            return Ok(Value::Function(wrap_fn_with_userdata(
+                lua, function, userdata, BIND_METHOD_KEY,
+            )?));
+        }
+        Ok(registered)
+    })
+}
+
+fn create_proxy_newindex(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (this, key, value): (mlua::Table, Value, Value)| {
+        // Reject writes to method and metamethod names.
+        if let Value::String(ref s) = key {
+            let key_str = s.to_string_lossy();
+            if is_readonly_key(&key_str) {
+                return Err(mlua::Error::RuntimeError(format!(
+                    "Attempted to assign to read-only key {}",
+                    key_str
+                )));
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(());
+        };
+        let fields: mlua::Table = userdata.user_value()?;
+        fields.raw_set(key, value)?;
+        Ok(())
+    })
+}
+
+fn create_proxy_tostring(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, this: mlua::Table| {
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok("AbbreviateConfig: 0x0000000000000000".to_string());
+        };
+        let id = userdata
+            .borrow::<AbbreviateConfig>()
+            .map(|c| c.id)
+            .unwrap_or(0);
+        Ok(format!("AbbreviateConfig: 0x{:016x}", id))
+    })
+}
+
 fn is_readonly_key(key: &str) -> bool {
     METHOD_NAMES.contains(&key) || META_NAMES.contains(&key)
 }
 
-/// Get the per-instance field table for `id`, or `None` if not yet created.
-fn get_instance_fields(lua: &Lua, id: u64) -> Option<mlua::Table> {
-    lua.globals()
-        .get::<mlua::Table>(FIELDS_TABLE)
-        .ok()
-        .and_then(|outer| outer.get::<mlua::Table>(id).ok())
-}
-
-/// Get or create the per-instance field table for `id`.
-fn get_or_create_instance_fields(lua: &Lua, id: u64) -> mlua::Table {
-    let outer = lua
-        .globals()
-        .get::<mlua::Table>(FIELDS_TABLE)
-        .unwrap_or_else(|_| {
-            let t = lua.create_table().unwrap();
-            lua.globals().set(FIELDS_TABLE, t.clone()).unwrap();
-            t
-        });
-
-    outer.get::<mlua::Table>(id).unwrap_or_else(|_| {
-        let t = lua.create_table().unwrap();
-        outer.set(id, t.clone()).unwrap();
-        t
-    })
-}
-
 /// Register `CreateAbbreviateConfig` in the Lua globals.
 pub fn register_abbreviate_config(lua: &Lua) -> Result<()> {
+    ensure_proxy_support(lua)?;
     lua.globals().set(
         "CreateAbbreviateConfig",
-        lua.create_function(|_, _config: Value| Ok(AbbreviateConfig::new()))?,
+        lua.create_function(|lua, _config: Value| {
+            ensure_proxy_support(lua)?;
+            let userdata = lua.create_userdata(AbbreviateConfig::new())?;
+            create_proxy(lua, userdata)
+        })?,
     )
 }

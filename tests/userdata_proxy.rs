@@ -1,0 +1,417 @@
+//! Tests for table-backed proxy objects (AbbreviateConfig, FunctionContainer,
+//! LuaDurationObject, UnitHealPrediction, CurveUtil).
+//!
+//! Verifies that each type:
+//! - Returns a table (not userdata) to Lua
+//! - Supports method calls
+//! - Supports per-instance field storage
+//! - Protects read-only keys from assignment
+
+use wow_ui_sim::lua_api::WowLuaEnv;
+
+// ============================================================================
+// AbbreviateConfig
+// ============================================================================
+
+#[test]
+fn abbreviate_config_is_table_with_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_get, has_set): (String, bool, bool) = env
+        .eval(
+            r#"
+            local cfg = CreateAbbreviateConfig({})
+            return type(cfg),
+                   type(cfg.GetAbbreviateNumberData) == "function",
+                   type(cfg.SetAbbreviateNumberData) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_get);
+    assert!(has_set);
+}
+
+#[test]
+fn abbreviate_config_get_set_data_roundtrip() {
+    let env = WowLuaEnv::new().unwrap();
+    let (before, after): (bool, f64) = env
+        .eval(
+            r#"
+            local cfg = CreateAbbreviateConfig({})
+            local before = cfg:GetAbbreviateNumberData() == nil
+            cfg:SetAbbreviateNumberData(42)
+            return before, cfg:GetAbbreviateNumberData()
+        "#,
+        )
+        .unwrap();
+    assert!(before);
+    assert!((after - 42.0).abs() < 0.001);
+}
+
+#[test]
+fn abbreviate_config_per_instance_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let (val_a, val_b): (String, String) = env
+        .eval(
+            r#"
+            local a = CreateAbbreviateConfig({})
+            local b = CreateAbbreviateConfig({})
+            a.custom = "alpha"
+            b.custom = "beta"
+            return a.custom, b.custom
+        "#,
+        )
+        .unwrap();
+    assert_eq!(val_a, "alpha");
+    assert_eq!(val_b, "beta");
+}
+
+#[test]
+fn abbreviate_config_readonly_keys() {
+    let env = WowLuaEnv::new().unwrap();
+    let blocked: bool = env
+        .eval(
+            r#"
+            local cfg = CreateAbbreviateConfig({})
+            local ok, err = pcall(function() cfg.GetAbbreviateNumberData = 1 end)
+            return not ok and err:find("read%-only") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(blocked);
+}
+
+#[test]
+fn abbreviate_config_tostring() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_prefix: bool = env
+        .eval(
+            r#"
+            local cfg = CreateAbbreviateConfig({})
+            return tostring(cfg):find("AbbreviateConfig:") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(has_prefix);
+}
+
+// ============================================================================
+// FunctionContainer
+// ============================================================================
+
+#[test]
+fn function_container_is_table_with_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_cancel, has_invoke): (String, bool, bool) = env
+        .eval(
+            r#"
+            local fc = C_FunctionContainers.CreateCallback(function() end)
+            return type(fc),
+                   type(fc.Cancel) == "function",
+                   type(fc.Invoke) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_cancel);
+    assert!(has_invoke);
+}
+
+#[test]
+fn function_container_cancel_and_invoke() {
+    let env = WowLuaEnv::new().unwrap();
+    let (not_cancelled, cancelled, invoked): (bool, bool, bool) = env
+        .eval(
+            r#"
+            local called = false
+            local fc = C_FunctionContainers.CreateCallback(function() called = true end)
+            local before = not fc:IsCancelled()
+            fc:Cancel()
+            fc:Invoke()
+            return before, fc:IsCancelled(), called
+        "#,
+        )
+        .unwrap();
+    assert!(not_cancelled);
+    assert!(cancelled);
+    assert!(!invoked); // Invoke does nothing after Cancel
+}
+
+#[test]
+fn function_container_per_instance_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let stored: String = env
+        .eval(
+            r#"
+            local fc = C_FunctionContainers.CreateCallback(function() end)
+            fc.myField = "hello"
+            return fc.myField
+        "#,
+        )
+        .unwrap();
+    assert_eq!(stored, "hello");
+}
+
+#[test]
+fn function_container_readonly_keys() {
+    let env = WowLuaEnv::new().unwrap();
+    let blocked: bool = env
+        .eval(
+            r#"
+            local fc = C_FunctionContainers.CreateCallback(function() end)
+            local ok, err = pcall(function() fc.Cancel = 1 end)
+            return not ok and err:find("read%-only") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(blocked);
+}
+
+#[test]
+fn function_container_tostring() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_prefix: bool = env
+        .eval(
+            r#"
+            local fc = C_FunctionContainers.CreateCallback(function() end)
+            return tostring(fc):find("LuaFunctionContainer:") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(has_prefix);
+}
+
+// ============================================================================
+// LuaDurationObject
+// ============================================================================
+
+#[test]
+fn duration_object_is_table_with_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_get, has_zero): (String, bool, bool) = env
+        .eval(
+            r#"
+            local d = C_DurationUtil.CreateDuration()
+            return type(d),
+                   type(d.GetStartTime) == "function",
+                   type(d.IsZero) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_get);
+    assert!(has_zero);
+}
+
+#[test]
+fn duration_object_is_zero_by_default() {
+    let env = WowLuaEnv::new().unwrap();
+    let is_zero: bool = env
+        .eval(
+            r#"
+            local d = C_DurationUtil.CreateDuration()
+            return d:IsZero()
+        "#,
+        )
+        .unwrap();
+    assert!(is_zero);
+}
+
+#[test]
+fn duration_object_per_instance_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let stored: f64 = env
+        .eval(
+            r#"
+            local d = C_DurationUtil.CreateDuration()
+            d.tag = 99
+            return d.tag
+        "#,
+        )
+        .unwrap();
+    assert!((stored - 99.0).abs() < 0.001);
+}
+
+#[test]
+fn duration_object_tostring() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_prefix: bool = env
+        .eval(
+            r#"
+            local d = C_DurationUtil.CreateDuration()
+            return tostring(d):find("LuaDurationObject:") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(has_prefix);
+}
+
+// ============================================================================
+// UnitHealPredictionCalculator
+// ============================================================================
+
+#[test]
+fn heal_prediction_is_table_with_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_reset, has_get): (String, bool, bool) = env
+        .eval(
+            r#"
+            local hp = CreateUnitHealPredictionCalculator()
+            return type(hp),
+                   type(hp.Reset) == "function",
+                   type(hp.GetIncomingHeals) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_reset);
+    assert!(has_get);
+}
+
+#[test]
+fn heal_prediction_set_get_roundtrip() {
+    let env = WowLuaEnv::new().unwrap();
+    let (mode_before, mode_after): (i64, i64) = env
+        .eval(
+            r#"
+            local hp = CreateUnitHealPredictionCalculator()
+            local before = hp:GetDamageAbsorbClampMode()
+            hp:SetDamageAbsorbClampMode(3)
+            return before, hp:GetDamageAbsorbClampMode()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(mode_before, 0);
+    assert_eq!(mode_after, 3);
+}
+
+#[test]
+fn heal_prediction_tostring() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_prefix: bool = env
+        .eval(
+            r#"
+            local hp = CreateUnitHealPredictionCalculator()
+            return tostring(hp):find("UnitHealPredictionCalculator:") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(has_prefix);
+}
+
+// ============================================================================
+// CurveUtil (LuaCurveObject + LuaColorCurveObject)
+// ============================================================================
+
+#[test]
+fn curve_object_is_table_with_methods() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_add, has_eval): (String, bool, bool) = env
+        .eval(
+            r#"
+            local c = C_CurveUtil.CreateCurve()
+            return type(c),
+                   type(c.AddPoint) == "function",
+                   type(c.Evaluate) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_add);
+    assert!(has_eval);
+}
+
+#[test]
+fn curve_object_add_and_evaluate() {
+    let env = WowLuaEnv::new().unwrap();
+    let result: f64 = env
+        .eval(
+            r#"
+            local c = C_CurveUtil.CreateCurve()
+            c:AddPoint(0, 10)
+            c:AddPoint(1, 20)
+            return c:Evaluate(0.5)
+        "#,
+        )
+        .unwrap();
+    assert!((result - 15.0).abs() < 0.001);
+}
+
+#[test]
+fn curve_object_copy_returns_table() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, count): (String, i64) = env
+        .eval(
+            r#"
+            local c = C_CurveUtil.CreateCurve()
+            c:AddPoint(0, 10)
+            c:AddPoint(1, 20)
+            local copy = c:Copy()
+            return type(copy), copy:GetPointCount()
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert_eq!(count, 2);
+}
+
+#[test]
+fn curve_object_per_instance_fields() {
+    let env = WowLuaEnv::new().unwrap();
+    let stored: String = env
+        .eval(
+            r#"
+            local c = C_CurveUtil.CreateCurve()
+            c.label = "test"
+            return c.label
+        "#,
+        )
+        .unwrap();
+    assert_eq!(stored, "test");
+}
+
+#[test]
+fn curve_object_tostring() {
+    let env = WowLuaEnv::new().unwrap();
+    let has_prefix: bool = env
+        .eval(
+            r#"
+            local c = C_CurveUtil.CreateCurve()
+            return tostring(c):find("LuaCurveObject:") ~= nil
+        "#,
+        )
+        .unwrap();
+    assert!(has_prefix);
+}
+
+#[test]
+fn color_curve_object_is_table() {
+    let env = WowLuaEnv::new().unwrap();
+    let (typ, has_eval): (String, bool) = env
+        .eval(
+            r#"
+            local cc = C_CurveUtil.CreateColorCurve()
+            return type(cc),
+                   type(cc.Evaluate) == "function"
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+    assert!(has_eval);
+}
+
+#[test]
+fn color_curve_copy_returns_table() {
+    let env = WowLuaEnv::new().unwrap();
+    let typ: String = env
+        .eval(
+            r#"
+            local cc = C_CurveUtil.CreateColorCurve()
+            cc:AddPoint(0, 1)
+            local copy = cc:Copy()
+            return type(copy)
+        "#,
+        )
+        .unwrap();
+    assert_eq!(typ, "table");
+}

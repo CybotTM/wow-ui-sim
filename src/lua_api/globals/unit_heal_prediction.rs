@@ -1,17 +1,18 @@
-//! UnitHealPredictionCalculator UserData type for WoW heal prediction API.
+//! UnitHealPredictionCalculator table-backed proxy for WoW heal prediction API.
 //!
-//! Implements `CreateUnitHealPredictionCalculator()` which returns a UserData
-//! object with methods for querying and setting heal prediction values.
-//!
-//! The metatable is automatically hidden by mlua (`getmetatable` returns `false`).
+//! Implements `CreateUnitHealPredictionCalculator()` which returns a table proxy
+//! wrapping a hidden userdata. The proxy supports all heal prediction methods and
+//! arbitrary per-instance field storage via the userdata's user-value table.
 
-use mlua::{AnyUserData, Lua, MetaMethod, Result, UserData, UserDataMethods, Value};
+use crate::lua_api::proxy_helpers::{lookup_registered_method, proxy_userdata, wrap_fn_with_userdata};
+use mlua::{AnyUserData, Lua, Result, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
-use std::collections::HashMap;
-use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 static NEXT_HEAL_PRED_ID: AtomicU64 = AtomicU64::new(1);
+
+const PROXY_MT_KEY: &str = "__unit_heal_pred_proxy_mt";
+const BIND_METHOD_KEY: &str = "__unit_heal_pred_bind_method_helper";
 
 /// Method names that are read-only (cannot be overwritten via __newindex).
 const METHOD_NAMES: &[&str] = &[
@@ -52,12 +53,13 @@ const METHOD_NAMES: &[&str] = &[
     "SetToDefaults",
 ];
 
+/// Metamethod names that are read-only.
+const META_NAMES: &[&str] = &["__eq", "__index", "__metatable", "__newindex", "__tostring"];
+
 /// Per-instance state for UnitHealPredictionCalculator.
 struct HealPredictionInner {
     /// Unique ID for tostring representation.
     id: u64,
-    /// Per-instance user field storage.
-    fields: RefCell<HashMap<String, Value>>,
     /// Stored heal prediction state.
     damage_absorb_clamp_mode: RefCell<i32>,
     heal_absorb_clamp_mode: RefCell<i32>,
@@ -71,10 +73,9 @@ struct HealPredictionInner {
 }
 
 impl HealPredictionInner {
-    fn new() -> Rc<Self> {
-        Rc::new(HealPredictionInner {
+    fn new() -> Self {
+        HealPredictionInner {
             id: NEXT_HEAL_PRED_ID.fetch_add(1, Ordering::Relaxed),
-            fields: RefCell::new(HashMap::new()),
             damage_absorb_clamp_mode: RefCell::new(0),
             heal_absorb_clamp_mode: RefCell::new(0),
             heal_absorb_mode: RefCell::new(0),
@@ -84,17 +85,17 @@ impl HealPredictionInner {
             damage_absorbs: RefCell::new(0.0),
             heal_absorbs: RefCell::new(0.0),
             maximum_health_mode: RefCell::new(0),
-        })
+        }
     }
 }
 
 /// WoW UnitHealPredictionCalculator userdata object.
 ///
 /// Tracks heal prediction values (incoming heals, absorbs, overflow) for a unit.
-/// Arbitrary field storage is supported via `__index`/`__newindex`.
-/// Methods are read-only (assignment fails with WoW's error message).
+/// Arbitrary field storage is supported via the proxy's user-value table.
+/// Methods are read-only (assignment fails with an error message).
 pub struct UnitHealPredictionCalculator {
-    inner: Rc<HealPredictionInner>,
+    inner: HealPredictionInner,
 }
 
 impl UnitHealPredictionCalculator {
@@ -109,14 +110,6 @@ impl UserData for UnitHealPredictionCalculator {
     fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         add_getter_methods(methods);
         add_setter_methods(methods);
-        add_index_metamethod(methods);
-        add_newindex_metamethod(methods);
-        methods.add_meta_method(MetaMethod::ToString, |_, this, ()| {
-            Ok(format!(
-                "UnitHealPredictionCalculator: 0x{:016x}",
-                this.inner.id
-            ))
-        });
     }
 }
 
@@ -124,73 +117,121 @@ fn add_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
     add_health_query_methods(methods);
     add_stored_getter_methods(methods);
     add_total_getter_methods(methods);
-    methods.add_method("GetPredictedValues", |_, this, _unit: Value| {
+    methods.add_function("GetPredictedValues", |_, (ud, _unit): (AnyUserData, Value)| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         let incoming = *this.inner.incoming_heals.borrow();
         let absorbs = *this.inner.heal_absorbs.borrow();
         let damage_absorbs = *this.inner.damage_absorbs.borrow();
         Ok((incoming, absorbs, damage_absorbs))
     });
-    methods.add_method("HasSecretValues", |_, _, ()| Ok(false));
+    methods.add_function("HasSecretValues", |_, _ud: AnyUserData| Ok(false));
 }
 
 fn add_health_query_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("EvaluateCurrentHealthPercent", |_, _, _unit: Value| {
-        Ok(1.0f64)
-    });
-    methods.add_method("EvaluateMissingHealthPercent", |_, _, _unit: Value| {
+    methods.add_function(
+        "EvaluateCurrentHealthPercent",
+        |_, (ud, _unit): (AnyUserData, Value)| {
+            let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            Ok(1.0f64)
+        },
+    );
+    methods.add_function(
+        "EvaluateMissingHealthPercent",
+        |_, (ud, _unit): (AnyUserData, Value)| {
+            let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            Ok(0.0f64)
+        },
+    );
+    methods.add_function("GetCurrentHealth", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(0.0f64)
     });
-    methods.add_method("GetCurrentHealth", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetCurrentHealthPercent", |_, _, ()| Ok(1.0f64));
-    methods.add_method("GetMaximumHealth", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetMaximumHealthMode", |_, this, ()| {
+    methods.add_function("GetCurrentHealthPercent", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(1.0f64)
+    });
+    methods.add_function("GetMaximumHealth", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
+    methods.add_function("GetMaximumHealthMode", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.maximum_health_mode.borrow())
     });
-    methods.add_method("GetMissingHealth", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetMissingHealthPercent", |_, _, ()| Ok(0.0f64));
+    methods.add_function("GetMissingHealth", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
+    methods.add_function("GetMissingHealthPercent", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
 }
 
 fn add_stored_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("GetDamageAbsorbClampMode", |_, this, ()| {
+    methods.add_function("GetDamageAbsorbClampMode", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.damage_absorb_clamp_mode.borrow())
     });
-    methods.add_method("GetDamageAbsorbs", |_, this, ()| {
+    methods.add_function("GetDamageAbsorbs", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.damage_absorbs.borrow())
     });
-    methods.add_method("GetHealAbsorbClampMode", |_, this, ()| {
+    methods.add_function("GetHealAbsorbClampMode", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.heal_absorb_clamp_mode.borrow())
     });
-    methods.add_method("GetHealAbsorbMode", |_, this, ()| {
+    methods.add_function("GetHealAbsorbMode", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.heal_absorb_mode.borrow())
     });
-    methods.add_method("GetHealAbsorbs", |_, this, ()| {
+    methods.add_function("GetHealAbsorbs", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.heal_absorbs.borrow())
     });
-    methods.add_method("GetIncomingHealClampMode", |_, this, ()| {
+    methods.add_function("GetIncomingHealClampMode", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.incoming_heal_clamp_mode.borrow())
     });
-    methods.add_method("GetIncomingHealOverflowPercent", |_, this, ()| {
+    methods.add_function("GetIncomingHealOverflowPercent", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.incoming_heal_overflow_percent.borrow())
     });
-    methods.add_method("GetIncomingHeals", |_, this, ()| {
+    methods.add_function("GetIncomingHeals", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.incoming_heals.borrow())
     });
 }
 
 fn add_total_getter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("GetMaximumDamageAbsorbs", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetMaximumHealAbsorbs", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetMaximumIncomingHeals", |_, _, ()| Ok(0.0f64));
-    methods.add_method("GetTotalDamageAbsorbs", |_, this, ()| {
+    methods.add_function("GetMaximumDamageAbsorbs", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
+    methods.add_function("GetMaximumHealAbsorbs", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
+    methods.add_function("GetMaximumIncomingHeals", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
+    methods.add_function("GetTotalDamageAbsorbs", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.damage_absorbs.borrow())
     });
-    methods.add_method("GetTotalHealAbsorbs", |_, this, ()| {
+    methods.add_function("GetTotalHealAbsorbs", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.heal_absorbs.borrow())
     });
-    methods.add_method("GetTotalIncomingHeals", |_, this, ()| {
+    methods.add_function("GetTotalIncomingHeals", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         Ok(*this.inner.incoming_heals.borrow())
     });
-    methods.add_method("GetTotalIncomingHealsFromHealer", |_, _, ()| Ok(0.0f64));
+    methods.add_function("GetTotalIncomingHealsFromHealer", |_, ud: AnyUserData| {
+        let _this = ud.borrow::<UnitHealPredictionCalculator>()?;
+        Ok(0.0f64)
+    });
 }
 
 fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
@@ -200,52 +241,83 @@ fn add_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods:
 }
 
 fn add_reset_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("Reset", |_, this, ()| {
+    methods.add_function("Reset", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         reset_all_prediction_state(&this.inner);
         Ok(())
     });
-    methods.add_method("ResetPredictedValues", |_, this, ()| {
+    methods.add_function("ResetPredictedValues", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         reset_predicted_values(&this.inner);
         Ok(())
     });
-    methods.add_method("SetToDefaults", |_, this, ()| {
+    methods.add_function("SetToDefaults", |_, ud: AnyUserData| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         reset_all_prediction_state(&this.inner);
         Ok(())
     });
 }
 
 fn add_mode_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("SetDamageAbsorbClampMode", |_, this, mode: i32| {
-        *this.inner.damage_absorb_clamp_mode.borrow_mut() = mode;
-        Ok(())
-    });
-    methods.add_method("SetHealAbsorbClampMode", |_, this, mode: i32| {
-        *this.inner.heal_absorb_clamp_mode.borrow_mut() = mode;
-        Ok(())
-    });
-    methods.add_method("SetHealAbsorbMode", |_, this, mode: i32| {
+    methods.add_function(
+        "SetDamageAbsorbClampMode",
+        |_, (ud, mode): (AnyUserData, i32)| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            *this.inner.damage_absorb_clamp_mode.borrow_mut() = mode;
+            Ok(())
+        },
+    );
+    methods.add_function(
+        "SetHealAbsorbClampMode",
+        |_, (ud, mode): (AnyUserData, i32)| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            *this.inner.heal_absorb_clamp_mode.borrow_mut() = mode;
+            Ok(())
+        },
+    );
+    methods.add_function("SetHealAbsorbMode", |_, (ud, mode): (AnyUserData, i32)| {
+        let this = ud.borrow::<UnitHealPredictionCalculator>()?;
         *this.inner.heal_absorb_mode.borrow_mut() = mode;
         Ok(())
     });
-    methods.add_method("SetIncomingHealClampMode", |_, this, mode: i32| {
-        *this.inner.incoming_heal_clamp_mode.borrow_mut() = mode;
-        Ok(())
-    });
-    methods.add_method("SetMaximumHealthMode", |_, this, mode: i32| {
-        *this.inner.maximum_health_mode.borrow_mut() = mode;
-        Ok(())
-    });
+    methods.add_function(
+        "SetIncomingHealClampMode",
+        |_, (ud, mode): (AnyUserData, i32)| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            *this.inner.incoming_heal_clamp_mode.borrow_mut() = mode;
+            Ok(())
+        },
+    );
+    methods.add_function(
+        "SetMaximumHealthMode",
+        |_, (ud, mode): (AnyUserData, i32)| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            *this.inner.maximum_health_mode.borrow_mut() = mode;
+            Ok(())
+        },
+    );
 }
 
 fn add_value_setter_methods<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_method("SetIncomingHealOverflowPercent", |_, this, pct: f64| {
-        *this.inner.incoming_heal_overflow_percent.borrow_mut() = pct;
-        Ok(())
-    });
-    methods.add_method(
+    methods.add_function(
+        "SetIncomingHealOverflowPercent",
+        |_, (ud, pct): (AnyUserData, f64)| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
+            *this.inner.incoming_heal_overflow_percent.borrow_mut() = pct;
+            Ok(())
+        },
+    );
+    methods.add_function(
         "SetPredictedValues",
-        |_, this, (unit, incoming, absorbs, damage_absorbs): (Value, f64, f64, f64)| {
-            let _ = unit;
+        |_,
+         (ud, _unit, incoming, absorbs, damage_absorbs): (
+            AnyUserData,
+            Value,
+            f64,
+            f64,
+            f64,
+        )| {
+            let this = ud.borrow::<UnitHealPredictionCalculator>()?;
             *this.inner.incoming_heals.borrow_mut() = incoming;
             *this.inner.heal_absorbs.borrow_mut() = absorbs;
             *this.inner.damage_absorbs.borrow_mut() = damage_absorbs;
@@ -270,72 +342,135 @@ fn reset_all_prediction_state(inner: &HealPredictionInner) {
     *inner.maximum_health_mode.borrow_mut() = 0;
 }
 
-fn add_index_metamethod<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_meta_function(
-        MetaMethod::Index,
-        |_lua: &Lua, (ud, key): (AnyUserData, Value)| {
-            let calc = ud.borrow::<UnitHealPredictionCalculator>()?;
-            let inner = Rc::clone(&calc.inner);
-            drop(calc);
-
-            let key_str = match &key {
-                Value::String(s) => s.to_string_lossy().to_string(),
-                _ => return Ok(Value::Nil),
-            };
-
-            // Metamethods are not exposed through __index
-            if key_str.starts_with("__") {
-                return Ok(Value::Nil);
-            }
-
-            // Method names: mlua's generated __index checks methods table first,
-            // then calls our __index. So we only reach here for non-method keys.
-            let fields = inner.fields.borrow();
-            Ok(fields.get(&key_str).cloned().unwrap_or(Value::Nil))
-        },
-    );
+fn ensure_proxy_support(lua: &Lua) -> Result<()> {
+    register_bind_method_helper(lua)?;
+    install_proxy_metatable(lua)
 }
 
-fn add_newindex_metamethod<M: UserDataMethods<UnitHealPredictionCalculator>>(methods: &mut M) {
-    methods.add_meta_function(
-        MetaMethod::NewIndex,
-        |_lua: &Lua, (ud, key, value): (AnyUserData, String, Value)| {
-            let calc = ud.borrow::<UnitHealPredictionCalculator>()?;
-            let inner = Rc::clone(&calc.inner);
-            drop(calc);
+fn register_bind_method_helper(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Function>(BIND_METHOD_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    lua.set_named_registry_value(
+        BIND_METHOD_KEY,
+        crate::lua_api::cfunc_wrap::create_bind_factory(lua)?,
+    )
+}
 
-            // Block method name assignment
-            if METHOD_NAMES.contains(&key.as_str()) {
+fn install_proxy_metatable(lua: &Lua) -> Result<()> {
+    if lua
+        .named_registry_value::<mlua::Table>(PROXY_MT_KEY)
+        .is_ok()
+    {
+        return Ok(());
+    }
+    let mt = create_proxy_metatable(lua)?;
+    lua.set_named_registry_value(PROXY_MT_KEY, mt)
+}
+
+fn create_proxy(lua: &Lua, userdata: mlua::AnyUserData) -> Result<Value> {
+    userdata.set_user_value(lua.create_table()?)?;
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", userdata)?;
+    let mt: mlua::Table = lua.named_registry_value(PROXY_MT_KEY)?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
+}
+
+fn create_proxy_metatable(lua: &Lua) -> Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua)?)?;
+    Ok(mt)
+}
+
+fn create_proxy_index(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
+        // Metamethod names always return nil.
+        if let Value::String(ref s) = key {
+            if s.to_string_lossy().starts_with("__") {
+                return Ok(Value::Nil);
+            }
+        }
+
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(Value::Nil);
+        };
+
+        // Check per-instance fields first.
+        if let Ok(fields) = userdata.user_value::<mlua::Table>() {
+            let field_value: Value = fields.raw_get(key.clone())?;
+            if !field_value.is_nil() {
+                return Ok(field_value);
+            }
+        }
+
+        // Fall back to registered methods on the userdata metatable.
+        let registered = lookup_registered_method(&userdata, &key)?;
+        if let Value::Function(function) = registered {
+            return Ok(Value::Function(wrap_fn_with_userdata(
+                lua, function, userdata, BIND_METHOD_KEY,
+            )?));
+        }
+        Ok(registered)
+    })
+}
+
+fn create_proxy_newindex(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, (this, key, value): (mlua::Table, Value, Value)| {
+        // Reject writes to method and metamethod names.
+        if let Value::String(ref s) = key {
+            let key_str = s.to_string_lossy();
+            if is_readonly_key(&key_str) {
                 return Err(mlua::Error::RuntimeError(format!(
                     "Attempted to assign to read-only key {}",
-                    key
+                    key_str
                 )));
             }
+        }
 
-            // Block metamethod assignment
-            if key.starts_with("__") {
-                return Err(mlua::Error::RuntimeError(format!(
-                    "Attempted to assign to read-only key {}",
-                    key
-                )));
-            }
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok(());
+        };
+        let fields: mlua::Table = userdata.user_value()?;
+        fields.raw_set(key, value)?;
+        Ok(())
+    })
+}
 
-            // Store or remove from per-instance field table
-            let mut fields = inner.fields.borrow_mut();
-            if let Value::Nil = value {
-                fields.remove(&key);
-            } else {
-                fields.insert(key, value);
-            }
-            Ok(())
-        },
-    );
+fn create_proxy_tostring(lua: &Lua) -> Result<mlua::Function> {
+    lua.create_function(|_, this: mlua::Table| {
+        let proxy_value = Value::Table(this);
+        let Some(userdata) = proxy_userdata(&proxy_value) else {
+            return Ok("UnitHealPredictionCalculator: 0x0000000000000000".to_string());
+        };
+        let id = userdata
+            .borrow::<UnitHealPredictionCalculator>()
+            .map(|c| c.inner.id)
+            .unwrap_or(0);
+        Ok(format!("UnitHealPredictionCalculator: 0x{:016x}", id))
+    })
+}
+
+fn is_readonly_key(key: &str) -> bool {
+    METHOD_NAMES.contains(&key) || META_NAMES.contains(&key)
 }
 
 /// Register `CreateUnitHealPredictionCalculator` in the Lua globals.
 pub fn register_unit_heal_prediction(lua: &Lua) -> Result<()> {
+    ensure_proxy_support(lua)?;
     lua.globals().set(
         "CreateUnitHealPredictionCalculator",
-        lua.create_function(|_, ()| Ok(UnitHealPredictionCalculator::new()))?,
+        lua.create_function(|lua, ()| {
+            ensure_proxy_support(lua)?;
+            let userdata = lua.create_userdata(UnitHealPredictionCalculator::new())?;
+            create_proxy(lua, userdata)
+        })?,
     )
 }
