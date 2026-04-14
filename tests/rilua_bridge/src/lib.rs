@@ -180,6 +180,71 @@ fn test_bridge_from_stack_extracts_primitives() {
 }
 
 #[test]
+fn test_bridge_from_stack_extracts_numbers_and_negative_indices() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+
+    state.push(Val::Num(42.5));
+    state.push(Val::Num(99.0));
+    state.push(Val::Num(7.0));
+
+    assert_eq!(f64::from_stack(state, 1).unwrap(), 42.5);
+    assert_eq!(i64::from_stack(state, 2).unwrap(), 99);
+    assert_eq!(u32::from_stack(state, -1).unwrap(), 7);
+    assert_eq!(Option::<u32>::from_stack(state, -1).unwrap(), Some(7));
+    assert_eq!(Val::from_stack(state, 1).unwrap(), Val::Num(42.5));
+}
+
+#[test]
+fn test_bridge_from_stack_bool_matches_lua_truthiness() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+
+    state.push(Val::Nil);
+    state.push(Val::Bool(false));
+    state.push(Val::Bool(true));
+    state.push(Val::Num(0.0));
+    let text = state.gc.intern_string(b"hi");
+    state.push(Val::Str(text));
+
+    assert!(!bool::from_stack(state, 1).unwrap());
+    assert!(!bool::from_stack(state, 2).unwrap());
+    assert!(bool::from_stack(state, 3).unwrap());
+    assert!(bool::from_stack(state, 4).unwrap());
+    assert!(bool::from_stack(state, 5).unwrap());
+}
+
+#[test]
+fn test_bridge_from_stack_reports_type_errors() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+
+    state.push(Val::Bool(true));
+    state.push(Val::Num(1.5));
+    state.push(Val::Num(-1.0));
+
+    let string_err = String::from_stack(state, 1).unwrap_err().to_string();
+    assert!(string_err.contains("expected string, got boolean at argument 1"));
+
+    let int_err = i32::from_stack(state, 2).unwrap_err().to_string();
+    assert!(int_err.contains("expected integer, got non-integer number at argument 2"));
+
+    let uint_err = u32::from_stack(state, 3).unwrap_err().to_string();
+    assert!(uint_err.contains("expected u32, value -1 out of range at argument 3"));
+}
+
+#[test]
+fn test_bridge_from_stack_rejects_invalid_utf8_strings() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    let invalid = state.gc.intern_string(&[0xff, 0xfe]);
+    state.push(Val::Str(invalid));
+
+    let err = String::from_stack(state, 1).unwrap_err().to_string();
+    assert!(err.contains("string at argument 1 is not valid UTF-8"));
+}
+
+#[test]
 fn test_bridge_into_stack_pushes_multiple_values() {
     let mut lua = Lua::new().unwrap();
     let state = lua.state_mut();
