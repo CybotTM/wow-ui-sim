@@ -4,6 +4,7 @@
 //! replacing the CPU-bound canvas rendering with GPU-accelerated quad batching.
 
 pub mod atlas;
+pub mod atlas_bc;
 mod pipeline;
 pub mod primitive;
 mod program;
@@ -11,7 +12,8 @@ mod quad;
 mod quad_batch_extras;
 mod quad_nine_slice;
 
-pub use atlas::{BcFormat, BcTextureEntry, GLYPH_ATLAS_TEX_INDEX, GpuTextureAtlas, TextureEntry};
+pub use atlas::{GLYPH_ATLAS_TEX_INDEX, GpuTextureAtlas, TextureEntry};
+pub use atlas_bc::{BcFormat, BcTextureEntry};
 pub use pipeline::WowUiPipeline;
 pub use primitive::{GpuBcTextureData, GpuTextureData, WowUiPrimitive, load_texture_or_crop};
 pub use program::WowUiProgram;
