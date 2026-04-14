@@ -3,7 +3,7 @@
 //! Borrows the Lua instance instead of owning it, allowing both startup loading
 //! (via WowLuaEnv) and runtime on-demand loading (from Lua callbacks).
 
-use super::env_init::addon_unpack_function;
+use super::env_init::{addon_unpack_function, addon_unpack_key};
 use super::state::SimState;
 use crate::Result;
 use mlua::Lua;
@@ -59,7 +59,8 @@ impl<'a> LoaderEnv<'a> {
     pub fn create_addon_table(&self) -> Result<mlua::Table> {
         let table = self.lua.create_table()?;
         let unpack_fn = addon_unpack_function(self.lua)?;
-        table.set("unpack", unpack_fn)?;
+        let unpack_key = addon_unpack_key(self.lua)?;
+        table.raw_set(unpack_key, unpack_fn)?;
         Ok(table)
     }
 

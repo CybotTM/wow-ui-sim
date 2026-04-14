@@ -47,11 +47,10 @@ pub fn load_lua_file(
             .map_err(|e| report_lua_load_error(lua, e))?;
     }
 
-    let exec_result = exec_addon_func(lua, func, ctx).map_err(|e| {
+    let exec_result = exec_addon_func(lua, func, ctx).inspect_err(|e| {
         if let LoadError::Lua(msg) = &e {
             crate::lua_api::script_helpers::call_error_handler(lua, msg);
         }
-        e
     });
     let call_elapsed = call_start.elapsed();
     timing.lua_call_time += call_elapsed;
@@ -78,9 +77,8 @@ fn exec_addon_func(
     func: mlua::Function,
     ctx: &AddonContext,
 ) -> Result<(), LoadError> {
-    let name = ctx.name.to_string();
     let table = ctx.table.clone();
-    func.call::<()>((name, table))
+    func.call::<()>((ctx.lua_name.clone(), table))
         .map_err(|e| LoadError::Lua(e.to_string()))
 }
 

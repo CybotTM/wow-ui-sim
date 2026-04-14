@@ -54,13 +54,8 @@ pub(super) fn load_test_xml(dir_suffix: &str, xml_content: &str) -> TestCtx {
     std::fs::write(&xml_path, xml_content).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_xml_file(
         &env.loader_env(),
         &xml_path,
@@ -83,13 +78,15 @@ pub(super) fn load_test_lua(dir_suffix: &str, lua_content: &str) -> (TestCtx, ml
     register_loading_test_addon(&env);
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table.clone(),
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx = AddonContext::new(
+        env.lua(),
+        "TestAddon",
+        addon_table.clone(),
+        &temp_dir,
+        false,
+        false,
+    )
+    .unwrap();
     load_lua_file(
         &env.loader_env(),
         &lua_path,
@@ -131,13 +128,8 @@ fn test_load_lua_file() {
     std::fs::write(&lua_path, "TEST_VAR = 42").unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: "TestAddon",
-        table: addon_table,
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx =
+        AddonContext::new(env.lua(), "TestAddon", addon_table, &temp_dir, false, false).unwrap();
     load_lua_file(
         &env.loader_env(),
         &lua_path,
@@ -186,13 +178,15 @@ fn load_test_lua_files(
     std::fs::create_dir_all(&temp_dir).unwrap();
 
     let addon_table = env.create_addon_table().unwrap();
-    let ctx = AddonContext {
-        name: addon_name,
-        table: addon_table.clone(),
-        addon_root: &temp_dir,
-        use_secure_env: false,
-        taint: false,
-    };
+    let ctx = AddonContext::new(
+        env.lua(),
+        addon_name,
+        addon_table.clone(),
+        &temp_dir,
+        false,
+        false,
+    )
+    .unwrap();
 
     for (filename, content) in files {
         let path = temp_dir.join(filename);

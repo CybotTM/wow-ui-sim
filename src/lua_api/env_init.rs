@@ -11,6 +11,7 @@ use std::rc::Rc;
 use std::time::Instant;
 
 const ADDON_UNPACK_REGISTRY_KEY: &str = "__addon_unpack";
+const ADDON_UNPACK_KEY_REGISTRY_KEY: &str = "__addon_unpack_key";
 
 /// Increment threshold counters for a frame's addon time.
 pub(super) fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
@@ -190,11 +191,16 @@ fn init_registry_tables(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Resul
         lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
     lua.set_named_registry_value(ADDON_UNPACK_REGISTRY_KEY, create_addon_unpack(lua)?)?;
+    lua.set_named_registry_value(ADDON_UNPACK_KEY_REGISTRY_KEY, lua.create_string("unpack")?)?;
     super::on_update::register(lua, state)
 }
 
 pub(super) fn addon_unpack_function(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.named_registry_value(ADDON_UNPACK_REGISTRY_KEY)
+}
+
+pub(super) fn addon_unpack_key(lua: &Lua) -> mlua::Result<mlua::String> {
+    lua.named_registry_value(ADDON_UNPACK_KEY_REGISTRY_KEY)
 }
 
 fn create_addon_unpack(lua: &Lua) -> mlua::Result<mlua::Function> {

@@ -145,7 +145,7 @@ fn process_script(
         }
         // In WoW, runtime errors in inline <Script> elements are caught by the
         // error handler and don't abort XML file processing.
-        if let Err(e) = func.call::<()>((ctx.name.to_string(), table_clone)) {
+        if let Err(e) = func.call::<()>((ctx.lua_name.clone(), table_clone)) {
             crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
             tracing::warn!("Inline script error: {}", e);
         }

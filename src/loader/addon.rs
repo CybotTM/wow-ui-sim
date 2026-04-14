@@ -15,6 +15,7 @@ use super::{LoadResult, LoadTiming};
 /// Context for loading addon files (name, private table, and addon root for path resolution).
 pub struct AddonContext<'a> {
     pub name: &'a str,
+    pub lua_name: mlua::String,
     pub table: Table,
     /// Addon root directory for fallback path resolution
     pub addon_root: &'a Path,
@@ -22,6 +23,26 @@ pub struct AddonContext<'a> {
     pub use_secure_env: bool,
     /// Whether to taint code with the addon name (false for Blizzard base UI).
     pub taint: bool,
+}
+
+impl<'a> AddonContext<'a> {
+    pub fn new(
+        lua: &mlua::Lua,
+        name: &'a str,
+        table: Table,
+        addon_root: &'a Path,
+        use_secure_env: bool,
+        taint: bool,
+    ) -> mlua::Result<Self> {
+        Ok(Self {
+            name,
+            lua_name: lua.create_string(name)?,
+            table,
+            addon_root,
+            use_secure_env,
+            taint,
+        })
+    }
 }
 
 /// Initialize saved variables for an addon (WTF first, then JSON fallback).
@@ -122,13 +143,15 @@ fn build_addon_context<'a>(
         .map_err(|e| LoadError::Lua(e.to_string()))?;
     register_loading_addon(env, folder_name, toc.is_secure_env());
 
-    Ok(AddonContext {
-        name: folder_name,
-        table: addon_table,
-        addon_root: &toc.addon_dir,
-        use_secure_env: toc.is_secure_env(),
-        taint: !is_blizzard_addon(toc),
-    })
+    AddonContext::new(
+        env.lua(),
+        folder_name,
+        addon_table,
+        &toc.addon_dir,
+        toc.is_secure_env(),
+        !is_blizzard_addon(toc),
+    )
+    .map_err(|e| LoadError::Lua(e.to_string()))
 }
 
 fn register_loading_addon(env: &LoaderEnv<'_>, folder_name: &str, use_secure_env: bool) {

@@ -1,8 +1,9 @@
 //! WoW Lua environment.
 
 use super::env_init::{
-    addon_taint_name, addon_unpack_function, call_with_taint, init_builtin_frames, init_lua_state,
-    is_blizzard_addon, record_addon_time, update_threshold_counters,
+    addon_taint_name, addon_unpack_function, addon_unpack_key, call_with_taint,
+    init_builtin_frames, init_lua_state, is_blizzard_addon, record_addon_time,
+    update_threshold_counters,
 };
 use super::state::{AddonInfo, PendingTimer, SimState};
 use crate::Result;
@@ -76,10 +77,11 @@ impl WowLuaEnv {
     /// Includes a default `unpack` method that returns values at numeric indices.
     pub fn create_addon_table(&self) -> Result<mlua::Table> {
         let table = self.lua.create_table()?;
-        // Add default unpack method - returns values at indices 1, 2, 3, 4.
-        // Addons like OmniCD use this pattern: local E, L, C = select(2, ...):unpack()
+        // Add default unpack method via cached Lua handles to avoid per-addon
+        // key-string recreation during startup.
         let unpack_fn = addon_unpack_function(&self.lua)?;
-        table.set("unpack", unpack_fn)?;
+        let unpack_key = addon_unpack_key(&self.lua)?;
+        table.raw_set(unpack_key, unpack_fn)?;
         Ok(table)
     }
 
