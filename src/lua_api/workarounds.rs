@@ -430,41 +430,41 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
 /// prevent "attempt to call method 'IsEnabled' (a nil value)" errors
 /// that block world quest pin rendering.
 fn patch_poi_button_update_point(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
-        -- Guard UpdateButtonAlpha against nil NormalTexture/PushedTexture.
-        -- These children should be created by POIButtonTemplate XML but
-        -- template child creation during CreateFrame doesn't cover them yet.
-        if POIButtonMixin then
-            local orig = POIButtonMixin.UpdateButtonAlpha
-            function POIButtonMixin:UpdateButtonAlpha()
-                if self.NormalTexture and self.PushedTexture then
-                    orig(self)
-                end
-            end
-        end
-        if POIButtonDisplayLayerMixin then
-            function POIButtonDisplayLayerMixin:UpdatePoint(isPushed)
-                local parent = self:GetParent()
-                if not parent or not parent.IsEnabled or not parent:IsEnabled() then
-                    return
-                end
-                local pushedX = isPushed and 1 or 0
-                local pushedY = isPushed and -1 or 0
-                local x = (self.offsetX or 0) + pushedX
-                local y = (self.offsetY or 0) + pushedY
-                if PixelUtil then
-                    PixelUtil.SetPoint(self, "CENTER", parent, "CENTER", x, y, x, y)
-                else
-                    self:SetPoint("CENTER", parent, "CENTER", x, y)
-                end
-            end
-        end
-    "#,
-    ) {
+    if let Err(e) = env.exec(PATCH_POI_BUTTON_UPDATE_POINT_LUA) {
         eprintln!("[workaround] patch_poi_button_update_point failed: {e}");
     }
 }
+
+const PATCH_POI_BUTTON_UPDATE_POINT_LUA: &str = r#"
+    -- Guard UpdateButtonAlpha against nil NormalTexture/PushedTexture.
+    -- These children should be created by POIButtonTemplate XML but
+    -- template child creation during CreateFrame doesn't cover them yet.
+    if POIButtonMixin then
+        local orig = POIButtonMixin.UpdateButtonAlpha
+        function POIButtonMixin:UpdateButtonAlpha()
+            if self.NormalTexture and self.PushedTexture then
+                orig(self)
+            end
+        end
+    end
+    if POIButtonDisplayLayerMixin then
+        function POIButtonDisplayLayerMixin:UpdatePoint(isPushed)
+            local parent = self:GetParent()
+            if not parent or not parent.IsEnabled or not parent:IsEnabled() then
+                return
+            end
+            local pushedX = isPushed and 1 or 0
+            local pushedY = isPushed and -1 or 0
+            local x = (self.offsetX or 0) + pushedX
+            local y = (self.offsetY or 0) + pushedY
+            if PixelUtil then
+                PixelUtil.SetPoint(self, "CENTER", parent, "CENTER", x, y, x, y)
+            else
+                self:SetPoint("CENTER", parent, "CENTER", x, y)
+            end
+        end
+    end
+"#;
 
 /// Add minimal stubs for global frames expected by Blizzard code but not
 /// created by any loaded addon (e.g. the frame exists in XML but the parent
