@@ -10,6 +10,9 @@ use std::time::Duration;
 use perf_addon_loading::{PerAddonLoadTiming, load_timed_game_addons_with_saved_vars};
 
 const ADDON_LOADING_BUDGET: Duration = Duration::from_secs(25);
+const XML_PARSE_BUDGET: Duration = Duration::from_millis(2500);
+const LUA_COMPILE_BUDGET: Duration = Duration::from_millis(2000);
+const LIFECYCLE_BUDGET: Duration = Duration::from_millis(7000);
 const HEAVIEST_ADDON_COUNT: usize = 8;
 const MIN_HEAVY_ADDON_ALLOWED_REGRESSION: Duration = Duration::from_millis(400);
 const NEW_HEAVY_ADDON_OUTLIER_THRESHOLD: Duration = Duration::from_millis(650);
@@ -76,6 +79,42 @@ fn blizzard_addon_loading_reports_phase_breakdown_under_budget() {
             "blizzard addon loading took {:.2?}, exceeding budget {:.2?}",
             loaded.addon_elapsed,
             ADDON_LOADING_BUDGET
+        );
+    }
+}
+
+#[test]
+fn loading_phase_breakdown_stays_within_budgets() {
+    test_timeout! {
+        let loaded = load_timed_game_addons_with_saved_vars();
+        let timing = &loaded.addon_timing;
+
+        eprintln!(
+            "loading phases: xml_parse={:.2?} lua_compile={:.2?} lifecycle={:.2?} layers={:.2?} frames={}",
+            timing.xml_parse_time,
+            timing.lua_compile_time,
+            timing.frame_lifecycle_time,
+            timing.frame_layer_children_time,
+            timing.frame_count,
+        );
+
+        assert!(
+            timing.xml_parse_time < XML_PARSE_BUDGET,
+            "XML parse took {:.2?}, exceeding budget {:.2?}",
+            timing.xml_parse_time,
+            XML_PARSE_BUDGET
+        );
+        assert!(
+            timing.lua_compile_time < LUA_COMPILE_BUDGET,
+            "Lua compile took {:.2?}, exceeding budget {:.2?}",
+            timing.lua_compile_time,
+            LUA_COMPILE_BUDGET
+        );
+        assert!(
+            timing.frame_lifecycle_time < LIFECYCLE_BUDGET,
+            "lifecycle scripts took {:.2?}, exceeding budget {:.2?}",
+            timing.frame_lifecycle_time,
+            LIFECYCLE_BUDGET
         );
     }
 }

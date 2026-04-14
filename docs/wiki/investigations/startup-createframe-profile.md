@@ -244,6 +244,36 @@ Most promising direction:
 - [ActionButtonTemplate.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/ActionButtonTemplate.xml) — action-button template inheritance and child regions
 - [MainActionBar.xml](../../Interface/BlizzardUI/Blizzard_ActionBar/Mainline/MainActionBar.xml) — `MainBarActionBarButtonTemplate` definition
 
+## Post-Optimization Profile (2026-04-14)
+
+After lifecycle dispatch, layout deferral, and Lua allocation reduction:
+
+### perf top functions (self time, `--no-addons --no-saved-vars lua-errors`)
+
+| Function | Self% | Category |
+|----------|-------|----------|
+| `sweeplist` | 6.4% | Lua GC sweep |
+| `luaV_execute` | 3.7% | Lua VM execution |
+| `hash_one` | 2.9% | HashMap hashing |
+| `luaS_newlstr` | 2.5% | Lua string creation |
+| `propagatemark` | 1.9% | Lua GC mark |
+| `luaD_precall` | 1.7% | Lua function dispatch |
+| `compute_frame_rect_cached` | 1.7% | Layout computation |
+| `mlua::stack_value` | 1.7% | mlua stack ops |
+| `luaH_next` | 1.6% | Lua table iteration |
+
+Profile is healthy — no single function dominates. Top costs are inherent Lua runtime (GC, VM, string interning) rather than simulator-side hot loops. `compute_frame_rect_cached` dropped from a top-3 spot to 1.7% after the `resolve_rect_if_dirty` fast-path optimization.
+
+### Loading phase budgets (test thresholds)
+
+| Phase | Measured | Budget |
+|-------|----------|--------|
+| Total addon loading | ~13.5s | 25s |
+| XML parse | ~1.1s | 2.5s |
+| Lua compile | ~240ms | 2s |
+| Lifecycle scripts | ~4.3s | 7s |
+| Full root layout | ~180ms | 500ms |
+
 ## See Also
 
 - [[global-frame-index]] — planned pure-Rust template child creation work
