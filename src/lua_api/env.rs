@@ -409,6 +409,16 @@ impl WowLuaEnv {
         let _ = self.lua.borrow_mut().gc_step(0);
     }
 
+    /// Read a global variable from rilua's global table.
+    pub fn get_rilua_global(&self, name: &str) -> rilua::Val {
+        self.lua.borrow_mut().get_global_val(name)
+    }
+
+    /// Set a global variable in rilua's global table.
+    pub fn set_rilua_global(&self, name: &str, val: rilua::Val) -> rilua::LuaResult<()> {
+        self.lua.borrow_mut().set_global_val(name, val)
+    }
+
     /// Get access to the simulator state.
     pub fn state(&self) -> &Rc<RefCell<SimState>> {
         &self.state
@@ -627,13 +637,14 @@ impl WowLuaEnv {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rilua::LuaApi;
     use std::path::PathBuf;
 
     #[test]
     fn wow_lua_env_seeds_rilua_app_data_with_sim_state() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-        let app_data = env
-            .rilua()
+        let rilua = env.rilua();
+        let app_data = rilua
             .state()
             .app_data::<WowLuaAppData>()
             .expect("rilua app_data should be seeded");
@@ -645,14 +656,30 @@ mod tests {
     }
 
     #[test]
+    fn rilua_global_set_get_roundtrip() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let val = rilua::Val::Num(42.0);
+        env.set_rilua_global("__test_val", val).unwrap();
+        let got = env.get_rilua_global("__test_val");
+        assert_eq!(got, rilua::Val::Num(42.0));
+    }
+
+    #[test]
+    fn rilua_global_nil_for_missing_key() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let got = env.get_rilua_global("__nonexistent_key_xyz");
+        assert_eq!(got, rilua::Val::Nil);
+    }
+
+    #[test]
     fn set_font_system_updates_rilua_app_data() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("."))));
 
         env.set_font_system(Rc::clone(&font_system));
 
-        let app_data = env
-            .rilua()
+        let rilua = env.rilua();
+        let app_data = rilua
             .state()
             .app_data::<WowLuaAppData>()
             .expect("rilua app_data should be seeded");
