@@ -280,26 +280,7 @@ fn register_menu_util(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
     t.set(
         "CreateRootMenuDescription",
-        lua.create_function(|lua, _menu_tag: Option<String>| {
-            let desc = lua.create_table()?;
-            desc.set(
-                "CreateButton",
-                lua.create_function(
-                    |_, (_self, _text, _callback): (Value, String, Option<mlua::Function>)| {
-                        Ok(Value::Nil)
-                    },
-                )?,
-            )?;
-            desc.set(
-                "CreateTitle",
-                lua.create_function(|_, (_self, _text): (Value, String)| Ok(Value::Nil))?,
-            )?;
-            desc.set(
-                "CreateDivider",
-                lua.create_function(|_, _self: Value| Ok(Value::Nil))?,
-            )?;
-            Ok(desc)
-        })?,
+        lua.create_function(create_root_menu_description)?,
     )?;
     t.set(
         "SetElementData",
@@ -310,4 +291,25 @@ fn register_menu_util(lua: &Lua) -> Result<mlua::Table> {
         lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(Value::Nil))?,
     )?;
     Ok(t)
+}
+
+fn create_root_menu_description(lua: &Lua, _menu_tag: Option<String>) -> Result<mlua::Table> {
+    let desc = lua.create_table()?;
+    desc.set(
+        "CreateButton",
+        lua.create_function(
+            |_, (_self, _text, _callback): (Value, String, Option<mlua::Function>)| {
+                Ok(Value::Nil)
+            },
+        )?,
+    )?;
+    desc.set(
+        "CreateTitle",
+        lua.create_function(|_, (_self, _text): (Value, String)| Ok(Value::Nil))?,
+    )?;
+    desc.set(
+        "CreateDivider",
+        lua.create_function(|_, _self: Value| Ok(Value::Nil))?,
+    )?;
+    Ok(desc)
 }
