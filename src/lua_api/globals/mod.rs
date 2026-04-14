@@ -116,18 +116,13 @@ pub mod protected_call;
 pub mod quest_frames;
 pub mod reputation_data;
 pub mod rilua_stubs;
-pub mod security_api;
 pub mod settings_api;
 pub mod sound_api;
 pub mod spell_api;
 pub mod spellbook_data;
 pub mod strings;
-pub mod system_api;
-mod system_api_runtime;
 pub mod targeting_api;
 pub mod template;
-pub mod timer_api;
-pub mod tooltip_api;
 pub mod traits_api;
 pub mod traits_api_node;
 pub mod unit_api;
@@ -136,7 +131,6 @@ pub mod unit_combat_api;
 pub mod unit_heal_prediction;
 pub mod unit_health_power_api;
 pub mod utility_api;
-pub mod utility_stubs;
 
 // Re-export for backwards compatibility
 pub use strings::register_all_ui_strings;

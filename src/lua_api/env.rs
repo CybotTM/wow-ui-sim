@@ -40,7 +40,6 @@ impl WowLuaAppData {
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
     pub(crate) lua: RefCell<rilua::Lua>,
-    /// Temporary mlua runtime for later Phase 2 migration items.
     pub(crate) compat_lua: Lua,
     pub(crate) state: Rc<RefCell<SimState>>,
 }
@@ -66,14 +65,6 @@ impl WowLuaEnv {
             compat_lua,
             state,
         })
-    }
-
-    pub(crate) fn from_compat_lua(compat_lua: Lua, state: Rc<RefCell<SimState>>) -> Self {
-        Self {
-            lua: RefCell::new(Self::new_rilua(Rc::clone(&state))),
-            compat_lua,
-            state,
-        }
     }
 
     fn new_rilua(state: Rc<RefCell<SimState>>) -> rilua::Lua {
