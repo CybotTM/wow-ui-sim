@@ -1,17 +1,42 @@
 //! rilua RustFn equivalents of font_api, strings/mod, and c_collection_api globals.
 //!
 //! Each section mirrors the mlua original but targets the rilua VM:
-//! - Plain `fn(&mut LuaState) -> LuaResult<u32>` for state-free helpers.
-//! - `borrow_state` / `borrow_state_mut` for SimState access.
-//! - `TableBuilder` / `define_functions!` for namespace tables.
-//! - `LuaApiMut::register_function` (via `WowLuaEnv::register_rilua_function`) for globals.
+//! - Plain `fn(&mut LuaState) -> LuaResult<u32>` (or non-capturing closures that
+//!   coerce to that) for state-free helpers.
+//! - `borrow_state` / `borrow_state_mut` for SimState access inside RustFns.
+//! - `TableBuilder` for namespace tables (C_*).
+//! - `LuaApiMut::register_function` for top-level globals.
+//!
+//! # TODOs
+//! - `CreateFont`: return cached object on repeat calls (registry lookup).
+//! - `CopyFontObject`: cycle-safe property copy.
+//! - `SetFontObject`: cycle detection.
+//! - `GetFontInfo`: resolve font object from name or table arg.
+//! - `CreateFontFamily`: extract first member's file/height/flags.
+//! - Keybinding functions: wire up to `keybindings` module on SimState.
+//! - `register_rilua_item_quality_colors`: iterate `ITEM_QUALITY_COLORS_DATA`.
+//! - `register_rilua_class_name_tables`: iterate `CLASS_NAMES_DATA`.
+//! - `register_rilua_icon_list`: iterate `ICON_LIST_DATA`.
+//! - `C_PetJournal::GetPetInfoByPetID / GetPetInfoBySpeciesID`: lookup by ID.
 
-use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut, create_string, create_table, create_table_with_fields, table_get, table_set, val_to_string};
+use crate::lua_api::rilua_methods::{
+    borrow_state, borrow_state_mut, create_string, create_table, table_get, table_set,
+    val_to_string,
+};
 use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 use crate::lua_bridge::table_set_rust_fn;
 use rilua::vm::state::LuaState;
-use rilua::vm::table::Table;
 use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+
+// ── Global-table helpers (mirrors rilua_create_frame.rs) ─────────────────────
+
+fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+    let key = state.gc.intern_string(name.as_bytes());
+    let global = state.global;
+    if let Some(g) = state.gc.tables.get_mut(global) {
+        let _ = g.raw_set(Val::Str(key), value, &state.gc.string_arena);
+    }
+}
 
 // ============================================================================
 // Section 1: font_api — CreateFont, GetFonts, GetFontInfo, CreateFontFamily,
@@ -22,7 +47,8 @@ use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
 
 fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
     table_set(state, font, "__fontHeight", Val::Num(0.0));
-    table_set(state, font, "__fontFlags", create_string(state, ""));
+    let empty = create_string(state, "");
+    table_set(state, font, "__fontFlags", empty);
     table_set(state, font, "__textColorR", Val::Num(1.0));
     table_set(state, font, "__textColorG", Val::Num(1.0));
     table_set(state, font, "__textColorB", Val::Num(1.0));
@@ -33,56 +59,57 @@ fn font_set_defaults(state: &mut LuaState, font: Val, name: Option<&str>) {
     table_set(state, font, "__shadowColorA", Val::Num(0.0));
     table_set(state, font, "__shadowOffsetX", Val::Num(0.0));
     table_set(state, font, "__shadowOffsetY", Val::Num(0.0));
-    table_set(state, font, "__justifyH", create_string(state, "CENTER"));
-    table_set(state, font, "__justifyV", create_string(state, "MIDDLE"));
-    match name {
-        Some(n) => { table_set(state, font, "__name", create_string(state, n)); }
-        None    => { table_set(state, font, "__name", Val::Nil); }
-    }
+    let center = create_string(state, "CENTER");
+    table_set(state, font, "__justifyH", center);
+    let middle = create_string(state, "MIDDLE");
+    table_set(state, font, "__justifyV", middle);
+    let name_val = match name {
+        Some(n) => create_string(state, n),
+        None => Val::Nil,
+    };
+    table_set(state, font, "__name", name_val);
 }
 
-fn font_table_get_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
+fn font_f64(state: &mut LuaState, font: Val, key: &str) -> f64 {
     match table_get(state, font, key) {
         Val::Num(n) => n,
         _ => 0.0,
     }
 }
 
-fn font_table_get_string(state: &mut LuaState, font: Val, key: &str) -> String {
+fn font_str(state: &mut LuaState, font: Val, key: &str) -> String {
     val_to_string(state, table_get(state, font, key)).unwrap_or_default()
 }
 
 // ── Font method registration ─────────────────────────────────────────────────
 
+/// Register all font methods (SetFont, GetFont, colors, shadow, justify, etc.)
+/// on the given font table Val.
 fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
     let Val::Table(font_ref) = font else {
-        return Err(runtime_error("expected font table"));
+        return Err(runtime_error("add_font_methods: expected table"));
     };
 
-    // SetFontHeight
     table_set_rust_fn(state, font_ref, "SetFontHeight", |state| {
-        // args: self, height
         let font = Val::from_stack(state, 1)?;
         let height = f64::from_stack(state, 2)?;
         table_set(state, font, "__fontHeight", Val::Num(height));
         Ok(0)
     })?;
 
-    // GetFontHeight
     table_set_rust_fn(state, font_ref, "GetFontHeight", |state| {
         let font = Val::from_stack(state, 1)?;
-        let height = font_table_get_f64(state, font, "__fontHeight");
-        height.into_stack(state)
+        font_f64(state, font, "__fontHeight").into_stack(state)
     })?;
 
-    // SetFont
     table_set_rust_fn(state, font_ref, "SetFont", |state| {
         let font = Val::from_stack(state, 1)?;
         let path = Option::<String>::from_stack(state, 2)?;
         let height = Option::<f64>::from_stack(state, 3)?;
         let flags = Option::<String>::from_stack(state, 4)?;
         let Some(path) = path else { return Ok(0) };
-        table_set(state, font, "__fontPath", create_string(state, &path));
+        let path_val = create_string(state, &path);
+        table_set(state, font, "__fontPath", path_val);
         if let Some(h) = height {
             table_set(state, font, "__fontHeight", Val::Num(h));
         }
@@ -91,16 +118,12 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetFont → (path|nil, height, flags)
     table_set_rust_fn(state, font_ref, "GetFont", |state| {
         let font = Val::from_stack(state, 1)?;
         let path = table_get(state, font, "__fontPath");
-        let path_val = match path {
-            Val::Str(_) => path,
-            _ => Val::Nil,
-        };
-        let height = font_table_get_f64(state, font, "__fontHeight");
-        let flags = font_table_get_string(state, font, "__fontFlags");
+        let path_val = match path { Val::Str(_) => path, _ => Val::Nil };
+        let height = font_f64(state, font, "__fontHeight");
+        let flags = font_str(state, font, "__fontFlags");
         let flags_val = create_string(state, &flags);
         state.push(path_val);
         state.push(Val::Num(height));
@@ -108,7 +131,6 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(3)
     })?;
 
-    // SetTextColor
     table_set_rust_fn(state, font_ref, "SetTextColor", |state| {
         let font = Val::from_stack(state, 1)?;
         let r = f64::from_stack(state, 2)?;
@@ -122,17 +144,15 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetTextColor → (r, g, b, a)
     table_set_rust_fn(state, font_ref, "GetTextColor", |state| {
         let font = Val::from_stack(state, 1)?;
-        let r = font_table_get_f64(state, font, "__textColorR");
-        let g = font_table_get_f64(state, font, "__textColorG");
-        let b = font_table_get_f64(state, font, "__textColorB");
-        let a = font_table_get_f64(state, font, "__textColorA");
+        let r = font_f64(state, font, "__textColorR");
+        let g = font_f64(state, font, "__textColorG");
+        let b = font_f64(state, font, "__textColorB");
+        let a = font_f64(state, font, "__textColorA");
         (r, g, b, a).into_stack(state)
     })?;
 
-    // SetShadowColor
     table_set_rust_fn(state, font_ref, "SetShadowColor", |state| {
         let font = Val::from_stack(state, 1)?;
         let r = f64::from_stack(state, 2)?;
@@ -146,17 +166,15 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetShadowColor → (r, g, b, a)
     table_set_rust_fn(state, font_ref, "GetShadowColor", |state| {
         let font = Val::from_stack(state, 1)?;
-        let r = font_table_get_f64(state, font, "__shadowColorR");
-        let g = font_table_get_f64(state, font, "__shadowColorG");
-        let b = font_table_get_f64(state, font, "__shadowColorB");
-        let a = font_table_get_f64(state, font, "__shadowColorA");
+        let r = font_f64(state, font, "__shadowColorR");
+        let g = font_f64(state, font, "__shadowColorG");
+        let b = font_f64(state, font, "__shadowColorB");
+        let a = font_f64(state, font, "__shadowColorA");
         (r, g, b, a).into_stack(state)
     })?;
 
-    // SetShadowOffset
     table_set_rust_fn(state, font_ref, "SetShadowOffset", |state| {
         let font = Val::from_stack(state, 1)?;
         let x = f64::from_stack(state, 2)?;
@@ -166,45 +184,41 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetShadowOffset → (x, y)
     table_set_rust_fn(state, font_ref, "GetShadowOffset", |state| {
         let font = Val::from_stack(state, 1)?;
-        let x = font_table_get_f64(state, font, "__shadowOffsetX");
-        let y = font_table_get_f64(state, font, "__shadowOffsetY");
+        let x = font_f64(state, font, "__shadowOffsetX");
+        let y = font_f64(state, font, "__shadowOffsetY");
         (x, y).into_stack(state)
     })?;
 
-    // SetJustifyH
     table_set_rust_fn(state, font_ref, "SetJustifyH", |state| {
         let font = Val::from_stack(state, 1)?;
         let j = String::from_stack(state, 2)?;
-        table_set(state, font, "__justifyH", create_string(state, &j));
+        let jv = create_string(state, &j);
+        table_set(state, font, "__justifyH", jv);
         Ok(0)
     })?;
 
-    // GetJustifyH
     table_set_rust_fn(state, font_ref, "GetJustifyH", |state| {
         let font = Val::from_stack(state, 1)?;
-        let j = font_table_get_string(state, font, "__justifyH");
+        let j = font_str(state, font, "__justifyH");
         create_string(state, &j).into_stack(state)
     })?;
 
-    // SetJustifyV
     table_set_rust_fn(state, font_ref, "SetJustifyV", |state| {
         let font = Val::from_stack(state, 1)?;
         let j = String::from_stack(state, 2)?;
-        table_set(state, font, "__justifyV", create_string(state, &j));
+        let jv = create_string(state, &j);
+        table_set(state, font, "__justifyV", jv);
         Ok(0)
     })?;
 
-    // GetJustifyV
     table_set_rust_fn(state, font_ref, "GetJustifyV", |state| {
         let font = Val::from_stack(state, 1)?;
-        let j = font_table_get_string(state, font, "__justifyV");
+        let j = font_str(state, font, "__justifyV");
         create_string(state, &j).into_stack(state)
     })?;
 
-    // SetSpacing
     table_set_rust_fn(state, font_ref, "SetSpacing", |state| {
         let font = Val::from_stack(state, 1)?;
         let spacing = f64::from_stack(state, 2)?;
@@ -212,14 +226,11 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetSpacing
     table_set_rust_fn(state, font_ref, "GetSpacing", |state| {
         let font = Val::from_stack(state, 1)?;
-        let s = font_table_get_f64(state, font, "__spacing");
-        s.into_stack(state)
+        font_f64(state, font, "__spacing").into_stack(state)
     })?;
 
-    // SetIndentedWordWrap
     table_set_rust_fn(state, font_ref, "SetIndentedWordWrap", |state| {
         let font = Val::from_stack(state, 1)?;
         let v = bool::from_stack(state, 2)?;
@@ -227,14 +238,12 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetIndentedWordWrap
     table_set_rust_fn(state, font_ref, "GetIndentedWordWrap", |state| {
         let font = Val::from_stack(state, 1)?;
         let v = matches!(table_get(state, font, "__indentedWordWrap"), Val::Bool(true));
         v.into_stack(state)
     })?;
 
-    // SetMaxLines
     table_set_rust_fn(state, font_ref, "SetMaxLines", |state| {
         let font = Val::from_stack(state, 1)?;
         let v = i32::from_stack(state, 2)?;
@@ -242,7 +251,6 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         Ok(0)
     })?;
 
-    // GetMaxLines
     table_set_rust_fn(state, font_ref, "GetMaxLines", |state| {
         let font = Val::from_stack(state, 1)?;
         let v = match table_get(state, font, "__maxLines") {
@@ -252,60 +260,43 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
         v.into_stack(state)
     })?;
 
-    // GetName
     table_set_rust_fn(state, font_ref, "GetName", |state| {
         let font = Val::from_stack(state, 1)?;
         let name = table_get(state, font, "__name");
-        match name {
-            Val::Str(_) => name.into_stack(state),
-            _ => Val::Nil.into_stack(state),
-        }
+        match name { Val::Str(_) => name.into_stack(state), _ => Val::Nil.into_stack(state) }
     })?;
 
-    // GetFontObjectForAlphabet — returns self
     table_set_rust_fn(state, font_ref, "GetFontObjectForAlphabet", |state| {
-        let font = Val::from_stack(state, 1)?;
-        font.into_stack(state)
+        Val::from_stack(state, 1)?.into_stack(state)
     })?;
 
-    // CopyFontObject — TODO: full cycle-safe copy; stubs field copy for now
+    // TODO: full cycle-safe property copy (mlua: copy_font_properties)
     table_set_rust_fn(state, font_ref, "CopyFontObject", |state| {
-        // TODO: implement cycle-safe font property copy
         let _font = Val::from_stack(state, 1)?;
         let _src = Val::from_stack(state, 2)?;
         Ok(0)
     })?;
 
-    // GetObjectType → "Font"
     table_set_rust_fn(state, font_ref, "GetObjectType", |state| {
         create_string(state, "Font").into_stack(state)
     })?;
 
-    // IsObjectType(name) → bool
     table_set_rust_fn(state, font_ref, "IsObjectType", |state| {
-        let type_name = Option::<String>::from_stack(state, 2)?
-            .unwrap_or_default();
-        type_name.eq_ignore_ascii_case("Font").into_stack(state)
+        let name = Option::<String>::from_stack(state, 2)?.unwrap_or_default();
+        name.eq_ignore_ascii_case("Font").into_stack(state)
     })?;
 
-    // GetFontObject → __fontObject
     table_set_rust_fn(state, font_ref, "GetFontObject", |state| {
         let font = Val::from_stack(state, 1)?;
-        let fo = table_get(state, font, "__fontObject");
-        fo.into_stack(state)
+        table_get(state, font, "__fontObject").into_stack(state)
     })?;
 
-    // SetFontObject — TODO: cycle detection; stubs assignment for now
+    // TODO: cycle detection (mlua: detect_font_object_cycle)
     table_set_rust_fn(state, font_ref, "SetFontObject", |state| {
-        // TODO: implement cycle detection (detect_font_object_cycle equivalent)
         let font = Val::from_stack(state, 1)?;
         let target = Val::from_stack(state, 2)?;
-        match target {
-            Val::Table(_) | Val::Str(_) => {
-                // Only assign table targets directly; string lookup not implemented yet
-                table_set(state, font, "__fontObject", target);
-            }
-            _ => {}
+        if matches!(target, Val::Table(_)) {
+            table_set(state, font, "__fontObject", target);
         }
         Ok(0)
     })?;
@@ -313,79 +304,54 @@ fn add_font_methods(state: &mut LuaState, font: Val) -> LuaResult<()> {
     Ok(())
 }
 
-// ── CreateFont global ────────────────────────────────────────────────────────
+// ── CreateFont ───────────────────────────────────────────────────────────────
 
-fn register_create_font(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "CreateFont", |state| {
-        // Coerce name arg (string or number), nil → error
-        let name_val = Val::from_stack(state, 1)?;
-        let name = match name_val {
-            Val::Str(_) => val_to_string(state, name_val)
-                .ok_or_else(|| runtime_error("CreateFont: invalid string"))?,
-            Val::Num(n) => (n as i64).to_string(),
-            _ => return Err(runtime_error("Usage: CreateFont(\"name\")")),
-        };
+pub fn create_font(state: &mut LuaState) -> LuaResult<u32> {
+    // Coerce name arg (string or number); nil/other → error
+    let name_val = Val::from_stack(state, 1)?;
+    let name = match name_val {
+        Val::Str(_) => val_to_string(state, name_val)
+            .ok_or_else(|| runtime_error("CreateFont: invalid string"))?,
+        Val::Num(n) => (n as i64).to_string(),
+        _ => return Err(runtime_error("Usage: CreateFont(\"name\")")),
+    };
 
-        // Check/create __font_registry in globals
-        // TODO: check registry for existing font object to return same instance
-        let font = create_table(state);
-        font_set_defaults(state, font, Some(&name));
-        add_font_methods(state, font)?;
-
-        // Set global _G[name] = font
-        let name_val = create_string(state, &name);
-        let Val::Str(name_ref) = name_val else { unreachable!() };
-        LuaApiMut::set_global(state, name_ref, font)?;
-
-        font.into_stack(state)
-    })
+    // TODO: check __font_registry for existing object (return same instance on repeat calls)
+    let font = create_table(state);
+    font_set_defaults(state, font, Some(&name));
+    add_font_methods(state, font)?;
+    set_global_val(state, &name, font);
+    font.into_stack(state)
 }
 
-// ── GetFonts global ──────────────────────────────────────────────────────────
-
-fn register_get_fonts(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "GetFonts", |state| {
-        let t = create_table(state);
-        t.into_stack(state)
-    })
+pub fn get_fonts(state: &mut LuaState) -> LuaResult<u32> {
+    create_table(state).into_stack(state)
 }
 
-// ── GetFontInfo global ───────────────────────────────────────────────────────
-
-fn register_get_font_info(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "GetFontInfo", |state| {
-        // TODO: resolve font object from arg (string name or table), populate info
-        let info = create_table(state);
-        table_set(state, info, "name", create_string(state, ""));
-        table_set(state, info, "height", Val::Num(12.0));
-        table_set(state, info, "outline", create_string(state, ""));
-        info.into_stack(state)
-    })
+pub fn get_font_info(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: resolve font object from arg (string name or table), populate fields
+    let info = create_table(state);
+    let empty = create_string(state, "");
+    table_set(state, info, "name", empty);
+    table_set(state, info, "height", Val::Num(12.0));
+    let outline = create_string(state, "");
+    table_set(state, info, "outline", outline);
+    info.into_stack(state)
 }
 
-// ── CreateFontFamily global ──────────────────────────────────────────────────
+pub fn create_font_family(state: &mut LuaState) -> LuaResult<u32> {
+    let name = String::from_stack(state, 1)?;
+    let _members = Val::from_stack(state, 2)?;
+    // TODO: extract first member's file/height/flags from members table
 
-fn register_create_font_family(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "CreateFontFamily", |state| {
-        let name = String::from_stack(state, 1)?;
-        let members = Val::from_stack(state, 2)?;
-
-        let font = create_table(state);
-        font_set_defaults(state, font, Some(&name));
-
-        // Apply first member's file/height/flags if present
-        // TODO: extract first member from the members table
-        let _ = members;
-
-        add_font_methods(state, font)?;
-        let name_val = create_string(state, &name);
-        let Val::Str(name_ref) = name_val else { unreachable!() };
-        LuaApiMut::set_global(state, name_ref, font)?;
-        font.into_stack(state)
-    })
+    let font = create_table(state);
+    font_set_defaults(state, font, Some(&name));
+    add_font_methods(state, font)?;
+    set_global_val(state, &name, font);
+    font.into_stack(state)
 }
 
-// ── create_standard_font_objects ─────────────────────────────────────────────
+// ── Standard font objects ─────────────────────────────────────────────────────
 
 /// (name, height, flags, r, g, b)
 const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
@@ -450,46 +416,34 @@ const STANDARD_FONTS: &[(&str, f64, &str, f64, f64, f64)] = &[
     ("FriendsFont_UserText", 11.0, "", 1.0, 1.0, 1.0),
 ];
 
-fn create_standard_font_object(
-    lua: &mut rilua::Lua,
-    name: &str,
-    height: f64,
-    flags: &str,
-    r: f64,
-    g: f64,
-    b: f64,
-) -> LuaResult<()> {
-    let state = lua.state_mut();
-    let font = create_table(state);
-    font_set_defaults(state, font, Some(name));
-    table_set(state, font, "__fontHeight", Val::Num(height));
-    table_set(state, font, "__fontFlags", create_string(state, flags));
-    table_set(state, font, "__textColorR", Val::Num(r));
-    table_set(state, font, "__textColorG", Val::Num(g));
-    table_set(state, font, "__textColorB", Val::Num(b));
-    add_font_methods(state, font)?;
-    let name_val = create_string(state, name);
-    let Val::Str(name_ref) = name_val else { unreachable!() };
-    LuaApiMut::set_global(state, name_ref, font)
-}
-
+/// Create and register all standard WoW font globals on the rilua state.
 pub fn register_standard_font_objects(lua: &mut rilua::Lua) -> LuaResult<()> {
     for &(name, height, flags, r, g, b) in STANDARD_FONTS {
-        create_standard_font_object(lua, name, height, flags, r, g, b)?;
+        let state = lua.state_mut();
+        let font = create_table(state);
+        font_set_defaults(state, font, Some(name));
+        table_set(state, font, "__fontHeight", Val::Num(height));
+        let flags_val = create_string(state, flags);
+        table_set(state, font, "__fontFlags", flags_val);
+        table_set(state, font, "__textColorR", Val::Num(r));
+        table_set(state, font, "__textColorG", Val::Num(g));
+        table_set(state, font, "__textColorB", Val::Num(b));
+        add_font_methods(state, font)?;
+        set_global_val(state, name, font);
     }
     Ok(())
 }
 
 // ============================================================================
-// Section 2: strings/mod — keybinding functions, tooltip colors, item quality
-//             colors, class name tables, icon list
+// Section 2: strings/mod — color tables, keybinding functions
 //
-// NOTE: String constant registration (register_all_ui_strings) passes raw
-// &str data arrays and has no rilua-specific logic — it continues to use mlua.
-// Only the Lua-table-building helpers are converted here.
+// String constant registration (register_all_ui_strings) passes raw &str
+// data arrays and has no rilua-specific logic — it stays mlua.
+// Only the Lua-table-building helpers that create method-bearing tables need
+// rilua equivalents.
 // ============================================================================
 
-// ── Color table helpers ──────────────────────────────────────────────────────
+// ── Color table helper ────────────────────────────────────────────────────────
 
 /// Build a rilua color table {r, g, b, a} with GetRGB/GetRGBA/GenerateHexColor/WrapTextInColorCode.
 pub fn make_rilua_color_table(state: &mut LuaState, r: f64, g: f64, b: f64, a: f64) -> LuaResult<Val> {
@@ -523,7 +477,8 @@ pub fn make_rilua_color_table(state: &mut LuaState, r: f64, g: f64, b: f64, a: f
         let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
         let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
         let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
-        let hex = format!("{:02x}{:02x}{:02x}", (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8);
+        let hex = format!("{:02x}{:02x}{:02x}",
+            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8);
         create_string(state, &hex).into_stack(state)
     })?;
 
@@ -533,178 +488,143 @@ pub fn make_rilua_color_table(state: &mut LuaState, r: f64, g: f64, b: f64, a: f
         let r = match table_get(state, this, "r") { Val::Num(n) => n, _ => 0.0 };
         let g = match table_get(state, this, "g") { Val::Num(n) => n, _ => 0.0 };
         let b = match table_get(state, this, "b") { Val::Num(n) => n, _ => 0.0 };
-        let wrapped = format!(
-            "|cff{:02x}{:02x}{:02x}{}|r",
-            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8, text
-        );
+        let wrapped = format!("|cff{:02x}{:02x}{:02x}{}|r",
+            (r * 255.0) as u8, (g * 255.0) as u8, (b * 255.0) as u8, text);
         create_string(state, &wrapped).into_stack(state)
     })?;
 
     Ok(t)
 }
 
-/// Register TOOLTIP_DEFAULT_COLOR and TOOLTIP_DEFAULT_BACKGROUND_COLOR globals.
 pub fn register_rilua_tooltip_colors(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // TODO: pull constants from string_data when accessible
+    // TODO: pull exact constants from string_data::TOOLTIP_DEFAULT_COLOR
     let state = lua.state_mut();
     let color = make_rilua_color_table(state, 1.0, 0.9, 0.0, 1.0)?;
-    let Val::Str(k1) = create_string(state, "TOOLTIP_DEFAULT_COLOR") else { unreachable!() };
-    LuaApiMut::set_global(state, k1, color)?;
-
+    set_global_val(state, "TOOLTIP_DEFAULT_COLOR", color);
     let bg = make_rilua_color_table(state, 0.09, 0.09, 0.19, 1.0)?;
-    let Val::Str(k2) = create_string(state, "TOOLTIP_DEFAULT_BACKGROUND_COLOR") else { unreachable!() };
-    LuaApiMut::set_global(state, k2, bg)
+    set_global_val(state, "TOOLTIP_DEFAULT_BACKGROUND_COLOR", bg);
+    Ok(())
 }
 
-/// Register ITEM_QUALITY_COLORS global.
 pub fn register_rilua_item_quality_colors(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // TODO: iterate ITEM_QUALITY_COLORS_DATA from string_data and build table
+    // TODO: iterate ITEM_QUALITY_COLORS_DATA from string_data
     let state = lua.state_mut();
     let t = create_table(state);
-    let Val::Str(k) = create_string(state, "ITEM_QUALITY_COLORS") else { unreachable!() };
-    LuaApiMut::set_global(state, k, t)
+    set_global_val(state, "ITEM_QUALITY_COLORS", t);
+    Ok(())
 }
 
-/// Register LOCALIZED_CLASS_NAMES_MALE and LOCALIZED_CLASS_NAMES_FEMALE globals.
 pub fn register_rilua_class_name_tables(lua: &mut rilua::Lua) -> LuaResult<()> {
     // TODO: iterate CLASS_NAMES_DATA from string_data
     let state = lua.state_mut();
     let male = create_table(state);
     let female = create_table(state);
-    let Val::Str(km) = create_string(state, "LOCALIZED_CLASS_NAMES_MALE") else { unreachable!() };
-    LuaApiMut::set_global(state, km, male)?;
-    let Val::Str(kf) = create_string(state, "LOCALIZED_CLASS_NAMES_FEMALE") else { unreachable!() };
-    LuaApiMut::set_global(state, kf, female)
+    set_global_val(state, "LOCALIZED_CLASS_NAMES_MALE", male);
+    set_global_val(state, "LOCALIZED_CLASS_NAMES_FEMALE", female);
+    Ok(())
 }
 
-/// Register ICON_LIST global.
 pub fn register_rilua_icon_list(lua: &mut rilua::Lua) -> LuaResult<()> {
     // TODO: iterate ICON_LIST_DATA from string_data
     let state = lua.state_mut();
     let t = create_table(state);
-    let Val::Str(k) = create_string(state, "ICON_LIST") else { unreachable!() };
-    LuaApiMut::set_global(state, k, t)
+    set_global_val(state, "ICON_LIST", t);
+    Ok(())
 }
 
-// ── Keybinding function registration ────────────────────────────────────────
+// ── Keybinding functions ──────────────────────────────────────────────────────
 //
-// Keybindings store their data in SimState, so these RustFns access it via
-// borrow_state / borrow_state_mut.
+// Keybinding state lives in SimState. Full wiring is a TODO; stubs return
+// no-op / empty values so addons don't hard-error on load.
+
+pub fn get_binding_key(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: keybindings::get_binding_key on SimState
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+pub fn get_binding_key_for_action(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: keybindings lookup on SimState
+    Val::Nil.into_stack(state)
+}
+
+pub fn get_binding_action(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: reverse keybinding lookup on SimState
+    create_string(state, "").into_stack(state)
+}
+
+pub fn get_binding(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: keybindings::get_binding_at on SimState
+    state.push(Val::Nil);
+    state.push(Val::Nil);
+    Ok(2)
+}
+
+pub fn get_num_bindings(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: keybindings::get_num_bindings on SimState
+    (0i32).into_stack(state)
+}
+
+pub fn get_current_binding_set(state: &mut LuaState) -> LuaResult<u32> {
+    (1i32).into_stack(state)
+}
+
+pub fn get_binding_text(state: &mut LuaState) -> LuaResult<u32> {
+    let key = Option::<String>::from_stack(state, 1)?;
+    match key {
+        Some(k) => create_string(state, &k).into_stack(state),
+        None => create_string(state, "").into_stack(state),
+    }
+}
+
+pub fn is_binding_for_game_pad(state: &mut LuaState) -> LuaResult<u32> {
+    false.into_stack(state)
+}
+
+pub fn set_binding(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: keybindings::set_binding on SimState
+    true.into_stack(state)
+}
+
+pub fn set_binding_click(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
+pub fn set_binding_spell(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
+pub fn set_binding_item(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
+pub fn set_binding_macro(state: &mut LuaState) -> LuaResult<u32> { true.into_stack(state) }
+
+pub fn save_bindings(state: &mut LuaState) -> LuaResult<u32> { Ok(0) }
+pub fn load_bindings(state: &mut LuaState) -> LuaResult<u32> { Ok(0) }
 
 pub fn register_rilua_keybinding_functions(lua: &mut rilua::Lua) -> LuaResult<()> {
-    register_rilua_binding_getters(lua)?;
-    register_rilua_binding_setters(lua)?;
-    register_rilua_binding_persistence(lua)?;
-    Ok(())
-}
-
-fn register_rilua_binding_getters(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // GetBindingKey(action) → key1, key2
-    LuaApiMut::register_function(lua, "GetBindingKey", |state| {
-        // TODO: implement via keybindings::get_binding_key equivalent on SimState
-        state.push(Val::Nil);
-        state.push(Val::Nil);
-        Ok(2)
-    })?;
-
-    // GetBindingKeyForAction(action) → key|nil
-    LuaApiMut::register_function(lua, "GetBindingKeyForAction", |state| {
-        // TODO: implement via keybindings lookup on SimState
-        Val::Nil.into_stack(state)
-    })?;
-
-    // GetBindingAction(key, checkOverride?) → action
-    LuaApiMut::register_function(lua, "GetBindingAction", |state| {
-        // TODO: reverse keybinding lookup on SimState
-        create_string(state, "").into_stack(state)
-    })?;
-
-    // GetBinding(index) → action, header, key1?, key2?
-    LuaApiMut::register_function(lua, "GetBinding", |state| {
-        // TODO: keybindings::get_binding_at on SimState
-        state.push(Val::Nil);
-        state.push(Val::Nil);
-        Ok(2)
-    })?;
-
-    // GetNumBindings() → count
-    LuaApiMut::register_function(lua, "GetNumBindings", |state| {
-        // TODO: keybindings::get_num_bindings on SimState
-        (0i32).into_stack(state)
-    })?;
-
-    // GetCurrentBindingSet() → 1
-    LuaApiMut::register_function(lua, "GetCurrentBindingSet", |state| {
-        (1i32).into_stack(state)
-    })?;
-
-    // GetBindingText(key, prefix?, abbrev?) → key|""
-    LuaApiMut::register_function(lua, "GetBindingText", |state| {
-        let key = Option::<String>::from_stack(state, 1)?;
-        match key {
-            Some(k) => create_string(state, &k).into_stack(state),
-            None => create_string(state, "").into_stack(state),
-        }
-    })?;
-
-    // IsBindingForGamePad → false
-    LuaApiMut::register_function(lua, "IsBindingForGamePad", |state| {
-        false.into_stack(state)
-    })?;
-
-    Ok(())
-}
-
-fn register_rilua_binding_setters(lua: &mut rilua::Lua) -> LuaResult<()> {
-    // SetBinding(key, action?) → bool
-    LuaApiMut::register_function(lua, "SetBinding", |state| {
-        // TODO: keybindings::set_binding on SimState
-        true.into_stack(state)
-    })?;
-
-    LuaApiMut::register_function(lua, "SetBindingClick", |state| {
-        true.into_stack(state)
-    })?;
-    LuaApiMut::register_function(lua, "SetBindingSpell", |state| {
-        true.into_stack(state)
-    })?;
-    LuaApiMut::register_function(lua, "SetBindingItem", |state| {
-        true.into_stack(state)
-    })?;
-    LuaApiMut::register_function(lua, "SetBindingMacro", |state| {
-        true.into_stack(state)
-    })?;
-    Ok(())
-}
-
-fn register_rilua_binding_persistence(lua: &mut rilua::Lua) -> LuaResult<()> {
-    LuaApiMut::register_function(lua, "SaveBindings", |state| {
-        let _which = Option::<i32>::from_stack(state, 1)?;
-        Ok(0)
-    })?;
-    LuaApiMut::register_function(lua, "LoadBindings", |state| {
-        let _which = Option::<i32>::from_stack(state, 1)?;
-        Ok(0)
-    })?;
+    LuaApiMut::register_function(lua, "GetBindingKey", get_binding_key)?;
+    LuaApiMut::register_function(lua, "GetBindingKeyForAction", get_binding_key_for_action)?;
+    LuaApiMut::register_function(lua, "GetBindingAction", get_binding_action)?;
+    LuaApiMut::register_function(lua, "GetBinding", get_binding)?;
+    LuaApiMut::register_function(lua, "GetNumBindings", get_num_bindings)?;
+    LuaApiMut::register_function(lua, "GetCurrentBindingSet", get_current_binding_set)?;
+    LuaApiMut::register_function(lua, "GetBindingText", get_binding_text)?;
+    LuaApiMut::register_function(lua, "IsBindingForGamePad", is_binding_for_game_pad)?;
+    LuaApiMut::register_function(lua, "SetBinding", set_binding)?;
+    LuaApiMut::register_function(lua, "SetBindingClick", set_binding_click)?;
+    LuaApiMut::register_function(lua, "SetBindingSpell", set_binding_spell)?;
+    LuaApiMut::register_function(lua, "SetBindingItem", set_binding_item)?;
+    LuaApiMut::register_function(lua, "SetBindingMacro", set_binding_macro)?;
+    LuaApiMut::register_function(lua, "SaveBindings", save_bindings)?;
+    LuaApiMut::register_function(lua, "LoadBindings", load_bindings)?;
     Ok(())
 }
 
 // ============================================================================
 // Section 3: c_collection_api — C_PetJournal, C_MountJournal, C_ToyBox
 //
-// These are namespace tables (C_*) that live in globals. They need SimState
-// access via borrow_state / borrow_state_mut inside each RustFn.
-//
-// NOTE: rilua RustFn cannot capture Rc<RefCell<SimState>> (plain fn pointer),
-// so SimState is always accessed via state.app_data::<WowLuaAppData>().
+// These are namespace tables. RustFns access SimState via borrow_state /
+// borrow_state_mut (app_data pattern — no captured state in fn pointers).
 // ============================================================================
 
 // ── C_PetJournal ─────────────────────────────────────────────────────────────
 
-fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let state = lua.state_mut();
-    let t = TableBuilder::new(state)
-        // GetNumPets() → total, owned
+pub fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let t = TableBuilder::new(lua.state_mut())
         .set_function("GetNumPets", |state| {
             let st = borrow_state(state)?;
             let total = st.world.pets.len() as i32;
@@ -712,7 +632,6 @@ fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             drop(st);
             (total, owned).into_stack(state)
         })?
-        // GetNumCollectedInfo(speciesId) → collected, total
         .set_function("GetNumCollectedInfo", |state| {
             let st = borrow_state(state)?;
             let owned = st.world.pets.iter().filter(|p| p.is_collected).count() as i32;
@@ -720,11 +639,9 @@ fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             drop(st);
             (owned, total).into_stack(state)
         })?
-        // GetNumPetsNeedingFanfare() → 0
         .set_function("GetNumPetsNeedingFanfare", |state| {
             (0i32).into_stack(state)
         })?
-        // GetPetInfoByIndex(index) → speciesId, ...
         .set_function("GetPetInfoByIndex", |state| {
             let index = i32::from_stack(state, 1)?;
             let st = borrow_state(state)?;
@@ -733,13 +650,13 @@ fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
                 drop(st);
                 return Ok(0);
             };
-            // Push: speciesId, nil, level, 0, 0, 0, false, name, icon, petType, 0, "", "", false, true, false, false
             let species = p.species_id as f64;
             let level = p.level as f64;
             let icon = p.icon as f64;
             let pet_type = p.pet_type as f64;
             let name_str = p.name.clone();
             drop(st);
+            // speciesId, nil, level, 0, 0, 0, false, name, icon, petType, 0, "", "", false, true, false, false
             state.push(Val::Num(species));
             state.push(Val::Nil);
             state.push(Val::Num(level));
@@ -759,31 +676,27 @@ fn register_rilua_pet_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
             state.push(Val::Bool(false));
             Ok(17)
         })?
-        // GetPetInfoByPetID(petId) → speciesId, ...
         .set_function("GetPetInfoByPetID", |state| {
             // TODO: lookup by pet_id string
             Ok(0)
         })?
-        // GetPetInfoBySpeciesID(speciesId) → speciesId, ...
         .set_function("GetPetInfoBySpeciesID", |state| {
             // TODO: lookup by species_id
             Ok(0)
         })?
-        // PetIsSummonable(petId) → false
         .set_function("PetIsSummonable", |state| {
             false.into_stack(state)
         })?
         .build();
 
-    let Val::Str(k) = create_string(lua.state_mut(), "C_PetJournal") else { unreachable!() };
-    LuaApiMut::set_global(lua.state_mut(), k, t)
+    set_global_val(lua.state_mut(), "C_PetJournal", t);
+    Ok(())
 }
 
 // ── C_MountJournal ───────────────────────────────────────────────────────────
 
-fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let state = lua.state_mut();
-    let t = TableBuilder::new(state)
+pub fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let t = TableBuilder::new(lua.state_mut())
         .set_function("GetNumMounts", |state| {
             let st = borrow_state(state)?;
             let n = st.world.mounts.len() as i32;
@@ -882,32 +795,23 @@ fn register_rilua_mount_journal(lua: &mut rilua::Lua) -> LuaResult<()> {
         .set_function("GetCollectedFilterSetting", |state| {
             true.into_stack(state)
         })?
-        .set_function("SetCollectedFilterSetting", |state| {
-            Ok(0)
-        })?
+        .set_function("SetCollectedFilterSetting", |_state| { Ok(0) })?
         .set_function("GetIsFavorite", |state| {
             (false, false).into_stack(state)
         })?
-        .set_function("SetIsFavorite", |state| {
-            Ok(0)
-        })?
-        .set_function("Summon", |state| {
-            Ok(0)
-        })?
-        .set_function("Dismiss", |state| {
-            Ok(0)
-        })?
+        .set_function("SetIsFavorite", |_state| { Ok(0) })?
+        .set_function("Summon", |_state| { Ok(0) })?
+        .set_function("Dismiss", |_state| { Ok(0) })?
         .build();
 
-    let Val::Str(k) = create_string(lua.state_mut(), "C_MountJournal") else { unreachable!() };
-    LuaApiMut::set_global(lua.state_mut(), k, t)
+    set_global_val(lua.state_mut(), "C_MountJournal", t);
+    Ok(())
 }
 
 // ── C_ToyBox ─────────────────────────────────────────────────────────────────
 
-fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
-    let state = lua.state_mut();
-    let t = TableBuilder::new(state)
+pub fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let t = TableBuilder::new(lua.state_mut())
         .set_function("GetNumTotalDisplayedToys", |state| {
             let st = borrow_state(state)?;
             let n = st.world.toys.len() as i32;
@@ -987,7 +891,10 @@ fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
             let st = borrow_state(state)?;
             let link = st.world.toys.iter()
                 .find(|t| t.item_id == item_id as u32)
-                .map(|toy| format!("|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r", toy.item_id, toy.name));
+                .map(|toy| format!(
+                    "|cff0070dd|Hitem:{}::::::::1:0|h[{}]|h|r",
+                    toy.item_id, toy.name
+                ));
             drop(st);
             match link {
                 Some(s) => create_string(state, &s).into_stack(state),
@@ -1005,18 +912,17 @@ fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
             }
             Ok(0)
         })?
-        // Filter stubs
         .set_function("GetCollectedShown", |state| { true.into_stack(state) })?
         .set_function("GetUncollectedShown", |state| { true.into_stack(state) })?
         .set_function("GetUnusableShown", |state| { true.into_stack(state) })?
-        .set_function("SetCollectedShown", |state| { Ok(0) })?
-        .set_function("SetUncollectedShown", |state| { Ok(0) })?
-        .set_function("SetUnusableShown", |state| { Ok(0) })?
-        .set_function("ForceToyRefilter", |state| { Ok(0) })?
+        .set_function("SetCollectedShown", |_state| { Ok(0) })?
+        .set_function("SetUncollectedShown", |_state| { Ok(0) })?
+        .set_function("SetUnusableShown", |_state| { Ok(0) })?
+        .set_function("ForceToyRefilter", |_state| { Ok(0) })?
         .build();
 
-    let Val::Str(k) = create_string(lua.state_mut(), "C_ToyBox") else { unreachable!() };
-    LuaApiMut::set_global(lua.state_mut(), k, t)
+    set_global_val(lua.state_mut(), "C_ToyBox", t);
+    Ok(())
 }
 
 // ============================================================================
@@ -1026,13 +932,13 @@ fn register_rilua_toy_box(lua: &mut rilua::Lua) -> LuaResult<()> {
 /// Register all font, string-table, and collection API globals on the rilua VM.
 pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
     // Font API
-    register_create_font(lua)?;
-    register_get_fonts(lua)?;
-    register_get_font_info(lua)?;
-    register_create_font_family(lua)?;
+    LuaApiMut::register_function(lua, "CreateFont", create_font)?;
+    LuaApiMut::register_function(lua, "GetFonts", get_fonts)?;
+    LuaApiMut::register_function(lua, "GetFontInfo", get_font_info)?;
+    LuaApiMut::register_function(lua, "CreateFontFamily", create_font_family)?;
     register_standard_font_objects(lua)?;
 
-    // String/UI table globals (Lua-table-backed only; pure constants stay mlua)
+    // String/UI table globals (Lua-table-backed; pure string constants stay mlua)
     register_rilua_tooltip_colors(lua)?;
     register_rilua_item_quality_colors(lua)?;
     register_rilua_class_name_tables(lua)?;
