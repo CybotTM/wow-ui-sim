@@ -9,7 +9,9 @@ mod perf_template_create;
 use std::time::Duration;
 
 use perf_game_ui::load_timed_game_ui;
-use perf_template_create::{TemplateBench, measure_action_bar_button_family, measure_template_create};
+use perf_template_create::{
+    TemplateBench, measure_action_bar_button_family, measure_template_create,
+};
 
 const FULL_GAME_STARTUP_BUDGET: Duration = Duration::from_secs(30);
 

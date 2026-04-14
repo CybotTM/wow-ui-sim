@@ -298,9 +298,7 @@ fn create_root_menu_description(lua: &Lua, _menu_tag: Option<String>) -> Result<
     desc.set(
         "CreateButton",
         lua.create_function(
-            |_, (_self, _text, _callback): (Value, String, Option<mlua::Function>)| {
-                Ok(Value::Nil)
-            },
+            |_, (_self, _text, _callback): (Value, String, Option<mlua::Function>)| Ok(Value::Nil),
         )?,
     )?;
     desc.set(

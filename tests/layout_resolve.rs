@@ -50,8 +50,14 @@ fn inherited_dirty_ancestor_resolves_child() {
     "#,
         )
         .unwrap();
-    assert!((w - 100.0).abs() < 0.01, "child width should be 100, got {w}");
-    assert!((h - 50.0).abs() < 0.01, "child height should be 50, got {h}");
+    assert!(
+        (w - 100.0).abs() < 0.01,
+        "child width should be 100, got {w}"
+    );
+    assert!(
+        (h - 50.0).abs() < 0.01,
+        "child height should be 50, got {h}"
+    );
 }
 
 #[test]
@@ -82,5 +88,8 @@ fn multiple_dirty_ancestors_resolve_correctly() {
         )
         .unwrap();
     assert!((w - 80.0).abs() < 0.01, "child width should be 80, got {w}");
-    assert!((h - 40.0).abs() < 0.01, "child height should be 40, got {h}");
+    assert!(
+        (h - 40.0).abs() < 0.01,
+        "child height should be 40, got {h}"
+    );
 }

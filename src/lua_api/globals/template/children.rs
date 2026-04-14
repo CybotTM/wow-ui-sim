@@ -76,13 +76,28 @@ fn create_child_frame_from_template(
 
     push_suppress(lua);
 
-    if !try_create_child_frame(lua, state, frame, widget_type, parent_name, &child_name, use_direct_creation) {
+    if !try_create_child_frame(
+        lua,
+        state,
+        frame,
+        widget_type,
+        parent_name,
+        &child_name,
+        use_direct_creation,
+    ) {
         pop_suppress(lua);
         return None;
     }
 
     apply_child_templates(lua, state, frame, &child_name, intrinsic, parent_name);
-    apply_inline_frame_content(lua, state, frame, &child_name, child_subst, use_direct_creation);
+    apply_inline_frame_content(
+        lua,
+        state,
+        frame,
+        &child_name,
+        child_subst,
+        use_direct_creation,
+    );
 
     pop_suppress(lua);
     defer_child_onload(lua, &child_name);

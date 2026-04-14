@@ -122,10 +122,7 @@ fn emit_vert_edge_strip(
     piece: &NineSlicePiece,
     alpha: f32,
 ) {
-    let strip = Rectangle::new(
-        Point::new(x, y),
-        Size::new(piece.width as f32, height),
-    );
+    let strip = Rectangle::new(Point::new(x, y), Size::new(piece.width as f32, height));
     let (path, uvs) = crop_piece(piece);
     emit_vert_tiles(
         batch,

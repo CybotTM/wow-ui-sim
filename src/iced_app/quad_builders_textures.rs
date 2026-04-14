@@ -4,7 +4,7 @@ use crate::atlas::{AtlasSliceMode, get_atlas_slice_info};
 use crate::render::{BlendMode, QuadBatch};
 
 use super::super::slice_render::{
-    StretchSliceRender, TexturedSlice, TextureUvs, ThreeSliceRender, TileSliceRender,
+    StretchSliceRender, TextureUvs, TexturedSlice, ThreeSliceRender, TileSliceRender,
     emit_stretch_slice_atlas, emit_three_slice_h_atlas, emit_tile_slice_atlas,
 };
 use super::super::statusbar::StatusBarFill;
@@ -437,8 +437,8 @@ mod tests {
         BlendMode, TexturedSlice, emit_texture_fill, remap_atlas_crop, stretch_slice_render,
         tile_slice_render,
     };
-    use crate::iced_app::slice_render::{tile_slice_center_height, tile_slice_center_width};
     use crate::atlas::get_render_atlas_info;
+    use crate::iced_app::slice_render::{tile_slice_center_height, tile_slice_center_width};
     use crate::render::QuadBatch;
     use crate::widget::{Frame, WidgetType};
     use iced::{Point, Rectangle, Size};
