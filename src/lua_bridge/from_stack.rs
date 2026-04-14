@@ -1,6 +1,8 @@
 //! [`FromStack`] trait and implementations for extracting typed values
 //! from the rilua call stack.
 
+use std::marker::PhantomData;
+
 use rilua::vm::state::LuaState;
 use rilua::LuaError;
 use rilua::LuaResult;
@@ -57,6 +59,84 @@ pub(crate) fn stack_val(state: &LuaState, index: i32) -> Val {
 /// the actual type name, matching the style of PUC-Rio's `luaL_checktype`.
 pub trait FromStack: Sized {
     fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self>;
+}
+
+// ---------------------------------------------------------------------------
+// Frame-backed table extraction
+// ---------------------------------------------------------------------------
+
+/// Host-side arena API for frame-backed Lua tables.
+pub trait FrameArena {
+    type Frame;
+
+    fn frame(&self, index: u32, generation: u32) -> Option<&Self::Frame>;
+    fn frame_mut(&mut self, index: u32, generation: u32) -> Option<&mut Self::Frame>;
+}
+
+/// Typed handle to a frame-backed Lua table stored in host app data.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct FrameRef<A: FrameArena + 'static> {
+    index: u32,
+    generation: u32,
+    _marker: PhantomData<fn() -> A>,
+}
+
+impl<A: FrameArena + 'static> FrameRef<A> {
+    pub fn index(&self) -> u32 {
+        self.index
+    }
+
+    pub fn generation(&self) -> u32 {
+        self.generation
+    }
+
+    pub fn get<'a>(&self, state: &'a LuaState) -> LuaResult<&'a A::Frame> {
+        let arena = state
+            .app_data::<A>()
+            .ok_or_else(|| runtime_error("missing frame arena app_data for frame-backed table"))?;
+        arena.frame(self.index, self.generation).ok_or_else(|| {
+            runtime_error(format!(
+                "missing frame for backing ({}, {})",
+                self.index, self.generation
+            ))
+        })
+    }
+
+    pub fn get_mut<'a>(&self, state: &'a mut LuaState) -> LuaResult<&'a mut A::Frame> {
+        let arena = state
+            .app_data_mut::<A>()
+            .ok_or_else(|| runtime_error("missing frame arena app_data for frame-backed table"))?;
+        arena.frame_mut(self.index, self.generation).ok_or_else(|| {
+            runtime_error(format!(
+                "missing frame for backing ({}, {})",
+                self.index, self.generation
+            ))
+        })
+    }
+}
+
+impl<A: FrameArena + 'static> FromStack for FrameRef<A> {
+    fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
+        let val = stack_val(state, index);
+        let Val::Table(table_ref) = val else {
+            return Err(type_error("frame-backed table", val.type_name(), index));
+        };
+
+        let backing = state
+            .gc
+            .tables
+            .get(table_ref)
+            .and_then(|table| table.backing())
+            .ok_or_else(|| type_error("frame-backed table", "table", index))?;
+
+        let frame_ref = Self {
+            index: backing.0,
+            generation: backing.1,
+            _marker: PhantomData,
+        };
+        let _ = frame_ref.get(state)?;
+        Ok(frame_ref)
+    }
 }
 
 // ---------------------------------------------------------------------------

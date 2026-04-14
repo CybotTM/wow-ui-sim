@@ -15,7 +15,9 @@ use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
-use crate::lua_bridge::{create_frame_table, FromStack, IntoStack, TableBuilder};
+use crate::lua_bridge::{
+    create_frame_table, FrameArena, FrameRef as BridgeFrameRef, FromStack, IntoStack, TableBuilder,
+};
 pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
 
 // ---------------------------------------------------------------------------
@@ -242,6 +244,115 @@ fn test_bridge_from_stack_rejects_invalid_utf8_strings() {
 
     let err = String::from_stack(state, 1).unwrap_err().to_string();
     assert!(err.contains("string at argument 1 is not valid UTF-8"));
+}
+
+#[derive(Debug, PartialEq, Eq)]
+struct TestFrame {
+    label: String,
+    visits: u32,
+}
+
+#[derive(Debug)]
+struct TestFrameSlot {
+    generation: u32,
+    frame: Option<TestFrame>,
+}
+
+#[derive(Debug)]
+struct TestFrameArena {
+    slots: Vec<TestFrameSlot>,
+}
+
+impl FrameArena for TestFrameArena {
+    type Frame = TestFrame;
+
+    fn frame(&self, index: u32, generation: u32) -> Option<&Self::Frame> {
+        let slot = self.slots.get(index as usize)?;
+        if slot.generation != generation {
+            return None;
+        }
+        slot.frame.as_ref()
+    }
+
+    fn frame_mut(&mut self, index: u32, generation: u32) -> Option<&mut Self::Frame> {
+        let slot = self.slots.get_mut(index as usize)?;
+        if slot.generation != generation {
+            return None;
+        }
+        slot.frame.as_mut()
+    }
+}
+
+#[test]
+fn test_bridge_from_stack_extracts_backed_frame_refs_from_app_data() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    state.set_app_data(TestFrameArena {
+        slots: vec![TestFrameSlot {
+            generation: 3,
+            frame: Some(TestFrame {
+                label: "FrameA".to_string(),
+                visits: 0,
+            }),
+        }],
+    });
+
+    let table_ref = create_frame_table(state, 0, 3);
+    state.push(Val::Table(table_ref));
+
+    let frame_ref = BridgeFrameRef::<TestFrameArena>::from_stack(state, 1).unwrap();
+    assert_eq!(frame_ref.get(state).unwrap().label, "FrameA");
+
+    frame_ref.get_mut(state).unwrap().visits += 1;
+    assert_eq!(frame_ref.get(state).unwrap().visits, 1);
+}
+
+#[test]
+fn test_bridge_from_stack_rejects_plain_tables_for_frame_refs() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    let table_ref = state.gc.alloc_table(Table::new());
+    state.push(Val::Table(table_ref));
+
+    let err = BridgeFrameRef::<TestFrameArena>::from_stack(state, 1)
+        .unwrap_err()
+        .to_string();
+    assert!(err.contains("expected frame-backed table, got table at argument 1"));
+}
+
+#[test]
+fn test_bridge_from_stack_rejects_missing_or_stale_frame_backing() {
+    let mut missing_app_data_lua = Lua::new().unwrap();
+    {
+        let state = missing_app_data_lua.state_mut();
+        let missing_app_data_ref = create_frame_table(state, 0, 3);
+        state.push(Val::Table(missing_app_data_ref));
+        let missing_app_data_err = BridgeFrameRef::<TestFrameArena>::from_stack(state, 1)
+            .unwrap_err()
+            .to_string();
+        assert!(missing_app_data_err.contains("missing frame arena app_data"));
+    }
+
+    let mut stale_lua = Lua::new().unwrap();
+    {
+        let state = stale_lua.state_mut();
+        state.set_app_data(TestFrameArena {
+            slots: vec![TestFrameSlot {
+                generation: 4,
+                frame: Some(TestFrame {
+                    label: "FrameA".to_string(),
+                    visits: 0,
+                }),
+            }],
+        });
+
+        let stale_ref = create_frame_table(state, 0, 3);
+        state.push(Val::Table(stale_ref));
+        let stale_err = BridgeFrameRef::<TestFrameArena>::from_stack(state, 1)
+            .unwrap_err()
+            .to_string();
+        assert!(stale_err.contains("missing frame for backing (0, 3)"));
+    }
 }
 
 #[test]
