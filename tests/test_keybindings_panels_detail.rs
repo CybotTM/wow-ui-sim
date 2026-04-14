@@ -1023,3 +1023,71 @@ fn talent_panel_has_at_least_one_visible_talent_node_frame() {
         );
     }
 }
+
+#[test]
+fn talent_panel_hero_nodes_container_keeps_top_anchor() {
+    test_timeout! {
+        let env = setup_full_env();
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (PlayerSpellsUtil and type(PlayerSpellsUtil.ToggleClassTalentFrame) == "function") then
+                    return "missing_toggle_class_talent_frame"
+                end
+
+                PlayerSpellsUtil.ToggleClassTalentFrame()
+
+                local talentsFrame = PlayerSpellsFrame and PlayerSpellsFrame.TalentsFrame
+                if not (talentsFrame and talentsFrame:IsShown()) then
+                    return "talents_frame_not_shown"
+                end
+
+                local heroContainer = talentsFrame.HeroTalentsContainer
+                if not heroContainer then
+                    return "missing_hero_container"
+                end
+
+                local nodesContainer = heroContainer.ExpandedContainer and heroContainer.ExpandedContainer.NodesContainer
+                if not nodesContainer then
+                    return "missing_nodes_container"
+                end
+
+                local found = {}
+                local list = {}
+                for i = 1, nodesContainer:GetNumPoints() do
+                    local point = select(1, nodesContainer:GetPoint(i))
+                    found[point] = true
+                    table.insert(list, point)
+                end
+                table.sort(list)
+
+                if not found["TOP"] then
+                    return "missing_top_anchor:" .. table.concat(list, ",")
+                end
+                if not found["LEFT"] then
+                    return "missing_left_anchor:" .. table.concat(list, ",")
+                end
+                if not found["BOTTOMRIGHT"] then
+                    return "missing_bottomright_anchor:" .. table.concat(list, ",")
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+        assert!(
+            errors.is_empty(),
+            "Hero nodes anchor test produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+        assert_eq!(
+            result,
+            "ok",
+            "Hero nodes container should keep inherited TOP plus inline LEFT/BOTTOMRIGHT anchors: {result}"
+        );
+    }
+}

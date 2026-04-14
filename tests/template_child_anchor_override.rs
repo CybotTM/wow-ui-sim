@@ -1,28 +1,23 @@
-//! Regression test: inline anchors on a child frame that also has `inherits=`
-//! must REPLACE (not be overridden by) anchors from the inherited template.
+//! Regressions for inherited child-frame anchor behavior.
 //!
-//! Mirrors the real-world case in WorldMapFrameTemplate:
-//!   MapCanvasFrameScrollContainerTemplate → defines TOPLEFT + BOTTOMRIGHT
-//!   WorldMapFrameTemplate defines a child:
-//!     <ScrollFrame parentKey="ScrollContainer"
-//!                  inherits="MapCanvasFrameScrollContainerTemplate">
-//!       <Anchors>
-//!         <Anchor point="TOPLEFT" .../>
-//!         <Anchor point="BOTTOMLEFT" .../>
-//!         <Anchor point="RIGHT" .../>
-//!       </Anchors>
-//!     </ScrollFrame>
+//! WoW XML applies inherited anchors first and then the child's inline anchors.
+//! Inline anchors should override conflicting inherited points, but they should
+//! not wipe inherited anchors that still contribute constraints.
 //!
-//! The inline anchors (TOPLEFT, BOTTOMLEFT, RIGHT) should win.
-//! Bug: anchors from the inherited template (BOTTOMRIGHT) are applied AFTER
-//! the inline anchors, leaving all 4 anchors on the child instead of 3.
+//! Two Blizzard patterns matter here:
+//! - `WorldMapFrameTemplate.ScrollContainer` inherits `TOPLEFT + BOTTOMRIGHT`
+//!   and then adds `TOPLEFT + BOTTOMLEFT + RIGHT`
+//! - `HeroTalentsContainer.ExpandedContainer.NodesContainer` inherits `TOP`
+//!   and then adds `LEFT + BOTTOMRIGHT`
+//!
+//! The simulator regressed by clearing all inherited anchors before reapplying
+//! inline child anchors, which drops the hero-tree `TOP` anchor and shifts the
+//! hero talent node container too low.
 
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::xml::{XmlElement, clear_templates, parse_xml, register_template};
 
-/// A template whose child will be inherited by the test child frame.
-/// Sets TOPLEFT + BOTTOMRIGHT on the frame itself (not via child — this template
-/// is used as the `inherits=` of the child, same as MapCanvasFrameScrollContainerTemplate).
+/// A template whose anchors mirror `MapCanvasFrameScrollContainerTemplate`.
 const SCROLL_CONTAINER_TEMPLATE_XML: &str = r#"
     <Ui>
         <Frame name="BaseScrollContainerTemplate" virtual="true">
@@ -34,9 +29,8 @@ const SCROLL_CONTAINER_TEMPLATE_XML: &str = r#"
     </Ui>
 "#;
 
-/// Parent template containing a child with:
-///   - `inherits="BaseScrollContainerTemplate"` (brings TOPLEFT + BOTTOMRIGHT)
-///   - Inline anchors: TOPLEFT + BOTTOMLEFT + RIGHT  (should replace the inherited ones)
+/// Parent template containing a map-style child with inherited and inline
+/// anchors on the same frame.
 const PARENT_TEMPLATE_XML: &str = r#"
     <Ui>
         <Frame name="ParentTemplate" virtual="true">
@@ -54,6 +48,34 @@ const PARENT_TEMPLATE_XML: &str = r#"
     </Ui>
 "#;
 
+/// Base template mirroring `HeroTalentsTreeNodesContainerTemplate`.
+const HERO_NODES_CONTAINER_TEMPLATE_XML: &str = r#"
+    <Ui>
+        <Frame name="HeroNodesContainerTemplate" virtual="true">
+            <Anchors>
+                <Anchor point="TOP" y="-90"/>
+            </Anchors>
+        </Frame>
+    </Ui>
+"#;
+
+/// Host template mirroring `ExpandedContainer.NodesContainer`.
+const HERO_NODES_HOST_TEMPLATE_XML: &str = r#"
+    <Ui>
+        <Frame name="HeroNodesHostTemplate" virtual="true">
+            <Size x="284" y="362"/>
+            <Frames>
+                <Frame parentKey="NodesContainer" inherits="HeroNodesContainerTemplate">
+                    <Anchors>
+                        <Anchor point="LEFT" x="60"/>
+                        <Anchor point="BOTTOMRIGHT" x="-60" y="60"/>
+                    </Anchors>
+                </Frame>
+            </Frames>
+        </Frame>
+    </Ui>
+"#;
+
 fn setup_env() -> WowLuaEnv {
     clear_templates();
     let env = WowLuaEnv::new().unwrap();
@@ -61,6 +83,11 @@ fn setup_env() -> WowLuaEnv {
     for (name, xml) in [
         ("BaseScrollContainerTemplate", SCROLL_CONTAINER_TEMPLATE_XML),
         ("ParentTemplate", PARENT_TEMPLATE_XML),
+        (
+            "HeroNodesContainerTemplate",
+            HERO_NODES_CONTAINER_TEMPLATE_XML,
+        ),
+        ("HeroNodesHostTemplate", HERO_NODES_HOST_TEMPLATE_XML),
     ] {
         let ui = parse_xml(xml).unwrap();
         if let XmlElement::Frame(frame) = &ui.elements[0] {
@@ -71,50 +98,86 @@ fn setup_env() -> WowLuaEnv {
     env
 }
 
-/// A child frame defined with both `inherits=` (template with TOPLEFT+BOTTOMRIGHT)
-/// and inline anchors (TOPLEFT+BOTTOMLEFT+RIGHT) should end up with exactly the
-/// 3 inline anchors. The template's BOTTOMRIGHT must not survive.
+/// World-map style child anchors should still produce the intended stretched
+/// layout after template application. This covers the case where the child
+/// reasserts `TOPLEFT` and adds `BOTTOMLEFT + RIGHT`.
 #[test]
-fn child_inline_anchors_replace_inherited_template_anchors() {
+fn child_inline_anchors_keep_expected_world_map_scroll_layout() {
     let env = setup_env();
 
     env.exec(r#"CreateFrame("Frame", "TestParentFrame", UIParent, "ParentTemplate")"#)
         .unwrap();
 
-    let result: String = env
+    let result: (f64, f64, f64, f64, i32) = env
         .eval(
             r#"
             local container = TestParentFrame.ScrollContainer
             if not container then
-                return "ScrollContainer is nil"
+                error("ScrollContainer is nil")
             end
 
-            local n = container:GetNumPoints()
+            return container:GetLeft(), container:GetTop(), container:GetWidth(), container:GetHeight(), container:GetNumPoints()
+            "#,
+        )
+        .unwrap();
 
-            -- Collect anchor names
+    let (left, top, width, height, num_points) = result;
+    assert_eq!(
+        left, 0.0,
+        "world-map style container should stay flush to parent left"
+    );
+    assert_eq!(
+        top, 1200.0,
+        "GetTop() uses WoW bottom-left coordinates, so a frame flush to the screen top should report the screen height"
+    );
+    assert_eq!(
+        width, 800.0,
+        "world-map style container should stretch to parent right"
+    );
+    assert_eq!(
+        height, 600.0,
+        "world-map style container should stretch to parent bottom"
+    );
+    assert!(
+        num_points >= 3,
+        "world-map style container should retain enough anchors to resolve all edges"
+    );
+}
+
+/// Hero-tree style child anchors must preserve the inherited `TOP` anchor while
+/// adding `LEFT + BOTTOMRIGHT`; otherwise the node container collapses downward.
+#[test]
+fn child_inline_anchors_preserve_inherited_hero_nodes_top_anchor() {
+    let env = setup_env();
+
+    env.exec(r#"CreateFrame("Frame", "TestHeroNodesHost", UIParent, "HeroNodesHostTemplate")"#)
+        .unwrap();
+
+    let result: String = env
+        .eval(
+            r#"
+            local container = TestHeroNodesHost.NodesContainer
+            if not container then
+                return "NodesContainer is nil"
+            end
+
             local found = {}
             local list = {}
-            for i = 1, n do
-                local point = container:GetPoint(i)
+            for i = 1, container:GetNumPoints() do
+                local point = select(1, container:GetPoint(i))
                 found[point] = true
                 table.insert(list, point)
             end
+            table.sort(list)
 
-            -- BOTTOMRIGHT comes from the inherited template; inline anchors should replace it
-            if found["BOTTOMRIGHT"] then
-                return "BOTTOMRIGHT must not be present (template anchor must be replaced by inline anchors). Got " .. n .. " anchors: " .. table.concat(list, ", ")
+            if not found["TOP"] then
+                return "missing inherited TOP anchor: " .. table.concat(list, ", ")
             end
-            if n ~= 3 then
-                return "expected 3 anchors, got " .. n .. ": " .. table.concat(list, ", ")
+            if not found["LEFT"] then
+                return "missing inline LEFT anchor: " .. table.concat(list, ", ")
             end
-            if not found["TOPLEFT"] then
-                return "TOPLEFT should be present"
-            end
-            if not found["BOTTOMLEFT"] then
-                return "BOTTOMLEFT should be present"
-            end
-            if not found["RIGHT"] then
-                return "RIGHT should be present"
+            if not found["BOTTOMRIGHT"] then
+                return "missing inline BOTTOMRIGHT anchor: " .. table.concat(list, ", ")
             end
 
             return "ok"
@@ -124,7 +187,6 @@ fn child_inline_anchors_replace_inherited_template_anchors() {
 
     assert_eq!(
         result, "ok",
-        "child inline anchors must replace inherited template anchors: {}",
-        result
+        "hero nodes container should keep inherited TOP and inline anchors: {result}"
     );
 }

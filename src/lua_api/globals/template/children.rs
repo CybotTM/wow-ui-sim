@@ -366,10 +366,14 @@ fn append_child_size_and_anchors(code: &mut String, frame: &FrameXml, parent_nam
     }
 }
 
-/// Clear all template-set anchors and re-apply inline anchors from the child XML.
+/// Re-apply inline anchors from the child XML after inherited templates.
 ///
-/// `$parent` in the child frame's own anchors refers to the actual parent frame,
-/// not the child's resolved global name.
+/// WoW processes inherited anchors first and then the child's own anchors.
+/// Reasserting inline anchors here lets them override conflicting inherited
+/// points without wiping inherited anchors that still contribute constraints.
+///
+/// `$parent` in the child frame's own anchors refers to the actual parent
+/// frame, not the child's resolved global name.
 fn reapply_inline_anchors(
     state: &Rc<RefCell<SimState>>,
     frame: &FrameXml,
@@ -388,12 +392,6 @@ fn reapply_inline_anchors(
         })
     };
     let Some(fid) = frame_id else { return };
-    {
-        let mut s = state.borrow_mut();
-        if let Some(f) = s.widgets.get_mut_visual(fid) {
-            f.clear_all_points();
-        }
-    }
     let mut s = state.borrow_mut();
     for anchor in &anchors.anchors {
         direct::set_single_anchor(&mut s, fid, anchor, parent_name);
