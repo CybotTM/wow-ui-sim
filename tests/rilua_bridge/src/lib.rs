@@ -427,6 +427,15 @@ fn test_define_functions_registers_typed_wrappers() {
             "IsTruthy" => |value: bool| -> bool {
                 Ok(value)
             },
+            "GetLargeId" => || -> u64 {
+                Ok(4_294_967_297_u64)
+            },
+            "Echo" => |name: String| {
+                Ok(name)
+            },
+            "Touch" => || {
+                Ok(())
+            },
         })
         .unwrap();
 
@@ -440,6 +449,11 @@ fn test_define_functions_registers_typed_wrappers() {
     lua.exec("assert(BridgeFns.IsTruthy(1) == true)").unwrap();
     lua.exec("assert(BridgeFns.IsTruthy(nil) == false)")
         .unwrap();
+    lua.exec("assert(BridgeFns.GetLargeId() == 4294967297)")
+        .unwrap();
+    lua.exec("assert(BridgeFns.Echo('priest') == 'priest')")
+        .unwrap();
+    lua.exec("assert(BridgeFns.Touch() == nil)").unwrap();
 }
 
 #[test]

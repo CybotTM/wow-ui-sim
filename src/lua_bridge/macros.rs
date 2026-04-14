@@ -99,6 +99,47 @@ macro_rules! define_methods {
 // define_functions!
 // ---------------------------------------------------------------------------
 
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __lua_bridge_extract_args {
+    ($state:expr, $idx:ident,) => {};
+    ($state:expr, $idx:ident, $arg_pat:ident : $arg_ty:ty $(, $rest_pat:ident : $rest_ty:ty)* $(,)?) => {
+        let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack($state, $idx)?;
+        $idx += 1;
+        $crate::__lua_bridge_extract_args!($state, $idx, $($rest_pat : $rest_ty),*);
+    };
+}
+
+#[doc(hidden)]
+#[macro_export]
+macro_rules! __lua_bridge_define_function_entries {
+    ($state:expr, $table:expr,) => {
+        Ok(())
+    };
+    ($state:expr, $table:expr, $name:literal => || $(-> $ret_ty:ty)? $body:block $(, $($rest:tt)*)?) => {{
+        fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
+            let __result: ::rilua::LuaResult<_> = $body;
+            let __val = __result?;
+            $crate::lua_bridge::IntoStack::into_stack(__val, state)
+        }
+        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
+        $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
+    }};
+    ($state:expr, $table:expr, $name:literal => |$first_pat:ident : $first_ty:ty $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block $(, $($rest:tt)*)?) => {{
+        fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
+            let mut __idx: i32 = 1;
+            $crate::__lua_bridge_extract_args!(state, __idx, $first_pat : $first_ty $(, $arg_pat : $arg_ty)*);
+            let _ = __idx;
+
+            let __result: ::rilua::LuaResult<_> = $body;
+            let __val = __result?;
+            $crate::lua_bridge::IntoStack::into_stack(__val, state)
+        }
+        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
+        $crate::__lua_bridge_define_function_entries!($state, $table $(, $($rest)*)?)
+    }};
+}
+
 /// Register global (non-method) Rust functions on a rilua table.
 ///
 /// Each arm becomes a `RustFn` that extracts arguments starting at index 1
@@ -107,29 +148,10 @@ macro_rules! define_methods {
 /// TODO: Support closures capturing state once rilua adds `RustFnMut`.
 #[macro_export]
 macro_rules! define_functions {
-    ($state:expr, $table:expr, {
-        $( $name:literal => |$( $arg_pat:ident : $arg_ty:ty ),* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
-    }) => {
+    ($state:expr, $table:expr, { $($entries:tt)* }) => {
         {
             let __result: ::rilua::LuaResult<()> = (|| {
-                $(
-                    {
-                        fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
-                            let mut __idx: i32 = 1;
-                            $(
-                                let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
-                                __idx += 1;
-                            )*
-                            let _ = __idx;
-
-                            let __result: ::rilua::LuaResult<_> = $body;
-                            let __val = __result?;
-                            $crate::lua_bridge::IntoStack::into_stack(__val, state)
-                        }
-                        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
-                    }
-                )*
-                Ok(())
+                $crate::__lua_bridge_define_function_entries!($state, $table, $($entries)*)
             })();
             __result
         }
