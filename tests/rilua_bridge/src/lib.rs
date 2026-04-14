@@ -410,6 +410,21 @@ fn test_table_builder_sets_values_and_functions() {
 }
 
 #[test]
+fn test_table_builder_rejects_multi_value_entries() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    let save_top = state.top;
+
+    let err = match TableBuilder::new(state).set("bad", ("left", "right")) {
+        Ok(_) => panic!("table builder unexpectedly accepted a multi-value entry"),
+        Err(err) => err.to_string(),
+    };
+
+    assert!(err.contains("table builder values must push exactly 0 or 1 Lua values, got 2"));
+    assert_eq!(state.top, save_top);
+}
+
+#[test]
 fn test_define_functions_registers_typed_wrappers() {
     let mut lua = Lua::new().unwrap();
     {

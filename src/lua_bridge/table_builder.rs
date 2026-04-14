@@ -79,15 +79,23 @@ impl<'a> TableBuilder<'a> {
     /// slot is consumed — the value is pushed and immediately popped to
     /// set the table entry.
     pub fn set(self, key: &str, value: impl IntoStack) -> LuaResult<Self> {
-        // Convert through a temporary stack push + pop to obtain the Val.
         let save_top = self.state.top;
         let count = value.into_stack(self.state)?;
-        let val = if count > 0 {
-            self.state.stack[save_top]
-        } else {
-            Val::Nil
+        let val = match count {
+            0 => Val::Nil,
+            1 => self.state.stack[save_top],
+            _ => {
+                self.state.top = save_top;
+                return Err(LuaError::Runtime(RuntimeError {
+                    message: format!(
+                        "table builder values must push exactly 0 or 1 Lua values, got {count}"
+                    ),
+                    level: 0,
+                    traceback: vec![],
+                }));
+            }
         };
-        self.state.top = save_top; // restore top (undo the temporary push)
+        self.state.top = save_top;
 
         let key_ref = self.state.gc.intern_string(key.as_bytes());
         let k = Val::Str(key_ref);
