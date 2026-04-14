@@ -355,46 +355,10 @@ impl GpuTextureAtlas {
     /// Create a new tiered GPU texture atlas.
     pub fn new(device: &wgpu::Device) -> Self {
         let tiers = std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i));
-
         let glyph_atlas_size = 2048;
         let (glyph_texture, glyph_view) = create_glyph_atlas(device, glyph_atlas_size);
-
-        let has_bc_support = device
-            .features()
-            .contains(wgpu::Features::TEXTURE_COMPRESSION_BC);
-        BC_SUPPORTED.store(has_bc_support, std::sync::atomic::Ordering::Relaxed);
-        eprintln!(
-            "{} [GPU] BC texture compression: {}",
-            crate::logging::global_elapsed_prefix(),
-            if has_bc_support {
-                "supported"
-            } else {
-                "NOT supported (using placeholders)"
-            }
-        );
-        let (bc1_atlas, bc3_atlas) = if has_bc_support {
-            (
-                BcAtlasTier::new(device, BcFormat::Bc1),
-                BcAtlasTier::new(device, BcFormat::Bc3),
-            )
-        } else {
-            (
-                BcAtlasTier::new_placeholder(device, "WoW UI BC1 Atlas (placeholder)"),
-                BcAtlasTier::new_placeholder(device, "WoW UI BC3 Atlas (placeholder)"),
-            )
-        };
-
-        let sampler = device.create_sampler(&wgpu::SamplerDescriptor {
-            label: Some("WoW UI Texture Sampler"),
-            address_mode_u: wgpu::AddressMode::ClampToEdge,
-            address_mode_v: wgpu::AddressMode::ClampToEdge,
-            address_mode_w: wgpu::AddressMode::ClampToEdge,
-            mag_filter: wgpu::FilterMode::Linear,
-            min_filter: wgpu::FilterMode::Linear,
-            mipmap_filter: wgpu::FilterMode::Nearest,
-            ..Default::default()
-        });
-
+        let (bc1_atlas, bc3_atlas, has_bc_support) = init_bc_atlases(device);
+        let sampler = create_texture_sampler(device);
         let (bind_group_layout, bind_group) = create_atlas_bind_groups(
             device,
             &tiers,
@@ -696,6 +660,48 @@ pub struct TierStats {
     pub allocated_bytes: usize,
     pub used_bytes: usize,
     pub used_slots: [usize; NUM_TIERS],
+}
+
+/// Detect BC texture compression support and create BC1/BC3 atlas tiers.
+fn init_bc_atlases(device: &wgpu::Device) -> (BcAtlasTier, BcAtlasTier, bool) {
+    let has_bc_support = device
+        .features()
+        .contains(wgpu::Features::TEXTURE_COMPRESSION_BC);
+    BC_SUPPORTED.store(has_bc_support, std::sync::atomic::Ordering::Relaxed);
+    eprintln!(
+        "{} [GPU] BC texture compression: {}",
+        crate::logging::global_elapsed_prefix(),
+        if has_bc_support {
+            "supported"
+        } else {
+            "NOT supported (using placeholders)"
+        }
+    );
+    let (bc1, bc3) = if has_bc_support {
+        (
+            BcAtlasTier::new(device, BcFormat::Bc1),
+            BcAtlasTier::new(device, BcFormat::Bc3),
+        )
+    } else {
+        (
+            BcAtlasTier::new_placeholder(device, "WoW UI BC1 Atlas (placeholder)"),
+            BcAtlasTier::new_placeholder(device, "WoW UI BC3 Atlas (placeholder)"),
+        )
+    };
+    (bc1, bc3, has_bc_support)
+}
+
+fn create_texture_sampler(device: &wgpu::Device) -> wgpu::Sampler {
+    device.create_sampler(&wgpu::SamplerDescriptor {
+        label: Some("WoW UI Texture Sampler"),
+        address_mode_u: wgpu::AddressMode::ClampToEdge,
+        address_mode_v: wgpu::AddressMode::ClampToEdge,
+        address_mode_w: wgpu::AddressMode::ClampToEdge,
+        mag_filter: wgpu::FilterMode::Linear,
+        min_filter: wgpu::FilterMode::Linear,
+        mipmap_filter: wgpu::FilterMode::Nearest,
+        ..Default::default()
+    })
 }
 
 /// Create the glyph atlas texture and view.
