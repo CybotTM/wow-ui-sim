@@ -133,6 +133,42 @@ impl WowLuaEnv {
         Ok(result)
     }
 
+    // ── rilua execution paths ────────────────────────────────────────
+
+    /// Execute Lua code on rilua's VM.
+    ///
+    /// Unlike `exec()` (which runs on mlua), this compiles and runs
+    /// code on the rilua Lua state. Only globals registered on rilua
+    /// are visible — WoW API functions are NOT available until the
+    /// full Phase 3 method migration is complete.
+    pub fn exec_rilua(&self, code: &str) -> rilua::LuaResult<()> {
+        self.lua.borrow_mut().exec(code)
+    }
+
+    /// Execute Lua code on rilua's VM with a custom chunk name.
+    pub fn exec_rilua_named(&self, code: &str, name: &str) -> rilua::LuaResult<()> {
+        self.lua.borrow_mut().exec_bytes(code.as_bytes(), name)
+    }
+
+    /// Compile Lua code on rilua and return a function handle.
+    pub fn load_rilua(&self, code: &str) -> rilua::LuaResult<rilua::Function> {
+        self.lua.borrow_mut().load(code)
+    }
+
+    /// Compile Lua code on rilua with a custom chunk name.
+    pub fn load_rilua_named(&self, code: &str, name: &str) -> rilua::LuaResult<rilua::Function> {
+        self.lua.borrow_mut().load_bytes(code.as_bytes(), name)
+    }
+
+    /// Call a rilua function handle with arguments.
+    pub fn call_rilua(
+        &self,
+        func: &rilua::Function,
+        args: &[rilua::Val],
+    ) -> rilua::LuaResult<Vec<rilua::Val>> {
+        self.lua.borrow_mut().call_function(func, args)
+    }
+
     /// Populate the `__addon_names` registry table mapping addon index → folder name.
     /// The table is pre-created in `init_registry_tables` so the OnUpdate dispatcher
     /// captures a reference to it. This method fills it after all addons are loaded.
@@ -699,6 +735,34 @@ mod tests {
         let func = env.lua.borrow_mut().load("return __test_add_one(5)").unwrap();
         let result = env.lua.borrow_mut().call_function(&func, &[rilua::Val::Nil]);
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn exec_rilua_runs_code_on_rilua_vm() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        env.exec_rilua("__rilua_test = 99").unwrap();
+        let val = env.get_rilua_global("__rilua_test");
+        assert_eq!(val, rilua::Val::Num(99.0));
+    }
+
+    #[test]
+    fn load_rilua_and_call() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let func = env.load_rilua("return 2 + 3").unwrap();
+        let results = env.call_rilua(&func, &[]).unwrap();
+        assert_eq!(results, vec![rilua::Val::Num(5.0)]);
+    }
+
+    #[test]
+    fn exec_rilua_named_sets_chunk_name() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        // Should not error — chunk name is for error messages only
+        env.exec_rilua_named("__rilua_named = true", "@test_chunk")
+            .unwrap();
+        assert_eq!(
+            env.get_rilua_global("__rilua_named"),
+            rilua::Val::Bool(true)
+        );
     }
 
     #[test]
