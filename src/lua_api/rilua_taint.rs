@@ -10,13 +10,41 @@ pub fn enable_taint_mode(lua: &mut rilua::Lua) {
 
 /// Stamp addon taint on a compiled function.
 ///
-/// In WoW, each addon's compiled closures carry the addon's name as taint.
-/// When the function executes, the call frame inherits its taint.
+/// Stores `addon_name` in the `__closure_taint` registry table keyed by
+/// the closure's GC arena index. When the VM calls this function, the
+/// taint propagation system reads it back to set the call frame's taint.
 pub fn stamp_addon_taint(lua: &mut rilua::Lua, func: &rilua::Function, addon_name: &str) {
-    // Store in registry: __closure_taint[func] = addon_name
+    use rilua::vm::table::Table;
     let state = lua.state_mut();
-    let _ = (state, func, addon_name);
-    // TODO: implement once rilua's taint registry is available
+    let cl_ref = func.gc_ref();
+    let taint_table = get_or_create_closure_taint_table(state);
+    let key = rilua::Val::Num(cl_ref.index() as f64);
+    let val = rilua::Val::Str(state.gc.intern_string(addon_name.as_bytes()));
+    if let Some(t) = state.gc.tables.get_mut(taint_table) {
+        let _ = t.raw_set(key, val, &state.gc.string_arena);
+    }
+}
+
+const CLOSURE_TAINT_KEY: &str = "__closure_taint";
+
+fn get_or_create_closure_taint_table(
+    state: &mut LuaState,
+) -> rilua::vm::gc::arena::GcRef<rilua::vm::table::Table> {
+    let key = state.gc.intern_string(CLOSURE_TAINT_KEY.as_bytes());
+    if let Some(reg) = state.gc.tables.get(state.registry) {
+        if let rilua::Val::Table(t) = reg.get_str(key, &state.gc.string_arena) {
+            return t;
+        }
+    }
+    let new_table = state.gc.alloc_table(rilua::vm::table::Table::new());
+    if let Some(reg) = state.gc.tables.get_mut(state.registry) {
+        let _ = reg.raw_set(
+            rilua::Val::Str(key),
+            rilua::Val::Table(new_table),
+            &state.gc.string_arena,
+        );
+    }
+    new_table
 }
 
 /// Set taint for the current frame before dispatching a script handler.
