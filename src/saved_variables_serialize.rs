@@ -1,25 +1,31 @@
 use std::fmt::Write;
 
-use mlua::{Table, Value};
+use rilua::Val;
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
 
 /// Serialize a top-level `VarName = value` assignment in WoW SavedVariables format.
-pub(super) fn serialize_assignment(out: &mut String, name: &str, value: &Value) {
-    let _ = write!(out, "{} = ", name);
-    serialize_value(out, value, 0);
+pub(super) fn serialize_assignment(out: &mut String, state: &LuaState, name: &str, value: Val) {
+    let _ = write!(out, "{name} = ");
+    let mut seen = Vec::new();
+    serialize_value(out, state, value, 0, &mut seen);
     out.push('\n');
 }
 
-/// Serialize a Lua value to WoW SavedVariables format.
-fn serialize_value(out: &mut String, value: &Value, depth: usize) {
+fn serialize_value(
+    out: &mut String,
+    state: &LuaState,
+    value: Val,
+    depth: usize,
+    seen: &mut Vec<GcRef<Table>>,
+) {
     match value {
-        Value::Nil => out.push_str("nil"),
-        Value::Boolean(value) => out.push_str(if *value { "true" } else { "false" }),
-        Value::Integer(value) => {
-            let _ = write!(out, "{}", value);
-        }
-        Value::Number(value) => write_number(out, *value),
-        Value::String(value) => write_string(out, value),
-        Value::Table(table) => serialize_table(out, table, depth),
+        Val::Nil => out.push_str("nil"),
+        Val::Bool(value) => out.push_str(if value { "true" } else { "false" }),
+        Val::Num(value) => write_number(out, value),
+        Val::Str(value) => write_string(out, state, value),
+        Val::Table(table) => serialize_table(out, state, table, depth, seen),
         _ => out.push_str("nil"),
     }
 }
@@ -29,14 +35,19 @@ fn write_number(out: &mut String, value: f64) {
         let _ = write!(out, "{}", value as i64);
         return;
     }
-    let _ = write!(out, "{}", value);
+    let _ = write!(out, "{value}");
 }
 
-fn write_string(out: &mut String, value: &mlua::String) {
-    let Ok(value) = value.to_str() else {
+fn write_string(
+    out: &mut String,
+    state: &LuaState,
+    value: rilua::vm::gc::arena::GcRef<rilua::vm::string::LuaString>,
+) {
+    let Some(value) = state.gc.string_arena.get(value) else {
         out.push_str("\"\"");
         return;
     };
+    let value = String::from_utf8_lossy(value.data());
 
     out.push('"');
     for ch in value.chars() {
@@ -53,32 +64,104 @@ fn write_string(out: &mut String, value: &mlua::String) {
     out.push('"');
 }
 
-/// Collect non-array entries from a table, sorted by key for deterministic output.
-fn collect_hash_entries(table: &Table, array_len: usize) -> Vec<(String, Value)> {
-    let Ok(pairs) = table
-        .clone()
-        .pairs::<Value, Value>()
-        .collect::<std::result::Result<Vec<_>, _>>()
-    else {
+fn serialize_table(
+    out: &mut String,
+    state: &LuaState,
+    table_ref: GcRef<Table>,
+    depth: usize,
+    seen: &mut Vec<GcRef<Table>>,
+) {
+    if seen.contains(&table_ref) {
+        out.push_str("{}");
+        return;
+    }
+    seen.push(table_ref);
+
+    out.push_str("{\n");
+    let indent = "\t".repeat(depth + 1);
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        let _ = write!(out, "{}}}", "\t".repeat(depth));
+        seen.pop();
+        return;
+    };
+    let array_values = table.array_slice();
+    let array_len = array_values
+        .iter()
+        .take_while(|value| !matches!(value, Val::Nil))
+        .count();
+
+    for (index, value) in array_values.iter().take(array_len).copied().enumerate() {
+        let _ = write!(out, "{indent}");
+        serialize_value(out, state, value, depth + 1, seen);
+        let _ = writeln!(out, ", -- [{}]", index + 1);
+    }
+
+    for (key, value) in collect_hash_entries(state, table_ref, array_len) {
+        let _ = write!(out, "{indent}[");
+        write_key(out, &key);
+        out.push_str("] = ");
+        serialize_value(out, state, value, depth + 1, seen);
+        out.push_str(",\n");
+    }
+
+    let _ = write!(out, "{}}}", "\t".repeat(depth));
+    seen.pop();
+}
+
+fn collect_hash_entries(
+    state: &LuaState,
+    table_ref: GcRef<Table>,
+    array_len: usize,
+) -> Vec<(SavedVarKey, Val)> {
+    let Some(table) = state.gc.tables.get(table_ref) else {
         return Vec::new();
     };
-    let mut entries: Vec<(String, Value)> = pairs
+
+    let mut entries: Vec<(SavedVarKey, Val)> = table
+        .hash_entries()
         .into_iter()
-        .filter_map(|(key, value)| match key {
-            Value::Integer(index) if index >= 1 && index <= array_len as i64 => None,
-            Value::String(string_key) => {
-                string_key.to_str().ok().map(|key| (key.to_string(), value))
-            }
-            Value::Integer(index) => Some((index.to_string(), value)),
-            Value::Number(number) => Some((number.to_string(), value)),
-            _ => None,
+        .filter_map(|(key, value)| match classify_key(state, key) {
+            Some(SavedVarKey::ArrayIndex(index)) if index >= 1 && index <= array_len as i64 => None,
+            Some(kind) => Some((kind, value)),
+            None => None,
         })
         .collect();
-    entries.sort_by(|left, right| left.0.cmp(&right.0));
+    entries.sort_by(|left, right| left.0.sort_key().cmp(&right.0.sort_key()));
     entries
 }
 
-/// Write a Lua-escaped key string (for `["key"]` syntax).
+fn classify_key(state: &LuaState, key: Val) -> Option<SavedVarKey> {
+    match key {
+        Val::Str(key) => {
+            let string = state.gc.string_arena.get(key)?;
+            Some(SavedVarKey::String(
+                String::from_utf8_lossy(string.data()).into_owned(),
+            ))
+        }
+        Val::Num(number) if is_integral(number) => Some(SavedVarKey::ArrayIndex(number as i64)),
+        Val::Num(number) => Some(SavedVarKey::Number(number)),
+        _ => None,
+    }
+}
+
+fn is_integral(number: f64) -> bool {
+    number.fract() == 0.0 && number.is_finite() && number.abs() < i64::MAX as f64
+}
+
+fn write_key(out: &mut String, key: &SavedVarKey) {
+    match key {
+        SavedVarKey::String(key) => {
+            out.push('"');
+            write_escaped_key(out, key);
+            out.push('"');
+        }
+        SavedVarKey::ArrayIndex(index) => {
+            let _ = write!(out, "{index}");
+        }
+        SavedVarKey::Number(number) => write_number(out, *number),
+    }
+}
+
 fn write_escaped_key(out: &mut String, key: &str) {
     for ch in key.chars() {
         match ch {
@@ -90,39 +173,21 @@ fn write_escaped_key(out: &mut String, key: &str) {
     }
 }
 
-/// Serialize a Lua table in WoW SavedVariables format.
-///
-/// WoW uses a specific format:
-/// - Array entries (sequential integer keys 1..N) are written without explicit keys
-/// - String/other keys use `["key"] = value` syntax
-/// - Tables are indented with tabs
-fn serialize_table(out: &mut String, table: &Table, depth: usize) {
-    out.push_str("{\n");
-    let indent = "\t".repeat(depth + 1);
-    let array_len = table.raw_len();
+#[derive(Debug, Clone, PartialEq)]
+enum SavedVarKey {
+    String(String),
+    ArrayIndex(i64),
+    Number(f64),
+}
 
-    for index in 1..=array_len {
-        let value: Value = match table.get(index as i64) {
-            Ok(value) => value,
-            Err(_) => break,
-        };
-        if value.is_nil() {
-            break;
+impl SavedVarKey {
+    fn sort_key(&self) -> String {
+        match self {
+            Self::String(key) => format!("s:{key}"),
+            Self::ArrayIndex(index) => format!("i:{index:020}"),
+            Self::Number(number) => format!("n:{number}"),
         }
-        let _ = write!(out, "{}", indent);
-        serialize_value(out, &value, depth + 1);
-        let _ = writeln!(out, ", -- [{}]", index);
     }
-
-    for (key, value) in &collect_hash_entries(table, array_len) {
-        let _ = write!(out, "{}[\"", indent);
-        write_escaped_key(out, key);
-        out.push_str("\"] = ");
-        serialize_value(out, value, depth + 1);
-        out.push_str(",\n");
-    }
-
-    let _ = write!(out, "{}}}", "\t".repeat(depth));
 }
 
 #[cfg(test)]
@@ -130,23 +195,29 @@ mod tests {
     use std::fs;
 
     use super::*;
-    use mlua::Lua;
+    use rilua::LuaApi;
     use tempfile::tempdir;
 
-    use crate::saved_variables::SavedVariablesManager;
+    use crate::lua_api::WowLuaEnv;
+    use crate::saved_variables::{SavedVariablesManager, WtfConfig};
+
+    fn new_env() -> WowLuaEnv {
+        WowLuaEnv::new().unwrap()
+    }
 
     #[test]
     fn test_init_empty_variables() {
-        let lua = Lua::new();
+        let env = new_env();
         let dir = tempdir().unwrap();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        let globals = lua.globals();
-        let db: Table = globals.get("TestDB").unwrap();
-        assert!(db.is_empty());
+        let is_empty: bool = env
+            .eval("return type(TestDB) == 'table' and next(TestDB) == nil")
+            .unwrap();
+        assert!(is_empty);
     }
 
     #[test]
@@ -154,28 +225,27 @@ mod tests {
         let dir = tempdir().unwrap();
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+            mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
                 .unwrap();
 
-            lua.load(r#"TestDB.setting1 = "hello"; TestDB.setting2 = 42"#)
-                .exec()
+            env.exec(r#"TestDB.setting1 = "hello"; TestDB.setting2 = 42"#)
                 .unwrap();
 
-            mgr.save_addon(&lua, "TestAddon").unwrap();
+            mgr.save_addon(&env.lua, "TestAddon").unwrap();
         }
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-            mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+            mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
                 .unwrap();
 
-            let val1: String = lua.load("return TestDB.setting1").eval().unwrap();
-            let val2: i64 = lua.load("return TestDB.setting2").eval().unwrap();
+            let val1: String = env.eval("return TestDB.setting1").unwrap();
+            let val2: i64 = env.eval("return TestDB.setting2").unwrap();
 
             assert_eq!(val1, "hello");
             assert_eq!(val2, 42);
@@ -185,17 +255,16 @@ mod tests {
     #[test]
     fn test_save_produces_lua_format() {
         let dir = tempdir().unwrap();
-        let lua = Lua::new();
+        let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        lua.load(r#"TestDB.name = "Haky"; TestDB.level = 70; TestDB.active = true"#)
-            .exec()
+        env.exec(r#"TestDB.name = "Haky"; TestDB.level = 70; TestDB.active = true"#)
             .unwrap();
 
-        mgr.save_addon(&lua, "TestAddon").unwrap();
+        mgr.save_addon(&env.lua, "TestAddon").unwrap();
 
         let content = fs::read_to_string(dir.path().join("TestAddon.lua")).unwrap();
         assert!(content.contains("TestDB = {"), "should have Lua assignment");
@@ -216,62 +285,60 @@ mod tests {
     #[test]
     fn test_save_nested_tables() {
         let dir = tempdir().unwrap();
-        let lua = Lua::new();
+        let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        lua.load(
+        env.exec(
             r#"
             TestDB.nested = { a = 1, b = { c = "deep" } }
             TestDB.list = { 10, 20, 30 }
         "#,
         )
-        .exec()
         .unwrap();
 
-        mgr.save_addon(&lua, "TestAddon").unwrap();
+        mgr.save_addon(&env.lua, "TestAddon").unwrap();
 
-        let lua2 = Lua::new();
+        let env2 = new_env();
         let mut mgr2 = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
-        mgr2.init_for_addon(&lua2, "TestAddon", &["TestDB".to_string()], &[])
+        mgr2.init_for_addon(&env2.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        let deep: String = lua2.load("return TestDB.nested.b.c").eval().unwrap();
+        let deep: String = env2.eval("return TestDB.nested.b.c").unwrap();
         assert_eq!(deep, "deep");
 
-        let second: i64 = lua2.load("return TestDB.list[2]").eval().unwrap();
+        let second: i64 = env2.eval("return TestDB.list[2]").unwrap();
         assert_eq!(second, 20);
 
-        let len: i64 = lua2.load("return #TestDB.list").eval().unwrap();
+        let len: i64 = env2.eval("return #TestDB.list").unwrap();
         assert_eq!(len, 3);
     }
 
     #[test]
     fn test_save_string_escaping() {
         let dir = tempdir().unwrap();
-        let lua = Lua::new();
+        let env = new_env();
         let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
-        mgr.init_for_addon(&lua, "TestAddon", &["TestDB".to_string()], &[])
+        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        lua.load(r#"TestDB.msg = "line1\nline2"; TestDB.path = "C:\\Users\\test""#)
-            .exec()
+        env.exec(r#"TestDB.msg = "line1\nline2"; TestDB.path = "C:\\Users\\test""#)
             .unwrap();
 
-        mgr.save_addon(&lua, "TestAddon").unwrap();
+        mgr.save_addon(&env.lua, "TestAddon").unwrap();
 
-        let lua2 = Lua::new();
+        let env2 = new_env();
         let mut mgr2 = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
-        mgr2.init_for_addon(&lua2, "TestAddon", &["TestDB".to_string()], &[])
+        mgr2.init_for_addon(&env2.lua, "TestAddon", &["TestDB".to_string()], &[])
             .unwrap();
 
-        let msg: String = lua2.load("return TestDB.msg").eval().unwrap();
+        let msg: String = env2.eval("return TestDB.msg").unwrap();
         assert_eq!(msg, "line1\nline2");
 
-        let path: String = lua2.load("return TestDB.path").eval().unwrap();
+        let path: String = env2.eval("return TestDB.path").unwrap();
         assert_eq!(path, "C:\\Users\\test");
     }
 
@@ -280,39 +347,39 @@ mod tests {
         let dir = tempdir().unwrap();
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Thrall", "Hyjal");
 
-            mgr.init_for_addon(&lua, "TestAddon", &[], &["CharDB".to_string()])
+            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
                 .unwrap();
 
-            lua.load("CharDB.level = 70").exec().unwrap();
-            mgr.save_addon(&lua, "TestAddon").unwrap();
+            env.exec("CharDB.level = 70").unwrap();
+            mgr.save_addon(&env.lua, "TestAddon").unwrap();
         }
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Thrall", "Hyjal");
 
-            mgr.init_for_addon(&lua, "TestAddon", &[], &["CharDB".to_string()])
+            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
                 .unwrap();
 
-            let level: i64 = lua.load("return CharDB.level").eval().unwrap();
+            let level: i64 = env.eval("return CharDB.level").unwrap();
             assert_eq!(level, 70);
         }
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
             mgr.set_character("Jaina", "Hyjal");
 
-            mgr.init_for_addon(&lua, "TestAddon", &[], &["CharDB".to_string()])
+            mgr.init_for_addon(&env.lua, "TestAddon", &[], &["CharDB".to_string()])
                 .unwrap();
 
-            let level: Value = lua.load("return CharDB.level").eval().unwrap();
-            assert!(level.is_nil());
+            let level: Val = env.eval("return CharDB.level").unwrap();
+            assert!(matches!(level, Val::Nil));
         }
     }
 
@@ -321,11 +388,11 @@ mod tests {
         let dir = tempdir().unwrap();
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
             mgr.init_for_addon(
-                &lua,
+                &env.lua,
                 "Angleur",
                 &[
                     "AngleurConfig".to_string(),
@@ -335,25 +402,24 @@ mod tests {
             )
             .unwrap();
 
-            lua.load(
+            env.exec(
                 r#"
                 AngleurConfig.method = "oneKey"
                 AngleurMinimapButton.hide = true
                 AngleurCharacter.sleeping = false
             "#,
             )
-            .exec()
             .unwrap();
 
-            mgr.save_addon(&lua, "Angleur").unwrap();
+            mgr.save_addon(&env.lua, "Angleur").unwrap();
         }
 
         {
-            let lua = Lua::new();
+            let env = new_env();
             let mut mgr = SavedVariablesManager::with_storage_dir(dir.path().to_path_buf());
 
             mgr.init_for_addon(
-                &lua,
+                &env.lua,
                 "Angleur",
                 &[
                     "AngleurConfig".to_string(),
@@ -363,21 +429,61 @@ mod tests {
             )
             .unwrap();
 
-            let method: String = lua.load("return AngleurConfig.method").eval().unwrap();
+            let method: String = env.eval("return AngleurConfig.method").unwrap();
             assert_eq!(method, "oneKey");
 
-            let hide: bool = lua.load("return AngleurMinimapButton.hide").eval().unwrap();
+            let hide: bool = env.eval("return AngleurMinimapButton.hide").unwrap();
             assert!(hide);
 
-            let sleeping: bool = lua.load("return AngleurCharacter.sleeping").eval().unwrap();
+            let sleeping: bool = env.eval("return AngleurCharacter.sleeping").unwrap();
             assert!(!sleeping);
         }
     }
 
     #[test]
+    fn test_load_wtf_saved_variables_before_local_storage() {
+        let dir = tempdir().unwrap();
+        let wtf_root = dir.path().join("WTF");
+        let local_root = dir.path().join("LocalSavedVariables");
+        let wtf_path = wtf_root
+            .join("Account")
+            .join("TestAccount")
+            .join("SavedVariables");
+        fs::create_dir_all(&wtf_path).unwrap();
+        fs::create_dir_all(&local_root).unwrap();
+        fs::write(
+            wtf_path.join("TestAddon.lua"),
+            "\nTestDB = { [\"source\"] = \"wtf\" }\n",
+        )
+        .unwrap();
+        fs::write(
+            local_root.join("TestAddon.lua"),
+            "\nTestDB = { [\"source\"] = \"local\" }\n",
+        )
+        .unwrap();
+
+        let env = new_env();
+        let mut mgr = SavedVariablesManager::with_storage_dir(local_root);
+        mgr.set_wtf_config(WtfConfig::new(
+            &wtf_root,
+            "TestAccount",
+            "Realm",
+            "Character",
+        ));
+
+        let loaded = mgr.load_wtf_for_addon(&env.lua, "TestAddon").unwrap();
+        assert_eq!(loaded, 1);
+        mgr.init_for_addon(&env.lua, "TestAddon", &["TestDB".to_string()], &[])
+            .unwrap();
+
+        let source: String = env.eval("return TestDB.source").unwrap();
+        assert_eq!(source, "wtf");
+    }
+
+    #[test]
     fn test_serialize_format_matches_wow() {
-        let lua = Lua::new();
-        lua.load(
+        let env = new_env();
+        env.exec(
             r#"
             TestVar = {
                 ["setting"] = "hello",
@@ -385,12 +491,12 @@ mod tests {
             }
         "#,
         )
-        .exec()
         .unwrap();
 
-        let value: Value = lua.globals().get("TestVar").unwrap();
+        let value: Val = env.eval("return TestVar").unwrap();
+        let lua = env.rilua();
         let mut output = String::new();
-        serialize_assignment(&mut output, "TestVar", &value);
+        serialize_assignment(&mut output, lua.state(), "TestVar", value);
 
         assert!(output.starts_with("TestVar = {"));
         assert!(output.contains("-- [1]"));

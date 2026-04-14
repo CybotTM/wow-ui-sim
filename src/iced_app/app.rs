@@ -511,7 +511,7 @@ impl Drop for App {
     fn drop(&mut self) {
         if let Some(ref saved_vars) = self.saved_vars {
             let env = self.env.borrow();
-            match saved_vars.save_all(&env.lua()) {
+            match saved_vars.save_all(&env.lua) {
                 Ok(()) => crate::logging::eprintln_elapsed("[wow-sim] SavedVariables saved"),
                 Err(e) => crate::logging::eprintln_elapsed(&format!(
                     "[wow-sim] SavedVariables save error: {e}"
