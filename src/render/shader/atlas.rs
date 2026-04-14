@@ -28,6 +28,7 @@ pub const NUM_TIERS: usize = 5;
 
 /// Size of each tier's atlas texture.
 const ATLAS_SIZE: u32 = 4096;
+const GLYPH_ATLAS_SIZE: u32 = 2048;
 
 /// Entry for a texture in the atlas.
 #[derive(Debug, Clone, Copy)]
@@ -170,32 +171,30 @@ pub struct GpuTextureAtlas {
     bc_texture_map: HashMap<String, BcTextureEntry>,
 }
 
+struct AtlasBacking {
+    glyph_texture: wgpu::Texture,
+    bc1_atlas: BcAtlasTier,
+    bc3_atlas: BcAtlasTier,
+    has_bc_support: bool,
+    bind_group: wgpu::BindGroup,
+    bind_group_layout: wgpu::BindGroupLayout,
+}
+
 impl GpuTextureAtlas {
     /// Create a new tiered GPU texture atlas.
     pub fn new(device: &wgpu::Device) -> Self {
-        let tiers = std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i));
-        let glyph_atlas_size = 2048;
-        let (glyph_texture, glyph_view) = create_glyph_atlas(device, glyph_atlas_size);
-        let (bc1_atlas, bc3_atlas, has_bc_support) = init_bc_atlases(device);
-        let sampler = create_texture_sampler(device);
-        let (bind_group_layout, bind_group) = create_atlas_bind_groups(
-            device,
-            &tiers,
-            &glyph_view,
-            &bc1_atlas.view,
-            &bc3_atlas.view,
-            &sampler,
-        );
+        let tiers = create_tier_atlases(device);
+        let backing = create_atlas_backing(device, &tiers);
 
         Self {
             tiers,
-            glyph_texture,
-            glyph_atlas_size,
-            bc1_atlas,
-            bc3_atlas,
-            has_bc_support,
-            bind_group,
-            bind_group_layout,
+            glyph_texture: backing.glyph_texture,
+            glyph_atlas_size: GLYPH_ATLAS_SIZE,
+            bc1_atlas: backing.bc1_atlas,
+            bc3_atlas: backing.bc3_atlas,
+            has_bc_support: backing.has_bc_support,
+            bind_group: backing.bind_group,
+            bind_group_layout: backing.bind_group_layout,
             texture_map: HashMap::new(),
             bc_texture_map: HashMap::new(),
         }
@@ -426,6 +425,32 @@ impl GpuTextureAtlas {
     }
 }
 
+fn create_tier_atlases(device: &wgpu::Device) -> [TierAtlas; NUM_TIERS] {
+    std::array::from_fn(|i| TierAtlas::new(device, TIER_SIZES[i], i))
+}
+
+fn create_atlas_backing(device: &wgpu::Device, tiers: &[TierAtlas; NUM_TIERS]) -> AtlasBacking {
+    let (glyph_texture, glyph_view) = create_glyph_atlas(device, GLYPH_ATLAS_SIZE);
+    let (bc1_atlas, bc3_atlas, has_bc_support) = init_bc_atlases(device);
+    let sampler = create_texture_sampler(device);
+    let (bind_group_layout, bind_group) = create_atlas_bind_groups(
+        device,
+        tiers,
+        &glyph_view,
+        &bc1_atlas.view,
+        &bc3_atlas.view,
+        &sampler,
+    );
+    AtlasBacking {
+        glyph_texture,
+        bc1_atlas,
+        bc3_atlas,
+        has_bc_support,
+        bind_group,
+        bind_group_layout,
+    }
+}
+
 /// Memory usage statistics for the atlas.
 #[derive(Debug, Default)]
 pub struct TierStats {
@@ -634,5 +659,36 @@ impl std::fmt::Debug for GpuTextureAtlas {
             .field("used_mb", &(stats.used_bytes / 1024 / 1024))
             .field("allocated_mb", &(stats.allocated_bytes / 1024 / 1024))
             .finish()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn create_test_device() -> wgpu::Device {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
+            power_preference: wgpu::PowerPreference::LowPower,
+            compatible_surface: None,
+            force_fallback_adapter: false,
+        }))
+        .expect("test adapter should exist");
+        let (device, _queue) =
+            pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor::default()))
+                .expect("test device should be created");
+        device
+    }
+
+    #[test]
+    fn create_tier_atlases_uses_configured_sizes_and_empty_slots() {
+        let device = create_test_device();
+        let tiers = create_tier_atlases(&device);
+
+        for (index, tier) in tiers.iter().enumerate() {
+            assert_eq!(tier.cell_size, TIER_SIZES[index]);
+            assert_eq!(tier.grid_size, ATLAS_SIZE / TIER_SIZES[index]);
+            assert_eq!(tier.next_slot, 0);
+        }
     }
 }
