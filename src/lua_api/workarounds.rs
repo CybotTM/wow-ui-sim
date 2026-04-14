@@ -48,6 +48,7 @@ pub fn apply_post_runtime_addon_load_from_lua(
 pub fn apply(env: &WowLuaEnv) {
     super::chat_init::show_chat_frame(env);
     super::chat_init::init_chat_type_colors(env);
+    patch_uiparent_idle_onupdate_worklists(env);
     workarounds_editmode::patch_edit_mode_manager(env);
     patch_bag_openers(env);
     patch_character_toggle(env);
@@ -59,6 +60,45 @@ pub fn apply(env: &WowLuaEnv) {
     patch_poi_button_update_point(env);
     patch_combat_log_filters(env);
     patch_missing_frame_stubs(env);
+}
+
+/// Skip idle UIParent fan-out handlers when their backing worklists are empty.
+///
+/// Mainline UIParent unconditionally calls `FCF_OnUpdate`,
+/// `ButtonPulse_OnUpdate`, and `AnimatedShine_OnUpdate` every frame. The
+/// Blizzard implementations immediately iterate their global worklist tables,
+/// so the empty-list case still pays for Lua dispatch + `pairs()` each tick.
+///
+/// Wrapping only the empty-table case keeps active work unchanged while
+/// removing needless idle polling in reduced harnesses and fully-settled UI.
+fn patch_uiparent_idle_onupdate_worklists(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_uiparent_onupdate_worklists_patched then
+            local function patchEmptyWorklist(globalName, worklistName)
+                local original = _G[globalName]
+                if type(original) ~= "function" then
+                    return
+                end
+
+                _G[globalName] = function(...)
+                    local worklist = _G[worklistName]
+                    if type(worklist) == "table" and next(worklist) == nil then
+                        return
+                    end
+
+                    return original(...)
+                end
+            end
+
+            patchEmptyWorklist("FCF_OnUpdate", "CHAT_FRAMES")
+            patchEmptyWorklist("ButtonPulse_OnUpdate", "PULSEBUTTONS")
+            patchEmptyWorklist("AnimatedShine_OnUpdate", "SHINES_TO_ANIMATE")
+
+            __wow_ui_sim_uiparent_onupdate_worklists_patched = true
+        end
+    "#,
+    );
 }
 
 /// Suppress spellbook helptips via CVars instead of monkey-patching.

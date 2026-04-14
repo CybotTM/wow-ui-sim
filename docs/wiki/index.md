@@ -55,7 +55,7 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[minimap]] | Basic circular placeholder; missing real content/mask/blips/POIs |
 | [[on-update-dirty]] | Blanket dirty discard suppresses cast bar; now tracks the compact-raid cleanup, remaining leave-button/BuffFrame churn, and the same-day `GameTimeFrame_SetDate()` calendar-atlas no-op fix |
 | [[startup-createframe-profile]] | Runtime `CreateFrame` profiling shows action-bar button template expansion is the biggest script-created startup cost; nested SpellFX, scrollbar, and ActionButtonTemplate region fast paths all reduced it |
-| [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only |
+| [[world-map-onupdate-hover-polling]] | Chat-frame hover polling was forcing mutable `IsMouseOver()` work on every idle tick; clean-layout hover checks are now read-only, and empty `UIParent` pulse/shine/chat worklists now short-circuit |
 | [[world-map-voice-chat-alerts]] | Reduced world-map stacks can show voice prompt frames above the map when `Blizzard_Channels` is loaded without `Blizzard_SocialToast` / chat-alert prerequisites |
 | [[protected-frames]] | 3-condition enforcement, covered methods, remaining gaps |
 | [[transparent-wrapper-render-order]] | Renderless `Frame`/`ScrollFrame` wrappers were creating fake z-order boundaries; descendant regions now hoist through them |

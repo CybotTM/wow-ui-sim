@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | world map UIParent empty worklist follow-up
+
+Updated `investigations/world-map-onupdate-hover-polling.md` with the
+`UIParent_OnUpdate` fan-out follow-up: `FCF_OnUpdate`, `ButtonPulse_OnUpdate`,
+and `AnimatedShine_OnUpdate` were still doing empty-list Lua dispatch every
+tick. Recorded the new post-load wrappers in `workarounds.rs`, the focused
+`uiparent_onupdate_worklists` regression tests, and refreshed the `index.md`
+summary for the page.
+
 ## [2026-04-14] investigations | on-update dirty GameTimeFrame calendar atlas follow-up
 
 Updated `investigations/on-update-dirty.md` with the `GameTimeFrame_SetDate()`
