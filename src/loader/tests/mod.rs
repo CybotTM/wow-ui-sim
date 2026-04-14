@@ -335,6 +335,49 @@ fn test_runtime_spellfx_template_creates_nested_inherited_children() {
 }
 
 #[test]
+fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
+    let t = load_test_xml(
+        "runtime-minimal-scrollbar-direct-grandchildren",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <EventFrame name="MinimalScrollBar" virtual="true">
+                <Frames>
+                    <Frame parentKey="Track">
+                        <Frames>
+                            <EventButton parentKey="Thumb">
+                                <Scripts>
+                                    <OnLoad>self.loaded = true;</OnLoad>
+                                </Scripts>
+                            </EventButton>
+                        </Frames>
+                    </Frame>
+                </Frames>
+            </EventFrame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            local originalCreateFrame = CreateFrame
+            local createCount = 0
+            CreateFrame = function(...)
+                createCount = createCount + 1
+                return originalCreateFrame(...)
+            end
+
+            local scrollbar = CreateFrame("EventFrame", "MinimalScrollBarFastPath", UIParent, "MinimalScrollBar")
+            assert(scrollbar.Track ~= nil, "Track child should exist")
+            assert(scrollbar.Track.Thumb ~= nil, "Thumb grandchild should exist")
+            assert(scrollbar.Track.Thumb.loaded == true, "Thumb OnLoad should fire")
+            assert(createCount == 1, "nested thumb should avoid Lua CreateFrame fallback, got " .. createCount)
+        "#,
+        )
+        .unwrap();
+}
+
+#[test]
 fn test_runtime_template_mixin_and_key_values_apply() {
     let t = load_test_xml(
         "runtime-template-mixin-keyvalues",

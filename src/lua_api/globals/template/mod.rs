@@ -183,13 +183,14 @@ fn apply_single_template(
     apply_animation_groups(lua, template, frame_name);
 
     // Create child frames defined in the template
+    let use_direct_child_creation = children::use_direct_runtime_child_creation(&entry.name);
     children::create_child_frames(
         lua,
         state,
         template,
         frame_name,
         frame_name,
-        children::use_direct_runtime_child_creation(&entry.name),
+        use_direct_child_creation,
     );
 
     // Create ScrollChild children
@@ -200,6 +201,7 @@ fn apply_single_template(
             &scroll_child.children,
             frame_name,
             frame_name,
+            use_direct_child_creation,
         );
     }
 

@@ -125,7 +125,14 @@ fn create_child_frame_from_template(
         reapply_inline_anchors(state, frame, &child_name, parent_name);
     }
 
-    apply_inline_frame_content(lua, state, frame, &child_name, child_subst);
+    apply_inline_frame_content(
+        lua,
+        state,
+        frame,
+        &child_name,
+        child_subst,
+        use_direct_creation,
+    );
 
     pop_suppress(lua);
     defer_child_onload(lua, &child_name);
@@ -397,6 +404,7 @@ pub(super) fn create_scroll_child_frames(
     children: &[FrameElement],
     parent_name: &str,
     subst_parent: &str,
+    use_direct_creation: bool,
 ) {
     let mut registered_scroll_child = false;
     for child in children {
@@ -411,7 +419,7 @@ pub(super) fn create_scroll_child_frames(
             intrinsic,
             parent_name,
             subst_parent,
-            false,
+            use_direct_creation,
         ) else {
             continue;
         };
@@ -441,6 +449,7 @@ fn apply_inline_frame_content(
     frame: &FrameXml,
     frame_name: &str,
     subst_parent: &str,
+    use_direct_creation: bool,
 ) {
     apply_mixin(lua, &frame.combined_mixin(), frame_name);
     apply_inline_key_values(lua, frame, frame_name);
@@ -462,10 +471,27 @@ fn apply_inline_frame_content(
 
     // Create child frames before layers so that relativeKey anchors
     // from FontStrings/Textures to sibling child frames resolve correctly
-    // (e.g. $parent.AccountWideIcon in ReputationEntryTemplate).
-    create_child_frames(lua, state, frame, frame_name, subst_parent, false);
+    // (e.g. $parent.AccountWideIcon in ReputationEntryTemplate). Keep the
+    // hot-path direct-create flag on nested inline descendants too, or shared
+    // templates like MinimalScrollBar fall back to Lua CreateFrame for
+    // grandchildren such as Track -> Thumb.
+    create_child_frames(
+        lua,
+        state,
+        frame,
+        frame_name,
+        subst_parent,
+        use_direct_creation,
+    );
     if let Some(scroll_child) = frame.scroll_child() {
-        create_scroll_child_frames(lua, state, &scroll_child.children, frame_name, subst_parent);
+        create_scroll_child_frames(
+            lua,
+            state,
+            &scroll_child.children,
+            frame_name,
+            subst_parent,
+            use_direct_creation,
+        );
     }
 
     super::apply_layers(lua, frame, frame_name, subst_parent);

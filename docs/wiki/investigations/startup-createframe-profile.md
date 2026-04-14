@@ -135,6 +135,29 @@ Shared-worktree startup also moved again on the same no-addons/no-saved-vars pat
 - lifecycle: `10.34s -> 6.77s`
 - `PLAYER_ENTERING_WORLD`: `37.44s -> 23.66s`
 
+### MinimalScrollBar recursive child fast path follow-up (2026-04-14)
+
+`MinimalScrollBar` was already on the top-level direct child-create hot list, but the fast path stopped one level too early. The template creates:
+
+- `Track`
+- `Track.Thumb`
+- `Back`
+- `Forward`
+
+Only the top-level children were using the Rust-side direct path. The nested `Track -> Thumb` creation still went through generated Lua `CreateFrame(...)` code.
+
+`template/children.rs` now propagates the direct child-create flag into inline descendants and scroll-child descendants instead of dropping back to the Lua path inside `apply_inline_frame_content()`.
+
+The focused regression `test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb` proves the change directly by wrapping Lua `CreateFrame`:
+
+- before the fix: runtime `CreateFrame("EventFrame", ..., "MinimalScrollBar")` hit Lua `CreateFrame` twice (root + nested thumb fallback)
+- after the fix: the same path hits Lua `CreateFrame` once (root only)
+
+On a current `wow-sim --no-addons --no-saved-vars` rerun with `WOW_SIM_PROFILE_CREATE_FRAME=1 WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS=10`, startup moved slightly again:
+
+- Blizzard addons loaded: `19.03s -> 18.51s`
+- `PLAYER_ENTERING_WORLD`: `24.20s -> 23.74s`
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.
