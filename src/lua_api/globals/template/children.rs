@@ -71,42 +71,79 @@ fn create_child_frame_from_template(
     use_direct_creation: bool,
 ) -> Option<String> {
     let is_named = frame.name.is_some();
-    let child_name = frame
-        .name
-        .as_ref()
-        .map(|name| name.replace("$parent", subst_parent))
-        .unwrap_or_else(|| format!("__tpl_{}", rand_id()));
-
+    let child_name = resolve_child_name(frame, subst_parent);
     let child_subst = if is_named { &child_name } else { subst_parent };
 
     push_suppress(lua);
 
-    let create_result = if use_direct_creation {
-        create_child_frame_direct(lua, state, frame, widget_type, parent_name, &child_name)
+    if !try_create_child_frame(lua, state, frame, widget_type, parent_name, &child_name, use_direct_creation) {
+        pop_suppress(lua);
+        return None;
+    }
+
+    apply_child_templates(lua, state, frame, &child_name, intrinsic, parent_name);
+    apply_inline_frame_content(lua, state, frame, &child_name, child_subst, use_direct_creation);
+
+    pop_suppress(lua);
+    defer_child_onload(lua, &child_name);
+    Some(child_name)
+}
+
+fn resolve_child_name(frame: &FrameXml, subst_parent: &str) -> String {
+    frame
+        .name
+        .as_ref()
+        .map(|name| name.replace("$parent", subst_parent))
+        .unwrap_or_else(|| format!("__tpl_{}", rand_id()))
+}
+
+/// Attempt to create the child frame via direct Rust or Lua path.
+/// Returns true on success, false on failure (with error logged).
+fn try_create_child_frame(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    widget_type: &str,
+    parent_name: &str,
+    child_name: &str,
+    use_direct_creation: bool,
+) -> bool {
+    let result = if use_direct_creation {
+        create_child_frame_direct(lua, state, frame, widget_type, parent_name, child_name)
             .or_else(|error| {
                 eprintln!(
                     "[template] Direct child create failed for '{}' (type={}) under '{}': {}. Falling back to Lua path.",
                     child_name, widget_type, parent_name, error
                 );
-                create_child_frame_via_lua(lua, frame, widget_type, parent_name, &child_name)
+                create_child_frame_via_lua(lua, frame, widget_type, parent_name, child_name)
             })
     } else {
-        create_child_frame_via_lua(lua, frame, widget_type, parent_name, &child_name)
+        create_child_frame_via_lua(lua, frame, widget_type, parent_name, child_name)
     };
-    if let Err(error) = create_result {
+    if let Err(error) = result {
         eprintln!(
             "[template] Failed to create child '{}' (type={}) under '{}': {}",
             child_name, widget_type, parent_name, error
         );
-        pop_suppress(lua);
-        return None;
+        return false;
     }
+    true
+}
 
+/// Apply intrinsic and inherited templates, then reapply inline anchors.
+fn apply_child_templates(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    child_name: &str,
+    intrinsic: Option<&str>,
+    parent_name: &str,
+) {
     if let Some(intrinsic_name) = intrinsic {
-        apply_templates_from_registry(lua, state, &child_name, intrinsic_name);
+        apply_templates_from_registry(lua, state, child_name, intrinsic_name);
         let intrinsic_code = format!(
             "{}.intrinsic = \"{}\"",
-            lua_global_ref(&child_name),
+            lua_global_ref(child_name),
             intrinsic_name
         );
         let _ = chunk_cache::exec(lua, &intrinsic_code, "template-mod");
@@ -114,28 +151,13 @@ fn create_child_frame_from_template(
 
     let inherits = frame.inherits.as_deref().unwrap_or("");
     if !inherits.is_empty() {
-        apply_templates_from_registry(lua, state, &child_name, inherits);
+        apply_templates_from_registry(lua, state, child_name, inherits);
     }
 
-    // If the inline child definition has its own anchors, they fully replace
-    // any anchors set by the inherited template (WoW behavior: most-derived
-    // anchors win completely, not merged).
+    // Inline anchors fully replace inherited anchors (WoW behavior).
     if frame.anchors().is_some() {
-        reapply_inline_anchors(state, frame, &child_name, parent_name);
+        reapply_inline_anchors(state, frame, child_name, parent_name);
     }
-
-    apply_inline_frame_content(
-        lua,
-        state,
-        frame,
-        &child_name,
-        child_subst,
-        use_direct_creation,
-    );
-
-    pop_suppress(lua);
-    defer_child_onload(lua, &child_name);
-    Some(child_name)
 }
 
 fn create_child_frame_via_lua(
