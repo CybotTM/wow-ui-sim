@@ -65,4 +65,4 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[global-frame-index]] | Lazy `_G` lookup design; Phase 1 done, Phases 2-3 planned |
 | [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
 | [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |
-| [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw now share BC cache, honor `RequestPreloadMap()`, use smaller budgets, and keep the fast tick alive until GPU uploads finish |
+| [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw now share BC cache, honor `RequestPreloadMap()`, keep the fast tick alive until GPU uploads finish, and count BC-preloaded tiles as cached during budgeted draw |

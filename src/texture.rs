@@ -113,7 +113,7 @@ impl TextureManager {
     /// Check if a texture is already in the CPU cache (no disk I/O needed).
     pub fn is_cached(&self, wow_path: &str) -> bool {
         let normalized = normalize_wow_path(wow_path);
-        self.cache.contains_key(&normalized)
+        self.cache.contains_key(&normalized) || self.bc_cache.contains_key(&normalized)
     }
 
     /// Load a texture, checking the lz4 disk cache before falling back to decode.
@@ -501,6 +501,26 @@ mod tests {
         assert_eq!(cached.height, 4);
         assert_eq!(cached.format, crate::render::shader::atlas::BcFormat::Bc1);
         assert_eq!(cached.bc_data.as_ref(), [0xaa; 8]);
+    }
+
+    #[test]
+    fn test_is_cached_reports_bc_preloaded_textures() {
+        let temp_dir = TempDir::new().unwrap();
+        let mut mgr = TextureManager::new(temp_dir.path());
+        mgr.bc_cache.insert(
+            normalize_wow_path(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"),
+            BcTextureResult {
+                width: 4,
+                height: 4,
+                bc_data: Arc::<[u8]>::from(vec![0xaa; 8]),
+                format: crate::render::shader::atlas::BcFormat::Bc1,
+            },
+        );
+
+        assert!(
+            mgr.is_cached(r"Interface\WorldMap\IsleofDorn\IsleOfDorn1"),
+            "BC-preloaded world-map tiles must count as cached so budgeted uploads keep streaming after the deadline"
+        );
     }
 
     #[test]

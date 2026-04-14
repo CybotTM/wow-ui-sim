@@ -408,6 +408,76 @@ fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
 }
 
 #[test]
+fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half_on_first_open() {
+    common::with_timeout(120, move || {
+        let env = env_with_isolated_world_map();
+
+        let fog_rect = {
+            let state = env.state().borrow();
+            let world_map_id = state
+                .widgets
+                .get_id_by_name("WorldMapFrame")
+                .expect("isolated world map should create WorldMapFrame");
+            let fog_pin_id = state
+                .widgets
+                .iter_ids()
+                .find(|&id| {
+                    state.widgets.get(id).is_some_and(|frame| {
+                        frame
+                            .object_type_name
+                            .as_deref()
+                            .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
+                            && is_descendant_of(&state.widgets, id, world_map_id)
+                    })
+                })
+                .expect("isolated world map should create a FogOfWarFrame pin");
+            compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
+        };
+
+        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
+        let visible_batch =
+            build_screenshot_like_batch_without_settle(&env, 1024, 768, Some("WorldMapFrame"));
+        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
+
+        env.exec(
+            r#"
+            local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+            assert(fogPin, "missing fog pin")
+            fogPin:Hide()
+        "#,
+        )
+        .expect("failed to hide fog pin");
+        wow_ui_sim::startup::process_pending_timers(&env);
+        wow_ui_sim::startup::fire_one_on_update_tick(&env);
+
+        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
+        let hidden_batch =
+            build_screenshot_like_batch_without_settle(&env, 1024, 768, Some("WorldMapFrame"));
+        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
+        let fog_diff =
+            diff_bounds(&visible_render, &hidden_render, 12).expect("fog should change pixels");
+
+        assert!(
+            fog_diff.0 as f32 >= fog_rect.x + fog_rect.width * 0.49,
+            "first-open fog should start on the unexplored half: diff={fog_diff:?} fog_rect={fog_rect:?}"
+        );
+        assert!(
+            fog_diff.2 as f32 >= fog_rect.x + fog_rect.width * 0.92,
+            "first-open fog should reach the right side of the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
+        );
+        assert!(
+            fog_diff.2 as f32 <= fog_rect.x + fog_rect.width + 2.0,
+            "first-open fog should not extend beyond the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
+        );
+        assert!(
+            fog_diff.1 as f32 <= fog_rect.y + 2.0
+                && fog_diff.3 as f32 >= fog_rect.y + fog_rect.height - 2.0,
+            "first-open fog should cover the full fog-frame height: diff={fog_diff:?} fog_rect={fog_rect:?}"
+        );
+    });
+}
+
+#[test]
 fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
     common::with_timeout(120, move || {
         let env = env_with_isolated_world_map();

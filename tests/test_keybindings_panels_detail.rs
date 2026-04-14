@@ -476,6 +476,56 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
 }
 
 #[test]
+fn world_map_fog_of_war_pin_matches_canvas_size_on_first_open() {
+    test_timeout! {
+        let env = setup_env();
+        env.apply_post_event_workarounds();
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let (fog_width, fog_height, explored_width, explored_height, expected_width, expected_height): (f64, f64, f64, f64, f64, f64) = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    error("world map not open")
+                end
+
+                local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+                assert(fogPin, "missing fog pin")
+
+                local explorationPin = WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate")()
+                assert(explorationPin, "missing exploration pin")
+
+                local expectedWidth = WorldMapFrame:DenormalizeHorizontalSize(1.0)
+                local expectedHeight = WorldMapFrame:DenormalizeVerticalSize(1.0)
+
+                return fogPin:GetWidth(), fogPin:GetHeight(),
+                    explorationPin:GetWidth(), explorationPin:GetHeight(),
+                    expectedWidth, expectedHeight
+            "#,
+            )
+            .unwrap();
+
+        assert!(
+            (fog_width - expected_width).abs() < 0.001,
+            "Fog pin width should match the full canvas width on first open: fog_width={fog_width} expected_width={expected_width}"
+        );
+        assert!(
+            (fog_height - expected_height).abs() < 0.001,
+            "Fog pin height should match the full canvas height on first open: fog_height={fog_height} expected_height={expected_height}"
+        );
+        assert!(
+            (explored_width - expected_width).abs() < 0.001,
+            "Exploration pin width should match the full canvas width on first open: explored_width={explored_width} expected_width={expected_width}"
+        );
+        assert!(
+            (explored_height - expected_height).abs() < 0.001,
+            "Exploration pin height should match the full canvas height on first open: explored_height={explored_height} expected_height={expected_height}"
+        );
+    }
+}
+
+#[test]
 fn world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame() {
     test_timeout! {
         let env = setup_env();

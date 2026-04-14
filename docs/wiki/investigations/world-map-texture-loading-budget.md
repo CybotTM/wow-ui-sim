@@ -45,6 +45,21 @@ The remaining explored-overlay gap had a separate root cause:
 - `C_Map.RequestPreloadMap()` now resolves the target map's art tiles plus exploration overlay textures into concrete WoW texture paths and queues them into the existing texture preload pass.
 - Queued API-side preloads share the same budgeted preload loop as normal render requests, and unfinished paths are re-queued when the budget is exhausted instead of being dropped.
 
+## 2026-04-14 Follow-up: First-Frame Quarter-Map Artifact
+
+After the preload/draw budget work landed, the first visible world-map frame could still open in a partially streamed state where only one map tile quadrant had uploaded. The screenshot looked like the fog of war was covering only one quarter of the map, but the geometry was a red herring: the fog and exploration pins still matched the full canvas size.
+
+The actual bug was that budgeted draw treated BC-preloaded world-map tiles as "not cached":
+
+- `TextureManager::is_cached()` only checked the RGBA `cache`
+- world-map preload now warms many map tiles into `bc_cache`
+- draw-path budget checks in `render_textures.rs` call `is_cached()` to decide whether they can stop once the deadline is hit
+- after the first BC upload, draw could hit its deadline, see the next tile as "uncached", and pause early even though preload had already warmed the source
+
+That mismatch made the first interactive frame vulnerable to partial tile upload progress, which visually showed up as an incorrect quarter-map explored/fog composition.
+
+The fix was small but critical: `TextureManager::is_cached()` now returns true when the normalized path exists in either `cache` or `bc_cache`. That keeps the upload loop streaming BC-preloaded map tiles across the deadline boundary instead of stalling after the first quadrant.
+
 ## Result
 
 After the cache + budget changes, the world map no longer took repeated ~50ms draw stalls while tiles streamed in. The same repro shifted to progressive smaller chunks:
@@ -61,15 +76,19 @@ After wiring `RequestPreloadMap()`, the base map and explored overlays no longer
 
 ## Verification
 
+- `cargo test texture::tests::test_is_cached_reports_bc_preloaded_textures --lib`
 - `cargo test texture::tests::test_load_bc_caches_dxt_blp_data --lib`
 - `cargo test budgeted_preload --lib`
 - `cargo test --lib request_preload_map_warms_map_art_and_overlay_textures`
+- `cargo test --test render_order isolated_world_map_fog_of_war_renders_only_on_unexplored_half_on_first_open`
 - `cargo test --test render_order isolated_world_map_stack_opens_and_populates_world_quest_pins`
+- `cargo test --test test_keybindings_panels_detail world_map_fog_of_war_pin_matches_canvas_size_on_first_open`
 - Runtime repro with `ToggleWorldMap()` confirmed the shift from ~50ms draw spikes to ~11ms draw chunks.
 
 ## Sources
 
 - [src/iced_app/render.rs](../../../src/iced_app/render.rs) — preload budget loop, `textures_pending` bookkeeping, and focused regression tests
+- [src/texture.rs](../../../src/texture.rs) — `bc_cache`, `TextureManager::is_cached()`, and BC-cache regression coverage
 - [src/lua_api/globals/c_map_api.rs](../../../src/lua_api/globals/c_map_api.rs) — `C_Map.RequestPreloadMap()` queueing
 - [src/lua_api/state.rs](../../../src/lua_api/state.rs) — API-side queued texture preload storage
 - [src/texture/preload.rs](../../../src/texture/preload.rs) — map-art / exploration-overlay path collection

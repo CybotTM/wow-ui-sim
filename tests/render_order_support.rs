@@ -48,10 +48,31 @@ pub(super) fn build_screenshot_like_batch(
     height: u32,
     filter: Option<&str>,
 ) -> QuadBatch {
+    build_screenshot_like_batch_with_settle(env, width, height, filter, true)
+}
+
+pub(super) fn build_screenshot_like_batch_without_settle(
+    env: &WowLuaEnv,
+    width: u32,
+    height: u32,
+    filter: Option<&str>,
+) -> QuadBatch {
+    build_screenshot_like_batch_with_settle(env, width, height, filter, false)
+}
+
+fn build_screenshot_like_batch_with_settle(
+    env: &WowLuaEnv,
+    width: u32,
+    height: u32,
+    filter: Option<&str>,
+    settle: bool,
+) -> QuadBatch {
     let font_system = make_font_system();
     env.set_font_system(Rc::clone(&font_system));
     env.set_screen_size(width as f32, height as f32);
-    wow_ui_sim::startup::run_extra_update_ticks(env, 3);
+    if settle {
+        wow_ui_sim::startup::run_extra_update_ticks(env, 3);
+    }
 
     let mut glyph_atlas = GlyphAtlas::new();
     let mut font_system = font_system.borrow_mut();

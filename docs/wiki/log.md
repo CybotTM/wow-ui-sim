@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] ingest | world-map texture loading budget follow-up
+
+Updated `investigations/world-map-texture-loading-budget.md` with a first-frame
+world-map follow-up: BC-preloaded tiles were landing in `bc_cache`, but
+`TextureManager::is_cached()` only consulted the RGBA cache. That caused
+budgeted draw to pause early after the first BC upload and could make the
+world map open with an apparent quarter-map fog/exploration artifact. Added
+the BC-cache root cause, fix, and regression coverage to the investigation
+page.
+
 ## [2026-04-14] investigations | world map 90s OnUpdate recapture
 
 Updated `investigations/world-map-onupdate-hover-polling.md` with the fresh
