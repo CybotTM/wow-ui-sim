@@ -472,68 +472,70 @@ const PATCH_POI_BUTTON_UPDATE_POINT_LUA: &str = r#"
 ///
 /// These stubs only provide the specific methods/fields called at startup.
 fn patch_missing_frame_stubs(env: &WowLuaEnv) {
-    let snippets: &[(&str, &str)] = &[
-        // FriendsFrameIcon: a Texture child of FriendsFrame, but FriendsFrame is
-        // hidden at startup. Provides SetTexture stub to silence OnEvent errors.
-        (
-            "FriendsFrameIcon",
-            r#"
-            if not FriendsFrameIcon then
-                rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
-            end
-        "#,
-        ),
-        // QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
-        // QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
-        (
-            "QueueStatusButton",
-            r#"
-            if QueueStatusButton and not QueueStatusButton.SetGlowLock then
-                QueueStatusButton.SetGlowLock = function() end
-            end
-            if not QueueStatusButton then
-                rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
-            end
-        "#,
-        ),
-        // TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
-        // If the parent frame failed to create (nil parent), the button is nil.
-        // Provide a stub with Text field for UpdateDefaultButtons().
-        (
-            "TextToSpeechDefaultButton",
-            r#"
-            if not TextToSpeechDefaultButton then
-                local t = { GetWidth = function() return 100 end }
-                rawset(_G, "TextToSpeechDefaultButton", {
-                    Text = t,
-                    SetShown = function() end,
-                    SetWidth = function() end,
-                    SetPoint = function() end,
-                })
-            elseif not TextToSpeechDefaultButton.Text then
-                TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
-            end
-        "#,
-        ),
-        (
-            "TextToSpeechCharacterSpecificButton",
-            r#"
-            if not TextToSpeechCharacterSpecificButton then
-                rawset(_G, "TextToSpeechCharacterSpecificButton", {
-                    SetShown = function() end,
-                    SetPoint = function() end,
-                })
-            end
-        "#,
-        ),
-    ];
-
-    for (name, code) in snippets {
+    for (name, code) in MISSING_FRAME_STUBS {
         if let Err(e) = env.exec(code) {
             eprintln!("[workaround] patch_missing_frame_stubs({name}) failed: {e}");
         }
     }
 }
+
+/// Stub snippets for global frames expected by Blizzard code but not created
+/// by any loaded addon. Each entry: (frame_name, lua_code).
+const MISSING_FRAME_STUBS: &[(&str, &str)] = &[
+    // FriendsFrameIcon: a Texture child of FriendsFrame, but FriendsFrame is
+    // hidden at startup. Provides SetTexture stub to silence OnEvent errors.
+    (
+        "FriendsFrameIcon",
+        r#"
+        if not FriendsFrameIcon then
+            rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
+        end
+    "#,
+    ),
+    // QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
+    // QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
+    (
+        "QueueStatusButton",
+        r#"
+        if QueueStatusButton and not QueueStatusButton.SetGlowLock then
+            QueueStatusButton.SetGlowLock = function() end
+        end
+        if not QueueStatusButton then
+            rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
+        end
+    "#,
+    ),
+    // TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
+    // If the parent frame failed to create (nil parent), the button is nil.
+    // Provide a stub with Text field for UpdateDefaultButtons().
+    (
+        "TextToSpeechDefaultButton",
+        r#"
+        if not TextToSpeechDefaultButton then
+            local t = { GetWidth = function() return 100 end }
+            rawset(_G, "TextToSpeechDefaultButton", {
+                Text = t,
+                SetShown = function() end,
+                SetWidth = function() end,
+                SetPoint = function() end,
+            })
+        elseif not TextToSpeechDefaultButton.Text then
+            TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
+        end
+    "#,
+    ),
+    (
+        "TextToSpeechCharacterSpecificButton",
+        r#"
+        if not TextToSpeechCharacterSpecificButton then
+            rawset(_G, "TextToSpeechCharacterSpecificButton", {
+                SetShown = function() end,
+                SetPoint = function() end,
+            })
+        end
+    "#,
+    ),
+];
 
 /// Initialize WorldMapFrame with the player's current zone map and refresh data
 /// providers so that map pins (world quests, POIs, etc.) are populated.
