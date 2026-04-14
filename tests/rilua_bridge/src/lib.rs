@@ -4,6 +4,8 @@
 //! These tests use rilua directly — they don't depend on the full
 //! wow-ui-sim crate, so they compile even when mlua-sys fails.
 
+mod benchmark;
+
 #[path = "../../../src/lua_bridge/mod.rs"]
 mod lua_bridge;
 
@@ -14,6 +16,7 @@ use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
 use crate::lua_bridge::{create_frame_table, FromStack, IntoStack, TableBuilder};
+pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -290,6 +293,18 @@ fn test_create_frame_table_sets_backing_and_keeps_table_behavior() {
     lua.exec("rawset(helper_frame, 'field', 55)").unwrap();
     lua.exec("assert(rawget(helper_frame, 'field') == 55)")
         .unwrap();
+}
+
+#[test]
+fn test_benchmark_table_field_access_returns_timings() {
+    let result = benchmark_table_field_access(1_000, 5).unwrap();
+
+    assert_eq!(result.total_iterations(), 5_000);
+    assert!(result.plain_elapsed.as_nanos() > 0);
+    assert!(result.backed_elapsed.as_nanos() > 0);
+    assert!(result.plain_ns_per_access().is_finite());
+    assert!(result.backed_ns_per_access().is_finite());
+    assert!(result.backed_over_plain_ratio().is_finite());
 }
 
 // ---------------------------------------------------------------------------
