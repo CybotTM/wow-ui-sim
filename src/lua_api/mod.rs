@@ -2,6 +2,7 @@
 
 mod addon_scan;
 pub(crate) mod proxy_helpers;
+pub(crate) mod rilua_methods;
 pub mod animation;
 mod builtin_frames;
 mod cfunc_wrap;

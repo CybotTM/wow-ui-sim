@@ -24,9 +24,9 @@ pub(crate) fn next_timer_id() -> u64 {
 }
 
 #[derive(Clone)]
-struct WowLuaAppData {
-    sim_state: Rc<RefCell<SimState>>,
-    font_system: Option<Rc<RefCell<WowFontSystem>>>,
+pub(crate) struct WowLuaAppData {
+    pub(crate) sim_state: Rc<RefCell<SimState>>,
+    pub(crate) font_system: Option<Rc<RefCell<WowFontSystem>>>,
 }
 
 impl WowLuaAppData {
