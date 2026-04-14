@@ -594,12 +594,10 @@ fn set_mixin_override_impl(_lua: &Lua, (obj, key, value): (Value, String, Value)
     // Store mixin function directly in the per-frame user_value table.
     // The UserData __index reads from this table, so mixin functions are found
     // without needing a separate __mixin_overrides lookup.
-    if let Value::UserData(ud) = &obj {
-        if ud.borrow::<crate::lua_api::frame::FrameRef>().is_ok() {
-            if let Ok(fields) = ud.user_value::<mlua::Table>() {
-                fields.raw_set(key, value)?;
-            }
-        }
+    if crate::lua_api::frame::extract_frame_id(&obj).is_some()
+        && let Some(fields) = crate::lua_api::frame::frame_fields(&obj)?
+    {
+        fields.raw_set(key, value)?;
     }
     Ok(())
 }
@@ -689,7 +687,7 @@ fn mixin_impl(lua: &Lua, args: MultiValue) -> Result<Value> {
     })?;
     let secure_methods: Value = lua.globals().get("__secureMixinMethods")?;
     let set_override: Option<Function> = lua.named_registry_value("__SetMixinOverride").ok();
-    let is_userdata = matches!(&object, Value::UserData(_));
+    let is_userdata = crate::lua_api::frame::extract_frame_id(&object).is_some();
     for mixin_val in iter {
         let mixin = match mixin_val {
             Value::Table(t) => t,

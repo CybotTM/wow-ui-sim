@@ -652,10 +652,8 @@ fn add_misc_stubs_mixin<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn widget_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
-    match frame_ref(lua, frame_id)? {
-        Value::UserData(ud) => ud.user_value(),
-        _ => lua.create_table(),
-    }
+    crate::lua_api::frame::frame_fields(&frame_ref(lua, frame_id)?)?
+        .ok_or_else(|| mlua::Error::runtime("frame fields unavailable"))
 }
 
 fn set_widget_set_registration(

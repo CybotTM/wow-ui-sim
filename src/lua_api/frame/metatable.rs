@@ -28,6 +28,7 @@ pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
     register_index_helper(lua)?;
     register_bind_method_helper(lua)?;
     register_custom_metatable_store(lua)?;
+    install_frame_proxy_metatable(lua)?;
     install_forbidden_proxy_metatable(lua)?;
     patch_metatable_index(lua)?;
     Ok(())
@@ -67,9 +68,27 @@ fn register_custom_metatable_store(lua: &Lua) -> mlua::Result<()> {
 }
 
 /// Shared metatable reused by all forbidden proxy tables.
+fn install_frame_proxy_metatable(lua: &Lua) -> mlua::Result<()> {
+    let mt = create_frame_proxy_metatable(lua)?;
+    lua.set_named_registry_value("__frame_proxy_mt", mt)
+}
+
 fn install_forbidden_proxy_metatable(lua: &Lua) -> mlua::Result<()> {
     let mt = create_forbidden_proxy_metatable(lua)?;
     lua.set_named_registry_value("__forbidden_proxy_mt", mt)
+}
+
+/// Create the normal table-backed Lua representation for a frame.
+pub fn create_frame_proxy(lua: &Lua, frame_val: Value) -> mlua::Result<Value> {
+    let proxy = lua.create_table()?;
+    proxy.raw_set("__lud", frame_val)?;
+    let mt: mlua::Table = lua.named_registry_value("__frame_proxy_mt").or_else(|_| {
+        let mt = create_frame_proxy_metatable(lua)?;
+        lua.set_named_registry_value("__frame_proxy_mt", mt.clone())?;
+        Ok(mt)
+    })?;
+    proxy.set_metatable(Some(mt));
+    Ok(Value::Table(proxy))
 }
 
 // ── Meta method registration ──────────────────────────────────────────────────
@@ -191,10 +210,22 @@ fn add_eq_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 /// Reads `__lud` (the FrameRef UserData) from the proxy table at call time so this single
 /// metatable can be reused for every forbidden proxy instance.
 fn create_forbidden_proxy_metatable(lua: &Lua) -> mlua::Result<mlua::Table> {
-    let mt = lua.create_table()?;
+    let mt = create_shared_proxy_metatable(lua)?;
     mt.raw_set("__metatable", "Forbidden")?;
-    mt.raw_set("__index", create_forbidden_index(lua)?)?;
-    mt.raw_set("__newindex", create_forbidden_newindex(lua)?)?;
+    Ok(mt)
+}
+
+fn create_frame_proxy_metatable(lua: &Lua) -> mlua::Result<mlua::Table> {
+    create_shared_proxy_metatable(lua)
+}
+
+fn create_shared_proxy_metatable(lua: &Lua) -> mlua::Result<mlua::Table> {
+    let mt = lua.create_table()?;
+    mt.raw_set("__index", create_proxy_index(lua)?)?;
+    mt.raw_set("__newindex", create_proxy_newindex(lua)?)?;
+    mt.raw_set("__len", create_proxy_len(lua)?)?;
+    mt.raw_set("__tostring", create_proxy_tostring(lua)?)?;
+    mt.raw_set("__eq", create_proxy_eq(lua)?)?;
     Ok(mt)
 }
 
@@ -209,7 +240,7 @@ fn wrap_fn_with_frame(
 }
 
 /// __index for forbidden proxy: reads __lud from proxy, forwards to frame methods.
-fn create_forbidden_index(lua: &Lua) -> mlua::Result<mlua::Function> {
+fn create_proxy_index(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
         let frame_val: Value = this.raw_get("__lud")?;
 
@@ -226,12 +257,57 @@ fn create_forbidden_index(lua: &Lua) -> mlua::Result<mlua::Function> {
 }
 
 /// __newindex for forbidden proxy: delegates to the FrameRef's __newindex.
-fn create_forbidden_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
+fn create_proxy_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (this, key, value): (mlua::Table, String, Value)| {
         let frame_val: Value = this.raw_get("__lud")?;
         let assign: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
         assign.call::<()>((frame_val, key, value))?;
         Ok(())
+    })
+}
+
+fn create_proxy_len(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, this: mlua::Table| {
+        let frame_val: Value = this.raw_get("__lud")?;
+        let Some(frame_id) = extract_frame_id(&frame_val) else {
+            return Ok(0);
+        };
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        Ok(state
+            .widgets
+            .get(frame_id)
+            .map(|f| f.children.len())
+            .unwrap_or(0) as i32)
+    })
+}
+
+fn create_proxy_tostring(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|lua, this: mlua::Table| {
+        let frame_val: Value = this.raw_get("__lud")?;
+        let Some(frame_id) = extract_frame_id(&frame_val) else {
+            return Ok("Frame: 0x00000000".to_string());
+        };
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        let type_name = state
+            .widgets
+            .get(frame_id)
+            .map(|f| {
+                f.object_type_name
+                    .as_deref()
+                    .unwrap_or(f.widget_type.as_str())
+            })
+            .unwrap_or("Frame");
+        Ok(format!("{}: 0x{:08X}", type_name, frame_id))
+    })
+}
+
+fn create_proxy_eq(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|_lua, (a, b): (Value, Value)| {
+        Ok(extract_frame_id(&a)
+            .zip(extract_frame_id(&b))
+            .is_some_and(|(a, b)| a == b))
     })
 }
 

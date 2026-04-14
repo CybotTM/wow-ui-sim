@@ -198,11 +198,15 @@ fn set_colorselect_texture_slot(
     texture: Value,
 ) -> mlua::Result<()> {
     match texture {
-        Value::UserData(_) => store_colorselect_texture_slot(lua, frame_id, slot_key, texture),
+        _ if crate::lua_api::frame::extract_frame_id(&texture).is_some() => {
+            store_colorselect_texture_slot(lua, frame_id, slot_key, texture)
+        }
         Value::Integer(_) | Value::Number(_) | Value::String(_) => {
             let existing_texture = get_colorselect_texture_slot(lua, frame_id, slot_key)?;
             let texture_ud = match existing_texture {
-                Value::UserData(_) => existing_texture,
+                _ if crate::lua_api::frame::extract_frame_id(&existing_texture).is_some() => {
+                    existing_texture
+                }
                 _ => {
                     let child_texture = get_or_create_child_texture(lua, frame_id, slot_key)?;
                     store_colorselect_texture_slot(lua, frame_id, slot_key, child_texture.clone())?;
@@ -236,7 +240,7 @@ fn store_colorselect_texture_slot(
 
 fn clear_colorselect_texture_slot(lua: &Lua, frame_id: u64, slot_key: &str) -> mlua::Result<()> {
     let existing_texture = get_colorselect_texture_slot(lua, frame_id, slot_key)?;
-    if matches!(existing_texture, Value::UserData(_)) {
+    if crate::lua_api::frame::extract_frame_id(&existing_texture).is_some() {
         set_texture_value(lua, &existing_texture, &Value::Nil)?;
     }
 

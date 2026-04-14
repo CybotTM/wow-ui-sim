@@ -21,10 +21,12 @@ fn enumerate_frames(lua: &Lua, arg: Value) -> Result<Value> {
     let state_rc = get_sim_state(lua);
     let state = state_rc.borrow();
 
-    let after_id: u64 = match &arg {
-        ref v @ Value::UserData(_) => extract_frame_id(v).unwrap_or(0),
+    let after_id: u64 = match arg {
         Value::Nil => 0,
-        _ => return Ok(Value::Nil),
+        other => match extract_frame_id(&other) {
+            Some(id) => id,
+            None => return Ok(Value::Nil),
+        },
     };
 
     match state.widgets.next_id_after(after_id) {

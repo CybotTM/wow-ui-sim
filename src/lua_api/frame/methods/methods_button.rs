@@ -167,10 +167,8 @@ fn apply_button_texture_setter(
     texture: &Value,
     set_button_field: fn(&mut crate::widget::Frame, Option<String>, Option<(f32, f32, f32, f32)>),
 ) -> Result<(), mlua::Error> {
-    if let Value::UserData(_) = texture {
-        if let Some(tex_id) = crate::lua_api::frame::extract_frame_id(texture) {
-            apply_set_button_texture(lua, state, button_id, parent_key, tex_id);
-        }
+    if let Some(tex_id) = crate::lua_api::frame::extract_frame_id(texture) {
+        apply_set_button_texture(lua, state, button_id, parent_key, tex_id);
     } else {
         apply_set_button_texture_path(
             lua,
@@ -496,7 +494,7 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetCheckedTexture", |lua, this, texture: Value| {
         let id = this.0;
         let path = extract_texture_path(&texture)?;
-        let is_userdata = matches!(texture, Value::UserData(_));
+        let is_userdata = crate::lua_api::frame::extract_frame_id(texture).is_some();
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if !is_userdata && let Some(frame) = state.widgets.get_mut_visual(id) {
@@ -515,7 +513,7 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetDisabledCheckedTexture", |lua, this, texture: Value| {
         let id = this.0;
         let path = extract_texture_path(&texture)?;
-        let is_userdata = matches!(texture, Value::UserData(_));
+        let is_userdata = crate::lua_api::frame::extract_frame_id(texture).is_some();
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if !is_userdata && let Some(frame) = state.widgets.get_mut_visual(id) {

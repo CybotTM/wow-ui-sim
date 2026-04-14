@@ -172,12 +172,7 @@ fn add_create_line_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 
 /// Extract the frame id from a FrameRef UserData value for anonymous frame naming.
 fn extract_id_from_ud(val: &Value) -> u64 {
-    if let Value::UserData(ud) = val {
-        if let Ok(frame_ref) = ud.borrow::<super::super::handle::FrameRef>() {
-            return frame_ref.0;
-        }
-    }
-    0
+    crate::lua_api::frame::extract_frame_id(val).unwrap_or(0)
 }
 
 /// CreateFontString(name, layer, inherits)

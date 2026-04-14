@@ -44,11 +44,8 @@ pub(super) fn texture_asset_to_string(asset: &Value) -> mlua::Result<Option<Stri
 /// Shared: get the per-frame fields table from a FrameRef userdata.
 /// Used by minimap, specialized, and alerts submodules.
 pub(super) fn frame_fields(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<mlua::Table> {
-    let frame = frame_ref(lua, frame_id)?;
-    match frame {
-        Value::UserData(ud) => ud.user_value(),
-        _ => lua.create_table(),
-    }
+    crate::lua_api::frame::frame_fields(&frame_ref(lua, frame_id)?)?
+        .ok_or_else(|| mlua::Error::runtime("frame fields unavailable"))
 }
 
 /// Drag/Input stubs.

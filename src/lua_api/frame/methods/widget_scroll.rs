@@ -82,10 +82,8 @@ fn call_scrollbox_mixin_override(
 }
 
 fn frame_user_value(lua: &mlua::Lua, frame_id: u64) -> mlua::Result<Table> {
-    let Value::UserData(ud) = frame_ref(lua, frame_id)? else {
-        return Err(mlua::Error::runtime("frame reference is not userdata"));
-    };
-    ud.user_value::<Table>()
+    crate::lua_api::frame::frame_fields(&frame_ref(lua, frame_id)?)?
+        .ok_or_else(|| mlua::Error::runtime("frame fields unavailable"))
 }
 
 fn callback_type_keys(lua: &mlua::Lua) -> (Value, Value) {
@@ -266,8 +264,8 @@ fn for_each_scrollbox_frame_fallback(
 }
 
 fn frame_element_data(frame: &Value) -> mlua::Result<Value> {
-    let maybe_func = match frame {
-        Value::UserData(ud) => ud.user_value::<Table>().ok().and_then(|fields| {
+    let maybe_func = crate::lua_api::frame::frame_fields(frame)?
+        .and_then(|fields| {
             fields
                 .raw_get::<Value>("GetElementData")
                 .ok()
@@ -275,16 +273,19 @@ fn frame_element_data(frame: &Value) -> mlua::Result<Value> {
                     Value::Function(func) => Some(func),
                     _ => None,
                 })
-        }),
-        Value::Table(table) => table
-            .raw_get::<Value>("GetElementData")
-            .ok()
-            .and_then(|value| match value {
-                Value::Function(func) => Some(func),
-                _ => None,
-            }),
-        _ => None,
-    };
+        })
+        .or_else(|| match frame {
+            Value::Table(table) => {
+                table
+                    .raw_get::<Value>("GetElementData")
+                    .ok()
+                    .and_then(|value| match value {
+                        Value::Function(func) => Some(func),
+                        _ => None,
+                    })
+            }
+            _ => None,
+        });
 
     match maybe_func {
         Some(func) => func.call(frame.clone()),

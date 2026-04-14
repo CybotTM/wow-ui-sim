@@ -67,7 +67,9 @@ fn add_set_statusbar_texture<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M
         let id = this.0;
         let (path, bar_id) = match &texture {
             Value::String(s) => (Some(s.to_string_lossy().to_string()), None),
-            Value::UserData(_) => (None, crate::lua_api::frame::extract_frame_id(&texture)),
+            _ if crate::lua_api::frame::extract_frame_id(&texture).is_some() => {
+                (None, crate::lua_api::frame::extract_frame_id(&texture))
+            }
             _ => (None, None),
         };
         let state_rc = get_sim_state(lua);

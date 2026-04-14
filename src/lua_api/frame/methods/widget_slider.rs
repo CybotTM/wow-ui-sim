@@ -170,12 +170,12 @@ fn add_set_thumb_texture_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mu
         let id = this.0;
         let store = get_or_create_slider_thumb_store(lua)?;
         match arg {
-            Value::UserData(_) => {
+            _ if crate::lua_api::frame::extract_frame_id(&arg).is_some() => {
                 store.set(id, arg)?;
             }
             Value::Integer(_) | Value::Number(_) | Value::String(_) => {
                 let existing: Value = store.get(id)?;
-                let thumb_ud = if let Value::UserData(_) = existing {
+                let thumb_ud = if crate::lua_api::frame::extract_frame_id(&existing).is_some() {
                     existing
                 } else {
                     let new_thumb = get_or_create_child_texture(lua, id, "ThumbTexture")?;

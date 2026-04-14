@@ -6,7 +6,7 @@
 use crate::lua_api::SimState;
 use crate::lua_api::frame::sync_child_to_lua;
 use crate::widget::{Frame, WidgetType};
-use mlua::{Lua, Result, Value};
+use mlua::{Lua, Result};
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -74,10 +74,8 @@ fn register_frame_global_impl(
 /// Get the per-frame fields table from the UserData's user_value.
 fn get_or_create_frame_fields(lua: &Lua, frame_id: u64) -> Result<mlua::Table> {
     let val = crate::lua_api::frame::frame_ref(lua, frame_id)?;
-    match val {
-        Value::UserData(ud) => Ok(ud.user_value::<mlua::Table>()?),
-        _ => Ok(lua.create_table()?),
-    }
+    crate::lua_api::frame::frame_fields(&val)?
+        .ok_or_else(|| mlua::Error::runtime("frame fields unavailable"))
 }
 
 /// Register all global frame objects.

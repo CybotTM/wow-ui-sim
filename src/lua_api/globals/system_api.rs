@@ -13,7 +13,7 @@
 //! - Streaming stubs: `GetFileStreamingStatus()`, `GetBackgroundLoadingStatus()`
 
 use crate::lua_api::SimState;
-use crate::lua_api::frame::{FrameRef, frame_ref};
+use crate::lua_api::frame::{FrameRef, extract_frame_id, frame_ref};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -52,12 +52,8 @@ fn register_type_override(lua: &Lua) -> Result<()> {
             Value::Table(_) => "table",
             Value::Function(_) => "function",
             Value::Thread(_) => "thread",
-            Value::UserData(ud) => {
-                if ud.borrow::<FrameRef>().is_ok() {
-                    return Ok("table");
-                }
-                "userdata"
-            }
+            Value::UserData(_) if extract_frame_id(&value).is_some() => return Ok("table"),
+            Value::UserData(_) => "userdata",
             Value::LightUserData(_) | Value::Error(_) | Value::Other(_) => "userdata",
         };
         Ok(type_str)
@@ -411,10 +407,7 @@ fn register_c_widget(lua: &Lua) -> Result<mlua::Table> {
 
 /// Check if a Lua value is a FrameRef UserData (i.e. a WoW widget).
 fn is_frame_widget(_: &Lua, widget: Value) -> Result<bool> {
-    match &widget {
-        Value::UserData(ud) => Ok(ud.borrow::<FrameRef>().is_ok()),
-        _ => Ok(false),
-    }
+    Ok(extract_frame_id(&widget).is_some())
 }
 
 /// Register WoW extensions to Lua stdlib tables (coroutine, math) and global `clock`.

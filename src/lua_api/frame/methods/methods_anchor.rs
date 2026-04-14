@@ -31,13 +31,7 @@ fn get_number(v: &Value) -> Option<f32> {
 /// to the corresponding frame object.
 fn get_frame_id(lua: &mlua::Lua, v: &Value) -> Option<usize> {
     match v {
-        ref v @ Value::UserData(_) => extract_frame_id(v).map(|id| id as usize),
-        Value::Table(t) => {
-            if let Ok(inner) = t.raw_get::<Value>("__lud") {
-                return extract_frame_id(&inner).map(|id| id as usize);
-            }
-            None
-        }
+        _ if extract_frame_id(v).is_some() => extract_frame_id(v).map(|id| id as usize),
         Value::String(s) => {
             let name = s.to_string_lossy();
             if let Ok(val) = lua.globals().get::<Value>(name.as_str()) {
@@ -520,7 +514,9 @@ fn resolve_set_all_points_target(
                 .map(|p| p as usize);
             (true, parent_id)
         }
-        ref v @ Value::UserData(_) => (true, extract_frame_id(v).map(|id| id as usize)),
+        _ if extract_frame_id(&first).is_some() => {
+            (true, extract_frame_id(&first).map(|id| id as usize))
+        }
         _ if has_arg => (true, None),
         _ => {
             let state_rc = get_sim_state(lua);

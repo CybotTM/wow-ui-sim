@@ -226,10 +226,9 @@ fn apply_direct_child_parent_refs(
     };
     let parent_val = frame_ref(lua, parent_id)?;
     let child_val = frame_ref(lua, child_id)?;
-    let Value::UserData(parent_ud) = parent_val else {
+    let Some(fields) = crate::lua_api::frame::frame_fields(&parent_val)? else {
         return Ok(());
     };
-    let fields: mlua::Table = parent_ud.user_value()?;
     let array = match fields.raw_get::<Value>(parent_array.as_str())? {
         Value::Table(existing) => existing,
         _ => {

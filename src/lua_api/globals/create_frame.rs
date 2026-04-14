@@ -3,7 +3,7 @@
 mod widget_defaults;
 
 use super::super::SimState;
-use super::super::frame::{extract_frame_id, frame_ref};
+use super::super::frame::{extract_frame_id, frame_fields, frame_ref};
 use super::create_frame_util::{
     apply_parent_array_from_template, apply_parent_key_from_template,
     migrate_children_to_new_frame, orphan_old_frame, register_button_child_globals,
@@ -33,20 +33,9 @@ pub(crate) fn sync_frame_owner_to_lua(lua: &Lua, state: &Rc<RefCell<SimState>>, 
     }
 }
 
-/// Extract a frame ID from a Lua Value, handling forbidden proxy tables.
+/// Extract a frame ID from a Lua Value, handling frame tables and forbidden proxies.
 fn extract_frame_id_or_proxy(value: &Value) -> Option<u64> {
-    match value {
-        Value::UserData(_) => extract_frame_id(value),
-        Value::Table(t) => {
-            // Forbidden proxy: UserData stored at "__lud"
-            if let Ok(inner) = t.raw_get::<Value>("__lud") {
-                extract_frame_id(&inner)
-            } else {
-                None
-            }
-        }
-        _ => None,
-    }
+    extract_frame_id(value)
 }
 
 #[derive(Clone, Copy)]
@@ -681,7 +670,7 @@ fn mark_default_parent(widgets: &mut WidgetRegistry, frame_id: u64) {
     }
 }
 
-/// Create a FrameRef UserData value for a frame and cache it in `_G`.
+/// Create a table-backed frame value for a frame and cache it in `_G`.
 fn create_frame_userdata(
     lua: &Lua,
     frame_id: u64,
@@ -704,12 +693,10 @@ fn create_frame_userdata(
 fn migrate_lua_fields_to_new_frame(lua: &Lua, old_id: u64, new_id: u64) -> Result<()> {
     let old_val = frame_ref(lua, old_id)?;
     let new_val = frame_ref(lua, new_id)?;
-    let (Value::UserData(old_ud), Value::UserData(new_ud)) = (old_val, new_val) else {
+    let (Some(old_fields), Some(new_fields)) = (frame_fields(&old_val)?, frame_fields(&new_val)?)
+    else {
         return Ok(());
     };
-
-    let old_fields: mlua::Table = old_ud.user_value()?;
-    let new_fields: mlua::Table = new_ud.user_value()?;
 
     for pair in old_fields.clone().pairs::<Value, Value>() {
         let (key, value) = pair?;
@@ -728,8 +715,7 @@ fn store_widget_type_key(lua: &Lua, ud: &Value, wt: WidgetType, frame_type: &str
     } else {
         resolve_object_type_name(frame_type)
     };
-    if let Value::UserData(u) = ud {
-        let fields: mlua::Table = u.user_value()?;
+    if let Some(fields) = frame_fields(ud)? {
         fields.raw_set("__wt", lua.create_string(type_key.as_str())?)?;
     }
     Ok(())
@@ -737,8 +723,12 @@ fn store_widget_type_key(lua: &Lua, ud: &Value, wt: WidgetType, frame_type: &str
 
 /// Create a forbidden proxy table: `{ __lud = ud }` with shared `__forbidden_proxy_mt`.
 fn create_forbidden_proxy(lua: &Lua, ud: Value) -> Result<Value> {
+    let inner = match ud {
+        Value::Table(table) => table.raw_get::<Value>("__lud")?,
+        other => other,
+    };
     let proxy = lua.create_table()?;
-    proxy.raw_set("__lud", ud)?;
+    proxy.raw_set("__lud", inner)?;
     let mt: mlua::Table = lua.named_registry_value("__forbidden_proxy_mt")?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))

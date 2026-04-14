@@ -1,6 +1,8 @@
-//! FrameRef UserData-based frame representation helpers.
+//! Frame-backed Lua table helpers.
 //!
-//! Frames are represented as FrameRef UserData with the frame ID stored directly.
+//! Frames are exposed to Lua as proxy tables with a hidden `__lud` field pointing
+//! at the internal `FrameRef` userdata. This keeps the public Lua value table-like
+//! while preserving the existing Rust method registration on `FrameRef`.
 //! SimState is stored in Lua app_data, accessed via `get_sim_state()`.
 
 use crate::lua_api::SimState;
@@ -30,8 +32,8 @@ impl mlua::UserData for FrameRef {
 /// Get the cached UserData Value for a frame ID.
 ///
 /// Looks up the numeric `__frame_refs[id]` cache first.
-/// If not cached, creates a new FrameRef UserData with an empty per-frame Lua
-/// table as user_value and caches it in `reg.__frame_refs`.
+/// If not cached, creates a new hidden `FrameRef` userdata, wraps it in a
+/// proxy table, and caches the proxy in `reg.__frame_refs`.
 pub fn frame_ref(lua: &mlua::Lua, id: u64) -> mlua::Result<mlua::Value> {
     let frame_refs = get_or_create_frame_ref_cache(lua)?;
     let cached: mlua::Value = frame_refs.raw_get(id as i64)?;
@@ -43,7 +45,7 @@ pub fn frame_ref(lua: &mlua::Lua, id: u64) -> mlua::Result<mlua::Value> {
     let ud = lua.create_userdata(FrameRef(id))?;
     let fields = lua.create_table()?;
     ud.set_user_value(fields)?;
-    let val = mlua::Value::UserData(ud);
+    let val = super::metatable::create_frame_proxy(lua, mlua::Value::UserData(ud))?;
     frame_refs.raw_set(id as i64, val.clone())?;
     Ok(val)
 }
@@ -72,23 +74,89 @@ pub fn get_sim_state(lua: &Lua) -> Rc<RefCell<SimState>> {
 pub fn sync_child_to_lua(lua: &Lua, parent_id: u64, key: &str, child_id: u64) -> mlua::Result<()> {
     let parent_val = frame_ref(lua, parent_id)?;
     let child_val = frame_ref(lua, child_id)?;
-    if let Value::UserData(ud) = &parent_val {
-        if let Ok(fields) = ud.user_value::<mlua::Table>() {
-            fields.raw_set(key, child_val)?;
-        }
+    if let Some(fields) = frame_fields(&parent_val)? {
+        fields.raw_set(key, child_val)?;
     }
     Ok(())
+}
+
+/// Extract the hidden FrameRef userdata from either a raw userdata or frame table.
+pub fn frame_userdata(value: &Value) -> Option<mlua::AnyUserData> {
+    match value {
+        Value::UserData(ud) => Some(ud.clone()),
+        Value::Table(t) => match t.raw_get::<Value>("__lud") {
+            Ok(Value::UserData(ud)) => Some(ud),
+            _ => None,
+        },
+        _ => None,
+    }
+}
+
+/// Get the hidden per-frame fields table from a frame value.
+pub fn frame_fields(value: &Value) -> mlua::Result<Option<mlua::Table>> {
+    let Some(userdata) = frame_userdata(value) else {
+        return Ok(None);
+    };
+    userdata.user_value::<mlua::Table>().map(Some)
 }
 
 /// Extract a frame ID from a Lua Value (FrameRef UserData).
 #[inline]
 pub fn extract_frame_id(value: &Value) -> Option<u64> {
-    match value {
-        Value::UserData(ud) => ud.borrow::<FrameRef>().ok().map(|r| r.0),
-        Value::Table(t) => t
-            .raw_get::<Value>("__lud")
-            .ok()
-            .and_then(|inner| extract_frame_id(&inner)),
-        _ => None,
+    frame_userdata(value).and_then(|ud| ud.borrow::<FrameRef>().ok().map(|r| r.0))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::lua_api::frame::metatable::setup_frame_helpers;
+    use crate::widget::{Frame, WidgetType};
+    use mlua::{Lua, LuaOptions, StdLib};
+
+    fn make_lua() -> Lua {
+        unsafe { Lua::unsafe_new_with(StdLib::ALL, LuaOptions::default()) }
+    }
+
+    #[test]
+    fn frame_ref_returns_table_proxy() {
+        let lua = make_lua();
+
+        let frame = frame_ref(&lua, 7).expect("frame ref should be created");
+
+        assert!(
+            matches!(frame, Value::Table(_)),
+            "frame should be exposed as a table"
+        );
+        assert_eq!(extract_frame_id(&frame), Some(7));
+    }
+
+    #[test]
+    fn frame_table_proxy_preserves_method_calls() {
+        let lua = make_lua();
+        let state = Rc::new(RefCell::new(SimState::default()));
+        let frame_id = {
+            let mut state = state.borrow_mut();
+            state.widgets.register(Frame::new(
+                WidgetType::Frame,
+                Some("ProxyFrame".to_string()),
+                None,
+            ))
+        };
+
+        lua.set_app_data(Rc::clone(&state));
+        setup_frame_helpers(&lua).expect("frame helpers should install");
+
+        let frame = frame_ref(&lua, frame_id).expect("frame ref should be created");
+        lua.globals()
+            .set("frame", frame)
+            .expect("global frame should be set");
+
+        let (frame_type, name): (String, String) = lua
+            .load("return type(frame), frame:GetName()")
+            .eval()
+            .expect("proxy frame should behave like a table with methods");
+
+        assert_eq!(frame_type, "table");
+        assert_eq!(name, "ProxyFrame");
     }
 }
