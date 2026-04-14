@@ -2,6 +2,7 @@
 
 mod addon_scan;
 pub(crate) mod proxy_helpers;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod rilua_methods;
 #[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
 pub(crate) mod rilua_script_helpers;
