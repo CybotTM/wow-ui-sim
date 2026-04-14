@@ -12,7 +12,7 @@ use crate::loader::chunk_cache;
 use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::loader::precompiled;
 use crate::lua_api::SimState;
-use crate::lua_api::frame::FrameRef;
+use crate::lua_api::frame::{FrameRef, frame_ref, get_sim_state};
 use crate::xml::{
     FrameElement, FrameXml, LayerElement, LayerXml, TemplateEntry, TextureXml, get_template_chain,
 };
@@ -667,7 +667,7 @@ fn apply_mixin_via_chunk(lua: &Lua, mixin: &str, frame_name: &str) {
 }
 
 fn frame_fields_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Option<mlua::Table>> {
-    let value: Value = lua.globals().raw_get(frame_name)?;
+    let value = resolve_frame_value_by_name(lua, frame_name)?;
     frame_fields_from_value(value)
 }
 
@@ -687,6 +687,27 @@ fn frame_fields_from_value(value: Value) -> mlua::Result<Option<mlua::Table>> {
         return userdata.user_value::<mlua::Table>().map(Some);
     }
     Ok(None)
+}
+
+fn resolve_frame_value_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Value> {
+    if let Some(id) = frame_name
+        .strip_prefix("__frame_")
+        .and_then(|suffix| suffix.parse::<u64>().ok())
+    {
+        return frame_ref(lua, id);
+    }
+
+    let globals = lua.globals();
+    let value: Value = globals.raw_get(frame_name)?;
+    if !value.is_nil() {
+        return Ok(value);
+    }
+
+    let frame_id = get_sim_state(lua).borrow().widgets.get_id_by_name(frame_name);
+    match frame_id {
+        Some(id) => frame_ref(lua, id),
+        None => Ok(Value::Nil),
+    }
 }
 
 fn resolve_global_path_value(lua: &Lua, path: &str) -> mlua::Result<Value> {
