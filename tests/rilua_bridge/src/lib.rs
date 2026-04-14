@@ -368,6 +368,16 @@ fn test_bridge_into_stack_pushes_multiple_values() {
 }
 
 #[test]
+fn test_bridge_into_stack_pushes_u64_ids_losslessly() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    let id = 4_294_967_297_u64;
+
+    assert_eq!(id.into_stack(state).unwrap(), 1);
+    assert_eq!(i64::from_stack(state, 1).unwrap(), id as i64);
+}
+
+#[test]
 fn test_table_builder_sets_values_and_functions() {
     let mut lua = Lua::new().unwrap();
     {

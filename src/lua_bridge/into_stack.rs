@@ -69,19 +69,22 @@ impl IntoStack for f64 {
 // Integer types
 // ---------------------------------------------------------------------------
 
+fn push_number(state: &mut LuaState, value: f64) -> LuaResult<u32> {
+    state.push(Val::Num(value));
+    Ok(1)
+}
+
 macro_rules! impl_into_stack_int {
     ($($ty:ty),*) => {$(
         impl IntoStack for $ty {
             fn into_stack(self, state: &mut LuaState) -> LuaResult<u32> {
-                #[allow(clippy::cast_lossless)]
-                state.push(Val::Num(self as f64));
-                Ok(1)
+                push_number(state, self as f64)
             }
         }
     )*};
 }
 
-impl_into_stack_int!(i32, i64, u32);
+impl_into_stack_int!(i32, i64, u32, u64);
 
 // ---------------------------------------------------------------------------
 // String / &str
