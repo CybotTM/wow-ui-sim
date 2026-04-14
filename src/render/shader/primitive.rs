@@ -74,41 +74,61 @@ pub fn load_texture_prefer_bc(
     tex_mgr: &mut crate::texture::TextureManager,
     path: &str,
 ) -> Option<LoadedTexture> {
-    // Crop requests always go through RGBA (sub-region extraction needs decoded pixels)
     if path.contains("@crop:") {
-        if let Some((base_path, x, y, crop_w, crop_h)) = decode_crop_request(tex_mgr, path) {
-            let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
-            return Some(LoadedTexture::Rgba(GpuTextureData {
-                path: path.to_string(),
-                width: tex_data.width,
-                height: tex_data.height,
-                rgba: Arc::clone(&tex_data.pixels),
-            }));
-        }
+        return load_cropped_texture(tex_mgr, path);
+    }
+    if let Some(bc_texture) = try_load_bc_texture(tex_mgr, path) {
+        return Some(bc_texture);
+    }
+    load_rgba_texture(tex_mgr, path)
+}
+
+fn load_cropped_texture(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) -> Option<LoadedTexture> {
+    let (base_path, x, y, crop_w, crop_h) = decode_crop_request(tex_mgr, path)?;
+    let tex_data = tex_mgr.load_sub_region(base_path, x, y, crop_w, crop_h)?;
+    Some(LoadedTexture::Rgba(GpuTextureData {
+        path: path.to_string(),
+        width: tex_data.width,
+        height: tex_data.height,
+        rgba: Arc::clone(&tex_data.pixels),
+    }))
+}
+
+fn try_load_bc_texture(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) -> Option<LoadedTexture> {
+    if !crate::render::shader::atlas::is_bc_supported() {
         return None;
     }
-
-    // Try BC path first (only succeeds for BLP files with DXT content AND GPU BC support)
-    if crate::render::shader::atlas::is_bc_supported() {
-        if let Some(bc_result) = tex_mgr.load_bc(path) {
-            // BC textures require dimensions that are multiples of 4
-            if bc_result.width % 4 == 0
-                && bc_result.height % 4 == 0
-                && bc_result.width <= crate::render::shader::atlas::BC_CELL_SIZE
-                && bc_result.height <= crate::render::shader::atlas::BC_CELL_SIZE
-            {
-                return Some(LoadedTexture::Bc(GpuBcTextureData {
-                    path: path.to_string(),
-                    width: bc_result.width,
-                    height: bc_result.height,
-                    bc_data: Arc::clone(&bc_result.bc_data),
-                    bc_format: bc_result.format,
-                }));
-            }
-        }
+    let bc_result = tex_mgr.load_bc(path)?;
+    if !bc_texture_dimensions_fit_gpu_atlas(bc_result.width, bc_result.height) {
+        return None;
     }
+    Some(LoadedTexture::Bc(GpuBcTextureData {
+        path: path.to_string(),
+        width: bc_result.width,
+        height: bc_result.height,
+        bc_data: Arc::clone(&bc_result.bc_data),
+        bc_format: bc_result.format,
+    }))
+}
 
-    // Fall back to RGBA
+fn bc_texture_dimensions_fit_gpu_atlas(width: u32, height: u32) -> bool {
+    const BC_BLOCK_DIMENSION: u32 = 4;
+    width % BC_BLOCK_DIMENSION == 0
+        && height % BC_BLOCK_DIMENSION == 0
+        && width <= crate::render::shader::atlas::BC_CELL_SIZE
+        && height <= crate::render::shader::atlas::BC_CELL_SIZE
+}
+
+fn load_rgba_texture(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+) -> Option<LoadedTexture> {
     let tex_data = tex_mgr.load(path)?;
     Some(LoadedTexture::Rgba(GpuTextureData {
         path: path.to_string(),
@@ -149,8 +169,8 @@ fn decode_crop_request<'a>(
 #[cfg(test)]
 mod tests {
     use super::{
-        LoadedTexture, WowUiPipeline, decode_crop_request, load_texture_prefer_bc, remap_entry_uv,
-        resolve_and_scale_quads,
+        LoadedTexture, WowUiPipeline, bc_texture_dimensions_fit_gpu_atlas, decode_crop_request,
+        load_texture_prefer_bc, remap_entry_uv, resolve_and_scale_quads,
     };
     use crate::render::BlendMode;
     use crate::render::shader::QuadBatch;
@@ -254,6 +274,20 @@ mod tests {
 
         assert!((left - (0.25 + 0.5 / 4096.0)).abs() < 1e-6);
         assert!((right - (0.25 + 31.5 / 4096.0)).abs() < 1e-6);
+    }
+
+    #[test]
+    fn bc_texture_dimensions_must_fit_bc_gpu_cell() {
+        assert!(bc_texture_dimensions_fit_gpu_atlas(4, 4));
+        assert!(bc_texture_dimensions_fit_gpu_atlas(
+            crate::render::shader::atlas::BC_CELL_SIZE,
+            crate::render::shader::atlas::BC_CELL_SIZE,
+        ));
+        assert!(!bc_texture_dimensions_fit_gpu_atlas(2, 4));
+        assert!(!bc_texture_dimensions_fit_gpu_atlas(
+            crate::render::shader::atlas::BC_CELL_SIZE + 4,
+            4,
+        ));
     }
 
     #[test]
