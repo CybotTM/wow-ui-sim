@@ -14,15 +14,20 @@ use perf_template_create::{TemplateBench, measure_action_bar_button_family, meas
 const FULL_GAME_STARTUP_BUDGET: Duration = Duration::from_secs(30);
 
 // Per-template budgets for creating N instances from a loaded game UI.
-// Set at ~5-8x measured baseline to absorb CI variance + debug builds.
+// Time budgets: ~5-8x measured baseline to absorb CI variance + debug builds.
+// Frame-count budgets: expected total frames (parents + children) created by
+// N template instances. Changes here indicate template structure changed.
 const ACTION_BUTTON_SPELLFX_BUDGET: Duration = Duration::from_millis(400);
 const ACTION_BUTTON_SPELLFX_COUNT: usize = 10;
+const ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES: usize = 350;
 
 const MINIMAL_SCROLLBAR_BUDGET: Duration = Duration::from_millis(400);
 const MINIMAL_SCROLLBAR_COUNT: usize = 10;
+const MINIMAL_SCROLLBAR_EXPECTED_FRAMES: usize = 130;
 
 const ACTION_BAR_BUTTON_BUDGET: Duration = Duration::from_millis(1500);
 const ACTION_BAR_BUTTON_COUNT: usize = 12;
+const ACTION_BAR_BUTTON_EXPECTED_FRAMES: usize = 805;
 
 #[test]
 fn full_game_startup_stays_under_budget() {
@@ -70,10 +75,11 @@ fn action_button_spellfx_template_stays_under_budget() {
             result.frames_created, ACTION_BUTTON_SPELLFX_BUDGET,
         );
 
-        assert!(
-            result.frames_created > result.count,
-            "{} should create child frames (got {} total for {} requested)",
-            result.template, result.frames_created, result.count,
+        assert_eq!(
+            result.frames_created, ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
+            "{} x{} created {} frames, expected {}",
+            result.template, result.count, result.frames_created,
+            ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
         );
         assert!(
             result.elapsed < ACTION_BUTTON_SPELLFX_BUDGET,
@@ -99,10 +105,11 @@ fn minimal_scrollbar_template_stays_under_budget() {
             result.frames_created, MINIMAL_SCROLLBAR_BUDGET,
         );
 
-        assert!(
-            result.frames_created > result.count,
-            "{} should create child frames (got {} total for {} requested)",
-            result.template, result.frames_created, result.count,
+        assert_eq!(
+            result.frames_created, MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
+            "{} x{} created {} frames, expected {}",
+            result.template, result.count, result.frames_created,
+            MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
         );
         assert!(
             result.elapsed < MINIMAL_SCROLLBAR_BUDGET,
@@ -124,10 +131,10 @@ fn action_bar_button_family_stays_under_budget() {
             result.frames_created, ACTION_BAR_BUTTON_BUDGET,
         );
 
-        assert!(
-            result.frames_created > result.count,
-            "action-bar button family should create child frames (got {} total for {} buttons)",
-            result.frames_created, result.count,
+        assert_eq!(
+            result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
+            "action-bar button family x{} created {} frames, expected {}",
+            result.count, result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
         );
         assert!(
             result.elapsed < ACTION_BAR_BUTTON_BUDGET,
