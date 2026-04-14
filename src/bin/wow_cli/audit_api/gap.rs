@@ -1,4 +1,6 @@
 use regex::Regex;
+use rilua::vm::state::LuaState;
+use rilua::{LuaApi, Val};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
@@ -55,12 +57,15 @@ pub fn introspect_simulator_c_methods() -> BTreeMap<String, BTreeSet<String>> {
     use wow_ui_sim::lua_api::WowLuaEnv;
 
     let env = WowLuaEnv::new().expect("Failed to create Lua environment");
-    let table: mlua::Table = env
-        .lua()
-        .load(INTROSPECT_C_NAMESPACES_LUA)
-        .eval()
+    let func = env
+        .load_rilua(INTROSPECT_C_NAMESPACES_LUA)
+        .expect("Failed to compile C_* introspection chunk");
+    let results = env
+        .call_rilua(&func, &[])
         .expect("C_* introspection failed");
-    parse_namespace_method_table(table)
+    let table = results.into_iter().next().unwrap_or(Val::Nil);
+    let lua = env.rilua();
+    parse_namespace_method_table(lua.state(), table)
 }
 
 const INTROSPECT_C_NAMESPACES_LUA: &str = r#"
@@ -79,18 +84,44 @@ const INTROSPECT_C_NAMESPACES_LUA: &str = r#"
     return result
 "#;
 
-fn parse_namespace_method_table(table: mlua::Table) -> BTreeMap<String, BTreeSet<String>> {
+fn parse_namespace_method_table(
+    state: &LuaState,
+    table: Val,
+) -> BTreeMap<String, BTreeSet<String>> {
     let mut map = BTreeMap::new();
-    for pair in table.pairs::<String, mlua::Table>() {
-        let (ns, methods_table) = pair.expect("pair iteration failed");
+    let Val::Table(table_ref) = table else {
+        return map;
+    };
+    let Some(table) = state.gc.tables.get(table_ref) else {
+        return map;
+    };
+
+    for (ns_key, methods_table) in table.hash_entries() {
+        let Some(ns) = val_to_string(state, ns_key) else {
+            continue;
+        };
+        let Val::Table(methods_ref) = methods_table else {
+            continue;
+        };
         let mut methods = BTreeSet::new();
-        for method_pair in methods_table.pairs::<i64, String>() {
-            let (_, method) = method_pair.expect("method iteration failed");
-            methods.insert(method);
+        if let Some(methods_table) = state.gc.tables.get(methods_ref) {
+            for method in methods_table.array_slice() {
+                if let Some(method) = val_to_string(state, *method) {
+                    methods.insert(method);
+                }
+            }
         }
         map.insert(ns, methods);
     }
     map
+}
+
+fn val_to_string(state: &LuaState, value: Val) -> Option<String> {
+    let Val::Str(string_ref) = value else {
+        return None;
+    };
+    let string = state.gc.string_arena.get(string_ref)?;
+    Some(String::from_utf8_lossy(string.data()).into_owned())
 }
 
 /// Scan the simulator Rust source for C_* method registrations (static fallback).
