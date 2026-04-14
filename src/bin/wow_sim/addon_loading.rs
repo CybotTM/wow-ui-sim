@@ -85,6 +85,27 @@ fn load_one_blizzard_addon(
     }
 }
 
+fn print_blizzard_frame_detail(t: &LoadTiming) {
+    println!(
+        "  frame breakdown: setup={:.2?} finalize={:.2?} ({} frames)",
+        t.xml_frame_setup_time, t.xml_frame_finalize_time, t.frame_count
+    );
+    println!(
+        "  setup: code_build={:.2?} exec_lua={:.2?} props={:.2?}",
+        t.frame_code_build_time, t.frame_exec_lua_time, t.frame_apply_props_time
+    );
+    println!(
+        "  finalize: layers={:.2?} ({} tex, {} fs) anim={:.2?} button={:.2?} lifecycle={:.2?} ({} fires)",
+        t.frame_layer_children_time,
+        t.texture_count,
+        t.fontstring_count,
+        t.frame_anim_time,
+        t.frame_button_time,
+        t.frame_lifecycle_time,
+        t.lifecycle_fire_count
+    );
+}
+
 fn print_blizzard_summary(
     elapsed: std::time::Duration,
     t: &LoadTiming,
@@ -106,24 +127,7 @@ fn print_blizzard_summary(
         t.lua_compile_time,
         t.lua_call_time
     ));
-    println!(
-        "  frame breakdown: setup={:.2?} finalize={:.2?} ({} frames)",
-        t.xml_frame_setup_time, t.xml_frame_finalize_time, t.frame_count
-    );
-    println!(
-        "  setup: code_build={:.2?} exec_lua={:.2?} props={:.2?}",
-        t.frame_code_build_time, t.frame_exec_lua_time, t.frame_apply_props_time
-    );
-    println!(
-        "  finalize: layers={:.2?} ({} tex, {} fs) anim={:.2?} button={:.2?} lifecycle={:.2?} ({} fires)",
-        t.frame_layer_children_time,
-        t.texture_count,
-        t.fontstring_count,
-        t.frame_anim_time,
-        t.frame_button_time,
-        t.frame_lifecycle_time,
-        t.lifecycle_fire_count
-    );
+    print_blizzard_frame_detail(t);
 }
 
 /// Scan, load, and register third-party addons; print summary.
@@ -393,25 +397,7 @@ fn print_load_summary(addons: &[(String, PathBuf)], stats: &LoadStats) {
     print_slowest_addons(&stats.addon_times);
 }
 
-fn print_timing_breakdown(t: &LoadTiming) {
-    let total_time = t.total();
-    if total_time.is_zero() {
-        return;
-    }
-    let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
-    println!("Total time: {:.2?}", total_time);
-    println!("  IO:         {:.2?} ({:.1}%)", t.io_time, pct(t.io_time));
-    println!(
-        "  XML parse:  {:.2?} ({:.1}%)",
-        t.xml_parse_time,
-        pct(t.xml_parse_time)
-    );
-    println!(
-        "  XML proc:   {:.2?} ({:.1}%)",
-        t.xml_process_time,
-        pct(t.xml_process_time)
-    );
-    print_frame_timing_detail(t, &pct);
+fn print_lua_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {
     println!(
         "  Lua exec:   {:.2?} ({:.1}%)",
         t.lua_exec_time,
@@ -432,6 +418,28 @@ fn print_timing_breakdown(t: &LoadTiming) {
         t.saved_vars_time,
         pct(t.saved_vars_time)
     );
+}
+
+fn print_timing_breakdown(t: &LoadTiming) {
+    let total_time = t.total();
+    if total_time.is_zero() {
+        return;
+    }
+    let pct = |d: std::time::Duration| 100.0 * d.as_secs_f64() / total_time.as_secs_f64();
+    println!("Total time: {:.2?}", total_time);
+    println!("  IO:         {:.2?} ({:.1}%)", t.io_time, pct(t.io_time));
+    println!(
+        "  XML parse:  {:.2?} ({:.1}%)",
+        t.xml_parse_time,
+        pct(t.xml_parse_time)
+    );
+    println!(
+        "  XML proc:   {:.2?} ({:.1}%)",
+        t.xml_process_time,
+        pct(t.xml_process_time)
+    );
+    print_frame_timing_detail(t, &pct);
+    print_lua_timing_detail(t, &pct);
 }
 
 fn print_frame_timing_detail(t: &LoadTiming, pct: &dyn Fn(std::time::Duration) -> f64) {

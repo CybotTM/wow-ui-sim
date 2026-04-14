@@ -108,13 +108,36 @@ fn create_timer_after(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::F
     })
 }
 
+/// Create the FunctionContainer handle userdata and its proxy table for a timer.
+///
+/// Returns `(handle_key, handle_proxy)` where `handle_key` is a registry value holding
+/// the raw userdata (for timer bookkeeping) and `handle_proxy` is the table returned to Lua.
+fn create_timer_handle(
+    lua: &Lua,
+    callback_key: &mlua::RegistryKey,
+    state: &Rc<RefCell<SimState>>,
+    id: u64,
+) -> Result<(mlua::RegistryKey, Value)> {
+    let handle = FunctionContainer::new_timer(
+        lua,
+        lua.registry_value::<mlua::Function>(callback_key)?,
+        Rc::clone(state),
+        id,
+    )?;
+    let handle_ud = lua.create_userdata(handle)?;
+    // Store raw userdata in registry for timer bookkeeping (used by create_fc_proxy).
+    let handle_key = lua.create_registry_value(handle_ud.clone())?;
+    // Return proxy table to Lua.
+    let handle_proxy = create_fc_table_proxy(lua, handle_ud)?;
+    Ok((handle_key, handle_proxy))
+}
+
 /// C_Timer.NewTicker(seconds, callback, iterations) - repeating timer with handle.
 fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     lua.create_function(
         move |lua, (seconds, callback, iterations): (f64, Value, Option<i32>)| {
             let secs = validate_seconds(seconds)?;
             let func = extract_callback_function(lua, &callback)?;
-
             let id = next_timer_id();
             let callback_key = lua.create_registry_value(func)?;
             let fire_at = Instant::now() + Duration::from_secs_f64(secs);
@@ -123,19 +146,7 @@ fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
                 let s = state.borrow();
                 s.loading_addon_index.or(s.executing_addon_index)
             };
-
-            let handle = FunctionContainer::new_timer(
-                lua,
-                lua.registry_value::<mlua::Function>(&callback_key)?,
-                Rc::clone(&state),
-                id,
-            )?;
-            let handle_ud = lua.create_userdata(handle)?;
-            // Store raw userdata in registry for timer bookkeeping (used by create_fc_proxy).
-            let handle_key = lua.create_registry_value(handle_ud.clone())?;
-            // Return proxy table to Lua.
-            let handle_proxy = create_fc_table_proxy(lua, handle_ud)?;
-
+            let (handle_key, handle_proxy) = create_timer_handle(lua, &callback_key, &state, id)?;
             let timer = PendingTimer {
                 id,
                 fire_at,
@@ -146,7 +157,6 @@ fn create_new_ticker(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fu
                 handle_key: Some(handle_key),
                 owner_addon,
             };
-
             state.borrow_mut().timers.push_back(timer);
             Ok(handle_proxy)
         },
@@ -167,17 +177,7 @@ fn create_new_timer(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Fun
             s.loading_addon_index.or(s.executing_addon_index)
         };
 
-        let handle = FunctionContainer::new_timer(
-            lua,
-            lua.registry_value::<mlua::Function>(&callback_key)?,
-            Rc::clone(&state),
-            id,
-        )?;
-        let handle_ud = lua.create_userdata(handle)?;
-        // Store raw userdata in registry for timer bookkeeping (used by create_fc_proxy).
-        let handle_key = lua.create_registry_value(handle_ud.clone())?;
-        // Return proxy table to Lua.
-        let handle_proxy = create_fc_table_proxy(lua, handle_ud)?;
+        let (handle_key, handle_proxy) = create_timer_handle(lua, &callback_key, &state, id)?;
 
         let timer = PendingTimer {
             id,

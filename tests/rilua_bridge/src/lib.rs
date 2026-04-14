@@ -4,6 +4,7 @@
 //! These tests use rilua directly — they don't depend on the full
 //! wow-ui-sim crate, so they compile even when mlua-sys fails.
 
+mod backed_table;
 mod benchmark;
 
 #[path = "../../../src/lua_bridge/mod.rs"]
@@ -25,7 +26,7 @@ pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
 // Helpers
 // ---------------------------------------------------------------------------
 
-fn abs_index(state: &LuaState, index: i32) -> usize {
+pub(crate) fn abs_index(state: &LuaState, index: i32) -> usize {
     if index > 0 {
         state.base + (index as usize) - 1
     } else {
@@ -33,7 +34,7 @@ fn abs_index(state: &LuaState, index: i32) -> usize {
     }
 }
 
-fn stack_val(state: &LuaState, index: i32) -> Val {
+pub(crate) fn stack_val(state: &LuaState, index: i32) -> Val {
     let abs = abs_index(state, index);
     if abs < state.stack.len() && abs < state.top {
         state.stack[abs]
@@ -42,7 +43,7 @@ fn stack_val(state: &LuaState, index: i32) -> Val {
     }
 }
 
-fn get_string(state: &LuaState, index: i32) -> LuaResult<String> {
+pub(crate) fn get_string(state: &LuaState, index: i32) -> LuaResult<String> {
     match stack_val(state, index) {
         Val::Str(r) => {
             let s = state.gc.string_arena.get(r).unwrap();
@@ -52,7 +53,7 @@ fn get_string(state: &LuaState, index: i32) -> LuaResult<String> {
     }
 }
 
-fn table_set_fn(state: &mut LuaState, table: GcRef<Table>, name: &str, func: RustFn) {
+pub(crate) fn table_set_fn(state: &mut LuaState, table: GcRef<Table>, name: &str, func: RustFn) {
     let key = state.gc.intern_string(name.as_bytes());
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
@@ -65,7 +66,7 @@ fn table_set_fn(state: &mut LuaState, table: GcRef<Table>, name: &str, func: Rus
     .unwrap();
 }
 
-fn set_global_table(state: &mut LuaState, name: &str, table_ref: GcRef<Table>) {
+pub(crate) fn set_global_table(state: &mut LuaState, name: &str, table_ref: GcRef<Table>) {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     state
@@ -77,7 +78,7 @@ fn set_global_table(state: &mut LuaState, name: &str, table_ref: GcRef<Table>) {
         .unwrap();
 }
 
-fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+pub(crate) fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     state
@@ -89,7 +90,7 @@ fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
         .unwrap();
 }
 
-fn make_index_self(state: &mut LuaState, mt_ref: GcRef<Table>) {
+pub(crate) fn make_index_self(state: &mut LuaState, mt_ref: GcRef<Table>) {
     let idx_key = state.gc.intern_string(b"__index");
     state
         .gc
@@ -617,23 +618,6 @@ fn test_frame_table_roundtrips_five_registered_methods() {
 }
 
 #[test]
-fn test_create_frame_table_sets_backing_and_keeps_table_behavior() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-        let frame_ref = create_frame_table(state, 17, 9);
-        let frame = state.gc.tables.get(frame_ref).unwrap();
-        assert_eq!(frame.backing(), Some((17, 9)));
-        set_global_table(state, "helper_frame", frame_ref);
-    }
-
-    lua.exec("assert(type(helper_frame) == 'table')").unwrap();
-    lua.exec("rawset(helper_frame, 'field', 55)").unwrap();
-    lua.exec("assert(rawget(helper_frame, 'field') == 55)")
-        .unwrap();
-}
-
-#[test]
 fn test_benchmark_table_field_access_returns_timings() {
     let result = benchmark_table_field_access(1_000, 5).unwrap();
 
@@ -645,220 +629,3 @@ fn test_benchmark_table_field_access_returns_timings() {
     assert!(result.backed_over_plain_ratio().is_finite());
 }
 
-// ---------------------------------------------------------------------------
-// Backed table behaves as real Lua table
-// ---------------------------------------------------------------------------
-
-#[test]
-fn test_backed_table_type_is_table() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-        let mut t = Table::new();
-        t.set_backing(Some((1, 0)));
-        let tref = state.gc.alloc_table(t);
-        set_global_table(state, "myframe", tref);
-    }
-    lua.exec("assert(type(myframe) == 'table', 'got ' .. type(myframe))")
-        .unwrap();
-}
-
-#[test]
-fn test_backed_table_rawset_rawget() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-        let mut t = Table::new();
-        t.set_backing(Some((1, 0)));
-        let tref = state.gc.alloc_table(t);
-        set_global_table(state, "myframe", tref);
-    }
-    lua.exec("rawset(myframe, 'foo', 42)").unwrap();
-    lua.exec("assert(rawget(myframe, 'foo') == 42)").unwrap();
-}
-
-#[test]
-fn test_backed_table_pairs() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-        let mut t = Table::new();
-        t.set_backing(Some((1, 0)));
-        let tref = state.gc.alloc_table(t);
-        set_global_table(state, "myframe", tref);
-    }
-    lua.exec(
-        r#"
-        myframe.a = 1
-        myframe.b = 2
-        myframe.c = 3
-        local count = 0
-        for _ in pairs(myframe) do count = count + 1 end
-        assert(count == 3, 'expected 3, got ' .. count)
-    "#,
-    )
-    .unwrap();
-}
-
-// ---------------------------------------------------------------------------
-// Backed table + metatable methods (the frame pattern)
-// ---------------------------------------------------------------------------
-
-#[test]
-fn test_backed_table_with_rust_methods() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-
-        // Metatable with methods
-        let mt = Table::new();
-        let mt_ref = state.gc.alloc_table(mt);
-
-        fn set_name(state: &mut LuaState) -> LuaResult<u32> {
-            let self_val = stack_val(state, 1);
-            let name = get_string(state, 2)?;
-            if let Val::Table(tref) = self_val {
-                let key = state.gc.intern_string(b"__name");
-                let name_val = Val::Str(state.gc.intern_string(name.as_bytes()));
-                state
-                    .gc
-                    .tables
-                    .get_mut(tref)
-                    .unwrap()
-                    .raw_set(Val::Str(key), name_val, &state.gc.string_arena)
-                    .unwrap();
-            }
-            Ok(0)
-        }
-
-        fn get_name(state: &mut LuaState) -> LuaResult<u32> {
-            let self_val = stack_val(state, 1);
-            if let Val::Table(tref) = self_val {
-                let key = state.gc.intern_string(b"__name");
-                let val = state
-                    .gc
-                    .tables
-                    .get(tref)
-                    .unwrap()
-                    .get(Val::Str(key), &state.gc.string_arena);
-                state.push(val);
-            } else {
-                state.push(Val::Nil);
-            }
-            Ok(1)
-        }
-
-        fn is_frame(state: &mut LuaState) -> LuaResult<u32> {
-            let self_val = stack_val(state, 1);
-            let result = if let Val::Table(tref) = self_val {
-                state.gc.tables.get(tref).unwrap().backing().is_some()
-            } else {
-                false
-            };
-            state.push(Val::Bool(result));
-            Ok(1)
-        }
-
-        fn get_frame_index(state: &mut LuaState) -> LuaResult<u32> {
-            let self_val = stack_val(state, 1);
-            if let Val::Table(tref) = self_val {
-                if let Some((idx, _)) = state.gc.tables.get(tref).unwrap().backing() {
-                    state.push(Val::Num(idx as f64));
-                    return Ok(1);
-                }
-            }
-            state.push(Val::Nil);
-            Ok(1)
-        }
-
-        fn show(state: &mut LuaState) -> LuaResult<u32> {
-            // Method with no return — just validates self is backed
-            let self_val = stack_val(state, 1);
-            if let Val::Table(tref) = self_val {
-                assert!(state.gc.tables.get(tref).unwrap().backing().is_some());
-            }
-            Ok(0)
-        }
-
-        table_set_fn(state, mt_ref, "SetName", set_name);
-        table_set_fn(state, mt_ref, "GetName", get_name);
-        table_set_fn(state, mt_ref, "IsFrame", is_frame);
-        table_set_fn(state, mt_ref, "GetFrameIndex", get_frame_index);
-        table_set_fn(state, mt_ref, "Show", show);
-        make_index_self(state, mt_ref);
-
-        // Create backed table
-        let mut ft = Table::new();
-        ft.set_backing(Some((7, 1)));
-        ft.set_metatable(Some(mt_ref));
-        let ft_ref = state.gc.alloc_table(ft);
-        set_global_table(state, "myframe", ft_ref);
-    }
-
-    // Method calls
-    lua.exec("myframe:SetName('TestFrame')").unwrap();
-    lua.exec("assert(myframe:GetName() == 'TestFrame')")
-        .unwrap();
-    lua.exec("assert(myframe:IsFrame() == true)").unwrap();
-    lua.exec("assert(myframe:GetFrameIndex() == 7)").unwrap();
-    lua.exec("myframe:Show()").unwrap();
-
-    // Dynamic properties coexist with methods
-    lua.exec("myframe.customProp = 123").unwrap();
-    lua.exec("assert(myframe.customProp == 123)").unwrap();
-
-    // rawset/rawget bypass metatable
-    lua.exec("rawset(myframe, 'raw', true)").unwrap();
-    lua.exec("assert(rawget(myframe, 'raw') == true)").unwrap();
-
-    // Methods still work after adding dynamic props
-    lua.exec("assert(myframe:GetName() == 'TestFrame')")
-        .unwrap();
-}
-
-// ---------------------------------------------------------------------------
-// Multiple backed tables share a metatable
-// ---------------------------------------------------------------------------
-
-#[test]
-fn test_multiple_backed_tables_shared_metatable() {
-    let mut lua = Lua::new().unwrap();
-    {
-        let state = lua.state_mut();
-
-        let mt = Table::new();
-        let mt_ref = state.gc.alloc_table(mt);
-
-        fn get_id(state: &mut LuaState) -> LuaResult<u32> {
-            let self_val = stack_val(state, 1);
-            if let Val::Table(tref) = self_val {
-                if let Some((idx, _)) = state.gc.tables.get(tref).unwrap().backing() {
-                    state.push(Val::Num(idx as f64));
-                    return Ok(1);
-                }
-            }
-            state.push(Val::Nil);
-            Ok(1)
-        }
-
-        table_set_fn(state, mt_ref, "GetID", get_id);
-        make_index_self(state, mt_ref);
-
-        // Two frames, same metatable, different backing
-        for (name, idx) in &[("frame1", 10), ("frame2", 20)] {
-            let mut ft = Table::new();
-            ft.set_backing(Some((*idx, 0)));
-            ft.set_metatable(Some(mt_ref));
-            let ft_ref = state.gc.alloc_table(ft);
-            set_global_table(state, name, ft_ref);
-        }
-    }
-
-    lua.exec("assert(frame1:GetID() == 10)").unwrap();
-    lua.exec("assert(frame2:GetID() == 20)").unwrap();
-
-    // Each has independent dynamic properties
-    lua.exec("frame1.x = 1; frame2.x = 2").unwrap();
-    lua.exec("assert(frame1.x == 1)").unwrap();
-    lua.exec("assert(frame2.x == 2)").unwrap();
-}

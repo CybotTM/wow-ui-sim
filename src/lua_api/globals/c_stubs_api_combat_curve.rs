@@ -69,6 +69,37 @@ impl LuaColorCurveObject {
 
 impl UserData for LuaColorCurveObject {}
 
+/// Shared field access for both curve types.
+trait CurveData: UserData + 'static {
+    fn curve_type(&self) -> &RefCell<i32>;
+    fn points(&self) -> &RefCell<Vec<CurvePoint>>;
+    fn id(&self) -> u64;
+}
+
+impl CurveData for LuaCurveObject {
+    fn curve_type(&self) -> &RefCell<i32> {
+        &self.curve_type
+    }
+    fn points(&self) -> &RefCell<Vec<CurvePoint>> {
+        &self.points
+    }
+    fn id(&self) -> u64 {
+        self.id
+    }
+}
+
+impl CurveData for LuaColorCurveObject {
+    fn curve_type(&self) -> &RefCell<i32> {
+        &self.curve_type
+    }
+    fn points(&self) -> &RefCell<Vec<CurvePoint>> {
+        &self.points
+    }
+    fn id(&self) -> u64 {
+        self.id
+    }
+}
+
 /// Piecewise linear interpolation over sorted points.
 fn interpolate(points: &[CurvePoint], x: f64) -> f64 {
     match points.len() {
@@ -255,36 +286,35 @@ fn create_color_curve_proxy(lua: &Lua, curve: LuaColorCurveObject) -> Result<Val
 }
 
 // ---------------------------------------------------------------------------
-// Curve method table builders
+// Shared generic method builders (used by both curve and color-curve tables)
 // ---------------------------------------------------------------------------
 
-fn add_curve_add_clear(lua: &Lua, table: &mlua::Table) -> Result<()> {
+/// Registers `AddPoint` and `ClearPoints` — identical for both curve types.
+fn add_shared_add_clear<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "AddPoint",
         lua.create_function(|_, (ud, x, y): (AnyUserData, f64, f64)| {
-            ud.borrow::<LuaCurveObject>()?
-                .points
-                .borrow_mut()
-                .push(CurvePoint { x, y });
+            ud.borrow::<T>()?.points().borrow_mut().push(CurvePoint { x, y });
             Ok(())
         })?,
     )?;
     table.raw_set(
         "ClearPoints",
         lua.create_function(|_, ud: AnyUserData| {
-            ud.borrow::<LuaCurveObject>()?.points.borrow_mut().clear();
+            ud.borrow::<T>()?.points().borrow_mut().clear();
             Ok(())
         })?,
     )?;
     Ok(())
 }
 
-fn add_curve_set_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+/// Registers `RemovePoint`, `SetPoints`, `SetToDefaults`, and `SetType` — identical for both types.
+fn add_shared_set_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "RemovePoint",
         lua.create_function(|_, (ud, index): (AnyUserData, usize)| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
-            let mut points = curve.points.borrow_mut();
+            let curve = ud.borrow::<T>()?;
+            let mut points = curve.points().borrow_mut();
             if index >= 1 && index <= points.len() {
                 points.remove(index - 1);
             }
@@ -294,8 +324,8 @@ fn add_curve_set_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "SetPoints",
         lua.create_function(|_, (ud, src): (AnyUserData, mlua::Table)| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
-            let mut points = curve.points.borrow_mut();
+            let curve = ud.borrow::<T>()?;
+            let mut points = curve.points().borrow_mut();
             points.clear();
             for pair in src.sequence_values::<mlua::Table>().flatten() {
                 points.push(CurvePoint {
@@ -309,64 +339,29 @@ fn add_curve_set_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "SetToDefaults",
         lua.create_function(|_, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
-            curve.points.borrow_mut().clear();
-            *curve.curve_type.borrow_mut() = 0;
+            let curve = ud.borrow::<T>()?;
+            curve.points().borrow_mut().clear();
+            *curve.curve_type().borrow_mut() = 0;
             Ok(())
         })?,
     )?;
     table.raw_set(
         "SetType",
         lua.create_function(|_, (ud, curve_type): (AnyUserData, i32)| {
-            *ud.borrow::<LuaCurveObject>()?.curve_type.borrow_mut() = curve_type;
+            *ud.borrow::<T>()?.curve_type().borrow_mut() = curve_type;
             Ok(())
         })?,
     )?;
     Ok(())
 }
 
-fn add_curve_copy_eval(lua: &Lua, table: &mlua::Table) -> Result<()> {
-    table.raw_set(
-        "Copy",
-        lua.create_function(|lua, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
-            let new_curve = LuaCurveObject {
-                id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
-                curve_type: RefCell::new(*curve.curve_type.borrow()),
-                points: RefCell::new(
-                    curve
-                        .points
-                        .borrow()
-                        .iter()
-                        .map(|point| CurvePoint {
-                            x: point.x,
-                            y: point.y,
-                        })
-                        .collect(),
-                ),
-            };
-            drop(curve);
-            create_curve_proxy(lua, new_curve)
-        })?,
-    )?;
-    table.raw_set(
-        "Evaluate",
-        lua.create_function(|_, (ud, x): (AnyUserData, f64)| {
-            Ok(interpolate(
-                &ud.borrow::<LuaCurveObject>()?.points.borrow(),
-                x,
-            ))
-        })?,
-    )?;
-    Ok(())
-}
-
-fn add_curve_get_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
+/// Registers `GetPoint`, `GetPointCount`, `GetPoints`, `GetType`, and `HasSecretValues` — identical for both types.
+fn add_shared_get_methods<T: CurveData>(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "GetPoint",
         lua.create_function(|lua, (ud, index): (AnyUserData, usize)| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
-            let points = curve.points.borrow();
+            let curve = ud.borrow::<T>()?;
+            let points = curve.points().borrow();
             if index < 1 || index > points.len() {
                 return Ok(Value::Nil);
             }
@@ -380,15 +375,15 @@ fn add_curve_get_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "GetPointCount",
         lua.create_function(|_, ud: AnyUserData| {
-            Ok(ud.borrow::<LuaCurveObject>()?.points.borrow().len())
+            Ok(ud.borrow::<T>()?.points().borrow().len())
         })?,
     )?;
     table.raw_set(
         "GetPoints",
         lua.create_function(|lua, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaCurveObject>()?;
+            let curve = ud.borrow::<T>()?;
             let point_table = lua.create_table()?;
-            for (index, point) in curve.points.borrow().iter().enumerate() {
+            for (index, point) in curve.points().borrow().iter().enumerate() {
                 let entry = lua.create_table()?;
                 entry.raw_set("x", point.x)?;
                 entry.raw_set("y", point.y)?;
@@ -400,7 +395,7 @@ fn add_curve_get_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "GetType",
         lua.create_function(|_, ud: AnyUserData| {
-            Ok(*ud.borrow::<LuaCurveObject>()?.curve_type.borrow())
+            Ok(*ud.borrow::<T>()?.curve_type().borrow())
         })?,
     )?;
     table.raw_set(
@@ -410,12 +405,46 @@ fn add_curve_get_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
+// ---------------------------------------------------------------------------
+// Curve method table builders
+// ---------------------------------------------------------------------------
+
+fn add_curve_copy_eval(lua: &Lua, table: &mlua::Table) -> Result<()> {
+    table.raw_set(
+        "Copy",
+        lua.create_function(|lua, ud: AnyUserData| {
+            let curve = ud.borrow::<LuaCurveObject>()?;
+            let new_curve = LuaCurveObject {
+                id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
+                curve_type: RefCell::new(*curve.curve_type().borrow()),
+                points: RefCell::new(
+                    curve
+                        .points()
+                        .borrow()
+                        .iter()
+                        .map(|p| CurvePoint { x: p.x, y: p.y })
+                        .collect(),
+                ),
+            };
+            drop(curve);
+            create_curve_proxy(lua, new_curve)
+        })?,
+    )?;
+    table.raw_set(
+        "Evaluate",
+        lua.create_function(|_, (ud, x): (AnyUserData, f64)| {
+            Ok(interpolate(&ud.borrow::<LuaCurveObject>()?.points().borrow(), x))
+        })?,
+    )?;
+    Ok(())
+}
+
 fn build_curve_methods(lua: &Lua) -> Result<mlua::Table> {
     let table = lua.create_table()?;
-    add_curve_add_clear(lua, &table)?;
-    add_curve_set_methods(lua, &table)?;
+    add_shared_add_clear::<LuaCurveObject>(lua, &table)?;
+    add_shared_set_methods::<LuaCurveObject>(lua, &table)?;
     add_curve_copy_eval(lua, &table)?;
-    add_curve_get_methods(lua, &table)?;
+    add_shared_get_methods::<LuaCurveObject>(lua, &table)?;
     Ok(table)
 }
 
@@ -423,43 +452,20 @@ fn build_curve_methods(lua: &Lua) -> Result<mlua::Table> {
 // Color curve method table builders
 // ---------------------------------------------------------------------------
 
-fn add_color_curve_basic(lua: &Lua, table: &mlua::Table) -> Result<()> {
-    table.raw_set(
-        "AddPoint",
-        lua.create_function(|_, (ud, x, y): (AnyUserData, f64, f64)| {
-            ud.borrow::<LuaColorCurveObject>()?
-                .points
-                .borrow_mut()
-                .push(CurvePoint { x, y });
-            Ok(())
-        })?,
-    )?;
-    table.raw_set(
-        "ClearPoints",
-        lua.create_function(|_, ud: AnyUserData| {
-            ud.borrow::<LuaColorCurveObject>()?
-                .points
-                .borrow_mut()
-                .clear();
-            Ok(())
-        })?,
-    )?;
+fn add_color_curve_copy_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "Copy",
         lua.create_function(|lua, ud: AnyUserData| {
             let curve = ud.borrow::<LuaColorCurveObject>()?;
             let new_curve = LuaColorCurveObject {
                 id: NEXT_CURVE_ID.fetch_add(1, Ordering::Relaxed),
-                curve_type: RefCell::new(*curve.curve_type.borrow()),
+                curve_type: RefCell::new(*curve.curve_type().borrow()),
                 points: RefCell::new(
                     curve
-                        .points
+                        .points()
                         .borrow()
                         .iter()
-                        .map(|point| CurvePoint {
-                            x: point.x,
-                            y: point.y,
-                        })
+                        .map(|p| CurvePoint { x: p.x, y: p.y })
                         .collect(),
                 ),
             };
@@ -467,14 +473,10 @@ fn add_color_curve_basic(lua: &Lua, table: &mlua::Table) -> Result<()> {
             create_color_curve_proxy(lua, new_curve)
         })?,
     )?;
-    Ok(())
-}
-
-fn add_color_curve_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "Evaluate",
         lua.create_function(|lua, (ud, x): (AnyUserData, f64)| {
-            let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points.borrow(), x);
+            let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points().borrow(), x);
             let color = lua.create_table()?;
             color.raw_set("r", y)?;
             color.raw_set("g", y)?;
@@ -486,7 +488,7 @@ fn add_color_curve_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
     table.raw_set(
         "EvaluateUnpacked",
         lua.create_function(|_, (ud, x): (AnyUserData, f64)| {
-            let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points.borrow(), x);
+            let y = interpolate(&ud.borrow::<LuaColorCurveObject>()?.points().borrow(), x);
             Ok(MultiValue::from_iter([
                 Value::Number(y),
                 Value::Number(y),
@@ -498,107 +500,12 @@ fn add_color_curve_evaluate(lua: &Lua, table: &mlua::Table) -> Result<()> {
     Ok(())
 }
 
-fn add_color_curve_get_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
-    table.raw_set(
-        "GetPoint",
-        lua.create_function(|lua, (ud, index): (AnyUserData, usize)| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            let points = curve.points.borrow();
-            if index < 1 || index > points.len() {
-                return Ok(Value::Nil);
-            }
-            let point = &points[index - 1];
-            let point_table = lua.create_table()?;
-            point_table.raw_set("x", point.x)?;
-            point_table.raw_set("y", point.y)?;
-            Ok(Value::Table(point_table))
-        })?,
-    )?;
-    table.raw_set(
-        "GetPointCount",
-        lua.create_function(|_, ud: AnyUserData| {
-            Ok(ud.borrow::<LuaColorCurveObject>()?.points.borrow().len())
-        })?,
-    )?;
-    table.raw_set(
-        "GetPoints",
-        lua.create_function(|lua, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            let point_table = lua.create_table()?;
-            for (index, point) in curve.points.borrow().iter().enumerate() {
-                let entry = lua.create_table()?;
-                entry.raw_set("x", point.x)?;
-                entry.raw_set("y", point.y)?;
-                point_table.raw_set(index + 1, entry)?;
-            }
-            Ok(point_table)
-        })?,
-    )?;
-    table.raw_set(
-        "GetType",
-        lua.create_function(|_, ud: AnyUserData| {
-            Ok(*ud.borrow::<LuaColorCurveObject>()?.curve_type.borrow())
-        })?,
-    )?;
-    table.raw_set(
-        "HasSecretValues",
-        lua.create_function(|_, _: AnyUserData| Ok(false))?,
-    )?;
-    Ok(())
-}
-
-fn add_color_curve_set_methods(lua: &Lua, table: &mlua::Table) -> Result<()> {
-    table.raw_set(
-        "RemovePoint",
-        lua.create_function(|_, (ud, index): (AnyUserData, usize)| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            let mut points = curve.points.borrow_mut();
-            if index >= 1 && index <= points.len() {
-                points.remove(index - 1);
-            }
-            Ok(())
-        })?,
-    )?;
-    table.raw_set(
-        "SetPoints",
-        lua.create_function(|_, (ud, src): (AnyUserData, mlua::Table)| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            let mut points = curve.points.borrow_mut();
-            points.clear();
-            for pair in src.sequence_values::<mlua::Table>().flatten() {
-                points.push(CurvePoint {
-                    x: pair.get("x").unwrap_or(0.0),
-                    y: pair.get("y").unwrap_or(0.0),
-                });
-            }
-            Ok(())
-        })?,
-    )?;
-    table.raw_set(
-        "SetToDefaults",
-        lua.create_function(|_, ud: AnyUserData| {
-            let curve = ud.borrow::<LuaColorCurveObject>()?;
-            curve.points.borrow_mut().clear();
-            *curve.curve_type.borrow_mut() = 0;
-            Ok(())
-        })?,
-    )?;
-    table.raw_set(
-        "SetType",
-        lua.create_function(|_, (ud, curve_type): (AnyUserData, i32)| {
-            *ud.borrow::<LuaColorCurveObject>()?.curve_type.borrow_mut() = curve_type;
-            Ok(())
-        })?,
-    )?;
-    Ok(())
-}
-
 fn build_color_curve_methods(lua: &Lua) -> Result<mlua::Table> {
     let table = lua.create_table()?;
-    add_color_curve_basic(lua, &table)?;
-    add_color_curve_evaluate(lua, &table)?;
-    add_color_curve_get_methods(lua, &table)?;
-    add_color_curve_set_methods(lua, &table)?;
+    add_shared_add_clear::<LuaColorCurveObject>(lua, &table)?;
+    add_shared_set_methods::<LuaColorCurveObject>(lua, &table)?;
+    add_color_curve_copy_evaluate(lua, &table)?;
+    add_shared_get_methods::<LuaColorCurveObject>(lua, &table)?;
     Ok(table)
 }
 

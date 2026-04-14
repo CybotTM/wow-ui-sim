@@ -185,51 +185,46 @@ impl WowLuaEnv {
 
     /// Fire an event with arguments to all registered frames.
     pub fn fire_event_with_args(&self, event: &str, args: &[Value]) -> Result<()> {
+        let listeners =
+            super::script_helpers::get_event_listeners_lua_order(&self.compat_lua, event)?;
+        for widget_id in listeners {
+            self.dispatch_event_to_frame(widget_id, event, args)?;
+        }
+        Ok(())
+    }
+
+    /// Dispatch a single event to one registered frame (OnEvent handler + unit callbacks).
+    fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Value]) -> Result<()> {
         use super::script_helpers::{
             call_error_handler, dispatch_frame_unit_event_callbacks, get_frame_ref, get_script,
         };
-
-        let listeners =
-            super::script_helpers::get_event_listeners_lua_order(&self.compat_lua, event)?;
-
-        for widget_id in listeners {
-            if let Some(frame) = get_frame_ref(&self.compat_lua, widget_id) {
-                let addon_idx = self
-                    .state
-                    .borrow()
-                    .widgets
-                    .get(widget_id)
-                    .and_then(|f| f.owner_addon);
-                if let Some(handler) = get_script(&self.compat_lua, widget_id, "OnEvent") {
-                    let taint = addon_taint_name(&self.state, addon_idx);
-                    let blizzard = is_blizzard_addon(&self.state, addon_idx);
-                    let mut call_args = vec![
-                        frame.clone(),
-                        Value::String(self.compat_lua.create_string(event)?),
-                    ];
-                    call_args.extend(args.iter().cloned());
-
-                    let start = Instant::now();
-                    self.state.borrow_mut().executing_addon_index = addon_idx;
-                    let result =
-                        call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args);
-                    self.state.borrow_mut().executing_addon_index = None;
-                    if let Err(e) = result {
-                        call_error_handler(&self.compat_lua, &e.to_string());
-                    }
-                    record_addon_time(&self.state, addon_idx, &start);
-                }
-
-                dispatch_frame_unit_event_callbacks(
-                    &self.compat_lua,
-                    widget_id,
-                    frame,
-                    args,
-                    event,
-                )?;
+        let Some(frame) = get_frame_ref(&self.compat_lua, widget_id) else {
+            return Ok(());
+        };
+        let addon_idx = self
+            .state
+            .borrow()
+            .widgets
+            .get(widget_id)
+            .and_then(|f| f.owner_addon);
+        if let Some(handler) = get_script(&self.compat_lua, widget_id, "OnEvent") {
+            let taint = addon_taint_name(&self.state, addon_idx);
+            let blizzard = is_blizzard_addon(&self.state, addon_idx);
+            let mut call_args = vec![
+                frame.clone(),
+                Value::String(self.compat_lua.create_string(event)?),
+            ];
+            call_args.extend(args.iter().cloned());
+            let start = Instant::now();
+            self.state.borrow_mut().executing_addon_index = addon_idx;
+            let result = call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args);
+            self.state.borrow_mut().executing_addon_index = None;
+            if let Err(e) = result {
+                call_error_handler(&self.compat_lua, &e.to_string());
             }
+            record_addon_time(&self.state, addon_idx, &start);
         }
-
+        dispatch_frame_unit_event_callbacks(&self.compat_lua, widget_id, frame, args, event)?;
         Ok(())
     }
 

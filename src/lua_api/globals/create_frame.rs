@@ -139,6 +139,29 @@ pub(crate) fn create_frame_instance(
     Ok(frame_id)
 }
 
+/// Emit a profiling log line if the timing threshold is met.
+fn maybe_log_create_frame_profile(
+    cfg: CreateFrameProfileConfig,
+    total_start: Instant,
+    finalize_start: Option<Instant>,
+    cfa: &CreateFrameArgs,
+    ref_name: &str,
+    template_timing: &CreateFrameTemplateTiming,
+) {
+    let total = total_start.elapsed();
+    if cfg.log_all || total >= cfg.min_duration {
+        let finalize = finalize_start.map(|s| s.elapsed()).unwrap_or_default();
+        log_create_frame_profile(
+            &cfa.frame_type,
+            ref_name,
+            cfa.template.as_deref(),
+            total,
+            finalize,
+            template_timing,
+        );
+    }
+}
+
 /// Create the CreateFrame Lua function.
 pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<mlua::Function> {
     let state_clone = Rc::clone(&state);
@@ -165,28 +188,10 @@ pub fn create_frame_function(lua: &Lua, state: Rc<RefCell<SimState>>) -> Result<
             .unwrap_or_else(|| format!("__frame_{}", frame_id));
         let finalize_start = profile_runtime_call.then(Instant::now);
         let template_timing = finalize_registered_frame(
-            lua,
-            &state_clone,
-            frame_id,
-            &cfa,
-            &ref_name,
-            profile_runtime_call,
+            lua, &state_clone, frame_id, &cfa, &ref_name, profile_runtime_call,
         )?;
-        if let (Some(cfg), Some(total_start)) = (profile, total_start) {
-            let total = total_start.elapsed();
-            if cfg.log_all || total >= cfg.min_duration {
-                let finalize = finalize_start
-                    .map(|start| start.elapsed())
-                    .unwrap_or_default();
-                log_create_frame_profile(
-                    &cfa.frame_type,
-                    &ref_name,
-                    cfa.template.as_deref(),
-                    total,
-                    finalize,
-                    &template_timing,
-                );
-            }
+        if let (Some(cfg), Some(ts)) = (profile, total_start) {
+            maybe_log_create_frame_profile(cfg, ts, finalize_start, &cfa, &ref_name, &template_timing);
         }
         frame_ref(lua, frame_id)
     })?;

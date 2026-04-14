@@ -85,6 +85,29 @@ fn register_slash_cmd_list(lua: &Lua) -> Result<()> {
     Ok(())
 }
 
+/// Dispatch an event to a single frame: call OnEvent handler then unit event callbacks.
+fn dispatch_event_to_frame(
+    lua: &Lua,
+    widget_id: u64,
+    event_name: &str,
+    event_args: &[Value],
+) -> Result<()> {
+    let frame = frame_ref(lua, widget_id)?;
+    if let Some(handler) = crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent") {
+        let mut call_args = vec![
+            frame.clone(),
+            Value::String(lua.create_string(event_name)?),
+        ];
+        call_args.extend(event_args.iter().cloned());
+        if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
+            crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
+        }
+    }
+    crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
+        lua, widget_id, frame, event_args, event_name,
+    )
+}
+
 /// Register `FireEvent()` - simulator utility to fire events for testing.
 fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
     let fire_event = lua.create_function(move |lua, args: mlua::Variadic<Value>| {
@@ -97,36 +120,12 @@ fn register_fire_event(lua: &Lua, _state: Rc<RefCell<SimState>>) -> Result<()> {
                 ));
             }
         };
-
         let event_args: Vec<Value> = args_iter.collect();
-
         let listeners =
             crate::lua_api::script_helpers::get_event_listeners_lua_order(lua, &event_name)?;
-
         for widget_id in listeners {
-            let frame = frame_ref(lua, widget_id)?;
-            if let Some(handler) =
-                crate::lua_api::script_helpers::get_script(lua, widget_id, "OnEvent")
-            {
-                let mut call_args = vec![
-                    frame.clone(),
-                    Value::String(lua.create_string(&event_name)?),
-                ];
-                call_args.extend(event_args.iter().cloned());
-
-                if let Err(e) = handler.call::<()>(mlua::MultiValue::from_vec(call_args)) {
-                    crate::lua_api::script_helpers::call_error_handler(lua, &e.to_string());
-                }
-            }
-            crate::lua_api::script_helpers::dispatch_frame_unit_event_callbacks(
-                lua,
-                widget_id,
-                frame,
-                &event_args,
-                &event_name,
-            )?;
+            dispatch_event_to_frame(lua, widget_id, &event_name, &event_args)?;
         }
-
         Ok(())
     })?;
     lua.globals().set("FireEvent", fire_event)?;
