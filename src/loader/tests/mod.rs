@@ -378,6 +378,95 @@ fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
 }
 
 #[test]
+fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias() {
+    let t = load_test_xml(
+        "runtime-anon-template-registry-ref",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <Frame name="AnonymousTemplate" virtual="true">
+                <Frames>
+                    <Frame parentKey="Child">
+                        <Scripts>
+                            <OnLoad>self.loaded = true;</OnLoad>
+                        </Scripts>
+                    </Frame>
+                </Frames>
+                <Scripts>
+                    <OnLoad>self.loaded = true;</OnLoad>
+                </Scripts>
+            </Frame>
+        </Ui>
+        "#,
+    );
+
+    t.env
+        .exec(
+            r#"
+            __test_frame = CreateFrame("Frame", nil, UIParent, "AnonymousTemplate")
+            assert(__test_frame.loaded == true, "anonymous template OnLoad should fire")
+            assert(__test_frame.Child ~= nil, "anonymous template child should exist")
+            assert(__test_frame.Child.loaded == true, "anonymous template child OnLoad should fire")
+        "#,
+        )
+        .unwrap();
+
+    let test_frame: mlua::Value = t.env.lua().globals().get("__test_frame").unwrap();
+    let frame_id = crate::lua_api::frame::extract_frame_id(&test_frame).unwrap();
+    let expr = format!(
+        "local reg = debug.getregistry(); return reg.__frame_refs[{id}] == __test_frame and _G[\"__frame_{id}\"] == nil",
+        id = frame_id
+    );
+    t.assert_lua_true(
+        &expr,
+        "anonymous runtime template should use registry frame refs without leaking __frame globals",
+    );
+}
+
+#[test]
+fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
+    let t = load_test_xml(
+        "runtime-anon-action-button-registry-ref",
+        "<Ui xmlns=\"http://www.blizzard.com/wow/ui/\"/>",
+    );
+
+    t.env
+        .exec(
+            r#"
+            __test_button = CreateFrame("Button", nil, UIParent)
+            local env = debug.getfenv(__test_button)
+            assert(env and env[1], "button env table should exist")
+            rawset(env[1], "UpdateState", function(self)
+                self.updateCalls = (self.updateCalls or 0) + 1
+            end)
+            SetActionUIButton(__test_button, 1)
+        "#,
+        )
+        .unwrap();
+
+    let test_button: mlua::Value = t.env.lua().globals().get("__test_button").unwrap();
+    let frame_id = crate::lua_api::frame::extract_frame_id(&test_button).unwrap();
+    let expr = format!(
+        "local reg = debug.getregistry(); return reg.__frame_refs[{id}] == __test_button and _G[\"__frame_{id}\"] == nil",
+        id = frame_id
+    );
+    t.assert_lua_true(
+        &expr,
+        "anonymous action button should stay out of _G and remain reachable through registry frame refs",
+    );
+
+    crate::lua_api::globals::action_bar_api::push_action_button_state_update(
+        t.env.state(),
+        t.env.lua(),
+    )
+    .unwrap();
+
+    t.assert_lua_true(
+        "__test_button.updateCalls == 1",
+        "anonymous action button UpdateState should run through registry frame refs",
+    );
+}
+
+#[test]
 fn test_runtime_template_mixin_and_key_values_apply() {
     let t = load_test_xml(
         "runtime-template-mixin-keyvalues",

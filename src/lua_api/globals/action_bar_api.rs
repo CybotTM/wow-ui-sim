@@ -1,5 +1,6 @@
 //! Action bar functions: queries, cooldowns, UseAction, and stubs.
 
+use crate::loader::helpers::lua_global_ref;
 use crate::lua_api::SimState;
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
@@ -562,9 +563,10 @@ pub fn push_action_button_state_update(state: &Rc<RefCell<SimState>>, lua: &Lua)
         .collect();
     for frame_id in buttons {
         // Use Lua code so metatable __index resolves mixin methods correctly.
+        let frame_ref = lua_global_ref(&format!("__frame_{}", frame_id));
         let code = format!(
-            "do local f = __frame_{} if f and f.UpdateState then f:UpdateState() end end",
-            frame_id
+            "do local f = {} if f and f.UpdateState then f:UpdateState() end end",
+            frame_ref
         );
         if let Err(e) = lua.load(&code).exec() {
             eprintln!("[action] UpdateState error for frame {}: {}", frame_id, e);

@@ -668,8 +668,8 @@ fn set_builtin_addon_owner(state: &Rc<RefCell<SimState>>) {
     s.loading_addon_index = Some(idx as u16);
 }
 
-/// Set `_G[name]` and `_G["__frame_{id}"]` for every named frame in the registry
-/// that doesn't already have a `_G` entry.
+/// Set `_G[name]` for every named frame in the registry that doesn't already
+/// have one.
 fn sync_named_frames_to_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Result<()> {
     let globals = lua.globals();
     let ids_and_names: Vec<(u64, String)> = state

@@ -815,6 +815,12 @@ fn escape_lua_string(s: &str) -> String {
 /// Frame names like `$TankMarkerCheckButton` contain characters that aren't
 /// valid in Lua identifiers, so we always use `_G["name"]` instead of bare names.
 pub(super) fn lua_global_ref(name: &str) -> String {
+    if let Some(id) = name
+        .strip_prefix("__frame_")
+        .and_then(|suffix| suffix.parse::<u64>().ok())
+    {
+        return format!("debug.getregistry().__frame_refs[{id}]");
+    }
     format!("_G[\"{}\"]", escape_lua_string(name))
 }
 

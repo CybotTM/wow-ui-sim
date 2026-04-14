@@ -604,11 +604,6 @@ pub(super) fn append_anchors_and_parent_refs(
     }
 }
 
-/// Create a fontstring from template XML.
-///
-/// `subst_parent` is the name used for `$parent` substitution (propagated
-/// through anonymous frames).
-
 /// Apply deferred mask atlases from KeyValues after all templates are applied.
 ///
 /// Some templates define MaskTexture children with `useAtlasSize="true"` but no

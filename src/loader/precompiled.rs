@@ -44,8 +44,19 @@ fn compile_fire_onload(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
         local __report = debug.getregistry()["__report_script_error"]
+        local reg = debug.getregistry()
+        local function resolve_frame(arg)
+            if type(arg) ~= "string" then
+                return arg
+            end
+            local id = arg:match("^__frame_(%d+)$")
+            if id then
+                return reg.__frame_refs[tonumber(id)]
+            end
+            return _G[arg]
+        end
         local arg = ...
-        local frame = type(arg) == "string" and _G[arg] or arg
+        local frame = resolve_frame(arg)
         if not frame then return end
         if type(frame.OnLoad_Intrinsic) == "function" then
             local ok, err = pcall(frame.OnLoad_Intrinsic, frame)
@@ -70,8 +81,19 @@ fn compile_fire_onshow(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
         local __report = debug.getregistry()["__report_script_error"]
+        local reg = debug.getregistry()
+        local function resolve_frame(arg)
+            if type(arg) ~= "string" then
+                return arg
+            end
+            local id = arg:match("^__frame_(%d+)$")
+            if id then
+                return reg.__frame_refs[tonumber(id)]
+            end
+            return _G[arg]
+        end
         local arg = ...
-        local frame = type(arg) == "string" and _G[arg] or arg
+        local frame = resolve_frame(arg)
         if not frame then return end
         if frame:IsVisible() then
             local handler = frame:GetScript("OnShow")
@@ -107,9 +129,17 @@ fn compile_suppress_pop(lua: &Lua) -> mlua::Result<Function> {
 fn compile_assign_parent_key(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
+        local reg = debug.getregistry()
+        local function resolve_frame(name)
+            local id = name:match("^__frame_(%d+)$")
+            if id then
+                return reg.__frame_refs[tonumber(id)]
+            end
+            return _G[name]
+        end
         local parent_name, key, child_name = ...
-        local parent = _G[parent_name]
-        local child = _G[child_name]
+        local parent = resolve_frame(parent_name)
+        local child = resolve_frame(child_name)
         if parent and child then
             if key:sub(1, 8) == "$parent." then
                 parent = parent:GetParent()
@@ -125,8 +155,10 @@ fn compile_assign_parent_key(lua: &Lua) -> mlua::Result<Function> {
 fn compile_set_intrinsic(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
+        local reg = debug.getregistry()
         local frame_name, base = ...
-        local frame = _G[frame_name]
+        local id = frame_name:match("^__frame_(%d+)$")
+        local frame = id and reg.__frame_refs[tonumber(id)] or _G[frame_name]
         if frame then
             frame.intrinsic = base
         end
