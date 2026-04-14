@@ -438,10 +438,8 @@ fn build_per_type_metatables(lua: &Lua) -> Result<()> {
     use crate::lua_api::frame::FrameRef;
 
     let dummy = lua.create_userdata(FrameRef(0))?;
-    // The patched __index checks debug.getfenv(ud)[1] — set up a valid fenv.
-    let fenv = lua.create_table()?;
-    fenv.raw_set(1, lua.create_table()?)?;
-    dummy.set_user_value(fenv)?;
+    // Dummy needs a user_value table so frame_fields() doesn't fail.
+    dummy.set_user_value(lua.create_table()?)?;
     let per_type = lua.create_table()?;
     let mut resolved: std::collections::HashMap<String, Value> = std::collections::HashMap::new();
 

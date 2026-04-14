@@ -170,8 +170,8 @@ fn patch_apply_system_anchor_nil_guard(env: &WowLuaEnv) {
 /// and `relativePoint` receives a number (the y offset), which is wrong.
 ///
 /// OnSystemLoad already ran during addon loading, copying the original
-/// SetPointOverride into each frame's fenv. We replace it on each registered
-/// frame by writing a fixed version into `debug.getfenv(frame)[1]`.
+/// SetPointOverride into each frame's fields table. We replace it on each
+/// registered frame by writing a fixed version directly on the frame table.
 fn fix_set_point_override_3arg(env: &WowLuaEnv) {
     let _ = env.exec(
         r#"
@@ -179,12 +179,10 @@ fn fix_set_point_override_3arg(env: &WowLuaEnv) {
         local emm = EditModeManagerFrame
         if not emm.registeredSystemFrames then return end
         for _, frame in ipairs(emm.registeredSystemFrames) do
-            local env = debug.getfenv(frame)
-            if env and env[1] and rawget(env[1], "SetPoint") then
-                local base = rawget(env[1], "SetPointBase")
-                    or frame.SetPointBase
+            if rawget(frame, "SetPoint") then
+                local base = rawget(frame, "SetPointBase") or frame.SetPointBase
                 if base then
-                    rawset(env[1], "SetPoint", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
+                    rawset(frame, "SetPoint", function(self, point, relativeTo, relativePoint, offsetX, offsetY)
                         if type(relativeTo) == "number" then
                             offsetX = relativeTo
                             offsetY = relativePoint

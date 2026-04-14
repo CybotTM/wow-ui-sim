@@ -708,7 +708,7 @@ fn migrate_lua_fields_to_new_frame(lua: &Lua, old_id: u64, new_id: u64) -> Resul
     Ok(())
 }
 
-/// Cache per-type `__index` table as `__ti` in fenv[1] for Lua-side method lookup.
+/// Store the widget type key as `__wt` in the frame's fields table.
 fn store_widget_type_key(lua: &Lua, ud: &Value, wt: WidgetType, frame_type: &str) -> Result<()> {
     let type_key = if wt.as_str().eq_ignore_ascii_case(frame_type) {
         wt.as_str().to_owned()

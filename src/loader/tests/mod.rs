@@ -433,9 +433,7 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
         .exec(
             r#"
             __test_button = CreateFrame("Button", nil, UIParent)
-            local env = debug.getfenv(__test_button)
-            assert(env and env[1], "button env table should exist")
-            rawset(env[1], "UpdateState", function(self)
+            rawset(__test_button, "UpdateState", function(self)
                 self.updateCalls = (self.updateCalls or 0) + 1
             end)
             SetActionUIButton(__test_button, 1)
