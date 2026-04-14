@@ -551,6 +551,72 @@ fn test_define_methods_registers_backed_table_methods() {
 }
 
 #[test]
+fn test_frame_table_roundtrips_five_registered_methods() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+        state.set_app_data(TestFrameArena {
+            slots: vec![TestFrameSlot {
+                generation: 9,
+                frame: Some(TestFrame {
+                    label: "init".to_string(),
+                    visits: 1,
+                }),
+            }],
+        });
+
+        let mt_ref = state.gc.alloc_table(Table::new());
+        define_methods!(state, mt_ref, {
+            "SetLabel" => |frame: &mut TestFrame, label: String| {
+                frame.label = label;
+                Ok(())
+            },
+            "AppendLabel" => |frame: &mut TestFrame, suffix: String| -> String {
+                frame.label.push_str(&suffix);
+                Ok(frame.label.clone())
+            },
+            "AddVisits" => |frame: &mut TestFrame, delta: u32| -> u32 {
+                frame.visits += delta;
+                Ok(frame.visits)
+            },
+            "GetLabel" => |frame: &TestFrame| -> String {
+                Ok(frame.label.clone())
+            },
+            "Snapshot" => |frame: &TestFrame| -> (String, u32) {
+                Ok((frame.label.clone(), frame.visits))
+            },
+        })
+        .unwrap();
+        make_index_self(state, mt_ref);
+
+        let frame_ref = create_frame_table(state, 0, 9);
+        state
+            .gc
+            .tables
+            .get_mut(frame_ref)
+            .unwrap()
+            .set_metatable(Some(mt_ref));
+        set_global_table(state, "roundtrip_frame", frame_ref);
+    }
+
+    lua.exec("assert(roundtrip_frame:SetLabel('mage') == nil)")
+        .unwrap();
+    lua.exec("assert(roundtrip_frame:AppendLabel('-healer') == 'mage-healer')")
+        .unwrap();
+    lua.exec("assert(roundtrip_frame:AddVisits(4) == 5)").unwrap();
+    lua.exec("assert(roundtrip_frame:GetLabel() == 'mage-healer')")
+        .unwrap();
+    lua.exec("local label, visits = roundtrip_frame:Snapshot(); assert(label == 'mage-healer' and visits == 5)")
+        .unwrap();
+
+    let state = lua.state_mut();
+    let arena = state.app_data::<TestFrameArena>().unwrap();
+    let frame = arena.frame(0, 9).unwrap();
+    assert_eq!(frame.label, "mage-healer");
+    assert_eq!(frame.visits, 5);
+}
+
+#[test]
 fn test_create_frame_table_sets_backing_and_keeps_table_behavior() {
     let mut lua = Lua::new().unwrap();
     {
