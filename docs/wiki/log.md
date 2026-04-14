@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | world map 90s OnUpdate recapture
+
+Updated `investigations/world-map-onupdate-hover-polling.md` with the fresh
+90s world-map profile after the recent OnUpdate fixes. Recorded the new
+`/tmp/worldmap-onupdate-20260414.log` numbers (`485` total `fire_on_update`
+spikes, `31` steady-state handlers, `64.73ms` post-90s average), added the
+new `world_map_onupdate_inventory` handler-ceiling regression test, and
+refreshed the `index.md` summary for the page.
+
 ## [2026-04-14] investigations | world map UIParent empty worklist follow-up
 
 Updated `investigations/world-map-onupdate-hover-polling.md` with the
