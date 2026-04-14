@@ -418,36 +418,63 @@ fn upload_pending_textures(
     glyph_atlas_size: u32,
 ) {
     let atlas = pipeline.texture_atlas_mut();
-    for tex_data in textures {
-        if atlas.get(&tex_data.path).is_none() {
-            atlas.upload(
-                queue,
-                &tex_data.path,
-                tex_data.width,
-                tex_data.height,
-                tex_data.rgba.as_ref(),
-            );
-        }
-    }
-
-    for bc_data in bc_textures {
-        if atlas.get_bc(&bc_data.path).is_none() && atlas.get(&bc_data.path).is_none() {
-            atlas.upload_bc(
-                queue,
-                &bc_data.path,
-                bc_data.width,
-                bc_data.height,
-                bc_data.bc_data.as_ref(),
-                bc_data.bc_format,
-            );
-        }
-    }
-
-    if let Some(glyph_data) = glyph_atlas_data {
-        atlas.upload_glyph_atlas(queue, glyph_data, glyph_atlas_size);
-    }
-
+    upload_rgba_textures(atlas, queue, textures);
+    upload_bc_textures(atlas, queue, bc_textures);
+    upload_glyph_atlas_if_present(atlas, queue, glyph_atlas_data, glyph_atlas_size);
     log_gpu_memory_once(atlas);
+}
+
+fn upload_rgba_textures(
+    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    queue: &wgpu::Queue,
+    textures: &[GpuTextureData],
+) {
+    for tex_data in textures {
+        if atlas.get(&tex_data.path).is_some() {
+            continue;
+        }
+        atlas.upload(
+            queue,
+            &tex_data.path,
+            tex_data.width,
+            tex_data.height,
+            tex_data.rgba.as_ref(),
+        );
+    }
+}
+
+fn upload_bc_textures(
+    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    queue: &wgpu::Queue,
+    bc_textures: &[GpuBcTextureData],
+) {
+    for bc_data in bc_textures {
+        let already_uploaded =
+            atlas.get_bc(&bc_data.path).is_some() || atlas.get(&bc_data.path).is_some();
+        if already_uploaded {
+            continue;
+        }
+        atlas.upload_bc(
+            queue,
+            &bc_data.path,
+            bc_data.width,
+            bc_data.height,
+            bc_data.bc_data.as_ref(),
+            bc_data.bc_format,
+        );
+    }
+}
+
+fn upload_glyph_atlas_if_present(
+    atlas: &mut crate::render::shader::atlas::GpuTextureAtlas,
+    queue: &wgpu::Queue,
+    glyph_atlas_data: &Option<Vec<u8>>,
+    glyph_atlas_size: u32,
+) {
+    let Some(glyph_data) = glyph_atlas_data else {
+        return;
+    };
+    atlas.upload_glyph_atlas(queue, glyph_data, glyph_atlas_size);
 }
 
 /// Log GPU atlas memory usage once after the first batch of textures.
