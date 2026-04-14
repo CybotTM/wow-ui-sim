@@ -27,6 +27,10 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
     let blizzard_start = std::time::Instant::now();
     let mut total_timing = LoadTiming::default();
 
+    // Stop GC during bulk loading — collect once at the end instead of
+    // incremental sweeps on every allocation.
+    env.lua().gc_stop();
+
     for (name, toc_path) in &addons {
         load_one_blizzard_addon(env, name, toc_path, verbose, &mut total_timing);
         if name == "Blizzard_EnvironmentCleanup" {
@@ -34,7 +38,12 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
         }
     }
 
-    print_blizzard_summary(blizzard_start.elapsed(), &total_timing);
+    let gc_start = std::time::Instant::now();
+    env.lua().gc_restart();
+    let _ = env.lua().gc_collect();
+    let gc_dur = gc_start.elapsed();
+
+    print_blizzard_summary(blizzard_start.elapsed(), &total_timing, gc_dur);
 }
 
 fn load_one_blizzard_addon(
@@ -76,7 +85,11 @@ fn load_one_blizzard_addon(
     }
 }
 
-fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
+fn print_blizzard_summary(
+    elapsed: std::time::Duration,
+    t: &LoadTiming,
+    gc_dur: std::time::Duration,
+) {
     let cache_total = t.cache_hits + t.cache_misses;
     let cache_info = if cache_total > 0 {
         format!(", bytecode cache: {}/{} hits", t.cache_hits, cache_total)
@@ -84,7 +97,7 @@ fn print_blizzard_summary(elapsed: std::time::Duration, t: &LoadTiming) {
         String::new()
     };
     logging::println_elapsed(&format!(
-        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}]{cache_info})",
+        "Blizzard addons loaded in {elapsed:.2?} (io={:.2?} xml={:.2?} xmlproc={:.2?} frames⊂xmlproc={:.2?} lua={:.2?} [compile={:.2?} call={:.2?}] gc={gc_dur:.2?}{cache_info})",
         t.io_time,
         t.xml_parse_time,
         t.xml_process_time,

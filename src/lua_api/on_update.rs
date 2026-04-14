@@ -139,18 +139,31 @@ pub(crate) fn dispatch(lua: &Lua, frame_ids: &[u64], elapsed: f64, suffix: &str)
 }
 
 /// Fire OnUpdate + OnPostUpdate for visible frames, then tick animations.
+///
+/// GC is paused for the duration of handler dispatch so that per-handler timing
+/// reflects only handler work, not interleaved GC sweeps.  A single GC step runs
+/// at the end and its cost is logged separately.
 pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<()> {
     let frame_ids = get_visible_on_update_frames(&env.state);
 
     if !frame_ids.is_empty() {
+        env.lua.gc_stop();
+
         let t = Instant::now();
         dispatch(&env.lua, &frame_ids, elapsed, "_OnUpdate");
         let on_update_dur = t.elapsed();
         dispatch(&env.lua, &frame_ids, elapsed, "_OnPostUpdate");
+        let handlers_dur = t.elapsed();
+
+        let gc_start = Instant::now();
+        env.lua.gc_restart();
+        let _ = env.lua.gc_step();
+        let gc_dur = gc_start.elapsed();
+
         let total = t.elapsed();
         if total.as_millis() > 20 {
             eprintln!(
-                "{} [fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} total={total:.1?}",
+                "{} [fire_on_update] {} handlers: OnUpdate={on_update_dur:.1?} handlers={handlers_dur:.1?} gc={gc_dur:.1?} total={total:.1?}",
                 crate::logging::global_elapsed_prefix(),
                 frame_ids.len()
             );

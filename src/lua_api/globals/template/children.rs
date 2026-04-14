@@ -42,9 +42,14 @@ pub(super) fn create_child_frames(
 }
 
 pub(super) fn use_direct_runtime_child_creation(template_name: &str) -> bool {
+    // Keep nested SpellFX templates on this hot list too. Otherwise the outer
+    // ActionButtonSpellFXTemplate fast path still falls back to Lua string
+    // child creation when it expands Interrupt/CastingAnim descendants.
     matches!(
         template_name,
         "ActionButtonSpellFXTemplate"
+            | "ActionButtonInterruptTemplate"
+            | "ActionButtonCastingAnimFrameTemplate"
             | "ActionButtonTemplate"
             | "ActionBarButtonTemplate"
             | "SmallActionButtonTemplate"
@@ -491,6 +496,12 @@ mod tests {
     fn action_button_template_uses_direct_runtime_child_creation() {
         assert!(use_direct_runtime_child_creation(
             "ActionButtonSpellFXTemplate"
+        ));
+        assert!(use_direct_runtime_child_creation(
+            "ActionButtonInterruptTemplate"
+        ));
+        assert!(use_direct_runtime_child_creation(
+            "ActionButtonCastingAnimFrameTemplate"
         ));
         assert!(use_direct_runtime_child_creation("ActionButtonTemplate"));
         assert!(use_direct_runtime_child_creation("MinimalScrollBar"));
