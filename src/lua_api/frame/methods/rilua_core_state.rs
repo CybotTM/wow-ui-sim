@@ -47,9 +47,186 @@ fn opt_f32(state: &LuaState, index: i32) -> f32 {
     }
 }
 
+fn has_queryable_rect(frame: &crate::widget::Frame, id: u64) -> bool {
+    !frame.anchors.is_empty() || frame.name.as_deref() == Some("UIParent") || id == 1
+}
+
+fn raw_frame_size(state: &crate::lua_api::state::SimState, id: u64) -> (f32, f32) {
+    state
+        .widgets
+        .get(id)
+        .map(|frame| (frame.width, frame.height))
+        .unwrap_or((0.0, 0.0))
+}
+
+fn resolved_frame_size(state: &crate::lua_api::state::SimState, id: u64) -> (f32, f32) {
+    state
+        .widgets
+        .get(id)
+        .map(|frame| {
+            if let Some(rect) = frame.layout_rect {
+                let eff_scale = frame.effective_scale.max(1e-6);
+                (rect.width / eff_scale, rect.height / eff_scale)
+            } else {
+                (frame.width, frame.height)
+            }
+        })
+        .unwrap_or((0.0, 0.0))
+}
+
+fn frame_size(state: &mut LuaState, id: u64, raw: bool) -> LuaResult<(f32, f32)> {
+    let mut sim = borrow_state_mut(state)?;
+    if !raw
+        && sim
+            .widgets
+            .get(id)
+            .is_some_and(|frame| has_queryable_rect(frame, id))
+    {
+        sim.resolve_rect_if_dirty(id);
+    }
+    let size = if raw {
+        raw_frame_size(&sim, id)
+    } else {
+        resolved_frame_size(&sim, id)
+    };
+    Ok(size)
+}
+
+struct ExplicitSizeState {
+    width: f32,
+    height: f32,
+    width_is_text_auto: bool,
+}
+
+fn current_explicit_size_state(
+    state: &crate::lua_api::state::SimState,
+    id: u64,
+) -> Option<ExplicitSizeState> {
+    state.widgets.get(id).map(|frame| ExplicitSizeState {
+        width: frame.width,
+        height: frame.height,
+        width_is_text_auto: frame.width_is_text_auto,
+    })
+}
+
+fn clear_auto_width_flag(state: &mut crate::lua_api::state::SimState, id: u64) {
+    if let Some(frame) = state.widgets.get_mut(id) {
+        frame.width_is_text_auto = false;
+    }
+}
+
+fn apply_explicit_size(
+    state: &mut crate::lua_api::state::SimState,
+    id: u64,
+    width: f32,
+    height: f32,
+) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.set_size(width, height);
+        frame.width_is_text_auto = false;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
+fn apply_explicit_width(state: &mut crate::lua_api::state::SimState, id: u64, width: f32) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.width = width;
+        frame.width_is_text_auto = false;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
+fn apply_explicit_height(state: &mut crate::lua_api::state::SimState, id: u64, height: f32) {
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.height = height;
+    }
+    state.widgets.mark_rect_dirty(id);
+}
+
 // ---------------------------------------------------------------------------
 // Visibility: Show / Hide / SetShown
 // ---------------------------------------------------------------------------
+
+pub fn get_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let ignore = bool::from_stack(state, 2).ok().unwrap_or(false);
+    let (width, _) = frame_size(state, id, ignore)?;
+    state.push(Val::Num(width as f64));
+    Ok(1)
+}
+
+pub fn get_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let ignore = bool::from_stack(state, 2).ok().unwrap_or(false);
+    let (_, height) = frame_size(state, id, ignore)?;
+    state.push(Val::Num(height as f64));
+    Ok(1)
+}
+
+pub fn get_size(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let ignore = bool::from_stack(state, 2).ok().unwrap_or(false);
+    let (width, height) = frame_size(state, id, ignore)?;
+    state.push(Val::Num(width as f64));
+    state.push(Val::Num(height as f64));
+    Ok(2)
+}
+
+pub fn set_size(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let width = arg_f32(state, 2)?;
+    let height = arg_f32(state, 3)?;
+    let mut sim = borrow_state_mut(state)?;
+    let Some(current) = current_explicit_size_state(&sim, id) else {
+        return Ok(0);
+    };
+
+    let size_changed = current.width != width || current.height != height;
+    if !size_changed {
+        if current.width_is_text_auto {
+            clear_auto_width_flag(&mut sim, id);
+        }
+        return Ok(0);
+    }
+
+    apply_explicit_size(&mut sim, id, width, height);
+    Ok(0)
+}
+
+pub fn set_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let width = arg_f32(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    let Some(current) = current_explicit_size_state(&sim, id) else {
+        return Ok(0);
+    };
+
+    if current.width == width {
+        if current.width_is_text_auto {
+            clear_auto_width_flag(&mut sim, id);
+        }
+        return Ok(0);
+    }
+
+    apply_explicit_width(&mut sim, id, width);
+    Ok(0)
+}
+
+pub fn set_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id(state, 1)?;
+    let height = arg_f32(state, 2)?;
+    let mut sim = borrow_state_mut(state)?;
+    let Some(current_height) = sim.widgets.get(id).map(|frame| frame.height) else {
+        return Ok(0);
+    };
+
+    if current_height == height {
+        return Ok(0);
+    }
+
+    apply_explicit_height(&mut sim, id, height);
+    Ok(0)
+}
 
 pub fn show(state: &mut LuaState) -> LuaResult<u32> {
     // TODO: needs Lua function calling (fires OnShow handlers on children)
@@ -937,6 +1114,13 @@ pub fn is_object_type(state: &mut LuaState) -> LuaResult<u32> {
 // ---------------------------------------------------------------------------
 
 pub fn register_all(state: &mut LuaState, mt: GcRef<Table>) -> LuaResult<()> {
+    // Size
+    table_set_rust_fn(state, mt, "GetWidth", get_width)?;
+    table_set_rust_fn(state, mt, "GetHeight", get_height)?;
+    table_set_rust_fn(state, mt, "GetSize", get_size)?;
+    table_set_rust_fn(state, mt, "SetSize", set_size)?;
+    table_set_rust_fn(state, mt, "SetWidth", set_width)?;
+    table_set_rust_fn(state, mt, "SetHeight", set_height)?;
     // Visibility
     table_set_rust_fn(state, mt, "Show", show)?;
     table_set_rust_fn(state, mt, "Hide", hide)?;

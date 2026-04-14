@@ -110,9 +110,9 @@ pub(super) fn init_lua_state(
 ) -> crate::Result<()> {
     register_pure_lua_taint_stubs(lua)?;
     init_registry_tables(lua, &state)?;
+    init_frame_metatable(lua)?;
     register_rilua_globals(lua)?;
     super::globals::rilua_security::create_secure_environment(lua)?;
-    init_frame_metatable(lua)?;
     enable_taint_and_wrap_loadstring(lua)?;
     super::keybindings::init_keybindings(&mut *lua.state_mut())?;
     crate::loader::precompiled::init(lua)?;
