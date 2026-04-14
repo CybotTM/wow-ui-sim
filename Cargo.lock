@@ -3714,6 +3714,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0c6a884d2998352bb4daf0183589aec883f16a6da1f4dde84d8e2e9a5409a1ce"
 
 [[package]]
+name = "rilua"
+version = "0.1.21"
+
+[[package]]
 name = "rmp"
 version = "0.8.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5778,6 +5782,7 @@ dependencies = [
  "pollster",
  "quick-xml 0.37.5",
  "regex",
+ "rilua",
  "rodio",
  "serde",
  "serde_json",

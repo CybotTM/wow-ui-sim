@@ -1,9 +1,9 @@
 //! [`IntoStack`] trait and implementations for pushing typed values
 //! onto the rilua call stack.
 
+use rilua::vm::state::LuaState;
 use rilua::LuaResult;
 use rilua::Val;
-use rilua::vm::state::LuaState;
 
 // ---------------------------------------------------------------------------
 // IntoStack trait

@@ -1,11 +1,11 @@
 //! [`FromStack`] trait and implementations for extracting typed values
 //! from the rilua call stack.
 
+use rilua::vm::state::LuaState;
 use rilua::LuaError;
 use rilua::LuaResult;
 use rilua::RuntimeError;
 use rilua::Val;
-use rilua::vm::state::LuaState;
 
 // ---------------------------------------------------------------------------
 // Stack helpers
@@ -170,14 +170,10 @@ impl FromStack for String {
                     .get(str_ref)
                     .map(|s| s.data())
                     .ok_or_else(|| {
-                        runtime_error(format!(
-                            "string at argument {index} has been collected"
-                        ))
+                        runtime_error(format!("string at argument {index} has been collected"))
                     })?;
                 String::from_utf8(bytes.to_vec()).map_err(|_| {
-                    runtime_error(format!(
-                        "string at argument {index} is not valid UTF-8"
-                    ))
+                    runtime_error(format!("string at argument {index} is not valid UTF-8"))
                 })
             }
             got => Err(type_error("string", got.type_name(), index)),

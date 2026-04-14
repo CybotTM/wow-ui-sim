@@ -68,40 +68,46 @@
 #[macro_export]
 macro_rules! define_methods {
     ($state:expr, $table:expr, {
-        $( $name:literal => |$frame_pat:pat $(, $arg_pat:pat : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
+        $( $name:literal => |$frame_pat:ident $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
     }) => {
-        $(
-            {
-                // Generate a named helper function to satisfy `RustFn = fn(...)`,
-                // which requires a concrete function pointer (not a closure).
-                // The body is placed inline below; in practice each arm expands
-                // to a `table_set_function` call with a wrapper `fn`.
-                //
-                // TODO: Implement frame resolution from arena when widget types
-                //       are accessible from this crate.
-                fn __method(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
-                    // arg 1 = self (frame handle) — will be resolved to &mut Frame.
-                    // For now we validate it exists and is not nil.
-                    let _self_val = $crate::lua_bridge::from_stack::stack_val(state, 1);
+        {
+            let __result: ::rilua::LuaResult<()> = (|| {
+                $(
+                    {
+                        // Generate a named helper function to satisfy `RustFn = fn(...)`,
+                        // which requires a concrete function pointer (not a closure).
+                        // The body is placed inline below; in practice each arm expands
+                        // to a `table_set_function` call with a wrapper `fn`.
+                        //
+                        // TODO: Implement frame resolution from arena when widget types
+                        //       are accessible from this crate.
+                        fn __method(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
+                            // arg 1 = self (frame handle) — will be resolved to &mut Frame.
+                            // For now we validate it exists and is not nil.
+                            let _self_val = $crate::lua_bridge::stack_val(state, 1);
 
-                    // TODO: resolve _self_val to &mut Frame via arena lookup.
-                    let $frame_pat = (); // placeholder until Frame type is wired up
+                            // TODO: resolve _self_val to &mut Frame via arena lookup.
+                            let $frame_pat = (); // placeholder until Frame type is wired up
 
-                    // Extract remaining arguments starting at position 2.
-                    let mut __idx: i32 = 2;
-                    $(
-                        let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
-                        __idx += 1;
-                    )*
-                    let _ = __idx;
+                            // Extract remaining arguments starting at position 2.
+                            let mut __idx: i32 = 2;
+                            $(
+                                let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
+                                __idx += 1;
+                            )*
+                            let _ = __idx;
 
-                    let __result: ::rilua::LuaResult<_> = $body;
-                    let __val = __result?;
-                    $crate::lua_bridge::IntoStack::into_stack(__val, state)
-                }
-                $crate::lua_bridge::table_builder::table_set_rust_fn($state, $table, $name, __method)?;
-            }
-        )*
+                            let __result: ::rilua::LuaResult<_> = $body;
+                            let __val = __result?;
+                            $crate::lua_bridge::IntoStack::into_stack(__val, state)
+                        }
+                        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __method)?;
+                    }
+                )*
+                Ok(())
+            })();
+            __result
+        }
     };
 }
 
@@ -118,24 +124,30 @@ macro_rules! define_methods {
 #[macro_export]
 macro_rules! define_functions {
     ($state:expr, $table:expr, {
-        $( $name:literal => |$( $arg_pat:pat : $arg_ty:ty ),* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
+        $( $name:literal => |$( $arg_pat:ident : $arg_ty:ty ),* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
     }) => {
-        $(
-            {
-                fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
-                    let mut __idx: i32 = 1;
-                    $(
-                        let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
-                        __idx += 1;
-                    )*
-                    let _ = __idx;
+        {
+            let __result: ::rilua::LuaResult<()> = (|| {
+                $(
+                    {
+                        fn __func(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
+                            let mut __idx: i32 = 1;
+                            $(
+                                let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
+                                __idx += 1;
+                            )*
+                            let _ = __idx;
 
-                    let __result: ::rilua::LuaResult<_> = $body;
-                    let __val = __result?;
-                    $crate::lua_bridge::IntoStack::into_stack(__val, state)
-                }
-                $crate::lua_bridge::table_builder::table_set_rust_fn($state, $table, $name, __func)?;
-            }
-        )*
+                            let __result: ::rilua::LuaResult<_> = $body;
+                            let __val = __result?;
+                            $crate::lua_bridge::IntoStack::into_stack(__val, state)
+                        }
+                        $crate::lua_bridge::table_set_rust_fn($state, $table, $name, __func)?;
+                    }
+                )*
+                Ok(())
+            })();
+            __result
+        }
     };
 }

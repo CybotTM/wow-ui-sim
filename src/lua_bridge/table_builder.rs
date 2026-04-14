@@ -1,13 +1,13 @@
 //! [`TableBuilder`]: fluent builder for creating and populating Lua tables.
 
-use rilua::LuaError;
-use rilua::LuaResult;
-use rilua::RuntimeError;
-use rilua::Val;
 use rilua::vm::closure::{Closure, RustClosure, RustFn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table as RiluaTable;
+use rilua::LuaError;
+use rilua::LuaResult;
+use rilua::RuntimeError;
+use rilua::Val;
 
 use crate::lua_bridge::IntoStack;
 
@@ -81,13 +81,18 @@ impl<'a> TableBuilder<'a> {
 
         let key_ref = self.state.gc.intern_string(key.as_bytes());
         let k = Val::Str(key_ref);
-        let table = self.state.gc.tables.get_mut(self.table_ref).ok_or_else(|| {
-            LuaError::Runtime(RuntimeError {
-                message: "table has been collected".into(),
-                level: 0,
-                traceback: vec![],
-            })
-        })?;
+        let table = self
+            .state
+            .gc
+            .tables
+            .get_mut(self.table_ref)
+            .ok_or_else(|| {
+                LuaError::Runtime(RuntimeError {
+                    message: "table has been collected".into(),
+                    level: 0,
+                    traceback: vec![],
+                })
+            })?;
         table.raw_set(k, val, &self.state.gc.string_arena)?;
         Ok(self)
     }

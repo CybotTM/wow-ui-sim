@@ -26,6 +26,7 @@ pub mod items;
 pub mod loader;
 pub mod logging;
 pub mod lua_api;
+pub mod lua_bridge;
 pub mod lua_errors;
 pub mod lua_server;
 #[path = "../data/manifest_interface_data.rs"]

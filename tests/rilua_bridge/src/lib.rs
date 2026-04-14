@@ -4,11 +4,16 @@
 //! These tests use rilua directly — they don't depend on the full
 //! wow-ui-sim crate, so they compile even when mlua-sys fails.
 
+#[path = "../../../src/lua_bridge/mod.rs"]
+mod lua_bridge;
+
 use rilua::vm::closure::{Closure, RustClosure, RustFn};
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
+
+use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -41,12 +46,7 @@ fn get_string(state: &LuaState, index: i32) -> LuaResult<String> {
     }
 }
 
-fn table_set_fn(
-    state: &mut LuaState,
-    table: GcRef<Table>,
-    name: &str,
-    func: RustFn,
-) {
+fn table_set_fn(state: &mut LuaState, table: GcRef<Table>, name: &str, func: RustFn) {
     let key = state.gc.intern_string(name.as_bytes());
     let closure = Closure::Rust(RustClosure::new(func, name));
     let closure_ref = state.gc.alloc_closure(closure);
@@ -67,11 +67,19 @@ fn set_global_table(state: &mut LuaState, name: &str, table_ref: GcRef<Table>) {
         .tables
         .get_mut(global)
         .unwrap()
-        .raw_set(
-            Val::Str(key),
-            Val::Table(table_ref),
-            &state.gc.string_arena,
-        )
+        .raw_set(Val::Str(key), Val::Table(table_ref), &state.gc.string_arena)
+        .unwrap();
+}
+
+fn set_global_val(state: &mut LuaState, name: &str, value: Val) {
+    let key = state.gc.intern_string(name.as_bytes());
+    let global = state.global;
+    state
+        .gc
+        .tables
+        .get_mut(global)
+        .unwrap()
+        .raw_set(Val::Str(key), value, &state.gc.string_arena)
         .unwrap();
 }
 
@@ -146,6 +154,125 @@ fn test_app_data_wrong_type() {
     let state = lua.state_mut();
     state.set_app_data(42_i32);
     assert!(state.app_data::<String>().is_none());
+}
+
+// ---------------------------------------------------------------------------
+// Phase 1: wow-ui-sim bridge
+// ---------------------------------------------------------------------------
+
+#[test]
+fn test_bridge_from_stack_extracts_primitives() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+
+    state.push(Val::Num(42.0));
+    let hello = state.gc.intern_string(b"hello");
+    state.push(Val::Str(hello));
+    state.push(Val::Bool(true));
+
+    assert_eq!(i32::from_stack(state, 1).unwrap(), 42);
+    assert_eq!(String::from_stack(state, 2).unwrap(), "hello");
+    assert!(bool::from_stack(state, 3).unwrap());
+    assert_eq!(Option::<u32>::from_stack(state, 4).unwrap(), None);
+}
+
+#[test]
+fn test_bridge_into_stack_pushes_multiple_values() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+
+    assert_eq!((123_i32, "ok", false).into_stack(state).unwrap(), 3);
+
+    assert_eq!(i32::from_stack(state, 1).unwrap(), 123);
+    assert_eq!(String::from_stack(state, 2).unwrap(), "ok");
+    assert!(!bool::from_stack(state, 3).unwrap());
+}
+
+#[test]
+fn test_table_builder_sets_values_and_functions() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+
+        fn ping(state: &mut LuaState) -> LuaResult<u32> {
+            "pong".into_stack(state)
+        }
+
+        let table = TableBuilder::new(state)
+            .set("answer", 42_i32)
+            .unwrap()
+            .set("enabled", true)
+            .unwrap()
+            .set_function("Ping", ping)
+            .unwrap()
+            .build();
+
+        set_global_val(state, "Bridge", table);
+    }
+
+    lua.exec("assert(Bridge.answer == 42)").unwrap();
+    lua.exec("assert(Bridge.enabled == true)").unwrap();
+    lua.exec("assert(Bridge.Ping() == 'pong')").unwrap();
+}
+
+#[test]
+fn test_define_functions_registers_typed_wrappers() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+        let table_ref = TableBuilder::new(state).build();
+        let table_ref = match table_ref {
+            Val::Table(table_ref) => table_ref,
+            _ => unreachable!(),
+        };
+
+        define_functions!(state, table_ref, {
+            "ConcatCount" => |name: String, count: Option<u32>| -> (String, u32) {
+                Ok((format!("{name}!"), count.unwrap_or(0)))
+            },
+            "IsTruthy" => |value: bool| -> bool {
+                Ok(value)
+            },
+        })
+        .unwrap();
+
+        set_global_table(state, "BridgeFns", table_ref);
+    }
+
+    lua.exec("local text, count = BridgeFns.ConcatCount('mage', 7); assert(text == 'mage!' and count == 7)")
+        .unwrap();
+    lua.exec("local text, count = BridgeFns.ConcatCount('rogue'); assert(text == 'rogue!' and count == 0)")
+        .unwrap();
+    lua.exec("assert(BridgeFns.IsTruthy(1) == true)").unwrap();
+    lua.exec("assert(BridgeFns.IsTruthy(nil) == false)")
+        .unwrap();
+}
+
+#[test]
+fn test_define_methods_registers_backed_table_methods() {
+    let mut lua = Lua::new().unwrap();
+    {
+        let state = lua.state_mut();
+
+        let mt_ref = state.gc.alloc_table(Table::new());
+        define_methods!(state, mt_ref, {
+            "Describe" => |frame, label: String, count: u32| -> (String, u32) {
+                let _ = frame;
+                Ok((label, count + 1))
+            },
+        })
+        .unwrap();
+        make_index_self(state, mt_ref);
+
+        let mut frame = Table::new();
+        frame.set_backing(Some((9, 3)));
+        frame.set_metatable(Some(mt_ref));
+        let frame_ref = state.gc.alloc_table(frame);
+        set_global_table(state, "myframe", frame_ref);
+    }
+
+    lua.exec("local label, count = myframe:Describe('frame', 4); assert(label == 'frame' and count == 5)")
+        .unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -300,7 +427,8 @@ fn test_backed_table_with_rust_methods() {
 
     // Method calls
     lua.exec("myframe:SetName('TestFrame')").unwrap();
-    lua.exec("assert(myframe:GetName() == 'TestFrame')").unwrap();
+    lua.exec("assert(myframe:GetName() == 'TestFrame')")
+        .unwrap();
     lua.exec("assert(myframe:IsFrame() == true)").unwrap();
     lua.exec("assert(myframe:GetFrameIndex() == 7)").unwrap();
     lua.exec("myframe:Show()").unwrap();
@@ -314,7 +442,8 @@ fn test_backed_table_with_rust_methods() {
     lua.exec("assert(rawget(myframe, 'raw') == true)").unwrap();
 
     // Methods still work after adding dynamic props
-    lua.exec("assert(myframe:GetName() == 'TestFrame')").unwrap();
+    lua.exec("assert(myframe:GetName() == 'TestFrame')")
+        .unwrap();
 }
 
 // ---------------------------------------------------------------------------
