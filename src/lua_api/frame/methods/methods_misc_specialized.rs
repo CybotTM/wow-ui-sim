@@ -515,10 +515,12 @@ fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u
     };
 
     let fog_state = state.fog_of_war_frames.entry(frame_id).or_default();
+    fog_state.ui_map_id = Some(map_id);
     fog_state.background_atlas = fog_info.background_atlas.map(str::to_string);
     fog_state.mask_atlas = fog_info.mask_atlas.map(str::to_string);
     fog_state.mask_scalar = Some(fog_info.mask_scalar);
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.fog_of_war_ui_map_id = Some(map_id);
         frame.fog_of_war_background_atlas = fog_state.background_atlas.clone();
         frame.fog_of_war_mask_atlas = fog_state.mask_atlas.clone();
         frame.fog_of_war_mask_scalar = Some(fog_info.mask_scalar as f32);
@@ -528,10 +530,12 @@ fn apply_fog_of_war_map_change(state: &mut crate::lua_api::SimState, frame_id: u
 
 fn clear_fog_of_war_frame(state: &mut crate::lua_api::SimState, frame_id: u64) {
     let fog_state = state.fog_of_war_frames.entry(frame_id).or_default();
+    fog_state.ui_map_id = None;
     fog_state.background_atlas = None;
     fog_state.mask_atlas = None;
     fog_state.mask_scalar = None;
     if let Some(frame) = state.widgets.get_mut_visual(frame_id) {
+        frame.fog_of_war_ui_map_id = None;
         frame.fog_of_war_background_atlas = None;
         frame.fog_of_war_mask_atlas = None;
         frame.fog_of_war_mask_scalar = None;

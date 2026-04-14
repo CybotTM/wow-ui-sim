@@ -66,4 +66,5 @@ LLM-maintained knowledge base for the wow-ui-sim project.
 | [[world-map-frame-level-rebuilds]] | World map pins were forcing no-op `SetFrameLevel()` invalidations; steady-state bucket rebuilds are now gone |
 | [[world-map-create-texture-sublevel]] | World-map textures were created at sublevel 0 because `CreateTexture(..., subLevel)` ignored its fourth argument; immediate `SetDrawLayer()` repair churn is now gone |
 | [[world-map-fog-of-war-first-open-size]] | First-open world-map fog pins could keep a stale size because `FogOfWarPinMixin` only resized on canvas scale changes; simulator now patches size-change handling for existing and future pins |
+| [[world-map-fog-of-war-overlay-model]] | Current world map has no `UiMapFogOfWar` entry; simulator now hides fake fog and seeds one real unexplored overlay chunk until character exploration state exists |
 | [[world-map-texture-loading-budget]] | World map tile uploads were hidden in BC texture work; preload/draw now share BC cache, honor `RequestPreloadMap()`, keep the fast tick alive until GPU uploads finish, and count BC-preloaded tiles as cached during budgeted draw |

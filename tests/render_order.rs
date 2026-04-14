@@ -408,149 +408,7 @@ fn isolated_world_map_stack_opens_and_populates_world_quest_pins() {
 }
 
 #[test]
-fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half_on_first_open() {
-    common::with_timeout(120, move || {
-        let env = env_with_isolated_world_map();
-
-        let fog_rect = {
-            let state = env.state().borrow();
-            let world_map_id = state
-                .widgets
-                .get_id_by_name("WorldMapFrame")
-                .expect("isolated world map should create WorldMapFrame");
-            let fog_pin_id = state
-                .widgets
-                .iter_ids()
-                .find(|&id| {
-                    state.widgets.get(id).is_some_and(|frame| {
-                        frame
-                            .object_type_name
-                            .as_deref()
-                            .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
-                            && is_descendant_of(&state.widgets, id, world_map_id)
-                    })
-                })
-                .expect("isolated world map should create a FogOfWarFrame pin");
-            compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
-        };
-
-        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
-        let visible_batch =
-            build_screenshot_like_batch_without_settle(&env, 1024, 768, Some("WorldMapFrame"));
-        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
-
-        env.exec(
-            r#"
-            local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
-            assert(fogPin, "missing fog pin")
-            fogPin:Hide()
-        "#,
-        )
-        .expect("failed to hide fog pin");
-        wow_ui_sim::startup::process_pending_timers(&env);
-        wow_ui_sim::startup::fire_one_on_update_tick(&env);
-
-        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
-        let hidden_batch =
-            build_screenshot_like_batch_without_settle(&env, 1024, 768, Some("WorldMapFrame"));
-        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
-        let fog_diff =
-            diff_bounds(&visible_render, &hidden_render, 12).expect("fog should change pixels");
-
-        assert!(
-            fog_diff.0 as f32 >= fog_rect.x + fog_rect.width * 0.49,
-            "first-open fog should start on the unexplored half: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.2 as f32 >= fog_rect.x + fog_rect.width * 0.92,
-            "first-open fog should reach the right side of the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.2 as f32 <= fog_rect.x + fog_rect.width + 2.0,
-            "first-open fog should not extend beyond the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.1 as f32 <= fog_rect.y + 2.0
-                && fog_diff.3 as f32 >= fog_rect.y + fog_rect.height - 2.0,
-            "first-open fog should cover the full fog-frame height: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-    });
-}
-
-#[test]
-fn isolated_world_map_fog_of_war_renders_only_on_unexplored_half() {
-    common::with_timeout(120, move || {
-        let env = env_with_isolated_world_map();
-
-        std::thread::sleep(std::time::Duration::from_millis(1200));
-        wow_ui_sim::startup::process_pending_timers(&env);
-        wow_ui_sim::startup::fire_one_on_update_tick(&env);
-
-        let fog_rect = {
-            let state = env.state().borrow();
-            let world_map_id = state
-                .widgets
-                .get_id_by_name("WorldMapFrame")
-                .expect("isolated world map should create WorldMapFrame");
-            let fog_pin_id = state
-                .widgets
-                .iter_ids()
-                .find(|&id| {
-                    state.widgets.get(id).is_some_and(|frame| {
-                        frame
-                            .object_type_name
-                            .as_deref()
-                            .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
-                            && is_descendant_of(&state.widgets, id, world_map_id)
-                    })
-                })
-                .expect("isolated world map should create a FogOfWarFrame pin");
-            compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
-        };
-
-        let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
-        let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
-        let visible_render = render_to_image(&visible_batch, &mut visible_mgr, 1024, 768, None);
-
-        env.exec(
-            r#"
-            local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
-            assert(fogPin, "missing fog pin")
-            fogPin:Hide()
-        "#,
-        )
-        .expect("failed to hide fog pin");
-        wow_ui_sim::startup::process_pending_timers(&env);
-        wow_ui_sim::startup::fire_one_on_update_tick(&env);
-
-        let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
-        let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
-        let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
-        let fog_diff =
-            diff_bounds(&visible_render, &hidden_render, 12).expect("fog should change pixels");
-
-        assert!(
-            fog_diff.0 as f32 >= fog_rect.x + fog_rect.width * 0.49,
-            "fog should start on the unexplored half: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.2 as f32 >= fog_rect.x + fog_rect.width * 0.92,
-            "fog should reach the right side of the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.2 as f32 <= fog_rect.x + fog_rect.width + 2.0,
-            "fog should not extend beyond the fog frame: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-        assert!(
-            fog_diff.1 as f32 <= fog_rect.y + 2.0
-                && fog_diff.3 as f32 >= fog_rect.y + fog_rect.height - 2.0,
-            "fog should cover the full fog-frame height: diff={fog_diff:?} fog_rect={fog_rect:?}"
-        );
-    });
-}
-
-#[test]
-fn isolated_world_map_exploration_overlay_renders_on_explored_half() {
+fn isolated_world_map_current_map_does_not_render_fog_of_war_without_db_entry() {
     common::with_timeout(120, move || {
         let env = env_with_isolated_world_map();
 
@@ -579,33 +437,8 @@ fn isolated_world_map_exploration_overlay_renders_on_explored_half() {
                 .expect("isolated world map should create a FogOfWarFrame pin");
             compute_frame_rect(&state.widgets, fog_pin_id, 1024.0, 768.0)
         };
-        let expected_overlay_bounds: (f32, f32, f32, f32) = env
-            .eval(
-                r#"
-                local mapID = C_Map.GetCurrentMapID()
-                local layer = C_Map.GetMapArtLayers(mapID)[1]
-                local explored = C_MapExplorationInfo.GetExploredMapTextures(mapID)
-                assert(type(explored) == "table" and #explored > 0, "missing explored overlays")
-
-                local minLeft = math.huge
-                local minTop = math.huge
-                local maxRight = 0
-                local maxBottom = 0
-
-                for _, overlay in ipairs(explored) do
-                    minLeft = math.min(minLeft, overlay.offsetX)
-                    minTop = math.min(minTop, overlay.offsetY)
-                    maxRight = math.max(maxRight, overlay.offsetX + overlay.textureWidth)
-                    maxBottom = math.max(maxBottom, overlay.offsetY + overlay.textureHeight)
-                end
-
-                return minLeft / layer.layerWidth,
-                    minTop / layer.layerHeight,
-                    maxRight / layer.layerWidth,
-                    maxBottom / layer.layerHeight
-            "#,
-            )
-            .expect("failed to compute expected exploration bounds");
+        let (explored_right_x, explored_right_y, unexplored_left_x, unexplored_left_y) =
+            exploration_sample_points(&env);
 
         let mut visible_mgr = make_texture_manager().expect("texture directories should exist");
         let visible_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
@@ -613,43 +446,107 @@ fn isolated_world_map_exploration_overlay_renders_on_explored_half() {
 
         env.exec(
             r#"
-            local pin = WorldMapFrame:EnumeratePinsByTemplate("MapExplorationPinTemplate")()
-            assert(pin, "missing exploration pin")
-            pin:Hide()
+            local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+            assert(fogPin, "missing fog pin")
+            fogPin:Hide()
         "#,
         )
-        .expect("failed to hide exploration pin");
+        .expect("failed to hide fog pin");
         wow_ui_sim::startup::process_pending_timers(&env);
         wow_ui_sim::startup::fire_one_on_update_tick(&env);
 
         let mut hidden_mgr = make_texture_manager().expect("texture directories should exist");
         let hidden_batch = build_screenshot_like_batch(&env, 1024, 768, Some("WorldMapFrame"));
         let hidden_render = render_to_image(&hidden_batch, &mut hidden_mgr, 1024, 768, None);
-        let overlay_diff = diff_bounds(&visible_render, &hidden_render, 12)
-            .expect("exploration overlay should change pixels");
-        let expected_left = map_rect.x + map_rect.width * expected_overlay_bounds.0;
-        let expected_top = map_rect.y + map_rect.height * expected_overlay_bounds.1;
-        let expected_right = map_rect.x + map_rect.width * expected_overlay_bounds.2;
-        let expected_bottom = map_rect.y + map_rect.height * expected_overlay_bounds.3;
-        let tolerance = 32.0;
+
+        let explored_right_pixel = sample_map_pixel(
+            &visible_render,
+            &hidden_render,
+            map_rect,
+            explored_right_x,
+            explored_right_y,
+        );
+        let unexplored_left_pixel = sample_map_pixel(
+            &visible_render,
+            &hidden_render,
+            map_rect,
+            unexplored_left_x,
+            unexplored_left_y,
+        );
+
+        let explored_delta = pixel_delta(explored_right_pixel.0, explored_right_pixel.1);
+        let unexplored_delta = pixel_delta(unexplored_left_pixel.0, unexplored_left_pixel.1);
 
         assert!(
-            (overlay_diff.0 as f32 - expected_left).abs() <= tolerance,
-            "exploration overlay should start where the API overlay data starts: diff={overlay_diff:?} expected_left={expected_left} rect={map_rect:?}"
+            explored_delta <= 24,
+            "maps without fog DB data should not darken explored regions: delta={explored_delta} sample=({explored_right_x:.2}, {explored_right_y:.2}) visible={:?} hidden={:?}",
+            explored_right_pixel.0,
+            explored_right_pixel.1
         );
         assert!(
-            (overlay_diff.1 as f32 - expected_top).abs() <= tolerance,
-            "exploration overlay should start at the expected top bound: diff={overlay_diff:?} expected_top={expected_top} rect={map_rect:?}"
-        );
-        assert!(
-            (overlay_diff.2 as f32 - expected_right).abs() <= tolerance,
-            "exploration overlay should end where the API overlay data ends: diff={overlay_diff:?} expected_right={expected_right} rect={map_rect:?}"
-        );
-        assert!(
-            (overlay_diff.3 as f32 - expected_bottom).abs() <= tolerance,
-            "exploration overlay should end at the expected bottom bound: diff={overlay_diff:?} expected_bottom={expected_bottom} rect={map_rect:?}"
+            unexplored_delta <= 24,
+            "maps without fog DB data should not darken unexplored regions either: delta={unexplored_delta} sample=({unexplored_left_x:.2}, {unexplored_left_y:.2}) visible={:?} hidden={:?}",
+            unexplored_left_pixel.0,
+            unexplored_left_pixel.1
         );
     });
+}
+
+fn exploration_sample_points(env: &wow_ui_sim::lua_api::WowLuaEnv) -> (f32, f32, f32, f32) {
+    env.eval(
+        r#"
+        local mapID = C_Map.GetCurrentMapID()
+        local exploredRightX, exploredRightY
+        local unexploredLeftX, unexploredLeftY
+
+        for yi = 5, 95, 5 do
+            local y = yi / 100
+            for xi = 5, 95, 5 do
+                local x = xi / 100
+                local isExplored = #C_MapExplorationInfo.GetExploredAreaIDsAtPosition(
+                    mapID,
+                    CreateVector2D(x, y)
+                ) > 0
+                if isExplored and x > 0.55 and not exploredRightX then
+                    exploredRightX, exploredRightY = x, y
+                end
+                if not isExplored and x < 0.45 and not unexploredLeftX then
+                    unexploredLeftX, unexploredLeftY = x, y
+                end
+            end
+        end
+
+        assert(exploredRightX and exploredRightY, "missing explored sample point on the right side")
+        assert(unexploredLeftX and unexploredLeftY, "missing unexplored sample point on the left side")
+        return exploredRightX, exploredRightY, unexploredLeftX, unexploredLeftY
+    "#,
+    )
+    .expect("failed to locate exploration sample points")
+}
+
+fn sample_map_pixel(
+    visible: &image::RgbaImage,
+    hidden: &image::RgbaImage,
+    map_rect: wow_ui_sim::LayoutRect,
+    normalized_x: f32,
+    normalized_y: f32,
+) -> ([u8; 4], [u8; 4]) {
+    let sample_x = (map_rect.x + map_rect.width * normalized_x)
+        .round()
+        .clamp(0.0, visible.width().saturating_sub(1) as f32) as u32;
+    let sample_y = (map_rect.y + map_rect.height * normalized_y)
+        .round()
+        .clamp(0.0, visible.height().saturating_sub(1) as f32) as u32;
+    (
+        visible.get_pixel(sample_x, sample_y).0,
+        hidden.get_pixel(sample_x, sample_y).0,
+    )
+}
+
+fn pixel_delta(lhs: [u8; 4], rhs: [u8; 4]) -> u32 {
+    u32::from(lhs[0].abs_diff(rhs[0]))
+        + u32::from(lhs[1].abs_diff(rhs[1]))
+        + u32::from(lhs[2].abs_diff(rhs[2]))
 }
 
 #[test]

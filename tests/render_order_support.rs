@@ -48,31 +48,10 @@ pub(super) fn build_screenshot_like_batch(
     height: u32,
     filter: Option<&str>,
 ) -> QuadBatch {
-    build_screenshot_like_batch_with_settle(env, width, height, filter, true)
-}
-
-pub(super) fn build_screenshot_like_batch_without_settle(
-    env: &WowLuaEnv,
-    width: u32,
-    height: u32,
-    filter: Option<&str>,
-) -> QuadBatch {
-    build_screenshot_like_batch_with_settle(env, width, height, filter, false)
-}
-
-fn build_screenshot_like_batch_with_settle(
-    env: &WowLuaEnv,
-    width: u32,
-    height: u32,
-    filter: Option<&str>,
-    settle: bool,
-) -> QuadBatch {
     let font_system = make_font_system();
     env.set_font_system(Rc::clone(&font_system));
     env.set_screen_size(width as f32, height as f32);
-    if settle {
-        wow_ui_sim::startup::run_extra_update_ticks(env, 3);
-    }
+    wow_ui_sim::startup::run_extra_update_ticks(env, 3);
 
     let mut glyph_atlas = GlyphAtlas::new();
     let mut font_system = font_system.borrow_mut();
@@ -112,36 +91,6 @@ pub(super) fn is_descendant_of(
         };
         frame_id = parent_id;
     }
-}
-
-pub(super) fn diff_bounds(
-    before: &RgbaImage,
-    after: &RgbaImage,
-    per_channel_tolerance: u8,
-) -> Option<(u32, u32, u32, u32)> {
-    let mut min_x = u32::MAX;
-    let mut min_y = u32::MAX;
-    let mut max_x = 0;
-    let mut max_y = 0;
-    let mut found = false;
-
-    for y in 0..before.height() {
-        for x in 0..before.width() {
-            let lhs = before.get_pixel(x, y).0;
-            let rhs = after.get_pixel(x, y).0;
-            let differs =
-                (0..4).any(|channel| lhs[channel].abs_diff(rhs[channel]) > per_channel_tolerance);
-            if differs {
-                min_x = min_x.min(x);
-                min_y = min_y.min(y);
-                max_x = max_x.max(x);
-                max_y = max_y.max(y);
-                found = true;
-            }
-        }
-    }
-
-    found.then_some((min_x, min_y, max_x, max_y))
 }
 
 pub(super) fn diff_pixels_in_rect(

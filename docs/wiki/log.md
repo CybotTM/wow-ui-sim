@@ -2,6 +2,35 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] ingest | world-map exploration seed follow-up
+
+Updated `investigations/world-map-fog-of-war-overlay-model.md` with the current
+map exploration follow-up. After removing synthetic fog, Isle of Dorn still
+showed fully explored because every default-visible overlay was treated as
+discovered. Documented the temporary seed that leaves one real overlay chunk
+(`WorldMapOverlay.ID = 4885`, The Three Shields / Skolzgal Mill) unexplored
+until per-character exploration state exists, and refreshed the `index.md`
+summary.
+
+## [2026-04-14] ingest | world-map fog-of-war overlay model correction
+
+Updated `investigations/world-map-fog-of-war-overlay-model.md` to correct the
+previous diagnosis. The current world map does not have a `UiMapFogOfWar` DB
+row, so the bug was not a wrong irregular fog shape; it was the simulator
+inventing fog for any map art and rendering synthetic geometry from exploration
+overlay gaps. Documented the DB-backed fog lookup, the removal of the synthetic
+renderer, and the new API/render regressions. Updated `index.md` with the
+corrected summary.
+
+## [2026-04-14] ingest | world-map fog-of-war overlay model
+
+Created `investigations/world-map-fog-of-war-overlay-model.md` for the third
+world-map fog bug: exploration APIs were already using real irregular overlay
+chunks, but the fog renderer still assumed a synthetic half-map model.
+Documented the root cause, the `FogOfWarFrame` `uiMapID` plumbing, the new
+overlay-complement fog geometry, and the focused API/render regressions.
+Updated `index.md` with the new investigation page.
+
 ## [2026-04-14] ingest | world-map texture loading budget follow-up
 
 Updated `investigations/world-map-texture-loading-budget.md` with a first-frame

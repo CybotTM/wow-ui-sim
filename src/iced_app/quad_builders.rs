@@ -1,6 +1,6 @@
 //! Widget-specific quad emitters for rendering WoW frames.
 
-use iced::{Point, Rectangle, Size};
+use iced::Rectangle;
 
 use crate::render::font::WowFontSystem;
 use crate::render::glyph::{GlyphAtlas, emit_text_quads};
@@ -52,46 +52,19 @@ pub fn build_frame_quads(
     }
 }
 
-const FOG_OPACITY: f32 = 0.6;
-const FOG_EDGE_FRACTION: f32 = 0.05;
-const FOG_EDGE_MIN_WIDTH: f32 = 16.0;
-const FOG_EDGE_MAX_WIDTH: f32 = 48.0;
-
-struct FogOverlayRects {
-    fade: Option<Rectangle>,
-    solid: Option<Rectangle>,
-}
-
 fn emit_fog_of_war_quads(
-    batch: &mut QuadBatch,
-    bounds: Rectangle,
+    _batch: &mut QuadBatch,
+    _bounds: Rectangle,
     frame: &crate::widget::Frame,
-    alpha: f32,
+    _alpha: f32,
 ) {
     if !is_fog_of_war_frame(frame) {
         return;
     }
-    let Some(fog_alpha) = fog_overlay_alpha(frame, alpha) else {
-        return;
-    };
-    let Some(rects) = fog_overlay_rects(bounds) else {
-        return;
-    };
 
-    if let Some(fade_bounds) = rects.fade {
-        batch.push_gradient(
-            fade_bounds,
-            [
-                [0.0, 0.0, 0.0, 0.0],
-                [0.0, 0.0, 0.0, fog_alpha],
-                [0.0, 0.0, 0.0, fog_alpha],
-                [0.0, 0.0, 0.0, 0.0],
-            ],
-        );
-    }
-    if let Some(solid_bounds) = rects.solid {
-        batch.push_solid(solid_bounds, [0.0, 0.0, 0.0, fog_alpha]);
-    }
+    // Blizzard fog-of-war is a dedicated background+mask asset model.
+    // Do not synthesize coverage from explored overlay chunks; that creates
+    // fake geometry and incorrect overlap on maps without real fog data.
 }
 
 fn is_fog_of_war_frame(frame: &crate::widget::Frame) -> bool {
@@ -99,45 +72,6 @@ fn is_fog_of_war_frame(frame: &crate::widget::Frame) -> bool {
         .object_type_name
         .as_deref()
         .is_some_and(|name| name.eq_ignore_ascii_case("FogOfWarFrame"))
-        && frame.fog_of_war_background_atlas.is_some()
-}
-
-fn fog_overlay_alpha(frame: &crate::widget::Frame, alpha: f32) -> Option<f32> {
-    let fog_alpha =
-        alpha * FOG_OPACITY * frame.fog_of_war_mask_scalar.unwrap_or(1.0).clamp(0.0, 1.0);
-    (fog_alpha > f32::EPSILON).then_some(fog_alpha)
-}
-
-fn fog_overlay_rects(bounds: Rectangle) -> Option<FogOverlayRects> {
-    let explored_left_fraction =
-        crate::lua_api::globals::c_map_api::EXPLORED_LEFT_FRACTION.clamp(0.0, 1.0);
-    let fog_fraction = 1.0 - explored_left_fraction;
-    if fog_fraction <= f32::EPSILON {
-        return None;
-    }
-
-    let fog_start_x = bounds.x + bounds.width * explored_left_fraction;
-    let fog_width = bounds.width * fog_fraction;
-    let fade_width = (bounds.width * FOG_EDGE_FRACTION)
-        .clamp(FOG_EDGE_MIN_WIDTH, FOG_EDGE_MAX_WIDTH)
-        .min(fog_width);
-    let fade = (fade_width > f32::EPSILON).then(|| {
-        Rectangle::new(
-            Point::new(fog_start_x, bounds.y),
-            Size::new(fade_width, bounds.height),
-        )
-    });
-
-    let solid_start_x = fog_start_x + fade_width;
-    let solid_width = bounds.x + bounds.width - solid_start_x;
-    let solid = (solid_width > f32::EPSILON).then(|| {
-        Rectangle::new(
-            Point::new(solid_start_x, bounds.y),
-            Size::new(solid_width, bounds.height),
-        )
-    });
-
-    Some(FogOverlayRects { fade, solid })
 }
 
 pub(super) fn color_with_alpha(c: &crate::widget::Color, alpha: f32) -> [f32; 4] {

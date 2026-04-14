@@ -80,7 +80,6 @@ After wiring `RequestPreloadMap()`, the base map and explored overlays no longer
 - `cargo test texture::tests::test_load_bc_caches_dxt_blp_data --lib`
 - `cargo test budgeted_preload --lib`
 - `cargo test --lib request_preload_map_warms_map_art_and_overlay_textures`
-- `cargo test --test render_order isolated_world_map_fog_of_war_renders_only_on_unexplored_half_on_first_open`
 - `cargo test --test render_order isolated_world_map_stack_opens_and_populates_world_quest_pins`
 - `cargo test --test test_keybindings_panels_detail world_map_fog_of_war_pin_matches_canvas_size_on_first_open`
 - Runtime repro with `ToggleWorldMap()` confirmed the shift from ~50ms draw spikes to ~11ms draw chunks.
@@ -101,4 +100,6 @@ After wiring `RequestPreloadMap()`, the base map and explored overlays no longer
 
 - [[world-map-frame-level-rebuilds]] — earlier fix for the periodic bucket rebuild loop
 - [[world-map-create-texture-sublevel]] — follow-up fix for world-map textures that were immediately repaired with `SetDrawLayer()`
+- [[world-map-fog-of-war-overlay-model]] — later fix for the separate
+  exploration-data versus fog-geometry mismatch
 - [[character-select-performance]] — earlier preload/draw-path texture stall investigation

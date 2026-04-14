@@ -44,7 +44,6 @@ source files.
 
 - `cargo test --test test_keybindings_panels_detail world_map_fog_of_war_pin_resizes_on_canvas_size_changed -- --nocapture`
 - `cargo test --test test_keybindings_panels_detail world_map_fog_of_war_pin_matches_canvas_size_on_first_open -- --nocapture`
-- `cargo test --test render_order isolated_world_map_fog_of_war_renders_only_on_unexplored_half -- --nocapture`
 
 ## Sources
 
@@ -59,5 +58,7 @@ source files.
 
 ## See Also
 
+- [[world-map-fog-of-war-overlay-model]] — later fix for the separate explored
+  chunk versus fog-geometry mismatch
 - [[world-map-texture-loading-budget]] — separate world-map preload/upload work
   that affected first-open responsiveness

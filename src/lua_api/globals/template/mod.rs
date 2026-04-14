@@ -703,7 +703,10 @@ fn resolve_frame_value_by_name(lua: &Lua, frame_name: &str) -> mlua::Result<Valu
         return Ok(value);
     }
 
-    let frame_id = get_sim_state(lua).borrow().widgets.get_id_by_name(frame_name);
+    let frame_id = get_sim_state(lua)
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name);
     match frame_id {
         Some(id) => frame_ref(lua, id),
         None => Ok(Value::Nil),

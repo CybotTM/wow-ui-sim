@@ -408,9 +408,9 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                     return "missing_fog_pin"
                 end
 
-                if not fogPin:IsShown() then
+                if fogPin:IsShown() then
                     return string.format(
-                        "fog_pin_hidden:type=%s:map=%s:bg=%s:mask=%s",
+                        "fog_pin_should_be_hidden:type=%s:map=%s:bg=%s:mask=%s",
                         tostring(fogPin:GetObjectType()),
                         tostring(fogPin.GetUiMapID and fogPin:GetUiMapID()),
                         tostring(fogPin:GetFogOfWarBackgroundAtlas()),
@@ -418,8 +418,12 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
                     )
                 end
 
-                if not fogPin:GetFogOfWarBackgroundAtlas() then
-                    return "fog_pin_missing_background"
+                if fogPin:GetFogOfWarBackgroundAtlas() or fogPin:GetFogOfWarMaskAtlas() then
+                    return string.format(
+                        "fog_pin_should_not_have_assets:bg=%s:mask=%s",
+                        tostring(fogPin:GetFogOfWarBackgroundAtlas()),
+                        tostring(fogPin:GetFogOfWarMaskAtlas())
+                    )
                 end
 
                 local width, height = pin:GetSize()
@@ -469,6 +473,64 @@ fn world_map_exploration_pin_has_visible_overlay_textures_after_opening() {
         assert!(
             errors.is_empty(),
             "World map exploration test produced {} Lua error(s):\n{}",
+            errors.len(),
+            errors.join("\n"),
+        );
+    }
+}
+
+#[test]
+fn world_map_current_map_keeps_fog_of_war_pin_hidden_without_fog_data() {
+    test_timeout! {
+        let env = setup_env();
+        install_test_error_handler(&env);
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let result: String = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    return "world_map_not_open"
+                end
+
+                local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+                if not fogPin then
+                    return "missing_fog_pin"
+                end
+
+                if fogPin:IsShown() then
+                    return string.format(
+                        "fog_pin_visible:map=%s:bg=%s:mask=%s",
+                        tostring(fogPin.GetUiMapID and fogPin:GetUiMapID()),
+                        tostring(fogPin:GetFogOfWarBackgroundAtlas()),
+                        tostring(fogPin:GetFogOfWarMaskAtlas())
+                    )
+                end
+
+                if fogPin:GetFogOfWarBackgroundAtlas() or fogPin:GetFogOfWarMaskAtlas() then
+                    return string.format(
+                        "fog_pin_has_assets:bg=%s:mask=%s",
+                        tostring(fogPin:GetFogOfWarBackgroundAtlas()),
+                        tostring(fogPin:GetFogOfWarMaskAtlas())
+                    )
+                end
+
+                return "ok"
+            "#,
+            )
+            .unwrap();
+
+        let errors = drain_test_errors(&env);
+
+        assert_eq!(
+            result,
+            "ok",
+            "Current world map should leave the fog pin hidden when no fog DB row exists: {result}"
+        );
+        assert!(
+            errors.is_empty(),
+            "World map fog visibility test produced {} Lua error(s):\n{}",
             errors.len(),
             errors.join("\n"),
         );
