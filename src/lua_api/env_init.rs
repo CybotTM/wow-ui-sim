@@ -105,11 +105,9 @@ pub(super) fn init_builtin_frames(state: &Rc<RefCell<SimState>>) {
     create_builtin_frames(&mut s.widgets, w, h, owner);
 }
 
-/// Initialize the Lua state: load Elune, register globals, patch stdlib, run keybindings.
+/// Initialize the Lua state: register globals, patch stdlib, run keybindings.
 pub(super) fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::Result<()> {
-    load_elune_security(lua)?;
-    patch_secureexecuterange(lua)?;
-    patch_elune_userdata_compat(lua)?;
+    register_pure_lua_taint_stubs(lua)?;
     init_registry_tables(lua, &state)?;
     super::globals::register_globals(lua, Rc::clone(&state))?;
     super::secure_env::create_secure_environment(lua)?;
@@ -120,47 +118,14 @@ pub(super) fn init_lua_state(lua: &Lua, state: Rc<RefCell<SimState>>) -> crate::
     Ok(())
 }
 
-/// Load Elune's security library and secure call functions.
-fn load_elune_security(lua: &Lua) -> crate::Result<()> {
-    unsafe extern "C" {
-        fn luaopen_security(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
-        fn luaopen_securecalls(state: *mut mlua::ffi::lua_State) -> std::ffi::c_int;
-    }
-    unsafe {
-        lua.exec_raw::<()>((), |state| {
-            luaopen_security(state);
-        })?;
-        lua.exec_raw::<()>((), |state| {
-            luaopen_securecalls(state);
-        })?;
-    };
-    Ok(())
-}
-
-/// Replace Elune's secureexecuterange with a plain Lua loop.
+/// Register pure-Lua taint stubs replacing Elune's C security library.
 ///
-/// Elune's C implementation silently skips callbacks when taint propagation
-/// interferes. The simulator doesn't enforce taint restrictions, so a plain
-/// loop using securecallfunction (which swallows errors per-entry like WoW)
-/// allows ContinueAfterAllEvents callbacks to fire during startup.
-fn patch_secureexecuterange(lua: &Lua) -> crate::Result<()> {
-    lua.load(
-        r#"
-        secureexecuterange = function(tbl, func, ...)
-            if type(tbl) ~= "table" then return end
-            for k, v in pairs(tbl) do
-                securecallfunction(func, k, v, ...)
-            end
-        end
-        "#,
-    )
-    .exec()?;
-    Ok(())
-}
-
-/// Wrap Elune's hooksecurefunc/issecurevariable to accept userdata (FrameRef).
-fn patch_elune_userdata_compat(lua: &Lua) -> crate::Result<()> {
-    lua.load(include_str!("../../data/lua/elune_userdata_compat.lua"))
+/// Provides the same API surface as Elune's `luaopen_security` and
+/// `luaopen_securecalls` without the C library dependency. Taint tracking
+/// is permissive — `issecure()` always returns true, `issecurevariable()`
+/// always returns true, `securecall` just calls the function directly.
+fn register_pure_lua_taint_stubs(lua: &Lua) -> crate::Result<()> {
+    lua.load(include_str!("../../data/lua/taint_stubs.lua"))
         .exec()?;
     Ok(())
 }

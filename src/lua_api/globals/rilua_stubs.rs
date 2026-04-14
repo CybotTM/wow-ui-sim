@@ -507,7 +507,7 @@ fn register_global_stubs(state: &mut LuaState) {
 }
 
 /// Returns true if the global `name` is currently `nil`.
-fn is_nil_global(state: &LuaState, name: &str) -> bool {
+fn is_nil_global(state: &mut LuaState, name: &str) -> bool {
     let key = state.gc.intern_string(name.as_bytes());
     let global = state.global;
     state
@@ -874,7 +874,7 @@ fn register_namespace_stubs(state: &mut LuaState) {
 }
 
 /// Returns true if `namespace.method` is currently `nil`.
-fn is_nil_namespace(state: &LuaState, namespace: &str, method: &str) -> bool {
+fn is_nil_namespace(state: &mut LuaState, namespace: &str, method: &str) -> bool {
     let ns_key = state.gc.intern_string(namespace.as_bytes());
     let m_key = state.gc.intern_string(method.as_bytes());
     let global = state.global;

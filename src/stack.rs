@@ -1,6 +1,6 @@
 /// Ensure the main thread has a 32 MB stack.
 ///
-/// Elune's taint tracking uses extra C stack that overflows the default 8 MB.
+/// Deep addon call chains can overflow the default 8 MB stack.
 /// winit (via iced) requires the event loop on the main thread, so we can't
 /// just spawn a worker thread with a larger stack. Instead, bump RLIMIT_STACK
 /// and re-exec so the kernel allocates a larger main-thread stack.

@@ -77,5 +77,4 @@ name = "frame_positions"
 harness = false
 
 [patch.crates-io]
-lua-src = { path = "elune-src" }
 iced_wgpu = { path = "iced-wgpu-patched" }
