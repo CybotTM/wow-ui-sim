@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | startup CreateFrame profiling ActionButtonTemplate regions
+
+Updated `investigations/startup-createframe-profile.md` with the direct
+`ActionButtonTemplate` layer/fontstring/button-texture fast path: the new
+Rust-side region creation in `template/elements*.rs`, the focused regression
+test that proves the hot path avoids Lua region fallback, and isolated
+`WOW_SIM_PROFILE_CREATE_FRAME` numbers showing another `-27.36%` drop in
+explicit template time across the profiled action-bar button families.
+
 ## [2026-04-14] investigations | startup CreateFrame profiling nested SpellFX follow-up
 
 Updated `investigations/startup-createframe-profile.md` with the nested `ActionButtonSpellFXTemplate` follow-up: the remaining `ActionButtonInterruptTemplate` / `ActionButtonCastingAnimFrameTemplate` child creation fallback, the widened direct-child selector in `template/children.rs`, and new `WOW_SIM_PROFILE_CREATE_FRAME` numbers showing another `-28.6%` drop in explicit template time across action-bar button families.

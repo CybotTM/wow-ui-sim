@@ -4,9 +4,16 @@ use crate::event::ScriptHandler;
 use crate::loader::chunk_cache;
 use crate::loader::helpers::{generate_scripts_code, generate_set_point_code};
 use crate::loader::helpers_anim::generate_animation_group_code;
+use crate::lua_api::SimState;
 use crate::lua_api::frame::get_sim_state;
+use crate::lua_api::frame::methods::{apply_atlas_to_frame, register_child_widget};
+use crate::lua_api::frame::{frame_ref, sync_child_to_lua};
 use crate::lua_api::script_helpers::set_script;
+use crate::render::BlendMode;
+use crate::widget::{Color, Frame, Gradient, WidgetType};
 use mlua::Lua;
+use std::cell::RefCell;
+use std::rc::Rc;
 
 use super::{escape_lua_string, get_size_values, lua_global_ref, rand_id};
 
@@ -234,6 +241,9 @@ pub(super) fn create_texture_from_template(
         .map(|n| n.replace("$parent", subst_parent))
         .unwrap_or_else(|| format!("__tex_{}", rand_id()));
 
+    #[cfg(test)]
+    super::test_counters::record_texture_create();
+
     let code = build_template_texture_lua(
         &resolved,
         parent_name,
@@ -249,6 +259,398 @@ pub(super) fn create_texture_from_template(
         );
     }
     apply_texture_animations(lua, &resolved, &child_name);
+}
+
+pub(super) fn create_texture_from_template_direct(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    texture: &crate::xml::TextureXml,
+    parent_name: &str,
+    subst_parent: &str,
+    draw_layer: &str,
+    is_mask: bool,
+    is_line: bool,
+) -> mlua::Result<()> {
+    let resolved = crate::xml::resolve_texture_inheritance(texture);
+    ensure_direct_texture_supported(&resolved)?;
+
+    let parent_id = resolve_state_frame_id(state, parent_name).ok_or_else(|| {
+        mlua::Error::runtime(format!(
+            "missing parent '{}' for direct texture create",
+            parent_name
+        ))
+    })?;
+    let child_name = resolved
+        .name
+        .as_ref()
+        .map(|n| n.replace("$parent", subst_parent))
+        .unwrap_or_else(|| format!("__tex_{}", rand_id()));
+
+    let widget_type = if is_line {
+        WidgetType::Line
+    } else {
+        WidgetType::Texture
+    };
+    let mut child = Frame::new(widget_type, Some(child_name.clone()), Some(parent_id));
+    if let Some(layer) = crate::widget::DrawLayer::from_str(draw_layer) {
+        child.draw_layer = layer;
+    }
+    if let Some(parent_key) = resolved.parent_key.as_ref() {
+        child.parent_key = Some(parent_key.clone());
+    }
+    if is_mask {
+        child.is_mask = true;
+        child.object_type_name = Some("MaskTexture".to_string());
+    }
+    let child_id = child.id;
+    register_child_widget(lua, parent_id, child, &Some(child_name))?;
+    sync_region_parent_refs(
+        lua,
+        state,
+        parent_id,
+        child_id,
+        resolved.parent_key.as_deref(),
+        resolved.parent_array.as_deref(),
+    )?;
+    apply_texture_visuals_direct(state, child_id, &resolved, is_mask, is_line);
+    apply_region_layout(
+        state,
+        child_id,
+        &resolved.anchors,
+        resolved.set_all_points,
+        parent_name,
+        resolved.anchors.is_none() && resolved.set_all_points != Some(true),
+    );
+    apply_region_visibility(state, child_id, resolved.hidden, resolved.alpha);
+    apply_mask_wiring_direct(state, parent_id, child_id, &resolved)?;
+    Ok(())
+}
+
+pub(super) fn resolve_state_frame_id(
+    state: &Rc<RefCell<SimState>>,
+    frame_name: &str,
+) -> Option<u64> {
+    state
+        .borrow()
+        .widgets
+        .get_id_by_name(frame_name)
+        .or_else(|| {
+            frame_name
+                .strip_prefix("__frame_")
+                .and_then(|suffix| suffix.parse::<u64>().ok())
+        })
+}
+
+pub(super) fn sync_region_parent_refs(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    parent_id: u64,
+    child_id: u64,
+    parent_key: Option<&str>,
+    parent_array: Option<&str>,
+) -> mlua::Result<()> {
+    if let Some(parent_key) = parent_key {
+        {
+            let mut sim = state.borrow_mut();
+            if let Some(parent) = sim.widgets.get_mut_visual(parent_id) {
+                parent
+                    .children_keys
+                    .insert(parent_key.to_string(), child_id);
+            }
+        }
+        sync_child_to_lua(lua, parent_id, parent_key, child_id)?;
+    }
+
+    let Some(parent_array) = parent_array else {
+        return Ok(());
+    };
+    let parent_val = frame_ref(lua, parent_id)?;
+    let child_val = frame_ref(lua, child_id)?;
+    let mlua::Value::UserData(parent_ud) = parent_val else {
+        return Ok(());
+    };
+    let fields: mlua::Table = parent_ud.user_value()?;
+    let array = match fields.raw_get::<mlua::Value>(parent_array)? {
+        mlua::Value::Table(existing) => existing,
+        _ => {
+            let created = lua.create_table()?;
+            fields.raw_set(parent_array, created.clone())?;
+            created
+        }
+    };
+    let next_index = array.raw_len() + 1;
+    array.raw_set(next_index, child_val)?;
+    Ok(())
+}
+
+pub(super) fn apply_region_layout(
+    state: &Rc<RefCell<SimState>>,
+    region_id: u64,
+    anchors: &Option<crate::xml::AnchorsXml>,
+    set_all_points: Option<bool>,
+    parent_name: &str,
+    default_fill_parent: bool,
+) {
+    if let Some(frame) = state.borrow_mut().widgets.get_mut_visual(region_id) {
+        frame.clear_all_points();
+    }
+
+    if let Some(anchors) = anchors {
+        let mut sim = state.borrow_mut();
+        for anchor in &anchors.anchors {
+            super::direct::set_single_anchor(&mut sim, region_id, anchor, parent_name);
+        }
+    }
+    if set_all_points == Some(true) || default_fill_parent {
+        set_region_all_points(state, region_id);
+    }
+}
+
+pub(super) fn apply_region_visibility(
+    state: &Rc<RefCell<SimState>>,
+    region_id: u64,
+    hidden: Option<bool>,
+    alpha: Option<f32>,
+) {
+    if hidden == Some(true) {
+        state.borrow_mut().set_frame_visible(region_id, false);
+    }
+    if let Some(alpha) = alpha {
+        super::direct::set_alpha(state, region_id, alpha);
+    }
+}
+
+pub(super) fn apply_texture_visuals_direct(
+    state: &Rc<RefCell<SimState>>,
+    texture_id: u64,
+    texture: &crate::xml::TextureXml,
+    is_mask: bool,
+    is_line: bool,
+) {
+    {
+        let mut sim = state.borrow_mut();
+        if let Some(frame) = sim.widgets.get_mut_visual(texture_id) {
+            apply_texture_size_direct(frame, texture);
+            if is_line && let Some(thickness) = texture.thickness {
+                frame.line_thickness = thickness;
+            }
+            apply_texture_source_direct(frame, texture, is_mask);
+            apply_texture_color_direct(frame, texture);
+            apply_texture_gradient_direct(frame, texture.gradient.as_ref());
+            if texture.horiz_tile == Some(true) {
+                frame.horiz_tile = true;
+            }
+            if texture.vert_tile == Some(true) {
+                frame.vert_tile = true;
+            }
+            if let Some(mode) = texture.effective_blend_mode() {
+                frame.alpha_mode = Some(mode.to_string());
+                frame.blend_mode = if mode.eq_ignore_ascii_case("ADD") {
+                    BlendMode::Additive
+                } else {
+                    BlendMode::Alpha
+                };
+            }
+        }
+    }
+
+    if let Some(atlas_name) = texture.atlas.as_deref()
+        && let Some(lookup) = crate::atlas::get_render_atlas_info(atlas_name)
+    {
+        let mut sim = state.borrow_mut();
+        apply_atlas_to_frame(
+            &mut sim.widgets,
+            texture_id,
+            lookup.info,
+            atlas_name,
+            &lookup,
+            texture.use_atlas_size.unwrap_or(is_mask),
+        );
+    }
+}
+
+fn ensure_direct_texture_supported(texture: &crate::xml::TextureXml) -> mlua::Result<()> {
+    if !crate::xml::collect_texture_mixins(texture).is_empty() {
+        return Err(mlua::Error::runtime(
+            "direct texture create does not support texture mixins yet",
+        ));
+    }
+    if texture.animations.is_some() {
+        return Err(mlua::Error::runtime(
+            "direct texture create does not support texture animations yet",
+        ));
+    }
+    if texture
+        .key_values
+        .as_ref()
+        .is_some_and(|values| !values.values.is_empty())
+    {
+        return Err(mlua::Error::runtime(
+            "direct texture create does not support texture key values yet",
+        ));
+    }
+    if texture
+        .color
+        .as_ref()
+        .is_some_and(|color| color.color.is_some())
+    {
+        return Err(mlua::Error::runtime(
+            "direct texture create does not support named color refs yet",
+        ));
+    }
+    Ok(())
+}
+
+fn apply_texture_size_direct(frame: &mut Frame, texture: &crate::xml::TextureXml) {
+    let Some(size) = texture.size.as_ref() else {
+        return;
+    };
+    let (width, height) = super::get_size_values(size);
+    match (width, height) {
+        (Some(width), Some(height)) => frame.set_size(width, height),
+        (Some(width), None) => frame.width = width,
+        (None, Some(height)) => frame.height = height,
+        (None, None) => {}
+    }
+}
+
+fn apply_texture_source_direct(frame: &mut Frame, texture: &crate::xml::TextureXml, is_mask: bool) {
+    if let Some(file) = texture.file.as_ref() {
+        frame.texture = Some(file.clone());
+    }
+    if let Some(atlas_name) = texture.atlas.as_ref() {
+        if crate::atlas::get_render_atlas_info(atlas_name).is_none() {
+            frame.atlas = Some(atlas_name.clone());
+            if texture.use_atlas_size.unwrap_or(is_mask) {
+                frame.width = 0.0;
+                frame.height = 0.0;
+            }
+        }
+    }
+    if let Some(tc) = texture.tex_coords.as_ref() {
+        frame.tex_coords = Some((
+            tc.left.unwrap_or(0.0),
+            tc.right.unwrap_or(1.0),
+            tc.top.unwrap_or(0.0),
+            tc.bottom.unwrap_or(1.0),
+        ));
+    }
+}
+
+fn apply_texture_color_direct(frame: &mut Frame, texture: &crate::xml::TextureXml) {
+    let Some(color) = texture.color.as_ref() else {
+        return;
+    };
+    let rgba = Color::new(
+        color.r.unwrap_or(1.0),
+        color.g.unwrap_or(1.0),
+        color.b.unwrap_or(1.0),
+        color.a.unwrap_or(1.0),
+    );
+    if texture.file.is_some() || texture.atlas.is_some() {
+        frame.vertex_color = Some(rgba);
+    } else {
+        frame.color_texture = Some(rgba);
+        frame.texture = None;
+        frame.texture_file_data_id = None;
+    }
+}
+
+fn apply_texture_gradient_direct(frame: &mut Frame, gradient: Option<&crate::xml::GradientXml>) {
+    let Some(gradient) = gradient else {
+        return;
+    };
+    let min = gradient.min_color.as_ref();
+    let max = gradient.max_color.as_ref();
+    frame.gradient = Some(Gradient {
+        vertical: gradient
+            .orientation
+            .as_deref()
+            .unwrap_or("VERTICAL")
+            .eq_ignore_ascii_case("VERTICAL"),
+        min_color: Color::new(
+            min.and_then(|c| c.r).unwrap_or(0.0),
+            min.and_then(|c| c.g).unwrap_or(0.0),
+            min.and_then(|c| c.b).unwrap_or(0.0),
+            min.and_then(|c| c.a).unwrap_or(1.0),
+        ),
+        max_color: Color::new(
+            max.and_then(|c| c.r).unwrap_or(0.0),
+            max.and_then(|c| c.g).unwrap_or(0.0),
+            max.and_then(|c| c.b).unwrap_or(0.0),
+            max.and_then(|c| c.a).unwrap_or(1.0),
+        ),
+    });
+}
+
+fn set_region_all_points(state: &Rc<RefCell<SimState>>, region_id: u64) {
+    let parent_id = state
+        .borrow()
+        .widgets
+        .get(region_id)
+        .and_then(|frame| frame.parent_id);
+    let mut sim = state.borrow_mut();
+    if let Some(frame) = sim.widgets.get_mut_visual(region_id) {
+        frame.clear_all_points();
+        frame.set_point(
+            crate::widget::AnchorPoint::TopLeft,
+            parent_id.map(|id| id as usize),
+            crate::widget::AnchorPoint::TopLeft,
+            0.0,
+            0.0,
+        );
+        frame.set_point(
+            crate::widget::AnchorPoint::BottomRight,
+            parent_id.map(|id| id as usize),
+            crate::widget::AnchorPoint::BottomRight,
+            0.0,
+            0.0,
+        );
+    }
+    sim.widgets.mark_rect_dirty(region_id);
+}
+
+fn apply_mask_wiring_direct(
+    state: &Rc<RefCell<SimState>>,
+    parent_id: u64,
+    mask_id: u64,
+    texture: &crate::xml::TextureXml,
+) -> mlua::Result<()> {
+    let Some(masked) = texture.masked_textures.as_ref() else {
+        return Ok(());
+    };
+    let mut sim = state.borrow_mut();
+    for entry in &masked.entries {
+        let Some(key) = entry.child_key.as_deref() else {
+            continue;
+        };
+        let target_id = resolve_mask_target_id(&sim, parent_id, key).ok_or_else(|| {
+            mlua::Error::runtime(format!(
+                "direct texture create could not resolve mask childKey '{}'",
+                key
+            ))
+        })?;
+        let Some(frame) = sim.widgets.get_mut_visual(target_id) else {
+            continue;
+        };
+        let already_masked = frame
+            .mask_textures
+            .iter()
+            .any(|existing| *existing == mask_id);
+        if !already_masked {
+            frame.mask_textures.push(mask_id);
+        }
+    }
+    Ok(())
+}
+
+fn resolve_mask_target_id(state: &SimState, parent_id: u64, key: &str) -> Option<u64> {
+    let mut current_id = parent_id;
+    for segment in key.split('.') {
+        let frame = state.widgets.get(current_id)?;
+        current_id = *frame.children_keys.get(segment)?;
+    }
+    Some(current_id)
 }
 
 /// Build Lua code that creates and configures a texture from a template.

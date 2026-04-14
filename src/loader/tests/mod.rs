@@ -378,6 +378,85 @@ fn test_runtime_minimal_scrollbar_avoids_lua_createframe_for_nested_thumb() {
 }
 
 #[test]
+fn test_runtime_action_button_template_avoids_lua_layer_and_button_texture_methods() {
+    let t = load_test_xml(
+        "runtime-action-button-template-direct-layers",
+        r#"
+        <Ui xmlns="http://www.blizzard.com/wow/ui/">
+            <CheckButton name="ActionButtonTemplate" virtual="true">
+                <Layers>
+                    <Layer level="BACKGROUND">
+                        <Texture name="$parentIcon" parentKey="icon" atlas="UI-HUD-ActionBar-IconFrame-Background">
+                            <Anchors>
+                                <Anchor point="CENTER"/>
+                            </Anchors>
+                        </Texture>
+                    </Layer>
+                    <Layer level="OVERLAY">
+                        <FontString name="$parentName" parentKey="Name" inherits="GameFontHighlightSmallOutline" justifyH="RIGHT">
+                            <Size x="36" y="10"/>
+                            <Anchors>
+                                <Anchor point="BOTTOM" x="0" y="2"/>
+                            </Anchors>
+                        </FontString>
+                    </Layer>
+                </Layers>
+                <NormalTexture name="$parentNormalTexture" parentKey="NormalTexture" atlas="UI-HUD-ActionBar-IconFrame">
+                    <Size x="46" y="45"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </NormalTexture>
+                <PushedTexture parentKey="PushedTexture" atlas="UI-HUD-ActionBar-IconFrame-Down">
+                    <Size x="46" y="45"/>
+                    <Anchors>
+                        <Anchor point="TOPLEFT"/>
+                    </Anchors>
+                </PushedTexture>
+            </CheckButton>
+        </Ui>
+        "#,
+    );
+
+    crate::lua_api::globals::template::test_counters::reset();
+
+    t.env
+        .exec(
+            r#"
+            local button = CreateFrame("CheckButton", "ActionButtonDirectLayerFastPath", UIParent, "ActionButtonTemplate")
+            assert(button.icon ~= nil, "layer texture parentKey should exist")
+            assert(button.Name ~= nil, "layer fontstring parentKey should exist")
+            assert(button:GetNormalTexture() ~= nil, "normal texture should exist")
+            assert(button:GetPushedTexture() ~= nil, "pushed texture should exist")
+            assert(ActionButtonDirectLayerFastPathIcon == button.icon, "named layer texture global should resolve")
+            assert(ActionButtonDirectLayerFastPathNormalTexture == button:GetNormalTexture(), "named button texture global should resolve")
+            assert(button.icon:GetParent() == button, "layer texture parent should match")
+            assert(button.Name:GetParent() == button, "layer fontstring parent should match")
+            assert(button:GetNormalTexture():GetParent() == button, "normal texture parent should match")
+            assert(button:GetPushedTexture():GetParent() == button, "pushed texture parent should match")
+        "#,
+        )
+        .unwrap();
+
+    let counts = crate::lua_api::globals::template::test_counters::snapshot();
+    assert_eq!(
+        counts.texture_creates, 0,
+        "hot template layers should avoid Lua texture creation fallback, got {:?}",
+        counts
+    );
+    assert_eq!(
+        counts.fontstring_creates, 0,
+        "hot template fontstrings should avoid Lua fontstring creation fallback, got {:?}",
+        counts
+    );
+    assert_eq!(
+        counts.button_texture_creates, 0,
+        "hot template button textures should avoid Lua button texture creation fallback, got {:?}",
+        counts
+    );
+}
+
+#[test]
 fn test_anonymous_runtime_template_uses_registry_frame_refs_without_global_alias() {
     let t = load_test_xml(
         "runtime-anon-template-registry-ref",

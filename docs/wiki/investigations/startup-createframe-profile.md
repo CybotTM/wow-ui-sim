@@ -158,6 +158,47 @@ On a current `wow-sim --no-addons --no-saved-vars` rerun with `WOW_SIM_PROFILE_C
 - Blizzard addons loaded: `19.03s -> 18.51s`
 - `PLAYER_ENTERING_WORLD`: `24.20s -> 23.74s`
 
+### ActionButtonTemplate direct region fast path follow-up (2026-04-14)
+
+After the nested `SpellFX` and recursive `MinimalScrollBar` work, the next
+residual action-bar hotspot was the remaining `ActionButtonTemplate` region
+setup:
+
+- layer textures
+- layer fontstrings
+- button state textures (`NormalTexture`, `PushedTexture`, and friends)
+
+Those regions were still being created through generated Lua chunks even on the
+hot action-button path. That meant each runtime-created button kept paying for
+Lua `CreateTexture`, `CreateFontString`, setter calls, parent-key wiring, and
+button-slot synchronization even after child-frame creation had moved to Rust.
+
+`template/elements.rs` and `template/elements_text.rs` now add direct Rust
+creation for those hot `ActionButtonTemplate` regions:
+
+- textures, lines, and mask textures create/register directly in Rust
+- fontstrings inherit font objects and copy common text fields directly
+- button state textures wire their button slots and visibility directly
+- inline descendants now stay on the same direct path through
+  `apply_inline_frame_content()`
+
+The focused regression
+`test_runtime_action_button_template_avoids_lua_layer_and_button_texture_methods`
+proves the change with test-only counters:
+
+- Lua template texture fallback count: `0`
+- Lua template fontstring fallback count: `0`
+- Lua template button-texture fallback count: `0`
+
+On isolated hot-family `WOW_SIM_PROFILE_CREATE_FRAME=1
+WOW_SIM_PROFILE_CREATE_FRAME_MIN_MS=10` runs, summing the action-bar button
+families (`MainBar`, `Pet`, `MultiBar1-7`, `Stance`, `Possess`) showed another
+meaningful drop:
+
+- explicit template time: `1815.60ms -> 1318.78ms` (`-27.36%`)
+- total `CreateFrame` time: `2855.80ms -> 2119.22ms` (`-25.79%`)
+- frame count: unchanged at `118`
+
 ## Implications
 
 Small Lua micro-optimizations in `ActionBarActionButtonMixin:OnLoad()` will not move startup enough. The dominant win needs to come from reducing explicit template application cost for runtime-created buttons.

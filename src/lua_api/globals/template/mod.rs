@@ -13,10 +13,54 @@ use crate::loader::helpers_anim::generate_animation_group_code;
 use crate::loader::precompiled;
 use crate::lua_api::SimState;
 use crate::lua_api::frame::FrameRef;
-use crate::xml::{FrameElement, FrameXml, LayerElement, TemplateEntry, get_template_chain};
+use crate::xml::{
+    FrameElement, FrameXml, LayerElement, LayerXml, TemplateEntry, TextureXml, get_template_chain,
+};
 use mlua::{Lua, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
+
+#[cfg(test)]
+pub(crate) mod test_counters {
+    use std::sync::atomic::{AtomicUsize, Ordering};
+
+    static LUA_TEMPLATE_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
+    static LUA_TEMPLATE_FONTSTRING_CREATES: AtomicUsize = AtomicUsize::new(0);
+    static LUA_TEMPLATE_BUTTON_TEXTURE_CREATES: AtomicUsize = AtomicUsize::new(0);
+
+    #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+    pub(crate) struct Snapshot {
+        pub(crate) texture_creates: usize,
+        pub(crate) fontstring_creates: usize,
+        pub(crate) button_texture_creates: usize,
+    }
+
+    pub(crate) fn reset() {
+        LUA_TEMPLATE_TEXTURE_CREATES.store(0, Ordering::SeqCst);
+        LUA_TEMPLATE_FONTSTRING_CREATES.store(0, Ordering::SeqCst);
+        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.store(0, Ordering::SeqCst);
+    }
+
+    pub(crate) fn snapshot() -> Snapshot {
+        Snapshot {
+            texture_creates: LUA_TEMPLATE_TEXTURE_CREATES.load(Ordering::SeqCst),
+            fontstring_creates: LUA_TEMPLATE_FONTSTRING_CREATES.load(Ordering::SeqCst),
+            button_texture_creates: LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.load(Ordering::SeqCst),
+        }
+    }
+
+    pub(crate) fn record_texture_create() {
+        LUA_TEMPLATE_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(crate) fn record_fontstring_create() {
+        LUA_TEMPLATE_FONTSTRING_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
+
+    pub(crate) fn record_button_texture_create() {
+        LUA_TEMPLATE_BUTTON_TEXTURE_CREATES.fetch_add(1, Ordering::SeqCst);
+    }
+}
 
 /// Extract the FrameXml, widget type, and optional intrinsic name from a FrameElement.
 fn frame_element_type(
@@ -148,42 +192,73 @@ fn apply_single_template(
     entry: &TemplateEntry,
 ) {
     let template = &entry.frame;
+    let use_direct_region_creation = entry.name == "ActionButtonTemplate";
 
+    apply_template_setup(lua, state, template, frame_name);
+    apply_template_regions(lua, state, template, frame_name, use_direct_region_creation);
+    create_template_children(lua, state, template, frame_name, &entry.name);
+    apply_template_scripts(lua, template, frame_name);
+}
+
+fn apply_template_setup(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    template: &FrameXml,
+    frame_name: &str,
+) {
     apply_mixin(lua, &template.combined_mixin(), frame_name);
-    let frame_id = resolve_template_frame_id(state, frame_name);
     for key_values in template.all_key_values() {
         apply_key_values(lua, key_values, frame_name);
     }
-    if let Some(fid) = frame_id {
-        apply_direct_rust_properties(state, fid, template, frame_name);
+    if let Some(frame_id) = resolve_template_frame_id(state, frame_name) {
+        apply_direct_rust_properties(state, frame_id, template, frame_name);
     }
+}
 
-    // Apply layers (textures and fontstrings)
-    // subst_parent = frame_name at the template root level
-    apply_layers(lua, template, frame_name, frame_name);
-
-    // Apply button textures (NormalTexture, PushedTexture, etc.)
-    apply_button_textures(lua, template, frame_name, frame_name);
-
-    // Apply StatusBar BarTexture
+fn apply_template_regions(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    template: &FrameXml,
+    frame_name: &str,
+    use_direct_region_creation: bool,
+) {
+    apply_layers(
+        lua,
+        state,
+        template,
+        frame_name,
+        frame_name,
+        use_direct_region_creation,
+    );
+    apply_button_texture_set(
+        lua,
+        state,
+        template,
+        frame_name,
+        frame_name,
+        use_direct_region_creation,
+    );
     if let Some(bar) = template.bar_texture() {
         elements_text::create_bar_texture_from_template(lua, bar, frame_name, frame_name);
     }
-
-    // Apply Slider ThumbTexture
     if let Some(thumb) = template.thumb_texture() {
         elements_text::create_thumb_texture_from_template(lua, thumb, frame_name, frame_name);
     }
-
-    // Apply ButtonText and EditBox FontString
     apply_button_text(lua, template, frame_name, frame_name);
     elements_text::apply_button_text_attribute(lua, template, frame_name);
     apply_editbox_fontstring(lua, template, frame_name, frame_name);
     apply_button_fonts(lua, template, frame_name);
     apply_animation_groups(lua, template, frame_name);
+}
 
-    // Create child frames defined in the template
-    let use_direct_child_creation = children::use_direct_runtime_child_creation(&entry.name);
+fn create_template_children(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    template: &FrameXml,
+    frame_name: &str,
+    template_name: &str,
+) {
+    let use_direct_child_creation = children::use_direct_runtime_child_creation(template_name);
     children::create_child_frames(
         lua,
         state,
@@ -192,8 +267,6 @@ fn apply_single_template(
         frame_name,
         use_direct_child_creation,
     );
-
-    // Create ScrollChild children
     if let Some(scroll_child) = template.scroll_child() {
         children::create_scroll_child_frames(
             lua,
@@ -204,8 +277,9 @@ fn apply_single_template(
             use_direct_child_creation,
         );
     }
+}
 
-    // Apply scripts from template (after children, so OnLoad can reference them)
+fn apply_template_scripts(lua: &Lua, template: &FrameXml, frame_name: &str) {
     if let Some(scripts) = template.scripts() {
         elements::apply_scripts_from_template(lua, scripts, frame_name);
     }
@@ -321,97 +395,201 @@ fn format_key_value(value: &str, value_type: Option<&str>) -> String {
 ///
 /// `subst_parent` is the name used for `$parent` substitution in child names.
 /// For anonymous frames, this propagates from the nearest named ancestor.
-fn apply_layers(lua: &Lua, template: &FrameXml, frame_name: &str, subst_parent: &str) {
+fn apply_layers(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    template: &FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+    use_direct_creation: bool,
+) {
+    let region_ctx = RegionCreateContext {
+        lua,
+        state,
+        frame_name,
+        subst_parent,
+    };
     for layers in template.layers() {
         for layer in &layers.layers {
-            let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
-            // Process elements in document order so that FontStrings referenced
-            // by subsequent Texture anchors (e.g. $parent.SpecName) are already
-            // created when the Texture's SetPoint runs.
-            for element in &layer.elements {
-                match element {
-                    LayerElement::Texture(t) => {
-                        elements::create_texture_from_template(
-                            lua,
-                            t,
-                            frame_name,
-                            subst_parent,
-                            draw_layer,
-                            false,
-                            false,
-                        );
-                    }
-                    LayerElement::Line(t) => {
-                        elements::create_texture_from_template(
-                            lua,
-                            t,
-                            frame_name,
-                            subst_parent,
-                            draw_layer,
-                            false,
-                            true,
-                        );
-                    }
-                    LayerElement::MaskTexture(t) => {
-                        elements::create_texture_from_template(
-                            lua,
-                            t,
-                            frame_name,
-                            subst_parent,
-                            draw_layer,
-                            true,
-                            false,
-                        );
-                    }
-                    LayerElement::FontString(f) => {
-                        elements_text::create_fontstring_from_template(
-                            lua,
-                            f,
-                            frame_name,
-                            subst_parent,
-                            draw_layer,
-                        );
-                    }
-                }
-            }
+            apply_layer_block(region_ctx, layer, use_direct_creation);
         }
     }
 }
 
-/// Apply button textures (NormalTexture, PushedTexture, etc.) from a template.
-fn apply_button_textures(lua: &Lua, template: &FrameXml, frame_name: &str, subst_parent: &str) {
-    let texture_specs: &[(&str, &str, Option<&crate::xml::TextureXml>)] = &[
-        ("Normal", "SetNormalTexture", template.normal_texture()),
-        ("Pushed", "SetPushedTexture", template.pushed_texture()),
-        (
-            "Disabled",
-            "SetDisabledTexture",
-            template.disabled_texture(),
-        ),
+#[derive(Clone, Copy)]
+struct RegionCreateContext<'a> {
+    lua: &'a Lua,
+    state: &'a Rc<RefCell<SimState>>,
+    frame_name: &'a str,
+    subst_parent: &'a str,
+}
+
+#[derive(Clone, Copy)]
+struct LayerCreateContext<'a> {
+    region: RegionCreateContext<'a>,
+    draw_layer: &'a str,
+    use_direct_creation: bool,
+}
+
+#[derive(Clone, Copy)]
+struct ButtonTextureContext<'a> {
+    region: RegionCreateContext<'a>,
+    use_direct_creation: bool,
+}
+
+fn apply_layer_block(region: RegionCreateContext<'_>, layer: &LayerXml, use_direct_creation: bool) {
+    let draw_layer = layer.level.as_deref().unwrap_or("ARTWORK");
+    let ctx = LayerCreateContext {
+        region,
+        draw_layer,
+        use_direct_creation,
+    };
+    for element in &layer.elements {
+        apply_layer_element(ctx, element);
+    }
+}
+
+fn apply_layer_element(ctx: LayerCreateContext<'_>, element: &LayerElement) {
+    match element {
+        LayerElement::Texture(texture) => create_texture_layer(ctx, texture, false, false),
+        LayerElement::Line(texture) => create_texture_layer(ctx, texture, false, true),
+        LayerElement::MaskTexture(texture) => create_texture_layer(ctx, texture, true, false),
+        LayerElement::FontString(fontstring) => create_fontstring_layer(ctx, fontstring),
+    }
+}
+
+fn create_texture_layer(
+    ctx: LayerCreateContext<'_>,
+    texture: &TextureXml,
+    is_mask: bool,
+    is_line: bool,
+) {
+    let used_direct = ctx.use_direct_creation
+        && elements::create_texture_from_template_direct(
+            ctx.region.lua,
+            ctx.region.state,
+            texture,
+            ctx.region.frame_name,
+            ctx.region.subst_parent,
+            ctx.draw_layer,
+            is_mask,
+            is_line,
+        )
+        .is_ok();
+    if used_direct {
+        return;
+    }
+
+    elements::create_texture_from_template(
+        ctx.region.lua,
+        texture,
+        ctx.region.frame_name,
+        ctx.region.subst_parent,
+        ctx.draw_layer,
+        is_mask,
+        is_line,
+    );
+}
+
+fn create_fontstring_layer(ctx: LayerCreateContext<'_>, fontstring: &crate::xml::FontStringXml) {
+    let used_direct = ctx.use_direct_creation
+        && elements_text::create_fontstring_from_template_direct(
+            ctx.region.lua,
+            ctx.region.state,
+            fontstring,
+            ctx.region.frame_name,
+            ctx.region.subst_parent,
+            ctx.draw_layer,
+        )
+        .is_ok();
+    if used_direct {
+        return;
+    }
+
+    elements_text::create_fontstring_from_template(
+        ctx.region.lua,
+        fontstring,
+        ctx.region.frame_name,
+        ctx.region.subst_parent,
+        ctx.draw_layer,
+    );
+}
+
+/// Apply button textures (NormalTexture, PushedTexture, etc.) from a frame/template.
+pub(super) fn apply_button_texture_set(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+    frame: &FrameXml,
+    frame_name: &str,
+    subst_parent: &str,
+    use_direct_creation: bool,
+) {
+    let ctx = ButtonTextureContext {
+        region: RegionCreateContext {
+            lua,
+            state,
+            frame_name,
+            subst_parent,
+        },
+        use_direct_creation,
+    };
+    for (parent_key, setter, tex_opt) in button_texture_specs(frame) {
+        let Some(texture) = tex_opt else {
+            continue;
+        };
+        apply_button_texture_spec(ctx, texture, parent_key, setter);
+    }
+}
+
+fn button_texture_specs(
+    frame: &FrameXml,
+) -> [(&'static str, &'static str, Option<&TextureXml>); 6] {
+    [
+        ("Normal", "SetNormalTexture", frame.normal_texture()),
+        ("Pushed", "SetPushedTexture", frame.pushed_texture()),
+        ("Disabled", "SetDisabledTexture", frame.disabled_texture()),
         (
             "Highlight",
             "SetHighlightTexture",
-            template.highlight_texture(),
+            frame.highlight_texture(),
         ),
-        ("Checked", "SetCheckedTexture", template.checked_texture()),
+        ("Checked", "SetCheckedTexture", frame.checked_texture()),
         (
             "DisabledChecked",
             "SetDisabledCheckedTexture",
-            template.disabled_checked_texture(),
+            frame.disabled_checked_texture(),
         ),
-    ];
-    for &(parent_key, setter, tex_opt) in texture_specs {
-        if let Some(tex) = tex_opt {
-            elements_text::create_button_texture_from_template(
-                lua,
-                tex,
-                frame_name,
-                subst_parent,
-                parent_key,
-                setter,
-            );
-        }
+    ]
+}
+
+fn apply_button_texture_spec(
+    ctx: ButtonTextureContext<'_>,
+    texture: &TextureXml,
+    parent_key: &str,
+    setter: &str,
+) {
+    let used_direct = ctx.use_direct_creation
+        && elements_text::create_button_texture_from_template_direct(
+            ctx.region.lua,
+            ctx.region.state,
+            texture,
+            ctx.region.frame_name,
+            ctx.region.subst_parent,
+            parent_key,
+        )
+        .is_ok();
+    if used_direct {
+        return;
     }
+
+    elements_text::create_button_texture_from_template(
+        ctx.region.lua,
+        texture,
+        ctx.region.frame_name,
+        ctx.region.subst_parent,
+        parent_key,
+        setter,
+    );
 }
 
 /// Apply mixin to a frame.
@@ -686,43 +864,6 @@ fn apply_inline_key_values(lua: &Lua, frame: &crate::xml::FrameXml, frame_name: 
         }
         code.push_str("end end");
         let _ = chunk_cache::exec(lua, &code, "template-key-values");
-    }
-}
-
-/// Apply button textures from inline frame content.
-fn apply_inline_button_textures(
-    lua: &Lua,
-    frame: &crate::xml::FrameXml,
-    frame_name: &str,
-    subst_parent: &str,
-) {
-    let texture_specs: &[(&str, &str, Option<&crate::xml::TextureXml>)] = &[
-        ("Normal", "SetNormalTexture", frame.normal_texture()),
-        ("Pushed", "SetPushedTexture", frame.pushed_texture()),
-        ("Disabled", "SetDisabledTexture", frame.disabled_texture()),
-        (
-            "Highlight",
-            "SetHighlightTexture",
-            frame.highlight_texture(),
-        ),
-        ("Checked", "SetCheckedTexture", frame.checked_texture()),
-        (
-            "DisabledChecked",
-            "SetDisabledCheckedTexture",
-            frame.disabled_checked_texture(),
-        ),
-    ];
-    for &(parent_key, setter, tex_opt) in texture_specs {
-        if let Some(tex) = tex_opt {
-            elements_text::create_button_texture_from_template(
-                lua,
-                tex,
-                frame_name,
-                subst_parent,
-                parent_key,
-                setter,
-            );
-        }
     }
 }
 

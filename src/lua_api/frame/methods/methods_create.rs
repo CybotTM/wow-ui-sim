@@ -36,7 +36,7 @@ fn extract_i32_arg(args: &[Value], index: usize) -> Option<i32> {
 }
 
 /// Register a child widget in the state and cache its FrameRef UserData in `_G`.
-fn register_child_widget(
+pub(crate) fn register_child_widget(
     lua: &mlua::Lua,
     parent_id: u64,
     child: Frame,
@@ -223,7 +223,7 @@ fn add_attach_font_string_method<M: mlua::UserDataMethods<FrameRef>>(methods: &m
 }
 
 /// Apply font properties from an inherited Font object to a fontstring widget.
-fn apply_font_inherit(lua: &mlua::Lua, frame: &mut Frame, inherits: Option<&str>) {
+pub(crate) fn apply_font_inherit(lua: &mlua::Lua, frame: &mut Frame, inherits: Option<&str>) {
     let Some(name) = inherits else { return };
     let Ok(globals) = lua.globals().get::<Value>(name) else {
         return;

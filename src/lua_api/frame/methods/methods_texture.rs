@@ -423,7 +423,7 @@ fn find_parent_key(
 }
 
 /// Apply atlas info to a frame: set texture, UVs, tiling, atlas name, and optionally size.
-fn apply_atlas_to_frame(
+pub(crate) fn apply_atlas_to_frame(
     widgets: &mut crate::widget::WidgetRegistry,
     frame_id: u64,
     atlas_info: &crate::atlas::AtlasInfo,
@@ -490,7 +490,7 @@ fn propagate_atlas_to_button(
 }
 
 /// Set the appropriate texture field on a button based on the parent key name.
-fn set_button_texture_field(
+pub(crate) fn set_button_texture_field(
     parent: &mut Frame,
     parent_key: &str,
     texture_path: String,

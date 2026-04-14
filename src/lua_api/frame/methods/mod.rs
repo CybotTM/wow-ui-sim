@@ -45,6 +45,9 @@ mod widget_statusbar;
 mod widget_tooltip;
 mod widget_tooltip_data;
 
+pub(crate) use methods_button::button_texture_should_show;
+pub(crate) use methods_create::{apply_font_inherit, register_child_widget};
+pub(crate) use methods_texture::{apply_atlas_to_frame, set_button_texture_field};
 pub(crate) use methods_visibility::fire_on_show_recursive;
 pub(crate) use widget_tooltip_data::UnitTooltipInfo;
 pub(crate) use widget_tooltip_data::resolve_unit_tooltip_info;

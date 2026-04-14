@@ -257,7 +257,7 @@ fn apply_set_button_texture_path(
 }
 
 /// Determine if a button texture child should be visible based on button state.
-pub(super) fn button_texture_should_show(
+pub(crate) fn button_texture_should_show(
     state: &crate::lua_api::SimState,
     button_id: u64,
     parent_key: &str,
