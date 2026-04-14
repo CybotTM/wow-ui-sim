@@ -310,32 +310,58 @@ fn add_rotation_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 }
 
 fn add_draw_layer_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
+    add_set_draw_layer_method(methods);
+    add_get_draw_layer_method(methods);
+}
+
+fn add_set_draw_layer_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("SetDrawLayer", |lua, this, args: mlua::MultiValue| {
-        let args_vec: Vec<Value> = args.into_iter().collect();
-        let Some((layer, sub_layer)) = draw_layer_request_from_args(&args_vec) else {
-            return Ok(());
-        };
-        let state_rc = get_sim_state(lua);
-        if draw_layer_matches(&state_rc.borrow(), this.0, layer, sub_layer) {
-            return Ok(());
-        }
-        let mut state = state_rc.borrow_mut();
-        if let Some(frame) = state.widgets.get_mut_visual(this.0) {
-            frame.draw_layer = layer;
-            frame.draw_sub_layer = sub_layer;
-        }
-        state.invalidate_strata_buckets();
-        Ok(())
+        set_draw_layer(lua, this.0, args)
     });
+}
+
+fn set_draw_layer(lua: &mlua::Lua, id: u64, args: mlua::MultiValue) -> mlua::Result<()> {
+    let args_vec: Vec<Value> = args.into_iter().collect();
+    let Some((layer, sub_layer)) = draw_layer_request_from_args(&args_vec) else {
+        return Ok(());
+    };
+    let state_rc = get_sim_state(lua);
+    if draw_layer_matches(&state_rc.borrow(), id, layer, sub_layer) {
+        return Ok(());
+    }
+
+    apply_draw_layer_change(&state_rc, id, layer, sub_layer);
+    Ok(())
+}
+
+fn apply_draw_layer_change(
+    state_rc: &std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    id: u64,
+    layer: crate::widget::DrawLayer,
+    sub_layer: i32,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(frame) = state.widgets.get_mut_visual(id) {
+        frame.draw_layer = layer;
+        frame.draw_sub_layer = sub_layer;
+    }
+    state.invalidate_strata_buckets();
+}
+
+fn add_get_draw_layer_method<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method("GetDrawLayer", |lua, this, ()| {
         let state_rc = get_sim_state(lua);
         let state = state_rc.borrow();
-        if let Some(f) = state.widgets.get(this.0) {
-            Ok((f.draw_layer.as_str().to_string(), f.draw_sub_layer))
-        } else {
-            Ok(("ARTWORK".to_string(), 0i32))
-        }
+        Ok(read_draw_layer(&state, this.0))
     });
+}
+
+fn read_draw_layer(state: &crate::lua_api::SimState, id: u64) -> (String, i32) {
+    state
+        .widgets
+        .get(id)
+        .map(|frame| (frame.draw_layer.as_str().to_string(), frame.draw_sub_layer))
+        .unwrap_or(("ARTWORK".to_string(), 0))
 }
 
 fn draw_layer_request_from_args(args: &[Value]) -> Option<(crate::widget::DrawLayer, i32)> {
