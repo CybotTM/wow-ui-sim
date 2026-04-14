@@ -266,8 +266,14 @@ impl WidgetRegistry {
         if ids.is_empty() {
             return self.empty_render_dirty_batch();
         }
-        let (strata_mask, has_sentinel) = self.render_dirty_mask(&ids);
-        let frame_ids = Self::drain_render_dirty_ids(&mut ids, has_sentinel);
+
+        self.build_render_dirty_batch(&mut ids)
+    }
+
+    fn build_render_dirty_batch(&self, ids: &mut HashSet<u64>) -> RenderDirtyBatch {
+        let (strata_mask, has_sentinel) = self.render_dirty_mask(ids);
+        let frame_ids = Self::drain_render_dirty_ids(ids, has_sentinel);
+
         RenderDirtyBatch {
             strata_mask,
             frame_ids,
@@ -673,4 +679,72 @@ fn render_dirty_source_set_bytes(values: &HashSet<RenderDirtySource>) -> usize {
 fn hash_map_u64_hash_set_u64_bytes(values: &HashMap<u64, HashSet<u64>>) -> usize {
     values.capacity() * std::mem::size_of::<(u64, HashSet<u64>)>()
         + values.values().map(hash_set_u64_bytes).sum::<usize>()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::widget::{Frame, FrameStrata, WidgetType};
+
+    fn frame(
+        id: u64,
+        widget_type: WidgetType,
+        parent_id: Option<u64>,
+        strata: FrameStrata,
+    ) -> Frame {
+        Frame {
+            id,
+            widget_type,
+            parent_id,
+            frame_strata: strata,
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn take_render_dirty_batch_drains_ids_and_sources() {
+        let mut registry = WidgetRegistry::default();
+        registry.register(frame(1, WidgetType::Frame, None, FrameStrata::High));
+        registry.register(frame(2, WidgetType::Texture, Some(1), FrameStrata::Low));
+        registry.add_child(1, 2);
+
+        registry.set_render_dirty_source(Some(RenderDirtySource {
+            frame_id: 42,
+            method: "TestMethod",
+        }));
+        registry.mark_visual_dirty(2);
+        registry.set_render_dirty_source(None);
+
+        let batch = registry.take_render_dirty_batch();
+
+        assert_eq!(batch.strata_mask, 1u16 << FrameStrata::High.as_index());
+        assert_eq!(batch.frame_ids, Some(HashSet::from([2])));
+        assert_eq!(
+            batch.sources.get(&2),
+            Some(&HashSet::from([RenderDirtySource {
+                frame_id: 42,
+                method: "TestMethod",
+            }]))
+        );
+        assert!(!registry.has_dirty_frames());
+        assert!(registry.take_render_dirty_batch().sources.is_empty());
+    }
+
+    #[test]
+    fn take_render_dirty_batch_returns_none_ids_for_full_rebuild_sentinel() {
+        let registry = WidgetRegistry::default();
+        registry.set_render_dirty_source(Some(RenderDirtySource {
+            frame_id: 99,
+            method: "MarkAll",
+        }));
+        registry.mark_all_visual_dirty();
+        registry.set_render_dirty_source(None);
+
+        let batch = registry.take_render_dirty_batch();
+        let all_mask = (1u16 << FrameStrata::COUNT) - 1;
+
+        assert_eq!(batch.strata_mask, all_mask);
+        assert_eq!(batch.frame_ids, None);
+        assert!(!registry.has_dirty_frames());
+    }
 }
