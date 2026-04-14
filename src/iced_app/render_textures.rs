@@ -128,24 +128,17 @@ impl App {
         let pending_paths = unresolved_texture_request_paths(quads, &uploaded, &failed);
 
         for path in pending_paths {
-            let loaded_any_textures = !textures.is_empty() || !bc_textures.is_empty();
-            let deadline_reached = std::time::Instant::now() >= deadline;
-            if loaded_any_textures && deadline_reached {
-                let base = path.find("@crop:").map_or(path, |i| &path[..i]);
-                if !tex_mgr.is_cached(base) {
-                    return (textures, bc_textures, true);
-                }
+            if should_pause_texture_loading(&textures, &bc_textures, deadline, path, &tex_mgr) {
+                return (textures, bc_textures, true);
             }
-            use crate::render::shader::primitive::LoadedTexture;
-            if let Some(loaded) = load_texture_prefer_bc(&mut tex_mgr, path) {
-                uploaded.insert(path.to_string());
-                match loaded {
-                    LoadedTexture::Rgba(data) => textures.push(data),
-                    LoadedTexture::Bc(data) => bc_textures.push(data),
-                }
-            } else {
-                failed.insert(path.to_string());
-            }
+            load_pending_texture(
+                &mut tex_mgr,
+                path,
+                &mut uploaded,
+                &mut failed,
+                &mut textures,
+                &mut bc_textures,
+            );
         }
         (textures, bc_textures, false)
     }
@@ -304,6 +297,53 @@ fn log_slow_texture_load(
     );
 }
 
+fn should_pause_texture_loading(
+    textures: &[GpuTextureData],
+    bc_textures: &[GpuBcTextureData],
+    deadline: std::time::Instant,
+    path: &str,
+    tex_mgr: &crate::texture::TextureManager,
+) -> bool {
+    let loaded_any_textures = !textures.is_empty() || !bc_textures.is_empty();
+    let deadline_reached = std::time::Instant::now() >= deadline;
+    let base_path_cached = tex_mgr.is_cached(texture_request_base_path(path));
+    should_pause_texture_loading_state(loaded_any_textures, deadline_reached, base_path_cached)
+}
+
+fn should_pause_texture_loading_state(
+    loaded_any_textures: bool,
+    deadline_reached: bool,
+    base_path_cached: bool,
+) -> bool {
+    loaded_any_textures && deadline_reached && !base_path_cached
+}
+
+fn texture_request_base_path(path: &str) -> &str {
+    path.find("@crop:").map_or(path, |index| &path[..index])
+}
+
+fn load_pending_texture(
+    tex_mgr: &mut crate::texture::TextureManager,
+    path: &str,
+    uploaded: &mut std::collections::HashSet<String>,
+    failed: &mut std::collections::HashSet<String>,
+    textures: &mut Vec<GpuTextureData>,
+    bc_textures: &mut Vec<GpuBcTextureData>,
+) {
+    use crate::render::shader::primitive::LoadedTexture;
+
+    if let Some(loaded) = load_texture_prefer_bc(tex_mgr, path) {
+        uploaded.insert(path.to_string());
+        match loaded {
+            LoadedTexture::Rgba(data) => textures.push(data),
+            LoadedTexture::Bc(data) => bc_textures.push(data),
+        }
+        return;
+    }
+
+    failed.insert(path.to_string());
+}
+
 fn unresolved_texture_request_paths<'a>(
     quads: &'a QuadBatch,
     uploaded: &std::collections::HashSet<String>,
@@ -381,7 +421,10 @@ fn texture_request_priority(path: &str) -> (u8, u8) {
 
 #[cfg(test)]
 mod tests {
-    use super::{collect_texture_request_paths, unresolved_texture_request_paths};
+    use super::{
+        collect_texture_request_paths, should_pause_texture_loading_state,
+        texture_request_base_path, unresolved_texture_request_paths,
+    };
     use crate::iced_app::App;
     use crate::render::{GlyphAtlas, QuadBatch, TextureRequest, WowFontSystem};
     use crate::screen::ScreenKind;
@@ -501,6 +544,26 @@ mod tests {
                 r"Interface\WorldMap\IsleofDorn\IsleOfDorn1",
             ]
         );
+    }
+
+    #[test]
+    fn texture_request_base_path_strips_crop_suffix() {
+        assert_eq!(
+            texture_request_base_path(r"Interface\Foo\Bar@crop:0.1,0.2,0.3,0.4"),
+            r"Interface\Foo\Bar"
+        );
+        assert_eq!(
+            texture_request_base_path(r"Interface\Foo\Bar"),
+            r"Interface\Foo\Bar"
+        );
+    }
+
+    #[test]
+    fn texture_loading_only_pauses_after_budget_hit_for_uncached_base_path() {
+        assert!(!should_pause_texture_loading_state(false, true, false));
+        assert!(!should_pause_texture_loading_state(true, false, false));
+        assert!(!should_pause_texture_loading_state(true, true, true));
+        assert!(should_pause_texture_loading_state(true, true, false));
     }
 
     fn build_test_app(debug_borders: bool, debug_anchors: bool) -> App {
