@@ -18,7 +18,9 @@ mod table_builder;
 
 pub(crate) use from_stack::stack_val;
 pub use from_stack::FrameArena;
+pub use from_stack::FrameObject;
 pub use from_stack::FrameRef;
+pub use from_stack::FromMethodSelf;
 pub use from_stack::FromStack;
 pub use into_stack::IntoStack;
 pub use table_builder::create_frame_table;

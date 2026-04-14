@@ -61,6 +61,16 @@ pub trait FromStack: Sized {
     fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self>;
 }
 
+/// Extract the `self` receiver for a frame-backed method call.
+pub trait FromMethodSelf<'a>: Sized {
+    fn from_method_self(state: &'a mut LuaState, index: i32) -> LuaResult<Self>;
+}
+
+/// Associates a frame type with the arena that stores it.
+pub trait FrameObject: Sized + 'static {
+    type Arena: FrameArena<Frame = Self> + 'static;
+}
+
 // ---------------------------------------------------------------------------
 // Frame-backed table extraction
 // ---------------------------------------------------------------------------
@@ -136,6 +146,20 @@ impl<A: FrameArena + 'static> FromStack for FrameRef<A> {
         };
         let _ = frame_ref.get(state)?;
         Ok(frame_ref)
+    }
+}
+
+impl<'a, T: FrameObject> FromMethodSelf<'a> for &'a T {
+    fn from_method_self(state: &'a mut LuaState, index: i32) -> LuaResult<Self> {
+        let frame_ref = FrameRef::<T::Arena>::from_stack(state, index)?;
+        frame_ref.get(state)
+    }
+}
+
+impl<'a, T: FrameObject> FromMethodSelf<'a> for &'a mut T {
+    fn from_method_self(state: &'a mut LuaState, index: i32) -> LuaResult<Self> {
+        let frame_ref = FrameRef::<T::Arena>::from_stack(state, index)?;
+        frame_ref.get_mut(state)
     }
 }
 

@@ -26,10 +26,9 @@
 //! **Expansion pattern** (per method entry):
 //!
 //! 1. `state.stack[state.base - 1]` is the function object itself.
-//! 2. Argument 1 (`FromStack` at index 1) is `self` — a `Val::Table` or
-//!    `Val::Userdata` that carries a frame ID in its backing store.
-//! 3. The frame ID is used to borrow `&mut Frame` from the widget arena
-//!    (stored in `state` app_data — implementation detail TBD).
+//! 2. Argument 1 is `self` — a frame-backed `Val::Table`.
+//! 3. The bridge resolves it through [`FromMethodSelf`] into `&Frame` or
+//!    `&mut Frame` using the arena stored in `state` app_data.
 //! 4. Remaining arguments are extracted in order starting at index 2.
 //! 5. The closure is called and its `LuaResult<R>` mapped through
 //!    `IntoStack` to push return values.
@@ -61,35 +60,16 @@
 /// - Extracts remaining arguments starting at index 2
 /// - Calls the closure and pushes the result
 ///
-/// The actual `Frame` type and arena resolution will be filled in once
-/// the widget arena is available in this crate.
-///
-/// TODO: Replace `_frame_unused: ()` placeholder with real arena lookup.
 #[macro_export]
 macro_rules! define_methods {
     ($state:expr, $table:expr, {
-        $( $name:literal => |$frame_pat:ident $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
+        $( $name:literal => |$frame_pat:ident : $frame_ty:ty $(, $arg_pat:ident : $arg_ty:ty)* $(,)?| $(-> $ret_ty:ty)? $body:block ),* $(,)?
     }) => {
         {
             let __result: ::rilua::LuaResult<()> = (|| {
                 $(
                     {
-                        // Generate a named helper function to satisfy `RustFn = fn(...)`,
-                        // which requires a concrete function pointer (not a closure).
-                        // The body is placed inline below; in practice each arm expands
-                        // to a `table_set_function` call with a wrapper `fn`.
-                        //
-                        // TODO: Implement frame resolution from arena when widget types
-                        //       are accessible from this crate.
                         fn __method(state: &mut ::rilua::vm::state::LuaState) -> ::rilua::LuaResult<u32> {
-                            // arg 1 = self (frame handle) — will be resolved to &mut Frame.
-                            // For now we validate it exists and is not nil.
-                            let _self_val = $crate::lua_bridge::stack_val(state, 1);
-
-                            // TODO: resolve _self_val to &mut Frame via arena lookup.
-                            let $frame_pat = (); // placeholder until Frame type is wired up
-
-                            // Extract remaining arguments starting at position 2.
                             let mut __idx: i32 = 2;
                             $(
                                 let $arg_pat: $arg_ty = <$arg_ty as $crate::lua_bridge::FromStack>::from_stack(state, __idx)?;
@@ -97,7 +77,11 @@ macro_rules! define_methods {
                             )*
                             let _ = __idx;
 
-                            let __result: ::rilua::LuaResult<_> = $body;
+                            let __result: ::rilua::LuaResult<_> = {
+                                let $frame_pat: $frame_ty =
+                                    <$frame_ty as $crate::lua_bridge::FromMethodSelf<'_>>::from_method_self(state, 1)?;
+                                $body
+                            };
                             let __val = __result?;
                             $crate::lua_bridge::IntoStack::into_stack(__val, state)
                         }

@@ -16,7 +16,8 @@ use rilua::vm::table::Table;
 use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
 use crate::lua_bridge::{
-    create_frame_table, FrameArena, FrameRef as BridgeFrameRef, FromStack, IntoStack, TableBuilder,
+    create_frame_table, FrameArena, FrameObject, FrameRef as BridgeFrameRef, FromStack, IntoStack,
+    TableBuilder,
 };
 pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
 
@@ -252,6 +253,10 @@ struct TestFrame {
     visits: u32,
 }
 
+impl FrameObject for TestFrame {
+    type Arena = TestFrameArena;
+}
+
 #[derive(Debug)]
 struct TestFrameSlot {
     generation: u32,
@@ -442,26 +447,43 @@ fn test_define_methods_registers_backed_table_methods() {
     let mut lua = Lua::new().unwrap();
     {
         let state = lua.state_mut();
+        state.set_app_data(TestFrameArena {
+            slots: vec![TestFrameSlot {
+                generation: 3,
+                frame: Some(TestFrame {
+                    label: "FrameA".to_string(),
+                    visits: 0,
+                }),
+            }],
+        });
 
         let mt_ref = state.gc.alloc_table(Table::new());
         define_methods!(state, mt_ref, {
-            "Describe" => |frame, label: String, count: u32| -> (String, u32) {
-                let _ = frame;
-                Ok((label, count + 1))
+            "Describe" => |frame: &mut TestFrame, label: String, count: u32| -> (String, u32) {
+                frame.label = label.clone();
+                frame.visits += count;
+                Ok((frame.label.clone(), frame.visits))
+            },
+            "VisitCount" => |frame: &TestFrame| -> u32 {
+                Ok(frame.visits)
             },
         })
         .unwrap();
         make_index_self(state, mt_ref);
 
-        let mut frame = Table::new();
-        frame.set_backing(Some((9, 3)));
-        frame.set_metatable(Some(mt_ref));
-        let frame_ref = state.gc.alloc_table(frame);
+        let frame_ref = create_frame_table(state, 0, 3);
+        state
+            .gc
+            .tables
+            .get_mut(frame_ref)
+            .unwrap()
+            .set_metatable(Some(mt_ref));
         set_global_table(state, "myframe", frame_ref);
     }
 
-    lua.exec("local label, count = myframe:Describe('frame', 4); assert(label == 'frame' and count == 5)")
+    lua.exec("local label, count = myframe:Describe('frame', 4); assert(label == 'frame' and count == 4)")
         .unwrap();
+    lua.exec("assert(myframe:VisitCount() == 4)").unwrap();
 }
 
 #[test]
