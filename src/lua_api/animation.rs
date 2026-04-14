@@ -1,0 +1,149 @@
+//! Minimal animation state used by the current rilua-side create methods.
+
+use std::collections::HashMap;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum AnimationType {
+    Alpha,
+    Translation,
+    Scale,
+    Rotation,
+    LineTranslation,
+    LineScale,
+    Path,
+    FlipBook,
+    VertexColor,
+    TextureCoordTranslation,
+    Animation,
+}
+
+impl AnimationType {
+    pub fn from_str(s: &str) -> Self {
+        match s.to_ascii_uppercase().as_str() {
+            "ALPHA" => Self::Alpha,
+            "TRANSLATION" => Self::Translation,
+            "SCALE" => Self::Scale,
+            "ROTATION" => Self::Rotation,
+            "LINETRANSLATION" => Self::LineTranslation,
+            "LINESCALE" => Self::LineScale,
+            "PATH" => Self::Path,
+            "FLIPBOOK" => Self::FlipBook,
+            "VERTEXCOLOR" => Self::VertexColor,
+            "TEXTURECOORDTRANSLATION" => Self::TextureCoordTranslation,
+            _ => Self::Animation,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Alpha => "Alpha",
+            Self::Translation => "Translation",
+            Self::Scale => "Scale",
+            Self::Rotation => "Rotation",
+            Self::LineTranslation => "LineTranslation",
+            Self::LineScale => "LineScale",
+            Self::Path => "Path",
+            Self::FlipBook => "FlipBook",
+            Self::VertexColor => "VertexColor",
+            Self::TextureCoordTranslation | Self::Animation => "Animation",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum LoopType {
+    None,
+    Repeat,
+    Bounce,
+}
+
+impl LoopType {
+    pub fn from_str(s: &str) -> Self {
+        match s.to_ascii_uppercase().as_str() {
+            "REPEAT" => Self::Repeat,
+            "BOUNCE" => Self::Bounce,
+            _ => Self::None,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AnimState {
+    pub anim_type: AnimationType,
+    pub name: Option<String>,
+    pub order: u32,
+    pub duration: f64,
+    pub start_delay: f64,
+    pub end_delay: f64,
+    pub elapsed: f64,
+    pub scripts: HashMap<String, ()>,
+}
+
+impl AnimState {
+    pub fn new(anim_type: AnimationType) -> Self {
+        Self {
+            anim_type,
+            name: None,
+            order: 1,
+            duration: 0.0,
+            start_delay: 0.0,
+            end_delay: 0.0,
+            elapsed: 0.0,
+            scripts: HashMap::new(),
+        }
+    }
+
+    pub fn total_time(&self) -> f64 {
+        self.start_delay + self.duration + self.end_delay
+    }
+}
+
+#[derive(Debug, Clone)]
+pub struct AnimGroupState {
+    pub owner_frame_id: u64,
+    pub frame_id: Option<u64>,
+    pub name: Option<String>,
+    pub playing: bool,
+    pub paused: bool,
+    pub done: bool,
+    pub pending_finish: bool,
+    pub reverse: bool,
+    pub elapsed: f64,
+    pub looping: LoopType,
+    pub speed_multiplier: f64,
+    pub set_to_final_alpha: bool,
+    pub animations: Vec<AnimState>,
+    pub scripts: HashMap<String, ()>,
+    pub saved_alphas: HashMap<u64, f32>,
+}
+
+impl AnimGroupState {
+    pub fn new(owner_frame_id: u64) -> Self {
+        Self {
+            owner_frame_id,
+            frame_id: None,
+            name: None,
+            playing: false,
+            paused: false,
+            done: false,
+            pending_finish: false,
+            reverse: false,
+            elapsed: 0.0,
+            looping: LoopType::None,
+            speed_multiplier: 1.0,
+            set_to_final_alpha: false,
+            animations: Vec::new(),
+            scripts: HashMap::new(),
+            saved_alphas: HashMap::new(),
+        }
+    }
+
+    pub fn has_visual_effects(&self) -> bool {
+        self.animations.iter().any(|anim| {
+            matches!(
+                anim.anim_type,
+                AnimationType::Alpha | AnimationType::Translation | AnimationType::FlipBook
+            )
+        })
+    }
+}

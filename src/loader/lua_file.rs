@@ -5,6 +5,7 @@ use crate::lua_api::globals::rilua_security::apply_secure_env_rilua;
 use crate::lua_api::rilua_methods::create_string;
 use crate::lua_api::rilua_script_helpers::call_error_handler;
 use crate::lua_api::rilua_taint::stamp_addon_taint;
+use rilua::LuaApiMut;
 use std::path::Path;
 use std::time::Instant;
 

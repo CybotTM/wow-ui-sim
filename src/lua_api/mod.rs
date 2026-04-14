@@ -1,23 +1,13 @@
 //! Lua API bindings implementing WoW's addon API.
 
 mod addon_scan;
-pub(crate) mod proxy_helpers;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_methods;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_script_helpers;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_timer_layout;
-#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
-pub(crate) mod rilua_taint;
 pub mod animation;
 mod builtin_frames;
-mod cfunc_wrap;
 pub(crate) mod chat_init;
 mod diagnostics;
 mod env;
-mod env_rilua;
 mod env_init;
+mod env_rilua;
 pub(crate) mod frame;
 mod frame_methods;
 pub(crate) mod game_data;
@@ -29,6 +19,14 @@ mod layout;
 pub(crate) mod loader_env;
 pub mod message_frame;
 pub(crate) mod on_update;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod rilua_methods;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod rilua_script_helpers;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod rilua_taint;
+#[allow(dead_code)] // Phase 3 infrastructure — callers added during VM switch
+pub(crate) mod rilua_timer_layout;
 pub(crate) mod script_helpers;
 pub(crate) mod secure_env;
 pub mod simple_html;

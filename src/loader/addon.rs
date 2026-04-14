@@ -117,7 +117,9 @@ fn build_addon_context<'a>(
     toc: &'a TocFile,
     folder_name: &'a str,
 ) -> Result<AddonContext<'a>, LoadError> {
-    let addon_table = env.create_addon_table()?;
+    let addon_table = env
+        .create_addon_table()
+        .map_err(|e| LoadError::Lua(e.to_string()))?;
     register_loading_addon(env, folder_name, toc.is_secure_env());
 
     Ok(AddonContext {
