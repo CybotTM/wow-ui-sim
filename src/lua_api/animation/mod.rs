@@ -2,6 +2,7 @@
 
 mod anim_handle;
 pub mod group_handle;
+mod proxy;
 pub mod tick;
 
 use mlua::{RegistryKey, Value};
@@ -9,6 +10,7 @@ use std::collections::HashMap;
 
 pub use anim_handle::AnimHandle;
 pub use group_handle::AnimGroupHandle;
+pub(crate) use proxy::{anim_handle_ref, clear_anim_handle_cache, group_handle_ref};
 pub use tick::tick_animation_groups;
 
 /// Extract a numeric value from a Lua argument list at the given index.

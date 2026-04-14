@@ -1,4 +1,4 @@
-//! AnimGroupHandle userdata methods and metamethods.
+//! AnimGroupHandle methods for fallback animation-group proxies.
 
 use crate::lua_api::SimState;
 use crate::lua_api::frame::frame_ref;
@@ -7,7 +7,9 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use super::tick::apply_flipbook_for_group;
-use super::{AnimGroupState, AnimHandle, AnimState, AnimationType, LoopType};
+use super::{
+    AnimGroupState, AnimState, AnimationType, LoopType, anim_handle_ref, clear_anim_handle_cache,
+};
 
 /// Parse Play/Restart arguments: (reverse: bool, offset: f64).
 fn parse_play_args(args: MultiValue) -> (bool, f64) {
@@ -552,14 +554,9 @@ impl AnimGroupHandle {
         methods.add_method("GetAnimations", |lua, this, ()| {
             let state = this.state.borrow();
             if let Some(group) = state.animation_groups.get(&this.group_id) {
-                let mut values = Vec::new();
+                let mut values = Vec::with_capacity(group.animations.len());
                 for i in 0..group.animations.len() {
-                    let handle = AnimHandle {
-                        group_id: this.group_id,
-                        anim_index: i,
-                        state: Rc::clone(&this.state),
-                    };
-                    values.push(Value::UserData(lua.create_userdata(handle)?));
+                    values.push(anim_handle_ref(lua, this.group_id, i, &this.state)?);
                 }
                 return Ok(MultiValue::from_vec(values));
             }
@@ -570,11 +567,13 @@ impl AnimGroupHandle {
             create_animation_impl(lua, this, args)
         });
 
-        methods.add_method("RemoveAnimations", |_, this, ()| {
+        methods.add_method("RemoveAnimations", |lua, this, ()| {
             let mut state = this.state.borrow_mut();
             if let Some(group) = state.animation_groups.get_mut(&this.group_id) {
                 group.animations.clear();
             }
+            drop(state);
+            clear_anim_handle_cache(lua, this.group_id)?;
             Ok(())
         });
     }
@@ -594,7 +593,7 @@ fn create_animation_impl(
     lua: &mlua::Lua,
     this: &AnimGroupHandle,
     args: MultiValue,
-) -> mlua::Result<mlua::AnyUserData> {
+) -> mlua::Result<Value> {
     let args: Vec<Value> = args.into_iter().collect();
     let anim_type_str = args.first().and_then(|v| {
         if let Value::String(s) = v {
@@ -623,76 +622,7 @@ fn create_animation_impl(
         group.animations.push(anim);
         idx
     };
-    lua.create_userdata(AnimHandle {
-        group_id: this.group_id,
-        anim_index,
-        state: Rc::clone(&this.state),
-    })
-}
-
-impl AnimGroupHandle {
-    /// __index metamethod: look up custom fields (set by Mixin, KeyValues, etc.)
-    fn add_index_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            mlua::MetaMethod::Index,
-            |lua: &Lua, (ud, key): (mlua::AnyUserData, Value)| {
-                let handle = ud.borrow::<AnimGroupHandle>()?;
-                let group_id = handle.group_id;
-                drop(handle);
-
-                let key_str = match &key {
-                    Value::String(s) => s.to_string_lossy().to_string(),
-                    _ => return Ok(Value::Nil),
-                };
-
-                if let Ok(fields_table) = lua.globals().get::<mlua::Table>("__anim_group_fields")
-                    && let Ok(group_fields) = fields_table.get::<mlua::Table>(group_id)
-                {
-                    let value: Value = group_fields
-                        .get::<Value>(key_str.as_str())
-                        .unwrap_or(Value::Nil);
-                    if value != Value::Nil {
-                        return Ok(value);
-                    }
-                }
-
-                Ok(Value::Nil)
-            },
-        );
-    }
-
-    /// __newindex metamethod: store custom fields (used by Mixin, KeyValues, etc.)
-    fn add_newindex_metamethod<M: UserDataMethods<Self>>(methods: &mut M) {
-        methods.add_meta_function(
-            mlua::MetaMethod::NewIndex,
-            |lua: &Lua, (ud, key, value): (mlua::AnyUserData, String, Value)| {
-                let handle = ud.borrow::<AnimGroupHandle>()?;
-                let group_id = handle.group_id;
-                drop(handle);
-
-                let fields_table = get_or_create_table(lua, "__anim_group_fields");
-                let group_fields: mlua::Table = fields_table
-                    .get::<mlua::Table>(group_id)
-                    .unwrap_or_else(|_| {
-                        let t = lua.create_table().unwrap();
-                        fields_table.set(group_id, t.clone()).unwrap();
-                        t
-                    });
-
-                group_fields.set(key, value)?;
-                Ok(())
-            },
-        );
-    }
-}
-
-/// Get or create a named global Lua table.
-fn get_or_create_table(lua: &Lua, name: &str) -> mlua::Table {
-    lua.globals().get::<mlua::Table>(name).unwrap_or_else(|_| {
-        let t = lua.create_table().unwrap();
-        lua.globals().set(name, t.clone()).unwrap();
-        t
-    })
+    anim_handle_ref(lua, this.group_id, anim_index, &this.state)
 }
 
 impl UserData for AnimGroupHandle {
@@ -707,7 +637,5 @@ impl UserData for AnimGroupHandle {
         Self::add_script_methods(methods);
         Self::add_identity_methods(methods);
         Self::add_animation_management_methods(methods);
-        Self::add_index_metamethod(methods);
-        Self::add_newindex_metamethod(methods);
     }
 }

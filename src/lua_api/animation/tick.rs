@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use super::group_handle::stop_group;
-use super::{AnimGroupHandle, AnimGroupState, AnimationType, LoopType};
+use super::{AnimGroupState, AnimationType, LoopType};
 use crate::lua_api::script_helpers::get_script;
 
 /// Advance all playing animation groups by `delta` seconds.
@@ -454,7 +454,7 @@ fn fire_animation_scripts(
 
 /// Create the `self` argument for animation group script callbacks.
 /// Returns the cached FrameRef if the group has a frame_id (preserving its
-/// fenv/mixin table), otherwise falls back to AnimGroupHandle.
+/// frame-backed Lua table), otherwise falls back to the cached animation-group proxy.
 fn make_group_self(
     lua: &Lua,
     state_rc: &Rc<RefCell<SimState>>,
@@ -464,11 +464,6 @@ fn make_group_self(
     if let Some(fid) = frame_id {
         crate::lua_api::frame::frame_ref(lua, fid)
     } else {
-        Ok(mlua::Value::UserData(lua.create_userdata(
-            AnimGroupHandle {
-                group_id,
-                state: Rc::clone(state_rc),
-            },
-        )?))
+        crate::lua_api::animation::group_handle_ref(lua, group_id, state_rc)
     }
 }

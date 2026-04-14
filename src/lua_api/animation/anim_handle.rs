@@ -1,4 +1,4 @@
-//! AnimHandle userdata methods.
+//! AnimHandle methods for fallback animation proxies.
 
 use crate::lua_api::SimState;
 use crate::lua_api::frame::frame_ref;
@@ -6,7 +6,7 @@ use mlua::{MultiValue, UserData, UserDataMethods, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-use super::{AnimGroupHandle, AnimationType, Smoothing, extract_number};
+use super::{AnimationType, Smoothing, extract_number, group_handle_ref};
 
 /// Userdata handle for an individual Animation.
 #[derive(Clone)]
@@ -465,11 +465,7 @@ impl AnimHandle {
     /// Register parent and name accessor methods.
     fn add_parent_name_methods<M: UserDataMethods<Self>>(methods: &mut M) {
         methods.add_method("GetParent", |lua, this, ()| {
-            let handle = AnimGroupHandle {
-                group_id: this.group_id,
-                state: Rc::clone(&this.state),
-            };
-            lua.create_userdata(handle)
+            group_handle_ref(lua, this.group_id, &this.state)
         });
 
         methods.add_method("GetRegionParent", |lua, this, ()| {
