@@ -10,7 +10,8 @@ use std::time::Duration;
 
 use perf_game_ui::load_timed_game_ui;
 use perf_template_create::{
-    TemplateBench, measure_action_bar_button_family, measure_template_create,
+    ACTION_BUTTON_SPELLFX_BENCH, ACTION_BUTTON_TEMPLATE_BENCH, MINIMAL_SCROLLBAR_BENCH,
+    TemplateBenchResult, measure_profiled_startup_hot_paths,
 };
 
 const FULL_GAME_STARTUP_BUDGET: Duration = Duration::from_secs(30);
@@ -20,16 +21,70 @@ const FULL_GAME_STARTUP_BUDGET: Duration = Duration::from_secs(30);
 // Frame-count budgets: expected total frames (parents + children) created by
 // N template instances. Changes here indicate template structure changed.
 const ACTION_BUTTON_SPELLFX_BUDGET: Duration = Duration::from_millis(400);
-const ACTION_BUTTON_SPELLFX_COUNT: usize = 10;
 const ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES: usize = 350;
 
+const ACTION_BUTTON_TEMPLATE_BUDGET: Duration = Duration::from_millis(500);
+const ACTION_BUTTON_TEMPLATE_EXPECTED_FRAMES: usize = 660;
+
 const MINIMAL_SCROLLBAR_BUDGET: Duration = Duration::from_millis(400);
-const MINIMAL_SCROLLBAR_COUNT: usize = 10;
 const MINIMAL_SCROLLBAR_EXPECTED_FRAMES: usize = 130;
 
 const ACTION_BAR_BUTTON_BUDGET: Duration = Duration::from_millis(1500);
 const ACTION_BAR_BUTTON_COUNT: usize = 12;
 const ACTION_BAR_BUTTON_EXPECTED_FRAMES: usize = 805;
+
+fn expected_hot_path_metrics(template: &str) -> (usize, usize, Duration) {
+    match template {
+        "ActionButtonSpellFXTemplate" => (
+            ACTION_BUTTON_SPELLFX_BENCH.count,
+            ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
+            ACTION_BUTTON_SPELLFX_BUDGET,
+        ),
+        "ActionButtonTemplate" => (
+            ACTION_BUTTON_TEMPLATE_BENCH.count,
+            ACTION_BUTTON_TEMPLATE_EXPECTED_FRAMES,
+            ACTION_BUTTON_TEMPLATE_BUDGET,
+        ),
+        "MinimalScrollBar" => (
+            MINIMAL_SCROLLBAR_BENCH.count,
+            MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
+            MINIMAL_SCROLLBAR_BUDGET,
+        ),
+        "ActionBarButtonTemplate" => (
+            ACTION_BAR_BUTTON_COUNT,
+            ACTION_BAR_BUTTON_EXPECTED_FRAMES,
+            ACTION_BAR_BUTTON_BUDGET,
+        ),
+        other => panic!("unexpected startup hot path result: {other}"),
+    }
+}
+
+fn assert_startup_hot_path_result(result: &TemplateBenchResult) {
+    let (expected_count, expected_frames, budget) = expected_hot_path_metrics(result.template);
+    eprintln!(
+        "{} x{}: {:.2?}, {} frames (budget {:.2?})",
+        result.template, result.count, result.elapsed, result.frames_created, budget,
+    );
+
+    assert_eq!(
+        result.count, expected_count,
+        "{} measured {} instances, expected {}",
+        result.template, result.count, expected_count,
+    );
+    assert_eq!(
+        result.frames_created, expected_frames,
+        "{} x{} created {} frames, expected {}",
+        result.template, result.count, result.frames_created, expected_frames,
+    );
+    assert!(
+        result.elapsed < budget,
+        "{} x{} took {:.2?}, exceeding budget {:.2?}",
+        result.template,
+        result.count,
+        result.elapsed,
+        budget,
+    );
+}
 
 #[test]
 fn full_game_startup_stays_under_budget() {
@@ -64,92 +119,29 @@ fn full_game_startup_stays_under_budget() {
 }
 
 #[test]
-fn action_button_spellfx_template_stays_under_budget() {
+fn profiled_startup_hot_paths_stay_under_budgets() {
     test_timeout! {
         common::with_perf_lock(|| {
             let loaded = load_timed_game_ui();
-            let result = measure_template_create(&loaded.env, &TemplateBench {
-                template: "ActionButtonSpellFXTemplate",
-                widget_type: "CheckButton",
-                count: ACTION_BUTTON_SPELLFX_COUNT,
-            });
-
-            eprintln!(
-                "{} x{}: {:.2?}, {} frames (budget {:.2?})",
-                result.template, result.count, result.elapsed,
-                result.frames_created, ACTION_BUTTON_SPELLFX_BUDGET,
-            );
+            let results = measure_profiled_startup_hot_paths(&loaded.env, ACTION_BAR_BUTTON_COUNT);
+            let hot_path_names = results
+                .iter()
+                .map(|result| result.template)
+                .collect::<Vec<_>>();
 
             assert_eq!(
-                result.frames_created, ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
-                "{} x{} created {} frames, expected {}",
-                result.template, result.count, result.frames_created,
-                ACTION_BUTTON_SPELLFX_EXPECTED_FRAMES,
+                hot_path_names,
+                vec![
+                    "ActionButtonSpellFXTemplate",
+                    "ActionButtonTemplate",
+                    "MinimalScrollBar",
+                    "ActionBarButtonTemplate",
+                ],
+                "startup hot path harness should cover every profiled template family",
             );
-            assert!(
-                result.elapsed < ACTION_BUTTON_SPELLFX_BUDGET,
-                "{} x{} took {:.2?}, exceeding budget {:.2?}",
-                result.template, result.count, result.elapsed, ACTION_BUTTON_SPELLFX_BUDGET,
-            );
-        });
-    }
-}
-
-#[test]
-fn minimal_scrollbar_template_stays_under_budget() {
-    test_timeout! {
-        common::with_perf_lock(|| {
-            let loaded = load_timed_game_ui();
-            let result = measure_template_create(&loaded.env, &TemplateBench {
-                template: "MinimalScrollBar",
-                widget_type: "EventFrame",
-                count: MINIMAL_SCROLLBAR_COUNT,
-            });
-
-            eprintln!(
-                "{} x{}: {:.2?}, {} frames (budget {:.2?})",
-                result.template, result.count, result.elapsed,
-                result.frames_created, MINIMAL_SCROLLBAR_BUDGET,
-            );
-
-            assert_eq!(
-                result.frames_created, MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
-                "{} x{} created {} frames, expected {}",
-                result.template, result.count, result.frames_created,
-                MINIMAL_SCROLLBAR_EXPECTED_FRAMES,
-            );
-            assert!(
-                result.elapsed < MINIMAL_SCROLLBAR_BUDGET,
-                "{} x{} took {:.2?}, exceeding budget {:.2?}",
-                result.template, result.count, result.elapsed, MINIMAL_SCROLLBAR_BUDGET,
-            );
-        });
-    }
-}
-
-#[test]
-fn action_bar_button_family_stays_under_budget() {
-    test_timeout! {
-        common::with_perf_lock(|| {
-            let loaded = load_timed_game_ui();
-            let result = measure_action_bar_button_family(&loaded.env, ACTION_BAR_BUTTON_COUNT);
-
-            eprintln!(
-                "action-bar button family x{}: {:.2?}, {} frames (budget {:.2?})",
-                result.count, result.elapsed,
-                result.frames_created, ACTION_BAR_BUTTON_BUDGET,
-            );
-
-            assert_eq!(
-                result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
-                "action-bar button family x{} created {} frames, expected {}",
-                result.count, result.frames_created, ACTION_BAR_BUTTON_EXPECTED_FRAMES,
-            );
-            assert!(
-                result.elapsed < ACTION_BAR_BUTTON_BUDGET,
-                "action-bar button family x{} took {:.2?}, exceeding budget {:.2?}",
-                result.count, result.elapsed, ACTION_BAR_BUTTON_BUDGET,
-            );
+            for result in &results {
+                assert_startup_hot_path_result(result);
+            }
         });
     }
 }
