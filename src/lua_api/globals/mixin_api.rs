@@ -113,45 +113,32 @@ fn add_taggable_methods(lua: &Lua, t: &mlua::Table) -> Result<()> {
 /// MapCanvasPinMixin - mixin for map pins on WorldMapFrame canvas.
 fn register_map_canvas_pin_mixin(lua: &Lua) -> Result<mlua::Table> {
     let t = lua.create_table()?;
-
-    // Inherited taggable methods
     add_taggable_methods(lua, &t)?;
-
-    // Pin-specific event handlers
-    t.set("OnLoad", lua.create_function(|_, _self: Value| Ok(()))?)?;
-    t.set(
-        "OnAcquired",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
-    )?;
-    t.set("OnReleased", lua.create_function(|_, _self: Value| Ok(()))?)?;
-    t.set(
-        "OnClick",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
-    )?;
-    t.set(
-        "OnMouseEnter",
-        lua.create_function(|_, _self: Value| Ok(()))?,
-    )?;
-    t.set(
-        "OnMouseLeave",
-        lua.create_function(|_, _self: Value| Ok(()))?,
-    )?;
-    t.set(
-        "OnMouseDown",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
-    )?;
-    t.set(
-        "OnMouseUp",
-        lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?,
-    )?;
-
-    // Pin positioning and frame level
+    add_pin_event_handler_stubs(lua, &t)?;
     add_pin_positioning_methods(lua, &t)?;
-
-    // Nudge settings
     add_pin_nudge_methods(lua, &t)?;
+    add_pin_misc_stubs(lua, &t)?;
+    Ok(t)
+}
 
-    // Misc pin methods
+fn add_pin_event_handler_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
+    let noop = lua.create_function(|_, _args: mlua::Variadic<Value>| Ok(()))?;
+    for name in [
+        "OnLoad",
+        "OnAcquired",
+        "OnReleased",
+        "OnClick",
+        "OnMouseEnter",
+        "OnMouseLeave",
+        "OnMouseDown",
+        "OnMouseUp",
+    ] {
+        t.set(name, noop.clone())?;
+    }
+    Ok(())
+}
+
+fn add_pin_misc_stubs(lua: &Lua, t: &mlua::Table) -> Result<()> {
     t.set(
         "DisableInheritedMotionScriptsWarning",
         lua.create_function(|_, _self: Value| Ok(false))?,
@@ -168,8 +155,7 @@ fn register_map_canvas_pin_mixin(lua: &Lua) -> Result<mlua::Table> {
         "AddIconWidgets",
         lua.create_function(|_, _self: Value| Ok(()))?,
     )?;
-
-    Ok(t)
+    Ok(())
 }
 
 /// Add pin positioning and frame level methods.
