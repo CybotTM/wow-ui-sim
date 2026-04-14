@@ -47,14 +47,24 @@ pub fn get_nine_slice_atlas_info(name: &str) -> Option<NineSliceAtlasInfo> {
     ATLAS_DB.get(&probe as &str)?;
 
     let piece = |key: &str| -> Option<NineSlicePiece> {
-        ATLAS_DB.get(key).map(|info| NineSlicePiece {
-            file: info.file,
-            left: info.left_tex_coord,
-            right: info.right_tex_coord,
-            top: info.top_tex_coord,
-            bottom: info.bottom_tex_coord,
-            width: info.width,
-            height: info.height,
+        let lookup = paired_2x_variant(key).or_else(|| ATLAS_DB.get(key))?;
+        let from_2x = ATLAS_DB.get(key).is_none();
+        let (width, height) = if from_2x {
+            (
+                (lookup.width as f32 / 2.0).round() as u32,
+                (lookup.height as f32 / 2.0).round() as u32,
+            )
+        } else {
+            (lookup.width, lookup.height)
+        };
+        Some(NineSlicePiece {
+            file: lookup.file,
+            left: lookup.left_tex_coord,
+            right: lookup.right_tex_coord,
+            top: lookup.top_tex_coord,
+            bottom: lookup.bottom_tex_coord,
+            width,
+            height,
         })
     };
 
@@ -183,6 +193,31 @@ fn try_spelling_corrections(lower: &str) -> Option<AtlasLookup> {
 #[cfg(test)]
 mod tests {
     use super::{get_atlas_info, get_render_atlas_info};
+
+    #[test]
+    fn nine_slice_uses_2x_fallback_with_logical_sizes() {
+        let ns_info = super::get_nine_slice_atlas_info("ui-frame-metal")
+            .expect("metal nineslice should exist from 2x atlas fallback");
+        let corner = super::ATLAS_DB
+            .get("ui-frame-metal-cornertopleft-2x")
+            .expect("metal corner +2x entry should exist");
+        let edge_top = super::ATLAS_DB
+            .get("_ui-frame-metal-edgetop-2x")
+            .expect("metal edge top +2x entry should exist");
+
+        assert_eq!(
+            ns_info.corner_tl.width,
+            (corner.width as f32 / 2.0).round() as u32
+        );
+        assert_eq!(
+            ns_info.edge_top.width,
+            (edge_top.width as f32 / 2.0).round() as u32
+        );
+        assert_eq!(
+            ns_info.edge_top.height,
+            (edge_top.height as f32 / 2.0).round() as u32
+        );
+    }
 
     #[test]
     fn exact_unsuffixed_atlas_beats_2x_fallback() {
