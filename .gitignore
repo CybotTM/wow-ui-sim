@@ -20,3 +20,4 @@ flamegraph.svg
 .codex/
 target-perf/
 perf.data*.flamegraph.svg
+tests/rilua_bridge/target/
