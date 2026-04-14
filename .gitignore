@@ -17,3 +17,6 @@ PLAN.md
 perf.data
 perf.data.old
 flamegraph.svg
+.codex/
+target-perf/
+perf.data*.flamegraph.svg
