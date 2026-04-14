@@ -29,21 +29,14 @@ impl mlua::UserData for FrameRef {
 
 /// Get the cached UserData Value for a frame ID.
 ///
-/// Looks up the numeric `__frame_refs[id]` cache first, then `_G["__frame_{id}"]`.
+/// Looks up the numeric `__frame_refs[id]` cache first.
 /// If not cached, creates a new FrameRef UserData with an empty per-frame Lua
-/// table as user_value and caches it in both places.
+/// table as user_value and caches it in `reg.__frame_refs`.
 pub fn frame_ref(lua: &mlua::Lua, id: u64) -> mlua::Result<mlua::Value> {
     let frame_refs = get_or_create_frame_ref_cache(lua)?;
     let cached: mlua::Value = frame_refs.raw_get(id as i64)?;
     if !cached.is_nil() {
         return Ok(cached);
-    }
-
-    let key = format!("__frame_{}", id);
-    let global_cached: mlua::Value = lua.globals().raw_get(key.as_str())?;
-    if !global_cached.is_nil() {
-        frame_refs.raw_set(id as i64, global_cached.clone())?;
-        return Ok(global_cached);
     }
 
     // Create and cache on demand
@@ -52,7 +45,6 @@ pub fn frame_ref(lua: &mlua::Lua, id: u64) -> mlua::Result<mlua::Value> {
     ud.set_user_value(fields)?;
     let val = mlua::Value::UserData(ud);
     frame_refs.raw_set(id as i64, val.clone())?;
-    lua.globals().raw_set(key.as_str(), val.clone())?;
     Ok(val)
 }
 

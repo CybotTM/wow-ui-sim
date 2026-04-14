@@ -47,9 +47,7 @@ fn create_and_register_global(
     state.borrow_mut().widgets.register(frame);
     let val = frame_ref(lua, id)?;
     let globals = lua.globals();
-    globals.raw_set(name, val.clone())?;
-    let frame_key = format!("__frame_{}", id);
-    globals.raw_set(frame_key.as_str(), val)?;
+    globals.raw_set(name, val)?;
     Ok(id)
 }
 

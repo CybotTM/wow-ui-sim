@@ -698,10 +698,6 @@ fn create_frame_userdata(
             crate::lua_api::secure_env::set_in_both_envs(lua, n, val.clone())?;
         }
     }
-    // __frame_{id} cache is handled by frame_ref(), but ensure it's set for named frames too
-    let frame_key = format!("__frame_{}", frame_id);
-    lua.globals().raw_set(frame_key.as_str(), val.clone())?;
-
     Ok(val)
 }
 

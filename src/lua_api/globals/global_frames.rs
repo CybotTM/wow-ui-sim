@@ -67,10 +67,7 @@ fn register_frame_global_impl(
     drop(st);
     let val = crate::lua_api::frame::frame_ref(lua, id)?;
     let globals = lua.globals();
-    globals.raw_set(name, val.clone())?;
-    // __frame_{id} cache is already set by frame_ref(), but set explicitly for clarity
-    let frame_key = format!("__frame_{}", id);
-    globals.raw_set(frame_key.as_str(), val)?;
+    globals.raw_set(name, val)?;
     Ok(id)
 }
 

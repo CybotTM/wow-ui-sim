@@ -683,10 +683,6 @@ fn sync_named_frames_to_globals(lua: &Lua, state: &Rc<RefCell<SimState>>) -> Res
         if globals.raw_get::<Value>(name.as_str())?.is_nil() {
             globals.raw_set(name.as_str(), val.clone())?;
         }
-        let frame_key = format!("__frame_{}", id);
-        if globals.raw_get::<Value>(frame_key.as_str())?.is_nil() {
-            globals.raw_set(frame_key.as_str(), val)?;
-        }
     }
     Ok(())
 }
