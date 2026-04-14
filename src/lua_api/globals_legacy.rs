@@ -251,12 +251,12 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
         return Ok(mt);
     }
     // Animation/Actor/ControlPoint types get a restricted metatable.
-    if let Some(otn) = obj_type_name.as_deref() {
-        if super::frame::methods::methods_core::is_anim_type(otn) {
-            let new_mt = build_anim_metatable(lua, &per_type, otn)?;
-            per_type.raw_set(type_key, new_mt.clone())?;
-            return Ok(Value::Table(new_mt));
-        }
+    if let Some(otn) = obj_type_name.as_deref()
+        && super::frame::methods::methods_core::is_anim_type(otn)
+    {
+        let new_mt = build_anim_metatable(lua, &per_type, otn)?;
+        per_type.raw_set(type_key, new_mt.clone())?;
+        return Ok(Value::Table(new_mt));
     }
     // Clone the base type's metatable into a new unique table for this alias.
     let new_mt = clone_metatable(lua, &per_type, widget_type.as_str())?;
@@ -269,13 +269,11 @@ fn resolve_frame_metatable(lua: &Lua, frame_id: u64) -> Result<Value> {
 fn clone_metatable(lua: &Lua, per_type: &mlua::Table, base_key: &str) -> Result<mlua::Table> {
     let base_mt: mlua::Table = per_type.raw_get(base_key)?;
     let base_idx: mlua::Table = base_mt.raw_get("__index")?;
-    let (new_idx, wrap_fn) = (
-        lua.create_table()?,
-        super::cfunc_wrap::create_wrap_factory(lua)?,
-    );
+    let new_idx = lua.create_table()?;
+    let wrap_fn = wrap_method_factory(lua)?;
     for pair in base_idx.pairs::<String, mlua::Function>() {
         let (k, f) = pair?;
-        new_idx.raw_set(k.as_str(), wrap_fn.call::<mlua::Function>(f)?)?;
+        new_idx.raw_set(k.as_str(), wrap_method(&wrap_fn, f)?)?;
     }
     let new_mt = lua.create_table()?;
     new_mt.raw_set("__index", new_idx)?;
@@ -389,42 +387,22 @@ fn build_anim_metatable(lua: &Lua, per_type: &mlua::Table, otn: &str) -> Result<
     let frame_mt: mlua::Table = per_type.raw_get("Frame")?;
     let frame_idx: mlua::Table = frame_mt.raw_get("__index")?;
     let index_table = lua.create_table()?;
+    let wrap_fn = wrap_method_factory(lua)?;
 
     // Common UIObject methods
-    for &name in ANIM_COMMON_META {
-        if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
-            index_table.set(name, wrap_method(lua, f)?)?;
-        }
-    }
+    copy_wrapped_methods(&frame_idx, &index_table, ANIM_COMMON_META, &wrap_fn)?;
     // Script methods for AnimationGroup and Animation subtypes (not ControlPoint/Actor)
     if otn != "ControlPoint" && otn != "Actor" && otn != "ModelSceneActor" {
-        for &name in ANIM_SCRIPT_META {
-            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
-                index_table.set(name, wrap_method(lua, f)?)?;
-            }
-        }
-
-        for &name in ANIM_RUNTIME_META {
-            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
-                index_table.set(name, wrap_method(lua, f)?)?;
-            }
-        }
+        copy_wrapped_methods(&frame_idx, &index_table, ANIM_SCRIPT_META, &wrap_fn)?;
+        copy_wrapped_methods(&frame_idx, &index_table, ANIM_RUNTIME_META, &wrap_fn)?;
     }
 
     if matches!(otn, "AnimationGroup" | "ParallelAnimation") {
-        for &name in ANIM_GROUP_RUNTIME_META {
-            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
-                index_table.set(name, wrap_method(lua, f)?)?;
-            }
-        }
+        copy_wrapped_methods(&frame_idx, &index_table, ANIM_GROUP_RUNTIME_META, &wrap_fn)?;
     }
 
     if otn == "Path" {
-        for &name in PATH_ANIM_RUNTIME_META {
-            if let Value::Function(f) = frame_idx.raw_get::<Value>(name)? {
-                index_table.set(name, wrap_method(lua, f)?)?;
-            }
-        }
+        copy_wrapped_methods(&frame_idx, &index_table, PATH_ANIM_RUNTIME_META, &wrap_fn)?;
     }
 
     let mt = lua.create_table()?;
@@ -443,14 +421,24 @@ fn build_per_type_metatables(lua: &Lua) -> Result<()> {
     fenv.raw_set(1, lua.create_table()?)?;
     dummy.set_user_value(fenv)?;
     let per_type = lua.create_table()?;
-    let mut resolved: std::collections::HashMap<String, Value> = std::collections::HashMap::new();
+    let index_helper: mlua::Function = lua.named_registry_value("__frame_index_helper")?;
+    let wrap_fn = wrap_method_factory(lua)?;
+    let mut resolved: std::collections::HashMap<&'static str, Value> =
+        std::collections::HashMap::new();
 
     for widget_type in all_widget_types() {
         let type_key = widget_type.as_str();
         if per_type.raw_get::<Value>(type_key)? != Value::Nil {
             continue;
         }
-        let mt = build_metatable_for_type(lua, widget_type, &dummy, &mut resolved)?;
+        let mt = build_metatable_for_type(
+            lua,
+            widget_type,
+            &dummy,
+            &index_helper,
+            &wrap_fn,
+            &mut resolved,
+        )?;
         per_type.raw_set(type_key, mt)?;
     }
 
@@ -466,7 +454,9 @@ fn build_metatable_for_type(
     lua: &Lua,
     widget_type: crate::widget::WidgetType,
     dummy: &mlua::AnyUserData,
-    resolved: &mut std::collections::HashMap<String, Value>,
+    index_helper: &mlua::Function,
+    wrap_fn: &mlua::Function,
+    resolved: &mut std::collections::HashMap<&'static str, Value>,
 ) -> Result<mlua::Table> {
     use crate::lua_api::frame::method_registry;
 
@@ -477,8 +467,8 @@ fn build_metatable_for_type(
         .chain(type_methods.iter());
 
     for &name in allowed {
-        if let Some(f) = resolve_method(lua, dummy, name, resolved)? {
-            index_table.set(name, wrap_method(lua, f)?)?;
+        if let Some(f) = resolve_method(index_helper, dummy, name, resolved)? {
+            index_table.set(name, wrap_method(wrap_fn, f)?)?;
         }
     }
 
@@ -492,18 +482,16 @@ fn build_metatable_for_type(
 /// Uses `ud[name]` in Lua (triggering mlua's internal __index) since mlua doesn't
 /// expose registered `add_method` entries via `AnyUserData::get`.
 fn resolve_method(
-    lua: &Lua,
+    index_helper: &mlua::Function,
     dummy: &mlua::AnyUserData,
-    name: &str,
-    cache: &mut std::collections::HashMap<String, Value>,
+    name: &'static str,
+    cache: &mut std::collections::HashMap<&'static str, Value>,
 ) -> Result<Option<mlua::Function>> {
     let val = if let Some(v) = cache.get(name) {
         v.clone()
     } else {
-        let v: Value = lua
-            .load("local ud, k = ...; return ud[k]")
-            .call((dummy.clone(), name))?;
-        cache.insert(name.to_owned(), v.clone());
+        let v: Value = index_helper.call((dummy.clone(), name))?;
+        cache.insert(name, v.clone());
         v
     };
     match val {
@@ -513,8 +501,26 @@ fn resolve_method(
 }
 
 /// Wrap a method function in a unique closure for per-type identity.
-fn wrap_method(lua: &Lua, f: mlua::Function) -> Result<mlua::Function> {
-    Ok(lua.create_function(move |_, args: mlua::MultiValue| f.call::<mlua::MultiValue>(args))?)
+fn wrap_method(wrap_fn: &mlua::Function, f: mlua::Function) -> Result<mlua::Function> {
+    wrap_fn.call(f)
+}
+
+fn wrap_method_factory(lua: &Lua) -> Result<mlua::Function> {
+    lua.named_registry_value("__frame_wrap_method_helper")
+}
+
+fn copy_wrapped_methods(
+    source: &mlua::Table,
+    target: &mlua::Table,
+    names: &[&str],
+    wrap_fn: &mlua::Function,
+) -> Result<()> {
+    for &name in names {
+        if let Value::Function(f) = source.raw_get::<Value>(name)? {
+            target.set(name, wrap_method(wrap_fn, f)?)?;
+        }
+    }
+    Ok(())
 }
 
 /// All widget type variants (used to pre-build per-type metatables).
@@ -692,4 +698,29 @@ fn register_ui_strings_and_fonts(lua: &Lua) -> Result<()> {
     let globals = lua.globals();
     register_all_ui_strings(lua, &globals)?;
     create_standard_font_objects(lua)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::lua_api::WowLuaEnv;
+
+    #[test]
+    fn same_widget_type_uses_same_metatable_identity() {
+        let env = WowLuaEnv::new().expect("wow lua env should initialize");
+        env.exec(
+            r#"
+            FirstButton = CreateFrame("Button", "FirstButton", UIParent)
+            SecondButton = CreateFrame("Button", "SecondButton", UIParent)
+            "#,
+        )
+        .expect("buttons should be created");
+
+        let same_metatable: bool = env
+            .eval("return getmetatable(FirstButton) == getmetatable(SecondButton)")
+            .expect("metatable identity should evaluate");
+        assert!(
+            same_metatable,
+            "same widget types should share the cached metatable table"
+        );
+    }
 }

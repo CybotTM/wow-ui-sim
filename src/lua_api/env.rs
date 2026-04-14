@@ -1,8 +1,8 @@
 //! WoW Lua environment.
 
 use super::env_init::{
-    addon_taint_name, call_with_taint, init_builtin_frames, init_lua_state, is_blizzard_addon,
-    record_addon_time, update_threshold_counters,
+    addon_taint_name, addon_unpack_function, call_with_taint, init_builtin_frames, init_lua_state,
+    is_blizzard_addon, record_addon_time, update_threshold_counters,
 };
 use super::state::{AddonInfo, PendingTimer, SimState};
 use crate::Result;
@@ -68,7 +68,7 @@ impl WowLuaEnv {
     ) -> Result<()> {
         let chunk = self.lua.load(code).set_name(name);
         let func: mlua::Function = chunk.into_function()?;
-        func.call::<()>((addon_name.to_string(), addon_table))?;
+        func.call::<()>((addon_name, addon_table))?;
         Ok(())
     }
 
@@ -76,15 +76,9 @@ impl WowLuaEnv {
     /// Includes a default `unpack` method that returns values at numeric indices.
     pub fn create_addon_table(&self) -> Result<mlua::Table> {
         let table = self.lua.create_table()?;
-        // Add default unpack method - returns values at indices 1, 2, 3, 4
+        // Add default unpack method - returns values at indices 1, 2, 3, 4.
         // Addons like OmniCD use this pattern: local E, L, C = select(2, ...):unpack()
-        let unpack_fn = self.lua.create_function(|_, this: mlua::Table| {
-            let v1: mlua::Value = this.get(1).unwrap_or(mlua::Value::Nil);
-            let v2: mlua::Value = this.get(2).unwrap_or(mlua::Value::Nil);
-            let v3: mlua::Value = this.get(3).unwrap_or(mlua::Value::Nil);
-            let v4: mlua::Value = this.get(4).unwrap_or(mlua::Value::Nil);
-            Ok((v1, v2, v3, v4))
-        })?;
+        let unpack_fn = addon_unpack_function(&self.lua)?;
         table.set("unpack", unpack_fn)?;
         Ok(table)
     }
@@ -446,12 +440,10 @@ impl WowLuaEnv {
         };
         let mut keys = Vec::new();
         let mut state = self.state.borrow_mut();
-        for pair in timing.pairs::<i64, f64>() {
-            if let Ok((idx, ms)) = pair {
-                keys.push(idx);
-                if let Some(addon) = state.addons.get_mut(idx as usize) {
-                    addon.runtime.current_frame_ms += ms;
-                }
+        for (idx, ms) in timing.pairs::<i64, f64>().flatten() {
+            keys.push(idx);
+            if let Some(addon) = state.addons.get_mut(idx as usize) {
+                addon.runtime.current_frame_ms += ms;
             }
         }
         drop(state);
@@ -537,5 +529,43 @@ impl WowLuaEnv {
     pub fn dump_frames(&self) -> String {
         let state = self.state.borrow();
         super::diagnostics::dump_frames(&state)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn addon_tables_share_cached_unpack_function() {
+        let env = WowLuaEnv::new().expect("wow lua env should initialize");
+        let table_a = env.create_addon_table().expect("table A should exist");
+        let table_b = env.create_addon_table().expect("table B should exist");
+
+        let unpack_a: mlua::Function = table_a.get("unpack").expect("table A unpack");
+        let unpack_b: mlua::Function = table_b.get("unpack").expect("table B unpack");
+        let same_fn: bool = env
+            .lua
+            .load("local a, b = ...; return a == b")
+            .call((unpack_a.clone(), unpack_b))
+            .expect("function equality should evaluate");
+        assert!(
+            same_fn,
+            "addon tables should reuse the shared unpack closure"
+        );
+
+        table_a
+            .raw_set(1, "one")
+            .expect("table A first value should be set");
+        table_a
+            .raw_set(3, "three")
+            .expect("table A third value should be set");
+        let unpacked: (String, mlua::Value, String, mlua::Value) = unpack_a
+            .call(table_a)
+            .expect("shared unpack closure should still read table values");
+        assert_eq!(unpacked.0, "one");
+        assert_eq!(unpacked.2, "three");
+        assert!(matches!(unpacked.1, mlua::Value::Nil));
+        assert!(matches!(unpacked.3, mlua::Value::Nil));
     }
 }

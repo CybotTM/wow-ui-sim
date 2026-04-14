@@ -26,6 +26,7 @@ pub fn add_meta_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
 pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
     register_assign_helper(lua)?;
     register_index_helper(lua)?;
+    register_wrap_method_helper(lua)?;
     register_bind_method_helper(lua)?;
     register_custom_metatable_store(lua)?;
     install_forbidden_proxy_metatable(lua)?;
@@ -49,6 +50,15 @@ fn register_index_helper(lua: &Lua) -> mlua::Result<()> {
         .load("return function(ud, key) return ud[key] end")
         .eval::<mlua::Function>()?;
     lua.set_named_registry_value("__frame_index_helper", index_helper)
+}
+
+/// Factory that wraps a method into a unique C closure.
+/// Reused by per-type metatable builders to avoid repeated Lua closure allocation.
+fn register_wrap_method_helper(lua: &Lua) -> mlua::Result<()> {
+    lua.set_named_registry_value(
+        "__frame_wrap_method_helper",
+        crate::lua_api::cfunc_wrap::create_wrap_factory(lua)?,
+    )
 }
 
 /// Factory that binds a method's first argument to a frame value.
@@ -344,14 +354,13 @@ fn dispatch_custom_newindex(
     key: &str,
     value: &Value,
 ) -> mlua::Result<bool> {
-    if let Ok(store) = lua.named_registry_value::<mlua::Table>("__frame_custom_mt") {
-        if let Ok(mt) = store.get::<mlua::Table>(frame_id) {
-            if let Ok(newindex) = mt.get::<mlua::Function>("__newindex") {
-                let frame_val = frame_ref(lua, frame_id)?;
-                newindex.call::<()>((frame_val, key.to_owned(), value.clone()))?;
-                return Ok(true);
-            }
-        }
+    if let Ok(store) = lua.named_registry_value::<mlua::Table>("__frame_custom_mt")
+        && let Ok(mt) = store.get::<mlua::Table>(frame_id)
+        && let Ok(newindex) = mt.get::<mlua::Function>("__newindex")
+    {
+        let frame_val = frame_ref(lua, frame_id)?;
+        newindex.call::<()>((frame_val, key.to_owned(), value.clone()))?;
+        return Ok(true);
     }
     Ok(false)
 }
@@ -384,10 +393,26 @@ fn sync_child_frame(
             parent_frame.children.push(child_id);
         }
     }
-    if let Some(child) = state.widgets.get_mut_visual(child_id) {
-        if child.parent_key.is_none() {
-            child.parent_key = Some(key.to_owned());
-        }
+    if let Some(child) = state.widgets.get_mut_visual(child_id)
+        && child.parent_key.is_none()
+    {
+        child.parent_key = Some(key.to_owned());
+    }
+}
+
+/// Remove a stale children_keys entry and clear parent_key when a non-frame is assigned.
+fn remove_stale_child_key(
+    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
+    frame_id: u64,
+    key: &str,
+) {
+    let mut state = state_rc.borrow_mut();
+    if let Some(parent_frame) = state.widgets.get_mut(frame_id)
+        && let Some(old_child_id) = parent_frame.children_keys.remove(key)
+        && let Some(child) = state.widgets.get_mut_visual(old_child_id)
+        && child.parent_key.as_deref() == Some(key)
+    {
+        child.parent_key = None;
     }
 }
 
@@ -468,23 +493,5 @@ mod tests {
         let lua = make_lua_and_patch();
         let result: String = lua.load("return obj:Lower()").eval().unwrap();
         assert_eq!(result, "hello", "method works when no property set");
-    }
-}
-
-/// Remove a stale children_keys entry and clear parent_key when a non-frame is assigned.
-fn remove_stale_child_key(
-    state_rc: std::rc::Rc<std::cell::RefCell<crate::lua_api::SimState>>,
-    frame_id: u64,
-    key: &str,
-) {
-    let mut state = state_rc.borrow_mut();
-    if let Some(parent_frame) = state.widgets.get_mut(frame_id) {
-        if let Some(old_child_id) = parent_frame.children_keys.remove(key) {
-            if let Some(child) = state.widgets.get_mut_visual(old_child_id) {
-                if child.parent_key.as_deref() == Some(key) {
-                    child.parent_key = None;
-                }
-            }
-        }
     }
 }

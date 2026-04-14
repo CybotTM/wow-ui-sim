@@ -3,6 +3,7 @@
 //! Borrows the Lua instance instead of owning it, allowing both startup loading
 //! (via WowLuaEnv) and runtime on-demand loading (from Lua callbacks).
 
+use super::env_init::addon_unpack_function;
 use super::state::SimState;
 use crate::Result;
 use mlua::Lua;
@@ -50,20 +51,14 @@ impl<'a> LoaderEnv<'a> {
     ) -> Result<()> {
         let chunk = self.lua.load(code).set_name(name);
         let func: mlua::Function = chunk.into_function()?;
-        func.call::<()>((addon_name.to_string(), addon_table))?;
+        func.call::<()>((addon_name, addon_table))?;
         Ok(())
     }
 
     /// Create a new empty table for addon private storage.
     pub fn create_addon_table(&self) -> Result<mlua::Table> {
         let table = self.lua.create_table()?;
-        let unpack_fn = self.lua.create_function(|_, this: mlua::Table| {
-            let v1: mlua::Value = this.get(1).unwrap_or(mlua::Value::Nil);
-            let v2: mlua::Value = this.get(2).unwrap_or(mlua::Value::Nil);
-            let v3: mlua::Value = this.get(3).unwrap_or(mlua::Value::Nil);
-            let v4: mlua::Value = this.get(4).unwrap_or(mlua::Value::Nil);
-            Ok((v1, v2, v3, v4))
-        })?;
+        let unpack_fn = addon_unpack_function(self.lua)?;
         table.set("unpack", unpack_fn)?;
         Ok(table)
     }

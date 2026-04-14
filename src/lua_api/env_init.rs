@@ -10,6 +10,8 @@ use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Instant;
 
+const ADDON_UNPACK_REGISTRY_KEY: &str = "__addon_unpack";
+
 /// Increment threshold counters for a frame's addon time.
 pub(super) fn update_threshold_counters(rt: &mut AddonRuntimeMetrics, ms: f64) {
     if ms > 1.0 {
@@ -187,7 +189,22 @@ fn init_registry_tables(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Resul
     let taint_fallback: mlua::Function =
         lua.load("return debug.getstacktaint()").into_function()?;
     lua.set_named_registry_value("__get_stack_taint_fallback", taint_fallback)?;
+    lua.set_named_registry_value(ADDON_UNPACK_REGISTRY_KEY, create_addon_unpack(lua)?)?;
     super::on_update::register(lua, state)
+}
+
+pub(super) fn addon_unpack_function(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.named_registry_value(ADDON_UNPACK_REGISTRY_KEY)
+}
+
+fn create_addon_unpack(lua: &Lua) -> mlua::Result<mlua::Function> {
+    lua.create_function(|_, this: mlua::Table| {
+        let v1: mlua::Value = this.get(1).unwrap_or(mlua::Value::Nil);
+        let v2: mlua::Value = this.get(2).unwrap_or(mlua::Value::Nil);
+        let v3: mlua::Value = this.get(3).unwrap_or(mlua::Value::Nil);
+        let v4: mlua::Value = this.get(4).unwrap_or(mlua::Value::Nil);
+        Ok((v1, v2, v3, v4))
+    })
 }
 
 /// Enable Elune taint tracking and wrap loadstring as secure.
