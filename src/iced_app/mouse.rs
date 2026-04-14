@@ -1,6 +1,7 @@
 //! Mouse event handlers for the iced application.
 
 use iced::Point;
+use rilua::Val;
 
 use super::app::App;
 use super::mouse_drag::{
@@ -165,7 +166,7 @@ impl App {
 
         {
             let env = self.env.borrow();
-            let button_val = mlua::Value::String(env.lua().create_string("LeftButton").unwrap());
+            let button_val = env.lua_string("LeftButton");
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
         }
         self.flush_post_script_updates();
@@ -210,7 +211,7 @@ impl App {
         }
 
         let env = self.env.borrow();
-        let button_val = mlua::Value::String(env.lua().create_string("LeftButton").unwrap());
+        let button_val = env.lua_string("LeftButton");
 
         if self.mouse_down_frame == Some(frame_id) {
             self.fire_left_click_sequence(frame_id, &env, &button_val);
@@ -227,11 +228,11 @@ impl App {
         &self,
         frame_id: u64,
         env: &crate::lua_api::WowLuaEnv,
-        button_val: &mlua::Value,
+        button_val: &Val,
     ) {
         self.toggle_checkbutton_if_needed(frame_id, env);
 
-        let down_val = mlua::Value::Boolean(false);
+        let down_val = Val::Bool(false);
         let _ = env.fire_script_handler(
             frame_id,
             "OnClick",
@@ -253,7 +254,7 @@ impl App {
         self.right_mouse_down_frame = Some(frame_id);
         {
             let env = self.env.borrow();
-            let button_val = mlua::Value::String(env.lua().create_string("RightButton").unwrap());
+            let button_val = env.lua_string("RightButton");
             let _ = env.fire_script_handler(frame_id, "OnMouseDown", vec![button_val]);
         }
         self.flush_post_script_updates();
@@ -267,10 +268,7 @@ impl App {
             eprintln!("[cursor] Right-click ClearCursor");
             {
                 let env = self.env.borrow();
-                let lua = env.lua();
-                if let Ok(clear_fn) = lua.globals().get::<mlua::Function>("ClearCursor") {
-                    let _ = clear_fn.call::<()>(());
-                }
+                let _ = env.call_global("ClearCursor", &[]);
             }
             self.right_mouse_down_frame = None;
             self.flush_post_script_updates();
@@ -281,11 +279,10 @@ impl App {
         if let Some(frame_id) = released_on {
             {
                 let env = self.env.borrow();
-                let button_val =
-                    mlua::Value::String(env.lua().create_string("RightButton").unwrap());
+                let button_val = env.lua_string("RightButton");
 
                 if self.right_mouse_down_frame == Some(frame_id) {
-                    let down_val = mlua::Value::Boolean(false);
+                    let down_val = Val::Bool(false);
                     let _ = env.fire_script_handler(
                         frame_id,
                         "OnClick",
@@ -357,8 +354,7 @@ impl App {
         }
 
         let env = self.env.borrow();
-        let lua = env.lua();
-        let button_val = mlua::Value::String(lua.create_string(button_name).unwrap());
+        let button_val = env.lua_string(button_name);
         eprintln!("[drag] OnDragStart fired on frame {}", drag_target);
         let _ = env.fire_script_handler(drag_target, "OnDragStart", vec![button_val]);
     }
@@ -368,8 +364,7 @@ impl App {
         // Fire OnDragStop on the source frame (walk up parent chain).
         if let Some(src_id) = source {
             let env = self.env.borrow();
-            let lua = env.lua();
-            let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
+            let button_val = env.lua_string("LeftButton");
             if let Some(drag_stop_target) = find_drag_script_target(&env, src_id, "OnDragStop") {
                 eprintln!("[drag] OnDragStop fired on frame {}", drag_stop_target);
                 let _ = env.fire_script_handler(drag_stop_target, "OnDragStop", vec![button_val]);
@@ -385,8 +380,7 @@ impl App {
     /// Used both at end of drag and on click when cursor holds an item.
     fn fire_receive_drag(&mut self, frame_id: u64) {
         let env = self.env.borrow();
-        let lua = env.lua();
-        let button_val = mlua::Value::String(lua.create_string("LeftButton").unwrap());
+        let button_val = env.lua_string("LeftButton");
         if let Some(receive_drag_target) = find_drag_script_target(&env, frame_id, "OnReceiveDrag")
         {
             eprintln!(
@@ -426,7 +420,7 @@ impl App {
                     .unwrap_or((false, false, None))
             };
             if motion_allowed && wheel_enabled && env.has_script_handler(frame_id, "OnMouseWheel") {
-                let delta_val = mlua::Value::Number(dy as f64);
+                let delta_val = Val::Num(dy as f64);
                 let _ = env.fire_script_handler(frame_id, "OnMouseWheel", vec![delta_val]);
                 return true;
             }

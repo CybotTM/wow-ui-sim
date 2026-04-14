@@ -529,7 +529,7 @@ pub fn run_startup(env: &WowLuaEnv) {
 }
 
 fn settle_extra_ticks(env: &WowLuaEnv) {
-    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
     std::thread::sleep(std::time::Duration::from_secs(2));
     for _ in 0..3 {
         env.state().borrow_mut().ensure_layout_rects();
@@ -541,12 +541,7 @@ fn settle_extra_ticks(env: &WowLuaEnv) {
 /// Override debugprofilestop with a C function returning 0, disabling the
 /// test runner's per-tick time budget so it processes all sync tests in one tick.
 fn override_debugprofilestop(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = lua.globals().set(
-        "debugprofilestop",
-        lua.create_function(|_, ()| Ok(0i64))
-            .expect("debugprofilestop override"),
-    );
+    let _ = env.exec("function debugprofilestop() return 0 end");
 }
 
 pub fn run_test(

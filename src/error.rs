@@ -3,7 +3,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum Error {
     #[error("Lua error: {0}")]
-    Lua(#[from] mlua::Error),
+    Lua(#[from] rilua::LuaError),
 
     #[error("XML parse error: {0}")]
     Xml(#[from] quick_xml::DeError),

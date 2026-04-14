@@ -6,6 +6,7 @@
 
 use crate::lua_api::WowLuaEnv;
 use crate::screen::ScreenKind;
+use rilua::Val;
 
 const GLUE_HIDE_CHAT: &str = r#"
     if GeneralDockManager then GeneralDockManager:Hide() end
@@ -99,7 +100,7 @@ pub fn settle_headless_startup(env: &WowLuaEnv) {
     }
     process_pending_timers(env);
     fire_one_on_update_tick(env);
-    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = crate::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
     run_extra_update_ticks(env, 3);
 }
 
@@ -117,12 +118,7 @@ fn fire_login_sequence(env: &WowLuaEnv, skip_is_logged_in: bool) {
     let fire = |name| fire_simple_event(env, name);
 
     log_with_timestamp(env, "[Startup] Firing ADDON_LOADED");
-    if let Err(e) = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(
-            env.lua().create_string("WoWUISim").unwrap(),
-        )],
-    ) {
+    if let Err(e) = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]) {
         log_with_timestamp(env, &format!("Error firing ADDON_LOADED: {e}"));
     }
 
@@ -194,19 +190,14 @@ fn fire_world_enter_sequence(env: &WowLuaEnv) {
         env,
         "[Startup] Firing TIME_PLAYED_MSG via RequestTimePlayed",
     );
-    if let Err(e) = env
-        .lua()
-        .globals()
-        .get::<mlua::Function>("RequestTimePlayed")
-        .and_then(|f| f.call::<()>(()))
-    {
+    if let Err(e) = env.call_global("RequestTimePlayed", &[]) {
         log_with_timestamp(env, &format!("Error calling RequestTimePlayed: {e}"));
     }
 
     log_with_timestamp(env, "[Startup] Firing PLAYER_ENTERING_WORLD");
     if let Err(e) = env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
+        &[Val::Bool(true), Val::Bool(false)],
     ) {
         log_with_timestamp(env, &format!("Error firing PLAYER_ENTERING_WORLD: {e}"));
     }
@@ -301,15 +292,11 @@ pub fn call_unit_frame_set_unit(env: &WowLuaEnv) {
 /// Fire UNIT_AURA("player", {isFullUpdate=true}) to populate buff frames.
 fn fire_unit_aura(env: &WowLuaEnv) {
     log_with_timestamp(env, "[Startup] Firing UNIT_AURA");
-    let lua = env.lua();
-    if let (Ok(unit), Ok(info)) = (lua.create_string("player"), lua.create_table()) {
-        let _ = info.set("isFullUpdate", true);
-        if let Err(e) = env.fire_event_with_args(
-            "UNIT_AURA",
-            &[mlua::Value::String(unit), mlua::Value::Table(info)],
-        ) {
-            log_with_timestamp(env, &format!("Error firing UNIT_AURA: {e}"));
-        }
+    let unit = env.lua_string("player");
+    if let Ok(info) = env.eval::<Val>("return { isFullUpdate = true }")
+        && let Err(e) = env.fire_event_with_args("UNIT_AURA", &[unit, info])
+    {
+        log_with_timestamp(env, &format!("Error firing UNIT_AURA: {e}"));
     }
 }
 

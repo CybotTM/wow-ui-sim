@@ -90,11 +90,7 @@ impl WowLuaEnv {
     }
 
     /// Register a Rust function as a global in rilua's Lua state.
-    pub fn register_rilua_function(
-        &self,
-        name: &str,
-        func: rilua::RustFn,
-    ) -> rilua::LuaResult<()> {
+    pub fn register_rilua_function(&self, name: &str, func: rilua::RustFn) -> rilua::LuaResult<()> {
         let mut lua = self.lua.borrow_mut();
         LuaApiMut::register_function(&mut *lua, name, func)
     }
@@ -195,5 +191,27 @@ mod tests {
             .as_ref()
             .expect("font system should be stored in rilua app_data");
         assert!(Rc::ptr_eq(stored, &font_system));
+    }
+
+    #[test]
+    fn wow_lua_env_public_surface_uses_rilua_values() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+
+        env.exec("fired = false").unwrap();
+        env.exec(
+            r#"
+            local frame = CreateFrame("Frame")
+            frame:RegisterEvent("TEST_EVENT")
+            frame:SetScript("OnEvent", function(_, _, value)
+                fired = value == 17
+            end)
+        "#,
+        )
+        .unwrap();
+
+        env.fire_event_with_args("TEST_EVENT", &[rilua::Val::Num(17.0)])
+            .unwrap();
+
+        assert!(env.eval::<bool>("return fired").unwrap());
     }
 }

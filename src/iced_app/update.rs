@@ -228,15 +228,10 @@ impl App {
     }
 
     fn fire_portrait_update(&self, env: &WowLuaEnv) {
-        let _ = env.fire_event_with_args(
-            "UNIT_PORTRAIT_UPDATE",
-            &[mlua::Value::String(
-                env.lua().create_string("player").unwrap(),
-            )],
-        );
+        let _ = env.fire_event_with_args("UNIT_PORTRAIT_UPDATE", &[env.lua_string("player")]);
         let _ = env.fire_event_with_args(
             "PLAYER_ENTERING_WORLD",
-            &[mlua::Value::Boolean(false), mlua::Value::Boolean(false)],
+            &[Val::Bool(false), Val::Bool(false)],
         );
     }
 
@@ -244,13 +239,11 @@ impl App {
         self.log_messages.push("Reloading UI...".to_string());
         {
             let env = self.env.borrow();
-            if let Ok(s) = env.lua().create_string("WoWUISim") {
-                let _ = env.fire_event_with_args("ADDON_LOADED", &[mlua::Value::String(s)]);
-            }
+            let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")]);
             let _ = env.fire_event("VARIABLES_LOADED");
             let _ = env.fire_event_with_args(
                 "PLAYER_ENTERING_WORLD",
-                &[mlua::Value::Boolean(false), mlua::Value::Boolean(true)],
+                &[Val::Bool(false), Val::Bool(true)],
             );
             let _ = env.fire_event("UPDATE_BINDINGS");
             let _ = env.fire_event("DISPLAY_SIZE_CHANGED");
@@ -401,12 +394,7 @@ impl App {
         };
         for idx in changed {
             let unit_id = format!("party{idx}");
-            let _ = env.fire_event_with_args(
-                "UNIT_HEALTH",
-                &[mlua::Value::String(
-                    env.lua().create_string(&unit_id).unwrap(),
-                )],
-            );
+            let _ = env.fire_event_with_args("UNIT_HEALTH", &[env.lua_string(&unit_id)]);
         }
     }
 
@@ -705,3 +693,4 @@ mod tests {
         );
     }
 }
+use rilua::Val;

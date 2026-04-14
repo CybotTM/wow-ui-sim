@@ -204,38 +204,37 @@ fn run_test_file(env: &WowLuaEnv, path: &PathBuf) -> Result<(u32, u32), String> 
 
 /// Get indices of async tests from __addon_tests.
 fn get_async_test_indices(env: &WowLuaEnv) -> Result<Vec<i64>, String> {
-    let lua = env.lua();
-    let tests: mlua::Table = lua
-        .globals()
-        .get("__addon_tests")
+    let csv: String = env
+        .eval(
+            r#"
+            local indices = {}
+            for idx, entry in ipairs(__addon_tests or {}) do
+                if entry.async then
+                    indices[#indices + 1] = tostring(idx)
+                end
+            end
+            return table.concat(indices, ",")
+            "#,
+        )
         .map_err(|e| format!("failed to read __addon_tests: {e}"))?;
-
-    let mut indices = Vec::new();
-    for pair in tests.pairs::<i64, mlua::Table>() {
-        let (idx, entry) = pair.map_err(|e| format!("{e}"))?;
-        let is_async: bool = entry.get("async").unwrap_or(false);
-        if is_async {
-            indices.push(idx);
-        }
+    if csv.is_empty() {
+        return Ok(Vec::new());
     }
-    Ok(indices)
+    csv.split(',')
+        .map(|s| s.parse::<i64>().map_err(|e| e.to_string()))
+        .collect()
 }
 
 /// Get test name by index from __addon_tests.
 fn get_test_name(env: &WowLuaEnv, idx: i64) -> Result<String, String> {
-    let lua = env.lua();
-    let tests: mlua::Table = lua
-        .globals()
-        .get("__addon_tests")
-        .map_err(|e| format!("{e}"))?;
-    let entry: mlua::Table = tests.get(idx).map_err(|e| format!("{e}"))?;
-    entry.get("name").map_err(|e| format!("{e}"))
+    env.eval::<String>(&format!("return (__addon_tests[{idx}] or {{}}).name or ''"))
+        .map_err(|e| format!("{e}"))
 }
 
 /// Run a single async test: call fn(done), tick until __async_done or timeout.
 fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
-    let chunk = env.lua().load(ASYNC_START);
-    chunk.call::<()>(idx).map_err(|e| format!("{e}"))?;
+    let code = format!("local idx = {idx}\n{ASYNC_START}");
+    env.exec(&code).map_err(|e| format!("{e}"))?;
 
     for _ in 0..MAX_ASYNC_TICKS {
         let done: bool = env.eval("__async_done").unwrap_or(false);
@@ -258,30 +257,29 @@ fn run_async_test(env: &WowLuaEnv, idx: i64) -> Result<(), String> {
 
 /// Read `__addon_test_results` from Lua and print failures.
 fn read_test_results(env: &WowLuaEnv, file_name: &str) -> Result<(u32, u32), String> {
-    let lua = env.lua();
-    let results: mlua::Table = lua
-        .globals()
-        .get("__addon_test_results")
-        .map_err(|e| format!("failed to read results: {e}"))?;
-
-    let mut passed = 0u32;
-    let mut failed = 0u32;
-
-    for pair in results.pairs::<i64, mlua::Table>() {
-        let (_, entry) = pair.map_err(|e| format!("result iteration error: {e}"))?;
-        let name: String = entry.get("name").unwrap_or_default();
-        let ok: bool = entry.get("ok").unwrap_or(false);
-        if ok {
-            passed += 1;
-        } else {
-            let err: String = entry.get("err").unwrap_or_default();
-            eprintln!("  \x1b[31m\u{2717}\x1b[0m {file_name} > {name}");
-            eprintln!("    {err}");
-            failed += 1;
-        }
-    }
-
-    Ok((passed, failed))
+    env.exec(&format!(
+        r#"
+        __wowsim_sync_passed = 0
+        __wowsim_sync_failed = 0
+        for _, entry in ipairs(__addon_test_results or {{{{}}}}) do
+            if entry.ok then
+                __wowsim_sync_passed = __wowsim_sync_passed + 1
+            else
+                print("  \x1b[31m\u{{2717}}\x1b[0m {file_name} > " .. tostring(entry.name or ""))
+                print("    " .. tostring(entry.err or ""))
+                __wowsim_sync_failed = __wowsim_sync_failed + 1
+            end
+        end
+        "#,
+    ))
+    .map_err(|e| format!("failed to summarize results: {e}"))?;
+    let passed = env
+        .eval::<i32>("return __wowsim_sync_passed or 0")
+        .map_err(|e| format!("{e}"))?;
+    let failed = env
+        .eval::<i32>("return __wowsim_sync_failed or 0")
+        .map_err(|e| format!("{e}"))?;
+    Ok((passed as u32, failed as u32))
 }
 
 /// Flush Lua print() output from console_output to stderr.

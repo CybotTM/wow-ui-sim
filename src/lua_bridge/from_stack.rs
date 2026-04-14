@@ -211,6 +211,12 @@ impl FromStack for f64 {
     }
 }
 
+impl FromStack for f32 {
+    fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
+        Ok(f64::from_stack(state, index)? as f32)
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Integer types
 // ---------------------------------------------------------------------------
@@ -296,6 +302,36 @@ impl<T: FromStack> FromStack for Option<T> {
             Val::Nil => Ok(None),
             _ => Ok(Some(T::from_stack(state, index)?)),
         }
+    }
+}
+
+impl<A: FromStack, B: FromStack> FromStack for (A, B) {
+    fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
+        Ok((
+            A::from_stack(state, index)?,
+            B::from_stack(state, index + 1)?,
+        ))
+    }
+}
+
+impl<A: FromStack, B: FromStack, C: FromStack> FromStack for (A, B, C) {
+    fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
+        Ok((
+            A::from_stack(state, index)?,
+            B::from_stack(state, index + 1)?,
+            C::from_stack(state, index + 2)?,
+        ))
+    }
+}
+
+impl<A: FromStack, B: FromStack, C: FromStack, D: FromStack> FromStack for (A, B, C, D) {
+    fn from_stack(state: &LuaState, index: i32) -> LuaResult<Self> {
+        Ok((
+            A::from_stack(state, index)?,
+            B::from_stack(state, index + 1)?,
+            C::from_stack(state, index + 2)?,
+            D::from_stack(state, index + 3)?,
+        ))
     }
 }
 

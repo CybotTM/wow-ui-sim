@@ -1,19 +1,23 @@
 //! WoW Lua environment.
 
 use super::env_init::{
-    addon_taint_name, call_with_taint, init_builtin_frames, init_lua_state, is_blizzard_addon,
-    record_addon_time, update_threshold_counters,
+    addon_taint_name, init_builtin_frames, init_lua_state, is_blizzard_addon, record_addon_time,
+    update_threshold_counters,
 };
 use super::state::{AddonInfo, PendingTimer, SimState};
 use crate::Result;
+use crate::lua_api::rilua_methods::{
+    call_function as call_rilua_function, create_string, frame_ref, registry_get, table_set,
+    val_to_string,
+};
+use crate::lua_api::rilua_script_helpers::{call_error_handler, get_event_listeners, get_script};
 use crate::render::font::WowFontSystem;
 use crate::screen::ScreenKind;
-use mlua::{Lua, Value};
-use rilua::LuaApiMut;
+use rilua::{LuaApi, LuaApiMut, Val};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 static NEXT_TIMER_ID: AtomicU64 = AtomicU64::new(1);
 
@@ -37,10 +41,101 @@ impl WowLuaAppData {
     }
 }
 
+trait FromRiluaResults: Sized {
+    fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self>;
+}
+
+fn first_result(results: &[Val]) -> Val {
+    results.first().copied().unwrap_or(Val::Nil)
+}
+
+fn decode_string(state: &rilua::vm::state::LuaState, value: Val) -> Result<String> {
+    val_to_string(state, value).ok_or_else(|| {
+        crate::Error::Other(format!("expected string result, got {}", value.type_name()))
+    })
+}
+
+fn decode_number(value: Val) -> Result<f64> {
+    match value {
+        Val::Num(n) => Ok(n),
+        other => Err(crate::Error::Other(format!(
+            "expected numeric result, got {}",
+            other.type_name()
+        ))),
+    }
+}
+
+impl FromRiluaResults for () {
+    fn from_results(_state: &rilua::vm::state::LuaState, _results: Vec<Val>) -> Result<Self> {
+        Ok(())
+    }
+}
+
+impl FromRiluaResults for bool {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        Ok(!matches!(
+            first_result(&results),
+            Val::Nil | Val::Bool(false)
+        ))
+    }
+}
+
+impl FromRiluaResults for f64 {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        decode_number(first_result(&results))
+    }
+}
+
+impl FromRiluaResults for f32 {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        Ok(decode_number(first_result(&results))? as f32)
+    }
+}
+
+impl FromRiluaResults for i32 {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        let number = decode_number(first_result(&results))?;
+        let int = number as i32;
+        if int as f64 == number {
+            Ok(int)
+        } else {
+            Err(crate::Error::Other(format!(
+                "expected integer result, got non-integer number {number}"
+            )))
+        }
+    }
+}
+
+impl FromRiluaResults for String {
+    fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        decode_string(state, first_result(&results))
+    }
+}
+
+impl FromRiluaResults for Option<String> {
+    fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        match first_result(&results) {
+            Val::Nil => Ok(None),
+            value => decode_string(state, value).map(Some),
+        }
+    }
+}
+
+impl FromRiluaResults for Val {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        Ok(first_result(&results))
+    }
+}
+
+impl FromRiluaResults for crate::lua_bridge::MultiValue {
+    fn from_results(_state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        Ok(results.into())
+    }
+}
+
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
     pub(crate) lua: RefCell<rilua::Lua>,
-    pub(crate) compat_lua: Lua,
     pub(crate) state: Rc<RefCell<SimState>>,
 }
 
@@ -56,13 +151,11 @@ impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
         let state = Rc::new(RefCell::new(SimState::default()));
-        let compat_lua = unsafe { Lua::unsafe_new() };
-        let lua = RefCell::new(Self::new_rilua(Rc::clone(&state)));
+        let mut lua = Self::new_rilua(Rc::clone(&state));
         init_builtin_frames(&state);
-        init_lua_state(&compat_lua, Rc::clone(&state))?;
+        init_lua_state(&mut lua, Rc::clone(&state))?;
         Ok(Self {
-            lua,
-            compat_lua,
+            lua: RefCell::new(lua),
             state,
         })
     }
@@ -75,96 +168,79 @@ impl WowLuaEnv {
 
     /// Execute Lua code.
     pub fn exec(&self, code: &str) -> Result<()> {
-        self.compat_lua.load(code).exec()?;
+        self.exec_rilua(code)?;
         Ok(())
     }
 
     /// Execute Lua code with a custom chunk name (for better error messages and debugstack).
     pub fn exec_named(&self, code: &str, name: &str) -> Result<()> {
-        self.compat_lua.load(code).set_name(name).exec()?;
+        self.exec_rilua_named(code, name)?;
         Ok(())
-    }
-
-    /// Execute Lua code with varargs (like WoW addon loading).
-    /// In WoW, each addon file receives (addonName, addonTable) as varargs.
-    pub fn exec_with_varargs(
-        &self,
-        code: &str,
-        name: &str,
-        addon_name: &str,
-        addon_table: mlua::Table,
-    ) -> Result<()> {
-        let chunk = self.compat_lua.load(code).set_name(name);
-        let func: mlua::Function = chunk.into_function()?;
-        func.call::<()>((addon_name.to_string(), addon_table))?;
-        Ok(())
-    }
-
-    /// Create a new empty table for addon private storage.
-    /// Includes a default `unpack` method that returns values at numeric indices.
-    pub fn create_addon_table(&self) -> Result<mlua::Table> {
-        let table = self.compat_lua.create_table()?;
-        // Add default unpack method - returns values at indices 1, 2, 3, 4
-        // Addons like OmniCD use this pattern: local E, L, C = select(2, ...):unpack()
-        let unpack_fn = self.compat_lua.create_function(|_, this: mlua::Table| {
-            let v1: mlua::Value = this.get(1).unwrap_or(mlua::Value::Nil);
-            let v2: mlua::Value = this.get(2).unwrap_or(mlua::Value::Nil);
-            let v3: mlua::Value = this.get(3).unwrap_or(mlua::Value::Nil);
-            let v4: mlua::Value = this.get(4).unwrap_or(mlua::Value::Nil);
-            Ok((v1, v2, v3, v4))
-        })?;
-        table.set("unpack", unpack_fn)?;
-        Ok(table)
     }
 
     /// Execute Lua code and return the result.
-    pub fn eval<T: mlua::FromLuaMulti>(&self, code: &str) -> Result<T> {
-        let result = self.compat_lua.load(code).eval()?;
-        Ok(result)
+    pub fn eval<T: FromRiluaResults>(&self, code: &str) -> Result<T> {
+        let mut lua = self.lua.borrow_mut();
+        let func = LuaApiMut::load(&mut *lua, code)?;
+        let results = lua.call_function(&func, &[])?;
+        T::from_results(lua.state(), results)
+    }
+
+    /// Create a Lua string value on the active rilua VM.
+    pub fn lua_string(&self, text: &str) -> Val {
+        let mut lua = self.lua.borrow_mut();
+        create_string(lua.state_mut(), text)
     }
 
     /// Populate the `__addon_names` registry table mapping addon index → folder name.
-    /// The table is pre-created in `init_registry_tables` so the OnUpdate dispatcher
-    /// captures a reference to it. This method fills it after all addons are loaded.
     pub fn sync_addon_names_to_lua(&self) {
-        let state = self.state.borrow();
-        let Ok(t) = self
-            .compat_lua
-            .named_registry_value::<mlua::Table>("__addon_names")
-        else {
-            return;
+        let addon_names = {
+            let state = self.state.borrow();
+            state
+                .addons
+                .iter()
+                .map(|addon| addon.folder_name.clone())
+                .collect::<Vec<_>>()
         };
-        for (i, addon) in state.addons.iter().enumerate() {
-            t.raw_set(i as i64, addon.folder_name.as_str()).ok();
+
+        let mut lua = self.lua.borrow_mut();
+        let state = lua.state_mut();
+        let table = registry_get(state, "__addon_names");
+        for (index, addon_name) in addon_names.iter().enumerate() {
+            table_set(
+                state,
+                table,
+                &index.to_string(),
+                create_string(state, addon_name),
+            );
+            if let Val::Table(table_ref) = table
+                && let Some(table) = state.gc.tables.get_mut(table_ref)
+            {
+                let _ = table.raw_set(
+                    Val::Num(index as f64),
+                    create_string(state, addon_name),
+                    &state.gc.string_arena,
+                );
+            }
         }
     }
 
     /// Restore globals that EnvironmentCleanup nil'd but later addons need.
-    ///
-    /// Call immediately after loading Blizzard_EnvironmentCleanup so that
-    /// subsequent Blizzard addons (Menu, SharedXMLGame, etc.) can use
-    /// `CreateSecureDelegate` at file scope.
     pub fn restore_post_cleanup_globals(&self) {
-        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&self.compat_lua);
+        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&*self.rilua());
     }
 
     /// Apply post-load workarounds for Blizzard code that depends on
     /// unimplemented engine features (AnimationGroups, EditMode, etc.).
-    /// Must be called after all addons are loaded and before firing events.
     pub fn apply_post_load_workarounds(&self) {
         super::workarounds::apply(self);
         self.restore_post_cleanup_globals();
-        // Wrap seterrorhandler with newsecurefunction so coroutine.create rejects it.
-        // Done here because BugGrabber overwrites it during addon loading.
-        let _ = self.compat_lua.load(
-            "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))"
-        ).exec();
+        let _ = self.exec(
+            "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))",
+        );
     }
 
     /// Apply workarounds that must run after startup events.
-    ///
-    /// Some fixes (like BagsBar anchoring) get undone by event handlers
-    /// (e.g. EDIT_MODE_LAYOUTS_UPDATED repositions managed frames).
     pub fn apply_post_event_workarounds(&self) {
         super::workarounds::apply_post_event(self);
     }
@@ -175,47 +251,97 @@ impl WowLuaEnv {
     }
 
     /// Fire an event with arguments to all registered frames.
-    pub fn fire_event_with_args(&self, event: &str, args: &[Value]) -> Result<()> {
-        let listeners =
-            super::script_helpers::get_event_listeners_lua_order(&self.compat_lua, event)?;
+    pub fn fire_event_with_args(&self, event: &str, args: &[Val]) -> Result<()> {
+        let listeners = {
+            let mut lua = self.lua.borrow_mut();
+            get_event_listeners(lua.state_mut(), event)
+        };
         for widget_id in listeners {
             self.dispatch_event_to_frame(widget_id, event, args)?;
         }
         Ok(())
     }
 
-    /// Dispatch a single event to one registered frame (OnEvent handler + unit callbacks).
-    fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Value]) -> Result<()> {
-        use super::script_helpers::{
-            call_error_handler, dispatch_frame_unit_event_callbacks, get_frame_ref, get_script,
-        };
-        let Some(frame) = get_frame_ref(&self.compat_lua, widget_id) else {
-            return Ok(());
-        };
-        let addon_idx = self
-            .state
+    fn handler_owner_addon(&self, widget_id: u64) -> Option<u16> {
+        self.state
             .borrow()
             .widgets
             .get(widget_id)
-            .and_then(|f| f.owner_addon);
-        if let Some(handler) = get_script(&self.compat_lua, widget_id, "OnEvent") {
-            let taint = addon_taint_name(&self.state, addon_idx);
-            let blizzard = is_blizzard_addon(&self.state, addon_idx);
-            let mut call_args = vec![
-                frame.clone(),
-                Value::String(self.compat_lua.create_string(event)?),
-            ];
-            call_args.extend(args.iter().cloned());
-            let start = Instant::now();
-            self.state.borrow_mut().executing_addon_index = addon_idx;
-            let result = call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args);
-            self.state.borrow_mut().executing_addon_index = None;
-            if let Err(e) = result {
-                call_error_handler(&self.compat_lua, &e.to_string());
-            }
-            record_addon_time(&self.state, addon_idx, &start);
+            .and_then(|frame| frame.owner_addon)
+    }
+
+    fn build_event_call_args(
+        &self,
+        lua: &mut rilua::Lua,
+        widget_id: u64,
+        event: &str,
+        args: &[Val],
+    ) -> Result<Vec<Val>> {
+        let frame = {
+            let state = lua.state_mut();
+            frame_ref(state, widget_id)?
+        };
+        let event_name = {
+            let state = lua.state_mut();
+            create_string(state, event)
+        };
+        let mut call_args = Vec::with_capacity(args.len() + 2);
+        call_args.push(frame);
+        call_args.push(event_name);
+        call_args.extend_from_slice(args);
+        Ok(call_args)
+    }
+
+    fn build_script_call_args(
+        &self,
+        lua: &mut rilua::Lua,
+        widget_id: u64,
+        extra_args: Vec<Val>,
+    ) -> Result<Vec<Val>> {
+        let frame = {
+            let state = lua.state_mut();
+            frame_ref(state, widget_id)?
+        };
+        let mut call_args = Vec::with_capacity(extra_args.len() + 1);
+        call_args.push(frame);
+        call_args.extend(extra_args);
+        Ok(call_args)
+    }
+
+    fn call_widget_handler(
+        &self,
+        lua: &mut rilua::Lua,
+        addon_idx: Option<u16>,
+        handler: Val,
+        call_args: &[Val],
+    ) {
+        let taint = addon_taint_name(&self.state, addon_idx);
+        let blizzard = is_blizzard_addon(&self.state, addon_idx);
+        let _ = (taint, blizzard);
+
+        let start = Instant::now();
+        self.state.borrow_mut().executing_addon_index = addon_idx;
+        let call_result = call_rilua_function(lua, handler, call_args);
+        self.state.borrow_mut().executing_addon_index = None;
+        if let Err(error) = call_result {
+            call_error_handler(lua, &error.to_string());
         }
-        dispatch_frame_unit_event_callbacks(&self.compat_lua, widget_id, frame, args, event)?;
+        record_addon_time(&self.state, addon_idx, &start);
+    }
+
+    fn dispatch_event_to_frame(&self, widget_id: u64, event: &str, args: &[Val]) -> Result<()> {
+        let addon_idx = self.handler_owner_addon(widget_id);
+        let mut lua = self.lua.borrow_mut();
+        let handler = {
+            let state = lua.state_mut();
+            get_script(state, widget_id, "OnEvent")
+        };
+        let Some(handler) = handler else {
+            return Ok(());
+        };
+
+        let call_args = self.build_event_call_args(&mut lua, widget_id, event, args)?;
+        self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
         Ok(())
     }
 
@@ -224,35 +350,27 @@ impl WowLuaEnv {
         &self,
         widget_id: u64,
         handler_name: &str,
-        extra_args: Vec<Value>,
+        extra_args: Vec<Val>,
     ) -> Result<()> {
-        use super::script_helpers::{call_error_handler, get_script};
+        let addon_idx = self.handler_owner_addon(widget_id);
+        let mut lua = self.lua.borrow_mut();
+        let handler = {
+            let state = lua.state_mut();
+            get_script(state, widget_id, handler_name)
+        };
+        let Some(handler) = handler else {
+            return Ok(());
+        };
 
-        if let Some(handler) = get_script(&self.compat_lua, widget_id, handler_name) {
-            let frame = super::frame::frame_ref(&self.compat_lua, widget_id)?;
-            let addon_idx = self
-                .state
-                .borrow()
-                .widgets
-                .get(widget_id)
-                .and_then(|f| f.owner_addon);
-            let taint = addon_taint_name(&self.state, addon_idx);
-            let blizzard = is_blizzard_addon(&self.state, addon_idx);
-            let mut call_args = vec![frame];
-            call_args.extend(extra_args);
-            self.state.borrow_mut().executing_addon_index = addon_idx;
-            if let Err(e) = call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args) {
-                call_error_handler(&self.compat_lua, &e.to_string());
-            }
-            self.state.borrow_mut().executing_addon_index = None;
-        }
-
+        let call_args = self.build_script_call_args(&mut lua, widget_id, extra_args)?;
+        self.call_widget_handler(&mut lua, addon_idx, handler, &call_args);
         Ok(())
     }
 
     /// Check if a script handler is registered for a widget.
     pub fn has_script_handler(&self, widget_id: u64, handler_name: &str) -> bool {
-        super::script_helpers::get_script(&self.compat_lua, widget_id, handler_name).is_some()
+        let mut lua = self.lua.borrow_mut();
+        get_script(lua.state_mut(), widget_id, handler_name).is_some()
     }
 
     /// Resolve a clicked frame to the nearest EditBox in its parent chain.
@@ -276,14 +394,10 @@ impl WowLuaEnv {
     }
 
     /// Simulate a left-click on a frame by ID.
-    ///
-    /// Handles EditBox focus management (focus/unfocus), then fires
-    /// OnMouseDown, OnClick, and OnMouseUp in sequence.
     pub fn send_click(&self, frame_id: u64) -> Result<()> {
         let editbox_target = self.resolve_editbox_focus_target(Some(frame_id));
         let old_focus = self.state.borrow().focused_frame_id;
 
-        // EditBox focus management (mirrors iced_app::update::update_editbox_focus)
         if let Some(editbox_id) = editbox_target {
             if old_focus != Some(editbox_id) {
                 self.state.borrow_mut().focused_frame_id = Some(editbox_id);
@@ -297,13 +411,10 @@ impl WowLuaEnv {
             self.fire_script_handler(old_id, "OnEditFocusLost", vec![])?;
         }
 
-        let button_val = Value::String(self.compat_lua.create_string("LeftButton")?);
-        self.fire_script_handler(frame_id, "OnMouseDown", vec![button_val.clone()])?;
-        let down_val = Value::Boolean(false);
-        self.fire_script_handler(frame_id, "OnClick", vec![button_val.clone(), down_val])?;
-        let up_inside_val = Value::Boolean(true);
-        self.fire_script_handler(frame_id, "OnMouseUp", vec![button_val, up_inside_val])?;
-
+        let button_val = self.lua_string("LeftButton");
+        self.fire_script_handler(frame_id, "OnMouseDown", vec![button_val])?;
+        self.fire_script_handler(frame_id, "OnClick", vec![button_val, Val::Bool(false)])?;
+        self.fire_script_handler(frame_id, "OnMouseUp", vec![button_val, Val::Bool(true)])?;
         Ok(())
     }
 
@@ -315,53 +426,39 @@ impl WowLuaEnv {
             return Ok(false);
         }
 
-        // Parse command and message: "/wa options" -> cmd="/wa", msg="options"
         let (cmd, msg) = match input.find(' ') {
             Some(pos) => (&input[..pos], input[pos + 1..].trim()),
             None => (input, ""),
         };
         let cmd_lower = cmd.to_lowercase();
 
-        // Scan globals for SLASH_* variables to find a matching command
-        let globals = self.compat_lua.globals();
-        let slash_cmd_list: mlua::Table = globals.get("SlashCmdList")?;
+        let mut lua = self.lua.borrow_mut();
+        let state = lua.state_mut();
+        let globals = state.global;
+        let slash_cmd_list = LuaApiMut::get_global_val(&mut *lua, "SlashCmdList");
+        let Val::Table(slash_table_ref) = slash_cmd_list else {
+            return Ok(false);
+        };
 
-        // Iterate through all globals looking for SLASH_* patterns
-        for pair in globals.pairs::<String, Value>() {
-            let (key, value) = pair?;
-
-            // Look for SLASH_NAME1, SLASH_NAME2, etc.
-            if !key.starts_with("SLASH_") {
+        for (name, handler) in matching_slash_handlers(state, globals, slash_table_ref, &cmd_lower)
+        {
+            if !matches!(handler, Val::Function(_)) {
                 continue;
             }
-
-            // Extract the command name (e.g., "SLASH_WEAKAURAS1" -> "WEAKAURAS")
-            let suffix = &key[6..]; // Skip "SLASH_"
-            let name = suffix.trim_end_matches(|c: char| c.is_ascii_digit());
-            if name.is_empty() {
-                continue;
-            }
-
-            // Check if this SLASH_ variable matches our command
-            if let Value::String(slash_str) = value
-                && slash_str.to_str()?.to_lowercase() == cmd_lower
-            {
-                // Found a match! Look up the handler in SlashCmdList
-                let handler: Option<mlua::Function> = slash_cmd_list.get(name).ok();
-                if let Some(handler) = handler {
-                    let msg_value = self.compat_lua.create_string(msg)?;
-                    handler.call::<()>(msg_value)?;
-                    return Ok(true);
-                }
-            }
+            let msg_val = create_string(state, msg);
+            let _ = call_rilua_function(&mut lua, handler, &[msg_val])?;
+            let _ = name;
+            return Ok(true);
         }
 
         Ok(false)
     }
 
-    /// Get access to the Lua state.
-    pub fn lua(&self) -> &Lua {
-        &self.compat_lua
+    /// Call a named global Lua function.
+    pub fn call_global(&self, name: &str, args: &[Val]) -> Result<Vec<Val>> {
+        let mut lua = self.lua.borrow_mut();
+        let func = LuaApiMut::get_global_val(&mut *lua, name);
+        call_rilua_function(&mut lua, func, args).map_err(Into::into)
     }
 
     /// Get access to the simulator state.
@@ -369,17 +466,8 @@ impl WowLuaEnv {
         &self.state
     }
 
-    /// Create a loader environment borrowing from this environment.
-    pub fn loader_env(&self) -> super::loader_env::LoaderEnv<'_> {
-        super::loader_env::LoaderEnv::new(&self.compat_lua, Rc::clone(&self.state))
-    }
-
     /// Set the font system for text measurement from Lua API methods.
-    ///
-    /// This stores the font system as Lua app_data so that methods like
-    /// `GetStringWidth()` can measure text accurately via cosmic-text.
     pub fn set_font_system(&self, font_system: Rc<RefCell<WowFontSystem>>) {
-        self.compat_lua.set_app_data(Rc::clone(&font_system));
         let mut rilua = self.rilua_mut();
         let app_data = rilua
             .state_mut()
@@ -393,7 +481,6 @@ impl WowLuaEnv {
         let mut state = self.state.borrow_mut();
         state.screen_width = width;
         state.screen_height = height;
-        // Screen resize invalidates all cached layout rects and strata buckets.
         state.invalidate_strata_buckets();
         state.widgets.clear_all_layout_rects();
         for name in &["UIParent", "WorldFrame"] {
@@ -445,65 +532,112 @@ impl WowLuaEnv {
     pub fn schedule_timer(
         &self,
         seconds: f64,
-        callback: mlua::Function,
-        interval: Option<std::time::Duration>,
+        callback: Val,
+        interval: Option<Duration>,
         iterations: Option<i32>,
     ) -> Result<u64> {
         let id = next_timer_id();
-        let callback_key = self.compat_lua.create_registry_value(callback)?;
-        let fire_at = Instant::now() + std::time::Duration::from_secs_f64(seconds);
-
-        let owner_addon = self.state.borrow().loading_addon_index;
+        {
+            let mut lua = self.lua.borrow_mut();
+            crate::lua_api::rilua_timer_layout::store_timer_callback(lua.state_mut(), id, callback);
+        }
+        let owner_addon = {
+            let state = self.state.borrow();
+            state.loading_addon_index.or(state.executing_addon_index)
+        };
         let timer = PendingTimer {
             id,
-            fire_at,
-            callback_key,
+            fire_at: Instant::now() + Duration::from_secs_f64(seconds),
             interval,
             remaining: iterations,
             cancelled: false,
-            handle_key: None,
             owner_addon,
         };
-
-        self.state.borrow_mut().timers.push_back(timer);
+        self.state.borrow_mut().rilua_timers.push_back(timer);
         Ok(id)
     }
 
-    /// Fire OnUpdate handlers for all frames that have them registered,
-    /// then tick animation groups.
+    /// Run ready timers and return how many callbacks fired.
+    pub fn process_timers(&self) -> Result<usize> {
+        let now = Instant::now();
+        let mut fired = 0usize;
+        let mut timers = {
+            let mut state = self.state.borrow_mut();
+            let mut pending = std::collections::VecDeque::new();
+            std::mem::swap(&mut pending, &mut state.rilua_timers);
+            pending
+        };
+
+        let mut requeue = std::collections::VecDeque::new();
+        while let Some(mut timer) = timers.pop_front() {
+            if timer_should_wait(&timer, now) {
+                requeue.push_back(timer);
+                continue;
+            }
+
+            let Some(callback) = self.timer_callback(timer.id) else {
+                continue;
+            };
+
+            self.fire_timer_callback(timer.owner_addon, callback);
+            fired += 1;
+
+            if reschedule_timer(&mut timer, now) {
+                requeue.push_back(timer);
+                continue;
+            }
+
+            self.remove_timer_callback(timer.id);
+        }
+
+        self.state.borrow_mut().rilua_timers = requeue;
+        Ok(fired)
+    }
+
+    /// Fire OnUpdate handlers for all frames that have them registered.
     pub fn fire_on_update(&self, elapsed: f64) -> Result<()> {
         super::on_update::fire(self, elapsed)
     }
 
-    /// Read and clear `__addon_timing`, applying accumulated ms to each addon.
     fn drain_addon_timing(&self) {
-        let Ok(timing) = self
-            .compat_lua
-            .named_registry_value::<mlua::Table>("__addon_timing")
-        else {
+        let mut lua = self.lua.borrow_mut();
+        let state = lua.state_mut();
+        let timing = registry_get(state, "__addon_timing");
+        let Val::Table(timing_ref) = timing else {
             return;
         };
-        let mut keys = Vec::new();
-        let mut state = self.state.borrow_mut();
-        for pair in timing.pairs::<i64, f64>() {
-            if let Ok((idx, ms)) = pair {
-                keys.push(idx);
-                if let Some(addon) = state.addons.get_mut(idx as usize) {
+        let entries = state
+            .gc
+            .tables
+            .get(timing_ref)
+            .map(|table| table.hash_entries())
+            .unwrap_or_default();
+        let mut consumed_keys = Vec::new();
+        {
+            let mut sim = self.state.borrow_mut();
+            for (key, value) in entries {
+                let Val::Num(idx) = key else {
+                    continue;
+                };
+                let Val::Num(ms) = value else {
+                    continue;
+                };
+                consumed_keys.push(idx);
+                if let Some(addon) = sim.addons.get_mut(idx as usize) {
                     addon.runtime.current_frame_ms += ms;
                 }
             }
         }
-        drop(state);
-        // Clear in-place (Lua dispatch holds a reference to this table).
-        for key in keys {
-            let _ = timing.raw_set(key, mlua::Value::Nil);
+        for idx in consumed_keys {
+            if let Some(table) = state.gc.tables.get_mut(timing_ref) {
+                let _ = table.raw_set(Val::Num(idx), Val::Nil, &state.gc.string_arena);
+            }
         }
     }
 
     pub(crate) fn finalize_frame_metrics(&self, frame_elapsed_ms: f64) {
         self.drain_addon_timing();
         let mut state = self.state.borrow_mut();
-        // Update app-level frame metrics (total frame time for percentage calculations).
         let app = &mut state.app_frame_metrics;
         app.recent_frame_ms.push_back(frame_elapsed_ms);
         if app.recent_frame_ms.len() > 60 {
@@ -534,41 +668,26 @@ impl WowLuaEnv {
     }
 
     /// Fire `EDIT_MODE_LAYOUTS_UPDATED` with layout info from `C_EditMode.GetLayouts()`.
-    ///
-    /// Triggers `EditModeManagerFrame:UpdateLayoutInfo()` to initialize `layoutInfo`
-    /// and unblock action bar positioning. No-op if EditMode addon isn't loaded.
     pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
-        let Ok(true) = self
-            .compat_lua
-            .load("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
-            .eval::<bool>()
+        let Ok(true) =
+            self.eval::<bool>("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
         else {
             return Ok(());
         };
 
-        let Ok(info) = self
-            .compat_lua
-            .load("return C_EditMode.GetLayouts()")
-            .eval::<mlua::Table>()
-        else {
-            return Ok(());
-        };
-
-        self.fire_event_with_args(
-            "EDIT_MODE_LAYOUTS_UPDATED",
-            &[Value::Table(info), Value::Boolean(true)],
-        )
+        let info = self.eval::<Val>("return C_EditMode.GetLayouts()")?;
+        self.fire_event_with_args("EDIT_MODE_LAYOUTS_UPDATED", &[info, Val::Bool(true)])
     }
 
     /// Get the time until the next timer fires, if any.
-    pub fn next_timer_delay(&self) -> Option<std::time::Duration> {
+    pub fn next_timer_delay(&self) -> Option<Duration> {
         let state = self.state.borrow();
         let now = Instant::now();
         state
-            .timers
+            .rilua_timers
             .iter()
-            .filter(|t| !t.cancelled)
-            .map(|t| t.fire_at.saturating_duration_since(now))
+            .filter(|timer| !timer.cancelled)
+            .map(|timer| timer.fire_at.saturating_duration_since(now))
             .min()
     }
 
@@ -577,4 +696,115 @@ impl WowLuaEnv {
         let state = self.state.borrow();
         super::diagnostics::dump_frames(&state)
     }
+
+    fn timer_callback(&self, timer_id: u64) -> Option<Val> {
+        let mut lua = self.lua.borrow_mut();
+        let callback =
+            crate::lua_api::rilua_timer_layout::get_timer_callback(lua.state_mut(), timer_id);
+        (!matches!(callback, Val::Nil)).then_some(callback)
+    }
+
+    fn fire_timer_callback(&self, owner_addon: Option<u16>, callback: Val) {
+        let start = Instant::now();
+        self.state.borrow_mut().executing_addon_index = owner_addon;
+        let call_result = {
+            let mut lua = self.lua.borrow_mut();
+            call_rilua_function(&mut lua, callback, &[])
+        };
+        self.state.borrow_mut().executing_addon_index = None;
+        if let Err(error) = call_result {
+            let mut lua = self.lua.borrow_mut();
+            call_error_handler(&mut lua, &error.to_string());
+        }
+        record_addon_time(&self.state, owner_addon, &start);
+    }
+
+    fn remove_timer_callback(&self, timer_id: u64) {
+        let mut lua = self.lua.borrow_mut();
+        crate::lua_api::rilua_timer_layout::remove_timer_callback(lua.state_mut(), timer_id);
+    }
+}
+
+fn global_hash_entries(
+    state: &rilua::vm::state::LuaState,
+    globals: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+) -> Vec<(Val, Val)> {
+    state
+        .gc
+        .tables
+        .get(globals)
+        .map(|table| table.hash_entries())
+        .unwrap_or_default()
+}
+
+fn slash_command_name(key: &str) -> Option<&str> {
+    if !key.starts_with("SLASH_") {
+        return None;
+    }
+    let suffix = &key[6..];
+    let name = suffix.trim_end_matches(|c: char| c.is_ascii_digit());
+    (!name.is_empty()).then_some(name)
+}
+
+fn matching_slash_handlers(
+    state: &mut rilua::vm::state::LuaState,
+    globals: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    slash_table_ref: rilua::vm::gc::arena::GcRef<rilua::vm::table::Table>,
+    command: &str,
+) -> Vec<(String, Val)> {
+    let entries = global_hash_entries(state, globals);
+    let mut matches = Vec::new();
+
+    for (key, value) in entries {
+        let Some(key_string) = val_to_string(state, key) else {
+            continue;
+        };
+        let Some(name) = slash_command_name(&key_string) else {
+            continue;
+        };
+        let Some(slash_command) = val_to_string(state, value) else {
+            continue;
+        };
+        if slash_command.to_lowercase() != command {
+            continue;
+        }
+
+        let handler = state
+            .gc
+            .tables
+            .get(slash_table_ref)
+            .map(|table| {
+                table.get_str(
+                    state.gc.intern_string(name.as_bytes()),
+                    &state.gc.string_arena,
+                )
+            })
+            .unwrap_or(Val::Nil);
+        matches.push((name.to_string(), handler));
+    }
+
+    matches
+}
+
+fn timer_should_wait(timer: &PendingTimer, now: Instant) -> bool {
+    timer.cancelled || timer.fire_at > now
+}
+
+fn reschedule_timer(timer: &mut PendingTimer, now: Instant) -> bool {
+    let Some(interval) = timer.interval else {
+        return false;
+    };
+
+    let should_repeat = match timer.remaining {
+        Some(remaining) if remaining <= 1 => false,
+        Some(remaining) => {
+            timer.remaining = Some(remaining - 1);
+            true
+        }
+        None => true,
+    };
+    if should_repeat {
+        timer.fire_at = now + interval;
+    }
+    should_repeat
 }

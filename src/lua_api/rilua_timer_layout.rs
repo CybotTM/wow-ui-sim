@@ -59,13 +59,17 @@ fn timer_callback_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Tab
     }
     let new_table = state.gc.alloc_table(Table::new());
     if let Some(reg) = state.gc.tables.get_mut(state.registry) {
-        let _ = reg.raw_set(Val::Str(key_ref), Val::Table(new_table), &state.gc.string_arena);
+        let _ = reg.raw_set(
+            Val::Str(key_ref),
+            Val::Table(new_table),
+            &state.gc.string_arena,
+        );
     }
     new_table
 }
 
 /// Store a callback `Val` for a timer ID in the registry table.
-fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback: Val) {
+pub(crate) fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback: Val) {
     let table = timer_callback_table(state);
     if let Some(t) = state.gc.tables.get_mut(table) {
         let _ = t.raw_set(Val::Num(timer_id as f64), callback, &state.gc.string_arena);
@@ -682,7 +686,11 @@ fn register_c_timer(lua: &mut rilua::Lua) -> LuaResult<()> {
         .tables
         .get_mut(global)
         .ok_or_else(|| runtime_error("missing global table"))?
-        .raw_set(Val::Str(key), Val::Table(c_timer_ref), &state.gc.string_arena)?;
+        .raw_set(
+            Val::Str(key),
+            Val::Table(c_timer_ref),
+            &state.gc.string_arena,
+        )?;
 
     Ok(())
 }
@@ -704,7 +712,11 @@ fn register_layout_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
         .tables
         .get_mut(global)
         .ok_or_else(|| runtime_error("missing global table"))?
-        .raw_set(Val::Str(key), Val::Table(layout_ref), &state.gc.string_arena)?;
+        .raw_set(
+            Val::Str(key),
+            Val::Table(layout_ref),
+            &state.gc.string_arena,
+        )?;
 
     Ok(())
 }

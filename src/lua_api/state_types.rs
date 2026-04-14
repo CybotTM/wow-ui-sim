@@ -1,9 +1,10 @@
 //! Plain data types used by SimState.
 
 use crate::lua_api::game_data::AuraInfo;
-use mlua::RegistryKey;
 use std::collections::{HashMap, HashSet, VecDeque};
 use std::time::Instant;
+
+pub use crate::lua_api::rilua_timer_layout::RiluaPendingTimer as PendingTimer;
 
 /// What is currently held on the cursor (drag-and-drop state).
 #[derive(Debug, Clone)]
@@ -12,26 +13,6 @@ pub enum CursorInfo {
     Action { slot: u32, spell_id: u32 },
     /// A spell from the spellbook (doesn't remove from spellbook).
     Spell { spell_id: u32 },
-}
-
-/// A pending timer callback.
-pub struct PendingTimer {
-    /// Unique timer ID.
-    pub id: u64,
-    /// When this timer should fire.
-    pub fire_at: Instant,
-    /// Lua function to call (stored in registry).
-    pub callback_key: RegistryKey,
-    /// For tickers: interval between firings.
-    pub interval: Option<std::time::Duration>,
-    /// For tickers with limited iterations: remaining count.
-    pub remaining: Option<i32>,
-    /// Whether this timer has been cancelled.
-    pub cancelled: bool,
-    /// The timer/ticker handle table (stored in registry) to pass to callback.
-    pub handle_key: Option<RegistryKey>,
-    /// Addon that created this timer (for profiler attribution).
-    pub owner_addon: Option<u16>,
 }
 
 /// Per-addon runtime profiler metrics, updated each frame.
