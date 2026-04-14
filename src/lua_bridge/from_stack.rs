@@ -3,11 +3,11 @@
 
 use std::marker::PhantomData;
 
-use rilua::vm::state::LuaState;
 use rilua::LuaError;
 use rilua::LuaResult;
 use rilua::RuntimeError;
 use rilua::Val;
+use rilua::vm::state::LuaState;
 
 // ---------------------------------------------------------------------------
 // Stack helpers

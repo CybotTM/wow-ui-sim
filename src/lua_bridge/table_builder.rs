@@ -1,13 +1,13 @@
 //! [`TableBuilder`]: fluent builder for creating and populating Lua tables.
 
-use rilua::vm::closure::{Closure, RustClosure, RustFn};
-use rilua::vm::gc::arena::GcRef;
-use rilua::vm::state::LuaState;
-use rilua::vm::table::Table as RiluaTable;
 use rilua::LuaError;
 use rilua::LuaResult;
 use rilua::RuntimeError;
 use rilua::Val;
+use rilua::vm::closure::{Closure, RustClosure, RustFn};
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table as RiluaTable;
 
 use crate::lua_bridge::IntoStack;
 

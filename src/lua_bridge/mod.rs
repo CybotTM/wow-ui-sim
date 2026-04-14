@@ -17,14 +17,14 @@ mod macros;
 mod multivalue;
 mod table_builder;
 
-pub(crate) use from_stack::stack_val;
 pub use from_stack::FrameArena;
 pub use from_stack::FrameObject;
 pub use from_stack::FrameRef;
 pub use from_stack::FromMethodSelf;
 pub use from_stack::FromStack;
+pub(crate) use from_stack::stack_val;
 pub use into_stack::IntoStack;
 pub use multivalue::MultiValue;
+pub use table_builder::TableBuilder;
 pub use table_builder::create_frame_table;
 pub(crate) use table_builder::table_set_rust_fn;
-pub use table_builder::TableBuilder;
