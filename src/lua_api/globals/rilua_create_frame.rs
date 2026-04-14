@@ -165,11 +165,9 @@ pub fn ui_dropdown_menu_add_button(state: &mut LuaState) -> LuaResult<u32> {
 
         if let Val::Table(fields_ref) = btn_fields {
             for (k, v) in array_pairs.into_iter().chain(hash_pairs) {
-                let _ = state
-                    .gc
-                    .tables
-                    .get_mut(fields_ref)
-                    .map(|t| t.raw_set(k, v, &state.gc.string_arena));
+                if let Some(t) = state.gc.tables.get_mut(fields_ref) {
+                    let _ = t.raw_set(k, v, &state.gc.string_arena);
+                }
             }
         }
     }
@@ -255,14 +253,14 @@ pub fn ui_dropdown_menu_set_text(state: &mut LuaState) -> LuaResult<u32> {
 pub fn ui_dropdown_menu_get_text(state: &mut LuaState) -> LuaResult<u32> {
     let frame: Val = FromStack::from_stack(state, 1)?;
     if let Some(id) = extract_frame_id(state, frame) {
-        let sim = borrow_state(state)?;
-        if let Some(f) = sim.widgets.get(id) {
-            if let Some(ref text) = f.text {
-                drop(sim);
-                let val = create_string(state, text);
-                state.push(val);
-                return Ok(1);
-            }
+        let text_owned: Option<String> = {
+            let sim = borrow_state(state)?;
+            sim.widgets.get(id).and_then(|f| f.text.clone())
+        };
+        if let Some(text) = text_owned {
+            let val = create_string(state, &text);
+            state.push(val);
+            return Ok(1);
         }
     }
     state.push(Val::Nil);
@@ -637,11 +635,9 @@ fn set_frame_field(state: &mut LuaState, field_name: &str) -> LuaResult<u32> {
         let fields = get_or_create_frame_fields(state, id);
         let key = create_string(state, field_name);
         if let Val::Table(fields_ref) = fields {
-            let _ = state
-                .gc
-                .tables
-                .get_mut(fields_ref)
-                .map(|t| t.raw_set(key, value, &state.gc.string_arena));
+            if let Some(t) = state.gc.tables.get_mut(fields_ref) {
+                let _ = t.raw_set(key, value, &state.gc.string_arena);
+            }
         }
     }
     Ok(0)

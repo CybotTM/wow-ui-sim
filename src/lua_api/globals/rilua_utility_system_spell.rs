@@ -83,12 +83,12 @@ pub fn getglobal(state: &mut LuaState) -> LuaResult<u32> {
         String::from_utf8(lua_str.data().to_vec())
             .map_err(|_| runtime_error("getglobal: non-UTF8 name"))?
     };
-    let globals = state.globals;
+    let global = state.global;
     let key_ref = state.gc.intern_string(name.as_bytes());
     let val = state
         .gc
         .tables
-        .get(globals)
+        .get(global)
         .map(|t| t.get_str(key_ref, &state.gc.string_arena))
         .unwrap_or(Val::Nil);
     state.push(val);
@@ -111,9 +111,9 @@ pub fn setglobal(state: &mut LuaState) -> LuaResult<u32> {
         String::from_utf8(lua_str.data().to_vec())
             .map_err(|_| runtime_error("setglobal: non-UTF8 name"))?
     };
-    let globals = state.globals;
+    let global = state.global;
     let key_ref = state.gc.intern_string(name.as_bytes());
-    if let Some(t) = state.gc.tables.get_mut(globals) {
+    if let Some(t) = state.gc.tables.get_mut(global) {
         let _ = t.raw_set(Val::Str(key_ref), value, &state.gc.string_arena);
     }
     Ok(0)

@@ -12,10 +12,10 @@
 //! rather than converted by hand. See the script for the template.
 
 use crate::lua_api::game_data::{AuraInfo, CastingState, PartyMember, SpellCooldownState, TargetInfo};
-use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut, create_string};
-use crate::lua_bridge::{FromStack, IntoStack, TableBuilder};
+use crate::lua_api::rilua_methods::{borrow_state, borrow_state_mut};
+use crate::lua_bridge::{FromStack, TableBuilder};
 use rilua::vm::state::LuaState;
-use rilua::{LuaResult, Val, runtime_error};
+use rilua::{LuaResult, Val};
 
 // ── Entry point ──────────────────────────────────────────────────────────────
 
@@ -710,9 +710,14 @@ fn has_achievement(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn earn_achievement(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::{Event, EventArg};
     let id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.world.earned_achievements.insert(id);
-    push_fire_event_call(state, "ACHIEVEMENT_EARNED", &[Val::Num(id as f64)])?;
+    let mut st = borrow_state_mut(state)?;
+    st.world.earned_achievements.insert(id);
+    st.events.push(Event {
+        name: "ACHIEVEMENT_EARNED".to_string(),
+        args: vec![EventArg::Number(id as f64)],
+    });
     Ok(0)
 }
 
@@ -806,16 +811,15 @@ fn set_guild_info(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn join_guild(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::{Event, EventArg};
     let name = String::from_stack(state, 1)?;
     let rank = String::from_stack(state, 2)?;
     let num_members = i32::from_stack(state, 3)?;
-    {
-        let mut st = borrow_state_mut(state)?;
-        st.world.guild_name = Some(name);
-        st.world.guild_rank = Some(rank);
-        st.world.guild_num_members = num_members;
-    }
-    push_fire_event_call(state, "PLAYER_GUILD_UPDATE", &[])?;
+    let mut st = borrow_state_mut(state)?;
+    st.world.guild_name = Some(name);
+    st.world.guild_rank = Some(rank);
+    st.world.guild_num_members = num_members;
+    st.events.push(Event { name: "PLAYER_GUILD_UPDATE".to_string(), args: vec![] });
     Ok(0)
 }
 
@@ -828,13 +832,12 @@ fn clear_guild(state: &mut LuaState) -> LuaResult<u32> {
 }
 
 fn leave_guild(state: &mut LuaState) -> LuaResult<u32> {
-    {
-        let mut st = borrow_state_mut(state)?;
-        st.world.guild_name = None;
-        st.world.guild_rank = None;
-        st.world.guild_num_members = 0;
-    }
-    push_fire_event_call(state, "PLAYER_GUILD_UPDATE", &[])?;
+    use crate::event::{Event, EventArg};
+    let mut st = borrow_state_mut(state)?;
+    st.world.guild_name = None;
+    st.world.guild_rank = None;
+    st.world.guild_num_members = 0;
+    st.events.push(Event { name: "PLAYER_GUILD_UPDATE".to_string(), args: vec![] });
     Ok(0)
 }
 
@@ -845,7 +848,7 @@ fn fire_event_admin(state: &mut LuaState) -> LuaResult<u32> {
     use crate::lua_bridge::stack_val;
 
     let event_name = String::from_stack(state, 1)?;
-    let nargs = (state.top as i32) - (state.base as i32);
+    let nargs = state.top() - state.base as i32;
     let mut event_args = Vec::new();
     for i in 2..=nargs {
         let val = stack_val(state, i);
@@ -1063,48 +1066,35 @@ fn update_premade_listing(state: &mut LuaState) -> LuaResult<u32> {
 // ── Encounter ─────────────────────────────────────────────────────────────────
 
 fn simulate_boss_kill(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::{Event, EventArg};
     let encounter_id = i32::from_stack(state, 1)?;
     let name = String::from_stack(state, 2)?;
     let difficulty_id = i32::from_stack(state, 3)?;
     let group_size = i32::from_stack(state, 4)?;
-    push_fire_event_call(state, "ENCOUNTER_END", &[
-        Val::Num(encounter_id as f64),
-        Val::Num(difficulty_id as f64),
-        Val::Num(group_size as f64),
-        Val::Num(1.0), // success=1
-    ])?;
-    // Also fire BOSS_KILL — reuse helper (name string needs to be interned)
-    push_fire_event_call(state, "BOSS_KILL", &[
-        Val::Num(encounter_id as f64),
-    ])?;
-    // Note: name arg for ENCOUNTER_END/BOSS_KILL requires a string Val which
-    // must be interned. These are queued into SimState events rather than
-    // calling the Lua FireEvent global, so we use the event queue directly.
-    {
-        use crate::event::{Event, EventArg};
-        let mut st = borrow_state_mut(state)?;
-        // Overwrite the last two events with correct name args
-        if let Some(e) = st.events.iter_mut().rev().nth(1) {
-            e.args = vec![
-                EventArg::Number(encounter_id as f64),
-                EventArg::String(name.clone()),
-                EventArg::Number(difficulty_id as f64),
-                EventArg::Number(group_size as f64),
-                EventArg::Number(1.0),
-            ];
-        }
-        if let Some(e) = st.events.last_mut() {
-            e.args = vec![
-                EventArg::Number(encounter_id as f64),
-                EventArg::String(name),
-            ];
-        }
-    }
+    let mut st = borrow_state_mut(state)?;
+    st.events.push(Event {
+        name: "ENCOUNTER_END".to_string(),
+        args: vec![
+            EventArg::Number(encounter_id as f64),
+            EventArg::String(name.clone()),
+            EventArg::Number(difficulty_id as f64),
+            EventArg::Number(group_size as f64),
+            EventArg::Number(1.0), // success
+        ],
+    });
+    st.events.push(Event {
+        name: "BOSS_KILL".to_string(),
+        args: vec![
+            EventArg::Number(encounter_id as f64),
+            EventArg::String(name),
+        ],
+    });
     Ok(0)
 }
 
 fn start_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::lua_api::state::{LootRollInfo};
+    use crate::event::{Event, EventArg};
+    use crate::lua_api::state::LootRollInfo;
     use crate::lua_bridge::stack_val;
 
     let roll_id = i32::from_stack(state, 1)?;
@@ -1130,21 +1120,24 @@ fn start_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
         item_level,
         item_link,
     };
-    {
-        let mut st = borrow_state_mut(state)?;
-        st.world.loot_rolls.insert(roll_id, info);
-    }
-    push_fire_event_call(state, "START_LOOT_ROLL", &[
-        Val::Num(roll_id as f64),
-        Val::Num(roll_time),
-    ])?;
+    let mut st = borrow_state_mut(state)?;
+    st.world.loot_rolls.insert(roll_id, info);
+    st.events.push(Event {
+        name: "START_LOOT_ROLL".to_string(),
+        args: vec![EventArg::Number(roll_id as f64), EventArg::Number(roll_time)],
+    });
     Ok(0)
 }
 
 fn end_loot_roll(state: &mut LuaState) -> LuaResult<u32> {
+    use crate::event::{Event, EventArg};
     let roll_id = i32::from_stack(state, 1)?;
-    borrow_state_mut(state)?.world.loot_rolls.remove(&roll_id);
-    push_fire_event_call(state, "LOOT_ROLLS_COMPLETE", &[Val::Num(roll_id as f64)])?;
+    let mut st = borrow_state_mut(state)?;
+    st.world.loot_rolls.remove(&roll_id);
+    st.events.push(Event {
+        name: "LOOT_ROLLS_COMPLETE".to_string(),
+        args: vec![EventArg::Number(roll_id as f64)],
+    });
     Ok(0)
 }
 
@@ -1258,25 +1251,6 @@ fn build_mail(
         is_gm: false,
         stationery_icon: 0,
     }
-}
-
-/// Queue a fire-event into SimState.events (rilua path — no mlua FireEvent call).
-///
-/// Converts `Val` args to `EventArg` and appends the event. This mirrors the
-/// Lua-side `FireEvent` call used by the mlua path without needing to call
-/// back into Lua from a RustFn.
-fn push_fire_event_call(
-    state: &mut LuaState,
-    event_name: &str,
-    args: &[Val],
-) -> LuaResult<()> {
-    use crate::event::{Event, EventArg};
-    let event_args: Vec<EventArg> = args.iter().map(|v| lua_val_to_event_arg(state, *v)).collect();
-    borrow_state_mut(state)?.events.push(Event {
-        name: event_name.to_string(),
-        args: event_args,
-    });
-    Ok(())
 }
 
 /// Convert a rilua `Val` to an `EventArg`.

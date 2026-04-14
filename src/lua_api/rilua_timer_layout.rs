@@ -89,20 +89,22 @@ pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
 /// Retrieve a stored timer callback by ID.
 pub fn get_timer_callback(state: &mut LuaState, timer_id: u64) -> Val {
     let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
-    let registry = state.gc.tables.get(state.registry);
-    let Some(reg) = registry else {
+    // Resolve the callback table GcRef from the registry.
+    let callback_table_ref = {
+        let reg_key = state.registry;
+        let Some(reg) = state.gc.tables.get(reg_key) else {
+            return Val::Nil;
+        };
+        match reg.get_str(key_ref, &state.gc.string_arena) {
+            Val::Table(t) => t,
+            _ => return Val::Nil,
+        }
+    };
+    // Look up the timer callback by ID.
+    let Some(t) = state.gc.tables.get(callback_table_ref) else {
         return Val::Nil;
     };
-    let callback_table = match reg.get_str(key_ref, &state.gc.string_arena) {
-        Val::Table(t) => t,
-        _ => return Val::Nil,
-    };
-    state
-        .gc
-        .tables
-        .get(callback_table)
-        .map(|t| t.get_raw(Val::Num(timer_id as f64)))
-        .unwrap_or(Val::Nil)
+    t.get(Val::Num(timer_id as f64), &state.gc.string_arena)
 }
 
 // ── Validation ───────────────────────────────────────────────────────────────
