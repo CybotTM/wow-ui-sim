@@ -18,7 +18,7 @@ use super::atlas_bc::{BcAtlasTier, build_bc_entry, init_bc_atlases, write_bc_slo
 pub use super::atlas_bc::{BC_CELL_SIZE, BcFormat, BcTextureEntry, is_bc_supported};
 
 #[cfg(test)]
-pub use super::atlas_bc::set_bc_supported_for_tests;
+pub(crate) use super::atlas_bc::set_bc_supported_for_tests;
 
 /// Cell sizes for each tier.
 pub const TIER_SIZES: [u32; 5] = [64, 128, 256, 512, 2048];

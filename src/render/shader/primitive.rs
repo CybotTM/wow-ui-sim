@@ -283,6 +283,57 @@ mod tests {
         assert!(resolved.vertices.iter().all(|v| v.tex_index == -1));
         assert!(resolved.vertices.iter().all(|v| v.color[3] == 0.0));
     }
+
+    #[test]
+    fn resolved_textures_remap_quad_uvs_into_atlas_slot() {
+        let instance = wgpu::Instance::new(&wgpu::InstanceDescriptor::default());
+        let (device, queue) = pollster::block_on(async {
+            let adapter = instance
+                .request_adapter(&wgpu::RequestAdapterOptions::default())
+                .await
+                .expect("adapter");
+            adapter
+                .request_device(&wgpu::DeviceDescriptor::default())
+                .await
+                .expect("device")
+        });
+
+        let mut pipeline = WowUiPipeline::new(&device, &queue, wgpu::TextureFormat::Rgba8UnormSrgb);
+        let path = r"Interface\Foo\Resolved";
+        let entry = pipeline
+            .texture_atlas_mut()
+            .upload(&queue, path, 16, 16, &[0xff; 16 * 16 * 4])
+            .expect("texture should upload into the atlas");
+
+        let mut batch = QuadBatch::default();
+        batch.push_textured_path(
+            Rectangle::new(Point::ORIGIN, Size::new(16.0, 16.0)),
+            path,
+            [1.0, 1.0, 1.0, 1.0],
+            BlendMode::Alpha,
+        );
+
+        let resolved = resolve_and_scale_quads(&mut pipeline, &batch, 1.0);
+        for vertex in &resolved.vertices {
+            let expected_u = remap_entry_uv(
+                vertex.local_uv[0],
+                entry.uv_x,
+                entry.uv_width,
+                entry.original_width,
+                entry.tier,
+            );
+            let expected_v = remap_entry_uv(
+                vertex.local_uv[1],
+                entry.uv_y,
+                entry.uv_height,
+                entry.original_height,
+                entry.tier,
+            );
+            assert_eq!(vertex.tex_index, entry.tex_index());
+            assert!((vertex.tex_coords[0] - expected_u).abs() < 1e-6);
+            assert!((vertex.tex_coords[1] - expected_v).abs() < 1e-6);
+        }
+    }
 }
 
 use crate::widget::FrameStrata;
@@ -441,51 +492,70 @@ fn resolve_texture_requests(
     vertices: &mut [crate::render::QuadVertex],
 ) {
     for request in requests {
-        // Try RGBA atlas first, then BC atlas
+        let verts = request_vertices(request, vertices);
         if let Some(entry) = atlas.get(&request.path) {
-            let start = request.vertex_start as usize;
-            let end = start + request.vertex_count as usize;
-            let tex_idx = entry.tex_index();
-            for vertex in vertices[start..end].iter_mut() {
-                if vertex.tex_index == -2 {
-                    vertex.tex_index = tex_idx;
-                    vertex.tex_coords[0] = remap_entry_uv(
-                        vertex.tex_coords[0],
-                        entry.uv_x,
-                        entry.uv_width,
-                        entry.original_width,
-                        entry.tier,
-                    );
-                    vertex.tex_coords[1] = remap_entry_uv(
-                        vertex.tex_coords[1],
-                        entry.uv_y,
-                        entry.uv_height,
-                        entry.original_height,
-                        entry.tier,
-                    );
-                }
-            }
+            apply_rgba_entry(verts, entry);
         } else if let Some(bc_entry) = atlas.get_bc(&request.path).copied() {
-            let start = request.vertex_start as usize;
-            let end = start + request.vertex_count as usize;
-            let tex_idx = bc_entry.tex_index();
-            for vertex in vertices[start..end].iter_mut() {
-                if vertex.tex_index == -2 {
-                    vertex.tex_index = tex_idx;
-                    vertex.tex_coords[0] = remap_bc_entry_uv(
-                        vertex.tex_coords[0],
-                        bc_entry.uv_x,
-                        bc_entry.uv_width,
-                        bc_entry.original_width,
-                    );
-                    vertex.tex_coords[1] = remap_bc_entry_uv(
-                        vertex.tex_coords[1],
-                        bc_entry.uv_y,
-                        bc_entry.uv_height,
-                        bc_entry.original_height,
-                    );
-                }
-            }
+            apply_bc_entry(verts, &bc_entry);
+        }
+    }
+}
+
+fn request_vertices<'a>(
+    request: &crate::render::TextureRequest,
+    vertices: &'a mut [crate::render::QuadVertex],
+) -> &'a mut [crate::render::QuadVertex] {
+    let start = request.vertex_start as usize;
+    let end = start + request.vertex_count as usize;
+    &mut vertices[start..end]
+}
+
+fn apply_rgba_entry(
+    vertices: &mut [crate::render::QuadVertex],
+    entry: &crate::render::shader::atlas::TextureEntry,
+) {
+    let tex_idx = entry.tex_index();
+    for vertex in vertices.iter_mut() {
+        if vertex.tex_index == -2 {
+            vertex.tex_index = tex_idx;
+            vertex.tex_coords[0] = remap_entry_uv(
+                vertex.tex_coords[0],
+                entry.uv_x,
+                entry.uv_width,
+                entry.original_width,
+                entry.tier,
+            );
+            vertex.tex_coords[1] = remap_entry_uv(
+                vertex.tex_coords[1],
+                entry.uv_y,
+                entry.uv_height,
+                entry.original_height,
+                entry.tier,
+            );
+        }
+    }
+}
+
+fn apply_bc_entry(
+    vertices: &mut [crate::render::QuadVertex],
+    bc_entry: &crate::render::shader::atlas::BcTextureEntry,
+) {
+    let tex_idx = bc_entry.tex_index();
+    for vertex in vertices.iter_mut() {
+        if vertex.tex_index == -2 {
+            vertex.tex_index = tex_idx;
+            vertex.tex_coords[0] = remap_bc_entry_uv(
+                vertex.tex_coords[0],
+                bc_entry.uv_x,
+                bc_entry.uv_width,
+                bc_entry.original_width,
+            );
+            vertex.tex_coords[1] = remap_bc_entry_uv(
+                vertex.tex_coords[1],
+                bc_entry.uv_y,
+                bc_entry.uv_height,
+                bc_entry.original_height,
+            );
         }
     }
 }
