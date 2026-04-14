@@ -14,3 +14,6 @@
 /docs/local/
 cache/
 PLAN.md
+perf.data
+perf.data.old
+flamegraph.svg
