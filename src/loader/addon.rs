@@ -3,7 +3,7 @@
 use crate::lua_api::LoaderEnv;
 use crate::saved_variables::SavedVariablesManager;
 use crate::toc::TocFile;
-use mlua::Table;
+use rilua::Val;
 use std::path::{Path, PathBuf};
 use std::time::Instant;
 
@@ -15,7 +15,7 @@ use super::{LoadResult, LoadTiming};
 /// Context for loading addon files (name, private table, and addon root for path resolution).
 pub struct AddonContext<'a> {
     pub name: &'a str,
-    pub table: Table,
+    pub table: Val,
     /// Addon root directory for fallback path resolution
     pub addon_root: &'a Path,
     /// Whether this addon uses the secure Lua environment (UseSecureEnvironment: 1)
@@ -117,9 +117,7 @@ fn build_addon_context<'a>(
     toc: &'a TocFile,
     folder_name: &'a str,
 ) -> Result<AddonContext<'a>, LoadError> {
-    let addon_table = env
-        .create_addon_table()
-        .map_err(|e| LoadError::Lua(e.to_string()))?;
+    let addon_table = env.create_addon_table()?;
     register_loading_addon(env, folder_name, toc.is_secure_env());
 
     Ok(AddonContext {

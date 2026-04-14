@@ -1,9 +1,9 @@
 //! rilua-specific methods for WowLuaEnv.
 
-use super::env::{WowLuaAppData, WowLuaEnv};
+use super::env::WowLuaEnv;
+use super::loader_env::{LoaderEnv, create_addon_table};
 use rilua::LuaApiMut;
 use std::cell::{Ref, RefMut};
-use std::rc::Rc;
 
 impl WowLuaEnv {
     // ── rilua execution paths ────────────────────────────────────────
@@ -94,15 +94,28 @@ impl WowLuaEnv {
         let mut lua = self.lua.borrow_mut();
         LuaApiMut::register_function(&mut *lua, name, func)
     }
+
+    /// Build a loader-facing environment wrapper on top of the active rilua VM.
+    pub fn loader_env(&self) -> LoaderEnv<'_> {
+        LoaderEnv::new(self)
+    }
+
+    /// Create the private addon table passed as the second vararg to addon chunks.
+    pub fn create_addon_table(&self) -> crate::Result<rilua::Val> {
+        let mut lua = self.lua.borrow_mut();
+        create_addon_table(&mut lua)
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::lua_api::env::WowLuaAppData;
     use crate::render::font::WowFontSystem;
     use rilua::LuaApi;
     use std::cell::RefCell;
     use std::path::PathBuf;
+    use std::rc::Rc;
 
     #[test]
     fn wow_lua_env_seeds_rilua_app_data_with_sim_state() {
