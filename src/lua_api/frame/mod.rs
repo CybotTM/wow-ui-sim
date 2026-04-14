@@ -6,7 +6,7 @@ pub(crate) mod method_registry;
 pub(crate) mod methods;
 
 pub use handle::{
-    FrameRef, extract_frame_id, frame_fields, frame_ref, frame_userdata, get_sim_state,
+    FrameRef, extract_frame_id, frame_fields, frame_ref, get_sim_state,
     sync_child_to_lua,
 };
 pub(crate) use methods::UnitTooltipInfo;

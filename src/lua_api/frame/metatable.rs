@@ -47,10 +47,10 @@ fn install_forbidden_proxy_metatable(lua: &Lua) -> mlua::Result<()> {
 pub fn create_frame_proxy(lua: &Lua, frame_val: Value) -> mlua::Result<Value> {
     let proxy = lua.create_table()?;
     proxy.raw_set("__lud", frame_val)?;
-    let mt: mlua::Table = lua.named_registry_value("__frame_proxy_mt").or_else(|_| {
+    let mt: mlua::Table = lua.named_registry_value("__frame_proxy_mt").or_else(|_: mlua::Error| {
         let mt = create_frame_proxy_metatable(lua)?;
         lua.set_named_registry_value("__frame_proxy_mt", mt.clone())?;
-        Ok(mt)
+        Ok::<_, mlua::Error>(mt)
     })?;
     proxy.set_metatable(Some(mt));
     Ok(Value::Table(proxy))

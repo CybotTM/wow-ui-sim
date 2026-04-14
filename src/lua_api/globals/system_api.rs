@@ -13,7 +13,7 @@
 //! - Streaming stubs: `GetFileStreamingStatus()`, `GetBackgroundLoadingStatus()`
 
 use crate::lua_api::SimState;
-use crate::lua_api::frame::{FrameRef, extract_frame_id, frame_ref};
+use crate::lua_api::frame::{extract_frame_id, frame_ref};
 use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;

@@ -494,7 +494,7 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetCheckedTexture", |lua, this, texture: Value| {
         let id = this.0;
         let path = extract_texture_path(&texture)?;
-        let is_userdata = crate::lua_api::frame::extract_frame_id(texture).is_some();
+        let is_userdata = crate::lua_api::frame::extract_frame_id(&texture).is_some();
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if !is_userdata && let Some(frame) = state.widgets.get_mut_visual(id) {
@@ -513,7 +513,7 @@ fn add_checked_texture_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut
     methods.add_method("SetDisabledCheckedTexture", |lua, this, texture: Value| {
         let id = this.0;
         let path = extract_texture_path(&texture)?;
-        let is_userdata = crate::lua_api::frame::extract_frame_id(texture).is_some();
+        let is_userdata = crate::lua_api::frame::extract_frame_id(&texture).is_some();
         let state_rc = get_sim_state(lua);
         let mut state = state_rc.borrow_mut();
         if !is_userdata && let Some(frame) = state.widgets.get_mut_visual(id) {

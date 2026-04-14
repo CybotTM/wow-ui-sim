@@ -6,7 +6,7 @@
 use crate::lua_api::SimState;
 use crate::lua_api::frame::sync_child_to_lua;
 use crate::widget::{Frame, WidgetType};
-use mlua::{Lua, Result};
+use mlua::{Lua, Result, Value};
 use std::cell::RefCell;
 use std::rc::Rc;
 
