@@ -419,6 +419,15 @@ impl WowLuaEnv {
         self.lua.borrow_mut().set_global_val(name, val)
     }
 
+    /// Register a Rust function as a global in rilua's Lua state.
+    pub fn register_rilua_function(
+        &self,
+        name: &str,
+        func: rilua::RustFn,
+    ) -> rilua::LuaResult<()> {
+        self.lua.borrow_mut().register_function(name, func)
+    }
+
     /// Get access to the simulator state.
     pub fn state(&self) -> &Rc<RefCell<SimState>> {
         &self.state
@@ -669,6 +678,27 @@ mod tests {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         let got = env.get_rilua_global("__nonexistent_key_xyz");
         assert_eq!(got, rilua::Val::Nil);
+    }
+
+    #[test]
+    fn register_rilua_function_callable_from_rilua() {
+        use rilua::LuaApiMut;
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        fn add_one(state: &mut rilua::vm::state::LuaState) -> rilua::LuaResult<u32> {
+            let arg = match state.stack_get(state.base) {
+                rilua::Val::Num(n) => n,
+                _ => 0.0,
+            };
+            state.push(rilua::Val::Num(arg + 1.0));
+            Ok(1)
+        }
+        env.register_rilua_function("__test_add_one", add_one)
+            .unwrap();
+
+        // Call it through rilua's VM
+        let func = env.lua.borrow_mut().load("return __test_add_one(5)").unwrap();
+        let result = env.lua.borrow_mut().call_function(&func, &[rilua::Val::Nil]);
+        assert!(result.is_ok());
     }
 
     #[test]
