@@ -9,6 +9,7 @@ use crate::Result;
 use crate::render::font::WowFontSystem;
 use crate::screen::ScreenKind;
 use mlua::{Lua, Value};
+use rilua::LuaApiMut;
 use rilua::vm::state::LuaState;
 use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
@@ -39,7 +40,7 @@ impl WowLuaAppData {
 
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
-    pub(crate) lua: RefCell<LuaState>,
+    pub(crate) lua: RefCell<rilua::Lua>,
     /// Temporary mlua runtime for later Phase 2 migration items.
     pub(crate) compat_lua: Lua,
     pub(crate) state: Rc<RefCell<SimState>>,
@@ -58,7 +59,7 @@ impl WowLuaEnv {
     pub fn new() -> Result<Self> {
         let state = Rc::new(RefCell::new(SimState::default()));
         let compat_lua = unsafe { Lua::unsafe_new() };
-        let lua = RefCell::new(Self::new_rilua_state(Rc::clone(&state)));
+        let lua = RefCell::new(Self::new_rilua(Rc::clone(&state)));
         init_builtin_frames(&state);
         init_lua_state(&compat_lua, Rc::clone(&state))?;
         Ok(Self {
@@ -70,15 +71,15 @@ impl WowLuaEnv {
 
     pub(crate) fn from_compat_lua(compat_lua: Lua, state: Rc<RefCell<SimState>>) -> Self {
         Self {
-            lua: RefCell::new(Self::new_rilua_state(Rc::clone(&state))),
+            lua: RefCell::new(Self::new_rilua(Rc::clone(&state))),
             compat_lua,
             state,
         }
     }
 
-    fn new_rilua_state(state: Rc<RefCell<SimState>>) -> LuaState {
-        let mut lua = LuaState::new();
-        lua.set_app_data(WowLuaAppData::new(state));
+    fn new_rilua(state: Rc<RefCell<SimState>>) -> rilua::Lua {
+        let mut lua = rilua::Lua::new().expect("failed to create rilua Lua state");
+        lua.state_mut().set_app_data(WowLuaAppData::new(state));
         lua
     }
 
@@ -378,30 +379,29 @@ impl WowLuaEnv {
         &self.compat_lua
     }
 
-    /// Get access to the primary rilua state owned by this environment.
-    pub fn lua_state(&self) -> Ref<'_, LuaState> {
+    /// Get access to the primary rilua Lua instance.
+    pub fn rilua(&self) -> Ref<'_, rilua::Lua> {
         self.lua.borrow()
     }
 
-    /// Get mutable access to the primary rilua state owned by this environment.
-    pub(crate) fn lua_state_mut(&self) -> RefMut<'_, LuaState> {
+    /// Get mutable access to the primary rilua Lua instance.
+    pub(crate) fn rilua_mut(&self) -> RefMut<'_, rilua::Lua> {
         self.lua.borrow_mut()
     }
 
     /// Stop the Lua garbage collector (defer collection until restart).
     pub fn gc_stop(&self) {
-        self.lua.borrow_mut().gc.gc_state.gc_threshold = usize::MAX;
+        self.lua.borrow_mut().gc_stop();
     }
 
     /// Restart the Lua garbage collector after a stop.
     pub fn gc_restart(&self) {
-        let mut state = self.lua.borrow_mut();
-        state.gc.gc_state.gc_threshold = state.gc.gc_state.total_bytes;
+        self.lua.borrow_mut().gc_restart();
     }
 
     /// Run a full garbage collection cycle.
     pub fn gc_collect(&self) {
-        let _ = self.lua.borrow_mut().full_gc();
+        let _ = self.lua.borrow_mut().gc_collect();
     }
 
     /// Run an incremental GC step.
@@ -425,8 +425,9 @@ impl WowLuaEnv {
     /// `GetStringWidth()` can measure text accurately via cosmic-text.
     pub fn set_font_system(&self, font_system: Rc<RefCell<WowFontSystem>>) {
         self.compat_lua.set_app_data(Rc::clone(&font_system));
-        let mut lua_state = self.lua_state_mut();
-        let app_data = lua_state
+        let mut rilua = self.rilua_mut();
+        let app_data = rilua
+            .state_mut()
             .app_data_mut::<WowLuaAppData>()
             .expect("WowLuaEnv rilua app_data should always exist");
         app_data.font_system = Some(font_system);
@@ -632,7 +633,8 @@ mod tests {
     fn wow_lua_env_seeds_rilua_app_data_with_sim_state() {
         let env = WowLuaEnv::new().expect("Failed to create Lua environment");
         let app_data = env
-            .lua_state()
+            .rilua()
+            .state()
             .app_data::<WowLuaAppData>()
             .expect("rilua app_data should be seeded");
 
@@ -650,7 +652,8 @@ mod tests {
         env.set_font_system(Rc::clone(&font_system));
 
         let app_data = env
-            .lua_state()
+            .rilua()
+            .state()
             .app_data::<WowLuaAppData>()
             .expect("rilua app_data should be seeded");
         let stored = app_data
