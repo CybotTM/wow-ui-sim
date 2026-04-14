@@ -148,7 +148,7 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
     let lua = env.lua();
 
     if !frame_ids.is_empty() {
-        lua.gc_stop();
+        env.gc_stop();
 
         let t = Instant::now();
         dispatch(lua, &frame_ids, elapsed, "_OnUpdate");
@@ -157,8 +157,8 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
         let handlers_dur = t.elapsed();
 
         let gc_start = Instant::now();
-        lua.gc_restart();
-        let _ = lua.gc_step();
+        env.gc_restart();
+        env.gc_step();
         let gc_dur = gc_start.elapsed();
 
         let total = t.elapsed();

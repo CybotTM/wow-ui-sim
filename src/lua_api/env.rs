@@ -388,6 +388,27 @@ impl WowLuaEnv {
         self.lua.borrow_mut()
     }
 
+    /// Stop the Lua garbage collector (defer collection until restart).
+    pub fn gc_stop(&self) {
+        self.lua.borrow_mut().gc.gc_state.gc_threshold = usize::MAX;
+    }
+
+    /// Restart the Lua garbage collector after a stop.
+    pub fn gc_restart(&self) {
+        let mut state = self.lua.borrow_mut();
+        state.gc.gc_state.gc_threshold = state.gc.gc_state.total_bytes;
+    }
+
+    /// Run a full garbage collection cycle.
+    pub fn gc_collect(&self) {
+        let _ = self.lua.borrow_mut().full_gc();
+    }
+
+    /// Run an incremental GC step.
+    pub fn gc_step(&self) {
+        let _ = self.lua.borrow_mut().gc_step(0);
+    }
+
     /// Get access to the simulator state.
     pub fn state(&self) -> &Rc<RefCell<SimState>> {
         &self.state

@@ -29,7 +29,7 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
 
     // Stop GC during bulk loading — collect once at the end instead of
     // incremental sweeps on every allocation.
-    env.lua().gc_stop();
+    env.gc_stop();
 
     for (name, toc_path) in &addons {
         load_one_blizzard_addon(env, name, toc_path, verbose, &mut total_timing);
@@ -39,8 +39,8 @@ pub fn load_blizzard_addons(env: &WowLuaEnv, screen: ScreenKind) {
     }
 
     let gc_start = std::time::Instant::now();
-    env.lua().gc_restart();
-    let _ = env.lua().gc_collect();
+    env.gc_restart();
+    env.gc_collect();
     let gc_dur = gc_start.elapsed();
 
     print_blizzard_summary(blizzard_start.elapsed(), &total_timing, gc_dur);
