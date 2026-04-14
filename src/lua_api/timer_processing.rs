@@ -20,16 +20,18 @@ impl WowLuaEnv {
 
     /// Remove registry keys for a finished or cancelled timer.
     fn cleanup_timer(&self, timer: PendingTimer) {
-        self.lua.remove_registry_value(timer.callback_key).ok();
+        self.compat_lua
+            .remove_registry_value(timer.callback_key)
+            .ok();
         if let Some(hk) = timer.handle_key {
-            self.lua.remove_registry_value(hk).ok();
+            self.compat_lua.remove_registry_value(hk).ok();
         }
     }
 
     /// Fire a single timer callback, returning true if it fired successfully.
     fn fire_timer_callback(&self, timer: &PendingTimer) -> bool {
         let Ok(callback) = self
-            .lua
+            .compat_lua
             .registry_value::<mlua::Function>(&timer.callback_key)
         else {
             return false;
@@ -50,10 +52,10 @@ impl WowLuaEnv {
         let handle: Option<mlua::AnyUserData> = timer
             .handle_key
             .as_ref()
-            .and_then(|k| self.lua.registry_value(k).ok());
+            .and_then(|k| self.compat_lua.registry_value(k).ok());
         match handle {
             Some(h) => {
-                let proxy = create_fc_proxy(&self.lua, &h).unwrap_or(h);
+                let proxy = create_fc_proxy(&self.compat_lua, &h).unwrap_or(h);
                 callback.call::<()>(proxy)
             }
             None => callback.call::<()>(()),

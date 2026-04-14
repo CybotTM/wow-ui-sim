@@ -56,7 +56,7 @@ impl WowLuaEnv {
     fn clear_target_if_any(&self) -> Result<bool> {
         let has_target = self.state.borrow().current_target.is_some();
         if has_target {
-            self.lua.load("ClearTarget()").exec()?;
+            self.compat_lua.load("ClearTarget()").exec()?;
             return Ok(true);
         }
         Ok(false)
@@ -80,7 +80,7 @@ impl WowLuaEnv {
         }
 
         let is_editbox = self.focused_is_editbox(focused);
-        if !is_editbox && super::keybindings::dispatch_key_binding(&self.lua, key)? {
+        if !is_editbox && super::keybindings::dispatch_key_binding(&self.compat_lua, key)? {
             return Ok(());
         }
 
@@ -150,7 +150,7 @@ impl WowLuaEnv {
 
     /// Fire OnKeyDown on a frame; if propagate_keyboard_input, walk up parents.
     fn fire_on_key_down(&self, frame_id: u64, key: &str) -> Result<()> {
-        let key_val = Value::String(self.lua.create_string(key)?);
+        let key_val = Value::String(self.compat_lua.create_string(key)?);
         self.fire_script_handler(frame_id, "OnKeyDown", vec![key_val])?;
         let propagate = self
             .state
@@ -177,17 +177,17 @@ impl WowLuaEnv {
     fn fire_handler_returns_truthy(&self, widget_id: u64, handler_name: &str) -> Result<bool> {
         use super::script_helpers::get_script;
 
-        let Some(handler) = get_script(&self.lua, widget_id, handler_name) else {
+        let Some(handler) = get_script(&self.compat_lua, widget_id, handler_name) else {
             return Ok(false);
         };
-        let frame = super::frame::frame_ref(&self.lua, widget_id)?;
+        let frame = super::frame::frame_ref(&self.compat_lua, widget_id)?;
         let result: Value = handler.call(MultiValue::from_vec(vec![frame]))?;
         Ok(is_truthy(&result))
     }
 
     /// Iterate UISpecialFrames, hide visible ones. Returns true if any were closed.
     fn close_special_windows(&self) -> Result<bool> {
-        let table: Option<mlua::Table> = self.lua.globals().get("UISpecialFrames").ok();
+        let table: Option<mlua::Table> = self.compat_lua.globals().get("UISpecialFrames").ok();
         let Some(table) = table else {
             return Ok(false);
         };
@@ -215,7 +215,7 @@ impl WowLuaEnv {
     /// Call the Lua CloseAllWindows() to close panels opened via ShowUIPanel.
     /// Returns false if CloseAllWindows is not defined (e.g. in tests).
     fn close_all_windows(&self) -> Result<bool> {
-        let func: Option<mlua::Function> = self.lua.globals().get("CloseAllWindows").ok();
+        let func: Option<mlua::Function> = self.compat_lua.globals().get("CloseAllWindows").ok();
         let Some(func) = func else { return Ok(false) };
         let result: Value = func.call(())?;
         Ok(is_truthy(&result))
@@ -259,7 +259,7 @@ impl WowLuaEnv {
 
         // Fire OnChar with each character
         for ch in text.chars() {
-            let char_val = Value::String(self.lua.create_string(ch.to_string())?);
+            let char_val = Value::String(self.compat_lua.create_string(ch.to_string())?);
             self.fire_script_handler(fid, "OnChar", vec![char_val])?;
         }
 
@@ -376,7 +376,7 @@ impl WowLuaEnv {
             self.state.borrow_mut().set_frame_visible(id, false);
         } else {
             self.state.borrow_mut().set_frame_visible(id, true);
-            super::frame::fire_on_show_recursive(&self.lua, id)?;
+            super::frame::fire_on_show_recursive(&self.compat_lua, id)?;
         }
         Ok(())
     }

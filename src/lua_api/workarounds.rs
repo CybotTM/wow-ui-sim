@@ -33,10 +33,7 @@ pub fn apply_post_runtime_addon_load_from_lua(
     state: Rc<RefCell<SimState>>,
     addon_name: &str,
 ) {
-    let env = WowLuaEnv {
-        lua: lua.clone(),
-        state,
-    };
+    let env = WowLuaEnv::from_compat_lua(lua.clone(), state);
     apply_post_runtime_addon_load(&env, addon_name);
 }
 

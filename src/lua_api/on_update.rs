@@ -145,19 +145,20 @@ pub(crate) fn dispatch(lua: &Lua, frame_ids: &[u64], elapsed: f64, suffix: &str)
 /// at the end and its cost is logged separately.
 pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<()> {
     let frame_ids = get_visible_on_update_frames(&env.state);
+    let lua = env.lua();
 
     if !frame_ids.is_empty() {
-        env.lua.gc_stop();
+        lua.gc_stop();
 
         let t = Instant::now();
-        dispatch(&env.lua, &frame_ids, elapsed, "_OnUpdate");
+        dispatch(lua, &frame_ids, elapsed, "_OnUpdate");
         let on_update_dur = t.elapsed();
-        dispatch(&env.lua, &frame_ids, elapsed, "_OnPostUpdate");
+        dispatch(lua, &frame_ids, elapsed, "_OnPostUpdate");
         let handlers_dur = t.elapsed();
 
         let gc_start = Instant::now();
-        env.lua.gc_restart();
-        let _ = env.lua.gc_step();
+        lua.gc_restart();
+        let _ = lua.gc_step();
         let gc_dur = gc_start.elapsed();
 
         let total = t.elapsed();
@@ -170,7 +171,7 @@ pub(crate) fn fire(env: &super::env::WowLuaEnv, elapsed: f64) -> crate::Result<(
         }
     }
 
-    super::animation::tick_animation_groups(&env.state, &env.lua, elapsed)?;
+    super::animation::tick_animation_groups(&env.state, lua, elapsed)?;
     env.finalize_frame_metrics(elapsed * 1000.0);
     Ok(())
 }

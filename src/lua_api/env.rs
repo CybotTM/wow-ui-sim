@@ -9,7 +9,8 @@ use crate::Result;
 use crate::render::font::WowFontSystem;
 use crate::screen::ScreenKind;
 use mlua::{Lua, Value};
-use std::cell::RefCell;
+use rilua::vm::state::LuaState;
+use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Instant;
@@ -21,9 +22,26 @@ pub(crate) fn next_timer_id() -> u64 {
     NEXT_TIMER_ID.fetch_add(1, Ordering::Relaxed)
 }
 
+#[derive(Clone)]
+struct WowLuaAppData {
+    sim_state: Rc<RefCell<SimState>>,
+    font_system: Option<Rc<RefCell<WowFontSystem>>>,
+}
+
+impl WowLuaAppData {
+    fn new(sim_state: Rc<RefCell<SimState>>) -> Self {
+        Self {
+            sim_state,
+            font_system: None,
+        }
+    }
+}
+
 /// The WoW Lua environment.
 pub struct WowLuaEnv {
-    pub(crate) lua: Lua,
+    pub(crate) lua: RefCell<LuaState>,
+    /// Temporary mlua runtime for later Phase 2 migration items.
+    pub(crate) compat_lua: Lua,
     pub(crate) state: Rc<RefCell<SimState>>,
 }
 
@@ -38,22 +56,41 @@ impl Drop for WowLuaEnv {
 impl WowLuaEnv {
     /// Create a new WoW Lua environment with the API initialized.
     pub fn new() -> Result<Self> {
-        let lua = unsafe { Lua::unsafe_new() };
         let state = Rc::new(RefCell::new(SimState::default()));
+        let compat_lua = unsafe { Lua::unsafe_new() };
+        let lua = RefCell::new(Self::new_rilua_state(Rc::clone(&state)));
         init_builtin_frames(&state);
-        init_lua_state(&lua, Rc::clone(&state))?;
-        Ok(Self { lua, state })
+        init_lua_state(&compat_lua, Rc::clone(&state))?;
+        Ok(Self {
+            lua,
+            compat_lua,
+            state,
+        })
+    }
+
+    pub(crate) fn from_compat_lua(compat_lua: Lua, state: Rc<RefCell<SimState>>) -> Self {
+        Self {
+            lua: RefCell::new(Self::new_rilua_state(Rc::clone(&state))),
+            compat_lua,
+            state,
+        }
+    }
+
+    fn new_rilua_state(state: Rc<RefCell<SimState>>) -> LuaState {
+        let mut lua = LuaState::new();
+        lua.set_app_data(WowLuaAppData::new(state));
+        lua
     }
 
     /// Execute Lua code.
     pub fn exec(&self, code: &str) -> Result<()> {
-        self.lua.load(code).exec()?;
+        self.compat_lua.load(code).exec()?;
         Ok(())
     }
 
     /// Execute Lua code with a custom chunk name (for better error messages and debugstack).
     pub fn exec_named(&self, code: &str, name: &str) -> Result<()> {
-        self.lua.load(code).set_name(name).exec()?;
+        self.compat_lua.load(code).set_name(name).exec()?;
         Ok(())
     }
 
@@ -66,7 +103,7 @@ impl WowLuaEnv {
         addon_name: &str,
         addon_table: mlua::Table,
     ) -> Result<()> {
-        let chunk = self.lua.load(code).set_name(name);
+        let chunk = self.compat_lua.load(code).set_name(name);
         let func: mlua::Function = chunk.into_function()?;
         func.call::<()>((addon_name.to_string(), addon_table))?;
         Ok(())
@@ -75,10 +112,10 @@ impl WowLuaEnv {
     /// Create a new empty table for addon private storage.
     /// Includes a default `unpack` method that returns values at numeric indices.
     pub fn create_addon_table(&self) -> Result<mlua::Table> {
-        let table = self.lua.create_table()?;
+        let table = self.compat_lua.create_table()?;
         // Add default unpack method - returns values at indices 1, 2, 3, 4
         // Addons like OmniCD use this pattern: local E, L, C = select(2, ...):unpack()
-        let unpack_fn = self.lua.create_function(|_, this: mlua::Table| {
+        let unpack_fn = self.compat_lua.create_function(|_, this: mlua::Table| {
             let v1: mlua::Value = this.get(1).unwrap_or(mlua::Value::Nil);
             let v2: mlua::Value = this.get(2).unwrap_or(mlua::Value::Nil);
             let v3: mlua::Value = this.get(3).unwrap_or(mlua::Value::Nil);
@@ -91,7 +128,7 @@ impl WowLuaEnv {
 
     /// Execute Lua code and return the result.
     pub fn eval<T: mlua::FromLuaMulti>(&self, code: &str) -> Result<T> {
-        let result = self.lua.load(code).eval()?;
+        let result = self.compat_lua.load(code).eval()?;
         Ok(result)
     }
 
@@ -101,7 +138,7 @@ impl WowLuaEnv {
     pub fn sync_addon_names_to_lua(&self) {
         let state = self.state.borrow();
         let Ok(t) = self
-            .lua
+            .compat_lua
             .named_registry_value::<mlua::Table>("__addon_names")
         else {
             return;
@@ -117,7 +154,7 @@ impl WowLuaEnv {
     /// subsequent Blizzard addons (Menu, SharedXMLGame, etc.) can use
     /// `CreateSecureDelegate` at file scope.
     pub fn restore_post_cleanup_globals(&self) {
-        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&self.lua);
+        let _ = super::globals::environment_restore::restore_post_cleanup_globals(&self.compat_lua);
     }
 
     /// Apply post-load workarounds for Blizzard code that depends on
@@ -128,7 +165,7 @@ impl WowLuaEnv {
         self.restore_post_cleanup_globals();
         // Wrap seterrorhandler with newsecurefunction so coroutine.create rejects it.
         // Done here because BugGrabber overwrites it during addon loading.
-        let _ = self.lua.load(
+        let _ = self.compat_lua.load(
             "rawset(_G, 'seterrorhandler', debug.newsecurefunction(rawget(_G, 'seterrorhandler')))"
         ).exec();
     }
@@ -152,34 +189,44 @@ impl WowLuaEnv {
             call_error_handler, dispatch_frame_unit_event_callbacks, get_frame_ref, get_script,
         };
 
-        let listeners = super::script_helpers::get_event_listeners_lua_order(&self.lua, event)?;
+        let listeners =
+            super::script_helpers::get_event_listeners_lua_order(&self.compat_lua, event)?;
 
         for widget_id in listeners {
-            if let Some(frame) = get_frame_ref(&self.lua, widget_id) {
+            if let Some(frame) = get_frame_ref(&self.compat_lua, widget_id) {
                 let addon_idx = self
                     .state
                     .borrow()
                     .widgets
                     .get(widget_id)
                     .and_then(|f| f.owner_addon);
-                if let Some(handler) = get_script(&self.lua, widget_id, "OnEvent") {
+                if let Some(handler) = get_script(&self.compat_lua, widget_id, "OnEvent") {
                     let taint = addon_taint_name(&self.state, addon_idx);
                     let blizzard = is_blizzard_addon(&self.state, addon_idx);
-                    let mut call_args =
-                        vec![frame.clone(), Value::String(self.lua.create_string(event)?)];
+                    let mut call_args = vec![
+                        frame.clone(),
+                        Value::String(self.compat_lua.create_string(event)?),
+                    ];
                     call_args.extend(args.iter().cloned());
 
                     let start = Instant::now();
                     self.state.borrow_mut().executing_addon_index = addon_idx;
-                    let result = call_with_taint(&self.lua, handler, taint, blizzard, call_args);
+                    let result =
+                        call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args);
                     self.state.borrow_mut().executing_addon_index = None;
                     if let Err(e) = result {
-                        call_error_handler(&self.lua, &e.to_string());
+                        call_error_handler(&self.compat_lua, &e.to_string());
                     }
                     record_addon_time(&self.state, addon_idx, &start);
                 }
 
-                dispatch_frame_unit_event_callbacks(&self.lua, widget_id, frame, args, event)?;
+                dispatch_frame_unit_event_callbacks(
+                    &self.compat_lua,
+                    widget_id,
+                    frame,
+                    args,
+                    event,
+                )?;
             }
         }
 
@@ -195,8 +242,8 @@ impl WowLuaEnv {
     ) -> Result<()> {
         use super::script_helpers::{call_error_handler, get_script};
 
-        if let Some(handler) = get_script(&self.lua, widget_id, handler_name) {
-            let frame = super::frame::frame_ref(&self.lua, widget_id)?;
+        if let Some(handler) = get_script(&self.compat_lua, widget_id, handler_name) {
+            let frame = super::frame::frame_ref(&self.compat_lua, widget_id)?;
             let addon_idx = self
                 .state
                 .borrow()
@@ -208,8 +255,8 @@ impl WowLuaEnv {
             let mut call_args = vec![frame];
             call_args.extend(extra_args);
             self.state.borrow_mut().executing_addon_index = addon_idx;
-            if let Err(e) = call_with_taint(&self.lua, handler, taint, blizzard, call_args) {
-                call_error_handler(&self.lua, &e.to_string());
+            if let Err(e) = call_with_taint(&self.compat_lua, handler, taint, blizzard, call_args) {
+                call_error_handler(&self.compat_lua, &e.to_string());
             }
             self.state.borrow_mut().executing_addon_index = None;
         }
@@ -219,7 +266,7 @@ impl WowLuaEnv {
 
     /// Check if a script handler is registered for a widget.
     pub fn has_script_handler(&self, widget_id: u64, handler_name: &str) -> bool {
-        super::script_helpers::get_script(&self.lua, widget_id, handler_name).is_some()
+        super::script_helpers::get_script(&self.compat_lua, widget_id, handler_name).is_some()
     }
 
     /// Resolve a clicked frame to the nearest EditBox in its parent chain.
@@ -264,7 +311,7 @@ impl WowLuaEnv {
             self.fire_script_handler(old_id, "OnEditFocusLost", vec![])?;
         }
 
-        let button_val = Value::String(self.lua.create_string("LeftButton")?);
+        let button_val = Value::String(self.compat_lua.create_string("LeftButton")?);
         self.fire_script_handler(frame_id, "OnMouseDown", vec![button_val.clone()])?;
         let down_val = Value::Boolean(false);
         self.fire_script_handler(frame_id, "OnClick", vec![button_val.clone(), down_val])?;
@@ -290,7 +337,7 @@ impl WowLuaEnv {
         let cmd_lower = cmd.to_lowercase();
 
         // Scan globals for SLASH_* variables to find a matching command
-        let globals = self.lua.globals();
+        let globals = self.compat_lua.globals();
         let slash_cmd_list: mlua::Table = globals.get("SlashCmdList")?;
 
         // Iterate through all globals looking for SLASH_* patterns
@@ -316,7 +363,7 @@ impl WowLuaEnv {
                 // Found a match! Look up the handler in SlashCmdList
                 let handler: Option<mlua::Function> = slash_cmd_list.get(name).ok();
                 if let Some(handler) = handler {
-                    let msg_value = self.lua.create_string(msg)?;
+                    let msg_value = self.compat_lua.create_string(msg)?;
                     handler.call::<()>(msg_value)?;
                     return Ok(true);
                 }
@@ -328,7 +375,17 @@ impl WowLuaEnv {
 
     /// Get access to the Lua state.
     pub fn lua(&self) -> &Lua {
-        &self.lua
+        &self.compat_lua
+    }
+
+    /// Get access to the primary rilua state owned by this environment.
+    pub fn lua_state(&self) -> Ref<'_, LuaState> {
+        self.lua.borrow()
+    }
+
+    /// Get mutable access to the primary rilua state owned by this environment.
+    pub(crate) fn lua_state_mut(&self) -> RefMut<'_, LuaState> {
+        self.lua.borrow_mut()
     }
 
     /// Get access to the simulator state.
@@ -338,7 +395,7 @@ impl WowLuaEnv {
 
     /// Create a loader environment borrowing from this environment.
     pub fn loader_env(&self) -> super::loader_env::LoaderEnv<'_> {
-        super::loader_env::LoaderEnv::new(&self.lua, Rc::clone(&self.state))
+        super::loader_env::LoaderEnv::new(&self.compat_lua, Rc::clone(&self.state))
     }
 
     /// Set the font system for text measurement from Lua API methods.
@@ -346,7 +403,12 @@ impl WowLuaEnv {
     /// This stores the font system as Lua app_data so that methods like
     /// `GetStringWidth()` can measure text accurately via cosmic-text.
     pub fn set_font_system(&self, font_system: Rc<RefCell<WowFontSystem>>) {
-        self.lua.set_app_data(font_system);
+        self.compat_lua.set_app_data(Rc::clone(&font_system));
+        let mut lua_state = self.lua_state_mut();
+        let app_data = lua_state
+            .app_data_mut::<WowLuaAppData>()
+            .expect("WowLuaEnv rilua app_data should always exist");
+        app_data.font_system = Some(font_system);
     }
 
     /// Update screen dimensions in SimState and resize UIParent/WorldFrame to match.
@@ -411,7 +473,7 @@ impl WowLuaEnv {
         iterations: Option<i32>,
     ) -> Result<u64> {
         let id = next_timer_id();
-        let callback_key = self.lua.create_registry_value(callback)?;
+        let callback_key = self.compat_lua.create_registry_value(callback)?;
         let fire_at = Instant::now() + std::time::Duration::from_secs_f64(seconds);
 
         let owner_addon = self.state.borrow().loading_addon_index;
@@ -439,7 +501,7 @@ impl WowLuaEnv {
     /// Read and clear `__addon_timing`, applying accumulated ms to each addon.
     fn drain_addon_timing(&self) {
         let Ok(timing) = self
-            .lua
+            .compat_lua
             .named_registry_value::<mlua::Table>("__addon_timing")
         else {
             return;
@@ -500,7 +562,7 @@ impl WowLuaEnv {
     /// and unblock action bar positioning. No-op if EditMode addon isn't loaded.
     pub fn fire_edit_mode_layouts_updated(&self) -> Result<()> {
         let Ok(true) = self
-            .lua
+            .compat_lua
             .load("return C_EditMode ~= nil and C_EditMode.GetLayouts ~= nil")
             .eval::<bool>()
         else {
@@ -508,7 +570,7 @@ impl WowLuaEnv {
         };
 
         let Ok(info) = self
-            .lua
+            .compat_lua
             .load("return C_EditMode.GetLayouts()")
             .eval::<mlua::Table>()
         else {
@@ -537,5 +599,47 @@ impl WowLuaEnv {
     pub fn dump_frames(&self) -> String {
         let state = self.state.borrow();
         super::diagnostics::dump_frames(&state)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn wow_lua_env_seeds_rilua_app_data_with_sim_state() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let app_data = env
+            .lua_state()
+            .app_data::<WowLuaAppData>()
+            .expect("rilua app_data should be seeded");
+
+        assert!(
+            Rc::ptr_eq(&app_data.sim_state, env.state()),
+            "rilua app_data should point at the shared SimState"
+        );
+    }
+
+    #[test]
+    fn set_font_system_updates_rilua_app_data() {
+        let env = WowLuaEnv::new().expect("Failed to create Lua environment");
+        let font_system = Rc::new(RefCell::new(WowFontSystem::new(&PathBuf::from("."))));
+
+        env.set_font_system(Rc::clone(&font_system));
+
+        let app_data = env
+            .lua_state()
+            .app_data::<WowLuaAppData>()
+            .expect("rilua app_data should be seeded");
+        let stored = app_data
+            .font_system
+            .as_ref()
+            .expect("font system should be stored in rilua app_data");
+
+        assert!(
+            Rc::ptr_eq(stored, &font_system),
+            "rilua app_data should track the same font system instance"
+        );
     }
 }
