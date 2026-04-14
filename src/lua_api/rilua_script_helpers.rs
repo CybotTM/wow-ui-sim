@@ -204,3 +204,84 @@ fn resolve_event_subtable(
         _ => None,
     }
 }
+
+// ── Script dispatch ─────────────────────────────────────────────────
+
+/// Dispatch a script handler for a frame via rilua.
+///
+/// Looks up the script handler in the rilua registry and calls it with the
+/// frame value as the first argument, followed by any additional args.
+///
+/// This is the rilua equivalent of calling `get_script` + `handler.call(frame_val)`.
+pub fn dispatch_script(
+    lua: &mut rilua::Lua,
+    widget_id: u64,
+    handler_name: &str,
+    extra_args: &[Val],
+) -> rilua::LuaResult<()> {
+    let handler = {
+        let state = lua.state_mut();
+        get_script(state, widget_id, handler_name)
+    };
+    let Some(handler_val) = handler else {
+        return Ok(());
+    };
+
+    // Build args: frame_ref as first arg, then extra_args
+    let frame_val = {
+        let state = lua.state_mut();
+        crate::lua_api::rilua_methods::frame_ref(state, widget_id)?
+    };
+    let mut args = vec![frame_val];
+    args.extend_from_slice(extra_args);
+
+    let Val::Function(func_ref) = handler_val else {
+        return Ok(());
+    };
+    let func = rilua::Function::from_gc_ref(func_ref);
+    match lua.call_function(&func, &args) {
+        Ok(_) => Ok(()),
+        Err(e) => {
+            call_error_handler(lua, &e.to_string());
+            Ok(())
+        }
+    }
+}
+
+// ── OnUpdate dispatch ───────────────────────────────────────────────
+
+/// Dispatch OnUpdate handlers for visible frames via rilua.
+///
+/// This is the rilua equivalent of `on_update::fire`. It iterates the
+/// `__on_update_scripts` registry table and calls each handler with
+/// `(frame, elapsed)` arguments.
+///
+/// Callers should pause GC before calling this and step GC after.
+pub fn dispatch_on_update(
+    lua: &mut rilua::Lua,
+    frame_ids: &[u64],
+    elapsed: f64,
+) -> rilua::LuaResult<()> {
+    let elapsed_val = Val::Num(elapsed);
+    for &frame_id in frame_ids {
+        let handler = {
+            let state = lua.state_mut();
+            get_script(state, frame_id, "OnUpdate")
+        };
+        let Some(handler_val) = handler else {
+            continue;
+        };
+        let frame_val = {
+            let state = lua.state_mut();
+            crate::lua_api::rilua_methods::frame_ref(state, frame_id)?
+        };
+        let Val::Function(func_ref) = handler_val else {
+            continue;
+        };
+        let func = rilua::Function::from_gc_ref(func_ref);
+        if let Err(e) = lua.call_function(&func, &[frame_val, elapsed_val]) {
+            call_error_handler(lua, &e.to_string());
+        }
+    }
+    Ok(())
+}

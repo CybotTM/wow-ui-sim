@@ -12,6 +12,7 @@ mod cfunc_wrap;
 pub(crate) mod chat_init;
 mod diagnostics;
 mod env;
+mod env_rilua;
 mod env_init;
 pub(crate) mod frame;
 mod frame_methods;

@@ -143,6 +143,28 @@ fn compile_from_source(
         .map_err(|e| report_lua_load_error(lua, e))
 }
 
+/// Compile Lua source code using rilua's compiler (pure Rust).
+///
+/// This is the rilua-side equivalent of `compile_from_source`. It compiles
+/// source code and returns a rilua Function handle. Used as a parallel
+/// compilation path for Phase 3 migration — the mlua path remains active
+/// until the full VM switch.
+pub fn compile_with_rilua(
+    lua: &mut rilua::Lua,
+    bytes: &[u8],
+    chunk_name: &str,
+) -> Result<rilua::Function, LoadError> {
+    use rilua::LuaApiMut;
+    // Strip UTF-8 BOM if present
+    let bytes = if bytes.starts_with(&[0xEF, 0xBB, 0xBF]) {
+        &bytes[3..]
+    } else {
+        bytes
+    };
+    lua.load_bytes(bytes, chunk_name)
+        .map_err(|e| LoadError::Lua(e.to_string()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -180,5 +202,24 @@ mod tests {
         if let Err(err) = loaded {
             panic!("bytecode should load in fresh Lua state: {err}");
         }
+    }
+
+    #[test]
+    fn rilua_compilation_matches_source_semantics() {
+        let mut lua = rilua::Lua::new().unwrap();
+        let func = compile_with_rilua(&mut lua, b"return 40 + 2", "@test")
+            .expect("rilua should compile simple expression");
+        let results = lua.call_function(&func, &[]).unwrap();
+        assert_eq!(results, vec![rilua::Val::Num(42.0)]);
+    }
+
+    #[test]
+    fn rilua_compilation_strips_bom() {
+        let mut lua = rilua::Lua::new().unwrap();
+        let source = b"\xEF\xBB\xBFreturn 1";
+        let func = compile_with_rilua(&mut lua, source, "@bom_test")
+            .expect("rilua should handle BOM-prefixed source");
+        let results = lua.call_function(&func, &[]).unwrap();
+        assert_eq!(results, vec![rilua::Val::Num(1.0)]);
     }
 }
