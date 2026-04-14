@@ -3,6 +3,8 @@
 //! Loads the base Blizzard UI, fires startup events, then clicks each micro
 //! menu button and verifies the corresponding panel frame is shown.
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -123,21 +125,12 @@ fn setup_env() -> WowLuaEnv {
 
 /// Fire startup events (same sequence as main.rs).
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    if let Ok(f) = lua.globals().get::<mlua::Function>("RequestTimePlayed") {
-        let _ = f.call::<()>(());
-    }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::call_global_if_present(env, "RequestTimePlayed");
+    common::fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
@@ -412,17 +405,16 @@ fn game_menu_buttons_display_text() {
     );
 
     // Collect text from all active buttons in the game menu's button pool
-    let button_texts: Vec<String> = env
-        .eval(
-            r#"
-            local texts = {}
-            for button in GameMenuFrame.buttonPool:EnumerateActive() do
-                table.insert(texts, button:GetText() or "")
-            end
-            return texts
-            "#,
-        )
-        .expect("Failed to enumerate game menu buttons");
+    env.exec(
+        r#"
+        __button_texts = {}
+        for button in GameMenuFrame.buttonPool:EnumerateActive() do
+            table.insert(__button_texts, button:GetText() or "")
+        end
+        "#,
+    )
+    .expect("Failed to enumerate game menu buttons");
+    let button_texts = common::drain_string_table(&env, "__button_texts");
 
     assert!(
         !button_texts.is_empty(),

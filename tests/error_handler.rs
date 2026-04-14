@@ -149,8 +149,7 @@ fn test_error_handler_receives_event_args() {
     )
     .unwrap();
 
-    let lua = env.lua();
-    let addon_name = mlua::Value::String(lua.create_string("MyAddon").unwrap());
+    let addon_name = env.lua_string("MyAddon");
     env.fire_event_with_args("ADDON_LOADED", &[addon_name]).ok();
 
     let (count, msg): (i32, String) = env.eval("return #TestErrors, TestErrors[1] or ''").unwrap();

@@ -16,32 +16,12 @@ fn blizzard_ui_dir() -> PathBuf {
 
 /// Install a Lua error handler that collects errors into `__test_errors`.
 fn install_test_error_handler(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        __test_errors = {}
-        seterrorhandler(function(msg)
-            table.insert(__test_errors, tostring(msg))
-        end)
-    "#,
-    )
-    .expect("Failed to install test error handler");
+    common::install_error_collector(env, "__test_errors");
 }
 
 /// Read collected errors from `__test_errors` and clear it.
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut errors = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            errors.push(msg);
-        }
-    }
-    let _ = lua.load("__test_errors = {}").exec();
-    errors
+    common::drain_string_table(env, "__test_errors")
 }
 
 /// Hook UIErrorsFrame:AddMessage and collect messages into `__test_ui_errors`.
@@ -63,19 +43,7 @@ fn install_test_ui_error_capture(env: &WowLuaEnv) {
 
 /// Read collected UIErrorsFrame messages and clear `__test_ui_errors`.
 fn drain_test_ui_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_ui_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut messages = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            messages.push(msg);
-        }
-    }
-    let _ = lua.load("__test_ui_errors = {}").exec();
-    messages
+    common::drain_string_table(env, "__test_ui_errors")
 }
 
 /// Load all Blizzard addons, fire startup events, return the environment.
@@ -113,19 +81,12 @@ fn load_all_blizzard_addons(env: &WowLuaEnv) {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
     let _ = env.fire_edit_mode_layouts_updated();
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",

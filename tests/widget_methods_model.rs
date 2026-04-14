@@ -530,7 +530,7 @@ fn test_model_scene_project_3d_point_uses_camera_projection() {
         "#,
         )
         .unwrap();
-    let behind: mlua::Value = env.eval("_G.scene_projection.behind[1]").unwrap();
+    let behind: rilua::Val = env.eval("_G.scene_projection.behind[1]").unwrap();
 
     assert!((center.0 - 197.0).abs() < 0.001);
     assert!((center.1 - 59.0).abs() < 0.001);
@@ -538,7 +538,7 @@ fn test_model_scene_project_3d_point_uses_camera_projection() {
     assert!((offset.0 - 220.796340).abs() < 0.001);
     assert!((offset.1 - 82.796340).abs() < 0.001);
     assert!((offset.2 - 0.9009009).abs() < 0.001);
-    assert!(matches!(behind, mlua::Value::Nil));
+    assert!(matches!(behind, rilua::Val::Nil));
 }
 
 #[test]

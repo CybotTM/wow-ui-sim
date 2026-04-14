@@ -182,21 +182,88 @@ impl FromRiluaValue for String {
     }
 }
 
-impl FromRiluaResults for Option<String> {
+impl<T> FromRiluaResults for Option<T>
+where
+    T: FromRiluaValue,
+{
     fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
         match first_result(&results) {
             Val::Nil => Ok(None),
-            value => decode_string(state, value).map(Some),
+            value => T::from_value(state, value).map(Some),
         }
     }
 }
 
-impl FromRiluaValue for Option<String> {
+impl<T> FromRiluaValue for Option<T>
+where
+    T: FromRiluaValue,
+{
     fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
         match value {
             Val::Nil => Ok(None),
-            value => decode_string(state, value).map(Some),
+            value => T::from_value(state, value).map(Some),
         }
+    }
+}
+
+impl<T> FromRiluaResults for Vec<T>
+where
+    T: FromRiluaValue,
+{
+    fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        match first_result(&results) {
+            Val::Nil => Ok(Vec::new()),
+            value => <Vec<T> as FromRiluaValue>::from_value(state, value),
+        }
+    }
+}
+
+impl<T> FromRiluaValue for Vec<T>
+where
+    T: FromRiluaValue,
+{
+    fn from_value(state: &rilua::vm::state::LuaState, value: Val) -> Result<Self> {
+        let Val::Table(table_ref) = value else {
+            return Err(crate::Error::Other(format!(
+                "expected table result, got {}",
+                value.type_name()
+            )));
+        };
+        let Some(table) = state.gc.tables.get(table_ref) else {
+            return Err(crate::Error::Other("table result was collected".into()));
+        };
+        table
+            .array_slice()
+            .iter()
+            .copied()
+            .map(|value| T::from_value(state, value))
+            .collect()
+    }
+}
+
+impl FromRiluaResults for std::collections::BTreeMap<String, String> {
+    fn from_results(state: &rilua::vm::state::LuaState, results: Vec<Val>) -> Result<Self> {
+        let value = first_result(&results);
+        let Val::Table(table_ref) = value else {
+            return Err(crate::Error::Other(format!(
+                "expected table result, got {}",
+                value.type_name()
+            )));
+        };
+        let Some(table) = state.gc.tables.get(table_ref) else {
+            return Err(crate::Error::Other("table result was collected".into()));
+        };
+
+        let mut key = Val::Nil;
+        let mut map = std::collections::BTreeMap::new();
+        while let Some((next_key, next_value)) = table.next(key, &state.gc.string_arena)? {
+            let decoded_key = decode_string(state, next_key)?;
+            let decoded_value = decode_string(state, next_value)?;
+            map.insert(decoded_key, decoded_value);
+            key = next_key;
+        }
+
+        Ok(map)
     }
 }
 
@@ -252,6 +319,18 @@ impl_from_results_tuple!(
     (A, B, C, D, E, F),
     (A, B, C, D, E, F, G),
     (A, B, C, D, E, F, G, H),
+    (A, B, C, D, E, F, G, H, I),
+    (A, B, C, D, E, F, G, H, I, J),
+    (A, B, C, D, E, F, G, H, I, J, K),
+    (A, B, C, D, E, F, G, H, I, J, K, L),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S),
+    (A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T),
 );
 
 /// The WoW Lua environment.

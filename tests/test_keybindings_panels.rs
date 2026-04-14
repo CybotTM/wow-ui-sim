@@ -117,21 +117,12 @@ fn setup_env() -> WowLuaEnv {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    if let Ok(f) = lua.globals().get::<mlua::Function>("RequestTimePlayed") {
-        let _ = f.call::<()>(());
-    }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::call_global_if_present(env, "RequestTimePlayed");
+    common::fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
@@ -195,31 +186,11 @@ fn build_batch_for_root(env: &WowLuaEnv, root_name: &str) -> wow_ui_sim::render:
 }
 
 fn install_test_error_handler(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        __test_errors = {}
-        seterrorhandler(function(msg)
-            table.insert(__test_errors, tostring(msg))
-        end)
-    "#,
-    )
-    .expect("Failed to install test error handler");
+    common::install_error_collector(env, "__test_errors");
 }
 
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut errors = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            errors.push(msg);
-        }
-    }
-    let _ = lua.load("__test_errors = {}").exec();
-    errors
+    common::drain_string_table(env, "__test_errors")
 }
 
 /// Create environment with ALL Blizzard addons (including Blizzard_UnitFrame).
@@ -242,7 +213,7 @@ fn setup_full_env() -> WowLuaEnv {
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
     env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
     env
 }
 

@@ -109,7 +109,7 @@ fn game_boot_lua_errors_pipeline_finishes() {
         env.state().borrow_mut().widgets.rebuild_anchor_index();
         process_pending_timers(&env);
         fire_one_on_update_tick(&env);
-        let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+        let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
         let errors = env.state().borrow().lua_errors.clone();
         assert!(
             errors.is_empty(),

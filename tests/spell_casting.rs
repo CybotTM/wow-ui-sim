@@ -77,12 +77,11 @@ fn cast_completes_and_heals_target() {
             (c.cast_id, c.spell_id)
         };
 
-        let lua = env.lua();
-        let player = lua.create_string("player").unwrap();
+        let player = env.lua_string("player");
         let args = &[
-            mlua::Value::String(player.clone()),
-            mlua::Value::Integer(cast_id as i64),
-            mlua::Value::Integer(spell_id as i64),
+            player,
+            rilua::Val::Num(cast_id as f64),
+            rilua::Val::Num(spell_id as f64),
         ];
         let _ = env.fire_event_with_args("UNIT_SPELLCAST_STOP", args);
         let _ = env.fire_event_with_args("UNIT_SPELLCAST_SUCCEEDED", args);
@@ -158,18 +157,11 @@ fn env_with_full_blizzard_ui() -> WowLuaEnv {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for ev in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(ev);
     }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::fire_player_entering_world(env, true, false);
     let _ = env.fire_edit_mode_layouts_updated();
     for ev in [
         "UPDATE_BINDINGS",
@@ -269,19 +261,7 @@ fn install_test_error_handler(env: &WowLuaEnv) {
 
 /// Read collected errors from `__test_errors` and clear it.
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut errors = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            errors.push(msg);
-        }
-    }
-    let _ = lua.load("__test_errors = {}").exec();
-    errors
+    common::drain_string_table(env, "__test_errors")
 }
 
 #[test]

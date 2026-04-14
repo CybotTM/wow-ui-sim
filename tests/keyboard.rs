@@ -203,9 +203,9 @@ fn test_propagate_keyboard_input_stops_without_flag() {
 
     env.send_key_press("Y", None).unwrap();
 
-    let parent_key: mlua::Value = env.eval("return _G.parent_key").unwrap();
+    let parent_key: rilua::Val = env.eval("return _G.parent_key").unwrap();
     assert!(
-        matches!(parent_key, mlua::Value::Nil),
+        matches!(parent_key, rilua::Val::Nil),
         "Parent should NOT receive OnKeyDown without propagation"
     );
 }

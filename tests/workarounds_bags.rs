@@ -39,7 +39,7 @@ fn settle_env_after_edit_mode_init(env: &WowLuaEnv) {
     env.state().borrow_mut().widgets.rebuild_anchor_index();
     process_pending_timers(env);
     fire_one_on_update_tick(env);
-    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
 
     std::thread::sleep(Duration::from_secs(2));
     for _ in 0..3 {

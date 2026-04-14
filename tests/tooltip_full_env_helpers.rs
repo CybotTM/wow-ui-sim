@@ -1,3 +1,4 @@
+use rilua::Val;
 use std::path::{Path, PathBuf};
 
 use wow_ui_sim::loader::{find_toc_file, load_addon};
@@ -103,18 +104,11 @@ fn load_blizzard_addons(env: &WowLuaEnv, ui: &Path) {
 fn fire_startup_events(env: &WowLuaEnv) {
     ensure_player_frame_for_aura_tests(env);
 
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
@@ -124,6 +118,17 @@ fn fire_startup_events(env: &WowLuaEnv) {
     }
 
     refresh_aura_frames(env);
+}
+
+fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
+    let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
+}
+
+fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
+    let _ = env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[Val::Bool(initial_login), Val::Bool(is_reload)],
+    );
 }
 
 fn ensure_player_frame_for_aura_tests(env: &WowLuaEnv) {

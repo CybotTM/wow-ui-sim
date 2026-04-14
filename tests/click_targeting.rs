@@ -42,23 +42,16 @@ fn env_with_full_ui() -> WowLuaEnv {
     env.apply_post_load_workarounds();
     fire_startup_events(&env);
     env.apply_post_event_workarounds();
-    let _ = global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = global_frames::hide_runtime_hidden_frames(&*env.rilua());
     env
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for ev in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(ev);
     }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::fire_player_entering_world(env, true, false);
     let _ = env.fire_edit_mode_layouts_updated();
     for ev in [
         "UPDATE_BINDINGS",
@@ -82,19 +75,7 @@ fn install_test_error_handler(env: &WowLuaEnv) {
 }
 
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut errors = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            errors.push(msg);
-        }
-    }
-    let _ = lua.load("__test_errors = {}").exec();
-    errors
+    common::drain_string_table(env, "__test_errors")
 }
 
 // ── CastSpellBookItem ────────────────────────────────────────────────

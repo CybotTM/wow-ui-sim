@@ -95,12 +95,8 @@ fn test_unit_health_event_fires_on_rot_tick() {
         let mut state = env.state().borrow_mut();
         state.player.health -= 5_000;
     }
-    let lua = env.lua();
-    env.fire_event_with_args(
-        "UNIT_HEALTH",
-        &[mlua::Value::String(lua.create_string("player").unwrap())],
-    )
-    .unwrap();
+    env.fire_event_with_args("UNIT_HEALTH", &[env.lua_string("player")])
+        .unwrap();
 
     let count: i32 = env.eval("return _G.healthEventCount").unwrap();
     assert_eq!(count, 1);
@@ -137,19 +133,14 @@ fn test_rot_damage_full_sequence_to_death() {
     .unwrap();
 
     let tick_damage = 20_000;
-    let lua = env.lua();
-
     // Tick 5 times: 100k -> 80k -> 60k -> 40k -> 20k -> 0
     for _ in 0..5 {
         {
             let mut state = env.state().borrow_mut();
             state.player.health = (state.player.health - tick_damage).max(0);
         }
-        env.fire_event_with_args(
-            "UNIT_HEALTH",
-            &[mlua::Value::String(lua.create_string("player").unwrap())],
-        )
-        .unwrap();
+        env.fire_event_with_args("UNIT_HEALTH", &[env.lua_string("player")])
+            .unwrap();
     }
 
     // Verify health went down in order.

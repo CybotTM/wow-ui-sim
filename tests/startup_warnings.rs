@@ -12,37 +12,16 @@ fn blizzard_ui_dir() -> PathBuf {
 
 /// Install a Lua error handler that collects errors into `__test_errors`.
 fn install_test_error_handler(env: &WowLuaEnv) {
-    env.exec(
-        r#"
-        __test_errors = {}
-        seterrorhandler(function(msg)
-            table.insert(__test_errors, tostring(msg))
-        end)
-    "#,
-    )
-    .expect("Failed to install test error handler");
+    common::install_error_collector(env, "__test_errors");
 }
 
 /// Read collected errors from `__test_errors` and clear it.
 fn drain_test_errors(env: &WowLuaEnv) -> Vec<String> {
-    let lua = env.lua();
-    let table: mlua::Table = match lua.globals().get("__test_errors") {
-        Ok(t) => t,
-        Err(_) => return Vec::new(),
-    };
-    let mut errors = Vec::new();
-    for entry in table.sequence_values::<String>() {
-        if let Ok(msg) = entry {
-            errors.push(msg);
-        }
-    }
-    // Clear the table for next batch
-    let _ = lua.load("__test_errors = {}").exec();
-    errors
+    common::drain_string_table(env, "__test_errors")
 }
 
 /// Fire a single event, collecting handler errors via the Lua error handler.
-fn fire(env: &WowLuaEnv, event: &str, args: &[mlua::Value]) -> Vec<String> {
+fn fire(env: &WowLuaEnv, event: &str, args: &[rilua::Val]) -> Vec<String> {
     env.fire_event_with_args(event, args).ok();
     drain_test_errors(env)
 }
@@ -88,13 +67,7 @@ fn load_and_startup() -> Vec<String> {
 }
 
 fn fire_startup_events(env: &WowLuaEnv, warnings: &mut Vec<String>) {
-    let lua = env.lua();
-
-    warnings.extend(fire(
-        env,
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    ));
+    warnings.extend(fire(env, "ADDON_LOADED", &[env.lua_string("WoWUISim")]));
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         warnings.extend(fire(env, event, &[]));
     }
@@ -102,13 +75,11 @@ fn fire_startup_events(env: &WowLuaEnv, warnings: &mut Vec<String>) {
     env.fire_edit_mode_layouts_updated().ok();
     warnings.extend(drain_test_errors(env));
 
-    if let Ok(f) = lua.globals().get::<mlua::Function>("RequestTimePlayed") {
-        let _ = f.call::<()>(());
-    }
+    common::call_global_if_present(env, "RequestTimePlayed");
     warnings.extend(fire(
         env,
         "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
+        &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
     ));
     for event in [
         "UPDATE_BINDINGS",
@@ -193,18 +164,11 @@ fn assert_lua(env: &WowLuaEnv, code: &str, msg: &str) {
 
 /// Fire startup events and process timers.
 fn fire_events_and_timers(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::fire_player_entering_world(env, true, false);
     let _ = env.process_timers();
     let _ = env.fire_on_update(0.016);
     let _ = env.process_timers();

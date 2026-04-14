@@ -104,18 +104,11 @@ fn setup_env() -> WowLuaEnv {
 }
 
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::fire_player_entering_world(env, true, false);
     for event in [
         "UPDATE_BINDINGS",
         "DISPLAY_SIZE_CHANGED",
@@ -601,12 +594,11 @@ fn professions_frame_loads_and_populates_specialization_tab() {
 fn loss_of_control_frame_shows_seeded_overlay_on_added_event() {
     test_timeout! {
         let env = setup_env();
-        let lua = env.lua();
         let _ = env.fire_event_with_args(
             "LOSS_OF_CONTROL_ADDED",
             &[
-                mlua::Value::String(lua.create_string("player").unwrap()),
-                mlua::Value::Integer(1),
+                env.lua_string("player"),
+                rilua::Val::Num(1.0),
             ],
         );
 

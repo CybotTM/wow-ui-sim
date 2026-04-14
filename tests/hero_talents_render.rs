@@ -34,7 +34,7 @@ fn setup_full_ui() -> WowLuaEnv {
     env.apply_post_event_workarounds();
     wow_ui_sim::startup::process_pending_timers(&env);
     wow_ui_sim::startup::fire_one_on_update_tick(&env);
-    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
     env
 }
 

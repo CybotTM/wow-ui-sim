@@ -1,5 +1,6 @@
 //! Shared test helpers.
 
+use rilua::Val;
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -97,4 +98,67 @@ pub fn env_with_shared_xml() -> WowLuaEnv {
     }
 
     env
+}
+
+#[allow(dead_code)]
+pub fn fire_addon_loaded(env: &WowLuaEnv, addon_name: &str) {
+    let _ = env.fire_event_with_args("ADDON_LOADED", &[env.lua_string(addon_name)]);
+}
+
+#[allow(dead_code)]
+pub fn fire_player_entering_world(env: &WowLuaEnv, initial_login: bool, is_reload: bool) {
+    let _ = env.fire_event_with_args(
+        "PLAYER_ENTERING_WORLD",
+        &[Val::Bool(initial_login), Val::Bool(is_reload)],
+    );
+}
+
+#[allow(dead_code)]
+pub fn call_global_if_present(env: &WowLuaEnv, function_name: &str) {
+    let is_present = env
+        .eval::<bool>(&format!("return type(_G[{function_name:?}]) == 'function'"))
+        .unwrap_or(false);
+    if is_present {
+        let _ = env.exec(&format!(r#"_G[{function_name:?}]()"#));
+    }
+}
+
+#[allow(dead_code)]
+pub fn install_error_collector(env: &WowLuaEnv, global_name: &str) {
+    env.exec(&format!(
+        r#"
+        local target = {global_name:?}
+        _G[target] = {{}}
+        seterrorhandler(function(msg)
+            table.insert(_G[target], tostring(msg))
+        end)
+        "#
+    ))
+    .expect("Failed to install test error handler");
+}
+
+#[allow(dead_code)]
+pub fn drain_string_table(env: &WowLuaEnv, global_name: &str) -> Vec<String> {
+    const SEP: char = '\u{1f}';
+    let joined = env
+        .eval::<String>(&format!(
+            r#"
+            local target = {global_name:?}
+            local values = _G[target]
+            if type(values) ~= "table" then
+                return ""
+            end
+            local parts = {{}}
+            for i = 1, #values do
+                parts[#parts + 1] = tostring(values[i])
+            end
+            _G[target] = {{}}
+            return table.concat(parts, string.char(31))
+            "#
+        ))
+        .unwrap_or_default();
+    if joined.is_empty() {
+        return Vec::new();
+    }
+    joined.split(SEP).map(|entry| entry.to_string()).collect()
 }

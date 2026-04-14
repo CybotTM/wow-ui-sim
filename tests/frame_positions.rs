@@ -40,7 +40,7 @@ fn create_env() -> WowLuaEnv {
     env.state().borrow_mut().widgets.rebuild_anchor_index();
     process_pending_timers(&env);
     fire_one_on_update_tick(&env);
-    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
 
     // Allow timer-driven layout callbacks to become due (real wall clock via Instant)
     std::thread::sleep(std::time::Duration::from_secs(2));

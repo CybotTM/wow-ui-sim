@@ -3,6 +3,8 @@
 //! Verifies that loading Blizzard addons and firing startup events results
 //! in the MainActionBar and its 12 ActionButton children being visible.
 
+mod common;
+
 use std::path::PathBuf;
 use wow_ui_sim::loader::load_addon;
 use wow_ui_sim::lua_api::WowLuaEnv;
@@ -118,21 +120,12 @@ fn env_with_action_bar() -> WowLuaEnv {
 
 /// Replicate the startup event sequence from main.rs / app.rs.
 fn fire_startup_events(env: &WowLuaEnv) {
-    let lua = env.lua();
-    let _ = env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    );
+    common::fire_addon_loaded(env, "WoWUISim");
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         let _ = env.fire_event(event);
     }
-    if let Ok(f) = lua.globals().get::<mlua::Function>("RequestTimePlayed") {
-        let _ = f.call::<()>(());
-    }
-    let _ = env.fire_event_with_args(
-        "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
-    );
+    common::call_global_if_present(env, "RequestTimePlayed");
+    common::fire_player_entering_world(env, true, false);
     let _ = env.fire_edit_mode_layouts_updated();
 
     // WoW's C++ engine fires ACTIONBAR_SHOWGRID on startup to show empty slots.

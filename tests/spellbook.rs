@@ -13,12 +13,12 @@ use wow_ui_sim::loader::{discover_blizzard_addons, load_addon};
 use wow_ui_sim::lua_api::WowLuaEnv;
 use wow_ui_sim::widget::{Frame, WidgetRegistry};
 
-const SPELLBOOK_TUTORIALS_LUA: &str = include_str!(
-    "../Interface/BlizzardUI/Blizzard_PlayerSpells/SpellBook/Blizzard_SpellBookFrameTutorials.lua"
-);
-
 fn blizzard_ui_dir() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("Interface/BlizzardUI")
+}
+
+fn spellbook_tutorials_lua_path() -> PathBuf {
+    blizzard_ui_dir().join("Blizzard_PlayerSpells/SpellBook/Blizzard_SpellBookFrameTutorials.lua")
 }
 
 fn setup_full_ui() -> WowLuaEnv {
@@ -50,7 +50,7 @@ fn fire_startup_sequence(env: &WowLuaEnv) {
     env.apply_post_event_workarounds();
     wow_ui_sim::startup::process_pending_timers(env);
     wow_ui_sim::startup::fire_one_on_update_tick(env);
-    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(env.lua());
+    let _ = wow_ui_sim::lua_api::globals::global_frames::hide_runtime_hidden_frames(&*env.rilua());
 }
 
 /// Open the spellbook once (first load, demand-loads Blizzard_PlayerSpells).
@@ -62,7 +62,9 @@ fn open_spellbook(env: &WowLuaEnv) {
 }
 
 fn restore_spellbook_tutorials(env: &WowLuaEnv) {
-    env.exec(SPELLBOOK_TUTORIALS_LUA)
+    let source = std::fs::read_to_string(spellbook_tutorials_lua_path())
+        .expect("Failed to read spellbook tutorials source");
+    env.exec(&source)
         .expect("Failed to restore spellbook tutorials mixin");
 }
 

@@ -103,18 +103,14 @@ fn load_action_bar_addons(env: &WowLuaEnv) {
 }
 
 fn fire_action_bar_startup(env: &WowLuaEnv) {
-    let lua = env.lua();
-    env.fire_event_with_args(
-        "ADDON_LOADED",
-        &[mlua::Value::String(lua.create_string("WoWUISim").unwrap())],
-    )
-    .unwrap();
+    env.fire_event_with_args("ADDON_LOADED", &[env.lua_string("WoWUISim")])
+        .unwrap();
     for event in ["VARIABLES_LOADED", "PLAYER_LOGIN"] {
         env.fire_event(event).unwrap();
     }
     env.fire_event_with_args(
         "PLAYER_ENTERING_WORLD",
-        &[mlua::Value::Boolean(true), mlua::Value::Boolean(false)],
+        &[rilua::Val::Bool(true), rilua::Val::Bool(false)],
     )
     .unwrap();
     env.fire_edit_mode_layouts_updated().unwrap();
@@ -195,7 +191,7 @@ fn action_button_drag_round_trip_keeps_spell_visible() {
             .get_id_by_name("ActionButton1")
             .unwrap();
         seed_action_slot(&env, 1, 853);
-        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[mlua::Value::Integer(0)])
+        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[rilua::Val::Num(0.0)])
             .unwrap();
         env.fire_event("ACTIONBAR_UPDATE_STATE").unwrap();
 
@@ -234,7 +230,7 @@ fn action_button_1_icon_matches_get_action_texture() {
     common::with_timeout(120, move || {
         let env = env_with_action_bar();
         seed_action_slot(&env, 1, 853);
-        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[mlua::Value::Integer(0)])
+        env.fire_event_with_args("ACTIONBAR_SLOT_CHANGED", &[rilua::Val::Num(0.0)])
             .unwrap();
         env.fire_event("ACTIONBAR_UPDATE_STATE").unwrap();
 

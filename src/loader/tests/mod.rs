@@ -472,7 +472,7 @@ fn test_action_button_updates_use_registry_frame_refs_for_anonymous_buttons() {
 
     crate::lua_api::globals::action_bar_api::push_action_button_state_update(
         t.env.state(),
-        t.env.lua(),
+        &*t.env.rilua(),
     )
     .unwrap();
 

@@ -7,7 +7,7 @@
 use rilua::vm::gc::arena::GcRef;
 use rilua::vm::state::LuaState;
 use rilua::vm::table::Table;
-use rilua::{LuaApiMut, Val};
+use rilua::{LuaApi, LuaApiMut, Val};
 
 // ── Registry helpers ────────────────────────────────────────────────
 
@@ -106,7 +106,9 @@ fn sync_on_update_cache(state: &mut LuaState, widget_id: u64, handler_name: &str
 
 /// Call the WoW error handler and log to stderr.
 pub fn call_error_handler(lua: &mut rilua::Lua, error_msg: &str) {
-    eprintln!("Lua error: {error_msg}");
+    if collect_lua_error(lua.state(), error_msg) {
+        eprintln!("Lua error: {error_msg}");
+    }
     let handler_code = r#"
         local handler = geterrorhandler()
         if handler then handler((...)) end

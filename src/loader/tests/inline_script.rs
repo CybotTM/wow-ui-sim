@@ -4,6 +4,7 @@ use super::super::lua_file::load_lua_file;
 use super::super::xml_file::load_xml_file;
 use crate::lua_api::WowLuaEnv;
 use crate::xml::parse_xml_file;
+use rilua::LuaApi;
 
 #[test]
 fn test_parse_wowless_test_xml() {
@@ -125,15 +126,18 @@ fn test_load_lua_file_runtime_error_collects_lua_error() {
 fn test_collect_lua_error_tracks_seen_message_counts() {
     let env = WowLuaEnv::new().unwrap();
 
-    let first_seen = crate::lua_api::script_helpers::collect_lua_error(
-        env.lua(),
+    let first_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+        env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    let second_seen = crate::lua_api::script_helpers::collect_lua_error(
-        env.lua(),
+    let second_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+        env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    let third_seen = crate::lua_api::script_helpers::collect_lua_error(env.lua(), "different boom");
+    let third_seen = crate::lua_api::rilua_script_helpers::collect_lua_error(
+        env.rilua().state(),
+        "different boom",
+    );
 
     let state = env.state().borrow();
     assert_eq!(state.lua_errors.len(), 3);
@@ -148,15 +152,15 @@ fn test_collect_lua_error_tracks_seen_message_counts() {
 fn test_suppressed_lua_error_summary_lines_report_repeat_counts() {
     let env = WowLuaEnv::new().unwrap();
 
-    crate::lua_api::script_helpers::collect_lua_error(
-        env.lua(),
+    crate::lua_api::rilua_script_helpers::collect_lua_error(
+        env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    crate::lua_api::script_helpers::collect_lua_error(
-        env.lua(),
+    crate::lua_api::rilua_script_helpers::collect_lua_error(
+        env.rilua().state(),
         "runtime error: repeated boom\nstack traceback:\n\t[C]: in function 'error'",
     );
-    crate::lua_api::script_helpers::collect_lua_error(env.lua(), "different boom");
+    crate::lua_api::rilua_script_helpers::collect_lua_error(env.rilua().state(), "different boom");
 
     let state = env.state().borrow();
     let summary = crate::lua_errors::suppressed_error_summary_lines(&state);
