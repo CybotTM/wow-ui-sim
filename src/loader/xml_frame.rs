@@ -166,7 +166,7 @@ fn register_virtual_or_intrinsic(
         crate::xml::register_template(name, widget_type, frame.clone());
     }
     if let Some(ref sm) = frame.secure_mixin {
-        apply_secure_mixins(env.lua(), sm);
+        apply_secure_mixins(env, sm);
     }
     if parent_override.is_none() {
         Some(None) // skip instantiation for top-level virtual frames
@@ -199,7 +199,7 @@ fn build_inherits_chain(
 fn apply_intrinsic_property(env: &LoaderEnv<'_>, intrinsic_base: Option<&str>, name: &str) {
     if let Some(base) = intrinsic_base {
         let fns = precompiled::get(env.lua());
-        fns.set_intrinsic.call::<()>((name, base)).ok();
+        fns.set_intrinsic.call((name, base)).ok();
     }
 }
 
@@ -439,7 +439,7 @@ fn create_scroll_child_elements(
         {
             let fns = precompiled::get(env.lua());
             fns.assign_parent_key
-                .call::<()>((parent_name, parent_key.as_str(), actual_child_name))
+                .call((parent_name, parent_key.as_str(), actual_child_name))
                 .ok();
         }
 
@@ -475,7 +475,7 @@ fn create_single_child_frame(
     if let (Some(actual_child_name), Some(parent_key)) = (child_name, &child_frame.parent_key) {
         let fns = precompiled::get(env.lua());
         fns.assign_parent_key
-            .call::<()>((parent_name, parent_key.as_str(), actual_child_name.as_str()))
+            .call((parent_name, parent_key.as_str(), actual_child_name.as_str()))
             .ok();
     }
     Ok(())
@@ -511,7 +511,7 @@ fn register_scroll_child(env: &LoaderEnv<'_>, parent_name: &str, child_name: &st
 /// keyed by the mixin table reference, so that `Mixin()` can apply only the stable
 /// methods (not user-added direct entries like test fixtures) when applying secure mixins
 /// to new frame instances.
-fn apply_secure_mixins(lua: &mlua::Lua, secure_mixin_attr: &str) {
+fn apply_secure_mixins(env: &LoaderEnv<'_>, secure_mixin_attr: &str) {
     let transform = r#"
         local names = ...
         __secureMixinMethods = __secureMixinMethods or {}
@@ -536,10 +536,13 @@ fn apply_secure_mixins(lua: &mlua::Lua, secure_mixin_attr: &str) {
     if names.is_empty() {
         return;
     }
-    let lua_names: mlua::Result<mlua::Table> = lua.create_sequence_from(names);
-    if let Ok(tbl) = lua_names {
-        let _ = lua.load(transform).call::<()>(tbl);
-    }
+    let names_table = names
+        .iter()
+        .map(|name| format!("{name:?}"))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let script = format!("local names = {{{names_table}}}\n{transform}");
+    let _ = env.exec(&script);
 }
 
 #[cfg(test)]
