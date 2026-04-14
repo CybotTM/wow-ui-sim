@@ -844,7 +844,7 @@ fn leave_guild(state: &mut LuaState) -> LuaResult<u32> {
 // ── Events ────────────────────────────────────────────────────────────────────
 
 fn fire_event_admin(state: &mut LuaState) -> LuaResult<u32> {
-    use crate::event::{Event, EventArg};
+    use crate::event::Event;
     use crate::lua_bridge::stack_val;
 
     let event_name = String::from_stack(state, 1)?;
