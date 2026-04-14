@@ -24,6 +24,8 @@ pub struct PrecompiledFns {
     pub assign_parent_key: Function,
     /// Set `_G[frame_name].intrinsic = base_name`.
     pub set_intrinsic: Function,
+    /// Append a child name to `__deferred_child_onloads` table.
+    pub defer_onload: Function,
 }
 
 impl PrecompiledFns {
@@ -36,6 +38,7 @@ impl PrecompiledFns {
             suppress_pop: compile_suppress_pop(lua)?,
             assign_parent_key: compile_assign_parent_key(lua)?,
             set_intrinsic: compile_set_intrinsic(lua)?,
+            defer_onload: compile_defer_onload(lua)?,
         })
     }
 }
@@ -126,6 +129,19 @@ fn compile_suppress_pop(lua: &Lua) -> mlua::Result<Function> {
         .into_function()
 }
 
+fn compile_defer_onload(lua: &Lua) -> mlua::Result<Function> {
+    lua.load(
+        r#"
+        local name = ...
+        if not __deferred_child_onloads then
+            __deferred_child_onloads = {}
+        end
+        __deferred_child_onloads[#__deferred_child_onloads + 1] = name
+    "#,
+    )
+    .into_function()
+}
+
 fn compile_assign_parent_key(lua: &Lua) -> mlua::Result<Function> {
     lua.load(
         r#"
@@ -192,6 +208,7 @@ pub fn get(lua: &Lua) -> PrecompiledFnsRef {
         suppress_pop: fns.suppress_pop.clone(),
         assign_parent_key: fns.assign_parent_key.clone(),
         set_intrinsic: fns.set_intrinsic.clone(),
+        defer_onload: fns.defer_onload.clone(),
     }
 }
 
@@ -205,6 +222,7 @@ pub fn try_get(lua: &Lua) -> Option<PrecompiledFnsRef> {
         suppress_pop: fns.suppress_pop.clone(),
         assign_parent_key: fns.assign_parent_key.clone(),
         set_intrinsic: fns.set_intrinsic.clone(),
+        defer_onload: fns.defer_onload.clone(),
     })
 }
 
@@ -218,4 +236,5 @@ pub struct PrecompiledFnsRef {
     pub suppress_pop: Function,
     pub assign_parent_key: Function,
     pub set_intrinsic: Function,
+    pub defer_onload: Function,
 }

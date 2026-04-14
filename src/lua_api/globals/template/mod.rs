@@ -759,36 +759,27 @@ fn build_mixin_post_init(mixin: &str) -> String {
 }
 
 /// Push the suppress-OnLoad depth counter (prevents premature OnLoad in nested CreateFrame).
+/// Uses a precompiled Lua function to avoid Rust→Lua globals.get + globals.set overhead.
 fn push_suppress(lua: &Lua) {
-    let depth: i32 = lua
-        .globals()
-        .get("__suppress_create_frame_onload")
-        .unwrap_or(0);
-    let _ = lua
-        .globals()
-        .set("__suppress_create_frame_onload", depth + 1);
+    if let Some(fns) = precompiled::try_get(lua) {
+        let _ = fns.suppress_push.call::<()>(());
+    }
 }
 
 /// Pop the suppress-OnLoad depth counter.
+/// Uses a precompiled Lua function to avoid Rust→Lua globals.get + globals.set overhead.
 fn pop_suppress(lua: &Lua) {
-    let depth: i32 = lua
-        .globals()
-        .get("__suppress_create_frame_onload")
-        .unwrap_or(0);
-    let _ = lua
-        .globals()
-        .set("__suppress_create_frame_onload", depth - 1);
+    if let Some(fns) = precompiled::try_get(lua) {
+        let _ = fns.suppress_pop.call::<()>(());
+    }
 }
 
 /// Queue a child frame name for deferred OnLoad firing.
+/// Uses a precompiled Lua function to avoid repeated globals.get/set and table creation.
 fn defer_child_onload(lua: &Lua, name: &str) {
-    let deferred: mlua::Table = lua
-        .globals()
-        .get("__deferred_child_onloads")
-        .unwrap_or_else(|_| lua.create_table().unwrap());
-    let len = deferred.raw_len();
-    let _ = deferred.raw_set(len + 1, name);
-    let _ = lua.globals().set("__deferred_child_onloads", deferred);
+    if let Some(fns) = precompiled::try_get(lua) {
+        let _ = fns.defer_onload.call::<()>(name);
+    }
 }
 
 /// Fire OnLoad on a frame.
