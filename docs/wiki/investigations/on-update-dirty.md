@@ -22,6 +22,22 @@
 **Inert (no dirty, no issue):**
 - `ChatFrame1`, `WorldFrame`, ModelScene frames, idle PartyMemberFrame buttons
 
+## 2026-04-14 Handler Audit Follow-up
+
+Two focused audit tests narrowed the remaining work after the earlier `SetText` / `SetEnabled` no-op guards:
+
+- `LeaveInstanceGroupButton`
+  - A settled second tick still calls `C_PartyInfo.IsPartyWalkIn()` once, `PartyUtil.CanLeaveInstance()` once, `IsInGroup()` twice, `IsInInstance()` once, and `GetPartyLFGID()` once.
+  - The handler still invokes `SetText` and `SetEnabled`, but the dirty batch stays empty once the button is already settled.
+  - Conclusion: the remaining cost is query/dispatch work while the button is visible, not visual mutation churn. After the solo visibility fix, this handler no longer matters outside grouped content.
+
+- `AuraButtonMixin:OnUpdate` (BuffFrame buttons)
+  - A settled second tick still runs `SecondsToTimeAbbrev()`, `Duration:SetFormattedText()`, `Duration:SetFontObject()`, `Duration:SetPoint()`, `Duration:SetShown()`, `Duration:SetVertexColor()`, and `SetAlpha()` once each.
+  - The dirty batch also stays empty on that settled tick.
+  - Conclusion: the remaining cost is Lua-side duration formatting and font-threshold branching before the guarded mutators decide nothing changed.
+
+That shifts the next optimization target away from more setter no-op guards and toward short-circuiting the redundant work in the handlers themselves, especially `AuraButtonMixin:OnUpdate`.
+
 ## Fix Strategies
 
 **Option A: Same-value guards in Rust methods** — Make `SetValue`, `SetText`, `SetAlpha`, `Show`, `Hide` etc. skip `get_mut()` when the new value equals the current value. Fixes the root cause; blanket discard can be removed entirely. Requires touching many API methods.

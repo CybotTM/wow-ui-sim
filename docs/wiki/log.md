@@ -2,6 +2,15 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | on-update dirty handler audit follow-up
+
+Updated `investigations/on-update-dirty.md` with focused handler-audit results:
+`LeaveInstanceGroupButton` now shows pure query/dispatch cost once its mutators
+settle, while the remaining BuffFrame button cost comes from
+`AuraButtonMixin:OnUpdate` doing duration formatting and font-threshold work on
+every tick before the no-op setters bail out. Refreshed the `index.md` summary
+for the page.
+
 ## [2026-04-14] investigations | on-update dirty solo compact raid manager follow-up
 
 Updated `investigations/on-update-dirty.md` with the compact-raid follow-up:
