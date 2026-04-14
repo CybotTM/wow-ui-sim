@@ -20,12 +20,9 @@ pub struct FrameRef(pub u64);
 
 impl mlua::UserData for FrameRef {
     fn add_methods<M: mlua::UserDataMethods<Self>>(methods: &mut M) {
-        // Regular frame methods — registered via add_method so mlua
-        // resolves them directly (bypasses __index entirely).
+        // Frame methods stay registered on the hidden userdata; the public Lua
+        // object is a table proxy that binds these methods back to this userdata.
         super::methods::register_all_methods(methods);
-
-        // Meta methods — __index, __newindex, __len, __tostring, __eq
-        super::metatable::add_meta_methods(methods);
     }
 }
 
@@ -111,10 +108,31 @@ mod tests {
     use super::*;
     use crate::lua_api::frame::metatable::setup_frame_helpers;
     use crate::widget::{Frame, WidgetType};
-    use mlua::{Lua, LuaOptions, StdLib};
+    use mlua::{Lua, LuaOptions, StdLib, Value};
 
     fn make_lua() -> Lua {
         unsafe { Lua::unsafe_new_with(StdLib::ALL, LuaOptions::default()) }
+    }
+
+    fn make_proxy_frame(name: &str) -> (Lua, u64, Value) {
+        let lua = make_lua();
+        let state = Rc::new(RefCell::new(SimState::default()));
+        let frame_id = {
+            let mut state = state.borrow_mut();
+            state
+                .widgets
+                .register(Frame::new(WidgetType::Frame, Some(name.to_string()), None))
+        };
+
+        lua.set_app_data(Rc::clone(&state));
+        setup_frame_helpers(&lua).expect("frame helpers should install");
+
+        let frame = frame_ref(&lua, frame_id).expect("frame ref should be created");
+        lua.globals()
+            .set("frame", frame.clone())
+            .expect("global frame should be set");
+
+        (lua, frame_id, frame)
     }
 
     #[test]
@@ -132,24 +150,7 @@ mod tests {
 
     #[test]
     fn frame_table_proxy_preserves_method_calls() {
-        let lua = make_lua();
-        let state = Rc::new(RefCell::new(SimState::default()));
-        let frame_id = {
-            let mut state = state.borrow_mut();
-            state.widgets.register(Frame::new(
-                WidgetType::Frame,
-                Some("ProxyFrame".to_string()),
-                None,
-            ))
-        };
-
-        lua.set_app_data(Rc::clone(&state));
-        setup_frame_helpers(&lua).expect("frame helpers should install");
-
-        let frame = frame_ref(&lua, frame_id).expect("frame ref should be created");
-        lua.globals()
-            .set("frame", frame)
-            .expect("global frame should be set");
+        let (lua, _, _) = make_proxy_frame("ProxyFrame");
 
         let (frame_type, name): (String, String) = lua
             .load("return type(frame), frame:GetName()")
@@ -158,5 +159,48 @@ mod tests {
 
         assert_eq!(frame_type, "table");
         assert_eq!(name, "ProxyFrame");
+    }
+
+    #[test]
+    fn frame_table_proxy_does_not_depend_on_index_helper_registry_fn() {
+        let (lua, _, _) = make_proxy_frame("ProxyFrame");
+        let poisoned = lua
+            .create_function(|_, _: (Value, Value)| -> mlua::Result<Value> {
+                Err(mlua::Error::RuntimeError("poisoned index helper".into()))
+            })
+            .expect("poisoned helper should be created");
+        lua.set_named_registry_value("__frame_index_helper", poisoned)
+            .expect("index helper should be replaced");
+
+        let name: String = lua
+            .load("return frame:GetName()")
+            .eval()
+            .expect("proxy method lookup should not use registry helper");
+
+        assert_eq!(name, "ProxyFrame");
+    }
+
+    #[test]
+    fn frame_table_proxy_does_not_depend_on_assign_helper_registry_fn() {
+        let (lua, _, _) = make_proxy_frame("ProxyFrame");
+        let poisoned = lua
+            .create_function(|_, _: (Value, String, Value)| -> mlua::Result<()> {
+                Err(mlua::Error::RuntimeError("poisoned assign helper".into()))
+            })
+            .expect("poisoned helper should be created");
+        lua.set_named_registry_value("__frame_assign_fn", poisoned)
+            .expect("assign helper should be replaced");
+
+        let value: i64 = lua
+            .load(
+                r#"
+                frame.ProxyValue = 42
+                return frame.ProxyValue
+            "#,
+            )
+            .eval()
+            .expect("proxy assignment should not use registry helper");
+
+        assert_eq!(value, 42);
     }
 }

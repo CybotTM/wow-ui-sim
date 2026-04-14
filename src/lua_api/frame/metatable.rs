@@ -1,59 +1,24 @@
-//! UserData meta methods for FrameRef.
+//! Table-backed frame proxy metatables.
 //!
-//! Registers __index, __newindex, __len, __tostring, __eq on FrameRef's UserData impl.
-//! Methods are registered directly on FrameRef via add_method, then a Lua wrapper around
-//! the shared `__index` metatable slot layers in per-frame fields and per-type method
-//! filtering before falling through to mlua's method resolution.
+//! Public frame values are Lua tables with a hidden `__lud` pointing at the internal
+//! `FrameRef` userdata. The proxy metatable implements frame lookup and assignment
+//! behavior while `FrameRef` itself only carries the registered Rust methods.
 
-use super::{
-    handle::{FrameRef, extract_frame_id, frame_ref, get_sim_state},
-    method_registry,
-};
+use super::handle::{extract_frame_id, frame_fields, frame_ref, frame_userdata, get_sim_state};
 use mlua::{Lua, Value};
 
-/// Register meta methods on the FrameRef UserData type.
-/// Called from FrameRef's UserData::add_methods impl.
-pub fn add_meta_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    add_index_metamethod(methods);
-    add_newindex_metamethod(methods);
-    add_len_metamethod(methods);
-    add_tostring_metamethod(methods);
-    add_eq_metamethod(methods);
-}
-
-/// Install shared Lua helpers and metatable overrides for FrameRef.
+/// Install shared metatables for table-backed frame proxies.
 /// Called once during Lua env setup.
 pub fn setup_frame_helpers(lua: &Lua) -> mlua::Result<()> {
-    register_assign_helper(lua)?;
-    register_index_helper(lua)?;
     register_bind_method_helper(lua)?;
     register_custom_metatable_store(lua)?;
     install_frame_proxy_metatable(lua)?;
     install_forbidden_proxy_metatable(lua)?;
-    patch_metatable_index(lua)?;
     Ok(())
 }
 
-/// Lua function that triggers __newindex from Rust: `parent[key] = value`.
-/// Used by SetParentKey to sync children through the UserData metamethod.
-fn register_assign_helper(lua: &Lua) -> mlua::Result<()> {
-    let assign_fn = lua
-        .load("return function(parent, key, value) parent[key] = value end")
-        .eval::<mlua::Function>()?;
-    lua.set_named_registry_value("__frame_assign_fn", assign_fn)
-}
-
-/// Lua function that reads a property via UserData __index.
-/// Used by forbidden proxy to forward property access to the underlying frame.
-fn register_index_helper(lua: &Lua) -> mlua::Result<()> {
-    let index_helper = lua
-        .load("return function(ud, key) return ud[key] end")
-        .eval::<mlua::Function>()?;
-    lua.set_named_registry_value("__frame_index_helper", index_helper)
-}
-
 /// Factory that binds a method's first argument to a frame value.
-/// Used by forbidden proxy to rebind method `self` from proxy to frame.
+/// Used by frame proxies to rebind method `self` from proxy to hidden userdata.
 fn register_bind_method_helper(lua: &Lua) -> mlua::Result<()> {
     lua.set_named_registry_value(
         "__frame_bind_method_helper",
@@ -91,120 +56,6 @@ pub fn create_frame_proxy(lua: &Lua, frame_val: Value) -> mlua::Result<Value> {
     Ok(Value::Table(proxy))
 }
 
-// ── Meta method registration ──────────────────────────────────────────────────
-
-/// __index: single rawget on per-frame user_value table.
-///
-/// mlua resolves registered add_method entries before __index, so we only need
-/// to handle children, mixin fns, and custom fields here — all stored in one table.
-fn add_index_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_meta_function(
-        mlua::MetaMethod::Index,
-        |lua, (ud, key): (mlua::AnyUserData, mlua::Value)| match key {
-            mlua::Value::Integer(idx) => {
-                let id = ud.borrow::<FrameRef>()?.0;
-                if idx == 0 {
-                    return Ok(mlua::Value::LightUserData(mlua::LightUserData(
-                        id as *mut std::ffi::c_void,
-                    )));
-                }
-                lookup_child_by_index(lua, id, idx)
-            }
-            mlua::Value::String(ref s) => lookup_type_injected(lua, &ud, &s.to_string_lossy()),
-            _ => Ok(mlua::Value::Nil),
-        },
-    );
-}
-
-/// __newindex: sync children_keys, dispatch custom __newindex, then store in user_value.
-fn add_newindex_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_meta_function(
-        mlua::MetaMethod::NewIndex,
-        |lua, (ud, key, value): (mlua::AnyUserData, mlua::Value, mlua::Value)| {
-            let this = ud.borrow::<FrameRef>()?;
-            let id = this.0;
-            drop(this);
-
-            let key_str = match &key {
-                mlua::Value::String(s) => s.to_string_lossy().to_string(),
-                mlua::Value::Integer(idx) => {
-                    // Numeric __newindex: store in per-frame table
-                    if let Ok(fields) = ud.user_value::<mlua::Table>() {
-                        fields.raw_set(*idx, value)?;
-                    }
-                    return Ok(());
-                }
-                _ => return Ok(()),
-            };
-
-            // Sync to Rust children_keys if value is a frame reference
-            sync_children_keys(lua, id, &key_str, &value);
-
-            // Check for per-frame custom __newindex metamethods
-            if dispatch_custom_newindex(lua, id, &key_str, &value)? {
-                return Ok(());
-            }
-
-            // Store in per-frame table (user_value)
-            if let Ok(fields) = ud.user_value::<mlua::Table>() {
-                fields.raw_set(key_str.as_str(), value)?;
-            }
-
-            Ok(())
-        },
-    );
-}
-
-/// __len: returns number of children.
-fn add_len_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_meta_method(mlua::MetaMethod::Len, |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(this.0)
-            .map(|f| f.children.len())
-            .unwrap_or(0) as i32)
-    });
-}
-
-/// __tostring: returns "WidgetType: 0xID" matching WoW's format.
-///
-/// WoW returns e.g. "Frame: 0x12345678" for `tostring(frame)`.  Returning the
-/// frame *name* caused `CreateFont(tostring(self))` inside
-/// `FontableFrameMixin:MakeFontObjectCustom` to overwrite `_G["ChatFrame1"]`
-/// (a FrameRef) with a Font table, breaking `:Hide()` / `:Show()` etc.
-fn add_tostring_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_meta_method(mlua::MetaMethod::ToString, |lua, this, ()| {
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let type_name = state
-            .widgets
-            .get(this.0)
-            .map(|f| {
-                f.object_type_name
-                    .as_deref()
-                    .unwrap_or(f.widget_type.as_str())
-            })
-            .unwrap_or("Frame");
-        Ok(format!("{}: 0x{:08X}", type_name, this.0))
-    });
-}
-
-/// __eq: compares two FrameRef values by ID.
-fn add_eq_metamethod<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
-    methods.add_meta_function(
-        mlua::MetaMethod::Eq,
-        |_lua, (a, b): (mlua::AnyUserData, mlua::AnyUserData)| {
-            let a_id = a.borrow::<FrameRef>().map(|r| r.0).unwrap_or(u64::MAX);
-            let b_id = b.borrow::<FrameRef>().map(|r| r.0).unwrap_or(u64::MAX - 1);
-            Ok(a_id == b_id)
-        },
-    );
-}
-
-// ── Forbidden proxy metatable ─────────────────────────────────────────────────
-
 /// Build the shared metatable used by all forbidden proxy tables.
 ///
 /// Reads `__lud` (the FrameRef UserData) from the proxy table at call time so this single
@@ -239,68 +90,58 @@ fn wrap_fn_with_frame(
     bind_fn.call((f, frame_val))
 }
 
-/// __index for forbidden proxy: reads __lud from proxy, forwards to frame methods.
+/// __index for frame proxies: resolves per-frame fields first, then registered methods.
 fn create_proxy_index(lua: &Lua) -> mlua::Result<mlua::Function> {
     lua.create_function(|lua, (this, key): (mlua::Table, Value)| {
-        let frame_val: Value = this.raw_get("__lud")?;
+        let frame_val = Value::Table(this.clone());
+        let Some(userdata) = frame_userdata(&frame_val) else {
+            return Ok(Value::Nil);
+        };
+        let frame_id = extract_frame_id(&frame_val).unwrap_or(0);
 
-        // Fall through: handles script handlers, children, custom fields via UserData __index.
-        let index_helper: mlua::Function = lua.named_registry_value("__frame_index_helper")?;
-        let result: Value = index_helper.call((frame_val.clone(), key))?;
-
-        if let Value::Function(f) = result {
-            return Ok(Value::Function(wrap_fn_with_frame(lua, f, frame_val)?));
+        match key {
+            Value::Integer(idx) => lookup_proxy_integer_key(lua, frame_id, idx),
+            Value::String(name) => {
+                let key_str = name.to_string_lossy().to_string();
+                lookup_proxy_string_key(lua, &frame_val, &userdata, frame_id, key_str.as_str())
+            }
+            _ => Ok(Value::Nil),
         }
-
-        Ok(result)
     })
 }
 
-/// __newindex for forbidden proxy: delegates to the FrameRef's __newindex.
+/// __newindex for frame proxies: syncs children keys, dispatches custom mt, stores fields.
 fn create_proxy_newindex(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, (this, key, value): (mlua::Table, String, Value)| {
-        let frame_val: Value = this.raw_get("__lud")?;
-        let assign: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
-        assign.call::<()>((frame_val, key, value))?;
+    lua.create_function(|lua, (this, key, value): (mlua::Table, Value, Value)| {
+        let frame_val = Value::Table(this);
+        let Some(fields) = frame_fields(&frame_val)? else {
+            return Ok(());
+        };
+        let frame_id = extract_frame_id(&frame_val).unwrap_or(0);
+
+        match key {
+            Value::Integer(idx) => fields.raw_set(idx, value)?,
+            Value::String(name) => {
+                let key_str = name.to_string_lossy().to_string();
+                sync_children_keys(lua, frame_id, &key_str, &value);
+                if dispatch_custom_newindex(lua, frame_id, &key_str, &value)? {
+                    return Ok(());
+                }
+                fields.raw_set(key_str.as_str(), value)?;
+            }
+            _ => {}
+        }
+
         Ok(())
     })
 }
 
 fn create_proxy_len(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, this: mlua::Table| {
-        let frame_val: Value = this.raw_get("__lud")?;
-        let Some(frame_id) = extract_frame_id(&frame_val) else {
-            return Ok(0);
-        };
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        Ok(state
-            .widgets
-            .get(frame_id)
-            .map(|f| f.children.len())
-            .unwrap_or(0) as i32)
-    })
+    lua.create_function(|lua, this: mlua::Table| Ok(frame_children_len(lua, &Value::Table(this))))
 }
 
 fn create_proxy_tostring(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, this: mlua::Table| {
-        let frame_val: Value = this.raw_get("__lud")?;
-        let Some(frame_id) = extract_frame_id(&frame_val) else {
-            return Ok("Frame: 0x00000000".to_string());
-        };
-        let state_rc = get_sim_state(lua);
-        let state = state_rc.borrow();
-        let type_name = state
-            .widgets
-            .get(frame_id)
-            .map(|f| {
-                f.object_type_name
-                    .as_deref()
-                    .unwrap_or(f.widget_type.as_str())
-            })
-            .unwrap_or("Frame");
-        Ok(format!("{}: 0x{:08X}", type_name, frame_id))
-    })
+    lua.create_function(|lua, this: mlua::Table| Ok(frame_display_name(lua, &Value::Table(this))))
 }
 
 fn create_proxy_eq(lua: &Lua) -> mlua::Result<mlua::Function> {
@@ -311,53 +152,46 @@ fn create_proxy_eq(lua: &Lua) -> mlua::Result<mlua::Function> {
     })
 }
 
-/// Lua code to patch a UserData metatable's __index: check per-instance fields
-/// (via debug.getfenv) before falling through to mlua's method resolution.
-/// Args: (userdata_instance).
-///
-/// Lookup order for string keys:
-/// 1. env[1] — mixin methods (per-instance overrides from Mixin())
-/// 2. env — per-frame properties (set via __newindex)
-/// 3. Rust __index — per-type injected methods + integer children
-/// 4. old_index — mlua registered Rust methods
-///
-/// Note: mlua wraps user values, so debug.getfenv(ud)[1] = fields.
-const PATCH_INDEX_LUA: &str = r#"
-    local ud, is_disallowed = ...
-    local mt = debug.getmetatable(ud)
-    local old_index = mt.__index
-    local dgetfenv = debug.getfenv
+// ── Lookup helpers ────────────────────────────────────────────────────────────
 
-    local function frame_index(self, key)
-        if type(key) == "string" then
-            local env = dgetfenv(self)
-            if env then
-                local val = rawget(rawget(env, 1), key)
-                if val ~= nil then return val end
-                val = rawget(env, key)
-                if val ~= nil then return val end
-            end
-            if is_disallowed(self, key) then
-                return nil
-            end
-        end
-        return old_index(self, key)
-    end
-
-    rawset(mt, "__index", frame_index)
-"#;
-
-/// Patch the FrameRef metatable __index to check per-frame fields before methods.
-/// Called once during init — all FrameRef instances share the same metatable.
-fn patch_metatable_index(lua: &Lua) -> mlua::Result<()> {
-    let dummy = lua.create_userdata(FrameRef(0))?;
-    let is_disallowed = create_method_filter_helper(lua)?;
-    lua.load(PATCH_INDEX_LUA)
-        .call::<()>((dummy, is_disallowed))?;
-    Ok(())
+fn lookup_proxy_integer_key(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Value> {
+    if idx == 0 {
+        return Ok(Value::LightUserData(mlua::LightUserData(
+            frame_id as *mut std::ffi::c_void,
+        )));
+    }
+    lookup_child_by_index(lua, frame_id, idx)
 }
 
-// ── Lookup helpers ────────────────────────────────────────────────────────────
+fn lookup_proxy_string_key(
+    lua: &Lua,
+    frame_val: &Value,
+    userdata: &mlua::AnyUserData,
+    frame_id: u64,
+    key: &str,
+) -> mlua::Result<Value> {
+    if let Some(fields) = frame_fields(frame_val)? {
+        let field_value: Value = fields.raw_get(key)?;
+        if !field_value.is_nil() {
+            return Ok(field_value);
+        }
+    }
+
+    if is_disallowed_method(lua, frame_id, key)? {
+        return Ok(Value::Nil);
+    }
+
+    let value = lookup_registered_method(userdata, key)?;
+    if let Value::Function(function) = value {
+        return Ok(Value::Function(wrap_fn_with_frame(
+            lua,
+            function,
+            Value::UserData(userdata.clone()),
+        )?));
+    }
+
+    Ok(value)
+}
 
 /// Look up a child frame by numeric index (1-indexed).
 fn lookup_child_by_index(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Value> {
@@ -374,43 +208,71 @@ fn lookup_child_by_index(lua: &Lua, frame_id: u64, idx: i64) -> mlua::Result<Val
     Ok(Value::Nil)
 }
 
-/// Check per-type __index tables for addon-injected methods.
-///
-/// Currently a no-op. The runtime method filter in `PATCH_INDEX_LUA` only blocks
-/// shared Rust methods that are invalid for the frame's widget type; it does not
-/// synthesize extra per-type methods here.
-fn lookup_type_injected(_lua: &Lua, _ud: &mlua::AnyUserData, _key: &str) -> mlua::Result<Value> {
-    Ok(Value::Nil)
+fn lookup_registered_method(userdata: &mlua::AnyUserData, key: &str) -> mlua::Result<Value> {
+    let index_value: Value = userdata.metatable()?.get("__index")?;
+    match index_value {
+        Value::Function(function) => function.call((userdata.clone(), key.to_owned())),
+        Value::Table(table) => table.raw_get(key),
+        _ => Ok(Value::Nil),
+    }
 }
 
-fn create_method_filter_helper(lua: &Lua) -> mlua::Result<mlua::Function> {
-    lua.create_function(|lua, (ud, key): (mlua::AnyUserData, String)| {
-        let frame_id = ud.borrow::<FrameRef>()?.0;
-        let (widget_type, is_anim_type) = {
-            let state_rc = get_sim_state(lua);
-            let state = state_rc.borrow();
-            state
-                .widgets
-                .get(frame_id)
-                .map(|frame| {
-                    (
-                        frame.widget_type,
-                        frame
-                            .object_type_name
-                            .as_deref()
-                            .is_some_and(super::methods::methods_core::is_anim_type),
-                    )
-                })
-                .unwrap_or((crate::widget::WidgetType::Frame, false))
-        };
+fn is_disallowed_method(lua: &Lua, frame_id: u64, key: &str) -> mlua::Result<bool> {
+    let (widget_type, is_anim_type) = {
+        let state_rc = get_sim_state(lua);
+        let state = state_rc.borrow();
+        state
+            .widgets
+            .get(frame_id)
+            .map(|frame| {
+                (
+                    frame.widget_type,
+                    frame
+                        .object_type_name
+                        .as_deref()
+                        .is_some_and(super::methods::methods_core::is_anim_type),
+                )
+            })
+            .unwrap_or((crate::widget::WidgetType::Frame, false))
+    };
 
-        if is_anim_type {
-            return Ok(false);
-        }
+    if is_anim_type {
+        return Ok(false);
+    }
 
-        Ok(method_registry::is_registered_method(&key)
-            && !method_registry::is_method_allowed(widget_type, &key))
-    })
+    Ok(super::method_registry::is_registered_method(key)
+        && !super::method_registry::is_method_allowed(widget_type, key))
+}
+
+fn frame_children_len(lua: &Lua, frame_val: &Value) -> i32 {
+    let Some(frame_id) = extract_frame_id(frame_val) else {
+        return 0;
+    };
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    state
+        .widgets
+        .get(frame_id)
+        .map(|f| f.children.len())
+        .unwrap_or(0) as i32
+}
+
+fn frame_display_name(lua: &Lua, frame_val: &Value) -> String {
+    let Some(frame_id) = extract_frame_id(frame_val) else {
+        return "Frame: 0x00000000".to_string();
+    };
+    let state_rc = get_sim_state(lua);
+    let state = state_rc.borrow();
+    let type_name = state
+        .widgets
+        .get(frame_id)
+        .map(|f| {
+            f.object_type_name
+                .as_deref()
+                .unwrap_or(f.widget_type.as_str())
+        })
+        .unwrap_or("Frame");
+    format!("{}: 0x{:08X}", type_name, frame_id)
 }
 
 /// If the frame has a per-frame custom `__newindex`, call it and return true.
@@ -469,81 +331,56 @@ fn sync_child_frame(
 
 #[cfg(test)]
 mod tests {
-    use mlua::{Lua, MetaMethod, StdLib, UserData, UserDataMethods, Value};
+    use super::{frame_children_len, frame_display_name};
+    use crate::lua_api::SimState;
+    use crate::lua_api::frame::frame_ref;
+    use crate::widget::{Frame, WidgetType};
+    use mlua::{Lua, LuaOptions, StdLib};
+    use std::cell::RefCell;
+    use std::rc::Rc;
 
-    struct TestObj;
-
-    impl UserData for TestObj {
-        fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
-            methods.add_method("Lower", |_, _, ()| Ok("hello"));
-            methods.add_meta_function(
-                MetaMethod::Index,
-                |_, (_ud, _key): (mlua::AnyUserData, Value)| Ok(Value::Nil),
-            );
-            methods.add_meta_function(
-                MetaMethod::NewIndex,
-                |_, (ud, key, value): (mlua::AnyUserData, String, Value)| {
-                    let fields = ud.user_value::<mlua::Table>()?;
-                    fields.raw_set(key, value)?;
-                    Ok(())
-                },
-            );
-        }
+    fn make_lua() -> Lua {
+        unsafe { Lua::unsafe_new_with(StdLib::ALL, LuaOptions::default()) }
     }
 
     #[test]
-    fn test_method_shadows_property_by_default() {
-        let lua = unsafe { Lua::unsafe_new_with(StdLib::ALL, mlua::LuaOptions::default()) };
-        let obj = lua.create_userdata(TestObj).unwrap();
-        let fields = lua.create_table().unwrap();
-        obj.set_user_value(fields).unwrap();
-        lua.globals().set("obj", obj).unwrap();
+    fn frame_proxy_helpers_match_expected_frame_shape() {
+        let lua = make_lua();
+        let state = Rc::new(RefCell::new(SimState::default()));
+        let (parent_id, child_id) = {
+            let mut state = state.borrow_mut();
+            let parent_id = state.widgets.register(Frame::new(
+                WidgetType::Frame,
+                Some("ParentFrame".to_string()),
+                None,
+            ));
+            let child_id = state.widgets.register(Frame::new(
+                WidgetType::Frame,
+                Some("ChildFrame".to_string()),
+                Some(parent_id),
+            ));
+            state
+                .widgets
+                .get_mut(parent_id)
+                .unwrap()
+                .children
+                .push(child_id);
+            (parent_id, child_id)
+        };
+        lua.set_app_data(Rc::clone(&state));
 
-        // Without patching, method wins over property
-        let result: String = lua
-            .load(
-                r#"
-            obj.Lower = "world"
-            return type(obj.Lower)
-        "#,
-            )
-            .eval()
-            .unwrap();
-        assert_eq!(result, "function", "method shadows property by default");
-    }
-
-    fn make_lua_and_patch() -> Lua {
-        let lua = unsafe { Lua::unsafe_new_with(StdLib::ALL, mlua::LuaOptions::default()) };
-        let obj = lua.create_userdata(TestObj).unwrap();
-        let fields = lua.create_table().unwrap();
-        obj.set_user_value(fields).unwrap();
-        lua.load(super::PATCH_INDEX_LUA)
-            .call::<()>(obj.clone())
-            .unwrap();
-        lua.globals().set("obj", obj).unwrap();
-        lua
-    }
-
-    #[test]
-    fn test_patched_index_property_wins() {
-        let lua = make_lua_and_patch();
-        let result: String = lua
-            .load(
-                r#"
-            obj.Lower = "world"
-            return obj.Lower
-        "#,
-            )
-            .eval()
-            .unwrap();
-        assert_eq!(result, "world", "property should shadow method");
-    }
-
-    #[test]
-    fn test_patched_index_method_still_works() {
-        let lua = make_lua_and_patch();
-        let result: String = lua.load("return obj:Lower()").eval().unwrap();
-        assert_eq!(result, "hello", "method works when no property set");
+        let frame = frame_ref(&lua, parent_id).expect("frame ref should be created");
+        assert_eq!(frame_children_len(&lua, &frame), 1);
+        assert_eq!(
+            frame_display_name(&lua, &frame),
+            format!("Frame: 0x{:08X}", parent_id)
+        );
+        assert_eq!(
+            super::lookup_child_by_index(&lua, parent_id, 1)
+                .ok()
+                .and_then(|value| crate::lua_api::frame::extract_frame_id(&value)),
+            Some(child_id)
+        );
     }
 }
 

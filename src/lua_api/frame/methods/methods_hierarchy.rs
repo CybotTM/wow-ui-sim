@@ -166,17 +166,21 @@ fn add_set_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
                         })
                         .unwrap_or_default()
                 };
-                let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
                 let parent_ref = frame_ref(lua, pid)?;
+                let mlua::Value::Table(parent_table) = parent_ref else {
+                    return Ok(());
+                };
                 for old_key in old_keys {
-                    assign_fn.call::<()>((parent_ref.clone(), old_key, Value::Nil))?;
+                    parent_table.set(old_key, Value::Nil)?;
                 }
             }
 
-            let assign_fn: mlua::Function = lua.named_registry_value("__frame_assign_fn")?;
             let parent_ref = frame_ref(lua, pid)?;
             let child_ref = frame_ref(lua, id)?;
-            assign_fn.call::<()>((parent_ref, key, child_ref))?;
+            let mlua::Value::Table(parent_table) = parent_ref else {
+                return Ok(());
+            };
+            parent_table.set(key, child_ref)?;
             Ok(())
         },
     );
