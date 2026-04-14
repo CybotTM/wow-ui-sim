@@ -54,6 +54,7 @@ pub fn apply(env: &WowLuaEnv) {
     patch_communities_toggle(env);
     patch_group_finder_toggle(env);
     patch_mail_toggle(env);
+    patch_quest_map_current_map_lookup(env);
     patch_map_canvas_zoom(env);
     patch_poi_button_update_point(env);
     patch_combat_log_filters(env);
@@ -253,6 +254,102 @@ fn patch_mail_toggle(env: &WowLuaEnv) {
             end
 
             __wow_ui_sim_toggle_mail_patched = true
+        end
+    "#,
+    );
+}
+
+/// Guard QuestLogMixin:GetCurrentMapID when QuestMapFrame has no world map parent.
+///
+/// In partial panel harnesses and some startup traces, Blizzard_UIPanels_Game
+/// loads QuestMapFrame before Blizzard_WorldMap attaches it to WorldMapFrame.
+/// PLAYER_ENTERING_WORLD still calls QuestMapFrame:Refresh(), which reaches
+/// GetCurrentMapID() and nil-dereferences self:GetParent():IsShown().
+///
+/// Falling back to C_Map.GetBestMapForUnit("player") matches Blizzard's own
+/// non-world-map branch and keeps the quest log path usable until the parent
+/// exists.
+fn patch_quest_map_current_map_lookup(env: &WowLuaEnv) {
+    let _ = env.exec(
+        r#"
+        if not __wow_ui_sim_quest_map_parent_guard_patched then
+            local function getQuestMapParent(frame)
+                if not frame or type(frame.GetParent) ~= "function" then
+                    return nil
+                end
+
+                local parent = frame:GetParent()
+                if not parent or type(parent.IsShown) ~= "function" then
+                    return nil
+                end
+
+                return parent
+            end
+
+            local function getCurrentMapID(self)
+                local parent = getQuestMapParent(self)
+                if parent and parent:IsShown() and type(parent.GetMapID) == "function" then
+                    return parent:GetMapID()
+                end
+
+                return C_Map.GetBestMapForUnit("player")
+            end
+
+            local function refresh(self)
+                local parent = getQuestMapParent(self)
+                if parent and QuestMapFrame.DetailsFrame.questMapID
+                    and self.DetailsFrame.questMapID ~= parent:GetMapID() then
+                    QuestMapFrame_CloseQuestDetails()
+                end
+
+                self:SyncQuestSystemWithCurrentMap()
+                SortQuestSortTypes()
+                SortQuests()
+                local numPOIs = QuestMapUpdateAllQuests()
+                QuestMapFrame_ResetFilters()
+                QuestMapFrame_UpdateAll(numPOIs)
+
+                self:ValidateTabs()
+                self:CheckEventsTabTutorial()
+            end
+
+            local function updateAll(numPOIs)
+                QuestMapFrame:UpdatePOIs()
+
+                if not numPOIs then
+                    QuestMapUpdateAllQuests()
+                end
+
+                local parent = getQuestMapParent(QuestMapFrame)
+                if parent and parent:IsShown() then
+                    local questDetailID = QuestMapFrame.DetailsFrame.questID
+                    if questDetailID then
+                        QuestMapFrame_ShowQuestDetails(questDetailID)
+                    else
+                        QuestLogQuests_Update()
+                    end
+
+                    if type(parent.OnQuestLogUpdate) == "function" then
+                        parent:OnQuestLogUpdate()
+                    end
+                end
+            end
+
+            if QuestLogMixin then
+                QuestLogMixin.GetCurrentMapID = getCurrentMapID
+                QuestLogMixin.Refresh = refresh
+            end
+
+            if QuestMapFrame then
+                QuestMapFrame.GetCurrentMapID = getCurrentMapID
+                QuestMapFrame.Refresh = refresh
+            end
+
+            if type(QuestMapFrame_UpdateAll) == "function" then
+                QuestMapFrame_UpdateAll = updateAll
+            end
+
+            __wow_ui_sim_quest_map_parent_guard_patched = true
         end
     "#,
     );
