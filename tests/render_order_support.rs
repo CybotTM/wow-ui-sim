@@ -215,72 +215,64 @@ pub(super) fn request_path_for_frame_texture(
 pub(super) fn world_quest_pin_pairs(
     state: &SimState,
 ) -> Vec<(u64, u64, wow_ui_sim::LayoutRect, String, String)> {
-    let mut pairs = Vec::new();
+    world_quest_icon_ids(state)
+        .into_iter()
+        .filter_map(|icon_id| world_quest_pin_pair(state, icon_id))
+        .collect()
+}
 
-    for icon_id in state.widgets.iter_ids().filter(|&id| {
-        let Some(frame) = state.widgets.get(id) else {
-            return false;
-        };
-        frame.atlas.as_deref() == Some("Worldquest-icon")
-    }) {
-        let Some(display_frame_id) = state.widgets.get(icon_id).and_then(|frame| frame.parent_id)
-        else {
-            continue;
-        };
-        let Some(button_id) = state
-            .widgets
-            .get(display_frame_id)
-            .and_then(|frame| frame.parent_id)
-        else {
-            continue;
-        };
-        let Some(circle_id) = state.widgets.iter_ids().find(|&id| {
-            let Some(frame) = state.widgets.get(id) else {
-                return false;
-            };
+fn world_quest_icon_ids(state: &SimState) -> Vec<u64> {
+    state
+        .widgets
+        .iter_ids()
+        .filter(|&id| {
+            state
+                .widgets
+                .get(id)
+                .is_some_and(|frame| frame.atlas.as_deref() == Some("Worldquest-icon"))
+        })
+        .collect()
+}
+
+fn world_quest_pin_pair(
+    state: &SimState,
+    icon_id: u64,
+) -> Option<(u64, u64, wow_ui_sim::LayoutRect, String, String)> {
+    let button_id = world_quest_button_id(state, icon_id)?;
+    let circle_id = world_quest_circle_id(state, button_id)?;
+    let circle_request_path = frame_request_path(state, circle_id)?;
+    let icon_request_path = frame_request_path(state, icon_id)?;
+
+    Some((
+        circle_id,
+        icon_id,
+        compute_frame_rect(&state.widgets, circle_id, 1024.0, 768.0),
+        circle_request_path,
+        icon_request_path,
+    ))
+}
+
+fn world_quest_button_id(state: &SimState, icon_id: u64) -> Option<u64> {
+    let display_frame_id = state.widgets.get(icon_id)?.parent_id?;
+    state.widgets.get(display_frame_id)?.parent_id
+}
+
+fn world_quest_circle_id(state: &SimState, button_id: u64) -> Option<u64> {
+    state.widgets.iter_ids().find(|&id| {
+        state.widgets.get(id).is_some_and(|frame| {
             frame.parent_id == Some(button_id)
                 && frame.atlas.as_deref() == Some("UI-QuestPoi-QuestNumber")
-        }) else {
-            continue;
-        };
+        })
+    })
+}
 
-        let Some(circle_texture) = state
-            .widgets
-            .get(circle_id)
-            .and_then(|frame| frame.texture.clone())
-        else {
-            continue;
-        };
-        let Some(icon_texture) = state
-            .widgets
-            .get(icon_id)
-            .and_then(|frame| frame.texture.clone())
-        else {
-            continue;
-        };
-
-        pairs.push((
-            circle_id,
-            icon_id,
-            compute_frame_rect(&state.widgets, circle_id, 1024.0, 768.0),
-            request_path_for_frame_texture(
-                &circle_texture,
-                state
-                    .widgets
-                    .get(circle_id)
-                    .and_then(|frame| frame.atlas_tex_coords),
-            ),
-            request_path_for_frame_texture(
-                &icon_texture,
-                state
-                    .widgets
-                    .get(icon_id)
-                    .and_then(|frame| frame.atlas_tex_coords),
-            ),
-        ));
-    }
-
-    pairs
+fn frame_request_path(state: &SimState, id: u64) -> Option<String> {
+    let frame = state.widgets.get(id)?;
+    let texture = frame.texture.as_deref()?;
+    Some(request_path_for_frame_texture(
+        texture,
+        frame.atlas_tex_coords,
+    ))
 }
 
 pub(super) fn blizzard_ui_dir() -> PathBuf {
@@ -387,4 +379,64 @@ pub(super) fn open_world_map(env: &WowLuaEnv) {
         .expect("failed to toggle world map after startup");
     wow_ui_sim::startup::process_pending_timers(env);
     wow_ui_sim::startup::fire_one_on_update_tick(env);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use wow_ui_sim::widget::{Frame, WidgetType};
+
+    #[test]
+    fn world_quest_pin_pairs_collect_matching_circle_and_icon() {
+        let mut state = SimState::default();
+        state.widgets.register(Frame {
+            id: 10,
+            widget_type: WidgetType::Frame,
+            width: 32.0,
+            height: 32.0,
+            ..Default::default()
+        });
+        state.widgets.register(Frame {
+            id: 20,
+            widget_type: WidgetType::Frame,
+            parent_id: Some(10),
+            ..Default::default()
+        });
+        state.widgets.register(Frame {
+            id: 30,
+            widget_type: WidgetType::Texture,
+            parent_id: Some(10),
+            width: 32.0,
+            height: 32.0,
+            atlas: Some("UI-QuestPoi-QuestNumber".to_string()),
+            texture: Some("Interface/Circle".to_string()),
+            atlas_tex_coords: Some((0.1, 0.9, 0.2, 0.8)),
+            ..Default::default()
+        });
+        state.widgets.register(Frame {
+            id: 40,
+            widget_type: WidgetType::Texture,
+            parent_id: Some(20),
+            width: 16.0,
+            height: 16.0,
+            atlas: Some("Worldquest-icon".to_string()),
+            texture: Some("Interface/Icon".to_string()),
+            ..Default::default()
+        });
+        state.widgets.add_child(10, 20);
+        state.widgets.add_child(10, 30);
+        state.widgets.add_child(20, 40);
+
+        let pairs = world_quest_pin_pairs(&state);
+
+        assert_eq!(pairs.len(), 1);
+        let (circle_id, icon_id, circle_rect, circle_request, icon_request) = &pairs[0];
+        assert_eq!((*circle_id, *icon_id), (30, 40));
+        assert_eq!((circle_rect.width, circle_rect.height), (32.0, 32.0));
+        assert_eq!(
+            circle_request,
+            "Interface/Circle@crop:0.100000,0.900000,0.200000,0.800000"
+        );
+        assert_eq!(icon_request, "Interface/Icon");
+    }
 }
