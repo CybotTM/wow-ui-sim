@@ -115,6 +115,7 @@ pub mod profession_data;
 pub mod protected_call;
 pub mod quest_frames;
 pub mod reputation_data;
+pub mod rilua_stubs;
 pub mod security_api;
 pub mod settings_api;
 pub mod sound_api;

@@ -1,0 +1,937 @@
+//! rilua RustFn equivalents for methods_text/, methods_attribute.rs, and methods_event.rs.
+//!
+//! Each function is a `RustFn` (`fn(&mut LuaState) -> LuaResult<u32>`) that mirrors
+//! the corresponding mlua method. Complex operations are stubbed with TODO.
+
+use crate::lua_api::rilua_methods::{
+    borrow_state, borrow_state_mut, create_string, frame_id_from_stack, val_to_string,
+};
+use crate::lua_bridge::{stack_val, table_set_rust_fn};
+use rilua::vm::gc::arena::GcRef;
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
+use rilua::{LuaResult, Val, runtime_error};
+
+// ── Text methods ────────────────────────────────────────────────────────────
+
+fn set_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let text_val = stack_val(state, 2);
+    let text = match text_val {
+        Val::Str(s) => {
+            let lua_str = state.gc.string_arena.get(s);
+            lua_str.map(|ls| String::from_utf8_lossy(ls.data()).to_string())
+        }
+        Val::Num(n) => Some(n.to_string()),
+        _ => None,
+    };
+    // TODO: button Text child creation, HTML stripping, font measurement, tooltip lines
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.text = text.clone();
+        frame.text_stripped = text
+            .as_ref()
+            .map(|t| crate::render::strip_wow_markup(t));
+    }
+    Ok(0)
+}
+
+fn get_text(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let frame = sim.widgets.get(id);
+    let is_editbox = frame
+        .map(|f| f.widget_type == crate::widget::WidgetType::EditBox)
+        .unwrap_or(false);
+    let text = frame.and_then(|f| {
+        use crate::widget::WidgetType;
+        if matches!(f.widget_type, WidgetType::Button | WidgetType::CheckButton) {
+            f.children_keys
+                .get("Text")
+                .and_then(|&cid| sim.widgets.get(cid))
+                .and_then(|c| c.text.clone())
+        } else {
+            f.text.clone()
+        }
+    });
+    drop(sim);
+    match text {
+        Some(t) => {
+            let s = create_string(state, &t);
+            state.stack.push(s);
+            Ok(1)
+        }
+        None if is_editbox => {
+            let s = create_string(state, "");
+            state.stack.push(s);
+            Ok(1)
+        }
+        None => {
+            state.stack.push(Val::Nil);
+            Ok(1)
+        }
+    }
+}
+
+fn set_formatted_text(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: format the text with string.format and delegate to set_text logic
+    let id = frame_id_from_stack(state, 1)?;
+    let _ = id;
+    Ok(0)
+}
+
+fn set_font(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: SimpleHTML per-textType dispatch
+    let font_val = stack_val(state, 2);
+    let size_val = stack_val(state, 3);
+    let flags_val = stack_val(state, 4);
+    let font = val_to_string(state, font_val);
+    let size = match size_val {
+        Val::Num(n) => Some(n as f32),
+        _ => None,
+    };
+    let flags = val_to_string(state, flags_val);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        if let Some(f) = font {
+            frame.font = Some(f);
+        }
+        if let Some(s) = size {
+            frame.font_size = s;
+        }
+        if let Some(ref f) = flags {
+            frame.font_outline = crate::widget::TextOutline::from_wow_str(f);
+        }
+    }
+    state.stack.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn get_font(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: SimpleHTML per-textType dispatch
+    let sim = borrow_state(state)?;
+    let frame = sim.widgets.get(id);
+    let font_path = frame
+        .and_then(|f| f.font.as_deref())
+        .unwrap_or("Fonts\\FRIZQT__.TTF")
+        .to_string();
+    let font_size = frame.map(|f| f.font_size).unwrap_or(12.0);
+    let flags = frame
+        .map(|f| match f.font_outline {
+            crate::widget::TextOutline::None => "",
+            crate::widget::TextOutline::Outline => "OUTLINE",
+            crate::widget::TextOutline::ThickOutline => "THICKOUTLINE",
+        })
+        .unwrap_or("")
+        .to_string();
+    drop(sim);
+    let font_val = create_string(state, &font_path);
+    let flags_val = create_string(state, &flags);
+    state.stack.push(font_val);
+    state.stack.push(Val::Num(font_size as f64));
+    state.stack.push(flags_val);
+    Ok(3)
+}
+
+fn set_font_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let height = match stack_val(state, 2) {
+        Val::Num(n) => n as f32,
+        _ => return Ok(0),
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut_visual(id) {
+        frame.font_size = height;
+    }
+    Ok(0)
+}
+
+fn get_font_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let size = sim
+        .widgets
+        .get(id)
+        .map(|f| f.font_size)
+        .unwrap_or(12.0);
+    drop(sim);
+    state.stack.push(Val::Num(size as f64));
+    Ok(1)
+}
+
+fn set_text_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: SimpleHTML per-textType dispatch
+    let r = val_to_f32(stack_val(state, 2), 1.0);
+    let g = val_to_f32(stack_val(state, 3), 1.0);
+    let b = val_to_f32(stack_val(state, 4), 1.0);
+    let a = val_to_f32(stack_val(state, 5), 1.0);
+    let new_color = crate::widget::Color::new(r, g, b, a);
+    let mut sim = borrow_state_mut(state)?;
+    if !sim.widgets.get(id).is_some_and(|f| f.text_color == new_color) {
+        if let Some(frame) = sim.widgets.get_mut_visual(id) {
+            frame.text_color = new_color;
+        }
+    }
+    Ok(0)
+}
+
+fn get_text_color(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: SimpleHTML per-textType dispatch
+    let sim = borrow_state(state)?;
+    let (r, g, b, a) = if let Some(frame) = sim.widgets.get(id) {
+        (
+            frame.text_color.r,
+            frame.text_color.g,
+            frame.text_color.b,
+            frame.text_color.a,
+        )
+    } else {
+        (1.0_f32, 1.0_f32, 1.0_f32, 1.0_f32)
+    };
+    drop(sim);
+    state.stack.push(Val::Num(r as f64));
+    state.stack.push(Val::Num(g as f64));
+    state.stack.push(Val::Num(b as f64));
+    state.stack.push(Val::Num(a as f64));
+    Ok(4)
+}
+
+// ── Attribute methods ───────────────────────────────────────────────────────
+
+fn get_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let name_val = stack_val(state, 2);
+    let Some(name) = val_to_string(state, name_val) else {
+        state.stack.push(Val::Nil);
+        return Ok(1);
+    };
+    // TODO: wildcard key fallback order (prefix/suffix) — only simple lookup for now
+    // TODO: __frame_table_attributes for table/userdata/function attributes
+    let sim = borrow_state(state)?;
+    let attr = sim
+        .widgets
+        .get(id)
+        .and_then(|f| f.attributes.get(name.as_str()));
+    let val = attribute_to_val(state, attr);
+    drop(sim);
+    state.stack.push(val);
+    Ok(1)
+}
+
+fn set_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let name_val = stack_val(state, 2);
+    let value = stack_val(state, 3);
+    let Some(name) = val_to_string(state, name_val) else {
+        return Ok(0);
+    };
+    // TODO: table/function/userdata attributes via a Lua-side __frame_table_attributes table
+    // TODO: fire OnAttributeChanged script handler
+    store_simple_attribute(state, id, &name, value)?;
+    Ok(0)
+}
+
+fn set_attribute_no_handler(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let name_val = stack_val(state, 2);
+    let value = stack_val(state, 3);
+    let Some(name) = val_to_string(state, name_val) else {
+        return Ok(0);
+    };
+    store_simple_attribute(state, id, &name, value)?;
+    Ok(0)
+}
+
+fn clear_attributes(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.attributes.clear();
+    }
+    Ok(0)
+}
+
+fn execute_attribute(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: full ExecuteAttribute semantics (function callback and snippet execution)
+    let _id = frame_id_from_stack(state, 1)?;
+    let reason = create_string(state, "attribute-missing");
+    state.stack.push(Val::Bool(false));
+    state.stack.push(reason);
+    Ok(2)
+}
+
+fn set_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let label_val = stack_val(state, 2);
+    let frame_val = stack_val(state, 3);
+    let Some(label) = val_to_string(state, label_val) else {
+        return Ok(0);
+    };
+    let key = format!("frameref-{}", label);
+    // TODO: store frame refs in Lua-side attribute table to preserve Val identity
+    // For now, only handle frame-backed table refs as Nil (ref itself is stored by caller)
+    let _ = (frame_val, key);
+    Ok(0)
+}
+
+fn get_frame_ref(state: &mut LuaState) -> LuaResult<u32> {
+    let _id = frame_id_from_stack(state, 1)?;
+    let _label_val = stack_val(state, 2);
+    // TODO: retrieve from Lua-side attribute table
+    state.stack.push(Val::Nil);
+    Ok(1)
+}
+
+fn set_forbidden(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: combat lockdown check
+    let forbidden = match stack_val(state, 2) {
+        Val::Nil => true,
+        Val::Bool(b) => b,
+        _ => true,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.forbidden = forbidden;
+    }
+    Ok(0)
+}
+
+fn is_forbidden(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let val = sim
+        .widgets
+        .get(id)
+        .map(|f| f.forbidden)
+        .unwrap_or(false);
+    drop(sim);
+    state.stack.push(Val::Bool(val));
+    Ok(1)
+}
+
+fn can_change_protected_state(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: combat lockdown check
+    state.stack.push(Val::Bool(true));
+    Ok(1)
+}
+
+fn set_pass_through_buttons(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: parse variadic button names from stack
+    let _ = id;
+    Ok(0)
+}
+
+fn set_flattens_render_layers(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let flatten = match stack_val(state, 2) {
+        Val::Nil => false,
+        Val::Bool(b) => b,
+        _ => false,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.flattens_render_layers = flatten;
+    }
+    Ok(0)
+}
+
+fn set_motion_scripts_while_disabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let enabled = match stack_val(state, 2) {
+        Val::Nil => false,
+        Val::Bool(b) => b,
+        _ => false,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.motion_scripts_while_disabled = enabled;
+    }
+    Ok(0)
+}
+
+fn get_motion_scripts_while_disabled(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let val = sim
+        .widgets
+        .get(id)
+        .map(|f| f.motion_scripts_while_disabled)
+        .unwrap_or(false);
+    drop(sim);
+    state.stack.push(Val::Bool(val));
+    Ok(1)
+}
+
+fn set_clips_children(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let clips = match stack_val(state, 2) {
+        Val::Nil => false,
+        Val::Bool(b) => b,
+        _ => false,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.clips_children = clips;
+    }
+    Ok(0)
+}
+
+fn does_clip_children(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let val = sim
+        .widgets
+        .get(id)
+        .map(|f| f.clips_children)
+        .unwrap_or(false);
+    drop(sim);
+    state.stack.push(Val::Bool(val));
+    Ok(1)
+}
+
+fn set_hit_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: combat lockdown check
+    let l = val_to_f32(stack_val(state, 2), 0.0);
+    let r = val_to_f32(stack_val(state, 3), 0.0);
+    let t = val_to_f32(stack_val(state, 4), 0.0);
+    let b = val_to_f32(stack_val(state, 5), 0.0);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        frame.hit_rect_insets = (l, r, t, b);
+    }
+    Ok(0)
+}
+
+fn get_hit_rect_insets(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let (l, r, t, b) = sim
+        .widgets
+        .get(id)
+        .map(|f| f.hit_rect_insets)
+        .unwrap_or((0.0, 0.0, 0.0, 0.0));
+    drop(sim);
+    state.stack.push(Val::Num(l as f64));
+    state.stack.push(Val::Num(r as f64));
+    state.stack.push(Val::Num(t as f64));
+    state.stack.push(Val::Num(b as f64));
+    Ok(4)
+}
+
+// ── Event methods ───────────────────────────────────────────────────────────
+
+fn register_event(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let Some(event) = val_to_string(state, event_val) else {
+        return Err(runtime_error("RegisterEvent: event name required"));
+    };
+    let newly_registered = {
+        let mut sim = borrow_state_mut(state)?;
+        if !crate::event::is_registerable_event(&event) {
+            let frame_name = sim
+                .widgets
+                .get(id)
+                .and_then(|f| f.name.clone())
+                .unwrap_or_else(|| "Frame".to_string());
+            return Err(runtime_error(format!(
+                "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
+                frame_name, frame_name, event
+            )));
+        }
+        sim.widgets
+            .get_mut(id)
+            .map(|f| f.registered_events.insert(event.clone()))
+            .unwrap_or(false)
+    };
+    if newly_registered {
+        rilua_hlist_register_individual(state, id, &event)?;
+    }
+    let restricted = crate::event::is_restricted_event(&event);
+    state
+        .stack
+        .push(Val::Bool(newly_registered && !restricted));
+    Ok(1)
+}
+
+fn register_unit_event(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let Some(event) = val_to_string(state, event_val) else {
+        state.stack.push(Val::Bool(false));
+        return Ok(1);
+    };
+    // Unit args at 3+ are intentionally ignored (unit event filtering not implemented)
+    let newly_registered = {
+        let mut sim = borrow_state_mut(state)?;
+        sim.widgets
+            .get_mut(id)
+            .map(|f| f.registered_events.insert(event.clone()))
+            .unwrap_or(false)
+    };
+    if newly_registered {
+        rilua_hlist_register_individual(state, id, &event)?;
+    }
+    state.stack.push(Val::Bool(newly_registered));
+    Ok(1)
+}
+
+fn unregister_event(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let Some(event) = val_to_string(state, event_val) else {
+        state.stack.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let was_registered = {
+        let mut sim = borrow_state_mut(state)?;
+        if !crate::event::is_registerable_event(&event) {
+            let frame_name = sim
+                .widgets
+                .get(id)
+                .and_then(|f| f.name.clone())
+                .unwrap_or_else(|| "Frame".to_string());
+            return Err(runtime_error(format!(
+                "{}:RegisterEvent(): {}:RegisterEvent(): Attempt to register unknown event \"{}\"",
+                frame_name, frame_name, event
+            )));
+        }
+        sim.widgets
+            .get_mut(id)
+            .map(|f| f.registered_events.remove(&event))
+            .unwrap_or(false)
+    };
+    if was_registered {
+        rilua_hlist_unregister_individual(state, id, &event)?;
+    }
+    state.stack.push(Val::Bool(was_registered));
+    Ok(1)
+}
+
+fn unregister_all_events(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut(id) {
+            frame.registered_events.clear();
+            frame.register_all_events = false;
+        }
+    }
+    rilua_hlist_unregister_all(state, id)?;
+    Ok(0)
+}
+
+fn register_all_events(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    {
+        let mut sim = borrow_state_mut(state)?;
+        if let Some(frame) = sim.widgets.get_mut(id) {
+            frame.register_all_events = true;
+        }
+    }
+    rilua_hlist_register_all(state, id)?;
+    Ok(0)
+}
+
+fn is_event_registered(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let event = val_to_string(state, event_val).unwrap_or_default();
+    let sim = borrow_state(state)?;
+    let registered = sim
+        .widgets
+        .get(id)
+        .map(|f| f.registered_events.contains(&event))
+        .unwrap_or(false);
+    drop(sim);
+    state.stack.push(Val::Bool(registered));
+    state.stack.push(Val::Nil);
+    Ok(2)
+}
+
+fn register_event_callback(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let Some(event) = val_to_string(state, event_val) else {
+        state.stack.push(Val::Bool(false));
+        return Ok(1);
+    };
+    if !crate::event::is_callback_event(&event) {
+        return Err(runtime_error(format!(
+            "Frame:RegisterEventCallback(): Attempt to register unknown event \"{}\"",
+            event
+        )));
+    }
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut(id) {
+        f.registered_events.insert(event.clone());
+    }
+    let restricted = crate::event::is_restricted_event(&event);
+    drop(sim);
+    state.stack.push(Val::Bool(!restricted));
+    Ok(1)
+}
+
+fn register_unit_event_callback(state: &mut LuaState) -> LuaResult<u32> {
+    // TODO: full unit-event callback (unit filter + Lua callback storage)
+    let id = frame_id_from_stack(state, 1)?;
+    let event_val = stack_val(state, 2);
+    let Some(event) = val_to_string(state, event_val) else {
+        state.stack.push(Val::Bool(false));
+        return Ok(1);
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut(id) {
+        f.registered_events.insert(event.clone());
+    }
+    let restricted = crate::event::is_restricted_event(&event);
+    drop(sim);
+    rilua_hlist_register_individual(state, id, &event)?;
+    state.stack.push(Val::Bool(!restricted));
+    Ok(1)
+}
+
+fn set_propagate_keyboard_input(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    // TODO: combat lockdown check
+    let propagate = match stack_val(state, 2) {
+        Val::Bool(b) => b,
+        _ => false,
+    };
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(f) = sim.widgets.get_mut(id) {
+        f.propagate_keyboard_input = propagate;
+    }
+    Ok(0)
+}
+
+fn get_propagate_keyboard_input(state: &mut LuaState) -> LuaResult<u32> {
+    let id = frame_id_from_stack(state, 1)?;
+    let sim = borrow_state(state)?;
+    let val = sim
+        .widgets
+        .get(id)
+        .map(|f| f.propagate_keyboard_input)
+        .unwrap_or(false);
+    drop(sim);
+    state.stack.push(Val::Bool(val));
+    Ok(1)
+}
+
+// ── hlist helpers (mirrors methods_event.rs) ────────────────────────────────
+
+/// Insert `id` into the per-event hlist stored in registry["__event_individual"][event].
+fn rilua_hlist_register_individual(state: &mut LuaState, id: u64, event: &str) -> LuaResult<()> {
+    let individual_val = crate::lua_api::rilua_methods::registry_get(state, "__event_individual");
+    let Val::Table(individual) = individual_val else {
+        return Ok(());
+    };
+    let event_key = state.gc.intern_string(event.as_bytes());
+    // Look up existing sub-table or create a new one
+    let existing = state
+        .gc
+        .tables
+        .get(individual)
+        .map(|t| t.get_str(event_key, &state.gc.string_arena));
+    let event_tbl = match existing {
+        Some(Val::Table(t)) => t,
+        _ => {
+            let new_tbl = state.gc.alloc_table(Table::new());
+            if let Some(t) = state.gc.tables.get_mut(individual) {
+                let _ = t.raw_set(Val::Str(event_key), Val::Table(new_tbl), &state.gc.string_arena);
+            }
+            new_tbl
+        }
+    };
+    rilua_hlist_insert(state, event_tbl, id)
+}
+
+/// Remove `id` from the per-event hlist.
+fn rilua_hlist_unregister_individual(
+    state: &mut LuaState,
+    id: u64,
+    event: &str,
+) -> LuaResult<()> {
+    let individual_val = crate::lua_api::rilua_methods::registry_get(state, "__event_individual");
+    let Val::Table(individual) = individual_val else {
+        return Ok(());
+    };
+    let event_key = state.gc.intern_string(event.as_bytes());
+    let existing = state
+        .gc
+        .tables
+        .get(individual)
+        .map(|t| t.get_str(event_key, &state.gc.string_arena));
+    if let Some(Val::Table(event_tbl)) = existing {
+        rilua_hlist_remove(state, event_tbl, id)?;
+    }
+    Ok(())
+}
+
+/// Insert `id` into the all-events hlist stored in registry["__event_all"].
+fn rilua_hlist_register_all(state: &mut LuaState, id: u64) -> LuaResult<()> {
+    let all_val = crate::lua_api::rilua_methods::registry_get(state, "__event_all");
+    if let Val::Table(all_tbl) = all_val {
+        rilua_hlist_insert(state, all_tbl, id)?;
+    }
+    Ok(())
+}
+
+/// Remove `id` from all individual event hlists and the all-events hlist.
+fn rilua_hlist_unregister_all(state: &mut LuaState, id: u64) -> LuaResult<()> {
+    // Remove from all individual event tables
+    let individual_val = crate::lua_api::rilua_methods::registry_get(state, "__event_individual");
+    if let Val::Table(individual) = individual_val {
+        // Collect all event sub-tables first to avoid borrow conflicts
+        let sub_tables: Vec<GcRef<Table>> = state
+            .gc
+            .tables
+            .get(individual)
+            .map(|t| {
+                t.hash_entries()
+                    .into_iter()
+                    .filter_map(|(_, v)| if let Val::Table(t) = v { Some(t) } else { None })
+                    .collect()
+            })
+            .unwrap_or_default();
+        for event_tbl in sub_tables {
+            rilua_hlist_remove(state, event_tbl, id)?;
+        }
+    }
+    // Remove from all-events hlist
+    let all_val = crate::lua_api::rilua_methods::registry_get(state, "__event_all");
+    if let Val::Table(all_tbl) = all_val {
+        rilua_hlist_remove(state, all_tbl, id)?;
+    }
+    Ok(())
+}
+
+/// hlist insert: append id to array, record index in "_s" sub-table.
+fn rilua_hlist_insert(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaResult<()> {
+    let set = rilua_hlist_set(state, tbl);
+    // Check if already present (use integer key lookup to avoid string_arena borrow)
+    let already = state
+        .gc
+        .tables
+        .get(set)
+        .map(|t| t.get_int(id as i64) != Val::Nil)
+        .unwrap_or(false);
+    if already {
+        return Ok(());
+    }
+    let n = state
+        .gc
+        .tables
+        .get(tbl)
+        .map(|t| t.array_len())
+        .unwrap_or(0)
+        + 1;
+    if let Some(t) = state.gc.tables.get_mut(tbl) {
+        let _ = t.raw_set(Val::Num(n as f64), Val::Num(id as f64), &state.gc.string_arena);
+    }
+    if let Some(s) = state.gc.tables.get_mut(set) {
+        let _ = s.raw_set(Val::Num(id as f64), Val::Num(n as f64), &state.gc.string_arena);
+    }
+    Ok(())
+}
+
+/// hlist remove: swap-remove to keep array dense.
+fn rilua_hlist_remove(state: &mut LuaState, tbl: GcRef<Table>, id: u64) -> LuaResult<()> {
+    let set = rilua_hlist_set(state, tbl);
+    // Use get_int to avoid string_arena borrow conflict
+    let idx = state
+        .gc
+        .tables
+        .get(set)
+        .and_then(|t| match t.get_int(id as i64) {
+            Val::Num(n) if n > 0.0 => Some(n as usize),
+            _ => None,
+        });
+    let Some(idx) = idx else { return Ok(()) };
+    let n = state
+        .gc
+        .tables
+        .get(tbl)
+        .map(|t| t.array_len())
+        .unwrap_or(0);
+    if idx != n {
+        let last_id = state
+            .gc
+            .tables
+            .get(tbl)
+            .and_then(|t| match t.get_int(n as i64) {
+                Val::Num(lid) => Some(lid as u64),
+                _ => None,
+            });
+        if let Some(lid) = last_id {
+            if let Some(t) = state.gc.tables.get_mut(tbl) {
+                let _ = t.raw_set(Val::Num(idx as f64), Val::Num(lid as f64), &state.gc.string_arena);
+            }
+            if let Some(s) = state.gc.tables.get_mut(set) {
+                let _ = s.raw_set(Val::Num(lid as f64), Val::Num(idx as f64), &state.gc.string_arena);
+            }
+        }
+    }
+    if let Some(t) = state.gc.tables.get_mut(tbl) {
+        let _ = t.raw_set(Val::Num(n as f64), Val::Nil, &state.gc.string_arena);
+    }
+    if let Some(s) = state.gc.tables.get_mut(set) {
+        let _ = s.raw_set(Val::Num(id as f64), Val::Nil, &state.gc.string_arena);
+    }
+    Ok(())
+}
+
+/// Get or create the "_s" set sub-table of a hlist table.
+fn rilua_hlist_set(state: &mut LuaState, tbl: GcRef<Table>) -> GcRef<Table> {
+    let key_ref = state.gc.intern_string(b"_s");
+    let existing = state
+        .gc
+        .tables
+        .get(tbl)
+        .map(|t| t.get_str(key_ref, &state.gc.string_arena));
+    if let Some(Val::Table(s)) = existing {
+        return s;
+    }
+    let new_set = state.gc.alloc_table(Table::new());
+    if let Some(t) = state.gc.tables.get_mut(tbl) {
+        let _ = t.raw_set(Val::Str(key_ref), Val::Table(new_set), &state.gc.string_arena);
+    }
+    new_set
+}
+
+// ── Local helpers ───────────────────────────────────────────────────────────
+
+fn val_to_f32(val: Val, default: f32) -> f32 {
+    match val {
+        Val::Num(n) => n as f32,
+        _ => default,
+    }
+}
+
+fn attribute_to_val(
+    state: &mut LuaState,
+    attr: Option<&crate::widget::AttributeValue>,
+) -> Val {
+    match attr {
+        None => Val::Nil,
+        Some(crate::widget::AttributeValue::Nil) => Val::Nil,
+        Some(crate::widget::AttributeValue::Boolean(b)) => Val::Bool(*b),
+        Some(crate::widget::AttributeValue::Number(n)) => Val::Num(*n),
+        Some(crate::widget::AttributeValue::String(s)) => create_string(state, s),
+    }
+}
+
+fn val_to_attribute(val: Val, state: &LuaState) -> crate::widget::AttributeValue {
+    match val {
+        Val::Nil => crate::widget::AttributeValue::Nil,
+        Val::Bool(b) => crate::widget::AttributeValue::Boolean(b),
+        Val::Num(n) => crate::widget::AttributeValue::Number(n),
+        Val::Str(s) => {
+            let text = state
+                .gc
+                .string_arena
+                .get(s)
+                .and_then(|ls| String::from_utf8(ls.data().to_vec()).ok())
+                .unwrap_or_default();
+            crate::widget::AttributeValue::String(text)
+        }
+        _ => crate::widget::AttributeValue::Nil,
+    }
+}
+
+fn store_simple_attribute(
+    state: &mut LuaState,
+    id: u64,
+    name: &str,
+    value: Val,
+) -> LuaResult<()> {
+    let attr = val_to_attribute(value, state);
+    let mut sim = borrow_state_mut(state)?;
+    if let Some(frame) = sim.widgets.get_mut(id) {
+        if matches!(attr, crate::widget::AttributeValue::Nil) {
+            frame.attributes.remove(name);
+        } else {
+            frame.attributes.insert(name.to_string(), attr);
+        }
+    }
+    Ok(())
+}
+
+// ── Registration ────────────────────────────────────────────────────────────
+
+/// Register all text, attribute, and event RustFn methods on the given table.
+pub fn register_all(state: &mut LuaState, table: GcRef<Table>) -> LuaResult<()> {
+    // Text methods
+    table_set_rust_fn(state, table, "SetText", set_text)?;
+    table_set_rust_fn(state, table, "GetText", get_text)?;
+    table_set_rust_fn(state, table, "SetFormattedText", set_formatted_text)?;
+    table_set_rust_fn(state, table, "SetFont", set_font)?;
+    table_set_rust_fn(state, table, "GetFont", get_font)?;
+    table_set_rust_fn(state, table, "SetFontHeight", set_font_height)?;
+    table_set_rust_fn(state, table, "GetFontHeight", get_font_height)?;
+    table_set_rust_fn(state, table, "SetTextColor", set_text_color)?;
+    table_set_rust_fn(state, table, "GetTextColor", get_text_color)?;
+    // Attribute methods
+    table_set_rust_fn(state, table, "GetAttribute", get_attribute)?;
+    table_set_rust_fn(state, table, "SetAttribute", set_attribute)?;
+    table_set_rust_fn(state, table, "SetAttributeNoHandler", set_attribute_no_handler)?;
+    table_set_rust_fn(state, table, "ClearAttributes", clear_attributes)?;
+    table_set_rust_fn(state, table, "ExecuteAttribute", execute_attribute)?;
+    table_set_rust_fn(state, table, "SetFrameRef", set_frame_ref)?;
+    table_set_rust_fn(state, table, "GetFrameRef", get_frame_ref)?;
+    table_set_rust_fn(state, table, "SetForbidden", set_forbidden)?;
+    table_set_rust_fn(state, table, "IsForbidden", is_forbidden)?;
+    table_set_rust_fn(state, table, "CanChangeProtectedState", can_change_protected_state)?;
+    table_set_rust_fn(state, table, "SetPassThroughButtons", set_pass_through_buttons)?;
+    table_set_rust_fn(state, table, "SetFlattensRenderLayers", set_flattens_render_layers)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetMotionScriptsWhileDisabled",
+        set_motion_scripts_while_disabled,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetMotionScriptsWhileDisabled",
+        get_motion_scripts_while_disabled,
+    )?;
+    table_set_rust_fn(state, table, "SetClipsChildren", set_clips_children)?;
+    table_set_rust_fn(state, table, "DoesClipChildren", does_clip_children)?;
+    table_set_rust_fn(state, table, "SetHitRectInsets", set_hit_rect_insets)?;
+    table_set_rust_fn(state, table, "GetHitRectInsets", get_hit_rect_insets)?;
+    // Event methods
+    table_set_rust_fn(state, table, "RegisterEvent", register_event)?;
+    table_set_rust_fn(state, table, "RegisterUnitEvent", register_unit_event)?;
+    table_set_rust_fn(state, table, "UnregisterEvent", unregister_event)?;
+    table_set_rust_fn(state, table, "UnregisterAllEvents", unregister_all_events)?;
+    table_set_rust_fn(state, table, "RegisterAllEvents", register_all_events)?;
+    table_set_rust_fn(state, table, "IsEventRegistered", is_event_registered)?;
+    table_set_rust_fn(state, table, "RegisterEventCallback", register_event_callback)?;
+    table_set_rust_fn(
+        state,
+        table,
+        "RegisterUnitEventCallback",
+        register_unit_event_callback,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "SetPropagateKeyboardInput",
+        set_propagate_keyboard_input,
+    )?;
+    table_set_rust_fn(
+        state,
+        table,
+        "GetPropagateKeyboardInput",
+        get_propagate_keyboard_input,
+    )?;
+    Ok(())
+}

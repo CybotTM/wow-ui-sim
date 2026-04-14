@@ -1,0 +1,708 @@
+//! rilua RustFn equivalents: C_Timer API, layout bridge, and string.format patch.
+//!
+//! # Timer API (C_Timer)
+//!
+//! Mirrors `globals/timer_api.rs` but uses rilua's `RustFn` (stateless function
+//! pointers) instead of mlua closures. Because `RustFn = fn(&mut LuaState) ->
+//! LuaResult<u32>` cannot capture `Rc<RefCell<SimState>>`, state is accessed via
+//! `state.app_data::<WowLuaAppData>()`.  Timer callbacks are stored in a rilua
+//! registry table (`__rilua_timer_callbacks`, keyed by timer ID) so GC keeps them
+//! alive without mlua RegistryKeys.
+//!
+//! # OnUpdate dispatch
+//!
+//! Already implemented in `rilua_script_helpers::dispatch_on_update`. No
+//! additional RustFns are needed here; callers use that function directly.
+//!
+//! # Layout bridge
+//!
+//! `GetFrameRect` and the individual edge/size queries are provided as RustFns
+//! that accept a frame-backed table as `self` (argument 1) and return WoW
+//! UI-coordinate values.  They mirror `frame/methods/methods_rect.rs` but use
+//! rilua state access via `rilua_methods::borrow_state`.
+//!
+//! # String format
+//!
+//! `register_string_format` patches `string.format` in the rilua VM with a
+//! Lua-level shim (loaded via `rilua::Lua::exec`) that handles `%F` and
+//! positional arguments (`%1$s`).  Since the format logic is pure string
+//! manipulation it can live entirely in Lua; the Rust implementation in
+//! `string_format.rs` stays on the mlua side only.
+
+use crate::lua_api::env::WowLuaAppData;
+use crate::lua_api::next_timer_id;
+use crate::lua_bridge::{TableBuilder, stack_val, table_set_rust_fn};
+use rilua::vm::state::LuaState;
+use rilua::vm::table::Table;
+use rilua::{LuaApiMut, LuaResult, Val, runtime_error};
+use std::time::{Duration, Instant};
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
+/// Maximum allowed timer duration in seconds ((2^32 - 1) / 1000).
+const MAX_TIMER_SECS: f64 = (u32::MAX as f64) / 1000.0;
+
+/// Registry key for the timer callback storage table.
+const TIMER_CALLBACKS_KEY: &str = "__rilua_timer_callbacks";
+
+// ── Timer callback storage ───────────────────────────────────────────────────
+
+/// Get or create the registry table that stores timer callbacks.
+/// Returns a `GcRef<Table>` for the callback table.
+fn timer_callback_table(state: &mut LuaState) -> rilua::vm::gc::arena::GcRef<Table> {
+    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let registry = state.gc.tables.get(state.registry);
+    if let Some(reg) = registry {
+        if let Val::Table(t) = reg.get_str(key_ref, &state.gc.string_arena) {
+            return t;
+        }
+    }
+    let new_table = state.gc.alloc_table(Table::new());
+    if let Some(reg) = state.gc.tables.get_mut(state.registry) {
+        let _ = reg.raw_set(Val::Str(key_ref), Val::Table(new_table), &state.gc.string_arena);
+    }
+    new_table
+}
+
+/// Store a callback `Val` for a timer ID in the registry table.
+fn store_timer_callback(state: &mut LuaState, timer_id: u64, callback: Val) {
+    let table = timer_callback_table(state);
+    if let Some(t) = state.gc.tables.get_mut(table) {
+        let _ = t.raw_set(Val::Num(timer_id as f64), callback, &state.gc.string_arena);
+    }
+}
+
+/// Remove a timer callback from the registry table (called after firing/cancel).
+pub fn remove_timer_callback(state: &mut LuaState, timer_id: u64) {
+    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let registry = state.gc.tables.get(state.registry);
+    let Some(reg) = registry else { return };
+    let callback_table = match reg.get_str(key_ref, &state.gc.string_arena) {
+        Val::Table(t) => t,
+        _ => return,
+    };
+    if let Some(t) = state.gc.tables.get_mut(callback_table) {
+        let _ = t.raw_set(Val::Num(timer_id as f64), Val::Nil, &state.gc.string_arena);
+    }
+}
+
+/// Retrieve a stored timer callback by ID.
+pub fn get_timer_callback(state: &mut LuaState, timer_id: u64) -> Val {
+    let key_ref = state.gc.intern_string(TIMER_CALLBACKS_KEY.as_bytes());
+    let registry = state.gc.tables.get(state.registry);
+    let Some(reg) = registry else {
+        return Val::Nil;
+    };
+    let callback_table = match reg.get_str(key_ref, &state.gc.string_arena) {
+        Val::Table(t) => t,
+        _ => return Val::Nil,
+    };
+    state
+        .gc
+        .tables
+        .get(callback_table)
+        .map(|t| t.get_raw(Val::Num(timer_id as f64)))
+        .unwrap_or(Val::Nil)
+}
+
+// ── Validation ───────────────────────────────────────────────────────────────
+
+fn validate_seconds(seconds: f64) -> LuaResult<f64> {
+    if seconds < 0.0 || seconds > MAX_TIMER_SECS || seconds.is_nan() || seconds.is_infinite() {
+        return Err(runtime_error("bad argument #1 (invalid duration)"));
+    }
+    Ok(seconds)
+}
+
+/// Extract a function `Val` from the stack, accepting plain functions only.
+/// Returns an error for non-function values.
+fn extract_callback(state: &LuaState, index: i32) -> LuaResult<Val> {
+    let val = stack_val(state, index);
+    match val {
+        Val::Function(_) => Ok(val),
+        _ => Err(runtime_error(format!(
+            "bad argument #{index} (function expected, got {})",
+            val.type_name()
+        ))),
+    }
+}
+
+// ── RiluaPendingTimer ────────────────────────────────────────────────────────
+
+/// A pending timer for the rilua VM. Unlike `PendingTimer` (which uses
+/// `mlua::RegistryKey`), callbacks are stored in the rilua registry table
+/// and referenced by ID. The `cancelled` flag is communicated by nilling
+/// the callback entry in the registry table.
+pub struct RiluaPendingTimer {
+    /// Unique timer ID (shared key with `__rilua_timer_callbacks` table).
+    pub id: u64,
+    /// When this timer should fire.
+    pub fire_at: Instant,
+    /// Repeat interval (None = one-shot).
+    pub interval: Option<Duration>,
+    /// Remaining iterations for tickers with a limit.
+    pub remaining: Option<i32>,
+    /// Whether this timer has been cancelled.
+    pub cancelled: bool,
+    /// Addon that created this timer.
+    pub owner_addon: Option<u16>,
+}
+
+// ── C_Timer.After ────────────────────────────────────────────────────────────
+
+/// `C_Timer.After(seconds, callback)` — one-shot timer, no handle returned.
+///
+/// Accepts non-negative `seconds` and any Lua function. The callback is stored
+/// in `__rilua_timer_callbacks[id]` and a `RiluaPendingTimer` is pushed onto
+/// `SimState.rilua_timers`.
+fn timer_after(state: &mut LuaState) -> LuaResult<u32> {
+    let seconds = match stack_val(state, 1) {
+        Val::Num(n) => n.max(0.0),
+        got => {
+            return Err(runtime_error(format!(
+                "bad argument #1 to 'After' (number expected, got {})",
+                got.type_name()
+            )));
+        }
+    };
+    let callback = extract_callback(state, 2)?;
+
+    let id = next_timer_id();
+    store_timer_callback(state, id, callback);
+
+    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+    let owner_addon = {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        let s = app.sim_state.borrow();
+        s.loading_addon_index.or(s.executing_addon_index)
+    };
+
+    let timer = RiluaPendingTimer {
+        id,
+        fire_at,
+        interval: None,
+        remaining: None,
+        cancelled: false,
+        owner_addon,
+    };
+
+    {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        app.sim_state.borrow_mut().rilua_timers.push_back(timer);
+    }
+
+    Ok(0)
+}
+
+// ── Timer handle table ───────────────────────────────────────────────────────
+
+/// Create a timer handle table with a `:Cancel()` method.
+///
+/// The table has a `__id` field (the timer ID as a number) and a `Cancel`
+/// function that nils out the callback entry, marking the timer as cancelled.
+fn create_timer_handle_table(state: &mut LuaState, timer_id: u64) -> LuaResult<Val> {
+    let handle = TableBuilder::new(state)
+        .set("__id", timer_id)?
+        .set_function("Cancel", timer_handle_cancel)?
+        .build();
+    Ok(handle)
+}
+
+/// `:Cancel()` method on timer handle tables.
+///
+/// Reads `self.__id`, then nils the corresponding entry in `__rilua_timer_callbacks`.
+fn timer_handle_cancel(state: &mut LuaState) -> LuaResult<u32> {
+    let self_val = stack_val(state, 1);
+    let Val::Table(table_ref) = self_val else {
+        return Err(runtime_error("Cancel: expected table self"));
+    };
+    let id_key = state.gc.intern_string(b"__id");
+    let id_val = state
+        .gc
+        .tables
+        .get(table_ref)
+        .map(|t| t.get_str(id_key, &state.gc.string_arena))
+        .unwrap_or(Val::Nil);
+    let Val::Num(id_f) = id_val else {
+        return Ok(0);
+    };
+    let timer_id = id_f as u64;
+    remove_timer_callback(state, timer_id);
+    // Also mark cancelled in the rilua timer queue (best-effort: iterate and flip flag).
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let mut sim = app.sim_state.borrow_mut();
+    for t in sim.rilua_timers.iter_mut() {
+        if t.id == timer_id {
+            t.cancelled = true;
+            break;
+        }
+    }
+    Ok(0)
+}
+
+// ── C_Timer.NewTicker ────────────────────────────────────────────────────────
+
+/// `C_Timer.NewTicker(seconds, callback, iterations?)` — repeating timer with handle.
+fn timer_new_ticker(state: &mut LuaState) -> LuaResult<u32> {
+    let seconds = match stack_val(state, 1) {
+        Val::Num(n) => validate_seconds(n)?,
+        got => {
+            return Err(runtime_error(format!(
+                "bad argument #1 to 'NewTicker' (number expected, got {})",
+                got.type_name()
+            )));
+        }
+    };
+    let callback = extract_callback(state, 2)?;
+    let iterations: Option<i32> = match stack_val(state, 3) {
+        Val::Num(n) => Some(n as i32),
+        Val::Nil => None,
+        _ => None,
+    };
+
+    let id = next_timer_id();
+    store_timer_callback(state, id, callback);
+
+    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+    let interval = Duration::from_secs_f64(seconds);
+
+    let owner_addon = {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        let s = app.sim_state.borrow();
+        s.loading_addon_index.or(s.executing_addon_index)
+    };
+
+    let timer = RiluaPendingTimer {
+        id,
+        fire_at,
+        interval: Some(interval),
+        remaining: iterations,
+        cancelled: false,
+        owner_addon,
+    };
+
+    {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        app.sim_state.borrow_mut().rilua_timers.push_back(timer);
+    }
+
+    let handle = create_timer_handle_table(state, id)?;
+    state.push(handle);
+    Ok(1)
+}
+
+// ── C_Timer.NewTimer ─────────────────────────────────────────────────────────
+
+/// `C_Timer.NewTimer(seconds, callback)` — one-shot timer with handle.
+fn timer_new_timer(state: &mut LuaState) -> LuaResult<u32> {
+    let seconds = match stack_val(state, 1) {
+        Val::Num(n) => validate_seconds(n)?,
+        got => {
+            return Err(runtime_error(format!(
+                "bad argument #1 to 'NewTimer' (number expected, got {})",
+                got.type_name()
+            )));
+        }
+    };
+    let callback = extract_callback(state, 2)?;
+
+    let id = next_timer_id();
+    store_timer_callback(state, id, callback);
+
+    let fire_at = Instant::now() + Duration::from_secs_f64(seconds);
+
+    let owner_addon = {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        let s = app.sim_state.borrow();
+        s.loading_addon_index.or(s.executing_addon_index)
+    };
+
+    let timer = RiluaPendingTimer {
+        id,
+        fire_at,
+        interval: None,
+        remaining: None,
+        cancelled: false,
+        owner_addon,
+    };
+
+    {
+        let app = state
+            .app_data::<WowLuaAppData>()
+            .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+        app.sim_state.borrow_mut().rilua_timers.push_back(timer);
+    }
+
+    let handle = create_timer_handle_table(state, id)?;
+    state.push(handle);
+    Ok(1)
+}
+
+// ── Layout bridge ─────────────────────────────────────────────────────────────
+//
+// These RustFns mirror frame rect query methods from `methods_rect.rs`.
+// They are registered on the rilua frame metatable (or as globals during
+// development) and use `rilua_methods::frame_id_from_stack` + `borrow_state`.
+
+/// Helper: resolve the rect for a frame and return (left, bottom, width, height)
+/// in WoW UI coordinates, or nil×4 if no rect is available.
+///
+/// `self` is argument 1 (a frame-backed table). Returns 4 numbers or 0 values.
+fn get_frame_rect(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let eff_scale = frame.effective_scale.max(1e-6);
+    let sh = sim.screen_height;
+    let left = rect.x / eff_scale;
+    let bottom = (sh - rect.y - rect.height) / eff_scale;
+    let width = rect.width / eff_scale;
+    let height = rect.height / eff_scale;
+    drop(sim);
+    state.push(Val::Num(left as f64));
+    state.push(Val::Num(bottom as f64));
+    state.push(Val::Num(width as f64));
+    state.push(Val::Num(height as f64));
+    Ok(4)
+}
+
+/// `frame:GetLeft()` — left edge in WoW UI coordinates.
+fn get_left(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let left = rect.x / frame.effective_scale.max(1e-6);
+    drop(sim);
+    state.push(Val::Num(left as f64));
+    Ok(1)
+}
+
+/// `frame:GetRight()` — right edge in WoW UI coordinates.
+fn get_right(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let right = (rect.x + rect.width) / frame.effective_scale.max(1e-6);
+    drop(sim);
+    state.push(Val::Num(right as f64));
+    Ok(1)
+}
+
+/// `frame:GetTop()` — top edge in WoW UI coordinates (inverted: large = near top of screen).
+fn get_top(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let sh = sim.screen_height;
+    let eff_scale = frame.effective_scale.max(1e-6);
+    let top = (sh - rect.y) / eff_scale;
+    drop(sim);
+    state.push(Val::Num(top as f64));
+    Ok(1)
+}
+
+/// `frame:GetBottom()` — bottom edge in WoW UI coordinates.
+fn get_bottom(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let sh = sim.screen_height;
+    let eff_scale = frame.effective_scale.max(1e-6);
+    let bottom = (sh - rect.y - rect.height) / eff_scale;
+    drop(sim);
+    state.push(Val::Num(bottom as f64));
+    Ok(1)
+}
+
+/// `frame:GetWidth()` — frame width in WoW UI coordinates.
+fn get_width(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let width = rect.width / frame.effective_scale.max(1e-6);
+    drop(sim);
+    state.push(Val::Num(width as f64));
+    Ok(1)
+}
+
+/// `frame:GetHeight()` — frame height in WoW UI coordinates.
+fn get_height(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let height = rect.height / frame.effective_scale.max(1e-6);
+    drop(sim);
+    state.push(Val::Num(height as f64));
+    Ok(1)
+}
+
+/// `frame:GetSize()` — (width, height) in WoW UI coordinates.
+fn get_size(state: &mut LuaState) -> LuaResult<u32> {
+    let id = crate::lua_api::rilua_methods::frame_id_from_stack(state, 1)?;
+    let app = state
+        .app_data::<WowLuaAppData>()
+        .ok_or_else(|| runtime_error("missing WowLuaAppData"))?;
+    let sim = app.sim_state.borrow();
+    let Some(frame) = sim.widgets.get(id) else {
+        return Ok(0);
+    };
+    let Some(rect) = frame.layout_rect else {
+        return Ok(0);
+    };
+    let eff_scale = frame.effective_scale.max(1e-6);
+    let width = rect.width / eff_scale;
+    let height = rect.height / eff_scale;
+    drop(sim);
+    state.push(Val::Num(width as f64));
+    state.push(Val::Num(height as f64));
+    Ok(2)
+}
+
+// ── Layout: public table builder ─────────────────────────────────────────────
+
+/// Register layout query RustFns on an existing table (e.g. the frame metatable).
+///
+/// The registered names match WoW's frame API: `GetRect`, `GetLeft`, `GetRight`,
+/// `GetTop`, `GetBottom`, `GetWidth`, `GetHeight`, `GetSize`.
+pub fn register_layout_fns_on_table(
+    state: &mut LuaState,
+    table: rilua::vm::gc::arena::GcRef<Table>,
+) -> LuaResult<()> {
+    table_set_rust_fn(state, table, "GetRect", get_frame_rect)?;
+    table_set_rust_fn(state, table, "GetLeft", get_left)?;
+    table_set_rust_fn(state, table, "GetRight", get_right)?;
+    table_set_rust_fn(state, table, "GetTop", get_top)?;
+    table_set_rust_fn(state, table, "GetBottom", get_bottom)?;
+    table_set_rust_fn(state, table, "GetWidth", get_width)?;
+    table_set_rust_fn(state, table, "GetHeight", get_height)?;
+    table_set_rust_fn(state, table, "GetSize", get_size)?;
+    Ok(())
+}
+
+// ── String format patch ──────────────────────────────────────────────────────
+
+/// Lua shim that patches `string.format` with WoW-compatible extensions.
+///
+/// Handles `%F` (uppercase float → `%f`) and positional arguments (`%1$s`).
+/// This is a pure Lua implementation loaded into the rilua VM.
+const STRING_FORMAT_PATCH_LUA: &str = r#"
+do
+    local _orig = string.format
+    local function _has_special(fmt)
+        return fmt:find("F", 1, true) or fmt:find("$", 1, true)
+    end
+
+    local function _reorder_args(fmt, args)
+        local out_fmt = ""
+        local reordered = {}
+        local seq = 0
+        local has_pos = false
+        local i = 1
+        local len = #fmt
+        while i <= len do
+            local c = fmt:sub(i, i)
+            if c ~= "%" then
+                out_fmt = out_fmt .. c
+                i = i + 1
+            elseif fmt:sub(i + 1, i + 1) == "%" then
+                out_fmt = out_fmt .. "%%"
+                i = i + 2
+            else
+                -- parse specifier
+                local spec_start = i
+                i = i + 1
+                -- check for positional N$
+                local pos_n, pos_end = fmt:match("^(%d+)%$()", i)
+                if pos_n then
+                    has_pos = true
+                    reordered[#reordered + 1] = args[tonumber(pos_n)]
+                    i = pos_end
+                else
+                    seq = seq + 1
+                    reordered[#reordered + 1] = args[seq]
+                end
+                -- flags, width, precision
+                while i <= len and fmt:sub(i, i):match("[-+%s#0]") do
+                    out_fmt = out_fmt .. "%"
+                    i = i + 1
+                end
+                out_fmt = out_fmt .. "%"
+                while i <= len and fmt:sub(i, i):match("%d") do
+                    out_fmt = out_fmt .. fmt:sub(i, i)
+                    i = i + 1
+                end
+                if i <= len and fmt:sub(i, i) == "." then
+                    out_fmt = out_fmt .. "."
+                    i = i + 1
+                    while i <= len and fmt:sub(i, i):match("%d") do
+                        out_fmt = out_fmt .. fmt:sub(i, i)
+                        i = i + 1
+                    end
+                end
+                -- conversion char
+                local conv = fmt:sub(i, i)
+                out_fmt = out_fmt .. (conv == "F" and "f" or conv)
+                i = i + 1
+            end
+        end
+        return out_fmt, reordered, has_pos
+    end
+
+    string.format = function(fmt, ...)
+        if type(fmt) ~= "string" then
+            return _orig(fmt, ...)
+        end
+        if not _has_special(fmt) then
+            return _orig(fmt, ...)
+        end
+        local args = {...}
+        local new_fmt, new_args = _reorder_args(fmt, args)
+        return _orig(new_fmt, table.unpack(new_args))
+    end
+    format = string.format
+end
+"#;
+
+/// Patch `string.format` in a rilua VM with WoW-compatible extensions.
+///
+/// Called once during rilua environment setup. On success the patched `format`
+/// global and `string.format` field both handle `%F` and positional arguments.
+pub fn patch_string_format(lua: &mut rilua::Lua) -> LuaResult<()> {
+    lua.exec(STRING_FORMAT_PATCH_LUA)
+        .map_err(|e| runtime_error(format!("string.format patch failed: {e}")))
+}
+
+// ── register_all ─────────────────────────────────────────────────────────────
+
+/// Register all timer, layout, and string-format RustFns on a rilua VM.
+///
+/// - `C_Timer` global table with `After`, `NewTicker`, `NewTimer`.
+/// - `__rilua_layout_fns` global table with the layout query functions
+///   (caller merges these into the frame metatable as appropriate).
+/// - Patches `string.format` with the WoW-compatible Lua shim.
+///
+/// # OnUpdate
+///
+/// OnUpdate dispatch is already handled by
+/// `rilua_script_helpers::dispatch_on_update` — no additional registration
+/// is needed here.
+pub fn register_all(lua: &mut rilua::Lua) -> LuaResult<()> {
+    register_c_timer(lua)?;
+    register_layout_globals(lua)?;
+    patch_string_format(lua)?;
+    Ok(())
+}
+
+/// Register the `C_Timer` global table with the three timer functions.
+fn register_c_timer(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let state = lua.state_mut();
+
+    let c_timer_ref = {
+        let builder = TableBuilder::new(state)
+            .set_function("After", timer_after)?
+            .set_function("NewTicker", timer_new_ticker)?
+            .set_function("NewTimer", timer_new_timer)?;
+        builder.table_ref()
+    };
+
+    let key = state.gc.intern_string(b"C_Timer");
+    let global = state.global;
+    state
+        .gc
+        .tables
+        .get_mut(global)
+        .ok_or_else(|| runtime_error("missing global table"))?
+        .raw_set(Val::Str(key), Val::Table(c_timer_ref), &state.gc.string_arena)?;
+
+    Ok(())
+}
+
+/// Register `__rilua_layout_fns` global table holding the layout query RustFns.
+///
+/// Callers that build the frame metatable should copy these entries onto it
+/// (or set `__rilua_layout_fns` as a fallback `__index` delegate).
+fn register_layout_globals(lua: &mut rilua::Lua) -> LuaResult<()> {
+    let state = lua.state_mut();
+
+    let layout_ref = state.gc.alloc_table(Table::new());
+    register_layout_fns_on_table(state, layout_ref)?;
+
+    let key = state.gc.intern_string(b"__rilua_layout_fns");
+    let global = state.global;
+    state
+        .gc
+        .tables
+        .get_mut(global)
+        .ok_or_else(|| runtime_error("missing global table"))?
+        .raw_set(Val::Str(key), Val::Table(layout_ref), &state.gc.string_arena)?;
+
+    Ok(())
+}

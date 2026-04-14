@@ -22,6 +22,7 @@ macro_rules! build_empty_sim_state {
             cvars: CVarStorage::new(),
             console_output: $collections.console_output,
             timers: $collections.timers,
+            rilua_timers: ::std::collections::VecDeque::new(),
             focused_frame_id: $runtime.focused_frame_id,
             addons: $collections.addons,
             tooltips: $collections.tooltips,
@@ -196,6 +197,8 @@ pub struct SimState {
     pub console_output: Vec<String>,
     /// Pending timer callbacks.
     pub timers: VecDeque<PendingTimer>,
+    /// Pending timer callbacks for the rilua VM.
+    pub rilua_timers: VecDeque<crate::lua_api::rilua_timer_layout::RiluaPendingTimer>,
     /// Currently focused frame ID (for keyboard input).
     pub focused_frame_id: Option<u64>,
     /// Registered addons (includes all scanned addons, not just loaded ones).
