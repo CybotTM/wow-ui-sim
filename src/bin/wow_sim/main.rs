@@ -275,7 +275,7 @@ fn apply_resource_limits() {
     let max_cores: usize = std::env::var("WOW_SIM_MAX_CORES")
         .ok()
         .and_then(|s| s.parse().ok())
-        .unwrap_or(1);
+        .unwrap_or(2);
     unsafe {
         let mut cpuset: libc::cpu_set_t = std::mem::zeroed();
         for i in 0..max_cores {
