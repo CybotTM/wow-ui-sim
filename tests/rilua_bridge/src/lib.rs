@@ -17,7 +17,7 @@ use rilua::{Lua, LuaApiMut, LuaResult, Val};
 
 use crate::lua_bridge::{
     create_frame_table, FrameArena, FrameObject, FrameRef as BridgeFrameRef, FromStack, IntoStack,
-    TableBuilder,
+    MultiValue as BridgeMultiValue, TableBuilder,
 };
 pub use benchmark::{benchmark_table_field_access, FieldAccessBenchResult};
 
@@ -383,6 +383,24 @@ fn test_bridge_into_stack_pushes_u64_ids_losslessly() {
 }
 
 #[test]
+fn test_bridge_multivalue_roundtrips_variable_values() {
+    let mut lua = Lua::new().unwrap();
+    let state = lua.state_mut();
+    let save_top = state.top;
+
+    assert_eq!(("alpha", 42_i32, true).into_stack(state).unwrap(), 3);
+
+    let values = BridgeMultiValue::from_stack(state, 1).unwrap();
+    assert_eq!(values.len(), 3);
+
+    state.top = save_top;
+    assert_eq!(values.into_stack(state).unwrap(), 3);
+    assert_eq!(String::from_stack(state, 1).unwrap(), "alpha");
+    assert_eq!(i32::from_stack(state, 2).unwrap(), 42);
+    assert!(bool::from_stack(state, 3).unwrap());
+}
+
+#[test]
 fn test_table_builder_sets_values_and_functions() {
     let mut lua = Lua::new().unwrap();
     {
@@ -451,6 +469,16 @@ fn test_define_functions_registers_typed_wrappers() {
             "Touch" => || {
                 Ok(())
             },
+            "CountArgs" => |values: BridgeMultiValue| -> u32 {
+                Ok(values.len() as u32)
+            },
+            "EchoTail" => |prefix: String, values: BridgeMultiValue| -> BridgeMultiValue {
+                assert_eq!(prefix, "tag");
+                Ok(values)
+            },
+            "Preset" => || -> BridgeMultiValue {
+                Ok(BridgeMultiValue::from_vec(vec![Val::Num(7.0), Val::Bool(true)]))
+            },
         })
         .unwrap();
 
@@ -469,6 +497,13 @@ fn test_define_functions_registers_typed_wrappers() {
     lua.exec("assert(BridgeFns.Echo('priest') == 'priest')")
         .unwrap();
     lua.exec("assert(BridgeFns.Touch() == nil)").unwrap();
+    lua.exec("assert(BridgeFns.CountArgs() == 0)").unwrap();
+    lua.exec("assert(BridgeFns.CountArgs('x', 2, true) == 3)")
+        .unwrap();
+    lua.exec("local a, b = BridgeFns.EchoTail('tag', 9, false); assert(a == 9 and b == false)")
+        .unwrap();
+    lua.exec("local a, b = BridgeFns.Preset(); assert(a == 7 and b == true)")
+        .unwrap();
 }
 
 #[test]
