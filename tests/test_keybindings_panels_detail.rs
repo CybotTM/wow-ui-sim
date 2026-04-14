@@ -526,6 +526,46 @@ fn world_map_fog_of_war_pin_matches_canvas_size_on_first_open() {
 }
 
 #[test]
+fn world_map_fog_of_war_pin_resizes_on_canvas_size_changed() {
+    test_timeout! {
+        let env = setup_env();
+        env.apply_post_event_workarounds();
+
+        env.send_key_press("M", None).expect("M keybind failed");
+
+        let (fog_width, fog_height, expected_width, expected_height): (f64, f64, f64, f64) = env
+            .eval(
+                r#"
+                if not (WorldMapFrame and WorldMapFrame:IsShown()) then
+                    error("world map not open")
+                end
+
+                local fogPin = WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate")()
+                assert(fogPin, "missing fog pin")
+
+                fogPin:SetSize(128, 96)
+                fogPin:OnCanvasSizeChanged()
+
+                local expectedWidth = WorldMapFrame:DenormalizeHorizontalSize(1.0)
+                local expectedHeight = WorldMapFrame:DenormalizeVerticalSize(1.0)
+
+                return fogPin:GetWidth(), fogPin:GetHeight(), expectedWidth, expectedHeight
+            "#,
+            )
+            .unwrap();
+
+        assert!(
+            (fog_width - expected_width).abs() < 0.001,
+            "Fog pin width should refresh when the canvas size changes: fog_width={fog_width} expected_width={expected_width}"
+        );
+        assert!(
+            (fog_height - expected_height).abs() < 0.001,
+            "Fog pin height should refresh when the canvas size changes: fog_height={fog_height} expected_height={expected_height}"
+        );
+    }
+}
+
+#[test]
 fn world_map_registers_fog_of_war_pin_template_as_fog_of_war_frame() {
     test_timeout! {
         let env = setup_env();

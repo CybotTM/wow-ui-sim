@@ -12,6 +12,15 @@ world map open with an apparent quarter-map fog/exploration artifact. Added
 the BC-cache root cause, fix, and regression coverage to the investigation
 page.
 
+## [2026-04-14] ingest | world-map fog-of-war first-open size
+
+Created `investigations/world-map-fog-of-war-first-open-size.md` for the fog
+overlay bug where first-open world-map fog could keep a stale size even though
+the map tiles were already correct. Documented the missing
+`FogOfWarPinMixin:OnCanvasSizeChanged()` handling, the simulator-side
+workaround that patches both the mixin and existing fog pins, and the focused
+regression tests. Updated `index.md` with the new investigation page.
+
 ## [2026-04-14] investigations | world map 90s OnUpdate recapture
 
 Updated `investigations/world-map-onupdate-hover-polling.md` with the fresh

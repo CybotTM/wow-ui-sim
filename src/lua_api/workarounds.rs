@@ -16,6 +16,7 @@ pub fn apply_post_event(env: &WowLuaEnv) {
     workarounds_editmode::init_edit_mode_layout(env);
     suppress_spellbook_tutorials(env);
     init_world_map_frame(env);
+    patch_fog_of_war_pin_canvas_resize(env);
 }
 
 /// Apply targeted cleanup after a load-on-demand addon finishes loading.
@@ -57,6 +58,7 @@ pub fn apply(env: &WowLuaEnv) {
     patch_mail_toggle(env);
     patch_quest_map_current_map_lookup(env);
     patch_map_canvas_zoom(env);
+    patch_fog_of_war_pin_canvas_resize(env);
     patch_poi_button_update_point(env);
     patch_combat_log_filters(env);
     patch_missing_frame_stubs(env);
@@ -419,6 +421,66 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
     "#,
     ) {
         eprintln!("[workaround] patch_map_canvas_zoom failed: {e}");
+    }
+}
+
+/// Keep FogOfWar pins sized to the canvas on first map open.
+///
+/// Blizzard's FogOfWarPinMixin only resizes itself in `OnCanvasScaleChanged()`,
+/// but the simulator's first visible world-map frame can reach `OnCanvasSizeChanged()`
+/// before any scale change callback. Other full-canvas map pins already handle
+/// size changes directly, so patch fog to follow the same rule.
+fn patch_fog_of_war_pin_canvas_resize(env: &WowLuaEnv) {
+    if let Err(e) = env.exec(
+        r#"
+        local function resizeToCanvas(self)
+            if not self or type(self.GetMap) ~= "function" then
+                return
+            end
+
+            local map = self:GetMap()
+            if not map then
+                return
+            end
+
+            if type(map.DenormalizeHorizontalSize) ~= "function" or type(map.DenormalizeVerticalSize) ~= "function" then
+                return
+            end
+
+            self:SetSize(
+                map:DenormalizeHorizontalSize(1.0),
+                map:DenormalizeVerticalSize(1.0)
+            )
+        end
+
+        local function installFogCallbacks(pin)
+            if not pin then
+                return
+            end
+
+            pin.OnCanvasSizeChanged = resizeToCanvas
+        end
+
+        if FogOfWarPinMixin then
+            local originalOnCanvasScaleChanged = FogOfWarPinMixin.OnCanvasScaleChanged
+            function FogOfWarPinMixin:OnCanvasScaleChanged(...)
+                resizeToCanvas(self)
+                if type(originalOnCanvasScaleChanged) == "function" then
+                    return originalOnCanvasScaleChanged(self, ...)
+                end
+            end
+
+            FogOfWarPinMixin.OnCanvasSizeChanged = resizeToCanvas
+        end
+
+        if WorldMapFrame and type(WorldMapFrame.EnumeratePinsByTemplate) == "function" then
+            for pin in WorldMapFrame:EnumeratePinsByTemplate("FogOfWarPinTemplate") do
+                installFogCallbacks(pin)
+            end
+        end
+    "#,
+    ) {
+        eprintln!("[workaround] patch_fog_of_war_pin_canvas_resize failed: {e}");
     }
 }
 
