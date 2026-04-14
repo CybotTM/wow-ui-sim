@@ -481,7 +481,6 @@ impl GpuTextureAtlas {
         if !self.has_bc_support {
             return None;
         }
-
         if let Some(entry) = self.bc_texture_map.get(path) {
             return Some(*entry);
         }
@@ -490,59 +489,13 @@ impl GpuTextureAtlas {
             BcFormat::Bc1 => &mut self.bc1_atlas,
             BcFormat::Bc3 => &mut self.bc3_atlas,
         };
-
         if atlas.is_full() {
             return None;
         }
 
         let (grid_x, grid_y) = atlas.allocate_slot()?;
-        let (pixel_x, pixel_y) = atlas.pixel_offset(grid_x, grid_y);
-
-        // BC textures must have dimensions that are multiples of 4.
-        let upload_width = width.max(4);
-        let upload_height = height.max(4);
-        let bytes_per_row = (upload_width / 4) * format.bytes_per_block();
-
-        queue.write_texture(
-            wgpu::TexelCopyTextureInfo {
-                texture: &atlas.texture,
-                mip_level: 0,
-                origin: wgpu::Origin3d {
-                    x: pixel_x,
-                    y: pixel_y,
-                    z: 0,
-                },
-                aspect: wgpu::TextureAspect::All,
-            },
-            bc_data,
-            wgpu::TexelCopyBufferLayout {
-                offset: 0,
-                bytes_per_row: Some(bytes_per_row),
-                rows_per_image: Some(upload_height / 4),
-            },
-            wgpu::Extent3d {
-                width: upload_width,
-                height: upload_height,
-                depth_or_array_layers: 1,
-            },
-        );
-
-        let (uv_base_x, uv_base_y) = atlas.uv_offset(grid_x, grid_y);
-        let cell_uv = BC_CELL_SIZE as f32 / BC_ATLAS_SIZE as f32;
-        let uv_width = (width as f32 / BC_ATLAS_SIZE as f32).min(cell_uv);
-        let uv_height = (height as f32 / BC_ATLAS_SIZE as f32).min(cell_uv);
-
-        let entry = BcTextureEntry {
-            format,
-            grid_x,
-            grid_y,
-            original_width: width,
-            original_height: height,
-            uv_x: uv_base_x,
-            uv_y: uv_base_y,
-            uv_width,
-            uv_height,
-        };
+        write_bc_slot(queue, atlas, grid_x, grid_y, width, height, bc_data, format);
+        let entry = build_bc_entry(atlas, format, grid_x, grid_y, width, height);
 
         self.bc_texture_map.insert(path.to_string(), entry);
         Some(entry)
@@ -660,6 +613,72 @@ pub struct TierStats {
     pub allocated_bytes: usize,
     pub used_bytes: usize,
     pub used_slots: [usize; NUM_TIERS],
+}
+
+/// Write BC-compressed data into an allocated atlas slot.
+fn write_bc_slot(
+    queue: &wgpu::Queue,
+    atlas: &BcAtlasTier,
+    grid_x: u32,
+    grid_y: u32,
+    width: u32,
+    height: u32,
+    bc_data: &[u8],
+    format: BcFormat,
+) {
+    let (pixel_x, pixel_y) = atlas.pixel_offset(grid_x, grid_y);
+    // BC textures must have dimensions that are multiples of 4.
+    let upload_width = width.max(4);
+    let upload_height = height.max(4);
+    let bytes_per_row = (upload_width / 4) * format.bytes_per_block();
+
+    queue.write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: &atlas.texture,
+            mip_level: 0,
+            origin: wgpu::Origin3d {
+                x: pixel_x,
+                y: pixel_y,
+                z: 0,
+            },
+            aspect: wgpu::TextureAspect::All,
+        },
+        bc_data,
+        wgpu::TexelCopyBufferLayout {
+            offset: 0,
+            bytes_per_row: Some(bytes_per_row),
+            rows_per_image: Some(upload_height / 4),
+        },
+        wgpu::Extent3d {
+            width: upload_width,
+            height: upload_height,
+            depth_or_array_layers: 1,
+        },
+    );
+}
+
+/// Build a BcTextureEntry from an allocated slot's grid coordinates.
+fn build_bc_entry(
+    atlas: &BcAtlasTier,
+    format: BcFormat,
+    grid_x: u32,
+    grid_y: u32,
+    width: u32,
+    height: u32,
+) -> BcTextureEntry {
+    let (uv_base_x, uv_base_y) = atlas.uv_offset(grid_x, grid_y);
+    let cell_uv = BC_CELL_SIZE as f32 / BC_ATLAS_SIZE as f32;
+    BcTextureEntry {
+        format,
+        grid_x,
+        grid_y,
+        original_width: width,
+        original_height: height,
+        uv_x: uv_base_x,
+        uv_y: uv_base_y,
+        uv_width: (width as f32 / BC_ATLAS_SIZE as f32).min(cell_uv),
+        uv_height: (height as f32 / BC_ATLAS_SIZE as f32).min(cell_uv),
+    }
 }
 
 /// Detect BC texture compression support and create BC1/BC3 atlas tiers.
