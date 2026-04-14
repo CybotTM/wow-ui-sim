@@ -10,6 +10,9 @@ use super::shader::primitive::{LoadedTexture, load_texture_prefer_bc};
 use super::shader::{GpuBcTextureData, GpuTextureData, QuadBatch, WowUiPrimitive};
 use crate::texture::TextureManager;
 
+const BYTES_PER_PIXEL: u32 = 4;
+const READ_BACK_ROW_ALIGNMENT: u32 = 256;
+
 /// Load unique textures for all batch texture requests.
 fn load_batch_textures(
     batch: &QuadBatch,
@@ -99,24 +102,37 @@ fn create_render_target(
     (texture, view)
 }
 
-/// Copy render target to a readable buffer and read back pixels into an image.
-fn read_back_pixels(
-    device: &wgpu::Device,
-    queue: &wgpu::Queue,
-    encoder: wgpu::CommandEncoder,
-    render_texture: &wgpu::Texture,
-    width: u32,
-    height: u32,
-) -> RgbaImage {
-    let bytes_per_row = (width * 4 + 255) & !255; // Align to 256
-    let output_buffer = device.create_buffer(&wgpu::BufferDescriptor {
+struct ReadBackBufferLayout {
+    bytes_per_row: u32,
+    size_bytes: u64,
+}
+
+fn read_back_buffer_layout(width: u32, height: u32) -> ReadBackBufferLayout {
+    let row_bytes = width * BYTES_PER_PIXEL;
+    let bytes_per_row = (row_bytes + READ_BACK_ROW_ALIGNMENT - 1) & !(READ_BACK_ROW_ALIGNMENT - 1);
+    ReadBackBufferLayout {
+        bytes_per_row,
+        size_bytes: (bytes_per_row * height) as u64,
+    }
+}
+
+fn create_read_back_buffer(device: &wgpu::Device, layout: &ReadBackBufferLayout) -> wgpu::Buffer {
+    device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("Screenshot Output Buffer"),
-        size: (bytes_per_row * height) as u64,
+        size: layout.size_bytes,
         usage: wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::MAP_READ,
         mapped_at_creation: false,
-    });
+    })
+}
 
-    let mut encoder = encoder;
+fn copy_render_texture_to_read_back_buffer(
+    encoder: &mut wgpu::CommandEncoder,
+    render_texture: &wgpu::Texture,
+    output_buffer: &wgpu::Buffer,
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+) {
     encoder.copy_texture_to_buffer(
         wgpu::TexelCopyTextureInfo {
             texture: render_texture,
@@ -125,7 +141,7 @@ fn read_back_pixels(
             aspect: wgpu::TextureAspect::All,
         },
         wgpu::TexelCopyBufferInfo {
-            buffer: &output_buffer,
+            buffer: output_buffer,
             layout: wgpu::TexelCopyBufferLayout {
                 offset: 0,
                 bytes_per_row: Some(bytes_per_row),
@@ -138,9 +154,9 @@ fn read_back_pixels(
             depth_or_array_layers: 1,
         },
     );
+}
 
-    queue.submit(std::iter::once(encoder.finish()));
-
+fn map_read_back_buffer(device: &wgpu::Device, output_buffer: &wgpu::Buffer) -> wgpu::BufferView {
     let buffer_slice = output_buffer.slice(..);
     let (sender, receiver) = std::sync::mpsc::channel();
     buffer_slice.map_async(wgpu::MapMode::Read, move |result| {
@@ -151,23 +167,55 @@ fn read_back_pixels(
         timeout: Some(std::time::Duration::from_secs(10)),
     });
     receiver.recv().unwrap().expect("Failed to map buffer");
+    buffer_slice.get_mapped_range()
+}
 
-    let data = buffer_slice.get_mapped_range();
-    let mut img = RgbaImage::new(width, height);
+fn image_from_read_back_buffer(
+    data: &[u8],
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+) -> RgbaImage {
+    let mut image = RgbaImage::new(width, height);
     for y in 0..height {
         let src_offset = (y * bytes_per_row) as usize;
-        let row = &data[src_offset..src_offset + (width * 4) as usize];
+        let row = &data[src_offset..src_offset + (width * BYTES_PER_PIXEL) as usize];
         for x in 0..width {
-            let i = (x * 4) as usize;
-            img.put_pixel(
+            let i = (x * BYTES_PER_PIXEL) as usize;
+            image.put_pixel(
                 x,
                 y,
                 image::Rgba([row[i], row[i + 1], row[i + 2], row[i + 3]]),
             );
         }
     }
+    image
+}
 
-    img
+/// Copy render target to a readable buffer and read back pixels into an image.
+fn read_back_pixels(
+    device: &wgpu::Device,
+    queue: &wgpu::Queue,
+    encoder: wgpu::CommandEncoder,
+    render_texture: &wgpu::Texture,
+    width: u32,
+    height: u32,
+) -> RgbaImage {
+    let layout = read_back_buffer_layout(width, height);
+    let output_buffer = create_read_back_buffer(device, &layout);
+
+    let mut encoder = encoder;
+    copy_render_texture_to_read_back_buffer(
+        &mut encoder,
+        render_texture,
+        &output_buffer,
+        width,
+        height,
+        layout.bytes_per_row,
+    );
+    queue.submit(std::iter::once(encoder.finish()));
+    let data = map_read_back_buffer(device, &output_buffer);
+    image_from_read_back_buffer(&data, width, height, layout.bytes_per_row)
 }
 
 /// Render a QuadBatch to an RGBA image using headless wgpu.
@@ -231,4 +279,29 @@ pub fn render_to_image(
     );
 
     read_back_pixels(&device, &queue, encoder, &render_texture, width, height)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{image_from_read_back_buffer, read_back_buffer_layout};
+
+    #[test]
+    fn read_back_buffer_layout_aligns_rows_to_256_bytes() {
+        let layout = read_back_buffer_layout(3, 2);
+        assert_eq!(layout.bytes_per_row, 256);
+        assert_eq!(layout.size_bytes, 512);
+    }
+
+    #[test]
+    fn image_from_read_back_buffer_ignores_row_padding() {
+        let data = vec![
+            1, 2, 3, 4, 5, 6, 7, 8, 99, 99, 99, 99, 9, 10, 11, 12, 13, 14, 15, 16, 88, 88, 88, 88,
+        ];
+        let image = image_from_read_back_buffer(&data, 2, 2, 12);
+
+        assert_eq!(image.get_pixel(0, 0).0, [1, 2, 3, 4]);
+        assert_eq!(image.get_pixel(1, 0).0, [5, 6, 7, 8]);
+        assert_eq!(image.get_pixel(0, 1).0, [9, 10, 11, 12]);
+        assert_eq!(image.get_pixel(1, 1).0, [13, 14, 15, 16]);
+    }
 }
