@@ -38,6 +38,33 @@ Two focused audit tests narrowed the remaining work after the earlier `SetText` 
 
 That shifts the next optimization target away from more setter no-op guards and toward short-circuiting the redundant work in the handlers themselves, especially `AuraButtonMixin:OnUpdate`.
 
+## 2026-04-14 GameTimeFrame calendar atlas follow-up
+
+The `GameTimeFrame_SetDate()` follow-up showed a different no-op churn shape than
+the visible `OnUpdate` handlers above:
+
+- `GameTimeFrame_SetDate()` re-applies three atlas-backed button textures every
+  time it runs (`up`, `down`, `mouseover`) even when the calendar day has not
+  changed.
+- In the simulator, the plain `SetNormalTexture` / `SetPushedTexture` /
+  `SetHighlightTexture` path resolved the atlas string, then immediately called
+  `get_mut_visual()` on both the button and child texture.
+- `get_mut_visual()` marks render-dirty on mutable borrow, so a same-day
+  `GameTimeFrame_SetDate()` still dirtied the minimap strata even though the
+  resolved file path, UVs, and visibility were identical.
+
+The fix was to make `apply_set_button_texture_path()` check the current button
+field and texture-child state first. When the resolved path/UVs, `fileDataID`,
+parent key, anchors, and visibility already match, it now returns before taking
+any visual mutable borrows.
+
+Regression coverage now includes:
+
+- a low-level button-texture test that repeats
+  `SetNormalTexture("ui-hud-calendar-1-up")`
+- a full-UI `GameTimeFrame_SetDate()` test that proves the second same-day call
+  leaves the render-dirty batch empty
+
 ## Fix Strategies
 
 **Option A: Same-value guards in Rust methods** — Make `SetValue`, `SetText`, `SetAlpha`, `Show`, `Hide` etc. skip `get_mut()` when the new value equals the current value. Fixes the root cause; blanket discard can be removed entirely. Requires touching many API methods.

@@ -2,6 +2,16 @@
 
 Chronological record of wiki operations.
 
+## [2026-04-14] investigations | on-update dirty GameTimeFrame calendar atlas follow-up
+
+Updated `investigations/on-update-dirty.md` with the `GameTimeFrame_SetDate()`
+follow-up: same-day calendar atlas updates were still dirtying render because
+the plain button texture setter took visual mutable borrows before checking for
+real changes. Recorded the new no-op fast path in
+`apply_set_button_texture_path()`, the focused atlas-backed button regression
+test, the full-UI `GameTimeFrame_SetDate()` regression test, and refreshed the
+`index.md` summary for the page.
+
 ## [2026-04-14] investigations | on-update dirty handler audit follow-up
 
 Updated `investigations/on-update-dirty.md` with focused handler-audit results:

@@ -241,19 +241,86 @@ fn apply_set_button_texture_path(
     let resolved = path.as_ref().map(|p| resolve_texture_string(p));
     let resolved_path = resolved.as_ref().map(|r| r.path.clone());
     let tex_coords = resolved.as_ref().and_then(|r| r.tex_coords);
+    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
+    let should_show = button_texture_should_show(state, button_id, parent_key);
+    if button_texture_path_is_noop(
+        state,
+        button_id,
+        tex_id,
+        parent_key,
+        resolved_path.as_deref(),
+        tex_coords,
+        file_data_id,
+        should_show,
+    ) {
+        return Ok(());
+    }
     if let Some(frame) = state.widgets.get_mut_visual(button_id) {
         set_button_field(frame, resolved_path.clone(), tex_coords);
     }
-    let tex_id = get_or_create_button_texture(lua, state, button_id, parent_key);
     if let Some(tex) = state.widgets.get_mut_visual(tex_id) {
         tex.texture = resolved_path;
         tex.tex_coords = tex_coords;
         tex.atlas_tex_coords = tex_coords;
         tex.texture_file_data_id = file_data_id;
     }
-    let should_show = button_texture_should_show(state, button_id, parent_key);
     state.widgets.set_visible(tex_id, should_show);
     Ok(())
+}
+
+fn button_texture_path_is_noop(
+    state: &crate::lua_api::SimState,
+    button_id: u64,
+    tex_id: u64,
+    parent_key: &str,
+    resolved_path: Option<&str>,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+    file_data_id: Option<i64>,
+    should_show: bool,
+) -> bool {
+    let Some(button) = state.widgets.get(button_id) else {
+        return false;
+    };
+    if !button_texture_field_matches(button, parent_key, resolved_path, tex_coords) {
+        return false;
+    }
+    let Some(tex) = state.widgets.get(tex_id) else {
+        return false;
+    };
+    tex.parent_key.as_deref() == Some(parent_key)
+        && !tex.anchors.is_empty()
+        && tex.texture.as_deref() == resolved_path
+        && tex.tex_coords == tex_coords
+        && tex.atlas_tex_coords == tex_coords
+        && tex.texture_file_data_id == file_data_id
+        && tex.visible == should_show
+}
+
+fn button_texture_field_matches(
+    button: &crate::widget::Frame,
+    parent_key: &str,
+    resolved_path: Option<&str>,
+    tex_coords: Option<(f32, f32, f32, f32)>,
+) -> bool {
+    match parent_key {
+        "NormalTexture" => {
+            button.normal_texture.as_deref() == resolved_path
+                && button.normal_tex_coords == tex_coords
+        }
+        "HighlightTexture" => {
+            button.highlight_texture.as_deref() == resolved_path
+                && button.highlight_tex_coords == tex_coords
+        }
+        "PushedTexture" => {
+            button.pushed_texture.as_deref() == resolved_path
+                && button.pushed_tex_coords == tex_coords
+        }
+        "DisabledTexture" => {
+            button.disabled_texture.as_deref() == resolved_path
+                && button.disabled_tex_coords == tex_coords
+        }
+        _ => false,
+    }
 }
 
 /// Determine if a button texture child should be visible based on button state.
