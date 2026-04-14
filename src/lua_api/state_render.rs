@@ -407,10 +407,23 @@ impl SimState {
     /// Force layout resolution for a single frame, clearing its rect_dirty flag.
     /// Called by GetSize/GetWidth/GetHeight, rect query methods, and IsRectValid
     /// to match WoW behavior where layout resolves immediately.
+    ///
+    /// Fast path: when `id` is directly in `rect_dirty_ids` (common during
+    /// loading — SetPoint marks dirty, then GetRect resolves), skips the
+    /// ancestor walk and resolves just `id`.
+    /// Slow path: when `id` inherits dirtiness from an ancestor, resolves
+    /// dirty ancestor subtrees first.
     pub fn resolve_rect_if_dirty(&mut self, id: u64) {
         if !self.widgets.is_rect_dirty(id) {
             return;
         }
+        // Fast path: `id` itself is dirty — no ancestor walk needed.
+        if self.widgets.is_rect_dirty_self(id) {
+            self.invalidate_layout(id);
+            self.widgets.clear_rect_dirty(id);
+            return;
+        }
+        // Slow path: dirty ancestor(s) need subtree recomputation first.
         self.resolve_dirty_ancestors(id);
         self.invalidate_layout(id);
         self.widgets.clear_rect_dirty(id);

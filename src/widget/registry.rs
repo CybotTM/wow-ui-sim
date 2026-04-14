@@ -462,6 +462,11 @@ impl WidgetRegistry {
         }
     }
 
+    /// Check if this specific frame (not ancestors) is in `rect_dirty_ids`.
+    pub fn is_rect_dirty_self(&self, id: u64) -> bool {
+        self.rect_dirty_ids.contains(&id)
+    }
+
     /// Check if a frame or any ancestor is rect-dirty.
     /// Pure ancestor walk using `rect_dirty_ids` as single source of truth.
     pub fn is_rect_dirty(&self, id: u64) -> bool {
