@@ -4,6 +4,7 @@ use super::super::handle::{FrameRef, extract_frame_id, frame_ref};
 use super::methods_core::lockdown_blocked;
 use crate::lua_api::frame::handle::get_sim_state;
 use crate::widget::{FrameStrata, WidgetRegistry};
+use mlua::Lua;
 use mlua::Value;
 
 /// Add hierarchy methods: parent access, children, regions.
@@ -142,6 +143,29 @@ fn add_parent_key_methods<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     add_get_parent_key(methods);
 }
 
+fn remove_old_parent_keys(lua: &Lua, pid: u64, id: u64) -> mlua::Result<()> {
+    let state_rc = get_sim_state(lua);
+    let old_keys: Vec<String> = state_rc
+        .borrow()
+        .widgets
+        .get(pid)
+        .map(|p| {
+            p.children_keys
+                .iter()
+                .filter(|&(_, &cid)| cid == id)
+                .map(|(k, _)| k.clone())
+                .collect()
+        })
+        .unwrap_or_default();
+    let mlua::Value::Table(parent_table) = frame_ref(lua, pid)? else {
+        return Ok(());
+    };
+    for old_key in old_keys {
+        parent_table.set(old_key, Value::Nil)?;
+    }
+    Ok(())
+}
+
 fn add_set_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
     methods.add_method(
         "SetParentKey",
@@ -150,37 +174,13 @@ fn add_set_parent_key<M: mlua::UserDataMethods<FrameRef>>(methods: &mut M) {
             let state_rc = get_sim_state(lua);
             let parent_id = state_rc.borrow().widgets.get(id).and_then(|f| f.parent_id);
             let Some(pid) = parent_id else { return Ok(()) };
-
             if remove_old.unwrap_or(false) {
-                let old_keys: Vec<String> = {
-                    let state = state_rc.borrow();
-                    state
-                        .widgets
-                        .get(pid)
-                        .map(|p| {
-                            p.children_keys
-                                .iter()
-                                .filter(|&(_, &cid)| cid == id)
-                                .map(|(k, _)| k.clone())
-                                .collect()
-                        })
-                        .unwrap_or_default()
-                };
-                let parent_ref = frame_ref(lua, pid)?;
-                let mlua::Value::Table(parent_table) = parent_ref else {
-                    return Ok(());
-                };
-                for old_key in old_keys {
-                    parent_table.set(old_key, Value::Nil)?;
-                }
+                remove_old_parent_keys(lua, pid, id)?;
             }
-
-            let parent_ref = frame_ref(lua, pid)?;
-            let child_ref = frame_ref(lua, id)?;
-            let mlua::Value::Table(parent_table) = parent_ref else {
+            let mlua::Value::Table(parent_table) = frame_ref(lua, pid)? else {
                 return Ok(());
             };
-            parent_table.set(key, child_ref)?;
+            parent_table.set(key, frame_ref(lua, id)?)?;
             Ok(())
         },
     );

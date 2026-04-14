@@ -79,46 +79,38 @@ fn suppress_spellbook_tutorials(env: &WowLuaEnv) {
 /// ContainerFrameSettingsManager.TokenTracker exists. Wrapping the public bag
 /// openers keeps Blizzard container logic intact while ensuring the token
 /// tracker is created before bag setup mutates ownership.
-fn patch_bag_openers(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not __wow_ui_sim_bag_openers_patched then
-            local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
+const BAG_OPENERS_PATCH: &str = r#"
+    if not __wow_ui_sim_bag_openers_patched then
+        local loader = (C_AddOns and C_AddOns.LoadAddOn) or LoadAddOn
 
-            local function ensureBagTokenTracker()
-                if not ContainerFrameSettingsManager or ContainerFrameSettingsManager.TokenTracker then
-                    return
-                end
-
-                if loader then
-                    pcall(loader, "Blizzard_TokenUI")
-                end
-
-                if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker and type(ContainerFrameSettingsManager.OnAddonLoaded) == "function" then
-                    ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
-                end
+        local function ensureBagTokenTracker()
+            if not ContainerFrameSettingsManager or ContainerFrameSettingsManager.TokenTracker then
+                return
             end
-
-            local function patchBagOpener(name)
-                local original = _G[name]
-                if type(original) ~= "function" then
-                    return
-                end
-
-                _G[name] = function(...)
-                    ensureBagTokenTracker()
-                    return original(...)
-                end
+            if loader then pcall(loader, "Blizzard_TokenUI") end
+            if ContainerFrameSettingsManager and not ContainerFrameSettingsManager.TokenTracker and type(ContainerFrameSettingsManager.OnAddonLoaded) == "function" then
+                ContainerFrameSettingsManager:OnAddonLoaded("Blizzard_TokenUI")
             end
-
-            patchBagOpener("OpenAllBags")
-            patchBagOpener("OpenBackpack")
-            patchBagOpener("OpenBag")
-
-            __wow_ui_sim_bag_openers_patched = true
         end
-    "#,
-    );
+
+        local function patchBagOpener(name)
+            local original = _G[name]
+            if type(original) ~= "function" then return end
+            _G[name] = function(...)
+                ensureBagTokenTracker()
+                return original(...)
+            end
+        end
+
+        patchBagOpener("OpenAllBags")
+        patchBagOpener("OpenBackpack")
+        patchBagOpener("OpenBag")
+        __wow_ui_sim_bag_openers_patched = true
+    end
+"#;
+
+fn patch_bag_openers(env: &WowLuaEnv) {
+    let _ = env.exec(BAG_OPENERS_PATCH);
 }
 
 /// Load Blizzard_TokenUI on demand before character tabs that depend on TokenFrame.
@@ -266,90 +258,66 @@ fn patch_mail_toggle(env: &WowLuaEnv) {
 /// Falling back to C_Map.GetBestMapForUnit("player") matches Blizzard's own
 /// non-world-map branch and keeps the quest log path usable until the parent
 /// exists.
-fn patch_quest_map_current_map_lookup(env: &WowLuaEnv) {
-    let _ = env.exec(
-        r#"
-        if not __wow_ui_sim_quest_map_parent_guard_patched then
-            local function getQuestMapParent(frame)
-                if not frame or type(frame.GetParent) ~= "function" then
-                    return nil
-                end
-
-                local parent = frame:GetParent()
-                if not parent or type(parent.IsShown) ~= "function" then
-                    return nil
-                end
-
-                return parent
-            end
-
-            local function getCurrentMapID(self)
-                local parent = getQuestMapParent(self)
-                if parent and parent:IsShown() and type(parent.GetMapID) == "function" then
-                    return parent:GetMapID()
-                end
-
-                return C_Map.GetBestMapForUnit("player")
-            end
-
-            local function refresh(self)
-                local parent = getQuestMapParent(self)
-                if parent and QuestMapFrame.DetailsFrame.questMapID
-                    and self.DetailsFrame.questMapID ~= parent:GetMapID() then
-                    QuestMapFrame_CloseQuestDetails()
-                end
-
-                self:SyncQuestSystemWithCurrentMap()
-                SortQuestSortTypes()
-                SortQuests()
-                local numPOIs = QuestMapUpdateAllQuests()
-                QuestMapFrame_ResetFilters()
-                QuestMapFrame_UpdateAll(numPOIs)
-
-                self:ValidateTabs()
-                self:CheckEventsTabTutorial()
-            end
-
-            local function updateAll(numPOIs)
-                QuestMapFrame:UpdatePOIs()
-
-                if not numPOIs then
-                    QuestMapUpdateAllQuests()
-                end
-
-                local parent = getQuestMapParent(QuestMapFrame)
-                if parent and parent:IsShown() then
-                    local questDetailID = QuestMapFrame.DetailsFrame.questID
-                    if questDetailID then
-                        QuestMapFrame_ShowQuestDetails(questDetailID)
-                    else
-                        QuestLogQuests_Update()
-                    end
-
-                    if type(parent.OnQuestLogUpdate) == "function" then
-                        parent:OnQuestLogUpdate()
-                    end
-                end
-            end
-
-            if QuestLogMixin then
-                QuestLogMixin.GetCurrentMapID = getCurrentMapID
-                QuestLogMixin.Refresh = refresh
-            end
-
-            if QuestMapFrame then
-                QuestMapFrame.GetCurrentMapID = getCurrentMapID
-                QuestMapFrame.Refresh = refresh
-            end
-
-            if type(QuestMapFrame_UpdateAll) == "function" then
-                QuestMapFrame_UpdateAll = updateAll
-            end
-
-            __wow_ui_sim_quest_map_parent_guard_patched = true
+const QUEST_MAP_PARENT_GUARD_LUA: &str = r#"
+    if not __wow_ui_sim_quest_map_parent_guard_patched then
+        local function getQuestMapParent(frame)
+            if not frame or type(frame.GetParent) ~= "function" then return nil end
+            local parent = frame:GetParent()
+            if not parent or type(parent.IsShown) ~= "function" then return nil end
+            return parent
         end
-    "#,
-    );
+        local function getCurrentMapID(self)
+            local parent = getQuestMapParent(self)
+            if parent and parent:IsShown() and type(parent.GetMapID) == "function" then
+                return parent:GetMapID()
+            end
+            return C_Map.GetBestMapForUnit("player")
+        end
+        local function refresh(self)
+            local parent = getQuestMapParent(self)
+            if parent and QuestMapFrame.DetailsFrame.questMapID
+                and self.DetailsFrame.questMapID ~= parent:GetMapID() then
+                QuestMapFrame_CloseQuestDetails()
+            end
+            self:SyncQuestSystemWithCurrentMap()
+            SortQuestSortTypes()
+            SortQuests()
+            local numPOIs = QuestMapUpdateAllQuests()
+            QuestMapFrame_ResetFilters()
+            QuestMapFrame_UpdateAll(numPOIs)
+            self:ValidateTabs()
+            self:CheckEventsTabTutorial()
+        end
+        local function updateAll(numPOIs)
+            QuestMapFrame:UpdatePOIs()
+            if not numPOIs then QuestMapUpdateAllQuests() end
+            local parent = getQuestMapParent(QuestMapFrame)
+            if parent and parent:IsShown() then
+                local questDetailID = QuestMapFrame.DetailsFrame.questID
+                if questDetailID then QuestMapFrame_ShowQuestDetails(questDetailID)
+                else QuestLogQuests_Update() end
+                if type(parent.OnQuestLogUpdate) == "function" then
+                    parent:OnQuestLogUpdate()
+                end
+            end
+        end
+        if QuestLogMixin then
+            QuestLogMixin.GetCurrentMapID = getCurrentMapID
+            QuestLogMixin.Refresh = refresh
+        end
+        if QuestMapFrame then
+            QuestMapFrame.GetCurrentMapID = getCurrentMapID
+            QuestMapFrame.Refresh = refresh
+        end
+        if type(QuestMapFrame_UpdateAll) == "function" then
+            QuestMapFrame_UpdateAll = updateAll
+        end
+        __wow_ui_sim_quest_map_parent_guard_patched = true
+    end
+"#;
+
+fn patch_quest_map_current_map_lookup(env: &WowLuaEnv) {
+    let _ = env.exec(QUEST_MAP_PARENT_GUARD_LUA);
 }
 
 /// Patch MapCanvasScrollControllerMixin to guard nil targetScale before compare.
@@ -379,6 +347,33 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
     }
 }
 
+const POI_BUTTON_UPDATE_POINT_LUA: &str = r#"
+    -- Guard UpdateButtonAlpha against nil NormalTexture/PushedTexture.
+    -- These children should be created by POIButtonTemplate XML but
+    -- template child creation during CreateFrame doesn't cover them yet.
+    if POIButtonMixin then
+        local orig = POIButtonMixin.UpdateButtonAlpha
+        function POIButtonMixin:UpdateButtonAlpha()
+            if self.NormalTexture and self.PushedTexture then orig(self) end
+        end
+    end
+    if POIButtonDisplayLayerMixin then
+        function POIButtonDisplayLayerMixin:UpdatePoint(isPushed)
+            local parent = self:GetParent()
+            if not parent or not parent.IsEnabled or not parent:IsEnabled() then
+                return
+            end
+            local x = (self.offsetX or 0) + (isPushed and 1 or 0)
+            local y = (self.offsetY or 0) + (isPushed and -1 or 0)
+            if PixelUtil then
+                PixelUtil.SetPoint(self, "CENTER", parent, "CENTER", x, y, x, y)
+            else
+                self:SetPoint("CENTER", parent, "CENTER", x, y)
+            end
+        end
+    end
+"#;
+
 /// Guard POIButtonDisplayLayerMixin:UpdatePoint against nil parent.
 ///
 /// When map pins are created via template pools, the Display child's
@@ -387,41 +382,53 @@ fn patch_map_canvas_zoom(env: &WowLuaEnv) {
 /// prevent "attempt to call method 'IsEnabled' (a nil value)" errors
 /// that block world quest pin rendering.
 fn patch_poi_button_update_point(env: &WowLuaEnv) {
-    if let Err(e) = env.exec(
-        r#"
-        -- Guard UpdateButtonAlpha against nil NormalTexture/PushedTexture.
-        -- These children should be created by POIButtonTemplate XML but
-        -- template child creation during CreateFrame doesn't cover them yet.
-        if POIButtonMixin then
-            local orig = POIButtonMixin.UpdateButtonAlpha
-            function POIButtonMixin:UpdateButtonAlpha()
-                if self.NormalTexture and self.PushedTexture then
-                    orig(self)
-                end
-            end
-        end
-        if POIButtonDisplayLayerMixin then
-            function POIButtonDisplayLayerMixin:UpdatePoint(isPushed)
-                local parent = self:GetParent()
-                if not parent or not parent.IsEnabled or not parent:IsEnabled() then
-                    return
-                end
-                local pushedX = isPushed and 1 or 0
-                local pushedY = isPushed and -1 or 0
-                local x = (self.offsetX or 0) + pushedX
-                local y = (self.offsetY or 0) + pushedY
-                if PixelUtil then
-                    PixelUtil.SetPoint(self, "CENTER", parent, "CENTER", x, y, x, y)
-                else
-                    self:SetPoint("CENTER", parent, "CENTER", x, y)
-                end
-            end
-        end
-    "#,
-    ) {
+    if let Err(e) = env.exec(POI_BUTTON_UPDATE_POINT_LUA) {
         eprintln!("[workaround] patch_poi_button_update_point failed: {e}");
     }
 }
+
+// FriendsFrameIcon: Texture child of FriendsFrame (hidden at startup).
+// Provides SetTexture stub to silence OnEvent errors.
+const STUB_FRIENDS_FRAME_ICON: &str = r#"
+    if not FriendsFrameIcon then
+        rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
+    end
+"#;
+
+// QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
+// QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
+const STUB_QUEUE_STATUS_BUTTON: &str = r#"
+    if QueueStatusButton and not QueueStatusButton.SetGlowLock then
+        QueueStatusButton.SetGlowLock = function() end
+    end
+    if not QueueStatusButton then
+        rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
+    end
+"#;
+
+// TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
+// If the parent frame failed to create (nil parent) the button is nil.
+// Provides a stub with Text field for UpdateDefaultButtons().
+const STUB_TTS_DEFAULT_BUTTON: &str = r#"
+    if not TextToSpeechDefaultButton then
+        local t = { GetWidth = function() return 100 end }
+        rawset(_G, "TextToSpeechDefaultButton", {
+            Text = t, SetShown = function() end,
+            SetWidth = function() end, SetPoint = function() end,
+        })
+    elseif not TextToSpeechDefaultButton.Text then
+        TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
+    end
+"#;
+
+// TextToSpeechCharacterSpecificButton: sibling button in ChatConfigFrame.xml.
+const STUB_TTS_CHAR_SPECIFIC_BUTTON: &str = r#"
+    if not TextToSpeechCharacterSpecificButton then
+        rawset(_G, "TextToSpeechCharacterSpecificButton", {
+            SetShown = function() end, SetPoint = function() end,
+        })
+    end
+"#;
 
 /// Add minimal stubs for global frames expected by Blizzard code but not
 /// created by any loaded addon (e.g. the frame exists in XML but the parent
@@ -429,63 +436,13 @@ fn patch_poi_button_update_point(env: &WowLuaEnv) {
 ///
 /// These stubs only provide the specific methods/fields called at startup.
 fn patch_missing_frame_stubs(env: &WowLuaEnv) {
-    let snippets: &[(&str, &str)] = &[
-        // FriendsFrameIcon: a Texture child of FriendsFrame, but FriendsFrame is
-        // hidden at startup. Provides SetTexture stub to silence OnEvent errors.
-        (
-            "FriendsFrameIcon",
-            r#"
-            if not FriendsFrameIcon then
-                rawset(_G, "FriendsFrameIcon", { SetTexture = function() end })
-            end
-        "#,
-        ),
-        // QueueStatusButton: created by Blizzard_QueueStatusFrame XML.
-        // QueueStatusButtonMixin provides SetGlowLock; stub it if missing.
-        (
-            "QueueStatusButton",
-            r#"
-            if QueueStatusButton and not QueueStatusButton.SetGlowLock then
-                QueueStatusButton.SetGlowLock = function() end
-            end
-            if not QueueStatusButton then
-                rawset(_G, "QueueStatusButton", { SetGlowLock = function() end })
-            end
-        "#,
-        ),
-        // TextToSpeechDefaultButton: Button in ChatConfigFrame.xml.
-        // If the parent frame failed to create (nil parent), the button is nil.
-        // Provide a stub with Text field for UpdateDefaultButtons().
-        (
-            "TextToSpeechDefaultButton",
-            r#"
-            if not TextToSpeechDefaultButton then
-                local t = { GetWidth = function() return 100 end }
-                rawset(_G, "TextToSpeechDefaultButton", {
-                    Text = t,
-                    SetShown = function() end,
-                    SetWidth = function() end,
-                    SetPoint = function() end,
-                })
-            elseif not TextToSpeechDefaultButton.Text then
-                TextToSpeechDefaultButton.Text = { GetWidth = function() return 100 end }
-            end
-        "#,
-        ),
-        (
-            "TextToSpeechCharacterSpecificButton",
-            r#"
-            if not TextToSpeechCharacterSpecificButton then
-                rawset(_G, "TextToSpeechCharacterSpecificButton", {
-                    SetShown = function() end,
-                    SetPoint = function() end,
-                })
-            end
-        "#,
-        ),
+    let snippets = [
+        ("FriendsFrameIcon", STUB_FRIENDS_FRAME_ICON),
+        ("QueueStatusButton", STUB_QUEUE_STATUS_BUTTON),
+        ("TextToSpeechDefaultButton", STUB_TTS_DEFAULT_BUTTON),
+        ("TextToSpeechCharacterSpecificButton", STUB_TTS_CHAR_SPECIFIC_BUTTON),
     ];
-
-    for (name, code) in snippets {
+    for (name, code) in &snippets {
         if let Err(e) = env.exec(code) {
             eprintln!("[workaround] patch_missing_frame_stubs({name}) failed: {e}");
         }

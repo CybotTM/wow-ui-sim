@@ -63,26 +63,20 @@ const ON_UPDATE_DISPATCH_LUA: &str = r#"
     end
 "#;
 
-/// Register the Lua dispatch function and its Rust callback.
-pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
-    super::script_helpers::get_or_create_scripts_table(lua);
-
+fn create_context_callbacks(
+    lua: &Lua,
+    state: &Rc<RefCell<SimState>>,
+) -> mlua::Result<()> {
     let enter_state = Rc::clone(state);
     let enter_context = lua.create_function(
         move |_, (frame_id, addon_idx, is_post_update): (u64, Option<u16>, bool)| {
-            let method = if is_post_update {
-                "OnPostUpdate"
-            } else {
-                "OnUpdate"
-            };
+            let method = if is_post_update { "OnPostUpdate" } else { "OnUpdate" };
             let mut state = enter_state.borrow_mut();
             state.executing_addon_index = addon_idx;
-            state
-                .widgets
-                .set_render_dirty_source(Some(crate::widget::RenderDirtySource {
-                    frame_id,
-                    method,
-                }));
+            state.widgets.set_render_dirty_source(Some(crate::widget::RenderDirtySource {
+                frame_id,
+                method,
+            }));
             Ok(())
         },
     )?;
@@ -95,7 +89,14 @@ pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result
         state.widgets.set_render_dirty_source(None);
         Ok(())
     })?;
-    lua.set_named_registry_value("__leave_on_update_context", leave_context)?;
+    lua.set_named_registry_value("__leave_on_update_context", leave_context)
+}
+
+/// Register the Lua dispatch function and its Rust callback.
+pub(crate) fn register(lua: &Lua, state: &Rc<RefCell<SimState>>) -> mlua::Result<()> {
+    super::script_helpers::get_or_create_scripts_table(lua);
+
+    create_context_callbacks(lua, state)?;
 
     let factory: mlua::Function = lua.load(ON_UPDATE_DISPATCH_LUA).into_function()?;
     let dispatch = factory.call::<mlua::Function>(())?;
